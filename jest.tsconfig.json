@@ -17,5 +17,5 @@
       "@mocks/*": ["__mocks__/*"]
     }
   },
-  "exclude": ["node_modules", "out", ".next"]
+  "exclude": ["node_modules", "build"]
 }
