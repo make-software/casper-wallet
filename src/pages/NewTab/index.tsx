@@ -1,8 +1,8 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { GlobalStyle } from '../../styles/globalStyle';
 
-import { Popup } from '../../shared/components/Popup';
+import { GlobalStyle } from '@src/styles/globalStyle';
+import { Popup } from '@src/shared/components/Popup';
 
 render(
   <>

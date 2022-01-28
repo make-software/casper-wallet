@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { withMarkup } from '../../../../../__testHelpers__/withMarkups';
+import { withMarkup } from '@testHelpers/withMarkups';
 
 import { Popup } from '../Popup';
 

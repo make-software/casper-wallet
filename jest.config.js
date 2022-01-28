@@ -20,7 +20,8 @@ module.exports = {
     '\\.(jpg|jpeg|png|gif|webp|svg|ttf|woff|woff2)$':
       '<rootDir>/__mocks__/file-mock.js',
     '^@src/(.*)$': '<rootDir>/src/$1',
-    '^@mocks/(.*)$': '<rootDir>/__mocks__/$1'
+    '^@mocks/(.*)$': '<rootDir>/__mocks__/$1',
+    '^@testHelpers/(.*)$': '<rootDir>/__testHelpers__/$1'
   },
   setupFilesAfterEnv: ['@testing-library/jest-dom/extend-expect'],
   coverageReporters: ['json', 'text'],

@@ -14,7 +14,8 @@
     "baseUrl": "./",
     "paths": {
       "@src/*": ["src/*"],
-      "@mocks/*": ["__mocks__/*"]
+      "@mocks/*": ["__mocks__/*"],
+      "@testHelpers/*": ["__testHelpers__/*"]
     }
   },
   "exclude": ["node_modules", "build"]

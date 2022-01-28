@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../../../assets/img/logo192.png';
+import logo from '@src/assets/img/logo192.png';
 
 import { AppContainer, AppLogo, AppLink, AppHeader } from './Popup.styled';
 

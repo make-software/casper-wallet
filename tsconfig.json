@@ -13,7 +13,12 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "noEmit": false,
-    "jsx": "react"
+    "jsx": "react",
+    "paths": {
+      "@src/*": ["src/*"],
+      "@mocks/*": ["__mocks__/*"],
+      "@testHelpers/*": ["__testHelpers__/*"]
+    }
   },
   "include": ["src", "custom.d.ts"],
   "exclude": ["build", "node_modules"]
