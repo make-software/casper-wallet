@@ -14,6 +14,7 @@
     "resolveJsonModule": true,
     "noEmit": false,
     "jsx": "react",
+    "baseUrl": ".",
     "paths": {
       "@src/*": ["src/*"],
       "@mocks/*": ["__mocks__/*"],
