@@ -3,16 +3,19 @@ process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
 process.env.ASSET_PATH = '/';
 
-var WebpackDevServer = require('webpack-dev-server'),
+const WebpackDevServer = require('webpack-dev-server'),
   webpack = require('webpack'),
   config = require('../webpack.config'),
   env = require('./env'),
   path = require('path');
 
-var options = config.chromeExtensionBoilerplate || {};
-var excludeEntriesToHotReload = options.notHotReload || [];
+const browser = process.env.BROWSER;
+const buildDir = browser === 'chrome' ? 'build/chrome' : 'build/firefox';
 
-for (var entryName in config.entry) {
+const options = config.chromeExtensionBoilerplate || {};
+const excludeEntriesToHotReload = options.notHotReload || [];
+
+for (const entryName in config.entry) {
   if (excludeEntriesToHotReload.indexOf(entryName) === -1) {
     config.entry[entryName] = [
       'webpack/hot/dev-server',
@@ -27,9 +30,9 @@ config.plugins = [new webpack.HotModuleReplacementPlugin()].concat(
 
 delete config.chromeExtensionBoilerplate;
 
-var compiler = webpack(config);
+const compiler = webpack(config);
 
-var server = new WebpackDevServer(
+const server = new WebpackDevServer(
   {
     https: false,
     hot: false,
@@ -37,7 +40,7 @@ var server = new WebpackDevServer(
     host: 'localhost',
     port: env.PORT,
     static: {
-      directory: path.join(__dirname, '../build')
+      directory: path.join(__dirname, '../' + buildDir)
     },
     devMiddleware: {
       publicPath: `http://localhost:${env.PORT}/`,

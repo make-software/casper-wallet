@@ -8,6 +8,8 @@ const webpack = require('webpack'),
   TsconfigPaths = require('tsconfig-paths-webpack-plugin');
 
 const ASSET_PATH = process.env.ASSET_PATH || '/';
+const browser = process.env.BROWSER;
+const buildDir = browser === 'chrome' ? 'build/chrome' : 'build/firefox';
 
 const alias = {
   'react-dom': '@hot-loader/react-dom'
@@ -48,7 +50,7 @@ const options = {
     notHotReload: ['contentScript', 'devtools']
   },
   output: {
-    path: path.resolve(__dirname, 'build'),
+    path: path.resolve(__dirname, buildDir),
     filename: '[name].bundle.js',
     clean: true,
     publicPath: ASSET_PATH
@@ -97,8 +99,9 @@ const options = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: 'src/manifest.json',
-          to: path.join(__dirname, 'build'),
+          from:
+            browser === 'chrome' ? 'src/manifest.v3.json' : 'src/manifest.json',
+          to: path.join(__dirname, buildDir, 'manifest.json'),
           force: true,
           transform: function (content, path) {
             // generates the manifest file using the package.json informations
@@ -117,7 +120,7 @@ const options = {
       patterns: [
         {
           from: 'src/assets/img/logo16.png',
-          to: path.join(__dirname, 'build'),
+          to: path.join(__dirname, buildDir),
           force: true
         }
       ]
@@ -126,7 +129,7 @@ const options = {
       patterns: [
         {
           from: 'src/assets/img/logo64.png',
-          to: path.join(__dirname, 'build'),
+          to: path.join(__dirname, buildDir),
           force: true
         }
       ]
@@ -135,7 +138,7 @@ const options = {
       patterns: [
         {
           from: 'src/assets/img/logo128.png',
-          to: path.join(__dirname, 'build'),
+          to: path.join(__dirname, buildDir),
           force: true
         }
       ]
@@ -144,7 +147,7 @@ const options = {
       patterns: [
         {
           from: 'src/assets/img/logo192.png',
-          to: path.join(__dirname, 'build'),
+          to: path.join(__dirname, buildDir),
           force: true
         }
       ]
