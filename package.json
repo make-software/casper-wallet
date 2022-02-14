@@ -1,10 +1,6 @@
 {
   "name": "casper-signer-v2",
   "version": "0.1.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lxieyang/chrome-extension-boilerplate-react.git"
-  },
   "scripts": {
     "build:chrome": "NODE_ENV=production BABEL_ENV=production BROWSER=chrome node utils/build.js",
     "build:firefox": "NODE_ENV=production BABEL_ENV=production node utils/build.js",
