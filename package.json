@@ -8,6 +8,7 @@
   "scripts": {
     "build:chrome": "NODE_ENV=production BABEL_ENV=production BROWSER=chrome node utils/build.js",
     "build:firefox": "NODE_ENV=production BABEL_ENV=production node utils/build.js",
+    "build:safari": "npm run build:firefox && ./safari_build.sh",
     "start:chrome": "NODE_ENV=production BABEL_ENV=production BROWSER=chrome PORT=3001 node utils/webserver.js",
     "start:firefox": "NODE_ENV=production BABEL_ENV=production PORT=3002 node utils/webserver.js",
     "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,md}'",
