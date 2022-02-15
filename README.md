@@ -35,7 +35,7 @@ You can open built extension in browsers also
 ### How to add build to Chrome browser
 For `Chrome` follow the instructions below:
 1. Navigate to `chrome://extensions/` in Chrome browser
-2. Install extension if it doesn't exists on a list
+2. [Install](#chrome) extension if it doesn't exists on a list
 3. Look at thumbnail of CasperLabs Signer extension. Copy `ID` field value there.
 4. Open new tab and fill the link `chrome-extension://{paste ID here}/popup.html`
 
@@ -44,7 +44,7 @@ TODO: Improve and simplify this process
 ### How to add build to Firefox browser
 For `Firefox` follow the instructions below:
 1. Navigate to `about:debugging#/runtime/this-firefox` in Firefox browser
-2. Install extension if it doesn't exists on a list
+2. [Install](#firefox) extension if it doesn't exists on a list
 3. Look at thumbnail of CasperLabs Signer extension. Copy `Internal UUID` field value there.
 4. Open new tab and fill the link `moz-extension://{paste Internal UUID here}/popup.html`
 
