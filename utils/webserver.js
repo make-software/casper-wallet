@@ -3,6 +3,7 @@ process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
 process.env.ASSET_PATH = '/';
 
+const XcodeBuildPlugin = require('xcode-build-webpack-plugin');
 const WebpackDevServer = require('webpack-dev-server'),
   webpack = require('webpack'),
   config = require('../webpack.config'),
@@ -10,7 +11,11 @@ const WebpackDevServer = require('webpack-dev-server'),
   path = require('path');
 
 const browser = process.env.BROWSER;
+const isSafari = browser === 'safari';
 const buildDir = browser === 'chrome' ? 'build/chrome' : 'build/firefox';
+const directory = isSafari
+  ? path.join(__dirname, '../build/safari/CasperLabs Signer')
+  : path.join(__dirname, '../' + buildDir);
 
 const options = config.chromeExtensionBoilerplate || {};
 const excludeEntriesToHotReload = options.notHotReload || [];
@@ -30,6 +35,19 @@ config.plugins = [new webpack.HotModuleReplacementPlugin()].concat(
 
 delete config.chromeExtensionBoilerplate;
 
+if (isSafari) {
+  config.plugins.push(
+    new XcodeBuildPlugin({
+      projectDir: './build/safari/CasperLabs Signer',
+      args: {
+        quiet: true,
+        scheme: 'CasperLabs Signer'
+      },
+      buildActions: 'build'
+    })
+  );
+}
+
 const compiler = webpack(config);
 
 const server = new WebpackDevServer(
@@ -40,7 +58,7 @@ const server = new WebpackDevServer(
     host: 'localhost',
     port: env.PORT,
     static: {
-      directory: path.join(__dirname, '../' + buildDir)
+      directory
     },
     devMiddleware: {
       publicPath: `http://localhost:${env.PORT}/`,
