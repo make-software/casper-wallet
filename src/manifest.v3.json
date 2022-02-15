@@ -43,6 +43,9 @@
       "all_frames": true
     }
   ],
+  "background": {
+    "service_worker": "./background.bundle.js"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

@@ -7,6 +7,12 @@ built from [chrome-extension-boilerplate-react](https://github.com/lxieyang/chro
 ```shell
 npm install
 ```
+
+Grant an execution permissions for `safari_build.sh` file:
+```shell
+chmod +x safari_build.sh
+```
+
 ## Run for dev
 For Chrome browser
 ```shell
@@ -22,7 +28,32 @@ Then you can get extension directly in browser by links:
 - http://127.0.0.1:3001/popup.html - for Chrome build
 - http://127.0.0.1:3002/popup.html - for Firefox build
 
-You can get all files by link `http://127.0.0.1:{port}/` also, where `port` depends on which process you need. 
+You can get all files by link `http://127.0.0.1:{port}/` also, where `port` depends on which process you need.
+
+You can open built extension in browsers also
+
+### How to add build to Chrome browser
+For `Chrome` follow the instructions below:
+1. Navigate to `chrome://extensions/` in Chrome browser
+2. Install extension if it doesn't exists on a list
+3. Look at thumbnail of CasperLabs Signer extension. Copy `ID` field value there.
+4. Open new tab and fill the link `chrome-extension://{paste ID here}/popup.html`
+
+TODO: Improve and simplify this process
+
+### How to add build to Firefox browser
+For `Firefox` follow the instructions below:
+1. Navigate to `about:debugging#/runtime/this-firefox` in Firefox browser
+2. Install extension if it doesn't exists on a list
+3. Look at thumbnail of CasperLabs Signer extension. Copy `Internal UUID` field value there.
+4. Open new tab and fill the link `moz-extension://{paste Internal UUID here}/popup.html`
+
+TODO: Improve and simplify this process
+
+### How to add build to Safari browser
+Script `build:safari` add built extension to Safari browser automatically. 
+
+[See instruction for details](#safari).
 
 ## How to build
 ### Chrome
