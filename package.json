@@ -12,6 +12,7 @@
     "prepare": "husky install"
   },
   "lint-staged": {
+    "*.md": "markdownlint",
     "src/**/*.{js,jsx,ts,tsx,json,md}": [
       "prettier --write"
     ]
@@ -63,6 +64,8 @@
     "husky": "^7.0.4",
     "jest": "^27.4.7",
     "lint-staged": "^12.3.2",
+    "markdownlint": "^0.25.1",
+    "markdownlint-cli": "^0.31.1",
     "prettier": "^2.5.1",
     "source-map-loader": "^3.0.0",
     "style-loader": "^3.3.1",
