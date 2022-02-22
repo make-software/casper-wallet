@@ -2,8 +2,11 @@ import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyle = createGlobalStyle`
   body {
-    width: 400px;
-    height: 400px;
+    min-width: 400px;
+    min-height: 400px;
+    
+    width: 100%;
+    height: 100%;
     
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

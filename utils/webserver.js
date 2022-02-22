@@ -1,3 +1,5 @@
+const { execSync } = require('child_process');
+
 // Do this as the first thing so that any code reading it knows the right env.
 process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
@@ -11,6 +13,8 @@ const WebpackDevServer = require('webpack-dev-server'),
   path = require('path');
 
 const browser = process.env.BROWSER;
+const open = process.env.OPEN || false;
+
 const isSafari = browser === 'safari';
 const buildDir = browser === 'chrome' ? 'build/chrome' : 'build/firefox';
 const directory = isSafari
@@ -78,5 +82,31 @@ if (process.env.NODE_ENV === 'development' && 'hot' in module) {
 }
 
 (async () => {
-  await server.start();
+  await server.startCallback(async () => {
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+
+    if (open) {
+      switch (browser) {
+        case 'chrome':
+          const chromeExtensionID = 'aohghmighlieiainnegkcijnfilokake'; // According to `key` in manifest
+          const openExtensionPageCommand = `open -a "Google Chrome" chrome-extension://${chromeExtensionID}/popup.html --args --remote-debugging-port=9222`;
+          const installExtensionCommand = `open -a "Google Chrome" chrome://extensions/ --args --load-extension=${path.join(
+            __dirname,
+            '../' + buildDir
+          )} --remote-debugging-port=9222`;
+
+          execSync(installExtensionCommand);
+          await delay(1000); // Waiting for install
+          execSync(openExtensionPageCommand);
+          break;
+
+        case 'firefox':
+          console.log('TODO: Implement running Firefox');
+          break;
+
+        default:
+          console.log('Unknown browser');
+      }
+    }
+  });
 })();
