@@ -15,11 +15,16 @@ const WebpackDevServer = require('webpack-dev-server'),
 const browser = process.env.BROWSER;
 const open = process.env.OPEN || false;
 
+const chromeBuildDir = 'build/chrome';
+const safariBuildDir = 'build/safari/CasperLabs Signer';
+
 const isSafari = browser === 'safari';
-const buildDir = browser === 'chrome' ? 'build/chrome' : 'build/firefox';
+
+// This script uses only for chrome or safari
+// Firefox runs with help `web-ext` library
 const directory = isSafari
-  ? path.join(__dirname, '../build/safari/CasperLabs Signer')
-  : path.join(__dirname, '../' + buildDir);
+  ? path.join(__dirname, '../' + safariBuildDir)
+  : path.join(__dirname, '../' + chromeBuildDir);
 
 const options = config.chromeExtensionBoilerplate || {};
 const excludeEntriesToHotReload = options.notHotReload || [];
@@ -83,30 +88,21 @@ if (process.env.NODE_ENV === 'development' && 'hot' in module) {
 
 (async () => {
   await server.startCallback(async () => {
+    if (browser !== 'chrome') {
+      return;
+    }
+
     const delay = ms => new Promise(res => setTimeout(res, ms));
 
-    if (open) {
-      switch (browser) {
-        case 'chrome':
-          const chromeExtensionID = 'aohghmighlieiainnegkcijnfilokake'; // According to `key` in manifest
-          const openExtensionPageCommand = `open -a "Google Chrome" chrome-extension://${chromeExtensionID}/popup.html --args --remote-debugging-port=9222`;
-          const installExtensionCommand = `open -a "Google Chrome" chrome://extensions/ --args --load-extension=${path.join(
-            __dirname,
-            '../' + buildDir
-          )} --remote-debugging-port=9222`;
+    const chromeExtensionID = 'aohghmighlieiainnegkcijnfilokake'; // According to `key` in manifest
+    const openExtensionPageCommand = `open -a "Google Chrome" chrome-extension://${chromeExtensionID}/popup.html --args --remote-debugging-port=9222`;
+    const installExtensionCommand = `open -a "Google Chrome" chrome://extensions/ --args --load-extension=${path.join(
+      __dirname,
+      '../' + chromeBuildDir
+    )} --remote-debugging-port=9222`;
 
-          execSync(installExtensionCommand);
-          await delay(1000); // Waiting for install
-          execSync(openExtensionPageCommand);
-          break;
-
-        case 'firefox':
-          console.log('TODO: Implement running Firefox');
-          break;
-
-        default:
-          console.log('Unknown browser');
-      }
-    }
+    execSync(installExtensionCommand);
+    await delay(2000); // Waiting for install
+    execSync(openExtensionPageCommand);
   });
 })();

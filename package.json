@@ -4,9 +4,9 @@
   "scripts": {
     "build:chrome": "NODE_ENV=production BABEL_ENV=production BROWSER=chrome node utils/build.js",
     "build:firefox": "NODE_ENV=production BABEL_ENV=production node utils/build.js",
-    "start:chrome": "npm run build:chrome && NODE_ENV=development BABEL_ENV=development BROWSER=chrome PORT=3001 OPEN=true node utils/webserver.js",
-    "start:firefox": "NODE_ENV=development BABEL_ENV=development PORT=3002 node utils/webserver.js",
-    "start:safari": "npm run build:firefox && ./safari_build.sh && NODE_ENV=development BABEL_ENV=development BROWSER=safari PORT=3003 node utils/webserver.js",
+    "start:chrome": "npm run build:chrome && NODE_ENV=development BABEL_ENV=development BROWSER=chrome PORT=3001 node utils/webserver.js",
+    "start:safari": "npm run build:firefox && ./safari_build.sh && NODE_ENV=development BABEL_ENV=development BROWSER=safari PORT=3002 node utils/webserver.js",
+    "start:firefox": "npm run build:firefox && web-ext run --source-dir ./build/firefox -u about:debugging#/runtime/this-firefox",
     "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,md}'",
     "test:unit": "jest --no-cache",
     "prepare": "husky install"
@@ -74,6 +74,7 @@
     "ts-loader": "^9.2.6",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "typescript": "^4.4.4",
+    "web-ext": "^6.7.0",
     "webpack": "^5.60.0",
     "webpack-cli": "^4.9.1",
     "webpack-dev-server": "^4.3.1",
