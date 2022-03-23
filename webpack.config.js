@@ -41,9 +41,9 @@ const options = {
     newtab: path.join(__dirname, 'src', 'pages', 'NewTab', 'index.tsx'),
     options: path.join(__dirname, 'src', 'pages', 'Options', 'index.tsx'),
     popup: path.join(__dirname, 'src', 'pages', 'Popup', 'index.tsx'),
-    background: path.join(__dirname, 'src', 'pages', 'Background', 'index.ts'),
-    contentScript: path.join(__dirname, 'src', 'pages', 'Content', 'index.ts'),
-    devtools: path.join(__dirname, 'src', 'pages', 'Devtools', 'index.ts'),
+    background: path.join(__dirname, 'src', 'pages', 'Background'),
+    contentScript: path.join(__dirname, 'src', 'pages', 'Content'),
+    devtools: path.join(__dirname, 'src', 'pages', 'Devtools'),
     panel: path.join(__dirname, 'src', 'pages', 'Panel', 'index.tsx')
   },
   chromeExtensionBoilerplate: {

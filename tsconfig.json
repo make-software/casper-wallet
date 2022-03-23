@@ -21,6 +21,6 @@
       "@testHelpers/*": ["__testHelpers__/*"]
     }
   },
-  "include": ["src", "custom.d.ts"],
+  "include": ["src", "custom.d.ts", "e2e/webdriver/custom.d.ts"],
   "exclude": ["build", "node_modules"]
 }
