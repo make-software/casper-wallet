@@ -1,0 +1,25 @@
+{
+  "extends": [
+    "react-app",
+    "plugin:jsx-a11y/recommended",
+    "prettier",
+    "plugin:react-hooks/recommended"
+  ],
+  "plugins": [
+    "jsx-a11y",
+    "prettier",
+    "react-hooks"
+  ],
+  "rules": {
+    "semi": 1,
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error"],
+    "jsx-a11y/no-autofocus": "off",
+    "prettier/prettier": [
+      "warn", {
+        "semi": true
+      }
+    ]
+  }
+}

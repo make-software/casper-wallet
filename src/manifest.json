@@ -1,0 +1,62 @@
+{
+  "manifest_version": 2,
+  "version": "0.1.0",
+  "name": "CasperLabs Signer",
+  "author": "https://casperlabs.io",
+  "description": "CasperLabs Signer tool for signing transactions on the blockchain.",
+  "icons": {
+    "16": "logo16.png",
+    "64": "logo64.png",
+    "128": "logo128.png",
+    "192": "logo192.png"
+  },
+  "background": {
+    "scripts": ["./background.bundle.js"],
+    "persistent": true
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.casperlabs.io/*",
+        "*://localhost/*",
+        "*://*.make.services/*",
+        "*://cspr.live/*",
+        "*://*.cspr.live/*",
+        "*://casperholders.io/*",
+        "*://*.casperholders.io/*",
+        "*://casperholders.com/*",
+        "*://*.casperholders.com/*",
+        "*://*.casperstats.io/*",
+        "*://casperstats.io/*",
+        "*://casper-qr.vercel.app/*",
+        "*://picaswap.io/wcspr/*",
+        "*://casperdash.io/*",
+        "*://*.casperdash.io/*",
+        "*://friendly.market/*",
+        "*://*.friendly.market/*",
+        "*://metacask.com/*",
+        "*://*.metacask.com/*",
+        "*://*.newland.finance/*",
+        "*://*.huobiapps.com/*",
+        "*://*.singlecoin.xyz/*",
+        "*://*.gitcoin.co/*",
+        "*://gitcoin.co/*"
+      ],
+      "js": ["./contentScript.bundle.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "permissions": ["notifications", "storage", "tabs"],
+  "web_accessible_resources": ["logo64.png"],
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "logo16.png",
+      "64": "logo64.png",
+      "128": "logo128.png",
+      "192": "logo192.png"
+    },
+    "default_title": "CasperLabs Signer"
+  }
+}
