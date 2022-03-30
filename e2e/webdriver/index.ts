@@ -8,7 +8,8 @@ import { BuildWebDriver } from './types';
 export async function buildWebDriver(
   buildWebDriver: BuildWebDriver = {}
 ): Promise<Driver> {
-  const browser = process.env.SELENIUM_BROWSER || 'chrome';
+  const browser =
+    buildWebDriver.browser || process.env.SELENIUM_BROWSER || 'chrome';
 
   const { driver: seleniumDriver, extensionUrl } = await buildBrowserWebDriver(
     browser,

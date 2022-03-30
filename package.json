@@ -4,9 +4,9 @@
   "scripts": {
     "build:chrome": "NODE_ENV=production BABEL_ENV=production BROWSER=chrome node utils/build.js",
     "build:firefox": "NODE_ENV=production BABEL_ENV=production node utils/build.js",
-    "start:chrome": "npm run build:chrome && NODE_ENV=development BABEL_ENV=development BROWSER=chrome PORT=3001 node utils/webserver.js",
-    "start:safari": "npm run build:firefox && ./safari_build.sh && NODE_ENV=development BABEL_ENV=development BROWSER=safari PORT=3002 node utils/webserver.js",
-    "start:firefox": "npm run build:firefox && web-ext run --source-dir ./build/firefox -u about:debugging#/runtime/this-firefox",
+    "start:chrome": "npm run build:chrome && NODE_ENV=development BABEL_ENV=development BROWSER=chrome PORT=3001 ts-node --project e2e.tsconfig.json utils/webserver.js",
+    "start:firefox": "npm run build:firefox && NODE_ENV=development BABEL_ENV=development BROWSER=firefox PORT=3002 ts-node --project e2e.tsconfig.json utils/webserver.js",
+    "start:safari": "npm run build:firefox && ./safari_build.sh && NODE_ENV=development BABEL_ENV=development BROWSER=safari PORT=3003 ts-node --project e2e.tsconfig.json utils/webserver.js",
     "test:e2e:chrome": "npm run build:chrome && SELENIUM_BROWSER=chrome ts-node --project e2e.tsconfig.json e2e/run-all.ts",
     "test:e2e:firefox": "npm run build:firefox && SELENIUM_BROWSER=firefox ts-node --project e2e.tsconfig.json e2e/run-all.ts",
     "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,md}'",
