@@ -1,4 +1,4 @@
-export enum HeaderLevel {
+export enum TitleLevel {
   h1 = 'h1',
   h2 = 'h2',
   h3 = 'h3',
@@ -7,7 +7,7 @@ export enum HeaderLevel {
   h6 = 'h6'
 }
 
-export enum HeaderAlign {
+export enum TitleAlign {
   center = 'center',
   left = 'left',
   right = 'right'

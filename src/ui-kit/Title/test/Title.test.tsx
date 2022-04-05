@@ -4,15 +4,15 @@ import { ThemeProvider } from 'styled-components';
 import { render } from '@testing-library/react';
 
 import { light } from '@src/styles/theme/light';
-import { HeaderAlign, HeaderLevel } from '../types';
-import { Header } from '../Header';
+import { TitleAlign, TitleLevel } from '../types';
+import { Title } from '../Title';
 
 describe('Header', () => {
   describe('by default', () => {
     it('should use "left" for align', () => {
       const { container } = render(
         <ThemeProvider theme={light}>
-          <Header>header</Header>
+          <Title>header</Title>
         </ThemeProvider>
       );
       expect(container.firstChild).toHaveStyle('text-align: left');
@@ -21,7 +21,7 @@ describe('Header', () => {
     it('should use "h2" for level', () => {
       const { getByRole } = render(
         <ThemeProvider theme={light}>
-          <Header>header</Header>
+          <Title>header</Title>
         </ThemeProvider>
       );
       expect(getByRole('heading', { level: 2 })).toBeInTheDocument();
@@ -30,19 +30,19 @@ describe('Header', () => {
 
   describe.each`
     level | abstractLevel
-    ${1}  | ${HeaderLevel.h1}
-    ${2}  | ${HeaderLevel.h2}
-    ${3}  | ${HeaderLevel.h3}
-    ${4}  | ${HeaderLevel.h4}
-    ${5}  | ${HeaderLevel.h5}
-    ${6}  | ${HeaderLevel.h6}
+    ${1}  | ${TitleLevel.h1}
+    ${2}  | ${TitleLevel.h2}
+    ${3}  | ${TitleLevel.h3}
+    ${4}  | ${TitleLevel.h4}
+    ${5}  | ${TitleLevel.h5}
+    ${6}  | ${TitleLevel.h6}
   `(
-    'with prop `level=HeaderLevel.$abstractLevel`',
+    'with prop `level=TitleLevel.$abstractLevel`',
     ({ level, abstractLevel }) => {
       it(`should use <h${level}> tag inside`, () => {
         const { getByRole } = render(
           <ThemeProvider theme={light}>
-            <Header level={abstractLevel}>header</Header>
+            <Title level={abstractLevel}>header</Title>
           </ThemeProvider>
         );
         expect(getByRole('heading', { level })).toBeInTheDocument();
@@ -52,16 +52,16 @@ describe('Header', () => {
 
   describe.each`
     align       | abstractAlign
-    ${'left'}   | ${HeaderAlign.left}
-    ${'center'} | ${HeaderAlign.center}
-    ${'right'}  | ${HeaderAlign.right}
+    ${'left'}   | ${TitleAlign.left}
+    ${'center'} | ${TitleAlign.center}
+    ${'right'}  | ${TitleAlign.right}
   `(
-    'with prop `align=HeaderAlign.$abstractAlign`',
+    'with prop `align=TitleAlign.$abstractAlign`',
     ({ align, abstractAlign }) => {
       it(`should have 'text-align' rule with value '${align}'`, () => {
         const { container } = render(
           <ThemeProvider theme={light}>
-            <Header align={abstractAlign}>header</Header>
+            <Title align={abstractAlign}>header</Title>
           </ThemeProvider>
         );
         expect(container.firstChild).toHaveStyle(`text-align: ${align}`);

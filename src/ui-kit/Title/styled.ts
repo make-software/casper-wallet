@@ -1,12 +1,12 @@
 import styled, { css } from 'styled-components';
-import { HeaderAlign } from './types';
+import { TitleAlign } from './types';
 
-interface StyledHeaderProps {
-  align: HeaderAlign;
+interface StyledTitleProps {
+  align: TitleAlign;
 }
 
-const common = css`
-  text-align: ${({ align }: StyledHeaderProps) => align};
+const common = css<StyledTitleProps>`
+  text-align: ${({ align }) => align};
   color: ${({ theme }) => theme.header.main};
 `;
 

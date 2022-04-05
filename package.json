@@ -25,6 +25,12 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-hot-loader": "^4.13.0",
+    "react-redux": "^7.2.8",
+    "reakit": "^1.3.11",
+    "redux": "^4.1.2",
+    "redux-observable": "^2.0.0",
+    "rxjs": "^7.5.5",
+    "store": "^2.0.12",
     "styled-components": "^5.3.3"
   },
   "devDependencies": {
@@ -41,6 +47,7 @@
     "@types/jest": "^27.4.0",
     "@types/react": "^17.0.33",
     "@types/react-dom": "^17.0.10",
+    "@types/store": "^2.0.2",
     "@types/styled-components": "^5.1.21",
     "@types/testing-library__react": "^10.2.0",
     "babel-eslint": "^10.1.0",
