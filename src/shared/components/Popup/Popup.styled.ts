@@ -1,8 +1,6 @@
 import styled, { keyframes } from 'styled-components';
 
-export const AppContainer = styled.div`
-  text-align: center;
-`;
+export const AppContainer = styled.div``;
 
 const AppLogoSpin = keyframes`
   from {

@@ -1,7 +1,9 @@
 import { createGlobalStyle } from 'styled-components';
+import { Theme } from './types';
 
-export const GlobalStyle = createGlobalStyle`
+export const GlobalStyle = createGlobalStyle<{ theme: Theme }>`
   body {
+    background: ${props => props.theme.background};
     min-width: 400px;
     min-height: 400px;
     

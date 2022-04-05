@@ -7,6 +7,7 @@ interface StyledHeaderProps {
 
 const common = css`
   text-align: ${({ align }: StyledHeaderProps) => align};
+  color: ${({ theme }) => theme.header.main};
 `;
 
 export const H1 = styled.h1`
