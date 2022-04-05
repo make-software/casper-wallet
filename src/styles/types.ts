@@ -1,5 +1,6 @@
 export interface Theme {
   background: string;
+  padding: number;
   header: {
     main: string;
   };

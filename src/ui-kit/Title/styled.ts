@@ -13,10 +13,9 @@ const common = css<StyledTitleProps>`
 export const H1 = styled.h1`
   ${common};
 
-  font-family: 'Inter', sans-serif;
   font-weight: 700;
-
   font-size: 24px;
+
   line-height: 28px;
 `;
 

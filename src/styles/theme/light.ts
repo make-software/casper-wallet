@@ -3,6 +3,7 @@ import { Color } from '../colors';
 
 export const light: Theme = {
   background: Color.white,
+  padding: 20,
   header: {
     main: Color.black
   },
