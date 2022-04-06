@@ -1,0 +1,17 @@
+# Please see the documentation for all configuration options:
+# https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "develop"
+    # Specify labels for npm pull requests
+    labels:
+      - "dependencies"
+    # Add reviewers
+    reviewers:
+      - "piotrwitek"
+      - "vladimir-gachkovsky"
