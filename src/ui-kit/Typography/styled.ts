@@ -11,6 +11,9 @@ interface StyledTypographyProps {
 
 export const Paragraph = styled.p<StyledTypographyProps>`
   text-align: ${({ align }) => align};
-  color: ${({ color, theme }) => theme.typography[color]};
+  color: ${({ color, theme }) => theme.typography.color[color]};
   font-size: ${({ fontSize }) => `${fontSize}px`};
+
+  margin-top: ${({ theme }) => theme.typography.marginTop}px;
+  margin-bottom: ${({ theme }) => theme.typography.marginBottom}px;
 `;

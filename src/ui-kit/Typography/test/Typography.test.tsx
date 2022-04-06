@@ -27,7 +27,7 @@ describe('Typography', () => {
         </ThemeProvider>
       );
       expect(container.firstChild).toHaveStyle(
-        `color: ${light.typography[TypographyColor.main]}`
+        `color: ${light.typography.color[TypographyColor.main]}`
       );
     });
   });
