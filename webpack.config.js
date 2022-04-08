@@ -38,13 +38,9 @@ if (fileSystem.existsSync(secretsPath)) {
 const options = {
   mode: process.env.NODE_ENV || 'development',
   entry: {
-    newtab: path.join(__dirname, 'src', 'pages', 'NewTab', 'index.tsx'),
-    options: path.join(__dirname, 'src', 'pages', 'Options', 'index.tsx'),
     popup: path.join(__dirname, 'src', 'pages', 'Popup', 'index.tsx'),
-    background: path.join(__dirname, 'src', 'pages', 'Background', 'index.ts'),
-    contentScript: path.join(__dirname, 'src', 'pages', 'Content', 'index.ts'),
-    devtools: path.join(__dirname, 'src', 'pages', 'Devtools', 'index.ts'),
-    panel: path.join(__dirname, 'src', 'pages', 'Panel', 'index.tsx')
+    background: path.join(__dirname, 'src', 'background', 'index.ts'),
+    contentScript: path.join(__dirname, 'src', 'content', 'index.ts')
   },
   chromeExtensionBoilerplate: {
     notHotReload: ['contentScript', 'devtools']
@@ -153,33 +149,9 @@ const options = {
       ]
     }),
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, 'src', 'pages', 'NewTab', 'index.html'),
-      filename: 'newtab.html',
-      chunks: ['newtab'],
-      cache: false
-    }),
-    new HtmlWebpackPlugin({
-      template: path.join(__dirname, 'src', 'pages', 'Options', 'index.html'),
-      filename: 'options.html',
-      chunks: ['options'],
-      cache: false
-    }),
-    new HtmlWebpackPlugin({
       template: path.join(__dirname, 'src', 'pages', 'Popup', 'index.html'),
       filename: 'popup.html',
       chunks: ['popup'],
-      cache: false
-    }),
-    new HtmlWebpackPlugin({
-      template: path.join(__dirname, 'src', 'pages', 'Devtools', 'index.html'),
-      filename: 'devtools.html',
-      chunks: ['devtools'],
-      cache: false
-    }),
-    new HtmlWebpackPlugin({
-      template: path.join(__dirname, 'src', 'pages', 'Panel', 'index.html'),
-      filename: 'panel.html',
-      chunks: ['panel'],
       cache: false
     })
   ],

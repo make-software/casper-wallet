@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { ThemeProvider } from 'styled-components';
 
-import { Popup } from '@src/shared/components/Popup';
+import { CreateVault } from '@src/pages/CreateVault';
 
 import { theme } from '@src/styles/theme';
 import { GlobalStyle } from '@src/styles/globalStyle';
@@ -10,7 +10,7 @@ import { GlobalStyle } from '@src/styles/globalStyle';
 render(
   <ThemeProvider theme={theme}>
     <GlobalStyle />
-    <Popup />
+    <CreateVault />
   </ThemeProvider>,
   window.document.querySelector('#app-container')
 );
