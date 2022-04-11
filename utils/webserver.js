@@ -93,7 +93,7 @@ if (process.env.NODE_ENV === 'development' && 'hot' in module) {
 
 (async () => {
   await server.startCallback(async () => {
-    if (!browserEnvVar || (!isChrome && !isFirefox)) {
+    if (!browserEnvVar || isSafari) {
       return;
     }
 
