@@ -14,7 +14,7 @@ import cssToXPath from 'css-to-xpath';
 import { WebElementWithAPI } from './WebElementWithAPI';
 
 import { DriverKey, PerformanceResults, RawLocator } from './types';
-import { ElementState } from '../constants';
+import { ElementState } from './constants';
 
 function wrapElementWithAPI(
   element: WebElement,
@@ -120,16 +120,16 @@ export class Driver {
 
   async waitForSelector(
     rawLocator: RawLocator,
-    { timeout = this.timeout, state = ElementState.visible } = {}
+    { timeout = this.timeout, state = ElementState.Visible } = {}
   ) {
     const selector = this.buildLocator(rawLocator);
     let element;
-    if (![ElementState.visible, ElementState.detached].includes(state)) {
+    if (![ElementState.Visible, ElementState.Detached].includes(state)) {
       throw new Error(`Provided state selector ${state} is not supported`);
     }
-    if (state === ElementState.visible) {
+    if (state === ElementState.Visible) {
       element = await this.driver.wait(until.elementLocated(selector), timeout);
-    } else if (state === ElementState.detached) {
+    } else if (state === ElementState.Detached) {
       element = await this.driver.wait(
         until.stalenessOf(await this.findElement(selector)),
         timeout

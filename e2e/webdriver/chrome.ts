@@ -1,24 +1,19 @@
-import { Builder, ThenableWebDriver } from 'selenium-webdriver';
-import chrome from 'selenium-webdriver/chrome';
-// @ts-ignore TODO: solve import
-import proxy from 'selenium-webdriver/proxy';
+import * as chrome from 'selenium-webdriver/chrome';
+import { Builder, ThenableWebDriver, Browser } from 'selenium-webdriver';
 
-import { Browsers, ExtensionBuildPath, extensionName } from '../constants';
-import { BuildWebDriver, WebDriverObject } from './types';
-
-const HTTPS_PROXY_HOST = '127.0.0.1:8000';
+import { WebDriverObject } from './types';
+import { ExtensionBuildPath, extensionName } from '../../constants';
 
 export class ChromeDriver {
   _driver: ThenableWebDriver;
 
-  static async build({ port }: BuildWebDriver): Promise<WebDriverObject> {
-    const args = [`load-extension=${ExtensionBuildPath.chrome}`];
+  static async build(port: number): Promise<WebDriverObject> {
+    const args = [`load-extension=${ExtensionBuildPath.Chrome}`];
 
     const options = new chrome.Options().addArguments(args.join(' '));
-    options.setProxy(proxy.manual({ https: HTTPS_PROXY_HOST }));
     options.setAcceptInsecureCerts(true);
     const builder = new Builder()
-      .forBrowser(Browsers.chrome)
+      .forBrowser(Browser.CHROME)
       .setChromeOptions(options);
     const service = new chrome.ServiceBuilder();
 

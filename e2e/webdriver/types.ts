@@ -2,8 +2,7 @@ import { ThenableWebDriver, WebElement } from 'selenium-webdriver';
 
 export type RawLocator = string | LocatorObject;
 export type Key = string | number | Promise<string | number>;
-
-type Browser = 'chrome' | 'firefox';
+export type Browser = 'chrome' | 'firefox' | 'safari';
 
 export interface BuildWebDriver {
   port?: number;

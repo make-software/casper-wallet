@@ -7,31 +7,27 @@ const webpack = require('webpack');
 const { buildWebDriver } = require('../e2e/webdriver');
 const config = require('../webpack.config');
 const env = require('./env');
+const {
+  browserEnvVar,
+  isChrome,
+  isFirefox,
+  isSafari,
+  ExtensionBuildPath,
+  extensionName
+} = require('../constants');
 
 // Do this as the first thing so that any code reading it knows the right env.
 process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
 process.env.ASSET_PATH = '/';
 
-const browser = process.env.BROWSER;
-
-const chromeBuildDir = 'build/chrome';
-const safariBuildDir = 'build/safari/CasperLabs Signer';
-const firefoxBuildDir = 'build/firefox';
-
-const isSafari = browser === 'safari';
-const isChrome = browser === 'chrome';
-const isFirefox = browser === 'firefox';
-
-// This script uses only for chrome or safari
-// Firefox runs with help `web-ext` library
 let directory;
 if (isSafari) {
-  directory = path.join(__dirname, '../', safariBuildDir);
+  directory = path.join(__dirname, '../', ExtensionBuildPath.Safari);
 } else if (isFirefox) {
-  directory = path.join(__dirname, '../', firefoxBuildDir);
+  directory = path.join(__dirname, '../', ExtensionBuildPath.Firefox);
 } else if (isChrome) {
-  directory = path.join(__dirname, '../', chromeBuildDir);
+  directory = path.join(__dirname, '../', ExtensionBuildPath.Firefox);
 } else {
   throw new Error('Unknown browser');
 }
@@ -57,10 +53,10 @@ delete config.chromeExtensionBoilerplate;
 if (isSafari) {
   config.plugins.push(
     new XcodeBuildPlugin({
-      projectDir: safariBuildDir,
+      projectDir: directory,
       args: {
         quiet: true,
-        scheme: 'CasperLabs Signer'
+        scheme: extensionName
       },
       buildActions: 'build'
     })
@@ -97,11 +93,11 @@ if (process.env.NODE_ENV === 'development' && 'hot' in module) {
 
 (async () => {
   await server.startCallback(async () => {
-    if (!browser || (!isChrome && !isFirefox)) {
+    if (!browserEnvVar || (!isChrome && !isFirefox)) {
       return;
     }
 
-    const driver = await buildWebDriver({ browser });
+    const driver = await buildWebDriver({ browser: browserEnvVar });
     await driver.navigate();
   });
 })();

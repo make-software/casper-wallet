@@ -7,9 +7,12 @@ const webpack = require('webpack'),
   TerserPlugin = require('terser-webpack-plugin'),
   TsconfigPaths = require('tsconfig-paths-webpack-plugin');
 
+const { isChrome, ExtensionBuildPath, ManifestPath } = require('./constants');
+
 const ASSET_PATH = process.env.ASSET_PATH || '/';
-const browser = process.env.BROWSER;
-const buildDir = browser === 'chrome' ? 'build/chrome' : 'build/firefox';
+const buildDir = isChrome
+  ? ExtensionBuildPath.Chrome
+  : ExtensionBuildPath.Firefox;
 
 const alias = {
   'react-dom': '@hot-loader/react-dom'
@@ -99,8 +102,7 @@ const options = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from:
-            browser === 'chrome' ? 'src/manifest.v3.json' : 'src/manifest.json',
+          from: isChrome ? ManifestPath.v3 : ManifestPath.v2,
           to: path.join(__dirname, buildDir, 'manifest.json'),
           force: true,
           transform: function (content, path) {

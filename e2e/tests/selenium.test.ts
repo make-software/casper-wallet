@@ -11,5 +11,6 @@ describe('Selenium', () => {
     });
 
     assert.equal(await path.getText(), 'src/pages/Popup/components/Popup.jsx');
+    await driver.driver.close();
   });
 });

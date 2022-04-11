@@ -2,7 +2,7 @@ import { until, WebElement } from 'selenium-webdriver';
 
 import { IWebElementWithAPI, Key } from './types';
 import { Driver } from './driver';
-import { ElementState } from '../constants';
+import { ElementState } from './constants';
 
 export class WebElementWithAPI
   extends WebElement
@@ -26,10 +26,10 @@ export class WebElementWithAPI
   }
   async waitForElementState(state: string, timeout: number): Promise<void> {
     switch (state) {
-      case ElementState.hidden:
+      case ElementState.Hidden:
         // @ts-ignore TODO: clarify Condition<boolean> case here
         return await driver.wait(until.stalenessOf(element), timeout);
-      case ElementState.visible:
+      case ElementState.Visible:
         return await this.driver.wait(
           until.elementIsVisible(this.element),
           timeout

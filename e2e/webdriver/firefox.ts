@@ -1,31 +1,28 @@
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
-import { ThenableWebDriver } from 'selenium-webdriver';
-import { BuildWebDriver, WebDriverObject } from './types';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import * as firefox from 'selenium-webdriver/firefox';
+import { ThenableWebDriver, Browser } from 'selenium-webdriver';
 import { Builder, until, By } from 'selenium-webdriver';
-import firefox from 'selenium-webdriver/firefox';
-// @ts-ignore TODO: solve import
-import proxy from 'selenium-webdriver/proxy';
-import { Browsers, ExtensionBuildPath } from '../constants';
+
+import { WebDriverObject } from './types';
+import { ExtensionBuildPath } from '../../constants';
 
 const TEMP_PROFILE_PATH_PREFIX = path.join(
   os.tmpdir(),
   'Casper-Signer-Profile'
 );
-const HTTPS_PROXY_HOST = '127.0.0.1:8000';
 
 export class FirefoxDriver {
   _driver: ThenableWebDriver;
 
-  static async build({ port }: BuildWebDriver): Promise<WebDriverObject> {
+  static async build(port: number): Promise<WebDriverObject> {
     const templateProfile = fs.mkdtempSync(TEMP_PROFILE_PATH_PREFIX);
     const options = new firefox.Options().setProfile(templateProfile);
-    options.setProxy(proxy.manual({ https: HTTPS_PROXY_HOST }));
     options.setAcceptInsecureCerts(true);
 
     const builder = new Builder()
-      .forBrowser(Browsers.firefox)
+      .forBrowser(Browser.FIREFOX)
       .setFirefoxOptions(options);
 
     if (port) {
@@ -36,7 +33,7 @@ export class FirefoxDriver {
     const driver = builder.build();
     const fxDriver = new FirefoxDriver(driver);
     const extensionId = await fxDriver.installExtension(
-      ExtensionBuildPath.firefox
+      ExtensionBuildPath.Firefox
     );
     const internalExtensionId = await fxDriver.getInternalId();
 
