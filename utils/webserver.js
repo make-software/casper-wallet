@@ -93,11 +93,29 @@ if (process.env.NODE_ENV === 'development' && 'hot' in module) {
 
 (async () => {
   await server.startCallback(async () => {
-    if (!browserEnvVar || isSafari) {
-      return;
-    }
+    if (isChrome) {
+      const delay = ms => new Promise(res => setTimeout(res, ms));
 
-    const driver = await buildWebDriver({ browser: browserEnvVar });
-    await driver.navigate();
+      const chromeExtensionID = 'aohghmighlieiainnegkcijnfilokake'; // According to `key` in manifest
+      const openExtensionPageCommand = `open -na "Google Chrome" chrome-extension://${chromeExtensionID}/popup.html --args --remote-debugging-port=9222`;
+      const installExtensionCommand = `open -na "Google Chrome" chrome://extensions/ --args --load-extension=${path.join(
+        __dirname,
+        '../',
+        ExtensionBuildPath.Chrome
+      )} --remote-debugging-port=9222`;
+
+      execSync(installExtensionCommand);
+      await delay(2000); // Waiting for install
+      execSync(openExtensionPageCommand);
+    } else if (isFirefox) {
+      execSync(
+        `web-ext run --source-dir ${ExtensionBuildPath.Firefox} -u about:debugging#/runtime/this-firefox`
+      );
+    }
+    if (isSafari) {
+      return null;
+    } else {
+      throw new Error("Unknown browser passed. Couldn't start browser");
+    }
   });
 })();
