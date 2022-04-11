@@ -9,7 +9,7 @@ export function Popup(): JSX.Element {
       <AppHeader>
         <AppLogo src={logo} alt="logo" />
         <p>
-          Edit <code>src/pages/Popup/components/Popup.jsx</code> and save to
+          Edit <code>src/shared/Popup/components/Popup.jsx</code> and save to
           reload.
         </p>
         <AppLink

@@ -6,8 +6,7 @@ import { Popup } from '../Popup';
 
 describe('Popup', () => {
   it('should render correct', () => {
-    const textOnSite =
-      'Edit src/pages/Popup/components/Popup.jsx and save to reload.';
+    const textOnSite = 'Learn React!';
     const { getByText } = render(<Popup />);
     const getByTextWithMarkup = withMarkup(getByText);
 
