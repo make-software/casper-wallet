@@ -16,7 +16,7 @@ const TEMP_PROFILE_PATH_PREFIX = path.join(
 export class FirefoxDriver {
   _driver: ThenableWebDriver;
 
-  static async build(port: number): Promise<WebDriverObject> {
+  static async build(port: number | undefined): Promise<WebDriverObject> {
     const templateProfile = fs.mkdtempSync(TEMP_PROFILE_PATH_PREFIX);
     const options = new firefox.Options().setProfile(templateProfile);
     options.setAcceptInsecureCerts(true);

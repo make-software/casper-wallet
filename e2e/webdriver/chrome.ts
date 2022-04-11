@@ -7,7 +7,7 @@ import { ExtensionBuildPath, extensionName } from '../../constants';
 export class ChromeDriver {
   _driver: ThenableWebDriver;
 
-  static async build(port: number): Promise<WebDriverObject> {
+  static async build(port: number | undefined): Promise<WebDriverObject> {
     const args = [`load-extension=${ExtensionBuildPath.Chrome}`];
 
     const options = new chrome.Options().addArguments(args.join(' '));
