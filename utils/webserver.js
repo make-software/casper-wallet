@@ -16,6 +16,8 @@ const {
   extensionName
 } = require('../constants');
 
+const { chromeExtensionID } = require('../src/manifest.v3.json');
+
 // Do this as the first thing so that any code reading it knows the right env.
 process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
@@ -96,7 +98,6 @@ if (process.env.NODE_ENV === 'development' && 'hot' in module) {
     if (isChrome) {
       const delay = ms => new Promise(res => setTimeout(res, ms));
 
-      const chromeExtensionID = 'aohghmighlieiainnegkcijnfilokake'; // According to `key` in manifest
       const openExtensionPageCommand = `open -na "Google Chrome" chrome-extension://${chromeExtensionID}/popup.html --args --remote-debugging-port=9222`;
       const installExtensionCommand = `open -na "Google Chrome" chrome://extensions/ --args --load-extension=${path.join(
         __dirname,
@@ -113,7 +114,7 @@ if (process.env.NODE_ENV === 'development' && 'hot' in module) {
       );
     }
     if (isSafari) {
-      return null;
+      execSync('open -na Safari');
     } else {
       throw new Error("Unknown browser passed. Couldn't start browser");
     }
