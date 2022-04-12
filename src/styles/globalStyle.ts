@@ -12,11 +12,13 @@ export const GlobalStyle = createGlobalStyle<{ theme: Theme }>`
     
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    
+    font-size: 15px;
   }
   
   #app-container {
     background: ${props => props.theme.background};
-    padding: ${props => props.theme.padding}px;
+    padding: ${props => props.theme.padding[2]};
     
     border-radius: 16px;
     

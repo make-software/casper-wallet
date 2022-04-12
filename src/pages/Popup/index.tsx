@@ -4,11 +4,11 @@ import { ThemeProvider } from 'styled-components';
 
 import { CreateVault } from '@src/pages/CreateVault';
 
-import { theme } from '@src/styles/theme';
+import { themeConfig } from '@src/libs/ui/theme-config';
 import { GlobalStyle } from '@src/styles/globalStyle';
 
 render(
-  <ThemeProvider theme={theme}>
+  <ThemeProvider theme={themeConfig}>
     <GlobalStyle />
     <CreateVault />
   </ThemeProvider>,

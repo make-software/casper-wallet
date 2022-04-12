@@ -4,9 +4,9 @@ import { light } from './light';
 import { dark } from './dark';
 
 import { themeKey } from '../constants';
-import { Theme } from '../types';
+// import { Theme } from '../types';
 
-export function getCurrentTheme(): Theme {
+export function getCurrentTheme() {
   const theme = store.get(themeKey);
 
   if (!theme) {
@@ -15,14 +15,14 @@ export function getCurrentTheme(): Theme {
     if (isDark) {
       store.set(themeKey, 'dark');
       // TODO: Implement dark theme and remove cast
-      return dark as Theme;
+      return dark;
     } else {
       store.set(themeKey, 'light');
       return light;
     }
   }
 
-  return theme === 'dark' ? (dark as Theme) : light;
+  return theme === 'dark' ? dark : light;
 }
 
 export const theme = {
