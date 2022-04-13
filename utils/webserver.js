@@ -8,7 +8,6 @@ const { buildWebDriver } = require('../e2e/webdriver');
 const config = require('../webpack.config');
 const env = require('./env');
 const {
-  browserEnvVar,
   isChrome,
   isFirefox,
   isSafari,
@@ -66,6 +65,7 @@ if (isSafari) {
 }
 
 const compiler = webpack(config);
+const publicPath = `http://localhost:${env.PORT}/`;
 
 const server = new WebpackDevServer(
   {
@@ -78,7 +78,7 @@ const server = new WebpackDevServer(
       directory
     },
     devMiddleware: {
-      publicPath: `http://localhost:${env.PORT}/`,
+      publicPath,
       writeToDisk: true
     },
     headers: {
@@ -112,9 +112,8 @@ if (process.env.NODE_ENV === 'development' && 'hot' in module) {
       execSync(
         `web-ext run --source-dir ${ExtensionBuildPath.Firefox} -u about:debugging#/runtime/this-firefox`
       );
-    }
-    if (isSafari) {
-      execSync('open -na Safari');
+    } else if (isSafari) {
+      execSync(`open -na Safari ${publicPath}popup.html`);
     } else {
       throw new Error("Unknown browser passed. Couldn't start browser");
     }
