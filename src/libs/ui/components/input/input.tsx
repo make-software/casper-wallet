@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
 import styled from 'styled-components';
 import { BaseProps } from '../../types';
 import { matchSize } from '../../utils/match-size';
@@ -94,6 +94,7 @@ export interface InputProps extends BaseProps {
   suffixIcon?: ReactNode | null;
   suffixText?: string | null;
 
+  type?: HTMLInputTypeAttribute;
   required?: boolean;
   error?: boolean;
   validationType?: InputValidationType;

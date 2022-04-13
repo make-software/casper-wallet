@@ -21,15 +21,12 @@ export const themeConfig = {
       mono: '"JetBrains Mono", serif'
     },
     fontWeight: {
-      // thin: 100,
-      // extraLight: 200,
       light: 300,
       regular: 400,
       medium: 500,
       semiBold: 600,
       bold: 700,
       extraBold: 800
-      // black: 900,
     }
   },
   color: {
@@ -63,6 +60,7 @@ export const themeConfig = {
     white: '#FFFFFF',
     gray0: '#F5F6F7',
     gray1: '#F2F3F5',
+    'gray1.5': '#E8E9EC',
     gray2: '#DFE1E4',
     gray3: '#D2D5D9',
     gray4: '#BABCBF',
@@ -83,6 +81,7 @@ export const themeConfig = {
     base: 6
   },
   padding: {
+    1.333: '1.333em',
     2: '2em'
   },
   animations: {

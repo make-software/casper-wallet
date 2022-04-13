@@ -29,10 +29,10 @@ const StyledText = styled(Text)<HeaderTextProps>(
       {
         0: '2rem',
         1: '1.8rem',
-        2: '1.5rem',
-        3: '1.3rem',
-        4: '1rem',
-        5: '0.6rem'
+        2: '1.6rem',
+        3: '1.5rem',
+        4: '1.4rem',
+        5: '1.2rem'
       },
       size
     ),
@@ -40,7 +40,7 @@ const StyledText = styled(Text)<HeaderTextProps>(
       {
         0: '4.8rem',
         1: '4rem',
-        2: '2.8rem',
+        2: '1.8rem',
         3: '2.8rem',
         4: '2rem',
         5: '2.4rem'

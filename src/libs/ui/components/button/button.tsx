@@ -6,7 +6,7 @@ import { matchSize } from '../../utils/match-size';
 import Link from '../link/link';
 
 const BaseButton = styled.button<ButtonProps>(
-  ({ theme, disabled, height = '36', width = '100%' }) => ({
+  ({ theme, disabled, height = '24', width = '100%' }) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -15,14 +15,14 @@ const BaseButton = styled.button<ButtonProps>(
     fontFamily: theme.typography.fontFamily.primary,
     fontWeight: matchSize(
       {
-        '24': theme.typography.fontWeight.medium,
+        '24': theme.typography.fontWeight.semiBold,
         '36': theme.typography.fontWeight.medium,
         '40': theme.typography.fontWeight.semiBold
       },
       height
     ),
     fontSize: matchSize(
-      { '24': '1.1rem', '36': '1.4rem', '40': '1.4rem' },
+      { '24': '1rem', '36': '1.2rem', '40': '1.4rem' },
       height
     ),
     minHeight: matchSize({ '24': 24, '36': 36, '40': 40 }, height),

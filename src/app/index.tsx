@@ -2,15 +2,20 @@ import React from 'react';
 import { render } from 'react-dom';
 import { ThemeProvider } from 'styled-components';
 
-import { CreateVault } from '@src/pages/CreateVault';
+import { CreateVault } from '@src/pages/create-vault';
 
+import { GlobalStyle } from '@src/libs/ui/global-style';
 import { themeConfig } from '@src/libs/ui/theme-config';
-import { GlobalStyle } from '@src/styles/globalStyle';
+
+import { Layout } from '@src/layout';
 
 render(
   <ThemeProvider theme={themeConfig}>
     <GlobalStyle />
-    <CreateVault />
+    <Layout>
+      {/* TODO: Implement router */}
+      <CreateVault />
+    </Layout>
   </ThemeProvider>,
   window.document.querySelector('#app-container')
 );
