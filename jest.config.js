@@ -13,7 +13,7 @@ module.exports = {
   coveragePathIgnorePatterns: ['/node_modules/'],
   testRegex: '(/tests?/.*|(\\.|/)(test|spec))\\.tsx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  modulePathIgnorePatterns: ['<rootDir>/.*/__mocks__'],
+  modulePathIgnorePatterns: ['<rootDir>/.*/__mocks__', '<rootDir>/e2e'],
   testEnvironment: 'jsdom',
   timers: 'fake',
   moduleNameMapper: {
