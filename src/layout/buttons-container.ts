@@ -13,6 +13,4 @@ export const ButtonsContainer = styled.div<Props>`
 
   border-top: ${({ theme }) => `1px solid ${theme.color['gray1.5']}`};
   padding: ${({ theme }) => theme.padding[1.333]};
-
-  width: 100%;
 `;
