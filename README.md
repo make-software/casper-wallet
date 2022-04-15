@@ -93,3 +93,9 @@ For `Firefox` follow the instructions below:
 
 Build present in `build/safari` folder.
 For more information please [follow the link](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension)
+
+## E2E tests
+
+Write tests into `e2e/tests` folder.
+
+Use npm scripts `test:e2e:chrome` and `test:e2e:firefox` depends on target browser
