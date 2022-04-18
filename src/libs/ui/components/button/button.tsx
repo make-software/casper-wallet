@@ -47,13 +47,13 @@ const BaseButton = styled.button<ButtonProps>(
 const PrimaryBlueButton = styled(BaseButton)<ButtonProps>(
   ({ theme, disabled }) => ({
     color: theme.color.white,
-    background: theme.color.blue,
+    background: theme.color.blue0,
 
     ': hover': {
-      background: theme.color.blueShade20
+      background: theme.color.blue2
     },
     ': active': {
-      background: theme.color.blueShade30
+      background: theme.color.blue3
     },
 
     ...(disabled && {
@@ -66,13 +66,13 @@ const PrimaryBlueButton = styled(BaseButton)<ButtonProps>(
 const PrimaryRedButton = styled(BaseButton)<ButtonProps>(
   ({ theme, disabled }) => ({
     color: theme.color.white,
-    background: theme.color.red,
+    background: theme.color.red0,
 
     ': hover': {
-      background: theme.color.redShade10
+      background: theme.color.red1
     },
     ': active': {
-      background: theme.color.redShade20
+      background: theme.color.red2
     },
 
     ...(disabled && {
@@ -84,16 +84,16 @@ const PrimaryRedButton = styled(BaseButton)<ButtonProps>(
 
 const SecondaryBlueButton = styled(BaseButton)<ButtonProps>(
   ({ theme, disabled }) => ({
-    color: theme.color.blue,
+    color: theme.color.blue0,
     background: theme.color.gray1,
     border: `1px solid ${theme.color.gray3}`,
 
     ': hover': {
-      background: theme.color.blueTint5,
+      background: theme.color.blue2,
       borderColor: 'transparent'
     },
     ': active': {
-      background: theme.color.blueTint10,
+      background: theme.color.blue3,
       borderColor: 'transparent'
     },
 
@@ -106,16 +106,16 @@ const SecondaryBlueButton = styled(BaseButton)<ButtonProps>(
 
 const SecondaryRedButton = styled(BaseButton)<ButtonProps>(
   ({ theme, disabled }) => ({
-    color: theme.color.red,
+    color: theme.color.red0,
     background: theme.color.gray1,
     border: `1px solid ${theme.color.gray3}`,
 
     ': hover': {
-      background: theme.color.redTint6,
+      background: theme.color.red1,
       border: '1px solid transparent'
     },
     ': active': {
-      background: theme.color.redTint12,
+      background: theme.color.red2,
       border: '1px solid transparent'
     },
 
@@ -128,14 +128,14 @@ const SecondaryRedButton = styled(BaseButton)<ButtonProps>(
 
 const UtilityButton = styled(BaseButton)<ButtonProps>(
   ({ theme, disabled }) => ({
-    color: theme.color.red,
+    color: theme.color.red0,
     background: theme.color.gray1,
 
     ': hover': {
-      background: theme.color.redTint6
+      background: theme.color.red1
     },
     ': active': {
-      background: theme.color.redTint12
+      background: theme.color.red2
     },
 
     ...(disabled && {

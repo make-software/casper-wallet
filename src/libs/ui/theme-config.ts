@@ -21,51 +21,43 @@ export const themeConfig = {
       mono: '"JetBrains Mono", serif'
     },
     fontWeight: {
-      light: 300,
       regular: 400,
       medium: 500,
-      semiBold: 600,
-      bold: 700,
-      extraBold: 800
+      semiBold: 600
+    },
+    header: {
+      fontWeight: {
+        bold: 700
+      }
     }
   },
   color: {
-    /* Text related */
     text: '#1A1919',
-    textPlaceholder: '#8F9398',
-    textDisabled: '#BABCBF',
-    navigationLink: '#C4C4C4',
-    contentViolet: '#8B5BF1',
+    textPlaceholder: '#909299',
+    textDisabled: '#909299',
+    navigationLink: '#0A2EBF',
 
-    /* Primary */
-    red: '#E6332A',
-    redShade10: '#D23028',
-    redShade20: '#BD2E27',
-    redTint6: '#FCF2F2',
-    redTint12: '#FCE7E5',
-    blue: '#0021A5',
-    blueBanner: '#294ACC',
-    blueBanner2: '#2A5DB2',
-    blueShade20: '#051F89',
-    blueShade30: '#081F7B',
-    blueTint5: 'rgba(0, 33, 165, 0.05)',
-    blueTint10: 'rgba(0, 33, 165, 0.1)',
-    darkBlue: '#181D40',
-    green: '#31DE91',
-    lightBlue: '#536ED9',
-    yellow: '#F1BF0B',
-    fillSecondaryRedHover: 'rgba(230, 51, 42, 0.08)',
+    red: '#E6332A', // CSPR red color
+    green: '#2DDC88',
 
-    /* Gray */
+    blue0: '#0A2EBF', // button
+    blue1: '#0021A5',
+    blue2: '#001C8C', // button:hover
+    blue3: '#001773', // button:active
+    blue4: '#001A80',
+
+    red0: '#CC000F', // button
+    red1: '#B2000D', // button:hover
+    red2: '#99000B', // button:active
+
     white: '#FFFFFF',
-    gray0: '#F5F6F7',
-    gray1: '#F2F3F5',
-    'gray1.5': '#E8E9EC',
-    gray2: '#DFE1E4',
-    gray3: '#D2D5D9',
-    gray4: '#BABCBF',
-    gray5: '#8F9398',
-    black: '#1A1919'
+    gray0: '#EFF0F2',
+    gray1: '#F5F6F7', // general background-color
+    gray2: '#E8E9EC', // border-line color
+    gray3: '#BCBDC1',
+    gray4: '#909299',
+    black: '#1A1919',
+    blackHole: '#000000'
   },
   boxShadow: {
     unset: 'unset',

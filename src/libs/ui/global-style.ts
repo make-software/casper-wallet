@@ -16,7 +16,7 @@ export const GlobalStyle = createGlobalStyle<{ theme: any }>`
   }
   
   #app-container {
-    background: ${props => props.theme.color.white};
+    background: ${props => props.theme.color.gray1};
     border-radius: 16px;
   }
   

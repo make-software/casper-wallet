@@ -25,7 +25,7 @@ const InputContainer = styled('div')<InputProps>(
     padding: '0 16px',
     borderRadius: theme.borderRadius.base,
     color: theme.color.text,
-    background: theme.color.gray1,
+    background: theme.color.white,
     caretColor: theme.color.red,
     fontFamily: monotype
       ? theme.typography.fontFamily.mono
@@ -58,6 +58,9 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
       '-webkit-appearance': 'none',
       'pointer-events': 'none'
     }
+  },
+  '::placeholder': {
+    color: theme.color.textPlaceholder
   }
 }));
 
@@ -70,7 +73,7 @@ const SuffixContainer = styled('div')(({ theme }) => ({
 }));
 
 const SuffixTextContainer = styled(SuffixContainer)(({ theme }) => ({
-  color: theme.color.gray5
+  color: theme.color.gray4
 }));
 
 export enum InputValidationType {

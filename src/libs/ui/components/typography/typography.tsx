@@ -7,36 +7,21 @@ import { matchSize, BaseProps, Size } from '@src/libs/ui';
 type Ref = HTMLSpanElement;
 
 export type TypographyType = 'header' | 'body' | 'caption' | 'label' | 'hash';
-export type TypographyWeight =
-  | 'light'
-  | 'regular'
-  | 'medium'
-  | 'semiBold'
-  | 'bold'
-  | 'extraBold';
+export type TypographyWeight = 'regular' | 'medium' | 'semiBold';
 
-export type TextVariation =
-  | 'inherit'
-  | 'gray'
-  | 'white'
-  | 'contentViolet'
-  | 'lightGray'
-  | 'darkGray'
-  | 'black'
-  | 'blue'
-  | 'red';
+export type TextVariation = 'inherit' | 'gray' | 'white' | 'black' | 'blue';
 
 type Transform = 'uppercase' | 'capitalize' | 'unset';
 
 export interface TypographyProps extends BaseProps {
-  type?: TypographyType;
+  type: TypographyType;
+  weight: TypographyWeight;
   variation?: TextVariation;
   monotype?: boolean;
   uppercase?: boolean;
   capitalize?: boolean;
   noWrap?: boolean;
   loading?: boolean;
-  weight?: TypographyWeight;
   size?: Size;
   transform?: Transform;
 }
@@ -47,10 +32,10 @@ const StyledTypography = styled('span').withConfig({
 })<TypographyProps>(
   ({
     theme,
-    loading,
-    type = 'body',
+    type,
+    weight,
     size = 2,
-    weight = 'regular',
+    loading,
     variation = 'inherit',
     monotype = false,
     uppercase = false,
@@ -67,14 +52,10 @@ const StyledTypography = styled('span').withConfig({
         : theme.typography.fontWeight[weight],
       color: {
         inherit: 'inherit',
-        lightGray: theme.color.gray3,
-        contentViolet: theme.color.contentViolet,
         gray: theme.color.gray4,
-        darkGray: theme.color.gray5,
         black: theme.color.black,
         white: theme.color.white,
-        blue: theme.color.blue,
-        red: theme.color.red
+        blue: theme.color.blue0
       }[variation],
       whiteSpace: noWrap ? 'nowrap' : 'initial',
       ...(loading && {
@@ -94,6 +75,7 @@ const StyledTypography = styled('span').withConfig({
       case 'header':
         return {
           ...body,
+          fontWeight: theme.typography.header.fontWeight.bold,
           fontSize: matchSize(
             {
               0: '2rem',

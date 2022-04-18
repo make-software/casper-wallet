@@ -56,14 +56,24 @@ export function FormField({
   return (
     <StyledContainer {...restProps}>
       <LabelContainer>
-        {label && <Typography size={1}>{label}</Typography>}
-        {rightLabel && <Typography size={1}>{rightLabel}</Typography>}
+        {label && (
+          <Typography type="label" weight="regular" size={1}>
+            {label}
+          </Typography>
+        )}
+        {rightLabel && (
+          <Typography type="label" weight="regular" size={1}>
+            {rightLabel}
+          </Typography>
+        )}
       </LabelContainer>
 
       {children}
 
       <StatusTextContainer status={status}>
-        <Typography size={2}>{statusText}</Typography>
+        <Typography type="body" weight="regular" size={2}>
+          {statusText}
+        </Typography>
       </StatusTextContainer>
     </StyledContainer>
   );

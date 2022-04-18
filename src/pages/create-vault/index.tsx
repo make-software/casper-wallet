@@ -27,13 +27,12 @@ export function CreateVaultPageContent() {
   return (
     <Container>
       <HeaderTextContainer>
-        <Typography type="header" weight="bold">
+        <Typography type="header" weight="semiBold">
           Create new vault
         </Typography>
       </HeaderTextContainer>
-
       <TextContainer>
-        <Typography variation="darkGray">
+        <Typography type="body" weight="regular" variation="gray">
           Please set a password for your vault. You will need it later to unlock
           it, so keep it safe.
         </Typography>

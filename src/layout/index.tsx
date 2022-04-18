@@ -11,7 +11,7 @@ interface Props {
 
 // TODO: Implement Header component
 const PageHeader = styled.header`
-  background: ${({ theme }) => theme.color.blue};
+  background: ${({ theme }) => theme.color.blue0};
   height: 72px;
 `;
 
