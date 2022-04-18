@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { Typography, Input, Button } from '@src/libs/ui';
@@ -24,32 +25,38 @@ const InputsContainer = styled.div`
 `;
 
 export function CreateVaultPageContent() {
+  const { t } = useTranslation();
   return (
     <Container>
       <HeaderTextContainer>
         <Typography type="header" weight="bold">
-          Create new vault
+          <Trans t={t}>Create new vault</Trans>
         </Typography>
       </HeaderTextContainer>
 
       <TextContainer>
         <Typography variation="darkGray">
-          Please set a password for your vault. You will need it later to unlock
-          it, so keep it safe.
+          <Trans t={t}>
+            Please set a password for your vault. You will need it later to
+            unlock it, so keep it safe.
+          </Trans>
         </Typography>
       </TextContainer>
       <InputsContainer>
-        <Input type="password" placeholder="Password" />
-        <Input type="password" placeholder="Confirm password" />
+        <Input type="password" placeholder={t('Password')} />
+        <Input type="password" placeholder={t('Confirm password')} />
       </InputsContainer>
     </Container>
   );
 }
 
 export function CreateVaultPageFooter() {
+  const { t } = useTranslation();
   return (
     <ButtonsContainer>
-      <Button onClick={() => console.log('clicked')}>Create Vault</Button>
+      <Button onClick={() => console.log('clicked')}>
+        <Trans t={t}>Create Vault</Trans>
+      </Button>
     </ButtonsContainer>
   );
 }

@@ -1,0 +1,29 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: casper-signer-v2\n"
+"mime-version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"POT-Creation-Date: 2022-04-18T15:05:20.899Z\n"
+"PO-Revision-Date: 2022-04-18T15:05:20.899Z\n"
+
+msgid "Create new vault"
+msgstr "Yeni kasa oluştur"
+
+msgid ""
+"Please set a password for your vault. You will need it later to unlock it, so keep it "
+"safe."
+msgstr ""
+"Lütfen kasanız için bir şifre belirleyin. Kilidi açmak için daha sonra ihtiyacınız olacak, "
+"bu yüzden güvende tutun."
+
+
+msgid "Password"
+msgstr "Parola"
+
+msgid "Confirm password"
+msgstr "Şifreyi Onayla"
+
+msgid "Create Vault"
+msgstr "Kasa Oluştur"
