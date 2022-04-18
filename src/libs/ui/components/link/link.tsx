@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { themeConfig } from '../../theme-config';
+import { themeConfig } from '@src/libs/ui';
 
 type Color = 'primaryBlue' | 'primaryRed' | 'hash' | 'inherit';
 

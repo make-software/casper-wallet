@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { HeaderText, Text, Input, Button } from '@src/libs/ui';
+import { Typography, Input, Button } from '@src/libs/ui';
 import { ButtonsContainer } from '@src/layout/buttons-container';
 
 const Container = styled.div`
@@ -27,14 +27,16 @@ export function CreateVaultPageContent() {
   return (
     <Container>
       <HeaderTextContainer>
-        <HeaderText size={2}>Create new vault</HeaderText>
+        <Typography type="header" weight="bold">
+          Create new vault
+        </Typography>
       </HeaderTextContainer>
 
       <TextContainer>
-        <Text variation="darkGray">
+        <Typography variation="darkGray">
           Please set a password for your vault. You will need it later to unlock
           it, so keep it safe.
-        </Text>
+        </Typography>
       </TextContainer>
       <InputsContainer>
         <Input type="password" placeholder="Password" />

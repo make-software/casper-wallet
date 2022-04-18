@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { BaseProps } from '../../types';
-import { SubtitleText } from '../subtitle-text/subtitle-text';
+import { Typography, BaseProps } from '@src/libs/ui';
 
 const getThemeColor = (status?: FormFieldStatus | null) => {
   if (status == null) {
@@ -57,14 +56,14 @@ export function FormField({
   return (
     <StyledContainer {...restProps}>
       <LabelContainer>
-        {label && <SubtitleText size={1}>{label}</SubtitleText>}
-        {rightLabel && <SubtitleText size={1}>{rightLabel}</SubtitleText>}
+        {label && <Typography size={1}>{label}</Typography>}
+        {rightLabel && <Typography size={1}>{rightLabel}</Typography>}
       </LabelContainer>
 
       {children}
 
       <StatusTextContainer status={status}>
-        <SubtitleText size={2}>{statusText}</SubtitleText>
+        <Typography size={2}>{statusText}</Typography>
       </StatusTextContainer>
     </StyledContainer>
   );

@@ -1,8 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { BaseProps } from '../../types';
-import Link from '../link/link';
-import SvgIcon from './svg-icon';
+import { BaseProps, Link, SvgIcon } from '@src/libs/ui';
 
 const getSocialMediaColor = (type: SocialMediaType) => {
   return {

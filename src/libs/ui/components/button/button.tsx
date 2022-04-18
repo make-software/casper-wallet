@@ -1,9 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { BaseProps } from '../../types';
-import { matchSize } from '../../utils/match-size';
-import Link from '../link/link';
+import { matchSize, BaseProps, Link } from '@src/libs/ui';
 
 const BaseButton = styled.button<ButtonProps>(
   ({ theme, disabled, height = '24', width = '100%' }) => ({
