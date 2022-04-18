@@ -1,11 +1,12 @@
 import React from 'react';
 
 import { Layout } from '@src/layout';
-import { useCreateVaultComponents } from '@src/pages/create-vault';
+import {
+  CreateVaultPageContent,
+  CreateVaultPageFooter
+} from '@src/pages/create-vault';
 
 export function App() {
-  const { CreateVaultPageContent, CreateVaultPageFooter } =
-    useCreateVaultComponents();
   return (
     <Layout
       renderHeader={() => <></>}

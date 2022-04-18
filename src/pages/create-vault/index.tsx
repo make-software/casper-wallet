@@ -23,7 +23,7 @@ const InputsContainer = styled.div`
   }
 `;
 
-function CreateVaultPageContent() {
+export function CreateVaultPageContent() {
   return (
     <Container>
       <HeaderTextContainer>
@@ -44,17 +44,10 @@ function CreateVaultPageContent() {
   );
 }
 
-function CreateVaultPageFooter() {
+export function CreateVaultPageFooter() {
   return (
     <ButtonsContainer>
       <Button onClick={() => console.log('clicked')}>Create Vault</Button>
     </ButtonsContainer>
   );
-}
-
-export function useCreateVaultComponents() {
-  return {
-    CreateVaultPageContent,
-    CreateVaultPageFooter
-  };
 }
