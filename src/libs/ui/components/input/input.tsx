@@ -10,10 +10,10 @@ import {
 
 const getThemeColorByError = (error?: boolean) => {
   if (error == null || !error) {
-    return 'gray3';
+    return 'contentSecondary';
   }
 
-  return 'red';
+  return 'fillRed';
 };
 
 const InputContainer = styled('div')<InputProps>(
@@ -24,9 +24,9 @@ const InputContainer = styled('div')<InputProps>(
     alignItems: 'center',
     padding: '0 16px',
     borderRadius: theme.borderRadius.base,
-    color: theme.color.text,
-    background: theme.color.white,
-    caretColor: theme.color.red,
+    color: theme.color.contentPrimary,
+    background: theme.color.backgroundPrimary,
+    caretColor: theme.color.fillRed,
     fontFamily: monotype
       ? theme.typography.fontFamily.mono
       : theme.typography.fontFamily.primary,
@@ -39,7 +39,7 @@ const InputContainer = styled('div')<InputProps>(
 
     ...(disabled && {
       opacity: 0.5,
-      color: theme.color.textDisabled
+      color: theme.color.contentSecondary
     })
   })
 );
@@ -60,7 +60,7 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
     }
   },
   '::placeholder': {
-    color: theme.color.textPlaceholder
+    color: theme.color.contentSecondary
   }
 }));
 
@@ -73,7 +73,7 @@ const SuffixContainer = styled('div')(({ theme }) => ({
 }));
 
 const SuffixTextContainer = styled(SuffixContainer)(({ theme }) => ({
-  color: theme.color.gray4
+  color: theme.color.contentSecondary
 }));
 
 export enum InputValidationType {

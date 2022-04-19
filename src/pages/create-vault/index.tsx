@@ -32,7 +32,7 @@ export function CreateVaultPageContent() {
         </Typography>
       </HeaderTextContainer>
       <TextContainer>
-        <Typography type="body" weight="regular" variation="gray">
+        <Typography type="body" weight="regular" variation="contentSecondary">
           Please set a password for your vault. You will need it later to unlock
           it, so keep it safe.
         </Typography>

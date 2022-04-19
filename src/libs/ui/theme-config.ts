@@ -32,32 +32,36 @@ export const themeConfig = {
     }
   },
   color: {
-    text: '#1A1919',
-    textPlaceholder: '#909299',
-    textDisabled: '#909299',
-    navigationLink: '#0A2EBF',
+    backgroundPrimary: '#FFFFFF',
+    backgroundSecondary: '#F5F6F7',
+    backgroundBlue: '#0A2EBF',
+    backgroundGreen: '#2DDC88',
 
-    red: '#E6332A', // CSPR red color
-    green: '#2DDC88',
+    borderPrimary: '#E8E9EC',
 
-    blue0: '#0A2EBF', // button
-    blue1: '#0021A5',
-    blue2: '#001C8C', // button:hover
-    blue3: '#001773', // button:active
-    blue4: '#001A80',
+    fillWhite: '#FFFFFF',
+    fillRed: '#CC000F',
+    fillRedHover: '#B2000D',
+    fillRedClick: '#99000B',
+    fillBlue: '#0A2EBF',
+    fillBlueHover: '#001C8C',
+    fillBlueClick: '#001773',
+    fillGreen: '#2DDC88',
+    fillGreyPrimary: '#BCBDC1',
+    fillGreySecondary: '#E8E9EC',
+    fillGradientIn: {
+      from: '#EFF0F2',
+      to: '#F5F6F7'
+    },
+    fillGradientOut: {
+      from: '#F3F4F5',
+      to: '#EFF0F2'
+    },
 
-    red0: '#CC000F', // button
-    red1: '#B2000D', // button:hover
-    red2: '#99000B', // button:active
-
-    white: '#FFFFFF',
-    gray0: '#EFF0F2',
-    gray1: '#F5F6F7', // general background-color
-    gray2: '#E8E9EC', // border-line color
-    gray3: '#BCBDC1',
-    gray4: '#909299',
-    black: '#1A1919',
-    blackHole: '#000000'
+    contentPrimary: '#1A1919',
+    contentSecondary: '#84868C',
+    contentBlue: '#0A2EBF',
+    contentOnFill: '#ffffff'
   },
   boxShadow: {
     unset: 'unset',

@@ -46,101 +46,113 @@ const BaseButton = styled.button<ButtonProps>(
 
 const PrimaryBlueButton = styled(BaseButton)<ButtonProps>(
   ({ theme, disabled }) => ({
-    color: theme.color.white,
-    background: theme.color.blue0,
+    color: theme.color.backgroundPrimary,
+    background: theme.color.fillBlue,
 
     ': hover': {
-      background: theme.color.blue2
+      background: theme.color.fillBlueHover
     },
     ': active': {
-      background: theme.color.blue3
+      background: theme.color.fillBlueClick
     },
 
     ...(disabled && {
-      color: theme.color.gray4,
-      background: theme.color.gray1
+      color: theme.color.backgroundPrimary,
+      background: theme.color.fillGreyPrimary
     })
   })
 );
 
 const PrimaryRedButton = styled(BaseButton)<ButtonProps>(
   ({ theme, disabled }) => ({
-    color: theme.color.white,
-    background: theme.color.red0,
+    color: theme.color.backgroundPrimary,
+    background: theme.color.fillRed,
 
     ': hover': {
-      background: theme.color.red1
+      background: theme.color.fillRedHover
     },
     ': active': {
-      background: theme.color.red2
+      background: theme.color.fillRedClick
     },
 
     ...(disabled && {
-      color: theme.color.gray4,
-      background: theme.color.gray1
+      color: theme.color.backgroundPrimary,
+      background: theme.color.fillGreyPrimary
     })
   })
 );
 
 const SecondaryBlueButton = styled(BaseButton)<ButtonProps>(
   ({ theme, disabled }) => ({
-    color: theme.color.blue0,
-    background: theme.color.gray1,
-    border: `1px solid ${theme.color.gray3}`,
+    color: theme.color.contentBlue,
+    background: `linear-gradient(
+      ${theme.color.fillGradientOut.from},
+      ${theme.color.fillGradientOut.to}
+    )`,
 
     ': hover': {
-      background: theme.color.blue2,
-      borderColor: 'transparent'
+      background: `linear-gradient(
+        ${theme.color.fillGradientIn.from},
+        ${theme.color.fillGradientIn.to}
+      )`
     },
     ': active': {
-      background: theme.color.blue3,
-      borderColor: 'transparent'
+      background: theme.color.fillGreySecondary
     },
 
     ...(disabled && {
-      color: theme.color.gray4,
-      background: theme.color.white
+      color: theme.color.contentSecondary,
+      background: `linear-gradient(
+        ${theme.color.fillGradientOut.from},
+        ${theme.color.fillGradientOut.to}
+      )`
     })
   })
 );
 
 const SecondaryRedButton = styled(BaseButton)<ButtonProps>(
   ({ theme, disabled }) => ({
-    color: theme.color.red0,
-    background: theme.color.gray1,
-    border: `1px solid ${theme.color.gray3}`,
+    color: theme.color.fillRed,
+    background: `linear-gradient(
+      ${theme.color.fillGradientOut.from},
+      ${theme.color.fillGradientOut.to}
+    )`,
 
     ': hover': {
-      background: theme.color.red1,
-      border: '1px solid transparent'
+      background: `linear-gradient(
+        ${theme.color.fillGradientIn.from},
+        ${theme.color.fillGradientIn.to}
+      )`
     },
     ': active': {
-      background: theme.color.red2,
-      border: '1px solid transparent'
+      background: theme.color.fillGreySecondary
     },
 
     ...(disabled && {
-      color: theme.color.gray4,
-      background: theme.color.white
+      color: theme.color.contentSecondary,
+      background: `linear-gradient(
+        ${theme.color.fillGradientOut.from},
+        ${theme.color.fillGradientOut.to}
+      )`
     })
   })
 );
 
 const UtilityButton = styled(BaseButton)<ButtonProps>(
   ({ theme, disabled }) => ({
-    color: theme.color.red0,
-    background: theme.color.gray1,
+    color: theme.color.backgroundPrimary,
+    background: theme.color.fillBlue,
 
     ': hover': {
-      background: theme.color.red1
+      background: theme.color.fillBlueHover
     },
     ': active': {
-      background: theme.color.red2
+      background: theme.color.fillBlueClick
     },
 
     ...(disabled && {
-      color: theme.color.gray4,
-      background: theme.color.white
+      color: theme.color.backgroundPrimary,
+      background: theme.color.fillGreyPrimary
     })
   })
 );

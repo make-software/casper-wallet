@@ -9,7 +9,12 @@ type Ref = HTMLSpanElement;
 export type TypographyType = 'header' | 'body' | 'caption' | 'label' | 'hash';
 export type TypographyWeight = 'regular' | 'medium' | 'semiBold';
 
-export type TextVariation = 'inherit' | 'gray' | 'white' | 'black' | 'blue';
+export type TextVariation =
+  | 'inherit'
+  | 'contentBlue'
+  | 'contentPrimary'
+  | 'contentSecondary'
+  | 'contentOnFill';
 
 type Transform = 'uppercase' | 'capitalize' | 'unset';
 
@@ -52,10 +57,10 @@ const StyledTypography = styled('span').withConfig({
         : theme.typography.fontWeight[weight],
       color: {
         inherit: 'inherit',
-        gray: theme.color.gray4,
-        black: theme.color.black,
-        white: theme.color.white,
-        blue: theme.color.blue0
+        contentSecondary: theme.color.contentSecondary,
+        contentPrimary: theme.color.contentPrimary,
+        contentOnFill: theme.color.contentOnFill,
+        contentBlue: theme.color.contentBlue
       }[variation],
       whiteSpace: noWrap ? 'nowrap' : 'initial',
       ...(loading && {
