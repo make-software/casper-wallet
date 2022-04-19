@@ -2,7 +2,7 @@ import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyle = createGlobalStyle<{ theme: any }>`
   html {
-    font-size: 15px;
+    font-size: 10px;
   }
   
   body {
@@ -11,8 +11,6 @@ export const GlobalStyle = createGlobalStyle<{ theme: any }>`
     
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    
-    font-size: 15px;
   }
   
   #app-container {

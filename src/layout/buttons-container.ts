@@ -12,7 +12,7 @@ export const ButtonsContainer = styled.div<Props>`
   gap: 20px;
 
   border-top: ${({ theme }) => `1px solid ${theme.color.borderPrimary}`};
-  padding: ${({ theme }) => theme.padding[1.333]};
+  padding: ${({ theme }) => theme.padding[1.6]};
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
 `;

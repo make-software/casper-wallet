@@ -1,12 +1,6 @@
 import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
 import styled from 'styled-components';
-import {
-  matchSize,
-  BaseProps,
-  FormField,
-  FormFieldStatus,
-  SvgIcon
-} from '@src/libs/ui';
+import { BaseProps, FormField, FormFieldStatus, SvgIcon } from '@src/libs/ui';
 
 const getThemeColorByError = (error?: boolean) => {
   if (error == null || !error) {
@@ -17,7 +11,7 @@ const getThemeColorByError = (error?: boolean) => {
 };
 
 const InputContainer = styled('div')<InputProps>(
-  ({ theme, disabled, error, monotype, height = '36' }) => ({
+  ({ theme, disabled, error, monotype }) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -30,8 +24,8 @@ const InputContainer = styled('div')<InputProps>(
     fontFamily: monotype
       ? theme.typography.fontFamily.mono
       : theme.typography.fontFamily.primary,
-    lineHeight: matchSize({ '36': '20px', '40': '20px' }, height),
-    height: matchSize({ '36': '36px', '40': '40px' }, height),
+    lineHeight: '2.4rem',
+    height: '4rem',
 
     path: {
       fill: theme.color[getThemeColorByError(error)]
@@ -48,7 +42,7 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
   background: 'inherit',
   color: 'inherit',
   fontFamily: 'inherit',
-  fontSize: 'inherit',
+  fontSize: '1.5rem',
   border: 'none',
   width: '100%',
   padding: 0,

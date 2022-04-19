@@ -1,38 +1,21 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { matchSize, BaseProps, Link } from '@src/libs/ui';
+import { BaseProps, Link } from '@src/libs/ui';
 
 const BaseButton = styled.button<ButtonProps>(
-  ({ theme, disabled, height = '24', width = '100%' }) => ({
+  ({ theme, disabled, height = '40', width = '100%' }) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     border: 'none',
     borderRadius: theme.borderRadius.base,
     fontFamily: theme.typography.fontFamily.primary,
-    fontWeight: matchSize(
-      {
-        '24': theme.typography.fontWeight.semiBold,
-        '36': theme.typography.fontWeight.medium,
-        '40': theme.typography.fontWeight.semiBold
-      },
-      height
-    ),
-    fontSize: matchSize(
-      { '24': '1rem', '36': '1.2rem', '40': '1.4rem' },
-      height
-    ),
-    minHeight: matchSize({ '24': 24, '36': 36, '40': 40 }, height),
-    lineHeight: matchSize({ '24': '2rem', '36': '2rem', '40': '2rem' }, height),
-    padding: matchSize(
-      { '24': '2px 10px', '36': '8px 25px', '40': '10px 30px' },
-      height
-    ),
-    width: matchSize(
-      { '100': '100px', '120': '120px', '176': '176px', '100%': '100%' },
-      width
-    ),
+    fontWeight: theme.typography.fontWeight.semiBold,
+    fontSize: '1.5rem',
+    minHeight: '4rem',
+    lineHeight: '2.4rem',
+    width,
 
     ':focus': {
       outline: 'none'

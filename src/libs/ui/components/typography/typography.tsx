@@ -1,10 +1,10 @@
 import React, { forwardRef } from 'react';
 import Skeleton from 'react-loading-skeleton';
-import styled, { CSSObject } from 'styled-components';
+import styled, { CSSObject, DefaultTheme } from 'styled-components';
 
-import { matchSize, BaseProps, Size } from '@src/libs/ui';
+import { BaseProps } from '@src/libs/ui';
 
-type Ref = HTMLSpanElement;
+type Ref = HTMLSpanElement | HTMLHeadingElement;
 
 export type TypographyType = 'header' | 'body' | 'caption' | 'label' | 'hash';
 export type TypographyWeight = 'regular' | 'medium' | 'semiBold';
@@ -16,129 +16,127 @@ export type TextVariation =
   | 'contentSecondary'
   | 'contentOnFill';
 
-type Transform = 'uppercase' | 'capitalize' | 'unset';
-
-export interface TypographyProps extends BaseProps {
-  type: TypographyType;
-  weight: TypographyWeight;
+export interface BodyStylesProps extends BaseProps {
   variation?: TextVariation;
-  monotype?: boolean;
   uppercase?: boolean;
   capitalize?: boolean;
   noWrap?: boolean;
   loading?: boolean;
-  size?: Size;
-  transform?: Transform;
+}
+
+interface TypographyProps extends BodyStylesProps {
+  type: TypographyType;
+  weight: TypographyWeight;
+}
+
+function getBodyStyles(
+  theme: DefaultTheme,
+  {
+    loading,
+    variation = 'inherit',
+    uppercase = false,
+    capitalize = false,
+    noWrap = false
+  }: BodyStylesProps
+): CSSObject {
+  return {
+    fontFamily: theme.typography.fontFamily.primary,
+    color: {
+      inherit: 'inherit',
+      contentSecondary: theme.color.contentSecondary,
+      contentPrimary: theme.color.contentPrimary,
+      contentOnFill: theme.color.contentOnFill,
+      contentBlue: theme.color.contentBlue
+    }[variation],
+    whiteSpace: noWrap ? 'nowrap' : 'initial',
+    ...(loading && {
+      display: 'inline-block',
+      width: '100%'
+    }),
+    ...(uppercase && {
+      textTransform: 'uppercase'
+    }),
+    ...(capitalize && {
+      textTransform: 'capitalize'
+    }),
+    '-webkit-text-size-adjust': '100%'
+  };
 }
 
 const StyledTypography = styled('span').withConfig({
   shouldForwardProp: (prop, defaultValidatorFn) =>
     !['loading'].includes(prop) && defaultValidatorFn(prop)
-})<TypographyProps>(
-  ({
-    theme,
-    type,
-    weight,
-    size = 2,
-    loading,
-    variation = 'inherit',
-    monotype = false,
-    uppercase = false,
-    capitalize = false,
-    noWrap = false,
-    transform = 'unset'
-  }): CSSObject => {
-    const body: CSSObject = {
-      fontFamily: monotype
-        ? theme.typography.fontFamily.mono
-        : theme.typography.fontFamily.primary,
-      fontWeight: monotype
-        ? theme.typography.fontWeight.regular
-        : theme.typography.fontWeight[weight],
-      color: {
-        inherit: 'inherit',
-        contentSecondary: theme.color.contentSecondary,
-        contentPrimary: theme.color.contentPrimary,
-        contentOnFill: theme.color.contentOnFill,
-        contentBlue: theme.color.contentBlue
-      }[variation],
-      whiteSpace: noWrap ? 'nowrap' : 'initial',
-      ...(loading && {
-        display: 'inline-block',
-        width: '100%'
-      }),
-      ...(uppercase && {
-        textTransform: 'uppercase'
-      }),
-      ...(capitalize && {
-        textTransform: 'capitalize'
-      }),
-      '-webkit-text-size-adjust': '100%'
-    };
+})<TypographyProps>(({ theme, type, weight, ...restProps }): CSSObject => {
+  const body = getBodyStyles(theme, restProps);
 
-    switch (type) {
-      case 'header':
-        return {
-          ...body,
-          fontWeight: theme.typography.header.fontWeight.bold,
-          fontSize: matchSize(
-            {
-              0: '2rem',
-              1: '1.8rem',
-              2: '1.6rem',
-              3: '1.5rem',
-              4: '1.4rem',
-              5: '1.2rem'
-            },
-            size
-          ),
-          lineHeight: matchSize(
-            {
-              0: '4.8rem',
-              1: '4rem',
-              2: '1.8rem',
-              3: '2.8rem',
-              4: '2rem',
-              5: '2.4rem'
-            },
-            size
-          )
-        };
-      case 'caption':
-        return {
-          ...body,
-          fontSize: '1.4rem',
-          lineHeight: '2rem'
-        };
-      case 'label':
-        return {
-          ...body,
-          textTransform: transform
-        };
-      case 'hash':
-        return {
-          ...body,
-          fontFamily: theme.typography.fontFamily.mono
-        };
-      case 'body':
-        return body;
-      default:
-        throw new Error('Unknown type of Typography');
-    }
+  switch (type) {
+    case 'caption':
+      return {
+        ...body,
+        fontSize: '1.4rem',
+        lineHeight: '2.4rem',
+        fontWeight:
+          weight !== 'regular'
+            ? theme.typography.fontWeight.medium
+            : theme.typography.fontWeight.regular
+      };
+    case 'label':
+      return {
+        ...body,
+        fontSize: '1.2rem',
+        lineHeight: '1.6rem',
+        fontWeight: theme.typography.fontWeight.medium,
+        textTransform: 'uppercase'
+      };
+    case 'hash':
+      return {
+        ...body,
+        fontSize: '1.4rem',
+        lineHeight: '1.6rem',
+        fontFamily: theme.typography.fontFamily.mono,
+        fontWeight: theme.typography.fontWeight.regular
+      };
+    case 'body':
+      return {
+        ...body,
+        fontSize: '1.5rem',
+        lineHeight: '2.4rem',
+        fontWeight:
+          weight !== 'regular'
+            ? theme.typography.fontWeight.semiBold
+            : theme.typography.fontWeight.regular
+      };
+    default:
+      throw new Error('Unknown type of Typography');
   }
-);
+});
+
+const StyledHeader = styled('h1').withConfig({
+  shouldForwardProp: (prop, defaultValidatorFn) =>
+    !['loading'].includes(prop) && defaultValidatorFn(prop)
+})<TypographyProps>(({ theme, ...props }) => {
+  const body = getBodyStyles(theme, props);
+  return {
+    ...body,
+    fontWeight: theme.typography.fontWeight.semiBold,
+    fontSize: '2.4rem',
+    lineHeight: '2.8rem'
+  };
+});
 
 export const Typography = forwardRef<Ref, TypographyProps>(function Typography(
   { ...props },
   ref
 ) {
+  const Component = props.type !== 'header' ? StyledTypography : StyledHeader;
+
   if (props.loading) {
     return (
-      <StyledTypography ref={ref} {...props}>
+      <Component ref={ref as any} {...props}>
         <Skeleton />
-      </StyledTypography>
+      </Component>
     );
   }
 
-  return <StyledTypography ref={ref} {...props} />;
+  return <Component ref={ref as any} {...props} />;
 });

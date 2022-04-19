@@ -16,7 +16,7 @@ const PageHeader = styled.header`
 `;
 
 const PageContent = styled.div`
-  padding: 0 ${({ theme }) => theme.padding[1.333]};
+  padding: 0 ${({ theme }) => theme.padding[1.6]};
   min-width: 360px;
   height: 100%;
   min-height: 450px;

@@ -1,4 +1,3 @@
-import { keyframes } from 'styled-components';
 import { withMedia } from './utils/match-media';
 
 const PAGE_MIN_WIDTH = 320;
@@ -24,11 +23,6 @@ export const themeConfig = {
       regular: 400,
       medium: 500,
       semiBold: 600
-    },
-    header: {
-      fontWeight: {
-        bold: 700
-      }
     }
   },
   color: {
@@ -63,32 +57,11 @@ export const themeConfig = {
     contentBlue: '#0A2EBF',
     contentOnFill: '#ffffff'
   },
-  boxShadow: {
-    unset: 'unset',
-    block: '0px 2px 4px rgba(143, 144, 152, 0.15)',
-    tooltip: '0px 4px 8px rgba(143, 144, 152, 0.2)'
-  },
-  border: {
-    base: '2px solid #1FBA59',
-    separator: '1px solid #F2F3F5',
-    tableRowSeparator: '1px solid #F2F3F5'
-  },
   borderRadius: {
     base: 6
   },
   padding: {
-    1.333: '1.333em',
-    2: '2em'
-  },
-  animations: {
-    fadeIn: keyframes`
-      0% {
-        opacity: 0;
-      }
-      100% {
-        opacity: 1;
-      }
-    `
+    1.6: '1.6rem'
   }
 };
 
