@@ -15,7 +15,7 @@ function save(target) {
   };
 }
 
-const source = path.join(__dirname, '../src/lang/casper-signer-v2.json');
-const target = path.join(__dirname, '../src/lang/casper-signer-v2.pot');
+const source = path.join(__dirname, '../lang/casper-signer-v2.json');
+const target = path.join(__dirname, '../lang/casper-signer-v2.pot');
 
 i18nextToPot('en', readFileSync(source), options).then(save(target));

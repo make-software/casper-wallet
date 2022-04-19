@@ -18,7 +18,7 @@ function save(target) {
 const languages = ['en', 'tr', 'ua', 'fr', 'nl', 'ru', 'pl', 'vi', 'az', 'es'];
 
 languages.forEach(lang => {
-  const source = path.join(__dirname, `../src/lang/${lang}.po`);
+  const source = path.join(__dirname, `../lang/${lang}.po`);
   const target = path.join(
     __dirname,
     `../src/assets/locales/${lang}/translation.json`
