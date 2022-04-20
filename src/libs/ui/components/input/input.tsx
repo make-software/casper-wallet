@@ -1,37 +1,31 @@
 import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
 import styled from 'styled-components';
-import {
-  matchSize,
-  BaseProps,
-  FormField,
-  FormFieldStatus,
-  SvgIcon
-} from '@src/libs/ui';
+import { BaseProps, FormField, FormFieldStatus, SvgIcon } from '@src/libs/ui';
 
 const getThemeColorByError = (error?: boolean) => {
   if (error == null || !error) {
-    return 'gray3';
+    return 'contentSecondary';
   }
 
-  return 'red';
+  return 'fillRed';
 };
 
 const InputContainer = styled('div')<InputProps>(
-  ({ theme, disabled, error, monotype, height = '36' }) => ({
+  ({ theme, disabled, error, monotype }) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '0 16px',
     borderRadius: theme.borderRadius.base,
-    color: theme.color.text,
-    background: theme.color.gray1,
-    caretColor: theme.color.red,
+    color: theme.color.contentPrimary,
+    background: theme.color.backgroundPrimary,
+    caretColor: theme.color.fillRed,
     fontFamily: monotype
       ? theme.typography.fontFamily.mono
       : theme.typography.fontFamily.primary,
-    lineHeight: matchSize({ '36': '20px', '40': '20px' }, height),
-    height: matchSize({ '36': '36px', '40': '40px' }, height),
+    lineHeight: '2.4rem',
+    height: '4rem',
 
     path: {
       fill: theme.color[getThemeColorByError(error)]
@@ -39,7 +33,7 @@ const InputContainer = styled('div')<InputProps>(
 
     ...(disabled && {
       opacity: 0.5,
-      color: theme.color.textDisabled
+      color: theme.color.contentSecondary
     })
   })
 );
@@ -48,7 +42,7 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
   background: 'inherit',
   color: 'inherit',
   fontFamily: 'inherit',
-  fontSize: 'inherit',
+  fontSize: '1.5rem',
   border: 'none',
   width: '100%',
   padding: 0,
@@ -58,6 +52,9 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
       '-webkit-appearance': 'none',
       'pointer-events': 'none'
     }
+  },
+  '::placeholder': {
+    color: theme.color.contentSecondary
   }
 }));
 
@@ -70,7 +67,7 @@ const SuffixContainer = styled('div')(({ theme }) => ({
 }));
 
 const SuffixTextContainer = styled(SuffixContainer)(({ theme }) => ({
-  color: theme.color.gray5
+  color: theme.color.contentSecondary
 }));
 
 export enum InputValidationType {

@@ -4,12 +4,12 @@ import { Typography, BaseProps } from '@src/libs/ui';
 
 const getThemeColor = (status?: FormFieldStatus | null) => {
   if (status == null) {
-    return 'gray3';
+    return 'fillGreyPrimary';
   }
 
   return {
-    [FormFieldStatus.Error]: 'red',
-    [FormFieldStatus.Success]: 'green'
+    [FormFieldStatus.Error]: 'fillRed',
+    [FormFieldStatus.Success]: 'fillGreen'
   }[status];
 };
 
@@ -56,14 +56,24 @@ export function FormField({
   return (
     <StyledContainer {...restProps}>
       <LabelContainer>
-        {label && <Typography size={1}>{label}</Typography>}
-        {rightLabel && <Typography size={1}>{rightLabel}</Typography>}
+        {label && (
+          <Typography type="label" weight="regular">
+            {label}
+          </Typography>
+        )}
+        {rightLabel && (
+          <Typography type="label" weight="regular">
+            {rightLabel}
+          </Typography>
+        )}
       </LabelContainer>
 
       {children}
 
       <StatusTextContainer status={status}>
-        <Typography size={2}>{statusText}</Typography>
+        <Typography type="body" weight="regular">
+          {statusText}
+        </Typography>
       </StatusTextContainer>
     </StyledContainer>
   );

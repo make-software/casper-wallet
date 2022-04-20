@@ -9,19 +9,19 @@ const getStateColor = (color: Color) => {
     // @ts-ignore
     {
       primaryBlue: {
-        color: themeConfig.color.blue,
-        hover: themeConfig.color.blueShade20,
-        active: themeConfig.color.blueShade30
+        color: themeConfig.color.fillBlue,
+        hover: themeConfig.color.fillBlueHover,
+        active: themeConfig.color.fillBlueClick
       },
       primaryRed: {
-        color: themeConfig.color.red,
-        hover: themeConfig.color.redShade10,
-        active: themeConfig.color.redShade20
+        color: themeConfig.color.fillRed,
+        hover: themeConfig.color.fillRedHover,
+        active: themeConfig.color.fillRedClick
       },
       hash: {
-        color: themeConfig.color.blue,
-        hover: themeConfig.color.red,
-        active: themeConfig.color.redShade20
+        color: themeConfig.color.fillBlue,
+        hover: themeConfig.color.fillRedHover,
+        active: themeConfig.color.fillRedClick
       }
     }[color] || {
       color: 'inherit',
