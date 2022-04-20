@@ -1,14 +1,16 @@
 import React from 'react';
 import { render } from 'react-dom';
+import { ThemeProvider } from 'styled-components';
 
-import { GlobalStyle } from '@src/styles/globalStyle';
-import { Popup } from '@src/shared/components/Popup';
+import { GlobalStyle, themeConfig } from '@src/libs/ui';
+
+import { App } from '@src/app';
 
 render(
-  <>
+  <ThemeProvider theme={themeConfig}>
     <GlobalStyle />
-    <Popup />
-  </>,
+    <App />
+  </ThemeProvider>,
   window.document.querySelector('#app-container')
 );
 
