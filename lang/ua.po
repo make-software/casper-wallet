@@ -1,0 +1,28 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: casper-signer-v2\n"
+"mime-version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"POT-Creation-Date: 2022-04-18T15:05:20.899Z\n"
+"PO-Revision-Date: 2022-04-18T15:05:20.899Z\n"
+
+msgid "Create new vault"
+msgstr "Створити нове сховище"
+
+msgid ""
+"Please set a password for your vault. You will need it later to unlock it, so keep it "
+"safe."
+msgstr ""
+"Будь ласка, встановіть пароль для вашого сховища. Він вам знадобиться пізніше, щоб розблокувати "
+"його, тому бережіть його"
+
+msgid "Password"
+msgstr "Пароль"
+
+msgid "Confirm password"
+msgstr "Підтвердьте пароль"
+
+msgid "Create Vault"
+msgstr "Створити сховище"

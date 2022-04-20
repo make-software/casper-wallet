@@ -150,6 +150,15 @@ const options = {
         }
       ]
     }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: 'src/assets/locales',
+          to: path.join(__dirname, buildDir, 'locales'),
+          force: true
+        }
+      ]
+    }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, 'src', 'pages', 'popup', 'index.html'),
       filename: 'popup.html',
