@@ -76,9 +76,9 @@ const StyledTypography = styled('span').withConfig({
         fontSize: '1.4rem',
         lineHeight: '2.4rem',
         fontWeight:
-          weight !== 'regular'
-            ? theme.typography.fontWeight.medium
-            : theme.typography.fontWeight.regular
+          weight === 'regular'
+            ? theme.typography.fontWeight.regular
+            : theme.typography.fontWeight.medium
       };
     case 'label':
       return {
@@ -102,9 +102,9 @@ const StyledTypography = styled('span').withConfig({
         fontSize: '1.5rem',
         lineHeight: '2.4rem',
         fontWeight:
-          weight !== 'regular'
-            ? theme.typography.fontWeight.semiBold
-            : theme.typography.fontWeight.regular
+          weight === 'regular'
+            ? theme.typography.fontWeight.regular
+            : theme.typography.fontWeight.semiBold
       };
     default:
       throw new Error('Unknown type of Typography');

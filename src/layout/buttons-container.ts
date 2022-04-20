@@ -11,7 +11,7 @@ export const ButtonsContainer = styled.div<Props>`
   justify-content: space-around;
   gap: 20px;
 
-  border-top: ${({ theme }) => `1px solid ${theme.color.borderPrimary}`};
+  border-top: ${({ theme }) => theme.border.separator};
   padding: ${({ theme }) => theme.padding[1.6]};
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};

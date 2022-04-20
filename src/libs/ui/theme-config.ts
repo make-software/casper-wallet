@@ -57,6 +57,9 @@ export const themeConfig = {
     contentBlue: '#0A2EBF',
     contentOnFill: '#ffffff'
   },
+  border: {
+    separator: '0.5px solid #E8E9EC'
+  },
   borderRadius: {
     base: 6
   },

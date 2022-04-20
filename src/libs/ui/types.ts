@@ -5,7 +5,3 @@ export type BaseProps = {
   style?: React.CSSProperties;
   onClick?: (ev: any) => void;
 };
-
-export type ActivableProps = {
-  active?: boolean;
-};
