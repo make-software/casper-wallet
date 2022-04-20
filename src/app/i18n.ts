@@ -18,7 +18,7 @@ i18n
   .init({
     detection: {
       order: ['customLanguageDetector'],
-      lookupLocalStorage: 'i18nextLng-v1'
+      lookupLocalStorage: 'i18nextLng'
     },
     debug: false,
     fallbackLng: 'en',
