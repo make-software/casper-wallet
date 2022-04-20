@@ -1,15 +1,15 @@
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 
-interface StyledPaperProps {
+interface StyledTileProps {
   withPadding?: boolean;
 }
 
-interface PaperProps extends StyledPaperProps {
+interface TileProps extends StyledTileProps {
   children: ReactNode;
 }
 
-const StyledPaper = styled.div<StyledPaperProps>`
+const StyledTile = styled.div<StyledTileProps>`
   width: 100%;
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
   padding: ${({ theme, withPadding }) =>
@@ -17,6 +17,6 @@ const StyledPaper = styled.div<StyledPaperProps>`
   border-radius: 1.2rem;
 `;
 
-export function Paper({ withPadding, children }: PaperProps) {
-  return <StyledPaper withPadding={withPadding}>{children}</StyledPaper>;
+export function Tile({ withPadding, children }: TileProps) {
+  return <StyledTile withPadding={withPadding}>{children}</StyledTile>;
 }
