@@ -1,4 +1,8 @@
 {
+  "Your vault is ready, but no accounts yet": "Kassanız hazırdır, lakin hələ heç bir hesab yoxdur",
+  "Please, create an account or import account you already have.": "Zəhmət olmasa, hesab yaradın və ya artıq sizdə olan hesabı idxal edin.",
+  "Create Account": "Hesab Yarat",
+  "Import Account": "Hesabı idxal edin",
   "Create new vault": "Yeni kassa yaradın",
   "Please set a password for your vault. You will need it later to unlock it, so keep it safe.": "Zəhmət olmasa anbarınız üçün parol təyin edin. Kilidini açmaq üçün daha sonra ona ehtiyacınız olacaq, ona görə də onu təhlükəsiz saxlayın.",
   "Password": "Parol",

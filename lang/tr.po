@@ -8,6 +8,18 @@ msgstr ""
 "POT-Creation-Date: 2022-04-18T15:05:20.899Z\n"
 "PO-Revision-Date: 2022-04-18T15:05:20.899Z\n"
 
+msgid "Your vault is ready, but no accounts yet"
+msgstr "Kasanız hazır, ancak henüz hesap yok"
+
+msgid "Please, create an account or import account you already have."
+msgstr "Lütfen bir hesap oluşturun veya sahip olduğunuz bir hesabı içe aktarın."
+
+msgid "Create Account"
+msgstr "Hesap Oluştur"
+
+msgid "Import Account"
+msgstr "Hesabı İçe Aktar"
+
 msgid "Create new vault"
 msgstr "Yeni kasa oluştur"
 

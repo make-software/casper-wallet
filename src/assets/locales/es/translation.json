@@ -1,4 +1,8 @@
 {
+  "Your vault is ready, but no accounts yet": "Su bóveda está lista, pero aún no hay cuentas",
+  "Please, create an account or import account you already have.": "Por favor, crea una cuenta o importa una cuenta que ya tengas.",
+  "Create Account": "Crear una Cuenta",
+  "Import Account": "Cuenta de Importación",
   "Create new vault": "Crear nueva bóveda",
   "Please set a password for your vault. You will need it later to unlock it, so keep it safe.": "Establezca una contraseña para su bóveda. Lo necesitará más tarde para desbloquearlo, así que manténgalo a salvo.",
   "Password": "Clave",

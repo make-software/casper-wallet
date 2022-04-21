@@ -1,9 +1,26 @@
-import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Typography, Input, Button } from '@src/libs/ui';
 import { ButtonsContainer } from '@src/layout/buttons-container';
+import { Routes } from '@src/app/routes';
+
+import { createVault as createVaultAction } from '@src/redux/vault/actions';
+
+import {
+  selectPassword,
+  selectConfirmPassword,
+  selectButtonIsEnabled
+} from './selectors';
+import {
+  changePassword,
+  changeConfirmPassword,
+  enableButton,
+  disableButton
+} from './actions';
 
 const Container = styled.div`
   height: 454px;
@@ -26,6 +43,10 @@ const InputsContainer = styled.div`
 
 export function CreateVaultPageContent() {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const password = useSelector(selectPassword);
+  const confirmPassword = useSelector(selectConfirmPassword);
+
   return (
     <Container>
       <HeaderTextContainer>
@@ -42,8 +63,22 @@ export function CreateVaultPageContent() {
         </Typography>
       </TextContainer>
       <InputsContainer>
-        <Input type="password" placeholder={t('Password')} />
-        <Input type="password" placeholder={t('Confirm password')} />
+        <Input
+          value={password}
+          type="password"
+          placeholder={t('Password')}
+          onChange={({ target: { value } }) =>
+            dispatch(changePassword({ password: value }))
+          }
+        />
+        <Input
+          value={confirmPassword}
+          type="password"
+          placeholder={t('Confirm password')}
+          onChange={({ target: { value } }) =>
+            dispatch(changeConfirmPassword({ password: value }))
+          }
+        />
       </InputsContainer>
     </Container>
   );
@@ -51,9 +86,39 @@ export function CreateVaultPageContent() {
 
 export function CreateVaultPageFooter() {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const password = useSelector(selectPassword);
+  const confirmPassword = useSelector(selectConfirmPassword);
+  const buttonIsEnabled = useSelector(selectButtonIsEnabled);
+
+  useEffect(() => {
+    if (
+      password?.trim() &&
+      confirmPassword?.trim() &&
+      password === confirmPassword
+    ) {
+      dispatch(enableButton());
+    } else {
+      dispatch(disableButton());
+    }
+  }, [password, confirmPassword, dispatch]);
+
+  function createVault(password: string) {
+    dispatch(changePassword({ password: '' }));
+    dispatch(changeConfirmPassword({ password: '' }));
+    dispatch(disableButton());
+    dispatch(createVaultAction({ password }));
+    navigate(Routes.createAccount);
+  }
+
   return (
     <ButtonsContainer>
-      <Button onClick={() => console.log('clicked')}>
+      <Button
+        disabled={!buttonIsEnabled}
+        onClick={() => password && createVault(password)}
+      >
         <Trans t={t}>Create Vault</Trans>
       </Button>
     </ButtonsContainer>

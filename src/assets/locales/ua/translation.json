@@ -1,4 +1,8 @@
 {
+  "Your vault is ready, but no accounts yet": "Ваше сховище готове, але ще немає облікових записів",
+  "Please, create an account or import account you already have.": "Будь ласка, створіть обліковий запис або імпортуйте обліковий запис, який у вас уже є.",
+  "Create Account": "Створити обліковий запис",
+  "Import Account": "Імпорт облікового запису",
   "Create new vault": "Створити нове сховище",
   "Please set a password for your vault. You will need it later to unlock it, so keep it safe.": "Будь ласка, встановіть пароль для вашого сховища. Він вам знадобиться пізніше, щоб розблокувати його, тому бережіть його",
   "Password": "Пароль",

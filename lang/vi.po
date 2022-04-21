@@ -8,6 +8,18 @@ msgstr ""
 "POT-Creation-Date: 2022-04-18T15:05:20.899Z\n"
 "PO-Revision-Date: 2022-04-18T15:05:20.899Z\n"
 
+msgid "Your vault is ready, but no accounts yet"
+msgstr "Vault của bạn đã sẵn sàng, nhưng chưa có tài khoản nào"
+
+msgid "Please, create an account or import account you already have."
+msgstr "Vui lòng tạo một tài khoản hoặc nhập tài khoản bạn đã có."
+
+msgid "Create Account"
+msgstr "Tạo tài khoản"
+
+msgid "Import Account"
+msgstr "Nhập tài khoản"
+
 msgid "Create new vault"
 msgstr "Tạo vault mới"
 

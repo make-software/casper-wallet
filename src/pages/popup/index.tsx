@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { render } from 'react-dom';
 import { ThemeProvider } from 'styled-components';
 
@@ -7,10 +7,12 @@ import { GlobalStyle, themeConfig } from '@src/libs/ui';
 import { App } from '@src/app';
 
 render(
-  <ThemeProvider theme={themeConfig}>
-    <GlobalStyle />
-    <App />
-  </ThemeProvider>,
+  <Suspense fallback={null}>
+    <ThemeProvider theme={themeConfig}>
+      <GlobalStyle />
+      <App />
+    </ThemeProvider>
+  </Suspense>,
   window.document.querySelector('#app-container')
 );
 

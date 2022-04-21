@@ -1,12 +1,10 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 
-type RenderFunction = () => JSX.Element;
-
 interface Props {
-  renderHeader: RenderFunction;
-  renderContent: RenderFunction;
-  renderFooter?: RenderFunction;
+  Header: ReactElement<any, any>;
+  Content: ReactElement<any, any>;
+  Footer?: ReactElement<any, any>;
 }
 
 // TODO: Implement Header component
@@ -19,7 +17,6 @@ const PageContent = styled.div`
   padding: 0 ${({ theme }) => theme.padding[1.6]};
   min-width: 360px;
   height: 100%;
-  min-height: 450px;
 
   display: flex;
   flex-direction: column;
@@ -28,12 +25,12 @@ const PageContent = styled.div`
 
 const PageFooter = styled.div``;
 
-export function Layout({ renderHeader, renderContent, renderFooter }: Props) {
+export function Layout({ Header, Content, Footer }: Props) {
   return (
     <>
-      <PageHeader>{renderHeader()}</PageHeader>
-      <PageContent>{renderContent()}</PageContent>
-      {renderFooter && <PageFooter>{renderFooter()}</PageFooter>}
+      <PageHeader>{Header}</PageHeader>
+      <PageContent>{Content}</PageContent>
+      {Footer && <PageFooter>{Footer}</PageFooter>}
     </>
   );
 }

@@ -1,4 +1,8 @@
 {
+  "Your vault is ready, but no accounts yet": "Vault của bạn đã sẵn sàng, nhưng chưa có tài khoản nào",
+  "Please, create an account or import account you already have.": "Vui lòng tạo một tài khoản hoặc nhập tài khoản bạn đã có.",
+  "Create Account": "Tạo tài khoản",
+  "Import Account": "Nhập tài khoản",
   "Create new vault": "Tạo vault mới",
   "Please set a password for your vault. You will need it later to unlock it, so keep it safe.": "Vui lòng đặt mật khẩu cho kho tiền của bạn. Bạn sẽ cần nó sau này để mở khóa, vì vậy hãy giữ nó an toàn.",
   "Password": "Mật khẩu",

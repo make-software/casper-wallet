@@ -8,6 +8,18 @@ msgstr ""
 "POT-Creation-Date: 2022-04-18T15:05:20.899Z\n"
 "PO-Revision-Date: 2022-04-18T15:05:20.899Z\n"
 
+msgid "Your vault is ready, but no accounts yet"
+msgstr "Ваше хранилище готово, но аккаунтов пока нет"
+
+msgid "Please, create an account or import account you already have."
+msgstr "Пожалуйста, создайте аккаунт или импортируйте аккаунт, который у вас уже есть."
+
+msgid "Create Account"
+msgstr "Создать аккаунт"
+
+msgid "Import Account"
+msgstr "Импорт аккаунта"
+
 msgid "Create new vault"
 msgstr "Создать новое хранилище"
 

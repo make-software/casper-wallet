@@ -8,6 +8,18 @@ msgstr ""
 "POT-Creation-Date: 2022-04-18T15:05:20.899Z\n"
 "PO-Revision-Date: 2022-04-18T15:05:20.899Z\n"
 
+msgid "Your vault is ready, but no accounts yet"
+msgstr "Je kluis is klaar, maar nog geen accounts"
+
+msgid "Please, create an account or import account you already have."
+msgstr "Maak alstublieft een account aan of importeer een account dat u al heeft."
+
+msgid "Create Account"
+msgstr "Account Aanmaken"
+
+msgid "Import Account"
+msgstr "Account Importeren"
+
 msgid "Create new vault"
 msgstr "Nieuwe kluis maken"
 

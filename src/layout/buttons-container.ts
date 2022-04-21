@@ -1,15 +1,15 @@
 import styled from 'styled-components';
 
-// Default direction value is `row`
+// Default direction value is `column`
 interface Props {
   direction?: 'row' | 'column';
 }
 
 export const ButtonsContainer = styled.div<Props>`
   display: flex;
-  flex-direction: ${({ direction }) => (direction ? direction : 'row')};
+  flex-direction: ${({ direction }) => (direction ? direction : 'column')};
   justify-content: space-around;
-  gap: 20px;
+  gap: 16px;
 
   border-top: ${({ theme }) => theme.border.separator};
   padding: ${({ theme }) => theme.padding[1.6]};

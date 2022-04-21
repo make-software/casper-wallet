@@ -8,6 +8,18 @@ msgstr ""
 "POT-Creation-Date: 2022-04-18T15:05:20.899Z\n"
 "PO-Revision-Date: 2022-04-18T15:05:20.899Z\n"
 
+msgid "Your vault is ready, but no accounts yet"
+msgstr "Votre coffre-fort est prêt, mais pas encore de comptes"
+
+msgid "Please, create an account or import account you already have."
+msgstr "Veuillez créer un compte ou importer un compte que vous avez déjà."
+
+msgid "Create Account"
+msgstr "Créer un Compte"
+
+msgid "Import Account"
+msgstr "Compte d'Importation"
+
 msgid "Create new vault"
 msgstr "Créer un nouveau coffre"
 

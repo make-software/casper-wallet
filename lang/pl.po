@@ -8,6 +8,18 @@ msgstr ""
 "POT-Creation-Date: 2022-04-18T15:05:20.899Z\n"
 "PO-Revision-Date: 2022-04-18T15:05:20.899Z\n"
 
+msgid "Your vault is ready, but no accounts yet"
+msgstr "Twój skarbiec jest gotowy, ale nie masz jeszcze kont"
+
+msgid "Please, create an account or import account you already have."
+msgstr "Utwórz konto lub zaimportuj konto, które już posiadasz."
+
+msgid "Create Account"
+msgstr "Utwórz Konto"
+
+msgid "Import Account"
+msgstr "Importuj Konto"
+
 msgid "Create new vault"
 msgstr "Utwórz nowy skarbiec"
 

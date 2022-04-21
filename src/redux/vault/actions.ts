@@ -6,3 +6,7 @@ export const createVault = createAction('CREATE_VAULT')<{
 
 export const lockVault = createAction('LOCK_VAULT')<void>();
 export const unlockVault = createAction('UNLOCK_LOCK')<void>();
+
+export const createAccount = createAction('CREATE_ACCOUNT')<{
+  accountName: string;
+}>();

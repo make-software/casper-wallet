@@ -1,4 +1,8 @@
 {
+  "Your vault is ready, but no accounts yet": "Twój skarbiec jest gotowy, ale nie masz jeszcze kont",
+  "Please, create an account or import account you already have.": "Utwórz konto lub zaimportuj konto, które już posiadasz.",
+  "Create Account": "Utwórz Konto",
+  "Import Account": "Importuj Konto",
   "Create new vault": "Utwórz nowy skarbiec",
   "Please set a password for your vault. You will need it later to unlock it, so keep it safe.": "Ustaw hasło do swojego skarbca. Będziesz go potrzebować później, aby go odblokować, więc trzymaj go w bezpiecznym miejscu.",
   "Password": "Hasło",
