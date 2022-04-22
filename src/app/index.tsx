@@ -8,7 +8,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { createStore } from '@src/redux';
 import { REDUX_STORAGE_KEY } from '@src/services/constants';
 
-import { Layout } from '@src/layout';
+import { Layout, Header } from '@src/layout';
 import {
   CreateVaultPageContent,
   CreateVaultPageFooter
@@ -52,7 +52,7 @@ export function App() {
               path={RoutePath.home}
               element={
                 <Layout
-                  Header={<></>}
+                  Header={<Header />}
                   Content={<HomePageContent />}
                   Footer={<></>}
                 />
@@ -62,7 +62,7 @@ export function App() {
               path={RoutePath.createVault}
               element={
                 <Layout
-                  Header={<></>}
+                  Header={<Header />}
                   Content={<CreateVaultPageContent />}
                   Footer={<CreateVaultPageFooter />}
                 />
@@ -72,7 +72,7 @@ export function App() {
               path={RoutePath.createAccount}
               element={
                 <Layout
-                  Header={<></>}
+                  Header={<Header />}
                   Content={<CreateAccountPageContent />}
                   Footer={<CreateAccountPageFooter />}
                 />

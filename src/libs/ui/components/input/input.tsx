@@ -46,6 +46,7 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
   border: 'none',
   width: '100%',
   padding: 0,
+  outline: 'none',
   '&[type=number]': {
     '&::-webkit-inner-spin-button, &::-webkit-outer-spin-button': {
       margin: 0,

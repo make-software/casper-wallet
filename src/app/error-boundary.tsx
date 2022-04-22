@@ -19,12 +19,11 @@ export class ErrorBoundary extends Component<Props, State> {
     };
   }
 
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.log(error, errorInfo);
+  componentDidCatch(error: Error) {
+    this.setState({
+      hasError: true,
+      error
+    });
   }
 
   render() {
