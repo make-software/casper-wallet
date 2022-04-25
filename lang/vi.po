@@ -36,7 +36,7 @@ msgid "Please set a password for your vault. Try to use at least"
 msgstr "Vui lòng đặt mật khẩu cho kho tiền của bạn. Cố gắng sử dụng ít nhất"
 
 msgid "to ensure a strong passphrase."
-msgstr "để đảm bảo một cụm mật khẩu mạnh."
+msgstr " để đảm bảo một cụm mật khẩu mạnh."
 
 msgid "Password"
 msgstr "Mật khẩu"

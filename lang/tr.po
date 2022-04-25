@@ -9,10 +9,10 @@ msgstr ""
 "PO-Revision-Date: 2022-04-25T18:11:14.531Z\n"
 
 msgid "Your vault is ready, but no accounts yet"
-msgstr "Kasanız hazır, ancak henüz hesap yok"
+msgstr "Kasanız hazır, ancak henüz hiç hesap yok"
 
 msgid "Please, create an account or import an account you already have."
-msgstr "Lütfen bir hesap oluşturun veya sahip olduğunuz bir hesabı içe aktarın."
+msgstr "Lütfen bir hesap oluşturun ya da sahip olduğunuz bir hesabı içe aktarın."
 
 msgid "Create Account"
 msgstr "Hesap Oluştur"
@@ -21,7 +21,7 @@ msgid "Import Account"
 msgstr "Hesabı İçe Aktar"
 
 msgid "Should be at least"
-msgstr "En az şu kadar olmalıdır"
+msgstr "En az şu kadar olmalıdır:"
 
 msgid "characters"
 msgstr "karakter"
@@ -33,10 +33,10 @@ msgid "Create new vault"
 msgstr "Yeni kasa oluştur"
 
 msgid "Please set a password for your vault. Try to use at least"
-msgstr "Lütfen kasanız için bir şifre belirleyin. Güçlü bir parola sağlamak için en az"
+msgstr "Lütfen kasanız için bir parola belirleyin. Güçlü bir parola sağlamak için en az"
 
 msgid "to ensure a strong passphrase."
-msgstr "kullanmaya çalışın."
+msgstr " kullanmaya çalışın."
 
 msgid "Password"
 msgstr "Parola"

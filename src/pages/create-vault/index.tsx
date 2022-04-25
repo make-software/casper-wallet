@@ -33,12 +33,9 @@ import { minPasswordLength, passwordIsValid } from './validation';
 
 type InputType = 'password' | 'text';
 
-const Container = styled.div`
-  height: 454px;
-`;
+const Container = styled.div``;
 
 const HeaderTextContainer = styled.div`
-  margin-top: 124px;
   padding: 0 16px;
 `;
 
@@ -124,7 +121,7 @@ export function CreateVaultPageContent() {
           </Trans>{' '}
           <Typography type="body" weight="semiBold" variation="contentPrimary">
             {minPasswordLength} <Trans t={t}>characters</Trans>
-          </Typography>{' '}
+          </Typography>
           <Trans t={t}>to ensure a strong passphrase.</Trans>
         </Typography>
       </TextContainer>

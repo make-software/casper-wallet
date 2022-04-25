@@ -5,28 +5,42 @@ interface Props {
   Header: ReactElement<any, any>;
   Content: ReactElement<any, any>;
   Footer?: ReactElement<any, any>;
+  // TODO: Optimise sizes; Remove dependency from count of buttons in footer
+  contentHeight?:
+    | 399 // With 2 buttons in footer
+    | 455 // With 2 button in footer
+    | 528; // Without buttons in footer
 }
 
 // TODO: Implement Header component
 const PageHeader = styled.header``;
 
-const PageContent = styled.div`
+interface PageContentProps {
+  contentHeight: number;
+}
+
+const PageContent = styled.div<PageContentProps>`
   padding: 0 ${({ theme }) => theme.padding[1.6]};
   min-width: 360px;
-  height: 100%;
 
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  height: ${({ contentHeight }) => contentHeight}px;
 `;
 
 const PageFooter = styled.div``;
 
-export function Layout({ Header, Content, Footer }: Props) {
+export function Layout({
+  Header,
+  Content,
+  Footer,
+  contentHeight = 528
+}: Props) {
   return (
     <>
       <PageHeader>{Header}</PageHeader>
-      <PageContent>{Content}</PageContent>
+      <PageContent contentHeight={contentHeight}>{Content}</PageContent>
       {Footer && <PageFooter>{Footer}</PageFooter>}
     </>
   );

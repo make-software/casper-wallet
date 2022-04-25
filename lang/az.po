@@ -36,7 +36,7 @@ msgid "Please set a password for your vault. Try to use at least"
 msgstr "Zəhmət olmasa anbarınız üçün parol təyin edin. Güclü parol ifadəsini təmin etmək üçün ən azı"
 
 msgid "to ensure a strong passphrase."
-msgstr "istifadə etməyə çalışın."
+msgstr " istifadə etməyə çalışın."
 
 msgid "Password"
 msgstr "Parol"

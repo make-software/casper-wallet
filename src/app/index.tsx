@@ -65,6 +65,7 @@ export function App() {
                   Header={<Header />}
                   Content={<CreateVaultPageContent />}
                   Footer={<CreateVaultPageFooter />}
+                  contentHeight={455}
                 />
               }
             />
@@ -75,6 +76,7 @@ export function App() {
                   Header={<Header />}
                   Content={<CreateAccountPageContent />}
                   Footer={<CreateAccountPageFooter />}
+                  contentHeight={399}
                 />
               }
             />

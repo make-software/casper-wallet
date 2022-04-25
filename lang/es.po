@@ -36,7 +36,7 @@ msgid "Please set a password for your vault. Try to use at least"
 msgstr "Establezca una contraseña para su bóveda. Trate de usar al menos"
 
 msgid "to ensure a strong passphrase."
-msgstr "para garantizar una frase de contraseña segura."
+msgstr " para garantizar una frase de contraseña segura."
 
 msgid "Password"
 msgstr "Clave"

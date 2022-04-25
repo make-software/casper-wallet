@@ -8,7 +8,7 @@
   "Passwords don't match": "Passwords don't match",
   "Create new vault": "Create new vault",
   "Please set a password for your vault. Try to use at least": "Please set a password for your vault. Try to use at least",
-  "to ensure a strong passphrase.": "to ensure a strong passphrase.",
+  "to ensure a strong passphrase.": " to ensure a strong passphrase.",
   "Password": "Password",
   "Confirm password": "Confirm password",
   "Create Vault": "Create Vault"
