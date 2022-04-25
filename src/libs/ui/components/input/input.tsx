@@ -1,17 +1,17 @@
 import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
 import styled from 'styled-components';
-import { BaseProps, FormField, FormFieldStatus, SvgIcon } from '@src/libs/ui';
+import { BaseProps, FormField, FormFieldStatus } from '@src/libs/ui';
 
 const getThemeColorByError = (error?: boolean) => {
   if (error == null || !error) {
-    return 'contentSecondary';
+    return 'contentTertiary';
   }
 
   return 'fillRed';
 };
 
 const InputContainer = styled('div')<InputProps>(
-  ({ theme, disabled, error, monotype }) => ({
+  ({ theme, oneColoredIcons, disabled, error, monotype }) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -28,7 +28,9 @@ const InputContainer = styled('div')<InputProps>(
     height: '4rem',
 
     path: {
-      fill: theme.color[getThemeColorByError(error)]
+      fill: oneColoredIcons
+        ? theme.color.contentTertiary
+        : theme.color[getThemeColorByError(error)]
     },
 
     ...(disabled && {
@@ -92,6 +94,8 @@ export interface InputProps extends BaseProps {
   rightLabel?: string;
   prefixIcon?: ReactNode | null;
   suffixIcon?: ReactNode | null;
+  // TODO: make a better name 🙈
+  oneColoredIcons?: boolean;
   suffixText?: string | null;
 
   type?: HTMLInputTypeAttribute;
@@ -112,6 +116,7 @@ export function Input({
   rightLabel,
   prefixIcon,
   suffixIcon,
+  oneColoredIcons,
   suffixText,
   required,
   error,
@@ -137,10 +142,6 @@ export function Input({
     onFocus && onFocus(event);
   };
 
-  if (error) {
-    suffixIcon = <SvgIcon src="assets/icons/ic-error.svg" />;
-  }
-
   return (
     <FormField
       id={id}
@@ -156,6 +157,7 @@ export function Input({
         monotype={monotype}
         error={error}
         height={height}
+        oneColoredIcons={oneColoredIcons}
       >
         {prefixIcon && <PrefixContainer>{prefixIcon}</PrefixContainer>}
 

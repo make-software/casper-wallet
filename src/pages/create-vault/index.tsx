@@ -1,10 +1,16 @@
-import React, { FocusEvent, ChangeEvent } from 'react';
+import React, { useState, FocusEvent, ChangeEvent } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { Button, Input, InputValidationType, Typography } from '@src/libs/ui';
+import {
+  Button,
+  Input,
+  InputValidationType,
+  SvgIcon,
+  Typography
+} from '@src/libs/ui';
 import { ButtonsContainer } from '@src/layout/buttons-container';
 import { Routes } from '@src/app/routes';
 
@@ -22,6 +28,8 @@ import {
   changePassword as changePasswordAction,
   setFormErrors
 } from './actions';
+
+type InputType = 'password' | 'text';
 
 const Container = styled.div`
   height: 454px;
@@ -50,6 +58,11 @@ export function CreateVaultPageContent() {
   const password = useSelector(selectPassword);
   const confirmPassword = useSelector(selectConfirmPassword);
   const formErrors = useSelector(selectFormErrors);
+
+  const [passwordInputType, setPasswordInputType] =
+    useState<InputType>('password');
+  const [confirmPasswordInputType, setConfirmPasswordInputType] =
+    useState<InputType>('password');
 
   const minPasswordLength = 12;
 
@@ -117,21 +130,35 @@ export function CreateVaultPageContent() {
         <Input
           validationType={InputValidationType.Password}
           value={password || ''}
-          type="password"
+          type={passwordInputType}
           placeholder={t('Password')}
           onChange={changePassword}
           onBlur={validatePassword}
           error={!!formErrors.passwordErrorMessage}
           validationText={formErrors.passwordErrorMessage}
+          oneColoredIcons
+          suffixIcon={
+            <PasswordVisibilityIcon
+              inputType={passwordInputType}
+              changeInputType={setPasswordInputType}
+            />
+          }
         />
         <Input
           value={confirmPassword || ''}
-          type="password"
+          type={confirmPasswordInputType}
           placeholder={t('Confirm password')}
           onChange={changeConfirmPassword}
           onBlur={validateConfirmPassword}
           error={!!formErrors.confirmPasswordErrorMessage}
           validationText={formErrors.confirmPasswordErrorMessage}
+          oneColoredIcons
+          suffixIcon={
+            <PasswordVisibilityIcon
+              inputType={confirmPasswordInputType}
+              changeInputType={setConfirmPasswordInputType}
+            />
+          }
         />
       </InputsContainer>
     </Container>
@@ -164,5 +191,41 @@ export function CreateVaultPageFooter() {
         <Trans t={t}>Create Vault</Trans>
       </Button>
     </ButtonsContainer>
+  );
+}
+
+interface PasswordVisibilityIconProps {
+  inputType: InputType;
+  changeInputType: (type: InputType) => void;
+}
+
+const InputIconContainer = styled.div`
+  line-height: 1rem;
+`;
+
+function PasswordVisibilityIcon({
+  inputType,
+  changeInputType
+}: PasswordVisibilityIconProps) {
+  if (inputType === 'password') {
+    return (
+      <InputIconContainer>
+        <SvgIcon
+          onClick={() => changeInputType('text')}
+          src="assets/icons/show.svg"
+          size={20}
+        />
+      </InputIconContainer>
+    );
+  }
+
+  return (
+    <InputIconContainer>
+      <SvgIcon
+        onClick={() => changeInputType('password')}
+        src="assets/icons/hide.svg"
+        size={20}
+      />
+    </InputIconContainer>
   );
 }

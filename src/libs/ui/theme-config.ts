@@ -29,20 +29,13 @@ export const themeConfig = {
     backgroundPrimary: '#FFFFFF',
     backgroundSecondary: '#F5F6F7',
     backgroundBlue: '#0A2EBF',
-    backgroundGreen: '#2DDC88',
 
     borderPrimary: '#E8E9EC',
 
     fillWhite: '#FFFFFF',
-    fillRed: '#CC000F',
-    fillRedHover: '#B2000D',
-    fillRedClick: '#99000B',
-    fillBlue: '#0A2EBF',
-    fillBlueHover: '#001C8C',
-    fillBlueClick: '#001773',
-    fillGreen: '#2DDC88',
-    fillGreyPrimary: '#BCBDC1',
-    fillGreySecondary: '#E8E9EC',
+    fillSecondary: '#E8E9EC',
+    fillTertiary: '#BCBDC1',
+
     fillGradientIn: {
       from: '#EFF0F2',
       to: '#F5F6F7'
@@ -52,10 +45,24 @@ export const themeConfig = {
       to: '#EFF0F2'
     },
 
+    fillBlue: '#0A2EBF',
+    fillBlueHover: '#001C8C',
+    fillBlueClick: '#001773',
+
+    fillRed: '#CC000F',
+    fillRedHover: '#B2000D',
+    fillRedClick: '#99000B',
+
+    fillGreen: '#2DDC88',
+
     contentPrimary: '#1A1919',
     contentSecondary: '#84868C',
+    contentTertiary: '#BCBDC1',
+    contentOnFill: '#FFFFFF',
     contentBlue: '#0A2EBF',
-    contentOnFill: '#ffffff'
+    contentRed: '#CC000F',
+    contentGreen: '#2DDC88',
+    contentGreenOnFill: '#77FFBE'
   },
   border: {
     separator: '0.5px solid #E8E9EC'

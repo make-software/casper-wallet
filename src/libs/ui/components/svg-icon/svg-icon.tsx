@@ -17,7 +17,6 @@ export interface SvgIconProps extends React.HTMLAttributes<Ref> {
   onMouseDown?: (ev: any) => void;
   color?: string;
   tooltip?: string;
-  active?: boolean;
   rotate?: boolean;
   marginLeft?: boolean;
   marginRight?: boolean;
@@ -36,17 +35,7 @@ const Container = styled('div').withConfig({
   marginLeft?: boolean;
   marginRight?: boolean;
 }>(
-  ({
-    theme,
-    size,
-    width,
-    height,
-    color,
-    active,
-    rotate,
-    marginLeft,
-    marginRight
-  }) => ({
+  ({ theme, size, width, height, color, rotate, marginLeft, marginRight }) => ({
     display: 'inline-block',
     verticalAlign: 'middle',
     width: width != null ? width : size,
@@ -87,7 +76,9 @@ export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
       onClick && onClick(ev);
     };
 
-    const preProcessor = (code: string): string => code;
+    const preProcessor = color
+      ? (code: string): string => code.replace(/fill=".*?"/g, `fill="${color}"`)
+      : (code: string): string => code;
     // false ? code.replace(/fill=".*?"/g, 'fill="currentColor"') : code;
 
     return (

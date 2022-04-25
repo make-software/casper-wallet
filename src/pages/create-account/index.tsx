@@ -34,7 +34,7 @@ export function CreateAccountPageContent() {
       <TextContainer>
         <Typography type="body" weight="regular" variation="contentSecondary">
           <Trans t={t}>
-            Please, create an account or import account you already have.
+            Please, create an account or import an account you already have.
           </Trans>
         </Typography>
       </TextContainer>

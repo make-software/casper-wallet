@@ -12,15 +12,19 @@ export type TypographyType =
   | 'caption'
   | 'label'
   | 'hash'
-  | 'form-field-status'; // Temporary name
+  | 'form-field-status'; // TODO: Temporary name. Make a better name
 export type TypographyWeight = 'regular' | 'medium' | 'semiBold';
 
 export type TextVariation =
   | 'inherit'
-  | 'contentBlue'
   | 'contentPrimary'
   | 'contentSecondary'
-  | 'contentOnFill';
+  | 'contentTertiary'
+  | 'contentOnFill'
+  | 'contentBlue'
+  | 'contentRed'
+  | 'contentGreen'
+  | 'contentGreenOnFill';
 
 export interface BodyStylesProps extends BaseProps {
   variation?: TextVariation;
@@ -49,10 +53,14 @@ function getBodyStyles(
     fontFamily: theme.typography.fontFamily.primary,
     color: {
       inherit: 'inherit',
-      contentSecondary: theme.color.contentSecondary,
       contentPrimary: theme.color.contentPrimary,
+      contentSecondary: theme.color.contentSecondary,
+      contentTertiary: theme.color.contentTertiary,
       contentOnFill: theme.color.contentOnFill,
-      contentBlue: theme.color.contentBlue
+      contentBlue: theme.color.contentBlue,
+      contentRed: theme.color.contentRed,
+      contentGreen: theme.color.contentGreen,
+      contentGreenOnFill: theme.color.contentGreenOnFill
     }[variation],
     whiteSpace: noWrap ? 'nowrap' : 'initial',
     ...(loading && {
