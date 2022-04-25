@@ -2,7 +2,7 @@ import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 
 interface StyledTagProps {
-  isEnabled?: boolean;
+  enabled?: boolean;
 }
 
 interface TagProps extends StyledTagProps {
@@ -10,10 +10,10 @@ interface TagProps extends StyledTagProps {
 }
 
 const StyledTag = styled.span<StyledTagProps>`
-  color: ${({ theme, isEnabled }) =>
-    isEnabled ? theme.color.contentOnFill : theme.color.contentPrimary};
-  background-color: ${({ theme, isEnabled }) =>
-    isEnabled ? theme.color.fillGreen : theme.color.fillGreySecondary};
+  color: ${({ theme, enabled }) =>
+    enabled ? theme.color.contentOnFill : theme.color.contentPrimary};
+  background-color: ${({ theme, enabled }) =>
+    enabled ? theme.color.fillGreen : theme.color.fillGreySecondary};
   font-weight: ${({ theme }) => theme.typography.fontWeight.regular};
   font-size: 1.2rem;
   line-height: 2rem;
@@ -21,6 +21,6 @@ const StyledTag = styled.span<StyledTagProps>`
   border-radius: ${({ theme }) => theme.borderRadius.base}px;
 `;
 
-export function Tag({ children, isEnabled }: TagProps) {
-  return <StyledTag isEnabled={isEnabled}>{children}</StyledTag>;
+export function Tag({ children, enabled }: TagProps) {
+  return <StyledTag enabled={enabled}>{children}</StyledTag>;
 }
