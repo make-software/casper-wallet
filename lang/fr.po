@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-25T17:16:05.131Z\n"
-"PO-Revision-Date: 2022-04-25T17:16:05.131Z\n"
+"POT-Creation-Date: 2022-04-25T18:11:14.531Z\n"
+"PO-Revision-Date: 2022-04-25T18:11:14.531Z\n"
 
 msgid "Your vault is ready, but no accounts yet"
 msgstr "Votre coffre-fort est prêt, mais pas encore de comptes"
@@ -20,8 +20,11 @@ msgstr "Créer un Compte"
 msgid "Import Account"
 msgstr "Compte d'Importation"
 
-msgid "Should be at least 12 characters"
-msgstr "Doit contenir au moins 12 caractères"
+msgid "Should be at least"
+msgstr "Doit contenir au moins"
+
+msgid "characters"
+msgstr "caractères"
 
 msgid "Passwords don't match"
 msgstr "Les mots de passe ne correspondent pas"
@@ -31,9 +34,6 @@ msgstr "Créer un nouveau coffre"
 
 msgid "Please set a password for your vault. Try to use at least"
 msgstr "Veuillez définir un mot de passe pour votre coffre-fort. Essayez d'utiliser au moins"
-
-msgid "12 characters"
-msgstr "12 caractères"
 
 msgid "to ensure a strong passphrase."
 msgstr "pour garantir une phrase secrète solide."

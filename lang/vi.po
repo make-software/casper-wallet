@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-25T17:16:05.131Z\n"
-"PO-Revision-Date: 2022-04-25T17:16:05.131Z\n"
+"POT-Creation-Date: 2022-04-25T18:11:14.531Z\n"
+"PO-Revision-Date: 2022-04-25T18:11:14.531Z\n"
 
 msgid "Your vault is ready, but no accounts yet"
 msgstr "Vault của bạn đã sẵn sàng, nhưng chưa có tài khoản nào"
@@ -20,8 +20,11 @@ msgstr "Tạo tài khoản"
 msgid "Import Account"
 msgstr "Nhập tài khoản"
 
-msgid "Should be at least 12 characters"
-msgstr "Phải có ít nhất 12 ký tự"
+msgid "Should be at least"
+msgstr "Phải có ít nhất"
+
+msgid "characters"
+msgstr "ký tự"
 
 msgid "Passwords don't match"
 msgstr "Mật khẩu không khớp"
@@ -31,9 +34,6 @@ msgstr "Tạo vault mới"
 
 msgid "Please set a password for your vault. Try to use at least"
 msgstr "Vui lòng đặt mật khẩu cho kho tiền của bạn. Cố gắng sử dụng ít nhất"
-
-msgid "12 characters"
-msgstr "12 ký tự"
 
 msgid "to ensure a strong passphrase."
 msgstr "để đảm bảo một cụm mật khẩu mạnh."

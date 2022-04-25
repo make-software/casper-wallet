@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-25T17:16:05.131Z\n"
-"PO-Revision-Date: 2022-04-25T17:16:05.131Z\n"
+"POT-Creation-Date: 2022-04-25T18:11:14.531Z\n"
+"PO-Revision-Date: 2022-04-25T18:11:14.531Z\n"
 
 msgid "Your vault is ready, but no accounts yet"
 msgstr "Ваше сховище готове, але ще немає облікових записів"
@@ -20,8 +20,11 @@ msgstr "Створити обліковий запис"
 msgid "Import Account"
 msgstr "Імпорт облікового запису"
 
-msgid "Should be at least 12 characters"
-msgstr "Має бути не менше 12 символів"
+msgid "Should be at least"
+msgstr "Має бути не менше"
+
+msgid "characters"
+msgstr "символів"
 
 msgid "Passwords don't match"
 msgstr "Паролі не збігаються"
@@ -32,11 +35,8 @@ msgstr "Створити нове сховище"
 msgid "Please set a password for your vault. Try to use at least"
 msgstr "Будь ласка, встановіть пароль для вашого сховища. Намагайтеся використовувати принаймні"
 
-msgid "12 characters"
-msgstr "12 символів,"
-
 msgid "to ensure a strong passphrase."
-msgstr "щоб забезпечити надійну парольну фразу."
+msgstr ", щоб забезпечити надійну парольну фразу."
 
 msgid "Password"
 msgstr "Пароль"

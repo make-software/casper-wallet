@@ -1,4 +1,4 @@
-const minPasswordLength = 12;
+export const minPasswordLength = 12;
 
 export function formIsValid(
   password: string | null,

@@ -1,10 +1,14 @@
 {
   "Your vault is ready, but no accounts yet": "Kassanız hazırdır, lakin hələ heç bir hesab yoxdur",
-  "Please, create an account or import account you already have.": "Zəhmət olmasa, hesab yaradın və ya artıq sizdə olan hesabı idxal edin.",
+  "Please, create an account or import an account you already have.": "Zəhmət olmasa, hesab yaradın və ya artıq mövcud olan hesabı idxal edin.",
   "Create Account": "Hesab Yarat",
   "Import Account": "Hesabı idxal edin",
+  "Should be at least": "Ən azı olmalıdır",
+  "characters": "simvol",
+  "Passwords don't match": "Parollar uyğun gəlmir",
   "Create new vault": "Yeni kassa yaradın",
-  "Please set a password for your vault. You will need it later to unlock it, so keep it safe.": "Zəhmət olmasa anbarınız üçün parol təyin edin. Kilidini açmaq üçün daha sonra ona ehtiyacınız olacaq, ona görə də onu təhlükəsiz saxlayın.",
+  "Please set a password for your vault. Try to use at least": "Zəhmət olmasa anbarınız üçün parol təyin edin. Güclü parol ifadəsini təmin etmək üçün ən azı",
+  "to ensure a strong passphrase.": "istifadə etməyə çalışın.",
   "Password": "Parol",
   "Confirm password": "Parolu təsdiqləyin",
   "Create Vault": "Vault yaradın"

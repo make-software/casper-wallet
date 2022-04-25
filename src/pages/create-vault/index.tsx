@@ -29,7 +29,7 @@ import {
   setFormErrors
 } from '@src/redux/substores/create-vault/actions';
 
-import { passwordIsValid } from './validation';
+import { minPasswordLength, passwordIsValid } from './validation';
 
 type InputType = 'password' | 'text';
 
@@ -84,9 +84,13 @@ export function CreateVaultPageContent() {
     if (passwordIsValid(value)) {
       dispatch(setFormErrors({ passwordErrorMessage: null }));
     } else {
+      const message = `${t('Should be at least')} ${minPasswordLength} ${t(
+        'characters'
+      )}`;
+
       dispatch(
         setFormErrors({
-          passwordErrorMessage: t('Should be at least 12 characters')
+          passwordErrorMessage: message
         })
       );
     }
@@ -119,7 +123,7 @@ export function CreateVaultPageContent() {
             Please set a password for your vault. Try to use at least
           </Trans>{' '}
           <Typography type="body" weight="semiBold" variation="contentPrimary">
-            <Trans t={t}>12 characters</Trans>
+            {minPasswordLength} <Trans t={t}>characters</Trans>
           </Typography>{' '}
           <Trans t={t}>to ensure a strong passphrase.</Trans>
         </Typography>
