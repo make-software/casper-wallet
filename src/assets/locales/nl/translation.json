@@ -1,10 +1,14 @@
 {
   "Your vault is ready, but no accounts yet": "Je kluis is klaar, maar nog geen accounts",
-  "Please, create an account or import account you already have.": "Maak alstublieft een account aan of importeer een account dat u al heeft.",
+  "Please, create an account or import an account you already have.": "Maak een account aan of importeer account dat u al heeft.",
   "Create Account": "Account Aanmaken",
   "Import Account": "Account Importeren",
+  "Should be at least 12 characters": "Moet minimaal 12 tekens bevatten",
+  "Passwords don't match": "Wachtwoorden komen niet overeen",
   "Create new vault": "Nieuwe kluis maken",
-  "Please set a password for your vault. You will need it later to unlock it, so keep it safe.": "Stel een wachtwoord in voor uw kluis. Je hebt het later nodig om het te ontgrendelen, dus bewaar het goed.",
+  "Please set a password for your vault. Try to use at least": "Stel een wachtwoord in voor uw kluis. Probeer ten minste",
+  "12 characters": "12 tekens",
+  "to ensure a strong passphrase.": "te gebruiken om een sterke wachtwoordzin te garanderen.",
   "Password": "Wachtwoord",
   "Confirm password": "Bevestig wachtwoord",
   "Create Vault": "Kluis maken"

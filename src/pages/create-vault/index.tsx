@@ -86,7 +86,7 @@ export function CreateVaultPageContent() {
     } else {
       dispatch(
         setFormErrors({
-          passwordErrorMessage: 'Should be at least 12 characters'
+          passwordErrorMessage: t('Should be at least 12 characters')
         })
       );
     }
@@ -99,7 +99,9 @@ export function CreateVaultPageContent() {
       dispatch(setFormErrors({ confirmPasswordErrorMessage: null }));
     } else {
       dispatch(
-        setFormErrors({ confirmPasswordErrorMessage: "Passwords don't match" })
+        setFormErrors({
+          confirmPasswordErrorMessage: t("Passwords don't match")
+        })
       );
     }
   }
@@ -114,16 +116,12 @@ export function CreateVaultPageContent() {
       <TextContainer>
         <Typography type="body" weight="regular" variation="contentSecondary">
           <Trans t={t}>
-            Please set a password for your vault. Try to use at least{' '}
-            <Typography
-              type="body"
-              weight="semiBold"
-              variation="contentPrimary"
-            >
-              12 characters
-            </Typography>{' '}
-            to ensure a strong passphrase.
-          </Trans>
+            Please set a password for your vault. Try to use at least
+          </Trans>{' '}
+          <Typography type="body" weight="semiBold" variation="contentPrimary">
+            <Trans t={t}>12 characters</Trans>
+          </Typography>{' '}
+          <Trans t={t}>to ensure a strong passphrase.</Trans>
         </Typography>
       </TextContainer>
       <InputsContainer>

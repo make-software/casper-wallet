@@ -5,13 +5,13 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-18T15:05:20.899Z\n"
-"PO-Revision-Date: 2022-04-18T15:05:20.899Z\n"
+"POT-Creation-Date: 2022-04-25T17:16:05.131Z\n"
+"PO-Revision-Date: 2022-04-25T17:16:05.131Z\n"
 
 msgid "Your vault is ready, but no accounts yet"
 msgstr "Twój skarbiec jest gotowy, ale nie masz jeszcze kont"
 
-msgid "Please, create an account or import account you already have."
+msgid "Please, create an account or import an account you already have."
 msgstr "Utwórz konto lub zaimportuj konto, które już posiadasz."
 
 msgid "Create Account"
@@ -20,15 +20,23 @@ msgstr "Utwórz Konto"
 msgid "Import Account"
 msgstr "Importuj Konto"
 
+msgid "Should be at least 12 characters"
+msgstr "Powinno mieć co najmniej 12 znaków"
+
+msgid "Passwords don't match"
+msgstr "Hasła nie pasują"
+
 msgid "Create new vault"
 msgstr "Utwórz nowy skarbiec"
 
-msgid ""
-"Please set a password for your vault. You will need it later to unlock it, so keep it "
-"safe."
-msgstr ""
-"Ustaw hasło do swojego skarbca. Będziesz go potrzebować później, aby go odblokować, "
-"więc trzymaj go w bezpiecznym miejscu."
+msgid "Please set a password for your vault. Try to use at least"
+msgstr "Ustaw hasło do swojego skarbca. Postaraj się użyć co najmniej"
+
+msgid "12 characters"
+msgstr "12 znaków,"
+
+msgid "to ensure a strong passphrase."
+msgstr "aby zapewnić silne hasło."
 
 msgid "Password"
 msgstr "Hasło"

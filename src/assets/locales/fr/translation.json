@@ -1,10 +1,14 @@
 {
   "Your vault is ready, but no accounts yet": "Votre coffre-fort est prêt, mais pas encore de comptes",
-  "Please, create an account or import account you already have.": "Veuillez créer un compte ou importer un compte que vous avez déjà.",
+  "Please, create an account or import an account you already have.": "Veuillez créer un compte ou importer un compte que vous avez déjà.",
   "Create Account": "Créer un Compte",
   "Import Account": "Compte d'Importation",
+  "Should be at least 12 characters": "Doit contenir au moins 12 caractères",
+  "Passwords don't match": "Les mots de passe ne correspondent pas",
   "Create new vault": "Créer un nouveau coffre",
-  "Please set a password for your vault. You will need it later to unlock it, so keep it safe.": "Veuillez définir un mot de passe pour votre coffre-fort. Vous en aurez besoin plus tard pour le déverrouiller, alors gardez-le en sécurité.",
+  "Please set a password for your vault. Try to use at least": "Veuillez définir un mot de passe pour votre coffre-fort. Essayez d'utiliser au moins",
+  "12 characters": "12 caractères",
+  "to ensure a strong passphrase.": "pour garantir une phrase secrète solide.",
   "Password": "Mot de passe",
   "Confirm password": "Confirmez le mot de passe",
   "Create Vault": "Créer un coffre-fort"

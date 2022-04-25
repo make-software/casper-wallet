@@ -5,13 +5,13 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-18T15:05:20.899Z\n"
-"PO-Revision-Date: 2022-04-18T15:05:20.899Z\n"
+"POT-Creation-Date: 2022-04-25T17:16:05.131Z\n"
+"PO-Revision-Date: 2022-04-25T17:16:05.131Z\n"
 
 msgid "Your vault is ready, but no accounts yet"
 msgstr "Su bóveda está lista, pero aún no hay cuentas"
 
-msgid "Please, create an account or import account you already have."
+msgid "Please, create an account or import an account you already have."
 msgstr "Por favor, crea una cuenta o importa una cuenta que ya tengas."
 
 msgid "Create Account"
@@ -20,15 +20,23 @@ msgstr "Crear una Cuenta"
 msgid "Import Account"
 msgstr "Cuenta de Importación"
 
+msgid "Should be at least 12 characters"
+msgstr "Debe tener al menos 12 caracteres."
+
+msgid "Passwords don't match"
+msgstr "Las contraseñas no coinciden"
+
 msgid "Create new vault"
 msgstr "Crear nueva bóveda"
 
-msgid ""
-"Please set a password for your vault. You will need it later to unlock it, so keep it "
-"safe."
-msgstr ""
-"Establezca una contraseña para su bóveda. Lo necesitará más tarde para desbloquearlo, "
-"así que manténgalo a salvo."
+msgid "Please set a password for your vault. Try to use at least"
+msgstr "Establezca una contraseña para su bóveda. Trate de usar al menos"
+
+msgid "12 characters"
+msgstr "12 caracteres"
+
+msgid "to ensure a strong passphrase."
+msgstr "para garantizar una frase de contraseña segura."
 
 msgid "Password"
 msgstr "Clave"
