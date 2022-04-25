@@ -21,13 +21,13 @@ import {
   selectFormIsValid,
   selectFormErrors,
   selectPassword
-} from './selectors';
+} from '@src/redux/substores/create-vault/selectors';
 
 import {
   changeConfirmPassword as changeConfirmPasswordAction,
   changePassword as changePasswordAction,
   setFormErrors
-} from './actions';
+} from '@src/redux/substores/create-vault/actions';
 
 type InputType = 'password' | 'text';
 

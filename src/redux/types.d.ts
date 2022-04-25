@@ -1,6 +1,6 @@
 import { ActionType, StateType } from 'typesafe-actions';
-import { VaultState } from '@src/redux/vault/types';
-import { CreateVaultState } from '@src/pages/create-vault/types';
+import { VaultState } from './vault/types';
+import { CreateVaultState } from './substores/create-vault/types';
 
 declare module 'typesafe-actions' {
   export type Store = StateType<typeof import('./index').default>;
