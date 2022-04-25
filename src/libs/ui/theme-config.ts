@@ -20,9 +20,11 @@ export const themeConfig = {
       mono: '"JetBrains Mono", serif'
     },
     fontWeight: {
+      light: 200,
       regular: 400,
       medium: 500,
-      semiBold: 600
+      semiBold: 600,
+      bold: 700
     }
   },
   color: {

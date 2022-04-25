@@ -12,8 +12,14 @@ export type TypographyType =
   | 'caption'
   | 'label'
   | 'hash'
+  | 'CSPR'
   | 'form-field-status'; // TODO: Temporary name. Make a better name
-export type TypographyWeight = 'regular' | 'medium' | 'semiBold';
+export type TypographyWeight =
+  | 'regular'
+  | 'light'
+  | 'medium'
+  | 'semiBold'
+  | 'bold';
 
 export type TextVariation =
   | 'inherit'
@@ -30,6 +36,7 @@ export interface BodyStylesProps extends BaseProps {
   variation?: TextVariation;
   uppercase?: boolean;
   capitalize?: boolean;
+  monospace?: boolean;
   noWrap?: boolean;
   loading?: boolean;
 }
@@ -80,56 +87,73 @@ function getBodyStyles(
 const StyledTypography = styled('span').withConfig({
   shouldForwardProp: (prop, defaultValidatorFn) =>
     !['loading'].includes(prop) && defaultValidatorFn(prop)
-})<TypographyProps>(({ theme, type, weight, ...restProps }): CSSObject => {
-  const body = getBodyStyles(theme, restProps);
+})<TypographyProps>(
+  ({ theme, type, monospace, weight, ...restProps }): CSSObject => {
+    const body = getBodyStyles(theme, restProps);
 
-  switch (type) {
-    case 'caption':
-      return {
-        ...body,
-        fontSize: '1.4rem',
-        lineHeight: '2.4rem',
-        fontWeight:
-          weight === 'regular'
+    switch (type) {
+      case 'caption':
+        return {
+          ...body,
+          fontSize: '1.4rem',
+          lineHeight: '2.4rem',
+          fontWeight:
+            weight === 'regular'
+              ? theme.typography.fontWeight.regular
+              : theme.typography.fontWeight.medium
+        };
+      case 'label':
+        return {
+          ...body,
+          fontSize: '1.2rem',
+          lineHeight: '1.6rem',
+          fontWeight: theme.typography.fontWeight.medium,
+          textTransform: 'uppercase'
+        };
+      case 'hash':
+        return {
+          ...body,
+          fontSize: '1.4rem',
+          lineHeight: '1.6rem',
+          fontFamily: theme.typography.fontFamily.mono,
+          fontWeight: theme.typography.fontWeight.regular
+        };
+      case 'body':
+        return {
+          ...body,
+          fontFamily: monospace
+            ? theme.typography.fontFamily.mono
+            : theme.typography.fontFamily.primary,
+          fontSize: '1.5rem',
+          lineHeight: '2.4rem',
+          fontWeight: monospace
             ? theme.typography.fontWeight.regular
-            : theme.typography.fontWeight.medium
-      };
-    case 'label':
-      return {
-        ...body,
-        fontSize: '1.2rem',
-        lineHeight: '1.6rem',
-        fontWeight: theme.typography.fontWeight.medium,
-        textTransform: 'uppercase'
-      };
-    case 'hash':
-      return {
-        ...body,
-        fontSize: '1.4rem',
-        lineHeight: '1.6rem',
-        fontFamily: theme.typography.fontFamily.mono,
-        fontWeight: theme.typography.fontWeight.regular
-      };
-    case 'body':
-      return {
-        ...body,
-        fontSize: '1.5rem',
-        lineHeight: '2.4rem',
-        fontWeight:
-          weight === 'regular'
+            : weight === 'regular'
             ? theme.typography.fontWeight.regular
             : theme.typography.fontWeight.semiBold
-      };
-    case 'form-field-status':
-      return {
-        ...body,
-        fontSize: '1rem',
-        lineHeight: '1.2rem'
-      };
-    default:
-      throw new Error('Unknown type of Typography');
+        };
+      case 'CSPR':
+        return {
+          ...body,
+          fontFamily: theme.typography.fontFamily.mono,
+          fontSize: '2.8rem',
+          lineHeight: '4rem',
+          fontWeight:
+            weight === 'light'
+              ? theme.typography.fontWeight.light
+              : theme.typography.fontWeight.bold
+        };
+      case 'form-field-status':
+        return {
+          ...body,
+          fontSize: '1rem',
+          lineHeight: '1.2rem'
+        };
+      default:
+        throw new Error('Unknown type of Typography');
+    }
   }
-});
+);
 
 const StyledHeader = styled('h1').withConfig({
   shouldForwardProp: (prop, defaultValidatorFn) =>
@@ -138,7 +162,7 @@ const StyledHeader = styled('h1').withConfig({
   const body = getBodyStyles(theme, props);
   return {
     ...body,
-    fontWeight: theme.typography.fontWeight.semiBold,
+    fontWeight: theme.typography.fontWeight.bold,
     fontSize: '2.4rem',
     lineHeight: '2.8rem'
   };
