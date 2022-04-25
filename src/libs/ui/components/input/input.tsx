@@ -72,8 +72,7 @@ const SuffixTextContainer = styled(SuffixContainer)(({ theme }) => ({
 }));
 
 export enum InputValidationType {
-  PositiveInteger = 'positive_int',
-  CSPR = 'cspr'
+  Password = 'password'
 }
 
 export interface InputProps extends BaseProps {
@@ -125,16 +124,10 @@ export function Input({
     validationType == null
       ? undefined
       : {
-          [InputValidationType.CSPR]: {
-            type: 'number',
-            min: '0',
+          [InputValidationType.Password]: {
+            type: 'password',
+            min: '12',
             max: '0',
-            step: '0'
-          },
-          [InputValidationType.PositiveInteger]: {
-            type: 'number',
-            min: '1',
-            max: '1',
             step: '0'
           }
         }[validationType];

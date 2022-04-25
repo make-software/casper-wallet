@@ -4,33 +4,31 @@ import { CreateVaultState } from './types';
 import {
   changePassword,
   changeConfirmPassword,
-  enableButton,
-  disableButton
+  setFormErrors
 } from './actions';
 
 const initialState: CreateVaultState = {
-  password: '',
-  confirmPassword: '',
-  buttonIsEnabled: false
+  password: null,
+  confirmPassword: null,
+  errors: {
+    passwordErrorMessage: null,
+    confirmPasswordErrorMessage: null
+  }
 };
 
 export const reducer = createReducer<CreateVaultState, Action>(initialState)
-  .handleAction([changePassword], (state, { payload: { password } }) => ({
+  .handleAction([changePassword], (state, { payload }) => ({
     ...state,
-    password
+    password: payload
   }))
-  .handleAction(
-    [changeConfirmPassword],
-    (state, { payload: { password } }) => ({
-      ...state,
-      confirmPassword: password
-    })
-  )
-  .handleAction([enableButton], state => ({
+  .handleAction([changeConfirmPassword], (state, { payload }) => ({
     ...state,
-    buttonIsEnabled: true
+    confirmPassword: payload
   }))
-  .handleAction([disableButton], state => ({
+  .handleAction([setFormErrors], (state, { payload }) => ({
     ...state,
-    buttonIsEnabled: false
+    errors: {
+      ...state.errors,
+      ...payload
+    }
   }));

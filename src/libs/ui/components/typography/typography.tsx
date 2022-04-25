@@ -6,7 +6,13 @@ import { BaseProps } from '@src/libs/ui';
 
 type Ref = HTMLSpanElement | HTMLHeadingElement;
 
-export type TypographyType = 'header' | 'body' | 'caption' | 'label' | 'hash';
+export type TypographyType =
+  | 'header'
+  | 'body'
+  | 'caption'
+  | 'label'
+  | 'hash'
+  | 'form-field-status'; // Temporary name
 export type TypographyWeight = 'regular' | 'medium' | 'semiBold';
 
 export type TextVariation =
@@ -105,6 +111,12 @@ const StyledTypography = styled('span').withConfig({
           weight === 'regular'
             ? theme.typography.fontWeight.regular
             : theme.typography.fontWeight.semiBold
+      };
+    case 'form-field-status':
+      return {
+        ...body,
+        fontSize: '1rem',
+        lineHeight: '1.2rem'
       };
     default:
       throw new Error('Unknown type of Typography');

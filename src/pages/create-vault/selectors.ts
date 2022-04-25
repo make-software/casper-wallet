@@ -1,7 +1,15 @@
-import { State } from '@src/redux/types';
+import { createSelector } from '@reduxjs/toolkit';
 
-export const selectPassword = (state: State) => state.createVaultPage?.password;
+import { State } from '@src/redux/types';
+import { formIsValid } from './validation';
+
+export const selectPassword = (state: State) => state.createVaultPage.password;
 export const selectConfirmPassword = (state: State) =>
-  state.createVaultPage?.confirmPassword;
-export const selectButtonIsEnabled = (state: State) =>
-  state.createVaultPage?.buttonIsEnabled;
+  state.createVaultPage.confirmPassword;
+export const selectFormErrors = (state: State) => state.createVaultPage.errors;
+
+export const selectFormIsValid = createSelector(
+  selectPassword,
+  selectConfirmPassword,
+  (password, confirmPassword) => formIsValid(password, confirmPassword)
+);

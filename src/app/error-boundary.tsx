@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ReactNode } from 'react';
 import { Typography } from '@src/libs/ui';
 
 interface Props {
@@ -31,7 +31,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <>
           <h1>{this.state.error?.message}</h1>
-          <Typography type="body" weight="semiBold">
+          <Typography type="body" weight="regular">
             {this.state.error?.stack}
           </Typography>
         </>

@@ -22,5 +22,5 @@ declare module 'typesafe-actions' {
 
 export interface State {
   vault: VaultState;
-  createVaultPage?: CreateVaultState;
+  createVaultPage: CreateVaultState;
 }

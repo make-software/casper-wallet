@@ -27,9 +27,10 @@ const LabelContainer = styled('div')(({ theme }) => ({
 }));
 
 const StatusTextContainer = styled('div')<FormFieldProps>(
-  ({ theme, status: status }) => ({
+  ({ theme, status }) => ({
     // @ts-ignore
-    color: theme.color[getThemeColor(status)]
+    color: theme.color[getThemeColor(status)],
+    margin: '4px 0 0 10px'
   })
 );
 
@@ -71,7 +72,7 @@ export function FormField({
       {children}
 
       <StatusTextContainer status={status}>
-        <Typography type="body" weight="regular">
+        <Typography type="form-field-status" weight="regular">
           {statusText}
         </Typography>
       </StatusTextContainer>

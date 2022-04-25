@@ -1,19 +1,16 @@
 import { createAction } from 'typesafe-actions';
+import { CreateVaultFormErrors } from './types';
 
-export interface CreateVaultAction {
-  password: string;
-}
+const PAGE = 'CREATE_VAULT';
 
-export const changePassword = createAction(
-  'CREATE_VAULT/CHANGE_PASSWORD_VALUE'
-)<CreateVaultAction>();
+export const changePassword = createAction(`${PAGE}/CHANGE_PASSWORD_VALUE`)<
+  string | null
+>();
 
 export const changeConfirmPassword = createAction(
-  'CREATE_VAULT/CHANGE_CONFIRM_PASSWORD_VALUE'
-)<CreateVaultAction>();
+  `${PAGE}/CHANGE_CONFIRM_PASSWORD_VALUE`
+)<string | null>();
 
-export const enableButton = createAction('CREATE_VAULT/ENABLE_BUTTON')<void>();
-
-export const disableButton = createAction(
-  'CREATE_VAULT/DISABLE_BUTTON'
-)<void>();
+export const setFormErrors = createAction(
+  `${PAGE}/SET_FORM_ERRORS`
+)<CreateVaultFormErrors>();
