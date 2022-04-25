@@ -27,7 +27,7 @@ msgid "characters"
 msgstr "karakter"
 
 msgid "Passwords don't match"
-msgstr "Şifreler eşleşmiyor"
+msgstr "Parolalar eşleşmiyor"
 
 msgid "Create new vault"
 msgstr "Yeni kasa oluştur"
@@ -42,7 +42,7 @@ msgid "Password"
 msgstr "Parola"
 
 msgid "Confirm password"
-msgstr "Şifreyi Onayla"
+msgstr "Parolayı Onayla"
 
 msgid "Create Vault"
 msgstr "Kasa Oluştur"

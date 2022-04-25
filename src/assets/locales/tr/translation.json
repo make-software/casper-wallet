@@ -5,11 +5,11 @@
   "Import Account": "Hesabı İçe Aktar",
   "Should be at least": "En az şu kadar olmalıdır:",
   "characters": "karakter",
-  "Passwords don't match": "Şifreler eşleşmiyor",
+  "Passwords don't match": "Parolalar eşleşmiyor",
   "Create new vault": "Yeni kasa oluştur",
   "Please set a password for your vault. Try to use at least": "Lütfen kasanız için bir parola belirleyin. Güçlü bir parola sağlamak için en az",
   "to ensure a strong passphrase.": " kullanmaya çalışın.",
   "Password": "Parola",
-  "Confirm password": "Şifreyi Onayla",
+  "Confirm password": "Parolayı Onayla",
   "Create Vault": "Kasa Oluştur"
 }
