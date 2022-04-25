@@ -29,6 +29,8 @@ import {
   setFormErrors
 } from '@src/redux/substores/create-vault/actions';
 
+import { passwordIsValid } from './validation';
+
 type InputType = 'password' | 'text';
 
 const Container = styled.div`
@@ -64,8 +66,6 @@ export function CreateVaultPageContent() {
   const [confirmPasswordInputType, setConfirmPasswordInputType] =
     useState<InputType>('password');
 
-  const minPasswordLength = 12;
-
   function changePassword({
     target: { value }
   }: ChangeEvent<HTMLInputElement>) {
@@ -81,7 +81,7 @@ export function CreateVaultPageContent() {
   function validatePassword({
     target: { value }
   }: FocusEvent<HTMLInputElement>) {
-    if (value && value.trim().length >= minPasswordLength) {
+    if (passwordIsValid(value)) {
       dispatch(setFormErrors({ passwordErrorMessage: null }));
     } else {
       dispatch(
