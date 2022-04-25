@@ -29,6 +29,7 @@ const fileExtensions = [
   'eot',
   'otf',
   'ttf',
+  'svg',
   'woff',
   'woff2'
 ];
@@ -80,10 +81,6 @@ const options = {
           }
         ],
         exclude: /node_modules/
-      },
-      {
-        test: /\.svg$/,
-        use: ['@svgr/webpack']
       }
     ]
   },

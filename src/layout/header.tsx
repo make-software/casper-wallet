@@ -1,11 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import LogoSVG from '@src/assets/icons/logo.svg';
-import LogoBackgroundSVG from '@src/assets/icons/logo-background.svg';
+import { SvgIcon } from '@src/libs/ui';
+
+const backgroundIconPath = 'assets/icons/logo-background.svg';
 
 const Container = styled.header`
   background: ${({ theme }) => theme.color.backgroundBlue};
+  background-image: url(${backgroundIconPath});
+  background-repeat: no-repeat;
   height: 72px;
 
   display: flex;
@@ -13,24 +16,15 @@ const Container = styled.header`
   align-items: center;
 `;
 
-const LogoBackground = styled(LogoBackgroundSVG)`
-  position: absolute;
-  top: 0;
-  left: 0;
-`;
-
 const LogoContainer = styled.div`
   padding-left: 20px;
 `;
-
-const Logo = styled(LogoSVG)``;
 
 export function Header() {
   return (
     <Container>
       <LogoContainer>
-        <Logo />
-        <LogoBackground />
+        <SvgIcon size={40} src="assets/icons/logo.svg" />
       </LogoContainer>
     </Container>
   );
