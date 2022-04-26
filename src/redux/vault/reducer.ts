@@ -33,12 +33,9 @@ export const reducer = createReducer(initialState)
       isLocked: false
     })
   )
-  .handleAction(
-    [createAccount],
-    (state, { payload: { accountName } }): State => {
-      return {
-        ...state,
-        accounts: [...state.accounts, { accountName, balance: null }]
-      };
-    }
-  );
+  .handleAction([createAccount], (state, { payload: { name } }): State => {
+    return {
+      ...state,
+      accounts: [...state.accounts, { name, balance: null }]
+    };
+  });

@@ -1,5 +1,5 @@
 export enum Routes {
-  home = '/',
-  createVault = '/create-vault',
-  createAccount = '/create-account'
+  Home = '/',
+  CreateVault = '/create-vault',
+  NoAccounts = '/no-accounts'
 }

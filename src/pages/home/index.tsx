@@ -10,13 +10,9 @@ import {
   selectIsVaultCreated
 } from '@src/redux/vault/selectors';
 
-const Container = styled.div`
-  height: 454px;
-`;
+const Container = styled.div``;
 
-const HeaderContainer = styled.div`
-  margin-top: 60px;
-`;
+const HeaderContainer = styled.div``;
 
 const TextContainer = styled.div`
   margin-top: 16px;
@@ -27,11 +23,11 @@ export function HomePageContent() {
   const isVaultExists = useSelector(selectIsVaultCreated);
 
   if (!isVaultExists) {
-    return <Navigate to={Routes.createVault} replace={true} />;
+    return <Navigate to={Routes.CreateVault} replace={true} />;
   }
 
   if (!isAccountExists) {
-    return <Navigate to={Routes.createAccount} />;
+    return <Navigate to={Routes.NoAccounts} />;
   }
 
   return (

@@ -1,6 +1,6 @@
 // TODO: Implement account type
 export interface Account {
-  accountName: string;
+  name: string;
   balance: number | null;
 }
 

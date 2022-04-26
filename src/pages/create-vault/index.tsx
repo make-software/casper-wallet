@@ -181,7 +181,7 @@ export function CreateVaultPageFooter() {
     dispatch(changeConfirmPasswordAction(null));
     dispatch(createVaultAction({ password }));
 
-    navigate(Routes.createAccount);
+    navigate(Routes.NoAccounts);
   }
 
   return (

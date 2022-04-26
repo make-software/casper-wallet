@@ -14,9 +14,9 @@ import {
   CreateVaultPageFooter
 } from '@src/pages/create-vault';
 import {
-  CreateAccountPageContent,
-  CreateAccountPageFooter
-} from '@src/pages/create-account';
+  NoAccountsPageContent,
+  NoAccountsPageFooter
+} from '@src/pages/no-accounts';
 import { HomePageContent } from '@src/pages/home';
 
 import { Routes as RoutePath } from './routes';
@@ -49,17 +49,13 @@ export function App() {
         <MemoryRouter>
           <Routes>
             <Route
-              path={RoutePath.home}
+              path={RoutePath.Home}
               element={
-                <Layout
-                  Header={<Header />}
-                  Content={<HomePageContent />}
-                  Footer={<></>}
-                />
+                <Layout Header={<Header />} Content={<HomePageContent />} />
               }
             />
             <Route
-              path={RoutePath.createVault}
+              path={RoutePath.CreateVault}
               element={
                 <Layout
                   Header={<Header />}
@@ -70,12 +66,12 @@ export function App() {
               }
             />
             <Route
-              path={RoutePath.createAccount}
+              path={RoutePath.NoAccounts}
               element={
                 <Layout
                   Header={<Header />}
-                  Content={<CreateAccountPageContent />}
-                  Footer={<CreateAccountPageFooter />}
+                  Content={<NoAccountsPageContent />}
+                  Footer={<NoAccountsPageFooter />}
                   contentHeight={399}
                 />
               }

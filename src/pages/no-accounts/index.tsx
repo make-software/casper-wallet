@@ -5,24 +5,21 @@ import { useNavigate } from 'react-router-dom';
 
 import { ButtonsContainer } from '@src/layout/buttons-container';
 import { Typography, Button } from '@src/libs/ui';
-import { createAccount } from '@src/redux/vault/actions';
+import { createAccount as createAccountAction } from '@src/redux/vault/actions';
 import { Routes } from '@src/app/routes';
 import { Trans, useTranslation } from 'react-i18next';
 
 const Container = styled.div`
-  height: 396px;
   padding: ${({ theme }) => theme.padding[1.6]};
 `;
 
-const HeaderContainer = styled.div`
-  margin-top: 128px;
-`;
+const HeaderContainer = styled.div``;
 
 const TextContainer = styled.div`
   margin-top: 16px;
 `;
 
-export function CreateAccountPageContent() {
+export function NoAccountsPageContent() {
   const { t } = useTranslation();
   return (
     <Container>
@@ -42,19 +39,19 @@ export function CreateAccountPageContent() {
   );
 }
 
-export function CreateAccountPageFooter() {
+export function NoAccountsPageFooter() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  function createFirstAccount() {
-    dispatch(createAccount({ accountName: 'First Account' }));
-    navigate(Routes.home);
+  function createAccount() {
+    dispatch(createAccountAction({ name: 'First Account' }));
+    navigate(Routes.Home);
   }
 
   return (
     <ButtonsContainer>
-      <Button onClick={createFirstAccount}>
+      <Button onClick={createAccount}>
         <Trans t={t}>Create Account</Trans>
       </Button>
       <Button color="secondaryBlue">
