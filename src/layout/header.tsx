@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 
 import { SvgIcon } from '@src/libs/ui';
@@ -14,18 +14,23 @@ const Container = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  padding: 0 16px;
 `;
 
-const LogoContainer = styled.div`
-  padding-left: 20px;
-`;
+const LogoContainer = styled.div``;
 
-export function Header() {
+interface HeaderProps {
+  IconButtons?: ReactElement<any, any>;
+}
+
+export function Header({ IconButtons }: HeaderProps) {
   return (
     <Container>
       <LogoContainer>
         <SvgIcon size={40} src="assets/icons/logo.svg" />
       </LogoContainer>
+      {IconButtons && IconButtons}
     </Container>
   );
 }

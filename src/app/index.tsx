@@ -9,8 +9,11 @@ import { createStore } from '@src/redux';
 import { REDUX_STORAGE_KEY } from '@src/services/constants';
 
 import { Layout, Header } from '@src/layout';
+import { IconButtons } from '@src/layout/icon-buttons';
+
 import { CreateVaultPageContent } from '@src/pages/create-vault';
 import { NoAccountsPageContent } from '@src/pages/no-accounts';
+import { UnlockVaultPageContent } from '@src/pages/unlock-vault';
 import { HomePageContent } from '@src/pages/home';
 
 import { Routes as RoutePath } from './routes';
@@ -45,7 +48,10 @@ export function App() {
             <Route
               path={RoutePath.Home}
               element={
-                <Layout Header={<Header />} Content={<HomePageContent />} />
+                <Layout
+                  Header={<Header IconButtons={<IconButtons lock />} />}
+                  Content={<HomePageContent />}
+                />
               }
             />
             <Route
@@ -61,8 +67,17 @@ export function App() {
               path={RoutePath.NoAccounts}
               element={
                 <Layout
-                  Header={<Header />}
+                  Header={<Header IconButtons={<IconButtons lock />} />}
                   Content={<NoAccountsPageContent />}
+                />
+              }
+            />
+            <Route
+              path={RoutePath.UnlockVault}
+              element={
+                <Layout
+                  Header={<Header />}
+                  Content={<UnlockVaultPageContent />}
                 />
               }
             />
