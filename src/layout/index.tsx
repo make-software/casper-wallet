@@ -10,7 +10,7 @@ const Container = styled.div`
   min-height: 600px;
 `;
 
-// TODO: Implement Header component
+// TODO: Implement Index component
 const PageHeader = styled.header``;
 
 const PageContent = styled.div`
