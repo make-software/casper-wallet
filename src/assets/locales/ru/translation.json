@@ -10,5 +10,10 @@
   "Please set a password for your vault. Try to use at least <2>{{minPasswordLength}} characters</2> to ensure a strong passphrase.": "Пожалуйста, установите пароль для вашего хранилища. Старайтесь использовать как минимум <2>{{minPasswordLength}} символов</2>, чтобы обеспечить надежную парольную фразу.",
   "Password": "Пароль",
   "Confirm password": "Подтвердить пароль",
-  "Create Vault": "Создать хранилище"
+  "Create Vault": "Создать хранилище",
+  "Password is not correct": "Неверный пароль",
+  "Your vault is locked": "Ваше хранилище заблокировано",
+  "Please enter the password to unlock.": "Пожалуйста, введите пароль для разблокировки.",
+  "Unlock vault": "Разблокировать хранилище",
+  "Reset vault": "Сбросить хранилище"
 }

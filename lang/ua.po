@@ -47,3 +47,18 @@ msgstr "Підтвердьте пароль"
 
 msgid "Create Vault"
 msgstr "Створити сховище"
+
+msgid "Password is not correct"
+msgstr "Пароль не вірний"
+
+msgid "Your vault is locked"
+msgstr "Ваше сховище заблоковано"
+
+msgid "Please enter the password to unlock."
+msgstr "Будь ласка, введіть пароль, для розблокування."
+
+msgid "Unlock vault"
+msgstr "Розблокувати сховище"
+
+msgid "Reset vault"
+msgstr "Скинути сховище"
