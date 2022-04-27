@@ -5,7 +5,8 @@ import { useSelector } from 'react-redux';
 import { Typography } from '@src/libs/ui';
 import {
   selectIsAccountCreated,
-  selectIsVaultCreated
+  selectIsVaultCreated,
+  selectIsVaultLocked
 } from '@src/redux/vault/selectors';
 import {
   ContentContainer,
@@ -16,13 +17,18 @@ import {
 export function HomePageContent() {
   const isAccountExists = useSelector(selectIsAccountCreated);
   const isVaultExists = useSelector(selectIsVaultCreated);
+  const isVaultLocked = useSelector(selectIsVaultLocked);
+
+  if (isVaultLocked) {
+    return <Navigate to={Routes.UnlockVault} replace={true} />;
+  }
 
   if (!isVaultExists) {
     return <Navigate to={Routes.CreateVault} replace={true} />;
   }
 
   if (!isAccountExists) {
-    return <Navigate to={Routes.NoAccounts} />;
+    return <Navigate to={Routes.NoAccounts} replace={true} />;
   }
 
   return (
