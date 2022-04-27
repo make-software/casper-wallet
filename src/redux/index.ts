@@ -1,22 +1,19 @@
-import { applyMiddleware, configureStore } from '@reduxjs/toolkit';
+import {
+  applyMiddleware,
+  // TODO: Move to actual `createStore`
+  legacy_createStore as createStoreRedux
+} from 'redux';
 import rootAction from './root-action';
 import rootReducer from './root-reducer';
 import { composeEnhancers } from './utils';
 
 export const createStore = (initialState: any) => {
   // configure middlewares
-  const middleware: any[] = [];
+  const middlewares: any[] = [];
   // compose enhancers
-  const enhancers = composeEnhancers(applyMiddleware(...middleware));
-
+  const enhancer = composeEnhancers(applyMiddleware(...middlewares));
   // create store
-  return configureStore({
-    reducer: rootReducer,
-    preloadedState: initialState,
-    enhancers,
-    middleware,
-    devTools: process.env.NODE_ENV === 'development'
-  });
+  return createStoreRedux(rootReducer, initialState, enhancer);
 };
 
 export { rootAction };

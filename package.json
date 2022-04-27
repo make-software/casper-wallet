@@ -29,7 +29,6 @@
   "dependencies": {
     "@hookform/resolvers": "^2.8.8",
     "@hot-loader/react-dom": "^17.0.1",
-    "@reduxjs/toolkit": "^1.8.1",
     "facepaint": "^1.2.1",
     "i18next": "^21.6.16",
     "i18next-browser-languagedetector": "^6.1.4",
