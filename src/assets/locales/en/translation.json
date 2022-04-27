@@ -11,5 +11,10 @@
   "to ensure a strong passphrase.": " to ensure a strong passphrase.",
   "Password": "Password",
   "Confirm password": "Confirm password",
-  "Create Vault": "Create Vault"
+  "Create Vault": "Create Vault",
+  "Password is not correct": "Password is not correct",
+  "Your vault is locked": "Your vault is locked",
+  "Please enter the password to unlock.": "Please enter the password to unlock.",
+  "Unlock vault": "Unlock vault",
+  "Reset vault": "Reset vault"
 }

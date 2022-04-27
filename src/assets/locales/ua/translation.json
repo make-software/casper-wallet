@@ -11,5 +11,10 @@
   "to ensure a strong passphrase.": ", щоб забезпечити надійну парольну фразу.",
   "Password": "Пароль",
   "Confirm password": "Підтвердьте пароль",
-  "Create Vault": "Створити сховище"
+  "Create Vault": "Створити сховище",
+  "Password is not correct": "Пароль не вірний",
+  "Your vault is locked": "Ваше сховище заблоковано",
+  "Please enter the password to unlock.": "Будь ласка, введіть пароль, для розблокування.",
+  "Unlock vault": "Розблокувати сховище",
+  "Reset vault": "Скинути сховище"
 }

@@ -5,20 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-25T18:11:14.531Z\n"
-"PO-Revision-Date: 2022-04-25T18:11:14.531Z\n"
-
-msgid "Your vault is ready, but no accounts yet"
-msgstr "Your vault is ready, but no accounts yet"
-
-msgid "Please, create an account or import an account you already have."
-msgstr "Please, create an account or import an account you already have."
-
-msgid "Create Account"
-msgstr "Create Account"
-
-msgid "Import Account"
-msgstr "Import Account"
+"POT-Creation-Date: 2022-04-27T12:01:13.554Z\n"
+"PO-Revision-Date: 2022-04-27T12:01:13.555Z\n"
 
 msgid "Should be at least"
 msgstr "Should be at least"
@@ -46,3 +34,30 @@ msgstr "Confirm password"
 
 msgid "Create Vault"
 msgstr "Create Vault"
+
+msgid "Your vault is ready, but no accounts yet"
+msgstr "Your vault is ready, but no accounts yet"
+
+msgid "Please, create an account or import an account you already have."
+msgstr "Please, create an account or import an account you already have."
+
+msgid "Create Account"
+msgstr "Create Account"
+
+msgid "Import Account"
+msgstr "Import Account"
+
+msgid "Password is not correct"
+msgstr "Password is not correct"
+
+msgid "Your vault is locked"
+msgstr "Your vault is locked"
+
+msgid "Please enter the password to unlock."
+msgstr "Please enter the password to unlock."
+
+msgid "Unlock vault"
+msgstr "Unlock vault"
+
+msgid "Reset vault"
+msgstr "Reset vault"

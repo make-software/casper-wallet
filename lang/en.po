@@ -46,3 +46,18 @@ msgstr "Confirm password"
 
 msgid "Create Vault"
 msgstr "Create Vault"
+
+msgid "Password is not correct"
+msgstr "Password is not correct"
+
+msgid "Your vault is locked"
+msgstr "Your vault is locked"
+
+msgid "Please enter the password to unlock."
+msgstr "Please enter the password to unlock."
+
+msgid "Unlock vault"
+msgstr "Unlock vault"
+
+msgid "Reset vault"
+msgstr "Reset vault"
