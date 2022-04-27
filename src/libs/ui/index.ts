@@ -7,6 +7,7 @@ export * from './components/svg-icon/svg-icon';
 export * from './components/svg-icon/svg-icon-social';
 export * from './components/tag/tag';
 export * from './components/tile/tile';
+export * from './components/list/list';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

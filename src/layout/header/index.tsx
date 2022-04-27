@@ -2,8 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { SvgIcon } from '@src/libs/ui';
-import { IconButtons } from '@src/layout/header/icon-buttons';
-import { NavigationBar } from '@src/layout/navigation-bar';
+
+import { IconButtons } from './icon-buttons';
+import { NavigationBar } from './navigation-bar';
 
 const backgroundIconPath = 'assets/icons/logo-background.svg';
 

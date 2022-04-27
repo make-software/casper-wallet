@@ -9,6 +9,7 @@ import { Layout, Header } from '@src/layout';
 import { CreateVaultPageContent } from '@src/pages/create-vault';
 import { NoAccountsPageContent } from '@src/pages/no-accounts';
 import { UnlockVaultPageContent } from '@src/pages/unlock-vault';
+import { TimeoutPageContent } from '@src/pages/timeout';
 import { HomePageContent } from '@src/pages/home';
 
 import { Routes as RoutePath } from './routes';
@@ -65,6 +66,15 @@ export function App() {
         path={RoutePath.UnlockVault}
         element={
           <Layout Header={<Header />} Content={<UnlockVaultPageContent />} />
+        }
+      />
+      <Route
+        path={RoutePath.Timeout}
+        element={
+          <Layout
+            Header={<Header subHeaderLink="close" withLockButton />}
+            Content={<TimeoutPageContent />}
+          />
         }
       />
     </Routes>

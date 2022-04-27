@@ -2,5 +2,6 @@ export enum Routes {
   Home = '/',
   CreateVault = '/create-vault',
   NoAccounts = '/no-accounts',
-  UnlockVault = '/unlock-vault'
+  UnlockVault = '/unlock-vault',
+  Timeout = '/timeout'
 }

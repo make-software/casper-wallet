@@ -2,10 +2,11 @@ import React from 'react';
 import styled from 'styled-components';
 import { themeConfig } from '@src/libs/ui';
 
-type Color = 'fillBlue' | 'fillRed';
+type Color = 'fillBlue' | 'fillRed' | 'inherit';
 
 const getStateColor = (color: Color) => {
   return (
+    // @ts-ignore
     {
       fillBlue: {
         color: themeConfig.color.fillBlue,
