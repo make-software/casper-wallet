@@ -6,8 +6,6 @@ import { FieldValues, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 
-import { Routes } from '@src/app/routes';
-
 import {
   ContentContainer,
   ButtonsContainer,
