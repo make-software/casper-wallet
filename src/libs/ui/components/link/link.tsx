@@ -2,24 +2,18 @@ import React from 'react';
 import styled from 'styled-components';
 import { themeConfig } from '@src/libs/ui';
 
-type Color = 'primaryBlue' | 'primaryRed' | 'hash' | 'inherit';
+type Color = 'fillBlue' | 'fillRed';
 
 const getStateColor = (color: Color) => {
   return (
-    // @ts-ignore
     {
-      primaryBlue: {
+      fillBlue: {
         color: themeConfig.color.fillBlue,
         hover: themeConfig.color.fillBlueHover,
         active: themeConfig.color.fillBlueClick
       },
-      primaryRed: {
+      fillRed: {
         color: themeConfig.color.fillRed,
-        hover: themeConfig.color.fillRedHover,
-        active: themeConfig.color.fillRedClick
-      },
-      hash: {
-        color: themeConfig.color.fillBlue,
         hover: themeConfig.color.fillRedHover,
         active: themeConfig.color.fillRedClick
       }
@@ -42,6 +36,7 @@ type Ref = HTMLAnchorElement;
 const StyledLink = styled.a<LinkProps>(({ theme, color }) => {
   const stateColor = getStateColor(color);
   return {
+    cursor: 'pointer',
     color: stateColor.color,
     '&:hover > *': {
       color: stateColor.hover
