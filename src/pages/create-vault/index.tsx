@@ -7,6 +7,9 @@ import { FieldValues, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 
+import { Routes } from '@src/app/routes';
+import { createVault as createVaultAction } from '@src/redux/vault/actions';
+
 import {
   Button,
   Input,
@@ -14,30 +17,16 @@ import {
   SvgIcon,
   Typography
 } from '@src/libs/ui';
-import { ContentContainer } from '@src/layout/content-container';
-import { ButtonsContainer } from '@src/layout/buttons-container';
-import { Routes } from '@src/app/routes';
 
-import { createVault as createVaultAction } from '@src/redux/vault/actions';
+import {
+  ContentContainer,
+  ButtonsContainer,
+  TextContainer,
+  HeaderTextContainer,
+  InputsContainer
+} from '@src/layout/containers';
 
 type InputType = 'password' | 'text';
-
-const HeaderTextContainer = styled.div`
-  padding: 0 16px;
-  margin-top: 24px;
-`;
-
-const TextContainer = styled.div`
-  margin-top: 16px;
-  padding: 0 16px;
-`;
-
-const InputsContainer = styled.div`
-  margin-top: 24px;
-  & > div:nth-child(2) {
-    margin-top: 16px;
-  }
-`;
 
 export function CreateVaultPageContent() {
   const { t } = useTranslation();
@@ -72,7 +61,7 @@ export function CreateVaultPageContent() {
     register,
     handleSubmit,
     formState: { errors, isDirty }
-    //@ts-ignore
+    //@ts-ignore TODO: fix type for `reValidateMode`
   } = useForm(formOptions);
 
   const [passwordInputType, setPasswordInputType] =

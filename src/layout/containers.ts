@@ -1,5 +1,24 @@
 import styled from 'styled-components';
 
+export const ContentContainer = styled.div`
+  padding: 0 ${({ theme }) => theme.padding[1.6]};
+`;
+
+export const HeaderTextContainer = styled(ContentContainer)`
+  margin-top: 24px;
+`;
+
+export const TextContainer = styled(ContentContainer)`
+  margin-top: 16px;
+`;
+
+export const InputsContainer = styled.div`
+  margin-top: 24px;
+  & > div:nth-child(2) {
+    margin-top: 16px;
+  }
+`;
+
 // Default direction value is `column`
 interface Props {
   direction?: 'row' | 'column';

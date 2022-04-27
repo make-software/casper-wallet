@@ -1,23 +1,18 @@
 import React from 'react';
-import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { Trans, useTranslation } from 'react-i18next';
 
-import { ButtonsContainer } from '@src/layout/buttons-container';
 import { Typography, Button } from '@src/libs/ui';
 import { createAccount as createAccountAction } from '@src/redux/vault/actions';
 import { Routes } from '@src/app/routes';
-import { Trans, useTranslation } from 'react-i18next';
 
-const Container = styled.div`
-  padding: ${({ theme }) => theme.padding[1.6]};
-`;
-
-const HeaderContainer = styled.div``;
-
-const TextContainer = styled.div`
-  margin-top: 16px;
-`;
+import {
+  ButtonsContainer,
+  HeaderTextContainer,
+  TextContainer,
+  ContentContainer
+} from '@src/layout/containers';
 
 export function NoAccountsPageContent() {
   const { t } = useTranslation();
@@ -30,12 +25,12 @@ export function NoAccountsPageContent() {
   }
 
   return (
-    <Container>
-      <HeaderContainer>
+    <ContentContainer>
+      <HeaderTextContainer>
         <Typography type="header" weight="semiBold">
           <Trans t={t}>Your vault is ready, but no accounts yet</Trans>
         </Typography>
-      </HeaderContainer>
+      </HeaderTextContainer>
       <TextContainer>
         <Typography type="body" weight="regular" variation="contentSecondary">
           <Trans t={t}>
@@ -51,6 +46,6 @@ export function NoAccountsPageContent() {
           <Trans t={t}>Import Account</Trans>
         </Button>
       </ButtonsContainer>
-    </Container>
+    </ContentContainer>
   );
 }

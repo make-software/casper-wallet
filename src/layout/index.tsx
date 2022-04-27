@@ -28,5 +28,3 @@ export function Layout({ Header, Content }: Props) {
 }
 
 export * from './header';
-export * from './buttons-container';
-export * from './content-container';
