@@ -1,7 +1,8 @@
-import React, { ReactElement } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { SvgIcon } from '@src/libs/ui';
+import { IconButtons } from '@src/layout/header/icon-buttons';
 
 const backgroundIconPath = 'assets/icons/logo-background.svg';
 export const headerHeight = '72px';
@@ -21,16 +22,17 @@ const Container = styled.header`
 const LogoContainer = styled.div``;
 
 interface HeaderProps {
-  IconButtons?: ReactElement<any, any>;
+  withLockButton?: boolean;
+  withMenu?: boolean;
 }
 
-export function Header({ IconButtons }: HeaderProps) {
+export function Header({ withLockButton, withMenu }: HeaderProps) {
   return (
     <Container>
       <LogoContainer>
         <SvgIcon size={40} src="assets/icons/logo.svg" />
       </LogoContainer>
-      {IconButtons && IconButtons}
+      <IconButtons withMenu={withMenu} withLockButton={withLockButton} />
     </Container>
   );
 }

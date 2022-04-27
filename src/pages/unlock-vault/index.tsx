@@ -18,7 +18,7 @@ import {
 import { Typography, Input, Button } from '@src/libs/ui';
 
 import { selectVaultPassword } from '@src/redux/vault/selectors';
-import { unlockVault as unlockVaultAction } from '@src/redux/vault/actions';
+import { unlockVault } from '@src/redux/vault/actions';
 
 export function UnlockVaultPageContent() {
   const { t } = useTranslation();
@@ -44,13 +44,13 @@ export function UnlockVaultPageContent() {
     //@ts-ignore TODO: fix type for `reValidateMode`
   } = useForm(formOptions);
 
-  function unlockVault({ password }: FieldValues) {
-    dispatch(unlockVaultAction());
-    navigate(Routes.Home);
+  function unlockVaultHandle({ password }: FieldValues) {
+    dispatch(unlockVault());
+    navigate(-1);
   }
 
   return (
-    <form onSubmit={handleSubmit(unlockVault)}>
+    <form onSubmit={handleSubmit(unlockVaultHandle)}>
       <ContentContainer>
         <HeaderTextContainer>
           <Typography type="header" weight="bold">
@@ -65,7 +65,7 @@ export function UnlockVaultPageContent() {
         <InputsContainer>
           <Input
             type="password"
-            placeholder="Password"
+            placeholder={t('Password')}
             error={!!errors.password}
             validationText={errors.password?.message}
             {...register('password')}
