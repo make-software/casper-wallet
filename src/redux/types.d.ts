@@ -1,6 +1,5 @@
 import { ActionType, StateType } from 'typesafe-actions';
 import { VaultState } from './vault/types';
-import { CreateVaultState } from './substores/create-vault/types';
 
 declare module 'typesafe-actions' {
   export type Store = StateType<typeof import('./index').default>;
@@ -22,5 +21,4 @@ declare module 'typesafe-actions' {
 
 export interface State {
   vault: VaultState;
-  createVaultPage: CreateVaultState;
 }

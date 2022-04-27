@@ -21,6 +21,14 @@ const TextContainer = styled.div`
 
 export function NoAccountsPageContent() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  function createAccount() {
+    dispatch(createAccountAction({ name: 'First Account' }));
+    navigate(Routes.Home);
+  }
+
   return (
     <Container>
       <HeaderContainer>
@@ -35,28 +43,14 @@ export function NoAccountsPageContent() {
           </Trans>
         </Typography>
       </TextContainer>
+      <ButtonsContainer>
+        <Button onClick={createAccount}>
+          <Trans t={t}>Create Account</Trans>
+        </Button>
+        <Button color="secondaryBlue">
+          <Trans t={t}>Import Account</Trans>
+        </Button>
+      </ButtonsContainer>
     </Container>
-  );
-}
-
-export function NoAccountsPageFooter() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  function createAccount() {
-    dispatch(createAccountAction({ name: 'First Account' }));
-    navigate(Routes.Home);
-  }
-
-  return (
-    <ButtonsContainer>
-      <Button onClick={createAccount}>
-        <Trans t={t}>Create Account</Trans>
-      </Button>
-      <Button color="secondaryBlue">
-        <Trans t={t}>Import Account</Trans>
-      </Button>
-    </ButtonsContainer>
   );
 }

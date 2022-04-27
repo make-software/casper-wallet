@@ -4,12 +4,12 @@ import styled from 'styled-components';
 import { SvgIcon } from '@src/libs/ui';
 
 const backgroundIconPath = 'assets/icons/logo-background.svg';
+export const headerHeight = '72px';
 
 const Container = styled.header`
-  background: ${({ theme }) => theme.color.backgroundBlue};
-  background-image: url(${backgroundIconPath});
-  background-repeat: no-repeat;
-  height: 72px;
+  background: url(${backgroundIconPath}) no-repeat;
+  background-color: ${({ theme }) => theme.color.backgroundBlue};
+  height: ${headerHeight};
 
   display: flex;
   justify-content: space-between;

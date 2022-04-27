@@ -152,6 +152,7 @@ export type ButtonSize = 'small' | 'normal' | 'big';
 
 /* eslint-disable-next-line */
 export interface ButtonProps extends BaseProps {
+  type?: 'button' | 'submit' | 'reset';
   onClick?: (ev: any) => void;
   color?:
     | 'primaryBlue'

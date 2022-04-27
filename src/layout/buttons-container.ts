@@ -6,6 +6,11 @@ interface Props {
 }
 
 export const ButtonsContainer = styled.div<Props>`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+
   display: flex;
   flex-direction: ${({ direction }) => (direction ? direction : 'column')};
   justify-content: space-around;

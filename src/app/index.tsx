@@ -9,14 +9,8 @@ import { createStore } from '@src/redux';
 import { REDUX_STORAGE_KEY } from '@src/services/constants';
 
 import { Layout, Header } from '@src/layout';
-import {
-  CreateVaultPageContent,
-  CreateVaultPageFooter
-} from '@src/pages/create-vault';
-import {
-  NoAccountsPageContent,
-  NoAccountsPageFooter
-} from '@src/pages/no-accounts';
+import { CreateVaultPageContent } from '@src/pages/create-vault';
+import { NoAccountsPageContent } from '@src/pages/no-accounts';
 import { HomePageContent } from '@src/pages/home';
 
 import { Routes as RoutePath } from './routes';
@@ -60,8 +54,6 @@ export function App() {
                 <Layout
                   Header={<Header />}
                   Content={<CreateVaultPageContent />}
-                  Footer={<CreateVaultPageFooter />}
-                  contentHeight={455}
                 />
               }
             />
@@ -71,8 +63,6 @@ export function App() {
                 <Layout
                   Header={<Header />}
                   Content={<NoAccountsPageContent />}
-                  Footer={<NoAccountsPageFooter />}
-                  contentHeight={399}
                 />
               }
             />

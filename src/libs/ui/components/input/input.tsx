@@ -2,6 +2,8 @@ import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
 import styled from 'styled-components';
 import { BaseProps, FormField, FormFieldStatus } from '@src/libs/ui';
 
+type Ref = HTMLInputElement;
+
 const getThemeColorByError = (error?: boolean) => {
   if (error == null || !error) {
     return 'contentTertiary';
@@ -87,8 +89,12 @@ export interface InputProps extends BaseProps {
   onBlur?: (ev: any) => void;
   onKeyDown?: (ev: any) => void;
   height?: '36' | '40';
-  min?: string;
-  max?: string;
+  min?: string | number;
+  max?: string | number;
+  maxLength?: number;
+  pattern?: string;
+  minLength?: number;
+  name?: string;
   step?: string;
   label?: string;
   rightLabel?: string;
@@ -105,26 +111,29 @@ export interface InputProps extends BaseProps {
   validationText?: string | null;
 }
 
-export function Input({
-  id,
-  className,
-  style,
-  disabled,
-  monotype,
-  height,
-  label,
-  rightLabel,
-  prefixIcon,
-  suffixIcon,
-  oneColoredIcons,
-  suffixText,
-  required,
-  error,
-  validationType,
-  validationText,
-  onFocus,
-  ...restProps
-}: InputProps) {
+export const Input = React.forwardRef<Ref, InputProps>(function Input(
+  {
+    id,
+    className,
+    style,
+    disabled,
+    monotype,
+    height,
+    label,
+    rightLabel,
+    prefixIcon,
+    suffixIcon,
+    suffixText,
+    required,
+    error,
+    validationType,
+    validationText,
+    oneColoredIcons,
+    onFocus,
+    ...restProps
+  }: InputProps,
+  ref
+) {
   const validationProps =
     validationType == null
       ? undefined
@@ -162,11 +171,10 @@ export function Input({
         {prefixIcon && <PrefixContainer>{prefixIcon}</PrefixContainer>}
 
         <StyledInput
-          title=""
-          disabled={disabled}
-          onFocus={handleFocus}
           {...validationProps}
           {...restProps}
+          ref={ref}
+          onFocus={handleFocus}
         />
 
         {suffixIcon && <SuffixContainer>{suffixIcon}</SuffixContainer>}
@@ -175,6 +183,6 @@ export function Input({
       </InputContainer>
     </FormField>
   );
-}
+});
 
 export default Input;

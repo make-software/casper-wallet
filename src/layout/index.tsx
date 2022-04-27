@@ -4,46 +4,29 @@ import styled from 'styled-components';
 interface Props {
   Header: ReactElement<any, any>;
   Content: ReactElement<any, any>;
-  Footer?: ReactElement<any, any>;
-  // TODO: Optimise sizes; Remove dependency from count of buttons in footer
-  contentHeight?:
-    | 399 // With 2 buttons in footer
-    | 455 // With 2 button in footer
-    | 528; // Without buttons in footer
 }
+
+const Container = styled.div`
+  min-height: 600px;
+`;
 
 // TODO: Implement Header component
 const PageHeader = styled.header``;
 
-interface PageContentProps {
-  contentHeight: number;
-}
-
-const PageContent = styled.div<PageContentProps>`
-  padding: 0 ${({ theme }) => theme.padding[1.6]};
+const PageContent = styled.div`
   min-width: 360px;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: ${({ contentHeight }) => contentHeight}px;
+  height: 100%;
 `;
 
-const PageFooter = styled.div``;
-
-export function Layout({
-  Header,
-  Content,
-  Footer,
-  contentHeight = 528
-}: Props) {
+export function Layout({ Header, Content }: Props) {
   return (
-    <>
+    <Container>
       <PageHeader>{Header}</PageHeader>
-      <PageContent contentHeight={contentHeight}>{Content}</PageContent>
-      {Footer && <PageFooter>{Footer}</PageFooter>}
-    </>
+      <PageContent>{Content}</PageContent>
+    </Container>
   );
 }
 
 export * from './header';
+export * from './buttons-container';
+export * from './content-container';
