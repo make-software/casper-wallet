@@ -1,12 +1,7 @@
 import './i18n';
 
 import React, { useEffect } from 'react';
-import {
-  Routes,
-  Route,
-  useNavigate
-  // Navigate
-} from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 // import browser from 'webextension-polyfill';
 
 import { Layout, Header } from '@src/layout';
