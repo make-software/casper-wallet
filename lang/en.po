@@ -5,18 +5,39 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-18T15:05:20.899Z\n"
-"PO-Revision-Date: 2022-04-18T15:05:20.899Z\n"
+"POT-Creation-Date: 2022-04-25T18:11:14.531Z\n"
+"PO-Revision-Date: 2022-04-25T18:11:14.531Z\n"
+
+msgid "Your vault is ready, but no accounts yet"
+msgstr "Your vault is ready, but no accounts yet"
+
+msgid "Please, create an account or import an account you already have."
+msgstr "Please, create an account or import an account you already have."
+
+msgid "Create Account"
+msgstr "Create Account"
+
+msgid "Import Account"
+msgstr "Import Account"
+
+msgid "Should be at least"
+msgstr "Should be at least"
+
+msgid "characters"
+msgstr "characters"
+
+msgid "Passwords don't match"
+msgstr "Passwords don't match"
 
 msgid "Create new vault"
 msgstr "Create new vault"
 
 msgid ""
-"Please set a password for your vault. You will need it later to unlock it, so keep it "
-"safe."
+"Please set a password for your vault. Try to use at least <2>{{minPasswordLength}} "
+"characters</2> to ensure a strong passphrase."
 msgstr ""
-"Please set a password for your vault. You will need it later to unlock it, so keep it "
-"safe."
+"Please set a password for your vault. Try to use at least <2>{{minPasswordLength}} "
+"characters</2> to ensure a strong passphrase."
 
 msgid "Password"
 msgstr "Password"

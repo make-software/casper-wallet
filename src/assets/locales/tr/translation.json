@@ -1,7 +1,15 @@
 {
+  "Your vault is ready, but no accounts yet": "Kasanız hazır, ancak henüz hiç hesap yok",
+  "Please, create an account or import an account you already have.": "Lütfen bir hesap oluşturun ya da sahip olduğunuz bir hesabı içe aktarın.",
+  "Create Account": "Hesap Oluştur",
+  "Import Account": "Hesabı İçe Aktar",
+  "Should be at least": "En az şu kadar olmalıdır:",
+  "characters": "karakter",
+  "Passwords don't match": "Parolalar eşleşmiyor",
   "Create new vault": "Yeni kasa oluştur",
-  "Please set a password for your vault. You will need it later to unlock it, so keep it safe.": "Lütfen kasanız için bir şifre belirleyin. Kilidi açmak için daha sonra ihtiyacınız olacak, bu yüzden güvende tutun.",
+  "Please set a password for your vault. Try to use at least": "Lütfen kasanız için bir parola belirleyin. Güçlü bir parola sağlamak için en az",
+  "to ensure a strong passphrase.": " kullanmaya çalışın.",
   "Password": "Parola",
-  "Confirm password": "Şifreyi Onayla",
+  "Confirm password": "Parolayı Onayla",
   "Create Vault": "Kasa Oluştur"
 }

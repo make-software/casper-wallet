@@ -28,8 +28,8 @@ const fileExtensions = [
   'gif',
   'eot',
   'otf',
-  'svg',
   'ttf',
+  'svg',
   'woff',
   'woff2'
 ];
@@ -155,6 +155,15 @@ const options = {
         {
           from: 'src/assets/locales',
           to: path.join(__dirname, buildDir, 'locales'),
+          force: true
+        }
+      ]
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: 'src/assets/icons',
+          to: path.join(__dirname, buildDir, 'assets/icons'),
           force: true
         }
       ]

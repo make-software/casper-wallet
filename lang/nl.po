@@ -5,18 +5,38 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-18T15:05:20.899Z\n"
-"PO-Revision-Date: 2022-04-18T15:05:20.899Z\n"
+"POT-Creation-Date: 2022-04-25T18:11:14.531Z\n"
+"PO-Revision-Date: 2022-04-25T18:11:14.531Z\n"
+
+msgid "Your vault is ready, but no accounts yet"
+msgstr "Je kluis is klaar, maar nog geen accounts"
+
+msgid "Please, create an account or import an account you already have."
+msgstr "Maak een account aan of importeer account dat u al heeft."
+
+msgid "Create Account"
+msgstr "Account Aanmaken"
+
+msgid "Import Account"
+msgstr "Account Importeren"
+
+msgid "Should be at least"
+msgstr "Moet minimaal bevatten"
+
+msgid "characters"
+msgstr "tekens"
+
+msgid "Passwords don't match"
+msgstr "Wachtwoorden komen niet overeen"
 
 msgid "Create new vault"
 msgstr "Nieuwe kluis maken"
 
-msgid ""
-"Please set a password for your vault. You will need it later to unlock it, so keep it "
-"safe."
-msgstr ""
-"Stel een wachtwoord in voor uw kluis. Je hebt het later nodig om het te ontgrendelen, "
-"dus bewaar het goed."
+msgid "Please set a password for your vault. Try to use at least"
+msgstr "Stel een wachtwoord in voor uw kluis. Probeer ten minste"
+
+msgid "to ensure a strong passphrase."
+msgstr " te gebruiken om een sterke wachtwoordzin te garanderen."
 
 msgid "Password"
 msgstr "Wachtwoord"

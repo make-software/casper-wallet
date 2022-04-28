@@ -5,18 +5,39 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-18T15:05:20.899Z\n"
-"PO-Revision-Date: 2022-04-18T15:05:20.899Z\n"
+"POT-Creation-Date: 2022-04-25T18:11:14.531Z\n"
+"PO-Revision-Date: 2022-04-25T18:11:14.531Z\n"
+
+msgid "Your vault is ready, but no accounts yet"
+msgstr "Ваше сховище готове, але ще немає облікових записів"
+
+msgid "Please, create an account or import an account you already have."
+msgstr "Будь ласка, створіть обліковий запис або імпортуйте обліковий запис, який у вас уже є."
+
+msgid "Create Account"
+msgstr "Створити обліковий запис"
+
+msgid "Import Account"
+msgstr "Імпорт облікового запису"
+
+msgid "Should be at least"
+msgstr "Має бути не менше"
+
+msgid "characters"
+msgstr "символів"
+
+msgid "Passwords don't match"
+msgstr "Паролі не збігаються"
 
 msgid "Create new vault"
 msgstr "Створити нове сховище"
 
 msgid ""
-"Please set a password for your vault. You will need it later to unlock it, so keep it "
-"safe."
+"Please set a password for your vault. Try to use at least <2>{{minPasswordLength}} "
+"characters</2> to ensure a strong passphrase."
 msgstr ""
-"Будь ласка, встановіть пароль для вашого сховища. Він вам знадобиться пізніше, щоб розблокувати "
-"його, тому бережіть його"
+"Будь ласка, встановіть пароль для вашого сховища. Намагайтеся використовувати принаймні <2>{{minPasswordLength}} "
+"символів</2>, щоб забезпечити надійну парольну фразу."
 
 msgid "Password"
 msgstr "Пароль"

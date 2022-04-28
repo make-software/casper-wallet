@@ -1,16 +1,20 @@
 import './i18n';
 
-import React, { Suspense } from 'react';
+import React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 // import browser from 'webextension-polyfill';
 
-import { Layout } from '@src/layout';
-import {
-  CreateVaultPageContent,
-  CreateVaultPageFooter
-} from '@src/pages/create-vault';
 import { createStore } from '@src/redux';
 import { REDUX_STORAGE_KEY } from '@src/services/constants';
+
+import { Layout, Header } from '@src/layout';
+import { CreateVaultPageContent } from '@src/pages/create-vault';
+import { NoAccountsPageContent } from '@src/pages/no-accounts';
+import { HomePageContent } from '@src/pages/home';
+
+import { Routes as RoutePath } from './routes';
+import { ErrorBoundary } from './error-boundary';
 
 let store: ReturnType<typeof createStore>;
 
@@ -24,7 +28,7 @@ export function App() {
     store = createStore(reduxStorageState);
     // each change should be saved in the localstorage
     store.subscribe(() => {
-      const { vault } = store.getState();
+      const vault = store.getState();
       try {
         localStorage.setItem(REDUX_STORAGE_KEY, JSON.stringify(vault));
       } catch {
@@ -34,14 +38,37 @@ export function App() {
   }
 
   return (
-    <Suspense fallback={null}>
+    <ErrorBoundary>
       <ReduxProvider store={store}>
-        <Layout
-          renderHeader={() => <></>}
-          renderContent={CreateVaultPageContent}
-          renderFooter={CreateVaultPageFooter}
-        />
+        <MemoryRouter>
+          <Routes>
+            <Route
+              path={RoutePath.Home}
+              element={
+                <Layout Header={<Header />} Content={<HomePageContent />} />
+              }
+            />
+            <Route
+              path={RoutePath.CreateVault}
+              element={
+                <Layout
+                  Header={<Header />}
+                  Content={<CreateVaultPageContent />}
+                />
+              }
+            />
+            <Route
+              path={RoutePath.NoAccounts}
+              element={
+                <Layout
+                  Header={<Header />}
+                  Content={<NoAccountsPageContent />}
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
       </ReduxProvider>
-    </Suspense>
+    </ErrorBoundary>
   );
 }

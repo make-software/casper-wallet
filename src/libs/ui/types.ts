@@ -1,3 +1,5 @@
+import React from 'react';
+
 export type BaseProps = {
   id?: string;
   className?: string;

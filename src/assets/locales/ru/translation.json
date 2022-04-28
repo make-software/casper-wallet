@@ -1,6 +1,13 @@
 {
+  "Your vault is ready, but no accounts yet": "Ваше хранилище готово, но аккаунтов пока нет",
+  "Please, create an account or import an account you already have.": "Пожалуйста, создайте аккаунт или импортируйте аккаунт, который у вас уже есть.",
+  "Create Account": "Создать аккаунт",
+  "Import Account": "Импорт аккаунта",
+  "Should be at least": "Должно быть не менее",
+  "characters": "символов",
+  "Passwords don't match": "Пароли не совпадают",
   "Create new vault": "Создать новое хранилище",
-  "Please set a password for your vault. You will need it later to unlock it, so keep it safe.": "Пожалуйста, установите пароль для вашего хранилища. Он понадобится вам позже, чтобы разблокировать его, так что сохраните его.",
+  "Please set a password for your vault. Try to use at least <2>{{minPasswordLength}} characters</2> to ensure a strong passphrase.": "Пожалуйста, установите пароль для вашего хранилища. Старайтесь использовать как минимум <2>{{minPasswordLength}} символов</2>, чтобы обеспечить надежную парольную фразу.",
   "Password": "Пароль",
   "Confirm password": "Подтвердить пароль",
   "Create Vault": "Создать хранилище"

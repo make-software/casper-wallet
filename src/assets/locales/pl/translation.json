@@ -1,6 +1,14 @@
 {
+  "Your vault is ready, but no accounts yet": "Twój skarbiec jest gotowy, ale nie masz jeszcze kont",
+  "Please, create an account or import an account you already have.": "Utwórz konto lub zaimportuj konto, które już posiadasz.",
+  "Create Account": "Utwórz Konto",
+  "Import Account": "Importuj Konto",
+  "Should be at least": "Powinno mieć co najmniej",
+  "characters": "znaków",
+  "Passwords don't match": "Hasła nie pasują",
   "Create new vault": "Utwórz nowy skarbiec",
-  "Please set a password for your vault. You will need it later to unlock it, so keep it safe.": "Ustaw hasło do swojego skarbca. Będziesz go potrzebować później, aby go odblokować, więc trzymaj go w bezpiecznym miejscu.",
+  "Please set a password for your vault. Try to use at least": "Ustaw hasło do swojego skarbca. Postaraj się użyć co najmniej",
+  "to ensure a strong passphrase.": ", aby zapewnić silne hasło.",
   "Password": "Hasło",
   "Confirm password": "Potwierdź hasło",
   "Create Vault": "Utwórz skarbiec"

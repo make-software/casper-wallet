@@ -41,7 +41,7 @@ const PrimaryBlueButton = styled(BaseButton)<ButtonProps>(
 
     ...(disabled && {
       color: theme.color.backgroundPrimary,
-      background: theme.color.fillGreyPrimary
+      background: theme.color.fillTertiary
     })
   })
 );
@@ -60,7 +60,7 @@ const PrimaryRedButton = styled(BaseButton)<ButtonProps>(
 
     ...(disabled && {
       color: theme.color.backgroundPrimary,
-      background: theme.color.fillGreyPrimary
+      background: theme.color.fillTertiary
     })
   })
 );
@@ -80,7 +80,7 @@ const SecondaryBlueButton = styled(BaseButton)<ButtonProps>(
       )`
     },
     ': active': {
-      background: theme.color.fillGreySecondary
+      background: theme.color.fillSecondary
     },
 
     ...(disabled && {
@@ -108,7 +108,7 @@ const SecondaryRedButton = styled(BaseButton)<ButtonProps>(
       )`
     },
     ': active': {
-      background: theme.color.fillGreySecondary
+      background: theme.color.fillSecondary
     },
 
     ...(disabled && {
@@ -135,7 +135,7 @@ const UtilityButton = styled(BaseButton)<ButtonProps>(
 
     ...(disabled && {
       color: theme.color.backgroundPrimary,
-      background: theme.color.fillGreyPrimary
+      background: theme.color.fillTertiary
     })
   })
 );
@@ -152,6 +152,7 @@ export type ButtonSize = 'small' | 'normal' | 'big';
 
 /* eslint-disable-next-line */
 export interface ButtonProps extends BaseProps {
+  type?: 'button' | 'submit' | 'reset';
   onClick?: (ev: any) => void;
   color?:
     | 'primaryBlue'

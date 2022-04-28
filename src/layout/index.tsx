@@ -1,39 +1,30 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 
-type RenderFunction = () => JSX.Element;
-
 interface Props {
-  renderHeader: RenderFunction;
-  renderContent: RenderFunction;
-  renderFooter?: RenderFunction;
+  Header: ReactElement<any, any>;
+  Content: ReactElement<any, any>;
 }
+
+const Container = styled.div`
+  min-height: 600px;
+`;
 
 // TODO: Implement Header component
-const PageHeader = styled.header`
-  background: ${({ theme }) => theme.color.backgroundBlue};
-  height: 72px;
-`;
+const PageHeader = styled.header``;
 
 const PageContent = styled.div`
-  padding: 0 ${({ theme }) => theme.padding[1.6]};
   min-width: 360px;
   height: 100%;
-  min-height: 450px;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
 `;
 
-const PageFooter = styled.div``;
-
-export function Layout({ renderHeader, renderContent, renderFooter }: Props) {
+export function Layout({ Header, Content }: Props) {
   return (
-    <>
-      <PageHeader>{renderHeader()}</PageHeader>
-      <PageContent>{renderContent()}</PageContent>
-      {renderFooter && <PageFooter>{renderFooter()}</PageFooter>}
-    </>
+    <Container>
+      <PageHeader>{Header}</PageHeader>
+      <PageContent>{Content}</PageContent>
+    </Container>
   );
 }
+
+export * from './header';

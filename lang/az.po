@@ -5,18 +5,38 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-18T15:05:20.899Z\n"
-"PO-Revision-Date: 2022-04-18T15:05:20.899Z\n"
+"POT-Creation-Date: 2022-04-25T18:11:14.531Z\n"
+"PO-Revision-Date: 2022-04-25T18:11:14.531Z\n"
+
+msgid "Your vault is ready, but no accounts yet"
+msgstr "Kassanız hazırdır, lakin hələ heç bir hesab yoxdur"
+
+msgid "Please, create an account or import an account you already have."
+msgstr "Zəhmət olmasa, hesab yaradın və ya artıq mövcud olan hesabı idxal edin."
+
+msgid "Create Account"
+msgstr "Hesab Yarat"
+
+msgid "Import Account"
+msgstr "Hesabı idxal edin"
+
+msgid "Should be at least"
+msgstr "Ən azı olmalıdır"
+
+msgid "characters"
+msgstr "simvol"
+
+msgid "Passwords don't match"
+msgstr "Parollar uyğun gəlmir"
 
 msgid "Create new vault"
 msgstr "Yeni kassa yaradın"
 
-msgid ""
-"Please set a password for your vault. You will need it later to unlock it, so keep it "
-"safe."
-msgstr ""
-"Zəhmət olmasa anbarınız üçün parol təyin edin. Kilidini açmaq üçün daha sonra ona "
-"ehtiyacınız olacaq, ona görə də onu təhlükəsiz saxlayın."
+msgid "Please set a password for your vault. Try to use at least"
+msgstr "Zəhmət olmasa anbarınız üçün parol təyin edin. Güclü parol ifadəsini təmin etmək üçün ən azı"
+
+msgid "to ensure a strong passphrase."
+msgstr " istifadə etməyə çalışın."
 
 msgid "Password"
 msgstr "Parol"

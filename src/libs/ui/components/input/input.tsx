@@ -1,17 +1,19 @@
 import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
 import styled from 'styled-components';
-import { BaseProps, FormField, FormFieldStatus, SvgIcon } from '@src/libs/ui';
+import { BaseProps, FormField, FormFieldStatus } from '@src/libs/ui';
+
+type Ref = HTMLInputElement;
 
 const getThemeColorByError = (error?: boolean) => {
   if (error == null || !error) {
-    return 'contentSecondary';
+    return 'contentTertiary';
   }
 
   return 'fillRed';
 };
 
 const InputContainer = styled('div')<InputProps>(
-  ({ theme, disabled, error, monotype }) => ({
+  ({ theme, oneColoredIcons, disabled, error, monotype }) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -28,7 +30,9 @@ const InputContainer = styled('div')<InputProps>(
     height: '4rem',
 
     path: {
-      fill: theme.color[getThemeColorByError(error)]
+      fill: oneColoredIcons
+        ? theme.color.contentTertiary
+        : theme.color[getThemeColorByError(error)]
     },
 
     ...(disabled && {
@@ -46,6 +50,7 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
   border: 'none',
   width: '100%',
   padding: 0,
+  outline: 'none',
   '&[type=number]': {
     '&::-webkit-inner-spin-button, &::-webkit-outer-spin-button': {
       margin: 0,
@@ -71,8 +76,7 @@ const SuffixTextContainer = styled(SuffixContainer)(({ theme }) => ({
 }));
 
 export enum InputValidationType {
-  PositiveInteger = 'positive_int',
-  CSPR = 'cspr'
+  Password = 'password'
 }
 
 export interface InputProps extends BaseProps {
@@ -85,13 +89,19 @@ export interface InputProps extends BaseProps {
   onBlur?: (ev: any) => void;
   onKeyDown?: (ev: any) => void;
   height?: '36' | '40';
-  min?: string;
-  max?: string;
+  min?: string | number;
+  max?: string | number;
+  maxLength?: number;
+  pattern?: string;
+  minLength?: number;
+  name?: string;
   step?: string;
   label?: string;
   rightLabel?: string;
   prefixIcon?: ReactNode | null;
   suffixIcon?: ReactNode | null;
+  // TODO: make a better name 🙈
+  oneColoredIcons?: boolean;
   suffixText?: string | null;
 
   type?: HTMLInputTypeAttribute;
@@ -101,39 +111,37 @@ export interface InputProps extends BaseProps {
   validationText?: string | null;
 }
 
-export function Input({
-  id,
-  className,
-  style,
-  disabled,
-  monotype,
-  height,
-  label,
-  rightLabel,
-  prefixIcon,
-  suffixIcon,
-  suffixText,
-  required,
-  error,
-  validationType,
-  validationText,
-  onFocus,
-  ...restProps
-}: InputProps) {
+export const Input = React.forwardRef<Ref, InputProps>(function Input(
+  {
+    id,
+    className,
+    style,
+    disabled,
+    monotype,
+    height,
+    label,
+    rightLabel,
+    prefixIcon,
+    suffixIcon,
+    suffixText,
+    required,
+    error,
+    validationType,
+    validationText,
+    oneColoredIcons,
+    onFocus,
+    ...restProps
+  }: InputProps,
+  ref
+) {
   const validationProps =
     validationType == null
       ? undefined
       : {
-          [InputValidationType.CSPR]: {
-            type: 'number',
-            min: '0',
+          [InputValidationType.Password]: {
+            type: 'password',
+            min: '12',
             max: '0',
-            step: '0'
-          },
-          [InputValidationType.PositiveInteger]: {
-            type: 'number',
-            min: '1',
-            max: '1',
             step: '0'
           }
         }[validationType];
@@ -142,10 +150,6 @@ export function Input({
     event.target.select();
     onFocus && onFocus(event);
   };
-
-  if (error) {
-    suffixIcon = <SvgIcon src="assets/icons/ic-error.svg" />;
-  }
 
   return (
     <FormField
@@ -162,15 +166,15 @@ export function Input({
         monotype={monotype}
         error={error}
         height={height}
+        oneColoredIcons={oneColoredIcons}
       >
         {prefixIcon && <PrefixContainer>{prefixIcon}</PrefixContainer>}
 
         <StyledInput
-          title=""
-          disabled={disabled}
-          onFocus={handleFocus}
           {...validationProps}
           {...restProps}
+          ref={ref}
+          onFocus={handleFocus}
         />
 
         {suffixIcon && <SuffixContainer>{suffixIcon}</SuffixContainer>}
@@ -179,6 +183,6 @@ export function Input({
       </InputContainer>
     </FormField>
   );
-}
+});
 
 export default Input;

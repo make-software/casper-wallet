@@ -1,13 +1,14 @@
 import { createReducer } from 'typesafe-actions';
 
-import { createVault, lockVault, unlockVault } from './actions';
+import { createVault, createAccount, lockVault, unlockVault } from './actions';
 import { VaultState } from './types';
 
 type State = VaultState;
 
 const initialState: State = {
   password: null,
-  isLocked: false
+  isLocked: false,
+  accounts: []
 };
 
 export const reducer = createReducer(initialState)
@@ -31,4 +32,10 @@ export const reducer = createReducer(initialState)
       ...state,
       isLocked: false
     })
-  );
+  )
+  .handleAction([createAccount], (state, { payload: { name } }): State => {
+    return {
+      ...state,
+      accounts: [...state.accounts, { name, balance: null }]
+    };
+  });

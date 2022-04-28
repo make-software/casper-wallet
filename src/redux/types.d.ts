@@ -1,5 +1,5 @@
 import { ActionType, StateType } from 'typesafe-actions';
-import { Epic } from 'redux-observable';
+import { VaultState } from './vault/types';
 
 declare module 'typesafe-actions' {
   export type Store = StateType<typeof import('./index').default>;
@@ -13,9 +13,12 @@ declare module 'typesafe-actions' {
     RootStateKey
   >;
   export type Services = typeof import('../services');
-  export type RootEpic = Epic<RootAction, RootAction, RootState, Services>;
 
   interface Types {
     RootAction: RootAction;
   }
+}
+
+export interface State {
+  vault: VaultState;
 }
