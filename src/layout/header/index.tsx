@@ -22,17 +22,17 @@ const Container = styled.header`
 const LogoContainer = styled.div``;
 
 interface HeaderProps {
-  withLockButton?: boolean;
+  withLock?: boolean;
   withMenu?: boolean;
 }
 
-export function Header({ withLockButton, withMenu }: HeaderProps) {
+export function Header({ withLock, withMenu }: HeaderProps) {
   return (
     <Container>
       <LogoContainer>
         <SvgIcon size={40} src="assets/icons/logo.svg" />
       </LogoContainer>
-      <IconButtons withMenu={withMenu} withLockButton={withLockButton} />
+      <IconButtons withMenu={withMenu} withLock={withLock} />
     </Container>
   );
 }

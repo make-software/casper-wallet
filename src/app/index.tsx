@@ -41,7 +41,7 @@ export function App() {
         path={RoutePath.Home}
         element={
           <Layout
-            Header={<Header withMenu withLockButton />}
+            Header={<Header withMenu withLock />}
             Content={<HomePageContent />}
           />
         }
@@ -56,7 +56,7 @@ export function App() {
         path={RoutePath.NoAccounts}
         element={
           <Layout
-            Header={<Header withMenu withLockButton />}
+            Header={<Header withMenu withLock />}
             Content={<NoAccountsPageContent />}
           />
         }

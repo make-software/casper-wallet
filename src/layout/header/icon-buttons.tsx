@@ -12,11 +12,11 @@ const Container = styled.div`
 `;
 
 interface IconButtonsProps {
-  withLockButton?: boolean;
+  withLock?: boolean;
   withMenu?: boolean;
 }
 
-export function IconButtons({ withLockButton, withMenu }: IconButtonsProps) {
+export function IconButtons({ withLock, withMenu }: IconButtonsProps) {
   const dispatch = useDispatch();
 
   function lockVaultHandle() {
@@ -25,7 +25,7 @@ export function IconButtons({ withLockButton, withMenu }: IconButtonsProps) {
 
   return (
     <Container>
-      {withLockButton && (
+      {withLock && (
         <SvgIcon
           onClick={lockVaultHandle}
           src="assets/icons/unlock.svg"
