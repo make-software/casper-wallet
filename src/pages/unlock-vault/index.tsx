@@ -27,7 +27,7 @@ export function UnlockVaultPageContent() {
 
   const errorMessage = t('Password is not correct');
   const formSchema = Yup.object().shape({
-    password: Yup.string().oneOf([vaultPassword], errorMessage)
+    password: Yup.string().equals([vaultPassword], errorMessage)
   });
 
   const formOptions = {

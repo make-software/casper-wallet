@@ -29,9 +29,9 @@ export function App() {
     if (isVaultLocked) {
       navigate(RoutePath.UnlockVault);
     } else if (!isVaultExists) {
-      navigate(RoutePath.CreateVault);
+      navigate(RoutePath.CreateVault, { replace: true });
     } else if (!isAccountExists) {
-      navigate(RoutePath.NoAccounts);
+      navigate(RoutePath.NoAccounts, { replace: true });
     }
   }, [isVaultLocked, isVaultExists, isAccountExists]);
 
