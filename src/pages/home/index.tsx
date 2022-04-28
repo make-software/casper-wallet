@@ -22,7 +22,7 @@ export function HomePageContent() {
   }
 
   if (!isAccountExists) {
-    return <Navigate to={Routes.NoAccounts} />;
+    return <Navigate to={Routes.NoAccounts} replace={true} />;
   }
 
   return (

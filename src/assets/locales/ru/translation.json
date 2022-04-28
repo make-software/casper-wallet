@@ -7,8 +7,7 @@
   "characters": "символов",
   "Passwords don't match": "Пароли не совпадают",
   "Create new vault": "Создать новое хранилище",
-  "Please set a password for your vault. Try to use at least": "Пожалуйста, установите пароль для вашего хранилища. Старайтесь использовать как минимум",
-  "to ensure a strong passphrase.": ", чтобы обеспечить надежную парольную фразу.",
+  "Please set a password for your vault. Try to use at least <2>{{minPasswordLength}} characters</2> to ensure a strong passphrase.": "Пожалуйста, установите пароль для вашего хранилища. Старайтесь использовать как минимум <2>{{minPasswordLength}} символов</2>, чтобы обеспечить надежную парольную фразу.",
   "Password": "Пароль",
   "Confirm password": "Подтвердить пароль",
   "Create Vault": "Создать хранилище"

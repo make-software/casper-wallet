@@ -32,11 +32,12 @@ msgstr "Пароли не совпадают"
 msgid "Create new vault"
 msgstr "Создать новое хранилище"
 
-msgid "Please set a password for your vault. Try to use at least"
-msgstr "Пожалуйста, установите пароль для вашего хранилища. Старайтесь использовать как минимум"
-
-msgid "to ensure a strong passphrase."
-msgstr ", чтобы обеспечить надежную парольную фразу."
+msgid ""
+"Please set a password for your vault. Try to use at least <2>{{minPasswordLength}} "
+"characters</2> to ensure a strong passphrase."
+msgstr ""
+"Пожалуйста, установите пароль для вашего хранилища. Старайтесь использовать как минимум <2>{{minPasswordLength}} "
+"символов</2>, чтобы обеспечить надежную парольную фразу."
 
 msgid "Password"
 msgstr "Пароль"
