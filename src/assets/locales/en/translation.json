@@ -10,5 +10,10 @@
   "Please set a password for your vault. Try to use at least <2>{{minPasswordLength}} characters</2> to ensure a strong passphrase.": "Please set a password for your vault. Try to use at least <2>{{minPasswordLength}} characters</2> to ensure a strong passphrase.",
   "Password": "Password",
   "Confirm password": "Confirm password",
-  "Create Vault": "Create Vault"
+  "Create Vault": "Create Vault",
+  "Password is not correct": "Password is not correct",
+  "Your vault is locked": "Your vault is locked",
+  "Please enter the password to unlock.": "Please enter the password to unlock.",
+  "Unlock vault": "Unlock vault",
+  "Reset vault": "Reset vault"
 }

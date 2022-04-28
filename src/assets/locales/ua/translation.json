@@ -10,5 +10,10 @@
   "Please set a password for your vault. Try to use at least <2>{{minPasswordLength}} characters</2> to ensure a strong passphrase.": "Будь ласка, встановіть пароль для вашого сховища. Намагайтеся використовувати принаймні <2>{{minPasswordLength}} символів</2>, щоб забезпечити надійну парольну фразу.",
   "Password": "Пароль",
   "Confirm password": "Підтвердьте пароль",
-  "Create Vault": "Створити сховище"
+  "Create Vault": "Створити сховище",
+  "Password is not correct": "Пароль не вірний",
+  "Your vault is locked": "Ваше сховище заблоковано",
+  "Please enter the password to unlock.": "Будь ласка, введіть пароль, для розблокування.",
+  "Unlock vault": "Розблокувати сховище",
+  "Reset vault": "Скинути сховище"
 }

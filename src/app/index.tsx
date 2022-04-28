@@ -1,74 +1,72 @@
 import './i18n';
 
-import React from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 // import browser from 'webextension-polyfill';
 
-import { createStore } from '@src/redux';
-import { REDUX_STORAGE_KEY } from '@src/services/constants';
-
 import { Layout, Header } from '@src/layout';
+
 import { CreateVaultPageContent } from '@src/pages/create-vault';
 import { NoAccountsPageContent } from '@src/pages/no-accounts';
+import { UnlockVaultPageContent } from '@src/pages/unlock-vault';
 import { HomePageContent } from '@src/pages/home';
 
 import { Routes as RoutePath } from './routes';
-import { ErrorBoundary } from './error-boundary';
-
-let store: ReturnType<typeof createStore>;
+import { useSelector } from 'react-redux';
+import {
+  selectIsAccountCreated,
+  selectIsVaultCreated,
+  selectIsVaultLocked
+} from '@src/redux/vault/selectors';
 
 export function App() {
-  const reduxStorageState = JSON.parse(
-    localStorage.getItem(REDUX_STORAGE_KEY) || '{}'
-  );
+  const isVaultLocked = useSelector(selectIsVaultLocked);
+  const isAccountExists = useSelector(selectIsAccountCreated);
+  const isVaultExists = useSelector(selectIsVaultCreated);
+  const navigate = useNavigate();
 
-  // should initialize store only once when localstorage data is fetched
-  if (store == null) {
-    store = createStore(reduxStorageState);
-    // each change should be saved in the localstorage
-    store.subscribe(() => {
-      const vault = store.getState();
-      try {
-        localStorage.setItem(REDUX_STORAGE_KEY, JSON.stringify(vault));
-      } catch {
-        // initialization workaround
-      }
-    });
-  }
+  useEffect(() => {
+    if (isVaultLocked) {
+      navigate(RoutePath.UnlockVault);
+    } else if (!isVaultExists) {
+      navigate(RoutePath.CreateVault, { replace: true });
+    } else if (!isAccountExists) {
+      navigate(RoutePath.NoAccounts, { replace: true });
+    }
+  }, [isVaultLocked, isVaultExists, isAccountExists]);
 
   return (
-    <ErrorBoundary>
-      <ReduxProvider store={store}>
-        <MemoryRouter>
-          <Routes>
-            <Route
-              path={RoutePath.Home}
-              element={
-                <Layout Header={<Header />} Content={<HomePageContent />} />
-              }
-            />
-            <Route
-              path={RoutePath.CreateVault}
-              element={
-                <Layout
-                  Header={<Header />}
-                  Content={<CreateVaultPageContent />}
-                />
-              }
-            />
-            <Route
-              path={RoutePath.NoAccounts}
-              element={
-                <Layout
-                  Header={<Header />}
-                  Content={<NoAccountsPageContent />}
-                />
-              }
-            />
-          </Routes>
-        </MemoryRouter>
-      </ReduxProvider>
-    </ErrorBoundary>
+    <Routes>
+      <Route
+        path={RoutePath.Home}
+        element={
+          <Layout
+            Header={<Header withMenu withLock />}
+            Content={<HomePageContent />}
+          />
+        }
+      />
+      <Route
+        path={RoutePath.CreateVault}
+        element={
+          <Layout Header={<Header />} Content={<CreateVaultPageContent />} />
+        }
+      />
+      <Route
+        path={RoutePath.NoAccounts}
+        element={
+          <Layout
+            Header={<Header withMenu withLock />}
+            Content={<NoAccountsPageContent />}
+          />
+        }
+      />
+      <Route
+        path={RoutePath.UnlockVault}
+        element={
+          <Layout Header={<Header />} Content={<UnlockVaultPageContent />} />
+        }
+      />
+    </Routes>
   );
 }
