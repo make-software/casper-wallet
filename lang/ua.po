@@ -32,11 +32,12 @@ msgstr "Паролі не збігаються"
 msgid "Create new vault"
 msgstr "Створити нове сховище"
 
-msgid "Please set a password for your vault. Try to use at least"
-msgstr "Будь ласка, встановіть пароль для вашого сховища. Намагайтеся використовувати принаймні"
-
-msgid "to ensure a strong passphrase."
-msgstr ", щоб забезпечити надійну парольну фразу."
+msgid ""
+"Please set a password for your vault. Try to use at least <2>{{minPasswordLength}} "
+"characters</2> to ensure a strong passphrase."
+msgstr ""
+"Будь ласка, встановіть пароль для вашого сховища. Намагайтеся використовувати принаймні <2>{{minPasswordLength}} "
+"символів</2>, щоб забезпечити надійну парольну фразу."
 
 msgid "Password"
 msgstr "Пароль"

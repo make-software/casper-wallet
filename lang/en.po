@@ -32,11 +32,12 @@ msgstr "Passwords don't match"
 msgid "Create new vault"
 msgstr "Create new vault"
 
-msgid "Please set a password for your vault. Try to use at least"
-msgstr "Please set a password for your vault. Try to use at least"
-
-msgid "to ensure a strong passphrase."
-msgstr " to ensure a strong passphrase."
+msgid ""
+"Please set a password for your vault. Try to use at least <2>{{minPasswordLength}} "
+"characters</2> to ensure a strong passphrase."
+msgstr ""
+"Please set a password for your vault. Try to use at least <2>{{minPasswordLength}} "
+"characters</2> to ensure a strong passphrase."
 
 msgid "Password"
 msgstr "Password"

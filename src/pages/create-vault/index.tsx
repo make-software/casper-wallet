@@ -85,16 +85,16 @@ export function CreateVaultPageContent() {
         <TextContainer>
           <Typography type="body" weight="regular" variation="contentSecondary">
             <Trans t={t}>
-              Please set a password for your vault. Try to use at least
-            </Trans>{' '}
-            <Typography
-              type="body"
-              weight="semiBold"
-              variation="contentPrimary"
-            >
-              {minPasswordLength} <Trans t={t}>characters</Trans>
-            </Typography>
-            <Trans t={t}>to ensure a strong passphrase.</Trans>
+              Please set a password for your vault. Try to use at least{' '}
+              <Typography
+                type="body"
+                weight="semiBold"
+                variation="contentPrimary"
+              >
+                {{ minPasswordLength }} characters
+              </Typography>{' '}
+              to ensure a strong passphrase.
+            </Trans>
           </Typography>
         </TextContainer>
         <InputsContainer>
