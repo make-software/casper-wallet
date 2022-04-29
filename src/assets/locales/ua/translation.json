@@ -15,7 +15,7 @@
   "Should be at least": "Має бути не менше",
   "characters": "символів",
   "Passwords don't match": "Паролі не збігаються",
-  "Create new vault": "Створити нове сховище",
+  "Create new vault": "Створіть нове сховище",
   "Please set a password for your vault. Try to use at least <2>{{minPasswordLength}} characters</2> to ensure a strong passphrase.": "Будь ласка, встановіть пароль для вашого сховища. Намагайтеся використовувати принаймні <2>{{minPasswordLength}} символів</2>, щоб забезпечити надійну парольну фразу.",
   "Password": "Пароль",
   "Confirm password": "Підтвердьте пароль",

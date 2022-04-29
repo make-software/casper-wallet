@@ -3,6 +3,7 @@ import { createGlobalStyle } from 'styled-components';
 export const GlobalStyle = createGlobalStyle<{ theme: any }>`
   html {
     font-size: 10px;
+    background: ${props => props.theme.color.backgroundSecondary};
   }
   
   body {

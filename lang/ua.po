@@ -57,7 +57,7 @@ msgid "Passwords don't match"
 msgstr "Паролі не збігаються"
 
 msgid "Create new vault"
-msgstr "Створити нове сховище"
+msgstr "Створіть нове сховище"
 
 msgid ""
 "Please set a password for your vault. Try to use at least <2>{{minPasswordLength}} "

@@ -7,7 +7,7 @@ interface Props {
 }
 
 const Container = styled.div`
-  min-height: 600px;
+  min-height: 599.9px;
 `;
 
 // TODO: Implement Index component
