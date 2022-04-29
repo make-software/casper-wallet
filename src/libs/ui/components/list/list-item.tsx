@@ -1,7 +1,13 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 
+const LeftContainer = styled.div``;
 const ContentContainer = styled.div`
+  width: 100%;
+`;
+const RightContainer = styled.div``;
+
+const MainContainer = styled.div`
   width: 100%;
   margin-left: 16px;
 
@@ -12,29 +18,55 @@ const ContentContainer = styled.div`
 const Container = styled.div`
   display: flex;
 
-  & ${ContentContainer} {
+  & ${MainContainer} {
     border-bottom: 1px solid ${({ theme }) => theme.color.borderPrimary};
   }
 
-  &:last-child ${ContentContainer} {
+  &:last-child ${MainContainer} {
     border-bottom: none;
   }
 `;
 
-interface ListItemProps {
+export type OnClickHandler = () => void;
+
+export interface ListItemType {
   Content: ReactElement;
   Left?: ReactElement;
   Right?: ReactElement;
 }
 
-export function ListItem({ Left, Content, Right }: ListItemProps) {
+interface ListItemProps {
+  item: ListItemType;
+  onClick?: OnClickHandler;
+  leftOnClick?: OnClickHandler;
+  contentOnClick?: OnClickHandler;
+  rightOnClick?: OnClickHandler;
+}
+
+export function ListItem({
+  item: { Left, Content, Right },
+  onClick,
+  leftOnClick,
+  contentOnClick,
+  rightOnClick
+}: ListItemProps) {
   return (
-    <Container>
-      {Left && Left}
-      <ContentContainer>
-        {Content}
-        {Right && Right}
-      </ContentContainer>
+    <Container onClick={onClick}>
+      {Left && (
+        <LeftContainer onClick={onClick ? undefined : leftOnClick}>
+          {Left}
+        </LeftContainer>
+      )}
+      <MainContainer>
+        <ContentContainer onClick={onClick ? undefined : contentOnClick}>
+          {Content}
+        </ContentContainer>
+        {Right && (
+          <RightContainer onClick={onClick ? undefined : rightOnClick}>
+            {Right}
+          </RightContainer>
+        )}
+      </MainContainer>
     </Container>
   );
 }

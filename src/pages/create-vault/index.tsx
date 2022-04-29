@@ -8,7 +8,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 
 import { Routes } from '@src/app/routes';
-import { createVault as createVaultAction } from '@src/redux/vault/actions';
+import { createVault, startTimeout } from '@src/redux/vault/actions';
 
 import {
   Button,
@@ -69,10 +69,12 @@ export function CreateVaultPageContent() {
   const [confirmPasswordInputType, setConfirmPasswordInputType] =
     useState<InputType>('password');
 
-  const onSubmit = (data: FieldValues) => {
-    dispatch(createVaultAction({ password: data.password }));
+  function onSubmit(data: FieldValues) {
+    dispatch(createVault({ password: data.password }));
+    dispatch(startTimeout());
+
     navigate(Routes.NoAccounts);
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

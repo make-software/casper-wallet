@@ -16,7 +16,7 @@ import {
 import { Typography, Input, Button } from '@src/libs/ui';
 
 import { selectVaultPassword } from '@src/redux/vault/selectors';
-import { unlockVault } from '@src/redux/vault/actions';
+import { startTimeout, unlockVault } from '@src/redux/vault/actions';
 
 export function UnlockVaultPageContent() {
   const { t } = useTranslation();
@@ -43,8 +43,9 @@ export function UnlockVaultPageContent() {
   } = useForm(formOptions);
 
   function unlockVaultHandle({ password }: FieldValues) {
-    dispatch(unlockVault());
     navigate(-1);
+    dispatch(unlockVault());
+    dispatch(startTimeout());
   }
 
   return (

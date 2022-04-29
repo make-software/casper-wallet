@@ -1,18 +1,20 @@
-import React, { ReactElement } from 'react';
+import React from 'react';
+import styled from 'styled-components';
 
 import { Tile } from '../tile/tile';
-import { ListItem } from './list-item';
+import { ListItem, OnClickHandler, ListItemType } from './list-item';
 
-interface ListItemType {
-  Content: ReactElement;
-  Left?: ReactElement;
-  Right?: ReactElement;
-}
+const Container = styled.div`
+  margin: 24px 0;
+`;
 
 export interface Item {
   id: number | string;
   item: ListItemType;
-  value: number;
+  onClick?: OnClickHandler;
+  leftOnClick?: OnClickHandler;
+  contentOnClick?: OnClickHandler;
+  rightOnClick?: OnClickHandler;
 }
 
 interface ListProps {
@@ -20,15 +22,17 @@ interface ListProps {
 }
 
 export function List({ items }: ListProps) {
-  if (items.length > 0) {
-    return (
-      <Tile>
-        {items.map(({ id, item }) => (
-          <ListItem key={id} {...item} />
-        ))}
-      </Tile>
-    );
+  if (items.length === 0) {
+    return null;
   }
 
-  throw new Error('List is empty');
+  return (
+    <Container>
+      <Tile>
+        {items.map(({ id, ...restProps }) => (
+          <ListItem key={id} {...restProps} />
+        ))}
+      </Tile>
+    </Container>
+  );
 }

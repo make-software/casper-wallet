@@ -1,6 +1,6 @@
 import './i18n';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 // import browser from 'webextension-polyfill';
 
@@ -13,28 +13,40 @@ import { TimeoutPageContent } from '@src/pages/timeout';
 import { HomePageContent } from '@src/pages/home';
 
 import { Routes as RoutePath } from './routes';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   selectIsAccountCreated,
   selectIsVaultCreated,
-  selectIsVaultLocked
+  selectIsVaultLocked,
+  selectTimeout,
+  selectTimeoutStartFrom
 } from '@src/redux/vault/selectors';
+import { useTimeoutLocking, useAppRedirects } from '@src/app/hooks';
 
 export function App() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const isVaultLocked = useSelector(selectIsVaultLocked);
   const isAccountExists = useSelector(selectIsAccountCreated);
   const isVaultExists = useSelector(selectIsVaultCreated);
-  const navigate = useNavigate();
+  const timeout = useSelector(selectTimeout);
+  const timeoutStartFrom = useSelector(selectTimeoutStartFrom);
 
-  useEffect(() => {
-    if (isVaultLocked) {
-      navigate(RoutePath.UnlockVault);
-    } else if (!isVaultExists) {
-      navigate(RoutePath.CreateVault);
-    } else if (!isAccountExists) {
-      navigate(RoutePath.NoAccounts);
-    }
-  }, [isVaultLocked, isVaultExists, isAccountExists]);
+  useTimeoutLocking({
+    dispatch,
+    timeout,
+    timeoutStartFrom,
+    isVaultLocked,
+    isVaultExists
+  });
+
+  useAppRedirects({
+    navigate,
+    isAccountExists,
+    isVaultExists,
+    isVaultLocked
+  });
 
   return (
     <Routes>
@@ -72,7 +84,7 @@ export function App() {
         path={RoutePath.Timeout}
         element={
           <Layout
-            Header={<Header subHeaderLink="close" withLockButton />}
+            Header={<Header navBarLink="close" withMenu withLockButton />}
             Content={<TimeoutPageContent />}
           />
         }

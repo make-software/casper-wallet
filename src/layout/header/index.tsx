@@ -25,14 +25,10 @@ const LogoContainer = styled.div``;
 interface HeaderProps {
   withLockButton?: boolean;
   withMenu?: boolean;
-  subHeaderLink?: 'back' | 'close' | 'cancel';
+  navBarLink?: 'back' | 'close' | 'cancel';
 }
 
-export function Header({
-  withLockButton,
-  withMenu,
-  subHeaderLink
-}: HeaderProps) {
+export function Header({ withLockButton, withMenu, navBarLink }: HeaderProps) {
   return (
     <>
       <Container>
@@ -41,7 +37,7 @@ export function Header({
         </LogoContainer>
         <IconButtons withMenu={withMenu} withLockButton={withLockButton} />
       </Container>
-      {subHeaderLink && <NavigationBar type={subHeaderLink} />}
+      {navBarLink && <NavigationBar type={navBarLink} />}
     </>
   );
 }

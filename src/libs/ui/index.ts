@@ -8,6 +8,9 @@ export * from './components/svg-icon/svg-icon-social';
 export * from './components/tag/tag';
 export * from './components/tile/tile';
 export * from './components/list/list';
+export * from './components/checkbox/checkbox';
+export * from './components/flex-box/flex-box';
+export * from './components/flex-row/flex-row';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

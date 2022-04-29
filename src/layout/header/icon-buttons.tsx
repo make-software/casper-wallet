@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { SvgIcon } from '@src/libs/ui';
-import { lockVault } from '@src/redux/vault/actions';
+import { clearTimeout, lockVault } from '@src/redux/vault/actions';
 import { useNavigate } from 'react-router-dom';
 import { Routes } from '@src/app/routes';
 
@@ -24,6 +24,7 @@ export function IconButtons({ withLockButton, withMenu }: IconButtonsProps) {
 
   function lockVaultHandle() {
     dispatch(lockVault());
+    dispatch(clearTimeout());
   }
 
   return (
