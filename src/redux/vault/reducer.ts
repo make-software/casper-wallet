@@ -7,7 +7,8 @@ import {
   unlockVault,
   changeTimeout,
   startTimeout,
-  clearTimeout
+  clearTimeout,
+  resetVault
 } from './actions';
 import { VaultState } from './types';
 
@@ -29,6 +30,7 @@ export const reducer = createReducer(initialState)
       password
     })
   )
+  .handleAction([resetVault], () => initialState)
   .handleAction(
     lockVault,
     (state, { payload }): State => ({
