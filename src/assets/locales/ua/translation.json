@@ -4,6 +4,11 @@
   "Please, create an account or import an account you already have.": "Будь ласка, створіть обліковий запис або імпортуйте обліковий запис, який у вас уже є.",
   "Create Account": "Створити обліковий запис",
   "Import Account": "Імпорт облікового запису",
+  "Are you sure you want to reset your vault?": "Ви впевнені, що хочете скинути налаштування свого сховища?",
+  "All accounts will be removed. Make sure you have securely stored the recovery phrase for each account before proceeding.": "Усі облікові записи буде видалено. Перш ніж продовжити, переконайтеся, що ви надійно зберегли фразу відновлення для кожного облікового запису.",
+  "I’ve read and understand the above": "Я прочитав і зрозумів вищесказане",
+  "Reset vault": "Скинути сховище",
+  "Cancel": "Скасувати",
   "Timeout": "Блокування за тайм-аутом",
   "Your vault will be automatically locked after some period of inactivity.": "Ваше сховище буде автоматично заблоковано після певного періоду бездіяльності.",
   "1 min": "1 хвилина",
@@ -23,6 +28,5 @@
   "Password is not correct": "Пароль не вірний",
   "Your vault is locked": "Ваше сховище заблоковано",
   "Please enter the password to unlock.": "Будь ласка, введіть пароль, для розблокування.",
-  "Unlock vault": "Розблокувати сховище",
-  "Reset vault": "Скинути сховище"
+  "Unlock vault": "Розблокувати сховище"
 }

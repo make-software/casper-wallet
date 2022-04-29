@@ -4,6 +4,11 @@
   "Please, create an account or import an account you already have.": "Пожалуйста, создайте аккаунт или импортируйте аккаунт, который у вас уже есть.",
   "Create Account": "Создать аккаунт",
   "Import Account": "Импорт аккаунта",
+  "Are you sure you want to reset your vault?": "Вы уверены, что хотите сбросить настройки хранилища?",
+  "All accounts will be removed. Make sure you have securely stored the recovery phrase for each account before proceeding.": "Все аккаунты будут удалены. Прежде чем продолжить, убедитесь, что вы надежно сохранили фразу восстановления для каждой учетной записи.",
+  "I’ve read and understand the above": "Я прочитал и понял выше",
+  "Reset vault": "Сбросить хранилище",
+  "Cancel": "Отмена",
   "Timeout": "Блокировка по тайм-ауту",
   "Your vault will be automatically locked after some period of inactivity.": "Ваше хранилище будет автоматически заблокировано после некоторого периода бездействия.",
   "1 min": "1 минута",
@@ -23,6 +28,5 @@
   "Password is not correct": "Неверный пароль",
   "Your vault is locked": "Ваше хранилище заблокировано",
   "Please enter the password to unlock.": "Пожалуйста, введите пароль для разблокировки.",
-  "Unlock vault": "Разблокировать хранилище",
-  "Reset vault": "Сбросить хранилище"
+  "Unlock vault": "Разблокировать хранилище"
 }

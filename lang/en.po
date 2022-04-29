@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-29T15:15:13.627Z\n"
-"PO-Revision-Date: 2022-04-29T15:15:13.628Z\n"
+"POT-Creation-Date: 2022-04-29T16:46:21.718Z\n"
+"PO-Revision-Date: 2022-04-29T16:46:21.718Z\n"
 
 msgid "Close"
 msgstr "Close"
@@ -22,6 +22,25 @@ msgstr "Create Account"
 
 msgid "Import Account"
 msgstr "Import Account"
+
+msgid "Are you sure you want to reset your vault?"
+msgstr "Are you sure you want to reset your vault?"
+
+msgid ""
+"All accounts will be removed. Make sure you have securely stored the recovery phrase for "
+"each account before proceeding."
+msgstr ""
+"All accounts will be removed. Make sure you have securely stored the recovery phrase for "
+"each account before proceeding."
+
+msgid "I’ve read and understand the above"
+msgstr "I’ve read and understand the above"
+
+msgid "Reset vault"
+msgstr "Reset vault"
+
+msgid "Cancel"
+msgstr "Cancel"
 
 msgid "Timeout"
 msgstr "Timeout"

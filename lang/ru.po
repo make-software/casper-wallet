@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-29T15:15:13.627Z\n"
-"PO-Revision-Date: 2022-04-29T15:15:13.628Z\n"
+"POT-Creation-Date: 2022-04-29T16:46:21.718Z\n"
+"PO-Revision-Date: 2022-04-29T16:46:21.718Z\n"
 
 msgid "Close"
 msgstr "Закрыть"
@@ -22,6 +22,25 @@ msgstr "Создать аккаунт"
 
 msgid "Import Account"
 msgstr "Импорт аккаунта"
+
+msgid "Are you sure you want to reset your vault?"
+msgstr "Вы уверены, что хотите сбросить настройки хранилища?"
+
+msgid ""
+"All accounts will be removed. Make sure you have securely stored the recovery phrase for "
+"each account before proceeding."
+msgstr ""
+"Все аккаунты будут удалены. Прежде чем продолжить, убедитесь, что вы надежно сохранили фразу восстановления "
+"для каждой учетной записи."
+
+msgid "I’ve read and understand the above"
+msgstr "Я прочитал и понял вышесказанное"
+
+msgid "Reset vault"
+msgstr "Сбросить хранилище"
+
+msgid "Cancel"
+msgstr "Отмена"
 
 msgid "Timeout"
 msgstr "Блокировка по тайм-ауту"
