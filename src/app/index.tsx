@@ -21,7 +21,7 @@ import {
   selectTimeout,
   selectTimeoutStartFrom
 } from '@src/redux/vault/selectors';
-import { useTimeoutLocking, useAppRedirects } from '@src/app/hooks';
+import { useAppRedirects, useTimeoutLocking } from './hooks';
 
 export function App() {
   const dispatch = useDispatch();
@@ -54,7 +54,7 @@ export function App() {
         path={RoutePath.Home}
         element={
           <Layout
-            Header={<Header withMenu withLockButton />}
+            Header={<Header withMenu withLock />}
             Content={<HomePageContent />}
           />
         }
@@ -69,7 +69,7 @@ export function App() {
         path={RoutePath.NoAccounts}
         element={
           <Layout
-            Header={<Header withMenu withLockButton />}
+            Header={<Header withMenu withLock />}
             Content={<NoAccountsPageContent />}
           />
         }
@@ -84,7 +84,7 @@ export function App() {
         path={RoutePath.Timeout}
         element={
           <Layout
-            Header={<Header navBarLink="close" withMenu withLockButton />}
+            Header={<Header navBarLink="close" withMenu withLock />}
             Content={<TimeoutPageContent />}
           />
         }

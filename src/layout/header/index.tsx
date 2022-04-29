@@ -23,19 +23,19 @@ const Container = styled.header`
 const LogoContainer = styled.div``;
 
 interface HeaderProps {
-  withLockButton?: boolean;
+  withLock?: boolean;
   withMenu?: boolean;
   navBarLink?: 'back' | 'close' | 'cancel';
 }
 
-export function Header({ withLockButton, withMenu, navBarLink }: HeaderProps) {
+export function Header({ withLock, withMenu, navBarLink }: HeaderProps) {
   return (
     <>
       <Container>
         <LogoContainer>
           <SvgIcon size={40} src="assets/icons/logo.svg" />
         </LogoContainer>
-        <IconButtons withMenu={withMenu} withLockButton={withLockButton} />
+        <IconButtons withMenu={withMenu} withLock={withLock} />
       </Container>
       {navBarLink && <NavigationBar type={navBarLink} />}
     </>
