@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-25T18:11:14.531Z\n"
-"PO-Revision-Date: 2022-04-25T18:11:14.531Z\n"
+"POT-Creation-Date: 2022-04-27T12:01:13.554Z\n"
+"PO-Revision-Date: 2022-04-27T12:01:13.555Z\n"
 
 msgid "Your vault is ready, but no accounts yet"
 msgstr "Ваше хранилище готово, но аккаунтов пока нет"
@@ -47,3 +47,18 @@ msgstr "Подтвердить пароль"
 
 msgid "Create Vault"
 msgstr "Создать хранилище"
+
+msgid "Password is not correct"
+msgstr "Неверный пароль"
+
+msgid "Your vault is locked"
+msgstr "Ваше хранилище заблокировано"
+
+msgid "Please enter the password to unlock."
+msgstr "Пожалуйста, введите пароль для разблокировки."
+
+msgid "Unlock vault"
+msgstr "Разблокировать хранилище"
+
+msgid "Reset vault"
+msgstr "Сбросить хранилище"

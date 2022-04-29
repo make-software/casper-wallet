@@ -10,5 +10,10 @@
   "Your vault is ready, but no accounts yet": "Your vault is ready, but no accounts yet",
   "Please, create an account or import an account you already have.": "Please, create an account or import an account you already have.",
   "Create Account": "Create Account",
-  "Import Account": "Import Account"
+  "Import Account": "Import Account",
+  "Password is not correct": "Password is not correct",
+  "Your vault is locked": "Your vault is locked",
+  "Please enter the password to unlock.": "Please enter the password to unlock.",
+  "Unlock vault": "Unlock vault",
+  "Reset vault": "Reset vault"
 }

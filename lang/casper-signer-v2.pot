@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-28T17:13:17.156Z\n"
-"PO-Revision-Date: 2022-04-28T17:13:17.156Z\n"
+"POT-Creation-Date: 2022-04-28T17:51:33.689Z\n"
+"PO-Revision-Date: 2022-04-28T17:51:33.689Z\n"
 
 msgid "Should be at least"
 msgstr "Should be at least"
@@ -47,3 +47,18 @@ msgstr "Create Account"
 
 msgid "Import Account"
 msgstr "Import Account"
+
+msgid "Password is not correct"
+msgstr "Password is not correct"
+
+msgid "Your vault is locked"
+msgstr "Your vault is locked"
+
+msgid "Please enter the password to unlock."
+msgstr "Please enter the password to unlock."
+
+msgid "Unlock vault"
+msgstr "Unlock vault"
+
+msgid "Reset vault"
+msgstr "Reset vault"

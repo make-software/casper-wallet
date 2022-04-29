@@ -13,7 +13,7 @@ const StyledTag = styled.span<StyledTagProps>`
   color: ${({ theme, enabled }) =>
     enabled ? theme.color.contentOnFill : theme.color.contentPrimary};
   background-color: ${({ theme, enabled }) =>
-    enabled ? theme.color.fillGreen : theme.color.fillGreySecondary};
+    enabled ? theme.color.fillGreen : theme.color.fillSecondary};
   font-weight: ${({ theme }) => theme.typography.fontWeight.regular};
   font-size: 1.2rem;
   line-height: 2rem;
