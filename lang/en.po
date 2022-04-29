@@ -5,8 +5,11 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-25T18:11:14.531Z\n"
-"PO-Revision-Date: 2022-04-25T18:11:14.531Z\n"
+"POT-Creation-Date: 2022-04-29T15:15:13.627Z\n"
+"PO-Revision-Date: 2022-04-29T15:15:13.628Z\n"
+
+msgid "Close"
+msgstr "Close"
 
 msgid "Your vault is ready, but no accounts yet"
 msgstr "Your vault is ready, but no accounts yet"
@@ -19,6 +22,30 @@ msgstr "Create Account"
 
 msgid "Import Account"
 msgstr "Import Account"
+
+msgid "Timeout"
+msgstr "Timeout"
+
+msgid "Your vault will be automatically locked after some period of inactivity."
+msgstr "Your vault will be automatically locked after some period of inactivity."
+
+msgid "1 min"
+msgstr "1 min"
+
+msgid "5 min"
+msgstr "5 min"
+
+msgid "15 min"
+msgstr "15 min"
+
+msgid "30 min"
+msgstr "30 min"
+
+msgid "1 hour"
+msgstr "1 hour"
+
+msgid "24 hours"
+msgstr "24 hours"
 
 msgid "Should be at least"
 msgstr "Should be at least"
