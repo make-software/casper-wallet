@@ -45,7 +45,7 @@ export function UnlockVaultPageContent() {
   function unlockVaultHandle({ password }: FieldValues) {
     navigate(-1);
     dispatch(unlockVault());
-    dispatch(startTimeout());
+    dispatch(startTimeout({ timeoutStartTime: Date.now() }));
   }
 
   return (

@@ -71,7 +71,7 @@ export function CreateVaultPageContent() {
 
   function onSubmit(data: FieldValues) {
     dispatch(createVault({ password: data.password }));
-    dispatch(startTimeout());
+    dispatch(startTimeout({ timeoutStartTime: Date.now() }));
 
     navigate(Routes.NoAccounts);
   }

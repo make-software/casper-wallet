@@ -13,9 +13,11 @@ export const createAccount = createAction('CREATE_ACCOUNT')<{
 }>();
 
 export const changeTimeout = createAction('CHANGE_TIMEOUT')<{
-  timeout: Timeout;
+  timeoutDuration: Timeout;
 }>();
 
-export const startTimeout = createAction('START_TIMEOUT')<void>();
+export const startTimeout = createAction('START_TIMEOUT')<{
+  timeoutStartTime: number;
+}>();
 
 export const clearTimeout = createAction('CLEAR_TIMEOUT')<void>();

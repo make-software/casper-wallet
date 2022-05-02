@@ -9,7 +9,7 @@ export interface Account {
 export type VaultState = {
   password: string | null;
   isLocked: boolean;
-  timeout: Timeout;
-  timeoutStartFrom: number | null;
+  timeoutDuration: Timeout;
+  timeoutStartTime: number | null;
   accounts: Account[];
 };
