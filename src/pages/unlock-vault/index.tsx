@@ -16,7 +16,7 @@ import {
 import { Typography, Input, Button } from '@src/libs/ui';
 
 import { selectVaultPassword } from '@src/redux/vault/selectors';
-import { startTimeout, unlockVault } from '@src/redux/vault/actions';
+import { unlockVault } from '@src/redux/vault/actions';
 
 export function UnlockVaultPageContent() {
   const { t } = useTranslation();
@@ -44,8 +44,7 @@ export function UnlockVaultPageContent() {
 
   function unlockVaultHandle({ password }: FieldValues) {
     navigate(-1);
-    dispatch(unlockVault());
-    dispatch(startTimeout({ timeoutStartTime: Date.now() }));
+    dispatch(unlockVault({ timeoutStartTime: Date.now() }));
   }
 
   return (

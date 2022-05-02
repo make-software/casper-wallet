@@ -8,13 +8,13 @@ import {
   TextContainer
 } from '@src/layout/containers';
 
-import { selectTimeout } from '@src/redux/vault/selectors';
+import { selectTimeoutDuration } from '@src/redux/vault/selectors';
 import styled from 'styled-components';
-import { changeTimeout, startTimeout } from '@src/redux/vault/actions';
+import { changeTimeout } from '@src/redux/vault/actions';
 import { Trans, useTranslation } from 'react-i18next';
 import { Timeout } from '@src/app/types';
 
-const Container = styled.div`
+const ListItemElementContainer = styled.div`
   height: 50px;
 
   display: flex;
@@ -27,7 +27,7 @@ const Container = styled.div`
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();
-  const timeout = useSelector(selectTimeout);
+  const timeoutDuration = useSelector(selectTimeoutDuration);
   const dispatch = useDispatch();
 
   return (
@@ -49,20 +49,24 @@ export function TimeoutPageContent() {
             key => ({
               id: Timeout[key],
               Content: (
-                <Container>
+                <ListItemElementContainer>
                   <Typography type="body" weight="regular">
                     <Trans t={t}>{Timeout[key]}</Trans>
                   </Typography>
-                </Container>
+                </ListItemElementContainer>
               ),
               Right: (
-                <Container>
-                  <Checkbox checked={timeout === Timeout[key]} />
-                </Container>
+                <ListItemElementContainer>
+                  <Checkbox checked={timeoutDuration === Timeout[key]} />
+                </ListItemElementContainer>
               ),
               onClick: () => {
-                dispatch(changeTimeout({ timeoutDuration: Timeout[key] }));
-                dispatch(startTimeout({ timeoutStartTime: Date.now() }));
+                dispatch(
+                  changeTimeout({
+                    timeoutDuration: Timeout[key],
+                    timeoutStartTime: Date.now()
+                  })
+                );
               }
             })
           )}

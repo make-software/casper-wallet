@@ -18,11 +18,11 @@ import {
   selectIsAccountCreated,
   selectIsVaultCreated,
   selectIsVaultLocked,
-  selectTimeout,
-  selectTimeoutStartFrom
+  selectTimeoutDuration,
+  selectTimeoutStartTime
 } from '@src/redux/vault/selectors';
 import { TimeoutValue } from '@src/app/types';
-import { clearTimeout, lockVault } from '@src/redux/vault/actions';
+import { lockVault } from '@src/redux/vault/actions';
 
 export function App() {
   const navigate = useNavigate();
@@ -31,8 +31,8 @@ export function App() {
   const isVaultLocked = useSelector(selectIsVaultLocked);
   const isVaultExists = useSelector(selectIsVaultCreated);
   const isAccountExists = useSelector(selectIsAccountCreated);
-  const timeout = useSelector(selectTimeout);
-  const timeoutStartFrom = useSelector(selectTimeoutStartFrom);
+  const timeoutDuration = useSelector(selectTimeoutDuration);
+  const timeoutStartTime = useSelector(selectTimeoutStartTime);
 
   // App redirects
   useEffect(() => {
@@ -43,18 +43,17 @@ export function App() {
     } else if (!isAccountExists) {
       navigate(RoutePath.NoAccounts);
     }
-  }, [isVaultLocked, isVaultExists, isAccountExists]);
+  }, [isVaultExists, isAccountExists, isVaultLocked]);
 
   // Timer of locking app
   useEffect(() => {
     let interval: NodeJS.Timeout;
     let currentTime = Date.now();
 
-    if (isVaultExists && !isVaultLocked && timeoutStartFrom) {
+    if (isVaultExists && !isVaultLocked && timeoutStartTime) {
       // Check up on opening popup
-      if (currentTime - timeoutStartFrom >= TimeoutValue[timeout]) {
+      if (currentTime - timeoutStartTime >= TimeoutValue[timeoutDuration]) {
         dispatch(lockVault());
-        dispatch(clearTimeout());
       } else {
         // Check up for opened popup
         interval = setInterval(() => {
@@ -62,18 +61,23 @@ export function App() {
 
           if (
             !isVaultLocked &&
-            timeoutStartFrom &&
-            currentTime - timeoutStartFrom >= TimeoutValue[timeout]
+            timeoutStartTime &&
+            currentTime - timeoutStartTime >= TimeoutValue[timeoutDuration]
           ) {
             clearInterval(interval);
             dispatch(lockVault());
-            dispatch(clearTimeout());
           }
         }, 1000);
       }
     }
     return () => clearInterval(interval);
-  }, [dispatch, isVaultLocked, isVaultExists, timeoutStartFrom, timeout]);
+  }, [
+    dispatch,
+    isVaultExists,
+    isVaultLocked,
+    timeoutStartTime,
+    timeoutDuration
+  ]);
 
   return (
     <Routes>

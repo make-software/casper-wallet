@@ -13,8 +13,8 @@ export const selectIsVaultLocked = (state: State): boolean =>
 export const selectVaultPassword = (state: State): string =>
   state.vault.password || '';
 
-export const selectTimeout = (state: State): Timeout =>
+export const selectTimeoutDuration = (state: State): Timeout =>
   state.vault.timeoutDuration;
 
-export const selectTimeoutStartFrom = (state: State): number | null =>
+export const selectTimeoutStartTime = (state: State): number | null =>
   state.vault.timeoutStartTime;

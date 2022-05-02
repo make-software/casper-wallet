@@ -3,10 +3,13 @@ import { Timeout } from '@src/app/types';
 
 export const createVault = createAction('CREATE_VAULT')<{
   password: string;
+  timeoutStartTime: number;
 }>();
 
 export const lockVault = createAction('LOCK_VAULT')<void>();
-export const unlockVault = createAction('UNLOCK_LOCK')<void>();
+export const unlockVault = createAction('UNLOCK_LOCK')<{
+  timeoutStartTime: number;
+}>();
 
 export const createAccount = createAction('CREATE_ACCOUNT')<{
   name: string;
@@ -14,10 +17,5 @@ export const createAccount = createAction('CREATE_ACCOUNT')<{
 
 export const changeTimeout = createAction('CHANGE_TIMEOUT')<{
   timeoutDuration: Timeout;
-}>();
-
-export const startTimeout = createAction('START_TIMEOUT')<{
   timeoutStartTime: number;
 }>();
-
-export const clearTimeout = createAction('CLEAR_TIMEOUT')<void>();

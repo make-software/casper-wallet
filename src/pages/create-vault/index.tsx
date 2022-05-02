@@ -8,7 +8,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 
 import { Routes } from '@src/app/routes';
-import { createVault, startTimeout } from '@src/redux/vault/actions';
+import { createVault } from '@src/redux/vault/actions';
 
 import {
   Button,
@@ -70,8 +70,9 @@ export function CreateVaultPageContent() {
     useState<InputType>('password');
 
   function onSubmit(data: FieldValues) {
-    dispatch(createVault({ password: data.password }));
-    dispatch(startTimeout({ timeoutStartTime: Date.now() }));
+    dispatch(
+      createVault({ password: data.password, timeoutStartTime: Date.now() })
+    );
 
     navigate(Routes.NoAccounts);
   }

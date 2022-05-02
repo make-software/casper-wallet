@@ -2,11 +2,9 @@ import { createReducer } from 'typesafe-actions';
 
 import {
   changeTimeout,
-  clearTimeout,
   createAccount,
   createVault,
   lockVault,
-  startTimeout,
   unlockVault
 } from './actions';
 import { VaultState } from './types';
@@ -25,22 +23,25 @@ const initialState: State = {
 export const reducer = createReducer(initialState)
   .handleAction(
     [createVault],
-    (state, { payload: { password } }): State => ({
+    (state, { payload: { password, timeoutStartTime } }): State => ({
       ...state,
-      password
+      password,
+      timeoutStartTime
     })
   )
   .handleAction(
     lockVault,
     (state, { payload }): State => ({
       ...state,
-      isLocked: true
+      isLocked: true,
+      timeoutStartTime: null
     })
   )
   .handleAction(
     unlockVault,
-    (state, { payload }): State => ({
+    (state, { payload: { timeoutStartTime } }): State => ({
       ...state,
+      timeoutStartTime,
       isLocked: false
     })
   )
@@ -53,19 +54,9 @@ export const reducer = createReducer(initialState)
   )
   .handleAction(
     [changeTimeout],
-    (state, { payload: { timeoutDuration } }): State => ({
+    (state, { payload: { timeoutDuration, timeoutStartTime } }): State => ({
       ...state,
-      timeoutDuration
-    })
-  )
-  .handleAction(
-    [startTimeout],
-    (state: State, { payload: { timeoutStartTime } }) => ({
-      ...state,
+      timeoutDuration,
       timeoutStartTime
     })
-  )
-  .handleAction([clearTimeout], (state: State) => ({
-    ...state,
-    timeoutStartTime: null
-  }));
+  );
