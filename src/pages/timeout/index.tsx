@@ -1,7 +1,13 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Trans, useTranslation } from 'react-i18next';
 
-import { Checkbox, List, Typography } from '@src/libs/ui';
+import {
+  ListItemElementContainer,
+  Typography,
+  Checkbox,
+  List
+} from '@src/libs/ui';
 import {
   ContentContainer,
   HeaderTextContainer,
@@ -9,21 +15,8 @@ import {
 } from '@src/layout/containers';
 
 import { selectTimeoutDuration } from '@src/redux/vault/selectors';
-import styled from 'styled-components';
 import { changeTimeout } from '@src/redux/vault/actions';
-import { Trans, useTranslation } from 'react-i18next';
 import { Timeout } from '@src/app/types';
-
-const ListItemElementContainer = styled.div`
-  height: 50px;
-
-  display: flex;
-  align-items: center;
-
-  &:last-child {
-    margin-right: 16px;
-  }
-`;
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();

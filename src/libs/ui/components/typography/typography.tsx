@@ -2,7 +2,11 @@ import React, { forwardRef } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import styled, { CSSObject, DefaultTheme } from 'styled-components';
 
-import { BaseProps } from '@src/libs/ui';
+import {
+  BaseProps,
+  ContentVariation,
+  getContentVariationFromTheme
+} from '@src/libs/ui';
 
 type Ref = HTMLSpanElement | HTMLHeadingElement;
 
@@ -21,19 +25,8 @@ export type TypographyWeight =
   | 'semiBold'
   | 'bold';
 
-export type TextVariation =
-  | 'inherit'
-  | 'contentPrimary'
-  | 'contentSecondary'
-  | 'contentTertiary'
-  | 'contentOnFill'
-  | 'contentBlue'
-  | 'contentRed'
-  | 'contentGreen'
-  | 'contentGreenOnFill';
-
 export interface BodyStylesProps extends BaseProps {
-  variation?: TextVariation;
+  variation?: ContentVariation;
   uppercase?: boolean;
   capitalize?: boolean;
   monospace?: boolean;
@@ -58,17 +51,7 @@ function getBodyStyles(
 ): CSSObject {
   return {
     fontFamily: theme.typography.fontFamily.primary,
-    color: {
-      inherit: 'inherit',
-      contentPrimary: theme.color.contentPrimary,
-      contentSecondary: theme.color.contentSecondary,
-      contentTertiary: theme.color.contentTertiary,
-      contentOnFill: theme.color.contentOnFill,
-      contentBlue: theme.color.contentBlue,
-      contentRed: theme.color.contentRed,
-      contentGreen: theme.color.contentGreen,
-      contentGreenOnFill: theme.color.contentGreenOnFill
-    }[variation],
+    color: getContentVariationFromTheme(theme, variation),
     whiteSpace: noWrap ? 'nowrap' : 'initial',
     ...(loading && {
       display: 'inline-block',

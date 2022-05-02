@@ -1,8 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Link, Typography } from '@src/libs/ui';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+
+import { Link, Typography } from '@src/libs/ui';
 
 const Container = styled.div`
   height: 56px;
