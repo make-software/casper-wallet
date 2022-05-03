@@ -30,6 +30,15 @@ export function TimeoutPageContent() {
   const timeoutDuration = useSelector(selectTimeoutDuration);
   const dispatch = useDispatch();
 
+  const timeoutTranslations = {
+    [Timeout['1 min']]: t('1 min'),
+    [Timeout['5 min']]: t('5 min'),
+    [Timeout['15 min']]: t('15 min'),
+    [Timeout['30 min']]: t('30 min'),
+    [Timeout['1 hour']]: t('1 hour'),
+    [Timeout['24 hours']]: t('24 hours')
+  };
+
   return (
     <ContentContainer>
       <HeaderTextContainer>
@@ -47,17 +56,17 @@ export function TimeoutPageContent() {
         <List
           listItems={(Object.keys(Timeout) as Array<keyof typeof Timeout>).map(
             key => ({
-              id: Timeout[key],
+              id: key,
               Content: (
                 <ListItemElementContainer>
                   <Typography type="body" weight="regular">
-                    <Trans t={t}>{Timeout[key]}</Trans>
+                    {timeoutTranslations[key]}
                   </Typography>
                 </ListItemElementContainer>
               ),
               Right: (
                 <ListItemElementContainer>
-                  <Checkbox checked={timeoutDuration === Timeout[key]} />
+                  <Checkbox checked={timeoutDuration === key} />
                 </ListItemElementContainer>
               ),
               onClick: () => {
