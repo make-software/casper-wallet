@@ -30,15 +30,6 @@ export function TimeoutPageContent() {
   const timeoutDuration = useSelector(selectTimeoutDuration);
   const dispatch = useDispatch();
 
-  const timeoutTranslations = {
-    [Timeout['1 min']]: t('1 min'),
-    [Timeout['5 min']]: t('5 min'),
-    [Timeout['15 min']]: t('15 min'),
-    [Timeout['30 min']]: t('30 min'),
-    [Timeout['1 hour']]: t('1 hour'),
-    [Timeout['24 hours']]: t('24 hours')
-  };
-
   return (
     <ContentContainer>
       <HeaderTextContainer>
@@ -60,7 +51,7 @@ export function TimeoutPageContent() {
               Content: (
                 <ListItemElementContainer>
                   <Typography type="body" weight="regular">
-                    {timeoutTranslations[key]}
+                    <Trans t={t} i18nKey={key} values={Timeout} />
                   </Typography>
                 </ListItemElementContainer>
               ),
