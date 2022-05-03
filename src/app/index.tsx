@@ -11,6 +11,7 @@ import { NoAccountsPageContent } from '@src/pages/no-accounts';
 import { UnlockVaultPageContent } from '@src/pages/unlock-vault';
 import { TimeoutPageContent } from '@src/pages/timeout';
 import { HomePageContent } from '@src/pages/home';
+import { MenuPageContent } from '@src/pages/menu';
 
 import { Routes as RoutePath } from './routes';
 import { useDispatch, useSelector } from 'react-redux';
@@ -82,7 +83,7 @@ export function App() {
   return (
     <Routes>
       <Route
-        path={RoutePath.Home}
+        index
         element={
           <Layout
             Header={<Header withMenu withLock />}
@@ -109,6 +110,15 @@ export function App() {
         path={RoutePath.UnlockVault}
         element={
           <Layout Header={<Header />} Content={<UnlockVaultPageContent />} />
+        }
+      />
+      <Route
+        path={RoutePath.Menu}
+        element={
+          <Layout
+            Header={<Header withMenu withLock />}
+            Content={<MenuPageContent />}
+          />
         }
       />
       <Route

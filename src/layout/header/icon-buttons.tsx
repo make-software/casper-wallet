@@ -1,9 +1,11 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { SvgIcon } from '@src/libs/ui';
 import { lockVault } from '@src/redux/vault/actions';
+import { Routes } from '@src/app/routes';
 
 const Container = styled.div`
   display: flex;
@@ -14,24 +16,23 @@ const Container = styled.div`
 interface IconButtonsProps {
   withLock?: boolean;
   withMenu?: boolean;
-  isMenuShow: boolean;
-  setIsMenuShow: Dispatch<SetStateAction<boolean>>;
 }
 
-export function IconButtons({
-  withLock,
-  withMenu,
-  isMenuShow,
-  setIsMenuShow
-}: IconButtonsProps) {
+export function IconButtons({ withLock, withMenu }: IconButtonsProps) {
   const dispatch = useDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   function lockVaultHandle() {
     dispatch(lockVault());
   }
 
-  function toggleMenuHandle() {
-    setIsMenuShow(!isMenuShow);
+  function openMenuHandle() {
+    if (location.pathname === Routes.Menu) {
+      navigate(-1);
+    } else {
+      navigate(Routes.Menu);
+    }
   }
 
   return (
@@ -45,10 +46,10 @@ export function IconButtons({
       )}
       {withMenu && (
         <SvgIcon
-          onClick={toggleMenuHandle}
+          onClick={openMenuHandle}
           src={
             // TODO: Change path to `close` menu icon
-            isMenuShow
+            location.pathname === Routes.Menu
               ? 'assets/icons/burger-menu.svg'
               : 'assets/icons/burger-menu.svg'
           }

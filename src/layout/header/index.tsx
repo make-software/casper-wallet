@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { SvgIcon } from '@src/libs/ui';
 import { Routes } from '@src/app/routes';
 
 import { IconButtons } from './icon-buttons';
 import { NavigationBar } from './navigation-bar';
-
-import { Menu } from './menu';
 
 const backgroundIconPath = 'assets/icons/logo-background.svg';
 
@@ -35,13 +33,7 @@ interface HeaderProps {
 }
 
 export function Header({ withLock, withMenu, navBarLink }: HeaderProps) {
-  const [isMenuShow, setIsMenuShow] = useState(false);
-  const location = useLocation();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    setIsMenuShow(false);
-  }, [location]);
 
   return (
     <>
@@ -53,15 +45,9 @@ export function Header({ withLock, withMenu, navBarLink }: HeaderProps) {
             src="assets/icons/logo.svg"
           />
         </LogoContainer>
-        <IconButtons
-          isMenuShow={isMenuShow}
-          setIsMenuShow={setIsMenuShow}
-          withMenu={withMenu}
-          withLock={withLock}
-        />
+        <IconButtons withMenu={withMenu} withLock={withLock} />
       </Container>
-      {isMenuShow && <Menu setIsMenuShow={setIsMenuShow} />}
-      {!isMenuShow && navBarLink && <NavigationBar type={navBarLink} />}
+      {navBarLink && <NavigationBar type={navBarLink} />}
     </>
   );
 }

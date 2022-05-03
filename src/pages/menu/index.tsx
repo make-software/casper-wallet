@@ -1,8 +1,7 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
-import styled from 'styled-components';
 
 import { Timeout } from '@src/app/types';
 import { Routes } from '@src/app/routes';
@@ -17,28 +16,15 @@ import { ContentContainer } from '@src/layout/containers';
 
 import { selectTimeoutDuration } from '@src/redux/vault/selectors';
 
-const MenuContainer = styled(ContentContainer)`
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  z-index: ${({ theme }) => theme.zIndex.modal};
-  background-color: ${({ theme }) => theme.color.backgroundSecondary};
-`;
-
-interface MenuProps {
-  setIsMenuShow: Dispatch<SetStateAction<boolean>>;
-}
-
-export function Menu({ setIsMenuShow }: MenuProps) {
+export function MenuPageContent() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation();
   const timeoutDuration = useSelector(selectTimeoutDuration);
 
   const iconSize = 24;
 
   return (
-    <MenuContainer>
+    <ContentContainer>
       <List
         listItems={[
           {
@@ -139,16 +125,11 @@ export function Menu({ setIsMenuShow }: MenuProps) {
               </ListItemElementContainer>
             ),
             onClick: () => {
-              if (location.pathname === Routes.Timeout) {
-                // Helps to avoid to stack the same routes in history
-                setIsMenuShow(false);
-              } else {
-                navigate(Routes.Timeout);
-              }
+              navigate(Routes.Timeout);
             }
           }
         ]}
       />
-    </MenuContainer>
+    </ContentContainer>
   );
 }
