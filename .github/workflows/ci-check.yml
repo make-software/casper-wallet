@@ -25,4 +25,4 @@ jobs:
     - name: Install & Check
       run: |
         npm install
-        npm check-ci
+        npm run ci-check
