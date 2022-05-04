@@ -176,7 +176,7 @@ export const Button = React.forwardRef<Ref, ButtonProps>(function Button(
     return (
       <Link
         href={displayAsLinkTo}
-        color="primaryRed"
+        color="fillRed"
         onClick={ev => {
           ev.preventDefault();
           props.onClick && props.onClick(ev);

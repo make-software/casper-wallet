@@ -2,6 +2,11 @@ import React from 'react';
 import styled from 'styled-components';
 import { Typography, BaseProps } from '@src/libs/ui';
 
+export enum FormFieldStatus {
+  Error = 'error',
+  Success = 'success'
+}
+
 const getThemeColor = (status?: FormFieldStatus | null) => {
   if (status == null) {
     return 'fillGreyPrimary';
@@ -33,11 +38,6 @@ const StatusTextContainer = styled('div')<FormFieldProps>(
     margin: '4px 0 0 10px'
   })
 );
-
-export enum FormFieldStatus {
-  Error = 'error',
-  Success = 'success'
-}
 
 export interface FormFieldProps extends BaseProps {
   label?: string;
