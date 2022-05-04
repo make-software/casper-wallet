@@ -1,6 +1,7 @@
 import { printLine } from '../print';
 
 // @ts-ignore
+// eslint-disable-next-line no-global-assign
 console = {
   log: jest.fn(),
   warn: jest.fn(),

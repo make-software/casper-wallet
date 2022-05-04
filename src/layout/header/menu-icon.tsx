@@ -14,11 +14,11 @@ const Container = styled.div`
 `;
 
 // TODO: implement `back` and `cancel` types
-interface NavigationBarProps {
+interface MenuIconProps {
   type: 'back' | 'close' | 'cancel';
 }
 
-export function NavigationBar({ type }: NavigationBarProps) {
+export function ManuIcon({ type }: MenuIconProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 

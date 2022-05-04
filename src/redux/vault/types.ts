@@ -1,5 +1,4 @@
-// TODO: Implement account type
-import { Timeout } from '@src/app/types';
+import { TimeoutDurationSetting } from '@src/app/constants';
 
 export interface Account {
   name: string;
@@ -9,7 +8,7 @@ export interface Account {
 export type VaultState = {
   password: string | null;
   isLocked: boolean;
-  timeoutDuration: Timeout;
+  timeoutDurationSetting: TimeoutDurationSetting;
   timeoutStartTime: number | null;
   accounts: Account[];
 };

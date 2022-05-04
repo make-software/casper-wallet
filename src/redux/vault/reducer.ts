@@ -1,21 +1,21 @@
 import { createReducer } from 'typesafe-actions';
 
 import {
-  changeTimeout,
+  changeTimeoutDuration,
   createAccount,
   createVault,
   lockVault,
   unlockVault
 } from './actions';
 import { VaultState } from './types';
-import { Timeout } from '@src/app/types';
+import { TimeoutDurationSetting } from '@src/app/constants';
 
 type State = VaultState;
 
 const initialState: State = {
   password: null,
   isLocked: false,
-  timeoutDuration: Timeout['5 min'],
+  timeoutDurationSetting: TimeoutDurationSetting['5 min'],
   timeoutStartTime: null,
   accounts: []
 };
@@ -53,10 +53,10 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    [changeTimeout],
+    [changeTimeoutDuration],
     (state, { payload: { timeoutDuration, timeoutStartTime } }): State => ({
       ...state,
-      timeoutDuration,
+      timeoutDurationSetting: timeoutDuration,
       timeoutStartTime
     })
   );

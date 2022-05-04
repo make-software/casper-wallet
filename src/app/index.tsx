@@ -15,44 +15,48 @@ import { HomePageContent } from '@src/pages/home';
 import { Routes as RoutePath } from './routes';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  selectIsAccountCreated,
-  selectIsVaultCreated,
-  selectIsVaultLocked,
-  selectTimeoutDuration,
-  selectTimeoutStartTime
+  selectVaultHasAccount,
+  selectVaultDoesExist,
+  selectVaultIsLocked,
+  selectVaultTimeoutDurationSetting,
+  selectVaultTimeoutStartTime
 } from '@src/redux/vault/selectors';
-import { TimeoutValue } from '@src/app/types';
 import { lockVault } from '@src/redux/vault/actions';
+import { MapTimeoutDurationSettingToValue } from './constants';
 
 export function App() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const isVaultLocked = useSelector(selectIsVaultLocked);
-  const isVaultExists = useSelector(selectIsVaultCreated);
-  const isAccountExists = useSelector(selectIsAccountCreated);
-  const timeoutDuration = useSelector(selectTimeoutDuration);
-  const timeoutStartTime = useSelector(selectTimeoutStartTime);
+  const vaultIsLocked = useSelector(selectVaultIsLocked);
+  const vaultDoesExists = useSelector(selectVaultDoesExist);
+  const vaultHasAccount = useSelector(selectVaultHasAccount);
+  const vaultTimeoutDurationSetting = useSelector(
+    selectVaultTimeoutDurationSetting
+  );
+  const vaultTimeoutStartTime = useSelector(selectVaultTimeoutStartTime);
 
   // App redirects
   useEffect(() => {
-    if (isVaultLocked) {
+    if (vaultIsLocked) {
       navigate(RoutePath.UnlockVault);
-    } else if (!isVaultExists) {
+    } else if (!vaultDoesExists) {
       navigate(RoutePath.CreateVault);
-    } else if (!isAccountExists) {
+    } else if (!vaultHasAccount) {
       navigate(RoutePath.NoAccounts);
     }
-  }, [isVaultExists, isAccountExists, isVaultLocked]);
+  }, [vaultDoesExists, vaultHasAccount, vaultIsLocked]);
 
   // Timer of locking app
   useEffect(() => {
     let interval: NodeJS.Timeout;
     let currentTime = Date.now();
+    const timeoutDurationValue =
+      MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
 
-    if (isVaultExists && !isVaultLocked && timeoutStartTime) {
+    if (vaultDoesExists && !vaultIsLocked && vaultTimeoutStartTime) {
       // Check up on opening popup
-      if (currentTime - timeoutStartTime >= TimeoutValue[timeoutDuration]) {
+      if (currentTime - vaultTimeoutStartTime >= timeoutDurationValue) {
         dispatch(lockVault());
       } else {
         // Check up for opened popup
@@ -60,9 +64,9 @@ export function App() {
           currentTime = Date.now();
 
           if (
-            !isVaultLocked &&
-            timeoutStartTime &&
-            currentTime - timeoutStartTime >= TimeoutValue[timeoutDuration]
+            !vaultIsLocked &&
+            vaultTimeoutStartTime &&
+            currentTime - vaultTimeoutStartTime >= timeoutDurationValue
           ) {
             clearInterval(interval);
             dispatch(lockVault());
@@ -73,10 +77,10 @@ export function App() {
     return () => clearInterval(interval);
   }, [
     dispatch,
-    isVaultExists,
-    isVaultLocked,
-    timeoutStartTime,
-    timeoutDuration
+    vaultDoesExists,
+    vaultIsLocked,
+    vaultTimeoutStartTime,
+    vaultTimeoutDurationSetting
   ]);
 
   return (
@@ -115,7 +119,7 @@ export function App() {
         path={RoutePath.Timeout}
         element={
           <Layout
-            Header={<Header navBarLink="close" withMenu withLock />}
+            Header={<Header menuIconType="close" withMenu withLock />}
             Content={<TimeoutPageContent />}
           />
         }
