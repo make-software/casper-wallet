@@ -3,8 +3,8 @@ import styled from 'styled-components';
 
 import { SvgIcon } from '@src/libs/ui';
 
-import { IconButtonsBar } from './icon-buttons-bar';
-import { ManuIcon } from './menu-icon';
+import { MainmenuBar } from './mainmenu-bar';
+import { SubmenuBar } from './submenu-bar';
 
 const backgroundIconPath = 'assets/icons/logo-background.svg';
 
@@ -25,19 +25,19 @@ const LogoContainer = styled.div``;
 interface HeaderProps {
   withLock?: boolean;
   withMenu?: boolean;
-  menuIconType?: 'back' | 'close' | 'cancel';
+  submenuActionType?: 'back' | 'close' | 'cancel';
 }
 
-export function Header({ withLock, withMenu, menuIconType }: HeaderProps) {
+export function Header({ withLock, withMenu, submenuActionType }: HeaderProps) {
   return (
     <>
       <Container>
         <LogoContainer>
           <SvgIcon size={40} src="assets/icons/logo.svg" />
         </LogoContainer>
-        <IconButtonsBar withMenu={withMenu} withLock={withLock} />
+        <MainmenuBar withMenu={withMenu} withLock={withLock} />
       </Container>
-      {menuIconType && <ManuIcon type={menuIconType} />}
+      {submenuActionType && <SubmenuBar actionType={submenuActionType} />}
     </>
   );
 }

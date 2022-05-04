@@ -13,12 +13,12 @@ const Container = styled.div`
   gap: 30px;
 `;
 
-interface IconButtonsBarProps {
+interface MainmenuBarProps {
   withLock?: boolean;
   withMenu?: boolean;
 }
 
-export function IconButtonsBar({ withLock, withMenu }: IconButtonsBarProps) {
+export function MainmenuBar({ withLock, withMenu }: MainmenuBarProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

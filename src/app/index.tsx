@@ -119,7 +119,7 @@ export function App() {
         path={RoutePath.Timeout}
         element={
           <Layout
-            Header={<Header menuIconType="close" withMenu withLock />}
+            Header={<Header submenuAction="close" withMenu withLock />}
             Content={<TimeoutPageContent />}
           />
         }
