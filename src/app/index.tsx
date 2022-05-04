@@ -49,6 +49,7 @@ export function App() {
     } else if (!vaultHasAccount) {
       navigate(RoutePath.NoAccounts);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vaultDoesExists, vaultHasAccount, vaultIsLocked]);
 
   // Timer of locking app
@@ -103,6 +104,7 @@ export function App() {
     setTimer,
     vaultDoesExists,
     vaultIsLocked,
+    timeoutDurationValue,
     vaultTimeoutStartTime,
     vaultTimeoutDurationSetting
   ]);
