@@ -1,6 +1,6 @@
 import './i18n';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 // import browser from 'webextension-polyfill';
 
@@ -21,7 +21,7 @@ import {
   selectVaultTimeoutDurationSetting,
   selectVaultTimeoutStartTime
 } from '@src/redux/vault/selectors';
-import { lockVault } from '@src/redux/vault/actions';
+import { lockVault, resetTimeoutStartTime } from '@src/redux/vault/actions';
 import { MapTimeoutDurationSettingToValue } from './constants';
 
 export function App() {
@@ -36,6 +36,10 @@ export function App() {
   );
   const vaultTimeoutStartTime = useSelector(selectVaultTimeoutStartTime);
 
+  const timeoutDurationValue =
+    MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
+  const [timer, setTimer] = useState(timeoutDurationValue);
+
   // App redirects
   useEffect(() => {
     if (vaultIsLocked) {
@@ -49,34 +53,54 @@ export function App() {
 
   // Timer of locking app
   useEffect(() => {
+    const events = [
+      'load',
+      'mousemove',
+      'mousedown',
+      'click',
+      'scroll',
+      'keypress'
+    ];
+
+    const resetTimeout = () => {
+      setTimer(timeoutDurationValue);
+      dispatch(resetTimeoutStartTime());
+    };
+
+    // Reset times on user interaction
+    for (let i in events) {
+      window.addEventListener(events[i], resetTimeout);
+    }
+
     let interval: NodeJS.Timeout;
     let currentTime = Date.now();
-    const timeoutDurationValue =
-      MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
 
     if (vaultDoesExists && !vaultIsLocked && vaultTimeoutStartTime) {
-      // Check up on opening popup
+      //   // Check up on opening popup
       if (currentTime - vaultTimeoutStartTime >= timeoutDurationValue) {
         dispatch(lockVault());
       } else {
+        const second = 1000;
         // Check up for opened popup
         interval = setInterval(() => {
-          currentTime = Date.now();
-
-          if (
-            !vaultIsLocked &&
-            vaultTimeoutStartTime &&
-            currentTime - vaultTimeoutStartTime >= timeoutDurationValue
-          ) {
-            clearInterval(interval);
+          if (timer > 0) {
+            setTimer(timer - second);
+          } else {
             dispatch(lockVault());
           }
-        }, 1000);
+        }, second);
       }
     }
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      for (let i in events) {
+        window.removeEventListener(events[i], resetTimeout);
+      }
+    };
   }, [
     dispatch,
+    timer,
+    setTimer,
     vaultDoesExists,
     vaultIsLocked,
     vaultTimeoutStartTime,
@@ -119,7 +143,7 @@ export function App() {
         path={RoutePath.Timeout}
         element={
           <Layout
-            Header={<Header submenuAction="close" withMenu withLock />}
+            Header={<Header submenuActionType="close" withMenu withLock />}
             Content={<TimeoutPageContent />}
           />
         }

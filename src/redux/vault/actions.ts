@@ -33,3 +33,9 @@ export const changeTimeoutDuration = createAction(
   timeoutDuration: TimeoutDurationSetting;
   timeoutStartTime: number;
 }>();
+
+export const resetTimeoutStartTime = createAction('RESTART_IDLE_TIMER', () => ({
+  timeoutStartTime: Date.now()
+}))<{
+  timeoutStartTime: number;
+}>();

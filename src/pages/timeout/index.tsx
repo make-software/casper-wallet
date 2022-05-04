@@ -30,6 +30,15 @@ export function TimeoutPageContent() {
   const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
   const dispatch = useDispatch();
 
+  const MapTimeoutDurationSettingToTranslation = {
+    [TimeoutDurationSetting['1 min']]: t('1 min'),
+    [TimeoutDurationSetting['5 min']]: t('5 min'),
+    [TimeoutDurationSetting['15 min']]: t('15 min'),
+    [TimeoutDurationSetting['30 min']]: t('30 min'),
+    [TimeoutDurationSetting['1 hour']]: t('1 hour'),
+    [TimeoutDurationSetting['24 hours']]: t('24 hours')
+  };
+
   return (
     <ContentContainer>
       <HeaderTextContainer>
@@ -54,7 +63,11 @@ export function TimeoutPageContent() {
             Content: (
               <ListItemElementContainer>
                 <Typography type="body" weight="regular">
-                  <Trans t={t} i18nKey={key} values={Timeout} />
+                  <Trans
+                    t={t}
+                    i18nKey={key}
+                    values={MapTimeoutDurationSettingToTranslation}
+                  />
                 </Typography>
               </ListItemElementContainer>
             ),
