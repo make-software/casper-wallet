@@ -11,61 +11,6 @@ msgstr ""
 msgid "Close"
 msgstr "Закрыть"
 
-msgid "Your vault is ready, but no accounts yet"
-msgstr "Ваше хранилище готово, но аккаунтов пока нет"
-
-msgid "Please, create an account or import an account you already have."
-msgstr "Пожалуйста, создайте аккаунт или импортируйте аккаунт, который у вас уже есть."
-
-msgid "Create Account"
-msgstr "Создать аккаунт"
-
-msgid "Import Account"
-msgstr "Импорт аккаунта"
-
-msgid "Are you sure you want to reset your vault?"
-msgstr "Вы уверены, что хотите сбросить настройки хранилища?"
-
-msgid ""
-"All accounts will be removed. Make sure you have securely stored the recovery phrase for "
-"each account before proceeding."
-msgstr ""
-"Все аккаунты будут удалены. Прежде чем продолжить, убедитесь, что вы надежно сохранили фразу восстановления "
-"для каждой учетной записи."
-
-msgid "I’ve read and understand the above"
-msgstr "Я прочитал и понял вышесказанное"
-
-msgid "Reset vault"
-msgstr "Сбросить хранилище"
-
-msgid "Cancel"
-msgstr "Отмена"
-
-msgid "Timeout"
-msgstr "Блокировка по тайм-ауту"
-
-msgid "Your vault will be automatically locked after some period of inactivity."
-msgstr "Ваше хранилище будет автоматически заблокировано после некоторого периода бездействия."
-
-msgid "1 min"
-msgstr "1 минута"
-
-msgid "5 min"
-msgstr "5 минут"
-
-msgid "15 min"
-msgstr "15 минут"
-
-msgid "30 min"
-msgstr "30 минут"
-
-msgid "1 hour"
-msgstr "1 час"
-
-msgid "24 hours"
-msgstr "24 часа"
-
 msgid "Should be at least"
 msgstr "Должно быть не менее"
 
@@ -94,6 +39,61 @@ msgstr "Подтвердить пароль"
 msgid "Create Vault"
 msgstr "Создать хранилище"
 
+msgid "Your vault is ready, but no accounts yet"
+msgstr "Ваше хранилище готово, но аккаунтов пока нет"
+
+msgid "Please, create an account or import an account you already have."
+msgstr "Пожалуйста, создайте аккаунт или импортируйте аккаунт, который у вас уже есть."
+
+msgid "Create account"
+msgstr "Создать аккаунт"
+
+msgid "Import account"
+msgstr "Импорт аккаунта"
+
+msgid "Are you sure you want to reset your vault?"
+msgstr "Вы уверены, что хотите сбросить настройки хранилища?"
+
+msgid ""
+"All accounts will be removed. Make sure you have securely stored the recovery phrase for "
+"each account before proceeding."
+msgstr ""
+"Все аккаунты будут удалены. Прежде чем продолжить, убедитесь, что вы надежно сохранили фразу восстановления "
+"для каждой учетной записи."
+
+msgid "I’ve read and understand the above"
+msgstr "Я прочитал и понял вышесказанное"
+
+msgid "Reset vault"
+msgstr "Сбросить хранилище"
+
+msgid "Cancel"
+msgstr "Отмена"
+
+msgid "1 min"
+msgstr "1 минута"
+
+msgid "5 min"
+msgstr "5 минут"
+
+msgid "15 min"
+msgstr "15 минут"
+
+msgid "30 min"
+msgstr "30 минут"
+
+msgid "1 hour"
+msgstr "1 час"
+
+msgid "24 hours"
+msgstr "24 часа"
+
+msgid "Timeout"
+msgstr "Тайм-аут"
+
+msgid "Your vault will be automatically locked after some period of inactivity."
+msgstr "Ваше хранилище будет автоматически заблокировано после некоторого периода бездействия."
+
 msgid "Password is not correct"
 msgstr "Неверный пароль"
 
@@ -105,6 +105,3 @@ msgstr "Пожалуйста, введите пароль для разблок�
 
 msgid "Unlock vault"
 msgstr "Разблокировать хранилище"
-
-msgid "Reset vault"
-msgstr "Сбросить хранилище"

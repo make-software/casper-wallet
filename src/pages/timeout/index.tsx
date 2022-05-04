@@ -1,19 +1,20 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { Typography, List, Checkbox } from '@src/libs/ui';
+import { Checkbox, List, Typography } from '@src/libs/ui';
 import {
   ContentContainer,
   HeaderTextContainer,
   TextContainer
 } from '@src/layout/containers';
 
-import { selectTimeout } from '@src/redux/vault/selectors';
+import { selectVaultTimeoutDurationSetting } from '@src/redux/vault/selectors';
 import styled from 'styled-components';
-import { changeTimeout, startTimeout } from '@src/redux/vault/actions';
+import { changeTimeoutDuration } from '@src/redux/vault/actions';
 import { Trans, useTranslation } from 'react-i18next';
+import { TimeoutDurationSetting } from '@src/app/constants';
 
-const Container = styled.div`
+const ListItemElementContainer = styled.div`
   height: 50px;
 
   display: flex;
@@ -26,8 +27,17 @@ const Container = styled.div`
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();
-  const timeout = useSelector(selectTimeout);
+  const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
   const dispatch = useDispatch();
+
+  const MapTimeoutDurationSettingToTranslation = {
+    [TimeoutDurationSetting['1 min']]: t('1 min'),
+    [TimeoutDurationSetting['5 min']]: t('5 min'),
+    [TimeoutDurationSetting['15 min']]: t('15 min'),
+    [TimeoutDurationSetting['30 min']]: t('30 min'),
+    [TimeoutDurationSetting['1 hour']]: t('1 hour'),
+    [TimeoutDurationSetting['24 hours']]: t('24 hours')
+  };
 
   return (
     <ContentContainer>
@@ -44,134 +54,36 @@ export function TimeoutPageContent() {
           </Trans>
         </Typography>
         <List
-          items={[
-            {
-              id: 1,
-              item: {
-                Content: (
-                  <Container>
-                    <Typography type="body" weight="regular">
-                      <Trans t={t}>1 min</Trans>
-                    </Typography>
-                  </Container>
-                ),
-                Right: (
-                  <Container>
-                    <Checkbox checked={timeout === '1min'} />
-                  </Container>
-                )
-              },
-              onClick: () => {
-                dispatch(changeTimeout({ timeout: '1min' }));
-                dispatch(startTimeout());
-              }
-            },
-            {
-              id: 2,
-              item: {
-                Content: (
-                  <Container>
-                    <Typography type="body" weight="regular">
-                      <Trans t={t}>5 min</Trans>
-                    </Typography>
-                  </Container>
-                ),
-                Right: (
-                  <Container>
-                    <Checkbox checked={timeout === '5min'} />
-                  </Container>
-                )
-              },
-              onClick: () => {
-                dispatch(changeTimeout({ timeout: '5min' }));
-                dispatch(startTimeout());
-              }
-            },
-            {
-              id: 3,
-              item: {
-                Content: (
-                  <Container>
-                    <Typography type="body" weight="regular">
-                      <Trans t={t}>15 min</Trans>
-                    </Typography>
-                  </Container>
-                ),
-                Right: (
-                  <Container>
-                    <Checkbox checked={timeout === '15min'} />
-                  </Container>
-                )
-              },
-              onClick: () => {
-                dispatch(changeTimeout({ timeout: '15min' }));
-                dispatch(startTimeout());
-              }
-            },
-            {
-              id: 4,
-              item: {
-                Content: (
-                  <Container>
-                    <Typography type="body" weight="regular">
-                      <Trans t={t}>30 min</Trans>
-                    </Typography>
-                  </Container>
-                ),
-                Right: (
-                  <Container>
-                    <Checkbox checked={timeout === '30min'} />
-                  </Container>
-                )
-              },
-              onClick: () => {
-                dispatch(changeTimeout({ timeout: '30min' }));
-                dispatch(startTimeout());
-              }
-            },
-            {
-              id: 5,
-              item: {
-                Content: (
-                  <Container>
-                    <Typography type="body" weight="regular">
-                      <Trans t={t}>1 hour</Trans>
-                    </Typography>
-                  </Container>
-                ),
-                Right: (
-                  <Container>
-                    <Checkbox checked={timeout === '1hour'} />
-                  </Container>
-                )
-              },
-              onClick: () => {
-                dispatch(changeTimeout({ timeout: '1hour' }));
-                dispatch(startTimeout());
-              }
-            },
-            {
-              id: 6,
-              item: {
-                Content: (
-                  <Container>
-                    <Typography type="body" weight="regular">
-                      <Trans t={t}>24 hours</Trans>
-                    </Typography>
-                  </Container>
-                ),
-                Right: (
-                  <Container>
-                    <Checkbox checked={timeout === '24hours'} />
-                  </Container>
-                )
-              },
-              onClick: () => {
-                dispatch(changeTimeout({ timeout: '24hours' }));
-                dispatch(startTimeout());
-              }
+          listItems={(
+            Object.keys(TimeoutDurationSetting) as Array<
+              keyof typeof TimeoutDurationSetting
+            >
+          ).map(key => ({
+            id: key,
+            Content: (
+              <ListItemElementContainer>
+                <Typography type="body" weight="regular">
+                  <Trans
+                    t={t}
+                    i18nKey={key}
+                    values={MapTimeoutDurationSettingToTranslation}
+                  />
+                </Typography>
+              </ListItemElementContainer>
+            ),
+            Right: (
+              <ListItemElementContainer>
+                <Checkbox checked={timeoutDuration === key} />
+              </ListItemElementContainer>
+            ),
+            onClick: () => {
+              dispatch(
+                changeTimeoutDuration({
+                  timeoutDuration: TimeoutDurationSetting[key]
+                })
+              );
             }
-          ]}
+          }))}
         />
       </TextContainer>
     </ContentContainer>

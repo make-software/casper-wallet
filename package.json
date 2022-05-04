@@ -11,16 +11,19 @@
     "start:safari": "npm run dev:build:firefox && ./safari_build.sh && NODE_ENV=development BABEL_ENV=development BROWSER=safari PORT=3003 ts-node --project scripts.tsconfig.json utils/webserver.js",
     "test:e2e:chrome": "npm run build:chrome && SELENIUM_BROWSER=chrome jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests",
     "test:e2e:firefox": "npm run build:firefox && SELENIUM_BROWSER=firefox jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests",
-    "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,md}'",
-    "test:unit": "jest --no-cache",
+    "format:check": "prettier --check 'src/*.{js,jsx,ts,tsx,json,md}'",
+    "format:write": "prettier --write 'src/*.{js,jsx,ts,tsx,json,md}'",
+    "lint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
+    "test": "jest --no-cache",
     "prepare": "husky install",
     "locale:extract_pot": "i18next 'src/**/*.{ts,tsx}' && node scripts/locale_extract_pot.js",
-    "locale:update_translations": "node scripts/locale_update_translations.js"
+    "locale:update_translations": "node scripts/locale_update_translations.js",
+    "ci-check": "npm run format:check && npm run lint && npm run test"
   },
   "lint-staged": {
     "*.md": "markdownlint",
     "src/**/*.{js,jsx,ts,tsx,json,md}": [
-      "prettier --write"
+      "npm run format:write"
     ]
   },
   "resolutions": {

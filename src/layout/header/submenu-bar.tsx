@@ -14,15 +14,15 @@ const Container = styled.div`
 `;
 
 // TODO: implement `back` and `cancel` types
-interface NavigationBarProps {
-  type: 'back' | 'close' | 'cancel';
+interface SubmenuBarProps {
+  actionType: 'back' | 'close' | 'cancel';
 }
 
-export function NavigationBar({ type }: NavigationBarProps) {
+export function SubmenuBar({ actionType }: SubmenuBarProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  switch (type) {
+  switch (actionType) {
     case 'close':
       return (
         <Container>

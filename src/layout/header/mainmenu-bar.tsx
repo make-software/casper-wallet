@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { SvgIcon } from '@src/libs/ui';
-import { clearTimeout, lockVault } from '@src/redux/vault/actions';
+import { lockVault } from '@src/redux/vault/actions';
 import { useNavigate } from 'react-router-dom';
 import { Routes } from '@src/app/routes';
 
@@ -13,18 +13,17 @@ const Container = styled.div`
   gap: 30px;
 `;
 
-interface IconButtonsProps {
+interface MainmenuBarProps {
   withLock?: boolean;
   withMenu?: boolean;
 }
 
-export function IconButtons({ withLock, withMenu }: IconButtonsProps) {
+export function MainmenuBar({ withLock, withMenu }: MainmenuBarProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   function lockVaultHandle() {
     dispatch(lockVault());
-    dispatch(clearTimeout());
   }
 
   return (

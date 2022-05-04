@@ -87,6 +87,7 @@ export const useMatchMedia = <T extends any>(
     mediaQueryLists.forEach(mql => mql.addListener(handler));
     // Remove listeners on cleanup
     return () => mediaQueryLists.forEach(mql => mql.removeListener(handler));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...dependencies]);
 
   return match;

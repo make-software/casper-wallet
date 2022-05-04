@@ -1,6 +1,6 @@
 import './i18n';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 // import browser from 'webextension-polyfill';
 
@@ -16,38 +16,73 @@ import { ResetVaultPageContent } from '@src/pages/reset-vault';
 import { Routes as RoutePath } from './routes';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  selectIsAccountCreated,
-  selectIsVaultCreated,
-  selectIsVaultLocked,
-  selectTimeout,
-  selectTimeoutStartFrom
+  selectVaultHasAccount,
+  selectVaultDoesExist,
+  selectVaultIsLocked,
+  selectVaultTimeoutDurationSetting,
+  selectVaultTimeoutStartTime
 } from '@src/redux/vault/selectors';
-import { useAppRedirects, useTimeoutLocking } from './hooks';
+import { lockVault } from '@src/redux/vault/actions';
+import { MapTimeoutDurationSettingToValue } from './constants';
 
 export function App() {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const isVaultLocked = useSelector(selectIsVaultLocked);
-  const isAccountExists = useSelector(selectIsAccountCreated);
-  const isVaultExists = useSelector(selectIsVaultCreated);
-  const timeout = useSelector(selectTimeout);
-  const timeoutStartFrom = useSelector(selectTimeoutStartFrom);
+  const vaultIsLocked = useSelector(selectVaultIsLocked);
+  const vaultDoesExists = useSelector(selectVaultDoesExist);
+  const vaultHasAccount = useSelector(selectVaultHasAccount);
+  const vaultTimeoutDurationSetting = useSelector(
+    selectVaultTimeoutDurationSetting
+  );
+  const vaultTimeoutStartTime = useSelector(selectVaultTimeoutStartTime);
 
-  useTimeoutLocking({
+  // App redirects
+  useEffect(() => {
+    if (vaultIsLocked) {
+      navigate(RoutePath.UnlockVault);
+    } else if (!vaultDoesExists) {
+      navigate(RoutePath.CreateVault);
+    } else if (!vaultHasAccount) {
+      navigate(RoutePath.NoAccounts);
+    }
+  }, [vaultDoesExists, vaultHasAccount, vaultIsLocked]);
+
+  // Timer of locking app
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    let currentTime = Date.now();
+    const timeoutDurationValue =
+      MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
+
+    if (vaultDoesExists && !vaultIsLocked && vaultTimeoutStartTime) {
+      // Check up on opening popup
+      if (currentTime - vaultTimeoutStartTime >= timeoutDurationValue) {
+        dispatch(lockVault());
+      } else {
+        // Check up for opened popup
+        interval = setInterval(() => {
+          currentTime = Date.now();
+
+          if (
+            !vaultIsLocked &&
+            vaultTimeoutStartTime &&
+            currentTime - vaultTimeoutStartTime >= timeoutDurationValue
+          ) {
+            clearInterval(interval);
+            dispatch(lockVault());
+          }
+        }, 1000);
+      }
+    }
+    return () => clearInterval(interval);
+  }, [
     dispatch,
-    timeout,
-    timeoutStartFrom,
-    isVaultLocked,
-    isVaultExists
-  });
-
-  useAppRedirects({
-    navigate,
-    isAccountExists,
-    isVaultExists,
-    isVaultLocked
-  });
+    vaultDoesExists,
+    vaultIsLocked,
+    vaultTimeoutStartTime,
+    vaultTimeoutDurationSetting
+  ]);
 
   return (
     <Routes>
@@ -85,7 +120,7 @@ export function App() {
         path={RoutePath.Timeout}
         element={
           <Layout
-            Header={<Header navBarLink="close" withMenu withLock />}
+            Header={<Header submenuActionType="close" withMenu withLock />}
             Content={<TimeoutPageContent />}
           />
         }

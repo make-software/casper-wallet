@@ -1,33 +1,33 @@
 import { createReducer } from 'typesafe-actions';
 
 import {
-  createVault,
+  changeTimeoutDuration,
   createAccount,
+  createVault,
   lockVault,
   unlockVault,
-  changeTimeout,
-  startTimeout,
-  clearTimeout,
   resetVault
 } from './actions';
 import { VaultState } from './types';
+import { TimeoutDurationSetting } from '@src/app/constants';
 
 type State = VaultState;
 
 const initialState: State = {
   password: null,
   isLocked: false,
-  timeout: '5min',
-  timeoutStartFrom: null,
+  timeoutDurationSetting: TimeoutDurationSetting['5 min'],
+  timeoutStartTime: null,
   accounts: []
 };
 
 export const reducer = createReducer(initialState)
   .handleAction(
     [createVault],
-    (state, { payload: { password } }): State => ({
+    (state, { payload: { password, timeoutStartTime } }): State => ({
       ...state,
-      password
+      password,
+      timeoutStartTime
     })
   )
   .handleAction([resetVault], () => initialState)
@@ -35,13 +35,15 @@ export const reducer = createReducer(initialState)
     lockVault,
     (state, { payload }): State => ({
       ...state,
-      isLocked: true
+      isLocked: true,
+      timeoutStartTime: null
     })
   )
   .handleAction(
     unlockVault,
-    (state, { payload }): State => ({
+    (state, { payload: { timeoutStartTime } }): State => ({
       ...state,
+      timeoutStartTime,
       isLocked: false
     })
   )
@@ -53,17 +55,10 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    [changeTimeout],
-    (state, { payload: { timeout } }): State => ({
+    [changeTimeoutDuration],
+    (state, { payload: { timeoutDuration, timeoutStartTime } }): State => ({
       ...state,
-      timeout
+      timeoutDurationSetting: timeoutDuration,
+      timeoutStartTime
     })
-  )
-  .handleAction([startTimeout], (state: State) => ({
-    ...state,
-    timeoutStartFrom: Date.now()
-  }))
-  .handleAction([clearTimeout], (state: State) => ({
-    ...state,
-    timeoutStartFrom: null
-  }));
+  );
