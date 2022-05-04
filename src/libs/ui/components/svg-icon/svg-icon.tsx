@@ -35,6 +35,7 @@ const Container = styled('div').withConfig({
   rotate?: boolean;
   marginLeft?: boolean;
   marginRight?: boolean;
+  onClick?: (ev: any) => void;
 }>(
   ({
     theme,
@@ -44,7 +45,8 @@ const Container = styled('div').withConfig({
     color = 'inherit',
     rotate,
     marginLeft,
-    marginRight
+    marginRight,
+    onClick
   }) => ({
     display: 'inline-block',
     verticalAlign: 'middle',
@@ -61,7 +63,8 @@ const Container = styled('div').withConfig({
     transform: rotate ? 'rotateX(180deg)' : 'rotateX(0deg)',
     transition: 'transform 500ms ease',
     marginLeft: marginLeft ? 8 : 'initial',
-    marginRight: marginRight ? 8 : 'initial'
+    marginRight: marginRight ? 8 : 'initial',
+    cursor: onClick ? 'pointer' : 'inherit'
   })
 );
 
