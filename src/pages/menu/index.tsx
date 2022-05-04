@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { Timeout } from '@src/app/types';
+import { TimeoutDurationSetting } from '@src/app/constants';
 import { Routes } from '@src/app/routes';
 
 import {
@@ -14,12 +14,12 @@ import {
 } from '@src/libs/ui';
 import { ContentContainer } from '@src/layout/containers';
 
-import { selectTimeoutDuration } from '@src/redux/vault/selectors';
+import { selectVaultTimeoutDurationSetting } from '@src/redux/vault/selectors';
 
 export function MenuPageContent() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const timeoutDuration = useSelector(selectTimeoutDuration);
+  const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
 
   const iconSize = 24;
 
@@ -111,7 +111,7 @@ export function MenuPageContent() {
                   weight="semiBold"
                   variation="contentBlue"
                 >
-                  {Timeout[timeoutDuration]}
+                  {TimeoutDurationSetting[timeoutDuration]}
                 </Typography>
               </ListItemElementContainer>
             ),

@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { SvgIcon } from '@src/libs/ui';
 import { Routes } from '@src/app/routes';
 
-import { IconButtons } from './icon-buttons';
-import { NavigationBar } from './navigation-bar';
+import { MainmenuBar } from './mainmenu-bar';
+import { SubmenuBar } from './submenu-bar';
 
 const backgroundIconPath = 'assets/icons/logo-background.svg';
 
@@ -29,10 +29,10 @@ const LogoContainer = styled.div`
 interface HeaderProps {
   withLock?: boolean;
   withMenu?: boolean;
-  navBarLink?: 'back' | 'close' | 'cancel';
+  submenuActionType?: 'back' | 'close' | 'cancel';
 }
 
-export function Header({ withLock, withMenu, navBarLink }: HeaderProps) {
+export function Header({ withLock, withMenu, submenuActionType }: HeaderProps) {
   const navigate = useNavigate();
 
   return (
@@ -45,9 +45,9 @@ export function Header({ withLock, withMenu, navBarLink }: HeaderProps) {
             src="assets/icons/logo.svg"
           />
         </LogoContainer>
-        <IconButtons withMenu={withMenu} withLock={withLock} />
+        <MainmenuBar withMenu={withMenu} withLock={withLock} />
       </Container>
-      {navBarLink && <NavigationBar type={navBarLink} />}
+      {submenuActionType && <SubmenuBar actionType={submenuActionType} />}
     </>
   );
 }

@@ -70,9 +70,7 @@ export function CreateVaultPageContent() {
     useState<InputType>('password');
 
   function onSubmit(data: FieldValues) {
-    dispatch(
-      createVault({ password: data.password, timeoutStartTime: Date.now() })
-    );
+    dispatch(createVault({ password: data.password }));
 
     navigate(Routes.NoAccounts);
   }

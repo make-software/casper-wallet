@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-29T15:15:13.627Z\n"
-"PO-Revision-Date: 2022-04-29T15:15:13.628Z\n"
+"POT-Creation-Date: 2022-05-04T14:16:26.401Z\n"
+"PO-Revision-Date: 2022-05-04T14:16:26.401Z\n"
 
 msgid "Close"
 msgstr "Close"
@@ -39,23 +39,23 @@ msgstr "Confirm password"
 msgid "Create Vault"
 msgstr "Create Vault"
 
+msgid "Create account"
+msgstr "Create account"
+
+msgid "Import account"
+msgstr "Import account"
+
+msgid "Connected sites"
+msgstr "Connected sites"
+
+msgid "Timeout"
+msgstr "Timeout"
+
 msgid "Your vault is ready, but no accounts yet"
 msgstr "Your vault is ready, but no accounts yet"
 
 msgid "Please, create an account or import an account you already have."
 msgstr "Please, create an account or import an account you already have."
-
-msgid "Create Account"
-msgstr "Create Account"
-
-msgid "Import Account"
-msgstr "Import Account"
-
-msgid "Timeout"
-msgstr "Timeout"
-
-msgid "Your vault will be automatically locked after some period of inactivity."
-msgstr "Your vault will be automatically locked after some period of inactivity."
 
 msgid "1 min"
 msgstr "1 min"
@@ -74,6 +74,9 @@ msgstr "1 hour"
 
 msgid "24 hours"
 msgstr "24 hours"
+
+msgid "Your vault will be automatically locked after some period of inactivity."
+msgstr "Your vault will be automatically locked after some period of inactivity."
 
 msgid "Password is not correct"
 msgstr "Password is not correct"

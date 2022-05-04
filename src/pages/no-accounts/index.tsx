@@ -40,10 +40,10 @@ export function NoAccountsPageContent() {
       </TextContainer>
       <ButtonsContainer>
         <Button onClick={createAccount}>
-          <Trans t={t}>Create Account</Trans>
+          <Trans t={t}>Create account</Trans>
         </Button>
         <Button color="secondaryBlue">
-          <Trans t={t}>Import Account</Trans>
+          <Trans t={t}>Import account</Trans>
         </Button>
       </ButtonsContainer>
     </ContentContainer>

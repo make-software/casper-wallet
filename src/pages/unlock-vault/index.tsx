@@ -2,7 +2,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { FieldValues, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 
@@ -42,9 +42,9 @@ export function UnlockVaultPageContent() {
     //@ts-ignore TODO: fix type for `reValidateMode`
   } = useForm(formOptions);
 
-  function unlockVaultHandle({ password }: FieldValues) {
+  function unlockVaultHandle() {
     navigate(-1);
-    dispatch(unlockVault({ timeoutStartTime: Date.now() }));
+    dispatch(unlockVault());
   }
 
   return (

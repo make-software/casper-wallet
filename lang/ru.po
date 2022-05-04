@@ -5,50 +5,14 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-29T15:15:13.627Z\n"
-"PO-Revision-Date: 2022-04-29T15:15:13.628Z\n"
+"POT-Creation-Date: 2022-05-04T14:02:50.561Z\n"
+"PO-Revision-Date: 2022-05-04T14:02:50.561Z\n"
 
 msgid "Close"
 msgstr "Закрыть"
 
-msgid "Your vault is ready, but no accounts yet"
-msgstr "Ваше хранилище готово, но аккаунтов пока нет"
-
-msgid "Please, create an account or import an account you already have."
-msgstr "Пожалуйста, создайте аккаунт или импортируйте аккаунт, который у вас уже есть."
-
-msgid "Create Account"
-msgstr "Создать аккаунт"
-
-msgid "Import Account"
-msgstr "Импорт аккаунта"
-
-msgid "Timeout"
-msgstr "Блокировка по тайм-ауту"
-
-msgid "Your vault will be automatically locked after some period of inactivity."
-msgstr "Ваше хранилище будет автоматически заблокировано после некоторого периода бездействия."
-
-msgid "1 min"
-msgstr "1 минута"
-
-msgid "5 min"
-msgstr "5 минут"
-
-msgid "15 min"
-msgstr "15 минут"
-
-msgid "30 min"
-msgstr "30 минут"
-
-msgid "1 hour"
-msgstr "1 час"
-
-msgid "24 hours"
-msgstr "24 часа"
-
 msgid "Should be at least"
-msgstr "Должно быть не менее"
+msgstr "Должно быть как минимум"
 
 msgid "characters"
 msgstr "символов"
@@ -70,10 +34,49 @@ msgid "Password"
 msgstr "Пароль"
 
 msgid "Confirm password"
-msgstr "Подтвердить пароль"
+msgstr "Подтвердите Пароль"
 
 msgid "Create Vault"
 msgstr "Создать хранилище"
+
+msgid "Create account"
+msgstr "Создать учетную запись"
+
+msgid "Import account"
+msgstr "Импорт учетной записи"
+
+msgid "Connected sites"
+msgstr "Подключенные сайты"
+
+msgid "Timeout"
+msgstr "Тайм-аут"
+
+msgid "Your vault is ready, but no accounts yet"
+msgstr "Ваше хранилище готово, но аккаунтов пока нет"
+
+msgid "Please, create an account or import an account you already have."
+msgstr "Пожалуйста, создайте учетную запись или импортируйте учетную запись, которая у вас уже есть."
+
+msgid "1 min"
+msgstr "1 мин"
+
+msgid "5 min"
+msgstr "5 мин"
+
+msgid "15 min"
+msgstr "15 мин"
+
+msgid "30 min"
+msgstr "30 мин"
+
+msgid "1 hour"
+msgstr "1 час"
+
+msgid "24 hours"
+msgstr "24 часа"
+
+msgid "Your vault will be automatically locked after some period of inactivity."
+msgstr "Ваше хранилище будет автоматически заблокировано после некоторого периода бездействия."
 
 msgid "Password is not correct"
 msgstr "Неверный пароль"

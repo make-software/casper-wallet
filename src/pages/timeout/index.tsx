@@ -14,14 +14,23 @@ import {
   TextContainer
 } from '@src/layout/containers';
 
-import { selectTimeoutDuration } from '@src/redux/vault/selectors';
-import { changeTimeout } from '@src/redux/vault/actions';
-import { Timeout } from '@src/app/types';
+import { selectVaultTimeoutDurationSetting } from '@src/redux/vault/selectors';
+import { changeTimeoutDuration } from '@src/redux/vault/actions';
+import { TimeoutDurationSetting } from '@src/app/constants';
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();
-  const timeoutDuration = useSelector(selectTimeoutDuration);
+  const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
   const dispatch = useDispatch();
+
+  const MapTimeoutDurationSettingToTranslation = {
+    [TimeoutDurationSetting['1 min']]: t('1 min'),
+    [TimeoutDurationSetting['5 min']]: t('5 min'),
+    [TimeoutDurationSetting['15 min']]: t('15 min'),
+    [TimeoutDurationSetting['30 min']]: t('30 min'),
+    [TimeoutDurationSetting['1 hour']]: t('1 hour'),
+    [TimeoutDurationSetting['24 hours']]: t('24 hours')
+  };
 
   return (
     <ContentContainer>
@@ -38,31 +47,36 @@ export function TimeoutPageContent() {
           </Trans>
         </Typography>
         <List
-          listItems={(Object.keys(Timeout) as Array<keyof typeof Timeout>).map(
-            key => ({
-              id: Timeout[key],
-              Content: (
-                <ListItemElementContainer>
-                  <Typography type="body" weight="regular">
-                    <Trans t={t}>{Timeout[key]}</Trans>
-                  </Typography>
-                </ListItemElementContainer>
-              ),
-              Right: (
-                <ListItemElementContainer>
-                  <Checkbox checked={timeoutDuration === Timeout[key]} />
-                </ListItemElementContainer>
-              ),
-              onClick: () => {
-                dispatch(
-                  changeTimeout({
-                    timeoutDuration: Timeout[key],
-                    timeoutStartTime: Date.now()
-                  })
-                );
-              }
-            })
-          )}
+          listItems={(
+            Object.keys(TimeoutDurationSetting) as Array<
+              keyof typeof TimeoutDurationSetting
+            >
+          ).map(key => ({
+            id: key,
+            Content: (
+              <ListItemElementContainer>
+                <Typography type="body" weight="regular">
+                  <Trans
+                    t={t}
+                    i18nKey={key}
+                    values={MapTimeoutDurationSettingToTranslation}
+                  />
+                </Typography>
+              </ListItemElementContainer>
+            ),
+            Right: (
+              <ListItemElementContainer>
+                <Checkbox checked={timeoutDuration === key} />
+              </ListItemElementContainer>
+            ),
+            onClick: () => {
+              dispatch(
+                changeTimeoutDuration({
+                  timeoutDuration: TimeoutDurationSetting[key]
+                })
+              );
+            }
+          }))}
         />
       </TextContainer>
     </ContentContainer>
