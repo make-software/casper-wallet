@@ -52,6 +52,8 @@ export function App() {
     } else if (!vaultHasAccount) {
       navigate(RoutePath.NoAccounts);
     }
+    // `location.pathname` is needed as a dependency to enable vault and account checking for each route.
+    // For the first time it was necessary to make a secure click on the logo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, vaultDoesExists, vaultHasAccount, vaultIsLocked]);
 
