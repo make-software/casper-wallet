@@ -77,7 +77,7 @@ export function App() {
     let currentTime = Date.now();
 
     if (vaultDoesExists && !vaultIsLocked && vaultTimeoutStartTime) {
-      //   // Check up on opening popup
+      // Check up on opening popup
       if (currentTime - vaultTimeoutStartTime >= timeoutDurationValue) {
         dispatch(lockVault());
       } else {
