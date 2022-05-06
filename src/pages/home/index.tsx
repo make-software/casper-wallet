@@ -16,7 +16,7 @@ export function HomePageContent() {
       </HeaderTextContainer>
 
       <TextContainer>
-        <Typography type="body" weight="regular" variation="contentSecondary">
+        <Typography type="body" weight="regular" color="contentSecondary">
           Not implemented yet
         </Typography>
       </TextContainer>

@@ -1,7 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
 
 import { SvgIcon } from '@src/libs/ui';
+import { RouterPaths } from '@src/app/router/paths';
 
 import { MainmenuBar } from './mainmenu-bar';
 import { SubmenuBar } from './submenu-bar';
@@ -20,7 +22,9 @@ const Container = styled.header`
   padding: 0 16px;
 `;
 
-const LogoContainer = styled.div``;
+const LogoContainer = styled.div`
+  cursor: pointer;
+`;
 
 interface HeaderProps {
   withLock?: boolean;
@@ -29,11 +33,17 @@ interface HeaderProps {
 }
 
 export function Header({ withLock, withMenu, submenuActionType }: HeaderProps) {
+  const navigate = useNavigate();
+
   return (
     <>
       <Container>
         <LogoContainer>
-          <SvgIcon size={40} src="assets/icons/logo.svg" />
+          <SvgIcon
+            onClick={() => navigate(RouterPaths.Home)}
+            size={40}
+            src="assets/icons/logo.svg"
+          />
         </LogoContainer>
         <MainmenuBar withMenu={withMenu} withLock={withLock} />
       </Container>
