@@ -11,7 +11,7 @@ import { NoAccountsPageContent } from '@src/pages/no-accounts';
 import { UnlockVaultPageContent } from '@src/pages/unlock-vault';
 import { TimeoutPageContent } from '@src/pages/timeout';
 import { HomePageContent } from '@src/pages/home';
-import { NavigationMenuPageContent } from '@src/pages/menu';
+import { NavigationMenuPageContent } from '@src/pages/navigation-menu';
 
 import { Routes as RoutePath } from './routes';
 import { useDispatch, useSelector } from 'react-redux';
