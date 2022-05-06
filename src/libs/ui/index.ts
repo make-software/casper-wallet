@@ -14,6 +14,7 @@ export * from './components/flex-row/flex-row';
 
 export * from './utils/match-media';
 export * from './utils/match-size';
+export * from './utils/getColorFromTheme';
 export * from './theme-config';
 export * from './global-style';
 export * from './types';

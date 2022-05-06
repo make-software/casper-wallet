@@ -1,7 +1,13 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Trans, useTranslation } from 'react-i18next';
 
-import { Checkbox, List, Typography } from '@src/libs/ui';
+import {
+  ListItemElementContainer,
+  Typography,
+  Checkbox,
+  List
+} from '@src/libs/ui';
 import {
   ContentContainer,
   HeaderTextContainer,
@@ -9,26 +15,22 @@ import {
 } from '@src/layout/containers';
 
 import { selectVaultTimeoutDurationSetting } from '@src/redux/vault/selectors';
-import styled from 'styled-components';
 import { changeTimeoutDuration } from '@src/redux/vault/actions';
-import { Trans, useTranslation } from 'react-i18next';
 import { TimeoutDurationSetting } from '@src/app/constants';
-
-const ListItemElementContainer = styled.div`
-  height: 50px;
-
-  display: flex;
-  align-items: center;
-
-  &:last-child {
-    margin-right: 16px;
-  }
-`;
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();
   const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
   const dispatch = useDispatch();
+
+  const MapTimeoutDurationSettingToTranslation = {
+    [TimeoutDurationSetting['1 min']]: t('1 min'),
+    [TimeoutDurationSetting['5 min']]: t('5 min'),
+    [TimeoutDurationSetting['15 min']]: t('15 min'),
+    [TimeoutDurationSetting['30 min']]: t('30 min'),
+    [TimeoutDurationSetting['1 hour']]: t('1 hour'),
+    [TimeoutDurationSetting['24 hours']]: t('24 hours')
+  };
 
   return (
     <ContentContainer>
@@ -38,7 +40,7 @@ export function TimeoutPageContent() {
         </Typography>
       </HeaderTextContainer>
       <TextContainer>
-        <Typography type="body" weight="regular" variation="contentSecondary">
+        <Typography type="body" weight="regular" color="contentSecondary">
           <Trans t={t}>
             Your vault will be automatically locked after some period of
             inactivity.
@@ -54,7 +56,11 @@ export function TimeoutPageContent() {
             Content: (
               <ListItemElementContainer>
                 <Typography type="body" weight="regular">
-                  <Trans t={t} i18nKey={key} values={Timeout} />
+                  <Trans
+                    t={t}
+                    i18nKey={key}
+                    values={MapTimeoutDurationSettingToTranslation}
+                  />
                 </Typography>
               </ListItemElementContainer>
             ),

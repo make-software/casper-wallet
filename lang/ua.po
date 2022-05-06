@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-29T15:15:13.627Z\n"
-"PO-Revision-Date: 2022-04-29T15:15:13.628Z\n"
+"POT-Creation-Date: 2022-05-04T14:02:50.561Z\n"
+"PO-Revision-Date: 2022-05-04T14:02:50.561Z\n"
 
 msgid "Close"
 msgstr "Закрити"
@@ -17,14 +17,17 @@ msgstr "Ваше сховище готове, але ще немає облік�
 msgid "Please, create an account or import an account you already have."
 msgstr "Будь ласка, створіть обліковий запис або імпортуйте обліковий запис, який у вас уже є."
 
-msgid "Create Account"
+msgid "Create account"
 msgstr "Створити обліковий запис"
 
-msgid "Import Account"
+msgid "Import account"
 msgstr "Імпорт облікового запису"
 
+msgid "Connected sites"
+msgstr "Підключені сайти"
+
 msgid "Timeout"
-msgstr "Блокування за тайм-аутом"
+msgstr "Тайм-аут"
 
 msgid "Your vault will be automatically locked after some period of inactivity."
 msgstr "Ваше сховище буде автоматично заблоковано після певного періоду бездіяльності."
