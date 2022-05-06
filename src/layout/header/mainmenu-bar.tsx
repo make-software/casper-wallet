@@ -23,11 +23,11 @@ export function MainmenuBar({ withLock, withMenu }: MainmenuBarProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  function lockVaultHandle() {
+  function handleLockVault() {
     dispatch(lockVault());
   }
 
-  function toggleMenuHandle() {
+  function handleToggleMenu() {
     const state = location.state as LocationState;
 
     navigate(location.pathname, {
@@ -40,14 +40,14 @@ export function MainmenuBar({ withLock, withMenu }: MainmenuBarProps) {
     <Container>
       {withLock && (
         <SvgIcon
-          onClick={lockVaultHandle}
+          onClick={handleLockVault}
           src="assets/icons/unlock.svg"
           size={24}
         />
       )}
       {withMenu && (
         <SvgIcon
-          onClick={toggleMenuHandle}
+          onClick={handleToggleMenu}
           color="contentOnFill"
           src={
             (location.state as LocationState)?.showNavigationMenu
