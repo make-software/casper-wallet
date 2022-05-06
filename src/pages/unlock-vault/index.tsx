@@ -44,13 +44,13 @@ export function UnlockVaultPageContent() {
     //@ts-ignore TODO: fix type for `reValidateMode`
   } = useForm(formOptions);
 
-  function unlockVaultHandle() {
+  function handleUnlockVault() {
     navigate(-1);
     dispatch(unlockVault());
   }
 
   return (
-    <form onSubmit={handleSubmit(unlockVaultHandle)}>
+    <form onSubmit={handleSubmit(handleUnlockVault)}>
       <ContentContainer>
         <HeaderTextContainer>
           <Typography type="header" weight="bold">
@@ -58,7 +58,7 @@ export function UnlockVaultPageContent() {
           </Typography>
         </HeaderTextContainer>
         <TextContainer>
-          <Typography type="body" weight="regular" variation="contentSecondary">
+          <Typography type="body" weight="regular" color="contentSecondary">
             <Trans t={t}>Please enter the password to unlock.</Trans>
           </Typography>
         </TextContainer>

@@ -12,8 +12,9 @@ import { UnlockVaultPageContent } from '@src/pages/unlock-vault';
 import { TimeoutPageContent } from '@src/pages/timeout';
 import { HomePageContent } from '@src/pages/home';
 import { ResetVaultPageContent } from '@src/pages/reset-vault';
+import { NavigationMenuPageContent } from '@src/pages/navigation-menu';
 
-import { Routes as RoutePath } from './routes';
+import { RouterPaths as RoutePath } from './router/paths';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   selectVaultHasAccount,
@@ -24,10 +25,13 @@ import {
 } from '@src/redux/vault/selectors';
 import { lockVault } from '@src/redux/vault/actions';
 import { MapTimeoutDurationSettingToValue } from './constants';
+import { useTypedLocation } from './router';
 
 export function App() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useTypedLocation();
+  const state = location.state;
 
   const vaultIsLocked = useSelector(selectVaultIsLocked);
   const vaultDoesExists = useSelector(selectVaultDoesExist);
@@ -46,7 +50,10 @@ export function App() {
     } else if (!vaultHasAccount) {
       navigate(RoutePath.NoAccounts);
     }
-  }, [vaultDoesExists, vaultHasAccount, vaultIsLocked]);
+    // `location.pathname` is needed as a dependency to enable vault and account checking for each route.
+    // For the first time it was necessary to make a secure click on the logo
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, vaultDoesExists, vaultHasAccount, vaultIsLocked]);
 
   // Timer of locking app
   useEffect(() => {
@@ -86,51 +93,73 @@ export function App() {
 
   return (
     <Routes>
-      <Route
-        path={RoutePath.Home}
-        element={
-          <Layout
-            Header={<Header withMenu withLock />}
-            Content={<HomePageContent />}
+      {state?.showNavigationMenu ? (
+        <Route>
+          <Route
+            path="*"
+            element={
+              <Layout
+                Header={<Header withMenu withLock />}
+                Content={<NavigationMenuPageContent />}
+              />
+            }
           />
-        }
-      />
-      <Route
-        path={RoutePath.CreateVault}
-        element={
-          <Layout Header={<Header />} Content={<CreateVaultPageContent />} />
-        }
-      />
-      <Route
-        path={RoutePath.NoAccounts}
-        element={
-          <Layout
-            Header={<Header withMenu withLock />}
-            Content={<NoAccountsPageContent />}
+        </Route>
+      ) : (
+        <Route>
+          <Route
+            path={RoutePath.Home}
+            element={
+              <Layout
+                Header={<Header withMenu withLock />}
+                Content={<HomePageContent />}
+              />
+            }
           />
-        }
-      />
-      <Route
-        path={RoutePath.UnlockVault}
-        element={
-          <Layout Header={<Header />} Content={<UnlockVaultPageContent />} />
-        }
-      />
-      <Route
-        path={RoutePath.Timeout}
-        element={
-          <Layout
-            Header={<Header submenuActionType="close" withMenu withLock />}
-            Content={<TimeoutPageContent />}
+          <Route
+            path={RoutePath.ResetVault}
+            element={
+              <Layout Header={<Header />} Content={<ResetVaultPageContent />} />
+            }
           />
-        }
-      />
-      <Route
-        path={RoutePath.ResetVault}
-        element={
-          <Layout Header={<Header />} Content={<ResetVaultPageContent />} />
-        }
-      />
+          <Route
+            path={RoutePath.CreateVault}
+            element={
+              <Layout
+                Header={<Header />}
+                Content={<CreateVaultPageContent />}
+              />
+            }
+          />
+          <Route
+            path={RoutePath.NoAccounts}
+            element={
+              <Layout
+                Header={<Header withLock />}
+                Content={<NoAccountsPageContent />}
+              />
+            }
+          />
+          <Route
+            path={RoutePath.UnlockVault}
+            element={
+              <Layout
+                Header={<Header />}
+                Content={<UnlockVaultPageContent />}
+              />
+            }
+          />
+          <Route
+            path={RoutePath.Timeout}
+            element={
+              <Layout
+                Header={<Header submenuActionType="close" withMenu withLock />}
+                Content={<TimeoutPageContent />}
+              />
+            }
+          />
+        </Route>
+      )}
     </Routes>
   );
 }

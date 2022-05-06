@@ -34,22 +34,28 @@ msgid "Password"
 msgstr "Пароль"
 
 msgid "Confirm password"
-msgstr "Подтвердить пароль"
+msgstr "Подтвердите Пароль"
 
 msgid "Create Vault"
 msgstr "Создать хранилище"
+
+msgid "Create account"
+msgstr "Создать учетную запись"
+
+msgid "Import account"
+msgstr "Импорт учетной записи"
+
+msgid "Connected sites"
+msgstr "Подключенные сайты"
+
+msgid "Timeout"
+msgstr "Тайм-аут"
 
 msgid "Your vault is ready, but no accounts yet"
 msgstr "Ваше хранилище готово, но аккаунтов пока нет"
 
 msgid "Please, create an account or import an account you already have."
-msgstr "Пожалуйста, создайте аккаунт или импортируйте аккаунт, который у вас уже есть."
-
-msgid "Create account"
-msgstr "Создать аккаунт"
-
-msgid "Import account"
-msgstr "Импорт аккаунта"
+msgstr "Пожалуйста, создайте учетную запись или импортируйте учетную запись, которая у вас уже есть."
 
 msgid "Are you sure you want to reset your vault?"
 msgstr "Вы уверены, что хотите сбросить настройки хранилища?"
@@ -71,25 +77,22 @@ msgid "Cancel"
 msgstr "Отмена"
 
 msgid "1 min"
-msgstr "1 минута"
+msgstr "1 мин"
 
 msgid "5 min"
-msgstr "5 минут"
+msgstr "5 мин"
 
 msgid "15 min"
-msgstr "15 минут"
+msgstr "15 мин"
 
 msgid "30 min"
-msgstr "30 минут"
+msgstr "30 мин"
 
 msgid "1 hour"
 msgstr "1 час"
 
 msgid "24 hours"
 msgstr "24 часа"
-
-msgid "Timeout"
-msgstr "Тайм-аут"
 
 msgid "Your vault will be automatically locked after some period of inactivity."
 msgstr "Ваше хранилище будет автоматически заблокировано после некоторого периода бездействия."

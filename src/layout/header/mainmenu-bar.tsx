@@ -4,8 +4,8 @@ import { useDispatch } from 'react-redux';
 
 import { SvgIcon } from '@src/libs/ui';
 import { lockVault } from '@src/redux/vault/actions';
-import { useNavigate } from 'react-router-dom';
-import { Routes } from '@src/app/routes';
+import { useNavigationMenu } from '@src/app/router/use-navigation-menu';
+import { useTypedLocation } from '@src/app/router';
 
 const Container = styled.div`
   display: flex;
@@ -20,9 +20,10 @@ interface MainmenuBarProps {
 
 export function MainmenuBar({ withLock, withMenu }: MainmenuBarProps) {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const location = useTypedLocation();
+  const { toggleNavigationMenu } = useNavigationMenu();
 
-  function lockVaultHandle() {
+  function handleLockVault() {
     dispatch(lockVault());
   }
 
@@ -30,16 +31,20 @@ export function MainmenuBar({ withLock, withMenu }: MainmenuBarProps) {
     <Container>
       {withLock && (
         <SvgIcon
-          onClick={lockVaultHandle}
+          onClick={handleLockVault}
           src="assets/icons/unlock.svg"
           size={24}
         />
       )}
       {withMenu && (
         <SvgIcon
-          // Temporary implementation. Navigation should migrate to menu items
-          onClick={() => navigate(Routes.Timeout)}
-          src="assets/icons/burger-menu.svg"
+          onClick={toggleNavigationMenu}
+          color="contentOnFill"
+          src={
+            location.state?.showNavigationMenu
+              ? 'assets/icons/burger-close.svg'
+              : 'assets/icons/burger-menu.svg'
+          }
           size={24}
         />
       )}

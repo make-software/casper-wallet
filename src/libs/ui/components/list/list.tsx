@@ -3,6 +3,17 @@ import styled from 'styled-components';
 
 import { Tile } from '../tile/tile';
 
+export const ListItemElementContainer = styled.div`
+  height: 50px;
+
+  display: flex;
+  align-items: center;
+
+  & > span {
+    white-space: nowrap;
+  }
+`;
+
 const ListContainer = styled.div`
   margin: 24px 0;
 `;
@@ -11,8 +22,14 @@ const ClickableContainer = styled.div`
   cursor: ${({ onClick }) => (onClick ? 'pointer' : 'inherit')};
 `;
 
-const LeftContainer = styled(ClickableContainer)``;
-const RightContainer = styled(ClickableContainer)``;
+const LeftContainer = styled(ClickableContainer)`
+  margin-left: 16px;
+`;
+
+const RightContainer = styled(ClickableContainer)`
+  margin-right: 16px;
+`;
+
 const ContentContainer = styled(ClickableContainer)`
   width: 100%;
 `;

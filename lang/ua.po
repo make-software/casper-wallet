@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-29T16:46:21.718Z\n"
-"PO-Revision-Date: 2022-04-29T16:46:21.718Z\n"
+"POT-Creation-Date: 2022-05-04T14:02:50.561Z\n"
+"PO-Revision-Date: 2022-05-04T14:02:50.561Z\n"
 
 msgid "Close"
 msgstr "Закрити"
@@ -39,17 +39,23 @@ msgstr "Підтвердьте пароль"
 msgid "Create Vault"
 msgstr "Створити сховище"
 
-msgid "Your vault is ready, but no accounts yet"
-msgstr "Ваше сховище готове, але ще немає облікових записів"
-
-msgid "Please, create an account or import an account you already have."
-msgstr "Будь ласка, створіть обліковий запис або імпортуйте обліковий запис, який у вас уже є."
-
 msgid "Create account"
 msgstr "Створити обліковий запис"
 
 msgid "Import account"
 msgstr "Імпорт облікового запису"
+
+msgid "Connected sites"
+msgstr "Підключені сайти"
+
+msgid "Timeout"
+msgstr "Тайм-аут"
+
+msgid "Your vault is ready, but no accounts yet"
+msgstr "Ваше сховище готове, але ще немає облікових записів"
+
+msgid "Please, create an account or import an account you already have."
+msgstr "Будь ласка, створіть обліковий запис або імпортуйте обліковий запис, який у вас уже є."
 
 msgid "Are you sure you want to reset your vault?"
 msgstr "Ви впевнені, що хочете скинути налаштування свого сховища?"
@@ -87,9 +93,6 @@ msgstr "1 година"
 
 msgid "24 hours"
 msgstr "24 години"
-
-msgid "Timeout"
-msgstr "Тайм-аут"
 
 msgid "Your vault will be automatically locked after some period of inactivity."
 msgstr "Ваше сховище буде автоматично заблоковано після певного періоду бездіяльності."

@@ -5,7 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Typography, Button } from '@src/libs/ui';
 import { createAccount as createAccountAction } from '@src/redux/vault/actions';
-import { Routes } from '@src/app/routes';
+import { RouterPaths } from '@src/app/router/paths';
 
 import {
   ButtonsContainer,
@@ -21,7 +21,7 @@ export function NoAccountsPageContent() {
 
   function createAccount() {
     dispatch(createAccountAction({ name: 'First Account' }));
-    navigate(Routes.Home);
+    navigate(RouterPaths.Home);
   }
 
   return (
@@ -32,7 +32,7 @@ export function NoAccountsPageContent() {
         </Typography>
       </HeaderTextContainer>
       <TextContainer>
-        <Typography type="body" weight="regular" variation="contentSecondary">
+        <Typography type="body" weight="regular" color="contentSecondary">
           <Trans t={t}>
             Please, create an account or import an account you already have.
           </Trans>
