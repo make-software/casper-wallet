@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 
 import { SvgIcon } from '@src/libs/ui';
-import { Routes } from '@src/app/routes';
+import { RouterPaths } from '@src/app/router/paths';
 
 import { MainmenuBar } from './mainmenu-bar';
 import { SubmenuBar } from './submenu-bar';
@@ -40,7 +40,7 @@ export function Header({ withLock, withMenu, submenuActionType }: HeaderProps) {
       <Container>
         <LogoContainer>
           <SvgIcon
-            onClick={() => navigate(Routes.Home)}
+            onClick={() => navigate(RouterPaths.Home)}
             size={40}
             src="assets/icons/logo.svg"
           />

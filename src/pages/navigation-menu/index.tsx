@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { TimeoutDurationSetting } from '@src/app/constants';
-import { Routes } from '@src/app/routes';
+import { RouterPaths } from '@src/app/router/paths';
 
 import {
   List,
@@ -15,11 +15,14 @@ import {
 import { ContentContainer } from '@src/layout/containers';
 
 import { selectVaultTimeoutDurationSetting } from '@src/redux/vault/selectors';
+import { useNavigationMenu } from '@src/app/router/use-navigation-menu';
 
 export function NavigationMenuPageContent() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
+
+  const { closeNavigationMenu } = useNavigationMenu();
 
   const iconSize = 24;
 
@@ -117,7 +120,8 @@ export function NavigationMenuPageContent() {
               </ListItemElementContainer>
             ),
             onClick: () => {
-              navigate(Routes.Timeout);
+              closeNavigationMenu();
+              navigate(RouterPaths.Timeout);
             }
           }
         ]}

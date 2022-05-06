@@ -1,7 +1,7 @@
 import './i18n';
 
 import React, { useEffect } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 // import browser from 'webextension-polyfill';
 
 import { Layout, Header } from '@src/layout';
@@ -13,7 +13,7 @@ import { TimeoutPageContent } from '@src/pages/timeout';
 import { HomePageContent } from '@src/pages/home';
 import { NavigationMenuPageContent } from '@src/pages/navigation-menu';
 
-import { Routes as RoutePath } from './routes';
+import { RouterPaths as RoutePath } from './router/paths';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   selectVaultHasAccount,
@@ -24,16 +24,13 @@ import {
 } from '@src/redux/vault/selectors';
 import { lockVault } from '@src/redux/vault/actions';
 import { MapTimeoutDurationSettingToValue } from './constants';
-
-export interface LocationState {
-  showNavigationMenu?: boolean;
-}
+import { useTypedLocation } from './router';
 
 export function App() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const location = useLocation();
-  const state = location.state as LocationState;
+  const location = useTypedLocation();
+  const state = location.state;
 
   const vaultIsLocked = useSelector(selectVaultIsLocked);
   const vaultDoesExists = useSelector(selectVaultDoesExist);
