@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactSVG from 'react-inlinesvg';
 import styled from 'styled-components';
-import { ContentVariation, getContentVariationFromTheme } from '@src/libs/ui';
+import { ContentColor, getColorFromTheme } from '@src/libs/ui';
 
 type Ref = HTMLDivElement;
 
@@ -16,7 +16,7 @@ export interface SvgIconProps extends React.HTMLAttributes<Ref> {
   alt?: string;
   onClick?: (ev: any) => void;
   onMouseDown?: (ev: any) => void;
-  color?: ContentVariation;
+  color?: ContentColor;
   tooltip?: string;
   rotate?: boolean;
   marginLeft?: boolean;
@@ -30,7 +30,7 @@ const Container = styled('div').withConfig({
   size: number;
   width?: string | number;
   height?: string | number;
-  color?: ContentVariation;
+  color?: ContentColor;
   active?: boolean;
   rotate?: boolean;
   marginLeft?: boolean;
@@ -52,11 +52,11 @@ const Container = styled('div').withConfig({
     verticalAlign: 'middle',
     width: width != null ? width : size,
     height: height != null ? height : size,
-    color: getContentVariationFromTheme(theme, color),
+    color: getColorFromTheme(theme, color),
     svg: {
       display: 'block',
       fill: 'currentColor',
-      color: getContentVariationFromTheme(theme, color),
+      color: getColorFromTheme(theme, color),
       width: width != null ? width : size,
       height: height != null ? height : size
     },

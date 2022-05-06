@@ -16,7 +16,7 @@ import { ContentContainer } from '@src/layout/containers';
 
 import { selectVaultTimeoutDurationSetting } from '@src/redux/vault/selectors';
 
-export function MenuPageContent() {
+export function NavigationMenuPageContent() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
@@ -85,11 +85,7 @@ export function MenuPageContent() {
             ),
             Right: (
               <ListItemElementContainer>
-                <Typography
-                  type="body"
-                  weight="semiBold"
-                  variation="contentBlue"
-                >
+                <Typography type="body" weight="semiBold" color="contentBlue">
                   3
                 </Typography>
               </ListItemElementContainer>
@@ -106,11 +102,7 @@ export function MenuPageContent() {
             ),
             Right: (
               <ListItemElementContainer>
-                <Typography
-                  type="body"
-                  weight="semiBold"
-                  variation="contentBlue"
-                >
+                <Typography type="body" weight="semiBold" color="contentBlue">
                   {TimeoutDurationSetting[timeoutDuration]}
                 </Typography>
               </ListItemElementContainer>

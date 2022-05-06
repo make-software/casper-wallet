@@ -56,7 +56,7 @@ export function UnlockVaultPageContent() {
           </Typography>
         </HeaderTextContainer>
         <TextContainer>
-          <Typography type="body" weight="regular" variation="contentSecondary">
+          <Typography type="body" weight="regular" color="contentSecondary">
             <Trans t={t}>Please enter the password to unlock.</Trans>
           </Typography>
         </TextContainer>

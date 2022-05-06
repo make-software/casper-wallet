@@ -40,7 +40,7 @@ export function TimeoutPageContent() {
         </Typography>
       </HeaderTextContainer>
       <TextContainer>
-        <Typography type="body" weight="regular" variation="contentSecondary">
+        <Typography type="body" weight="regular" color="contentSecondary">
           <Trans t={t}>
             Your vault will be automatically locked after some period of
             inactivity.

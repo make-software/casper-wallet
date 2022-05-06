@@ -1,10 +1,20 @@
 import { DefaultTheme } from 'styled-components';
-import { ContentVariation } from '@src/libs/ui';
 
-export function getContentVariationFromTheme(
-  theme: DefaultTheme,
-  variant: ContentVariation
-) {
+export type ContentColor =
+  | 'inherit'
+  | 'contentPrimary'
+  | 'contentSecondary'
+  | 'contentTertiary'
+  | 'contentOnFill'
+  | 'contentBlue'
+  | 'contentRed'
+  | 'contentGreen'
+  | 'contentGreenOnFill';
+
+// can extend more color types later here if needed (like FillColor etc.) the utility below can be generic and can work with all of them
+export type Color = ContentColor;
+
+export function getColorFromTheme(theme: DefaultTheme, color: Color) {
   return {
     inherit: 'inherit',
     contentPrimary: theme.color.contentPrimary,
@@ -15,5 +25,5 @@ export function getContentVariationFromTheme(
     contentRed: theme.color.contentRed,
     contentGreen: theme.color.contentGreen,
     contentGreenOnFill: theme.color.contentGreenOnFill
-  }[variant];
+  }[color];
 }

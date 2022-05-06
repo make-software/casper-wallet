@@ -2,9 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { themeConfig } from '@src/libs/ui';
 
-type Color = 'fillBlue' | 'fillRed' | 'inherit';
+type LinkColor = 'fillBlue' | 'fillRed' | 'inherit';
 
-const getStateColor = (color: Color) => {
+const getStateColor = (color: LinkColor) => {
   return (
     // @ts-ignore
     {
@@ -30,7 +30,7 @@ const getStateColor = (color: Color) => {
 export interface LinkProps extends React.HTMLAttributes<Ref> {
   href?: string;
   target?: string;
-  color: Color;
+  color: LinkColor;
 }
 
 type Ref = HTMLAnchorElement;

@@ -11,7 +11,7 @@ import { NoAccountsPageContent } from '@src/pages/no-accounts';
 import { UnlockVaultPageContent } from '@src/pages/unlock-vault';
 import { TimeoutPageContent } from '@src/pages/timeout';
 import { HomePageContent } from '@src/pages/home';
-import { MenuPageContent } from '@src/pages/menu';
+import { NavigationMenuPageContent } from '@src/pages/menu';
 
 import { Routes as RoutePath } from './routes';
 import { useDispatch, useSelector } from 'react-redux';
@@ -99,7 +99,7 @@ export function App() {
             element={
               <Layout
                 Header={<Header withMenu withLock />}
-                Content={<MenuPageContent />}
+                Content={<NavigationMenuPageContent />}
               />
             }
           />

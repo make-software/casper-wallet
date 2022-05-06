@@ -32,7 +32,7 @@ export function NoAccountsPageContent() {
         </Typography>
       </HeaderTextContainer>
       <TextContainer>
-        <Typography type="body" weight="regular" variation="contentSecondary">
+        <Typography type="body" weight="regular" color="contentSecondary">
           <Trans t={t}>
             Please, create an account or import an account you already have.
           </Trans>

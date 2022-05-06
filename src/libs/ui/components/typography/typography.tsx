@@ -2,11 +2,7 @@ import React, { forwardRef } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import styled, { CSSObject, DefaultTheme } from 'styled-components';
 
-import {
-  BaseProps,
-  ContentVariation,
-  getContentVariationFromTheme
-} from '@src/libs/ui';
+import { BaseProps, ContentColor, getColorFromTheme } from '@src/libs/ui';
 
 type Ref = HTMLSpanElement | HTMLHeadingElement;
 
@@ -26,7 +22,7 @@ export type TypographyWeight =
   | 'bold';
 
 export interface BodyStylesProps extends BaseProps {
-  variation?: ContentVariation;
+  color?: ContentColor;
   uppercase?: boolean;
   capitalize?: boolean;
   monospace?: boolean;
@@ -43,7 +39,7 @@ function getBodyStyles(
   theme: DefaultTheme,
   {
     loading,
-    variation = 'inherit',
+    color = 'inherit',
     uppercase = false,
     capitalize = false,
     noWrap = false
@@ -51,7 +47,7 @@ function getBodyStyles(
 ): CSSObject {
   return {
     fontFamily: theme.typography.fontFamily.primary,
-    color: getContentVariationFromTheme(theme, variation),
+    color: getColorFromTheme(theme, color),
     whiteSpace: noWrap ? 'nowrap' : 'initial',
     ...(loading && {
       display: 'inline-block',
