@@ -1,7 +1,8 @@
 import './i18n';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
+import debounce from 'lodash.debounce';
 // import browser from 'webextension-polyfill';
 
 import { Layout, Header } from '@src/layout';
@@ -40,10 +41,6 @@ export function App() {
   );
   const vaultTimeoutStartTime = useSelector(selectVaultTimeoutStartTime);
 
-  const timeoutDurationValue =
-    MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
-  const [timer, setTimer] = useState(timeoutDurationValue);
-
   // App redirects
   useEffect(() => {
     if (vaultIsLocked) {
@@ -69,48 +66,46 @@ export function App() {
       'keypress'
     ];
 
-    const resetTimeout = () => {
-      setTimer(timeoutDurationValue);
+    function resetTimeout() {
       dispatch(resetTimeoutStartTime());
-    };
+    }
+
+    const handleResetTimeout = debounce(resetTimeout, 5000);
 
     // Reset times on user interaction
     for (let i in events) {
-      window.addEventListener(events[i], resetTimeout);
+      window.addEventListener(events[i], handleResetTimeout);
     }
 
     let interval: NodeJS.Timeout;
     let currentTime = Date.now();
 
     if (vaultDoesExists && !vaultIsLocked && vaultTimeoutStartTime) {
+      const timeoutDurationValue =
+        MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
       // Check up on opening popup
       if (currentTime - vaultTimeoutStartTime >= timeoutDurationValue) {
         dispatch(lockVault());
       } else {
-        const second = 1000;
         // Check up for opened popup
         interval = setInterval(() => {
-          if (timer > 0) {
-            setTimer(timer - second);
-          } else {
+          currentTime = Date.now();
+          if (currentTime - vaultTimeoutStartTime >= timeoutDurationValue) {
             dispatch(lockVault());
           }
-        }, second);
+        }, 1000);
       }
     }
     return () => {
       clearInterval(interval);
       for (let i in events) {
-        window.removeEventListener(events[i], resetTimeout);
+        window.removeEventListener(events[i], handleResetTimeout);
       }
     };
   }, [
     dispatch,
-    timer,
-    setTimer,
     vaultDoesExists,
     vaultIsLocked,
-    timeoutDurationValue,
     vaultTimeoutStartTime,
     vaultTimeoutDurationSetting
   ]);
