@@ -1,8 +1,7 @@
 import './i18n';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import debounce from 'lodash.debounce';
 // import browser from 'webextension-polyfill';
 
 import { Layout, Header } from '@src/layout';
@@ -15,109 +14,40 @@ import { HomePageContent } from '@src/pages/home';
 import { NavigationMenuPageContent } from '@src/pages/navigation-menu';
 
 import { RouterPaths as RoutePath } from './router/paths';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
   selectVaultHasAccount,
   selectVaultDoesExist,
-  selectVaultIsLocked,
-  selectVaultTimeoutDurationSetting,
-  selectVaultTimeoutStartTime
+  selectVaultIsLocked
 } from '@src/redux/vault/selectors';
-import { lockVault, resetTimeoutStartTime } from '@src/redux/vault/actions';
-import { MapTimeoutDurationSettingToValue } from './constants';
+
 import { useTypedLocation } from './router';
+import { useLockVaultTimeout } from '@src/app/hooks/useLockVaultTimeout';
 
 export function App() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const location = useTypedLocation();
   const state = location.state;
 
   const vaultIsLocked = useSelector(selectVaultIsLocked);
   const vaultDoesExists = useSelector(selectVaultDoesExist);
   const vaultHasAccount = useSelector(selectVaultHasAccount);
-  const vaultTimeoutDurationSetting = useSelector(
-    selectVaultTimeoutDurationSetting
-  );
-  const vaultTimeoutStartTime = useSelector(selectVaultTimeoutStartTime);
+
+  useLockVaultTimeout();
 
   // App redirects
   useEffect(() => {
     if (vaultIsLocked) {
       navigate(RoutePath.UnlockVault);
     } else if (!vaultDoesExists) {
-      navigate(RoutePath.CreateVault);
+      navigate(RoutePath.CreateVault, { replace: true });
     } else if (!vaultHasAccount) {
-      navigate(RoutePath.NoAccounts);
+      navigate(RoutePath.NoAccounts, { replace: true });
     }
     // `location.pathname` is needed as a dependency to enable vault and account checking for each route.
     // For the first time it was necessary to make a secure click on the logo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, vaultDoesExists, vaultHasAccount, vaultIsLocked]);
-
-  const timer = useRef<NodeJS.Timeout>();
-  // Timer of locking app
-  useEffect(() => {
-    const currentTime = Date.now();
-    const timeoutDurationValue =
-      MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
-    // Check up on opening popup
-    if (vaultDoesExists && !vaultIsLocked && vaultTimeoutStartTime) {
-      if (currentTime - vaultTimeoutStartTime >= timeoutDurationValue) {
-        dispatch(lockVault());
-      } else {
-        // For opened popup
-        timer.current = startTimeout(timeoutDurationValue);
-      }
-    }
-
-    function startTimeout(delay: number): NodeJS.Timeout {
-      return setTimeout(() => {
-        if (vaultDoesExists && !vaultIsLocked) {
-          dispatch(lockVault());
-        }
-      }, delay);
-    }
-
-    function resetTimeout() {
-      dispatch(resetTimeoutStartTime());
-
-      const timeoutDurationValue =
-        MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
-
-      if (timer.current) {
-        clearTimeout(timer.current);
-        timer.current = startTimeout(timeoutDurationValue);
-      }
-    }
-
-    const handleResetTimeout = debounce(resetTimeout, 5000);
-    const events = [
-      'load',
-      'mousemove',
-      'mousedown',
-      'click',
-      'scroll',
-      'keypress'
-    ];
-
-    for (let i in events) {
-      window.addEventListener(events[i], handleResetTimeout);
-    }
-
-    return () => {
-      timer.current && clearTimeout(timer.current);
-      for (let i in events) {
-        window.removeEventListener(events[i], handleResetTimeout);
-      }
-    };
-  }, [
-    dispatch,
-    vaultDoesExists,
-    vaultIsLocked,
-    vaultTimeoutDurationSetting,
-    vaultTimeoutStartTime
-  ]);
 
   return (
     <Routes>
