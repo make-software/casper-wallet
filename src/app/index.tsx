@@ -1,6 +1,6 @@
 import './i18n';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import debounce from 'lodash.debounce';
 // import browser from 'webextension-polyfill';
@@ -53,10 +53,45 @@ export function App() {
     // `location.pathname` is needed as a dependency to enable vault and account checking for each route.
     // For the first time it was necessary to make a secure click on the logo
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname, vaultDoesExists, vaultHasAccount, vaultIsLocked]);
+  }, [vaultDoesExists, vaultHasAccount, vaultIsLocked]);
 
+  const timer = useRef<NodeJS.Timeout>();
   // Timer of locking app
   useEffect(() => {
+    const currentTime = Date.now();
+    const timeoutDurationValue =
+      MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
+    // Check up on opening popup
+    if (vaultDoesExists && !vaultIsLocked && vaultTimeoutStartTime) {
+      if (currentTime - vaultTimeoutStartTime >= timeoutDurationValue) {
+        dispatch(lockVault());
+      } else {
+        // For opened popup
+        timer.current = startTimeout(timeoutDurationValue);
+      }
+    }
+
+    function startTimeout(delay: number): NodeJS.Timeout {
+      return setTimeout(() => {
+        if (vaultDoesExists && !vaultIsLocked) {
+          dispatch(lockVault());
+        }
+      }, delay);
+    }
+
+    function resetTimeout() {
+      dispatch(resetTimeoutStartTime());
+
+      const timeoutDurationValue =
+        MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
+
+      if (timer.current) {
+        clearTimeout(timer.current);
+        timer.current = startTimeout(timeoutDurationValue);
+      }
+    }
+
+    const handleResetTimeout = debounce(resetTimeout, 500);
     const events = [
       'load',
       'mousemove',
@@ -66,38 +101,12 @@ export function App() {
       'keypress'
     ];
 
-    function resetTimeout() {
-      dispatch(resetTimeoutStartTime());
-    }
-
-    const handleResetTimeout = debounce(resetTimeout, 5000);
-
-    // Reset times on user interaction
     for (let i in events) {
       window.addEventListener(events[i], handleResetTimeout);
     }
 
-    let interval: NodeJS.Timeout;
-    let currentTime = Date.now();
-
-    if (vaultDoesExists && !vaultIsLocked && vaultTimeoutStartTime) {
-      const timeoutDurationValue =
-        MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
-      // Check up on opening popup
-      if (currentTime - vaultTimeoutStartTime >= timeoutDurationValue) {
-        dispatch(lockVault());
-      } else {
-        // Check up for opened popup
-        interval = setInterval(() => {
-          currentTime = Date.now();
-          if (currentTime - vaultTimeoutStartTime >= timeoutDurationValue) {
-            dispatch(lockVault());
-          }
-        }, 1000);
-      }
-    }
     return () => {
-      clearInterval(interval);
+      timer.current && clearTimeout(timer.current);
       for (let i in events) {
         window.removeEventListener(events[i], handleResetTimeout);
       }
@@ -106,8 +115,8 @@ export function App() {
     dispatch,
     vaultDoesExists,
     vaultIsLocked,
-    vaultTimeoutStartTime,
-    vaultTimeoutDurationSetting
+    vaultTimeoutDurationSetting,
+    vaultTimeoutStartTime
   ]);
 
   return (
