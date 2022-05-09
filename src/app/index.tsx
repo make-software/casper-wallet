@@ -91,7 +91,7 @@ export function App() {
       }
     }
 
-    const handleResetTimeout = debounce(resetTimeout, 500);
+    const handleResetTimeout = debounce(resetTimeout, 5000);
     const events = [
       'load',
       'mousemove',
