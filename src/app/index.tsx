@@ -22,10 +22,10 @@ import {
 } from '@src/redux/vault/selectors';
 
 import { useLockVaultTimeout } from './hooks/use-lock-vault-timeout';
-import { useTypedLocation, useNavigate } from './router';
+import { useTypedLocation, useTypedNavigate } from './router';
 
 export function App() {
-  const navigate = useNavigate();
+  const navigate = useTypedNavigate();
   const location = useTypedLocation();
   const state = location.state;
 
@@ -38,7 +38,8 @@ export function App() {
   // App redirects
   useEffect(() => {
     if (vaultIsLocked) {
-      navigate(RoutePath.UnlockVault);
+      location.pathname !== RoutePath.UnlockVault &&
+        navigate(RoutePath.UnlockVault);
     } else if (!vaultDoesExists) {
       navigate(RoutePath.CreateVault, { replace: true });
     } else if (!vaultHasAccount) {

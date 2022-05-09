@@ -43,8 +43,8 @@ export function UnlockVaultPageContent() {
   } = useForm(formOptions);
 
   function handleUnlockVault() {
-    navigate(-1);
     dispatch(unlockVault());
+    navigate(-1);
   }
 
   return (
