@@ -45,7 +45,13 @@ export function App() {
     } else if (!vaultHasAccount) {
       navigate(RoutePath.NoAccounts, { replace: true });
     }
-  }, [navigate, vaultDoesExists, vaultHasAccount, vaultIsLocked]);
+  }, [
+    location.pathname,
+    navigate,
+    vaultDoesExists,
+    vaultHasAccount,
+    vaultIsLocked
+  ]);
 
   return (
     <Routes>
