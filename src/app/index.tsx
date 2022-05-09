@@ -1,7 +1,7 @@
 import './i18n';
 
 import React, { useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 // import browser from 'webextension-polyfill';
 
 import { Layout, Header } from '@src/layout';
@@ -21,8 +21,8 @@ import {
   selectVaultIsLocked
 } from '@src/redux/vault/selectors';
 
-import { useTypedLocation } from './router';
-import { useLockVaultTimeout } from '@src/app/hooks/useLockVaultTimeout';
+import { useLockVaultTimeout } from './hooks/use-lock-vault-timeout';
+import { useTypedLocation, useNavigate } from './router';
 
 export function App() {
   const navigate = useNavigate();
@@ -44,10 +44,7 @@ export function App() {
     } else if (!vaultHasAccount) {
       navigate(RoutePath.NoAccounts, { replace: true });
     }
-    // `location.pathname` is needed as a dependency to enable vault and account checking for each route.
-    // For the first time it was necessary to make a secure click on the logo
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname, vaultDoesExists, vaultHasAccount, vaultIsLocked]);
+  }, [navigate, vaultDoesExists, vaultHasAccount, vaultIsLocked]);
 
   return (
     <Routes>
