@@ -8,7 +8,7 @@ export enum TimeoutDurationSetting {
 }
 
 export const MapTimeoutDurationSettingToValue = {
-  [TimeoutDurationSetting['1 min']]: 1000 * 60,
+  [TimeoutDurationSetting['1 min']]: 1000 * 60 * 1,
   [TimeoutDurationSetting['5 min']]: 1000 * 60 * 5,
   [TimeoutDurationSetting['15 min']]: 1000 * 60 * 15,
   [TimeoutDurationSetting['30 min']]: 1000 * 60 * 30,

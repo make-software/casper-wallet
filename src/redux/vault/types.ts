@@ -9,6 +9,6 @@ export type VaultState = {
   password: string | null;
   isLocked: boolean;
   timeoutDurationSetting: TimeoutDurationSetting;
-  timeoutStartTime: number | null;
+  lastActivityTime: number | null;
   accounts: Account[];
 };

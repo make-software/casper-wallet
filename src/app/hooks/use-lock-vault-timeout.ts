@@ -1,85 +1,76 @@
-import { useRef, useEffect, useCallback } from 'react';
-import { lockVault, resetTimeoutStartTime } from '@src/redux/vault/actions';
-import debouncedResetTimeout from 'lodash.debounce';
+import { useRef, useEffect } from 'react';
+import { lockVault, refreshTimeout } from '@src/redux/vault/actions';
+import throttle from 'lodash.throttle';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
   selectVaultDoesExist,
   selectVaultIsLocked,
   selectVaultTimeoutDurationSetting,
-  selectVaultTimeoutStartTime
+  selectVaultLastActivityTime
 } from '@src/redux/vault/selectors';
 import { MapTimeoutDurationSettingToValue } from '../constants';
 
-export function useLockVaultTimeout() {
-  const timer = useRef<NodeJS.Timeout>();
+export function useVaultTimeoutController(): void {
+  const timeoutCounterRef = useRef<NodeJS.Timeout>();
   const dispatch = useDispatch();
 
-  const vaultTimeoutStartTime = useSelector(selectVaultTimeoutStartTime);
-  const vaultIsLocked = useSelector(selectVaultIsLocked);
   const vaultDoesExists = useSelector(selectVaultDoesExist);
+  const vaultIsLocked = useSelector(selectVaultIsLocked);
+  const vaultLastActivityTime = useSelector(selectVaultLastActivityTime);
   const vaultTimeoutDurationSetting = useSelector(
     selectVaultTimeoutDurationSetting
   );
+  const timeoutDurationValue =
+    MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
 
-  const startTimeout = useCallback(
-    (delay: number): NodeJS.Timeout => {
-      return setTimeout(() => {
-        if (vaultDoesExists && !vaultIsLocked) {
-          dispatch(lockVault());
-        }
-      }, delay);
-    },
-    [dispatch, vaultDoesExists, vaultIsLocked]
-  );
-
-  function resetTimeout() {
-    dispatch(resetTimeoutStartTime());
-
-    const timeoutDurationValue =
-      MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
-
-    if (timer.current) {
-      clearTimeout(timer.current);
-      timer.current = startTimeout(timeoutDurationValue);
-    }
-  }
-
-  const handleResetTimeout = debouncedResetTimeout(resetTimeout, 5000);
-
+  // should init/update the timeout counter on related state updates
+  // only this effect should manage ref instance to prevent complexity
   useEffect(() => {
-    const currentTime = Date.now();
-    const timeoutDurationValue =
-      MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
+    if (vaultDoesExists && !vaultIsLocked && vaultLastActivityTime) {
+      const currentTime = Date.now();
+      const timeoutExpired =
+        currentTime - vaultLastActivityTime >= timeoutDurationValue;
 
-    if (vaultDoesExists && !vaultIsLocked && vaultTimeoutStartTime) {
-      // Check if the stored timeout has expired
-      if (currentTime - vaultTimeoutStartTime >= timeoutDurationValue) {
+      if (timeoutExpired) {
         dispatch(lockVault());
       } else {
-        timer.current = startTimeout(timeoutDurationValue);
+        timeoutCounterRef.current && clearTimeout(timeoutCounterRef.current);
+        timeoutCounterRef.current = setTimeout(() => {
+          dispatch(lockVault());
+        }, timeoutDurationValue);
       }
     }
-
-    const events = ['mousemove', 'mousedown', 'click', 'scroll', 'keypress'];
-
-    for (let i in events) {
-      window.addEventListener(events[i], handleResetTimeout);
-    }
-
     return () => {
-      timer.current && clearTimeout(timer.current);
-      for (let i in events) {
-        window.removeEventListener(events[i], handleResetTimeout);
-      }
+      timeoutCounterRef.current && clearTimeout(timeoutCounterRef.current);
     };
   }, [
     dispatch,
-    startTimeout,
-    handleResetTimeout,
     vaultDoesExists,
     vaultIsLocked,
-    vaultTimeoutDurationSetting,
-    vaultTimeoutStartTime
+    vaultLastActivityTime,
+    timeoutDurationValue
   ]);
+
+  // should refresh timeout on any user activity
+  useEffect(() => {
+    const events = ['mousemove', 'mousedown', 'click', 'scroll', 'keypress'];
+    const throttleDelay = 5000;
+    const throttledRefreshTimeout = throttle(() => {
+      dispatch(refreshTimeout());
+    }, throttleDelay);
+
+    if (vaultDoesExists && !vaultIsLocked) {
+      for (let i in events) {
+        window.addEventListener(events[i], throttledRefreshTimeout);
+      }
+    }
+
+    return () => {
+      throttledRefreshTimeout.cancel();
+      for (let i in events) {
+        window.removeEventListener(events[i], throttledRefreshTimeout);
+      }
+    };
+  }, [dispatch, vaultDoesExists, vaultIsLocked]);
 }

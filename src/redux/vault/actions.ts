@@ -5,18 +5,19 @@ export const createVault = createAction(
   'CREATE_VAULT',
   (payload: { password: string }) => ({
     password: payload.password,
-    timeoutStartTime: Date.now()
+    lastActivityTime: Date.now()
   })
 )<{
   password: string;
-  timeoutStartTime: number;
+  lastActivityTime: number;
 }>();
 
 export const lockVault = createAction('LOCK_VAULT')<void>();
-export const unlockVault = createAction('UNLOCK_LOCK', () => ({
-  timeoutStartTime: Date.now()
+
+export const unlockVault = createAction('UNLOCK_VAULT', () => ({
+  lastActivityTime: Date.now()
 }))<{
-  timeoutStartTime: number;
+  lastActivityTime: number;
 }>();
 
 export const createAccount = createAction('CREATE_ACCOUNT')<{
@@ -27,15 +28,15 @@ export const changeTimeoutDuration = createAction(
   'CHANGE_TIMEOUT_DURATION',
   (payload: { timeoutDuration: TimeoutDurationSetting }) => ({
     timeoutDuration: payload.timeoutDuration,
-    timeoutStartTime: Date.now()
+    lastActivityTime: Date.now()
   })
 )<{
   timeoutDuration: TimeoutDurationSetting;
-  timeoutStartTime: number;
+  lastActivityTime: number;
 }>();
 
-export const resetTimeoutStartTime = createAction('RESTART_IDLE_TIMER', () => ({
-  timeoutStartTime: Date.now()
+export const refreshTimeout = createAction('REFRESH_TIMEOUT', () => ({
+  lastActivityTime: Date.now()
 }))<{
-  timeoutStartTime: number;
+  lastActivityTime: number;
 }>();

@@ -5,7 +5,7 @@ import {
   createAccount,
   createVault,
   lockVault,
-  resetTimeoutStartTime,
+  refreshTimeout,
   unlockVault
 } from './actions';
 import { VaultState } from './types';
@@ -17,17 +17,17 @@ const initialState: State = {
   password: null,
   isLocked: false,
   timeoutDurationSetting: TimeoutDurationSetting['5 min'],
-  timeoutStartTime: null,
+  lastActivityTime: null,
   accounts: []
 };
 
 export const reducer = createReducer(initialState)
   .handleAction(
     [createVault],
-    (state, { payload: { password, timeoutStartTime } }): State => ({
+    (state, { payload: { password, lastActivityTime } }): State => ({
       ...state,
       password,
-      timeoutStartTime
+      lastActivityTime
     })
   )
   .handleAction(
@@ -35,14 +35,14 @@ export const reducer = createReducer(initialState)
     (state, { payload }): State => ({
       ...state,
       isLocked: true,
-      timeoutStartTime: null
+      lastActivityTime: null
     })
   )
   .handleAction(
     unlockVault,
-    (state, { payload: { timeoutStartTime } }): State => ({
+    (state, { payload: { lastActivityTime } }): State => ({
       ...state,
-      timeoutStartTime,
+      lastActivityTime,
       isLocked: false
     })
   )
@@ -55,16 +55,16 @@ export const reducer = createReducer(initialState)
   )
   .handleAction(
     [changeTimeoutDuration],
-    (state, { payload: { timeoutDuration, timeoutStartTime } }): State => ({
+    (state, { payload: { timeoutDuration, lastActivityTime } }): State => ({
       ...state,
       timeoutDurationSetting: timeoutDuration,
-      timeoutStartTime
+      lastActivityTime
     })
   )
   .handleAction(
-    [resetTimeoutStartTime],
-    (state, { payload: { timeoutStartTime } }) => ({
+    [refreshTimeout],
+    (state, { payload: { lastActivityTime } }) => ({
       ...state,
-      timeoutStartTime
+      lastActivityTime
     })
   );

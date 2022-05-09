@@ -21,7 +21,7 @@ import {
   selectVaultIsLocked
 } from '@src/redux/vault/selectors';
 
-import { useLockVaultTimeout } from './hooks/use-lock-vault-timeout';
+import { useVaultTimeoutController } from './hooks/use-lock-vault-timeout';
 import { useTypedLocation, useTypedNavigate } from './router';
 
 export function App() {
@@ -33,7 +33,7 @@ export function App() {
   const vaultDoesExists = useSelector(selectVaultDoesExist);
   const vaultHasAccount = useSelector(selectVaultHasAccount);
 
-  useLockVaultTimeout();
+  useVaultTimeoutController();
 
   // App redirects
   useEffect(() => {

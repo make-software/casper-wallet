@@ -17,5 +17,5 @@ export const selectVaultTimeoutDurationSetting = (
   state: State
 ): TimeoutDurationSetting => state.vault.timeoutDurationSetting;
 
-export const selectVaultTimeoutStartTime = (state: State): number | null =>
-  state.vault.timeoutStartTime;
+export const selectVaultLastActivityTime = (state: State): number | null =>
+  state.vault.lastActivityTime;
