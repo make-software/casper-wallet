@@ -53,7 +53,7 @@ export function App() {
     // `location.pathname` is needed as a dependency to enable vault and account checking for each route.
     // For the first time it was necessary to make a secure click on the logo
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vaultDoesExists, vaultHasAccount, vaultIsLocked]);
+  }, [location.pathname, vaultDoesExists, vaultHasAccount, vaultIsLocked]);
 
   const timer = useRef<NodeJS.Timeout>();
   // Timer of locking app
