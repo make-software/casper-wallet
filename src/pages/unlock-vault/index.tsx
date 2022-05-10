@@ -32,17 +32,14 @@ export function UnlockVaultPageContent() {
     password: Yup.string().equals([vaultPassword], errorMessage)
   });
 
-  const formOptions = {
-    reValidateMode: 'onSubmit',
-    resolver: yupResolver(formSchema)
-  };
-
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty }
-    //@ts-ignore TODO: fix type for `reValidateMode`
-  } = useForm(formOptions);
+  } = useForm({
+    reValidateMode: 'onSubmit',
+    resolver: yupResolver(formSchema)
+  });
 
   function handleUnlockVault() {
     dispatch(unlockVault());
