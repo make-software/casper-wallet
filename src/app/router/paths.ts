@@ -3,5 +3,6 @@ export enum RouterPaths {
   CreateVault = '/create-vault',
   NoAccounts = '/no-accounts',
   UnlockVault = '/unlock-vault',
-  Timeout = '/timeout'
+  Timeout = '/timeout',
+  ResetVault = '/reset-vault'
 }

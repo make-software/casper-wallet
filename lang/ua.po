@@ -11,45 +11,6 @@ msgstr ""
 msgid "Close"
 msgstr "Закрити"
 
-msgid "Your vault is ready, but no accounts yet"
-msgstr "Ваше сховище готове, але ще немає облікових записів"
-
-msgid "Please, create an account or import an account you already have."
-msgstr "Будь ласка, створіть обліковий запис або імпортуйте обліковий запис, який у вас уже є."
-
-msgid "Create account"
-msgstr "Створити обліковий запис"
-
-msgid "Import account"
-msgstr "Імпорт облікового запису"
-
-msgid "Connected sites"
-msgstr "Підключені сайти"
-
-msgid "Timeout"
-msgstr "Тайм-аут"
-
-msgid "Your vault will be automatically locked after some period of inactivity."
-msgstr "Ваше сховище буде автоматично заблоковано після певного періоду бездіяльності."
-
-msgid "1 min"
-msgstr "1 хвилина"
-
-msgid "5 min"
-msgstr "5 хвилин"
-
-msgid "15 min"
-msgstr "15 хвилин"
-
-msgid "30 min"
-msgstr "30 хвилин"
-
-msgid "1 hour"
-msgstr "1 година"
-
-msgid "24 hours"
-msgstr "24 години"
-
 msgid "Should be at least"
 msgstr "Має бути не менше"
 
@@ -78,6 +39,64 @@ msgstr "Підтвердьте пароль"
 msgid "Create Vault"
 msgstr "Створити сховище"
 
+msgid "Create account"
+msgstr "Створити обліковий запис"
+
+msgid "Import account"
+msgstr "Імпорт облікового запису"
+
+msgid "Connected sites"
+msgstr "Підключені сайти"
+
+msgid "Timeout"
+msgstr "Тайм-аут"
+
+msgid "Your vault is ready, but no accounts yet"
+msgstr "Ваше сховище готове, але ще немає облікових записів"
+
+msgid "Please, create an account or import an account you already have."
+msgstr "Будь ласка, створіть обліковий запис або імпортуйте обліковий запис, який у вас уже є."
+
+msgid "Are you sure you want to reset your vault?"
+msgstr "Ви впевнені, що хочете скинути налаштування свого сховища?"
+
+msgid ""
+"All accounts will be removed. Make sure you have securely stored the recovery phrase for "
+"each account before proceeding."
+msgstr ""
+"Усі облікові записи буде видалено. Перш ніж продовжити, переконайтеся, що ви надійно зберегли фразу відновлення "
+"для кожного облікового запису."
+
+msgid "I’ve read and understand the above"
+msgstr "Я прочитав і зрозумів вищесказане"
+
+msgid "Reset vault"
+msgstr "Скинути сховище"
+
+msgid "Cancel"
+msgstr "Скасувати"
+
+msgid "1 min"
+msgstr "1 хвилина"
+
+msgid "5 min"
+msgstr "5 хвилин"
+
+msgid "15 min"
+msgstr "15 хвилин"
+
+msgid "30 min"
+msgstr "30 хвилин"
+
+msgid "1 hour"
+msgstr "1 година"
+
+msgid "24 hours"
+msgstr "24 години"
+
+msgid "Your vault will be automatically locked after some period of inactivity."
+msgstr "Ваше сховище буде автоматично заблоковано після певного періоду бездіяльності."
+
 msgid "Password is not correct"
 msgstr "Пароль не вірний"
 
@@ -89,6 +108,3 @@ msgstr "Будь ласка, введіть пароль, для розблок�
 
 msgid "Unlock vault"
 msgstr "Розблокувати сховище"
-
-msgid "Reset vault"
-msgstr "Скинути сховище"
