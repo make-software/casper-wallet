@@ -10,7 +10,7 @@ const navigatorAvailable = (): boolean =>
 
 type Language = Lang | string;
 
-const LanguageDetector = {
+const languageDetector = {
   name: 'customLanguageDetector',
   lookup(options: { lookupLocalStorage: string }) {
     let result: Language = Lang.EN; // default language. Used as fallback.
@@ -40,4 +40,4 @@ const LanguageDetector = {
   }
 };
 
-export default LanguageDetector;
+export default languageDetector;

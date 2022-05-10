@@ -49,7 +49,7 @@ export function Checkbox({ checked, onChange, label }: CheckboxProps) {
     >
       <SvgIcon src={iconSrc} size={24} />
       {label && (
-        <Typography type="body" weight="regular" variation="contentPrimary">
+        <Typography type="body" weight="regular" color="contentPrimary">
           {label}
         </Typography>
       )}

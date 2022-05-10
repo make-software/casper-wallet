@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 
-import { Routes } from '@src/app/routes';
+import { RouterPaths } from '@src/app/router';
 
 import {
   ContentContainer,
@@ -45,8 +45,8 @@ export function UnlockVaultPageContent() {
   } = useForm(formOptions);
 
   function handleUnlockVault() {
-    navigate(-1);
     dispatch(unlockVault());
+    navigate(-1);
   }
 
   return (
@@ -79,7 +79,7 @@ export function UnlockVaultPageContent() {
         <Button
           type="button"
           color="secondaryRed"
-          onClick={() => navigate(Routes.ResetVault)}
+          onClick={() => navigate(RouterPaths.ResetVault)}
         >
           {t('Reset vault')}
         </Button>
