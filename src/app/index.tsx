@@ -35,12 +35,15 @@ export function App() {
 
   // App redirects
   useEffect(() => {
-    if (vaultIsLocked) {
+    if (vaultIsLocked && location.pathname !== RouterPath.ResetVault) {
       location.pathname !== RouterPath.UnlockVault &&
         navigate(RouterPath.UnlockVault);
     } else if (!vaultDoesExists) {
       navigate(RouterPath.CreateVault, { replace: true });
-    } else if (!vaultHasAccount) {
+    } else if (
+      !vaultHasAccount &&
+      location.pathname !== RouterPath.ResetVault
+    ) {
       navigate(RouterPath.NoAccounts, { replace: true });
     }
   }, [
