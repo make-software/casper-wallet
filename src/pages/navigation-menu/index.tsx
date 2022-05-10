@@ -1,21 +1,18 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation, Trans } from 'react-i18next';
 
 import { TimeoutDurationSetting } from '@src/app/constants';
-import { RouterPaths } from '@src/app/router/paths';
-
+import { RouterPath, useNavigationMenu } from '@src/app/router';
+import { ContentContainer } from '@src/layout/containers';
 import {
   List,
   ListItemElementContainer,
   SvgIcon,
   Typography
 } from '@src/libs/ui';
-import { ContentContainer } from '@src/layout/containers';
-
 import { selectVaultTimeoutDurationSetting } from '@src/redux/vault/selectors';
-import { useNavigationMenu } from '@src/app/router/use-navigation-menu';
 
 export function NavigationMenuPageContent() {
   const { t } = useTranslation();
@@ -121,7 +118,7 @@ export function NavigationMenuPageContent() {
             ),
             onClick: () => {
               closeNavigationMenu();
-              navigate(RouterPaths.Timeout);
+              navigate(RouterPath.Timeout);
             }
           }
         ]}

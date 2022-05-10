@@ -1,4 +1,4 @@
-export enum RouterPaths {
+export enum RouterPath {
   Home = '/',
   CreateVault = '/create-vault',
   NoAccounts = '/no-accounts',

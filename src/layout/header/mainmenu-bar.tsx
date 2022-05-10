@@ -1,11 +1,10 @@
 import React from 'react';
-import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 
+import { useNavigationMenu, useTypedLocation } from '@src/app/router';
 import { SvgIcon } from '@src/libs/ui';
 import { lockVault } from '@src/redux/vault/actions';
-import { useNavigationMenu } from '@src/app/router/use-navigation-menu';
-import { useTypedLocation } from '@src/app/router';
 
 const Container = styled.div`
   display: flex;

@@ -5,7 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Typography, Button } from '@src/libs/ui';
 import { createAccount as createAccountAction } from '@src/redux/vault/actions';
-import { RouterPaths } from '@src/app/router/paths';
+import { RouterPath } from '@src/app/router';
 
 import {
   ButtonsContainer,
@@ -21,7 +21,7 @@ export function NoAccountsPageContent() {
 
   function createAccount() {
     dispatch(createAccountAction({ name: 'First Account' }));
-    navigate(RouterPaths.Home);
+    navigate(RouterPath.Home);
   }
 
   return (

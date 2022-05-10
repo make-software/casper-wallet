@@ -1,29 +1,26 @@
 import './i18n';
 
 import React, { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
-// import browser from 'webextension-polyfill';
-
-import { Layout, Header } from '@src/layout';
-
-import { CreateVaultPageContent } from '@src/pages/create-vault';
-import { NoAccountsPageContent } from '@src/pages/no-accounts';
-import { UnlockVaultPageContent } from '@src/pages/unlock-vault';
-import { TimeoutPageContent } from '@src/pages/timeout';
-import { HomePageContent } from '@src/pages/home';
-import { ResetVaultPageContent } from '@src/pages/reset-vault';
-import { NavigationMenuPageContent } from '@src/pages/navigation-menu';
-
-import { RouterPaths as RoutePath } from './router/paths';
 import { useSelector } from 'react-redux';
+import { Route, Routes } from 'react-router-dom';
+
+// import browser from 'webextension-polyfill';
+import { Header, Layout } from '@src/layout';
+import { CreateVaultPageContent } from '@src/pages/create-vault';
+import { HomePageContent } from '@src/pages/home';
+import { NavigationMenuPageContent } from '@src/pages/navigation-menu';
+import { NoAccountsPageContent } from '@src/pages/no-accounts';
+import { ResetVaultPageContent } from '@src/pages/reset-vault';
+import { TimeoutPageContent } from '@src/pages/timeout';
+import { UnlockVaultPageContent } from '@src/pages/unlock-vault';
 import {
-  selectVaultHasAccount,
   selectVaultDoesExist,
+  selectVaultHasAccount,
   selectVaultIsLocked
 } from '@src/redux/vault/selectors';
 
 import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
-import { useTypedLocation, useTypedNavigate } from './router';
+import { RouterPath, useTypedLocation, useTypedNavigate } from './router';
 
 export function App() {
   const navigate = useTypedNavigate();
@@ -39,12 +36,12 @@ export function App() {
   // App redirects
   useEffect(() => {
     if (vaultIsLocked) {
-      location.pathname !== RoutePath.UnlockVault &&
-        navigate(RoutePath.UnlockVault);
+      location.pathname !== RouterPath.UnlockVault &&
+        navigate(RouterPath.UnlockVault);
     } else if (!vaultDoesExists) {
-      navigate(RoutePath.CreateVault, { replace: true });
+      navigate(RouterPath.CreateVault, { replace: true });
     } else if (!vaultHasAccount) {
-      navigate(RoutePath.NoAccounts, { replace: true });
+      navigate(RouterPath.NoAccounts, { replace: true });
     }
   }, [
     location.pathname,
@@ -71,7 +68,7 @@ export function App() {
       ) : (
         <Route>
           <Route
-            path={RoutePath.Home}
+            path={RouterPath.Home}
             element={
               <Layout
                 Header={<Header withMenu withLock />}
@@ -80,13 +77,13 @@ export function App() {
             }
           />
           <Route
-            path={RoutePath.ResetVault}
+            path={RouterPath.ResetVault}
             element={
               <Layout Header={<Header />} Content={<ResetVaultPageContent />} />
             }
           />
           <Route
-            path={RoutePath.CreateVault}
+            path={RouterPath.CreateVault}
             element={
               <Layout
                 Header={<Header />}
@@ -95,7 +92,7 @@ export function App() {
             }
           />
           <Route
-            path={RoutePath.NoAccounts}
+            path={RouterPath.NoAccounts}
             element={
               <Layout
                 Header={<Header withLock />}
@@ -104,7 +101,7 @@ export function App() {
             }
           />
           <Route
-            path={RoutePath.UnlockVault}
+            path={RouterPath.UnlockVault}
             element={
               <Layout
                 Header={<Header />}
@@ -113,7 +110,7 @@ export function App() {
             }
           />
           <Route
-            path={RoutePath.Timeout}
+            path={RouterPath.Timeout}
             element={
               <Layout
                 Header={<Header submenuActionType="close" withMenu withLock />}

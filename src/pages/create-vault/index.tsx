@@ -7,7 +7,7 @@ import { FieldValues, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 
-import { RouterPaths } from '@src/app/router/paths';
+import { RouterPath } from '@src/app/router';
 import { createVault } from '@src/redux/vault/actions';
 
 import {
@@ -72,7 +72,7 @@ export function CreateVaultPageContent() {
   function onSubmit(data: FieldValues) {
     dispatch(createVault({ password: data.password }));
 
-    navigate(RouterPaths.NoAccounts);
+    navigate(RouterPath.NoAccounts);
   }
 
   return (
