@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { Trans, useTranslation } from 'react-i18next';
+
 import {
   ContentContainer,
   ButtonsContainer,
@@ -7,22 +10,20 @@ import {
 } from '@src/layout/containers';
 
 import { Typography, Button, Checkbox } from '@src/libs/ui';
-import { Trans, useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useTypedNavigate } from '@src/app/router';
 import { resetVault } from '@src/redux/vault/actions';
 
 export function ResetVaultPageContent() {
-  const [checked, setCheckedStatus] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  function resetVaultHandle() {
+  function handleResetVault() {
     dispatch(resetVault());
   }
 
-  function cancelHandle() {
+  function handleCancel() {
     navigate(-1);
   }
 
@@ -35,7 +36,7 @@ export function ResetVaultPageContent() {
           </Typography>
         </HeaderTextContainer>
         <TextContainer>
-          <Typography type="body" weight="regular" variation="contentSecondary">
+          <Typography type="body" weight="regular" color="contentSecondary">
             <Trans t={t}>
               All accounts will be removed. Make sure you have securely stored
               the recovery phrase for each account before proceeding.
@@ -46,19 +47,19 @@ export function ResetVaultPageContent() {
       <ButtonsContainer>
         <Checkbox
           label={t('I’ve read and understand the above')}
-          checked={checked}
+          checked={isChecked}
           onChange={(value: boolean) => {
-            setCheckedStatus(value);
+            setIsChecked(value);
           }}
         />
         <Button
-          onClick={resetVaultHandle}
+          onClick={handleResetVault}
           color="primaryRed"
-          disabled={!checked}
+          disabled={!isChecked}
         >
           <Trans t={t}>Reset vault</Trans>
         </Button>
-        <Button onClick={cancelHandle} color="secondaryBlue">
+        <Button onClick={handleCancel} color="secondaryBlue">
           <Trans t={t}>Cancel</Trans>
         </Button>
       </ButtonsContainer>
