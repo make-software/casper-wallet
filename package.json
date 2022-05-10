@@ -17,11 +17,12 @@
     "format:check": "prettier --check 'src/*.{js,jsx,ts,tsx,json,md}'",
     "format:write": "prettier --write 'src/*.{js,jsx,ts,tsx,json,md}'",
     "lint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
+    "tsc": "tsc -p ./ --noEmit",
     "test": "jest --no-cache",
     "prepare": "husky install",
     "locale:extract_pot": "i18next 'src/**/*.{ts,tsx}' && node scripts/locale_extract_pot.js",
     "locale:update_translations": "node scripts/locale_update_translations.js",
-    "ci-check": "npm run format:check && npm run lint && npm run test"
+    "ci-check": "npm run format:check && npm run lint && npm run tsc && npm run test"
   },
   "lint-staged": {
     "*.md": "markdownlint",
