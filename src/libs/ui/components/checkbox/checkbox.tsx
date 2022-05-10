@@ -20,7 +20,7 @@ const StyledFlexRow = styled(FlexRow)<{
     }
   },
   span: {
-    color: theme.color.fillBlue
+    color: theme.color.contentPrimary
   }
 }));
 
@@ -49,7 +49,7 @@ export function Checkbox({ checked, onChange, label }: CheckboxProps) {
     >
       <SvgIcon src={iconSrc} size={24} />
       {label && (
-        <Typography type="body" weight="regular">
+        <Typography type="body" weight="regular" color="contentPrimary">
           {label}
         </Typography>
       )}

@@ -12,6 +12,8 @@ export const createVault = createAction(
   lastActivityTime: number;
 }>();
 
+export const resetVault = createAction('RESET_VAULT')<void>();
+
 export const lockVault = createAction('LOCK_VAULT')<void>();
 
 export const unlockVault = createAction('UNLOCK_VAULT', () => ({

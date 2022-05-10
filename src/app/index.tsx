@@ -11,6 +11,7 @@ import { NoAccountsPageContent } from '@src/pages/no-accounts';
 import { UnlockVaultPageContent } from '@src/pages/unlock-vault';
 import { TimeoutPageContent } from '@src/pages/timeout';
 import { HomePageContent } from '@src/pages/home';
+import { ResetVaultPageContent } from '@src/pages/reset-vault';
 import { NavigationMenuPageContent } from '@src/pages/navigation-menu';
 
 import { RouterPaths as RoutePath } from './router/paths';
@@ -21,7 +22,7 @@ import {
   selectVaultIsLocked
 } from '@src/redux/vault/selectors';
 
-import { useVaultTimeoutController } from './hooks/use-lock-vault-timeout';
+import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
 import { useTypedLocation, useTypedNavigate } from './router';
 
 export function App() {
@@ -76,6 +77,12 @@ export function App() {
                 Header={<Header withMenu withLock />}
                 Content={<HomePageContent />}
               />
+            }
+          />
+          <Route
+            path={RoutePath.ResetVault}
+            element={
+              <Layout Header={<Header />} Content={<ResetVaultPageContent />} />
             }
           />
           <Route

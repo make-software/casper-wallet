@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-05-04T14:02:50.561Z\n"
-"PO-Revision-Date: 2022-05-04T14:02:50.561Z\n"
+"POT-Creation-Date: 2022-05-04T14:16:26.401Z\n"
+"PO-Revision-Date: 2022-05-04T14:16:26.401Z\n"
 
 msgid "Close"
 msgstr "Close"
@@ -57,6 +57,25 @@ msgstr "Your vault is ready, but no accounts yet"
 msgid "Please, create an account or import an account you already have."
 msgstr "Please, create an account or import an account you already have."
 
+msgid "Are you sure you want to reset your vault?"
+msgstr "Are you sure you want to reset your vault?"
+
+msgid ""
+"All accounts will be removed. Make sure you have securely stored the recovery phrase for "
+"each account before proceeding."
+msgstr ""
+"All accounts will be removed. Make sure you have securely stored the recovery phrase for "
+"each account before proceeding."
+
+msgid "I’ve read and understand the above"
+msgstr "I’ve read and understand the above"
+
+msgid "Reset vault"
+msgstr "Reset vault"
+
+msgid "Cancel"
+msgstr "Cancel"
+
 msgid "1 min"
 msgstr "1 min"
 
@@ -89,6 +108,3 @@ msgstr "Please enter the password to unlock."
 
 msgid "Unlock vault"
 msgstr "Unlock vault"
-
-msgid "Reset vault"
-msgstr "Reset vault"

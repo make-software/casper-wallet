@@ -1,6 +1,6 @@
 {
   "Close": "Закрыть",
-  "Should be at least": "Должно быть как минимум",
+  "Should be at least": "Должно быть не менее",
   "characters": "символов",
   "Passwords don't match": "Пароли не совпадают",
   "Create new vault": "Создайте новое хранилище",
@@ -8,6 +8,11 @@
   "Password": "Пароль",
   "Confirm password": "Подтвердите Пароль",
   "Create Vault": "Создать хранилище",
+  "Are you sure you want to reset your vault?": "Вы уверены, что хотите сбросить настройки хранилища?",
+  "All accounts will be removed. Make sure you have securely stored the recovery phrase for each account before proceeding.": "Все аккаунты будут удалены. Прежде чем продолжить, убедитесь, что вы надежно сохранили фразу восстановления для каждой учетной записи.",
+  "I’ve read and understand the above": "Я прочитал и понял вышесказанное",
+  "Reset vault": "Сбросить хранилище",
+  "Cancel": "Отмена",
   "Create account": "Создать учетную запись",
   "Import account": "Импорт учетной записи",
   "Connected sites": "Подключенные сайты",
@@ -24,6 +29,5 @@
   "Password is not correct": "Неверный пароль",
   "Your vault is locked": "Ваше хранилище заблокировано",
   "Please enter the password to unlock.": "Пожалуйста, введите пароль для разблокировки.",
-  "Unlock vault": "Разблокировать хранилище",
-  "Reset vault": "Сбросить хранилище"
+  "Unlock vault": "Разблокировать хранилище"
 }
