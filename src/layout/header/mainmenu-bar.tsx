@@ -2,9 +2,11 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { useNavigationMenu, useTypedLocation } from '@src/app/router';
-import { SvgIcon } from '@src/libs/ui';
-import { lockVault } from '@src/redux/vault/actions';
+import { useTypedLocation } from '@src/hooks';
+import { useNavigationMenu } from '@popup/router';
+
+import { SvgIcon } from '@libs/ui';
+import { lockVault } from '@libs/redux/vault/actions';
 
 const Container = styled.div`
   display: flex;

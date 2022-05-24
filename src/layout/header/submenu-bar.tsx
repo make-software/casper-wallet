@@ -1,9 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { Link, Typography } from '@src/libs/ui';
+import { Link, Typography, SvgIcon } from '@src/libs/ui';
+import { RouterPath } from '@src/apps/popup/router';
 
 const Container = styled.div`
   height: 56px;
@@ -14,7 +15,11 @@ const Container = styled.div`
   border-bottom: 0.5px solid ${({ theme }) => theme.color.borderPrimary};
 `;
 
-// TODO: implement `back` and `cancel` types
+const LinkWithIcon = styled(Link)`
+  display: flex;
+  align-items: center;
+`;
+
 interface SubmenuBarProps {
   actionType: 'back' | 'close' | 'cancel';
 }
@@ -28,9 +33,35 @@ export function SubmenuBar({ actionType }: SubmenuBarProps) {
       return (
         <Container>
           <Typography type="body" weight="semiBold">
-            <Link onClick={() => navigate(-1)} color="fillBlue">
-              {t('Close')}
+            <Link onClick={() => navigate(RouterPath.Home)} color="fillBlue">
+              <Trans t={t}>Close</Trans>
             </Link>
+          </Typography>
+        </Container>
+      );
+    case 'cancel':
+      return (
+        <Container>
+          <Typography type="body" weight="semiBold">
+            <Link onClick={() => navigate(RouterPath.Home)} color="fillBlue">
+              <Trans t={t}>Cancel</Trans>
+            </Link>
+          </Typography>
+        </Container>
+      );
+    case 'back':
+      return (
+        <Container>
+          <Typography type="body" weight="semiBold">
+            <LinkWithIcon onClick={() => navigate(-1)} color="fillBlue">
+              <SvgIcon
+                src="assets/icons/chevron.svg"
+                color="contentBlue"
+                rotate={{ axis: 'Y', deg: 180 }}
+                size={24}
+              />
+              <Trans t={t}>Back</Trans>
+            </LinkWithIcon>
           </Typography>
         </Container>
       );

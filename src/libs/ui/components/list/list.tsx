@@ -3,11 +3,15 @@ import styled from 'styled-components';
 
 import { Tile } from '../tile/tile';
 
-export const ListItemElementContainer = styled.div`
+interface ListItemElementContainerProps {
+  gap?: number;
+}
+export const ListItemElementContainer = styled.div<ListItemElementContainerProps>`
   height: 50px;
 
   display: flex;
   align-items: center;
+  gap: ${({ gap }) => (gap ? `${gap}px` : 'inherit')};
 
   & > span {
     white-space: nowrap;

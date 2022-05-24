@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 
 import { SvgIcon } from '@src/libs/ui';
-import { RouterPath } from '@src/app/router';
+import { RouterPath } from '@src/apps/popup/router';
 
 import { MainmenuBar } from './mainmenu-bar';
 import { SubmenuBar } from './submenu-bar';
