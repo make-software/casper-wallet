@@ -58,6 +58,11 @@ export function ImportAccountWithFileContentPage() {
       }),
     name: Yup.string()
       .required('Name is required')
+      .max(20, 'Account name can’t be longer than 20 characters')
+      .matches(
+        /^[\daA-zZ\s]+$/,
+        'Account name can’t contain special characters'
+      )
       .test('unique', 'Account name is already taken', value => {
         return !existingAccountNames.includes(value as string);
       })
