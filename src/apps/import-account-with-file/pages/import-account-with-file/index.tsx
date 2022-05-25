@@ -91,7 +91,9 @@ export function ImportAccountWithFileContentPage() {
 
       if (!fileContents || fileContents.includes('PUBLIC KEY')) {
         console.log("There isn't private key in file");
-        navigate(RouterPath.ImportAccountWithFileFailure);
+        navigate(RouterPath.ImportAccountWithFileFailure, {
+          state: { message: t("There isn't private key in file") }
+        });
 
         return;
       }
@@ -107,7 +109,9 @@ export function ImportAccountWithFileContentPage() {
 
         if (!algorithm) {
           console.log('Unknown algorithm');
-          navigate(RouterPath.ImportAccountWithFileFailure);
+          navigate(RouterPath.ImportAccountWithFileFailure, {
+            state: { message: t('Unknown algorithm') }
+          });
 
           return;
         }
@@ -119,12 +123,11 @@ export function ImportAccountWithFileContentPage() {
 
         const secretKeyBase64 = encodeBase64(decodeBase16(hexKey));
 
-        console.log('existingPrivateKeys', existingPrivateKeys);
-        console.log('secretKeyBase64', secretKeyBase64);
-
         if (existingPrivateKeys.includes(secretKeyBase64)) {
           console.log('Private key is already exists');
-          navigate(RouterPath.ImportAccountWithFileFailure);
+          navigate(RouterPath.ImportAccountWithFileFailure, {
+            state: { message: t('Secret key is already imported') }
+          });
 
           return;
         }

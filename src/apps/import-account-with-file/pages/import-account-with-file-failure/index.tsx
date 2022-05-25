@@ -1,7 +1,7 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { useTypedNavigate } from '@src/hooks';
+import { useTypedLocation, useTypedNavigate } from '@src/hooks';
 
 import {
   ButtonsContainer,
@@ -18,6 +18,8 @@ export function ImportAccountWithFileFailureContentPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
   const { closeWindow } = useSeparatedWindow();
+  const location = useTypedLocation();
+  const state = location.state;
 
   return (
     <ContentContainer>
@@ -28,9 +30,9 @@ export function ImportAccountWithFileFailureContentPage() {
       </HeaderTextContainer>
       <TextContainer>
         <Typography type="body" weight="regular" color="contentSecondary">
-          <Trans t={t}>
-            We couldn't import your account. Please try again.
-          </Trans>
+          {state?.message
+            ? state.message
+            : t("We couldn't import your account. Please try again.")}
         </Typography>
       </TextContainer>
       <ButtonsContainer>
