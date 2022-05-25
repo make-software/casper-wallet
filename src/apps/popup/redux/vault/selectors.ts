@@ -12,6 +12,14 @@ export const selectVaultHasAccount = (state: RootState): boolean =>
 export const selectVaultAccounts = (state: RootState): Account[] =>
   state.vault.accounts;
 
+const selectAccountName = (_: RootState, accountName: string) => accountName;
+export const selectVaultAccountByName = createSelector(
+  selectVaultAccounts,
+  selectAccountName,
+  (accounts, accountName) =>
+    accounts.find(account => account.name === accountName)
+);
+
 export const selectVaultAccountsNames = createSelector(
   selectVaultAccounts,
   accounts => accounts.map(account => account.name)

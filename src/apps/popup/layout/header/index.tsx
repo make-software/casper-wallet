@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { RouterPath } from '@popup/router';
@@ -12,9 +12,15 @@ interface HeaderProps {
   withLock?: boolean;
   withMenu?: boolean;
   submenuActionType?: 'back' | 'close' | 'cancel';
+  SubmenuActionBar?: ReactElement;
 }
 
-export function Header({ withLock, withMenu, submenuActionType }: HeaderProps) {
+export function Header({
+  withLock,
+  withMenu,
+  submenuActionType,
+  SubmenuActionBar
+}: HeaderProps) {
   const navigate = useNavigate();
 
   return (
@@ -25,7 +31,12 @@ export function Header({ withLock, withMenu, submenuActionType }: HeaderProps) {
         </LogoContainer>
         <MainmenuBar withMenu={withMenu} withLock={withLock} />
       </HeaderContainer>
-      {submenuActionType && <SubmenuBar actionType={submenuActionType} />}
+      {submenuActionType && (
+        <SubmenuBar
+          actionType={submenuActionType}
+          ActionBar={SubmenuActionBar}
+        />
+      )}
     </>
   );
 }
