@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { Button, Typography } from '@libs/ui';
 import {
@@ -17,6 +18,7 @@ import { removeAccount } from '@popup/redux/vault/actions';
 export function RemoveAccountPageContent() {
   const navigate = useTypedNavigate();
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const { accountName } = useParams();
 
   const handleRemoveAccount = useCallback(() => {
@@ -38,19 +40,23 @@ export function RemoveAccountPageContent() {
     <ContentContainer>
       <HeaderTextContainer>
         <Typography type="header" weight="bold">
-          Remove account?
+          <Trans t={t}>Remove account?</Trans>
         </Typography>
       </HeaderTextContainer>
       <TextContainer>
         <Typography type="body" weight="regular" color="contentSecondary">
-          Are you sure you want to remove this account. This action can’t be
-          undone.
+          <Trans t={t}>
+            Are you sure you want to remove this account. This action can’t be
+            undone.
+          </Trans>
         </Typography>
       </TextContainer>
       <ButtonsContainer>
-        <Button onClick={handleRemoveAccount}>Remove</Button>
+        <Button onClick={handleRemoveAccount}>
+          <Trans t={t}>Remove</Trans>
+        </Button>
         <Button onClick={() => navigate(RouterPath.Home)} color="secondaryBlue">
-          Cancel
+          <Trans t={t}>Cancel</Trans>
         </Button>
       </ButtonsContainer>
     </ContentContainer>
