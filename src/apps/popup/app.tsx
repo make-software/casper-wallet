@@ -30,6 +30,7 @@ import {
   AccountSettingsActionsGroup
 } from '@popup/pages/account-settings';
 import { RemoveAccountPageContent } from '@popup/pages/remove-account';
+import { RenameAccountPageContent } from '@popup/pages/rename-account';
 
 export function App() {
   const navigate = useTypedNavigate();
@@ -126,6 +127,15 @@ export function App() {
               <Layout
                 Header={<Header withLock withMenu submenuActionType="back" />}
                 Content={<RemoveAccountPageContent />}
+              />
+            }
+          />
+          <Route
+            path={RouterPath.RenameAccount}
+            element={
+              <Layout
+                Header={<Header withLock withMenu submenuActionType="back" />}
+                Content={<RenameAccountPageContent />}
               />
             }
           />

@@ -25,6 +25,10 @@ export const unlockVault = createAction('UNLOCK_VAULT', () => ({
 
 export const importAccount = createAction('IMPORT_ACCOUNT')<Account>();
 export const removeAccount = createAction('REMOVE_ACCOUNT')<{ name: string }>();
+export const renameAccount = createAction('RENAME_ACCOUNT')<{
+  oldName: string;
+  nextName: string;
+}>();
 
 export const changeTimeoutDuration = createAction(
   'CHANGE_TIMEOUT_DURATION',

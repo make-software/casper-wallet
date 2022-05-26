@@ -2,10 +2,11 @@ import React, { useCallback } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { Trans, useTranslation } from 'react-i18next';
+import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import * as Yup from 'yup';
 
-import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
-import { RouterPath, useTypedNavigate } from '@import-account-with-file/router';
+import { useFormValidations } from '@src/hooks';
+
 import { Button, Input, SvgIcon, Typography } from '@libs/ui';
 import { Account } from '@popup/redux/vault/types';
 import {
@@ -14,17 +15,25 @@ import {
   HeaderTextContainer,
   InputsContainer,
   TextContainer
-} from '@src/layout/containers';
+} from '@layout/containers';
+
+import { RouterPath, useTypedNavigate } from '@import-account-with-file/router';
 
 import {
   checkAccountNameIsTaken,
   sendImportedAccount
-} from '@src/apps/popup/redux/remote-actions';
+} from '@popup/redux/remote-actions';
+
 import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
 
 export function ImportAccountWithFileContentPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
+
+  const { accountNameValidation } = useFormValidations(async value => {
+    const isAccountNameTaken = value && (await checkAccountNameIsTaken(value));
+    return !isAccountNameTaken;
+  });
 
   const onSuccess = useCallback(
     async (accountData: Account) => {
@@ -59,18 +68,7 @@ export function ImportAccountWithFileContentPage() {
         }
         return false;
       }),
-    name: Yup.string()
-      .required('Name is required')
-      .max(20, 'Account name can’t be longer than 20 characters')
-      .matches(
-        /^[\daA-zZ\s]+$/,
-        'Account name can’t contain special characters'
-      )
-      .test('unique', 'Account name is already taken', async value => {
-        const isAccountNameTaken =
-          value && (await checkAccountNameIsTaken(value));
-        return !isAccountNameTaken;
-      })
+    name: accountNameValidation
   });
 
   const formOptions: UseFormProps = {

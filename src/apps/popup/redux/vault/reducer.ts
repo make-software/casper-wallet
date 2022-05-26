@@ -9,7 +9,8 @@ import {
   unlockVault,
   resetVault,
   importAccount,
-  removeAccount
+  removeAccount,
+  renameAccount
 } from './actions';
 import { VaultState } from './types';
 
@@ -61,6 +62,21 @@ export const reducer = createReducer(initialState)
     (state, { payload: { name } }): State => ({
       ...state,
       accounts: state.accounts.filter(account => account.name !== name)
+    })
+  )
+  .handleAction(
+    [renameAccount],
+    (state, { payload: { oldName, nextName } }): State => ({
+      ...state,
+      accounts: state.accounts.map(account => {
+        if (account.name === oldName) {
+          return {
+            ...account,
+            name: nextName
+          };
+        }
+        return account;
+      })
     })
   )
   .handleAction(
