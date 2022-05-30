@@ -8,16 +8,15 @@ import {
   ContentContainer,
   HeaderTextContainer,
   TextContainer
-} from '@layout/containers';
+} from '@src/layout/containers';
 import { Button, Typography } from '@libs/ui';
 
-import { useWindowManager } from '@src/hooks';
 import { LocationState, RouterPath } from '@import-account-with-file/router';
+import { closeWindow } from '@import-account-with-file/utils/close-window';
 
 export function ImportAccountWithFileFailureContentPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
-  const { closeWindow } = useWindowManager();
   const location = useTypedLocation();
   const state = location.state as LocationState;
 

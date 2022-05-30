@@ -1,61 +1,59 @@
-import React from 'react';
+import React, { ElementType } from 'react';
 import { render } from 'react-dom';
-import { Provider as ReduxProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
-import { Header, Layout } from '@src/layout';
-import { REDUX_STORAGE_KEY } from '@libs/services/constants';
+import { Layout } from '@src/layout';
 import { GlobalStyle, themeConfig } from '@libs/ui';
 
-import { RouterPath } from '@import-account-with-file/router';
-import { ImportAccountWithFileSuccessContentPage } from '@import-account-with-file/pages/import-account-with-file-success';
-import { ImportAccountWithFileFailureContentPage } from '@import-account-with-file/pages/import-account-with-file-failure';
-import { ImportAccountWithFileContentPage } from '@import-account-with-file/pages/import-account-with-file';
+import { Header } from './layout';
+import { RouterPath } from './router';
 
-import { createStore } from '@popup/redux';
+import { ImportAccountWithFileSuccessContentPage } from './pages/import-account-with-file-success';
+import { ImportAccountWithFileFailureContentPage } from './pages/import-account-with-file-failure';
+import { ImportAccountWithFileContentPage } from './pages/import-account-with-file';
 
-const reduxStorageState = JSON.parse(
-  localStorage.getItem(REDUX_STORAGE_KEY) || '{}'
-);
-const store = createStore(reduxStorageState);
+interface ImportAccountWithFileLayoutProps {
+  Content: ElementType;
+}
+
+function ImportAccountWithFileLayout({
+  Content
+}: ImportAccountWithFileLayoutProps) {
+  return <Layout Header={<Header />} Content={<Content />} />;
+}
 
 render(
   <ThemeProvider theme={themeConfig}>
     <GlobalStyle />
-    <ReduxProvider store={store}>
-      <HashRouter>
-        <Routes>
-          <Route
-            path={RouterPath.ImportAccountWithFile}
-            element={
-              <Layout
-                Header={<Header />}
-                Content={<ImportAccountWithFileContentPage />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.ImportAccountWithFileSuccess}
-            element={
-              <Layout
-                Header={<Header />}
-                Content={<ImportAccountWithFileSuccessContentPage />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.ImportAccountWithFileFailure}
-            element={
-              <Layout
-                Header={<Header />}
-                Content={<ImportAccountWithFileFailureContentPage />}
-              />
-            }
-          />
-        </Routes>
-      </HashRouter>
-    </ReduxProvider>
+    <HashRouter>
+      <Routes>
+        <Route
+          path={RouterPath.ImportAccountWithFile}
+          element={
+            <ImportAccountWithFileLayout
+              Content={ImportAccountWithFileContentPage}
+            />
+          }
+        />
+        <Route
+          path={RouterPath.ImportAccountWithFileSuccess}
+          element={
+            <ImportAccountWithFileLayout
+              Content={ImportAccountWithFileSuccessContentPage}
+            />
+          }
+        />
+        <Route
+          path={RouterPath.ImportAccountWithFileFailure}
+          element={
+            <ImportAccountWithFileLayout
+              Content={ImportAccountWithFileFailureContentPage}
+            />
+          }
+        />
+      </Routes>
+    </HashRouter>
   </ThemeProvider>,
   document.querySelector('#import-account-with-file-app-container')
 );

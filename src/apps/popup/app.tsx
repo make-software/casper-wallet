@@ -4,7 +4,9 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
 
-import { Header, Layout } from '@src/layout';
+import { useTypedLocation, useTypedNavigate } from '@src/hooks';
+import { Layout } from '@src/layout';
+
 import { CreateVaultPageContent } from '@popup/pages/create-vault';
 import { HomePageContent } from '@popup/pages/home';
 import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
@@ -12,10 +14,8 @@ import { NoAccountsPageContent } from '@popup/pages/no-accounts';
 import { ResetVaultPageContent } from '@popup/pages/reset-vault';
 import { TimeoutPageContent } from '@popup/pages/timeout';
 import { UnlockVaultPageContent } from '@popup/pages/unlock-vault';
-import {
-  ImportAccountContentPage,
-  ImportAccountWithFileProcessContentPage
-} from '@popup/pages/import-account';
+
+import { Header } from './layout';
 
 import {
   selectVaultDoesExist,
@@ -23,9 +23,8 @@ import {
   selectVaultIsLocked
 } from './redux/vault/selectors';
 
-import { useTypedLocation, useTypedNavigate } from '@src/hooks';
-
 import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
+import { useAppsMessages } from './hooks/use-apps-messages';
 import { LocationState, RouterPath } from './router';
 
 export function App() {
@@ -38,6 +37,7 @@ export function App() {
   const vaultHasAccount = useSelector(selectVaultHasAccount);
 
   useVaultTimeoutController();
+  useAppsMessages();
 
   // App redirects
   useEffect(() => {
@@ -48,11 +48,7 @@ export function App() {
       navigate(RouterPath.CreateVault, { replace: true });
     } else if (
       !vaultHasAccount &&
-      location.pathname !== RouterPath.ResetVault &&
-      location.pathname !== RouterPath.ImportAccount &&
-      location.pathname !== RouterPath.ImportAccountWithFile &&
-      location.pathname !== RouterPath.ImportAccountWithFileSuccess &&
-      location.pathname !== RouterPath.ImportAccountWithFileFailure
+      location.pathname !== RouterPath.ResetVault
     ) {
       navigate(RouterPath.NoAccounts, { replace: true });
     }
@@ -101,30 +97,6 @@ export function App() {
               <Layout
                 Header={<Header />}
                 Content={<CreateVaultPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.ImportAccount}
-            element={
-              <Layout
-                Header={
-                  vaultHasAccount ? (
-                    <Header withLock withMenu submenuActionType="back" />
-                  ) : (
-                    <Header withLock submenuActionType="back" />
-                  )
-                }
-                Content={<ImportAccountContentPage />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.ImportAccountWithFile}
-            element={
-              <Layout
-                Header={<Header withLock />}
-                Content={<ImportAccountWithFileProcessContentPage />}
               />
             }
           />

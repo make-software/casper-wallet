@@ -26,7 +26,7 @@ import {
   TextContainer,
   HeaderTextContainer,
   InputsContainer
-} from '@layout/containers';
+} from '@src/layout/containers';
 
 type InputType = 'password' | 'text';
 

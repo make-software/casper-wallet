@@ -5,7 +5,7 @@ import {
   ContentContainer,
   HeaderTextContainer,
   TextContainer
-} from '@layout/containers';
+} from '@src/layout/containers';
 import { Typography, List, ListItemElementContainer } from '@libs/ui';
 import { selectVaultAccounts } from '@popup/redux/vault/selectors';
 

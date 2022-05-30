@@ -7,7 +7,7 @@ import {
   ButtonsContainer,
   HeaderTextContainer,
   TextContainer
-} from '@layout/containers';
+} from '@src/layout/containers';
 
 import { Typography, Button, Checkbox } from '@libs/ui';
 import { useTypedNavigate } from '@src/hooks';

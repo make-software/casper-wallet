@@ -1,5 +1,4 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
@@ -22,14 +21,9 @@ import {
   HeaderTextContainer,
   InputsContainer,
   TextContainer
-} from '@layout/containers';
+} from '@src/layout/containers';
 import { Button, Input, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath } from '@import-account-with-file/router';
-
-import {
-  selectVaultAccountNames,
-  selectVaultAccountPrivateKeysBase64
-} from '@popup/redux/vault/selectors';
 
 function getAlgorithm(content: string): 'Ed25519' | 'Secp256K1' | undefined {
   if (content.includes('curveEd25519')) {
@@ -43,11 +37,6 @@ function getAlgorithm(content: string): 'Ed25519' | 'Secp256K1' | undefined {
 export function ImportAccountWithFileContentPage() {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
-
-  const existingVaultAccountNames = useSelector(selectVaultAccountNames);
-  const existingVaultPrivateKeysBase64 = useSelector(
-    selectVaultAccountPrivateKeysBase64
-  );
 
   const formSchema = Yup.object().shape({
     secretKeyFile: Yup.mixed()
@@ -65,8 +54,15 @@ export function ImportAccountWithFileContentPage() {
         /^[\daA-zZ\s]+$/,
         'Account name can’t contain special characters'
       )
-      .test('unique', 'Account name is already taken', value => {
-        return !existingVaultAccountNames.includes(value as string);
+      .test('unique', 'Account name is already taken', async value => {
+        const isAccountNameTaken = await Browser.runtime.sendMessage({
+          type: 'check-name-is-taken',
+          payload: {
+            accountName: value
+          }
+        });
+
+        return !isAccountNameTaken;
       })
   });
 
@@ -138,7 +134,14 @@ export function ImportAccountWithFileContentPage() {
 
         const secretKeyBase64 = encodeBase64(decodeBase16(hexKey));
 
-        if (existingVaultPrivateKeysBase64.includes(secretKeyBase64)) {
+        const isSecretKeyAlreadyImported = await Browser.runtime.sendMessage({
+          type: 'check-key-is-imported',
+          payload: {
+            secretKeyBase64
+          }
+        });
+
+        if (isSecretKeyAlreadyImported) {
           console.log('Private key is already exists');
           navigate(RouterPath.ImportAccountWithFileFailure, {
             state: {
@@ -167,10 +170,12 @@ export function ImportAccountWithFileContentPage() {
             : Keys.Secp256K1.parseKeyPair(publicKey, secretKey, 'raw');
 
         await Browser.runtime.sendMessage({
-          success: true,
-          account: {
-            name: name,
-            keyPair
+          type: 'import-account',
+          payload: {
+            account: {
+              name: name,
+              keyPair
+            }
           }
         });
 

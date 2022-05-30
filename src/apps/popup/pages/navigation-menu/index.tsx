@@ -3,9 +3,11 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
+import { PurposeForOpening, useWindowManager } from '@src/hooks';
+
 import { TimeoutDurationSetting } from '@popup/constants';
 import { RouterPath, useNavigationMenu } from '@popup/router';
-import { ContentContainer } from '@layout/containers';
+import { ContentContainer } from '@src/layout/containers';
 import { List, ListItemElementContainer, SvgIcon, Typography } from '@libs/ui';
 import { selectVaultTimeoutDurationSetting } from '@popup/redux/vault/selectors';
 
@@ -14,6 +16,7 @@ export function NavigationMenuPageContent() {
   const navigate = useNavigate();
   const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
 
+  const { openWindow } = useWindowManager();
   const { closeNavigationMenu } = useNavigationMenu();
 
   const iconSize = 24;
@@ -61,7 +64,9 @@ export function NavigationMenuPageContent() {
             ),
             onClick: () => {
               closeNavigationMenu();
-              navigate(RouterPath.ImportAccount);
+              openWindow(PurposeForOpening.ImportAccount).catch(e =>
+                console.log(e)
+              );
             }
           },
           {

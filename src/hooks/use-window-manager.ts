@@ -81,29 +81,12 @@ export function useWindowManager() {
         })
         .catch(e => {
           // TODO: handle errors
-          console.log(e);
+          console.error(e);
         });
     }
   }
 
-  async function close() {
-    try {
-      if (windowId) {
-        await Browser.windows.remove(windowId);
-      } else {
-        // This allows the FE to call close popup without querying for window id to pass.
-        const currentWindow = await Browser.windows.getCurrent();
-        if (currentWindow.type === 'popup' && currentWindow.id) {
-          await Browser.windows.remove(currentWindow.id);
-        }
-      }
-    } catch (error) {
-      throw error;
-    }
-  }
-
   const openWindow = useCallback(open, [dispatch, open, windowId]);
-  const closeWindow = useCallback(close, [windowId]);
 
-  return { openWindow, closeWindow };
+  return { openWindow };
 }

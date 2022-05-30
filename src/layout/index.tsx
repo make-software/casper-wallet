@@ -29,4 +29,5 @@ export function Layout({ Header, Content }: Props) {
   );
 }
 
-export * from './header';
+export * from './logo';
+export * from './containers';

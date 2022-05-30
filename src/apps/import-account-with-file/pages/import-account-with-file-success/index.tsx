@@ -6,13 +6,12 @@ import {
   ContentContainer,
   HeaderTextContainer,
   TextContainer
-} from '@layout/containers';
+} from '@src/layout/containers';
 import { Button, Typography } from '@libs/ui';
-import { useWindowManager } from '@src/hooks';
+import { closeWindow } from '@import-account-with-file/utils/close-window';
 
 export function ImportAccountWithFileSuccessContentPage() {
   const { t } = useTranslation();
-  const { closeWindow } = useWindowManager();
 
   return (
     <ContentContainer>

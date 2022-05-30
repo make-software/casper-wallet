@@ -7,7 +7,7 @@ import {
   ContentContainer,
   HeaderTextContainer,
   TextContainer
-} from '@layout/containers';
+} from '@src/layout/containers';
 
 import { selectVaultTimeoutDurationSetting } from '@popup/redux/vault/selectors';
 import { changeTimeoutDuration } from '@popup/redux/vault/actions';

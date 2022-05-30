@@ -1,9 +1,9 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { PurposeForOpening, useWindowManager } from '@src/hooks';
+
 import { Typography, Button } from '@libs/ui';
-import { RouterPath } from '@popup/router';
 
 import {
   ButtonsContainer,
@@ -14,7 +14,7 @@ import {
 
 export function NoAccountsPageContent() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { openWindow } = useWindowManager();
 
   function createAccount() {
     // TODO: Implement `create account with mnemonic phrase` feature
@@ -40,7 +40,11 @@ export function NoAccountsPageContent() {
         </Button>
         <Button
           color="secondaryBlue"
-          onClick={() => navigate(RouterPath.ImportAccount)}
+          onClick={() =>
+            openWindow(PurposeForOpening.ImportAccount).catch(e =>
+              console.log(e)
+            )
+          }
         >
           <Trans t={t}>Import account</Trans>
         </Button>
