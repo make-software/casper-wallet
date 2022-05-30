@@ -42,7 +42,3 @@ export const selectVaultTimeoutDurationSetting = (
 
 export const selectVaultLastActivityTime = (state: State): number | null =>
   state.vault.lastActivityTime;
-
-// TODO: move it to separated store part
-export const selectWindowId = (state: State): number | null =>
-  state.vault.windowId;

@@ -1,5 +1,6 @@
 import { createReducer } from 'typesafe-actions';
 
+import { TimeoutDurationSetting } from '@popup/constants';
 import {
   changeTimeoutDuration,
   createAccount,
@@ -7,12 +8,9 @@ import {
   lockVault,
   unlockVault,
   resetVault,
-  refreshTimeout,
-  saveWindowId,
-  clearWindowId
+  refreshTimeout
 } from './actions';
 import { VaultState } from './types';
-import { TimeoutDurationSetting } from '@popup/constants';
 
 type State = VaultState;
 
@@ -21,8 +19,7 @@ const initialState: State = {
   isLocked: false,
   timeoutDurationSetting: TimeoutDurationSetting['5 min'],
   lastActivityTime: null,
-  accounts: [],
-  windowId: null
+  accounts: []
 };
 
 export const reducer = createReducer(initialState)
@@ -71,20 +68,5 @@ export const reducer = createReducer(initialState)
     (state, { payload: { lastActivityTime } }) => ({
       ...state,
       lastActivityTime
-    })
-  )
-  // TODO: move it to separated store part
-  .handleAction(
-    [saveWindowId],
-    (state, { payload }): State => ({
-      ...state,
-      windowId: payload
-    })
-  )
-  .handleAction(
-    clearWindowId,
-    (state): State => ({
-      ...state,
-      windowId: null
     })
   );

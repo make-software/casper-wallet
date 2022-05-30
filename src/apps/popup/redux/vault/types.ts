@@ -13,7 +13,4 @@ export type VaultState = {
   timeoutDurationSetting: TimeoutDurationSetting;
   lastActivityTime: number | null;
   accounts: Account[];
-
-  // TODO: move it to separated store part
-  windowId: number | null;
 };

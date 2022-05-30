@@ -41,7 +41,3 @@ export const refreshTimeout = createAction('REFRESH_TIMEOUT', () => ({
 }))<{
   lastActivityTime: number;
 }>();
-
-// TODO: move it to separated store part
-export const saveWindowId = createAction('STORE_WINDOW_ID')<number>();
-export const clearWindowId = createAction('CLEAR_WINDOW_ID')<void>();
