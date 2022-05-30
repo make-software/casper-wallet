@@ -3,7 +3,7 @@ import { createReducer } from 'typesafe-actions';
 import { TimeoutDurationSetting } from '@popup/constants';
 import {
   changeTimeoutDuration,
-  createAccount,
+  importAccount,
   createVault,
   lockVault,
   unlockVault,
@@ -49,10 +49,10 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    [createAccount],
-    (state, { payload: { name, keyPair, isBackedUp } }): State => ({
+    [importAccount],
+    (state, { payload: { name, keyPair } }): State => ({
       ...state,
-      accounts: [...state.accounts, { name, keyPair, isBackedUp }]
+      accounts: [...state.accounts, { name, keyPair }]
     })
   )
   .handleAction(

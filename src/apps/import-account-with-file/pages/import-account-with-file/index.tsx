@@ -170,8 +170,7 @@ export function ImportAccountWithFileContentPage() {
           success: true,
           account: {
             name: name,
-            keyPair,
-            isBackedUp: true
+            keyPair
           }
         });
 

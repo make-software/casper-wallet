@@ -23,7 +23,7 @@ export const unlockVault = createAction('UNLOCK_VAULT', () => ({
   lastActivityTime: number;
 }>();
 
-export const createAccount = createAction('CREATE_ACCOUNT')<Account>();
+export const importAccount = createAction('IMPORT_ACCOUNT')<Account>();
 
 export const changeTimeoutDuration = createAction(
   'CHANGE_TIMEOUT_DURATION',

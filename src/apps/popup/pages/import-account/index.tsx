@@ -16,7 +16,7 @@ import {
   TextContainer
 } from '@layout/containers';
 import { Typography, Button } from '@libs/ui';
-import { createAccount } from '@popup/redux/vault/actions';
+import { importAccount } from '@popup/redux/vault/actions';
 
 import { RouterPath } from '@popup/router';
 
@@ -57,7 +57,7 @@ export function ImportAccountWithFileProcessContentPage() {
     async (message: any, sender: MessageSender) => {
       if (message.success) {
         const { account } = message;
-        dispatch(createAccount(account));
+        dispatch(importAccount(account));
       }
     },
     [dispatch]

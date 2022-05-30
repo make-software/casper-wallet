@@ -4,7 +4,6 @@ import { Keys } from 'casper-js-sdk';
 export interface Account {
   name: string;
   keyPair: Keys.Ed25519 | Keys.Secp256K1;
-  isBackedUp: boolean;
 }
 
 export type VaultState = {
