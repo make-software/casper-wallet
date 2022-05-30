@@ -44,8 +44,10 @@ export function ImportAccountWithFileContentPage() {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
-  const existingAccountNames = useSelector(selectVaultAccountNames);
-  const existingPrivateKeys = useSelector(selectVaultAccountPrivateKeysBase64);
+  const existingVaultAccountNames = useSelector(selectVaultAccountNames);
+  const existingVaultPrivateKeysBase64 = useSelector(
+    selectVaultAccountPrivateKeysBase64
+  );
 
   const formSchema = Yup.object().shape({
     secretKeyFile: Yup.mixed()
@@ -64,7 +66,7 @@ export function ImportAccountWithFileContentPage() {
         'Account name can’t contain special characters'
       )
       .test('unique', 'Account name is already taken', value => {
-        return !existingAccountNames.includes(value as string);
+        return !existingVaultAccountNames.includes(value as string);
       })
   });
 
@@ -136,7 +138,7 @@ export function ImportAccountWithFileContentPage() {
 
         const secretKeyBase64 = encodeBase64(decodeBase16(hexKey));
 
-        if (existingPrivateKeys.includes(secretKeyBase64)) {
+        if (existingVaultPrivateKeysBase64.includes(secretKeyBase64)) {
           console.log('Private key is already exists');
           navigate(RouterPath.ImportAccountWithFileFailure, {
             state: {

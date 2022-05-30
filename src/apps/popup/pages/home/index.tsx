@@ -12,7 +12,6 @@ import { selectVaultAccounts } from '@popup/redux/vault/selectors';
 export function HomePageContent() {
   const accounts = useSelector(selectVaultAccounts);
 
-  console.log('accounts', accounts);
   return (
     <ContentContainer>
       <HeaderTextContainer>
