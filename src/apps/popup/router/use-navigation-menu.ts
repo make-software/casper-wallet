@@ -1,5 +1,6 @@
 import { useTypedLocation } from '@hooks/use-typed-location';
 import { useTypedNavigate } from '@hooks/use-typed-navigate';
+import { LocationState } from '@popup/router/types';
 
 export function useNavigationMenu() {
   const navigate = useTypedNavigate();
@@ -8,7 +9,10 @@ export function useNavigationMenu() {
   const toggleNavigationMenu = () => {
     navigate(location.pathname, {
       replace: true,
-      state: { showNavigationMenu: !location.state?.showNavigationMenu }
+      state: {
+        showNavigationMenu: !(location.state as LocationState)
+          ?.showNavigationMenu
+      }
     });
   };
 

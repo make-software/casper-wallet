@@ -12,14 +12,14 @@ import {
 import { Button, Typography } from '@libs/ui';
 
 import { useWindowManager } from '@src/hooks';
-import { RouterPath } from '@import-account-with-file/paths';
+import { LocationState, RouterPath } from '@import-account-with-file/router';
 
 export function ImportAccountWithFileFailureContentPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
   const { closeWindow } = useWindowManager();
   const location = useTypedLocation();
-  const state = location.state;
+  const state = location.state as LocationState;
 
   return (
     <ContentContainer>
@@ -30,8 +30,8 @@ export function ImportAccountWithFileFailureContentPage() {
       </HeaderTextContainer>
       <TextContainer>
         <Typography type="body" weight="regular" color="contentSecondary">
-          {state?.message
-            ? state.message
+          {state?.importAccountStatusMessage
+            ? state.importAccountStatusMessage
             : t("We couldn't import your account. Please try again.")}
         </Typography>
       </TextContainer>

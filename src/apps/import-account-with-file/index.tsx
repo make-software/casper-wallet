@@ -8,7 +8,7 @@ import { Header, Layout } from '@src/layout';
 import { REDUX_STORAGE_KEY } from '@libs/services/constants';
 import { GlobalStyle, themeConfig } from '@libs/ui';
 
-import { RouterPath } from '@import-account-with-file/paths';
+import { RouterPath } from '@import-account-with-file/router';
 import { ImportAccountWithFileSuccessContentPage } from '@import-account-with-file/pages/import-account-with-file-success';
 import { ImportAccountWithFileFailureContentPage } from '@import-account-with-file/pages/import-account-with-file-failure';
 import { ImportAccountWithFileContentPage } from '@import-account-with-file/pages/import-account-with-file';

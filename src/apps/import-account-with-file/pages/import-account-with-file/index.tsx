@@ -24,7 +24,7 @@ import {
   TextContainer
 } from '@layout/containers';
 import { Button, Input, SvgIcon, Typography } from '@libs/ui';
-import { RouterPath } from '@import-account-with-file/paths';
+import { RouterPath } from '@import-account-with-file/router';
 
 import {
   selectVaultAccountNames,
@@ -100,7 +100,7 @@ export function ImportAccountWithFileContentPage() {
         console.log("There isn't private key in file");
         navigate(RouterPath.ImportAccountWithFileFailure, {
           state: {
-            message: t(
+            importAccountStatusMessage: t(
               'A private key was not detected. Try importing a different file.'
             )
           }
@@ -122,7 +122,7 @@ export function ImportAccountWithFileContentPage() {
           console.log('Unknown algorithm');
           navigate(RouterPath.ImportAccountWithFileFailure, {
             state: {
-              message: t(
+              importAccountStatusMessage: t(
                 'A private key was not detected. Try importing a different file.'
               )
             }
@@ -142,7 +142,7 @@ export function ImportAccountWithFileContentPage() {
           console.log('Private key is already exists');
           navigate(RouterPath.ImportAccountWithFileFailure, {
             state: {
-              message: t(
+              importAccountStatusMessage: t(
                 'This account already exists. Try importing a different file.'
               )
             }

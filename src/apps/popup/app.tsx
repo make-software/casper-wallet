@@ -26,12 +26,12 @@ import {
 import { useTypedLocation, useTypedNavigate } from '@src/hooks';
 
 import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
-import { RouterPath } from './router';
+import { LocationState, RouterPath } from './router';
 
 export function App() {
   const navigate = useTypedNavigate();
   const location = useTypedLocation();
-  const state = location.state;
+  const state = location.state as LocationState;
 
   const vaultIsLocked = useSelector(selectVaultIsLocked);
   const vaultDoesExists = useSelector(selectVaultDoesExist);
