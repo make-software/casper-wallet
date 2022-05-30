@@ -7,11 +7,6 @@ type Ref = HTMLDivElement;
 
 /* eslint-disable-next-line */
 
-interface Rotate {
-  axis: 'X' | 'Y';
-  deg: number;
-}
-
 export interface SvgIconProps extends React.HTMLAttributes<Ref> {
   className?: string;
   style?: React.CSSProperties;
@@ -24,21 +19,21 @@ export interface SvgIconProps extends React.HTMLAttributes<Ref> {
   onMouseDown?: (ev: any) => void;
   color?: ContentColor;
   tooltip?: string;
-  rotate?: Rotate;
+  flipByAxis?: 'X' | 'Y';
   marginLeft?: boolean;
   marginRight?: boolean;
 }
 
 const Container = styled('div').withConfig({
   shouldForwardProp: (prop, defaultValidatorFn) =>
-    !['rotate'].includes(prop) && defaultValidatorFn(prop)
+    !['flipByAxis'].includes(prop) && defaultValidatorFn(prop)
 })<{
   size: number;
   width?: string | number;
   height?: string | number;
   color?: ContentColor;
   active?: boolean;
-  rotate?: Rotate;
+  flipByAxis?: 'X' | 'Y';
   marginLeft?: boolean;
   marginRight?: boolean;
   onClick?: (ev: any) => void;
@@ -49,7 +44,7 @@ const Container = styled('div').withConfig({
     width,
     height,
     color = 'inherit',
-    rotate,
+    flipByAxis,
     marginLeft,
     marginRight,
     onClick
@@ -66,7 +61,7 @@ const Container = styled('div').withConfig({
       width: width != null ? width : size,
       height: height != null ? height : size
     },
-    transform: rotate ? `rotate${rotate.axis}(${rotate.deg}deg)` : 'none',
+    transform: flipByAxis ? `rotate${flipByAxis}(180deg)` : 'none',
     transition: 'transform 500ms ease',
     marginLeft: marginLeft ? 8 : 'initial',
     marginRight: marginRight ? 8 : 'initial',
@@ -80,7 +75,7 @@ const StyledReactSVG = styled(ReactSVG)(({ theme }) => ({
 
 export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
   (
-    { src, alt, size = 16, color, onClick, rotate, ...props }: SvgIconProps,
+    { src, alt, size = 16, color, onClick, flipByAxis, ...props }: SvgIconProps,
     ref
   ) => {
     const handleClick = (ev: any) => {
@@ -98,7 +93,7 @@ export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
         title={alt}
         size={size}
         color={color}
-        rotate={rotate}
+        flipByAxis={flipByAxis}
         onClick={handleClick}
         {...props}
       >

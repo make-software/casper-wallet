@@ -57,7 +57,7 @@ export function SubmenuBar({ actionType }: SubmenuBarProps) {
               <SvgIcon
                 src="assets/icons/chevron.svg"
                 color="contentBlue"
-                rotate={{ axis: 'Y', deg: 180 }}
+                flipByAxis="Y"
                 size={24}
               />
               <Trans t={t}>Back</Trans>
