@@ -7,7 +7,7 @@ import MessageSender = Runtime.MessageSender;
 import {
   useTypedNavigate,
   PurposeForOpening,
-  useSeparatedWindow
+  useWindowManager
 } from '@src/hooks';
 import {
   ContentContainer,
@@ -50,7 +50,7 @@ export function ImportAccountContentPage() {
 
 export function ImportAccountWithFileProcessContentPage() {
   const dispatch = useDispatch();
-  const { openWindow } = useSeparatedWindow();
+  const { openWindow } = useWindowManager();
   const { t } = useTranslation();
 
   const handleMessage = useCallback(

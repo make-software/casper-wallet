@@ -8,11 +8,11 @@ import {
   TextContainer
 } from '@layout/containers';
 import { Button, Typography } from '@libs/ui';
-import { useSeparatedWindow } from '@src/hooks';
+import { useWindowManager } from '@src/hooks';
 
 export function ImportAccountWithFileSuccessContentPage() {
   const { t } = useTranslation();
-  const { closeWindow } = useSeparatedWindow();
+  const { closeWindow } = useWindowManager();
 
   return (
     <ContentContainer>

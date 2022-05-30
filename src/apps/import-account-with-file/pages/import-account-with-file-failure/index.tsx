@@ -11,13 +11,13 @@ import {
 } from '@layout/containers';
 import { Button, Typography } from '@libs/ui';
 
-import { useSeparatedWindow } from '@src/hooks';
+import { useWindowManager } from '@src/hooks';
 import { RouterPath } from '@import-account-with-file/paths';
 
 export function ImportAccountWithFileFailureContentPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
-  const { closeWindow } = useSeparatedWindow();
+  const { closeWindow } = useWindowManager();
   const location = useTypedLocation();
   const state = location.state;
 

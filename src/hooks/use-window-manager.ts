@@ -12,7 +12,7 @@ export enum PurposeForOpening {
   ImportAccount = 'ImportAccount'
 }
 
-export function useSeparatedWindow() {
+export function useWindowManager() {
   const dispatch = useDispatch();
   const windowId = useSelector(selectWindowId);
 
