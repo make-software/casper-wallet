@@ -11,7 +11,7 @@ import {
 
 import { Typography, Button, Checkbox } from '@libs/ui';
 import { useTypedNavigate } from '@src/hooks';
-import { resetVault } from '@libs/redux/vault/actions';
+import { resetVault } from '@popup/redux/vault/actions';
 
 export function ResetVaultPageContent() {
   const [isChecked, setIsChecked] = useState(false);

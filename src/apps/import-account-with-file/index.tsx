@@ -5,7 +5,6 @@ import { ThemeProvider } from 'styled-components';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
 import { Header, Layout } from '@src/layout';
-import { createStore } from '@libs/redux';
 import { REDUX_STORAGE_KEY } from '@libs/services/constants';
 import { GlobalStyle, themeConfig } from '@libs/ui';
 
@@ -13,6 +12,8 @@ import { RouterPath } from '@import-account-with-file/paths';
 import { ImportAccountWithFileSuccessContentPage } from '@import-account-with-file/pages/import-account-with-file-success';
 import { ImportAccountWithFileFailureContentPage } from '@import-account-with-file/pages/import-account-with-file-failure';
 import { ImportAccountWithFileContentPage } from '@import-account-with-file/pages/import-account-with-file';
+
+import { createStore } from '@popup/redux';
 
 const reduxStorageState = JSON.parse(
   localStorage.getItem(REDUX_STORAGE_KEY) || '{}'

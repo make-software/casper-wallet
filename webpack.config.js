@@ -41,15 +41,7 @@ if (fileSystem.existsSync(secretsPath)) {
 const options = {
   mode: process.env.NODE_ENV || 'development',
   entry: {
-    popup: path.join(
-      __dirname,
-      'src',
-      'apps',
-      'popup',
-      'pages',
-      'popup',
-      'index.tsx'
-    ),
+    popup: path.join(__dirname, 'src', 'apps', 'popup', 'index.tsx'),
     importAccountWithFile: path.join(
       __dirname,
       'src',
@@ -184,15 +176,7 @@ const options = {
       ]
     }),
     new HtmlWebpackPlugin({
-      template: path.join(
-        __dirname,
-        'src',
-        'apps',
-        'popup',
-        'pages',
-        'popup',
-        'index.html'
-      ),
+      template: path.join(__dirname, 'src', 'apps', 'popup', 'index.html'),
       filename: 'popup.html',
       chunks: ['popup'],
       cache: false

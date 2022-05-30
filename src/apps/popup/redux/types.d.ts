@@ -12,7 +12,7 @@ declare module 'typesafe-actions' {
     StateType<typeof import('./root-reducer').default>,
     RootStateKey
   >;
-  export type Services = typeof import('../services');
+  export type Services = typeof import('@libs/services');
 
   interface Types {
     RootAction: RootAction;

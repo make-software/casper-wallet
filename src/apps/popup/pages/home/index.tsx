@@ -7,7 +7,7 @@ import {
   TextContainer
 } from '@layout/containers';
 import { Typography, List, ListItemElementContainer } from '@libs/ui';
-import { selectVaultAccounts } from '@libs/redux/vault/selectors';
+import { selectVaultAccounts } from '@popup/redux/vault/selectors';
 
 export function HomePageContent() {
   const accounts = useSelector(selectVaultAccounts);

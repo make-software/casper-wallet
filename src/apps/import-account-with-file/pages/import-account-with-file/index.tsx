@@ -29,7 +29,7 @@ import { RouterPath } from '@import-account-with-file/paths';
 import {
   selectVaultAccountNames,
   selectVaultAccountPrivateKeysBase64
-} from '@libs/redux/vault/selectors';
+} from '@popup/redux/vault/selectors';
 
 function getAlgorithm(content: string): 'Ed25519' | 'Secp256K1' | undefined {
   if (content.includes('curveEd25519')) {

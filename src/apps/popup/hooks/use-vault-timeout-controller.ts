@@ -7,8 +7,8 @@ import {
   selectVaultIsLocked,
   selectVaultTimeoutDurationSetting,
   selectVaultLastActivityTime
-} from '@libs/redux/vault/selectors';
-import { lockVault, refreshTimeout } from '@libs/redux/vault/actions';
+} from '@popup/redux/vault/selectors';
+import { lockVault, refreshTimeout } from '@popup/redux/vault/actions';
 
 import { MapTimeoutDurationSettingToValue } from '../constants';
 

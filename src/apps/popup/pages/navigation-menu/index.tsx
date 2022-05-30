@@ -7,7 +7,7 @@ import { TimeoutDurationSetting } from '@popup/constants';
 import { RouterPath, useNavigationMenu } from '@popup/router';
 import { ContentContainer } from '@layout/containers';
 import { List, ListItemElementContainer, SvgIcon, Typography } from '@libs/ui';
-import { selectVaultTimeoutDurationSetting } from '@libs/redux/vault/selectors';
+import { selectVaultTimeoutDurationSetting } from '@popup/redux/vault/selectors';
 
 export function NavigationMenuPageContent() {
   const { t } = useTranslation();

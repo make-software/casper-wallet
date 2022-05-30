@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Typography, Button } from '@libs/ui';
-import { createAccount as createAccountAction } from '@libs/redux/vault/actions';
+import { createAccount as createAccountAction } from '@popup/redux/vault/actions';
 import { RouterPath } from '@popup/router';
 
 import {

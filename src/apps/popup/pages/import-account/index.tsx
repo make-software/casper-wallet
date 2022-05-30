@@ -16,7 +16,7 @@ import {
   TextContainer
 } from '@layout/containers';
 import { Typography, Button } from '@libs/ui';
-import { createAccount } from '@libs/redux/vault/actions';
+import { createAccount } from '@popup/redux/vault/actions';
 
 import { RouterPath } from '@popup/router';
 

@@ -9,8 +9,8 @@ import {
   TextContainer
 } from '@layout/containers';
 
-import { selectVaultTimeoutDurationSetting } from '@libs/redux/vault/selectors';
-import { changeTimeoutDuration } from '@libs/redux/vault/actions';
+import { selectVaultTimeoutDurationSetting } from '@popup/redux/vault/selectors';
+import { changeTimeoutDuration } from '@popup/redux/vault/actions';
 import { TimeoutDurationSetting } from '@popup/constants';
 
 export function TimeoutPageContent() {

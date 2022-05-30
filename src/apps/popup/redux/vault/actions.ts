@@ -1,6 +1,6 @@
 import { createAction } from 'typesafe-actions';
 import { TimeoutDurationSetting } from '@popup/constants';
-import { Account } from '@libs/redux/vault/types';
+import { Account } from '@popup/redux/vault/types';
 
 export const createVault = createAction(
   'CREATE_VAULT',

@@ -2,8 +2,11 @@ import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { browser } from 'webextension-polyfill-ts';
 
-import { selectWindowId } from '@libs/redux/vault/selectors';
-import { clearWindowId, saveWindowId } from '@libs/redux/vault/actions';
+import { selectWindowId } from '@libs/../apps/popup/redux/vault/selectors';
+import {
+  clearWindowId,
+  saveWindowId
+} from '@libs/../apps/popup/redux/vault/actions';
 
 export enum PurposeForOpening {
   ImportAccount = 'ImportAccount'

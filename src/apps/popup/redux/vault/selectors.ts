@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
-import { State } from '@libs/redux/types';
+import { State } from '@popup/redux/types';
 import { TimeoutDurationSetting } from '@popup/constants';
-import { Account } from '@libs/redux/vault/types';
+import { Account } from '@popup/redux/vault/types';
 
 import { encodeBase64 } from 'tweetnacl-util';
 

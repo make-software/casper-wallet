@@ -17,8 +17,8 @@ import {
 } from '@layout/containers';
 import { Typography, Input, Button } from '@libs/ui';
 
-import { selectVaultPassword } from '@libs/redux/vault/selectors';
-import { unlockVault } from '@libs/redux/vault/actions';
+import { selectVaultPassword } from '@popup/redux/vault/selectors';
+import { unlockVault } from '@popup/redux/vault/actions';
 
 export function UnlockVaultPageContent() {
   const { t } = useTranslation();

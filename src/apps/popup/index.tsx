@@ -1,162 +1,55 @@
-import '@libs/i18n/i18n';
+import React, { Suspense } from 'react';
+import { render } from 'react-dom';
+import { Provider as ReduxProvider } from 'react-redux';
+import { HashRouter } from 'react-router-dom';
+import { ThemeProvider } from 'styled-components';
 
-import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { Route, Routes } from 'react-router-dom';
+import { GlobalStyle, themeConfig } from '@libs/ui';
 
-import { Header, Layout } from '@src/layout';
-import { CreateVaultPageContent } from '@popup/pages/create-vault';
-import { HomePageContent } from '@popup/pages/home';
-import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
-import { NoAccountsPageContent } from '@popup/pages/no-accounts';
-import { ResetVaultPageContent } from '@popup/pages/reset-vault';
-import { TimeoutPageContent } from '@popup/pages/timeout';
-import { UnlockVaultPageContent } from '@popup/pages/unlock-vault';
-import {
-  ImportAccountContentPage,
-  ImportAccountWithFileProcessContentPage
-} from '@popup/pages/import-account';
+import { App } from './app';
+import { REDUX_STORAGE_KEY } from '@libs/services/constants';
+import { createStore } from './redux';
 
-import {
-  selectVaultDoesExist,
-  selectVaultHasAccount,
-  selectVaultIsLocked
-} from '@libs/redux/vault/selectors';
+import { ErrorBoundary } from './error-boundary';
 
-import { useTypedLocation, useTypedNavigate } from '@src/hooks';
+export let store: ReturnType<typeof createStore>;
 
-import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
-import { RouterPath } from './router';
-
-export function App() {
-  const navigate = useTypedNavigate();
-  const location = useTypedLocation();
-  const state = location.state;
-
-  const vaultIsLocked = useSelector(selectVaultIsLocked);
-  const vaultDoesExists = useSelector(selectVaultDoesExist);
-  const vaultHasAccount = useSelector(selectVaultHasAccount);
-
-  useVaultTimeoutController();
-
-  // App redirects
-  useEffect(() => {
-    if (vaultIsLocked && location.pathname !== RouterPath.ResetVault) {
-      location.pathname !== RouterPath.UnlockVault &&
-        navigate(RouterPath.UnlockVault);
-    } else if (!vaultDoesExists) {
-      navigate(RouterPath.CreateVault, { replace: true });
-    } else if (
-      !vaultHasAccount &&
-      location.pathname !== RouterPath.ResetVault &&
-      location.pathname !== RouterPath.ImportAccount &&
-      location.pathname !== RouterPath.ImportAccountWithFile &&
-      location.pathname !== RouterPath.ImportAccountWithFileSuccess &&
-      location.pathname !== RouterPath.ImportAccountWithFileFailure
-    ) {
-      navigate(RouterPath.NoAccounts, { replace: true });
+const reduxStorageState = JSON.parse(
+  localStorage.getItem(REDUX_STORAGE_KEY) || '{}'
+);
+// should initialize store only once when localstorage data is fetched
+// @ts-ignore
+if (store == null) {
+  store = createStore(reduxStorageState);
+  // each change should be saved in the localstorage
+  store.subscribe(() => {
+    const vault = store.getState();
+    try {
+      localStorage.setItem(REDUX_STORAGE_KEY, JSON.stringify(vault));
+    } catch {
+      // initialization workaround
     }
-  }, [
-    location.pathname,
-    navigate,
-    vaultDoesExists,
-    vaultHasAccount,
-    vaultIsLocked
-  ]);
+  });
+}
 
-  return (
-    <Routes>
-      {state?.showNavigationMenu ? (
-        <Route>
-          <Route
-            path="*"
-            element={
-              <Layout
-                Header={<Header withMenu withLock />}
-                Content={<NavigationMenuPageContent />}
-              />
-            }
-          />
-        </Route>
-      ) : (
-        <Route>
-          <Route
-            path={RouterPath.Home}
-            element={
-              <Layout
-                Header={<Header withMenu withLock />}
-                Content={<HomePageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.ResetVault}
-            element={
-              <Layout Header={<Header />} Content={<ResetVaultPageContent />} />
-            }
-          />
-          <Route
-            path={RouterPath.CreateVault}
-            element={
-              <Layout
-                Header={<Header />}
-                Content={<CreateVaultPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.ImportAccount}
-            element={
-              <Layout
-                Header={
-                  vaultHasAccount ? (
-                    <Header withLock withMenu submenuActionType="back" />
-                  ) : (
-                    <Header withLock submenuActionType="back" />
-                  )
-                }
-                Content={<ImportAccountContentPage />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.ImportAccountWithFile}
-            element={
-              <Layout
-                Header={<Header withLock />}
-                Content={<ImportAccountWithFileProcessContentPage />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.NoAccounts}
-            element={
-              <Layout
-                Header={<Header withLock />}
-                Content={<NoAccountsPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.UnlockVault}
-            element={
-              <Layout
-                Header={<Header />}
-                Content={<UnlockVaultPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.Timeout}
-            element={
-              <Layout
-                Header={<Header submenuActionType="close" withMenu withLock />}
-                Content={<TimeoutPageContent />}
-              />
-            }
-          />
-        </Route>
-      )}
-    </Routes>
-  );
+render(
+  <Suspense fallback={null}>
+    <ErrorBoundary>
+      <ThemeProvider theme={themeConfig}>
+        <ReduxProvider store={store}>
+          <GlobalStyle />
+          <HashRouter>
+            <App />
+          </HashRouter>
+        </ReduxProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+  </Suspense>,
+  window.document.querySelector('#app-container')
+);
+
+if ('hot' in module) {
+  // TODO: handle `ts-ignore` directive
+  // @ts-ignore
+  module.hot.accept();
 }

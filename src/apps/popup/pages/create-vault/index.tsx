@@ -10,7 +10,7 @@ import * as Yup from 'yup';
 import { useTypedNavigate } from '@src/hooks';
 
 import { RouterPath } from '@popup/router';
-import { createVault } from '@libs/redux/vault/actions';
+import { createVault } from '@popup/redux/vault/actions';
 
 import {
   Button,

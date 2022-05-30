@@ -6,7 +6,7 @@ import { useTypedLocation } from '@src/hooks';
 import { useNavigationMenu } from '@popup/router';
 
 import { SvgIcon } from '@libs/ui';
-import { lockVault } from '@libs/redux/vault/actions';
+import { lockVault } from '@popup/redux/vault/actions';
 
 const Container = styled.div`
   display: flex;
