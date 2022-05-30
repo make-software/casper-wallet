@@ -30,7 +30,7 @@ export function HomePageContent() {
           listItems={accounts.map(account => ({
             id: account.name,
             Content: (
-              <ListItemElementContainer gap={10}>
+              <ListItemElementContainer>
                 <Typography type="body" weight="semiBold">
                   {account.name}
                 </Typography>
