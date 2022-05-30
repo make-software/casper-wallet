@@ -12,7 +12,7 @@ import ASN1 from '@lapo/asn1js';
 import { encodeBase64 } from 'tweetnacl-util';
 import { decodeBase16, decodeBase64, Keys } from 'casper-js-sdk';
 
-import { browser } from 'webextension-polyfill-ts';
+import Browser from 'webextension-polyfill';
 
 import { useTypedNavigate } from '@src/hooks';
 
@@ -164,7 +164,7 @@ export function ImportAccountWithFileContentPage() {
             ? Keys.Ed25519.parseKeyPair(publicKey, secretKey)
             : Keys.Secp256K1.parseKeyPair(publicKey, secretKey, 'raw');
 
-        await browser.runtime.sendMessage({
+        await Browser.runtime.sendMessage({
           success: true,
           account: {
             name: name,

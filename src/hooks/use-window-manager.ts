@@ -1,12 +1,9 @@
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { browser } from 'webextension-polyfill-ts';
+import Browser from 'webextension-polyfill';
 
-import { selectWindowId } from '@libs/../apps/popup/redux/vault/selectors';
-import {
-  clearWindowId,
-  saveWindowId
-} from '@libs/../apps/popup/redux/vault/actions';
+import { selectWindowId } from '@popup/redux/vault/selectors';
+import { clearWindowId, saveWindowId } from '@popup/redux/vault/actions';
 
 export enum PurposeForOpening {
   ImportAccount = 'ImportAccount'
@@ -21,10 +18,10 @@ export function useWindowManager() {
   }, [dispatch]);
 
   useEffect(() => {
-    browser.windows.onRemoved.addListener(handleCloseWindow);
+    Browser.windows.onRemoved.addListener(handleCloseWindow);
 
     return () => {
-      browser.windows.onRemoved.removeListener(handleCloseWindow);
+      Browser.windows.onRemoved.removeListener(handleCloseWindow);
     };
   }, [windowId, dispatch, handleCloseWindow]);
 
@@ -35,13 +32,13 @@ export function useWindowManager() {
     const id = isNewWindow ? null : windowId;
 
     if (id) {
-      const allWindows = await browser.windows.getAll();
+      const allWindows = await Browser.windows.getAll();
       const isWindowExists = allWindows.find(window => window.id === id);
 
       if (isWindowExists) {
-        const window = await browser.windows.get(id);
+        const window = await Browser.windows.get(id);
         if (window.id) {
-          await browser.windows.update(window.id, {
+          await Browser.windows.update(window.id, {
             // Bring popup window to the front
             focused: true,
             drawAttention: true
@@ -52,7 +49,7 @@ export function useWindowManager() {
         await open(purposeForOpening, true);
       }
     } else {
-      browser.windows
+      Browser.windows
         .getCurrent()
         .then(window => {
           const windowWidth = window.width ?? 0;
@@ -61,7 +58,7 @@ export function useWindowManager() {
           const popupWidth = 360;
           const popupHeight = 600;
 
-          browser.windows
+          Browser.windows
             .create({
               url:
                 purposeForOpening === PurposeForOpening.ImportAccount
@@ -89,12 +86,12 @@ export function useWindowManager() {
   async function close() {
     try {
       if (windowId) {
-        await browser.windows.remove(windowId);
+        await Browser.windows.remove(windowId);
       } else {
         // This allows the FE to call close popup without querying for window id to pass.
-        const currentWindow = await browser.windows.getCurrent();
+        const currentWindow = await Browser.windows.getCurrent();
         if (currentWindow.type === 'popup' && currentWindow.id) {
-          await browser.windows.remove(currentWindow.id);
+          await Browser.windows.remove(currentWindow.id);
         }
       }
     } catch (error) {

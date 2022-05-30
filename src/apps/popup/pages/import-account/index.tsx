@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { browser, Runtime } from 'webextension-polyfill-ts';
+import Browser, { Runtime } from 'webextension-polyfill';
 import MessageSender = Runtime.MessageSender;
 
 import {
@@ -69,9 +69,9 @@ export function ImportAccountWithFileProcessContentPage() {
   }, []);
 
   useEffect(() => {
-    browser.runtime.onMessage.addListener(handleMessage);
+    Browser.runtime.onMessage.addListener(handleMessage);
     return () => {
-      browser.runtime.onMessage.removeListener(handleMessage);
+      Browser.runtime.onMessage.removeListener(handleMessage);
     };
   }, [handleMessage]);
 

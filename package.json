@@ -37,6 +37,7 @@
     "@hookform/resolvers": "^2.8.8",
     "@hot-loader/react-dom": "^17.0.1",
     "@lapo/asn1js": "^1.2.3",
+    "@types/webextension-polyfill": "^0.8.3",
     "casper-js-sdk": "^2.9.1",
     "facepaint": "^1.2.1",
     "i18next": "^21.6.16",
@@ -58,7 +59,6 @@
     "styled-components": "^5.3.3",
     "tweetnacl-util": "^0.15.1",
     "typesafe-actions": "5.1.0",
-    "webextension-polyfill-ts": "^0.26.0",
     "yup": "^0.32.11"
   },
   "devDependencies": {
