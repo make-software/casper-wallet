@@ -1,17 +1,12 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import Browser from 'webextension-polyfill';
 import { Trans, useTranslation } from 'react-i18next';
-import * as Yup from 'yup';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import { FieldValues, useForm } from 'react-hook-form';
+import * as Yup from 'yup';
 
-import Hex from '@lapo/asn1js/hex';
-import Base64 from '@lapo/asn1js/base64';
-import ASN1 from '@lapo/asn1js';
-import { encodeBase64 } from 'tweetnacl-util';
-import { decodeBase16, decodeBase64, Keys } from 'casper-js-sdk';
-
-import Browser from 'webextension-polyfill';
+import { Keys } from 'casper-js-sdk';
 
 import { useTypedNavigate } from '@src/hooks';
 
@@ -25,18 +20,43 @@ import {
 import { Button, Input, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath } from '@import-account-with-file/router';
 
-function getAlgorithm(content: string): 'Ed25519' | 'Secp256K1' | undefined {
-  if (content.includes('curveEd25519')) {
-    return 'Ed25519';
-  } else if (content.includes('secp256k1')) {
-    return 'Secp256K1';
-  }
-  return undefined;
-}
+import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
 
 export function ImportAccountWithFileContentPage() {
-  const { t } = useTranslation();
   const navigate = useTypedNavigate();
+  const { t } = useTranslation();
+
+  const onSuccess = useCallback(
+    async (name: string, keyPair: Keys.Ed25519 | Keys.Secp256K1) => {
+      await Browser.runtime.sendMessage({
+        type: 'import-account',
+        payload: {
+          account: {
+            name,
+            keyPair
+          }
+        }
+      });
+      navigate(RouterPath.ImportAccountWithFileSuccess);
+    },
+    [navigate]
+  );
+
+  const onFailure = useCallback(
+    (message?: string) => {
+      navigate(RouterPath.ImportAccountWithFileFailure, {
+        state: {
+          importAccountStatusMessage: message
+        }
+      });
+    },
+    [navigate]
+  );
+
+  const { secretKeyFileReader } = useSecretKeyFileReader({
+    onSuccess,
+    onFailure
+  });
 
   const formSchema = Yup.object().shape({
     secretKeyFile: Yup.mixed()
@@ -86,105 +106,7 @@ export function ImportAccountWithFileContentPage() {
     secretKeyFile: { 0: secretKeyFile },
     name
   }: FieldValues) {
-    const reader = new FileReader();
-    reader.readAsText(secretKeyFile);
-
-    reader.onload = async e => {
-      const fileContents = reader.result as string;
-
-      if (!fileContents || fileContents.includes('PUBLIC KEY')) {
-        console.log("There isn't private key in file");
-        navigate(RouterPath.ImportAccountWithFileFailure, {
-          state: {
-            importAccountStatusMessage: t(
-              'A private key was not detected. Try importing a different file.'
-            )
-          }
-        });
-
-        return;
-      }
-
-      const reHex = /^\s*(?:[0-9A-Fa-f][0-9A-Fa-f]\s*)+$/;
-      try {
-        const der: Uint8Array = reHex.test(fileContents)
-          ? Hex.decode(fileContents)
-          : Base64.unarmor(fileContents);
-
-        const decodedString = ASN1.decode(der).toPrettyString();
-        const algorithm = getAlgorithm(decodedString);
-
-        if (!algorithm) {
-          console.log('Unknown algorithm');
-          navigate(RouterPath.ImportAccountWithFileFailure, {
-            state: {
-              importAccountStatusMessage: t(
-                'A private key was not detected. Try importing a different file.'
-              )
-            }
-          });
-
-          return;
-        }
-
-        const hexKey =
-          algorithm === 'Ed25519'
-            ? decodedString.split('\n')[4].split('|')[1]
-            : decodedString.split('\n')[2].split('|')[1];
-
-        const secretKeyBase64 = encodeBase64(decodeBase16(hexKey));
-
-        const isSecretKeyAlreadyImported = await Browser.runtime.sendMessage({
-          type: 'check-key-is-imported',
-          payload: {
-            secretKeyBase64
-          }
-        });
-
-        if (isSecretKeyAlreadyImported) {
-          console.log('Private key is already exists');
-          navigate(RouterPath.ImportAccountWithFileFailure, {
-            state: {
-              importAccountStatusMessage: t(
-                'This account already exists. Try importing a different file.'
-              )
-            }
-          });
-
-          return;
-        }
-
-        const secretKeyBytes = decodeBase64(secretKeyBase64);
-
-        const secretKey =
-          algorithm === 'Ed25519'
-            ? Keys.Ed25519.parsePrivateKey(secretKeyBytes)
-            : Keys.Secp256K1.parsePrivateKey(secretKeyBytes, 'raw');
-        const publicKey =
-          algorithm === 'Ed25519'
-            ? Keys.Ed25519.privateToPublicKey(secretKeyBytes)
-            : Keys.Secp256K1.privateToPublicKey(secretKeyBytes);
-        const keyPair =
-          algorithm === 'Ed25519'
-            ? Keys.Ed25519.parseKeyPair(publicKey, secretKey)
-            : Keys.Secp256K1.parseKeyPair(publicKey, secretKey, 'raw');
-
-        await Browser.runtime.sendMessage({
-          type: 'import-account',
-          payload: {
-            account: {
-              name: name,
-              keyPair
-            }
-          }
-        });
-
-        navigate(RouterPath.ImportAccountWithFileSuccess);
-      } catch (e) {
-        console.log(e);
-        navigate(RouterPath.ImportAccountWithFileFailure);
-      }
-    };
+    secretKeyFileReader(name, secretKeyFile);
   }
 
   return (
