@@ -66,7 +66,12 @@ export function useAppsMessages() {
           throw new Error('Unknown message type');
       }
     },
-    [dispatch, existingVaultAccountNames, existingVaultPrivateKeysBase64]
+    [
+      dispatch,
+      existingVaultAccountNames,
+      existingVaultPrivateKeysBase64,
+      windowId
+    ]
   );
 
   useEffect(() => {
