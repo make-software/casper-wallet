@@ -6,8 +6,6 @@ import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import { FieldValues, useForm } from 'react-hook-form';
 import * as Yup from 'yup';
 
-import { Keys } from 'casper-js-sdk';
-
 import { useTypedNavigate } from '@src/hooks';
 
 import {
@@ -21,20 +19,18 @@ import { Button, Input, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath } from '@import-account-with-file/router';
 
 import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
+import { Account } from '@popup/redux/vault/types';
 
 export function ImportAccountWithFileContentPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
   const onSuccess = useCallback(
-    async (name: string, keyPair: Keys.Ed25519 | Keys.Secp256K1) => {
+    async (accountData: Account) => {
       await Browser.runtime.sendMessage({
         type: 'import-account',
         payload: {
-          account: {
-            name,
-            keyPair
-          }
+          account: accountData
         }
       });
       navigate(RouterPath.ImportAccountWithFileSuccess);

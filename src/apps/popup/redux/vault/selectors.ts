@@ -1,9 +1,9 @@
+import { decodeBase16, encodeBase64 } from 'casper-js-sdk';
+
 import { createSelector } from 'reselect';
 import { State } from '@popup/redux/types';
 import { TimeoutDurationSetting } from '@popup/constants';
 import { Account } from '@popup/redux/vault/types';
-
-import { encodeBase64 } from 'tweetnacl-util';
 
 export const selectVaultDoesExist = (state: State): boolean =>
   !!state.vault.password;
@@ -19,14 +19,11 @@ export const selectVaultAccountNames = createSelector(
   accounts => accounts.map(account => account.name)
 );
 
-export const selectVaultAccountPrivateKeysBase64 = createSelector(
+export const selectVaultAccountSecretKeysBase64 = createSelector(
   selectVaultAccounts,
   accounts =>
     accounts.map(account =>
-      'data' in account.keyPair.privateKey
-        ? //@ts-ignore
-          encodeBase64(account.keyPair.privateKey.data)
-        : encodeBase64(account.keyPair.privateKey)
+      encodeBase64(decodeBase16(account.keyPair.secretKey))
     )
 );
 

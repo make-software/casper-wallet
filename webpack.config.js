@@ -192,6 +192,9 @@ const options = {
       filename: 'import-account-with-file.html',
       chunks: ['importAccountWithFile'],
       cache: false
+    }),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer']
     })
   ],
   infrastructureLogging: {

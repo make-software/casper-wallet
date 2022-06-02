@@ -1,9 +1,14 @@
 import { TimeoutDurationSetting } from '@popup/constants';
-import { Keys } from 'casper-js-sdk';
+
+// Maybe make sense to move `Account` and `AccountKeyPair` to shared place, because it used by `popup` and `import-account-with-file` apps
+interface AccountKeyPair {
+  secretKey: string;
+  publicKey: string;
+}
 
 export interface Account {
   name: string;
-  keyPair: Keys.Ed25519 | Keys.Secp256K1;
+  keyPair: AccountKeyPair;
 }
 
 export type VaultState = {

@@ -8,6 +8,7 @@ import {
 } from '@src/layout/containers';
 import { Typography, List, ListItemElementContainer } from '@libs/ui';
 import { selectVaultAccounts } from '@popup/redux/vault/selectors';
+import { truncateKey } from '@popup/pages/home/utils';
 
 export function HomePageContent() {
   const accounts = useSelector(selectVaultAccounts);
@@ -39,7 +40,7 @@ export function HomePageContent() {
                   weight="regular"
                   color="contentSecondary"
                 >
-                  {account.keyPair.signatureAlgorithm}
+                  {truncateKey(account.keyPair.publicKey)}
                 </Typography>
               </ListItemElementContainer>
             )

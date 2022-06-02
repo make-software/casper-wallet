@@ -3,12 +3,12 @@ import { importAccount } from '@popup/redux/vault/actions';
 import Browser, { Runtime } from 'webextension-polyfill';
 import { useDispatch, useSelector } from 'react-redux';
 import MessageSender = Runtime.MessageSender;
-import { Keys } from 'casper-js-sdk';
 import {
   selectVaultAccountNames,
-  selectVaultAccountPrivateKeysBase64
+  selectVaultAccountSecretKeysBase64
 } from '@popup/redux/vault/selectors';
 import { selectWindowId } from '@popup/redux/windowManagement/selectors';
+import { Account } from '@popup/redux/vault/types';
 
 interface Message {
   type:
@@ -17,10 +17,7 @@ interface Message {
     | 'check-key-is-imported'
     | 'get-window-id';
   payload: {
-    account?: {
-      name: string;
-      keyPair: Keys.Ed25519 | Keys.Secp256K1;
-    };
+    account?: Account;
     accountName?: string;
     secretKeyBase64?: string;
   };
@@ -32,7 +29,7 @@ export function useAppsMessages() {
   const windowId = useSelector(selectWindowId);
   const existingVaultAccountNames = useSelector(selectVaultAccountNames);
   const existingVaultPrivateKeysBase64 = useSelector(
-    selectVaultAccountPrivateKeysBase64
+    selectVaultAccountSecretKeysBase64
   );
 
   const handleMessage = useCallback(

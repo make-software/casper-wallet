@@ -2,11 +2,13 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import Browser from 'webextension-polyfill';
 
+// These libraries are required for backward compatibility with Legacy Signer
 import Hex from '@lapo/asn1js/hex';
 import Base64 from '@lapo/asn1js/base64';
 import ASN1 from '@lapo/asn1js';
-import { encodeBase64 } from 'tweetnacl-util';
-import { decodeBase16, decodeBase64, Keys } from 'casper-js-sdk';
+
+import { decodeBase16, encodeBase64, decodeBase64, Keys } from 'casper-js-sdk';
+import { Account } from '@popup/redux/vault/types';
 
 function getAlgorithm(content: string): 'Ed25519' | 'Secp256K1' | undefined {
   if (content.includes('curveEd25519')) {
@@ -17,7 +19,7 @@ function getAlgorithm(content: string): 'Ed25519' | 'Secp256K1' | undefined {
   return undefined;
 }
 
-type OnSuccess = (name: string, keyPair: Keys.Secp256K1 | Keys.Ed25519) => void;
+type OnSuccess = (accountData: Account) => void;
 type OnFailure = (message?: string) => void;
 
 interface UseSecretKeyFileReaderProps {
@@ -40,7 +42,6 @@ export function useSecretKeyFileReader({
         const fileContents = reader.result as string;
 
         if (!fileContents || fileContents.includes('PUBLIC KEY')) {
-          console.log("There isn't private key in file");
           onFailure(
             t('A private key was not detected. Try importing a different file.')
           );
@@ -58,7 +59,6 @@ export function useSecretKeyFileReader({
           const algorithm = getAlgorithm(decodedString);
 
           if (!algorithm) {
-            console.log('Unknown algorithm');
             onFailure(
               t(
                 'A private key was not detected. Try importing a different file.'
@@ -83,7 +83,6 @@ export function useSecretKeyFileReader({
           });
 
           if (isSecretKeyAlreadyImported) {
-            console.log('Private key is already exists');
             onFailure(
               t('This account already exists. Try importing a different file.')
             );
@@ -97,16 +96,24 @@ export function useSecretKeyFileReader({
             algorithm === 'Ed25519'
               ? Keys.Ed25519.parsePrivateKey(secretKeyBytes)
               : Keys.Secp256K1.parsePrivateKey(secretKeyBytes, 'raw');
+
           const publicKey =
             algorithm === 'Ed25519'
               ? Keys.Ed25519.privateToPublicKey(secretKeyBytes)
               : Keys.Secp256K1.privateToPublicKey(secretKeyBytes);
+
           const keyPair =
             algorithm === 'Ed25519'
               ? Keys.Ed25519.parseKeyPair(publicKey, secretKey)
               : Keys.Secp256K1.parseKeyPair(publicKey, secretKey, 'raw');
 
-          onSuccess(name, keyPair);
+          onSuccess({
+            name,
+            keyPair: {
+              secretKey: Buffer.from(keyPair.privateKey).toString('hex'),
+              publicKey: keyPair.publicKey.toHex()
+            }
+          });
         } catch (e) {
           console.log(e);
           onFailure();
