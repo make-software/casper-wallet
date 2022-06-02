@@ -40,7 +40,7 @@ export function HomePageContent() {
                   weight="regular"
                   color="contentSecondary"
                 >
-                  {truncateKey(account.keyPair.publicKey)}
+                  {truncateKey(account.publicKey)}
                 </Typography>
               </ListItemElementContainer>
             )

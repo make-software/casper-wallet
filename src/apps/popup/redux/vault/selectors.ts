@@ -22,9 +22,7 @@ export const selectVaultAccountNames = createSelector(
 export const selectVaultAccountSecretKeysBase64 = createSelector(
   selectVaultAccounts,
   accounts =>
-    accounts.map(account =>
-      encodeBase64(decodeBase16(account.keyPair.secretKey))
-    )
+    accounts.map(account => encodeBase64(decodeBase16(account.secretKey)))
 );
 
 export const selectVaultIsLocked = (state: State): boolean =>

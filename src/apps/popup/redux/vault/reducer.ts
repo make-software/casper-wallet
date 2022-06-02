@@ -50,9 +50,9 @@ export const reducer = createReducer(initialState)
   )
   .handleAction(
     [importAccount],
-    (state, { payload: { name, keyPair } }): State => ({
+    (state, { payload }): State => ({
       ...state,
-      accounts: [...state.accounts, { name, keyPair }]
+      accounts: [...state.accounts, payload]
     })
   )
   .handleAction(

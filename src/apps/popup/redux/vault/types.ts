@@ -1,14 +1,10 @@
 import { TimeoutDurationSetting } from '@popup/constants';
 
-// Maybe make sense to move `Account` and `AccountKeyPair` to shared place, because it used by `popup` and `import-account-with-file` apps
-interface AccountKeyPair {
-  secretKey: string;
-  publicKey: string;
-}
-
+// Maybe make sense to move `Account` to shared place, because it used by `popup` and `import-account-with-file` apps
 export interface Account {
   name: string;
-  keyPair: AccountKeyPair;
+  secretKey: string;
+  publicKey: string;
 }
 
 export type VaultState = {
