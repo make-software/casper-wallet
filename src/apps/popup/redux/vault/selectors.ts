@@ -1,5 +1,3 @@
-import { decodeBase16, encodeBase64 } from 'casper-js-sdk';
-
 import { createSelector } from 'reselect';
 import { State } from '@popup/redux/types';
 import { TimeoutDurationSetting } from '@popup/constants';
@@ -21,8 +19,7 @@ export const selectVaultAccountNames = createSelector(
 
 export const selectVaultAccountSecretKeysBase64 = createSelector(
   selectVaultAccounts,
-  accounts =>
-    accounts.map(account => encodeBase64(decodeBase16(account.secretKey)))
+  accounts => accounts.map(account => account.secretKey)
 );
 
 export const selectVaultIsLocked = (state: State): boolean =>

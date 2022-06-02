@@ -8,6 +8,7 @@ import Base64 from '@lapo/asn1js/base64';
 import ASN1 from '@lapo/asn1js';
 
 import { decodeBase16, encodeBase64, decodeBase64, Keys } from 'casper-js-sdk';
+
 import { Account } from '@popup/redux/vault/types';
 
 function getAlgorithm(content: string): 'Ed25519' | 'Secp256K1' | undefined {
@@ -109,7 +110,11 @@ export function useSecretKeyFileReader({
 
           onSuccess({
             name,
-            secretKey: Buffer.from(keyPair.privateKey).toString('hex'),
+            secretKey: Buffer.from(keyPair.privateKey).toString(
+              'base64',
+              0,
+              32
+            ),
             publicKey: keyPair.publicKey.toHex()
           });
         } catch (e) {
