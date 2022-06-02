@@ -15,7 +15,7 @@ const Container = styled.div`
   border-bottom: 0.5px solid ${({ theme }) => theme.color.borderPrimary};
 `;
 
-const LinkWithIcon = styled(Link)`
+const LinkWithIconContainer = styled.div`
   display: flex;
   align-items: center;
 `;
@@ -53,15 +53,18 @@ export function SubmenuBar({ actionType }: SubmenuBarProps) {
       return (
         <Container>
           <Typography type="body" weight="semiBold">
-            <LinkWithIcon onClick={() => navigate(-1)} color="fillBlue">
+            <LinkWithIconContainer>
               <SvgIcon
+                onClick={() => navigate(-1)}
                 src="assets/icons/chevron.svg"
                 color="contentBlue"
                 flipByAxis="Y"
                 size={24}
               />
-              <Trans t={t}>Back</Trans>
-            </LinkWithIcon>
+              <Link onClick={() => navigate(-1)} color="fillBlue">
+                <Trans t={t}>Back</Trans>
+              </Link>
+            </LinkWithIconContainer>
           </Typography>
         </Container>
       );
