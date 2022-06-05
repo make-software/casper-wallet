@@ -1,12 +1,13 @@
 const { Browser } = require('selenium-webdriver');
+const { NODE_ENV, BROWSER: browserEnvVar } = require('./utils/env');
 
 const extensionName = 'CasperLabs Signer';
-const browserEnvVar = process.env.BROWSER;
+const buildRootDir = NODE_ENV === 'production' ? 'build' : 'dist';
 
 const ExtensionBuildPath = {
-  Chrome: `build/${Browser.CHROME}`,
-  Firefox: `build/${Browser.FIREFOX}`,
-  Safari: `build/${Browser.SAFARI}/${extensionName}`
+  Chrome: `${buildRootDir}/${Browser.CHROME}`,
+  Firefox: `${buildRootDir}/${Browser.FIREFOX}`,
+  Safari: `${buildRootDir}/${Browser.SAFARI}/${extensionName}`
 };
 
 const ManifestPath = {

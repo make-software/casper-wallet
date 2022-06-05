@@ -4,9 +4,9 @@
   "scripts": {
     "devtools:redux": "redux-devtools --hostname=localhost --port=8000",
     "build:chrome": "NODE_ENV=production BABEL_ENV=production BROWSER=chrome node utils/build.js",
-    "build:firefox": "NODE_ENV=production BABEL_ENV=production node utils/build.js",
+    "build:firefox": "NODE_ENV=production BABEL_ENV=production BROWSER=firefox node utils/build.js",
     "dev:build:chrome": "NODE_ENV=development BABEL_ENV=development BROWSER=chrome node utils/build.js",
-    "dev:build:firefox": "NODE_ENV=development BABEL_ENV=development node utils/build.js",
+    "dev:build:firefox": "NODE_ENV=development BABEL_ENV=development BROWSER=firefox node utils/build.js",
     "dev:chrome": "npm run dev:build:chrome && NODE_ENV=development BABEL_ENV=development BROWSER=chrome PORT=3001 ts-node --project scripts.tsconfig.json utils/webserver.js",
     "start:chrome": "concurrently -k -n start,redux \"npm run dev:chrome\" \"npm run devtools:redux\"",
     "dev:firefox": "npm run dev:build:firefox && NODE_ENV=development BABEL_ENV=development BROWSER=firefox PORT=3002 ts-node --project scripts.tsconfig.json utils/webserver.js",
