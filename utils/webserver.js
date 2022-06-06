@@ -1,10 +1,8 @@
 const { execSync } = require('child_process');
-const path = require('path');
 const XcodeBuildPlugin = require('xcode-build-webpack-plugin');
 const WebpackDevServer = require('webpack-dev-server');
 const webpack = require('webpack');
 
-const { buildWebDriver } = require('../e2e/webdriver');
 const config = require('../webpack.config');
 const env = require('./env');
 const {
@@ -15,6 +13,8 @@ const {
   extensionName
 } = require('../constants');
 
+const { getExtensionBuildAbsolutePath } = require('./build-dir-utils');
+
 const { chromeExtensionID } = require('../src/manifest.v3.json');
 
 // Do this as the first thing so that any code reading it knows the right env.
@@ -22,17 +22,7 @@ process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
 process.env.ASSET_PATH = '/';
 
-let directory;
-if (isSafari) {
-  directory = path.join(__dirname, '../', ExtensionBuildPath.Safari);
-} else if (isFirefox) {
-  directory = path.join(__dirname, '../', ExtensionBuildPath.Firefox);
-} else if (isChrome) {
-  directory = path.join(__dirname, '../', ExtensionBuildPath.Firefox);
-} else {
-  throw new Error('Unknown browser');
-}
-
+const extensionAbsPath = getExtensionBuildAbsolutePath();
 const options = config.chromeExtensionBoilerplate || {};
 const excludeEntriesToHotReload = options.notHotReload || [];
 
@@ -54,7 +44,7 @@ delete config.chromeExtensionBoilerplate;
 if (isSafari) {
   config.plugins.push(
     new XcodeBuildPlugin({
-      projectDir: directory,
+      projectDir: extensionAbsPath,
       args: {
         quiet: true,
         scheme: extensionName
@@ -75,7 +65,7 @@ const server = new WebpackDevServer(
     host: 'localhost',
     port: env.PORT,
     static: {
-      directory
+      directory: extensionAbsPath
     },
     devMiddleware: {
       publicPath,
@@ -99,11 +89,7 @@ if (process.env.NODE_ENV === 'development' && 'hot' in module) {
       const delay = ms => new Promise(res => setTimeout(res, ms));
 
       const openExtensionPageCommand = `open -na "Google Chrome" chrome-extension://${chromeExtensionID}/popup.html --args --remote-debugging-port=9222`;
-      const installExtensionCommand = `open -na "Google Chrome" chrome://extensions/ --args --load-extension=${path.join(
-        __dirname,
-        '../',
-        ExtensionBuildPath.Chrome
-      )} --remote-debugging-port=9222`;
+      const installExtensionCommand = `open -na "Google Chrome" chrome://extensions/ --args --load-extension=${extensionAbsPath} --remote-debugging-port=9222`;
 
       execSync(installExtensionCommand);
       await delay(2000); // Waiting for install
