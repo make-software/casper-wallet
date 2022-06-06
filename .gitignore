@@ -9,7 +9,7 @@ node_modules
 coverage
 
 # development
-dist
+output
 
 # production
 build

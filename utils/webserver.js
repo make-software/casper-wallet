@@ -22,7 +22,7 @@ process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
 process.env.ASSET_PATH = '/';
 
-const directory = getExtensionBuildAbsolutePath();
+const extensionAbsPath = getExtensionBuildAbsolutePath();
 const options = config.chromeExtensionBoilerplate || {};
 const excludeEntriesToHotReload = options.notHotReload || [];
 
@@ -44,7 +44,7 @@ delete config.chromeExtensionBoilerplate;
 if (isSafari) {
   config.plugins.push(
     new XcodeBuildPlugin({
-      projectDir: directory,
+      projectDir: extensionAbsPath,
       args: {
         quiet: true,
         scheme: extensionName
@@ -65,7 +65,7 @@ const server = new WebpackDevServer(
     host: 'localhost',
     port: env.PORT,
     static: {
-      directory
+      directory: extensionAbsPath
     },
     devMiddleware: {
       publicPath,
@@ -88,7 +88,6 @@ if (process.env.NODE_ENV === 'development' && 'hot' in module) {
     if (isChrome) {
       const delay = ms => new Promise(res => setTimeout(res, ms));
 
-      const extensionAbsPath = getExtensionBuildAbsolutePath();
       const openExtensionPageCommand = `open -na "Google Chrome" chrome-extension://${chromeExtensionID}/popup.html --args --remote-debugging-port=9222`;
       const installExtensionCommand = `open -na "Google Chrome" chrome://extensions/ --args --load-extension=${extensionAbsPath} --remote-debugging-port=9222`;
 
