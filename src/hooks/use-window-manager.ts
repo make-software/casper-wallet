@@ -5,7 +5,7 @@ import Browser from 'webextension-polyfill';
 import { selectWindowId } from '@popup/redux/windowManagement/selectors';
 import {
   clearWindowId,
-  saveWindowId
+  storeWindowId
 } from '@popup/redux/windowManagement/actions';
 
 export enum PurposeForOpening {
@@ -75,7 +75,7 @@ export function useWindowManager() {
             })
             .then(newPopup => {
               if (newPopup.id) {
-                dispatch(saveWindowId(newPopup.id));
+                dispatch(storeWindowId(newPopup.id));
               }
             });
         })

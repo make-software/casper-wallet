@@ -1,7 +1,7 @@
 import { createReducer } from 'typesafe-actions';
 
 import { WindowManagementState } from './types';
-import { clearWindowId, saveWindowId } from './actions';
+import { clearWindowId, storeWindowId } from './actions';
 type State = WindowManagementState;
 
 const initialState: State = {
@@ -10,7 +10,7 @@ const initialState: State = {
 
 export const reducer = createReducer(initialState)
   .handleAction(
-    [saveWindowId],
+    [storeWindowId],
     (state, { payload }): State => ({
       ...state,
       windowId: payload
