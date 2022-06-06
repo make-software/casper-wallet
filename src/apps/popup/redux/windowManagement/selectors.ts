@@ -1,4 +1,4 @@
-import { State } from '@popup/redux/types';
+import { RootState } from 'typesafe-actions';
 
-export const selectWindowId = (state: State): number | null =>
+export const selectWindowId = (state: RootState): number | null =>
   state.windowManagement.windowId;
