@@ -1,11 +1,13 @@
 import React, { useCallback } from 'react';
-import Browser from 'webextension-polyfill';
-import { Trans, useTranslation } from 'react-i18next';
-import { UseFormProps } from 'react-hook-form/dist/types/form';
-import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import { FieldValues, useForm } from 'react-hook-form';
+import { UseFormProps } from 'react-hook-form/dist/types/form';
+import { Trans, useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 
+import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
+import { RouterPath, useTypedNavigate } from '@import-account-with-file/router';
+import { Button, Input, SvgIcon, Typography } from '@libs/ui';
+import { Account } from '@popup/redux/vault/types';
 import {
   ButtonsContainer,
   ContentContainer,
@@ -13,11 +15,12 @@ import {
   InputsContainer,
   TextContainer
 } from '@src/layout/containers';
-import { Button, Input, SvgIcon, Typography } from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@import-account-with-file/router';
 
+import {
+  checkAccountNameIsTaken,
+  sendImportedAccount
+} from '@src/apps/popup/redux/remote-actions';
 import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
-import { Account } from '@popup/redux/vault/types';
 
 export function ImportAccountWithFileContentPage() {
   const navigate = useTypedNavigate();
@@ -25,12 +28,7 @@ export function ImportAccountWithFileContentPage() {
 
   const onSuccess = useCallback(
     async (accountData: Account) => {
-      await Browser.runtime.sendMessage({
-        type: 'import-account',
-        payload: {
-          account: accountData
-        }
-      });
+      await sendImportedAccount(accountData);
       navigate(RouterPath.ImportAccountWithFileSuccess);
     },
     [navigate]
@@ -69,13 +67,8 @@ export function ImportAccountWithFileContentPage() {
         'Account name can’t contain special characters'
       )
       .test('unique', 'Account name is already taken', async value => {
-        const isAccountNameTaken = await Browser.runtime.sendMessage({
-          type: 'check-name-is-taken',
-          payload: {
-            accountName: value
-          }
-        });
-
+        const isAccountNameTaken =
+          value && (await checkAccountNameIsTaken(value));
         return !isAccountNameTaken;
       })
   });

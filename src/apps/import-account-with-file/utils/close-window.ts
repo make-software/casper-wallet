@@ -1,7 +1,8 @@
 import Browser from 'webextension-polyfill';
+import { getWindowId } from '@src/apps/popup/redux/remote-actions';
 
 export async function closeWindow() {
-  const windowId = await Browser.runtime.sendMessage({ type: 'get-window-id' });
+  const windowId = await getWindowId();
 
   try {
     if (windowId) {

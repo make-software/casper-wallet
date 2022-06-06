@@ -24,7 +24,7 @@ import {
 } from './redux/vault/selectors';
 
 import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
-import { useAppsMessages } from './hooks/use-apps-messages';
+import { useRemoteActions } from './redux/use-remote-actions';
 
 export function App() {
   const navigate = useTypedNavigate();
@@ -36,7 +36,7 @@ export function App() {
   const vaultHasAccount = useSelector(selectVaultHasAccount);
 
   useVaultTimeoutController();
-  useAppsMessages();
+  useRemoteActions();
 
   // App redirects
   useEffect(() => {

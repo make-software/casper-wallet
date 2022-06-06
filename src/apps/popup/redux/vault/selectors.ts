@@ -12,12 +12,12 @@ export const selectVaultHasAccount = (state: State): boolean =>
 export const selectVaultAccounts = (state: State): Account[] =>
   state.vault.accounts;
 
-export const selectVaultAccountNames = createSelector(
+export const selectVaultAccountsNames = createSelector(
   selectVaultAccounts,
   accounts => accounts.map(account => account.name)
 );
 
-export const selectVaultAccountSecretKeysBase64 = createSelector(
+export const selectVaultAccountsSecretKeysBase64 = createSelector(
   selectVaultAccounts,
   accounts => accounts.map(account => account.secretKey)
 );

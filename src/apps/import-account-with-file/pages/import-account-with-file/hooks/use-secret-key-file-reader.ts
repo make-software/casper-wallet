@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import Browser from 'webextension-polyfill';
 
 // These libraries are required for backward compatibility with Legacy Signer
 import Hex from '@lapo/asn1js/hex';
@@ -10,6 +9,7 @@ import ASN1 from '@lapo/asn1js';
 import { decodeBase16, encodeBase64, decodeBase64, Keys } from 'casper-js-sdk';
 
 import { Account } from '@popup/redux/vault/types';
+import { checkSecretKeyExist } from '@src/apps/popup/redux/remote-actions';
 
 function getAlgorithm(content: string): 'Ed25519' | 'Secp256K1' | undefined {
   if (content.includes('curveEd25519')) {
@@ -75,15 +75,10 @@ export function useSecretKeyFileReader({
               : decodedString.split('\n')[2].split('|')[1];
 
           const secretKeyBase64 = encodeBase64(decodeBase16(hexKey));
+          const doesSecretKeyExist =
+            secretKeyBase64 && (await checkSecretKeyExist(secretKeyBase64));
 
-          const isSecretKeyAlreadyImported = await Browser.runtime.sendMessage({
-            type: 'check-key-is-imported',
-            payload: {
-              secretKeyBase64
-            }
-          });
-
-          if (isSecretKeyAlreadyImported) {
+          if (doesSecretKeyExist) {
             onFailure(
               t('This account already exists. Try importing a different file.')
             );
@@ -118,7 +113,7 @@ export function useSecretKeyFileReader({
             publicKey: keyPair.publicKey.toHex()
           });
         } catch (e) {
-          console.log(e);
+          console.error(e);
           onFailure();
         }
       };
