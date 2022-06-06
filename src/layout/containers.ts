@@ -1,5 +1,23 @@
 import styled from 'styled-components';
 
+const backgroundIconPath = 'assets/icons/logo-background.svg';
+
+export const HeaderContainer = styled.header`
+  background: url(${backgroundIconPath}) no-repeat;
+  background-color: ${({ theme }) => theme.color.backgroundBlue};
+  height: 72px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 0 16px;
+`;
+
+export const LogoContainer = styled.div`
+  cursor: ${props => (props.onClick ? 'pointer' : 'default')};
+`;
+
 export const ContentContainer = styled.div`
   padding: 0 ${({ theme }) => theme.padding[1.6]};
 `;

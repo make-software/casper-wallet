@@ -8,6 +8,7 @@ export const ListItemElementContainer = styled.div`
 
   display: flex;
   align-items: center;
+  gap: 10px;
 
   & > span {
     white-space: nowrap;

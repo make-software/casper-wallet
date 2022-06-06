@@ -2,8 +2,8 @@ import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 
 interface Props {
-  Header: ReactElement<any, any>;
-  Content: ReactElement<any, any>;
+  Header: ReactElement;
+  Content: ReactElement;
 }
 
 const Container = styled.div`
@@ -29,4 +29,5 @@ export function Layout({ Header, Content }: Props) {
   );
 }
 
-export * from './header';
+export * from './logo';
+export * from './containers';

@@ -58,6 +58,15 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
       'pointer-events': 'none'
     }
   },
+  '&[type=file]': {
+    cursor: 'pointer',
+    color: theme.color.contentSecondary,
+    height: '40px',
+    lineHeight: '40px'
+  },
+  '&[type=file]::file-selector-button': {
+    display: 'none'
+  },
   '::placeholder': {
     color: theme.color.contentSecondary
   }

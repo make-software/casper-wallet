@@ -41,7 +41,14 @@ if (fileSystem.existsSync(secretsPath)) {
 const options = {
   mode: process.env.NODE_ENV || 'development',
   entry: {
-    popup: path.join(__dirname, 'src', 'pages', 'popup', 'index.tsx'),
+    popup: path.join(__dirname, 'src', 'apps', 'popup', 'index.tsx'),
+    importAccountWithFile: path.join(
+      __dirname,
+      'src',
+      'apps',
+      'import-account-with-file',
+      'index.tsx'
+    ),
     background: path.join(__dirname, 'src', 'background', 'index.ts'),
     contentScript: path.join(__dirname, 'src', 'content', 'index.ts')
   },
@@ -169,10 +176,25 @@ const options = {
       ]
     }),
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, 'src', 'pages', 'popup', 'index.html'),
+      template: path.join(__dirname, 'src', 'apps', 'popup', 'index.html'),
       filename: 'popup.html',
       chunks: ['popup'],
       cache: false
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(
+        __dirname,
+        'src',
+        'apps',
+        'import-account-with-file',
+        'index.html'
+      ),
+      filename: 'import-account-with-file.html',
+      chunks: ['importAccountWithFile'],
+      cache: false
+    }),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer']
     })
   ],
   infrastructureLogging: {
