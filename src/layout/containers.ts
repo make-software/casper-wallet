@@ -15,7 +15,7 @@ export const HeaderContainer = styled.header`
 `;
 
 export const LogoContainer = styled.div`
-  cursor: pointer;
+  cursor: ${props => (props.onClick ? 'pointer' : 'default')};
 `;
 
 export const ContentContainer = styled.div`
