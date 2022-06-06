@@ -1,8 +1,6 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { useTypedLocation, useTypedNavigate } from '@src/hooks';
-
 import {
   ButtonsContainer,
   ContentContainer,
@@ -11,14 +9,18 @@ import {
 } from '@src/layout/containers';
 import { Button, Typography } from '@libs/ui';
 
-import { LocationState, RouterPath } from '@import-account-with-file/router';
+import {
+  RouterPath,
+  useTypedLocation,
+  useTypedNavigate
+} from '@import-account-with-file/router';
 import { closeWindow } from '@import-account-with-file/utils/close-window';
 
 export function ImportAccountWithFileFailureContentPage() {
-  const navigate = useTypedNavigate();
   const { t } = useTranslation();
+  const navigate = useTypedNavigate();
   const location = useTypedLocation();
-  const state = location.state as LocationState;
+  const state = location.state;
 
   return (
     <ContentContainer>

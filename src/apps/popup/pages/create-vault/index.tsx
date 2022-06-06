@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
-import { Trans, useTranslation } from 'react-i18next';
 import { FieldValues, useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { Trans, useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 import * as Yup from 'yup';
 
-import { useTypedNavigate } from '@src/hooks';
-
-import { RouterPath } from '@popup/router';
-import { createVault } from '@popup/redux/vault/actions';
-
+import { yupResolver } from '@hookform/resolvers/yup';
 import {
   Button,
   Input,
@@ -19,13 +14,14 @@ import {
   SvgIcon,
   Typography
 } from '@libs/ui';
-
+import { createVault } from '@popup/redux/vault/actions';
+import { RouterPath, useTypedNavigate } from '@popup/router';
 import {
-  ContentContainer,
   ButtonsContainer,
-  TextContainer,
+  ContentContainer,
   HeaderTextContainer,
-  InputsContainer
+  InputsContainer,
+  TextContainer
 } from '@src/layout/containers';
 
 type InputType = 'password' | 'text';

@@ -2,8 +2,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { useTypedLocation } from '@src/hooks';
-import { LocationState, useNavigationMenu } from '@popup/router';
+import { useNavigationMenu, useTypedLocation } from '@popup/router';
 
 import { SvgIcon } from '@libs/ui';
 import { lockVault } from '@popup/redux/vault/actions';
@@ -42,7 +41,7 @@ export function MainmenuBar({ withLock, withMenu }: MainmenuBarProps) {
           onClick={toggleNavigationMenu}
           color="contentOnFill"
           src={
-            (location.state as LocationState)?.showNavigationMenu
+            location.state.showNavigationMenu
               ? 'assets/icons/burger-close.svg'
               : 'assets/icons/burger-menu.svg'
           }

@@ -10,7 +10,7 @@ import {
 } from '@src/layout/containers';
 
 import { Typography, Button, Checkbox } from '@libs/ui';
-import { useTypedNavigate } from '@src/hooks';
+import { useTypedNavigate } from '@popup/router';
 import { resetVault } from '@popup/redux/vault/actions';
 
 export function ResetVaultPageContent() {

@@ -4,7 +4,6 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
 
-import { useTypedLocation, useTypedNavigate } from '@src/hooks';
 import { Layout } from '@src/layout';
 
 import { CreateVaultPageContent } from '@popup/pages/create-vault';
@@ -14,6 +13,7 @@ import { NoAccountsPageContent } from '@popup/pages/no-accounts';
 import { ResetVaultPageContent } from '@popup/pages/reset-vault';
 import { TimeoutPageContent } from '@popup/pages/timeout';
 import { UnlockVaultPageContent } from '@popup/pages/unlock-vault';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { Header } from './layout';
 
@@ -25,12 +25,11 @@ import {
 
 import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
 import { useAppsMessages } from './hooks/use-apps-messages';
-import { LocationState, RouterPath } from './router';
 
 export function App() {
   const navigate = useTypedNavigate();
   const location = useTypedLocation();
-  const state = location.state as LocationState;
+  const state = location.state;
 
   const vaultIsLocked = useSelector(selectVaultIsLocked);
   const vaultDoesExists = useSelector(selectVaultDoesExist);

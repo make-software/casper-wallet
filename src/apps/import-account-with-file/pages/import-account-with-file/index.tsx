@@ -6,8 +6,6 @@ import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import { FieldValues, useForm } from 'react-hook-form';
 import * as Yup from 'yup';
 
-import { useTypedNavigate } from '@src/hooks';
-
 import {
   ButtonsContainer,
   ContentContainer,
@@ -16,7 +14,7 @@ import {
   TextContainer
 } from '@src/layout/containers';
 import { Button, Input, SvgIcon, Typography } from '@libs/ui';
-import { RouterPath } from '@import-account-with-file/router';
+import { RouterPath, useTypedNavigate } from '@import-account-with-file/router';
 
 import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
 import { Account } from '@popup/redux/vault/types';
