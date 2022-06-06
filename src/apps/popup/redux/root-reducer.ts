@@ -1,11 +1,11 @@
 import { combineReducers } from 'redux';
 
-import { reducer as vaultReducer } from './vault/reducer';
-import { reducer as windowManagementReducer } from './windowManagement/reducer';
+import { reducer as vault } from './vault/reducer';
+import { reducer as windowManagement } from './windowManagement/reducer';
 
 const rootReducer = combineReducers({
-  vault: vaultReducer,
-  windowManagement: windowManagementReducer
+  vault,
+  windowManagement
 });
 
 export default rootReducer;
