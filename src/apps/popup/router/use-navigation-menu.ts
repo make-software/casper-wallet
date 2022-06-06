@@ -8,7 +8,7 @@ export function useNavigationMenu() {
     navigate(location.pathname, {
       replace: true,
       state: {
-        showNavigationMenu: !location.state.showNavigationMenu
+        showNavigationMenu: !location.state?.showNavigationMenu
       }
     });
   };

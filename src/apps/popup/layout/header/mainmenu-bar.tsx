@@ -41,7 +41,7 @@ export function MainmenuBar({ withLock, withMenu }: MainmenuBarProps) {
           onClick={toggleNavigationMenu}
           color="contentOnFill"
           src={
-            location.state.showNavigationMenu
+            location.state?.showNavigationMenu
               ? 'assets/icons/burger-close.svg'
               : 'assets/icons/burger-menu.svg'
           }

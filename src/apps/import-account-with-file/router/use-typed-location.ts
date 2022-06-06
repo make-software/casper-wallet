@@ -5,6 +5,6 @@ export function useTypedLocation() {
   const location = useLocation();
 
   return location as typeof location & {
-    state: LocationState;
+    state?: LocationState;
   };
 }
