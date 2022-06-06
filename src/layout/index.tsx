@@ -2,8 +2,8 @@ import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 
 interface Props {
-  Header: ReactElement<any, any>;
-  Content: ReactElement<any, any>;
+  Header: ReactElement;
+  Content: ReactElement;
 }
 
 const Container = styled.div`
