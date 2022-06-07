@@ -12,14 +12,14 @@ interface HeaderProps {
   withLock?: boolean;
   withMenu?: boolean;
   submenuActionType?: 'back' | 'close' | 'cancel';
-  SubmenuActionBar?: ReactElement;
+  SubmenuActionGroup?: ReactElement;
 }
 
 export function Header({
   withLock,
   withMenu,
   submenuActionType,
-  SubmenuActionBar
+  SubmenuActionGroup
 }: HeaderProps) {
   const navigate = useNavigate();
 
@@ -34,7 +34,7 @@ export function Header({
       {submenuActionType && (
         <SubmenuBar
           actionType={submenuActionType}
-          ActionBar={SubmenuActionBar}
+          ActionGroup={SubmenuActionGroup}
         />
       )}
     </>

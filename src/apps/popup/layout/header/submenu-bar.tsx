@@ -23,10 +23,10 @@ const LinkWithIconContainer = styled.div`
 
 interface SubmenuBarProps {
   actionType: 'back' | 'close' | 'cancel';
-  ActionBar?: ReactElement<any, any>;
+  ActionGroup?: ReactElement;
 }
 
-export function SubmenuBar({ actionType, ActionBar }: SubmenuBarProps) {
+export function SubmenuBar({ actionType, ActionGroup }: SubmenuBarProps) {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
@@ -79,7 +79,7 @@ export function SubmenuBar({ actionType, ActionBar }: SubmenuBarProps) {
   return (
     <Container>
       {NavLink}
-      {ActionBar && ActionBar}
+      {ActionGroup && ActionGroup}
     </Container>
   );
 }

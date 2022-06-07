@@ -27,7 +27,7 @@ import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller'
 import { useRemoteActions } from './redux/use-remote-actions';
 import {
   AccountSettingsPageContent,
-  RemoveAccountIconButton
+  AccountSettingsActionsGroup
 } from '@popup/pages/account-settings';
 import { RemoveAccountPageContent } from '@popup/pages/remove-account';
 
@@ -113,7 +113,7 @@ export function App() {
                     withLock
                     withMenu
                     submenuActionType="close"
-                    SubmenuActionBar={<RemoveAccountIconButton />}
+                    SubmenuActionGroup={<AccountSettingsActionsGroup />}
                   />
                 }
                 Content={<AccountSettingsPageContent />}

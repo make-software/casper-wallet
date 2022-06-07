@@ -34,7 +34,7 @@ export function AccountSettingsPageContent() {
   );
 }
 
-export function RemoveAccountIconButton() {
+export function AccountSettingsActionsGroup() {
   const { accountName } = useParams();
   const navigate = useTypedNavigate();
 
