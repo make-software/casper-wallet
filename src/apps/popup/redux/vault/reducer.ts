@@ -10,7 +10,7 @@ import {
   resetVault,
   importAccount,
   removeAccount,
-  renameAccount
+  renameAccount,
   switchActiveAccount
 } from './actions';
 import { VaultState } from './types';

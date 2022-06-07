@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation, Trans } from 'react-i18next';
 import styled from 'styled-components';
 
 import { PurposeForOpening, useWindowManager } from '@src/hooks';
@@ -75,6 +76,7 @@ const AccountDetailsListItemContainer = styled.div`
 export function HomePageContent() {
   const dispatch = useDispatch();
   const navigate = useTypedNavigate();
+  const { t } = useTranslation();
 
   const { openWindow } = useWindowManager();
 
@@ -124,7 +126,7 @@ export function HomePageContent() {
       {accounts.length > 0 && (
         <AccountListContainer>
           <Typography type="label" weight="medium" color="contentSecondary">
-            Accounts list
+            <Trans t={t}>Accounts list</Trans>
           </Typography>
 
           <Tile>
@@ -190,9 +192,11 @@ export function HomePageContent() {
                   )
                 }
               >
-                Import
+                <Trans t={t}>Import</Trans>
               </Button>
-              <Button color="secondaryBlue">Create</Button>
+              <Button color="secondaryBlue">
+                <Trans t={t}>Create</Trans>
+              </Button>
             </ButtonsContainer>
           </Tile>
         </AccountListContainer>
