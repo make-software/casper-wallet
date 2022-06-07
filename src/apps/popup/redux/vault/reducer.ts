@@ -3,12 +3,13 @@ import { createReducer } from 'typesafe-actions';
 import { TimeoutDurationSetting } from '@popup/constants';
 import {
   changeTimeoutDuration,
-  importAccount,
+  refreshTimeout,
   createVault,
   lockVault,
   unlockVault,
   resetVault,
-  refreshTimeout
+  importAccount,
+  removeAccount
 } from './actions';
 import { VaultState } from './types';
 
@@ -53,6 +54,13 @@ export const reducer = createReducer(initialState)
     (state, { payload }): State => ({
       ...state,
       accounts: [...state.accounts, payload]
+    })
+  )
+  .handleAction(
+    [removeAccount],
+    (state, { payload: { name } }): State => ({
+      ...state,
+      accounts: state.accounts.filter(account => account.name !== name)
     })
   )
   .handleAction(

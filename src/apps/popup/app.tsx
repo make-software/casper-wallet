@@ -25,6 +25,11 @@ import {
 
 import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
 import { useRemoteActions } from './redux/use-remote-actions';
+import {
+  AccountSettingsPageContent,
+  AccountSettingsActionsGroup
+} from '@popup/pages/account-settings';
+import { RemoveAccountPageContent } from '@popup/pages/remove-account';
 
 export function App() {
   const navigate = useTypedNavigate();
@@ -96,6 +101,31 @@ export function App() {
               <Layout
                 Header={<Header />}
                 Content={<CreateVaultPageContent />}
+              />
+            }
+          />
+          <Route
+            path={RouterPath.AccountSettings}
+            element={
+              <Layout
+                Header={
+                  <Header
+                    withLock
+                    withMenu
+                    submenuActionType="close"
+                    SubmenuActionGroup={<AccountSettingsActionsGroup />}
+                  />
+                }
+                Content={<AccountSettingsPageContent />}
+              />
+            }
+          />
+          <Route
+            path={RouterPath.RemoveAccount}
+            element={
+              <Layout
+                Header={<Header withLock withMenu submenuActionType="back" />}
+                Content={<RemoveAccountPageContent />}
               />
             }
           />

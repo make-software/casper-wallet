@@ -7,10 +7,14 @@ import {
   TextContainer
 } from '@src/layout/containers';
 import { Typography, List, ListItemElementContainer } from '@libs/ui';
+
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
 import { selectVaultAccounts } from '@popup/redux/vault/selectors';
 import { truncateKey } from '@popup/pages/home/utils';
 
 export function HomePageContent() {
+  const navigate = useTypedNavigate();
   const accounts = useSelector(selectVaultAccounts);
 
   return (
@@ -43,7 +47,12 @@ export function HomePageContent() {
                   {truncateKey(account.publicKey)}
                 </Typography>
               </ListItemElementContainer>
-            )
+            ),
+            onClick: () => {
+              navigate(
+                RouterPath.AccountSettings.replace(':accountName', account.name)
+              );
+            }
           }))}
         />
       )}
