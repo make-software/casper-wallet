@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button, Typography } from '@libs/ui';
+
 import {
   ContentContainer,
   HeaderTextContainer,
@@ -18,8 +19,8 @@ import { removeAccount } from '@popup/redux/vault/actions';
 export function RemoveAccountPageContent() {
   const navigate = useTypedNavigate();
   const dispatch = useDispatch();
-  const { t } = useTranslation();
   const { accountName } = useParams();
+  const { t } = useTranslation();
 
   const handleRemoveAccount = useCallback(() => {
     if (!accountName) {

@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from 'typesafe-actions';
 
+import styled from 'styled-components';
+
 import { ContentContainer, HeaderTextContainer } from '@layout/containers';
 import { SvgIcon, Tile, Typography } from '@libs/ui';
 import { selectVaultAccountByName } from '@popup/redux/vault/selectors';
@@ -34,17 +36,26 @@ export function AccountSettingsPageContent() {
   );
 }
 
-export function AccountSettingsActionsGroup() {
+interface AccountIconButtonProps {
+  type: 'rename' | 'remove';
+}
+
+export function AccountIconButton({ type }: AccountIconButtonProps) {
   const { accountName } = useParams();
   const navigate = useTypedNavigate();
 
-  const handleNavigateToRemoveAccountPage = useCallback(() => {
+  const handleNavigateToNextPage = useCallback(() => {
     if (!accountName) {
       return;
     }
 
-    navigate(RouterPath.RemoveAccount.replace(':accountName', accountName));
-  }, [navigate, accountName]);
+    const path =
+      type === 'remove'
+        ? RouterPath.RemoveAccount.replace(':accountName', accountName)
+        : RouterPath.RenameAccount.replace(':accountName', accountName);
+
+    navigate(path);
+  }, [navigate, accountName, type]);
 
   if (!accountName) {
     return null;
@@ -52,10 +63,26 @@ export function AccountSettingsActionsGroup() {
 
   return (
     <SvgIcon
-      onClick={handleNavigateToRemoveAccountPage}
-      color="contentRed"
-      src="assets/icons/delete.svg"
+      onClick={handleNavigateToNextPage}
+      color={type === 'remove' ? 'contentRed' : 'contentBlue'}
+      src={
+        type === 'remove' ? 'assets/icons/delete.svg' : 'assets/icons/edit.svg'
+      }
       size={24}
     />
+  );
+}
+
+const AccountSettingsActionsGroupContainer = styled.div`
+  display: flex;
+  gap: 28px;
+`;
+
+export function AccountSettingsActionsGroup() {
+  return (
+    <AccountSettingsActionsGroupContainer>
+      <AccountIconButton type="rename" />
+      <AccountIconButton type="remove" />
+    </AccountSettingsActionsGroupContainer>
   );
 }
