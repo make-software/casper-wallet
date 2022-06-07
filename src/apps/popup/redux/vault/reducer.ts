@@ -11,6 +11,7 @@ import {
   importAccount,
   removeAccount,
   renameAccount
+  switchActiveAccount
 } from './actions';
 import { VaultState } from './types';
 
@@ -21,7 +22,8 @@ const initialState: State = {
   isLocked: false,
   timeoutDurationSetting: TimeoutDurationSetting['5 min'],
   lastActivityTime: null,
-  accounts: []
+  accounts: [],
+  activeAccount: null
 };
 
 export const reducer = createReducer(initialState)
@@ -50,13 +52,18 @@ export const reducer = createReducer(initialState)
       isLocked: false
     })
   )
-  .handleAction(
-    [importAccount],
-    (state, { payload }): State => ({
+  .handleAction([importAccount], (state, { payload }): State => {
+    return {
       ...state,
-      accounts: [...state.accounts, payload]
-    })
-  )
+      accounts: [...state.accounts, payload],
+      activeAccount: state.accounts.length === 0 ? payload : state.activeAccount
+    };
+  })
+  .handleAction(switchActiveAccount, (state, { payload }) => ({
+    ...state,
+    activeAccount:
+      state.accounts.find(account => account.name === payload) || null
+  }))
   .handleAction(
     [removeAccount],
     (state, { payload: { name } }): State => ({

@@ -10,7 +10,7 @@ import { RouterPath } from '@popup/router';
 
 import {
   ContentContainer,
-  ButtonsContainer,
+  FooterButtonsContainer,
   HeaderTextContainer,
   InputsContainer,
   TextContainer
@@ -69,7 +69,7 @@ export function UnlockVaultPageContent() {
           />
         </InputsContainer>
       </ContentContainer>
-      <ButtonsContainer>
+      <FooterButtonsContainer>
         <Button disabled={!isDirty} type="submit">
           {t('Unlock vault')}
         </Button>
@@ -80,7 +80,7 @@ export function UnlockVaultPageContent() {
         >
           {t('Reset vault')}
         </Button>
-      </ButtonsContainer>
+      </FooterButtonsContainer>
     </form>
   );
 }

@@ -19,7 +19,8 @@ export const LogoContainer = styled.div`
 `;
 
 export const ContentContainer = styled.div`
-  padding: 0 ${({ theme }) => theme.padding[1.6]};
+  padding: 0 ${({ theme }) => theme.padding[1.6]}
+    ${({ theme }) => theme.padding[1.6]};
 `;
 
 export const HeaderTextContainer = styled(ContentContainer)`
@@ -42,7 +43,7 @@ interface Props {
   direction?: 'row' | 'column';
 }
 
-export const ButtonsContainer = styled.div<Props>`
+export const FooterButtonsContainer = styled.div<Props>`
   position: absolute;
   bottom: 0;
   left: 0;
@@ -57,4 +58,15 @@ export const ButtonsContainer = styled.div<Props>`
   padding: ${({ theme }) => theme.padding[1.6]};
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
+`;
+
+export const ButtonsContainer = styled.div`
+  width: 100%;
+
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+
+  padding: 0 ${({ theme }) => theme.padding[1.6]}
+    ${({ theme }) => theme.padding[1.6]};
 `;

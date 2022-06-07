@@ -41,39 +41,39 @@ export function TimeoutPageContent() {
             inactivity.
           </Trans>
         </Typography>
-        <List
-          listItems={(
-            Object.keys(TimeoutDurationSetting) as Array<
-              keyof typeof TimeoutDurationSetting
-            >
-          ).map(key => ({
-            id: key,
-            Content: (
-              <ListItemElementContainer>
-                <Typography type="body" weight="regular">
-                  <Trans
-                    t={t}
-                    i18nKey={key}
-                    values={MapTimeoutDurationSettingToTranslation}
-                  />
-                </Typography>
-              </ListItemElementContainer>
-            ),
-            Right: (
-              <ListItemElementContainer>
-                <Checkbox checked={timeoutDuration === key} />
-              </ListItemElementContainer>
-            ),
-            onClick: () => {
-              dispatch(
-                changeTimeoutDuration({
-                  timeoutDuration: TimeoutDurationSetting[key]
-                })
-              );
-            }
-          }))}
-        />
       </TextContainer>
+      <List
+        listItems={(
+          Object.keys(TimeoutDurationSetting) as Array<
+            keyof typeof TimeoutDurationSetting
+          >
+        ).map(key => ({
+          id: key,
+          Content: (
+            <ListItemElementContainer>
+              <Typography type="body" weight="regular">
+                <Trans
+                  t={t}
+                  i18nKey={key}
+                  values={MapTimeoutDurationSettingToTranslation}
+                />
+              </Typography>
+            </ListItemElementContainer>
+          ),
+          Right: (
+            <ListItemElementContainer>
+              <Checkbox checked={timeoutDuration === key} />
+            </ListItemElementContainer>
+          ),
+          onClick: () => {
+            dispatch(
+              changeTimeoutDuration({
+                timeoutDuration: TimeoutDurationSetting[key]
+              })
+            );
+          }
+        }))}
+      />
     </ContentContainer>
   );
 }

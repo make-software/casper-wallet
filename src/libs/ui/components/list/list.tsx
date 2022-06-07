@@ -4,7 +4,8 @@ import styled from 'styled-components';
 import { Tile } from '../tile/tile';
 
 export const ListItemElementContainer = styled.div`
-  height: 50px;
+  min-height: 50px;
+  height: 100%;
 
   display: flex;
   align-items: center;
@@ -15,8 +16,8 @@ export const ListItemElementContainer = styled.div`
   }
 `;
 
-const ListContainer = styled.div`
-  margin: 24px 0;
+export const ListContainer = styled.div`
+  margin: 24px 0 0;
 `;
 
 const ClickableContainer = styled.div`
@@ -24,26 +25,30 @@ const ClickableContainer = styled.div`
 `;
 
 const LeftContainer = styled(ClickableContainer)`
-  margin-left: 16px;
+  padding: 0 16px;
 `;
 
 const RightContainer = styled(ClickableContainer)`
-  margin-right: 16px;
+  padding: 0 16px;
 `;
 
 const ContentContainer = styled(ClickableContainer)`
   width: 100%;
 `;
 
-const MainContainer = styled.div`
+interface MainContainerProps {
+  withLeftComponent?: boolean;
+}
+
+export const MainContainer = styled.div<MainContainerProps>`
   width: 100%;
-  margin-left: 16px;
+  margin-left: ${({ withLeftComponent }) => (withLeftComponent ? 0 : '16px')};
 
   display: flex;
   justify-content: space-between;
 `;
 
-const ListItemContainer = styled(ClickableContainer)`
+export const ListItemContainer = styled(ClickableContainer)`
   display: flex;
 
   & ${MainContainer} {
@@ -97,7 +102,7 @@ export function List({ listItems }: ListProps) {
                   {Left}
                 </LeftContainer>
               )}
-              <MainContainer>
+              <MainContainer withLeftComponent={!!Left}>
                 <ContentContainer
                   onClick={onClick ? undefined : contentOnClick}
                 >

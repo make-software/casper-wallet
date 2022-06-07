@@ -65,7 +65,7 @@ export function NavigationMenuPageContent() {
             onClick: () => {
               closeNavigationMenu();
               openWindow(PurposeForOpening.ImportAccount).catch(e =>
-                console.log(e)
+                console.error(e)
               );
             }
           },
