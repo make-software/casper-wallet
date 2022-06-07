@@ -28,12 +28,13 @@ export function RenameAccountPageContent() {
   const { t } = useTranslation();
 
   const existingAccountNames = useSelector(selectVaultAccountsNames);
-  const { accountNameValidation } = useFormValidations(value => {
-    return !existingAccountNames.includes(value as string);
-  });
+
+  const { createAccountNameValidation } = useFormValidations();
 
   const formSchema = Yup.object().shape({
-    name: accountNameValidation
+    name: createAccountNameValidation(value => {
+      return !existingAccountNames.includes(value as string);
+    })
   });
 
   const formOptions: UseFormProps = {
@@ -55,7 +56,7 @@ export function RenameAccountPageContent() {
       return;
     }
 
-    dispatch(renameAccount({ oldName: accountName, nextName: name }));
+    dispatch(renameAccount({ oldName: accountName, newName: name }));
     navigate(RouterPath.AccountSettings.replace(':accountName', name));
   }
 

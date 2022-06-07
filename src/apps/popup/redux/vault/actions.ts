@@ -27,7 +27,7 @@ export const importAccount = createAction('IMPORT_ACCOUNT')<Account>();
 export const removeAccount = createAction('REMOVE_ACCOUNT')<{ name: string }>();
 export const renameAccount = createAction('RENAME_ACCOUNT')<{
   oldName: string;
-  nextName: string;
+  newName: string;
 }>();
 
 export const changeTimeoutDuration = createAction(

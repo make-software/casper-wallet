@@ -66,13 +66,13 @@ export const reducer = createReducer(initialState)
   )
   .handleAction(
     [renameAccount],
-    (state, { payload: { oldName, nextName } }): State => ({
+    (state, { payload: { oldName, newName } }): State => ({
       ...state,
       accounts: state.accounts.map(account => {
         if (account.name === oldName) {
           return {
             ...account,
-            name: nextName
+            name: newName
           };
         }
         return account;

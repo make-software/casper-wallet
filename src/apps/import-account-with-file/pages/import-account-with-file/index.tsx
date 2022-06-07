@@ -30,10 +30,7 @@ export function ImportAccountWithFileContentPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  const { accountNameValidation } = useFormValidations(async value => {
-    const isAccountNameTaken = value && (await checkAccountNameIsTaken(value));
-    return !isAccountNameTaken;
-  });
+  const { createAccountNameValidation } = useFormValidations();
 
   const onSuccess = useCallback(
     async (accountData: Account) => {
@@ -68,7 +65,11 @@ export function ImportAccountWithFileContentPage() {
         }
         return false;
       }),
-    name: accountNameValidation
+    name: createAccountNameValidation(async value => {
+      const isAccountNameTaken =
+        value && (await checkAccountNameIsTaken(value));
+      return !isAccountNameTaken;
+    })
   });
 
   const formOptions: UseFormProps = {
