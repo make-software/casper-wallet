@@ -13,5 +13,5 @@ export type VaultState = {
   timeoutDurationSetting: TimeoutDurationSetting;
   lastActivityTime: number | null;
   accounts: Account[];
-  activeAccount: Account | null;
+  activeAccountName: string | null;
 };

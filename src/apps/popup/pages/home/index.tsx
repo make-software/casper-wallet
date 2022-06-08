@@ -5,18 +5,13 @@ import styled from 'styled-components';
 
 import { PurposeForOpening, useWindowManager } from '@src/hooks';
 
-import {
-  ContentContainer,
-  TextContainer,
-  ButtonsContainer
-} from '@src/layout/containers';
+import { ContentContainer, TextContainer } from '@src/layout/containers';
 import {
   Button,
   Checkbox,
   List,
   ListContainer,
   ListItemElementContainer,
-  MainContainer,
   SvgIcon,
   Tile,
   Typography
@@ -29,7 +24,7 @@ import {
   selectVaultActiveAccount
 } from '@popup/redux/vault/selectors';
 import { truncateKey } from '@popup/pages/home/utils';
-import { switchActiveAccount } from '@popup/redux/vault/actions';
+import { changeActiveAccount } from '@popup/redux/vault/actions';
 
 // Account info
 
@@ -59,10 +54,6 @@ const AccountListContainer = styled.div`
     margin-top: 12px;
     margin-bottom: 16px;
   }
-
-  &:last-child ${MainContainer} {
-    border-bottom: 1px solid ${({ theme }) => theme.color.borderPrimary};
-  }
 `;
 
 const AccountDetailsListItemContainer = styled.div`
@@ -71,6 +62,16 @@ const AccountDetailsListItemContainer = styled.div`
 
   margin-top: 12px;
   margin-bottom: 12px;
+`;
+
+const ButtonsContainer = styled.div`
+  width: 100%;
+
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+
+  padding: ${({ theme }) => theme.padding[1.6]};
 `;
 
 export function HomePageContent() {
@@ -83,8 +84,8 @@ export function HomePageContent() {
   const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
 
-  const handleSwitchActiveAccount = useCallback(
-    (name: string) => () => dispatch(switchActiveAccount(name)),
+  const handleChangeActiveAccount = useCallback(
+    (name: string) => () => dispatch(changeActiveAccount(name)),
     [dispatch]
   );
 
@@ -95,11 +96,9 @@ export function HomePageContent() {
           <ActiveAccountDetailsContainer>
             <SvgIcon src="assets/icons/default-avatar.svg" size={120} />
             <TextContainer>
-              <div>
-                <Typography type="body" weight="semiBold">
-                  {activeAccount.name}
-                </Typography>
-              </div>
+              <Typography type="body" weight="semiBold">
+                {activeAccount.name}
+              </Typography>
               <AccountPublicKeyContainer>
                 <Typography
                   type="hash"
@@ -125,80 +124,77 @@ export function HomePageContent() {
       )}
       {accounts.length > 0 && (
         <AccountListContainer>
-          <Typography type="label" weight="medium" color="contentSecondary">
-            <Trans t={t}>Accounts list</Trans>
-          </Typography>
-
-          <Tile>
-            <List
-              listItems={accounts.map(account => ({
-                id: account.name,
-                Left: (
-                  <ListItemElementContainer>
-                    <Checkbox
-                      checked={
-                        activeAccount
-                          ? activeAccount.name === account.name
-                          : false
+          <List
+            headerLabel={t('Accounts list')}
+            listItems={accounts.map(account => ({
+              id: account.name,
+              Left: (
+                <ListItemElementContainer>
+                  <Checkbox
+                    checked={
+                      activeAccount
+                        ? activeAccount.name === account.name
+                        : false
+                    }
+                  />
+                </ListItemElementContainer>
+              ),
+              Content: (
+                <ListItemElementContainer>
+                  <AccountDetailsListItemContainer>
+                    <Typography
+                      type="body"
+                      weight={
+                        activeAccount && activeAccount.name === account.name
+                          ? 'semiBold'
+                          : 'regular'
                       }
-                    />
-                  </ListItemElementContainer>
-                ),
-                Content: (
-                  <ListItemElementContainer>
-                    <AccountDetailsListItemContainer>
-                      <Typography
-                        type="body"
-                        weight={
-                          activeAccount && activeAccount.name === account.name
-                            ? 'semiBold'
-                            : 'regular'
-                        }
-                      >
-                        {account.name}
-                      </Typography>
-                      <Typography
-                        type="hash"
-                        weight="regular"
-                        color="contentSecondary"
-                      >
-                        {truncateKey(account.publicKey)}
-                      </Typography>
-                    </AccountDetailsListItemContainer>
-                  </ListItemElementContainer>
-                ),
-                Right: (
-                  <ListItemElementContainer>
-                    <SvgIcon src="assets/icons/more.svg" size={24} />
-                  </ListItemElementContainer>
-                ),
-                leftOnClick: handleSwitchActiveAccount(account.name),
-                contentOnClick: handleSwitchActiveAccount(account.name),
-                rightOnClick: () =>
-                  navigate(
-                    RouterPath.AccountSettings.replace(
-                      ':accountName',
-                      account.name
+                    >
+                      {account.name}
+                    </Typography>
+                    <Typography
+                      type="hash"
+                      weight="regular"
+                      color="contentSecondary"
+                    >
+                      {truncateKey(account.publicKey)}
+                    </Typography>
+                  </AccountDetailsListItemContainer>
+                </ListItemElementContainer>
+              ),
+              Right: (
+                <ListItemElementContainer>
+                  <SvgIcon src="assets/icons/more.svg" size={24} />
+                </ListItemElementContainer>
+              ),
+              leftOnClick: handleChangeActiveAccount(account.name),
+              contentOnClick: handleChangeActiveAccount(account.name),
+              rightOnClick: () =>
+                navigate(
+                  RouterPath.AccountSettings.replace(
+                    ':accountName',
+                    account.name
+                  )
+                )
+            }))}
+            renderFooter={() => (
+              <ButtonsContainer>
+                <Button
+                  color="secondaryBlue"
+                  onClick={() =>
+                    openWindow(PurposeForOpening.ImportAccount).catch(e =>
+                      console.error(e)
                     )
-                  )
-              }))}
-            />
-            <ButtonsContainer>
-              <Button
-                color="secondaryBlue"
-                onClick={() =>
-                  openWindow(PurposeForOpening.ImportAccount).catch(e =>
-                    console.error(e)
-                  )
-                }
-              >
-                <Trans t={t}>Import</Trans>
-              </Button>
-              <Button color="secondaryBlue">
-                <Trans t={t}>Create</Trans>
-              </Button>
-            </ButtonsContainer>
-          </Tile>
+                  }
+                >
+                  <Trans t={t}>Import</Trans>
+                </Button>
+                <Button color="secondaryBlue">
+                  <Trans t={t}>Create</Trans>
+                </Button>
+              </ButtonsContainer>
+            )}
+          />
         </AccountListContainer>
       )}
     </ContentContainer>

@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 
-import { Tile } from '../tile/tile';
+import { Typography, Tile } from '@libs/ui';
 
 export const ListItemElementContainer = styled.div`
   min-height: 50px;
@@ -60,6 +60,11 @@ export const ListItemContainer = styled(ClickableContainer)`
   }
 `;
 
+const HeaderLabelContainer = styled.div`
+  margin-top: 12px;
+  margin-bottom: 12px;
+`;
+
 export type OnClickHandler = () => void;
 
 export interface ListItemType {
@@ -75,49 +80,63 @@ export interface ListItemType {
 
 interface ListProps {
   listItems: ListItemType[];
+  headerLabel?: string;
+  renderFooter?: () => JSX.Element;
 }
 
-export function List({ listItems }: ListProps) {
+export function List({ listItems, renderFooter, headerLabel }: ListProps) {
   if (listItems.length === 0) {
     return null;
   }
 
   return (
-    <Tile>
-      <ListContainer>
-        {listItems.map(
-          ({
-            id,
-            Content,
-            Right,
-            Left,
-            onClick,
-            contentOnClick,
-            rightOnClick,
-            leftOnClick
-          }) => (
-            <ListItemContainer key={id} onClick={onClick}>
-              {Left && (
-                <LeftContainer onClick={onClick ? undefined : leftOnClick}>
-                  {Left}
-                </LeftContainer>
-              )}
-              <MainContainer withLeftComponent={!!Left}>
-                <ContentContainer
-                  onClick={onClick ? undefined : contentOnClick}
-                >
-                  {Content}
-                </ContentContainer>
-                {Right && (
-                  <RightContainer onClick={onClick ? undefined : rightOnClick}>
-                    {Right}
-                  </RightContainer>
+    <>
+      {headerLabel && (
+        <HeaderLabelContainer>
+          <Typography type="label" weight="medium" color="contentSecondary">
+            {headerLabel}
+          </Typography>
+        </HeaderLabelContainer>
+      )}
+      <Tile>
+        <ListContainer>
+          {listItems.map(
+            ({
+              id,
+              Content,
+              Right,
+              Left,
+              onClick,
+              contentOnClick,
+              rightOnClick,
+              leftOnClick
+            }) => (
+              <ListItemContainer key={id} onClick={onClick}>
+                {Left && (
+                  <LeftContainer onClick={onClick ? undefined : leftOnClick}>
+                    {Left}
+                  </LeftContainer>
                 )}
-              </MainContainer>
-            </ListItemContainer>
-          )
-        )}
-      </ListContainer>
-    </Tile>
+                <MainContainer withLeftComponent={!!Left}>
+                  <ContentContainer
+                    onClick={onClick ? undefined : contentOnClick}
+                  >
+                    {Content}
+                  </ContentContainer>
+                  {Right && (
+                    <RightContainer
+                      onClick={onClick ? undefined : rightOnClick}
+                    >
+                      {Right}
+                    </RightContainer>
+                  )}
+                </MainContainer>
+              </ListItemContainer>
+            )
+          )}
+          {renderFooter && renderFooter()}
+        </ListContainer>
+      </Tile>
+    </>
   );
 }

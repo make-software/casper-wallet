@@ -26,7 +26,9 @@ export const selectVaultAccountsNames = createSelector(
 );
 
 export const selectVaultActiveAccount = (state: RootState) =>
-  state.vault.activeAccount;
+  state.vault.accounts.find(
+    account => account.name === state.vault.activeAccountName
+  );
 
 export const selectVaultAccountsSecretKeysBase64 = createSelector(
   selectVaultAccounts,

@@ -59,14 +59,3 @@ export const FooterButtonsContainer = styled.div<Props>`
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
 `;
-
-export const ButtonsContainer = styled.div`
-  width: 100%;
-
-  display: flex;
-  justify-content: space-around;
-  gap: 16px;
-
-  padding: 0 ${({ theme }) => theme.padding[1.6]}
-    ${({ theme }) => theme.padding[1.6]};
-`;
