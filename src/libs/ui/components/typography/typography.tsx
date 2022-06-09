@@ -11,7 +11,8 @@ export type TypographyType =
   | 'body'
   | 'caption'
   | 'label'
-  | 'hash'
+  | 'caption-hash'
+  | 'body-hash'
   | 'CSPR'
   | 'form-field-status'; // TODO: Temporary name. Make a better name
 export type TypographyWeight =
@@ -89,11 +90,19 @@ const StyledTypography = styled('span').withConfig({
           fontWeight: theme.typography.fontWeight.medium,
           textTransform: 'uppercase'
         };
-      case 'hash':
+      case 'caption-hash':
         return {
           ...body,
           fontSize: '1.4rem',
           lineHeight: '1.6rem',
+          fontFamily: theme.typography.fontFamily.mono,
+          fontWeight: theme.typography.fontWeight.regular
+        };
+      case 'body-hash':
+        return {
+          ...body,
+          fontSize: '1.5rem',
+          lineHeight: '2.4rem',
           fontFamily: theme.typography.fontFamily.mono,
           fontWeight: theme.typography.fontWeight.regular
         };

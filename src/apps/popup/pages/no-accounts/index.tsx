@@ -10,7 +10,7 @@ import {
   HeaderTextContainer,
   TextContainer,
   ContentContainer
-} from '@src/layout/containers';
+} from '@layout/containers';
 
 export function NoAccountsPageContent() {
   const { t } = useTranslation();

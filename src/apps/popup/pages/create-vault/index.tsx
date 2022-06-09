@@ -22,7 +22,7 @@ import {
   HeaderTextContainer,
   InputsContainer,
   TextContainer
-} from '@src/layout/containers';
+} from '@layout/containers';
 
 type InputType = 'password' | 'text';
 

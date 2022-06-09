@@ -7,7 +7,7 @@ import { PurposeForOpening, useWindowManager } from '@src/hooks';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 import { RouterPath, useNavigationMenu } from '@popup/router';
-import { ContentContainer } from '@src/layout/containers';
+import { ContentContainer } from '@layout/containers';
 import { List, ListItemElementContainer, SvgIcon, Typography } from '@libs/ui';
 import { selectVaultTimeoutDurationSetting } from '@popup/redux/vault/selectors';
 

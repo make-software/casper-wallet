@@ -14,7 +14,7 @@ import {
   HeaderTextContainer,
   InputsContainer,
   TextContainer
-} from '@src/layout/containers';
+} from '@layout/containers';
 import { Typography, Input, Button } from '@libs/ui';
 
 import { selectVaultPassword } from '@popup/redux/vault/selectors';

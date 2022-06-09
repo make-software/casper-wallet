@@ -1,14 +1,16 @@
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { PurposeForOpening, useWindowManager } from '@src/hooks';
 
-import { ContentContainer, TextContainer } from '@src/layout/containers';
+import { ContentContainer, TextContainer } from '@layout/containers';
 import {
   Button,
   Checkbox,
+  Hash,
+  HashVariant,
   List,
   ListContainer,
   ListItemElementContainer,
@@ -23,7 +25,6 @@ import {
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@popup/redux/vault/selectors';
-import { truncateKey } from '@popup/pages/home/utils';
 import { changeActiveAccount } from '@popup/redux/vault/actions';
 
 // Account info
@@ -33,16 +34,6 @@ const ActiveAccountDetailsContainer = styled.div`
 
   margin-top: 16px;
   padding-top: 24px;
-`;
-
-const AccountPublicKeyContainer = styled.div`
-  display: flex;
-  justify-content: center;
-
-  & > span {
-    line-height: 24px;
-    cursor: pointer;
-  }
 `;
 
 // List of accounts
@@ -99,25 +90,12 @@ export function HomePageContent() {
               <Typography type="body" weight="semiBold">
                 {activeAccount.name}
               </Typography>
-              <AccountPublicKeyContainer>
-                <Typography
-                  type="hash"
-                  weight="regular"
-                  color="contentSecondary"
-                  onClick={() =>
-                    navigator.clipboard.writeText(activeAccount.publicKey)
-                  }
-                >
-                  {truncateKey(activeAccount.publicKey)}
-                </Typography>
-                <SvgIcon
-                  src="assets/icons/copy.svg"
-                  size={24}
-                  onClick={() =>
-                    navigator.clipboard.writeText(activeAccount.publicKey)
-                  }
-                />
-              </AccountPublicKeyContainer>
+              <Hash
+                hash={activeAccount.publicKey}
+                variant={HashVariant.CaptionHash}
+                truncated
+                withCopy
+              />
             </TextContainer>
           </ActiveAccountDetailsContainer>
         </Tile>
@@ -152,13 +130,11 @@ export function HomePageContent() {
                     >
                       {account.name}
                     </Typography>
-                    <Typography
-                      type="hash"
-                      weight="regular"
-                      color="contentSecondary"
-                    >
-                      {truncateKey(account.publicKey)}
-                    </Typography>
+                    <Hash
+                      hash={account.publicKey}
+                      variant={HashVariant.CaptionHash}
+                      truncated
+                    />
                   </AccountDetailsListItemContainer>
                 </ListItemElementContainer>
               ),

@@ -7,7 +7,7 @@ import {
   FooterButtonsContainer,
   HeaderTextContainer,
   TextContainer
-} from '@src/layout/containers';
+} from '@layout/containers';
 
 import { Typography, Button, Checkbox } from '@libs/ui';
 import { useTypedNavigate } from '@popup/router';
