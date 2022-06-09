@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 import { PurposeForOpening, useWindowManager } from '@src/hooks';
 
-import { ContentContainer, TextContainer } from '@layout/containers';
+import { ContentContainer } from '@layout/containers';
 import {
   Button,
   Checkbox,
@@ -29,11 +29,22 @@ import { changeActiveAccount } from '@popup/redux/vault/actions';
 
 // Account info
 
-const ActiveAccountDetailsContainer = styled.div`
-  text-align: center;
+const AccountInfoBaseContainer = styled.div`
+  display: flex;
+  flex-direction: column;
 
-  margin-top: 16px;
-  padding-top: 24px;
+  width: 100%;
+
+  align-items: center;
+  margin-bottom: 16px;
+`;
+
+const AvatarContainer = styled(AccountInfoBaseContainer)`
+  padding-top: 16px;
+`;
+const NameAndAddressContainer = styled(AccountInfoBaseContainer)``;
+const BalanceContainer = styled(AccountInfoBaseContainer)`
+  margin-bottom: 24px;
 `;
 
 // List of accounts
@@ -83,21 +94,33 @@ export function HomePageContent() {
   return (
     <ContentContainer>
       {activeAccount && (
-        <Tile>
-          <ActiveAccountDetailsContainer>
+        <Tile withPadding>
+          <AvatarContainer>
             <SvgIcon src="assets/icons/default-avatar.svg" size={120} />
-            <TextContainer>
-              <Typography type="body" weight="semiBold">
-                {activeAccount.name}
+          </AvatarContainer>
+          <NameAndAddressContainer>
+            <Typography type="body" weight="semiBold">
+              {activeAccount.name}
+            </Typography>
+            <Hash
+              hash={activeAccount.publicKey}
+              variant={HashVariant.CaptionHash}
+              truncated
+              withCopy
+            />
+          </NameAndAddressContainer>
+          <BalanceContainer>
+            <Typography type="CSPR" weight="bold">
+              2,133,493{' '}
+              <Typography type="CSPR" weight="light" color="contentSecondary">
+                CSPR
               </Typography>
-              <Hash
-                hash={activeAccount.publicKey}
-                variant={HashVariant.CaptionHash}
-                truncated
-                withCopy
-              />
-            </TextContainer>
-          </ActiveAccountDetailsContainer>
+            </Typography>
+            <Typography type="body" weight="regular" color="contentSecondary">
+              $30,294.34
+            </Typography>
+          </BalanceContainer>
+          <Button>Connect</Button>
         </Tile>
       )}
       {accounts.length > 0 && (
