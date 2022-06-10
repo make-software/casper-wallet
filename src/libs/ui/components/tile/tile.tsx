@@ -12,8 +12,11 @@ interface TileProps extends StyledTileProps {
 const StyledTile = styled.div<StyledTileProps>`
   width: 100%;
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
+
+  margin-top: 16px;
   padding: ${({ theme, withPadding }) =>
     withPadding ? theme.padding[1.6] : 0};
+
   border-radius: 1.2rem;
 `;
 

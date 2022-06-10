@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { ListItemElementContainer, Typography, Checkbox, List } from '@libs/ui';
+import {
+  Typography,
+  Checkbox,
+  List,
+  ListItemActionContainer,
+  ListItemContainerWithLeftPadding,
+  ListItemContentContainer
+} from '@libs/ui';
 import {
   ContentContainer,
   HeaderTextContainer,
@@ -18,14 +25,26 @@ export function TimeoutPageContent() {
   const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
   const dispatch = useDispatch();
 
-  const MapTimeoutDurationSettingToTranslation = {
-    [TimeoutDurationSetting['1 min']]: t('1 min'),
-    [TimeoutDurationSetting['5 min']]: t('5 min'),
-    [TimeoutDurationSetting['15 min']]: t('15 min'),
-    [TimeoutDurationSetting['30 min']]: t('30 min'),
-    [TimeoutDurationSetting['1 hour']]: t('1 hour'),
-    [TimeoutDurationSetting['24 hours']]: t('24 hours')
-  };
+  const timeoutsMenuItems = useMemo(() => {
+    const MapTimeoutDurationSettingToTranslation = {
+      [TimeoutDurationSetting['1 min']]: t('1 min'),
+      [TimeoutDurationSetting['5 min']]: t('5 min'),
+      [TimeoutDurationSetting['15 min']]: t('15 min'),
+      [TimeoutDurationSetting['30 min']]: t('30 min'),
+      [TimeoutDurationSetting['1 hour']]: t('1 hour'),
+      [TimeoutDurationSetting['24 hours']]: t('24 hours')
+    };
+
+    return (
+      Object.keys(TimeoutDurationSetting) as Array<
+        keyof typeof TimeoutDurationSetting
+      >
+    ).map(key => ({
+      id: key,
+      title: MapTimeoutDurationSettingToTranslation[key],
+      checked: timeoutDuration === key
+    }));
+  }, [t, timeoutDuration]);
 
   return (
     <ContentContainer>
@@ -43,36 +62,30 @@ export function TimeoutPageContent() {
         </Typography>
       </TextContainer>
       <List
-        listItems={(
-          Object.keys(TimeoutDurationSetting) as Array<
-            keyof typeof TimeoutDurationSetting
-          >
-        ).map(key => ({
-          id: key,
-          Content: (
-            <ListItemElementContainer>
-              <Typography type="body" weight="regular">
-                <Trans
-                  t={t}
-                  i18nKey={key}
-                  values={MapTimeoutDurationSettingToTranslation}
-                />
-              </Typography>
-            </ListItemElementContainer>
-          ),
-          Right: (
-            <ListItemElementContainer>
-              <Checkbox checked={timeoutDuration === key} />
-            </ListItemElementContainer>
-          ),
-          onClick: () => {
-            dispatch(
-              changeTimeoutDuration({
-                timeoutDuration: TimeoutDurationSetting[key]
-              })
-            );
-          }
-        }))}
+        rows={timeoutsMenuItems}
+        renderRow={menuItems =>
+          menuItems.map(menuItem => (
+            <ListItemContainerWithLeftPadding
+              key={menuItem.id}
+              onClick={() => {
+                dispatch(
+                  changeTimeoutDuration({
+                    timeoutDuration: TimeoutDurationSetting[menuItem.id]
+                  })
+                );
+              }}
+            >
+              <ListItemContentContainer withBottomBorder>
+                <Typography type="body" weight="regular">
+                  {menuItem.title}
+                </Typography>
+              </ListItemContentContainer>
+              <ListItemActionContainer withBottomBorder>
+                <Checkbox checked={timeoutDuration === menuItem.id} />
+              </ListItemActionContainer>
+            </ListItemContainerWithLeftPadding>
+          ))
+        }
       />
     </ContentContainer>
   );

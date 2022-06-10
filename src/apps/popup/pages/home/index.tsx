@@ -11,12 +11,13 @@ import {
   Checkbox,
   Hash,
   HashVariant,
-  List,
-  ListContainer,
-  ListItemElementContainer,
   SvgIcon,
   Tile,
-  Typography
+  Typography,
+  List,
+  ListItemActionContainer,
+  ListItemContainer,
+  ListItemContentContainer
 } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -48,15 +49,6 @@ const BalanceContainer = styled(AccountInfoBaseContainer)`
 `;
 
 // List of accounts
-
-const AccountListContainer = styled.div`
-  margin-top: 20px;
-
-  & ${ListContainer} {
-    margin-top: 12px;
-    margin-bottom: 16px;
-  }
-`;
 
 const AccountDetailsListItemContainer = styled.div`
   display: flex;
@@ -124,13 +116,15 @@ export function HomePageContent() {
         </Tile>
       )}
       {accounts.length > 0 && (
-        <AccountListContainer>
-          <List
-            headerLabel={t('Accounts list')}
-            listItems={accounts.map(account => ({
-              id: account.name,
-              Left: (
-                <ListItemElementContainer>
+        <List
+          headerLabel={t('Accounts list')}
+          rows={accounts}
+          renderRow={rows =>
+            rows.map(account => (
+              <ListItemContainer key={account.name}>
+                <ListItemActionContainer
+                  onClick={handleChangeActiveAccount(account.name)}
+                >
                   <Checkbox
                     checked={
                       activeAccount
@@ -138,10 +132,11 @@ export function HomePageContent() {
                         : false
                     }
                   />
-                </ListItemElementContainer>
-              ),
-              Content: (
-                <ListItemElementContainer>
+                </ListItemActionContainer>
+                <ListItemContentContainer
+                  withBottomBorder
+                  onClick={handleChangeActiveAccount(account.name)}
+                >
                   <AccountDetailsListItemContainer>
                     <Typography
                       type="body"
@@ -159,42 +154,41 @@ export function HomePageContent() {
                       truncated
                     />
                   </AccountDetailsListItemContainer>
-                </ListItemElementContainer>
-              ),
-              Right: (
-                <ListItemElementContainer>
-                  <SvgIcon src="assets/icons/more.svg" size={24} />
-                </ListItemElementContainer>
-              ),
-              leftOnClick: handleChangeActiveAccount(account.name),
-              contentOnClick: handleChangeActiveAccount(account.name),
-              rightOnClick: () =>
-                navigate(
-                  RouterPath.AccountSettings.replace(
-                    ':accountName',
-                    account.name
-                  )
-                )
-            }))}
-            renderFooter={() => (
-              <ButtonsContainer>
-                <Button
-                  color="secondaryBlue"
+                </ListItemContentContainer>
+                <ListItemActionContainer
+                  withBottomBorder
                   onClick={() =>
-                    openWindow(PurposeForOpening.ImportAccount).catch(e =>
-                      console.error(e)
+                    navigate(
+                      RouterPath.AccountSettings.replace(
+                        ':accountName',
+                        account.name
+                      )
                     )
                   }
                 >
-                  <Trans t={t}>Import</Trans>
-                </Button>
-                <Button color="secondaryBlue">
-                  <Trans t={t}>Create</Trans>
-                </Button>
-              </ButtonsContainer>
-            )}
-          />
-        </AccountListContainer>
+                  <SvgIcon src="assets/icons/more.svg" size={24} />
+                </ListItemActionContainer>
+              </ListItemContainer>
+            ))
+          }
+          renderFooter={() => (
+            <ButtonsContainer>
+              <Button
+                color="secondaryBlue"
+                onClick={() =>
+                  openWindow(PurposeForOpening.ImportAccount).catch(e =>
+                    console.error(e)
+                  )
+                }
+              >
+                <Trans t={t}>Import</Trans>
+              </Button>
+              <Button color="secondaryBlue">
+                <Trans t={t}>Create</Trans>
+              </Button>
+            </ButtonsContainer>
+          )}
+        />
       )}
     </ContentContainer>
   );
