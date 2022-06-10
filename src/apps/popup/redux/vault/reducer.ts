@@ -68,7 +68,11 @@ export const reducer = createReducer(initialState)
     [removeAccount],
     (state, { payload: { name } }): State => ({
       ...state,
-      accounts: state.accounts.filter(account => account.name !== name)
+      accounts: state.accounts.filter(account => account.name !== name),
+      activeAccountName:
+        state.activeAccountName === name
+          ? (state.accounts.length > 1 && state.accounts[0].name) || null
+          : state.activeAccountName
     })
   )
   .handleAction(
