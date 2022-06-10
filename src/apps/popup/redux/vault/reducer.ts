@@ -83,7 +83,9 @@ export const reducer = createReducer(initialState)
           };
         }
         return account;
-      })
+      }),
+      activeAccountName:
+        state.activeAccountName === oldName ? newName : state.activeAccountName
     })
   )
   .handleAction(
