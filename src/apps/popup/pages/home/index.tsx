@@ -119,58 +119,54 @@ export function HomePageContent() {
         <List
           headerLabel={t('Accounts list')}
           rows={accounts}
-          renderRow={rows =>
-            rows.map(account => (
-              <ListItemContainer key={account.name}>
-                <ListItemActionContainer
-                  onClick={handleChangeActiveAccount(account.name)}
-                >
-                  <Checkbox
-                    checked={
-                      activeAccount
-                        ? activeAccount.name === account.name
-                        : false
-                    }
-                  />
-                </ListItemActionContainer>
-                <ListItemContentContainer
-                  withBottomBorder
-                  onClick={handleChangeActiveAccount(account.name)}
-                >
-                  <AccountDetailsListItemContainer>
-                    <Typography
-                      type="body"
-                      weight={
-                        activeAccount && activeAccount.name === account.name
-                          ? 'semiBold'
-                          : 'regular'
-                      }
-                    >
-                      {account.name}
-                    </Typography>
-                    <Hash
-                      hash={account.publicKey}
-                      variant={HashVariant.CaptionHash}
-                      truncated
-                    />
-                  </AccountDetailsListItemContainer>
-                </ListItemContentContainer>
-                <ListItemActionContainer
-                  withBottomBorder
-                  onClick={() =>
-                    navigate(
-                      RouterPath.AccountSettings.replace(
-                        ':accountName',
-                        account.name
-                      )
-                    )
+          renderRow={account => (
+            <ListItemContainer key={account.name}>
+              <ListItemActionContainer
+                onClick={handleChangeActiveAccount(account.name)}
+              >
+                <Checkbox
+                  checked={
+                    activeAccount ? activeAccount.name === account.name : false
                   }
-                >
-                  <SvgIcon src="assets/icons/more.svg" size={24} />
-                </ListItemActionContainer>
-              </ListItemContainer>
-            ))
-          }
+                />
+              </ListItemActionContainer>
+              <ListItemContentContainer
+                withBottomBorder
+                onClick={handleChangeActiveAccount(account.name)}
+              >
+                <AccountDetailsListItemContainer>
+                  <Typography
+                    type="body"
+                    weight={
+                      activeAccount && activeAccount.name === account.name
+                        ? 'semiBold'
+                        : 'regular'
+                    }
+                  >
+                    {account.name}
+                  </Typography>
+                  <Hash
+                    hash={account.publicKey}
+                    variant={HashVariant.CaptionHash}
+                    truncated
+                  />
+                </AccountDetailsListItemContainer>
+              </ListItemContentContainer>
+              <ListItemActionContainer
+                withBottomBorder
+                onClick={() =>
+                  navigate(
+                    RouterPath.AccountSettings.replace(
+                      ':accountName',
+                      account.name
+                    )
+                  )
+                }
+              >
+                <SvgIcon src="assets/icons/more.svg" size={24} />
+              </ListItemActionContainer>
+            </ListItemContainer>
+          )}
           renderFooter={() => (
             <ButtonsContainer>
               <Button

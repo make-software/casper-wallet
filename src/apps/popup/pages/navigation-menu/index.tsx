@@ -80,35 +80,30 @@ export function NavigationMenuPageContent() {
     <ContentContainer>
       <List
         rows={menuItems}
-        renderRow={menuItems =>
-          menuItems.map(menuItem => (
-            <ListItemContainer
-              key={menuItem.id}
-              onClick={menuItem.handleOnClick}
-            >
-              <ListItemIconContainer>
-                <SvgIcon
-                  src={menuItem.iconPath}
-                  size={iconSize}
-                  color="contentBlue"
-                />
-              </ListItemIconContainer>
-              <ListItemContentContainer withBottomBorder>
-                <Typography type="body" weight="regular">
-                  {menuItem.title}
-                </Typography>
-              </ListItemContentContainer>
+        renderRow={menuItem => (
+          <ListItemContainer key={menuItem.id} onClick={menuItem.handleOnClick}>
+            <ListItemIconContainer>
+              <SvgIcon
+                src={menuItem.iconPath}
+                size={iconSize}
+                color="contentBlue"
+              />
+            </ListItemIconContainer>
+            <ListItemContentContainer withBottomBorder>
+              <Typography type="body" weight="regular">
+                {menuItem.title}
+              </Typography>
+            </ListItemContentContainer>
 
-              {menuItem.currentValue && (
-                <ListItemValueContainer withBottomBorder>
-                  <Typography type="body" weight="semiBold" color="contentBlue">
-                    {menuItem.currentValue}
-                  </Typography>
-                </ListItemValueContainer>
-              )}
-            </ListItemContainer>
-          ))
-        }
+            {menuItem.currentValue && (
+              <ListItemValueContainer withBottomBorder>
+                <Typography type="body" weight="semiBold" color="contentBlue">
+                  {menuItem.currentValue}
+                </Typography>
+              </ListItemValueContainer>
+            )}
+          </ListItemContainer>
+        )}
       />
     </ContentContainer>
   );

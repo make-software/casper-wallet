@@ -9,7 +9,7 @@ const HeaderLabelContainer = styled.div`
 
 interface ListProps<T> {
   rows: T[];
-  renderRow: (rowData: T[]) => JSX.Element[];
+  renderRow: (rowData: T) => JSX.Element;
   renderFooter?: () => JSX.Element;
   headerLabel?: string;
 }
@@ -30,7 +30,7 @@ export function List<T>({
         </HeaderLabelContainer>
       )}
       <Tile>
-        {renderRow(rows)}
+        {rows.map(row => renderRow(row))}
         {renderFooter && renderFooter()}
       </Tile>
     </>

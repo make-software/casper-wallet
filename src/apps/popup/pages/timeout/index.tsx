@@ -63,29 +63,27 @@ export function TimeoutPageContent() {
       </TextContainer>
       <List
         rows={timeoutsMenuItems}
-        renderRow={menuItems =>
-          menuItems.map(menuItem => (
-            <ListItemContainerWithLeftPadding
-              key={menuItem.id}
-              onClick={() => {
-                dispatch(
-                  changeTimeoutDuration({
-                    timeoutDuration: TimeoutDurationSetting[menuItem.id]
-                  })
-                );
-              }}
-            >
-              <ListItemContentContainer withBottomBorder>
-                <Typography type="body" weight="regular">
-                  {menuItem.title}
-                </Typography>
-              </ListItemContentContainer>
-              <ListItemActionContainer withBottomBorder>
-                <Checkbox checked={timeoutDuration === menuItem.id} />
-              </ListItemActionContainer>
-            </ListItemContainerWithLeftPadding>
-          ))
-        }
+        renderRow={menuItem => (
+          <ListItemContainerWithLeftPadding
+            key={menuItem.id}
+            onClick={() => {
+              dispatch(
+                changeTimeoutDuration({
+                  timeoutDuration: TimeoutDurationSetting[menuItem.id]
+                })
+              );
+            }}
+          >
+            <ListItemContentContainer withBottomBorder>
+              <Typography type="body" weight="regular">
+                {menuItem.title}
+              </Typography>
+            </ListItemContentContainer>
+            <ListItemActionContainer withBottomBorder>
+              <Checkbox checked={timeoutDuration === menuItem.id} />
+            </ListItemActionContainer>
+          </ListItemContainerWithLeftPadding>
+        )}
       />
     </ContentContainer>
   );
