@@ -58,6 +58,13 @@ const AccountDetailsListItemContainer = styled.div`
   margin-bottom: 12px;
 `;
 
+const BalanceInCSPRsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+
+  gap: 8px;
+`;
+
 const ButtonsContainer = styled.div`
   width: 100%;
 
@@ -102,12 +109,14 @@ export function HomePageContent() {
             />
           </NameAndAddressContainer>
           <BalanceContainer>
-            <Typography type="CSPR" weight="bold">
-              2,133,493{' '}
+            <BalanceInCSPRsContainer>
+              <Typography type="CSPR" weight="bold">
+                2,133,493
+              </Typography>
               <Typography type="CSPR" weight="light" color="contentSecondary">
                 CSPR
               </Typography>
-            </Typography>
+            </BalanceInCSPRsContainer>
             <Typography type="body" weight="regular" color="contentSecondary">
               $30,294.34
             </Typography>
