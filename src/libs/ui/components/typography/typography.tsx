@@ -11,8 +11,6 @@ export type TypographyType =
   | 'body'
   | 'caption'
   | 'label'
-  | 'caption-hash'
-  | 'body-hash'
   | 'CSPR'
   | 'form-field-status'; // TODO: Temporary name. Make a better name
 export type TypographyWeight =
@@ -34,6 +32,7 @@ export interface BodyStylesProps extends BaseProps {
 interface TypographyProps extends BodyStylesProps {
   type: TypographyType;
   weight: TypographyWeight;
+  asHash?: boolean;
 }
 
 function getBodyStyles(
@@ -68,7 +67,7 @@ const StyledTypography = styled('span').withConfig({
   shouldForwardProp: (prop, defaultValidatorFn) =>
     !['loading'].includes(prop) && defaultValidatorFn(prop)
 })<TypographyProps>(
-  ({ theme, type, monospace, weight, ...restProps }): CSSObject => {
+  ({ theme, type, monospace, weight, asHash, ...restProps }): CSSObject => {
     const body = getBodyStyles(theme, restProps);
 
     switch (type) {
@@ -76,9 +75,12 @@ const StyledTypography = styled('span').withConfig({
         return {
           ...body,
           fontSize: '1.4rem',
-          lineHeight: '2.4rem',
+          lineHeight: asHash ? '1.6rem' : '2.4rem',
+          fontFamily: asHash
+            ? theme.typography.fontFamily.mono
+            : theme.typography.fontFamily.primary,
           fontWeight:
-            weight === 'regular'
+            weight === 'regular' || asHash
               ? theme.typography.fontWeight.regular
               : theme.typography.fontWeight.medium
         };
@@ -90,35 +92,21 @@ const StyledTypography = styled('span').withConfig({
           fontWeight: theme.typography.fontWeight.medium,
           textTransform: 'uppercase'
         };
-      case 'caption-hash':
-        return {
-          ...body,
-          fontSize: '1.4rem',
-          lineHeight: '1.6rem',
-          fontFamily: theme.typography.fontFamily.mono,
-          fontWeight: theme.typography.fontWeight.regular
-        };
-      case 'body-hash':
-        return {
-          ...body,
-          fontSize: '1.5rem',
-          lineHeight: '2.4rem',
-          fontFamily: theme.typography.fontFamily.mono,
-          fontWeight: theme.typography.fontWeight.regular
-        };
       case 'body':
         return {
           ...body,
-          fontFamily: monospace
-            ? theme.typography.fontFamily.mono
-            : theme.typography.fontFamily.primary,
+          fontFamily:
+            monospace || asHash
+              ? theme.typography.fontFamily.mono
+              : theme.typography.fontFamily.primary,
           fontSize: '1.5rem',
           lineHeight: '2.4rem',
-          fontWeight: monospace
-            ? theme.typography.fontWeight.regular
-            : weight === 'regular'
-            ? theme.typography.fontWeight.regular
-            : theme.typography.fontWeight.semiBold
+          fontWeight:
+            monospace || asHash
+              ? theme.typography.fontWeight.regular
+              : weight === 'regular'
+              ? theme.typography.fontWeight.regular
+              : theme.typography.fontWeight.semiBold
         };
       case 'CSPR':
         return {

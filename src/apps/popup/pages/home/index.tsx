@@ -95,7 +95,7 @@ export function HomePageContent() {
               {activeAccount.name}
             </Typography>
             <Hash
-              hash={activeAccount.publicKey}
+              value={activeAccount.publicKey}
               variant={HashVariant.CaptionHash}
               truncated
               withCopy
@@ -146,7 +146,7 @@ export function HomePageContent() {
                     {account.name}
                   </Typography>
                   <Hash
-                    hash={account.publicKey}
+                    value={account.publicKey}
                     variant={HashVariant.CaptionHash}
                     truncated
                   />
