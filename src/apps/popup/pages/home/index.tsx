@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { PurposeForOpening, useWindowManager } from '@src/hooks';
 
@@ -14,9 +14,7 @@ import {
   SvgIcon,
   PageTile,
   Typography,
-  List,
-  ListItemActionContainer,
-  ListItemContainer
+  List
 } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -29,31 +27,44 @@ import { changeActiveAccount } from '@popup/redux/vault/actions';
 
 // Account info
 
+const fullWidthAndMarginTop = css`
+  margin-top: 16px;
+  width: 100%;
+`;
+
 const CenteredFlexColumn = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+`;
 
-  width: 100%;
+const AvatarContainer = styled(CenteredFlexColumn)`
+  ${fullWidthAndMarginTop};
+`;
+const NameAndAddressContainer = styled(CenteredFlexColumn)`
+  ${fullWidthAndMarginTop};
+`;
+const BalanceContainer = styled(CenteredFlexColumn)`
+  ${fullWidthAndMarginTop};
 
-  margin-top: 16px;
   & + Button {
     margin-top: 24px;
   }
 `;
 
-const AvatarContainer = styled(CenteredFlexColumn)``;
-const NameAndAddressContainer = styled(CenteredFlexColumn)``;
-const BalanceContainer = styled(CenteredFlexColumn)``;
-
 // List of accounts
+
+export const ListItemContainer = styled.div`
+  display: flex;
+
+  min-height: 50px;
+  height: 100%;
+`;
 
 const ListItemClickableContainer = styled.div`
   display: flex;
-  flex-direction: row;
 
   width: 100%;
-  height: 100%;
 
   cursor: pointer;
 
@@ -79,6 +90,14 @@ const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
 const BalanceInCSPRsContainer = styled.div`
   display: flex;
   gap: 8px;
+`;
+
+export const AccountBurgerMenuContainer = styled.div`
+  display: flex;
+  align-items: center;
+
+  padding: 14px 18px;
+  cursor: pointer;
 `;
 
 const ButtonsContainer = styled.div`
@@ -187,7 +206,7 @@ export function HomePageContent() {
                   </Typography>
                 </AccountBalanceListItemContainer>
               </ListItemClickableContainer>
-              <ListItemActionContainer
+              <AccountBurgerMenuContainer
                 onClick={() =>
                   navigate(
                     RouterPath.AccountSettings.replace(
@@ -198,7 +217,7 @@ export function HomePageContent() {
                 }
               >
                 <SvgIcon src="assets/icons/more.svg" size={24} />
-              </ListItemActionContainer>
+              </AccountBurgerMenuContainer>
             </ListItemContainer>
           )}
           renderFooter={() => (

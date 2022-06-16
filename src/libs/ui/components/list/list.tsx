@@ -67,14 +67,14 @@ export function List<T>({
             <RowContainer>{renderRow(row)}</RowContainer>
           ))}
         </RowsContainer>
-        <ListFooterContainer
-          marginLeftForItemSeparator={marginLeftForItemSeparator}
-        >
-          {renderFooter && renderFooter()}
-        </ListFooterContainer>
+        {renderFooter && (
+          <ListFooterContainer
+            marginLeftForItemSeparator={marginLeftForItemSeparator}
+          >
+            {renderFooter()}
+          </ListFooterContainer>
+        )}
       </Tile>
     </>
   );
 }
-
-export * from './list-containers';

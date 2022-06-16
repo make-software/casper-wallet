@@ -2,23 +2,39 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { PurposeForOpening, useWindowManager } from '@src/hooks';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 import { RouterPath, useNavigationMenu } from '@popup/router';
 import { ContentContainer } from '@layout/containers';
-import {
-  SvgIcon,
-  Typography,
-  List,
-  ListItemValueContainer,
-  ListItemContentContainer,
-  ListItemContainer,
-  ListItemIconContainer
-} from '@libs/ui';
+import { SvgIcon, Typography, List } from '@libs/ui';
 
 import { selectVaultTimeoutDurationSetting } from '@popup/redux/vault/selectors';
+
+const ListItemClickableContainer = styled.div`
+  display: flex;
+
+  width: 100%;
+  cursor: pointer;
+
+  padding: 14px 18px;
+  & > * + * {
+    padding-left: 18px;
+  }
+
+  & > span {
+    white-space: nowrap;
+  }
+`;
+
+export const MenuItemTitleContainer = styled.div`
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+`;
 
 interface MenuItem {
   id: number;
@@ -82,28 +98,26 @@ export function NavigationMenuPageContent() {
         rows={menuItems}
         marginLeftForItemSeparator={60}
         renderRow={menuItem => (
-          <ListItemContainer key={menuItem.id} onClick={menuItem.handleOnClick}>
-            <ListItemIconContainer>
-              <SvgIcon
-                src={menuItem.iconPath}
-                size={iconSize}
-                color="contentBlue"
-              />
-            </ListItemIconContainer>
-            <ListItemContentContainer withBottomBorder>
+          <ListItemClickableContainer
+            key={menuItem.id}
+            onClick={menuItem.handleOnClick}
+          >
+            <SvgIcon
+              src={menuItem.iconPath}
+              size={iconSize}
+              color="contentBlue"
+            />
+            <MenuItemTitleContainer>
               <Typography type="body" weight="regular">
                 {menuItem.title}
               </Typography>
-            </ListItemContentContainer>
-
+            </MenuItemTitleContainer>
             {menuItem.currentValue && (
-              <ListItemValueContainer withBottomBorder>
-                <Typography type="body" weight="semiBold" color="contentBlue">
-                  {menuItem.currentValue}
-                </Typography>
-              </ListItemValueContainer>
+              <Typography type="body" weight="semiBold" color="contentBlue">
+                {menuItem.currentValue}
+              </Typography>
             )}
-          </ListItemContainer>
+          </ListItemClickableContainer>
         )}
       />
     </ContentContainer>
