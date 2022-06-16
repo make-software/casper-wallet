@@ -29,25 +29,44 @@ import { changeActiveAccount } from '@popup/redux/vault/actions';
 
 // Account info
 
-const AccountInfoBaseContainer = styled.div`
+const CenteredFlexColumn = styled.div`
   display: flex;
   flex-direction: column;
 
   width: 100%;
 
   align-items: center;
-  margin-bottom: 16px;
+
+  margin-top: 16px;
+
+  & + Button {
+    margin-top: 24px;
+  }
 `;
 
-const AvatarContainer = styled(AccountInfoBaseContainer)`
-  padding-top: 16px;
-`;
-const NameAndAddressContainer = styled(AccountInfoBaseContainer)``;
-const BalanceContainer = styled(AccountInfoBaseContainer)`
-  margin-bottom: 24px;
-`;
+const AvatarContainer = styled(CenteredFlexColumn)``;
+const NameAndAddressContainer = styled(CenteredFlexColumn)``;
+const BalanceContainer = styled(CenteredFlexColumn)``;
 
 // List of accounts
+
+const ListItemClickableContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+
+  padding-top: 14px;
+  padding-bottom: 14px;
+  padding-left: 18px;
+
+  width: 100%;
+  height: 100%;
+
+  cursor: pointer;
+
+  & > * + * {
+    padding-left: 18px;
+  }
+`;
 
 const AccountNameWithHashListItemContainer = styled.div`
   display: flex;
@@ -77,24 +96,6 @@ const ButtonsContainer = styled.div`
   gap: 16px;
 
   padding: ${({ theme }) => theme.padding[1.6]};
-`;
-
-const ListItemClickableContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-
-  padding-top: 14px;
-  padding-bottom: 14px;
-  padding-left: 18px;
-
-  width: 100%;
-  height: 100%;
-
-  cursor: pointer;
-
-  & > * + * {
-    padding-left: 18px;
-  }
 `;
 
 export function HomePageContent() {
