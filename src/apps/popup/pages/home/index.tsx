@@ -32,13 +32,11 @@ import { changeActiveAccount } from '@popup/redux/vault/actions';
 const CenteredFlexColumn = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: center;
 
   width: 100%;
 
-  align-items: center;
-
   margin-top: 16px;
-
   & + Button {
     margin-top: 24px;
   }
@@ -54,46 +52,41 @@ const ListItemClickableContainer = styled.div`
   display: flex;
   flex-direction: row;
 
-  padding-top: 14px;
-  padding-bottom: 14px;
-  padding-left: 18px;
-
   width: 100%;
   height: 100%;
 
   cursor: pointer;
 
+  padding-top: 14px;
+  padding-bottom: 14px;
+  padding-left: 18px;
   & > * + * {
     padding-left: 18px;
   }
 `;
 
-const AccountNameWithHashListItemContainer = styled.div`
+const LeftAlignedFlexColumn = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-
-  width: 100%;
 `;
 
-const AccountBalanceListItemContainer = styled.div`
-  display: flex;
-  flex-direction: column;
+const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
+const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
+  width: 100%;
 `;
 
 const BalanceInCSPRsContainer = styled.div`
   display: flex;
-  flex-direction: row;
-
   gap: 8px;
 `;
 
 const ButtonsContainer = styled.div`
-  width: 100%;
-
   display: flex;
   justify-content: space-around;
   gap: 16px;
+
+  width: 100%;
 
   padding: ${({ theme }) => theme.padding[1.6]};
 `;
