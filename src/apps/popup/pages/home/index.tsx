@@ -144,6 +144,7 @@ export function HomePageContent() {
         <List
           headerLabel={t('Accounts list')}
           rows={accounts}
+          marginLeftForItemSeparator={60}
           renderRow={account => (
             <ListItemContainer key={account.name}>
               <ListItemClickableContainer

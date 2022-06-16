@@ -80,6 +80,7 @@ export function NavigationMenuPageContent() {
     <ContentContainer>
       <List
         rows={menuItems}
+        marginLeftForItemSeparator={60}
         renderRow={menuItem => (
           <ListItemContainer key={menuItem.id} onClick={menuItem.handleOnClick}>
             <ListItemIconContainer>

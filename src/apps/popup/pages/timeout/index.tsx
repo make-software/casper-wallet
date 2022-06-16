@@ -63,6 +63,7 @@ export function TimeoutPageContent() {
       </TextContainer>
       <List
         rows={timeoutsMenuItems}
+        marginLeftForItemSeparator={16}
         renderRow={menuItem => (
           <ListItemContainerWithLeftPadding
             key={menuItem.id}
