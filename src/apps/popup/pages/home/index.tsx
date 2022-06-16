@@ -12,12 +12,11 @@ import {
   Hash,
   HashVariant,
   SvgIcon,
-  Tile,
+  PageTile,
   Typography,
   List,
   ListItemActionContainer,
-  ListItemContainer,
-  ListItemContentContainer
+  ListItemContainer
 } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -50,12 +49,17 @@ const BalanceContainer = styled(AccountInfoBaseContainer)`
 
 // List of accounts
 
-const AccountDetailsListItemContainer = styled.div`
+const AccountNameWithHashListItemContainer = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
 
-  margin-top: 12px;
-  margin-bottom: 12px;
+  width: 100%;
+`;
+
+const AccountBalanceListItemContainer = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 const BalanceInCSPRsContainer = styled.div`
@@ -73,6 +77,24 @@ const ButtonsContainer = styled.div`
   gap: 16px;
 
   padding: ${({ theme }) => theme.padding[1.6]};
+`;
+
+const ListItemClickableContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+
+  padding-top: 14px;
+  padding-bottom: 14px;
+  padding-left: 18px;
+
+  width: 100%;
+  height: 100%;
+
+  cursor: pointer;
+
+  & > * + * {
+    padding-left: 18px;
+  }
 `;
 
 export function HomePageContent() {
@@ -93,7 +115,7 @@ export function HomePageContent() {
   return (
     <ContentContainer>
       {activeAccount && (
-        <Tile withPadding>
+        <PageTile>
           <AvatarContainer>
             <SvgIcon src="assets/icons/default-avatar.svg" size={120} />
           </AvatarContainer>
@@ -122,7 +144,7 @@ export function HomePageContent() {
             </Typography>
           </BalanceContainer>
           <Button>Connect</Button>
-        </Tile>
+        </PageTile>
       )}
       {accounts.length > 0 && (
         <List
@@ -130,7 +152,7 @@ export function HomePageContent() {
           rows={accounts}
           renderRow={account => (
             <ListItemContainer key={account.name}>
-              <ListItemActionContainer
+              <ListItemClickableContainer
                 onClick={handleChangeActiveAccount(account.name)}
               >
                 <Checkbox
@@ -138,12 +160,7 @@ export function HomePageContent() {
                     activeAccount ? activeAccount.name === account.name : false
                   }
                 />
-              </ListItemActionContainer>
-              <ListItemContentContainer
-                withBottomBorder
-                onClick={handleChangeActiveAccount(account.name)}
-              >
-                <AccountDetailsListItemContainer>
+                <AccountNameWithHashListItemContainer>
                   <Typography
                     type="body"
                     weight={
@@ -159,10 +176,23 @@ export function HomePageContent() {
                     variant={HashVariant.CaptionHash}
                     truncated
                   />
-                </AccountDetailsListItemContainer>
-              </ListItemContentContainer>
+                </AccountNameWithHashListItemContainer>
+
+                <AccountBalanceListItemContainer>
+                  <Typography type="body" weight="regular" monospace>
+                    2.1M
+                  </Typography>
+                  <Typography
+                    type="body"
+                    weight="regular"
+                    monospace
+                    color="contentSecondary"
+                  >
+                    CSPR
+                  </Typography>
+                </AccountBalanceListItemContainer>
+              </ListItemClickableContainer>
               <ListItemActionContainer
-                withBottomBorder
                 onClick={() =>
                   navigate(
                     RouterPath.AccountSettings.replace(

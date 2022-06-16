@@ -37,7 +37,7 @@ export const ListItemActionContainer = styled(ContainerWithBottomBorder)`
   display: flex;
   align-items: center;
 
-  padding: 0 16px;
+  padding: 14px 18px;
 
   cursor: pointer;
 `;
