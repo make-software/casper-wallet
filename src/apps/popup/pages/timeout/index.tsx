@@ -16,6 +16,7 @@ import { TimeoutDurationSetting } from '@popup/constants';
 
 const ListItemClickableContainer = styled.div`
   display: flex;
+  justify-content: space-between;
 
   width: 100%;
   cursor: pointer;
@@ -92,11 +93,9 @@ export function TimeoutPageContent() {
               );
             }}
           >
-            <TimeoutValueContainer>
-              <Typography type="body" weight="regular">
-                {menuItem.title}
-              </Typography>
-            </TimeoutValueContainer>
+            <Typography type="body" weight="regular">
+              {menuItem.title}
+            </Typography>
             <Checkbox checked={timeoutDuration === menuItem.id} />
           </ListItemClickableContainer>
         )}
