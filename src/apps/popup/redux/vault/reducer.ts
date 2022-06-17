@@ -64,17 +64,20 @@ export const reducer = createReducer(initialState)
     ...state,
     activeAccountName: payload
   }))
-  .handleAction(
-    [removeAccount],
-    (state, { payload: { name } }): State => ({
+  .handleAction([removeAccount], (state, { payload: { name } }): State => {
+    const nextAccountsState = state.accounts.filter(
+      account => account.name !== name
+    );
+
+    return {
       ...state,
-      accounts: state.accounts.filter(account => account.name !== name),
+      accounts: nextAccountsState,
       activeAccountName:
         state.activeAccountName === name
-          ? (state.accounts.length > 1 && state.accounts[0].name) || null
+          ? (state.accounts.length > 1 && nextAccountsState[0].name) || null
           : state.activeAccountName
-    })
-  )
+    };
+  })
   .handleAction(
     [renameAccount],
     (state, { payload: { oldName, newName } }): State => ({
