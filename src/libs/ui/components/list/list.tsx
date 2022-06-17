@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 
 import { Tile, Typography } from '@libs/ui';
 
-const HeaderLabelContainer = styled.div`
+const TopMarginContainer = styled.div`
   margin-top: 16px;
 `;
 
@@ -55,28 +55,30 @@ export function List<T>({
   return (
     <>
       {headerLabel && (
-        <HeaderLabelContainer>
+        <TopMarginContainer>
           <Typography type="label" weight="medium" color="contentSecondary">
             {headerLabel}
           </Typography>
-        </HeaderLabelContainer>
+        </TopMarginContainer>
       )}
-      <Tile>
-        <RowsContainer
-          marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
-        >
-          {rows.map(row => (
-            <RowContainer>{renderRow(row)}</RowContainer>
-          ))}
-        </RowsContainer>
-        {renderFooter && (
-          <ListFooterContainer
+      <TopMarginContainer>
+        <Tile>
+          <RowsContainer
             marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
           >
-            {renderFooter()}
-          </ListFooterContainer>
-        )}
-      </Tile>
+            {rows.map(row => (
+              <RowContainer>{renderRow(row)}</RowContainer>
+            ))}
+          </RowsContainer>
+          {renderFooter && (
+            <ListFooterContainer
+              marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
+            >
+              {renderFooter()}
+            </ListFooterContainer>
+          )}
+        </Tile>
+      </TopMarginContainer>
     </>
   );
 }
