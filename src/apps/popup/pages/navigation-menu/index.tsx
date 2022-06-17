@@ -29,8 +29,9 @@ const ListItemClickableContainer = styled.div`
   }
 `;
 
-export const MenuItemTitleContainer = styled.div`
+export const SpaceBetweenContainer = styled.div`
   display: flex;
+  justify-content: space-between;
   align-items: center;
 
   width: 100%;
@@ -107,16 +108,16 @@ export function NavigationMenuPageContent() {
               size={iconSize}
               color="contentBlue"
             />
-            <MenuItemTitleContainer>
+            <SpaceBetweenContainer>
               <Typography type="body" weight="regular">
                 {menuItem.title}
               </Typography>
-            </MenuItemTitleContainer>
-            {menuItem.currentValue && (
-              <Typography type="body" weight="semiBold" color="contentBlue">
-                {menuItem.currentValue}
-              </Typography>
-            )}
+              {menuItem.currentValue && (
+                <Typography type="body" weight="semiBold" color="contentBlue">
+                  {menuItem.currentValue}
+                </Typography>
+              )}
+            </SpaceBetweenContainer>
           </ListItemClickableContainer>
         )}
       />
