@@ -80,7 +80,7 @@ export function TimeoutPageContent() {
       </TextContainer>
       <List
         rows={timeoutsMenuItems}
-        marginLeftForItemSeparator={16}
+        marginLeftForItemSeparatorLine={16}
         renderRow={menuItem => (
           <ListItemClickableContainer
             key={menuItem.id}

@@ -96,7 +96,7 @@ export function NavigationMenuPageContent() {
     <ContentContainer>
       <List
         rows={menuItems}
-        marginLeftForItemSeparator={60}
+        marginLeftForItemSeparatorLine={60}
         renderRow={menuItem => (
           <ListItemClickableContainer
             key={menuItem.id}

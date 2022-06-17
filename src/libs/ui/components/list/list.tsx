@@ -8,15 +8,15 @@ const HeaderLabelContainer = styled.div`
 `;
 
 interface BorderBottomPseudoElementProps {
-  marginLeftForItemSeparator: number;
+  marginLeftForItemSeparatorLine: number;
 }
 
 const borderBottomPseudoElementRules = css<BorderBottomPseudoElementProps>`
   content: '';
-  width: ${({ marginLeftForItemSeparator }) =>
-    `calc(100% - ${marginLeftForItemSeparator}px)`};
-  margin-left: ${({ marginLeftForItemSeparator }) =>
-    marginLeftForItemSeparator}px;
+  width: ${({ marginLeftForItemSeparatorLine }) =>
+    `calc(100% - ${marginLeftForItemSeparatorLine}px)`};
+  margin-left: ${({ marginLeftForItemSeparatorLine }) =>
+    marginLeftForItemSeparatorLine}px;
   border-bottom: ${({ theme }) => `0.5px solid ${theme.color.borderPrimary}`};
 `;
 
@@ -48,7 +48,7 @@ interface ListProps<T> extends BorderBottomPseudoElementProps {
 export function List<T>({
   rows,
   renderRow,
-  marginLeftForItemSeparator,
+  marginLeftForItemSeparatorLine,
   renderFooter,
   headerLabel
 }: ListProps<T>) {
@@ -62,14 +62,16 @@ export function List<T>({
         </HeaderLabelContainer>
       )}
       <Tile>
-        <RowsContainer marginLeftForItemSeparator={marginLeftForItemSeparator}>
+        <RowsContainer
+          marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
+        >
           {rows.map(row => (
             <RowContainer>{renderRow(row)}</RowContainer>
           ))}
         </RowsContainer>
         {renderFooter && (
           <ListFooterContainer
-            marginLeftForItemSeparator={marginLeftForItemSeparator}
+            marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
           >
             {renderFooter()}
           </ListFooterContainer>

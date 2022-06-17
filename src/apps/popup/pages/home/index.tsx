@@ -92,7 +92,7 @@ const BalanceInCSPRsContainer = styled.div`
   gap: 8px;
 `;
 
-export const AccountBurgerMenuContainer = styled.div`
+export const ListItemBurgerMenuContainer = styled.div`
   display: flex;
   align-items: center;
 
@@ -163,7 +163,7 @@ export function HomePageContent() {
         <List
           headerLabel={t('Accounts list')}
           rows={accounts}
-          marginLeftForItemSeparator={60}
+          marginLeftForItemSeparatorLine={60}
           renderRow={account => (
             <ListItemContainer key={account.name}>
               <ListItemClickableContainer
@@ -206,7 +206,7 @@ export function HomePageContent() {
                   </Typography>
                 </AccountBalanceListItemContainer>
               </ListItemClickableContainer>
-              <AccountBurgerMenuContainer
+              <ListItemBurgerMenuContainer
                 onClick={() =>
                   navigate(
                     RouterPath.AccountSettings.replace(
@@ -217,7 +217,7 @@ export function HomePageContent() {
                 }
               >
                 <SvgIcon src="assets/icons/more.svg" size={24} />
-              </AccountBurgerMenuContainer>
+              </ListItemBurgerMenuContainer>
             </ListItemContainer>
           )}
           renderFooter={() => (
