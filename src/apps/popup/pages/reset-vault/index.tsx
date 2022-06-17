@@ -4,10 +4,10 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import {
   ContentContainer,
-  ButtonsContainer,
+  FooterButtonsContainer,
   HeaderTextContainer,
   TextContainer
-} from '@src/layout/containers';
+} from '@layout/containers';
 
 import { Typography, Button, Checkbox } from '@libs/ui';
 import { useTypedNavigate } from '@popup/router';
@@ -44,7 +44,7 @@ export function ResetVaultPageContent() {
           </Typography>
         </TextContainer>
       </ContentContainer>
-      <ButtonsContainer>
+      <FooterButtonsContainer>
         <Checkbox
           label={t('I’ve read and understand the above')}
           checked={isChecked}
@@ -62,7 +62,7 @@ export function ResetVaultPageContent() {
         <Button onClick={handleCancel} color="secondaryBlue">
           <Trans t={t}>Cancel</Trans>
         </Button>
-      </ButtonsContainer>
+      </FooterButtonsContainer>
     </>
   );
 }

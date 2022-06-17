@@ -9,7 +9,7 @@ import {
   ContentContainer,
   HeaderTextContainer,
   TextContainer,
-  ButtonsContainer
+  FooterButtonsContainer
 } from '@layout/containers';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -52,14 +52,14 @@ export function RemoveAccountPageContent() {
           </Trans>
         </Typography>
       </TextContainer>
-      <ButtonsContainer>
+      <FooterButtonsContainer>
         <Button onClick={handleRemoveAccount}>
           <Trans t={t}>Remove</Trans>
         </Button>
         <Button onClick={() => navigate(RouterPath.Home)} color="secondaryBlue">
           <Trans t={t}>Cancel</Trans>
         </Button>
-      </ButtonsContainer>
+      </FooterButtonsContainer>
     </ContentContainer>
   );
 }

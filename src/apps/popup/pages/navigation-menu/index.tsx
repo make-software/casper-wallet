@@ -1,131 +1,125 @@
-import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { PurposeForOpening, useWindowManager } from '@src/hooks';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 import { RouterPath, useNavigationMenu } from '@popup/router';
-import { ContentContainer } from '@src/layout/containers';
-import { List, ListItemElementContainer, SvgIcon, Typography } from '@libs/ui';
+import { ContentContainer } from '@layout/containers';
+import { SvgIcon, Typography, List } from '@libs/ui';
+
 import { selectVaultTimeoutDurationSetting } from '@popup/redux/vault/selectors';
 
+const ListItemClickableContainer = styled.div`
+  display: flex;
+
+  width: 100%;
+  cursor: pointer;
+
+  padding: 14px 18px;
+  & > * + * {
+    padding-left: 18px;
+  }
+
+  & > span {
+    white-space: nowrap;
+  }
+`;
+
+export const SpaceBetweenContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  width: 100%;
+`;
+
+interface MenuItem {
+  id: number;
+  title: string;
+  iconPath: string;
+  currentValue?: string | number;
+  handleOnClick?: () => void;
+}
+
 export function NavigationMenuPageContent() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
 
   const { openWindow } = useWindowManager();
   const { closeNavigationMenu } = useNavigationMenu();
 
+  const menuItems: MenuItem[] = useMemo(
+    () => [
+      {
+        id: 1,
+        title: t('Create account'),
+        iconPath: 'assets/icons/plus.svg'
+      },
+      {
+        id: 2,
+        title: t('Import account'),
+        iconPath: 'assets/icons/upload.svg',
+        handleOnClick: () => {
+          closeNavigationMenu();
+          openWindow(PurposeForOpening.ImportAccount).catch(e =>
+            console.error(e)
+          );
+        }
+      },
+      {
+        id: 3,
+        title: t('Connected sites'),
+        iconPath: 'assets/icons/link.svg',
+        currentValue: 3
+      },
+      {
+        id: 4,
+        title: t('Timeout'),
+        iconPath: 'assets/icons/lock.svg',
+        currentValue: TimeoutDurationSetting[timeoutDuration],
+        handleOnClick: () => {
+          closeNavigationMenu();
+          navigate(RouterPath.Timeout);
+        }
+      }
+    ],
+    [navigate, t, timeoutDuration, closeNavigationMenu, openWindow]
+  );
   const iconSize = 24;
 
   return (
     <ContentContainer>
       <List
-        listItems={[
-          {
-            id: 1,
-            Content: (
-              <ListItemElementContainer>
-                <Typography type="body" weight="regular">
-                  <Trans t={t}>Create account</Trans>
-                </Typography>
-              </ListItemElementContainer>
-            ),
-            Left: (
-              <ListItemElementContainer>
-                <SvgIcon
-                  color="contentBlue"
-                  size={iconSize}
-                  src="assets/icons/plus.svg"
-                />
-              </ListItemElementContainer>
-            )
-          },
-          {
-            id: 2,
-            Content: (
-              <ListItemElementContainer>
-                <Typography type="body" weight="regular">
-                  <Trans t={t}>Import account</Trans>
-                </Typography>
-              </ListItemElementContainer>
-            ),
-            Left: (
-              <ListItemElementContainer>
-                <SvgIcon
-                  color="contentBlue"
-                  size={iconSize}
-                  src="assets/icons/upload.svg"
-                />
-              </ListItemElementContainer>
-            ),
-            onClick: () => {
-              closeNavigationMenu();
-              openWindow(PurposeForOpening.ImportAccount).catch(e =>
-                console.log(e)
-              );
-            }
-          },
-          {
-            id: 3,
-            Content: (
-              <ListItemElementContainer>
-                <Typography type="body" weight="regular">
-                  <Trans t={t}>Connected sites</Trans>
-                </Typography>
-              </ListItemElementContainer>
-            ),
-            Left: (
-              <ListItemElementContainer>
-                <SvgIcon
-                  color="contentBlue"
-                  size={iconSize}
-                  src="assets/icons/link.svg"
-                />
-              </ListItemElementContainer>
-            ),
-            Right: (
-              <ListItemElementContainer>
+        rows={menuItems}
+        marginLeftForItemSeparatorLine={60}
+        renderRow={menuItem => (
+          <ListItemClickableContainer
+            key={menuItem.id}
+            onClick={menuItem.handleOnClick}
+          >
+            <SvgIcon
+              src={menuItem.iconPath}
+              size={iconSize}
+              color="contentBlue"
+            />
+            <SpaceBetweenContainer>
+              <Typography type="body" weight="regular">
+                {menuItem.title}
+              </Typography>
+              {menuItem.currentValue && (
                 <Typography type="body" weight="semiBold" color="contentBlue">
-                  3
+                  {menuItem.currentValue}
                 </Typography>
-              </ListItemElementContainer>
-            )
-          },
-          {
-            id: 4,
-            Content: (
-              <ListItemElementContainer>
-                <Typography type="body" weight="regular">
-                  <Trans t={t}>Timeout</Trans>
-                </Typography>
-              </ListItemElementContainer>
-            ),
-            Right: (
-              <ListItemElementContainer>
-                <Typography type="body" weight="semiBold" color="contentBlue">
-                  {TimeoutDurationSetting[timeoutDuration]}
-                </Typography>
-              </ListItemElementContainer>
-            ),
-            Left: (
-              <ListItemElementContainer>
-                <SvgIcon
-                  size={iconSize}
-                  color="contentBlue"
-                  src="assets/icons/lock.svg"
-                />
-              </ListItemElementContainer>
-            ),
-            onClick: () => {
-              closeNavigationMenu();
-              navigate(RouterPath.Timeout);
-            }
-          }
-        ]}
+              )}
+            </SpaceBetweenContainer>
+          </ListItemClickableContainer>
+        )}
       />
     </ContentContainer>
   );

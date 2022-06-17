@@ -10,11 +10,11 @@ import { RouterPath } from '@popup/router';
 
 import {
   ContentContainer,
-  ButtonsContainer,
+  FooterButtonsContainer,
   HeaderTextContainer,
   InputsContainer,
   TextContainer
-} from '@src/layout/containers';
+} from '@layout/containers';
 import { Typography, Input, Button } from '@libs/ui';
 
 import { selectVaultPassword } from '@popup/redux/vault/selectors';
@@ -69,7 +69,7 @@ export function UnlockVaultPageContent() {
           />
         </InputsContainer>
       </ContentContainer>
-      <ButtonsContainer>
+      <FooterButtonsContainer>
         <Button disabled={!isDirty} type="submit">
           {t('Unlock vault')}
         </Button>
@@ -80,7 +80,7 @@ export function UnlockVaultPageContent() {
         >
           {t('Reset vault')}
         </Button>
-      </ButtonsContainer>
+      </FooterButtonsContainer>
     </form>
   );
 }

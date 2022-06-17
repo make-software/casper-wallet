@@ -17,12 +17,12 @@ import {
 import { createVault } from '@popup/redux/vault/actions';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import {
-  ButtonsContainer,
+  FooterButtonsContainer,
   ContentContainer,
   HeaderTextContainer,
   InputsContainer,
   TextContainer
-} from '@src/layout/containers';
+} from '@layout/containers';
 
 type InputType = 'password' | 'text';
 
@@ -123,11 +123,11 @@ export function CreateVaultPageContent() {
           />
         </InputsContainer>
       </ContentContainer>
-      <ButtonsContainer>
+      <FooterButtonsContainer>
         <Button disabled={!isDirty}>
           <Trans t={t}>Create Vault</Trans>
         </Button>
-      </ButtonsContainer>
+      </FooterButtonsContainer>
     </form>
   );
 }

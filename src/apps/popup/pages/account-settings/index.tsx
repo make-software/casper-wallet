@@ -6,7 +6,7 @@ import { RootState } from 'typesafe-actions';
 import styled from 'styled-components';
 
 import { ContentContainer, HeaderTextContainer } from '@layout/containers';
-import { SvgIcon, Tile, Typography } from '@libs/ui';
+import { SvgIcon, PageTile, Typography } from '@libs/ui';
 import { selectVaultAccountByName } from '@popup/redux/vault/selectors';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -25,13 +25,13 @@ export function AccountSettingsPageContent() {
 
   return (
     <ContentContainer>
-      <Tile>
+      <PageTile>
         <HeaderTextContainer>
           <Typography type="header" weight="bold">
             {account.name}
           </Typography>
         </HeaderTextContainer>
-      </Tile>
+      </PageTile>
     </ContentContainer>
   );
 }

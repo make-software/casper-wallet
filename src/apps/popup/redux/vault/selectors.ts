@@ -25,6 +25,11 @@ export const selectVaultAccountsNames = createSelector(
   accounts => accounts.map(account => account.name)
 );
 
+export const selectVaultActiveAccount = (state: RootState) =>
+  state.vault.accounts.find(
+    account => account.name === state.vault.activeAccountName
+  );
+
 export const selectVaultAccountsSecretKeysBase64 = createSelector(
   selectVaultAccounts,
   accounts => accounts.map(account => account.secretKey)

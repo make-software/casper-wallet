@@ -1,31 +1,68 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
-import { ListItemElementContainer, Typography, Checkbox, List } from '@libs/ui';
+import { Typography, Checkbox, List } from '@libs/ui';
 import {
   ContentContainer,
   HeaderTextContainer,
   TextContainer
-} from '@src/layout/containers';
+} from '@layout/containers';
 
 import { selectVaultTimeoutDurationSetting } from '@popup/redux/vault/selectors';
 import { changeTimeoutDuration } from '@popup/redux/vault/actions';
 import { TimeoutDurationSetting } from '@popup/constants';
+
+const ListItemClickableContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+
+  width: 100%;
+  cursor: pointer;
+
+  padding: 14px 18px;
+  & > * + * {
+    padding-left: 18px;
+  }
+
+  & > span {
+    white-space: nowrap;
+  }
+`;
+
+export const TimeoutValueContainer = styled.div`
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+`;
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();
   const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
   const dispatch = useDispatch();
 
-  const MapTimeoutDurationSettingToTranslation = {
-    [TimeoutDurationSetting['1 min']]: t('1 min'),
-    [TimeoutDurationSetting['5 min']]: t('5 min'),
-    [TimeoutDurationSetting['15 min']]: t('15 min'),
-    [TimeoutDurationSetting['30 min']]: t('30 min'),
-    [TimeoutDurationSetting['1 hour']]: t('1 hour'),
-    [TimeoutDurationSetting['24 hours']]: t('24 hours')
-  };
+  const timeoutsMenuItems = useMemo(() => {
+    const MapTimeoutDurationSettingToTranslation = {
+      [TimeoutDurationSetting['1 min']]: t('1 min'),
+      [TimeoutDurationSetting['5 min']]: t('5 min'),
+      [TimeoutDurationSetting['15 min']]: t('15 min'),
+      [TimeoutDurationSetting['30 min']]: t('30 min'),
+      [TimeoutDurationSetting['1 hour']]: t('1 hour'),
+      [TimeoutDurationSetting['24 hours']]: t('24 hours')
+    };
+
+    return (
+      Object.keys(TimeoutDurationSetting) as Array<
+        keyof typeof TimeoutDurationSetting
+      >
+    ).map(key => ({
+      id: key,
+      title: MapTimeoutDurationSettingToTranslation[key],
+      checked: timeoutDuration === key
+    }));
+  }, [t, timeoutDuration]);
 
   return (
     <ContentContainer>
@@ -41,39 +78,28 @@ export function TimeoutPageContent() {
             inactivity.
           </Trans>
         </Typography>
-        <List
-          listItems={(
-            Object.keys(TimeoutDurationSetting) as Array<
-              keyof typeof TimeoutDurationSetting
-            >
-          ).map(key => ({
-            id: key,
-            Content: (
-              <ListItemElementContainer>
-                <Typography type="body" weight="regular">
-                  <Trans
-                    t={t}
-                    i18nKey={key}
-                    values={MapTimeoutDurationSettingToTranslation}
-                  />
-                </Typography>
-              </ListItemElementContainer>
-            ),
-            Right: (
-              <ListItemElementContainer>
-                <Checkbox checked={timeoutDuration === key} />
-              </ListItemElementContainer>
-            ),
-            onClick: () => {
+      </TextContainer>
+      <List
+        rows={timeoutsMenuItems}
+        marginLeftForItemSeparatorLine={16}
+        renderRow={menuItem => (
+          <ListItemClickableContainer
+            key={menuItem.id}
+            onClick={() => {
               dispatch(
                 changeTimeoutDuration({
-                  timeoutDuration: TimeoutDurationSetting[key]
+                  timeoutDuration: TimeoutDurationSetting[menuItem.id]
                 })
               );
-            }
-          }))}
-        />
-      </TextContainer>
+            }}
+          >
+            <Typography type="body" weight="regular">
+              {menuItem.title}
+            </Typography>
+            <Checkbox checked={timeoutDuration === menuItem.id} />
+          </ListItemClickableContainer>
+        )}
+      />
     </ContentContainer>
   );
 }

@@ -1,118 +1,84 @@
-import React, { ReactElement } from 'react';
-import styled from 'styled-components';
+import React from 'react';
+import styled, { css } from 'styled-components';
 
-import { Tile } from '../tile/tile';
+import { Tile, Typography } from '@libs/ui';
 
-export const ListItemElementContainer = styled.div`
-  height: 50px;
-
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  & > span {
-    white-space: nowrap;
-  }
+const TopMarginContainer = styled.div`
+  margin-top: 16px;
 `;
 
-const ListContainer = styled.div`
-  margin: 24px 0;
-`;
-
-const ClickableContainer = styled.div`
-  cursor: ${({ onClick }) => (onClick ? 'pointer' : 'inherit')};
-`;
-
-const LeftContainer = styled(ClickableContainer)`
-  margin-left: 16px;
-`;
-
-const RightContainer = styled(ClickableContainer)`
-  margin-right: 16px;
-`;
-
-const ContentContainer = styled(ClickableContainer)`
-  width: 100%;
-`;
-
-const MainContainer = styled.div`
-  width: 100%;
-  margin-left: 16px;
-
-  display: flex;
-  justify-content: space-between;
-`;
-
-const ListItemContainer = styled(ClickableContainer)`
-  display: flex;
-
-  & ${MainContainer} {
-    border-bottom: 1px solid ${({ theme }) => theme.color.borderPrimary};
-  }
-
-  &:last-child ${MainContainer} {
-    border-bottom: none;
-  }
-`;
-
-export type OnClickHandler = () => void;
-
-export interface ListItemType {
-  id: string | number;
-  Content: ReactElement;
-  Left?: ReactElement;
-  Right?: ReactElement;
-  onClick?: OnClickHandler;
-  leftOnClick?: OnClickHandler;
-  contentOnClick?: OnClickHandler;
-  rightOnClick?: OnClickHandler;
+interface BorderBottomPseudoElementProps {
+  marginLeftForItemSeparatorLine: number;
 }
 
-interface ListProps {
-  listItems: ListItemType[];
+const borderBottomPseudoElementRules = css<BorderBottomPseudoElementProps>`
+  content: '';
+  width: ${({ marginLeftForItemSeparatorLine }) =>
+    `calc(100% - ${marginLeftForItemSeparatorLine}px)`};
+  margin-left: ${({ marginLeftForItemSeparatorLine }) =>
+    marginLeftForItemSeparatorLine}px;
+  border-bottom: ${({ theme }) => `0.5px solid ${theme.color.borderPrimary}`};
+`;
+
+const RowsContainer = styled.div`
+  & > * + *:before {
+    ${borderBottomPseudoElementRules};
+  }
+`;
+
+const FlexColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const RowContainer = styled(FlexColumn)``;
+const ListFooterContainer = styled(FlexColumn)`
+  &::before {
+    ${borderBottomPseudoElementRules};
+  }
+`;
+
+interface ListProps<T> extends BorderBottomPseudoElementProps {
+  rows: T[];
+  renderRow: (rowData: T) => JSX.Element;
+  renderFooter?: () => JSX.Element;
+  headerLabel?: string;
 }
 
-export function List({ listItems }: ListProps) {
-  if (listItems.length === 0) {
-    return null;
-  }
-
+export function List<T>({
+  rows,
+  renderRow,
+  marginLeftForItemSeparatorLine,
+  renderFooter,
+  headerLabel
+}: ListProps<T>) {
   return (
-    <Tile>
-      <ListContainer>
-        {listItems.map(
-          ({
-            id,
-            Content,
-            Right,
-            Left,
-            onClick,
-            contentOnClick,
-            rightOnClick,
-            leftOnClick
-          }) => (
-            <ListItemContainer key={id} onClick={onClick}>
-              {Left && (
-                <LeftContainer onClick={onClick ? undefined : leftOnClick}>
-                  {Left}
-                </LeftContainer>
-              )}
-              <MainContainer>
-                <ContentContainer
-                  onClick={onClick ? undefined : contentOnClick}
-                >
-                  {Content}
-                </ContentContainer>
-                {Right && (
-                  <RightContainer onClick={onClick ? undefined : rightOnClick}>
-                    {Right}
-                  </RightContainer>
-                )}
-              </MainContainer>
-            </ListItemContainer>
-          )
-        )}
-      </ListContainer>
-    </Tile>
+    <>
+      {headerLabel && (
+        <TopMarginContainer>
+          <Typography type="label" weight="medium" color="contentSecondary">
+            {headerLabel}
+          </Typography>
+        </TopMarginContainer>
+      )}
+      <TopMarginContainer>
+        <Tile>
+          <RowsContainer
+            marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
+          >
+            {rows.map(row => (
+              <RowContainer>{renderRow(row)}</RowContainer>
+            ))}
+          </RowsContainer>
+          {renderFooter && (
+            <ListFooterContainer
+              marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
+            >
+              {renderFooter()}
+            </ListFooterContainer>
+          )}
+        </Tile>
+      </TopMarginContainer>
+    </>
   );
 }

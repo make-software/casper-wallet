@@ -29,6 +29,9 @@ export const renameAccount = createAction('RENAME_ACCOUNT')<{
   oldName: string;
   newName: string;
 }>();
+export const changeActiveAccount = createAction(
+  'CHANGE_ACTIVE_ACCOUNT'
+)<string>();
 
 export const changeTimeoutDuration = createAction(
   'CHANGE_TIMEOUT_DURATION',
