@@ -111,6 +111,7 @@ export function ImportAccountWithFileContentPage() {
         <InputsContainer>
           <Input
             type="file"
+            accept=".pem"
             prefixIcon={<SvgIcon src="assets/icons/file.svg" size={24} />}
             suffixIcon={
               <SvgIcon

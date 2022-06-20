@@ -89,6 +89,7 @@ export enum InputValidationType {
 }
 
 export interface InputProps extends BaseProps {
+  accept?: string;
   disabled?: boolean;
   monotype?: boolean;
   placeholder?: string;
