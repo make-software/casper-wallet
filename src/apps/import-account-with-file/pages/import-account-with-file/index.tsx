@@ -61,7 +61,7 @@ export function ImportAccountWithFileContentPage() {
       .test(
         'required',
         t('File with secret key should be loaded'),
-        value => !!value && value.length > 0
+        value => value !== null && value.length > 0
       )
       .test('fileType', t('Unsupported file format'), value => {
         if (value && value.length > 0) {
