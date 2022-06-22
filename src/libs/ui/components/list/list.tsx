@@ -38,20 +38,25 @@ const ListFooterContainer = styled(FlexColumn)`
   }
 `;
 
-interface ListProps<T> extends BorderBottomPseudoElementProps {
-  rows: T[];
-  renderRow: (rowData: T) => JSX.Element;
+interface ListRowBase {
+  id: number | string;
+}
+
+interface ListProps<ListRow extends ListRowBase>
+  extends BorderBottomPseudoElementProps {
+  rows: ListRow[];
+  renderRow: (rowData: ListRow) => JSX.Element;
   renderFooter?: () => JSX.Element;
   headerLabel?: string;
 }
 
-export function List<T>({
+export function List<ListRow extends ListRowBase>({
   rows,
   renderRow,
   marginLeftForItemSeparatorLine,
   renderFooter,
   headerLabel
-}: ListProps<T>) {
+}: ListProps<ListRow>) {
   return (
     <>
       {headerLabel && (
@@ -67,7 +72,7 @@ export function List<T>({
             marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
           >
             {rows.map(row => (
-              <RowContainer>{renderRow(row)}</RowContainer>
+              <RowContainer key={row.id}>{renderRow(row)}</RowContainer>
             ))}
           </RowsContainer>
           {renderFooter && (

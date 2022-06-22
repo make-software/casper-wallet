@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import styled, { css } from 'styled-components';
@@ -125,6 +125,11 @@ export function HomePageContent() {
     [dispatch]
   );
 
+  const accountListRows = useMemo(
+    () => accounts.map(account => ({ ...account, id: account.name })),
+    [accounts]
+  );
+
   return (
     <ContentContainer>
       {activeAccount && (
@@ -159,10 +164,10 @@ export function HomePageContent() {
           <Button>Connect</Button>
         </PageTile>
       )}
-      {accounts.length > 0 && (
+      {accountListRows.length > 0 && (
         <List
           headerLabel={t('Accounts list')}
-          rows={accounts}
+          rows={accountListRows}
           marginLeftForItemSeparatorLine={60}
           renderRow={account => (
             <ListItemContainer key={account.name}>
