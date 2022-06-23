@@ -1,4 +1,6 @@
-import React from 'react';
+import '@libs/i18n/i18n';
+
+import React, { Suspense } from 'react';
 import { render } from 'react-dom';
 import { ThemeProvider } from 'styled-components';
 import { HashRouter, Route, Routes } from 'react-router-dom';
@@ -13,36 +15,38 @@ import { ImportAccountWithFileContentPage } from './pages/import-account-with-fi
 import { ImportAccountWithFileLayout } from './layout';
 
 render(
-  <ThemeProvider theme={themeConfig}>
-    <GlobalStyle />
-    <HashRouter>
-      <Routes>
-        <Route
-          path={RouterPath.ImportAccountWithFile}
-          element={
-            <ImportAccountWithFileLayout
-              Content={<ImportAccountWithFileContentPage />}
-            />
-          }
-        />
-        <Route
-          path={RouterPath.ImportAccountWithFileSuccess}
-          element={
-            <ImportAccountWithFileLayout
-              Content={<ImportAccountWithFileSuccessContentPage />}
-            />
-          }
-        />
-        <Route
-          path={RouterPath.ImportAccountWithFileFailure}
-          element={
-            <ImportAccountWithFileLayout
-              Content={<ImportAccountWithFileFailureContentPage />}
-            />
-          }
-        />
-      </Routes>
-    </HashRouter>
-  </ThemeProvider>,
+  <Suspense fallback={null}>
+    <ThemeProvider theme={themeConfig}>
+      <GlobalStyle />
+      <HashRouter>
+        <Routes>
+          <Route
+            path={RouterPath.ImportAccountWithFile}
+            element={
+              <ImportAccountWithFileLayout
+                Content={<ImportAccountWithFileContentPage />}
+              />
+            }
+          />
+          <Route
+            path={RouterPath.ImportAccountWithFileSuccess}
+            element={
+              <ImportAccountWithFileLayout
+                Content={<ImportAccountWithFileSuccessContentPage />}
+              />
+            }
+          />
+          <Route
+            path={RouterPath.ImportAccountWithFileFailure}
+            element={
+              <ImportAccountWithFileLayout
+                Content={<ImportAccountWithFileFailureContentPage />}
+              />
+            }
+          />
+        </Routes>
+      </HashRouter>
+    </ThemeProvider>
+  </Suspense>,
   document.querySelector('#import-account-with-file-app-container')
 );
