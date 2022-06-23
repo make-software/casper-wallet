@@ -58,7 +58,11 @@ export function ImportAccountWithFileContentPage() {
 
   const formSchema = Yup.object().shape({
     secretKeyFile: Yup.mixed()
-      .required(t('File with secret key should be loaded'))
+      .test(
+        'required',
+        t('File with secret key should be loaded'),
+        value => value !== null && value.length > 0
+      )
       .test('fileType', t('Unsupported file format'), value => {
         if (value && value.length > 0) {
           return ['application/x-x509-ca-cert'].includes(value[0].type);
