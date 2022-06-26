@@ -1,5 +1,6 @@
-import React, { ReactElement, useMemo } from 'react';
+import React, { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { RouterPath } from '@popup/router';
 
@@ -7,6 +8,19 @@ import { HeaderContainer, LogoContainer, Logo } from '@src/layout';
 
 import { MainmenuBar } from './mainmenu-bar';
 import { SubmenuBar } from './submenu-bar';
+import { ConnectionStatus } from '@popup/layout/header/connection-status';
+
+const CentredFlexRow = styled.div`
+  display: flex;
+  width: 100%;
+
+  align-items: center;
+`;
+
+export const SpaceBetweenContainer = styled(CentredFlexRow)`
+  justify-content: space-between;
+  padding-left: 20px;
+`;
 
 interface HeaderProps {
   isActiveAccountConnectedToActiveTab?: boolean;
@@ -25,21 +39,18 @@ export function Header({
 }: HeaderProps) {
   const navigate = useNavigate();
 
-  const activeAccountConnectionStatus = useMemo(() => {
-    if (isActiveAccountConnectedToActiveTab === undefined) {
-      return undefined;
-    }
-    return isActiveAccountConnectedToActiveTab ? 'Connected' : 'Disconnected';
-  }, [isActiveAccountConnectedToActiveTab]);
-
   return (
     <>
       <HeaderContainer>
         <LogoContainer>
           <Logo onClick={() => navigate(RouterPath.Home)} />
         </LogoContainer>
-        {activeAccountConnectionStatus}
-        <MainmenuBar withMenu={withMenu} withLock={withLock} />
+        <SpaceBetweenContainer>
+          <ConnectionStatus
+            isConnected={isActiveAccountConnectedToActiveTab || false}
+          />
+          <MainmenuBar withMenu={withMenu} withLock={withLock} />
+        </SpaceBetweenContainer>
       </HeaderContainer>
       {submenuActionType && (
         <SubmenuBar
