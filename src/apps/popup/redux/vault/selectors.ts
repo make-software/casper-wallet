@@ -25,10 +25,66 @@ export const selectVaultAccountsNames = createSelector(
   accounts => accounts.map(account => account.name)
 );
 
-export const selectVaultActiveAccount = (state: RootState) =>
-  state.vault.accounts.find(
-    account => account.name === state.vault.activeAccountName
-  );
+export const selectVaultActiveAccountName = (state: RootState) =>
+  state.vault.activeAccountName;
+export const selectVaultActiveAccount = createSelector(
+  selectVaultAccounts,
+  selectVaultActiveAccountName,
+  (accounts, activeAccountName) =>
+    accounts.find(account => account.name === activeAccountName)
+);
+
+export const selectVaultMapAccountNamesToConnectedTabOrigins = (
+  state: RootState
+) => state.vault.mapAccountNamesToConnectedTabOrigins;
+
+export const selectActiveTabOrigin = (_: RootState, activeTabOrigin: string) =>
+  activeTabOrigin;
+export const selectIsActiveAccountConnectedToActiveTab = createSelector(
+  selectActiveTabOrigin,
+  selectVaultActiveAccountName,
+  selectVaultMapAccountNamesToConnectedTabOrigins,
+  (
+    activeTabOrigin,
+    activeAccountName,
+    mapAccountNamesToConnectedTabOrigins
+  ) => {
+    if (
+      activeAccountName === null ||
+      Object.keys(mapAccountNamesToConnectedTabOrigins).length === 0 ||
+      !(activeAccountName in mapAccountNamesToConnectedTabOrigins)
+    ) {
+      return false;
+    }
+
+    return mapAccountNamesToConnectedTabOrigins[activeAccountName].includes(
+      activeTabOrigin
+    );
+  }
+);
+
+export const selectConnectedAccountsToActiveTab = createSelector(
+  selectActiveTabOrigin,
+  selectVaultAccounts,
+  selectVaultMapAccountNamesToConnectedTabOrigins,
+  (activeTabOrigin, accounts, mapAccountNamesToConnectedTabOrigins) => {
+    if (Object.keys(mapAccountNamesToConnectedTabOrigins).length === 0) {
+      return [];
+    }
+
+    const connectedAccountsNames = Object.keys(
+      mapAccountNamesToConnectedTabOrigins
+    ).filter(
+      key =>
+        key &&
+        mapAccountNamesToConnectedTabOrigins[key].includes(activeTabOrigin)
+    );
+
+    return accounts.filter(account =>
+      connectedAccountsNames.includes(account.name)
+    );
+  }
+);
 
 export const selectVaultAccountsSecretKeysBase64 = createSelector(
   selectVaultAccounts,

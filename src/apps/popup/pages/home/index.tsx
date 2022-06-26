@@ -1,9 +1,11 @@
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
+import { RootState } from 'typesafe-actions';
 import styled, { css } from 'styled-components';
 
 import { PurposeForOpening, useWindowManager } from '@src/hooks';
+import { useActiveTabOrigin } from '@popup/hooks/use-active-tab-origin';
 
 import { ContentContainer } from '@layout/containers';
 import {
@@ -20,10 +22,14 @@ import {
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
+  selectIsActiveAccountConnectedToActiveTab,
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@popup/redux/vault/selectors';
-import { changeActiveAccount } from '@popup/redux/vault/actions';
+import {
+  changeActiveAccount,
+  connectAccountToSite
+} from '@popup/redux/vault/actions';
 
 // Account info
 
@@ -116,6 +122,11 @@ export function HomePageContent() {
   const { t } = useTranslation();
 
   const { openWindow } = useWindowManager();
+  const activeTabOrigin = useActiveTabOrigin();
+
+  const isActiveAccountConnectedToActiveTab = useSelector((state: RootState) =>
+    selectIsActiveAccountConnectedToActiveTab(state, activeTabOrigin)
+  );
 
   const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
@@ -129,6 +140,19 @@ export function HomePageContent() {
     ...account,
     id: account.name
   }));
+
+  const handleConnectAccountToSite = useCallback(async () => {
+    if (!activeAccount || !activeTabOrigin) {
+      return;
+    }
+
+    dispatch(
+      connectAccountToSite({
+        accountName: activeAccount.name,
+        siteOrigin: activeTabOrigin
+      })
+    );
+  }, [dispatch, activeAccount, activeTabOrigin]);
 
   return (
     <ContentContainer>
@@ -161,7 +185,15 @@ export function HomePageContent() {
               $30,294.34
             </Typography>
           </BalanceContainer>
-          <Button>Connect</Button>
+          {isActiveAccountConnectedToActiveTab ? (
+            <Button color="secondaryBlue">
+              <Trans t={t}>Disconnect</Trans>
+            </Button>
+          ) : (
+            <Button onClick={handleConnectAccountToSite}>
+              <Trans t={t}>Connect</Trans>
+            </Button>
+          )}
         </PageTile>
       )}
       {accountListRows.length > 0 && (

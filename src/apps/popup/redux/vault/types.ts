@@ -7,6 +7,10 @@ export interface Account {
   publicKey: string;
 }
 
+export interface MapAccountNamesToConnectedTabOrigins {
+  [accountName: string]: string[];
+}
+
 export type VaultState = {
   password: string | null;
   isLocked: boolean;
@@ -14,4 +18,5 @@ export type VaultState = {
   lastActivityTime: number | null;
   accounts: Account[];
   activeAccountName: string | null;
+  mapAccountNamesToConnectedTabOrigins: MapAccountNamesToConnectedTabOrigins;
 };

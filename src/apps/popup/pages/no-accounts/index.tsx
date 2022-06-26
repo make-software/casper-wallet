@@ -42,7 +42,7 @@ export function NoAccountsPageContent() {
           color="secondaryBlue"
           onClick={() =>
             openWindow(PurposeForOpening.ImportAccount).catch(e =>
-              console.log(e)
+              console.error(e)
             )
           }
         >
