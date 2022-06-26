@@ -4,17 +4,24 @@ import styled from 'styled-components';
 import { BaseProps, Link } from '@src/libs/ui';
 
 const BaseButton = styled.button<ButtonProps>(
-  ({ theme, disabled, height = '40', width = '100%' }) => ({
+  ({ theme, disabled, height = '40', variant, width = '100%' }) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     border: 'none',
-    borderRadius: theme.borderRadius.base,
+    borderRadius:
+      variant === 'inline'
+        ? theme.borderRadius.hundred
+        : theme.borderRadius.base,
     fontFamily: theme.typography.fontFamily.primary,
-    fontWeight: theme.typography.fontWeight.semiBold,
-    fontSize: '1.5rem',
-    minHeight: '4rem',
+    fontWeight:
+      variant === 'inline'
+        ? theme.typography.fontWeight.medium
+        : theme.typography.fontWeight.semiBold,
+    fontSize: variant === 'inline' ? '1.4rem' : '1.5rem',
+    minHeight: variant === 'inline' ? '3.2rem' : '4rem',
     lineHeight: '2.4rem',
+    padding: variant === 'inline' ? '4px 12px' : 'unset',
     width,
 
     ':focus': {
@@ -148,7 +155,7 @@ const COMPONENT_MAP_BY_COLOR = {
   utility: UtilityButton
 };
 
-export type ButtonSize = 'small' | 'normal' | 'big';
+export type ButtonVariant = 'inline' | 'fullWidth';
 
 /* eslint-disable-next-line */
 export interface ButtonProps extends BaseProps {
@@ -164,12 +171,18 @@ export interface ButtonProps extends BaseProps {
   displayAsLinkTo?: string;
   height?: '24' | '36' | '40';
   width?: '100' | '120' | '176' | '100%';
+  variant?: ButtonVariant;
 }
 
 type Ref = HTMLButtonElement;
 
 export const Button = React.forwardRef<Ref, ButtonProps>(function Button(
-  { color = 'primaryBlue', displayAsLinkTo, ...props }: ButtonProps,
+  {
+    color = 'primaryBlue',
+    variant = 'fullWidth',
+    displayAsLinkTo,
+    ...props
+  }: ButtonProps,
   ref
 ) {
   if (displayAsLinkTo) {
@@ -188,7 +201,9 @@ export const Button = React.forwardRef<Ref, ButtonProps>(function Button(
   }
 
   const ButtonComponent = COMPONENT_MAP_BY_COLOR[color] || PrimaryBlueButton;
-  return <ButtonComponent ref={ref} color={color} {...props} />;
+  return (
+    <ButtonComponent ref={ref} color={color} variant={variant} {...props} />
+  );
 });
 
 export default Button;
