@@ -64,13 +64,15 @@ export const themeConfig = {
     contentBlue: '#0A2EBF',
     contentRed: '#CC000F',
     contentGreen: '#2DDC88',
-    contentGreenOnFill: '#77FFBE'
+    contentGreenOnFill: '#77FFBE',
+    contentYellow: '#E0BB38'
   },
   border: {
     separator: '0.5px solid #E8E9EC'
   },
   borderRadius: {
-    base: 6
+    base: 6,
+    hundred: 100
   },
   padding: {
     1.6: '1.6rem'
