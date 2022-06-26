@@ -9,7 +9,8 @@ export type ContentColor =
   | 'contentBlue'
   | 'contentRed'
   | 'contentGreen'
-  | 'contentGreenOnFill';
+  | 'contentGreenOnFill'
+  | 'contentYellow';
 
 // can extend more color types later here if needed (like FillColor etc.) the utility below can be generic and can work with all of them
 export type Color = ContentColor;
@@ -24,6 +25,7 @@ export function getColorFromTheme(theme: DefaultTheme, color: Color) {
     contentBlue: theme.color.contentBlue,
     contentRed: theme.color.contentRed,
     contentGreen: theme.color.contentGreen,
-    contentGreenOnFill: theme.color.contentGreenOnFill
+    contentGreenOnFill: theme.color.contentGreenOnFill,
+    contentYellow: theme.color.contentYellow
   }[color];
 }
