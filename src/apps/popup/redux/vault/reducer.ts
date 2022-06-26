@@ -11,9 +11,10 @@ import {
   importAccount,
   removeAccount,
   renameAccount,
-  changeActiveAccount
+  changeActiveAccount,
+  connectAccountToSite
 } from './actions';
-import { VaultState } from './types';
+import { MapAccountNamesToConnectedTabOrigins, VaultState } from './types';
 
 type State = VaultState;
 
@@ -23,7 +24,8 @@ const initialState: State = {
   timeoutDurationSetting: TimeoutDurationSetting['5 min'],
   lastActivityTime: null,
   accounts: [],
-  activeAccountName: null
+  activeAccountName: null,
+  mapAccountNamesToConnectedTabOrigins: {}
 };
 
 export const reducer = createReducer(initialState)
@@ -69,31 +71,61 @@ export const reducer = createReducer(initialState)
       account => account.name !== name
     );
 
+    const nextMapAccountNamesToConnectedTabOrigins = {
+      ...Object.keys(state.mapAccountNamesToConnectedTabOrigins)
+        .filter(key => key !== name)
+        .reduce(
+          (acc: MapAccountNamesToConnectedTabOrigins, key) =>
+            (acc[key] = state.mapAccountNamesToConnectedTabOrigins[key]) && acc,
+          {}
+        )
+    };
+
     return {
       ...state,
       accounts: nextAccountsState,
       activeAccountName:
         state.activeAccountName === name
           ? (state.accounts.length > 1 && nextAccountsState[0].name) || null
-          : state.activeAccountName
+          : state.activeAccountName,
+      mapAccountNamesToConnectedTabOrigins:
+        nextMapAccountNamesToConnectedTabOrigins
     };
   })
   .handleAction(
     [renameAccount],
-    (state, { payload: { oldName, newName } }): State => ({
-      ...state,
-      accounts: state.accounts.map(account => {
-        if (account.name === oldName) {
-          return {
-            ...account,
-            name: newName
-          };
-        }
-        return account;
-      }),
-      activeAccountName:
-        state.activeAccountName === oldName ? newName : state.activeAccountName
-    })
+    (state, { payload: { oldName, newName } }): State => {
+      const nextMapAccountNamesToConnectedTabOrigins = {
+        ...Object.keys(state.mapAccountNamesToConnectedTabOrigins)
+          .filter(key => key !== oldName)
+          .reduce(
+            (acc: MapAccountNamesToConnectedTabOrigins, key) =>
+              (acc[key] = state.mapAccountNamesToConnectedTabOrigins[key]) &&
+              acc,
+            {}
+          ),
+        [newName]: state.mapAccountNamesToConnectedTabOrigins[oldName]
+      };
+
+      return {
+        ...state,
+        accounts: state.accounts.map(account => {
+          if (account.name === oldName) {
+            return {
+              ...account,
+              name: newName
+            };
+          }
+          return account;
+        }),
+        activeAccountName:
+          state.activeAccountName === oldName
+            ? newName
+            : state.activeAccountName,
+        mapAccountNamesToConnectedTabOrigins:
+          nextMapAccountNamesToConnectedTabOrigins
+      };
+    }
   )
   .handleAction(
     [changeTimeoutDuration],
@@ -108,5 +140,21 @@ export const reducer = createReducer(initialState)
     (state, { payload: { lastActivityTime } }) => ({
       ...state,
       lastActivityTime
+    })
+  )
+  .handleAction(
+    [connectAccountToSite],
+    (state, { payload: { siteOrigin, accountName } }) => ({
+      ...state,
+      mapAccountNamesToConnectedTabOrigins: {
+        ...state.mapAccountNamesToConnectedTabOrigins,
+        [accountName]:
+          accountName in state.mapAccountNamesToConnectedTabOrigins
+            ? [
+                ...state.mapAccountNamesToConnectedTabOrigins[accountName],
+                siteOrigin
+              ]
+            : [siteOrigin]
+      }
     })
   );

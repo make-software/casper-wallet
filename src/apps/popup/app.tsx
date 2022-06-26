@@ -13,17 +13,23 @@ import { NoAccountsPageContent } from '@popup/pages/no-accounts';
 import { ResetVaultPageContent } from '@popup/pages/reset-vault';
 import { TimeoutPageContent } from '@popup/pages/timeout';
 import { UnlockVaultPageContent } from '@popup/pages/unlock-vault';
+import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
+
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { Header } from './layout';
 
 import {
+  selectIsActiveAccountConnectedToActiveTab,
+  selectVaultActiveAccountName,
   selectVaultDoesExist,
   selectVaultHasAccount,
   selectVaultIsLocked
 } from './redux/vault/selectors';
 
 import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
+import { useActiveTabOrigin } from './hooks/use-active-tab-origin';
+
 import { useRemoteActions } from './redux/use-remote-actions';
 import {
   AccountSettingsPageContent,
@@ -31,15 +37,22 @@ import {
 } from '@popup/pages/account-settings';
 import { RemoveAccountPageContent } from '@popup/pages/remove-account';
 import { RenameAccountPageContent } from '@popup/pages/rename-account';
+import { RootState } from 'typesafe-actions';
 
 export function App() {
   const navigate = useTypedNavigate();
   const location = useTypedLocation();
   const state = location.state;
 
+  const activeTabOrigin = useActiveTabOrigin();
+  const isActiveAccountConnectedToActiveTab = useSelector((state: RootState) =>
+    selectIsActiveAccountConnectedToActiveTab(state, activeTabOrigin)
+  );
+
   const vaultIsLocked = useSelector(selectVaultIsLocked);
   const vaultDoesExists = useSelector(selectVaultDoesExist);
   const vaultHasAccount = useSelector(selectVaultHasAccount);
+  const activeAccountName = useSelector(selectVaultActiveAccountName); // only as dep for connect account redirects
 
   useVaultTimeoutController();
   useRemoteActions();
@@ -65,6 +78,14 @@ export function App() {
     vaultIsLocked
   ]);
 
+  // Connect account redirects
+  useEffect(() => {
+    if (!isActiveAccountConnectedToActiveTab) {
+      navigate(RouterPath.ConnectAnotherAccount);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActiveAccountConnectedToActiveTab, activeAccountName]);
+
   return (
     <Routes>
       {state?.showNavigationMenu ? (
@@ -73,7 +94,15 @@ export function App() {
             path="*"
             element={
               <Layout
-                Header={<Header withMenu withLock />}
+                Header={
+                  <Header
+                    isActiveAccountConnectedToActiveTab={
+                      isActiveAccountConnectedToActiveTab
+                    }
+                    withMenu
+                    withLock
+                  />
+                }
                 Content={<NavigationMenuPageContent />}
               />
             }
@@ -85,7 +114,15 @@ export function App() {
             path={RouterPath.Home}
             element={
               <Layout
-                Header={<Header withMenu withLock />}
+                Header={
+                  <Header
+                    isActiveAccountConnectedToActiveTab={
+                      isActiveAccountConnectedToActiveTab
+                    }
+                    withMenu
+                    withLock
+                  />
+                }
                 Content={<HomePageContent />}
               />
             }
@@ -111,6 +148,9 @@ export function App() {
               <Layout
                 Header={
                   <Header
+                    isActiveAccountConnectedToActiveTab={
+                      isActiveAccountConnectedToActiveTab
+                    }
                     withLock
                     withMenu
                     submenuActionType="close"
@@ -125,7 +165,16 @@ export function App() {
             path={RouterPath.RemoveAccount}
             element={
               <Layout
-                Header={<Header withLock withMenu submenuActionType="back" />}
+                Header={
+                  <Header
+                    isActiveAccountConnectedToActiveTab={
+                      isActiveAccountConnectedToActiveTab
+                    }
+                    withLock
+                    withMenu
+                    submenuActionType="back"
+                  />
+                }
                 Content={<RemoveAccountPageContent />}
               />
             }
@@ -134,7 +183,16 @@ export function App() {
             path={RouterPath.RenameAccount}
             element={
               <Layout
-                Header={<Header withLock withMenu submenuActionType="back" />}
+                Header={
+                  <Header
+                    isActiveAccountConnectedToActiveTab={
+                      isActiveAccountConnectedToActiveTab
+                    }
+                    withLock
+                    withMenu
+                    submenuActionType="back"
+                  />
+                }
                 Content={<RenameAccountPageContent />}
               />
             }
@@ -161,8 +219,35 @@ export function App() {
             path={RouterPath.Timeout}
             element={
               <Layout
-                Header={<Header submenuActionType="close" withMenu withLock />}
+                Header={
+                  <Header
+                    isActiveAccountConnectedToActiveTab={
+                      isActiveAccountConnectedToActiveTab
+                    }
+                    submenuActionType="close"
+                    withMenu
+                    withLock
+                  />
+                }
                 Content={<TimeoutPageContent />}
+              />
+            }
+          />
+          <Route
+            path={RouterPath.ConnectAnotherAccount}
+            element={
+              <Layout
+                Header={
+                  <Header
+                    isActiveAccountConnectedToActiveTab={
+                      isActiveAccountConnectedToActiveTab
+                    }
+                    withLock
+                    withMenu
+                    submenuActionType="cancel"
+                  />
+                }
+                Content={<ConnectAnotherAccountPageContent />}
               />
             }
           />

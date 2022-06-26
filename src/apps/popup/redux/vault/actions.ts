@@ -49,3 +49,8 @@ export const refreshTimeout = createAction('REFRESH_TIMEOUT', () => ({
 }))<{
   lastActivityTime: number;
 }>();
+
+export const connectAccountToSite = createAction('CONNECT_ACCOUNT_TO_SITE')<{
+  siteOrigin: string;
+  accountName: string;
+}>();
