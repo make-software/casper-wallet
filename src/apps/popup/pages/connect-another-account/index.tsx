@@ -1,5 +1,5 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
 import styled from 'styled-components';
@@ -22,6 +22,11 @@ import {
   selectConnectedAccountsToActiveTab,
   selectVaultActiveAccount
 } from '@popup/redux/vault/selectors';
+import { RouterPath, useTypedNavigate } from '@popup/router';
+import {
+  changeActiveAccount,
+  connectAccountToSite
+} from '@popup/redux/vault/actions';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;
@@ -51,13 +56,33 @@ export const SpaceBetweenContainer = styled(CentredFlexRow)`
 `;
 
 export function ConnectAnotherAccountPageContent() {
+  const dispatch = useDispatch();
+  const navigate = useTypedNavigate();
   const { t } = useTranslation();
+
   const activeTabOrigin = useActiveTabOrigin();
 
   const connectedAccountsToActiveTab = useSelector((state: RootState) =>
     selectConnectedAccountsToActiveTab(state, activeTabOrigin)
   );
   const activeAccount = useSelector(selectVaultActiveAccount);
+
+  const handleConnectAccount = useCallback(
+    (accountName: string) => {
+      dispatch(
+        connectAccountToSite({ siteOrigin: activeTabOrigin, accountName })
+      );
+      navigate(RouterPath.Home);
+    },
+    [dispatch, navigate, activeTabOrigin]
+  );
+  const handleSwitchToAccount = useCallback(
+    (accountName: string) => {
+      dispatch(changeActiveAccount(accountName));
+      navigate(RouterPath.Home);
+    },
+    [dispatch, navigate]
+  );
 
   return (
     <ContentContainer>
@@ -91,7 +116,11 @@ export function ConnectAnotherAccountPageContent() {
                   truncated
                 />
               </LeftAlignedFlexColumn>
-              <Button variant="inline" width="100">
+              <Button
+                variant="inline"
+                width="100"
+                onClick={() => handleConnectAccount(activeAccount.name)}
+              >
                 <Trans t={t}>Connect</Trans>
               </Button>
             </SpaceBetweenContainer>
@@ -120,7 +149,12 @@ export function ConnectAnotherAccountPageContent() {
                   truncated
                 />
               </LeftAlignedFlexColumn>
-              <Button color="secondaryBlue" variant="inline" width="100">
+              <Button
+                color="secondaryBlue"
+                variant="inline"
+                width="100"
+                onClick={() => handleSwitchToAccount(account.name)}
+              >
                 <Trans t={t}>Switch</Trans>
               </Button>
             </SpaceBetweenContainer>
