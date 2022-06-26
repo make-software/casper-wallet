@@ -31,13 +31,6 @@ const ListItemClickableContainer = styled.div`
   }
 `;
 
-export const TimeoutValueContainer = styled.div`
-  display: flex;
-  align-items: center;
-
-  width: 100%;
-`;
-
 export function TimeoutPageContent() {
   const { t } = useTranslation();
   const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
