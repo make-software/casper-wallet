@@ -80,11 +80,13 @@ export function App() {
 
   // Connect account redirects
   useEffect(() => {
+    // TODO: improve redirects
     if (!isActiveAccountConnectedToActiveTab) {
       navigate(RouterPath.ConnectAnotherAccount);
+    } else {
+      navigate(RouterPath.Home, { replace: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isActiveAccountConnectedToActiveTab, activeAccountName]);
+  }, [navigate, activeAccountName, isActiveAccountConnectedToActiveTab]);
 
   return (
     <Routes>
