@@ -21,7 +21,6 @@ import { Header } from './layout';
 
 import {
   selectIsActiveAccountConnectedToActiveTab,
-  selectVaultActiveAccountName,
   selectVaultDoesExist,
   selectVaultHasAccount,
   selectVaultIsLocked
@@ -52,7 +51,6 @@ export function App() {
   const vaultIsLocked = useSelector(selectVaultIsLocked);
   const vaultDoesExists = useSelector(selectVaultDoesExist);
   const vaultHasAccount = useSelector(selectVaultHasAccount);
-  const activeAccountName = useSelector(selectVaultActiveAccountName); // only as dep for connect account redirects
 
   useVaultTimeoutController();
   useRemoteActions();
@@ -77,16 +75,6 @@ export function App() {
     vaultHasAccount,
     vaultIsLocked
   ]);
-
-  // Connect account redirects
-  useEffect(() => {
-    // TODO: improve redirects
-    if (!isActiveAccountConnectedToActiveTab) {
-      navigate(RouterPath.ConnectAnotherAccount);
-    } else {
-      navigate(RouterPath.Home, { replace: true });
-    }
-  }, [navigate, activeAccountName, isActiveAccountConnectedToActiveTab]);
 
   return (
     <Routes>

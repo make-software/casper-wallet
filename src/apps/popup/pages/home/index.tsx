@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
@@ -24,7 +24,9 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 import {
   selectIsActiveAccountConnectedToActiveTab,
   selectVaultAccounts,
-  selectVaultActiveAccount
+  selectVaultActiveAccount,
+  selectVaultActiveAccountName,
+  selectVaultMapAccountNamesToConnectedTabOrigins
 } from '@popup/redux/vault/selectors';
 import {
   changeActiveAccount,
@@ -117,6 +119,8 @@ const ButtonsContainer = styled.div`
 `;
 
 export function HomePageContent() {
+  const [accountWasChanged, setAccountWasChanged] = useState(false);
+
   const dispatch = useDispatch();
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -131,8 +135,40 @@ export function HomePageContent() {
   const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
 
+  const mapAccountNamesToConnectedTabOrigins = useSelector(
+    selectVaultMapAccountNamesToConnectedTabOrigins
+  );
+  useEffect(() => {
+    if (
+      activeAccount === undefined ||
+      activeTabOrigin === '' ||
+      !accountWasChanged
+    ) {
+      return;
+    }
+
+    if (!(activeAccount.name in mapAccountNamesToConnectedTabOrigins)) {
+      navigate(RouterPath.ConnectAnotherAccount);
+    } else if (
+      !mapAccountNamesToConnectedTabOrigins[activeAccount.name].includes(
+        activeTabOrigin
+      )
+    ) {
+      navigate(RouterPath.ConnectAnotherAccount);
+    }
+  }, [
+    activeTabOrigin,
+    accountWasChanged,
+    activeAccount,
+    mapAccountNamesToConnectedTabOrigins,
+    navigate
+  ]);
+
   const handleChangeActiveAccount = useCallback(
-    (name: string) => () => dispatch(changeActiveAccount(name)),
+    (name: string) => () => {
+      dispatch(changeActiveAccount(name));
+      setAccountWasChanged(true);
+    },
     [dispatch]
   );
 
