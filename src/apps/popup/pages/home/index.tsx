@@ -25,13 +25,11 @@ import {
   selectIsActiveAccountConnectedToActiveTab,
   selectVaultAccounts,
   selectVaultActiveAccount,
-  selectVaultActiveAccountName,
+  selectVaultIsLocked,
   selectVaultMapAccountNamesToConnectedTabOrigins
 } from '@popup/redux/vault/selectors';
-import {
-  changeActiveAccount,
-  connectAccountToSite
-} from '@popup/redux/vault/actions';
+import { changeActiveAccount } from '@popup/redux/vault/actions';
+import { useConnectAccount } from '@popup/hooks/use-connect-account';
 
 // Account info
 
@@ -125,8 +123,11 @@ export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
+  const isLocked = useSelector(selectVaultIsLocked);
+
   const { openWindow } = useWindowManager();
   const activeTabOrigin = useActiveTabOrigin();
+  const { connectAccount } = useConnectAccount(activeTabOrigin, isLocked);
 
   const isActiveAccountConnectedToActiveTab = useSelector((state: RootState) =>
     selectIsActiveAccountConnectedToActiveTab(state, activeTabOrigin)
@@ -172,19 +173,6 @@ export function HomePageContent() {
     [dispatch]
   );
 
-  const handleConnectAccountToSite = useCallback(async () => {
-    if (!activeAccount || !activeTabOrigin) {
-      return;
-    }
-
-    dispatch(
-      connectAccountToSite({
-        accountName: activeAccount.name,
-        siteOrigin: activeTabOrigin
-      })
-    );
-  }, [dispatch, activeAccount, activeTabOrigin]);
-
   return (
     <ContentContainer>
       {activeAccount && (
@@ -221,7 +209,7 @@ export function HomePageContent() {
               <Trans t={t}>Disconnect</Trans>
             </Button>
           ) : (
-            <Button onClick={handleConnectAccountToSite}>
+            <Button onClick={() => connectAccount(activeAccount)}>
               <Trans t={t}>Connect</Trans>
             </Button>
           )}
