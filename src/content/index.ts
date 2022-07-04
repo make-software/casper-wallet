@@ -13,20 +13,13 @@ async function handleMessage(action: RemoteAction, sender: MessageSender) {
       const { origin } = window.location;
       return origin;
 
-    // const tabs = await Browser.tabs.query({
-    //   active: true,
-    //   currentWindow: true
-    // });
-    //
-    // await Browser.tabs.sendMessage(tabs[0].id as number, {
-    //   name: 'connected',
-    //   detail: {
-    //     isUnlocked: true,
-    //     isConnected: true,
-    //     activeKey: 'publicKey in hex'
-    //   }
-    // });
+    case 'send-connect-status':
+      const signerConnectedEvent = new CustomEvent('signer:connected', {
+        detail: action.payload
+      });
+      window.dispatchEvent(signerConnectedEvent);
 
+      break;
     default:
       throw new Error('Unknown message type');
   }

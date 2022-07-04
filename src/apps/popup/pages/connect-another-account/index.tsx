@@ -20,13 +20,13 @@ import {
 
 import {
   selectConnectedAccountsToActiveTab,
-  selectVaultActiveAccount
+  selectVaultActiveAccount,
+  selectVaultIsLocked
 } from '@popup/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import {
-  changeActiveAccount,
-  connectAccountToSite
-} from '@popup/redux/vault/actions';
+import { changeActiveAccount } from '@popup/redux/vault/actions';
+import { useConnectAccount } from '@popup/hooks/use-connect-account';
+import { Account } from '@popup/redux/vault/types';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;
@@ -62,19 +62,20 @@ export function ConnectAnotherAccountPageContent() {
 
   const activeTabOrigin = useActiveTabOrigin();
 
+  const isLocked = useSelector(selectVaultIsLocked);
+  const { connectAccount } = useConnectAccount(activeTabOrigin, isLocked);
+
   const connectedAccountsToActiveTab = useSelector((state: RootState) =>
     selectConnectedAccountsToActiveTab(state, activeTabOrigin)
   );
   const activeAccount = useSelector(selectVaultActiveAccount);
 
-  const handleConnectAccount = useCallback(
-    (accountName: string) => {
-      dispatch(
-        connectAccountToSite({ siteOrigin: activeTabOrigin, accountName })
-      );
+  const handleConnectAccountToSite = useCallback(
+    (account: Account) => {
+      connectAccount(account);
       navigate(RouterPath.Home);
     },
-    [dispatch, navigate, activeTabOrigin]
+    [navigate, connectAccount]
   );
   const handleSwitchToAccount = useCallback(
     (accountName: string) => {
@@ -119,7 +120,7 @@ export function ConnectAnotherAccountPageContent() {
               <Button
                 variant="inline"
                 width="100"
-                onClick={() => handleConnectAccount(activeAccount.name)}
+                onClick={() => handleConnectAccountToSite(activeAccount)}
               >
                 <Trans t={t}>Connect</Trans>
               </Button>
