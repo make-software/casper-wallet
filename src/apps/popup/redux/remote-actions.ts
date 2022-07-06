@@ -1,7 +1,7 @@
 import { EmptyAction, PayloadAction } from 'typesafe-actions';
 import Browser from 'webextension-polyfill';
 
-import { Account } from '@src/apps/popup/redux/vault/types';
+import { AccountData } from '@src/apps/popup/redux/vault/types';
 
 export type RemoteAction =
   | SendImportedAccountAction
@@ -11,9 +11,9 @@ export type RemoteAction =
 
 export type SendImportedAccountAction = PayloadAction<
   'send-imported-account',
-  { account: Account }
+  { account: AccountData }
 >;
-export const sendImportedAccount = (account: Account): Promise<boolean> => {
+export const sendImportedAccount = (account: AccountData): Promise<boolean> => {
   const action: SendImportedAccountAction = {
     type: 'send-imported-account',
     payload: {

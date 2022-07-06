@@ -8,7 +8,7 @@ import * as Yup from 'yup';
 import { useFormValidations } from '@src/hooks';
 
 import { Button, Input, SvgIcon, Typography } from '@libs/ui';
-import { Account } from '@popup/redux/vault/types';
+import { AccountData } from '@popup/redux/vault/types';
 import {
   FooterButtonsContainer,
   ContentContainer,
@@ -33,7 +33,7 @@ export function ImportAccountWithFileContentPage() {
   const { createAccountNameValidation } = useFormValidations();
 
   const onSuccess = useCallback(
-    async (accountData: Account) => {
+    async (accountData: AccountData) => {
       await sendImportedAccount(accountData);
       navigate(RouterPath.ImportAccountWithFileSuccess);
     },

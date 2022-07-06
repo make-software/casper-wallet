@@ -1,6 +1,6 @@
 import { createAction } from 'typesafe-actions';
 import { TimeoutDurationSetting } from '@popup/constants';
-import { Account } from '@popup/redux/vault/types';
+import { AccountData } from '@popup/redux/vault/types';
 
 export const createVault = createAction(
   'CREATE_VAULT',
@@ -23,7 +23,7 @@ export const unlockVault = createAction('UNLOCK_VAULT', () => ({
   lastActivityTime: number;
 }>();
 
-export const importAccount = createAction('IMPORT_ACCOUNT')<Account>();
+export const importAccount = createAction('IMPORT_ACCOUNT')<AccountData>();
 export const removeAccount = createAction('REMOVE_ACCOUNT')<{ name: string }>();
 export const renameAccount = createAction('RENAME_ACCOUNT')<{
   oldName: string;
@@ -50,7 +50,7 @@ export const refreshTimeout = createAction('REFRESH_TIMEOUT', () => ({
   lastActivityTime: number;
 }>();
 
-export const connectAccountToSite = createAction('CONNECT_ACCOUNT_TO_SITE')<{
-  siteOrigin: string;
+export const connectAccountToApp = createAction('CONNECT_ACCOUNT_TO_APP')<{
+  appOrigin: string;
   accountName: string;
 }>();

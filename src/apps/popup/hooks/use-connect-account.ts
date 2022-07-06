@@ -1,27 +1,21 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { Account } from '@popup/redux/vault/types';
-import { connectAccountToSite } from '@popup/redux/vault/actions';
+import { connectAccountToApp } from '@popup/redux/vault/actions';
 import { sendConnectStatusToActiveTab } from '@content/remote-actions';
 import { useCallback } from 'react';
-import { selectVaultMapAccountNamesToConnectedTabOrigins } from '@popup/redux/vault/selectors';
 
 export function useConnectAccount(origin: string, isLocked: boolean) {
   const dispatch = useDispatch();
-  const mapAccountNamesToConnectedTabOrigins = useSelector(
-    selectVaultMapAccountNamesToConnectedTabOrigins
-  );
 
   const connectAccount = useCallback(
     (account: Account) => {
-      const isConnected =
-        account.name in mapAccountNamesToConnectedTabOrigins &&
-        mapAccountNamesToConnectedTabOrigins[account.name].includes(origin);
+      const isConnected = account.connectedToApps?.includes(origin);
 
       dispatch(
-        connectAccountToSite({
+        connectAccountToApp({
           accountName: account.name,
-          siteOrigin: origin
+          appOrigin: origin
         })
       );
 
@@ -31,7 +25,7 @@ export function useConnectAccount(origin: string, isLocked: boolean) {
         isUnlocked: !isLocked
       }).catch(e => console.error(e));
     },
-    [dispatch, isLocked, mapAccountNamesToConnectedTabOrigins, origin]
+    [dispatch, isLocked, origin]
   );
 
   return { connectAccount };
