@@ -22,11 +22,11 @@ import {
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
+  selectConnectedAccountsToActiveTab,
   selectIsActiveAccountConnectedToActiveTab,
   selectVaultAccounts,
   selectVaultActiveAccount,
-  selectVaultIsLocked,
-  selectVaultMapAccountNamesToConnectedTabOrigins
+  selectVaultIsLocked
 } from '@popup/redux/vault/selectors';
 import { changeActiveAccount } from '@popup/redux/vault/actions';
 import { useConnectAccount } from '@popup/hooks/use-connect-account';
@@ -135,10 +135,10 @@ export function HomePageContent() {
 
   const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
-
-  const mapAccountNamesToConnectedTabOrigins = useSelector(
-    selectVaultMapAccountNamesToConnectedTabOrigins
+  const connectedAccountsToActiveTab = useSelector((state: RootState) =>
+    selectConnectedAccountsToActiveTab(state, activeTabOrigin)
   );
+
   useEffect(() => {
     if (
       activeAccount === undefined ||
@@ -148,21 +148,18 @@ export function HomePageContent() {
       return;
     }
 
-    if (!(activeAccount.name in mapAccountNamesToConnectedTabOrigins)) {
-      navigate(RouterPath.ConnectAnotherAccount);
-    } else if (
-      !mapAccountNamesToConnectedTabOrigins[activeAccount.name].includes(
-        activeTabOrigin
-      )
+    if (
+      !activeAccount.connectedToApps?.includes(activeTabOrigin) &&
+      connectedAccountsToActiveTab.length > 0
     ) {
       navigate(RouterPath.ConnectAnotherAccount);
     }
   }, [
+    navigate,
     activeTabOrigin,
     accountWasChanged,
     activeAccount,
-    mapAccountNamesToConnectedTabOrigins,
-    navigate
+    connectedAccountsToActiveTab
   ]);
 
   const handleChangeActiveAccount = useCallback(
