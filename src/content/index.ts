@@ -1,6 +1,9 @@
 import Browser, { Runtime } from 'webextension-polyfill';
 
-import { RemoteAction } from './remote-actions';
+import {
+  RemoteAction,
+  passToBackgroundRequestConnection
+} from './remote-actions';
 import MessageSender = Runtime.MessageSender;
 
 if (process.env.NODE_ENV === 'development') {
@@ -26,3 +29,26 @@ async function handleMessage(action: RemoteAction, sender: MessageSender) {
 }
 
 Browser.runtime.onMessage.addListener(handleMessage);
+
+function injectScript() {
+  try {
+    let jsPath = 'scripts/inpage.bundle.js';
+    const container = document.head || document.documentElement;
+    const scriptTag = document.createElement('script');
+    scriptTag.setAttribute('type', 'text/javascript');
+    scriptTag.src = Browser.runtime.getURL(jsPath);
+
+    container.insertBefore(scriptTag, container.children[0]);
+    scriptTag.onload = function () {
+      container.removeChild(scriptTag);
+
+      window.addEventListener('request-connection-from-app', async () => {
+        await passToBackgroundRequestConnection();
+      });
+    };
+  } catch (e) {
+    console.error('CasperLabs provider injection failed.', e);
+  }
+}
+
+window.onload = () => injectScript();

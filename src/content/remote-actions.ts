@@ -36,3 +36,15 @@ export const sendConnectStatusToActiveTab = async (
   const tabs = await Browser.tabs.query({ active: true, currentWindow: true });
   return Browser.tabs.sendMessage(tabs[0].id as number, action);
 };
+
+export type PassToBackgroundAction = RequestConnectionAction;
+
+type RequestConnectionAction = EmptyAction<'request-connection'>;
+
+export const passToBackgroundRequestConnection = async () => {
+  const action: RequestConnectionAction = {
+    type: 'request-connection'
+  };
+
+  await Browser.runtime.sendMessage(action);
+};
