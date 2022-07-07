@@ -1,2 +1,19 @@
-console.log('This is the background page.');
-console.log('Put the background scripts here.');
+import Browser, { Runtime } from 'webextension-polyfill';
+import MessageSender = Runtime.MessageSender;
+
+import { PurposeForOpening } from '@src/hooks';
+import { openWindow } from '@background/window-manager';
+
+import { PassToBackgroundAction } from '@content/remote-actions';
+
+Browser.runtime.onMessage.addListener(
+  async (action: PassToBackgroundAction, sender: MessageSender) => {
+    switch (action.type) {
+      case 'request-connection':
+        await openWindow(PurposeForOpening.ConnectToApp);
+        break;
+      default:
+        throw new Error('Unknown message type');
+    }
+  }
+);

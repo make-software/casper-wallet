@@ -18,7 +18,7 @@
     "format:write": "prettier --write 'src/*.{js,jsx,ts,tsx,json,md}'",
     "lint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
     "tsc": "tsc -p ./ --noEmit",
-    "test": "jest --no-cache",
+    "test": "jest --no-cache --passWithNoTests",
     "prepare": "husky install",
     "locale:extract_pot": "i18next 'src/**/*.{ts,tsx}' && node scripts/locale_extract_pot.js",
     "locale:update_translations": "node scripts/locale_update_translations.js",

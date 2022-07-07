@@ -9,7 +9,17 @@ import {
 } from '@popup/redux/windowManagement/actions';
 
 export enum PurposeForOpening {
-  ImportAccount = 'ImportAccount'
+  ImportAccount = 'ImportAccount',
+  ConnectToApp = 'ConnectToApp'
+}
+
+function getUrlByPurposeForOpening(purposeForOpening: PurposeForOpening) {
+  switch (purposeForOpening) {
+    case PurposeForOpening.ImportAccount:
+      return 'import-account-with-file.html';
+    default:
+      return 'popup.html?#/';
+  }
 }
 
 export function useWindowManager() {
@@ -63,10 +73,7 @@ export function useWindowManager() {
 
           Browser.windows
             .create({
-              url:
-                purposeForOpening === PurposeForOpening.ImportAccount
-                  ? 'import-account-with-file.html'
-                  : 'popup.html?#/',
+              url: getUrlByPurposeForOpening(purposeForOpening),
               type: 'popup',
               height: popupHeight,
               width: popupWidth,
