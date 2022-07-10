@@ -3,7 +3,10 @@ import { PurposeForOpening } from '@src/hooks';
 
 let windowId: number | null = null;
 
-function getUrlByPurposeForOpening(purposeForOpening: PurposeForOpening) {
+function getUrlByPurposeForOpening(
+  purposeForOpening: PurposeForOpening,
+  origin: string
+) {
   switch (purposeForOpening) {
     case PurposeForOpening.ConnectToApp:
       return `connect-to-app.html?origin=${origin}`;
@@ -35,7 +38,7 @@ export async function openWindow(
   const windowWidth = window.width ?? 0;
   const xOffset = 100;
   const yOffset = 100;
-  const url = getUrlByPurposeForOpening(purposeForOpening);
+  const url = getUrlByPurposeForOpening(purposeForOpening, origin);
 
   await Browser.windows
     .create({
