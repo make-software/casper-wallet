@@ -14,7 +14,7 @@ export function useActiveTabOrigin({ currentWindow }: UseActiveTabOriginProps) {
       setActiveTabOrigin(origin);
     }
     getActiveTabOriginAndSaveToState().catch(e => console.error(e));
-  }, []);
+  }, [currentWindow]);
 
   return activeTabOrigin;
 }

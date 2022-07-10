@@ -20,6 +20,7 @@ import {
 
 import {
   selectConnectedAccountsToActiveTab,
+  selectVaultAccounts,
   selectVaultActiveAccount,
   selectVaultIsLocked
 } from '@popup/redux/vault/selectors';
@@ -27,6 +28,7 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 import { changeActiveAccount } from '@popup/redux/vault/actions';
 import { useConnectAccount } from '@popup/hooks/use-connect-account';
 import { Account } from '@popup/redux/vault/types';
+import { sendActiveAccountChangedToActiveTab } from '@content/remote-actions';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;
@@ -71,21 +73,38 @@ export function ConnectAnotherAccountPageContent() {
   const connectedAccountsToActiveTab = useSelector((state: RootState) =>
     selectConnectedAccountsToActiveTab(state, activeTabOrigin)
   );
+  const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
 
   const handleConnectAccountToSite = useCallback(
-    (account: Account) => {
-      connectAccount(account);
+    async (account: Account) => {
+      await connectAccount(account);
       navigate(RouterPath.Home);
     },
     [navigate, connectAccount]
   );
+
   const handleSwitchToAccount = useCallback(
     (accountName: string) => {
       dispatch(changeActiveAccount(accountName));
+
+      const nextAccount = accounts.find(
+        account => account.name === accountName
+      );
+
+      if (nextAccount) {
+        sendActiveAccountChangedToActiveTab(
+          {
+            isConnected: true,
+            isUnlocked: !isLocked,
+            activeKey: nextAccount.publicKey
+          },
+          true
+        ).catch(e => console.error(e));
+      }
       navigate(RouterPath.Home);
     },
-    [dispatch, navigate]
+    [dispatch, accounts, isLocked, navigate]
   );
 
   return (

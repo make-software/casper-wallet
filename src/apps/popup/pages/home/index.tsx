@@ -22,13 +22,13 @@ import {
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
+  selectConnectedAccountsToActiveTab,
   selectIsActiveAccountConnectedToActiveTab,
   selectVaultAccounts,
   selectVaultActiveAccount,
   selectVaultIsLocked
 } from '@popup/redux/vault/selectors';
 import { changeActiveAccount } from '@popup/redux/vault/actions';
-import { useConnectAccount } from '@popup/hooks/use-connect-account';
 import { sendActiveAccountChangedToActiveTab } from '@content/remote-actions';
 
 // Account info
@@ -129,11 +129,10 @@ export function HomePageContent() {
 
   const { openWindow } = useWindowManager();
   const activeTabOrigin = useActiveTabOrigin({ currentWindow: true });
-  const { connectAccount } = useConnectAccount({
-    origin: activeTabOrigin,
-    isLocked
-  });
 
+  const connectedAccountsToActiveTab = useSelector((state: RootState) =>
+    selectConnectedAccountsToActiveTab(state, activeTabOrigin)
+  );
   const isActiveAccountConnectedToActiveTab = useSelector((state: RootState) =>
     selectIsActiveAccountConnectedToActiveTab(state, activeTabOrigin)
   );
@@ -151,13 +150,14 @@ export function HomePageContent() {
     }
 
     if (activeAccount.connectedToApps?.includes(activeTabOrigin)) {
-      sendActiveAccountChangedToActiveTab({
-        isConnected: true,
-        isUnlocked: !isLocked,
-        activeKey: activeAccount.publicKey
-      }).catch(e => console.error(e));
-    } else {
-      navigate(RouterPath.ConnectAnotherAccount);
+      sendActiveAccountChangedToActiveTab(
+        {
+          isConnected: true,
+          isUnlocked: !isLocked,
+          activeKey: activeAccount.publicKey
+        },
+        true
+      ).catch(e => console.error(e));
     }
   }, [navigate, activeTabOrigin, accountWasChanged, activeAccount, isLocked]);
 
@@ -169,23 +169,27 @@ export function HomePageContent() {
     [dispatch]
   );
 
+  const handleConnectAccount = useCallback(() => {
+    if (!activeAccount || isActiveAccountConnectedToActiveTab) {
+      return;
+    }
+
+    if (connectedAccountsToActiveTab.length === 0) {
+      navigate(RouterPath.NoConnectedAccount);
+    } else {
+      navigate(RouterPath.ConnectAnotherAccount);
+    }
+  }, [
+    navigate,
+    activeAccount,
+    connectedAccountsToActiveTab,
+    isActiveAccountConnectedToActiveTab
+  ]);
+
   const accountListRows = accounts.map(account => ({
     ...account,
     id: account.name
   }));
-
-  const handleConnectAccountToSite = useCallback(async () => {
-    if (!activeAccount || !activeTabOrigin) {
-      return;
-    }
-
-    dispatch(
-      connectAccountToSite({
-        accountName: activeAccount.name,
-        siteOrigin: activeTabOrigin
-      })
-    );
-  }, [dispatch, activeAccount, activeTabOrigin]);
 
   return (
     <ContentContainer>
@@ -223,7 +227,7 @@ export function HomePageContent() {
               <Trans t={t}>Disconnect</Trans>
             </Button>
           ) : (
-            <Button onClick={() => connectAccount(activeAccount)}>
+            <Button onClick={handleConnectAccount}>
               <Trans t={t}>Connect</Trans>
             </Button>
           )}
