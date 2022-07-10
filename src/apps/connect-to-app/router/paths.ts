@@ -1,4 +1,5 @@
 export enum RouterPath {
-  ConnectToApp = '/',
+  SelectAccountsToConnect = '/',
+  PreConnect = '/preconnect',
   Connecting = '/connecting'
 }

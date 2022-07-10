@@ -10,7 +10,7 @@ Browser.runtime.onMessage.addListener(
   async (action: PassToBackgroundAction, sender: MessageSender) => {
     switch (action.type) {
       case 'request-connection':
-        await openWindow(PurposeForOpening.ConnectToApp);
+        await openWindow(PurposeForOpening.ConnectToApp, action.payload);
         break;
       default:
         throw new Error('Unknown message type');

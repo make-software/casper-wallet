@@ -3,18 +3,21 @@ import Browser from 'webextension-polyfill';
 
 export type RemoteAction =
   | GetActiveTabOriginAction
-  | SendConnectStatusToActiveTabAction;
+  | SendConnectStatusToActiveTabAction
+  | SendActiveAccountChangedToActiveTabAction;
 
 export type GetActiveTabOriginAction = EmptyAction<'get-active-tab-origin'>;
 
-export const getActiveTabOrigin = async (): Promise<string> => {
+export const getActiveTabOrigin = async (
+  currentWindow: boolean
+): Promise<string> => {
   const action: GetActiveTabOriginAction = { type: 'get-active-tab-origin' };
 
-  const tabs = await Browser.tabs.query({ active: true, currentWindow: true });
+  const tabs = await Browser.tabs.query({ active: true, currentWindow });
   return Browser.tabs.sendMessage(tabs[0].id as number, action);
 };
 
-interface SendConnectStatusDetails {
+interface SendAccountDetailsToActiveTab {
   isUnlocked: boolean;
   isConnected: boolean;
   activeKey: string;
@@ -22,28 +25,54 @@ interface SendConnectStatusDetails {
 
 export type SendConnectStatusToActiveTabAction = PayloadAction<
   'send-connect-status',
-  SendConnectStatusDetails
+  SendAccountDetailsToActiveTab
 >;
 
 export const sendConnectStatusToActiveTab = async (
-  payload: SendConnectStatusDetails
+  payload: SendAccountDetailsToActiveTab,
+  currentWindow: boolean = true
 ) => {
   const action: SendConnectStatusToActiveTabAction = {
     type: 'send-connect-status',
     payload
   };
 
-  const tabs = await Browser.tabs.query({ active: true, currentWindow: true });
+  const tabs = await Browser.tabs.query({ active: true, currentWindow });
   return Browser.tabs.sendMessage(tabs[0].id as number, action);
 };
 
-export type PassToBackgroundAction = RequestConnectionAction;
+type SendActiveAccountChangedToActiveTabAction = PayloadAction<
+  'send-active-account-changed',
+  SendAccountDetailsToActiveTab
+>;
 
-type RequestConnectionAction = EmptyAction<'request-connection'>;
+export const sendActiveAccountChangedToActiveTab = async (
+  payload: SendAccountDetailsToActiveTab,
+  currentWindow: boolean
+) => {
+  const action: SendActiveAccountChangedToActiveTabAction = {
+    type: 'send-active-account-changed',
+    payload
+  };
 
-export const passToBackgroundRequestConnection = async () => {
+  const tabs = await Browser.tabs.query({
+    active: true,
+    currentWindow
+  });
+
+  return Browser.tabs.sendMessage(tabs[0].id as number, action);
+};
+
+export type PassToBackgroundAction =
+  | RequestConnectionAction
+  | SendConnectStatusToActiveTabAction;
+
+type RequestConnectionAction = PayloadAction<'request-connection', string>;
+
+export const passToBackgroundRequestConnection = async (origin: string) => {
   const action: RequestConnectionAction = {
-    type: 'request-connection'
+    type: 'request-connection',
+    payload: origin
   };
 
   await Browser.runtime.sendMessage(action);

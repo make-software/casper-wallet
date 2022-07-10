@@ -5,7 +5,7 @@ import { RootState } from 'typesafe-actions';
 import styled, { css } from 'styled-components';
 
 import { PurposeForOpening, useWindowManager } from '@src/hooks';
-import { useActiveTabOrigin } from '@popup/hooks/use-active-tab-origin';
+import { useActiveTabOrigin } from '@hooks/use-active-tab-origin';
 
 import { ContentContainer } from '@layout/containers';
 import {
@@ -22,7 +22,6 @@ import {
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
-  selectConnectedAccountsToActiveTab,
   selectIsActiveAccountConnectedToActiveTab,
   selectVaultAccounts,
   selectVaultActiveAccount,
@@ -30,6 +29,7 @@ import {
 } from '@popup/redux/vault/selectors';
 import { changeActiveAccount } from '@popup/redux/vault/actions';
 import { useConnectAccount } from '@popup/hooks/use-connect-account';
+import { sendActiveAccountChangedToActiveTab } from '@content/remote-actions';
 
 // Account info
 
@@ -88,8 +88,10 @@ const LeftAlignedFlexColumn = styled.div`
   align-items: flex-start;
 `;
 
-const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
-const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
+export const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
+export const AccountNameWithHashListItemContainer = styled(
+  LeftAlignedFlexColumn
+)`
   width: 100%;
 `;
 
@@ -126,8 +128,11 @@ export function HomePageContent() {
   const isLocked = useSelector(selectVaultIsLocked);
 
   const { openWindow } = useWindowManager();
-  const activeTabOrigin = useActiveTabOrigin();
-  const { connectAccount } = useConnectAccount(activeTabOrigin, isLocked);
+  const activeTabOrigin = useActiveTabOrigin({ currentWindow: true });
+  const { connectAccount } = useConnectAccount({
+    origin: activeTabOrigin,
+    isLocked
+  });
 
   const isActiveAccountConnectedToActiveTab = useSelector((state: RootState) =>
     selectIsActiveAccountConnectedToActiveTab(state, activeTabOrigin)
@@ -135,9 +140,6 @@ export function HomePageContent() {
 
   const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const connectedAccountsToActiveTab = useSelector((state: RootState) =>
-    selectConnectedAccountsToActiveTab(state, activeTabOrigin)
-  );
 
   useEffect(() => {
     if (
@@ -148,19 +150,16 @@ export function HomePageContent() {
       return;
     }
 
-    if (
-      !activeAccount.connectedToApps?.includes(activeTabOrigin) &&
-      connectedAccountsToActiveTab.length > 0
-    ) {
+    if (activeAccount.connectedToApps?.includes(activeTabOrigin)) {
+      sendActiveAccountChangedToActiveTab({
+        isConnected: true,
+        isUnlocked: !isLocked,
+        activeKey: activeAccount.publicKey
+      }).catch(e => console.error(e));
+    } else {
       navigate(RouterPath.ConnectAnotherAccount);
     }
-  }, [
-    navigate,
-    activeTabOrigin,
-    accountWasChanged,
-    activeAccount,
-    connectedAccountsToActiveTab
-  ]);
+  }, [navigate, activeTabOrigin, accountWasChanged, activeAccount, isLocked]);
 
   const handleChangeActiveAccount = useCallback(
     (name: string) => () => {

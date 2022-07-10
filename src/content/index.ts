@@ -21,10 +21,19 @@ async function handleMessage(action: RemoteAction, sender: MessageSender) {
         detail: action.payload
       });
       window.dispatchEvent(signerConnectedEvent);
+      break;
 
+    case 'send-active-account-changed':
+      const signerActiveAccountChanged = new CustomEvent(
+        'signer:activeKeyChanged',
+        {
+          detail: action.payload
+        }
+      );
+      window.dispatchEvent(signerActiveAccountChanged);
       break;
     default:
-      throw new Error('Unknown message type');
+      throw new Error('Content script: Unknown message type');
   }
 }
 
@@ -43,7 +52,8 @@ function injectScript() {
       container.removeChild(scriptTag);
 
       window.addEventListener('request-connection-from-app', async () => {
-        await passToBackgroundRequestConnection();
+        const { origin } = window.location;
+        await passToBackgroundRequestConnection(origin);
       });
     };
   } catch (e) {

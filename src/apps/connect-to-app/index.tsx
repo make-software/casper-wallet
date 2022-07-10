@@ -1,25 +1,48 @@
-import React from 'react';
+import '@libs/i18n/i18n';
+
+import React, { Suspense } from 'react';
 import { render } from 'react-dom';
+import { HashRouter } from 'react-router-dom';
+import { Provider as ReduxProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
-import { HashRouter, Route, Routes } from 'react-router-dom';
 
 import { GlobalStyle, themeConfig } from '@libs/ui';
 
-import { RouterPath } from '@src/apps/connect-to-app/router';
+import { createStore } from '@popup/redux';
+import { REDUX_STORAGE_KEY } from '@libs/services/constants';
 
-import { ConnectToAppLayout } from './layout';
+import { App } from '@connect-to-app/app';
+
+export let store: ReturnType<typeof createStore>;
+
+const reduxStorageState = JSON.parse(
+  localStorage.getItem(REDUX_STORAGE_KEY) || '{}'
+);
+// should initialize store only once when localstorage data is fetched
+// @ts-ignore
+if (store == null) {
+  store = createStore(reduxStorageState);
+  // each change should be saved in the localstorage
+  store.subscribe(() => {
+    const vault = store.getState();
+    try {
+      localStorage.setItem(REDUX_STORAGE_KEY, JSON.stringify(vault));
+    } catch {
+      // initialization workaround
+    }
+  });
+}
 
 render(
-  <ThemeProvider theme={themeConfig}>
-    <GlobalStyle />
-    <HashRouter>
-      <Routes>
-        <Route
-          path={RouterPath.ConnectToApp}
-          element={<ConnectToAppLayout Content={<div>Connect to App</div>} />}
-        />
-      </Routes>
-    </HashRouter>
-  </ThemeProvider>,
+  <Suspense fallback={null}>
+    <ThemeProvider theme={themeConfig}>
+      <GlobalStyle />
+      <ReduxProvider store={store}>
+        <HashRouter>
+          <App />
+        </HashRouter>
+      </ReduxProvider>
+    </ThemeProvider>
+  </Suspense>,
   document.querySelector('#connect-to-app-app-container')
 );

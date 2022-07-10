@@ -7,6 +7,17 @@ const TopMarginContainer = styled.div`
   margin-top: 16px;
 `;
 
+const SpacedBetweenFlexRox = styled.div`
+  display: flex;
+  justify-content: space-between;
+
+  margin: 0 16px;
+`;
+
+const PointerContainer = styled.div`
+  cursor: pointer;
+`;
+
 interface BorderBottomPseudoElementProps {
   marginLeftForItemSeparatorLine: number;
 }
@@ -38,11 +49,17 @@ const ListFooterContainer = styled(FlexColumn)`
   }
 `;
 
+interface HeaderAction {
+  caption: string;
+  onClick: () => void;
+}
+
 interface ListProps<T> extends BorderBottomPseudoElementProps {
   rows: T[];
   renderRow: (rowData: T) => JSX.Element;
   renderFooter?: () => JSX.Element;
   headerLabel?: string;
+  headerAction?: HeaderAction;
 }
 
 export function List<T>({
@@ -50,15 +67,30 @@ export function List<T>({
   renderRow,
   marginLeftForItemSeparatorLine,
   renderFooter,
-  headerLabel
+  headerLabel,
+  headerAction
 }: ListProps<T>) {
   return (
     <>
       {headerLabel && (
         <TopMarginContainer>
-          <Typography type="label" weight="medium" color="contentSecondary">
-            {headerLabel}
-          </Typography>
+          <SpacedBetweenFlexRox>
+            <Typography type="label" weight="medium" color="contentSecondary">
+              {headerLabel}
+            </Typography>
+            {headerAction && (
+              <PointerContainer>
+                <Typography
+                  type="label"
+                  weight="medium"
+                  color="contentBlue"
+                  onClick={headerAction.onClick}
+                >
+                  {headerAction.caption}
+                </Typography>
+              </PointerContainer>
+            )}
+          </SpacedBetweenFlexRox>
         </TopMarginContainer>
       )}
       <TopMarginContainer>
