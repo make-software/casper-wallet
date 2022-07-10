@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
 import styled from 'styled-components';
 
-import { useActiveTabOrigin } from '@popup/hooks/use-active-tab-origin';
+import { useActiveTabOrigin } from '@hooks/use-active-tab-origin';
 
 import { ContentContainer, HeaderTextContainer } from '@src/layout';
 import {
@@ -60,10 +60,13 @@ export function ConnectAnotherAccountPageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  const activeTabOrigin = useActiveTabOrigin();
+  const activeTabOrigin = useActiveTabOrigin({ currentWindow: true });
 
   const isLocked = useSelector(selectVaultIsLocked);
-  const { connectAccount } = useConnectAccount(activeTabOrigin, isLocked);
+  const { connectAccount } = useConnectAccount({
+    origin: activeTabOrigin,
+    isLocked
+  });
 
   const connectedAccountsToActiveTab = useSelector((state: RootState) =>
     selectConnectedAccountsToActiveTab(state, activeTabOrigin)

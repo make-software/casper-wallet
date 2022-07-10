@@ -3,7 +3,19 @@ import { PurposeForOpening } from '@src/hooks';
 
 let windowId: number | null = null;
 
-export async function openWindow(purposeForOpening: PurposeForOpening) {
+function getUrlByPurposeForOpening(purposeForOpening: PurposeForOpening) {
+  switch (purposeForOpening) {
+    case PurposeForOpening.ConnectToApp:
+      return `connect-to-app.html?origin=${origin}`;
+    default:
+      throw new Error('Unknown purpose for opening');
+  }
+}
+
+export async function openWindow(
+  purposeForOpening: PurposeForOpening,
+  origin: string
+) {
   if (windowId) {
     const window = await Browser.windows.get(windowId);
 
@@ -16,23 +28,22 @@ export async function openWindow(purposeForOpening: PurposeForOpening) {
     return;
   }
 
+  const window = await Browser.windows.getCurrent();
+
   const popupWidth = 360;
   const popupHeight = 600;
-  let url: string;
-
-  switch (purposeForOpening) {
-    case PurposeForOpening.ConnectToApp:
-      url = 'connect-to-app.html';
-      break;
-    default:
-      throw new Error('Unknown purpose for opening');
-  }
+  const windowWidth = window.width ?? 0;
+  const xOffset = 100;
+  const yOffset = 100;
+  const url = getUrlByPurposeForOpening(purposeForOpening);
 
   await Browser.windows
     .create({
       type: 'popup',
       height: popupHeight,
       width: popupWidth,
+      left: windowWidth - popupWidth - xOffset,
+      top: yOffset,
       url
     })
     .then(newWindow => {

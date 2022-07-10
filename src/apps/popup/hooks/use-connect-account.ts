@@ -5,7 +5,17 @@ import { connectAccountToApp } from '@popup/redux/vault/actions';
 import { sendConnectStatusToActiveTab } from '@content/remote-actions';
 import { useCallback } from 'react';
 
-export function useConnectAccount(origin: string, isLocked: boolean) {
+interface UseConnectAccountProps {
+  origin: string;
+  isLocked: boolean;
+  currentWindow?: boolean;
+}
+
+export function useConnectAccount({
+  origin,
+  isLocked,
+  currentWindow = true
+}: UseConnectAccountProps) {
   const dispatch = useDispatch();
 
   const connectAccount = useCallback(
@@ -19,13 +29,16 @@ export function useConnectAccount(origin: string, isLocked: boolean) {
         })
       );
 
-      sendConnectStatusToActiveTab({
-        activeKey: account.publicKey,
-        isConnected,
-        isUnlocked: !isLocked
-      }).catch(e => console.error(e));
+      return sendConnectStatusToActiveTab(
+        {
+          activeKey: account.publicKey,
+          isConnected,
+          isUnlocked: !isLocked
+        },
+        currentWindow
+      );
     },
-    [dispatch, isLocked, origin]
+    [dispatch, isLocked, origin, currentWindow]
   );
 
   return { connectAccount };

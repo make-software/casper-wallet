@@ -27,7 +27,7 @@ import {
 } from './redux/vault/selectors';
 
 import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
-import { useActiveTabOrigin } from './hooks/use-active-tab-origin';
+import { useActiveTabOrigin } from '@hooks/use-active-tab-origin';
 
 import { useRemoteActions } from './redux/use-remote-actions';
 import {
@@ -43,7 +43,7 @@ export function App() {
   const location = useTypedLocation();
   const state = location.state;
 
-  const activeTabOrigin = useActiveTabOrigin();
+  const activeTabOrigin = useActiveTabOrigin({ currentWindow: true });
   const isActiveAccountConnectedToActiveTab = useSelector((state: RootState) =>
     selectIsActiveAccountConnectedToActiveTab(state, activeTabOrigin)
   );

@@ -131,7 +131,9 @@ export const reducer = createReducer(initialState)
           ...account,
           connectedToApps:
             account.connectedToApps?.length > 0
-              ? [...account.connectedToApps, appOrigin]
+              ? account.connectedToApps.includes(appOrigin)
+                ? account.connectedToApps
+                : [...account.connectedToApps, appOrigin]
               : [appOrigin]
         };
       })

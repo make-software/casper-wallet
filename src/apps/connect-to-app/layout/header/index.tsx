@@ -1,12 +1,20 @@
 import React from 'react';
 import { HeaderContainer, LogoContainer, Logo } from '@src/layout';
+import { SubmenuBar } from './submenu-bar';
 
-export function Header() {
+interface HeaderProps {
+  submenuActionType?: 'back' | 'cancel';
+}
+
+export function Header({ submenuActionType }: HeaderProps) {
   return (
-    <HeaderContainer>
-      <LogoContainer>
-        <Logo />
-      </LogoContainer>
-    </HeaderContainer>
+    <>
+      <HeaderContainer>
+        <LogoContainer>
+          <Logo />
+        </LogoContainer>
+      </HeaderContainer>
+      {submenuActionType && <SubmenuBar actionType={submenuActionType} />}
+    </>
   );
 }

@@ -14,7 +14,7 @@ import { selectVaultTimeoutDurationSetting } from '@popup/redux/vault/selectors'
 import { changeTimeoutDuration } from '@popup/redux/vault/actions';
 import { TimeoutDurationSetting } from '@popup/constants';
 
-const ListItemClickableContainer = styled.div`
+export const ListItemClickableContainer = styled.div`
   display: flex;
   justify-content: space-between;
 
