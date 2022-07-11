@@ -19,7 +19,7 @@ import {
 } from '@libs/ui';
 
 import {
-  selectConnectedAccountsToActiveTab,
+  selectConnectedAccountsToOrigin,
   selectVaultAccounts,
   selectVaultActiveAccount,
   selectVaultIsLocked
@@ -28,7 +28,7 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 import { changeActiveAccount } from '@popup/redux/vault/actions';
 import { useConnectAccount } from '@popup/hooks/use-connect-account';
 import { Account } from '@popup/redux/vault/types';
-import { sendActiveAccountChangedToActiveTab } from '@content/remote-actions';
+import { sendActiveAccountChanged } from '@content/remote-actions';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;
@@ -67,11 +67,11 @@ export function ConnectAnotherAccountPageContent() {
   const isLocked = useSelector(selectVaultIsLocked);
   const { connectAccount } = useConnectAccount({
     origin: activeTabOrigin,
-    isLocked
+    currentWindow: true
   });
 
   const connectedAccountsToActiveTab = useSelector((state: RootState) =>
-    selectConnectedAccountsToActiveTab(state, activeTabOrigin)
+    selectConnectedAccountsToOrigin(state, activeTabOrigin)
   );
   const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
@@ -93,7 +93,7 @@ export function ConnectAnotherAccountPageContent() {
       );
 
       if (nextAccount) {
-        sendActiveAccountChangedToActiveTab(
+        sendActiveAccountChanged(
           {
             isConnected: true,
             isUnlocked: !isLocked,

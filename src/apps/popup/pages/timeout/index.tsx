@@ -1,35 +1,18 @@
 import React, { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import { Typography, Checkbox, List } from '@libs/ui';
 import {
   ContentContainer,
   HeaderTextContainer,
-  TextContainer
+  TextContainer,
+  ListItemClickableContainer
 } from '@layout/containers';
 
 import { selectVaultTimeoutDurationSetting } from '@popup/redux/vault/selectors';
 import { changeTimeoutDuration } from '@popup/redux/vault/actions';
 import { TimeoutDurationSetting } from '@popup/constants';
-
-export const ListItemClickableContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-
-  width: 100%;
-  cursor: pointer;
-
-  padding: 14px 18px;
-  & > * + * {
-    padding-left: 18px;
-  }
-
-  & > span {
-    white-space: nowrap;
-  }
-`;
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();

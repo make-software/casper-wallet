@@ -1,22 +1,22 @@
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { Account } from '@popup/redux/vault/types';
 import { connectAccountToApp } from '@popup/redux/vault/actions';
-import { sendConnectStatusToActiveTab } from '@content/remote-actions';
+import { sendConnectStatus } from '@content/remote-actions';
 import { useCallback } from 'react';
+import { selectVaultIsLocked } from '@popup/redux/vault/selectors';
 
 interface UseConnectAccountProps {
   origin: string;
-  isLocked: boolean;
-  currentWindow?: boolean;
+  currentWindow: boolean;
 }
 
 export function useConnectAccount({
   origin,
-  isLocked,
-  currentWindow = true
+  currentWindow
 }: UseConnectAccountProps) {
   const dispatch = useDispatch();
+  const isLocked = useSelector(selectVaultIsLocked);
 
   const connectAccount = useCallback(
     (account: Account) => {
@@ -29,7 +29,7 @@ export function useConnectAccount({
         })
       );
 
-      return sendConnectStatusToActiveTab(
+      return sendConnectStatus(
         {
           activeKey: account.publicKey,
           isConnected,

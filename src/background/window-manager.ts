@@ -34,7 +34,7 @@ export async function openWindow(
   const window = await Browser.windows.getCurrent();
 
   const popupWidth = 360;
-  const popupHeight = 600;
+  const popupHeight = 700;
   const windowWidth = window.width ?? 0;
   const xOffset = 100;
   const yOffset = 100;
