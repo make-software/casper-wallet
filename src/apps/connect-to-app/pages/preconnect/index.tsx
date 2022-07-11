@@ -2,11 +2,14 @@ import React, { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { HeaderTextContainer } from '@src/layout';
+
 import {
   ContentContainer,
-  HeaderTextContainer,
-  FooterButtonsContainer
-} from '@src/layout';
+  FooterButtonsContainer,
+  PaddingContainer
+} from '@connect-to-app/layout';
+
 import {
   Button,
   CurrentSiteFavicon,
@@ -77,39 +80,41 @@ export function PreConnectPageContent({
 
   return (
     <ContentContainer>
-      {faviconUrl ? (
-        <HeaderTextContainer>
-          <CurrentSiteFavicon faviconUrl={faviconUrl} hostName={originName} />
-          <HeaderTextContent>
+      <PaddingContainer>
+        {faviconUrl ? (
+          <HeaderTextContainer>
+            <CurrentSiteFavicon faviconUrl={faviconUrl} hostName={originName} />
+            <HeaderTextContent>
+              <Typography type="header" weight="bold">
+                <Trans t={t}>{headerText}</Trans>
+              </Typography>
+            </HeaderTextContent>
+          </HeaderTextContainer>
+        ) : (
+          <HeaderTextContainer>
             <Typography type="header" weight="bold">
               <Trans t={t}>{headerText}</Trans>
             </Typography>
-          </HeaderTextContent>
-        </HeaderTextContainer>
-      ) : (
-        <HeaderTextContainer>
-          <Typography type="header" weight="bold">
-            <Trans t={t}>{headerText}</Trans>
-          </Typography>
-        </HeaderTextContainer>
-      )}
-      <List
-        headerLabel={t('allow this site to')}
-        rows={listItems}
-        renderRow={listItem => (
-          <ListItemContainer key={listItem.id}>
-            <SvgIcon
-              src={listItem.iconPath}
-              size={24}
-              color="contentTertiary"
-            />
-            <Typography type="body" weight="regular">
-              {listItem.text}
-            </Typography>
-          </ListItemContainer>
+          </HeaderTextContainer>
         )}
-        marginLeftForItemSeparatorLine={60}
-      />
+        <List
+          headerLabel={t('allow this site to')}
+          rows={listItems}
+          renderRow={listItem => (
+            <ListItemContainer key={listItem.id}>
+              <SvgIcon
+                src={listItem.iconPath}
+                size={24}
+                color="contentTertiary"
+              />
+              <Typography type="body" weight="regular">
+                {listItem.text}
+              </Typography>
+            </ListItemContainer>
+          )}
+          marginLeftForItemSeparatorLine={60}
+        />
+      </PaddingContainer>
       <FooterButtonsContainer>
         <TextCentredContainer>
           <Typography type="caption" weight="regular">

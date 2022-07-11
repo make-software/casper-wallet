@@ -11,10 +11,15 @@ import {
   Typography
 } from '@libs/ui';
 import {
-  ContentContainer,
   HeaderTextContainer,
-  FooterButtonsContainer
+  ListItemClickableContainer
 } from '@layout/containers';
+import {
+  ContentContainer,
+  FooterButtonsContainer,
+  PaddingContainer
+} from '@connect-to-app/layout';
+
 import { useTranslation, Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import {
@@ -25,8 +30,7 @@ import {
   AccountBalanceListItemContainer,
   AccountNameWithHashListItemContainer
 } from '@popup/pages/home';
-// TODO: Reorganize containers
-import { ListItemClickableContainer } from '@popup/pages/timeout';
+
 import { RouterPath, useTypedNavigate } from '@connect-to-app/router';
 
 const HeaderTextContent = styled.div`
@@ -83,77 +87,79 @@ export function SelectAccountsToConnectPageContent({
 
   return (
     <ContentContainer>
-      {faviconUrl ? (
-        <HeaderTextContainer>
-          <CurrentSiteFavicon faviconUrl={faviconUrl} hostName={originName} />
-          <HeaderTextContent>
+      <PaddingContainer>
+        {faviconUrl ? (
+          <HeaderTextContainer>
+            <CurrentSiteFavicon faviconUrl={faviconUrl} hostName={originName} />
+            <HeaderTextContent>
+              <Typography type="header" weight="bold">
+                <Trans t={t}>{headerText}</Trans>
+              </Typography>
+            </HeaderTextContent>
+          </HeaderTextContainer>
+        ) : (
+          <HeaderTextContainer>
             <Typography type="header" weight="bold">
               <Trans t={t}>{headerText}</Trans>
             </Typography>
-          </HeaderTextContent>
-        </HeaderTextContainer>
-      ) : (
-        <HeaderTextContainer>
-          <Typography type="header" weight="bold">
-            <Trans t={t}>{headerText}</Trans>
-          </Typography>
-        </HeaderTextContainer>
-      )}
-      <List
-        headerLabel={t('select account(s)')}
-        headerAction={headerAction}
-        rows={accounts}
-        renderRow={account => (
-          <ListItemClickableContainer
-            onClick={() =>
-              setSelectedAccountNames(selectedAccountNames =>
-                selectedAccountNames.includes(account.name)
-                  ? selectedAccountNames.filter(
-                      accountName => accountName !== account.name
-                    )
-                  : [...selectedAccountNames, account.name]
-              )
-            }
-          >
-            <Checkbox
-              variant="square"
-              checked={selectedAccountNames.includes(account.name)}
-            />
-            <AccountNameWithHashListItemContainer>
-              <Typography
-                type="body"
-                weight={
-                  activeAccount && activeAccount.name === account.name
-                    ? 'semiBold'
-                    : 'regular'
-                }
-              >
-                {account.name}
-              </Typography>
-              <Hash
-                value={account.publicKey}
-                variant={HashVariant.CaptionHash}
-                truncated
-              />
-            </AccountNameWithHashListItemContainer>
-
-            <AccountBalanceListItemContainer>
-              <Typography type="body" weight="regular" monospace>
-                2.1M
-              </Typography>
-              <Typography
-                type="body"
-                weight="regular"
-                monospace
-                color="contentSecondary"
-              >
-                CSPR
-              </Typography>
-            </AccountBalanceListItemContainer>
-          </ListItemClickableContainer>
+          </HeaderTextContainer>
         )}
-        marginLeftForItemSeparatorLine={60}
-      />
+        <List
+          headerLabel={t('select account(s)')}
+          headerAction={headerAction}
+          rows={accounts}
+          renderRow={account => (
+            <ListItemClickableContainer
+              onClick={() =>
+                setSelectedAccountNames(selectedAccountNames =>
+                  selectedAccountNames.includes(account.name)
+                    ? selectedAccountNames.filter(
+                        accountName => accountName !== account.name
+                      )
+                    : [...selectedAccountNames, account.name]
+                )
+              }
+            >
+              <Checkbox
+                variant="square"
+                checked={selectedAccountNames.includes(account.name)}
+              />
+              <AccountNameWithHashListItemContainer>
+                <Typography
+                  type="body"
+                  weight={
+                    activeAccount && activeAccount.name === account.name
+                      ? 'semiBold'
+                      : 'regular'
+                  }
+                >
+                  {account.name}
+                </Typography>
+                <Hash
+                  value={account.publicKey}
+                  variant={HashVariant.CaptionHash}
+                  truncated
+                />
+              </AccountNameWithHashListItemContainer>
+
+              <AccountBalanceListItemContainer>
+                <Typography type="body" weight="regular" monospace>
+                  2.1M
+                </Typography>
+                <Typography
+                  type="body"
+                  weight="regular"
+                  monospace
+                  color="contentSecondary"
+                >
+                  CSPR
+                </Typography>
+              </AccountBalanceListItemContainer>
+            </ListItemClickableContainer>
+          )}
+          marginLeftForItemSeparatorLine={60}
+        />
+      </PaddingContainer>
 
       <FooterButtonsContainer>
         <TextCentredContainer>

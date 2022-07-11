@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
@@ -22,14 +22,14 @@ import {
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
-  selectConnectedAccountsToActiveTab,
-  selectIsActiveAccountConnectedToActiveTab,
+  selectConnectedAccountsToOrigin,
+  selectActiveAccountIsConnectedToOrigin,
   selectVaultAccounts,
   selectVaultActiveAccount,
   selectVaultIsLocked
 } from '@popup/redux/vault/selectors';
 import { changeActiveAccount } from '@popup/redux/vault/actions';
-import { sendActiveAccountChangedToActiveTab } from '@content/remote-actions';
+import { sendActiveAccountChanged } from '@content/remote-actions';
 
 // Account info
 
@@ -119,8 +119,6 @@ const ButtonsContainer = styled.div`
 `;
 
 export function HomePageContent() {
-  const [accountWasChanged, setAccountWasChanged] = useState(false);
-
   const dispatch = useDispatch();
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -130,27 +128,23 @@ export function HomePageContent() {
   const { openWindow } = useWindowManager();
   const activeTabOrigin = useActiveTabOrigin({ currentWindow: true });
 
-  const connectedAccountsToActiveTab = useSelector((state: RootState) =>
-    selectConnectedAccountsToActiveTab(state, activeTabOrigin)
+  const connectedAccounts = useSelector((state: RootState) =>
+    selectConnectedAccountsToOrigin(state, activeTabOrigin)
   );
-  const isActiveAccountConnectedToActiveTab = useSelector((state: RootState) =>
-    selectIsActiveAccountConnectedToActiveTab(state, activeTabOrigin)
+  const isActiveAccountConnected = useSelector((state: RootState) =>
+    selectActiveAccountIsConnectedToOrigin(state, activeTabOrigin)
   );
 
   const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
 
   useEffect(() => {
-    if (
-      activeAccount === undefined ||
-      activeTabOrigin === '' ||
-      !accountWasChanged
-    ) {
+    if (activeAccount === undefined || activeTabOrigin === '') {
       return;
     }
 
     if (activeAccount.connectedToApps?.includes(activeTabOrigin)) {
-      sendActiveAccountChangedToActiveTab(
+      sendActiveAccountChanged(
         {
           isConnected: true,
           isUnlocked: !isLocked,
@@ -159,32 +153,26 @@ export function HomePageContent() {
         true
       ).catch(e => console.error(e));
     }
-  }, [navigate, activeTabOrigin, accountWasChanged, activeAccount, isLocked]);
+  }, [activeTabOrigin, activeAccount, isLocked]);
 
   const handleChangeActiveAccount = useCallback(
     (name: string) => () => {
       dispatch(changeActiveAccount(name));
-      setAccountWasChanged(true);
     },
     [dispatch]
   );
 
   const handleConnectAccount = useCallback(() => {
-    if (!activeAccount || isActiveAccountConnectedToActiveTab) {
+    if (!activeAccount || isActiveAccountConnected) {
       return;
     }
 
-    if (connectedAccountsToActiveTab.length === 0) {
+    if (connectedAccounts.length === 0) {
       navigate(RouterPath.NoConnectedAccount);
     } else {
       navigate(RouterPath.ConnectAnotherAccount);
     }
-  }, [
-    navigate,
-    activeAccount,
-    connectedAccountsToActiveTab,
-    isActiveAccountConnectedToActiveTab
-  ]);
+  }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
 
   return (
     <ContentContainer>
@@ -217,7 +205,7 @@ export function HomePageContent() {
               $30,294.34
             </Typography>
           </BalanceContainer>
-          {isActiveAccountConnectedToActiveTab ? (
+          {isActiveAccountConnected ? (
             <Button color="secondaryBlue">
               <Trans t={t}>Disconnect</Trans>
             </Button>

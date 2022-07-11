@@ -1,10 +1,9 @@
 import Browser, { Runtime } from 'webextension-polyfill';
-
-import {
-  RemoteAction,
-  passToBackgroundRequestConnection
-} from './remote-actions';
 import MessageSender = Runtime.MessageSender;
+
+import { passToBackgroundRequestConnection } from '@background/remote-actions';
+
+import { RemoteAction } from './remote-actions';
 
 if (process.env.NODE_ENV === 'development') {
   console.log('Must reload extension for modifications to take effect.');

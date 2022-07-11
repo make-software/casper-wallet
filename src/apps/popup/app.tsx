@@ -21,7 +21,7 @@ import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { Header } from './layout';
 
 import {
-  selectIsActiveAccountConnectedToActiveTab,
+  selectActiveAccountIsConnectedToOrigin,
   selectVaultDoesExist,
   selectVaultHasAccount,
   selectVaultIsLocked
@@ -45,8 +45,8 @@ export function App() {
   const state = location.state;
 
   const activeTabOrigin = useActiveTabOrigin({ currentWindow: true });
-  const isActiveAccountConnectedToActiveTab = useSelector((state: RootState) =>
-    selectIsActiveAccountConnectedToActiveTab(state, activeTabOrigin)
+  const isActiveAccountConnected = useSelector((state: RootState) =>
+    selectActiveAccountIsConnectedToOrigin(state, activeTabOrigin)
   );
 
   const vaultIsLocked = useSelector(selectVaultIsLocked);
@@ -87,9 +87,7 @@ export function App() {
               <Layout
                 Header={
                   <Header
-                    isActiveAccountConnectedToActiveTab={
-                      isActiveAccountConnectedToActiveTab
-                    }
+                    isAccountConnected={isActiveAccountConnected}
                     withMenu
                     withLock
                   />
@@ -107,9 +105,7 @@ export function App() {
               <Layout
                 Header={
                   <Header
-                    isActiveAccountConnectedToActiveTab={
-                      isActiveAccountConnectedToActiveTab
-                    }
+                    isAccountConnected={isActiveAccountConnected}
                     withMenu
                     withLock
                   />
@@ -139,9 +135,7 @@ export function App() {
               <Layout
                 Header={
                   <Header
-                    isActiveAccountConnectedToActiveTab={
-                      isActiveAccountConnectedToActiveTab
-                    }
+                    isAccountConnected={isActiveAccountConnected}
                     withLock
                     withMenu
                     submenuActionType="close"
@@ -158,9 +152,7 @@ export function App() {
               <Layout
                 Header={
                   <Header
-                    isActiveAccountConnectedToActiveTab={
-                      isActiveAccountConnectedToActiveTab
-                    }
+                    isAccountConnected={isActiveAccountConnected}
                     withLock
                     withMenu
                     submenuActionType="back"
@@ -176,9 +168,7 @@ export function App() {
               <Layout
                 Header={
                   <Header
-                    isActiveAccountConnectedToActiveTab={
-                      isActiveAccountConnectedToActiveTab
-                    }
+                    isAccountConnected={isActiveAccountConnected}
                     withLock
                     withMenu
                     submenuActionType="back"
@@ -205,9 +195,7 @@ export function App() {
                   <Header
                     withLock
                     withMenu
-                    isActiveAccountConnectedToActiveTab={
-                      isActiveAccountConnectedToActiveTab
-                    }
+                    isAccountConnected={isActiveAccountConnected}
                   />
                 }
                 Content={<NoConnectedAccountPageContent />}
@@ -229,9 +217,7 @@ export function App() {
               <Layout
                 Header={
                   <Header
-                    isActiveAccountConnectedToActiveTab={
-                      isActiveAccountConnectedToActiveTab
-                    }
+                    isAccountConnected={isActiveAccountConnected}
                     submenuActionType="close"
                     withMenu
                     withLock
@@ -247,9 +233,7 @@ export function App() {
               <Layout
                 Header={
                   <Header
-                    isActiveAccountConnectedToActiveTab={
-                      isActiveAccountConnectedToActiveTab
-                    }
+                    isAccountConnected={isActiveAccountConnected}
                     withLock
                     withMenu
                     submenuActionType="cancel"

@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { RouterPath } from '@connect-to-app/router';
-import { Layout } from '@src/layout';
-import { Header } from '@connect-to-app/layout/header';
+import { Layout, Header } from '@connect-to-app/layout';
 import { SelectAccountsToConnectPageContent } from '@connect-to-app/pages/select-accounts-to-connect';
 import { PreConnectPageContent } from '@connect-to-app/pages/preconnect';
 import { ConnectionPageContent } from '@connect-to-app/pages/connection';

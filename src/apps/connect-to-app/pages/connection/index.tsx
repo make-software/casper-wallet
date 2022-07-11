@@ -11,7 +11,7 @@ import {
 } from '@popup/redux/vault/selectors';
 import { useConnectAccount } from '@popup/hooks/use-connect-account';
 import { closeWindow } from '@connect-to-app/utils/closeWindow';
-import { sendActiveAccountChangedToActiveTab } from '@content/remote-actions';
+import { sendActiveAccountChanged } from '@content/remote-actions';
 import { useActiveTabOrigin } from '@src/hooks';
 
 const ContentContainer = styled.div`
@@ -22,7 +22,6 @@ const ContentContainer = styled.div`
 
   height: 100%;
   width: 100%;
-  margin-top: 120px;
 `;
 
 const IconsContainer = styled.div`
@@ -105,7 +104,6 @@ export function ConnectionPageContent({
 
   const { connectAccount } = useConnectAccount({
     origin,
-    isLocked,
     currentWindow: false
   });
 
@@ -127,7 +125,7 @@ export function ConnectionPageContent({
       }
 
       if (activeAccount) {
-        await sendActiveAccountChangedToActiveTab(
+        await sendActiveAccountChanged(
           {
             isConnected:
               activeAccount.connectedToApps.includes(activeTabOrigin),
@@ -141,10 +139,9 @@ export function ConnectionPageContent({
       const isLastIteration = array.length - 1 === index;
 
       if (isLastIteration) {
-        setTimeout(() => closeWindow(), 2000);
+        setTimeout(() => closeWindow(), 1000);
       }
     });
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTabOrigin]);
 
