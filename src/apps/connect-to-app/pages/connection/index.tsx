@@ -3,7 +3,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import styled from 'styled-components';
 
 import { SvgIcon, Typography } from '@libs/ui';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   selectVaultAccounts,
   selectVaultActiveAccount,
@@ -13,6 +13,8 @@ import { useConnectAccount } from '@popup/hooks/use-connect-account';
 import { closeWindow } from '@connect-to-app/utils/closeWindow';
 import { sendActiveAccountChanged } from '@content/remote-actions';
 import { useActiveTabOrigin } from '@src/hooks';
+import { Account } from '@popup/redux/vault/types';
+import { changeActiveAccount } from '@popup/redux/vault/actions';
 
 const ContentContainer = styled.div`
   display: flex;
@@ -84,6 +86,36 @@ const BigDot = styled.div`
   border-radius: 6px;
 `;
 
+function getNextActiveAccount(
+  accounts: Account[],
+  selectedAccountNames: string[],
+  currentActiveAccount: Account | undefined
+) {
+  if (!currentActiveAccount) {
+    return null;
+  }
+
+  if (selectedAccountNames.includes(currentActiveAccount.name)) {
+    return currentActiveAccount;
+  }
+
+  const currentActiveAccountIndex = accounts.findIndex(
+    account => account.name === currentActiveAccount.name
+  );
+
+  const nextAccountBelowCurrentActiveAccount = accounts
+    .slice(currentActiveAccountIndex)
+    .find(account => selectedAccountNames.includes(account.name));
+
+  if (nextAccountBelowCurrentActiveAccount) {
+    return nextAccountBelowCurrentActiveAccount;
+  }
+
+  return accounts
+    .slice(0, currentActiveAccountIndex)
+    .find(account => selectedAccountNames.includes(account.name));
+}
+
 interface ConnectionPageContentProps {
   selectedAccountNames: string[];
   faviconUrl: string;
@@ -95,6 +127,7 @@ export function ConnectionPageContent({
   faviconUrl,
   origin
 }: ConnectionPageContentProps) {
+  const dispatch = useDispatch();
   const { t } = useTranslation();
 
   const accounts = useSelector(selectVaultAccounts);
@@ -117,31 +150,35 @@ export function ConnectionPageContent({
       return;
     }
 
+    const nextActiveAccount = getNextActiveAccount(
+      accounts,
+      selectedAccountNames,
+      activeAccount
+    );
+
     selectedAccountNames.forEach(async (accountName, index, array) => {
       const account = accounts.find(account => account.name === accountName);
 
       if (account) {
         await connectAccount(account);
       }
-
-      if (activeAccount) {
-        await sendActiveAccountChanged(
-          {
-            isConnected:
-              activeAccount.connectedToApps.includes(activeTabOrigin),
-            isUnlocked: !isLocked,
-            activeKey: activeAccount.publicKey
-          },
-          false
-        );
-      }
-
-      const isLastIteration = array.length - 1 === index;
-
-      if (isLastIteration) {
-        setTimeout(() => closeWindow(), 1000);
-      }
     });
+
+    if (nextActiveAccount) {
+      dispatch(changeActiveAccount(nextActiveAccount.name));
+      sendActiveAccountChanged(
+        {
+          isConnected: true,
+          isUnlocked: !isLocked,
+          activeKey: nextActiveAccount.publicKey
+        },
+        false
+      ).then(() => {
+        setTimeout(() => closeWindow(), 1000);
+      });
+    } else {
+      setTimeout(() => closeWindow(), 1000);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTabOrigin]);
 
