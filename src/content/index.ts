@@ -1,7 +1,10 @@
 import Browser, { Runtime } from 'webextension-polyfill';
 import MessageSender = Runtime.MessageSender;
 
-import { passToBackgroundRequestConnection } from '@background/remote-actions';
+import {
+  passToBackgroundDisconnectedFromApp,
+  passToBackgroundRequestConnection
+} from '@background/remote-actions';
 
 import { RemoteAction } from './remote-actions';
 
@@ -53,6 +56,11 @@ function injectScript() {
       window.addEventListener('request-connection-from-app', async () => {
         const { origin } = window.location;
         await passToBackgroundRequestConnection(origin);
+      });
+
+      window.addEventListener('disconnected-from-app', async () => {
+        const { origin } = window.location;
+        await passToBackgroundDisconnectedFromApp(origin);
       });
     };
   } catch (e) {

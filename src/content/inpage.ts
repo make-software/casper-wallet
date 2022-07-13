@@ -4,7 +4,10 @@ window.casperlabsHelper = {
     window.dispatchEvent(event);
   },
   // mocks
-  disconnectFromSite(): void {},
+  disconnectFromSite(): void {
+    const event = new CustomEvent('disconnected-from-app');
+    window.dispatchEvent(event);
+  },
   getActivePublicKey(): Promise<string> {
     return Promise.resolve('');
   },
