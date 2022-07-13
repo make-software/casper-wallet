@@ -54,3 +54,7 @@ export const connectAccountToApp = createAction('CONNECT_ACCOUNT_TO_APP')<{
   appOrigin: string;
   accountName: string;
 }>();
+
+export const disconnectFromApp = createAction('DISCONNECT_FROM_APP')<{
+  appOrigin: string;
+}>();
