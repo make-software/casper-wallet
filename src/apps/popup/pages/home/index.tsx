@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import styled, { css } from 'styled-components';
@@ -125,10 +125,10 @@ export function HomePageContent() {
     [dispatch]
   );
 
-  const accountListRows = useMemo(
-    () => accounts.map(account => ({ ...account, id: account.name })),
-    [accounts]
-  );
+  const accountListRows = accounts.map(account => ({
+    ...account,
+    id: account.name
+  }));
 
   return (
     <ContentContainer>
