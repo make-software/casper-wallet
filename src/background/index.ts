@@ -6,7 +6,7 @@ import { openWindow } from '@background/window-manager';
 
 import { PassToBackgroundAction } from '@background/remote-actions';
 import { REDUX_STORAGE_KEY } from '@libs/services/constants';
-import { disconnectFromApp } from '@popup/redux/vault/actions';
+import { disconnectAccountsFromApp } from '@popup/redux/vault/actions';
 import { createInitStore } from '@popup/redux/utils';
 
 const initStore = createInitStore(REDUX_STORAGE_KEY);
@@ -20,7 +20,9 @@ initStore().then(store => {
           break;
 
         case 'disconnected-from-app':
-          store.dispatch(disconnectFromApp({ appOrigin: action.payload }));
+          store.dispatch(
+            disconnectAccountsFromApp({ appOrigin: action.payload })
+          );
           break;
         default:
           throw new Error('Unknown message type');

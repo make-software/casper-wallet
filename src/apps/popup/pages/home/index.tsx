@@ -28,8 +28,15 @@ import {
   selectVaultActiveAccount,
   selectVaultIsLocked
 } from '@popup/redux/vault/selectors';
-import { changeActiveAccount } from '@popup/redux/vault/actions';
-import { sendActiveAccountChanged } from '@content/remote-actions';
+import {
+  changeActiveAccount,
+  disconnectAccountsFromApp
+} from '@popup/redux/vault/actions';
+import {
+  sendActiveAccountChanged,
+  sendDisconnectedAccount
+} from '@content/remote-actions';
+import { Account } from '@popup/redux/vault/types';
 
 // Account info
 
@@ -162,6 +169,35 @@ export function HomePageContent() {
     [dispatch]
   );
 
+  const handleDisconnectAccount = useCallback(
+    (account: Account) => {
+      if (!activeAccount || !isActiveAccountConnected) {
+        return;
+      }
+
+      dispatch(
+        disconnectAccountsFromApp({
+          appOrigin: activeTabOrigin
+        })
+      );
+      sendDisconnectedAccount(
+        {
+          isConnected: false,
+          isUnlocked: !isLocked,
+          activeKey: account.publicKey
+        },
+        true
+      ).catch(e => console.error(e));
+    },
+    [
+      dispatch,
+      activeAccount,
+      isActiveAccountConnected,
+      activeTabOrigin,
+      isLocked
+    ]
+  );
+
   const handleConnectAccount = useCallback(() => {
     if (!activeAccount || isActiveAccountConnected) {
       return;
@@ -206,7 +242,10 @@ export function HomePageContent() {
             </Typography>
           </BalanceContainer>
           {isActiveAccountConnected ? (
-            <Button color="secondaryBlue">
+            <Button
+              onClick={() => handleDisconnectAccount(activeAccount)}
+              color="secondaryBlue"
+            >
               <Trans t={t}>Disconnect</Trans>
             </Button>
           ) : (
