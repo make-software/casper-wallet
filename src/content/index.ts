@@ -33,6 +33,14 @@ async function handleMessage(action: RemoteAction, sender: MessageSender) {
         }
       );
       window.dispatchEvent(signerActiveAccountChanged);
+
+      break;
+    case 'send-disconnected-account':
+      const signerDisconnectedAccount = new CustomEvent('signer:disconnected', {
+        detail: action.payload
+      });
+      window.dispatchEvent(signerDisconnectedAccount);
+
       break;
     default:
       throw new Error('Content script: Unknown message type');

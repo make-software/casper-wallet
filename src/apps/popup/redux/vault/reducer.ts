@@ -13,7 +13,7 @@ import {
   renameAccount,
   changeActiveAccount,
   connectAccountToApp,
-  disconnectFromApp
+  disconnectAccountsFromApp
 } from './actions';
 import { Account, VaultState } from './types';
 
@@ -140,12 +140,15 @@ export const reducer = createReducer(initialState)
       })
     })
   )
-  .handleAction([disconnectFromApp], (state, { payload: { appOrigin } }) => ({
-    ...state,
-    accounts: state.accounts.map(account => ({
-      ...account,
-      connectedToApps: account.connectedToApps.filter(
-        connectedAppOrigin => connectedAppOrigin !== appOrigin
-      )
-    }))
-  }));
+  .handleAction(
+    [disconnectAccountsFromApp],
+    (state, { payload: { appOrigin } }) => ({
+      ...state,
+      accounts: state.accounts.map(account => ({
+        ...account,
+        connectedToApps: account.connectedToApps.filter(
+          connectedAppOrigin => connectedAppOrigin !== appOrigin
+        )
+      }))
+    })
+  );

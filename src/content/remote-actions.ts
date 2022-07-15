@@ -4,7 +4,8 @@ import Browser from 'webextension-polyfill';
 export type RemoteAction =
   | GetActiveTabOriginAction
   | SendConnectStatusAction
-  | SendActiveAccountChangedAction;
+  | SendActiveAccountChangedAction
+  | SendDisconnectedAccountAction;
 
 async function sendMessageToContent(
   action: RemoteAction,
@@ -57,6 +58,23 @@ export const sendActiveAccountChanged = async (
 ) => {
   const action: SendActiveAccountChangedAction = {
     type: 'send-active-account-changed',
+    payload
+  };
+
+  return sendMessageToContent(action, currentWindow);
+};
+
+type SendDisconnectedAccountAction = PayloadAction<
+  'send-disconnected-account',
+  MessageAccountDetail
+>;
+
+export const sendDisconnectedAccount = async (
+  payload: MessageAccountDetail,
+  currentWindow: boolean
+) => {
+  const action: SendDisconnectedAccountAction = {
+    type: 'send-disconnected-account',
     payload
   };
 
