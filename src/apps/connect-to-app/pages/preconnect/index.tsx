@@ -122,9 +122,10 @@ export function PreConnectPageContent({
           </Typography>
         </TextCentredContainer>
         <Button onClick={() => navigate(RouterPath.Connecting)}>
+          {/* TODO: optimize text in Trans component below */}
           <Trans t={t}>
             Connect to {{ selectedAccountNamesLength }}{' '}
-            {selectedAccountNames.length > 1 ? 'accounts' : 'account'}
+            {selectedAccountNames.length > 1 ? t('accounts') : t('account')}
           </Trans>
         </Button>
         <Button color="secondaryBlue" onClick={() => closeWindow()}>
