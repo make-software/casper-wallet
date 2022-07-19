@@ -6,13 +6,12 @@ import { SvgIcon, Typography } from '@libs/ui';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   selectVaultAccounts,
-  selectVaultActiveAccount,
+  selectVaultActiveAccountName,
   selectVaultIsLocked
 } from '@popup/redux/vault/selectors';
 import { useConnectAccount } from '@popup/hooks/use-connect-account';
 import { closeWindow } from '@connect-to-app/utils/closeWindow';
 import { sendActiveAccountChanged } from '@content/remote-actions';
-import { useActiveTabOrigin } from '@src/hooks';
 import { Account } from '@popup/redux/vault/types';
 import { changeActiveAccount } from '@popup/redux/vault/actions';
 
@@ -31,28 +30,7 @@ const IconsContainer = styled.div`
   align-items: center;
 
   margin-top: 32px;
-
-  & > * {
-    margin-right: 16px;
-    & + * {
-      margin-right: 8px;
-      & + * {
-        margin-right: 12px;
-        & + * {
-          margin-right: 12px;
-          & + * {
-            margin-right: 8px;
-            & + * {
-              margin-right: 16px;
-              & + * {
-                margin-right: 0;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  gap: 16px;
 `;
 
 const LogoOverlay = styled.div`
@@ -72,35 +50,20 @@ const AppLogoImg = styled.img`
   height: 40px;
 `;
 
-const SmallDot = styled.div`
-  background-color: ${({ theme }) => theme.color.contentTertiary};
-  width: 4px;
-  height: 4px;
-  border-radius: 4px;
-`;
-
-const BigDot = styled.div`
-  background-color: ${({ theme }) => theme.color.contentTertiary};
-  width: 6px;
-  height: 6px;
-  border-radius: 6px;
-`;
-
 function getNextActiveAccount(
   accounts: Account[],
   selectedAccountNames: string[],
-  currentActiveAccount: Account | undefined
+  currentActiveAccountName: string | null
 ) {
-  if (!currentActiveAccount) {
+  if (
+    !currentActiveAccountName ||
+    selectedAccountNames.includes(currentActiveAccountName)
+  ) {
     return null;
   }
 
-  if (selectedAccountNames.includes(currentActiveAccount.name)) {
-    return currentActiveAccount;
-  }
-
   const currentActiveAccountIndex = accounts.findIndex(
-    account => account.name === currentActiveAccount.name
+    account => account.name === currentActiveAccountName
   );
 
   const nextAccountBelowCurrentActiveAccount = accounts
@@ -131,9 +94,8 @@ export function ConnectionPageContent({
   const { t } = useTranslation();
 
   const accounts = useSelector(selectVaultAccounts);
-  const activeAccount = useSelector(selectVaultActiveAccount);
+  const activeAccountName = useSelector(selectVaultActiveAccountName);
   const isLocked = useSelector(selectVaultIsLocked);
-  const activeTabOrigin = useActiveTabOrigin({ currentWindow: false });
 
   const { connectAccount } = useConnectAccount({
     origin,
@@ -142,10 +104,10 @@ export function ConnectionPageContent({
 
   useEffect(() => {
     if (
+      selectedAccountNames.length === 0 ||
       accounts.length === 0 ||
       isLocked ||
-      !origin ||
-      selectedAccountNames.length === 0
+      !origin
     ) {
       return;
     }
@@ -153,10 +115,10 @@ export function ConnectionPageContent({
     const nextActiveAccount = getNextActiveAccount(
       accounts,
       selectedAccountNames,
-      activeAccount
+      activeAccountName
     );
 
-    selectedAccountNames.forEach(async (accountName, index, array) => {
+    selectedAccountNames.forEach(async accountName => {
       const account = accounts.find(account => account.name === accountName);
 
       if (account) {
@@ -180,7 +142,7 @@ export function ConnectionPageContent({
       setTimeout(() => closeWindow(), 1000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTabOrigin]);
+  }, []);
 
   return (
     <ContentContainer>
@@ -191,15 +153,7 @@ export function ConnectionPageContent({
         <LogoOverlay>
           <SvgIcon src="assets/icons/logo.svg" size={40} color="contentRed" />
         </LogoOverlay>
-
-        <SmallDot />
-        <BigDot />
-
-        <SvgIcon src="assets/icons/lock.svg" size={24} />
-
-        <BigDot />
-        <SmallDot />
-
+        <SvgIcon src="assets/illustrations/connection.svg" size={76} />
         <LogoOverlay>
           <AppLogoImg src={faviconUrl} alt="favicon" />
         </LogoOverlay>

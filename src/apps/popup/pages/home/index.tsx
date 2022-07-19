@@ -133,34 +133,34 @@ export function HomePageContent() {
   const isLocked = useSelector(selectVaultIsLocked);
 
   const { openWindow } = useWindowManager();
-  const activeTabOrigin = useActiveTabOrigin({ currentWindow: true });
+  const origin = useActiveTabOrigin({ currentWindow: true });
 
   const connectedAccounts = useSelector((state: RootState) =>
-    selectConnectedAccountsToOrigin(state, activeTabOrigin)
+    selectConnectedAccountsToOrigin(state, origin)
   );
   const isActiveAccountConnected = useSelector((state: RootState) =>
-    selectActiveAccountIsConnectedToOrigin(state, activeTabOrigin)
+    selectActiveAccountIsConnectedToOrigin(state, origin)
   );
 
   const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
 
   useEffect(() => {
-    if (activeAccount === undefined || activeTabOrigin === '') {
+    if (activeAccount === undefined || origin === '') {
       return;
     }
 
-    if (activeAccount.connectedToApps?.includes(activeTabOrigin)) {
+    if (activeAccount.connectedToApps?.includes(origin)) {
       sendActiveAccountChanged(
         {
-          isConnected: true,
+          isConnected: activeAccount.connectedToApps.includes(origin),
           isUnlocked: !isLocked,
           activeKey: activeAccount.publicKey
         },
         true
       ).catch(e => console.error(e));
     }
-  }, [activeTabOrigin, activeAccount, isLocked]);
+  }, [origin, activeAccount, isLocked]);
 
   const handleChangeActiveAccount = useCallback(
     (name: string) => () => {
@@ -177,7 +177,7 @@ export function HomePageContent() {
 
       dispatch(
         disconnectAccountsFromApp({
-          appOrigin: activeTabOrigin
+          appOrigin: origin
         })
       );
       sendDisconnectedAccount(
@@ -189,13 +189,7 @@ export function HomePageContent() {
         true
       ).catch(e => console.error(e));
     },
-    [
-      dispatch,
-      activeAccount,
-      isActiveAccountConnected,
-      activeTabOrigin,
-      isLocked
-    ]
+    [dispatch, activeAccount, isActiveAccountConnected, origin, isLocked]
   );
 
   const handleConnectAccount = useCallback(() => {

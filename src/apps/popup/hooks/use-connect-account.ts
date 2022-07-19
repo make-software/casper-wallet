@@ -20,7 +20,11 @@ export function useConnectAccount({
 
   const connectAccount = useCallback(
     (account: Account) => {
-      const isConnected = account.connectedToApps?.includes(origin);
+      const isConnected = account.connectedToApps.includes(origin);
+
+      if (isConnected) {
+        return;
+      }
 
       dispatch(
         connectAccountToApp({
@@ -32,7 +36,7 @@ export function useConnectAccount({
       return sendConnectStatus(
         {
           activeKey: account.publicKey,
-          isConnected,
+          isConnected: true,
           isUnlocked: !isLocked
         },
         currentWindow

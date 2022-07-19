@@ -3,7 +3,10 @@ import MessageSender = Runtime.MessageSender;
 
 import {
   passToBackgroundDisconnectedFromApp,
-  passToBackgroundRequestConnection
+  passToBackgroundRequestConnection,
+  getActivePublicKey,
+  getIsConnected,
+  getVersion
 } from '@background/remote-actions';
 
 import { RemoteAction } from './remote-actions';
@@ -61,6 +64,44 @@ function injectScript() {
     scriptTag.onload = function () {
       container.removeChild(scriptTag);
 
+      function sendReplyMessage(message: string, value: boolean | string) {
+        window.postMessage({
+          type: 'reply',
+          message,
+          value
+        });
+      }
+
+      window.addEventListener('message', async e => {
+        if (e.data.type !== 'request') {
+          return;
+        }
+
+        switch (e.data.message) {
+          case 'get-is-connected':
+            const { origin } = window.location;
+            const isConnected = await getIsConnected(origin);
+            sendReplyMessage('get-is-connected', isConnected);
+
+            break;
+          case 'get-active-public-key':
+            const activePublicKey = await getActivePublicKey();
+            sendReplyMessage('get-active-public-key', activePublicKey);
+
+            break;
+          case 'get-version':
+            const version = await getVersion();
+            sendReplyMessage('get-version', version);
+
+            break;
+          default:
+            throw new Error(
+              '[content-script]: Unknown message type',
+              e.data.message
+            );
+        }
+      });
+
       window.addEventListener('request-connection-from-app', async () => {
         const { origin } = window.location;
         await passToBackgroundRequestConnection(origin);
@@ -76,4 +117,4 @@ function injectScript() {
   }
 }
 
-window.onload = () => injectScript();
+injectScript();

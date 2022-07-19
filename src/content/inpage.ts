@@ -1,24 +1,39 @@
+function sendRequestMessage<T>(message: string): Promise<T> {
+  return new Promise(resolve => {
+    window.postMessage({ type: 'request', message }, '*');
+
+    const transact = (e: MessageEvent) => {
+      if (e.data.type === 'reply' && e.data.message === message) {
+        window.removeEventListener('message', transact, false);
+        resolve(e.data.value);
+      }
+    };
+
+    window.addEventListener('message', transact, false);
+  });
+}
+
 window.casperlabsHelper = {
   requestConnection: async () => {
     const event = new CustomEvent('request-connection-from-app');
     window.dispatchEvent(event);
   },
-  // mocks
   disconnectFromSite(): void {
     const event = new CustomEvent('disconnected-from-app');
     window.dispatchEvent(event);
   },
   getActivePublicKey(): Promise<string> {
-    return Promise.resolve('');
-  },
-  getSelectedPublicKeyBase64(): Promise<string> {
-    return Promise.resolve('');
+    return sendRequestMessage('get-active-public-key');
   },
   getVersion(): Promise<string> {
-    return Promise.resolve('');
+    return sendRequestMessage('get-version');
   },
   isConnected(): Promise<boolean> {
-    return Promise.resolve(false);
+    return sendRequestMessage('get-is-connected');
+  },
+  // mocks
+  getSelectedPublicKeyBase64(): Promise<string> {
+    return Promise.resolve('');
   },
   sign(
     deploy: { deploy: any },
