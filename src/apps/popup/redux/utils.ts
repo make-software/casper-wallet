@@ -1,7 +1,7 @@
 import { compose } from 'redux';
 import { composeWithDevTools } from 'remote-redux-devtools';
-import Browser from 'webextension-polyfill';
 import { createStore } from '@popup/redux/index';
+import { storage } from '@extend-chrome/storage';
 
 declare global {
   interface Window {
@@ -23,7 +23,7 @@ export function createInitStore(reduxStorageKey: string) {
   let store: ReturnType<typeof createStore>;
 
   return async () => {
-    const { [reduxStorageKey]: data } = await Browser.storage.local.get(
+    const { [reduxStorageKey]: data } = await storage.local.get(
       reduxStorageKey
     );
 
@@ -32,7 +32,7 @@ export function createInitStore(reduxStorageKey: string) {
 
       store.subscribe(() => {
         const vault = store.getState();
-        Browser.storage.local.set({ [reduxStorageKey]: vault }).catch(() => {
+        storage.local.set({ [reduxStorageKey]: vault }).catch(() => {
           // initialization workaround
         });
       });

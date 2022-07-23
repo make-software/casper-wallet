@@ -34,6 +34,7 @@
     "styled-components": "^5"
   },
   "dependencies": {
+    "@extend-chrome/storage": "^1.5.0",
     "@hookform/resolvers": "^2.8.8",
     "@hot-loader/react-dom": "^17.0.1",
     "@lapo/asn1js": "^1.2.1",
