@@ -70,10 +70,8 @@ export function SelectAccountsToConnectPageContent({
     setSelectedAccountNames([]);
   }, [setSelectedAccountNames]);
 
-  const areAllAccountsSelected = useMemo(
-    () =>
-      accounts.every(account => selectedAccountNames.includes(account.name)),
-    [accounts, selectedAccountNames]
+  const areAllAccountsSelected = accounts.every(account =>
+    selectedAccountNames.includes(account.name)
   );
 
   const headerAction = useMemo(() => {

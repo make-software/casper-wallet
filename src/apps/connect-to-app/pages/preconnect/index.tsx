@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -60,21 +60,18 @@ export function PreConnectPageContent({
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  const listItems = useMemo(
-    () => [
-      {
-        id: 1,
-        text: t('See address, balance, activity'),
-        iconPath: 'assets/icons/show.svg'
-      },
-      {
-        id: 2,
-        text: t('Suggest transaction to approve'),
-        iconPath: 'assets/icons/thumb-up.svg'
-      }
-    ],
-    [t]
-  );
+  const listItems = [
+    {
+      id: 1,
+      text: t('See address, balance, activity'),
+      iconPath: 'assets/icons/show.svg'
+    },
+    {
+      id: 2,
+      text: t('Suggest transaction to approve'),
+      iconPath: 'assets/icons/thumb-up.svg'
+    }
+  ];
 
   const selectedAccountNamesLength = selectedAccountNames.length;
 
