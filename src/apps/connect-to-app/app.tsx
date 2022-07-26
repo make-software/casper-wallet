@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { RouterPath } from '@connect-to-app/router';
 import { Layout, Header } from '@connect-to-app/layout';
@@ -6,28 +6,29 @@ import { SelectAccountsToConnectPageContent } from '@connect-to-app/pages/select
 import { PreConnectPageContent } from '@connect-to-app/pages/preconnect';
 import { ConnectionPageContent } from '@connect-to-app/pages/connection';
 
+function getSiteRelatedData() {
+  const origin = document.location.search.split('origin=')[1];
+  const originName = origin.split('://')[1];
+  const splittedOrigin = originName.split('.');
+  const capitalizedOrigin = splittedOrigin
+    .map((word, index) =>
+      index === splittedOrigin.length - 2 ? word.toUpperCase() : word
+    )
+    .join('.');
+
+  return {
+    origin,
+    faviconUrl: `${origin}/favicon.ico`,
+    originName,
+    headerText: `Connect with ${capitalizedOrigin}`
+  };
+}
+
 export function App() {
   const [selectedAccountNames, setSelectedAccountNames] = useState<string[]>(
     []
   );
-
-  const { origin, faviconUrl, originName, headerText } = useMemo(() => {
-    const origin = document.location.search.split('origin=')[1];
-    const originName = origin.split('://')[1];
-    const splittedOrigin = originName.split('.');
-    const capitalizedOrigin = splittedOrigin
-      .map((word, index) =>
-        index === splittedOrigin.length - 2 ? word.toUpperCase() : word
-      )
-      .join('.');
-
-    return {
-      origin,
-      faviconUrl: `${origin}/favicon.ico`,
-      originName,
-      headerText: `Connect with ${capitalizedOrigin}`
-    };
-  }, []);
+  const { origin, originName, headerText, faviconUrl } = getSiteRelatedData();
 
   return (
     <Routes>

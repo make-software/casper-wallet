@@ -1,9 +1,9 @@
+import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { Account } from '@popup/redux/vault/types';
 import { connectAccountToApp } from '@popup/redux/vault/actions';
 import { sendConnectStatus } from '@content/remote-actions';
-import { useCallback } from 'react';
 import { selectVaultIsLocked } from '@popup/redux/vault/selectors';
 
 interface UseConnectAccountProps {
@@ -22,7 +22,8 @@ export function useConnectAccount({
     (account: Account) => {
       const isConnected = account.connectedToApps.includes(origin);
 
-      if (isConnected) {
+      // TODO: should handle behavior for locked app
+      if (isConnected || isLocked) {
         return;
       }
 
