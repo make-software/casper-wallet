@@ -8,7 +8,7 @@ import { GlobalStyle, themeConfig } from '@libs/ui';
 
 import { App } from './app';
 import { ErrorBoundary } from '@popup/error-boundary';
-import { Provider as ReduxProvider } from 'react-redux/es/exports';
+import { Provider as ReduxProvider } from 'react-redux';
 import { createInitStore } from '@popup/redux/utils';
 
 const initStore = createInitStore(REDUX_STORAGE_KEY);
