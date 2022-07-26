@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import { SvgIcon, Typography } from '@libs/ui';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  selectVaultActiveAccount,
   selectVaultAccounts,
-  selectVaultActiveAccountName,
   selectVaultIsLocked
 } from '@popup/redux/vault/selectors';
 import { useConnectAccount } from '@popup/hooks/use-connect-account';
@@ -53,17 +53,14 @@ const AppLogoImg = styled.img`
 function getNextActiveAccount(
   accounts: Account[],
   selectedAccountNames: string[],
-  currentActiveAccountName: string | null
+  currentActiveAccount: Account
 ) {
-  if (
-    !currentActiveAccountName ||
-    selectedAccountNames.includes(currentActiveAccountName)
-  ) {
-    return null;
+  if (selectedAccountNames.includes(currentActiveAccount.name)) {
+    return currentActiveAccount;
   }
 
   const currentActiveAccountIndex = accounts.findIndex(
-    account => account.name === currentActiveAccountName
+    account => account.name === currentActiveAccount.name
   );
 
   const nextAccountBelowCurrentActiveAccount = accounts
@@ -74,6 +71,7 @@ function getNextActiveAccount(
     return nextAccountBelowCurrentActiveAccount;
   }
 
+  // next account above current active account
   return accounts
     .slice(0, currentActiveAccountIndex)
     .find(account => selectedAccountNames.includes(account.name));
@@ -94,7 +92,7 @@ export function ConnectionPageContent({
   const { t } = useTranslation();
 
   const accounts = useSelector(selectVaultAccounts);
-  const activeAccountName = useSelector(selectVaultActiveAccountName);
+  const activeAccount = useSelector(selectVaultActiveAccount);
   const isLocked = useSelector(selectVaultIsLocked);
 
   const { connectAccount } = useConnectAccount({
@@ -106,6 +104,7 @@ export function ConnectionPageContent({
     if (
       selectedAccountNames.length === 0 ||
       accounts.length === 0 ||
+      !activeAccount ||
       isLocked ||
       !origin
     ) {
@@ -115,7 +114,7 @@ export function ConnectionPageContent({
     const nextActiveAccount = getNextActiveAccount(
       accounts,
       selectedAccountNames,
-      activeAccountName
+      activeAccount
     );
 
     selectedAccountNames.forEach(async accountName => {
