@@ -23,7 +23,7 @@ initStore().then(store => {
           await openWindow(PurposeForOpening.ConnectToApp, action.payload);
           break;
 
-        case 'disconnected-from-app':
+        case 'disconnected-from-site':
           store.dispatch(
             disconnectAccountsFromApp({ appOrigin: action.payload })
           );

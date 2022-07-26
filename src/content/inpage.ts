@@ -15,12 +15,10 @@ function sendRequestMessage<T>(message: string): Promise<T> {
 
 window.casperlabsHelper = {
   requestConnection: async () => {
-    const event = new CustomEvent('request-connection-from-app');
-    window.dispatchEvent(event);
+    return sendRequestMessage('request-connection-from-site');
   },
-  disconnectFromSite(): void {
-    const event = new CustomEvent('disconnected-from-app');
-    window.dispatchEvent(event);
+  disconnectFromSite() {
+    return sendRequestMessage('disconnected-from-site');
   },
   getActivePublicKey(): Promise<string> {
     return sendRequestMessage('get-active-public-key');

@@ -2,8 +2,8 @@ import Browser, { Runtime } from 'webextension-polyfill';
 import MessageSender = Runtime.MessageSender;
 
 import {
-  passToBackgroundDisconnectedFromApp,
-  passToBackgroundRequestConnection,
+  requestConnection,
+  disconnectFromSite,
   getActivePublicKey,
   getIsConnected,
   getVersion
@@ -78,38 +78,35 @@ function injectScript() {
         }
 
         switch (e.data.message) {
-          case 'get-is-connected':
-            const { origin } = window.location;
-            const isConnected = await getIsConnected(origin);
-            sendReplyMessage('get-is-connected', isConnected);
-
+          case 'request-connection-from-site':
+            await requestConnection(window.location.origin);
             break;
+
+          case 'disconnected-from-site':
+            await disconnectFromSite(window.location.origin);
+            break;
+
+          case 'get-is-connected':
+            const isConnected = await getIsConnected(window.location.origin);
+            sendReplyMessage('get-is-connected', isConnected);
+            break;
+
           case 'get-active-public-key':
             const activePublicKey = await getActivePublicKey();
             sendReplyMessage('get-active-public-key', activePublicKey);
-
             break;
+
           case 'get-version':
             const version = await getVersion();
             sendReplyMessage('get-version', version);
-
             break;
+
           default:
             throw new Error(
               '[content-script]: Unknown message type',
               e.data.message
             );
         }
-      });
-
-      window.addEventListener('request-connection-from-app', async () => {
-        const { origin } = window.location;
-        await passToBackgroundRequestConnection(origin);
-      });
-
-      window.addEventListener('disconnected-from-app', async () => {
-        const { origin } = window.location;
-        await passToBackgroundDisconnectedFromApp(origin);
       });
     };
   } catch (e) {

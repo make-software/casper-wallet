@@ -6,14 +6,14 @@ import { SendConnectStatusAction } from '@content/remote-actions';
 export type PassToBackgroundAction =
   | RequestConnectionAction
   | SendConnectStatusAction
-  | DisconnectedFromAppAction
+  | DisconnectedFromSiteAction
   | GetIsConnected
   | GetActivePublicKey
   | GetVersion;
 
 type RequestConnectionAction = PayloadAction<'request-connection', string>;
 
-export const passToBackgroundRequestConnection = async (origin: string) => {
+export const requestConnection = async (origin: string) => {
   const action: RequestConnectionAction = {
     type: 'request-connection',
     payload: origin
@@ -22,11 +22,14 @@ export const passToBackgroundRequestConnection = async (origin: string) => {
   await Browser.runtime.sendMessage(action);
 };
 
-type DisconnectedFromAppAction = PayloadAction<'disconnected-from-app', string>;
+type DisconnectedFromSiteAction = PayloadAction<
+  'disconnected-from-site',
+  string
+>;
 
-export const passToBackgroundDisconnectedFromApp = async (origin: string) => {
-  const action: DisconnectedFromAppAction = {
-    type: 'disconnected-from-app',
+export const disconnectFromSite = async (origin: string) => {
+  const action: DisconnectedFromSiteAction = {
+    type: 'disconnected-from-site',
     payload: origin
   };
 
