@@ -12,8 +12,8 @@ import {
   removeAccount,
   renameAccount,
   changeActiveAccount,
-  connectAccountToApp,
-  disconnectAccountsFromApp
+  connectAccountToSite,
+  disconnectAccountsFromSite
 } from './actions';
 import { Account, VaultState } from './types';
 
@@ -59,7 +59,7 @@ export const reducer = createReducer(initialState)
       ...state,
       accounts: [
         ...state.accounts,
-        { ...payload, connectedToApps: [] } as Account
+        { ...payload, connectedToSites: [] } as Account
       ],
       activeAccountName:
         state.accounts.length === 0 ? payload.name : state.activeAccountName
@@ -120,7 +120,7 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    [connectAccountToApp],
+    [connectAccountToSite],
     (state, { payload: { appOrigin, accountName } }) => ({
       ...state,
       accounts: state.accounts.map(account => {
@@ -130,23 +130,23 @@ export const reducer = createReducer(initialState)
 
         return {
           ...account,
-          connectedToApps:
-            account.connectedToApps?.length > 0
-              ? account.connectedToApps.includes(appOrigin)
-                ? account.connectedToApps
-                : [...account.connectedToApps, appOrigin]
+          connectedToSites:
+            account.connectedToSites?.length > 0
+              ? account.connectedToSites.includes(appOrigin)
+                ? account.connectedToSites
+                : [...account.connectedToSites, appOrigin]
               : [appOrigin]
         };
       })
     })
   )
   .handleAction(
-    [disconnectAccountsFromApp],
+    [disconnectAccountsFromSite],
     (state, { payload: { appOrigin } }) => ({
       ...state,
       accounts: state.accounts.map(account => ({
         ...account,
-        connectedToApps: account.connectedToApps.filter(
+        connectedToSites: account.connectedToSites.filter(
           connectedAppOrigin => connectedAppOrigin !== appOrigin
         )
       }))

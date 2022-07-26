@@ -8,7 +8,7 @@ export interface AccountData {
 
 // Maybe make sense to move `Account` to shared place, because it used by `popup` and `import-account-with-file` apps
 export interface Account extends AccountData {
-  connectedToApps: string[];
+  connectedToSites: string[];
 }
 
 export type VaultState = {

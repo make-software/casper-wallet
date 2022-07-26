@@ -50,13 +50,13 @@ export const refreshTimeout = createAction('REFRESH_TIMEOUT', () => ({
   lastActivityTime: number;
 }>();
 
-export const connectAccountToApp = createAction('CONNECT_ACCOUNT_TO_APP')<{
+export const connectAccountToSite = createAction('CONNECT_ACCOUNT_TO_SITE')<{
   appOrigin: string;
   accountName: string;
 }>();
 
-export const disconnectAccountsFromApp = createAction(
-  'DISCONNECT_ACCOUNTS_FROM_APP'
+export const disconnectAccountsFromSite = createAction(
+  'DISCONNECT_ACCOUNTS_FROM_SITE'
 )<{
   appOrigin: string;
 }>();

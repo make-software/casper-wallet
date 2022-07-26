@@ -48,12 +48,12 @@ export const selectActiveAccountIsConnectedToOrigin = createSelector(
     if (
       activeAccountName === null ||
       !activeAccount ||
-      activeAccount.connectedToApps?.length === 0
+      activeAccount.connectedToSites?.length === 0
     ) {
       return false;
     }
 
-    return activeAccount.connectedToApps?.includes(activeTabOrigin);
+    return activeAccount.connectedToSites?.includes(activeTabOrigin);
   }
 );
 
@@ -62,7 +62,7 @@ export const selectConnectedAccountsToOrigin = createSelector(
   selectVaultAccounts,
   (activeTabOrigin, accounts) =>
     accounts.filter(account =>
-      account.connectedToApps?.includes(activeTabOrigin)
+      account.connectedToSites?.includes(activeTabOrigin)
     )
 );
 
