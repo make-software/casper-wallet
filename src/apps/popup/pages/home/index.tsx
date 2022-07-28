@@ -125,6 +125,11 @@ export function HomePageContent() {
     [dispatch]
   );
 
+  const accountListRows = accounts.map(account => ({
+    ...account,
+    id: account.name
+  }));
+
   return (
     <ContentContainer>
       {activeAccount && (
@@ -159,10 +164,10 @@ export function HomePageContent() {
           <Button>Connect</Button>
         </PageTile>
       )}
-      {accounts.length > 0 && (
+      {accountListRows.length > 0 && (
         <List
           headerLabel={t('Accounts list')}
-          rows={accounts}
+          rows={accountListRows}
           marginLeftForItemSeparatorLine={60}
           renderRow={account => (
             <ListItemContainer key={account.name}>
