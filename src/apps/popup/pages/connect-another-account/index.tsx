@@ -107,6 +107,13 @@ export function ConnectAnotherAccountPageContent() {
     [dispatch, accounts, isLocked, navigate]
   );
 
+  const connectedAccountsListItems = connectedAccountsToActiveTab.map(
+    account => ({
+      ...account,
+      id: account.name
+    })
+  );
+
   return (
     <ContentContainer>
       <HeaderTextContainer>
@@ -152,7 +159,7 @@ export function ConnectAnotherAccountPageContent() {
       )}
       <List
         headerLabel={t('Switch to another account')}
-        rows={connectedAccountsToActiveTab}
+        rows={connectedAccountsListItems}
         renderRow={account => (
           <ListItemContainer key={account.name}>
             <SvgIcon

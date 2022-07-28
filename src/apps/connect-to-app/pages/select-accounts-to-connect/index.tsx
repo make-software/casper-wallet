@@ -83,6 +83,11 @@ export function SelectAccountsToConnectPageContent({
       : { caption: captionSelectAll, onClick: handleSelectAll };
   }, [t, areAllAccountsSelected, handleSelectAll, handleUnselectAll]);
 
+  const accountsListItems = accounts.map(account => ({
+    ...account,
+    id: account.name
+  }));
+
   return (
     <ContentContainer>
       <PaddingContainer>
@@ -105,7 +110,7 @@ export function SelectAccountsToConnectPageContent({
         <List
           headerLabel={t('select account(s)')}
           headerAction={headerAction}
-          rows={accounts}
+          rows={accountsListItems}
           renderRow={account => (
             <ListItemClickableContainer
               onClick={() =>
