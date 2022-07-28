@@ -45,7 +45,7 @@ interface ListRowBase {
 interface ListProps<ListRow extends ListRowBase>
   extends BorderBottomPseudoElementProps {
   rows: ListRow[];
-  renderRow: (rowData: ListRow) => JSX.Element;
+  renderRow: (row: ListRow) => JSX.Element;
   renderFooter?: () => JSX.Element;
   headerLabel?: string;
 }
