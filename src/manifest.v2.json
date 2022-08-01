@@ -17,11 +17,7 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "http://*/*",
-        "https://*/*",
-        "*://aohghmighlieiainnegkcijnfilokake/*"
-      ],
+      "matches": ["http://*/*", "https://*/*"],
       "js": ["./contentScript.bundle.js", "./scripts/inpage.bundle.js"],
       "run_at": "document_start",
       "all_frames": true
