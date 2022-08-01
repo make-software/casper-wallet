@@ -5,7 +5,7 @@ export type RemoteAction =
   | GetActiveTabOriginAction
   | SendConnectStatusAction
   | SendActiveAccountChangedAction
-  | SendDisconnectedAccountAction;
+  | SendDisconnectAccountAction;
 
 async function sendMessageToContent(
   action: RemoteAction,
@@ -64,17 +64,17 @@ export const sendActiveAccountChanged = async (
   return sendMessageToContent(action, currentWindow);
 };
 
-type SendDisconnectedAccountAction = PayloadAction<
-  'send-disconnected-account',
+type SendDisconnectAccountAction = PayloadAction<
+  'send-disconnect-account',
   MessageAccountDetail
 >;
 
-export const sendDisconnectedAccount = async (
+export const sendDisconnectAccount = async (
   payload: MessageAccountDetail,
   currentWindow: boolean
 ) => {
-  const action: SendDisconnectedAccountAction = {
-    type: 'send-disconnected-account',
+  const action: SendDisconnectAccountAction = {
+    type: 'send-disconnect-account',
     payload
   };
 

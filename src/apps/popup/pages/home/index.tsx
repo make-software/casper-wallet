@@ -34,7 +34,7 @@ import {
 } from '@popup/redux/vault/actions';
 import {
   sendActiveAccountChanged,
-  sendDisconnectedAccount
+  sendDisconnectAccount
 } from '@content/remote-actions';
 import { Account } from '@popup/redux/vault/types';
 
@@ -180,7 +180,7 @@ export function HomePageContent() {
           appOrigin: origin
         })
       );
-      sendDisconnectedAccount(
+      sendDisconnectAccount(
         {
           isConnected: false,
           isUnlocked: !isLocked,

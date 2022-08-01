@@ -17,7 +17,7 @@ const CentredFlexRow = styled.div`
   align-items: center;
 `;
 
-export const SpaceBetweenContainer = styled(CentredFlexRow)`
+const SpaceBetweenContainer = styled(CentredFlexRow)`
   justify-content: space-between;
   padding-left: 20px;
 `;

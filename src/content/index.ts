@@ -38,11 +38,11 @@ async function handleMessage(action: RemoteAction, sender: MessageSender) {
       window.dispatchEvent(signerActiveAccountChanged);
 
       break;
-    case 'send-disconnected-account':
-      const signerDisconnectedAccount = new CustomEvent('signer:disconnected', {
+    case 'send-disconnect-account':
+      const signerDisconnectAccount = new CustomEvent('signer:disconnected', {
         detail: action.payload
       });
-      window.dispatchEvent(signerDisconnectedAccount);
+      window.dispatchEvent(signerDisconnectAccount);
 
       break;
     default:
