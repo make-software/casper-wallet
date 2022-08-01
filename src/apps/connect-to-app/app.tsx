@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import { RouterPath } from '@connect-to-app/router';
 import { Layout, Header } from '@connect-to-app/layout';
 import { SelectAccountsToConnectPageContent } from '@connect-to-app/pages/select-accounts-to-connect';
-import { PreConnectPageContent } from '@connect-to-app/pages/preconnect';
+import { ApproveConnectionPageContent } from '@connect-to-app/pages/approve-connection';
 import { ConnectionPageContent } from '@connect-to-app/pages/connection';
 
 function getSiteRelatedData() {
@@ -50,12 +50,12 @@ export function App() {
         }
       />
       <Route
-        path={RouterPath.PreConnect}
+        path={RouterPath.ApproveConnection}
         element={
           <Layout
             Header={<Header submenuActionType="back" />}
             Content={
-              <PreConnectPageContent
+              <ApproveConnectionPageContent
                 selectedAccountNames={selectedAccountNames}
                 faviconUrl={faviconUrl}
                 originName={originName}

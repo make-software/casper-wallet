@@ -44,19 +44,19 @@ export const ListItemContainer = styled.div`
   }
 `;
 
-interface PreConnectPageContentProps {
+interface ApproveConnectionPageContentProps {
   selectedAccountNames: string[];
   faviconUrl: string;
   originName: string;
   headerText: string;
 }
 
-export function PreConnectPageContent({
+export function ApproveConnectionPageContent({
   selectedAccountNames,
   faviconUrl,
   originName,
   headerText
-}: PreConnectPageContentProps) {
+}: ApproveConnectionPageContentProps) {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 

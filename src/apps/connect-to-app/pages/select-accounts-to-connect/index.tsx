@@ -172,7 +172,7 @@ export function SelectAccountsToConnectPageContent({
         </TextCentredContainer>
         <Button
           disabled={selectedAccountNames.length === 0}
-          onClick={() => navigate(RouterPath.PreConnect)}
+          onClick={() => navigate(RouterPath.ApproveConnection)}
         >
           <Trans t={t}>Next</Trans>
         </Button>
