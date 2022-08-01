@@ -6,10 +6,10 @@ import { openWindow } from '@background/window-manager';
 
 import { PassToBackgroundAction } from '@background/remote-actions';
 import { REDUX_STORAGE_KEY } from '@libs/services/constants';
-import { disconnectAccountsFromSite } from '@popup/redux/vault/actions';
+import { disconnectAllAccountsFromSite } from '@popup/redux/vault/actions';
 import { createInitStore } from '@popup/redux/utils';
 import {
-  selectVaultAccounts,
+  selectIsSomeAccountConnectedToOrigin,
   selectVaultActiveAccount
 } from '@popup/redux/vault/selectors';
 
@@ -25,14 +25,14 @@ initStore().then(store => {
 
         case 'disconnected-from-site':
           store.dispatch(
-            disconnectAccountsFromSite({ appOrigin: action.payload })
+            disconnectAllAccountsFromSite({ appOrigin: action.payload })
           );
           break;
 
         case 'get-is-connected':
-          const accounts = selectVaultAccounts(store.getState());
-          return accounts.some(account =>
-            account.connectedToSites.includes(action.payload)
+          return selectIsSomeAccountConnectedToOrigin(
+            store.getState(),
+            action.payload
           );
 
         case 'get-active-public-key':

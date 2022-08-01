@@ -13,9 +13,9 @@ import {
   renameAccount,
   changeActiveAccount,
   connectAccountToSite,
-  disconnectAccountsFromSite
+  disconnectAllAccountsFromSite
 } from './actions';
-import { Account, VaultState } from './types';
+import { VaultState } from './types';
 
 type State = VaultState;
 
@@ -25,6 +25,7 @@ const initialState: State = {
   timeoutDurationSetting: TimeoutDurationSetting['5 min'],
   lastActivityTime: null,
   accounts: [],
+  connectedAccountsToSites: {},
   activeAccountName: null
 };
 
@@ -57,10 +58,7 @@ export const reducer = createReducer(initialState)
   .handleAction([importAccount], (state, { payload }): State => {
     return {
       ...state,
-      accounts: [
-        ...state.accounts,
-        { ...payload, connectedToSites: [] } as Account
-      ],
+      accounts: [...state.accounts, payload],
       activeAccountName:
         state.accounts.length === 0 ? payload.name : state.activeAccountName
     };
@@ -73,6 +71,11 @@ export const reducer = createReducer(initialState)
     const nextAccountsState = state.accounts.filter(
       account => account.name !== name
     );
+    const nextConnectedAccountsToSites = Object.fromEntries(
+      Object.entries(state.connectedAccountsToSites).filter(
+        ([accountName]) => accountName !== name
+      )
+    );
 
     return {
       ...state,
@@ -80,12 +83,20 @@ export const reducer = createReducer(initialState)
       activeAccountName:
         state.activeAccountName === name
           ? (state.accounts.length > 1 && nextAccountsState[0].name) || null
-          : state.activeAccountName
+          : state.activeAccountName,
+      connectedAccountsToSites: nextConnectedAccountsToSites
     };
   })
   .handleAction(
     [renameAccount],
     (state, { payload: { oldName, newName } }): State => {
+      const nextConnectedAccountsToSites = Object.fromEntries(
+        Object.entries(state.connectedAccountsToSites).map(
+          ([accountName, sites]) =>
+            accountName === oldName ? [newName, sites] : [accountName, sites]
+        )
+      );
+
       return {
         ...state,
         accounts: state.accounts.map(account => {
@@ -100,7 +111,8 @@ export const reducer = createReducer(initialState)
         activeAccountName:
           state.activeAccountName === oldName
             ? newName
-            : state.activeAccountName
+            : state.activeAccountName,
+        connectedAccountsToSites: nextConnectedAccountsToSites
       };
     }
   )
@@ -123,32 +135,26 @@ export const reducer = createReducer(initialState)
     [connectAccountToSite],
     (state, { payload: { appOrigin, accountName } }) => ({
       ...state,
-      accounts: state.accounts.map(account => {
-        if (account.name !== accountName) {
-          return account;
-        }
-
-        return {
-          ...account,
-          connectedToSites:
-            account.connectedToSites?.length > 0
-              ? account.connectedToSites.includes(appOrigin)
-                ? account.connectedToSites
-                : [...account.connectedToSites, appOrigin]
-              : [appOrigin]
-        };
-      })
+      connectedAccountsToSites: {
+        ...state.connectedAccountsToSites,
+        [accountName]:
+          accountName in state.connectedAccountsToSites
+            ? [...state.connectedAccountsToSites[accountName], appOrigin]
+            : [appOrigin]
+      }
     })
   )
   .handleAction(
-    [disconnectAccountsFromSite],
+    [disconnectAllAccountsFromSite],
     (state, { payload: { appOrigin } }) => ({
       ...state,
-      accounts: state.accounts.map(account => ({
-        ...account,
-        connectedToSites: account.connectedToSites.filter(
-          connectedAppOrigin => connectedAppOrigin !== appOrigin
+      connectedAccountsToSites: Object.fromEntries(
+        Object.entries(state.connectedAccountsToSites).map(
+          ([accountName, sites]) => [
+            accountName,
+            sites.filter(siteOrigin => siteOrigin !== appOrigin)
+          ]
         )
-      }))
+      )
     })
   );

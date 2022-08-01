@@ -8,7 +8,7 @@ import ASN1 from '@lapo/asn1js';
 
 import { decodeBase16, encodeBase64, decodeBase64, Keys } from 'casper-js-sdk';
 
-import { AccountData } from '@popup/redux/vault/types';
+import { Account } from '@popup/redux/vault/types';
 import { checkSecretKeyExist } from '@popup/redux/remote-actions';
 
 function getAlgorithm(content: string): 'Ed25519' | 'Secp256K1' | undefined {
@@ -20,7 +20,7 @@ function getAlgorithm(content: string): 'Ed25519' | 'Secp256K1' | undefined {
   return undefined;
 }
 
-type OnSuccess = (accountData: AccountData) => void;
+type OnSuccess = (accountData: Account) => void;
 type OnFailure = (message?: string) => void;
 
 interface UseSecretKeyFileReaderProps {

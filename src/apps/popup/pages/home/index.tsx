@@ -30,7 +30,7 @@ import {
 } from '@popup/redux/vault/selectors';
 import {
   changeActiveAccount,
-  disconnectAccountsFromSite
+  disconnectAllAccountsFromSite
 } from '@popup/redux/vault/actions';
 import {
   sendActiveAccountChanged,
@@ -150,10 +150,10 @@ export function HomePageContent() {
       return;
     }
 
-    if (origin && activeAccount.connectedToSites?.includes(origin)) {
+    if (origin && isActiveAccountConnected) {
       sendActiveAccountChanged(
         {
-          isConnected: activeAccount.connectedToSites.includes(origin),
+          isConnected: isActiveAccountConnected,
           isUnlocked: !isLocked,
           activeKey: activeAccount.publicKey
         },
@@ -176,7 +176,7 @@ export function HomePageContent() {
       }
 
       dispatch(
-        disconnectAccountsFromSite({
+        disconnectAllAccountsFromSite({
           appOrigin: origin
         })
       );

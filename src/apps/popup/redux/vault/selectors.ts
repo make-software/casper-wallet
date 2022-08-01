@@ -34,44 +34,66 @@ export const selectVaultActiveAccount = createSelector(
     accounts.find(account => account.name === activeAccountName)
 );
 
-export const selectActiveTabOrigin = (
-  _: RootState,
-  activeTabOrigin: string | null
-) => activeTabOrigin;
+const selectActiveTabOrigin = (_: RootState, activeTabOrigin: string | null) =>
+  activeTabOrigin;
+
+const selectVaultConnectedAccountsToSite = (state: RootState) =>
+  state.vault.connectedAccountsToSites;
+
+export const selectIsSomeAccountConnectedToOrigin = createSelector(
+  selectActiveTabOrigin,
+  selectVaultConnectedAccountsToSite,
+  (origin, connectedAccountsToSites) =>
+    Object.values(connectedAccountsToSites).some(
+      sites => origin && sites.includes(origin)
+    )
+);
+
 export const selectActiveAccountIsConnectedToOrigin = createSelector(
   selectActiveTabOrigin,
   selectVaultActiveAccountName,
-  selectVaultAccounts,
-  (activeTabOrigin, activeAccountName, accounts) => {
-    if (activeTabOrigin === null) {
+  selectVaultConnectedAccountsToSite,
+  (origin, activeAccountName, connectedAccountsToSites) => {
+    if (origin === null) {
       return false;
     }
 
-    const activeAccount = accounts.find(
-      account => account.name === activeAccountName
-    );
-
     if (
       activeAccountName === null ||
-      !activeAccount ||
-      activeAccount.connectedToSites?.length === 0
+      !Object.keys(connectedAccountsToSites).includes(activeAccountName)
     ) {
       return false;
     }
 
-    return activeAccount.connectedToSites?.includes(activeTabOrigin);
+    return connectedAccountsToSites[activeAccountName].includes(origin);
   }
 );
 
 export const selectConnectedAccountsToOrigin = createSelector(
   selectActiveTabOrigin,
   selectVaultAccounts,
-  (activeTabOrigin, accounts) =>
-    accounts.filter(
-      account =>
-        activeTabOrigin !== null &&
-        account.connectedToSites?.includes(activeTabOrigin)
-    )
+  selectVaultConnectedAccountsToSite,
+  (origin, accounts, connectedAccountsToSites): Account[] => {
+    if (origin === null) {
+      return [];
+    }
+
+    const connectedAccountNames: string[] = Object.entries(
+      connectedAccountsToSites
+    ).reduce((accountNames: string[], [accountName, sites]) => {
+      if (sites.includes(origin)) {
+        return [...accountNames, accountName];
+      }
+
+      return accountNames;
+    }, []);
+
+    return connectedAccountNames
+      .map(accountName =>
+        accounts.find(account => account.name === accountName)
+      )
+      .filter((account): account is Account => !!account);
+  }
 );
 
 export const selectVaultAccountsSecretKeysBase64 = createSelector(
