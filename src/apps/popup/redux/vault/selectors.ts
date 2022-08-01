@@ -34,13 +34,19 @@ export const selectVaultActiveAccount = createSelector(
     accounts.find(account => account.name === activeAccountName)
 );
 
-export const selectActiveTabOrigin = (_: RootState, activeTabOrigin: string) =>
-  activeTabOrigin;
+export const selectActiveTabOrigin = (
+  _: RootState,
+  activeTabOrigin: string | null
+) => activeTabOrigin;
 export const selectActiveAccountIsConnectedToOrigin = createSelector(
   selectActiveTabOrigin,
   selectVaultActiveAccountName,
   selectVaultAccounts,
   (activeTabOrigin, activeAccountName, accounts) => {
+    if (activeTabOrigin === null) {
+      return false;
+    }
+
     const activeAccount = accounts.find(
       account => account.name === activeAccountName
     );
@@ -61,8 +67,10 @@ export const selectConnectedAccountsToOrigin = createSelector(
   selectActiveTabOrigin,
   selectVaultAccounts,
   (activeTabOrigin, accounts) =>
-    accounts.filter(account =>
-      account.connectedToSites?.includes(activeTabOrigin)
+    accounts.filter(
+      account =>
+        activeTabOrigin !== null &&
+        account.connectedToSites?.includes(activeTabOrigin)
     )
 );
 

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import {
   Button,
   Checkbox,
-  CurrentSiteFavicon,
+  SiteFaviconBudge,
   Hash,
   HashVariant,
   List,
@@ -40,16 +40,14 @@ const TextCentredContainer = styled.div`
 interface SelectAccountsToConnectPageProps {
   selectedAccountNames: string[];
   setSelectedAccountNames: Dispatch<SetStateAction<string[]>>;
-  faviconUrl: string;
-  originName: string;
+  origin: string;
   headerText: string;
 }
 
 export function SelectAccountsToConnectPage({
   selectedAccountNames,
   setSelectedAccountNames,
-  faviconUrl,
-  originName,
+  origin,
   headerText
 }: SelectAccountsToConnectPageProps) {
   const navigate = useTypedNavigate();
@@ -87,22 +85,14 @@ export function SelectAccountsToConnectPage({
   return (
     <Page>
       <Content>
-        {faviconUrl ? (
-          <HeaderTextContainer>
-            <CurrentSiteFavicon faviconUrl={faviconUrl} hostName={originName} />
-            <HeaderTextContent>
-              <Typography type="header" weight="bold">
-                <Trans t={t}>{headerText}</Trans>
-              </Typography>
-            </HeaderTextContent>
-          </HeaderTextContainer>
-        ) : (
-          <HeaderTextContainer>
+        <HeaderTextContainer>
+          <SiteFaviconBudge origin={origin} />
+          <HeaderTextContent>
             <Typography type="header" weight="bold">
               <Trans t={t}>{headerText}</Trans>
             </Typography>
-          </HeaderTextContainer>
-        )}
+          </HeaderTextContent>
+        </HeaderTextContainer>
         <List
           headerLabel={t('select account(s)')}
           headerAction={headerAction}

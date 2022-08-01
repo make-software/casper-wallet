@@ -18,8 +18,6 @@ function getSiteRelatedData() {
 
   return {
     origin,
-    faviconUrl: `${origin}/favicon.ico`,
-    originName,
     headerText: `Connect with ${capitalizedOrigin}`
   };
 }
@@ -28,7 +26,7 @@ export function App() {
   const [selectedAccountNames, setSelectedAccountNames] = useState<string[]>(
     []
   );
-  const { origin, originName, headerText, faviconUrl } = getSiteRelatedData();
+  const { origin, headerText } = getSiteRelatedData();
 
   return (
     <Routes>
@@ -41,8 +39,7 @@ export function App() {
               <SelectAccountsToConnectPage
                 selectedAccountNames={selectedAccountNames}
                 setSelectedAccountNames={setSelectedAccountNames}
-                faviconUrl={faviconUrl}
-                originName={originName}
+                origin={origin}
                 headerText={headerText}
               />
             }
@@ -57,8 +54,7 @@ export function App() {
             Content={
               <ApproveConnectionPage
                 selectedAccountNames={selectedAccountNames}
-                faviconUrl={faviconUrl}
-                originName={originName}
+                origin={origin}
                 headerText={headerText}
               />
             }
@@ -73,7 +69,6 @@ export function App() {
             Content={
               <ConnectingPage
                 selectedAccountNames={selectedAccountNames}
-                faviconUrl={faviconUrl}
                 origin={origin}
               />
             }

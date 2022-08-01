@@ -6,13 +6,7 @@ import { HeaderTextContainer } from '@src/layout';
 
 import { Page, Content, FooterButtons } from '@connect-to-app/layout';
 
-import {
-  Button,
-  CurrentSiteFavicon,
-  List,
-  SvgIcon,
-  Typography
-} from '@libs/ui';
+import { Button, SiteFaviconBudge, List, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@connect-to-app/router';
 import { closeWindow } from '@connect-to-app/utils/closeWindow';
 
@@ -42,15 +36,13 @@ export const ListItemContainer = styled.div`
 
 interface ApproveConnectionPageProps {
   selectedAccountNames: string[];
-  faviconUrl: string;
-  originName: string;
+  origin: string;
   headerText: string;
 }
 
 export function ApproveConnectionPage({
   selectedAccountNames,
-  faviconUrl,
-  originName,
+  origin,
   headerText
 }: ApproveConnectionPageProps) {
   const navigate = useTypedNavigate();
@@ -74,22 +66,14 @@ export function ApproveConnectionPage({
   return (
     <Page>
       <Content>
-        {faviconUrl ? (
-          <HeaderTextContainer>
-            <CurrentSiteFavicon faviconUrl={faviconUrl} hostName={originName} />
-            <HeaderTextContent>
-              <Typography type="header" weight="bold">
-                <Trans t={t}>{headerText}</Trans>
-              </Typography>
-            </HeaderTextContent>
-          </HeaderTextContainer>
-        ) : (
-          <HeaderTextContainer>
+        <HeaderTextContainer>
+          <SiteFaviconBudge origin={origin} />
+          <HeaderTextContent>
             <Typography type="header" weight="bold">
               <Trans t={t}>{headerText}</Trans>
             </Typography>
-          </HeaderTextContainer>
-        )}
+          </HeaderTextContent>
+        </HeaderTextContainer>
         <List
           headerLabel={t('allow this site to')}
           rows={listItems}

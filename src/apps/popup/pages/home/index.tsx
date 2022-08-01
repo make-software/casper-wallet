@@ -150,7 +150,7 @@ export function HomePageContent() {
       return;
     }
 
-    if (activeAccount.connectedToSites?.includes(origin)) {
+    if (origin && activeAccount.connectedToSites?.includes(origin)) {
       sendActiveAccountChanged(
         {
           isConnected: activeAccount.connectedToSites.includes(origin),
@@ -171,7 +171,7 @@ export function HomePageContent() {
 
   const handleDisconnectAccount = useCallback(
     (account: Account) => {
-      if (!activeAccount || !isActiveAccountConnected) {
+      if (!activeAccount || !isActiveAccountConnected || !origin) {
         return;
       }
 

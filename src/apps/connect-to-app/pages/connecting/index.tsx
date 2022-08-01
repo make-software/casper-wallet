@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import styled from 'styled-components';
 
-import { SvgIcon, Typography } from '@libs/ui';
+import { getFaviconUrlFromOrigin, SvgIcon, Typography } from '@libs/ui';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   selectVaultActiveAccount,
@@ -79,13 +79,11 @@ function getNextActiveAccount(
 
 interface ConnectingPageProps {
   selectedAccountNames: string[];
-  faviconUrl: string;
   origin: string;
 }
 
 export function ConnectingPage({
   selectedAccountNames,
-  faviconUrl,
   origin
 }: ConnectingPageProps) {
   const dispatch = useDispatch();
@@ -99,6 +97,8 @@ export function ConnectingPage({
     origin,
     currentWindow: false
   });
+
+  const faviconUrl = getFaviconUrlFromOrigin(origin);
 
   useEffect(() => {
     if (
@@ -154,7 +154,8 @@ export function ConnectingPage({
         </LogoOverlay>
         <SvgIcon src="assets/illustrations/connection.svg" size={76} />
         <LogoOverlay>
-          <AppLogoImg src={faviconUrl} alt="favicon" />
+          {/* TODO: handle null-favicon-url case */}
+          {faviconUrl && <AppLogoImg src={faviconUrl} alt="favicon" />}
         </LogoOverlay>
       </IconsContainer>
     </Page>

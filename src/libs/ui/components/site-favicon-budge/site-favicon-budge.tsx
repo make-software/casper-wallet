@@ -22,17 +22,28 @@ const FaviconImg = styled.img`
   height: 24px;
 `;
 
-interface CurrentSiteFaviconProps {
-  faviconUrl: string;
-  hostName: string;
+export function getFaviconUrlFromOrigin(origin: string) {
+  if (!/https?:\/\//.test(origin)) {
+    return null;
+  }
+
+  return `${origin}/favicon.ico`;
 }
 
-export function CurrentSiteFavicon({
-  faviconUrl,
-  hostName
-}: CurrentSiteFaviconProps) {
+interface SiteFaviconBudgeProps {
+  origin: string | null;
+}
+
+export function SiteFaviconBudge({ origin }: SiteFaviconBudgeProps) {
+  if (origin === null) {
+    return null;
+  }
+
+  const faviconUrl = getFaviconUrlFromOrigin(origin);
+  const hostName = origin.split('://')[1];
+
   // TODO: load default favicon when url incorrect
-  if (!/https:\/\//.test(faviconUrl)) {
+  if (faviconUrl === null) {
     return null;
   }
 

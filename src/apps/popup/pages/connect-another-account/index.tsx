@@ -9,7 +9,7 @@ import { useActiveTabOrigin } from '@hooks/use-active-tab-origin';
 import { ContentContainer, HeaderTextContainer } from '@src/layout';
 import {
   Button,
-  CurrentSiteFavicon,
+  SiteFaviconBudge,
   Hash,
   HashVariant,
   List,
@@ -117,10 +117,7 @@ export function ConnectAnotherAccountPageContent() {
   return (
     <ContentContainer>
       <HeaderTextContainer>
-        <CurrentSiteFavicon
-          faviconUrl={`${activeTabOrigin}/favicon.ico`}
-          hostName={activeTabOrigin.split('://')[1]}
-        />
+        <SiteFaviconBudge origin={activeTabOrigin} />
         <HeaderTextContent>
           <Typography type="header" weight="bold">
             Your current account is not connected

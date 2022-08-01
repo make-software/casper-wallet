@@ -6,7 +6,7 @@ interface UseActiveTabOriginProps {
 }
 
 export function useActiveTabOrigin({ currentWindow }: UseActiveTabOriginProps) {
-  const [activeTabOrigin, setActiveTabOrigin] = useState('');
+  const [activeTabOrigin, setActiveTabOrigin] = useState<string | null>(null);
 
   useEffect(() => {
     async function getActiveTabOriginAndSaveToState() {

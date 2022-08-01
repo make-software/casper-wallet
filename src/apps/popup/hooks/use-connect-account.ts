@@ -7,7 +7,7 @@ import { sendConnectStatus } from '@content/remote-actions';
 import { selectVaultIsLocked } from '@popup/redux/vault/selectors';
 
 interface UseConnectAccountProps {
-  origin: string;
+  origin: string | null;
   currentWindow: boolean;
 }
 
@@ -20,10 +20,14 @@ export function useConnectAccount({
 
   const connectAccount = useCallback(
     (account: Account) => {
+      // TODO: should handle behavior for locked app
+      if (origin === null || isLocked) {
+        return;
+      }
+
       const isConnected = account.connectedToSites.includes(origin);
 
-      // TODO: should handle behavior for locked app
-      if (isConnected || isLocked) {
+      if (isConnected) {
         return;
       }
 
