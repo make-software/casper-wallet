@@ -15,7 +15,7 @@ import { sendActiveAccountChanged } from '@content/remote-actions';
 import { Account } from '@popup/redux/vault/types';
 import { changeActiveAccount } from '@popup/redux/vault/actions';
 
-const ContentContainer = styled.div`
+const Page = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -77,17 +77,17 @@ function getNextActiveAccount(
     .find(account => selectedAccountNames.includes(account.name));
 }
 
-interface ConnectionPageContentProps {
+interface ConnectingPageProps {
   selectedAccountNames: string[];
   faviconUrl: string;
   origin: string;
 }
 
-export function ConnectionPageContent({
+export function ConnectingPage({
   selectedAccountNames,
   faviconUrl,
   origin
-}: ConnectionPageContentProps) {
+}: ConnectingPageProps) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -144,7 +144,7 @@ export function ConnectionPageContent({
   }, []);
 
   return (
-    <ContentContainer>
+    <Page>
       <Typography type="header" weight="bold">
         <Trans t={t}>Connecting</Trans>
       </Typography>
@@ -157,6 +157,6 @@ export function ConnectionPageContent({
           <AppLogoImg src={faviconUrl} alt="favicon" />
         </LogoOverlay>
       </IconsContainer>
-    </ContentContainer>
+    </Page>
   );
 }

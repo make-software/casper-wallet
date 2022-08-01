@@ -4,11 +4,7 @@ import styled from 'styled-components';
 
 import { HeaderTextContainer } from '@src/layout';
 
-import {
-  ContentContainer,
-  FooterButtonsContainer,
-  PaddingContainer
-} from '@connect-to-app/layout';
+import { Page, Content, FooterButtons } from '@connect-to-app/layout';
 
 import {
   Button,
@@ -44,19 +40,19 @@ export const ListItemContainer = styled.div`
   }
 `;
 
-interface ApproveConnectionPageContentProps {
+interface ApproveConnectionPageProps {
   selectedAccountNames: string[];
   faviconUrl: string;
   originName: string;
   headerText: string;
 }
 
-export function ApproveConnectionPageContent({
+export function ApproveConnectionPage({
   selectedAccountNames,
   faviconUrl,
   originName,
   headerText
-}: ApproveConnectionPageContentProps) {
+}: ApproveConnectionPageProps) {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
@@ -76,8 +72,8 @@ export function ApproveConnectionPageContent({
   const selectedAccountNamesLength = selectedAccountNames.length;
 
   return (
-    <ContentContainer>
-      <PaddingContainer>
+    <Page>
+      <Content>
         {faviconUrl ? (
           <HeaderTextContainer>
             <CurrentSiteFavicon faviconUrl={faviconUrl} hostName={originName} />
@@ -111,8 +107,8 @@ export function ApproveConnectionPageContent({
           )}
           marginLeftForItemSeparatorLine={60}
         />
-      </PaddingContainer>
-      <FooterButtonsContainer>
+      </Content>
+      <FooterButtons>
         <TextCentredContainer>
           <Typography type="caption" weight="regular">
             <Trans t={t}>Only connect with sites you trust</Trans>
@@ -128,7 +124,7 @@ export function ApproveConnectionPageContent({
         <Button color="secondaryBlue" onClick={() => closeWindow()}>
           <Trans t={t}>Cancel</Trans>
         </Button>
-      </FooterButtonsContainer>
-    </ContentContainer>
+      </FooterButtons>
+    </Page>
   );
 }

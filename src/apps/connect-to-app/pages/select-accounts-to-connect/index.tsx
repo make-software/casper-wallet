@@ -14,11 +14,7 @@ import {
   HeaderTextContainer,
   ListItemClickableContainer
 } from '@layout/containers';
-import {
-  ContentContainer,
-  FooterButtonsContainer,
-  PaddingContainer
-} from '@connect-to-app/layout';
+import { Page, Content, FooterButtons } from '@connect-to-app/layout';
 
 import { useTranslation, Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -41,7 +37,7 @@ const TextCentredContainer = styled.div`
   text-align: center;
 `;
 
-interface SelectAccountsToConnectPageContentProps {
+interface SelectAccountsToConnectPageProps {
   selectedAccountNames: string[];
   setSelectedAccountNames: Dispatch<SetStateAction<string[]>>;
   faviconUrl: string;
@@ -49,13 +45,13 @@ interface SelectAccountsToConnectPageContentProps {
   headerText: string;
 }
 
-export function SelectAccountsToConnectPageContent({
+export function SelectAccountsToConnectPage({
   selectedAccountNames,
   setSelectedAccountNames,
   faviconUrl,
   originName,
   headerText
-}: SelectAccountsToConnectPageContentProps) {
+}: SelectAccountsToConnectPageProps) {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
@@ -89,8 +85,8 @@ export function SelectAccountsToConnectPageContent({
   }));
 
   return (
-    <ContentContainer>
-      <PaddingContainer>
+    <Page>
+      <Content>
         {faviconUrl ? (
           <HeaderTextContainer>
             <CurrentSiteFavicon faviconUrl={faviconUrl} hostName={originName} />
@@ -162,9 +158,9 @@ export function SelectAccountsToConnectPageContent({
           )}
           marginLeftForItemSeparatorLine={60}
         />
-      </PaddingContainer>
+      </Content>
 
-      <FooterButtonsContainer>
+      <FooterButtons>
         <TextCentredContainer>
           <Typography type="caption" weight="regular">
             <Trans t={t}>Only connect with sites you trust</Trans>
@@ -176,7 +172,7 @@ export function SelectAccountsToConnectPageContent({
         >
           <Trans t={t}>Next</Trans>
         </Button>
-      </FooterButtonsContainer>
-    </ContentContainer>
+      </FooterButtons>
+    </Page>
   );
 }

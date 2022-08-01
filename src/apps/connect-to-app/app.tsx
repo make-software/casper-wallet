@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { RouterPath } from '@connect-to-app/router';
 import { Layout, Header } from '@connect-to-app/layout';
-import { SelectAccountsToConnectPageContent } from '@connect-to-app/pages/select-accounts-to-connect';
-import { ApproveConnectionPageContent } from '@connect-to-app/pages/approve-connection';
-import { ConnectionPageContent } from '@connect-to-app/pages/connection';
+import { SelectAccountsToConnectPage } from '@connect-to-app/pages/select-accounts-to-connect';
+import { ApproveConnectionPage } from '@connect-to-app/pages/approve-connection';
+import { ConnectingPage } from '@connect-to-app/pages/connecting';
 
 function getSiteRelatedData() {
   const origin = document.location.search.split('origin=')[1];
@@ -38,7 +38,7 @@ export function App() {
           <Layout
             Header={<Header submenuActionType="cancel" />}
             Content={
-              <SelectAccountsToConnectPageContent
+              <SelectAccountsToConnectPage
                 selectedAccountNames={selectedAccountNames}
                 setSelectedAccountNames={setSelectedAccountNames}
                 faviconUrl={faviconUrl}
@@ -55,7 +55,7 @@ export function App() {
           <Layout
             Header={<Header submenuActionType="back" />}
             Content={
-              <ApproveConnectionPageContent
+              <ApproveConnectionPage
                 selectedAccountNames={selectedAccountNames}
                 faviconUrl={faviconUrl}
                 originName={originName}
@@ -71,7 +71,7 @@ export function App() {
           <Layout
             Header={<Header />}
             Content={
-              <ConnectionPageContent
+              <ConnectingPage
                 selectedAccountNames={selectedAccountNames}
                 faviconUrl={faviconUrl}
                 origin={origin}
