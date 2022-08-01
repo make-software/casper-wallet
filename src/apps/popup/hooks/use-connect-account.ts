@@ -47,14 +47,14 @@ export function useConnectAccount({
         })
       );
 
-      return sendConnectStatus(
+      sendConnectStatus(
         {
           activeKey: account.publicKey,
           isConnected: true,
           isUnlocked: !isLocked
         },
         currentWindow
-      );
+      ).catch(e => console.error(e));
     },
     [dispatch, isLocked, connectedAccountsToSites, origin, currentWindow]
   );
