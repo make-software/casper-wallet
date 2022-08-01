@@ -2,6 +2,10 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Typography, SvgIcon } from '@libs/ui';
+import { useActiveTabOrigin } from '@src/hooks';
+import { useSelector } from 'react-redux';
+import { RootState } from 'typesafe-actions';
+import { selectActiveAccountIsConnectedToOrigin } from '@popup/redux/vault/selectors';
 
 const ConnectionStatusContainer = styled.div`
   display: flex;
@@ -15,14 +19,15 @@ const ConnectionStatusContainer = styled.div`
   border-radius: 100px;
 `;
 
-interface ConnectionStatusProps {
-  isConnected: boolean;
-}
+export function ConnectionStatus() {
+  const origin = useActiveTabOrigin({ currentWindow: true });
+  const isActiveAccountConnected = useSelector((state: RootState) =>
+    selectActiveAccountIsConnectedToOrigin(state, origin)
+  );
 
-export function ConnectionStatus({ isConnected }: ConnectionStatusProps) {
   return (
     <ConnectionStatusContainer>
-      {isConnected && (
+      {isActiveAccountConnected && (
         <SvgIcon
           src="assets/icons/checkbox-checked.svg"
           size={16}
@@ -35,7 +40,7 @@ export function ConnectionStatus({ isConnected }: ConnectionStatusProps) {
         weight="semiBold"
         color="contentOnFill"
       >
-        {isConnected ? 'Connected' : 'Disconnected'}
+        {isActiveAccountConnected ? 'Connected' : 'Disconnected'}
       </Typography>
     </ConnectionStatusContainer>
   );

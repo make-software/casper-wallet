@@ -25,13 +25,11 @@ const SpaceBetweenContainer = styled(CentredFlexRow)`
 interface HeaderProps {
   withLock?: boolean;
   withMenu?: boolean;
-  isAccountConnected?: boolean;
   submenuActionType?: 'back' | 'close' | 'cancel';
   SubmenuActionGroup?: ReactElement;
 }
 
 export function Header({
-  isAccountConnected,
   withLock,
   withMenu,
   submenuActionType,
@@ -46,7 +44,7 @@ export function Header({
           <Logo onClick={() => navigate(RouterPath.Home)} />
         </LogoContainer>
         <SpaceBetweenContainer>
-          <ConnectionStatus isConnected={isAccountConnected || false} />
+          <ConnectionStatus />
           <MainmenuBar withMenu={withMenu} withLock={withLock} />
         </SpaceBetweenContainer>
       </HeaderContainer>

@@ -21,14 +21,12 @@ import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { Header } from './layout';
 
 import {
-  selectActiveAccountIsConnectedToOrigin,
   selectVaultDoesExist,
   selectVaultHasAccount,
   selectVaultIsLocked
 } from './redux/vault/selectors';
 
 import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
-import { useActiveTabOrigin } from '@hooks/use-active-tab-origin';
 
 import { useRemoteActions } from './redux/use-remote-actions';
 import {
@@ -37,17 +35,11 @@ import {
 } from '@popup/pages/account-settings';
 import { RemoveAccountPageContent } from '@popup/pages/remove-account';
 import { RenameAccountPageContent } from '@popup/pages/rename-account';
-import { RootState } from 'typesafe-actions';
 
 export function App() {
   const navigate = useTypedNavigate();
   const location = useTypedLocation();
   const state = location.state;
-
-  const activeTabOrigin = useActiveTabOrigin({ currentWindow: true });
-  const isActiveAccountConnected = useSelector((state: RootState) =>
-    selectActiveAccountIsConnectedToOrigin(state, activeTabOrigin)
-  );
 
   const vaultIsLocked = useSelector(selectVaultIsLocked);
   const vaultDoesExists = useSelector(selectVaultDoesExist);
@@ -85,13 +77,7 @@ export function App() {
             path="*"
             element={
               <Layout
-                Header={
-                  <Header
-                    isAccountConnected={isActiveAccountConnected}
-                    withMenu
-                    withLock
-                  />
-                }
+                Header={<Header withMenu withLock />}
                 Content={<NavigationMenuPageContent />}
               />
             }
@@ -103,13 +89,7 @@ export function App() {
             path={RouterPath.Home}
             element={
               <Layout
-                Header={
-                  <Header
-                    isAccountConnected={isActiveAccountConnected}
-                    withMenu
-                    withLock
-                  />
-                }
+                Header={<Header withMenu withLock />}
                 Content={<HomePageContent />}
               />
             }
@@ -135,7 +115,6 @@ export function App() {
               <Layout
                 Header={
                   <Header
-                    isAccountConnected={isActiveAccountConnected}
                     withLock
                     withMenu
                     submenuActionType="close"
@@ -150,14 +129,7 @@ export function App() {
             path={RouterPath.RemoveAccount}
             element={
               <Layout
-                Header={
-                  <Header
-                    isAccountConnected={isActiveAccountConnected}
-                    withLock
-                    withMenu
-                    submenuActionType="back"
-                  />
-                }
+                Header={<Header withLock withMenu submenuActionType="back" />}
                 Content={<RemoveAccountPageContent />}
               />
             }
@@ -166,14 +138,7 @@ export function App() {
             path={RouterPath.RenameAccount}
             element={
               <Layout
-                Header={
-                  <Header
-                    isAccountConnected={isActiveAccountConnected}
-                    withLock
-                    withMenu
-                    submenuActionType="back"
-                  />
-                }
+                Header={<Header withLock withMenu submenuActionType="back" />}
                 Content={<RenameAccountPageContent />}
               />
             }
@@ -191,13 +156,7 @@ export function App() {
             path={RouterPath.NoConnectedAccount}
             element={
               <Layout
-                Header={
-                  <Header
-                    withLock
-                    withMenu
-                    isAccountConnected={isActiveAccountConnected}
-                  />
-                }
+                Header={<Header withLock withMenu />}
                 Content={<NoConnectedAccountPageContent />}
               />
             }
@@ -215,14 +174,7 @@ export function App() {
             path={RouterPath.Timeout}
             element={
               <Layout
-                Header={
-                  <Header
-                    isAccountConnected={isActiveAccountConnected}
-                    submenuActionType="close"
-                    withMenu
-                    withLock
-                  />
-                }
+                Header={<Header submenuActionType="close" withMenu withLock />}
                 Content={<TimeoutPageContent />}
               />
             }
@@ -231,14 +183,7 @@ export function App() {
             path={RouterPath.ConnectAnotherAccount}
             element={
               <Layout
-                Header={
-                  <Header
-                    isAccountConnected={isActiveAccountConnected}
-                    withLock
-                    withMenu
-                    submenuActionType="cancel"
-                  />
-                }
+                Header={<Header withLock withMenu submenuActionType="cancel" />}
                 Content={<ConnectAnotherAccountPageContent />}
               />
             }
