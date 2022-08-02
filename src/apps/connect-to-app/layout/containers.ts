@@ -4,7 +4,7 @@ interface FooterButtonsContainerProps {
   direction?: 'row' | 'column';
 }
 
-export const FooterButtons = styled.div<FooterButtonsContainerProps>`
+export const FooterButtonsContainer = styled.div<FooterButtonsContainerProps>`
   margin-top: 16px;
 
   width: 100%;
@@ -20,7 +20,7 @@ export const FooterButtons = styled.div<FooterButtonsContainerProps>`
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
 `;
 
-export const Page = styled.div`
+export const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -28,6 +28,6 @@ export const Page = styled.div`
   height: 100%;
 `;
 
-export const Content = styled.div`
+export const ContentContainer = styled.div`
   padding: ${({ theme }) => theme.padding['1.6']};
 `;

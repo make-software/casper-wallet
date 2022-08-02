@@ -15,7 +15,7 @@ import { sendActiveAccountChanged } from '@content/remote-actions';
 import { Account } from '@popup/redux/vault/types';
 import { changeActiveAccount } from '@popup/redux/vault/actions';
 
-const Page = styled.div`
+const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -144,7 +144,7 @@ export function ConnectingPage({
   }, []);
 
   return (
-    <Page>
+    <PageContainer>
       <Typography type="header" weight="bold">
         <Trans t={t}>Connecting</Trans>
       </Typography>
@@ -158,6 +158,6 @@ export function ConnectingPage({
           {faviconUrl && <AppLogoImg src={faviconUrl} alt="favicon" />}
         </LogoOverlay>
       </IconsContainer>
-    </Page>
+    </PageContainer>
   );
 }

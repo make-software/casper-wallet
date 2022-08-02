@@ -14,7 +14,11 @@ import {
   HeaderTextContainer,
   ListItemClickableContainer
 } from '@layout/containers';
-import { Page, Content, FooterButtons } from '@connect-to-app/layout';
+import {
+  PageContainer,
+  ContentContainer,
+  FooterButtonsContainer
+} from '@connect-to-app/layout';
 
 import { useTranslation, Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -83,8 +87,8 @@ export function AccountsSelectionPage({
   }));
 
   return (
-    <Page>
-      <Content>
+    <PageContainer>
+      <ContentContainer>
         <HeaderTextContainer>
           <SiteFaviconBudge origin={origin} />
           <HeaderTextContent>
@@ -148,9 +152,8 @@ export function AccountsSelectionPage({
           )}
           marginLeftForItemSeparatorLine={60}
         />
-      </Content>
-
-      <FooterButtons>
+      </ContentContainer>
+      <FooterButtonsContainer>
         <TextCentredContainer>
           <Typography type="caption" weight="regular">
             <Trans t={t}>Only connect with sites you trust</Trans>
@@ -162,7 +165,7 @@ export function AccountsSelectionPage({
         >
           <Trans t={t}>Next</Trans>
         </Button>
-      </FooterButtons>
-    </Page>
+      </FooterButtonsContainer>
+    </PageContainer>
   );
 }

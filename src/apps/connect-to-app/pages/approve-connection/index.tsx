@@ -4,7 +4,11 @@ import styled from 'styled-components';
 
 import { HeaderTextContainer } from '@src/layout';
 
-import { Page, Content, FooterButtons } from '@connect-to-app/layout';
+import {
+  PageContainer,
+  ContentContainer,
+  FooterButtonsContainer
+} from '@connect-to-app/layout';
 
 import { Button, SiteFaviconBudge, List, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@connect-to-app/router';
@@ -63,8 +67,8 @@ export function ApproveConnectionPage({
   const selectedAccountNamesLength = selectedAccountNames.length;
 
   return (
-    <Page>
-      <Content>
+    <PageContainer>
+      <ContentContainer>
         <HeaderTextContainer>
           <SiteFaviconBudge origin={origin} />
           <HeaderTextContent>
@@ -90,8 +94,8 @@ export function ApproveConnectionPage({
           )}
           marginLeftForItemSeparatorLine={60}
         />
-      </Content>
-      <FooterButtons>
+      </ContentContainer>
+      <FooterButtonsContainer>
         <TextCentredContainer>
           <Typography type="caption" weight="regular">
             <Trans t={t}>Only connect with sites you trust</Trans>
@@ -107,7 +111,7 @@ export function ApproveConnectionPage({
         <Button color="secondaryBlue" onClick={() => closeWindow()}>
           <Trans t={t}>Cancel</Trans>
         </Button>
-      </FooterButtons>
-    </Page>
+      </FooterButtonsContainer>
+    </PageContainer>
   );
 }
