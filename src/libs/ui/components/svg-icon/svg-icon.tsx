@@ -78,9 +78,11 @@ export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
     { src, alt, size = 16, color, onClick, flipByAxis, ...props }: SvgIconProps,
     ref
   ) => {
-    const handleClick = (ev: any) => {
-      onClick && onClick(ev);
-    };
+    const handleClick =
+      onClick &&
+      ((ev: any) => {
+        onClick(ev);
+      });
 
     const preProcessor = color
       ? (code: string): string => code.replace(/fill=".*?"/g, `fill="${color}"`)
@@ -94,7 +96,7 @@ export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
         size={size}
         color={color}
         flipByAxis={flipByAxis}
-        onClick={onClick && handleClick}
+        onClick={handleClick}
         {...props}
       >
         <StyledReactSVG src={src} preProcessor={preProcessor} cacheRequests />
