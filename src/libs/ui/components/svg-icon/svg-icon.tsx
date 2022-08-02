@@ -94,7 +94,7 @@ export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
         size={size}
         color={color}
         flipByAxis={flipByAxis}
-        onClick={handleClick}
+        onClick={onClick && handleClick}
         {...props}
       >
         <StyledReactSVG src={src} preProcessor={preProcessor} cacheRequests />
