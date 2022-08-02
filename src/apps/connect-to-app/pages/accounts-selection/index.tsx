@@ -37,19 +37,19 @@ const TextCentredContainer = styled.div`
   text-align: center;
 `;
 
-interface SelectAccountsToConnectPageProps {
+interface AccountsSelectionPageProps {
   selectedAccountNames: string[];
   setSelectedAccountNames: Dispatch<SetStateAction<string[]>>;
   origin: string;
   headerText: string;
 }
 
-export function SelectAccountsToConnectPage({
+export function AccountsSelectionPage({
   selectedAccountNames,
   setSelectedAccountNames,
   origin,
   headerText
-}: SelectAccountsToConnectPageProps) {
+}: AccountsSelectionPageProps) {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 

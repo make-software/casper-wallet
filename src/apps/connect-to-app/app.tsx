@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { RouterPath } from '@connect-to-app/router';
 import { Layout, Header } from '@connect-to-app/layout';
-import { SelectAccountsToConnectPage } from '@connect-to-app/pages/select-accounts-to-connect';
+import { AccountsSelectionPage } from '@connect-to-app/pages/accounts-selection';
 import { ApproveConnectionPage } from '@connect-to-app/pages/approve-connection';
 import { ConnectingPage } from '@connect-to-app/pages/connecting';
 
@@ -36,7 +36,7 @@ export function App() {
           <Layout
             Header={<Header submenuActionType="cancel" />}
             Content={
-              <SelectAccountsToConnectPage
+              <AccountsSelectionPage
                 selectedAccountNames={selectedAccountNames}
                 setSelectedAccountNames={setSelectedAccountNames}
                 origin={origin}
