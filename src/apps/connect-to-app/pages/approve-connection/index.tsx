@@ -18,13 +18,12 @@ const TextCentredContainer = styled.div`
   text-align: center;
 `;
 
-export const ListItemContainer = styled.div`
+const ListItemContainer = styled.div`
   display: flex;
 
   width: 100%;
-  cursor: pointer;
-
   padding: 14px 18px;
+
   & > * + * {
     padding-left: 18px;
   }
