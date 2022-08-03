@@ -1,47 +1,47 @@
-import { useCallback, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+// TODO: No best place for `createOpenWindow` function. Need to move to most appropriate place
 import Browser from 'webextension-polyfill';
-
-import { selectWindowId } from '@popup/redux/windowManagement/selectors';
-import {
-  clearWindowId,
-  storeWindowId
-} from '@popup/redux/windowManagement/actions';
 
 export enum PurposeForOpening {
   ImportAccount = 'ImportAccount',
   ConnectToApp = 'ConnectToApp'
 }
 
-function getUrlByPurposeForOpening(purposeForOpening: PurposeForOpening) {
+function getUrlByPurposeForOpening(
+  purposeForOpening: PurposeForOpening,
+  origin?: string
+) {
   switch (purposeForOpening) {
     case PurposeForOpening.ImportAccount:
       return 'import-account-with-file.html';
+    case PurposeForOpening.ConnectToApp:
+      return `connect-to-app.html?origin=${origin}`;
     default:
       return 'popup.html?#/';
   }
 }
 
-export function useWindowManager() {
-  const dispatch = useDispatch();
-  const windowId = useSelector(selectWindowId);
+interface CreateOpenWindowProps {
+  windowId: number | null;
+  clearWindowId: () => void;
+  setWindowId: (id: number) => void;
+}
 
-  const handleCloseWindow = useCallback(() => {
-    dispatch(clearWindowId());
-  }, [dispatch]);
+export interface OpenWindowProps {
+  purposeForOpening: PurposeForOpening;
+  isNewWindow?: boolean;
+  origin?: string;
+}
 
-  useEffect(() => {
-    Browser.windows.onRemoved.addListener(handleCloseWindow);
-
-    return () => {
-      Browser.windows.onRemoved.removeListener(handleCloseWindow);
-    };
-  }, [windowId, dispatch, handleCloseWindow]);
-
-  async function open(
-    purposeForOpening: PurposeForOpening,
-    isNewWindow?: boolean
-  ) {
+export function createOpenWindow({
+  windowId,
+  setWindowId,
+  clearWindowId
+}: CreateOpenWindowProps) {
+  return async function openWindow({
+    purposeForOpening,
+    isNewWindow,
+    origin
+  }: OpenWindowProps) {
     const id = isNewWindow ? null : windowId;
 
     if (id) {
@@ -58,8 +58,8 @@ export function useWindowManager() {
           });
         }
       } else {
-        dispatch(clearWindowId());
-        await open(purposeForOpening, true);
+        clearWindowId();
+        await openWindow({ purposeForOpening, isNewWindow: true, origin });
       }
     } else {
       Browser.windows
@@ -69,11 +69,12 @@ export function useWindowManager() {
           const xOffset = window.left ?? 0;
           const yOffset = window.top ?? 0;
           const popupWidth = 360;
-          const popupHeight = 600;
+          const popupHeight =
+            purposeForOpening === PurposeForOpening.ConnectToApp ? 700 : 600;
 
           Browser.windows
             .create({
-              url: getUrlByPurposeForOpening(purposeForOpening),
+              url: getUrlByPurposeForOpening(purposeForOpening, origin),
               type: 'popup',
               height: popupHeight,
               width: popupWidth,
@@ -82,7 +83,13 @@ export function useWindowManager() {
             })
             .then(newPopup => {
               if (newPopup.id) {
-                dispatch(storeWindowId(newPopup.id));
+                setWindowId(newPopup.id);
+
+                const handleCloseWindow = () => {
+                  Browser.windows.onRemoved.removeListener(handleCloseWindow);
+                  clearWindowId();
+                };
+                Browser.windows.onRemoved.addListener(handleCloseWindow);
               }
             });
         })
@@ -91,9 +98,5 @@ export function useWindowManager() {
           console.error(e);
         });
     }
-  }
-
-  const openWindow = useCallback(open, [dispatch, open, windowId]);
-
-  return { openWindow };
+  };
 }

@@ -2,7 +2,6 @@ import Browser, { Runtime } from 'webextension-polyfill';
 import MessageSender = Runtime.MessageSender;
 
 import { PurposeForOpening } from '@src/hooks';
-import { openWindow } from '@background/window-manager';
 
 import { PassToBackgroundAction } from '@background/remote-actions';
 import { REDUX_STORAGE_KEY } from '@libs/services/constants';
@@ -13,6 +12,8 @@ import {
   selectVaultActiveAccount
 } from '@popup/redux/vault/selectors';
 
+import { openWindow } from '@background/open-window';
+
 const initStore = createInitStore(REDUX_STORAGE_KEY);
 
 initStore().then(store => {
@@ -20,7 +21,10 @@ initStore().then(store => {
     async (action: PassToBackgroundAction, sender: MessageSender) => {
       switch (action.type) {
         case 'request-connection':
-          await openWindow(PurposeForOpening.ConnectToApp, action.payload);
+          await openWindow({
+            purposeForOpening: PurposeForOpening.ConnectToApp,
+            origin: action.payload
+          });
           break;
 
         case 'disconnected-from-site':

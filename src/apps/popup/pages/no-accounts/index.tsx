@@ -41,9 +41,9 @@ export function NoAccountsPageContent() {
         <Button
           color="secondaryBlue"
           onClick={() =>
-            openWindow(PurposeForOpening.ImportAccount).catch(e =>
-              console.error(e)
-            )
+            openWindow({
+              purposeForOpening: PurposeForOpening.ImportAccount
+            }).catch(e => console.error(e))
           }
         >
           <Trans t={t}>Import account</Trans>
