@@ -13,7 +13,7 @@ export * from './components/checkbox/checkbox';
 export * from './components/flex-box/flex-box';
 export * from './components/flex-row/flex-row';
 export * from './components/hash/hash';
-export * from './components/site-favicon-budge/site-favicon-budge';
+export * from './components/site-favicon-badge/site-favicon-badge';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

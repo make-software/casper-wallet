@@ -10,7 +10,7 @@ import {
   FooterButtonsContainer
 } from '@connect-to-app/layout';
 
-import { Button, SiteFaviconBudge, List, SvgIcon, Typography } from '@libs/ui';
+import { Button, SiteFaviconBadge, List, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@connect-to-app/router';
 import { closeWindow } from '@connect-to-app/utils/closeWindow';
 
@@ -70,7 +70,7 @@ export function ApproveConnectionPage({
     <PageContainer>
       <ContentContainer>
         <HeaderTextContainer>
-          <SiteFaviconBudge origin={origin} />
+          <SiteFaviconBadge origin={origin} />
           <HeaderTextContent>
             <Typography type="header" weight="bold">
               <Trans t={t}>{headerText}</Trans>

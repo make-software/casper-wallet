@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import {
   Button,
   Checkbox,
-  SiteFaviconBudge,
+  SiteFaviconBadge,
   Hash,
   HashVariant,
   List,
@@ -90,7 +90,7 @@ export function AccountsSelectionPage({
     <PageContainer>
       <ContentContainer>
         <HeaderTextContainer>
-          <SiteFaviconBudge origin={origin} />
+          <SiteFaviconBadge origin={origin} />
           <HeaderTextContent>
             <Typography type="header" weight="bold">
               <Trans t={t}>{headerText}</Trans>

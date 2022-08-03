@@ -30,11 +30,11 @@ export function getFaviconUrlFromOrigin(origin: string) {
   return `${origin}/favicon.ico`;
 }
 
-interface SiteFaviconBudgeProps {
+interface SiteFaviconBadgeProps {
   origin: string | null;
 }
 
-export function SiteFaviconBudge({ origin }: SiteFaviconBudgeProps) {
+export function SiteFaviconBadge({ origin }: SiteFaviconBadgeProps) {
   if (origin === null) {
     return null;
   }
