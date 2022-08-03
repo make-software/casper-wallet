@@ -7,9 +7,7 @@ export interface Account {
   publicKey: string;
 }
 
-interface ConnectedAccountsToSites {
-  [accountName: string]: string[];
-}
+type AccountNamesByOrigin = Record<string, string[]>;
 
 export type VaultState = {
   password: string | null;
@@ -18,5 +16,5 @@ export type VaultState = {
   lastActivityTime: number | null;
   accounts: Account[];
   activeAccountName: string | null;
-  connectedAccountsToSites: ConnectedAccountsToSites;
+  accountNamesByOrigin: AccountNamesByOrigin;
 };

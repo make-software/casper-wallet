@@ -3,7 +3,7 @@ import MessageSender = Runtime.MessageSender;
 
 import { PurposeForOpening } from '@src/hooks';
 
-import { PassToBackgroundAction } from '@background/remote-actions';
+import { BackgroundAction } from '@background/remote-actions';
 import { REDUX_STORAGE_KEY } from '@libs/services/constants';
 import { disconnectAllAccountsFromSite } from '@popup/redux/vault/actions';
 import { createInitStore } from '@popup/redux/utils';
@@ -18,7 +18,7 @@ const initStore = createInitStore(REDUX_STORAGE_KEY);
 
 initStore().then(store => {
   Browser.runtime.onMessage.addListener(
-    async (action: PassToBackgroundAction, sender: MessageSender) => {
+    async (action: BackgroundAction, sender: MessageSender) => {
       switch (action.type) {
         case 'request-connection':
           await openWindow({
@@ -29,7 +29,7 @@ initStore().then(store => {
 
         case 'disconnected-from-site':
           store.dispatch(
-            disconnectAllAccountsFromSite({ appOrigin: action.payload })
+            disconnectAllAccountsFromSite({ siteOrigin: action.payload })
           );
           break;
 

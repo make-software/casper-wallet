@@ -24,10 +24,14 @@ export const unlockVault = createAction('UNLOCK_VAULT', () => ({
 }>();
 
 export const importAccount = createAction('IMPORT_ACCOUNT')<Account>();
-export const removeAccount = createAction('REMOVE_ACCOUNT')<{ name: string }>();
+export const removeAccount = createAction('REMOVE_ACCOUNT')<{
+  accountName: string;
+  siteOrigin: string;
+}>();
 export const renameAccount = createAction('RENAME_ACCOUNT')<{
   oldName: string;
   newName: string;
+  siteOrigin: string;
 }>();
 export const changeActiveAccount = createAction(
   'CHANGE_ACTIVE_ACCOUNT'
@@ -51,12 +55,12 @@ export const refreshTimeout = createAction('REFRESH_TIMEOUT', () => ({
 }>();
 
 export const connectAccountToSite = createAction('CONNECT_ACCOUNT_TO_SITE')<{
-  appOrigin: string;
+  siteOrigin: string;
   accountName: string;
 }>();
 
 export const disconnectAllAccountsFromSite = createAction(
   'DISCONNECT_ALL_ACCOUNTS_FROM_SITE'
 )<{
-  appOrigin: string;
+  siteOrigin: string;
 }>();

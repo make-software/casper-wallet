@@ -37,56 +37,46 @@ export const selectVaultActiveAccount = createSelector(
 const selectActiveTabOrigin = (_: RootState, activeTabOrigin: string | null) =>
   activeTabOrigin;
 
-const selectVaultConnectedAccountsToSite = (state: RootState) =>
-  state.vault.connectedAccountsToSites;
+const selectVaultAccountNamesByOrigin = (state: RootState) =>
+  state.vault.accountNamesByOrigin;
 
 export const selectIsSomeAccountConnectedToOrigin = createSelector(
   selectActiveTabOrigin,
-  selectVaultConnectedAccountsToSite,
-  (origin, connectedAccountsToSites) =>
-    Object.values(connectedAccountsToSites).some(
-      sites => origin && sites.includes(origin)
-    )
+  selectVaultAccountNamesByOrigin,
+  (origin, accountNamesByOrigin) => origin && origin in accountNamesByOrigin
 );
 
 export const selectActiveAccountIsConnectedToOrigin = createSelector(
   selectActiveTabOrigin,
   selectVaultActiveAccountName,
-  selectVaultConnectedAccountsToSite,
-  (origin, activeAccountName, connectedAccountsToSites) => {
+  selectVaultAccountNamesByOrigin,
+  (origin, activeAccountName, accountNamesByOrigin) => {
     if (origin === null) {
       return false;
     }
 
-    if (
-      activeAccountName === null ||
-      !Object.keys(connectedAccountsToSites).includes(activeAccountName)
-    ) {
+    if (activeAccountName === null || !(origin in accountNamesByOrigin)) {
       return false;
     }
 
-    return connectedAccountsToSites[activeAccountName].includes(origin);
+    return accountNamesByOrigin[origin].includes(activeAccountName);
   }
 );
 
 export const selectConnectedAccountsToOrigin = createSelector(
   selectActiveTabOrigin,
   selectVaultAccounts,
-  selectVaultConnectedAccountsToSite,
-  (origin, accounts, connectedAccountsToSites): Account[] => {
+  selectVaultAccountNamesByOrigin,
+  (origin, accounts, accountNamesByOrigin): Account[] => {
     if (origin === null) {
       return [];
     }
 
-    const connectedAccountNames: string[] = Object.entries(
-      connectedAccountsToSites
-    ).reduce((accountNames: string[], [accountName, sites]) => {
-      if (sites.includes(origin)) {
-        return [...accountNames, accountName];
-      }
+    const connectedAccountNames = accountNamesByOrigin[origin];
 
-      return accountNames;
-    }, []);
+    if (!connectedAccountNames) {
+      return [];
+    }
 
     return connectedAccountNames
       .map(accountName =>

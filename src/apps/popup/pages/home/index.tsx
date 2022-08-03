@@ -177,7 +177,7 @@ export function HomePageContent() {
 
       dispatch(
         disconnectAllAccountsFromSite({
-          appOrigin: origin
+          siteOrigin: origin
         })
       );
       sendDisconnectAccount(

@@ -7,7 +7,7 @@ import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import * as Yup from 'yup';
 
-import { useFormValidations } from '@src/hooks';
+import { useActiveTabOrigin, useFormValidations } from '@src/hooks';
 
 import {
   FooterButtonsContainer,
@@ -26,6 +26,8 @@ export function RenameAccountPageContent() {
   const dispatch = useDispatch();
   const { accountName } = useParams();
   const { t } = useTranslation();
+
+  const siteOrigin = useActiveTabOrigin({ currentWindow: true });
 
   const existingAccountNames = useSelector(selectVaultAccountsNames);
 
@@ -52,11 +54,13 @@ export function RenameAccountPageContent() {
   } = useForm(formOptions);
 
   function onSubmit({ name }: FieldValues) {
-    if (!accountName) {
+    if (!accountName || !siteOrigin) {
       return;
     }
 
-    dispatch(renameAccount({ oldName: accountName, newName: name }));
+    dispatch(
+      renameAccount({ oldName: accountName, newName: name, siteOrigin })
+    );
     navigate(RouterPath.AccountSettings.replace(':accountName', name));
   }
 

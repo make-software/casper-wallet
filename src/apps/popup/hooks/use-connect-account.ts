@@ -43,7 +43,7 @@ export function useConnectAccount({
       dispatch(
         connectAccountToSite({
           accountName: account.name,
-          appOrigin: origin
+          siteOrigin: origin
         })
       );
 

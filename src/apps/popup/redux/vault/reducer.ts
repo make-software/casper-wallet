@@ -25,7 +25,7 @@ const initialState: State = {
   timeoutDurationSetting: TimeoutDurationSetting['5 min'],
   lastActivityTime: null,
   accounts: [],
-  connectedAccountsToSites: {},
+  accountNamesByOrigin: {},
   activeAccountName: null
 };
 
@@ -67,35 +67,40 @@ export const reducer = createReducer(initialState)
     ...state,
     activeAccountName: payload
   }))
-  .handleAction([removeAccount], (state, { payload: { name } }): State => {
-    const nextAccountsState = state.accounts.filter(
-      account => account.name !== name
-    );
-    const nextConnectedAccountsToSites = Object.fromEntries(
-      Object.entries(state.connectedAccountsToSites).filter(
-        ([accountName]) => accountName !== name
-      )
-    );
+  .handleAction(
+    [removeAccount],
+    (state, { payload: { accountName, siteOrigin } }): State => {
+      const nextAccountsState = state.accounts.filter(
+        account => account.name !== accountName
+      );
 
-    return {
-      ...state,
-      accounts: nextAccountsState,
-      activeAccountName:
-        state.activeAccountName === name
-          ? (state.accounts.length > 1 && nextAccountsState[0].name) || null
-          : state.activeAccountName,
-      connectedAccountsToSites: nextConnectedAccountsToSites
-    };
-  })
+      const nextAccountNamesByOrigin = {
+        ...state.accountNamesByOrigin,
+        [siteOrigin]: state.accountNamesByOrigin[siteOrigin].filter(
+          name => accountName !== name
+        )
+      };
+
+      return {
+        ...state,
+        accounts: nextAccountsState,
+        activeAccountName:
+          state.activeAccountName === accountName
+            ? (state.accounts.length > 1 && nextAccountsState[0].name) || null
+            : state.activeAccountName,
+        accountNamesByOrigin: nextAccountNamesByOrigin
+      };
+    }
+  )
   .handleAction(
     [renameAccount],
-    (state, { payload: { oldName, newName } }): State => {
-      const nextConnectedAccountsToSites = Object.fromEntries(
-        Object.entries(state.connectedAccountsToSites).map(
-          ([accountName, sites]) =>
-            accountName === oldName ? [newName, sites] : [accountName, sites]
+    (state, { payload: { oldName, newName, siteOrigin } }): State => {
+      const nextAccountNamesByOrigin = {
+        ...state.accountNamesByOrigin,
+        [siteOrigin]: state.accountNamesByOrigin[siteOrigin].map(accountName =>
+          accountName === oldName ? newName : accountName
         )
-      );
+      };
 
       return {
         ...state,
@@ -112,7 +117,7 @@ export const reducer = createReducer(initialState)
           state.activeAccountName === oldName
             ? newName
             : state.activeAccountName,
-        connectedAccountsToSites: nextConnectedAccountsToSites
+        accountNamesByOrigin: nextAccountNamesByOrigin
       };
     }
   )
@@ -133,27 +138,23 @@ export const reducer = createReducer(initialState)
   )
   .handleAction(
     [connectAccountToSite],
-    (state, { payload: { appOrigin, accountName } }) => ({
+    (state, { payload: { siteOrigin, accountName } }) => ({
       ...state,
-      connectedAccountsToSites: {
-        ...state.connectedAccountsToSites,
-        [accountName]:
-          accountName in state.connectedAccountsToSites
-            ? [...state.connectedAccountsToSites[accountName], appOrigin]
-            : [appOrigin]
+      accountNamesByOrigin: {
+        ...state.accountNamesByOrigin,
+        [siteOrigin]: state.accountNamesByOrigin[siteOrigin]
+          ? [...state.accountNamesByOrigin[siteOrigin], accountName]
+          : [accountName]
       }
     })
   )
   .handleAction(
     [disconnectAllAccountsFromSite],
-    (state, { payload: { appOrigin } }) => ({
+    (state, { payload: { siteOrigin } }) => ({
       ...state,
-      connectedAccountsToSites: Object.fromEntries(
-        Object.entries(state.connectedAccountsToSites).map(
-          ([accountName, sites]) => [
-            accountName,
-            sites.filter(siteOrigin => siteOrigin !== appOrigin)
-          ]
+      accountNamesByOrigin: Object.fromEntries(
+        Object.entries({ ...state.accountNamesByOrigin }).filter(
+          ([origin]) => origin !== siteOrigin
         )
       )
     })

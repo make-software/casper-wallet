@@ -15,6 +15,7 @@ import {
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { removeAccount } from '@popup/redux/vault/actions';
+import { useActiveTabOrigin } from '@src/hooks';
 
 export function RemoveAccountPageContent() {
   const navigate = useTypedNavigate();
@@ -22,15 +23,17 @@ export function RemoveAccountPageContent() {
   const { accountName } = useParams();
   const { t } = useTranslation();
 
+  const siteOrigin = useActiveTabOrigin({ currentWindow: true });
+
   const handleRemoveAccount = useCallback(() => {
-    if (!accountName) {
+    if (!accountName || !siteOrigin) {
       navigate(RouterPath.Home);
       return;
     }
 
-    dispatch(removeAccount({ name: accountName }));
+    dispatch(removeAccount({ accountName, siteOrigin }));
     navigate(RouterPath.Home);
-  }, [dispatch, navigate, accountName]);
+  }, [dispatch, navigate, accountName, siteOrigin]);
 
   if (!accountName) {
     navigate(RouterPath.Home);

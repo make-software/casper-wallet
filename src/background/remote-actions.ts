@@ -3,7 +3,7 @@ import { EmptyAction, PayloadAction } from 'typesafe-actions';
 
 import { SendConnectStatusAction } from '@content/remote-actions';
 
-export type PassToBackgroundAction =
+export type BackgroundAction =
   | RequestConnectionAction
   | SendConnectStatusAction
   | DisconnectedFromSiteAction
