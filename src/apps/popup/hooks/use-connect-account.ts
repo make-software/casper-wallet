@@ -21,7 +21,7 @@ export function useConnectAccount({
 }: UseConnectAccountProps) {
   const dispatch = useDispatch();
   const isLocked = useSelector(selectVaultIsLocked);
-  const connectedAccountsToSites = useSelector((state: RootState) =>
+  const connectedAccounts = useSelector((state: RootState) =>
     selectConnectedAccountsToOrigin(state, origin)
   );
 
@@ -32,7 +32,7 @@ export function useConnectAccount({
         return;
       }
 
-      const isConnected = connectedAccountsToSites.some(
+      const isConnected = connectedAccounts.some(
         connectedAccount => connectedAccount.name === account.name
       );
 
@@ -56,7 +56,7 @@ export function useConnectAccount({
         currentWindow
       ).catch(e => console.error(e));
     },
-    [dispatch, isLocked, connectedAccountsToSites, origin, currentWindow]
+    [dispatch, isLocked, connectedAccounts, origin, currentWindow]
   );
 
   return { connectAccount };
