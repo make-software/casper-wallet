@@ -18,7 +18,7 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["./contentScript.bundle.js"],
+      "js": ["./contentScript.bundle.js", "./scripts/inpage.bundle.js"],
       "run_at": "document_start",
       "all_frames": true
     }
@@ -33,5 +33,5 @@
     },
     "default_title": "CasperLabs Signer"
   },
-  "web_accessible_resources": ["logo64.png"]
+  "web_accessible_resources": ["logo64.png", "scripts/inpage.bundle.js"]
 }

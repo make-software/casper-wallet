@@ -1,9 +1,11 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
+import { RootState } from 'typesafe-actions';
 import styled, { css } from 'styled-components';
 
 import { PurposeForOpening, useWindowManager } from '@src/hooks';
+import { useActiveTabOrigin } from '@hooks/use-active-tab-origin';
 
 import { ContentContainer } from '@layout/containers';
 import {
@@ -20,10 +22,21 @@ import {
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
+  selectConnectedAccountsToOrigin,
+  selectActiveAccountIsConnectedToOrigin,
   selectVaultAccounts,
-  selectVaultActiveAccount
+  selectVaultActiveAccount,
+  selectVaultIsLocked
 } from '@popup/redux/vault/selectors';
-import { changeActiveAccount } from '@popup/redux/vault/actions';
+import {
+  changeActiveAccount,
+  disconnectAllAccountsFromSite
+} from '@popup/redux/vault/actions';
+import {
+  sendActiveAccountChanged,
+  sendDisconnectAccount
+} from '@content/remote-actions';
+import { Account } from '@popup/redux/vault/types';
 
 // Account info
 
@@ -82,8 +95,10 @@ const LeftAlignedFlexColumn = styled.div`
   align-items: flex-start;
 `;
 
-const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
-const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
+export const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
+export const AccountNameWithHashListItemContainer = styled(
+  LeftAlignedFlexColumn
+)`
   width: 100%;
 `;
 
@@ -115,15 +130,79 @@ export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
+  const isLocked = useSelector(selectVaultIsLocked);
+
   const { openWindow } = useWindowManager();
+  const origin = useActiveTabOrigin({ currentWindow: true });
+
+  const connectedAccounts = useSelector((state: RootState) =>
+    selectConnectedAccountsToOrigin(state, origin)
+  );
+  const isActiveAccountConnected = useSelector((state: RootState) =>
+    selectActiveAccountIsConnectedToOrigin(state, origin)
+  );
 
   const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
 
+  useEffect(() => {
+    if (activeAccount === undefined || origin === '') {
+      return;
+    }
+
+    if (origin && isActiveAccountConnected) {
+      sendActiveAccountChanged(
+        {
+          isConnected: isActiveAccountConnected,
+          isUnlocked: !isLocked,
+          activeKey: activeAccount.publicKey
+        },
+        true
+      ).catch(e => console.error(e));
+    }
+  }, [origin, activeAccount, isLocked]);
+
   const handleChangeActiveAccount = useCallback(
-    (name: string) => () => dispatch(changeActiveAccount(name)),
+    (name: string) => () => {
+      dispatch(changeActiveAccount(name));
+    },
     [dispatch]
   );
+
+  const handleDisconnectAccount = useCallback(
+    (account: Account) => {
+      if (!activeAccount || !isActiveAccountConnected || !origin) {
+        return;
+      }
+
+      dispatch(
+        disconnectAllAccountsFromSite({
+          siteOrigin: origin
+        })
+      );
+      sendDisconnectAccount(
+        {
+          isConnected: false,
+          isUnlocked: !isLocked,
+          activeKey: account.publicKey
+        },
+        true
+      ).catch(e => console.error(e));
+    },
+    [dispatch, activeAccount, isActiveAccountConnected, origin, isLocked]
+  );
+
+  const handleConnectAccount = useCallback(() => {
+    if (!activeAccount || isActiveAccountConnected) {
+      return;
+    }
+
+    if (connectedAccounts.length === 0) {
+      navigate(RouterPath.NoConnectedAccount);
+    } else {
+      navigate(RouterPath.ConnectAnotherAccount);
+    }
+  }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
 
   const accountListRows = accounts.map(account => ({
     ...account,
@@ -161,7 +240,18 @@ export function HomePageContent() {
               $30,294.34
             </Typography>
           </BalanceContainer>
-          <Button>Connect</Button>
+          {isActiveAccountConnected ? (
+            <Button
+              onClick={() => handleDisconnectAccount(activeAccount)}
+              color="secondaryBlue"
+            >
+              <Trans t={t}>Disconnect</Trans>
+            </Button>
+          ) : (
+            <Button onClick={handleConnectAccount}>
+              <Trans t={t}>Connect</Trans>
+            </Button>
+          )}
         </PageTile>
       )}
       {accountListRows.length > 0 && (
@@ -230,9 +320,9 @@ export function HomePageContent() {
               <Button
                 color="secondaryBlue"
                 onClick={() =>
-                  openWindow(PurposeForOpening.ImportAccount).catch(e =>
-                    console.error(e)
-                  )
+                  openWindow({
+                    purposeForOpening: PurposeForOpening.ImportAccount
+                  }).catch(e => console.error(e))
                 }
               >
                 <Trans t={t}>Import</Trans>
