@@ -36,17 +36,19 @@ async function handleMessage(action: RemoteAction, sender: MessageSender) {
         }
       );
       window.dispatchEvent(signerActiveAccountChanged);
-
       break;
+
     case 'send-disconnect-account':
       const signerDisconnectAccount = new CustomEvent('signer:disconnected', {
         detail: action.payload
       });
       window.dispatchEvent(signerDisconnectAccount);
-
       break;
+
     default:
-      throw new Error('Content script: Unknown message type');
+      throw new Error(
+        'Content: Unknown message type: ' + JSON.stringify(action)
+      );
   }
 }
 
@@ -103,8 +105,7 @@ function injectScript() {
 
           default:
             throw new Error(
-              '[content-script]: Unknown message type',
-              e.data.message
+              'Injected: Unknown message type: ' + JSON.stringify(e.data)
             );
         }
       });

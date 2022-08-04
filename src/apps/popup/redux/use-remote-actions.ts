@@ -50,7 +50,9 @@ export function useRemoteActions() {
           return windowId;
 
         default:
-          throw new Error('Unknown message type');
+          throw new Error(
+            'Popup: Unknown message type: ' + JSON.stringify(action)
+          );
       }
     },
     [dispatch, vaultAccountsNames, vaultAccountsSecretKeysBase64, windowId]

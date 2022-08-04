@@ -48,7 +48,9 @@ initStore().then(store => {
           return '1.4.12';
 
         default:
-          throw new Error('Unknown message type');
+          throw new Error(
+            'Background: Unknown message type: ' + JSON.stringify(action)
+          );
       }
     }
   );
