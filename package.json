@@ -108,7 +108,7 @@
     "i18next-conv": "^12.1.1",
     "jest": "^27.4.7",
     "lint-staged": "^12.3.2",
-    "markdownlint": "^0.25.1",
+    "markdownlint": "^0.26.1",
     "markdownlint-cli": "^0.31.1",
     "prettier": "^2.5.1",
     "remote-redux-devtools": "^0.5.16",
