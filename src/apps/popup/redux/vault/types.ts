@@ -7,6 +7,8 @@ export interface Account {
   publicKey: string;
 }
 
+type AccountNamesByOrigin = Record<string, string[]>;
+
 export type VaultState = {
   password: string | null;
   isLocked: boolean;
@@ -14,4 +16,5 @@ export type VaultState = {
   lastActivityTime: number | null;
   accounts: Account[];
   activeAccountName: string | null;
+  accountNamesByOrigin: AccountNamesByOrigin;
 };

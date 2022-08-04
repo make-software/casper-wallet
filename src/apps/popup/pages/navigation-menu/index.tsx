@@ -67,9 +67,9 @@ export function NavigationMenuPageContent() {
         iconPath: 'assets/icons/upload.svg',
         handleOnClick: () => {
           closeNavigationMenu();
-          openWindow(PurposeForOpening.ImportAccount).catch(e =>
-            console.error(e)
-          );
+          openWindow({
+            purposeForOpening: PurposeForOpening.ImportAccount
+          }).catch(e => console.error(e));
         }
       },
       {

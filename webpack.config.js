@@ -49,8 +49,16 @@ const options = {
       'import-account-with-file',
       'index.tsx'
     ),
+    connectToApp: path.join(
+      __dirname,
+      'src',
+      'apps',
+      'connect-to-app',
+      'index.tsx'
+    ),
     background: path.join(__dirname, 'src', 'background', 'index.ts'),
-    contentScript: path.join(__dirname, 'src', 'content', 'index.ts')
+    contentScript: path.join(__dirname, 'src', 'content', 'index.ts'),
+    'scripts/inpage': path.join(__dirname, 'src', 'content', 'inpage.ts')
   },
   chromeExtensionBoilerplate: {
     notHotReload: ['contentScript', 'devtools']
@@ -176,6 +184,15 @@ const options = {
         }
       ]
     }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: 'src/assets/illustrations',
+          to: path.join(__dirname, buildDir, 'assets/illustrations'),
+          force: true
+        }
+      ]
+    }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, 'src', 'apps', 'popup', 'index.html'),
       filename: 'popup.html',
@@ -192,6 +209,18 @@ const options = {
       ),
       filename: 'import-account-with-file.html',
       chunks: ['importAccountWithFile'],
+      cache: false
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(
+        __dirname,
+        'src',
+        'apps',
+        'connect-to-app',
+        'index.html'
+      ),
+      filename: 'connect-to-app.html',
+      chunks: ['connectToApp'],
       cache: false
     }),
     new webpack.ProvidePlugin({

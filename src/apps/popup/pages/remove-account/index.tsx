@@ -28,7 +28,7 @@ export function RemoveAccountPageContent() {
       return;
     }
 
-    dispatch(removeAccount({ name: accountName }));
+    dispatch(removeAccount({ accountName }));
     navigate(RouterPath.Home);
   }, [dispatch, navigate, accountName]);
 

@@ -25,10 +25,62 @@ export const selectVaultAccountsNames = createSelector(
   accounts => accounts.map(account => account.name)
 );
 
-export const selectVaultActiveAccount = (state: RootState) =>
-  state.vault.accounts.find(
-    account => account.name === state.vault.activeAccountName
-  );
+export const selectVaultActiveAccountName = (state: RootState) =>
+  state.vault.activeAccountName;
+export const selectVaultActiveAccount = createSelector(
+  selectVaultAccounts,
+  selectVaultActiveAccountName,
+  (accounts, activeAccountName) =>
+    accounts.find(account => account.name === activeAccountName)
+);
+
+const selectActiveTabOrigin = (_: RootState, activeTabOrigin: string | null) =>
+  activeTabOrigin;
+
+const selectVaultAccountNamesByOrigin = (state: RootState) =>
+  state.vault.accountNamesByOrigin;
+
+export const selectIsSomeAccountConnectedToOrigin = createSelector(
+  selectActiveTabOrigin,
+  selectVaultAccountNamesByOrigin,
+  (origin, accountNamesByOrigin) => origin && origin in accountNamesByOrigin
+);
+
+export const selectActiveAccountIsConnectedToOrigin = createSelector(
+  selectActiveTabOrigin,
+  selectVaultActiveAccountName,
+  selectVaultAccountNamesByOrigin,
+  (origin, activeAccountName, accountNamesByOrigin) => {
+    if (
+      origin === null ||
+      activeAccountName === null ||
+      accountNamesByOrigin[origin] == null
+    ) {
+      return false;
+    }
+
+    return accountNamesByOrigin[origin].includes(activeAccountName);
+  }
+);
+
+export const selectConnectedAccountsToOrigin = createSelector(
+  selectActiveTabOrigin,
+  selectVaultAccounts,
+  selectVaultAccountNamesByOrigin,
+  (origin, accounts, accountNamesByOrigin): Account[] => {
+    if (origin === null || accountNamesByOrigin[origin] == null) {
+      return [];
+    }
+
+    const connectedAccountNames = accountNamesByOrigin[origin];
+
+    return connectedAccountNames
+      .map(accountName =>
+        accounts.find(account => account.name === accountName)
+      )
+      .filter((account): account is Account => !!account);
+  }
+);
 
 export const selectVaultAccountsSecretKeysBase64 = createSelector(
   selectVaultAccounts,

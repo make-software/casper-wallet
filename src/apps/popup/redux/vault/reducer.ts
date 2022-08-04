@@ -11,7 +11,9 @@ import {
   importAccount,
   removeAccount,
   renameAccount,
-  changeActiveAccount
+  changeActiveAccount,
+  connectAccountToSite,
+  disconnectAllAccountsFromSite
 } from './actions';
 import { VaultState } from './types';
 
@@ -23,6 +25,7 @@ const initialState: State = {
   timeoutDurationSetting: TimeoutDurationSetting['5 min'],
   lastActivityTime: null,
   accounts: [],
+  accountNamesByOrigin: {},
   activeAccountName: null
 };
 
@@ -64,36 +67,63 @@ export const reducer = createReducer(initialState)
     ...state,
     activeAccountName: payload
   }))
-  .handleAction([removeAccount], (state, { payload: { name } }): State => {
-    const nextAccountsState = state.accounts.filter(
-      account => account.name !== name
-    );
+  .handleAction(
+    [removeAccount],
+    (state, { payload: { accountName } }): State => {
+      const nextAccountsState = state.accounts.filter(
+        account => account.name !== accountName
+      );
 
-    return {
-      ...state,
-      accounts: nextAccountsState,
-      activeAccountName:
-        state.activeAccountName === name
-          ? (state.accounts.length > 1 && nextAccountsState[0].name) || null
-          : state.activeAccountName
-    };
-  })
+      const nextAccountNamesByOrigin = Object.fromEntries(
+        Object.keys(state.accountNamesByOrigin).map(origin => [
+          origin,
+          state.accountNamesByOrigin[origin].filter(
+            name => accountName !== name
+          )
+        ])
+      );
+
+      return {
+        ...state,
+        accounts: nextAccountsState,
+        activeAccountName:
+          state.activeAccountName === accountName
+            ? (state.accounts.length > 1 && nextAccountsState[0].name) || null
+            : state.activeAccountName,
+        accountNamesByOrigin: nextAccountNamesByOrigin
+      };
+    }
+  )
   .handleAction(
     [renameAccount],
-    (state, { payload: { oldName, newName } }): State => ({
-      ...state,
-      accounts: state.accounts.map(account => {
-        if (account.name === oldName) {
-          return {
-            ...account,
-            name: newName
-          };
-        }
-        return account;
-      }),
-      activeAccountName:
-        state.activeAccountName === oldName ? newName : state.activeAccountName
-    })
+    (state, { payload: { oldName, newName } }): State => {
+      const nextAccountNamesByOrigin = Object.fromEntries(
+        Object.keys(state.accountNamesByOrigin).map(origin => [
+          origin,
+          state.accountNamesByOrigin[origin].map(accountName =>
+            accountName === oldName ? newName : accountName
+          )
+        ])
+      );
+
+      return {
+        ...state,
+        accounts: state.accounts.map(account => {
+          if (account.name === oldName) {
+            return {
+              ...account,
+              name: newName
+            };
+          }
+          return account;
+        }),
+        activeAccountName:
+          state.activeAccountName === oldName
+            ? newName
+            : state.activeAccountName,
+        accountNamesByOrigin: nextAccountNamesByOrigin
+      };
+    }
   )
   .handleAction(
     [changeTimeoutDuration],
@@ -108,5 +138,29 @@ export const reducer = createReducer(initialState)
     (state, { payload: { lastActivityTime } }) => ({
       ...state,
       lastActivityTime
+    })
+  )
+  .handleAction(
+    [connectAccountToSite],
+    (state, { payload: { siteOrigin, accountName } }) => ({
+      ...state,
+      accountNamesByOrigin: {
+        ...state.accountNamesByOrigin,
+        [siteOrigin]:
+          state.accountNamesByOrigin[siteOrigin]?.length > 0
+            ? [...state.accountNamesByOrigin[siteOrigin], accountName]
+            : [accountName]
+      }
+    })
+  )
+  .handleAction(
+    [disconnectAllAccountsFromSite],
+    (state, { payload: { siteOrigin } }) => ({
+      ...state,
+      accountNamesByOrigin: Object.fromEntries(
+        Object.entries({ ...state.accountNamesByOrigin }).filter(
+          ([origin]) => origin !== siteOrigin
+        )
+      )
     })
   );

@@ -44,6 +44,7 @@ interface Props {
 }
 
 export const FooterButtonsContainer = styled.div<Props>`
+  margin-top: 16px;
   position: absolute;
   bottom: 0;
   left: 0;
@@ -58,4 +59,21 @@ export const FooterButtonsContainer = styled.div<Props>`
   padding: ${({ theme }) => theme.padding[1.6]};
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
+`;
+
+export const ListItemClickableContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+
+  width: 100%;
+  cursor: pointer;
+
+  padding: 14px 18px;
+  & > * + * {
+    padding-left: 18px;
+  }
+
+  & > span {
+    white-space: nowrap;
+  }
 `;

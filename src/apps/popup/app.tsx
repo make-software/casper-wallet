@@ -13,6 +13,9 @@ import { NoAccountsPageContent } from '@popup/pages/no-accounts';
 import { ResetVaultPageContent } from '@popup/pages/reset-vault';
 import { TimeoutPageContent } from '@popup/pages/timeout';
 import { UnlockVaultPageContent } from '@popup/pages/unlock-vault';
+import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
+import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
+
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { Header } from './layout';
@@ -24,6 +27,7 @@ import {
 } from './redux/vault/selectors';
 
 import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
+
 import { useRemoteActions } from './redux/use-remote-actions';
 import {
   AccountSettingsPageContent,
@@ -149,6 +153,15 @@ export function App() {
             }
           />
           <Route
+            path={RouterPath.NoConnectedAccount}
+            element={
+              <Layout
+                Header={<Header withLock withMenu />}
+                Content={<NoConnectedAccountPageContent />}
+              />
+            }
+          />
+          <Route
             path={RouterPath.UnlockVault}
             element={
               <Layout
@@ -163,6 +176,15 @@ export function App() {
               <Layout
                 Header={<Header submenuActionType="close" withMenu withLock />}
                 Content={<TimeoutPageContent />}
+              />
+            }
+          />
+          <Route
+            path={RouterPath.ConnectAnotherAccount}
+            element={
+              <Layout
+                Header={<Header withLock withMenu submenuActionType="cancel" />}
+                Content={<ConnectAnotherAccountPageContent />}
               />
             }
           />
