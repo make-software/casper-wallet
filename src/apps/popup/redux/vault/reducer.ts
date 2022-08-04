@@ -74,12 +74,14 @@ export const reducer = createReducer(initialState)
         account => account.name !== accountName
       );
 
-      const nextAccountNamesByOrigin = {
-        ...state.accountNamesByOrigin,
-        [siteOrigin]: state.accountNamesByOrigin[siteOrigin].filter(
-          name => accountName !== name
-        )
-      };
+      const nextAccountNamesByOrigin = Object.fromEntries(
+        Object.keys(state.accountNamesByOrigin).map(origin => [
+          origin,
+          state.accountNamesByOrigin[origin].filter(
+            name => accountName !== name
+          )
+        ])
+      );
 
       return {
         ...state,
@@ -95,12 +97,14 @@ export const reducer = createReducer(initialState)
   .handleAction(
     [renameAccount],
     (state, { payload: { oldName, newName, siteOrigin } }): State => {
-      const nextAccountNamesByOrigin = {
-        ...state.accountNamesByOrigin,
-        [siteOrigin]: state.accountNamesByOrigin[siteOrigin].map(accountName =>
-          accountName === oldName ? newName : accountName
-        )
-      };
+      const nextAccountNamesByOrigin = Object.fromEntries(
+        Object.keys(state.accountNamesByOrigin).map(origin => [
+          origin,
+          state.accountNamesByOrigin[origin].map(accountName =>
+            accountName === oldName ? newName : accountName
+          )
+        ])
+      );
 
       return {
         ...state,
@@ -142,9 +146,10 @@ export const reducer = createReducer(initialState)
       ...state,
       accountNamesByOrigin: {
         ...state.accountNamesByOrigin,
-        [siteOrigin]: state.accountNamesByOrigin[siteOrigin]
-          ? [...state.accountNamesByOrigin[siteOrigin], accountName]
-          : [accountName]
+        [siteOrigin]:
+          state.accountNamesByOrigin[siteOrigin]?.length > 0
+            ? [...state.accountNamesByOrigin[siteOrigin], accountName]
+            : [accountName]
       }
     })
   )
