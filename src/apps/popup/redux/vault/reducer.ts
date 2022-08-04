@@ -69,7 +69,7 @@ export const reducer = createReducer(initialState)
   }))
   .handleAction(
     [removeAccount],
-    (state, { payload: { accountName, siteOrigin } }): State => {
+    (state, { payload: { accountName } }): State => {
       const nextAccountsState = state.accounts.filter(
         account => account.name !== accountName
       );
@@ -96,7 +96,7 @@ export const reducer = createReducer(initialState)
   )
   .handleAction(
     [renameAccount],
-    (state, { payload: { oldName, newName, siteOrigin } }): State => {
+    (state, { payload: { oldName, newName } }): State => {
       const nextAccountNamesByOrigin = Object.fromEntries(
         Object.keys(state.accountNamesByOrigin).map(origin => [
           origin,
