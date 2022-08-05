@@ -1,7 +1,10 @@
 import React, { Suspense } from 'react';
 import { render } from 'react-dom';
 import { HashRouter } from 'react-router-dom';
+import { GlobalScrollbar } from 'mac-scrollbar';
 import { ThemeProvider } from 'styled-components';
+
+import 'mac-scrollbar/dist/mac-scrollbar.css';
 
 import { REDUX_STORAGE_KEY } from '@libs/services/constants';
 import { GlobalStyle, themeConfig } from '@libs/ui';
@@ -19,6 +22,7 @@ initStore().then(store =>
       <ErrorBoundary>
         <ThemeProvider theme={themeConfig}>
           <GlobalStyle />
+          <GlobalScrollbar />
           <ReduxProvider store={store}>
             <HashRouter>
               <App />

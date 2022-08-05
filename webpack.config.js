@@ -84,6 +84,7 @@ const options = {
         loader: 'html-loader',
         exclude: /node_modules/
       },
+      { test: /\.css$/i, use: ['style-loader', 'css-loader'] },
       { test: /\.(ts|tsx)$/, loader: 'ts-loader', exclude: /node_modules/ },
       {
         test: /\.(js|jsx)$/,
