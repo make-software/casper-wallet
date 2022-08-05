@@ -1,0 +1,1 @@
+xcrun safari-web-extension-converter --no-prompt --no-open --project-location ./output/safari --macos-only ./output/firefox
