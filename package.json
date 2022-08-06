@@ -116,7 +116,7 @@
     "lint-staged": "^12.3.2",
     "markdownlint": "^0.25.1",
     "markdownlint-cli": "^0.31.1",
-    "prettier": "^2.5.1",
+    "prettier": "^2.7.1",
     "remote-redux-devtools": "^0.5.16",
     "selenium-webdriver": "^4.1.1",
     "source-map-loader": "^3.0.0",
