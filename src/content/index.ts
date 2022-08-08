@@ -54,17 +54,16 @@ async function handleMessage(action: RemoteAction, sender: MessageSender) {
 
 Browser.runtime.onMessage.addListener(handleMessage);
 
-function injectScript() {
+function injectInpageScript() {
   try {
-    let jsPath = 'scripts/inpage.bundle.js';
-    const container = document.head || document.documentElement;
+    const documentHeadOrRoot = document.head || document.documentElement;
+    const inpageScriptPath = 'scripts/inpage.bundle.js';
+
     const scriptTag = document.createElement('script');
     scriptTag.setAttribute('type', 'text/javascript');
-    scriptTag.src = Browser.runtime.getURL(jsPath);
-
-    container.insertBefore(scriptTag, container.children[0]);
+    scriptTag.src = Browser.runtime.getURL(inpageScriptPath);
     scriptTag.onload = function () {
-      container.removeChild(scriptTag);
+      documentHeadOrRoot.removeChild(scriptTag);
 
       function sendReplyMessage(message: string, value: boolean | string) {
         window.postMessage({
@@ -75,7 +74,7 @@ function injectScript() {
       }
 
       window.addEventListener('message', async e => {
-        if (e.data.type !== 'request') {
+        if (e.data?.type !== 'request') {
           return;
         }
 
@@ -110,9 +109,11 @@ function injectScript() {
         }
       });
     };
+
+    documentHeadOrRoot.insertBefore(scriptTag, documentHeadOrRoot.children[0]);
   } catch (e) {
     console.error('CasperLabs provider injection failed.', e);
   }
 }
 
-injectScript();
+injectInpageScript();
