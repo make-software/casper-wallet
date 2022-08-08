@@ -184,7 +184,9 @@ export function HomePageContent() {
           </BalanceContainer>
           {isActiveAccountConnected ? (
             <Button
-              onClick={() => handleDisconnectAccount(activeAccount)}
+              onClick={() =>
+                handleDisconnectAccount(activeAccount, origin as string)
+              }
               color="secondaryBlue"
             >
               <Trans t={t}>Disconnect</Trans>

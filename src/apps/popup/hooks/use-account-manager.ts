@@ -86,7 +86,7 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
   //  and implement and use `disconnectAccountsFromSite` action
   //  instead `disconnectAllAccountsFromSite` for `handleDisconnectAccount`
   const handleDisconnectAccount = useCallback(
-    async (account: Account, redirectToPage?: string) => {
+    async (account: Account, origin: string, redirectToPage?: string) => {
       if (!activeAccount || !isActiveAccountConnected || !origin) {
         return;
       }
@@ -116,13 +116,12 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
       currentWindow,
       activeAccount,
       isActiveAccountConnected,
-      origin,
       isLocked
     ]
   );
 
   const handleDisconnectAllAccounts = useCallback(
-    async (redirectToPage?: string) => {
+    async (origin: string, redirectToPage?: string) => {
       if (!activeAccount || !isActiveAccountConnected || !origin) {
         return;
       }
@@ -152,7 +151,6 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
       currentWindow,
       activeAccount,
       isActiveAccountConnected,
-      origin,
       isLocked
     ]
   );

@@ -1,16 +1,19 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+
 import { Hash, HashVariant, List, Typography } from '@libs/ui';
 import { ContentContainer, HeaderTextContainer } from '@src/layout';
-import { useSelector } from 'react-redux';
+
 import {
   AccountNamesAndPublicKeys,
   selectAccountNamesAndPublicKeysByOrigin
 } from '@popup/redux/vault/selectors';
-import { SiteControls } from '@popup/pages/connected-sites/site-controls';
+
 import { useAccountManager } from '@popup/hooks/use-account-manager';
-import { RouterPath } from '@popup/router';
+
+import { SiteControls } from '@popup/pages/connected-sites/site-controls';
 
 const CentredFlexRow = styled.div`
   display: flex;
@@ -49,7 +52,7 @@ export function ConnectedSitesPage() {
 
   const lists = Object.entries(accountNamesAndPublicKeysByOrigin).map(
     ([origin, accountNamesAndPublicKeys]) => [
-      { id: origin, origin: origin.split('://')[1] } as SiteOriginListRow,
+      { id: origin, origin },
       ...accountNamesAndPublicKeys
     ]
   );
@@ -68,13 +71,14 @@ export function ConnectedSitesPage() {
           renderRow={(row, index) => {
             if (index === 0) {
               const { id, origin } = row as SiteOriginListRow;
+              const siteTitle = origin.split('://')[1];
 
               return (
                 <SiteControls
                   key={id}
-                  siteTitle={origin}
+                  siteTitle={siteTitle}
                   disconnectSite={async () => {
-                    await handleDisconnectAllAccounts(RouterPath.Home);
+                    await handleDisconnectAllAccounts(origin);
                   }}
                 />
               );

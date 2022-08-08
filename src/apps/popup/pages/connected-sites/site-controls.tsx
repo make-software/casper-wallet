@@ -1,7 +1,8 @@
 import React from 'react';
-import { Button, Typography } from '@libs/ui';
 import { useTranslation, Trans } from 'react-i18next';
 import styled from 'styled-components';
+
+import { Button, Typography } from '@libs/ui';
 
 const SiteControlsContainer = styled.div`
   display: flex;

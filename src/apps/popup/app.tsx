@@ -166,7 +166,7 @@ export function App() {
             path={RouterPath.ConnectedSites}
             element={
               <Layout
-                Header={<Header withMenu withLock />}
+                Header={<Header submenuActionType="back" withMenu withLock />}
                 Content={<ConnectedSitesPage />}
               />
             }

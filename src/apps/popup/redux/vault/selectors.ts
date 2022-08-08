@@ -122,6 +122,11 @@ export const selectAccountNamesAndPublicKeysByOrigin = createSelector(
   }
 );
 
+export const selectCountOfConnectedSites = createSelector(
+  selectVaultAccountNamesByOrigin,
+  accountNamesByOrigin => Object.keys(accountNamesByOrigin).length
+);
+
 export const selectVaultAccountsSecretKeysBase64 = createSelector(
   selectVaultAccounts,
   accounts => accounts.map(account => account.secretKey)
