@@ -76,7 +76,11 @@ export function NavigationMenuPageContent() {
         id: 3,
         title: t('Connected sites'),
         iconPath: 'assets/icons/link.svg',
-        currentValue: 3
+        currentValue: 3,
+        handleOnClick: () => {
+          closeNavigationMenu();
+          navigate(RouterPath.ConnectedSites);
+        }
       },
       {
         id: 4,

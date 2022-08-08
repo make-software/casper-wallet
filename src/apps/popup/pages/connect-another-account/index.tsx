@@ -1,5 +1,5 @@
-import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
 import styled from 'styled-components';
@@ -20,15 +20,10 @@ import {
 
 import {
   selectConnectedAccountsToOrigin,
-  selectVaultAccounts,
-  selectVaultActiveAccount,
-  selectVaultIsLocked
+  selectVaultActiveAccount
 } from '@popup/redux/vault/selectors';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import { changeActiveAccount } from '@popup/redux/vault/actions';
-import { useConnectAccount } from '@popup/hooks/use-connect-account';
-import { Account } from '@popup/redux/vault/types';
-import { sendActiveAccountChanged } from '@content/remote-actions';
+import { RouterPath } from '@popup/router';
+import { useAccountManager } from '@popup/hooks/use-account-manager';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;
@@ -58,54 +53,17 @@ export const SpaceBetweenContainer = styled(CentredFlexRow)`
 `;
 
 export function ConnectAnotherAccountPageContent() {
-  const dispatch = useDispatch();
-  const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
   const activeTabOrigin = useActiveTabOrigin({ currentWindow: true });
-
-  const isLocked = useSelector(selectVaultIsLocked);
-  const { connectAccount } = useConnectAccount({
-    origin: activeTabOrigin,
-    currentWindow: true
-  });
+  const { handleConnectAccount, handleChangeActiveAccount } = useAccountManager(
+    { currentWindow: true }
+  );
 
   const connectedAccountsToActiveTab = useSelector((state: RootState) =>
     selectConnectedAccountsToOrigin(state, activeTabOrigin)
   );
-  const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
-
-  const handleConnectAccountToSite = useCallback(
-    async (account: Account) => {
-      await connectAccount(account);
-      navigate(RouterPath.Home);
-    },
-    [navigate, connectAccount]
-  );
-
-  const handleSwitchToAccount = useCallback(
-    (accountName: string) => {
-      dispatch(changeActiveAccount(accountName));
-
-      const nextAccount = accounts.find(
-        account => account.name === accountName
-      );
-
-      if (nextAccount) {
-        sendActiveAccountChanged(
-          {
-            isConnected: true,
-            isUnlocked: !isLocked,
-            activeKey: nextAccount.publicKey
-          },
-          true
-        ).catch(e => console.error(e));
-      }
-      navigate(RouterPath.Home);
-    },
-    [dispatch, accounts, isLocked, navigate]
-  );
 
   const connectedAccountsListItems = connectedAccountsToActiveTab.map(
     account => ({
@@ -146,7 +104,9 @@ export function ConnectAnotherAccountPageContent() {
               <Button
                 variant="inline"
                 width="100"
-                onClick={() => handleConnectAccountToSite(activeAccount)}
+                onClick={() =>
+                  handleConnectAccount(activeAccount, RouterPath.Home)
+                }
               >
                 <Trans t={t}>Connect</Trans>
               </Button>
@@ -180,7 +140,9 @@ export function ConnectAnotherAccountPageContent() {
                 color="secondaryBlue"
                 variant="inline"
                 width="100"
-                onClick={() => handleSwitchToAccount(account.name)}
+                onClick={() =>
+                  handleChangeActiveAccount(account.name, RouterPath.Home)
+                }
               >
                 <Trans t={t}>Switch</Trans>
               </Button>

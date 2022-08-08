@@ -6,6 +6,7 @@ export enum RouterPath {
   RenameAccount = '/rename-account/:accountName',
   NoAccounts = '/no-accounts',
   NoConnectedAccount = '/no-connected-account',
+  ConnectedSites = '/connected-sites',
   UnlockVault = '/unlock-vault',
   Timeout = '/timeout',
   ResetVault = '/reset-vault',

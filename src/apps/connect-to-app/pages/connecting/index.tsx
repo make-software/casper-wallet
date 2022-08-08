@@ -9,11 +9,11 @@ import {
   selectVaultAccounts,
   selectVaultIsLocked
 } from '@popup/redux/vault/selectors';
-import { useConnectAccount } from '@popup/hooks/use-connect-account';
 import { closeWindow } from '@connect-to-app/utils/closeWindow';
 import { sendActiveAccountChanged } from '@content/remote-actions';
 import { Account } from '@popup/redux/vault/types';
 import { changeActiveAccount } from '@popup/redux/vault/actions';
+import { useAccountManager } from '@popup/hooks/use-account-manager';
 
 const PageContainer = styled.div`
   display: flex;
@@ -93,8 +93,7 @@ export function ConnectingPage({
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isLocked = useSelector(selectVaultIsLocked);
 
-  const { connectAccount } = useConnectAccount({
-    origin,
+  const { handleConnectAccount } = useAccountManager({
     currentWindow: false
   });
 
@@ -121,7 +120,7 @@ export function ConnectingPage({
       const account = accounts.find(account => account.name === accountName);
 
       if (account) {
-        await connectAccount(account);
+        await handleConnectAccount(account);
       }
     });
 
@@ -141,7 +140,7 @@ export function ConnectingPage({
       setTimeout(() => closeWindow(), 1000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [handleConnectAccount]);
 
   return (
     <PageContainer>

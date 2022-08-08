@@ -82,6 +82,46 @@ export const selectConnectedAccountsToOrigin = createSelector(
   }
 );
 
+export interface AccountNamesAndPublicKeys {
+  id: string;
+  name: string;
+  publicKey: string;
+}
+
+export const selectAccountNamesAndPublicKeysByOrigin = createSelector(
+  selectVaultAccountNamesByOrigin,
+  selectVaultAccounts,
+  (accountNamesByOrigin, accounts) => {
+    return Object.fromEntries(
+      Object.entries(accountNamesByOrigin).map(([origin, accountNames]) => [
+        origin,
+        accountNames
+          .map(accountName => {
+            const account = accounts.find(
+              account => account.name === accountName
+            );
+
+            if (account === undefined) {
+              return null;
+            }
+
+            return {
+              id: account.name,
+              name: account.name,
+              publicKey: account.publicKey
+            };
+          })
+          .filter(
+            (
+              accountNamesAndPublicKeys
+            ): accountNamesAndPublicKeys is AccountNamesAndPublicKeys =>
+              !!accountNamesAndPublicKeys
+          )
+      ])
+    );
+  }
+);
+
 export const selectVaultAccountsSecretKeysBase64 = createSelector(
   selectVaultAccounts,
   accounts => accounts.map(account => account.secretKey)

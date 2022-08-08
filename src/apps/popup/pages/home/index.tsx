@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useCallback } from 'react';
+import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
 import styled, { css } from 'styled-components';
@@ -22,21 +22,12 @@ import {
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
-  selectConnectedAccountsToOrigin,
   selectActiveAccountIsConnectedToOrigin,
+  selectConnectedAccountsToOrigin,
   selectVaultAccounts,
-  selectVaultActiveAccount,
-  selectVaultIsLocked
+  selectVaultActiveAccount
 } from '@popup/redux/vault/selectors';
-import {
-  changeActiveAccount,
-  disconnectAllAccountsFromSite
-} from '@popup/redux/vault/actions';
-import {
-  sendActiveAccountChanged,
-  sendDisconnectAccount
-} from '@content/remote-actions';
-import { Account } from '@popup/redux/vault/types';
+import { useAccountManager } from '@popup/hooks/use-account-manager';
 
 // Account info
 
@@ -126,70 +117,21 @@ const ButtonsContainer = styled.div`
 `;
 
 export function HomePageContent() {
-  const dispatch = useDispatch();
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  const isLocked = useSelector(selectVaultIsLocked);
-
   const { openWindow } = useWindowManager();
   const origin = useActiveTabOrigin({ currentWindow: true });
-
-  const connectedAccounts = useSelector((state: RootState) =>
-    selectConnectedAccountsToOrigin(state, origin)
-  );
+  const { handleChangeActiveAccount, handleDisconnectAccount } =
+    useAccountManager({ currentWindow: true });
   const isActiveAccountConnected = useSelector((state: RootState) =>
     selectActiveAccountIsConnectedToOrigin(state, origin)
   );
 
   const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
-
-  useEffect(() => {
-    if (activeAccount === undefined || origin === '') {
-      return;
-    }
-
-    if (origin && isActiveAccountConnected) {
-      sendActiveAccountChanged(
-        {
-          isConnected: isActiveAccountConnected,
-          isUnlocked: !isLocked,
-          activeKey: activeAccount.publicKey
-        },
-        true
-      ).catch(e => console.error(e));
-    }
-  }, [origin, activeAccount, isLocked]);
-
-  const handleChangeActiveAccount = useCallback(
-    (name: string) => () => {
-      dispatch(changeActiveAccount(name));
-    },
-    [dispatch]
-  );
-
-  const handleDisconnectAccount = useCallback(
-    (account: Account) => {
-      if (!activeAccount || !isActiveAccountConnected || !origin) {
-        return;
-      }
-
-      dispatch(
-        disconnectAllAccountsFromSite({
-          siteOrigin: origin
-        })
-      );
-      sendDisconnectAccount(
-        {
-          isConnected: false,
-          isUnlocked: !isLocked,
-          activeKey: account.publicKey
-        },
-        true
-      ).catch(e => console.error(e));
-    },
-    [dispatch, activeAccount, isActiveAccountConnected, origin, isLocked]
+  const connectedAccounts = useSelector((state: RootState) =>
+    selectConnectedAccountsToOrigin(state, origin)
   );
 
   const handleConnectAccount = useCallback(() => {
@@ -262,7 +204,7 @@ export function HomePageContent() {
           renderRow={account => (
             <ListItemContainer key={account.name}>
               <ListItemClickableContainer
-                onClick={handleChangeActiveAccount(account.name)}
+                onClick={() => handleChangeActiveAccount(account.name)}
               >
                 <Checkbox
                   checked={
