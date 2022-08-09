@@ -128,48 +128,6 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
     [dispatch, currentWindow, origin, isLocked, connectedAccountNames]
   );
 
-  const disconnectAccount = useCallback(
-    async (accountName: string, origin: string) => {
-      if (origin == null) {
-        return;
-      }
-
-      if (accountNamesByOrigin[origin].length === 1) {
-        await disconnectAllAccounts(origin);
-        return;
-      }
-
-      if (activeAccount == null || !isActiveAccountConnected) {
-        return;
-      }
-
-      dispatch(
-        disconnectAccountFromSite({
-          siteOrigin: origin,
-          accountName
-        })
-      );
-
-      const nextActiveAccount = getNextActiveAccount(
-        accounts,
-        connectedAccountNames.filter(name => accountName !== name),
-        activeAccount
-      );
-
-      if (nextActiveAccount) {
-        await changeActiveAccount(nextActiveAccount.name);
-      }
-    },
-    [
-      dispatch,
-      activeAccount,
-      isActiveAccountConnected,
-      accounts,
-      connectedAccountNames,
-      changeActiveAccount
-    ]
-  );
-
   const disconnectAllAccounts = useCallback(
     async (origin: string) => {
       if (!origin) {
@@ -209,6 +167,50 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
       }
     },
     [dispatch, currentWindow, accountNamesByOrigin, accounts, isLocked]
+  );
+
+  const disconnectAccount = useCallback(
+    async (accountName: string, origin: string) => {
+      if (origin == null) {
+        return;
+      }
+
+      if (accountNamesByOrigin[origin].length === 1) {
+        await disconnectAllAccounts(origin);
+        return;
+      }
+
+      if (activeAccount == null || !isActiveAccountConnected) {
+        return;
+      }
+
+      dispatch(
+        disconnectAccountFromSite({
+          siteOrigin: origin,
+          accountName
+        })
+      );
+
+      const nextActiveAccount = getNextActiveAccount(
+        accounts,
+        connectedAccountNames.filter(name => accountName !== name),
+        activeAccount
+      );
+
+      if (nextActiveAccount) {
+        await changeActiveAccount(nextActiveAccount.name);
+      }
+    },
+    [
+      dispatch,
+      accountNamesByOrigin,
+      activeAccount,
+      isActiveAccountConnected,
+      accounts,
+      connectedAccountNames,
+      disconnectAllAccounts,
+      changeActiveAccount
+    ]
   );
 
   return {

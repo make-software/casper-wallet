@@ -11,7 +11,7 @@ import {
 } from '@popup/redux/vault/selectors';
 import { closeWindow } from '@connect-to-app/utils/closeWindow';
 import { sendActiveAccountChanged } from '@content/remote-actions';
-import { setActiveAccountName } from '@popup/redux/vault/actions';
+import { changeActiveAccount } from '@popup/redux/vault/actions';
 import {
   getNextActiveAccount,
   useAccountManager
@@ -100,7 +100,7 @@ export function ConnectingPage({
     });
 
     if (nextActiveAccount) {
-      dispatch(setActiveAccountName(nextActiveAccount.name));
+      dispatch(changeActiveAccount(nextActiveAccount.name));
       sendActiveAccountChanged(
         {
           isConnected: true,
