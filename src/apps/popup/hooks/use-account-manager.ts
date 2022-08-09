@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { Account } from '@popup/redux/vault/types';
 import {
-  setActiveAccountName,
+  changeActiveAccount as changeActiveAccountAction,
   connectAccountToSite,
   disconnectAccountFromSite,
   disconnectAllAccountsFromSite
@@ -14,7 +14,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import {
   selectActiveAccountIsConnectedToOrigin,
-  selectConnectedAccountNames,
+  selectConnectedAccountNamesToActiveTab,
   selectVaultAccountNamesByOrigin,
   selectVaultAccounts,
   selectVaultActiveAccount,
@@ -64,7 +64,7 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
   const accounts = useSelector(selectVaultAccounts);
   const accountNamesByOrigin = useSelector(selectVaultAccountNamesByOrigin);
   const connectedAccountNames = useSelector((state: RootState) =>
-    selectConnectedAccountNames(state, origin)
+    selectConnectedAccountNamesToActiveTab(state, origin)
   );
   const isActiveAccountConnected = useSelector((state: RootState) =>
     selectActiveAccountIsConnectedToOrigin(state, origin)
@@ -75,7 +75,7 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
       const nextActiveAccount = accounts.find(account => account.name === name);
 
       if (nextActiveAccount) {
-        dispatch(setActiveAccountName(name));
+        dispatch(changeActiveAccountAction(name));
         const isNextActiveAccountConnected = connectedAccountNames.some(
           accountName => accountName === nextActiveAccount.name
         );

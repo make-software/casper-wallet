@@ -63,7 +63,7 @@ export const selectActiveAccountIsConnectedToOrigin = createSelector(
   }
 );
 
-export const selectConnectedAccountNames = createSelector(
+export const selectConnectedAccountNamesToActiveTab = createSelector(
   selectActiveTabOrigin,
   selectVaultAccountNamesByOrigin,
   (origin, accountNamesByOrigin) =>
@@ -72,18 +72,12 @@ export const selectConnectedAccountNames = createSelector(
       : []
 );
 
-export const selectConnectedAccountsToOrigin = createSelector(
+export const selectConnectedAccountsToActiveTab = createSelector(
   selectActiveTabOrigin,
   selectVaultAccounts,
-  selectVaultAccountNamesByOrigin,
-  (origin, accounts, accountNamesByOrigin): Account[] => {
-    if (origin === null || accountNamesByOrigin[origin] == null) {
-      return [];
-    }
-
-    const connectedAccountNames = accountNamesByOrigin[origin];
-
-    return connectedAccountNames
+  selectConnectedAccountNamesToActiveTab,
+  (origin, accounts, connectedAccountNamesToOrigin): Account[] => {
+    return connectedAccountNamesToOrigin
       .map(accountName =>
         accounts.find(account => account.name === accountName)
       )

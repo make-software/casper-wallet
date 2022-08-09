@@ -23,7 +23,7 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
   selectActiveAccountIsConnectedToOrigin,
-  selectConnectedAccountsToOrigin,
+  selectConnectedAccountsToActiveTab,
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@popup/redux/vault/selectors';
@@ -132,7 +132,7 @@ export function HomePageContent() {
   const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const connectedAccounts = useSelector((state: RootState) =>
-    selectConnectedAccountsToOrigin(state, origin)
+    selectConnectedAccountsToActiveTab(state, origin)
   );
 
   const handleConnectAccount = useCallback(() => {

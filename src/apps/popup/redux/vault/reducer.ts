@@ -11,7 +11,7 @@ import {
   importAccount,
   removeAccount,
   renameAccount,
-  setActiveAccountName,
+  changeActiveAccount,
   connectAccountToSite,
   disconnectAccountFromSite,
   disconnectAllAccountsFromSite
@@ -64,7 +64,7 @@ export const reducer = createReducer(initialState)
         state.accounts.length === 0 ? payload.name : state.activeAccountName
     };
   })
-  .handleAction(setActiveAccountName, (state, { payload }) => ({
+  .handleAction(changeActiveAccount, (state, { payload }) => ({
     ...state,
     activeAccountName: payload
   }))
