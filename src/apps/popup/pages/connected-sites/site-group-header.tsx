@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 import { Button, Typography } from '@libs/ui';
 
-const SiteControlsContainer = styled.div`
+const SiteGroupHeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -12,16 +12,19 @@ const SiteControlsContainer = styled.div`
   padding: ${({ theme }) => theme.padding[1.6]};
 `;
 
-interface SiteControlsProps {
+interface SiteGroupHeaderProps {
   siteTitle: string;
   disconnectSite: () => void;
 }
 
-export function SiteControls({ siteTitle, disconnectSite }: SiteControlsProps) {
+export function SiteGroupHeader({
+  siteTitle,
+  disconnectSite
+}: SiteGroupHeaderProps) {
   const { t } = useTranslation();
 
   return (
-    <SiteControlsContainer>
+    <SiteGroupHeaderContainer>
       <Typography type="body" color="contentBlue" weight="regular">
         {siteTitle}
       </Typography>
@@ -34,6 +37,6 @@ export function SiteControls({ siteTitle, disconnectSite }: SiteControlsProps) {
       >
         <Trans t={t}>Disconnect site</Trans>
       </Button>
-    </SiteControlsContainer>
+    </SiteGroupHeaderContainer>
   );
 }

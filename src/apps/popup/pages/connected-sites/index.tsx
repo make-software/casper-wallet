@@ -1,9 +1,8 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
-import { Hash, HashVariant, List, SvgIcon, Typography } from '@libs/ui';
+import { List, Typography } from '@libs/ui';
 import { ContentContainer, HeaderTextContainer } from '@src/layout';
 
 import {
@@ -13,29 +12,8 @@ import {
 
 import { useAccountManager } from '@popup/hooks/use-account-manager';
 
-import { SiteControls } from '@popup/pages/connected-sites/site-controls';
-
-const CentredFlexRow = styled.div`
-  display: flex;
-  width: 100%;
-
-  align-items: center;
-
-  gap: 18px;
-`;
-
-const ListItemContainer = styled(CentredFlexRow)`
-  display: flex;
-  justify-content: space-between;
-
-  padding: 12px 16px;
-`;
-
-const AccountNameAndPublicKeyContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-`;
+import { SiteGroupHeader } from '@popup/pages/connected-sites/site-group-header';
+import { SiteGroupItem } from '@popup/pages/connected-sites/site-group-item';
 
 interface SiteOriginListRow {
   id: string;
@@ -77,7 +55,7 @@ export function ConnectedSitesPage() {
               const siteTitle = origin.split('://')[1];
 
               return (
-                <SiteControls
+                <SiteGroupHeader
                   key={id}
                   siteTitle={siteTitle}
                   disconnectSite={async () => {
@@ -89,30 +67,19 @@ export function ConnectedSitesPage() {
             const { id, name, publicKey } = row as AccountNamesAndPublicKeys;
 
             return (
-              <ListItemContainer key={id}>
-                <AccountNameAndPublicKeyContainer>
-                  <Typography type="body" weight="regular">
-                    {name}
-                  </Typography>
-                  <Hash
-                    variant={HashVariant.CaptionHash}
-                    value={publicKey}
-                    truncated
-                  />
-                </AccountNameAndPublicKeyContainer>
-                <SvgIcon
-                  onClick={async () => {
-                    if (array == null || array.length === 0) {
-                      return;
-                    }
+              <SiteGroupItem
+                id={id}
+                name={name}
+                publicKey={publicKey}
+                handleOnClick={async () => {
+                  if (array == null || array.length === 0) {
+                    return;
+                  }
 
-                    const { origin } = array[0] as SiteOriginListRow;
-                    await disconnectAccount(name, origin);
-                  }}
-                  src="assets/icons/close.svg"
-                  size={24}
-                />
-              </ListItemContainer>
+                  const { origin } = array[0] as SiteOriginListRow;
+                  await disconnectAccount(name, origin);
+                }}
+              />
             );
           }}
           marginLeftForItemSeparatorLine={16}
