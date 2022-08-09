@@ -122,8 +122,9 @@ export function HomePageContent() {
 
   const { openWindow } = useWindowManager();
   const origin = useActiveTabOrigin({ currentWindow: true });
-  const { handleChangeActiveAccount, handleDisconnectAccount } =
-    useAccountManager({ currentWindow: true });
+  const { changeActiveAccount, disconnectAccount } = useAccountManager({
+    currentWindow: true
+  });
   const isActiveAccountConnected = useSelector((state: RootState) =>
     selectActiveAccountIsConnectedToOrigin(state, origin)
   );
@@ -184,9 +185,7 @@ export function HomePageContent() {
           </BalanceContainer>
           {isActiveAccountConnected ? (
             <Button
-              onClick={() =>
-                handleDisconnectAccount(activeAccount, origin as string)
-              }
+              onClick={() => disconnectAccount(activeAccount, origin as string)}
               color="secondaryBlue"
             >
               <Trans t={t}>Disconnect</Trans>
@@ -206,7 +205,7 @@ export function HomePageContent() {
           renderRow={account => (
             <ListItemContainer key={account.name}>
               <ListItemClickableContainer
-                onClick={() => handleChangeActiveAccount(account.name)}
+                onClick={() => changeActiveAccount(account.name)}
               >
                 <Checkbox
                   checked={

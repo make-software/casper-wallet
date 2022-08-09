@@ -22,7 +22,7 @@ import {
   selectConnectedAccountsToOrigin,
   selectVaultActiveAccount
 } from '@popup/redux/vault/selectors';
-import { RouterPath } from '@popup/router';
+import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@popup/hooks/use-account-manager';
 
 const HeaderTextContent = styled.div`
@@ -53,12 +53,13 @@ export const SpaceBetweenContainer = styled(CentredFlexRow)`
 `;
 
 export function ConnectAnotherAccountPageContent() {
+  const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
   const activeTabOrigin = useActiveTabOrigin({ currentWindow: true });
-  const { handleConnectAccount, handleChangeActiveAccount } = useAccountManager(
-    { currentWindow: true }
-  );
+  const { connectAccount, changeActiveAccount } = useAccountManager({
+    currentWindow: true
+  });
 
   const connectedAccountsToActiveTab = useSelector((state: RootState) =>
     selectConnectedAccountsToOrigin(state, activeTabOrigin)
@@ -104,9 +105,10 @@ export function ConnectAnotherAccountPageContent() {
               <Button
                 variant="inline"
                 width="100"
-                onClick={() =>
-                  handleConnectAccount(activeAccount, RouterPath.Home)
-                }
+                onClick={async () => {
+                  await connectAccount(activeAccount);
+                  navigate(RouterPath.Home);
+                }}
               >
                 <Trans t={t}>Connect</Trans>
               </Button>
@@ -140,9 +142,10 @@ export function ConnectAnotherAccountPageContent() {
                 color="secondaryBlue"
                 variant="inline"
                 width="100"
-                onClick={() =>
-                  handleChangeActiveAccount(account.name, RouterPath.Home)
-                }
+                onClick={async () => {
+                  await changeActiveAccount(account.name);
+                  navigate(RouterPath.Home);
+                }}
               >
                 <Trans t={t}>Switch</Trans>
               </Button>

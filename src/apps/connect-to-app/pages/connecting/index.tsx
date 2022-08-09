@@ -11,9 +11,11 @@ import {
 } from '@popup/redux/vault/selectors';
 import { closeWindow } from '@connect-to-app/utils/closeWindow';
 import { sendActiveAccountChanged } from '@content/remote-actions';
-import { Account } from '@popup/redux/vault/types';
-import { changeActiveAccount } from '@popup/redux/vault/actions';
-import { useAccountManager } from '@popup/hooks/use-account-manager';
+import { setActiveAccountName } from '@popup/redux/vault/actions';
+import {
+  getNextActiveAccount,
+  useAccountManager
+} from '@popup/hooks/use-account-manager';
 
 const PageContainer = styled.div`
   display: flex;
@@ -50,33 +52,6 @@ const AppLogoImg = styled.img`
   height: 40px;
 `;
 
-function getNextActiveAccount(
-  accounts: Account[],
-  selectedAccountNames: string[],
-  currentActiveAccount: Account
-) {
-  if (selectedAccountNames.includes(currentActiveAccount.name)) {
-    return currentActiveAccount;
-  }
-
-  const currentActiveAccountIndex = accounts.findIndex(
-    account => account.name === currentActiveAccount.name
-  );
-
-  const nextAccountBelowCurrentActiveAccount = accounts
-    .slice(currentActiveAccountIndex)
-    .find(account => selectedAccountNames.includes(account.name));
-
-  if (nextAccountBelowCurrentActiveAccount) {
-    return nextAccountBelowCurrentActiveAccount;
-  }
-
-  // next account above current active account
-  return accounts
-    .slice(0, currentActiveAccountIndex)
-    .find(account => selectedAccountNames.includes(account.name));
-}
-
 interface ConnectingPageProps {
   selectedAccountNames: string[];
   origin: string;
@@ -93,7 +68,7 @@ export function ConnectingPage({
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isLocked = useSelector(selectVaultIsLocked);
 
-  const { handleConnectAccount } = useAccountManager({
+  const { connectAccount } = useAccountManager({
     currentWindow: false
   });
 
@@ -120,12 +95,12 @@ export function ConnectingPage({
       const account = accounts.find(account => account.name === accountName);
 
       if (account) {
-        await handleConnectAccount(account);
+        await connectAccount(account);
       }
     });
 
     if (nextActiveAccount) {
-      dispatch(changeActiveAccount(nextActiveAccount.name));
+      dispatch(setActiveAccountName(nextActiveAccount.name));
       sendActiveAccountChanged(
         {
           isConnected: true,
@@ -140,7 +115,7 @@ export function ConnectingPage({
       setTimeout(() => closeWindow(), 1000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [handleConnectAccount]);
+  }, [connectAccount]);
 
   return (
     <PageContainer>

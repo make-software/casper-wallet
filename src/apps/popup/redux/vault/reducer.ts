@@ -11,8 +11,9 @@ import {
   importAccount,
   removeAccount,
   renameAccount,
-  changeActiveAccount,
+  setActiveAccountName,
   connectAccountToSite,
+  disconnectAccountFromSite,
   disconnectAllAccountsFromSite
 } from './actions';
 import { VaultState } from './types';
@@ -63,7 +64,7 @@ export const reducer = createReducer(initialState)
         state.accounts.length === 0 ? payload.name : state.activeAccountName
     };
   })
-  .handleAction(changeActiveAccount, (state, { payload }) => ({
+  .handleAction(setActiveAccountName, (state, { payload }) => ({
     ...state,
     activeAccountName: payload
   }))
@@ -151,6 +152,20 @@ export const reducer = createReducer(initialState)
             ? [...state.accountNamesByOrigin[siteOrigin], accountName]
             : [accountName]
       }
+    })
+  )
+  .handleAction(
+    [disconnectAccountFromSite],
+    (state, { payload: { accountName, siteOrigin } }) => ({
+      ...state,
+      accountNamesByOrigin: Object.fromEntries(
+        Object.entries({ ...state.accountNamesByOrigin }).map(
+          ([origin, accountNames]) =>
+            origin === siteOrigin
+              ? [origin, accountNames.filter(name => name !== accountName)]
+              : [origin, accountNames]
+        )
+      )
     })
   )
   .handleAction(

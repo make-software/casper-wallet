@@ -63,6 +63,15 @@ export const selectActiveAccountIsConnectedToOrigin = createSelector(
   }
 );
 
+export const selectConnectedAccountNames = createSelector(
+  selectActiveTabOrigin,
+  selectVaultAccountNamesByOrigin,
+  (origin, accountNamesByOrigin) =>
+    origin != null && accountNamesByOrigin[origin]?.length > 0
+      ? accountNamesByOrigin[origin]
+      : []
+);
+
 export const selectConnectedAccountsToOrigin = createSelector(
   selectActiveTabOrigin,
   selectVaultAccounts,

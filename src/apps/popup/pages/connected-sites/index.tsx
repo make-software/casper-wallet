@@ -42,7 +42,7 @@ interface SiteOriginListRow {
 export function ConnectedSitesPage() {
   const { t } = useTranslation();
 
-  const { handleDisconnectAllAccounts } = useAccountManager({
+  const { disconnectAllAccounts } = useAccountManager({
     currentWindow: true
   });
 
@@ -78,7 +78,7 @@ export function ConnectedSitesPage() {
                   key={id}
                   siteTitle={siteTitle}
                   disconnectSite={async () => {
-                    await handleDisconnectAllAccounts(origin);
+                    await disconnectAllAccounts(origin);
                   }}
                 />
               );

@@ -31,8 +31,8 @@ export const renameAccount = createAction('RENAME_ACCOUNT')<{
   oldName: string;
   newName: string;
 }>();
-export const changeActiveAccount = createAction(
-  'CHANGE_ACTIVE_ACCOUNT'
+export const setActiveAccountName = createAction(
+  'SET_ACTIVE_ACCOUNT_NAME'
 )<string>();
 
 export const changeTimeoutDuration = createAction(
@@ -55,6 +55,13 @@ export const refreshTimeout = createAction('REFRESH_TIMEOUT', () => ({
 export const connectAccountToSite = createAction('CONNECT_ACCOUNT_TO_SITE')<{
   siteOrigin: string;
   accountName: string;
+}>();
+
+export const disconnectAccountFromSite = createAction(
+  'DISCONNECT_ACCOUNT_FROM_SITE'
+)<{
+  accountName: string;
+  siteOrigin: string;
 }>();
 
 export const disconnectAllAccountsFromSite = createAction(

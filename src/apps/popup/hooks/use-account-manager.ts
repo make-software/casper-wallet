@@ -1,8 +1,9 @@
 import { useCallback } from 'react';
 import { Account } from '@popup/redux/vault/types';
 import {
-  changeActiveAccount,
+  setActiveAccountName,
   connectAccountToSite,
+  disconnectAccountFromSite,
   disconnectAllAccountsFromSite
 } from '@popup/redux/vault/actions';
 import {
@@ -13,21 +14,46 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import {
   selectActiveAccountIsConnectedToOrigin,
-  selectConnectedAccountsToOrigin,
+  selectConnectedAccountNames,
   selectVaultAccounts,
   selectVaultActiveAccount,
   selectVaultIsLocked
 } from '@popup/redux/vault/selectors';
 import { RootState } from 'typesafe-actions';
 import { useActiveTabOrigin } from '@src/hooks';
-import { useTypedNavigate } from '@popup/router';
+
+export function getNextActiveAccount(
+  accounts: Account[],
+  connectedAccountNames: string[],
+  currentActiveAccount: Account
+) {
+  if (connectedAccountNames.includes(currentActiveAccount.name)) {
+    return currentActiveAccount;
+  }
+
+  const currentActiveAccountIndex = accounts.findIndex(
+    account => account.name === currentActiveAccount.name
+  );
+
+  const nextAccountBelowCurrentActiveAccount = accounts
+    .slice(currentActiveAccountIndex)
+    .find(account => connectedAccountNames.includes(account.name));
+
+  if (nextAccountBelowCurrentActiveAccount) {
+    return nextAccountBelowCurrentActiveAccount;
+  }
+
+  // next account above current active account
+  return accounts
+    .slice(0, currentActiveAccountIndex)
+    .find(account => connectedAccountNames.includes(account.name));
+}
 
 interface UseAccountManagerProps {
   currentWindow: boolean;
 }
 
 export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
-  const navigate = useTypedNavigate();
   const dispatch = useDispatch();
 
   const origin = useActiveTabOrigin({ currentWindow });
@@ -35,23 +61,47 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
   const isLocked = useSelector(selectVaultIsLocked);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const accounts = useSelector(selectVaultAccounts);
-  const connectedAccounts = useSelector((state: RootState) =>
-    selectConnectedAccountsToOrigin(state, origin)
+  const connectedAccountNames = useSelector((state: RootState) =>
+    selectConnectedAccountNames(state, origin)
   );
   const isActiveAccountConnected = useSelector((state: RootState) =>
     selectActiveAccountIsConnectedToOrigin(state, origin)
   );
 
-  const handleConnectAccount = useCallback(
-    async (account: Account, redirectToPage?: string) => {
+  const changeActiveAccount = useCallback(
+    async (name: string) => {
+      const nextActiveAccount = accounts.find(account => account.name === name);
+
+      if (nextActiveAccount) {
+        dispatch(setActiveAccountName(name));
+        const isNextActiveAccountConnected = connectedAccountNames.some(
+          accountName => accountName === nextActiveAccount.name
+        );
+        if (isNextActiveAccountConnected) {
+          await sendActiveAccountChanged(
+            {
+              isConnected: true,
+              isUnlocked: !isLocked,
+              activeKey: nextActiveAccount.publicKey
+            },
+            currentWindow
+          );
+        }
+      }
+    },
+    [dispatch, currentWindow, connectedAccountNames, accounts, isLocked]
+  );
+
+  const connectAccount = useCallback(
+    async (account: Account) => {
       // TODO: should handle behavior for locked app
       console.log('handleConnectAccount fired', account, isLocked, origin);
       if (origin === null || isLocked) {
         return;
       }
 
-      const isConnected = connectedAccounts.some(
-        connectedAccount => connectedAccount.name === account.name
+      const isConnected = connectedAccountNames.some(
+        connectedAccountName => connectedAccountName === account.name
       );
 
       if (isConnected) {
@@ -73,55 +123,47 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
         },
         currentWindow
       );
-
-      if (redirectToPage) {
-        navigate(redirectToPage);
-      }
     },
-    [dispatch, navigate, currentWindow, origin, isLocked, connectedAccounts]
+    [dispatch, currentWindow, origin, isLocked, connectedAccountNames]
   );
 
-  // TODO: Currently we can disconnect only all accounts.
-  //  Need update `handleDisconnectAllAccounts` when it will be supported by `casper-js-sdk`
-  //  and implement and use `disconnectAccountsFromSite` action
-  //  instead `disconnectAllAccountsFromSite` for `handleDisconnectAccount`
-  const handleDisconnectAccount = useCallback(
-    async (account: Account, origin: string, redirectToPage?: string) => {
+  const disconnectAccount = useCallback(
+    async (account: Account, origin: string) => {
       if (!activeAccount || !isActiveAccountConnected || !origin) {
         return;
       }
 
       dispatch(
-        disconnectAllAccountsFromSite({
-          siteOrigin: origin
+        disconnectAccountFromSite({
+          siteOrigin: origin,
+          accountName: account.name
         })
       );
 
-      await sendDisconnectAccount(
-        {
-          isConnected: false,
-          isUnlocked: !isLocked,
-          activeKey: account.publicKey
-        },
-        currentWindow
+      const nextActiveAccount = getNextActiveAccount(
+        accounts,
+        connectedAccountNames.filter(
+          accountName => accountName !== account.name
+        ),
+        activeAccount
       );
 
-      if (redirectToPage) {
-        navigate(redirectToPage);
+      if (nextActiveAccount) {
+        await changeActiveAccount(nextActiveAccount.name);
       }
     },
     [
       dispatch,
-      navigate,
-      currentWindow,
       activeAccount,
       isActiveAccountConnected,
-      isLocked
+      accounts,
+      connectedAccountNames,
+      changeActiveAccount
     ]
   );
 
-  const handleDisconnectAllAccounts = useCallback(
-    async (origin: string, redirectToPage?: string) => {
+  const disconnectAllAccounts = useCallback(
+    async (origin: string) => {
       if (!activeAccount || !isActiveAccountConnected || !origin) {
         return;
       }
@@ -140,54 +182,14 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
         },
         currentWindow
       );
-
-      if (redirectToPage) {
-        navigate(redirectToPage);
-      }
     },
-    [
-      dispatch,
-      navigate,
-      currentWindow,
-      activeAccount,
-      isActiveAccountConnected,
-      isLocked
-    ]
-  );
-
-  const handleChangeActiveAccount = useCallback(
-    async (name: string, redirectToPage?: string) => {
-      dispatch(changeActiveAccount(name));
-
-      const nextAccount = accounts.find(account => account.name === name);
-
-      if (nextAccount) {
-        const isNextAccountConnected = connectedAccounts.some(
-          account => account.name === nextAccount.name
-        );
-        if (isNextAccountConnected) {
-          await sendActiveAccountChanged(
-            {
-              isConnected: true,
-              isUnlocked: !isLocked,
-              activeKey: nextAccount.publicKey
-            },
-            currentWindow
-          );
-        }
-      }
-
-      if (redirectToPage) {
-        navigate(redirectToPage);
-      }
-    },
-    [dispatch, navigate, currentWindow, connectedAccounts, accounts, isLocked]
+    [dispatch, currentWindow, activeAccount, isActiveAccountConnected, isLocked]
   );
 
   return {
-    handleConnectAccount,
-    handleDisconnectAccount,
-    handleDisconnectAllAccounts,
-    handleChangeActiveAccount
+    connectAccount,
+    disconnectAccount,
+    disconnectAllAccounts,
+    changeActiveAccount
   };
 }
