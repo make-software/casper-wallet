@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { Hash, HashVariant, List, Typography } from '@libs/ui';
+import { Hash, HashVariant, List, SvgIcon, Typography } from '@libs/ui';
 import { ContentContainer, HeaderTextContainer } from '@src/layout';
 
 import {
@@ -25,6 +25,9 @@ const CentredFlexRow = styled.div`
 `;
 
 const ListItemContainer = styled(CentredFlexRow)`
+  display: flex;
+  justify-content: space-between;
+
   padding: 12px 16px;
 `;
 
@@ -42,7 +45,7 @@ interface SiteOriginListRow {
 export function ConnectedSitesPage() {
   const { t } = useTranslation();
 
-  const { disconnectAllAccounts } = useAccountManager({
+  const { disconnectAccount, disconnectAllAccounts } = useAccountManager({
     currentWindow: true
   });
 
@@ -68,7 +71,7 @@ export function ConnectedSitesPage() {
         <List
           key={rows[0].id}
           rows={rows}
-          renderRow={(row, index) => {
+          renderRow={(row, index, array) => {
             if (index === 0) {
               const { id, origin } = row as SiteOriginListRow;
               const siteTitle = origin.split('://')[1];
@@ -97,6 +100,18 @@ export function ConnectedSitesPage() {
                     truncated
                   />
                 </AccountNameAndPublicKeyContainer>
+                <SvgIcon
+                  onClick={async () => {
+                    if (array == null || array.length === 0) {
+                      return;
+                    }
+
+                    const { origin } = array[0] as SiteOriginListRow;
+                    await disconnectAccount(name, origin);
+                  }}
+                  src="assets/icons/close.svg"
+                  size={24}
+                />
               </ListItemContainer>
             );
           }}

@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   selectActiveAccountIsConnectedToOrigin,
   selectConnectedAccountNames,
+  selectVaultAccountNamesByOrigin,
   selectVaultAccounts,
   selectVaultActiveAccount,
   selectVaultIsLocked
@@ -61,6 +62,7 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
   const isLocked = useSelector(selectVaultIsLocked);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const accounts = useSelector(selectVaultAccounts);
+  const accountNamesByOrigin = useSelector(selectVaultAccountNamesByOrigin);
   const connectedAccountNames = useSelector((state: RootState) =>
     selectConnectedAccountNames(state, origin)
   );
@@ -95,7 +97,6 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
   const connectAccount = useCallback(
     async (account: Account) => {
       // TODO: should handle behavior for locked app
-      console.log('handleConnectAccount fired', account, isLocked, origin);
       if (origin === null || isLocked) {
         return;
       }
@@ -128,23 +129,30 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
   );
 
   const disconnectAccount = useCallback(
-    async (account: Account, origin: string) => {
-      if (!activeAccount || !isActiveAccountConnected || !origin) {
+    async (accountName: string, origin: string) => {
+      if (origin == null) {
+        return;
+      }
+
+      if (accountNamesByOrigin[origin].length === 1) {
+        await disconnectAllAccounts(origin);
+        return;
+      }
+
+      if (activeAccount == null || !isActiveAccountConnected) {
         return;
       }
 
       dispatch(
         disconnectAccountFromSite({
           siteOrigin: origin,
-          accountName: account.name
+          accountName
         })
       );
 
       const nextActiveAccount = getNextActiveAccount(
         accounts,
-        connectedAccountNames.filter(
-          accountName => accountName !== account.name
-        ),
+        connectedAccountNames.filter(name => accountName !== name),
         activeAccount
       );
 
@@ -164,26 +172,43 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
 
   const disconnectAllAccounts = useCallback(
     async (origin: string) => {
-      if (!activeAccount || !isActiveAccountConnected || !origin) {
+      if (!origin) {
         return;
       }
 
-      dispatch(
-        disconnectAllAccountsFromSite({
-          siteOrigin: origin
-        })
-      );
+      // TODO: An active account may not be related to the site from which the user is trying to disconnect.
+      //  Therefore, it makes no sense to send the public key from the account of others site.
+      //  It would be better if we can send an array of keys from a list of accounts that are being disconnected
+      //  !!! I send a public key for first account by origin as temporary solution. !!!
+      function getPublicKeyByOrigin(origin: string) {
+        const firstAccountNameByOrigin = accountNamesByOrigin[origin][0];
+        const firstAccountByOrigin = accounts.find(
+          account => account.name === firstAccountNameByOrigin
+        );
 
-      await sendDisconnectAccount(
-        {
-          isConnected: false,
-          isUnlocked: !isLocked,
-          activeKey: activeAccount.publicKey
-        },
-        currentWindow
-      );
+        return firstAccountByOrigin?.publicKey;
+      }
+
+      const activeKey = getPublicKeyByOrigin(origin);
+
+      if (activeKey != null) {
+        dispatch(
+          disconnectAllAccountsFromSite({
+            siteOrigin: origin
+          })
+        );
+
+        await sendDisconnectAccount(
+          {
+            isConnected: false,
+            isUnlocked: !isLocked,
+            activeKey
+          },
+          currentWindow
+        );
+      }
     },
-    [dispatch, currentWindow, activeAccount, isActiveAccountConnected, isLocked]
+    [dispatch, currentWindow, accountNamesByOrigin, accounts, isLocked]
   );
 
   return {

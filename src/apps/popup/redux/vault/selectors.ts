@@ -37,7 +37,7 @@ export const selectVaultActiveAccount = createSelector(
 const selectActiveTabOrigin = (_: RootState, activeTabOrigin: string | null) =>
   activeTabOrigin;
 
-const selectVaultAccountNamesByOrigin = (state: RootState) =>
+export const selectVaultAccountNamesByOrigin = (state: RootState) =>
   state.vault.accountNamesByOrigin;
 
 export const selectIsSomeAccountConnectedToOrigin = createSelector(
