@@ -160,7 +160,7 @@ export function HomePageContent() {
         true
       ).catch(e => console.error(e));
     }
-  }, [origin, activeAccount, isLocked]);
+  }, [origin, activeAccount, isLocked, isActiveAccountConnected]);
 
   const handleChangeActiveAccount = useCallback(
     (name: string) => () => {
