@@ -8,7 +8,7 @@ import { REDUX_STORAGE_KEY } from '@libs/services/constants';
 import { disconnectAllAccountsFromSite } from '@popup/redux/vault/actions';
 import { createInitStore } from '@popup/redux/utils';
 import {
-  selectIsSomeAccountConnectedToOrigin,
+  selectIsAnyAccountConnectedWithOrigin,
   selectVaultActiveAccount
 } from '@popup/redux/vault/selectors';
 
@@ -34,7 +34,7 @@ initStore().then(store => {
           break;
 
         case 'get-is-connected':
-          return selectIsSomeAccountConnectedToOrigin(
+          return selectIsAnyAccountConnectedWithOrigin(
             store.getState(),
             action.payload
           );

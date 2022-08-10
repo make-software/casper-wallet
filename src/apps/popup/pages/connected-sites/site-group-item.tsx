@@ -26,20 +26,18 @@ const AccountNameAndPublicKeyContainer = styled.div`
 `;
 
 interface SiteGroupItemProps {
-  id: string;
   name: string;
   publicKey: string;
   handleOnClick: () => void;
 }
 
 export function SiteGroupItem({
-  id,
   name,
   publicKey,
   handleOnClick
 }: SiteGroupItemProps) {
   return (
-    <SiteGroupItemContainer key={id}>
+    <SiteGroupItemContainer>
       <AccountNameAndPublicKeyContainer>
         <Typography type="body" weight="regular">
           {name}

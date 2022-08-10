@@ -22,8 +22,8 @@ import {
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
-  selectActiveAccountIsConnectedToOrigin,
-  selectConnectedAccountsToActiveTab,
+  selectIsActiveAccountConnectedWithOrigin,
+  selectConnectedAccountsWithOrigin,
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@popup/redux/vault/selectors';
@@ -126,13 +126,13 @@ export function HomePageContent() {
     currentWindow: true
   });
   const isActiveAccountConnected = useSelector((state: RootState) =>
-    selectActiveAccountIsConnectedToOrigin(state, origin)
+    selectIsActiveAccountConnectedWithOrigin(state, origin)
   );
 
   const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const connectedAccounts = useSelector((state: RootState) =>
-    selectConnectedAccountsToActiveTab(state, origin)
+    selectConnectedAccountsWithOrigin(state, origin)
   );
 
   const handleConnectAccount = useCallback(() => {
@@ -185,8 +185,9 @@ export function HomePageContent() {
           </BalanceContainer>
           {isActiveAccountConnected ? (
             <Button
+              loading={origin == null}
               onClick={() =>
-                disconnectAccount(activeAccount.name, origin as string)
+                origin && disconnectAccount(activeAccount.name, origin)
               }
               color="secondaryBlue"
             >

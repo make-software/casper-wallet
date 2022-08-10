@@ -7,7 +7,7 @@ export interface Account {
   publicKey: string;
 }
 
-type AccountNamesByOrigin = Record<string, string[]>;
+type AccountNamesByOriginDict = Record<string, string[]>;
 
 export type VaultState = {
   password: string | null;
@@ -16,5 +16,5 @@ export type VaultState = {
   lastActivityTime: number | null;
   accounts: Account[];
   activeAccountName: string | null;
-  accountNamesByOrigin: AccountNamesByOrigin;
+  accountNamesByOriginDict: AccountNamesByOriginDict;
 };

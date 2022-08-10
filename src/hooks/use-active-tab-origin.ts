@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getActiveTabOrigin } from '@content/remote-actions';
+import { fetchActiveSiteOrigin } from '@content/remote-actions';
 
 interface UseActiveTabOriginProps {
   currentWindow: boolean;
@@ -9,11 +9,9 @@ export function useActiveTabOrigin({ currentWindow }: UseActiveTabOriginProps) {
   const [activeTabOrigin, setActiveTabOrigin] = useState<string | null>(null);
 
   useEffect(() => {
-    async function getActiveTabOriginAndSaveToState() {
-      const origin = await getActiveTabOrigin(currentWindow);
+    fetchActiveSiteOrigin(currentWindow).then(origin => {
       setActiveTabOrigin(origin);
-    }
-    getActiveTabOriginAndSaveToState().catch(e => console.error(e));
+    });
   }, [currentWindow]);
 
   return activeTabOrigin;

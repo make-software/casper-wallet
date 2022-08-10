@@ -26,7 +26,7 @@ const initialState: State = {
   timeoutDurationSetting: TimeoutDurationSetting['5 min'],
   lastActivityTime: null,
   accounts: [],
-  accountNamesByOrigin: {},
+  accountNamesByOriginDict: {},
   activeAccountName: null
 };
 
@@ -75,10 +75,10 @@ export const reducer = createReducer(initialState)
         account => account.name !== accountName
       );
 
-      const nextAccountNamesByOrigin = Object.fromEntries(
-        Object.keys(state.accountNamesByOrigin).map(origin => [
+      const nextAccountNamesByOriginDict = Object.fromEntries(
+        Object.keys(state.accountNamesByOriginDict).map(origin => [
           origin,
-          state.accountNamesByOrigin[origin].filter(
+          state.accountNamesByOriginDict[origin].filter(
             name => accountName !== name
           )
         ])
@@ -91,17 +91,17 @@ export const reducer = createReducer(initialState)
           state.activeAccountName === accountName
             ? (state.accounts.length > 1 && nextAccountsState[0].name) || null
             : state.activeAccountName,
-        accountNamesByOrigin: nextAccountNamesByOrigin
+        accountNamesByOriginDict: nextAccountNamesByOriginDict
       };
     }
   )
   .handleAction(
     [renameAccount],
     (state, { payload: { oldName, newName } }): State => {
-      const nextAccountNamesByOrigin = Object.fromEntries(
-        Object.keys(state.accountNamesByOrigin).map(origin => [
+      const nextAccountNamesByOriginDict = Object.fromEntries(
+        Object.keys(state.accountNamesByOriginDict).map(origin => [
           origin,
-          state.accountNamesByOrigin[origin].map(accountName =>
+          state.accountNamesByOriginDict[origin].map(accountName =>
             accountName === oldName ? newName : accountName
           )
         ])
@@ -122,7 +122,7 @@ export const reducer = createReducer(initialState)
           state.activeAccountName === oldName
             ? newName
             : state.activeAccountName,
-        accountNamesByOrigin: nextAccountNamesByOrigin
+        accountNamesByOriginDict: nextAccountNamesByOriginDict
       };
     }
   )
@@ -145,11 +145,11 @@ export const reducer = createReducer(initialState)
     [connectAccountToSite],
     (state, { payload: { siteOrigin, accountName } }) => ({
       ...state,
-      accountNamesByOrigin: {
-        ...state.accountNamesByOrigin,
+      accountNamesByOriginDict: {
+        ...state.accountNamesByOriginDict,
         [siteOrigin]:
-          state.accountNamesByOrigin[siteOrigin]?.length > 0
-            ? [...state.accountNamesByOrigin[siteOrigin], accountName]
+          state.accountNamesByOriginDict[siteOrigin]?.length > 0
+            ? [...state.accountNamesByOriginDict[siteOrigin], accountName]
             : [accountName]
       }
     })
@@ -158,8 +158,8 @@ export const reducer = createReducer(initialState)
     [disconnectAccountFromSite],
     (state, { payload: { accountName, siteOrigin } }) => ({
       ...state,
-      accountNamesByOrigin: Object.fromEntries(
-        Object.entries({ ...state.accountNamesByOrigin }).map(
+      accountNamesByOriginDict: Object.fromEntries(
+        Object.entries({ ...state.accountNamesByOriginDict }).map(
           ([origin, accountNames]) =>
             origin === siteOrigin
               ? [origin, accountNames.filter(name => name !== accountName)]
@@ -172,8 +172,8 @@ export const reducer = createReducer(initialState)
     [disconnectAllAccountsFromSite],
     (state, { payload: { siteOrigin } }) => ({
       ...state,
-      accountNamesByOrigin: Object.fromEntries(
-        Object.entries({ ...state.accountNamesByOrigin }).filter(
+      accountNamesByOriginDict: Object.fromEntries(
+        Object.entries({ ...state.accountNamesByOriginDict }).filter(
           ([origin]) => origin !== siteOrigin
         )
       )

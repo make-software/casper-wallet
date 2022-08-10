@@ -19,7 +19,7 @@ import {
 } from '@libs/ui';
 
 import {
-  selectConnectedAccountsToActiveTab,
+  selectConnectedAccountsWithOrigin,
   selectVaultActiveAccount
 } from '@popup/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -62,7 +62,7 @@ export function ConnectAnotherAccountPageContent() {
   });
 
   const connectedAccountsToActiveTab = useSelector((state: RootState) =>
-    selectConnectedAccountsToActiveTab(state, activeTabOrigin)
+    selectConnectedAccountsWithOrigin(state, activeTabOrigin)
   );
   const activeAccount = useSelector(selectVaultActiveAccount);
 

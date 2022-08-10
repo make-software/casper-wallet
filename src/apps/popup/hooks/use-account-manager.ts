@@ -13,9 +13,9 @@ import {
 } from '@content/remote-actions';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  selectActiveAccountIsConnectedToOrigin,
-  selectConnectedAccountNamesToActiveTab,
-  selectVaultAccountNamesByOrigin,
+  selectIsActiveAccountConnectedWithOrigin,
+  selectConnectedAccountNamesWithOrigin,
+  selectVaultAccountNamesByOriginDict,
   selectVaultAccounts,
   selectVaultActiveAccount,
   selectVaultIsLocked
@@ -62,12 +62,12 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
   const isLocked = useSelector(selectVaultIsLocked);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const accounts = useSelector(selectVaultAccounts);
-  const accountNamesByOrigin = useSelector(selectVaultAccountNamesByOrigin);
+  const accountNamesByOrigin = useSelector(selectVaultAccountNamesByOriginDict);
   const connectedAccountNames = useSelector((state: RootState) =>
-    selectConnectedAccountNamesToActiveTab(state, origin)
+    selectConnectedAccountNamesWithOrigin(state, origin)
   );
   const isActiveAccountConnected = useSelector((state: RootState) =>
-    selectActiveAccountIsConnectedToOrigin(state, origin)
+    selectIsActiveAccountConnectedWithOrigin(state, origin)
   );
 
   const changeActiveAccount = useCallback(

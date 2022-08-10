@@ -17,7 +17,7 @@ if (process.env.NODE_ENV === 'development') {
 
 async function handleMessage(action: RemoteAction, sender: MessageSender) {
   switch (action.type) {
-    case 'get-active-tab-origin':
+    case 'fetch-active-tab-origin':
       const { origin } = window.location;
       return origin;
 
