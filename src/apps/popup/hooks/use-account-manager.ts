@@ -62,7 +62,9 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
   const isLocked = useSelector(selectVaultIsLocked);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const accounts = useSelector(selectVaultAccounts);
-  const accountNamesByOrigin = useSelector(selectVaultAccountNamesByOriginDict);
+  const accountNamesByOriginDict = useSelector(
+    selectVaultAccountNamesByOriginDict
+  );
   const connectedAccountNames = useSelector((state: RootState) =>
     selectConnectedAccountNamesWithOrigin(state, origin)
   );
@@ -139,7 +141,7 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
       //  It would be better if we can send an array of keys from a list of accounts that are being disconnected
       //  !!! I send a public key for first account by origin as temporary solution. !!!
       function getPublicKeyByOrigin(origin: string) {
-        const firstAccountNameByOrigin = accountNamesByOrigin[origin][0];
+        const firstAccountNameByOrigin = accountNamesByOriginDict[origin][0];
         const firstAccountByOrigin = accounts.find(
           account => account.name === firstAccountNameByOrigin
         );
@@ -166,7 +168,7 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
         );
       }
     },
-    [dispatch, currentWindow, accountNamesByOrigin, accounts, isLocked]
+    [dispatch, currentWindow, accountNamesByOriginDict, accounts, isLocked]
   );
 
   const disconnectAccount = useCallback(
@@ -175,7 +177,7 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
         return;
       }
 
-      if (accountNamesByOrigin[origin].length === 1) {
+      if (accountNamesByOriginDict[origin].length === 1) {
         await disconnectAllAccounts(origin);
         return;
       }
@@ -203,7 +205,7 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
     },
     [
       dispatch,
-      accountNamesByOrigin,
+      accountNamesByOriginDict,
       activeAccount,
       isActiveAccountConnected,
       accounts,
