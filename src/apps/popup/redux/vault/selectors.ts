@@ -12,17 +12,17 @@ export const selectVaultHasAccount = (state: RootState): boolean =>
 export const selectVaultAccounts = (state: RootState): Account[] =>
   state.vault.accounts;
 
-const selectAccountName = (_: RootState, accountName: string) => accountName;
-export const selectVaultAccountByName = createSelector(
-  selectVaultAccounts,
-  selectAccountName,
-  (accounts, accountName) =>
-    accounts.find(account => account.name === accountName)
-);
-
 export const selectVaultAccountsNames = createSelector(
   selectVaultAccounts,
   accounts => accounts.map(account => account.name)
+);
+
+const withAccountName = (_: RootState, accountName: string) => accountName;
+export const selectVaultAccountWithName = createSelector(
+  selectVaultAccounts,
+  withAccountName,
+  (accounts, accountName) =>
+    accounts.find(account => account.name === accountName)
 );
 
 export const selectVaultActiveAccountName = (state: RootState) =>
@@ -34,52 +34,89 @@ export const selectVaultActiveAccount = createSelector(
     accounts.find(account => account.name === activeAccountName)
 );
 
-const selectActiveTabOrigin = (_: RootState, activeTabOrigin: string | null) =>
-  activeTabOrigin;
+export const selectVaultAccountNamesByOriginDict = (state: RootState) =>
+  state.vault.accountNamesByOriginDict;
 
-const selectVaultAccountNamesByOrigin = (state: RootState) =>
-  state.vault.accountNamesByOrigin;
+export const selectVaultAccountsByOriginDict = createSelector(
+  selectVaultAccountNamesByOriginDict,
+  selectVaultAccounts,
+  (accountNamesByOriginDict, accounts): Record<string, Account[]> => {
+    return Object.fromEntries(
+      Object.entries(accountNamesByOriginDict).map(([origin, accountNames]) => [
+        origin,
+        accountNames
+          .map(accountName => {
+            const account = accounts.find(
+              account => account.name === accountName
+            );
 
-export const selectIsSomeAccountConnectedToOrigin = createSelector(
-  selectActiveTabOrigin,
-  selectVaultAccountNamesByOrigin,
-  (origin, accountNamesByOrigin) => origin && origin in accountNamesByOrigin
+            if (account == null) {
+              return null;
+            }
+
+            return account;
+          })
+          .filter(
+            (accountNamesAndPublicKeys): accountNamesAndPublicKeys is Account =>
+              accountNamesAndPublicKeys != null
+          )
+      ])
+    );
+  }
 );
 
-export const selectActiveAccountIsConnectedToOrigin = createSelector(
-  selectActiveTabOrigin,
+const withActiveTabOrigin = (_: RootState, activeTabOrigin: string | null) =>
+  activeTabOrigin;
+
+export const selectIsAnyAccountConnectedWithOrigin = createSelector(
+  withActiveTabOrigin,
+  selectVaultAccountNamesByOriginDict,
+  (origin, accountNamesByOriginDict) =>
+    origin && origin in accountNamesByOriginDict
+);
+
+export const selectIsActiveAccountConnectedWithOrigin = createSelector(
+  withActiveTabOrigin,
   selectVaultActiveAccountName,
-  selectVaultAccountNamesByOrigin,
-  (origin, activeAccountName, accountNamesByOrigin) => {
+  selectVaultAccountNamesByOriginDict,
+  (origin, activeAccountName, accountNamesByOriginDict) => {
     if (
       origin === null ||
       activeAccountName === null ||
-      accountNamesByOrigin[origin] == null
+      accountNamesByOriginDict[origin] == null
     ) {
       return false;
     }
 
-    return accountNamesByOrigin[origin].includes(activeAccountName);
+    return accountNamesByOriginDict[origin].includes(activeAccountName);
   }
 );
 
-export const selectConnectedAccountsToOrigin = createSelector(
-  selectActiveTabOrigin,
+export const selectConnectedAccountNamesWithOrigin = createSelector(
+  withActiveTabOrigin,
+  selectVaultAccountNamesByOriginDict,
+  (origin, accountNamesByOriginDict) =>
+    origin != null && accountNamesByOriginDict[origin]?.length > 0
+      ? accountNamesByOriginDict[origin]
+      : []
+);
+
+export const selectConnectedAccountsWithOrigin = createSelector(
+  withActiveTabOrigin,
   selectVaultAccounts,
-  selectVaultAccountNamesByOrigin,
-  (origin, accounts, accountNamesByOrigin): Account[] => {
-    if (origin === null || accountNamesByOrigin[origin] == null) {
-      return [];
-    }
-
-    const connectedAccountNames = accountNamesByOrigin[origin];
-
-    return connectedAccountNames
+  selectConnectedAccountNamesWithOrigin,
+  (origin, accounts, connectedAccountNamesToOrigin): Account[] => {
+    return connectedAccountNamesToOrigin
       .map(accountName =>
         accounts.find(account => account.name === accountName)
       )
       .filter((account): account is Account => !!account);
   }
+);
+
+export const selectCountOfConnectedSites = createSelector(
+  selectVaultAccountNamesByOriginDict,
+  accountNamesByOriginDict => Object.keys(accountNamesByOriginDict).length
 );
 
 export const selectVaultAccountsSecretKeysBase64 = createSelector(

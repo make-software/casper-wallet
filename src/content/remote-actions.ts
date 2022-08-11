@@ -2,26 +2,32 @@ import { EmptyAction, PayloadAction } from 'typesafe-actions';
 import Browser from 'webextension-polyfill';
 
 export type RemoteAction =
-  | GetActiveTabOriginAction
+  | FetchActiveTabOriginAction
   | SendConnectStatusAction
   | SendActiveAccountChangedAction
   | SendDisconnectAccountAction;
 
-async function sendMessageToContent(
+async function sendMessageToActiveTab(
   action: RemoteAction,
   currentWindow: boolean
 ) {
-  const tabs = await Browser.tabs.query({ active: true, currentWindow });
+  // TODO: check this if that actually is a best practice?
+  const tabs = await Browser.tabs.query({
+    currentWindow: currentWindow,
+    active: true
+  });
   return Browser.tabs.sendMessage(tabs[0].id as number, action);
 }
 
-export type GetActiveTabOriginAction = EmptyAction<'get-active-tab-origin'>;
-
-export const getActiveTabOrigin = async (
+export type FetchActiveTabOriginAction = EmptyAction<'fetch-active-tab-origin'>;
+// TODO: come up with conventions for remote actions names
+export const fetchActiveTabOrigin = async (
   currentWindow: boolean
 ): Promise<string> => {
-  const action: GetActiveTabOriginAction = { type: 'get-active-tab-origin' };
-  return sendMessageToContent(action, currentWindow);
+  const action: FetchActiveTabOriginAction = {
+    type: 'fetch-active-tab-origin'
+  };
+  return sendMessageToActiveTab(action, currentWindow);
 };
 
 interface MessageAccountDetail {
@@ -44,7 +50,7 @@ export const sendConnectStatus = async (
     payload
   };
 
-  return sendMessageToContent(action, currentWindow);
+  return sendMessageToActiveTab(action, currentWindow);
 };
 
 type SendActiveAccountChangedAction = PayloadAction<
@@ -61,7 +67,7 @@ export const sendActiveAccountChanged = async (
     payload
   };
 
-  return sendMessageToContent(action, currentWindow);
+  return sendMessageToActiveTab(action, currentWindow);
 };
 
 type SendDisconnectAccountAction = PayloadAction<
@@ -78,5 +84,5 @@ export const sendDisconnectAccount = async (
     payload
   };
 
-  return sendMessageToContent(action, currentWindow);
+  return sendMessageToActiveTab(action, currentWindow);
 };

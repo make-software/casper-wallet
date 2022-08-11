@@ -24,17 +24,17 @@ export function createInitStore(reduxStorageKey: string) {
   let store: ReturnType<typeof createStore>;
 
   return async () => {
-    const { [reduxStorageKey]: data } = await Browser.storage.local.get(
+    const { [reduxStorageKey]: state } = await Browser.storage.local.get(
       reduxStorageKey
     );
 
     if (store == null) {
-      store = createStore(data || {});
+      store = createStore(state || {});
 
       store.subscribe(() => {
         const vault = store.getState();
-        Browser.storage.local.set({ [reduxStorageKey]: vault }).catch(() => {
-          // initialization workaround
+        Browser.storage.local.set({ [reduxStorageKey]: vault }).catch(e => {
+          console.error('Store error: ', e);
         });
       });
     }

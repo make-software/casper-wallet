@@ -7,7 +7,7 @@ import styled from 'styled-components';
 
 import { ContentContainer, HeaderTextContainer } from '@layout/containers';
 import { SvgIcon, PageTile, Typography } from '@libs/ui';
-import { selectVaultAccountByName } from '@popup/redux/vault/selectors';
+import { selectVaultAccountWithName } from '@popup/redux/vault/selectors';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
@@ -15,7 +15,7 @@ export function AccountSettingsPageContent() {
   const navigate = useTypedNavigate();
   const { accountName } = useParams();
   const account = useSelector((state: RootState) =>
-    selectVaultAccountByName(state, accountName || '')
+    selectVaultAccountWithName(state, accountName || '')
   );
 
   if (!account) {

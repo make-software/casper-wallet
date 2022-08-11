@@ -15,6 +15,7 @@ import { TimeoutPageContent } from '@popup/pages/timeout';
 import { UnlockVaultPageContent } from '@popup/pages/unlock-vault';
 import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
 import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
+import { ConnectedSitesPage } from '@popup/pages/connected-sites';
 
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
@@ -158,6 +159,15 @@ export function App() {
               <Layout
                 Header={<Header withLock withMenu />}
                 Content={<NoConnectedAccountPageContent />}
+              />
+            }
+          />
+          <Route
+            path={RouterPath.ConnectedSites}
+            element={
+              <Layout
+                Header={<Header submenuActionType="back" withMenu withLock />}
+                Content={<ConnectedSitesPage />}
               />
             }
           />

@@ -57,6 +57,13 @@ export const connectAccountToSite = createAction('CONNECT_ACCOUNT_TO_SITE')<{
   accountName: string;
 }>();
 
+export const disconnectAccountFromSite = createAction(
+  'DISCONNECT_ACCOUNT_FROM_SITE'
+)<{
+  accountName: string;
+  siteOrigin: string;
+}>();
+
 export const disconnectAllAccountsFromSite = createAction(
   'DISCONNECT_ALL_ACCOUNTS_FROM_SITE'
 )<{

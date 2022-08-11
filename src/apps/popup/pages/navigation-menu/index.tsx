@@ -11,7 +11,10 @@ import { RouterPath, useNavigationMenu } from '@popup/router';
 import { ContentContainer } from '@layout/containers';
 import { SvgIcon, Typography, List } from '@libs/ui';
 
-import { selectVaultTimeoutDurationSetting } from '@popup/redux/vault/selectors';
+import {
+  selectCountOfConnectedSites,
+  selectVaultTimeoutDurationSetting
+} from '@popup/redux/vault/selectors';
 
 const ListItemClickableContainer = styled.div`
   display: flex;
@@ -50,6 +53,7 @@ export function NavigationMenuPageContent() {
   const { t } = useTranslation();
 
   const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
+  const countOfConnectedSites = useSelector(selectCountOfConnectedSites);
 
   const { openWindow } = useWindowManager();
   const { closeNavigationMenu } = useNavigationMenu();
@@ -76,7 +80,11 @@ export function NavigationMenuPageContent() {
         id: 3,
         title: t('Connected sites'),
         iconPath: 'assets/icons/link.svg',
-        currentValue: 3
+        currentValue: countOfConnectedSites,
+        handleOnClick: () => {
+          closeNavigationMenu();
+          navigate(RouterPath.ConnectedSites);
+        }
       },
       {
         id: 4,
@@ -89,7 +97,14 @@ export function NavigationMenuPageContent() {
         }
       }
     ],
-    [navigate, t, timeoutDuration, closeNavigationMenu, openWindow]
+    [
+      navigate,
+      t,
+      timeoutDuration,
+      closeNavigationMenu,
+      countOfConnectedSites,
+      openWindow
+    ]
   );
   const iconSize = 24;
 
@@ -112,7 +127,7 @@ export function NavigationMenuPageContent() {
               <Typography type="body" weight="regular">
                 {menuItem.title}
               </Typography>
-              {menuItem.currentValue && (
+              {menuItem.currentValue != null && (
                 <Typography type="body" weight="semiBold" color="contentBlue">
                   {menuItem.currentValue}
                 </Typography>
