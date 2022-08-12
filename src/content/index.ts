@@ -110,7 +110,7 @@ function injectInpageScript() {
       });
     };
 
-    documentHeadOrRoot.insertBefore(scriptTag, documentHeadOrRoot.children[0]);
+    documentHeadOrRoot.appendChild(scriptTag);
   } catch (e) {
     console.error('CasperLabs provider injection failed.', e);
   }
