@@ -10,11 +10,14 @@ import {
 } from '@src/layout';
 import { Typography, SvgIcon, Button } from '@libs/ui';
 
+import { useTypedNavigate, RouterPath } from '@popup/router';
+
 const IllustrationContainer = styled.div`
   margin: 24px 16px 0 16px;
 `;
 
 export function NoConnectedAccountPageContent() {
+  const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
   return (
@@ -37,7 +40,7 @@ export function NoConnectedAccountPageContent() {
       </TextContainer>
 
       <FooterButtonsContainer>
-        <Button onClick={() => window.close()}>
+        <Button onClick={() => navigate(RouterPath.Home)}>
           <Trans t={t}>Got it</Trans>
         </Button>
       </FooterButtonsContainer>
