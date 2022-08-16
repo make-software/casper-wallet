@@ -56,7 +56,7 @@ export function RemoveAccountPageContent() {
         <Button onClick={handleRemoveAccount}>
           <Trans t={t}>Remove</Trans>
         </Button>
-        <Button onClick={() => navigate(RouterPath.Home)} color="secondaryBlue">
+        <Button onClick={() => navigate(-1)} color="secondaryBlue">
           <Trans t={t}>Cancel</Trans>
         </Button>
       </FooterButtonsContainer>
