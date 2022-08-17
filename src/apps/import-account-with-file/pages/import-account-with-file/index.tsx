@@ -63,12 +63,16 @@ export function ImportAccountWithFileContentPage() {
         t('File with secret key should be loaded'),
         value => value !== null && value.length > 0
       )
-      .test('fileType', t('Unsupported file format'), value => {
-        if (value && value.length > 0) {
-          return /\.pem$/.test(value[0].name);
+      .test(
+        'fileType',
+        t('Please upload a .PEM containing your private key.'),
+        filesArray => {
+          if (filesArray && filesArray.length > 0) {
+            return /\.pem$/.test(filesArray[0].name);
+          }
+          return false;
         }
-        return false;
-      }),
+      ),
     name: createAccountNameValidation(async value => {
       const isAccountNameTaken =
         value && (await checkAccountNameIsTaken(value));
