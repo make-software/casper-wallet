@@ -66,9 +66,9 @@ export function ImportAccountWithFileContentPage() {
       .test(
         'fileType',
         t('Please upload a .PEM containing your private key.'),
-        value => {
-          if (value && value.length > 0) {
-            return /\.pem$/.test(value[0].name);
+        filesArray => {
+          if (filesArray && filesArray.length > 0) {
+            return /\.pem$/.test(filesArray[0].name);
           }
           return false;
         }
