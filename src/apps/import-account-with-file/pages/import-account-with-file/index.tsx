@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { Trans, useTranslation } from 'react-i18next';
@@ -27,6 +27,8 @@ import {
 import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
 
 export function ImportAccountWithFileContentPage() {
+  const [isFileLoaded, setIsFileLoaded] = useState(false);
+
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
@@ -93,7 +95,7 @@ export function ImportAccountWithFileContentPage() {
     resetField,
     register,
     handleSubmit,
-    formState: { errors, isDirty }
+    formState: { errors, dirtyFields }
   } = useForm(formOptions);
 
   async function onSubmit({
@@ -102,6 +104,8 @@ export function ImportAccountWithFileContentPage() {
   }: FieldValues) {
     secretKeyFileReader(name, secretKeyFile);
   }
+
+  const isSubmitDisabled = !dirtyFields.name || !isFileLoaded;
 
   return (
     <ContentContainer>
@@ -123,7 +127,10 @@ export function ImportAccountWithFileContentPage() {
             prefixIcon={<SvgIcon src="assets/icons/file.svg" size={24} />}
             suffixIcon={
               <SvgIcon
-                onClick={() => resetField('secretKeyFile')}
+                onClick={() => {
+                  setIsFileLoaded(false);
+                  resetField('secretKeyFile');
+                }}
                 src="assets/icons/close-filter.svg"
                 size={24}
               />
@@ -131,6 +138,7 @@ export function ImportAccountWithFileContentPage() {
             {...register('secretKeyFile')}
             error={!!errors.secretKeyFile}
             validationText={errors.secretKeyFile?.message}
+            onChange={e => setIsFileLoaded(e.target.files.length > 0)}
           />
           <Input
             type="text"
@@ -141,7 +149,7 @@ export function ImportAccountWithFileContentPage() {
           />
         </InputsContainer>
         <FooterButtonsContainer>
-          <Button disabled={!isDirty}>
+          <Button disabled={isSubmitDisabled}>
             <Trans t={t}>Import</Trans>
           </Button>
         </FooterButtonsContainer>
