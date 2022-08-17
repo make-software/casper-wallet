@@ -83,7 +83,7 @@ export function RenameAccountPageContent() {
           </Button>
           <Button
             type="button"
-            onClick={() => navigate(RouterPath.Home)}
+            onClick={() => navigate(-1)}
             color="secondaryBlue"
           >
             <Trans t={t}>Cancel</Trans>
