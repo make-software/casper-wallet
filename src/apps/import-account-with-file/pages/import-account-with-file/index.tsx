@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { Trans, useTranslation } from 'react-i18next';
@@ -27,8 +27,6 @@ import {
 import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
 
 export function ImportAccountWithFileContentPage() {
-  const [isFileLoaded, setIsFileLoaded] = useState(false);
-
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
@@ -63,7 +61,7 @@ export function ImportAccountWithFileContentPage() {
       .test(
         'required',
         t('File with secret key should be loaded'),
-        value => value !== null && value.length > 0
+        filesArray => filesArray !== null && filesArray.length > 0
       )
       .test(
         'fileType',
@@ -83,6 +81,7 @@ export function ImportAccountWithFileContentPage() {
   });
 
   const formOptions: UseFormProps = {
+    mode: 'onChange',
     reValidateMode: 'onChange',
     resolver: yupResolver(formSchema),
     defaultValues: {
@@ -95,7 +94,7 @@ export function ImportAccountWithFileContentPage() {
     resetField,
     register,
     handleSubmit,
-    formState: { errors, dirtyFields }
+    formState: { errors, isValid, isDirty, dirtyFields }
   } = useForm(formOptions);
 
   async function onSubmit({
@@ -105,7 +104,7 @@ export function ImportAccountWithFileContentPage() {
     secretKeyFileReader(name, secretKeyFile);
   }
 
-  const isSubmitDisabled = !dirtyFields.name || !isFileLoaded;
+  const isSubmitDisabled = !isValid || !isDirty;
 
   return (
     <ContentContainer>
@@ -126,19 +125,17 @@ export function ImportAccountWithFileContentPage() {
             accept=".pem"
             prefixIcon={<SvgIcon src="assets/icons/file.svg" size={24} />}
             suffixIcon={
-              <SvgIcon
-                onClick={() => {
-                  setIsFileLoaded(false);
-                  resetField('secretKeyFile');
-                }}
-                src="assets/icons/close-filter.svg"
-                size={24}
-              />
+              dirtyFields.secretKeyFile && (
+                <SvgIcon
+                  onClick={() => resetField('secretKeyFile')}
+                  src="assets/icons/close-filter.svg"
+                  size={24}
+                />
+              )
             }
             {...register('secretKeyFile')}
             error={!!errors.secretKeyFile}
             validationText={errors.secretKeyFile?.message}
-            onChange={e => setIsFileLoaded(e.target.files.length > 0)}
           />
           <Input
             type="text"
