@@ -14,8 +14,12 @@ import {
 
 import { openWindow } from '@background/open-window';
 
-const initStore = createInitStore(REDUX_STORAGE_KEY);
+chrome.runtime.onInstalled.addListener(() => {
+  // this will run on installation or update so
+  // first clear previous rules, then register new rules
+});
 
+const initStore = createInitStore(REDUX_STORAGE_KEY);
 initStore().then(store => {
   Browser.runtime.onMessage.addListener(
     async (action: BackgroundAction, sender: MessageSender) => {
