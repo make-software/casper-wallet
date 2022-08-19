@@ -1,4 +1,4 @@
-import Browser from 'webextension-polyfill';
+import browser from 'webextension-polyfill';
 import { EmptyAction, PayloadAction } from 'typesafe-actions';
 
 import { SendConnectStatusAction } from '@content/remote-actions';
@@ -19,7 +19,7 @@ export const requestConnection = async (origin: string) => {
     payload: origin
   };
 
-  await Browser.runtime.sendMessage(action);
+  await browser.runtime.sendMessage(action);
 };
 
 type DisconnectedFromSiteAction = PayloadAction<
@@ -33,7 +33,7 @@ export const disconnectFromSite = async (origin: string) => {
     payload: origin
   };
 
-  await Browser.runtime.sendMessage(action);
+  await browser.runtime.sendMessage(action);
 };
 
 type GetIsConnected = PayloadAction<'get-is-connected', string>;
@@ -44,7 +44,7 @@ export const getIsConnected = (origin: string) => {
     payload: origin
   };
 
-  return Browser.runtime.sendMessage(action);
+  return browser.runtime.sendMessage(action);
 };
 
 type GetActivePublicKey = EmptyAction<'get-active-public-key'>;
@@ -54,7 +54,7 @@ export const getActivePublicKey = () => {
     type: 'get-active-public-key'
   };
 
-  return Browser.runtime.sendMessage(action);
+  return browser.runtime.sendMessage(action);
 };
 
 type GetVersion = EmptyAction<'get-version'>;
@@ -64,5 +64,5 @@ export const getVersion = () => {
     type: 'get-version'
   };
 
-  return Browser.runtime.sendMessage(action);
+  return browser.runtime.sendMessage(action);
 };

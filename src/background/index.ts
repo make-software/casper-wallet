@@ -1,4 +1,4 @@
-import Browser, { Runtime } from 'webextension-polyfill';
+import browser, { Runtime } from 'webextension-polyfill';
 import MessageSender = Runtime.MessageSender;
 
 import { PurposeForOpening } from '@src/hooks';
@@ -21,7 +21,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 const initStore = createInitStore(REDUX_STORAGE_KEY);
 initStore().then(store => {
-  Browser.runtime.onMessage.addListener(
+  browser.runtime.onMessage.addListener(
     async (action: BackgroundAction, sender: MessageSender) => {
       switch (action.type) {
         case 'request-connection':

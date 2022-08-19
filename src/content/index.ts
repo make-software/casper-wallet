@@ -1,4 +1,4 @@
-import Browser, { Runtime } from 'webextension-polyfill';
+import browser, { Runtime } from 'webextension-polyfill';
 import MessageSender = Runtime.MessageSender;
 
 import {
@@ -52,7 +52,7 @@ async function handleMessage(action: RemoteAction, sender: MessageSender) {
   }
 }
 
-Browser.runtime.onMessage.addListener(handleMessage);
+browser.runtime.onMessage.addListener(handleMessage);
 
 function injectInpageScript() {
   try {
@@ -61,7 +61,7 @@ function injectInpageScript() {
 
     const scriptTag = document.createElement('script');
     scriptTag.setAttribute('type', 'text/javascript');
-    scriptTag.src = Browser.runtime.getURL(inpageScriptPath);
+    scriptTag.src = browser.runtime.getURL(inpageScriptPath);
     scriptTag.onload = function () {
       documentHeadOrRoot.removeChild(scriptTag);
 

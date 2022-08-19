@@ -1,5 +1,5 @@
 // TODO: No best place for `createOpenWindow` function. Need to move to most appropriate place
-import Browser from 'webextension-polyfill';
+import browser from 'webextension-polyfill';
 
 export enum PurposeForOpening {
   ImportAccount = 'ImportAccount',
@@ -45,13 +45,13 @@ export function createOpenWindow({
     const id = isNewWindow ? null : windowId;
 
     if (id) {
-      const allWindows = await Browser.windows.getAll();
+      const allWindows = await browser.windows.getAll();
       const isWindowExists = allWindows.find(window => window.id === id);
 
       if (isWindowExists) {
-        const window = await Browser.windows.get(id);
+        const window = await browser.windows.get(id);
         if (window.id) {
-          await Browser.windows.update(window.id, {
+          await browser.windows.update(window.id, {
             // Bring popup window to the front
             focused: true,
             drawAttention: true
@@ -62,7 +62,7 @@ export function createOpenWindow({
         await openWindow({ purposeForOpening, isNewWindow: true, origin });
       }
     } else {
-      Browser.windows
+      browser.windows
         .getCurrent()
         .then(window => {
           const windowWidth = window.width ?? 0;
@@ -72,7 +72,7 @@ export function createOpenWindow({
           const popupHeight =
             purposeForOpening === PurposeForOpening.ConnectToApp ? 700 : 600;
 
-          Browser.windows
+          browser.windows
             .create({
               url: getUrlByPurposeForOpening(purposeForOpening, origin),
               type: 'popup',
@@ -86,10 +86,10 @@ export function createOpenWindow({
                 setWindowId(newPopup.id);
 
                 const handleCloseWindow = () => {
-                  Browser.windows.onRemoved.removeListener(handleCloseWindow);
+                  browser.windows.onRemoved.removeListener(handleCloseWindow);
                   clearWindowId();
                 };
-                Browser.windows.onRemoved.addListener(handleCloseWindow);
+                browser.windows.onRemoved.addListener(handleCloseWindow);
               }
             });
         })

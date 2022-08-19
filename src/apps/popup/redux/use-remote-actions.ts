@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Browser, { Runtime } from 'webextension-polyfill';
+import browser, { Runtime } from 'webextension-polyfill';
 
 import { importAccount } from '@popup/redux/vault/actions';
 import {
@@ -59,9 +59,9 @@ export function useRemoteActions() {
   );
 
   useEffect(() => {
-    Browser.runtime.onMessage.addListener(handleMessage);
+    browser.runtime.onMessage.addListener(handleMessage);
     return () => {
-      Browser.runtime.onMessage.removeListener(handleMessage);
+      browser.runtime.onMessage.removeListener(handleMessage);
     };
   }, [handleMessage]);
 }

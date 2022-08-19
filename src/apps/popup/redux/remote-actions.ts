@@ -1,5 +1,5 @@
 import { EmptyAction, PayloadAction } from 'typesafe-actions';
-import Browser from 'webextension-polyfill';
+import browser from 'webextension-polyfill';
 
 import { Account } from '@src/apps/popup/redux/vault/types';
 
@@ -20,7 +20,7 @@ export const sendImportedAccount = (account: Account): Promise<boolean> => {
       account: account
     }
   };
-  return Browser.runtime.sendMessage(action);
+  return browser.runtime.sendMessage(action);
 };
 
 export type CheckAccountNameIsTakenAction = PayloadAction<
@@ -35,7 +35,7 @@ export const checkAccountNameIsTaken = (value: string): Promise<boolean> => {
       accountName: value
     }
   };
-  return Browser.runtime.sendMessage(action);
+  return browser.runtime.sendMessage(action);
 };
 
 export type CheckSecretKeyExistAction = PayloadAction<
@@ -51,12 +51,12 @@ export const checkSecretKeyExist = (
       secretKeyBase64
     }
   };
-  return Browser.runtime.sendMessage(action);
+  return browser.runtime.sendMessage(action);
 };
 
 export type GetWindowIdAction = EmptyAction<'get-window-id'>;
 
 export const getWindowId = (): Promise<number | null> => {
   const action: GetWindowIdAction = { type: 'get-window-id' };
-  return Browser.runtime.sendMessage(action);
+  return browser.runtime.sendMessage(action);
 };

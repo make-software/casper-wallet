@@ -1,5 +1,5 @@
 import { EmptyAction, PayloadAction } from 'typesafe-actions';
-import Browser from 'webextension-polyfill';
+import browser from 'webextension-polyfill';
 
 export type RemoteAction =
   | FetchActiveTabOriginAction
@@ -12,11 +12,11 @@ async function sendMessageToActiveTab(
   currentWindow: boolean
 ) {
   // TODO: check this if that actually is a best practice?
-  const tabs = await Browser.tabs.query({
+  const tabs = await browser.tabs.query({
     currentWindow: currentWindow,
     active: true
   });
-  return Browser.tabs.sendMessage(tabs[0].id as number, action);
+  return browser.tabs.sendMessage(tabs[0].id as number, action);
 }
 
 export type FetchActiveTabOriginAction = EmptyAction<'fetch-active-tab-origin'>;
