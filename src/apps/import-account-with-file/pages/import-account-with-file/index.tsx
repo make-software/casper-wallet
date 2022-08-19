@@ -91,9 +91,10 @@ export function ImportAccountWithFileContentPage() {
   };
 
   const {
-    resetField,
     register,
     handleSubmit,
+    getValues,
+    setValue,
     formState: { errors, isValid, isDirty, dirtyFields }
   } = useForm(formOptions);
 
@@ -105,6 +106,8 @@ export function ImportAccountWithFileContentPage() {
   }
 
   const isSubmitDisabled = !isValid || !isDirty;
+  const { secretKeyFile } = getValues();
+  const isFileLoaded = dirtyFields.secretKeyFile && secretKeyFile?.length > 0;
 
   return (
     <ContentContainer>
@@ -125,9 +128,11 @@ export function ImportAccountWithFileContentPage() {
             accept=".pem"
             prefixIcon={<SvgIcon src="assets/icons/file.svg" size={24} />}
             suffixIcon={
-              dirtyFields.secretKeyFile && (
+              isFileLoaded && (
                 <SvgIcon
-                  onClick={() => resetField('secretKeyFile')}
+                  onClick={() =>
+                    setValue('secretKeyFile', null, { shouldValidate: true })
+                  }
                   src="assets/icons/close-filter.svg"
                   size={24}
                 />
