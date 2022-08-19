@@ -61,7 +61,7 @@ export function ImportAccountWithFileContentPage() {
       .test(
         'required',
         t('File with secret key should be loaded'),
-        value => value !== null && value.length > 0
+        filesArray => filesArray !== null && filesArray.length > 0
       )
       .test(
         'fileType',
@@ -81,6 +81,7 @@ export function ImportAccountWithFileContentPage() {
   });
 
   const formOptions: UseFormProps = {
+    mode: 'onChange',
     reValidateMode: 'onChange',
     resolver: yupResolver(formSchema),
     defaultValues: {
@@ -90,10 +91,11 @@ export function ImportAccountWithFileContentPage() {
   };
 
   const {
-    resetField,
     register,
     handleSubmit,
-    formState: { errors, isDirty }
+    watch,
+    setValue,
+    formState: { errors, isValid, isDirty }
   } = useForm(formOptions);
 
   async function onSubmit({
@@ -102,6 +104,10 @@ export function ImportAccountWithFileContentPage() {
   }: FieldValues) {
     secretKeyFileReader(name, secretKeyFile);
   }
+
+  const isSubmitDisabled = !isValid || !isDirty;
+  const secretKeyFile = watch('secretKeyFile');
+  const isFileLoaded = secretKeyFile?.length > 0;
 
   return (
     <ContentContainer>
@@ -122,11 +128,15 @@ export function ImportAccountWithFileContentPage() {
             accept=".pem"
             prefixIcon={<SvgIcon src="assets/icons/file.svg" size={24} />}
             suffixIcon={
-              <SvgIcon
-                onClick={() => resetField('secretKeyFile')}
-                src="assets/icons/close-filter.svg"
-                size={24}
-              />
+              isFileLoaded && (
+                <SvgIcon
+                  onClick={() =>
+                    setValue('secretKeyFile', null, { shouldValidate: true })
+                  }
+                  src="assets/icons/close-filter.svg"
+                  size={24}
+                />
+              )
             }
             {...register('secretKeyFile')}
             error={!!errors.secretKeyFile}
@@ -141,7 +151,7 @@ export function ImportAccountWithFileContentPage() {
           />
         </InputsContainer>
         <FooterButtonsContainer>
-          <Button disabled={!isDirty}>
+          <Button disabled={isSubmitDisabled}>
             <Trans t={t}>Import</Trans>
           </Button>
         </FooterButtonsContainer>
