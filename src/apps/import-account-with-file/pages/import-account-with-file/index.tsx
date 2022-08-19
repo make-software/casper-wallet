@@ -93,9 +93,9 @@ export function ImportAccountWithFileContentPage() {
   const {
     register,
     handleSubmit,
-    getValues,
+    watch,
     setValue,
-    formState: { errors, isValid, isDirty, dirtyFields }
+    formState: { errors, isValid, isDirty }
   } = useForm(formOptions);
 
   async function onSubmit({
@@ -106,8 +106,8 @@ export function ImportAccountWithFileContentPage() {
   }
 
   const isSubmitDisabled = !isValid || !isDirty;
-  const { secretKeyFile } = getValues();
-  const isFileLoaded = dirtyFields.secretKeyFile && secretKeyFile?.length > 0;
+  const secretKeyFile = watch('secretKeyFile');
+  const isFileLoaded = secretKeyFile?.length > 0;
 
   return (
     <ContentContainer>
