@@ -43,6 +43,11 @@ const FlexColumn = styled.div`
 `;
 
 const RowContainer = styled(FlexColumn)``;
+const ListHeaderContainer = styled(FlexColumn)`
+  &::after {
+    ${borderBottomPseudoElementRules};
+  }
+`;
 const ListFooterContainer = styled(FlexColumn)`
   &::before {
     ${borderBottomPseudoElementRules};
@@ -63,6 +68,7 @@ interface ListProps<ListRow extends ListRowBase>
   rows: ListRow[];
   renderRow: (row: ListRow, index: number, array: ListRow[]) => JSX.Element;
   renderFooter?: () => JSX.Element;
+  renderHeader?: () => JSX.Element;
   headerLabel?: string;
   headerAction?: HeaderAction;
 }
@@ -70,10 +76,11 @@ interface ListProps<ListRow extends ListRowBase>
 export function List<ListRow extends ListRowBase>({
   rows,
   renderRow,
-  marginLeftForItemSeparatorLine,
+  renderHeader,
   renderFooter,
   headerLabel,
-  headerAction
+  headerAction,
+  marginLeftForItemSeparatorLine
 }: ListProps<ListRow>) {
   return (
     <>
@@ -100,6 +107,13 @@ export function List<ListRow extends ListRowBase>({
       )}
       <TopMarginContainer>
         <Tile>
+          {renderHeader && (
+            <ListHeaderContainer
+              marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
+            >
+              {renderHeader()}
+            </ListHeaderContainer>
+          )}
           <RowsContainer
             marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
           >

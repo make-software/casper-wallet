@@ -30,18 +30,19 @@ export function ConnectedSitesPage() {
       </HeaderTextContainer>
       {Object.entries(accountsByOrigin).map(([origin, accounts], index) => {
         const siteTitle = origin.split('://')[1];
-        return [
-          <SiteGroupHeader
-            key={origin + 'header'}
-            siteTitle={siteTitle}
-            disconnectSite={async () => {
-              await disconnectAllAccounts(origin);
-            }}
-          />,
-
+        return (
           <List
             key={origin + 'list'}
             rows={accounts.map(account => ({ ...account, id: account.name }))}
+            renderHeader={() => (
+              <SiteGroupHeader
+                key={origin + 'header'}
+                siteTitle={siteTitle}
+                disconnectSite={async () => {
+                  await disconnectAllAccounts(origin);
+                }}
+              />
+            )}
             renderRow={(account, index, array) => {
               const { name, publicKey } = account;
 
@@ -62,7 +63,7 @@ export function ConnectedSitesPage() {
             }}
             marginLeftForItemSeparatorLine={16}
           />
-        ];
+        );
       })}
     </ContentContainer>
   );
