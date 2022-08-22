@@ -52,7 +52,7 @@ export function NavigationMenuPageContent() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
+  const timeoutDurationSetting = useSelector(selectVaultTimeoutDurationSetting);
   const countOfConnectedSites = useSelector(selectCountOfConnectedSites);
 
   const { openWindow } = useWindowManager();
@@ -90,7 +90,7 @@ export function NavigationMenuPageContent() {
         id: 4,
         title: t('Timeout'),
         iconPath: 'assets/icons/lock.svg',
-        currentValue: TimeoutDurationSetting[timeoutDuration],
+        currentValue: TimeoutDurationSetting[timeoutDurationSetting],
         handleOnClick: () => {
           closeNavigationMenu();
           navigate(RouterPath.Timeout);
@@ -100,7 +100,7 @@ export function NavigationMenuPageContent() {
     [
       navigate,
       t,
-      timeoutDuration,
+      timeoutDurationSetting,
       closeNavigationMenu,
       countOfConnectedSites,
       openWindow

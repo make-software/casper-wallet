@@ -16,11 +16,11 @@ import { TimeoutDurationSetting } from '@popup/constants';
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();
-  const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
+  const timeoutDurationSetting = useSelector(selectVaultTimeoutDurationSetting);
   const dispatch = useDispatch();
 
   const timeoutsMenuItems = useMemo(() => {
-    const MapTimeoutDurationSettingToTranslation = {
+    const timeoutDurationSettingTranslationDict = {
       [TimeoutDurationSetting['1 min']]: t('1 min'),
       [TimeoutDurationSetting['5 min']]: t('5 min'),
       [TimeoutDurationSetting['15 min']]: t('15 min'),
@@ -33,12 +33,12 @@ export function TimeoutPageContent() {
       Object.keys(TimeoutDurationSetting) as Array<
         keyof typeof TimeoutDurationSetting
       >
-    ).map(key => ({
-      id: key,
-      title: MapTimeoutDurationSettingToTranslation[key],
-      checked: timeoutDuration === key
+    ).map(timeoutDurationItem => ({
+      id: timeoutDurationItem,
+      title: timeoutDurationSettingTranslationDict[timeoutDurationItem],
+      checked: timeoutDurationSetting === timeoutDurationItem
     }));
-  }, [t, timeoutDuration]);
+  }, [t, timeoutDurationSetting]);
 
   return (
     <ContentContainer>
@@ -72,7 +72,7 @@ export function TimeoutPageContent() {
             <Typography type="body" weight="regular">
               {menuItem.title}
             </Typography>
-            <Checkbox checked={timeoutDuration === menuItem.id} />
+            <Checkbox checked={timeoutDurationSetting === menuItem.id} />
           </ListItemClickableContainer>
         )}
       />
