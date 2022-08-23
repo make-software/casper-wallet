@@ -76,7 +76,7 @@
     "@testing-library/react": "^12.1.2",
     "@testing-library/react-hooks": "^7.0.2",
     "@testing-library/user-event": "^13.5.0",
-    "@types/chrome": "^0.0.161",
+    "@types/chrome": "^0.0.195",
     "@types/expect": "^24.3.0",
     "@types/facepaint": "^1.2.2",
     "@types/jest": "^27.4.0",
