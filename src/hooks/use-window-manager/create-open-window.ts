@@ -10,14 +10,11 @@ function getUrlByPurposeForOpening(
   purposeForOpening: PurposeForOpening,
   origin?: string
 ) {
-  // `width` and `height` params needs for resize window for Windows OS
-  // Window size on Windows less a little than I set to it:
-  // `width` less on 13px and `height` less on 35px
   switch (purposeForOpening) {
     case PurposeForOpening.ImportAccount:
-      return 'import-account-with-file.html?width=373&height=635';
+      return 'import-account-with-file.html?width=360&height=600';
     case PurposeForOpening.ConnectToApp:
-      return `connect-to-app.html?origin=${origin}&width=373&height=735`;
+      return `connect-to-app.html?origin=${origin}&width=360&height=700`;
     default:
       return 'popup.html?#/';
   }
