@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
+
+import { useWindowResizeToSizeFromQuerystring } from '@hooks/use-window-resize-to-size-from-querystring';
+
 import { RouterPath } from '@connect-to-app/router';
 import { Layout, Header } from '@connect-to-app/layout';
 import { AccountsSelectionPage } from '@connect-to-app/pages/accounts-selection';
@@ -7,7 +10,13 @@ import { ApproveConnectionPage } from '@connect-to-app/pages/approve-connection'
 import { ConnectingPage } from '@connect-to-app/pages/connecting';
 
 function getSiteRelatedData() {
-  const origin = document.location.search.split('origin=')[1];
+  const querystring = new URLSearchParams(document.location.search);
+  const origin = querystring.get('origin');
+
+  if (origin == null) {
+    throw new Error("Origin wasn't found");
+  }
+
   const originName = origin.split('://')[1];
   const splittedOrigin = originName.split('.');
   const capitalizedOrigin = splittedOrigin
@@ -26,6 +35,8 @@ export function App() {
   const [selectedAccountNames, setSelectedAccountNames] = useState<string[]>(
     []
   );
+  useWindowResizeToSizeFromQuerystring();
+
   const { origin, headerText } = getSiteRelatedData();
 
   return (
