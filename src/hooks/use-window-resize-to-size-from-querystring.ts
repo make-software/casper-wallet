@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import browser from 'webextension-polyfill';
 
 export function useWindowResizeToSizeFromQuerystring() {
   useEffect(() => {
@@ -13,7 +14,16 @@ export function useWindowResizeToSizeFromQuerystring() {
       const heightPx = Number.parseInt(height);
 
       if (!Number.isNaN(widthPx) && !Number.isNaN(heightPx)) {
-        setTimeout(() => window.resizeTo(widthPx, heightPx), 250);
+        setTimeout(() => {
+          browser.windows
+            .update(browser.windows.WINDOW_ID_CURRENT, {
+              width: widthPx,
+              height: heightPx
+            })
+            .catch(e => {
+              throw new Error(e);
+            });
+        }, 250);
       }
     }
   }, []);
