@@ -15,7 +15,7 @@ import { RouterPath } from './router';
 import { ImportAccountWithFileSuccessContentPage } from './pages/import-account-with-file-success';
 import { ImportAccountWithFileFailureContentPage } from './pages/import-account-with-file-failure';
 import { ImportAccountWithFileContentPage } from './pages/import-account-with-file';
-import { ImportAccountWithFileLayout } from './layout';
+import { Header, Layout } from '@layout/window';
 
 render(
   <Suspense fallback={null}>
@@ -27,7 +27,8 @@ render(
           <Route
             path={RouterPath.ImportAccountWithFile}
             element={
-              <ImportAccountWithFileLayout
+              <Layout
+                Header={<Header />}
                 Content={<ImportAccountWithFileContentPage />}
               />
             }
@@ -35,7 +36,8 @@ render(
           <Route
             path={RouterPath.ImportAccountWithFileSuccess}
             element={
-              <ImportAccountWithFileLayout
+              <Layout
+                Header={<Header />}
                 Content={<ImportAccountWithFileSuccessContentPage />}
               />
             }
@@ -43,7 +45,8 @@ render(
           <Route
             path={RouterPath.ImportAccountWithFileFailure}
             element={
-              <ImportAccountWithFileLayout
+              <Layout
+                Header={<Header />}
                 Content={<ImportAccountWithFileFailureContentPage />}
               />
             }

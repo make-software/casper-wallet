@@ -17,7 +17,7 @@ import {
 import { createVault } from '@popup/redux/vault/actions';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import {
-  FooterButtonsContainer,
+  FooterButtonsAbsoluteContainer,
   ContentContainer,
   HeaderTextContainer,
   InputsContainer,
@@ -123,11 +123,11 @@ export function CreateVaultPageContent() {
           />
         </InputsContainer>
       </ContentContainer>
-      <FooterButtonsContainer>
+      <FooterButtonsAbsoluteContainer>
         <Button disabled={!isDirty}>
           <Trans t={t}>Create Vault</Trans>
         </Button>
-      </FooterButtonsContainer>
+      </FooterButtonsAbsoluteContainer>
     </form>
   );
 }

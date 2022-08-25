@@ -13,7 +13,7 @@ const Container = styled.div`
 const PageHeader = styled.header``;
 
 const PageContent = styled.div`
-  min-width: 360px;
+  width: 100%;
   height: calc(100% - 128px); // 128px is headers height
 `;
 
@@ -27,4 +27,3 @@ export function Layout({ Header, Content }: Props) {
 }
 
 export * from './header';
-export * from './containers';

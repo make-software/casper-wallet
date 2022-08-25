@@ -2,7 +2,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
-  FooterButtonsContainer,
+  FooterButtonsAbsoluteContainer,
   ContentContainer,
   HeaderTextContainer,
   TextContainer
@@ -36,14 +36,14 @@ export function ImportAccountWithFileFailureContentPage() {
             : t("We couldn't import your account. Please try again.")}
         </Typography>
       </TextContainer>
-      <FooterButtonsContainer>
+      <FooterButtonsAbsoluteContainer>
         <Button onClick={() => navigate(RouterPath.ImportAccountWithFile)}>
           <Trans t={t}>Try to import again</Trans>
         </Button>
         <Button color="secondaryBlue" onClick={() => closeWindow()}>
           <Trans t={t}>Maybe later</Trans>
         </Button>
-      </FooterButtonsContainer>
+      </FooterButtonsAbsoluteContainer>
     </ContentContainer>
   );
 }
