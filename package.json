@@ -8,7 +8,7 @@
     "build:chrome": "NODE_ENV=production BABEL_ENV=production BROWSER=chrome node utils/build.js",
     "build:firefox": "npm run build:manifest:v2",
     "build:safari": "npm run build:manifest:v2 && ./safari_build.sh",
-    "build:all": "npm run build:chrome && npm run build:safari && cd ./build && zip builds.zip ./*",
+    "build:all": "npm run build:chrome && npm run build:safari && cd ./build && zip -r builds.zip ./*",
     "dev:build:chrome": "NODE_ENV=development BABEL_ENV=development BROWSER=chrome node utils/build.js",
     "dev:build:firefox": "npm run dev:build:manifest:v2",
     "dev:chrome": "npm run dev:build:chrome && NODE_ENV=development BABEL_ENV=development BROWSER=chrome PORT=3001 ts-node --project scripts.tsconfig.json utils/webserver.js",
