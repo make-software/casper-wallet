@@ -1,6 +1,30 @@
 {
   "name": "casper-signer-v2",
   "version": "0.1.0",
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/changelog",
+    "@semantic-release/npm",
+    "@semantic-release/git",
+    "@semantic-release/github"
+  ],
+  "release": {
+    "branches": ["develop"],
+    "prepare": [
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      {
+        "path": "@semantic-release/git",
+        "assets": [
+          "package.json",
+          "package-lock.json",
+          "CHANGELOG.md"
+        ],
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      }
+    ]
+  },
   "scripts": {
     "devtools:redux": "redux-devtools --hostname=localhost --port=8000",
     "build:manifest:v2": "NODE_ENV=production BABEL_ENV=production BROWSER=firefox node utils/build.js",
@@ -71,6 +95,8 @@
     "@babel/preset-env": "^7.15.8",
     "@babel/preset-react": "^7.14.5",
     "@redux-devtools/cli": "^1.0.7",
+    "@semantic-release/changelog": "^6.0.1",
+    "@semantic-release/git": "^10.0.1",
     "@testing-library/dom": "^8.11.3",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
