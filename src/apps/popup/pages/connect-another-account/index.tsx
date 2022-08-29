@@ -4,8 +4,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
 import styled from 'styled-components';
 
-import { useActiveTabOrigin } from '@hooks/use-active-tab-origin';
-
 import { ContentContainer, HeaderTextContainer } from '@src/layout';
 import {
   Button,
@@ -20,7 +18,8 @@ import {
 
 import {
   selectConnectedAccountsWithOrigin,
-  selectVaultActiveAccount
+  selectVaultActiveAccount,
+  selectVaultActiveOrigin
 } from '@popup/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@popup/hooks/use-account-manager';
@@ -56,13 +55,11 @@ export function ConnectAnotherAccountPageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  const activeTabOrigin = useActiveTabOrigin({ currentWindow: true });
-  const { connectAccount, changeActiveAccount } = useAccountManager({
-    currentWindow: true
-  });
+  const activeOrigin = useSelector(selectVaultActiveOrigin);
+  const { connectAccounts, changeActiveAccount } = useAccountManager();
 
   const connectedAccountsToActiveTab = useSelector((state: RootState) =>
-    selectConnectedAccountsWithOrigin(state, activeTabOrigin)
+    selectConnectedAccountsWithOrigin(state)
   );
   const activeAccount = useSelector(selectVaultActiveAccount);
 
@@ -76,7 +73,7 @@ export function ConnectAnotherAccountPageContent() {
   return (
     <ContentContainer>
       <HeaderTextContainer>
-        <SiteFaviconBadge origin={activeTabOrigin} />
+        <SiteFaviconBadge origin={activeOrigin} />
         <HeaderTextContent>
           <Typography type="header" weight="bold">
             Your current account is not connected
@@ -106,7 +103,7 @@ export function ConnectAnotherAccountPageContent() {
                 variant="inline"
                 width="100"
                 onClick={async () => {
-                  await connectAccount(activeAccount);
+                  await connectAccounts([activeAccount.name]);
                   navigate(RouterPath.Home);
                 }}
               >

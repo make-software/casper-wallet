@@ -29,7 +29,6 @@ import {
 
 import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
 
-import { useRemoteActions } from './redux/use-remote-actions';
 import {
   AccountSettingsPageContent,
   AccountSettingsActionsGroup
@@ -47,7 +46,6 @@ export function App() {
   const vaultHasAccount = useSelector(selectVaultHasAccount);
 
   useVaultTimeoutController();
-  useRemoteActions();
 
   // App redirects
   useEffect(() => {

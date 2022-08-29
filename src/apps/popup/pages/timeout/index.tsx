@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Typography, Checkbox, List } from '@libs/ui';
@@ -11,13 +11,13 @@ import {
 } from '@layout/containers';
 
 import { selectVaultTimeoutDurationSetting } from '@popup/redux/vault/selectors';
-import { changeTimeoutDuration } from '@popup/redux/vault/actions';
+import { timeoutDurationChanged } from '@popup/redux/vault/actions';
 import { TimeoutDurationSetting } from '@popup/constants';
+import { dispatchToMainStore } from '../../redux/utils';
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();
   const timeoutDurationSetting = useSelector(selectVaultTimeoutDurationSetting);
-  const dispatch = useDispatch();
 
   const timeoutsMenuItems = useMemo(() => {
     const timeoutDurationSettingTranslationDict = {
@@ -62,8 +62,8 @@ export function TimeoutPageContent() {
           <ListItemClickableContainer
             key={menuItem.id}
             onClick={() => {
-              dispatch(
-                changeTimeoutDuration({
+              dispatchToMainStore(
+                timeoutDurationChanged({
                   timeoutDuration: TimeoutDurationSetting[menuItem.id]
                 })
               );

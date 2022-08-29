@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 
@@ -14,11 +13,11 @@ import {
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { removeAccount } from '@popup/redux/vault/actions';
+import { accountRemoved } from '@popup/redux/vault/actions';
+import { dispatchToMainStore } from '../../redux/utils';
 
 export function RemoveAccountPageContent() {
   const navigate = useTypedNavigate();
-  const dispatch = useDispatch();
   const { accountName } = useParams();
   const { t } = useTranslation();
 
@@ -28,9 +27,9 @@ export function RemoveAccountPageContent() {
       return;
     }
 
-    dispatch(removeAccount({ accountName }));
+    dispatchToMainStore(accountRemoved({ accountName }));
     navigate(RouterPath.Home);
-  }, [dispatch, navigate, accountName]);
+  }, [navigate, accountName]);
 
   if (!accountName) {
     navigate(RouterPath.Home);

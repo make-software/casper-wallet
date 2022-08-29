@@ -1,6 +1,6 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -18,11 +18,11 @@ import {
 import { Typography, Input, Button } from '@libs/ui';
 
 import { selectVaultPassword } from '@popup/redux/vault/selectors';
-import { unlockVault } from '@popup/redux/vault/actions';
+import { vaultUnlocked } from '@popup/redux/vault/actions';
+import { dispatchToMainStore } from '../../redux/utils';
 
 export function UnlockVaultPageContent() {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const vaultPassword = useSelector(selectVaultPassword);
@@ -42,7 +42,7 @@ export function UnlockVaultPageContent() {
   });
 
   function handleUnlockVault() {
-    dispatch(unlockVault());
+    dispatchToMainStore(vaultUnlocked());
     navigate(-1);
   }
 

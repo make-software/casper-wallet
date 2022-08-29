@@ -15,9 +15,7 @@ import { SiteGroupItem } from '@popup/pages/connected-sites/site-group-item';
 export function ConnectedSitesPage() {
   const { t } = useTranslation();
 
-  const { disconnectAccount, disconnectAllAccounts } = useAccountManager({
-    currentWindow: true
-  });
+  const { disconnectAccount, disconnectAllAccounts } = useAccountManager();
 
   const accountsByOrigin = useSelector(selectVaultAccountsByOriginDict);
 

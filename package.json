@@ -1,6 +1,8 @@
 {
-  "name": "casper-signer-v2",
-  "version": "0.1.0",
+  "name": "Casper Wallet",
+  "description": "Casper Wallet - tool for signing transactions on the blockchain.",
+  "version": "0.1.2",
+  "author": "MAKE LLC",
   "scripts": {
     "devtools:redux": "redux-devtools --hostname=localhost",
     "build:manifest:v2": "NODE_ENV=production BABEL_ENV=production BROWSER=firefox node utils/build.js",
@@ -9,8 +11,8 @@
     "build:firefox": "npm run build:manifest:v2",
     "build:safari": "npm run build:manifest:v2 && ./safari_build.sh",
     "build:all": "npm run build:chrome && npm run build:safari && cd ./build && zip -r builds.zip ./*",
-    "dev:build:chrome": "NODE_ENV=development BABEL_ENV=development BROWSER=chrome node utils/build.js",
-    "dev:build:firefox": "npm run dev:build:manifest:v2",
+    "dev:build:chrome": "rm -rf ./output/chrome && NODE_ENV=development BABEL_ENV=development BROWSER=chrome node utils/build.js",
+    "dev:build:firefox": "rm -rf ./output/firefox && npm run dev:build:manifest:v2",
     "dev:chrome": "npm run dev:build:chrome && NODE_ENV=development BABEL_ENV=development BROWSER=chrome PORT=3001 ts-node --project scripts.tsconfig.json utils/webserver.js",
     "start:chrome": "concurrently -k -n start,redux \"npm run dev:chrome\" \"npm run devtools:redux -- --port=8000\"",
     "dev:firefox": "npm run dev:build:firefox && NODE_ENV=development BABEL_ENV=development BROWSER=firefox PORT=3002 ts-node --project scripts.tsconfig.json utils/webserver.js",

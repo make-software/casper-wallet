@@ -63,17 +63,7 @@ export function App() {
       />
       <Route
         path={RouterPath.Connecting}
-        element={
-          <Layout
-            Header={<Header />}
-            Content={
-              <ConnectingPage
-                selectedAccountNames={selectedAccountNames}
-                origin={origin}
-              />
-            }
-          />
-        }
+        element={<Layout Header={<Header />} Content={<ConnectingPage />} />}
       />
     </Routes>
   );

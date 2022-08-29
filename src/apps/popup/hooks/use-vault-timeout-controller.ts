@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import throttle from 'lodash.throttle';
 
 import {
@@ -8,13 +8,13 @@ import {
   selectVaultTimeoutDurationSetting,
   selectVaultLastActivityTime
 } from '@popup/redux/vault/selectors';
-import { lockVault, refreshTimeout } from '@popup/redux/vault/actions';
+import { vaultLocked, timeoutRefreshed } from '@popup/redux/vault/actions';
 
 import { MapTimeoutDurationSettingToValue } from '../constants';
+import { dispatchToMainStore } from '../redux/utils';
 
 export function useVaultTimeoutController(): void {
   const timeoutCounterRef = useRef<NodeJS.Timeout>();
-  const dispatch = useDispatch();
 
   const vaultDoesExists = useSelector(selectVaultDoesExist);
   const vaultIsLocked = useSelector(selectVaultIsLocked);
@@ -34,11 +34,11 @@ export function useVaultTimeoutController(): void {
         currentTime - vaultLastActivityTime >= timeoutDurationValue;
 
       if (timeoutExpired) {
-        dispatch(lockVault());
+        dispatchToMainStore(vaultLocked());
       } else {
         timeoutCounterRef.current && clearTimeout(timeoutCounterRef.current);
         timeoutCounterRef.current = setTimeout(() => {
-          dispatch(lockVault());
+          dispatchToMainStore(vaultLocked());
         }, timeoutDurationValue);
       }
     }
@@ -46,7 +46,6 @@ export function useVaultTimeoutController(): void {
       timeoutCounterRef.current && clearTimeout(timeoutCounterRef.current);
     };
   }, [
-    dispatch,
     vaultDoesExists,
     vaultIsLocked,
     vaultLastActivityTime,
@@ -55,11 +54,15 @@ export function useVaultTimeoutController(): void {
 
   // should refresh timeout on any user activity
   useEffect(() => {
-    const events = ['mousemove', 'mousedown', 'click', 'scroll', 'keypress'];
-    const throttleDelay = 5000;
-    const throttledRefreshTimeout = throttle(() => {
-      dispatch(refreshTimeout());
-    }, throttleDelay);
+    const events = ['mousemove', 'click', 'scroll', 'keypress'];
+    const throttleDelay = 60000;
+    const throttledRefreshTimeout = throttle(
+      () => {
+        dispatchToMainStore(timeoutRefreshed());
+      },
+      throttleDelay,
+      { trailing: false }
+    );
 
     if (vaultDoesExists && !vaultIsLocked) {
       for (let i in events) {
@@ -73,5 +76,5 @@ export function useVaultTimeoutController(): void {
         window.removeEventListener(events[i], throttledRefreshTimeout);
       }
     };
-  }, [dispatch, vaultDoesExists, vaultIsLocked]);
+  }, [vaultDoesExists, vaultIsLocked]);
 }

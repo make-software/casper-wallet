@@ -1,27 +1,10 @@
 import { EmptyAction, PayloadAction } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 
-import { Account } from '@src/apps/popup/redux/vault/types';
-
 export type RemoteAction =
-  | SendImportedAccountAction
   | CheckAccountNameIsTakenAction
   | CheckSecretKeyExistAction
   | GetWindowIdAction;
-
-export type SendImportedAccountAction = PayloadAction<
-  'send-imported-account',
-  { account: Account }
->;
-export const sendImportedAccount = (account: Account): Promise<boolean> => {
-  const action: SendImportedAccountAction = {
-    type: 'send-imported-account',
-    payload: {
-      account: account
-    }
-  };
-  return browser.runtime.sendMessage(action);
-};
 
 export type CheckAccountNameIsTakenAction = PayloadAction<
   'check-account-name-is-taken',

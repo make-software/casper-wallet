@@ -19,12 +19,11 @@ import {
 
 import { RouterPath, useTypedNavigate } from '@import-account-with-file/router';
 
-import {
-  checkAccountNameIsTaken,
-  sendImportedAccount
-} from '@popup/redux/remote-actions';
+import { checkAccountNameIsTaken } from '@src/apps/popup/redux/import-account-actions-should-be-removed';
 
 import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
+import { dispatchToMainStore } from '@src/apps/popup/redux/utils';
+import { accountImported } from '@src/apps/popup/redux/vault/actions';
 
 export function ImportAccountWithFileContentPage() {
   const navigate = useTypedNavigate();
@@ -34,7 +33,7 @@ export function ImportAccountWithFileContentPage() {
 
   const onSuccess = useCallback(
     async (accountData: Account) => {
-      await sendImportedAccount(accountData);
+      dispatchToMainStore(accountImported(accountData));
       navigate(RouterPath.ImportAccountWithFileSuccess);
     },
     [navigate]

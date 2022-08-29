@@ -19,7 +19,7 @@ const GRPC_URL = 'https://casper-node-proxy.dev.make.services/rpc';
 export let casperService = new CasperServiceByJsonRPC(GRPC_URL);
 
 type WalletService = {
-  logs: string[];
+  logs: [string, object][];
   errorMessage: string | null;
   activePublicKey: string | null;
   connectSigner: () => Promise<void>;
@@ -41,22 +41,26 @@ export const useWalletService = () => {
 
 export const WalletServiceProvider = props => {
   const [error, setError] = useState<null | Error>(null);
-  const [logs, setLogs] = useState<string[]>([]);
-  const log = (msg: string) => setLogs(state => [...state, msg]);
-  const [activePublicKey, setActivePublicKey] = useState<null | string>(null);
+  const [logs, setLogs] = useState<[string, object][]>([]);
+  const log = (msg: string, payload?: any) =>
+    setLogs(state => [[msg, payload], ...state]);
 
-  const updatePublicKey = useCallback(
-    (key: string | null) => {
-      setActivePublicKey(key);
-      localStorage.setItem(
-        REDUX_WALLET_SYNC_KEY,
-        JSON.stringify({
-          publicKey: activePublicKey
-        } as SyncWalletBroadcastMessage)
-      );
-    },
-    [activePublicKey]
-  );
+  const [activePublicKey, setActivePublicKey] = useState<null | string>(() => {
+    const state: SyncWalletBroadcastMessage | null = JSON.parse(
+      localStorage.getItem(REDUX_WALLET_SYNC_KEY) || 'null'
+    );
+    return state?.publicKey || null;
+  });
+
+  const updatePublicKey = useCallback((key: string | null) => {
+    setActivePublicKey(key);
+    localStorage.setItem(
+      REDUX_WALLET_SYNC_KEY,
+      JSON.stringify({
+        publicKey: key
+      } as SyncWalletBroadcastMessage)
+    );
+  }, []);
 
   // SYNC BETWEEN TABS AND WINDOWS
   useEffect(() => {
@@ -87,7 +91,7 @@ export const WalletServiceProvider = props => {
   // SIGNER SUBSCRIPTIONS
   useEffect(() => {
     const handleConnected = (msg: SignerMsg) => {
-      log('connected');
+      log('event:connected', msg.detail);
       const publicKey = msg.detail!.activeKey;
       if (publicKey) {
         updatePublicKey(publicKey);
@@ -95,23 +99,23 @@ export const WalletServiceProvider = props => {
     };
 
     const handleDisconnected = (msg: SignerMsg) => {
-      log('disconnected');
+      log('event:disconnected', msg.detail);
       if (activePublicKey) {
         updatePublicKey(null);
       }
     };
 
     const handleActiveKeyChanged = (msg: SignerMsg) => {
-      log('activeKeyChanged');
+      log('event:activeKeyChanged', msg.detail);
       const publicKey = msg.detail!.activeKey;
 
-      if (activePublicKey && publicKey && msg.detail!.isConnected) {
+      if (publicKey && msg.detail!.isConnected) {
         updatePublicKey(publicKey);
       }
     };
 
     const handleUnlocked = (msg: SignerMsg) => {
-      log('unlocked');
+      log('event:unlocked', msg.detail);
       if (activePublicKey && msg.detail!.isConnected) {
         const publicKey = msg.detail!.activeKey;
         // when unlocking Signer we need to make sure the active key is the same as in memory
@@ -140,12 +144,12 @@ export const WalletServiceProvider = props => {
   }, [activePublicKey, updatePublicKey]);
 
   const disconnect = () => {
-    console.log('disconnect');
+    console.log('disconnectRequest');
     SignerService.disconnect();
   };
 
   const connectSigner = async () => {
-    console.log('sendConnectionRequest');
+    console.log('connectRequest');
     SignerService.sendConnectionRequest();
   };
 

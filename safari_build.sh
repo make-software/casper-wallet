@@ -3,10 +3,10 @@
 xcrun safari-web-extension-converter --no-prompt --no-open --project-location ./build/xcode-framework --macos-only ./build/firefox
 
 # Building extension for Safari by XCode Framework
-cd ./build/xcode-framework/CasperLabs\ Signer && xcodebuild -quiet -scheme CasperLabs\ Signer -derivedDataPath ../../safari/CasperLabs\ Signer
+cd ./build/xcode-framework/Casper\ Wallet && xcodebuild -quiet -scheme Casper\ Wallet -derivedDataPath ../../safari/Casper\ Wallet
 
 # Remove XCode Framework
 cd ../../ && rm -rf ./xcode-framework
 
 # Add link to app file in root folder
-cd ./safari && ln -s ./CasperLabs\ Signer/Build/Products/Debug/CasperLabs\ Signer.app Install\ extension\ to\ Safari
+cd ./safari && ln -s ./Casper\ Wallet/Build/Products/Debug/Casper\ Wallet.app Install\ extension\ to\ Safari

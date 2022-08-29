@@ -2,7 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Typography, SvgIcon } from '@libs/ui';
-import { useActiveTabOrigin } from '@src/hooks';
 import { useSelector } from 'react-redux';
 import { RootState } from 'typesafe-actions';
 import { selectIsActiveAccountConnectedWithOrigin } from '@popup/redux/vault/selectors';
@@ -20,9 +19,8 @@ const ConnectionStatusContainer = styled.div`
 `;
 
 export function ConnectionStatus() {
-  const origin = useActiveTabOrigin({ currentWindow: true });
   const isActiveAccountConnected = useSelector((state: RootState) =>
-    selectIsActiveAccountConnectedWithOrigin(state, origin)
+    selectIsActiveAccountConnectedWithOrigin(state)
   );
 
   return (

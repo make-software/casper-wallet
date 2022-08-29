@@ -1,11 +1,11 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { useNavigationMenu, useTypedLocation } from '@popup/router';
 
 import { SvgIcon } from '@libs/ui';
-import { lockVault } from '@popup/redux/vault/actions';
+import { vaultLocked } from '@popup/redux/vault/actions';
+import { dispatchToMainStore } from '../../redux/utils';
 
 const Container = styled.div`
   display: flex;
@@ -19,12 +19,11 @@ interface MainmenuBarProps {
 }
 
 export function MainmenuBar({ withLock, withMenu }: MainmenuBarProps) {
-  const dispatch = useDispatch();
   const location = useTypedLocation();
   const { toggleNavigationMenu } = useNavigationMenu();
 
   function handleLockVault() {
-    dispatch(lockVault());
+    dispatchToMainStore(vaultLocked());
   }
 
   return (

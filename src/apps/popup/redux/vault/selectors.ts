@@ -25,13 +25,23 @@ export const selectVaultAccountWithName = createSelector(
     accounts.find(account => account.name === accountName)
 );
 
-export const selectVaultActiveAccountName = (state: RootState) =>
-  state.vault.activeAccountName;
+export const selectVaultActiveOrigin = (state: RootState) =>
+  state.vault.activeOrigin;
+
+export const selectVaultActiveAccountName = (state: RootState) => {
+  const activeAccountName = state.vault.activeAccountName;
+  return activeAccountName;
+};
+
 export const selectVaultActiveAccount = createSelector(
   selectVaultAccounts,
   selectVaultActiveAccountName,
-  (accounts, activeAccountName) =>
-    accounts.find(account => account.name === activeAccountName)
+  (accounts, activeAccountName) => {
+    const activeAccount = accounts.find(
+      account => account.name === activeAccountName
+    );
+    return activeAccount;
+  }
 );
 
 export const selectVaultAccountNamesByOriginDict = (state: RootState) =>
@@ -65,18 +75,15 @@ export const selectVaultAccountsByOriginDict = createSelector(
   }
 );
 
-const withActiveTabOrigin = (_: RootState, activeTabOrigin: string | null) =>
-  activeTabOrigin;
-
 export const selectIsAnyAccountConnectedWithOrigin = createSelector(
-  withActiveTabOrigin,
+  selectVaultActiveOrigin,
   selectVaultAccountNamesByOriginDict,
   (origin, accountNamesByOriginDict) =>
-    origin && origin in accountNamesByOriginDict
+    Boolean(origin && origin in accountNamesByOriginDict)
 );
 
 export const selectIsActiveAccountConnectedWithOrigin = createSelector(
-  withActiveTabOrigin,
+  selectVaultActiveOrigin,
   selectVaultActiveAccountName,
   selectVaultAccountNamesByOriginDict,
   (origin, activeAccountName, accountNamesByOriginDict) => {
@@ -93,7 +100,7 @@ export const selectIsActiveAccountConnectedWithOrigin = createSelector(
 );
 
 export const selectConnectedAccountNamesWithOrigin = createSelector(
-  withActiveTabOrigin,
+  selectVaultActiveOrigin,
   selectVaultAccountNamesByOriginDict,
   (origin, accountNamesByOriginDict) =>
     origin != null && accountNamesByOriginDict[origin]?.length > 0
@@ -102,7 +109,7 @@ export const selectConnectedAccountNamesWithOrigin = createSelector(
 );
 
 export const selectConnectedAccountsWithOrigin = createSelector(
-  withActiveTabOrigin,
+  selectVaultActiveOrigin,
   selectVaultAccounts,
   selectConnectedAccountNamesWithOrigin,
   (origin, accounts, connectedAccountNamesToOrigin): Account[] => {

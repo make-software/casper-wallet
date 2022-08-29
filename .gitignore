@@ -13,7 +13,6 @@ output
 
 # production
 build
-CasperLabs Signer
 
 # misc
 .DS_Store

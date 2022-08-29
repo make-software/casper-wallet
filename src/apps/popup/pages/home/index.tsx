@@ -5,7 +5,6 @@ import { RootState } from 'typesafe-actions';
 import styled, { css } from 'styled-components';
 
 import { PurposeForOpening, useWindowManager } from '@src/hooks';
-import { useActiveTabOrigin } from '@hooks/use-active-tab-origin';
 
 import { ContentContainer } from '@layout/containers';
 import {
@@ -25,7 +24,8 @@ import {
   selectIsActiveAccountConnectedWithOrigin,
   selectConnectedAccountsWithOrigin,
   selectVaultAccounts,
-  selectVaultActiveAccount
+  selectVaultActiveAccount,
+  selectVaultActiveOrigin
 } from '@popup/redux/vault/selectors';
 import { useAccountManager } from '@popup/hooks/use-account-manager';
 
@@ -121,18 +121,16 @@ export function HomePageContent() {
   const { t } = useTranslation();
 
   const { openWindow } = useWindowManager();
-  const origin = useActiveTabOrigin({ currentWindow: true });
-  const { changeActiveAccount, disconnectAccount } = useAccountManager({
-    currentWindow: true
-  });
-  const isActiveAccountConnected = useSelector((state: RootState) =>
-    selectIsActiveAccountConnectedWithOrigin(state, origin)
+  const activeOrigin = useSelector(selectVaultActiveOrigin);
+  const { changeActiveAccount, disconnectAccount } = useAccountManager();
+  const isActiveAccountConnected = useSelector(
+    selectIsActiveAccountConnectedWithOrigin
   );
 
   const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const connectedAccounts = useSelector((state: RootState) =>
-    selectConnectedAccountsWithOrigin(state, origin)
+    selectConnectedAccountsWithOrigin(state)
   );
 
   const handleConnectAccount = useCallback(() => {
@@ -185,16 +183,20 @@ export function HomePageContent() {
           </BalanceContainer>
           {isActiveAccountConnected ? (
             <Button
-              loading={origin == null}
+              disabled={activeOrigin == null}
               onClick={() =>
-                origin && disconnectAccount(activeAccount.name, origin)
+                activeOrigin &&
+                disconnectAccount(activeAccount.name, activeOrigin)
               }
               color="secondaryBlue"
             >
               <Trans t={t}>Disconnect</Trans>
             </Button>
           ) : (
-            <Button onClick={handleConnectAccount}>
+            <Button
+              disabled={activeOrigin == null}
+              onClick={handleConnectAccount}
+            >
               <Trans t={t}>Connect</Trans>
             </Button>
           )}

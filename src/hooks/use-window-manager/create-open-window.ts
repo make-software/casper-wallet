@@ -1,4 +1,4 @@
-// TODO: No best place for `createOpenWindow` function. Need to move to most appropriate place
+// TODO:Move this to the background folder
 import browser from 'webextension-polyfill';
 
 export enum PurposeForOpening {
@@ -31,7 +31,7 @@ export interface OpenWindowProps {
   isNewWindow?: boolean;
   origin?: string;
 }
-
+// TODO: This function should return created window instance
 export function createOpenWindow({
   windowId,
   setWindowId,
@@ -59,15 +59,16 @@ export function createOpenWindow({
         }
       } else {
         clearWindowId();
+        // TODO: why this is calling recursively? this logic should be simplified
         await openWindow({ purposeForOpening, isNewWindow: true, origin });
       }
     } else {
       browser.windows
         .getCurrent()
-        .then(window => {
-          const windowWidth = window.width ?? 0;
-          const xOffset = window.left ?? 0;
-          const yOffset = window.top ?? 0;
+        .then(currentWindow => {
+          const windowWidth = currentWindow.width ?? 0;
+          const xOffset = currentWindow.left ?? 0;
+          const yOffset = currentWindow.top ?? 0;
           const popupWidth = 360;
           const popupHeight =
             purposeForOpening === PurposeForOpening.ConnectToApp ? 700 : 600;
@@ -81,9 +82,9 @@ export function createOpenWindow({
               left: windowWidth + xOffset - popupWidth,
               top: yOffset
             })
-            .then(newPopup => {
-              if (newPopup.id) {
-                setWindowId(newPopup.id);
+            .then(newWindow => {
+              if (newWindow.id) {
+                setWindowId(newWindow.id);
 
                 const handleCloseWindow = () => {
                   browser.windows.onRemoved.removeListener(handleCloseWindow);

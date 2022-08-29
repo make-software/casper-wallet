@@ -1,64 +1,55 @@
 import { useCallback } from 'react';
 import { Account } from '@popup/redux/vault/types';
 import {
-  changeActiveAccount as changeActiveAccountAction,
-  connectAccountToSite,
-  disconnectAccountFromSite,
-  disconnectAllAccountsFromSite
+  activeAccountChanged,
+  accountsConnected,
+  accountDisconnected,
+  allAccountsDisconnected
 } from '@popup/redux/vault/actions';
+
+import { useSelector } from 'react-redux';
 import {
-  sendActiveAccountChanged,
-  sendConnectStatus,
-  sendDisconnectAccount
-} from '@content/remote-actions';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  selectIsActiveAccountConnectedWithOrigin,
   selectConnectedAccountNamesWithOrigin,
   selectVaultAccountNamesByOriginDict,
   selectVaultAccounts,
   selectVaultActiveAccount,
-  selectVaultIsLocked
+  selectVaultIsLocked,
+  selectVaultActiveOrigin
 } from '@popup/redux/vault/selectors';
 import { RootState } from 'typesafe-actions';
-import { useActiveTabOrigin } from '@src/hooks';
+import { emitSdkEventToAllActiveTabs, sdkEvent } from '@src/content/sdk-event';
+import { dispatchToMainStore } from '../redux/utils';
 
-export function getNextActiveAccount(
+export function findAccountInAListClosestToGivenAccountFilteredByNames(
   accounts: Account[],
-  connectedAccountNames: string[],
-  currentActiveAccount: Account
-) {
-  if (connectedAccountNames.includes(currentActiveAccount.name)) {
-    return currentActiveAccount;
+  givenAccount: Account,
+  allowedAccountNames: string[]
+): Account | undefined {
+  // if account already connected return
+  if (allowedAccountNames.includes(givenAccount.name)) {
+    return givenAccount;
   }
 
-  const currentActiveAccountIndex = accounts.findIndex(
-    account => account.name === currentActiveAccount.name
+  const activeAccountIndex = accounts.findIndex(
+    account => account.name === givenAccount.name
   );
 
-  const nextAccountBelowCurrentActiveAccount = accounts
-    .slice(currentActiveAccountIndex)
-    .find(account => connectedAccountNames.includes(account.name));
+  const firstConnectedAccountBelowActiveAccount = accounts
+    .slice(activeAccountIndex)
+    .find(account => allowedAccountNames.includes(account.name));
 
-  if (nextAccountBelowCurrentActiveAccount) {
-    return nextAccountBelowCurrentActiveAccount;
+  if (firstConnectedAccountBelowActiveAccount) {
+    return firstConnectedAccountBelowActiveAccount;
   }
 
-  // next account above current active account
-  return accounts
-    .slice(0, currentActiveAccountIndex)
-    .find(account => connectedAccountNames.includes(account.name));
+  const firstConnectedAccountAboveActiveAccount = accounts
+    .slice(0, activeAccountIndex)
+    .find(account => allowedAccountNames.includes(account.name));
+
+  return firstConnectedAccountAboveActiveAccount;
 }
 
-interface UseAccountManagerProps {
-  currentWindow: boolean;
-}
-
-export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
-  const dispatch = useDispatch();
-
-  const origin = useActiveTabOrigin({ currentWindow });
-
+export function useAccountManager() {
   const isLocked = useSelector(selectVaultIsLocked);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const accounts = useSelector(selectVaultAccounts);
@@ -66,159 +57,192 @@ export function useAccountManager({ currentWindow }: UseAccountManagerProps) {
     selectVaultAccountNamesByOriginDict
   );
   const connectedAccountNames = useSelector((state: RootState) =>
-    selectConnectedAccountNamesWithOrigin(state, origin)
+    selectConnectedAccountNamesWithOrigin(state)
   );
-  const isActiveAccountConnected = useSelector((state: RootState) =>
-    selectIsActiveAccountConnectedWithOrigin(state, origin)
+  const activeOrigin = useSelector((state: RootState) =>
+    selectVaultActiveOrigin(state)
   );
 
   const changeActiveAccount = useCallback(
-    async (name: string) => {
-      const nextActiveAccount = accounts.find(account => account.name === name);
+    async (accountName: string) => {
+      if (activeAccount?.name && accountName === activeAccount.name) {
+        return;
+      }
 
-      if (nextActiveAccount) {
-        dispatch(changeActiveAccountAction(name));
-        const isNextActiveAccountConnected = connectedAccountNames.some(
-          accountName => accountName === nextActiveAccount.name
+      const newActiveAccount = accounts.find(
+        account => account.name === accountName
+      );
+      if (newActiveAccount == null) {
+        throw Error('new active account should be found');
+      }
+
+      const isActiveAccountConnected = connectedAccountNames.some(
+        name => name === newActiveAccount.name
+      );
+      if (isActiveAccountConnected) {
+        emitSdkEventToAllActiveTabs(
+          sdkEvent.changedActiveConnectedAccountEvent({
+            isConnected: true,
+            isLocked: isLocked,
+            activeKey: newActiveAccount.publicKey
+          })
         );
-        if (isNextActiveAccountConnected) {
-          await sendActiveAccountChanged(
-            {
+      }
+
+      dispatchToMainStore(activeAccountChanged(newActiveAccount.name));
+    },
+    [activeAccount?.name, accounts, connectedAccountNames, isLocked]
+  );
+
+  const connectAccounts = useCallback(
+    async (accountNames: string[]) => {
+      if (activeAccount?.name == null || activeOrigin == null || isLocked) {
+        return;
+      }
+
+      // connected active account
+      if (accountNames.includes(activeAccount.name)) {
+        emitSdkEventToAllActiveTabs(
+          sdkEvent.connectedActiveAccountEvent({
+            isConnected: true,
+            isLocked: isLocked,
+            activeKey: activeAccount.publicKey
+          })
+        );
+        dispatchToMainStore(
+          accountsConnected({
+            accountNames: accountNames,
+            siteOrigin: activeOrigin
+          })
+        );
+      } else {
+        // not connected active account, so need to change
+        const newActiveAccountFromConnected =
+          findAccountInAListClosestToGivenAccountFilteredByNames(
+            accounts,
+            activeAccount,
+            accountNames
+          );
+
+        if (
+          newActiveAccountFromConnected &&
+          newActiveAccountFromConnected.name !== activeAccount.name
+        ) {
+          emitSdkEventToAllActiveTabs(
+            sdkEvent.changedActiveConnectedAccountEvent({
               isConnected: true,
-              isUnlocked: !isLocked,
-              activeKey: nextActiveAccount.publicKey
-            },
-            currentWindow
+              isLocked: isLocked,
+              activeKey: newActiveAccountFromConnected.publicKey
+            })
+          );
+          dispatchToMainStore(
+            activeAccountChanged(newActiveAccountFromConnected.name)
           );
         }
       }
     },
-    [dispatch, currentWindow, connectedAccountNames, accounts, isLocked]
-  );
-
-  const connectAccount = useCallback(
-    async (account: Account) => {
-      // TODO: should handle behavior for locked app
-      if (origin === null || isLocked) {
-        return;
-      }
-
-      const isConnected = connectedAccountNames.some(
-        connectedAccountName => connectedAccountName === account.name
-      );
-
-      if (isConnected) {
-        return;
-      }
-
-      dispatch(
-        connectAccountToSite({
-          accountName: account.name,
-          siteOrigin: origin
-        })
-      );
-
-      await sendConnectStatus(
-        {
-          activeKey: account.publicKey,
-          isConnected: true,
-          isUnlocked: !isLocked
-        },
-        currentWindow
-      );
-    },
-    [dispatch, currentWindow, origin, isLocked, connectedAccountNames]
-  );
-
-  const disconnectAllAccounts = useCallback(
-    async (origin: string) => {
-      if (!origin) {
-        return;
-      }
-
-      // TODO: An active account may not be related to the site from which the user is trying to disconnect.
-      //  Therefore, it makes no sense to send the public key from the account of others site.
-      //  It would be better if we can send an array of keys from a list of accounts that are being disconnected
-      //  !!! I send a public key for first account by origin as temporary solution. !!!
-      function getPublicKeyByOrigin(origin: string) {
-        const firstAccountNameByOrigin = accountNamesByOriginDict[origin][0];
-        const firstAccountByOrigin = accounts.find(
-          account => account.name === firstAccountNameByOrigin
-        );
-
-        return firstAccountByOrigin?.publicKey;
-      }
-
-      const activeKey = getPublicKeyByOrigin(origin);
-
-      if (activeKey != null) {
-        dispatch(
-          disconnectAllAccountsFromSite({
-            siteOrigin: origin
-          })
-        );
-
-        await sendDisconnectAccount(
-          {
-            isConnected: false,
-            isUnlocked: !isLocked,
-            activeKey
-          },
-          currentWindow
-        );
-      }
-    },
-    [dispatch, currentWindow, accountNamesByOriginDict, accounts, isLocked]
+    [activeAccount, activeOrigin, isLocked, accounts]
   );
 
   const disconnectAccount = useCallback(
     async (accountName: string, origin: string) => {
-      if (origin == null) {
+      if (
+        !activeAccount?.name ||
+        !origin ||
+        !accountNamesByOriginDict[origin].includes(accountName) ||
+        isLocked
+      ) {
         return;
       }
 
-      if (accountNamesByOriginDict[origin].length === 1) {
-        await disconnectAllAccounts(origin);
-        return;
+      // disconnected active account, so need to change
+      if (accountName === activeAccount.name) {
+        const newActiveAccountFromConnected =
+          findAccountInAListClosestToGivenAccountFilteredByNames(
+            accounts,
+            activeAccount,
+            connectedAccountNames.filter(
+              accountName => accountName !== activeAccount.name
+            )
+          );
+        if (newActiveAccountFromConnected) {
+          emitSdkEventToAllActiveTabs(
+            sdkEvent.changedActiveConnectedAccountEvent({
+              isConnected: true,
+              isLocked: isLocked,
+              activeKey: newActiveAccountFromConnected.publicKey
+            })
+          );
+          dispatchToMainStore(
+            activeAccountChanged(newActiveAccountFromConnected.name)
+          );
+        } else {
+          // it was last account
+          emitSdkEventToAllActiveTabs(
+            sdkEvent.disconnectedActiveAccountEvent({
+              isConnected: false,
+              isLocked: isLocked,
+              activeKey: activeAccount?.publicKey
+            })
+          );
+        }
       }
 
-      if (activeAccount == null || !isActiveAccountConnected) {
-        return;
-      }
-
-      dispatch(
-        disconnectAccountFromSite({
+      dispatchToMainStore(
+        accountDisconnected({
           siteOrigin: origin,
           accountName
         })
       );
-
-      const nextActiveAccount = getNextActiveAccount(
-        accounts,
-        connectedAccountNames.filter(name => accountName !== name),
-        activeAccount
-      );
-
-      if (nextActiveAccount) {
-        await changeActiveAccount(nextActiveAccount.name);
-      }
     },
     [
-      dispatch,
       accountNamesByOriginDict,
-      activeAccount,
-      isActiveAccountConnected,
       accounts,
+      activeAccount,
       connectedAccountNames,
-      disconnectAllAccounts,
-      changeActiveAccount
+      isLocked
+    ]
+  );
+
+  const disconnectAllAccounts = useCallback(
+    async (origin: string) => {
+      if (!activeAccount?.name || !origin || isLocked) {
+        return;
+      }
+
+      const allAccountNames = accountNamesByOriginDict[origin];
+      if (allAccountNames == null || allAccountNames.length === 0) {
+        return;
+      }
+
+      if (allAccountNames.includes(activeAccount.name)) {
+        await emitSdkEventToAllActiveTabs(
+          sdkEvent.disconnectedActiveAccountEvent({
+            isConnected: false,
+            isLocked: isLocked,
+            activeKey: activeAccount?.publicKey
+          })
+        );
+      }
+
+      dispatchToMainStore(
+        allAccountsDisconnected({
+          siteOrigin: origin
+        })
+      );
+    },
+    [
+      accountNamesByOriginDict,
+      activeAccount?.name,
+      activeAccount?.publicKey,
+      isLocked
     ]
   );
 
   return {
-    connectAccount,
+    changeActiveAccount,
+    connectAccounts,
     disconnectAccount,
-    disconnectAllAccounts,
-    changeActiveAccount
+    disconnectAllAccounts
   };
 }

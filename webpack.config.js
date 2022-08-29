@@ -2,6 +2,7 @@ const webpack = require('webpack'),
   path = require('path'),
   fileSystem = require('fs-extra'),
   env = require('./utils/env'),
+  pkg = require('./package.json'),
   CopyWebpackPlugin = require('copy-webpack-plugin'),
   HtmlWebpackPlugin = require('html-webpack-plugin'),
   TerserPlugin = require('terser-webpack-plugin'),
@@ -58,7 +59,7 @@ const options = {
     ),
     background: path.join(__dirname, 'src', 'background', 'index.ts'),
     contentScript: path.join(__dirname, 'src', 'content', 'index.ts'),
-    'scripts/inpage': path.join(__dirname, 'src', 'content', 'inpage.ts')
+    sdk: path.join(__dirname, 'src', 'content', 'sdk.ts')
   },
   chromeExtensionBoilerplate: {
     notHotReload: ['contentScript', 'devtools']
@@ -121,9 +122,11 @@ const options = {
             // generates the manifest file using the package.json informations
             return Buffer.from(
               JSON.stringify({
-                description: process.env.npm_package_description,
-                version: process.env.npm_package_version,
-                ...JSON.parse(content.toString())
+                ...JSON.parse(content.toString()),
+                name: pkg.name,
+                version: pkg.version,
+                author: pkg.author,
+                description: pkg.description,
               })
             );
           }

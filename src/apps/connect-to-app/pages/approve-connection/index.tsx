@@ -13,6 +13,7 @@ import {
 import { Button, SiteFaviconBadge, List, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@connect-to-app/router';
 import { closeWindow } from '@connect-to-app/utils/closeWindow';
+import { useAccountManager } from '@src/apps/popup/hooks/use-account-manager';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;
@@ -51,6 +52,12 @@ export function ApproveConnectionPage({
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
+  const { connectAccounts } = useAccountManager();
+
+  const handleApproveConnection = () => {
+    connectAccounts(selectedAccountNames);
+    navigate(RouterPath.Connecting);
+  };
   const listItems = [
     {
       id: 1,
@@ -101,7 +108,7 @@ export function ApproveConnectionPage({
             <Trans t={t}>Only connect with sites you trust</Trans>
           </Typography>
         </TextCentredContainer>
-        <Button onClick={() => navigate(RouterPath.Connecting)}>
+        <Button onClick={handleApproveConnection}>
           {/* TODO: optimize text in Trans component below */}
           <Trans t={t}>
             Connect to {{ selectedAccountNamesLength }}{' '}

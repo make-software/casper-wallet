@@ -3,6 +3,13 @@ import { composeWithDevTools } from 'remote-redux-devtools';
 import browser from 'webextension-polyfill';
 
 import { createStore } from '@popup/redux';
+import {
+  backgroundEvent,
+  PopupState,
+  selectPopupState
+} from '@src/background/background-events';
+
+import { ReduxAction } from './redux-action';
 
 declare global {
   interface Window {
@@ -10,35 +17,55 @@ declare global {
   }
 }
 
+// export const composeEnhancers = compose;
 export const composeEnhancers =
   process.env.NODE_ENV === 'development'
     ? composeWithDevTools({
-        name: 'Casper Signer',
+        name: 'Casper Wallet',
         hostname: 'localhost',
         port: 8000,
         realtime: true
       })
     : compose;
 
-export function createInitStore(reduxStorageKey: string) {
-  let store: ReturnType<typeof createStore>;
+const REDUX_STORAGE_KEY = 'redux-storage';
 
-  return async () => {
-    const { [reduxStorageKey]: state } = await browser.storage.local.get(
-      reduxStorageKey
-    );
+// this needs to be private
+let storeSingleton: ReturnType<typeof createStore>;
 
-    if (store == null) {
-      store = createStore(state || {});
+export async function getMainStoreSingleton() {
+  const { [REDUX_STORAGE_KEY]: state } = await browser.storage.local.get([
+    REDUX_STORAGE_KEY
+  ]);
 
-      store.subscribe(() => {
-        const vault = store.getState();
-        browser.storage.local.set({ [reduxStorageKey]: vault }).catch(e => {
-          console.error('Store error: ', e);
-        });
+  if (storeSingleton == null) {
+    console.warn('STORE INIT', state);
+    storeSingleton = createStore(state || {});
+    storeSingleton.subscribe(() => {
+      const state = storeSingleton.getState();
+      browser.storage.local.set({ [REDUX_STORAGE_KEY]: state }).catch(e => {
+        console.error('STORE ERROR: ', e);
       });
-    }
 
-    return store;
-  };
+      const popupState = selectPopupState(storeSingleton.getState());
+      browser.runtime
+        .sendMessage(backgroundEvent.popupStateUpdated(popupState))
+        .catch(err => {
+          // will fail when extension is closed
+        });
+    });
+  } else {
+    console.warn('STORE REUSED', state);
+  }
+
+  return storeSingleton;
+}
+
+export function createMainStoreReplica<T extends PopupState>(state: T) {
+  const store = createStore(state);
+  return store;
+}
+
+export function dispatchToMainStore(action: ReduxAction) {
+  browser.runtime.sendMessage(action);
 }

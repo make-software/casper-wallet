@@ -1,26 +1,26 @@
 import { useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { selectWindowId } from '@popup/redux/windowManagement/selectors';
 import {
-  clearWindowId,
-  storeWindowId
+  windowIdCleared,
+  windowIdChanged
 } from '@popup/redux/windowManagement/actions';
 
 import { createOpenWindow } from '@src/hooks';
+import { dispatchToMainStore } from '@src/apps/popup/redux/utils';
 
 export function useWindowManager() {
-  const dispatch = useDispatch();
   const windowId = useSelector(selectWindowId);
 
   const openWindow = useMemo(
     () =>
       createOpenWindow({
         windowId,
-        setWindowId: (id: number) => dispatch(storeWindowId(id)),
-        clearWindowId: () => dispatch(clearWindowId())
+        setWindowId: (id: number) => dispatchToMainStore(windowIdChanged(id)),
+        clearWindowId: () => dispatchToMainStore(windowIdCleared())
       }),
-    [dispatch, windowId]
+    [windowId]
   );
 
   return { openWindow };

@@ -36,13 +36,15 @@ function App() {
         Casper Wallet Integration Playground
       </Row>
       <Row>
-        Active Account: {statusText}{' '}
+        Connected Account: {statusText}{' '}
         <Button variant="contained" onClick={handleConnect}>
           {connectButtonText}
         </Button>
       </Row>
       {errorMessage && <div>{errorMessage}</div>}
-      <div>{JSON.stringify(logs, null, 2)}</div>
+      <div>
+        {logs.map(([log, payload], index) => <div key={index}>{log} {JSON.stringify(payload, null, 2)}]</div>)}
+      </div>
     </Container>
   );
 }
