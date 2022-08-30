@@ -1,50 +1,26 @@
 import React, { useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import { Typography, Checkbox, List } from '@libs/ui';
 import {
   ContentContainer,
   HeaderTextContainer,
-  TextContainer
+  TextContainer,
+  ListItemClickableContainer
 } from '@layout/containers';
 
 import { selectVaultTimeoutDurationSetting } from '@popup/redux/vault/selectors';
-import { changeTimeoutDuration } from '@popup/redux/vault/actions';
+import { timeoutDurationChanged } from '@popup/redux/vault/actions';
 import { TimeoutDurationSetting } from '@popup/constants';
-
-const ListItemClickableContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-
-  width: 100%;
-  cursor: pointer;
-
-  padding: 14px 18px;
-  & > * + * {
-    padding-left: 18px;
-  }
-
-  & > span {
-    white-space: nowrap;
-  }
-`;
-
-export const TimeoutValueContainer = styled.div`
-  display: flex;
-  align-items: center;
-
-  width: 100%;
-`;
+import { dispatchToMainStore } from '../../redux/utils';
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();
-  const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
-  const dispatch = useDispatch();
+  const timeoutDurationSetting = useSelector(selectVaultTimeoutDurationSetting);
 
   const timeoutsMenuItems = useMemo(() => {
-    const MapTimeoutDurationSettingToTranslation = {
+    const timeoutDurationSettingTranslationDict = {
       [TimeoutDurationSetting['1 min']]: t('1 min'),
       [TimeoutDurationSetting['5 min']]: t('5 min'),
       [TimeoutDurationSetting['15 min']]: t('15 min'),
@@ -57,12 +33,12 @@ export function TimeoutPageContent() {
       Object.keys(TimeoutDurationSetting) as Array<
         keyof typeof TimeoutDurationSetting
       >
-    ).map(key => ({
-      id: key,
-      title: MapTimeoutDurationSettingToTranslation[key],
-      checked: timeoutDuration === key
+    ).map(timeoutDurationItem => ({
+      id: timeoutDurationItem,
+      title: timeoutDurationSettingTranslationDict[timeoutDurationItem],
+      checked: timeoutDurationSetting === timeoutDurationItem
     }));
-  }, [t, timeoutDuration]);
+  }, [t, timeoutDurationSetting]);
 
   return (
     <ContentContainer>
@@ -86,8 +62,8 @@ export function TimeoutPageContent() {
           <ListItemClickableContainer
             key={menuItem.id}
             onClick={() => {
-              dispatch(
-                changeTimeoutDuration({
+              dispatchToMainStore(
+                timeoutDurationChanged({
                   timeoutDuration: TimeoutDurationSetting[menuItem.id]
                 })
               );
@@ -96,7 +72,7 @@ export function TimeoutPageContent() {
             <Typography type="body" weight="regular">
               {menuItem.title}
             </Typography>
-            <Checkbox checked={timeoutDuration === menuItem.id} />
+            <Checkbox checked={timeoutDurationSetting === menuItem.id} />
           </ListItemClickableContainer>
         )}
       />

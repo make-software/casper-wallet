@@ -1,55 +1,65 @@
-import React, { Suspense } from 'react';
+import 'mac-scrollbar/dist/mac-scrollbar.css';
+
+import { GlobalScrollbar } from 'mac-scrollbar';
+import React, { Suspense, useEffect, useState } from 'react';
 import { render } from 'react-dom';
 import { Provider as ReduxProvider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
+import { isActionOf } from 'typesafe-actions';
+import browser from 'webextension-polyfill';
 
 import { GlobalStyle, themeConfig } from '@libs/ui';
+import { ErrorBoundary } from '@popup/error-boundary';
 
 import { App } from './app';
-import { REDUX_STORAGE_KEY } from '@libs/services/constants';
-import { createStore } from './redux';
+import { createMainStoreReplica } from './redux/utils';
+import {
+  BackgroundEvent,
+  backgroundEvent,
+  PopupState
+} from '@src/background/background-events';
+import { popupWindowInit } from './redux/windowManagement/actions';
 
-import { ErrorBoundary } from './error-boundary';
+const Tree = () => {
+  const [state, setState] = useState<PopupState | null>(null);
 
-export let store: ReturnType<typeof createStore>;
-
-const reduxStorageState = JSON.parse(
-  localStorage.getItem(REDUX_STORAGE_KEY) || '{}'
-);
-// should initialize store only once when localstorage data is fetched
-// @ts-ignore
-if (store == null) {
-  store = createStore(reduxStorageState);
-  // each change should be saved in the localstorage
-  store.subscribe(() => {
-    const vault = store.getState();
-    try {
-      localStorage.setItem(REDUX_STORAGE_KEY, JSON.stringify(vault));
-    } catch {
-      // initialization workaround
+  // setup listener to state events
+  useEffect(() => {
+    function handleBackgroundMessage(message: BackgroundEvent) {
+      if (isActionOf(backgroundEvent.popupStateUpdated)(message)) {
+        setState(message.payload);
+      }
     }
-  });
-}
+    browser.runtime.onMessage.addListener(handleBackgroundMessage);
+    browser.runtime.sendMessage(popupWindowInit());
 
-render(
-  <Suspense fallback={null}>
-    <ErrorBoundary>
-      <ThemeProvider theme={themeConfig}>
-        <ReduxProvider store={store}>
+    return () => {
+      browser.runtime.onMessage.removeListener(handleBackgroundMessage);
+    };
+  }, []);
+
+  if (state == null) {
+    return null;
+  }
+
+  const store = createMainStoreReplica(state);
+
+  return (
+    <Suspense fallback={null}>
+      <ErrorBoundary>
+        <ThemeProvider theme={themeConfig}>
           <GlobalStyle />
-          <HashRouter>
-            <App />
-          </HashRouter>
-        </ReduxProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
-  </Suspense>,
-  window.document.querySelector('#app-container')
-);
+          <GlobalScrollbar />
+          <ReduxProvider store={store}>
+            <HashRouter>
+              <App />
+            </HashRouter>
+          </ReduxProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </Suspense>
+  );
+};
 
-if ('hot' in module) {
-  // TODO: handle `ts-ignore` directive
-  // @ts-ignore
-  module.hot.accept();
-}
+render(<Tree />, window.document.querySelector('#app-container'));

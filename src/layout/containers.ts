@@ -14,6 +14,14 @@ export const HeaderContainer = styled.header`
   padding: 0 16px;
 `;
 
+export const PageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  height: 100%;
+`;
+
 export const LogoContainer = styled.div`
   cursor: ${props => (props.onClick ? 'pointer' : 'default')};
 `;
@@ -44,9 +52,7 @@ interface Props {
 }
 
 export const FooterButtonsContainer = styled.div<Props>`
-  position: absolute;
-  bottom: 0;
-  left: 0;
+  margin-top: 16px;
   width: 100%;
 
   display: flex;
@@ -58,4 +64,27 @@ export const FooterButtonsContainer = styled.div<Props>`
   padding: ${({ theme }) => theme.padding[1.6]};
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
+`;
+
+export const FooterButtonsAbsoluteContainer = styled(FooterButtonsContainer)`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+`;
+
+export const ListItemClickableContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+
+  width: 100%;
+  cursor: pointer;
+
+  padding: 14px 18px;
+  & > * + * {
+    padding-left: 18px;
+  }
+
+  & > span {
+    white-space: nowrap;
+  }
 `;

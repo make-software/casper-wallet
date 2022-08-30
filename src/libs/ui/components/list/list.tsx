@@ -7,6 +7,17 @@ const TopMarginContainer = styled.div`
   margin-top: 16px;
 `;
 
+const SpacedBetweenFlexRox = styled.div`
+  display: flex;
+  justify-content: space-between;
+
+  margin: 0 16px;
+`;
+
+const PointerContainer = styled.div`
+  cursor: pointer;
+`;
+
 interface BorderBottomPseudoElementProps {
   marginLeftForItemSeparatorLine: number;
 }
@@ -32,11 +43,21 @@ const FlexColumn = styled.div`
 `;
 
 const RowContainer = styled(FlexColumn)``;
+const ListHeaderContainer = styled(FlexColumn)`
+  &::after {
+    ${borderBottomPseudoElementRules};
+  }
+`;
 const ListFooterContainer = styled(FlexColumn)`
   &::before {
     ${borderBottomPseudoElementRules};
   }
 `;
+
+interface HeaderAction {
+  caption: string;
+  onClick: () => void;
+}
 
 interface ListRowBase {
   id: number | string;
@@ -45,34 +66,61 @@ interface ListRowBase {
 interface ListProps<ListRow extends ListRowBase>
   extends BorderBottomPseudoElementProps {
   rows: ListRow[];
-  renderRow: (row: ListRow) => JSX.Element;
+  renderRow: (row: ListRow, index: number, array: ListRow[]) => JSX.Element;
   renderFooter?: () => JSX.Element;
+  renderHeader?: () => JSX.Element;
   headerLabel?: string;
+  headerAction?: HeaderAction;
 }
 
 export function List<ListRow extends ListRowBase>({
   rows,
   renderRow,
-  marginLeftForItemSeparatorLine,
+  renderHeader,
   renderFooter,
-  headerLabel
+  headerLabel,
+  headerAction,
+  marginLeftForItemSeparatorLine
 }: ListProps<ListRow>) {
   return (
     <>
       {headerLabel && (
         <TopMarginContainer>
-          <Typography type="label" weight="medium" color="contentSecondary">
-            {headerLabel}
-          </Typography>
+          <SpacedBetweenFlexRox>
+            <Typography type="label" weight="medium" color="contentSecondary">
+              {headerLabel}
+            </Typography>
+            {headerAction && (
+              <PointerContainer>
+                <Typography
+                  type="label"
+                  weight="medium"
+                  color="contentBlue"
+                  onClick={headerAction.onClick}
+                >
+                  {headerAction.caption}
+                </Typography>
+              </PointerContainer>
+            )}
+          </SpacedBetweenFlexRox>
         </TopMarginContainer>
       )}
       <TopMarginContainer>
         <Tile>
+          {renderHeader && (
+            <ListHeaderContainer
+              marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
+            >
+              {renderHeader()}
+            </ListHeaderContainer>
+          )}
           <RowsContainer
             marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
           >
-            {rows.map(row => (
-              <RowContainer key={row.id}>{renderRow(row)}</RowContainer>
+            {rows.map((row, index, array) => (
+              <RowContainer key={row.id}>
+                {renderRow(row, index, array)}
+              </RowContainer>
             ))}
           </RowsContainer>
           {renderFooter && (

@@ -11,7 +11,10 @@ import { RouterPath, useNavigationMenu } from '@popup/router';
 import { ContentContainer } from '@layout/containers';
 import { SvgIcon, Typography, List } from '@libs/ui';
 
-import { selectVaultTimeoutDurationSetting } from '@popup/redux/vault/selectors';
+import {
+  selectCountOfConnectedSites,
+  selectVaultTimeoutDurationSetting
+} from '@popup/redux/vault/selectors';
 
 const ListItemClickableContainer = styled.div`
   display: flex;
@@ -49,7 +52,8 @@ export function NavigationMenuPageContent() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const timeoutDuration = useSelector(selectVaultTimeoutDurationSetting);
+  const timeoutDurationSetting = useSelector(selectVaultTimeoutDurationSetting);
+  const countOfConnectedSites = useSelector(selectCountOfConnectedSites);
 
   const { openWindow } = useWindowManager();
   const { closeNavigationMenu } = useNavigationMenu();
@@ -67,29 +71,40 @@ export function NavigationMenuPageContent() {
         iconPath: 'assets/icons/upload.svg',
         handleOnClick: () => {
           closeNavigationMenu();
-          openWindow(PurposeForOpening.ImportAccount).catch(e =>
-            console.error(e)
-          );
+          openWindow({
+            purposeForOpening: PurposeForOpening.ImportAccount
+          }).catch(e => console.error(e));
         }
       },
       {
         id: 3,
         title: t('Connected sites'),
         iconPath: 'assets/icons/link.svg',
-        currentValue: 3
+        currentValue: countOfConnectedSites,
+        handleOnClick: () => {
+          closeNavigationMenu();
+          navigate(RouterPath.ConnectedSites);
+        }
       },
       {
         id: 4,
         title: t('Timeout'),
         iconPath: 'assets/icons/lock.svg',
-        currentValue: TimeoutDurationSetting[timeoutDuration],
+        currentValue: TimeoutDurationSetting[timeoutDurationSetting],
         handleOnClick: () => {
           closeNavigationMenu();
           navigate(RouterPath.Timeout);
         }
       }
     ],
-    [navigate, t, timeoutDuration, closeNavigationMenu, openWindow]
+    [
+      navigate,
+      t,
+      timeoutDurationSetting,
+      closeNavigationMenu,
+      countOfConnectedSites,
+      openWindow
+    ]
   );
   const iconSize = 24;
 
@@ -112,7 +127,7 @@ export function NavigationMenuPageContent() {
               <Typography type="body" weight="regular">
                 {menuItem.title}
               </Typography>
-              {menuItem.currentValue && (
+              {menuItem.currentValue != null && (
                 <Typography type="body" weight="semiBold" color="contentBlue">
                   {menuItem.currentValue}
                 </Typography>

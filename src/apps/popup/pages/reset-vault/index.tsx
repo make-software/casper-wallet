@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -11,16 +10,16 @@ import {
 
 import { Typography, Button, Checkbox } from '@libs/ui';
 import { useTypedNavigate } from '@popup/router';
-import { resetVault } from '@popup/redux/vault/actions';
+import { vaultReseted } from '@popup/redux/vault/actions';
+import { dispatchToMainStore } from '../../redux/utils';
 
 export function ResetVaultPageContent() {
   const [isChecked, setIsChecked] = useState(false);
-  const dispatch = useDispatch();
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
   function handleResetVault() {
-    dispatch(resetVault());
+    dispatchToMainStore(vaultReseted());
   }
 
   function handleCancel() {

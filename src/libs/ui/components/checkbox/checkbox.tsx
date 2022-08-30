@@ -16,7 +16,7 @@ const StyledFlexRow = styled(FlexRow)<{
   svg: {
     fill: checked ? theme.color.fillBlue : 'none',
     rect: {
-      stroke: theme.color.fillBlue
+      stroke: checked ? theme.color.fillBlue : theme.color.fillTertiary
     }
   },
   span: {
@@ -29,16 +29,27 @@ export interface CheckboxProps extends BaseProps {
   onChange?: (value?: any) => void;
   checked: boolean;
   disabled?: boolean;
+  variant?: 'square' | 'circle';
 }
 
-export function Checkbox({ checked, onChange, label }: CheckboxProps) {
+export function Checkbox({
+  checked,
+  onChange,
+  label,
+  variant = 'circle'
+}: CheckboxProps) {
   const handleClick = (ev: ChangeEvent<HTMLInputElement>) => {
     onChange && onChange(!checked);
   };
 
-  const iconSrc = checked
-    ? 'assets/icons/checkbox-checked.svg'
-    : 'assets/icons/checkbox.svg';
+  const iconSrc =
+    variant === 'square'
+      ? checked
+        ? 'assets/icons/checkbox-square-checked.svg'
+        : 'assets/icons/checkbox-square.svg'
+      : checked
+      ? 'assets/icons/checkbox-checked.svg'
+      : 'assets/icons/checkbox.svg';
 
   return (
     <StyledFlexRow

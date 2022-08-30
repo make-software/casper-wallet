@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
+import { RootState } from 'typesafe-actions';
 import styled, { css } from 'styled-components';
 
 import { PurposeForOpening, useWindowManager } from '@src/hooks';
@@ -20,10 +21,13 @@ import {
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
+  selectIsActiveAccountConnectedWithOrigin,
+  selectConnectedAccountsWithOrigin,
   selectVaultAccounts,
-  selectVaultActiveAccount
+  selectVaultActiveAccount,
+  selectVaultActiveOrigin
 } from '@popup/redux/vault/selectors';
-import { changeActiveAccount } from '@popup/redux/vault/actions';
+import { useAccountManager } from '@popup/hooks/use-account-manager';
 
 // Account info
 
@@ -82,8 +86,10 @@ const LeftAlignedFlexColumn = styled.div`
   align-items: flex-start;
 `;
 
-const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
-const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
+export const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
+export const AccountNameWithHashListItemContainer = styled(
+  LeftAlignedFlexColumn
+)`
   width: 100%;
 `;
 
@@ -111,19 +117,33 @@ const ButtonsContainer = styled.div`
 `;
 
 export function HomePageContent() {
-  const dispatch = useDispatch();
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
   const { openWindow } = useWindowManager();
+  const activeOrigin = useSelector(selectVaultActiveOrigin);
+  const { changeActiveAccount, disconnectAccount } = useAccountManager();
+  const isActiveAccountConnected = useSelector(
+    selectIsActiveAccountConnectedWithOrigin
+  );
 
   const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
-
-  const handleChangeActiveAccount = useCallback(
-    (name: string) => () => dispatch(changeActiveAccount(name)),
-    [dispatch]
+  const connectedAccounts = useSelector((state: RootState) =>
+    selectConnectedAccountsWithOrigin(state)
   );
+
+  const handleConnectAccount = useCallback(() => {
+    if (!activeAccount || isActiveAccountConnected) {
+      return;
+    }
+
+    if (connectedAccounts.length === 0) {
+      navigate(RouterPath.NoConnectedAccount);
+    } else {
+      navigate(RouterPath.ConnectAnotherAccount);
+    }
+  }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
 
   const accountListRows = accounts.map(account => ({
     ...account,
@@ -161,7 +181,25 @@ export function HomePageContent() {
               $30,294.34
             </Typography>
           </BalanceContainer>
-          <Button>Connect</Button>
+          {isActiveAccountConnected ? (
+            <Button
+              disabled={activeOrigin == null}
+              onClick={() =>
+                activeOrigin &&
+                disconnectAccount(activeAccount.name, activeOrigin)
+              }
+              color="secondaryBlue"
+            >
+              <Trans t={t}>Disconnect</Trans>
+            </Button>
+          ) : (
+            <Button
+              disabled={activeOrigin == null}
+              onClick={handleConnectAccount}
+            >
+              <Trans t={t}>Connect</Trans>
+            </Button>
+          )}
         </PageTile>
       )}
       {accountListRows.length > 0 && (
@@ -172,7 +210,7 @@ export function HomePageContent() {
           renderRow={account => (
             <ListItemContainer key={account.name}>
               <ListItemClickableContainer
-                onClick={handleChangeActiveAccount(account.name)}
+                onClick={() => changeActiveAccount(account.name)}
               >
                 <Checkbox
                   checked={
@@ -230,9 +268,9 @@ export function HomePageContent() {
               <Button
                 color="secondaryBlue"
                 onClick={() =>
-                  openWindow(PurposeForOpening.ImportAccount).catch(e =>
-                    console.error(e)
-                  )
+                  openWindow({
+                    purposeForOpening: PurposeForOpening.ImportAccount
+                  }).catch(e => console.error(e))
                 }
               >
                 <Trans t={t}>Import</Trans>

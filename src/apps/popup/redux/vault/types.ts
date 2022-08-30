@@ -7,11 +7,15 @@ export interface Account {
   publicKey: string;
 }
 
+type AccountNamesByOriginDict = Record<string, string[]>;
+
 export type VaultState = {
   password: string | null;
   isLocked: boolean;
   timeoutDurationSetting: TimeoutDurationSetting;
   lastActivityTime: number | null;
   accounts: Account[];
+  accountNamesByOriginDict: AccountNamesByOriginDict;
   activeAccountName: string | null;
+  activeOrigin: string | null;
 };

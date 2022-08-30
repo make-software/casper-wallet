@@ -2,8 +2,10 @@ import { createAction } from 'typesafe-actions';
 import { TimeoutDurationSetting } from '@popup/constants';
 import { Account } from '@popup/redux/vault/types';
 
-export const createVault = createAction(
-  'CREATE_VAULT',
+// actions that update storage state
+
+export const vaultCreated = createAction(
+  'VAULT_CREATED',
   (payload: { password: string }) => ({
     password: payload.password,
     lastActivityTime: Date.now()
@@ -13,28 +15,35 @@ export const createVault = createAction(
   lastActivityTime: number;
 }>();
 
-export const resetVault = createAction('RESET_VAULT')<void>();
+export const vaultReseted = createAction('VAULT_RESETED')<void>();
 
-export const lockVault = createAction('LOCK_VAULT')<void>();
+export const vaultLocked = createAction('VAULT_LOCKED')<void>();
 
-export const unlockVault = createAction('UNLOCK_VAULT', () => ({
+export const vaultUnlocked = createAction('VAULT_UNLOCKED', () => ({
   lastActivityTime: Date.now()
 }))<{
   lastActivityTime: number;
 }>();
 
-export const importAccount = createAction('IMPORT_ACCOUNT')<Account>();
-export const removeAccount = createAction('REMOVE_ACCOUNT')<{ name: string }>();
-export const renameAccount = createAction('RENAME_ACCOUNT')<{
+export const accountImported = createAction('ACCOUNT_IMPORTED')<Account>();
+export const accountRemoved = createAction('ACCOUNT_REMOVED')<{
+  accountName: string;
+}>();
+export const accountRenamed = createAction('ACCOUNT_RENAMEED')<{
   oldName: string;
   newName: string;
 }>();
-export const changeActiveAccount = createAction(
-  'CHANGE_ACTIVE_ACCOUNT'
+
+export const activeOriginChanged = createAction('ACTIVE_ORIGIN_CHANGED')<
+  string | null
+>();
+
+export const activeAccountChanged = createAction(
+  'ACTIVE_ACCOUNT_CHANGED'
 )<string>();
 
-export const changeTimeoutDuration = createAction(
-  'CHANGE_TIMEOUT_DURATION',
+export const timeoutDurationChanged = createAction(
+  'TIMEOUT_DURATION_CHANGED',
   (payload: { timeoutDuration: TimeoutDurationSetting }) => ({
     timeoutDuration: payload.timeoutDuration,
     lastActivityTime: Date.now()
@@ -44,8 +53,24 @@ export const changeTimeoutDuration = createAction(
   lastActivityTime: number;
 }>();
 
-export const refreshTimeout = createAction('REFRESH_TIMEOUT', () => ({
+export const timeoutRefreshed = createAction('TIMEOUT_REFRESHED', () => ({
   lastActivityTime: Date.now()
 }))<{
   lastActivityTime: number;
+}>();
+
+export const accountsConnected = createAction('ACCOUNTS_CONNECTED')<{
+  siteOrigin: string;
+  accountNames: string[];
+}>();
+
+export const accountDisconnected = createAction('ACCOUNT_DISCONNECTED')<{
+  accountName: string;
+  siteOrigin: string;
+}>();
+
+export const allAccountsDisconnected = createAction(
+  'ALL_ACCOUNTS_DISCONNECTED'
+)<{
+  siteOrigin: string;
 }>();

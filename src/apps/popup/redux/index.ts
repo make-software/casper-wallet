@@ -3,7 +3,7 @@ import {
   // TODO: Move to actual `createStore`
   legacy_createStore as createStoreRedux
 } from 'redux';
-import rootAction from './root-action';
+import reduxAction from './redux-action';
 import rootReducer from './root-reducer';
 import { composeEnhancers } from './utils';
 
@@ -16,4 +16,4 @@ export const createStore = (initialState: any) => {
   return createStoreRedux(rootReducer, initialState, enhancer);
 };
 
-export { rootAction };
+export { reduxAction as rootAction };

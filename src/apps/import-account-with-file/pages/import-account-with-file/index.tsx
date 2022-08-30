@@ -10,7 +10,7 @@ import { useFormValidations } from '@src/hooks';
 import { Button, Input, SvgIcon, Typography } from '@libs/ui';
 import { Account } from '@popup/redux/vault/types';
 import {
-  FooterButtonsContainer,
+  FooterButtonsAbsoluteContainer,
   ContentContainer,
   HeaderTextContainer,
   InputsContainer,
@@ -19,12 +19,11 @@ import {
 
 import { RouterPath, useTypedNavigate } from '@import-account-with-file/router';
 
-import {
-  checkAccountNameIsTaken,
-  sendImportedAccount
-} from '@popup/redux/remote-actions';
+import { checkAccountNameIsTaken } from '@src/apps/popup/redux/import-account-actions-should-be-removed';
 
 import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
+import { dispatchToMainStore } from '@src/apps/popup/redux/utils';
+import { accountImported } from '@src/apps/popup/redux/vault/actions';
 
 export function ImportAccountWithFileContentPage() {
   const navigate = useTypedNavigate();
@@ -34,7 +33,7 @@ export function ImportAccountWithFileContentPage() {
 
   const onSuccess = useCallback(
     async (accountData: Account) => {
-      await sendImportedAccount(accountData);
+      dispatchToMainStore(accountImported(accountData));
       navigate(RouterPath.ImportAccountWithFileSuccess);
     },
     [navigate]
@@ -61,14 +60,18 @@ export function ImportAccountWithFileContentPage() {
       .test(
         'required',
         t('File with secret key should be loaded'),
-        value => value !== null && value.length > 0
+        filesArray => filesArray !== null && filesArray.length > 0
       )
-      .test('fileType', t('Unsupported file format'), value => {
-        if (value && value.length > 0) {
-          return /\.pem$/.test(value[0].name);
+      .test(
+        'fileType',
+        t('Please upload a .PEM containing your private key.'),
+        filesArray => {
+          if (filesArray && filesArray.length > 0) {
+            return /\.pem$/.test(filesArray[0].name);
+          }
+          return false;
         }
-        return false;
-      }),
+      ),
     name: createAccountNameValidation(async value => {
       const isAccountNameTaken =
         value && (await checkAccountNameIsTaken(value));
@@ -77,6 +80,7 @@ export function ImportAccountWithFileContentPage() {
   });
 
   const formOptions: UseFormProps = {
+    mode: 'onChange',
     reValidateMode: 'onChange',
     resolver: yupResolver(formSchema),
     defaultValues: {
@@ -86,10 +90,11 @@ export function ImportAccountWithFileContentPage() {
   };
 
   const {
-    resetField,
     register,
     handleSubmit,
-    formState: { errors, isDirty }
+    watch,
+    setValue,
+    formState: { errors, isValid, isDirty }
   } = useForm(formOptions);
 
   async function onSubmit({
@@ -98,6 +103,10 @@ export function ImportAccountWithFileContentPage() {
   }: FieldValues) {
     secretKeyFileReader(name, secretKeyFile);
   }
+
+  const isSubmitDisabled = !isValid || !isDirty;
+  const secretKeyFile = watch('secretKeyFile');
+  const isFileLoaded = secretKeyFile?.length > 0;
 
   return (
     <ContentContainer>
@@ -118,11 +127,15 @@ export function ImportAccountWithFileContentPage() {
             accept=".pem"
             prefixIcon={<SvgIcon src="assets/icons/file.svg" size={24} />}
             suffixIcon={
-              <SvgIcon
-                onClick={() => resetField('secretKeyFile')}
-                src="assets/icons/close-filter.svg"
-                size={24}
-              />
+              isFileLoaded && (
+                <SvgIcon
+                  onClick={() =>
+                    setValue('secretKeyFile', null, { shouldValidate: true })
+                  }
+                  src="assets/icons/close-filter.svg"
+                  size={24}
+                />
+              )
             }
             {...register('secretKeyFile')}
             error={!!errors.secretKeyFile}
@@ -136,11 +149,11 @@ export function ImportAccountWithFileContentPage() {
             validationText={errors.name?.message}
           />
         </InputsContainer>
-        <FooterButtonsContainer>
-          <Button disabled={!isDirty}>
+        <FooterButtonsAbsoluteContainer>
+          <Button disabled={isSubmitDisabled}>
             <Trans t={t}>Import</Trans>
           </Button>
-        </FooterButtonsContainer>
+        </FooterButtonsAbsoluteContainer>
       </form>
     </ContentContainer>
   );

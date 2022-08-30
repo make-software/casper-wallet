@@ -1,6 +1,6 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { FieldValues, useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
@@ -10,7 +10,7 @@ import * as Yup from 'yup';
 import { useFormValidations } from '@src/hooks';
 
 import {
-  FooterButtonsContainer,
+  FooterButtonsAbsoluteContainer,
   ContentContainer,
   HeaderTextContainer,
   InputsContainer
@@ -18,12 +18,12 @@ import {
 import { Button, Input, Typography } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import { renameAccount } from '@popup/redux/vault/actions';
+import { accountRenamed } from '@popup/redux/vault/actions';
 import { selectVaultAccountsNames } from '@popup/redux/vault/selectors';
+import { dispatchToMainStore } from '../../redux/utils';
 
 export function RenameAccountPageContent() {
   const navigate = useTypedNavigate();
-  const dispatch = useDispatch();
   const { accountName } = useParams();
   const { t } = useTranslation();
 
@@ -56,7 +56,9 @@ export function RenameAccountPageContent() {
       return;
     }
 
-    dispatch(renameAccount({ oldName: accountName, newName: name }));
+    dispatchToMainStore(
+      accountRenamed({ oldName: accountName, newName: name })
+    );
     navigate(RouterPath.AccountSettings.replace(':accountName', name));
   }
 
@@ -77,18 +79,18 @@ export function RenameAccountPageContent() {
             validationText={errors.name?.message}
           />
         </InputsContainer>
-        <FooterButtonsContainer>
+        <FooterButtonsAbsoluteContainer>
           <Button disabled={!isDirty}>
             <Trans t={t}>Update</Trans>
           </Button>
           <Button
             type="button"
-            onClick={() => navigate(RouterPath.Home)}
+            onClick={() => navigate(-1)}
             color="secondaryBlue"
           >
             <Trans t={t}>Cancel</Trans>
           </Button>
-        </FooterButtonsContainer>
+        </FooterButtonsAbsoluteContainer>
       </form>
     </ContentContainer>
   );

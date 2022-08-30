@@ -1,5 +1,6 @@
 import React, { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { RouterPath } from '@popup/router';
 
@@ -7,6 +8,19 @@ import { HeaderContainer, LogoContainer, Logo } from '@src/layout';
 
 import { MainmenuBar } from './mainmenu-bar';
 import { SubmenuBar } from './submenu-bar';
+import { ConnectionStatus } from '@popup/layout/header/connection-status';
+
+const CentredFlexRow = styled.div`
+  display: flex;
+  width: 100%;
+
+  align-items: center;
+`;
+
+const SpaceBetweenContainer = styled(CentredFlexRow)`
+  justify-content: space-between;
+  padding-left: 20px;
+`;
 
 interface HeaderProps {
   withLock?: boolean;
@@ -29,7 +43,10 @@ export function Header({
         <LogoContainer>
           <Logo onClick={() => navigate(RouterPath.Home)} />
         </LogoContainer>
-        <MainmenuBar withMenu={withMenu} withLock={withLock} />
+        <SpaceBetweenContainer>
+          <ConnectionStatus />
+          <MainmenuBar withMenu={withMenu} withLock={withLock} />
+        </SpaceBetweenContainer>
       </HeaderContainer>
       {submenuActionType && (
         <SubmenuBar

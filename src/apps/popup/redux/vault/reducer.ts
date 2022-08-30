@@ -2,16 +2,20 @@ import { createReducer } from 'typesafe-actions';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 import {
-  changeTimeoutDuration,
-  refreshTimeout,
-  createVault,
-  lockVault,
-  unlockVault,
-  resetVault,
-  importAccount,
-  removeAccount,
-  renameAccount,
-  changeActiveAccount
+  timeoutDurationChanged,
+  timeoutRefreshed,
+  vaultCreated,
+  vaultLocked,
+  vaultUnlocked,
+  vaultReseted,
+  accountImported,
+  accountRemoved,
+  accountRenamed,
+  activeAccountChanged,
+  accountsConnected,
+  accountDisconnected,
+  allAccountsDisconnected,
+  activeOriginChanged
 } from './actions';
 import { VaultState } from './types';
 
@@ -23,21 +27,23 @@ const initialState: State = {
   timeoutDurationSetting: TimeoutDurationSetting['5 min'],
   lastActivityTime: null,
   accounts: [],
-  activeAccountName: null
+  accountNamesByOriginDict: {},
+  activeAccountName: null,
+  activeOrigin: null
 };
 
 export const reducer = createReducer(initialState)
   .handleAction(
-    [createVault],
+    [vaultCreated],
     (state, { payload: { password, lastActivityTime } }): State => ({
       ...state,
       password,
       lastActivityTime
     })
   )
-  .handleAction([resetVault], () => initialState)
+  .handleAction([vaultReseted], () => initialState)
   .handleAction(
-    lockVault,
+    vaultLocked,
     (state, { payload }): State => ({
       ...state,
       isLocked: true,
@@ -45,14 +51,14 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    unlockVault,
+    vaultUnlocked,
     (state, { payload: { lastActivityTime } }): State => ({
       ...state,
       lastActivityTime,
       isLocked: false
     })
   )
-  .handleAction([importAccount], (state, { payload }): State => {
+  .handleAction([accountImported], (state, { payload }): State => {
     return {
       ...state,
       accounts: [...state.accounts, payload],
@@ -60,43 +66,74 @@ export const reducer = createReducer(initialState)
         state.accounts.length === 0 ? payload.name : state.activeAccountName
     };
   })
-  .handleAction(changeActiveAccount, (state, { payload }) => ({
+  .handleAction(activeAccountChanged, (state, { payload }) => ({
     ...state,
     activeAccountName: payload
   }))
-  .handleAction([removeAccount], (state, { payload: { name } }): State => {
-    const nextAccountsState = state.accounts.filter(
-      account => account.name !== name
-    );
-
-    return {
-      ...state,
-      accounts: nextAccountsState,
-      activeAccountName:
-        state.activeAccountName === name
-          ? (state.accounts.length > 1 && nextAccountsState[0].name) || null
-          : state.activeAccountName
-    };
-  })
+  .handleAction(activeOriginChanged, (state, { payload }) => ({
+    ...state,
+    activeOrigin: payload
+  }))
   .handleAction(
-    [renameAccount],
-    (state, { payload: { oldName, newName } }): State => ({
-      ...state,
-      accounts: state.accounts.map(account => {
-        if (account.name === oldName) {
-          return {
-            ...account,
-            name: newName
-          };
-        }
-        return account;
-      }),
-      activeAccountName:
-        state.activeAccountName === oldName ? newName : state.activeAccountName
-    })
+    [accountRemoved],
+    (state, { payload: { accountName } }): State => {
+      const nextAccountsState = state.accounts.filter(
+        account => account.name !== accountName
+      );
+
+      const nextAccountNamesByOriginDict = Object.fromEntries(
+        Object.keys(state.accountNamesByOriginDict).map(origin => [
+          origin,
+          state.accountNamesByOriginDict[origin].filter(
+            name => accountName !== name
+          )
+        ])
+      );
+
+      return {
+        ...state,
+        accounts: nextAccountsState,
+        activeAccountName:
+          state.activeAccountName === accountName
+            ? (state.accounts.length > 1 && nextAccountsState[0].name) || null
+            : state.activeAccountName,
+        accountNamesByOriginDict: nextAccountNamesByOriginDict
+      };
+    }
   )
   .handleAction(
-    [changeTimeoutDuration],
+    [accountRenamed],
+    (state, { payload: { oldName, newName } }): State => {
+      const nextAccountNamesByOriginDict = Object.fromEntries(
+        Object.keys(state.accountNamesByOriginDict).map(origin => [
+          origin,
+          state.accountNamesByOriginDict[origin].map(accountName =>
+            accountName === oldName ? newName : accountName
+          )
+        ])
+      );
+
+      return {
+        ...state,
+        accounts: state.accounts.map(account => {
+          if (account.name === oldName) {
+            return {
+              ...account,
+              name: newName
+            };
+          }
+          return account;
+        }),
+        activeAccountName:
+          state.activeAccountName === oldName
+            ? newName
+            : state.activeAccountName,
+        accountNamesByOriginDict: nextAccountNamesByOriginDict
+      };
+    }
+  )
+  .handleAction(
+    [timeoutDurationChanged],
     (state, { payload: { timeoutDuration, lastActivityTime } }): State => ({
       ...state,
       timeoutDurationSetting: timeoutDuration,
@@ -104,9 +141,47 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    [refreshTimeout],
+    [timeoutRefreshed],
     (state, { payload: { lastActivityTime } }) => ({
       ...state,
       lastActivityTime
+    })
+  )
+  .handleAction(
+    [accountsConnected],
+    (state, { payload: { siteOrigin, accountNames } }) => ({
+      ...state,
+      accountNamesByOriginDict: {
+        ...state.accountNamesByOriginDict,
+        [siteOrigin]:
+          state.accountNamesByOriginDict[siteOrigin]?.length > 0
+            ? [...state.accountNamesByOriginDict[siteOrigin], ...accountNames]
+            : [...accountNames]
+      }
+    })
+  )
+  .handleAction(
+    [accountDisconnected],
+    (state, { payload: { accountName, siteOrigin } }) => ({
+      ...state,
+      accountNamesByOriginDict: Object.fromEntries(
+        Object.entries({ ...state.accountNamesByOriginDict }).map(
+          ([origin, accountNames]) =>
+            origin === siteOrigin
+              ? [origin, accountNames.filter(name => name !== accountName)]
+              : [origin, accountNames]
+        )
+      )
+    })
+  )
+  .handleAction(
+    [allAccountsDisconnected],
+    (state, { payload: { siteOrigin } }) => ({
+      ...state,
+      accountNamesByOriginDict: Object.fromEntries(
+        Object.entries({ ...state.accountNamesByOriginDict }).filter(
+          ([origin]) => origin !== siteOrigin
+        )
+      )
     })
   );

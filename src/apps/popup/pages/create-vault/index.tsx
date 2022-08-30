@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 
@@ -14,21 +13,21 @@ import {
   SvgIcon,
   Typography
 } from '@libs/ui';
-import { createVault } from '@popup/redux/vault/actions';
+import { vaultCreated } from '@popup/redux/vault/actions';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import {
-  FooterButtonsContainer,
+  FooterButtonsAbsoluteContainer,
   ContentContainer,
   HeaderTextContainer,
   InputsContainer,
   TextContainer
 } from '@layout/containers';
+import { dispatchToMainStore } from '../../redux/utils';
 
 type InputType = 'password' | 'text';
 
 export function CreateVaultPageContent() {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
   const navigate = useTypedNavigate();
 
   const minPasswordLength = 12;
@@ -67,7 +66,7 @@ export function CreateVaultPageContent() {
     useState<InputType>('password');
 
   function onSubmit(data: FieldValues) {
-    dispatch(createVault({ password: data.password }));
+    dispatchToMainStore(vaultCreated({ password: data.password }));
 
     navigate(RouterPath.NoAccounts);
   }
@@ -123,11 +122,11 @@ export function CreateVaultPageContent() {
           />
         </InputsContainer>
       </ContentContainer>
-      <FooterButtonsContainer>
+      <FooterButtonsAbsoluteContainer>
         <Button disabled={!isDirty}>
           <Trans t={t}>Create Vault</Trans>
         </Button>
-      </FooterButtonsContainer>
+      </FooterButtonsAbsoluteContainer>
     </form>
   );
 }

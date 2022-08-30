@@ -6,7 +6,7 @@ import { PurposeForOpening, useWindowManager } from '@src/hooks';
 import { Typography, Button } from '@libs/ui';
 
 import {
-  FooterButtonsContainer,
+  FooterButtonsAbsoluteContainer,
   HeaderTextContainer,
   TextContainer,
   ContentContainer
@@ -34,21 +34,21 @@ export function NoAccountsPageContent() {
           </Trans>
         </Typography>
       </TextContainer>
-      <FooterButtonsContainer>
+      <FooterButtonsAbsoluteContainer>
         <Button onClick={createAccount}>
           <Trans t={t}>Create account</Trans>
         </Button>
         <Button
           color="secondaryBlue"
           onClick={() =>
-            openWindow(PurposeForOpening.ImportAccount).catch(e =>
-              console.log(e)
-            )
+            openWindow({
+              purposeForOpening: PurposeForOpening.ImportAccount
+            }).catch(e => console.error(e))
           }
         >
           <Trans t={t}>Import account</Trans>
         </Button>
-      </FooterButtonsContainer>
+      </FooterButtonsAbsoluteContainer>
     </ContentContainer>
   );
 }

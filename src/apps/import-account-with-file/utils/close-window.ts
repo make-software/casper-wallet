@@ -1,17 +1,16 @@
-import Browser from 'webextension-polyfill';
-import { getWindowId } from '@src/apps/popup/redux/remote-actions';
+import browser from 'webextension-polyfill';
+import { getWindowId } from '@src/apps/popup/redux/import-account-actions-should-be-removed';
 
 export async function closeWindow() {
-  const windowId = await getWindowId();
-
   try {
+    const windowId = await getWindowId();
     if (windowId) {
-      await Browser.windows.remove(windowId);
+      await browser.windows.remove(windowId);
     } else {
-      // This allows the FE to call close popup without querying for window id to pass.
-      const currentWindow = await Browser.windows.getCurrent();
-      if (currentWindow.type === 'popup' && currentWindow.id) {
-        await Browser.windows.remove(currentWindow.id);
+      // If there is no windowId in the state it'll fallback to use currentWindow id to close
+      const currentWindow = await browser.windows.getCurrent();
+      if (currentWindow.id) {
+        await browser.windows.remove(currentWindow.id);
       }
     }
   } catch (error) {

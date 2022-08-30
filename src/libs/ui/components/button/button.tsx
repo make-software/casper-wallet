@@ -3,32 +3,48 @@ import styled from 'styled-components';
 
 import { BaseProps, Link } from '@src/libs/ui';
 
-const BaseButton = styled.button<ButtonProps>(
-  ({ theme, disabled, height = '40', width = '100%' }) => ({
+export interface BaseButtonProps extends BaseProps {
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  loading?: boolean;
+  height?: '24' | '36' | '40';
+  width?: '100' | '120' | '176' | '100%';
+  variant?: ButtonVariant;
+}
+
+const BaseButton = styled.button<BaseButtonProps>(
+  ({ theme, loading, disabled, height = '40', variant, width = '100%' }) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     border: 'none',
-    borderRadius: theme.borderRadius.base,
+    borderRadius:
+      variant === 'inline'
+        ? theme.borderRadius.hundred
+        : theme.borderRadius.base,
     fontFamily: theme.typography.fontFamily.primary,
-    fontWeight: theme.typography.fontWeight.semiBold,
-    fontSize: '1.5rem',
-    minHeight: '4rem',
+    fontWeight:
+      variant === 'inline'
+        ? theme.typography.fontWeight.medium
+        : theme.typography.fontWeight.semiBold,
+    fontSize: variant === 'inline' ? '1.4rem' : '1.5rem',
+    minHeight: variant === 'inline' ? '3.2rem' : '4rem',
     lineHeight: '2.4rem',
+    padding: variant === 'inline' ? '4px 12px' : 'unset',
     width,
 
     ':focus': {
       outline: 'none'
     },
 
-    ...(disabled && {
+    ...((disabled || loading) && {
       pointerEvents: 'none'
     })
   })
 );
 
-const PrimaryBlueButton = styled(BaseButton)<ButtonProps>(
-  ({ theme, disabled }) => ({
+const PrimaryBlueButton = styled(BaseButton)<BaseButtonProps>(
+  ({ theme, loading, disabled }) => ({
     color: theme.color.backgroundPrimary,
     background: theme.color.fillBlue,
 
@@ -39,15 +55,15 @@ const PrimaryBlueButton = styled(BaseButton)<ButtonProps>(
       background: theme.color.fillBlueClick
     },
 
-    ...(disabled && {
+    ...((disabled || loading) && {
       color: theme.color.backgroundPrimary,
       background: theme.color.fillTertiary
     })
   })
 );
 
-const PrimaryRedButton = styled(BaseButton)<ButtonProps>(
-  ({ theme, disabled }) => ({
+const PrimaryRedButton = styled(BaseButton)<BaseButtonProps>(
+  ({ theme, loading, disabled }) => ({
     color: theme.color.backgroundPrimary,
     background: theme.color.fillRed,
 
@@ -58,15 +74,15 @@ const PrimaryRedButton = styled(BaseButton)<ButtonProps>(
       background: theme.color.fillRedClick
     },
 
-    ...(disabled && {
+    ...((disabled || loading) && {
       color: theme.color.backgroundPrimary,
       background: theme.color.fillTertiary
     })
   })
 );
 
-const SecondaryBlueButton = styled(BaseButton)<ButtonProps>(
-  ({ theme, disabled }) => ({
+const SecondaryBlueButton = styled(BaseButton)<BaseButtonProps>(
+  ({ theme, loading, disabled }) => ({
     color: theme.color.contentBlue,
     background: `linear-gradient(
       ${theme.color.fillGradientOut.from},
@@ -83,7 +99,7 @@ const SecondaryBlueButton = styled(BaseButton)<ButtonProps>(
       background: theme.color.fillSecondary
     },
 
-    ...(disabled && {
+    ...((disabled || loading) && {
       color: theme.color.contentSecondary,
       background: `linear-gradient(
         ${theme.color.fillGradientOut.from},
@@ -93,8 +109,8 @@ const SecondaryBlueButton = styled(BaseButton)<ButtonProps>(
   })
 );
 
-const SecondaryRedButton = styled(BaseButton)<ButtonProps>(
-  ({ theme, disabled }) => ({
+const SecondaryRedButton = styled(BaseButton)<BaseButtonProps>(
+  ({ theme, loading, disabled }) => ({
     color: theme.color.fillRed,
     background: `linear-gradient(
       ${theme.color.fillGradientOut.from},
@@ -111,7 +127,7 @@ const SecondaryRedButton = styled(BaseButton)<ButtonProps>(
       background: theme.color.fillSecondary
     },
 
-    ...(disabled && {
+    ...((disabled || loading) && {
       color: theme.color.contentSecondary,
       background: `linear-gradient(
         ${theme.color.fillGradientOut.from},
@@ -121,8 +137,8 @@ const SecondaryRedButton = styled(BaseButton)<ButtonProps>(
   })
 );
 
-const UtilityButton = styled(BaseButton)<ButtonProps>(
-  ({ theme, disabled }) => ({
+const UtilityButton = styled(BaseButton)<BaseButtonProps>(
+  ({ theme, loading, disabled }) => ({
     color: theme.color.backgroundPrimary,
     background: theme.color.fillBlue,
 
@@ -133,14 +149,14 @@ const UtilityButton = styled(BaseButton)<ButtonProps>(
       background: theme.color.fillBlueClick
     },
 
-    ...(disabled && {
+    ...((disabled || loading) && {
       color: theme.color.backgroundPrimary,
       background: theme.color.fillTertiary
     })
   })
 );
 
-const COMPONENT_MAP_BY_COLOR = {
+const BUTTON_COMPONENT_BY_COLOR_DICT = {
   primaryBlue: PrimaryBlueButton,
   primaryRed: PrimaryRedButton,
   secondaryBlue: SecondaryBlueButton,
@@ -148,28 +164,29 @@ const COMPONENT_MAP_BY_COLOR = {
   utility: UtilityButton
 };
 
-export type ButtonSize = 'small' | 'normal' | 'big';
+export type ButtonVariant = 'inline' | 'fullWidth';
 
 /* eslint-disable-next-line */
-export interface ButtonProps extends BaseProps {
-  type?: 'button' | 'submit' | 'reset';
-  onClick?: (ev: any) => void;
+export interface ButtonProps extends BaseButtonProps {
   color?:
     | 'primaryBlue'
     | 'primaryRed'
     | 'secondaryBlue'
     | 'secondaryRed'
     | 'utility';
-  disabled?: boolean;
   displayAsLinkTo?: string;
-  height?: '24' | '36' | '40';
-  width?: '100' | '120' | '176' | '100%';
+  onClick?: (ev: any) => void;
 }
 
 type Ref = HTMLButtonElement;
 
 export const Button = React.forwardRef<Ref, ButtonProps>(function Button(
-  { color = 'primaryBlue', displayAsLinkTo, ...props }: ButtonProps,
+  {
+    color = 'primaryBlue',
+    variant = 'fullWidth',
+    displayAsLinkTo,
+    ...props
+  }: ButtonProps,
   ref
 ) {
   if (displayAsLinkTo) {
@@ -187,8 +204,9 @@ export const Button = React.forwardRef<Ref, ButtonProps>(function Button(
     );
   }
 
-  const ButtonComponent = COMPONENT_MAP_BY_COLOR[color] || PrimaryBlueButton;
-  return <ButtonComponent ref={ref} color={color} {...props} />;
+  const ButtonComponent =
+    BUTTON_COMPONENT_BY_COLOR_DICT[color] || PrimaryBlueButton;
+  return <ButtonComponent ref={ref} variant={variant} {...props} />;
 });
 
 export default Button;
