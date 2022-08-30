@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { RouterPath } from '@connect-to-app/router';
-import { Layout, Header } from '@connect-to-app/layout';
+import { Layout, Header } from '@layout/window';
 import { AccountsSelectionPage } from '@connect-to-app/pages/accounts-selection';
 import { ApproveConnectionPage } from '@connect-to-app/pages/approve-connection';
 import { ConnectingPage } from '@connect-to-app/pages/connecting';

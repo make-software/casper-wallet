@@ -6,7 +6,7 @@ import {
   ContentContainer,
   HeaderTextContainer,
   TextContainer,
-  FooterButtonsContainer
+  FooterButtonsAbsoluteContainer
 } from '@src/layout';
 import { Typography, SvgIcon, Button } from '@libs/ui';
 
@@ -39,11 +39,11 @@ export function NoConnectedAccountPageContent() {
         </Typography>
       </TextContainer>
 
-      <FooterButtonsContainer>
+      <FooterButtonsAbsoluteContainer>
         <Button onClick={() => navigate(RouterPath.Home)}>
           <Trans t={t}>Got it</Trans>
         </Button>
-      </FooterButtonsContainer>
+      </FooterButtonsAbsoluteContainer>
     </ContentContainer>
   );
 }

@@ -10,15 +10,14 @@ import {
   List,
   Typography
 } from '@libs/ui';
-import {
-  HeaderTextContainer,
-  ListItemClickableContainer
-} from '@layout/containers';
+
 import {
   PageContainer,
   ContentContainer,
+  HeaderTextContainer,
+  ListItemClickableContainer,
   FooterButtonsContainer
-} from '@connect-to-app/layout';
+} from '@layout/containers';
 
 import { useTranslation, Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';

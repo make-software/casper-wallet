@@ -2,7 +2,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
-  FooterButtonsContainer,
+  FooterButtonsAbsoluteContainer,
   ContentContainer,
   HeaderTextContainer,
   TextContainer
@@ -25,11 +25,11 @@ export function ImportAccountWithFileSuccessContentPage() {
           <Trans t={t}>Now you can see it in your accounts list.</Trans>
         </Typography>
       </TextContainer>
-      <FooterButtonsContainer>
+      <FooterButtonsAbsoluteContainer>
         <Button onClick={() => closeWindow()}>
           <Trans t={t}>Done</Trans>
         </Button>
-      </FooterButtonsContainer>
+      </FooterButtonsAbsoluteContainer>
     </ContentContainer>
   );
 }

@@ -8,7 +8,7 @@ import {
   PageContainer,
   ContentContainer,
   FooterButtonsContainer
-} from '@connect-to-app/layout';
+} from '@layout/containers';
 
 import { Button, SiteFaviconBadge, List, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@connect-to-app/router';

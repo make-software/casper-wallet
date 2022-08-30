@@ -6,7 +6,7 @@ import { PurposeForOpening, useWindowManager } from '@src/hooks';
 import { Typography, Button } from '@libs/ui';
 
 import {
-  FooterButtonsContainer,
+  FooterButtonsAbsoluteContainer,
   HeaderTextContainer,
   TextContainer,
   ContentContainer
@@ -34,7 +34,7 @@ export function NoAccountsPageContent() {
           </Trans>
         </Typography>
       </TextContainer>
-      <FooterButtonsContainer>
+      <FooterButtonsAbsoluteContainer>
         <Button onClick={createAccount}>
           <Trans t={t}>Create account</Trans>
         </Button>
@@ -48,7 +48,7 @@ export function NoAccountsPageContent() {
         >
           <Trans t={t}>Import account</Trans>
         </Button>
-      </FooterButtonsContainer>
+      </FooterButtonsAbsoluteContainer>
     </ContentContainer>
   );
 }

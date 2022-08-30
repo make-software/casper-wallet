@@ -10,7 +10,7 @@ import { useFormValidations } from '@src/hooks';
 import { Button, Input, SvgIcon, Typography } from '@libs/ui';
 import { Account } from '@popup/redux/vault/types';
 import {
-  FooterButtonsContainer,
+  FooterButtonsAbsoluteContainer,
   ContentContainer,
   HeaderTextContainer,
   InputsContainer,
@@ -150,11 +150,11 @@ export function ImportAccountWithFileContentPage() {
             validationText={errors.name?.message}
           />
         </InputsContainer>
-        <FooterButtonsContainer>
+        <FooterButtonsAbsoluteContainer>
           <Button disabled={isSubmitDisabled}>
             <Trans t={t}>Import</Trans>
           </Button>
-        </FooterButtonsContainer>
+        </FooterButtonsAbsoluteContainer>
       </form>
     </ContentContainer>
   );

@@ -10,7 +10,7 @@ import * as Yup from 'yup';
 import { useFormValidations } from '@src/hooks';
 
 import {
-  FooterButtonsContainer,
+  FooterButtonsAbsoluteContainer,
   ContentContainer,
   HeaderTextContainer,
   InputsContainer
@@ -77,7 +77,7 @@ export function RenameAccountPageContent() {
             validationText={errors.name?.message}
           />
         </InputsContainer>
-        <FooterButtonsContainer>
+        <FooterButtonsAbsoluteContainer>
           <Button disabled={!isDirty}>
             <Trans t={t}>Update</Trans>
           </Button>
@@ -88,7 +88,7 @@ export function RenameAccountPageContent() {
           >
             <Trans t={t}>Cancel</Trans>
           </Button>
-        </FooterButtonsContainer>
+        </FooterButtonsAbsoluteContainer>
       </form>
     </ContentContainer>
   );
