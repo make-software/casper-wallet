@@ -4,13 +4,63 @@ built from [chrome-extension-boilerplate-react](https://github.com/lxieyang/chro
 
 ![signer logo](src/assets/img/logo128.png)
 
-## Development environment setup
+## For Testers - instructions to test Wallet integration with any site
+
+### Install dependencies
+
+```shell
+npm install
+```
+
+_NOTE: Node.js LTS is required._
+
+### Run Playground integration Site (or use your own site instead)
+
+```shell
+cd playground && npm run start
+```
+
+_NOTE: This will open automatically in a new tab._
+
+### Load Wallet Extension in Chrome
+
+1. Navigate `chrome://extensions/` in Chrome browser
+2. Enable `Developer mode` (right top corner, at least for Chrome 98)
+3. Click on `Load unpacked` button (left top corner)
+4. Pick `build/chrome` folder from `builds.zip` deliverable.
+
+To open as a tab:
+
+1. Open a new tab and use the link `chrome-extension://{paste ID here}/popup.html`
+
+### Load Wallet Extension in Firefox
+
+1. Navigate `about:debugging#/runtime/this-firefox` in Firefox browser
+2. Click on `Load Temporary Add-on...` button.
+3. Pick `build/firefox/manifest.json` file from `builds.zip` deliverable.
+
+To open as a tab:
+
+1. Open new tab and fill the link `moz-extension://{paste Internal UUID here}/popup.html`
+
+### Load Wallet Extension in Safari
+
+1. Open `build/safari` folder from `builds.zip`.
+2. Double click on "Doble Click to Install" file.
+3. Follow instructions and enable Casper Wallet in opened Extensions Preferences window.
+4. Open Safari and enable unsigned extensions. Extension should be available.
+
+For more information please [follow the link](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension)
+
+## Development setup
 
 Install dependencies:
 
 ```shell
 npm install
 ```
+
+_NOTE: Node.js LTS is required._
 
 Grant script execution permissions for `safari_build.sh` file:
 
@@ -38,54 +88,7 @@ npm run start:safari
 
 You can run all these commands in parallel.
 
-## For Testers
-
-Install dependencies:
-
-```shell
-npm install
-```
-
-Run Playground integration App:
-
-```shell
-cd playground && npm run start
-```
-
-### Chrome
-
-Open `build/chrome` folder from `builds.zip`.
-For opening it in Chrome:
-
-1. Navigate `chrome://extensions/` in Chrome browser
-2. Enable `Developer mode` (right top corner, at least for Chrome 98)
-3. Click on `Load unpacked` button (left top corner)
-4. Pick `build/chrome` folder from `builds.zip` deliverable.
-
-To open as a tab:
-
-1. Open a new tab and use the link `chrome-extension://{paste ID here}/popup.html`
-
-### Firefox
-
-1. Navigate `about:debugging#/runtime/this-firefox` in Firefox browser
-2. Click on `Load Temporary Add-on...` button.
-3. Pick `build/firefox/manifest.json` file from `builds.zip` deliverable.
-
-To open as a tab:
-
-1. Open new tab and fill the link `moz-extension://{paste Internal UUID here}/popup.html`
-
-### Safari
-
-1. Open `build/safari` folder from `builds.zip`.
-2. Double click on "Doble Click to Install" file.
-3. Follow instructions and enable Casper Wallet in opened Extensions Preferences window.
-4. Open Safari and enable unsigned extensions. Extension should be available.
-
-For more information please [follow the link](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension)
-
-## Build for production
+## Build production deliverable
 
 ```shell
 npm run build:all
