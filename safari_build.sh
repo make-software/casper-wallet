@@ -1,13 +1,17 @@
-# Deploying the XCode Framework for building of extension for Safari
-# Firefox extension built on manifest V2, the same version Safari required, so we use the Firefox build as source for extension for Safari
-xcrun safari-web-extension-converter --no-prompt --no-open --project-location ./build/xcode-framework --macos-only ./build/firefox
+rm -rf ./build/safari
+# Converting Firefox build folder into a Xcode Project
+# Firefox extension is built on manifest V2, the same version Safari required
+xcrun safari-web-extension-converter --no-prompt --no-open --project-location ./build/safari/xcode-project --macos-only ./build/firefox
 
-# Building extension for Safari by XCode Framework
-cd ./build/xcode-framework/Casper\ Wallet && xcodebuild -quiet -scheme Casper\ Wallet -derivedDataPath ../../safari/Casper\ Wallet
+# Building safari extension binary using XCode Project
+cd ./build/safari/xcode-project/Casper\ Wallet
+xcodebuild -quiet -scheme Casper\ Wallet -derivedDataPath ../../output
 
-# Remove XCode Framework
-cd ../../ && rm -rf ./xcode-framework
+# Copy and Cleanup
+cd ../../
+cp -r ./output/Build/Products/Debug ./Casper\ Wallet
+rm -rf ./xcode-project ./output
 
 # Add link to app file in root folder
-rm ./safari/Install\ extension\ to\ Safari
-cd ./safari && ln -s ./Casper\ Wallet/Build/Products/Debug/Casper\ Wallet.app Install\ extension\ to\ Safari
+rm ./Double\ Click\ to\ Install
+ln -s ./Casper\ Wallet/Casper\ Wallet.app Double\ Click\ to\ Install
