@@ -9,4 +9,5 @@ cd ./build/xcode-framework/Casper\ Wallet && xcodebuild -quiet -scheme Casper\ W
 cd ../../ && rm -rf ./xcode-framework
 
 # Add link to app file in root folder
+rm ./safari/Install\ extension\ to\ Safari
 cd ./safari && ln -s ./Casper\ Wallet/Build/Products/Debug/Casper\ Wallet.app Install\ extension\ to\ Safari
