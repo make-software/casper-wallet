@@ -8,12 +8,12 @@ import {
   HeaderTextContainer,
   TextContainer,
   ListItemClickableContainer
-} from '@layout/containers';
+} from '@src/libs/layout/containers';
 
-import { selectVaultTimeoutDurationSetting } from '@popup/redux/vault/selectors';
-import { timeoutDurationChanged } from '@popup/redux/vault/actions';
+import { selectVaultTimeoutDurationSetting } from '@src/background/redux/vault/selectors';
+import { timeoutDurationChanged } from '@src/background/redux/vault/actions';
 import { TimeoutDurationSetting } from '@popup/constants';
-import { dispatchToMainStore } from '../../redux/utils';
+import { dispatchToMainStore } from '../../../../background/redux/utils';
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();

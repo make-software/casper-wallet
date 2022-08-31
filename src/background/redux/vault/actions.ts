@@ -1,6 +1,6 @@
 import { createAction } from 'typesafe-actions';
 import { TimeoutDurationSetting } from '@popup/constants';
-import { Account } from '@popup/redux/vault/types';
+import { Account } from '@src/background/redux/vault/types';
 
 // actions that update storage state
 

@@ -22,7 +22,7 @@
       "@connect-to-app/*": ["src/apps/connect-to-app/*"],
       "@background/*": ["src/background/*"],
       "@content/*": ["src/content/*"],
-      "@layout/*": ["src/layout/*"],
+      "@layout/*": ["src/libs/layout/*"],
       "@libs/*": ["src/libs/*"],
       "@hooks/*": ["src/hooks/*"],
       "@mocks/*": ["__mocks__/*"],

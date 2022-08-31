@@ -1,4 +1,3 @@
-// TODO:Move this to the background folder
 import browser from 'webextension-polyfill';
 
 export enum PurposeForOpening {
@@ -32,6 +31,7 @@ export interface OpenWindowProps {
   origin?: string;
 }
 // TODO: This function should return created window instance
+// background should manage the windows using request messages received from popup/content
 export function createOpenWindow({
   windowId,
   setWindowId,

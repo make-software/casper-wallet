@@ -6,7 +6,7 @@ import styled, { css } from 'styled-components';
 
 import { PurposeForOpening, useWindowManager } from '@src/hooks';
 
-import { ContentContainer } from '@layout/containers';
+import { ContentContainer } from '@src/libs/layout/containers';
 import {
   Button,
   Checkbox,
@@ -26,7 +26,7 @@ import {
   selectVaultAccounts,
   selectVaultActiveAccount,
   selectVaultActiveOrigin
-} from '@popup/redux/vault/selectors';
+} from '@src/background/redux/vault/selectors';
 import { useAccountManager } from '@popup/hooks/use-account-manager';
 
 // Account info

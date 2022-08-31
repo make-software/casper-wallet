@@ -14,13 +14,13 @@ import { App } from '@connect-to-app/app';
 import { GlobalStyle, themeConfig } from '@libs/ui';
 import { ErrorBoundary } from '@popup/error-boundary';
 
-import { createMainStoreReplica } from '../popup/redux/utils';
+import { createMainStoreReplica } from '../../background/redux/utils';
 import {
   BackgroundEvent,
   backgroundEvent,
   PopupState
 } from '@src/background/background-events';
-import { connectWindowInit } from '../popup/redux/windowManagement/actions';
+import { connectWindowInit } from '../../background/redux/windowManagement/actions';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);

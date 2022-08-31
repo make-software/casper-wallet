@@ -8,13 +8,13 @@ import { PurposeForOpening, useWindowManager } from '@src/hooks';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 import { RouterPath, useNavigationMenu } from '@popup/router';
-import { ContentContainer } from '@layout/containers';
+import { ContentContainer } from '@src/libs/layout/containers';
 import { SvgIcon, Typography, List } from '@libs/ui';
 
 import {
   selectCountOfConnectedSites,
   selectVaultTimeoutDurationSetting
-} from '@popup/redux/vault/selectors';
+} from '@src/background/redux/vault/selectors';
 
 const ListItemClickableContainer = styled.div`
   display: flex;

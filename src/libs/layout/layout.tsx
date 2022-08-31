@@ -7,14 +7,16 @@ interface Props {
 }
 
 const Container = styled.div`
+  max-height: 600px;
+  min-height: 560px;
   height: 100%;
 `;
 
 const PageHeader = styled.header``;
 
 const PageContent = styled.div`
-  width: 100%;
-  height: calc(100% - 128px); // 128px is headers height
+  min-width: 360px;
+  height: 100%;
 `;
 
 export function Layout({ Header, Content }: Props) {
@@ -25,5 +27,3 @@ export function Layout({ Header, Content }: Props) {
     </Container>
   );
 }
-
-export * from './header';

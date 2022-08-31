@@ -9,12 +9,12 @@ import {
   HeaderTextContainer,
   TextContainer,
   FooterButtonsAbsoluteContainer
-} from '@layout/containers';
+} from '@src/libs/layout/containers';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { accountRemoved } from '@popup/redux/vault/actions';
-import { dispatchToMainStore } from '../../redux/utils';
+import { accountRemoved } from '@src/background/redux/vault/actions';
+import { dispatchToMainStore } from '../../../../background/redux/utils';
 
 export function RemoveAccountPageContent() {
   const navigate = useTypedNavigate();

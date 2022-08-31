@@ -1,12 +1,12 @@
 import { getType, RootAction } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 
-import { getMainStoreSingleton } from '@popup/redux/utils';
+import { getMainStoreSingleton } from '@src/background/redux/utils';
 import {
   CheckAccountNameIsTakenAction,
   CheckSecretKeyExistAction
-} from '@src/apps/popup/redux/import-account-actions-should-be-removed';
-import { isReduxAction } from '@src/apps/popup/redux/redux-action';
+} from '@src/background/redux/import-account-actions-should-be-removed';
+import { isReduxAction } from '@src/background/redux/redux-action';
 import {
   accountDisconnected,
   accountImported,
@@ -22,7 +22,7 @@ import {
   vaultLocked,
   vaultReseted,
   vaultUnlocked
-} from '@src/apps/popup/redux/vault/actions';
+} from '@src/background/redux/vault/actions';
 import {
   selectIsAnyAccountConnectedWithOrigin,
   selectVaultAccounts,
@@ -30,15 +30,15 @@ import {
   selectVaultAccountsSecretKeysBase64,
   selectVaultActiveAccount,
   selectVaultIsLocked
-} from '@src/apps/popup/redux/vault/selectors';
+} from '@src/background/redux/vault/selectors';
 import {
   connectWindowInit,
   importWindowInit,
   popupWindowInit,
   windowIdChanged,
   windowIdCleared
-} from '@src/apps/popup/redux/windowManagement/actions';
-import { selectWindowId } from '@src/apps/popup/redux/windowManagement/selectors';
+} from '@src/background/redux/windowManagement/actions';
+import { selectWindowId } from '@src/background/redux/windowManagement/selectors';
 import { isSDKMessage, SdkMessage, sdkMessage } from '@src/content/sdk-message';
 import { PurposeForOpening } from '@src/hooks';
 

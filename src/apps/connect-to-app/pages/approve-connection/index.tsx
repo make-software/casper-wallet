@@ -2,13 +2,13 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { HeaderTextContainer } from '@src/layout';
+import { HeaderTextContainer } from '@src/libs/layout';
 
 import {
   PageContainer,
   ContentContainer,
   FooterButtonsContainer
-} from '@layout/containers';
+} from '@src/libs/layout/containers';
 
 import { Button, SiteFaviconBadge, List, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@connect-to-app/router';

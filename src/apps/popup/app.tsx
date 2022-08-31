@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
 
-import { Layout } from '@src/layout';
+import { Layout } from '@src/libs/layout';
 
 import { CreateVaultPageContent } from '@popup/pages/create-vault';
 import { HomePageContent } from '@popup/pages/home';
@@ -19,13 +19,11 @@ import { ConnectedSitesPage } from '@popup/pages/connected-sites';
 
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
-import { Header } from './layout';
-
 import {
   selectVaultDoesExist,
   selectVaultHasAccount,
   selectVaultIsLocked
-} from './redux/vault/selectors';
+} from '../../background/redux/vault/selectors';
 
 import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
 
@@ -35,6 +33,7 @@ import {
 } from '@popup/pages/account-settings';
 import { RemoveAccountPageContent } from '@popup/pages/remove-account';
 import { RenameAccountPageContent } from '@popup/pages/rename-account';
+import { PopupHeader } from '@src/libs/layout/header';
 
 export function App() {
   const navigate = useTypedNavigate();
@@ -76,7 +75,7 @@ export function App() {
             path="*"
             element={
               <Layout
-                Header={<Header withMenu withLock />}
+                Header={<PopupHeader withMenu withLock />}
                 Content={<NavigationMenuPageContent />}
               />
             }
@@ -88,7 +87,7 @@ export function App() {
             path={RouterPath.Home}
             element={
               <Layout
-                Header={<Header withMenu withLock />}
+                Header={<PopupHeader withMenu withLock />}
                 Content={<HomePageContent />}
               />
             }
@@ -96,14 +95,17 @@ export function App() {
           <Route
             path={RouterPath.ResetVault}
             element={
-              <Layout Header={<Header />} Content={<ResetVaultPageContent />} />
+              <Layout
+                Header={<PopupHeader />}
+                Content={<ResetVaultPageContent />}
+              />
             }
           />
           <Route
             path={RouterPath.CreateVault}
             element={
               <Layout
-                Header={<Header />}
+                Header={<PopupHeader />}
                 Content={<CreateVaultPageContent />}
               />
             }
@@ -113,7 +115,7 @@ export function App() {
             element={
               <Layout
                 Header={
-                  <Header
+                  <PopupHeader
                     withLock
                     withMenu
                     submenuActionType="close"
@@ -128,7 +130,9 @@ export function App() {
             path={RouterPath.RemoveAccount}
             element={
               <Layout
-                Header={<Header withLock withMenu submenuActionType="back" />}
+                Header={
+                  <PopupHeader withLock withMenu submenuActionType="back" />
+                }
                 Content={<RemoveAccountPageContent />}
               />
             }
@@ -137,7 +141,9 @@ export function App() {
             path={RouterPath.RenameAccount}
             element={
               <Layout
-                Header={<Header withLock withMenu submenuActionType="back" />}
+                Header={
+                  <PopupHeader withLock withMenu submenuActionType="back" />
+                }
                 Content={<RenameAccountPageContent />}
               />
             }
@@ -146,7 +152,7 @@ export function App() {
             path={RouterPath.NoAccounts}
             element={
               <Layout
-                Header={<Header withLock />}
+                Header={<PopupHeader withLock />}
                 Content={<NoAccountsPageContent />}
               />
             }
@@ -155,7 +161,7 @@ export function App() {
             path={RouterPath.NoConnectedAccount}
             element={
               <Layout
-                Header={<Header withLock withMenu />}
+                Header={<PopupHeader withLock withMenu />}
                 Content={<NoConnectedAccountPageContent />}
               />
             }
@@ -164,7 +170,9 @@ export function App() {
             path={RouterPath.ConnectedSites}
             element={
               <Layout
-                Header={<Header submenuActionType="back" withMenu withLock />}
+                Header={
+                  <PopupHeader submenuActionType="back" withMenu withLock />
+                }
                 Content={<ConnectedSitesPage />}
               />
             }
@@ -173,7 +181,7 @@ export function App() {
             path={RouterPath.UnlockVault}
             element={
               <Layout
-                Header={<Header />}
+                Header={<PopupHeader />}
                 Content={<UnlockVaultPageContent />}
               />
             }
@@ -182,7 +190,9 @@ export function App() {
             path={RouterPath.Timeout}
             element={
               <Layout
-                Header={<Header submenuActionType="close" withMenu withLock />}
+                Header={
+                  <PopupHeader submenuActionType="close" withMenu withLock />
+                }
                 Content={<TimeoutPageContent />}
               />
             }
@@ -191,7 +201,9 @@ export function App() {
             path={RouterPath.ConnectAnotherAccount}
             element={
               <Layout
-                Header={<Header withLock withMenu submenuActionType="cancel" />}
+                Header={
+                  <PopupHeader withLock withMenu submenuActionType="cancel" />
+                }
                 Content={<ConnectAnotherAccountPageContent />}
               />
             }

@@ -14,12 +14,12 @@ import {
   HeaderTextContainer,
   InputsContainer,
   TextContainer
-} from '@layout/containers';
+} from '@src/libs/layout/containers';
 import { Typography, Input, Button } from '@libs/ui';
 
-import { selectVaultPassword } from '@popup/redux/vault/selectors';
-import { vaultUnlocked } from '@popup/redux/vault/actions';
-import { dispatchToMainStore } from '../../redux/utils';
+import { selectVaultPassword } from '@src/background/redux/vault/selectors';
+import { vaultUnlocked } from '@src/background/redux/vault/actions';
+import { dispatchToMainStore } from '../../../../background/redux/utils';
 
 export function UnlockVaultPageContent() {
   const { t } = useTranslation();

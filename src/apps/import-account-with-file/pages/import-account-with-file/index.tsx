@@ -8,22 +8,22 @@ import * as Yup from 'yup';
 import { useFormValidations } from '@src/hooks';
 
 import { Button, Input, SvgIcon, Typography } from '@libs/ui';
-import { Account } from '@popup/redux/vault/types';
+import { Account } from '@src/background/redux/vault/types';
 import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
   HeaderTextContainer,
   InputsContainer,
   TextContainer
-} from '@layout/containers';
+} from '@src/libs/layout/containers';
 
 import { RouterPath, useTypedNavigate } from '@import-account-with-file/router';
 
-import { checkAccountNameIsTaken } from '@src/apps/popup/redux/import-account-actions-should-be-removed';
+import { checkAccountNameIsTaken } from '@src/background/redux/import-account-actions-should-be-removed';
 
 import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
-import { dispatchToMainStore } from '@src/apps/popup/redux/utils';
-import { accountImported } from '@src/apps/popup/redux/vault/actions';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import { accountImported } from '@src/background/redux/vault/actions';
 
 export function ImportAccountWithFileContentPage() {
   const navigate = useTypedNavigate();

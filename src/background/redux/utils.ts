@@ -2,7 +2,7 @@ import { compose } from 'redux';
 import { composeWithDevTools } from 'remote-redux-devtools';
 import browser from 'webextension-polyfill';
 
-import { createStore } from '@popup/redux';
+import { createStore } from '@src/background/redux';
 import {
   backgroundEvent,
   PopupState,

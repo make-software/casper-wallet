@@ -3,9 +3,9 @@ import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { List, Typography } from '@libs/ui';
-import { ContentContainer, HeaderTextContainer } from '@src/layout';
+import { ContentContainer, HeaderTextContainer } from '@src/libs/layout';
 
-import { selectVaultAccountsByOriginDict } from '@popup/redux/vault/selectors';
+import { selectVaultAccountsByOriginDict } from '@src/background/redux/vault/selectors';
 
 import { useAccountManager } from '@popup/hooks/use-account-manager';
 

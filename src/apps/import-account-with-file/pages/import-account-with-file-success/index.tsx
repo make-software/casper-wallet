@@ -6,7 +6,7 @@ import {
   ContentContainer,
   HeaderTextContainer,
   TextContainer
-} from '@layout/containers';
+} from '@src/libs/layout/containers';
 import { Button, Typography } from '@libs/ui';
 import { closeWindow } from '@import-account-with-file/utils/close-window';
 

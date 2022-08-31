@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect';
 import { TimeoutDurationSetting } from '@popup/constants';
-import { Account } from '@popup/redux/vault/types';
+import { Account } from '@src/background/redux/vault/types';
 import { RootState } from 'typesafe-actions';
 
 export const selectVaultDoesExist = (state: RootState): boolean =>

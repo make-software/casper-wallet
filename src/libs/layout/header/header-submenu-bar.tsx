@@ -26,7 +26,7 @@ interface SubmenuBarProps {
   ActionGroup?: ReactElement;
 }
 
-export function SubmenuBar({ actionType, ActionGroup }: SubmenuBarProps) {
+export function HeaderSubmenuBar({ actionType, ActionGroup }: SubmenuBarProps) {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 

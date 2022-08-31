@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
 import styled from 'styled-components';
 
-import { ContentContainer, HeaderTextContainer } from '@src/layout';
+import { ContentContainer, HeaderTextContainer } from '@src/libs/layout';
 import {
   Button,
   SiteFaviconBadge,
@@ -20,7 +20,7 @@ import {
   selectConnectedAccountsWithOrigin,
   selectVaultActiveAccount,
   selectVaultActiveOrigin
-} from '@popup/redux/vault/selectors';
+} from '@src/background/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@popup/hooks/use-account-manager';
 
