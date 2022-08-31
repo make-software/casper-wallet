@@ -13,7 +13,7 @@ import {
 import { Button, SiteFaviconBadge, List, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@connect-to-app/router';
 import { closeWindow } from '@connect-to-app/utils/closeWindow';
-import { useAccountManager } from '@src/apps/popup/hooks/use-account-manager';
+import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;
@@ -52,7 +52,7 @@ export function ApproveConnectionPage({
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  const { connectAccounts } = useAccountManager();
+  const { connectAccountsWithEvent: connectAccounts } = useAccountManager();
 
   const handleApproveConnection = () => {
     connectAccounts(selectedAccountNames, origin);

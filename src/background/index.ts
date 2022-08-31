@@ -1,12 +1,12 @@
 import { getType, RootAction } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 
-import { getMainStoreSingleton } from '@src/background/redux/utils';
 import {
   CheckAccountNameIsTakenAction,
   CheckSecretKeyExistAction
 } from '@src/background/redux/import-account-actions-should-be-removed';
 import { isReduxAction } from '@src/background/redux/redux-action';
+import { getMainStoreSingleton } from '@src/background/redux/utils';
 import {
   accountDisconnected,
   accountImported,
@@ -39,11 +39,11 @@ import {
   windowIdCleared
 } from '@src/background/redux/windowManagement/actions';
 import { selectWindowId } from '@src/background/redux/windowManagement/selectors';
+import { emitSdkEventToAllActiveTabs, sdkEvent } from '@src/content/sdk-event';
 import { isSDKMessage, SdkMessage, sdkMessage } from '@src/content/sdk-message';
 import { PurposeForOpening } from '@src/hooks';
 
 import { openWindow } from './open-window';
-import { emitSdkEventToAllActiveTabs, sdkEvent } from '@src/content/sdk-event';
 
 browser.runtime.onInstalled.addListener(() => {
   // this will run on installation or update so

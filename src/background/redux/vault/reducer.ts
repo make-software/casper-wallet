@@ -66,45 +66,97 @@ export const reducer = createReducer(initialState)
         state.accounts.length === 0 ? payload.name : state.activeAccountName
     };
   })
-  .handleAction(activeAccountChanged, (state, { payload }) => ({
-    ...state,
-    activeAccountName: payload
-  }))
-  .handleAction(activeOriginChanged, (state, { payload }) => ({
-    ...state,
-    activeOrigin: payload
-  }))
+  .handleAction(
+    [accountsConnected],
+    (state, { payload: { siteOrigin, accountNames } }) => ({
+      ...state,
+      accountNamesByOriginDict: {
+        ...state.accountNamesByOriginDict,
+        [siteOrigin]:
+          state.accountNamesByOriginDict[siteOrigin]?.length > 0
+            ? [...state.accountNamesByOriginDict[siteOrigin], ...accountNames]
+            : [...accountNames]
+      }
+    })
+  )
   .handleAction(
     [accountRemoved],
     (state, { payload: { accountName } }): State => {
-      const nextAccountsState = state.accounts.filter(
+      const newAccounts = state.accounts.filter(
         account => account.name !== accountName
       );
 
-      const nextAccountNamesByOriginDict = Object.fromEntries(
-        Object.keys(state.accountNamesByOriginDict).map(origin => [
-          origin,
-          state.accountNamesByOriginDict[origin].filter(
-            name => accountName !== name
+      const newActiveAccount =
+        state.activeAccountName === accountName
+          ? (state.accounts.length > 1 && newAccounts[0].name) || null
+          : state.activeAccountName;
+
+      const newAccountNamesByOriginDict = Object.fromEntries(
+        Object.entries(state.accountNamesByOriginDict)
+          // when last account for origin, remove group
+          .filter(
+            ([origin, names]) =>
+              !(names.includes(accountName) && names.length === 1)
           )
-        ])
+          // otherwise just remove single account
+          .map(([origin, names]) => [
+            origin,
+            names.filter(name => name !== accountName)
+          ])
       );
 
       return {
         ...state,
-        accounts: nextAccountsState,
-        activeAccountName:
-          state.activeAccountName === accountName
-            ? (state.accounts.length > 1 && nextAccountsState[0].name) || null
-            : state.activeAccountName,
-        accountNamesByOriginDict: nextAccountNamesByOriginDict
+        accounts: newAccounts,
+        activeAccountName: newActiveAccount,
+        accountNamesByOriginDict: newAccountNamesByOriginDict
       };
     }
   )
   .handleAction(
+    [accountDisconnected],
+    (state, { payload: { siteOrigin, accountName } }) => {
+      const newAccountNamesByOriginDict = Object.fromEntries(
+        Object.entries(state.accountNamesByOriginDict)
+          // when last account for origin, remove group
+          .filter(
+            ([origin, names]) =>
+              !(
+                origin === siteOrigin &&
+                names.includes(accountName) &&
+                names.length === 1
+              )
+          )
+          // otherwise just remove single account
+          .map(([origin, names]) => [
+            origin,
+            origin === siteOrigin
+              ? names.filter(name => name !== accountName)
+              : names
+          ])
+      );
+      return {
+        ...state,
+        accountNamesByOriginDict: newAccountNamesByOriginDict
+      };
+    }
+  )
+  .handleAction(
+    [allAccountsDisconnected],
+    (state, { payload: { siteOrigin } }) => ({
+      ...state,
+      accountNamesByOriginDict: Object.fromEntries(
+        Object.entries(state.accountNamesByOriginDict).filter(
+          ([origin]) => origin !== siteOrigin
+        )
+      )
+    })
+  )
+
+  .handleAction(
     [accountRenamed],
     (state, { payload: { oldName, newName } }): State => {
-      const nextAccountNamesByOriginDict = Object.fromEntries(
+      const newAccountNamesByOriginDict = Object.fromEntries(
         Object.keys(state.accountNamesByOriginDict).map(origin => [
           origin,
           state.accountNamesByOriginDict[origin].map(accountName =>
@@ -128,10 +180,18 @@ export const reducer = createReducer(initialState)
           state.activeAccountName === oldName
             ? newName
             : state.activeAccountName,
-        accountNamesByOriginDict: nextAccountNamesByOriginDict
+        accountNamesByOriginDict: newAccountNamesByOriginDict
       };
     }
   )
+  .handleAction(activeAccountChanged, (state, { payload }) => ({
+    ...state,
+    activeAccountName: payload
+  }))
+  .handleAction(activeOriginChanged, (state, { payload }) => ({
+    ...state,
+    activeOrigin: payload
+  }))
   .handleAction(
     [timeoutDurationChanged],
     (state, { payload: { timeoutDuration, lastActivityTime } }): State => ({
@@ -145,43 +205,5 @@ export const reducer = createReducer(initialState)
     (state, { payload: { lastActivityTime } }) => ({
       ...state,
       lastActivityTime
-    })
-  )
-  .handleAction(
-    [accountsConnected],
-    (state, { payload: { siteOrigin, accountNames } }) => ({
-      ...state,
-      accountNamesByOriginDict: {
-        ...state.accountNamesByOriginDict,
-        [siteOrigin]:
-          state.accountNamesByOriginDict[siteOrigin]?.length > 0
-            ? [...state.accountNamesByOriginDict[siteOrigin], ...accountNames]
-            : [...accountNames]
-      }
-    })
-  )
-  .handleAction(
-    [accountDisconnected],
-    (state, { payload: { accountName, siteOrigin } }) => ({
-      ...state,
-      accountNamesByOriginDict: Object.fromEntries(
-        Object.entries({ ...state.accountNamesByOriginDict }).map(
-          ([origin, accountNames]) =>
-            origin === siteOrigin
-              ? [origin, accountNames.filter(name => name !== accountName)]
-              : [origin, accountNames]
-        )
-      )
-    })
-  )
-  .handleAction(
-    [allAccountsDisconnected],
-    (state, { payload: { siteOrigin } }) => ({
-      ...state,
-      accountNamesByOriginDict: Object.fromEntries(
-        Object.entries({ ...state.accountNamesByOriginDict }).filter(
-          ([origin]) => origin !== siteOrigin
-        )
-      )
     })
   );

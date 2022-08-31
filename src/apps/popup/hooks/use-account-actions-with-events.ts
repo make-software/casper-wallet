@@ -59,9 +59,9 @@ export function useAccountManager() {
     selectConnectedAccountNamesWithOrigin(state)
   );
 
-  const changeActiveAccount = useCallback(
+  const changeActiveAccountWithEvent = useCallback(
     async (accountName: string) => {
-      if (activeAccount?.name && accountName === activeAccount.name) {
+      if (!activeAccount?.name || accountName === activeAccount.name) {
         return;
       }
 
@@ -90,9 +90,9 @@ export function useAccountManager() {
     [activeAccount?.name, accounts, connectedAccountNames, isLocked]
   );
 
-  const connectAccounts = useCallback(
+  const connectAccountsWithEvent = useCallback(
     async (accountNames: string[], origin) => {
-      if (activeAccount?.name == null || origin == null || isLocked) {
+      if (!activeAccount?.name || origin == null || isLocked) {
         return;
       }
 
@@ -140,7 +140,7 @@ export function useAccountManager() {
     [activeAccount, isLocked, accounts]
   );
 
-  const disconnectAccount = useCallback(
+  const disconnectAccountWithEvent = useCallback(
     async (accountName: string, origin: string) => {
       if (
         !activeAccount?.name ||
@@ -200,16 +200,13 @@ export function useAccountManager() {
     ]
   );
 
-  const disconnectAllAccounts = useCallback(
+  const disconnectAllAccountsWithEvent = useCallback(
     async (origin: string) => {
       if (!activeAccount?.name || !origin || isLocked) {
         return;
       }
 
       const allAccountNames = accountNamesByOriginDict[origin];
-      if (allAccountNames == null || allAccountNames.length === 0) {
-        return;
-      }
 
       if (allAccountNames.includes(activeAccount.name)) {
         await emitSdkEventToAllActiveTabs(
@@ -236,9 +233,9 @@ export function useAccountManager() {
   );
 
   return {
-    changeActiveAccount,
-    connectAccounts,
-    disconnectAccount,
-    disconnectAllAccounts
+    changeActiveAccountWithEvent: changeActiveAccountWithEvent,
+    connectAccountsWithEvent: connectAccountsWithEvent,
+    disconnectAccountWithEvent: disconnectAccountWithEvent,
+    disconnectAllAccountsWithEvent: disconnectAllAccountsWithEvent
   };
 }

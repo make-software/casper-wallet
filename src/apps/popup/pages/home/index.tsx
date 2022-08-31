@@ -27,7 +27,7 @@ import {
   selectVaultActiveAccount,
   selectVaultActiveOrigin
 } from '@src/background/redux/vault/selectors';
-import { useAccountManager } from '@popup/hooks/use-account-manager';
+import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 
 // Account info
 
@@ -122,7 +122,10 @@ export function HomePageContent() {
 
   const { openWindow } = useWindowManager();
   const activeOrigin = useSelector(selectVaultActiveOrigin);
-  const { changeActiveAccount, disconnectAccount } = useAccountManager();
+  const {
+    changeActiveAccountWithEvent: changeActiveAccount,
+    disconnectAccountWithEvent: disconnectAccount
+  } = useAccountManager();
   const isActiveAccountConnected = useSelector(
     selectIsActiveAccountConnectedWithOrigin
   );
