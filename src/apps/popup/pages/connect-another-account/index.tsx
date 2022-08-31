@@ -103,7 +103,7 @@ export function ConnectAnotherAccountPageContent() {
                 variant="inline"
                 width="100"
                 onClick={async () => {
-                  await connectAccounts([activeAccount.name]);
+                  await connectAccounts([activeAccount.name], activeOrigin);
                   navigate(RouterPath.Home);
                 }}
               >

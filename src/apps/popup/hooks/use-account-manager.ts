@@ -13,8 +13,7 @@ import {
   selectVaultAccountNamesByOriginDict,
   selectVaultAccounts,
   selectVaultActiveAccount,
-  selectVaultIsLocked,
-  selectVaultActiveOrigin
+  selectVaultIsLocked
 } from '@src/background/redux/vault/selectors';
 import { RootState } from 'typesafe-actions';
 import { emitSdkEventToAllActiveTabs, sdkEvent } from '@src/content/sdk-event';
@@ -59,9 +58,6 @@ export function useAccountManager() {
   const connectedAccountNames = useSelector((state: RootState) =>
     selectConnectedAccountNamesWithOrigin(state)
   );
-  const activeOrigin = useSelector((state: RootState) =>
-    selectVaultActiveOrigin(state)
-  );
 
   const changeActiveAccount = useCallback(
     async (accountName: string) => {
@@ -95,8 +91,8 @@ export function useAccountManager() {
   );
 
   const connectAccounts = useCallback(
-    async (accountNames: string[]) => {
-      if (activeAccount?.name == null || activeOrigin == null || isLocked) {
+    async (accountNames: string[], origin) => {
+      if (activeAccount?.name == null || origin == null || isLocked) {
         return;
       }
 
@@ -112,7 +108,7 @@ export function useAccountManager() {
         dispatchToMainStore(
           accountsConnected({
             accountNames: accountNames,
-            siteOrigin: activeOrigin
+            siteOrigin: origin
           })
         );
       } else {
@@ -141,7 +137,7 @@ export function useAccountManager() {
         }
       }
     },
-    [activeAccount, activeOrigin, isLocked, accounts]
+    [activeAccount, isLocked, accounts]
   );
 
   const disconnectAccount = useCallback(

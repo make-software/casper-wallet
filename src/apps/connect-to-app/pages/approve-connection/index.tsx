@@ -55,7 +55,7 @@ export function ApproveConnectionPage({
   const { connectAccounts } = useAccountManager();
 
   const handleApproveConnection = () => {
-    connectAccounts(selectedAccountNames);
+    connectAccounts(selectedAccountNames, origin);
     navigate(RouterPath.Connecting);
   };
   const listItems = [
