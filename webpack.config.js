@@ -242,7 +242,10 @@ if (env.NODE_ENV === 'development') {
     minimize: true,
     minimizer: [
       new TerserPlugin({
-        extractComments: false
+        extractComments: false,
+        terserOptions: {
+          safari10: true
+        }
       })
     ]
   };

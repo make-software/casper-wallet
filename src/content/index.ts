@@ -48,9 +48,8 @@ function emitSdkEvent(action: SdkEvent) {
   }
 
   const event = new CustomEvent(eventType, {
-    detail: action.payload
+    detail: JSON.stringify(action.payload)
   });
-  console.error('event', JSON.stringify(event));
   window.dispatchEvent(event);
 }
 

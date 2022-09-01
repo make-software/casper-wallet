@@ -8,7 +8,7 @@ import React, {
 
 import { DeployUtil, CasperServiceByJsonRPC } from 'casper-js-sdk';
 
-import { SignerMsg, SignerService } from './signer-service';
+import { WalletState, SignerService } from './signer-service';
 
 const REDUX_WALLET_SYNC_KEY = 'cspr-redux-wallet-sync';
 type SyncWalletBroadcastMessage = {
@@ -90,46 +90,57 @@ export const WalletServiceProvider = props => {
 
   // SIGNER SUBSCRIPTIONS
   useEffect(() => {
-    const handleConnected = (msg: SignerMsg) => {
+    const handleConnected = (msg: any) => {
       log('event:connected', msg.detail);
-      const publicKey = msg.detail!.activeKey;
-      if (publicKey) {
-        updatePublicKey(publicKey);
-      }
-    };
-
-    const handleDisconnected = (msg: SignerMsg) => {
-      log('event:disconnected', msg.detail);
-      if (activePublicKey) {
-        updatePublicKey(null);
-      }
-    };
-
-    const handleActiveKeyChanged = (msg: SignerMsg) => {
-      log('event:activeKeyChanged', msg.detail);
-      const publicKey = msg.detail!.activeKey;
-
-      if (publicKey && msg.detail!.isConnected) {
-        updatePublicKey(publicKey);
-      }
-    };
-
-    const handleUnlocked = (msg: SignerMsg) => {
-      log('event:unlocked', msg.detail);
-      if (activePublicKey && msg.detail!.isConnected) {
-        const publicKey = msg.detail!.activeKey;
-        // when unlocking Signer we need to make sure the active key is the same as in memory
-        if (publicKey !== activePublicKey) {
-          // show select account
+      try {
+        const action: WalletState = JSON.parse(msg.detail);
+        if (action.activeKey) {
+          updatePublicKey(action.activeKey);
         }
+      } catch (err) {
+        console.error(err);
       }
     };
+
+    const handleDisconnected = (msg: any) => {
+      log('event:disconnected', msg.detail);
+      try {
+        // const action: WalletState = JSON.parse(msg.detail);
+        if (activePublicKey) {
+          updatePublicKey(null);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    const handleActiveKeyChanged = (msg: any) => {
+      log('event:activeKeyChanged', msg.detail);
+      try {
+        const action: WalletState = JSON.parse(msg.detail);
+        if (action.isConnected && action.activeKey) {
+          updatePublicKey(action.activeKey);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    // const handleUnlocked = (msg: any) => {
+    //   log('event:unlocked', msg.detail);
+    //   try {
+    //     // const action: WalletState = JSON.parse(msg.detail);
+    //     // TODO
+    //   } catch (err) {
+    //     console.error(err);
+    //   }
+    // };
 
     // subscribe to signer events
     window.addEventListener('signer:connected', handleConnected);
     window.addEventListener('signer:disconnected', handleDisconnected);
     window.addEventListener('signer:activeKeyChanged', handleActiveKeyChanged);
-    window.addEventListener('signer:unlocked', handleUnlocked);
+    // window.addEventListener('signer:unlocked', handleUnlocked);
 
     return () => {
       window.removeEventListener('signer:connected', handleConnected);
@@ -138,7 +149,7 @@ export const WalletServiceProvider = props => {
         'signer:activeKeyChanged',
         handleActiveKeyChanged
       );
-      window.removeEventListener('signer:unlocked', handleUnlocked);
+      // window.removeEventListener('signer:unlocked', handleUnlocked);
       SignerService.removeAllSubscribers();
     };
   }, [activePublicKey, updatePublicKey]);
