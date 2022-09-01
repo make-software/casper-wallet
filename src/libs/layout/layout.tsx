@@ -1,5 +1,6 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
+import { MacScrollbar } from 'mac-scrollbar';
 
 interface Props {
   Header: ReactElement;
@@ -8,22 +9,22 @@ interface Props {
 
 const Container = styled.div`
   max-height: 600px;
-  min-height: 560px;
+  min-height: 600px;
   height: 100%;
+  width: 360px;
 `;
 
 const PageHeader = styled.header``;
 
-const PageContent = styled.div`
-  min-width: 360px;
-  height: 100%;
-`;
+const PageContent = styled.div``;
 
 export function Layout({ Header, Content }: Props) {
   return (
-    <Container>
-      <PageHeader>{Header}</PageHeader>
-      <PageContent>{Content}</PageContent>
-    </Container>
+    <MacScrollbar>
+      <Container>
+        <PageHeader>{Header}</PageHeader>
+        <PageContent>{Content}</PageContent>
+      </Container>
+    </MacScrollbar>
   );
 }
