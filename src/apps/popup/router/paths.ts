@@ -8,6 +8,5 @@ export enum RouterPath {
   RenameAccount = '/rename-account/:accountName',
   NoConnectedAccount = '/no-connected-account',
   ConnectAnotherAccount = '/connect-another-account',
-  ConnectedSites = '/connected-sites',
-  SigningRequest = '/signing-request'
+  ConnectedSites = '/connected-sites'
 }

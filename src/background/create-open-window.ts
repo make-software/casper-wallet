@@ -2,7 +2,8 @@ import browser from 'webextension-polyfill';
 
 export enum PurposeForOpening {
   ImportAccount = 'ImportAccount',
-  ConnectToApp = 'ConnectToApp'
+  ConnectToApp = 'ConnectToApp',
+  SigningRequest = 'SigningRequest'
 }
 
 function getUrlByPurposeForOpening(
@@ -14,6 +15,8 @@ function getUrlByPurposeForOpening(
       return 'import-account-with-file.html';
     case PurposeForOpening.ConnectToApp:
       return `connect-to-app.html?origin=${origin}`;
+    case PurposeForOpening.SigningRequest:
+      return 'signing-request.html';
     default:
       return 'popup.html?#/';
   }

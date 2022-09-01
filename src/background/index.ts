@@ -24,6 +24,7 @@ import {
   vaultUnlocked
 } from '@src/background/redux/vault/actions';
 import {
+  selectIsActiveAccountConnectedWithOrigin,
   selectIsAnyAccountConnectedWithOrigin,
   selectVaultAccounts,
   selectVaultAccountsNames,
@@ -96,6 +97,19 @@ browser.runtime.onMessage.addListener(
               success = true;
             }
             sendResponse(sdkMessage.disconnectResponse(success, action.meta));
+            break;
+          }
+
+          case getType(sdkMessage.signingRequest): {
+            const isActiveAccountConnected =
+              selectIsActiveAccountConnectedWithOrigin(store.getState());
+
+            if (isActiveAccountConnected) {
+              openWindow({
+                purposeForOpening: PurposeForOpening.SigningRequest
+              });
+            }
+
             break;
           }
 

@@ -115,7 +115,20 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       signingPublicKeyHex: string,
       targetPublicKeyHex: string | undefined
     ): Promise<{ deploy: any }> {
-      throw Error('Not implementeed');
+      return fetchFromExtensionBackend<
+        ReturnType<typeof sdkMessage['signingRequest']>['payload']
+      >(
+        sdkMessage.signingRequest(
+          {
+            deploy,
+            targetPublicKeyHex,
+            signingPublicKeyHex
+          },
+          {
+            id: requestId++
+          }
+        )
+      );
     },
     signMessage(rawMessage: string, signingPublicKey: string): Promise<string> {
       throw Error('Not implementeed');

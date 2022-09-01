@@ -17,11 +17,11 @@ import {
   SvgIcon,
   Typography
 } from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { SigningRequest } from './types';
+import { closeWindow } from '@connect-to-app/utils/closeWindow';
 
-function objectKeyToTitle(key: string) {
+function keyToTitle(key: string) {
   const spacedString = key.replace(/([A-Z]+|\d+)/g, ' $1');
   return `${spacedString[0].toUpperCase()}${spacedString.slice(1)}`;
 }
@@ -51,7 +51,6 @@ interface SignatureRequestPageProps {
 }
 
 export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
-  const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
   const {
@@ -62,10 +61,10 @@ export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
     chain,
     payment,
     deployType,
-    ...specificRows
+    ...accordionContent
   } = request;
 
-  const generalRows = {
+  const listContent = {
     signingKey,
     account,
     deployHash,
@@ -75,7 +74,7 @@ export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
     deployType
   };
 
-  const keysWithHashes = [
+  const keysOfHashedValues = [
     'signingKey',
     'account',
     'deployHash',
@@ -96,9 +95,9 @@ export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
           </Typography>
         </HeaderTextContainer>
         <List
-          rows={Object.entries(generalRows).map(([key, value]) => ({
+          rows={Object.entries(listContent).map(([key, value]) => ({
             id: key,
-            title: objectKeyToTitle(key),
+            title: keyToTitle(key),
             value
           }))}
           renderRow={({ id, title, value }) => (
@@ -106,7 +105,7 @@ export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
               <Typography type="body" weight="regular" color="contentSecondary">
                 {title}
               </Typography>
-              {keysWithHashes.includes(id) ? (
+              {keysOfHashedValues.includes(id) ? (
                 <Hash
                   value={value as string}
                   variant={HashVariant.BodyHash}
@@ -123,41 +122,36 @@ export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
           renderFooter={() => (
             <Accordion
               renderContent={() =>
-                Object.entries(specificRows).map(([key, value]) => {
-                  const id = key;
-                  const title = objectKeyToTitle(key);
-
-                  return (
-                    <AccordionRowContainer key={id}>
-                      <Typography
-                        type="body"
-                        weight="regular"
-                        color="contentSecondary"
-                      >
-                        {title}
+                Object.entries(accordionContent).map(([key, value]) => (
+                  <AccordionRowContainer key={key}>
+                    <Typography
+                      type="body"
+                      weight="regular"
+                      color="contentSecondary"
+                    >
+                      {keyToTitle(key)}
+                    </Typography>
+                    {keysOfHashedValues.includes(key) ? (
+                      <Hash
+                        value={value as string}
+                        variant={HashVariant.BodyHash}
+                        color="contentPrimary"
+                        // truncated={true}
+                      />
+                    ) : (
+                      <Typography type="body" weight="regular">
+                        {value}
                       </Typography>
-                      {keysWithHashes.includes(id) ? (
-                        <Hash
-                          value={value as string}
-                          variant={HashVariant.BodyHash}
-                          color="contentPrimary"
-                          // truncated={true}
-                        />
-                      ) : (
-                        <Typography type="body" weight="regular">
-                          {value}
-                        </Typography>
-                      )}
-                    </AccordionRowContainer>
-                  );
-                })
+                    )}
+                  </AccordionRowContainer>
+                ))
               }
               children={({ isOpen }) => (
                 <AccordionHeaderContainer>
                   <Typography type="body" weight="bold">
                     {deployType === 'Contract Call'
-                      ? 'Contract arguments'
-                      : 'Transfer Data'}
+                      ? t('Contract arguments')
+                      : t('Transfer Data')}
                   </Typography>
                   <SvgIcon
                     src="assets/icons/chevron-up.svg"
@@ -175,12 +169,10 @@ export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
         <Button color="primaryRed">
           <Trans t={t}>Sign</Trans>
         </Button>
-        <Button color="secondaryBlue" onClick={() => navigate(RouterPath.Home)}>
+        <Button color="secondaryBlue" onClick={() => closeWindow()}>
           <Trans t={t}>Cancel</Trans>
         </Button>
       </FooterButtonsContainer>
     </PageContainer>
   );
 }
-
-export * from './mocked-data';

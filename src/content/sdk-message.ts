@@ -41,6 +41,14 @@ export const sdkMessage = {
   getVersionResponse: createAction('CasperWalletProvider:GetVersion:Response')<
     string,
     Meta
+  >(),
+  signingRequest: createAction('CasperWalletProvider:Signing:Request')<
+    {
+      deploy: any;
+      signingPublicKeyHex: string;
+      targetPublicKeyHex: string | undefined;
+    },
+    Meta
   >()
 };
 
