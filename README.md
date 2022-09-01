@@ -4,9 +4,14 @@ built from [chrome-extension-boilerplate-react](https://github.com/lxieyang/chro
 
 ![signer logo](src/assets/img/logo128.png)
 
-## For Testers (to test Wallet integrations with any site)
+## Testing Casper Wallet integration with dApps (**Casper Wallet Playground**)
 
-### Run Casper Wallet integration site (you can use your own site instead)
+*Casper Wallet Playground is a React webapp created as a developer tool to help test integration with various features available in Casper Wallet.*
+
+### Run Casper Wallet Playground site
+
+Clone this repository and run following commands from the repo root folder.
+*NOTE: Node.js LTS is required.*
 
 ```shell
 cd playground
@@ -14,8 +19,7 @@ npm install
 npm run start
 ```
 
-_NOTE: This will open automatically in a new tab._
-_NOTE: Node.js LTS is required._
+This will open webapp automatically in a new tab.
 
 ### Load Wallet Extension in Chrome
 
@@ -51,11 +55,12 @@ For more information please [follow the link](https://developer.apple.com/docume
 
 ### Install dependencies
 
+Clone this repository and run following commands from the repo root folder.
+*NOTE: Node.js LTS is required.*
+
 ```shell
 npm install
 ```
-
-_NOTE: Node.js LTS is required._
 
 ### Grant script execution permissions for `safari_build.sh` file
 
