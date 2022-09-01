@@ -9,6 +9,7 @@ export * from './components/tag/tag';
 export * from './components/tile/tile';
 export * from './components/page-tile/page-tile';
 export * from './components/list/list';
+export * from './components/accordion/accordion';
 export * from './components/checkbox/checkbox';
 export * from './components/flex-box/flex-box';
 export * from './components/flex-row/flex-row';
