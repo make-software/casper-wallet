@@ -57,6 +57,13 @@ const options = {
       'connect-to-app',
       'index.tsx'
     ),
+    signingRequest: path.join(
+      __dirname,
+      'src',
+      'apps',
+      'signing-request',
+      'index.tsx'
+    ),
     background: path.join(__dirname, 'src', 'background', 'index.ts'),
     contentScript: path.join(__dirname, 'src', 'content', 'index.ts'),
     sdk: path.join(__dirname, 'src', 'content', 'sdk.ts')
@@ -126,7 +133,7 @@ const options = {
                 name: pkg.name,
                 version: pkg.version,
                 author: pkg.author,
-                description: pkg.description,
+                description: pkg.description
               })
             );
           }
@@ -224,6 +231,18 @@ const options = {
       ),
       filename: 'connect-to-app.html',
       chunks: ['connectToApp'],
+      cache: false
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(
+        __dirname,
+        'src',
+        'apps',
+        'signing-request',
+        'index.html'
+      ),
+      filename: 'signing-request.html',
+      chunks: ['signingRequest'],
       cache: false
     }),
     new webpack.ProvidePlugin({
