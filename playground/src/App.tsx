@@ -20,8 +20,14 @@ const Row = styled(Container)({
 });
 
 function App() {
-  const { connectSigner, disconnect, activePublicKey, errorMessage, logs } =
-    useWalletService();
+  const {
+    connectSigner,
+    disconnect,
+    sign,
+    activePublicKey,
+    errorMessage,
+    logs
+  } = useWalletService();
   const handleConnect = activePublicKey ? disconnect : connectSigner;
 
   const statusText = activePublicKey
@@ -40,10 +46,24 @@ function App() {
         <Button variant="contained" onClick={handleConnect}>
           {connectButtonText}
         </Button>
+        <Button
+          disabled={activePublicKey == null}
+          variant="contained"
+          onClick={() =>
+            activePublicKey &&
+            sign({ deploy: {} }, activePublicKey, 'someTargetPublicKeyHex')
+          }
+        >
+          Signing Request
+        </Button>
       </Row>
       {errorMessage && <div>{errorMessage}</div>}
       <div>
-        {logs.map(([log, payload], index) => <div key={index}>{log} {JSON.stringify(payload, null, 2)}]</div>)}
+        {logs.map(([log, payload], index) => (
+          <div key={index}>
+            {log} {JSON.stringify(payload, null, 2)}]
+          </div>
+        ))}
       </div>
     </Container>
   );
