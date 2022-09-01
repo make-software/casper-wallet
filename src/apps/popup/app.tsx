@@ -110,113 +110,105 @@ function UnlockedRouter() {
     );
   }
 
+  if (state?.showNavigationMenu) {
+    return (
+      <Routes>
+        <Route
+          path={RouterPath.Any}
+          element={
+            <Layout
+              Header={<PopupHeader withMenu withLock />}
+              Content={<NavigationMenuPageContent />}
+            />
+          }
+        />
+      </Routes>
+    );
+  }
+
   return (
     <Routes>
-      {state?.showNavigationMenu ? (
-        <Route>
-          <Route
-            path={RouterPath.Any}
-            element={
-              <Layout
-                Header={<PopupHeader withMenu withLock />}
-                Content={<NavigationMenuPageContent />}
+      <Route
+        path={RouterPath.Home}
+        element={
+          <Layout
+            Header={<PopupHeader withMenu withLock />}
+            Content={<HomePageContent />}
+          />
+        }
+      />
+      <Route
+        path={RouterPath.AccountSettings}
+        element={
+          <Layout
+            Header={
+              <PopupHeader
+                withLock
+                withMenu
+                submenuActionType="close"
+                SubmenuActionGroup={<AccountSettingsActionsGroup />}
               />
             }
+            Content={<AccountSettingsPageContent />}
           />
-        </Route>
-      ) : (
-        <Route>
-          <Route
-            path={RouterPath.Home}
-            element={
-              <Layout
-                Header={<PopupHeader withMenu withLock />}
-                Content={<HomePageContent />}
-              />
+        }
+      />
+      <Route
+        path={RouterPath.Timeout}
+        element={
+          <Layout
+            Header={<PopupHeader submenuActionType="close" withMenu withLock />}
+            Content={<TimeoutPageContent />}
+          />
+        }
+      />
+      <Route
+        path={RouterPath.RemoveAccount}
+        element={
+          <Layout
+            Header={<PopupHeader withLock withMenu submenuActionType="back" />}
+            Content={<RemoveAccountPageContent />}
+          />
+        }
+      />
+      <Route
+        path={RouterPath.RenameAccount}
+        element={
+          <Layout
+            Header={<PopupHeader withLock withMenu submenuActionType="back" />}
+            Content={<RenameAccountPageContent />}
+          />
+        }
+      />
+      <Route
+        path={RouterPath.NoConnectedAccount}
+        element={
+          <Layout
+            Header={<PopupHeader withLock withMenu />}
+            Content={<NoConnectedAccountPageContent />}
+          />
+        }
+      />
+      <Route
+        path={RouterPath.ConnectAnotherAccount}
+        element={
+          <Layout
+            Header={
+              <PopupHeader withLock withMenu submenuActionType="cancel" />
             }
+            Content={<ConnectAnotherAccountPageContent />}
           />
-          <Route
-            path={RouterPath.AccountSettings}
-            element={
-              <Layout
-                Header={
-                  <PopupHeader
-                    withLock
-                    withMenu
-                    submenuActionType="close"
-                    SubmenuActionGroup={<AccountSettingsActionsGroup />}
-                  />
-                }
-                Content={<AccountSettingsPageContent />}
-              />
-            }
+        }
+      />
+      <Route
+        path={RouterPath.ConnectedSites}
+        element={
+          <Layout
+            Header={<PopupHeader submenuActionType="back" withMenu withLock />}
+            Content={<ConnectedSitesPage />}
           />
-          <Route
-            path={RouterPath.Timeout}
-            element={
-              <Layout
-                Header={
-                  <PopupHeader submenuActionType="close" withMenu withLock />
-                }
-                Content={<TimeoutPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.RemoveAccount}
-            element={
-              <Layout
-                Header={
-                  <PopupHeader withLock withMenu submenuActionType="back" />
-                }
-                Content={<RemoveAccountPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.RenameAccount}
-            element={
-              <Layout
-                Header={
-                  <PopupHeader withLock withMenu submenuActionType="back" />
-                }
-                Content={<RenameAccountPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.NoConnectedAccount}
-            element={
-              <Layout
-                Header={<PopupHeader withLock withMenu />}
-                Content={<NoConnectedAccountPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.ConnectAnotherAccount}
-            element={
-              <Layout
-                Header={
-                  <PopupHeader withLock withMenu submenuActionType="cancel" />
-                }
-                Content={<ConnectAnotherAccountPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.ConnectedSites}
-            element={
-              <Layout
-                Header={
-                  <PopupHeader submenuActionType="back" withMenu withLock />
-                }
-                Content={<ConnectedSitesPage />}
-              />
-            }
-          />
-        </Route>
-      )}
+        }
+      />
     </Routes>
   );
 }
