@@ -86,6 +86,8 @@ export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
     'transferId'
   ];
 
+  // TODO: make dictionary for all variants of titles of rows
+
   return (
     <PageContainer>
       <ContentContainer>
@@ -110,7 +112,6 @@ export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
                   value={value as string}
                   variant={HashVariant.BodyHash}
                   color="contentPrimary"
-                  // truncated={true}
                 />
               ) : (
                 <Typography type="body" weight="regular">
@@ -136,7 +137,6 @@ export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
                         value={value as string}
                         variant={HashVariant.BodyHash}
                         color="contentPrimary"
-                        // truncated={true}
                       />
                     ) : (
                       <Typography type="body" weight="regular">
