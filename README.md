@@ -45,7 +45,7 @@ To open as a tab:
 ### Load Wallet Extension in Safari
 
 1. Open `build/safari` folder from `builds.zip` or `builds` folder when building from sources.
-2. Double click on "Doble Click to Install" file.
+2. Double click on "Casper Wallet.app" file.
 3. Follow instructions and enable Casper Wallet in opened Extensions Preferences window.
 4. Open Safari and enable unsigned extensions. Extension should be available.
 
@@ -62,10 +62,10 @@ Clone this repository and run following commands from the repo root folder.
 npm install
 ```
 
-### Grant script execution permissions for `safari_build.sh` file
+### Grant script execution permissions for `scripts` folder
 
 ```shell
-chmod +x safari_build.sh
+chmod +x scripts/*
 ```
 
 ### Start watcher script to rebuild on changes (`output` folder)
