@@ -16,6 +16,10 @@ import { UnlockVaultPageContent } from '@popup/pages/unlock-vault';
 import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
 import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
 import { ConnectedSitesPage } from '@popup/pages/connected-sites';
+import {
+  SignatureRequestPage,
+  transferData
+} from '@popup/pages/signature-request';
 
 import { RouterPath, useTypedLocation } from '@popup/router';
 
