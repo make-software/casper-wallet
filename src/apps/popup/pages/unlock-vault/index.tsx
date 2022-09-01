@@ -43,7 +43,6 @@ export function UnlockVaultPageContent() {
 
   function handleUnlockVault() {
     dispatchToMainStore(vaultUnlocked());
-    navigate(-1);
   }
 
   return (

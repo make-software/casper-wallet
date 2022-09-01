@@ -21,7 +21,7 @@ import {
   HeaderTextContainer,
   InputsContainer,
   TextContainer
-} from '@src/libs/layout/containers';
+} from '@layout/containers';
 import { dispatchToMainStore } from '../../../../background/redux/utils';
 
 type InputType = 'password' | 'text';
@@ -68,7 +68,7 @@ export function CreateVaultPageContent() {
   function onSubmit(data: FieldValues) {
     dispatchToMainStore(vaultCreated({ password: data.password }));
 
-    navigate(RouterPath.NoAccounts);
+    navigate(RouterPath.Home);
   }
 
   return (
