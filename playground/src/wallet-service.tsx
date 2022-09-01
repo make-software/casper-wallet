@@ -29,6 +29,11 @@ type WalletService = {
     accountPublicKey: any,
     recipientPublicKey?: any
   ) => Promise<any>;
+  sign: (
+    deploy: any,
+    accountPublicKey: any,
+    recipientPublicKey?: any
+  ) => Promise<any>;
 };
 
 export const walletServiceContext = createContext<WalletService>({} as any);
@@ -164,6 +169,14 @@ export const WalletServiceProvider = props => {
     SignerService.sendConnectionRequest();
   };
 
+  const sign = (deploy, accountPublicKey, recipientPublicKey) => {
+    return SignerService.sign(
+      { deploy: {} },
+      accountPublicKey,
+      recipientPublicKey
+    );
+  };
+
   const signAndDeploy = (deploy, accountPublicKey, recipientPublicKey) => {
     const deployJson: any = DeployUtil.deployToJson(deploy);
     // for debugging to casper team
@@ -202,7 +215,8 @@ export const WalletServiceProvider = props => {
     activePublicKey: activePublicKey,
     connectSigner: connectSigner,
     disconnect: disconnect,
-    signAndDeploy: signAndDeploy
+    signAndDeploy: signAndDeploy,
+    sign: sign
   };
 
   return <WalletServiceContextProvider value={contextProps} {...props} />;
