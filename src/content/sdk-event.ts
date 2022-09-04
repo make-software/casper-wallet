@@ -1,5 +1,6 @@
 import { ActionType, createAction } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
+import { SdkMessage } from './sdk-message';
 
 // Event emitted to connected sites
 
@@ -30,7 +31,9 @@ export const sdkEvent = {
 
 export type SdkEvent = ActionType<typeof sdkEvent>;
 
-export async function emitSdkEventToAllActiveTabs(action: SdkEvent) {
+export async function emitSdkEventToAllActiveTabs(
+  action: SdkEvent | SdkMessage
+) {
   const tabs = await browser.tabs.query({
     active: true
   });

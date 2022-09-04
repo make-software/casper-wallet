@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Link, SvgIcon, Typography } from '@libs/ui';
 
 import { useTypedNavigate } from '@connect-to-app/router';
-import { closeWindow } from '@connect-to-app/utils/closeWindow';
+import { closeActiveWindow } from '@src/background/close-window';
 
 import { SubmenuActionType } from '../types';
 
@@ -32,7 +32,7 @@ export function SubmenuBarNavLink_TO_BE_REMOVED({
     case 'cancel':
       return (
         <Typography type="body" weight="semiBold">
-          <Link onClick={() => closeWindow()} color="fillBlue">
+          <Link onClick={() => closeActiveWindow()} color="fillBlue">
             <Trans t={t}>Cancel</Trans>
           </Link>
         </Typography>

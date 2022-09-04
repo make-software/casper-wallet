@@ -8,15 +8,18 @@ export enum PurposeForOpening {
 
 function getUrlByPurposeForOpening(
   purposeForOpening: PurposeForOpening,
-  origin?: string
+  query?: Record<string, string>
 ) {
+  const urlSearchParams = new URLSearchParams(query).toString();
+  const searchParamsWithPrefix = urlSearchParams && '?' + urlSearchParams;
+
   switch (purposeForOpening) {
     case PurposeForOpening.ImportAccount:
-      return 'import-account-with-file.html';
+      return 'import-account-with-file.html' + searchParamsWithPrefix;
     case PurposeForOpening.ConnectToApp:
-      return `connect-to-app.html?origin=${origin}`;
+      return `connect-to-app.html` + searchParamsWithPrefix;
     case PurposeForOpening.SigningRequest:
-      return 'signing-request.html';
+      return 'signing-request.html' + searchParamsWithPrefix;
     default:
       return 'popup.html?#/';
   }
@@ -31,7 +34,7 @@ interface CreateOpenWindowProps {
 export interface OpenWindowProps {
   purposeForOpening: PurposeForOpening;
   isNewWindow?: boolean;
-  origin?: string;
+  query?: Record<string, string>;
 }
 // TODO: This function should return created window instance
 // background should manage the windows using request messages received from popup/content
@@ -43,7 +46,7 @@ export function createOpenWindow({
   return async function openWindow({
     purposeForOpening,
     isNewWindow,
-    origin
+    query
   }: OpenWindowProps) {
     const id = isNewWindow ? null : windowId;
 
@@ -63,7 +66,7 @@ export function createOpenWindow({
       } else {
         clearWindowId();
         // TODO: why this is calling recursively? this logic should be simplified
-        await openWindow({ purposeForOpening, isNewWindow: true, origin });
+        await openWindow({ purposeForOpening, isNewWindow: true, query });
       }
     } else {
       browser.windows
@@ -78,7 +81,7 @@ export function createOpenWindow({
 
           browser.windows
             .create({
-              url: getUrlByPurposeForOpening(purposeForOpening, origin),
+              url: getUrlByPurposeForOpening(purposeForOpening, query),
               type: 'popup',
               height: popupHeight,
               width: popupWidth,

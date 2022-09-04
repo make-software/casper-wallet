@@ -68,7 +68,7 @@ browser.runtime.onMessage.addListener(
             if (accounts.length > 0) {
               openWindow({
                 purposeForOpening: PurposeForOpening.ConnectToApp,
-                origin: action.payload
+                query: { origin: action.payload }
               });
               success = true;
             }
@@ -100,13 +100,14 @@ browser.runtime.onMessage.addListener(
             break;
           }
 
-          case getType(sdkMessage.signingRequest): {
+          case getType(sdkMessage.signRequest): {
             const isActiveAccountConnected =
               selectIsActiveAccountConnectedWithOrigin(store.getState());
 
             if (isActiveAccountConnected) {
               openWindow({
-                purposeForOpening: PurposeForOpening.SigningRequest
+                purposeForOpening: PurposeForOpening.SigningRequest,
+                query: { requestId: action.meta.requestId }
               });
             }
 

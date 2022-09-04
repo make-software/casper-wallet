@@ -1,24 +1,6 @@
-import { SigningRequest } from './types';
+import { CasperDeploy } from './types';
 
-export const transferData: SigningRequest = {
-  signingKey: '01f044...6cfg5h3',
-  account: '01f044...6cfg5h3',
-  deployHash: '01f044...6cfg5h3',
-  timestamp: '8/14/2022, 10:51:15 AM',
-  chain: 'casper-test',
-  payment: '2 500 000 000',
-  deployType: 'Transfer Call',
-  recipient: '01f044...6cfg5h3',
-  amount: '2 500 000 000',
-  transferId: '1660491814768'
-};
-
-export const contractData: SigningRequest = {
-  signingKey: '01f044...6cfg5h3',
-  account: '01f044...6cfg5h3',
-  deployHash: '01f044...6cfg5h3',
-  timestamp: '8/14/2022, 10:51:15 AM',
-  chain: 'casper-test',
-  payment: '2 500 000 000',
-  deployType: 'Contract Call'
+// @ts-ignore
+export const casperDeployMock: CasperDeploy = {
+  // TODO: this mock should be casper deploy use above type
 };

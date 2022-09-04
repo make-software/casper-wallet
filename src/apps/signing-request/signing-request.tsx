@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { closeActiveWindow } from '@src/background/close-window';
 import {
   ContentContainer,
   FooterButtonsContainer,
@@ -18,8 +19,13 @@ import {
   Typography
 } from '@libs/ui';
 
-import { SigningRequest } from './types';
-import { closeWindow } from '@connect-to-app/utils/closeWindow';
+import { casperDeployMock } from './mocked-data';
+import { DeployArguments, isKeyOfHashValue, SignatureRequest } from './types';
+import { emitSdkEventToAllActiveTabs } from '@src/content/sdk-event';
+import { signDeploy } from './sign-deploy';
+import { sdkMessage } from '@src/content/sdk-message';
+import { useSelector } from 'react-redux';
+import { selectVaultActiveAccount } from '@src/background/redux/vault/selectors';
 
 function keyToTitle(key: string) {
   const spacedString = key.replace(/([A-Z]+|\d+)/g, ' $1');
@@ -46,47 +52,48 @@ const AccordionRowContainer = styled(CentredFlexRowSpaceBetweenContainer)`
   margin: 10px 16px;
 `;
 
-interface SignatureRequestPageProps {
-  request: SigningRequest;
-}
+interface SignatureRequestPageProps {}
 
-export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
+export function SignatureRequestPage(props: SignatureRequestPageProps) {
   const { t } = useTranslation();
+  const searchParams = new URLSearchParams(document.location.search);
+  const requestId = searchParams.get('requestId');
 
-  const {
-    signingKey,
-    account,
-    deployHash,
-    timestamp,
-    chain,
-    payment,
-    deployType,
-    ...accordionContent
-  } = request;
+  if (!requestId) {
+    throw Error('Missing search param');
+  }
 
-  const listContent = {
-    signingKey,
-    account,
-    deployHash,
-    timestamp,
-    chain,
-    payment,
-    deployType
+  const activeAccount = useSelector(selectVaultActiveAccount);
+
+  const casperDeploy = casperDeployMock;
+
+  const handleSign = useCallback(() => {
+    if (activeAccount?.publicKey == null || activeAccount.secretKey == null) {
+      throw Error('No active account during signing');
+    }
+    const signature = signDeploy(
+      casperDeploy.hash,
+      activeAccount.publicKey,
+      activeAccount.secretKey
+    );
+    emitSdkEventToAllActiveTabs(
+      sdkMessage.signResponse({ signature }, { requestId })
+    );
+  }, [
+    activeAccount?.publicKey,
+    activeAccount?.secretKey,
+    casperDeploy.hash,
+    requestId
+  ]);
+
+  // @ts-ignore
+  const signatureRequest: SignatureRequest = {
+    //TODO: should be taken from casper deploy
   };
 
-  const keysOfHashedValues = [
-    'signingKey',
-    'account',
-    'deployHash',
-    'payment',
-    'delegator',
-    'validator',
-    'amount',
-    'recipient',
-    'transferId'
-  ];
-
-  // TODO: make dictionary for all variants of titles of rows
+  const deployArguments: DeployArguments = {
+    //TODO: should be taken from casper deploy
+  };
 
   return (
     <PageContainer>
@@ -97,17 +104,17 @@ export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
           </Typography>
         </HeaderTextContainer>
         <List
-          rows={Object.entries(listContent).map(([key, value]) => ({
+          rows={Object.entries(signatureRequest).map(([key, value]) => ({
             id: key,
-            title: keyToTitle(key),
+            label: keyToTitle(key),
             value
           }))}
-          renderRow={({ id, title, value }) => (
+          renderRow={({ id, label, value }) => (
             <ListItemContainer key={id}>
               <Typography type="body" weight="regular" color="contentSecondary">
-                {title}
+                {label}
               </Typography>
-              {keysOfHashedValues.includes(id) ? (
+              {isKeyOfHashValue(id) ? (
                 <Hash
                   value={value as string}
                   variant={HashVariant.BodyHash}
@@ -123,7 +130,7 @@ export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
           renderFooter={() => (
             <Accordion
               renderContent={() =>
-                Object.entries(accordionContent).map(([key, value]) => (
+                Object.entries(deployArguments).map(([key, value]) => (
                   <AccordionRowContainer key={key}>
                     <Typography
                       type="body"
@@ -132,7 +139,7 @@ export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
                     >
                       {keyToTitle(key)}
                     </Typography>
-                    {keysOfHashedValues.includes(key) ? (
+                    {isKeyOfHashValue(key) ? (
                       <Hash
                         value={value as string}
                         variant={HashVariant.BodyHash}
@@ -149,7 +156,7 @@ export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
               children={({ isOpen }) => (
                 <AccordionHeaderContainer>
                   <Typography type="body" weight="bold">
-                    {deployType === 'Contract Call'
+                    {signatureRequest.deployType === 'Contract Call'
                       ? t('Contract arguments')
                       : t('Transfer Data')}
                   </Typography>
@@ -166,10 +173,10 @@ export function SignatureRequestPage({ request }: SignatureRequestPageProps) {
         />
       </ContentContainer>
       <FooterButtonsContainer>
-        <Button color="primaryRed">
+        <Button color="primaryRed" onClick={handleSign}>
           <Trans t={t}>Sign</Trans>
         </Button>
-        <Button color="secondaryBlue" onClick={() => closeWindow()}>
+        <Button color="secondaryBlue" onClick={() => closeActiveWindow()}>
           <Trans t={t}>Cancel</Trans>
         </Button>
       </FooterButtonsContainer>
