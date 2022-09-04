@@ -7,7 +7,13 @@ import { ApproveConnectionPage } from '@connect-to-app/pages/approve-connection'
 import { ConnectingPage } from '@connect-to-app/pages/connecting';
 
 function getSiteRelatedData() {
-  const origin = document.location.search.split('origin=')[1];
+  const searchParams = new URLSearchParams(document.location.search);
+  const origin = searchParams.get('origin');
+
+  if (origin == null) {
+    throw new Error('Missing origin search param');
+  }
+
   const originName = origin.split('://')[1];
   const splittedOrigin = originName.split('.');
   const capitalizedOrigin = splittedOrigin

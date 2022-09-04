@@ -1,6 +1,11 @@
 import browser from 'webextension-polyfill';
 
-import { sdkMessageProxyEvents, isSDKMessage } from './sdk-message';
+import {
+  sdkMessageProxyEvents,
+  isSDKMessage,
+  sdkMessage,
+  SdkMessage
+} from './sdk-message';
 import { sdkEvent, SdkEvent } from './sdk-event';
 import { getType } from 'typesafe-actions';
 import { activeOriginChanged } from '@src/background/redux/vault/actions';
@@ -25,7 +30,7 @@ function syncActiveOriginWithStore() {
 }
 
 // Proxy Wallet Events to connected site
-function emitSdkEvent(action: SdkEvent) {
+function emitSdkEvent(action: SdkEvent | SdkMessage) {
   console.error('CONTENT EMIT SDK EVENT:', JSON.stringify(action));
   let eventType: string;
   switch (action.type) {
@@ -40,6 +45,15 @@ function emitSdkEvent(action: SdkEvent) {
     case getType(sdkEvent.changedActiveConnectedAccountEvent):
       eventType = 'signer:activeKeyChanged';
       break;
+
+    // Todo for Piotr: design convention for delayed sdk request responses
+    case getType(sdkMessage.signResponse):
+      window.dispatchEvent(
+        new CustomEvent(sdkMessageProxyEvents.SDKResponseAction, {
+          detail: JSON.stringify(action)
+        })
+      );
+      return;
 
     default:
       throw Error(
@@ -67,17 +81,15 @@ async function handleSdkRequest(e: Event) {
     .catch(err => {
       throw Error('Content: sdk request send message:' + err);
     });
-  // validation
-  if (!isSDKMessage(responseAction)) {
-    throw Error(
-      'Content: invalid sdk responseAction.' + JSON.stringify(responseAction)
+
+  // if valid message send back response
+  if (isSDKMessage(responseAction)) {
+    window.dispatchEvent(
+      new CustomEvent(sdkMessageProxyEvents.SDKResponseAction, {
+        detail: JSON.stringify(responseAction)
+      })
     );
   }
-  window.dispatchEvent(
-    new CustomEvent(sdkMessageProxyEvents.SDKResponseAction, {
-      detail: JSON.stringify(responseAction)
-    })
-  );
 }
 
 // inject sdk script - idempotent, doesn't need cleanup

@@ -14,7 +14,7 @@ function fetchFromExtensionBackend<T extends SdkMessage['payload']>(
     const timeoutId = setTimeout(() => {
       reject(
         Error(
-          `SDK RESPONSE TIMEOUT: ${requestAction.type}:${requestAction.meta.id}`
+          `SDK RESPONSE TIMEOUT: ${requestAction.type}:${requestAction.meta.requestId}`
         )
       );
     }, options?.timeout || 60000);
@@ -32,7 +32,7 @@ function fetchFromExtensionBackend<T extends SdkMessage['payload']>(
       // filter out response events not for this request
       if (
         !isSDKMessage(responseAction) ||
-        responseAction.meta.id !== requestAction.meta.id
+        responseAction.meta.requestId !== requestAction.meta.requestId
       ) {
         return;
       }
@@ -58,6 +58,9 @@ export type CasperWalletProviderOptions = {
 
 export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
   let requestId = 0;
+  const generateRequestId = (): string => {
+    return (requestId++).toString();
+  };
 
   return {
     requestConnection: async (): Promise<boolean> => {
@@ -65,7 +68,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         ReturnType<typeof sdkMessage['connectResponse']>['payload']
       >(
         sdkMessage.connectRequest(window.location.origin, {
-          id: requestId++
+          requestId: generateRequestId()
         }),
         options
       );
@@ -75,7 +78,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         ReturnType<typeof sdkMessage['disconnectResponse']>['payload']
       >(
         sdkMessage.disconnectRequest(window.location.origin, {
-          id: requestId++
+          requestId: generateRequestId()
         }),
         options
       );
@@ -85,7 +88,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         ReturnType<typeof sdkMessage['isConnectedResponse']>['payload']
       >(
         sdkMessage.isConnectedRequest(window.location.origin, {
-          id: requestId++
+          requestId: generateRequestId()
         }),
         options
       );
@@ -95,7 +98,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         ReturnType<typeof sdkMessage['getActivePublicKeyResponse']>['payload']
       >(
         sdkMessage.getActivePublicKeyRequest(undefined, {
-          id: requestId++
+          requestId: generateRequestId()
         }),
         options
       );
@@ -105,27 +108,27 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         ReturnType<typeof sdkMessage['getVersionResponse']>['payload']
       >(
         sdkMessage.getVersionRequest(undefined, {
-          id: requestId++
+          requestId: generateRequestId()
         }),
         options
       );
     },
     sign(
-      deploy: { deploy: any },
+      deployBytes: Uint8Array,
       signingPublicKeyHex: string,
       targetPublicKeyHex: string | undefined
-    ): Promise<{ deploy: any }> {
+    ): Promise<{ signature: Uint8Array }> {
       return fetchFromExtensionBackend<
-        ReturnType<typeof sdkMessage['signingRequest']>['payload']
+        ReturnType<typeof sdkMessage['signResponse']>['payload']
       >(
-        sdkMessage.signingRequest(
+        sdkMessage.signRequest(
           {
-            deploy,
+            deployBytes,
             targetPublicKeyHex,
             signingPublicKeyHex
           },
           {
-            id: requestId++
+            requestId: generateRequestId()
           }
         )
       );
@@ -153,6 +156,6 @@ window.casperlabsHelper = {
     casperWalletProviderInstance.getActivePublicKey as any,
   getVersion: casperWalletProviderInstance.getVersion,
   isConnected: casperWalletProviderInstance.isConnected,
-  sign: casperWalletProviderInstance.sign,
+  sign: casperWalletProviderInstance.sign as any,
   signMessage: casperWalletProviderInstance.signMessage
 };
