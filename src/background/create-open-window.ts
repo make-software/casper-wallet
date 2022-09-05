@@ -19,7 +19,7 @@ function getUrlByPurposeForOpening(
     case PurposeForOpening.ConnectToApp:
       return `connect-to-app.html` + searchParamsWithPrefix;
     case PurposeForOpening.SigningRequest:
-      return 'signing-request.html' + searchParamsWithPrefix;
+      return 'signature-request.html' + searchParamsWithPrefix;
     default:
       return 'popup.html?#/';
   }
