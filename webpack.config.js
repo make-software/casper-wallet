@@ -61,7 +61,7 @@ const options = {
       __dirname,
       'src',
       'apps',
-      'signing-request',
+      'signature-request',
       'index.tsx'
     ),
     background: path.join(__dirname, 'src', 'background', 'index.ts'),
@@ -238,7 +238,7 @@ const options = {
         __dirname,
         'src',
         'apps',
-        'signing-request',
+        'signature-request',
         'index.html'
       ),
       filename: 'signing-request.html',
