@@ -9,7 +9,6 @@
     "isolatedModules": true,
     "resolveJsonModule": true,
     "noEmit": true,
-    "baseUrl": "e2e"
+    "baseUrl": "."
   },
-  "exclude": ["build", "node_modules"]
 }
