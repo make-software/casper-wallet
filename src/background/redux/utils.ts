@@ -23,8 +23,7 @@ export const composeEnhancers =
     ? composeWithDevTools({
         name: 'Casper Wallet',
         hostname: 'localhost',
-        port: 8000,
-        realtime: true
+        port: 8000
       })
     : compose;
 
