@@ -1,8 +1,8 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 
-import { SubmenuActionType } from './types';
-import { SubmenuBarNavLink } from './submenu-bar-nav-link';
+import { SubmenuActionType } from '../types';
+import { SubmenuBarNavLink_TO_BE_REMOVED } from './submenu-bar-nav-link';
 
 const SubmenuBarContainer = styled.div`
   height: 56px;
@@ -20,10 +20,18 @@ interface SubmenuBarProps {
   ActionGroup?: ReactElement;
 }
 
-export function SubmenuBar({ actionType, ActionGroup }: SubmenuBarProps) {
+// should be removed, it's the same as HeaderSubmenuBar, only difference is handlers
+// which can be supplied using props e.g. onCancel, onClose etc.
+export function SubmenuBar_TO_BE_REMOVED({
+  actionType,
+  ActionGroup
+}: SubmenuBarProps) {
   return (
     <SubmenuBarContainer>
-      <SubmenuBarNavLink actionType={actionType} ActionGroup={ActionGroup} />
+      <SubmenuBarNavLink_TO_BE_REMOVED
+        actionType={actionType}
+        ActionGroup={ActionGroup}
+      />
       {ActionGroup && ActionGroup}
     </SubmenuBarContainer>
   );

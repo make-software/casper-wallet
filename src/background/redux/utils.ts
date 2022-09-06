@@ -2,7 +2,7 @@ import { compose } from 'redux';
 import { composeWithDevTools } from 'remote-redux-devtools';
 import browser from 'webextension-polyfill';
 
-import { createStore } from '@popup/redux';
+import { createStore } from '@src/background/redux';
 import {
   backgroundEvent,
   PopupState,
@@ -23,8 +23,7 @@ export const composeEnhancers =
     ? composeWithDevTools({
         name: 'Casper Wallet',
         hostname: 'localhost',
-        port: 8000,
-        realtime: true
+        port: 8000
       })
     : compose;
 

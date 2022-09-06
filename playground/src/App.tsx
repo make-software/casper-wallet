@@ -33,7 +33,7 @@ function App() {
     <Container>
       <Row style={{ fontSize: '2rem' }}>
         <img src={logo} alt="logo" />
-        Casper Wallet Integration Playground
+        Casper Wallet Playground
       </Row>
       <Row>
         Connected Account: {statusText}{' '}

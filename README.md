@@ -4,33 +4,85 @@ built from [chrome-extension-boilerplate-react](https://github.com/lxieyang/chro
 
 ![signer logo](src/assets/img/logo128.png)
 
-## Development environment setup
+## Testing Casper Wallet integration with dApps (**Casper Wallet Playground**)
 
-Install dependencies:
+*Casper Wallet Playground is a React webapp created as a developer tool to help test integration with various features available in Casper Wallet.*
+
+### Run Casper Wallet Playground site
+
+Clone this repository and run following commands from the repo root folder.
+*NOTE: Node.js LTS is required.*
+
+```shell
+cd playground
+npm install
+npm run start
+```
+
+This will open webapp automatically in a new tab.
+
+### Load Wallet Extension in Chrome
+
+1. Navigate `chrome://extensions/` in Chrome browser
+2. Enable `Developer mode` (right top corner, at least for Chrome 98)
+3. Click on `Load unpacked` button (left top corner)
+4. Pick `build/chrome` folder from `builds.zip` deliverable or `builds` folder when building from sources.
+
+To open as a tab:
+
+1. Open a new tab and use the link `chrome-extension://{paste ID here}/popup.html`
+
+### Load Wallet Extension in Firefox
+
+1. Navigate `about:debugging#/runtime/this-firefox` in Firefox browser
+2. Click on `Load Temporary Add-on...` button.
+3. Pick `build/firefox/manifest.json` file from `builds.zip` deliverable or `builds` folder when building from sources.
+
+To open as a tab:
+
+1. Open new tab and fill the link `moz-extension://{paste Internal UUID here}/popup.html`
+
+### Load Wallet Extension in Safari
+
+1. Open `build/safari` folder from `builds.zip` or `builds` folder when building from sources.
+2. Double click on "Casper Wallet.app" file.
+3. Follow instructions and enable Casper Wallet in opened Extensions Preferences window.
+4. Open Safari and enable unsigned extensions. Extension should be available.
+
+For more information please [follow the link](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension)
+
+## Development setup
+
+### Install dependencies
+
+Clone this repository and run following commands from the repo root folder.
+*NOTE: Node.js LTS is required.*
 
 ```shell
 npm install
 ```
 
-Grant script execution permissions for `safari_build.sh` file:
+### Grant script execution permissions for `scripts` folder
 
 ```shell
-chmod +x safari_build.sh
+chmod +x scripts/*
 ```
 
-Open extension in Chrome browser:
+### Start watcher script to rebuild on changes (`output` folder)
+
+Chrome:
 
 ```shell
 npm run start:chrome
 ```
 
-Open extension in Firefox browser:
+Firefox:
 
 ```shell
 npm run start:firefox
 ```
 
-Open extension in Safari browser:
+Safari:
 
 ```shell
 npm run start:safari
@@ -38,79 +90,11 @@ npm run start:safari
 
 You can run all these commands in parallel.
 
-## For Testers
-
-Install dependencies:
+### Build deliverable from sources (`build` folder)
 
 ```shell
-npm install
+npm run build:all
 ```
-
-Any browser:
-
-```shell
-cd playground && npm run start
-```
-
-For Firefox browser
-
-```shell
-npm run start:firefox
-```
-
-For Safari browser
-
-```shell
-npm run start:safari
-```
-
-## Build for production
-
-### Chrome
-
-```shell
-npm run build:chrome
-```
-
-Then you can find a build in `build/chrome` folder.
-For opening it in Chrome:
-
-1. Navigate `chrome://extensions/` in Chrome browser
-2. Enable `Developer mode` (right top corner, at least for Chrome 98)
-3. Click on `Load unpacked` button (left top corner)
-4. Choice and open `build/chrome` folder
-
-To open as a tab:
-
-1. Open a new tab and use the link `chrome-extension://{paste ID here}/popup.html`
-
-### Firefox
-
-```shell
-npm run build:firefox
-```
-
-Then you can find a build in `build/firefox` folder.
-For opening it in Firefox:
-
-1. Navigate `about:debugging#/runtime/this-firefox` in Firefox browser
-2. Click on `Load Temporary Add-on...` button.
-3. Choice `build/firefox/manifest.json` file
-
-After that go to Safari -> Preferences -> Extensions and you can see it there
-
-To open as a tab:
-
-1. Open new tab and fill the link `moz-extension://{paste Internal UUID here}/popup.html`
-
-### Safari
-
-```shell
-npm run build:safari
-```
-
-Build present in `build/safari` folder.
-For more information please [follow the link](https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension)
 
 ## E2E tests
 

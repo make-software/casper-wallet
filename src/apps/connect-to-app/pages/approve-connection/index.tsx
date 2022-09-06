@@ -2,18 +2,18 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { HeaderTextContainer } from '@src/layout';
+import { HeaderTextContainer } from '@src/libs/layout';
 
 import {
   PageContainer,
   ContentContainer,
   FooterButtonsContainer
-} from '@layout/containers';
+} from '@src/libs/layout/containers';
 
 import { Button, SiteFaviconBadge, List, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@connect-to-app/router';
 import { closeWindow } from '@connect-to-app/utils/closeWindow';
-import { useAccountManager } from '@src/apps/popup/hooks/use-account-manager';
+import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;
@@ -52,10 +52,10 @@ export function ApproveConnectionPage({
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  const { connectAccounts } = useAccountManager();
+  const { connectAccountsWithEvent: connectAccounts } = useAccountManager();
 
   const handleApproveConnection = () => {
-    connectAccounts(selectedAccountNames);
+    connectAccounts(selectedAccountNames, origin);
     navigate(RouterPath.Connecting);
   };
   const listItems = [

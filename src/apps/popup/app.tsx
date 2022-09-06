@@ -1,10 +1,10 @@
 import '@libs/i18n/i18n';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
 
-import { Layout } from '@src/layout';
+import { Layout } from '@src/libs/layout';
 
 import { CreateVaultPageContent } from '@popup/pages/create-vault';
 import { HomePageContent } from '@popup/pages/home';
@@ -17,15 +17,13 @@ import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-a
 import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
 import { ConnectedSitesPage } from '@popup/pages/connected-sites';
 
-import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
-
-import { Header } from './layout';
+import { RouterPath, useTypedLocation } from '@popup/router';
 
 import {
   selectVaultDoesExist,
   selectVaultHasAccount,
   selectVaultIsLocked
-} from './redux/vault/selectors';
+} from '../../background/redux/vault/selectors';
 
 import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
 
@@ -35,169 +33,182 @@ import {
 } from '@popup/pages/account-settings';
 import { RemoveAccountPageContent } from '@popup/pages/remove-account';
 import { RenameAccountPageContent } from '@popup/pages/rename-account';
+import { PopupHeader } from '@src/libs/layout/header';
 
 export function App() {
-  const navigate = useTypedNavigate();
+  const vaultIsLocked = useSelector(selectVaultIsLocked);
+  useVaultTimeoutController();
+
+  if (vaultIsLocked) {
+    return <LockedRouter />;
+  }
+
+  return <UnlockedRouter />;
+}
+
+function LockedRouter() {
+  return (
+    <Routes>
+      <Route
+        path={RouterPath.Any}
+        element={
+          <Layout
+            Header={<PopupHeader />}
+            Content={<UnlockVaultPageContent />}
+          />
+        }
+      />
+      <Route
+        path={RouterPath.ResetVault}
+        element={
+          <Layout
+            Header={<PopupHeader />}
+            Content={<ResetVaultPageContent />}
+          />
+        }
+      />
+    </Routes>
+  );
+}
+
+function UnlockedRouter() {
   const location = useTypedLocation();
   const state = location.state;
 
-  const vaultIsLocked = useSelector(selectVaultIsLocked);
   const vaultDoesExists = useSelector(selectVaultDoesExist);
   const vaultHasAccount = useSelector(selectVaultHasAccount);
 
-  useVaultTimeoutController();
+  if (!vaultDoesExists) {
+    return (
+      <Routes>
+        <Route
+          path={RouterPath.Any}
+          element={
+            <Layout
+              Header={<PopupHeader />}
+              Content={<CreateVaultPageContent />}
+            />
+          }
+        />
+      </Routes>
+    );
+  }
 
-  // App redirects
-  useEffect(() => {
-    if (vaultIsLocked && location.pathname !== RouterPath.ResetVault) {
-      location.pathname !== RouterPath.UnlockVault &&
-        navigate(RouterPath.UnlockVault);
-    } else if (!vaultDoesExists) {
-      navigate(RouterPath.CreateVault, { replace: true });
-    } else if (
-      !vaultHasAccount &&
-      location.pathname !== RouterPath.ResetVault
-    ) {
-      navigate(RouterPath.NoAccounts, { replace: true });
-    }
-  }, [
-    location.pathname,
-    navigate,
-    vaultDoesExists,
-    vaultHasAccount,
-    vaultIsLocked
-  ]);
+  if (!vaultHasAccount) {
+    return (
+      <Routes>
+        <Route
+          path={RouterPath.Any}
+          element={
+            <Layout
+              Header={<PopupHeader withLock />}
+              Content={<NoAccountsPageContent />}
+            />
+          }
+        />
+      </Routes>
+    );
+  }
+
+  if (state?.showNavigationMenu) {
+    return (
+      <Routes>
+        <Route
+          path={RouterPath.Any}
+          element={
+            <Layout
+              Header={<PopupHeader withMenu withLock />}
+              Content={<NavigationMenuPageContent />}
+            />
+          }
+        />
+      </Routes>
+    );
+  }
 
   return (
     <Routes>
-      {state?.showNavigationMenu ? (
-        <Route>
-          <Route
-            path="*"
-            element={
-              <Layout
-                Header={<Header withMenu withLock />}
-                Content={<NavigationMenuPageContent />}
+      <Route
+        path={RouterPath.Home}
+        element={
+          <Layout
+            Header={<PopupHeader withMenu withLock />}
+            Content={<HomePageContent />}
+          />
+        }
+      />
+      <Route
+        path={RouterPath.AccountSettings}
+        element={
+          <Layout
+            Header={
+              <PopupHeader
+                withLock
+                withMenu
+                submenuActionType="close"
+                SubmenuActionGroup={<AccountSettingsActionsGroup />}
               />
             }
+            Content={<AccountSettingsPageContent />}
           />
-        </Route>
-      ) : (
-        <Route>
-          <Route
-            path={RouterPath.Home}
-            element={
-              <Layout
-                Header={<Header withMenu withLock />}
-                Content={<HomePageContent />}
-              />
+        }
+      />
+      <Route
+        path={RouterPath.Timeout}
+        element={
+          <Layout
+            Header={<PopupHeader submenuActionType="close" withMenu withLock />}
+            Content={<TimeoutPageContent />}
+          />
+        }
+      />
+      <Route
+        path={RouterPath.RemoveAccount}
+        element={
+          <Layout
+            Header={<PopupHeader withLock withMenu submenuActionType="back" />}
+            Content={<RemoveAccountPageContent />}
+          />
+        }
+      />
+      <Route
+        path={RouterPath.RenameAccount}
+        element={
+          <Layout
+            Header={<PopupHeader withLock withMenu submenuActionType="back" />}
+            Content={<RenameAccountPageContent />}
+          />
+        }
+      />
+      <Route
+        path={RouterPath.NoConnectedAccount}
+        element={
+          <Layout
+            Header={<PopupHeader withLock withMenu />}
+            Content={<NoConnectedAccountPageContent />}
+          />
+        }
+      />
+      <Route
+        path={RouterPath.ConnectAnotherAccount}
+        element={
+          <Layout
+            Header={
+              <PopupHeader withLock withMenu submenuActionType="cancel" />
             }
+            Content={<ConnectAnotherAccountPageContent />}
           />
-          <Route
-            path={RouterPath.ResetVault}
-            element={
-              <Layout Header={<Header />} Content={<ResetVaultPageContent />} />
-            }
+        }
+      />
+      <Route
+        path={RouterPath.ConnectedSites}
+        element={
+          <Layout
+            Header={<PopupHeader submenuActionType="back" withMenu withLock />}
+            Content={<ConnectedSitesPage />}
           />
-          <Route
-            path={RouterPath.CreateVault}
-            element={
-              <Layout
-                Header={<Header />}
-                Content={<CreateVaultPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.AccountSettings}
-            element={
-              <Layout
-                Header={
-                  <Header
-                    withLock
-                    withMenu
-                    submenuActionType="close"
-                    SubmenuActionGroup={<AccountSettingsActionsGroup />}
-                  />
-                }
-                Content={<AccountSettingsPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.RemoveAccount}
-            element={
-              <Layout
-                Header={<Header withLock withMenu submenuActionType="back" />}
-                Content={<RemoveAccountPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.RenameAccount}
-            element={
-              <Layout
-                Header={<Header withLock withMenu submenuActionType="back" />}
-                Content={<RenameAccountPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.NoAccounts}
-            element={
-              <Layout
-                Header={<Header withLock />}
-                Content={<NoAccountsPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.NoConnectedAccount}
-            element={
-              <Layout
-                Header={<Header withLock withMenu />}
-                Content={<NoConnectedAccountPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.ConnectedSites}
-            element={
-              <Layout
-                Header={<Header submenuActionType="back" withMenu withLock />}
-                Content={<ConnectedSitesPage />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.UnlockVault}
-            element={
-              <Layout
-                Header={<Header />}
-                Content={<UnlockVaultPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.Timeout}
-            element={
-              <Layout
-                Header={<Header submenuActionType="close" withMenu withLock />}
-                Content={<TimeoutPageContent />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.ConnectAnotherAccount}
-            element={
-              <Layout
-                Header={<Header withLock withMenu submenuActionType="cancel" />}
-                Content={<ConnectAnotherAccountPageContent />}
-              />
-            }
-          />
-        </Route>
-      )}
+        }
+      />
     </Routes>
   );
 }

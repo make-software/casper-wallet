@@ -5,9 +5,12 @@ import { RootState } from 'typesafe-actions';
 
 import styled from 'styled-components';
 
-import { ContentContainer, HeaderTextContainer } from '@layout/containers';
+import {
+  ContentContainer,
+  HeaderTextContainer
+} from '@src/libs/layout/containers';
 import { SvgIcon, PageTile, Typography } from '@libs/ui';
-import { selectVaultAccountWithName } from '@popup/redux/vault/selectors';
+import { selectVaultAccountWithName } from '@src/background/redux/vault/selectors';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 

@@ -1,7 +1,7 @@
 {
   "name": "Casper Wallet",
   "description": "Casper Wallet - tool for signing transactions on the blockchain.",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "author": "MAKE LLC",
   "scripts": {
     "devtools:redux": "redux-devtools --hostname=localhost",
@@ -9,15 +9,15 @@
     "dev:build:manifest:v2": "NODE_ENV=development BABEL_ENV=development BROWSER=firefox node utils/build.js",
     "build:chrome": "NODE_ENV=production BABEL_ENV=production BROWSER=chrome node utils/build.js",
     "build:firefox": "npm run build:manifest:v2",
-    "build:safari": "npm run build:manifest:v2 && ./safari_build.sh",
+    "build:safari": "npm run build:manifest:v2 && ./scripts/build_safari.sh",
     "build:all": "npm run build:chrome && npm run build:safari && cd ./build && zip -r builds.zip ./*",
     "dev:build:chrome": "rm -rf ./output/chrome && NODE_ENV=development BABEL_ENV=development BROWSER=chrome node utils/build.js",
     "dev:build:firefox": "rm -rf ./output/firefox && npm run dev:build:manifest:v2",
-    "dev:chrome": "npm run dev:build:chrome && NODE_ENV=development BABEL_ENV=development BROWSER=chrome PORT=3001 ts-node --project scripts.tsconfig.json utils/webserver.js",
+    "dev:chrome": "npm run dev:build:chrome && NODE_ENV=development BABEL_ENV=development BROWSER=chrome PORT=3001 node utils/webserver.js",
     "start:chrome": "concurrently -k -n start,redux \"npm run dev:chrome\" \"npm run devtools:redux -- --port=8000\"",
-    "dev:firefox": "npm run dev:build:firefox && NODE_ENV=development BABEL_ENV=development BROWSER=firefox PORT=3002 ts-node --project scripts.tsconfig.json utils/webserver.js",
+    "dev:firefox": "npm run dev:build:firefox && NODE_ENV=development BABEL_ENV=development BROWSER=firefox PORT=3002 node utils/webserver.js",
     "start:firefox": "concurrently -k -n start,redux \"npm run dev:firefox\" \"npm run devtools:redux -- --port=8001\"",
-    "start:safari": "npm run dev:build:manifest:v2 && ./build_xcode_framework.sh && NODE_ENV=development BABEL_ENV=development BROWSER=safari PORT=3003 ts-node --project scripts.tsconfig.json utils/webserver.js",
+    "start:safari": "npm run dev:build:manifest:v2 && ./convert-web-extension.sh && NODE_ENV=development BABEL_ENV=development BROWSER=safari PORT=3003 node utils/webserver.js",
     "test:e2e:chrome": "npm run build:chrome && SELENIUM_BROWSER=chrome jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests",
     "test:e2e:firefox": "npm run build:firefox && SELENIUM_BROWSER=firefox jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests",
     "format:check": "prettier --check 'src/*.{js,jsx,ts,tsx,json,md}'",
@@ -28,7 +28,10 @@
     "prepare": "husky install",
     "locale:extract_pot": "i18next 'src/**/*.{ts,tsx}' && node scripts/locale_extract_pot.js",
     "locale:update_translations": "node scripts/locale_update_translations.js",
-    "ci-check": "npm run format:check && npm run lint && npm run tsc && npm run test"
+    "ci-check": "npm run format:check && npm run lint && npm run tsc && npm run test",
+    "dependency:graph": "npx madge --ts-config=tsconfig.json --image=graph.svg src/background/index.ts",
+    "dependency:circular": "npx madge --ts-config=tsconfig.json --circular src/background/index.ts",
+    "dependency:orphans": "npx madge --ts-config=tsconfig.json --orphans src/**/*"
   },
   "lint-staged": {
     "*.md": "markdownlint",

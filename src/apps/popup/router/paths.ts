@@ -1,14 +1,12 @@
 export enum RouterPath {
+  Any = '*',
   Home = '/',
-  CreateVault = '/create-vault',
   AccountSettings = '/account-settings/:accountName',
-  RemoveAccount = '/remove-account/:accountName',
-  RenameAccount = '/rename-account/:accountName',
-  NoAccounts = '/no-accounts',
-  NoConnectedAccount = '/no-connected-account',
-  ConnectedSites = '/connected-sites',
-  UnlockVault = '/unlock-vault',
   Timeout = '/timeout',
   ResetVault = '/reset-vault',
-  ConnectAnotherAccount = '/connect-another-account'
+  RemoveAccount = '/remove-account/:accountName',
+  RenameAccount = '/rename-account/:accountName',
+  NoConnectedAccount = '/no-connected-account',
+  ConnectAnotherAccount = '/connect-another-account',
+  ConnectedSites = '/connected-sites'
 }

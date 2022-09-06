@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
-import { Account } from '@popup/redux/vault/types';
+import { Account } from '@src/background/redux/vault/types';
 import {
   activeAccountChanged,
   accountsConnected,
   accountDisconnected,
   allAccountsDisconnected
-} from '@popup/redux/vault/actions';
+} from '@src/background/redux/vault/actions';
 
 import { useSelector } from 'react-redux';
 import {
@@ -13,12 +13,11 @@ import {
   selectVaultAccountNamesByOriginDict,
   selectVaultAccounts,
   selectVaultActiveAccount,
-  selectVaultIsLocked,
-  selectVaultActiveOrigin
-} from '@popup/redux/vault/selectors';
+  selectVaultIsLocked
+} from '@src/background/redux/vault/selectors';
 import { RootState } from 'typesafe-actions';
 import { emitSdkEventToAllActiveTabs, sdkEvent } from '@src/content/sdk-event';
-import { dispatchToMainStore } from '../redux/utils';
+import { dispatchToMainStore } from '../../../background/redux/utils';
 
 export function findAccountInAListClosestToGivenAccountFilteredByNames(
   accounts: Account[],
@@ -59,13 +58,10 @@ export function useAccountManager() {
   const connectedAccountNames = useSelector((state: RootState) =>
     selectConnectedAccountNamesWithOrigin(state)
   );
-  const activeOrigin = useSelector((state: RootState) =>
-    selectVaultActiveOrigin(state)
-  );
 
-  const changeActiveAccount = useCallback(
+  const changeActiveAccountWithEvent = useCallback(
     async (accountName: string) => {
-      if (activeAccount?.name && accountName === activeAccount.name) {
+      if (!activeAccount?.name || accountName === activeAccount.name) {
         return;
       }
 
@@ -94,9 +90,9 @@ export function useAccountManager() {
     [activeAccount?.name, accounts, connectedAccountNames, isLocked]
   );
 
-  const connectAccounts = useCallback(
-    async (accountNames: string[]) => {
-      if (activeAccount?.name == null || activeOrigin == null || isLocked) {
+  const connectAccountsWithEvent = useCallback(
+    async (accountNames: string[], origin) => {
+      if (!activeAccount?.name || origin == null || isLocked) {
         return;
       }
 
@@ -112,7 +108,7 @@ export function useAccountManager() {
         dispatchToMainStore(
           accountsConnected({
             accountNames: accountNames,
-            siteOrigin: activeOrigin
+            siteOrigin: origin
           })
         );
       } else {
@@ -141,10 +137,10 @@ export function useAccountManager() {
         }
       }
     },
-    [activeAccount, activeOrigin, isLocked, accounts]
+    [activeAccount, isLocked, accounts]
   );
 
-  const disconnectAccount = useCallback(
+  const disconnectAccountWithEvent = useCallback(
     async (accountName: string, origin: string) => {
       if (
         !activeAccount?.name ||
@@ -204,16 +200,13 @@ export function useAccountManager() {
     ]
   );
 
-  const disconnectAllAccounts = useCallback(
+  const disconnectAllAccountsWithEvent = useCallback(
     async (origin: string) => {
       if (!activeAccount?.name || !origin || isLocked) {
         return;
       }
 
       const allAccountNames = accountNamesByOriginDict[origin];
-      if (allAccountNames == null || allAccountNames.length === 0) {
-        return;
-      }
 
       if (allAccountNames.includes(activeAccount.name)) {
         await emitSdkEventToAllActiveTabs(
@@ -240,9 +233,9 @@ export function useAccountManager() {
   );
 
   return {
-    changeActiveAccount,
-    connectAccounts,
-    disconnectAccount,
-    disconnectAllAccounts
+    changeActiveAccountWithEvent: changeActiveAccountWithEvent,
+    connectAccountsWithEvent: connectAccountsWithEvent,
+    disconnectAccountWithEvent: disconnectAccountWithEvent,
+    disconnectAllAccountsWithEvent: disconnectAllAccountsWithEvent
   };
 }

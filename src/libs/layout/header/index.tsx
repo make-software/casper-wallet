@@ -1,14 +1,12 @@
 import React, { ReactElement } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { RouterPath } from '@popup/router';
+import { HeaderContainer, Logo, LogoContainer } from '@src/libs/layout';
+import { HeaderConnectionStatus } from '@src/libs/layout/header/header-connection-status';
 
-import { HeaderContainer, LogoContainer, Logo } from '@src/layout';
-
-import { MainmenuBar } from './mainmenu-bar';
-import { SubmenuBar } from './submenu-bar';
-import { ConnectionStatus } from '@popup/layout/header/connection-status';
+import { HeaderActions } from './header-actions';
+import { HeaderSubmenuBar } from './header-submenu-bar';
+import { SubmenuActionType } from '../types';
 
 const CentredFlexRow = styled.div`
   display: flex;
@@ -25,31 +23,29 @@ const SpaceBetweenContainer = styled(CentredFlexRow)`
 interface HeaderProps {
   withLock?: boolean;
   withMenu?: boolean;
-  submenuActionType?: 'back' | 'close' | 'cancel';
+  submenuActionType?: SubmenuActionType;
   SubmenuActionGroup?: ReactElement;
 }
 
-export function Header({
+export function PopupHeader({
   withLock,
   withMenu,
   submenuActionType,
   SubmenuActionGroup
 }: HeaderProps) {
-  const navigate = useNavigate();
-
   return (
     <>
       <HeaderContainer>
         <LogoContainer>
-          <Logo onClick={() => navigate(RouterPath.Home)} />
+          <Logo />
         </LogoContainer>
         <SpaceBetweenContainer>
-          <ConnectionStatus />
-          <MainmenuBar withMenu={withMenu} withLock={withLock} />
+          <HeaderConnectionStatus />
+          <HeaderActions withMenu={withMenu} withLock={withLock} />
         </SpaceBetweenContainer>
       </HeaderContainer>
       {submenuActionType && (
-        <SubmenuBar
+        <HeaderSubmenuBar
           actionType={submenuActionType}
           ActionGroup={SubmenuActionGroup}
         />

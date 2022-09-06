@@ -15,7 +15,7 @@ import { RouterPath } from './router';
 import { ImportAccountWithFileSuccessContentPage } from './pages/import-account-with-file-success';
 import { ImportAccountWithFileFailureContentPage } from './pages/import-account-with-file-failure';
 import { ImportAccountWithFileContentPage } from './pages/import-account-with-file';
-import { Header, Layout } from '@layout/window';
+import { HeaderWindow_TO_BE_REMOVED, LayoutWindow } from '@src/libs/layout';
 
 render(
   <Suspense fallback={null}>
@@ -27,8 +27,8 @@ render(
           <Route
             path={RouterPath.ImportAccountWithFile}
             element={
-              <Layout
-                Header={<Header />}
+              <LayoutWindow
+                Header={<HeaderWindow_TO_BE_REMOVED />}
                 Content={<ImportAccountWithFileContentPage />}
               />
             }
@@ -36,8 +36,8 @@ render(
           <Route
             path={RouterPath.ImportAccountWithFileSuccess}
             element={
-              <Layout
-                Header={<Header />}
+              <LayoutWindow
+                Header={<HeaderWindow_TO_BE_REMOVED />}
                 Content={<ImportAccountWithFileSuccessContentPage />}
               />
             }
@@ -45,8 +45,8 @@ render(
           <Route
             path={RouterPath.ImportAccountWithFileFailure}
             element={
-              <Layout
-                Header={<Header />}
+              <LayoutWindow
+                Header={<HeaderWindow_TO_BE_REMOVED />}
                 Content={<ImportAccountWithFileFailureContentPage />}
               />
             }

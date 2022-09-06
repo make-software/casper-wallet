@@ -7,11 +7,14 @@ import {
   selectVaultIsLocked,
   selectVaultTimeoutDurationSetting,
   selectVaultLastActivityTime
-} from '@popup/redux/vault/selectors';
-import { vaultLocked, timeoutRefreshed } from '@popup/redux/vault/actions';
+} from '@src/background/redux/vault/selectors';
+import {
+  vaultLocked,
+  timeoutRefreshed
+} from '@src/background/redux/vault/actions';
 
 import { MapTimeoutDurationSettingToValue } from '../constants';
-import { dispatchToMainStore } from '../redux/utils';
+import { dispatchToMainStore } from '../../../background/redux/utils';
 
 export function useVaultTimeoutController(): void {
   const timeoutCounterRef = useRef<NodeJS.Timeout>();

@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
 import styled from 'styled-components';
 
-import { ContentContainer, HeaderTextContainer } from '@src/layout';
+import { ContentContainer, HeaderTextContainer } from '@src/libs/layout';
 import {
   Button,
   SiteFaviconBadge,
@@ -20,9 +20,9 @@ import {
   selectConnectedAccountsWithOrigin,
   selectVaultActiveAccount,
   selectVaultActiveOrigin
-} from '@popup/redux/vault/selectors';
+} from '@src/background/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import { useAccountManager } from '@popup/hooks/use-account-manager';
+import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;
@@ -56,7 +56,10 @@ export function ConnectAnotherAccountPageContent() {
   const { t } = useTranslation();
 
   const activeOrigin = useSelector(selectVaultActiveOrigin);
-  const { connectAccounts, changeActiveAccount } = useAccountManager();
+  const {
+    connectAccountsWithEvent: connectAccounts,
+    changeActiveAccountWithEvent: changeActiveAccount
+  } = useAccountManager();
 
   const connectedAccountsToActiveTab = useSelector((state: RootState) =>
     selectConnectedAccountsWithOrigin(state)
@@ -103,7 +106,7 @@ export function ConnectAnotherAccountPageContent() {
                 variant="inline"
                 width="100"
                 onClick={async () => {
-                  await connectAccounts([activeAccount.name]);
+                  await connectAccounts([activeAccount.name], activeOrigin);
                   navigate(RouterPath.Home);
                 }}
               >

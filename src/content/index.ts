@@ -3,7 +3,7 @@ import browser from 'webextension-polyfill';
 import { sdkMessageProxyEvents, isSDKMessage } from './sdk-message';
 import { sdkEvent, SdkEvent } from './sdk-event';
 import { getType } from 'typesafe-actions';
-import { activeOriginChanged } from '@src/apps/popup/redux/vault/actions';
+import { activeOriginChanged } from '@src/background/redux/vault/actions';
 
 // Sync activeOrigin of active tab with store
 function syncActiveOriginWithStore() {
@@ -48,9 +48,8 @@ function emitSdkEvent(action: SdkEvent) {
   }
 
   const event = new CustomEvent(eventType, {
-    detail: action.payload
+    detail: JSON.stringify(action.payload)
   });
-  console.error('event', JSON.stringify(event));
   window.dispatchEvent(event);
 }
 

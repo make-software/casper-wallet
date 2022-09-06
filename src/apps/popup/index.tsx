@@ -1,6 +1,5 @@
 import 'mac-scrollbar/dist/mac-scrollbar.css';
 
-import { GlobalScrollbar } from 'mac-scrollbar';
 import React, { Suspense, useEffect, useState } from 'react';
 import { render } from 'react-dom';
 import { Provider as ReduxProvider } from 'react-redux';
@@ -11,15 +10,15 @@ import browser from 'webextension-polyfill';
 
 import { GlobalStyle, themeConfig } from '@libs/ui';
 import { ErrorBoundary } from '@popup/error-boundary';
-
-import { App } from './app';
-import { createMainStoreReplica } from './redux/utils';
 import {
   BackgroundEvent,
   backgroundEvent,
   PopupState
 } from '@src/background/background-events';
-import { popupWindowInit } from './redux/windowManagement/actions';
+
+import { createMainStoreReplica } from '../../background/redux/utils';
+import { popupWindowInit } from '../../background/redux/windowManagement/actions';
+import { App } from './app';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
@@ -50,7 +49,6 @@ const Tree = () => {
       <ErrorBoundary>
         <ThemeProvider theme={themeConfig}>
           <GlobalStyle />
-          <GlobalScrollbar />
           <ReduxProvider store={store}>
             <HashRouter>
               <App />

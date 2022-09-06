@@ -123,6 +123,12 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
   };
 };
 
+declare global {
+  interface Window {
+    CasperWalletProvider: typeof CasperWalletProvider;
+  }
+}
+
 window.CasperWalletProvider = CasperWalletProvider;
 // for backward compatibility
 const casperWalletProviderInstance = CasperWalletProvider();

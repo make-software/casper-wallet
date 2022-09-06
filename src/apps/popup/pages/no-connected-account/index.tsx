@@ -7,7 +7,7 @@ import {
   HeaderTextContainer,
   TextContainer,
   FooterButtonsAbsoluteContainer
-} from '@src/layout';
+} from '@src/libs/layout';
 import { Typography, SvgIcon, Button } from '@libs/ui';
 
 import { useTypedNavigate, RouterPath } from '@popup/router';

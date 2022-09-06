@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { Typography, SvgIcon } from '@libs/ui';
 import { useSelector } from 'react-redux';
 import { RootState } from 'typesafe-actions';
-import { selectIsActiveAccountConnectedWithOrigin } from '@popup/redux/vault/selectors';
+import { selectIsActiveAccountConnectedWithOrigin } from '@src/background/redux/vault/selectors';
 
 const ConnectionStatusContainer = styled.div`
   display: flex;
@@ -18,7 +18,7 @@ const ConnectionStatusContainer = styled.div`
   border-radius: 100px;
 `;
 
-export function ConnectionStatus() {
+export function HeaderConnectionStatus() {
   const isActiveAccountConnected = useSelector((state: RootState) =>
     selectIsActiveAccountConnectedWithOrigin(state)
   );

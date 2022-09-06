@@ -7,7 +7,7 @@ import { Link, SvgIcon, Typography } from '@libs/ui';
 import { useTypedNavigate } from '@connect-to-app/router';
 import { closeWindow } from '@connect-to-app/utils/closeWindow';
 
-import { SubmenuActionType } from './types';
+import { SubmenuActionType } from '../types';
 
 const LinkWithIconContainer = styled.div`
   display: flex;
@@ -19,7 +19,12 @@ interface NavLinkProps {
   ActionGroup?: ReactElement;
 }
 
-export function SubmenuBarNavLink({ actionType, ActionGroup }: NavLinkProps) {
+// should be removed, it's the same as HeaderSubmenuBar, only difference is handlers
+// which can be supplied using props e.g. onCancel, onClose etc.
+export function SubmenuBarNavLink_TO_BE_REMOVED({
+  actionType,
+  ActionGroup
+}: NavLinkProps) {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 

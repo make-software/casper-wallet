@@ -17,14 +17,14 @@ import {
   HeaderTextContainer,
   ListItemClickableContainer,
   FooterButtonsContainer
-} from '@layout/containers';
+} from '@src/libs/layout/containers';
 
 import { useTranslation, Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import {
   selectVaultAccounts,
   selectVaultActiveAccount
-} from '@popup/redux/vault/selectors';
+} from '@src/background/redux/vault/selectors';
 import {
   AccountBalanceListItemContainer,
   AccountNameWithHashListItemContainer

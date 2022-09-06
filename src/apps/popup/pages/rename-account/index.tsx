@@ -14,13 +14,13 @@ import {
   ContentContainer,
   HeaderTextContainer,
   InputsContainer
-} from '@layout/containers';
+} from '@src/libs/layout/containers';
 import { Button, Input, Typography } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import { accountRenamed } from '@popup/redux/vault/actions';
-import { selectVaultAccountsNames } from '@popup/redux/vault/selectors';
-import { dispatchToMainStore } from '../../redux/utils';
+import { accountRenamed } from '@src/background/redux/vault/actions';
+import { selectVaultAccountsNames } from '@src/background/redux/vault/selectors';
+import { dispatchToMainStore } from '../../../../background/redux/utils';
 
 export function RenameAccountPageContent() {
   const navigate = useTypedNavigate();

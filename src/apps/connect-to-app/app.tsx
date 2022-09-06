@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { RouterPath } from '@connect-to-app/router';
-import { Layout, Header } from '@layout/window';
+import { LayoutWindow, HeaderWindow_TO_BE_REMOVED } from '@src/libs/layout';
 import { AccountsSelectionPage } from '@connect-to-app/pages/accounts-selection';
 import { ApproveConnectionPage } from '@connect-to-app/pages/approve-connection';
 import { ConnectingPage } from '@connect-to-app/pages/connecting';
@@ -33,8 +33,8 @@ export function App() {
       <Route
         path={RouterPath.SelectAccountsToConnect}
         element={
-          <Layout
-            Header={<Header submenuActionType="cancel" />}
+          <LayoutWindow
+            Header={<HeaderWindow_TO_BE_REMOVED submenuActionType="cancel" />}
             Content={
               <AccountsSelectionPage
                 selectedAccountNames={selectedAccountNames}
@@ -49,8 +49,8 @@ export function App() {
       <Route
         path={RouterPath.ApproveConnection}
         element={
-          <Layout
-            Header={<Header submenuActionType="back" />}
+          <LayoutWindow
+            Header={<HeaderWindow_TO_BE_REMOVED submenuActionType="back" />}
             Content={
               <ApproveConnectionPage
                 selectedAccountNames={selectedAccountNames}
@@ -63,7 +63,12 @@ export function App() {
       />
       <Route
         path={RouterPath.Connecting}
-        element={<Layout Header={<Header />} Content={<ConnectingPage />} />}
+        element={
+          <LayoutWindow
+            Header={<HeaderWindow_TO_BE_REMOVED />}
+            Content={<ConnectingPage />}
+          />
+        }
       />
     </Routes>
   );

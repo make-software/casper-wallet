@@ -6,7 +6,7 @@ import styled, { css } from 'styled-components';
 
 import { PurposeForOpening, useWindowManager } from '@src/hooks';
 
-import { ContentContainer } from '@layout/containers';
+import { ContentContainer } from '@src/libs/layout/containers';
 import {
   Button,
   Checkbox,
@@ -26,8 +26,8 @@ import {
   selectVaultAccounts,
   selectVaultActiveAccount,
   selectVaultActiveOrigin
-} from '@popup/redux/vault/selectors';
-import { useAccountManager } from '@popup/hooks/use-account-manager';
+} from '@src/background/redux/vault/selectors';
+import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 
 // Account info
 
@@ -122,7 +122,10 @@ export function HomePageContent() {
 
   const { openWindow } = useWindowManager();
   const activeOrigin = useSelector(selectVaultActiveOrigin);
-  const { changeActiveAccount, disconnectAccount } = useAccountManager();
+  const {
+    changeActiveAccountWithEvent: changeActiveAccount,
+    disconnectAccountWithEvent: disconnectAccount
+  } = useAccountManager();
   const isActiveAccountConnected = useSelector(
     selectIsActiveAccountConnectedWithOrigin
   );

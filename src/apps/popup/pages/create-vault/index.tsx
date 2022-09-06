@@ -13,7 +13,7 @@ import {
   SvgIcon,
   Typography
 } from '@libs/ui';
-import { vaultCreated } from '@popup/redux/vault/actions';
+import { vaultCreated } from '@src/background/redux/vault/actions';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import {
   FooterButtonsAbsoluteContainer,
@@ -22,7 +22,7 @@ import {
   InputsContainer,
   TextContainer
 } from '@layout/containers';
-import { dispatchToMainStore } from '../../redux/utils';
+import { dispatchToMainStore } from '../../../../background/redux/utils';
 
 type InputType = 'password' | 'text';
 
@@ -68,7 +68,7 @@ export function CreateVaultPageContent() {
   function onSubmit(data: FieldValues) {
     dispatchToMainStore(vaultCreated({ password: data.password }));
 
-    navigate(RouterPath.NoAccounts);
+    navigate(RouterPath.Home);
   }
 
   return (

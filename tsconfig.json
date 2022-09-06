@@ -22,13 +22,13 @@
       "@connect-to-app/*": ["src/apps/connect-to-app/*"],
       "@background/*": ["src/background/*"],
       "@content/*": ["src/content/*"],
-      "@layout/*": ["src/layout/*"],
+      "@layout/*": ["src/libs/layout/*"],
       "@libs/*": ["src/libs/*"],
       "@hooks/*": ["src/hooks/*"],
       "@mocks/*": ["__mocks__/*"],
       "@testHelpers/*": ["__testHelpers__/*"]
     }
   },
-  "include": ["src", "custom.d.ts"],
+  "include": ["src"],
   "exclude": ["build", "output", "node_modules"]
 }

@@ -3,11 +3,11 @@ import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { List, Typography } from '@libs/ui';
-import { ContentContainer, HeaderTextContainer } from '@src/layout';
+import { ContentContainer, HeaderTextContainer } from '@src/libs/layout';
 
-import { selectVaultAccountsByOriginDict } from '@popup/redux/vault/selectors';
+import { selectVaultAccountsByOriginDict } from '@src/background/redux/vault/selectors';
 
-import { useAccountManager } from '@popup/hooks/use-account-manager';
+import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 
 import { SiteGroupHeader } from '@popup/pages/connected-sites/site-group-header';
 import { SiteGroupItem } from '@popup/pages/connected-sites/site-group-item';
@@ -15,7 +15,10 @@ import { SiteGroupItem } from '@popup/pages/connected-sites/site-group-item';
 export function ConnectedSitesPage() {
   const { t } = useTranslation();
 
-  const { disconnectAccount, disconnectAllAccounts } = useAccountManager();
+  const {
+    disconnectAccountWithEvent: disconnectAccount,
+    disconnectAllAccountsWithEvent: disconnectAllAccounts
+  } = useAccountManager();
 
   const accountsByOrigin = useSelector(selectVaultAccountsByOriginDict);
 

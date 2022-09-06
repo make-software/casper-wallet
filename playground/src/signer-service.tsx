@@ -4,12 +4,10 @@ if (Signer == null) {
   throw Error("Signer is null: shouldn't be possible");
 }
 
-export type SignerMsg = Event & {
-  detail?: {
+export type WalletState = {
     isConnected: boolean;
     isUnlocked: boolean;
     activeKey: string;
-  };
 };
 
 export type EventType = 'connected' | 'disconnected' | 'publicKeyChanged';
