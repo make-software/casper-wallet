@@ -105,9 +105,18 @@ browser.runtime.onMessage.addListener(
               selectIsActiveAccountConnectedWithOrigin(store.getState());
 
             if (isActiveAccountConnected) {
+              const query: Record<string, string> = {
+                requestId: action.meta.requestId
+              };
+
+              // !!! TEMPORARY SOLUTION FOR DEMO REASON ONLY. SHOULD BE DELETED !!!
+              if (action.payload.targetPublicKeyHex != null) {
+                query.testEntryPoint = action.payload.targetPublicKeyHex;
+              }
+
               openWindow({
                 purposeForOpening: PurposeForOpening.SigningRequest,
-                query: { requestId: action.meta.requestId }
+                query
               });
             }
 
