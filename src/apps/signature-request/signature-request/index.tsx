@@ -35,11 +35,6 @@ import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { useDeriveDataFromDeployRaw } from '../hooks/use-derive-data-from-deploy-raw';
 import { useMockedDeployData } from '../signature-request/hooks/use-mocked-deploy-data';
 
-function keyToTitle(key: string) {
-  const spacedString = key.replace(/([A-Z]+|\d+)/g, ' $1');
-  return `${spacedString[0].toUpperCase()}${spacedString.slice(1)}`;
-}
-
 function stringValueToNumberInStringWithSpaces(value: string) {
   const numericValue = Number.parseInt(value);
 
@@ -70,10 +65,43 @@ const AccordionRowContainer = styled(CentredFlexRowSpaceBetweenContainer)`
   margin: 10px 16px;
 `;
 
+enum RowTitle {
+  SigningKey = 'signingKey',
+  Account = 'account',
+  DeployHash = 'deployHash',
+  DeployType = 'deployType',
+  Delegator = 'delegator',
+  Validator = 'validator',
+  Recipient = 'recipient',
+  Amount = 'amount',
+  TransferId = 'transferId',
+  TransactionFee = 'transactionFee',
+  Timestamp = 'timestamp',
+  ChainName = 'chainName',
+  EntryPoint = 'entryPoint'
+}
+
 interface SignatureRequestPageProps {}
 
 export function SignatureRequestPage(props: SignatureRequestPageProps) {
   const { t } = useTranslation();
+
+  const rowTitles = {
+    [RowTitle.SigningKey]: t('Signing key'),
+    [RowTitle.Account]: t('Account'),
+    [RowTitle.DeployHash]: t('Deploy hash'),
+    [RowTitle.Delegator]: t('Delegator'),
+    [RowTitle.Validator]: t('Validator'),
+    [RowTitle.Recipient]: t('Recipient'),
+    [RowTitle.Amount]: t('Amount'),
+    [RowTitle.TransferId]: t('Transfer ID'),
+    [RowTitle.TransactionFee]: t('Transaction fee'),
+    [RowTitle.Timestamp]: t('Timestamp'),
+    [RowTitle.DeployType]: t('Deploy type'),
+    [RowTitle.ChainName]: t('Chain name'),
+    [RowTitle.EntryPoint]: t('Entry point')
+  };
+
   const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
   const testEntryPoint = searchParams.get('testEntryPoint');
@@ -131,7 +159,7 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
         <List
           rows={Object.entries(signatureRequest).map(([key, value]) => ({
             id: key,
-            label: keyToTitle(key),
+            label: rowTitles[key as RowTitle],
             value
           }))}
           renderRow={({ id, label, value }) => (
@@ -167,7 +195,7 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
                       weight="regular"
                       color="contentSecondary"
                     >
-                      {keyToTitle(key)}
+                      {rowTitles[key as RowTitle]}
                     </Typography>
                     {isKeyOfHashValue(key) ? (
                       <Hash
