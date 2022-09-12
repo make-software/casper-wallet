@@ -1,8 +1,10 @@
 import React, { useCallback } from 'react';
+import { useSelector } from 'react-redux';
+
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { closeActiveWindow } from '@src/background/close-window';
+import { closeActiveWindow } from '@background/close-window';
 import {
   ContentContainer,
   FooterButtonsContainer,
@@ -19,17 +21,33 @@ import {
   Typography
 } from '@libs/ui';
 
-import { casperDeployMock } from './mocked-data';
-import { DeployArguments, isKeyOfHashValue, SignatureRequest } from './types';
-import { emitSdkEventToAllActiveTabs } from '@src/content/sdk-event';
-import { signDeploy } from './sign-deploy';
-import { sdkMessage } from '@src/content/sdk-message';
-import { useSelector } from 'react-redux';
-import { selectVaultActiveAccount } from '@src/background/redux/vault/selectors';
+import {
+  DeployArguments,
+  DeployType,
+  isKeyOfHashValue,
+  isKeyOfPriceValue,
+  SignatureRequest
+} from '../types';
+import { emitSdkEventToAllActiveTabs } from '@content/sdk-event';
+import { signDeploy } from '../sign-deploy';
+import { sdkMessage } from '@content/sdk-message';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+import { useDeriveDataFromDeployRaw } from '../hooks/use-derive-data-from-deploy-raw';
+import { useMockedDeployData } from '../signature-request/hooks/use-mocked-deploy-data';
 
 function keyToTitle(key: string) {
   const spacedString = key.replace(/([A-Z]+|\d+)/g, ' $1');
   return `${spacedString[0].toUpperCase()}${spacedString.slice(1)}`;
+}
+
+function stringValueToNumberInStringWithSpaces(value: string) {
+  const numericValue = Number.parseInt(value);
+
+  if (Number.isNaN(numericValue)) {
+    throw new Error("Can't convert string value to number");
+  }
+
+  return numericValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 }
 
 const ListItemContainer = styled.div`
@@ -58,14 +76,16 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
   const { t } = useTranslation();
   const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
+  const testEntryPoint = searchParams.get('testEntryPoint');
 
-  if (!requestId) {
+  if (!requestId || !testEntryPoint) {
     throw Error('Missing search param');
   }
 
   const activeAccount = useSelector(selectVaultActiveAccount);
 
-  const casperDeploy = casperDeployMock;
+  const casperDeploy = useMockedDeployData(testEntryPoint);
+  const deployInfo = useDeriveDataFromDeployRaw(casperDeploy);
 
   const handleSign = useCallback(() => {
     if (activeAccount?.publicKey == null || activeAccount.secretKey == null) {
@@ -88,7 +108,12 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
 
   // @ts-ignore
   const signatureRequest: SignatureRequest = {
-    //TODO: should be taken from casper deploy
+    account: deployInfo.account,
+    deployHash: deployInfo.deployHash,
+    timestamp: deployInfo.timestamp,
+    transactionFee: deployInfo.payment,
+    chainName: deployInfo.chainName,
+    deployType: deployInfo.deployType as DeployType
   };
 
   const deployArguments: DeployArguments = {
@@ -114,11 +139,16 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
               <Typography type="body" weight="regular" color="contentSecondary">
                 {label}
               </Typography>
-              {isKeyOfHashValue(id) ? (
+              {isKeyOfHashValue(id) || isKeyOfPriceValue(id) ? (
                 <Hash
-                  value={value as string}
+                  value={
+                    isKeyOfPriceValue(id)
+                      ? stringValueToNumberInStringWithSpaces(value)
+                      : value
+                  }
                   variant={HashVariant.BodyHash}
                   color="contentPrimary"
+                  truncated={isKeyOfHashValue(id)}
                 />
               ) : (
                 <Typography type="body" weight="regular">
@@ -144,6 +174,7 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
                         value={value as string}
                         variant={HashVariant.BodyHash}
                         color="contentPrimary"
+                        truncated
                       />
                     ) : (
                       <Typography type="body" weight="regular">

@@ -1,5 +1,4 @@
-import { CLPublicKey, decodeBase16, CLPublicKeyTag } from 'casper-js-sdk';
-import { AsymmetricKey, Ed25519, Secp256K1 } from 'casper-js-sdk/dist/lib/Keys';
+import { CLPublicKey, decodeBase16, CLPublicKeyTag, Keys } from 'casper-js-sdk';
 
 export const signDeploy = (
   deployHash: Uint8Array,
@@ -10,14 +9,14 @@ export const signDeploy = (
   const publicKey = clPublicKey.value();
   const secretKey = decodeBase16(privateKeyHex);
 
-  let signingKey: AsymmetricKey;
+  let signingKey: Keys.AsymmetricKey;
   switch (clPublicKey.tag) {
     case CLPublicKeyTag.ED25519:
-      signingKey = new Ed25519({ publicKey, secretKey });
+      signingKey = new Keys.Ed25519({ publicKey, secretKey });
       break;
 
     case CLPublicKeyTag.SECP256K1:
-      signingKey = new Secp256K1(publicKey, secretKey);
+      signingKey = new Keys.Secp256K1(publicKey, secretKey);
       break;
 
     default:
@@ -33,4 +32,5 @@ export const signDeploy = (
   }
 
   return signature;
+  // return new Uint8Array([]);
 };
