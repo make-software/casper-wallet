@@ -46,15 +46,38 @@ function App() {
         <Button variant="contained" onClick={handleConnect}>
           {connectButtonText}
         </Button>
+        {/*
+          !!! TEMPORARY SOLUTION FOR DEMO REASON ONLY. SHOULD BE DELETED !!!
+          `recipientPublicKey` used as entry points keys for demo
+        */}
+        <Button
+          disabled={activePublicKey == null}
+          variant="contained"
+          onClick={() =>
+            activePublicKey && sign({ deploy: {} }, activePublicKey, 'delegate')
+          }
+        >
+          Signing Delegate Request
+        </Button>
         <Button
           disabled={activePublicKey == null}
           variant="contained"
           onClick={() =>
             activePublicKey &&
-            sign({ deploy: {} }, activePublicKey, 'someTargetPublicKeyHex')
+            sign({ deploy: {} }, activePublicKey, 'undelegate')
           }
         >
-          Signing Request
+          Signing Undelegate Request
+        </Button>
+        <Button
+          disabled={activePublicKey == null}
+          variant="contained"
+          onClick={() =>
+            activePublicKey &&
+            sign({ deploy: {} }, activePublicKey, 'redelegate')
+          }
+        >
+          Signing Redelegate Request
         </Button>
       </Row>
       {errorMessage && <div>{errorMessage}</div>}
