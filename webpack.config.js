@@ -93,7 +93,11 @@ const options = {
         exclude: /node_modules/
       },
       { test: /\.css$/i, use: ['style-loader', 'css-loader'] },
-      { test: /\.(ts|tsx)$/, loader: 'ts-loader', exclude: /node_modules/ },
+      {
+        test: /\.tsx?$/,
+        loader: 'ts-loader',
+        exclude: /node_modules/
+      },
       {
         test: /\.(js|jsx)$/,
         use: [
