@@ -24,9 +24,14 @@ const LinkWithIconContainer = styled.div`
 interface SubmenuBarProps {
   actionType: 'back' | 'close' | 'cancel';
   ActionGroup?: ReactElement;
+  onAction?: () => void;
 }
 
-export function HeaderSubmenuBar({ actionType, ActionGroup }: SubmenuBarProps) {
+export function HeaderSubmenuBar({
+  actionType,
+  ActionGroup,
+  onAction
+}: SubmenuBarProps) {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
@@ -36,7 +41,14 @@ export function HeaderSubmenuBar({ actionType, ActionGroup }: SubmenuBarProps) {
     case 'close':
       NavLink = (
         <Typography type="body" weight="semiBold">
-          <Link onClick={() => navigate(RouterPath.Home)} color="fillBlue">
+          <Link
+            onClick={
+              typeof onAction === 'function'
+                ? onAction
+                : () => navigate(RouterPath.Home)
+            }
+            color="fillBlue"
+          >
             <Trans t={t}>Close</Trans>
           </Link>
         </Typography>
@@ -46,7 +58,14 @@ export function HeaderSubmenuBar({ actionType, ActionGroup }: SubmenuBarProps) {
     case 'cancel':
       NavLink = (
         <Typography type="body" weight="semiBold">
-          <Link onClick={() => navigate(RouterPath.Home)} color="fillBlue">
+          <Link
+            onClick={
+              typeof onAction === 'function'
+                ? onAction
+                : () => navigate(RouterPath.Home)
+            }
+            color="fillBlue"
+          >
             <Trans t={t}>Cancel</Trans>
           </Link>
         </Typography>
@@ -58,13 +77,20 @@ export function HeaderSubmenuBar({ actionType, ActionGroup }: SubmenuBarProps) {
         <Typography type="body" weight="semiBold">
           <LinkWithIconContainer>
             <SvgIcon
-              onClick={() => navigate(-1)}
+              onClick={
+                typeof onAction === 'function' ? onAction : () => navigate(-1)
+              }
               src="assets/icons/chevron.svg"
               color="contentBlue"
               flipByAxis="Y"
               size={24}
             />
-            <Link onClick={() => navigate(-1)} color="fillBlue">
+            <Link
+              onClick={
+                typeof onAction === 'function' ? onAction : () => navigate(-1)
+              }
+              color="fillBlue"
+            >
               <Trans t={t}>Back</Trans>
             </Link>
           </LinkWithIconContainer>
