@@ -1,12 +1,21 @@
 import { Deploy } from 'casper-js-sdk/dist/lib/DeployUtil';
 
+export type ArgDict = { [key: string]: string | string[] };
+export type DeployType = 'Transfer Call' | 'Contract Call';
+
+export enum DeployTypeEnum {
+  TransferCall = 'Transfer Call',
+  ContractCall = 'Contract Call'
+}
+
 export type SignatureRequest = {
   signingKey: string;
   account: string;
   deployHash: string;
   timestamp: string;
   transactionFee: string;
-  deployType: 'Transfer Call' | 'Contract Call';
+  chainName: string;
+  deployType: DeployType;
 };
 
 export type DeployArguments = {
@@ -23,14 +32,20 @@ export const isKeyOfHashValue = (key: string) => {
     'signingKey',
     'account',
     'deployHash',
-    'transactionFee',
     'delegator',
     'validator',
-    'amount',
-    'recipient',
-    'transferId'
+    'recipient'
   ];
   return keysOfHashValues.includes(
+    key as keyof SignatureRequest | keyof DeployArguments
+  );
+};
+
+export const isKeyOfPriceValue = (key: string) => {
+  const keysOfPriceValues: (keyof SignatureRequest | keyof DeployArguments)[] =
+    ['amount', 'transferId', 'transactionFee'];
+
+  return keysOfPriceValues.includes(
     key as keyof SignatureRequest | keyof DeployArguments
   );
 };
