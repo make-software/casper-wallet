@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+
 import { BaseProps } from '../../types';
 import { useClickAway } from '../../hooks/use-click-away';
 
@@ -59,5 +60,3 @@ export function Accordion({
     </AccordionContainer>
   );
 }
-
-export default Accordion;
