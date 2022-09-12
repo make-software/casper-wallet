@@ -209,15 +209,6 @@ function UnlockedRouter() {
           />
         }
       />
-      <Route
-        path={RouterPath.SigningRequest}
-        element={
-          <Layout
-            Header={<PopupHeader withLock withMenu />}
-            Content={<SignatureRequestPage request={transferData} />}
-          />
-        }
-      />
     </Routes>
   );
 }
