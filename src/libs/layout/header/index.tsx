@@ -29,16 +29,6 @@ interface HeaderProps {
   SubmenuActionGroup?: ReactElement;
 }
 
-export function PopupHeaderWithoutRouter() {
-  return (
-    <HeaderContainer>
-      <LogoContainer>
-        <Logo />
-      </LogoContainer>
-    </HeaderContainer>
-  );
-}
-
 export function PopupHeader({
   withLock,
   withMenu,
