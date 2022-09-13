@@ -148,6 +148,35 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
     //TODO: should be taken from casper deploy
   };
 
+  function renderRowValue(id: string, value: string) {
+    if (isKeyOfHashValue(id)) {
+      return (
+        <Hash
+          value={value}
+          variant={HashVariant.BodyHash}
+          color="contentPrimary"
+          truncated
+        />
+      );
+    }
+
+    if (isKeyOfPriceValue(id)) {
+      return (
+        <Hash
+          value={stringValueToNumberInStringWithSpaces(value)}
+          variant={HashVariant.BodyHash}
+          color="contentPrimary"
+        />
+      );
+    }
+
+    return (
+      <Typography type="body" weight="regular">
+        {value}
+      </Typography>
+    );
+  }
+
   return (
     <PageContainer>
       <ContentContainer>
@@ -167,22 +196,7 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
               <Typography type="body" weight="regular" color="contentSecondary">
                 {label}
               </Typography>
-              {isKeyOfHashValue(id) || isKeyOfPriceValue(id) ? (
-                <Hash
-                  value={
-                    isKeyOfPriceValue(id)
-                      ? stringValueToNumberInStringWithSpaces(value)
-                      : value
-                  }
-                  variant={HashVariant.BodyHash}
-                  color="contentPrimary"
-                  truncated={isKeyOfHashValue(id)}
-                />
-              ) : (
-                <Typography type="body" weight="regular">
-                  {value}
-                </Typography>
-              )}
+              {renderRowValue(id, value)}
             </ListItemContainer>
           )}
           renderFooter={() => (
