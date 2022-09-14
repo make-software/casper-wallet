@@ -65,7 +65,7 @@ const AccordionRowContainer = styled(CentredFlexRowSpaceBetweenContainer)`
   margin: 10px 16px;
 `;
 
-enum RowTitle {
+enum RowLabel {
   SigningKey = 'signingKey',
   Account = 'account',
   DeployHash = 'deployHash',
@@ -86,20 +86,23 @@ interface SignatureRequestPageProps {}
 export function SignatureRequestPage(props: SignatureRequestPageProps) {
   const { t } = useTranslation();
 
-  const rowTitles = {
-    [RowTitle.SigningKey]: t('Signing key'),
-    [RowTitle.Account]: t('Account'),
-    [RowTitle.DeployHash]: t('Deploy hash'),
-    [RowTitle.Delegator]: t('Delegator'),
-    [RowTitle.Validator]: t('Validator'),
-    [RowTitle.Recipient]: t('Recipient'),
-    [RowTitle.Amount]: t('Amount'),
-    [RowTitle.TransferId]: t('Transfer ID'),
-    [RowTitle.TransactionFee]: t('Transaction fee'),
-    [RowTitle.Timestamp]: t('Timestamp'),
-    [RowTitle.DeployType]: t('Deploy type'),
-    [RowTitle.ChainName]: t('Chain name'),
-    [RowTitle.EntryPoint]: t('Entry point')
+  const labelDict: Record<
+    keyof SignatureRequest | keyof DeployArguments,
+    string
+  > = {
+    [RowLabel.SigningKey]: t('Signing key'),
+    [RowLabel.Account]: t('Account'),
+    [RowLabel.DeployHash]: t('Deploy hash'),
+    [RowLabel.Delegator]: t('Delegator'),
+    [RowLabel.Validator]: t('Validator'),
+    [RowLabel.Recipient]: t('Recipient'),
+    [RowLabel.Amount]: t('Amount'),
+    [RowLabel.TransferId]: t('Transfer ID'),
+    [RowLabel.TransactionFee]: t('Transaction fee'),
+    [RowLabel.Timestamp]: t('Timestamp'),
+    [RowLabel.DeployType]: t('Deploy type'),
+    [RowLabel.ChainName]: t('Chain name'),
+    [RowLabel.EntryPoint]: t('Entry point')
   };
 
   const searchParams = new URLSearchParams(document.location.search);
@@ -188,7 +191,7 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
         <List
           rows={Object.entries(signatureRequest).map(([key, value]) => ({
             id: key,
-            label: rowTitles[key as RowTitle],
+            label: labelDict[key as keyof typeof signatureRequest],
             value
           }))}
           renderRow={({ id, label, value }) => (
@@ -209,7 +212,7 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
                       weight="regular"
                       color="contentSecondary"
                     >
-                      {rowTitles[key as RowTitle]}
+                      {labelDict[key as keyof typeof deployArguments]}
                     </Typography>
                     {isKeyOfHashValue(key) ? (
                       <Hash
