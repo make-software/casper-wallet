@@ -2,11 +2,14 @@ import {
   AuctionManagerEntryPoint,
   casperDelegateDeploy,
   casperUndelegateDeploy,
-  casperRedelegateDeploy
+  casperRedelegateDeploy,
+  casperTransferDeploy
 } from '../../mocked-data';
 
-export function useMockedDeployData(testEntryPoint: string | null) {
+export function useMockedDeployData(testEntryPoint: string) {
   switch (testEntryPoint) {
+    case 'transfer':
+      return casperTransferDeploy;
     case AuctionManagerEntryPoint.delegate:
       return casperDelegateDeploy;
     case AuctionManagerEntryPoint.undelegate:
