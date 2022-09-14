@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { SvgIcon, Typography } from '@libs/ui';
+import { ContentColor, SvgIcon, Typography } from '@libs/ui';
 
 import { truncateKey } from './utils';
 
@@ -25,9 +25,16 @@ interface HashProps {
   variant: HashVariant;
   truncated?: boolean;
   withCopy?: boolean;
+  color?: ContentColor;
 }
 
-export function Hash({ value, variant, withCopy, truncated }: HashProps) {
+export function Hash({
+  value,
+  variant,
+  withCopy,
+  truncated,
+  color
+}: HashProps) {
   return (
     <HashContainer
       onClick={
@@ -38,7 +45,7 @@ export function Hash({ value, variant, withCopy, truncated }: HashProps) {
         asHash
         type={variant}
         weight="regular"
-        color="contentSecondary"
+        color={color || 'contentSecondary'}
       >
         {truncated ? truncateKey(value) : value}
       </Typography>

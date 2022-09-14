@@ -5,7 +5,7 @@ export const sdkMessageProxyEvents = {
   SDKResponseAction: 'CasperWalletProviderEvent:SDKResponseAction'
 };
 
-type Meta = { id: number };
+type Meta = { requestId: string };
 
 export const sdkMessage = {
   connectRequest: createAction('CasperWalletProvider:Connect')<string, Meta>(),
@@ -41,6 +41,18 @@ export const sdkMessage = {
   getVersionResponse: createAction('CasperWalletProvider:GetVersion:Response')<
     string,
     Meta
+  >(),
+  signRequest: createAction('CasperWalletProvider:Sign')<
+    {
+      deployBytes: Uint8Array;
+      signingPublicKeyHex: string;
+      targetPublicKeyHex: string | undefined;
+    },
+    Meta
+  >(),
+  signResponse: createAction('CasperWalletProvider:Sign:Response')<
+    { signature: Uint8Array },
+    Meta
   >()
 };
 
@@ -52,6 +64,6 @@ export function isSDKMessage(action?: {
 }): action is SdkMessage {
   return (
     typeof action?.type === 'string' &&
-    typeof (action.meta as Meta | undefined)?.id === 'number'
+    typeof (action.meta as Meta | undefined)?.requestId === 'string'
   );
 }

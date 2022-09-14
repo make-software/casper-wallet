@@ -20,8 +20,14 @@ const Row = styled(Container)({
 });
 
 function App() {
-  const { connectSigner, disconnect, activePublicKey, errorMessage, logs } =
-    useWalletService();
+  const {
+    connectSigner,
+    disconnect,
+    sign,
+    activePublicKey,
+    errorMessage,
+    logs
+  } = useWalletService();
   const handleConnect = activePublicKey ? disconnect : connectSigner;
 
   const statusText = activePublicKey
@@ -40,10 +46,47 @@ function App() {
         <Button variant="contained" onClick={handleConnect}>
           {connectButtonText}
         </Button>
+        {/*
+          !!! TEMPORARY SOLUTION FOR DEMO REASON ONLY. SHOULD BE DELETED !!!
+          `recipientPublicKey` used as entry points keys for demo
+        */}
+        <Button
+          disabled={activePublicKey == null}
+          variant="contained"
+          onClick={() =>
+            activePublicKey && sign({ deploy: {} }, activePublicKey, 'delegate')
+          }
+        >
+          Signing Delegate Request
+        </Button>
+        <Button
+          disabled={activePublicKey == null}
+          variant="contained"
+          onClick={() =>
+            activePublicKey &&
+            sign({ deploy: {} }, activePublicKey, 'undelegate')
+          }
+        >
+          Signing Undelegate Request
+        </Button>
+        <Button
+          disabled={activePublicKey == null}
+          variant="contained"
+          onClick={() =>
+            activePublicKey &&
+            sign({ deploy: {} }, activePublicKey, 'redelegate')
+          }
+        >
+          Signing Redelegate Request
+        </Button>
       </Row>
       {errorMessage && <div>{errorMessage}</div>}
       <div>
-        {logs.map(([log, payload], index) => <div key={index}>{log} {JSON.stringify(payload, null, 2)}]</div>)}
+        {logs.map(([log, payload], index) => (
+          <div key={index}>
+            {log} {JSON.stringify(payload, null, 2)}]
+          </div>
+        ))}
       </div>
     </Container>
   );

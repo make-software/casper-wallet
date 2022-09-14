@@ -12,7 +12,7 @@ import {
 
 import { Button, SiteFaviconBadge, List, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@connect-to-app/router';
-import { closeWindow } from '@connect-to-app/utils/closeWindow';
+import { closeActiveWindow } from '@src/background/close-window';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 
 const HeaderTextContent = styled.div`
@@ -115,7 +115,7 @@ export function ApproveConnectionPage({
             {selectedAccountNames.length > 1 ? t('accounts') : t('account')}
           </Trans>
         </Button>
-        <Button color="secondaryBlue" onClick={() => closeWindow()}>
+        <Button color="secondaryBlue" onClick={() => closeActiveWindow()}>
           <Trans t={t}>Cancel</Trans>
         </Button>
       </FooterButtonsContainer>

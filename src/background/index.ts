@@ -24,6 +24,7 @@ import {
   vaultUnlocked
 } from '@src/background/redux/vault/actions';
 import {
+  selectIsActiveAccountConnectedWithOrigin,
   selectIsAnyAccountConnectedWithOrigin,
   selectVaultAccounts,
   selectVaultAccountsNames,
@@ -67,7 +68,7 @@ browser.runtime.onMessage.addListener(
             if (accounts.length > 0) {
               openWindow({
                 purposeForOpening: PurposeForOpening.ConnectToApp,
-                origin: action.payload
+                query: { origin: action.payload }
               });
               success = true;
             }
@@ -96,6 +97,29 @@ browser.runtime.onMessage.addListener(
               success = true;
             }
             sendResponse(sdkMessage.disconnectResponse(success, action.meta));
+            break;
+          }
+
+          case getType(sdkMessage.signRequest): {
+            const isActiveAccountConnected =
+              selectIsActiveAccountConnectedWithOrigin(store.getState());
+
+            if (isActiveAccountConnected) {
+              const query: Record<string, string> = {
+                requestId: action.meta.requestId
+              };
+
+              // !!! TEMPORARY SOLUTION FOR DEMO REASON ONLY. SHOULD BE DELETED !!!
+              if (action.payload.targetPublicKeyHex != null) {
+                query.testEntryPoint = action.payload.targetPublicKeyHex;
+              }
+
+              openWindow({
+                purposeForOpening: PurposeForOpening.SignatureRequest,
+                query
+              });
+            }
+
             break;
           }
 

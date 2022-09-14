@@ -3,23 +3,22 @@ import 'mac-scrollbar/dist/mac-scrollbar.css';
 
 import React, { Suspense, useEffect, useState } from 'react';
 import { render } from 'react-dom';
-import { Provider as ReduxProvider } from 'react-redux';
-import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
+
+import { GlobalStyle, themeConfig } from '@libs/ui';
+
+import { App } from './app';
+import {
+  backgroundEvent,
+  BackgroundEvent,
+  PopupState
+} from '@background/background-events';
 import { isActionOf } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
-
-import { App } from '@connect-to-app/app';
-import { GlobalStyle, themeConfig } from '@libs/ui';
+import { signWindowInit } from '@background/redux/windowManagement/actions';
+import { createMainStoreReplica } from '@background/redux/utils';
 import { ErrorBoundary } from '@popup/error-boundary';
-
-import { createMainStoreReplica } from '../../background/redux/utils';
-import {
-  BackgroundEvent,
-  backgroundEvent,
-  PopupState
-} from '@src/background/background-events';
-import { connectWindowInit } from '../../background/redux/windowManagement/actions';
+import { Provider as ReduxProvider } from 'react-redux/es/exports';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
@@ -32,7 +31,7 @@ const Tree = () => {
       }
     }
     browser.runtime.onMessage.addListener(handleBackgroundMessage);
-    browser.runtime.sendMessage(connectWindowInit());
+    browser.runtime.sendMessage(signWindowInit());
 
     return () => {
       browser.runtime.onMessage.removeListener(handleBackgroundMessage);
@@ -51,9 +50,7 @@ const Tree = () => {
         <ThemeProvider theme={themeConfig}>
           <GlobalStyle />
           <ReduxProvider store={store}>
-            <HashRouter>
-              <App />
-            </HashRouter>
+            <App />
           </ReduxProvider>
         </ThemeProvider>
       </ErrorBoundary>
@@ -61,7 +58,4 @@ const Tree = () => {
   );
 };
 
-render(
-  <Tree />,
-  window.document.querySelector('#connect-to-app-app-container')
-);
+render(<Tree />, document.querySelector('#signature-request-app-container'));

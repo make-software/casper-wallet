@@ -57,6 +57,13 @@ const options = {
       'connect-to-app',
       'index.tsx'
     ),
+    signatureRequest: path.join(
+      __dirname,
+      'src',
+      'apps',
+      'signature-request',
+      'index.tsx'
+    ),
     background: path.join(__dirname, 'src', 'background', 'index.ts'),
     contentScript: path.join(__dirname, 'src', 'content', 'index.ts'),
     sdk: path.join(__dirname, 'src', 'content', 'sdk.ts')
@@ -86,7 +93,11 @@ const options = {
         exclude: /node_modules/
       },
       { test: /\.css$/i, use: ['style-loader', 'css-loader'] },
-      { test: /\.(ts|tsx)$/, loader: 'ts-loader', exclude: /node_modules/ },
+      {
+        test: /\.tsx?$/,
+        loader: 'ts-loader',
+        exclude: /node_modules/
+      },
       {
         test: /\.(js|jsx)$/,
         use: [
@@ -126,7 +137,7 @@ const options = {
                 name: pkg.name,
                 version: pkg.version,
                 author: pkg.author,
-                description: pkg.description,
+                description: pkg.description
               })
             );
           }
@@ -224,6 +235,18 @@ const options = {
       ),
       filename: 'connect-to-app.html',
       chunks: ['connectToApp'],
+      cache: false
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(
+        __dirname,
+        'src',
+        'apps',
+        'signature-request',
+        'index.html'
+      ),
+      filename: 'signature-request.html',
+      chunks: ['signatureRequest'],
       cache: false
     }),
     new webpack.ProvidePlugin({

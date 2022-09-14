@@ -8,10 +8,8 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 const Container = styled.div`
   height: 56px;
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
-
   display: flex;
   justify-content: space-between;
-
   padding: ${({ theme }) => theme.padding[1.6]};
   border-bottom: 0.5px solid ${({ theme }) => theme.color.borderPrimary};
 `;

@@ -8,7 +8,7 @@ import {
   TextContainer
 } from '@src/libs/layout/containers';
 import { Button, Typography } from '@libs/ui';
-import { closeWindow } from '@import-account-with-file/utils/close-window';
+import { closeActiveWindow } from '@src/background/close-window';
 
 export function ImportAccountWithFileSuccessContentPage() {
   const { t } = useTranslation();
@@ -26,7 +26,7 @@ export function ImportAccountWithFileSuccessContentPage() {
         </Typography>
       </TextContainer>
       <FooterButtonsAbsoluteContainer>
-        <Button onClick={() => closeWindow()}>
+        <Button onClick={() => closeActiveWindow()}>
           <Trans t={t}>Done</Trans>
         </Button>
       </FooterButtonsAbsoluteContainer>
