@@ -115,7 +115,7 @@ browser.runtime.onMessage.addListener(
               }
 
               openWindow({
-                purposeForOpening: PurposeForOpening.SigningRequest,
+                purposeForOpening: PurposeForOpening.SignatureRequest,
                 query
               });
             }
