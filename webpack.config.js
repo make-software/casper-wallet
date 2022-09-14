@@ -57,7 +57,7 @@ const options = {
       'connect-to-app',
       'index.tsx'
     ),
-    signingRequest: path.join(
+    signatureRequest: path.join(
       __dirname,
       'src',
       'apps',
@@ -245,8 +245,8 @@ const options = {
         'signature-request',
         'index.html'
       ),
-      filename: 'signing-request.html',
-      chunks: ['signingRequest'],
+      filename: 'signature-request.html',
+      chunks: ['signatureRequest'],
       cache: false
     }),
     new webpack.ProvidePlugin({
