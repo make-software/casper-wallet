@@ -1,7 +1,6 @@
 import '@libs/i18n/i18n';
 import 'mac-scrollbar/dist/mac-scrollbar.css';
 
-import { GlobalScrollbar } from 'mac-scrollbar';
 import React, { Suspense, useEffect, useState } from 'react';
 import { render } from 'react-dom';
 import { Provider as ReduxProvider } from 'react-redux';
@@ -51,7 +50,6 @@ const Tree = () => {
       <ErrorBoundary>
         <ThemeProvider theme={themeConfig}>
           <GlobalStyle />
-          <GlobalScrollbar />
           <ReduxProvider store={store}>
             <HashRouter>
               <App />
