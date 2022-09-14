@@ -5,3 +5,4 @@ export const windowIdCleared = createAction('WINDOW_ID_CLEARED')<void>();
 export const popupWindowInit = createAction('POPUP_WINDOW_INIT')<void>();
 export const connectWindowInit = createAction('CONNECT_WINDOW_INIT')<void>();
 export const importWindowInit = createAction('IMPORT_WINDOW_INIT')<void>();
+export const signWindowInit = createAction('SIGN_WINDOW_INIT')<void>();

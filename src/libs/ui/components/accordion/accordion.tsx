@@ -5,7 +5,6 @@ import { BaseProps } from '../../types';
 import { useClickAway } from '../../hooks/use-click-away';
 
 export interface AccordionProps extends BaseProps {
-  backgroundColor?: string;
   children: (renderProps: RenderProps) => React.ReactNode | string;
   renderContent: (renderProps: RenderProps) => React.ReactNode | string;
   disableClickAway?: boolean;
@@ -17,12 +16,11 @@ interface RenderProps {
 
 const AccordionContainer = styled.div<{
   isOpen: boolean;
-  backgroundColor?: string;
-}>(({ isOpen, backgroundColor = 'transparent' }) => ({
+}>(({ isOpen }) => ({
   display: 'flex',
   flexDirection: 'column',
 
-  background: isOpen ? backgroundColor : 'transparent',
+  background: 'transparent',
   width: '100%'
 }));
 

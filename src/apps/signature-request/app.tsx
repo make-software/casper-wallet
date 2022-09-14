@@ -6,9 +6,6 @@ import { SignatureRequestPage } from './signature-request';
 
 export function App() {
   return (
-    <LayoutWindow
-      Header={<PopupHeader withoutRouter />}
-      Content={<SignatureRequestPage />}
-    />
+    <LayoutWindow Header={<PopupHeader />} Content={<SignatureRequestPage />} />
   );
 }

@@ -23,30 +23,16 @@ const SpaceBetweenContainer = styled(CentredFlexRow)`
 interface HeaderProps {
   withLock?: boolean;
   withMenu?: boolean;
-  withoutRouter?: boolean;
   submenuActionType?: SubmenuActionType;
-  submenuOnAction?: () => void;
   SubmenuActionGroup?: ReactElement;
 }
 
 export function PopupHeader({
   withLock,
   withMenu,
-  withoutRouter,
   submenuActionType,
-  submenuOnAction,
   SubmenuActionGroup
 }: HeaderProps) {
-  if (withoutRouter) {
-    return (
-      <HeaderContainer>
-        <LogoContainer>
-          <Logo />
-        </LogoContainer>
-      </HeaderContainer>
-    );
-  }
-
   return (
     <>
       <HeaderContainer>
@@ -61,7 +47,6 @@ export function PopupHeader({
       {submenuActionType && (
         <HeaderSubmenuBar
           actionType={submenuActionType}
-          onAction={submenuOnAction}
           ActionGroup={SubmenuActionGroup}
         />
       )}

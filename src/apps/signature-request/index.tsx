@@ -15,7 +15,7 @@ import {
 } from '@background/background-events';
 import { isActionOf } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
-import { connectWindowInit } from '@background/redux/windowManagement/actions';
+import { signWindowInit } from '@background/redux/windowManagement/actions';
 import { createMainStoreReplica } from '@background/redux/utils';
 import { ErrorBoundary } from '@popup/error-boundary';
 import { Provider as ReduxProvider } from 'react-redux/es/exports';
@@ -31,7 +31,7 @@ const Tree = () => {
       }
     }
     browser.runtime.onMessage.addListener(handleBackgroundMessage);
-    browser.runtime.sendMessage(connectWindowInit());
+    browser.runtime.sendMessage(signWindowInit());
 
     return () => {
       browser.runtime.onMessage.removeListener(handleBackgroundMessage);
