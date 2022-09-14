@@ -65,22 +65,6 @@ const AccordionRowContainer = styled(CentredFlexRowSpaceBetweenContainer)`
   margin: 10px 16px;
 `;
 
-enum RowLabel {
-  SigningKey = 'signingKey',
-  Account = 'account',
-  DeployHash = 'deployHash',
-  DeployType = 'deployType',
-  Delegator = 'delegator',
-  Validator = 'validator',
-  Recipient = 'recipient',
-  Amount = 'amount',
-  TransferId = 'transferId',
-  TransactionFee = 'transactionFee',
-  Timestamp = 'timestamp',
-  ChainName = 'chainName',
-  EntryPoint = 'entryPoint'
-}
-
 interface SignatureRequestPageProps {}
 
 export function SignatureRequestPage(props: SignatureRequestPageProps) {
@@ -90,19 +74,19 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
     keyof SignatureRequest | keyof DeployArguments,
     string
   > = {
-    [RowLabel.SigningKey]: t('Signing key'),
-    [RowLabel.Account]: t('Account'),
-    [RowLabel.DeployHash]: t('Deploy hash'),
-    [RowLabel.Delegator]: t('Delegator'),
-    [RowLabel.Validator]: t('Validator'),
-    [RowLabel.Recipient]: t('Recipient'),
-    [RowLabel.Amount]: t('Amount'),
-    [RowLabel.TransferId]: t('Transfer ID'),
-    [RowLabel.TransactionFee]: t('Transaction fee'),
-    [RowLabel.Timestamp]: t('Timestamp'),
-    [RowLabel.DeployType]: t('Deploy type'),
-    [RowLabel.ChainName]: t('Chain name'),
-    [RowLabel.EntryPoint]: t('Entry point')
+    signingKey: t('Signing key'),
+    account: t('Account'),
+    deployHash: t('Deploy hash'),
+    delegator: t('Delegator'),
+    validator: t('Validator'),
+    recipient: t('Recipient'),
+    amount: t('Amount'),
+    transferId: t('Transfer ID'),
+    transactionFee: t('Transaction fee'),
+    timestamp: t('Timestamp'),
+    deployType: t('Deploy type'),
+    chainName: t('Chain name'),
+    entryPoint: t('Entry point')
   };
 
   const searchParams = new URLSearchParams(document.location.search);
