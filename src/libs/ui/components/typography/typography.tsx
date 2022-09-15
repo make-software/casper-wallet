@@ -12,6 +12,7 @@ export type TypographyType =
   | 'caption'
   | 'label'
   | 'CSPR'
+  | 'listSubtext'
   | 'form-field-status'; // TODO: Temporary name. Make a better name
 export type TypographyWeight =
   | 'regular'
@@ -119,6 +120,14 @@ const StyledTypography = styled('span').withConfig({
               ? theme.typography.fontWeight.light
               : theme.typography.fontWeight.bold
         };
+
+      case 'listSubtext':
+        return {
+          ...body,
+          fontSize: '1.2rem',
+          lineHeight: '1.6rem'
+        };
+
       case 'form-field-status':
         return {
           ...body,

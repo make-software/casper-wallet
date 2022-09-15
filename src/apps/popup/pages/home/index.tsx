@@ -4,18 +4,15 @@ import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
 import styled, { css } from 'styled-components';
 
-import { PurposeForOpening, useWindowManager } from '@src/hooks';
-
 import { ContentContainer } from '@src/libs/layout/containers';
 import {
   Button,
-  Checkbox,
   Hash,
+  Link,
   HashVariant,
   SvgIcon,
   PageTile,
-  Typography,
-  List
+  Typography
 } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -23,11 +20,14 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 import {
   selectIsActiveAccountConnectedWithOrigin,
   selectConnectedAccountsWithOrigin,
-  selectVaultAccounts,
   selectVaultActiveAccount,
-  selectVaultActiveOrigin
+  selectVaultActiveOrigin,
+  selectCountOfAccounts
 } from '@src/background/redux/vault/selectors';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
+import { SubmenuBarContainer } from '@layout/header/header-submenu-bar';
+
+import { ConnectionStatusBadge } from './components/connection-status-badge';
 
 // Account info
 
@@ -65,21 +65,6 @@ export const ListItemContainer = styled.div`
   height: 100%;
 `;
 
-const ListItemClickableContainer = styled.div`
-  display: flex;
-
-  width: 100%;
-
-  cursor: pointer;
-
-  padding-top: 14px;
-  padding-bottom: 14px;
-  padding-left: 18px;
-  & > * + * {
-    padding-left: 18px;
-  }
-`;
-
 const LeftAlignedFlexColumn = styled.div`
   display: flex;
   flex-direction: column;
@@ -108,29 +93,25 @@ export const ListItemBurgerMenuContainer = styled.div`
 
 const ButtonsContainer = styled.div`
   display: flex;
+  flex-direction: column;
   justify-content: space-around;
   gap: 16px;
 
   width: 100%;
 
-  padding: ${({ theme }) => theme.padding[1.6]};
+  margin-top: 16px;
 `;
 
 export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  const { openWindow } = useWindowManager();
   const activeOrigin = useSelector(selectVaultActiveOrigin);
-  const {
-    changeActiveAccountWithEvent: changeActiveAccount,
-    disconnectAccountWithEvent: disconnectAccount
-  } = useAccountManager();
+  const { disconnectAccountWithEvent: disconnectAccount } = useAccountManager();
   const isActiveAccountConnected = useSelector(
     selectIsActiveAccountConnectedWithOrigin
   );
 
-  const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const connectedAccounts = useSelector((state: RootState) =>
     selectConnectedAccountsWithOrigin(state)
@@ -148,15 +129,11 @@ export function HomePageContent() {
     }
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
 
-  const accountListRows = accounts.map(account => ({
-    ...account,
-    id: account.name
-  }));
-
   return (
     <ContentContainer>
       {activeAccount && (
         <PageTile>
+          <ConnectionStatusBadge isConnected={isActiveAccountConnected} />
           <AvatarContainer>
             <SvgIcon src="assets/icons/default-avatar.svg" size={120} />
           </AvatarContainer>
@@ -168,7 +145,7 @@ export function HomePageContent() {
               value={activeAccount.publicKey}
               variant={HashVariant.CaptionHash}
               truncated
-              withCopy
+              withCopyOnClick
             />
           </NameAndAddressContainer>
           <BalanceContainer>
@@ -184,107 +161,74 @@ export function HomePageContent() {
               $30,294.34
             </Typography>
           </BalanceContainer>
-          {isActiveAccountConnected ? (
+          <ButtonsContainer>
+            {isActiveAccountConnected ? (
+              <Button
+                disabled={activeOrigin == null}
+                onClick={() =>
+                  activeOrigin &&
+                  disconnectAccount(activeAccount.name, activeOrigin)
+                }
+                color="secondaryBlue"
+              >
+                <Trans t={t}>Disconnect</Trans>
+              </Button>
+            ) : (
+              <Button
+                disabled={activeOrigin == null}
+                onClick={handleConnectAccount}
+                color="primaryRed"
+              >
+                <Trans t={t}>Connect</Trans>
+              </Button>
+            )}
             <Button
-              disabled={activeOrigin == null}
-              onClick={() =>
-                activeOrigin &&
-                disconnectAccount(activeAccount.name, activeOrigin)
-              }
               color="secondaryBlue"
+              onClick={() =>
+                navigate(
+                  RouterPath.AccountSettings.replace(
+                    ':accountName',
+                    activeAccount.name
+                  )
+                )
+              }
             >
-              <Trans t={t}>Disconnect</Trans>
+              <Trans t={t}>Manage account</Trans>
             </Button>
-          ) : (
-            <Button
-              disabled={activeOrigin == null}
-              onClick={handleConnectAccount}
-            >
-              <Trans t={t}>Connect</Trans>
-            </Button>
-          )}
+          </ButtonsContainer>
         </PageTile>
       )}
-      {accountListRows.length > 0 && (
-        <List
-          headerLabel={t('Accounts list')}
-          rows={accountListRows}
-          marginLeftForItemSeparatorLine={60}
-          renderRow={account => (
-            <ListItemContainer key={account.name}>
-              <ListItemClickableContainer
-                onClick={() => changeActiveAccount(account.name)}
-              >
-                <Checkbox
-                  checked={
-                    activeAccount ? activeAccount.name === account.name : false
-                  }
-                />
-                <AccountNameWithHashListItemContainer>
-                  <Typography
-                    type="body"
-                    weight={
-                      activeAccount && activeAccount.name === account.name
-                        ? 'semiBold'
-                        : 'regular'
-                    }
-                  >
-                    {account.name}
-                  </Typography>
-                  <Hash
-                    value={account.publicKey}
-                    variant={HashVariant.CaptionHash}
-                    truncated
-                  />
-                </AccountNameWithHashListItemContainer>
-
-                <AccountBalanceListItemContainer>
-                  <Typography type="body" weight="regular" monospace>
-                    2.1M
-                  </Typography>
-                  <Typography
-                    type="body"
-                    weight="regular"
-                    monospace
-                    color="contentSecondary"
-                  >
-                    CSPR
-                  </Typography>
-                </AccountBalanceListItemContainer>
-              </ListItemClickableContainer>
-              <ListItemBurgerMenuContainer
-                onClick={() =>
-                  navigate(
-                    RouterPath.AccountSettings.replace(
-                      ':accountName',
-                      account.name
-                    )
-                  )
-                }
-              >
-                <SvgIcon src="assets/icons/more.svg" size={24} />
-              </ListItemBurgerMenuContainer>
-            </ListItemContainer>
-          )}
-          renderFooter={() => (
-            <ButtonsContainer>
-              <Button
-                color="secondaryBlue"
-                onClick={() =>
-                  openWindow({
-                    purposeForOpening: PurposeForOpening.ImportAccount
-                  }).catch(e => console.error(e))
-                }
-              >
-                <Trans t={t}>Import</Trans>
-              </Button>
-              <Button color="secondaryBlue">
-                <Trans t={t}>Create</Trans>
-              </Button>
-            </ButtonsContainer>
-          )}
-        />
-      )}
     </ContentContainer>
+  );
+}
+
+export function HomePageSubmenuActionGroup() {
+  const navigate = useTypedNavigate();
+  const { t } = useTranslation();
+
+  const countOfAccounts = useSelector(selectCountOfAccounts);
+
+  return (
+    <SubmenuBarContainer>
+      <LeftAlignedFlexColumn>
+        <Typography type="body" weight="regular">
+          <Trans t={t}>Accounts list</Trans>
+        </Typography>
+
+        <Typography
+          type="listSubtext"
+          weight="regular"
+          color="contentSecondary"
+        >
+          {countOfAccounts} {countOfAccounts > 1 ? t('accounts') : t('account')}
+        </Typography>
+      </LeftAlignedFlexColumn>
+
+      <Typography type="body" weight="bold">
+        <Link color="fillBlue" onClick={() => navigate(RouterPath.AccountList)}>
+          <Trans t={t}>Switch account</Trans>
+        </Link>
+      </Typography>
+    </SubmenuBarContainer>
   );
 }

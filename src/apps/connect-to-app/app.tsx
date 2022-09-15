@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { RouterPath } from '@connect-to-app/router';
-import { LayoutWindow, PopupHeader } from '@src/libs/layout';
+import { HeaderSubmenuBar, LayoutWindow, PopupHeader } from '@src/libs/layout';
 import { AccountsSelectionPage } from '@connect-to-app/pages/accounts-selection';
 import { ApproveConnectionPage } from '@connect-to-app/pages/approve-connection';
 import { ConnectingPage } from '@connect-to-app/pages/connecting';
@@ -40,7 +40,13 @@ export function App() {
         path={RouterPath.SelectAccountsToConnect}
         element={
           <LayoutWindow
-            Header={<PopupHeader submenuActionType="cancel" />}
+            Header={
+              <PopupHeader
+                renderActionGroup={() => (
+                  <HeaderSubmenuBar actionType="cancel" />
+                )}
+              />
+            }
             Content={
               <AccountsSelectionPage
                 selectedAccountNames={selectedAccountNames}
@@ -56,7 +62,11 @@ export function App() {
         path={RouterPath.ApproveConnection}
         element={
           <LayoutWindow
-            Header={<PopupHeader submenuActionType="back" />}
+            Header={
+              <PopupHeader
+                renderActionGroup={() => <HeaderSubmenuBar actionType="back" />}
+              />
+            }
             Content={
               <ApproveConnectionPage
                 selectedAccountNames={selectedAccountNames}

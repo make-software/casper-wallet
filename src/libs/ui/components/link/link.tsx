@@ -37,6 +37,7 @@ type Ref = HTMLAnchorElement;
 const StyledLink = styled.a<LinkProps>(({ theme, color }) => {
   const stateColor = getStateColor(color);
   return {
+    textDecoration: 'none',
     cursor: 'pointer',
     color: stateColor.color,
     '&:hover > *': {
@@ -49,7 +50,7 @@ const StyledLink = styled.a<LinkProps>(({ theme, color }) => {
 });
 
 export const Link = React.forwardRef<Ref, LinkProps>(function Link(props, ref) {
-  return <StyledLink ref={ref} target="_blank" {...props} />;
+  return <StyledLink ref={ref} target={props.target} {...props} />;
 });
 
 export default Link;

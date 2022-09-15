@@ -5,13 +5,15 @@ import { useTranslation, Trans } from 'react-i18next';
 import { Link, Typography, SvgIcon } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-const Container = styled.div`
-  height: 56px;
-  background-color: ${({ theme }) => theme.color.backgroundPrimary};
+export const SubmenuBarContainer = styled.div`
   display: flex;
   justify-content: space-between;
-  padding: ${({ theme }) => theme.padding[1.6]};
+  align-items: center;
+
+  height: 56px;
+  background-color: ${({ theme }) => theme.color.backgroundPrimary};
   border-bottom: 0.5px solid ${({ theme }) => theme.color.borderPrimary};
+  padding: 8px ${({ theme }) => theme.padding[1.6]};
 `;
 
 const LinkWithIconContainer = styled.div`
@@ -75,9 +77,9 @@ export function HeaderSubmenuBar({ actionType, ActionGroup }: SubmenuBarProps) {
   }
 
   return (
-    <Container>
+    <SubmenuBarContainer>
       {NavLink}
       {ActionGroup && ActionGroup}
-    </Container>
+    </SubmenuBarContainer>
   );
 }

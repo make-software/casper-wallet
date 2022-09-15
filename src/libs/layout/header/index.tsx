@@ -1,12 +1,10 @@
-import React, { ReactElement } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { HeaderContainer, Logo, LogoContainer } from '@src/libs/layout';
 // import { HeaderConnectionStatus } from '@src/libs/layout/header/header-connection-status';
 
 import { HeaderActions } from './header-actions';
-import { HeaderSubmenuBar } from './header-submenu-bar';
-import { SubmenuActionType } from '../types';
 
 const CentredFlexRow = styled.div`
   display: flex;
@@ -23,15 +21,13 @@ const SpaceBetweenContainer = styled(CentredFlexRow)`
 interface HeaderProps {
   withLock?: boolean;
   withMenu?: boolean;
-  submenuActionType?: SubmenuActionType;
-  SubmenuActionGroup?: ReactElement;
+  renderActionGroup?: () => JSX.Element;
 }
 
 export function PopupHeader({
   withLock,
   withMenu,
-  submenuActionType,
-  SubmenuActionGroup
+  renderActionGroup
 }: HeaderProps) {
   return (
     <>
@@ -44,12 +40,9 @@ export function PopupHeader({
           <HeaderActions withMenu={withMenu} withLock={withLock} />
         </SpaceBetweenContainer>
       </HeaderContainer>
-      {submenuActionType && (
-        <HeaderSubmenuBar
-          actionType={submenuActionType}
-          ActionGroup={SubmenuActionGroup}
-        />
-      )}
+      {renderActionGroup && renderActionGroup()}
     </>
   );
 }
+
+export * from './header-submenu-bar';
