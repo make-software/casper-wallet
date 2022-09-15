@@ -14,12 +14,13 @@ export enum AuctionManagerEntryPoint {
 }
 
 const config = {
-  delegate_cost: '2500000000',
-  undelegate_cost: '10000',
-  redelegate_cost: '0',
+  delegate_cost: '2500000000', // in motes
+  undelegate_cost: '10000', // in motes
+  redelegate_cost: '0', // in motes
   network_name: 'casper-test',
   auction_manager_contract_hash:
-    '93d923e336b20a4c4ca14d592b60e5bd3fe330775618290104f9beb326db7ae2'
+    '93d923e336b20a4c4ca14d592b60e5bd3fe330775618290104f9beb326db7ae2',
+  transfer_cost: '100000000' // in motes
 };
 
 const getAuctionManagerDeployCost = (entryPoint: AuctionManagerEntryPoint) => {
@@ -76,6 +77,32 @@ const makeAuctionManagerDeploy = (
   return DeployUtil.makeDeploy(deployParams, session, payment);
 };
 
+export const makeNativeTransferDeploy = (
+  senderPublicKeyHex: string,
+  recipientPublicKeyHex: string,
+  amountMotes: string,
+  transferIdMemo: string
+) => {
+  const senderPublicKey = CLPublicKey.fromHex(senderPublicKeyHex);
+  const recipientPublicKey = CLPublicKey.fromHex(recipientPublicKeyHex);
+
+  const deployParams = new DeployUtil.DeployParams(
+    senderPublicKey,
+    config.network_name
+  );
+
+  const session = DeployUtil.ExecutableDeployItem.newTransfer(
+    amountMotes,
+    recipientPublicKey,
+    undefined,
+    transferIdMemo
+  );
+
+  const payment = DeployUtil.standardPayment(config.transfer_cost);
+
+  return DeployUtil.makeDeploy(deployParams, session, payment);
+};
+
 export const casperDelegateDeploy = makeAuctionManagerDeploy(
   AuctionManagerEntryPoint.delegate,
   '01f9631111f51219ac0b96ce69ffd9f8fc274a744a8e3e77cd7b18f8b5d4bcf39a',
@@ -98,4 +125,11 @@ export const casperRedelegateDeploy = makeAuctionManagerDeploy(
   `0106ca7c39cd272dbf21a86eeb3b36b7c26e2e9b94af64292419f7862936bca2ca`, // MAKE Stake 10% [testnet],
   null,
   '500000'
+);
+
+export const casperTransferDeploy = makeNativeTransferDeploy(
+  '01f9631111f51219ac0b96ce69ffd9f8fc274a744a8e3e77cd7b18f8b5d4bcf39a',
+  '0162e0fd5f95dbaa1ddf4d39b7d268f91ca2cf055fb821ea4d6e11e2da82541e62',
+  '500000',
+  '73195849643'
 );

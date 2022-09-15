@@ -122,14 +122,19 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
   ]);
 
   // @ts-ignore
-  const signatureRequest: SignatureRequest = {
-    account: deployInfo.account,
-    deployHash: deployInfo.deployHash,
-    timestamp: deployInfo.timestamp,
-    transactionFee: deployInfo.payment,
-    chainName: deployInfo.chainName,
-    deployType: deployInfo.deployType as DeployType
-  };
+  let signatureRequest: SignatureRequest = {};
+
+  if (activeAccount != null) {
+    signatureRequest = {
+      signingKey: activeAccount.publicKey,
+      account: deployInfo.account,
+      deployHash: deployInfo.deployHash,
+      timestamp: deployInfo.timestamp,
+      transactionFee: deployInfo.payment,
+      chainName: deployInfo.chainName,
+      deployType: deployInfo.deployType as DeployType
+    };
+  }
 
   const deployArguments: DeployArguments = {
     //TODO: should be taken from casper deploy

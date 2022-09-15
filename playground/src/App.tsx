@@ -79,6 +79,15 @@ function App() {
         >
           Signing Redelegate Request
         </Button>
+        <Button
+          disabled={activePublicKey == null}
+          variant="contained"
+          onClick={() =>
+            activePublicKey && sign({ deploy: {} }, activePublicKey, 'transfer')
+          }
+        >
+          Signing Transfer Request
+        </Button>
       </Row>
       {errorMessage && <div>{errorMessage}</div>}
       <div>
