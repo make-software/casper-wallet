@@ -2,7 +2,7 @@ import * as chrome from 'selenium-webdriver/chrome';
 import { Builder, ThenableWebDriver, Browser } from 'selenium-webdriver';
 
 import { WebDriverObject } from './types';
-import { ExtensionBuildPath, extensionName } from '../../constants';
+import { ExtensionBuildPath, extensionName } from './constants';
 
 export class ChromeDriver {
   _driver: ThenableWebDriver;

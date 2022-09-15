@@ -12,7 +12,7 @@ coverage
 output
 
 # production
-build
+dist
 
 # misc
 .DS_Store
@@ -21,6 +21,7 @@ build
 .env.test.local
 .env.production.local
 .history
+.parcel-cache
 .xcode-project
 
 # secrets

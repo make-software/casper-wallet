@@ -6,7 +6,7 @@ import { ThenableWebDriver, Browser } from 'selenium-webdriver';
 import { Builder, until, By } from 'selenium-webdriver';
 
 import { WebDriverObject } from './types';
-import { ExtensionBuildPath } from '../../constants';
+import { ExtensionBuildPath } from './constants';
 
 const TEMP_PROFILE_PATH_PREFIX = path.join(
   os.tmpdir(),

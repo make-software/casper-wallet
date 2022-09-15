@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES6",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": false,
     "skipLibCheck": true,
@@ -28,6 +28,6 @@
       "~testHelpers/*": ["__testHelpers__/*"]
     }
   },
-  "include": ["src"],
-  "exclude": ["build", "output", "node_modules"]
+  "include": ["src", "deps/asn1.js"],
+  "exclude": ["dist", "scripts", "deps"]
 }

@@ -1,32 +1,33 @@
 {
   "manifest_version": 2,
+  "permissions": ["storage", "activeTab"],
+  "content_security_policy": "default-src 'self'; frame-ancestors 'none';",
   "icons": {
-    "16": "logo16.png",
-    "64": "logo64.png",
-    "128": "logo128.png",
-    "192": "logo192.png"
+    "16": "assets/img/logo16.png",
+    "64": "assets/img/logo64.png",
+    "128": "assets/img/logo128.png",
+    "192": "assets/img/logo192.png"
   },
-  "permissions": ["notifications", "storage", "tabs"],
+  "browser_action": {
+    "default_popup": "./apps/popup/index.html",
+    "default_icon": {
+      "16": "assets/img/logo16.png",
+      "64": "assets/img/logo64.png",
+      "128": "assets/img/logo128.png",
+      "192": "assets/img/logo192.png"
+    }
+  },
   "background": {
-    "scripts": ["./background.bundle.js"],
+    "scripts": ["./background/index.ts"],
     "persistent": true
   },
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["./contentScript.bundle.js", "./sdk.bundle.js"],
+      "js": ["./content/index.ts"],
       "run_at": "document_start",
       "all_frames": true
     }
   ],
-  "browser_action": {
-    "default_popup": "popup.html",
-    "default_icon": {
-      "16": "logo16.png",
-      "64": "logo64.png",
-      "128": "logo128.png",
-      "192": "logo192.png"
-    }
-  },
-  "web_accessible_resources": ["logo64.png", "sdk.bundle.js"]
+  "web_accessible_resources": ["./sdk.bundle.js"]
 }
