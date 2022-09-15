@@ -15,6 +15,7 @@ import { LinkType, HeaderSubmenuBarNavLink } from '@libs/layout';
 import {
   Button,
   Hash,
+  Link,
   HashVariant,
   SvgIcon,
   PageTile,
@@ -31,6 +32,7 @@ import {
   selectCountOfAccounts
 } from '@src/background/redux/vault/selectors';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
+import { SubmenuBarContainer } from '@layout/header/header-submenu-bar';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 

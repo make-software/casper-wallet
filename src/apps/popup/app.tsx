@@ -135,8 +135,8 @@ function UnlockedRouter() {
           <Layout
             Header={
               <PopupHeader
-                withMenu
                 withLock
+                withMenu
                 withConnectionStatus
                 renderSubmenuBarItems={() => (
                   <HomePageHeaderSubmenuItems linkType="switchAccount" />
@@ -186,14 +186,29 @@ function UnlockedRouter() {
         }
       />
       <Route
+        path={RouterPath.AccountList}
+        element={
+          <Layout
+            Header={
+              <PopupHeader
+                withLock
+                withMenu
+                renderActionGroup={() => <HeaderSubmenuBar actionType="back" />}
+              />
+            }
+            Content={<AccountListPage />}
+          />
+        }
+      />
+      <Route
         path={RouterPath.Timeout}
         element={
           <Layout
             Header={
               <PopupHeader
-                withConnectionStatus
-                withMenu
                 withLock
+                withMenu
+                withConnectionStatus
                 renderSubmenuBarItems={() => (
                   <HeaderSubmenuBarNavLink linkType="close" />
                 )}
