@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { SvgIcon, Typography } from '@libs/ui';
+import { SvgIcon, Typography } from '~src/libs/ui';
 
 import { truncateKey } from './utils';
 

@@ -4,9 +4,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
 import styled, { css } from 'styled-components';
 
-import { PurposeForOpening, useWindowManager } from '@src/hooks';
+import {
+  PurposeForOpening,
+  useWindowManager
+} from '~src/apps/popup/hooks/use-window-manager';
 
-import { ContentContainer } from '@src/libs/layout/containers';
+import { ContentContainer } from '~src/libs/layout/containers';
 import {
   Button,
   Checkbox,
@@ -16,9 +19,9 @@ import {
   PageTile,
   Typography,
   List
-} from '@libs/ui';
+} from '~src/libs/ui';
 
-import { RouterPath, useTypedNavigate } from '@popup/router';
+import { RouterPath, useTypedNavigate } from '~src/apps/popup/router';
 
 import {
   selectIsActiveAccountConnectedWithOrigin,
@@ -26,8 +29,8 @@ import {
   selectVaultAccounts,
   selectVaultActiveAccount,
   selectVaultActiveOrigin
-} from '@src/background/redux/vault/selectors';
-import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
+} from '~src/libs/redux/vault/selectors';
+import { useAccountManager } from '~src/apps/popup/hooks/use-account-actions-with-events';
 
 // Account info
 
@@ -162,7 +165,7 @@ export function HomePageContent() {
           </AvatarContainer>
           <NameAndAddressContainer>
             <Typography type="body" weight="semiBold">
-              {activeAccount.name}
+              {activeAccount.name} asdfa
             </Typography>
             <Hash
               value={activeAccount.publicKey}

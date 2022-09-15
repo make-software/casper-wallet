@@ -4,17 +4,20 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { PurposeForOpening, useWindowManager } from '@src/hooks';
+import {
+  PurposeForOpening,
+  useWindowManager
+} from '~src/apps/popup/hooks/use-window-manager';
 
-import { TimeoutDurationSetting } from '@popup/constants';
-import { RouterPath, useNavigationMenu } from '@popup/router';
-import { ContentContainer } from '@src/libs/layout/containers';
-import { SvgIcon, Typography, List } from '@libs/ui';
+import { TimeoutDurationSetting } from '~src/libs/redux/vault/types';
+import { RouterPath, useNavigationMenu } from '~src/apps/popup/router';
+import { ContentContainer } from '~src/libs/layout/containers';
+import { SvgIcon, Typography, List } from '~src/libs/ui';
 
 import {
   selectCountOfConnectedSites,
   selectVaultTimeoutDurationSetting
-} from '@src/background/redux/vault/selectors';
+} from '~src/libs/redux/vault/selectors';
 
 const ListItemClickableContainer = styled.div`
   display: flex;

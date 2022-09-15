@@ -1,5 +1,5 @@
 import { To, useNavigate } from 'react-router-dom';
-import { LocationState } from '@popup/router/types';
+import { LocationState } from '~src/apps/popup/router/types';
 
 export function useTypedNavigate() {
   const navigate = useNavigate();

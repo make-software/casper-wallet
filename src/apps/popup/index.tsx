@@ -7,17 +7,16 @@ import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { isActionOf } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
-
-import { GlobalStyle, themeConfig } from '@libs/ui';
-import { ErrorBoundary } from '@popup/error-boundary';
 import {
   BackgroundEvent,
   backgroundEvent,
   PopupState
-} from '@src/background/background-events';
+} from '~src/libs/messages/background-events';
+import { ErrorBoundary } from '~src/libs/layout/error-boundary';
+import { GlobalStyle, themeConfig } from '~src/libs/ui';
 
-import { createMainStoreReplica } from '../../background/redux/utils';
-import { popupWindowInit } from '../../background/redux/windowManagement/actions';
+import { createMainStoreReplica } from '../../libs/redux/utils';
+import { popupWindowInit } from '../../libs/redux/windowManagement/actions';
 import { App } from './app';
 
 const Tree = () => {

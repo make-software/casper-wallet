@@ -1,13 +1,12 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-
-import { dispatchToMainStore } from '@src/background/redux/utils';
+import { createOpenWindow } from '~src/background/create-open-window';
+import { dispatchToMainStore } from '~src/libs/redux/utils';
 import {
   windowIdChanged,
   windowIdCleared
-} from '@src/background/redux/windowManagement/actions';
-import { selectWindowId } from '@src/background/redux/windowManagement/selectors';
-import { createOpenWindow } from '@src/hooks';
+} from '~src/libs/redux/windowManagement/actions';
+import { selectWindowId } from '~src/libs/redux/windowManagement/selectors';
 
 export function useWindowManager() {
   const windowId = useSelector(selectWindowId);

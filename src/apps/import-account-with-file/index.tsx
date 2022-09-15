@@ -1,21 +1,20 @@
-import '@libs/i18n/i18n';
-
-import React, { Suspense } from 'react';
-import { render } from 'react-dom';
-import { ThemeProvider } from 'styled-components';
-import { GlobalScrollbar } from 'mac-scrollbar';
-import { HashRouter, Route, Routes } from 'react-router-dom';
-
+import '~src/libs/i18n/i18n';
 import 'mac-scrollbar/dist/mac-scrollbar.css';
 
-import { GlobalStyle, themeConfig } from '@libs/ui';
+import { GlobalScrollbar } from 'mac-scrollbar';
+import React, { Suspense } from 'react';
+import { render } from 'react-dom';
+import { HashRouter, Route, Routes } from 'react-router-dom';
+import { ThemeProvider } from 'styled-components';
+import { HeaderWindow_TO_BE_REMOVED, LayoutWindow } from '~src/libs/layout';
+import { GlobalStyle, themeConfig } from '~src/libs/ui';
 
+import { ImportAccountWithFileContentPage } from './pages/import-account-with-file';
+import { ImportAccountWithFileFailureContentPage } from './pages/import-account-with-file-failure';
+import { ImportAccountWithFileSuccessContentPage } from './pages/import-account-with-file-success';
 import { RouterPath } from './router';
 
-import { ImportAccountWithFileSuccessContentPage } from './pages/import-account-with-file-success';
-import { ImportAccountWithFileFailureContentPage } from './pages/import-account-with-file-failure';
-import { ImportAccountWithFileContentPage } from './pages/import-account-with-file';
-import { HeaderWindow_TO_BE_REMOVED, LayoutWindow } from '@src/libs/layout';
+console.log('reloadt');
 
 render(
   <Suspense fallback={null}>

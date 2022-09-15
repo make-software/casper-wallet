@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { themeConfig } from '@src/libs/ui';
+import { themeConfig } from '~src/libs/ui';
 
 type LinkColor = 'fillBlue' | 'fillRed' | 'inherit';
 

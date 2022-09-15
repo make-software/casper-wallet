@@ -2,12 +2,12 @@ import { compose } from 'redux';
 import { composeWithDevTools } from 'remote-redux-devtools';
 import browser from 'webextension-polyfill';
 
-import { createStore } from '@src/background/redux';
+import { createStore } from '~src/libs/redux';
 import {
   backgroundEvent,
   PopupState,
   selectPopupState
-} from '@src/background/background-events';
+} from '~src/libs/messages/background-events';
 
 import { ReduxAction } from './redux-action';
 

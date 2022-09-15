@@ -1,23 +1,25 @@
 import { useCallback } from 'react';
-import { Account } from '@src/background/redux/vault/types';
-import {
-  activeAccountChanged,
-  accountsConnected,
-  accountDisconnected,
-  allAccountsDisconnected
-} from '@src/background/redux/vault/actions';
-
 import { useSelector } from 'react-redux';
+import { RootState } from 'typesafe-actions';
+import { dispatchToMainStore } from '~src/libs/redux/utils';
+import {
+  emitSdkEventToAllActiveTabs,
+  sdkEvent
+} from '~src/libs/messages/sdk-event';
+import {
+  accountDisconnected,
+  accountsConnected,
+  activeAccountChanged,
+  allAccountsDisconnected
+} from '~src/libs/redux/vault/actions';
 import {
   selectConnectedAccountNamesWithOrigin,
   selectVaultAccountNamesByOriginDict,
   selectVaultAccounts,
   selectVaultActiveAccount,
   selectVaultIsLocked
-} from '@src/background/redux/vault/selectors';
-import { RootState } from 'typesafe-actions';
-import { emitSdkEventToAllActiveTabs, sdkEvent } from '@src/content/sdk-event';
-import { dispatchToMainStore } from '../../../background/redux/utils';
+} from '~src/libs/redux/vault/selectors';
+import { Account } from '~src/libs/redux/vault/types';
 
 export function findAccountInAListClosestToGivenAccountFilteredByNames(
   accounts: Account[],

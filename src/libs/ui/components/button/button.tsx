@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { BaseProps, Link } from '@src/libs/ui';
+import { BaseProps, Link } from '~src/libs/ui';
 
 export interface BaseButtonProps extends BaseProps {
   type?: 'button' | 'submit' | 'reset';

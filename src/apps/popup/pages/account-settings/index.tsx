@@ -8,11 +8,11 @@ import styled from 'styled-components';
 import {
   ContentContainer,
   HeaderTextContainer
-} from '@src/libs/layout/containers';
-import { SvgIcon, PageTile, Typography } from '@libs/ui';
-import { selectVaultAccountWithName } from '@src/background/redux/vault/selectors';
+} from '~src/libs/layout/containers';
+import { SvgIcon, PageTile, Typography } from '~src/libs/ui';
+import { selectVaultAccountWithName } from '~src/libs/redux/vault/selectors';
 
-import { RouterPath, useTypedNavigate } from '@popup/router';
+import { RouterPath, useTypedNavigate } from '~src/apps/popup/router';
 
 export function AccountSettingsPageContent() {
   const navigate = useTypedNavigate();

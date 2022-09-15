@@ -1,5 +1,5 @@
 import React from 'react';
-import { HeaderContainer, LogoContainer, Logo } from '@src/libs/layout';
+import { HeaderContainer, LogoContainer, Logo } from '~src/libs/layout';
 import { SubmenuBar_TO_BE_REMOVED } from './submenu-bar';
 
 import { SubmenuActionType } from '../types';

@@ -2,28 +2,28 @@ import React, { useCallback } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { Trans, useTranslation } from 'react-i18next';
-import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import * as Yup from 'yup';
-
-import { useFormValidations } from '@src/hooks';
-
-import { Button, Input, SvgIcon, Typography } from '@libs/ui';
-import { Account } from '@src/background/redux/vault/types';
 import {
-  FooterButtonsAbsoluteContainer,
+  RouterPath,
+  useTypedNavigate
+} from '~src/apps/import-account-with-file/router';
+import { checkAccountNameIsTaken } from '~src/libs/redux/import-account-actions-should-be-removed';
+import { dispatchToMainStore } from '~src/libs/redux/utils';
+import { accountImported } from '~src/libs/redux/vault/actions';
+import { Account } from '~src/libs/redux/vault/types';
+import { useFormValidations } from '~src/libs/hooks';
+import {
   ContentContainer,
+  FooterButtonsAbsoluteContainer,
   HeaderTextContainer,
   InputsContainer,
   TextContainer
-} from '@src/libs/layout/containers';
+} from '~src/libs/layout/containers';
+import { Button, Input, SvgIcon, Typography } from '~src/libs/ui';
 
-import { RouterPath, useTypedNavigate } from '@import-account-with-file/router';
-
-import { checkAccountNameIsTaken } from '@src/background/redux/import-account-actions-should-be-removed';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { accountImported } from '@src/background/redux/vault/actions';
 
 export function ImportAccountWithFileContentPage() {
   const navigate = useTypedNavigate();

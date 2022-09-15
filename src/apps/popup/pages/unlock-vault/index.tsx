@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 
-import { RouterPath } from '@popup/router';
+import { RouterPath } from '~src/apps/popup/router';
 
 import {
   ContentContainer,
@@ -14,12 +14,12 @@ import {
   HeaderTextContainer,
   InputsContainer,
   TextContainer
-} from '@src/libs/layout/containers';
-import { Typography, Input, Button } from '@libs/ui';
+} from '~src/libs/layout/containers';
+import { Typography, Input, Button } from '~src/libs/ui';
 
-import { selectVaultPassword } from '@src/background/redux/vault/selectors';
-import { vaultUnlocked } from '@src/background/redux/vault/actions';
-import { dispatchToMainStore } from '../../../../background/redux/utils';
+import { selectVaultPassword } from '~src/libs/redux/vault/selectors';
+import { vaultUnlocked } from '~src/libs/redux/vault/actions';
+import { dispatchToMainStore } from '../../../../libs/redux/utils';
 
 export function UnlockVaultPageContent() {
   const { t } = useTranslation();

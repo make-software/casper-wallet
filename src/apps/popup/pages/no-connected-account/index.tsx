@@ -7,10 +7,10 @@ import {
   HeaderTextContainer,
   TextContainer,
   FooterButtonsAbsoluteContainer
-} from '@src/libs/layout';
-import { Typography, SvgIcon, Button } from '@libs/ui';
+} from '~src/libs/layout';
+import { Typography, SvgIcon, Button } from '~src/libs/ui';
 
-import { useTypedNavigate, RouterPath } from '@popup/router';
+import { useTypedNavigate, RouterPath } from '~src/apps/popup/router';
 
 const IllustrationContainer = styled.div`
   margin: 24px 16px 0 16px;

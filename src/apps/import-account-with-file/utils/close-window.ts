@@ -1,5 +1,5 @@
 import browser from 'webextension-polyfill';
-import { getWindowId } from '@src/background/redux/import-account-actions-should-be-removed';
+import { getWindowId } from '~src/libs/redux/import-account-actions-should-be-removed';
 
 export async function closeWindow() {
   try {

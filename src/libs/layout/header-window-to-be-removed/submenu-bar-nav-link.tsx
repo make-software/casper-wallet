@@ -2,10 +2,10 @@ import React, { ReactElement } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { Link, SvgIcon, Typography } from '@libs/ui';
+import { Link, SvgIcon, Typography } from '~src/libs/ui';
 
-import { useTypedNavigate } from '@connect-to-app/router';
-import { closeWindow } from '@connect-to-app/utils/closeWindow';
+import { useTypedNavigate } from '~src/apps/connect-to-app/router';
+import { closeWindow } from '~src/apps/connect-to-app/utils/closeWindow';
 
 import { SubmenuActionType } from '../types';
 

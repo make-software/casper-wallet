@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import styled from 'styled-components';
 
-import { getFaviconUrlFromOrigin, SvgIcon, Typography } from '@libs/ui';
-import { closeWindow } from '@connect-to-app/utils/closeWindow';
+import { getFaviconUrlFromOrigin, SvgIcon, Typography } from '~src/libs/ui';
+import { closeWindow } from '~src/apps/connect-to-app/utils/closeWindow';
 
 const PageContainer = styled.div`
   display: flex;

@@ -4,25 +4,25 @@ import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-
-import { yupResolver } from '@hookform/resolvers/yup';
+import { RouterPath, useTypedNavigate } from '~src/apps/popup/router';
+import { dispatchToMainStore } from '~src/libs/redux/utils';
+import { vaultCreated } from '~src/libs/redux/vault/actions';
+import {
+  ContentContainer,
+  FooterButtonsAbsoluteContainer,
+  HeaderTextContainer,
+  InputsContainer,
+  TextContainer
+} from '~src/libs/layout';
 import {
   Button,
   Input,
   InputValidationType,
   SvgIcon,
   Typography
-} from '@libs/ui';
-import { vaultCreated } from '@src/background/redux/vault/actions';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import {
-  FooterButtonsAbsoluteContainer,
-  ContentContainer,
-  HeaderTextContainer,
-  InputsContainer,
-  TextContainer
-} from '@layout/containers';
-import { dispatchToMainStore } from '../../../../background/redux/utils';
+} from '~src/libs/ui';
+
+import { yupResolver } from '@hookform/resolvers/yup';
 
 type InputType = 'password' | 'text';
 

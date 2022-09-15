@@ -1,7 +1,7 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 
-import { Tile, Typography } from '@libs/ui';
+import { Tile, Typography } from '~src/libs/ui';
 
 const TopMarginContainer = styled.div`
   margin-top: 16px;

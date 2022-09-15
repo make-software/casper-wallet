@@ -1,4 +1,4 @@
-import { ActiveLanguages, Lang } from './domain';
+import { EnabledLanguages, LangCode } from './constants';
 
 const localStorageAvailable = (): boolean =>
   // @ts-ignore
@@ -8,12 +8,10 @@ const navigatorAvailable = (): boolean =>
   // @ts-ignore
   window !== 'undefined' && window.navigator !== null;
 
-type Language = Lang | string;
-
 const languageDetector = {
   name: 'customLanguageDetector',
   lookup(options: { lookupLocalStorage: string }) {
-    let result: Language = Lang.EN; // default language. Used as fallback.
+    let result: string = LangCode.EN; // default language. Used as fallback.
 
     // check if language previously stored in localStorage
     if (options.lookupLocalStorage && localStorageAvailable()) {
@@ -26,7 +24,7 @@ const languageDetector = {
     // if not found in localStorage, then check userAgent and try to found in
     // the list of available languages
     if (navigatorAvailable() && window.navigator.language !== undefined) {
-      if (ActiveLanguages.includes(window.navigator.language as Lang)) {
+      if (EnabledLanguages.includes(window.navigator.language)) {
         result = window.navigator.language;
       }
     }

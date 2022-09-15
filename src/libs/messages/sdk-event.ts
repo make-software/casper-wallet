@@ -17,6 +17,9 @@ export type LegacySignerState = {
 };
 
 export const sdkEvent = {
+  initialWalletStateEvent: createAction(
+    'initialWalletStateEvent'
+  )<WalletState>(),
   connectedActiveAccountEvent: createAction(
     'connectedActiveAccountEvent'
   )<WalletState>(),

@@ -5,7 +5,7 @@ import { BaseProps } from '../../types';
 
 import FlexRow from '../flex-row/flex-row';
 import SvgIcon from '../svg-icon/svg-icon';
-import { Typography } from '@src/libs/ui';
+import { Typography } from '~src/libs/ui';
 
 const StyledFlexRow = styled(FlexRow)<{
   checked?: boolean;

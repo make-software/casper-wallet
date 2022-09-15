@@ -1,12 +1,15 @@
 import { getType, RootAction } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
-
 import {
   CheckAccountNameIsTakenAction,
   CheckSecretKeyExistAction
-} from '@src/background/redux/import-account-actions-should-be-removed';
-import { isReduxAction } from '@src/background/redux/redux-action';
-import { getMainStoreSingleton } from '@src/background/redux/utils';
+} from '~src/libs/redux/import-account-actions-should-be-removed';
+import { isReduxAction } from '~src/libs/redux/redux-action';
+import { getMainStoreSingleton } from '~src/libs/redux/utils';
+import {
+  emitSdkEventToAllActiveTabs,
+  sdkEvent
+} from '~src/libs/messages/sdk-event';
 import {
   accountDisconnected,
   accountImported,
@@ -22,33 +25,54 @@ import {
   vaultLocked,
   vaultReseted,
   vaultUnlocked
-} from '@src/background/redux/vault/actions';
+} from '~src/libs/redux/vault/actions';
 import {
+  selectIsActiveAccountConnectedWithOrigin,
   selectIsAnyAccountConnectedWithOrigin,
   selectVaultAccounts,
   selectVaultAccountsNames,
   selectVaultAccountsSecretKeysBase64,
   selectVaultActiveAccount,
   selectVaultIsLocked
-} from '@src/background/redux/vault/selectors';
+} from '~src/libs/redux/vault/selectors';
 import {
   connectWindowInit,
   importWindowInit,
   popupWindowInit,
   windowIdChanged,
   windowIdCleared
-} from '@src/background/redux/windowManagement/actions';
-import { selectWindowId } from '@src/background/redux/windowManagement/selectors';
-import { emitSdkEventToAllActiveTabs, sdkEvent } from '@src/content/sdk-event';
-import { isSDKMessage, SdkMessage, sdkMessage } from '@src/content/sdk-message';
-import { PurposeForOpening } from '@src/hooks';
+} from '~src/libs/redux/windowManagement/actions';
+import { selectWindowId } from '~src/libs/redux/windowManagement/selectors';
+import {
+  isSDKMessage,
+  SdkMessage,
+  sdkMessage
+} from '~src/libs/messages/sdk-message';
 
+import { PurposeForOpening } from './create-open-window';
 import { openWindow } from './open-window';
 
 browser.runtime.onInstalled.addListener(() => {
   // this will run on installation or update so
   // first clear previous rules, then register new rules
+  // rerun content script on each tab
+  // browser.tabs.query({}).then(tabs => {
+  //   tabs.forEach(tab => {
+  //     tab.id &&
+  //       chrome.scripting.executeScript({
+  //         target: { tabId: tab.id },
+  //         files: ['content.js']
+  //       });
+  //   });
+  // });
 });
+
+// TODO: this implements programmatical popup open
+// chrome.action.onClicked.addListener(function(tab) {
+// create popup window
+// });
+
+// TODO: needed for tabUpdatedEvent - chrome.windows.onFocusChanged
 
 // two events at the same time start from the same storage state, will loose update
 browser.runtime.onMessage.addListener(
@@ -61,6 +85,25 @@ browser.runtime.onMessage.addListener(
         console.error(`BACKEND SDK MESSAGE:`, JSON.stringify(action));
 
         switch (action.type) {
+          // TODO: test and complete initial state event
+          // case getType(backgroungMessage.getInitialState): {
+          //   const isLocked = selectVaultIsLocked(store.getState());
+          //   const isActiveAccountConnected =
+          //     selectIsActiveAccountConnectedWithOrigin(store.getState());
+          //   const activeAccount = selectVaultActiveAccount(store.getState());
+          //   if (activeAccount) {
+          //     emitSdkEventToAllActiveTabs(
+          //       sdkEvent.initialWalletStateEvent({
+          //         isLocked: isLocked,
+          //         isConnected: isActiveAccountConnected,
+          //         activeKey: activeAccount?.publicKey
+          //       })
+          //     );
+          //   }
+
+          //   break;
+          // }
+
           case getType(sdkMessage.connectRequest): {
             let success = false;
             const accounts = selectVaultAccounts(store.getState());

@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
 import styled from 'styled-components';
 
-import { ContentContainer, HeaderTextContainer } from '@src/libs/layout';
+import { ContentContainer, HeaderTextContainer } from '~src/libs/layout';
 import {
   Button,
   SiteFaviconBadge,
@@ -14,15 +14,15 @@ import {
   PageTile,
   SvgIcon,
   Typography
-} from '@libs/ui';
+} from '~src/libs/ui';
 
 import {
   selectConnectedAccountsWithOrigin,
   selectVaultActiveAccount,
   selectVaultActiveOrigin
-} from '@src/background/redux/vault/selectors';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
+} from '~src/libs/redux/vault/selectors';
+import { RouterPath, useTypedNavigate } from '~src/apps/popup/router';
+import { useAccountManager } from '~src/apps/popup/hooks/use-account-actions-with-events';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;

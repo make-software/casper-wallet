@@ -2,8 +2,8 @@ import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { Link, Typography, SvgIcon } from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@popup/router';
+import { Link, Typography, SvgIcon } from '~src/libs/ui';
+import { RouterPath, useTypedNavigate } from '~src/apps/popup/router';
 
 const Container = styled.div`
   height: 56px;

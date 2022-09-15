@@ -1,6 +1,6 @@
 import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
 import styled from 'styled-components';
-import { BaseProps, FormField, FormFieldStatus } from '@src/libs/ui';
+import { BaseProps, FormField, FormFieldStatus } from '~src/libs/ui';
 
 type Ref = HTMLInputElement;
 

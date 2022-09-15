@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import styled from 'styled-components';
 
-import { Button, Typography } from '@libs/ui';
+import { Button, Typography } from '~src/libs/ui';
 
 const SiteGroupHeaderContainer = styled.div`
   display: flex;

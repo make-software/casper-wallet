@@ -1,39 +1,39 @@
-import '@libs/i18n/i18n';
+import '~src/libs/i18n/i18n';
 
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
 
-import { Layout } from '@src/libs/layout';
+import { Layout } from '~src/libs/layout';
 
-import { CreateVaultPageContent } from '@popup/pages/create-vault';
-import { HomePageContent } from '@popup/pages/home';
-import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
-import { NoAccountsPageContent } from '@popup/pages/no-accounts';
-import { ResetVaultPageContent } from '@popup/pages/reset-vault';
-import { TimeoutPageContent } from '@popup/pages/timeout';
-import { UnlockVaultPageContent } from '@popup/pages/unlock-vault';
-import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
-import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
-import { ConnectedSitesPage } from '@popup/pages/connected-sites';
+import { CreateVaultPageContent } from './pages/create-vault';
+import { HomePageContent } from './pages/home';
+import { NavigationMenuPageContent } from './pages/navigation-menu';
+import { NoAccountsPageContent } from './pages/no-accounts';
+import { ResetVaultPageContent } from './pages/reset-vault';
+import { TimeoutPageContent } from './pages/timeout';
+import { UnlockVaultPageContent } from './pages/unlock-vault';
+import { ConnectAnotherAccountPageContent } from './pages/connect-another-account';
+import { NoConnectedAccountPageContent } from './pages/no-connected-account';
+import { ConnectedSitesPage } from './pages/connected-sites';
 
-import { RouterPath, useTypedLocation } from '@popup/router';
+import { RouterPath, useTypedLocation } from './router';
 
 import {
   selectVaultDoesExist,
   selectVaultHasAccount,
   selectVaultIsLocked
-} from '../../background/redux/vault/selectors';
+} from '../../libs/redux/vault/selectors';
 
 import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
 
 import {
   AccountSettingsPageContent,
   AccountSettingsActionsGroup
-} from '@popup/pages/account-settings';
-import { RemoveAccountPageContent } from '@popup/pages/remove-account';
-import { RenameAccountPageContent } from '@popup/pages/rename-account';
-import { PopupHeader } from '@src/libs/layout/header';
+} from './pages/account-settings';
+import { RemoveAccountPageContent } from './pages/remove-account';
+import { RenameAccountPageContent } from './pages/rename-account';
+import { PopupHeader } from '~src/libs/layout/header';
 
 export function App() {
   const vaultIsLocked = useSelector(selectVaultIsLocked);

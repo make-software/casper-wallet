@@ -6,9 +6,9 @@ import {
   ContentContainer,
   HeaderTextContainer,
   TextContainer
-} from '@src/libs/layout/containers';
-import { Button, Typography } from '@libs/ui';
-import { closeWindow } from '@import-account-with-file/utils/close-window';
+} from '~src/libs/layout/containers';
+import { Button, Typography } from '~src/libs/ui';
+import { closeWindow } from '~src/apps/import-account-with-file/utils/close-window';
 
 export function ImportAccountWithFileSuccessContentPage() {
   const { t } = useTranslation();

@@ -3,7 +3,7 @@ import {
   isSDKMessage,
   sdkMessage,
   SdkMessage
-} from './sdk-message';
+} from '../libs/messages/sdk-message';
 
 function fetchFromExtensionBackend<T extends SdkMessage['payload']>(
   requestAction: SdkMessage,

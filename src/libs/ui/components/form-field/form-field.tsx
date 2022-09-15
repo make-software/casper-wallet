@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Typography, BaseProps } from '@src/libs/ui';
+import { Typography, BaseProps } from '~src/libs/ui';
 
 export enum FormFieldStatus {
   Error = 'error',

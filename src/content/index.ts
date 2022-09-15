@@ -1,9 +1,12 @@
-import browser from 'webextension-polyfill';
-
-import { sdkMessageProxyEvents, isSDKMessage } from './sdk-message';
-import { sdkEvent, SdkEvent } from './sdk-event';
 import { getType } from 'typesafe-actions';
-import { activeOriginChanged } from '@src/background/redux/vault/actions';
+import browser from 'webextension-polyfill';
+import { activeOriginChanged } from '~src/libs/redux/vault/actions';
+import {
+  isSDKMessage,
+  sdkMessageProxyEvents
+} from '~src/libs/messages/sdk-message';
+
+import { sdkEvent, SdkEvent } from '../libs/messages/sdk-event';
 
 // Sync activeOrigin of active tab with store
 function syncActiveOriginWithStore() {
@@ -29,6 +32,10 @@ function emitSdkEvent(action: SdkEvent) {
   console.error('CONTENT EMIT SDK EVENT:', JSON.stringify(action));
   let eventType: string;
   switch (action.type) {
+    case getType(sdkEvent.initialWalletStateEvent):
+      eventType = 'signer:initialState';
+      break;
+
     case getType(sdkEvent.connectedActiveAccountEvent):
       eventType = 'signer:connected';
       break;
@@ -83,12 +90,12 @@ async function handleSdkRequest(e: Event) {
 // inject sdk script - idempotent, doesn't need cleanup
 function injectSdkScript() {
   try {
+    const SDK_SCRIPT_PATH = 'sdk/index.js';
     const documentHeadOrRoot = document.head || document.documentElement;
-    const inpageScriptPath = 'sdk.bundle.js';
 
     const scriptTag = document.createElement('script');
     scriptTag.setAttribute('type', 'text/javascript');
-    scriptTag.src = browser.runtime.getURL(inpageScriptPath);
+    scriptTag.src = browser.runtime.getURL(SDK_SCRIPT_PATH);
     scriptTag.onload = function () {
       documentHeadOrRoot.removeChild(scriptTag);
     };
@@ -114,6 +121,7 @@ function init() {
     sdkMessageProxyEvents.SDKRequestAction,
     handleSdkRequest
   );
+  // browser.runtime.sendMessage(backgroungMessage.getWalletInitialState);
 }
 
 // cleanup logic

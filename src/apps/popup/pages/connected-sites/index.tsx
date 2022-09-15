@@ -2,15 +2,15 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { List, Typography } from '@libs/ui';
-import { ContentContainer, HeaderTextContainer } from '@src/libs/layout';
+import { List, Typography } from '~src/libs/ui';
+import { ContentContainer, HeaderTextContainer } from '~src/libs/layout';
 
-import { selectVaultAccountsByOriginDict } from '@src/background/redux/vault/selectors';
+import { selectVaultAccountsByOriginDict } from '~src/libs/redux/vault/selectors';
 
-import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
+import { useAccountManager } from '~src/apps/popup/hooks/use-account-actions-with-events';
 
-import { SiteGroupHeader } from '@popup/pages/connected-sites/site-group-header';
-import { SiteGroupItem } from '@popup/pages/connected-sites/site-group-item';
+import { SiteGroupHeader } from '~src/apps/popup/pages/connected-sites/site-group-header';
+import { SiteGroupItem } from '~src/apps/popup/pages/connected-sites/site-group-item';
 
 export function ConnectedSitesPage() {
   const { t } = useTranslation();

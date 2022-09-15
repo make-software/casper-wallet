@@ -1,5 +1,5 @@
 import React from 'react';
-import { SvgIcon } from '@libs/ui';
+import { SvgIcon } from '~src/libs/ui';
 
 interface LogoProps {
   onClick?: () => void;

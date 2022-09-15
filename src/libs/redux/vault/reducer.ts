@@ -1,6 +1,6 @@
 import { createReducer } from 'typesafe-actions';
 
-import { TimeoutDurationSetting } from '@popup/constants';
+import { TimeoutDurationSetting } from '~src/libs/redux/vault/types';
 import {
   timeoutDurationChanged,
   timeoutRefreshed,

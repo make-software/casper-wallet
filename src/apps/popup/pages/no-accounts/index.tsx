@@ -1,16 +1,16 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-
-import { PurposeForOpening, useWindowManager } from '@src/hooks';
-
-import { Typography, Button } from '@libs/ui';
-
 import {
+  PurposeForOpening,
+  useWindowManager
+} from '~src/apps/popup/hooks/use-window-manager';
+import {
+  ContentContainer,
   FooterButtonsAbsoluteContainer,
   HeaderTextContainer,
-  TextContainer,
-  ContentContainer
-} from '@src/libs/layout/containers';
+  TextContainer
+} from '~src/libs/layout/containers';
+import { Button, Typography } from '~src/libs/ui';
 
 export function NoAccountsPageContent() {
   const { t } = useTranslation();

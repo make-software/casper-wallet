@@ -9,7 +9,7 @@ import {
   HashVariant,
   List,
   Typography
-} from '@libs/ui';
+} from '~src/libs/ui';
 
 import {
   PageContainer,
@@ -17,20 +17,20 @@ import {
   HeaderTextContainer,
   ListItemClickableContainer,
   FooterButtonsContainer
-} from '@src/libs/layout/containers';
+} from '~src/libs/layout/containers';
 
 import { useTranslation, Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import {
   selectVaultAccounts,
   selectVaultActiveAccount
-} from '@src/background/redux/vault/selectors';
+} from '~src/libs/redux/vault/selectors';
 import {
   AccountBalanceListItemContainer,
   AccountNameWithHashListItemContainer
-} from '@popup/pages/home';
+} from '~src/apps/popup/pages/home';
 
-import { RouterPath, useTypedNavigate } from '@connect-to-app/router';
+import { RouterPath, useTypedNavigate } from '~src/apps/connect-to-app/router';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;

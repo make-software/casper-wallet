@@ -1,5 +1,5 @@
 import { To, useNavigate } from 'react-router-dom';
-import { LocationState } from '@import-account-with-file/router/types';
+import { LocationState } from '~src/apps/import-account-with-file/router/types';
 
 export function useTypedNavigate() {
   const navigate = useNavigate();

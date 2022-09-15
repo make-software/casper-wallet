@@ -2,18 +2,24 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { HeaderTextContainer } from '@src/libs/layout';
+import { HeaderTextContainer } from '~src/libs/layout';
 
 import {
   PageContainer,
   ContentContainer,
   FooterButtonsContainer
-} from '@src/libs/layout/containers';
+} from '~src/libs/layout/containers';
 
-import { Button, SiteFaviconBadge, List, SvgIcon, Typography } from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@connect-to-app/router';
-import { closeWindow } from '@connect-to-app/utils/closeWindow';
-import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
+import {
+  Button,
+  SiteFaviconBadge,
+  List,
+  SvgIcon,
+  Typography
+} from '~src/libs/ui';
+import { RouterPath, useTypedNavigate } from '~src/apps/connect-to-app/router';
+import { closeWindow } from '~src/apps/connect-to-app/utils/closeWindow';
+import { useAccountManager } from '~src/apps/popup/hooks/use-account-actions-with-events';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;

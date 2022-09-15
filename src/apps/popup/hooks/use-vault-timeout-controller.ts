@@ -1,20 +1,24 @@
-import { useRef, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import throttle from 'lodash.throttle';
-
+import { useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import { dispatchToMainStore } from '~src/libs/redux/utils';
+import { timeoutRefreshed, vaultLocked } from '~src/libs/redux/vault/actions';
 import {
   selectVaultDoesExist,
   selectVaultIsLocked,
-  selectVaultTimeoutDurationSetting,
-  selectVaultLastActivityTime
-} from '@src/background/redux/vault/selectors';
-import {
-  vaultLocked,
-  timeoutRefreshed
-} from '@src/background/redux/vault/actions';
+  selectVaultLastActivityTime,
+  selectVaultTimeoutDurationSetting
+} from '~src/libs/redux/vault/selectors';
+import { TimeoutDurationSetting } from '~src/libs/redux/vault/types';
 
-import { MapTimeoutDurationSettingToValue } from '../constants';
-import { dispatchToMainStore } from '../../../background/redux/utils';
+const MapTimeoutDurationSettingToValue: Record<string, number> = {
+  [TimeoutDurationSetting['1 min']]: 1000 * 60 * 1,
+  [TimeoutDurationSetting['5 min']]: 1000 * 60 * 5,
+  [TimeoutDurationSetting['15 min']]: 1000 * 60 * 15,
+  [TimeoutDurationSetting['30 min']]: 1000 * 60 * 30,
+  [TimeoutDurationSetting['1 hour']]: 1000 * 60 * 60,
+  [TimeoutDurationSetting['24 hours']]: 1000 * 60 * 60 * 24
+};
 
 export function useVaultTimeoutController(): void {
   const timeoutCounterRef = useRef<NodeJS.Timeout>();

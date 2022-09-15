@@ -8,8 +8,8 @@ import ASN1 from '@lapo/asn1js';
 
 import { decodeBase16, encodeBase64, decodeBase64, Keys } from 'casper-js-sdk';
 
-import { Account } from '@src/background/redux/vault/types';
-import { checkSecretKeyExist } from '@src/background/redux/import-account-actions-should-be-removed';
+import { Account } from '~src/libs/redux/vault/types';
+import { checkSecretKeyExist } from '~src/libs/redux/import-account-actions-should-be-removed';
 
 function getAlgorithm(content: string): 'Ed25519' | 'Secp256K1' | undefined {
   if (content.includes('curveEd25519')) {

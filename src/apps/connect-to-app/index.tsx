@@ -1,4 +1,4 @@
-import '@libs/i18n/i18n';
+import '~src/libs/i18n/i18n';
 import 'mac-scrollbar/dist/mac-scrollbar.css';
 
 import { GlobalScrollbar } from 'mac-scrollbar';
@@ -9,18 +9,17 @@ import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { isActionOf } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
-
-import { App } from '@connect-to-app/app';
-import { GlobalStyle, themeConfig } from '@libs/ui';
-import { ErrorBoundary } from '@popup/error-boundary';
-
-import { createMainStoreReplica } from '../../background/redux/utils';
 import {
   BackgroundEvent,
   backgroundEvent,
   PopupState
-} from '@src/background/background-events';
-import { connectWindowInit } from '../../background/redux/windowManagement/actions';
+} from '~src/libs/messages/background-events';
+import { ErrorBoundary } from '~src/libs/layout/error-boundary';
+import { GlobalStyle, themeConfig } from '~src/libs/ui';
+
+import { createMainStoreReplica } from '../../libs/redux/utils';
+import { connectWindowInit } from '../../libs/redux/windowManagement/actions';
+import { App } from './app';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);

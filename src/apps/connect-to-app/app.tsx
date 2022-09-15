@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import { RouterPath } from '@connect-to-app/router';
-import { LayoutWindow, HeaderWindow_TO_BE_REMOVED } from '@src/libs/layout';
-import { AccountsSelectionPage } from '@connect-to-app/pages/accounts-selection';
-import { ApproveConnectionPage } from '@connect-to-app/pages/approve-connection';
-import { ConnectingPage } from '@connect-to-app/pages/connecting';
+import { HeaderWindow_TO_BE_REMOVED, LayoutWindow } from '~src/libs/layout';
+
+import { AccountsSelectionPage } from './pages/accounts-selection';
+import { ApproveConnectionPage } from './pages/approve-connection';
+import { ConnectingPage } from './pages/connecting';
+import { RouterPath } from './router';
 
 function getSiteRelatedData() {
   const origin = document.location.search.split('origin=')[1];

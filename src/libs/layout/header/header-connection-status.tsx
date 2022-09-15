@@ -1,10 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Typography, SvgIcon } from '@libs/ui';
+import { Typography, SvgIcon } from '~src/libs/ui';
 import { useSelector } from 'react-redux';
 import { RootState } from 'typesafe-actions';
-import { selectIsActiveAccountConnectedWithOrigin } from '@src/background/redux/vault/selectors';
+import { selectIsActiveAccountConnectedWithOrigin } from '~src/libs/redux/vault/selectors';
 
 const ConnectionStatusContainer = styled.div`
   display: flex;

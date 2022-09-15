@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Typography } from '@libs/ui';
+import { Typography } from '~src/libs/ui';
 
 const SiteFaviconAndHostnameContainer = styled.div`
   display: flex;

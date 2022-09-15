@@ -11,9 +11,9 @@ function getUrlByPurposeForOpening(
 ) {
   switch (purposeForOpening) {
     case PurposeForOpening.ImportAccount:
-      return 'import-account-with-file.html';
+      return 'apps/import-account-with-file/index.html';
     case PurposeForOpening.ConnectToApp:
-      return `connect-to-app.html?origin=${origin}`;
+      return `apps/connect-to-app/index.html?origin=${origin}`;
     default:
       return 'popup.html?#/';
   }

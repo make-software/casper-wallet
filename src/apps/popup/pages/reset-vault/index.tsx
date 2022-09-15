@@ -6,12 +6,12 @@ import {
   FooterButtonsContainer,
   HeaderTextContainer,
   TextContainer
-} from '@src/libs/layout/containers';
+} from '~src/libs/layout/containers';
 
-import { Typography, Button, Checkbox } from '@libs/ui';
-import { useTypedNavigate } from '@popup/router';
-import { vaultReseted } from '@src/background/redux/vault/actions';
-import { dispatchToMainStore } from '../../../../background/redux/utils';
+import { Typography, Button, Checkbox } from '~src/libs/ui';
+import { useTypedNavigate } from '~src/apps/popup/router';
+import { vaultReseted } from '~src/libs/redux/vault/actions';
+import { dispatchToMainStore } from '../../../../libs/redux/utils';
 
 export function ResetVaultPageContent() {
   const [isChecked, setIsChecked] = useState(false);

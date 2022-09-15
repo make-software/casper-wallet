@@ -6,15 +6,15 @@ import {
   ContentContainer,
   HeaderTextContainer,
   TextContainer
-} from '@src/libs/layout/containers';
-import { Button, Typography } from '@libs/ui';
+} from '~src/libs/layout/containers';
+import { Button, Typography } from '~src/libs/ui';
 
 import {
   RouterPath,
   useTypedLocation,
   useTypedNavigate
-} from '@import-account-with-file/router';
-import { closeWindow } from '@import-account-with-file/utils/close-window';
+} from '~src/apps/import-account-with-file/router';
+import { closeWindow } from '~src/apps/import-account-with-file/utils/close-window';
 
 export function ImportAccountWithFileFailureContentPage() {
   const { t } = useTranslation();

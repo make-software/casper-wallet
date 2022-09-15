@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Hash, HashVariant, SvgIcon, Typography } from '@libs/ui';
+import { Hash, HashVariant, SvgIcon, Typography } from '~src/libs/ui';
 
 const CentredFlexRow = styled.div`
   display: flex;

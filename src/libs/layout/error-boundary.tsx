@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from 'react';
-import { Typography } from '@libs/ui';
+import { Typography } from '~src/libs/ui';
 
 interface Props {
   children: ReactNode;

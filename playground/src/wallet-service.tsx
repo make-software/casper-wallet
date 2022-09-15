@@ -156,6 +156,7 @@ export const WalletServiceProvider = props => {
 
   const disconnect = () => {
     console.log('disconnectRequest');
+    updatePublicKey(null);
     SignerService.disconnect();
   };
 

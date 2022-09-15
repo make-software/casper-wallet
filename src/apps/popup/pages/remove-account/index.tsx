@@ -2,19 +2,19 @@ import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { Button, Typography } from '@libs/ui';
+import { Button, Typography } from '~src/libs/ui';
 
 import {
   ContentContainer,
   HeaderTextContainer,
   TextContainer,
   FooterButtonsAbsoluteContainer
-} from '@src/libs/layout/containers';
+} from '~src/libs/layout/containers';
 
-import { RouterPath, useTypedNavigate } from '@popup/router';
+import { RouterPath, useTypedNavigate } from '~src/apps/popup/router';
 
-import { accountRemoved } from '@src/background/redux/vault/actions';
-import { dispatchToMainStore } from '../../../../background/redux/utils';
+import { accountRemoved } from '~src/libs/redux/vault/actions';
+import { dispatchToMainStore } from '../../../../libs/redux/utils';
 
 export function RemoveAccountPageContent() {
   const navigate = useTypedNavigate();

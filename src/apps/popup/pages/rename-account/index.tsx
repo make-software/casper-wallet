@@ -4,23 +4,23 @@ import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { FieldValues, useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
-import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
+import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 
-import { useFormValidations } from '@src/hooks';
+import { useFormValidations } from '~src/libs/hooks';
 
 import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
   HeaderTextContainer,
   InputsContainer
-} from '@src/libs/layout/containers';
-import { Button, Input, Typography } from '@libs/ui';
+} from '~src/libs/layout/containers';
+import { Button, Input, Typography } from '~src/libs/ui';
 
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import { accountRenamed } from '@src/background/redux/vault/actions';
-import { selectVaultAccountsNames } from '@src/background/redux/vault/selectors';
-import { dispatchToMainStore } from '../../../../background/redux/utils';
+import { RouterPath, useTypedNavigate } from '~src/apps/popup/router';
+import { accountRenamed } from '~src/libs/redux/vault/actions';
+import { selectVaultAccountsNames } from '~src/libs/redux/vault/selectors';
+import { dispatchToMainStore } from '../../../../libs/redux/utils';
 
 export function RenameAccountPageContent() {
   const navigate = useTypedNavigate();
