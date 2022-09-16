@@ -4,7 +4,7 @@ import {
   casperUndelegateDeploy,
   casperRedelegateDeploy,
   casperTransferDeploy
-} from '../../mocked-data';
+} from '../mocked-data';
 
 export function useMockedDeployData(testEntryPoint: string) {
   switch (testEntryPoint) {

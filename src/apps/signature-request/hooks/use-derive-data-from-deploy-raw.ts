@@ -1,9 +1,5 @@
 import { CasperDeploy } from '../types';
-import {
-  getDeployPayment,
-  getDeployType,
-  parseBytesToString
-} from '../deploy-utils';
+import { getDeployPayment, getDeployType, bytesToHex } from '../utils/deploy';
 
 export function useDeriveDataFromDeployRaw(deploy: CasperDeploy) {
   const { header } = deploy;
@@ -11,9 +7,9 @@ export function useDeriveDataFromDeployRaw(deploy: CasperDeploy) {
   const deployType = getDeployType(deploy);
 
   return {
-    deployHash: parseBytesToString(deploy.hash),
+    deployHash: bytesToHex(deploy.hash),
     account: header.account.toHex(),
-    bodyHash: parseBytesToString(header.bodyHash),
+    bodyHash: bytesToHex(header.bodyHash),
     chainName: header.chainName,
     timestamp: new Date(header.timestamp).toLocaleString(),
     gasPrice: header.gasPrice.toString(),

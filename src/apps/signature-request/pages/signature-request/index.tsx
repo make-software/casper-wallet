@@ -27,13 +27,13 @@ import {
   isKeyOfHashValue,
   isKeyOfPriceValue,
   SignatureRequest
-} from '../types';
+} from '../../types';
 import { emitSdkEventToAllActiveTabs } from '@content/sdk-event';
-import { signDeploy } from '../sign-deploy';
+import { signDeploy } from '../../sign-deploy';
 import { sdkMessage } from '@content/sdk-message';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { useDeriveDataFromDeployRaw } from '../hooks/use-derive-data-from-deploy-raw';
-import { useMockedDeployData } from '../signature-request/hooks/use-mocked-deploy-data';
+import { useDeriveDataFromDeployRaw } from '../../hooks/use-derive-data-from-deploy-raw';
+import { useMockedDeployData } from '../../hooks/use-mocked-deploy-data';
 
 function stringValueToNumberInStringWithSpaces(value: string) {
   const numericValue = Number.parseInt(value);

@@ -1,7 +1,7 @@
 import { encodeBase16 } from 'casper-js-sdk';
 import { CasperDeploy } from '../types';
 
-export function getDeployType(deploy: CasperDeploy) {
+export function getDeployType(deploy: CasperDeploy): string {
   if (deploy.isTransfer()) {
     return 'Transfer Call';
   }
@@ -13,19 +13,18 @@ export function getDeployType(deploy: CasperDeploy) {
     return 'Contract Call';
   }
 
-  throw new Error('Unknown deploy type');
+  throw new Error('getDeployType failed');
 }
 
-export function getDeployPayment(deploy: CasperDeploy) {
+export function getDeployPayment(deploy: CasperDeploy): string {
   const arg = deploy.payment.moduleBytes?.getArgByName('amount');
-
-  if (arg == null) {
-    throw new Error("Can't acquire payment amount from deploy");
+  if (arg != null) {
+    return arg.value().toString();
   }
 
-  return arg.value().toString();
+  throw new Error('getDeployPayment failed');
 }
 
-export function parseBytesToString(bytes: Uint8Array): string {
+export function bytesToHex(bytes: Uint8Array): string {
   return encodeBase16(bytes);
 }
