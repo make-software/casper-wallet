@@ -30,10 +30,10 @@ function syncActiveOriginWithStore() {
 }
 
 // Proxy Wallet Events to connected site
-function emitSdkEvent(action: SdkEvent | SdkMessage) {
-  console.error('CONTENT EMIT SDK EVENT:', JSON.stringify(action));
+function emitSdkEvent(message: SdkEvent) {
+  console.error('CONTENT EMIT SDK EVENT:', JSON.stringify(message));
   let eventType: string;
-  switch (action.type) {
+  switch (message.type) {
     case getType(sdkEvent.connectedActiveAccountEvent):
       eventType = 'signer:connected';
       break;
@@ -46,25 +46,38 @@ function emitSdkEvent(action: SdkEvent | SdkMessage) {
       eventType = 'signer:activeKeyChanged';
       break;
 
-    // Todo for Piotr: design convention for delayed sdk request responses
-    case getType(sdkMessage.signResponse):
-      window.dispatchEvent(
-        new CustomEvent(sdkMessageProxyEvents.SDKResponseAction, {
-          detail: JSON.stringify(action)
-        })
-      );
-      return;
-
     default:
       throw Error(
-        'Content: emit sdk event unknown action: ' + JSON.stringify(action)
+        'Content: emit sdk event unknown action: ' + JSON.stringify(message)
       );
   }
 
   const event = new CustomEvent(eventType, {
-    detail: JSON.stringify(action.payload)
+    detail: JSON.stringify(message.payload)
   });
   window.dispatchEvent(event);
+}
+
+async function handleOnMessage(message: SdkEvent | SdkMessage) {
+  // Todo for Piotr: design convention for delayed sdk request responses
+  if (isSDKMessage(message)) {
+    switch (message.type) {
+      case getType(sdkMessage.signResponse):
+        window.dispatchEvent(
+          new CustomEvent(sdkMessageProxyEvents.SDKResponseAction, {
+            detail: JSON.stringify(message)
+          })
+        );
+        return;
+      default:
+        throw Error(
+          'Content: handleOnMessage unknown sdk message: ' +
+            JSON.stringify(message)
+        );
+    }
+  } else {
+    emitSdkEvent(message);
+  }
 }
 
 // SDK Message proxy to the backend
@@ -121,7 +134,7 @@ function init() {
   window.addEventListener('focus', syncActiveOriginWithStore);
   window.addEventListener('blur', syncActiveOriginWithStore);
 
-  browser.runtime.onMessage.addListener(emitSdkEvent);
+  browser.runtime.onMessage.addListener(handleOnMessage);
   window.addEventListener(
     sdkMessageProxyEvents.SDKRequestAction,
     handleSdkRequest
@@ -140,7 +153,7 @@ function cleanup() {
   window.removeEventListener('focus', syncActiveOriginWithStore);
   window.removeEventListener('blur', syncActiveOriginWithStore);
 
-  browser.runtime.onMessage.removeListener(emitSdkEvent);
+  browser.runtime.onMessage.removeListener(handleOnMessage);
   window.removeEventListener(
     sdkMessageProxyEvents.SDKRequestAction,
     handleSdkRequest

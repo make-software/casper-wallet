@@ -43,7 +43,7 @@ export async function getMainStoreSingleton() {
     storeSingleton.subscribe(() => {
       const state = storeSingleton.getState();
       browser.storage.local.set({ [REDUX_STORAGE_KEY]: state }).catch(e => {
-        console.error('STORE ERROR: ', e);
+        console.error('STORE SAVE ERROR: ', e);
       });
 
       const popupState = selectPopupState(storeSingleton.getState());

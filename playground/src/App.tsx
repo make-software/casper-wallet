@@ -4,6 +4,12 @@ import { Button } from '@mui/material';
 import styled from '@emotion/styled';
 import { useWalletService } from './wallet-service';
 import { truncateKey } from './utils';
+import {
+  AuctionManagerEntryPoint,
+  makeAuctionManagerDeploy,
+  makeNativeTransferDeploy
+} from './deploy-utils';
+import { DeployUtil } from 'casper-js-sdk';
 
 const Container = styled('div')({
   backgroundColor: '#282c34',
@@ -28,6 +34,18 @@ function App() {
     errorMessage,
     logs
   } = useWalletService();
+
+  const handleSignDeploy = deploy => {
+    if (activePublicKey) {
+      const deployJson = DeployUtil.deployToJson(deploy);
+      sign(JSON.stringify(deployJson), activePublicKey, 'undelegate').then(
+        res => {
+          alert('Sign successful: ' + res.signature);
+        }
+      );
+    }
+  };
+
   const handleConnect = activePublicKey ? disconnect : connectSigner;
 
   const statusText = activePublicKey
@@ -46,48 +64,78 @@ function App() {
         <Button variant="contained" onClick={handleConnect}>
           {connectButtonText}
         </Button>
-        {/*
-          !!! TEMPORARY SOLUTION FOR DEMO REASON ONLY. SHOULD BE DELETED !!!
-          `recipientPublicKey` used as entry points keys for demo
-        */}
-        <Button
-          disabled={activePublicKey == null}
-          variant="contained"
-          onClick={() =>
-            activePublicKey && sign({ deploy: {} }, activePublicKey, 'delegate')
-          }
-        >
-          Signing Delegate Request
-        </Button>
-        <Button
-          disabled={activePublicKey == null}
-          variant="contained"
-          onClick={() =>
-            activePublicKey &&
-            sign({ deploy: {} }, activePublicKey, 'undelegate')
-          }
-        >
-          Signing Undelegate Request
-        </Button>
-        <Button
-          disabled={activePublicKey == null}
-          variant="contained"
-          onClick={() =>
-            activePublicKey &&
-            sign({ deploy: {} }, activePublicKey, 'redelegate')
-          }
-        >
-          Signing Redelegate Request
-        </Button>
-        <Button
-          disabled={activePublicKey == null}
-          variant="contained"
-          onClick={() =>
-            activePublicKey && sign({ deploy: {} }, activePublicKey, 'transfer')
-          }
-        >
-          Signing Transfer Request
-        </Button>
+      </Row>
+      <Row>
+        Test signature request:{' '}
+        {activePublicKey == null ? (
+          'Not connected'
+        ) : (
+          <div>
+            <Button
+              disabled={activePublicKey == null}
+              variant="text"
+              onClick={() => {
+                const deploy = makeNativeTransferDeploy(
+                  activePublicKey,
+                  '0106ca7c39cd272dbf21a86eeb3b36b7c26e2e9b94af64292419f7862936bca2ca',
+                  '2500000000',
+                  '1234'
+                );
+                handleSignDeploy(deploy);
+              }}
+            >
+              Transfer
+            </Button>
+            <Button
+              disabled={activePublicKey == null}
+              variant="text"
+              onClick={() => {
+                const deploy = makeAuctionManagerDeploy(
+                  AuctionManagerEntryPoint.delegate,
+                  activePublicKey,
+                  `0106ca7c39cd272dbf21a86eeb3b36b7c26e2e9b94af64292419f7862936bca2ca`, // MAKE Stake 10% [testnet],
+                  null,
+                  '2500000000'
+                );
+                handleSignDeploy(deploy);
+              }}
+            >
+              Delegate
+            </Button>
+            <Button
+              disabled={activePublicKey == null}
+              variant="text"
+              onClick={() => {
+                const deploy = makeAuctionManagerDeploy(
+                  AuctionManagerEntryPoint.undelegate,
+                  activePublicKey,
+                  `0106ca7c39cd272dbf21a86eeb3b36b7c26e2e9b94af64292419f7862936bca2ca`, // MAKE Stake 10% [testnet],
+                  null,
+                  '2500000000'
+                );
+                handleSignDeploy(deploy);
+              }}
+            >
+              Undelegate
+            </Button>
+            <Button
+              disabled={activePublicKey == null}
+              variant="text"
+              onClick={() => {
+                const deploy = makeAuctionManagerDeploy(
+                  AuctionManagerEntryPoint.redelegate,
+                  activePublicKey,
+                  `0106ca7c39cd272dbf21a86eeb3b36b7c26e2e9b94af64292419f7862936bca2ca`, // MAKE Stake 10% [testnet],
+                  '017d96b9a63abcb61c870a4f55187a0a7ac24096bdb5fc585c12a686a4d892009e', // MAKE Stake 2
+                  '2500000000'
+                );
+                handleSignDeploy(deploy);
+              }}
+            >
+              Redelegate
+            </Button>
+          </div>
+        )}
       </Row>
       {errorMessage && <div>{errorMessage}</div>}
       <div>

@@ -1,5 +1,5 @@
-import { CasperDeploy } from '../types';
-import { getDeployPayment, getDeployType, bytesToHex } from '../utils/deploy';
+import { CasperDeploy } from './types';
+import { getDeployPayment, getDeployType, bytesToHex } from './deploy';
 
 export function useDeriveDataFromDeployRaw(deploy: CasperDeploy) {
   const { header } = deploy;

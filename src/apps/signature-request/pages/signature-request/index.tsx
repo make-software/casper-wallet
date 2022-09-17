@@ -1,10 +1,12 @@
 import React, { useCallback } from 'react';
-import { useSelector } from 'react-redux';
-
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { closeActiveWindow } from '@background/close-window';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+import { emitSdkEventToAllActiveTabs } from '@content/sdk-event';
+import { sdkMessage } from '@content/sdk-message';
 import {
   ContentContainer,
   FooterButtonsContainer,
@@ -20,30 +22,13 @@ import {
   SvgIcon,
   Typography
 } from '@libs/ui';
+import { selectDeploysJsonById } from '@src/background/redux/deploys/selectors';
 
-import {
-  DeployArguments,
-  DeployType,
-  isKeyOfHashValue,
-  isKeyOfPriceValue,
-  SignatureRequest
-} from '../../types';
-import { emitSdkEventToAllActiveTabs } from '@content/sdk-event';
-import { signDeploy } from '../../sign-deploy';
-import { sdkMessage } from '@content/sdk-message';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { useDeriveDataFromDeployRaw } from '../../hooks/use-derive-data-from-deploy-raw';
-import { useMockedDeployData } from '../../hooks/use-mocked-deploy-data';
-
-function stringValueToNumberInStringWithSpaces(value: string) {
-  const numericValue = Number.parseInt(value);
-
-  if (Number.isNaN(numericValue)) {
-    throw new Error("Can't convert string value to number");
-  }
-
-  return numericValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-}
+import { useDeriveDataFromDeployRaw } from './use-derive-data-from-deploy-raw';
+import { signDeploy } from './sign-deploy';
+import { SignatureRequestValue } from './signature-request-value';
+import { DeployArguments, isKeyOfHashValue, SignatureRequest } from './types';
+import { DeployUtil } from 'casper-js-sdk';
 
 const ListItemContainer = styled.div`
   display: flex;
@@ -65,12 +50,10 @@ const AccordionRowContainer = styled(CentredFlexRowSpaceBetweenContainer)`
   margin: 10px 16px;
 `;
 
-interface SignatureRequestPageProps {}
-
-export function SignatureRequestPage(props: SignatureRequestPageProps) {
+export function SignatureRequestPage() {
   const { t } = useTranslation();
 
-  const labelDict: Record<
+  const LABEL_DICT: Record<
     keyof SignatureRequest | keyof DeployArguments,
     string
   > = {
@@ -91,23 +74,29 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
 
   const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
-  const testEntryPoint = searchParams.get('testEntryPoint');
 
-  if (!requestId || !testEntryPoint) {
+  if (!requestId) {
     throw Error('Missing search param');
   }
 
   const activeAccount = useSelector(selectVaultActiveAccount);
+  if (activeAccount?.publicKey == null) {
+    throw Error('No active account');
+  }
 
-  const casperDeploy = useMockedDeployData(testEntryPoint);
-  const deployInfo = useDeriveDataFromDeployRaw(casperDeploy);
+  const deployJsonById = useSelector(selectDeploysJsonById);
+  const deployJson = deployJsonById[requestId];
+  const res = DeployUtil.deployFromJson(deployJson);
+  if (!res.ok) {
+    throw Error('Deploy Error');
+  }
+
+  const deploy = res.val;
+  const deployInfo = useDeriveDataFromDeployRaw(deploy);
 
   const handleSign = useCallback(() => {
-    if (activeAccount?.publicKey == null || activeAccount.secretKey == null) {
-      throw Error('No active account during signing');
-    }
     const signature = signDeploy(
-      casperDeploy.hash,
+      deploy.hash,
       activeAccount.publicKey,
       activeAccount.secretKey
     );
@@ -117,57 +106,23 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
   }, [
     activeAccount?.publicKey,
     activeAccount?.secretKey,
-    casperDeploy.hash,
+    deploy.hash,
     requestId
   ]);
 
-  // @ts-ignore
-  let signatureRequest: SignatureRequest = {};
-
-  if (activeAccount != null) {
-    signatureRequest = {
-      signingKey: activeAccount.publicKey,
-      account: deployInfo.account,
-      deployHash: deployInfo.deployHash,
-      timestamp: deployInfo.timestamp,
-      transactionFee: deployInfo.payment,
-      chainName: deployInfo.chainName,
-      deployType: deployInfo.deployType as DeployType
-    };
-  }
+  let signatureRequest: SignatureRequest = {
+    signingKey: 'SHOULD COME FROM DEPLOY',
+    account: deployInfo.account,
+    deployHash: deployInfo.deployHash,
+    timestamp: deployInfo.timestamp,
+    transactionFee: deployInfo.payment,
+    chainName: deployInfo.chainName,
+    deployType: deployInfo.deployType
+  };
 
   const deployArguments: DeployArguments = {
     //TODO: should be taken from casper deploy
   };
-
-  function renderRowValue(id: string, value: string) {
-    if (isKeyOfHashValue(id)) {
-      return (
-        <Hash
-          value={value}
-          variant={HashVariant.BodyHash}
-          color="contentPrimary"
-          truncated
-        />
-      );
-    }
-
-    if (isKeyOfPriceValue(id)) {
-      return (
-        <Hash
-          value={stringValueToNumberInStringWithSpaces(value)}
-          variant={HashVariant.BodyHash}
-          color="contentPrimary"
-        />
-      );
-    }
-
-    return (
-      <Typography type="body" weight="regular">
-        {value}
-      </Typography>
-    );
-  }
 
   return (
     <PageContainer>
@@ -180,7 +135,7 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
         <List
           rows={Object.entries(signatureRequest).map(([key, value]) => ({
             id: key,
-            label: labelDict[key as keyof typeof signatureRequest],
+            label: LABEL_DICT[key as keyof typeof signatureRequest],
             value
           }))}
           renderRow={({ id, label, value }) => (
@@ -188,7 +143,7 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
               <Typography type="body" weight="regular" color="contentSecondary">
                 {label}
               </Typography>
-              {renderRowValue(id, value)}
+              <SignatureRequestValue id={id} value={value} />
             </ListItemContainer>
           )}
           renderFooter={() => (
@@ -201,7 +156,7 @@ export function SignatureRequestPage(props: SignatureRequestPageProps) {
                       weight="regular"
                       color="contentSecondary"
                     >
-                      {labelDict[key as keyof typeof deployArguments]}
+                      {LABEL_DICT[key as keyof typeof deployArguments]}
                     </Typography>
                     {isKeyOfHashValue(key) ? (
                       <Hash

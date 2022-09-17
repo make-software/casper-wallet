@@ -44,7 +44,7 @@ export const sdkMessage = {
   >(),
   signRequest: createAction('CasperWalletProvider:Sign')<
     {
-      deployBytes: Uint8Array;
+      deployJson: string;
       signingPublicKeyHex: string;
       targetPublicKeyHex: string | undefined;
     },

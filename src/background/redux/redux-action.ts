@@ -1,9 +1,11 @@
 import { ActionType } from 'typesafe-actions';
 import * as vault from './vault/actions';
+import * as deploys from './deploys/actions';
 import * as windowManagement from './windowManagement/actions';
 
 const reduxAction = {
   vault,
+  deploys,
   windowManagement
 };
 

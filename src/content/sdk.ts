@@ -17,7 +17,7 @@ function fetchFromExtensionBackend<T extends SdkMessage['payload']>(
           `SDK RESPONSE TIMEOUT: ${requestAction.type}:${requestAction.meta.requestId}`
         )
       );
-    }, options?.timeout || 60000);
+    }, options?.timeout || /** 30min */ 30 * 60 * 1000);
 
     console.error('SDK SENT REQUEST:', JSON.stringify(requestAction));
     window.dispatchEvent(
@@ -114,7 +114,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       );
     },
     sign(
-      deployBytes: Uint8Array,
+      deployJson: string,
       signingPublicKeyHex: string,
       targetPublicKeyHex: string | undefined
     ): Promise<{ signature: Uint8Array }> {
@@ -123,7 +123,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       >(
         sdkMessage.signRequest(
           {
-            deployBytes,
+            deployJson,
             targetPublicKeyHex,
             signingPublicKeyHex
           },
@@ -133,7 +133,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         )
       );
     },
-    signMessage(rawMessage: string, signingPublicKey: string): Promise<string> {
+    signMessage(message: string, signingPublicKey: string): Promise<string> {
       throw Error('Not implementeed');
     }
   };

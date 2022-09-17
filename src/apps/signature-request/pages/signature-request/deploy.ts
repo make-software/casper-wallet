@@ -1,7 +1,7 @@
 import { encodeBase16 } from 'casper-js-sdk';
-import { CasperDeploy } from '../types';
+import { CasperDeploy, DeployType } from './types';
 
-export function getDeployType(deploy: CasperDeploy): string {
+export function getDeployType(deploy: CasperDeploy): DeployType {
   if (deploy.isTransfer()) {
     return 'Transfer Call';
   }

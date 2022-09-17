@@ -36,6 +36,7 @@ import {
   connectWindowInit,
   importWindowInit,
   popupWindowInit,
+  signWindowInit,
   windowIdChanged,
   windowIdCleared
 } from '@src/background/redux/windowManagement/actions';
@@ -45,16 +46,17 @@ import { isSDKMessage, SdkMessage, sdkMessage } from '@src/content/sdk-message';
 import { PurposeForOpening } from '@src/hooks';
 
 import { openWindow } from './open-window';
+import { deployPayloadReceived } from './redux/deploys/actions';
 
 browser.runtime.onInstalled.addListener(() => {
   // this will run on installation or update so
   // first clear previous rules, then register new rules
 });
 
-// two events at the same time start from the same storage state, will loose update
+// NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 browser.runtime.onMessage.addListener(
   (action: RootAction | SdkMessage, sender) => {
-    return new Promise(async sendResponse => {
+    return new Promise(async (sendResponse, sendReject) => {
       // Popup comms handling
       const store = await getMainStoreSingleton();
 
@@ -72,8 +74,10 @@ browser.runtime.onMessage.addListener(
               });
               success = true;
             }
-            sendResponse(sdkMessage.connectResponse(success, action.meta));
-            break;
+
+            return sendResponse(
+              sdkMessage.connectResponse(success, action.meta)
+            );
           }
 
           case getType(sdkMessage.disconnectRequest): {
@@ -96,8 +100,10 @@ browser.runtime.onMessage.addListener(
               );
               success = true;
             }
-            sendResponse(sdkMessage.disconnectResponse(success, action.meta));
-            break;
+
+            return sendResponse(
+              sdkMessage.disconnectResponse(success, action.meta)
+            );
           }
 
           case getType(sdkMessage.signRequest): {
@@ -105,43 +111,49 @@ browser.runtime.onMessage.addListener(
               selectIsActiveAccountConnectedWithOrigin(store.getState());
 
             if (isActiveAccountConnected) {
-              const query: Record<string, string> = {
-                requestId: action.meta.requestId
-              };
-
-              // !!! TEMPORARY SOLUTION FOR DEMO REASON ONLY. SHOULD BE DELETED !!!
-              if (action.payload.targetPublicKeyHex != null) {
-                query.testEntryPoint = action.payload.targetPublicKeyHex;
+              let deployJson;
+              try {
+                deployJson = JSON.parse(action.payload.deployJson);
+              } catch (err) {
+                return sendReject('Deploy json string parse error');
               }
 
+              store.dispatch(
+                deployPayloadReceived({
+                  id: action.meta.requestId,
+                  json: deployJson
+                })
+              );
               openWindow({
                 purposeForOpening: PurposeForOpening.SignatureRequest,
-                query
+                query: {
+                  requestId: action.meta.requestId
+                }
               });
             }
 
-            break;
+            return sendResponse(undefined);
           }
 
           case getType(sdkMessage.isConnectedRequest): {
             const isConnected = selectIsAnyAccountConnectedWithOrigin(
               store.getState()
             );
-            sendResponse(
+
+            return sendResponse(
               sdkMessage.isConnectedResponse(isConnected, action.meta)
             );
-            break;
           }
 
           case getType(sdkMessage.getActivePublicKeyRequest): {
             const activeAccount = selectVaultActiveAccount(store.getState());
-            sendResponse(
+
+            return sendResponse(
               sdkMessage.getActivePublicKeyResponse(
                 activeAccount?.publicKey,
                 action.meta
               )
             );
-            break;
           }
 
           case getType(sdkMessage.getVersionRequest): {
@@ -149,8 +161,9 @@ browser.runtime.onMessage.addListener(
             // temporary WORKAROUND for cspr.live connect
             const version = '1.4.12' || manifestData.version;
 
-            sendResponse(sdkMessage.getVersionResponse(version, action.meta));
-            break;
+            return sendResponse(
+              sdkMessage.getVersionResponse(version, action.meta)
+            );
           }
 
           default:
@@ -165,6 +178,7 @@ browser.runtime.onMessage.addListener(
           case getType(popupWindowInit):
           case getType(connectWindowInit):
           case getType(importWindowInit):
+          case getType(signWindowInit):
           case getType(windowIdChanged):
           case getType(windowIdCleared):
           case getType(vaultCreated):
@@ -182,8 +196,7 @@ browser.runtime.onMessage.addListener(
           case getType(accountDisconnected):
           case getType(allAccountsDisconnected):
             store.dispatch(action);
-            // true will wait for store to update and emit event
-            return true;
+            return sendResponse(undefined);
 
           // All below should be removed when Import Account is integrated with window
           case 'check-secret-key-exist' as any: {

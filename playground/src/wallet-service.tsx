@@ -1,3 +1,4 @@
+import { CasperServiceByJsonRPC } from 'casper-js-sdk';
 import React, {
   createContext,
   useCallback,
@@ -6,9 +7,14 @@ import React, {
   useState
 } from 'react';
 
-import { DeployUtil, CasperServiceByJsonRPC } from 'casper-js-sdk';
+import type { CasperWalletProvider } from '../../src/content/sdk';
 
-import { WalletState, SignerService } from './signer-service';
+const getCasperWalletInstance = (): ReturnType<typeof CasperWalletProvider> => {
+  try {
+    return new (window as any).CasperWalletProvider();
+  } catch (err) {}
+  throw Error('Please install the Casper Wallet Extension.');
+};
 
 const REDUX_WALLET_SYNC_KEY = 'cspr-redux-wallet-sync';
 type SyncWalletBroadcastMessage = {
@@ -18,22 +24,23 @@ type SyncWalletBroadcastMessage = {
 const GRPC_URL = 'https://casper-node-proxy.dev.make.services/rpc';
 export let casperService = new CasperServiceByJsonRPC(GRPC_URL);
 
+export type WalletState = {
+  isConnected: boolean;
+  isUnlocked: boolean;
+  activeKey: string;
+};
+
 type WalletService = {
   logs: [string, object][];
   errorMessage: string | null;
   activePublicKey: string | null;
   connectSigner: () => Promise<void>;
   disconnect: () => void;
-  signAndDeploy: (
-    deploy: any,
-    accountPublicKey: any,
-    recipientPublicKey?: any
-  ) => Promise<any>;
   sign: (
-    deploy: any,
-    accountPublicKey: any,
-    recipientPublicKey?: any
-  ) => Promise<any>;
+    deployJson: string,
+    accountPublicKey: string,
+    recipientPublicKey?: string
+  ) => Promise<{ signature: Uint8Array }>;
 };
 
 export const walletServiceContext = createContext<WalletService>({} as any);
@@ -95,6 +102,16 @@ export const WalletServiceProvider = props => {
 
   // SIGNER SUBSCRIPTIONS
   useEffect(() => {
+    const handleInitialState = (msg: any) => {
+      log('event:initialState', msg.detail);
+      try {
+        // const action: WalletState = JSON.parse(msg.detail);
+        // TODO: implement initial state logic
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
     const handleConnected = (msg: any) => {
       log('event:connected', msg.detail);
       try {
@@ -131,82 +148,43 @@ export const WalletServiceProvider = props => {
       }
     };
 
-    // const handleUnlocked = (msg: any) => {
-    //   log('event:unlocked', msg.detail);
-    //   try {
-    //     // const action: WalletState = JSON.parse(msg.detail);
-    //     // TODO
-    //   } catch (err) {
-    //     console.error(err);
-    //   }
-    // };
-
     // subscribe to signer events
+    window.addEventListener('signer:initialState', handleInitialState);
     window.addEventListener('signer:connected', handleConnected);
     window.addEventListener('signer:disconnected', handleDisconnected);
     window.addEventListener('signer:activeKeyChanged', handleActiveKeyChanged);
-    // window.addEventListener('signer:unlocked', handleUnlocked);
 
     return () => {
+      window.removeEventListener('signer:initialState', handleInitialState);
       window.removeEventListener('signer:connected', handleConnected);
       window.removeEventListener('signer:disconnected', handleDisconnected);
       window.removeEventListener(
         'signer:activeKeyChanged',
         handleActiveKeyChanged
       );
-      // window.removeEventListener('signer:unlocked', handleUnlocked);
-      SignerService.removeAllSubscribers();
     };
   }, [activePublicKey, updatePublicKey]);
 
   const disconnect = () => {
     console.log('disconnectRequest');
-    SignerService.disconnect();
+    getCasperWalletInstance().disconnectFromSite();
   };
 
   const connectSigner = async () => {
     console.log('connectRequest');
-    SignerService.sendConnectionRequest();
+    getCasperWalletInstance().requestConnection();
   };
 
-  const sign = (deploy, accountPublicKey, recipientPublicKey) => {
-    return SignerService.sign(
-      { deploy: {} },
+  const sign = async (
+    deployJson: string,
+    accountPublicKey: string,
+    recipientPublicKey?: string
+  ) => {
+    return getCasperWalletInstance().sign(
+      deployJson,
       accountPublicKey,
       recipientPublicKey
     );
-  };
-
-  const signAndDeploy = (deploy, accountPublicKey, recipientPublicKey) => {
-    const deployJson: any = DeployUtil.deployToJson(deploy);
-    // for debugging to casper team
-    // console.log(JSON.stringify(deployJson));
-
-    if (activePublicKey && accountPublicKey) {
-      // return window['casperlabsHelper'].sign(
-      return SignerService.sign(
-        deployJson,
-        accountPublicKey,
-        recipientPublicKey
-      ).then(signedDeployJson => {
-        const signedDeploy = DeployUtil.deployFromJson(signedDeployJson);
-
-        if (signedDeploy.ok) {
-          return casperService
-            .deploy(signedDeploy.val)
-            .then(res => {
-              return res;
-            })
-            .catch(err => {
-              setError(err);
-            });
-        } else {
-          setError(signedDeploy.val);
-        }
-      });
-    }
-
-    return Promise.reject('Account not connected');
   };
 
   const contextProps: WalletService = {
@@ -215,7 +193,6 @@ export const WalletServiceProvider = props => {
     activePublicKey: activePublicKey,
     connectSigner: connectSigner,
     disconnect: disconnect,
-    signAndDeploy: signAndDeploy,
     sign: sign
   };
 

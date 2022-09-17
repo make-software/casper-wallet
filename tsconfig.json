@@ -29,6 +29,6 @@
       "@testHelpers/*": ["__testHelpers__/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "playground/src/mocked-data.ts"],
   "exclude": ["build", "output", "node_modules"]
 }
