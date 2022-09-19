@@ -31,6 +31,7 @@ export const themeConfig = {
     backgroundPrimary: '#FFFFFF',
     backgroundSecondary: '#F5F6F7',
     backgroundBlue: '#0A2EBF',
+    backgroundRed: '#C2000E',
 
     borderPrimary: '#E8E9EC',
 
