@@ -103,6 +103,7 @@ export function SignatureRequestPage() {
     emitSdkEventToAllActiveTabs(
       sdkMessage.signResponse({ signature }, { requestId })
     );
+    closeActiveWindow();
   }, [
     activeAccount?.publicKey,
     activeAccount?.secretKey,

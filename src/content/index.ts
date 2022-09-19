@@ -81,7 +81,7 @@ async function handleOnMessage(message: SdkEvent | SdkMessage) {
 }
 
 // SDK Message proxy to the backend
-async function handleSdkRequest(e: Event) {
+function handleSdkRequest(e: Event) {
   const requestAction = (e as CustomEvent).detail;
   // validation
   if (!isSDKMessage(requestAction)) {
@@ -89,20 +89,22 @@ async function handleSdkRequest(e: Event) {
       'Content: invalid sdk requestAction.' + JSON.stringify(requestAction)
     );
   }
-  const responseAction = await browser.runtime
+  browser.runtime
     .sendMessage(requestAction)
+    .then(responseAction => {
+      console.log(responseAction);
+      // if valid message send back response
+      if (isSDKMessage(responseAction)) {
+        window.dispatchEvent(
+          new CustomEvent(sdkMessageProxyEvents.SDKResponseAction, {
+            detail: JSON.stringify(responseAction)
+          })
+        );
+      }
+    })
     .catch(err => {
       throw Error('Content: sdk request send message:' + err);
     });
-
-  // if valid message send back response
-  if (isSDKMessage(responseAction)) {
-    window.dispatchEvent(
-      new CustomEvent(sdkMessageProxyEvents.SDKResponseAction, {
-        detail: JSON.stringify(responseAction)
-      })
-    );
-  }
 }
 
 // inject sdk script - idempotent, doesn't need cleanup

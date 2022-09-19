@@ -40,7 +40,7 @@ function App() {
       const deployJson = DeployUtil.deployToJson(deploy);
       sign(JSON.stringify(deployJson), activePublicKey, 'undelegate').then(
         res => {
-          alert('Sign successful: ' + res.signature);
+          alert('Sign successful: ' + Object.values(res.signature).toString());
         }
       );
     }

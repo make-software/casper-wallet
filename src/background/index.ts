@@ -7,8 +7,8 @@ import {
 } from '@src/background/redux/import-account-actions-should-be-removed';
 import { isReduxAction } from '@src/background/redux/redux-action';
 import {
-  getMainStoreSingleton,
-  REDUX_STORAGE_KEY
+  getMainStoreSingleton
+  // REDUX_STORAGE_KEY
 } from '@src/background/redux/utils';
 import {
   accountDisconnected,
@@ -55,16 +55,15 @@ browser.runtime.onInstalled.addListener(() => {
   // this will run on installation or update so
   // first clear previous rules, then register new rules
   // DEV MODE: clean store on installation
-  browser.storage.local.remove([REDUX_STORAGE_KEY]);
+  // browser.storage.local.remove([REDUX_STORAGE_KEY]);
 });
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 browser.runtime.onMessage.addListener(
   (action: RootAction | SdkMessage, sender) => {
-    return new Promise(async (sendResponse, sendReject) => {
+    return new Promise(async (sendResponse, sendError) => {
       // Popup comms handling
       const store = await getMainStoreSingleton();
-
       if (isSDKMessage(action)) {
         console.error(`BACKEND SDK MESSAGE:`, JSON.stringify(action));
 
@@ -115,27 +114,31 @@ browser.runtime.onMessage.addListener(
             const isActiveAccountConnected =
               selectIsActiveAccountConnectedWithOrigin(store.getState());
 
-            if (isActiveAccountConnected) {
-              let deployJson;
-              try {
-                deployJson = JSON.parse(action.payload.deployJson);
-              } catch (err) {
-                return sendReject('Deploy json string parse error');
-              }
-
-              store.dispatch(
-                deployPayloadReceived({
-                  id: action.meta.requestId,
-                  json: deployJson
-                })
-              );
-              openWindow({
-                purposeForOpening: PurposeForOpening.SignatureRequest,
-                query: {
-                  requestId: action.meta.requestId
-                }
-              });
+            // TODO PIOTR: Not connected error should be shown on every SDK call
+            // need to design a global error handling
+            if (!isActiveAccountConnected) {
+              return sendError('Active account not connected.');
             }
+
+            let deployJson;
+            try {
+              deployJson = JSON.parse(action.payload.deployJson);
+            } catch (err) {
+              return sendError('Deploy json string parse error');
+            }
+
+            store.dispatch(
+              deployPayloadReceived({
+                id: action.meta.requestId,
+                json: deployJson
+              })
+            );
+            openWindow({
+              purposeForOpening: PurposeForOpening.SignatureRequest,
+              query: {
+                requestId: action.meta.requestId
+              }
+            });
 
             return sendResponse(undefined);
           }
