@@ -124,7 +124,7 @@
     "prettier": "^2.5.1",
     "remote-redux-devtools": "^0.5.16",
     "selenium-webdriver": "^4.1.1",
-    "source-map-loader": "^3.0.0",
+    "source-map-loader": "^4.0.0",
     "style-loader": "^3.3.1",
     "terser-webpack-plugin": "^5.3.5",
     "ts-jest": "29.0.1",
