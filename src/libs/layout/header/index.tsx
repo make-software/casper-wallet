@@ -2,27 +2,26 @@ import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 
 import { HeaderContainer, Logo, LogoContainer } from '@src/libs/layout';
-// import { HeaderConnectionStatus } from '@src/libs/layout/header/header-connection-status';
+import { HeaderConnectionStatus } from '@src/libs/layout/header/header-connection-status';
 
 import { HeaderActions } from './header-actions';
 import { HeaderSubmenuBar } from './header-submenu-bar';
 import { SubmenuActionType } from '../types';
 
-const CentredFlexRow = styled.div`
+const LeftAlignedContainer = styled.div`
   display: flex;
-  width: 100%;
-
+  justify-content: flex-start;
   align-items: center;
 `;
 
-const SpaceBetweenContainer = styled(CentredFlexRow)`
-  justify-content: space-between;
-  padding-left: 20px;
+const LogoAndConnectionStatusContainer = styled(LeftAlignedContainer)`
+  gap: 18px;
 `;
 
 interface HeaderProps {
   withLock?: boolean;
   withMenu?: boolean;
+  withConnectionStatus?: boolean;
   submenuActionType?: SubmenuActionType;
   SubmenuActionGroup?: ReactElement;
 }
@@ -30,19 +29,21 @@ interface HeaderProps {
 export function PopupHeader({
   withLock,
   withMenu,
+  withConnectionStatus,
   submenuActionType,
   SubmenuActionGroup
 }: HeaderProps) {
   return (
     <>
       <HeaderContainer>
-        <LogoContainer>
-          <Logo />
-        </LogoContainer>
-        <SpaceBetweenContainer>
-          {/* <HeaderConnectionStatus /> */}
-          <HeaderActions withMenu={withMenu} withLock={withLock} />
-        </SpaceBetweenContainer>
+        <LogoAndConnectionStatusContainer>
+          <LogoContainer>
+            <Logo />
+          </LogoContainer>
+          {withConnectionStatus && <HeaderConnectionStatus />}
+        </LogoAndConnectionStatusContainer>
+
+        <HeaderActions withMenu={withMenu} withLock={withLock} />
       </HeaderContainer>
       {submenuActionType && (
         <HeaderSubmenuBar
