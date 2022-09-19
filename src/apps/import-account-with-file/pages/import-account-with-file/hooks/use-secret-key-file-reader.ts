@@ -105,11 +105,7 @@ export function useSecretKeyFileReader({
 
           onSuccess({
             name,
-            secretKey: Buffer.from(keyPair.privateKey).toString(
-              'base64',
-              0,
-              32
-            ),
+            secretKey: Buffer.from(keyPair.privateKey).toString('base64'),
             publicKey: keyPair.publicKey.toHex()
           });
         } catch (e) {

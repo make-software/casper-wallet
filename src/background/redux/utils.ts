@@ -27,7 +27,7 @@ export const composeEnhancers =
       })
     : compose;
 
-const REDUX_STORAGE_KEY = 'redux-storage';
+export const REDUX_STORAGE_KEY = 'redux-storage';
 
 // this needs to be private
 let storeSingleton: ReturnType<typeof createStore>;

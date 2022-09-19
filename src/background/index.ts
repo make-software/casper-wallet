@@ -6,7 +6,10 @@ import {
   CheckSecretKeyExistAction
 } from '@src/background/redux/import-account-actions-should-be-removed';
 import { isReduxAction } from '@src/background/redux/redux-action';
-import { getMainStoreSingleton } from '@src/background/redux/utils';
+import {
+  getMainStoreSingleton,
+  REDUX_STORAGE_KEY
+} from '@src/background/redux/utils';
 import {
   accountDisconnected,
   accountImported,
@@ -51,6 +54,8 @@ import { deployPayloadReceived } from './redux/deploys/actions';
 browser.runtime.onInstalled.addListener(() => {
   // this will run on installation or update so
   // first clear previous rules, then register new rules
+  // DEV MODE: clean store on installation
+  browser.storage.local.remove([REDUX_STORAGE_KEY]);
 });
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance

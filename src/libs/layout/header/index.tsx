@@ -2,7 +2,7 @@ import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 
 import { HeaderContainer, Logo, LogoContainer } from '@src/libs/layout';
-import { HeaderConnectionStatus } from '@src/libs/layout/header/header-connection-status';
+// import { HeaderConnectionStatus } from '@src/libs/layout/header/header-connection-status';
 
 import { HeaderActions } from './header-actions';
 import { HeaderSubmenuBar } from './header-submenu-bar';
@@ -40,7 +40,7 @@ export function PopupHeader({
           <Logo />
         </LogoContainer>
         <SpaceBetweenContainer>
-          <HeaderConnectionStatus />
+          {/* <HeaderConnectionStatus /> */}
           <HeaderActions withMenu={withMenu} withLock={withLock} />
         </SpaceBetweenContainer>
       </HeaderContainer>

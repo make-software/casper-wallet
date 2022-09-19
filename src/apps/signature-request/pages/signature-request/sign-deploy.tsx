@@ -1,4 +1,4 @@
-import { CLPublicKey, CLPublicKeyTag, Keys, decodeBase64 } from 'casper-js-sdk';
+import { CLPublicKey, CLPublicKeyTag, decodeBase64, Keys } from 'casper-js-sdk';
 
 export const signDeploy = (
   deployHash: Uint8Array,
@@ -8,7 +8,6 @@ export const signDeploy = (
   const clPublicKey = CLPublicKey.fromHex(publicKeyHex);
   const publicKey = clPublicKey.value();
   const secretKey = decodeBase64(privateKeyBase64);
-  console.log('SIGN', publicKeyHex, privateKeyBase64);
 
   let signingKey: Keys.AsymmetricKey;
   switch (clPublicKey.tag) {
@@ -35,13 +34,3 @@ export const signDeploy = (
   return signature;
   // return new Uint8Array([]);
 };
-
-const pk = '01f9631111f51219ac0b96ce69ffd9f8fc274a744a8e3e77cd7b18f8b5d4bcf39a';
-const sk = '0Z4EkL1TStnELE1QL2IgtjiOem3mjMp4WHOX91Er6Lc=';
-const hash = Buffer.from(
-  'cffc63f9c514bfc78c53852705f556b8a4fd5bfd6e073a66952ece942bdf19e0',
-  'hex'
-);
-
-const res = signDeploy(hash, pk, sk);
-console.log(res);
