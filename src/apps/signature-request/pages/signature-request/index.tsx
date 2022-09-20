@@ -69,6 +69,9 @@ export function SignatureRequestPage() {
     timestamp: t('Timestamp'),
     deployType: t('Deploy type'),
     chainName: t('Chain name'),
+    recipientKey: t('Recipient (Key)'),
+    recipientHash: t('Recipient (Hash)'),
+    newValidator: t('New validator'),
     entryPoint: t('Entry point')
   };
 
@@ -122,7 +125,7 @@ export function SignatureRequestPage() {
   };
 
   const deployArguments: DeployArguments = {
-    //TODO: should be taken from casper deploy
+    ...deployInfo.deployArgs
   };
 
   return (
@@ -167,9 +170,7 @@ export function SignatureRequestPage() {
                         truncated
                       />
                     ) : (
-                      <Typography type="body" weight="regular">
-                        {value}
-                      </Typography>
+                      <SignatureRequestValue id={key} value={value} />
                     )}
                   </AccordionRowContainer>
                 ))
