@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { formatTimestamp } from '@libs/ui/utils/formatters';
+import { formatNumber, formatTimestamp } from '@libs/ui/utils/formatters';
 import {
   CSPR,
   Hash,
@@ -13,6 +13,7 @@ import { capitalizeString } from '@src/utils/helpers';
 
 import {
   isKeyOfHashValue,
+  isKeyOfIdValue,
   isKeyOfPriceValue,
   isKeyOfTimestampValue
 } from './types';
@@ -40,6 +41,16 @@ export function SignatureRequestValue({
       <Typography type="body" weight="regular">
         <CSPR motes={value} precisionCase={PrecisionCase.full} />
       </Typography>
+    );
+  }
+
+  if (isKeyOfIdValue(id)) {
+    return (
+      <Hash
+        value={formatNumber(value)}
+        variant={HashVariant.BodyHash}
+        color="contentPrimary"
+      />
     );
   }
 

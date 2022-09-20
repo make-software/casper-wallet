@@ -49,9 +49,19 @@ export const isKeyOfHashValue = (key: string) => {
 
 export const isKeyOfPriceValue = (key: string) => {
   const keysOfPriceValues: (keyof SignatureRequest | keyof DeployArguments)[] =
-    ['amount', 'transferId', 'transactionFee'];
+    ['amount', 'transactionFee'];
 
   return keysOfPriceValues.includes(
+    key as keyof SignatureRequest | keyof DeployArguments
+  );
+};
+
+export const isKeyOfIdValue = (key: string) => {
+  const keysOfIdValues: (keyof SignatureRequest | keyof DeployArguments)[] = [
+    'transferId'
+  ];
+
+  return keysOfIdValues.includes(
     key as keyof SignatureRequest | keyof DeployArguments
   );
 };
