@@ -21,10 +21,13 @@ export type SignatureRequest = {
 export type DeployArguments = {
   delegator?: string;
   validator?: string;
+  newValidator?: string;
   amount?: string;
   recipient?: string;
   transferId?: string;
   entryPoint?: string;
+  recipientKey?: string;
+  recipientHash?: string;
 };
 
 export const isKeyOfHashValue = (key: string) => {
@@ -34,7 +37,10 @@ export const isKeyOfHashValue = (key: string) => {
     'deployHash',
     'delegator',
     'validator',
-    'recipient'
+    'newValidator',
+    'recipient',
+    'recipientKey',
+    'recipientHash'
   ];
   return keysOfHashValues.includes(
     key as keyof SignatureRequest | keyof DeployArguments
@@ -46,6 +52,17 @@ export const isKeyOfPriceValue = (key: string) => {
     ['amount', 'transferId', 'transactionFee'];
 
   return keysOfPriceValues.includes(
+    key as keyof SignatureRequest | keyof DeployArguments
+  );
+};
+
+export const isKeyOfTimestampValue = (key: string) => {
+  const keysOfTimestampValues: (
+    | keyof SignatureRequest
+    | keyof DeployArguments
+  )[] = ['timestamp'];
+
+  return keysOfTimestampValues.includes(
     key as keyof SignatureRequest | keyof DeployArguments
   );
 };
