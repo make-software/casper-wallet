@@ -115,7 +115,7 @@ export function SignatureRequestPage() {
   ]);
 
   let signatureRequest: SignatureRequest = {
-    signingKey: 'SHOULD COME FROM DEPLOY',
+    signingKey: deployInfo.signingKey,
     account: deployInfo.account,
     deployHash: deployInfo.deployHash,
     timestamp: deployInfo.timestamp,

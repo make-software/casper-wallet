@@ -16,8 +16,9 @@ export function useDeriveDataFromDeployRaw(deploy: CasperDeploy) {
   const deployArgs = getDeployArgs(deploy);
 
   return {
-    deployHash: bytesToHex(deploy.hash),
+    signingKey: account.toHex(),
     account: account.toHex(),
+    deployHash: bytesToHex(deploy.hash),
     bodyHash: bytesToHex(bodyHash),
     gasPrice: gasPrice.toString(),
     timestamp: timestamp.toString(),
