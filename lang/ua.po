@@ -98,7 +98,7 @@ msgid "Your vault will be automatically locked after some period of inactivity."
 msgstr "Ваше сховище буде автоматично заблоковано після певного періоду бездіяльності."
 
 msgid "Password is not correct"
-msgstr "Пароль не вірний"
+msgstr "Пароль неправильний"
 
 msgid "Your vault is locked"
 msgstr "Ваше сховище заблоковано"
