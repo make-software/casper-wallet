@@ -43,7 +43,7 @@ msgid "Create account"
 msgstr "Створити обліковий запис"
 
 msgid "Import account"
-msgstr "Імпорт облікового запису"
+msgstr "Імпортувати обліковий запис"
 
 msgid "Connected sites"
 msgstr "Підключені сайти"

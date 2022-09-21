@@ -43,7 +43,7 @@ msgid "Create account"
 msgstr "Создать учетную запись"
 
 msgid "Import account"
-msgstr "Импорт учетной записи"
+msgstr "Импортировать учетную запись"
 
 msgid "Connected sites"
 msgstr "Подключенные сайты"
