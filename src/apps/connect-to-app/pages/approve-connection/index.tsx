@@ -79,7 +79,7 @@ export function ApproveConnectionPage({
         <HeaderTextContainer>
           <SiteFaviconBadge origin={origin} />
           <HeaderTextContent>
-            <Typography type="header" weight="bold">
+            <Typography type="header">
               <Trans t={t}>{headerText}</Trans>
             </Typography>
           </HeaderTextContent>
@@ -94,9 +94,7 @@ export function ApproveConnectionPage({
                 size={24}
                 color="contentTertiary"
               />
-              <Typography type="body" weight="regular">
-                {listItem.text}
-              </Typography>
+              <Typography type="body">{listItem.text}</Typography>
             </ListItemContainer>
           )}
           marginLeftForItemSeparatorLine={60}
@@ -104,7 +102,7 @@ export function ApproveConnectionPage({
       </ContentContainer>
       <FooterButtonsContainer>
         <TextCentredContainer>
-          <Typography type="caption" weight="regular">
+          <Typography type="captionRegular">
             <Trans t={t}>Only connect with sites you trust</Trans>
           </Typography>
         </TextCentredContainer>

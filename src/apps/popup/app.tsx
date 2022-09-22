@@ -4,10 +4,10 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
 
-import { HeaderSubmenuBar, Layout } from '@src/libs/layout';
+import { HeaderSubmenuBarNavLink, Layout } from '@src/libs/layout';
 
 import { CreateVaultPageContent } from '@popup/pages/create-vault';
-import { HomePageContent, HomePageSubmenuActionGroup } from '@popup/pages/home';
+import { HomePageContent, HomePageHeaderSubmenuItems } from '@popup/pages/home';
 import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
 import { NoAccountsPageContent } from '@popup/pages/no-accounts';
 import { ResetVaultPageContent } from '@popup/pages/reset-vault';
@@ -137,30 +137,12 @@ function UnlockedRouter() {
               <PopupHeader
                 withMenu
                 withLock
-                renderActionGroup={() => <HomePageSubmenuActionGroup />}
-              />
-            }
-            Content={<HomePageContent />}
-          />
-        }
-      />
-      <Route
-        path={RouterPath.AccountSettings}
-        element={
-          <Layout
-            Header={
-              <PopupHeader
-                withLock
-                withMenu
-                renderActionGroup={() => (
-                  <HeaderSubmenuBar
-                    actionType="close"
-                    ActionGroup={<AccountSettingsActionsGroup />}
-                  />
+                renderSubmenuBarItems={() => (
+                  <HomePageHeaderSubmenuItems linkType="switchAccount" />
                 )}
               />
             }
-            Content={<AccountSettingsPageContent />}
+            Content={<HomePageContent />}
           />
         }
       />
@@ -172,10 +154,32 @@ function UnlockedRouter() {
               <PopupHeader
                 withLock
                 withMenu
-                renderActionGroup={() => <HeaderSubmenuBar actionType="back" />}
+                renderSubmenuBarItems={() => (
+                  <HomePageHeaderSubmenuItems linkType="done" />
+                )}
               />
             }
             Content={<AccountListPage />}
+          />
+        }
+      />
+      <Route
+        path={RouterPath.AccountSettings}
+        element={
+          <Layout
+            Header={
+              <PopupHeader
+                withLock
+                withMenu
+                renderSubmenuBarItems={() => (
+                  <>
+                    <HeaderSubmenuBarNavLink linkType="close" />
+                    <AccountSettingsActionsGroup />
+                  </>
+                )}
+              />
+            }
+            Content={<AccountSettingsPageContent />}
           />
         }
       />
@@ -187,8 +191,8 @@ function UnlockedRouter() {
               <PopupHeader
                 withMenu
                 withLock
-                renderActionGroup={() => (
-                  <HeaderSubmenuBar actionType="close" />
+                renderSubmenuBarItems={() => (
+                  <HeaderSubmenuBarNavLink linkType="close" />
                 )}
               />
             }
@@ -204,7 +208,9 @@ function UnlockedRouter() {
               <PopupHeader
                 withLock
                 withMenu
-                renderActionGroup={() => <HeaderSubmenuBar actionType="back" />}
+                renderSubmenuBarItems={() => (
+                  <HeaderSubmenuBarNavLink linkType="back" />
+                )}
               />
             }
             Content={<RemoveAccountPageContent />}
@@ -219,7 +225,9 @@ function UnlockedRouter() {
               <PopupHeader
                 withLock
                 withMenu
-                renderActionGroup={() => <HeaderSubmenuBar actionType="back" />}
+                renderSubmenuBarItems={() => (
+                  <HeaderSubmenuBarNavLink linkType="back" />
+                )}
               />
             }
             Content={<RenameAccountPageContent />}
@@ -243,8 +251,8 @@ function UnlockedRouter() {
               <PopupHeader
                 withLock
                 withMenu
-                renderActionGroup={() => (
-                  <HeaderSubmenuBar actionType="cancel" />
+                renderSubmenuBarItems={() => (
+                  <HeaderSubmenuBarNavLink linkType="cancel" />
                 )}
               />
             }
@@ -260,7 +268,9 @@ function UnlockedRouter() {
               <PopupHeader
                 withMenu
                 withLock
-                renderActionGroup={() => <HeaderSubmenuBar actionType="back" />}
+                renderSubmenuBarItems={() => (
+                  <HeaderSubmenuBarNavLink linkType="back" />
+                )}
               />
             }
             Content={<ConnectedSitesPage />}

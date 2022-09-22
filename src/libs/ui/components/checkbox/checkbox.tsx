@@ -60,7 +60,7 @@ export function Checkbox({
     >
       <SvgIcon src={iconSrc} size={24} />
       {label && (
-        <Typography type="body" weight="regular" color="contentPrimary">
+        <Typography type="body" color="contentPrimary">
           {label}
         </Typography>
       )}

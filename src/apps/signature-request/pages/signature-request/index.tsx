@@ -129,7 +129,7 @@ export function SignatureRequestPage() {
     <PageContainer>
       <ContentContainer>
         <HeaderTextContainer>
-          <Typography type="header" weight="bold">
+          <Typography type="header">
             <Trans t={t}>Signature Request</Trans>
           </Typography>
         </HeaderTextContainer>
@@ -141,7 +141,7 @@ export function SignatureRequestPage() {
           }))}
           renderRow={({ id, label, value }) => (
             <ListItemContainer key={id}>
-              <Typography type="body" weight="regular" color="contentSecondary">
+              <Typography type="body" color="contentSecondary">
                 {label}
               </Typography>
               <SignatureRequestValue id={id} value={value} />
@@ -152,11 +152,7 @@ export function SignatureRequestPage() {
               renderContent={() =>
                 Object.entries(deployArguments).map(([key, value]) => (
                   <AccordionRowContainer key={key}>
-                    <Typography
-                      type="body"
-                      weight="regular"
-                      color="contentSecondary"
-                    >
+                    <Typography type="body" color="contentSecondary">
                       {LABEL_DICT[key as keyof typeof deployArguments]}
                     </Typography>
                     {isKeyOfHashValue(key) ? (
@@ -167,16 +163,14 @@ export function SignatureRequestPage() {
                         truncated
                       />
                     ) : (
-                      <Typography type="body" weight="regular">
-                        {value}
-                      </Typography>
+                      <Typography type="body">{value}</Typography>
                     )}
                   </AccordionRowContainer>
                 ))
               }
               children={({ isOpen }) => (
                 <AccordionHeaderContainer>
-                  <Typography type="body" weight="bold">
+                  <Typography type="bodySemiBold">
                     {signatureRequest.deployType === 'Contract Call'
                       ? t('Contract arguments')
                       : t('Transfer Data')}

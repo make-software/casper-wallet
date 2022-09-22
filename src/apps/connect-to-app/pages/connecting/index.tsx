@@ -51,7 +51,7 @@ export function ConnectingPage() {
 
   return (
     <PageContainer>
-      <Typography type="header" weight="bold">
+      <Typography type="header">
         <Trans t={t}>Connecting</Trans>
       </Typography>
       <IconsContainer>

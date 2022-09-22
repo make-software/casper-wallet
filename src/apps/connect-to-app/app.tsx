@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { RouterPath } from '@connect-to-app/router';
-import { HeaderSubmenuBar, LayoutWindow, PopupHeader } from '@src/libs/layout';
+import {
+  HeaderSubmenuBarNavLink,
+  LayoutWindow,
+  PopupHeader
+} from '@src/libs/layout';
 import { AccountsSelectionPage } from '@connect-to-app/pages/accounts-selection';
 import { ApproveConnectionPage } from '@connect-to-app/pages/approve-connection';
 import { ConnectingPage } from '@connect-to-app/pages/connecting';
@@ -42,8 +46,8 @@ export function App() {
           <LayoutWindow
             Header={
               <PopupHeader
-                renderActionGroup={() => (
-                  <HeaderSubmenuBar actionType="cancel" />
+                renderSubmenuBarItems={() => (
+                  <HeaderSubmenuBarNavLink linkType="cancel" />
                 )}
               />
             }
@@ -64,7 +68,9 @@ export function App() {
           <LayoutWindow
             Header={
               <PopupHeader
-                renderActionGroup={() => <HeaderSubmenuBar actionType="back" />}
+                renderSubmenuBarItems={() => (
+                  <HeaderSubmenuBarNavLink linkType="back" />
+                )}
               />
             }
             Content={

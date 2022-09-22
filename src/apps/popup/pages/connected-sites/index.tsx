@@ -25,7 +25,7 @@ export function ConnectedSitesPage() {
   return (
     <ContentContainer>
       <HeaderTextContainer>
-        <Typography type="header" weight="bold">
+        <Typography type="header">
           <Trans t={t}>Connected sites</Trans>
         </Typography>
       </HeaderTextContainer>

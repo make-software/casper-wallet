@@ -4,11 +4,17 @@ import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
 import styled, { css } from 'styled-components';
 
-import { ContentContainer } from '@src/libs/layout/containers';
+import {
+  CenteredFlexColumn,
+  ContentContainer,
+  LeftAlignedFlexColumn
+} from '@src/libs/layout/containers';
+
+import { LinkType, HeaderSubmenuBarNavLink } from '@libs/layout';
+
 import {
   Button,
   Hash,
-  Link,
   HashVariant,
   SvgIcon,
   PageTile,
@@ -25,7 +31,6 @@ import {
   selectCountOfAccounts
 } from '@src/background/redux/vault/selectors';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
-import { SubmenuBarContainer } from '@layout/header/header-submenu-bar';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
@@ -34,12 +39,6 @@ import { ConnectionStatusBadge } from './components/connection-status-badge';
 const fullWidthAndMarginTop = css`
   margin-top: 16px;
   width: 100%;
-`;
-
-const CenteredFlexColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 `;
 
 const AvatarContainer = styled(CenteredFlexColumn)`
@@ -58,37 +57,9 @@ const BalanceContainer = styled(CenteredFlexColumn)`
 
 // List of accounts
 
-export const ListItemContainer = styled.div`
-  display: flex;
-
-  min-height: 50px;
-  height: 100%;
-`;
-
-const LeftAlignedFlexColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-`;
-
-export const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
-export const AccountNameWithHashListItemContainer = styled(
-  LeftAlignedFlexColumn
-)`
-  width: 100%;
-`;
-
 const BalanceInCSPRsContainer = styled.div`
   display: flex;
   gap: 8px;
-`;
-
-export const ListItemBurgerMenuContainer = styled.div`
-  display: flex;
-  align-items: center;
-
-  padding: 14px 18px;
-  cursor: pointer;
 `;
 
 const ButtonsContainer = styled.div`
@@ -133,14 +104,15 @@ export function HomePageContent() {
     <ContentContainer>
       {activeAccount && (
         <PageTile>
-          <ConnectionStatusBadge isConnected={isActiveAccountConnected} />
+          <ConnectionStatusBadge
+            isConnected={isActiveAccountConnected}
+            displayContext="home"
+          />
           <AvatarContainer>
             <SvgIcon src="assets/icons/default-avatar.svg" size={120} />
           </AvatarContainer>
           <NameAndAddressContainer>
-            <Typography type="body" weight="semiBold">
-              {activeAccount.name}
-            </Typography>
+            <Typography type="bodySemiBold">{activeAccount.name}</Typography>
             <Hash
               value={activeAccount.publicKey}
               variant={HashVariant.CaptionHash}
@@ -150,14 +122,12 @@ export function HomePageContent() {
           </NameAndAddressContainer>
           <BalanceContainer>
             <BalanceInCSPRsContainer>
-              <Typography type="CSPR" weight="bold">
-                2,133,493
-              </Typography>
-              <Typography type="CSPR" weight="light" color="contentSecondary">
+              <Typography type="CSPRBold">2,133,493</Typography>
+              <Typography type="CSPRLight" color="contentSecondary">
                 CSPR
               </Typography>
             </BalanceInCSPRsContainer>
-            <Typography type="body" weight="regular" color="contentSecondary">
+            <Typography type="body" color="contentSecondary">
               $30,294.34
             </Typography>
           </BalanceContainer>
@@ -202,33 +172,29 @@ export function HomePageContent() {
   );
 }
 
-export function HomePageSubmenuActionGroup() {
-  const navigate = useTypedNavigate();
-  const { t } = useTranslation();
+interface HomePageHeaderSubmenuItemsProps {
+  linkType: LinkType;
+}
 
+export function HomePageHeaderSubmenuItems({
+  linkType
+}: HomePageHeaderSubmenuItemsProps) {
+  const { t } = useTranslation();
   const countOfAccounts = useSelector(selectCountOfAccounts);
 
   return (
-    <SubmenuBarContainer>
+    <>
       <LeftAlignedFlexColumn>
-        <Typography type="body" weight="regular">
+        <Typography type="body">
           <Trans t={t}>Accounts list</Trans>
         </Typography>
 
-        <Typography
-          type="listSubtext"
-          weight="regular"
-          color="contentSecondary"
-        >
+        <Typography type="listSubtext" color="contentSecondary">
           {countOfAccounts} {countOfAccounts > 1 ? t('accounts') : t('account')}
         </Typography>
       </LeftAlignedFlexColumn>
 
-      <Typography type="body" weight="bold">
-        <Link color="fillBlue" onClick={() => navigate(RouterPath.AccountList)}>
-          <Trans t={t}>Switch account</Trans>
-        </Link>
-      </Typography>
-    </SubmenuBarContainer>
+      <HeaderSubmenuBarNavLink linkType={linkType} />
+    </>
   );
 }

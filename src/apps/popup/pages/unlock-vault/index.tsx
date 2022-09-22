@@ -49,12 +49,12 @@ export function UnlockVaultPageContent() {
     <form onSubmit={handleSubmit(handleUnlockVault)}>
       <ContentContainer>
         <HeaderTextContainer>
-          <Typography type="header" weight="bold">
+          <Typography type="header">
             <Trans t={t}>Your vault is locked</Trans>
           </Typography>
         </HeaderTextContainer>
         <TextContainer>
-          <Typography type="body" weight="regular" color="contentSecondary">
+          <Typography type="body" color="contentSecondary">
             <Trans t={t}>Please enter the password to unlock.</Trans>
           </Typography>
         </TextContainer>

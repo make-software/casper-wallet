@@ -1,33 +1,38 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { HeaderContainer, Logo, LogoContainer } from '@src/libs/layout';
+import {
+  HeaderContainer,
+  Logo,
+  LogoContainer,
+  CenteredSpaceBetweenFlexRow
+} from '@src/libs/layout';
 // import { HeaderConnectionStatus } from '@src/libs/layout/header/header-connection-status';
 
 import { HeaderActions } from './header-actions';
 
-const CentredFlexRow = styled.div`
-  display: flex;
+const SpaceBetweenContainer = styled(CenteredSpaceBetweenFlexRow)`
   width: 100%;
-
-  align-items: center;
+  padding-left: 20px;
 `;
 
-const SpaceBetweenContainer = styled(CentredFlexRow)`
-  justify-content: space-between;
-  padding-left: 20px;
+const SubmenuBarContainer = styled(CenteredSpaceBetweenFlexRow)`
+  height: 56px;
+  background-color: ${({ theme }) => theme.color.backgroundPrimary};
+  border-bottom: 0.5px solid ${({ theme }) => theme.color.borderPrimary};
+  padding: 8px ${({ theme }) => theme.padding[1.6]};
 `;
 
 interface HeaderProps {
   withLock?: boolean;
   withMenu?: boolean;
-  renderActionGroup?: () => JSX.Element;
+  renderSubmenuBarItems?: () => JSX.Element;
 }
 
 export function PopupHeader({
   withLock,
   withMenu,
-  renderActionGroup
+  renderSubmenuBarItems
 }: HeaderProps) {
   return (
     <>
@@ -40,9 +45,11 @@ export function PopupHeader({
           <HeaderActions withMenu={withMenu} withLock={withLock} />
         </SpaceBetweenContainer>
       </HeaderContainer>
-      {renderActionGroup && renderActionGroup()}
+      {renderSubmenuBarItems && (
+        <SubmenuBarContainer>{renderSubmenuBarItems()}</SubmenuBarContainer>
+      )}
     </>
   );
 }
 
-export * from './header-submenu-bar';
+export * from './header-submenu-bar-nav-link';

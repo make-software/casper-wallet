@@ -16,7 +16,8 @@ import {
   ContentContainer,
   HeaderTextContainer,
   ListItemClickableContainer,
-  FooterButtonsContainer
+  FooterButtonsContainer,
+  LeftAlignedFlexColumn
 } from '@src/libs/layout/containers';
 
 import { useTranslation, Trans } from 'react-i18next';
@@ -25,10 +26,6 @@ import {
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
-import {
-  AccountBalanceListItemContainer,
-  AccountNameWithHashListItemContainer
-} from '@popup/pages/home';
 
 import { RouterPath, useTypedNavigate } from '@connect-to-app/router';
 
@@ -38,6 +35,11 @@ const HeaderTextContent = styled.div`
 
 const TextCentredContainer = styled.div`
   text-align: center;
+`;
+
+const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
+const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
+  width: 100%;
 `;
 
 interface AccountsSelectionPageProps {
@@ -91,7 +93,7 @@ export function AccountsSelectionPage({
         <HeaderTextContainer>
           <SiteFaviconBadge origin={origin} />
           <HeaderTextContent>
-            <Typography type="header" weight="bold">
+            <Typography type="header">
               <Trans t={t}>{headerText}</Trans>
             </Typography>
           </HeaderTextContent>
@@ -118,11 +120,10 @@ export function AccountsSelectionPage({
               />
               <AccountNameWithHashListItemContainer>
                 <Typography
-                  type="body"
-                  weight={
+                  type={
                     activeAccount && activeAccount.name === account.name
-                      ? 'semiBold'
-                      : 'regular'
+                      ? 'bodySemiBold'
+                      : 'body'
                   }
                 >
                   {account.name}
@@ -135,15 +136,8 @@ export function AccountsSelectionPage({
               </AccountNameWithHashListItemContainer>
 
               <AccountBalanceListItemContainer>
-                <Typography type="body" weight="regular" monospace>
-                  2.1M
-                </Typography>
-                <Typography
-                  type="body"
-                  weight="regular"
-                  monospace
-                  color="contentSecondary"
-                >
+                <Typography type="bodyHash">2.1M</Typography>
+                <Typography type="bodyHash" color="contentSecondary">
                   CSPR
                 </Typography>
               </AccountBalanceListItemContainer>
@@ -154,7 +148,7 @@ export function AccountsSelectionPage({
       </ContentContainer>
       <FooterButtonsContainer>
         <TextCentredContainer>
-          <Typography type="caption" weight="regular">
+          <Typography type="captionRegular">
             <Trans t={t}>Only connect with sites you trust</Trans>
           </Typography>
         </TextCentredContainer>
