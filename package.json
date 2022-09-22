@@ -46,7 +46,7 @@
     "@formatjs/intl": "^2.4.1",
     "@hookform/resolvers": "^2.8.8",
     "@hot-loader/react-dom": "^17.0.1",
-    "@lapo/asn1js": "^1.2.1",
+    "@lapo/asn1js": "^1.2.3",
     "@types/webextension-polyfill": "^0.8.3",
     "big.js": "^6.2.1",
     "casper-js-sdk": "2.10.0",
