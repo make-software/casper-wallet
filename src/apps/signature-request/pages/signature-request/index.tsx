@@ -3,6 +3,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { DeployUtil } from 'casper-js-sdk';
+
 import { closeActiveWindow } from '@background/close-window';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { emitSdkEventToAllActiveTabs } from '@content/sdk-event';
@@ -27,8 +29,12 @@ import { selectDeploysJsonById } from '@src/background/redux/deploys/selectors';
 import { useDeriveDataFromDeployRaw } from './use-derive-data-from-deploy-raw';
 import { signDeploy } from './sign-deploy';
 import { SignatureRequestValue } from './signature-request-value';
-import { DeployArguments, isKeyOfHashValue, SignatureRequest } from './types';
-import { DeployUtil } from 'casper-js-sdk';
+import {
+  isKeyOfHashValue,
+  SignatureRequestFields,
+  SignatureRequestArguments,
+  SignatureRequestKeys
+} from './types';
 
 const ListItemContainer = styled.div`
   display: flex;
@@ -53,10 +59,7 @@ const AccordionRowContainer = styled(CentredFlexRowSpaceBetweenContainer)`
 export function SignatureRequestPage() {
   const { t } = useTranslation();
 
-  const LABEL_DICT: Record<
-    keyof SignatureRequest | keyof DeployArguments,
-    string
-  > = {
+  const LABEL_DICT: Record<SignatureRequestKeys, string> = {
     signingKey: t('Signing key'),
     account: t('Account'),
     deployHash: t('Deploy hash'),
@@ -114,7 +117,7 @@ export function SignatureRequestPage() {
     requestId
   ]);
 
-  let signatureRequest: SignatureRequest = {
+  let signatureRequest: SignatureRequestFields = {
     signingKey: deployInfo.signingKey,
     account: deployInfo.account,
     deployHash: deployInfo.deployHash,
@@ -124,7 +127,7 @@ export function SignatureRequestPage() {
     deployType: deployInfo.deployType
   };
 
-  const deployArguments: DeployArguments = {
+  const deployArguments: SignatureRequestArguments = {
     ...deployInfo.deployArgs
   };
 

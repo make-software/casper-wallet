@@ -8,7 +8,7 @@ export enum DeployTypeEnum {
   ContractCall = 'Contract Call'
 }
 
-export type SignatureRequest = {
+export type SignatureRequestFields = {
   signingKey: string;
   account: string;
   deployHash: string;
@@ -18,7 +18,7 @@ export type SignatureRequest = {
   deployType: DeployType;
 };
 
-export type DeployArguments = {
+export type SignatureRequestArguments = {
   delegator?: string;
   validator?: string;
   newValidator?: string;
@@ -30,8 +30,12 @@ export type DeployArguments = {
   recipientHash?: string;
 };
 
+export type SignatureRequestKeys =
+  | keyof SignatureRequestFields
+  | keyof SignatureRequestArguments;
+
 export const isKeyOfHashValue = (key: string) => {
-  const keysOfHashValues: (keyof SignatureRequest | keyof DeployArguments)[] = [
+  const keysOfHashValues: SignatureRequestKeys[] = [
     'signingKey',
     'account',
     'deployHash',
@@ -42,39 +46,26 @@ export const isKeyOfHashValue = (key: string) => {
     'recipientKey',
     'recipientHash'
   ];
-  return keysOfHashValues.includes(
-    key as keyof SignatureRequest | keyof DeployArguments
-  );
+  return keysOfHashValues.includes(key as SignatureRequestKeys);
 };
 
 export const isKeyOfPriceValue = (key: string) => {
-  const keysOfPriceValues: (keyof SignatureRequest | keyof DeployArguments)[] =
-    ['amount', 'transactionFee'];
-
-  return keysOfPriceValues.includes(
-    key as keyof SignatureRequest | keyof DeployArguments
-  );
-};
-
-export const isKeyOfIdValue = (key: string) => {
-  const keysOfIdValues: (keyof SignatureRequest | keyof DeployArguments)[] = [
-    'transferId'
+  const keysOfPriceValues: SignatureRequestKeys[] = [
+    'amount',
+    'transactionFee'
   ];
 
-  return keysOfIdValues.includes(
-    key as keyof SignatureRequest | keyof DeployArguments
-  );
+  return keysOfPriceValues.includes(key as SignatureRequestKeys);
+};
+
+export const isKeyOfNumericValue = (key: string) => {
+  const keysOfNumericValues: SignatureRequestKeys[] = ['transferId'];
+  return keysOfNumericValues.includes(key as SignatureRequestKeys);
 };
 
 export const isKeyOfTimestampValue = (key: string) => {
-  const keysOfTimestampValues: (
-    | keyof SignatureRequest
-    | keyof DeployArguments
-  )[] = ['timestamp'];
-
-  return keysOfTimestampValues.includes(
-    key as keyof SignatureRequest | keyof DeployArguments
-  );
+  const keysOfTimestampValues: SignatureRequestKeys[] = ['timestamp'];
+  return keysOfTimestampValues.includes(key as SignatureRequestKeys);
 };
 
 export type CasperDeploy = Deploy;
