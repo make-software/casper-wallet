@@ -80,7 +80,7 @@ export function getDeployArgs(deploy: CasperDeploy) {
   }
 }
 
-function sanitiseNestedLists(value: CLValue): string {
+function unwrapNestedLists(value: CLValue): string {
   const parsedValue = parseDeployArg(value);
   if (Array.isArray(parsedValue)) {
     const parsedType = (value as CLList<CLValue>).vectorType;
@@ -205,7 +205,7 @@ function parseDeployArg(arg: CLValue): string | string[] {
 
     case CLTypeTag.List:
       const list = (arg as CLList<CLValue>).value();
-      return list.map(member => sanitiseNestedLists(member));
+      return list.map(member => unwrapNestedLists(member));
 
     case CLTypeTag.ByteArray:
       const bytes = (arg as CLByteArray).value();
@@ -227,11 +227,11 @@ function parseDeployArg(arg: CLValue): string | string[] {
 
     case CLTypeTag.Tuple2:
       const tupleTwo = arg as CLTuple2;
-      return tupleTwo.value().map(member => sanitiseNestedLists(member));
+      return tupleTwo.value().map(member => unwrapNestedLists(member));
 
     case CLTypeTag.Tuple3:
       const tupleThree = arg as CLTuple3;
-      return tupleThree.value().map(member => sanitiseNestedLists(member));
+      return tupleThree.value().map(member => unwrapNestedLists(member));
 
     case CLTypeTag.PublicKey:
       return (arg as CLPublicKey).toHex();

@@ -1,6 +1,10 @@
 import React from 'react';
 
-import { formatNumber, formatTimestamp } from '@libs/ui/utils/formatters';
+import {
+  capitalizeString,
+  formatNumber,
+  formatTimestamp
+} from '@libs/ui/utils/formatters';
 import {
   CSPR,
   Hash,
@@ -8,8 +12,6 @@ import {
   PrecisionCase,
   Typography
 } from '@src/libs/ui';
-
-import { capitalizeString } from '@src/utils/helpers';
 
 import {
   isKeyOfHashValue,
