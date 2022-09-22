@@ -4,7 +4,7 @@ const backgroundIconPath = 'assets/icons/logo-background.svg';
 
 export const HeaderContainer = styled.header`
   background: url(${backgroundIconPath}) no-repeat;
-  background-color: ${({ theme }) => theme.color.backgroundBlue};
+  background-color: ${({ theme }) => theme.color.backgroundRed};
   height: 72px;
 
   display: flex;

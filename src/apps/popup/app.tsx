@@ -117,7 +117,7 @@ function UnlockedRouter() {
           path={RouterPath.Any}
           element={
             <Layout
-              Header={<PopupHeader withMenu withLock />}
+              Header={<PopupHeader withConnectionStatus withMenu withLock />}
               Content={<NavigationMenuPageContent />}
             />
           }
@@ -132,7 +132,7 @@ function UnlockedRouter() {
         path={RouterPath.Home}
         element={
           <Layout
-            Header={<PopupHeader withMenu withLock />}
+            Header={<PopupHeader withLock withMenu withConnectionStatus />}
             Content={<HomePageContent />}
           />
         }
@@ -145,6 +145,7 @@ function UnlockedRouter() {
               <PopupHeader
                 withLock
                 withMenu
+                withConnectionStatus
                 submenuActionType="close"
                 SubmenuActionGroup={<AccountSettingsActionsGroup />}
               />
@@ -157,7 +158,14 @@ function UnlockedRouter() {
         path={RouterPath.Timeout}
         element={
           <Layout
-            Header={<PopupHeader submenuActionType="close" withMenu withLock />}
+            Header={
+              <PopupHeader
+                withLock
+                withMenu
+                withConnectionStatus
+                submenuActionType="close"
+              />
+            }
             Content={<TimeoutPageContent />}
           />
         }
@@ -166,7 +174,14 @@ function UnlockedRouter() {
         path={RouterPath.RemoveAccount}
         element={
           <Layout
-            Header={<PopupHeader withLock withMenu submenuActionType="back" />}
+            Header={
+              <PopupHeader
+                withLock
+                withMenu
+                withConnectionStatus
+                submenuActionType="back"
+              />
+            }
             Content={<RemoveAccountPageContent />}
           />
         }
@@ -175,7 +190,14 @@ function UnlockedRouter() {
         path={RouterPath.RenameAccount}
         element={
           <Layout
-            Header={<PopupHeader withLock withMenu submenuActionType="back" />}
+            Header={
+              <PopupHeader
+                withLock
+                withMenu
+                withConnectionStatus
+                submenuActionType="back"
+              />
+            }
             Content={<RenameAccountPageContent />}
           />
         }
@@ -184,7 +206,7 @@ function UnlockedRouter() {
         path={RouterPath.NoConnectedAccount}
         element={
           <Layout
-            Header={<PopupHeader withLock withMenu />}
+            Header={<PopupHeader withLock withMenu withConnectionStatus />}
             Content={<NoConnectedAccountPageContent />}
           />
         }
@@ -194,7 +216,12 @@ function UnlockedRouter() {
         element={
           <Layout
             Header={
-              <PopupHeader withLock withMenu submenuActionType="cancel" />
+              <PopupHeader
+                withLock
+                withMenu
+                withConnectionStatus
+                submenuActionType="cancel"
+              />
             }
             Content={<ConnectAnotherAccountPageContent />}
           />
@@ -204,7 +231,14 @@ function UnlockedRouter() {
         path={RouterPath.ConnectedSites}
         element={
           <Layout
-            Header={<PopupHeader submenuActionType="back" withMenu withLock />}
+            Header={
+              <PopupHeader
+                withLock
+                withMenu
+                withConnectionStatus
+                submenuActionType="back"
+              />
+            }
             Content={<ConnectedSitesPage />}
           />
         }

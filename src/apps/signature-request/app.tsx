@@ -10,10 +10,10 @@ export function App() {
     <HashRouter>
       <Routes>
         <Route
-          path={'*'}
+          path="*"
           element={
             <LayoutWindow
-              Header={<PopupHeader />}
+              Header={<PopupHeader withConnectionStatus />}
               Content={<SignatureRequestPage />}
             />
           }

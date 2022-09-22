@@ -40,7 +40,9 @@ export function App() {
         path={RouterPath.SelectAccountsToConnect}
         element={
           <LayoutWindow
-            Header={<PopupHeader submenuActionType="cancel" />}
+            Header={
+              <PopupHeader withConnectionStatus submenuActionType="cancel" />
+            }
             Content={
               <AccountsSelectionPage
                 selectedAccountNames={selectedAccountNames}
@@ -56,7 +58,9 @@ export function App() {
         path={RouterPath.ApproveConnection}
         element={
           <LayoutWindow
-            Header={<PopupHeader submenuActionType="back" />}
+            Header={
+              <PopupHeader withConnectionStatus submenuActionType="back" />
+            }
             Content={
               <ApproveConnectionPage
                 selectedAccountNames={selectedAccountNames}
@@ -70,7 +74,10 @@ export function App() {
       <Route
         path={RouterPath.Connecting}
         element={
-          <LayoutWindow Header={<PopupHeader />} Content={<ConnectingPage />} />
+          <LayoutWindow
+            Header={<PopupHeader withConnectionStatus />}
+            Content={<ConnectingPage />}
+          />
         }
       />
     </Routes>
