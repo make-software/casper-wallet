@@ -1,9 +1,12 @@
 import Big from 'big.js';
 import { createIntl, createIntlCache } from '@formatjs/intl';
 
+import { MOTES_PER_CSPR_RATE } from '@libs/ui/utils/constants';
+
 const cache = createIntlCache();
 const intl = createIntl(
   {
+    // TODO: should implement using active lang from i18n
     locale: 'en-US',
     messages: {}
   },
@@ -58,8 +61,6 @@ export function formatMotes(motes: string) {
 
   return int.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 }
-
-export const MOTES_PER_CSPR_RATE = '1000000000'; // 1 000 000 000 MOTES === 1 CSPR
 
 export const motesToCSPR = (motes: string): string => {
   return Big(motes).div(MOTES_PER_CSPR_RATE).toString();

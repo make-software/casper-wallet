@@ -55,31 +55,22 @@ export function getDeployArgs(deploy: CasperDeploy): ArgDict {
   }
 
   if (deploy.session.moduleBytes) {
-    try {
-      const deployArgs: ArgDict = getDeployArgsFromArgsDict(
-        deploy.session.moduleBytes.args.args
-      );
-      deployArgs.moduleBytes =
-        deploy.session.moduleBytes.moduleBytes.toString();
+    const deployArgs: ArgDict = getDeployArgsFromArgsDict(
+      deploy.session.moduleBytes.args.args
+    );
+    deployArgs.moduleBytes = deploy.session.moduleBytes.moduleBytes.toString();
 
-      return deployArgs;
-    } catch (err) {
-      throw err;
-    }
+    return deployArgs;
   }
 
   const storedContract = getStoredContractFromSession(deploy.session);
 
-  try {
-    const deployArgs: ArgDict = getDeployArgsFromArgsDict(
-      storedContract.args.args
-    );
-    deployArgs.entryPoint = storedContract.entryPoint;
+  const deployArgs: ArgDict = getDeployArgsFromArgsDict(
+    storedContract.args.args
+  );
+  deployArgs.entryPoint = storedContract.entryPoint;
 
-    return deployArgs;
-  } catch (err) {
-    throw err;
-  }
+  return deployArgs;
 }
 
 function unwrapNestedLists(value: CLValue): string {
