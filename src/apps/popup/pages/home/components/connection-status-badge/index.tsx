@@ -5,28 +5,36 @@ import { hexToRGBA, Typography } from '@libs/ui';
 
 interface ConnectionStatusBadgeProps {
   isConnected: boolean;
+  displayContext: 'accountList' | 'home';
 }
 
 const ConnectionStatusBadgeContainer = styled.div<ConnectionStatusBadgeProps>`
   width: fit-content;
   border-radius: 10px;
-  padding: 2px 8px;
+  padding: ${({ displayContext }) =>
+    displayContext === 'accountList' ? '2px 0' : '2px 8px'};
 
   color: ${({ theme, isConnected }) =>
     isConnected ? theme.color.contentGreen : theme.color.contentSecondary};
 
-  background-color: ${({ theme, isConnected }) =>
-    isConnected
+  background-color: ${({ theme, isConnected, displayContext }) =>
+    displayContext === 'accountList'
+      ? null
+      : isConnected
       ? hexToRGBA(theme.color.contentGreen, '.12')
       : theme.color.backgroundSecondary};
 `;
 
 export function ConnectionStatusBadge({
-  isConnected
+  isConnected,
+  displayContext
 }: ConnectionStatusBadgeProps) {
   return (
-    <ConnectionStatusBadgeContainer isConnected={isConnected}>
-      <Typography type="listSubtext" weight="regular">
+    <ConnectionStatusBadgeContainer
+      isConnected={isConnected}
+      displayContext={displayContext}
+    >
+      <Typography type="listSubtext">
         {isConnected ? '• Connected' : '• Disconnected'}
       </Typography>
     </ConnectionStatusBadgeContainer>

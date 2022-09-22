@@ -16,12 +16,12 @@ export function ImportAccountWithFileSuccessContentPage() {
   return (
     <ContentContainer>
       <HeaderTextContainer>
-        <Typography type="header" weight="bold">
+        <Typography type="header">
           <Trans t={t}>Your account was successfully imported</Trans>
         </Typography>
       </HeaderTextContainer>
       <TextContainer>
-        <Typography type="body" weight="regular" color="contentSecondary">
+        <Typography type="body" color="contentSecondary">
           <Trans t={t}>Now you can see it in your accounts list.</Trans>
         </Typography>
       </TextContainer>

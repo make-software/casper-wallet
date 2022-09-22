@@ -25,7 +25,7 @@ export function SiteGroupHeader({
 
   return (
     <SiteGroupHeaderContainer>
-      <Typography type="body" color="contentBlue" weight="regular">
+      <Typography type="body" color="contentBlue">
         {siteTitle}
       </Typography>
 

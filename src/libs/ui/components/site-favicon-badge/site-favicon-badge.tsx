@@ -50,11 +50,7 @@ export function SiteFaviconBadge({ origin }: SiteFaviconBadgeProps) {
   return (
     <SiteFaviconAndHostnameContainer>
       <FaviconImg src={faviconUrl} alt={`${hostName} favicon`} />
-      {hostName && (
-        <Typography type="body" weight="regular">
-          {hostName}
-        </Typography>
-      )}
+      {hostName && <Typography type="body">{hostName}</Typography>}
     </SiteFaviconAndHostnameContainer>
   );
 }

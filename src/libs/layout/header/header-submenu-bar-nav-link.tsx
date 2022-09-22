@@ -1,61 +1,49 @@
-import React, { ReactElement } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Link, Typography, SvgIcon } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-export const SubmenuBarContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  height: 56px;
-  background-color: ${({ theme }) => theme.color.backgroundPrimary};
-  border-bottom: 0.5px solid ${({ theme }) => theme.color.borderPrimary};
-  padding: 8px ${({ theme }) => theme.padding[1.6]};
-`;
-
 const LinkWithIconContainer = styled.div`
   display: flex;
   align-items: center;
 `;
 
-interface SubmenuBarProps {
-  actionType: 'back' | 'close' | 'cancel';
-  ActionGroup?: ReactElement;
+export type LinkType = 'back' | 'close' | 'cancel' | 'done' | 'switchAccount';
+
+interface HeaderSubmenuBarNavLinkProps {
+  linkType: LinkType;
 }
 
-export function HeaderSubmenuBar({ actionType, ActionGroup }: SubmenuBarProps) {
+export function HeaderSubmenuBarNavLink({
+  linkType
+}: HeaderSubmenuBarNavLinkProps) {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
-  let NavLink;
-
-  switch (actionType) {
+  switch (linkType) {
     case 'close':
-      NavLink = (
-        <Typography type="body" weight="semiBold">
+      return (
+        <Typography type="bodySemiBold">
           <Link onClick={() => navigate(RouterPath.Home)} color="fillBlue">
             <Trans t={t}>Close</Trans>
           </Link>
         </Typography>
       );
 
-      break;
     case 'cancel':
-      NavLink = (
-        <Typography type="body" weight="semiBold">
+      return (
+        <Typography type="bodySemiBold">
           <Link onClick={() => navigate(RouterPath.Home)} color="fillBlue">
             <Trans t={t}>Cancel</Trans>
           </Link>
         </Typography>
       );
 
-      break;
     case 'back':
-      NavLink = (
-        <Typography type="body" weight="semiBold">
+      return (
+        <Typography type="bodySemiBold">
           <LinkWithIconContainer>
             <SvgIcon
               onClick={() => navigate(-1)}
@@ -71,15 +59,28 @@ export function HeaderSubmenuBar({ actionType, ActionGroup }: SubmenuBarProps) {
         </Typography>
       );
 
-      break;
+    case 'done':
+      return (
+        <Typography type="bodySemiBold">
+          <Link color="fillBlue" onClick={() => navigate(RouterPath.Home)}>
+            {t('Done')}
+          </Link>
+        </Typography>
+      );
+
+    case 'switchAccount':
+      return (
+        <Typography type="bodySemiBold">
+          <Link
+            color="fillBlue"
+            onClick={() => navigate(RouterPath.AccountList)}
+          >
+            {t('Switch account')}
+          </Link>
+        </Typography>
+      );
+
     default:
       throw new Error('Unknown Link type');
   }
-
-  return (
-    <SubmenuBarContainer>
-      {NavLink}
-      {ActionGroup && ActionGroup}
-    </SubmenuBarContainer>
-  );
 }

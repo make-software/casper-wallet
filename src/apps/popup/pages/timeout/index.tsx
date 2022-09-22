@@ -43,12 +43,12 @@ export function TimeoutPageContent() {
   return (
     <ContentContainer>
       <HeaderTextContainer>
-        <Typography type="header" weight="bold">
+        <Typography type="header">
           <Trans t={t}>Timeout</Trans>
         </Typography>
       </HeaderTextContainer>
       <TextContainer>
-        <Typography type="body" weight="regular" color="contentSecondary">
+        <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             Your vault will be automatically locked after some period of
             inactivity.
@@ -69,9 +69,7 @@ export function TimeoutPageContent() {
               );
             }}
           >
-            <Typography type="body" weight="regular">
-              {menuItem.title}
-            </Typography>
+            <Typography type="body">{menuItem.title}</Typography>
             <Checkbox checked={timeoutDurationSetting === menuItem.id} />
           </ListItemClickableContainer>
         )}

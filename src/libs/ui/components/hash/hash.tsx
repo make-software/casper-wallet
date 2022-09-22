@@ -22,8 +22,8 @@ const CopyStatusContainer = styled.div`
 `;
 
 export enum HashVariant {
-  CaptionHash = 'caption',
-  BodyHash = 'body'
+  CaptionHash = 'captionHash',
+  BodyHash = 'bodyHash'
 }
 
 interface HashProps {
@@ -76,18 +76,13 @@ export function Hash({
             src="assets/icons/checkbox-checked.svg"
             size={24}
           />
-          <Typography type="body" weight="regular" color="contentGreen">
+          <Typography type="body" color="contentGreen">
             <Trans t={t}>Copied!</Trans>
           </Typography>
         </CopyStatusContainer>
       ) : (
         <>
-          <Typography
-            asHash
-            type={variant}
-            weight="regular"
-            color={color || 'contentSecondary'}
-          >
+          <Typography type={variant} color={color || 'contentSecondary'}>
             {truncated ? truncateKey(value) : value}
           </Typography>
           {withCopyOnClick && <SvgIcon src="assets/icons/copy.svg" size={24} />}

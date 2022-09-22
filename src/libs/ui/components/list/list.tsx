@@ -87,14 +87,13 @@ export function List<ListRow extends ListRowBase>({
       {headerLabel && (
         <TopMarginContainer>
           <SpacedBetweenFlexRox>
-            <Typography type="label" weight="medium" color="contentSecondary">
+            <Typography type="labelMedium" color="contentSecondary">
               {headerLabel}
             </Typography>
             {headerAction && (
               <PointerContainer>
                 <Typography
-                  type="label"
-                  weight="medium"
+                  type="labelMedium"
                   color="contentBlue"
                   onClick={headerAction.onClick}
                 >

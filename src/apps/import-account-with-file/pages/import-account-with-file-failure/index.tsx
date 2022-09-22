@@ -25,12 +25,12 @@ export function ImportAccountWithFileFailureContentPage() {
   return (
     <ContentContainer>
       <HeaderTextContainer>
-        <Typography type="header" weight="bold">
+        <Typography type="header">
           <Trans t={t}>Something went wrong</Trans>
         </Typography>
       </HeaderTextContainer>
       <TextContainer>
-        <Typography type="body" weight="regular" color="contentSecondary">
+        <Typography type="body" color="contentSecondary">
           {state?.importAccountStatusMessage
             ? state.importAccountStatusMessage
             : t("We couldn't import your account. Please try again.")}

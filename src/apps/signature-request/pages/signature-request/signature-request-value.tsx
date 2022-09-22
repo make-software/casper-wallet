@@ -33,9 +33,5 @@ export function SignatureRequestValue({
     );
   }
 
-  return (
-    <Typography type="body" weight="regular">
-      {value}
-    </Typography>
-  );
+  return <Typography type="body">{value}</Typography>;
 }

@@ -78,7 +78,7 @@ export function ConnectAnotherAccountPageContent() {
       <HeaderTextContainer>
         <SiteFaviconBadge origin={activeOrigin} />
         <HeaderTextContent>
-          <Typography type="header" weight="bold">
+          <Typography type="header">
             Your current account is not connected
           </Typography>
         </HeaderTextContent>
@@ -93,9 +93,7 @@ export function ConnectAnotherAccountPageContent() {
             />
             <SpaceBetweenContainer>
               <LeftAlignedFlexColumn>
-                <Typography type="body" weight="regular">
-                  {activeAccount.name}
-                </Typography>
+                <Typography type="body">{activeAccount.name}</Typography>
                 <Hash
                   value={activeAccount.publicKey}
                   variant={HashVariant.CaptionHash}
@@ -129,9 +127,7 @@ export function ConnectAnotherAccountPageContent() {
 
             <SpaceBetweenContainer>
               <LeftAlignedFlexColumn>
-                <Typography type="body" weight="regular">
-                  {account.name}
-                </Typography>
+                <Typography type="body">{account.name}</Typography>
                 <Hash
                   value={account.publicKey}
                   variant={HashVariant.CaptionHash}

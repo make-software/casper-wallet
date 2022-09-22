@@ -32,12 +32,7 @@ export function HeaderConnectionStatus() {
           color="contentGreen"
         />
       )}
-      <Typography
-        uppercase
-        type="form-field-status"
-        weight="semiBold"
-        color="contentOnFill"
-      >
+      <Typography uppercase type="formFieldStatus" color="contentOnFill">
         {isActiveAccountConnected ? 'Connected' : 'Disconnected'}
       </Typography>
     </ConnectionStatusContainer>
