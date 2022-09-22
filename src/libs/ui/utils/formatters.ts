@@ -1,3 +1,4 @@
+import Big from 'big.js';
 import { createIntl, createIntlCache } from '@formatjs/intl';
 
 const cache = createIntlCache();
@@ -56,4 +57,22 @@ export function formatMotes(motes: string) {
   }
 
   return int.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
+export const MOTES_PER_CSPR_RATE = '1000000000'; // 1 000 000 000 MOTES === 1 CSPR
+
+export const motesToCSPR = (motes: string): string => {
+  return Big(motes).div(MOTES_PER_CSPR_RATE).toString();
+};
+
+export function snakeAndKebabToCamel(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/([-_][a-z0-9])/g, group =>
+      group.toUpperCase().replace('-', '').replace('_', '')
+    );
+}
+
+export function capitalizeString(str: string): string {
+  return `${str[0].toUpperCase()}${str.slice(1)}`;
 }

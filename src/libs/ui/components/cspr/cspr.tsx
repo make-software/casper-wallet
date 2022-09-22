@@ -1,7 +1,6 @@
 import React from 'react';
 
-import { motesToCSPR } from '@src/utils/currency';
-import { formatNumber } from '@libs/ui/utils/formatters';
+import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
 import { Hash, HashVariant } from '@libs/ui';
 
 export enum PrecisionCase {

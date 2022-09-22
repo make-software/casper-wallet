@@ -18,7 +18,7 @@ import {
   encodeBase16
 } from 'casper-js-sdk';
 
-import { snakeAndKebabToCamel } from '@src/utils/helpers';
+import { snakeAndKebabToCamel } from '@libs/ui/utils/formatters';
 import { ArgDict, CasperDeploy, DeployType } from './types';
 
 export function getDeployType(deploy: CasperDeploy): DeployType {
