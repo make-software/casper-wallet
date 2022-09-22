@@ -26,7 +26,7 @@ import {
 } from '@libs/ui';
 import { selectDeploysJsonById } from '@src/background/redux/deploys/selectors';
 
-import { useDeriveDataFromDeployRaw } from './use-derive-data-from-deploy-raw';
+import { useDeriveDeployInfoFromDeployRaw } from './use-derive-deploy-info-from-deploy-raw';
 import { signDeploy } from './sign-deploy';
 import { SignatureRequestValue } from './signature-request-value';
 import {
@@ -98,7 +98,7 @@ export function SignatureRequestPage() {
   }
 
   const deploy = res.val;
-  const deployInfo = useDeriveDataFromDeployRaw(deploy);
+  const deployInfo = useDeriveDeployInfoFromDeployRaw(deploy);
 
   const handleSign = useCallback(() => {
     const signature = signDeploy(

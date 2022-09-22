@@ -6,7 +6,7 @@ import {
   bytesToHex
 } from './deploy';
 
-export function useDeriveDataFromDeployRaw(deploy: CasperDeploy) {
+export function useDeriveDeployInfoFromDeployRaw(deploy: CasperDeploy) {
   const {
     header: { account, chainName, bodyHash, timestamp, gasPrice }
   } = deploy;
