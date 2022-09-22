@@ -130,7 +130,7 @@
     "ts-jest": "29.0.1",
     "ts-loader": "^9.2.6",
     "ts-node": "^10.7.0",
-    "tsconfig-paths-webpack-plugin": "^3.5.2",
+    "tsconfig-paths-webpack-plugin": "^4.0.0",
     "typescript": "^4.6.2",
     "url-loader": "^4.1.1",
     "web-ext": "^6.7.0",
