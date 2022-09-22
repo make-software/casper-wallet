@@ -49,14 +49,14 @@ export function bytesToHex(bytes: Uint8Array): string {
   return encodeBase16(bytes);
 }
 
-export function getDeployArgs(deploy: CasperDeploy) {
+export function getDeployArgs(deploy: CasperDeploy): ArgDict {
   if (deploy.session.transfer) {
-    return parseTransferData(deploy.session.transfer);
+    return getDeployArgsFromTransfer(deploy.session.transfer);
   }
 
   if (deploy.session.moduleBytes) {
     try {
-      const deployArgs: ArgDict = parseDeployArgs(
+      const deployArgs: ArgDict = getDeployArgsFromArgsDict(
         deploy.session.moduleBytes.args.args
       );
       deployArgs.moduleBytes =
@@ -71,7 +71,9 @@ export function getDeployArgs(deploy: CasperDeploy) {
   const storedContract = getStoredContractFromSession(deploy.session);
 
   try {
-    const deployArgs: ArgDict = parseDeployArgs(storedContract.args.args);
+    const deployArgs: ArgDict = getDeployArgsFromArgsDict(
+      storedContract.args.args
+    );
     deployArgs.entryPoint = storedContract.entryPoint;
 
     return deployArgs;
@@ -89,7 +91,9 @@ function unwrapNestedLists(value: CLValue): string {
   return parsedValue;
 }
 
-function parseTransferData(transferDeploy: DeployUtil.Transfer) {
+function getDeployArgsFromTransfer(
+  transferDeploy: DeployUtil.Transfer
+): ArgDict {
   const transferArgs: ArgDict = {};
   const targetFromDeploy = transferDeploy.getArgByName('target');
 
@@ -155,7 +159,7 @@ function getStoredContractFromSession(
           Provided session code: ${session}`);
 }
 
-function parseDeployArgs(args: Map<string, CLValue>) {
+function getDeployArgsFromArgsDict(args: Map<string, CLValue>) {
   const deployArgs: ArgDict = {};
 
   args.forEach((argument, key) => {
