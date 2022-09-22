@@ -13,7 +13,7 @@ import { capitalizeString } from '@src/utils/helpers';
 
 import {
   isKeyOfHashValue,
-  isKeyOfIdValue,
+  isKeyOfNumericValue,
   isKeyOfPriceValue,
   isKeyOfTimestampValue
 } from './types';
@@ -44,7 +44,7 @@ export function SignatureRequestValue({
     );
   }
 
-  if (isKeyOfIdValue(id)) {
+  if (isKeyOfNumericValue(id)) {
     return (
       <Hash
         value={formatNumber(value)}
