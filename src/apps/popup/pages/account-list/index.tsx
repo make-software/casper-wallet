@@ -1,27 +1,30 @@
 import React from 'react';
-import {
-  Checkbox,
-  Hash,
-  HashVariant,
-  List,
-  SvgIcon,
-  Typography
-} from '@libs/ui';
-import {
-  PageContainer,
-  ContentContainer,
-  LeftAlignedFlexColumn
-} from '@libs/layout';
+
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+
+import { Checkbox, Hash, HashVariant, List, Typography } from '@libs/ui';
+import {
+  ContentContainer,
+  LeftAlignedFlexColumn,
+  PageContainer
+} from '@libs/layout';
+
+import { RouterPath, useTypedNavigate } from '@popup/router';
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+
 import {
   selectConnectedAccountNamesWithOrigin,
+  selectIsAnyAccountConnectedWithOrigin,
   selectVaultAccounts,
-  selectVaultActiveAccountName
+  selectVaultActiveAccountName,
+  selectVaultActiveOrigin
 } from '@background/redux/vault/selectors';
-import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import styled from 'styled-components';
+
 import { ConnectionStatusBadge } from '@popup/pages/home/components/connection-status-badge';
+
+import { Popover } from './components/popover';
 
 import { sortAccounts } from './utils';
 
@@ -50,21 +53,21 @@ const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
   width: 100%;
 `;
 
-const ListItemBurgerMenuContainer = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 14px 18px;
-  cursor: pointer;
-`;
-
 export function AccountListPage() {
   const navigate = useTypedNavigate();
+  const { t } = useTranslation();
 
-  const { changeActiveAccountWithEvent: changeActiveAccount } =
-    useAccountManager();
+  const {
+    changeActiveAccountWithEvent: changeActiveAccount,
+    disconnectAccountWithEvent: disconnectAccount
+  } = useAccountManager();
 
   const accounts = useSelector(selectVaultAccounts);
+  const activeOrigin = useSelector(selectVaultActiveOrigin);
   const activeAccountName = useSelector(selectVaultActiveAccountName);
+  const isAnyAccountConnected = useSelector(
+    selectIsAnyAccountConnectedWithOrigin
+  );
 
   const connectedAccountNames = useSelector(
     selectConnectedAccountNamesWithOrigin
@@ -125,18 +128,50 @@ export function AccountListPage() {
                   </Typography>
                 </AccountBalanceListItemContainer>
               </ListItemClickableContainer>
-              <ListItemBurgerMenuContainer
-                onClick={() =>
-                  navigate(
-                    RouterPath.AccountSettings.replace(
-                      ':accountName',
-                      account.name
-                    )
-                  )
-                }
-              >
-                <SvgIcon src="assets/icons/more.svg" size={24} />
-              </ListItemBurgerMenuContainer>
+              <Popover
+                renderMenuItems={({ closePopover }) => (
+                  <>
+                    {connectedAccountNames.includes(account.name) ? (
+                      <Typography
+                        type="body"
+                        onClick={e => {
+                          closePopover(e);
+                          activeOrigin &&
+                            disconnectAccount(account.name, activeOrigin);
+                        }}
+                      >
+                        <Trans t={t}>Disconnect</Trans>
+                      </Typography>
+                    ) : (
+                      <Typography
+                        type="body"
+                        onClick={() =>
+                          navigate(
+                            isAnyAccountConnected
+                              ? `${RouterPath.ConnectAnotherAccount}/${account.id}`
+                              : RouterPath.NoConnectedAccount
+                          )
+                        }
+                      >
+                        <Trans t={t}>Connect</Trans>
+                      </Typography>
+                    )}
+                    <Typography
+                      type="body"
+                      onClick={() =>
+                        navigate(
+                          RouterPath.AccountSettings.replace(
+                            ':accountName',
+                            account.name
+                          )
+                        )
+                      }
+                    >
+                      <Trans t={t}>Manage</Trans>
+                    </Typography>
+                  </>
+                )}
+              />
             </ListItemContainer>
           )}
           marginLeftForItemSeparatorLine={60}

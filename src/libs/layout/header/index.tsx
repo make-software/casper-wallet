@@ -5,19 +5,14 @@ import {
   HeaderContainer,
   Logo,
   LogoContainer,
-  CenteredSpaceBetweenFlexRow
+  CenteredSpaceBetweenFlexRow,
+  LeftAlignedCenteredFlexRow
 } from '@src/libs/layout';
 import { HeaderConnectionStatus } from '@src/libs/layout/header/header-connection-status';
 
 import { HeaderActions } from './header-actions';
 
-const LeftAlignedContainer = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-`;
-
-const LogoAndConnectionStatusContainer = styled(LeftAlignedContainer)`
+const LogoAndConnectionStatusContainer = styled(LeftAlignedCenteredFlexRow)`
   gap: 18px;
 `;
 

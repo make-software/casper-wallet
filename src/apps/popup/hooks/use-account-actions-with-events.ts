@@ -134,6 +134,12 @@ export function useAccountManager() {
           dispatchToMainStore(
             activeAccountChanged(newActiveAccountFromConnected.name)
           );
+          dispatchToMainStore(
+            accountsConnected({
+              accountNames: accountNames,
+              siteOrigin: origin
+            })
+          );
         }
       }
     },

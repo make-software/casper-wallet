@@ -181,22 +181,28 @@ function UnlockedRouter() {
                 )}
               />
             }
-            Content={<AccountSettingsPageContent />}
+            Content={<AccountListPage />}
           />
         }
       />
       <Route
-        path={RouterPath.AccountList}
+        path={RouterPath.AccountSettings}
         element={
           <Layout
             Header={
               <PopupHeader
                 withLock
                 withMenu
-                renderActionGroup={() => <HeaderSubmenuBar actionType="back" />}
+                withConnectionStatus
+                renderSubmenuBarItems={() => (
+                  <>
+                    <HeaderSubmenuBarNavLink linkType="close" />
+                    <AccountSettingsActionsGroup />
+                  </>
+                )}
               />
             }
-            Content={<AccountListPage />}
+            Content={<AccountSettingsPageContent />}
           />
         }
       />
@@ -264,24 +270,6 @@ function UnlockedRouter() {
         }
       />
       <Route
-        path={RouterPath.ConnectAnotherAccount}
-        element={
-          <Layout
-            Header={
-              <PopupHeader
-                withLock
-                withMenu
-                withConnectionStatus
-                renderSubmenuBarItems={() => (
-                  <HeaderSubmenuBarNavLink linkType="cancel" />
-                )}
-              />
-            }
-            Content={<ConnectAnotherAccountPageContent />}
-          />
-        }
-      />
-      <Route
         path={RouterPath.ConnectedSites}
         element={
           <Layout
@@ -299,6 +287,29 @@ function UnlockedRouter() {
           />
         }
       />
+      {[
+        RouterPath.ConnectAnotherAccount,
+        RouterPath.ConnectAnotherAccountByParams
+      ].map(path => (
+        <Route
+          path={path}
+          element={
+            <Layout
+              Header={
+                <PopupHeader
+                  withLock
+                  withMenu
+                  withConnectionStatus
+                  renderSubmenuBarItems={() => (
+                    <HeaderSubmenuBarNavLink linkType="cancel" />
+                  )}
+                />
+              }
+              Content={<ConnectAnotherAccountPageContent />}
+            />
+          }
+        />
+      ))}
     </Routes>
   );
 }
