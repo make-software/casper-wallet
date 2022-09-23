@@ -7,13 +7,18 @@ import {
   LogoContainer,
   CenteredSpaceBetweenFlexRow
 } from '@src/libs/layout';
-// import { HeaderConnectionStatus } from '@src/libs/layout/header/header-connection-status';
+import { HeaderConnectionStatus } from '@src/libs/layout/header/header-connection-status';
 
 import { HeaderActions } from './header-actions';
 
-const SpaceBetweenContainer = styled(CenteredSpaceBetweenFlexRow)`
-  width: 100%;
-  padding-left: 20px;
+const LeftAlignedContainer = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+`;
+
+const LogoAndConnectionStatusContainer = styled(LeftAlignedContainer)`
+  gap: 18px;
 `;
 
 const SubmenuBarContainer = styled(CenteredSpaceBetweenFlexRow)`
@@ -26,24 +31,27 @@ const SubmenuBarContainer = styled(CenteredSpaceBetweenFlexRow)`
 interface HeaderProps {
   withLock?: boolean;
   withMenu?: boolean;
+  withConnectionStatus?: boolean;
   renderSubmenuBarItems?: () => JSX.Element;
 }
 
 export function PopupHeader({
   withLock,
   withMenu,
+  withConnectionStatus,
   renderSubmenuBarItems
 }: HeaderProps) {
   return (
     <>
       <HeaderContainer>
-        <LogoContainer>
-          <Logo />
-        </LogoContainer>
-        <SpaceBetweenContainer>
-          {/* <HeaderConnectionStatus /> */}
-          <HeaderActions withMenu={withMenu} withLock={withLock} />
-        </SpaceBetweenContainer>
+        <LogoAndConnectionStatusContainer>
+          <LogoContainer>
+            <Logo />
+          </LogoContainer>
+          {withConnectionStatus && <HeaderConnectionStatus />}
+        </LogoAndConnectionStatusContainer>
+
+        <HeaderActions withMenu={withMenu} withLock={withLock} />
       </HeaderContainer>
       {renderSubmenuBarItems && (
         <SubmenuBarContainer>{renderSubmenuBarItems()}</SubmenuBarContainer>

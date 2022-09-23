@@ -1,9 +1,24 @@
 import React from 'react';
 
-import { formatMotes } from '@libs/ui/utils/formatters';
-import { Hash, HashVariant, Typography } from '@src/libs/ui';
+import {
+  capitalizeString,
+  formatNumber,
+  formatTimestamp
+} from '@libs/ui/utils/formatters';
+import {
+  CSPR,
+  Hash,
+  HashVariant,
+  PrecisionCase,
+  Typography
+} from '@src/libs/ui';
 
-import { isKeyOfHashValue, isKeyOfPriceValue } from './types';
+import {
+  isKeyOfHashValue,
+  isKeyOfNumericValue,
+  isKeyOfPriceValue,
+  isKeyOfTimestampValue
+} from './types';
 
 export function SignatureRequestValue({
   id,
@@ -25,13 +40,25 @@ export function SignatureRequestValue({
 
   if (isKeyOfPriceValue(id)) {
     return (
+      <Typography type="body">
+        <CSPR motes={value} precisionCase={PrecisionCase.full} />
+      </Typography>
+    );
+  }
+
+  if (isKeyOfNumericValue(id)) {
+    return (
       <Hash
-        value={formatMotes(value)}
+        value={formatNumber(value)}
         variant={HashVariant.BodyHash}
         color="contentPrimary"
       />
     );
   }
 
-  return <Typography type="body">{value}</Typography>;
+  if (isKeyOfTimestampValue(id)) {
+    return <Typography type="body">{formatTimestamp(value)}</Typography>;
+  }
+
+  return <Typography type="body">{capitalizeString(value)}</Typography>;
 }

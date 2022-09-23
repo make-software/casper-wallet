@@ -118,7 +118,7 @@ function UnlockedRouter() {
           path={RouterPath.Any}
           element={
             <Layout
-              Header={<PopupHeader withMenu withLock />}
+              Header={<PopupHeader withConnectionStatus withMenu withLock />}
               Content={<NavigationMenuPageContent />}
             />
           }
@@ -137,6 +137,7 @@ function UnlockedRouter() {
               <PopupHeader
                 withMenu
                 withLock
+                withConnectionStatus
                 renderSubmenuBarItems={() => (
                   <HomePageHeaderSubmenuItems linkType="switchAccount" />
                 )}
@@ -171,6 +172,7 @@ function UnlockedRouter() {
               <PopupHeader
                 withLock
                 withMenu
+                withConnectionStatus
                 renderSubmenuBarItems={() => (
                   <>
                     <HeaderSubmenuBarNavLink linkType="close" />
@@ -189,6 +191,7 @@ function UnlockedRouter() {
           <Layout
             Header={
               <PopupHeader
+                withConnectionStatus
                 withMenu
                 withLock
                 renderSubmenuBarItems={() => (
@@ -208,6 +211,7 @@ function UnlockedRouter() {
               <PopupHeader
                 withLock
                 withMenu
+                withConnectionStatus
                 renderSubmenuBarItems={() => (
                   <HeaderSubmenuBarNavLink linkType="back" />
                 )}
@@ -225,6 +229,7 @@ function UnlockedRouter() {
               <PopupHeader
                 withLock
                 withMenu
+                withConnectionStatus
                 renderSubmenuBarItems={() => (
                   <HeaderSubmenuBarNavLink linkType="back" />
                 )}
@@ -238,7 +243,7 @@ function UnlockedRouter() {
         path={RouterPath.NoConnectedAccount}
         element={
           <Layout
-            Header={<PopupHeader withLock withMenu />}
+            Header={<PopupHeader withLock withMenu withConnectionStatus />}
             Content={<NoConnectedAccountPageContent />}
           />
         }
@@ -251,6 +256,7 @@ function UnlockedRouter() {
               <PopupHeader
                 withLock
                 withMenu
+                withConnectionStatus
                 renderSubmenuBarItems={() => (
                   <HeaderSubmenuBarNavLink linkType="cancel" />
                 )}
@@ -268,6 +274,7 @@ function UnlockedRouter() {
               <PopupHeader
                 withMenu
                 withLock
+                withConnectionStatus
                 renderSubmenuBarItems={() => (
                   <HeaderSubmenuBarNavLink linkType="back" />
                 )}

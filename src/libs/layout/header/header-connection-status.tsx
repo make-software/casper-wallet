@@ -3,8 +3,8 @@ import styled from 'styled-components';
 
 import { Typography, SvgIcon } from '@libs/ui';
 import { useSelector } from 'react-redux';
-import { RootState } from 'typesafe-actions';
-import { selectIsActiveAccountConnectedWithOrigin } from '@src/background/redux/vault/selectors';
+import { selectCountOfConnectedAccounts } from '@src/background/redux/vault/selectors';
+import { useTranslation } from 'react-i18next';
 
 const ConnectionStatusContainer = styled.div`
   display: flex;
@@ -19,13 +19,12 @@ const ConnectionStatusContainer = styled.div`
 `;
 
 export function HeaderConnectionStatus() {
-  const isActiveAccountConnected = useSelector((state: RootState) =>
-    selectIsActiveAccountConnectedWithOrigin(state)
-  );
+  const { t } = useTranslation();
+  const countOfConnectedAccounts = useSelector(selectCountOfConnectedAccounts);
 
   return (
     <ConnectionStatusContainer>
-      {isActiveAccountConnected && (
+      {countOfConnectedAccounts > 0 && (
         <SvgIcon
           src="assets/icons/checkbox-checked.svg"
           size={16}
@@ -33,7 +32,9 @@ export function HeaderConnectionStatus() {
         />
       )}
       <Typography uppercase type="formFieldStatus" color="contentOnFill">
-        {isActiveAccountConnected ? 'Connected' : 'Disconnected'}
+        {countOfConnectedAccounts > 0
+          ? `${t('Connected')}: ${countOfConnectedAccounts}`
+          : t('Disconnected')}
       </Typography>
     </ConnectionStatusContainer>
   );

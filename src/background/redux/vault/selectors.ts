@@ -126,6 +126,11 @@ export const selectCountOfAccounts = createSelector(
   accounts => accounts.length
 );
 
+export const selectCountOfConnectedAccounts = createSelector(
+  selectConnectedAccountsWithOrigin,
+  connectedAccounts => connectedAccounts.length
+);
+
 export const selectCountOfConnectedSites = createSelector(
   selectVaultAccountNamesByOriginDict,
   accountNamesByOriginDict => Object.keys(accountNamesByOriginDict).length

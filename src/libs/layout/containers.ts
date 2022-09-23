@@ -36,7 +36,7 @@ export const SpaceBetweenFlexColumn = styled(FlexColumn)`
 
 export const HeaderContainer = styled(CenteredSpaceBetweenFlexRow)`
   background: url(${backgroundIconPath}) no-repeat;
-  background-color: ${({ theme }) => theme.color.backgroundBlue};
+  background-color: ${({ theme }) => theme.color.backgroundRed};
   height: 72px;
 
   padding: 0 16px;

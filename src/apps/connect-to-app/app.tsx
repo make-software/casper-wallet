@@ -46,6 +46,7 @@ export function App() {
           <LayoutWindow
             Header={
               <PopupHeader
+                withConnectionStatus
                 renderSubmenuBarItems={() => (
                   <HeaderSubmenuBarNavLink linkType="cancel" />
                 )}
@@ -68,6 +69,7 @@ export function App() {
           <LayoutWindow
             Header={
               <PopupHeader
+                withConnectionStatus
                 renderSubmenuBarItems={() => (
                   <HeaderSubmenuBarNavLink linkType="back" />
                 )}
@@ -86,7 +88,10 @@ export function App() {
       <Route
         path={RouterPath.Connecting}
         element={
-          <LayoutWindow Header={<PopupHeader />} Content={<ConnectingPage />} />
+          <LayoutWindow
+            Header={<PopupHeader withConnectionStatus />}
+            Content={<ConnectingPage />}
+          />
         }
       />
     </Routes>
