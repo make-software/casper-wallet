@@ -55,7 +55,7 @@ export const SpaceBetweenContainer = styled(CentredFlexRow)`
 export function ConnectAnotherAccountPageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
-  const { accountName: targetAccountName } = useParams();
+  const { targetAccountName } = useParams();
 
   const activeOrigin = useSelector(selectVaultActiveOrigin);
   const {

@@ -181,27 +181,6 @@ function UnlockedRouter() {
                 )}
               />
             }
-            Content={<AccountListPage />}
-          />
-        }
-      />
-      <Route
-        path={RouterPath.AccountSettings}
-        element={
-          <Layout
-            Header={
-              <PopupHeader
-                withLock
-                withMenu
-                withConnectionStatus
-                renderSubmenuBarItems={() => (
-                  <>
-                    <HeaderSubmenuBarNavLink linkType="close" />
-                    <AccountSettingsActionsGroup />
-                  </>
-                )}
-              />
-            }
             Content={<AccountSettingsPageContent />}
           />
         }
@@ -287,29 +266,42 @@ function UnlockedRouter() {
           />
         }
       />
-      {[
-        RouterPath.ConnectAnotherAccount,
-        RouterPath.ConnectAnotherAccountByParams
-      ].map(path => (
-        <Route
-          path={path}
-          element={
-            <Layout
-              Header={
-                <PopupHeader
-                  withLock
-                  withMenu
-                  withConnectionStatus
-                  renderSubmenuBarItems={() => (
-                    <HeaderSubmenuBarNavLink linkType="cancel" />
-                  )}
-                />
-              }
-              Content={<ConnectAnotherAccountPageContent />}
-            />
-          }
-        />
-      ))}
+      <Route
+        path={RouterPath.ConnectAnotherAccount}
+        element={
+          <Layout
+            Header={
+              <PopupHeader
+                withLock
+                withMenu
+                withConnectionStatus
+                renderSubmenuBarItems={() => (
+                  <HeaderSubmenuBarNavLink linkType="cancel" />
+                )}
+              />
+            }
+            Content={<ConnectAnotherAccountPageContent />}
+          />
+        }
+      />
+      <Route
+        path={RouterPath.ConnectAnotherAccountByParams}
+        element={
+          <Layout
+            Header={
+              <PopupHeader
+                withLock
+                withMenu
+                withConnectionStatus
+                renderSubmenuBarItems={() => (
+                  <HeaderSubmenuBarNavLink linkType="cancel" />
+                )}
+              />
+            }
+            Content={<ConnectAnotherAccountPageContent />}
+          />
+        }
+      />
     </Routes>
   );
 }
