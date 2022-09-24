@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, MouseEvent } from 'react';
 import styled from 'styled-components';
 
 import { SvgIcon } from '@libs/ui';
@@ -6,15 +6,14 @@ import { CenteredFlexRow, FlexColumn } from '@libs/layout';
 
 import { useClickAway } from '@libs/ui/hooks/use-click-away';
 
+import { PopoverPortal } from './popover-portal';
+
 const PopoverContainer = styled(CenteredFlexRow)`
   padding: 14px 18px;
   cursor: pointer;
 `;
 
 const PopoverItemsContainer = styled(FlexColumn)`
-  position: absolute;
-  right: 16px;
-
   gap: 12px;
 
   padding: 16px 20px;
@@ -25,7 +24,7 @@ const PopoverItemsContainer = styled(FlexColumn)`
 `;
 
 type RenderProps = {
-  closePopover: (e: Event) => void;
+  closePopover: (e: MouseEvent<HTMLDivElement>) => void;
 };
 
 interface PopoverProps {
@@ -39,19 +38,25 @@ export function Popover({ renderMenuItems }: PopoverProps) {
     callback: () => setIsOpen(false)
   });
 
-  const closePopover = (e: Event) => {
+  const closePopover = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     setIsOpen(false);
   };
 
   return (
-    <PopoverContainer ref={ref} onClick={() => setIsOpen(true)}>
+    <PopoverContainer ref={ref}>
       {isOpen && (
-        <PopoverItemsContainer>
-          {renderMenuItems({ closePopover })}
-        </PopoverItemsContainer>
+        <PopoverPortal top={ref.current?.getBoundingClientRect().top}>
+          <PopoverItemsContainer>
+            {renderMenuItems({ closePopover })}
+          </PopoverItemsContainer>
+        </PopoverPortal>
       )}
-      <SvgIcon src="assets/icons/more.svg" size={24} />
+      <SvgIcon
+        src="assets/icons/more.svg"
+        size={24}
+        onClick={e => setIsOpen(true)}
+      />
     </PopoverContainer>
   );
 }

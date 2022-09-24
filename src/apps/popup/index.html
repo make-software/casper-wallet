@@ -10,10 +10,17 @@
       rel="stylesheet"
     />
 
+    <style>
+      #popover-root {
+          z-index: 10; /* themeConfig -> zIndex -> dropdown: 10 */
+      }
+    </style>
+
     <title>Casper Wallet</title>
   </head>
 
   <body>
+    <div id="popover-root"></div>
     <div id="app-container"></div>
   </body>
 </html>

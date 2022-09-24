@@ -53,6 +53,10 @@ const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
   width: 100%;
 `;
 
+const PopoverMenuItem = styled.div`
+  cursor: pointer;
+`;
+
 export function AccountListPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -132,19 +136,19 @@ export function AccountListPage() {
                 renderMenuItems={({ closePopover }) => (
                   <>
                     {connectedAccountNames.includes(account.name) ? (
-                      <Typography
-                        type="body"
+                      <PopoverMenuItem
                         onClick={e => {
                           closePopover(e);
                           activeOrigin &&
                             disconnectAccount(account.name, activeOrigin);
                         }}
                       >
-                        <Trans t={t}>Disconnect</Trans>
-                      </Typography>
+                        <Typography type="body">
+                          <Trans t={t}>Disconnect</Trans>
+                        </Typography>
+                      </PopoverMenuItem>
                     ) : (
-                      <Typography
-                        type="body"
+                      <PopoverMenuItem
                         onClick={() =>
                           navigate(
                             isAnyAccountConnected
@@ -153,11 +157,12 @@ export function AccountListPage() {
                           )
                         }
                       >
-                        <Trans t={t}>Connect</Trans>
-                      </Typography>
+                        <Typography type="body">
+                          <Trans t={t}>Connect</Trans>
+                        </Typography>
+                      </PopoverMenuItem>
                     )}
-                    <Typography
-                      type="body"
+                    <PopoverMenuItem
                       onClick={() =>
                         navigate(
                           RouterPath.AccountSettings.replace(
@@ -167,8 +172,10 @@ export function AccountListPage() {
                         )
                       }
                     >
-                      <Trans t={t}>Manage</Trans>
-                    </Typography>
+                      <Typography type="body">
+                        <Trans t={t}>Manage</Trans>
+                      </Typography>
+                    </PopoverMenuItem>
                   </>
                 )}
               />
