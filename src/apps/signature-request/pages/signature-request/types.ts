@@ -49,18 +49,13 @@ export const isKeyOfHashValue = (key: string) => {
   return keysOfHashValues.includes(key as SignatureRequestKeys);
 };
 
-export const isKeyOfPriceValue = (key: string) => {
+export const isKeyOfCurrencyValue = (key: string) => {
   const keysOfPriceValues: SignatureRequestKeys[] = [
     'amount',
     'transactionFee'
   ];
 
   return keysOfPriceValues.includes(key as SignatureRequestKeys);
-};
-
-export const isKeyOfNumericValue = (key: string) => {
-  const keysOfNumericValues: SignatureRequestKeys[] = ['transferId'];
-  return keysOfNumericValues.includes(key as SignatureRequestKeys);
 };
 
 export const isKeyOfTimestampValue = (key: string) => {

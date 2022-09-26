@@ -5,18 +5,11 @@ import {
   formatNumber,
   formatTimestamp
 } from '@libs/ui/utils/formatters';
-import {
-  CSPR,
-  Hash,
-  HashVariant,
-  PrecisionCase,
-  Typography
-} from '@src/libs/ui';
+import { Hash, HashVariant, Typography } from '@src/libs/ui';
 
 import {
   isKeyOfHashValue,
-  isKeyOfNumericValue,
-  isKeyOfPriceValue,
+  isKeyOfCurrencyValue,
   isKeyOfTimestampValue
 } from './types';
 
@@ -38,15 +31,7 @@ export function SignatureRequestValue({
     );
   }
 
-  if (isKeyOfPriceValue(id)) {
-    return (
-      <Typography type="body" weight="regular">
-        <CSPR motes={value} precisionCase={PrecisionCase.full} />
-      </Typography>
-    );
-  }
-
-  if (isKeyOfNumericValue(id)) {
+  if (isKeyOfCurrencyValue(id)) {
     return (
       <Hash
         value={formatNumber(value)}
