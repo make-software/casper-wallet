@@ -59,11 +59,12 @@ export type CasperWalletProviderOptions = {
 export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
   let requestId = 0;
   const generateRequestId = (): string => {
-    return (requestId++).toString();
+    requestId = requestId + 1;
+    return requestId.toString();
   };
 
   return {
-    requestConnection: async (): Promise<boolean> => {
+    requestConnection(): Promise<boolean> {
       return fetchFromExtensionBackend<
         ReturnType<typeof sdkMessage['connectResponse']>['payload']
       >(
@@ -113,11 +114,11 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         options
       );
     },
-    sign(
+    sign: (
       deployJson: string,
       signingPublicKeyHex: string,
       targetPublicKeyHex: string | undefined
-    ): Promise<{ signature: Uint8Array }> {
+    ): Promise<{ signature: Uint8Array }> => {
       return fetchFromExtensionBackend<
         ReturnType<typeof sdkMessage['signResponse']>['payload']
       >(
