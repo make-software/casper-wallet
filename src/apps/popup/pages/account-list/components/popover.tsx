@@ -1,9 +1,7 @@
-import React, { useState, MouseEvent } from 'react';
+import React, { useState, useRef, PropsWithChildren, MouseEvent } from 'react';
 import styled from 'styled-components';
 
-import { SvgIcon } from '@libs/ui';
 import { CenteredFlexRow, FlexColumn } from '@libs/layout';
-
 import { useClickAway } from '@libs/ui/hooks/use-click-away';
 
 import { PopoverPortal } from './popover-portal';
@@ -23,40 +21,62 @@ const PopoverItemsContainer = styled(FlexColumn)`
   border-radius: 8px;
 `;
 
+interface PopoverContainerProps {
+  top?: number;
+}
+
+const popoverTopOffset = 15;
+const PortalContainer = styled.div<PopoverContainerProps>`
+  position: absolute;
+  right: 16px;
+  top: ${({ top }) => (top ? top - popoverTopOffset : 0)}px;
+`;
+
 type RenderProps = {
-  closePopover: (e: MouseEvent<HTMLDivElement>) => void;
+  closePopover: (e: MouseEvent<HTMLAnchorElement>) => void;
 };
 
 interface PopoverProps {
   renderMenuItems: (renderProps: RenderProps) => JSX.Element;
 }
 
-export function Popover({ renderMenuItems }: PopoverProps) {
+export function Popover({
+  renderMenuItems,
+  children
+}: PropsWithChildren<PopoverProps>) {
   const [isOpen, setIsOpen] = useState(false);
+  const popoverContainerRef = useRef<HTMLDivElement>(null);
 
   const { ref } = useClickAway({
-    callback: () => setIsOpen(false)
+    callback: () => isOpen && setIsOpen(false)
   });
 
-  const closePopover = (e: MouseEvent<HTMLDivElement>) => {
+  const closePopover = (e: MouseEvent<HTMLAnchorElement>) => {
     e.stopPropagation();
     setIsOpen(false);
   };
 
   return (
-    <PopoverContainer ref={ref}>
+    <>
+      <PopoverContainer
+        ref={popoverContainerRef}
+        onClick={() => setIsOpen(true)}
+      >
+        {children}
+      </PopoverContainer>
+
       {isOpen && (
-        <PopoverPortal top={ref.current?.getBoundingClientRect().top}>
-          <PopoverItemsContainer>
-            {renderMenuItems({ closePopover })}
-          </PopoverItemsContainer>
+        <PopoverPortal>
+          <PortalContainer
+            ref={ref}
+            top={popoverContainerRef.current?.getBoundingClientRect().top}
+          >
+            <PopoverItemsContainer>
+              {renderMenuItems({ closePopover })}
+            </PopoverItemsContainer>
+          </PortalContainer>
         </PopoverPortal>
       )}
-      <SvgIcon
-        src="assets/icons/more.svg"
-        size={24}
-        onClick={e => setIsOpen(true)}
-      />
-    </PopoverContainer>
+    </>
   );
 }
