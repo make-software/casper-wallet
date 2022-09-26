@@ -48,7 +48,7 @@ export function App() {
               <PopupHeader
                 withConnectionStatus
                 renderSubmenuBarItems={() => (
-                  <HeaderSubmenuBarNavLink linkType="cancel" />
+                  <HeaderSubmenuBarNavLink linkType="cancelWindow" />
                 )}
               />
             }

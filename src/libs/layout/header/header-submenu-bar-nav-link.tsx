@@ -1,16 +1,24 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useTranslation, Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { Link, Typography, SvgIcon } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { closeActiveWindow } from '@background/close-window';
 
 const LinkWithIconContainer = styled.div`
   display: flex;
   align-items: center;
 `;
 
-export type LinkType = 'back' | 'close' | 'cancel' | 'done' | 'switchAccount';
+export type LinkType =
+  | 'back'
+  | 'close'
+  | 'cancel'
+  | 'done'
+  | 'switchAccount'
+  | 'cancelWindow';
 
 interface HeaderSubmenuBarNavLinkProps {
   linkType: LinkType;
@@ -25,62 +33,78 @@ export function HeaderSubmenuBarNavLink({
   switch (linkType) {
     case 'close':
       return (
-        <Typography type="bodySemiBold">
-          <Link onClick={() => navigate(RouterPath.Home)} color="fillBlue">
-            <Trans t={t}>Close</Trans>
-          </Link>
-        </Typography>
+        <NavLink label={t('Close')} onClick={() => navigate(RouterPath.Home)} />
       );
 
     case 'cancel':
       return (
-        <Typography type="bodySemiBold">
-          <Link onClick={() => navigate(RouterPath.Home)} color="fillBlue">
-            <Trans t={t}>Cancel</Trans>
-          </Link>
-        </Typography>
+        <NavLink
+          label={t('Cancel')}
+          onClick={() => navigate(RouterPath.Home)}
+        />
       );
 
     case 'back':
       return (
-        <Typography type="bodySemiBold">
-          <LinkWithIconContainer>
-            <SvgIcon
-              onClick={() => navigate(-1)}
-              src="assets/icons/chevron.svg"
-              color="contentBlue"
-              flipByAxis="Y"
-              size={24}
-            />
-            <Link onClick={() => navigate(-1)} color="fillBlue">
-              <Trans t={t}>Back</Trans>
-            </Link>
-          </LinkWithIconContainer>
-        </Typography>
+        <NavLink
+          label={t('Back')}
+          onClick={() => navigate(-1)}
+          withLeftChevronIcon
+        />
       );
 
     case 'done':
       return (
-        <Typography type="bodySemiBold">
-          <Link color="fillBlue" onClick={() => navigate(RouterPath.Home)}>
-            {t('Done')}
-          </Link>
-        </Typography>
+        <NavLink label={t('Done')} onClick={() => navigate(RouterPath.Home)} />
       );
 
     case 'switchAccount':
       return (
-        <Typography type="bodySemiBold">
-          <Link
-            color="fillBlue"
-            onClick={() => navigate(RouterPath.AccountList)}
-          >
-            {t('Switch account')}
-          </Link>
-        </Typography>
+        <NavLink
+          label={t('Switch account')}
+          onClick={() => navigate(RouterPath.AccountList)}
+        />
+      );
+
+    case 'cancelWindow':
+      return (
+        <NavLink label={t('Cancel')} onClick={() => closeActiveWindow()} />
       );
 
     default:
       throw new Error('Unknown Link type');
   }
+}
+
+interface NavLinkProps {
+  label: string;
+  onClick: () => void;
+  withLeftChevronIcon?: boolean;
+}
+
+function NavLink({ label, onClick, withLeftChevronIcon }: NavLinkProps) {
+  const LinkComponent = (
+    <Link color="fillBlue" onClick={onClick}>
+      {label}
+    </Link>
+  );
+
+  return (
+    <Typography type="bodySemiBold">
+      {withLeftChevronIcon ? (
+        <LinkWithIconContainer>
+          <SvgIcon
+            onClick={onClick}
+            src="assets/icons/chevron.svg"
+            color="contentBlue"
+            flipByAxis="Y"
+            size={24}
+          />
+          {LinkComponent}
+        </LinkWithIconContainer>
+      ) : (
+        LinkComponent
+      )}
+    </Typography>
+  );
 }
