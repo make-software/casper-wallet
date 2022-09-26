@@ -9,9 +9,13 @@ import React, {
 
 import type { CasperWalletProvider } from '../../src/content/sdk';
 
+let casperWalletInstance;
 const getCasperWalletInstance = (): ReturnType<typeof CasperWalletProvider> => {
   try {
-    return new (window as any).CasperWalletProvider();
+    if (casperWalletInstance == null) {
+      casperWalletInstance = new (window as any).CasperWalletProvider();
+    }
+    return casperWalletInstance;
   } catch (err) {}
   throw Error('Please install the Casper Wallet Extension.');
 };

@@ -11,7 +11,7 @@ const Container = styled.div`
   max-height: 600px;
   min-height: 600px;
   height: 100%;
-  width: 360px;
+  min-width: 360px;
 `;
 
 const PageHeader = styled.header``;
