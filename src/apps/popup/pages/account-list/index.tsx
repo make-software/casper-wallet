@@ -4,7 +4,15 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { Checkbox, Hash, HashVariant, List, Typography } from '@libs/ui';
+import {
+  Checkbox,
+  Hash,
+  HashVariant,
+  Link,
+  List,
+  SvgIcon,
+  Typography
+} from '@libs/ui';
 import {
   ContentContainer,
   LeftAlignedFlexColumn,
@@ -51,10 +59,6 @@ const ListItemClickableContainer = styled.div`
 const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
 const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
   width: 100%;
-`;
-
-const PopoverMenuItem = styled.div`
-  cursor: pointer;
 `;
 
 export function AccountListPage() {
@@ -136,7 +140,8 @@ export function AccountListPage() {
                 renderMenuItems={({ closePopover }) => (
                   <>
                     {connectedAccountNames.includes(account.name) ? (
-                      <PopoverMenuItem
+                      <Link
+                        color="inherit"
                         onClick={e => {
                           closePopover(e);
                           activeOrigin &&
@@ -146,9 +151,10 @@ export function AccountListPage() {
                         <Typography type="body">
                           <Trans t={t}>Disconnect</Trans>
                         </Typography>
-                      </PopoverMenuItem>
+                      </Link>
                     ) : (
-                      <PopoverMenuItem
+                      <Link
+                        color="inherit"
                         onClick={() =>
                           navigate(
                             isAnyAccountConnected
@@ -160,9 +166,10 @@ export function AccountListPage() {
                         <Typography type="body">
                           <Trans t={t}>Connect</Trans>
                         </Typography>
-                      </PopoverMenuItem>
+                      </Link>
                     )}
-                    <PopoverMenuItem
+                    <Link
+                      color="inherit"
                       onClick={() =>
                         navigate(
                           RouterPath.AccountSettings.replace(
@@ -175,10 +182,12 @@ export function AccountListPage() {
                       <Typography type="body">
                         <Trans t={t}>Manage</Trans>
                       </Typography>
-                    </PopoverMenuItem>
+                    </Link>
                   </>
                 )}
-              />
+              >
+                <SvgIcon src="assets/icons/more.svg" size={24} />
+              </Popover>
             </ListItemContainer>
           )}
           marginLeftForItemSeparatorLine={60}
