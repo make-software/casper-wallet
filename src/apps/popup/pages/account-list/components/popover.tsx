@@ -30,6 +30,8 @@ const PortalContainer = styled.div<PopoverContainerProps>`
   position: absolute;
   right: 16px;
   top: ${({ top }) => (top ? top - popoverTopOffset : 0)}px;
+
+  z-index: ${({ theme }) => theme.zIndex.dropdown};
 `;
 
 type RenderProps = {
