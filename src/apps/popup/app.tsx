@@ -155,6 +155,7 @@ function UnlockedRouter() {
               <PopupHeader
                 withLock
                 withMenu
+                withConnectionStatus
                 renderSubmenuBarItems={() => (
                   <HomePageHeaderSubmenuItems linkType="done" />
                 )}
