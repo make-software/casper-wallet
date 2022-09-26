@@ -126,7 +126,7 @@ export const selectCountOfConnectedAccounts = createSelector(
   connectedAccounts => connectedAccounts.length
 );
 
-export const selectCountOfAccounts = createSelector(
+export const selectVaultCountOfAccounts = createSelector(
   selectVaultAccounts,
   accounts => accounts.length
 );
