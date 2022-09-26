@@ -3,9 +3,9 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import {
   ContentContainer,
-  FooterButtonsContainer,
   HeaderTextContainer,
-  TextContainer
+  TextContainer,
+  FooterButtonsAbsoluteContainer
 } from '@src/libs/layout/containers';
 
 import { Typography, Button, Checkbox } from '@libs/ui';
@@ -43,7 +43,7 @@ export function ResetVaultPageContent() {
           </Typography>
         </TextContainer>
       </ContentContainer>
-      <FooterButtonsContainer>
+      <FooterButtonsAbsoluteContainer>
         <Checkbox
           label={t('I’ve read and understand the above')}
           checked={isChecked}
@@ -61,7 +61,7 @@ export function ResetVaultPageContent() {
         <Button onClick={handleCancel} color="secondaryBlue">
           <Trans t={t}>Cancel</Trans>
         </Button>
-      </FooterButtonsContainer>
+      </FooterButtonsAbsoluteContainer>
     </>
   );
 }
