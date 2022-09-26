@@ -135,8 +135,8 @@ function UnlockedRouter() {
           <Layout
             Header={
               <PopupHeader
-                withMenu
                 withLock
+                withMenu
                 withConnectionStatus
                 renderSubmenuBarItems={() => (
                   <HomePageHeaderSubmenuItems linkType="switchAccount" />
@@ -155,6 +155,7 @@ function UnlockedRouter() {
               <PopupHeader
                 withLock
                 withMenu
+                withConnectionStatus
                 renderSubmenuBarItems={() => (
                   <HomePageHeaderSubmenuItems linkType="done" />
                 )}
@@ -191,9 +192,9 @@ function UnlockedRouter() {
           <Layout
             Header={
               <PopupHeader
-                withConnectionStatus
-                withMenu
                 withLock
+                withMenu
+                withConnectionStatus
                 renderSubmenuBarItems={() => (
                   <HeaderSubmenuBarNavLink linkType="close" />
                 )}
@@ -249,6 +250,24 @@ function UnlockedRouter() {
         }
       />
       <Route
+        path={RouterPath.ConnectedSites}
+        element={
+          <Layout
+            Header={
+              <PopupHeader
+                withMenu
+                withLock
+                withConnectionStatus
+                renderSubmenuBarItems={() => (
+                  <HeaderSubmenuBarNavLink linkType="back" />
+                )}
+              />
+            }
+            Content={<ConnectedSitesPage />}
+          />
+        }
+      />
+      <Route
         path={RouterPath.ConnectAnotherAccount}
         element={
           <Layout
@@ -267,20 +286,20 @@ function UnlockedRouter() {
         }
       />
       <Route
-        path={RouterPath.ConnectedSites}
+        path={RouterPath.ConnectAnotherAccountByParams}
         element={
           <Layout
             Header={
               <PopupHeader
-                withMenu
                 withLock
+                withMenu
                 withConnectionStatus
                 renderSubmenuBarItems={() => (
-                  <HeaderSubmenuBarNavLink linkType="back" />
+                  <HeaderSubmenuBarNavLink linkType="cancel" />
                 )}
               />
             }
-            Content={<ConnectedSitesPage />}
+            Content={<ConnectAnotherAccountPageContent />}
           />
         }
       />

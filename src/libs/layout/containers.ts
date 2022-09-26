@@ -10,6 +10,10 @@ export const CenteredFlexRow = styled(FlexRow)`
   align-items: center;
 `;
 
+export const LeftAlignedCenteredFlexRow = styled(CenteredFlexRow)`
+  justify-content: flex-start;
+`;
+
 export const SpaceBetweenFlexRow = styled(FlexRow)`
   justify-content: space-between;
 `;
