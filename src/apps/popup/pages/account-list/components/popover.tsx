@@ -6,7 +6,7 @@ import { useClickAway } from '@libs/ui/hooks/use-click-away';
 
 import { PopoverPortal } from './popover-portal';
 
-const popoverTopOffset = 15;
+const popoverOffsetFromChildren = 64;
 
 const ChildrenContainer = styled(CenteredFlexRow)`
   padding: 14px 18px;
@@ -20,7 +20,7 @@ interface PopoverContainerProps {
 const PopoverContainer = styled.div<PopoverContainerProps>`
   position: absolute;
   right: 16px;
-  top: ${({ top }) => (top ? top - popoverTopOffset : 0)}px;
+  top: ${({ top }) => (top ? top + popoverOffsetFromChildren : 0)}px;
 
   z-index: ${({ theme }) => theme.zIndex.dropdown};
 `;
