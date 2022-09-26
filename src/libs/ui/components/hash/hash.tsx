@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { ContentColor, SvgIcon, Typography } from '@libs/ui';
@@ -10,46 +11,83 @@ const HashContainer = styled.div`
   justify-content: center;
   align-items: center;
 
-  & > span {
-    cursor: ${({ onClick }) => (onClick ? 'pointer' : 'cursor')};
-  }
+  cursor: ${({ onClick }) => (onClick ? 'pointer' : 'cursor')};
+`;
+
+const CopyStatusContainer = styled.div`
+  display: flex;
+  gap: 4px;
+
+  cursor: auto;
 `;
 
 export enum HashVariant {
-  CaptionHash = 'caption',
-  BodyHash = 'body'
+  CaptionHash = 'captionHash',
+  BodyHash = 'bodyHash'
 }
 
 interface HashProps {
   value: string;
   variant: HashVariant;
   truncated?: boolean;
-  withCopy?: boolean;
   color?: ContentColor;
+  withCopyOnClick?: boolean;
 }
 
 export function Hash({
   value,
   variant,
-  withCopy,
+  withCopyOnClick,
   truncated,
   color
 }: HashProps) {
-  return (
-    <HashContainer
-      onClick={
-        withCopy ? () => navigator.clipboard.writeText(value) : undefined
+  const { t } = useTranslation();
+  const [isClicked, setIsClicked] = useState(false);
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+
+    if (isClicked) {
+      timeout = setTimeout(() => {
+        setIsClicked(false);
+      }, 2000);
+    }
+
+    return () => timeout && clearTimeout(timeout);
+  }, [isClicked, setIsClicked]);
+
+  const handleCopyOnClick = withCopyOnClick
+    ? () => {
+        if (isClicked) {
+          return;
+        }
+
+        setIsClicked(true);
+        navigator.clipboard.writeText(value);
       }
-    >
-      <Typography
-        asHash
-        type={variant}
-        weight="regular"
-        color={color || 'contentSecondary'}
-      >
-        {truncated ? truncateKey(value) : value}
-      </Typography>
-      {withCopy && <SvgIcon src="assets/icons/copy.svg" size={24} />}
+    : undefined;
+
+  return (
+    <HashContainer onClick={handleCopyOnClick}>
+      {isClicked ? (
+        <CopyStatusContainer>
+          <SvgIcon
+            color="contentGreen"
+            src="assets/icons/checkbox-checked.svg"
+            size={24}
+          />
+          <Typography type="body" color="contentGreen">
+            <Trans t={t}>Copied!</Trans>
+          </Typography>
+        </CopyStatusContainer>
+      ) : (
+        <>
+          <Typography type={variant} color={color || 'contentSecondary'}>
+            {truncated ? truncateKey(value) : value}
+          </Typography>
+          {withCopyOnClick && <SvgIcon src="assets/icons/copy.svg" size={24} />}
+        </>
+      )}
     </HashContainer>
   );
 }

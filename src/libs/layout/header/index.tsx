@@ -1,37 +1,40 @@
-import React, { ReactElement } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
-import { HeaderContainer, Logo, LogoContainer } from '@src/libs/layout';
+import {
+  HeaderContainer,
+  Logo,
+  LogoContainer,
+  CenteredSpaceBetweenFlexRow,
+  LeftAlignedCenteredFlexRow
+} from '@src/libs/layout';
 import { HeaderConnectionStatus } from '@src/libs/layout/header/header-connection-status';
 
 import { HeaderActions } from './header-actions';
-import { HeaderSubmenuBar } from './header-submenu-bar';
-import { SubmenuActionType } from '../types';
 
-const LeftAlignedContainer = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
+const LogoAndConnectionStatusContainer = styled(LeftAlignedCenteredFlexRow)`
+  gap: 18px;
 `;
 
-const LogoAndConnectionStatusContainer = styled(LeftAlignedContainer)`
-  gap: 18px;
+const SubmenuBarContainer = styled(CenteredSpaceBetweenFlexRow)`
+  height: 56px;
+  background-color: ${({ theme }) => theme.color.backgroundPrimary};
+  border-bottom: 0.5px solid ${({ theme }) => theme.color.borderPrimary};
+  padding: 8px ${({ theme }) => theme.padding[1.6]};
 `;
 
 interface HeaderProps {
   withLock?: boolean;
   withMenu?: boolean;
   withConnectionStatus?: boolean;
-  submenuActionType?: SubmenuActionType;
-  SubmenuActionGroup?: ReactElement;
+  renderSubmenuBarItems?: () => JSX.Element;
 }
 
 export function PopupHeader({
   withLock,
   withMenu,
   withConnectionStatus,
-  submenuActionType,
-  SubmenuActionGroup
+  renderSubmenuBarItems
 }: HeaderProps) {
   return (
     <>
@@ -45,12 +48,11 @@ export function PopupHeader({
 
         <HeaderActions withMenu={withMenu} withLock={withLock} />
       </HeaderContainer>
-      {submenuActionType && (
-        <HeaderSubmenuBar
-          actionType={submenuActionType}
-          ActionGroup={SubmenuActionGroup}
-        />
+      {renderSubmenuBarItems && (
+        <SubmenuBarContainer>{renderSubmenuBarItems()}</SubmenuBarContainer>
       )}
     </>
   );
 }
+
+export * from './header-submenu-bar-nav-link';

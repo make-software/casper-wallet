@@ -30,9 +30,7 @@ export function AccountSettingsPageContent() {
     <ContentContainer>
       <PageTile>
         <HeaderTextContainer>
-          <Typography type="header" weight="bold">
-            {account.name}
-          </Typography>
+          <Typography type="header">{account.name}</Typography>
         </HeaderTextContainer>
       </PageTile>
     </ContentContainer>

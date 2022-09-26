@@ -75,15 +75,15 @@ export function CreateVaultPageContent() {
     <form onSubmit={handleSubmit(onSubmit)}>
       <ContentContainer>
         <HeaderTextContainer>
-          <Typography type="header" weight="semiBold">
+          <Typography type="header">
             <Trans t={t}>Create new vault</Trans>
           </Typography>
         </HeaderTextContainer>
         <TextContainer>
-          <Typography type="body" weight="regular" color="contentSecondary">
+          <Typography type="body" color="contentSecondary">
             <Trans t={t}>
               Please set a password for your vault. Try to use at least{' '}
-              <Typography type="body" weight="semiBold" color="contentPrimary">
+              <Typography type="bodySemiBold" color="contentPrimary">
                 {{ minPasswordLength }} characters
               </Typography>{' '}
               to ensure a strong passphrase.

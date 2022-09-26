@@ -26,12 +26,12 @@ export function NoConnectedAccountPageContent() {
         <SvgIcon src="assets/illustrations/no-connection.svg" size={120} />
       </IllustrationContainer>
       <HeaderTextContainer>
-        <Typography type="header" weight="bold">
+        <Typography type="header">
           <Trans t={t}>Casper Signer is not connected to this site yet</Trans>
         </Typography>
       </HeaderTextContainer>
       <TextContainer>
-        <Typography type="body" weight="regular" color="contentSecondary">
+        <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             To connect to this site, find and click the connect button on the
             site

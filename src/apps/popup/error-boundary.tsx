@@ -31,9 +31,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <>
           <h1>{this.state.error?.message}</h1>
-          <Typography type="body" weight="regular">
-            {this.state.error?.stack}
-          </Typography>
+          <Typography type="body">{this.state.error?.stack}</Typography>
         </>
       );
     }

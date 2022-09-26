@@ -65,7 +65,7 @@ export function RenameAccountPageContent() {
   return (
     <ContentContainer>
       <HeaderTextContainer>
-        <Typography type="header" weight="bold">
+        <Typography type="header">
           <Trans t={t}>Rename account</Trans>
         </Typography>
       </HeaderTextContainer>

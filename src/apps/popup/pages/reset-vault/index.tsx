@@ -30,12 +30,12 @@ export function ResetVaultPageContent() {
     <>
       <ContentContainer>
         <HeaderTextContainer>
-          <Typography type="header" weight="bold">
+          <Typography type="header">
             <Trans t={t}>Are you sure you want to reset your vault?</Trans>
           </Typography>
         </HeaderTextContainer>
         <TextContainer>
-          <Typography type="body" weight="regular" color="contentSecondary">
+          <Typography type="body" color="contentSecondary">
             <Trans t={t}>
               All accounts will be removed. Make sure you have securely stored
               the recovery phrase for each account before proceeding.

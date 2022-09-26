@@ -42,16 +42,8 @@ export function SignatureRequestValue({
   }
 
   if (isKeyOfTimestampValue(id)) {
-    return (
-      <Typography type="body" weight="regular">
-        {formatTimestamp(value)}
-      </Typography>
-    );
+    return <Typography type="body">{formatTimestamp(value)}</Typography>;
   }
 
-  return (
-    <Typography type="body" weight="regular">
-      {capitalizeString(value)}
-    </Typography>
-  );
+  return <Typography type="body">{capitalizeString(value)}</Typography>;
 }

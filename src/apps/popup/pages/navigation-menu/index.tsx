@@ -124,11 +124,9 @@ export function NavigationMenuPageContent() {
               color="contentBlue"
             />
             <SpaceBetweenContainer>
-              <Typography type="body" weight="regular">
-                {menuItem.title}
-              </Typography>
+              <Typography type="body">{menuItem.title}</Typography>
               {menuItem.currentValue != null && (
-                <Typography type="body" weight="semiBold" color="contentBlue">
+                <Typography type="bodySemiBold" color="contentBlue">
                   {menuItem.currentValue}
                 </Typography>
               )}

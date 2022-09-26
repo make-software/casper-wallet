@@ -23,12 +23,12 @@ export function NoAccountsPageContent() {
   return (
     <ContentContainer>
       <HeaderTextContainer>
-        <Typography type="header" weight="semiBold">
+        <Typography type="header">
           <Trans t={t}>Your vault is ready, but no accounts yet</Trans>
         </Typography>
       </HeaderTextContainer>
       <TextContainer>
-        <Typography type="body" weight="regular" color="contentSecondary">
+        <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             Please, create an account or import an account you already have.
           </Trans>

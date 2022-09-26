@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
-import { RootState } from 'typesafe-actions';
 import styled from 'styled-components';
 
 import { ContentContainer, HeaderTextContainer } from '@src/libs/layout';
@@ -18,6 +18,7 @@ import {
 
 import {
   selectConnectedAccountsWithOrigin,
+  selectVaultAccounts,
   selectVaultActiveAccount,
   selectVaultActiveOrigin
 } from '@src/background/redux/vault/selectors';
@@ -54,6 +55,7 @@ export const SpaceBetweenContainer = styled(CentredFlexRow)`
 export function ConnectAnotherAccountPageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
+  const { targetAccountName } = useParams();
 
   const activeOrigin = useSelector(selectVaultActiveOrigin);
   const {
@@ -61,10 +63,15 @@ export function ConnectAnotherAccountPageContent() {
     changeActiveAccountWithEvent: changeActiveAccount
   } = useAccountManager();
 
-  const connectedAccountsToActiveTab = useSelector((state: RootState) =>
-    selectConnectedAccountsWithOrigin(state)
+  const connectedAccountsToActiveTab = useSelector(
+    selectConnectedAccountsWithOrigin
   );
+
+  const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const targetAccount = targetAccountName
+    ? accounts.find(account => account.name === targetAccountName)
+    : activeAccount;
 
   const connectedAccountsListItems = connectedAccountsToActiveTab.map(
     account => ({
@@ -78,12 +85,12 @@ export function ConnectAnotherAccountPageContent() {
       <HeaderTextContainer>
         <SiteFaviconBadge origin={activeOrigin} />
         <HeaderTextContent>
-          <Typography type="header" weight="bold">
+          <Typography type="header">
             Your current account is not connected
           </Typography>
         </HeaderTextContent>
       </HeaderTextContainer>
-      {activeAccount && (
+      {targetAccount && (
         <PageTile>
           <CentredFlexRow>
             <SvgIcon
@@ -93,11 +100,9 @@ export function ConnectAnotherAccountPageContent() {
             />
             <SpaceBetweenContainer>
               <LeftAlignedFlexColumn>
-                <Typography type="body" weight="regular">
-                  {activeAccount.name}
-                </Typography>
+                <Typography type="body">{targetAccount.name}</Typography>
                 <Hash
-                  value={activeAccount.publicKey}
+                  value={targetAccount.publicKey}
                   variant={HashVariant.CaptionHash}
                   truncated
                 />
@@ -106,7 +111,7 @@ export function ConnectAnotherAccountPageContent() {
                 variant="inline"
                 width="100"
                 onClick={async () => {
-                  await connectAccounts([activeAccount.name], activeOrigin);
+                  await connectAccounts([targetAccount.name], activeOrigin);
                   navigate(RouterPath.Home);
                 }}
               >
@@ -129,9 +134,7 @@ export function ConnectAnotherAccountPageContent() {
 
             <SpaceBetweenContainer>
               <LeftAlignedFlexColumn>
-                <Typography type="body" weight="regular">
-                  {account.name}
-                </Typography>
+                <Typography type="body">{account.name}</Typography>
                 <Hash
                   value={account.publicKey}
                   variant={HashVariant.CaptionHash}

@@ -111,12 +111,12 @@ export function ImportAccountWithFileContentPage() {
   return (
     <ContentContainer>
       <HeaderTextContainer>
-        <Typography type="header" weight="bold">
+        <Typography type="header">
           <Trans t={t}>Import account by uploading a file</Trans>
         </Typography>
       </HeaderTextContainer>
       <TextContainer>
-        <Typography type="body" weight="regular" color="contentSecondary">
+        <Typography type="body" color="contentSecondary">
           <Trans t={t}>Import your account from Secret Key File.</Trans>
         </Typography>
       </TextContainer>
