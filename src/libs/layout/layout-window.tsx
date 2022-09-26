@@ -2,12 +2,14 @@ import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 import { MacScrollbar } from 'mac-scrollbar';
 
+import { FlexColumn } from '@layout/containers';
+
 interface Props {
   Header: ReactElement;
   Content: ReactElement;
 }
 
-const Container = styled.div`
+const Container = styled(FlexColumn)`
   height: 100%;
 `;
 
@@ -15,7 +17,7 @@ const PageHeader = styled.header``;
 
 const PageContent = styled.div`
   width: 100%;
-  height: calc(100% - 128px); // 128px is headers height
+  height: 100%;
 `;
 
 export function LayoutWindow({ Header, Content }: Props) {
