@@ -17,6 +17,10 @@ export const GlobalStyle = createGlobalStyle<{ theme: any }>`
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  .ms-container {
+    height: 100%;
+  }
   
   #app-container {
     background: ${props => props.theme.color.backgroundSecondary};
