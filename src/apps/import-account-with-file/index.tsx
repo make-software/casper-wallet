@@ -20,5 +20,5 @@ render(
       </ThemeProvider>
     </ErrorBoundary>
   </Suspense>,
-  document.querySelector('#import-account-with-file-app-container')
+  document.querySelector('#app-container')
 );

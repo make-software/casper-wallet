@@ -1,30 +1,29 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
-import { MacScrollbar } from 'mac-scrollbar';
+
+import { FlexColumn } from './containers';
 
 interface Props {
   Header: ReactElement;
   Content: ReactElement;
 }
 
-const Container = styled.div`
-  max-height: 600px;
-  min-height: 600px;
+const Container = styled(FlexColumn)`
   height: 100%;
-  min-width: 360px;
 `;
 
 const PageHeader = styled.header``;
 
-const PageContent = styled.div``;
+const PageContent = styled.div`
+  height: 472px;
+  overflow-y: auto;
+`;
 
 export function Layout({ Header, Content }: Props) {
   return (
-    <MacScrollbar>
-      <Container>
-        <PageHeader>{Header}</PageHeader>
-        <PageContent>{Content}</PageContent>
-      </Container>
-    </MacScrollbar>
+    <Container>
+      <PageHeader>{Header}</PageHeader>
+      <PageContent>{Content}</PageContent>
+    </Container>
   );
 }

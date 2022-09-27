@@ -1,12 +1,12 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
-import { MacScrollbar } from 'mac-scrollbar';
 
 import { FlexColumn } from '@layout/containers';
 
 interface Props {
   Header: ReactElement;
   Content: ReactElement;
+  renderFooter?: () => ReactElement;
 }
 
 const Container = styled(FlexColumn)`
@@ -16,17 +16,18 @@ const Container = styled(FlexColumn)`
 const PageHeader = styled.header``;
 
 const PageContent = styled.div`
-  width: 100%;
   height: 100%;
+  overflow-y: auto;
 `;
 
-export function LayoutWindow({ Header, Content }: Props) {
+const PageFooter = styled.footer``;
+
+export function LayoutWindow({ Header, Content, renderFooter }: Props) {
   return (
-    <MacScrollbar>
-      <Container>
-        <PageHeader>{Header}</PageHeader>
-        <PageContent>{Content}</PageContent>
-      </Container>
-    </MacScrollbar>
+    <Container>
+      <PageHeader>{Header}</PageHeader>
+      <PageContent>{Content}</PageContent>
+      {renderFooter && <PageFooter>{renderFooter()}</PageFooter>}
+    </Container>
   );
 }

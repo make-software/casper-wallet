@@ -60,4 +60,4 @@ const Tree = () => {
   );
 };
 
-render(<Tree />, window.document.querySelector('#app-container'));
+render(<Tree />, document.querySelector('#app-container'));

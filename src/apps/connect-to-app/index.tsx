@@ -61,7 +61,4 @@ const Tree = () => {
   );
 };
 
-render(
-  <Tree />,
-  window.document.querySelector('#connect-to-app-app-container')
-);
+render(<Tree />, document.querySelector('#app-container'));

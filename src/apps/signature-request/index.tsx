@@ -58,4 +58,4 @@ const Tree = () => {
   );
 };
 
-render(<Tree />, document.querySelector('#signature-request-app-container'));
+render(<Tree />, document.querySelector('#app-container'));
