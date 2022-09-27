@@ -80,7 +80,6 @@ interface Props {
 }
 
 export const FooterButtonsContainer = styled(SpaceBetweenFlexRow)<Props>`
-  margin-top: 16px;
   width: 100%;
 
   flex-direction: ${({ direction }) => (direction ? direction : 'column')};
@@ -92,6 +91,10 @@ export const FooterButtonsContainer = styled(SpaceBetweenFlexRow)<Props>`
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
 `;
 
+/**
+ * @deprecated to be replaced by FooterButtonsContainer when Popup layout is refactored
+ * to be the same as window layout
+ */
 export const FooterButtonsAbsoluteContainer = styled(FooterButtonsContainer)`
   position: absolute;
   bottom: 0;

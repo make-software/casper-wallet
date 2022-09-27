@@ -76,8 +76,7 @@ export function createOpenWindow({
           const xOffset = currentWindow.left ?? 0;
           const yOffset = currentWindow.top ?? 0;
           const popupWidth = 360;
-          const popupHeight =
-            purposeForOpening === PurposeForOpening.ConnectToApp ? 700 : 600;
+          const popupHeight = 700;
 
           browser.windows
             .create({

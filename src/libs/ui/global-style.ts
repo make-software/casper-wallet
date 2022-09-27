@@ -10,15 +10,21 @@ export const GlobalStyle = createGlobalStyle<{ theme: any }>`
   
   body {
     height: 100%;
-    
-    background: none;
+    min-height: 600px;
+    min-width: 360px;
     padding: 0;
-    
+
+    background: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  .ms-container {
+    height: 100%;
+  }
   
   #app-container {
+    height: 100%;
     background: ${props => props.theme.color.backgroundSecondary};
     border-radius: 16px;
   }

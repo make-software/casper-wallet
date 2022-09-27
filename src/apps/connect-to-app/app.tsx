@@ -1,14 +1,43 @@
 import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { RouterPath } from '@connect-to-app/router';
-import {
-  HeaderSubmenuBarNavLink,
-  LayoutWindow,
-  PopupHeader
-} from '@src/libs/layout';
-import { AccountsSelectionPage } from '@connect-to-app/pages/accounts-selection';
-import { ApproveConnectionPage } from '@connect-to-app/pages/approve-connection';
-import { ConnectingPage } from '@connect-to-app/pages/connecting';
+import { AccountsSelectionPage } from '@src/apps/connect-to-app/pages/accounts-selection';
+import { ApproveConnectionPage } from '@src/apps/connect-to-app/pages/approve-connection';
+import { ConnectingPage } from '@src/apps/connect-to-app/pages/connecting';
+
+export function App() {
+  const [selectedAccountNames, setSelectedAccountNames] = useState<string[]>(
+    []
+  );
+  const { origin, title } = getSiteRelatedData();
+
+  return (
+    <Routes>
+      <Route
+        path={RouterPath.SelectAccountsToConnect}
+        element={
+          <AccountsSelectionPage
+            selectedAccountNames={selectedAccountNames}
+            setSelectedAccountNames={setSelectedAccountNames}
+            origin={origin}
+            title={title}
+          />
+        }
+      />
+      <Route
+        path={RouterPath.ApproveConnection}
+        element={
+          <ApproveConnectionPage
+            selectedAccountNames={selectedAccountNames}
+            origin={origin}
+            title={title}
+          />
+        }
+      />
+      <Route path={RouterPath.Connecting} element={<ConnectingPage />} />
+    </Routes>
+  );
+}
 
 function getSiteRelatedData() {
   const searchParams = new URLSearchParams(document.location.search);
@@ -19,81 +48,10 @@ function getSiteRelatedData() {
   }
 
   const originName = origin.split('://')[1];
-  const splittedOrigin = originName.split('.');
-  const capitalizedOrigin = splittedOrigin
-    .map((word, index) =>
-      index === splittedOrigin.length - 2 ? word.toUpperCase() : word
-    )
-    .join('.');
+  const title = `Connect with ${originName}`;
 
   return {
     origin,
-    headerText: `Connect with ${capitalizedOrigin}`
+    title
   };
-}
-
-export function App() {
-  const [selectedAccountNames, setSelectedAccountNames] = useState<string[]>(
-    []
-  );
-  const { origin, headerText } = getSiteRelatedData();
-
-  return (
-    <Routes>
-      <Route
-        path={RouterPath.SelectAccountsToConnect}
-        element={
-          <LayoutWindow
-            Header={
-              <PopupHeader
-                withConnectionStatus
-                renderSubmenuBarItems={() => (
-                  <HeaderSubmenuBarNavLink linkType="cancel" />
-                )}
-              />
-            }
-            Content={
-              <AccountsSelectionPage
-                selectedAccountNames={selectedAccountNames}
-                setSelectedAccountNames={setSelectedAccountNames}
-                origin={origin}
-                headerText={headerText}
-              />
-            }
-          />
-        }
-      />
-      <Route
-        path={RouterPath.ApproveConnection}
-        element={
-          <LayoutWindow
-            Header={
-              <PopupHeader
-                withConnectionStatus
-                renderSubmenuBarItems={() => (
-                  <HeaderSubmenuBarNavLink linkType="back" />
-                )}
-              />
-            }
-            Content={
-              <ApproveConnectionPage
-                selectedAccountNames={selectedAccountNames}
-                origin={origin}
-                headerText={headerText}
-              />
-            }
-          />
-        }
-      />
-      <Route
-        path={RouterPath.Connecting}
-        element={
-          <LayoutWindow
-            Header={<PopupHeader withConnectionStatus />}
-            Content={<ConnectingPage />}
-          />
-        }
-      />
-    </Routes>
-  );
 }
