@@ -28,7 +28,7 @@ import {
   selectConnectedAccountsWithOrigin,
   selectVaultActiveAccount,
   selectVaultActiveOrigin,
-  selectCountOfAccounts
+  selectVaultCountOfAccounts
 } from '@src/background/redux/vault/selectors';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 
@@ -180,7 +180,7 @@ export function HomePageHeaderSubmenuItems({
   linkType
 }: HomePageHeaderSubmenuItemsProps) {
   const { t } = useTranslation();
-  const countOfAccounts = useSelector(selectCountOfAccounts);
+  const countOfAccounts = useSelector(selectVaultCountOfAccounts);
 
   return (
     <>

@@ -27,9 +27,9 @@ import {
   vaultUnlocked
 } from '@src/background/redux/vault/actions';
 import {
+  selectVaultCountOfAccounts,
   selectIsActiveAccountConnectedWithOrigin,
   selectIsAnyAccountConnectedWithOrigin,
-  selectVaultAccounts,
   selectVaultAccountsNames,
   selectVaultAccountsSecretKeysBase64,
   selectVaultActiveAccount,
@@ -70,8 +70,10 @@ browser.runtime.onMessage.addListener(
         switch (action.type) {
           case getType(sdkMessage.connectRequest): {
             let success = false;
-            const accounts = selectVaultAccounts(store.getState());
-            if (accounts.length > 0) {
+            const countOfAccounts = selectVaultCountOfAccounts(
+              store.getState()
+            );
+            if (countOfAccounts > 0) {
               openWindow({
                 purposeForOpening: PurposeForOpening.ConnectToApp,
                 query: { origin: action.payload }
