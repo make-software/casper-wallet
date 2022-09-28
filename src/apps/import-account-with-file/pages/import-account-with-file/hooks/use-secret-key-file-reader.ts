@@ -1,24 +1,10 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
-// These libraries are required for backward compatibility with Legacy Signer
-import Hex from '@lapo/asn1js/hex';
-import Base64 from '@lapo/asn1js/base64';
-import ASN1 from '@lapo/asn1js';
-
-import { decodeBase16, encodeBase64, decodeBase64, Keys } from 'casper-js-sdk';
-
-import { Account } from '@src/background/redux/vault/types';
 import { checkSecretKeyExist } from '@src/background/redux/import-account-actions-should-be-removed';
+import { Account } from '@src/background/redux/vault/types';
 
-function getAlgorithm(content: string): 'Ed25519' | 'Secp256K1' | undefined {
-  if (content.includes('curveEd25519')) {
-    return 'Ed25519';
-  } else if (content.includes('secp256k1')) {
-    return 'Secp256K1';
-  }
-  return undefined;
-}
+import { parseSecretKeyFileContent } from './import-secret-key';
 
 type OnSuccess = (accountData: Account) => void;
 type OnFailure = (message?: string) => void;
@@ -35,82 +21,44 @@ export function useSecretKeyFileReader({
   const { t } = useTranslation();
 
   const secretKeyFileReader = useCallback(
-    (name: string, secretKeyFile: any) => {
+    (name: string, secretKeyFile: Blob) => {
       const reader = new FileReader();
       reader.readAsText(secretKeyFile);
 
       reader.onload = async e => {
         const fileContents = reader.result as string;
 
-        if (!fileContents || fileContents.includes('PUBLIC KEY')) {
-          onFailure(
-            t('A private key was not detected. Try importing a different file.')
-          );
-
-          return;
-        }
-
-        const reHex = /^\s*(?:[0-9A-Fa-f][0-9A-Fa-f]\s*)+$/;
         try {
-          const der: Uint8Array = reHex.test(fileContents)
-            ? Hex.decode(fileContents)
-            : Base64.unarmor(fileContents);
-
-          const decodedString = ASN1.decode(der).toPrettyString();
-          const algorithm = getAlgorithm(decodedString);
-
-          if (!algorithm) {
-            onFailure(
+          if (!fileContents || fileContents.includes('PUBLIC KEY')) {
+            throw Error(
               t(
                 'A private key was not detected. Try importing a different file.'
               )
             );
-
-            return;
           }
 
-          const hexKey =
-            algorithm === 'Ed25519'
-              ? decodedString.split('\n')[4].split('|')[1]
-              : decodedString.split('\n')[2].split('|')[1];
+          const { publicKeyHex, secretKeyBase64 } =
+            parseSecretKeyFileContent(fileContents);
 
-          const secretKeyBase64 = encodeBase64(decodeBase16(hexKey));
           const doesSecretKeyExist =
             secretKeyBase64 && (await checkSecretKeyExist(secretKeyBase64));
-
           if (doesSecretKeyExist) {
-            onFailure(
+            throw Error(
               t('This account already exists. Try importing a different file.')
             );
-
-            return;
           }
 
-          const secretKeyBytes = decodeBase64(secretKeyBase64);
-
-          const secretKey =
-            algorithm === 'Ed25519'
-              ? Keys.Ed25519.parsePrivateKey(secretKeyBytes)
-              : Keys.Secp256K1.parsePrivateKey(secretKeyBytes, 'raw');
-
-          const publicKey =
-            algorithm === 'Ed25519'
-              ? Keys.Ed25519.privateToPublicKey(secretKeyBytes)
-              : Keys.Secp256K1.privateToPublicKey(secretKeyBytes);
-
-          const keyPair =
-            algorithm === 'Ed25519'
-              ? Keys.Ed25519.parseKeyPair(publicKey, secretKey)
-              : Keys.Secp256K1.parseKeyPair(publicKey, secretKey, 'raw');
-
-          onSuccess({
+          return onSuccess({
             name,
-            secretKey: Buffer.from(keyPair.privateKey).toString('base64'),
-            publicKey: keyPair.publicKey.toHex()
+            publicKey: publicKeyHex,
+            secretKey: secretKeyBase64
           });
-        } catch (e) {
-          console.error(e);
-          onFailure();
+        } catch (err) {
+          if (err instanceof Error) {
+            return onFailure(err.message);
+          } else {
+            console.error(err);
+          }
         }
       };
     },
