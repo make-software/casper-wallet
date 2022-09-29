@@ -3,7 +3,10 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { SvgIcon, Typography } from '@libs/ui';
 
-import { PageContainer, TextContainer } from '@onboarding/layout/containers';
+import {
+  PageContainer,
+  TextContainer
+} from '@src/apps/onboarding/layout/containers';
 
 export function WelcomePageContent() {
   const { t } = useTranslation();

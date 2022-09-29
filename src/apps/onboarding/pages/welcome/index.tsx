@@ -3,12 +3,12 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, Typography } from '@libs/ui';
 
-import { FooterContainer } from '@onboarding/layout/containers';
-import { Layout } from '@onboarding/layout';
-import { useTypedNavigate } from '@onboarding/router/use-typed-navigate';
+import { FooterContainer } from '@src/apps/onboarding/layout/containers';
+import { Layout } from '@src/apps/onboarding/layout';
+import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
+import { RouterPath } from '@src/apps/onboarding/router';
 
 import { WelcomePageContent } from './content';
-import { RouterPath } from '@onboarding/router';
 
 export function WelcomePage() {
   const navigate = useTypedNavigate();

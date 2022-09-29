@@ -1,11 +1,11 @@
 import React from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
-import { RouterPath } from '@onboarding/router';
+import { RouterPath } from '@src/apps/onboarding/router';
 
-import { WelcomePage } from '@onboarding/pages/welcome';
-import { CreatePasswordPage } from '@onboarding/pages/create-password';
-import { CreateSecretPhrasePage } from '@onboarding/pages/create-secret-phrase';
+import { WelcomePage } from '@src/apps/onboarding/pages/welcome';
+import { CreatePasswordPage } from '@src/apps/onboarding/pages/create-password';
+import { CreateSecretPhrasePage } from '@src/apps/onboarding/pages/create-secret-phrase';
 
 export function AppRouter() {
   return (

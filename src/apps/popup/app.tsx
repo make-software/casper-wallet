@@ -27,7 +27,7 @@ import { AccountListPage } from '@popup/pages/account-list';
 
 import { RouterPath, useTypedLocation } from '@popup/router';
 
-import { openOnboardingAppInTab } from '@onboarding/utils/openOnboardingAppInTab';
+import { openOnboardingAppInTab } from '@src/apps/onboarding/utils/openOnboardingAppInTab';
 
 import {
   selectVaultDoesExist,

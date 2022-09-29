@@ -2,10 +2,11 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { HeaderSubmenuBarNavLink } from '@libs/layout';
-import { FooterContainer } from '@onboarding/layout/containers';
 import { Button } from '@libs/ui';
-import { Layout } from '@onboarding/layout';
-import { CreateSecretPhraseContent } from '@onboarding/pages/create-secret-phrase/content';
+
+import { FooterContainer } from '@src/apps/onboarding/layout/containers';
+import { Layout } from '@src/apps/onboarding/layout';
+import { CreateSecretPhraseContent } from '@src/apps/onboarding/pages/create-secret-phrase/content';
 
 export function CreateSecretPhrasePage() {
   const { t } = useTranslation();

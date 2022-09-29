@@ -5,7 +5,7 @@ import { ErrorBoundary } from '@popup/error-boundary';
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyle, themeConfig } from '@libs/ui';
 
-import { AppRouter } from '@onboarding/app-router';
+import { AppRouter } from '@src/apps/onboarding/app-router';
 
 render(
   <Suspense fallback={null}>
