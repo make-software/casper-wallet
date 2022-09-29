@@ -12,7 +12,10 @@ import {
 import { InputsContainer } from '@libs/layout';
 import { minPasswordLength } from '@libs/forms/create-password';
 
-import { PageContainer, TextContainer } from '@onboarding/layout/containers';
+import {
+  PageContainer,
+  TextContainer
+} from '@src/apps/onboarding/layout/containers';
 
 interface CreatePasswordPageContentProps {
   register: UseFormRegister<FieldValues>;

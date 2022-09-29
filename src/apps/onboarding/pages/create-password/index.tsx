@@ -6,10 +6,10 @@ import { HeaderSubmenuBarNavLink } from '@libs/layout';
 import { Button, Checkbox } from '@libs/ui';
 import { useCreatePasswordForm } from '@libs/forms/create-password';
 
-import { RouterPath } from '@onboarding/router';
-import { useTypedNavigate } from '@onboarding/router/use-typed-navigate';
-import { FooterContainer } from '@onboarding/layout/containers';
-import { Layout } from '@onboarding/layout';
+import { RouterPath } from '@src/apps/onboarding/router';
+import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
+import { FooterContainer } from '@src/apps/onboarding/layout/containers';
+import { Layout } from '@src/apps/onboarding/layout';
 
 import { CreatePasswordPageContent } from './content';
 
