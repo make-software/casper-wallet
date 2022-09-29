@@ -6,6 +6,7 @@ import {
   PasswordInputType,
   Button,
   Input,
+  InputType,
   InputValidationType,
   PasswordVisibilityIcon,
   Typography
