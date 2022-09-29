@@ -63,7 +63,3 @@ const Tree = () => {
 };
 
 render(<Tree />, document.querySelector('#app-container'));
-
-browser.tabs
-  .create({ url: 'onboarding.html', active: true })
-  .catch(e => console.error(e));
