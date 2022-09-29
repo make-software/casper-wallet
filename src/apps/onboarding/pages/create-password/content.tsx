@@ -10,7 +10,7 @@ import {
   Typography
 } from '@libs/ui';
 import { InputsContainer } from '@libs/layout';
-import { minPasswordLength } from '@libs/forms/create-password';
+import { minPasswordLength } from '@libs/ui/forms/form-validation-rules';
 
 import {
   PageContainer,
