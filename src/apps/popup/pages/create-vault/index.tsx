@@ -3,9 +3,9 @@ import { FieldValues } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
+  PasswordInputType,
   Button,
   Input,
-  InputType,
   InputValidationType,
   PasswordVisibilityIcon,
   Typography
@@ -38,9 +38,9 @@ export function CreateVaultPageContent() {
   } = useCreatePasswordForm();
 
   const [passwordInputType, setPasswordInputType] =
-    useState<InputType>('password');
+    useState<PasswordInputType>('password');
   const [confirmPasswordInputType, setConfirmPasswordInputType] =
-    useState<InputType>('password');
+    useState<PasswordInputType>('password');
 
   function onSubmit(data: FieldValues) {
     dispatchToMainStore(vaultCreated({ password: data.password }));
@@ -75,8 +75,8 @@ export function CreateVaultPageContent() {
             oneColoredIcons
             suffixIcon={
               <PasswordVisibilityIcon
-                inputType={passwordInputType}
-                changeInputType={setPasswordInputType}
+                passwordInputType={passwordInputType}
+                setPasswordInputType={setPasswordInputType}
               />
             }
             {...register('password')}
@@ -89,8 +89,8 @@ export function CreateVaultPageContent() {
             oneColoredIcons
             suffixIcon={
               <PasswordVisibilityIcon
-                inputType={confirmPasswordInputType}
-                changeInputType={setConfirmPasswordInputType}
+                passwordInputType={confirmPasswordInputType}
+                setPasswordInputType={setConfirmPasswordInputType}
               />
             }
             {...register('confirmPassword')}
