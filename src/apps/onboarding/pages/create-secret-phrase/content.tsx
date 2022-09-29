@@ -2,9 +2,8 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Typography } from '@libs/ui';
-import { TextContainer } from '@libs/layout';
 
-import { PageContainer } from '@onboarding/layout/containers';
+import { PageContainer, TextContainer } from '@onboarding/layout/containers';
 
 export function CreateSecretPhraseContent() {
   const { t } = useTranslation();
