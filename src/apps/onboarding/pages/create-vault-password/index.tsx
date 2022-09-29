@@ -11,12 +11,12 @@ import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate
 import { FooterContainer } from '@src/apps/onboarding/layout/containers';
 import { Layout } from '@src/apps/onboarding/layout';
 
-import { CreatePasswordPageContent } from './content';
+import { CreateVaultPasswordPageContent } from './content';
 
 import { dispatchToMainStore } from '@background/redux/utils';
 import { vaultCreated } from '@background/redux/vault/actions';
 
-export function CreatePasswordPage() {
+export function CreateVaultPasswordPage() {
   const [isChecked, setIsChecked] = useState(false);
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -33,7 +33,7 @@ export function CreatePasswordPage() {
       <Layout
         renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
         renderContent={() => (
-          <CreatePasswordPageContent
+          <CreateVaultPasswordPageContent
             formState={formState}
             register={register}
           />

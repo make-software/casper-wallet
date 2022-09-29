@@ -1,6 +1,6 @@
 export enum RouterPath {
   Welcome = '/',
-  CreatePassword = '/create-password',
+  CreateVaultPassword = '/create-vault-password',
   CreateSecretPhrase = '/create-secret-phrase',
   RecoverWalletFromSecretPhrase = '/recover-wallet-from-secret-phrase',
   GenerateSecretPhraseInfo = '/generate-secret-phrase-info',

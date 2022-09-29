@@ -22,7 +22,7 @@ interface CreatePasswordPageContentProps {
   formState: FormState<FieldValues>;
 }
 
-export function CreatePasswordPageContent({
+export function CreateVaultPasswordPageContent({
   register,
   formState: { isDirty, errors }
 }: CreatePasswordPageContentProps) {

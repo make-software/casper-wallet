@@ -26,7 +26,7 @@ export function WelcomePage() {
             </Trans>
           </Typography>
           <Button
-            onClick={() => navigate(RouterPath.CreatePassword)}
+            onClick={() => navigate(RouterPath.CreateVaultPassword)}
             color="primaryRed"
           >
             <Trans t={t}>Get started</Trans>
