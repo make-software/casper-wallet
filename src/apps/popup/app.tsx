@@ -39,12 +39,7 @@ import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller'
 
 export function App() {
   const vaultIsLocked = useSelector(selectVaultIsLocked);
-  const vaultDoesExist = useSelector(selectVaultDoesExist);
   useVaultTimeoutController();
-
-  if (!vaultDoesExist) {
-    openOnboardingAppInTab();
-  }
 
   if (vaultIsLocked) {
     return <LockedRouter />;
