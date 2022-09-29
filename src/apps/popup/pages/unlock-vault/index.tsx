@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,13 @@ import {
   InputsContainer,
   TextContainer
 } from '@src/libs/layout/containers';
-import { Typography, Input, Button } from '@libs/ui';
+import {
+  PasswordInputType,
+  Typography,
+  Input,
+  Button,
+  PasswordVisibilityIcon
+} from '@libs/ui';
 
 import { selectVaultPassword } from '@src/background/redux/vault/selectors';
 import { vaultUnlocked } from '@src/background/redux/vault/actions';
@@ -24,6 +30,9 @@ import { dispatchToMainStore } from '../../../../background/redux/utils';
 export function UnlockVaultPageContent() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const [passwordInputType, setPasswordInputType] =
+    useState<PasswordInputType>('password');
 
   const vaultPassword = useSelector(selectVaultPassword);
 
@@ -60,10 +69,16 @@ export function UnlockVaultPageContent() {
         </TextContainer>
         <InputsContainer>
           <Input
-            type="password"
+            type={passwordInputType}
             placeholder={t('Password')}
             error={!!errors.password}
             validationText={errors.password?.message}
+            suffixIcon={
+              <PasswordVisibilityIcon
+                passwordInputType={passwordInputType}
+                setPasswordInputType={setPasswordInputType}
+              />
+            }
             {...register('password')}
           />
         </InputsContainer>
