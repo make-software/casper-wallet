@@ -114,3 +114,16 @@ export const ListItemClickableContainer = styled(SpaceBetweenFlexRow)`
     white-space: nowrap;
   }
 `;
+
+export const TabFooterContainer = styled(FooterButtonsContainer)`
+  padding: 24px 32px;
+  margin-top: 64px;
+`;
+
+export const TabTextContainer = styled.div`
+  margin-top: 24px;
+`;
+
+export const TabPageContainer = styled.div`
+  padding: 24px 32px;
+`;

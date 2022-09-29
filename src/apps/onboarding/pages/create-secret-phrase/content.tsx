@@ -2,21 +2,17 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Typography } from '@libs/ui';
-
-import {
-  PageContainer,
-  TextContainer
-} from '@src/apps/onboarding/layout/containers';
+import { TabPageContainer, TabTextContainer } from '@src/libs/layout';
 
 export function CreateSecretPhraseContent() {
   const { t } = useTranslation();
 
   return (
-    <PageContainer>
+    <TabPageContainer>
       <Typography type="header">
         <Trans t={t}>Create secret phrase</Trans>
       </Typography>
-      <TextContainer>
+      <TabTextContainer>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             Casper Signer doesn’t have a “Reset password” feature. All you get
@@ -24,7 +20,7 @@ export function CreateSecretPhraseContent() {
             account.
           </Trans>
         </Typography>
-      </TextContainer>
-    </PageContainer>
+      </TabTextContainer>
+    </TabPageContainer>
   );
 }

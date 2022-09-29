@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { FieldValues } from 'react-hook-form';
 
-import { HeaderSubmenuBarNavLink } from '@libs/layout';
+import {
+  LayoutTab,
+  HeaderSubmenuBarNavLink,
+  TabFooterContainer
+} from '@libs/layout';
 import { Button, Checkbox } from '@libs/ui';
 import { useCreatePasswordForm } from '@libs/ui/forms/create-password';
 
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { FooterContainer } from '@src/apps/onboarding/layout/containers';
-import { Layout } from '@src/apps/onboarding/layout';
 
 import { CreateVaultPasswordPageContent } from './content';
 
@@ -30,7 +32,8 @@ export function CreateVaultPasswordPage() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Layout
+      <LayoutTab
+        layoutContext="withStepper"
         renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
         renderContent={() => (
           <CreateVaultPasswordPageContent
@@ -38,9 +41,8 @@ export function CreateVaultPasswordPage() {
             register={register}
           />
         )}
-        contentBackgroundColor="backgroundSecondary"
         renderFooter={() => (
-          <FooterContainer>
+          <TabFooterContainer>
             <Checkbox
               checked={isChecked}
               onChange={() => setIsChecked(currentValue => !currentValue)}
@@ -49,7 +51,7 @@ export function CreateVaultPasswordPage() {
             <Button disabled={!isChecked || !formState.isDirty}>
               <Trans t={t}>Create password</Trans>
             </Button>
-          </FooterContainer>
+          </TabFooterContainer>
         )}
       />
     </form>

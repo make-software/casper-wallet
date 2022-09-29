@@ -9,13 +9,12 @@ import {
   PasswordVisibilityIcon,
   Typography
 } from '@libs/ui';
-import { InputsContainer } from '@libs/layout';
-import { minPasswordLength } from '@libs/ui/forms/form-validation-rules';
-
 import {
-  PageContainer,
-  TextContainer
-} from '@src/apps/onboarding/layout/containers';
+  InputsContainer,
+  TabPageContainer,
+  TabTextContainer
+} from '@libs/layout';
+import { minPasswordLength } from '@libs/ui/forms/form-validation-rules';
 
 interface CreatePasswordPageContentProps {
   register: UseFormRegister<FieldValues>;
@@ -34,12 +33,12 @@ export function CreateVaultPasswordPageContent({
     useState<PasswordInputType>('password');
 
   return (
-    <PageContainer>
+    <TabPageContainer>
       <Typography type="header">
         <Trans t={t}>Create password</Trans>
       </Typography>
 
-      <TextContainer>
+      <TabTextContainer>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             You’ll need it to unlock your Signer. Try to use at least{' '}
@@ -49,7 +48,7 @@ export function CreateVaultPasswordPageContent({
             to ensure a strong passphrase.
           </Trans>
         </Typography>
-      </TextContainer>
+      </TabTextContainer>
       <InputsContainer>
         <Input
           validationType={InputValidationType.Password}
@@ -81,6 +80,6 @@ export function CreateVaultPasswordPageContent({
           validationText={errors.confirmPassword?.message}
         />
       </InputsContainer>
-    </PageContainer>
+    </TabPageContainer>
   );
 }

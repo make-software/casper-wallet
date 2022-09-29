@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { SvgIcon } from '@libs/ui';
-import { CenteredFlexColumn, CenteredFlexRow } from '@libs/layout';
+import { CenteredFlexColumn, CenteredFlexRow } from '@layout/index';
 
 const Container = styled.div`
   width: 100%;
@@ -29,12 +29,12 @@ const HeaderContainer = styled(CenteredFlexRow)`
 `;
 
 interface ContentContainerProps {
-  contentBackgroundColor: 'backgroundPrimary' | 'backgroundSecondary';
+  layoutContext: 'withIllustration' | 'withStepper';
 }
 
-const ContentContainer = styled.div<ContentContainerProps>`
-  background-color: ${({ theme, contentBackgroundColor }) =>
-    contentBackgroundColor === 'backgroundPrimary'
+const MainContainer = styled.div<ContentContainerProps>`
+  background-color: ${({ theme, layoutContext }) =>
+    layoutContext === 'withIllustration'
       ? theme.color.backgroundPrimary
       : theme.color.backgroundSecondary};
   box-shadow: 0 8px 24px rgba(132, 134, 140, 0.12);
@@ -50,8 +50,8 @@ interface LayoutProps extends ContentContainerProps {
   renderFooter?: () => JSX.Element;
 }
 
-export function Layout({
-  contentBackgroundColor,
+export function LayoutTab({
+  layoutContext,
   renderHeader,
   renderContent,
   renderFooter
@@ -60,11 +60,11 @@ export function Layout({
     <Container>
       <AbsoluteCenteredContainer>
         <SvgIcon src="assets/icons/logo.svg" color="brandRed" size={60} />
-        <ContentContainer contentBackgroundColor={contentBackgroundColor}>
+        <MainContainer layoutContext={layoutContext}>
           {renderHeader && <HeaderContainer>{renderHeader()}</HeaderContainer>}
           {renderContent()}
           {renderFooter && renderFooter()}
-        </ContentContainer>
+        </MainContainer>
       </AbsoluteCenteredContainer>
     </Container>
   );
