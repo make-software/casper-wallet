@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-
-import { PageContainer, TextContainer } from '@onboarding/layout/containers';
 import { useTranslation, Trans } from 'react-i18next';
+import { FieldValues, FormState, UseFormRegister } from 'react-hook-form';
+
 import {
   Input,
   InputType,
@@ -9,11 +9,20 @@ import {
   PasswordVisibilityIcon,
   Typography
 } from '@libs/ui';
-
-import { minPasswordLength } from '@libs/constants';
 import { InputsContainer } from '@libs/layout';
+import { minPasswordLength } from '@libs/forms/create-password';
 
-export function CreatePasswordPageContent() {
+import { PageContainer, TextContainer } from '@onboarding/layout/containers';
+
+interface CreatePasswordPageContentProps {
+  register: UseFormRegister<FieldValues>;
+  formState: FormState<FieldValues>;
+}
+
+export function CreatePasswordPageContent({
+  register,
+  formState: { isDirty, errors }
+}: CreatePasswordPageContentProps) {
   const { t } = useTranslation();
 
   const [passwordInputType, setPasswordInputType] =
@@ -32,11 +41,9 @@ export function CreatePasswordPageContent() {
           <Trans t={t}>
             You’ll need it to unlock your Signer. Try to use at least{' '}
             <Typography type="bodySemiBold" color="contentPrimary">
-              {/*{{ minPasswordLength }} characters*/}
-              {/*12 characters*/}
               {minPasswordLength} characters
             </Typography>{' '}
-            characters to ensure a strong passphrase.
+            to ensure a strong passphrase.
           </Trans>
         </Typography>
       </TextContainer>
@@ -52,9 +59,9 @@ export function CreatePasswordPageContent() {
               changeInputType={setPasswordInputType}
             />
           }
-          // {...register('password')}
-          // error={!!errors.password}
-          // validationText={errors.password?.message}
+          {...register('password')}
+          error={!!errors.password}
+          validationText={errors.password?.message}
         />
         <Input
           type={confirmPasswordInputType}
@@ -66,9 +73,9 @@ export function CreatePasswordPageContent() {
               changeInputType={setConfirmPasswordInputType}
             />
           }
-          // {...register('confirmPassword')}
-          // error={!!errors.confirmPassword}
-          // validationText={errors.confirmPassword?.message}
+          {...register('confirmPassword')}
+          error={!!errors.confirmPassword}
+          validationText={errors.confirmPassword?.message}
         />
       </InputsContainer>
     </PageContainer>

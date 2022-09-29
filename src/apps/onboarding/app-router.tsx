@@ -5,6 +5,7 @@ import { RouterPath } from '@onboarding/router';
 
 import { WelcomePage } from '@onboarding/pages/welcome';
 import { CreatePasswordPage } from '@onboarding/pages/create-password';
+import { CreateSecretPhrasePage } from '@onboarding/pages/create-secret-phrase';
 
 export function AppRouter() {
   return (
@@ -14,6 +15,10 @@ export function AppRouter() {
         <Route
           path={RouterPath.CreatePassword}
           element={<CreatePasswordPage />}
+        />
+        <Route
+          path={RouterPath.CreateSecretPhrase}
+          element={<CreateSecretPhrasePage />}
         />
       </Routes>
     </HashRouter>

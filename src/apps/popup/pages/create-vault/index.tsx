@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
-import { FieldValues, useForm } from 'react-hook-form';
-import { UseFormProps } from 'react-hook-form/dist/types/form';
+import { FieldValues } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
-import * as Yup from 'yup';
 
-import { yupResolver } from '@hookform/resolvers/yup';
 import {
   Button,
   Input,
@@ -24,39 +21,21 @@ import {
   InputsContainer,
   TextContainer
 } from '@layout/containers';
-import { minPasswordLength } from '@libs/constants';
+
+import {
+  useCreatePasswordForm,
+  minPasswordLength
+} from '@libs/forms/create-password';
 
 export function CreateVaultPageContent() {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
-  const passwordAmountCharactersMessage = `${t(
-    'Should be at least'
-  )} ${minPasswordLength} ${t('characters')}`;
-
-  const passwordsDoesntMatchMessage = t("Passwords don't match");
-
-  const formSchema = Yup.object().shape({
-    password: Yup.string().min(
-      minPasswordLength,
-      passwordAmountCharactersMessage
-    ),
-    confirmPassword: Yup.string().oneOf(
-      [Yup.ref('password')],
-      passwordsDoesntMatchMessage
-    )
-  });
-
-  const formOptions: UseFormProps = {
-    reValidateMode: 'onChange',
-    resolver: yupResolver(formSchema)
-  };
-
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty }
-  } = useForm(formOptions);
+  } = useCreatePasswordForm();
 
   const [passwordInputType, setPasswordInputType] =
     useState<InputType>('password');

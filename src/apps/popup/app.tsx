@@ -4,7 +4,8 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
 
-import { HeaderSubmenuBarNavLink, Layout } from '@src/libs/layout';
+import { HeaderSubmenuBarNavLink, Layout } from '@libs/layout';
+import { PopupHeader } from '@libs/layout/header';
 
 import { CreateVaultPageContent } from '@popup/pages/create-vault';
 import { HomePageContent, HomePageHeaderSubmenuItems } from '@popup/pages/home';
@@ -16,17 +17,6 @@ import { UnlockVaultPageContent } from '@popup/pages/unlock-vault';
 import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
 import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
 import { ConnectedSitesPage } from '@popup/pages/connected-sites';
-
-import { RouterPath, useTypedLocation } from '@popup/router';
-
-import {
-  selectVaultDoesExist,
-  selectVaultHasAccount,
-  selectVaultIsLocked
-} from '../../background/redux/vault/selectors';
-
-import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
-
 import {
   AccountSettingsPageContent,
   AccountSettingsActionsGroup
@@ -34,11 +24,27 @@ import {
 import { RemoveAccountPageContent } from '@popup/pages/remove-account';
 import { RenameAccountPageContent } from '@popup/pages/rename-account';
 import { AccountListPage } from '@popup/pages/account-list';
-import { PopupHeader } from '@src/libs/layout/header';
+
+import { RouterPath, useTypedLocation } from '@popup/router';
+
+import { openOnboardingAppInTab } from '@onboarding/utils/openOnboardingAppInTab';
+
+import {
+  selectVaultDoesExist,
+  selectVaultHasAccount,
+  selectVaultIsLocked
+} from '@background/redux/vault/selectors';
+
+import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
 
 export function App() {
   const vaultIsLocked = useSelector(selectVaultIsLocked);
+  const vaultDoesExist = useSelector(selectVaultDoesExist);
   useVaultTimeoutController();
+
+  if (!vaultDoesExist) {
+    openOnboardingAppInTab();
+  }
 
   if (vaultIsLocked) {
     return <LockedRouter />;
