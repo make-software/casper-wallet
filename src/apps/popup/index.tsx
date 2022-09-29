@@ -9,15 +9,17 @@ import { isActionOf } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 
 import { GlobalStyle, themeConfig } from '@libs/ui';
+
 import { ErrorBoundary } from '@popup/error-boundary';
 import {
   BackgroundEvent,
   backgroundEvent,
   PopupState
-} from '@src/background/background-events';
+} from '@background/background-events';
 
-import { createMainStoreReplica } from '../../background/redux/utils';
-import { popupWindowInit } from '../../background/redux/windowManagement/actions';
+import { createMainStoreReplica } from '@background/redux/utils';
+import { popupWindowInit } from '@background/redux/windowManagement/actions';
+
 import { App } from './app';
 
 const Tree = () => {
@@ -61,3 +63,7 @@ const Tree = () => {
 };
 
 render(<Tree />, document.querySelector('#app-container'));
+
+browser.tabs
+  .create({ url: 'onboarding.html', active: true })
+  .catch(e => console.error(e));

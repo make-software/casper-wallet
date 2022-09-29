@@ -16,6 +16,7 @@ export * from './components/flex-row/flex-row';
 export * from './components/hash/hash';
 export * from './components/cspr/cspr';
 export * from './components/site-favicon-badge/site-favicon-badge';
+export * from './components/password-visibility-icon/password-visibility-icon';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

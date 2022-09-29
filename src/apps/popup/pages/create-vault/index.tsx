@@ -2,18 +2,20 @@ import React, { useState } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import * as Yup from 'yup';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import {
   Button,
   Input,
+  InputType,
   InputValidationType,
-  SvgIcon,
+  PasswordVisibilityIcon,
   Typography
 } from '@libs/ui';
-import { vaultCreated } from '@src/background/redux/vault/actions';
+import { vaultCreated } from '@background/redux/vault/actions';
+import { dispatchToMainStore } from '@background/redux/utils';
+
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import {
   FooterButtonsAbsoluteContainer,
@@ -22,15 +24,11 @@ import {
   InputsContainer,
   TextContainer
 } from '@layout/containers';
-import { dispatchToMainStore } from '../../../../background/redux/utils';
-
-type InputType = 'password' | 'text';
+import { minPasswordLength } from '@libs/constants';
 
 export function CreateVaultPageContent() {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
-
-  const minPasswordLength = 12;
 
   const passwordAmountCharactersMessage = `${t(
     'Should be at least'
@@ -128,41 +126,5 @@ export function CreateVaultPageContent() {
         </Button>
       </FooterButtonsAbsoluteContainer>
     </form>
-  );
-}
-
-interface PasswordVisibilityIconProps {
-  inputType: InputType;
-  changeInputType: (type: InputType) => void;
-}
-
-const InputIconContainer = styled.div`
-  line-height: 1rem;
-`;
-
-function PasswordVisibilityIcon({
-  inputType,
-  changeInputType
-}: PasswordVisibilityIconProps) {
-  if (inputType === 'password') {
-    return (
-      <InputIconContainer>
-        <SvgIcon
-          onClick={() => changeInputType('text')}
-          src="assets/icons/hide.svg"
-          size={20}
-        />
-      </InputIconContainer>
-    );
-  }
-
-  return (
-    <InputIconContainer>
-      <SvgIcon
-        onClick={() => changeInputType('password')}
-        src="assets/icons/show.svg"
-        size={20}
-      />
-    </InputIconContainer>
   );
 }

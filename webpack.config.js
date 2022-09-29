@@ -64,6 +64,7 @@ const options = {
       'signature-request',
       'index.tsx'
     ),
+    onboarding: path.join(__dirname, 'src', 'apps', 'onboarding', 'index.tsx'),
     background: path.join(__dirname, 'src', 'background', 'index.ts'),
     contentScript: path.join(__dirname, 'src', 'content', 'index.ts'),
     sdk: path.join(__dirname, 'src', 'content', 'sdk.ts')
@@ -247,6 +248,12 @@ const options = {
       ),
       filename: 'signature-request.html',
       chunks: ['signatureRequest'],
+      cache: false
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname, 'src', 'apps', 'onboarding', 'index.html'),
+      filename: 'onboarding.html',
+      chunks: ['onboarding'],
       cache: false
     }),
     new webpack.ProvidePlugin({

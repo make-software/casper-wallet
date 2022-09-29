@@ -66,7 +66,9 @@ export const themeConfig = {
     contentRed: '#CC000F',
     contentGreen: '#2DDC88',
     contentGreenOnFill: '#77FFBE',
-    contentYellow: '#E0BB38'
+    contentYellow: '#E0BB38',
+
+    brandRed: '#FF0012'
   },
   border: {
     separator: '0.5px solid #E8E9EC'
