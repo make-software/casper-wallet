@@ -22,10 +22,8 @@ import {
   TextContainer
 } from '@layout/containers';
 
-import {
-  useCreatePasswordForm,
-  minPasswordLength
-} from '@libs/forms/create-password';
+import { useCreatePasswordForm } from '@libs/ui/forms/create-password';
+import { minPasswordLength } from '@libs/ui/forms/form-validation-rules';
 
 export function CreateVaultPageContent() {
   const { t } = useTranslation();

@@ -4,7 +4,7 @@ import { FieldValues } from 'react-hook-form';
 
 import { HeaderSubmenuBarNavLink } from '@libs/layout';
 import { Button, Checkbox } from '@libs/ui';
-import { useCreatePasswordForm } from '@libs/forms/create-password';
+import { useCreatePasswordForm } from '@libs/ui/forms/create-password';
 
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
