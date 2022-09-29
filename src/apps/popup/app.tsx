@@ -27,7 +27,7 @@ import { AccountListPage } from '@popup/pages/account-list';
 
 import { RouterPath, useTypedLocation } from '@popup/router';
 
-import { openOnboardingAppInTab } from '@src/apps/onboarding/utils/openOnboardingAppInTab';
+import { openOnboardingAppInTab } from '@src/apps/popup/utils/openOnboardingAppInTab';
 
 import {
   selectVaultDoesExist,
@@ -39,12 +39,7 @@ import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller'
 
 export function App() {
   const vaultIsLocked = useSelector(selectVaultIsLocked);
-  const vaultDoesExist = useSelector(selectVaultDoesExist);
   useVaultTimeoutController();
-
-  if (!vaultDoesExist) {
-    openOnboardingAppInTab();
-  }
 
   if (vaultIsLocked) {
     return <LockedRouter />;
@@ -84,6 +79,10 @@ function UnlockedRouter() {
 
   const vaultDoesExists = useSelector(selectVaultDoesExist);
   const vaultHasAccount = useSelector(selectVaultHasAccount);
+
+  if (!vaultDoesExists) {
+    openOnboardingAppInTab();
+  }
 
   if (!vaultDoesExists) {
     return (
