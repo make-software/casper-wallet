@@ -1,6 +1,7 @@
 export * from './components/button/button';
 export * from './components/form-field/form-field';
 export * from './components/input/input';
+export * from './components/textarea/textarea';
 export * from './components/link/link';
 export * from './components/typography/typography';
 export * from './components/svg-icon/svg-icon';
