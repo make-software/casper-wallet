@@ -13,10 +13,10 @@ import { useCreatePasswordForm } from '@libs/ui/forms/create-password';
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 
-import { CreateVaultPasswordPageContent } from './content';
-
 import { dispatchToMainStore } from '@background/redux/utils';
 import { vaultCreated } from '@background/redux/vault/actions';
+
+import { CreateVaultPasswordPageContent } from './content';
 
 export function CreateVaultPasswordPage() {
   const [isChecked, setIsChecked] = useState(false);
