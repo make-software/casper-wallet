@@ -10,6 +10,10 @@ export const CenteredFlexRow = styled(FlexRow)`
   align-items: center;
 `;
 
+export const CenteredCenteredFlexRow = styled(CenteredFlexRow)`
+  justify-content: center;
+`;
+
 export const LeftAlignedCenteredFlexRow = styled(CenteredFlexRow)`
   justify-content: flex-start;
 `;
@@ -117,7 +121,7 @@ export const ListItemClickableContainer = styled(SpaceBetweenFlexRow)`
 
 export const TabFooterContainer = styled(FooterButtonsContainer)`
   padding: 24px 32px;
-  margin-top: 64px;
+  margin-top: 30px;
 `;
 
 export const TabTextContainer = styled.div`
