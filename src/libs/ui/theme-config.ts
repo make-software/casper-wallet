@@ -68,7 +68,8 @@ export const themeConfig = {
     contentGreenOnFill: '#77FFBE',
     contentYellow: '#E0BB38',
 
-    brandRed: '#FF0012'
+    brandRed: '#FF0012',
+    black: '#000000'
   },
   border: {
     separator: '0.5px solid #E8E9EC'
