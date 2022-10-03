@@ -37,6 +37,7 @@ interface WordTagProps {
   hideIndex?: boolean;
   disabled?: boolean;
   selected?: boolean;
+  onRemovedWordClick?: (value: string) => void;
 }
 
 export function WordTag({
@@ -44,13 +45,20 @@ export function WordTag({
   index,
   disabled,
   selected,
-  hideIndex
+  hideIndex,
+  onRemovedWordClick
 }: WordTagProps) {
+  const handleOnClick =
+    !disabled && onRemovedWordClick && value
+      ? () => onRemovedWordClick(value)
+      : undefined;
+
   return (
     <WordContainer
       disabled={disabled}
       selected={selected}
       isEmptyWord={value == null}
+      onClick={handleOnClick}
     >
       {!hideIndex && (
         <Typography

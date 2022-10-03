@@ -14,7 +14,13 @@ import { mockedMnemonicPhrase } from '@src/apps/onboarding/mockedData';
 
 import { ConfirmSecretPhrasePageContent } from './content';
 
-export function ConfirmSecretPhrasePage() {
+interface ConfirmSecretPhrasePageProps {
+  phrase: string[];
+}
+
+export function ConfirmSecretPhrasePage({
+  phrase
+}: ConfirmSecretPhrasePageProps) {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 

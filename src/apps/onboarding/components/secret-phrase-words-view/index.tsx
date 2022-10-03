@@ -12,10 +12,7 @@ import { SvgIcon, Typography, hexToRGBA } from '@libs/ui';
 
 import { WordTag } from '../word-tag';
 
-import {
-  mockedMnemonicPhraseConfirmation,
-  mockedRemovedWordsFromMnemonicPhrase
-} from '@src/apps/onboarding/mockedData';
+import { useWordsCollection } from './hooks/use-words-collection';
 
 const allCornersBorderRadius = css`
   border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
@@ -85,6 +82,7 @@ const WordListContainer = styled(FlexRow)`
 
 interface RenderHeaderProps {
   removedWords: string[];
+  selectedWords: string[];
   onRemovedWordClick: (value: string) => void;
 }
 
@@ -106,10 +104,27 @@ export function SecretPhraseWordsView({
   renderFooter
 }: SecretPhraseWordsViewProps) {
   const { t } = useTranslation();
-  const [phraseConfirmation] = useState<(string | null)[]>(
-    mockedMnemonicPhraseConfirmation
-  );
   const [isBlurred, setIsBlurred] = useState(true);
+  const {
+    removedWords,
+    partialWords,
+    selectedWords,
+    setPartialWords,
+    setSelectedWords
+  } = useWordsCollection(phrase);
+
+  const onRemovedWordClick = (value: string): void => {
+    setSelectedWords(prevSelectedWords => [...prevSelectedWords, value]);
+    setPartialWords(prevPartialWords => {
+      const nearestRemovedWordIndex = partialWords.findIndex(
+        word => word === null
+      );
+
+      return prevPartialWords.map((word, index) =>
+        index === nearestRemovedWordIndex ? value : word
+      );
+    });
+  };
 
   const secretPhraseForCopy = phrase.map(word => word).join(' ');
 
@@ -118,8 +133,9 @@ export function SecretPhraseWordsView({
       {confirmationMode && renderHeader != null && (
         <HeaderContainer>
           {renderHeader({
-            removedWords: mockedRemovedWordsFromMnemonicPhrase,
-            onRemovedWordClick: () => {}
+            removedWords,
+            selectedWords,
+            onRemovedWordClick
           })}
         </HeaderContainer>
       )}
@@ -138,15 +154,9 @@ export function SecretPhraseWordsView({
           </BlurredSecretPhraseWordsViewOverlayContainer>
         )}
         <WordListContainer>
-          {(confirmationMode ? phraseConfirmation : phrase).map(
-            (word, index) => (
-              <WordTag
-                key={`${index}-${word}`}
-                value={word}
-                index={index + 1}
-              />
-            )
-          )}
+          {(confirmationMode ? partialWords : phrase).map((word, index) => (
+            <WordTag key={`${index}-${word}`} value={word} index={index + 1} />
+          ))}
         </WordListContainer>
         {renderFooter != null && (
           <FooterContainer>

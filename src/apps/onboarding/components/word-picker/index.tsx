@@ -8,6 +8,7 @@ import { WordTag } from '../word-tag';
 const WordPickerContainer = styled(FlexRow)`
   gap: 7px;
 
+  color: ${({ theme }) => theme.color.contentBlue};
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
   border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
 
@@ -16,9 +17,15 @@ const WordPickerContainer = styled(FlexRow)`
 
 interface WordPickerProps {
   words: string[];
+  selectedWords: string[];
+  onRemovedWordClick: (value: string) => void;
 }
 
-export function WordPicker({ words }: WordPickerProps) {
+export function WordPicker({
+  words,
+  selectedWords,
+  onRemovedWordClick
+}: WordPickerProps) {
   return (
     <WordPickerContainer>
       {words.map((word, index) => (
@@ -27,6 +34,8 @@ export function WordPicker({ words }: WordPickerProps) {
           value={word}
           index={index + 1}
           hideIndex
+          onRemovedWordClick={onRemovedWordClick}
+          disabled={selectedWords.includes(word)}
         />
       ))}
     </WordPickerContainer>
