@@ -13,7 +13,11 @@ import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate
 
 import { WriteSecretPhrasePageContent } from './content';
 
-export function WriteSecretPhrasePage() {
+interface WriteSecretPhrasePageProps {
+  phrase: string[];
+}
+
+export function WriteSecretPhrasePage({ phrase }: WriteSecretPhrasePageProps) {
   const [isChecked, setIsChecked] = useState(false);
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -22,7 +26,7 @@ export function WriteSecretPhrasePage() {
     <LayoutTab
       layoutContext="withStepper"
       renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
-      renderContent={() => <WriteSecretPhrasePageContent />}
+      renderContent={() => <WriteSecretPhrasePageContent phrase={phrase} />}
       renderFooter={() => (
         <TabFooterContainer>
           <Checkbox

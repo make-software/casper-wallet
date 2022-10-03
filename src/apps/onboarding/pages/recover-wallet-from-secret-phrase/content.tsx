@@ -26,7 +26,7 @@ export function RecoverWalletFromSecretPhrasePageContent() {
         </Typography>
       </TabTextContainer>
       <InputsContainer>
-        <TextArea rows={10} fullWidth></TextArea>
+        <TextArea rows={6} fullWidth></TextArea>
       </InputsContainer>
     </TabPageContainer>
   );

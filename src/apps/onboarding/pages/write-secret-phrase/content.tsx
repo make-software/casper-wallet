@@ -1,14 +1,32 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
+import styled from 'styled-components';
 
-import { TabPageContainer, TabTextContainer } from '@libs/layout';
-import { Typography } from '@libs/ui';
+import { FlexRow, TabPageContainer, TabTextContainer } from '@libs/layout';
+import { CopyToClipboard, SvgIcon, Typography } from '@libs/ui';
 
-import { PhraseBoard } from '@src/apps/onboarding/components/phrase-board';
-import { mockedMnemonicPhrase } from '@src/apps/onboarding/mockedData';
+import { SecretPhraseWordsView } from '@src/apps/onboarding/components/secret-phrase-words-view';
 
-export function WriteSecretPhrasePageContent() {
+const CopySecretPhraseStatusContainer = styled(FlexRow)`
+  gap: 4px;
+`;
+
+const CopySecretPhraseClickableContainer = styled(
+  CopySecretPhraseStatusContainer
+)`
+  cursor: pointer;
+`;
+
+interface WriteSecretPhrasePageContentProps {
+  phrase: string[];
+}
+
+export function WriteSecretPhrasePageContent({
+  phrase
+}: WriteSecretPhrasePageContentProps) {
   const { t } = useTranslation();
+  const secretPhraseForCopy = phrase.map(word => word).join(' ');
+
   return (
     <TabPageContainer>
       <Typography type="header">
@@ -24,10 +42,39 @@ export function WriteSecretPhrasePageContent() {
         </Typography>
       </TabTextContainer>
 
-      <PhraseBoard
-        phrase={mockedMnemonicPhrase}
+      <SecretPhraseWordsView
+        phrase={phrase}
         withHiddenContentOnStart
-        withCopyToClipboardControls
+        renderFooter={() => (
+          <CopyToClipboard
+            renderClickableComponent={() => (
+              <CopySecretPhraseClickableContainer>
+                <SvgIcon
+                  src="assets/icons/copy.svg"
+                  size={24}
+                  color="contentBlue"
+                />
+                <Typography type="captionMedium" color="contentBlue">
+                  <Trans t={t}>Copy secret phrase</Trans>
+                </Typography>
+              </CopySecretPhraseClickableContainer>
+            )}
+            renderStatusComponent={() => (
+              <CopySecretPhraseStatusContainer>
+                <SvgIcon
+                  src="assets/icons/checkbox-checked.svg"
+                  size={24}
+                  color="contentGreen"
+                />
+                <Typography type="captionMedium" color="contentGreen">
+                  <Trans t={t}>Copied to clipboard for 1 min</Trans>
+                </Typography>
+              </CopySecretPhraseStatusContainer>
+            )}
+            valueToCopy={secretPhraseForCopy}
+            cleanupTimeout={1000 * 60} // 1 minute
+          />
+        )}
       />
     </TabPageContainer>
   );
