@@ -13,6 +13,7 @@ import { useRecoverWalletFromSecretPhrase } from '@libs/ui/forms/recover-wallet-
 import { mockedMnemonicPhrase } from '@src/apps/onboarding/mockedData';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { RouterPath } from '@src/apps/onboarding/router';
+import { closeActiveTab } from '@src/apps/onboarding/utils/closeActiveTab';
 
 import { RecoverWalletFromSecretPhrasePageContent } from './content';
 
@@ -43,7 +44,7 @@ export function RecoverWalletFromSecretPhrasePage() {
   }, [navigate, t, errors]);
 
   function onSubmit(data: FieldValues) {
-    navigate(RouterPath.WalletCreated);
+    closeActiveTab().catch(e => console.error(e));
   }
 
   return (
