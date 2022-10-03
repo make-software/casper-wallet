@@ -32,7 +32,9 @@ function buildWordsCollection(phrase: string[]): WordCollections {
   return { removedWords, partialWords };
 }
 
-interface UseWordsCollectionResult extends WordCollections {
+export interface UseWordsCollectionResult extends WordCollections {
+  phrase: string[];
+  phraseString: string;
   selectedWords: string[];
   setSelectedWords: Dispatch<SetStateAction<string[]>>;
   setPartialWords: Dispatch<SetStateAction<(string | null)[]>>;
@@ -42,14 +44,18 @@ export function useWordsCollection(phrase: string[]): UseWordsCollectionResult {
   const [removedWords, setRemovedWords] = useState<string[]>([]);
   const [partialWords, setPartialWords] = useState<(string | null)[]>([]);
   const [selectedWords, setSelectedWords] = useState<string[]>([]);
+  const [phraseString, setPhraseString] = useState<string>('');
 
   useEffect(() => {
     const { removedWords, partialWords } = buildWordsCollection(phrase);
     setPartialWords(partialWords);
     setRemovedWords(removedWords);
-  }, []);
+    setPhraseString(phrase.join(' '));
+  }, [phrase]);
 
   return {
+    phrase,
+    phraseString,
     removedWords,
     partialWords,
     selectedWords,

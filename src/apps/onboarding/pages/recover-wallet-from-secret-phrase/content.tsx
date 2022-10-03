@@ -7,8 +7,15 @@ import {
   InputsContainer
 } from '@libs/layout';
 import { TextArea, Typography } from '@libs/ui';
+import { FieldValues, UseFormRegister } from 'react-hook-form';
 
-export function RecoverWalletFromSecretPhrasePageContent() {
+interface RecoverWalletFromSecretPhrasePageContentProps {
+  register: UseFormRegister<FieldValues>;
+}
+
+export function RecoverWalletFromSecretPhrasePageContent({
+  register
+}: RecoverWalletFromSecretPhrasePageContentProps) {
   const { t } = useTranslation();
   return (
     <TabPageContainer>
@@ -26,7 +33,7 @@ export function RecoverWalletFromSecretPhrasePageContent() {
         </Typography>
       </TabTextContainer>
       <InputsContainer>
-        <TextArea rows={6} fullWidth></TextArea>
+        <TextArea rows={6} {...register('phrase')} />
       </InputsContainer>
     </TabPageContainer>
   );

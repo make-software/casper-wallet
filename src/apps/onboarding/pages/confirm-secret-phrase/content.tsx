@@ -33,7 +33,7 @@ export function ConfirmSecretPhrasePageContent({
       <SecretPhraseWordsView
         phrase={phrase}
         confirmationMode
-        renderHeader={(removedWords, selectedWords, onRemovedWordClick) => (
+        renderHeader={({ removedWords, selectedWords, onRemovedWordClick }) => (
           <WordPicker
             words={removedWords}
             selectedWords={selectedWords}

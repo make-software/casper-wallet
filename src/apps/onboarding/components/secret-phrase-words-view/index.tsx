@@ -105,13 +105,6 @@ export function SecretPhraseWordsView({
 }: SecretPhraseWordsViewProps) {
   const { t } = useTranslation();
   const [isBlurred, setIsBlurred] = useState(true);
-  const {
-    removedWords,
-    partialWords,
-    selectedWords,
-    setPartialWords,
-    setSelectedWords
-  } = useWordsCollection(phrase);
 
   const onRemovedWordClick = (value: string): void => {
     setSelectedWords(prevSelectedWords => [...prevSelectedWords, value]);

@@ -18,3 +18,7 @@ export function useConfirmPasswordRule(targetKey: string) {
 
   return Yup.string().oneOf([Yup.ref(targetKey)], passwordsDoesntMatchMessage);
 }
+
+export function usePhraseRule(originalPhrase: string) {
+  return Yup.string().equals([originalPhrase], "Phrase didn't match");
+}

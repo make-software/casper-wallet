@@ -14,8 +14,6 @@ import { ConfirmSecretPhraseSuccessPage } from '@src/apps/onboarding/pages/confi
 import { OnboardingSuccessPage } from '@src/apps/onboarding/pages/onboarding-success';
 import { OnboardingErrorPage } from '@src/apps/onboarding/pages/onboarding-error';
 
-import { mockedMnemonicPhrase } from './mockedData';
-
 export function AppRouter() {
   return (
     <HashRouter>
@@ -43,9 +41,7 @@ export function AppRouter() {
         />
         <Route
           path={RouterPath.ConfirmSecretPhrase}
-          element={
-            <ConfirmSecretPhrasePage phrase={[...mockedMnemonicPhrase]} />
-          }
+          element={<ConfirmSecretPhrasePage />}
         />
         <Route
           path={RouterPath.ConfirmSecretPhraseSuccess}
