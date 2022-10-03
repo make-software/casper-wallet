@@ -6,6 +6,7 @@ import { FlexRow, TabPageContainer, TabTextContainer } from '@libs/layout';
 import { CopyToClipboard, SvgIcon, Typography } from '@libs/ui';
 
 import { SecretPhraseWordsView } from '@src/apps/onboarding/components/secret-phrase-words-view';
+import { UseWordsCollectionResult } from '@src/apps/onboarding/components/secret-phrase-words-view/hooks/use-words-collection';
 
 const CopySecretPhraseStatusContainer = styled(FlexRow)`
   gap: 4px;
@@ -18,14 +19,16 @@ const CopySecretPhraseClickableContainer = styled(
 `;
 
 interface WriteSecretPhrasePageContentProps {
-  phrase: string[];
+  wordsCollection: UseWordsCollectionResult;
 }
 
 export function WriteSecretPhrasePageContent({
-  phrase
+  wordsCollection
 }: WriteSecretPhrasePageContentProps) {
   const { t } = useTranslation();
-  const secretPhraseForCopy = phrase.map(word => word).join(' ');
+  const secretPhraseForCopy = wordsCollection.phrase
+    .map(word => word)
+    .join(' ');
 
   return (
     <TabPageContainer>
@@ -43,7 +46,7 @@ export function WriteSecretPhrasePageContent({
       </TabTextContainer>
 
       <SecretPhraseWordsView
-        phrase={phrase}
+        wordsCollection={wordsCollection}
         withHiddenContentOnStart
         renderFooter={() => (
           <CopyToClipboard

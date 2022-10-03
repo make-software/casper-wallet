@@ -10,23 +10,25 @@ import { Button, Checkbox } from '@libs/ui';
 
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
+import { mockedMnemonicPhrase } from '@src/apps/onboarding/mockedData';
+import { useWordsCollection } from '@src/apps/onboarding/components/secret-phrase-words-view/hooks/use-words-collection';
 
 import { WriteSecretPhrasePageContent } from './content';
 
-interface WriteSecretPhrasePageProps {
-  phrase: string[];
-}
-
-export function WriteSecretPhrasePage({ phrase }: WriteSecretPhrasePageProps) {
+export function WriteSecretPhrasePage() {
   const [isChecked, setIsChecked] = useState(false);
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
+
+  const wordsCollection = useWordsCollection(mockedMnemonicPhrase);
 
   return (
     <LayoutTab
       layoutContext="withStepper"
       renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
-      renderContent={() => <WriteSecretPhrasePageContent phrase={phrase} />}
+      renderContent={() => (
+        <WriteSecretPhrasePageContent wordsCollection={wordsCollection} />
+      )}
       renderFooter={() => (
         <TabFooterContainer>
           <Checkbox

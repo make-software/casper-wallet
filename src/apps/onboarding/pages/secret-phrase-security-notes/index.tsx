@@ -29,8 +29,7 @@ export function SecretPhraseSecurityNotesPage() {
             checked={isChecked}
             onChange={() => setIsChecked(currentValue => !currentValue)}
             label={t(
-              'I understand I have to be careful to save my secret phrase.\n' +
-                'My money will depend on it.'
+              'I understand I have to be careful to save my secret phrase. My money will depend on it.'
             )}
           />
           <Button
