@@ -155,7 +155,12 @@ export function SecretPhraseWordsView({
         )}
         <WordListContainer>
           {(confirmationMode ? partialWords : phrase).map((word, index) => (
-            <WordTag key={`${index}-${word}`} value={word} index={index + 1} />
+            <WordTag
+              key={`${index}-${word}`}
+              value={word}
+              order={index + 1}
+              selected={word != null && selectedWords.includes(word)}
+            />
           ))}
         </WordListContainer>
         {renderFooter != null && (
