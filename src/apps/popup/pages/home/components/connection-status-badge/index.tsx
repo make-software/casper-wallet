@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { hexToRGBA, Typography } from '@libs/ui';
@@ -29,13 +30,15 @@ export function ConnectionStatusBadge({
   isConnected,
   displayContext
 }: ConnectionStatusBadgeProps) {
+  const { t } = useTranslation();
+
   return (
     <ConnectionStatusBadgeContainer
       isConnected={isConnected}
       displayContext={displayContext}
     >
       <Typography type="listSubtext">
-        {isConnected ? '• Connected' : '• Disconnected'}
+        {`• ${isConnected ? t('Connected') : t('Not connected')}`}
       </Typography>
     </ConnectionStatusBadgeContainer>
   );
