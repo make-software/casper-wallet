@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Typography } from '@libs/ui';
+import { KeyValueItem, Typography } from '@libs/ui';
 
 const UnorderedList = styled.ul`
   padding-inline-start: unset;
@@ -22,11 +22,6 @@ const ListItem = styled.li`
     margin-right: 10px;
   }
 `;
-
-interface KeyValueItem {
-  key: number | string;
-  value: string;
-}
 
 interface TextListProps {
   items: KeyValueItem[];
