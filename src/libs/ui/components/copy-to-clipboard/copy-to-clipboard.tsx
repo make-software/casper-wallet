@@ -6,7 +6,7 @@ const Container = styled.div``;
 interface CopyToClipboardProps {
   renderClickableComponent: () => JSX.Element;
   renderStatusComponent: () => JSX.Element;
-  value: string;
+  valueToCopy: string;
   overlayTimeout?: number;
   cleanupTimeout?: number;
   handlePostAction?: () => void;
@@ -15,7 +15,7 @@ interface CopyToClipboardProps {
 export function CopyToClipboard({
   renderClickableComponent,
   renderStatusComponent,
-  value,
+  valueToCopy,
   overlayTimeout = 2000,
   cleanupTimeout
 }: CopyToClipboardProps) {
@@ -27,8 +27,8 @@ export function CopyToClipboard({
     }
 
     setIsClicked(true);
-    navigator.clipboard.writeText(value);
-  }, [isClicked, value]);
+    navigator.clipboard.writeText(valueToCopy);
+  }, [isClicked, valueToCopy]);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;

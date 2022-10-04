@@ -5,29 +5,15 @@ import { TabPageContainer, TabTextContainer } from '@libs/layout';
 import { Typography } from '@libs/ui';
 
 import { WordPicker } from '@src/apps/onboarding/components/word-picker';
-import { PhraseBoard } from '@src/apps/onboarding/components/phrase-board';
+import { SecretPhraseWordsView } from '@src/apps/onboarding/components/secret-phrase-words-view';
 
 import {
-  mockedMnemonicPhrase,
-  mockedWordCollection
+  mockedMnemonicPhraseConfirmation,
+  mockedRemovedWordsFromMnemonicPhrase
 } from '@src/apps/onboarding/mockedData';
 
 export function ConfirmSecretPhrasePageContent() {
   const { t } = useTranslation();
-
-  const mnemonicPhraseWithGaps = mockedMnemonicPhrase.map(word => {
-    const isWordInCollection = mockedWordCollection.find(
-      wordFromCollection =>
-        word.order === wordFromCollection.order &&
-        word.word === wordFromCollection.word
-    );
-
-    if (isWordInCollection) {
-      return { ...word, word: null };
-    }
-
-    return word;
-  });
 
   return (
     <TabPageContainer>
@@ -43,8 +29,13 @@ export function ConfirmSecretPhrasePageContent() {
         </Typography>
       </TabTextContainer>
 
-      <WordPicker words={mockedWordCollection} />
-      <PhraseBoard phrase={mnemonicPhraseWithGaps} />
+      <SecretPhraseWordsView
+        phrase={mockedMnemonicPhraseConfirmation}
+        confirmationMode
+        renderHeader={() => (
+          <WordPicker words={mockedRemovedWordsFromMnemonicPhrase} />
+        )}
+      />
     </TabPageContainer>
   );
 }

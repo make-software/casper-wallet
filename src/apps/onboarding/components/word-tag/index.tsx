@@ -35,24 +35,24 @@ const WordContainer = styled(FlexRow)<WordContainerProps & IsEmptyWord>`
   border-radius: 6px;
 `;
 
-interface WordProps extends WordContainerProps {
-  word: string | null;
+interface WordTagProps extends WordContainerProps {
+  value: string | null;
   order: number;
   hideOrder?: boolean;
 }
 
-export function Word({
-  word,
+export function WordTag({
+  value,
   order,
   color = 'contentPrimary',
   isHighlighted,
   hideOrder
-}: WordProps) {
+}: WordTagProps) {
   return (
     <WordContainer
       color={color}
       isHighlighted={isHighlighted}
-      isEmptyWord={word == null}
+      isEmptyWord={value == null}
     >
       {!hideOrder && (
         <Typography
@@ -62,7 +62,7 @@ export function Word({
           {order}
         </Typography>
       )}
-      <Typography type="body">{word}</Typography>
+      <Typography type="body">{value}</Typography>
     </WordContainer>
   );
 }
