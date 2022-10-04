@@ -1,17 +1,21 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
 
 import { LayoutTab, TabFooterContainer } from '@libs/layout';
 import { Button } from '@libs/ui';
 
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { RouterPath } from '@src/apps/onboarding/router';
+import { RouterPath, useTypedLocation } from '@src/apps/onboarding/router';
 
 import { OnboardingErrorPageContent } from './content';
 
 export function OnboardingErrorPage() {
   const navigate = useTypedNavigate();
-  const { t } = useTranslation();
+  const location = useTypedLocation();
+  const state = location.state;
+
+  if (state?.primaryButtonLabel == null) {
+    throw new Error('Cannot render ErrorPage: not enough props');
+  }
 
   return (
     <LayoutTab
@@ -20,7 +24,7 @@ export function OnboardingErrorPage() {
       renderFooter={() => (
         <TabFooterContainer>
           <Button onClick={() => navigate(RouterPath.CreateSecretPhrase)}>
-            <Trans t={t}>Start over again</Trans>
+            {state.primaryButtonLabel}
           </Button>
         </TabFooterContainer>
       )}

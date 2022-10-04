@@ -1,30 +1,27 @@
 import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgIcon, Typography } from '@libs/ui';
 import { TabPageContainer, TabTextContainer } from '@libs/layout';
 
+import { useTypedLocation } from '@src/apps/onboarding/router';
+
 export function OnboardingErrorPageContent() {
-  const { t } = useTranslation();
+  const location = useTypedLocation();
+  const state = location.state;
+
+  if (state?.errorContentText == null || state?.errorHeaderText == null) {
+    throw new Error('Cannot render ErrorPage: not enough props');
+  }
 
   return (
     <TabPageContainer>
       <SvgIcon src="assets/illustrations/error.svg" size={140} />
       <TabTextContainer>
-        <Typography type="header">
-          <Trans t={t}>
-            We can’t connect your wallet with this secret phrase
-          </Trans>
-        </Typography>
+        <Typography type="header">{state.errorHeaderText}</Typography>
       </TabTextContainer>
 
       <TabTextContainer>
-        <Typography type="body">
-          <Trans t={t}>
-            It could be you’ve made a mistake while entering it. Please try
-            again.
-          </Trans>
-        </Typography>
+        <Typography type="body">{state.errorContentText}</Typography>
       </TabTextContainer>
     </TabPageContainer>
   );
