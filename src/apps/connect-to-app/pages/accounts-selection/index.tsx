@@ -37,7 +37,6 @@ export function AccountsSelectionPage({
     <LayoutWindow
       Header={
         <PopupHeader
-          withConnectionStatus
           renderSubmenuBarItems={() => (
             <HeaderSubmenuBarNavLink linkType="cancelWindow" />
           )}

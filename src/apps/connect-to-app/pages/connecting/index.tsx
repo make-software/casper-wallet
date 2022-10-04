@@ -8,9 +8,6 @@ export interface Props {}
 
 export function ConnectingPage() {
   return (
-    <LayoutWindow
-      Header={<PopupHeader withConnectionStatus />}
-      Content={<ConnectingContent />}
-    />
+    <LayoutWindow Header={<PopupHeader />} Content={<ConnectingContent />} />
   );
 }

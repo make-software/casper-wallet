@@ -44,7 +44,6 @@ export function ApproveConnectionPage({
     <LayoutWindow
       Header={
         <PopupHeader
-          withConnectionStatus
           renderSubmenuBarItems={() => (
             <HeaderSubmenuBarNavLink linkType="back" />
           )}
