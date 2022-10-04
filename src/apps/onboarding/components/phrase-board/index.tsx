@@ -4,7 +4,7 @@ import styled, { css } from 'styled-components';
 
 import {
   CenteredFlexColumn,
-  CenteredFlexRow,
+  AlignedFlexRow,
   FlexColumn,
   FlexRow
 } from '@libs/layout';
@@ -71,7 +71,7 @@ const WordListContainer = styled(FlexRow)`
   padding: ${({ theme }) => theme.padding[1.6]};
 `;
 
-const CopySecretPhraseContainer = styled(CenteredFlexRow)`
+const CopySecretPhraseContainer = styled(AlignedFlexRow)`
   height: 56px;
 
   border-top: ${({ theme }) => theme.border.separator};

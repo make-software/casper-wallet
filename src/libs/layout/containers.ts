@@ -6,15 +6,15 @@ export const FlexRow = styled.div`
   display: flex;
 `;
 
-export const CenteredFlexRow = styled(FlexRow)`
+export const AlignedFlexRow = styled(FlexRow)`
   align-items: center;
 `;
 
-export const CenteredCenteredFlexRow = styled(CenteredFlexRow)`
+export const CenteredFlexRow = styled(AlignedFlexRow)`
   justify-content: center;
 `;
 
-export const LeftAlignedCenteredFlexRow = styled(CenteredFlexRow)`
+export const LeftAlignedCenteredFlexRow = styled(AlignedFlexRow)`
   justify-content: flex-start;
 `;
 
@@ -22,7 +22,7 @@ export const SpaceBetweenFlexRow = styled(FlexRow)`
   justify-content: space-between;
 `;
 
-export const CenteredSpaceBetweenFlexRow = styled(CenteredFlexRow)`
+export const CenteredSpaceBetweenFlexRow = styled(AlignedFlexRow)`
   justify-content: space-between;
 `;
 

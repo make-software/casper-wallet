@@ -3,11 +3,11 @@ import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { ContentColor, CopyToClipboard, SvgIcon, Typography } from '@libs/ui';
-import { CenteredCenteredFlexRow } from '@libs/layout';
+import { CenteredFlexRow } from '@libs/layout';
 
 import { truncateKey } from './utils';
 
-const HashContainer = styled(CenteredCenteredFlexRow)``;
+const HashContainer = styled(CenteredFlexRow)``;
 
 const ClickableHashContainer = styled(HashContainer)`
   cursor: pointer;

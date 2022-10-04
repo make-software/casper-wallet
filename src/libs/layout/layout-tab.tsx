@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { SvgIcon } from '@libs/ui';
-import { CenteredFlexColumn, CenteredFlexRow } from '@layout/index';
+import { CenteredFlexColumn, AlignedFlexRow } from '@layout/index';
 
 const Container = styled.div`
   width: 100%;
@@ -21,7 +21,7 @@ const AbsoluteCenteredContainer = styled(CenteredFlexColumn)`
   transform: translate(-50%, -50%);
 `;
 
-const HeaderContainer = styled(CenteredFlexRow)`
+const HeaderContainer = styled(AlignedFlexRow)`
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
   height: 56px;
 
