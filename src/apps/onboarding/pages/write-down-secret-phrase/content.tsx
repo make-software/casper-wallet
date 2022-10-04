@@ -6,16 +6,21 @@ import { TabPageContainer, TabTextContainer, FlexRow } from '@libs/layout';
 import { CopyToClipboard, SvgIcon, Typography } from '@libs/ui';
 
 import { SecretPhraseWordsView } from '@src/apps/onboarding/components/secret-phrase-words-view';
-import { mockedMnemonicPhrase } from '@src/apps/onboarding/mockedData';
 
 const CopySecretPhraseContainer = styled(FlexRow)`
   gap: 4px;
 `;
 
-export function WriteDownSecretPhrasePageContent() {
+interface WriteDownSecretPhrasePageContentProps {
+  phrase: string[];
+}
+
+export function WriteDownSecretPhrasePageContent({
+  phrase
+}: WriteDownSecretPhrasePageContentProps) {
   const { t } = useTranslation();
 
-  const secretPhraseForCopy = mockedMnemonicPhrase.map(word => word).join(' ');
+  const secretPhraseForCopy = phrase.map(word => word).join(' ');
 
   return (
     <TabPageContainer>
@@ -33,7 +38,7 @@ export function WriteDownSecretPhrasePageContent() {
       </TabTextContainer>
 
       <SecretPhraseWordsView
-        phrase={mockedMnemonicPhrase}
+        phrase={phrase}
         withHiddenContentOnStart
         renderFooter={() => (
           <CopyToClipboard

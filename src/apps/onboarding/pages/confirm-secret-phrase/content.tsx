@@ -7,12 +7,15 @@ import { Typography } from '@libs/ui';
 import { WordPicker } from '@src/apps/onboarding/components/word-picker';
 import { SecretPhraseWordsView } from '@src/apps/onboarding/components/secret-phrase-words-view';
 
-import {
-  mockedMnemonicPhraseConfirmation,
-  mockedRemovedWordsFromMnemonicPhrase
-} from '@src/apps/onboarding/mockedData';
+interface ConfirmSecretPhrasePageContentProps {
+  removedWords: string[];
+  partialPhrase: (string | null)[];
+}
 
-export function ConfirmSecretPhrasePageContent() {
+export function ConfirmSecretPhrasePageContent({
+  removedWords,
+  partialPhrase
+}: ConfirmSecretPhrasePageContentProps) {
   const { t } = useTranslation();
 
   return (
@@ -30,11 +33,9 @@ export function ConfirmSecretPhrasePageContent() {
       </TabTextContainer>
 
       <SecretPhraseWordsView
-        phrase={mockedMnemonicPhraseConfirmation}
+        phrase={partialPhrase}
         confirmationMode
-        renderHeader={() => (
-          <WordPicker words={mockedRemovedWordsFromMnemonicPhrase} />
-        )}
+        renderHeader={() => <WordPicker words={removedWords} />}
       />
     </TabPageContainer>
   );
