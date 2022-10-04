@@ -9,7 +9,7 @@ import { TextList } from '@src/apps/onboarding/components/text-list';
 export function CreateSecretPhraseConfirmationPageContent() {
   const { t } = useTranslation();
 
-  const textListItems = [
+  const items = [
     { key: 1, value: t('Save a backup in multiple places.') },
     { key: 2, value: t('Never share the phrase with anyone.') },
     {
@@ -36,7 +36,7 @@ export function CreateSecretPhraseConfirmationPageContent() {
       </Typography>
 
       <TabTextContainer>
-        <TextList textListItems={textListItems} />
+        <TextList items={items} />
       </TabTextContainer>
     </TabPageContainer>
   );

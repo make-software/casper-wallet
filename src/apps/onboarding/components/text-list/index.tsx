@@ -23,19 +23,19 @@ const ListItem = styled.li`
   }
 `;
 
-interface TextListItem {
+interface KeyValueItem {
   key: number | string;
   value: string;
 }
 
 interface TextListProps {
-  textListItems: TextListItem[];
+  items: KeyValueItem[];
 }
 
-export function TextList({ textListItems }: TextListProps) {
+export function TextList({ items }: TextListProps) {
   return (
     <UnorderedList>
-      {textListItems.map(({ key, value }) => (
+      {items.map(({ key, value }) => (
         <ListItem key={key}>
           <Typography type="body" color="contentSecondary">
             {value}
