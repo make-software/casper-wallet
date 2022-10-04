@@ -32,7 +32,7 @@ const PopoverItemsContainer = styled(FlexColumn)`
 
   background: ${({ theme }) => theme.color.fillWhite};
   box-shadow: 0 1px 8px rgba(132, 134, 140, 0.2);
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.borderRadius.eight}px;
 `;
 
 type RenderProps = {

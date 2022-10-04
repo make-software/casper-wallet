@@ -45,11 +45,7 @@ export function WriteDownSecretPhrasePageContent() {
           <CopyToClipboard
             renderClickableComponent={() => (
               <CopySecretPhraseClickableContainer>
-                <SvgIcon
-                  src="assets/icons/copy.svg"
-                  size={24}
-                  color="contentBlue"
-                />
+                <SvgIcon src="assets/icons/copy.svg" color="contentBlue" />
                 <Typography type="captionMedium" color="contentBlue">
                   <Trans t={t}>Copy secret phrase</Trans>
                 </Typography>
@@ -59,7 +55,6 @@ export function WriteDownSecretPhrasePageContent() {
               <CopySecretPhraseStatusContainer>
                 <SvgIcon
                   src="assets/icons/checkbox-checked.svg"
-                  size={24}
                   color="contentGreen"
                 />
                 <Typography type="captionMedium" color="contentGreen">

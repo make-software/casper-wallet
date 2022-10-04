@@ -4,5 +4,5 @@ export const Tile = styled.div`
   width: 100%;
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
 
-  border-radius: 1.2rem;
+  border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
 `;

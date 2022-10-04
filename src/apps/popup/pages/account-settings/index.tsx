@@ -69,7 +69,6 @@ export function AccountIconButton({ type }: AccountIconButtonProps) {
       src={
         type === 'remove' ? 'assets/icons/delete.svg' : 'assets/icons/edit.svg'
       }
-      size={24}
     />
   );
 }

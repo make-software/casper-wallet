@@ -9,7 +9,7 @@ const WordPickerContainer = styled(FlexRow)`
   gap: 7px;
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
-  border-radius: 12px;
+  border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
 
   padding: ${({ theme }) => theme.padding['1.6']};
 `;

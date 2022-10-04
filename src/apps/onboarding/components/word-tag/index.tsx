@@ -32,7 +32,7 @@ const WordContainer = styled(FlexRow)<WordContainerProps & IsEmptyWord>`
       ? theme.color[color]
       : 'inherit'};
 
-  border-radius: 6px;
+  border-radius: ${({ theme }) => theme.borderRadius.base}px;
 `;
 
 interface WordTagProps extends WordContainerProps {

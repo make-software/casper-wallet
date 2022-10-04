@@ -7,7 +7,7 @@ type Ref = HTMLTextAreaElement;
 
 const StyledTextArea = styled.textarea<TextAreaProps>`
   border: none;
-  border-radius: 6px;
+  border-radius: ${({ theme }) => theme.borderRadius.base}px;
   resize: ${({ resize }) => (resize ? 'auto' : 'none')};
 
   width: 100%;

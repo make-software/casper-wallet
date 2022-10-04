@@ -15,7 +15,7 @@ const ConnectionStatusContainer = styled.div`
 
   background-color: rgb(0, 0, 0, 0.16);
   padding: 4px 8px;
-  border-radius: 100px;
+  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
 
 export function HeaderConnectionStatus() {

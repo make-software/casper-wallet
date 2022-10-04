@@ -76,6 +76,10 @@ export const themeConfig = {
   },
   borderRadius: {
     base: 6,
+    eight: 8,
+    ten: 10,
+    twelve: 12,
+    eighty: 80,
     hundred: 100
   },
   padding: {

@@ -13,12 +13,12 @@ import { SvgIcon, Typography, hexToRGBA } from '@libs/ui';
 import { WordTag } from '../word-tag';
 
 const allCornersBorderRadius = css`
-  border-radius: 12px;
+  border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
 `;
 
 const topCornersBorderRadius = css`
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
+  border-top-left-radius: ${({ theme }) => theme.borderRadius.twelve}px;
+  border-top-right-radius: ${({ theme }) => theme.borderRadius.twelve}px;
 `;
 
 const HeaderContainer = styled.div`
@@ -108,11 +108,7 @@ export function SecretPhraseWordsView({
             onClick={() => setIsBlurred(false)}
           >
             <TextAndIconContainer>
-              <SvgIcon
-                src="assets/icons/lock.svg"
-                size={24}
-                color="contentOnFill"
-              />
+              <SvgIcon src="assets/icons/lock.svg" color="contentOnFill" />
               <Typography type="captionMedium" color="contentOnFill">
                 <Trans t={t}>Click to reveal secret phrase</Trans>
               </Typography>

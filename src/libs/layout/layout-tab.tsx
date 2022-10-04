@@ -38,7 +38,7 @@ const MainContainer = styled.div<ContentContainerProps>`
       ? theme.color.backgroundPrimary
       : theme.color.backgroundSecondary};
   box-shadow: 0 8px 24px rgba(132, 134, 140, 0.12);
-  border-radius: 12px;
+  border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
 
   height: 100%;
   overflow-y: auto;

@@ -30,7 +30,7 @@ const LogoOverlay = styled.div`
 
   width: 80px;
   height: 80px;
-  border-radius: 80px;
+  border-radius: ${({ theme }) => theme.borderRadius.eighty}px;
 
   background-color: ${({ theme }) => theme.color.contentOnFill};
 `;

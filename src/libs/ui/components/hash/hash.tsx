@@ -57,7 +57,7 @@ export function Hash({
         renderClickableComponent={() => (
           <ClickableHashContainer>
             {HashComponent}
-            <SvgIcon src="assets/icons/copy.svg" size={24} />
+            <SvgIcon src="assets/icons/copy.svg" />
           </ClickableHashContainer>
         )}
         renderStatusComponent={() => (
@@ -65,7 +65,6 @@ export function Hash({
             <SvgIcon
               color="contentGreen"
               src="assets/icons/checkbox-checked.svg"
-              size={24}
             />
             <Typography type="body" color="contentGreen">
               <Trans t={t}>Copied!</Trans>

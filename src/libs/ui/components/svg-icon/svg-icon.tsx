@@ -75,7 +75,7 @@ const StyledReactSVG = styled(ReactSVG)(({ theme }) => ({
 
 export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
   (
-    { src, alt, size = 16, color, onClick, flipByAxis, ...props }: SvgIconProps,
+    { src, alt, size = 24, color, onClick, flipByAxis, ...props }: SvgIconProps,
     ref
   ) => {
     const handleClick =
