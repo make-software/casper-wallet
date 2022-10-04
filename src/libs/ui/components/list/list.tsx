@@ -2,10 +2,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { Tile, Typography } from '@libs/ui';
-
-const TopMarginContainer = styled.div`
-  margin-top: 16px;
-`;
+import { TopMarginContainer } from '@src/libs/layout';
 
 const SpacedBetweenFlexRox = styled.div`
   display: flex;

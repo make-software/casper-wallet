@@ -1,15 +1,14 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import styled from 'styled-components';
 
-import { TabPageContainer, TabTextContainer } from '@libs/layout';
+import {
+  TabPageContainer,
+  TabTextContainer,
+  TopMarginContainer
+} from '@libs/layout';
 import { Typography } from '@libs/ui';
 
 import { TextList } from '@src/apps/onboarding/components/text-list';
-
-const TextListContainer = styled.div`
-  margin-top: 16px;
-`;
 
 export function ConfirmSecretPhraseSuccessPageContent() {
   const { t } = useTranslation();
@@ -51,9 +50,9 @@ export function ConfirmSecretPhraseSuccessPageContent() {
         </Typography>
       </TabTextContainer>
 
-      <TextListContainer>
+      <TopMarginContainer>
         <TextList textListItems={textListItems} />
-      </TextListContainer>
+      </TopMarginContainer>
     </TabPageContainer>
   );
 }

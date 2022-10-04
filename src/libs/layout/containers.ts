@@ -131,3 +131,7 @@ export const TabTextContainer = styled.div`
 export const TabPageContainer = styled.div`
   padding: 24px 32px;
 `;
+
+export const TopMarginContainer = styled.div`
+  margin-top: 16px;
+`;
