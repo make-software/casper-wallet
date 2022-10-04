@@ -25,9 +25,8 @@ export function WordPicker({ words }: WordPickerProps) {
         <WordTag
           key={`${index}-${word}`}
           value={word}
-          order={index + 1}
-          color="contentBlue"
-          hideOrder
+          index={index + 1}
+          hideIndex
         />
       ))}
     </WordPickerContainer>

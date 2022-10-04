@@ -117,7 +117,7 @@ export function SecretPhraseWordsView({
         )}
         <WordListContainer>
           {phrase.map((word, index) => (
-            <WordTag key={`${index}-${word}`} value={word} order={index + 1} />
+            <WordTag key={`${index}-${word}`} value={word} index={index + 1} />
           ))}
         </WordListContainer>
         {renderFooter != null && (

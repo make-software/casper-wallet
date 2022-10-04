@@ -3,63 +3,61 @@ import styled from 'styled-components';
 import { Typography } from '@libs/ui';
 import { FlexRow } from '@libs/layout';
 
-interface WordContainerProps {
-  color?: 'contentBlue' | 'contentPrimary' | 'contentSecondary';
-  isHighlighted?: boolean;
-}
-
 interface IsEmptyWord {
   isEmptyWord?: boolean;
 }
 
-const WordContainer = styled(FlexRow)<WordContainerProps & IsEmptyWord>`
+type DisabledOrSelected = Pick<WordTagProps, 'selected' | 'disabled'>;
+
+const WordContainer = styled(FlexRow)<DisabledOrSelected & IsEmptyWord>`
   gap: 4px;
   padding: 2px 8px;
-
   width: ${({ isEmptyWord }) => (isEmptyWord ? '72px' : 'unset')};
-
-  background: ${({ theme, isHighlighted }) =>
-    isHighlighted
+  background: ${({ theme, selected }) =>
+    selected
       ? theme.color.backgroundBlue
       : `linear-gradient(
         ${theme.color.fillGradientOut.from},
         ${theme.color.fillGradientOut.to}
   )`};
-  color: ${({ theme, color, isHighlighted }) =>
-    isHighlighted
+  color: ${({ theme, disabled, selected }) =>
+    disabled
+      ? theme.color.contentSecondary
+      : selected
       ? theme.color.contentOnFill
-      : color != null
-      ? theme.color[color]
       : 'inherit'};
-
-  border-radius: ${({ theme }) => theme.borderRadius.base}px;
+  border-radius: 6px;
+  cursor: ${({ onClick, disabled }) =>
+    onClick && !disabled ? 'pointer' : 'auto'};
 `;
 
-interface WordTagProps extends WordContainerProps {
+interface WordTagProps {
   value: string | null;
-  order: number;
-  hideOrder?: boolean;
+  index: number;
+  hideIndex?: boolean;
+  disabled?: boolean;
+  selected?: boolean;
 }
 
 export function WordTag({
   value,
-  order,
-  color = 'contentPrimary',
-  isHighlighted,
-  hideOrder
+  index,
+  disabled,
+  selected,
+  hideIndex
 }: WordTagProps) {
   return (
     <WordContainer
-      color={color}
-      isHighlighted={isHighlighted}
+      disabled={disabled}
+      selected={selected}
       isEmptyWord={value == null}
     >
-      {!hideOrder && (
+      {!hideIndex && (
         <Typography
           type="labelMedium"
-          color={!isHighlighted ? 'contentSecondary' : 'inherit'}
+          color={selected ? 'inherit' : 'contentSecondary'}
         >
-          {order}
+          {index}
         </Typography>
       )}
       <Typography type="body">{value}</Typography>
