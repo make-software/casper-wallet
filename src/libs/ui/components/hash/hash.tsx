@@ -72,7 +72,7 @@ export function Hash({
             </Typography>
           </CopyStatusContainer>
         )}
-        value={value}
+        valueToCopy={value}
       />
     );
   }
