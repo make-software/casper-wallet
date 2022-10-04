@@ -10,16 +10,16 @@ const StyledTextArea = styled.textarea<TextAreaProps>`
   border-radius: 6px;
   resize: ${({ resize }) => (resize ? 'auto' : 'none')};
 
-  width: ${({ fullWidth }) => (fullWidth ? '100%' : 'auto')};
+  width: 100%;
+
+  padding: 12px 16px;
 `;
 
 interface TextAreaProps extends BaseProps {
   name?: string;
   cols?: number;
   rows?: number;
-  spellcheck?: boolean;
   resize?: boolean;
-  fullWidth?: boolean;
 }
 
 export const TextArea = forwardRef<Ref, TextAreaProps>(function TextArea(

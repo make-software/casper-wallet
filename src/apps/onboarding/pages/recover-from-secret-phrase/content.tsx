@@ -26,7 +26,7 @@ export function RecoverFromSecretPhrasePageContent() {
         </Typography>
       </TabTextContainer>
       <InputsContainer>
-        <TextArea rows={10} fullWidth></TextArea>
+        <TextArea rows={10}></TextArea>
       </InputsContainer>
     </TabPageContainer>
   );
