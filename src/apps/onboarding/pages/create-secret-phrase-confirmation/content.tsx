@@ -5,12 +5,27 @@ import { TabPageContainer, TabTextContainer } from '@libs/layout';
 import { Typography } from '@libs/ui';
 
 import { TextList } from '@src/apps/onboarding/components/text-list';
-import { useSecurityNotes } from '@src/apps/onboarding/hooks/use-security-notes';
 
 export function CreateSecretPhraseConfirmationPageContent() {
   const { t } = useTranslation();
 
-  const textListItems = useSecurityNotes();
+  const textListItems = [
+    { key: 1, value: t('Save a backup in multiple places.') },
+    { key: 2, value: t('Never share the phrase with anyone.') },
+    {
+      key: 3,
+      value: t(
+        'Be careful of phishin! Casper Signer will never spontaneously ask for your secret phrase.'
+      )
+    },
+    {
+      key: 4,
+      value: t(
+        'If you need to back up your secret phrase again, you can find it in Settings.'
+      )
+    },
+    { key: 5, value: t('Casper Signer cannot recover your secret phrase.') }
+  ];
 
   return (
     <TabPageContainer>

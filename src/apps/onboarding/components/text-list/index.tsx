@@ -24,8 +24,8 @@ const ListItem = styled.li`
 `;
 
 interface TextListItem {
-  id: number | string;
-  content: string;
+  key: number | string;
+  value: string;
 }
 
 interface TextListProps {
@@ -35,10 +35,10 @@ interface TextListProps {
 export function TextList({ textListItems }: TextListProps) {
   return (
     <UnorderedList>
-      {textListItems.map(({ id, content }) => (
-        <ListItem key={id}>
+      {textListItems.map(({ key, value }) => (
+        <ListItem key={key}>
           <Typography type="body" color="contentSecondary">
-            {content}
+            {value}
           </Typography>
         </ListItem>
       ))}
