@@ -7,7 +7,7 @@ import { Typography } from '@libs/ui';
 import { TextList } from '@src/apps/onboarding/components/text-list';
 import { useSecurityNotes } from '@src/apps/onboarding/hooks/use-security-notes';
 
-export function SecretPhraseSecurityNotesPageContent() {
+export function CreateSecretPhraseConfirmationPageContent() {
   const { t } = useTranslation();
 
   const textListItems = useSecurityNotes();

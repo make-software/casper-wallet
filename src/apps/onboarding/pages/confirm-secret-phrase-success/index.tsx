@@ -8,20 +8,24 @@ import {
 } from '@libs/layout';
 import { Button } from '@libs/ui';
 
-import { RecoverWalletFromSecretPhrasePageContent } from './content';
+import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
+import { RouterPath } from '@src/apps/onboarding/router';
 
-export function RecoverWalletFromSecretPhrasePage() {
+import { ConfirmSecretPhraseSuccessPageContent } from './content';
+
+export function ConfirmSecretPhraseSuccessPage() {
+  const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
   return (
     <LayoutTab
       layoutContext="withStepper"
       renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
-      renderContent={() => <RecoverWalletFromSecretPhrasePageContent />}
+      renderContent={() => <ConfirmSecretPhraseSuccessPageContent />}
       renderFooter={() => (
         <TabFooterContainer>
-          <Button>
-            <Trans t={t}>Connect to my wallet</Trans>
+          <Button onClick={() => navigate(RouterPath.OnboardingSuccess)}>
+            <Trans t={t}>Done</Trans>
           </Button>
         </TabFooterContainer>
       )}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import {
   LayoutTab,
@@ -8,12 +8,12 @@ import {
 } from '@libs/layout';
 import { Button, Checkbox } from '@libs/ui';
 
-import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
+import { RouterPath } from '@src/apps/onboarding/router';
 
-import { WriteSecretPhrasePageContent } from './content';
+import { CreateSecretPhraseConfirmationPageContent } from './content';
 
-export function WriteSecretPhrasePage() {
+export function CreateSecretPhraseConfirmationPage() {
   const [isChecked, setIsChecked] = useState(false);
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -22,19 +22,20 @@ export function WriteSecretPhrasePage() {
     <LayoutTab
       layoutContext="withStepper"
       renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
-      renderContent={() => <WriteSecretPhrasePageContent />}
+      renderContent={() => <CreateSecretPhraseConfirmationPageContent />}
       renderFooter={() => (
         <TabFooterContainer>
           <Checkbox
             checked={isChecked}
             onChange={() => setIsChecked(currentValue => !currentValue)}
             label={t(
-              'I confirm I have written down and safely stored my secret phrase.'
+              'I understand I have to be careful to save my secret phrase.\n' +
+                'My money will depend on it.'
             )}
           />
           <Button
             disabled={!isChecked}
-            onClick={() => navigate(RouterPath.ConfirmSecretPhrase)}
+            onClick={() => navigate(RouterPath.WriteDownSecretPhrase)}
           >
             <Trans t={t}>Next</Trans>
           </Button>

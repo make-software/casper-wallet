@@ -6,13 +6,13 @@ import { RouterPath } from '@src/apps/onboarding/router';
 import { WelcomePage } from '@src/apps/onboarding/pages/welcome';
 import { CreateVaultPasswordPage } from '@src/apps/onboarding/pages/create-vault-password';
 import { CreateSecretPhrasePage } from '@src/apps/onboarding/pages/create-secret-phrase';
-import { RecoverWalletFromSecretPhrasePage } from '@src/apps/onboarding/pages/recover-wallet-from-secret-phrase';
-import { SecretPhraseSecurityNotesPage } from '@src/apps/onboarding/pages/secret-phrase-security-notes';
-import { WriteSecretPhrasePage } from '@src/apps/onboarding/pages/write-secret-phrase';
+import { RecoverFromSecretPhrasePage } from '@src/apps/onboarding/pages/recover-from-secret-phrase';
+import { CreateSecretPhraseConfirmationPage } from '@src/apps/onboarding/pages/create-secret-phrase-confirmation';
+import { WriteDownSecretPhrasePage } from '@src/apps/onboarding/pages/write-down-secret-phrase';
 import { ConfirmSecretPhrasePage } from '@src/apps/onboarding/pages/confirm-secret-phrase';
-import { SecretPhraseConfirmedPage } from '@src/apps/onboarding/pages/secret-phrase-confirmed';
-import { WalletCreatedPage } from '@src/apps/onboarding/pages/wallet-created';
-import { ErrorPage } from '@src/apps/onboarding/pages/error';
+import { ConfirmSecretPhraseSuccessPage } from '@src/apps/onboarding/pages/confirm-secret-phrase-success';
+import { OnboardingSuccessPage } from '@src/apps/onboarding/pages/onboarding-success';
+import { OnboardingErrorPage } from '@src/apps/onboarding/pages/onboarding-error';
 
 export function AppRouter() {
   return (
@@ -28,30 +28,33 @@ export function AppRouter() {
           element={<CreateSecretPhrasePage />}
         />
         <Route
-          path={RouterPath.RecoverWalletFromSecretPhrase}
-          element={<RecoverWalletFromSecretPhrasePage />}
+          path={RouterPath.RecoverFromSecretPhrase}
+          element={<RecoverFromSecretPhrasePage />}
         />
         <Route
-          path={RouterPath.SecretPhraseSecurityNotes}
-          element={<SecretPhraseSecurityNotesPage />}
+          path={RouterPath.CreateSecretPhraseConfirmation}
+          element={<CreateSecretPhraseConfirmationPage />}
         />
         <Route
-          path={RouterPath.WriteSecretPhrase}
-          element={<WriteSecretPhrasePage />}
+          path={RouterPath.WriteDownSecretPhrase}
+          element={<WriteDownSecretPhrasePage />}
         />
         <Route
           path={RouterPath.ConfirmSecretPhrase}
           element={<ConfirmSecretPhrasePage />}
         />
         <Route
-          path={RouterPath.SecretPhraseConfirmed}
-          element={<SecretPhraseConfirmedPage />}
+          path={RouterPath.ConfirmSecretPhraseSuccess}
+          element={<ConfirmSecretPhraseSuccessPage />}
         />
         <Route
-          path={RouterPath.WalletCreated}
-          element={<WalletCreatedPage />}
+          path={RouterPath.OnboardingSuccess}
+          element={<OnboardingSuccessPage />}
         />
-        <Route path={RouterPath.Error} element={<ErrorPage />} />
+        <Route
+          path={RouterPath.OnboardingError}
+          element={<OnboardingErrorPage />}
+        />
       </Routes>
     </HashRouter>
   );

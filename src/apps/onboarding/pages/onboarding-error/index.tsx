@@ -7,19 +7,19 @@ import { Button } from '@libs/ui';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { RouterPath } from '@src/apps/onboarding/router';
 
-import { ErrorPageContent } from './content';
+import { OnboardingErrorPageContent } from './content';
 
-export function ErrorPage() {
+export function OnboardingErrorPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
   return (
     <LayoutTab
       layoutContext="withIllustration"
-      renderContent={() => <ErrorPageContent />}
+      renderContent={() => <OnboardingErrorPageContent />}
       renderFooter={() => (
         <TabFooterContainer>
-          <Button onClick={() => navigate(RouterPath.Welcome)}>
+          <Button onClick={() => navigate(RouterPath.CreateSecretPhrase)}>
             <Trans t={t}>Start over again</Trans>
           </Button>
         </TabFooterContainer>

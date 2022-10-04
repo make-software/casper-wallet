@@ -4,15 +4,15 @@ import { useTranslation, Trans } from 'react-i18next';
 import { LayoutTab, TabFooterContainer } from '@libs/layout';
 import { Button } from '@libs/ui';
 
-import { WalletCreatedPageContent } from './content';
+import { OnboardingSuccessPageContent } from './content';
 
-export function WalletCreatedPage() {
+export function OnboardingSuccessPage() {
   const { t } = useTranslation();
 
   return (
     <LayoutTab
       layoutContext="withIllustration"
-      renderContent={() => <WalletCreatedPageContent />}
+      renderContent={() => <OnboardingSuccessPageContent />}
       renderFooter={() => (
         <TabFooterContainer>
           <Button>

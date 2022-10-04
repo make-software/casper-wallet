@@ -8,7 +8,7 @@ import {
 } from '@libs/layout';
 import { TextArea, Typography } from '@libs/ui';
 
-export function RecoverWalletFromSecretPhrasePageContent() {
+export function RecoverFromSecretPhrasePageContent() {
   const { t } = useTranslation();
   return (
     <TabPageContainer>

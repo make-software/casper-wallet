@@ -7,7 +7,7 @@ import { Typography } from '@libs/ui';
 import { PhraseBoard } from '@src/apps/onboarding/components/phrase-board';
 import { mockedMnemonicPhrase } from '@src/apps/onboarding/mockedData';
 
-export function WriteSecretPhrasePageContent() {
+export function WriteDownSecretPhrasePageContent() {
   const { t } = useTranslation();
   return (
     <TabPageContainer>

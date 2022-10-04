@@ -9,7 +9,7 @@ const TipContainer = styled.div`
   margin-top: 12px;
 `;
 
-export function WalletCreatedPageContent() {
+export function OnboardingSuccessPageContent() {
   const { t } = useTranslation();
 
   return (

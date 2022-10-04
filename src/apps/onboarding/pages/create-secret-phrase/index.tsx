@@ -25,13 +25,13 @@ export function CreateSecretPhrasePage() {
       renderFooter={() => (
         <TabFooterContainer>
           <Button
-            onClick={() => navigate(RouterPath.SecretPhraseSecurityNotes)}
+            onClick={() => navigate(RouterPath.CreateSecretPhraseConfirmation)}
           >
             <Trans t={t}>Create my secret phrase</Trans>
           </Button>
           <Button
             color="secondaryBlue"
-            onClick={() => navigate(RouterPath.RecoverWalletFromSecretPhrase)}
+            onClick={() => navigate(RouterPath.RecoverFromSecretPhrase)}
           >
             <Trans t={t}>I already have a secret phrase</Trans>
           </Button>

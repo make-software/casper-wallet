@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { SvgIcon, Typography } from '@libs/ui';
 import { TabPageContainer, TabTextContainer } from '@libs/layout';
 
-export function ErrorPageContent() {
+export function OnboardingErrorPageContent() {
   const { t } = useTranslation();
 
   return (

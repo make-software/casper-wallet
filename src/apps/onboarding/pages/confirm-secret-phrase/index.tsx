@@ -24,7 +24,9 @@ export function ConfirmSecretPhrasePage() {
       renderContent={() => <ConfirmSecretPhrasePageContent />}
       renderFooter={() => (
         <TabFooterContainer>
-          <Button onClick={() => navigate(RouterPath.SecretPhraseConfirmed)}>
+          <Button
+            onClick={() => navigate(RouterPath.ConfirmSecretPhraseSuccess)}
+          >
             <Trans t={t}>Confirm</Trans>
           </Button>
         </TabFooterContainer>

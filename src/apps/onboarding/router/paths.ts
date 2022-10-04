@@ -2,11 +2,11 @@ export enum RouterPath {
   Welcome = '/',
   CreateVaultPassword = '/create-vault-password',
   CreateSecretPhrase = '/create-secret-phrase',
-  RecoverWalletFromSecretPhrase = '/recover-wallet-from-secret-phrase',
-  SecretPhraseSecurityNotes = '/secret-phrase-security-notes',
-  WriteSecretPhrase = '/write-secret-phrase',
+  RecoverFromSecretPhrase = '/recover-from-secret-phrase',
+  CreateSecretPhraseConfirmation = '/create-secret-phrase-confirmation',
+  WriteDownSecretPhrase = '/write-down-secret-phrase',
   ConfirmSecretPhrase = '/confirm-secret-phrase',
-  SecretPhraseConfirmed = '/secret-phrase-confirmed',
-  WalletCreated = '/wallet-created',
-  Error = '/error'
+  ConfirmSecretPhraseSuccess = '/confirm-secret-phrase-success',
+  OnboardingSuccess = '/onboarding-success',
+  OnboardingError = '/onboarding-error'
 }

@@ -12,7 +12,7 @@ const TextListContainer = styled.div`
   margin-top: 16px;
 `;
 
-export function SecretPhraseConfirmedPageContent() {
+export function ConfirmSecretPhraseSuccessPageContent() {
   const { t } = useTranslation();
 
   const textListItems = useSecurityNotes();
