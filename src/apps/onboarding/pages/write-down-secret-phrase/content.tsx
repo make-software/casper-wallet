@@ -8,14 +8,8 @@ import { CopyToClipboard, SvgIcon, Typography } from '@libs/ui';
 import { SecretPhraseWordsView } from '@src/apps/onboarding/components/secret-phrase-words-view';
 import { mockedMnemonicPhrase } from '@src/apps/onboarding/mockedData';
 
-const CopySecretPhraseStatusContainer = styled(FlexRow)`
+const CopySecretPhraseContainer = styled(FlexRow)`
   gap: 4px;
-`;
-
-const CopySecretPhraseClickableContainer = styled(
-  CopySecretPhraseStatusContainer
-)`
-  cursor: pointer;
 `;
 
 export function WriteDownSecretPhrasePageContent() {
@@ -43,24 +37,25 @@ export function WriteDownSecretPhrasePageContent() {
         withHiddenContentOnStart
         renderFooter={() => (
           <CopyToClipboard
-            renderClickableComponent={() => (
-              <CopySecretPhraseClickableContainer>
-                <SvgIcon src="assets/icons/copy.svg" color="contentBlue" />
-                <Typography type="captionMedium" color="contentBlue">
-                  <Trans t={t}>Copy secret phrase</Trans>
-                </Typography>
-              </CopySecretPhraseClickableContainer>
-            )}
-            renderStatusComponent={() => (
-              <CopySecretPhraseStatusContainer>
+            renderContent={({ isClicked }) => (
+              <CopySecretPhraseContainer>
                 <SvgIcon
-                  src="assets/icons/checkbox-checked.svg"
-                  color="contentGreen"
+                  src={
+                    isClicked
+                      ? 'assets/icons/checkbox-checked.svg'
+                      : 'assets/icons/copy.svg'
+                  }
+                  color={isClicked ? 'contentGreen' : 'contentBlue'}
                 />
-                <Typography type="captionMedium" color="contentGreen">
-                  <Trans t={t}>Copied to clipboard for 1 min</Trans>
+                <Typography
+                  type="captionMedium"
+                  color={isClicked ? 'contentGreen' : 'contentBlue'}
+                >
+                  {isClicked
+                    ? t('Copied to clipboard for 1 min')
+                    : t('Copy secret phrase')}
                 </Typography>
-              </CopySecretPhraseStatusContainer>
+              </CopySecretPhraseContainer>
             )}
             valueToCopy={secretPhraseForCopy}
             cleanupTimeout={1000 * 60} // 1 minute

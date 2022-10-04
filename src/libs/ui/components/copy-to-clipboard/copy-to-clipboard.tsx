@@ -1,34 +1,32 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
-const Container = styled.div``;
+const Container = styled.div`
+  cursor: ${({ onClick }) => (onClick != null ? 'pointer' : 'auto')};
+`;
+
+interface RenderContentProps {
+  isClicked: boolean;
+}
 
 interface CopyToClipboardProps {
-  renderClickableComponent: () => JSX.Element;
-  renderStatusComponent: () => JSX.Element;
+  renderContent: (renderContentProps: RenderContentProps) => JSX.Element;
   valueToCopy: string;
-  overlayTimeout?: number;
   cleanupTimeout?: number;
-  handlePostAction?: () => void;
 }
 
 export function CopyToClipboard({
-  renderClickableComponent,
-  renderStatusComponent,
+  renderContent,
   valueToCopy,
-  overlayTimeout = 2000,
   cleanupTimeout
 }: CopyToClipboardProps) {
+  const overlayTimeout = 2000;
   const [isClicked, setIsClicked] = useState(false);
 
   const handleCopyOnClick = useCallback(() => {
-    if (isClicked) {
-      return;
-    }
-
     setIsClicked(true);
     navigator.clipboard.writeText(valueToCopy);
-  }, [isClicked, valueToCopy]);
+  }, [valueToCopy]);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
@@ -42,13 +40,9 @@ export function CopyToClipboard({
     return () => timeout && clearTimeout(timeout);
   }, [isClicked, setIsClicked, overlayTimeout]);
 
-  if (isClicked) {
-    return renderStatusComponent();
-  }
-
   return (
-    <Container onClick={handleCopyOnClick}>
-      {renderClickableComponent()}
+    <Container onClick={isClicked ? undefined : handleCopyOnClick}>
+      {renderContent({ isClicked })}
     </Container>
   );
 }

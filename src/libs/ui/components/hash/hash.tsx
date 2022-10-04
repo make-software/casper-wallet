@@ -9,15 +9,9 @@ import { truncateKey } from './utils';
 
 const HashContainer = styled(CenteredFlexRow)``;
 
-const ClickableHashContainer = styled(HashContainer)`
-  cursor: pointer;
-`;
-
 const CopyStatusContainer = styled.div`
   display: flex;
   gap: 4px;
-
-  cursor: auto;
 `;
 
 export enum HashVariant {
@@ -54,22 +48,25 @@ export function Hash({
   if (withCopyOnClick) {
     return (
       <CopyToClipboard
-        renderClickableComponent={() => (
-          <ClickableHashContainer>
-            {HashComponent}
-            <SvgIcon src="assets/icons/copy.svg" />
-          </ClickableHashContainer>
-        )}
-        renderStatusComponent={() => (
-          <CopyStatusContainer>
-            <SvgIcon
-              color="contentGreen"
-              src="assets/icons/checkbox-checked.svg"
-            />
-            <Typography type="body" color="contentGreen">
-              <Trans t={t}>Copied!</Trans>
-            </Typography>
-          </CopyStatusContainer>
+        renderContent={({ isClicked }) => (
+          <>
+            {isClicked ? (
+              <CopyStatusContainer>
+                <SvgIcon
+                  color="contentGreen"
+                  src="assets/icons/checkbox-checked.svg"
+                />
+                <Typography type="body" color="contentGreen">
+                  <Trans t={t}>Copied!</Trans>
+                </Typography>
+              </CopyStatusContainer>
+            ) : (
+              <>
+                {HashComponent}
+                <SvgIcon src="assets/icons/copy.svg" />
+              </>
+            )}
+          </>
         )}
         valueToCopy={value}
       />
