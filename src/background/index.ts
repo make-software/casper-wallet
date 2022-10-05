@@ -70,10 +70,11 @@ browser.runtime.onMessage.addListener(
         switch (action.type) {
           case getType(sdkMessage.connectRequest): {
             let success = false;
+            const isLocked = selectVaultIsLocked(store.getState());
             const countOfAccounts = selectVaultCountOfAccounts(
               store.getState()
             );
-            if (countOfAccounts > 0) {
+            if (!isLocked && countOfAccounts > 0) {
               openWindow({
                 purposeForOpening: PurposeForOpening.ConnectToApp,
                 query: { origin: action.payload }

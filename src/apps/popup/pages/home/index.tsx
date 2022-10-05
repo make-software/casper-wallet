@@ -139,7 +139,7 @@ export function HomePageContent() {
                   activeOrigin &&
                   disconnectAccount(activeAccount.name, activeOrigin)
                 }
-                color="secondaryBlue"
+                color="secondaryRed"
               >
                 <Trans t={t}>Disconnect</Trans>
               </Button>

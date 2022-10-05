@@ -59,14 +59,14 @@ export function ImportAccountWithFileContentPage() {
     secretKeyFile: Yup.mixed()
       .test(
         'required',
-        t('File with secret key should be loaded'),
-        filesArray => filesArray !== null && filesArray.length > 0
+        t('File is required.'),
+        filesArray => filesArray != null && filesArray.length > 0
       )
       .test(
         'fileType',
-        t('Please upload a .PEM containing your private key.'),
+        t('Please upload a PEM file containing private key.'),
         filesArray => {
-          if (filesArray && filesArray.length > 0) {
+          if (filesArray != null && filesArray.length > 0) {
             return /\.pem$/.test(filesArray[0].name);
           }
           return false;

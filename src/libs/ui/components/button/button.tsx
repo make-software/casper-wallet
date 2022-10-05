@@ -3,7 +3,9 @@ import styled from 'styled-components';
 
 import { BaseProps, Link } from '@src/libs/ui';
 
-export interface BaseButtonProps extends BaseProps {
+type ButtonVariant = 'inline' | 'fullWidth';
+
+interface BaseButtonProps extends BaseProps {
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
   loading?: boolean;
@@ -164,10 +166,8 @@ const BUTTON_COMPONENT_BY_COLOR_DICT = {
   utility: UtilityButton
 };
 
-export type ButtonVariant = 'inline' | 'fullWidth';
-
-/* eslint-disable-next-line */
 export interface ButtonProps extends BaseButtonProps {
+  // TODO: change color to variant, and remove variant prop, using width is enough
   color?:
     | 'primaryBlue'
     | 'primaryRed'

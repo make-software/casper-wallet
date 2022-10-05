@@ -9,14 +9,14 @@ export const signDeploy = (
   const publicKey = clPublicKey.value();
   const secretKey = decodeBase64(privateKeyBase64);
 
-  let signingKey: Keys.AsymmetricKey;
+  let keyPair: Keys.AsymmetricKey;
   switch (clPublicKey.tag) {
     case CLPublicKeyTag.ED25519:
-      signingKey = new Keys.Ed25519({ publicKey, secretKey });
+      keyPair = new Keys.Ed25519({ publicKey, secretKey });
       break;
 
     case CLPublicKeyTag.SECP256K1:
-      signingKey = new Keys.Secp256K1(publicKey, secretKey);
+      keyPair = new Keys.Secp256K1(publicKey, secretKey);
       break;
 
     default:
@@ -24,7 +24,7 @@ export const signDeploy = (
   }
 
   // signature is a signed deploy hash
-  const signature = signingKey.sign(deployHash);
+  const signature = keyPair.sign(deployHash);
 
   // ERROR HANDLING
   if (signature == null) {
