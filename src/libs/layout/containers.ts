@@ -22,7 +22,7 @@ export const SpaceBetweenFlexRow = styled(FlexRow)`
   justify-content: space-between;
 `;
 
-export const CenteredSpaceBetweenFlexRow = styled(AlignedFlexRow)`
+export const AlignedSpaceBetweenFlexRow = styled(AlignedFlexRow)`
   justify-content: space-between;
 `;
 
@@ -42,7 +42,7 @@ export const SpaceBetweenFlexColumn = styled(FlexColumn)`
   justify-content: space-between;
 `;
 
-export const HeaderContainer = styled(CenteredSpaceBetweenFlexRow)`
+export const HeaderContainer = styled(AlignedSpaceBetweenFlexRow)`
   background: url(${backgroundIconPath}) no-repeat;
   background-color: ${({ theme }) => theme.color.backgroundRed};
   height: 72px;
@@ -132,6 +132,6 @@ export const TabPageContainer = styled.div`
   padding: 24px 32px;
 `;
 
-export const TopMarginContainer = styled.div`
+export const ListSpacingContainer = styled.div`
   margin-top: 16px;
 `;

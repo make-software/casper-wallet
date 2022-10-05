@@ -2,7 +2,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { Tile, Typography } from '@libs/ui';
-import { TopMarginContainer } from '@src/libs/layout';
+import { ListSpacingContainer } from '@src/libs/layout';
 
 const SpacedBetweenFlexRox = styled.div`
   display: flex;
@@ -82,7 +82,7 @@ export function List<ListRow extends ListRowBase>({
   return (
     <>
       {headerLabel && (
-        <TopMarginContainer>
+        <ListSpacingContainer>
           <SpacedBetweenFlexRox>
             <Typography type="labelMedium" color="contentSecondary">
               {headerLabel}
@@ -99,9 +99,9 @@ export function List<ListRow extends ListRowBase>({
               </PointerContainer>
             )}
           </SpacedBetweenFlexRox>
-        </TopMarginContainer>
+        </ListSpacingContainer>
       )}
-      <TopMarginContainer>
+      <ListSpacingContainer>
         <Tile>
           {renderHeader && (
             <ListHeaderContainer
@@ -127,7 +127,7 @@ export function List<ListRow extends ListRowBase>({
             </ListFooterContainer>
           )}
         </Tile>
-      </TopMarginContainer>
+      </ListSpacingContainer>
     </>
   );
 }
