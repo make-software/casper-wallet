@@ -66,13 +66,20 @@ export const themeConfig = {
     contentRed: '#CC000F',
     contentGreen: '#2DDC88',
     contentGreenOnFill: '#77FFBE',
-    contentYellow: '#E0BB38'
+    contentYellow: '#E0BB38',
+
+    brandRed: '#FF0012',
+    black: '#000000'
   },
   border: {
     separator: '0.5px solid #E8E9EC'
   },
   borderRadius: {
     base: 6,
+    eight: 8,
+    ten: 10,
+    twelve: 12,
+    eighty: 80,
     hundred: 100
   },
   padding: {

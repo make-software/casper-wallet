@@ -1,6 +1,7 @@
 export * from './components/button/button';
 export * from './components/form-field/form-field';
 export * from './components/input/input';
+export * from './components/textarea/textarea';
 export * from './components/link/link';
 export * from './components/typography/typography';
 export * from './components/svg-icon/svg-icon';
@@ -16,6 +17,8 @@ export * from './components/flex-row/flex-row';
 export * from './components/hash/hash';
 export * from './components/cspr/cspr';
 export * from './components/site-favicon-badge/site-favicon-badge';
+export * from './components/password-visibility-icon/password-visibility-icon';
+export * from './components/copy-to-clipboard/copy-to-clipboard';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

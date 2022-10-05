@@ -42,7 +42,7 @@ export function SiteGroupItem({
         <Typography type="body">{name}</Typography>
         <Hash variant={HashVariant.CaptionHash} value={publicKey} truncated />
       </AccountNameAndPublicKeyContainer>
-      <SvgIcon onClick={handleOnClick} src="assets/icons/close.svg" size={24} />
+      <SvgIcon onClick={handleOnClick} src="assets/icons/close.svg" />
     </SiteGroupItemContainer>
   );
 }

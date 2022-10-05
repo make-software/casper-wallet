@@ -7,3 +7,8 @@ export type BaseProps = {
   style?: React.CSSProperties;
   onClick?: (ev: any) => void;
 };
+
+export interface KeyValueItem {
+  key: number | string;
+  value: string;
+}

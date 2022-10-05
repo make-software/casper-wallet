@@ -11,7 +11,7 @@ interface ConnectionStatusBadgeProps {
 
 const ConnectionStatusBadgeContainer = styled.div<ConnectionStatusBadgeProps>`
   width: fit-content;
-  border-radius: 10px;
+  border-radius: ${({ theme }) => theme.borderRadius.ten}px;
   padding: ${({ displayContext }) =>
     displayContext === 'accountList' ? '2px 0' : '2px 8px'};
 

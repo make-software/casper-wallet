@@ -1,0 +1,62 @@
+export const mockedMnemonicPhrase = [
+  'cause',
+  'ignore',
+  'love',
+  'chat',
+  'decorate',
+  'move',
+  'snooze',
+  'if',
+  'reconsider',
+  'pesky',
+  'poo',
+  'unveil',
+  'reconsider',
+  'pesky',
+  'poo',
+  'forever',
+  'crown',
+  'dog',
+  'love',
+  'if',
+  'more',
+  'low',
+  'federal',
+  'end'
+];
+
+export const mockedMnemonicPhraseConfirmation = [
+  'cause',
+  null,
+  'love',
+  'chat',
+  'decorate',
+  'move',
+  null,
+  'if',
+  'reconsider',
+  'pesky',
+  null,
+  'unveil',
+  'reconsider',
+  'pesky',
+  null,
+  'forever',
+  'crown',
+  null,
+  'love',
+  'if',
+  'more',
+  null,
+  'federal',
+  'end'
+];
+
+export const mockedRemovedWordsFromMnemonicPhrase = [
+  'poo',
+  'ignore',
+  'dog',
+  'poo',
+  'snooze',
+  'low'
+];

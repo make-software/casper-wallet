@@ -9,15 +9,17 @@ import { isActionOf } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 
 import { GlobalStyle, themeConfig } from '@libs/ui';
+
 import { ErrorBoundary } from '@popup/error-boundary';
 import {
   BackgroundEvent,
   backgroundEvent,
   PopupState
-} from '@src/background/background-events';
+} from '@background/background-events';
 
-import { createMainStoreReplica } from '../../background/redux/utils';
-import { popupWindowInit } from '../../background/redux/windowManagement/actions';
+import { createMainStoreReplica } from '@background/redux/utils';
+import { popupWindowInit } from '@background/redux/windowManagement/actions';
+
 import { App } from './app';
 
 const Tree = () => {

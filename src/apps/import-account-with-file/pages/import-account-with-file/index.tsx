@@ -125,7 +125,7 @@ export function ImportAccountWithFileContentPage() {
           <Input
             type="file"
             accept=".pem"
-            prefixIcon={<SvgIcon src="assets/icons/file.svg" size={24} />}
+            prefixIcon={<SvgIcon src="assets/icons/file.svg" />}
             suffixIcon={
               isFileLoaded && (
                 <SvgIcon
@@ -133,7 +133,6 @@ export function ImportAccountWithFileContentPage() {
                     setValue('secretKeyFile', null, { shouldValidate: true })
                   }
                   src="assets/icons/close-filter.svg"
-                  size={24}
                 />
               )
             }
