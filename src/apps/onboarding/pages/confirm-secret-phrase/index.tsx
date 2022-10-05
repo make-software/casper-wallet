@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import {
@@ -8,27 +8,31 @@ import {
 } from '@libs/layout';
 import { Button } from '@libs/ui';
 
-import { RouterPath } from '@src/apps/onboarding/router';
+import { RouterPath, useTypedLocation } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { useWordsCollection } from '@src/apps/onboarding/components/secret-phrase-words-view/hooks/use-words-collection';
-import { mockedMnemonicPhrase } from '@src/apps/onboarding/mockedData';
 
 import { ConfirmSecretPhrasePageContent } from './content';
 
 export function ConfirmSecretPhrasePage() {
-  const navigate = useTypedNavigate();
   const { t } = useTranslation();
+  const navigate = useTypedNavigate();
+  const location = useTypedLocation();
 
-  const wordsCollection = useWordsCollection(mockedMnemonicPhrase);
+  if (location.state?.phrase == null) {
+    throw new Error("Mnemonic phrase didn't passed");
+  }
+
+  const { phrase } = location.state;
+
+  const [isPhraseConfirmed, setIsPhraseConfirmed] = useState(false);
+  const [isConfirmationFormFilled, setIsConfirmationFormFilled] =
+    useState(false);
 
   function handleSubmit() {
-    const { phraseString, partialWords } = wordsCollection;
-    const enteredPhraseString = partialWords.join(' ');
-
-    if (phraseString === enteredPhraseString) {
-      navigate(RouterPath.SecretPhraseConfirmed);
+    if (isPhraseConfirmed) {
+      navigate(RouterPath.ConfirmSecretPhraseSuccess);
     } else {
-      navigate(RouterPath.Error, {
+      navigate(RouterPath.OnboardingError, {
         state: {
           errorHeaderText: t('Ah, that’s not guite a correct secret phrase'),
           errorContentText: t(
@@ -40,18 +44,20 @@ export function ConfirmSecretPhrasePage() {
     }
   }
 
-  const isSubmitButtonDisabled = wordsCollection.selectedWords.length < 6;
-
   return (
     <LayoutTab
       layoutContext="withStepper"
       renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
       renderContent={() => (
-        <ConfirmSecretPhrasePageContent phrase={mockedMnemonicPhrase} />
+        <ConfirmSecretPhrasePageContent
+          phrase={phrase}
+          setIsConfirmationFormFilled={setIsConfirmationFormFilled}
+          setIsPhraseConfirmed={setIsPhraseConfirmed}
+        />
       )}
       renderFooter={() => (
         <TabFooterContainer>
-          <Button disabled={isSubmitButtonDisabled} onClick={handleSubmit}>
+          <Button disabled={!isConfirmationFormFilled} onClick={handleSubmit}>
             <Trans t={t}>Confirm</Trans>
           </Button>
         </TabFooterContainer>

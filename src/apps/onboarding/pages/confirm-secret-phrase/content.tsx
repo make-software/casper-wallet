@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { TabPageContainer, TabTextContainer } from '@libs/layout';
@@ -9,10 +9,14 @@ import { SecretPhraseWordsView } from '@src/apps/onboarding/components/secret-ph
 
 interface ConfirmSecretPhrasePageContentProps {
   phrase: string[];
+  setIsConfirmationFormFilled: Dispatch<SetStateAction<boolean>>;
+  setIsPhraseConfirmed: Dispatch<SetStateAction<boolean>>;
 }
 
 export function ConfirmSecretPhrasePageContent({
-  phrase
+  phrase,
+  setIsConfirmationFormFilled,
+  setIsPhraseConfirmed
 }: ConfirmSecretPhrasePageContentProps) {
   const { t } = useTranslation();
 
@@ -33,10 +37,18 @@ export function ConfirmSecretPhrasePageContent({
       <SecretPhraseWordsView
         phrase={phrase}
         confirmationMode
-        renderHeader={({ removedWords, selectedWords, onRemovedWordClick }) => (
+        setIsPhraseConfirmed={setIsPhraseConfirmed}
+        setIsConfirmationFormFilled={setIsConfirmationFormFilled}
+        renderHeader={({
+          phrase,
+          wordIndexes,
+          disabledWordIndexes,
+          onRemovedWordClick
+        }) => (
           <WordPicker
-            words={removedWords}
-            selectedWords={selectedWords}
+            phrase={phrase}
+            wordIndexes={wordIndexes}
+            disabledWordIndexes={disabledWordIndexes}
             onRemovedWordClick={onRemovedWordClick}
           />
         )}

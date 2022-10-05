@@ -19,6 +19,12 @@ export function useConfirmPasswordRule(targetKey: string) {
   return Yup.string().oneOf([Yup.ref(targetKey)], passwordsDoesntMatchMessage);
 }
 
-export function usePhraseRule(originalPhrase: string) {
-  return Yup.string().equals([originalPhrase], "Phrase didn't match");
+export function usePhraseRule() {
+  const { t } = useTranslation();
+
+  return Yup.string().test(
+    'unique',
+    t('There should be 24 words in a valid secret phrase.'),
+    value => value != null && value.trim().split(' ').length === 24
+  );
 }

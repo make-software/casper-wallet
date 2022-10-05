@@ -5,9 +5,9 @@ import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 
 import { usePhraseRule } from '@libs/ui/forms/form-validation-rules';
 
-export function useRecoverWalletFromSecretPhrase(originalPhrase: string) {
+export function useRecoverFromSecretPhraseForm() {
   const formSchema = Yup.object().shape({
-    phrase: usePhraseRule(originalPhrase)
+    phrase: usePhraseRule()
   });
 
   const formOptions: UseFormProps = {

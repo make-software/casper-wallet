@@ -16,26 +16,28 @@ const WordPickerContainer = styled(FlexRow)`
 `;
 
 interface WordPickerProps {
-  words: string[];
-  selectedWords: string[];
-  onRemovedWordClick: (value: string) => void;
+  phrase: string[];
+  wordIndexes: number[];
+  disabledWordIndexes: number[];
+  onRemovedWordClick: (index: number) => void;
 }
 
 export function WordPicker({
-  words,
-  selectedWords,
+  phrase,
+  wordIndexes,
+  disabledWordIndexes,
   onRemovedWordClick
 }: WordPickerProps) {
   return (
     <WordPickerContainer>
-      {words.map((word, index) => (
+      {wordIndexes.map(wordIndex => (
         <WordTag
-          key={`${index}-${word}`}
-          value={word}
-          index={index + 1}
+          key={wordIndex}
+          value={phrase[wordIndex]}
+          index={wordIndex}
           hideIndex
           onRemovedWordClick={onRemovedWordClick}
-          disabled={selectedWords.includes(word)}
+          disabled={disabledWordIndexes.includes(wordIndex)}
         />
       ))}
     </WordPickerContainer>

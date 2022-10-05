@@ -24,6 +24,7 @@ export function CreateVaultPasswordPage() {
   const { t } = useTranslation();
 
   const { register, handleSubmit, formState } = useCreatePasswordForm();
+  const { isDirty } = formState;
 
   function onSubmit(data: FieldValues) {
     dispatchToMainStore(vaultCreated({ password: data.password }));
@@ -48,7 +49,7 @@ export function CreateVaultPasswordPage() {
               onChange={() => setIsChecked(currentValue => !currentValue)}
               label={t('I have read and agreed to the Terms of Use')}
             />
-            <Button disabled={!isChecked || !formState.isDirty}>
+            <Button disabled={!isChecked || !isDirty}>
               <Trans t={t}>Create password</Trans>
             </Button>
           </TabFooterContainer>

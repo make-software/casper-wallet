@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import styled, { css } from 'styled-components';
 
@@ -11,8 +11,8 @@ import {
 import { SvgIcon, Typography, hexToRGBA } from '@libs/ui';
 
 import { WordTag } from '../word-tag';
-
-import { useWordsCollection } from './hooks/use-words-collection';
+import { PartialPhraseArray } from './types';
+import { buildWordsCollection } from './utils';
 
 const allCornersBorderRadius = css`
   border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
@@ -81,9 +81,10 @@ const WordListContainer = styled(FlexRow)`
 `;
 
 interface RenderHeaderProps {
-  removedWords: string[];
-  selectedWords: string[];
-  onRemovedWordClick: (value: string) => void;
+  phrase: string[];
+  wordIndexes: number[];
+  disabledWordIndexes: number[];
+  onRemovedWordClick: (index: number) => void;
 }
 
 interface RenderFooterProps {
@@ -93,6 +94,8 @@ interface RenderFooterProps {
 interface SecretPhraseWordsViewProps {
   phrase: string[];
   confirmationMode?: boolean;
+  setIsConfirmationFormFilled?: Dispatch<SetStateAction<boolean>>;
+  setIsPhraseConfirmed?: Dispatch<SetStateAction<boolean>>;
   renderHeader?: (props: RenderHeaderProps) => JSX.Element;
   renderFooter?: (props: RenderFooterProps) => JSX.Element;
 }
@@ -101,33 +104,81 @@ export function SecretPhraseWordsView({
   phrase,
   confirmationMode,
   renderHeader,
-  renderFooter
+  renderFooter,
+  setIsConfirmationFormFilled,
+  setIsPhraseConfirmed
 }: SecretPhraseWordsViewProps) {
+  const secretPhraseString = phrase.map(word => word).join(' ');
+
   const { t } = useTranslation();
   const [isBlurred, setIsBlurred] = useState(true);
+  const [removedWordIndexes, setRemovedWordIndexes] = useState<number[]>([]);
+  const [partialPhrase, setPartialPhrase] = useState<PartialPhraseArray>([]);
+  const [disabledWordIndexes, setDisabledWordIndexes] = useState<number[]>([]);
+  const [selectedWordIndexes, setSelectedWordIndexes] = useState<number[]>([]);
 
-  const onRemovedWordClick = (value: string): void => {
-    setSelectedWords(prevSelectedWords => [...prevSelectedWords, value]);
-    setPartialWords(prevPartialWords => {
-      const nearestRemovedWordIndex = partialWords.findIndex(
+  useEffect(() => {
+    const { removedWordIndexes, partialPhrase } = buildWordsCollection(phrase);
+    setPartialPhrase(partialPhrase);
+    setRemovedWordIndexes(removedWordIndexes);
+  }, [phrase]);
+
+  useEffect(() => {
+    if (
+      !confirmationMode ||
+      setIsConfirmationFormFilled == null ||
+      setIsPhraseConfirmed == null
+    ) {
+      return;
+    }
+
+    const isFormFilled = !partialPhrase.includes(null);
+    setIsConfirmationFormFilled(isFormFilled);
+
+    if (isFormFilled) {
+      const enteredPhraseString = partialPhrase.join(' ');
+      setIsPhraseConfirmed(secretPhraseString === enteredPhraseString);
+    }
+  }, [
+    partialPhrase,
+    secretPhraseString,
+    confirmationMode,
+    setIsConfirmationFormFilled,
+    setIsPhraseConfirmed
+  ]);
+
+  const onRemovedWordClick = (index: number): void => {
+    setPartialPhrase(prevPartialPhrase => {
+      const nearestRemovedWordIndex = partialPhrase.findIndex(
         word => word === null
       );
 
-      return prevPartialWords.map((word, index) =>
-        index === nearestRemovedWordIndex ? value : word
+      return prevPartialPhrase.map((word, wordIndex) =>
+        wordIndex === nearestRemovedWordIndex ? phrase[index] : word
       );
     });
-  };
 
-  const secretPhraseForCopy = phrase.map(word => word).join(' ');
+    setSelectedWordIndexes(prevIndexes => {
+      const sortedPartialPhrase = [...removedWordIndexes].sort((a, b) =>
+        a < b ? -1 : 1
+      );
+      return [...prevIndexes, sortedPartialPhrase[selectedWordIndexes.length]];
+    });
+
+    setDisabledWordIndexes(prevDisabledWordIndexes => [
+      ...prevDisabledWordIndexes,
+      index
+    ]);
+  };
 
   return (
     <SecretPhraseWordsViewContainer>
       {confirmationMode && renderHeader != null && (
         <HeaderContainer>
           {renderHeader({
-            removedWords,
-            selectedWords,
+            phrase,
+            wordIndexes: removedWordIndexes,
+            disabledWordIndexes,
             onRemovedWordClick
           })}
         </HeaderContainer>
@@ -147,18 +198,24 @@ export function SecretPhraseWordsView({
           </BlurredSecretPhraseWordsViewOverlayContainer>
         )}
         <WordListContainer>
-          {(confirmationMode ? partialWords : phrase).map((word, index) => (
-            <WordTag
-              key={`${index}-${word}`}
-              value={word}
-              order={index + 1}
-              selected={word != null && selectedWords.includes(word)}
-            />
-          ))}
+          {(confirmationMode ? partialPhrase : phrase).map((word, index) => {
+            return (
+              <WordTag
+                key={`${index}-${word}`}
+                value={word}
+                index={index}
+                selected={
+                  confirmationMode &&
+                  word != null &&
+                  selectedWordIndexes.includes(index)
+                }
+              />
+            );
+          })}
         </WordListContainer>
         {renderFooter != null && (
           <FooterContainer>
-            {renderFooter({ secretPhraseForCopy })}
+            {renderFooter({ secretPhraseForCopy: secretPhraseString })}
           </FooterContainer>
         )}
       </WordListAndFooterContainer>

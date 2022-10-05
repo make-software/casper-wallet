@@ -8,24 +8,28 @@ import {
 } from '@libs/layout';
 import { Button, Checkbox } from '@libs/ui';
 
-import { RouterPath } from '@src/apps/onboarding/router';
+import { RouterPath, useTypedLocation } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { mockedMnemonicPhrase } from '@src/apps/onboarding/mockedData';
 
 import { WriteDownSecretPhrasePageContent } from './content';
 
 export function WriteDownSecretPhrasePage() {
   const [isChecked, setIsChecked] = useState(false);
-  const navigate = useTypedNavigate();
   const { t } = useTranslation();
+  const navigate = useTypedNavigate();
+  const location = useTypedLocation();
+
+  if (location.state?.phrase == null) {
+    throw new Error("Mnemonic phrase didn't passed");
+  }
+
+  const { phrase } = location.state;
 
   return (
     <LayoutTab
       layoutContext="withStepper"
       renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
-      renderContent={() => (
-        <WriteDownSecretPhrasePageContent phrase={mockedMnemonicPhrase} />
-      )}
+      renderContent={() => <WriteDownSecretPhrasePageContent phrase={phrase} />}
       renderFooter={() => (
         <TabFooterContainer>
           <Checkbox
@@ -37,7 +41,11 @@ export function WriteDownSecretPhrasePage() {
           />
           <Button
             disabled={!isChecked}
-            onClick={() => navigate(RouterPath.ConfirmSecretPhrase)}
+            onClick={() =>
+              navigate(RouterPath.ConfirmSecretPhrase, {
+                state: { phrase }
+              })
+            }
           >
             <Trans t={t}>Next</Trans>
           </Button>

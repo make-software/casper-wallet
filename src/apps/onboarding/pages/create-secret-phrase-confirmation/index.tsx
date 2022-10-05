@@ -10,6 +10,7 @@ import { Button, Checkbox } from '@libs/ui';
 
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { RouterPath } from '@src/apps/onboarding/router';
+import { mockedMnemonicPhrase } from '@src/apps/onboarding/mockedData';
 
 import { CreateSecretPhraseConfirmationPageContent } from './content';
 
@@ -35,7 +36,11 @@ export function CreateSecretPhraseConfirmationPage() {
           />
           <Button
             disabled={!isChecked}
-            onClick={() => navigate(RouterPath.WriteDownSecretPhrase)}
+            onClick={() =>
+              navigate(RouterPath.WriteDownSecretPhrase, {
+                state: { phrase: mockedMnemonicPhrase }
+              })
+            }
           >
             <Trans t={t}>Next</Trans>
           </Button>
