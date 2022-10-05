@@ -1,5 +1,5 @@
 export type LocationState = {
-  primaryButtonLabel?: string;
+  errorPrimaryButtonLabel?: string;
   errorHeaderText?: string;
   errorContentText?: string;
 };

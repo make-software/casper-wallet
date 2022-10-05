@@ -13,7 +13,7 @@ export function OnboardingErrorPage() {
   const location = useTypedLocation();
   const state = location.state;
 
-  if (state?.primaryButtonLabel == null) {
+  if (state?.errorPrimaryButtonLabel == null) {
     throw new Error('Cannot render ErrorPage: not enough props');
   }
 
@@ -24,7 +24,7 @@ export function OnboardingErrorPage() {
       renderFooter={() => (
         <TabFooterContainer>
           <Button onClick={() => navigate(RouterPath.CreateSecretPhrase)}>
-            {state.primaryButtonLabel}
+            {state.errorPrimaryButtonLabel}
           </Button>
         </TabFooterContainer>
       )}
