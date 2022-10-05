@@ -39,7 +39,6 @@ export function WriteDownSecretPhrasePageContent({
 
       <SecretPhraseWordsView
         phrase={phrase}
-        withHiddenContentOnStart
         renderFooter={() => (
           <CopyToClipboard
             renderContent={({ isClicked }) => (
@@ -63,7 +62,7 @@ export function WriteDownSecretPhrasePageContent({
               </CopySecretPhraseContainer>
             )}
             valueToCopy={secretPhraseForCopy}
-            cleanupTimeout={1000 * 60} // 1 minute
+            automaticallyClearClipboard
           />
         )}
       />

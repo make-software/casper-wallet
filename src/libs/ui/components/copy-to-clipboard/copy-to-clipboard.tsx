@@ -12,15 +12,17 @@ interface RenderContentProps {
 interface CopyToClipboardProps {
   renderContent: (renderContentProps: RenderContentProps) => JSX.Element;
   valueToCopy: string;
-  cleanupTimeout?: number;
+  automaticallyClearClipboard?: boolean;
 }
 
 export function CopyToClipboard({
   renderContent,
   valueToCopy,
-  cleanupTimeout
+  automaticallyClearClipboard
 }: CopyToClipboardProps) {
   const overlayTimeout = 2000;
+  // const cleanupTimeout = 1000 * 60; // 1 minute
+
   const [isClicked, setIsClicked] = useState(false);
 
   const handleCopyOnClick = useCallback(() => {

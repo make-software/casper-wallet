@@ -80,7 +80,6 @@ const WordListContainer = styled(FlexRow)`
 
 interface SecretPhraseWordsViewProps {
   phrase: (string | null)[];
-  withHiddenContentOnStart?: boolean;
   confirmationMode?: boolean;
   renderHeader?: () => JSX.Element;
   renderFooter?: () => JSX.Element;
@@ -88,7 +87,6 @@ interface SecretPhraseWordsViewProps {
 
 export function SecretPhraseWordsView({
   phrase,
-  withHiddenContentOnStart,
   confirmationMode,
   renderHeader,
   renderFooter
@@ -102,7 +100,7 @@ export function SecretPhraseWordsView({
         <HeaderContainer>{renderHeader()}</HeaderContainer>
       )}
       <WordListAndFooterContainer>
-        {withHiddenContentOnStart && isBlurred && (
+        {!confirmationMode && isBlurred && (
           <BlurredSecretPhraseWordsViewOverlayContainer
             withFooter={renderFooter != null}
             onClick={() => setIsBlurred(false)}
