@@ -13,7 +13,6 @@ import { SvgIcon, Typography, hexToRGBA } from '@libs/ui';
 import { WordTag } from '../word-tag';
 
 import {
-  mockedMnemonicPhrase,
   mockedMnemonicPhraseConfirmation,
   mockedRemovedWordsFromMnemonicPhrase
 } from '@src/apps/onboarding/mockedData';
@@ -94,24 +93,25 @@ interface RenderFooterProps {
 }
 
 interface SecretPhraseWordsViewProps {
+  phrase: string[];
   confirmationMode?: boolean;
   renderHeader?: (props: RenderHeaderProps) => JSX.Element;
   renderFooter?: (props: RenderFooterProps) => JSX.Element;
 }
 
 export function SecretPhraseWordsView({
+  phrase,
   confirmationMode,
   renderHeader,
   renderFooter
 }: SecretPhraseWordsViewProps) {
   const { t } = useTranslation();
+  const [phraseConfirmation] = useState<(string | null)[]>(
+    mockedMnemonicPhraseConfirmation
+  );
   const [isBlurred, setIsBlurred] = useState(true);
 
-  const phrase = confirmationMode
-    ? mockedMnemonicPhraseConfirmation
-    : mockedMnemonicPhrase;
-
-  const secretPhraseForCopy = mockedMnemonicPhrase.map(word => word).join(' ');
+  const secretPhraseForCopy = phrase.map(word => word).join(' ');
 
   return (
     <SecretPhraseWordsViewContainer>
@@ -138,9 +138,15 @@ export function SecretPhraseWordsView({
           </BlurredSecretPhraseWordsViewOverlayContainer>
         )}
         <WordListContainer>
-          {phrase.map((word, index) => (
-            <WordTag key={`${index}-${word}`} value={word} index={index + 1} />
-          ))}
+          {(confirmationMode ? phraseConfirmation : phrase).map(
+            (word, index) => (
+              <WordTag
+                key={`${index}-${word}`}
+                value={word}
+                index={index + 1}
+              />
+            )
+          )}
         </WordListContainer>
         {renderFooter != null && (
           <FooterContainer>

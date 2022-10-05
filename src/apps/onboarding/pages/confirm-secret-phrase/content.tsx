@@ -7,7 +7,13 @@ import { Typography } from '@libs/ui';
 import { WordPicker } from '@src/apps/onboarding/components/word-picker';
 import { SecretPhraseWordsView } from '@src/apps/onboarding/components/secret-phrase-words-view';
 
-export function ConfirmSecretPhrasePageContent() {
+interface ConfirmSecretPhrasePageContentProps {
+  phrase: string[];
+}
+
+export function ConfirmSecretPhrasePageContent({
+  phrase
+}: ConfirmSecretPhrasePageContentProps) {
   const { t } = useTranslation();
 
   return (
@@ -25,6 +31,7 @@ export function ConfirmSecretPhrasePageContent() {
       </TabTextContainer>
 
       <SecretPhraseWordsView
+        phrase={phrase}
         confirmationMode
         renderHeader={({ removedWords }) => <WordPicker words={removedWords} />}
       />
