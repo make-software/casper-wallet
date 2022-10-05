@@ -9,7 +9,7 @@ import {
 } from '@libs/layout';
 import { Button } from '@libs/ui';
 
-import { RouterPath } from '@src/apps/onboarding/router';
+import { RouterPath, useTypedLocation } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 
 import { ConfirmSecretPhrasePageContent } from './content';

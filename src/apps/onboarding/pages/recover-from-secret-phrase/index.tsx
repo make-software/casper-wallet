@@ -15,6 +15,7 @@ import { RouterPath } from '@src/apps/onboarding/router';
 import { closeActiveTab } from '@src/apps/onboarding/utils/close-active-tab';
 
 import { RecoverFromSecretPhrasePageContent } from './content';
+import { FieldValues } from 'react-hook-form';
 
 export function RecoverFromSecretPhrasePage() {
   const navigate = useTypedNavigate();
