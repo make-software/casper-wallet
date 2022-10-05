@@ -58,7 +58,7 @@ export function Checkbox({
       checked={checked}
       onClick={handleClick}
     >
-      <SvgIcon src={iconSrc} size={24} />
+      <SvgIcon src={iconSrc} />
       {label && (
         <Typography type="body" color="contentPrimary">
           {label}

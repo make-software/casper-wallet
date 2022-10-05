@@ -8,9 +8,13 @@ import {
 } from '@libs/layout';
 import { Button } from '@libs/ui';
 
-import { CreateSecretPhraseContent } from '@src/apps/onboarding/pages/create-secret-phrase/content';
+import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
+import { RouterPath } from '@src/apps/onboarding/router';
+
+import { CreateSecretPhraseContent } from './content';
 
 export function CreateSecretPhrasePage() {
+  const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
   return (
@@ -20,10 +24,15 @@ export function CreateSecretPhrasePage() {
       renderContent={() => <CreateSecretPhraseContent />}
       renderFooter={() => (
         <TabFooterContainer>
-          <Button>
+          <Button
+            onClick={() => navigate(RouterPath.CreateSecretPhraseConfirmation)}
+          >
             <Trans t={t}>Create my secret phrase</Trans>
           </Button>
-          <Button color="secondaryBlue">
+          <Button
+            color="secondaryBlue"
+            onClick={() => navigate(RouterPath.RecoverFromSecretPhrase)}
+          >
             <Trans t={t}>I already have a secret phrase</Trans>
           </Button>
         </TabFooterContainer>

@@ -1,14 +1,14 @@
 import React, { useState, useRef, PropsWithChildren, MouseEvent } from 'react';
 import styled from 'styled-components';
 
-import { CenteredFlexRow, FlexColumn } from '@libs/layout';
+import { AlignedFlexRow, FlexColumn } from '@libs/layout';
 import { useClickAway } from '@libs/ui/hooks/use-click-away';
 
 import { PopoverPortal } from './popover-portal';
 
 const popoverOffsetFromChildren = 64;
 
-const ChildrenContainer = styled(CenteredFlexRow)`
+const ChildrenContainer = styled(AlignedFlexRow)`
   padding: 14px 18px;
   cursor: pointer;
 `;
@@ -32,7 +32,7 @@ const PopoverItemsContainer = styled(FlexColumn)`
 
   background: ${({ theme }) => theme.color.fillWhite};
   box-shadow: 0 1px 8px rgba(132, 134, 140, 0.2);
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.borderRadius.eight}px;
 `;
 
 type RenderProps = {

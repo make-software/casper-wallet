@@ -8,10 +8,18 @@ export function WelcomePageContent() {
   const { t } = useTranslation();
   return (
     <TabPageContainer>
-      <SvgIcon src="assets/illustrations/welcome.svg" size={140} />
-      <Typography type="header">
-        <Trans t={t}>Welcome to Signer! Ready to create your new wallet?</Trans>
-      </Typography>
+      <SvgIcon
+        src="assets/illustrations/welcome.svg"
+        width={264}
+        height={140}
+      />
+      <TabTextContainer>
+        <Typography type="header">
+          <Trans t={t}>
+            Welcome to Signer! Ready to create your new wallet?
+          </Trans>
+        </Typography>
+      </TabTextContainer>
 
       <TabTextContainer>
         <Typography type="body" color="contentSecondary">

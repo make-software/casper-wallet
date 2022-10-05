@@ -5,7 +5,7 @@ import {
   HeaderContainer,
   Logo,
   LogoContainer,
-  CenteredSpaceBetweenFlexRow,
+  AlignedSpaceBetweenFlexRow,
   LeftAlignedCenteredFlexRow
 } from '@src/libs/layout';
 import { HeaderConnectionStatus } from '@src/libs/layout/header/header-connection-status';
@@ -16,7 +16,7 @@ const LogoAndConnectionStatusContainer = styled(LeftAlignedCenteredFlexRow)`
   gap: 18px;
 `;
 
-const SubmenuBarContainer = styled(CenteredSpaceBetweenFlexRow)`
+const SubmenuBarContainer = styled(AlignedSpaceBetweenFlexRow)`
   height: 56px;
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
   border-bottom: 0.5px solid ${({ theme }) => theme.color.borderPrimary};

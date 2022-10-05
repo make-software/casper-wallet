@@ -29,11 +29,7 @@ export function HeaderActions({ withLock, withMenu }: MainmenuBarProps) {
   return (
     <Container>
       {withLock && (
-        <SvgIcon
-          onClick={handleLockVault}
-          src="assets/icons/unlock.svg"
-          size={24}
-        />
+        <SvgIcon onClick={handleLockVault} src="assets/icons/unlock.svg" />
       )}
       {withMenu && (
         <SvgIcon
@@ -44,7 +40,6 @@ export function HeaderActions({ withLock, withMenu }: MainmenuBarProps) {
               ? 'assets/icons/burger-close.svg'
               : 'assets/icons/burger-menu.svg'
           }
-          size={24}
         />
       )}
     </Container>

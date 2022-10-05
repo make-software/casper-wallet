@@ -98,7 +98,6 @@ function NavLink({ label, onClick, withLeftChevronIcon }: NavLinkProps) {
             src="assets/icons/chevron.svg"
             color="contentBlue"
             flipByAxis="Y"
-            size={24}
           />
           {LinkComponent}
         </LinkWithIconContainer>

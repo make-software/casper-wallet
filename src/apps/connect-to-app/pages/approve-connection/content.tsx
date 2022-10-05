@@ -67,11 +67,7 @@ export function ApproveConnectionContent({
           rows={listItems}
           renderRow={listItem => (
             <ListItemContainer key={listItem.id}>
-              <SvgIcon
-                src={listItem.iconPath}
-                size={24}
-                color="contentTertiary"
-              />
+              <SvgIcon src={listItem.iconPath} color="contentTertiary" />
               <Typography type="body">{listItem.text}</Typography>
             </ListItemContainer>
           )}

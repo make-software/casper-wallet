@@ -14,7 +14,7 @@ const SiteFaviconAndHostnameContainer = styled.div`
   padding: 4px 12px;
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
-  border-radius: 100px;
+  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
 
 const FaviconImg = styled.img`

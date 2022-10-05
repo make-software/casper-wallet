@@ -186,7 +186,7 @@ export function AccountListPage() {
                   </>
                 )}
               >
-                <SvgIcon src="assets/icons/more.svg" size={24} />
+                <SvgIcon src="assets/icons/more.svg" />
               </Popover>
             </ListItemContainer>
           )}

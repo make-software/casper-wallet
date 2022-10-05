@@ -93,11 +93,7 @@ export function ConnectAnotherAccountPageContent() {
       {targetAccount && (
         <PageTile>
           <CentredFlexRow>
-            <SvgIcon
-              src="assets/icons/error.svg"
-              size={24}
-              color="contentYellow"
-            />
+            <SvgIcon src="assets/icons/error.svg" color="contentYellow" />
             <SpaceBetweenContainer>
               <LeftAlignedFlexColumn>
                 <Typography type="body">{targetAccount.name}</Typography>
@@ -128,7 +124,6 @@ export function ConnectAnotherAccountPageContent() {
           <ListItemContainer key={account.name}>
             <SvgIcon
               src="assets/icons/checkbox-checked.svg"
-              size={24}
               color="contentGreen"
             />
 

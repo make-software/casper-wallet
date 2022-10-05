@@ -6,11 +6,15 @@ export const FlexRow = styled.div`
   display: flex;
 `;
 
-export const CenteredFlexRow = styled(FlexRow)`
+export const AlignedFlexRow = styled(FlexRow)`
   align-items: center;
 `;
 
-export const LeftAlignedCenteredFlexRow = styled(CenteredFlexRow)`
+export const CenteredFlexRow = styled(AlignedFlexRow)`
+  justify-content: center;
+`;
+
+export const LeftAlignedCenteredFlexRow = styled(AlignedFlexRow)`
   justify-content: flex-start;
 `;
 
@@ -18,7 +22,7 @@ export const SpaceBetweenFlexRow = styled(FlexRow)`
   justify-content: space-between;
 `;
 
-export const CenteredSpaceBetweenFlexRow = styled(CenteredFlexRow)`
+export const AlignedSpaceBetweenFlexRow = styled(AlignedFlexRow)`
   justify-content: space-between;
 `;
 
@@ -38,7 +42,7 @@ export const SpaceBetweenFlexColumn = styled(FlexColumn)`
   justify-content: space-between;
 `;
 
-export const HeaderContainer = styled(CenteredSpaceBetweenFlexRow)`
+export const HeaderContainer = styled(AlignedSpaceBetweenFlexRow)`
   background: url(${backgroundIconPath}) no-repeat;
   background-color: ${({ theme }) => theme.color.backgroundRed};
   height: 72px;
@@ -117,7 +121,7 @@ export const ListItemClickableContainer = styled(SpaceBetweenFlexRow)`
 
 export const TabFooterContainer = styled(FooterButtonsContainer)`
   padding: 24px 32px;
-  margin-top: 64px;
+  margin-top: 30px;
 `;
 
 export const TabTextContainer = styled.div`
@@ -126,4 +130,8 @@ export const TabTextContainer = styled.div`
 
 export const TabPageContainer = styled.div`
   padding: 24px 32px;
+`;
+
+export const ListSpacingContainer = styled.div`
+  margin-top: 16px;
 `;

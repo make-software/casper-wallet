@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { SvgIcon } from '@libs/ui';
-import { CenteredFlexColumn, CenteredFlexRow } from '@layout/index';
+import { CenteredFlexColumn, AlignedFlexRow } from '@layout/index';
 
 const Container = styled.div`
   width: 100%;
@@ -21,7 +21,7 @@ const AbsoluteCenteredContainer = styled(CenteredFlexColumn)`
   transform: translate(-50%, -50%);
 `;
 
-const HeaderContainer = styled(CenteredFlexRow)`
+const HeaderContainer = styled(AlignedFlexRow)`
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
   height: 56px;
 
@@ -38,7 +38,7 @@ const MainContainer = styled.div<ContentContainerProps>`
       ? theme.color.backgroundPrimary
       : theme.color.backgroundSecondary};
   box-shadow: 0 8px 24px rgba(132, 134, 140, 0.12);
-  border-radius: 12px;
+  border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
 
   height: 100%;
   overflow-y: auto;
