@@ -23,7 +23,7 @@ export * from './components/copy-to-clipboard/copy-to-clipboard';
 export * from './utils/match-media';
 export * from './utils/match-size';
 export * from './utils/hex-to-rgba';
-export * from './utils/getColorFromTheme';
+export * from './utils/get-color-from-theme';
 export * from './theme-config';
 export * from './global-style';
 export * from './types';

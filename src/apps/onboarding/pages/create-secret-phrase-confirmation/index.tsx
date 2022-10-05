@@ -10,7 +10,7 @@ import { Button, Checkbox } from '@libs/ui';
 
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { RouterPath } from '@src/apps/onboarding/router';
-import { mockedMnemonicPhrase } from '@src/apps/onboarding/mockedData';
+import { mockedMnemonicPhrase } from '@src/apps/onboarding/mocked-data';
 
 import { CreateSecretPhraseConfirmationPageContent } from './content';
 

@@ -9,10 +9,10 @@ import {
 import { Button } from '@libs/ui';
 import { useRecoverFromSecretPhraseForm } from '@libs/ui/forms/recover-from-secret-phrase';
 
-import { mockedMnemonicPhrase } from '@src/apps/onboarding/mockedData';
+import { mockedMnemonicPhrase } from '@src/apps/onboarding/mocked-data';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { RouterPath } from '@src/apps/onboarding/router';
-import { closeActiveTab } from '@src/apps/onboarding/utils/closeActiveTab';
+import { closeActiveTab } from '@src/apps/onboarding/utils/close-active-tab';
 
 import { RecoverFromSecretPhrasePageContent } from './content';
 import { FieldValues } from 'react-hook-form';
