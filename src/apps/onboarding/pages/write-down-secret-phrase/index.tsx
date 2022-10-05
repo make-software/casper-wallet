@@ -10,7 +10,6 @@ import { Button, Checkbox } from '@libs/ui';
 
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { mockedMnemonicPhrase } from '@src/apps/onboarding/mockedData';
 
 import { WriteDownSecretPhrasePageContent } from './content';
 
@@ -23,9 +22,7 @@ export function WriteDownSecretPhrasePage() {
     <LayoutTab
       layoutContext="withStepper"
       renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
-      renderContent={() => (
-        <WriteDownSecretPhrasePageContent phrase={mockedMnemonicPhrase} />
-      )}
+      renderContent={() => <WriteDownSecretPhrasePageContent />}
       renderFooter={() => (
         <TabFooterContainer>
           <Checkbox

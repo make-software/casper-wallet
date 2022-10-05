@@ -12,6 +12,12 @@ import { SvgIcon, Typography, hexToRGBA } from '@libs/ui';
 
 import { WordTag } from '../word-tag';
 
+import {
+  mockedMnemonicPhrase,
+  mockedMnemonicPhraseConfirmation,
+  mockedRemovedWordsFromMnemonicPhrase
+} from '@src/apps/onboarding/mockedData';
+
 const allCornersBorderRadius = css`
   border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
 `;
@@ -78,15 +84,22 @@ const WordListContainer = styled(FlexRow)`
   padding: ${({ theme }) => theme.padding[1.6]};
 `;
 
+interface RenderHeaderProps {
+  removedWords: string[];
+  onRemovedWordClick: (value: string) => void;
+}
+
+interface RenderFooterProps {
+  secretPhraseForCopy: string;
+}
+
 interface SecretPhraseWordsViewProps {
-  phrase: (string | null)[];
   confirmationMode?: boolean;
-  renderHeader?: () => JSX.Element;
-  renderFooter?: () => JSX.Element;
+  renderHeader?: (props: RenderHeaderProps) => JSX.Element;
+  renderFooter?: (props: RenderFooterProps) => JSX.Element;
 }
 
 export function SecretPhraseWordsView({
-  phrase,
   confirmationMode,
   renderHeader,
   renderFooter
@@ -94,10 +107,21 @@ export function SecretPhraseWordsView({
   const { t } = useTranslation();
   const [isBlurred, setIsBlurred] = useState(true);
 
+  const phrase = confirmationMode
+    ? mockedMnemonicPhraseConfirmation
+    : mockedMnemonicPhrase;
+
+  const secretPhraseForCopy = mockedMnemonicPhrase.map(word => word).join(' ');
+
   return (
     <SecretPhraseWordsViewContainer>
       {confirmationMode && renderHeader != null && (
-        <HeaderContainer>{renderHeader()}</HeaderContainer>
+        <HeaderContainer>
+          {renderHeader({
+            removedWords: mockedRemovedWordsFromMnemonicPhrase,
+            onRemovedWordClick: () => {}
+          })}
+        </HeaderContainer>
       )}
       <WordListAndFooterContainer>
         {!confirmationMode && isBlurred && (
@@ -119,7 +143,9 @@ export function SecretPhraseWordsView({
           ))}
         </WordListContainer>
         {renderFooter != null && (
-          <FooterContainer>{renderFooter()}</FooterContainer>
+          <FooterContainer>
+            {renderFooter({ secretPhraseForCopy })}
+          </FooterContainer>
         )}
       </WordListAndFooterContainer>
     </SecretPhraseWordsViewContainer>

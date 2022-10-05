@@ -11,16 +11,8 @@ const CopySecretPhraseContainer = styled(FlexRow)`
   gap: 4px;
 `;
 
-interface WriteDownSecretPhrasePageContentProps {
-  phrase: string[];
-}
-
-export function WriteDownSecretPhrasePageContent({
-  phrase
-}: WriteDownSecretPhrasePageContentProps) {
+export function WriteDownSecretPhrasePageContent() {
   const { t } = useTranslation();
-
-  const secretPhraseForCopy = phrase.map(word => word).join(' ');
 
   return (
     <TabPageContainer>
@@ -38,8 +30,7 @@ export function WriteDownSecretPhrasePageContent({
       </TabTextContainer>
 
       <SecretPhraseWordsView
-        phrase={phrase}
-        renderFooter={() => (
+        renderFooter={({ secretPhraseForCopy }) => (
           <CopyToClipboard
             renderContent={({ isClicked }) => (
               <CopySecretPhraseContainer>

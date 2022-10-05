@@ -10,10 +10,6 @@ import { Button } from '@libs/ui';
 
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import {
-  mockedMnemonicPhraseConfirmation,
-  mockedRemovedWordsFromMnemonicPhrase
-} from '@src/apps/onboarding/mockedData';
 
 import { ConfirmSecretPhrasePageContent } from './content';
 
@@ -25,12 +21,7 @@ export function ConfirmSecretPhrasePage() {
     <LayoutTab
       layoutContext="withStepper"
       renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
-      renderContent={() => (
-        <ConfirmSecretPhrasePageContent
-          partialPhrase={mockedMnemonicPhraseConfirmation}
-          removedWords={mockedRemovedWordsFromMnemonicPhrase}
-        />
-      )}
+      renderContent={() => <ConfirmSecretPhrasePageContent />}
       renderFooter={() => (
         <TabFooterContainer>
           <Button
