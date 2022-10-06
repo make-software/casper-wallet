@@ -1,4 +1,5 @@
 export enum RouterPath {
+  Any = '*',
   Welcome = '/',
   CreateVaultPassword = '/create-vault-password',
   CreateSecretPhrase = '/create-secret-phrase',

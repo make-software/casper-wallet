@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { SecretPhrase } from '@src/libs/crypto';
 
 import { RouterPath } from '@src/apps/onboarding/router';
 
@@ -13,7 +15,8 @@ import { ConfirmSecretPhrasePage } from '@src/apps/onboarding/pages/confirm-secr
 import { ConfirmSecretPhraseSuccessPage } from '@src/apps/onboarding/pages/confirm-secret-phrase-success';
 import { OnboardingSuccessPage } from '@src/apps/onboarding/pages/onboarding-success';
 import { OnboardingErrorPage } from '@src/apps/onboarding/pages/onboarding-error';
-import { SecretPhrase } from '@src/libs/crypto';
+
+import { selectVaultDoesExist } from '@background/redux/vault/selectors';
 
 export interface FormState {
   secretPhrase: SecretPhrase | null;
@@ -32,6 +35,61 @@ export function AppRouter() {
       [name]: value
     }));
 
+  const generalRoutes = (
+    <>
+      <Route
+        path={RouterPath.RecoverFromSecretPhrase}
+        element={<RecoverFromSecretPhrasePage />}
+      />
+      <Route
+        path={RouterPath.CreateSecretPhraseConfirmation}
+        element={
+          <CreateSecretPhraseConfirmationPage
+            formState={onboardingFormState}
+            setFormState={setFormState}
+          />
+        }
+      />
+      <Route
+        path={RouterPath.WriteDownSecretPhrase}
+        element={
+          <WriteDownSecretPhrasePage phrase={onboardingFormState.secretPhrase} />
+        }
+      />
+      <Route
+        path={RouterPath.ConfirmSecretPhrase}
+        element={
+          <ConfirmSecretPhrasePage phrase={onboardingFormState.secretPhrase} />
+        }
+      />
+      <Route
+        path={RouterPath.ConfirmSecretPhraseSuccess}
+        element={<ConfirmSecretPhraseSuccessPage />}
+      />
+      <Route
+        path={RouterPath.OnboardingSuccess}
+        element={<OnboardingSuccessPage />}
+      />
+      <Route
+        path={RouterPath.OnboardingError}
+        element={<OnboardingErrorPage />}
+      />
+    </>
+  );
+
+  const doesVaultExists = useSelector(selectVaultDoesExist);
+
+  if (doesVaultExists) {
+    return (
+      <HashRouter>
+        <Routes>
+          <Route path={RouterPath.Any} element={<CreateSecretPhrasePage />} />
+          {generalRoutes}
+        </Routes>
+      </HashRouter>
+    );
+  }
+
   return (
     <HashRouter>
       <Routes>
@@ -44,47 +102,7 @@ export function AppRouter() {
           path={RouterPath.CreateSecretPhrase}
           element={<CreateSecretPhrasePage />}
         />
-        <Route
-          path={RouterPath.RecoverFromSecretPhrase}
-          element={<RecoverFromSecretPhrasePage />}
-        />
-        <Route
-          path={RouterPath.CreateSecretPhraseConfirmation}
-          element={
-            <CreateSecretPhraseConfirmationPage
-              formState={onboardingFormState}
-              setFormState={setFormState}
-            />
-          }
-        />
-        <Route
-          path={RouterPath.WriteDownSecretPhrase}
-          element={
-            <WriteDownSecretPhrasePage
-              phrase={onboardingFormState.secretPhrase}
-            />
-          }
-        />
-        <Route
-          path={RouterPath.ConfirmSecretPhrase}
-          element={
-            <ConfirmSecretPhrasePage
-              phrase={onboardingFormState.secretPhrase}
-            />
-          }
-        />
-        <Route
-          path={RouterPath.ConfirmSecretPhraseSuccess}
-          element={<ConfirmSecretPhraseSuccessPage />}
-        />
-        <Route
-          path={RouterPath.OnboardingSuccess}
-          element={<OnboardingSuccessPage />}
-        />
-        <Route
-          path={RouterPath.OnboardingError}
-          element={<OnboardingErrorPage />}
-        />
+        {generalRoutes}
       </Routes>
     </HashRouter>
   );
