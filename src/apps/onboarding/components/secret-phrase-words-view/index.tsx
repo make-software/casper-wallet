@@ -95,7 +95,7 @@ interface SecretPhraseWordsViewProps {
   phrase: string[];
   confirmationMode?: boolean;
   setIsConfirmationFormFilled?: Dispatch<SetStateAction<boolean>>;
-  setIsPhraseConfirmed?: Dispatch<SetStateAction<boolean>>;
+  setIsConfirmationSuccess?: Dispatch<SetStateAction<boolean>>;
   renderHeader?: (props: RenderHeaderProps) => JSX.Element;
   renderFooter?: (props: RenderFooterProps) => JSX.Element;
 }
@@ -106,7 +106,7 @@ export function SecretPhraseWordsView({
   renderHeader,
   renderFooter,
   setIsConfirmationFormFilled,
-  setIsPhraseConfirmed
+  setIsConfirmationSuccess
 }: SecretPhraseWordsViewProps) {
   const secretPhraseString = phrase.map(word => word).join(' ');
 
@@ -127,7 +127,7 @@ export function SecretPhraseWordsView({
     if (
       !confirmationMode ||
       setIsConfirmationFormFilled == null ||
-      setIsPhraseConfirmed == null
+      setIsConfirmationSuccess == null
     ) {
       return;
     }
@@ -137,14 +137,14 @@ export function SecretPhraseWordsView({
 
     if (isFormFilled) {
       const enteredPhraseString = partialPhrase.join(' ');
-      setIsPhraseConfirmed(secretPhraseString === enteredPhraseString);
+      setIsConfirmationSuccess(secretPhraseString === enteredPhraseString);
     }
   }, [
     partialPhrase,
     secretPhraseString,
     confirmationMode,
     setIsConfirmationFormFilled,
-    setIsPhraseConfirmed
+    setIsConfirmationSuccess
   ]);
 
   const onRemovedWordClick = (index: number): void => {

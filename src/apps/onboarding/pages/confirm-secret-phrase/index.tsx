@@ -24,12 +24,12 @@ export function ConfirmSecretPhrasePage() {
 
   const { phrase } = location.state;
 
-  const [isPhraseConfirmed, setIsPhraseConfirmed] = useState(false);
+  const [isConfirmationSuccess, setIsConfirmationSuccess] = useState(false);
   const [isConfirmationFormFilled, setIsConfirmationFormFilled] =
     useState(false);
 
   function handleSubmit() {
-    if (isPhraseConfirmed) {
+    if (isConfirmationSuccess) {
       navigate(RouterPath.ConfirmSecretPhraseSuccess);
     } else {
       navigate(RouterPath.OnboardingError, {
@@ -52,7 +52,7 @@ export function ConfirmSecretPhrasePage() {
         <ConfirmSecretPhrasePageContent
           phrase={phrase}
           setIsConfirmationFormFilled={setIsConfirmationFormFilled}
-          setIsPhraseConfirmed={setIsPhraseConfirmed}
+          setIsConfirmationSuccess={setIsConfirmationSuccess}
         />
       )}
       renderFooter={() => (

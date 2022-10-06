@@ -10,13 +10,13 @@ import { SecretPhraseWordsView } from '@src/apps/onboarding/components/secret-ph
 interface ConfirmSecretPhrasePageContentProps {
   phrase: string[];
   setIsConfirmationFormFilled: Dispatch<SetStateAction<boolean>>;
-  setIsPhraseConfirmed: Dispatch<SetStateAction<boolean>>;
+  setIsConfirmationSuccess: Dispatch<SetStateAction<boolean>>;
 }
 
 export function ConfirmSecretPhrasePageContent({
   phrase,
   setIsConfirmationFormFilled,
-  setIsPhraseConfirmed
+  setIsConfirmationSuccess
 }: ConfirmSecretPhrasePageContentProps) {
   const { t } = useTranslation();
 
@@ -37,7 +37,7 @@ export function ConfirmSecretPhrasePageContent({
       <SecretPhraseWordsView
         phrase={phrase}
         confirmationMode
-        setIsPhraseConfirmed={setIsPhraseConfirmed}
+        setIsConfirmationSuccess={setIsConfirmationSuccess}
         setIsConfirmationFormFilled={setIsConfirmationFormFilled}
         renderHeader={({
           phrase,
