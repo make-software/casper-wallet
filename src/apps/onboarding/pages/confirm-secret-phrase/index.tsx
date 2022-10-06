@@ -25,8 +25,7 @@ export function ConfirmSecretPhrasePage() {
   const { phrase } = location.state;
 
   const [isConfirmationSuccess, setIsConfirmationSuccess] = useState(false);
-  const [isConfirmationFormFilled, setIsConfirmationFormFilled] =
-    useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
 
   function handleSubmit() {
     if (isConfirmationSuccess) {
@@ -51,13 +50,13 @@ export function ConfirmSecretPhrasePage() {
       renderContent={() => (
         <ConfirmSecretPhrasePageContent
           phrase={phrase}
-          setIsConfirmationFormFilled={setIsConfirmationFormFilled}
+          setIsFormValid={setIsFormValid}
           setIsConfirmationSuccess={setIsConfirmationSuccess}
         />
       )}
       renderFooter={() => (
         <TabFooterContainer>
-          <Button disabled={!isConfirmationFormFilled} onClick={handleSubmit}>
+          <Button disabled={!isFormValid} onClick={handleSubmit}>
             <Trans t={t}>Confirm</Trans>
           </Button>
         </TabFooterContainer>

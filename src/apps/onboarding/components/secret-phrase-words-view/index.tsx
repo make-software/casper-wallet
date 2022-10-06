@@ -94,7 +94,7 @@ interface RenderFooterProps {
 interface SecretPhraseWordsViewProps {
   phrase: string[];
   confirmationMode?: boolean;
-  setIsConfirmationFormFilled?: Dispatch<SetStateAction<boolean>>;
+  setIsFormValid?: Dispatch<SetStateAction<boolean>>;
   setIsConfirmationSuccess?: Dispatch<SetStateAction<boolean>>;
   renderHeader?: (props: RenderHeaderProps) => JSX.Element;
   renderFooter?: (props: RenderFooterProps) => JSX.Element;
@@ -105,7 +105,7 @@ export function SecretPhraseWordsView({
   confirmationMode,
   renderHeader,
   renderFooter,
-  setIsConfirmationFormFilled,
+  setIsFormValid,
   setIsConfirmationSuccess
 }: SecretPhraseWordsViewProps) {
   const secretPhraseString = phrase.map(word => word).join(' ');
@@ -126,16 +126,16 @@ export function SecretPhraseWordsView({
   useEffect(() => {
     if (
       !confirmationMode ||
-      setIsConfirmationFormFilled == null ||
+      setIsFormValid == null ||
       setIsConfirmationSuccess == null
     ) {
       return;
     }
 
-    const isFormFilled = !partialPhrase.includes(null);
-    setIsConfirmationFormFilled(isFormFilled);
+    const isFormValid = !partialPhrase.includes(null);
+    setIsFormValid(isFormValid);
 
-    if (isFormFilled) {
+    if (isFormValid) {
       const enteredPhraseString = partialPhrase.join(' ');
       setIsConfirmationSuccess(secretPhraseString === enteredPhraseString);
     }
@@ -143,7 +143,7 @@ export function SecretPhraseWordsView({
     partialPhrase,
     secretPhraseString,
     confirmationMode,
-    setIsConfirmationFormFilled,
+    setIsFormValid,
     setIsConfirmationSuccess
   ]);
 
