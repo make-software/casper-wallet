@@ -4,14 +4,16 @@ import { FieldValues } from 'react-hook-form';
 
 import {
   LayoutTab,
-  HeaderSubmenuBarNavLink,
-  TabFooterContainer
+  TabHeaderContainer,
+  TabFooterContainer,
+  HeaderSubmenuBarNavLink
 } from '@libs/layout';
 import { Button, Checkbox } from '@libs/ui';
 import { useCreatePasswordForm } from '@libs/ui/forms/create-password';
 
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
+import { Stepper } from '@src/apps/onboarding/components/stepper';
 
 import { dispatchToMainStore } from '@background/redux/utils';
 import { vaultCreated } from '@background/redux/vault/actions';
@@ -35,7 +37,12 @@ export function CreateVaultPasswordPage() {
     <form onSubmit={handleSubmit(onSubmit)}>
       <LayoutTab
         layoutContext="withStepper"
-        renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
+        renderHeader={() => (
+          <TabHeaderContainer>
+            <HeaderSubmenuBarNavLink linkType="back" />
+            <Stepper steps={6} step={1} />
+          </TabHeaderContainer>
+        )}
         renderContent={() => (
           <CreateVaultPasswordPageContent
             formState={formState}

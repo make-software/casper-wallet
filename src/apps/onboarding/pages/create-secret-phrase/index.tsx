@@ -3,13 +3,15 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import {
   LayoutTab,
-  HeaderSubmenuBarNavLink,
-  TabFooterContainer
+  TabHeaderContainer,
+  TabFooterContainer,
+  HeaderSubmenuBarNavLink
 } from '@libs/layout';
 import { Button } from '@libs/ui';
 
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { RouterPath } from '@src/apps/onboarding/router';
+import { Stepper } from '@src/apps/onboarding/components/stepper';
 
 import { CreateSecretPhraseContent } from './content';
 
@@ -20,7 +22,12 @@ export function CreateSecretPhrasePage() {
   return (
     <LayoutTab
       layoutContext="withStepper"
-      renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
+      renderHeader={() => (
+        <TabHeaderContainer>
+          <HeaderSubmenuBarNavLink linkType="back" />
+          <Stepper steps={6} step={2} />
+        </TabHeaderContainer>
+      )}
       renderContent={() => <CreateSecretPhraseContent />}
       renderFooter={() => (
         <TabFooterContainer>

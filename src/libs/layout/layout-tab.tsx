@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { SvgIcon } from '@libs/ui';
-import { CenteredFlexColumn, AlignedFlexRow } from '@layout/index';
+import { CenteredFlexColumn } from '@src/libs/layout';
 
 const Container = styled.div`
   width: 100%;
@@ -19,13 +19,6 @@ const AbsoluteCenteredContainer = styled(CenteredFlexColumn)`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-`;
-
-const HeaderContainer = styled(AlignedFlexRow)`
-  background-color: ${({ theme }) => theme.color.backgroundPrimary};
-  height: 56px;
-
-  padding: 16px 20px;
 `;
 
 interface ContentContainerProps {
@@ -61,7 +54,7 @@ export function LayoutTab({
       <AbsoluteCenteredContainer>
         <SvgIcon src="assets/icons/logo.svg" color="brandRed" size={60} />
         <MainContainer layoutContext={layoutContext}>
-          {renderHeader && <HeaderContainer>{renderHeader()}</HeaderContainer>}
+          {renderHeader && renderHeader()}
           {renderContent()}
           {renderFooter && renderFooter()}
         </MainContainer>

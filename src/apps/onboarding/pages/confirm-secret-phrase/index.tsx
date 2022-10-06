@@ -5,12 +5,15 @@ import { Navigate } from 'react-router-dom';
 import {
   HeaderSubmenuBarNavLink,
   LayoutTab,
-  TabFooterContainer
+  TabHeaderContainer,
+  TabFooterContainer,
+  HeaderSubmenuBarNavLink
 } from '@libs/layout';
 import { Button } from '@libs/ui';
 
 import { RouterPath, useTypedLocation } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
+import { Stepper } from '@src/apps/onboarding/components/stepper';
 
 import { ConfirmSecretPhrasePageContent } from './content';
 
@@ -51,7 +54,12 @@ export function ConfirmSecretPhrasePage({
   return (
     <LayoutTab
       layoutContext="withStepper"
-      renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
+      renderHeader={() => (
+        <TabHeaderContainer>
+          <HeaderSubmenuBarNavLink linkType="back" />
+          <Stepper steps={6} step={5} />
+        </TabHeaderContainer>
+      )}
       renderContent={() => (
         <ConfirmSecretPhrasePageContent
           phrase={phrase}
