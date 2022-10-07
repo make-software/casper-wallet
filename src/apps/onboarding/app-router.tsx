@@ -14,14 +14,24 @@ import { ConfirmSecretPhraseSuccessPage } from '@src/apps/onboarding/pages/confi
 import { OnboardingSuccessPage } from '@src/apps/onboarding/pages/onboarding-success';
 import { OnboardingErrorPage } from '@src/apps/onboarding/pages/onboarding-error';
 
-export interface FormState {
-  phrase: string[] | null;
+interface FormState {
+  [key: string]: string[] | null;
 }
+
+export type SetNameAndValueToFormState = (
+  name: keyof FormState,
+  value: string[] | null
+) => void;
 
 export function AppRouter() {
   const [formState, setFormState] = useState<FormState>({
     phrase: null
   });
+
+  const setNameAndValueToFormState: SetNameAndValueToFormState = (
+    name,
+    value
+  ) => setFormState(prevFormState => ({ ...prevFormState, [name]: value }));
 
   return (
     <HashRouter>
@@ -42,7 +52,9 @@ export function AppRouter() {
         <Route
           path={RouterPath.CreateSecretPhraseConfirmation}
           element={
-            <CreateSecretPhraseConfirmationPage setFormState={setFormState} />
+            <CreateSecretPhraseConfirmationPage
+              setNameAndValueToFormState={setNameAndValueToFormState}
+            />
           }
         />
         <Route
