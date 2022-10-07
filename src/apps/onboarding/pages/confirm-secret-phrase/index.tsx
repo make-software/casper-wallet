@@ -3,7 +3,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router-dom';
 
 import {
-  HeaderSubmenuBarNavLink,
   LayoutTab,
   TabHeaderContainer,
   TabFooterContainer,
@@ -11,7 +10,7 @@ import {
 } from '@libs/layout';
 import { Button } from '@libs/ui';
 
-import { RouterPath, useTypedLocation } from '@src/apps/onboarding/router';
+import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { Stepper } from '@src/apps/onboarding/components/stepper';
 

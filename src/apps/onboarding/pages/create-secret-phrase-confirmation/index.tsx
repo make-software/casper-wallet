@@ -12,18 +12,16 @@ import { Button, Checkbox } from '@libs/ui';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { RouterPath } from '@src/apps/onboarding/router';
 import { Stepper } from '@src/apps/onboarding/components/stepper';
-import { FormState, SetFormState } from '@src/apps/onboarding/app-router';
+import { SetFormState } from '@src/apps/onboarding/app-router';
 
 import { CreateSecretPhraseConfirmationPageContent } from './content';
 import { generateSecretPhrase } from '@src/libs/crypto';
 
 interface CreateSecretPhraseConfirmationPageProps {
-  formState: FormState;
   setFormState: SetFormState;
 }
 
 export function CreateSecretPhraseConfirmationPage({
-  formState,
   setFormState
 }: CreateSecretPhraseConfirmationPageProps) {
   const [isChecked, setIsChecked] = useState(false);

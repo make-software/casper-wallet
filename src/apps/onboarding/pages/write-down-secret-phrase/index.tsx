@@ -10,7 +10,7 @@ import {
 } from '@libs/layout';
 import { Button, Checkbox } from '@libs/ui';
 
-import { RouterPath, useTypedLocation } from '@src/apps/onboarding/router';
+import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { Stepper } from '@src/apps/onboarding/components/stepper';
 
@@ -52,11 +52,7 @@ export function WriteDownSecretPhrasePage({
           />
           <Button
             disabled={!isChecked}
-            onClick={() =>
-              navigate(RouterPath.ConfirmSecretPhrase, {
-                state: { phrase }
-              })
-            }
+            onClick={() => navigate(RouterPath.ConfirmSecretPhrase)}
           >
             <Trans t={t}>Next</Trans>
           </Button>

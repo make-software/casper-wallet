@@ -44,16 +44,15 @@ export function AppRouter() {
       <Route
         path={RouterPath.CreateSecretPhraseConfirmation}
         element={
-          <CreateSecretPhraseConfirmationPage
-            formState={onboardingFormState}
-            setFormState={setFormState}
-          />
+          <CreateSecretPhraseConfirmationPage setFormState={setFormState} />
         }
       />
       <Route
         path={RouterPath.WriteDownSecretPhrase}
         element={
-          <WriteDownSecretPhrasePage phrase={onboardingFormState.secretPhrase} />
+          <WriteDownSecretPhrasePage
+            phrase={onboardingFormState.secretPhrase}
+          />
         }
       />
       <Route
