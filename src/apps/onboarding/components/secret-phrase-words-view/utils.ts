@@ -7,13 +7,13 @@ function getRandomInt(min: number, max: number): number {
 }
 
 interface WordCollections {
-  removedWordIndexes: number[];
+  hiddenWordIndexes: number[];
   partialPhrase: PartialPhraseArray;
 }
 
 export function buildWordsCollection(phrase: string[]): WordCollections {
   const collectionSize = 6;
-  const removedWordIndexes: number[] = [];
+  const hiddenWordIndexes: number[] = [];
   const partialPhrase: PartialPhraseArray = [...phrase];
 
   let i = 0;
@@ -22,12 +22,12 @@ export function buildWordsCollection(phrase: string[]): WordCollections {
     const index = getRandomInt(0, phrase.length - 1);
 
     if (partialPhrase[index] != null) {
-      removedWordIndexes.push(index);
+      hiddenWordIndexes.push(index);
       partialPhrase[index] = null;
 
       i++;
     }
   }
 
-  return { removedWordIndexes, partialPhrase };
+  return { hiddenWordIndexes, partialPhrase };
 }

@@ -41,15 +41,15 @@ export function ConfirmSecretPhrasePageContent({
         setIsFormValid={setIsFormValid}
         renderHeader={({
           phrase,
-          wordIndexes,
+          hiddenWordIndexes,
           disabledWordIndexes,
-          onRemovedWordClick
+          onHiddenWordClick
         }) => (
           <WordPicker
             phrase={phrase}
-            wordIndexes={wordIndexes}
+            hiddenWordIndexes={hiddenWordIndexes}
             disabledWordIndexes={disabledWordIndexes}
-            onRemovedWordClick={onRemovedWordClick}
+            onHiddenWordClick={onHiddenWordClick}
           />
         )}
       />

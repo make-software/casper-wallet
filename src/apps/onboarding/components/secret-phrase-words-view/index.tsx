@@ -82,9 +82,9 @@ const WordListContainer = styled(FlexRow)`
 
 interface RenderHeaderProps {
   phrase: string[];
-  wordIndexes: number[];
+  hiddenWordIndexes: number[];
   disabledWordIndexes: number[];
-  onRemovedWordClick: (index: number) => void;
+  onHiddenWordClick: (index: number) => void;
 }
 
 interface RenderFooterProps {
@@ -112,15 +112,15 @@ export function SecretPhraseWordsView({
 
   const { t } = useTranslation();
   const [isBlurred, setIsBlurred] = useState(true);
-  const [removedWordIndexes, setRemovedWordIndexes] = useState<number[]>([]);
+  const [hiddenWordIndexes, setHiddenWordIndexes] = useState<number[]>([]);
   const [partialPhrase, setPartialPhrase] = useState<PartialPhraseArray>([]);
   const [disabledWordIndexes, setDisabledWordIndexes] = useState<number[]>([]);
   const [selectedWordIndexes, setSelectedWordIndexes] = useState<number[]>([]);
 
   useEffect(() => {
-    const { removedWordIndexes, partialPhrase } = buildWordsCollection(phrase);
+    const { hiddenWordIndexes, partialPhrase } = buildWordsCollection(phrase);
     setPartialPhrase(partialPhrase);
-    setRemovedWordIndexes(removedWordIndexes);
+    setHiddenWordIndexes(hiddenWordIndexes);
   }, [phrase]);
 
   useEffect(() => {
@@ -147,26 +147,26 @@ export function SecretPhraseWordsView({
     setIsConfirmationSuccess
   ]);
 
-  const onRemovedWordClick = (index: number): void => {
+  const onHiddenWordClick = (index: number): void => {
     setPartialPhrase(prevPartialPhrase => {
-      const nearestRemovedWordIndex = partialPhrase.findIndex(
+      const firstHiddenWordIndex = partialPhrase.findIndex(
         word => word === null
       );
 
       return prevPartialPhrase.map((word, wordIndex) =>
-        wordIndex === nearestRemovedWordIndex ? phrase[index] : word
+        wordIndex === firstHiddenWordIndex ? phrase[index] : word
       );
     });
 
     setSelectedWordIndexes(prevIndexes => {
-      const sortedPartialPhrase = [...removedWordIndexes].sort((a, b) =>
+      const sortedPartialPhrase = [...hiddenWordIndexes].sort((a, b) =>
         a < b ? -1 : 1
       );
       return [...prevIndexes, sortedPartialPhrase[selectedWordIndexes.length]];
     });
 
-    setDisabledWordIndexes(prevDisabledWordIndexes => [
-      ...prevDisabledWordIndexes,
+    setDisabledWordIndexes(prevSelectedWordIndexes => [
+      ...prevSelectedWordIndexes,
       index
     ]);
   };
@@ -177,9 +177,9 @@ export function SecretPhraseWordsView({
         <HeaderContainer>
           {renderHeader({
             phrase,
-            wordIndexes: removedWordIndexes,
+            hiddenWordIndexes,
             disabledWordIndexes,
-            onRemovedWordClick
+            onHiddenWordClick
           })}
         </HeaderContainer>
       )}

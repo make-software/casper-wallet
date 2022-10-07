@@ -37,7 +37,7 @@ interface WordTagProps {
   hideIndex?: boolean;
   disabled?: boolean;
   selected?: boolean;
-  onRemovedWordClick?: (index: number) => void;
+  onHiddenWordClick?: (index: number) => void;
 }
 
 export function WordTag({
@@ -46,11 +46,11 @@ export function WordTag({
   disabled,
   selected,
   hideIndex,
-  onRemovedWordClick
+  onHiddenWordClick
 }: WordTagProps) {
   const handleOnClick =
-    !disabled && onRemovedWordClick != null && index != null
-      ? () => onRemovedWordClick(index)
+    !disabled && onHiddenWordClick != null && index != null
+      ? () => onHiddenWordClick(index)
       : undefined;
 
   return (

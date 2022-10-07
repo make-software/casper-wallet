@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
+import { FieldValues } from 'react-hook-form';
 
 import {
   LayoutTab,
@@ -9,13 +10,11 @@ import {
 import { Button } from '@libs/ui';
 import { useRecoverFromSecretPhraseForm } from '@libs/ui/forms/recover-from-secret-phrase';
 
-import { mockedMnemonicPhrase } from '@src/apps/onboarding/mocked-data';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { RouterPath } from '@src/apps/onboarding/router';
 import { closeActiveTab } from '@src/apps/onboarding/utils/close-active-tab';
 
 import { RecoverFromSecretPhrasePageContent } from './content';
-import { FieldValues } from 'react-hook-form';
 
 export function RecoverFromSecretPhrasePage() {
   const navigate = useTypedNavigate();
@@ -25,9 +24,11 @@ export function RecoverFromSecretPhrasePage() {
     useRecoverFromSecretPhraseForm();
   const { isDirty } = formState;
 
-  function onSubmit({ phrase }: FieldValues) {
-    if (phrase === mockedMnemonicPhrase.join(' ')) {
-      closeActiveTab().catch(e => console.error(e));
+  async function onSubmit({ phrase }: FieldValues) {
+    // TODO: Parse phrase and restore wallet from it
+    const isParsingPhraseWasSuccess = true;
+    if (isParsingPhraseWasSuccess) {
+      await closeActiveTab();
     } else {
       navigate(RouterPath.OnboardingError, {
         state: {
@@ -37,7 +38,8 @@ export function RecoverFromSecretPhrasePage() {
           errorContentText: t(
             'It could be you’ve made a mistake while entering it. Please try again.'
           ),
-          errorPrimaryButtonLabel: t('Try again')
+          errorPrimaryButtonLabel: t('Try again'),
+          errorRedirectPath: RouterPath.CreateSecretPhrase
         }
       });
     }
@@ -51,7 +53,7 @@ export function RecoverFromSecretPhrasePage() {
         renderContent={() => (
           <RecoverFromSecretPhrasePageContent
             register={register}
-            formState={formState}
+            errorMessage={formState.errors?.phrase}
           />
         )}
         renderFooter={() => (

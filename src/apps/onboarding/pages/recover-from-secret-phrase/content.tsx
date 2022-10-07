@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import { FieldValues, FormState, UseFormRegister } from 'react-hook-form';
+import { FieldValues, UseFormRegister } from 'react-hook-form';
 
 import {
   TabPageContainer,
@@ -11,12 +11,12 @@ import { TextArea, Typography } from '@libs/ui';
 
 interface RecoverFromSecretPhrasePageContentProps {
   register: UseFormRegister<FieldValues>;
-  formState: FormState<FieldValues>;
+  errorMessage: string | null;
 }
 
 export function RecoverFromSecretPhrasePageContent({
   register,
-  formState: { errors }
+  errorMessage
 }: RecoverFromSecretPhrasePageContentProps) {
   const { t } = useTranslation();
   return (
@@ -38,8 +38,8 @@ export function RecoverFromSecretPhrasePageContent({
         <TextArea
           rows={6}
           {...register('phrase')}
-          error={!!errors.phrase}
-          validationText={errors.phrase?.message}
+          error={!!errorMessage}
+          validationText={errorMessage}
         />
       </InputsContainer>
     </TabPageContainer>
