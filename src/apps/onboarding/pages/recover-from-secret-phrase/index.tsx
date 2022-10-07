@@ -39,7 +39,7 @@ export function RecoverFromSecretPhrasePage() {
             'It could be you’ve made a mistake while entering it. Please try again.'
           ),
           errorPrimaryButtonLabel: t('Try again'),
-          errorRedirectPath: RouterPath.CreateSecretPhrase
+          errorRedirectPath: RouterPath.RecoverFromSecretPhrase
         }
       });
     }
