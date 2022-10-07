@@ -83,7 +83,7 @@ const WordListContainer = styled(FlexRow)`
 interface RenderHeaderProps {
   phrase: string[];
   hiddenWordIndexes: number[];
-  disabledWordIndexes: number[];
+  disabledHiddenWordIndexes: number[];
   onHiddenWordClick: (index: number) => void;
 }
 
@@ -114,8 +114,12 @@ export function SecretPhraseWordsView({
   const [isBlurred, setIsBlurred] = useState(true);
   const [hiddenWordIndexes, setHiddenWordIndexes] = useState<number[]>([]);
   const [partialPhrase, setPartialPhrase] = useState<PartialPhraseArray>([]);
-  const [disabledWordIndexes, setDisabledWordIndexes] = useState<number[]>([]);
-  const [selectedWordIndexes, setSelectedWordIndexes] = useState<number[]>([]);
+  const [disabledHiddenWordIndexes, setDisabledHiddenWordIndexes] = useState<
+    number[]
+  >([]);
+  const [selectedHiddenWordIndexes, setSelectedHiddenWordIndexes] = useState<
+    number[]
+  >([]);
 
   useEffect(() => {
     const { hiddenWordIndexes, partialPhrase } = buildWordsCollection(phrase);
@@ -158,14 +162,17 @@ export function SecretPhraseWordsView({
       );
     });
 
-    setSelectedWordIndexes(prevIndexes => {
+    setSelectedHiddenWordIndexes(prevIndexes => {
       const sortedPartialPhrase = [...hiddenWordIndexes].sort((a, b) =>
         a < b ? -1 : 1
       );
-      return [...prevIndexes, sortedPartialPhrase[selectedWordIndexes.length]];
+      return [
+        ...prevIndexes,
+        sortedPartialPhrase[selectedHiddenWordIndexes.length]
+      ];
     });
 
-    setDisabledWordIndexes(prevSelectedWordIndexes => [
+    setDisabledHiddenWordIndexes(prevSelectedWordIndexes => [
       ...prevSelectedWordIndexes,
       index
     ]);
@@ -178,7 +185,7 @@ export function SecretPhraseWordsView({
           {renderHeader({
             phrase,
             hiddenWordIndexes,
-            disabledWordIndexes,
+            disabledHiddenWordIndexes,
             onHiddenWordClick
           })}
         </HeaderContainer>
@@ -207,7 +214,7 @@ export function SecretPhraseWordsView({
                 selected={
                   confirmationMode &&
                   word != null &&
-                  selectedWordIndexes.includes(index)
+                  selectedHiddenWordIndexes.includes(index)
                 }
               />
             );
