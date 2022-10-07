@@ -83,7 +83,7 @@ const WordListContainer = styled(FlexRow)`
 interface RenderHeaderProps {
   phrase: string[];
   hiddenWordIndexes: number[];
-  disabledHiddenWordIndexes: number[];
+  selectedHiddenWordIndexes: number[];
   onHiddenWordClick: (index: number) => void;
 }
 
@@ -114,9 +114,6 @@ export function SecretPhraseWordsView({
   const [isBlurred, setIsBlurred] = useState(true);
   const [hiddenWordIndexes, setHiddenWordIndexes] = useState<number[]>([]);
   const [partialPhrase, setPartialPhrase] = useState<PartialPhraseArray>([]);
-  const [disabledHiddenWordIndexes, setDisabledHiddenWordIndexes] = useState<
-    number[]
-  >([]);
   const [selectedHiddenWordIndexes, setSelectedHiddenWordIndexes] = useState<
     number[]
   >([]);
@@ -162,17 +159,7 @@ export function SecretPhraseWordsView({
       );
     });
 
-    setSelectedHiddenWordIndexes(prevIndexes => {
-      const sortedPartialPhrase = [...hiddenWordIndexes].sort((a, b) =>
-        a < b ? -1 : 1
-      );
-      return [
-        ...prevIndexes,
-        sortedPartialPhrase[selectedHiddenWordIndexes.length]
-      ];
-    });
-
-    setDisabledHiddenWordIndexes(prevSelectedWordIndexes => [
+    setSelectedHiddenWordIndexes(prevSelectedWordIndexes => [
       ...prevSelectedWordIndexes,
       index
     ]);
@@ -185,7 +172,7 @@ export function SecretPhraseWordsView({
           {renderHeader({
             phrase,
             hiddenWordIndexes,
-            disabledHiddenWordIndexes,
+            selectedHiddenWordIndexes,
             onHiddenWordClick
           })}
         </HeaderContainer>
@@ -213,8 +200,8 @@ export function SecretPhraseWordsView({
                 index={index}
                 selected={
                   confirmationMode &&
-                  word != null &&
-                  selectedHiddenWordIndexes.includes(index)
+                  hiddenWordIndexes.includes(index) &&
+                  partialPhrase[index] != null
                 }
               />
             );

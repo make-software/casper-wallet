@@ -18,14 +18,14 @@ const WordPickerContainer = styled(FlexRow)`
 interface WordPickerProps {
   phrase: string[];
   hiddenWordIndexes: number[];
-  disabledHiddenWordIndexes: number[];
+  selectedHiddenWordIndexes: number[];
   onHiddenWordClick: (index: number) => void;
 }
 
 export function WordPicker({
   phrase,
   hiddenWordIndexes,
-  disabledHiddenWordIndexes,
+  selectedHiddenWordIndexes,
   onHiddenWordClick
 }: WordPickerProps) {
   return (
@@ -37,7 +37,7 @@ export function WordPicker({
           index={wordIndex}
           hideIndex
           onHiddenWordClick={onHiddenWordClick}
-          disabled={disabledHiddenWordIndexes.includes(wordIndex)}
+          disabled={selectedHiddenWordIndexes.includes(wordIndex)}
         />
       ))}
     </WordPickerContainer>

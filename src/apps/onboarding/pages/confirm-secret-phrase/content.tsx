@@ -42,13 +42,13 @@ export function ConfirmSecretPhrasePageContent({
         renderHeader={({
           phrase,
           hiddenWordIndexes,
-          disabledHiddenWordIndexes,
+          selectedHiddenWordIndexes,
           onHiddenWordClick
         }) => (
           <WordPicker
             phrase={phrase}
             hiddenWordIndexes={hiddenWordIndexes}
-            disabledHiddenWordIndexes={disabledHiddenWordIndexes}
+            selectedHiddenWordIndexes={selectedHiddenWordIndexes}
             onHiddenWordClick={onHiddenWordClick}
           />
         )}
