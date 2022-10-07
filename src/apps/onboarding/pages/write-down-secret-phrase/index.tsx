@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { Navigate } from 'react-router-dom';
 
 import {
   LayoutTab,
@@ -25,8 +26,7 @@ export function WriteDownSecretPhrasePage({
   const navigate = useTypedNavigate();
 
   if (phrase == null) {
-    // Maybe will be better to do some redirect to page which will set up the phrase
-    throw new Error("Mnemonic phrase didn't passed");
+    return <Navigate to={RouterPath.Welcome} />;
   }
 
   return (
