@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
 import { RouterPath } from '@src/apps/onboarding/router';
@@ -14,7 +14,23 @@ import { ConfirmSecretPhraseSuccessPage } from '@src/apps/onboarding/pages/confi
 import { OnboardingSuccessPage } from '@src/apps/onboarding/pages/onboarding-success';
 import { OnboardingErrorPage } from '@src/apps/onboarding/pages/onboarding-error';
 
+interface FormState {
+  phrase: string[] | null;
+}
+
+export type SetFormState = (name: keyof FormState, value: any) => void;
+
 export function AppRouter() {
+  const [onboardingFormState, setOnboardingFormState] = useState<FormState>({
+    phrase: null
+  });
+
+  const setFormState: SetFormState = (name, value) =>
+    setOnboardingFormState(prevOnboardingFormState => ({
+      ...prevOnboardingFormState,
+      [name]: value
+    }));
+
   return (
     <HashRouter>
       <Routes>
@@ -33,15 +49,21 @@ export function AppRouter() {
         />
         <Route
           path={RouterPath.CreateSecretPhraseConfirmation}
-          element={<CreateSecretPhraseConfirmationPage />}
+          element={
+            <CreateSecretPhraseConfirmationPage setFormState={setFormState} />
+          }
         />
         <Route
           path={RouterPath.WriteDownSecretPhrase}
-          element={<WriteDownSecretPhrasePage />}
+          element={
+            <WriteDownSecretPhrasePage phrase={onboardingFormState.phrase} />
+          }
         />
         <Route
           path={RouterPath.ConfirmSecretPhrase}
-          element={<ConfirmSecretPhrasePage />}
+          element={
+            <ConfirmSecretPhrasePage phrase={onboardingFormState.phrase} />
+          }
         />
         <Route
           path={RouterPath.ConfirmSecretPhraseSuccess}

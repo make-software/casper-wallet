@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import styled, { css } from 'styled-components';
 
@@ -11,11 +11,8 @@ import {
 import { SvgIcon, Typography, hexToRGBA } from '@libs/ui';
 
 import { WordTag } from '../word-tag';
-
-import {
-  mockedMnemonicPhraseConfirmation,
-  mockedRemovedWordsFromMnemonicPhrase
-} from '@src/apps/onboarding/mockedData';
+import { PartialPhraseArray } from './types';
+import { buildWordsCollection } from './utils';
 
 const allCornersBorderRadius = css`
   border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
@@ -84,8 +81,10 @@ const WordListContainer = styled(FlexRow)`
 `;
 
 interface RenderHeaderProps {
-  removedWords: string[];
-  onRemovedWordClick: (value: string) => void;
+  phrase: string[];
+  hiddenWordIndexes: number[];
+  selectedHiddenWordIndexes: number[];
+  onHiddenWordClick: (index: number) => void;
 }
 
 interface RenderFooterProps {
@@ -95,6 +94,8 @@ interface RenderFooterProps {
 interface SecretPhraseWordsViewProps {
   phrase: string[];
   confirmationMode?: boolean;
+  setIsFormValid?: Dispatch<SetStateAction<boolean>>;
+  setIsConfirmationSuccess?: Dispatch<SetStateAction<boolean>>;
   renderHeader?: (props: RenderHeaderProps) => JSX.Element;
   renderFooter?: (props: RenderFooterProps) => JSX.Element;
 }
@@ -103,23 +104,76 @@ export function SecretPhraseWordsView({
   phrase,
   confirmationMode,
   renderHeader,
-  renderFooter
+  renderFooter,
+  setIsFormValid,
+  setIsConfirmationSuccess
 }: SecretPhraseWordsViewProps) {
-  const { t } = useTranslation();
-  const [phraseConfirmation] = useState<(string | null)[]>(
-    mockedMnemonicPhraseConfirmation
-  );
-  const [isBlurred, setIsBlurred] = useState(true);
+  const secretPhraseString = phrase.map(word => word).join(' ');
 
-  const secretPhraseForCopy = phrase.map(word => word).join(' ');
+  const { t } = useTranslation();
+  const [isBlurred, setIsBlurred] = useState(true);
+  const [hiddenWordIndexes, setHiddenWordIndexes] = useState<number[]>([]);
+  const [partialPhrase, setPartialPhrase] = useState<PartialPhraseArray>([]);
+  const [selectedHiddenWordIndexes, setSelectedHiddenWordIndexes] = useState<
+    number[]
+  >([]);
+
+  useEffect(() => {
+    const { hiddenWordIndexes, partialPhrase } = buildWordsCollection(phrase);
+    setPartialPhrase(partialPhrase);
+    setHiddenWordIndexes(hiddenWordIndexes);
+  }, [phrase]);
+
+  useEffect(() => {
+    if (
+      !confirmationMode ||
+      setIsFormValid == null ||
+      setIsConfirmationSuccess == null
+    ) {
+      return;
+    }
+
+    const isFormValid = !partialPhrase.includes(null);
+    setIsFormValid(isFormValid);
+
+    if (isFormValid) {
+      const enteredPhraseString = partialPhrase.join(' ');
+      setIsConfirmationSuccess(secretPhraseString === enteredPhraseString);
+    }
+  }, [
+    partialPhrase,
+    secretPhraseString,
+    confirmationMode,
+    setIsFormValid,
+    setIsConfirmationSuccess
+  ]);
+
+  const onHiddenWordClick = (index: number): void => {
+    setPartialPhrase(prevPartialPhrase => {
+      const firstHiddenWordIndex = partialPhrase.findIndex(
+        word => word === null
+      );
+
+      return prevPartialPhrase.map((word, wordIndex) =>
+        wordIndex === firstHiddenWordIndex ? phrase[index] : word
+      );
+    });
+
+    setSelectedHiddenWordIndexes(prevSelectedWordIndexes => [
+      ...prevSelectedWordIndexes,
+      index
+    ]);
+  };
 
   return (
     <SecretPhraseWordsViewContainer>
       {confirmationMode && renderHeader != null && (
         <HeaderContainer>
           {renderHeader({
-            removedWords: mockedRemovedWordsFromMnemonicPhrase,
-            onRemovedWordClick: () => {}
+            phrase,
+            hiddenWordIndexes,
+            selectedHiddenWordIndexes,
+            onHiddenWordClick
           })}
         </HeaderContainer>
       )}
@@ -138,19 +192,24 @@ export function SecretPhraseWordsView({
           </BlurredSecretPhraseWordsViewOverlayContainer>
         )}
         <WordListContainer>
-          {(confirmationMode ? phraseConfirmation : phrase).map(
-            (word, index) => (
+          {(confirmationMode ? partialPhrase : phrase).map((word, index) => {
+            return (
               <WordTag
                 key={`${index}-${word}`}
                 value={word}
-                index={index + 1}
+                index={index}
+                selected={
+                  confirmationMode &&
+                  hiddenWordIndexes.includes(index) &&
+                  partialPhrase[index] != null
+                }
               />
-            )
-          )}
+            );
+          })}
         </WordListContainer>
         {renderFooter != null && (
           <FooterContainer>
-            {renderFooter({ secretPhraseForCopy })}
+            {renderFooter({ secretPhraseForCopy: secretPhraseString })}
           </FooterContainer>
         )}
       </WordListAndFooterContainer>

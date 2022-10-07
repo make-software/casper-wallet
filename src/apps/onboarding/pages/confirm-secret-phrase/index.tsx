@@ -1,35 +1,67 @@
-import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import React, { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
+  HeaderSubmenuBarNavLink,
   LayoutTab,
-  TabFooterContainer,
-  HeaderSubmenuBarNavLink
+  TabFooterContainer
 } from '@libs/layout';
 import { Button } from '@libs/ui';
 
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { mockedMnemonicPhrase } from '@src/apps/onboarding/mockedData';
 
 import { ConfirmSecretPhrasePageContent } from './content';
 
-export function ConfirmSecretPhrasePage() {
-  const navigate = useTypedNavigate();
+interface ConfirmSecretPhrasePageProps {
+  phrase: string[] | null;
+}
+
+export function ConfirmSecretPhrasePage({
+  phrase
+}: ConfirmSecretPhrasePageProps) {
   const { t } = useTranslation();
+  const navigate = useTypedNavigate();
+
+  const [isConfirmationSuccess, setIsConfirmationSuccess] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  if (phrase == null) {
+    // Maybe will be better to do some redirect to page which will set up the phrase
+    throw new Error("Mnemonic phrase didn't passed");
+  }
+
+  function handleSubmit() {
+    if (isConfirmationSuccess) {
+      navigate(RouterPath.ConfirmSecretPhraseSuccess);
+    } else {
+      navigate(RouterPath.OnboardingError, {
+        state: {
+          errorHeaderText: t('Ah, that’s not guite a correct secret phrase'),
+          errorContentText: t(
+            'You can start over again. Make sure you save your secret phrase as a text file or write it down somewhere.'
+          ),
+          errorPrimaryButtonLabel: t('Start over again'),
+          errorRedirectPath: RouterPath.CreateSecretPhrase
+        }
+      });
+    }
+  }
 
   return (
     <LayoutTab
       layoutContext="withStepper"
       renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
       renderContent={() => (
-        <ConfirmSecretPhrasePageContent phrase={mockedMnemonicPhrase} />
+        <ConfirmSecretPhrasePageContent
+          phrase={phrase}
+          setIsFormValid={setIsFormValid}
+          setIsConfirmationSuccess={setIsConfirmationSuccess}
+        />
       )}
       renderFooter={() => (
         <TabFooterContainer>
-          <Button
-            onClick={() => navigate(RouterPath.ConfirmSecretPhraseSuccess)}
-          >
+          <Button disabled={!isFormValid} onClick={handleSubmit}>
             <Trans t={t}>Confirm</Trans>
           </Button>
         </TabFooterContainer>

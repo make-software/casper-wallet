@@ -23,7 +23,7 @@ interface CreatePasswordPageContentProps {
 
 export function CreateVaultPasswordPageContent({
   register,
-  formState: { isDirty, errors }
+  formState: { errors }
 }: CreatePasswordPageContentProps) {
   const { t } = useTranslation();
 

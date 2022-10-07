@@ -12,6 +12,10 @@ export function OnboardingErrorPage() {
   const navigate = useTypedNavigate();
   const location = useTypedLocation();
   const state = location.state;
+  const redirectPath =
+    location.state?.errorRedirectPath != null
+      ? location.state.errorRedirectPath
+      : RouterPath.Welcome;
 
   if (state?.errorPrimaryButtonLabel == null) {
     throw new Error('Cannot render ErrorPage: not enough props');
@@ -23,7 +27,7 @@ export function OnboardingErrorPage() {
       renderContent={() => <OnboardingErrorPageContent />}
       renderFooter={() => (
         <TabFooterContainer>
-          <Button onClick={() => navigate(RouterPath.CreateSecretPhrase)}>
+          <Button onClick={() => navigate(redirectPath)}>
             {state.errorPrimaryButtonLabel}
           </Button>
         </TabFooterContainer>

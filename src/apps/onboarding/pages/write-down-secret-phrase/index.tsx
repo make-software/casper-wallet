@@ -10,22 +10,30 @@ import { Button, Checkbox } from '@libs/ui';
 
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { mockedMnemonicPhrase } from '@src/apps/onboarding/mockedData';
 
 import { WriteDownSecretPhrasePageContent } from './content';
 
-export function WriteDownSecretPhrasePage() {
+interface WriteDownSecretPhrasePageProps {
+  phrase: string[] | null;
+}
+
+export function WriteDownSecretPhrasePage({
+  phrase
+}: WriteDownSecretPhrasePageProps) {
   const [isChecked, setIsChecked] = useState(false);
-  const navigate = useTypedNavigate();
   const { t } = useTranslation();
+  const navigate = useTypedNavigate();
+
+  if (phrase == null) {
+    // Maybe will be better to do some redirect to page which will set up the phrase
+    throw new Error("Mnemonic phrase didn't passed");
+  }
 
   return (
     <LayoutTab
       layoutContext="withStepper"
       renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
-      renderContent={() => (
-        <WriteDownSecretPhrasePageContent phrase={mockedMnemonicPhrase} />
-      )}
+      renderContent={() => <WriteDownSecretPhrasePageContent phrase={phrase} />}
       renderFooter={() => (
         <TabFooterContainer>
           <Checkbox

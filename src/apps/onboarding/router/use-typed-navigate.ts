@@ -1,4 +1,5 @@
 import { To, useNavigate } from 'react-router-dom';
+import { LocationState } from './types';
 
 export function useTypedNavigate() {
   const navigate = useNavigate();
@@ -8,6 +9,7 @@ export function useTypedNavigate() {
       to: To,
       options?: {
         replace?: boolean;
+        state?: LocationState;
       }
     ): void;
     (delta: number): void;
