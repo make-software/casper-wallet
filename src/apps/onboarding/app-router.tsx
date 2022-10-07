@@ -13,16 +13,17 @@ import { ConfirmSecretPhrasePage } from '@src/apps/onboarding/pages/confirm-secr
 import { ConfirmSecretPhraseSuccessPage } from '@src/apps/onboarding/pages/confirm-secret-phrase-success';
 import { OnboardingSuccessPage } from '@src/apps/onboarding/pages/onboarding-success';
 import { OnboardingErrorPage } from '@src/apps/onboarding/pages/onboarding-error';
+import { SecretPhrase } from '@src/libs/crypto';
 
-interface FormState {
-  phrase: string[] | null;
+export interface FormState {
+  secretPhrase: SecretPhrase | null;
 }
 
 export type SetFormState = (name: keyof FormState, value: any) => void;
 
 export function AppRouter() {
   const [onboardingFormState, setOnboardingFormState] = useState<FormState>({
-    phrase: null
+    secretPhrase: null
   });
 
   const setFormState: SetFormState = (name, value) =>
@@ -50,19 +51,26 @@ export function AppRouter() {
         <Route
           path={RouterPath.CreateSecretPhraseConfirmation}
           element={
-            <CreateSecretPhraseConfirmationPage setFormState={setFormState} />
+            <CreateSecretPhraseConfirmationPage
+              formState={onboardingFormState}
+              setFormState={setFormState}
+            />
           }
         />
         <Route
           path={RouterPath.WriteDownSecretPhrase}
           element={
-            <WriteDownSecretPhrasePage phrase={onboardingFormState.phrase} />
+            <WriteDownSecretPhrasePage
+              phrase={onboardingFormState.secretPhrase}
+            />
           }
         />
         <Route
           path={RouterPath.ConfirmSecretPhrase}
           element={
-            <ConfirmSecretPhrasePage phrase={onboardingFormState.phrase} />
+            <ConfirmSecretPhrasePage
+              phrase={onboardingFormState.secretPhrase}
+            />
           }
         />
         <Route
