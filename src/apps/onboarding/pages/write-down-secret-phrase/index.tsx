@@ -8,22 +8,26 @@ import {
 } from '@libs/layout';
 import { Button, Checkbox } from '@libs/ui';
 
-import { RouterPath, useTypedLocation } from '@src/apps/onboarding/router';
+import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 
 import { WriteDownSecretPhrasePageContent } from './content';
 
-export function WriteDownSecretPhrasePage() {
+interface WriteDownSecretPhrasePageProps {
+  phrase: string[] | null;
+}
+
+export function WriteDownSecretPhrasePage({
+  phrase
+}: WriteDownSecretPhrasePageProps) {
   const [isChecked, setIsChecked] = useState(false);
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
-  const location = useTypedLocation();
 
-  if (location.state?.phrase == null) {
+  if (phrase == null) {
+    // Maybe will be better to do some redirect to page which will set up the phrase
     throw new Error("Mnemonic phrase didn't passed");
   }
-
-  const { phrase } = location.state;
 
   return (
     <LayoutTab
@@ -41,11 +45,7 @@ export function WriteDownSecretPhrasePage() {
           />
           <Button
             disabled={!isChecked}
-            onClick={() =>
-              navigate(RouterPath.ConfirmSecretPhrase, {
-                state: { phrase }
-              })
-            }
+            onClick={() => navigate(RouterPath.ConfirmSecretPhrase)}
           >
             <Trans t={t}>Next</Trans>
           </Button>

@@ -1,31 +1,35 @@
 import React, { useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
+  HeaderSubmenuBarNavLink,
   LayoutTab,
-  TabFooterContainer,
-  HeaderSubmenuBarNavLink
+  TabFooterContainer
 } from '@libs/layout';
 import { Button } from '@libs/ui';
 
-import { RouterPath, useTypedLocation } from '@src/apps/onboarding/router';
+import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 
 import { ConfirmSecretPhrasePageContent } from './content';
 
-export function ConfirmSecretPhrasePage() {
+interface ConfirmSecretPhrasePageProps {
+  phrase: string[] | null;
+}
+
+export function ConfirmSecretPhrasePage({
+  phrase
+}: ConfirmSecretPhrasePageProps) {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
-  const location = useTypedLocation();
-
-  if (location.state?.phrase == null) {
-    throw new Error("Mnemonic phrase didn't passed");
-  }
-
-  const { phrase } = location.state;
 
   const [isConfirmationSuccess, setIsConfirmationSuccess] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
+
+  if (phrase == null) {
+    // Maybe will be better to do some redirect to page which will set up the phrase
+    throw new Error("Mnemonic phrase didn't passed");
+  }
 
   function handleSubmit() {
     if (isConfirmationSuccess) {
@@ -37,7 +41,8 @@ export function ConfirmSecretPhrasePage() {
           errorContentText: t(
             'You can start over again. Make sure you save your secret phrase as a text file or write it down somewhere.'
           ),
-          errorPrimaryButtonLabel: t('Start over again')
+          errorPrimaryButtonLabel: t('Start over again'),
+          errorRedirectPath: RouterPath.CreateSecretPhrase
         }
       });
     }

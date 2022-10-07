@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import {
@@ -13,8 +13,15 @@ import { RouterPath } from '@src/apps/onboarding/router';
 import { mockedMnemonicPhrase } from '@src/apps/onboarding/mocked-data';
 
 import { CreateSecretPhraseConfirmationPageContent } from './content';
+import { FormState } from '@src/apps/onboarding/app-router';
 
-export function CreateSecretPhraseConfirmationPage() {
+interface CreateSecretPhraseConfirmationPageProps {
+  setFormState: Dispatch<SetStateAction<FormState>>;
+}
+
+export function CreateSecretPhraseConfirmationPage({
+  setFormState
+}: CreateSecretPhraseConfirmationPageProps) {
   const [isChecked, setIsChecked] = useState(false);
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -36,11 +43,14 @@ export function CreateSecretPhraseConfirmationPage() {
           />
           <Button
             disabled={!isChecked}
-            onClick={() =>
-              navigate(RouterPath.WriteDownSecretPhrase, {
-                state: { phrase: mockedMnemonicPhrase }
-              })
-            }
+            onClick={() => {
+              setFormState(prevFormState => ({
+                ...prevFormState,
+                phrase: mockedMnemonicPhrase
+              }));
+
+              navigate(RouterPath.WriteDownSecretPhrase);
+            }}
           >
             <Trans t={t}>Next</Trans>
           </Button>
