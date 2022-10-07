@@ -39,7 +39,7 @@ export function Stepper({ steps, step }: StepperProps) {
   return (
     <StepperContainer>
       {createStepsArray(steps).map(stepNumber => (
-        <Step isCurrentStep={stepNumber === step} />
+        <Step key={stepNumber} isCurrentStep={stepNumber === step} />
       ))}
     </StepperContainer>
   );
