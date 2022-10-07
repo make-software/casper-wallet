@@ -26,7 +26,7 @@ export function WriteDownSecretPhrasePage({
   const navigate = useTypedNavigate();
 
   if (phrase == null) {
-    return <Navigate to={RouterPath.Welcome} />;
+    return <Navigate to={RouterPath.CreateSecretPhrase} />;
   }
 
   return (

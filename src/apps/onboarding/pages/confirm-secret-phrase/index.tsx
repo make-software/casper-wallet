@@ -28,7 +28,7 @@ export function ConfirmSecretPhrasePage({
   const [isFormValid, setIsFormValid] = useState(false);
 
   if (phrase == null) {
-    return <Navigate to={RouterPath.Welcome} />;
+    return <Navigate to={RouterPath.CreateSecretPhrase} />;
   }
 
   function handleSubmit() {
