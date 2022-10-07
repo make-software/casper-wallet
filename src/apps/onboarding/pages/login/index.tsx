@@ -23,8 +23,10 @@ export function LoginPage({ setIsLoggedIn }: LoginPageProps) {
   } = useLoginForm();
 
   function onSubmit() {
-    setSessionLoginStatus(true);
-    setIsLoggedIn(true);
+    setSessionLoginStatus({
+      loginStatus: true,
+      setIsLoggedIn
+    });
     navigate(RouterPath.CreateSecretPhrase);
   }
 

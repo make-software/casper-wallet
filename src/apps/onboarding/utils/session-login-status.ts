@@ -1,3 +1,5 @@
+import { Dispatch, SetStateAction } from 'react';
+
 const onboardingSessionLoginStatusFieldName = 'onboarding-session-login-status';
 
 export function getSessionLoginStatus(): boolean {
@@ -19,15 +21,23 @@ export function getSessionLoginStatus(): boolean {
   }
 }
 
-export function setSessionLoginStatus(
-  onboardingSessionLoginStatus: boolean
-): void {
-  const onboardingSessionLoginStatusString = JSON.stringify(
-    onboardingSessionLoginStatus
-  );
+interface SetSessionLoginStatusProps {
+  loginStatus: boolean;
+  setIsLoggedIn?: Dispatch<SetStateAction<boolean>>;
+}
+
+export function setSessionLoginStatus({
+  loginStatus,
+  setIsLoggedIn
+}: SetSessionLoginStatusProps): void {
+  const onboardingSessionLoginStatusString = JSON.stringify(loginStatus);
 
   sessionStorage.setItem(
     onboardingSessionLoginStatusFieldName,
     onboardingSessionLoginStatusString
   );
+
+  if (setIsLoggedIn != null) {
+    setIsLoggedIn(loginStatus);
+  }
 }

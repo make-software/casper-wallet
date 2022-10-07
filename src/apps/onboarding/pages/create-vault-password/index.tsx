@@ -36,8 +36,10 @@ export function CreateVaultPasswordPage({
   const { isDirty } = formState;
 
   function onSubmit(data: FieldValues) {
-    setSessionLoginStatus(true);
-    setIsLoggedIn(true);
+    setSessionLoginStatus({
+      loginStatus: true,
+      setIsLoggedIn
+    });
     dispatchToMainStore(vaultCreated({ password: data.password }));
     navigate(RouterPath.CreateSecretPhrase);
   }
