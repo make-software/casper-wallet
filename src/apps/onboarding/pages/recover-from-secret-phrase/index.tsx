@@ -53,7 +53,7 @@ export function RecoverFromSecretPhrasePage() {
         renderContent={() => (
           <RecoverFromSecretPhrasePageContent
             register={register}
-            errorMessage={formState.errors?.phrase}
+            errorMessage={formState.errors?.phrase?.message}
           />
         )}
         renderFooter={() => (

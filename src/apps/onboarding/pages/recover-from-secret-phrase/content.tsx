@@ -7,7 +7,7 @@ import {
   TabTextContainer,
   InputsContainer
 } from '@libs/layout';
-import { TextArea, Typography } from '@libs/ui';
+import { FormField, FormFieldStatus, TextArea, Typography } from '@libs/ui';
 
 interface RecoverFromSecretPhrasePageContentProps {
   register: UseFormRegister<FieldValues>;
@@ -35,12 +35,12 @@ export function RecoverFromSecretPhrasePageContent({
         </Typography>
       </TabTextContainer>
       <InputsContainer>
-        <TextArea
-          rows={6}
-          {...register('phrase')}
-          error={!!errorMessage}
-          validationText={errorMessage}
-        />
+        <FormField
+          status={errorMessage ? FormFieldStatus.Error : undefined}
+          statusText={errorMessage}
+        >
+          <TextArea rows={6} {...register('phrase')} />
+        </FormField>
       </InputsContainer>
     </TabPageContainer>
   );
