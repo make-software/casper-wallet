@@ -10,16 +10,18 @@ import { Button, Checkbox } from '@libs/ui';
 
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { RouterPath } from '@src/apps/onboarding/router';
-import { mockedMnemonicPhrase } from '@src/apps/onboarding/mocked-data';
-import { SetFormState } from '@src/apps/onboarding/app-router';
+import { FormState, SetFormState } from '@src/apps/onboarding/app-router';
 
 import { CreateSecretPhraseConfirmationPageContent } from './content';
+import { generateSecretPhrase } from '@src/libs/crypto';
 
 interface CreateSecretPhraseConfirmationPageProps {
+  formState: FormState;
   setFormState: SetFormState;
 }
 
 export function CreateSecretPhraseConfirmationPage({
+  formState,
   setFormState
 }: CreateSecretPhraseConfirmationPageProps) {
   const [isChecked, setIsChecked] = useState(false);
@@ -44,7 +46,7 @@ export function CreateSecretPhraseConfirmationPage({
           <Button
             disabled={!isChecked}
             onClick={() => {
-              setFormState('phrase', mockedMnemonicPhrase);
+              setFormState('secretPhrase', generateSecretPhrase());
               navigate(RouterPath.WriteDownSecretPhrase);
             }}
           >
