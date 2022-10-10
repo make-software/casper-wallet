@@ -34,6 +34,10 @@ import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-wit
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
+export const HomePageContentContainer = styled(ContentContainer)`
+  padding-bottom: ${({ theme }) => theme.padding[1.2]};
+`;
+
 // Account info
 
 const fullWidthAndMarginTop = css`
@@ -101,7 +105,7 @@ export function HomePageContent() {
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
 
   return (
-    <ContentContainer>
+    <HomePageContentContainer>
       {activeAccount && (
         <PageTile>
           <ConnectionStatusBadge
@@ -168,7 +172,7 @@ export function HomePageContent() {
           </ButtonsContainer>
         </PageTile>
       )}
-    </ContentContainer>
+    </HomePageContentContainer>
   );
 }
 
