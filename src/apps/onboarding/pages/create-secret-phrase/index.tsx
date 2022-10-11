@@ -25,7 +25,7 @@ export function CreateSecretPhrasePage() {
       renderHeader={() => (
         <TabHeaderContainer>
           <HeaderSubmenuBarNavLink linkType="back" />
-          <Stepper steps={6} step={2} />
+          <Stepper length={6} activeIndex={1} />
         </TabHeaderContainer>
       )}
       renderContent={() => <CreateSecretPhraseContent />}

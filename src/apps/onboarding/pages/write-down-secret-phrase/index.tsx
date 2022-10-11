@@ -37,7 +37,7 @@ export function WriteDownSecretPhrasePage({
       renderHeader={() => (
         <TabHeaderContainer>
           <HeaderSubmenuBarNavLink linkType="back" />
-          <Stepper steps={6} step={4} />
+          <Stepper length={6} activeIndex={3} />
         </TabHeaderContainer>
       )}
       renderContent={() => <WriteDownSecretPhrasePageContent phrase={phrase} />}

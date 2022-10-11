@@ -13,33 +13,33 @@ const StepperContainer = styled(FlexRow)`
 `;
 
 interface StepProps {
-  isCurrentStep: boolean;
+  isActiveStep: boolean;
 }
 
 const Step = styled.div<StepProps>`
   width: 8px;
   height: 8px;
 
-  background-color: ${({ theme, isCurrentStep }) =>
-    isCurrentStep ? theme.color.fillRed : theme.color.fillSecondary};
+  background-color: ${({ theme, isActiveStep }) =>
+    isActiveStep ? theme.color.fillRed : theme.color.fillSecondary};
 
   border-radius: ${({ theme }) => theme.borderRadius.eight}px;
 `;
 
-function createStepsArray(countOfSteps: number): number[] {
-  return Array.from({ length: countOfSteps }, (_, index) => index + 1);
+function createStepsArray(length: number): number[] {
+  return Array.from({ length }, (_, index) => index);
 }
 
 interface StepperProps {
-  steps: number;
-  step: number;
+  length: number;
+  activeIndex: number;
 }
 
-export function Stepper({ steps, step }: StepperProps) {
+export function Stepper({ length, activeIndex }: StepperProps) {
   return (
     <StepperContainer>
-      {createStepsArray(steps).map(stepNumber => (
-        <Step key={stepNumber} isCurrentStep={stepNumber === step} />
+      {createStepsArray(length).map(stepNumber => (
+        <Step key={stepNumber} isActiveStep={stepNumber === activeIndex} />
       ))}
     </StepperContainer>
   );

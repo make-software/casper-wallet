@@ -16,7 +16,7 @@ import {
   BackgroundEvent,
   PopupState
 } from '@background/background-events';
-import { connectWindowInit } from '@background/redux/windowManagement/actions';
+import { popupWindowInit } from '@background/redux/windowManagement/actions';
 import { createMainStoreReplica } from '@background/redux/utils';
 
 const Tree = () => {
@@ -30,7 +30,7 @@ const Tree = () => {
       }
     }
     browser.runtime.onMessage.addListener(handleBackgroundMessage);
-    browser.runtime.sendMessage(connectWindowInit());
+    browser.runtime.sendMessage(popupWindowInit());
 
     return () => {
       browser.runtime.onMessage.removeListener(handleBackgroundMessage);

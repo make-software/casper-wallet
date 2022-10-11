@@ -56,7 +56,7 @@ export function ConfirmSecretPhrasePage({
       renderHeader={() => (
         <TabHeaderContainer>
           <HeaderSubmenuBarNavLink linkType="back" />
-          <Stepper steps={6} step={5} />
+          <Stepper length={6} activeIndex={4} />
         </TabHeaderContainer>
       )}
       renderContent={() => (

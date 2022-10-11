@@ -54,7 +54,7 @@ export function RecoverFromSecretPhrasePage() {
         renderHeader={() => (
           <TabHeaderContainer>
             <HeaderSubmenuBarNavLink linkType="back" />
-            <Stepper steps={3} step={3} />
+            <Stepper length={3} activeIndex={2} />
           </TabHeaderContainer>
         )}
         renderContent={() => (

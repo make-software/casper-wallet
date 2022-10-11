@@ -51,7 +51,7 @@ export function CreateVaultPasswordPage({
         renderHeader={() => (
           <TabHeaderContainer>
             <HeaderSubmenuBarNavLink linkType="back" />
-            <Stepper steps={6} step={1} />
+            <Stepper length={6} activeIndex={0} />
           </TabHeaderContainer>
         )}
         renderContent={() => (
