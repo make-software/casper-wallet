@@ -83,7 +83,8 @@ export const themeConfig = {
     hundred: 100
   },
   padding: {
-    1.6: '1.6rem'
+    1.6: '1.6rem',
+    1.2: '1.2rem'
   }
 };
 
