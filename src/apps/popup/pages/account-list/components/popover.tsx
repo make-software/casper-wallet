@@ -26,10 +26,9 @@ const PopoverContainer = styled.div<PopoverContainerProps>`
     }
 
     const { top, bottom, height } = domRect;
-    const containerBottomPadding = 16; // theme.padding['1.6']
 
     if (top && bottom) {
-      return bottom + containerBottomPadding >= window.innerHeight - height
+      return bottom >= window.innerHeight - height
         ? `${top - height}px`
         : `${top + popoverOffsetFromChildren}px`;
     }
