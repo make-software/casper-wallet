@@ -14,13 +14,25 @@ const ChildrenContainer = styled(AlignedFlexRow)`
 `;
 
 interface PopoverContainerProps {
-  top?: number;
+  domRect?: DOMRect;
 }
 
 const PopoverContainer = styled.div<PopoverContainerProps>`
   position: absolute;
   right: 16px;
-  top: ${({ top }) => (top ? top + popoverOffsetFromChildren : 0)}px;
+  top: ${({ domRect }) => {
+    if (domRect == null) {
+      return '0px';
+    }
+
+    const { top, bottom, height } = domRect;
+
+    if (top && bottom) {
+      return bottom >= window.innerHeight - height
+        ? `${top - height}px`
+        : `${top + popoverOffsetFromChildren}px`;
+    }
+  }};
 
   z-index: ${({ theme }) => theme.zIndex.dropdown};
 `;
@@ -72,7 +84,7 @@ export function Popover({
         <PopoverPortal>
           <PopoverContainer
             ref={clickAwayRef}
-            top={childrenContainerRef.current?.getBoundingClientRect().top}
+            domRect={childrenContainerRef.current?.getBoundingClientRect()}
           >
             <PopoverItemsContainer>
               {renderMenuItems({ closePopover })}
