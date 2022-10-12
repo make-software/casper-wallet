@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as Yup from 'yup';
 
 import { RouterPath } from '@popup/router';
 
@@ -25,7 +22,8 @@ import {
 
 import { selectVaultPassword } from '@src/background/redux/vault/selectors';
 import { vaultUnlocked } from '@src/background/redux/vault/actions';
-import { dispatchToMainStore } from '../../../../background/redux/utils';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import { useUnlockWalletForm } from '@src/libs/ui/forms/unlock-wallet';
 
 export function UnlockVaultPageContent() {
   const { t } = useTranslation();
@@ -36,19 +34,11 @@ export function UnlockVaultPageContent() {
 
   const vaultPassword = useSelector(selectVaultPassword);
 
-  const errorMessage = t('Password is not correct');
-  const formSchema = Yup.object().shape({
-    password: Yup.string().equals([vaultPassword], errorMessage)
-  });
-
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty }
-  } = useForm({
-    reValidateMode: 'onSubmit',
-    resolver: yupResolver(formSchema)
-  });
+  } = useUnlockWalletForm(vaultPassword);
 
   function handleUnlockVault() {
     dispatchToMainStore(vaultUnlocked());

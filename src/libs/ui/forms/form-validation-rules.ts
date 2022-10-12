@@ -3,13 +3,20 @@ import { useTranslation } from 'react-i18next';
 
 export const minPasswordLength = 12;
 
-export function usePasswordRule() {
+export function useCreatePasswordRule() {
   const { t } = useTranslation();
   const passwordAmountCharactersMessage = t(
     `Should be at least ${minPasswordLength} characters`
   );
 
   return Yup.string().min(minPasswordLength, passwordAmountCharactersMessage);
+}
+
+export function useExpectPasswordRule(expectedPassword: string) {
+  const { t } = useTranslation();
+  const errorMessage = t('Password is not correct');
+
+  return Yup.string().equals([expectedPassword], errorMessage);
 }
 
 export function useConfirmPasswordRule(targetKey: string) {
@@ -27,11 +34,4 @@ export function usePhraseRule() {
     t('There should be 24 words in a valid secret phrase.'),
     value => value != null && value.trim().split(' ').length === 24
   );
-}
-
-export function useUnlockWalletRule(vaultPassword: string) {
-  const { t } = useTranslation();
-  const errorMessage = t('Password is not correct');
-
-  return Yup.string().equals([vaultPassword], errorMessage);
 }

@@ -3,15 +3,15 @@ import { useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 
-import { useUnlockWalletRule } from './form-validation-rules';
+import { useExpectPasswordRule } from './form-validation-rules';
 
-export function useUnlockWalletForm(vaultPassword: string) {
+export function useUnlockWalletForm(expectedPassword: string) {
   const formSchema = Yup.object().shape({
-    password: useUnlockWalletRule(vaultPassword)
+    password: useExpectPasswordRule(expectedPassword)
   });
 
   const formOptions: UseFormProps = {
-    reValidateMode: 'onChange',
+    reValidateMode: 'onSubmit',
     resolver: yupResolver(formSchema)
   };
 
