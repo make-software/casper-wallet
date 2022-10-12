@@ -28,12 +28,16 @@ export function CreateSecretPhraseConfirmationPage({
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
+  const handleBack = () => {
+    navigate(RouterPath.CreateSecretPhrase);
+  };
+
   return (
     <LayoutTab
       layoutContext="withStepper"
       renderHeader={() => (
         <TabHeaderContainer>
-          <HeaderSubmenuBarNavLink linkType="back" />
+          <HeaderSubmenuBarNavLink linkType="back" onClick={handleBack} />
           <Stepper length={6} activeIndex={2} />
         </TabHeaderContainer>
       )}

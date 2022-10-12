@@ -76,16 +76,19 @@ export function AppRouter() {
     return (
       <HashRouter>
         <Routes>
-          <Route path={RouterPath.Any} element={<CreateSecretPhrasePage />} />
           <Route
-            path={RouterPath.RecoverFromSecretPhrase}
-            element={<RecoverFromSecretPhrasePage />}
-          />
-          <Route
-            path={RouterPath.CreateSecretPhraseConfirmation}
+            path={RouterPath.Any}
             element={
               <CreateSecretPhraseConfirmationPage setFormState={setFormState} />
             }
+          />
+          <Route
+            path={RouterPath.CreateSecretPhrase}
+            element={<CreateSecretPhrasePage />}
+          />
+          <Route
+            path={RouterPath.RecoverFromSecretPhrase}
+            element={<RecoverFromSecretPhrasePage />}
           />
           <Route
             path={RouterPath.WriteDownSecretPhrase}

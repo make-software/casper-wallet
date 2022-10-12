@@ -37,7 +37,6 @@ export function UnlockWalletPage({ saveIsLoggedIn }: UnlockWalletPageProps) {
 
   function onSubmit() {
     saveIsLoggedIn(true);
-    navigate(RouterPath.CreateSecretPhrase);
   }
 
   return (

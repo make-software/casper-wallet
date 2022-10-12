@@ -20,7 +20,7 @@ export function CreateSecretPhrasePage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  const handleClick = () => {
+  const handleBack = () => {
     dispatchToMainStore(vaultReseted());
     navigate(RouterPath.CreateVaultPassword);
   };
@@ -30,7 +30,7 @@ export function CreateSecretPhrasePage() {
       layoutContext="withStepper"
       renderHeader={() => (
         <TabHeaderContainer>
-          <HeaderSubmenuBarNavLink linkType="back" onClick={handleClick} />
+          <HeaderSubmenuBarNavLink linkType="back" onClick={handleBack} />
           <Stepper length={6} activeIndex={1} />
         </TabHeaderContainer>
       )}

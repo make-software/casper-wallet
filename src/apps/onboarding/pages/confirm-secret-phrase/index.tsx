@@ -32,7 +32,7 @@ export function ConfirmSecretPhrasePage({
   const [isFormValid, setIsFormValid] = useState(false);
 
   if (phrase == null) {
-    return <Navigate to={RouterPath.CreateSecretPhrase} />;
+    return <Navigate to={RouterPath.CreateSecretPhraseConfirmation} />;
   }
 
   function handleSubmit() {
@@ -56,7 +56,7 @@ export function ConfirmSecretPhrasePage({
             'You can start over again. Make sure you save your secret phrase as a text file or write it down somewhere.'
           ),
           errorPrimaryButtonLabel: t('Start over again'),
-          errorRedirectPath: RouterPath.CreateSecretPhrase
+          errorRedirectPath: RouterPath.CreateSecretPhraseConfirmation
         }
       });
     }
