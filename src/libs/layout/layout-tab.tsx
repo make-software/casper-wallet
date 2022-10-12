@@ -34,6 +34,7 @@ const MainContainer = styled.div<ContentContainerProps>`
   border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
 
   height: 100%;
+  width: 100%;
   overflow-y: auto;
 `;
 
