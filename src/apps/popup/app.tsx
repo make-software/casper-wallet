@@ -7,10 +7,8 @@ import { Route, Routes } from 'react-router-dom';
 import { HeaderSubmenuBarNavLink, Layout } from '@libs/layout';
 import { PopupHeader } from '@libs/layout/header';
 
-import { CreateVaultPageContent } from '@popup/pages/create-vault';
 import { HomePageContent, HomePageHeaderSubmenuItems } from '@popup/pages/home';
 import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
-import { NoAccountsPageContent } from '@popup/pages/no-accounts';
 import { ResetVaultPageContent } from '@popup/pages/reset-vault';
 import { TimeoutPageContent } from '@popup/pages/timeout';
 import { UnlockVaultPageContent } from '@popup/pages/unlock-vault';
@@ -80,40 +78,9 @@ function UnlockedRouter() {
   const vaultDoesExists = useSelector(selectVaultDoesExist);
   const vaultHasAccount = useSelector(selectVaultHasAccount);
 
-  if (!vaultDoesExists) {
+  if (!vaultDoesExists || !vaultHasAccount) {
     openOnboardingAppInTab();
-  }
-
-  if (!vaultDoesExists) {
-    return (
-      <Routes>
-        <Route
-          path={RouterPath.Any}
-          element={
-            <Layout
-              Header={<PopupHeader />}
-              Content={<CreateVaultPageContent />}
-            />
-          }
-        />
-      </Routes>
-    );
-  }
-
-  if (!vaultHasAccount) {
-    return (
-      <Routes>
-        <Route
-          path={RouterPath.Any}
-          element={
-            <Layout
-              Header={<PopupHeader withLock />}
-              Content={<NoAccountsPageContent />}
-            />
-          }
-        />
-      </Routes>
-    );
+    return null;
   }
 
   if (state?.showNavigationMenu) {

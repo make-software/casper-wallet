@@ -41,7 +41,7 @@ export function ResetWalletPage() {
             disabled={!isChecked}
             onClick={handleResetVault}
           >
-            <Trans t={t}>Reset wallet</Trans>
+            <Trans t={t}>Start again</Trans>
           </Button>
           <Button onClick={handleCancel} color="secondaryBlue">
             <Trans t={t}>Cancel</Trans>

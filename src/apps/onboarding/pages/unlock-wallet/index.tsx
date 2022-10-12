@@ -59,7 +59,7 @@ export function UnlockWalletPage({ saveIsLoggedIn }: UnlockWalletPageProps) {
               color="secondaryRed"
               onClick={() => navigate(RouterPath.ResetWallet)}
             >
-              <Trans t={t}>Reset wallet</Trans>
+              <Trans t={t}>Start again</Trans>
             </Button>
           </TabFooterContainer>
         )}
