@@ -61,7 +61,7 @@ export function ApproveConnectionContent({
           <SiteFaviconBadge origin={origin} />
           <HeaderTextContent>
             <Typography type="header">
-              <FadedOut>{title}</FadedOut>
+              {title.length > 30 ? <FadedOut>{title}</FadedOut> : title}
             </Typography>
           </HeaderTextContent>
         </HeaderTextContainer>

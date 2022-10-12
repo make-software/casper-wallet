@@ -87,7 +87,11 @@ export function AccountsSelectionContent({
           <SiteFaviconBadge origin={origin} />
           <HeaderTextContent>
             <Typography type="header">
-              <FadedOut>{headerText}</FadedOut>
+              {headerText.length > 30 ? (
+                <FadedOut>{headerText}</FadedOut>
+              ) : (
+                headerText
+              )}
             </Typography>
           </HeaderTextContent>
         </HeaderTextContainer>
