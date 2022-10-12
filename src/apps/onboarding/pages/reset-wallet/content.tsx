@@ -19,7 +19,10 @@ export function ResetWalletPageContent() {
 
       <TabTextContainer>
         <Typography type="body" color="contentSecondary">
-          <Trans t={t}>Your wallet password will be removed.</Trans>
+          <Trans t={t}>
+            You'll be able to set your wallet password again starting the
+            onboarding from the beggining.
+          </Trans>
         </Typography>
       </TabTextContainer>
     </TabPageContainer>

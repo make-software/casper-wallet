@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
-import {
-  LayoutTab,
-  TabHeaderContainer,
-  TabFooterContainer,
-  HeaderSubmenuBarNavLink
-} from '@libs/layout';
+import { LayoutTab, TabFooterContainer } from '@libs/layout';
 import { Button, Checkbox } from '@libs/ui';
 
 import { dispatchToMainStore } from '@background/redux/utils';
@@ -33,11 +28,6 @@ export function ResetWalletPage() {
   return (
     <LayoutTab
       layoutContext="withIllustration"
-      renderHeader={() => (
-        <TabHeaderContainer>
-          <HeaderSubmenuBarNavLink linkType="back" />
-        </TabHeaderContainer>
-      )}
       renderContent={() => <ResetWalletPageContent />}
       renderFooter={() => (
         <TabFooterContainer>
