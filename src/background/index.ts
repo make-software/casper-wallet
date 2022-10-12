@@ -11,6 +11,7 @@ import {
   // REDUX_STORAGE_KEY
 } from '@src/background/redux/utils';
 import {
+  accountCreated,
   accountDisconnected,
   accountImported,
   accountRemoved,
@@ -196,6 +197,7 @@ browser.runtime.onMessage.addListener(
           case getType(vaultReseted):
           case getType(vaultLocked):
           case getType(vaultUnlocked):
+          case getType(accountCreated):
           case getType(accountImported):
           case getType(accountRemoved):
           case getType(accountRenamed):

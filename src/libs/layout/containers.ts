@@ -119,6 +119,15 @@ export const ListItemClickableContainer = styled(SpaceBetweenFlexRow)`
   }
 `;
 
+export const TabHeaderContainer = styled(AlignedFlexRow)`
+  background-color: ${({ theme }) => theme.color.backgroundPrimary};
+
+  height: 56px;
+
+  padding: 16px 20px;
+  position: relative;
+`;
+
 export const TabFooterContainer = styled(FooterButtonsContainer)`
   padding: 24px 32px;
   margin-top: 30px;

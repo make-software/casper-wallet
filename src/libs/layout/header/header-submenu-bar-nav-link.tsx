@@ -22,10 +22,12 @@ export type LinkType =
 
 interface HeaderSubmenuBarNavLinkProps {
   linkType: LinkType;
+  onClick?: () => void;
 }
 
 export function HeaderSubmenuBarNavLink({
-  linkType
+  linkType,
+  onClick
 }: HeaderSubmenuBarNavLinkProps) {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -48,7 +50,13 @@ export function HeaderSubmenuBarNavLink({
       return (
         <NavLink
           label={t('Back')}
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            if (onClick) {
+              onClick();
+            } else {
+              navigate(-1);
+            }
+          }}
           withLeftChevronIcon
         />
       );

@@ -2,19 +2,16 @@ import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
-import {
-  useCreatePasswordRule,
-  useRepeatPasswordRule
-} from '@libs/ui/forms/form-validation-rules';
 
-export function useCreatePasswordForm() {
+import { useExpectPasswordRule } from './form-validation-rules';
+
+export function useUnlockWalletForm(expectedPassword: string) {
   const formSchema = Yup.object().shape({
-    password: useCreatePasswordRule(),
-    confirmPassword: useRepeatPasswordRule('password')
+    password: useExpectPasswordRule(expectedPassword)
   });
 
   const formOptions: UseFormProps = {
-    reValidateMode: 'onChange',
+    reValidateMode: 'onSubmit',
     resolver: yupResolver(formSchema)
   };
 

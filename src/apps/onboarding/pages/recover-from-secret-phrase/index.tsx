@@ -4,6 +4,7 @@ import { FieldValues } from 'react-hook-form';
 
 import {
   LayoutTab,
+  TabHeaderContainer,
   TabFooterContainer,
   HeaderSubmenuBarNavLink
 } from '@libs/layout';
@@ -13,6 +14,7 @@ import { useRecoverFromSecretPhraseForm } from '@libs/ui/forms/recover-from-secr
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { RouterPath } from '@src/apps/onboarding/router';
 import { closeActiveTab } from '@src/apps/onboarding/utils/close-active-tab';
+import { Stepper } from '@src/apps/onboarding/components/stepper';
 
 import { RecoverFromSecretPhrasePageContent } from './content';
 
@@ -49,7 +51,12 @@ export function RecoverFromSecretPhrasePage() {
     <form onSubmit={handleSubmit(onSubmit)}>
       <LayoutTab
         layoutContext="withStepper"
-        renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
+        renderHeader={() => (
+          <TabHeaderContainer>
+            <HeaderSubmenuBarNavLink linkType="back" />
+            <Stepper length={3} activeIndex={2} />
+          </TabHeaderContainer>
+        )}
         renderContent={() => (
           <RecoverFromSecretPhrasePageContent
             register={register}

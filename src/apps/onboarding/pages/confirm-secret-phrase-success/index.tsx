@@ -3,6 +3,7 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import {
   LayoutTab,
+  TabHeaderContainer,
   TabFooterContainer,
   HeaderSubmenuBarNavLink
 } from '@libs/layout';
@@ -10,6 +11,7 @@ import { Button } from '@libs/ui';
 
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { RouterPath } from '@src/apps/onboarding/router';
+import { Stepper } from '@src/apps/onboarding/components/stepper';
 
 import { ConfirmSecretPhraseSuccessPageContent } from './content';
 
@@ -20,7 +22,12 @@ export function ConfirmSecretPhraseSuccessPage() {
   return (
     <LayoutTab
       layoutContext="withStepper"
-      renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
+      renderHeader={() => (
+        <TabHeaderContainer>
+          <HeaderSubmenuBarNavLink linkType="back" />
+          <Stepper length={6} activeIndex={5} />
+        </TabHeaderContainer>
+      )}
       renderContent={() => <ConfirmSecretPhraseSuccessPageContent />}
       renderFooter={() => (
         <TabFooterContainer>

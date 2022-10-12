@@ -26,6 +26,8 @@ export const vaultUnlocked = createAction('VAULT_UNLOCKED', () => ({
 }>();
 
 export const accountImported = createAction('ACCOUNT_IMPORTED')<Account>();
+export const accountCreated =
+  createAction('ACCOUNT_CREATED')<Pick<Account, 'publicKey' | 'secretKey'>>();
 export const accountRemoved = createAction('ACCOUNT_REMOVED')<{
   accountName: string;
 }>();

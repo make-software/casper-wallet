@@ -5,8 +5,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import * as Yup from 'yup';
 
-import { useFormValidations } from '@src/hooks';
-
 import { Button, Input, SvgIcon, Typography } from '@libs/ui';
 import { Account } from '@src/background/redux/vault/types';
 import {
@@ -24,12 +22,11 @@ import { checkAccountNameIsTaken } from '@src/background/redux/import-account-ac
 import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { accountImported } from '@src/background/redux/vault/actions';
+import { useAccountNameIsTakenRule } from '@src/libs/ui/forms/form-validation-rules';
 
 export function ImportAccountWithFileContentPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
-
-  const { createAccountNameValidation } = useFormValidations();
 
   const onSuccess = useCallback(
     async (accountData: Account) => {
@@ -72,7 +69,7 @@ export function ImportAccountWithFileContentPage() {
           return false;
         }
       ),
-    name: createAccountNameValidation(async value => {
+    name: useAccountNameIsTakenRule(async value => {
       const isAccountNameTaken =
         value && (await checkAccountNameIsTaken(value));
       return !isAccountNameTaken;

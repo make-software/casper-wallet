@@ -4,21 +4,29 @@ import { FieldValues } from 'react-hook-form';
 
 import {
   LayoutTab,
-  HeaderSubmenuBarNavLink,
-  TabFooterContainer
+  TabHeaderContainer,
+  TabFooterContainer,
+  HeaderSubmenuBarNavLink
 } from '@libs/layout';
 import { Button, Checkbox } from '@libs/ui';
 import { useCreatePasswordForm } from '@libs/ui/forms/create-password';
 
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
+import { Stepper } from '@src/apps/onboarding/components/stepper';
 
 import { dispatchToMainStore } from '@background/redux/utils';
 import { vaultCreated } from '@background/redux/vault/actions';
 
 import { CreateVaultPasswordPageContent } from './content';
 
-export function CreateVaultPasswordPage() {
+interface CreateVaultPasswordPageProps {
+  saveIsLoggedIn: (isLoggedIn: boolean) => void;
+}
+
+export function CreateVaultPasswordPage({
+  saveIsLoggedIn
+}: CreateVaultPasswordPageProps) {
   const [isChecked, setIsChecked] = useState(false);
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -27,6 +35,7 @@ export function CreateVaultPasswordPage() {
   const { isDirty } = formState;
 
   function onSubmit(data: FieldValues) {
+    saveIsLoggedIn(true);
     dispatchToMainStore(vaultCreated({ password: data.password }));
     navigate(RouterPath.CreateSecretPhrase);
   }
@@ -35,7 +44,12 @@ export function CreateVaultPasswordPage() {
     <form onSubmit={handleSubmit(onSubmit)}>
       <LayoutTab
         layoutContext="withStepper"
-        renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
+        renderHeader={() => (
+          <TabHeaderContainer>
+            <HeaderSubmenuBarNavLink linkType="back" />
+            <Stepper length={6} activeIndex={0} />
+          </TabHeaderContainer>
+        )}
         renderContent={() => (
           <CreateVaultPasswordPageContent
             formState={formState}

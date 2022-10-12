@@ -15,7 +15,8 @@ import {
   accountsConnected,
   accountDisconnected,
   allAccountsDisconnected,
-  activeOriginChanged
+  activeOriginChanged,
+  accountCreated
 } from './actions';
 import { VaultState } from './types';
 
@@ -58,12 +59,22 @@ export const reducer = createReducer(initialState)
       isLocked: false
     })
   )
-  .handleAction([accountImported], (state, { payload }): State => {
+  .handleAction(accountImported, (state, { payload: account }): State => {
     return {
       ...state,
-      accounts: [...state.accounts, payload],
+      accounts: [...state.accounts, account],
       activeAccountName:
-        state.accounts.length === 0 ? payload.name : state.activeAccountName
+        state.accounts.length === 0 ? account.name : state.activeAccountName
+    };
+  })
+  .handleAction(accountCreated, (state, { payload }): State => {
+    const accountCount = state.accounts.length;
+    const account = { ...payload, name: `Account ${accountCount + 1}` };
+    return {
+      ...state,
+      accounts: [...state.accounts, account],
+      activeAccountName:
+        state.accounts.length === 0 ? account.name : state.activeAccountName
     };
   })
   .handleAction(

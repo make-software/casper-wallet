@@ -3,6 +3,7 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import {
   LayoutTab,
+  TabHeaderContainer,
   TabFooterContainer,
   HeaderSubmenuBarNavLink
 } from '@libs/layout';
@@ -10,18 +11,17 @@ import { Button, Checkbox } from '@libs/ui';
 
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { RouterPath } from '@src/apps/onboarding/router';
-import { FormState, SetFormState } from '@src/apps/onboarding/app-router';
+import { Stepper } from '@src/apps/onboarding/components/stepper';
+import { SetFormState } from '@src/apps/onboarding/app-router';
 
 import { CreateSecretPhraseConfirmationPageContent } from './content';
 import { generateSecretPhrase } from '@src/libs/crypto';
 
 interface CreateSecretPhraseConfirmationPageProps {
-  formState: FormState;
   setFormState: SetFormState;
 }
 
 export function CreateSecretPhraseConfirmationPage({
-  formState,
   setFormState
 }: CreateSecretPhraseConfirmationPageProps) {
   const [isChecked, setIsChecked] = useState(false);
@@ -31,7 +31,12 @@ export function CreateSecretPhraseConfirmationPage({
   return (
     <LayoutTab
       layoutContext="withStepper"
-      renderHeader={() => <HeaderSubmenuBarNavLink linkType="back" />}
+      renderHeader={() => (
+        <TabHeaderContainer>
+          <HeaderSubmenuBarNavLink linkType="back" />
+          <Stepper length={6} activeIndex={2} />
+        </TabHeaderContainer>
+      )}
       renderContent={() => <CreateSecretPhraseConfirmationPageContent />}
       renderFooter={() => (
         <TabFooterContainer>

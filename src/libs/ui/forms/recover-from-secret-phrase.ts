@@ -3,11 +3,11 @@ import { useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 
-import { usePhraseRule } from '@libs/ui/forms/form-validation-rules';
+import { useValidSecretPhraseRule } from '@libs/ui/forms/form-validation-rules';
 
 export function useRecoverFromSecretPhraseForm() {
   const formSchema = Yup.object().shape({
-    phrase: usePhraseRule()
+    phrase: useValidSecretPhraseRule()
   });
 
   const formOptions: UseFormProps = {
