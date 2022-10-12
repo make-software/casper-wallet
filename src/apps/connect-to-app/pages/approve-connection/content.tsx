@@ -1,12 +1,15 @@
 import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { HeaderTextContainer } from '@src/libs/layout';
+import {
+  HeaderTextContainer,
+  PageContainer,
+  ContentContainer
+} from '@src/libs/layout';
+import { SiteFaviconBadge, List, SvgIcon, Typography } from '@src/libs/ui';
 
-import { PageContainer, ContentContainer } from '@src/libs/layout/containers';
-
-import { SiteFaviconBadge, List, SvgIcon, Typography } from '@libs/ui';
+import { FadedOut } from '@connect-to-app/components/faded-out';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;
@@ -58,7 +61,7 @@ export function ApproveConnectionContent({
           <SiteFaviconBadge origin={origin} />
           <HeaderTextContent>
             <Typography type="header">
-              <Trans t={t}>{title}</Trans>
+              <FadedOut>{title}</FadedOut>
             </Typography>
           </HeaderTextContent>
         </HeaderTextContainer>

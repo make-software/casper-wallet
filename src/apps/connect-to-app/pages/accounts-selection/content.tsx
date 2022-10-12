@@ -1,4 +1,6 @@
 import React, { useMemo, useCallback, SetStateAction, Dispatch } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import {
@@ -8,7 +10,7 @@ import {
   HashVariant,
   List,
   Typography
-} from '@libs/ui';
+} from '@src/libs/ui';
 
 import {
   PageContainer,
@@ -16,10 +18,10 @@ import {
   HeaderTextContainer,
   ListItemClickableContainer,
   LeftAlignedFlexColumn
-} from '@src/libs/layout/containers';
+} from '@src/libs/layout';
 
-import { useTranslation, Trans } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { FadedOut } from '@connect-to-app/components/faded-out';
+
 import {
   selectVaultAccounts,
   selectVaultActiveAccount
@@ -85,7 +87,7 @@ export function AccountsSelectionContent({
           <SiteFaviconBadge origin={origin} />
           <HeaderTextContent>
             <Typography type="header">
-              <Trans t={t}>{headerText}</Trans>
+              <FadedOut>{headerText}</FadedOut>
             </Typography>
           </HeaderTextContent>
         </HeaderTextContainer>
