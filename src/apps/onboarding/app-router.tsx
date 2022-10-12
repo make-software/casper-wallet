@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { SecretPhrase } from '@src/libs/crypto';
 
 import { RouterPath } from '@src/apps/onboarding/router';
-import { getSessionLoginStatus } from '@src/apps/onboarding/utils/session-login-status';
 
-import { LoginPage } from '@src/apps/onboarding/pages/login';
+import { useSessionStorage } from '@src/apps/onboarding/hooks/use-session-storage';
+
+import { UnlockWalletPage } from '@src/apps/onboarding/pages/unlock-wallet';
+import { ResetWalletPage } from '@src/apps/onboarding/pages/reset-wallet';
 import { WelcomePage } from '@src/apps/onboarding/pages/welcome';
 import { CreateVaultPasswordPage } from '@src/apps/onboarding/pages/create-vault-password';
 import { CreateSecretPhrasePage } from '@src/apps/onboarding/pages/create-secret-phrase';
@@ -31,11 +33,8 @@ export function AppRouter() {
     secretPhrase: null
   });
 
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-
-  useEffect(() => {
-    setIsLoggedIn(getSessionLoginStatus());
-  }, []);
+  const { loadIsLoggedIn, saveIsLoggedIn } = useSessionStorage();
+  const isLoggedIn = loadIsLoggedIn();
 
   const setFormState: SetFormState = (name, value) =>
     setOnboardingFormState(prevOnboardingFormState => ({
@@ -50,7 +49,9 @@ export function AppRouter() {
           <Route path={RouterPath.Any} element={<WelcomePage />} />
           <Route
             path={RouterPath.CreateVaultPassword}
-            element={<CreateVaultPasswordPage setIsLoggedIn={setIsLoggedIn} />}
+            element={
+              <CreateVaultPasswordPage saveIsLoggedIn={saveIsLoggedIn} />
+            }
           />
         </Routes>
       </HashRouter>
@@ -63,8 +64,9 @@ export function AppRouter() {
         <Routes>
           <Route
             path={RouterPath.Any}
-            element={<LoginPage setIsLoggedIn={setIsLoggedIn} />}
+            element={<UnlockWalletPage saveIsLoggedIn={saveIsLoggedIn} />}
           />
+          <Route path={RouterPath.ResetWallet} element={<ResetWalletPage />} />
         </Routes>
       </HashRouter>
     );

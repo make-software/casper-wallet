@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { FieldValues } from 'react-hook-form';
 
@@ -13,7 +13,6 @@ import { useCreatePasswordForm } from '@libs/ui/forms/create-password';
 
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { setSessionLoginStatus } from '@src/apps/onboarding/utils/session-login-status';
 import { Stepper } from '@src/apps/onboarding/components/stepper';
 
 import { dispatchToMainStore } from '@background/redux/utils';
@@ -22,11 +21,11 @@ import { vaultCreated } from '@background/redux/vault/actions';
 import { CreateVaultPasswordPageContent } from './content';
 
 interface CreateVaultPasswordPageProps {
-  setIsLoggedIn: Dispatch<SetStateAction<boolean>>;
+  saveIsLoggedIn: (isLoggedIn: boolean) => void;
 }
 
 export function CreateVaultPasswordPage({
-  setIsLoggedIn
+  saveIsLoggedIn
 }: CreateVaultPasswordPageProps) {
   const [isChecked, setIsChecked] = useState(false);
   const navigate = useTypedNavigate();
@@ -36,10 +35,7 @@ export function CreateVaultPasswordPage({
   const { isDirty } = formState;
 
   function onSubmit(data: FieldValues) {
-    setSessionLoginStatus({
-      loginStatus: true,
-      setIsLoggedIn
-    });
+    saveIsLoggedIn(true);
     dispatchToMainStore(vaultCreated({ password: data.password }));
     navigate(RouterPath.CreateSecretPhrase);
   }
