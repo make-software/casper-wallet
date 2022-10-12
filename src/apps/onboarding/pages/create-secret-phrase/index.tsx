@@ -2,16 +2,17 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
+  HeaderSubmenuBarNavLink,
   LayoutTab,
-  TabHeaderContainer,
   TabFooterContainer,
-  HeaderSubmenuBarNavLink
+  TabHeaderContainer
 } from '@libs/layout';
 import { Button } from '@libs/ui';
-
-import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { RouterPath } from '@src/apps/onboarding/router';
 import { Stepper } from '@src/apps/onboarding/components/stepper';
+import { RouterPath } from '@src/apps/onboarding/router';
+import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import { vaultReseted } from '@src/background/redux/vault/actions';
 
 import { CreateSecretPhraseContent } from './content';
 
@@ -19,12 +20,17 @@ export function CreateSecretPhrasePage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
+  const handleClick = () => {
+    dispatchToMainStore(vaultReseted());
+    navigate(RouterPath.CreateVaultPassword);
+  };
+
   return (
     <LayoutTab
       layoutContext="withStepper"
       renderHeader={() => (
         <TabHeaderContainer>
-          <HeaderSubmenuBarNavLink linkType="back" />
+          <HeaderSubmenuBarNavLink linkType="back" onClick={handleClick} />
           <Stepper length={6} activeIndex={1} />
         </TabHeaderContainer>
       )}
