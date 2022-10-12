@@ -4,13 +4,13 @@ import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import {
   useCreatePasswordRule,
-  useConfirmPasswordRule
+  useRepeatPasswordRule
 } from '@libs/ui/forms/form-validation-rules';
 
 export function useCreatePasswordForm() {
   const formSchema = Yup.object().shape({
     password: useCreatePasswordRule(),
-    confirmPassword: useConfirmPasswordRule('password')
+    confirmPassword: useRepeatPasswordRule('password')
   });
 
   const formOptions: UseFormProps = {

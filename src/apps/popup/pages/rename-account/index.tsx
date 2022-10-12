@@ -7,8 +7,6 @@ import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import * as Yup from 'yup';
 
-import { useFormValidations } from '@src/hooks';
-
 import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
@@ -20,7 +18,8 @@ import { Button, Input, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { accountRenamed } from '@src/background/redux/vault/actions';
 import { selectVaultAccountsNames } from '@src/background/redux/vault/selectors';
-import { dispatchToMainStore } from '../../../../background/redux/utils';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import { useAccountNameIsTakenRule } from '@src/libs/ui/forms/form-validation-rules';
 
 export function RenameAccountPageContent() {
   const navigate = useTypedNavigate();
@@ -29,10 +28,8 @@ export function RenameAccountPageContent() {
 
   const existingAccountNames = useSelector(selectVaultAccountsNames);
 
-  const { createAccountNameValidation } = useFormValidations();
-
   const formSchema = Yup.object().shape({
-    name: createAccountNameValidation(value => {
+    name: useAccountNameIsTakenRule(value => {
       return !existingAccountNames.includes(value as string);
     })
   });

@@ -19,14 +19,14 @@ export function useExpectPasswordRule(expectedPassword: string) {
   return Yup.string().equals([expectedPassword], errorMessage);
 }
 
-export function useConfirmPasswordRule(targetKey: string) {
+export function useRepeatPasswordRule(inputName: string) {
   const { t } = useTranslation();
   const passwordsDoesntMatchMessage = t("Passwords don't match");
 
-  return Yup.string().oneOf([Yup.ref(targetKey)], passwordsDoesntMatchMessage);
+  return Yup.string().oneOf([Yup.ref(inputName)], passwordsDoesntMatchMessage);
 }
 
-export function usePhraseRule() {
+export function useValidSecretPhraseRule() {
   const { t } = useTranslation();
 
   return Yup.string().test(
@@ -34,4 +34,23 @@ export function usePhraseRule() {
     t('There should be 24 words in a valid secret phrase.'),
     value => value != null && value.trim().split(' ').length === 24
   );
+}
+
+export function useAccountNameIsTakenRule(
+  isAccountNameIsTakenCallback: (
+    value: string | undefined
+  ) => Promise<boolean> | boolean
+) {
+  const { t } = useTranslation();
+
+  return Yup.string()
+    .required(t('Name is required'))
+    .max(20, t("Account name can't be longer than 20 characters"))
+    .matches(
+      /^[\daA-zZ\s]+$/,
+      t('Account name can’t contain special characters')
+    )
+    .test('unique', t('Account name is already taken'), value =>
+      isAccountNameIsTakenCallback(value)
+    );
 }
