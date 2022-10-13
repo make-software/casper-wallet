@@ -1,12 +1,14 @@
 import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { HeaderTextContainer } from '@src/libs/layout';
-
-import { PageContainer, ContentContainer } from '@src/libs/layout/containers';
-
-import { SiteFaviconBadge, List, SvgIcon, Typography } from '@libs/ui';
+import {
+  HeaderTextContainer,
+  PageContainer,
+  ContentContainer,
+  BreakWordContainer
+} from '@src/libs/layout';
+import { SiteFaviconBadge, List, SvgIcon, Typography } from '@src/libs/ui';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;
@@ -58,7 +60,7 @@ export function ApproveConnectionContent({
           <SiteFaviconBadge origin={origin} />
           <HeaderTextContent>
             <Typography type="header">
-              <Trans t={t}>{title}</Trans>
+              <BreakWordContainer>{title}</BreakWordContainer>
             </Typography>
           </HeaderTextContent>
         </HeaderTextContainer>
