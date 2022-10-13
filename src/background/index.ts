@@ -77,27 +77,18 @@ browser.runtime.onMessage.addListener(
             );
 
             if (!isLocked && countOfAccounts > 0) {
-              const tabs = await browser.tabs.query({
-                active: true,
-                currentWindow: true
-              });
+              const query: Record<string, string> = {
+                origin: action.payload.origin
+              };
 
-              if (tabs.length > 0) {
-                const query: Record<string, string> = {
-                  origin: action.payload
-                };
-
-                const siteTitle = tabs[0].title;
-
-                if (siteTitle != null) {
-                  query.siteTitle = siteTitle;
-                }
-
-                openWindow({
-                  purposeForOpening: PurposeForOpening.ConnectToApp,
-                  query
-                });
+              if (action.payload.title != null) {
+                query.siteTitle = action.payload.title;
               }
+
+              openWindow({
+                purposeForOpening: PurposeForOpening.ConnectToApp,
+                query
+              });
               success = true;
             }
 
