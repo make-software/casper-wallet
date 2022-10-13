@@ -2,7 +2,8 @@ import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
-import styled, { css } from 'styled-components';
+import Identicon from 'react-identicons';
+import styled, { css, useTheme } from 'styled-components';
 
 import {
   CenteredFlexColumn,
@@ -12,14 +13,7 @@ import {
 
 import { LinkType, HeaderSubmenuBarNavLink } from '@libs/layout';
 
-import {
-  Button,
-  Hash,
-  HashVariant,
-  SvgIcon,
-  PageTile,
-  Typography
-} from '@libs/ui';
+import { Button, Hash, HashVariant, PageTile, Typography } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
@@ -80,6 +74,7 @@ const ButtonsContainer = styled.div`
 export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
+  const theme = useTheme();
 
   const activeOrigin = useSelector(selectVaultActiveOrigin);
   const { disconnectAccountWithEvent: disconnectAccount } = useAccountManager();
@@ -113,7 +108,11 @@ export function HomePageContent() {
             displayContext="home"
           />
           <AvatarContainer>
-            <SvgIcon src="assets/icons/default-avatar.svg" size={120} />
+            <Identicon
+              string={activeAccount.publicKey.toLowerCase()}
+              size={120}
+              bg={theme.color.backgroundPrimary}
+            />
           </AvatarContainer>
           <NameAndAddressContainer>
             <Typography type="bodySemiBold">{activeAccount.name}</Typography>
