@@ -6,7 +6,6 @@ import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import * as Yup from 'yup';
 
 import { Button, Input, SvgIcon, Typography } from '@libs/ui';
-import { Account } from '@src/background/redux/vault/types';
 import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
@@ -15,14 +14,16 @@ import {
   TextContainer
 } from '@src/libs/layout/containers';
 
-import { RouterPath, useTypedNavigate } from '@import-account-with-file/router';
+import { useAccountNameRule } from '@src/libs/ui/forms/form-validation-rules';
 
+import { Account } from '@src/background/redux/vault/types';
 import { checkAccountNameIsTaken } from '@src/background/redux/import-account-actions-should-be-removed';
-
-import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { accountImported } from '@src/background/redux/vault/actions';
-import { useAccountNameIsTakenRule } from '@src/libs/ui/forms/form-validation-rules';
+
+import { RouterPath, useTypedNavigate } from '@import-account-with-file/router';
+
+import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
 
 export function ImportAccountWithFileContentPage() {
   const navigate = useTypedNavigate();
@@ -69,7 +70,7 @@ export function ImportAccountWithFileContentPage() {
           return false;
         }
       ),
-    name: useAccountNameIsTakenRule(async value => {
+    name: useAccountNameRule(async value => {
       const isAccountNameTaken =
         value && (await checkAccountNameIsTaken(value));
       return !isAccountNameTaken;

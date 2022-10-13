@@ -3,15 +3,20 @@ import { useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 
-import { useAccountNameIsTakenRule } from './form-validation-rules';
+import { useAccountNameRule } from './form-validation-rules';
 
 export function useRenameAccount(
   accountName: string | undefined,
   existingAccountNames: string[]
 ) {
   const formSchema = Yup.object().shape({
-    name: useAccountNameIsTakenRule(value => {
-      return !existingAccountNames.includes(value as string);
+    name: useAccountNameRule(value => {
+      return (
+        value != null &&
+        !existingAccountNames
+          .filter(existingAccountName => existingAccountName !== accountName)
+          .includes(value)
+      );
     })
   });
 
