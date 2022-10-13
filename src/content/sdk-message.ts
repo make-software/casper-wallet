@@ -8,7 +8,10 @@ export const sdkMessageProxyEvents = {
 type Meta = { requestId: string };
 
 export const sdkMessage = {
-  connectRequest: createAction('CasperWalletProvider:Connect')<string, Meta>(),
+  connectRequest: createAction('CasperWalletProvider:Connect')<
+    { origin: string; title: string },
+    Meta
+  >(),
   connectResponse: createAction('CasperWalletProvider:Connect:Response')<
     boolean,
     Meta

@@ -46,14 +46,16 @@ function useSiteRelatedData() {
 
   const searchParams = new URLSearchParams(document.location.search);
   const origin = searchParams.get('origin');
+  const siteTitle = searchParams.get('title');
 
   if (origin == null) {
     throw new Error('Missing origin search param');
   }
 
-  const originName = origin.split('://')[1];
   const connectWith = t('Connect with');
-  const title = `${connectWith} ${originName}`;
+  const title = `${connectWith} ${
+    siteTitle != null ? siteTitle : origin.split('://')[1]
+  }`;
 
   return {
     origin,
