@@ -17,15 +17,14 @@ import {
   ContentContainer,
   HeaderTextContainer,
   ListItemClickableContainer,
-  LeftAlignedFlexColumn
+  LeftAlignedFlexColumn,
+  BreakWordContainer
 } from '@src/libs/layout';
 
 import {
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
-
-import { BreakWordContainer } from '@connect-to-app/containers';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;

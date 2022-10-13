@@ -5,11 +5,10 @@ import styled from 'styled-components';
 import {
   HeaderTextContainer,
   PageContainer,
-  ContentContainer
+  ContentContainer,
+  BreakWordContainer
 } from '@src/libs/layout';
 import { SiteFaviconBadge, List, SvgIcon, Typography } from '@src/libs/ui';
-
-import { BreakWordContainer } from '@connect-to-app/containers';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;
