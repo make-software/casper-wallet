@@ -82,7 +82,7 @@ browser.runtime.onMessage.addListener(
               };
 
               if (action.payload.title != null) {
-                query.siteTitle = action.payload.title;
+                query.title = action.payload.title;
               }
 
               openWindow({
