@@ -20,12 +20,12 @@ import {
   LeftAlignedFlexColumn
 } from '@src/libs/layout';
 
-import { FadedOut } from '@connect-to-app/components/faded-out';
-
 import {
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
+
+import { BreakWordContainer } from '@connect-to-app/containers';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;
@@ -87,11 +87,7 @@ export function AccountsSelectionContent({
           <SiteFaviconBadge origin={origin} />
           <HeaderTextContent>
             <Typography type="header">
-              {headerText.length > 30 ? (
-                <FadedOut>{headerText}</FadedOut>
-              ) : (
-                headerText
-              )}
+              <BreakWordContainer>{headerText}</BreakWordContainer>
             </Typography>
           </HeaderTextContent>
         </HeaderTextContainer>

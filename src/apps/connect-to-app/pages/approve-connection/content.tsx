@@ -9,7 +9,7 @@ import {
 } from '@src/libs/layout';
 import { SiteFaviconBadge, List, SvgIcon, Typography } from '@src/libs/ui';
 
-import { FadedOut } from '@connect-to-app/components/faded-out';
+import { BreakWordContainer } from '@connect-to-app/containers';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;
@@ -61,7 +61,7 @@ export function ApproveConnectionContent({
           <SiteFaviconBadge origin={origin} />
           <HeaderTextContent>
             <Typography type="header">
-              {title.length > 30 ? <FadedOut>{title}</FadedOut> : title}
+              <BreakWordContainer>{title}</BreakWordContainer>
             </Typography>
           </HeaderTextContent>
         </HeaderTextContainer>
