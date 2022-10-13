@@ -109,7 +109,7 @@ export function HomePageContent() {
           />
           <AvatarContainer>
             <Identicon
-              string={activeAccount.publicKey}
+              string={activeAccount.publicKey.toLowerCase()}
               size={120}
               bg={theme.color.backgroundPrimary}
             />
