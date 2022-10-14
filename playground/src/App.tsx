@@ -134,6 +134,22 @@ function App() {
             >
               Redelegate
             </Button>
+
+            <Button
+              disabled={activePublicKey == null}
+              variant="text"
+              onClick={() => {
+                const deploy = makeNativeTransferDeploy(
+                  activePublicKey,
+                  '0106ca7c39cd272dbf21a86eeb3b36b7c26e2e9b94af64292419f7862936bca2Ca',
+                  '2500000000',
+                  '1234'
+                );
+                handleSignDeploy(deploy);
+              }}
+            >
+              Invalid Transfer
+            </Button>
           </div>
         )}
       </Row>
