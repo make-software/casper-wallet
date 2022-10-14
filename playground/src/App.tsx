@@ -141,6 +141,7 @@ function App() {
               onClick={() => {
                 const deploy = makeNativeTransferDeploy(
                   activePublicKey,
+                  // recipientPublicKey was corrupted by changing last `c` char to `C`
                   '0106ca7c39cd272dbf21a86eeb3b36b7c26e2e9b94af64292419f7862936bca2Ca',
                   '2500000000',
                   '1234'
@@ -148,7 +149,7 @@ function App() {
                 handleSignDeploy(deploy);
               }}
             >
-              Invalid Transfer
+              Invalid Checksum
             </Button>
           </div>
         )}
