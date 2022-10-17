@@ -144,3 +144,7 @@ export const TabPageContainer = styled.div`
 export const ListSpacingContainer = styled.div`
   margin-top: 16px;
 `;
+
+export const BreakWordContainer = styled.div`
+  overflow-wrap: break-word;
+`;

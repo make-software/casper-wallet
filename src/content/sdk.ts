@@ -68,9 +68,12 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       return fetchFromExtensionBackend<
         ReturnType<typeof sdkMessage['connectResponse']>['payload']
       >(
-        sdkMessage.connectRequest(window.location.origin, {
-          requestId: generateRequestId()
-        }),
+        sdkMessage.connectRequest(
+          { origin: window.location.origin, title: document.title },
+          {
+            requestId: generateRequestId()
+          }
+        ),
         options
       );
     },

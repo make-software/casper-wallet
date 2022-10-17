@@ -61,7 +61,7 @@ browser.runtime.onInstalled.addListener(() => {
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 browser.runtime.onMessage.addListener(
-  (action: RootAction | SdkMessage, sender) => {
+  async (action: RootAction | SdkMessage, sender) => {
     return new Promise(async (sendResponse, sendError) => {
       // Popup comms handling
       const store = await getMainStoreSingleton();
@@ -75,10 +75,19 @@ browser.runtime.onMessage.addListener(
             const countOfAccounts = selectVaultCountOfAccounts(
               store.getState()
             );
+
             if (!isLocked && countOfAccounts > 0) {
+              const query: Record<string, string> = {
+                origin: action.payload.origin
+              };
+
+              if (action.payload.title != null) {
+                query.title = action.payload.title;
+              }
+
               openWindow({
                 purposeForOpening: PurposeForOpening.ConnectToApp,
-                query: { origin: action.payload }
+                query
               });
               success = true;
             }

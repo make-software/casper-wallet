@@ -36,7 +36,7 @@ export function useValidSecretPhraseRule() {
   );
 }
 
-export function useAccountNameIsTakenRule(
+export function useAccountNameRule(
   isAccountNameIsTakenCallback: (
     value: string | undefined
   ) => Promise<boolean> | boolean
