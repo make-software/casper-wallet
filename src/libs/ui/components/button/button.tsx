@@ -39,6 +39,10 @@ const BaseButton = styled.button<BaseButtonProps>(
       outline: 'none'
     },
 
+    ':hover': {
+      cursor: 'pointer'
+    },
+
     ...((disabled || loading) && {
       pointerEvents: 'none'
     })
