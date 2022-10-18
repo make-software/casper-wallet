@@ -75,7 +75,8 @@ export function createOpenWindow({
           const windowWidth = currentWindow.width ?? 0;
           const xOffset = currentWindow.left ?? 0;
           const yOffset = currentWindow.top ?? 0;
-          const popupWidth = 360;
+          const crossPlatformWidthOffset = 13;
+          const popupWidth = 360 + crossPlatformWidthOffset;
           const popupHeight = 700;
 
           browser.windows

@@ -6,7 +6,7 @@ import { ThemeProvider } from 'styled-components';
 
 import 'mac-scrollbar/dist/mac-scrollbar.css';
 
-import { WindowGlobalStyle, themeConfig } from '@libs/ui';
+import { GlobalStyle, themeConfig } from '@libs/ui';
 
 import { ErrorBoundary } from '@popup/error-boundary';
 import { AppRouter } from './app-router';
@@ -15,7 +15,7 @@ render(
   <Suspense fallback={null}>
     <ErrorBoundary>
       <ThemeProvider theme={themeConfig}>
-        <WindowGlobalStyle />
+        <GlobalStyle />
         <AppRouter />
       </ThemeProvider>
     </ErrorBoundary>

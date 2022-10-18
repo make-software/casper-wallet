@@ -10,7 +10,7 @@ import { isActionOf } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 
 import { App } from '@connect-to-app/app';
-import { WindowGlobalStyle, themeConfig } from '@libs/ui';
+import { GlobalStyle, themeConfig } from '@libs/ui';
 import { ErrorBoundary } from '@popup/error-boundary';
 
 import { createMainStoreReplica } from '../../background/redux/utils';
@@ -49,7 +49,7 @@ const Tree = () => {
     <Suspense fallback={null}>
       <ErrorBoundary>
         <ThemeProvider theme={themeConfig}>
-          <WindowGlobalStyle />
+          <GlobalStyle />
           <ReduxProvider store={store}>
             <HashRouter>
               <App />
