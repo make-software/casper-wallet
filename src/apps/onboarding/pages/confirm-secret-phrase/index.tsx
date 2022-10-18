@@ -14,7 +14,7 @@ import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { accountCreated } from '@src/background/redux/vault/actions';
-import { createInitialAccount } from '@src/libs/services';
+import { initializeWallet } from '@src/libs/services';
 
 import { ConfirmSecretPhrasePageContent } from './content';
 
@@ -37,7 +37,7 @@ export function ConfirmSecretPhrasePage({
 
   function handleSubmit() {
     if (isConfirmationSuccess) {
-      const account = createInitialAccount();
+      const account = initializeWallet();
       dispatchToMainStore(accountCreated(account));
       navigate(RouterPath.ConfirmSecretPhraseSuccess);
     } else {

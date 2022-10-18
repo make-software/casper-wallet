@@ -16,7 +16,7 @@ function syncActiveOriginWithStore() {
   if (document.visibilityState === 'visible') {
     activeOrigin = window.location.origin;
   }
-  console.error('CONTENT ACTIVE ORIGIN:', activeOrigin);
+  // console.warn('CONTENT ACTIVE ORIGIN:', activeOrigin);
   if (chrome.runtime?.id) {
     browser.runtime
       .sendMessage(activeOriginChanged(activeOrigin))

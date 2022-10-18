@@ -16,7 +16,7 @@ import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate
 import { closeActiveTab } from '@src/apps/onboarding/utils/close-active-tab';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { accountCreated } from '@src/background/redux/vault/actions';
-import { createInitialAccount } from '@src/libs/services';
+import { initializeWallet } from '@src/libs/services';
 
 import { RecoverFromSecretPhrasePageContent } from './content';
 
@@ -32,7 +32,7 @@ export function RecoverFromSecretPhrasePage() {
     // TODO: Parse phrase and restore wallet from it
     const isParsingPhraseWasSuccess = true;
     if (isParsingPhraseWasSuccess) {
-      const account = createInitialAccount();
+      const account = initializeWallet();
       dispatchToMainStore(accountCreated(account));
       await closeActiveTab();
     } else {

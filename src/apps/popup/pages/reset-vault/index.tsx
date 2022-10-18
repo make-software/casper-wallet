@@ -11,7 +11,7 @@ import {
 import { Typography, Button, Checkbox } from '@libs/ui';
 import { useTypedNavigate } from '@popup/router';
 import { vaultReseted } from '@src/background/redux/vault/actions';
-import { dispatchToMainStore } from '../../../../background/redux/utils';
+import { dispatchToMainStore } from '@src/background/redux/utils';
 
 export function ResetVaultPageContent() {
   const [isChecked, setIsChecked] = useState(false);
@@ -20,6 +20,7 @@ export function ResetVaultPageContent() {
 
   function handleResetVault() {
     dispatchToMainStore(vaultReseted());
+    window.close();
   }
 
   function handleCancel() {

@@ -38,7 +38,7 @@ export async function getMainStoreSingleton() {
   ]);
 
   if (storeSingleton == null) {
-    console.warn('STORE INIT', state);
+    // console.warn('STORE INIT', state);
     storeSingleton = createStore(state || {});
     storeSingleton.subscribe(() => {
       const state = storeSingleton.getState();
@@ -54,7 +54,7 @@ export async function getMainStoreSingleton() {
         });
     });
   } else {
-    console.warn('STORE REUSED', state);
+    // console.warn('STORE REUSED', state);
   }
 
   return storeSingleton;

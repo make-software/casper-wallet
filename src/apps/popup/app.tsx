@@ -1,6 +1,6 @@
 import '@libs/i18n/i18n';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
 
@@ -24,8 +24,6 @@ import { RenameAccountPageContent } from '@popup/pages/rename-account';
 import { AccountListPage } from '@popup/pages/account-list';
 
 import { RouterPath, useTypedLocation } from '@popup/router';
-
-import { openOnboardingAppInTab } from '@src/apps/popup/utils/openOnboardingAppInTab';
 
 import {
   selectVaultDoesExist,
@@ -78,13 +76,6 @@ function UnlockedRouter() {
   const vaultDoesExists = useSelector(selectVaultDoesExist);
   const vaultHasAccount = useSelector(selectVaultHasAccount);
 
-  // make sure onboarding open only once per click on action
-  useEffect(() => {
-    if (!vaultDoesExists || !vaultHasAccount) {
-      openOnboardingAppInTab();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   if (!vaultDoesExists || !vaultHasAccount) {
     return null;
   }
