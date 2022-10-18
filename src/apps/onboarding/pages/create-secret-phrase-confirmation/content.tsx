@@ -15,7 +15,7 @@ export function CreateSecretPhraseConfirmationPageContent() {
     {
       key: 3,
       value: t(
-        'Be careful of phishin! Casper Signer will never spontaneously ask for your secret phrase.'
+        'Be careful of phishing! Casper Signer will never spontaneously ask for your secret phrase.'
       )
     },
     {
