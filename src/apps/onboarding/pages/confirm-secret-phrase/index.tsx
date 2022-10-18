@@ -9,12 +9,12 @@ import {
   TabHeaderContainer
 } from '@libs/layout';
 import { Button } from '@libs/ui';
-import { parseSecretKeyFileContent } from '@src/apps/import-account-with-file/pages/import-account-with-file/hooks/import-secret-key';
 import { Stepper } from '@src/apps/onboarding/components/stepper';
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { accountCreated } from '@src/background/redux/vault/actions';
+import { createInitialAccount } from '@src/libs/services';
 
 import { ConfirmSecretPhrasePageContent } from './content';
 
@@ -37,15 +37,7 @@ export function ConfirmSecretPhrasePage({
 
   function handleSubmit() {
     if (isConfirmationSuccess) {
-      // temporary account creation, will be replaced by derivation logic
-      const { publicKeyHex, secretKeyBase64 } = parseSecretKeyFileContent(
-        'MC4CAQAwBQYDK2VwBCIEIKu6biwimq52O4qzdyAp78RrIblNs6GXZdkcqr0+iLLj'
-      );
-      const account = {
-        publicKey: publicKeyHex,
-        secretKey: secretKeyBase64
-      };
-
+      const account = createInitialAccount();
       dispatchToMainStore(accountCreated(account));
       navigate(RouterPath.ConfirmSecretPhraseSuccess);
     } else {

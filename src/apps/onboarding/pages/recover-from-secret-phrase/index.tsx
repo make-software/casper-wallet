@@ -1,20 +1,22 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
 import { FieldValues } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
+  HeaderSubmenuBarNavLink,
   LayoutTab,
-  TabHeaderContainer,
   TabFooterContainer,
-  HeaderSubmenuBarNavLink
+  TabHeaderContainer
 } from '@libs/layout';
 import { Button } from '@libs/ui';
 import { useRecoverFromSecretPhraseForm } from '@libs/ui/forms/recover-from-secret-phrase';
-
-import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { RouterPath } from '@src/apps/onboarding/router';
-import { closeActiveTab } from '@src/apps/onboarding/utils/close-active-tab';
 import { Stepper } from '@src/apps/onboarding/components/stepper';
+import { RouterPath } from '@src/apps/onboarding/router';
+import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
+import { closeActiveTab } from '@src/apps/onboarding/utils/close-active-tab';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import { accountCreated } from '@src/background/redux/vault/actions';
+import { createInitialAccount } from '@src/libs/services';
 
 import { RecoverFromSecretPhrasePageContent } from './content';
 
@@ -30,6 +32,8 @@ export function RecoverFromSecretPhrasePage() {
     // TODO: Parse phrase and restore wallet from it
     const isParsingPhraseWasSuccess = true;
     if (isParsingPhraseWasSuccess) {
+      const account = createInitialAccount();
+      dispatchToMainStore(accountCreated(account));
       await closeActiveTab();
     } else {
       navigate(RouterPath.OnboardingError, {
