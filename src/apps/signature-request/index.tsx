@@ -5,7 +5,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { render } from 'react-dom';
 import { ThemeProvider } from 'styled-components';
 
-import { GlobalStyle, themeConfig } from '@libs/ui';
+import { WindowGlobalStyle, themeConfig } from '@libs/ui';
 
 import { App } from './app';
 import {
@@ -48,7 +48,7 @@ const Tree = () => {
     <Suspense fallback={null}>
       <ErrorBoundary>
         <ThemeProvider theme={themeConfig}>
-          <GlobalStyle />
+          <WindowGlobalStyle />
           <ReduxProvider store={store}>
             <App />
           </ReduxProvider>

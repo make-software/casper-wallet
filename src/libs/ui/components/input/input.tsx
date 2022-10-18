@@ -28,6 +28,7 @@ const InputContainer = styled('div')<InputProps>(
       : theme.typography.fontFamily.primary,
     lineHeight: '2.4rem',
     height: '4rem',
+    width: '100%',
 
     path: {
       fill: oneColoredIcons
