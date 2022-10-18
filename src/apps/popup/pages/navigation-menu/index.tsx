@@ -8,7 +8,12 @@ import { PurposeForOpening, useWindowManager } from '@src/hooks';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 import { RouterPath, useNavigationMenu } from '@popup/router';
-import { ContentContainer } from '@src/libs/layout/containers';
+import {
+  AlignedFlexRow,
+  AlignedSpaceBetweenFlexRow,
+  ContentContainer,
+  FlexColumn
+} from '@src/libs/layout/containers';
 import { SvgIcon, Typography, List } from '@libs/ui';
 
 import {
@@ -16,9 +21,7 @@ import {
   selectVaultTimeoutDurationSetting
 } from '@src/background/redux/vault/selectors';
 
-const ListItemClickableContainer = styled.div`
-  display: flex;
-
+const ListItemClickableContainer = styled(AlignedFlexRow)`
   width: 100%;
   cursor: pointer;
 
@@ -32,20 +35,22 @@ const ListItemClickableContainer = styled.div`
   }
 `;
 
-export const SpaceBetweenContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
+export const SpaceBetweenContainer = styled(AlignedSpaceBetweenFlexRow)`
   width: 100%;
 `;
 
 interface MenuItem {
   id: number;
   title: string;
+  subTitle?: string;
   iconPath: string;
   currentValue?: string | number;
   handleOnClick?: () => void;
+}
+
+interface MenuItems {
+  headerLabel: string;
+  items: MenuItem[];
 }
 
 export function NavigationMenuPageContent() {
@@ -58,82 +63,136 @@ export function NavigationMenuPageContent() {
   const { openWindow } = useWindowManager();
   const { closeNavigationMenu } = useNavigationMenu();
 
-  const menuItems: MenuItem[] = useMemo(
+  const menu: MenuItems[] = useMemo(
     () => [
       {
-        id: 1,
-        title: t('Create account'),
-        iconPath: 'assets/icons/plus.svg'
+        headerLabel: t('Account'),
+        items: [
+          {
+            id: 1,
+            title: t('Create account'),
+            iconPath: 'assets/icons/plus.svg'
+          },
+          {
+            id: 2,
+            title: t('Import account'),
+            iconPath: 'assets/icons/upload.svg',
+            handleOnClick: () => {
+              closeNavigationMenu();
+              openWindow({
+                purposeForOpening: PurposeForOpening.ImportAccount
+              }).catch(e => console.error(e));
+            }
+          }
+        ]
       },
       {
-        id: 2,
-        title: t('Import account'),
-        iconPath: 'assets/icons/upload.svg',
-        handleOnClick: () => {
-          closeNavigationMenu();
-          openWindow({
-            purposeForOpening: PurposeForOpening.ImportAccount
-          }).catch(e => console.error(e));
-        }
+        headerLabel: t('Settings'),
+        items: [
+          {
+            id: 1,
+            title: t('Connected sites'),
+            iconPath: 'assets/icons/link.svg',
+            currentValue: countOfConnectedSites,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.ConnectedSites);
+            }
+          },
+          {
+            id: 2,
+            title: t('Timeout'),
+            iconPath: 'assets/icons/lock.svg',
+            currentValue: TimeoutDurationSetting[timeoutDurationSetting],
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.Timeout);
+            }
+          }
+        ]
       },
       {
-        id: 3,
-        title: t('Connected sites'),
-        iconPath: 'assets/icons/link.svg',
-        currentValue: countOfConnectedSites,
-        handleOnClick: () => {
-          closeNavigationMenu();
-          navigate(RouterPath.ConnectedSites);
-        }
+        headerLabel: t('Security'),
+        items: [
+          {
+            id: 1,
+            title: t('Back up your secret phrase'),
+            iconPath: 'assets/icons/secure.svg'
+          },
+          {
+            id: 2,
+            title: t('Download account keys'),
+            subTitle: t('For all accounts imported with a file'),
+            iconPath: 'assets/icons/download.svg'
+          }
+        ]
       },
       {
-        id: 4,
-        title: t('Timeout'),
-        iconPath: 'assets/icons/lock.svg',
-        currentValue: TimeoutDurationSetting[timeoutDurationSetting],
-        handleOnClick: () => {
-          closeNavigationMenu();
-          navigate(RouterPath.Timeout);
-        }
+        headerLabel: t('More'),
+        items: [
+          {
+            id: 1,
+            title: t('Share feedback'),
+            iconPath: 'assets/icons/chat.svg'
+          },
+          {
+            id: 2,
+            title: t('About us'),
+            iconPath: 'assets/icons/team.svg'
+          }
+        ]
       }
     ],
     [
-      navigate,
       t,
-      timeoutDurationSetting,
+      navigate,
+      openWindow,
       closeNavigationMenu,
       countOfConnectedSites,
-      openWindow
+      timeoutDurationSetting
     ]
   );
+
   const iconSize = 24;
 
   return (
     <ContentContainer>
-      <List
-        rows={menuItems}
-        marginLeftForItemSeparatorLine={60}
-        renderRow={menuItem => (
-          <ListItemClickableContainer
-            key={menuItem.id}
-            onClick={menuItem.handleOnClick}
-          >
-            <SvgIcon
-              src={menuItem.iconPath}
-              size={iconSize}
-              color="contentBlue"
-            />
-            <SpaceBetweenContainer>
-              <Typography type="body">{menuItem.title}</Typography>
-              {menuItem.currentValue != null && (
-                <Typography type="bodySemiBold" color="contentBlue">
-                  {menuItem.currentValue}
-                </Typography>
-              )}
-            </SpaceBetweenContainer>
-          </ListItemClickableContainer>
-        )}
-      />
+      {menu.map(({ headerLabel, items }) => (
+        <List
+          headerLabel={headerLabel}
+          rows={items}
+          marginLeftForItemSeparatorLine={60}
+          renderRow={menuItem => (
+            <ListItemClickableContainer
+              key={menuItem.id}
+              onClick={menuItem.handleOnClick}
+            >
+              <SvgIcon
+                src={menuItem.iconPath}
+                size={iconSize}
+                color="contentBlue"
+              />
+              <SpaceBetweenContainer>
+                {menuItem.subTitle ? (
+                  <FlexColumn>
+                    <Typography type="body">{menuItem.title}</Typography>
+                    <Typography type="listSubtext" color="contentSecondary">
+                      {menuItem.subTitle}
+                    </Typography>
+                  </FlexColumn>
+                ) : (
+                  <Typography type="body">{menuItem.title}</Typography>
+                )}
+                {menuItem.currentValue != null && (
+                  <Typography type="bodySemiBold" color="contentBlue">
+                    {menuItem.currentValue}
+                  </Typography>
+                )}
+              </SpaceBetweenContainer>
+            </ListItemClickableContainer>
+          )}
+        />
+      ))}
     </ContentContainer>
   );
 }
