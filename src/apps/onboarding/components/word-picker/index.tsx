@@ -6,6 +6,7 @@ import { FlexRow } from '@libs/layout';
 import { WordTag } from '../word-tag';
 
 const WordPickerContainer = styled(FlexRow)`
+  flex-wrap: wrap;
   gap: 7px;
 
   color: ${({ theme }) => theme.color.contentBlue};
