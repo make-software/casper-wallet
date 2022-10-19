@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 import { PartialPhraseArray } from './types';
 
 function getRandomInt(min: number, max: number): number {
@@ -8,50 +7,27 @@ function getRandomInt(min: number, max: number): number {
 }
 
 interface WordCollections {
-  hiddenWordIndexes: number[];
-  partialPhrase: PartialPhraseArray;
-  setPartialPhrase: Dispatch<SetStateAction<PartialPhraseArray>>;
+  initialHiddenWordIndexes: number[];
+  initialPartialPhrase: PartialPhraseArray;
 }
 
-function buildInitialWordsCollection(stringifyPhrase: string) {
-  try {
-    const phrase = JSON.parse(stringifyPhrase);
-    const collectionSize = 6;
-    const initialHiddenWordIndexes: number[] = [];
-    const initialPartialPhrase: PartialPhraseArray = [...phrase];
+export function buildInitialWordsCollection(phrase: string[]): WordCollections {
+  const collectionSize = 6;
+  const initialHiddenWordIndexes: number[] = [];
+  const initialPartialPhrase: PartialPhraseArray = [...phrase];
 
-    let i = 0;
+  let i = 0;
 
-    while (i < collectionSize) {
-      const index = getRandomInt(0, phrase.length - 1);
+  while (i < collectionSize) {
+    const index = getRandomInt(0, phrase.length - 1);
 
-      if (initialPartialPhrase[index] != null) {
-        initialHiddenWordIndexes.push(index);
-        initialPartialPhrase[index] = null;
+    if (initialPartialPhrase[index] != null) {
+      initialHiddenWordIndexes.push(index);
+      initialPartialPhrase[index] = null;
 
-        i++;
-      }
+      i++;
     }
-
-    return { initialHiddenWordIndexes, initialPartialPhrase };
-  } catch (e) {
-    throw e;
-  }
-}
-
-export function useWordsCollection(stringifyPhrase: string): WordCollections {
-  const [hiddenWordIndexes, setHiddenWordIndexes] = useState<number[]>([]);
-  const [partialPhrase, setPartialPhrase] = useState<PartialPhraseArray>([]);
-
-  const { initialHiddenWordIndexes, initialPartialPhrase } = useMemo(
-    () => buildInitialWordsCollection(stringifyPhrase),
-    [stringifyPhrase]
-  );
-
-  if (partialPhrase.length === 0 || hiddenWordIndexes.length === 0) {
-    setPartialPhrase(initialPartialPhrase);
-    setHiddenWordIndexes(initialHiddenWordIndexes);
   }
 
-  return { partialPhrase, setPartialPhrase, hiddenWordIndexes };
+  return { initialHiddenWordIndexes, initialPartialPhrase };
 }

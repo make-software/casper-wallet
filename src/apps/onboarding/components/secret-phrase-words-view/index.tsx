@@ -17,7 +17,8 @@ import {
 import { SvgIcon, Typography, hexToRGBA } from '@libs/ui';
 
 import { WordTag } from '../word-tag';
-import { useWordsCollection } from './utils';
+import { PartialPhraseArray } from './types';
+import { buildInitialWordsCollection } from './utils';
 
 const allCornersBorderRadius = css`
   border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
@@ -117,13 +118,26 @@ export function SecretPhraseWordsView({
 
   const { t } = useTranslation();
   const [isBlurred, setIsBlurred] = useState(true);
+  const [hiddenWordIndexes, setHiddenWordIndexes] = useState<number[]>([]);
+  const [partialPhrase, setPartialPhrase] = useState<PartialPhraseArray>([]);
   const [selectedHiddenWordIndexes, setSelectedHiddenWordIndexes] = useState<
     number[]
   >([]);
 
-  const stringifyPhrase = useMemo(() => JSON.stringify(phrase), []);
-  const { partialPhrase, setPartialPhrase, hiddenWordIndexes } =
-    useWordsCollection(stringifyPhrase);
+  const strPhrase = phrase.toString();
+  const { initialPartialPhrase, initialHiddenWordIndexes } = useMemo(
+    () => buildInitialWordsCollection(phrase),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [strPhrase]
+  );
+
+  if (partialPhrase.length === 0) {
+    setPartialPhrase(initialPartialPhrase);
+  }
+
+  if (hiddenWordIndexes.length === 0) {
+    setHiddenWordIndexes(initialHiddenWordIndexes);
+  }
 
   useEffect(() => {
     if (
