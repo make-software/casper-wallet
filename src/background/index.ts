@@ -6,10 +6,7 @@ import {
   CheckSecretKeyExistAction
 } from '@src/background/redux/import-account-actions-should-be-removed';
 import { isReduxAction } from '@src/background/redux/redux-action';
-import {
-  getMainStoreSingleton
-  // REDUX_STORAGE_KEY
-} from '@src/background/redux/utils';
+import { getMainStoreSingleton } from '@src/background/redux/utils';
 import {
   accountCreated,
   accountDisconnected,
@@ -48,6 +45,10 @@ import { selectWindowId } from '@src/background/redux/windowManagement/selectors
 import { emitSdkEventToAllActiveTabs, sdkEvent } from '@src/content/sdk-event';
 import { isSDKMessage, SdkMessage, sdkMessage } from '@src/content/sdk-message';
 import { PurposeForOpening } from '@src/hooks';
+import {
+  enableOnboardingFlow,
+  openOnboardingUi
+} from '@src/background/open-onboarding-flow';
 
 import { openWindow } from './open-window';
 import { deployPayloadReceived } from './redux/deploys/actions';
@@ -59,14 +60,22 @@ browser.runtime.onInstalled.addListener(() => {
   // browser.storage.local.remove([REDUX_STORAGE_KEY]);
 });
 
+async function handleActionClick() {
+  await openOnboardingUi();
+}
+
+browser.action && browser.action.onClicked.addListener(handleActionClick);
+browser.browserAction &&
+  browser.browserAction.onClicked.addListener(handleActionClick);
+
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 browser.runtime.onMessage.addListener(
   async (action: RootAction | SdkMessage, sender) => {
+    const store = await getMainStoreSingleton();
     return new Promise(async (sendResponse, sendError) => {
       // Popup comms handling
-      const store = await getMainStoreSingleton();
       if (isSDKMessage(action)) {
-        console.error(`BACKEND SDK MESSAGE:`, JSON.stringify(action));
+        // console.warn(`BACKEND SDK MESSAGE:`, JSON.stringify(action));
 
         switch (action.type) {
           case getType(sdkMessage.connectRequest): {
@@ -193,9 +202,15 @@ browser.runtime.onMessage.addListener(
             );
         }
       } else if (isReduxAction(action)) {
-        console.error(`BACKEND REDUX ACTION:`, JSON.stringify(action));
+        // console.warn(`BACKEND REDUX ACTION:`, JSON.stringify(action));
 
         switch (action.type) {
+          case getType(vaultReseted): {
+            store.dispatch(action);
+            await enableOnboardingFlow();
+            return sendResponse(undefined);
+          }
+
           case getType(popupWindowInit):
           case getType(connectWindowInit):
           case getType(importWindowInit):
@@ -203,7 +218,6 @@ browser.runtime.onMessage.addListener(
           case getType(windowIdChanged):
           case getType(windowIdCleared):
           case getType(vaultCreated):
-          case getType(vaultReseted):
           case getType(vaultLocked):
           case getType(vaultUnlocked):
           case getType(accountCreated):
