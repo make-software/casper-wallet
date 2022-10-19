@@ -71,19 +71,15 @@ export function useAccountManager() {
       if (newActiveAccount == null) {
         throw Error('new active account should be found');
       }
+      const isConnected = connectedAccountNames.includes(newActiveAccount.name);
 
-      const isActiveAccountConnected = connectedAccountNames.some(
-        name => name === newActiveAccount.name
+      emitSdkEventToAllActiveTabs(
+        sdkEvent.changedActiveConnectedAccountEvent({
+          isConnected,
+          isLocked: isLocked,
+          activeKey: newActiveAccount.publicKey
+        })
       );
-      if (isActiveAccountConnected) {
-        emitSdkEventToAllActiveTabs(
-          sdkEvent.changedActiveConnectedAccountEvent({
-            isConnected: true,
-            isLocked: isLocked,
-            activeKey: newActiveAccount.publicKey
-          })
-        );
-      }
 
       dispatchToMainStore(activeAccountChanged(newActiveAccount.name));
     },
@@ -157,37 +153,15 @@ export function useAccountManager() {
         return;
       }
 
-      // disconnected active account, so need to change
+      // disconnected active account, so need to emit event
       if (accountName === activeAccount.name) {
-        const newActiveAccountFromConnected =
-          findAccountInAListClosestToGivenAccountFilteredByNames(
-            accounts,
-            activeAccount,
-            connectedAccountNames.filter(
-              accountName => accountName !== activeAccount.name
-            )
-          );
-        if (newActiveAccountFromConnected) {
-          emitSdkEventToAllActiveTabs(
-            sdkEvent.changedActiveConnectedAccountEvent({
-              isConnected: true,
-              isLocked: isLocked,
-              activeKey: newActiveAccountFromConnected.publicKey
-            })
-          );
-          dispatchToMainStore(
-            activeAccountChanged(newActiveAccountFromConnected.name)
-          );
-        } else {
-          // it was last account
-          emitSdkEventToAllActiveTabs(
-            sdkEvent.disconnectedActiveAccountEvent({
-              isConnected: false,
-              isLocked: isLocked,
-              activeKey: activeAccount?.publicKey
-            })
-          );
-        }
+        emitSdkEventToAllActiveTabs(
+          sdkEvent.disconnectedActiveAccountEvent({
+            isConnected: false,
+            isLocked: isLocked,
+            activeKey: activeAccount?.publicKey
+          })
+        );
       }
 
       dispatchToMainStore(
@@ -197,13 +171,7 @@ export function useAccountManager() {
         })
       );
     },
-    [
-      accountNamesByOriginDict,
-      accounts,
-      activeAccount,
-      connectedAccountNames,
-      isLocked
-    ]
+    [accountNamesByOriginDict, activeAccount, isLocked]
   );
 
   const disconnectAllAccountsWithEvent = useCallback(

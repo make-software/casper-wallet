@@ -22,6 +22,7 @@ import {
 } from '@src/libs/layout';
 
 import {
+  selectConnectedAccountNamesWithOrigin,
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
@@ -50,18 +51,25 @@ export function AccountsSelectionContent({
 }: AccountsSelectionContentProps) {
   const { t } = useTranslation();
 
-  const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const accounts = useSelector(selectVaultAccounts);
+  const connectedAccountNames = useSelector(
+    selectConnectedAccountNamesWithOrigin
+  );
+
+  const notConnectedAccounts = accounts.filter(
+    a => !connectedAccountNames.includes(a.name)
+  );
 
   const handleSelectAll = useCallback(() => {
-    setSelectedAccountNames(accounts.map(account => account.name));
-  }, [accounts, setSelectedAccountNames]);
+    setSelectedAccountNames(notConnectedAccounts.map(account => account.name));
+  }, [notConnectedAccounts, setSelectedAccountNames]);
 
   const handleUnselectAll = useCallback(() => {
     setSelectedAccountNames([]);
   }, [setSelectedAccountNames]);
 
-  const areAllAccountsSelected = accounts.every(account =>
+  const areAllAccountsSelected = notConnectedAccounts.every(account =>
     selectedAccountNames.includes(account.name)
   );
 
@@ -74,7 +82,7 @@ export function AccountsSelectionContent({
       : { caption: captionSelectAll, onClick: handleSelectAll };
   }, [t, areAllAccountsSelected, handleSelectAll, handleUnselectAll]);
 
-  const accountsListItems = accounts.map(account => ({
+  const accountsListItems = notConnectedAccounts.map(account => ({
     ...account,
     id: account.name
   }));

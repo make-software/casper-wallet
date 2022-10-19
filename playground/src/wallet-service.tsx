@@ -146,6 +146,8 @@ export const WalletServiceProvider = props => {
         const action: WalletState = JSON.parse(msg.detail);
         if (action.isConnected && action.activeKey) {
           updatePublicKey(action.activeKey);
+        } else {
+          updatePublicKey(null);
         }
       } catch (err) {
         console.error(err);
