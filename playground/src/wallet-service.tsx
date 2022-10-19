@@ -13,7 +13,7 @@ let casperWalletInstance;
 const getCasperWalletInstance = (): ReturnType<typeof CasperWalletProvider> => {
   try {
     if (casperWalletInstance == null) {
-      casperWalletInstance = new (window as any).CasperWalletProvider();
+      casperWalletInstance = (window as any).CasperWalletProvider();
     }
     return casperWalletInstance;
   } catch (err) {}
