@@ -1,4 +1,10 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState
+} from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import styled, { css } from 'styled-components';
 
@@ -11,8 +17,7 @@ import {
 import { SvgIcon, Typography, hexToRGBA } from '@libs/ui';
 
 import { WordTag } from '../word-tag';
-import { PartialPhraseArray } from './types';
-import { buildWordsCollection } from './utils';
+import { useWordsCollection } from './utils';
 
 const allCornersBorderRadius = css`
   border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
@@ -112,17 +117,13 @@ export function SecretPhraseWordsView({
 
   const { t } = useTranslation();
   const [isBlurred, setIsBlurred] = useState(true);
-  const [hiddenWordIndexes, setHiddenWordIndexes] = useState<number[]>([]);
-  const [partialPhrase, setPartialPhrase] = useState<PartialPhraseArray>([]);
   const [selectedHiddenWordIndexes, setSelectedHiddenWordIndexes] = useState<
     number[]
   >([]);
 
-  useEffect(() => {
-    const { hiddenWordIndexes, partialPhrase } = buildWordsCollection(phrase);
-    setPartialPhrase(partialPhrase);
-    setHiddenWordIndexes(hiddenWordIndexes);
-  }, [phrase]);
+  const stringifyPhrase = useMemo(() => JSON.stringify(phrase), []);
+  const { partialPhrase, setPartialPhrase, hiddenWordIndexes } =
+    useWordsCollection(stringifyPhrase);
 
   useEffect(() => {
     if (
