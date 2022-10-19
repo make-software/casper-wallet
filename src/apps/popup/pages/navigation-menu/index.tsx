@@ -42,13 +42,13 @@ export const SpaceBetweenContainer = styled(AlignedSpaceBetweenFlexRow)`
 interface MenuItem {
   id: number;
   title: string;
-  subTitle?: string;
+  description?: string;
   iconPath: string;
   currentValue?: string | number;
   handleOnClick?: () => void;
 }
 
-interface MenuItems {
+interface MenuGroup {
   headerLabel: string;
   items: MenuItem[];
 }
@@ -63,7 +63,7 @@ export function NavigationMenuPageContent() {
   const { openWindow } = useWindowManager();
   const { closeNavigationMenu } = useNavigationMenu();
 
-  const menu: MenuItems[] = useMemo(
+  const menuGroups: MenuGroup[] = useMemo(
     () => [
       {
         headerLabel: t('Account'),
@@ -122,7 +122,7 @@ export function NavigationMenuPageContent() {
           {
             id: 2,
             title: t('Download account keys'),
-            subTitle: t('For all accounts imported with a file'),
+            description: t('For all accounts imported with a file'),
             iconPath: 'assets/icons/download.svg'
           }
         ]
@@ -153,11 +153,9 @@ export function NavigationMenuPageContent() {
     ]
   );
 
-  const iconSize = 24;
-
   return (
     <ContentContainer>
-      {menu.map(({ headerLabel, items }) => (
+      {menuGroups.map(({ headerLabel, items }) => (
         <List
           headerLabel={headerLabel}
           rows={items}
@@ -167,17 +165,13 @@ export function NavigationMenuPageContent() {
               key={menuItem.id}
               onClick={menuItem.handleOnClick}
             >
-              <SvgIcon
-                src={menuItem.iconPath}
-                size={iconSize}
-                color="contentBlue"
-              />
+              <SvgIcon src={menuItem.iconPath} color="contentBlue" />
               <SpaceBetweenContainer>
-                {menuItem.subTitle ? (
+                {menuItem.description ? (
                   <FlexColumn>
                     <Typography type="body">{menuItem.title}</Typography>
                     <Typography type="listSubtext" color="contentSecondary">
-                      {menuItem.subTitle}
+                      {menuItem.description}
                     </Typography>
                   </FlexColumn>
                 ) : (
