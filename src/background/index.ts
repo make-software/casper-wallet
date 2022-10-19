@@ -31,7 +31,9 @@ import {
   selectVaultAccountsNames,
   selectVaultAccountsSecretKeysBase64,
   selectVaultActiveAccount,
-  selectVaultIsLocked
+  selectVaultIsLocked,
+  selectVaultHasAccount,
+  selectVaultDoesExist
 } from '@src/background/redux/vault/selectors';
 import {
   connectWindowInit,
@@ -47,17 +49,30 @@ import { isSDKMessage, SdkMessage, sdkMessage } from '@src/content/sdk-message';
 import { PurposeForOpening } from '@src/hooks';
 import {
   enableOnboardingFlow,
+  disableOnboardingFlow,
   openOnboardingUi
 } from '@src/background/open-onboarding-flow';
 
 import { openWindow } from './open-window';
 import { deployPayloadReceived } from './redux/deploys/actions';
 
-browser.runtime.onInstalled.addListener(() => {
+browser.runtime.onInstalled.addListener(async () => {
   // this will run on installation or update so
   // first clear previous rules, then register new rules
   // DEV MODE: clean store on installation
   // browser.storage.local.remove([REDUX_STORAGE_KEY]);
+
+  const store = await getMainStoreSingleton();
+  const state = store.getState();
+
+  const vaultDoesExists = selectVaultDoesExist(state);
+  const vaultHasAccount = selectVaultHasAccount(state);
+
+  if (!vaultDoesExists || !vaultHasAccount) {
+    await openOnboardingUi();
+  } else {
+    await disableOnboardingFlow();
+  }
 });
 
 async function handleActionClick() {

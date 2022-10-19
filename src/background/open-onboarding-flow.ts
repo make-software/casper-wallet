@@ -8,7 +8,7 @@ export async function disableOnboardingFlow() {
   browser.action?.setPopup && browser.action.setPopup({ popup: 'popup.html' });
   browser.browserAction?.setPopup &&
     browser.browserAction.setPopup({ popup: 'popup.html' });
-  return browser.storage.local.remove(storageKey);
+  browser.storage.local.remove(storageKey);
 }
 
 export async function enableOnboardingFlow() {
