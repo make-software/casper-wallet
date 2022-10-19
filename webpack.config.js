@@ -40,6 +40,9 @@ if (fileSystem.existsSync(secretsPath)) {
 }
 
 const options = {
+  experiments: {
+    topLevelAwait: true
+  },
   mode: process.env.NODE_ENV || 'development',
   entry: {
     popup: path.join(__dirname, 'src', 'apps', 'popup', 'index.tsx'),
