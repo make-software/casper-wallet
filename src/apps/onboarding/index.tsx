@@ -1,3 +1,5 @@
+import '@libs/i18n/i18n';
+
 import React, { Suspense, useEffect, useState } from 'react';
 import { render } from 'react-dom';
 import { isActionOf } from 'typesafe-actions';
