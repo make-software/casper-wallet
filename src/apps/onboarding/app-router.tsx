@@ -42,96 +42,111 @@ export function AppRouter() {
       [name]: value
     }));
 
-  function NoVaultRoutes() {
-    return (
-      <HashRouter>
-        <Routes>
-          <Route path={RouterPath.Any} element={<WelcomePage />} />
-          <Route
-            path={RouterPath.CreateVaultPassword}
-            element={
-              <CreateVaultPasswordPage saveIsLoggedIn={saveIsLoggedIn} />
-            }
-          />
-        </Routes>
-      </HashRouter>
-    );
-  }
-
-  function UnauthorizedUserRoutes() {
-    return (
-      <HashRouter>
-        <Routes>
-          <Route
-            path={RouterPath.Any}
-            element={<UnlockWalletPage saveIsLoggedIn={saveIsLoggedIn} />}
-          />
-          <Route path={RouterPath.ResetWallet} element={<ResetWalletPage />} />
-        </Routes>
-      </HashRouter>
-    );
-  }
-
-  function AuthorizedUserRoutes() {
-    return (
-      <HashRouter>
-        <Routes>
-          <Route
-            path={RouterPath.Any}
-            element={
-              <CreateSecretPhraseConfirmationPage setFormState={setFormState} />
-            }
-          />
-          <Route
-            path={RouterPath.CreateSecretPhrase}
-            element={<CreateSecretPhrasePage />}
-          />
-          <Route
-            path={RouterPath.RecoverFromSecretPhrase}
-            element={<RecoverFromSecretPhrasePage />}
-          />
-          <Route
-            path={RouterPath.WriteDownSecretPhrase}
-            element={
-              <WriteDownSecretPhrasePage
-                phrase={onboardingFormState.secretPhrase}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.ConfirmSecretPhrase}
-            element={
-              <ConfirmSecretPhrasePage
-                phrase={onboardingFormState.secretPhrase}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.ConfirmSecretPhraseSuccess}
-            element={<ConfirmSecretPhraseSuccessPage />}
-          />
-          <Route
-            path={RouterPath.OnboardingSuccess}
-            element={<OnboardingSuccessPage />}
-          />
-          <Route
-            path={RouterPath.OnboardingError}
-            element={<OnboardingErrorPage />}
-          />
-        </Routes>
-      </HashRouter>
-    );
-  }
-
   const doesVaultExists = useSelector(selectVaultDoesExist);
 
   if (doesVaultExists) {
     if (isLoggedIn) {
-      return <AuthorizedUserRoutes />;
+      return (
+        <AuthorizedUserRoutes
+          onboardingFormState={onboardingFormState}
+          setFormState={setFormState}
+        />
+      );
     }
 
-    return <UnauthorizedUserRoutes />;
+    return <UnauthorizedUserRoutes saveIsLoggedIn={saveIsLoggedIn} />;
   }
 
-  return <NoVaultRoutes />;
+  return <NoVaultRoutes saveIsLoggedIn={saveIsLoggedIn} />;
+}
+
+type UnauthorizedRouterProps = {
+  saveIsLoggedIn: (isLoggedInNextValue: boolean) => void;
+};
+
+function NoVaultRoutes({ saveIsLoggedIn }: UnauthorizedRouterProps) {
+  return (
+    <HashRouter>
+      <Routes>
+        <Route path={RouterPath.Any} element={<WelcomePage />} />
+        <Route
+          path={RouterPath.CreateVaultPassword}
+          element={<CreateVaultPasswordPage saveIsLoggedIn={saveIsLoggedIn} />}
+        />
+      </Routes>
+    </HashRouter>
+  );
+}
+
+function UnauthorizedUserRoutes({ saveIsLoggedIn }: UnauthorizedRouterProps) {
+  return (
+    <HashRouter>
+      <Routes>
+        <Route
+          path={RouterPath.Any}
+          element={<UnlockWalletPage saveIsLoggedIn={saveIsLoggedIn} />}
+        />
+        <Route path={RouterPath.ResetWallet} element={<ResetWalletPage />} />
+      </Routes>
+    </HashRouter>
+  );
+}
+
+type AuthorizedRouterProps = {
+  onboardingFormState: FormState;
+  setFormState: SetFormState;
+};
+
+function AuthorizedUserRoutes({
+  setFormState,
+  onboardingFormState
+}: AuthorizedRouterProps) {
+  return (
+    <HashRouter>
+      <Routes>
+        <Route
+          path={RouterPath.Any}
+          element={
+            <CreateSecretPhraseConfirmationPage setFormState={setFormState} />
+          }
+        />
+        <Route
+          path={RouterPath.CreateSecretPhrase}
+          element={<CreateSecretPhrasePage />}
+        />
+        <Route
+          path={RouterPath.RecoverFromSecretPhrase}
+          element={<RecoverFromSecretPhrasePage />}
+        />
+        <Route
+          path={RouterPath.WriteDownSecretPhrase}
+          element={
+            <WriteDownSecretPhrasePage
+              phrase={onboardingFormState.secretPhrase}
+            />
+          }
+        />
+        <Route
+          path={RouterPath.ConfirmSecretPhrase}
+          element={
+            <ConfirmSecretPhrasePage
+              phrase={onboardingFormState.secretPhrase}
+            />
+          }
+        />
+        <Route
+          path={RouterPath.ConfirmSecretPhraseSuccess}
+          element={<ConfirmSecretPhraseSuccessPage />}
+        />
+        <Route
+          path={RouterPath.OnboardingSuccess}
+          element={<OnboardingSuccessPage />}
+        />
+        <Route
+          path={RouterPath.OnboardingError}
+          element={<OnboardingErrorPage />}
+        />
+      </Routes>
+    </HashRouter>
+  );
 }
