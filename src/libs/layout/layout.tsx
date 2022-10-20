@@ -15,7 +15,7 @@ const Container = styled(FlexColumn)`
 const PageHeader = styled.header``;
 
 const PageContent = styled.div`
-  height: 472px;
+  min-height: 472px;
   overflow-y: auto;
 `;
 
