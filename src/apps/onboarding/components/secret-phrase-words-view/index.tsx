@@ -1,4 +1,10 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState
+} from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import styled, { css } from 'styled-components';
 
@@ -12,7 +18,7 @@ import { SvgIcon, Typography, hexToRGBA } from '@libs/ui';
 
 import { WordTag } from '../word-tag';
 import { PartialPhraseArray } from './types';
-import { buildWordsCollection } from './utils';
+import { buildInitialWordsCollection } from './utils';
 
 const allCornersBorderRadius = css`
   border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
@@ -118,11 +124,20 @@ export function SecretPhraseWordsView({
     number[]
   >([]);
 
-  useEffect(() => {
-    const { hiddenWordIndexes, partialPhrase } = buildWordsCollection(phrase);
-    setPartialPhrase(partialPhrase);
-    setHiddenWordIndexes(hiddenWordIndexes);
-  }, [phrase]);
+  const strPhrase = phrase.toString();
+  const { initialPartialPhrase, initialHiddenWordIndexes } = useMemo(
+    () => buildInitialWordsCollection(phrase),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [strPhrase]
+  );
+
+  if (partialPhrase.length === 0) {
+    setPartialPhrase(initialPartialPhrase);
+  }
+
+  if (hiddenWordIndexes.length === 0) {
+    setHiddenWordIndexes(initialHiddenWordIndexes);
+  }
 
   useEffect(() => {
     if (

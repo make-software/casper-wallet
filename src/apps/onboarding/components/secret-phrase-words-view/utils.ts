@@ -7,27 +7,27 @@ function getRandomInt(min: number, max: number): number {
 }
 
 interface WordCollections {
-  hiddenWordIndexes: number[];
-  partialPhrase: PartialPhraseArray;
+  initialHiddenWordIndexes: number[];
+  initialPartialPhrase: PartialPhraseArray;
 }
 
-export function buildWordsCollection(phrase: string[]): WordCollections {
+export function buildInitialWordsCollection(phrase: string[]): WordCollections {
   const collectionSize = 6;
-  const hiddenWordIndexes: number[] = [];
-  const partialPhrase: PartialPhraseArray = [...phrase];
+  const initialHiddenWordIndexes: number[] = [];
+  const initialPartialPhrase: PartialPhraseArray = [...phrase];
 
   let i = 0;
 
   while (i < collectionSize) {
     const index = getRandomInt(0, phrase.length - 1);
 
-    if (partialPhrase[index] != null) {
-      hiddenWordIndexes.push(index);
-      partialPhrase[index] = null;
+    if (initialPartialPhrase[index] != null) {
+      initialHiddenWordIndexes.push(index);
+      initialPartialPhrase[index] = null;
 
       i++;
     }
   }
 
-  return { hiddenWordIndexes, partialPhrase };
+  return { initialHiddenWordIndexes, initialPartialPhrase };
 }
