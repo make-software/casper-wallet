@@ -7,25 +7,38 @@ import {
   TextContainer
 } from '@src/libs/layout';
 import { SvgIcon, Typography } from '@src/libs/ui';
-import { ErrorContent } from '@src/libs/layout/error/types';
+
+import { ErrorPageContentProps } from './types';
 
 const IllustrationContainer = styled.div`
   margin: 35px 16px;
 `;
 
-export function ErrorContentPage({
+export function ErrorPageContent({
   errorContentText,
-  errorHeaderText
-}: ErrorContent) {
+  errorHeaderText,
+  layoutType
+}: ErrorPageContentProps) {
   if (errorContentText == null || errorHeaderText == null) {
     throw new Error('Cannot render ErrorPage: not enough props');
+  }
+
+  if (layoutType !== 'tab' && layoutType !== 'window') {
+    throw new Error('Unknown layout type');
   }
 
   return (
     <PageContainer>
       <ContentContainer>
         <IllustrationContainer>
-          <SvgIcon src="assets/illustrations/process-error.svg" size={140} />
+          <SvgIcon
+            src={
+              layoutType === 'tab'
+                ? 'assets/illustrations/error.svg'
+                : 'assets/illustrations/process-error.svg'
+            }
+            size={140}
+          />
         </IllustrationContainer>
         <TextContainer>
           <Typography type="header">{errorHeaderText}</Typography>

@@ -1,12 +1,12 @@
-import React, { ReactElement } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { FlexColumn } from '@layout/containers';
 
 interface Props {
-  Header: ReactElement;
-  Content: ReactElement;
-  renderFooter?: () => ReactElement;
+  renderHeader?: () => JSX.Element;
+  renderContent: () => JSX.Element;
+  renderFooter?: () => JSX.Element;
 }
 
 const Container = styled(FlexColumn)`
@@ -22,11 +22,15 @@ const PageContent = styled.div`
 
 const PageFooter = styled.footer``;
 
-export function LayoutWindow({ Header, Content, renderFooter }: Props) {
+export function LayoutWindow({
+  renderHeader,
+  renderContent,
+  renderFooter
+}: Props) {
   return (
     <Container>
-      <PageHeader>{Header}</PageHeader>
-      <PageContent>{Content}</PageContent>
+      {renderHeader && <PageHeader>{renderHeader()}</PageHeader>}
+      <PageContent>{renderContent()}</PageContent>
       {renderFooter && <PageFooter>{renderFooter()}</PageFooter>}
     </Container>
   );

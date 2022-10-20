@@ -61,8 +61,8 @@ export function SignatureRequestPage() {
 
   return (
     <LayoutWindow
-      Header={<PopupHeader withConnectionStatus />}
-      Content={<SignatureRequestContent deploy={deploy} />}
+      renderHeader={() => <PopupHeader withConnectionStatus />}
+      renderContent={() => <SignatureRequestContent deploy={deploy} />}
       renderFooter={() => (
         <FooterButtonsContainer>
           <Button color="primaryRed" onClick={handleSign}>

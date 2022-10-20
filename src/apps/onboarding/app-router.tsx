@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { SecretPhrase } from '@src/libs/crypto';
 
-import { RouterPath } from '@src/apps/onboarding/router';
+import { SecretPhrase } from '@src/libs/crypto';
+import { ErrorPath, ErrorPage } from '@src/libs/layout/error';
+
+import {
+  RouterPath,
+  useTypedLocation,
+  useTypedNavigate
+} from '@src/apps/onboarding/router';
 
 import { useSessionStorage } from '@src/apps/onboarding/hooks/use-session-storage';
 
@@ -18,7 +24,6 @@ import { WriteDownSecretPhrasePage } from '@src/apps/onboarding/pages/write-down
 import { ConfirmSecretPhrasePage } from '@src/apps/onboarding/pages/confirm-secret-phrase';
 import { ConfirmSecretPhraseSuccessPage } from '@src/apps/onboarding/pages/confirm-secret-phrase-success';
 import { OnboardingSuccessPage } from '@src/apps/onboarding/pages/onboarding-success';
-import { OnboardingErrorPage } from '@src/apps/onboarding/pages/onboarding-error';
 
 import { selectVaultDoesExist } from '@background/redux/vault/selectors';
 
@@ -143,8 +148,14 @@ function AuthorizedUserRoutes({
           element={<OnboardingSuccessPage />}
         />
         <Route
-          path={RouterPath.OnboardingError}
-          element={<OnboardingErrorPage />}
+          path={ErrorPath}
+          element={
+            <ErrorPage
+              createTypedLocation={useTypedLocation}
+              createTypedNavigate={useTypedNavigate}
+              layoutType="tab"
+            />
+          }
         />
       </Routes>
     </HashRouter>

@@ -35,21 +35,21 @@ export function AccountsSelectionPage({
 
   return (
     <LayoutWindow
-      Header={
+      renderHeader={() => (
         <PopupHeader
           renderSubmenuBarItems={() => (
             <HeaderSubmenuBarNavLink linkType="cancelWindow" />
           )}
         />
-      }
-      Content={
+      )}
+      renderContent={() => (
         <AccountsSelectionContent
           selectedAccountNames={selectedAccountNames}
           setSelectedAccountNames={setSelectedAccountNames}
           origin={origin}
           headerText={title}
         />
-      }
+      )}
       renderFooter={() => (
         <FooterButtonsContainer>
           <TextCentredContainer>

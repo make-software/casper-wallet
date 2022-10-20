@@ -2,8 +2,14 @@ import React from 'react';
 
 import { SignatureRequestPage } from './pages/signature-request';
 import { HashRouter, Route, Routes } from 'react-router-dom';
-import { RouterPath } from '@src/apps/signature-request/router';
-import { ErrorPage } from '@src/apps/signature-request/pages/error';
+
+import { ErrorPath, ErrorPage } from '@src/libs/layout/error';
+
+import {
+  RouterPath,
+  useTypedLocation,
+  useTypedNavigate
+} from '@src/apps/signature-request/router';
 
 export function App() {
   return (
@@ -13,7 +19,16 @@ export function App() {
           path={RouterPath.SignatureRequest}
           element={<SignatureRequestPage />}
         />
-        <Route path={RouterPath.Error} element={<ErrorPage />} />
+        <Route
+          path={ErrorPath}
+          element={
+            <ErrorPage
+              createTypedNavigate={useTypedNavigate}
+              createTypedLocation={useTypedLocation}
+              layoutType="window"
+            />
+          }
+        />
       </Routes>
     </HashRouter>
   );
