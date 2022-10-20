@@ -4,8 +4,9 @@ import ASN1 from '@lapo/asn1js';
 import Base64 from '@lapo/asn1js/base64';
 // These libraries are required for backward compatibility with Legacy Signer
 import { t } from 'i18next';
+import { privateKeyBytesToBase64 } from './utils';
 
-export function parseSecretKeyFileContent(fileContents: string): {
+export function parseSecretKeyString(fileContents: string): {
   publicKeyHex: string;
   secretKeyBase64: string;
 } {
@@ -47,7 +48,7 @@ export function parseSecretKeyFileContent(fileContents: string): {
   }
 
   return {
-    secretKeyBase64: Buffer.from(keyPair.privateKey).toString('base64'),
+    secretKeyBase64: privateKeyBytesToBase64(keyPair.privateKey),
     publicKeyHex: keyPair.publicKey.toHex()
   };
 }
