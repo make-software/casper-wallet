@@ -1,8 +1,9 @@
 import { getBip44Path } from './bip44';
+import { Bip44Path } from './ledger-casper-fixtures';
 
 describe('bip44', () => {
   it('should generate valid bip44 derivation path for casper coin', () => {
-    expect(getBip44Path(0)).toBe("m/44'/506'/0'/0/0");
-    expect(getBip44Path(1)).toBe("m/44'/506'/0'/0/1");
+    expect(getBip44Path(0)).toBe(Bip44Path.Address0);
+    expect(getBip44Path(1)).toBe(Bip44Path.Address1);
   });
 });
