@@ -32,7 +32,7 @@ export function RecoverFromSecretPhrasePage() {
 
   async function onSubmit({ phrase }: FieldValues) {
     // TODO: Parse phrase and restore wallet from it
-    const isParsingPhraseWasSuccess = false;
+    const isParsingPhraseWasSuccess = true;
     if (isParsingPhraseWasSuccess) {
       const account = initializeWallet();
       dispatchToMainStore(accountCreated(account));

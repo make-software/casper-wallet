@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavigateFunction } from 'react-router/lib/hooks';
 
 import {
   LayoutTab,
@@ -11,7 +12,7 @@ import { Button } from '@libs/ui';
 
 import { closeActiveWindow } from '@background/close-window';
 
-import { ErrorPageProps, LayoutType } from './types';
+import { LayoutType, LayoutTypeProp } from './types';
 import { ErrorPageContent } from './content';
 
 function getLayoutByType(layoutType: LayoutType) {
@@ -23,6 +24,11 @@ function getLayoutByType(layoutType: LayoutType) {
     default:
       throw new Error('Unknown layout type');
   }
+}
+
+export interface ErrorPageProps extends LayoutTypeProp {
+  createTypedNavigate: () => NavigateFunction;
+  createTypedLocation: () => Location & any;
 }
 
 export function ErrorPage({
@@ -67,7 +73,7 @@ export function ErrorPage({
       renderFooter={() => (
         <FooterButtonsContainer>
           <Button
-            color={layoutType === 'tab' ? 'primaryBlue' : 'primaryRed'}
+            color="primaryBlue"
             onClick={
               layoutType === 'tab'
                 ? () =>

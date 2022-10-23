@@ -8,11 +8,13 @@ import {
 } from '@src/libs/layout';
 import { SvgIcon, Typography } from '@src/libs/ui';
 
-import { ErrorPageContentProps } from './types';
+import { ErrorContent, LayoutTypeProp } from './types';
 
 const IllustrationContainer = styled.div`
   margin: 35px 16px;
 `;
+
+export interface ErrorPageContentProps extends ErrorContent, LayoutTypeProp {}
 
 export function ErrorPageContent({
   errorContentText,
