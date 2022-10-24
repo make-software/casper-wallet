@@ -7,8 +7,10 @@ import {
   LayoutTab,
   TabFooterContainer,
   TabHeaderContainer
-} from '@libs/layout';
-import { Button } from '@libs/ui';
+} from '@src/libs/layout';
+import { createErrorLocationState, ErrorPath } from '@src/libs/layout/error';
+import { Button } from '@src/libs/ui';
+
 import { Stepper } from '@src/apps/onboarding/components/stepper';
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
@@ -38,16 +40,17 @@ export function ConfirmSecretPhrasePage({
       initializeWalletWithPhrase(phrase);
       navigate(RouterPath.ConfirmSecretPhraseSuccess);
     } else {
-      navigate(RouterPath.OnboardingError, {
-        state: {
+      navigate(
+        ErrorPath,
+        createErrorLocationState({
           errorHeaderText: t('Ah, that’s not guite a correct secret phrase'),
           errorContentText: t(
             'You can start over again. Make sure you save your secret phrase as a text file or write it down somewhere.'
           ),
           errorPrimaryButtonLabel: t('Start over again'),
           errorRedirectPath: RouterPath.CreateSecretPhraseConfirmation
-        }
-      });
+        })
+      );
     }
   }
 
