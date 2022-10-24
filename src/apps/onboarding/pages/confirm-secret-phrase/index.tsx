@@ -14,11 +14,9 @@ import { Button } from '@src/libs/ui';
 import { Stepper } from '@src/apps/onboarding/components/stepper';
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { accountCreated } from '@src/background/redux/vault/actions';
-import { initializeWallet } from '@src/libs/services';
 
 import { ConfirmSecretPhrasePageContent } from './content';
+import { initializeWalletWithPhrase } from '../../hooks/initialize-wallet';
 
 interface ConfirmSecretPhrasePageProps {
   phrase: string[] | null;
@@ -39,8 +37,7 @@ export function ConfirmSecretPhrasePage({
 
   function handleSubmit() {
     if (isConfirmationSuccess) {
-      const account = initializeWallet();
-      dispatchToMainStore(accountCreated(account));
+      initializeWalletWithPhrase(phrase);
       navigate(RouterPath.ConfirmSecretPhraseSuccess);
     } else {
       navigate(

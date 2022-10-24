@@ -1,6 +1,6 @@
 import {
-  encodeEntropy,
-  decodeEntropy,
+  encodeSeed,
+  decodeSeed,
   generateSecretPhrase,
   validateSecretPhrase
 } from './bip39';
@@ -14,8 +14,8 @@ describe('bip39', () => {
   });
 
   it('should encode and decode entropy correctly', () => {
-    const entropy = encodeEntropy(originalMnemonic);
-    const mnemonic = decodeEntropy(entropy);
+    const entropy = encodeSeed(originalMnemonic);
+    const mnemonic = decodeSeed(entropy);
     expect(mnemonic).toStrictEqual(originalMnemonic);
   });
 });

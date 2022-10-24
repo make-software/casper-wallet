@@ -8,16 +8,28 @@ export function generateSecretPhrase(): SecretPhrase {
   return mnmemonic;
 }
 
-export function encodeEntropy(mnemonic: SecretPhrase): Uint8Array {
-  const entropy = bip39.mnemonicToEntropy(mnemonic.join(' '), wordlist);
+export function secretPhraseToSeed(secretPhrase: SecretPhrase): Uint8Array {
+  const entropy = bip39.mnemonicToSeedSync(secretPhrase.join(' '));
   return entropy;
 }
 
-export function decodeEntropy(entropy: Uint8Array): SecretPhrase {
+export function encodeSeed(secretPhrase: SecretPhrase): Uint8Array {
+  const entropy = bip39.mnemonicToEntropy(secretPhrase.join(' '), wordlist);
+  return entropy;
+}
+
+export function decodeSeed(entropy: Uint8Array): SecretPhrase {
   const mnemonic = bip39.entropyToMnemonic(entropy, wordlist);
   return mnemonic.split(' ');
 }
 
-export function validateSecretPhrase(mnemonic: SecretPhrase): boolean {
-  return bip39.validateMnemonic(mnemonic.join(' '), wordlist);
+export function validateSecretPhrase(
+  secretPhrase: unknown
+): secretPhrase is SecretPhrase {
+  try {
+    const mnemonic = (secretPhrase as any).join(' ');
+    return bip39.validateMnemonic(mnemonic, wordlist);
+  } catch {
+    return false;
+  }
 }
