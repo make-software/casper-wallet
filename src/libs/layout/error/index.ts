@@ -20,4 +20,4 @@ export function createErrorLocationState({
 
 export * from './types';
 export * from './window-page';
-export * from './tap-page';
+export * from './tab-page';
