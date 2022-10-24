@@ -20,6 +20,8 @@ import {
   selectCountOfConnectedSites,
   selectVaultTimeoutDurationSetting
 } from '@src/background/redux/vault/selectors';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import { accountCreated } from '@src/background/redux/vault/actions';
 
 const ListItemClickableContainer = styled(AlignedFlexRow)`
   width: 100%;
@@ -71,7 +73,11 @@ export function NavigationMenuPageContent() {
           {
             id: 1,
             title: t('Create account'),
-            iconPath: 'assets/icons/plus.svg'
+            iconPath: 'assets/icons/plus.svg',
+            handleOnClick: () => {
+              closeNavigationMenu();
+              dispatchToMainStore(accountCreated());
+            }
           },
           {
             id: 2,

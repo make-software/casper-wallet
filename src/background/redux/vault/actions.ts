@@ -1,6 +1,6 @@
 import { createAction } from 'typesafe-actions';
 import { TimeoutDurationSetting } from '@popup/constants';
-import { Account, KeyPair } from '@src/background/redux/vault/types';
+import { Account } from '@src/background/redux/vault/types';
 
 // actions that update storage state
 
@@ -26,7 +26,7 @@ export const vaultUnlocked = createAction('VAULT_UNLOCKED', () => ({
 }>();
 
 export const accountImported = createAction('ACCOUNT_IMPORTED')<Account>();
-export const accountCreated = createAction('ACCOUNT_CREATED')<KeyPair>();
+export const accountCreated = createAction('ACCOUNT_CREATED')<void>();
 export const accountRemoved = createAction('ACCOUNT_REMOVED')<{
   accountName: string;
 }>();

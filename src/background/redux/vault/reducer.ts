@@ -19,6 +19,7 @@ import {
   accountCreated
 } from './actions';
 import { VaultState } from './types';
+import { deriveKeyPair } from '@src/libs/crypto/bip32';
 
 type State = VaultState;
 
@@ -30,7 +31,8 @@ const initialState: State = {
   accounts: [],
   accountNamesByOriginDict: {},
   activeAccountName: null,
-  activeOrigin: null
+  activeOrigin: null,
+  secretPhrase: null
 };
 
 export const reducer = createReducer(initialState)
@@ -68,8 +70,12 @@ export const reducer = createReducer(initialState)
     };
   })
   .handleAction(accountCreated, (state, { payload }): State => {
-    const accountCount = state.accounts.length;
-    const account = { ...payload, name: `Account ${accountCount + 1}` };
+    const accountCount = state.accounts.filter(
+      account => !account.imported
+    ).length;
+    const secretPhrase = state.secretPhrase;
+    const keyPair = deriveKeyPair(secretPhrase, accountCount);
+    const account = { ...keyPair, name: `Account ${accountCount + 1}` };
     return {
       ...state,
       accounts: [...state.accounts, account],
