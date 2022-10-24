@@ -20,8 +20,8 @@ export function AppRouter() {
           path={RouterPath.ImportAccountWithFile}
           element={
             <LayoutWindow
-              Header={<PopupHeader />}
-              Content={<ImportAccountWithFileContentPage />}
+              renderHeader={() => <PopupHeader />}
+              renderContent={() => <ImportAccountWithFileContentPage />}
             />
           }
         />
@@ -29,8 +29,8 @@ export function AppRouter() {
           path={RouterPath.ImportAccountWithFileSuccess}
           element={
             <LayoutWindow
-              Header={<PopupHeader />}
-              Content={<ImportAccountWithFileSuccessContentPage />}
+              renderHeader={() => <PopupHeader />}
+              renderContent={() => <ImportAccountWithFileSuccessContentPage />}
             />
           }
         />
@@ -38,8 +38,8 @@ export function AppRouter() {
           path={RouterPath.ImportAccountWithFileFailure}
           element={
             <LayoutWindow
-              Header={<PopupHeader />}
-              Content={<ImportAccountWithFileFailureContentPage />}
+              renderHeader={() => <PopupHeader />}
+              renderContent={() => <ImportAccountWithFileFailureContentPage />}
             />
           }
         />

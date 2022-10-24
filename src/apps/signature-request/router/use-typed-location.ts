@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom';
-import { LocationState } from '@src/apps/onboarding/router/types';
+import { LocationState } from './types';
 
 export function useTypedLocation() {
   const location = useLocation();

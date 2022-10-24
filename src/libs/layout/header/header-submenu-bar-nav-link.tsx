@@ -35,7 +35,12 @@ export function HeaderSubmenuBarNavLink({
   switch (linkType) {
     case 'close':
       return (
-        <NavLink label={t('Close')} onClick={() => navigate(RouterPath.Home)} />
+        <NavLink
+          label={t('Close')}
+          onClick={() =>
+            onClick != null ? onClick() : navigate(RouterPath.Home)
+          }
+        />
       );
 
     case 'cancel':

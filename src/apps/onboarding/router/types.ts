@@ -1,8 +1,3 @@
-import { RouterPath } from '@src/apps/onboarding/router/paths';
+import { ErrorLocationState } from '@layout/error/types';
 
-export type LocationState = {
-  errorPrimaryButtonLabel?: string;
-  errorHeaderText?: string;
-  errorContentText?: string;
-  errorRedirectPath?: RouterPath;
-};
+export interface LocationState extends ErrorLocationState {}

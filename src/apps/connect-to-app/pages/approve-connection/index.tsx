@@ -42,14 +42,16 @@ export function ApproveConnectionPage({
   const selectedAccountNamesLength = selectedAccountNames.length;
   return (
     <LayoutWindow
-      Header={
+      renderHeader={() => (
         <PopupHeader
           renderSubmenuBarItems={() => (
             <HeaderSubmenuBarNavLink linkType="back" />
           )}
         />
-      }
-      Content={<ApproveConnectionContent origin={origin} title={title} />}
+      )}
+      renderContent={() => (
+        <ApproveConnectionContent origin={origin} title={title} />
+      )}
       renderFooter={() => (
         <FooterButtonsContainer>
           <TextCentredContainer>

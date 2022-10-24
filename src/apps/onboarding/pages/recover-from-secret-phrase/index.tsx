@@ -7,9 +7,11 @@ import {
   LayoutTab,
   TabFooterContainer,
   TabHeaderContainer
-} from '@libs/layout';
-import { Button } from '@libs/ui';
-import { useRecoverFromSecretPhraseForm } from '@libs/ui/forms/recover-from-secret-phrase';
+} from '@src/libs/layout';
+import { createErrorLocationState, ErrorPath } from '@src/libs/layout/error';
+import { Button } from '@src/libs/ui';
+import { useRecoverFromSecretPhraseForm } from '@src/libs/ui/forms/recover-from-secret-phrase';
+
 import { Stepper } from '@src/apps/onboarding/components/stepper';
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
@@ -32,8 +34,9 @@ export function RecoverFromSecretPhrasePage() {
       closeActiveTab();
     } catch (err) {
       console.error(err);
-      navigate(RouterPath.OnboardingError, {
-        state: {
+      navigate(
+        ErrorPath,
+        createErrorLocationState({
           errorHeaderText: t(
             'We can’t connect your wallet with this secret phrase'
           ),
@@ -42,8 +45,8 @@ export function RecoverFromSecretPhrasePage() {
           ),
           errorPrimaryButtonLabel: t('Try again'),
           errorRedirectPath: RouterPath.RecoverFromSecretPhrase
-        }
-      });
+        })
+      );
     }
   }
 
@@ -53,7 +56,10 @@ export function RecoverFromSecretPhrasePage() {
         layoutContext="withStepper"
         renderHeader={() => (
           <TabHeaderContainer>
-            <HeaderSubmenuBarNavLink linkType="back" />
+            <HeaderSubmenuBarNavLink
+              linkType="back"
+              onClick={() => navigate(RouterPath.CreateSecretPhrase)}
+            />
             <Stepper length={3} activeIndex={2} />
           </TabHeaderContainer>
         )}
