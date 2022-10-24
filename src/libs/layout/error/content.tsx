@@ -8,25 +8,24 @@ import {
 } from '@src/libs/layout';
 import { SvgIcon, Typography } from '@src/libs/ui';
 
-import { ErrorContent, LayoutTypeProp } from './types';
+import { ErrorContent } from './types';
 
 const IllustrationContainer = styled.div`
   margin: 35px 16px;
 `;
 
-export interface ErrorPageContentProps extends ErrorContent, LayoutTypeProp {}
+interface ErrorPageContentProps extends ErrorContent {
+  // TODO: I guess will be better pass it through location state. It require extending of location state type
+  illustrationType: 'onboarding' | 'general';
+}
 
 export function ErrorPageContent({
   errorContentText,
   errorHeaderText,
-  layoutType
+  illustrationType
 }: ErrorPageContentProps) {
   if (errorContentText == null || errorHeaderText == null) {
     throw new Error('Cannot render ErrorPage: not enough props');
-  }
-
-  if (layoutType !== 'tab' && layoutType !== 'window') {
-    throw new Error('Unknown layout type');
   }
 
   return (
@@ -35,7 +34,7 @@ export function ErrorPageContent({
         <IllustrationContainer>
           <SvgIcon
             src={
-              layoutType === 'tab'
+              illustrationType === 'onboarding'
                 ? 'assets/illustrations/error.svg'
                 : 'assets/illustrations/process-error.svg'
             }

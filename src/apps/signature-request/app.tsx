@@ -3,7 +3,7 @@ import React from 'react';
 import { SignatureRequestPage } from './pages/signature-request';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
-import { ErrorPath, ErrorPage } from '@src/libs/layout/error';
+import { ErrorPath, WindowErrorPage } from '@src/libs/layout/error';
 
 import {
   RouterPath,
@@ -22,10 +22,9 @@ export function App() {
         <Route
           path={ErrorPath}
           element={
-            <ErrorPage
+            <WindowErrorPage
               createTypedNavigate={useTypedNavigate}
               createTypedLocation={useTypedLocation}
-              layoutType="window"
             />
           }
         />

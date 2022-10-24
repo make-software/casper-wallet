@@ -19,4 +19,5 @@ export function createErrorLocationState({
 }
 
 export * from './types';
-export * from './page';
+export * from './window-page';
+export * from './tap-page';

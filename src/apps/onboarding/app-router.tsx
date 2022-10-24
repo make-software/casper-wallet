@@ -3,7 +3,7 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import { SecretPhrase } from '@src/libs/crypto';
-import { ErrorPath, ErrorPage } from '@src/libs/layout/error';
+import { ErrorPath, TabErrorPage } from '@src/libs/layout/error';
 
 import {
   RouterPath,
@@ -150,10 +150,9 @@ function AuthorizedUserRoutes({
         <Route
           path={ErrorPath}
           element={
-            <ErrorPage
+            <TabErrorPage
               createTypedLocation={useTypedLocation}
               createTypedNavigate={useTypedNavigate}
-              layoutType="tab"
             />
           }
         />
