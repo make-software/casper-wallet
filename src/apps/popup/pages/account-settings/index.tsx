@@ -10,7 +10,10 @@ import {
   HeaderTextContainer
 } from '@src/libs/layout/containers';
 import { SvgIcon, PageTile, Typography } from '@libs/ui';
-import { selectVaultAccountWithName } from '@src/background/redux/vault/selectors';
+import {
+  selectVaultAccountWithName,
+  selectVaultImportedAccounts
+} from '@src/background/redux/vault/selectors';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
@@ -41,7 +44,7 @@ interface AccountIconButtonProps {
   type: 'rename' | 'remove';
 }
 
-export function AccountIconButton({ type }: AccountIconButtonProps) {
+function AccountIconButton({ type }: AccountIconButtonProps) {
   const { accountName } = useParams();
   const navigate = useTypedNavigate();
 
@@ -79,10 +82,21 @@ const AccountSettingsActionsGroupContainer = styled.div`
 `;
 
 export function AccountSettingsActionsGroup() {
+  const { accountName } = useParams();
+  const importedAccountNames = useSelector(selectVaultImportedAccounts).map(
+    a => a.name
+  );
+
+  if (!accountName) {
+    return null;
+  }
+
+  const isImportedAccount = importedAccountNames.includes(accountName);
+
   return (
     <AccountSettingsActionsGroupContainer>
       <AccountIconButton type="rename" />
-      <AccountIconButton type="remove" />
+      {isImportedAccount && <AccountIconButton type="remove" />}
     </AccountSettingsActionsGroupContainer>
   );
 }
