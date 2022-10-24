@@ -17,6 +17,7 @@ import {
   activeAccountChanged,
   activeOriginChanged,
   allAccountsDisconnected,
+  secretPhraseCreated,
   timeoutDurationChanged,
   timeoutRefreshed,
   vaultCreated,
@@ -235,6 +236,7 @@ browser.runtime.onMessage.addListener(
           case getType(vaultCreated):
           case getType(vaultLocked):
           case getType(vaultUnlocked):
+          case getType(secretPhraseCreated):
           case getType(accountCreated):
           case getType(accountImported):
           case getType(accountRemoved):

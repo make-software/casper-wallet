@@ -4,7 +4,10 @@ import { secretPhraseToSeed, validateSecretPhrase } from './bip39';
 import { getBip44Path } from './bip44';
 import { privateKeyBytesToBase64, publicKeyBytesToHex } from './utils';
 
-export function deriveKeyPair(secretPhrase: unknown, index: number): KeyPair {
+export function deriveKeyPair(
+  secretPhrase: null | string[],
+  index: number
+): KeyPair {
   if (!validateSecretPhrase(secretPhrase)) {
     throw Error('secret phrase is invalid');
   }

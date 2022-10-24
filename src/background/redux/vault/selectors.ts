@@ -17,6 +17,16 @@ export const selectVaultAccountsNames = createSelector(
   accounts => accounts.map(account => account.name)
 );
 
+export const selectVaultImportedAccounts = createSelector(
+  selectVaultAccounts,
+  accounts => accounts.filter(account => account.imported)
+);
+
+export const selectVaultDerivedAccounts = createSelector(
+  selectVaultAccounts,
+  accounts => accounts.filter(account => !account.imported)
+);
+
 const withAccountName = (_: RootState, accountName: string) => accountName;
 export const selectVaultAccountWithName = createSelector(
   selectVaultAccounts,

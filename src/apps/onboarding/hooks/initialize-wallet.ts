@@ -1,12 +1,13 @@
 import { disableOnboardingFlow } from '@src/background/open-onboarding-flow';
 import { dispatchToMainStore } from '@src/background/redux/utils';
-import { accountCreated } from '@src/background/redux/vault/actions';
-import { deriveKeyPair } from '../../../libs/crypto';
+import { secretPhraseCreated } from '@src/background/redux/vault/actions';
+import { validateSecretPhrase } from '@src/libs/crypto';
 
-export function initializeWalletWithPhrase(phrase: unknown) {
+export function initializeWalletWithPhrase(phrase: null | string[]) {
   // cleanup and disabling action handler
   disableOnboardingFlow();
-
-  const account = deriveKeyPair(phrase, 0);
-  dispatchToMainStore(accountCreated(account));
+  if (!validateSecretPhrase(phrase)) {
+    throw Error('Invalid secret phrase.');
+  }
+  dispatchToMainStore(secretPhraseCreated(phrase));
 }

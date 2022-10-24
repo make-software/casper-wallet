@@ -30,9 +30,10 @@ export function RecoverFromSecretPhrasePage() {
 
   function onSubmit({ phrase }: FieldValues) {
     try {
-      initializeWalletWithPhrase(phrase);
+      initializeWalletWithPhrase((phrase as string).split(' '));
       closeActiveTab();
-    } catch {
+    } catch (err) {
+      console.error(err);
       navigate(
         ErrorPath,
         createErrorLocationState({

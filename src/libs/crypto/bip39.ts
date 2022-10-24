@@ -24,12 +24,11 @@ export function decodeSeed(entropy: Uint8Array): SecretPhrase {
 }
 
 export function validateSecretPhrase(
-  secretPhrase: unknown
+  secretPhrase: null | string[]
 ): secretPhrase is SecretPhrase {
-  try {
-    const mnemonic = (secretPhrase as any).join(' ');
-    return bip39.validateMnemonic(mnemonic, wordlist);
-  } catch {
+  if (secretPhrase == null) {
     return false;
   }
+  const mnemonic = secretPhrase.join(' ');
+  return bip39.validateMnemonic(mnemonic, wordlist);
 }
