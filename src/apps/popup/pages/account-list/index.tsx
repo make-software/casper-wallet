@@ -16,7 +16,8 @@ import {
 import {
   ContentContainer,
   LeftAlignedFlexColumn,
-  PageContainer
+  PageContainer,
+  SpaceBetweenFlexRow
 } from '@libs/layout';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -122,12 +123,22 @@ export function AccountListPage() {
                     variant={HashVariant.CaptionHash}
                     truncated
                   />
-                  {connectedAccountNames.includes(account.name) && (
-                    <ConnectionStatusBadge
-                      isConnected
-                      displayContext="accountList"
-                    />
-                  )}
+                  <SpaceBetweenFlexRow>
+                    {account.imported && (
+                      <Typography
+                        type="listSubtext"
+                        style={{ padding: '2px 0' }}
+                      >
+                        {`${t('Imported')}`}
+                      </Typography>
+                    )}
+                    {connectedAccountNames.includes(account.name) && (
+                      <ConnectionStatusBadge
+                        isConnected
+                        displayContext="accountList"
+                      />
+                    )}
+                  </SpaceBetweenFlexRow>
                 </AccountNameWithHashListItemContainer>
                 <AccountBalanceListItemContainer>
                   <Typography type="bodyHash">2.1M</Typography>

@@ -19,6 +19,7 @@ export const LeftAlignedCenteredFlexRow = styled(AlignedFlexRow)`
 `;
 
 export const SpaceBetweenFlexRow = styled(FlexRow)`
+  width: 100%;
   justify-content: space-between;
 `;
 
