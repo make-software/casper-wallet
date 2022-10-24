@@ -1,6 +1,6 @@
 import { decodeBase64, Keys } from 'casper-js-sdk';
 import fs from 'fs';
-import { parseSecretKeyFileContent } from './import-secret-key';
+import { parseSecretKeyString } from './parse-secret-key-string';
 
 /** manual testing should confirm that imported keys have the same public key and private key than legacy signer */
 
@@ -23,7 +23,7 @@ it('should import key pair from the pem file, validate keys and generate the sam
   ).forEach(({ type, pemFilePath, pemFilePublicKeyHex }) => {
     const pemFileContents = fs.readFileSync(pemFilePath).toString();
     const { publicKeyHex, secretKeyBase64 } =
-      parseSecretKeyFileContent(pemFileContents);
+      parseSecretKeyString(pemFileContents);
 
     const keyPair = getKeyPairFromSecretKeyBase64(type, secretKeyBase64);
 

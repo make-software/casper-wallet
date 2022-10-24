@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { checkSecretKeyExist } from '@src/background/redux/import-account-actions-should-be-removed';
 import { Account } from '@src/background/redux/vault/types';
-
-import { parseSecretKeyFileContent } from './import-secret-key';
+import { parseSecretKeyString } from '@src/libs/crypto';
 
 type OnSuccess = (accountData: Account) => void;
 type OnFailure = (message?: string) => void;
@@ -38,7 +37,7 @@ export function useSecretKeyFileReader({
           }
 
           const { publicKeyHex, secretKeyBase64 } =
-            parseSecretKeyFileContent(fileContents);
+            parseSecretKeyString(fileContents);
 
           const doesSecretKeyExist =
             secretKeyBase64 && (await checkSecretKeyExist(secretKeyBase64));

@@ -15,8 +15,8 @@ import { emitSdkEventToAllActiveTabs } from '@src/content/sdk-event';
 import { sdkMessage } from '@src/content/sdk-message';
 import { Button } from '@src/libs/ui';
 
-import { signDeploy } from './sign-deploy';
 import { SignatureRequestContent } from './signature-request-content';
+import { signDeploy } from '@src/libs/crypto';
 
 export function SignatureRequestPage() {
   const { t } = useTranslation();
