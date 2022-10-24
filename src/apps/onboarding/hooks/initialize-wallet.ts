@@ -3,7 +3,7 @@ import { dispatchToMainStore } from '@src/background/redux/utils';
 import { secretPhraseCreated } from '@src/background/redux/vault/actions';
 import { validateSecretPhrase } from '@src/libs/crypto';
 
-export function initializeWalletWithPhrase(phrase: unknown) {
+export function initializeWalletWithPhrase(phrase: null | string[]) {
   // cleanup and disabling action handler
   disableOnboardingFlow();
   if (!validateSecretPhrase(phrase)) {

@@ -28,9 +28,10 @@ export function RecoverFromSecretPhrasePage() {
 
   function onSubmit({ phrase }: FieldValues) {
     try {
-      initializeWalletWithPhrase(phrase);
+      initializeWalletWithPhrase((phrase as string).split(' '));
       closeActiveTab();
-    } catch {
+    } catch (err) {
+      console.error(err);
       navigate(RouterPath.OnboardingError, {
         state: {
           errorHeaderText: t(

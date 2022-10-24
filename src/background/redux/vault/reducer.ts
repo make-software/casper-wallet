@@ -73,8 +73,11 @@ export const reducer = createReducer(initialState)
   .handleAction(
     [secretPhraseCreated, accountCreated],
     (state, action): State => {
+      let isSecretPhraseCreated = false;
       let secretPhrase = state.secretPhrase;
+
       if (isActionOf(secretPhraseCreated)(action) && secretPhrase == null) {
+        isSecretPhraseCreated = true;
         secretPhrase = action.payload;
       }
 
@@ -87,7 +90,8 @@ export const reducer = createReducer(initialState)
         ...state,
         accounts: [...state.accounts, account],
         activeAccountName:
-          state.accounts.length === 0 ? account.name : state.activeAccountName
+          state.accounts.length === 0 ? account.name : state.activeAccountName,
+        ...(isSecretPhraseCreated && { secretPhrase })
       };
     }
   )

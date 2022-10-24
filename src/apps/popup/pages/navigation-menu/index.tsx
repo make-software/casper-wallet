@@ -161,31 +161,32 @@ export function NavigationMenuPageContent() {
 
   return (
     <ContentContainer>
-      {menuGroups.map(({ headerLabel, items }) => (
+      {menuGroups.map(({ headerLabel: groupLabel, items: groupItems }) => (
         <List
-          headerLabel={headerLabel}
-          rows={items}
+          key={groupLabel}
+          headerLabel={groupLabel}
+          rows={groupItems}
           marginLeftForItemSeparatorLine={60}
-          renderRow={menuItem => (
+          renderRow={groupItem => (
             <ListItemClickableContainer
-              key={menuItem.id}
-              onClick={menuItem.handleOnClick}
+              key={groupLabel + groupItem.id}
+              onClick={groupItem.handleOnClick}
             >
-              <SvgIcon src={menuItem.iconPath} color="contentBlue" />
+              <SvgIcon src={groupItem.iconPath} color="contentBlue" />
               <SpaceBetweenContainer>
-                {menuItem.description ? (
+                {groupItem.description ? (
                   <FlexColumn>
-                    <Typography type="body">{menuItem.title}</Typography>
+                    <Typography type="body">{groupItem.title}</Typography>
                     <Typography type="listSubtext" color="contentSecondary">
-                      {menuItem.description}
+                      {groupItem.description}
                     </Typography>
                   </FlexColumn>
                 ) : (
-                  <Typography type="body">{menuItem.title}</Typography>
+                  <Typography type="body">{groupItem.title}</Typography>
                 )}
-                {menuItem.currentValue != null && (
+                {groupItem.currentValue != null && (
                   <Typography type="bodySemiBold" color="contentBlue">
-                    {menuItem.currentValue}
+                    {groupItem.currentValue}
                   </Typography>
                 )}
               </SpaceBetweenContainer>
