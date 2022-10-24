@@ -1,4 +1,4 @@
-import { createReducer } from 'typesafe-actions';
+import { createReducer, isActionOf } from 'typesafe-actions';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 import {
@@ -16,7 +16,8 @@ import {
   accountDisconnected,
   allAccountsDisconnected,
   activeOriginChanged,
-  accountCreated
+  accountCreated,
+  secretPhraseCreated
 } from './actions';
 import { VaultState } from './types';
 import { deriveKeyPair } from '@src/libs/crypto/bip32';
@@ -69,20 +70,27 @@ export const reducer = createReducer(initialState)
         state.accounts.length === 0 ? account.name : state.activeAccountName
     };
   })
-  .handleAction(accountCreated, (state, { payload }): State => {
-    const accountCount = state.accounts.filter(
-      account => !account.imported
-    ).length;
-    const secretPhrase = state.secretPhrase;
-    const keyPair = deriveKeyPair(secretPhrase, accountCount);
-    const account = { ...keyPair, name: `Account ${accountCount + 1}` };
-    return {
-      ...state,
-      accounts: [...state.accounts, account],
-      activeAccountName:
-        state.accounts.length === 0 ? account.name : state.activeAccountName
-    };
-  })
+  .handleAction(
+    [secretPhraseCreated, accountCreated],
+    (state, action): State => {
+      let secretPhrase = state.secretPhrase;
+      if (isActionOf(secretPhraseCreated)(action) && secretPhrase == null) {
+        secretPhrase = action.payload;
+      }
+
+      const accountCount = state.accounts.filter(
+        account => !account.imported
+      ).length;
+      const keyPair = deriveKeyPair(secretPhrase, accountCount);
+      const account = { ...keyPair, name: `Account ${accountCount + 1}` };
+      return {
+        ...state,
+        accounts: [...state.accounts, account],
+        activeAccountName:
+          state.accounts.length === 0 ? account.name : state.activeAccountName
+      };
+    }
+  )
   .handleAction(
     [accountsConnected],
     (state, { payload: { siteOrigin, accountNames } }) => ({

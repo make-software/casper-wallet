@@ -1,6 +1,7 @@
 import { createAction } from 'typesafe-actions';
 import { TimeoutDurationSetting } from '@popup/constants';
 import { Account } from '@src/background/redux/vault/types';
+import { SecretPhrase } from '@src/libs/crypto';
 
 // actions that update storage state
 
@@ -24,6 +25,10 @@ export const vaultUnlocked = createAction('VAULT_UNLOCKED', () => ({
 }))<{
   lastActivityTime: number;
 }>();
+
+export const secretPhraseCreated = createAction(
+  'SECRET_PHRASE_CREATED'
+)<SecretPhrase>();
 
 export const accountImported = createAction('ACCOUNT_IMPORTED')<Account>();
 export const accountCreated = createAction('ACCOUNT_CREATED')<void>();
