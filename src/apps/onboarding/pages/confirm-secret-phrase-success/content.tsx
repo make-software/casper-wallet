@@ -5,10 +5,8 @@ import {
   TabPageContainer,
   TabTextContainer,
   ListSpacingContainer
-} from '@libs/layout';
-import { Typography } from '@libs/ui';
-
-import { TextList } from '@src/apps/onboarding/components/text-list';
+} from '@src/libs/layout';
+import { Typography, TextList } from '@src/libs/ui';
 
 export function ConfirmSecretPhraseSuccessPageContent() {
   const { t } = useTranslation();

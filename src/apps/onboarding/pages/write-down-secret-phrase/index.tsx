@@ -7,8 +7,9 @@ import {
   TabHeaderContainer,
   TabFooterContainer,
   HeaderSubmenuBarNavLink
-} from '@libs/layout';
-import { Button, Checkbox } from '@libs/ui';
+} from '@src/libs/layout';
+import { Button, Checkbox } from '@src/libs/ui';
+import { SecretPhrase } from '@src/libs/crypto';
 
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
@@ -17,7 +18,7 @@ import { Stepper } from '@src/apps/onboarding/components/stepper';
 import { WriteDownSecretPhrasePageContent } from './content';
 
 interface WriteDownSecretPhrasePageProps {
-  phrase: string[] | null;
+  phrase: SecretPhrase | null;
 }
 
 export function WriteDownSecretPhrasePage({

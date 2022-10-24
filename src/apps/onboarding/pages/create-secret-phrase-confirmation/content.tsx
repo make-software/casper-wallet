@@ -1,10 +1,8 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { TabPageContainer, TabTextContainer } from '@libs/layout';
-import { Typography } from '@libs/ui';
-
-import { TextList } from '@src/apps/onboarding/components/text-list';
+import { TabPageContainer, TabTextContainer } from '@src/libs/layout';
+import { Typography, TextList } from '@src/libs/ui';
 
 export function CreateSecretPhraseConfirmationPageContent() {
   const { t } = useTranslation();

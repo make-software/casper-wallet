@@ -1,11 +1,12 @@
-import React, { ReactElement } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { FlexColumn } from './containers';
 
 interface Props {
-  Header: ReactElement;
-  Content: ReactElement;
+  renderHeader: () => JSX.Element;
+  renderContent: () => JSX.Element;
+  renderFooter?: () => JSX.Element;
 }
 
 const Container = styled(FlexColumn)`
@@ -15,15 +16,18 @@ const Container = styled(FlexColumn)`
 const PageHeader = styled.header``;
 
 const PageContent = styled.div`
-  min-height: 472px;
+  height: 100%;
   overflow-y: auto;
 `;
 
-export function Layout({ Header, Content }: Props) {
+const PageFooter = styled.footer``;
+
+export function Layout({ renderHeader, renderContent, renderFooter }: Props) {
   return (
     <Container>
-      <PageHeader>{Header}</PageHeader>
-      <PageContent>{Content}</PageContent>
+      <PageHeader>{renderHeader()}</PageHeader>
+      <PageContent>{renderContent()}</PageContent>
+      {renderFooter && <PageFooter>{renderFooter()}</PageFooter>}
     </Container>
   );
 }

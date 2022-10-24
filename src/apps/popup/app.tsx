@@ -22,6 +22,7 @@ import {
 import { RemoveAccountPageContent } from '@popup/pages/remove-account';
 import { RenameAccountPageContent } from '@popup/pages/rename-account';
 import { AccountListPage } from '@popup/pages/account-list';
+import { BackupSecretPhrasePage } from '@popup/pages/backup-secret-phrase';
 
 import { RouterPath, useTypedLocation } from '@popup/router';
 
@@ -51,8 +52,8 @@ function LockedRouter() {
         path={RouterPath.Any}
         element={
           <Layout
-            Header={<PopupHeader />}
-            Content={<UnlockVaultPageContent />}
+            renderHeader={() => <PopupHeader />}
+            renderContent={() => <UnlockVaultPageContent />}
           />
         }
       />
@@ -60,8 +61,8 @@ function LockedRouter() {
         path={RouterPath.ResetVault}
         element={
           <Layout
-            Header={<PopupHeader />}
-            Content={<ResetVaultPageContent />}
+            renderHeader={() => <PopupHeader />}
+            renderContent={() => <ResetVaultPageContent />}
           />
         }
       />
@@ -87,8 +88,10 @@ function UnlockedRouter() {
           path={RouterPath.Any}
           element={
             <Layout
-              Header={<PopupHeader withConnectionStatus withMenu withLock />}
-              Content={<NavigationMenuPageContent />}
+              renderHeader={() => (
+                <PopupHeader withConnectionStatus withMenu withLock />
+              )}
+              renderContent={() => <NavigationMenuPageContent />}
             />
           }
         />
@@ -102,7 +105,7 @@ function UnlockedRouter() {
         path={RouterPath.Home}
         element={
           <Layout
-            Header={
+            renderHeader={() => (
               <PopupHeader
                 withLock
                 withMenu
@@ -111,8 +114,8 @@ function UnlockedRouter() {
                   <HomePageHeaderSubmenuItems linkType="switchAccount" />
                 )}
               />
-            }
-            Content={<HomePageContent />}
+            )}
+            renderContent={() => <HomePageContent />}
           />
         }
       />
@@ -120,7 +123,7 @@ function UnlockedRouter() {
         path={RouterPath.AccountList}
         element={
           <Layout
-            Header={
+            renderHeader={() => (
               <PopupHeader
                 withLock
                 withMenu
@@ -129,8 +132,8 @@ function UnlockedRouter() {
                   <HomePageHeaderSubmenuItems linkType="done" />
                 )}
               />
-            }
-            Content={<AccountListPage />}
+            )}
+            renderContent={() => <AccountListPage />}
           />
         }
       />
@@ -138,7 +141,7 @@ function UnlockedRouter() {
         path={RouterPath.AccountSettings}
         element={
           <Layout
-            Header={
+            renderHeader={() => (
               <PopupHeader
                 withLock
                 withMenu
@@ -150,8 +153,8 @@ function UnlockedRouter() {
                   </>
                 )}
               />
-            }
-            Content={<AccountSettingsPageContent />}
+            )}
+            renderContent={() => <AccountSettingsPageContent />}
           />
         }
       />
@@ -159,7 +162,7 @@ function UnlockedRouter() {
         path={RouterPath.Timeout}
         element={
           <Layout
-            Header={
+            renderHeader={() => (
               <PopupHeader
                 withLock
                 withMenu
@@ -168,8 +171,8 @@ function UnlockedRouter() {
                   <HeaderSubmenuBarNavLink linkType="close" />
                 )}
               />
-            }
-            Content={<TimeoutPageContent />}
+            )}
+            renderContent={() => <TimeoutPageContent />}
           />
         }
       />
@@ -177,7 +180,7 @@ function UnlockedRouter() {
         path={RouterPath.RemoveAccount}
         element={
           <Layout
-            Header={
+            renderHeader={() => (
               <PopupHeader
                 withLock
                 withMenu
@@ -186,8 +189,8 @@ function UnlockedRouter() {
                   <HeaderSubmenuBarNavLink linkType="back" />
                 )}
               />
-            }
-            Content={<RemoveAccountPageContent />}
+            )}
+            renderContent={() => <RemoveAccountPageContent />}
           />
         }
       />
@@ -195,7 +198,7 @@ function UnlockedRouter() {
         path={RouterPath.RenameAccount}
         element={
           <Layout
-            Header={
+            renderHeader={() => (
               <PopupHeader
                 withLock
                 withMenu
@@ -204,8 +207,8 @@ function UnlockedRouter() {
                   <HeaderSubmenuBarNavLink linkType="back" />
                 )}
               />
-            }
-            Content={<RenameAccountPageContent />}
+            )}
+            renderContent={() => <RenameAccountPageContent />}
           />
         }
       />
@@ -213,8 +216,10 @@ function UnlockedRouter() {
         path={RouterPath.NoConnectedAccount}
         element={
           <Layout
-            Header={<PopupHeader withLock withMenu withConnectionStatus />}
-            Content={<NoConnectedAccountPageContent />}
+            renderHeader={() => (
+              <PopupHeader withLock withMenu withConnectionStatus />
+            )}
+            renderContent={() => <NoConnectedAccountPageContent />}
           />
         }
       />
@@ -222,7 +227,7 @@ function UnlockedRouter() {
         path={RouterPath.ConnectedSites}
         element={
           <Layout
-            Header={
+            renderHeader={() => (
               <PopupHeader
                 withMenu
                 withLock
@@ -231,8 +236,8 @@ function UnlockedRouter() {
                   <HeaderSubmenuBarNavLink linkType="back" />
                 )}
               />
-            }
-            Content={<ConnectedSitesPage />}
+            )}
+            renderContent={() => <ConnectedSitesPage />}
           />
         }
       />
@@ -240,7 +245,7 @@ function UnlockedRouter() {
         path={RouterPath.ConnectAnotherAccount}
         element={
           <Layout
-            Header={
+            renderHeader={() => (
               <PopupHeader
                 withLock
                 withMenu
@@ -249,8 +254,8 @@ function UnlockedRouter() {
                   <HeaderSubmenuBarNavLink linkType="cancel" />
                 )}
               />
-            }
-            Content={<ConnectAnotherAccountPageContent />}
+            )}
+            renderContent={() => <ConnectAnotherAccountPageContent />}
           />
         }
       />
@@ -258,7 +263,7 @@ function UnlockedRouter() {
         path={RouterPath.ConnectAnotherAccountByParams}
         element={
           <Layout
-            Header={
+            renderHeader={() => (
               <PopupHeader
                 withLock
                 withMenu
@@ -267,10 +272,14 @@ function UnlockedRouter() {
                   <HeaderSubmenuBarNavLink linkType="cancel" />
                 )}
               />
-            }
-            Content={<ConnectAnotherAccountPageContent />}
+            )}
+            renderContent={() => <ConnectAnotherAccountPageContent />}
           />
         }
+      />
+      <Route
+        path={RouterPath.BackupSecretPhrase}
+        element={<BackupSecretPhrasePage />}
       />
     </Routes>
   );

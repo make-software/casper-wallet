@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Typography } from '@libs/ui';
-import { FlexRow } from '@libs/layout';
+
+import { Typography } from '@src/libs/ui';
+import { FlexRow } from '@src/libs/layout';
 
 interface IsEmptyWord {
   isEmptyWord?: boolean;

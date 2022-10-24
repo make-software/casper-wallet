@@ -2,17 +2,21 @@ import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import styled from 'styled-components';
 
-import { TabPageContainer, TabTextContainer, FlexRow } from '@libs/layout';
-import { CopyToClipboard, SvgIcon, Typography } from '@libs/ui';
-
-import { SecretPhraseWordsView } from '@src/apps/onboarding/components/secret-phrase-words-view';
+import { TabPageContainer, TabTextContainer, FlexRow } from '@src/libs/layout';
+import {
+  CopyToClipboard,
+  SvgIcon,
+  Typography,
+  SecretPhraseWordsView
+} from '@src/libs/ui';
+import { SecretPhrase } from '@src/libs/crypto';
 
 const CopySecretPhraseContainer = styled(FlexRow)`
   gap: 4px;
 `;
 
 interface WriteDownSecretPhrasePageContentProps {
-  phrase: string[];
+  phrase: SecretPhrase;
 }
 
 export function WriteDownSecretPhrasePageContent({
