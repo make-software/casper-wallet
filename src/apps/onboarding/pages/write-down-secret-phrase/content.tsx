@@ -1,19 +1,13 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import styled from 'styled-components';
 
-import { TabPageContainer, TabTextContainer, FlexRow } from '@src/libs/layout';
+import { TabPageContainer, TabTextContainer } from '@src/libs/layout';
 import {
-  CopyToClipboard,
-  SvgIcon,
   Typography,
-  SecretPhraseWordsView
+  SecretPhraseWordsView,
+  CopySecretPhraseBar
 } from '@src/libs/ui';
 import { SecretPhrase } from '@src/libs/crypto';
-
-const CopySecretPhraseContainer = styled(FlexRow)`
-  gap: 4px;
-`;
 
 interface WriteDownSecretPhrasePageContentProps {
   phrase: SecretPhrase;
@@ -42,30 +36,7 @@ export function WriteDownSecretPhrasePageContent({
       <SecretPhraseWordsView
         phrase={phrase}
         renderFooter={({ secretPhraseForCopy }) => (
-          <CopyToClipboard
-            renderContent={({ isClicked }) => (
-              <CopySecretPhraseContainer>
-                <SvgIcon
-                  src={
-                    isClicked
-                      ? 'assets/icons/checkbox-checked.svg'
-                      : 'assets/icons/copy.svg'
-                  }
-                  color={isClicked ? 'contentGreen' : 'contentBlue'}
-                />
-                <Typography
-                  type="captionMedium"
-                  color={isClicked ? 'contentGreen' : 'contentBlue'}
-                >
-                  {isClicked
-                    ? t('Copied to clipboard for 1 min')
-                    : t('Copy secret phrase')}
-                </Typography>
-              </CopySecretPhraseContainer>
-            )}
-            valueToCopy={secretPhraseForCopy}
-            automaticallyClearClipboard
-          />
+          <CopySecretPhraseBar secretPhraseForCopy={secretPhraseForCopy} />
         )}
       />
     </TabPageContainer>

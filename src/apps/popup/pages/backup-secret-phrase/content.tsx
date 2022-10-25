@@ -5,15 +5,13 @@ import styled from 'styled-components';
 
 import {
   ContentContainer,
-  FlexRow,
   HeaderTextContainer,
   TextContainer
 } from '@src/libs/layout';
 import {
   Typography,
   SecretPhraseWordsView,
-  CopyToClipboard,
-  SvgIcon,
+  CopySecretPhraseBar,
   TextList
 } from '@src/libs/ui';
 
@@ -21,10 +19,6 @@ import { selectVaultSecretPhrase } from '@background/redux/vault/selectors';
 
 const WarningContainer = styled(TextContainer)`
   margin-top: unset;
-`;
-
-const CopySecretPhraseContainer = styled(FlexRow)`
-  gap: 4px;
 `;
 
 const ListSpacingContainer = styled.div`
@@ -81,30 +75,7 @@ export function BackupSecretPhrasePageContent() {
       <SecretPhraseWordsView
         phrase={phrase}
         renderFooter={({ secretPhraseForCopy }) => (
-          <CopyToClipboard
-            renderContent={({ isClicked }) => (
-              <CopySecretPhraseContainer>
-                <SvgIcon
-                  src={
-                    isClicked
-                      ? 'assets/icons/checkbox-checked.svg'
-                      : 'assets/icons/copy.svg'
-                  }
-                  color={isClicked ? 'contentGreen' : 'contentBlue'}
-                />
-                <Typography
-                  type="captionMedium"
-                  color={isClicked ? 'contentGreen' : 'contentBlue'}
-                >
-                  {isClicked
-                    ? t('Copied to clipboard for 1 min')
-                    : t('Copy secret phrase')}
-                </Typography>
-              </CopySecretPhraseContainer>
-            )}
-            valueToCopy={secretPhraseForCopy}
-            automaticallyClearClipboard
-          />
+          <CopySecretPhraseBar secretPhraseForCopy={secretPhraseForCopy} />
         )}
       />
 
