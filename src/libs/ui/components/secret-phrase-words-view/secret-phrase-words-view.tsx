@@ -13,10 +13,10 @@ import {
   AlignedFlexRow,
   FlexColumn,
   FlexRow
-} from '@libs/layout';
-import { SvgIcon, Typography, hexToRGBA } from '@libs/ui';
+} from '@src/libs/layout';
+import { SvgIcon, Typography, WordTag, hexToRGBA } from '@src/libs/ui';
+import { SecretPhrase } from '@src/libs/crypto';
 
-import { WordTag } from '../word-tag';
 import { PartialPhraseArray } from './types';
 import { buildInitialWordsCollection } from './utils';
 
@@ -87,7 +87,7 @@ const WordListContainer = styled(FlexRow)`
 `;
 
 interface RenderHeaderProps {
-  phrase: string[];
+  phrase: SecretPhrase;
   hiddenWordIndexes: number[];
   selectedHiddenWordIndexes: number[];
   onHiddenWordClick: (index: number) => void;
@@ -98,7 +98,7 @@ interface RenderFooterProps {
 }
 
 interface SecretPhraseWordsViewProps {
-  phrase: string[];
+  phrase: SecretPhrase;
   confirmationMode?: boolean;
   setIsFormValid?: Dispatch<SetStateAction<boolean>>;
   setIsConfirmationSuccess?: Dispatch<SetStateAction<boolean>>;

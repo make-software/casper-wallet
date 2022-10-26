@@ -10,6 +10,7 @@ import {
 } from '@src/libs/layout';
 import { createErrorLocationState, ErrorPath } from '@src/libs/layout/error';
 import { Button } from '@src/libs/ui';
+import { SecretPhrase } from '@src/libs/crypto';
 
 import { Stepper } from '@src/apps/onboarding/components/stepper';
 import { RouterPath } from '@src/apps/onboarding/router';
@@ -19,7 +20,7 @@ import { ConfirmSecretPhrasePageContent } from './content';
 import { initializeWalletWithPhrase } from '../../hooks/initialize-wallet';
 
 interface ConfirmSecretPhrasePageProps {
-  phrase: string[] | null;
+  phrase: SecretPhrase | null;
 }
 
 export function ConfirmSecretPhrasePage({

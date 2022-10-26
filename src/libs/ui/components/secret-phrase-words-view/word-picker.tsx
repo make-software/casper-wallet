@@ -1,9 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { FlexRow } from '@libs/layout';
-
-import { WordTag } from '../word-tag';
+import { FlexRow } from '@src/libs/layout';
+import { WordTag } from '@src/libs/ui';
+import { SecretPhrase } from '@src/libs/crypto';
 
 const WordPickerContainer = styled(FlexRow)`
   flex-wrap: wrap;
@@ -17,7 +17,7 @@ const WordPickerContainer = styled(FlexRow)`
 `;
 
 interface WordPickerProps {
-  phrase: string[];
+  phrase: SecretPhrase;
   hiddenWordIndexes: number[];
   selectedHiddenWordIndexes: number[];
   onHiddenWordClick: (index: number) => void;

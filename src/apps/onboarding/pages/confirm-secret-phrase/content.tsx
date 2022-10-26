@@ -1,14 +1,12 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { TabPageContainer, TabTextContainer } from '@libs/layout';
-import { Typography } from '@libs/ui';
-
-import { WordPicker } from '@src/apps/onboarding/components/word-picker';
-import { SecretPhraseWordsView } from '@src/apps/onboarding/components/secret-phrase-words-view';
+import { TabPageContainer, TabTextContainer } from '@src/libs/layout';
+import { Typography, SecretPhraseWordsView, WordPicker } from '@src/libs/ui';
+import { SecretPhrase } from '@src/libs/crypto';
 
 interface ConfirmSecretPhrasePageContentProps {
-  phrase: string[];
+  phrase: SecretPhrase;
   setIsFormValid: Dispatch<SetStateAction<boolean>>;
   setIsConfirmationSuccess: Dispatch<SetStateAction<boolean>>;
 }

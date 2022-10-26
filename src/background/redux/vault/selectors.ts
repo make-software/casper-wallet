@@ -1,10 +1,19 @@
 import { createSelector } from 'reselect';
+import { RootState } from 'typesafe-actions';
+import { SecretPhrase } from '@libs/crypto';
+
 import { TimeoutDurationSetting } from '@popup/constants';
 import { Account } from '@src/background/redux/vault/types';
-import { RootState } from 'typesafe-actions';
 
 export const selectVaultDoesExist = (state: RootState): boolean =>
   !!state.vault.password;
+
+export const selectVaultPassword = (state: RootState): string =>
+  state.vault.password || '';
+
+export const selectVaultSecretPhrase = (
+  state: RootState
+): SecretPhrase | null => state.vault.secretPhrase;
 
 export const selectVaultHasAccount = (state: RootState): boolean =>
   state.vault.accounts.length > 0;
@@ -153,9 +162,6 @@ export const selectVaultAccountsSecretKeysBase64 = createSelector(
 
 export const selectVaultIsLocked = (state: RootState): boolean =>
   state.vault.isLocked;
-
-export const selectVaultPassword = (state: RootState): string =>
-  state.vault.password || '';
 
 export const selectVaultTimeoutDurationSetting = (
   state: RootState

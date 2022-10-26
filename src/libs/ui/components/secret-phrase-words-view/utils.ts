@@ -1,3 +1,4 @@
+import { SecretPhrase } from '@src/libs/crypto';
 import { PartialPhraseArray } from './types';
 
 function getRandomInt(min: number, max: number): number {
@@ -11,7 +12,9 @@ interface WordCollections {
   initialPartialPhrase: PartialPhraseArray;
 }
 
-export function buildInitialWordsCollection(phrase: string[]): WordCollections {
+export function buildInitialWordsCollection(
+  phrase: SecretPhrase
+): WordCollections {
   const collectionSize = 6;
   const initialHiddenWordIndexes: number[] = [];
   const initialPartialPhrase: PartialPhraseArray = [...phrase];

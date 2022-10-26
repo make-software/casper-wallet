@@ -123,7 +123,11 @@ export function NavigationMenuPageContent() {
           {
             id: 1,
             title: t('Back up your secret phrase'),
-            iconPath: 'assets/icons/secure.svg'
+            iconPath: 'assets/icons/secure.svg',
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.BackupSecretPhrase);
+            }
           },
           {
             id: 2,
