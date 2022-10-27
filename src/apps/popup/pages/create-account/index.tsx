@@ -11,7 +11,7 @@ import {
   FooterButtonsContainer
 } from '@src/libs/layout';
 import { Button } from '@src/libs/ui';
-import { useCreateNewAccountForm } from '@src/libs/ui/forms/create-new-account';
+import { useCreateAccountForm } from '@src/libs/ui/forms/create-account';
 
 import { RouterPath, useTypedNavigate } from '@src/apps/popup/router';
 
@@ -19,13 +19,13 @@ import { selectVaultAccountsNames } from '@src/background/redux/vault/selectors'
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { accountCreated } from '@src/background/redux/vault/actions';
 
-import { CreateNewAccountPageContent } from './content';
+import { CreateAccountPageContent } from './content';
 
-const CreateNewAccountForm = styled.form`
+const CreateAccountForm = styled.form`
   height: 100%;
 `;
 
-export function CreateNewAccountPage() {
+export function CreateAccountPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
   const existingAccountNames = useSelector(selectVaultAccountsNames);
@@ -34,14 +34,14 @@ export function CreateNewAccountPage() {
     register,
     handleSubmit,
     formState: { errors, isDirty }
-  } = useCreateNewAccountForm(existingAccountNames);
+  } = useCreateAccountForm(existingAccountNames);
   const onSubmit = ({ name }: FieldValues) => {
     dispatchToMainStore(accountCreated(name.trim()));
     navigate(RouterPath.Home);
   };
 
   return (
-    <CreateNewAccountForm onSubmit={handleSubmit(onSubmit)}>
+    <CreateAccountForm onSubmit={handleSubmit(onSubmit)}>
       <LayoutWindow
         renderHeader={() => (
           <PopupHeader
@@ -54,7 +54,7 @@ export function CreateNewAccountPage() {
           />
         )}
         renderContent={() => (
-          <CreateNewAccountPageContent
+          <CreateAccountPageContent
             register={register}
             errorMessage={errors.name?.message}
           />
@@ -73,6 +73,6 @@ export function CreateNewAccountPage() {
           </FooterButtonsContainer>
         )}
       />
-    </CreateNewAccountForm>
+    </CreateAccountForm>
   );
 }

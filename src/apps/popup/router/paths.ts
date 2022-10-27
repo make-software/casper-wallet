@@ -1,7 +1,7 @@
 export enum RouterPath {
   Any = '*',
   Home = '/',
-  CreateNewAccount = '/create-new-account',
+  CreateAccount = '/create-account',
   AccountSettings = '/account-settings/:accountName',
   AccountList = '/account-list',
   Timeout = '/timeout',

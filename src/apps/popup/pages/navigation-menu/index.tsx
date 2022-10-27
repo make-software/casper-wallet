@@ -74,7 +74,7 @@ export function NavigationMenuPageContent() {
             iconPath: 'assets/icons/plus.svg',
             handleOnClick: () => {
               closeNavigationMenu();
-              navigate(RouterPath.CreateNewAccount);
+              navigate(RouterPath.CreateAccount);
             }
           },
           {

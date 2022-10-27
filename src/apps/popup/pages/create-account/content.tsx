@@ -20,15 +20,15 @@ const TextContainer = styled.div`
   padding: 0 ${({ theme }) => theme.padding[1.6]} 0;
 `;
 
-interface CreateNewAccountPageContentProps {
+interface CreateAccountPageContentProps {
   register: UseFormRegister<FieldValues>;
   errorMessage: string | null;
 }
 
-export function CreateNewAccountPageContent({
+export function CreateAccountPageContent({
   register,
   errorMessage
-}: CreateNewAccountPageContentProps) {
+}: CreateAccountPageContentProps) {
   const { t } = useTranslation();
 
   return (
