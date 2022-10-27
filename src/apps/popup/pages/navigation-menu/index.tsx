@@ -131,7 +131,11 @@ export function NavigationMenuPageContent() {
             id: 2,
             title: t('Download account keys'),
             description: t('For all accounts imported with a file'),
-            iconPath: 'assets/icons/download.svg'
+            iconPath: 'assets/icons/download.svg',
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.DownloadSecretKeys);
+            }
           }
         ]
       },
