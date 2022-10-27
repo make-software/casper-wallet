@@ -5,7 +5,10 @@ import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 
 import { useAccountNameRule } from './form-validation-rules';
 
-export function useCreateAccountForm(existingAccountNames: string[]) {
+export function useCreateAccountForm(
+  existingAccountNames: string[],
+  defaultName: string
+) {
   const formSchema = Yup.object().shape({
     name: useAccountNameRule(value => {
       return value != null && !existingAccountNames.includes(value);
@@ -16,7 +19,7 @@ export function useCreateAccountForm(existingAccountNames: string[]) {
     mode: 'onChange',
     resolver: yupResolver(formSchema),
     defaultValues: {
-      name: ''
+      name: defaultName
     }
   };
 
