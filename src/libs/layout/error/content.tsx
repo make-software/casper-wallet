@@ -1,18 +1,15 @@
 import React from 'react';
-import styled from 'styled-components';
 
 import {
   PageContainer,
   ContentContainer,
+  IllustrationContainer,
+  OnboardingIllustrationContainer,
   TextContainer
 } from '@src/libs/layout';
 import { SvgIcon, Typography } from '@src/libs/ui';
 
 import { ErrorContent } from './types';
-
-const IllustrationContainer = styled.div`
-  margin: 35px 16px;
-`;
 
 interface ErrorPageContentProps extends ErrorContent {
   // TODO: I guess will be better pass it through location state. It require extending of location state type
@@ -31,16 +28,16 @@ export function ErrorPageContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <IllustrationContainer>
-          <SvgIcon
-            src={
-              illustrationType === 'onboarding'
-                ? 'assets/illustrations/error.svg'
-                : 'assets/illustrations/process-error.svg'
-            }
-            size={140}
-          />
-        </IllustrationContainer>
+        {illustrationType === 'onboarding' ? (
+          <OnboardingIllustrationContainer>
+            <SvgIcon src="assets/illustrations/error.svg" size={140} />
+          </OnboardingIllustrationContainer>
+        ) : (
+          <IllustrationContainer>
+            <SvgIcon src="assets/illustrations/process-error.svg" size={140} />
+          </IllustrationContainer>
+        )}
+
         <TextContainer>
           <Typography type="header">{errorHeaderText}</Typography>
         </TextContainer>

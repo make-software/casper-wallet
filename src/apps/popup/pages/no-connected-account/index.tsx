@@ -1,20 +1,16 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import styled from 'styled-components';
 
 import {
   ContentContainer,
   HeaderTextContainer,
+  IllustrationContainer,
   TextContainer,
   FooterButtonsAbsoluteContainer
 } from '@src/libs/layout';
 import { Typography, SvgIcon, Button } from '@libs/ui';
 
 import { useTypedNavigate, RouterPath } from '@popup/router';
-
-const IllustrationContainer = styled.div`
-  margin: 24px 16px 0 16px;
-`;
 
 export function NoConnectedAccountPageContent() {
   const navigate = useTypedNavigate();

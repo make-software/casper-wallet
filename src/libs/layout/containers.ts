@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const backgroundIconPath = 'assets/icons/logo-background.svg';
 
@@ -148,4 +148,13 @@ export const ListSpacingContainer = styled.div`
 
 export const BreakWordContainer = styled.div`
   overflow-wrap: break-word;
+`;
+
+export const IllustrationContainer = styled.div`
+  margin-top: 24px;
+  margin-left: 16px;
+`;
+
+export const OnboardingIllustrationContainer = styled(IllustrationContainer)`
+  margin-top: 40px;
 `;

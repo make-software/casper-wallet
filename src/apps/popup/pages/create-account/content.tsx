@@ -3,12 +3,12 @@ import { FieldValues, UseFormRegister } from 'react-hook-form';
 import { useTranslation, Trans } from 'react-i18next';
 import styled from 'styled-components';
 
-import { ContentContainer, InputsContainer } from '@src/libs/layout';
+import {
+  ContentContainer,
+  IllustrationContainer,
+  InputsContainer
+} from '@src/libs/layout';
 import { SvgIcon, Typography, Input } from '@src/libs/ui';
-
-const IllustrationContainer = styled.div`
-  margin: 24px 16px 0;
-`;
 
 const HeaderTextContainer = styled.div`
   margin-top: 16px;
