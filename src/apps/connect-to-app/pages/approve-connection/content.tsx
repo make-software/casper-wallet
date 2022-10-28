@@ -10,10 +10,6 @@ import {
 } from '@src/libs/layout';
 import { SiteFaviconBadge, List, SvgIcon, Typography } from '@src/libs/ui';
 
-const HeaderTextContent = styled.div`
-  margin-top: 16px;
-`;
-
 const ListItemContainer = styled.div`
   display: flex;
 
@@ -58,11 +54,9 @@ export function ApproveConnectionContent({
       <ContentContainer>
         <HeaderTextContainer>
           <SiteFaviconBadge origin={origin} />
-          <HeaderTextContent>
-            <Typography type="header">
-              <BreakWordContainer>{title}</BreakWordContainer>
-            </Typography>
-          </HeaderTextContent>
+          <Typography type="header">
+            <BreakWordContainer>{title}</BreakWordContainer>
+          </Typography>
         </HeaderTextContainer>
         <List
           headerLabel={t('allow this site to')}

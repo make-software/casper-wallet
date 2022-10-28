@@ -17,17 +17,11 @@ import {
 
 import { selectVaultSecretPhrase } from '@background/redux/vault/selectors';
 
-const WarningContainer = styled(TextContainer)`
-  margin-top: unset;
-`;
-
 const ListSpacingContainer = styled.div`
   margin-top: 12px;
 `;
 
-const TipsContainer = styled(TextContainer)`
-  margin-top: 24px;
-`;
+const TipsContainer = styled(HeaderTextContainer)``;
 
 export function BackupSecretPhrasePageContent() {
   const { t } = useTranslation();
@@ -63,14 +57,14 @@ export function BackupSecretPhrasePageContent() {
           <Trans t={t}>Back up your secret phrase</Trans>
         </Typography>
       </HeaderTextContainer>
-      <WarningContainer>
+      <TextContainer>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             Your secret recovery phrase controls all of your accounts. Your
             money will depend on it.
           </Trans>
         </Typography>
-      </WarningContainer>
+      </TextContainer>
 
       <SecretPhraseWordsView
         phrase={phrase}

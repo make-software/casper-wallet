@@ -1,24 +1,15 @@
 import React from 'react';
 import { FieldValues, UseFormRegister } from 'react-hook-form';
 import { useTranslation, Trans } from 'react-i18next';
-import styled from 'styled-components';
 
 import {
   ContentContainer,
   IllustrationContainer,
+  HeaderTextContainer,
+  TextContainer,
   InputsContainer
 } from '@src/libs/layout';
 import { SvgIcon, Typography, Input } from '@src/libs/ui';
-
-const HeaderTextContainer = styled.div`
-  margin-top: 16px;
-  padding: 0 ${({ theme }) => theme.padding[1.6]} 0;
-`;
-
-const TextContainer = styled.div`
-  margin-top: 16px;
-  padding: 0 ${({ theme }) => theme.padding[1.6]} 0;
-`;
 
 interface CreateAccountPageContentProps {
   register: UseFormRegister<FieldValues>;

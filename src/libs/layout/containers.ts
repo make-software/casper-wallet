@@ -59,13 +59,19 @@ export const LogoContainer = styled.div`
   cursor: ${props => (props.onClick ? 'pointer' : 'default')};
 `;
 
-export const ContentContainer = styled.div`
-  padding: 0 ${({ theme }) => theme.padding[1.6]}
-    ${({ theme }) => theme.padding[1.6]};
+const contentContainerPaddings = css`
+  padding: 0 ${({ theme }) => theme.padding[1.6]} 0;
 `;
 
-export const HeaderTextContainer = styled(ContentContainer)`
+export const ContentContainer = styled.div`
+  ${contentContainerPaddings};
+`;
+
+export const HeaderTextContainer = styled(FlexColumn)`
   margin-top: 24px;
+  gap: 16px;
+
+  ${contentContainerPaddings};
 `;
 
 export const TextContainer = styled(ContentContainer)`
@@ -143,7 +149,7 @@ export const TabPageContainer = styled.div`
 `;
 
 export const ListSpacingContainer = styled.div`
-  margin-top: 16px;
+  margin-top: 24px;
 `;
 
 export const BreakWordContainer = styled.div`

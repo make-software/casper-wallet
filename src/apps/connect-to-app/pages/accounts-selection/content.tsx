@@ -27,10 +27,6 @@ import {
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
 
-const HeaderTextContent = styled.div`
-  margin-top: 16px;
-`;
-
 const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
 const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
   width: 100%;
@@ -92,11 +88,9 @@ export function AccountsSelectionContent({
       <ContentContainer>
         <HeaderTextContainer>
           <SiteFaviconBadge origin={origin} />
-          <HeaderTextContent>
-            <Typography type="header">
-              <BreakWordContainer>{headerText}</BreakWordContainer>
-            </Typography>
-          </HeaderTextContent>
+          <Typography type="header">
+            <BreakWordContainer>{headerText}</BreakWordContainer>
+          </Typography>
         </HeaderTextContainer>
         <List
           headerLabel={t('select account(s)')}
