@@ -59,23 +59,25 @@ export const LogoContainer = styled.div`
   cursor: ${props => (props.onClick ? 'pointer' : 'default')};
 `;
 
-const contentContainerPaddings = css`
-  padding: 0 ${({ theme }) => theme.padding[1.6]} 0;
+export const ContentContainer = styled.div`
+  padding: 0 ${({ theme }) => theme.padding[1.6]}
+    ${({ theme }) => theme.padding[1.6]};
 `;
 
-export const ContentContainer = styled.div`
-  ${contentContainerPaddings};
+const contentPaddings = css`
+  padding: 0 ${({ theme }) => theme.padding[1.6]} 0;
 `;
 
 export const HeaderTextContainer = styled(FlexColumn)`
   margin-top: 24px;
   gap: 16px;
 
-  ${contentContainerPaddings};
+  ${contentPaddings};
 `;
 
-export const TextContainer = styled(ContentContainer)`
+export const TextContainer = styled.div`
   margin-top: 16px;
+  ${contentPaddings};
 `;
 
 export const InputsContainer = styled.div`
