@@ -8,6 +8,7 @@ import { RouterPath } from '@popup/router';
 import {
   ContentContainer,
   FooterButtonsAbsoluteContainer,
+  IllustrationContainer,
   HeaderTextContainer,
   InputsContainer,
   TextContainer
@@ -17,8 +18,9 @@ import {
   Typography,
   Input,
   Button,
-  PasswordVisibilityIcon
-} from '@libs/ui';
+  PasswordVisibilityIcon,
+  SvgIcon
+} from '@src/libs/ui';
 
 import { selectVaultPassword } from '@src/background/redux/vault/selectors';
 import { vaultUnlocked } from '@src/background/redux/vault/actions';
@@ -47,9 +49,12 @@ export function UnlockVaultPageContent() {
   return (
     <form onSubmit={handleSubmit(handleUnlockVault)}>
       <ContentContainer>
+        <IllustrationContainer>
+          <SvgIcon src="assets/illustrations/locked-wallet.svg" size={120} />
+        </IllustrationContainer>
         <HeaderTextContainer>
           <Typography type="header">
-            <Trans t={t}>Your vault is locked</Trans>
+            <Trans t={t}>Your wallet is locked</Trans>
           </Typography>
         </HeaderTextContainer>
         <TextContainer>
@@ -75,14 +80,14 @@ export function UnlockVaultPageContent() {
       </ContentContainer>
       <FooterButtonsAbsoluteContainer>
         <Button disabled={!isDirty} type="submit">
-          {t('Unlock vault')}
+          {t('Unlock wallet')}
         </Button>
         <Button
           type="button"
           color="secondaryRed"
           onClick={() => navigate(RouterPath.ResetVault)}
         >
-          {t('Reset vault')}
+          {t('Reset wallet')}
         </Button>
       </FooterButtonsAbsoluteContainer>
     </form>

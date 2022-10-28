@@ -5,14 +5,15 @@ import { Trans, useTranslation } from 'react-i18next';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import * as Yup from 'yup';
 
-import { Button, Input, SvgIcon, Typography } from '@libs/ui';
 import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
+  IllustrationContainer,
   HeaderTextContainer,
   InputsContainer,
   TextContainer
-} from '@src/libs/layout/containers';
+} from '@src/libs/layout';
+import { Button, Input, SvgIcon, Typography } from '@src/libs/ui';
 
 import { useAccountNameRule } from '@src/libs/ui/forms/form-validation-rules';
 
@@ -21,7 +22,10 @@ import { checkAccountNameIsTaken } from '@src/background/redux/import-account-ac
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { accountImported } from '@src/background/redux/vault/actions';
 
-import { RouterPath, useTypedNavigate } from '@import-account-with-file/router';
+import {
+  RouterPath,
+  useTypedNavigate
+} from '@src/apps/import-account-with-file/router';
 
 import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
 
@@ -108,6 +112,9 @@ export function ImportAccountWithFileContentPage() {
 
   return (
     <ContentContainer>
+      <IllustrationContainer>
+        <SvgIcon src="assets/illustrations/secret-key.svg" size={120} />
+      </IllustrationContainer>
       <HeaderTextContainer>
         <Typography type="header">
           <Trans t={t}>Import account by uploading a file</Trans>

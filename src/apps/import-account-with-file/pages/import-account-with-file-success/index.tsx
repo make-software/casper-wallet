@@ -5,9 +5,11 @@ import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
   HeaderTextContainer,
-  TextContainer
-} from '@src/libs/layout/containers';
-import { Button, Typography } from '@libs/ui';
+  TextContainer,
+  IllustrationContainer
+} from '@src/libs/layout';
+import { Button, SvgIcon, Typography } from '@src/libs/ui';
+
 import { closeActiveWindow } from '@src/background/close-window';
 
 export function ImportAccountWithFileSuccessContentPage() {
@@ -15,6 +17,9 @@ export function ImportAccountWithFileSuccessContentPage() {
 
   return (
     <ContentContainer>
+      <IllustrationContainer>
+        <SvgIcon src="assets/illustrations/account-imported.svg" size={120} />
+      </IllustrationContainer>
       <HeaderTextContainer>
         <Typography type="header">
           <Trans t={t}>Your account was successfully imported</Trans>

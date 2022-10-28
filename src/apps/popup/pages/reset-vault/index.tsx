@@ -3,12 +3,13 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import {
   ContentContainer,
+  IllustrationContainer,
   HeaderTextContainer,
   TextContainer,
   FooterButtonsAbsoluteContainer
 } from '@src/libs/layout/containers';
+import { SvgIcon, Typography, Button, Checkbox } from '@src/libs/ui';
 
-import { Typography, Button, Checkbox } from '@libs/ui';
 import { useTypedNavigate } from '@popup/router';
 import { vaultReseted } from '@src/background/redux/vault/actions';
 import { dispatchToMainStore } from '@src/background/redux/utils';
@@ -30,9 +31,12 @@ export function ResetVaultPageContent() {
   return (
     <>
       <ContentContainer>
+        <IllustrationContainer>
+          <SvgIcon src="assets/illustrations/reset-wallet.svg" size={120} />
+        </IllustrationContainer>
         <HeaderTextContainer>
           <Typography type="header">
-            <Trans t={t}>Are you sure you want to reset your vault?</Trans>
+            <Trans t={t}>Are you sure you want to reset your wallet?</Trans>
           </Typography>
         </HeaderTextContainer>
         <TextContainer>
@@ -57,7 +61,7 @@ export function ResetVaultPageContent() {
           color="primaryRed"
           disabled={!isChecked}
         >
-          <Trans t={t}>Reset vault</Trans>
+          <Trans t={t}>Reset wallet</Trans>
         </Button>
         <Button onClick={handleCancel} color="secondaryBlue">
           <Trans t={t}>Cancel</Trans>

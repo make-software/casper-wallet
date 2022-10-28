@@ -2,14 +2,14 @@ import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { Button, Typography } from '@libs/ui';
-
 import {
   ContentContainer,
+  IllustrationContainer,
   HeaderTextContainer,
   TextContainer,
   FooterButtonsAbsoluteContainer
 } from '@src/libs/layout/containers';
+import { Button, Typography, SvgIcon } from '@src/libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
@@ -38,6 +38,9 @@ export function RemoveAccountPageContent() {
 
   return (
     <ContentContainer>
+      <IllustrationContainer>
+        <SvgIcon src="assets/illustrations/remove-account.svg" size={120} />
+      </IllustrationContainer>
       <HeaderTextContainer>
         <Typography type="header">
           <Trans t={t}>Remove account?</Trans>
@@ -52,7 +55,7 @@ export function RemoveAccountPageContent() {
         </Typography>
       </TextContainer>
       <FooterButtonsAbsoluteContainer>
-        <Button onClick={handleRemoveAccount}>
+        <Button color="primaryRed" onClick={handleRemoveAccount}>
           <Trans t={t}>Remove</Trans>
         </Button>
         <Button onClick={() => navigate(-1)} color="secondaryBlue">
