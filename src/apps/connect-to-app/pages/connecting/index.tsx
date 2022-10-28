@@ -9,6 +9,7 @@ export interface Props {}
 export function ConnectingPage() {
   return (
     <LayoutWindow
+      variant="default"
       renderHeader={() => <PopupHeader />}
       renderContent={() => <ConnectingContent />}
     />

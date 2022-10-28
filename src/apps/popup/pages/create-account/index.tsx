@@ -2,7 +2,6 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { useTranslation, Trans } from 'react-i18next';
 import { FieldValues } from 'react-hook-form';
-import styled from 'styled-components';
 
 import {
   LayoutWindow,
@@ -24,10 +23,6 @@ import { accountCreated } from '@src/background/redux/vault/actions';
 
 import { CreateAccountPageContent } from './content';
 import { getSubmitButtonStateFromValidation } from '@libs/ui/forms/get-submit-button-state-from-validation';
-
-const CreateAccountForm = styled.form`
-  height: 100%;
-`;
 
 export function CreateAccountPage() {
   const navigate = useTypedNavigate();
@@ -52,38 +47,38 @@ export function CreateAccountPage() {
   const isButtonDisabled = getSubmitButtonStateFromValidation({ isValid });
 
   return (
-    <CreateAccountForm onSubmit={handleSubmit(onSubmit)}>
-      <LayoutWindow
-        renderHeader={() => (
-          <PopupHeader
-            withLock
-            withMenu
-            withConnectionStatus
-            renderSubmenuBarItems={() => (
-              <HeaderSubmenuBarNavLink linkType="back" />
-            )}
-          />
-        )}
-        renderContent={() => (
-          <CreateAccountPageContent
-            register={register}
-            errorMessage={errors.name?.message}
-          />
-        )}
-        renderFooter={() => (
-          <FooterButtonsContainer>
-            <Button disabled={isButtonDisabled}>
-              <Trans t={t}>Create account</Trans>
-            </Button>
-            <Button
-              color="secondaryBlue"
-              onClick={() => navigate(RouterPath.Home)}
-            >
-              <Trans t={t}>Cancel</Trans>
-            </Button>
-          </FooterButtonsContainer>
-        )}
-      />
-    </CreateAccountForm>
+    <LayoutWindow
+      variant="form"
+      onSubmit={handleSubmit(onSubmit)}
+      renderHeader={() => (
+        <PopupHeader
+          withLock
+          withMenu
+          withConnectionStatus
+          renderSubmenuBarItems={() => (
+            <HeaderSubmenuBarNavLink linkType="back" />
+          )}
+        />
+      )}
+      renderContent={() => (
+        <CreateAccountPageContent
+          register={register}
+          errorMessage={errors.name?.message}
+        />
+      )}
+      renderFooter={() => (
+        <FooterButtonsContainer>
+          <Button disabled={isButtonDisabled}>
+            <Trans t={t}>Create account</Trans>
+          </Button>
+          <Button
+            color="secondaryBlue"
+            onClick={() => navigate(RouterPath.Home)}
+          >
+            <Trans t={t}>Cancel</Trans>
+          </Button>
+        </FooterButtonsContainer>
+      )}
+    />
   );
 }

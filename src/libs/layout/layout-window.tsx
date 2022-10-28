@@ -1,17 +1,25 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import styled from 'styled-components';
 
 import { FlexColumn } from '@layout/containers';
 
-interface Props {
+interface BaseLayoutWindowProps {
+  variant: 'form' | 'default';
   renderHeader?: () => JSX.Element;
   renderContent: () => JSX.Element;
   renderFooter?: () => JSX.Element;
 }
 
-const Container = styled(FlexColumn)`
-  height: 100%;
-`;
+interface LayoutWindowFormProps extends BaseLayoutWindowProps {
+  variant: 'form';
+  onSubmit: () => void;
+}
+
+interface LayoutWindowDefaultProps extends BaseLayoutWindowProps {
+  variant: 'default';
+}
+
+type LayoutWindowProps = LayoutWindowFormProps | LayoutWindowDefaultProps;
 
 const PageHeader = styled.header``;
 
@@ -25,13 +33,50 @@ const PageFooter = styled.footer``;
 export function LayoutWindow({
   renderHeader,
   renderContent,
-  renderFooter
-}: Props) {
+  renderFooter,
+  ...layoutContainerProps
+}: LayoutWindowProps) {
   return (
-    <Container>
+    <LayoutContainer {...layoutContainerProps}>
       {renderHeader && <PageHeader>{renderHeader()}</PageHeader>}
       <PageContent>{renderContent()}</PageContent>
       {renderFooter && <PageFooter>{renderFooter()}</PageFooter>}
-    </Container>
+    </LayoutContainer>
   );
+}
+
+const Container = styled(FlexColumn)`
+  height: 100%;
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+`;
+
+interface LayoutFormProps {
+  variant: 'form';
+  onSubmit: () => void;
+}
+
+interface LayoutDefaultProps {
+  variant: 'default';
+}
+
+type LayoutContainerProps = LayoutDefaultProps | LayoutFormProps;
+
+function LayoutContainer({
+  children,
+  ...props
+}: PropsWithChildren<LayoutContainerProps>) {
+  switch (props.variant) {
+    case 'form':
+      return <Form onSubmit={props.onSubmit}>{children}</Form>;
+    case 'default':
+      return <Container>{children}</Container>;
+    default:
+      throw new Error('Unknown layout variant');
+  }
 }

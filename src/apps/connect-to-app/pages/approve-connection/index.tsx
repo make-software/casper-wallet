@@ -42,6 +42,7 @@ export function ApproveConnectionPage({
   const selectedAccountNamesLength = selectedAccountNames.length;
   return (
     <LayoutWindow
+      variant="default"
       renderHeader={() => (
         <PopupHeader
           renderSubmenuBarItems={() => (

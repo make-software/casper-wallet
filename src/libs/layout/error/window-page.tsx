@@ -33,6 +33,7 @@ export function WindowErrorPage({
 
   return (
     <LayoutWindow
+      variant="default"
       renderHeader={() => (
         <PopupHeader
           renderSubmenuBarItems={() => (
