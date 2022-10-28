@@ -1,35 +1,32 @@
 import React, { useCallback } from 'react';
-import { FieldValues, useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
-import { Trans, useTranslation } from 'react-i18next';
+import { FieldValues, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import * as Yup from 'yup';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
-  FooterButtonsAbsoluteContainer,
-  ContentContainer,
-  IllustrationContainer,
-  HeaderTextContainer,
-  InputsContainer,
-  TextContainer
+  LayoutWindow,
+  PopupHeader,
+  FooterButtonsContainer
 } from '@src/libs/layout';
-import { Button, Input, SvgIcon, Typography } from '@src/libs/ui';
-
+import { Button } from '@src/libs/ui';
 import { useAccountNameRule } from '@src/libs/ui/forms/form-validation-rules';
 
 import { Account } from '@src/background/redux/vault/types';
-import { checkAccountNameIsTaken } from '@src/background/redux/import-account-actions-should-be-removed';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { accountImported } from '@src/background/redux/vault/actions';
+import { checkAccountNameIsTaken } from '@src/background/redux/import-account-actions-should-be-removed';
 
 import {
   RouterPath,
   useTypedNavigate
 } from '@src/apps/import-account-with-file/router';
+import { useSecretKeyFileReader } from '@src/apps/import-account-with-file/pages/import-account-with-file/hooks/use-secret-key-file-reader';
 
-import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
+import { ImportAccountWithFilePageContent } from './content';
 
-export function ImportAccountWithFileContentPage() {
+export function ImportAccountWithFilePage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
@@ -111,54 +108,25 @@ export function ImportAccountWithFileContentPage() {
   const isFileLoaded = secretKeyFile?.length > 0;
 
   return (
-    <ContentContainer>
-      <IllustrationContainer>
-        <SvgIcon src="assets/illustrations/secret-key.svg" size={120} />
-      </IllustrationContainer>
-      <HeaderTextContainer>
-        <Typography type="header">
-          <Trans t={t}>Import account by uploading a file</Trans>
-        </Typography>
-      </HeaderTextContainer>
-      <TextContainer>
-        <Typography type="body" color="contentSecondary">
-          <Trans t={t}>Import your account from Secret Key File.</Trans>
-        </Typography>
-      </TextContainer>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <InputsContainer>
-          <Input
-            type="file"
-            accept=".pem"
-            prefixIcon={<SvgIcon src="assets/icons/file.svg" />}
-            suffixIcon={
-              isFileLoaded && (
-                <SvgIcon
-                  onClick={() =>
-                    setValue('secretKeyFile', null, { shouldValidate: true })
-                  }
-                  src="assets/icons/close-filter.svg"
-                />
-              )
-            }
-            {...register('secretKeyFile')}
-            error={!!errors.secretKeyFile}
-            validationText={errors.secretKeyFile?.message}
-          />
-          <Input
-            type="text"
-            placeholder={t('Account name')}
-            {...register('name')}
-            error={!!errors.name}
-            validationText={errors.name?.message}
-          />
-        </InputsContainer>
-        <FooterButtonsAbsoluteContainer>
+    <LayoutWindow
+      variant="form"
+      onSubmit={handleSubmit(onSubmit)}
+      renderHeader={() => <PopupHeader />}
+      renderContent={() => (
+        <ImportAccountWithFilePageContent
+          register={register}
+          setValue={setValue}
+          isFileLoaded={isFileLoaded}
+          errors={errors}
+        />
+      )}
+      renderFooter={() => (
+        <FooterButtonsContainer>
           <Button disabled={isSubmitDisabled}>
             <Trans t={t}>Import</Trans>
           </Button>
-        </FooterButtonsAbsoluteContainer>
-      </form>
-    </ContentContainer>
+        </FooterButtonsContainer>
+      )}
+    />
   );
 }

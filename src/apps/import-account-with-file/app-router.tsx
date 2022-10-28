@@ -9,7 +9,7 @@ import { RouterPath } from './router';
 
 import { ImportAccountWithFileSuccessContentPage } from './pages/import-account-with-file-success';
 import { ImportAccountWithFileFailureContentPage } from './pages/import-account-with-file-failure';
-import { ImportAccountWithFileContentPage } from './pages/import-account-with-file';
+import { ImportAccountWithFilePage } from './pages/import-account-with-file';
 import { PopupHeader, LayoutWindow } from '@src/libs/layout';
 
 export function AppRouter() {
@@ -18,13 +18,7 @@ export function AppRouter() {
       <Routes>
         <Route
           path={RouterPath.ImportAccountWithFile}
-          element={
-            <LayoutWindow
-              variant="default"
-              renderHeader={() => <PopupHeader />}
-              renderContent={() => <ImportAccountWithFileContentPage />}
-            />
-          }
+          element={<ImportAccountWithFilePage />}
         />
         <Route
           path={RouterPath.ImportAccountWithFileSuccess}
