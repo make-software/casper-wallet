@@ -19,6 +19,7 @@ export function BackupSecretPhrasePage() {
 
   return (
     <LayoutWindow
+      variant="default"
       renderHeader={() => (
         <PopupHeader
           withLock

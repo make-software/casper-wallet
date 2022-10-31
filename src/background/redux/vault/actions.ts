@@ -31,7 +31,7 @@ export const secretPhraseCreated = createAction(
 )<SecretPhrase>();
 
 export const accountImported = createAction('ACCOUNT_IMPORTED')<Account>();
-export const accountCreated = createAction('ACCOUNT_CREATED')<void>();
+export const accountCreated = createAction('ACCOUNT_CREATED')<string | null>();
 export const accountRemoved = createAction('ACCOUNT_REMOVED')<{
   accountName: string;
 }>();

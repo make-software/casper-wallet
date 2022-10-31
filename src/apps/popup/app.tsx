@@ -23,6 +23,7 @@ import { RemoveAccountPageContent } from '@popup/pages/remove-account';
 import { RenameAccountPageContent } from '@popup/pages/rename-account';
 import { AccountListPage } from '@popup/pages/account-list';
 import { BackupSecretPhrasePage } from '@popup/pages/backup-secret-phrase';
+import { CreateAccountPage } from '@src/apps/popup/pages/create-account';
 
 import { RouterPath, useTypedLocation } from '@popup/router';
 
@@ -137,6 +138,7 @@ function UnlockedRouter() {
           />
         }
       />
+      <Route path={RouterPath.CreateAccount} element={<CreateAccountPage />} />
       <Route
         path={RouterPath.AccountSettings}
         element={

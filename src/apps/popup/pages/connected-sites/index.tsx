@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { List, Typography } from '@libs/ui';
-import { ContentContainer, HeaderTextContainer } from '@src/libs/layout';
+import { ContentContainer, TextContainer } from '@src/libs/layout';
 
 import { selectVaultAccountsByOriginDict } from '@src/background/redux/vault/selectors';
 
@@ -24,11 +24,11 @@ export function ConnectedSitesPage() {
 
   return (
     <ContentContainer>
-      <HeaderTextContainer>
+      <TextContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Connected sites</Trans>
         </Typography>
-      </HeaderTextContainer>
+      </TextContainer>
       {Object.entries(accountsByOrigin).map(([origin, accounts], index) => {
         const siteTitle = origin.split('://')[1];
         return (

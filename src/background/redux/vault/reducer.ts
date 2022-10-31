@@ -85,7 +85,14 @@ export const reducer = createReducer(initialState)
         account => !account.imported
       ).length;
       const keyPair = deriveKeyPair(secretPhrase, accountCount);
-      const account = { ...keyPair, name: `Account ${accountCount + 1}` };
+      const name =
+        isActionOf(accountCreated)(action) && action.payload != null
+          ? action.payload
+          : `Account ${accountCount + 1}`;
+      const account = {
+        ...keyPair,
+        name
+      };
       return {
         ...state,
         accounts: [...state.accounts, account],

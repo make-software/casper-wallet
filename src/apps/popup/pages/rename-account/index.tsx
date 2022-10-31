@@ -7,11 +7,11 @@ import { FieldValues } from 'react-hook-form';
 import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
-  HeaderTextContainer,
+  IllustrationContainer,
+  TextContainer,
   InputsContainer
 } from '@src/libs/layout';
-
-import { Button, Input, Typography } from '@libs/ui';
+import { Button, Input, SvgIcon, Typography } from '@src/libs/ui';
 import { useRenameAccount } from '@src/libs/ui/forms/rename-account';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -46,11 +46,14 @@ export function RenameAccountPageContent() {
 
   return (
     <ContentContainer>
-      <HeaderTextContainer>
+      <IllustrationContainer>
+        <SvgIcon src="assets/illustrations/rename-account.svg" size={120} />
+      </IllustrationContainer>
+      <TextContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Rename account</Trans>
         </Typography>
-      </HeaderTextContainer>
+      </TextContainer>
       <form onSubmit={handleSubmit(onSubmit)}>
         <InputsContainer>
           <Input

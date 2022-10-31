@@ -4,7 +4,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import {
   TabPageContainer,
   TabTextContainer,
-  ListSpacingContainer
+  VerticalSpaceContainer
 } from '@src/libs/layout';
 import { Typography, TextList } from '@src/libs/ui';
 
@@ -48,9 +48,9 @@ export function ConfirmSecretPhraseSuccessPageContent() {
         </Typography>
       </TabTextContainer>
 
-      <ListSpacingContainer>
+      <VerticalSpaceContainer gap="medium">
         <TextList items={items} />
-      </ListSpacingContainer>
+      </VerticalSpaceContainer>
     </TabPageContainer>
   );
 }

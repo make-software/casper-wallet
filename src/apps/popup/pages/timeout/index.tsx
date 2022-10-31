@@ -5,7 +5,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Typography, Checkbox, List } from '@libs/ui';
 import {
   ContentContainer,
-  HeaderTextContainer,
   TextContainer,
   ListItemClickableContainer
 } from '@src/libs/layout/containers';
@@ -42,12 +41,12 @@ export function TimeoutPageContent() {
 
   return (
     <ContentContainer>
-      <HeaderTextContainer>
+      <TextContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Timeout</Trans>
         </Typography>
-      </HeaderTextContainer>
-      <TextContainer>
+      </TextContainer>
+      <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             Your vault will be automatically locked after some period of

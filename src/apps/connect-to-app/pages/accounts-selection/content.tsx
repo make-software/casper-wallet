@@ -15,10 +15,11 @@ import {
 import {
   PageContainer,
   ContentContainer,
-  HeaderTextContainer,
+  TextContainer,
   ListItemClickableContainer,
   LeftAlignedFlexColumn,
-  BreakWordContainer
+  BreakWordContainer,
+  VerticalSpaceContainer
 } from '@src/libs/layout';
 
 import {
@@ -26,10 +27,6 @@ import {
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
-
-const HeaderTextContent = styled.div`
-  margin-top: 16px;
-`;
 
 const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
 const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
@@ -90,14 +87,14 @@ export function AccountsSelectionContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <HeaderTextContainer>
+        <TextContainer gap="big">
           <SiteFaviconBadge origin={origin} />
-          <HeaderTextContent>
+          <VerticalSpaceContainer gap="medium">
             <Typography type="header">
               <BreakWordContainer>{headerText}</BreakWordContainer>
             </Typography>
-          </HeaderTextContent>
-        </HeaderTextContainer>
+          </VerticalSpaceContainer>
+        </TextContainer>
         <List
           headerLabel={t('select account(s)')}
           headerAction={headerAction}

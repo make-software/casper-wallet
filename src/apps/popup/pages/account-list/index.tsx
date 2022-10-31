@@ -17,7 +17,8 @@ import {
   ContentContainer,
   LeftAlignedFlexColumn,
   PageContainer,
-  SpaceBetweenFlexRow
+  SpaceBetweenFlexRow,
+  FlexRow
 } from '@libs/layout';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -37,15 +38,12 @@ import { Popover } from './components/popover';
 
 import { sortAccounts } from './utils';
 
-const ListItemContainer = styled.div`
-  display: flex;
-
+const ListItemContainer = styled(FlexRow)`
   min-height: 50px;
   height: 100%;
 `;
 
-const ListItemClickableContainer = styled.div`
-  display: flex;
+const ListItemClickableContainer = styled(FlexRow)`
   width: 100%;
   cursor: pointer;
   padding-top: 14px;

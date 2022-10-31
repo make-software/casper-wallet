@@ -50,6 +50,11 @@ export function useAccountNameRule(
       /^[\daA-zZ\s]+$/,
       t('Account name can’t contain special characters')
     )
+    .test(
+      'empty',
+      t("Name can't be empty"),
+      value => value != null && value.trim() !== ''
+    )
     .test('unique', t('Account name is already taken'), value =>
       isAccountNameIsTakenCallback(value)
     );

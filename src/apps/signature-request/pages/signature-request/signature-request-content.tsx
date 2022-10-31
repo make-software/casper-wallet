@@ -4,8 +4,9 @@ import styled from 'styled-components';
 
 import {
   ContentContainer,
-  HeaderTextContainer,
-  PageContainer
+  PageContainer,
+  TextContainer,
+  SpaceBetweenFlexRow
 } from '@layout/containers';
 import {
   Accordion,
@@ -26,16 +27,14 @@ import {
 } from './types';
 import { useDeriveDeployInfoFromDeployRaw } from './use-derive-deploy-info-from-deploy-raw';
 
-const ListItemContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
+const ListItemContainer = styled(SpaceBetweenFlexRow)`
   margin: 16px;
+  width: unset;
 `;
 
-const CentredFlexRowSpaceBetweenContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
+const CentredFlexRowSpaceBetweenContainer = styled(SpaceBetweenFlexRow)`
   align-items: center;
+  width: unset;
 `;
 
 const AccordionHeaderContainer = styled(CentredFlexRowSpaceBetweenContainer)`
@@ -91,11 +90,11 @@ export function SignatureRequestContent({ deploy }: SignatureRequestViewProps) {
   return (
     <PageContainer>
       <ContentContainer>
-        <HeaderTextContainer>
+        <TextContainer gap="big">
           <Typography type="header">
             <Trans t={t}>Signature Request</Trans>
           </Typography>
-        </HeaderTextContainer>
+        </TextContainer>
         <List
           rows={Object.entries(signatureRequest).map(([key, value]) => ({
             id: key,

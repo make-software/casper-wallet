@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { ContentContainer, HeaderTextContainer } from '@src/libs/layout';
+import { ContentContainer, TextContainer } from '@src/libs/layout';
 import {
   Button,
   SiteFaviconBadge,
@@ -82,14 +82,14 @@ export function ConnectAnotherAccountPageContent() {
 
   return (
     <ContentContainer>
-      <HeaderTextContainer>
+      <TextContainer gap="big">
         <SiteFaviconBadge origin={activeOrigin} />
         <HeaderTextContent>
           <Typography type="header">
             Your current account is not connected
           </Typography>
         </HeaderTextContent>
-      </HeaderTextContainer>
+      </TextContainer>
       {targetAccount && (
         <PageTile>
           <CentredFlexRow>

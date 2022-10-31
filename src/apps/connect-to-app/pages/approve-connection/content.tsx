@@ -3,30 +3,18 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import {
-  HeaderTextContainer,
+  TextContainer,
   PageContainer,
   ContentContainer,
-  BreakWordContainer
+  BreakWordContainer,
+  VerticalSpaceContainer,
+  ListItemClickableContainer
 } from '@src/libs/layout';
 import { SiteFaviconBadge, List, SvgIcon, Typography } from '@src/libs/ui';
 
-const HeaderTextContent = styled.div`
-  margin-top: 16px;
-`;
-
-const ListItemContainer = styled.div`
-  display: flex;
-
-  width: 100%;
-  padding: 14px 18px;
-
-  & > * + * {
-    padding-left: 18px;
-  }
-
-  & > span {
-    white-space: nowrap;
-  }
+const ListItemContainer = styled(ListItemClickableContainer)`
+  cursor: unset;
+  justify-content: unset;
 `;
 
 interface ApproveConnectionContentProps {
@@ -56,14 +44,14 @@ export function ApproveConnectionContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <HeaderTextContainer>
+        <TextContainer gap="big">
           <SiteFaviconBadge origin={origin} />
-          <HeaderTextContent>
+          <VerticalSpaceContainer gap="medium">
             <Typography type="header">
               <BreakWordContainer>{title}</BreakWordContainer>
             </Typography>
-          </HeaderTextContent>
-        </HeaderTextContainer>
+          </VerticalSpaceContainer>
+        </TextContainer>
         <List
           headerLabel={t('allow this site to')}
           rows={listItems}

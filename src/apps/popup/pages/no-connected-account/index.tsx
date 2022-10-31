@@ -1,20 +1,15 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import styled from 'styled-components';
 
 import {
   ContentContainer,
-  HeaderTextContainer,
+  IllustrationContainer,
   TextContainer,
   FooterButtonsAbsoluteContainer
 } from '@src/libs/layout';
 import { Typography, SvgIcon, Button } from '@libs/ui';
 
 import { useTypedNavigate, RouterPath } from '@popup/router';
-
-const IllustrationContainer = styled.div`
-  margin: 24px 16px 0 16px;
-`;
 
 export function NoConnectedAccountPageContent() {
   const navigate = useTypedNavigate();
@@ -25,12 +20,12 @@ export function NoConnectedAccountPageContent() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/no-connection.svg" size={120} />
       </IllustrationContainer>
-      <HeaderTextContainer>
+      <TextContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Casper Signer is not connected to this site yet</Trans>
         </Typography>
-      </HeaderTextContainer>
-      <TextContainer>
+      </TextContainer>
+      <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             To connect to this site, find and click the connect button on the

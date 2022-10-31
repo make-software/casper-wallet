@@ -35,6 +35,7 @@ export function AccountsSelectionPage({
 
   return (
     <LayoutWindow
+      variant="default"
       renderHeader={() => (
         <PopupHeader
           renderSubmenuBarItems={() => (

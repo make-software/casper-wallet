@@ -4,16 +4,16 @@ import { Trans, useTranslation } from 'react-i18next';
 import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
-  HeaderTextContainer,
-  TextContainer
-} from '@src/libs/layout/containers';
-import { Button, Typography } from '@libs/ui';
+  TextContainer,
+  IllustrationContainer
+} from '@src/libs/layout';
+import { Button, SvgIcon, Typography } from '@src/libs/ui';
 
 import {
   RouterPath,
   useTypedLocation,
   useTypedNavigate
-} from '@import-account-with-file/router';
+} from '@src/apps/import-account-with-file/router';
 import { closeActiveWindow } from '@src/background/close-window';
 
 export function ImportAccountWithFileFailureContentPage() {
@@ -24,12 +24,15 @@ export function ImportAccountWithFileFailureContentPage() {
 
   return (
     <ContentContainer>
-      <HeaderTextContainer>
+      <IllustrationContainer>
+        <SvgIcon src="assets/illustrations/process-error.svg" size={120} />
+      </IllustrationContainer>
+      <TextContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Something went wrong</Trans>
         </Typography>
-      </HeaderTextContainer>
-      <TextContainer>
+      </TextContainer>
+      <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           {state?.importAccountStatusMessage
             ? state.importAccountStatusMessage
