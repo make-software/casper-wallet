@@ -2,12 +2,12 @@ import { CLPublicKey, CLPublicKeyTag, decodeBase64, Keys } from 'casper-js-sdk';
 
 export function downloadFile(content: Blob, filename: string): void {
   const url = window.URL.createObjectURL(content);
-  const tempLink = document.createElement('a');
+  const downloadFileLink = document.createElement('a');
 
-  tempLink.href = url;
-  tempLink.setAttribute('download', filename);
-  tempLink.click();
-  tempLink.remove();
+  downloadFileLink.href = url;
+  downloadFileLink.setAttribute('download', filename);
+  downloadFileLink.click();
+  downloadFileLink.remove();
 }
 
 export function makeSecretKeyFileContent(

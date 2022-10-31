@@ -6,15 +6,16 @@ import styled from 'styled-components';
 
 import { PurposeForOpening, useWindowManager } from '@src/hooks';
 
-import { TimeoutDurationSetting } from '@popup/constants';
-import { RouterPath, useNavigationMenu } from '@popup/router';
+import { TimeoutDurationSetting } from '@src/apps/popup/constants';
+import { RouterPath, useNavigationMenu } from '@src/apps/popup/router';
+
 import {
-  AlignedFlexRow,
-  AlignedSpaceBetweenFlexRow,
   ContentContainer,
-  FlexColumn
-} from '@src/libs/layout/containers';
-import { SvgIcon, Typography, List } from '@libs/ui';
+  ListItemClickableContainer as BaseListItemClickableContainer,
+  FlexColumn,
+  SpaceBetweenFlexRow
+} from '@src/libs/layout';
+import { SvgIcon, Typography, List } from '@src/libs/ui';
 
 import {
   selectCountOfConnectedSites,
@@ -27,23 +28,14 @@ interface ListItemClickableContainerProps {
 }
 
 const ListItemClickableContainer = styled(
-  AlignedFlexRow
+  BaseListItemClickableContainer
 )<ListItemClickableContainerProps>`
-  width: 100%;
+  align-items: center;
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-
-  padding: 14px 18px;
-  & > * + * {
-    padding-left: 18px;
-  }
-
-  & > span {
-    white-space: nowrap;
-  }
 `;
 
-export const SpaceBetweenContainer = styled(AlignedSpaceBetweenFlexRow)`
-  width: 100%;
+export const SpaceBetweenContainer = styled(SpaceBetweenFlexRow)`
+  align-items: center;
 `;
 
 interface MenuItem {

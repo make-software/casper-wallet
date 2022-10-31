@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
 
 import {
   HeaderSubmenuBarNavLink,
@@ -20,14 +19,8 @@ import {
 } from '@src/background/redux/vault/selectors';
 
 import { DownloadSecretKeysPageContent } from './content';
-import {
-  downloadFile,
-  makeSecretKeyFileContent
-} from '@popup/pages/download-secret-keys/utils';
 
-const DownloadSecretKeysForm = styled.form`
-  height: 100%;
-`;
+import { downloadFile, makeSecretKeyFileContent } from './utils';
 
 export function DownloadSecretKeysPage() {
   const navigate = useTypedNavigate();
@@ -68,32 +61,32 @@ export function DownloadSecretKeysPage() {
   };
 
   return (
-    <DownloadSecretKeysForm onSubmit={handleSubmit(onSubmit)}>
-      <LayoutWindow
-        renderHeader={() => (
-          <PopupHeader
-            withLock
-            withMenu
-            withConnectionStatus
-            renderSubmenuBarItems={() => (
-              <HeaderSubmenuBarNavLink linkType="back" />
-            )}
-          />
-        )}
-        renderContent={() => (
-          <DownloadSecretKeysPageContent
-            register={register}
-            errorMessage={errors.password?.message}
-          />
-        )}
-        renderFooter={() => (
-          <FooterButtonsContainer>
-            <Button disabled={!isDirty}>
-              <Trans t={t}>Download</Trans>
-            </Button>
-          </FooterButtonsContainer>
-        )}
-      />
-    </DownloadSecretKeysForm>
+    <LayoutWindow
+      variant="form"
+      onSubmit={handleSubmit(onSubmit)}
+      renderHeader={() => (
+        <PopupHeader
+          withLock
+          withMenu
+          withConnectionStatus
+          renderSubmenuBarItems={() => (
+            <HeaderSubmenuBarNavLink linkType="back" />
+          )}
+        />
+      )}
+      renderContent={() => (
+        <DownloadSecretKeysPageContent
+          register={register}
+          errorMessage={errors.password?.message}
+        />
+      )}
+      renderFooter={() => (
+        <FooterButtonsContainer>
+          <Button disabled={!isDirty}>
+            <Trans t={t}>Download</Trans>
+          </Button>
+        </FooterButtonsContainer>
+      )}
+    />
   );
 }

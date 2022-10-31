@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { FieldValues, UseFormRegister } from 'react-hook-form';
 import { useTranslation, Trans } from 'react-i18next';
-import styled from 'styled-components';
 
 import {
   ContentContainer,
   IllustrationContainer,
+  TextContainer,
   InputsContainer
 } from '@src/libs/layout';
 import {
@@ -15,11 +15,6 @@ import {
   PasswordVisibilityIcon,
   PasswordInputType
 } from '@src/libs/ui';
-
-const HeaderTextContainer = styled.div`
-  margin-top: 16px;
-  padding: 0 ${({ theme }) => theme.padding[1.6]} 0;
-`;
 
 interface DownloadSecretKeysPageContentProps {
   register: UseFormRegister<FieldValues>;
@@ -40,11 +35,11 @@ export function DownloadSecretKeysPageContent({
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/password.svg" size={120} />
       </IllustrationContainer>
-      <HeaderTextContainer>
+      <TextContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Enter your password to download account keys</Trans>
         </Typography>
-      </HeaderTextContainer>
+      </TextContainer>
 
       <InputsContainer>
         <Input

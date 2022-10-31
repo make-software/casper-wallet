@@ -17,6 +17,7 @@ export function DownloadedSecretKeysPage() {
   const { t } = useTranslation();
   return (
     <LayoutWindow
+      variant="default"
       renderHeader={() => (
         <PopupHeader
           withLock
