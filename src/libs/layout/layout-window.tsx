@@ -49,13 +49,6 @@ const Container = styled(FlexColumn)`
   height: 100%;
 `;
 
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-
-  height: 100%;
-`;
-
 interface LayoutFormProps {
   variant: 'form';
   onSubmit: () => void;
@@ -73,7 +66,11 @@ function LayoutContainer({
 }: PropsWithChildren<LayoutContainerProps>) {
   switch (props.variant) {
     case 'form':
-      return <Form onSubmit={props.onSubmit}>{children}</Form>;
+      return (
+        <Container as="form" onSubmit={props.onSubmit}>
+          {children}
+        </Container>
+      );
     case 'default':
       return <Container>{children}</Container>;
     default:
