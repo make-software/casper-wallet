@@ -4,7 +4,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import {
   ContentContainer,
   IllustrationContainer,
-  HeaderTextContainer,
   TextContainer,
   FooterButtonsAbsoluteContainer
 } from '@src/libs/layout/containers';
@@ -34,12 +33,12 @@ export function ResetVaultPageContent() {
         <IllustrationContainer>
           <SvgIcon src="assets/illustrations/reset-wallet.svg" size={120} />
         </IllustrationContainer>
-        <HeaderTextContainer>
+        <TextContainer gap="big">
           <Typography type="header">
             <Trans t={t}>Are you sure you want to reset your wallet?</Trans>
           </Typography>
-        </HeaderTextContainer>
-        <TextContainer>
+        </TextContainer>
+        <TextContainer gap="medium">
           <Typography type="body" color="contentSecondary">
             <Trans t={t}>
               All accounts will be removed. Make sure you have securely stored

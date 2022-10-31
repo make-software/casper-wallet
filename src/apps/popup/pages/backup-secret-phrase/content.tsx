@@ -1,12 +1,11 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
 
 import {
   ContentContainer,
-  HeaderTextContainer,
-  TextContainer
+  TextContainer,
+  VerticalSpaceContainer
 } from '@src/libs/layout';
 import {
   Typography,
@@ -16,12 +15,6 @@ import {
 } from '@src/libs/ui';
 
 import { selectVaultSecretPhrase } from '@background/redux/vault/selectors';
-
-const ListSpacingContainer = styled.div`
-  margin-top: 12px;
-`;
-
-const TipsContainer = styled(HeaderTextContainer)``;
 
 export function BackupSecretPhrasePageContent() {
   const { t } = useTranslation();
@@ -52,12 +45,12 @@ export function BackupSecretPhrasePageContent() {
 
   return (
     <ContentContainer>
-      <HeaderTextContainer>
+      <TextContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Back up your secret phrase</Trans>
         </Typography>
-      </HeaderTextContainer>
-      <TextContainer>
+      </TextContainer>
+      <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             Your secret recovery phrase controls all of your accounts. Your
@@ -73,14 +66,14 @@ export function BackupSecretPhrasePageContent() {
         )}
       />
 
-      <TipsContainer>
+      <TextContainer gap="big">
         <Typography type="bodySemiBold">
           <Trans t={t}>Tips on storing it safely</Trans>
         </Typography>
-        <ListSpacingContainer>
+        <VerticalSpaceContainer gap="small">
           <TextList items={items} />
-        </ListSpacingContainer>
-      </TipsContainer>
+        </VerticalSpaceContainer>
+      </TextContainer>
     </ContentContainer>
   );
 }

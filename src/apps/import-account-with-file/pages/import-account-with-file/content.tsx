@@ -6,7 +6,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import {
   ContentContainer,
   IllustrationContainer,
-  HeaderTextContainer,
   InputsContainer,
   TextContainer
 } from '@src/libs/layout';
@@ -32,12 +31,12 @@ export function ImportAccountWithFilePageContent({
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/secret-key.svg" size={120} />
       </IllustrationContainer>
-      <HeaderTextContainer>
+      <TextContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Import account by uploading a file</Trans>
         </Typography>
-      </HeaderTextContainer>
-      <TextContainer>
+      </TextContainer>
+      <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>Import your account from Secret Key File.</Trans>
         </Typography>

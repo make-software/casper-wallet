@@ -2,6 +2,27 @@ import styled, { css } from 'styled-components';
 
 const backgroundIconPath = 'assets/icons/logo-background.svg';
 
+interface VerticalSpaceContainerProps {
+  gap: 'none' | 'small' | 'medium' | 'big';
+}
+
+export const VerticalSpaceContainer = styled.div<VerticalSpaceContainerProps>`
+  margin-top: ${({ gap }) => {
+    switch (gap) {
+      case 'none':
+        return 0;
+      case 'small':
+        return '1.2rem';
+      case 'medium':
+        return '1.6rem';
+      case 'big':
+        return '2.4rem';
+      default:
+        throw new Error('Unknown gap');
+    }
+  }};
+`;
+
 export const FlexRow = styled.div`
   display: flex;
 `;
@@ -64,20 +85,8 @@ export const ContentContainer = styled.div`
     ${({ theme }) => theme.padding[1.6]};
 `;
 
-const contentPaddings = css`
+export const TextContainer = styled(VerticalSpaceContainer)`
   padding: 0 ${({ theme }) => theme.padding[1.6]} 0;
-`;
-
-export const HeaderTextContainer = styled(FlexColumn)`
-  margin-top: 24px;
-  gap: 16px;
-
-  ${contentPaddings};
-`;
-
-export const TextContainer = styled.div`
-  margin-top: 16px;
-  ${contentPaddings};
 `;
 
 export const InputsContainer = styled.div`
@@ -148,10 +157,6 @@ export const TabTextContainer = styled.div`
 
 export const TabPageContainer = styled.div`
   padding: 24px 32px;
-`;
-
-export const ListSpacingContainer = styled.div`
-  margin-top: 24px;
 `;
 
 export const BreakWordContainer = styled.div`

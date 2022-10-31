@@ -4,8 +4,8 @@ import styled from 'styled-components';
 
 import {
   ContentContainer,
-  HeaderTextContainer,
-  PageContainer
+  PageContainer,
+  TextContainer
 } from '@layout/containers';
 import {
   Accordion,
@@ -91,11 +91,11 @@ export function SignatureRequestContent({ deploy }: SignatureRequestViewProps) {
   return (
     <PageContainer>
       <ContentContainer>
-        <HeaderTextContainer>
+        <TextContainer gap="big">
           <Typography type="header">
             <Trans t={t}>Signature Request</Trans>
           </Typography>
-        </HeaderTextContainer>
+        </TextContainer>
         <List
           rows={Object.entries(signatureRequest).map(([key, value]) => ({
             id: key,

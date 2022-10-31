@@ -38,11 +38,11 @@ export function ErrorPageContent({
           </IllustrationContainer>
         )}
 
-        <TextContainer>
+        <TextContainer gap="big">
           <Typography type="header">{errorHeaderText}</Typography>
         </TextContainer>
 
-        <TextContainer>
+        <TextContainer gap="medium">
           <Typography type="body" color="contentSecondary">
             {errorContentText}
           </Typography>

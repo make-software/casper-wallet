@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { TabPageContainer, ListSpacingContainer } from '@src/libs/layout';
+import { TabPageContainer, VerticalSpaceContainer } from '@src/libs/layout';
 import { Typography, TextList } from '@src/libs/ui';
 
 export function CreateSecretPhraseConfirmationPageContent() {
@@ -33,9 +33,9 @@ export function CreateSecretPhraseConfirmationPageContent() {
         </Trans>
       </Typography>
 
-      <ListSpacingContainer>
+      <VerticalSpaceContainer gap="big">
         <TextList items={items} />
-      </ListSpacingContainer>
+      </VerticalSpaceContainer>
     </TabPageContainer>
   );
 }

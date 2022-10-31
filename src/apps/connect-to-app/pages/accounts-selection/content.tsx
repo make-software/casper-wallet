@@ -15,10 +15,11 @@ import {
 import {
   PageContainer,
   ContentContainer,
-  HeaderTextContainer,
+  TextContainer,
   ListItemClickableContainer,
   LeftAlignedFlexColumn,
-  BreakWordContainer
+  BreakWordContainer,
+  VerticalSpaceContainer
 } from '@src/libs/layout';
 
 import {
@@ -86,12 +87,14 @@ export function AccountsSelectionContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <HeaderTextContainer>
+        <TextContainer gap="big">
           <SiteFaviconBadge origin={origin} />
-          <Typography type="header">
-            <BreakWordContainer>{headerText}</BreakWordContainer>
-          </Typography>
-        </HeaderTextContainer>
+          <VerticalSpaceContainer gap="medium">
+            <Typography type="header">
+              <BreakWordContainer>{headerText}</BreakWordContainer>
+            </Typography>
+          </VerticalSpaceContainer>
+        </TextContainer>
         <List
           headerLabel={t('select account(s)')}
           headerAction={headerAction}

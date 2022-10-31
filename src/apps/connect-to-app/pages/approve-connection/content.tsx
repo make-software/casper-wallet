@@ -3,10 +3,11 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import {
-  HeaderTextContainer,
+  TextContainer,
   PageContainer,
   ContentContainer,
-  BreakWordContainer
+  BreakWordContainer,
+  VerticalSpaceContainer
 } from '@src/libs/layout';
 import { SiteFaviconBadge, List, SvgIcon, Typography } from '@src/libs/ui';
 
@@ -52,12 +53,14 @@ export function ApproveConnectionContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <HeaderTextContainer>
+        <TextContainer gap="big">
           <SiteFaviconBadge origin={origin} />
-          <Typography type="header">
-            <BreakWordContainer>{title}</BreakWordContainer>
-          </Typography>
-        </HeaderTextContainer>
+          <VerticalSpaceContainer gap="medium">
+            <Typography type="header">
+              <BreakWordContainer>{title}</BreakWordContainer>
+            </Typography>
+          </VerticalSpaceContainer>
+        </TextContainer>
         <List
           headerLabel={t('allow this site to')}
           rows={listItems}

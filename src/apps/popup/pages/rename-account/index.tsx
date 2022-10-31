@@ -8,7 +8,7 @@ import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
   IllustrationContainer,
-  HeaderTextContainer,
+  TextContainer,
   InputsContainer
 } from '@src/libs/layout';
 import { Button, Input, SvgIcon, Typography } from '@src/libs/ui';
@@ -49,11 +49,11 @@ export function RenameAccountPageContent() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/rename-account.svg" size={120} />
       </IllustrationContainer>
-      <HeaderTextContainer>
+      <TextContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Rename account</Trans>
         </Typography>
-      </HeaderTextContainer>
+      </TextContainer>
       <form onSubmit={handleSubmit(onSubmit)}>
         <InputsContainer>
           <Input

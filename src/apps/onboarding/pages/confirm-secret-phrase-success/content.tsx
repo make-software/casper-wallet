@@ -1,13 +1,12 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import styled from 'styled-components';
 
-import { TabPageContainer, TabTextContainer } from '@src/libs/layout';
+import {
+  TabPageContainer,
+  TabTextContainer,
+  VerticalSpaceContainer
+} from '@src/libs/layout';
 import { Typography, TextList } from '@src/libs/ui';
-
-const ListSpacingContainer = styled.div`
-  margin-top: 16px;
-`;
 
 export function ConfirmSecretPhraseSuccessPageContent() {
   const { t } = useTranslation();
@@ -49,9 +48,9 @@ export function ConfirmSecretPhraseSuccessPageContent() {
         </Typography>
       </TabTextContainer>
 
-      <ListSpacingContainer>
+      <VerticalSpaceContainer gap="medium">
         <TextList items={items} />
-      </ListSpacingContainer>
+      </VerticalSpaceContainer>
     </TabPageContainer>
   );
 }

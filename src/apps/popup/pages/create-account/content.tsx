@@ -5,7 +5,6 @@ import { useTranslation, Trans } from 'react-i18next';
 import {
   ContentContainer,
   IllustrationContainer,
-  HeaderTextContainer,
   TextContainer,
   InputsContainer
 } from '@src/libs/layout';
@@ -27,12 +26,12 @@ export function CreateAccountPageContent({
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/create-account.svg" size={120} />
       </IllustrationContainer>
-      <HeaderTextContainer>
+      <TextContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Create secure account</Trans>
         </Typography>
-      </HeaderTextContainer>
-      <TextContainer>
+      </TextContainer>
+      <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             This account will be associated with your originally created secret

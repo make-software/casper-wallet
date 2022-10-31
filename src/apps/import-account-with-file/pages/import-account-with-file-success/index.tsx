@@ -4,7 +4,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
-  HeaderTextContainer,
   TextContainer,
   IllustrationContainer
 } from '@src/libs/layout';
@@ -20,12 +19,12 @@ export function ImportAccountWithFileSuccessContentPage() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/account-imported.svg" size={120} />
       </IllustrationContainer>
-      <HeaderTextContainer>
+      <TextContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Your account was successfully imported</Trans>
         </Typography>
-      </HeaderTextContainer>
-      <TextContainer>
+      </TextContainer>
+      <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>Now you can see it in your accounts list.</Trans>
         </Typography>

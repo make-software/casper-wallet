@@ -9,7 +9,6 @@ import {
   ContentContainer,
   FooterButtonsAbsoluteContainer,
   IllustrationContainer,
-  HeaderTextContainer,
   InputsContainer,
   TextContainer
 } from '@src/libs/layout/containers';
@@ -52,12 +51,12 @@ export function UnlockVaultPageContent() {
         <IllustrationContainer>
           <SvgIcon src="assets/illustrations/locked-wallet.svg" size={120} />
         </IllustrationContainer>
-        <HeaderTextContainer>
+        <TextContainer gap="big">
           <Typography type="header">
             <Trans t={t}>Your wallet is locked</Trans>
           </Typography>
-        </HeaderTextContainer>
-        <TextContainer>
+        </TextContainer>
+        <TextContainer gap="medium">
           <Typography type="body" color="contentSecondary">
             <Trans t={t}>Please enter the password to unlock.</Trans>
           </Typography>

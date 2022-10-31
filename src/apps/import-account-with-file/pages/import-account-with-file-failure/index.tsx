@@ -4,7 +4,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
-  HeaderTextContainer,
   TextContainer,
   IllustrationContainer
 } from '@src/libs/layout';
@@ -28,12 +27,12 @@ export function ImportAccountWithFileFailureContentPage() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/process-error.svg" size={120} />
       </IllustrationContainer>
-      <HeaderTextContainer>
+      <TextContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Something went wrong</Trans>
         </Typography>
-      </HeaderTextContainer>
-      <TextContainer>
+      </TextContainer>
+      <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           {state?.importAccountStatusMessage
             ? state.importAccountStatusMessage
