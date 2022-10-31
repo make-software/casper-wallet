@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 const backgroundIconPath = 'assets/icons/logo-background.svg';
 
@@ -124,10 +124,11 @@ export const FooterButtonsAbsoluteContainer = styled(FooterButtonsContainer)`
 `;
 
 export const ListItemClickableContainer = styled(SpaceBetweenFlexRow)`
-  width: 100%;
   cursor: pointer;
 
+  width: 100%;
   padding: 14px 18px;
+
   & > * + * {
     padding-left: 18px;
   }

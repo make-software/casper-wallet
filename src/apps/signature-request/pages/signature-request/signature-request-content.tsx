@@ -5,7 +5,8 @@ import styled from 'styled-components';
 import {
   ContentContainer,
   PageContainer,
-  TextContainer
+  TextContainer,
+  SpaceBetweenFlexRow
 } from '@layout/containers';
 import {
   Accordion,
@@ -26,16 +27,14 @@ import {
 } from './types';
 import { useDeriveDeployInfoFromDeployRaw } from './use-derive-deploy-info-from-deploy-raw';
 
-const ListItemContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
+const ListItemContainer = styled(SpaceBetweenFlexRow)`
   margin: 16px;
+  width: unset;
 `;
 
-const CentredFlexRowSpaceBetweenContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
+const CentredFlexRowSpaceBetweenContainer = styled(SpaceBetweenFlexRow)`
   align-items: center;
+  width: unset;
 `;
 
 const AccordionHeaderContainer = styled(CentredFlexRowSpaceBetweenContainer)`

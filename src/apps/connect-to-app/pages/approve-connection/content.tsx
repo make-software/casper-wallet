@@ -7,23 +7,14 @@ import {
   PageContainer,
   ContentContainer,
   BreakWordContainer,
-  VerticalSpaceContainer
+  VerticalSpaceContainer,
+  ListItemClickableContainer
 } from '@src/libs/layout';
 import { SiteFaviconBadge, List, SvgIcon, Typography } from '@src/libs/ui';
 
-const ListItemContainer = styled.div`
-  display: flex;
-
-  width: 100%;
-  padding: 14px 18px;
-
-  & > * + * {
-    padding-left: 18px;
-  }
-
-  & > span {
-    white-space: nowrap;
-  }
+const ListItemContainer = styled(ListItemClickableContainer)`
+  cursor: unset;
+  justify-content: unset;
 `;
 
 interface ApproveConnectionContentProps {
