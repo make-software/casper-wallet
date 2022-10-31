@@ -7,15 +7,17 @@ export function getSubmitButtonStateFromValidation({
   isValid,
   isDirty
 }: GetSubmitButtonStateFromValidationProps) {
-  let isSubmitButtonDisabled = true;
+  if (isDirty != null && isValid != null) {
+    return !isValid || !isDirty;
+  }
 
   if (isDirty != null) {
-    isSubmitButtonDisabled = !isDirty;
+    return !isDirty;
   }
 
   if (isValid != null) {
-    isSubmitButtonDisabled = !isValid;
+    return !isValid;
   }
 
-  return isSubmitButtonDisabled;
+  return false;
 }
