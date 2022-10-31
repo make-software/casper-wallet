@@ -18,12 +18,19 @@ import { SvgIcon, Typography, List } from '@libs/ui';
 
 import {
   selectCountOfConnectedSites,
+  selectVaultHasImportedAccount,
   selectVaultTimeoutDurationSetting
 } from '@src/background/redux/vault/selectors';
 
-const ListItemClickableContainer = styled(AlignedFlexRow)`
+interface ListItemClickableContainerProps {
+  disabled: boolean;
+}
+
+const ListItemClickableContainer = styled(
+  AlignedFlexRow
+)<ListItemClickableContainerProps>`
   width: 100%;
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 
   padding: 14px 18px;
   & > * + * {
@@ -44,6 +51,7 @@ interface MenuItem {
   title: string;
   description?: string;
   iconPath: string;
+  disabled: boolean;
   currentValue?: string | number;
   handleOnClick?: () => void;
 }
@@ -59,6 +67,7 @@ export function NavigationMenuPageContent() {
 
   const timeoutDurationSetting = useSelector(selectVaultTimeoutDurationSetting);
   const countOfConnectedSites = useSelector(selectCountOfConnectedSites);
+  const vaultHasImportedAccount = useSelector(selectVaultHasImportedAccount);
 
   const { openWindow } = useWindowManager();
   const { closeNavigationMenu } = useNavigationMenu();
@@ -72,6 +81,7 @@ export function NavigationMenuPageContent() {
             id: 1,
             title: t('Create account'),
             iconPath: 'assets/icons/plus.svg',
+            disabled: false,
             handleOnClick: () => {
               closeNavigationMenu();
               navigate(RouterPath.CreateAccount);
@@ -81,6 +91,7 @@ export function NavigationMenuPageContent() {
             id: 2,
             title: t('Import account'),
             iconPath: 'assets/icons/upload.svg',
+            disabled: false,
             handleOnClick: () => {
               closeNavigationMenu();
               openWindow({
@@ -98,6 +109,7 @@ export function NavigationMenuPageContent() {
             title: t('Connected sites'),
             iconPath: 'assets/icons/link.svg',
             currentValue: countOfConnectedSites,
+            disabled: false,
             handleOnClick: () => {
               closeNavigationMenu();
               navigate(RouterPath.ConnectedSites);
@@ -108,6 +120,7 @@ export function NavigationMenuPageContent() {
             title: t('Timeout'),
             iconPath: 'assets/icons/lock.svg',
             currentValue: TimeoutDurationSetting[timeoutDurationSetting],
+            disabled: false,
             handleOnClick: () => {
               closeNavigationMenu();
               navigate(RouterPath.Timeout);
@@ -122,6 +135,7 @@ export function NavigationMenuPageContent() {
             id: 1,
             title: t('Back up your secret phrase'),
             iconPath: 'assets/icons/secure.svg',
+            disabled: false,
             handleOnClick: () => {
               closeNavigationMenu();
               navigate(RouterPath.BackupSecretPhrase);
@@ -132,6 +146,7 @@ export function NavigationMenuPageContent() {
             title: t('Download account keys'),
             description: t('For all accounts imported with a file'),
             iconPath: 'assets/icons/download.svg',
+            disabled: !vaultHasImportedAccount,
             handleOnClick: () => {
               closeNavigationMenu();
               navigate(RouterPath.DownloadSecretKeys);
@@ -145,12 +160,14 @@ export function NavigationMenuPageContent() {
           {
             id: 1,
             title: t('Share feedback'),
-            iconPath: 'assets/icons/chat.svg'
+            iconPath: 'assets/icons/chat.svg',
+            disabled: false
           },
           {
             id: 2,
             title: t('About us'),
-            iconPath: 'assets/icons/team.svg'
+            iconPath: 'assets/icons/team.svg',
+            disabled: false
           }
         ]
       }
@@ -161,7 +178,8 @@ export function NavigationMenuPageContent() {
       openWindow,
       closeNavigationMenu,
       countOfConnectedSites,
-      timeoutDurationSetting
+      timeoutDurationSetting,
+      vaultHasImportedAccount
     ]
   );
 
@@ -175,14 +193,27 @@ export function NavigationMenuPageContent() {
           marginLeftForItemSeparatorLine={60}
           renderRow={groupItem => (
             <ListItemClickableContainer
+              disabled={groupItem.disabled}
               key={groupLabel + groupItem.id}
-              onClick={groupItem.handleOnClick}
+              onClick={groupItem.disabled ? undefined : groupItem.handleOnClick}
             >
-              <SvgIcon src={groupItem.iconPath} color="contentBlue" />
+              <SvgIcon
+                src={groupItem.iconPath}
+                color={groupItem.disabled ? 'contentSecondary' : 'contentBlue'}
+              />
               <SpaceBetweenContainer>
                 {groupItem.description ? (
                   <FlexColumn>
-                    <Typography type="body">{groupItem.title}</Typography>
+                    <Typography
+                      type="body"
+                      color={
+                        groupItem.disabled
+                          ? 'contentSecondary'
+                          : 'contentPrimary'
+                      }
+                    >
+                      {groupItem.title}
+                    </Typography>
                     <Typography type="listSubtext" color="contentSecondary">
                       {groupItem.description}
                     </Typography>

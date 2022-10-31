@@ -1,6 +1,5 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import { FieldValues } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -15,9 +14,16 @@ import { useDownloadSecretKeysForm } from '@src/libs/ui/forms/download-secret-ke
 
 import { RouterPath, useTypedNavigate } from '@src/apps/popup/router';
 
-import { selectVaultPassword } from '@src/background/redux/vault/selectors';
+import {
+  selectVaultImportedAccounts,
+  selectVaultPassword
+} from '@src/background/redux/vault/selectors';
 
 import { DownloadSecretKeysPageContent } from './content';
+import {
+  downloadFile,
+  makeSecretKeyFileContent
+} from '@popup/pages/download-secret-keys/utils';
 
 const DownloadSecretKeysForm = styled.form`
   height: 100%;
@@ -34,7 +40,30 @@ export function DownloadSecretKeysPage() {
     formState: { isDirty, errors }
   } = useDownloadSecretKeysForm(expectedPassword);
 
-  const onSubmit = (data: FieldValues) => {
+  const importedAccounts = useSelector(selectVaultImportedAccounts);
+
+  if (importedAccounts.length === 0) {
+    // Redirect to error page?
+    throw new Error("Imported accounts wasn't found");
+  }
+
+  const onSubmit = () => {
+    try {
+      importedAccounts.forEach(account => {
+        const file = makeSecretKeyFileContent(
+          account.publicKey,
+          account.secretKey
+        );
+        downloadFile(
+          new Blob([file], { type: 'text/plain;charset=utf-8' }),
+          `${account.name}_secret_key.pem`
+        );
+      });
+    } catch (e) {
+      // Redirect to error page?
+      console.error(e);
+    }
+
     navigate(RouterPath.DownloadedSecretKeys);
   };
 
