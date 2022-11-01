@@ -56,7 +56,7 @@ export function ConnectingContent() {
       </Typography>
       <IconsContainer>
         <LogoOverlay>
-          <SvgIcon src="assets/icons/logo.svg" size={40} color="contentRed" />
+          <SvgIcon src="assets/icons/casper-wallet-logo.svg" size={40} />
         </LogoOverlay>
         <SvgIcon src="assets/illustrations/connection.svg" size={76} />
         <LogoOverlay>

@@ -21,6 +21,11 @@ const Container = styled('div')({
   justifyContent: 'center'
 });
 
+const LogoTitleContainer = styled(Container)({
+  marginTop: '24px',
+  flexDirection: 'row'
+});
+
 const Row = styled(Container)({
   flexDirection: 'row'
 });
@@ -55,10 +60,11 @@ function App() {
 
   return (
     <Container>
-      <Row style={{ fontSize: '2rem' }}>
+      <LogoTitleContainer style={{ fontSize: '2rem' }}>
         <img src={logo} alt="logo" />
         Casper Wallet Playground
-      </Row>
+      </LogoTitleContainer>
+
       <Row>
         Connected Account: {statusText}{' '}
         <Button variant="contained" onClick={handleConnect}>
