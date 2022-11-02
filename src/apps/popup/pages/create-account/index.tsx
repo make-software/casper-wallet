@@ -10,7 +10,10 @@ import {
   FooterButtonsContainer
 } from '@src/libs/layout';
 import { Button } from '@src/libs/ui';
-import { useCreateAccountForm } from '@src/libs/ui/forms/create-account';
+import {
+  useCreateAccountForm,
+  getDefaultName
+} from '@src/libs/ui/forms/create-account';
 
 import { RouterPath, useTypedNavigate } from '@src/apps/popup/router';
 
@@ -37,7 +40,7 @@ export function CreateAccountPage() {
     formState: { errors, isValid }
   } = useCreateAccountForm(
     existingAccountNames,
-    `Account ${derivedAccounts.length + 1}`
+    getDefaultName(derivedAccounts.length, existingAccountNames)
   );
   const onSubmit = ({ name }: FieldValues) => {
     dispatchToMainStore(accountCreated(name.trim()));
