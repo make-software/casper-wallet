@@ -1,29 +1,20 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Hash, HashVariant, SvgIcon, Typography } from '@libs/ui';
+import { Hash, HashVariant, SvgIcon, Typography } from '@src/libs/ui';
+import {
+  AlignedSpaceBetweenFlexRow,
+  LeftAlignedFlexColumn
+} from '@src/libs/layout';
 
-const CentredFlexRow = styled.div`
-  display: flex;
-  width: 100%;
-
-  align-items: center;
-
+const SiteGroupItemContainer = styled(AlignedSpaceBetweenFlexRow)`
   gap: 18px;
-`;
 
-const SiteGroupItemContainer = styled(CentredFlexRow)`
-  display: flex;
-  justify-content: space-between;
-
+  width: 100%;
   padding: 12px 16px;
 `;
 
-const AccountNameAndPublicKeyContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-`;
+const AccountNameAndPublicKeyContainer = styled(LeftAlignedFlexColumn)``;
 
 interface SiteGroupItemProps {
   name: string;

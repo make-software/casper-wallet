@@ -38,6 +38,7 @@ export function ConnectedSitesPage() {
             renderHeader={() => (
               <SiteGroupHeader
                 key={origin + 'header'}
+                siteOrder={index + 1}
                 siteTitle={siteTitle}
                 disconnectSite={async () => {
                   await disconnectAllAccounts(origin);
