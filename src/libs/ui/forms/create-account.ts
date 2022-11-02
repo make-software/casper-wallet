@@ -25,3 +25,20 @@ export function useCreateAccountForm(
 
   return useForm(formOptions);
 }
+
+export function getDefaultName(
+  derivedAccountsCount: number,
+  existingAccountNames: string[]
+) {
+  const accountString = 'Account';
+
+  let sequenceNumber = derivedAccountsCount + 1;
+  let defaultName = `${accountString} ${sequenceNumber}`;
+
+  while (existingAccountNames.includes(defaultName)) {
+    sequenceNumber++;
+    defaultName = `${accountString} ${sequenceNumber}`;
+  }
+
+  return defaultName;
+}

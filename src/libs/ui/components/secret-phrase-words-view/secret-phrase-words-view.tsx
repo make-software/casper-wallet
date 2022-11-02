@@ -56,7 +56,6 @@ const BlurredSecretPhraseWordsViewOverlayContainer = styled(
 
   height: ${({ withFooter }) => (withFooter ? 'calc(100% - 56px)' : '100%')};
   width: 100%;
-  max-width: 448px;
 
   background-color: ${({ theme }) => hexToRGBA(theme.color.black, '.32')};
   backdrop-filter: blur(8px);

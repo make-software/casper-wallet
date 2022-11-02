@@ -1,7 +1,5 @@
 import styled from 'styled-components';
 
-const backgroundIconPath = 'assets/icons/logo-background.svg';
-
 interface VerticalSpaceContainerProps {
   gap: 'none' | 'small' | 'medium' | 'big';
 }
@@ -65,7 +63,6 @@ export const SpaceBetweenFlexColumn = styled(FlexColumn)`
 `;
 
 export const HeaderContainer = styled(AlignedSpaceBetweenFlexRow)`
-  background: url(${backgroundIconPath}) no-repeat;
   background-color: ${({ theme }) => theme.color.backgroundRed};
   height: 72px;
 
