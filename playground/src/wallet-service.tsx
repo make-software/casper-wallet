@@ -7,10 +7,8 @@ import React, {
   useState
 } from 'react';
 
-import type { CasperWalletProvider } from '../../src/content/sdk';
-
 let casperWalletInstance;
-const getCasperWalletInstance = (): ReturnType<typeof CasperWalletProvider> => {
+const getCasperWalletInstance = () => {
   try {
     if (casperWalletInstance == null) {
       casperWalletInstance = (window as any).CasperWalletProvider();
