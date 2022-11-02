@@ -24,6 +24,8 @@ import { RenameAccountPageContent } from '@popup/pages/rename-account';
 import { AccountListPage } from '@popup/pages/account-list';
 import { BackupSecretPhrasePage } from '@popup/pages/backup-secret-phrase';
 import { CreateAccountPage } from '@src/apps/popup/pages/create-account';
+import { DownloadSecretKeysPage } from '@popup/pages/download-secret-keys';
+import { DownloadedSecretKeysPage } from '@popup/pages/downloaded-secret-keys';
 
 import { RouterPath, useTypedLocation } from '@popup/router';
 
@@ -282,6 +284,14 @@ function UnlockedRouter() {
       <Route
         path={RouterPath.BackupSecretPhrase}
         element={<BackupSecretPhrasePage />}
+      />
+      <Route
+        path={RouterPath.DownloadSecretKeys}
+        element={<DownloadSecretKeysPage />}
+      />
+      <Route
+        path={RouterPath.DownloadedSecretKeys}
+        element={<DownloadedSecretKeysPage />}
       />
     </Routes>
   );

@@ -31,6 +31,11 @@ export const selectVaultImportedAccounts = createSelector(
   accounts => accounts.filter(account => account.imported)
 );
 
+export const selectVaultHasImportedAccount = createSelector(
+  selectVaultImportedAccounts,
+  importedAccounts => importedAccounts.length > 0
+);
+
 export const selectVaultDerivedAccounts = createSelector(
   selectVaultAccounts,
   accounts => accounts.filter(account => !account.imported)
