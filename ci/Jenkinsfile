@@ -57,7 +57,7 @@ pipeline {
         steps {
             script {
                 docker.withRegistry('https://494750395663.dkr.ecr.us-east-1.amazonaws.com', 'ecr:us-east-1:make-ecr-casper-dev') {
-                    sh "docker push $registry$dockerImage:${env.VER}-${env.GIT_HASH}"
+                    sh "docker push $registry$dockerImage:${env.GIT_HASH}"
                 }
             }
         }
