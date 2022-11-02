@@ -12,5 +12,7 @@ export enum RouterPath {
   ConnectAnotherAccount = '/connect-another-account',
   ConnectAnotherAccountByParams = '/connect-another-account/:targetAccountName',
   ConnectedSites = '/connected-sites',
-  BackupSecretPhrase = '/backup-secret-phrase'
+  BackupSecretPhrase = '/backup-secret-phrase',
+  DownloadSecretKeys = '/download-secret-keys',
+  DownloadedSecretKeys = '/downloaded-secret-keys'
 }
