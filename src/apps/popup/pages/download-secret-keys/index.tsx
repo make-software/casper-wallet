@@ -10,6 +10,8 @@ import {
 } from '@src/libs/layout';
 import { Button } from '@src/libs/ui';
 import { useDownloadSecretKeysForm } from '@src/libs/ui/forms/download-secret-keys';
+import { getSubmitButtonStateFromValidation } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
+import { createAsymmetricKey } from '@src/libs/crypto/create-asymmetric-key';
 
 import { RouterPath, useTypedNavigate } from '@src/apps/popup/router';
 
@@ -20,7 +22,7 @@ import {
 
 import { DownloadSecretKeysPageContent } from './content';
 
-import { downloadFile, makeSecretKeyFileContent } from './utils';
+import { downloadFile } from './utils';
 
 export function DownloadSecretKeysPage() {
   const navigate = useTypedNavigate();
@@ -37,16 +39,17 @@ export function DownloadSecretKeysPage() {
 
   if (importedAccounts.length === 0) {
     // Redirect to error page?
-    throw new Error("Imported accounts wasn't found");
+    throw new Error('There are no imported accounts!');
   }
 
   const onSubmit = () => {
     try {
       importedAccounts.forEach(account => {
-        const file = makeSecretKeyFileContent(
+        const asymmetricKey = createAsymmetricKey(
           account.publicKey,
           account.secretKey
         );
+        const file = asymmetricKey.exportPrivateKeyInPem();
         downloadFile(
           new Blob([file], { type: 'text/plain;charset=utf-8' }),
           `${account.name}_secret_key.pem`
@@ -59,6 +62,10 @@ export function DownloadSecretKeysPage() {
 
     navigate(RouterPath.DownloadedSecretKeys);
   };
+
+  const isSubmitButtonDisabled = getSubmitButtonStateFromValidation({
+    isDirty
+  });
 
   return (
     <LayoutWindow
@@ -82,7 +89,7 @@ export function DownloadSecretKeysPage() {
       )}
       renderFooter={() => (
         <FooterButtonsContainer>
-          <Button disabled={!isDirty}>
+          <Button disabled={isSubmitButtonDisabled}>
             <Trans t={t}>Download</Trans>
           </Button>
         </FooterButtonsContainer>
