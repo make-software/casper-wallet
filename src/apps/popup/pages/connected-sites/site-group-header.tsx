@@ -32,7 +32,7 @@ export function SiteGroupHeader({
     <SiteGroupHeaderContainer>
       <SiteGroupHeaderActionContainer>
         <Typography type="bodySemiBold" color="contentPrimary">
-          Site {siteOrder}
+          <Trans t={t}>Site</Trans> {siteOrder}
         </Typography>
 
         <Button
