@@ -63,22 +63,73 @@ pipeline {
         }
     }
 
-  //   stage('Clone casper-infra repo') {
-  //     when {
-  //       anyOf {
-  //         branch "master";
-  //         branch "rc-1*"
-  //       }
-  //     }
-  //     environment {
-  //       GIT_CREDS_USR = credentials('repo-git-user')
-  //       GIT_CREDS_PSW = credentials('repo-git-pass')
-  //     }
-  //     steps {
-  //       sh "git clone https://$GIT_CREDS_USR:$GIT_CREDS_PSW@bitbucket.org/makellc/casper-infra.git"
-  //       sh 'git config --global user.email \'jenkins@make.servies\''
-  //       sh 'git config --global user.name "Jenkins CI"'
-  //     }
-  //   }
+    stage('Clone casper-infra repo') {
+      when {
+        anyOf {
+          branch "master";
+          branch "k8s-2.1";
+          branch "rc-*"
+        }
+      }
+      environment {
+        GIT_CREDS_USR = credentials('repo-git-user')
+        GIT_CREDS_PSW = credentials('repo-git-pass')
+      }
+      steps {
+        sh "git clone https://$GIT_CREDS_USR:$GIT_CREDS_PSW@bitbucket.org/makellc/casper-infra.git"
+        sh 'git config --global user.email \'jenkins@make.servies\''
+        sh 'git config --global user.name "Jenkins CI"'
+      }
+    }
+
+    stage('DEV') {
+      when {
+        anyOf {
+          branch "master";
+          branch "k8s-2.1";
+          branch "rc-*"
+        }
+      }
+        environment {
+          env = 'dev'
+          dir = 'casper-wallet'
+          app = 'wallet'
+        }
+        steps {
+          dir(path: 'casper-infra') {
+            sh 'cd ./kubernetes/environment/$env/$dir && pwd && ls -la && sed -i "s|/$app.*|/$app:$GIT_HASH|g" $app.yaml'
+            sh 'git status && git commit -am "$dir-$app-$env releasing from branch $BRANCH_NAME" && pwd && ls -la && chmod a+x ../ci/push.sh && ../ci/push.sh || echo \'no changes\''
+          }
+        }
+     }
+
+      // stage('ArgoCD') {
+      // when {
+      //   anyOf {
+      //     branch "master";
+      //     branch "rc-*"
+      //   }
+      // }
+      //   steps {
+      //       sh 'sleep 180'
+      //   }
+      // }
+  }
+
+    // post {
+    //     success {
+    //       script {
+    //         if (env.BRANCH_NAME == 'dev' || env.BRANCH_NAME == 'master' || env.BRANCH_NAME =~ 'rc.*')
+    //         slackSend (color: '#00FF00', message: "SUCCESSFUL\n*Job:* `${env.JOB_NAME}`\n*Build:* `${env.BUILD_NUMBER}`\n *Commit:* `${env.GIT_HASH}`\n *More info at:* `${env.BUILD_URL}`")
+    //       }
+    //     }
+
+    //     failure {
+    //       script {
+    //         if (env.BRANCH_NAME == 'dev' || env.BRANCH_NAME == 'master' || env.BRANCH_NAME =~ 'rc.*')
+    //         slackSend (color: '#FF0000', message: "FAILED\n*Job:* `${env.JOB_NAME}`\n*Build:* `${env.BUILD_NUMBER}`\n *Commit:* `${env.GIT_HASH}`\n *More info at:* `${env.BUILD_URL}`")
+    //       }
+    //     }
+    // }
   }
 }
