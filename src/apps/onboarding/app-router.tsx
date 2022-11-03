@@ -109,15 +109,12 @@ function AuthorizedUserRoutes({
   return (
     <HashRouter>
       <Routes>
+        <Route path={RouterPath.Any} element={<CreateSecretPhrasePage />} />
         <Route
-          path={RouterPath.Any}
+          path={RouterPath.CreateSecretPhraseConfirmation}
           element={
             <CreateSecretPhraseConfirmationPage setFormState={setFormState} />
           }
-        />
-        <Route
-          path={RouterPath.CreateSecretPhrase}
-          element={<CreateSecretPhrasePage />}
         />
         <Route
           path={RouterPath.RecoverFromSecretPhrase}

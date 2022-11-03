@@ -33,7 +33,7 @@ export function ConfirmSecretPhrasePage({
   const [isFormValid, setIsFormValid] = useState(false);
 
   if (phrase == null) {
-    return <Navigate to={RouterPath.CreateSecretPhraseConfirmation} />;
+    return <Navigate to={RouterPath.Any} />;
   }
 
   function handleSubmit() {
