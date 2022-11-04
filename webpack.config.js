@@ -82,7 +82,19 @@ const options = {
     publicPath: ASSET_PATH
   },
   module: {
+    noParse: /\.wasm$/,
     rules: [
+      {
+        test: /\.wasm$/,
+        // Tells WebPack that this module should be included as
+        // base64-encoded binary file and not as code
+        loader: 'base64-loader',
+        // Disables WebPack's opinion where WebAssembly should be,
+        // makes it think that it's not WebAssembly
+        //
+        // Error: WebAssembly module is included in initial chunk.
+        type: 'javascript/auto'
+      },
       {
         test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
         loader: 'file-loader',
@@ -121,7 +133,13 @@ const options = {
     extensions: fileExtensions
       .map(extension => '.' + extension)
       .concat(['.js', '.jsx', '.ts', '.tsx']),
-    plugins: [new TsconfigPaths.TsconfigPathsPlugin({})]
+    plugins: [new TsconfigPaths.TsconfigPathsPlugin({})],
+    fallback: {
+      path: false,
+      fs: false,
+      Buffer: false,
+      process: false
+    }
   },
   plugins: [
     new webpack.ProgressPlugin(),
