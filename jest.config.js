@@ -1,10 +1,10 @@
 module.exports = {
-  roots: ['<rootDir>'],
+  preset: 'ts-jest/presets/js-with-ts',
+  testEnvironment: 'node',
   transform: {
-    '^.+\\.tsx?$': ['ts-jest', {}]
+    '^.+\\.(j|t)sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }]
   },
-  clearMocks: true,
-  moduleDirectories: ['node_modules'],
+  transformIgnorePatterns: ['<rootDir>/node_modules/(?!micro-aes-gcm/.*)'],
   coveragePathIgnorePatterns: ['/node_modules/'],
   testRegex: '(/tests?/.*|(\\.|/)(test|spec))\\.tsx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
