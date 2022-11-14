@@ -96,6 +96,37 @@ You can run all these commands in parallel.
 npm run build:all
 ```
 
+## Redux DevTools
+
+### What is it?
+
+Developer Tools to power-up Redux development workflow or any other architecture which handles the state change.
+
+It can be used as a browser extension (for Chrome, Edge and Firefox), as a standalone app or as a React component integrated in the client app.
+
+You can read more about Redux DevTools on link <https://github.com/reduxjs/redux-devtools>
+
+### How to configure?
+
+We are using redux devtool as separate local server. It can be started with `devtools:redux` npm start script.
+
+All npm start scripts, except Safari (`start:chrome`, `start:firefox`) for dev-environment, already include launching the redux dev tools on `8000` port for Chrome and `8001` port for Firefox.
+
+You should install Redux DevTools browser extension and connect it to Redux DevTool local server
+
+### How to run?
+
+1. Install browser extension
+   - For Chrome - <https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=en>
+   - For Firefox - <https://addons.mozilla.org/en-US/firefox/addon/reduxdevtools/>
+   - Safari not supported 😢
+
+2. Start npm script for browser you need. For example, run `npm run start:chrome` for Chrome
+3. Connect your extension with local redux dev server with steps:
+    1. Open extension and click by right mouse button on it then pick `Redux DevTools` menu item and click on `Open Remote DevTools`![Opening Redux DevTools app](./src/assets/illustrations/redux-devtools-guide/opening-redux-devtools.png)
+    2. Open `Settings` of Redux DevTools app then select `use local (custom) server` option and set hostname as a `localhost` and set a port depends on browser you need (`8000` for Chrome and `8001` for Firefox) ![Redux DevTools settings](./src/assets/illustrations/redux-devtools-guide/redux-devtools-settings.png)
+    3. Click `Connect` button and enjoy 🙂
+
 ## E2E tests
 
 Write tests into `e2e/tests` folder.
