@@ -1,8 +1,13 @@
 import * as argon2 from 'argon2-browser';
 import { randomBytes } from '@noble/hashes/utils';
+import { convertBytesToHex, convertHexToBytes } from './utils';
 
-function generateRandomSalt() {
+export function generateRandomSaltBytes() {
   return randomBytes(32);
+}
+
+export function generateRandomSaltHex() {
+  return convertBytesToHex(randomBytes(32));
 }
 
 const createOptions = ({
@@ -20,7 +25,9 @@ const createOptions = ({
     hashLen: 32
   };
 
-  options.salt = saltHex ? Buffer.from(saltHex, 'hex') : generateRandomSalt();
+  options.salt = saltHex
+    ? convertHexToBytes(saltHex)
+    : generateRandomSaltBytes();
 
   if (passwordDigest) {
     options.encoded = passwordDigest;
@@ -42,10 +49,10 @@ export async function encodePassword(password: string): Promise<string> {
 
 export async function verifyPasswordAgainstDigest(
   passwordDigest: string,
-  password: string
+  password?: string
 ): Promise<boolean> {
   return await argon2
-    .verify(createOptions({ password, passwordDigest }))
+    .verify(createOptions({ password: password || '', passwordDigest }))
     .then(res => {
       return true;
     })

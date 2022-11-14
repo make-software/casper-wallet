@@ -17,7 +17,7 @@ import { RouterPath, useTypedNavigate } from '@src/apps/popup/router';
 
 import {
   selectVaultImportedAccounts,
-  selectVaultPassword
+  selectVaultPasswordDigest
 } from '@src/background/redux/vault/selectors';
 
 import { DownloadSecretKeysPageContent } from './content';
@@ -28,12 +28,12 @@ export function DownloadSecretKeysPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  const expectedPassword = useSelector(selectVaultPassword);
+  const vaultPasswordDigest = useSelector(selectVaultPasswordDigest);
   const {
     register,
     handleSubmit,
     formState: { isDirty, errors }
-  } = useDownloadSecretKeysForm(expectedPassword);
+  } = useDownloadSecretKeysForm(vaultPasswordDigest);
 
   const importedAccounts = useSelector(selectVaultImportedAccounts);
 

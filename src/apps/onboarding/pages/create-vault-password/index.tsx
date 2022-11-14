@@ -1,23 +1,27 @@
 import React, { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 import { FieldValues } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
+  HeaderSubmenuBarNavLink,
   LayoutTab,
-  TabHeaderContainer,
   TabFooterContainer,
-  HeaderSubmenuBarNavLink
+  TabHeaderContainer
 } from '@libs/layout';
 import { Button, Checkbox } from '@libs/ui';
 import { useCreatePasswordForm } from '@libs/ui/forms/create-password';
 
+import { Stepper } from '@src/apps/onboarding/components/stepper';
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { Stepper } from '@src/apps/onboarding/components/stepper';
 
 import { dispatchToMainStore } from '@background/redux/utils';
 import { vaultCreated } from '@background/redux/vault/actions';
 
+import {
+  encodePassword,
+  generateRandomSaltHex
+} from '@src/libs/crypto/hashing';
 import { CreateVaultPasswordPageContent } from './content';
 
 interface CreateVaultPasswordPageProps {
@@ -34,9 +38,11 @@ export function CreateVaultPasswordPage({
   const { register, handleSubmit, formState } = useCreatePasswordForm();
   const { isDirty } = formState;
 
-  function onSubmit(data: FieldValues) {
+  async function onSubmit(data: FieldValues) {
+    const passwordDigest = await encodePassword(data.password);
+    const encSaltHex = generateRandomSaltHex();
+    dispatchToMainStore(vaultCreated({ passwordDigest, encSaltHex }));
     saveIsLoggedIn(true);
-    dispatchToMainStore(vaultCreated({ password: data.password }));
     navigate(RouterPath.CreateSecretPhrase);
   }
 

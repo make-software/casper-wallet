@@ -21,7 +21,7 @@ import {
   SvgIcon
 } from '@src/libs/ui';
 
-import { selectVaultPassword } from '@src/background/redux/vault/selectors';
+import { selectVaultPasswordDigest } from '@src/background/redux/vault/selectors';
 import { vaultUnlocked } from '@src/background/redux/vault/actions';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { useUnlockWalletForm } from '@src/libs/ui/forms/unlock-wallet';
@@ -33,13 +33,13 @@ export function UnlockVaultPageContent() {
   const [passwordInputType, setPasswordInputType] =
     useState<PasswordInputType>('password');
 
-  const vaultPassword = useSelector(selectVaultPassword);
+  const vaultPasswordDigest = useSelector(selectVaultPasswordDigest);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty }
-  } = useUnlockWalletForm(vaultPassword);
+  } = useUnlockWalletForm(vaultPasswordDigest);
 
   function handleUnlockVault() {
     dispatchToMainStore(vaultUnlocked());

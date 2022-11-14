@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
+import { verifyPasswordAgainstDigest } from '@src/libs/crypto/hashing';
 
 export const minPasswordLength = 12;
 
@@ -12,11 +13,13 @@ export function useCreatePasswordRule() {
   return Yup.string().min(minPasswordLength, passwordAmountCharactersMessage);
 }
 
-export function useExpectPasswordRule(expectedPassword: string) {
+export function useVerifyPasswordAgainstDigestRule(passwordDigest: string) {
   const { t } = useTranslation();
   const errorMessage = t('Password is not correct');
 
-  return Yup.string().equals([expectedPassword], errorMessage);
+  return Yup.string().test('authenticate', errorMessage, password =>
+    verifyPasswordAgainstDigest(passwordDigest, password)
+  );
 }
 
 export function useRepeatPasswordRule(inputName: string) {

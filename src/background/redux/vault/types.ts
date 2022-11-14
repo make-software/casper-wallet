@@ -15,7 +15,8 @@ export interface Account extends KeyPair {
 type AccountNamesByOriginDict = Record<string, string[]>;
 
 export type VaultState = {
-  password: string | null;
+  passwordDigest: string | null;
+  encSaltHex: string | null;
   secretPhrase: SecretPhrase | null;
   isLocked: boolean;
   timeoutDurationSetting: TimeoutDurationSetting;

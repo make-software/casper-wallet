@@ -7,12 +7,14 @@ import { SecretPhrase } from '@src/libs/crypto';
 
 export const vaultCreated = createAction(
   'VAULT_CREATED',
-  (payload: { password: string }) => ({
-    password: payload.password,
+  (payload: { passwordDigest: string; encSaltHex: string }) => ({
+    passwordDigest: payload.passwordDigest,
+    encSaltHex: payload.encSaltHex,
     lastActivityTime: Date.now()
   })
 )<{
-  password: string;
+  passwordDigest: string;
+  encSaltHex: string;
   lastActivityTime: number;
 }>();
 

@@ -6,10 +6,10 @@ import { TimeoutDurationSetting } from '@popup/constants';
 import { Account } from '@src/background/redux/vault/types';
 
 export const selectVaultDoesExist = (state: RootState): boolean =>
-  !!state.vault.password;
+  !!state.vault.passwordDigest;
 
-export const selectVaultPassword = (state: RootState): string =>
-  state.vault.password || '';
+export const selectVaultPasswordDigest = (state: RootState): string =>
+  state.vault.passwordDigest || '';
 
 export const selectVaultSecretPhrase = (
   state: RootState

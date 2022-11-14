@@ -25,7 +25,8 @@ import { deriveKeyPair } from '@src/libs/crypto/bip32';
 type State = VaultState;
 
 const initialState: State = {
-  password: null,
+  passwordDigest: null,
+  encSaltHex: null,
   isLocked: false,
   timeoutDurationSetting: TimeoutDurationSetting['5 min'],
   lastActivityTime: null,
@@ -39,9 +40,13 @@ const initialState: State = {
 export const reducer = createReducer(initialState)
   .handleAction(
     [vaultCreated],
-    (state, { payload: { password, lastActivityTime } }): State => ({
+    (
+      state,
+      { payload: { passwordDigest: password, encSaltHex, lastActivityTime } }
+    ): State => ({
       ...state,
-      password,
+      passwordDigest: password,
+      encSaltHex: encSaltHex,
       lastActivityTime
     })
   )
