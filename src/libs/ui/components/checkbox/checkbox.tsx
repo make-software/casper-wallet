@@ -36,7 +36,8 @@ export function Checkbox({
   checked,
   onChange,
   label,
-  variant = 'circle'
+  variant = 'circle',
+  dataTestId
 }: CheckboxProps) {
   const handleClick = (ev: ChangeEvent<HTMLInputElement>) => {
     onChange && onChange(!checked);
@@ -57,6 +58,7 @@ export function Checkbox({
       align="center"
       checked={checked}
       onClick={handleClick}
+      data-testid={dataTestId}
     >
       <SvgIcon src={iconSrc} />
       {label && (

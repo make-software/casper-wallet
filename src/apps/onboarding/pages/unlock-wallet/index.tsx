@@ -51,10 +51,15 @@ export function UnlockWalletPage({ saveIsLoggedIn }: UnlockWalletPageProps) {
         )}
         renderFooter={() => (
           <TabFooterContainer>
-            <Button disabled={!isDirty} color="primaryRed">
+            <Button
+              dataTestId="unlock-wallet:unlock-wallet-button"
+              disabled={!isDirty}
+              color="primaryRed"
+            >
               <Trans t={t}>Unlock wallet</Trans>
             </Button>
             <Button
+              dataTestId="unlock-wallet:start-again-button"
               color="secondaryRed"
               onClick={() => navigate(RouterPath.ResetWallet)}
             >

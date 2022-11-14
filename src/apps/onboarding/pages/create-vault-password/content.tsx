@@ -51,6 +51,7 @@ export function CreateVaultPasswordPageContent({
       </TabTextContainer>
       <InputsContainer>
         <Input
+          dataTestId="create-password:password-input"
           validationType={InputValidationType.Password}
           type={passwordInputType}
           placeholder={t('Password')}
@@ -66,6 +67,7 @@ export function CreateVaultPasswordPageContent({
           validationText={errors.password?.message}
         />
         <Input
+          dataTestId="create-password:confirm-password-input"
           type={confirmPasswordInputType}
           placeholder={t('Confirm password')}
           oneColoredIcons

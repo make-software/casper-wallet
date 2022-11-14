@@ -59,11 +59,15 @@ export function CreateVaultPasswordPage({
         renderFooter={() => (
           <TabFooterContainer>
             <Checkbox
+              dataTestId="create-password:create-password-checkbox"
               checked={isChecked}
               onChange={() => setIsChecked(currentValue => !currentValue)}
               label={t('I have read and agreed to the Terms of Use')}
             />
-            <Button disabled={!isChecked || !isDirty}>
+            <Button
+              dataTestId="create-password:create-password-button"
+              disabled={!isChecked || !isDirty}
+            >
               <Trans t={t}>Create password</Trans>
             </Button>
           </TabFooterContainer>

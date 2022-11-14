@@ -3,6 +3,7 @@
     "module": "commonjs",
     "target": "esnext",
     "jsx": "react",
+    "allowJs": true,
     "sourceMap": false,
     "experimentalDecorators": true,
     "noImplicitUseStrict": true,

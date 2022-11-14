@@ -63,6 +63,7 @@ export function UnlockWalletPageContent({
 
         <InputsContainer>
           <Input
+            dataTestId="unlock-wallet:password-input"
             validationType={InputValidationType.Password}
             type={passwordInputType}
             placeholder={t('Password')}
