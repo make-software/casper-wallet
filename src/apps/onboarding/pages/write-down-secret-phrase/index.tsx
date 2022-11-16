@@ -48,7 +48,7 @@ export function WriteDownSecretPhrasePage({
             checked={isChecked}
             onChange={() => setIsChecked(currentValue => !currentValue)}
             label={t(
-              'I confirm I have written down and safely stored my secret phrase.'
+              'I confirm I have written down and securely stored my secret recovery phrase'
             )}
           />
           <Button

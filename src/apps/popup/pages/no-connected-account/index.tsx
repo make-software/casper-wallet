@@ -22,14 +22,14 @@ export function NoConnectedAccountPageContent() {
       </IllustrationContainer>
       <TextContainer gap="big">
         <Typography type="header">
-          <Trans t={t}>Casper Signer is not connected to this site yet</Trans>
+          <Trans t={t}>Casper Wallet is not connected to this site yet</Trans>
         </Typography>
       </TextContainer>
       <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            To connect to this site, find and click the connect button on the
-            site
+            To connect to this site, click on the Connect/Sign In button on the
+            site.
           </Trans>
         </Typography>
       </TextContainer>

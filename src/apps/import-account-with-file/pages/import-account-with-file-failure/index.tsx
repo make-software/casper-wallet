@@ -36,7 +36,9 @@ export function ImportAccountWithFileFailureContentPage() {
         <Typography type="body" color="contentSecondary">
           {state?.importAccountStatusMessage
             ? state.importAccountStatusMessage
-            : t("We couldn't import your account. Please try again.")}
+            : t(
+                ': We couldn’t import your account. Please confirm that you’re importing a file containing your secret key (not to be confused with your public key).'
+              )}
         </Typography>
       </TextContainer>
       <FooterButtonsAbsoluteContainer>

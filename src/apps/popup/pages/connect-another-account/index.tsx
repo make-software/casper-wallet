@@ -86,7 +86,7 @@ export function ConnectAnotherAccountPageContent() {
         <SiteFaviconBadge origin={activeOrigin} />
         <HeaderTextContent>
           <Typography type="header">
-            Your current account is not connected
+            This account isn’t yet connected to this site
           </Typography>
         </HeaderTextContent>
       </TextContainer>

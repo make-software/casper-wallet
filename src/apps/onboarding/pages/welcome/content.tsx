@@ -15,17 +15,16 @@ export function WelcomePageContent() {
       />
       <TabTextContainer>
         <Typography type="header">
-          <Trans t={t}>
-            Welcome to Signer! Ready to create your new wallet?
-          </Trans>
+          <Trans t={t}>Ready to create your new wallet?</Trans>
         </Typography>
       </TabTextContainer>
 
       <TabTextContainer>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            With a Casper Wallet you can send and receive funds, connect to
-            Dapps, trade NFTs and so much more!
+            With a Casper Wallet you can create unlimited accounts, view your
+            account balance, and securely sign transactions on the Casper
+            Network.
           </Trans>
         </Typography>
       </TabTextContainer>

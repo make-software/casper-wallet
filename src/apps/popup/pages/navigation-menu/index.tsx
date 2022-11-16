@@ -15,7 +15,7 @@ import {
   FlexColumn,
   SpaceBetweenFlexRow
 } from '@src/libs/layout';
-import { SvgIcon, Typography, List } from '@src/libs/ui';
+import { SvgIcon, Typography, List, Link } from '@src/libs/ui';
 
 import {
   selectCountOfConnectedSites,
@@ -43,6 +43,7 @@ interface MenuItem {
   title: string;
   description?: string;
   iconPath: string;
+  href?: string;
   disabled: boolean;
   currentValue?: string | number;
   handleOnClick?: () => void;
@@ -82,6 +83,7 @@ export function NavigationMenuPageContent() {
           {
             id: 2,
             title: t('Import account'),
+            description: t('From Signer secret key file'),
             iconPath: 'assets/icons/upload.svg',
             disabled: false,
             handleOnClick: () => {
@@ -125,7 +127,7 @@ export function NavigationMenuPageContent() {
         items: [
           {
             id: 1,
-            title: t('Back up your secret phrase'),
+            title: t('Back up your secret recovery phrase'),
             iconPath: 'assets/icons/secure.svg',
             disabled: false,
             handleOnClick: () => {
@@ -136,7 +138,7 @@ export function NavigationMenuPageContent() {
           {
             id: 2,
             title: t('Download account keys'),
-            description: t('For all accounts imported with a file'),
+            description: t('For all accounts imported via file'),
             iconPath: 'assets/icons/download.svg',
             disabled: !vaultHasImportedAccount,
             handleOnClick: () => {
@@ -153,12 +155,14 @@ export function NavigationMenuPageContent() {
             id: 1,
             title: t('Share feedback'),
             iconPath: 'assets/icons/chat.svg',
+            href: 'https://casper-signer.canny.io/feature-requests',
             disabled: false
           },
           {
             id: 2,
             title: t('About us'),
             iconPath: 'assets/icons/team.svg',
+            href: 'https://make.services/',
             disabled: false
           }
         ]
@@ -210,6 +214,10 @@ export function NavigationMenuPageContent() {
                       {groupItem.description}
                     </Typography>
                   </FlexColumn>
+                ) : groupItem.href ? (
+                  <Link color="inherit" target="_blank" href={groupItem.href}>
+                    <Typography type="body">{groupItem.title}</Typography>
+                  </Link>
                 ) : (
                   <Typography type="body">{groupItem.title}</Typography>
                 )}
