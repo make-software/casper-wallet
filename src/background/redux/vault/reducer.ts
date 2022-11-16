@@ -1,10 +1,9 @@
-import { createReducer, isActionOf } from 'typesafe-actions';
+import { createReducer } from 'typesafe-actions';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 import {
   timeoutDurationChanged,
   timeoutRefreshed,
-  vaultCreated,
   vaultLocked,
   vaultUnlocked,
   vaultReseted,
@@ -16,38 +15,33 @@ import {
   accountDisconnected,
   allAccountsDisconnected,
   activeOriginChanged,
-  accountCreated,
-  secretPhraseCreated
+  accountAdded,
+  vaultStateUpdated
 } from './actions';
 import { VaultState } from './types';
-import { deriveKeyPair } from '@src/libs/crypto/bip32';
 
 type State = VaultState;
 
 const initialState: State = {
-  passwordDigest: null,
-  encSaltHex: null,
+  passwordHash: null,
+  passwordSaltHash: null,
+  encryptSaltHash: null,
+  secretPhraseCipher: null,
   isLocked: false,
   timeoutDurationSetting: TimeoutDurationSetting['5 min'],
   lastActivityTime: null,
   accounts: [],
   accountNamesByOriginDict: {},
   activeAccountName: null,
-  activeOrigin: null,
-  secretPhrase: null
+  activeOrigin: null
 };
 
 export const reducer = createReducer(initialState)
   .handleAction(
-    [vaultCreated],
-    (
-      state,
-      { payload: { passwordDigest: password, encSaltHex, lastActivityTime } }
-    ): State => ({
+    vaultStateUpdated,
+    (state, action): State => ({
       ...state,
-      passwordDigest: password,
-      encSaltHex: encSaltHex,
-      lastActivityTime
+      ...action.payload
     })
   )
   .handleAction([vaultReseted], () => initialState)
@@ -67,6 +61,15 @@ export const reducer = createReducer(initialState)
       isLocked: false
     })
   )
+  .handleAction(accountAdded, (state, action): State => {
+    const account = action.payload;
+
+    return {
+      ...state,
+      accounts: [...state.accounts, account],
+      activeAccountName: account.name
+    };
+  })
   .handleAction(accountImported, (state, { payload: account }): State => {
     return {
       ...state,
@@ -76,39 +79,7 @@ export const reducer = createReducer(initialState)
     };
   })
   .handleAction(
-    [secretPhraseCreated, accountCreated],
-    (state, action): State => {
-      let isSecretPhraseCreated = false;
-      let secretPhrase = state.secretPhrase;
-
-      if (isActionOf(secretPhraseCreated)(action) && secretPhrase == null) {
-        isSecretPhraseCreated = true;
-        secretPhrase = action.payload;
-      }
-
-      const accountCount = state.accounts.filter(
-        account => !account.imported
-      ).length;
-      const keyPair = deriveKeyPair(secretPhrase, accountCount);
-      const name =
-        isActionOf(accountCreated)(action) && action.payload != null
-          ? action.payload
-          : `Account ${accountCount + 1}`;
-      const account = {
-        ...keyPair,
-        name
-      };
-      return {
-        ...state,
-        accounts: [...state.accounts, account],
-        activeAccountName:
-          state.accounts.length === 0 ? account.name : state.activeAccountName,
-        ...(isSecretPhraseCreated && { secretPhrase })
-      };
-    }
-  )
-  .handleAction(
-    [accountsConnected],
+    accountsConnected,
     (state, { payload: { siteOrigin, accountNames } }) => ({
       ...state,
       accountNamesByOriginDict: {
@@ -121,7 +92,7 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    [accountRemoved],
+    accountRemoved,
     (state, { payload: { accountName } }): State => {
       const newAccounts = state.accounts.filter(
         account => account.name !== accountName

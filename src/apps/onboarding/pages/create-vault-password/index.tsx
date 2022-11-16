@@ -16,13 +16,9 @@ import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 
 import { dispatchToMainStore } from '@background/redux/utils';
-import { vaultCreated } from '@background/redux/vault/actions';
 
-import {
-  encodePassword,
-  generateRandomSaltHex
-} from '@src/libs/crypto/hashing';
 import { CreateVaultPasswordPageContent } from './content';
+import { createEmptyVault } from '@src/background/redux/vault/actions';
 
 interface CreateVaultPasswordPageProps {
   saveIsLoggedIn: (isLoggedIn: boolean) => void;
@@ -39,9 +35,7 @@ export function CreateVaultPasswordPage({
   const { isDirty } = formState;
 
   async function onSubmit(data: FieldValues) {
-    const passwordDigest = await encodePassword(data.password);
-    const encSaltHex = generateRandomSaltHex();
-    dispatchToMainStore(vaultCreated({ passwordDigest, encSaltHex }));
+    dispatchToMainStore(createEmptyVault({ password: data.password }));
     saveIsLoggedIn(true);
     navigate(RouterPath.CreateSecretPhrase);
   }

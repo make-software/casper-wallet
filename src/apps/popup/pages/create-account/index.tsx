@@ -22,10 +22,10 @@ import {
   selectVaultDerivedAccounts
 } from '@src/background/redux/vault/selectors';
 import { dispatchToMainStore } from '@src/background/redux/utils';
-import { accountCreated } from '@src/background/redux/vault/actions';
+import { accountAdded } from '@src/background/redux/vault/actions';
 
 import { CreateAccountPageContent } from './content';
-import { getSubmitButtonStateFromValidation } from '@libs/ui/forms/get-submit-button-state-from-validation';
+import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 
 export function CreateAccountPage() {
   const navigate = useTypedNavigate();
@@ -43,11 +43,11 @@ export function CreateAccountPage() {
     getDefaultName(derivedAccounts.length, existingAccountNames)
   );
   const onSubmit = ({ name }: FieldValues) => {
-    dispatchToMainStore(accountCreated(name.trim()));
+    dispatchToMainStore(accountAdded(name.trim()));
     navigate(RouterPath.Home);
   };
 
-  const isButtonDisabled = getSubmitButtonStateFromValidation({ isValid });
+  const isButtonDisabled = calculateSubmitButtonDisabled({ isValid });
 
   return (
     <LayoutWindow

@@ -1,10 +1,6 @@
 import { CasperDeploy } from './types';
-import {
-  getDeployPayment,
-  getDeployType,
-  getDeployArgs,
-  bytesToHex
-} from './deploy';
+import { getDeployPayment, getDeployType, getDeployArgs } from './deploy';
+import { convertBytesToHex } from '@src/libs/crypto/utils';
 
 export function useDeriveDeployInfoFromDeployRaw(deploy: CasperDeploy) {
   const {
@@ -18,8 +14,8 @@ export function useDeriveDeployInfoFromDeployRaw(deploy: CasperDeploy) {
   return {
     signingKey: account.toHex(),
     account: account.toHex(),
-    deployHash: bytesToHex(deploy.hash),
-    bodyHash: bytesToHex(bodyHash),
+    deployHash: convertBytesToHex(deploy.hash),
+    bodyHash: convertBytesToHex(bodyHash),
     gasPrice: gasPrice.toString(),
     timestamp: timestamp.toString(),
     chainName,

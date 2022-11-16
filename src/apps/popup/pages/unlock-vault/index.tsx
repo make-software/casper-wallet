@@ -21,10 +21,14 @@ import {
   SvgIcon
 } from '@src/libs/ui';
 
-import { selectVaultPasswordDigest } from '@src/background/redux/vault/selectors';
+import {
+  selectVaultPasswordHash,
+  selectVaultPasswordSaltHash
+} from '@src/background/redux/vault/selectors';
 import { vaultUnlocked } from '@src/background/redux/vault/actions';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { useUnlockWalletForm } from '@src/libs/ui/forms/unlock-wallet';
+import { calculateSubmitButtonDisabled } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
 
 export function UnlockVaultPageContent() {
   const { t } = useTranslation();
@@ -33,17 +37,23 @@ export function UnlockVaultPageContent() {
   const [passwordInputType, setPasswordInputType] =
     useState<PasswordInputType>('password');
 
-  const vaultPasswordDigest = useSelector(selectVaultPasswordDigest);
+  const vaultPasswordHash = useSelector(selectVaultPasswordHash);
+  const vaultPasswordSaltHash = useSelector(selectVaultPasswordSaltHash);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isDirty }
-  } = useUnlockWalletForm(vaultPasswordDigest);
+    formState: { errors, isDirty, isSubmitting, isValidating }
+  } = useUnlockWalletForm(vaultPasswordHash, vaultPasswordSaltHash);
 
-  function handleUnlockVault() {
+  async function handleUnlockVault() {
     dispatchToMainStore(vaultUnlocked());
   }
+
+  const submitButtonDisabled = calculateSubmitButtonDisabled({
+    isDirty,
+    isSubmitting: isSubmitting || isValidating
+  });
 
   return (
     <form onSubmit={handleSubmit(handleUnlockVault)}>
@@ -78,7 +88,7 @@ export function UnlockVaultPageContent() {
         </InputsContainer>
       </ContentContainer>
       <FooterButtonsAbsoluteContainer>
-        <Button disabled={!isDirty} type="submit">
+        <Button disabled={submitButtonDisabled} type="submit">
           {t('Unlock wallet')}
         </Button>
         <Button

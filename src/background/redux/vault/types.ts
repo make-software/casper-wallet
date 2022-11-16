@@ -1,5 +1,4 @@
 import { TimeoutDurationSetting } from '@popup/constants';
-import { SecretPhrase } from '@src/libs/crypto';
 
 export interface KeyPair {
   secretKey: string;
@@ -15,9 +14,10 @@ export interface Account extends KeyPair {
 type AccountNamesByOriginDict = Record<string, string[]>;
 
 export type VaultState = {
-  passwordDigest: string | null;
-  encSaltHex: string | null;
-  secretPhrase: SecretPhrase | null;
+  passwordHash: string | null;
+  passwordSaltHash: string | null;
+  encryptSaltHash: string | null;
+  secretPhraseCipher: string | null;
   isLocked: boolean;
   timeoutDurationSetting: TimeoutDurationSetting;
   lastActivityTime: number | null;

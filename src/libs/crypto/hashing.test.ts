@@ -1,53 +1,66 @@
 import {
   deriveEncryptionKey,
   encodePassword,
-  verifyPasswordAgainstDigest
+  verifyPasswordAgainstHash
 } from './hashing';
 import {
-  FIXED_ENCRYPTION_KEY_HEX,
-  FIXED_PASSWORD_DIGEST,
+  FIXED_ENCRYPTION_KEY_HASH,
+  FIXED_PASSWORD_HASH,
   FIXED_PASSWORD_TEXT,
-  FIXED_RANDOM_SALT
+  FIXED_ENCRYPTION_SALT,
+  FIXED_PASSWORD_SALT
 } from './__fixtures';
 
 describe('crypto.hashing', () => {
   it('should verify fixtures of hashed password matches the text password ', async () => {
-    const result = await verifyPasswordAgainstDigest(
-      FIXED_PASSWORD_DIGEST,
+    const result = await verifyPasswordAgainstHash(
+      FIXED_PASSWORD_HASH,
+      FIXED_PASSWORD_SALT,
       FIXED_PASSWORD_TEXT
     );
     expect(result).toBeTruthy();
   });
 
   it('should match password text that created it', async () => {
-    const passwordDigest = await encodePassword(FIXED_PASSWORD_TEXT);
-    const result = await verifyPasswordAgainstDigest(
-      passwordDigest,
+    const passwordHash = await encodePassword(
+      FIXED_PASSWORD_TEXT,
+      FIXED_PASSWORD_SALT
+    );
+    const result = await verifyPasswordAgainstHash(
+      passwordHash,
+      FIXED_PASSWORD_SALT,
       FIXED_PASSWORD_TEXT
     );
     expect(result).toBeTruthy();
   });
 
   it('should fail matching any other text', async () => {
-    const passwordDigest = await encodePassword('some text');
-    const result = await verifyPasswordAgainstDigest(
-      passwordDigest,
+    const passwordHash = await encodePassword('some text', FIXED_PASSWORD_SALT);
+    const result = await verifyPasswordAgainstHash(
+      passwordHash,
+      FIXED_PASSWORD_SALT,
       FIXED_PASSWORD_TEXT
     );
     expect(result).toBeFalsy();
   });
 
-  it('should generate random hash from the same input each time', async () => {
-    const digest1 = await encodePassword(FIXED_PASSWORD_TEXT);
-    const digest2 = await encodePassword(FIXED_PASSWORD_TEXT);
-    expect(digest1).not.toBe(digest2);
+  it('should generate random hash from the same text with different salt each time', async () => {
+    const hash1 = await encodePassword(
+      FIXED_PASSWORD_TEXT,
+      FIXED_PASSWORD_SALT
+    );
+    const hash2 = await encodePassword(
+      FIXED_PASSWORD_TEXT,
+      'asdfasdfa32fas32fgasd2rfa'
+    );
+    expect(hash1).not.toBe(hash2);
   });
 
   it('should derive expected encryption key from fixed password + salt', async () => {
     const key = await deriveEncryptionKey(
       FIXED_PASSWORD_TEXT,
-      FIXED_RANDOM_SALT
+      FIXED_ENCRYPTION_SALT
     );
-    expect(Buffer.from(key).toString('hex')).toBe(FIXED_ENCRYPTION_KEY_HEX);
+    expect(Buffer.from(key).toString('hex')).toBe(FIXED_ENCRYPTION_KEY_HASH);
   });
 });
