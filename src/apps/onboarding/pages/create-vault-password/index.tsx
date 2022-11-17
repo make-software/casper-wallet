@@ -59,17 +59,13 @@ export function CreateVaultPasswordPage({
         renderFooter={() => (
           <TabFooterContainer>
             <Checkbox
-              dataTestId="create-password:create-password-checkbox"
               checked={isChecked}
               onChange={() => setIsChecked(currentValue => !currentValue)}
               label={t(
                 'I have read and agree to the Casper Wallet Terms of Service.'
               )}
             />
-            <Button
-              dataTestId="create-password:create-password-button"
-              disabled={!isChecked || !isDirty}
-            >
+            <Button disabled={!isChecked || !isDirty}>
               <Trans t={t}>Create password</Trans>
             </Button>
           </TabFooterContainer>

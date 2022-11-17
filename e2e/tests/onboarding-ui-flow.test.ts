@@ -1,25 +1,24 @@
+import { By } from 'selenium-webdriver';
 import { strict as assert } from 'assert';
 import { buildWebDriver } from '../webdriver';
 
 import { Driver } from '../webdriver/driver';
-
-const vaultPassword = '3hQqzYn4C7Y8rEZTVEZb';
+import { AppRoutes } from '../app-routes';
+import { vaultPassword } from '../__fixtures';
 
 describe('Onboarding UI flow', () => {
   let driver: Driver;
 
   beforeAll(async () => {
     driver = await buildWebDriver();
-    await driver.navigate('onboarding');
+    await driver.navigate(AppRoutes.Onboarding);
   });
 
   describe('`Welcome` page', () => {
     it('should contains `Get started` button with text, which navigate to `Create password` page by click on it', async () => {
       const getStartedButton = await driver.findElement(
-        '[data-testid="welcome:get-started-button"]'
+        By.xpath("//*[text()='Get started']")
       );
-
-      assert.equal(await getStartedButton.getText(), 'Get started');
 
       await getStartedButton.click();
       assert.equal(
@@ -30,23 +29,23 @@ describe('Onboarding UI flow', () => {
   });
 
   describe('`Create password` page', () => {
-    it('should navigate to `Create secret phrase confirmation` page', async () => {
+    it('should navigate to `Create secret phrase confirmation` page when the user filled the password, checked the checkbox and click on `Create password` button', async () => {
       try {
         await driver.fill(
-          '[data-testid="create-password:password-input"]',
+          By.xpath("//input[@placeholder()='Password']"),
           vaultPassword
         );
         await driver.fill(
-          '[data-testid="create-password:confirm-password-input"]',
+          By.xpath("//input[@placeholder()='Confirm password']"),
           vaultPassword
         );
 
         await driver.clickElement(
-          '[data-testid="create-password:create-password-checkbox"]'
+          By.xpath(
+            "//*[text()='I have read and agree to the Casper Wallet Terms of Service.']"
+          )
         );
-        await driver.clickElement(
-          '[data-testid="create-password:create-password-button"]'
-        );
+        await driver.clickElement(By.xpath("//*[text()='Create password']"));
 
         assert.equal(
           await driver.driver.getCurrentUrl(),
@@ -63,20 +62,18 @@ describe('Onboarding UI flow', () => {
       // Reopen Onboarding UI. App should be locked by password
       await driver.driver.close();
       driver = await buildWebDriver();
-      await driver.navigate('onboarding');
+      await driver.navigate(AppRoutes.Onboarding);
     });
 
-    it('should unlock vault after user provide correct password', async () => {
+    it('should unlock vault after user fill correct password and click on `Unlock wallet` button', async () => {
       const unlockWalletHeader = await driver.findElement('h1');
       assert.equal(await unlockWalletHeader.getText(), 'Your wallet is locked');
 
       await driver.fill(
-        '[data-testid="unlock-wallet:password-input"]',
+        By.xpath("//input[@placeholder()='Password']"),
         vaultPassword
       );
-      await driver.clickElement(
-        '[data-testid="unlock-wallet:unlock-wallet-button"]'
-      );
+      await driver.clickElement(By.xpath("//*[text()='Unlock wallet']"));
 
       const createPhraseHeader = await driver.findElement('h1');
       assert.equal(await createPhraseHeader.getText(), 'Create secret phrase');

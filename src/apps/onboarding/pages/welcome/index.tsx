@@ -26,7 +26,6 @@ export function WelcomePage() {
             </Trans>
           </Typography>
           <Button
-            dataTestId="welcome:get-started-button"
             onClick={() => navigate(RouterPath.CreateVaultPassword)}
             color="primaryRed"
           >
