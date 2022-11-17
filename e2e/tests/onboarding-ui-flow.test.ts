@@ -2,8 +2,8 @@ import { strict as assert } from 'assert';
 import { buildWebDriver } from '../webdriver';
 
 import { Driver } from '../webdriver/driver';
-
-const vaultPassword = '3hQqzYn4C7Y8rEZTVEZb';
+import { sendE2EEvent } from '../utils';
+import { vaultPassword } from '../constants';
 
 describe('Onboarding UI flow', () => {
   let driver: Driver;
@@ -64,6 +64,11 @@ describe('Onboarding UI flow', () => {
       await driver.driver.close();
       driver = await buildWebDriver();
       await driver.navigate('onboarding');
+
+      await sendE2EEvent(driver, {
+        type: 'set-to-popup-state',
+        payload: { vault: { password: vaultPassword } }
+      });
     });
 
     it('should unlock vault after user provide correct password', async () => {

@@ -1,5 +1,7 @@
 import { createReducer, isActionOf } from 'typesafe-actions';
 
+import { deriveKeyPair } from '@src/libs/crypto/bip32';
+
 import { TimeoutDurationSetting } from '@popup/constants';
 import {
   timeoutDurationChanged,
@@ -19,8 +21,9 @@ import {
   accountCreated,
   secretPhraseCreated
 } from './actions';
+import { E2ESetToPopupState } from '../e2e/actions';
+
 import { VaultState } from './types';
-import { deriveKeyPair } from '@src/libs/crypto/bip32';
 
 type State = VaultState;
 
@@ -242,4 +245,8 @@ export const reducer = createReducer(initialState)
       ...state,
       lastActivityTime
     })
-  );
+  )
+  .handleAction([E2ESetToPopupState], (state, { payload: { vault } }) => ({
+    ...state,
+    ...vault
+  }));

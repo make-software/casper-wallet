@@ -56,6 +56,7 @@ import {
 
 import { openWindow } from './open-window';
 import { deployPayloadReceived } from './redux/deploys/actions';
+import { E2ESetToPopupState } from './redux/e2e/actions';
 
 browser.runtime.onInstalled.addListener(async () => {
   // this will run on installation or update so
@@ -248,6 +249,7 @@ browser.runtime.onMessage.addListener(
           case getType(accountsConnected):
           case getType(accountDisconnected):
           case getType(allAccountsDisconnected):
+          case getType(E2ESetToPopupState):
             store.dispatch(action);
             return sendResponse(undefined);
 

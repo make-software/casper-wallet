@@ -21,6 +21,12 @@ import {
 import { popupWindowInit } from '@background/redux/windowManagement/actions';
 import { createMainStoreReplica } from '@background/redux/utils';
 
+import { handleE2EEvents } from '../../../e2e/utils';
+
+if (process.env.NODE_ENV === 'development') {
+  handleE2EEvents(browser);
+}
+
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
 

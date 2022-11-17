@@ -61,7 +61,7 @@ export class Driver {
     return this.driver.executeAsyncScript(script, args);
   }
 
-  async executeScript(script: string, ...args: string[]) {
+  async executeScript(script: string, ...args: any[]) {
     return this.driver.executeScript(script, args);
   }
 
