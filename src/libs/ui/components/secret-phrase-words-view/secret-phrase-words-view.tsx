@@ -200,7 +200,7 @@ export function SecretPhraseWordsView({
             <TextAndIconContainer>
               <SvgIcon src="assets/icons/lock.svg" color="contentOnFill" />
               <Typography type="captionMedium" color="contentOnFill">
-                <Trans t={t}>Click to reveal secret phrase</Trans>
+                <Trans t={t}>Click to reveal secret recovery phrase</Trans>
               </Typography>
             </TextAndIconContainer>
           </BlurredSecretPhraseWordsViewOverlayContainer>

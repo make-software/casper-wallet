@@ -62,7 +62,9 @@ export function CreateVaultPasswordPage({
               dataTestId="create-password:create-password-checkbox"
               checked={isChecked}
               onChange={() => setIsChecked(currentValue => !currentValue)}
-              label={t('I have read and agreed to the Terms of Use')}
+              label={t(
+                'I have read and agree to the Casper Wallet Terms of Service.'
+              )}
             />
             <Button
               dataTestId="create-password:create-password-button"

@@ -28,9 +28,8 @@ export function RecoverFromSecretPhrasePageContent({
       <TabTextContainer>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            While creating your Casper Signer wallet you’ve got a 24-word secret
-            phrase. Please, enter each word of your secret phrase, separated by
-            spacing.
+            Recover your wallet by entering each word of your 24-word secret
+            recovery phrase, separated by spaces.
           </Trans>
         </Typography>
       </TabTextContainer>
@@ -39,7 +38,11 @@ export function RecoverFromSecretPhrasePageContent({
           status={errorMessage ? FormFieldStatus.Error : undefined}
           statusText={errorMessage}
         >
-          <TextArea rows={6} {...register('phrase')} />
+          <TextArea
+            rows={6}
+            {...register('phrase')}
+            placeholder={t('e.g. Bobcat Lemon Blanket…')}
+          />
         </FormField>
       </InputsContainer>
     </TabPageContainer>

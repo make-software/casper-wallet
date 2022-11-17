@@ -48,8 +48,7 @@ export function CreateSecretPhraseConfirmationPage({
             checked={isChecked}
             onChange={() => setIsChecked(currentValue => !currentValue)}
             label={t(
-              'I understand I have to be careful to save my secret phrase.\n' +
-                'My money will depend on it.'
+              ' I understand that I am solely responsible for storing and protecting my secret recovery phrase. Access to my funds depend on it.'
             )}
           />
           <Button

@@ -21,13 +21,14 @@ export function ConfirmSecretPhrasePageContent({
   return (
     <TabPageContainer>
       <Typography type="header">
-        <Trans t={t}>Confirm your secret phrase</Trans>
+        <Trans t={t}>Confirm your secret recovery phrase</Trans>
       </Typography>
 
       <TabTextContainer>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            Click one by one 6 words to complete the secret phrase below.
+            Choose the six words one by one to complete the secret recovery
+            phrase
           </Trans>
         </Typography>
       </TabTextContainer>

@@ -42,7 +42,9 @@ export function ResetVaultPageContent() {
           <Typography type="body" color="contentSecondary">
             <Trans t={t}>
               All accounts will be removed. Make sure you have securely stored
-              the recovery phrase for each account before proceeding.
+              your Casper Wallet’s secret recovery phrase and any legacy secret
+              key files. Without them you may be unable to access to the
+              accounts.
             </Trans>
           </Typography>
         </TextContainer>

@@ -18,13 +18,16 @@ export function DownloadedSecretKeysPageContent() {
 
       <TextContainer gap="big">
         <Typography type="header">
-          <Trans t={t}>Your keys were downloaded</Trans>
+          <Trans t={t}>Your secret key was downloaded</Trans>
         </Typography>
       </TextContainer>
 
       <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
-          <Trans t={t}>Please keep them safe and secure.</Trans>
+          <Trans t={t}>
+            Keep your account secret key file safe and secure. Do not share it
+            with anyone.
+          </Trans>
         </Typography>
       </TextContainer>
     </ContentContainer>

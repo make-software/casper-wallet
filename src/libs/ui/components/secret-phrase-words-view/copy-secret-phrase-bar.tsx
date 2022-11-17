@@ -34,8 +34,8 @@ export function CopySecretPhraseBar({
             color={isClicked ? 'contentGreen' : 'contentBlue'}
           >
             {isClicked
-              ? t('Copied to clipboard for 1 min')
-              : t('Copy secret phrase')}
+              ? t('Copied to clipboard for 1 minute')
+              : t('Copy secret recovery phrase')}
           </Typography>
         </CopySecretPhraseContainer>
       )}
