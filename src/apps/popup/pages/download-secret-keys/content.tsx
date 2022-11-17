@@ -37,7 +37,9 @@ export function DownloadSecretKeysPageContent({
       </IllustrationContainer>
       <TextContainer gap="big">
         <Typography type="header">
-          <Trans t={t}>Enter your password to download account keys</Trans>
+          <Trans t={t}>
+            Enter your password to download account secret key
+          </Trans>
         </Typography>
       </TextContainer>
 

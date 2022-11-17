@@ -40,13 +40,13 @@ export function CreateSecretPhrasePage() {
           <Button
             onClick={() => navigate(RouterPath.CreateSecretPhraseConfirmation)}
           >
-            <Trans t={t}>Create my secret phrase</Trans>
+            <Trans t={t}>Create my secret recovery phrase</Trans>
           </Button>
           <Button
             color="secondaryBlue"
             onClick={() => navigate(RouterPath.RecoverFromSecretPhrase)}
           >
-            <Trans t={t}>I already have a secret phrase</Trans>
+            <Trans t={t}>Import an existing secret recovery phrase</Trans>
           </Button>
         </TabFooterContainer>
       )}

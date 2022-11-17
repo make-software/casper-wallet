@@ -1,129 +1,32 @@
-import React, { useCallback } from 'react';
-import { UseFormProps } from 'react-hook-form/dist/types/form';
-import { FieldValues, useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
-import * as Yup from 'yup';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
+  FooterButtonsContainer,
   LayoutWindow,
-  PopupHeader,
-  FooterButtonsContainer
-} from '@src/libs/layout';
-import { Button } from '@src/libs/ui';
-import { useAccountNameRule } from '@src/libs/ui/forms/form-validation-rules';
+  PopupHeader
+} from '@libs/layout';
+import { Button } from '@libs/ui';
+import { RouterPath } from '../../router';
 
-import { Account } from '@src/background/redux/vault/types';
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { accountImported } from '@src/background/redux/vault/actions';
-import { checkAccountNameIsTaken } from '@src/background/redux/import-account-actions-should-be-removed';
-
-import {
-  RouterPath,
-  useTypedNavigate
-} from '@src/apps/import-account-with-file/router';
-import { useSecretKeyFileReader } from '@src/apps/import-account-with-file/pages/import-account-with-file/hooks/use-secret-key-file-reader';
-
-import { ImportAccountWithFilePageContent } from './content';
+import { ImportAccountWithFileContentPage } from './content';
 
 export function ImportAccountWithFilePage() {
-  const navigate = useTypedNavigate();
+  const navigate = useNavigate();
   const { t } = useTranslation();
-
-  const onSuccess = useCallback(
-    async (accountData: Account) => {
-      dispatchToMainStore(accountImported(accountData));
-      navigate(RouterPath.ImportAccountWithFileSuccess);
-    },
-    [navigate]
-  );
-
-  const onFailure = useCallback(
-    (message?: string) => {
-      navigate(RouterPath.ImportAccountWithFileFailure, {
-        state: {
-          importAccountStatusMessage: message
-        }
-      });
-    },
-    [navigate]
-  );
-
-  const { secretKeyFileReader } = useSecretKeyFileReader({
-    onSuccess,
-    onFailure
-  });
-
-  const formSchema = Yup.object().shape({
-    secretKeyFile: Yup.mixed()
-      .test(
-        'required',
-        t('File is required.'),
-        filesArray => filesArray != null && filesArray.length > 0
-      )
-      .test(
-        'fileType',
-        t('Please upload a PEM file containing private key.'),
-        filesArray => {
-          if (filesArray != null && filesArray.length > 0) {
-            return /\.pem$/.test(filesArray[0].name);
-          }
-          return false;
-        }
-      ),
-    name: useAccountNameRule(async value => {
-      const isAccountNameTaken =
-        value && (await checkAccountNameIsTaken(value));
-      return !isAccountNameTaken;
-    })
-  });
-
-  const formOptions: UseFormProps = {
-    mode: 'onChange',
-    reValidateMode: 'onChange',
-    resolver: yupResolver(formSchema),
-    defaultValues: {
-      secretKeyFile: null,
-      name: ''
-    }
-  };
-
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors, isValid, isDirty }
-  } = useForm(formOptions);
-
-  async function onSubmit({
-    secretKeyFile: { 0: secretKeyFile },
-    name
-  }: FieldValues) {
-    secretKeyFileReader(name, secretKeyFile);
-  }
-
-  const isSubmitDisabled = !isValid || !isDirty;
-  const secretKeyFile = watch('secretKeyFile');
-  const isFileLoaded = secretKeyFile?.length > 0;
 
   return (
     <LayoutWindow
-      variant="form"
-      onSubmit={handleSubmit(onSubmit)}
+      variant="default"
       renderHeader={() => <PopupHeader />}
-      renderContent={() => (
-        <ImportAccountWithFilePageContent
-          register={register}
-          setValue={setValue}
-          isFileLoaded={isFileLoaded}
-          errors={errors}
-        />
-      )}
+      renderContent={() => <ImportAccountWithFileContentPage />}
       renderFooter={() => (
         <FooterButtonsContainer>
-          <Button disabled={isSubmitDisabled}>
-            <Trans t={t}>Import</Trans>
+          <Button
+            onClick={() => navigate(RouterPath.ImportAccountWithFileUpload)}
+          >
+            <Trans t={t}>Upload your file</Trans>
           </Button>
         </FooterButtonsContainer>
       )}

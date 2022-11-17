@@ -57,7 +57,7 @@ export function UnlockWalletPageContent({
 
         <TabTextContainer>
           <Typography type="body" color="contentSecondary">
-            <Trans t={t}>Please enter the password to unlock</Trans>
+            <Trans t={t}>Please enter your password to unlock.</Trans>
           </Typography>
         </TabTextContainer>
 

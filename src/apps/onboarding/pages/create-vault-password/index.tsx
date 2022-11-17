@@ -61,7 +61,9 @@ export function CreateVaultPasswordPage({
             <Checkbox
               checked={isChecked}
               onChange={() => setIsChecked(currentValue => !currentValue)}
-              label={t('I have read and agreed to the Terms of Use')}
+              label={t(
+                'I have read and agree to the Casper Wallet Terms of Service.'
+              )}
             />
             <Button disabled={!isChecked || !isDirty}>
               <Trans t={t}>Create password</Trans>

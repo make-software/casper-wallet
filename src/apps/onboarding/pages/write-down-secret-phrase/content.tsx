@@ -21,14 +21,14 @@ export function WriteDownSecretPhrasePageContent({
   return (
     <TabPageContainer>
       <Typography type="header">
-        <Trans t={t}>Write down your secret phrase</Trans>
+        <Trans t={t}>Write down your secret recovery phrase</Trans>
       </Typography>
 
       <TabTextContainer>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            Never disclose your secret phrase. Anyone with this phrase can take
-            your Casper forever.
+            Never disclose your secret recovery phrase. Anyone with this phrase
+            can take your funds forever.
           </Trans>
         </Typography>
       </TabTextContainer>
