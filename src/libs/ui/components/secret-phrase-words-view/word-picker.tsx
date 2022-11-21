@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { FlexRow } from '@src/libs/layout';
-import { WordTag } from '@src/libs/ui';
+import { BaseProps, WordTag } from '@src/libs/ui';
 import { SecretPhrase } from '@src/libs/crypto';
 
 const WordPickerContainer = styled(FlexRow)`
@@ -16,7 +16,7 @@ const WordPickerContainer = styled(FlexRow)`
   padding: ${({ theme }) => theme.padding['1.6']};
 `;
 
-interface WordPickerProps {
+interface WordPickerProps extends BaseProps {
   phrase: SecretPhrase;
   hiddenWordIndexes: number[];
   selectedHiddenWordIndexes: number[];
@@ -27,10 +27,11 @@ export function WordPicker({
   phrase,
   hiddenWordIndexes,
   selectedHiddenWordIndexes,
-  onHiddenWordClick
+  onHiddenWordClick,
+  dataTestId
 }: WordPickerProps) {
   return (
-    <WordPickerContainer>
+    <WordPickerContainer data-testid={dataTestId}>
       {hiddenWordIndexes.map(wordIndex => (
         <WordTag
           key={wordIndex}
