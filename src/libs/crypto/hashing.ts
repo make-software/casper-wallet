@@ -42,11 +42,11 @@ export async function verifyPasswordAgainstHash(
 
 export async function deriveEncryptionKey(
   password: string,
-  saltHash: string
+  keyDerivationSaltHash: string
 ): Promise<Uint8Array> {
   return scryptAsync(
     password,
-    convertHexToBytes(saltHash),
+    convertHexToBytes(keyDerivationSaltHash),
     createScryptOptions()
   );
 }

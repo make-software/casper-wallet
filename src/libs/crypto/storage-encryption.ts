@@ -4,17 +4,23 @@ import { SecretPhrase } from './bip39';
 export function encryptSecretPhrase(
   secretPhrase: SecretPhrase,
   password: string,
-  encryptSaltHash: string
+  keyDerivationSaltHash: string
 ): Promise<string> {
-  return aesEncryptString(password, encryptSaltHash, secretPhrase.join(''));
+  return aesEncryptString(
+    password,
+    keyDerivationSaltHash,
+    secretPhrase.join('')
+  );
 }
 
 export function decryptSecretPhrase(
   secretPhraseCipher: string,
   password: string,
-  encryptSaltHash: string
+  keyDerivationSaltHash: string
 ): Promise<SecretPhrase> {
-  return aesDecryptString(password, encryptSaltHash, secretPhraseCipher).then(
-    val => val.split(' ')
-  );
+  return aesDecryptString(
+    password,
+    keyDerivationSaltHash,
+    secretPhraseCipher
+  ).then(val => val.split(' '));
 }

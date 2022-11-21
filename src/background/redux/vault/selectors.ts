@@ -13,8 +13,8 @@ export const selectVaultPasswordHash = (state: RootState): string =>
 export const selectVaultPasswordSaltHash = (state: RootState): string =>
   state.vault.passwordSaltHash || '';
 
-export const selectVaultEncryptSaltHash = (state: RootState): string =>
-  state.vault.encryptSaltHash || '';
+export const selectKeyDerivationSaltHash = (state: RootState): string =>
+  state.vault.keyDerivationSaltHash || '';
 
 export const selectVaultSecretPhraseCipher = (
   state: RootState

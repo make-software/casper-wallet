@@ -2,7 +2,7 @@ import { put, takeLatest } from 'redux-saga/effects';
 import { getType } from 'typesafe-actions';
 
 import { deriveKeyPair, validateSecretPhrase } from '@src/libs/crypto';
-import { encryptSecretPhrase } from '@src/libs/crypto/decode-secret-phrase';
+import { encryptSecretPhrase } from '@src/libs/crypto/storage-encryption';
 
 import { selectSessionSecretPhrase } from '../session/selectors';
 import { sagaCall, sagaSelect } from '../utils';
@@ -15,7 +15,7 @@ import {
 } from './actions';
 import {
   selectVaultDerivedAccounts,
-  selectVaultEncryptSaltHash
+  selectKeyDerivationSaltHash
 } from './selectors';
 import {
   encodePassword,
@@ -39,13 +39,13 @@ function* createEmptyVaultSaga(action: ReturnType<typeof createEmptyVault>) {
   const passwordHash = yield* sagaCall(() =>
     encodePassword(password, passwordSaltHash)
   );
-  const encryptSaltHash = generateRandomSaltHex();
+  const keyDerivationSaltHash = generateRandomSaltHex();
 
   yield put(
     vaultStateUpdated({
       passwordHash,
       passwordSaltHash,
-      encryptSaltHash
+      keyDerivationSaltHash
     })
   );
 }
@@ -66,9 +66,9 @@ function* initializeVaultSaga(action: ReturnType<typeof initializeVault>) {
   };
 
   const password = 'dasdasdsa';
-  const encryptSaltHash = yield* sagaSelect(selectVaultEncryptSaltHash);
+  const keyDerivationSaltHash = yield* sagaSelect(selectKeyDerivationSaltHash);
   const secretPhraseCipher = yield* sagaCall(() =>
-    encryptSecretPhrase(secretPhrase, password, encryptSaltHash)
+    encryptSecretPhrase(secretPhrase, password, keyDerivationSaltHash)
   );
 
   yield put(

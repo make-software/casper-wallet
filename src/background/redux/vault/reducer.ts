@@ -25,7 +25,7 @@ type State = VaultState;
 const initialState: State = {
   passwordHash: null,
   passwordSaltHash: null,
-  encryptSaltHash: null,
+  keyDerivationSaltHash: null,
   secretPhraseCipher: null,
   isLocked: false,
   timeoutDurationSetting: TimeoutDurationSetting['5 min'],

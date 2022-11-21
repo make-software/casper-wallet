@@ -16,7 +16,7 @@ type AccountNamesByOriginDict = Record<string, string[]>;
 export type VaultState = {
   passwordHash: string | null;
   passwordSaltHash: string | null;
-  encryptSaltHash: string | null;
+  keyDerivationSaltHash: string | null;
   secretPhraseCipher: string | null;
   isLocked: boolean;
   timeoutDurationSetting: TimeoutDurationSetting;
