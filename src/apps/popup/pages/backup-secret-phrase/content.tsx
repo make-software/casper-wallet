@@ -13,13 +13,12 @@ import {
   CopySecretPhraseBar,
   TextList
 } from '@src/libs/ui';
-
-import { selectVaultSecretPhrase } from '@background/redux/vault/selectors';
+import { selectSessionSecretPhrase } from '@src/background/redux/session/selectors';
 
 export function BackupSecretPhrasePageContent() {
   const { t } = useTranslation();
 
-  const phrase = useSelector(selectVaultSecretPhrase);
+  const phrase = useSelector(selectSessionSecretPhrase);
 
   if (phrase == null) {
     throw new Error("Secret phrase wasn't found");

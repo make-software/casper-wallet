@@ -18,7 +18,10 @@ import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate
 import { closeActiveTab } from '@src/apps/onboarding/utils/close-active-tab';
 
 import { RecoverFromSecretPhrasePageContent } from './content';
-import { initializeWalletWithPhrase } from '../../hooks/initialize-wallet';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import { initializeVault } from '@src/background/redux/vault/actions';
+import { calculateSubmitButtonDisabled } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
+import { validateSecretPhrase } from '@src/libs/crypto';
 
 export function RecoverFromSecretPhrasePage() {
   const navigate = useTypedNavigate();
@@ -26,11 +29,15 @@ export function RecoverFromSecretPhrasePage() {
 
   const { register, handleSubmit, formState } =
     useRecoverFromSecretPhraseForm();
-  const { isDirty } = formState;
+  const { isDirty, isValid } = formState;
 
   function onSubmit({ phrase }: FieldValues) {
     try {
-      initializeWalletWithPhrase((phrase as string).split(' '));
+      const secretPhrase = phrase.trim().split(' ');
+      if (!validateSecretPhrase(secretPhrase)) {
+        throw Error('Invalid secret phrase.');
+      }
+      dispatchToMainStore(initializeVault({ secretPhrase }));
       closeActiveTab();
     } catch (err) {
       console.error(err);
@@ -47,6 +54,12 @@ export function RecoverFromSecretPhrasePage() {
       );
     }
   }
+
+  const submitButtonDisabled = calculateSubmitButtonDisabled({
+    isDirty
+  });
+
+  console.log(submitButtonDisabled, isDirty, isValid);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -69,7 +82,7 @@ export function RecoverFromSecretPhrasePage() {
         )}
         renderFooter={() => (
           <TabFooterContainer>
-            <Button disabled={!isDirty}>
+            <Button disabled={submitButtonDisabled}>
               <Trans t={t}>Recover my wallet</Trans>
             </Button>
           </TabFooterContainer>

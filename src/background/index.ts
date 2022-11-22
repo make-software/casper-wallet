@@ -8,7 +8,7 @@ import {
 import { isReduxAction } from '@src/background/redux/redux-action';
 import { getMainStoreSingleton } from '@src/background/redux/utils';
 import {
-  accountCreated,
+  accountAdded,
   accountDisconnected,
   accountImported,
   accountRemoved,
@@ -17,12 +17,14 @@ import {
   activeAccountChanged,
   activeOriginChanged,
   allAccountsDisconnected,
-  secretPhraseCreated,
+  createAccount,
+  createEmptyVault,
+  initializeVault,
   timeoutDurationChanged,
   timeoutRefreshed,
-  vaultCreated,
   vaultLocked,
   vaultReseted,
+  vaultStateUpdated,
   vaultUnlocked
 } from '@src/background/redux/vault/actions';
 import {
@@ -227,17 +229,19 @@ browser.runtime.onMessage.addListener(
             return sendResponse(undefined);
           }
 
+          case getType(createEmptyVault):
+          case getType(initializeVault):
+          case getType(createAccount):
+          case getType(vaultLocked):
           case getType(popupWindowInit):
           case getType(connectWindowInit):
           case getType(importWindowInit):
           case getType(signWindowInit):
           case getType(windowIdChanged):
           case getType(windowIdCleared):
-          case getType(vaultCreated):
-          case getType(vaultLocked):
+          case getType(vaultStateUpdated):
           case getType(vaultUnlocked):
-          case getType(secretPhraseCreated):
-          case getType(accountCreated):
+          case getType(accountAdded):
           case getType(accountImported):
           case getType(accountRemoved):
           case getType(accountRenamed):

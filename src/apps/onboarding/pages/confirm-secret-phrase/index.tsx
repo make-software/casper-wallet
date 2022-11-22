@@ -17,7 +17,8 @@ import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 
 import { ConfirmSecretPhrasePageContent } from './content';
-import { initializeWalletWithPhrase } from '../../hooks/initialize-wallet';
+import { initializeVault } from '@src/background/redux/vault/actions';
+import { dispatchToMainStore } from '@src/background/redux/utils';
 
 interface ConfirmSecretPhrasePageProps {
   phrase: SecretPhrase | null;
@@ -37,10 +38,15 @@ export function ConfirmSecretPhrasePage({
   }
 
   function handleSubmit() {
-    if (isConfirmationSuccess) {
-      initializeWalletWithPhrase(phrase);
-      navigate(RouterPath.ConfirmSecretPhraseSuccess);
-    } else {
+    try {
+      if (isConfirmationSuccess && phrase) {
+        dispatchToMainStore(initializeVault({ secretPhrase: phrase }));
+        navigate(RouterPath.ConfirmSecretPhraseSuccess);
+      } else {
+        throw Error('Invalid secret phrase.');
+      }
+    } catch (err) {
+      console.error(err);
       navigate(
         ErrorPath,
         createErrorLocationState({

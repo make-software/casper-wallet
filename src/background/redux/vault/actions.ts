@@ -1,20 +1,31 @@
 import { createAction } from 'typesafe-actions';
 import { TimeoutDurationSetting } from '@popup/constants';
-import { Account } from '@src/background/redux/vault/types';
+import { Account, VaultState } from '@src/background/redux/vault/types';
 import { SecretPhrase } from '@src/libs/crypto';
 
-// actions that update storage state
+/**
+ * USE CASES ACTIONS - don't update state in reducer, invoke state reducer events (imperative mode)
+ */
 
-export const vaultCreated = createAction(
-  'VAULT_CREATED',
-  (payload: { password: string }) => ({
-    password: payload.password,
-    lastActivityTime: Date.now()
-  })
-)<{
+export const createEmptyVault = createAction('CREATE_EMPTY_VAULT')<{
   password: string;
-  lastActivityTime: number;
 }>();
+
+export const initializeVault = createAction('INITIALIZE_VAULT')<{
+  secretPhrase: SecretPhrase;
+}>();
+
+export const createAccount = createAction('CREATE_ACCOUNT')<{
+  name?: string;
+}>();
+
+/**
+ * STATE UPDATE EVENTS - can update state in reducer (past tense)
+ */
+
+export const vaultStateUpdated = createAction('VAULT_STATE_UPDATED')<
+  Partial<VaultState>
+>();
 
 export const vaultReseted = createAction('VAULT_RESETED')<void>();
 
@@ -26,12 +37,8 @@ export const vaultUnlocked = createAction('VAULT_UNLOCKED', () => ({
   lastActivityTime: number;
 }>();
 
-export const secretPhraseCreated = createAction(
-  'SECRET_PHRASE_CREATED'
-)<SecretPhrase>();
-
 export const accountImported = createAction('ACCOUNT_IMPORTED')<Account>();
-export const accountCreated = createAction('ACCOUNT_CREATED')<string | null>();
+export const accountAdded = createAction('ACCOUNT_ADDED')<Account>();
 export const accountRemoved = createAction('ACCOUNT_REMOVED')<{
   accountName: string;
 }>();

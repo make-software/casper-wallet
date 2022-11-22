@@ -10,14 +10,15 @@ import {
 } from '@src/libs/layout';
 import { Button } from '@src/libs/ui';
 import { useDownloadSecretKeysForm } from '@src/libs/ui/forms/download-secret-keys';
-import { getSubmitButtonStateFromValidation } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
+import { calculateSubmitButtonDisabled } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
 import { createAsymmetricKey } from '@src/libs/crypto/create-asymmetric-key';
 
 import { RouterPath, useTypedNavigate } from '@src/apps/popup/router';
 
 import {
   selectVaultImportedAccounts,
-  selectVaultPassword
+  selectVaultPasswordHash,
+  selectVaultPasswordSaltHash
 } from '@src/background/redux/vault/selectors';
 
 import { DownloadSecretKeysPageContent } from './content';
@@ -28,12 +29,14 @@ export function DownloadSecretKeysPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  const expectedPassword = useSelector(selectVaultPassword);
+  const vaultPasswordHash = useSelector(selectVaultPasswordHash);
+  const vaultPasswordSaltHash = useSelector(selectVaultPasswordSaltHash);
+
   const {
     register,
     handleSubmit,
     formState: { isDirty, errors }
-  } = useDownloadSecretKeysForm(expectedPassword);
+  } = useDownloadSecretKeysForm(vaultPasswordHash, vaultPasswordSaltHash);
 
   const importedAccounts = useSelector(selectVaultImportedAccounts);
 
@@ -63,7 +66,7 @@ export function DownloadSecretKeysPage() {
     navigate(RouterPath.DownloadedSecretKeys);
   };
 
-  const isSubmitButtonDisabled = getSubmitButtonStateFromValidation({
+  const isSubmitButtonDisabled = calculateSubmitButtonDisabled({
     isDirty
   });
 
