@@ -44,11 +44,9 @@ export function RecoverFromSecretPhrasePage() {
       navigate(
         ErrorPath,
         createErrorLocationState({
-          errorHeaderText: t(
-            'We can’t connect your wallet with this secret phrase'
-          ),
+          errorHeaderText: t('Import of Secret Recovery Phrase failed'),
           errorContentText: t(
-            'It could be you’ve made a mistake while entering it. Please try again.'
+            'Confirm that you are using a Casper Wallet secret recovery phrase, and that you typed each word correctly and in the correct order.'
           ),
           errorPrimaryButtonLabel: t('Try again'),
           errorRedirectPath: RouterPath.RecoverFromSecretPhrase
@@ -85,7 +83,7 @@ export function RecoverFromSecretPhrasePage() {
         renderFooter={() => (
           <TabFooterContainer>
             <Button disabled={submitButtonDisabled}>
-              <Trans t={t}>Connect to my wallet</Trans>
+              <Trans t={t}>Recover my wallet</Trans>
             </Button>
           </TabFooterContainer>
         )}

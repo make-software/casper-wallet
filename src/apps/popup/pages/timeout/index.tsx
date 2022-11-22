@@ -49,8 +49,8 @@ export function TimeoutPageContent() {
       <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            Your vault will be automatically locked after some period of
-            inactivity.
+            Your wallet will automatically lock after some period of inactivity.
+            Select the desired duration.
           </Trans>
         </Typography>
       </TextContainer>

@@ -26,7 +26,10 @@ export function ImportAccountWithFileSuccessContentPage() {
       </TextContainer>
       <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
-          <Trans t={t}>Now you can see it in your accounts list.</Trans>
+          <Trans t={t}>
+            Imported accounts are distinguished by an ‘IMPORTED’ badge in the
+            account lists.
+          </Trans>
         </Typography>
       </TextContainer>
       <FooterButtonsAbsoluteContainer>

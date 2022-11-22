@@ -48,7 +48,7 @@ export function RemoveAccountPageContent() {
       <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            Are you sure you want to remove this account? This action can’t be
+            Are you sure you want to remove this account? The action can’t be
             undone.
           </Trans>
         </Typography>

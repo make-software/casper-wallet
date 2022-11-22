@@ -20,6 +20,7 @@ interface TextAreaProps extends BaseProps {
   cols?: number;
   rows?: number;
   resize?: boolean;
+  placeholder?: string;
 }
 
 export const TextArea = forwardRef<Ref, TextAreaProps>(function TextArea(

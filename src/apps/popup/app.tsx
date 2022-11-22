@@ -172,7 +172,7 @@ function UnlockedRouter() {
                 withMenu
                 withConnectionStatus
                 renderSubmenuBarItems={() => (
-                  <HeaderSubmenuBarNavLink linkType="close" />
+                  <HeaderSubmenuBarNavLink linkType="back" />
                 )}
               />
             )}

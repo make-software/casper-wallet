@@ -10,14 +10,13 @@ export function CreateSecretPhraseContent() {
   return (
     <TabPageContainer>
       <Typography type="header">
-        <Trans t={t}>Create secret phrase</Trans>
+        <Trans t={t}>Create secret recovery phrase</Trans>
       </Typography>
       <TabTextContainer>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            Casper Signer doesn’t have a “Reset password” feature. All you get
-            is a secret phrase, which makes it easy to back up and restore your
-            account.
+            Your unique secret recovery phrase allows you to recover your wallet
+            at any time on any device that has Casper Wallet installed.
           </Trans>
         </Typography>
       </TabTextContainer>

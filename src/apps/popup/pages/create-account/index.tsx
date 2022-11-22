@@ -72,13 +72,7 @@ export function CreateAccountPage() {
       renderFooter={() => (
         <FooterButtonsContainer>
           <Button disabled={isButtonDisabled}>
-            <Trans t={t}>Create account</Trans>
-          </Button>
-          <Button
-            color="secondaryBlue"
-            onClick={() => navigate(RouterPath.Home)}
-          >
-            <Trans t={t}>Cancel</Trans>
+            <Trans t={t}>Create Account</Trans>
           </Button>
         </FooterButtonsContainer>
       )}
