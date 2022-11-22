@@ -10,6 +10,8 @@ import {
 } from '@src/background/background-events';
 
 import { ReduxAction } from './redux-action';
+import { RootState } from 'typesafe-actions';
+import { select, call } from 'redux-saga/effects';
 
 declare global {
   interface Window {
@@ -67,4 +69,15 @@ export function createMainStoreReplica<T extends PopupState>(state: T) {
 
 export function dispatchToMainStore(action: ReduxAction) {
   browser.runtime.sendMessage(action);
+}
+
+export function* sagaSelect<T>(selector: (state: RootState) => T) {
+  const res: T = yield select(selector);
+  return res;
+}
+
+// eslint-disable-next-line require-yield
+export function* sagaCall<T>(fn: (...args: any) => Promise<T>) {
+  const res: T = yield call(fn) as T;
+  return res;
 }

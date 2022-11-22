@@ -45,10 +45,6 @@ export function getDeployPayment(deploy: CasperDeploy): string {
   throw new Error('getDeployPayment failed');
 }
 
-export function bytesToHex(bytes: Uint8Array): string {
-  return encodeBase16(bytes);
-}
-
 export function getDeployArgs(deploy: CasperDeploy): ArgDict {
   if (deploy.session.transfer) {
     return getDeployArgsFromTransfer(deploy.session.transfer);
@@ -204,7 +200,7 @@ function parseDeployArg(arg: CLValue): string | string[] {
 
     case CLTypeTag.ByteArray:
       const bytes = (arg as CLByteArray).value();
-      return bytesToHex(bytes);
+      return encodeBase16(bytes);
 
     case CLTypeTag.Result:
       const result = arg as CLResult<CLType, CLType>;
@@ -234,7 +230,7 @@ function parseDeployArg(arg: CLValue): string | string[] {
     default:
       // Special handling as there is no CLTypeTag for CLAccountHash
       if (arg instanceof CLAccountHash) {
-        return bytesToHex(arg.value());
+        return encodeBase16(arg.value());
       }
       return arg.value().toString();
   }

@@ -10,7 +10,10 @@ import {
 import { Button } from '@src/libs/ui';
 import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
 
-import { selectVaultPassword } from '@background/redux/vault/selectors';
+import {
+  selectVaultPasswordHash,
+  selectVaultPasswordSaltHash
+} from '@background/redux/vault/selectors';
 
 import { RouterPath, useTypedNavigate } from '@src/apps/onboarding/router';
 import { UnlockWalletPageContent } from '@src/apps/onboarding/pages/unlock-wallet/content';
@@ -27,13 +30,15 @@ interface UnlockWalletPageProps {
 export function UnlockWalletPage({ saveIsLoggedIn }: UnlockWalletPageProps) {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
-  const vaultPassword = useSelector(selectVaultPassword);
+
+  const vaultPasswordHash = useSelector(selectVaultPasswordHash);
+  const vaultPasswordSaltHash = useSelector(selectVaultPasswordSaltHash);
 
   const {
     register,
     handleSubmit,
     formState: { isDirty, errors }
-  } = useUnlockWalletForm(vaultPassword);
+  } = useUnlockWalletForm(vaultPasswordHash, vaultPasswordSaltHash);
 
   function onSubmit() {
     saveIsLoggedIn(true);

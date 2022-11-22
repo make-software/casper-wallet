@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
+import { verifyPasswordAgainstHash } from '@src/libs/crypto/hashing';
 
 export const minPasswordLength = 12;
 
@@ -12,11 +13,16 @@ export function useCreatePasswordRule() {
   return Yup.string().min(minPasswordLength, passwordAmountCharactersMessage);
 }
 
-export function useExpectPasswordRule(expectedPassword: string) {
+export function useVerifyPasswordAgainstHashRule(
+  passwordHash: string,
+  passwordSaltHash: string
+) {
   const { t } = useTranslation();
   const errorMessage = t('Password is not correct');
 
-  return Yup.string().equals([expectedPassword], errorMessage);
+  return Yup.string().test('authenticate', errorMessage, async password =>
+    verifyPasswordAgainstHash(passwordHash, passwordSaltHash, password)
+  );
 }
 
 export function useRepeatPasswordRule(inputName: string) {
@@ -28,12 +34,12 @@ export function useRepeatPasswordRule(inputName: string) {
 
 export function useValidSecretPhraseRule() {
   const { t } = useTranslation();
+  const errorMessage = t('There should be 24 words in a valid secret phrase.');
 
-  return Yup.string().test(
-    'unique',
-    t('There should be 24 words in a valid secret phrase.'),
-    value => value != null && value.trim().split(' ').length === 24
-  );
+  return Yup.string().test('unique', errorMessage, value => {
+    console.log(value);
+    return value != null && value.trim().split(' ').length === 24;
+  });
 }
 
 export function useAccountNameRule(

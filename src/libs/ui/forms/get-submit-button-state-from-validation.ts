@@ -1,22 +1,24 @@
-interface GetSubmitButtonStateFromValidationProps {
+interface Props {
   isValid?: boolean;
   isDirty?: boolean;
+  isSubmitting?: boolean;
 }
 
-export function getSubmitButtonStateFromValidation({
+export function calculateSubmitButtonDisabled({
   isValid,
-  isDirty
-}: GetSubmitButtonStateFromValidationProps) {
+  isDirty,
+  isSubmitting
+}: Props) {
   if (isDirty != null && isValid != null) {
-    return !isValid || !isDirty;
+    return !isValid || !isDirty || isSubmitting;
   }
 
   if (isDirty != null) {
-    return !isDirty;
+    return !isDirty || isSubmitting;
   }
 
   if (isValid != null) {
-    return !isValid;
+    return !isValid || isSubmitting;
   }
 
   return false;

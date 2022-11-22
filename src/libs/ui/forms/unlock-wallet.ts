@@ -3,11 +3,14 @@ import { useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 
-import { useExpectPasswordRule } from './form-validation-rules';
+import { useVerifyPasswordAgainstHashRule } from './form-validation-rules';
 
-export function useUnlockWalletForm(expectedPassword: string) {
+export function useUnlockWalletForm(
+  passwordHash: string,
+  passwordSaltHash: string
+) {
   const formSchema = Yup.object().shape({
-    password: useExpectPasswordRule(expectedPassword)
+    password: useVerifyPasswordAgainstHashRule(passwordHash, passwordSaltHash)
   });
 
   const formOptions: UseFormProps = {

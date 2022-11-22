@@ -1,69 +1,52 @@
-import * as argon2 from 'argon2-browser';
 import { randomBytes } from '@noble/hashes/utils';
+import { scryptAsync } from '@noble/hashes/scrypt';
 
-function generateRandomSalt() {
+import { convertBytesToHex, convertHexToBytes } from './utils';
+
+export function generateRandomSaltBytes() {
   return randomBytes(32);
 }
 
-const createOptions = ({
-  password,
-  saltHex,
-  passwordDigest
-}: {
-  password: string;
-  saltHex?: string;
-  passwordDigest?: string;
-}) => {
-  const options: any = {
-    pass: password,
-    type: argon2.ArgonType.Argon2i,
-    hashLen: 32
-  };
+export function generateRandomSaltHex() {
+  return convertBytesToHex(generateRandomSaltBytes());
+}
 
-  options.salt = saltHex ? Buffer.from(saltHex, 'hex') : generateRandomSalt();
-
-  if (passwordDigest) {
-    options.encoded = passwordDigest;
-  }
-
+const createScryptOptions = () => {
+  const options = { N: 2 ** 18, r: 8, p: 1, dkLen: 32 };
   return options;
 };
 
-export async function encodePassword(password: string): Promise<string> {
-  return await argon2
-    .hash(createOptions({ password }))
-    .then(res => {
-      return res.encoded;
-    })
+export async function encodePassword(
+  password: string,
+  saltHash: string
+): Promise<string> {
+  return scryptAsync(
+    password,
+    convertHexToBytes(saltHash),
+    createScryptOptions()
+  )
+    .then(convertBytesToHex)
     .catch(err => {
-      throw Error('Argon encode failed!');
+      throw Error('encodePassword failed!');
     });
 }
 
-export async function verifyPasswordAgainstDigest(
-  passwordDigest: string,
-  password: string
+export async function verifyPasswordAgainstHash(
+  passwordHash: string,
+  passwordSaltHash: string,
+  password: string | undefined
 ): Promise<boolean> {
-  return await argon2
-    .verify(createOptions({ password, passwordDigest }))
-    .then(res => {
-      return true;
-    })
-    .catch(err => {
-      return false;
-    });
+  const digest = await encodePassword(password || '', passwordSaltHash);
+  return passwordHash === digest;
 }
 
 export async function deriveEncryptionKey(
   password: string,
-  saltHex: string
+  keyDerivationSaltHash: string
 ): Promise<Uint8Array> {
-  return await argon2
-    .hash(createOptions({ password, saltHex }))
-    .then(res => {
-      return res.hash;
-    })
-    .catch(err => {
-      throw Error('Argon key failed!');
-    });
+  return scryptAsync(
+    password,
+    convertHexToBytes(keyDerivationSaltHash),
+    createScryptOptions()
+  );
 }
