@@ -11,6 +11,23 @@ export class ChromeDriver {
     const args = [`load-extension=${ExtensionBuildPath.Chrome}`];
 
     const options = new chrome.Options().addArguments(args.join(' '));
+    // Allow Selenium to use Chrome's clipboard for tests
+    options.setUserPreferences({
+      profile: {
+        content_settings: {
+          exceptions: {
+            clipboard: {
+              'chrome-extension://aohghmighlieiainnegkcijnfilokake/,*': {
+                expiration: '0',
+                last_modified: Date.now(),
+                model: 0,
+                setting: 1
+              }
+            }
+          }
+        }
+      }
+    });
     options.setAcceptInsecureCerts(true);
     const builder = new Builder()
       .forBrowser(Browser.CHROME)

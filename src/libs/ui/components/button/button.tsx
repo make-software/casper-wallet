@@ -189,6 +189,7 @@ export const Button = React.forwardRef<Ref, ButtonProps>(function Button(
     color = 'primaryBlue',
     variant = 'fullWidth',
     displayAsLinkTo,
+    dataTestId,
     ...props
   }: ButtonProps,
   ref
@@ -202,6 +203,7 @@ export const Button = React.forwardRef<Ref, ButtonProps>(function Button(
           ev.preventDefault();
           props.onClick && props.onClick(ev);
         }}
+        data-testid={dataTestId}
       >
         <UtilityButton>{props.children}</UtilityButton>
       </Link>
@@ -210,7 +212,14 @@ export const Button = React.forwardRef<Ref, ButtonProps>(function Button(
 
   const ButtonComponent =
     BUTTON_COMPONENT_BY_COLOR_DICT[color] || PrimaryBlueButton;
-  return <ButtonComponent ref={ref} variant={variant} {...props} />;
+  return (
+    <ButtonComponent
+      ref={ref}
+      variant={variant}
+      data-testid={dataTestId}
+      {...props}
+    />
+  );
 });
 
 export default Button;

@@ -119,6 +119,7 @@ export interface InputProps extends BaseProps {
   error?: boolean;
   validationType?: InputValidationType;
   validationText?: string | null;
+  dataTestId?: string;
 }
 
 export const Input = React.forwardRef<Ref, InputProps>(function Input(
@@ -140,6 +141,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
     validationText,
     oneColoredIcons,
     onFocus,
+    dataTestId,
     ...restProps
   }: InputProps,
   ref
@@ -185,6 +187,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
           {...restProps}
           ref={ref}
           onFocus={handleFocus}
+          data-testid={dataTestId}
         />
 
         {suffixIcon && <SuffixContainer>{suffixIcon}</SuffixContainer>}
