@@ -209,11 +209,6 @@ export function SecretPhraseWordsView({
           {(confirmationMode ? partialPhrase : phrase).map((word, index) => {
             return (
               <WordTag
-                dataTestId={
-                  hiddenWordIndexes.includes(index)
-                    ? `hidden-word-${index}`
-                    : undefined
-                }
                 key={`${index}-${word}`}
                 value={word}
                 index={index}

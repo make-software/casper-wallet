@@ -118,22 +118,21 @@ describe('Onboarding UI: confirm secret phrase flow [happy path]', () => {
     describe('`Confirm Secret Phrase` page', () => {
       it('should navigate to `Confirm Secret Phrase Success` page when user complete the puzzle test and click on `Confirm` button', async () => {
         const phrase = copiedPhrase.split(' ');
-        const hiddenWordElements = await driver.findElements(
-          By.xpath("//*[starts-with(@data-testid, 'hidden-word-')]")
-        );
 
         const wordPicker = await driver.findElement(
           By.xpath("//*[@data-testid='word-picker']")
         );
 
-        for (let i = 0; i < 6; i++) {
-          const hiddenWordElement = hiddenWordElements[i];
-          const index = Number.parseInt(await hiddenWordElement.getText()) - 1;
+        const hiddenWords = (await wordPicker.getText()).split('\n');
 
-          const hiddenWord = phrase[index];
-          await wordPicker
-            .findElement(By.xpath(`//*[text()='${hiddenWord}']`))
-            .click();
+        for (let i = 0; i < phrase.length; i++) {
+          const word = phrase[i];
+
+          if (hiddenWords.includes(word)) {
+            await wordPicker
+              .findElement(By.xpath(`//*[text()='${word}']`))
+              .click();
+          }
         }
 
         await driver.clickElement(By.xpath("//button[text()='Confirm']"));

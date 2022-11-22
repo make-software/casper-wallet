@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { BaseProps, Typography } from '@src/libs/ui';
+import { Typography } from '@src/libs/ui';
 import { FlexRow } from '@src/libs/layout';
 
 interface IsEmptyWord {
@@ -32,7 +32,7 @@ const WordContainer = styled(FlexRow)<DisabledOrSelected & IsEmptyWord>`
     onClick && !disabled ? 'pointer' : 'auto'};
 `;
 
-interface WordTagProps extends BaseProps {
+interface WordTagProps {
   value: string | null;
   index: number;
   hideIndex?: boolean;
@@ -47,8 +47,7 @@ export function WordTag({
   disabled,
   selected,
   hideIndex,
-  onHiddenWordClick,
-  dataTestId
+  onHiddenWordClick
 }: WordTagProps) {
   const handleOnClick =
     !disabled && onHiddenWordClick != null && index != null
@@ -61,7 +60,6 @@ export function WordTag({
       selected={selected}
       isEmptyWord={value == null}
       onClick={handleOnClick}
-      data-testid={dataTestId}
     >
       {!hideIndex && (
         <Typography

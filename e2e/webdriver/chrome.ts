@@ -11,6 +11,7 @@ export class ChromeDriver {
     const args = [`load-extension=${ExtensionBuildPath.Chrome}`];
 
     const options = new chrome.Options().addArguments(args.join(' '));
+    // Allow Selenium to use Chrome's clipboard for tests
     options.setUserPreferences({
       profile: {
         content_settings: {
