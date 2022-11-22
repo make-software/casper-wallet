@@ -4,9 +4,9 @@ import { buildWebDriver } from '../webdriver';
 
 import { Driver } from '../webdriver/driver';
 import { AppRoutes } from '../app-routes';
-import { vaultPassword } from '../__fixtures';
+import { vaultPassword, recoverSecretPhrase } from '../__fixtures';
 
-describe('Onboarding UI flow: happy path', () => {
+describe('Onboarding UI: confirm secret phrase flow [happy path]', () => {
   let driver: Driver;
 
   beforeAll(async () => {
@@ -116,7 +116,7 @@ describe('Onboarding UI flow: happy path', () => {
     });
 
     describe('`Confirm Secret Phrase` page', () => {
-      it('should navigate to `Awesome, your secret phrase is confirmed!` page when user complete the puzzle test click on `Confirm` button', async () => {
+      it('should navigate to `Confirm Secret Phrase Success` page when user complete the puzzle test and click on `Confirm` button', async () => {
         const phrase = copiedPhrase.split(' ');
         const hiddenWordElements = await driver.findElements(
           By.xpath("//*[starts-with(@data-testid, 'hidden-word-')]")
@@ -146,8 +146,8 @@ describe('Onboarding UI flow: happy path', () => {
     });
   });
 
-  describe('`Awesome, your secret phrase is confirmed!` page', () => {
-    it('should navigate to `Congrats` page when user click on `Done` button', async () => {
+  describe('`Confirm Secret Phrase Success` page', () => {
+    it('should navigate to `Onboarding Success` page when user click on `Done` button', async () => {
       await driver.clickElement(By.xpath("//button[text()='Done']"));
 
       assert.equal(
@@ -157,10 +157,68 @@ describe('Onboarding UI flow: happy path', () => {
     });
   });
 
-  describe('`Congrats! Your Casper Wallet is set up and ready to go` page', () => {
+  describe('`Onboarding Success` page', () => {
     it('should contains a `Got it` button', async () => {
       assert.ok(
         await driver.findElement(By.xpath("//button[text()='Got it']"))
+      );
+    });
+  });
+});
+
+describe('Onboarding UI: recover secret phrase flow [happy path]', () => {
+  let driver: Driver;
+
+  beforeAll(async () => {
+    driver = await buildWebDriver();
+    await driver.navigate(AppRoutes.Onboarding);
+    // This testsuits should test a scenario for recovery wallet, so we should navigate to start place
+    // Welcome page
+    await driver.clickElement(By.xpath("//*[text()='Get started']"));
+    // Create password page
+    await driver.fill(
+      By.xpath("//input[@placeholder='Password']"),
+      vaultPassword
+    );
+    await driver.fill(
+      By.xpath("//input[@placeholder='Confirm password']"),
+      vaultPassword
+    );
+    await driver.clickElement(
+      By.xpath(
+        "//*[text()='I have read and agree to the Casper Wallet Terms of Service.']"
+      )
+    );
+    await driver.clickElement(By.xpath("//button[text()='Create password']"));
+  });
+
+  describe('`Create Secret Phrase` page', () => {
+    it('should navigate to `Recover From Secret Phrase` page by click on `Import an existing secret recovery phrase` button', async () => {
+      await driver.clickElement(
+        By.xpath("//*[text()='Import an existing secret recovery phrase']")
+      );
+
+      assert.equal(
+        await driver.driver.getCurrentUrl(),
+        'chrome-extension://aohghmighlieiainnegkcijnfilokake/onboarding.html#/recover-from-secret-phrase'
+      );
+    });
+  });
+
+  describe('`Recover From Secret Phrase` page', () => {
+    it('should recover wallet without errors when user filled correct recover secret phrase in textarea and click on `Recover my wallet` button', async () => {
+      await driver.fill(
+        By.xpath("//textarea[@placeholder='e.g. Bobcat Lemon Blanket…']"),
+        recoverSecretPhrase
+      );
+
+      await driver.clickElement(
+        By.xpath("//button[text()='Recover my wallet']")
+      );
+
+      assert.notEqual(
+        await driver.driver.getCurrentUrl(),
+        'chrome-extension://aohghmighlieiainnegkcijnfilokake/onboarding.html#/error'
       );
     });
   });
