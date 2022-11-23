@@ -19,6 +19,7 @@
     "start:firefox": "concurrently -k -n start,redux \"npm run dev:firefox\" \"npm run devtools:redux -- --port=8001\"",
     "start:safari": "npm run dev:build:manifest:v2 && ./convert-web-extension.sh && NODE_ENV=development BABEL_ENV=development BROWSER=safari PORT=3003 node utils/webserver.js",
     "test:e2e:chrome": "npm run dev:build:chrome && SELENIUM_BROWSER=chrome jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests",
+    "ci:test:e2e:chrome": "npm run dev:build:chrome && SELENIUM_BROWSER=chrome SELENIUM_HEADLESS=true jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests",
     "test:e2e:firefox": "npm run build:firefox && SELENIUM_BROWSER=firefox jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests",
     "format:check": "prettier --check 'src/*.{js,jsx,ts,tsx,json,md}'",
     "format:write": "prettier --write 'src/*.{js,jsx,ts,tsx,json,md}'",

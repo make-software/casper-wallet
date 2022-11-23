@@ -7,10 +7,17 @@ import { ExtensionBuildPath, extensionName } from '../../constants';
 export class ChromeDriver {
   _driver: ThenableWebDriver;
 
-  static async build(port: number | undefined): Promise<WebDriverObject> {
+  static async build(
+    port: number | undefined,
+    headless: boolean | undefined
+  ): Promise<WebDriverObject> {
     const args = [`load-extension=${ExtensionBuildPath.Chrome}`];
 
-    const options = new chrome.Options().addArguments(args.join(' '));
+    if (headless) {
+      args.push('--headless=chrome');
+    }
+
+    const options = new chrome.Options().addArguments(...args);
     // Allow Selenium to use Chrome's clipboard for tests
     options.setUserPreferences({
       profile: {
