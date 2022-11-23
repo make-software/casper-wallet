@@ -1,8 +1,9 @@
-import { SecretPhrase } from '@src/libs/crypto';
 import { createAction } from 'typesafe-actions';
 
 export const sessionDestroyed = createAction('SESSION_DESTROYED')<void>();
 
-export const secretPhraseDecrypted = createAction(
-  'SECRET_PHRASE_DECRYPTED'
-)<SecretPhrase>();
+export const encryptionKeyHashCreated = createAction(
+  'ENCRYPTION_KEY_HASH_CREATED'
+)<{
+  encryptionKeyHash: string;
+}>();
