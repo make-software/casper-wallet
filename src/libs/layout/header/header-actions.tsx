@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { useNavigationMenu, useTypedLocation } from '@popup/router';
 
 import { SvgIcon } from '@libs/ui';
-import { vaultLocked } from '@src/background/redux/vault/actions';
+import { lockVault } from '@src/background/redux/vault/actions';
 import { dispatchToMainStore } from '../../../background/redux/utils';
 
 const Container = styled.div`
@@ -23,7 +23,7 @@ export function HeaderActions({ withLock, withMenu }: MainmenuBarProps) {
   const { toggleNavigationMenu } = useNavigationMenu();
 
   function handleLockVault() {
-    dispatchToMainStore(vaultLocked());
+    dispatchToMainStore(lockVault());
   }
 
   return (

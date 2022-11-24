@@ -1,24 +1,61 @@
 import '@libs/i18n/i18n';
+import 'mac-scrollbar/dist/mac-scrollbar.css';
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { render } from 'react-dom';
 import { ThemeProvider } from 'styled-components';
 
-import 'mac-scrollbar/dist/mac-scrollbar.css';
-
 import { GlobalStyle, themeConfig } from '@libs/ui';
+import { Provider as ReduxProvider } from 'react-redux';
 
 import { ErrorBoundary } from '@popup/error-boundary';
+import {
+  backgroundEvent,
+  BackgroundEvent,
+  PopupState
+} from '@src/background/background-events';
+import { importWindowInit } from '@src/background/redux/windowManagement/actions';
+import browser from 'webextension-polyfill';
 import { AppRouter } from './app-router';
+import { isActionOf } from 'typesafe-actions';
+import { createMainStoreReplica } from '@src/background/redux/utils';
 
-render(
-  <Suspense fallback={null}>
-    <ErrorBoundary>
-      <ThemeProvider theme={themeConfig}>
-        <GlobalStyle />
-        <AppRouter />
-      </ThemeProvider>
-    </ErrorBoundary>
-  </Suspense>,
-  document.querySelector('#app-container')
-);
+const Tree = () => {
+  const [state, setState] = useState<PopupState | null>(null);
+
+  // setup listener to state events
+  useEffect(() => {
+    function handleBackgroundMessage(message: BackgroundEvent) {
+      if (isActionOf(backgroundEvent.popupStateUpdated)(message)) {
+        setState(message.payload);
+      }
+    }
+    browser.runtime.onMessage.addListener(handleBackgroundMessage);
+    browser.runtime.sendMessage(importWindowInit());
+
+    return () => {
+      browser.runtime.onMessage.removeListener(handleBackgroundMessage);
+    };
+  }, []);
+
+  if (state == null) {
+    return null;
+  }
+
+  const store = createMainStoreReplica(state);
+
+  return (
+    <Suspense fallback={null}>
+      <ErrorBoundary>
+        <ThemeProvider theme={themeConfig}>
+          <GlobalStyle />
+          <ReduxProvider store={store}>
+            <AppRouter />
+          </ReduxProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </Suspense>
+  );
+};
+
+render(<Tree />, document.querySelector('#app-container'));

@@ -37,7 +37,6 @@ export function useValidSecretPhraseRule() {
   const errorMessage = t('There should be 24 words in a valid secret phrase.');
 
   return Yup.string().test('unique', errorMessage, value => {
-    console.log(value);
     return value != null && value.trim().split(' ').length === 24;
   });
 }

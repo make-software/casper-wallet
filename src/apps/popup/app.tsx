@@ -35,11 +35,11 @@ import {
   selectVaultIsLocked
 } from '@background/redux/vault/selectors';
 
-import { useVaultTimeoutController } from './hooks/use-vault-timeout-controller';
+import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 
 export function App() {
   const vaultIsLocked = useSelector(selectVaultIsLocked);
-  useVaultTimeoutController();
+  useUserActivityTracker();
 
   if (vaultIsLocked) {
     return <LockedRouter />;

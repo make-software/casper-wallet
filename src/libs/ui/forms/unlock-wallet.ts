@@ -5,6 +5,10 @@ import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 
 import { useVerifyPasswordAgainstHashRule } from './form-validation-rules';
 
+export type UnlockWalletFormValues = {
+  password: string;
+};
+
 export function useUnlockWalletForm(
   passwordHash: string,
   passwordSaltHash: string
@@ -13,10 +17,10 @@ export function useUnlockWalletForm(
     password: useVerifyPasswordAgainstHashRule(passwordHash, passwordSaltHash)
   });
 
-  const formOptions: UseFormProps = {
+  const formOptions: UseFormProps<UnlockWalletFormValues> = {
     reValidateMode: 'onSubmit',
     resolver: yupResolver(formSchema)
   };
 
-  return useForm(formOptions);
+  return useForm<UnlockWalletFormValues>(formOptions);
 }

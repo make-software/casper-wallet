@@ -12,7 +12,7 @@ import { Stepper } from '@src/apps/onboarding/components/stepper';
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { dispatchToMainStore } from '@src/background/redux/utils';
-import { vaultReseted } from '@src/background/redux/vault/actions';
+import { resetVault } from '@src/background/redux/vault/actions';
 
 import { CreateSecretPhraseContent } from './content';
 
@@ -21,7 +21,7 @@ export function CreateSecretPhrasePage() {
   const { t } = useTranslation();
 
   const handleBack = () => {
-    dispatchToMainStore(vaultReseted());
+    dispatchToMainStore(resetVault());
     navigate(RouterPath.CreateVaultPassword);
   };
 

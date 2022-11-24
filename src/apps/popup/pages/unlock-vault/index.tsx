@@ -25,9 +25,12 @@ import {
   selectVaultPasswordHash,
   selectVaultPasswordSaltHash
 } from '@src/background/redux/vault/selectors';
-import { vaultUnlocked } from '@src/background/redux/vault/actions';
+import { unlockVault } from '@src/background/redux/vault/actions';
 import { dispatchToMainStore } from '@src/background/redux/utils';
-import { useUnlockWalletForm } from '@src/libs/ui/forms/unlock-wallet';
+import {
+  UnlockWalletFormValues,
+  useUnlockWalletForm
+} from '@src/libs/ui/forms/unlock-wallet';
 import { calculateSubmitButtonDisabled } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
 
 export function UnlockVaultPageContent() {
@@ -46,8 +49,8 @@ export function UnlockVaultPageContent() {
     formState: { errors, isDirty, isSubmitting, isValidating }
   } = useUnlockWalletForm(vaultPasswordHash, vaultPasswordSaltHash);
 
-  async function handleUnlockVault() {
-    dispatchToMainStore(vaultUnlocked());
+  async function handleUnlockVault({ password }: UnlockWalletFormValues) {
+    dispatchToMainStore(unlockVault({ password }));
   }
 
   const submitButtonDisabled = calculateSubmitButtonDisabled({

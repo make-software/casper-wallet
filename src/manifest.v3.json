@@ -6,7 +6,7 @@
     "128": "logo128.png",
     "192": "logo192.png"
   },
-  "permissions": ["notifications", "storage", "tabs"],
+  "permissions": ["background", "notifications", "storage", "tabs"],
   "background": {
     "service_worker": "./background.bundle.js"
   },

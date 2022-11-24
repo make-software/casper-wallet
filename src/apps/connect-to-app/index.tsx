@@ -13,12 +13,12 @@ import { App } from '@connect-to-app/app';
 import { GlobalStyle, themeConfig } from '@libs/ui';
 import { ErrorBoundary } from '@popup/error-boundary';
 
-import { createMainStoreReplica } from '../../background/redux/utils';
 import {
   BackgroundEvent,
   backgroundEvent,
   PopupState
 } from '@src/background/background-events';
+import { createMainStoreReplica } from '../../background/redux/utils';
 import { connectWindowInit } from '../../background/redux/windowManagement/actions';
 
 const Tree = () => {

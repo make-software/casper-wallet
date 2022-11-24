@@ -12,8 +12,11 @@ import { ImportAccountWithFileSuccessContentPage } from './pages/import-account-
 import { ImportAccountWithFileFailureContentPage } from './pages/import-account-with-file-failure';
 import { ImportAccountWithFileUploadPage } from './pages/import-account-with-file-upload';
 import { PopupHeader, LayoutWindow } from '@src/libs/layout';
+import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 
 export function AppRouter() {
+  useUserActivityTracker();
+
   return (
     <HashRouter>
       <Routes>

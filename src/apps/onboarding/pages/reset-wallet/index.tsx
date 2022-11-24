@@ -5,7 +5,7 @@ import { LayoutTab, TabFooterContainer } from '@libs/layout';
 import { Button, Checkbox } from '@libs/ui';
 
 import { dispatchToMainStore } from '@background/redux/utils';
-import { vaultReseted } from '@background/redux/vault/actions';
+import { resetVault } from '@background/redux/vault/actions';
 
 import { ResetWalletPageContent } from './content';
 import { useTypedNavigate } from '@src/apps/onboarding/router';
@@ -17,7 +17,7 @@ export function ResetWalletPage() {
   const [isChecked, setIsChecked] = useState<boolean>(false);
 
   function handleResetVault() {
-    dispatchToMainStore(vaultReseted());
+    dispatchToMainStore(resetVault());
   }
 
   function handleCancel() {

@@ -10,8 +10,11 @@ import {
   useTypedLocation,
   useTypedNavigate
 } from '@src/apps/signature-request/router';
+import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 
 export function App() {
+  useUserActivityTracker();
+
   return (
     <HashRouter>
       <Routes>

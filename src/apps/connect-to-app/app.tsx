@@ -6,8 +6,11 @@ import { RouterPath } from '@src/apps/connect-to-app/router';
 import { AccountsSelectionPage } from '@src/apps/connect-to-app/pages/accounts-selection';
 import { ApproveConnectionPage } from '@src/apps/connect-to-app/pages/approve-connection';
 import { ConnectingPage } from '@src/apps/connect-to-app/pages/connecting';
+import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 
 export function App() {
+  useUserActivityTracker();
+
   const [selectedAccountNames, setSelectedAccountNames] = useState<string[]>(
     []
   );

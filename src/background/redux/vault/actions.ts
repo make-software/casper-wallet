@@ -7,6 +7,13 @@ import { SecretPhrase } from '@src/libs/crypto';
  * USE CASES ACTIONS - don't update state in reducer, invoke state reducer events (imperative mode)
  */
 
+export const startApp = createAction('START_APP')<void>();
+
+export const resetVault = createAction('RESET_VAULT')<void>();
+
+export const lockVault = createAction('LOCK_VAULT')<void>();
+export const unlockVault = createAction('UNLOCK_VAULT')<{ password: string }>();
+
 export const createEmptyVault = createAction('CREATE_EMPTY_VAULT')<{
   password: string;
 }>();
@@ -66,9 +73,12 @@ export const timeoutDurationChanged = createAction(
   lastActivityTime: number;
 }>();
 
-export const timeoutRefreshed = createAction('TIMEOUT_REFRESHED', () => ({
-  lastActivityTime: Date.now()
-}))<{
+export const lastActivityTimeRefreshed = createAction(
+  'LAST_ACTIVITY_TIME_REFRESHED',
+  () => ({
+    lastActivityTime: Date.now()
+  })
+)<{
   lastActivityTime: number;
 }>();
 

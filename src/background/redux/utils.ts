@@ -12,6 +12,7 @@ import {
 import { ReduxAction } from './redux-action';
 import { RootState } from 'typesafe-actions';
 import { select, call } from 'redux-saga/effects';
+import { startApp } from './vault/actions';
 
 declare global {
   interface Window {
@@ -42,8 +43,10 @@ export async function getMainStoreSingleton() {
   if (storeSingleton == null) {
     // console.warn('STORE INIT', state);
     storeSingleton = createStore(state || {});
+    // on updates persist state in storage and propagate to replicas
     storeSingleton.subscribe(() => {
       const state = storeSingleton.getState();
+
       browser.storage.local.set({ [REDUX_STORAGE_KEY]: state }).catch(e => {
         console.error('STORE SAVE ERROR: ', e);
       });
@@ -55,6 +58,8 @@ export async function getMainStoreSingleton() {
           // will fail when extension is closed
         });
     });
+    // send start action
+    storeSingleton.dispatch(startApp());
   } else {
     // console.warn('STORE REUSED', state);
   }
@@ -71,13 +76,15 @@ export function dispatchToMainStore(action: ReduxAction) {
   browser.runtime.sendMessage(action);
 }
 
-export function* sagaSelect<T>(selector: (state: RootState) => T) {
-  const res: T = yield select(selector);
+export function* sagaSelect<Result>(selector: (state: RootState) => Result) {
+  const res: Result = yield select(selector);
   return res;
 }
 
-// eslint-disable-next-line require-yield
-export function* sagaCall<T>(fn: (...args: any) => Promise<T>) {
-  const res: T = yield call(fn) as T;
+export function* sagaCall<Result, Args extends any[]>(
+  fn: (...args: Args) => Promise<Result>,
+  ...args: Args
+) {
+  const res: Result = yield call(fn, ...args) as Result;
   return res;
 }

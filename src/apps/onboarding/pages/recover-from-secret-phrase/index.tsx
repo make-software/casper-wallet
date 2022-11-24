@@ -29,7 +29,7 @@ export function RecoverFromSecretPhrasePage() {
 
   const { register, handleSubmit, formState } =
     useRecoverFromSecretPhraseForm();
-  const { isDirty, isValid } = formState;
+  const { isDirty } = formState;
 
   function onSubmit({ phrase }: FieldValues) {
     try {
@@ -58,8 +58,6 @@ export function RecoverFromSecretPhrasePage() {
   const submitButtonDisabled = calculateSubmitButtonDisabled({
     isDirty
   });
-
-  console.log(submitButtonDisabled, isDirty, isValid);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

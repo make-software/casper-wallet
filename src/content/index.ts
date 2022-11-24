@@ -92,7 +92,6 @@ function handleSdkRequest(e: Event) {
   browser.runtime
     .sendMessage(requestAction)
     .then(responseAction => {
-      console.log(responseAction);
       // if valid message send back response
       if (isSDKMessage(responseAction)) {
         window.dispatchEvent(

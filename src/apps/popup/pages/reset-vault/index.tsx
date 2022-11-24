@@ -10,7 +10,7 @@ import {
 import { SvgIcon, Typography, Button, Checkbox } from '@src/libs/ui';
 
 import { useTypedNavigate } from '@popup/router';
-import { vaultReseted } from '@src/background/redux/vault/actions';
+import { resetVault } from '@src/background/redux/vault/actions';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 
 export function ResetVaultPageContent() {
@@ -19,7 +19,7 @@ export function ResetVaultPageContent() {
   const { t } = useTranslation();
 
   function handleResetVault() {
-    dispatchToMainStore(vaultReseted());
+    dispatchToMainStore(resetVault());
     window.close();
   }
 

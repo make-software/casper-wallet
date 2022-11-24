@@ -3,7 +3,7 @@ import { createReducer } from 'typesafe-actions';
 import { TimeoutDurationSetting } from '@popup/constants';
 import {
   timeoutDurationChanged,
-  timeoutRefreshed,
+  lastActivityTimeRefreshed,
   vaultLocked,
   vaultUnlocked,
   vaultReseted,
@@ -213,7 +213,7 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    [timeoutRefreshed],
+    [lastActivityTimeRefreshed],
     (state, { payload: { lastActivityTime } }) => ({
       ...state,
       lastActivityTime

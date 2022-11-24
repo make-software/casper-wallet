@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { FieldValues, UseFormRegister } from 'react-hook-form';
+import { UseFormRegister } from 'react-hook-form';
 import styled from 'styled-components';
 
 import {
@@ -16,6 +16,7 @@ import {
   InputValidationType,
   PasswordVisibilityIcon
 } from '@libs/ui';
+import { UnlockWalletFormValues } from '@src/libs/ui/forms/unlock-wallet';
 
 // Design of this page is temporary. Should be changed after it will be done in Figma
 const TabPageContainer = styled.div`
@@ -30,8 +31,8 @@ const GrayBackgroundContainer = styled(TabPageContainerBase)`
 `;
 
 interface LoginPageContentProps {
-  register: UseFormRegister<FieldValues>;
-  errorMessage: string | null;
+  register: UseFormRegister<UnlockWalletFormValues>;
+  errorMessage?: string;
 }
 
 export function UnlockWalletPageContent({

@@ -20,12 +20,15 @@ import {
   createAccount,
   createEmptyVault,
   initializeVault,
+  lockVault,
+  resetVault,
   timeoutDurationChanged,
-  timeoutRefreshed,
+  lastActivityTimeRefreshed,
   vaultLocked,
   vaultReseted,
   vaultStateUpdated,
-  vaultUnlocked
+  vaultUnlocked,
+  unlockVault
 } from '@src/background/redux/vault/actions';
 import {
   selectVaultCountOfAccounts,
@@ -57,7 +60,8 @@ import {
 } from '@src/background/open-onboarding-flow';
 
 import { openWindow } from './open-window';
-import { deployPayloadReceived } from './redux/deploys/actions';
+import { deployPayloadReceived, deploysReseted } from './redux/deploys/actions';
+import { sessionReseted } from './redux/session/actions';
 
 browser.runtime.onInstalled.addListener(async () => {
   // this will run on installation or update so
@@ -223,7 +227,7 @@ browser.runtime.onMessage.addListener(
         // console.warn(`BACKEND REDUX ACTION:`, JSON.stringify(action));
 
         switch (action.type) {
-          case getType(vaultReseted): {
+          case getType(resetVault): {
             store.dispatch(action);
             await enableOnboardingFlow();
             return sendResponse(undefined);
@@ -232,7 +236,13 @@ browser.runtime.onMessage.addListener(
           case getType(createEmptyVault):
           case getType(initializeVault):
           case getType(createAccount):
+          case getType(lockVault):
+          case getType(unlockVault):
+          case getType(deploysReseted):
+          case getType(sessionReseted):
+          case getType(vaultReseted):
           case getType(vaultLocked):
+          case getType(vaultUnlocked):
           case getType(popupWindowInit):
           case getType(connectWindowInit):
           case getType(importWindowInit):
@@ -240,7 +250,6 @@ browser.runtime.onMessage.addListener(
           case getType(windowIdChanged):
           case getType(windowIdCleared):
           case getType(vaultStateUpdated):
-          case getType(vaultUnlocked):
           case getType(accountAdded):
           case getType(accountImported):
           case getType(accountRemoved):
@@ -248,7 +257,7 @@ browser.runtime.onMessage.addListener(
           case getType(activeOriginChanged):
           case getType(activeAccountChanged):
           case getType(timeoutDurationChanged):
-          case getType(timeoutRefreshed):
+          case getType(lastActivityTimeRefreshed):
           case getType(accountsConnected):
           case getType(accountDisconnected):
           case getType(allAccountsDisconnected):
