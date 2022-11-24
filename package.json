@@ -29,7 +29,8 @@
     "prepare": "husky install",
     "locale:extract_pot": "i18next 'src/**/*.{ts,tsx}' && node scripts/locale_extract_pot.js",
     "locale:update_translations": "node scripts/locale_update_translations.js",
-    "ci-check": "npm run format:check && npm run lint && npm run tsc && npm run test && ci:test:e2e:chrome",
+    "prepush-check": "npm run format:check && npm run lint && npm run tsc && npm run test",
+    "ci-check": "npm run prepush-check && npm run ci:test:e2e:chrome",
     "dependency:graph": "npx madge --ts-config=tsconfig.json --image=graph.svg src/background/index.ts",
     "dependency:circular": "npx madge --ts-config=tsconfig.json --circular src/background/index.ts",
     "dependency:orphans": "npx madge --ts-config=tsconfig.json --orphans src/**/*"
