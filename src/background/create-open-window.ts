@@ -36,8 +36,8 @@ export interface OpenWindowProps {
   isNewWindow?: boolean;
   query?: Record<string, string>;
 }
-// TODO: This function should return created window instance
-// background should manage the windows using request messages received from popup/content
+
+// This function returns a window instance that was created or reused
 export function createOpenWindow({
   windowId,
   setWindowId,
@@ -47,17 +47,30 @@ export function createOpenWindow({
     purposeForOpening,
     isNewWindow,
     query
-  }: OpenWindowProps) {
+  }: OpenWindowProps): Promise<browser.Windows.Window> {
     const id = isNewWindow ? null : windowId;
 
-    if (id) {
-      const allWindows = await browser.windows.getAll();
-      const isWindowExists = allWindows.find(window => window.id === id);
+    if (id != null) {
+      const window = await reuseExistingWindow(id);
+      if (window != null) {
+        return window;
+      }
+    }
 
-      if (isWindowExists) {
+    return openNewWindow();
+
+    // helpers
+
+    async function reuseExistingWindow(
+      id: number
+    ): Promise<browser.Windows.Window | undefined> {
+      const allWindows = await browser.windows.getAll();
+      const existingWindow = allWindows.find(window => window.id === id);
+
+      if (existingWindow) {
         const window = await browser.windows.get(id);
         if (window.id) {
-          await browser.windows.update(window.id, {
+          return browser.windows.update(window.id, {
             // Bring popup window to the front
             focused: true,
             drawAttention: true
@@ -65,45 +78,40 @@ export function createOpenWindow({
         }
       } else {
         clearWindowId();
-        // TODO: why this is calling recursively? this logic should be simplified
-        await openWindow({ purposeForOpening, isNewWindow: true, query });
       }
-    } else {
-      browser.windows
-        .getCurrent()
-        .then(currentWindow => {
-          const windowWidth = currentWindow.width ?? 0;
-          const xOffset = currentWindow.left ?? 0;
-          const yOffset = currentWindow.top ?? 0;
-          const crossPlatformWidthOffset = 16;
-          const popupWidth = 360 + crossPlatformWidthOffset;
-          const popupHeight = 700;
+    }
 
-          browser.windows
-            .create({
-              url: getUrlByPurposeForOpening(purposeForOpening, query),
-              type: 'popup',
-              height: popupHeight,
-              width: popupWidth,
-              left: windowWidth + xOffset - popupWidth,
-              top: yOffset
-            })
-            .then(newWindow => {
-              if (newWindow.id) {
-                setWindowId(newWindow.id);
+    async function openNewWindow(): Promise<browser.Windows.Window> {
+      return browser.windows.getCurrent().then(currentWindow => {
+        const windowWidth = currentWindow.width ?? 0;
+        const xOffset = currentWindow.left ?? 0;
+        const yOffset = currentWindow.top ?? 0;
+        const crossPlatformWidthOffset = 16;
+        const popupWidth = 360 + crossPlatformWidthOffset;
+        const popupHeight = 700;
 
-                const handleCloseWindow = () => {
-                  browser.windows.onRemoved.removeListener(handleCloseWindow);
-                  clearWindowId();
-                };
-                browser.windows.onRemoved.addListener(handleCloseWindow);
-              }
-            });
-        })
-        .catch(e => {
-          // TODO: handle errors
-          console.error(e);
-        });
+        return browser.windows
+          .create({
+            url: getUrlByPurposeForOpening(purposeForOpening, query),
+            type: 'popup',
+            height: popupHeight,
+            width: popupWidth,
+            left: windowWidth + xOffset - popupWidth,
+            top: yOffset
+          })
+          .then(newWindow => {
+            if (newWindow.id) {
+              setWindowId(newWindow.id);
+
+              const handleCloseWindow = () => {
+                browser.windows.onRemoved.removeListener(handleCloseWindow);
+                clearWindowId();
+              };
+              browser.windows.onRemoved.addListener(handleCloseWindow);
+            }
+            return newWindow;
+          });
+      });
     }
   };
 }
