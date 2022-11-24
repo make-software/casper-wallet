@@ -2,9 +2,12 @@ import { put, takeLatest } from 'redux-saga/effects';
 import { getType } from 'typesafe-actions';
 
 import { deriveKeyPair, validateSecretPhrase } from '@src/libs/crypto';
-import { encryptSecretPhrase } from '@src/libs/crypto/storage-encryption';
+import {
+  decryptSecretPhrase,
+  encryptSecretPhrase
+} from '@src/libs/crypto/secret-phrase';
 
-import { selectSessionSecretPhrase } from '../session/selectors';
+import { selectSessionEncryptionKeyHash } from '../session/selectors';
 import { sagaCall, sagaSelect } from '../utils';
 import {
   accountAdded,
@@ -15,13 +18,16 @@ import {
 } from './actions';
 import {
   selectVaultDerivedAccounts,
-  selectKeyDerivationSaltHash
+  selectVaultSecretPhraseCipher
 } from './selectors';
 import {
+  deriveEncryptionKey,
   encodePassword,
   generateRandomSaltHex
 } from '@src/libs/crypto/hashing';
 import { disableOnboardingFlow } from '@src/background/open-onboarding-flow';
+import { encryptionKeyHashCreated } from '../session/actions';
+import { convertBytesToHex } from '@src/libs/crypto/utils';
 
 export function* vaultSagas() {
   yield takeLatest(getType(createEmptyVault), createEmptyVaultSaga);
@@ -33,70 +39,97 @@ export function* vaultSagas() {
  *
  */
 function* createEmptyVaultSaga(action: ReturnType<typeof createEmptyVault>) {
-  const { password } = action.payload;
+  try {
+    const { password } = action.payload;
 
-  const passwordSaltHash = generateRandomSaltHex();
-  const passwordHash = yield* sagaCall(() =>
-    encodePassword(password, passwordSaltHash)
-  );
-  const keyDerivationSaltHash = generateRandomSaltHex();
+    const passwordSaltHash = generateRandomSaltHex();
+    const passwordHash = yield* sagaCall(() =>
+      encodePassword(password, passwordSaltHash)
+    );
+    const keyDerivationSaltHash = generateRandomSaltHex();
+    const encryptionKeyBytes = yield* sagaCall(() =>
+      deriveEncryptionKey(password, keyDerivationSaltHash)
+    );
+    const encryptionKeyHash = convertBytesToHex(encryptionKeyBytes);
 
-  yield put(
-    vaultStateUpdated({
-      passwordHash,
-      passwordSaltHash,
-      keyDerivationSaltHash
-    })
-  );
+    yield put(
+      vaultStateUpdated({
+        passwordHash,
+        passwordSaltHash,
+        keyDerivationSaltHash
+      })
+    );
+    yield put(
+      encryptionKeyHashCreated({ encryptionKeyHash: encryptionKeyHash })
+    );
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 /**
  *
  */
 function* initializeVaultSaga(action: ReturnType<typeof initializeVault>) {
-  const { secretPhrase } = action.payload;
-  if (!validateSecretPhrase(secretPhrase)) {
-    throw Error('Invalid secret phrase.');
+  try {
+    const { secretPhrase } = action.payload;
+    if (!validateSecretPhrase(secretPhrase)) {
+      throw Error('Invalid secret phrase.');
+    }
+
+    const keyPair = deriveKeyPair(secretPhrase, 0);
+    const account = {
+      ...keyPair,
+      name: 'Account 1'
+    };
+
+    const encryptionKeyHash = yield* sagaSelect(selectSessionEncryptionKeyHash);
+
+    if (encryptionKeyHash == null) {
+      throw Error("Encryption key doesn't exist");
+    }
+
+    const secretPhraseCipher = yield* sagaCall(() =>
+      encryptSecretPhrase(encryptionKeyHash, secretPhrase)
+    );
+
+    yield put(
+      vaultStateUpdated({
+        secretPhraseCipher
+      })
+    );
+    yield put(accountAdded(account));
+    // cleanup and disabling action handler
+    disableOnboardingFlow();
+  } catch (err) {
+    console.error(err);
   }
-
-  const keyPair = deriveKeyPair(secretPhrase, 0);
-  const account = {
-    ...keyPair,
-    name: 'Account 1'
-  };
-
-  const password = 'dasdasdsa';
-  const keyDerivationSaltHash = yield* sagaSelect(selectKeyDerivationSaltHash);
-  const secretPhraseCipher = yield* sagaCall(() =>
-    encryptSecretPhrase(secretPhrase, password, keyDerivationSaltHash)
-  );
-
-  yield put(
-    vaultStateUpdated({
-      secretPhraseCipher
-    })
-  );
-  yield put(accountAdded(account));
-  // cleanup and disabling action handler
-  disableOnboardingFlow();
 }
 
 /**
  *
  */
 function* createAccountSaga(action: ReturnType<typeof createAccount>) {
-  const { name } = action.payload;
+  try {
+    const { name } = action.payload;
 
-  const secretPhrase = yield* sagaSelect(selectSessionSecretPhrase);
-  const derivedAccounts = yield* sagaSelect(selectVaultDerivedAccounts);
+    const derivedAccounts = yield* sagaSelect(selectVaultDerivedAccounts);
+    const accountCount = derivedAccounts.length;
 
-  const accountCount = derivedAccounts.length;
+    const encryptionKeyHash = yield* sagaSelect(selectSessionEncryptionKeyHash);
+    const secretPhraseCipher = yield* sagaSelect(selectVaultSecretPhraseCipher);
+    const secretPhrase = yield* sagaCall(() =>
+      decryptSecretPhrase(encryptionKeyHash, secretPhraseCipher)
+    );
 
-  const keyPair = deriveKeyPair(secretPhrase, accountCount);
-  const account = {
-    ...keyPair,
-    name: name ?? `Account ${accountCount + 1}`
-  };
+    const keyPair = deriveKeyPair(secretPhrase, accountCount);
+    const account = {
+      ...keyPair,
+      name: name ?? `Account ${accountCount + 1}`
+    };
 
-  yield put(accountAdded(account));
+    yield put(accountAdded(account));
+  } catch (err) {
+    console.error(err);
+  }
 }

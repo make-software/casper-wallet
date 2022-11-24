@@ -1,19 +1,19 @@
 import { createReducer } from 'typesafe-actions';
 
 import { SessionState } from './types';
-import { secretPhraseDecrypted, sessionDestroyed } from './actions';
+import { sessionDestroyed, encryptionKeyHashCreated } from './actions';
 type State = SessionState;
 
 const initialState: State = {
-  secretPhrase: null
+  encryptionKeyHash: null
 };
 
 export const reducer = createReducer(initialState)
-  .handleAction([sessionDestroyed], (state, action): State => initialState)
+  .handleAction([sessionDestroyed], (): State => initialState)
   .handleAction(
-    [secretPhraseDecrypted],
+    [encryptionKeyHashCreated],
     (state, action): State => ({
       ...state,
-      secretPhrase: action.payload
+      encryptionKeyHash: action.payload.encryptionKeyHash
     })
   );
