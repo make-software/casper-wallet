@@ -15,6 +15,7 @@ export class ChromeDriver {
 
     if (headless) {
       args.push('--headless=chrome');
+      args.push('--disable-gpu');
     }
 
     const options = new chrome.Options().addArguments(...args);
