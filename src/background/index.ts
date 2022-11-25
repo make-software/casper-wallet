@@ -58,6 +58,10 @@ import {
   disableOnboardingFlow,
   openOnboardingUi
 } from '@src/background/open-onboarding-flow';
+import {
+  getAccountBalance,
+  getCurrencyRate
+} from '@libs/services/balance-service';
 
 import { openWindow } from './open-window';
 import { deployPayloadReceived, deploysReseted } from './redux/deploys/actions';
@@ -216,6 +220,26 @@ browser.runtime.onMessage.addListener(
             return sendResponse(
               sdkMessage.getVersionResponse(version, action.meta)
             );
+          }
+
+          case getType(sdkMessage.fetchBalanceRequest): {
+            try {
+              const [balance, rate] = await Promise.all([
+                getAccountBalance({ publicKey: action.payload.publicKey }),
+                getCurrencyRate()
+              ]);
+
+              return sendResponse(
+                sdkMessage.fetchBalanceResponse(
+                  { balance: balance?.data, currencyRate: rate?.data },
+                  action.meta
+                )
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
           }
 
           default:

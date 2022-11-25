@@ -66,6 +66,20 @@ export const motesToCSPR = (motes: string): string => {
   return Big(motes).div(MOTES_PER_CSPR_RATE).toString();
 };
 
+export const motesToCurrency = (
+  motes: string,
+  currencyPerCsprRate: number
+): string => {
+  if (currencyPerCsprRate === 0) {
+    throw new Error('motesToCurrency: the CSPR rate cannot be zero');
+  }
+
+  return Big(motes)
+    .div(MOTES_PER_CSPR_RATE)
+    .mul(currencyPerCsprRate)
+    .toString();
+};
+
 export function snakeAndKebabToCamel(str: string): string {
   return str
     .toLowerCase()
@@ -77,3 +91,32 @@ export function snakeAndKebabToCamel(str: string): string {
 export function capitalizeString(str: string): string {
   return `${str[0].toUpperCase()}${str.slice(1)}`;
 }
+
+export const balanceFormatter = (amount: string, isCSPR = false): string => {
+  let result = '';
+
+  const roundedAmount = Number(amount).toFixed(2);
+  const firstPartOfAmount = roundedAmount.split('.')[0];
+  const secondPartOfAmount = roundedAmount.split('.')[1];
+
+  const reverseStr = firstPartOfAmount.split('').reverse().join('');
+  const length = firstPartOfAmount.length;
+
+  if (length >= 4) {
+    for (let i = length - 1; i >= 0; i--) {
+      if (i % 3 === 0 && i !== 0) {
+        result += `${reverseStr[i]},`;
+      } else {
+        result += reverseStr[i];
+      }
+    }
+  } else {
+    result = firstPartOfAmount;
+  }
+
+  if (!isCSPR || secondPartOfAmount !== '00') {
+    result += `.${secondPartOfAmount}`;
+  }
+
+  return result;
+};
