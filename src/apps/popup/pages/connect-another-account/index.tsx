@@ -19,11 +19,11 @@ import {
 import {
   selectConnectedAccountsWithOrigin,
   selectVaultAccounts,
-  selectVaultActiveAccount,
-  selectVaultActiveOrigin
+  selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
+import { selectActiveOrigin } from '@src/background/redux/session/selectors';
 
 const HeaderTextContent = styled.div`
   margin-top: 16px;
@@ -57,7 +57,7 @@ export function ConnectAnotherAccountPageContent() {
   const { t } = useTranslation();
   const { targetAccountName } = useParams();
 
-  const activeOrigin = useSelector(selectVaultActiveOrigin);
+  const activeOrigin = useSelector(selectActiveOrigin);
   const {
     connectAccountsWithEvent: connectAccounts,
     changeActiveAccountWithEvent: changeActiveAccount

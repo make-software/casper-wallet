@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -13,33 +13,15 @@ import {
   CopySecretPhraseBar,
   TextList
 } from '@src/libs/ui';
-import { selectSessionEncryptionKeyHash } from '@src/background/redux/session/selectors';
-import { selectVaultSecretPhraseCipher } from '@src/background/redux/vault/selectors';
-import { decryptSecretPhrase } from '@src/libs/crypto/secret-phrase';
-import { SecretPhrase } from '@src/libs/crypto';
+import { selectSecretPhrase } from '@src/background/redux/vault/selectors';
 
 export function BackupSecretPhrasePageContent() {
   const { t } = useTranslation();
-  const [secretPhrase, setSecretPhrase] = useState<null | SecretPhrase>(null);
 
-  const encryptionKeyHash = useSelector(selectSessionEncryptionKeyHash);
-  const secretPhraseCipher = useSelector(selectVaultSecretPhraseCipher);
-
-  useEffect(() => {
-    if (encryptionKeyHash != null && secretPhraseCipher != null) {
-      decryptSecretPhrase(encryptionKeyHash, secretPhraseCipher)
-        .then(decryptedSecretPhrase => {
-          setSecretPhrase(decryptedSecretPhrase);
-        })
-        .catch(err => {
-          throw Error('Secret Phrase decryption failed');
-        });
-    }
-    return () => {};
-  }, [encryptionKeyHash, secretPhraseCipher]);
+  const secretPhrase = useSelector(selectSecretPhrase);
 
   if (secretPhrase == null) {
-    return null;
+    throw Error("Secret Phrase doesn't exist");
   }
 
   const items = [

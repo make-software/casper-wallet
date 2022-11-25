@@ -19,9 +19,9 @@ import { closeActiveTab } from '@src/apps/onboarding/utils/close-active-tab';
 
 import { RecoverFromSecretPhrasePageContent } from './content';
 import { dispatchToMainStore } from '@src/background/redux/utils';
-import { initializeVault } from '@src/background/redux/vault/actions';
 import { calculateSubmitButtonDisabled } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
 import { validateSecretPhrase } from '@src/libs/crypto';
+import { initVault } from '@src/background/redux/sagas/actions';
 
 export function RecoverFromSecretPhrasePage() {
   const navigate = useTypedNavigate();
@@ -37,7 +37,7 @@ export function RecoverFromSecretPhrasePage() {
       if (!validateSecretPhrase(secretPhrase)) {
         throw Error('Invalid secret phrase.');
       }
-      dispatchToMainStore(initializeVault({ secretPhrase }));
+      dispatchToMainStore(initVault({ secretPhrase }));
       closeActiveTab();
     } catch (err) {
       console.error(err);

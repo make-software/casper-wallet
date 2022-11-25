@@ -1,11 +1,20 @@
 import { createReducer } from 'typesafe-actions';
 
 import { SessionState } from './types';
-import { sessionReseted, encryptionKeyHashCreated } from './actions';
+import {
+  sessionReseted,
+  encryptionKeyHashCreated,
+  vaultUnlocked,
+  lastActivityTimeRefreshed,
+  activeOriginChanged
+} from './actions';
 type State = SessionState;
 
 const initialState: State = {
-  encryptionKeyHash: null
+  encryptionKeyHash: null,
+  isLocked: true,
+  lastActivityTime: null,
+  activeOrigin: null
 };
 
 export const reducer = createReducer(initialState)
@@ -16,4 +25,23 @@ export const reducer = createReducer(initialState)
       ...state,
       encryptionKeyHash: action.payload.encryptionKeyHash
     })
-  );
+  )
+  .handleAction(
+    vaultUnlocked,
+    (state, { payload: { lastActivityTime } }): State => ({
+      ...state,
+      lastActivityTime,
+      isLocked: false
+    })
+  )
+  .handleAction(
+    lastActivityTimeRefreshed,
+    (state, { payload: { lastActivityTime } }) => ({
+      ...state,
+      lastActivityTime
+    })
+  )
+  .handleAction(activeOriginChanged, (state, { payload }) => ({
+    ...state,
+    activeOrigin: payload
+  }));

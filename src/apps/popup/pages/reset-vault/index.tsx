@@ -10,8 +10,8 @@ import {
 import { SvgIcon, Typography, Button, Checkbox } from '@src/libs/ui';
 
 import { useTypedNavigate } from '@popup/router';
-import { resetVault } from '@src/background/redux/vault/actions';
 import { dispatchToMainStore } from '@src/background/redux/utils';
+import { resetVault } from '@src/background/redux/sagas/actions';
 
 export function ResetVaultPageContent() {
   const [isChecked, setIsChecked] = useState(false);

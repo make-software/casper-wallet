@@ -12,7 +12,8 @@ import {
 import { ReduxAction } from './redux-action';
 import { RootState } from 'typesafe-actions';
 import { select, call } from 'redux-saga/effects';
-import { startApp } from './vault/actions';
+import { startApp } from './sagas/actions';
+import { KeysState } from './keys/types';
 
 declare global {
   interface Window {
@@ -30,32 +31,47 @@ export const composeEnhancers =
       })
     : compose;
 
-export const REDUX_STORAGE_KEY = 'redux-storage';
+export const VAULT_CIPHER_KEY = 'vault_cipher';
+export const KEYS_KEY = 'keys';
+
+type StorageState = {
+  [VAULT_CIPHER_KEY]: string;
+  [KEYS_KEY]: KeysState;
+};
 
 // this needs to be private
 let storeSingleton: ReturnType<typeof createStore>;
 
 export async function getMainStoreSingleton() {
-  const { [REDUX_STORAGE_KEY]: state } = await browser.storage.local.get([
-    REDUX_STORAGE_KEY
-  ]);
+  // load vault and keys ciphers
+  const { [VAULT_CIPHER_KEY]: vaultCipher, [KEYS_KEY]: keys } =
+    (await browser.storage.local.get([
+      VAULT_CIPHER_KEY,
+      KEYS_KEY
+    ])) as StorageState;
 
   if (storeSingleton == null) {
     // console.warn('STORE INIT', state);
-    storeSingleton = createStore(state || {});
-    // on updates persist state in storage and propagate to replicas
+    storeSingleton = createStore({ vaultCipher, keys });
+    // on updates propagate new state to replicas and also persist encrypted vault
     storeSingleton.subscribe(() => {
       const state = storeSingleton.getState();
 
-      browser.storage.local.set({ [REDUX_STORAGE_KEY]: state }).catch(e => {
-        console.error('STORE SAVE ERROR: ', e);
-      });
-
-      const popupState = selectPopupState(storeSingleton.getState());
+      // propagate state to replicas
+      const popupState = selectPopupState(state);
       browser.runtime
         .sendMessage(backgroundEvent.popupStateUpdated(popupState))
-        .catch(err => {
-          // will fail when extension is closed
+        .catch(e => {
+          console.error('STATE PROPAGATION FAILED: ', e);
+        });
+
+      // persist vault and keys ciphers
+      const { vaultCipher, keys } = state;
+
+      browser.storage.local
+        .set({ [VAULT_CIPHER_KEY]: vaultCipher, [KEYS_KEY]: keys })
+        .catch(e => {
+          console.error('PERSIST ENCRYPTED VAULT FAILED: ', e);
         });
     });
     // send start action

@@ -10,13 +10,12 @@ import {
 import { Button } from '@src/libs/ui';
 import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
 
-import {
-  selectVaultPasswordHash,
-  selectVaultPasswordSaltHash
-} from '@background/redux/vault/selectors';
-
 import { RouterPath, useTypedNavigate } from '@src/apps/onboarding/router';
 import { UnlockWalletPageContent } from '@src/apps/onboarding/pages/unlock-wallet/content';
+import {
+  selectPasswordHash,
+  selectPasswordSaltHash
+} from '@src/background/redux/keys/selectors';
 
 // Design of this page is temporary. Should be changed after it will be done in Figma
 const TabFooterContainer = styled(TabFooterContainerBase)`
@@ -31,14 +30,14 @@ export function UnlockWalletPage({ saveIsLoggedIn }: UnlockWalletPageProps) {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  const vaultPasswordHash = useSelector(selectVaultPasswordHash);
-  const vaultPasswordSaltHash = useSelector(selectVaultPasswordSaltHash);
+  const passwordHash = useSelector(selectPasswordHash);
+  const passwordSaltHash = useSelector(selectPasswordSaltHash);
 
   const {
     register,
     handleSubmit,
     formState: { isDirty, errors }
-  } = useUnlockWalletForm(vaultPasswordHash, vaultPasswordSaltHash);
+  } = useUnlockWalletForm(passwordHash, passwordSaltHash);
 
   function onSubmit() {
     saveIsLoggedIn(true);

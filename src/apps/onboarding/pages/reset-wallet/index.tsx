@@ -5,10 +5,10 @@ import { LayoutTab, TabFooterContainer } from '@libs/layout';
 import { Button, Checkbox } from '@libs/ui';
 
 import { dispatchToMainStore } from '@background/redux/utils';
-import { resetVault } from '@background/redux/vault/actions';
 
 import { ResetWalletPageContent } from './content';
 import { useTypedNavigate } from '@src/apps/onboarding/router';
+import { resetVault } from '@src/background/redux/sagas/actions';
 
 // Design of this page is temporary. Should be changed after it will be done in Figma
 
