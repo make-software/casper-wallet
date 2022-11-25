@@ -1,3 +1,4 @@
+import { QueryClient } from 'react-query';
 import { getType, RootAction } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 
@@ -58,6 +59,10 @@ import {
   disableOnboardingFlow,
   openOnboardingUi
 } from '@src/background/open-onboarding-flow';
+import {
+  getAccountBalance,
+  getCurrencyRate
+} from '@libs/services/balance-service';
 
 import { openWindow } from './open-window';
 import { deployPayloadReceived, deploysReseted } from './redux/deploys/actions';
@@ -89,6 +94,8 @@ async function handleActionClick() {
 browser.action && browser.action.onClicked.addListener(handleActionClick);
 browser.browserAction &&
   browser.browserAction.onClicked.addListener(handleActionClick);
+
+const queryClient = new QueryClient();
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 browser.runtime.onMessage.addListener(
@@ -216,6 +223,34 @@ browser.runtime.onMessage.addListener(
             return sendResponse(
               sdkMessage.getVersionResponse(version, action.meta)
             );
+          }
+
+          case getType(sdkMessage.fetchBalanceRequest): {
+            try {
+              const { data: balance } = await queryClient.fetchQuery(
+                ['balance', action.payload.publicKey],
+                () => getAccountBalance(action.payload.publicKey),
+                {
+                  staleTime: 60000
+                }
+              );
+              const { data: rate } = await queryClient.fetchQuery(
+                'currencyRate',
+                getCurrencyRate,
+                { staleTime: 3600000 }
+              );
+
+              return sendResponse(
+                sdkMessage.fetchBalanceResponse(
+                  { balance, currencyRate: rate },
+                  action.meta
+                )
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
           }
 
           default:

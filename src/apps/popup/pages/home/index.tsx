@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
@@ -10,7 +10,6 @@ import {
   ContentContainer,
   LeftAlignedFlexColumn
 } from '@src/libs/layout/containers';
-
 import { LinkType, HeaderSubmenuBarNavLink } from '@libs/layout';
 
 import { Button, Hash, HashVariant, PageTile, Typography } from '@libs/ui';
@@ -25,6 +24,10 @@ import {
   selectVaultCountOfAccounts
 } from '@src/background/redux/vault/selectors';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
+import {
+  ActiveAccountBalance,
+  getActiveAccountBalance
+} from '@libs/services/balance-service';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
@@ -76,6 +79,11 @@ export function HomePageContent() {
   const { t } = useTranslation();
   const theme = useTheme();
 
+  const [balance, setBalance] = useState<ActiveAccountBalance>({
+    amount: '0',
+    fiatAmount: '0'
+  });
+
   const activeOrigin = useSelector(selectVaultActiveOrigin);
   const { disconnectAccountWithEvent: disconnectAccount } = useAccountManager();
   const isActiveAccountConnected = useSelector(
@@ -98,6 +106,16 @@ export function HomePageContent() {
       navigate(RouterPath.ConnectAnotherAccount);
     }
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
+
+  useEffect(() => {
+    getActiveAccountBalance(activeAccount?.publicKey)
+      .then(({ amount, fiatAmount }) => {
+        setBalance({ amount, fiatAmount });
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, [activeAccount?.publicKey]);
 
   return (
     <HomePageContentContainer>
@@ -125,13 +143,13 @@ export function HomePageContent() {
           </NameAndAddressContainer>
           <BalanceContainer>
             <BalanceInCSPRsContainer>
-              <Typography type="CSPRBold">2,133,493</Typography>
+              <Typography type="CSPRBold">{balance.amount}</Typography>
               <Typography type="CSPRLight" color="contentSecondary">
                 CSPR
               </Typography>
             </BalanceInCSPRsContainer>
             <Typography type="body" color="contentSecondary">
-              $30,294.34
+              {`$${balance.fiatAmount}`}
             </Typography>
           </BalanceContainer>
           <ButtonsContainer>

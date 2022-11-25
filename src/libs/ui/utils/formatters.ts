@@ -66,6 +66,20 @@ export const motesToCSPR = (motes: string): string => {
   return Big(motes).div(MOTES_PER_CSPR_RATE).toString();
 };
 
+export const motesToCurrency = (
+  motes: string,
+  currencyPerCsprRate: number
+): string => {
+  if (currencyPerCsprRate === 0) {
+    throw new Error('motesToCurrency: the CSPR rate cannot be zero');
+  }
+
+  return Big(motes)
+    .div(MOTES_PER_CSPR_RATE)
+    .mul(currencyPerCsprRate)
+    .toString();
+};
+
 export function snakeAndKebabToCamel(str: string): string {
   return str
     .toLowerCase()
