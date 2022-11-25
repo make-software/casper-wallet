@@ -16,6 +16,7 @@ export class ChromeDriver {
     if (headless) {
       args.push('--headless=chrome');
       args.push('--disable-gpu');
+      args.push('--no-sandbox');
     }
 
     const options = new chrome.Options().addArguments(...args);
