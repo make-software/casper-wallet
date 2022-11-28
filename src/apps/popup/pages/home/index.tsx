@@ -29,7 +29,8 @@ import {
   getActiveAccountBalance
 } from '@libs/services/balance-service';
 import {
-  balanceFormatter,
+  formatCurrency,
+  formatNumber,
   motesToCSPR,
   motesToCurrency
 } from '@libs/ui/utils/formatters';
@@ -85,8 +86,8 @@ export function HomePageContent() {
   const theme = useTheme();
 
   const [balance, setBalance] = useState<ActiveAccountBalance>({
-    amount: '0',
-    fiatAmount: '0'
+    amount: '-',
+    fiatAmount: '-'
   });
 
   const activeOrigin = useSelector(selectVaultActiveOrigin);
@@ -115,18 +116,19 @@ export function HomePageContent() {
   useEffect(() => {
     getActiveAccountBalance(activeAccount?.publicKey)
       .then(({ payload: { balance, currencyRate } }) => {
-        let amount = '0';
-        let fiatAmount = '0';
+        if (balance != null && currencyRate != null) {
+          const amount = formatNumber(motesToCSPR(balance));
+          const fiatAmount = formatCurrency(
+            motesToCurrency(balance, currencyRate),
+            'USD',
+            { precision: 2 }
+          );
 
-        if (balance) {
-          amount = balanceFormatter(motesToCSPR(balance), true);
-          fiatAmount = balanceFormatter(motesToCurrency(balance, currencyRate));
+          setBalance({ amount, fiatAmount });
         }
-
-        setBalance({ amount, fiatAmount });
       })
       .catch(error => {
-        console.error('Something went wrong:', error);
+        console.error('Balance request failed:', error);
       });
   }, [activeAccount?.publicKey]);
 
@@ -162,7 +164,7 @@ export function HomePageContent() {
               </Typography>
             </BalanceInCSPRsContainer>
             <Typography type="body" color="contentSecondary">
-              {`$${balance.fiatAmount}`}
+              {balance.fiatAmount}
             </Typography>
           </BalanceContainer>
           <ButtonsContainer>

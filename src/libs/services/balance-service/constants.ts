@@ -1,4 +1,6 @@
-import { GetAccountBalanceUrl } from '@libs/services/balance-service/types';
+interface GetAccountBalanceUrl {
+  publicKey: string;
+}
 
 const BASE_URL = 'https://casper-api.dev.make.services';
 

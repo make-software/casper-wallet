@@ -12,14 +12,10 @@ export interface ActiveAccountBalance {
 }
 
 export interface FetchBalanceResponse {
-  balance: string;
-  currencyRate: number;
+  balance: string | null;
+  currencyRate: number | null;
 }
 
 export interface DataWithPayload<T> {
   payload: T;
-}
-
-export interface GetAccountBalanceUrl {
-  publicKey: string;
 }

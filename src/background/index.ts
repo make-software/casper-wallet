@@ -231,7 +231,10 @@ browser.runtime.onMessage.addListener(
 
               return sendResponse(
                 sdkMessage.fetchBalanceResponse(
-                  { balance: balance?.data, currencyRate: rate?.data },
+                  {
+                    balance: balance?.data || null,
+                    currencyRate: rate?.data || null
+                  },
                   action.meta
                 )
               );

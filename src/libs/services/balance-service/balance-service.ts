@@ -45,23 +45,22 @@ export const getActiveAccountBalance = async (
     )
   );
 
-export const getAccountBalance = async ({
-  publicKey
-}: {
-  publicKey: string;
-}) => {
-  return await queryClient.fetchQuery(
-    ['fetchBalanceRequest', publicKey],
+export const getAccountBalance = async ({ publicKey }: { publicKey: string }) =>
+  await queryClient.fetchQuery(
+    ['getAccountBalanceRequest', publicKey],
     () => getAccountBalanceRequest(publicKey),
     {
       // cached for 1 min
       staleTime: 60 * SECOND
     }
   );
-};
 
 export const getCurrencyRate = async () =>
-  await queryClient.fetchQuery('currencyRate', getCurrencyRateRequest, {
-    // cached for 1 hr
-    staleTime: 360 * SECOND
-  });
+  await queryClient.fetchQuery(
+    'getCurrencyRateRequest',
+    getCurrencyRateRequest,
+    {
+      // cached for 1 hr
+      staleTime: 360 * SECOND
+    }
+  );
