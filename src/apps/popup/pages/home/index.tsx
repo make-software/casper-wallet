@@ -21,12 +21,12 @@ import {
   selectIsActiveAccountConnectedWithOrigin,
   selectConnectedAccountsWithOrigin,
   selectVaultActiveAccount,
-  selectVaultActiveOrigin,
   selectVaultCountOfAccounts
 } from '@src/background/redux/vault/selectors';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
+import { selectActiveOrigin } from '@src/background/redux/session/selectors';
 
 export const HomePageContentContainer = styled(ContentContainer)`
   padding-bottom: ${({ theme }) => theme.padding[1.2]};
@@ -76,7 +76,7 @@ export function HomePageContent() {
   const { t } = useTranslation();
   const theme = useTheme();
 
-  const activeOrigin = useSelector(selectVaultActiveOrigin);
+  const activeOrigin = useSelector(selectActiveOrigin);
   const { disconnectAccountWithEvent: disconnectAccount } = useAccountManager();
   const isActiveAccountConnected = useSelector(
     selectIsActiveAccountConnectedWithOrigin

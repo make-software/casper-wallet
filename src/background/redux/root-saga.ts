@@ -1,6 +1,7 @@
 import { all } from 'redux-saga/effects';
-import { vaultSagas } from './vault/sagas';
+import { vaultSagas } from './sagas/vault-sagas';
+import { onboardingSagas } from './sagas/onboarding-sagas';
 
 export default function* rootSaga() {
-  yield all([vaultSagas()]);
+  yield all([vaultSagas(), onboardingSagas()]);
 }

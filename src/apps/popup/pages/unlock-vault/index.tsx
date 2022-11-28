@@ -21,17 +21,17 @@ import {
   SvgIcon
 } from '@src/libs/ui';
 
-import {
-  selectVaultPasswordHash,
-  selectVaultPasswordSaltHash
-} from '@src/background/redux/vault/selectors';
-import { unlockVault } from '@src/background/redux/vault/actions';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import {
   UnlockWalletFormValues,
   useUnlockWalletForm
 } from '@src/libs/ui/forms/unlock-wallet';
 import { calculateSubmitButtonDisabled } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
+import {
+  selectPasswordHash,
+  selectPasswordSaltHash
+} from '@src/background/redux/keys/selectors';
+import { unlockVault } from '@src/background/redux/sagas/actions';
 
 export function UnlockVaultPageContent() {
   const { t } = useTranslation();
@@ -40,14 +40,14 @@ export function UnlockVaultPageContent() {
   const [passwordInputType, setPasswordInputType] =
     useState<PasswordInputType>('password');
 
-  const vaultPasswordHash = useSelector(selectVaultPasswordHash);
-  const vaultPasswordSaltHash = useSelector(selectVaultPasswordSaltHash);
+  const passwordHash = useSelector(selectPasswordHash);
+  const passwordSaltHash = useSelector(selectPasswordSaltHash);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty, isSubmitting, isValidating }
-  } = useUnlockWalletForm(vaultPasswordHash, vaultPasswordSaltHash);
+  } = useUnlockWalletForm(passwordHash, passwordSaltHash);
 
   async function handleUnlockVault({ password }: UnlockWalletFormValues) {
     dispatchToMainStore(unlockVault({ password }));

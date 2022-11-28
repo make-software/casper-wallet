@@ -8,7 +8,7 @@ import {
 } from './sdk-message';
 import { sdkEvent, SdkEvent } from './sdk-event';
 import { getType } from 'typesafe-actions';
-import { activeOriginChanged } from '@src/background/redux/vault/actions';
+import { activeOriginChanged } from '@src/background/redux/session/actions';
 
 // Sync activeOrigin of active tab with store
 function syncActiveOriginWithStore() {

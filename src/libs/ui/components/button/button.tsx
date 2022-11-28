@@ -8,14 +8,13 @@ type ButtonVariant = 'inline' | 'fullWidth';
 interface BaseButtonProps extends BaseProps {
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
-  loading?: boolean;
   height?: '24' | '36' | '40';
   width?: '100' | '120' | '176' | '100%';
   variant?: ButtonVariant;
 }
 
 const BaseButton = styled.button<BaseButtonProps>(
-  ({ theme, loading, disabled, height = '40', variant, width = '100%' }) => ({
+  ({ theme, disabled, height = '40', variant, width = '100%' }) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -43,14 +42,14 @@ const BaseButton = styled.button<BaseButtonProps>(
       cursor: 'pointer'
     },
 
-    ...((disabled || loading) && {
+    ...(disabled && {
       pointerEvents: 'none'
     })
   })
 );
 
 const PrimaryBlueButton = styled(BaseButton)<BaseButtonProps>(
-  ({ theme, loading, disabled }) => ({
+  ({ theme, disabled }) => ({
     color: theme.color.backgroundPrimary,
     background: theme.color.fillBlue,
 
@@ -61,7 +60,7 @@ const PrimaryBlueButton = styled(BaseButton)<BaseButtonProps>(
       background: theme.color.fillBlueClick
     },
 
-    ...((disabled || loading) && {
+    ...(disabled && {
       color: theme.color.backgroundPrimary,
       background: theme.color.fillTertiary
     })
@@ -69,7 +68,7 @@ const PrimaryBlueButton = styled(BaseButton)<BaseButtonProps>(
 );
 
 const PrimaryRedButton = styled(BaseButton)<BaseButtonProps>(
-  ({ theme, loading, disabled }) => ({
+  ({ theme, disabled }) => ({
     color: theme.color.backgroundPrimary,
     background: theme.color.fillRed,
 
@@ -80,7 +79,7 @@ const PrimaryRedButton = styled(BaseButton)<BaseButtonProps>(
       background: theme.color.fillRedClick
     },
 
-    ...((disabled || loading) && {
+    ...(disabled && {
       color: theme.color.backgroundPrimary,
       background: theme.color.fillTertiary
     })
@@ -88,7 +87,7 @@ const PrimaryRedButton = styled(BaseButton)<BaseButtonProps>(
 );
 
 const SecondaryBlueButton = styled(BaseButton)<BaseButtonProps>(
-  ({ theme, loading, disabled }) => ({
+  ({ theme, disabled }) => ({
     color: theme.color.contentBlue,
     background: `linear-gradient(
       ${theme.color.fillGradientOut.from},
@@ -105,7 +104,7 @@ const SecondaryBlueButton = styled(BaseButton)<BaseButtonProps>(
       background: theme.color.fillSecondary
     },
 
-    ...((disabled || loading) && {
+    ...(disabled && {
       color: theme.color.contentSecondary,
       background: `linear-gradient(
         ${theme.color.fillGradientOut.from},
@@ -116,7 +115,7 @@ const SecondaryBlueButton = styled(BaseButton)<BaseButtonProps>(
 );
 
 const SecondaryRedButton = styled(BaseButton)<BaseButtonProps>(
-  ({ theme, loading, disabled }) => ({
+  ({ theme, disabled }) => ({
     color: theme.color.fillRed,
     background: `linear-gradient(
       ${theme.color.fillGradientOut.from},
@@ -133,7 +132,7 @@ const SecondaryRedButton = styled(BaseButton)<BaseButtonProps>(
       background: theme.color.fillSecondary
     },
 
-    ...((disabled || loading) && {
+    ...(disabled && {
       color: theme.color.contentSecondary,
       background: `linear-gradient(
         ${theme.color.fillGradientOut.from},
@@ -144,7 +143,7 @@ const SecondaryRedButton = styled(BaseButton)<BaseButtonProps>(
 );
 
 const UtilityButton = styled(BaseButton)<BaseButtonProps>(
-  ({ theme, loading, disabled }) => ({
+  ({ theme, disabled }) => ({
     color: theme.color.backgroundPrimary,
     background: theme.color.fillBlue,
 
@@ -155,7 +154,7 @@ const UtilityButton = styled(BaseButton)<BaseButtonProps>(
       background: theme.color.fillBlueClick
     },
 
-    ...((disabled || loading) && {
+    ...(disabled && {
       color: theme.color.backgroundPrimary,
       background: theme.color.fillTertiary
     })

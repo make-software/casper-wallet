@@ -2,29 +2,23 @@ import { createSelector } from 'reselect';
 import { RootState } from 'typesafe-actions';
 
 import { TimeoutDurationSetting } from '@popup/constants';
-import { Account } from '@src/background/redux/vault/types';
+import { Account, VaultState } from '@src/background/redux/vault/types';
+import { SecretPhrase } from '@src/libs/crypto';
+import { selectActiveOrigin } from '../session/selectors';
+
+export const selectVault = (state: RootState): VaultState => state.vault;
 
 export const selectVaultDoesExist = (state: RootState): boolean =>
-  !!state.vault.passwordHash;
-
-export const selectVaultPasswordHash = (state: RootState): string =>
-  state.vault.passwordHash || '';
-
-export const selectVaultPasswordSaltHash = (state: RootState): string =>
-  state.vault.passwordSaltHash || '';
-
-export const selectKeyDerivationSaltHash = (state: RootState): string =>
-  state.vault.keyDerivationSaltHash || '';
-
-export const selectVaultSecretPhraseCipher = (
-  state: RootState
-): string | null => state.vault.secretPhraseCipher;
+  !!state.keys.passwordHash;
 
 export const selectVaultHasAccount = (state: RootState): boolean =>
   state.vault.accounts.length > 0;
 
 export const selectVaultAccounts = (state: RootState): Account[] =>
   state.vault.accounts;
+
+export const selectSecretPhrase = (state: RootState): null | SecretPhrase =>
+  state.vault.secretPhrase;
 
 export const selectVaultAccountsNames = createSelector(
   selectVaultAccounts,
@@ -53,9 +47,6 @@ export const selectVaultAccountWithName = createSelector(
   (accounts, accountName) =>
     accounts.find(account => account.name === accountName)
 );
-
-export const selectVaultActiveOrigin = (state: RootState) =>
-  state.vault.activeOrigin;
 
 export const selectVaultActiveAccountName = (state: RootState) => {
   const activeAccountName = state.vault.activeAccountName;
@@ -105,14 +96,14 @@ export const selectVaultAccountsByOriginDict = createSelector(
 );
 
 export const selectIsAnyAccountConnectedWithOrigin = createSelector(
-  selectVaultActiveOrigin,
+  selectActiveOrigin,
   selectVaultAccountNamesByOriginDict,
   (origin, accountNamesByOriginDict) =>
     Boolean(origin && origin in accountNamesByOriginDict)
 );
 
 export const selectIsActiveAccountConnectedWithOrigin = createSelector(
-  selectVaultActiveOrigin,
+  selectActiveOrigin,
   selectVaultActiveAccountName,
   selectVaultAccountNamesByOriginDict,
   (origin, activeAccountName, accountNamesByOriginDict) => {
@@ -129,7 +120,7 @@ export const selectIsActiveAccountConnectedWithOrigin = createSelector(
 );
 
 export const selectConnectedAccountNamesWithOrigin = createSelector(
-  selectVaultActiveOrigin,
+  selectActiveOrigin,
   selectVaultAccountNamesByOriginDict,
   (origin, accountNamesByOriginDict) =>
     origin != null && accountNamesByOriginDict[origin]?.length > 0
@@ -138,7 +129,7 @@ export const selectConnectedAccountNamesWithOrigin = createSelector(
 );
 
 export const selectConnectedAccountsWithOrigin = createSelector(
-  selectVaultActiveOrigin,
+  selectActiveOrigin,
   selectVaultAccounts,
   selectConnectedAccountNamesWithOrigin,
   (origin, accounts, connectedAccountNamesToOrigin): Account[] => {
@@ -170,12 +161,6 @@ export const selectVaultAccountsSecretKeysBase64 = createSelector(
   accounts => accounts.map(account => account.secretKey)
 );
 
-export const selectVaultIsLocked = (state: RootState): boolean =>
-  state.vault.isLocked;
-
 export const selectVaultTimeoutDurationSetting = (
   state: RootState
 ): TimeoutDurationSetting => state.vault.timeoutDurationSetting;
-
-export const selectVaultLastActivityTime = (state: RootState): number | null =>
-  state.vault.lastActivityTime;

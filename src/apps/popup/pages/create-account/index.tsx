@@ -22,10 +22,10 @@ import {
   selectVaultDerivedAccounts
 } from '@src/background/redux/vault/selectors';
 import { dispatchToMainStore } from '@src/background/redux/utils';
-import { createAccount } from '@src/background/redux/vault/actions';
 
 import { CreateAccountPageContent } from './content';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
+import { createAccount } from '@src/background/redux/sagas/actions';
 
 export function CreateAccountPage() {
   const navigate = useTypedNavigate();

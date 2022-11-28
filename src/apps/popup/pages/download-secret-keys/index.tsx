@@ -15,28 +15,28 @@ import { createAsymmetricKey } from '@src/libs/crypto/create-asymmetric-key';
 
 import { RouterPath, useTypedNavigate } from '@src/apps/popup/router';
 
-import {
-  selectVaultImportedAccounts,
-  selectVaultPasswordHash,
-  selectVaultPasswordSaltHash
-} from '@src/background/redux/vault/selectors';
+import { selectVaultImportedAccounts } from '@src/background/redux/vault/selectors';
 
 import { DownloadSecretKeysPageContent } from './content';
 
 import { downloadFile } from './utils';
+import {
+  selectPasswordHash,
+  selectPasswordSaltHash
+} from '@src/background/redux/keys/selectors';
 
 export function DownloadSecretKeysPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  const vaultPasswordHash = useSelector(selectVaultPasswordHash);
-  const vaultPasswordSaltHash = useSelector(selectVaultPasswordSaltHash);
+  const passwordHash = useSelector(selectPasswordHash);
+  const passwordSaltHash = useSelector(selectPasswordSaltHash);
 
   const {
     register,
     handleSubmit,
     formState: { isDirty, errors }
-  } = useDownloadSecretKeysForm(vaultPasswordHash, vaultPasswordSaltHash);
+  } = useDownloadSecretKeysForm(passwordHash, passwordSaltHash);
 
   const importedAccounts = useSelector(selectVaultImportedAccounts);
 

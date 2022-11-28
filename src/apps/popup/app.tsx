@@ -31,17 +31,17 @@ import { RouterPath, useTypedLocation } from '@popup/router';
 
 import {
   selectVaultDoesExist,
-  selectVaultHasAccount,
-  selectVaultIsLocked
+  selectVaultHasAccount
 } from '@background/redux/vault/selectors';
 
 import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
+import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
 
 export function App() {
-  const vaultIsLocked = useSelector(selectVaultIsLocked);
+  const isLocked = useSelector(selectVaultIsLocked);
   useUserActivityTracker();
 
-  if (vaultIsLocked) {
+  if (isLocked) {
     return <LockedRouter />;
   }
 

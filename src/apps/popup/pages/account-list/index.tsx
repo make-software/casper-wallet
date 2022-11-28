@@ -28,8 +28,7 @@ import {
   selectConnectedAccountNamesWithOrigin,
   selectIsAnyAccountConnectedWithOrigin,
   selectVaultAccounts,
-  selectVaultActiveAccountName,
-  selectVaultActiveOrigin
+  selectVaultActiveAccountName
 } from '@background/redux/vault/selectors';
 
 import { ConnectionStatusBadge } from '@popup/pages/home/components/connection-status-badge';
@@ -37,6 +36,7 @@ import { ConnectionStatusBadge } from '@popup/pages/home/components/connection-s
 import { Popover } from './components/popover';
 
 import { sortAccounts } from './utils';
+import { selectActiveOrigin } from '@src/background/redux/session/selectors';
 
 const ListItemContainer = styled(FlexRow)`
   min-height: 50px;
@@ -70,7 +70,7 @@ export function AccountListPage() {
   } = useAccountManager();
 
   const accounts = useSelector(selectVaultAccounts);
-  const activeOrigin = useSelector(selectVaultActiveOrigin);
+  const activeOrigin = useSelector(selectActiveOrigin);
   const activeAccountName = useSelector(selectVaultActiveAccountName);
   const isAnyAccountConnected = useSelector(
     selectIsAnyAccountConnectedWithOrigin

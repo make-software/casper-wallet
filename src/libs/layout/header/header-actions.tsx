@@ -4,8 +4,8 @@ import styled from 'styled-components';
 import { useNavigationMenu, useTypedLocation } from '@popup/router';
 
 import { SvgIcon } from '@libs/ui';
-import { lockVault } from '@src/background/redux/vault/actions';
-import { dispatchToMainStore } from '../../../background/redux/utils';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import { lockVault } from '@src/background/redux/sagas/actions';
 
 const Container = styled.div`
   display: flex;
