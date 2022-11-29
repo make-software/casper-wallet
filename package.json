@@ -71,7 +71,7 @@
     "react-inlinesvg": "^3.0.1",
     "react-loading-skeleton": "^3.1.0",
     "react-query": "^3.39.2",
-    "react-redux": "8.0.0",
+    "react-redux": "8.0.5",
     "react-router-dom": "^6.3.0",
     "redux": "4.2.0",
     "redux-saga": "1.2.1",
