@@ -18,9 +18,9 @@ import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { CreateVaultPasswordPageContent } from './content';
-import { createEmptyVault } from '@src/background/redux/vault/actions';
 import { useSelector } from 'react-redux';
-import { selectVaultPasswordHash } from '@src/background/redux/vault/selectors';
+import { selectPasswordHash } from '@src/background/redux/keys/selectors';
+import { initKeys } from '@src/background/redux/sagas/actions';
 
 interface CreateVaultPasswordPageProps {
   saveIsLoggedIn: (isLoggedIn: boolean) => void;
@@ -32,18 +32,18 @@ export function CreateVaultPasswordPage({
   const [isChecked, setIsChecked] = useState(false);
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
-  const vaultPasswordHash = useSelector(selectVaultPasswordHash);
+  const passwordHash = useSelector(selectPasswordHash);
 
   const { register, handleSubmit, formState } = useCreatePasswordForm();
   const { isDirty, isSubmitSuccessful } = formState;
   useEffect(() => {
-    if (vaultPasswordHash) {
+    if (passwordHash) {
       navigate(RouterPath.CreateSecretPhrase);
     }
-  }, [navigate, vaultPasswordHash]);
+  }, [navigate, passwordHash]);
 
   async function onSubmit(data: FieldValues) {
-    dispatchToMainStore(createEmptyVault({ password: data.password }));
+    dispatchToMainStore(initKeys({ password: data.password }));
     saveIsLoggedIn(true);
   }
 
@@ -72,10 +72,7 @@ export function CreateVaultPasswordPage({
                 'I have read and agree to the Casper Wallet Terms of Service.'
               )}
             />
-            <Button
-              disabled={!isChecked || !isDirty}
-              loading={isSubmitSuccessful}
-            >
+            <Button disabled={!isChecked || !isDirty || isSubmitSuccessful}>
               <Trans t={t}>Create password</Trans>
             </Button>
           </TabFooterContainer>

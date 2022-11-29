@@ -15,20 +15,11 @@ import {
   accountRenamed,
   accountsConnected,
   activeAccountChanged,
-  activeOriginChanged,
   allAccountsDisconnected,
-  createAccount,
-  createEmptyVault,
-  initializeVault,
-  lockVault,
-  resetVault,
   timeoutDurationChanged,
-  lastActivityTimeRefreshed,
-  vaultLocked,
   vaultReseted,
-  vaultStateUpdated,
-  vaultUnlocked,
-  unlockVault
+  vaultLoaded,
+  secretPhraseCreated
 } from '@src/background/redux/vault/actions';
 import {
   selectVaultCountOfAccounts,
@@ -37,7 +28,6 @@ import {
   selectVaultAccountsNames,
   selectVaultAccountsSecretKeysBase64,
   selectVaultActiveAccount,
-  selectVaultIsLocked,
   selectVaultHasAccount,
   selectVaultDoesExist
 } from '@src/background/redux/vault/selectors';
@@ -65,7 +55,27 @@ import {
 
 import { openWindow } from './open-window';
 import { deployPayloadReceived, deploysReseted } from './redux/deploys/actions';
-import { sessionReseted } from './redux/session/actions';
+import {
+  activeOriginChanged,
+  encryptionKeyHashCreated,
+  lastActivityTimeRefreshed,
+  sessionReseted,
+  vaultUnlocked
+} from './redux/session/actions';
+import {
+  createAccount,
+  initKeys,
+  initVault,
+  lockVault,
+  resetVault,
+  unlockVault
+} from './redux/sagas/actions';
+import {
+  vaultCipherCreated,
+  vaultCipherReseted
+} from './redux/vault-cipher/actions';
+import { keysReseted, keysUpdated } from './redux/keys/actions';
+import { selectVaultIsLocked } from './redux/session/selectors';
 
 browser.runtime.onInstalled.addListener(async () => {
   // this will run on installation or update so
@@ -260,25 +270,20 @@ browser.runtime.onMessage.addListener(
             return sendResponse(undefined);
           }
 
-          case getType(createEmptyVault):
-          case getType(initializeVault):
-          case getType(createAccount):
           case getType(lockVault):
           case getType(unlockVault):
+          case getType(initKeys):
+          case getType(initVault):
+          case getType(createAccount):
           case getType(deploysReseted):
           case getType(sessionReseted):
+          case getType(encryptionKeyHashCreated):
+          case getType(vaultLoaded):
           case getType(vaultReseted):
-          case getType(vaultLocked):
           case getType(vaultUnlocked):
-          case getType(popupWindowInit):
-          case getType(connectWindowInit):
-          case getType(importWindowInit):
-          case getType(signWindowInit):
-          case getType(windowIdChanged):
-          case getType(windowIdCleared):
-          case getType(vaultStateUpdated):
-          case getType(accountAdded):
+          case getType(secretPhraseCreated):
           case getType(accountImported):
+          case getType(accountAdded):
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeOriginChanged):
@@ -288,6 +293,16 @@ browser.runtime.onMessage.addListener(
           case getType(accountsConnected):
           case getType(accountDisconnected):
           case getType(allAccountsDisconnected):
+          case getType(windowIdChanged):
+          case getType(windowIdCleared):
+          case getType(popupWindowInit):
+          case getType(connectWindowInit):
+          case getType(importWindowInit):
+          case getType(signWindowInit):
+          case getType(vaultCipherReseted):
+          case getType(vaultCipherCreated):
+          case getType(keysReseted):
+          case getType(keysUpdated):
             store.dispatch(action);
             return sendResponse(undefined);
 

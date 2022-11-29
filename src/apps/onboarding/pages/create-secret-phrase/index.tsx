@@ -12,9 +12,9 @@ import { Stepper } from '@src/apps/onboarding/components/stepper';
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
 import { dispatchToMainStore } from '@src/background/redux/utils';
-import { resetVault } from '@src/background/redux/vault/actions';
 
 import { CreateSecretPhraseContent } from './content';
+import { resetVault } from '@src/background/redux/sagas/actions';
 
 export function CreateSecretPhrasePage() {
   const navigate = useTypedNavigate();

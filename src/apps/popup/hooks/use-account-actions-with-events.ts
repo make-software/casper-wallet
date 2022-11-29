@@ -12,12 +12,12 @@ import {
   selectConnectedAccountNamesWithOrigin,
   selectVaultAccountNamesByOriginDict,
   selectVaultAccounts,
-  selectVaultActiveAccount,
-  selectVaultIsLocked
+  selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
 import { RootState } from 'typesafe-actions';
 import { emitSdkEventToAllActiveTabs, sdkEvent } from '@src/content/sdk-event';
 import { dispatchToMainStore } from '../../../background/redux/utils';
+import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
 
 export function findAccountInAListClosestToGivenAccountFilteredByNames(
   accounts: Account[],

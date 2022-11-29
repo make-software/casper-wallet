@@ -2,63 +2,39 @@ import { createReducer } from 'typesafe-actions';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 import {
-  timeoutDurationChanged,
-  lastActivityTimeRefreshed,
-  vaultLocked,
-  vaultUnlocked,
   vaultReseted,
+  vaultLoaded,
+  secretPhraseCreated,
+  accountAdded,
   accountImported,
   accountRemoved,
   accountRenamed,
-  activeAccountChanged,
   accountsConnected,
   accountDisconnected,
   allAccountsDisconnected,
-  activeOriginChanged,
-  accountAdded,
-  vaultStateUpdated
+  activeAccountChanged,
+  timeoutDurationChanged
 } from './actions';
 import { VaultState } from './types';
 
 type State = VaultState;
 
 const initialState: State = {
-  passwordHash: null,
-  passwordSaltHash: null,
-  keyDerivationSaltHash: null,
-  secretPhraseCipher: null,
-  isLocked: false,
   timeoutDurationSetting: TimeoutDurationSetting['5 min'],
-  lastActivityTime: null,
+  secretPhrase: null,
   accounts: [],
   accountNamesByOriginDict: {},
-  activeAccountName: null,
-  activeOrigin: null
+  activeAccountName: null
 };
 
 export const reducer = createReducer(initialState)
+  .handleAction(vaultReseted, () => initialState)
+  .handleAction(vaultLoaded, (state, action) => action.payload)
   .handleAction(
-    vaultStateUpdated,
+    secretPhraseCreated,
     (state, action): State => ({
       ...state,
-      ...action.payload
-    })
-  )
-  .handleAction([vaultReseted], () => initialState)
-  .handleAction(
-    vaultLocked,
-    (state, { payload }): State => ({
-      ...state,
-      isLocked: true,
-      lastActivityTime: null
-    })
-  )
-  .handleAction(
-    vaultUnlocked,
-    (state, { payload: { lastActivityTime } }): State => ({
-      ...state,
-      lastActivityTime,
-      isLocked: false
+      secretPhrase: action.payload
     })
   )
   .handleAction(accountAdded, (state, action): State => {
@@ -78,19 +54,6 @@ export const reducer = createReducer(initialState)
         state.accounts.length === 0 ? account.name : state.activeAccountName
     };
   })
-  .handleAction(
-    accountsConnected,
-    (state, { payload: { siteOrigin, accountNames } }) => ({
-      ...state,
-      accountNamesByOriginDict: {
-        ...state.accountNamesByOriginDict,
-        [siteOrigin]:
-          state.accountNamesByOriginDict[siteOrigin]?.length > 0
-            ? [...state.accountNamesByOriginDict[siteOrigin], ...accountNames]
-            : [...accountNames]
-      }
-    })
-  )
   .handleAction(
     accountRemoved,
     (state, { payload: { accountName } }): State => {
@@ -126,47 +89,7 @@ export const reducer = createReducer(initialState)
     }
   )
   .handleAction(
-    [accountDisconnected],
-    (state, { payload: { siteOrigin, accountName } }) => {
-      const newAccountNamesByOriginDict = Object.fromEntries(
-        Object.entries(state.accountNamesByOriginDict)
-          // when last account for origin, remove group
-          .filter(
-            ([origin, names]) =>
-              !(
-                origin === siteOrigin &&
-                names.includes(accountName) &&
-                names.length === 1
-              )
-          )
-          // otherwise just remove single account
-          .map(([origin, names]) => [
-            origin,
-            origin === siteOrigin
-              ? names.filter(name => name !== accountName)
-              : names
-          ])
-      );
-      return {
-        ...state,
-        accountNamesByOriginDict: newAccountNamesByOriginDict
-      };
-    }
-  )
-  .handleAction(
-    [allAccountsDisconnected],
-    (state, { payload: { siteOrigin } }) => ({
-      ...state,
-      accountNamesByOriginDict: Object.fromEntries(
-        Object.entries(state.accountNamesByOriginDict).filter(
-          ([origin]) => origin !== siteOrigin
-        )
-      )
-    })
-  )
-
-  .handleAction(
-    [accountRenamed],
+    accountRenamed,
     (state, { payload: { oldName, newName } }): State => {
       const newAccountNamesByOriginDict = Object.fromEntries(
         Object.keys(state.accountNamesByOriginDict).map(origin => [
@@ -196,26 +119,66 @@ export const reducer = createReducer(initialState)
       };
     }
   )
+  .handleAction(
+    accountsConnected,
+    (state, { payload: { siteOrigin, accountNames } }) => ({
+      ...state,
+      accountNamesByOriginDict: {
+        ...state.accountNamesByOriginDict,
+        [siteOrigin]:
+          state.accountNamesByOriginDict[siteOrigin]?.length > 0
+            ? [...state.accountNamesByOriginDict[siteOrigin], ...accountNames]
+            : [...accountNames]
+      }
+    })
+  )
+  .handleAction(
+    accountDisconnected,
+    (state, { payload: { siteOrigin, accountName } }) => {
+      const newAccountNamesByOriginDict = Object.fromEntries(
+        Object.entries(state.accountNamesByOriginDict)
+          // when last account for origin, remove group
+          .filter(
+            ([origin, names]) =>
+              !(
+                origin === siteOrigin &&
+                names.includes(accountName) &&
+                names.length === 1
+              )
+          )
+          // otherwise just remove single account
+          .map(([origin, names]) => [
+            origin,
+            origin === siteOrigin
+              ? names.filter(name => name !== accountName)
+              : names
+          ])
+      );
+      return {
+        ...state,
+        accountNamesByOriginDict: newAccountNamesByOriginDict
+      };
+    }
+  )
+  .handleAction(
+    allAccountsDisconnected,
+    (state, { payload: { siteOrigin } }) => ({
+      ...state,
+      accountNamesByOriginDict: Object.fromEntries(
+        Object.entries(state.accountNamesByOriginDict).filter(
+          ([origin]) => origin !== siteOrigin
+        )
+      )
+    })
+  )
   .handleAction(activeAccountChanged, (state, { payload }) => ({
     ...state,
     activeAccountName: payload
   }))
-  .handleAction(activeOriginChanged, (state, { payload }) => ({
-    ...state,
-    activeOrigin: payload
-  }))
   .handleAction(
-    [timeoutDurationChanged],
-    (state, { payload: { timeoutDuration, lastActivityTime } }): State => ({
+    timeoutDurationChanged,
+    (state, { payload: { timeoutDuration } }): State => ({
       ...state,
-      timeoutDurationSetting: timeoutDuration,
-      lastActivityTime
-    })
-  )
-  .handleAction(
-    [lastActivityTimeRefreshed],
-    (state, { payload: { lastActivityTime } }) => ({
-      ...state,
-      lastActivityTime
+      timeoutDurationSetting: timeoutDuration
     })
   );
