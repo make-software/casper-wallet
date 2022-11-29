@@ -25,7 +25,8 @@ jobs:
     - name: Install & Check
       run: |
         apt-get update -y \
-        && apt-get -y install xvfb \
-        && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+        && apt-get -y install xvfb
+        
         npm install
-        npm run ci-check
+        npm run prepush-check
+        xvfb-run --auto-servernum npm run ci:test:e2e:chrome 
