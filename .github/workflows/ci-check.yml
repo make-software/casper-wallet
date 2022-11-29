@@ -24,5 +24,8 @@ jobs:
 
     - name: Install & Check
       run: |
+        apt-get update -y \
+        && apt-get -y install xvfb \
+        && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
         npm install
         npm run ci-check
