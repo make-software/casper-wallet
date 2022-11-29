@@ -8,9 +8,6 @@ import { selectActiveOrigin } from '../session/selectors';
 
 export const selectVault = (state: RootState): VaultState => state.vault;
 
-export const selectVaultDoesExist = (state: RootState): boolean =>
-  !!state.keys.passwordHash;
-
 export const selectVaultHasAccount = (state: RootState): boolean =>
   state.vault.accounts.length > 0;
 

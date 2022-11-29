@@ -5,7 +5,7 @@
 import { SecretPhrase } from '@src/libs/crypto';
 import { createAction } from 'typesafe-actions';
 
-export const startApp = createAction('START_APP_SAGA')<void>();
+export const startBackground = createAction('START_BACKGROUND_SAGA')<void>();
 
 export const resetVault = createAction('RESET_VAULT_SAGA')<void>();
 

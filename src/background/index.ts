@@ -27,9 +27,7 @@ import {
   selectIsAnyAccountConnectedWithOrigin,
   selectVaultAccountsNames,
   selectVaultAccountsSecretKeysBase64,
-  selectVaultActiveAccount,
-  selectVaultHasAccount,
-  selectVaultDoesExist
+  selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
 import {
   connectWindowInit,
@@ -76,6 +74,8 @@ import {
 } from './redux/vault-cipher/actions';
 import { keysReseted, keysUpdated } from './redux/keys/actions';
 import { selectVaultIsLocked } from './redux/session/selectors';
+import { selectKeysDoesExist } from './redux/keys/selectors';
+import { selectVaultDoesExist } from './redux/vault-cipher/selectors';
 
 browser.runtime.onInstalled.addListener(async () => {
   // this will run on installation or update so
@@ -86,10 +86,10 @@ browser.runtime.onInstalled.addListener(async () => {
   const store = await getMainStoreSingleton();
   const state = store.getState();
 
-  const vaultDoesExists = selectVaultDoesExist(state);
-  const vaultHasAccount = selectVaultHasAccount(state);
+  const keysDoesExist = selectKeysDoesExist(state);
+  const vaultDoesExist = selectVaultDoesExist(state);
 
-  if (!vaultDoesExists || !vaultHasAccount) {
+  if (!keysDoesExist || !vaultDoesExist) {
     await openOnboardingUi();
   } else {
     await disableOnboardingFlow();

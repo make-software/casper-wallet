@@ -12,7 +12,7 @@ import {
 import { ReduxAction } from './redux-action';
 import { RootState } from 'typesafe-actions';
 import { select, call } from 'redux-saga/effects';
-import { startApp } from './sagas/actions';
+import { startBackground } from './sagas/actions';
 import { KeysState } from './keys/types';
 
 declare global {
@@ -53,6 +53,8 @@ export async function getMainStoreSingleton() {
   if (storeSingleton == null) {
     // console.warn('STORE INIT', state);
     storeSingleton = createStore({ vaultCipher, keys });
+    // send start action
+    storeSingleton.dispatch(startBackground());
     // on updates propagate new state to replicas and also persist encrypted vault
     storeSingleton.subscribe(() => {
       const state = storeSingleton.getState();
@@ -74,8 +76,6 @@ export async function getMainStoreSingleton() {
           console.error('PERSIST ENCRYPTED VAULT FAILED: ', e);
         });
     });
-    // send start action
-    storeSingleton.dispatch(startApp());
   } else {
     // console.warn('STORE REUSED', state);
   }

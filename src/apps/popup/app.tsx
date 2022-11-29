@@ -29,13 +29,11 @@ import { DownloadedSecretKeysPage } from '@popup/pages/downloaded-secret-keys';
 
 import { RouterPath, useTypedLocation } from '@popup/router';
 
-import {
-  selectVaultDoesExist,
-  selectVaultHasAccount
-} from '@background/redux/vault/selectors';
+import { selectVaultHasAccount } from '@background/redux/vault/selectors';
 
 import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
+import { selectKeysDoesExist } from '@src/background/redux/keys/selectors';
 
 export function App() {
   const isLocked = useSelector(selectVaultIsLocked);
@@ -77,10 +75,10 @@ function UnlockedRouter() {
   const location = useTypedLocation();
   const state = location.state;
 
-  const vaultDoesExists = useSelector(selectVaultDoesExist);
+  const keysDoesExist = useSelector(selectKeysDoesExist);
   const vaultHasAccount = useSelector(selectVaultHasAccount);
 
-  if (!vaultDoesExists || !vaultHasAccount) {
+  if (!keysDoesExist || !vaultHasAccount) {
     return null;
   }
 

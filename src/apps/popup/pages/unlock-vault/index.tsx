@@ -43,6 +43,10 @@ export function UnlockVaultPageContent() {
   const passwordHash = useSelector(selectPasswordHash);
   const passwordSaltHash = useSelector(selectPasswordSaltHash);
 
+  if (passwordHash == null || passwordSaltHash == null) {
+    throw Error("Password doesn't exist");
+  }
+
   const {
     register,
     handleSubmit,
