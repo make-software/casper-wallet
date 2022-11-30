@@ -13,31 +13,42 @@ import { CURRENCY_RATE_URL, getAccountBalanceUrl, SECOND } from './constants';
 
 const queryClient = new QueryClient();
 
-export const fetchHandler = async (url: string) =>
-  await fetch(url)
-    .then(resp => resp.json())
-    .catch(error => {
-      console.error(error);
-    });
+const toJson = (res: Response): Promise<any> => res.json();
 
 export const getCurrencyRateRequest =
-  async (): Promise<GetCurrencyRateRequestResponse> =>
-    await fetchHandler(CURRENCY_RATE_URL);
+  (): Promise<GetCurrencyRateRequestResponse> =>
+    fetch(CURRENCY_RATE_URL)
+      .then(toJson)
+      .catch(error => {
+        console.error(error);
+      });
 
-export const getAccountBalanceRequest = async (
+export const getAccountBalanceRequest = (
   publicKey: string
 ): Promise<GetAccountBalanceRequestResponse> => {
   if (!publicKey) {
     throw Error('Missing public key');
   }
 
-  return await fetchHandler(getAccountBalanceUrl({ publicKey }));
+  return fetch(getAccountBalanceUrl({ publicKey }))
+    .then(res => {
+      if (res.status === 404) {
+        return {
+          data: '0'
+        };
+      }
+
+      return toJson(res);
+    })
+    .catch(error => {
+      console.error(error);
+    });
 };
 
-export const getActiveAccountBalance = async (
+export const getActiveAccountBalance = (
   publicKey = ''
 ): Promise<DataWithPayload<FetchBalanceResponse>> =>
-  await browser.runtime.sendMessage(
+  browser.runtime.sendMessage(
     sdkMessage.fetchBalanceRequest(
       { publicKey },
       // Temporary solution, need to discuss with Piotr
@@ -45,8 +56,8 @@ export const getActiveAccountBalance = async (
     )
   );
 
-export const getAccountBalance = async ({ publicKey }: { publicKey: string }) =>
-  await queryClient.fetchQuery(
+export const getAccountBalance = ({ publicKey }: { publicKey: string }) =>
+  queryClient.fetchQuery(
     ['getAccountBalanceRequest', publicKey],
     () => getAccountBalanceRequest(publicKey),
     {
@@ -55,12 +66,8 @@ export const getAccountBalance = async ({ publicKey }: { publicKey: string }) =>
     }
   );
 
-export const getCurrencyRate = async () =>
-  await queryClient.fetchQuery(
-    'getCurrencyRateRequest',
-    getCurrencyRateRequest,
-    {
-      // cached for 1 hr
-      staleTime: 360 * SECOND
-    }
-  );
+export const getCurrencyRate = () =>
+  queryClient.fetchQuery('getCurrencyRateRequest', getCurrencyRateRequest, {
+    // cached for 1 hr
+    staleTime: 360 * SECOND
+  });
