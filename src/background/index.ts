@@ -5,7 +5,6 @@ import {
   CheckAccountNameIsTakenAction,
   CheckSecretKeyExistAction
 } from '@src/background/redux/import-account-actions-should-be-removed';
-import { isReduxAction } from '@src/background/redux/redux-action';
 import { getMainStoreSingleton } from '@src/background/redux/utils';
 import {
   accountAdded,
@@ -76,6 +75,7 @@ import { keysReseted, keysUpdated } from './redux/keys/actions';
 import { selectVaultIsLocked } from './redux/session/selectors';
 import { selectKeysDoesExist } from './redux/keys/selectors';
 import { selectVaultDoesExist } from './redux/vault-cipher/selectors';
+import { ServiceMessage, serviceMessage } from './service-message';
 
 browser.runtime.onInstalled.addListener(async () => {
   // this will run on installation or update so
@@ -106,13 +106,12 @@ browser.browserAction &&
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 browser.runtime.onMessage.addListener(
-  async (action: RootAction | SdkMessage, sender) => {
+  async (action: RootAction | SdkMessage | ServiceMessage, sender) => {
     const store = await getMainStoreSingleton();
     return new Promise(async (sendResponse, sendError) => {
       // Popup comms handling
       if (isSDKMessage(action)) {
         // console.warn(`BACKEND SDK MESSAGE:`, JSON.stringify(action));
-
         switch (action.type) {
           case getType(sdkMessage.connectRequest): {
             let success = false;
@@ -232,37 +231,13 @@ browser.runtime.onMessage.addListener(
             );
           }
 
-          case getType(sdkMessage.fetchBalanceRequest): {
-            try {
-              const [balance, rate] = await Promise.all([
-                getAccountBalance({ publicKey: action.payload.publicKey }),
-                getCurrencyRate()
-              ]);
-
-              return sendResponse(
-                sdkMessage.fetchBalanceResponse(
-                  {
-                    balance: balance?.data || null,
-                    currencyRate: rate?.data || null
-                  },
-                  action.meta
-                )
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
           default:
             throw Error(
               'Background: Unknown sdk message: ' + JSON.stringify(action)
             );
         }
-      } else if (isReduxAction(action)) {
+      } else if (action.type != null) {
         // console.warn(`BACKEND REDUX ACTION:`, JSON.stringify(action));
-
         switch (action.type) {
           case getType(resetVault): {
             store.dispatch(action);
@@ -306,7 +281,28 @@ browser.runtime.onMessage.addListener(
             store.dispatch(action);
             return sendResponse(undefined);
 
-          // All below should be removed when Import Account is integrated with window
+          // SERVICE MESSAGE HANDLERS
+          case getType(serviceMessage.fetchBalanceRequest): {
+            try {
+              const [balance, rate] = await Promise.all([
+                getAccountBalance({ publicKey: action.payload.publicKey }),
+                getCurrencyRate()
+              ]);
+
+              return sendResponse(
+                serviceMessage.fetchBalanceResponse({
+                  balance: balance?.data || null,
+                  currencyRate: rate?.data || null
+                })
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          // TODO: All below should be removed when Import Account is integrated with window
           case 'check-secret-key-exist' as any: {
             const { secretKeyBase64 } = (
               action as any as CheckSecretKeyExistAction

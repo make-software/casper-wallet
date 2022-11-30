@@ -1,7 +1,5 @@
 import { ActionType, createAction } from 'typesafe-actions';
 
-import { FetchBalanceResponse } from '@libs/services/balance-service';
-
 export const sdkMessageProxyEvents = {
   SDKRequestAction: 'CasperWalletProviderEvent:SDKRequestAction',
   SDKResponseAction: 'CasperWalletProviderEvent:SDKResponseAction'
@@ -58,14 +56,7 @@ export const sdkMessage = {
   signResponse: createAction('CasperWalletProvider:Sign:Response')<
     { signature: Uint8Array },
     Meta
-  >(),
-  fetchBalanceRequest: createAction('CasperWalletProvider:GetAccountBalance')<
-    { publicKey: string },
-    Meta
-  >(),
-  fetchBalanceResponse: createAction(
-    'CasperWalletProvider:GetAccountBalance:Response'
-  )<FetchBalanceResponse, Meta>()
+  >()
 };
 
 export type SdkMessage = ActionType<typeof sdkMessage>;

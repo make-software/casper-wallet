@@ -1,7 +1,4 @@
 import browser from 'webextension-polyfill';
-import { QueryClient } from 'react-query';
-
-import { sdkMessage } from '@content/sdk-message';
 
 import {
   DataWithPayload,
@@ -10,18 +7,13 @@ import {
   GetCurrencyRateRequestResponse
 } from './types';
 import { CURRENCY_RATE_URL, getAccountBalanceUrl, SECOND } from './constants';
-
-const queryClient = new QueryClient();
-
-const toJson = (res: Response): Promise<any> => res.json();
+import { handleError, toJson } from './utils';
+import { queryClient } from './query-client';
+import { serviceMessage } from '@src/background/service-message';
 
 export const getCurrencyRateRequest =
   (): Promise<GetCurrencyRateRequestResponse> =>
-    fetch(CURRENCY_RATE_URL)
-      .then(toJson)
-      .catch(error => {
-        console.error(error);
-      });
+    fetch(CURRENCY_RATE_URL).then(toJson).catch(handleError);
 
 export const getAccountBalanceRequest = (
   publicKey: string
@@ -40,20 +32,14 @@ export const getAccountBalanceRequest = (
 
       return toJson(res);
     })
-    .catch(error => {
-      console.error(error);
-    });
+    .catch(handleError);
 };
 
 export const getActiveAccountBalance = (
   publicKey = ''
 ): Promise<DataWithPayload<FetchBalanceResponse>> =>
   browser.runtime.sendMessage(
-    sdkMessage.fetchBalanceRequest(
-      { publicKey },
-      // Temporary solution, need to discuss with Piotr
-      { requestId: '' }
-    )
+    serviceMessage.fetchBalanceRequest({ publicKey })
   );
 
 export const getAccountBalance = ({ publicKey }: { publicKey: string }) =>

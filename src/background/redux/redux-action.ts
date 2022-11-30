@@ -23,7 +23,7 @@ export function isReduxAction(action?: {
   type?: unknown;
   meta?: unknown;
 }): action is ReduxAction {
-  return typeof action?.type === 'string' && action.meta === undefined;
+  return typeof action?.type === 'string';
 }
 
 export default reduxAction;
