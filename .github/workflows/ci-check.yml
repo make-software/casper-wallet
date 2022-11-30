@@ -24,9 +24,12 @@ jobs:
 
     - name: Install & Check
       run: |
-        apt-get update -y \
-        && apt-get -y install xvfb
+        curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add
+        echo "deb https://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list
+
+        apt-get -y update
+        apt-get -y install google-chrome-stable
+        apt-get -y install libnss3
         
         npm install
-        npm run prepush-check
-        xvfb-run --auto-servernum npm run ci:test:e2e:chrome 
+        npm run ci-check
