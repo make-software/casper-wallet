@@ -1,6 +1,6 @@
 import browser from 'webextension-polyfill';
 
-const storageKey = 'onboarding_tab_state';
+const ONBOARDING_TAB_STATE_KEY = 'onboarding_tab_state';
 
 type OnboardingFlowState = { tabId: number; windowId: number };
 
@@ -8,7 +8,7 @@ export async function disableOnboardingFlow() {
   browser.action?.setPopup && browser.action.setPopup({ popup: 'popup.html' });
   browser.browserAction?.setPopup &&
     browser.browserAction.setPopup({ popup: 'popup.html' });
-  browser.storage.local.remove(storageKey);
+  browser.storage.local.remove(ONBOARDING_TAB_STATE_KEY);
 }
 
 export async function enableOnboardingFlow() {
@@ -48,15 +48,16 @@ export async function openOnboardingUi() {
 
 async function loadState() {
   try {
-    const { [storageKey]: state } = await browser.storage.local.get(storageKey);
+    const { [ONBOARDING_TAB_STATE_KEY]: state } =
+      await browser.storage.local.get(ONBOARDING_TAB_STATE_KEY);
     return (state || {}) as OnboardingFlowState;
   } catch {
     // reset on error
-    localStorage.setItem(storageKey, '{}');
+    localStorage.setItem(ONBOARDING_TAB_STATE_KEY, '{}');
     return {} as OnboardingFlowState;
   }
 }
 
 async function saveState(state: OnboardingFlowState) {
-  return browser.storage.local.set({ [storageKey]: state });
+  return browser.storage.local.set({ [ONBOARDING_TAB_STATE_KEY]: state });
 }

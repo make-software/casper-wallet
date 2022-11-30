@@ -27,7 +27,6 @@ import {
   selectSecretPhrase,
   selectVault,
   selectVaultDerivedAccounts,
-  selectVaultDoesExist,
   selectVaultTimeoutDurationSetting
 } from '../vault/selectors';
 import {
@@ -43,8 +42,16 @@ import {
 import { convertBytesToHex } from '@src/libs/crypto/utils';
 import { MapTimeoutDurationSettingToValue } from '@src/apps/popup/constants';
 import { selectKeyDerivationSaltHash } from '../keys/selectors';
-import { createAccount, lockVault, startApp, unlockVault } from './actions';
-import { selectVaultCipher } from '../vault-cipher/selectors';
+import {
+  createAccount,
+  lockVault,
+  startBackground,
+  unlockVault
+} from './actions';
+import {
+  selectVaultCipher,
+  selectVaultDoesExist
+} from '../vault-cipher/selectors';
 import { keysUpdated } from '../keys/actions';
 import { vaultCipherCreated } from '../vault-cipher/actions';
 import { deploysReseted } from '../deploys/actions';
@@ -54,7 +61,7 @@ export function* vaultSagas() {
   yield takeLatest(getType(unlockVault), unlockVaultSaga);
   yield takeLatest(
     [
-      getType(startApp),
+      getType(startBackground),
       getType(lastActivityTimeRefreshed),
       getType(timeoutDurationChanged)
     ],
@@ -78,7 +85,7 @@ export function* vaultSagas() {
 }
 
 /**
- *
+ * on lock destroy session, vault and deploys
  */
 function* lockVaultSaga(action: ReturnType<typeof lockVault>) {
   try {
@@ -91,8 +98,9 @@ function* lockVaultSaga(action: ReturnType<typeof lockVault>) {
 }
 
 /**
- * generate a new encryption key each login and update stored cipher
- * do not reuse the same key all the time for encryption - collisions
+ * on unlock decrypt stored vault from cipher
+ * generate a new encryption key each login and update existing cipher (collisions0
+ * put new encryption key in session
  */
 function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
   try {
@@ -102,6 +110,10 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
     const keyDerivationSaltHash = yield* sagaSelect(
       selectKeyDerivationSaltHash
     );
+    if (keyDerivationSaltHash == null) {
+      throw Error("Key derivation salt doesn't exist");
+    }
+
     const encryptionKeyBytes = yield* sagaCall(() =>
       deriveEncryptionKey(password, keyDerivationSaltHash)
     );
@@ -149,7 +161,7 @@ function* timeoutCounterSaga(action: any) {
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   try {
-    const vaultDoesExists = yield* sagaSelect(selectVaultDoesExist);
+    const vaultDoesExist = yield* sagaSelect(selectVaultDoesExist);
     const vaultIsLocked = yield* sagaSelect(selectVaultIsLocked);
     const vaultLastActivityTime = yield* sagaSelect(
       selectVaultLastActivityTime
@@ -160,7 +172,7 @@ function* timeoutCounterSaga(action: any) {
     const timeoutDurationValue =
       MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
 
-    if (vaultDoesExists && !vaultIsLocked && vaultLastActivityTime) {
+    if (vaultDoesExist && !vaultIsLocked && vaultLastActivityTime) {
       const currentTime = Date.now();
       const timeoutExpired =
         currentTime - vaultLastActivityTime >= timeoutDurationValue;

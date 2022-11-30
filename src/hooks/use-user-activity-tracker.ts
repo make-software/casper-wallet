@@ -1,14 +1,14 @@
 import throttle from 'lodash.throttle';
 import { useEffect } from 'react';
 
-import { selectVaultDoesExist } from '@src/background/redux/vault/selectors';
 import { useSelector } from 'react-redux';
 import { dispatchToMainStore } from '../background/redux/utils';
 import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
 import { lastActivityTimeRefreshed } from '@src/background/redux/session/actions';
+import { selectKeysDoesExist } from '@src/background/redux/keys/selectors';
 
 export function useUserActivityTracker(): void {
-  const vaultDoesExists = useSelector(selectVaultDoesExist);
+  const keysDoesExist = useSelector(selectKeysDoesExist);
   const vaultIsLocked = useSelector(selectVaultIsLocked);
 
   // window listeners that dispatch timeout refresh action on any user activity
@@ -23,7 +23,7 @@ export function useUserActivityTracker(): void {
       { trailing: false }
     );
 
-    if (vaultDoesExists && !vaultIsLocked) {
+    if (keysDoesExist && !vaultIsLocked) {
       for (let i in events) {
         window.addEventListener(events[i], throttledRefreshTimeout);
       }
@@ -35,5 +35,5 @@ export function useUserActivityTracker(): void {
         window.removeEventListener(events[i], throttledRefreshTimeout);
       }
     };
-  }, [vaultDoesExists, vaultIsLocked]);
+  }, [keysDoesExist, vaultIsLocked]);
 }

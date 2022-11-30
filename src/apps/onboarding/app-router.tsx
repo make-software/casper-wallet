@@ -24,8 +24,7 @@ import { WriteDownSecretPhrasePage } from '@src/apps/onboarding/pages/write-down
 import { ConfirmSecretPhrasePage } from '@src/apps/onboarding/pages/confirm-secret-phrase';
 import { ConfirmSecretPhraseSuccessPage } from '@src/apps/onboarding/pages/confirm-secret-phrase-success';
 import { OnboardingSuccessPage } from '@src/apps/onboarding/pages/onboarding-success';
-
-import { selectVaultDoesExist } from '@background/redux/vault/selectors';
+import { selectKeysDoesExist } from '@src/background/redux/keys/selectors';
 
 export interface FormState {
   secretPhrase: SecretPhrase | null;
@@ -47,9 +46,9 @@ export function AppRouter() {
       [name]: value
     }));
 
-  const doesVaultExists = useSelector(selectVaultDoesExist);
+  const keysDoesExist = useSelector(selectKeysDoesExist);
 
-  if (doesVaultExists) {
+  if (keysDoesExist) {
     if (isLoggedIn) {
       return (
         <AuthorizedUserRoutes
