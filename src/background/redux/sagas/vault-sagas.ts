@@ -222,14 +222,23 @@ function* createAccountSaga(action: ReturnType<typeof createAccount>) {
   try {
     const { name } = action.payload;
 
+    if (name == null) {
+      throw Error('Account name missing');
+    }
+
     const derivedAccounts = yield* sagaSelect(selectVaultDerivedAccounts);
+
+    if (derivedAccounts.find(a => a.name === name)) {
+      throw Error('Account name exist');
+    }
+
     const accountCount = derivedAccounts.length;
     const secretPhrase = yield* sagaSelect(selectSecretPhrase);
 
     const keyPair = deriveKeyPair(secretPhrase, accountCount);
     const account = {
       ...keyPair,
-      name: name ?? `Account ${accountCount + 1}`
+      name
     };
 
     yield put(accountAdded(account));

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { useTranslation, Trans } from 'react-i18next';
-import { FieldValues } from 'react-hook-form';
 
 import {
   LayoutWindow,
@@ -12,7 +11,8 @@ import {
 import { Button } from '@src/libs/ui';
 import {
   useCreateAccountForm,
-  getDefaultName
+  getDefaultName,
+  CreateAccountFormValues
 } from '@src/libs/ui/forms/create-account';
 
 import { RouterPath, useTypedNavigate } from '@src/apps/popup/router';
@@ -42,8 +42,12 @@ export function CreateAccountPage() {
     existingAccountNames,
     getDefaultName(derivedAccounts.length, existingAccountNames)
   );
-  const onSubmit = ({ name }: FieldValues) => {
-    dispatchToMainStore(createAccount(name.trim()));
+  const onSubmit = ({ name }: CreateAccountFormValues) => {
+    const newName = name.trim();
+    if (derivedAccounts.find(a => a.name.trim() === newName)) {
+      throw Error('Account name exist.');
+    }
+    dispatchToMainStore(createAccount({ name: newName }));
     navigate(RouterPath.Home);
   };
 

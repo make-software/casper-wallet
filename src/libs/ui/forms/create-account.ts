@@ -5,6 +5,10 @@ import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 
 import { useAccountNameRule } from './form-validation-rules';
 
+export type CreateAccountFormValues = {
+  name: string;
+};
+
 export function useCreateAccountForm(
   existingAccountNames: string[],
   defaultName: string
@@ -15,7 +19,7 @@ export function useCreateAccountForm(
     })
   });
 
-  const formOptions: UseFormProps = {
+  const formOptions: UseFormProps<CreateAccountFormValues> = {
     mode: 'onChange',
     resolver: yupResolver(formSchema),
     defaultValues: {
@@ -23,7 +27,7 @@ export function useCreateAccountForm(
     }
   };
 
-  return useForm(formOptions);
+  return useForm<CreateAccountFormValues>(formOptions);
 }
 
 export function getDefaultName(

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FieldValues, UseFormRegister } from 'react-hook-form';
+import { UseFormRegister } from 'react-hook-form';
 import { useTranslation, Trans } from 'react-i18next';
 
 import {
@@ -9,10 +9,11 @@ import {
   InputsContainer
 } from '@src/libs/layout';
 import { SvgIcon, Typography, Input } from '@src/libs/ui';
+import { CreateAccountFormValues } from '@src/libs/ui/forms/create-account';
 
 interface CreateAccountPageContentProps {
-  register: UseFormRegister<FieldValues>;
-  errorMessage: string | null;
+  register: UseFormRegister<CreateAccountFormValues>;
+  errorMessage?: string;
 }
 
 export function CreateAccountPageContent({
