@@ -5,16 +5,6 @@ const Container = styled.div`
   cursor: ${({ onClick }) => (onClick != null ? 'pointer' : 'auto')};
 `;
 
-function clearClipboardAfterMinute() {
-  // It won't work if user change a focus to other window
-  // TODO: improve solution
-  const cleanupTimeout = 1000 * 60; // 1 minute
-
-  setTimeout(async () => {
-    await navigator.clipboard.writeText('');
-  }, cleanupTimeout);
-}
-
 interface RenderContentProps {
   isClicked: boolean;
 }
@@ -22,13 +12,11 @@ interface RenderContentProps {
 interface CopyToClipboardProps {
   renderContent: (renderContentProps: RenderContentProps) => JSX.Element;
   valueToCopy: string;
-  automaticallyClearClipboard?: boolean;
 }
 
 export function CopyToClipboard({
   renderContent,
-  valueToCopy,
-  automaticallyClearClipboard
+  valueToCopy
 }: CopyToClipboardProps) {
   const overlayTimeout = 2000;
   const [isClicked, setIsClicked] = useState(false);
@@ -40,11 +28,7 @@ export function CopyToClipboard({
 
     setIsClicked(true);
     await navigator.clipboard.writeText(valueToCopy);
-
-    if (automaticallyClearClipboard) {
-      clearClipboardAfterMinute();
-    }
-  }, [isClicked, valueToCopy, automaticallyClearClipboard]);
+  }, [isClicked, valueToCopy]);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
