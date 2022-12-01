@@ -155,7 +155,7 @@ export function NavigationMenuPageContent() {
             id: 1,
             title: t('Share feedback'),
             iconPath: 'assets/icons/chat.svg',
-            href: 'https://casper-signer.canny.io/feature-requests',
+            href: 'https://casper-wallet.canny.io/feature-requests',
             disabled: false
           },
           {
