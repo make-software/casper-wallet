@@ -8,10 +8,18 @@ import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate
 import { RouterPath } from '@src/apps/onboarding/router';
 
 import { WelcomePageContent } from './content';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import { resetVault } from '@src/background/redux/sagas/actions';
 
 export function WelcomePage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
+
+  const handleClick = () => {
+    dispatchToMainStore(resetVault()).then(() => {
+      navigate(RouterPath.CreateVaultPassword);
+    });
+  };
 
   return (
     <LayoutTab
@@ -25,10 +33,7 @@ export function WelcomePage() {
               wallet’s secret recovery phrase.
             </Trans>
           </Typography>
-          <Button
-            onClick={() => navigate(RouterPath.CreateVaultPassword)}
-            color="primaryRed"
-          >
+          <Button onClick={handleClick} color="primaryRed">
             <Trans t={t}>Get started</Trans>
           </Button>
         </TabFooterContainer>

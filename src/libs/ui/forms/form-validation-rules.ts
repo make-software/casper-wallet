@@ -1,6 +1,8 @@
 import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { verifyPasswordAgainstHash } from '@src/libs/crypto/hashing';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import { loginRetryCountIncrement } from '@src/background/redux/login-retry-count/actions';
 
 export const minPasswordLength = 12;
 
@@ -20,9 +22,17 @@ export function useVerifyPasswordAgainstHashRule(
   const { t } = useTranslation();
   const errorMessage = t('Password is not correct');
 
-  return Yup.string().test('authenticate', errorMessage, async password =>
-    verifyPasswordAgainstHash(passwordHash, passwordSaltHash, password)
-  );
+  return Yup.string().test('authenticate', errorMessage, async password => {
+    const result = await verifyPasswordAgainstHash(
+      passwordHash,
+      passwordSaltHash,
+      password
+    );
+    if (result === false) {
+      dispatchToMainStore(loginRetryCountIncrement());
+    }
+    return result;
+  });
 }
 
 export function useRepeatPasswordRule(inputName: string) {

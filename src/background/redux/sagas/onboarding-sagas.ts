@@ -26,6 +26,7 @@ import { deploysReseted } from '../deploys/actions';
 import { initKeys, initVault, resetVault } from './actions';
 import { keysReseted, keysUpdated } from '../keys/actions';
 import { vaultCipherReseted } from '../vault-cipher/actions';
+import { loginRetryCountReseted } from '../login-retry-count/actions';
 
 export function* onboardingSagas() {
   yield takeLatest(getType(resetVault), resetVaultSaga);
@@ -43,6 +44,7 @@ function* resetVaultSaga(action: ReturnType<typeof resetVault>) {
     yield put(keysReseted());
     yield put(sessionReseted());
     yield put(deploysReseted());
+    yield put(loginRetryCountReseted());
     browser.storage.local.clear();
   } catch (err) {
     console.error(err);

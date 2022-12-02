@@ -14,6 +14,7 @@ import { RootState } from 'typesafe-actions';
 import { select, call } from 'redux-saga/effects';
 import { startBackground } from './sagas/actions';
 import { KeysState } from './keys/types';
+import { LoginRetryCountState } from './login-retry-count/reducer';
 
 declare global {
   interface Window {
@@ -33,26 +34,32 @@ export const composeEnhancers =
 
 export const VAULT_CIPHER_KEY = 'vault_cipher';
 export const KEYS_KEY = 'keys';
+export const LOGIN_RETRY_KEY = 'login_retry';
 
 type StorageState = {
   [VAULT_CIPHER_KEY]: string;
   [KEYS_KEY]: KeysState;
+  [LOGIN_RETRY_KEY]: LoginRetryCountState;
 };
 
 // this needs to be private
 let storeSingleton: ReturnType<typeof createStore>;
 
 export async function getMainStoreSingleton() {
-  // load vault and keys ciphers
-  const { [VAULT_CIPHER_KEY]: vaultCipher, [KEYS_KEY]: keys } =
-    (await browser.storage.local.get([
-      VAULT_CIPHER_KEY,
-      KEYS_KEY
-    ])) as StorageState;
+  // load selected state
+  const {
+    [VAULT_CIPHER_KEY]: vaultCipher,
+    [KEYS_KEY]: keys,
+    [LOGIN_RETRY_KEY]: loginRetryCount
+  } = (await browser.storage.local.get([
+    VAULT_CIPHER_KEY,
+    KEYS_KEY,
+    LOGIN_RETRY_KEY
+  ])) as StorageState;
 
   if (storeSingleton == null) {
     // console.warn('STORE INIT', state);
-    storeSingleton = createStore({ vaultCipher, keys });
+    storeSingleton = createStore({ vaultCipher, keys, loginRetryCount });
     // send start action
     storeSingleton.dispatch(startBackground());
     // on updates propagate new state to replicas and also persist encrypted vault
@@ -67,11 +74,14 @@ export async function getMainStoreSingleton() {
           // console.error('STATE PROPAGATION FAILED: ', e);
         });
 
-      // persist vault and keys ciphers
-      const { vaultCipher, keys } = state;
-
+      // persist selected state
+      const { vaultCipher, keys, loginRetryCount } = state;
       browser.storage.local
-        .set({ [VAULT_CIPHER_KEY]: vaultCipher, [KEYS_KEY]: keys })
+        .set({
+          [VAULT_CIPHER_KEY]: vaultCipher,
+          [KEYS_KEY]: keys,
+          [LOGIN_RETRY_KEY]: loginRetryCount
+        })
         .catch(e => {
           console.error('PERSIST ENCRYPTED VAULT FAILED: ', e);
         });
@@ -89,7 +99,7 @@ export function createMainStoreReplica<T extends PopupState>(state: T) {
 }
 
 export function dispatchToMainStore(action: ReduxAction) {
-  browser.runtime.sendMessage(action);
+  return browser.runtime.sendMessage(action);
 }
 
 export function* sagaSelect<Result>(selector: (state: RootState) => Result) {

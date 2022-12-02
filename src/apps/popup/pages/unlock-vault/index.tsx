@@ -32,6 +32,7 @@ import {
   selectPasswordSaltHash
 } from '@src/background/redux/keys/selectors';
 import { unlockVault } from '@src/background/redux/sagas/actions';
+import { selectLoginRetryCount } from '@src/background/redux/login-retry-count/selectors';
 
 export function UnlockVaultPageContent() {
   const { t } = useTranslation();
@@ -40,6 +41,7 @@ export function UnlockVaultPageContent() {
   const [passwordInputType, setPasswordInputType] =
     useState<PasswordInputType>('password');
 
+  const loginRetryCount = useSelector(selectLoginRetryCount);
   const passwordHash = useSelector(selectPasswordHash);
   const passwordSaltHash = useSelector(selectPasswordSaltHash);
 
@@ -62,6 +64,57 @@ export function UnlockVaultPageContent() {
     isSubmitting: isSubmitting || isValidating
   });
 
+  const retryLeft = 5 - loginRetryCount;
+
+  if (retryLeft <= 0) {
+    return (
+      <>
+        <ContentContainer>
+          <IllustrationContainer>
+            <SvgIcon src="assets/illustrations/locked-wallet.svg" size={120} />
+          </IllustrationContainer>
+          <TextContainer gap="big">
+            <Typography type="header">
+              <Trans t={t}>Your wallet is locked</Trans>
+            </Typography>
+          </TextContainer>
+          <TextContainer gap="medium">
+            <Typography type="body" color="contentSecondary">
+              <Trans t={t}>
+                Please enter your password to unlock. You have{' '}
+                <b>{{ retryLeft }}</b> tries left.
+              </Trans>
+            </Typography>
+          </TextContainer>
+          <InputsContainer>
+            <Input
+              type={passwordInputType}
+              placeholder={t('Password')}
+              error={!!errors.password}
+              validationText={errors.password?.message}
+              suffixIcon={
+                <PasswordVisibilityIcon
+                  passwordInputType={passwordInputType}
+                  setPasswordInputType={setPasswordInputType}
+                />
+              }
+              {...register('password')}
+            />
+          </InputsContainer>
+        </ContentContainer>
+        <FooterButtonsAbsoluteContainer>
+          <Button
+            type="button"
+            color="secondaryRed"
+            onClick={() => navigate(RouterPath.ResetVault)}
+          >
+            {t('Reset wallet')}
+          </Button>
+        </FooterButtonsAbsoluteContainer>
+      </>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit(handleUnlockVault)}>
       <ContentContainer>
@@ -75,7 +128,10 @@ export function UnlockVaultPageContent() {
         </TextContainer>
         <TextContainer gap="medium">
           <Typography type="body" color="contentSecondary">
-            <Trans t={t}>Please enter your password to unlock.</Trans>
+            <Trans t={t}>
+              Please enter your password to unlock. You have {{ retryLeft }}{' '}
+              tries left.
+            </Trans>
           </Typography>
         </TextContainer>
         <InputsContainer>

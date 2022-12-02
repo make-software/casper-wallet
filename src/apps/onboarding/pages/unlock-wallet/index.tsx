@@ -16,6 +16,9 @@ import {
   selectPasswordHash,
   selectPasswordSaltHash
 } from '@src/background/redux/keys/selectors';
+import { selectLoginRetryCount } from '@src/background/redux/login-retry-count/selectors';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import { loginRetryCountReseted } from '@src/background/redux/login-retry-count/actions';
 
 // Design of this page is temporary. Should be changed after it will be done in Figma
 const TabFooterContainer = styled(TabFooterContainerBase)`
@@ -30,6 +33,7 @@ export function UnlockWalletPage({ saveIsLoggedIn }: UnlockWalletPageProps) {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
+  const loginRetryCount = useSelector(selectLoginRetryCount);
   const passwordHash = useSelector(selectPasswordHash);
   const passwordSaltHash = useSelector(selectPasswordSaltHash);
 
@@ -44,7 +48,35 @@ export function UnlockWalletPage({ saveIsLoggedIn }: UnlockWalletPageProps) {
   } = useUnlockWalletForm(passwordHash, passwordSaltHash);
 
   function onSubmit() {
+    dispatchToMainStore(loginRetryCountReseted());
     saveIsLoggedIn(true);
+  }
+
+  const retryLeft = 5 - loginRetryCount;
+
+  if (retryLeft <= 0) {
+    return (
+      <LayoutTab
+        layoutContext="withIllustration"
+        renderContent={() => (
+          <UnlockWalletPageContent
+            retryLeft={retryLeft}
+            register={register}
+            errorMessage={errors.password?.message}
+          />
+        )}
+        renderFooter={() => (
+          <TabFooterContainer>
+            <Button
+              color="secondaryRed"
+              onClick={() => navigate(RouterPath.ResetWallet)}
+            >
+              <Trans t={t}>Start again</Trans>
+            </Button>
+          </TabFooterContainer>
+        )}
+      />
+    );
   }
 
   return (
@@ -53,6 +85,7 @@ export function UnlockWalletPage({ saveIsLoggedIn }: UnlockWalletPageProps) {
         layoutContext="withIllustration"
         renderContent={() => (
           <UnlockWalletPageContent
+            retryLeft={retryLeft}
             register={register}
             errorMessage={errors.password?.message}
           />

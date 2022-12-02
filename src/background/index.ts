@@ -77,6 +77,10 @@ import { selectVaultIsLocked } from './redux/session/selectors';
 import { selectKeysDoesExist } from './redux/keys/selectors';
 import { selectVaultDoesExist } from './redux/vault-cipher/selectors';
 import { ServiceMessage, serviceMessage } from './service-message';
+import {
+  loginRetryCountIncrement,
+  loginRetryCountReseted
+} from './redux/login-retry-count/actions';
 
 browser.runtime.onInstalled.addListener(async () => {
   // this will run on installation or update so
@@ -280,6 +284,8 @@ browser.runtime.onMessage.addListener(
           case getType(vaultCipherCreated):
           case getType(keysReseted):
           case getType(keysUpdated):
+          case getType(loginRetryCountReseted):
+          case getType(loginRetryCountIncrement):
             store.dispatch(action);
             return sendResponse(undefined);
 

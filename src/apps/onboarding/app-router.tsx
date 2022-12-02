@@ -25,6 +25,7 @@ import { ConfirmSecretPhrasePage } from '@src/apps/onboarding/pages/confirm-secr
 import { ConfirmSecretPhraseSuccessPage } from '@src/apps/onboarding/pages/confirm-secret-phrase-success';
 import { OnboardingSuccessPage } from '@src/apps/onboarding/pages/onboarding-success';
 import { selectKeysDoesExist } from '@src/background/redux/keys/selectors';
+import { selectEncryptionKeyHash } from '@src/background/redux/session/selectors';
 
 export interface FormState {
   secretPhrase: SecretPhrase | null;
@@ -47,8 +48,9 @@ export function AppRouter() {
     }));
 
   const keysDoesExist = useSelector(selectKeysDoesExist);
+  const encryptionKeyHash = useSelector(selectEncryptionKeyHash);
 
-  if (keysDoesExist) {
+  if (keysDoesExist && encryptionKeyHash != null) {
     if (isLoggedIn) {
       return (
         <AuthorizedUserRoutes
@@ -56,9 +58,9 @@ export function AppRouter() {
           setFormState={setFormState}
         />
       );
+    } else {
+      return <UnlockUserRoutes saveIsLoggedIn={saveIsLoggedIn} />;
     }
-
-    return <UnauthorizedUserRoutes saveIsLoggedIn={saveIsLoggedIn} />;
   }
 
   return <NoVaultRoutes saveIsLoggedIn={saveIsLoggedIn} />;
@@ -82,7 +84,7 @@ function NoVaultRoutes({ saveIsLoggedIn }: UnauthorizedRouterProps) {
   );
 }
 
-function UnauthorizedUserRoutes({ saveIsLoggedIn }: UnauthorizedRouterProps) {
+function UnlockUserRoutes({ saveIsLoggedIn }: UnauthorizedRouterProps) {
   return (
     <HashRouter>
       <Routes>

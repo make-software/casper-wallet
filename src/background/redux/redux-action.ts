@@ -2,6 +2,7 @@ import { ActionType } from 'typesafe-actions';
 import * as sagas from './sagas/actions';
 import * as vault from './vault/actions';
 import * as vaultCipher from './vault-cipher/actions';
+import * as loginRetryCount from './login-retry-count/actions';
 import * as keys from './keys/actions';
 import * as deploys from './deploys/actions';
 import * as windowManagement from './windowManagement/actions';
@@ -10,6 +11,7 @@ import * as session from './session/actions';
 const reduxAction = {
   sagas,
   vaultCipher,
+  loginRetryCount,
   vault,
   keys,
   deploys,

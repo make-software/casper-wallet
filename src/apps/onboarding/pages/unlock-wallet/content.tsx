@@ -31,11 +31,13 @@ const GrayBackgroundContainer = styled(TabPageContainerBase)`
 `;
 
 interface LoginPageContentProps {
+  retryLeft: number;
   register: UseFormRegister<UnlockWalletFormValues>;
   errorMessage?: string;
 }
 
 export function UnlockWalletPageContent({
+  retryLeft,
   register,
   errorMessage
 }: LoginPageContentProps) {
@@ -58,7 +60,10 @@ export function UnlockWalletPageContent({
 
         <TabTextContainer>
           <Typography type="body" color="contentSecondary">
-            <Trans t={t}>Please enter your password to unlock.</Trans>
+            <Trans t={t}>
+              Please enter your password to unlock. You have{' '}
+              <b>{{ retryLeft }}</b> tries left.
+            </Trans>
           </Typography>
         </TabTextContainer>
 

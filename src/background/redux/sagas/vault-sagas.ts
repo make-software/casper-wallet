@@ -55,6 +55,7 @@ import {
 import { keysUpdated } from '../keys/actions';
 import { vaultCipherCreated } from '../vault-cipher/actions';
 import { deploysReseted } from '../deploys/actions';
+import { loginRetryCountReseted } from '../login-retry-count/actions';
 
 export function* vaultSagas() {
   yield takeLatest(getType(lockVault), lockVaultSaga);
@@ -134,6 +135,7 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
       encryptVault(newEncryptionKeyHash, vault)
     );
 
+    yield put(loginRetryCountReseted());
     yield put(vaultLoaded(vault));
     yield put(
       keysUpdated({
