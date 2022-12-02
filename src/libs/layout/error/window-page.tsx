@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigateFunction } from 'react-router/lib/hooks';
+import { NavigateFunction } from 'react-router';
 
 import {
   LayoutWindow,

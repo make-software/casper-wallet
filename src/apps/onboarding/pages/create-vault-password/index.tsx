@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { FieldValues } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -9,7 +8,10 @@ import {
   TabHeaderContainer
 } from '@libs/layout';
 import { Button, Checkbox } from '@libs/ui';
-import { useCreatePasswordForm } from '@libs/ui/forms/create-password';
+import {
+  CreatePasswordFormValues,
+  useCreatePasswordForm
+} from '@libs/ui/forms/create-password';
 
 import { Stepper } from '@src/apps/onboarding/components/stepper';
 import { RouterPath } from '@src/apps/onboarding/router';
@@ -42,7 +44,7 @@ export function CreateVaultPasswordPage({
     }
   }, [navigate, passwordHash]);
 
-  async function onSubmit(data: FieldValues) {
+  async function onSubmit(data: CreatePasswordFormValues) {
     dispatchToMainStore(initKeys({ password: data.password }));
     saveIsLoggedIn(true);
   }

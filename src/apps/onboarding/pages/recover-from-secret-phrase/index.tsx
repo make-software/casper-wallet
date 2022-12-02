@@ -1,5 +1,4 @@
 import React from 'react';
-import { FieldValues } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -10,7 +9,10 @@ import {
 } from '@src/libs/layout';
 import { createErrorLocationState, ErrorPath } from '@src/libs/layout/error';
 import { Button } from '@src/libs/ui';
-import { useRecoverFromSecretPhraseForm } from '@src/libs/ui/forms/recover-from-secret-phrase';
+import {
+  RecoverSecretPhraseFormValues,
+  useRecoverFromSecretPhraseForm
+} from '@src/libs/ui/forms/recover-from-secret-phrase';
 
 import { Stepper } from '@src/apps/onboarding/components/stepper';
 import { RouterPath } from '@src/apps/onboarding/router';
@@ -31,7 +33,7 @@ export function RecoverFromSecretPhrasePage() {
     useRecoverFromSecretPhraseForm();
   const { isDirty } = formState;
 
-  function onSubmit({ phrase }: FieldValues) {
+  function onSubmit({ phrase }: RecoverSecretPhraseFormValues) {
     try {
       const secretPhrase = phrase.trim().split(' ');
       if (!validateSecretPhrase(secretPhrase)) {

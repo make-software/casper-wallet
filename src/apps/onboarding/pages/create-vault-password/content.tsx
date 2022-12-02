@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import { FieldValues, FormState, UseFormRegister } from 'react-hook-form';
+import { FormState, UseFormRegister } from 'react-hook-form';
 
 import {
   PasswordInputType,
@@ -15,10 +15,11 @@ import {
   TabTextContainer
 } from '@libs/layout';
 import { minPasswordLength } from '@libs/ui/forms/form-validation-rules';
+import { CreatePasswordFormValues } from '@src/libs/ui/forms/create-password';
 
 interface CreatePasswordPageContentProps {
-  register: UseFormRegister<FieldValues>;
-  formState: FormState<FieldValues>;
+  register: UseFormRegister<CreatePasswordFormValues>;
+  formState: FormState<CreatePasswordFormValues>;
 }
 
 export function CreateVaultPasswordPageContent({

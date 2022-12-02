@@ -31,6 +31,7 @@ import {
 import {
   connectWindowInit,
   importWindowInit,
+  onboardingAppInit,
   popupWindowInit,
   signWindowInit,
   windowIdChanged,
@@ -270,6 +271,7 @@ browser.runtime.onMessage.addListener(
           case getType(allAccountsDisconnected):
           case getType(windowIdChanged):
           case getType(windowIdCleared):
+          case getType(onboardingAppInit):
           case getType(popupWindowInit):
           case getType(connectWindowInit):
           case getType(importWindowInit):

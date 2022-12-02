@@ -7,16 +7,21 @@ import {
   useRepeatPasswordRule
 } from '@libs/ui/forms/form-validation-rules';
 
+export type CreatePasswordFormValues = {
+  password: string;
+  confirmPassword: string;
+};
+
 export function useCreatePasswordForm() {
   const formSchema = Yup.object().shape({
     password: useCreatePasswordRule(),
     confirmPassword: useRepeatPasswordRule('password')
   });
 
-  const formOptions: UseFormProps = {
+  const formOptions: UseFormProps<CreatePasswordFormValues> = {
     reValidateMode: 'onChange',
     resolver: yupResolver(formSchema)
   };
 
-  return useForm(formOptions);
+  return useForm<CreatePasswordFormValues>(formOptions);
 }

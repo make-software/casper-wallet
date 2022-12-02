@@ -1,6 +1,5 @@
 import React from 'react';
-import { FieldValues, UseFormRegister, UseFormSetValue } from 'react-hook-form';
-import { FieldErrors } from 'react-hook-form/dist/types/errors';
+import { FieldErrors, UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -10,11 +9,12 @@ import {
   TextContainer
 } from '@src/libs/layout';
 import { Input, SvgIcon, Typography } from '@src/libs/ui';
+import { ImportAccountFormValues } from '.';
 
 interface ImportAccountWithFilePageContentProps {
-  register: UseFormRegister<FieldValues>;
-  errors: FieldErrors;
-  setValue: UseFormSetValue<FieldValues>;
+  register: UseFormRegister<ImportAccountFormValues>;
+  errors: FieldErrors<ImportAccountFormValues>;
+  setValue: UseFormSetValue<ImportAccountFormValues>;
   isFileLoaded: boolean;
 }
 
@@ -45,7 +45,7 @@ export function ImportAccountWithFileUploadPageContent({
             isFileLoaded && (
               <SvgIcon
                 onClick={() =>
-                  setValue('secretKeyFile', null, { shouldValidate: true })
+                  setValue('secretKeyFile', undefined, { shouldValidate: true })
                 }
                 src="assets/icons/close-filter.svg"
               />

@@ -5,6 +5,10 @@ import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 
 import { useAccountNameRule } from './form-validation-rules';
 
+export type RenameAccountFormValues = {
+  name: string;
+};
+
 export function useRenameAccount(
   accountName: string | undefined,
   existingAccountNames: string[]
@@ -20,7 +24,7 @@ export function useRenameAccount(
     })
   });
 
-  const formOptions: UseFormProps = {
+  const formOptions: UseFormProps<RenameAccountFormValues> = {
     mode: 'onChange',
     resolver: yupResolver(formSchema),
     defaultValues: {
@@ -28,5 +32,5 @@ export function useRenameAccount(
     }
   };
 
-  return useForm(formOptions);
+  return useForm<RenameAccountFormValues>(formOptions);
 }

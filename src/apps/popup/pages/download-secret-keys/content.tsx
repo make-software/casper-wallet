@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FieldValues, UseFormRegister } from 'react-hook-form';
+import { UseFormRegister } from 'react-hook-form';
 import { useTranslation, Trans } from 'react-i18next';
 
 import {
@@ -15,10 +15,11 @@ import {
   PasswordVisibilityIcon,
   PasswordInputType
 } from '@src/libs/ui';
+import { DownloadSecretKeysFormValues } from '@src/libs/ui/forms/download-secret-keys';
 
 interface DownloadSecretKeysPageContentProps {
-  register: UseFormRegister<FieldValues>;
-  errorMessage: string | null;
+  register: UseFormRegister<DownloadSecretKeysFormValues>;
+  errorMessage?: string;
 }
 
 export function DownloadSecretKeysPageContent({

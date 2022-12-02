@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import { FieldValues, UseFormRegister } from 'react-hook-form';
+import { UseFormRegister } from 'react-hook-form';
 
 import {
   TabPageContainer,
@@ -8,10 +8,11 @@ import {
   InputsContainer
 } from '@libs/layout';
 import { FormField, FormFieldStatus, TextArea, Typography } from '@libs/ui';
+import { RecoverSecretPhraseFormValues } from '@src/libs/ui/forms/recover-from-secret-phrase';
 
 interface RecoverFromSecretPhrasePageContentProps {
-  register: UseFormRegister<FieldValues>;
-  errorMessage: string | null;
+  register: UseFormRegister<RecoverSecretPhraseFormValues>;
+  errorMessage?: string;
 }
 
 export function RecoverFromSecretPhrasePageContent({

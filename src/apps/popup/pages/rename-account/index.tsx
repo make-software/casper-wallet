@@ -2,7 +2,6 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { FieldValues } from 'react-hook-form';
 
 import {
   FooterButtonsAbsoluteContainer,
@@ -12,7 +11,10 @@ import {
   InputsContainer
 } from '@src/libs/layout';
 import { Button, Input, SvgIcon, Typography } from '@src/libs/ui';
-import { useRenameAccount } from '@src/libs/ui/forms/rename-account';
+import {
+  RenameAccountFormValues,
+  useRenameAccount
+} from '@src/libs/ui/forms/rename-account';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
@@ -33,7 +35,7 @@ export function RenameAccountPageContent() {
     formState: { errors, isDirty }
   } = useRenameAccount(accountName, existingAccountNames);
 
-  function onSubmit({ name }: FieldValues) {
+  function onSubmit({ name }: RenameAccountFormValues) {
     if (!accountName) {
       return;
     }

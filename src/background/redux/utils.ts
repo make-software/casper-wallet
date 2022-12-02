@@ -64,7 +64,7 @@ export async function getMainStoreSingleton() {
       browser.runtime
         .sendMessage(backgroundEvent.popupStateUpdated(popupState))
         .catch(e => {
-          console.error('STATE PROPAGATION FAILED: ', e);
+          // console.error('STATE PROPAGATION FAILED: ', e);
         });
 
       // persist vault and keys ciphers

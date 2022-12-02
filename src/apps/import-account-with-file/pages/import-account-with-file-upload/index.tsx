@@ -23,6 +23,11 @@ import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
 
 import { ImportAccountWithFileUploadPageContent } from './content';
 
+export type ImportAccountFormValues = {
+  secretKeyFile: string | undefined;
+  name: string;
+};
+
 export function ImportAccountWithFileUploadPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -75,12 +80,12 @@ export function ImportAccountWithFileUploadPage() {
     })
   });
 
-  const formOptions: UseFormProps = {
+  const formOptions: UseFormProps<ImportAccountFormValues> = {
     mode: 'onChange',
     reValidateMode: 'onChange',
     resolver: yupResolver(formSchema),
     defaultValues: {
-      secretKeyFile: null,
+      secretKeyFile: undefined,
       name: ''
     }
   };
@@ -91,7 +96,7 @@ export function ImportAccountWithFileUploadPage() {
     watch,
     setValue,
     formState: { errors, isValid, isDirty }
-  } = useForm(formOptions);
+  } = useForm<ImportAccountFormValues>(formOptions);
 
   async function onSubmit({
     secretKeyFile: { 0: secretKeyFile },
@@ -102,7 +107,7 @@ export function ImportAccountWithFileUploadPage() {
 
   const isSubmitDisabled = !isValid || !isDirty;
   const secretKeyFile = watch('secretKeyFile');
-  const isFileLoaded = secretKeyFile?.length > 0;
+  const isFileLoaded = secretKeyFile != null && secretKeyFile.length > 0;
 
   return (
     <LayoutWindow
