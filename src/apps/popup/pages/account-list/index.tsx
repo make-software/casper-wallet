@@ -54,8 +54,9 @@ const ListItemClickableContainer = styled(FlexRow)`
     padding-left: 18px;
   }
 `;
-
-const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
+// Hidden account balance until a solution for fetching many balances will be ready
+// https://github.com/make-software/casper-wallet/issues/374
+// const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
 const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
   width: 100%;
 `;
@@ -138,12 +139,13 @@ export function AccountListPage() {
                     )}
                   </SpaceBetweenFlexRow>
                 </AccountNameWithHashListItemContainer>
-                <AccountBalanceListItemContainer>
-                  <Typography type="bodyHash">2.1M</Typography>
-                  <Typography type="bodyHash" color="contentSecondary">
-                    CSPR
-                  </Typography>
-                </AccountBalanceListItemContainer>
+                {/* Hidden account balance until a solution for fetching many balances will be ready */}
+                {/*<AccountBalanceListItemContainer>*/}
+                {/*  <Typography type="bodyHash">2.1M</Typography>*/}
+                {/*  <Typography type="bodyHash" color="contentSecondary">*/}
+                {/*    CSPR*/}
+                {/*  </Typography>*/}
+                {/*</AccountBalanceListItemContainer>*/}
               </ListItemClickableContainer>
               <Popover
                 renderMenuItems={({ closePopover }) => (
