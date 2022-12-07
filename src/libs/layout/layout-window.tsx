@@ -2,6 +2,7 @@ import React, { PropsWithChildren } from 'react';
 import styled from 'styled-components';
 
 import { FlexColumn } from '@layout/containers';
+import { useContentHeight } from '@libs/ui/hooks/use-content-height';
 
 interface BaseLayoutWindowProps {
   variant: 'form' | 'default';
@@ -24,7 +25,6 @@ type LayoutWindowProps = LayoutWindowFormProps | LayoutWindowDefaultProps;
 const PageHeader = styled.header``;
 
 const PageContent = styled.div`
-  height: 100%;
   overflow-y: auto;
 `;
 
@@ -36,11 +36,24 @@ export function LayoutWindow({
   renderFooter,
   ...layoutContainerProps
 }: LayoutWindowProps) {
+  const { headerRef, footerRef, headerHeight, footerHeight } =
+    useContentHeight();
+
   return (
     <LayoutContainer {...layoutContainerProps}>
-      {renderHeader && <PageHeader>{renderHeader()}</PageHeader>}
-      <PageContent>{renderContent()}</PageContent>
-      {renderFooter && <PageFooter>{renderFooter()}</PageFooter>}
+      {renderHeader && (
+        <PageHeader ref={headerRef}>{renderHeader()}</PageHeader>
+      )}
+      <PageContent
+        style={{
+          height: `calc(100vh - ${headerHeight}px - ${footerHeight}px)`
+        }}
+      >
+        {renderContent()}
+      </PageContent>
+      {renderFooter && (
+        <PageFooter ref={footerRef}>{renderFooter()}</PageFooter>
+      )}
     </LayoutContainer>
   );
 }
