@@ -21,7 +21,6 @@ import {
   secretPhraseCreated
 } from '@src/background/redux/vault/actions';
 import {
-  selectVaultCountOfAccounts,
   selectIsActiveAccountConnectedWithOrigin,
   selectIsAnyAccountConnectedWithOrigin,
   selectVaultAccountsNames,
@@ -136,26 +135,20 @@ browser.runtime.onMessage.addListener(
         switch (action.type) {
           case getType(sdkMessage.connectRequest): {
             let success = false;
-            const isLocked = selectVaultIsLocked(store.getState());
-            const countOfAccounts = selectVaultCountOfAccounts(
-              store.getState()
-            );
 
-            if (!isLocked && countOfAccounts > 0) {
-              const query: Record<string, string> = {
-                origin: action.payload.origin
-              };
+            const query: Record<string, string> = {
+              origin: action.payload.origin
+            };
 
-              if (action.payload.title != null) {
-                query.title = action.payload.title;
-              }
-
-              openWindow({
-                purposeForOpening: PurposeForOpening.ConnectToApp,
-                query
-              });
-              success = true;
+            if (action.payload.title != null) {
+              query.title = action.payload.title;
             }
+
+            openWindow({
+              purposeForOpening: PurposeForOpening.ConnectToApp,
+              query
+            });
+            success = true;
 
             return sendResponse(
               sdkMessage.connectResponse(success, action.meta)

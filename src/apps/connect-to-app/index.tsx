@@ -4,12 +4,11 @@ import 'mac-scrollbar/dist/mac-scrollbar.css';
 import React, { Suspense, useEffect, useState } from 'react';
 import { render } from 'react-dom';
 import { Provider as ReduxProvider } from 'react-redux';
-import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { isActionOf } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 
-import { App } from '@connect-to-app/app';
+import { AppRouter } from '@src/apps/connect-to-app/app-router';
 import { GlobalStyle, themeConfig } from '@libs/ui';
 import { ErrorBoundary } from '@popup/error-boundary';
 
@@ -51,9 +50,7 @@ const Tree = () => {
         <ThemeProvider theme={themeConfig}>
           <GlobalStyle />
           <ReduxProvider store={store}>
-            <HashRouter>
-              <App />
-            </HashRouter>
+            <AppRouter />
           </ReduxProvider>
         </ThemeProvider>
       </ErrorBoundary>

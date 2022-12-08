@@ -7,7 +7,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { GlobalStyle, themeConfig } from '@libs/ui';
 
-import { App } from './app';
+import { AppRouter } from './app-router';
 import {
   backgroundEvent,
   BackgroundEvent,
@@ -50,7 +50,7 @@ const Tree = () => {
         <ThemeProvider theme={themeConfig}>
           <GlobalStyle />
           <ReduxProvider store={store}>
-            <App />
+            <AppRouter />
           </ReduxProvider>
         </ThemeProvider>
       </ErrorBoundary>
