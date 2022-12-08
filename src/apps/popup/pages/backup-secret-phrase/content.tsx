@@ -57,7 +57,7 @@ export function BackupSecretPhrasePageContent() {
       <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            Use your secret recovery phrase to recover access to your accounts
+            Use your secret recovery phrase to recover access to your accounts.
           </Trans>
         </Typography>
       </TextContainer>
