@@ -75,12 +75,39 @@ import {
 import { keysReseted, keysUpdated } from './redux/keys/actions';
 import { selectVaultIsLocked } from './redux/session/selectors';
 import { selectKeysDoesExist } from './redux/keys/selectors';
-import { selectVaultDoesExist } from './redux/vault-cipher/selectors';
+import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
 import { ServiceMessage, serviceMessage } from './service-message';
 import {
   loginRetryCountIncrement,
   loginRetryCountReseted
 } from './redux/login-retry-count/actions';
+
+// setup default onboarding action
+async function handleActionClick() {
+  await openOnboardingUi();
+}
+browser.action && browser.action.onClicked.addListener(handleActionClick);
+browser.browserAction &&
+  browser.browserAction.onClicked.addListener(handleActionClick);
+
+async function isOnboardingCompleted() {
+  const store = await getMainStoreSingleton();
+  const state = store.getState();
+
+  const keysDoesExist = selectKeysDoesExist(state);
+  const vaultCipherDoesExist = selectVaultCipherDoesExist(state);
+
+  return keysDoesExist && vaultCipherDoesExist;
+}
+
+browser.runtime.onStartup.addListener(() => {
+  // check if onboarding is completed and then disable
+  isOnboardingCompleted().then(yes => {
+    if (yes) {
+      disableOnboardingFlow();
+    }
+  });
+});
 
 browser.runtime.onInstalled.addListener(async () => {
   // this will run on installation or update so
@@ -88,26 +115,15 @@ browser.runtime.onInstalled.addListener(async () => {
   // DEV MODE: clean store on installation
   // browser.storage.local.remove([REDUX_STORAGE_KEY]);
 
-  const store = await getMainStoreSingleton();
-  const state = store.getState();
-
-  const keysDoesExist = selectKeysDoesExist(state);
-  const vaultDoesExist = selectVaultDoesExist(state);
-
-  if (!keysDoesExist || !vaultDoesExist) {
-    await openOnboardingUi();
-  } else {
-    await disableOnboardingFlow();
-  }
+  // after installation/update check if onboarding is completed
+  isOnboardingCompleted().then(yes => {
+    if (yes) {
+      disableOnboardingFlow();
+    } else {
+      openOnboardingUi();
+    }
+  });
 });
-
-async function handleActionClick() {
-  await openOnboardingUi();
-}
-
-browser.action && browser.action.onClicked.addListener(handleActionClick);
-browser.browserAction &&
-  browser.browserAction.onClicked.addListener(handleActionClick);
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 browser.runtime.onMessage.addListener(
