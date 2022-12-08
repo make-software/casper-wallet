@@ -17,8 +17,8 @@ import { isActionOf } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 import { signWindowInit } from '@background/redux/windowManagement/actions';
 import { createMainStoreReplica } from '@background/redux/utils';
-import { ErrorBoundary } from '@popup/error-boundary';
 import { Provider as ReduxProvider } from 'react-redux/es/exports';
+import { ErrorBoundary } from '@src/libs/layout/error';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
@@ -46,14 +46,14 @@ const Tree = () => {
 
   return (
     <Suspense fallback={null}>
-      <ErrorBoundary>
-        <ThemeProvider theme={themeConfig}>
-          <GlobalStyle />
-          <ReduxProvider store={store}>
+      <ThemeProvider theme={themeConfig}>
+        <GlobalStyle />
+        <ReduxProvider store={store}>
+          <ErrorBoundary>
             <AppRouter />
-          </ReduxProvider>
-        </ThemeProvider>
-      </ErrorBoundary>
+          </ErrorBoundary>
+        </ReduxProvider>
+      </ThemeProvider>
     </Suspense>
   );
 };

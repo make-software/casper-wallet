@@ -9,7 +9,7 @@ import browser from 'webextension-polyfill';
 
 import { GlobalStyle, themeConfig } from '@libs/ui';
 
-import { ErrorBoundary } from '@popup/error-boundary';
+import { ErrorBoundary } from '@src/libs/layout/error';
 import {
   BackgroundEvent,
   backgroundEvent,
@@ -47,14 +47,14 @@ const Tree = () => {
 
   return (
     <Suspense fallback={null}>
-      <ErrorBoundary>
-        <ThemeProvider theme={themeConfig}>
-          <GlobalStyle />
-          <ReduxProvider store={store}>
+      <ThemeProvider theme={themeConfig}>
+        <GlobalStyle />
+        <ReduxProvider store={store}>
+          <ErrorBoundary>
             <AppRouter />
-          </ReduxProvider>
-        </ThemeProvider>
-      </ErrorBoundary>
+          </ErrorBoundary>
+        </ReduxProvider>
+      </ThemeProvider>
     </Suspense>
   );
 };

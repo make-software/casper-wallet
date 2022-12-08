@@ -41,10 +41,13 @@ function App() {
     logs
   } = useWalletService();
 
-  const handleSignDeploy = deploy => {
-    if (activePublicKey) {
+  const handleSignDeploy = (
+    accountPublicKey: string,
+    deploy: DeployUtil.Deploy
+  ) => {
+    if (accountPublicKey) {
       const deployJson = DeployUtil.deployToJson(deploy);
-      sign(JSON.stringify(deployJson), activePublicKey, 'undelegate').then(
+      sign(JSON.stringify(deployJson), accountPublicKey, 'undelegate').then(
         res => {
           alert('Sign successful: ' + Object.values(res.signature).toString());
         }
@@ -98,7 +101,7 @@ function App() {
                   '2500000000',
                   '1234'
                 );
-                handleSignDeploy(deploy);
+                handleSignDeploy(activePublicKey, deploy);
               }}
             >
               Transfer
@@ -113,7 +116,7 @@ function App() {
                   null,
                   '2500000000'
                 );
-                handleSignDeploy(deploy);
+                handleSignDeploy(activePublicKey, deploy);
               }}
             >
               Delegate
@@ -128,7 +131,7 @@ function App() {
                   null,
                   '2500000000'
                 );
-                handleSignDeploy(deploy);
+                handleSignDeploy(activePublicKey, deploy);
               }}
             >
               Undelegate
@@ -143,7 +146,7 @@ function App() {
                   '017d96b9a63abcb61c870a4f55187a0a7ac24096bdb5fc585c12a686a4d892009e', // MAKE Stake 2
                   '2500000000'
                 );
-                handleSignDeploy(deploy);
+                handleSignDeploy(activePublicKey, deploy);
               }}
             >
               Redelegate
@@ -159,7 +162,7 @@ function App() {
                   '2500000000',
                   '1234'
                 );
-                handleSignDeploy(deploy);
+                handleSignDeploy(activePublicKey, deploy);
               }}
             >
               Invalid Checksum
@@ -167,14 +170,15 @@ function App() {
             <Button
               variant="text"
               onClick={() => {
+                const pk =
+                  '01ebf429a18b232b71df5759fe4e77dd05bf8ab3f2ccdcca50d0baa47d6ff27e02';
                 const deploy = makeNativeTransferDeploy(
-                  '01ebf429a18b232b71df5759fe4e77dd05bf8ab3f2ccdcca50d0baa47d6ff27e02',
-                  // recipientPublicKey was corrupted by changing last `c` char to `C`
-                  '0106ca7c39cd272dbf21a86eeb3b36b7c26e2e9b94af64292419f7862936bca2Ca',
+                  pk,
+                  '0106ca7c39cd272dbf21a86eeb3b36b7c26e2e9b94af64292419f7862936bca2ca',
                   '2500000000',
                   '1234'
                 );
-                handleSignDeploy(deploy);
+                handleSignDeploy(pk, deploy);
               }}
             >
               Not approved

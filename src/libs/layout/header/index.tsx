@@ -46,7 +46,9 @@ export function PopupHeader({
           {withConnectionStatus && <HeaderConnectionStatus />}
         </LogoAndConnectionStatusContainer>
 
-        <HeaderActions withMenu={withMenu} withLock={withLock} />
+        {(withMenu || withLock) && (
+          <HeaderActions withMenu={withMenu} withLock={withLock} />
+        )}
       </HeaderContainer>
       {renderSubmenuBarItems && (
         <SubmenuBarContainer>{renderSubmenuBarItems()}</SubmenuBarContainer>

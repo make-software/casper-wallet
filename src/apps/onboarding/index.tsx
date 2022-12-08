@@ -7,7 +7,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import browser from 'webextension-polyfill';
 import { ThemeProvider } from 'styled-components';
 
-import { ErrorBoundary } from '@popup/error-boundary';
+import { ErrorBoundary } from '@src/libs/layout/error';
 
 import { GlobalStyle, themeConfig } from '@libs/ui';
 
@@ -47,14 +47,14 @@ const Tree = () => {
 
   return (
     <Suspense fallback={null}>
-      <ErrorBoundary>
-        <ThemeProvider theme={themeConfig}>
-          <GlobalStyle />
-          <ReduxProvider store={store}>
+      <ThemeProvider theme={themeConfig}>
+        <GlobalStyle />
+        <ReduxProvider store={store}>
+          <ErrorBoundary>
             <AppRouter />
-          </ReduxProvider>
-        </ThemeProvider>
-      </ErrorBoundary>
+          </ErrorBoundary>
+        </ReduxProvider>
+      </ThemeProvider>
     </Suspense>
   );
 };

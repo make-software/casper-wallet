@@ -8,7 +8,6 @@ import { ThemeProvider } from 'styled-components';
 import { GlobalStyle, themeConfig } from '@libs/ui';
 import { Provider as ReduxProvider } from 'react-redux';
 
-import { ErrorBoundary } from '@popup/error-boundary';
 import {
   backgroundEvent,
   BackgroundEvent,
@@ -19,6 +18,7 @@ import browser from 'webextension-polyfill';
 import { AppRouter } from './app-router';
 import { isActionOf } from 'typesafe-actions';
 import { createMainStoreReplica } from '@src/background/redux/utils';
+import { ErrorBoundary } from '@src/libs/layout/error';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
@@ -46,14 +46,14 @@ const Tree = () => {
 
   return (
     <Suspense fallback={null}>
-      <ErrorBoundary>
-        <ThemeProvider theme={themeConfig}>
-          <GlobalStyle />
-          <ReduxProvider store={store}>
+      <ThemeProvider theme={themeConfig}>
+        <GlobalStyle />
+        <ReduxProvider store={store}>
+          <ErrorBoundary>
             <AppRouter />
-          </ReduxProvider>
-        </ThemeProvider>
-      </ErrorBoundary>
+          </ErrorBoundary>
+        </ReduxProvider>
+      </ThemeProvider>
     </Suspense>
   );
 };

@@ -70,13 +70,22 @@ export function createOpenWindow({
       const existingWindow = allWindows.find(window => window.id === id);
 
       if (existingWindow) {
-        const window = await browser.windows.get(id);
-        if (window.id) {
-          return browser.windows.update(window.id, {
-            // Bring popup window to the front
+        console.log('searchParams', searchParams);
+        const window = await browser.windows.get(id, { populate: true });
+        if (window?.id != null) {
+          // Bring popup window to the front
+          await browser.windows.update(window.id, {
             focused: true,
             drawAttention: true
           });
+          // update tab url
+          const tab = window.tabs?.[0];
+          if (tab?.id != null) {
+            await browser.tabs.update({
+              url: getUrlByPurposeForOpening(purposeForOpening, searchParams)
+            });
+          }
+          return window;
         }
       } else {
         clearWindowId();

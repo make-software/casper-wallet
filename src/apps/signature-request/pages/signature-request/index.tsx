@@ -10,7 +10,10 @@ import {
 } from '@libs/layout';
 import { closeActiveWindow } from '@src/background/close-window';
 import { selectDeploysJsonById } from '@src/background/redux/deploys/selectors';
-import { selectVaultAccounts } from '@src/background/redux/vault/selectors';
+import {
+  selectConnectedAccountNamesWithOrigin,
+  selectVaultAccounts
+} from '@src/background/redux/vault/selectors';
 import { emitSdkEventToAllActiveTabs } from '@src/content/sdk-event';
 import { sdkMessage } from '@src/content/sdk-message';
 import { Button } from '@src/libs/ui';
@@ -37,13 +40,24 @@ export function SignatureRequestPage() {
   if (signingAccount == null) {
     throw Error('No signing account');
   }
+
+  const connectedAccountNames = useSelector(
+    selectConnectedAccountNamesWithOrigin
+  );
   // signing account should be connected to site
+  if (!connectedAccountNames.includes(signingAccount.name)) {
+    throw Error('Account with signingPublicKeyHex is not connected to site');
+  }
 
   const deployJsonById = useSelector(selectDeploysJsonById);
   const deployJson = deployJsonById[requestId];
+  if (deployJson == null) {
+    throw Error('Deploy not found in state');
+  }
+
   const res = DeployUtil.deployFromJson(deployJson);
   if (!res.ok) {
-    throw Error('Deploy Error');
+    throw Error('Deploy from json parsing error');
   }
 
   const deploy = res.val;
