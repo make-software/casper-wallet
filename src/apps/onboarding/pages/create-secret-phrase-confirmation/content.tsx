@@ -25,7 +25,7 @@ export function CreateSecretPhraseConfirmationPageContent() {
     {
       key: 5,
       value: t(
-        'Casper Wallet cannot recover your secret recovery phrase! If you lose it, you may not be able to recover your funds'
+        'Casper Wallet cannot recover your secret recovery phrase! If you lose it, you may not be able to recover your funds.'
       )
     }
   ];
