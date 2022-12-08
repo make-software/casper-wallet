@@ -7,6 +7,7 @@ import {
   VerticalSpaceContainer
 } from '@src/libs/layout';
 import { Typography, TextList } from '@src/libs/ui';
+import { Underline } from '@libs/ui/components/underline/underline';
 
 export function ConfirmSecretPhraseSuccessPageContent() {
   const { t } = useTranslation();
@@ -16,8 +17,11 @@ export function ConfirmSecretPhraseSuccessPageContent() {
     { key: 2, value: t('Never share the phrase with anyone.') },
     {
       key: 3,
-      value: t(
-        'Be careful of phishing! Casper Signer will never spontaneously ask for your secret phrase.'
+      value: (
+        <Trans>
+          Be careful of phishing! Casper Signer will{' '}
+          <Underline>never</Underline> spontaneously ask for your secret phrase.
+        </Trans>
       )
     },
     {
