@@ -82,13 +82,14 @@ function App() {
         </Button>
       </Row>
       <Row>
-        Test signature request:{' '}
         {activePublicKey == null ? (
-          'Not connected'
+          'CONNECT TO SEE MORE ACTIONS'
         ) : (
           <div>
+            <div style={{ textAlign: 'center' }}>
+              SIGNATURE REQUEST SCENARIOS
+            </div>
             <Button
-              disabled={activePublicKey == null}
               variant="text"
               onClick={() => {
                 const deploy = makeNativeTransferDeploy(
@@ -103,7 +104,6 @@ function App() {
               Transfer
             </Button>
             <Button
-              disabled={activePublicKey == null}
               variant="text"
               onClick={() => {
                 const deploy = makeAuctionManagerDeploy(
@@ -119,7 +119,6 @@ function App() {
               Delegate
             </Button>
             <Button
-              disabled={activePublicKey == null}
               variant="text"
               onClick={() => {
                 const deploy = makeAuctionManagerDeploy(
@@ -135,7 +134,6 @@ function App() {
               Undelegate
             </Button>
             <Button
-              disabled={activePublicKey == null}
               variant="text"
               onClick={() => {
                 const deploy = makeAuctionManagerDeploy(
@@ -150,9 +148,8 @@ function App() {
             >
               Redelegate
             </Button>
-
+            <div style={{ textAlign: 'center' }}>SIGNATURE REQUEST ERRORS</div>
             <Button
-              disabled={activePublicKey == null}
               variant="text"
               onClick={() => {
                 const deploy = makeNativeTransferDeploy(
@@ -166,6 +163,21 @@ function App() {
               }}
             >
               Invalid Checksum
+            </Button>
+            <Button
+              variant="text"
+              onClick={() => {
+                const deploy = makeNativeTransferDeploy(
+                  '01ebf429a18b232b71df5759fe4e77dd05bf8ab3f2ccdcca50d0baa47d6ff27e02',
+                  // recipientPublicKey was corrupted by changing last `c` char to `C`
+                  '0106ca7c39cd272dbf21a86eeb3b36b7c26e2e9b94af64292419f7862936bca2Ca',
+                  '2500000000',
+                  '1234'
+                );
+                handleSignDeploy(deploy);
+              }}
+            >
+              Not approved
             </Button>
           </div>
         )}

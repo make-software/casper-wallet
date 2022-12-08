@@ -21,7 +21,6 @@ import {
   secretPhraseCreated
 } from '@src/background/redux/vault/actions';
 import {
-  selectIsActiveAccountConnectedWithOrigin,
   selectIsAnyAccountConnectedWithOrigin,
   selectVaultAccountsNames,
   selectVaultAccountsSecretKeysBase64,
@@ -146,7 +145,7 @@ browser.runtime.onMessage.addListener(
 
             openWindow({
               purposeForOpening: PurposeForOpening.ConnectToApp,
-              query
+              searchParams: query
             });
             success = true;
 
@@ -182,20 +181,12 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(sdkMessage.signRequest): {
-            const isActiveAccountConnected =
-              selectIsActiveAccountConnectedWithOrigin(store.getState());
-
-            // TODO PIOTR: Not connected error should be shown on every SDK call
-            // need to design a global error handling
-            if (!isActiveAccountConnected) {
-              return sendError('Active account not connected.');
-            }
-
+            const { signingPublicKeyHex } = action.payload;
             let deployJson;
             try {
               deployJson = JSON.parse(action.payload.deployJson);
             } catch (err) {
-              return sendError('Deploy json string parse error');
+              return sendError(Error('Desploy json string parse error'));
             }
 
             store.dispatch(
@@ -206,8 +197,9 @@ browser.runtime.onMessage.addListener(
             );
             openWindow({
               purposeForOpening: PurposeForOpening.SignatureRequest,
-              query: {
-                requestId: action.meta.requestId
+              searchParams: {
+                requestId: action.meta.requestId,
+                signingPublicKeyHex
               }
             });
 

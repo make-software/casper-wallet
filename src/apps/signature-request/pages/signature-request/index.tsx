@@ -10,7 +10,7 @@ import {
 } from '@libs/layout';
 import { closeActiveWindow } from '@src/background/close-window';
 import { selectDeploysJsonById } from '@src/background/redux/deploys/selectors';
-import { selectVaultActiveAccount } from '@src/background/redux/vault/selectors';
+import { selectVaultAccounts } from '@src/background/redux/vault/selectors';
 import { emitSdkEventToAllActiveTabs } from '@src/content/sdk-event';
 import { sdkMessage } from '@src/content/sdk-message';
 import { Button } from '@src/libs/ui';
@@ -23,15 +23,21 @@ export function SignatureRequestPage() {
 
   const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
+  const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
 
-  if (!requestId) {
+  if (!requestId || !signingPublicKeyHex) {
     throw Error('Missing search param');
   }
 
-  const activeAccount = useSelector(selectVaultActiveAccount);
-  if (activeAccount?.publicKey == null) {
-    throw Error('No active account');
+  const accounts = useSelector(selectVaultAccounts);
+  const signingAccount = accounts.find(
+    a => a.publicKey === signingPublicKeyHex
+  );
+  // signing account should exist in wallet
+  if (signingAccount == null) {
+    throw Error('No signing account');
   }
+  // signing account should be connected to site
 
   const deployJsonById = useSelector(selectDeploysJsonById);
   const deployJson = deployJsonById[requestId];
@@ -45,16 +51,16 @@ export function SignatureRequestPage() {
   const handleSign = useCallback(() => {
     const signature = signDeploy(
       deploy.hash,
-      activeAccount.publicKey,
-      activeAccount.secretKey
+      signingAccount.publicKey,
+      signingAccount.secretKey
     );
     emitSdkEventToAllActiveTabs(
       sdkMessage.signResponse({ signature }, { requestId })
     );
     closeActiveWindow();
   }, [
-    activeAccount?.publicKey,
-    activeAccount?.secretKey,
+    signingAccount?.publicKey,
+    signingAccount?.secretKey,
     deploy.hash,
     requestId
   ]);

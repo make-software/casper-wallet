@@ -6,11 +6,13 @@ export enum PurposeForOpening {
   SignatureRequest = 'SignatureRequest'
 }
 
+export type WindowSearchParams = Record<string, string>;
+
 function getUrlByPurposeForOpening(
   purposeForOpening: PurposeForOpening,
-  query?: Record<string, string>
+  searchParams?: WindowSearchParams
 ) {
-  const urlSearchParams = new URLSearchParams(query).toString();
+  const urlSearchParams = new URLSearchParams(searchParams).toString();
   const searchParamsWithPrefix = urlSearchParams && '?' + urlSearchParams;
 
   switch (purposeForOpening) {
@@ -34,7 +36,7 @@ interface CreateOpenWindowProps {
 export interface OpenWindowProps {
   purposeForOpening: PurposeForOpening;
   isNewWindow?: boolean;
-  query?: Record<string, string>;
+  searchParams?: WindowSearchParams;
 }
 
 // This function returns a window instance that was created or reused
@@ -46,7 +48,7 @@ export function createOpenWindow({
   return async function openWindow({
     purposeForOpening,
     isNewWindow,
-    query
+    searchParams
   }: OpenWindowProps): Promise<browser.Windows.Window> {
     const id = isNewWindow ? null : windowId;
 
@@ -92,7 +94,7 @@ export function createOpenWindow({
 
         return browser.windows
           .create({
-            url: getUrlByPurposeForOpening(purposeForOpening, query),
+            url: getUrlByPurposeForOpening(purposeForOpening, searchParams),
             type: 'popup',
             height: popupHeight,
             width: popupWidth,

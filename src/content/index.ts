@@ -86,9 +86,10 @@ function handleSdkRequest(e: Event) {
   // validation
   if (!isSDKMessage(requestAction)) {
     throw Error(
-      'Content: invalid sdk requestAction.' + JSON.stringify(requestAction)
+      'Content: invalid sdk requestAction: ' + JSON.stringify(requestAction)
     );
   }
+
   browser.runtime
     .sendMessage(requestAction)
     .then(responseAction => {
@@ -102,7 +103,7 @@ function handleSdkRequest(e: Event) {
       }
     })
     .catch(err => {
-      throw Error('Content: sdk request send message:' + err);
+      throw Error('Content: sdk request send message: ' + err);
     });
 }
 
@@ -120,7 +121,7 @@ function injectSdkScript() {
     };
     documentHeadOrRoot.insertBefore(scriptTag, documentHeadOrRoot.children[0]);
   } catch (e) {
-    console.error('CasperWalletSdk injection failed.', e);
+    console.error('CasperWalletSdk injection failed. ', e);
   }
 }
 
