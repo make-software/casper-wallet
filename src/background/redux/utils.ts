@@ -71,7 +71,7 @@ export async function getMainStoreSingleton() {
       browser.runtime
         .sendMessage(backgroundEvent.popupStateUpdated(popupState))
         .catch(e => {
-          // console.error('STATE PROPAGATION FAILED: ', e);
+          // console.log('STATE PROPAGATION FAILED: ', e);
         });
 
       // persist selected state
@@ -83,11 +83,11 @@ export async function getMainStoreSingleton() {
           [LOGIN_RETRY_KEY]: loginRetryCount
         })
         .catch(e => {
-          console.error('PERSIST ENCRYPTED VAULT FAILED: ', e);
+          console.error('Persist encrypted vault failed: ', e);
         });
     });
   } else {
-    // console.warn('STORE REUSED', state);
+    // console.log('STORE REUSED', state);
   }
 
   return storeSingleton;

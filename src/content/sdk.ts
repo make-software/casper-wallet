@@ -19,7 +19,7 @@ function fetchFromExtensionBackend<T extends SdkMessage['payload']>(
       );
     }, options?.timeout || /** 30min */ 30 * 60 * 1000);
 
-    console.error('SDK SENT REQUEST:', JSON.stringify(requestAction));
+    // console.log('SDK SENT REQUEST:', JSON.stringify(requestAction));
     window.dispatchEvent(
       new CustomEvent(sdkMessageProxyEvents.SDKRequestAction, {
         detail: requestAction
@@ -28,7 +28,7 @@ function fetchFromExtensionBackend<T extends SdkMessage['payload']>(
 
     const waitForResponseEvent = (e: Event) => {
       const responseAction = JSON.parse((e as CustomEvent).detail);
-      console.error('SDK GOT RESPONSE:', JSON.stringify(responseAction));
+      // console.log('SDK GOT RESPONSE:', JSON.stringify(responseAction));
       // filter out response events not for this request
       if (
         !isSDKMessage(responseAction) ||

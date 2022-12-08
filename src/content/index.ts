@@ -31,7 +31,7 @@ function syncActiveOriginWithStore() {
 
 // Proxy Wallet Events to connected site
 function emitSdkEvent(message: SdkEvent) {
-  console.error('CONTENT EMIT SDK EVENT:', JSON.stringify(message));
+  // console.error('CONTENT EMIT SDK EVENT:', JSON.stringify(message));
   let eventType: string;
   switch (message.type) {
     case getType(sdkEvent.connectedActiveAccountEvent):
@@ -125,7 +125,7 @@ function injectSdkScript() {
 }
 
 function init() {
-  console.error('CONTENT INIT');
+  // console.log('CONTENT INIT');
 
   // idempotent, doesn't need cleanup
   injectSdkScript();
@@ -146,7 +146,7 @@ function init() {
 export const cleanupEventType = 'CasperWalletProvider:Cleanup';
 window.dispatchEvent(new CustomEvent(cleanupEventType));
 function cleanup() {
-  console.error('CONTENT CLEANUP');
+  // console.error('CONTENT CLEANUP');
   document.removeEventListener(cleanupEventType, cleanup);
 
   window.removeEventListener('load', syncActiveOriginWithStore);
