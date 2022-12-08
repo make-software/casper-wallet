@@ -43,6 +43,7 @@ type WalletService = {
     accountPublicKey: string,
     recipientPublicKey?: string
   ) => Promise<{ signature: Uint8Array }>;
+  getVersion: () => Promise<string>;
 };
 
 export const walletServiceContext = createContext<WalletService>({} as any);
@@ -198,7 +199,8 @@ export const WalletServiceProvider = props => {
     activePublicKey: activePublicKey,
     connectSigner: connectSigner,
     disconnect: disconnect,
-    sign: sign
+    sign: sign,
+    getVersion: getCasperWalletInstance().getVersion
   };
 
   return <WalletServiceContextProvider value={contextProps} {...props} />;

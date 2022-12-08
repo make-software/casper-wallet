@@ -236,9 +236,8 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(sdkMessage.getVersionRequest): {
-            const manifestData = chrome.runtime.getManifest();
-            // temporary WORKAROUND for cspr.live connect
-            const version = '1.4.12' || manifestData.version;
+            const manifestData = await chrome.runtime.getManifest();
+            const version = manifestData.version;
 
             return sendResponse(
               sdkMessage.getVersionResponse(version, action.meta)

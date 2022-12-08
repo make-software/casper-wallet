@@ -35,6 +35,7 @@ function App() {
     connectSigner,
     disconnect,
     sign,
+    getVersion,
     activePublicKey,
     errorMessage,
     logs
@@ -69,6 +70,15 @@ function App() {
         Connected Account: {statusText}{' '}
         <Button variant="contained" onClick={handleConnect}>
           {connectButtonText}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={async () => {
+            const ver = await getVersion();
+            alert(ver);
+          }}
+        >
+          Show Version
         </Button>
       </Row>
       <Row>
