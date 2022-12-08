@@ -14,6 +14,7 @@ import {
   TextList
 } from '@src/libs/ui';
 import { selectSecretPhrase } from '@src/background/redux/vault/selectors';
+import { Underline } from '@libs/ui/components/underline/underline';
 
 export function BackupSecretPhrasePageContent() {
   const { t } = useTranslation();
@@ -29,8 +30,12 @@ export function BackupSecretPhrasePageContent() {
     { key: 2, value: t('Never share the phrase with anyone.') },
     {
       key: 3,
-      value: t(
-        'Be careful of phishing! Casper Wallet will never spontaneously ask you for your secret recovery phrase.'
+      value: (
+        <Trans>
+          Be careful of phishing! Casper Wallet will{' '}
+          <Underline>never</Underline> spontaneously ask you for your secret
+          recovery phrase.
+        </Trans>
       )
     },
     {
@@ -57,7 +62,7 @@ export function BackupSecretPhrasePageContent() {
       <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            Use your secret recovery phrase to recover access to your accounts
+            Use your secret recovery phrase to recover access to your accounts.
           </Trans>
         </Typography>
       </TextContainer>

@@ -3,6 +3,7 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { TabPageContainer, VerticalSpaceContainer } from '@src/libs/layout';
 import { Typography, TextList } from '@src/libs/ui';
+import { Underline } from '@libs/ui/components/underline/underline';
 
 export function CreateSecretPhraseConfirmationPageContent() {
   const { t } = useTranslation();
@@ -12,8 +13,12 @@ export function CreateSecretPhraseConfirmationPageContent() {
     { key: 2, value: t('Never share the phrase with anyone.') },
     {
       key: 3,
-      value: t(
-        'Be careful of phishing! Casper Wallet will never spontaneously ask you for your secret recovery phrase.'
+      value: (
+        <Trans>
+          Be careful of phishing! Casper Wallet will{' '}
+          <Underline>never</Underline> spontaneously ask you for your secret
+          recovery phrase.
+        </Trans>
       )
     },
     {
@@ -25,7 +30,7 @@ export function CreateSecretPhraseConfirmationPageContent() {
     {
       key: 5,
       value: t(
-        'Casper Wallet cannot recover your secret recovery phrase! If you lose it, you may not be able to recover your funds'
+        'Casper Wallet cannot recover your secret recovery phrase! If you lose it, you may not be able to recover your funds.'
       )
     }
   ];

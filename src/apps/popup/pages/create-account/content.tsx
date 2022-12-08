@@ -36,7 +36,7 @@ export function CreateAccountPageContent({
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             New accounts are recovered using your Casper Wallet’s secret
-            recovery phrase
+            recovery phrase.
           </Trans>
         </Typography>
       </TextContainer>
