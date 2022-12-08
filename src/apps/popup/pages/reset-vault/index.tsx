@@ -12,6 +12,7 @@ import { SvgIcon, Typography, Button, Checkbox } from '@src/libs/ui';
 import { useTypedNavigate } from '@popup/router';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { resetVault } from '@src/background/redux/sagas/actions';
+import { closeWindowByReload } from '@background/close-window-by-reload';
 
 export function ResetVaultPageContent() {
   const [isChecked, setIsChecked] = useState(false);
@@ -19,8 +20,9 @@ export function ResetVaultPageContent() {
   const { t } = useTranslation();
 
   function handleResetVault() {
-    dispatchToMainStore(resetVault());
-    window.close();
+    dispatchToMainStore(resetVault()).then(() => {
+      closeWindowByReload();
+    });
   }
 
   function handleCancel() {
