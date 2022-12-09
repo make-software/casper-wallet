@@ -4,7 +4,6 @@ export type ArgDict = { [key: string]: string | string[] };
 
 export enum DeployType {
   TransferCall = 'Transfer Call',
-  StandardPayment = 'Standard Payment',
   ContractCall = 'Contract Call',
   Unknown = 'Unknown'
 }

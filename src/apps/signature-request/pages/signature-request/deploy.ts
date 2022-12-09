@@ -27,15 +27,6 @@ export function getDeployType(deploy: CasperDeploy): DeployType {
   }
 
   if (deploy.isStandardPayment()) {
-    return DeployType.StandardPayment;
-  }
-
-  if (
-    deploy.session.isStoredContractByHash() ||
-    deploy.session.isStoredContractByName() ||
-    deploy.session.isStoredVersionContractByHash() ||
-    deploy.session.isStoredVersionContractByName()
-  ) {
     return DeployType.ContractCall;
   }
 
