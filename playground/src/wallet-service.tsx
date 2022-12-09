@@ -40,8 +40,7 @@ type WalletService = {
   disconnect: () => void;
   sign: (
     deployJson: string,
-    accountPublicKey: string,
-    recipientPublicKey?: string
+    accountPublicKey: string
   ) => Promise<{ signature: Uint8Array }>;
   getVersion: () => Promise<string>;
 };
@@ -181,16 +180,8 @@ export const WalletServiceProvider = props => {
     getCasperWalletInstance().requestConnection();
   };
 
-  const sign = async (
-    deployJson: string,
-    accountPublicKey: string,
-    recipientPublicKey?: string
-  ) => {
-    return getCasperWalletInstance().sign(
-      deployJson,
-      accountPublicKey,
-      recipientPublicKey
-    );
+  const sign = async (deployJson: string, accountPublicKey: string) => {
+    return getCasperWalletInstance().sign(deployJson, accountPublicKey);
   };
 
   const contextProps: WalletService = {

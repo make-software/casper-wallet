@@ -70,7 +70,6 @@ export function createOpenWindow({
       const existingWindow = allWindows.find(window => window.id === id);
 
       if (existingWindow) {
-        console.log('searchParams', searchParams);
         const window = await browser.windows.get(id, { populate: true });
         if (window?.id != null) {
           // Bring popup window to the front
