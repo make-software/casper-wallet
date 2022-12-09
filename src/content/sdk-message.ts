@@ -49,7 +49,6 @@ export const sdkMessage = {
     {
       deployJson: string;
       signingPublicKeyHex: string;
-      targetPublicKeyHex: string | undefined;
     },
     Meta
   >(),

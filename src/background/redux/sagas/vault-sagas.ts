@@ -50,7 +50,7 @@ import {
 } from './actions';
 import {
   selectVaultCipher,
-  selectVaultDoesExist
+  selectVaultCipherDoesExist
 } from '../vault-cipher/selectors';
 import { keysUpdated } from '../keys/actions';
 import { vaultCipherCreated } from '../vault-cipher/actions';
@@ -163,7 +163,7 @@ function* timeoutCounterSaga(action: any) {
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   try {
-    const vaultDoesExist = yield* sagaSelect(selectVaultDoesExist);
+    const vaultDoesExist = yield* sagaSelect(selectVaultCipherDoesExist);
     const vaultIsLocked = yield* sagaSelect(selectVaultIsLocked);
     const vaultLastActivityTime = yield* sagaSelect(
       selectVaultLastActivityTime

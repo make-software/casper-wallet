@@ -23,26 +23,23 @@ import { ArgDict, CasperDeploy, DeployType } from './types';
 
 export function getDeployType(deploy: CasperDeploy): DeployType {
   if (deploy.isTransfer()) {
-    return 'Transfer Call';
+    return DeployType.TransferCall;
   }
 
-  if (
-    deploy.session.isStoredContractByHash() ||
-    deploy.session.isStoredContractByName()
-  ) {
-    return 'Contract Call';
+  if (deploy.isStandardPayment()) {
+    return DeployType.ContractCall;
   }
 
-  throw new Error('getDeployType failed');
+  return DeployType.Unknown;
 }
 
 export function getDeployPayment(deploy: CasperDeploy): string {
   const arg = deploy.payment.moduleBytes?.getArgByName('amount');
   if (arg != null) {
     return arg.value().toString();
+  } else {
+    return 'N/A';
   }
-
-  throw new Error('getDeployPayment failed');
 }
 
 export function getDeployArgs(deploy: CasperDeploy): ArgDict {

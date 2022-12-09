@@ -4,7 +4,6 @@ import { NavigateFunction } from 'react-router';
 import {
   LayoutWindow,
   PopupHeader,
-  HeaderSubmenuBarNavLink,
   FooterButtonsContainer
 } from '@libs/layout';
 import { Button } from '@libs/ui';
@@ -12,20 +11,26 @@ import { Button } from '@libs/ui';
 import { closeActiveWindow } from '@background/close-window';
 
 import { ErrorPageContent } from './content';
+import { ErrorLocationState } from './types';
 
 interface ErrorPageProps {
-  createTypedNavigate: () => NavigateFunction;
-  createTypedLocation: () => Location & any;
+  overrideState?: { state: Required<ErrorLocationState> };
+  createTypedNavigate?: () => NavigateFunction;
+  createTypedLocation?: () => Location & any;
 }
 
 export function WindowErrorPage({
+  overrideState,
   createTypedNavigate,
   createTypedLocation
 }: ErrorPageProps) {
-  const navigate = createTypedNavigate();
-  const location = createTypedLocation();
+  const navigate = createTypedNavigate
+    ? createTypedNavigate()
+    : closeActiveWindow;
+  const location = createTypedLocation && createTypedLocation();
 
-  const state = location.state;
+  const state: Required<ErrorLocationState> =
+    overrideState?.state || location.state;
 
   if (state?.errorPrimaryButtonLabel == null) {
     throw new Error('Cannot render ErrorPage: not enough props');
@@ -34,16 +39,7 @@ export function WindowErrorPage({
   return (
     <LayoutWindow
       variant="default"
-      renderHeader={() => (
-        <PopupHeader
-          renderSubmenuBarItems={() => (
-            <HeaderSubmenuBarNavLink
-              linkType="close"
-              onClick={() => closeActiveWindow()}
-            />
-          )}
-        />
-      )}
+      renderHeader={() => <PopupHeader />}
       renderContent={() => (
         <ErrorPageContent
           errorHeaderText={state.errorHeaderText}
@@ -56,7 +52,7 @@ export function WindowErrorPage({
           <Button
             color="primaryBlue"
             onClick={() =>
-              location.state?.errorRedirectPath != null
+              location?.state?.errorRedirectPath != null
                 ? navigate(location.state.errorRedirectPath)
                 : closeActiveWindow()
             }

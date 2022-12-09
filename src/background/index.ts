@@ -21,8 +21,6 @@ import {
   secretPhraseCreated
 } from '@src/background/redux/vault/actions';
 import {
-  selectVaultCountOfAccounts,
-  selectIsActiveAccountConnectedWithOrigin,
   selectIsAnyAccountConnectedWithOrigin,
   selectVaultAccountsNames,
   selectVaultAccountsSecretKeysBase64,
@@ -75,12 +73,39 @@ import {
 import { keysReseted, keysUpdated } from './redux/keys/actions';
 import { selectVaultIsLocked } from './redux/session/selectors';
 import { selectKeysDoesExist } from './redux/keys/selectors';
-import { selectVaultDoesExist } from './redux/vault-cipher/selectors';
+import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
 import { ServiceMessage, serviceMessage } from './service-message';
 import {
   loginRetryCountIncrement,
   loginRetryCountReseted
 } from './redux/login-retry-count/actions';
+
+// setup default onboarding action
+async function handleActionClick() {
+  await openOnboardingUi();
+}
+browser.action && browser.action.onClicked.addListener(handleActionClick);
+browser.browserAction &&
+  browser.browserAction.onClicked.addListener(handleActionClick);
+
+async function isOnboardingCompleted() {
+  const store = await getMainStoreSingleton();
+  const state = store.getState();
+
+  const keysDoesExist = selectKeysDoesExist(state);
+  const vaultCipherDoesExist = selectVaultCipherDoesExist(state);
+
+  return keysDoesExist && vaultCipherDoesExist;
+}
+
+browser.runtime.onStartup.addListener(() => {
+  // check if onboarding is completed and then disable
+  isOnboardingCompleted().then(yes => {
+    if (yes) {
+      disableOnboardingFlow();
+    }
+  });
+});
 
 browser.runtime.onInstalled.addListener(async () => {
   // this will run on installation or update so
@@ -88,26 +113,15 @@ browser.runtime.onInstalled.addListener(async () => {
   // DEV MODE: clean store on installation
   // browser.storage.local.remove([REDUX_STORAGE_KEY]);
 
-  const store = await getMainStoreSingleton();
-  const state = store.getState();
-
-  const keysDoesExist = selectKeysDoesExist(state);
-  const vaultDoesExist = selectVaultDoesExist(state);
-
-  if (!keysDoesExist || !vaultDoesExist) {
-    await openOnboardingUi();
-  } else {
-    await disableOnboardingFlow();
-  }
+  // after installation/update check if onboarding is completed
+  isOnboardingCompleted().then(yes => {
+    if (yes) {
+      disableOnboardingFlow();
+    } else {
+      openOnboardingUi();
+    }
+  });
 });
-
-async function handleActionClick() {
-  await openOnboardingUi();
-}
-
-browser.action && browser.action.onClicked.addListener(handleActionClick);
-browser.browserAction &&
-  browser.browserAction.onClicked.addListener(handleActionClick);
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 browser.runtime.onMessage.addListener(
@@ -120,26 +134,20 @@ browser.runtime.onMessage.addListener(
         switch (action.type) {
           case getType(sdkMessage.connectRequest): {
             let success = false;
-            const isLocked = selectVaultIsLocked(store.getState());
-            const countOfAccounts = selectVaultCountOfAccounts(
-              store.getState()
-            );
 
-            if (!isLocked && countOfAccounts > 0) {
-              const query: Record<string, string> = {
-                origin: action.payload.origin
-              };
+            const query: Record<string, string> = {
+              origin: action.payload.origin
+            };
 
-              if (action.payload.title != null) {
-                query.title = action.payload.title;
-              }
-
-              openWindow({
-                purposeForOpening: PurposeForOpening.ConnectToApp,
-                query
-              });
-              success = true;
+            if (action.payload.title != null) {
+              query.title = action.payload.title;
             }
+
+            openWindow({
+              purposeForOpening: PurposeForOpening.ConnectToApp,
+              searchParams: query
+            });
+            success = true;
 
             return sendResponse(
               sdkMessage.connectResponse(success, action.meta)
@@ -173,20 +181,12 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(sdkMessage.signRequest): {
-            const isActiveAccountConnected =
-              selectIsActiveAccountConnectedWithOrigin(store.getState());
-
-            // TODO PIOTR: Not connected error should be shown on every SDK call
-            // need to design a global error handling
-            if (!isActiveAccountConnected) {
-              return sendError('Active account not connected.');
-            }
-
+            const { signingPublicKeyHex } = action.payload;
             let deployJson;
             try {
               deployJson = JSON.parse(action.payload.deployJson);
             } catch (err) {
-              return sendError('Deploy json string parse error');
+              return sendError(Error('Desploy json string parse error'));
             }
 
             store.dispatch(
@@ -197,8 +197,9 @@ browser.runtime.onMessage.addListener(
             );
             openWindow({
               purposeForOpening: PurposeForOpening.SignatureRequest,
-              query: {
-                requestId: action.meta.requestId
+              searchParams: {
+                requestId: action.meta.requestId,
+                signingPublicKeyHex
               }
             });
 
@@ -227,9 +228,8 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(sdkMessage.getVersionRequest): {
-            const manifestData = chrome.runtime.getManifest();
-            // temporary WORKAROUND for cspr.live connect
-            const version = '1.4.12' || manifestData.version;
+            const manifestData = await chrome.runtime.getManifest();
+            const version = manifestData.version;
 
             return sendResponse(
               sdkMessage.getVersionResponse(version, action.meta)

@@ -40,9 +40,9 @@ type WalletService = {
   disconnect: () => void;
   sign: (
     deployJson: string,
-    accountPublicKey: string,
-    recipientPublicKey?: string
+    accountPublicKey: string
   ) => Promise<{ signature: Uint8Array }>;
+  getVersion: () => Promise<string>;
 };
 
 export const walletServiceContext = createContext<WalletService>({} as any);
@@ -59,15 +59,15 @@ export const WalletServiceProvider = props => {
   const log = (msg: string, payload?: any) =>
     setLogs(state => [[msg, payload], ...state]);
 
-  const [activePublicKey, setActivePublicKey] = useState<null | string>(() => {
+  const [activePublicKey, _setActivePublicKey] = useState<null | string>(() => {
     const state: SyncWalletBroadcastMessage | null = JSON.parse(
       localStorage.getItem(REDUX_WALLET_SYNC_KEY) || 'null'
     );
     return state?.publicKey || null;
   });
 
-  const updatePublicKey = useCallback((key: string | null) => {
-    setActivePublicKey(key);
+  const setActivePublicKey = useCallback((key: string | null) => {
+    _setActivePublicKey(key);
     localStorage.setItem(
       REDUX_WALLET_SYNC_KEY,
       JSON.stringify({
@@ -86,7 +86,7 @@ export const WalletServiceProvider = props => {
           const publicKeyChanged = activePublicKey !== message.publicKey;
 
           if (publicKeyChanged) {
-            updatePublicKey(message.publicKey);
+            setActivePublicKey(message.publicKey);
           }
         } catch (err: any) {
           setError(err);
@@ -100,7 +100,7 @@ export const WalletServiceProvider = props => {
     return () => {
       window.removeEventListener('storage', syncWalletBetweenTabsAndWindows);
     };
-  }, [activePublicKey, updatePublicKey]);
+  }, [activePublicKey, setActivePublicKey]);
 
   // SIGNER SUBSCRIPTIONS
   useEffect(() => {
@@ -119,7 +119,7 @@ export const WalletServiceProvider = props => {
       try {
         const action: WalletState = JSON.parse(msg.detail);
         if (action.activeKey) {
-          updatePublicKey(action.activeKey);
+          setActivePublicKey(action.activeKey);
         }
       } catch (err) {
         console.error(err);
@@ -131,7 +131,7 @@ export const WalletServiceProvider = props => {
       try {
         // const action: WalletState = JSON.parse(msg.detail);
         if (activePublicKey) {
-          updatePublicKey(null);
+          setActivePublicKey(null);
         }
       } catch (err) {
         console.error(err);
@@ -143,9 +143,9 @@ export const WalletServiceProvider = props => {
       try {
         const action: WalletState = JSON.parse(msg.detail);
         if (action.isConnected && action.activeKey) {
-          updatePublicKey(action.activeKey);
+          setActivePublicKey(action.activeKey);
         } else {
-          updatePublicKey(null);
+          setActivePublicKey(null);
         }
       } catch (err) {
         console.error(err);
@@ -167,10 +167,11 @@ export const WalletServiceProvider = props => {
         handleActiveKeyChanged
       );
     };
-  }, [activePublicKey, updatePublicKey]);
+  }, [activePublicKey, setActivePublicKey]);
 
   const disconnect = () => {
     console.log('disconnectRequest');
+    setActivePublicKey(null);
     getCasperWalletInstance().disconnectFromSite();
   };
 
@@ -179,16 +180,8 @@ export const WalletServiceProvider = props => {
     getCasperWalletInstance().requestConnection();
   };
 
-  const sign = async (
-    deployJson: string,
-    accountPublicKey: string,
-    recipientPublicKey?: string
-  ) => {
-    return getCasperWalletInstance().sign(
-      deployJson,
-      accountPublicKey,
-      recipientPublicKey
-    );
+  const sign = async (deployJson: string, accountPublicKey: string) => {
+    return getCasperWalletInstance().sign(deployJson, accountPublicKey);
   };
 
   const contextProps: WalletService = {
@@ -197,7 +190,8 @@ export const WalletServiceProvider = props => {
     activePublicKey: activePublicKey,
     connectSigner: connectSigner,
     disconnect: disconnect,
-    sign: sign
+    sign: sign,
+    getVersion: getCasperWalletInstance().getVersion
   };
 
   return <WalletServiceContextProvider value={contextProps} {...props} />;

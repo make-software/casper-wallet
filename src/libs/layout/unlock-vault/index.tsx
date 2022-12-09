@@ -3,8 +3,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-import { RouterPath } from '@popup/router';
-
 import {
   ContentContainer,
   FooterButtonsAbsoluteContainer,
@@ -33,6 +31,7 @@ import {
 } from '@src/background/redux/keys/selectors';
 import { unlockVault } from '@src/background/redux/sagas/actions';
 import { selectLoginRetryCount } from '@src/background/redux/login-retry-count/selectors';
+import { LockedRouterPath } from '../locked-router';
 
 export function UnlockVaultPageContent() {
   const { t } = useTranslation();
@@ -106,7 +105,7 @@ export function UnlockVaultPageContent() {
           <Button
             type="button"
             color="secondaryRed"
-            onClick={() => navigate(RouterPath.ResetVault)}
+            onClick={() => navigate(LockedRouterPath.ResetVault)}
           >
             {t('Reset wallet')}
           </Button>
@@ -157,7 +156,7 @@ export function UnlockVaultPageContent() {
         <Button
           type="button"
           color="secondaryRed"
-          onClick={() => navigate(RouterPath.ResetVault)}
+          onClick={() => navigate(LockedRouterPath.ResetVault)}
         >
           {t('Reset wallet')}
         </Button>
