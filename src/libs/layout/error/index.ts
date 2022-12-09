@@ -18,6 +18,7 @@ export function createErrorLocationState({
   };
 }
 
+export * from './error-boundary';
+export * from './tab-page';
 export * from './types';
 export * from './window-page';
-export * from './tab-page';

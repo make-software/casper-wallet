@@ -1,5 +1,8 @@
 import React, { Component, ReactNode } from 'react';
-import { Typography } from '@libs/ui';
+import {
+  createErrorLocationState,
+  WindowErrorPage
+} from '@src/libs/layout/error';
 
 interface Props {
   children: ReactNode;
@@ -28,11 +31,18 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      // TODO: Add localizations below
       return (
-        <>
-          <h1>{this.state.error?.message}</h1>
-          <Typography type="body">{this.state.error?.stack}</Typography>
-        </>
+        <WindowErrorPage
+          overrideState={createErrorLocationState({
+            errorHeaderText: 'Something went wrong',
+            errorContentText:
+              this.state.error?.message ||
+              'Please check browser console for error details, this will be a valuable for our team to fix the issue.',
+            errorPrimaryButtonLabel: 'Close',
+            errorRedirectPath: null
+          })}
+        />
       );
     }
 

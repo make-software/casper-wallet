@@ -2,16 +2,14 @@ import '@libs/i18n/i18n';
 
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Route, Routes } from 'react-router-dom';
+import { HashRouter, Route, Routes } from 'react-router-dom';
 
 import { HeaderSubmenuBarNavLink, Layout } from '@libs/layout';
 import { PopupHeader } from '@libs/layout/header';
 
 import { HomePageContent, HomePageHeaderSubmenuItems } from '@popup/pages/home';
 import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
-import { ResetVaultPageContent } from '@popup/pages/reset-vault';
 import { TimeoutPageContent } from '@popup/pages/timeout';
-import { UnlockVaultPageContent } from '@popup/pages/unlock-vault';
 import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
 import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
 import { ConnectedSitesPage } from '@popup/pages/connected-sites';
@@ -29,13 +27,14 @@ import { DownloadedSecretKeysPage } from '@popup/pages/downloaded-secret-keys';
 
 import { RouterPath, useTypedLocation } from '@popup/router';
 
-import { selectVaultHasAccount } from '@background/redux/vault/selectors';
+import { selectVaultHasAccounts } from '@background/redux/vault/selectors';
 
 import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
 import { selectKeysDoesExist } from '@src/background/redux/keys/selectors';
+import { LockedRouter } from '@src/libs/layout/locked-router';
 
-export function App() {
+export function AppRouter() {
   const isLocked = useSelector(selectVaultIsLocked);
   useUserActivityTracker();
 
@@ -43,40 +42,19 @@ export function App() {
     return <LockedRouter />;
   }
 
-  return <UnlockedRouter />;
-}
-
-function LockedRouter() {
   return (
-    <Routes>
-      <Route
-        path={RouterPath.Any}
-        element={
-          <Layout
-            renderHeader={() => <PopupHeader />}
-            renderContent={() => <UnlockVaultPageContent />}
-          />
-        }
-      />
-      <Route
-        path={RouterPath.ResetVault}
-        element={
-          <Layout
-            renderHeader={() => <PopupHeader />}
-            renderContent={() => <ResetVaultPageContent />}
-          />
-        }
-      />
-    </Routes>
+    <HashRouter>
+      <AppRoutes />;
+    </HashRouter>
   );
 }
 
-function UnlockedRouter() {
+function AppRoutes() {
   const location = useTypedLocation();
   const state = location.state;
 
   const keysDoesExist = useSelector(selectKeysDoesExist);
-  const vaultHasAccount = useSelector(selectVaultHasAccount);
+  const vaultHasAccount = useSelector(selectVaultHasAccounts);
 
   if (!keysDoesExist || !vaultHasAccount) {
     return null;

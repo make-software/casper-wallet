@@ -5,7 +5,7 @@ import {
   SdkMessage
 } from './sdk-message';
 
-function fetchFromExtensionBackend<T extends SdkMessage['payload']>(
+function fetchFromBackground<T extends SdkMessage['payload']>(
   requestAction: SdkMessage,
   options?: CasperWalletProviderOptions
 ): Promise<T> {
@@ -19,7 +19,7 @@ function fetchFromExtensionBackend<T extends SdkMessage['payload']>(
       );
     }, options?.timeout || /** 30min */ 30 * 60 * 1000);
 
-    console.error('SDK SENT REQUEST:', JSON.stringify(requestAction));
+    // console.log('SDK SENT REQUEST:', JSON.stringify(requestAction));
     window.dispatchEvent(
       new CustomEvent(sdkMessageProxyEvents.SDKRequestAction, {
         detail: requestAction
@@ -28,7 +28,7 @@ function fetchFromExtensionBackend<T extends SdkMessage['payload']>(
 
     const waitForResponseEvent = (e: Event) => {
       const responseAction = JSON.parse((e as CustomEvent).detail);
-      console.error('SDK GOT RESPONSE:', JSON.stringify(responseAction));
+      // console.log('SDK GOT RESPONSE:', JSON.stringify(responseAction));
       // filter out response events not for this request
       if (
         !isSDKMessage(responseAction) ||
@@ -65,7 +65,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
 
   return {
     requestConnection(): Promise<boolean> {
-      return fetchFromExtensionBackend<
+      return fetchFromBackground<
         ReturnType<typeof sdkMessage['connectResponse']>['payload']
       >(
         sdkMessage.connectRequest(
@@ -78,7 +78,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       );
     },
     disconnectFromSite(): Promise<boolean> {
-      return fetchFromExtensionBackend<
+      return fetchFromBackground<
         ReturnType<typeof sdkMessage['disconnectResponse']>['payload']
       >(
         sdkMessage.disconnectRequest(window.location.origin, {
@@ -88,7 +88,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       );
     },
     isConnected(): Promise<boolean> {
-      return fetchFromExtensionBackend<
+      return fetchFromBackground<
         ReturnType<typeof sdkMessage['isConnectedResponse']>['payload']
       >(
         sdkMessage.isConnectedRequest(window.location.origin, {
@@ -98,7 +98,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       );
     },
     getActivePublicKey(): Promise<string | undefined> {
-      return fetchFromExtensionBackend<
+      return fetchFromBackground<
         ReturnType<typeof sdkMessage['getActivePublicKeyResponse']>['payload']
       >(
         sdkMessage.getActivePublicKeyRequest(undefined, {
@@ -108,7 +108,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       );
     },
     getVersion(): Promise<string> {
-      return fetchFromExtensionBackend<
+      return fetchFromBackground<
         ReturnType<typeof sdkMessage['getVersionResponse']>['payload']
       >(
         sdkMessage.getVersionRequest(undefined, {
@@ -119,16 +119,14 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
     },
     sign: (
       deployJson: string,
-      signingPublicKeyHex: string,
-      targetPublicKeyHex: string | undefined
+      signingPublicKeyHex: string
     ): Promise<{ signature: Uint8Array }> => {
-      return fetchFromExtensionBackend<
+      return fetchFromBackground<
         ReturnType<typeof sdkMessage['signResponse']>['payload']
       >(
         sdkMessage.signRequest(
           {
             deployJson,
-            targetPublicKeyHex,
             signingPublicKeyHex
           },
           {

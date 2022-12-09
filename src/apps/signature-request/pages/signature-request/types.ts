@@ -1,11 +1,11 @@
 import { Deploy } from 'casper-js-sdk/dist/lib/DeployUtil';
 
 export type ArgDict = { [key: string]: string | string[] };
-export type DeployType = 'Transfer Call' | 'Contract Call';
 
-export enum DeployTypeEnum {
+export enum DeployType {
   TransferCall = 'Transfer Call',
-  ContractCall = 'Contract Call'
+  ContractCall = 'Contract Call',
+  Unknown = 'Unknown'
 }
 
 export type SignatureRequestFields = {

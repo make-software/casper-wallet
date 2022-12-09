@@ -31,7 +31,7 @@ function syncActiveOriginWithStore() {
 
 // Proxy Wallet Events to connected site
 function emitSdkEvent(message: SdkEvent) {
-  console.error('CONTENT EMIT SDK EVENT:', JSON.stringify(message));
+  // console.error('CONTENT EMIT SDK EVENT:', JSON.stringify(message));
   let eventType: string;
   switch (message.type) {
     case getType(sdkEvent.connectedActiveAccountEvent):
@@ -86,9 +86,10 @@ function handleSdkRequest(e: Event) {
   // validation
   if (!isSDKMessage(requestAction)) {
     throw Error(
-      'Content: invalid sdk requestAction.' + JSON.stringify(requestAction)
+      'Content: invalid sdk requestAction: ' + JSON.stringify(requestAction)
     );
   }
+
   browser.runtime
     .sendMessage(requestAction)
     .then(responseAction => {
@@ -102,7 +103,7 @@ function handleSdkRequest(e: Event) {
       }
     })
     .catch(err => {
-      throw Error('Content: sdk request send message:' + err);
+      throw Error('Content: sdk request send message: ' + err);
     });
 }
 
@@ -120,12 +121,12 @@ function injectSdkScript() {
     };
     documentHeadOrRoot.insertBefore(scriptTag, documentHeadOrRoot.children[0]);
   } catch (e) {
-    console.error('CasperWalletSdk injection failed.', e);
+    console.error('CasperWalletSdk injection failed. ', e);
   }
 }
 
 function init() {
-  console.error('CONTENT INIT');
+  // console.log('CONTENT INIT');
 
   // idempotent, doesn't need cleanup
   injectSdkScript();
@@ -146,7 +147,7 @@ function init() {
 export const cleanupEventType = 'CasperWalletProvider:Cleanup';
 window.dispatchEvent(new CustomEvent(cleanupEventType));
 function cleanup() {
-  console.error('CONTENT CLEANUP');
+  // console.error('CONTENT CLEANUP');
   document.removeEventListener(cleanupEventType, cleanup);
 
   window.removeEventListener('load', syncActiveOriginWithStore);

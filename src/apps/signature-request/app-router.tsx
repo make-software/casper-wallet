@@ -11,9 +11,17 @@ import {
   useTypedNavigate
 } from '@src/apps/signature-request/router';
 import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
+import { useSelector } from 'react-redux';
+import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
+import { LockedRouter } from '@src/libs/layout/locked-router';
 
-export function App() {
+export function AppRouter() {
   useUserActivityTracker();
+
+  const isLocked = useSelector(selectVaultIsLocked);
+  if (isLocked) {
+    return <LockedRouter />;
+  }
 
   return (
     <HashRouter>
