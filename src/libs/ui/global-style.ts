@@ -25,6 +25,7 @@ export const GlobalStyle = createGlobalStyle<{ theme: any }>`
   
   #app-container {
     height: 100%;
+    min-height: 600px;
     background: ${props => props.theme.color.backgroundSecondary};
     border-radius: 16px;
   }

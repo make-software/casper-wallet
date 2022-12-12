@@ -2,7 +2,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
-  Layout,
+  PopupLayout,
   PopupHeader,
   HeaderSubmenuBarNavLink,
   FooterButtonsContainer
@@ -18,7 +18,7 @@ export function BackupSecretPhrasePage() {
   const { t } = useTranslation();
 
   return (
-    <Layout
+    <PopupLayout
       renderHeader={() => (
         <PopupHeader
           withLock

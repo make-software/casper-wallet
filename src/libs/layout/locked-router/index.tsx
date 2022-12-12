@@ -4,7 +4,7 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import { ResetVaultPageContent } from '@src/libs/layout/reset-vault';
 import { UnlockVaultPageContent } from '@src/libs/layout/unlock-vault';
 import { PopupHeader } from '../header';
-import { Layout } from '../layout';
+import { PopupLayout } from '../popup-layout';
 
 export const LockedRouterPath = {
   Any: '*',
@@ -18,7 +18,7 @@ export function LockedRouter() {
         <Route
           path={LockedRouterPath.Any}
           element={
-            <Layout
+            <PopupLayout
               renderHeader={() => <PopupHeader />}
               renderContent={() => <UnlockVaultPageContent />}
             />
@@ -27,7 +27,7 @@ export function LockedRouter() {
         <Route
           path={LockedRouterPath.ResetVault}
           element={
-            <Layout
+            <PopupLayout
               renderHeader={() => <PopupHeader />}
               renderContent={() => <ResetVaultPageContent />}
             />

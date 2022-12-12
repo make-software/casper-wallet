@@ -2,10 +2,10 @@ import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import {
-  LayoutWindow,
   PopupHeader,
   FooterButtonsContainer,
-  HeaderSubmenuBarNavLink
+  HeaderSubmenuBarNavLink,
+  PopupLayout
 } from '@src/libs/layout';
 import { Button } from '@src/libs/ui';
 import { useTypedNavigate, RouterPath } from '@src/apps/popup/router';
@@ -16,8 +16,7 @@ export function DownloadedSecretKeysPage() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
   return (
-    <LayoutWindow
-      variant="default"
+    <PopupLayout
       renderHeader={() => (
         <PopupHeader
           withLock

@@ -97,6 +97,7 @@ export function AccountListPage() {
     }));
 
     setAccountListRows(accountListRows);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
