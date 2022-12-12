@@ -51,6 +51,8 @@ export function CreateAccountPage() {
     navigate(RouterPath.Home);
   };
 
+  const handleGoBackHome = () => navigate(RouterPath.Home);
+
   const isButtonDisabled = calculateSubmitButtonDisabled({ isValid });
 
   return (
@@ -77,6 +79,13 @@ export function CreateAccountPage() {
         <FooterButtonsContainer>
           <Button disabled={isButtonDisabled}>
             <Trans t={t}>Create Account</Trans>
+          </Button>
+          <Button
+            type="button"
+            onClick={handleGoBackHome}
+            color="secondaryBlue"
+          >
+            <Trans t={t}>Cancel</Trans>
           </Button>
         </FooterButtonsContainer>
       )}
