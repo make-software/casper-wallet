@@ -1,4 +1,5 @@
 export * from './components/button/button';
+export * from './components/form/form';
 export * from './components/form-field/form-field';
 export * from './components/input/input';
 export * from './components/textarea/textarea';

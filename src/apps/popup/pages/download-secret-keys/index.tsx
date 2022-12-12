@@ -4,9 +4,9 @@ import { useSelector } from 'react-redux';
 
 import {
   HeaderSubmenuBarNavLink,
-  LayoutWindow,
   PopupHeader,
-  FooterButtonsContainer
+  FooterButtonsContainer,
+  PopupLayout
 } from '@src/libs/layout';
 import { Button } from '@src/libs/ui';
 import { useDownloadSecretKeysForm } from '@src/libs/ui/forms/download-secret-keys';
@@ -75,7 +75,7 @@ export function DownloadSecretKeysPage() {
   });
 
   return (
-    <LayoutWindow
+    <PopupLayout
       variant="form"
       onSubmit={handleSubmit(onSubmit)}
       renderHeader={() => (

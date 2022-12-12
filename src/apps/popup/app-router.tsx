@@ -4,7 +4,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
-import { HeaderSubmenuBarNavLink, Layout } from '@libs/layout';
+import { HeaderSubmenuBarNavLink, PopupLayout } from '@libs/layout';
 import { PopupHeader } from '@libs/layout/header';
 
 import { HomePageContent, HomePageHeaderSubmenuItems } from '@popup/pages/home';
@@ -66,7 +66,7 @@ function AppRoutes() {
         <Route
           path={RouterPath.Any}
           element={
-            <Layout
+            <PopupLayout
               renderHeader={() => (
                 <PopupHeader withConnectionStatus withMenu withLock />
               )}
@@ -83,7 +83,7 @@ function AppRoutes() {
       <Route
         path={RouterPath.Home}
         element={
-          <Layout
+          <PopupLayout
             renderHeader={() => (
               <PopupHeader
                 withLock
@@ -101,7 +101,7 @@ function AppRoutes() {
       <Route
         path={RouterPath.AccountList}
         element={
-          <Layout
+          <PopupLayout
             renderHeader={() => (
               <PopupHeader
                 withLock
@@ -120,7 +120,7 @@ function AppRoutes() {
       <Route
         path={RouterPath.AccountSettings}
         element={
-          <Layout
+          <PopupLayout
             renderHeader={() => (
               <PopupHeader
                 withLock
@@ -141,7 +141,7 @@ function AppRoutes() {
       <Route
         path={RouterPath.Timeout}
         element={
-          <Layout
+          <PopupLayout
             renderHeader={() => (
               <PopupHeader
                 withLock
@@ -159,7 +159,7 @@ function AppRoutes() {
       <Route
         path={RouterPath.RemoveAccount}
         element={
-          <Layout
+          <PopupLayout
             renderHeader={() => (
               <PopupHeader
                 withLock
@@ -177,7 +177,7 @@ function AppRoutes() {
       <Route
         path={RouterPath.RenameAccount}
         element={
-          <Layout
+          <PopupLayout
             renderHeader={() => (
               <PopupHeader
                 withLock
@@ -195,7 +195,7 @@ function AppRoutes() {
       <Route
         path={RouterPath.NoConnectedAccount}
         element={
-          <Layout
+          <PopupLayout
             renderHeader={() => (
               <PopupHeader withLock withMenu withConnectionStatus />
             )}
@@ -206,7 +206,7 @@ function AppRoutes() {
       <Route
         path={RouterPath.ConnectedSites}
         element={
-          <Layout
+          <PopupLayout
             renderHeader={() => (
               <PopupHeader
                 withMenu
@@ -224,7 +224,7 @@ function AppRoutes() {
       <Route
         path={RouterPath.ConnectAnotherAccount}
         element={
-          <Layout
+          <PopupLayout
             renderHeader={() => (
               <PopupHeader
                 withLock
@@ -242,7 +242,7 @@ function AppRoutes() {
       <Route
         path={RouterPath.ConnectAnotherAccountByParams}
         element={
-          <Layout
+          <PopupLayout
             renderHeader={() => (
               <PopupHeader
                 withLock
