@@ -1,5 +1,4 @@
-import React from 'react';
-
+import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -23,6 +22,7 @@ import {
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+import { ConnectionStatusBadge } from '@popup/pages/home/components/connection-status-badge';
 
 import {
   selectConnectedAccountNamesWithOrigin,
@@ -30,13 +30,12 @@ import {
   selectVaultAccounts,
   selectVaultActiveAccountName
 } from '@background/redux/vault/selectors';
-
-import { ConnectionStatusBadge } from '@popup/pages/home/components/connection-status-badge';
+import { selectActiveOrigin } from '@background/redux/session/selectors';
+import { Account } from '@background/redux/vault/types';
 
 import { Popover } from './components/popover';
 
 import { sortAccounts } from './utils';
-import { selectActiveOrigin } from '@src/background/redux/session/selectors';
 
 const ListItemContainer = styled(FlexRow)`
   min-height: 50px;
@@ -61,7 +60,13 @@ const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
   width: 100%;
 `;
 
+export interface AccountListRows extends Account {
+  id: string;
+}
+
 export function AccountListPage() {
+  const [accountListRows, setAccountListRows] = useState<AccountListRows[]>([]);
+
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
@@ -81,14 +86,18 @@ export function AccountListPage() {
     selectConnectedAccountNamesWithOrigin
   );
 
-  const accountListRows = sortAccounts(
-    accounts,
-    activeAccountName,
-    connectedAccountNames
-  ).map(account => ({
-    ...account,
-    id: account.name
-  }));
+  useEffect(() => {
+    const accountListRows = sortAccounts(
+      accounts,
+      activeAccountName,
+      connectedAccountNames
+    ).map(account => ({
+      ...account,
+      id: account.name
+    }));
+
+    setAccountListRows(accountListRows);
+  }, []);
 
   return (
     <PageContainer>
