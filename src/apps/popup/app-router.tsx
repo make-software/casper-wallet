@@ -44,7 +44,7 @@ export function AppRouter() {
 
   return (
     <HashRouter>
-      <AppRoutes />;
+      <AppRoutes />
     </HashRouter>
   );
 }
