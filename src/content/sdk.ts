@@ -120,7 +120,9 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
     sign: (
       deployJson: string,
       signingPublicKeyHex: string
-    ): Promise<{ signature: Uint8Array }> => {
+    ): Promise<
+      { cancelled: true } | { cancelled: false; signature: Uint8Array }
+    > => {
       return fetchFromBackground<
         ReturnType<typeof sdkMessage['signResponse']>['payload']
       >(

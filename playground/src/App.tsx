@@ -49,7 +49,11 @@ function App() {
       const deployJson = DeployUtil.deployToJson(deploy);
       console.log('deployJson', JSON.stringify(deployJson));
       sign(JSON.stringify(deployJson), accountPublicKey).then(res => {
-        alert('Sign successful: ' + Object.values(res.signature).toString());
+        if (res.cancelled) {
+          alert('Sign cancelled');
+        } else {
+          alert('Sign successful: ' + Object.values(res.signature).toString());
+        }
       });
     }
   };

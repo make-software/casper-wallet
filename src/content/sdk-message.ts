@@ -53,7 +53,7 @@ export const sdkMessage = {
     Meta
   >(),
   signResponse: createAction('CasperWalletProvider:Sign:Response')<
-    { signature: Uint8Array },
+    { cancelled: true } | { cancelled: false; signature: Uint8Array },
     Meta
   >()
 };

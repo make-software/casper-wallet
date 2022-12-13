@@ -69,7 +69,7 @@ export function SignatureRequestPage() {
       signingAccount.secretKey
     );
     emitSdkEventToAllActiveTabs(
-      sdkMessage.signResponse({ signature }, { requestId })
+      sdkMessage.signResponse({ signature, cancelled: false }, { requestId })
     );
     closeActiveWindow();
   }, [
@@ -78,6 +78,13 @@ export function SignatureRequestPage() {
     deploy.hash,
     requestId
   ]);
+
+  const handleCancel = useCallback(() => {
+    emitSdkEventToAllActiveTabs(
+      sdkMessage.signResponse({ cancelled: true }, { requestId })
+    );
+    closeActiveWindow();
+  }, [requestId]);
 
   return (
     <LayoutWindow
@@ -89,7 +96,7 @@ export function SignatureRequestPage() {
           <Button color="primaryRed" onClick={handleSign}>
             <Trans t={t}>Sign</Trans>
           </Button>
-          <Button color="secondaryBlue" onClick={() => closeActiveWindow()}>
+          <Button color="secondaryBlue" onClick={handleCancel}>
             <Trans t={t}>Cancel</Trans>
           </Button>
         </FooterButtonsContainer>
