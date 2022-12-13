@@ -1,7 +1,6 @@
 import { createReducer } from 'typesafe-actions';
 import { vaultCipherCreated, vaultCipherReseted } from './actions';
-
-export type VaultCipherState = null | string;
+import { VaultCipherState } from './types';
 
 const initialState = null as VaultCipherState;
 

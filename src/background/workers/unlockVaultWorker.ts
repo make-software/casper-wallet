@@ -4,6 +4,7 @@ import {
 } from '@libs/crypto/hashing';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import { decryptVault, encryptVault } from '@libs/crypto/vault';
+import { VaultCipherState } from '@background/redux/vault-cipher/types';
 
 /**
  * on unlock decrypt stored vault from cipher
@@ -11,7 +12,15 @@ import { decryptVault, encryptVault } from '@libs/crypto/vault';
  * put new encryption key in session
  */
 
-onmessage = async function (event) {
+interface UnlockVaultEventData extends MessageEvent {
+  data: {
+    password: string;
+    keyDerivationSaltHash: string;
+    vaultCipher: VaultCipherState;
+  };
+}
+
+onmessage = async function (event: UnlockVaultEventData) {
   const { password, keyDerivationSaltHash, vaultCipher } = event.data;
 
   const encryptionKeyBytes = await deriveEncryptionKey(
@@ -20,7 +29,7 @@ onmessage = async function (event) {
   );
 
   const encryptionKeyHash = convertBytesToHex(encryptionKeyBytes);
-  //
+  // decrypt cipher
   const vault = await decryptVault(encryptionKeyHash, vaultCipher);
 
   // derive a new random encryption key

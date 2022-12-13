@@ -44,10 +44,7 @@ import {
   startBackground,
   unlockVault
 } from './actions';
-import {
-  selectVaultCipher,
-  selectVaultCipherDoesExist
-} from '../vault-cipher/selectors';
+import { selectVaultCipherDoesExist } from '../vault-cipher/selectors';
 import { keysUpdated } from '../keys/actions';
 import { vaultCipherCreated } from '../vault-cipher/actions';
 import { deploysReseted } from '../deploys/actions';
@@ -107,9 +104,6 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
       newVaultCipher,
       newEncryptionKeyHash
     } = action.payload;
-
-    const vaultCipher = yield* sagaSelect(selectVaultCipher);
-    console.log(vaultCipher, 'redux');
 
     yield put(loginRetryCountReseted());
     yield put(vaultLoaded(vault));
