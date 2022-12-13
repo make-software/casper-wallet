@@ -1,5 +1,5 @@
 import { DeployUtil } from 'casper-js-sdk';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -20,9 +20,12 @@ import { Button } from '@src/libs/ui';
 
 import { SignatureRequestContent } from './signature-request-content';
 import { signDeploy } from '@src/libs/crypto';
+import { CasperDeploy } from './types';
 
 export function SignatureRequestPage() {
   const { t } = useTranslation();
+
+  const [deploy, setDeploy] = useState<undefined | CasperDeploy>(undefined);
 
   const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
@@ -58,23 +61,30 @@ export function SignatureRequestPage() {
   }
 
   const deployJsonById = useSelector(selectDeploysJsonById);
-  const deployJson = deployJsonById[requestId];
-  if (deployJson == null) {
-    const error = Error('Deploy not found in state');
-    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
-    throw error;
-  }
 
-  const res = DeployUtil.deployFromJson(deployJson);
-  if (!res.ok) {
-    const error = Error('Parsing deploy from json error');
-    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
-    throw error;
-  }
+  useEffect(() => {
+    const deployJson = deployJsonById[requestId];
+    if (deployJson == null) {
+      return;
+    }
 
-  const deploy = res.val;
+    const res = DeployUtil.deployFromJson(deployJson);
+    if (!res.ok) {
+      const error = Error('Parsing deploy from json error');
+      emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
+      throw error;
+    }
+
+    setDeploy(res.val);
+
+    return () => {};
+  }, [deployJsonById, requestId]);
 
   const handleSign = useCallback(() => {
+    if (deploy?.hash == null) {
+      return;
+    }
+
     const signature = signDeploy(
       deploy.hash,
       signingAccount.publicKey,
@@ -87,7 +97,7 @@ export function SignatureRequestPage() {
   }, [
     signingAccount?.publicKey,
     signingAccount?.secretKey,
-    deploy.hash,
+    deploy?.hash,
     requestId
   ]);
 
@@ -105,7 +115,11 @@ export function SignatureRequestPage() {
       renderContent={() => <SignatureRequestContent deploy={deploy} />}
       renderFooter={() => (
         <FooterButtonsContainer>
-          <Button color="primaryRed" onClick={handleSign}>
+          <Button
+            color="primaryRed"
+            disabled={deploy == null}
+            onClick={handleSign}
+          >
             <Trans t={t}>Sign</Trans>
           </Button>
           <Button color="secondaryBlue" onClick={handleCancel}>

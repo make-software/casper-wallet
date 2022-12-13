@@ -18,7 +18,6 @@ import {
   encodeBase16
 } from 'casper-js-sdk';
 
-import { snakeAndKebabToCamel } from '@libs/ui/utils/formatters';
 import { ArgDict, CasperDeploy, DeployType } from './types';
 
 export function getDeployType(deploy: CasperDeploy): DeployType {
@@ -42,32 +41,28 @@ export function getDeployPayment(deploy: CasperDeploy): string {
   }
 }
 
+export function getEntryPoint(deploy: CasperDeploy): string | undefined {
+  const storedContractObj = getStoredContractObjFromSession(deploy.session);
+  return storedContractObj?.entryPoint;
+}
+
 export function getDeployArgs(deploy: CasperDeploy): ArgDict {
   if (deploy.session.transfer) {
-    return getDeployArgsFromTransfer(deploy.session.transfer);
+    return getDeployArgsForTransfer(deploy.session.transfer);
   }
 
-  if (deploy.session.moduleBytes) {
-    const deployArgs: ArgDict = getDeployArgsFromArgsDict(
-      deploy.session.moduleBytes.args.args
-    );
-    deployArgs.moduleBytes = deploy.session.moduleBytes.moduleBytes.toString();
+  const storedContractObj = getStoredContractObjFromSession(deploy.session);
 
-    return deployArgs;
-  }
-
-  const storedContract = getStoredContractFromSession(deploy.session);
-
-  const deployArgs: ArgDict = getDeployArgsFromArgsDict(
-    storedContract.args.args
-  );
-  deployArgs.entryPoint = storedContract.entryPoint;
+  const deployArgs: ArgDict =
+    storedContractObj != null
+      ? getDeployArgsFromArgsDict(storedContractObj.args.args)
+      : {};
 
   return deployArgs;
 }
 
 function unwrapNestedLists(value: CLValue): string {
-  const parsedValue = parseDeployArg(value);
+  const parsedValue = parseDeployArgValue(value);
   if (Array.isArray(parsedValue)) {
     const parsedType = (value as CLList<CLValue>).vectorType;
     return `<${parsedType}>[...]`;
@@ -75,10 +70,10 @@ function unwrapNestedLists(value: CLValue): string {
   return parsedValue;
 }
 
-function getDeployArgsFromTransfer(
+function getDeployArgsForTransfer(
   transferDeploy: DeployUtil.Transfer
 ): ArgDict {
-  const transferArgs: ArgDict = {};
+  const args: ArgDict = {};
   const targetFromDeploy = transferDeploy.getArgByName('target');
 
   if (targetFromDeploy == null) {
@@ -87,12 +82,12 @@ function getDeployArgsFromTransfer(
 
   switch (targetFromDeploy.clType().tag) {
     case CLTypeTag.ByteArray:
-      transferArgs.recipientHash = encodeBase16(targetFromDeploy.value());
+      args.recipientHash = encodeBase16(targetFromDeploy.value());
       break;
     // If deploy is created using version of SDK gte than 2.7.0
     // In fact this logic can be removed in future as well as pkHex param
     case CLTypeTag.PublicKey:
-      transferArgs.recipientKey = (targetFromDeploy as CLPublicKey).toHex();
+      args.recipientKey = (targetFromDeploy as CLPublicKey).toHex();
       break;
     default: {
       throw new Error(
@@ -110,19 +105,20 @@ function getDeployArgsFromTransfer(
     throw new Error("Couldn't find 'id' in transfer data");
   }
 
-  transferArgs.amount = amountString.value().toString();
-  transferArgs.transferId = idString.value().unwrap().value().toString();
+  args.amount = amountString.value().toString();
+  args.transferId = idString.value().unwrap().value().toString();
 
-  return transferArgs;
+  return args;
 }
 
-function getStoredContractFromSession(
+function getStoredContractObjFromSession(
   session: DeployUtil.ExecutableDeployItem
 ):
   | DeployUtil.StoredContractByHash
   | DeployUtil.StoredContractByName
   | DeployUtil.StoredVersionedContractByHash
-  | DeployUtil.StoredVersionedContractByName {
+  | DeployUtil.StoredVersionedContractByName
+  | undefined {
   if (session.storedContractByHash) {
     return session.storedContractByHash;
   }
@@ -139,50 +135,78 @@ function getStoredContractFromSession(
     return session.storedVersionedContractByName;
   }
 
-  throw new Error(`Stored Contract could not be parsed.\n\
-          Provided session code: ${session}`);
+  return undefined;
 }
 
 function getDeployArgsFromArgsDict(args: Map<string, CLValue>) {
   const deployArgs: ArgDict = {};
 
-  args.forEach((argument, key) => {
-    deployArgs[snakeAndKebabToCamel(key)] = parseDeployArg(argument);
+  args.forEach((value, key) => {
+    deployArgs[key] = value;
   });
 
   return deployArgs;
 }
 
-function parseDeployArg(arg: CLValue): string | string[] {
-  const tag = arg.clType().tag;
+export function isDeployArgValueHash(value: CLValue): boolean {
+  const tag = value.clType().tag;
+  switch (tag) {
+    case CLTypeTag.Key:
+    case CLTypeTag.URef:
+    case CLTypeTag.PublicKey:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+export function isDeployArgValueNumber(value: CLValue): boolean {
+  const tag = value.clType().tag;
+  switch (tag) {
+    case CLTypeTag.U8:
+    case CLTypeTag.U32:
+    case CLTypeTag.U64:
+    case CLTypeTag.U128:
+    case CLTypeTag.U256:
+    case CLTypeTag.U512:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+export function parseDeployArgValue(value: CLValue): string | string[] {
+  const tag = value.clType().tag;
 
   switch (tag) {
     case CLTypeTag.Unit:
       return String('CLValue Unit');
 
     case CLTypeTag.Key:
-      const key = arg as CLKey;
+      const key = value as CLKey;
       if (key.isAccount()) {
-        return parseDeployArg(key.value() as CLAccountHash);
+        return parseDeployArgValue(key.value() as CLAccountHash);
       }
 
       if (key.isURef()) {
-        return parseDeployArg(key.value() as CLURef);
+        return parseDeployArgValue(key.value() as CLURef);
       }
 
       if (key.isHash()) {
-        return parseDeployArg(key.value() as CLByteArray);
+        return parseDeployArgValue(key.value() as CLByteArray);
       }
 
       throw new Error('Failed to parse key argument');
 
     case CLTypeTag.URef:
-      return (arg as CLURef).toFormattedStr();
+      return (value as CLURef).toFormattedStr();
 
     case CLTypeTag.Option:
-      const option = arg as CLOption<CLValue>;
+      const option = value as CLOption<CLValue>;
       if (option.isSome()) {
-        return parseDeployArg(option.value().unwrap());
+        return parseDeployArgValue(option.value().unwrap());
       }
       // This will be None due to the above logic
       const optionValue = option.value().toString();
@@ -192,43 +216,43 @@ function parseDeployArg(arg: CLValue): string | string[] {
       return `${optionValue} ${optionCLType}`;
 
     case CLTypeTag.List:
-      const list = (arg as CLList<CLValue>).value();
+      const list = (value as CLList<CLValue>).value();
       return list.map(member => unwrapNestedLists(member));
 
     case CLTypeTag.ByteArray:
-      const bytes = (arg as CLByteArray).value();
+      const bytes = (value as CLByteArray).value();
       return encodeBase16(bytes);
 
     case CLTypeTag.Result:
-      const result = arg as CLResult<CLType, CLType>;
+      const result = value as CLResult<CLType, CLType>;
       const status = result.isOk() ? 'OK:' : 'ERR:';
-      const parsed = parseDeployArg(result.value().val);
+      const parsed = parseDeployArgValue(result.value().val);
       return `${status} ${parsed}`;
 
     case CLTypeTag.Map:
-      const map = arg as CLMap<CLValue, CLValue>;
+      const map = value as CLMap<CLValue, CLValue>;
       return map.value().toString();
 
     case CLTypeTag.Tuple1:
-      const tupleOne = arg as CLTuple1;
-      return parseDeployArg(tupleOne.value()[0]);
+      const tupleOne = value as CLTuple1;
+      return parseDeployArgValue(tupleOne.value()[0]);
 
     case CLTypeTag.Tuple2:
-      const tupleTwo = arg as CLTuple2;
+      const tupleTwo = value as CLTuple2;
       return tupleTwo.value().map(member => unwrapNestedLists(member));
 
     case CLTypeTag.Tuple3:
-      const tupleThree = arg as CLTuple3;
+      const tupleThree = value as CLTuple3;
       return tupleThree.value().map(member => unwrapNestedLists(member));
 
     case CLTypeTag.PublicKey:
-      return (arg as CLPublicKey).toHex();
+      return (value as CLPublicKey).toHex();
 
     default:
       // Special handling as there is no CLTypeTag for CLAccountHash
-      if (arg instanceof CLAccountHash) {
-        return encodeBase16(arg.value());
+      if (value instanceof CLAccountHash) {
+        return encodeBase16(value.value());
       }
-      return arg.value().toString();
+      return value.value().toString();
   }
 }

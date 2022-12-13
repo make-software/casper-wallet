@@ -8,24 +8,16 @@ import {
   TextContainer,
   SpaceBetweenFlexRow
 } from '@layout/containers';
-import {
-  Accordion,
-  Hash,
-  HashVariant,
-  List,
-  SvgIcon,
-  Typography
-} from '@libs/ui';
+import { Accordion, List, SvgIcon, Typography } from '@libs/ui';
 
 import { SignatureRequestValue } from './signature-request-value';
 import {
   CasperDeploy,
-  isKeyOfHashValue,
   SignatureRequestArguments,
   SignatureRequestFields,
   SignatureRequestKeys
 } from './types';
-import { useDeriveDeployInfoFromDeployRaw } from './use-derive-deploy-info-from-deploy-raw';
+import { deriveDeployInfoFromDeployRaw } from './derive-deploy-info-from-deploy-raw';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
   margin: 16px;
@@ -41,16 +33,20 @@ const AccordionHeaderContainer = styled(CentredFlexRowSpaceBetweenContainer)`
   margin: 16px;
 `;
 
-const AccordionRowContainer = styled(CentredFlexRowSpaceBetweenContainer)`
+const AccordionItem = styled(CentredFlexRowSpaceBetweenContainer)`
   margin: 10px 16px;
 `;
 
 export interface SignatureRequestViewProps {
-  deploy: CasperDeploy;
+  deploy?: CasperDeploy;
 }
 
 export function SignatureRequestContent({ deploy }: SignatureRequestViewProps) {
   const { t } = useTranslation();
+
+  if (deploy == null) {
+    return null;
+  }
 
   const LABEL_DICT: Record<SignatureRequestKeys, string> = {
     signingKey: t('Signing key'),
@@ -58,6 +54,7 @@ export function SignatureRequestContent({ deploy }: SignatureRequestViewProps) {
     deployHash: t('Deploy hash'),
     delegator: t('Delegator'),
     validator: t('Validator'),
+    new_validator: t('New validator'),
     recipient: t('Recipient'),
     amount: t('Amount'),
     transferId: t('Transfer ID'),
@@ -67,11 +64,10 @@ export function SignatureRequestContent({ deploy }: SignatureRequestViewProps) {
     chainName: t('Chain name'),
     recipientKey: t('Recipient (Key)'),
     recipientHash: t('Recipient (Hash)'),
-    newValidator: t('New validator'),
     entryPoint: t('Entry point')
   };
 
-  const deployInfo = useDeriveDeployInfoFromDeployRaw(deploy);
+  const deployInfo = deriveDeployInfoFromDeployRaw(deploy);
 
   let signatureRequest: SignatureRequestFields = {
     signingKey: deployInfo.signingKey,
@@ -82,6 +78,10 @@ export function SignatureRequestContent({ deploy }: SignatureRequestViewProps) {
     chainName: deployInfo.chainName,
     deployType: deployInfo.deployType
   };
+  const deployDetailRecords = Object.entries(signatureRequest);
+  if (deployInfo.entryPoint != null) {
+    deployDetailRecords.push(['entryPoint', deployInfo.entryPoint]);
+  }
 
   const deployArguments: SignatureRequestArguments = {
     ...deployInfo.deployArgs
@@ -96,7 +96,7 @@ export function SignatureRequestContent({ deploy }: SignatureRequestViewProps) {
           </Typography>
         </TextContainer>
         <List
-          rows={Object.entries(signatureRequest).map(([key, value]) => ({
+          rows={deployDetailRecords.map(([key, value]) => ({
             id: key,
             label: LABEL_DICT[key as keyof typeof signatureRequest],
             value
@@ -112,23 +112,18 @@ export function SignatureRequestContent({ deploy }: SignatureRequestViewProps) {
           renderFooter={() => (
             <Accordion
               renderContent={() =>
-                Object.entries(deployArguments).map(([key, value]) => (
-                  <AccordionRowContainer key={key}>
-                    <Typography type="body" color="contentSecondary">
-                      {LABEL_DICT[key as keyof typeof deployArguments]}
-                    </Typography>
-                    {isKeyOfHashValue(key) ? (
-                      <Hash
-                        value={value as string}
-                        variant={HashVariant.BodyHash}
-                        color="contentPrimary"
-                        truncated
-                      />
-                    ) : (
+                Object.entries(deployArguments).map(([key, value]) => {
+                  const label =
+                    LABEL_DICT[key as keyof typeof signatureRequest] || key;
+                  return (
+                    <AccordionItem key={key}>
+                      <Typography type="body" color="contentSecondary">
+                        {label}
+                      </Typography>
                       <SignatureRequestValue id={key} value={value} />
-                    )}
-                  </AccordionRowContainer>
-                ))
+                    </AccordionItem>
+                  );
+                })
               }
               children={({ isOpen }) => (
                 <AccordionHeaderContainer>
