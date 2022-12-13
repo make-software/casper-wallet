@@ -26,11 +26,14 @@ import {
 } from '@src/libs/ui/forms/unlock-wallet';
 import { calculateSubmitButtonDisabled } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
 import {
+  selectKeyDerivationSaltHash,
   selectPasswordHash,
   selectPasswordSaltHash
 } from '@src/background/redux/keys/selectors';
 import { unlockVault } from '@src/background/redux/sagas/actions';
 import { selectLoginRetryCount } from '@src/background/redux/login-retry-count/selectors';
+import { selectVaultCipher } from '@background/redux/vault-cipher/selectors';
+
 import { LockedRouterPath } from '../locked-router';
 
 export function UnlockVaultPageContent() {
@@ -43,6 +46,8 @@ export function UnlockVaultPageContent() {
   const loginRetryCount = useSelector(selectLoginRetryCount);
   const passwordHash = useSelector(selectPasswordHash);
   const passwordSaltHash = useSelector(selectPasswordSaltHash);
+  const keyDerivationSaltHash = useSelector(selectKeyDerivationSaltHash);
+  const vaultCipher = useSelector(selectVaultCipher);
 
   if (passwordHash == null || passwordSaltHash == null) {
     throw Error("Password doesn't exist");
@@ -55,7 +60,32 @@ export function UnlockVaultPageContent() {
   } = useUnlockWalletForm(passwordHash, passwordSaltHash);
 
   async function handleUnlockVault({ password }: UnlockWalletFormValues) {
-    dispatchToMainStore(unlockVault({ password }));
+    const unlockVaultWorker = new Worker(
+      new URL('@src/background/workers/unlockVaultWorker.js', import.meta.url)
+    );
+
+    unlockVaultWorker.postMessage({
+      password,
+      keyDerivationSaltHash,
+      vaultCipher
+    });
+
+    unlockVaultWorker.onmessage = event => {
+      const {
+        vault,
+        newKeyDerivationSaltHash,
+        newVaultCipher,
+        newEncryptionKeyHash
+      } = event.data;
+      dispatchToMainStore(
+        unlockVault({
+          vault,
+          newKeyDerivationSaltHash,
+          newVaultCipher,
+          newEncryptionKeyHash
+        })
+      );
+    };
   }
 
   const submitButtonDisabled = calculateSubmitButtonDisabled({

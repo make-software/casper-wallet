@@ -2,7 +2,9 @@ import { put, takeLatest } from 'redux-saga/effects';
 import { getType } from 'typesafe-actions';
 
 import { deriveKeyPair } from '@src/libs/crypto';
-import { decryptVault, encryptVault } from '@src/libs/crypto/vault';
+import { encryptVault } from '@src/libs/crypto/vault';
+
+import { MapTimeoutDurationSettingToValue } from '@src/apps/popup/constants';
 
 import {
   selectEncryptionKeyHash,
@@ -30,18 +32,12 @@ import {
   selectVaultTimeoutDurationSetting
 } from '../vault/selectors';
 import {
-  deriveEncryptionKey,
-  generateRandomSaltHex
-} from '@src/libs/crypto/hashing';
-import {
   encryptionKeyHashCreated,
   lastActivityTimeRefreshed,
   sessionReseted,
   vaultUnlocked
 } from '../session/actions';
-import { convertBytesToHex } from '@src/libs/crypto/utils';
-import { MapTimeoutDurationSettingToValue } from '@src/apps/popup/constants';
-import { selectKeyDerivationSaltHash } from '../keys/selectors';
+
 import {
   createAccount,
   lockVault,
@@ -105,35 +101,15 @@ function* lockVaultSaga(action: ReturnType<typeof lockVault>) {
  */
 function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
   try {
-    const { password } = action.payload;
+    const {
+      vault,
+      newKeyDerivationSaltHash,
+      newVaultCipher,
+      newEncryptionKeyHash
+    } = action.payload;
 
-    // get current encryption key
-    const keyDerivationSaltHash = yield* sagaSelect(
-      selectKeyDerivationSaltHash
-    );
-    if (keyDerivationSaltHash == null) {
-      throw Error("Key derivation salt doesn't exist");
-    }
-
-    const encryptionKeyBytes = yield* sagaCall(() =>
-      deriveEncryptionKey(password, keyDerivationSaltHash)
-    );
-    const encryptionKeyHash = convertBytesToHex(encryptionKeyBytes);
-    // decrypt cipher
     const vaultCipher = yield* sagaSelect(selectVaultCipher);
-    const vault = yield* sagaCall(() =>
-      decryptVault(encryptionKeyHash, vaultCipher)
-    );
-    // derive a new random encryption key
-    const newKeyDerivationSaltHash = generateRandomSaltHex();
-    const newEncryptionKeyBytes = yield* sagaCall(() =>
-      deriveEncryptionKey(password, newKeyDerivationSaltHash)
-    );
-    const newEncryptionKeyHash = convertBytesToHex(newEncryptionKeyBytes);
-    // encrypt cipher with the new key
-    const newVaultCipher = yield* sagaCall(() =>
-      encryptVault(newEncryptionKeyHash, vault)
-    );
+    console.log(vaultCipher, 'redux');
 
     yield put(loginRetryCountReseted());
     yield put(vaultLoaded(vault));
