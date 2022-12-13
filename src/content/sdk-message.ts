@@ -55,7 +55,8 @@ export const sdkMessage = {
   signResponse: createAction('CasperWalletProvider:Sign:Response')<
     { cancelled: true } | { cancelled: false; signature: Uint8Array },
     Meta
-  >()
+  >(),
+  signError: createAction('CasperWalletProvider:Sign:Error')<Error, Meta>()
 };
 
 export type SdkMessage = ActionType<typeof sdkMessage>;

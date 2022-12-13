@@ -29,7 +29,8 @@ export function SignatureRequestPage() {
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
 
   if (!requestId || !signingPublicKeyHex) {
-    throw Error('Missing search param');
+    const error = Error('Missing search param');
+    throw error;
   }
 
   const accounts = useSelector(selectVaultAccounts);
@@ -38,7 +39,9 @@ export function SignatureRequestPage() {
   );
   // signing account should exist in wallet
   if (signingAccount == null) {
-    throw Error('No signing account');
+    const error = Error('No signing account');
+    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
+    throw error;
   }
 
   const connectedAccountNames = useSelector(
@@ -46,18 +49,27 @@ export function SignatureRequestPage() {
   );
   // signing account should be connected to site
   if (!connectedAccountNames.includes(signingAccount.name)) {
-    throw Error('Account with signingPublicKeyHex is not connected to site');
+    const error = Error(
+      'Account with signingPublicKeyHex is not connected to site'
+    );
+    console.log('error');
+    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
+    throw error;
   }
 
   const deployJsonById = useSelector(selectDeploysJsonById);
   const deployJson = deployJsonById[requestId];
   if (deployJson == null) {
-    throw Error('Deploy not found in state');
+    const error = Error('Deploy not found in state');
+    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
+    throw error;
   }
 
   const res = DeployUtil.deployFromJson(deployJson);
   if (!res.ok) {
-    throw Error('Deploy from json parsing error');
+    const error = Error('Parsing deploy from json error');
+    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
+    throw error;
   }
 
   const deploy = res.val;

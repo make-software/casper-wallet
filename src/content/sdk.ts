@@ -27,12 +27,12 @@ function fetchFromBackground<T extends SdkMessage['payload']>(
     );
 
     const waitForResponseEvent = (e: Event) => {
-      const responseAction = JSON.parse((e as CustomEvent).detail);
-      // console.log('SDK GOT RESPONSE:', JSON.stringify(responseAction));
+      const message = JSON.parse((e as CustomEvent).detail);
+      console.log('SDK GOT RESPONSE:', JSON.stringify(message));
       // filter out response events not for this request
       if (
-        !isSDKMessage(responseAction) ||
-        responseAction.meta.requestId !== requestAction.meta.requestId
+        !isSDKMessage(message) ||
+        message.meta.requestId !== requestAction.meta.requestId
       ) {
         return;
       }
@@ -41,7 +41,13 @@ function fetchFromBackground<T extends SdkMessage['payload']>(
         sdkMessageProxyEvents.SDKResponseAction,
         waitForResponseEvent
       );
-      resolve(responseAction.payload as T);
+      // check for errors
+      if (message.payload instanceof Error) {
+        reject(message.payload);
+      } else {
+        resolve(message.payload as T);
+      }
+
       clearTimeout(timeoutId);
     };
 

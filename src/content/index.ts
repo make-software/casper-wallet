@@ -58,10 +58,11 @@ function emitSdkEvent(message: SdkEvent) {
   window.dispatchEvent(event);
 }
 
-async function handleOnMessage(message: SdkEvent | SdkMessage) {
+async function handleSdkResponseOrEvent(message: SdkEvent | SdkMessage) {
   // Todo for Piotr: design convention for delayed sdk request responses
   if (isSDKMessage(message)) {
     switch (message.type) {
+      case getType(sdkMessage.signError):
       case getType(sdkMessage.signResponse):
         window.dispatchEvent(
           new CustomEvent(sdkMessageProxyEvents.SDKResponseAction, {
@@ -92,12 +93,12 @@ function handleSdkRequest(e: Event) {
 
   browser.runtime
     .sendMessage(requestAction)
-    .then(responseAction => {
+    .then(message => {
       // if valid message send back response
-      if (isSDKMessage(responseAction)) {
+      if (isSDKMessage(message)) {
         window.dispatchEvent(
           new CustomEvent(sdkMessageProxyEvents.SDKResponseAction, {
-            detail: JSON.stringify(responseAction)
+            detail: JSON.stringify(message)
           })
         );
       }
@@ -136,7 +137,7 @@ function init() {
   window.addEventListener('focus', syncActiveOriginWithStore);
   window.addEventListener('blur', syncActiveOriginWithStore);
 
-  browser.runtime.onMessage.addListener(handleOnMessage);
+  browser.runtime.onMessage.addListener(handleSdkResponseOrEvent);
   window.addEventListener(
     sdkMessageProxyEvents.SDKRequestAction,
     handleSdkRequest
@@ -155,7 +156,7 @@ function cleanup() {
   window.removeEventListener('focus', syncActiveOriginWithStore);
   window.removeEventListener('blur', syncActiveOriginWithStore);
 
-  browser.runtime.onMessage.removeListener(handleOnMessage);
+  browser.runtime.onMessage.removeListener(handleSdkResponseOrEvent);
   window.removeEventListener(
     sdkMessageProxyEvents.SDKRequestAction,
     handleSdkRequest

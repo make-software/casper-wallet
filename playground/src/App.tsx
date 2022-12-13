@@ -47,14 +47,20 @@ function App() {
   ) => {
     if (accountPublicKey) {
       const deployJson = DeployUtil.deployToJson(deploy);
-      console.log('deployJson', JSON.stringify(deployJson));
-      sign(JSON.stringify(deployJson), accountPublicKey).then(res => {
-        if (res.cancelled) {
-          alert('Sign cancelled');
-        } else {
-          alert('Sign successful: ' + Object.values(res.signature).toString());
-        }
-      });
+      // console.log('deployJson', JSON.stringify(deployJson));
+      sign(JSON.stringify(deployJson), accountPublicKey)
+        .then(res => {
+          if (res.cancelled) {
+            alert('Sign cancelled');
+          } else {
+            alert(
+              'Sign successful: ' + Object.values(res.signature).toString()
+            );
+          }
+        })
+        .catch(err => {
+          alert('Error: ' + err);
+        });
     }
   };
 
