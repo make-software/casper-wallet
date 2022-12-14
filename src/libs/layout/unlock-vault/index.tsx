@@ -44,6 +44,7 @@ interface UnlockMessageEvent extends MessageEvent {
 export function UnlockVaultPageContent() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [passwordInputType, setPasswordInputType] =
     useState<PasswordInputType>('password');
@@ -65,6 +66,7 @@ export function UnlockVaultPageContent() {
   } = useUnlockWalletForm(passwordHash, passwordSaltHash);
 
   async function handleUnlockVault({ password }: UnlockWalletFormValues) {
+    setIsLoading(true);
     const unlockVaultWorker = new Worker(
       new URL('@src/background/workers/unlockVaultWorker.ts', import.meta.url)
     );
@@ -94,11 +96,14 @@ export function UnlockVaultPageContent() {
           newVaultCipher,
           newEncryptionKeyHash
         })
-      );
+      ).finally(() => {
+        setIsLoading(false);
+      });
     };
 
     unlockVaultWorker.onerror = error => {
       console.error(error);
+      setIsLoading(false);
     };
   }
 
@@ -194,10 +199,11 @@ export function UnlockVaultPageContent() {
         </InputsContainer>
       </ContentContainer>
       <FooterButtonsAbsoluteContainer>
-        <Button disabled={submitButtonDisabled} type="submit">
-          {t('Unlock wallet')}
+        <Button disabled={isLoading || submitButtonDisabled} type="submit">
+          {isLoading ? t('Loading') : t('Unlock wallet')}
         </Button>
         <Button
+          disabled={isLoading}
           type="button"
           color="secondaryRed"
           onClick={() => navigate(LockedRouterPath.ResetVault)}
