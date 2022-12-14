@@ -1,10 +1,13 @@
+import { ActionType, createAction, RootState } from 'typesafe-actions';
+
 import { VaultState } from '@src/background/redux/vault/types';
 import { WindowManagementState } from '@src/background/redux/windowManagement/types';
-import { ActionType, createAction, RootState } from 'typesafe-actions';
+
 import { DeploysState } from './redux/deploys/types';
 import { KeysState } from './redux/keys/types';
 import { LoginRetryCountState } from './redux/login-retry-count/reducer';
 import { SessionState } from './redux/session/types';
+import { VaultCipherState } from './redux/vault-cipher/types';
 
 // General purpose events emitted by background to all extension windows
 
@@ -15,6 +18,7 @@ export type PopupState = {
   vault: VaultState;
   deploys: DeploysState;
   windowManagement: WindowManagementState;
+  vaultCipher: VaultCipherState;
 };
 
 export const selectPopupState = (state: RootState): PopupState => {
@@ -25,7 +29,8 @@ export const selectPopupState = (state: RootState): PopupState => {
     session: state.session,
     vault: state.vault,
     deploys: state.deploys,
-    windowManagement: state.windowManagement
+    windowManagement: state.windowManagement,
+    vaultCipher: state.vaultCipher
   };
 };
 
