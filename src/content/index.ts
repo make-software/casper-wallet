@@ -9,6 +9,7 @@ import {
 import { sdkEvent, SdkEvent } from './sdk-event';
 import { getType } from 'typesafe-actions';
 import { activeOriginChanged } from '@src/background/redux/session/actions';
+import { SdkEventTypes } from './sdk-event-types';
 
 // Sync activeOrigin of active tab with store
 function syncActiveOriginWithStore() {
@@ -58,15 +59,15 @@ function emitSdkEvent(message: SdkEvent) {
   let eventType: string;
   switch (message.type) {
     case getType(sdkEvent.connectedActiveAccountEvent):
-      eventType = 'signer:connected';
+      eventType = SdkEventTypes.Connected;
       break;
 
     case getType(sdkEvent.disconnectedActiveAccountEvent):
-      eventType = 'signer:disconnected';
+      eventType = SdkEventTypes.Disconnected;
       break;
 
     case getType(sdkEvent.changedActiveConnectedAccountEvent):
-      eventType = 'signer:activeKeyChanged';
+      eventType = SdkEventTypes.ActiveKeyChanged;
       break;
 
     default:

@@ -1,4 +1,5 @@
 import { convertHexToBytes } from '@src/libs/crypto/utils';
+import { SdkEventTypes } from './sdk-event-types';
 import {
   sdkMessageProxyEvents,
   isSDKMessage,
@@ -165,9 +166,11 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
 declare global {
   interface Window {
     CasperWalletProvider: typeof CasperWalletProvider;
+    CasperWalletEventTypes: typeof SdkEventTypes;
   }
 }
 
+window.CasperWalletEventTypes = SdkEventTypes;
 window.CasperWalletProvider = CasperWalletProvider;
 // for backward compatibility
 const casperWalletProviderInstance = CasperWalletProvider();

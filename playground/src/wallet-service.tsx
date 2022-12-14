@@ -18,6 +18,8 @@ const getCasperWalletInstance = () => {
   throw Error('Please install the Casper Wallet Extension.');
 };
 
+let CasperWalletEventTypes;
+
 const REDUX_WALLET_SYNC_KEY = 'cspr-redux-wallet-sync';
 type SyncWalletBroadcastMessage = {
   publicKey: string | null;
@@ -41,7 +43,9 @@ type WalletService = {
   sign: (
     deployJson: string,
     accountPublicKey: string
-  ) => Promise<{ cancelled: true } | { cancelled: false, signature: Uint8Array}>;
+  ) => Promise<
+    { cancelled: true } | { cancelled: false; signature: Uint8Array }
+  >;
   getVersion: () => Promise<string>;
 };
 
@@ -58,6 +62,26 @@ export const WalletServiceProvider = props => {
   const [logs, setLogs] = useState<[string, object][]>([]);
   const log = (msg: string, payload?: any) =>
     setLogs(state => [[msg, payload], ...state]);
+
+  const [counter, setCounter] = useState(0);
+  const [extensionLoaded, setExtensionLoaded] = useState(false);
+
+  useEffect(() => {
+    let timer;
+    if ((window as any).CasperWalletEventTypes != null) {
+      CasperWalletEventTypes = (window as any).CasperWalletEventTypes;
+      setExtensionLoaded(true);
+      clearTimeout(timer);
+    } else {
+      timer = setTimeout(() => {
+        setCounter(i => (i = 1));
+      }, 500);
+    }
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [counter]);
 
   const [activePublicKey, _setActivePublicKey] = useState<null | string>(() => {
     const state: SyncWalletBroadcastMessage | null = JSON.parse(
@@ -104,6 +128,10 @@ export const WalletServiceProvider = props => {
 
   // SIGNER SUBSCRIPTIONS
   useEffect(() => {
+    if (extensionLoaded === false) {
+      return;
+    }
+
     const handleInitialState = (msg: any) => {
       log('event:initialState', msg.detail);
       try {
@@ -153,21 +181,36 @@ export const WalletServiceProvider = props => {
     };
 
     // subscribe to signer events
-    window.addEventListener('signer:initialState', handleInitialState);
-    window.addEventListener('signer:connected', handleConnected);
-    window.addEventListener('signer:disconnected', handleDisconnected);
-    window.addEventListener('signer:activeKeyChanged', handleActiveKeyChanged);
+    window.addEventListener('casper-wallet:initialState', handleInitialState);
+    window.addEventListener(CasperWalletEventTypes.Connected, handleConnected);
+    window.addEventListener(
+      CasperWalletEventTypes.Disconnected,
+      handleDisconnected
+    );
+    window.addEventListener(
+      CasperWalletEventTypes.ActiveKeyChanged,
+      handleActiveKeyChanged
+    );
 
     return () => {
-      window.removeEventListener('signer:initialState', handleInitialState);
-      window.removeEventListener('signer:connected', handleConnected);
-      window.removeEventListener('signer:disconnected', handleDisconnected);
       window.removeEventListener(
-        'signer:activeKeyChanged',
+        'casper-wallet:initialState',
+        handleInitialState
+      );
+      window.removeEventListener(
+        CasperWalletEventTypes.Connected,
+        handleConnected
+      );
+      window.removeEventListener(
+        CasperWalletEventTypes.Disconnected,
+        handleDisconnected
+      );
+      window.removeEventListener(
+        CasperWalletEventTypes.ActiveKeyChanged,
         handleActiveKeyChanged
       );
     };
-  }, [activePublicKey, setActivePublicKey]);
+  }, [activePublicKey, setActivePublicKey, extensionLoaded]);
 
   const disconnect = () => {
     console.log('disconnectRequest');
