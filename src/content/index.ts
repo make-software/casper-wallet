@@ -29,6 +29,29 @@ function syncActiveOriginWithStore() {
   }
 }
 
+async function handleSdkResponseOrEvent(message: SdkEvent | SdkMessage) {
+  // Todo for Piotr: design convention for delayed sdk request responses
+  if (isSDKMessage(message)) {
+    switch (message.type) {
+      case getType(sdkMessage.signError):
+      case getType(sdkMessage.signResponse):
+        window.dispatchEvent(
+          new CustomEvent(sdkMessageProxyEvents.SDKResponseAction, {
+            detail: JSON.stringify(message)
+          })
+        );
+        return;
+      default:
+        throw Error(
+          'Content: handleOnMessage unknown sdk message: ' +
+            JSON.stringify(message)
+        );
+    }
+  } else {
+    emitSdkEvent(message);
+  }
+}
+
 // Proxy Wallet Events to connected site
 function emitSdkEvent(message: SdkEvent) {
   // console.error('CONTENT EMIT SDK EVENT:', JSON.stringify(message));
@@ -56,29 +79,6 @@ function emitSdkEvent(message: SdkEvent) {
     detail: JSON.stringify(message.payload)
   });
   window.dispatchEvent(event);
-}
-
-async function handleSdkResponseOrEvent(message: SdkEvent | SdkMessage) {
-  // Todo for Piotr: design convention for delayed sdk request responses
-  if (isSDKMessage(message)) {
-    switch (message.type) {
-      case getType(sdkMessage.signError):
-      case getType(sdkMessage.signResponse):
-        window.dispatchEvent(
-          new CustomEvent(sdkMessageProxyEvents.SDKResponseAction, {
-            detail: JSON.stringify(message)
-          })
-        );
-        return;
-      default:
-        throw Error(
-          'Content: handleOnMessage unknown sdk message: ' +
-            JSON.stringify(message)
-        );
-    }
-  } else {
-    emitSdkEvent(message);
-  }
 }
 
 // SDK Message proxy to the backend

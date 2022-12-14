@@ -21,6 +21,7 @@ import { Button } from '@src/libs/ui';
 import { SignatureRequestContent } from './signature-request-content';
 import { signDeploy } from '@src/libs/crypto';
 import { CasperDeploy } from './types';
+import { convertBytesToHex } from '@src/libs/crypto/utils';
 
 export function SignatureRequestPage() {
   const { t } = useTranslation();
@@ -55,7 +56,6 @@ export function SignatureRequestPage() {
     const error = Error(
       'Account with signingPublicKeyHex is not connected to site'
     );
-    console.log('error');
     emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
     throw error;
   }
@@ -91,7 +91,10 @@ export function SignatureRequestPage() {
       signingAccount.secretKey
     );
     emitSdkEventToAllActiveTabs(
-      sdkMessage.signResponse({ signature, cancelled: false }, { requestId })
+      sdkMessage.signResponse(
+        { signatureHex: convertBytesToHex(signature), cancelled: false },
+        { requestId }
+      )
     );
     closeActiveWindow();
   }, [

@@ -22,9 +22,6 @@ export function SignatureRequestValue({
   id: string;
   value: string | CLValue;
 }) {
-  if (id === 'amount') {
-    console.log(id, value);
-  }
   if (typeof value === 'string' || typeof value === 'number') {
     // string args
     if (isKeyOfHashValue(id)) {

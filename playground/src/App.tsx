@@ -9,7 +9,7 @@ import {
   makeAuctionManagerDeploy,
   makeNativeTransferDeploy
 } from './deploy-utils';
-import { DeployUtil } from 'casper-js-sdk';
+import { CLPublicKey, DeployUtil } from 'casper-js-sdk';
 
 const Container = styled('div')({
   backgroundColor: '#282c34',
@@ -53,13 +53,17 @@ function App() {
           if (res.cancelled) {
             alert('Sign cancelled');
           } else {
-            alert(
-              'Sign successful: ' + Object.values(res.signature).toString()
+            const signedDeploy = DeployUtil.setSignature(
+              deploy,
+              res.signature,
+              CLPublicKey.fromHex(accountPublicKey)
             );
+            alert('Sign successful: ' + JSON.stringify(signedDeploy, null, 2));
           }
         })
         .catch(err => {
           alert('Error: ' + err);
+          throw err;
         });
     }
   };

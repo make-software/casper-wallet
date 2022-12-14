@@ -1,3 +1,4 @@
+import { convertHexToBytes } from '@src/libs/crypto/utils';
 import {
   sdkMessageProxyEvents,
   isSDKMessage,
@@ -28,7 +29,7 @@ function fetchFromBackground<T extends SdkMessage['payload']>(
 
     const waitForResponseEvent = (e: Event) => {
       const message = JSON.parse((e as CustomEvent).detail);
-      console.log('SDK GOT RESPONSE:', JSON.stringify(message));
+      // console.log('SDK GOT RESPONSE:', JSON.stringify(message));
       // filter out response events not for this request
       if (
         !isSDKMessage(message) ||
@@ -127,7 +128,8 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       deployJson: string,
       signingPublicKeyHex: string
     ): Promise<
-      { cancelled: true } | { cancelled: false; signature: Uint8Array }
+      | { cancelled: true }
+      | { cancelled: false; signatureHex: string; signature: Uint8Array }
     > => {
       return fetchFromBackground<
         ReturnType<typeof sdkMessage['signResponse']>['payload']
@@ -141,7 +143,18 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
             requestId: generateRequestId()
           }
         )
-      );
+      ).then(res => {
+        if (res.cancelled === false) {
+          const signature = convertHexToBytes(res.signatureHex);
+          return {
+            cancelled: res.cancelled,
+            signatureHex: res.signatureHex,
+            signature
+          };
+        }
+
+        return res;
+      });
     },
     signMessage(message: string, signingPublicKey: string): Promise<string> {
       throw Error('Not implementeed');
