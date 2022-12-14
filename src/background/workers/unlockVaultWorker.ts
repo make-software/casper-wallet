@@ -12,7 +12,7 @@ import { VaultCipherState } from '@background/redux/vault-cipher/types';
  * put new encryption key in session
  */
 
-interface UnlockVaultEventData extends MessageEvent {
+interface UnlockVaultMessageEvent extends MessageEvent {
   data: {
     password: string;
     keyDerivationSaltHash: string;
@@ -20,7 +20,7 @@ interface UnlockVaultEventData extends MessageEvent {
   };
 }
 
-onmessage = async function (event: UnlockVaultEventData) {
+onmessage = async function (event: UnlockVaultMessageEvent) {
   const { password, keyDerivationSaltHash, vaultCipher } = event.data;
 
   const encryptionKeyBytes = await deriveEncryptionKey(

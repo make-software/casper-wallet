@@ -37,7 +37,7 @@ import { UnlockVault } from '@background/redux/sagas/types';
 
 import { LockedRouterPath } from '../locked-router';
 
-interface UnlockVaultEventData extends MessageEvent {
+interface UnlockMessageEvent extends MessageEvent {
   data: UnlockVault;
 }
 
@@ -79,7 +79,7 @@ export function UnlockVaultPageContent() {
       vaultCipher
     });
 
-    unlockVaultWorker.onmessage = (event: UnlockVaultEventData) => {
+    unlockVaultWorker.onmessage = (event: UnlockMessageEvent) => {
       const {
         vault,
         newKeyDerivationSaltHash,
