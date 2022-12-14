@@ -1,6 +1,7 @@
+import { CLValue } from 'casper-js-sdk';
 import { Deploy } from 'casper-js-sdk/dist/lib/DeployUtil';
 
-export type ArgDict = { [key: string]: string | string[] };
+export type ArgDict = { [key: string]: string | CLValue };
 
 export enum DeployType {
   TransferCall = 'Transfer Call',
@@ -16,16 +17,16 @@ export type SignatureRequestFields = {
   transactionFee: string;
   chainName: string;
   deployType: DeployType;
+  entryPoint?: string;
 };
 
 export type SignatureRequestArguments = {
   delegator?: string;
   validator?: string;
-  newValidator?: string;
+  new_validator?: string;
   amount?: string;
   recipient?: string;
   transferId?: string;
-  entryPoint?: string;
   recipientKey?: string;
   recipientHash?: string;
 };
@@ -41,7 +42,7 @@ export const isKeyOfHashValue = (key: string) => {
     'deployHash',
     'delegator',
     'validator',
-    'newValidator',
+    'new_validator',
     'recipient',
     'recipientKey',
     'recipientHash'

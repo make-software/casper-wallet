@@ -4,3 +4,11 @@ export function truncateKey(key: string): string {
 
   return `${beginOfKey}...${endOfKey}`;
 }
+
+export const isValidHash = (hash?: string | null): hash is string => {
+  if (hash == null) {
+    return false;
+  }
+  const validHashRegExp = new RegExp('^([0-9A-Fa-f]){64}$');
+  return validHashRegExp.test(hash.trim());
+};

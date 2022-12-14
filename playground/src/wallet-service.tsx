@@ -41,7 +41,7 @@ type WalletService = {
   sign: (
     deployJson: string,
     accountPublicKey: string
-  ) => Promise<{ signature: Uint8Array }>;
+  ) => Promise<{ cancelled: true } | { cancelled: false, signature: Uint8Array}>;
   getVersion: () => Promise<string>;
 };
 

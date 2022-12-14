@@ -1,5 +1,5 @@
 import { DeployUtil } from 'casper-js-sdk';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -20,16 +20,20 @@ import { Button } from '@src/libs/ui';
 
 import { SignatureRequestContent } from './signature-request-content';
 import { signDeploy } from '@src/libs/crypto';
+import { CasperDeploy } from './types';
 
 export function SignatureRequestPage() {
   const { t } = useTranslation();
+
+  const [deploy, setDeploy] = useState<undefined | CasperDeploy>(undefined);
 
   const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
 
   if (!requestId || !signingPublicKeyHex) {
-    throw Error('Missing search param');
+    const error = Error('Missing search param');
+    throw error;
   }
 
   const accounts = useSelector(selectVaultAccounts);
@@ -38,7 +42,9 @@ export function SignatureRequestPage() {
   );
   // signing account should exist in wallet
   if (signingAccount == null) {
-    throw Error('No signing account');
+    const error = Error('No signing account');
+    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
+    throw error;
   }
 
   const connectedAccountNames = useSelector(
@@ -46,38 +52,61 @@ export function SignatureRequestPage() {
   );
   // signing account should be connected to site
   if (!connectedAccountNames.includes(signingAccount.name)) {
-    throw Error('Account with signingPublicKeyHex is not connected to site');
+    const error = Error(
+      'Account with signingPublicKeyHex is not connected to site'
+    );
+    console.log('error');
+    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
+    throw error;
   }
 
   const deployJsonById = useSelector(selectDeploysJsonById);
-  const deployJson = deployJsonById[requestId];
-  if (deployJson == null) {
-    throw Error('Deploy not found in state');
-  }
 
-  const res = DeployUtil.deployFromJson(deployJson);
-  if (!res.ok) {
-    throw Error('Deploy from json parsing error');
-  }
+  useEffect(() => {
+    const deployJson = deployJsonById[requestId];
+    if (deployJson == null) {
+      return;
+    }
 
-  const deploy = res.val;
+    const res = DeployUtil.deployFromJson(deployJson);
+    if (!res.ok) {
+      const error = Error('Parsing deploy from json error');
+      emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
+      throw error;
+    }
+
+    setDeploy(res.val);
+
+    return () => {};
+  }, [deployJsonById, requestId]);
 
   const handleSign = useCallback(() => {
+    if (deploy?.hash == null) {
+      return;
+    }
+
     const signature = signDeploy(
       deploy.hash,
       signingAccount.publicKey,
       signingAccount.secretKey
     );
     emitSdkEventToAllActiveTabs(
-      sdkMessage.signResponse({ signature }, { requestId })
+      sdkMessage.signResponse({ signature, cancelled: false }, { requestId })
     );
     closeActiveWindow();
   }, [
     signingAccount?.publicKey,
     signingAccount?.secretKey,
-    deploy.hash,
+    deploy?.hash,
     requestId
   ]);
+
+  const handleCancel = useCallback(() => {
+    emitSdkEventToAllActiveTabs(
+      sdkMessage.signResponse({ cancelled: true }, { requestId })
+    );
+    closeActiveWindow();
+  }, [requestId]);
 
   return (
     <LayoutWindow
@@ -86,10 +115,14 @@ export function SignatureRequestPage() {
       renderContent={() => <SignatureRequestContent deploy={deploy} />}
       renderFooter={() => (
         <FooterButtonsContainer>
-          <Button color="primaryRed" onClick={handleSign}>
+          <Button
+            color="primaryRed"
+            disabled={deploy == null}
+            onClick={handleSign}
+          >
             <Trans t={t}>Sign</Trans>
           </Button>
-          <Button color="secondaryBlue" onClick={() => closeActiveWindow()}>
+          <Button color="secondaryBlue" onClick={handleCancel}>
             <Trans t={t}>Cancel</Trans>
           </Button>
         </FooterButtonsContainer>
