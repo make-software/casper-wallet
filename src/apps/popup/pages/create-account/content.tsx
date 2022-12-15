@@ -27,7 +27,7 @@ export function CreateAccountPageContent({
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/create-account.svg" size={120} />
       </IllustrationContainer>
-      <TextContainer gap="big">
+      <TextContainer gap="medium">
         <Typography type="header">
           <Trans t={t}>Create account</Trans>
         </Typography>
