@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { useTranslation, Trans } from 'react-i18next';
 
 import {
-  LayoutWindow,
+  PopupLayout,
   PopupHeader,
   HeaderSubmenuBarNavLink,
   FooterButtonsContainer
@@ -56,7 +56,7 @@ export function CreateAccountPage() {
   const isButtonDisabled = calculateSubmitButtonDisabled({ isValid });
 
   return (
-    <LayoutWindow
+    <PopupLayout
       variant="form"
       onSubmit={handleSubmit(onSubmit)}
       renderHeader={() => (
