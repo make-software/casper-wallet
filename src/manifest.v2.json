@@ -6,7 +6,7 @@
     "128": "logo128.png",
     "192": "logo192.png"
   },
-  "permissions": ["notifications", "storage", "tabs"],
+  "permissions": ["management", "notifications", "storage", "tabs"],
   "background": {
     "scripts": ["./background.bundle.js"],
     "persistent": true

@@ -98,16 +98,19 @@ async function isOnboardingCompleted() {
   return keysDoesExist && vaultCipherDoesExist;
 }
 
-browser.runtime.onStartup.addListener(() => {
+const init = () => {
   // check if onboarding is completed and then disable
   isOnboardingCompleted().then(yes => {
     if (yes) {
       disableOnboardingFlow();
     }
   });
-});
+};
+browser.runtime.onStartup.addListener(init);
+browser.management.onEnabled.addListener(init);
 
 browser.runtime.onInstalled.addListener(async () => {
+  console.log('installed');
   // this will run on installation or update so
   // first clear previous rules, then register new rules
   // DEV MODE: clean store on installation
