@@ -132,11 +132,11 @@ export const WalletServiceProvider = props => {
       return;
     }
 
-    const handleInitialState = (msg: any) => {
-      log('event:initialState', msg.detail);
+    const handleTabChanged = (msg: any) => {
+      log('event:tabChanged', msg.detail);
       try {
         // const action: WalletState = JSON.parse(msg.detail);
-        // TODO: implement initial state logic
+        // TODO: implement tab activation logic
       } catch (err) {
         console.error(err);
       }
@@ -181,7 +181,7 @@ export const WalletServiceProvider = props => {
     };
 
     // subscribe to signer events
-    window.addEventListener('casper-wallet:initialState', handleInitialState);
+    window.addEventListener(CasperWalletEventTypes.TabChanged, handleTabChanged);
     window.addEventListener(CasperWalletEventTypes.Connected, handleConnected);
     window.addEventListener(
       CasperWalletEventTypes.Disconnected,
@@ -194,8 +194,8 @@ export const WalletServiceProvider = props => {
 
     return () => {
       window.removeEventListener(
-        'casper-wallet:initialState',
-        handleInitialState
+        CasperWalletEventTypes.TabChanged,
+        handleTabChanged
       );
       window.removeEventListener(
         CasperWalletEventTypes.Connected,

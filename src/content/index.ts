@@ -70,6 +70,10 @@ function emitSdkEvent(message: SdkEvent) {
       eventType = SdkEventTypes.ActiveKeyChanged;
       break;
 
+    case getType(sdkEvent.changedTab):
+      eventType = SdkEventTypes.TabChanged;
+      break;
+
     default:
       throw Error(
         'Content: emit sdk event unknown action: ' + JSON.stringify(message)

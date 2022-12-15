@@ -24,6 +24,7 @@ export const sdkEvent = {
   disconnectedActiveAccountEvent: createAction(
     'disconnectedActiveAccountEvent'
   )<WalletState>(),
+  changedTab: createAction('changedTabEvent')<WalletState>(),
   changedActiveConnectedAccountEvent: createAction(
     'changedActiveConnectedAccountEvent'
   )<WalletState>()
