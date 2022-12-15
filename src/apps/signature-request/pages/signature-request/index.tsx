@@ -1,5 +1,5 @@
 import { DeployUtil } from 'casper-js-sdk';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -37,31 +37,22 @@ export function SignatureRequestPage() {
     throw error;
   }
 
-  const accounts = useSelector(selectVaultAccounts);
-  const signingAccount = accounts.find(
-    a => a.publicKey === signingPublicKeyHex
-  );
-  // signing account should exist in wallet
-  if (signingAccount == null) {
-    const error = Error('No signing account');
-    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
-    throw error;
-  }
+  const renderDeps = [requestId, signingPublicKeyHex];
 
-  const connectedAccountNames = useSelector(
+  const vaultAccounts = useSelector(selectVaultAccounts);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const accounts = useMemo(() => vaultAccounts, renderDeps);
+
+  const connectedAccountNamesWithOrigin = useSelector(
     selectConnectedAccountNamesWithOrigin
   );
-  // signing account should be connected to site
-  if (!connectedAccountNames.includes(signingAccount.name)) {
-    const error = Error(
-      'Account with signingPublicKeyHex is not connected to site'
-    );
-    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
-    throw error;
-  }
+  const connectedAccountNames = useMemo(
+    () => connectedAccountNamesWithOrigin,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    renderDeps
+  );
 
   const deployJsonById = useSelector(selectDeploysJsonById);
-
   useEffect(() => {
     const deployJson = deployJsonById[requestId];
     if (deployJson == null) {
@@ -78,7 +69,27 @@ export function SignatureRequestPage() {
     setDeploy(res.val);
 
     return () => {};
-  }, [deployJsonById, requestId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, renderDeps);
+
+  const signingAccount = accounts.find(
+    a => a.publicKey === signingPublicKeyHex
+  );
+  // signing account should exist in wallet
+  if (signingAccount == null) {
+    const error = Error('No signing account');
+    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
+    throw error;
+  }
+
+  // signing account should be connected to site
+  if (!connectedAccountNames.includes(signingAccount.name)) {
+    const error = Error(
+      'Account with signingPublicKeyHex is not connected to site'
+    );
+    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
+    throw error;
+  }
 
   const handleSign = useCallback(() => {
     if (deploy?.hash == null) {
