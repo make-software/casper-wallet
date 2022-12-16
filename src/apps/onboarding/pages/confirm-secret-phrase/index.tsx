@@ -50,11 +50,11 @@ export function ConfirmSecretPhrasePage({
       navigate(
         ErrorPath,
         createErrorLocationState({
-          errorHeaderText: t('Ah, that’s not guite a correct secret phrase'),
+          errorHeaderText: t("That's not the correct word order."),
           errorContentText: t(
-            'You can start over again. Make sure you save your secret phrase as a text file or write it down somewhere.'
+            'Please start over. Make sure you save your secret phrase as a text file or write it down somewhere.'
           ),
-          errorPrimaryButtonLabel: t('Start over again'),
+          errorPrimaryButtonLabel: t('Generate a new secret recovery phrase'),
           errorRedirectPath: RouterPath.CreateSecretPhraseConfirmation
         })
       );
