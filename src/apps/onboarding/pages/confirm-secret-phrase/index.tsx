@@ -50,7 +50,7 @@ export function ConfirmSecretPhrasePage({
       navigate(
         ErrorPath,
         createErrorLocationState({
-          errorHeaderText: t("That's not the correct word order."),
+          errorHeaderText: t("That's not the correct word order"),
           errorContentText: t(
             'Please start over. Make sure you save your secret phrase as a text file or write it down somewhere.'
           ),
