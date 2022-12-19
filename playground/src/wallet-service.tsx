@@ -29,8 +29,8 @@ const GRPC_URL = 'https://casper-node-proxy.dev.make.services/rpc';
 export let casperService = new CasperServiceByJsonRPC(GRPC_URL);
 
 export type WalletState = {
+  isLocked: boolean;
   isConnected: boolean;
-  isUnlocked: boolean;
   activeKey: string;
 };
 
@@ -100,33 +100,7 @@ export const WalletServiceProvider = props => {
     );
   }, []);
 
-  // SYNC BETWEEN TABS AND WINDOWS
-  useEffect(() => {
-    const syncWalletBetweenTabsAndWindows = ev => {
-      if (ev.key === REDUX_WALLET_SYNC_KEY) {
-        try {
-          const message: SyncWalletBroadcastMessage = JSON.parse(ev.newValue);
-
-          const publicKeyChanged = activePublicKey !== message.publicKey;
-
-          if (publicKeyChanged) {
-            setActivePublicKey(message.publicKey);
-          }
-        } catch (err: any) {
-          setError(err);
-        }
-      }
-    };
-
-    // subscribe to storage events to sync cache storage with other app instances
-    window.addEventListener('storage', syncWalletBetweenTabsAndWindows);
-
-    return () => {
-      window.removeEventListener('storage', syncWalletBetweenTabsAndWindows);
-    };
-  }, [activePublicKey, setActivePublicKey]);
-
-  // SIGNER SUBSCRIPTIONS
+  // WALLET SUBSCRIPTIONS
   useEffect(() => {
     if (extensionLoaded === false) {
       return;
@@ -135,8 +109,12 @@ export const WalletServiceProvider = props => {
     const handleTabChanged = (msg: any) => {
       log('event:tabChanged', msg.detail);
       try {
-        // const action: WalletState = JSON.parse(msg.detail);
-        // TODO: implement tab activation logic
+        const action: WalletState = JSON.parse(msg.detail);
+        if (action.activeKey) {
+          setActivePublicKey(action.activeKey);
+        } else {
+          setActivePublicKey(null);
+        }
       } catch (err) {
         console.error(err);
       }
@@ -157,7 +135,6 @@ export const WalletServiceProvider = props => {
     const handleDisconnected = (msg: any) => {
       log('event:disconnected', msg.detail);
       try {
-        // const action: WalletState = JSON.parse(msg.detail);
         if (activePublicKey) {
           setActivePublicKey(null);
         }
@@ -170,7 +147,7 @@ export const WalletServiceProvider = props => {
       log('event:activeKeyChanged', msg.detail);
       try {
         const action: WalletState = JSON.parse(msg.detail);
-        if (action.isConnected && action.activeKey) {
+        if (action.activeKey) {
           setActivePublicKey(action.activeKey);
         } else {
           setActivePublicKey(null);
