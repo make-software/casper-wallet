@@ -26,8 +26,10 @@ import {
   vaultReseted
 } from '../vault/actions';
 import {
+  selectIsActiveAccountConnectedWithOrigin,
   selectSecretPhrase,
   selectVault,
+  selectVaultActiveAccount,
   selectVaultDerivedAccounts,
   selectVaultTimeoutDurationSetting
 } from '../vault/selectors';
@@ -49,6 +51,7 @@ import { keysUpdated } from '../keys/actions';
 import { vaultCipherCreated } from '../vault-cipher/actions';
 import { deploysReseted } from '../deploys/actions';
 import { loginRetryCountReseted } from '../login-retry-count/actions';
+import { emitSdkEventToAllActiveTabs, sdkEvent } from '@src/content/sdk-event';
 
 export function* vaultSagas() {
   yield takeLatest(getType(lockVault), lockVaultSaga);
@@ -86,6 +89,14 @@ function* lockVaultSaga(action: ReturnType<typeof lockVault>) {
     yield put(sessionReseted());
     yield put(vaultReseted());
     yield put(deploysReseted());
+
+    emitSdkEventToAllActiveTabs(
+      sdkEvent.lockedEvent({
+        isLocked: true,
+        isConnected: false,
+        activeKey: null
+      })
+    );
   } catch (err) {
     console.error(err);
   }
@@ -121,6 +132,21 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
       encryptionKeyHashCreated({ encryptionKeyHash: newEncryptionKeyHash })
     );
     yield put(vaultUnlocked());
+
+    const isActiveAccountConnected = yield* sagaSelect(
+      selectIsActiveAccountConnectedWithOrigin
+    );
+    const activeAccount = yield* sagaSelect(selectVaultActiveAccount);
+
+    if (activeAccount) {
+      emitSdkEventToAllActiveTabs(
+        sdkEvent.unlockedEvent({
+          isLocked: false,
+          isConnected: isActiveAccountConnected,
+          activeKey: isActiveAccountConnected ? activeAccount.publicKey : null
+        })
+      );
+    }
   } catch (err) {
     console.error(err);
   }

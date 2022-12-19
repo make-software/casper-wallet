@@ -106,6 +106,34 @@ export const WalletServiceProvider = props => {
       return;
     }
 
+    const handleLocked = (msg: any) => {
+      log('event:locked', msg.detail);
+      try {
+        const action: WalletState = JSON.parse(msg.detail);
+        if (action.activeKey) {
+          setActivePublicKey(action.activeKey);
+        } else {
+          setActivePublicKey(null);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    
+    const handleUnlocked = (msg: any) => {
+      log('event:unlocked', msg.detail);
+      try {
+        const action: WalletState = JSON.parse(msg.detail);
+        if (action.activeKey) {
+          setActivePublicKey(action.activeKey);
+        } else {
+          setActivePublicKey(null);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    
     const handleTabChanged = (msg: any) => {
       log('event:tabChanged', msg.detail);
       try {
@@ -158,6 +186,8 @@ export const WalletServiceProvider = props => {
     };
 
     // subscribe to signer events
+    window.addEventListener(CasperWalletEventTypes.Locked, handleLocked);
+    window.addEventListener(CasperWalletEventTypes.Unlocked, handleUnlocked);
     window.addEventListener(CasperWalletEventTypes.TabChanged, handleTabChanged);
     window.addEventListener(CasperWalletEventTypes.Connected, handleConnected);
     window.addEventListener(
@@ -170,6 +200,14 @@ export const WalletServiceProvider = props => {
     );
 
     return () => {
+      window.removeEventListener(
+        CasperWalletEventTypes.Locked,
+        handleLocked
+      );
+      window.removeEventListener(
+        CasperWalletEventTypes.Unlocked,
+        handleUnlocked
+      );
       window.removeEventListener(
         CasperWalletEventTypes.TabChanged,
         handleTabChanged

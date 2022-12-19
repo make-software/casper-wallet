@@ -17,7 +17,7 @@ function syncActiveOriginWithStore() {
   if (document.visibilityState === 'visible') {
     activeOrigin = window.location.origin;
   }
-  console.log('CONTENT ACTIVE ORIGIN:', activeOrigin);
+  // console.log('CONTENT ACTIVE ORIGIN:', activeOrigin);
   if (chrome.runtime?.id) {
     // update state
     browser.runtime
@@ -73,6 +73,14 @@ function emitSdkEvent(message: SdkEvent) {
 
     case getType(sdkEvent.changedTab):
       eventType = SdkEventTypes.TabChanged;
+      break;
+
+    case getType(sdkEvent.lockedEvent):
+      eventType = SdkEventTypes.Locked;
+      break;
+
+    case getType(sdkEvent.unlockedEvent):
+      eventType = SdkEventTypes.Unlocked;
       break;
 
     default:
