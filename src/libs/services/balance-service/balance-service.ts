@@ -47,13 +47,13 @@ export const getAccountBalance = ({ publicKey }: { publicKey: string }) =>
     ['getAccountBalanceRequest', publicKey],
     () => getAccountBalanceRequest(publicKey),
     {
-      // cached for 1 min
-      staleTime: 60 * SECOND
+      // cached for 30 sec
+      staleTime: 30 * SECOND
     }
   );
 
 export const getCurrencyRate = () =>
   queryClient.fetchQuery('getCurrencyRateRequest', getCurrencyRateRequest, {
-    // cached for 1 hr
-    staleTime: 360 * SECOND
+    // cached for 30 sec
+    staleTime: 30 * SECOND
   });
