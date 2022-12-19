@@ -1,6 +1,8 @@
 import { EmptyAction, PayloadAction } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 
+// WARNING: legacy to be refactored, don't reuse!
+
 export type RemoteAction =
   | CheckAccountNameIsTakenAction
   | CheckSecretKeyExistAction
