@@ -111,12 +111,12 @@ browser.runtime.onStartup.addListener(init);
 browser.management.onEnabled.addListener(init);
 
 browser.runtime.onInstalled.addListener(async () => {
-  console.log('installed');
+  // console.log('installed');
   // this will run on installation or update so
   // first clear previous rules, then register new rules
   // DEV MODE: clean store on installation
   // browser.storage.local.remove([REDUX_STORAGE_KEY]);
-
+  //
   // after installation/update check if onboarding is completed
   isOnboardingCompleted().then(yes => {
     if (yes) {
@@ -261,7 +261,6 @@ browser.runtime.onMessage.addListener(
               selectIsActiveAccountConnectedWithOrigin(store.getState());
             const isLocked = selectVaultIsLocked(store.getState());
             const activeAccount = selectVaultActiveAccount(store.getState());
-
             if (activeAccount) {
               emitSdkEventToAllActiveTabs(
                 sdkEvent.changedTab({
@@ -274,6 +273,7 @@ browser.runtime.onMessage.addListener(
                 })
               );
             }
+
             return sendResponse(undefined);
           }
 
@@ -285,9 +285,9 @@ browser.runtime.onMessage.addListener(
           case getType(deploysReseted):
           case getType(sessionReseted):
           case getType(encryptionKeyHashCreated):
+          case getType(vaultUnlocked):
           case getType(vaultLoaded):
           case getType(vaultReseted):
-          case getType(vaultUnlocked):
           case getType(secretPhraseCreated):
           case getType(accountImported):
           case getType(accountAdded):

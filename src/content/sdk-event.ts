@@ -18,7 +18,9 @@ export const sdkEvent = {
   changedTab: createAction('changedTabEvent')<WalletState>(),
   changedConnectedAccountEvent: createAction(
     'changedConnectedAccountEvent'
-  )<WalletState>()
+  )<WalletState>(),
+  lockedEvent: createAction('lockedEvent')<WalletState>(),
+  unlockedEvent: createAction('unlockedEvent')<WalletState>()
 };
 
 export type SdkEvent = ActionType<typeof sdkEvent>;
