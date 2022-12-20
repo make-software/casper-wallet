@@ -59,13 +59,17 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
     }
   },
   '&[type=file]': {
+    display: 'flex',
     cursor: 'pointer',
     color: theme.color.contentSecondary,
-    height: '40px',
+    height: 'auto',
     lineHeight: '40px'
   },
   '&[type=file]::file-selector-button': {
-    display: 'none'
+    opacity: '0',
+    width: '0',
+    padding: '0',
+    border: '0'
   },
   '::placeholder': {
     color: theme.color.contentSecondary
