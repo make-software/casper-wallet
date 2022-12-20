@@ -24,6 +24,7 @@ const Container = styled(FlexColumn)`
   height: 100%;
   height: -webkit-fill-available;
   min-height: 600px;
+  width: 360px;
 `;
 
 const PageHeader = styled.header``;

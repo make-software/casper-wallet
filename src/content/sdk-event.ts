@@ -5,27 +5,19 @@ import { SdkMessage } from './sdk-message';
 // Event emitted to connected sites
 
 export type WalletState = {
-  activeKey: string;
-  isConnected: boolean;
   isLocked: boolean;
-};
-
-// for backward compatibility
-export type LegacySignerState = {
-  activeKey: string;
   isConnected: boolean;
-  isUnlocked: boolean;
+  activeKey: string | null;
 };
 
 export const sdkEvent = {
-  connectedActiveAccountEvent: createAction(
-    'connectedActiveAccountEvent'
+  connectedAccountEvent: createAction('connectedAccountEvent')<WalletState>(),
+  disconnectedAccountEvent: createAction(
+    'disconnectedAccountEvent'
   )<WalletState>(),
-  disconnectedActiveAccountEvent: createAction(
-    'disconnectedActiveAccountEvent'
-  )<WalletState>(),
-  changedActiveConnectedAccountEvent: createAction(
-    'changedActiveConnectedAccountEvent'
+  changedTab: createAction('changedTabEvent')<WalletState>(),
+  changedConnectedAccountEvent: createAction(
+    'changedConnectedAccountEvent'
   )<WalletState>()
 };
 

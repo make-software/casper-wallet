@@ -71,13 +71,18 @@ export function useAccountManager() {
       if (newActiveAccount == null) {
         throw Error('new active account should be found');
       }
-      const isConnected = connectedAccountNames.includes(newActiveAccount.name);
+      const isActiveAccountConnected = connectedAccountNames.includes(
+        newActiveAccount.name
+      );
 
       emitSdkEventToAllActiveTabs(
-        sdkEvent.changedActiveConnectedAccountEvent({
-          isConnected,
+        sdkEvent.changedConnectedAccountEvent({
           isLocked: isLocked,
-          activeKey: newActiveAccount.publicKey
+          isConnected: isActiveAccountConnected,
+          activeKey:
+            isActiveAccountConnected && !isLocked
+              ? newActiveAccount.publicKey
+              : null
         })
       );
 
@@ -92,10 +97,10 @@ export function useAccountManager() {
         return;
       }
 
-      // connected active account
+      // connected accounts including active
       if (accountNames.includes(activeAccount.name)) {
         emitSdkEventToAllActiveTabs(
-          sdkEvent.connectedActiveAccountEvent({
+          sdkEvent.connectedAccountEvent({
             isConnected: true,
             isLocked: isLocked,
             activeKey: activeAccount.publicKey
@@ -108,7 +113,7 @@ export function useAccountManager() {
           })
         );
       } else {
-        // not connected active account, so need to change
+        // connected accounts not including active, so will switch active to connected
         const newActiveAccountFromConnected =
           findAccountInAListClosestToGivenAccountFilteredByNames(
             accounts,
@@ -121,9 +126,9 @@ export function useAccountManager() {
           newActiveAccountFromConnected.name !== activeAccount.name
         ) {
           emitSdkEventToAllActiveTabs(
-            sdkEvent.changedActiveConnectedAccountEvent({
-              isConnected: true,
+            sdkEvent.changedConnectedAccountEvent({
               isLocked: isLocked,
+              isConnected: true,
               activeKey: newActiveAccountFromConnected.publicKey
             })
           );
@@ -156,7 +161,7 @@ export function useAccountManager() {
       // disconnected active account, so need to emit event
       if (accountName === activeAccount.name) {
         emitSdkEventToAllActiveTabs(
-          sdkEvent.disconnectedActiveAccountEvent({
+          sdkEvent.disconnectedAccountEvent({
             isConnected: false,
             isLocked: isLocked,
             activeKey: activeAccount?.publicKey
@@ -184,7 +189,7 @@ export function useAccountManager() {
 
       if (allAccountNames.includes(activeAccount.name)) {
         await emitSdkEventToAllActiveTabs(
-          sdkEvent.disconnectedActiveAccountEvent({
+          sdkEvent.disconnectedAccountEvent({
             isConnected: false,
             isLocked: isLocked,
             activeKey: activeAccount?.publicKey

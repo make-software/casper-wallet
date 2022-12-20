@@ -17,8 +17,9 @@ function syncActiveOriginWithStore() {
   if (document.visibilityState === 'visible') {
     activeOrigin = window.location.origin;
   }
-  // console.warn('CONTENT ACTIVE ORIGIN:', activeOrigin);
+  console.log('CONTENT ACTIVE ORIGIN:', activeOrigin);
   if (chrome.runtime?.id) {
+    // update state
     browser.runtime
       .sendMessage(activeOriginChanged(activeOrigin))
       .catch(err => {
@@ -58,16 +59,20 @@ function emitSdkEvent(message: SdkEvent) {
   // console.error('CONTENT EMIT SDK EVENT:', JSON.stringify(message));
   let eventType: string;
   switch (message.type) {
-    case getType(sdkEvent.connectedActiveAccountEvent):
+    case getType(sdkEvent.connectedAccountEvent):
       eventType = SdkEventTypes.Connected;
       break;
 
-    case getType(sdkEvent.disconnectedActiveAccountEvent):
+    case getType(sdkEvent.disconnectedAccountEvent):
       eventType = SdkEventTypes.Disconnected;
       break;
 
-    case getType(sdkEvent.changedActiveConnectedAccountEvent):
+    case getType(sdkEvent.changedConnectedAccountEvent):
       eventType = SdkEventTypes.ActiveKeyChanged;
+      break;
+
+    case getType(sdkEvent.changedTab):
+      eventType = SdkEventTypes.TabChanged;
       break;
 
     default:

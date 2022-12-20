@@ -21,6 +21,7 @@ import {
   secretPhraseCreated
 } from '@src/background/redux/vault/actions';
 import {
+  selectIsActiveAccountConnectedWithOrigin,
   selectIsAnyAccountConnectedWithOrigin,
   selectVaultAccountsNames,
   selectVaultAccountsSecretKeysBase64,
@@ -164,7 +165,7 @@ browser.runtime.onMessage.addListener(
             const activeAccount = selectVaultActiveAccount(store.getState());
             if (activeAccount) {
               emitSdkEventToAllActiveTabs(
-                sdkEvent.disconnectedActiveAccountEvent({
+                sdkEvent.disconnectedAccountEvent({
                   isConnected: false,
                   isLocked: isLocked,
                   activeKey: activeAccount?.publicKey
@@ -253,6 +254,29 @@ browser.runtime.onMessage.addListener(
             return sendResponse(undefined);
           }
 
+          case getType(activeOriginChanged): {
+            store.dispatch(action);
+
+            const isActiveAccountConnected =
+              selectIsActiveAccountConnectedWithOrigin(store.getState());
+            const isLocked = selectVaultIsLocked(store.getState());
+            const activeAccount = selectVaultActiveAccount(store.getState());
+
+            if (activeAccount) {
+              emitSdkEventToAllActiveTabs(
+                sdkEvent.changedTab({
+                  isLocked: isLocked,
+                  isConnected: isActiveAccountConnected,
+                  activeKey:
+                    isActiveAccountConnected && !isLocked
+                      ? activeAccount.publicKey
+                      : null
+                })
+              );
+            }
+            return sendResponse(undefined);
+          }
+
           case getType(lockVault):
           case getType(unlockVault):
           case getType(initKeys):
@@ -269,7 +293,6 @@ browser.runtime.onMessage.addListener(
           case getType(accountAdded):
           case getType(accountRemoved):
           case getType(accountRenamed):
-          case getType(activeOriginChanged):
           case getType(activeAccountChanged):
           case getType(timeoutDurationChanged):
           case getType(lastActivityTimeRefreshed):
