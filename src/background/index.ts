@@ -108,7 +108,7 @@ const init = () => {
   });
 };
 browser.runtime.onStartup.addListener(init);
-browser.management.onEnabled.addListener(init);
+browser.management?.onEnabled?.addListener(init);
 
 browser.runtime.onInstalled.addListener(async () => {
   // console.log('installed');
