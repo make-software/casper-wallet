@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, Typography, SvgIcon } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { closeActiveWindow } from '@background/close-window';
+import { closeCurrentWindow } from '@src/background/close-current-window';
 
 const LinkWithIconContainer = styled.div`
   display: flex;
@@ -81,7 +81,7 @@ export function HeaderSubmenuBarNavLink({
 
     case 'cancelWindow':
       return (
-        <NavLink label={t('Cancel')} onClick={() => closeActiveWindow()} />
+        <NavLink label={t('Cancel')} onClick={() => closeCurrentWindow()} />
       );
 
     default:

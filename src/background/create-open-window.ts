@@ -1,26 +1,32 @@
 import browser from 'webextension-polyfill';
 
-export enum PurposeForOpening {
+export enum WindowApp {
   ImportAccount = 'ImportAccount',
   ConnectToApp = 'ConnectToApp',
+  SwitchAccount = 'SwitchAccount',
   SignatureRequest = 'SignatureRequest'
 }
 
 export type WindowSearchParams = Record<string, string>;
 
-function getUrlByPurposeForOpening(
-  purposeForOpening: PurposeForOpening,
+function getUrlByWindowApp(
+  windowApp: WindowApp,
   searchParams?: WindowSearchParams
 ) {
   const urlSearchParams = new URLSearchParams(searchParams).toString();
   const searchParamsWithPrefix = urlSearchParams && '?' + urlSearchParams;
 
-  switch (purposeForOpening) {
-    case PurposeForOpening.ImportAccount:
+  switch (windowApp) {
+    case WindowApp.ImportAccount:
       return 'import-account-with-file.html' + searchParamsWithPrefix;
-    case PurposeForOpening.ConnectToApp:
+    case WindowApp.ConnectToApp:
       return `connect-to-app.html` + searchParamsWithPrefix;
-    case PurposeForOpening.SignatureRequest:
+    case WindowApp.SwitchAccount:
+      return (
+        `connect-to-app.html?switchAccount=true` +
+        (urlSearchParams && '&' + urlSearchParams)
+      );
+    case WindowApp.SignatureRequest:
       return 'signature-request.html' + searchParamsWithPrefix;
     default:
       return 'popup.html?#/';
@@ -34,7 +40,7 @@ interface CreateOpenWindowProps {
 }
 
 export interface OpenWindowProps {
-  purposeForOpening: PurposeForOpening;
+  windowApp: WindowApp;
   isNewWindow?: boolean;
   searchParams?: WindowSearchParams;
 }
@@ -46,7 +52,7 @@ export function createOpenWindow({
   clearWindowId
 }: CreateOpenWindowProps) {
   return async function openWindow({
-    purposeForOpening,
+    windowApp,
     isNewWindow,
     searchParams
   }: OpenWindowProps): Promise<browser.Windows.Window> {
@@ -81,7 +87,7 @@ export function createOpenWindow({
           const tab = window.tabs?.[0];
           if (tab?.id != null) {
             await browser.tabs.update({
-              url: getUrlByPurposeForOpening(purposeForOpening, searchParams)
+              url: getUrlByWindowApp(windowApp, searchParams)
             });
           }
           return window;
@@ -102,7 +108,7 @@ export function createOpenWindow({
 
         return browser.windows
           .create({
-            url: getUrlByPurposeForOpening(purposeForOpening, searchParams),
+            url: getUrlByWindowApp(windowApp, searchParams),
             type: 'popup',
             height: popupHeight,
             width: popupWidth,

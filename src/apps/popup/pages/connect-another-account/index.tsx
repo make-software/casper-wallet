@@ -4,7 +4,12 @@ import { useParams } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { ContentContainer, TextContainer } from '@src/libs/layout';
+import {
+  ContentContainer,
+  LeftAlignedFlexColumn,
+  TextContainer,
+  VerticalSpaceContainer
+} from '@src/libs/layout';
 import {
   Button,
   SiteFaviconBadge,
@@ -25,14 +30,9 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import { selectActiveOrigin } from '@src/background/redux/session/selectors';
 
-const HeaderTextContent = styled.div`
-  margin-top: 16px;
-`;
-
 const CentredFlexRow = styled.div`
   display: flex;
   width: 100%;
-
   align-items: center;
 
   gap: 18px;
@@ -40,12 +40,6 @@ const CentredFlexRow = styled.div`
 
 const ListItemContainer = styled(CentredFlexRow)`
   padding: 14px 18px;
-`;
-
-const LeftAlignedFlexColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
 `;
 
 export const SpaceBetweenContainer = styled(CentredFlexRow)`
@@ -84,11 +78,11 @@ export function ConnectAnotherAccountPageContent() {
     <ContentContainer>
       <TextContainer gap="big">
         <SiteFaviconBadge origin={activeOrigin} />
-        <HeaderTextContent>
+        <VerticalSpaceContainer gap="medium">
           <Typography type="header">
             This account isn’t yet connected to this site
           </Typography>
-        </HeaderTextContent>
+        </VerticalSpaceContainer>
       </TextContainer>
       {targetAccount && (
         <PageTile>

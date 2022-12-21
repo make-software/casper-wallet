@@ -12,7 +12,7 @@ import { SvgIcon, Typography, Button, Checkbox } from '@src/libs/ui';
 import { useTypedNavigate } from '@popup/router';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { resetVault } from '@src/background/redux/sagas/actions';
-import { closeWindowByReload } from '@background/close-window-by-reload';
+import { closeWindowByReloadExtension } from '@src/background/close-window-by-reload-extension';
 
 export function ResetVaultPageContent() {
   const [isChecked, setIsChecked] = useState(false);
@@ -21,7 +21,7 @@ export function ResetVaultPageContent() {
 
   function handleResetVault() {
     dispatchToMainStore(resetVault()).then(() => {
-      closeWindowByReload();
+      closeWindowByReloadExtension();
     });
   }
 

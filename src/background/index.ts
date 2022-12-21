@@ -39,7 +39,7 @@ import {
 import { selectWindowId } from '@src/background/redux/windowManagement/selectors';
 import { emitSdkEventToAllActiveTabs, sdkEvent } from '@src/content/sdk-event';
 import { isSDKMessage, SdkMessage, sdkMessage } from '@src/content/sdk-message';
-import { PurposeForOpening } from '@src/hooks';
+import { WindowApp } from '@src/hooks';
 import {
   enableOnboardingFlow,
   disableOnboardingFlow,
@@ -148,7 +148,7 @@ browser.runtime.onMessage.addListener(
             }
 
             openWindow({
-              purposeForOpening: PurposeForOpening.ConnectToApp,
+              windowApp: WindowApp.ConnectToApp,
               searchParams: query
             });
             success = true;
@@ -184,6 +184,28 @@ browser.runtime.onMessage.addListener(
             );
           }
 
+          case getType(sdkMessage.switchAccountRequest): {
+            let success = false;
+
+            const query: Record<string, string> = {
+              origin: action.payload.origin
+            };
+
+            if (action.payload.title != null) {
+              query.title = action.payload.title;
+            }
+
+            openWindow({
+              windowApp: WindowApp.SwitchAccount,
+              searchParams: query
+            });
+            success = true;
+
+            return sendResponse(
+              sdkMessage.switchAccountResponse(success, action.meta)
+            );
+          }
+
           case getType(sdkMessage.signRequest): {
             const { signingPublicKeyHex } = action.payload;
             let deployJson;
@@ -200,7 +222,7 @@ browser.runtime.onMessage.addListener(
               })
             );
             openWindow({
-              purposeForOpening: PurposeForOpening.SignatureRequest,
+              windowApp: WindowApp.SignatureRequest,
               searchParams: {
                 requestId: action.meta.requestId,
                 signingPublicKeyHex

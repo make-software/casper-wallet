@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { PurposeForOpening, useWindowManager } from '@src/hooks';
+import { WindowApp, useWindowManager } from '@src/hooks';
 
 import { TimeoutDurationSetting } from '@src/apps/popup/constants';
 import { RouterPath, useNavigationMenu } from '@src/apps/popup/router';
@@ -89,7 +89,7 @@ export function NavigationMenuPageContent() {
             handleOnClick: () => {
               closeNavigationMenu();
               openWindow({
-                purposeForOpening: PurposeForOpening.ImportAccount
+                windowApp: WindowApp.ImportAccount
               }).catch(e => console.error(e));
             }
           }

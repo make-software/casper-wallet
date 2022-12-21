@@ -95,6 +95,19 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         options
       );
     },
+    requestSwitchAccount(): Promise<boolean> {
+      return fetchFromBackground<
+        ReturnType<typeof sdkMessage['switchAccountResponse']>['payload']
+      >(
+        sdkMessage.switchAccountRequest(
+          { origin: window.location.origin, title: document.title },
+          {
+            requestId: generateRequestId()
+          }
+        ),
+        options
+      );
+    },
     isConnected(): Promise<boolean> {
       return fetchFromBackground<
         ReturnType<typeof sdkMessage['isConnectedResponse']>['payload']

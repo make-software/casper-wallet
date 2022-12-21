@@ -38,15 +38,18 @@ type WalletService = {
   logs: [string, object][];
   errorMessage: string | null;
   activePublicKey: string | null;
-  connectSigner: () => Promise<void>;
-  disconnect: () => void;
+  connect: () => Promise<boolean>;
+  disconnect: () => Promise<boolean>;
+  switchAccount: () => Promise<boolean>;
+  isConnected: () => Promise<boolean>;
+  getActivePublicKey: () => Promise<string | undefined>;
+  getVersion: () => Promise<string>;
   sign: (
     deployJson: string,
     accountPublicKey: string
   ) => Promise<
     { cancelled: true } | { cancelled: false; signature: Uint8Array }
   >;
-  getVersion: () => Promise<string>;
 };
 
 export const walletServiceContext = createContext<WalletService>({} as any);
@@ -109,17 +112,13 @@ export const WalletServiceProvider = props => {
     const handleLocked = (msg: any) => {
       log('event:locked', msg.detail);
       try {
-        const action: WalletState = JSON.parse(msg.detail);
-        if (action.activeKey) {
-          setActivePublicKey(action.activeKey);
-        } else {
-          setActivePublicKey(null);
-        }
+        // const action: WalletState = JSON.parse(msg.detail);
+        // TODO: diplay locked label
       } catch (err) {
         console.error(err);
       }
     };
-    
+
     const handleUnlocked = (msg: any) => {
       log('event:unlocked', msg.detail);
       try {
@@ -133,7 +132,7 @@ export const WalletServiceProvider = props => {
         console.error(err);
       }
     };
-    
+
     const handleTabChanged = (msg: any) => {
       log('event:tabChanged', msg.detail);
       try {
@@ -188,7 +187,10 @@ export const WalletServiceProvider = props => {
     // subscribe to signer events
     window.addEventListener(CasperWalletEventTypes.Locked, handleLocked);
     window.addEventListener(CasperWalletEventTypes.Unlocked, handleUnlocked);
-    window.addEventListener(CasperWalletEventTypes.TabChanged, handleTabChanged);
+    window.addEventListener(
+      CasperWalletEventTypes.TabChanged,
+      handleTabChanged
+    );
     window.addEventListener(CasperWalletEventTypes.Connected, handleConnected);
     window.addEventListener(
       CasperWalletEventTypes.Disconnected,
@@ -200,10 +202,7 @@ export const WalletServiceProvider = props => {
     );
 
     return () => {
-      window.removeEventListener(
-        CasperWalletEventTypes.Locked,
-        handleLocked
-      );
+      window.removeEventListener(CasperWalletEventTypes.Locked, handleLocked);
       window.removeEventListener(
         CasperWalletEventTypes.Unlocked,
         handleUnlocked
@@ -227,15 +226,28 @@ export const WalletServiceProvider = props => {
     };
   }, [activePublicKey, setActivePublicKey, extensionLoaded]);
 
+  const connect = async () => {
+    console.log('connectRequest');
+    return getCasperWalletInstance().requestConnection();
+  };
+
   const disconnect = () => {
     console.log('disconnectRequest');
     setActivePublicKey(null);
-    getCasperWalletInstance().disconnectFromSite();
+    return getCasperWalletInstance().disconnectFromSite();
   };
 
-  const connectSigner = async () => {
-    console.log('connectRequest');
-    getCasperWalletInstance().requestConnection();
+  const switchAccount = () => {
+    console.log('switchAccount');
+    return getCasperWalletInstance().requestSwitchAccount();
+  };
+
+  const isConnected = async () => {
+    return getCasperWalletInstance().isConnected();
+  };
+
+  const getActivePublicKey = async () => {
+    return getCasperWalletInstance().getActivePublicKey();
   };
 
   const sign = async (deployJson: string, accountPublicKey: string) => {
@@ -246,8 +258,11 @@ export const WalletServiceProvider = props => {
     logs,
     errorMessage: error?.message || null,
     activePublicKey: activePublicKey,
-    connectSigner: connectSigner,
+    connect: connect,
     disconnect: disconnect,
+    switchAccount: switchAccount,
+    isConnected: isConnected,
+    getActivePublicKey: getActivePublicKey,
     sign: sign,
     getVersion: getCasperWalletInstance().getVersion
   };

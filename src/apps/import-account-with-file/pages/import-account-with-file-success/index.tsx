@@ -9,7 +9,7 @@ import {
 } from '@src/libs/layout';
 import { Button, SvgIcon, Typography } from '@src/libs/ui';
 
-import { closeActiveWindow } from '@src/background/close-window';
+import { closeCurrentWindow } from '@src/background/close-current-window';
 
 export function ImportAccountWithFileSuccessContentPage() {
   const { t } = useTranslation();
@@ -33,7 +33,7 @@ export function ImportAccountWithFileSuccessContentPage() {
         </Typography>
       </TextContainer>
       <FooterButtonsAbsoluteContainer>
-        <Button onClick={() => closeActiveWindow()}>
+        <Button onClick={() => closeCurrentWindow()}>
           <Trans t={t}>Done</Trans>
         </Button>
       </FooterButtonsAbsoluteContainer>

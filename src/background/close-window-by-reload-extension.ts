@@ -4,6 +4,7 @@ import browser from 'webextension-polyfill';
 // window.close() method can only be called on windows that were opened by a script using the Window.open() method.
 // If the window was > not opened by a script, an error similar to this one appears in the console:
 // Scripts may not close windows that were not opened by script
-export function closeWindowByReload() {
+// WARNING: IT WILL RELOAD ENTIRE EXTENSION
+export function closeWindowByReloadExtension() {
   browser.runtime.reload();
 }
