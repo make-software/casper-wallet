@@ -45,7 +45,7 @@ type StorageState = {
 // this needs to be private
 let storeSingleton: ReturnType<typeof createStore>;
 
-export async function getMainStoreSingleton() {
+export async function getExistingMainStoreSingletonOrInit() {
   // load selected state
   const {
     [VAULT_CIPHER_KEY]: vaultCipher,

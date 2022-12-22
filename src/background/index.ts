@@ -5,7 +5,7 @@ import {
   CheckAccountNameIsTakenAction,
   CheckSecretKeyExistAction
 } from '@src/background/redux/import-account-actions-should-be-removed';
-import { getMainStoreSingleton } from '@src/background/redux/utils';
+import { getExistingMainStoreSingletonOrInit } from '@src/background/redux/utils';
 import {
   accountAdded,
   accountDisconnected,
@@ -90,7 +90,7 @@ browser.browserAction &&
   browser.browserAction.onClicked.addListener(handleActionClick);
 
 async function isOnboardingCompleted() {
-  const store = await getMainStoreSingleton();
+  const store = await getExistingMainStoreSingletonOrInit();
   const state = store.getState();
 
   const keysDoesExist = selectKeysDoesExist(state);
@@ -130,7 +130,7 @@ browser.runtime.onInstalled.addListener(async () => {
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 browser.runtime.onMessage.addListener(
   async (action: RootAction | SdkMessage | ServiceMessage, sender) => {
-    const store = await getMainStoreSingleton();
+    const store = await getExistingMainStoreSingletonOrInit();
     return new Promise(async (sendResponse, sendError) => {
       // Popup comms handling
       if (isSDKMessage(action)) {
