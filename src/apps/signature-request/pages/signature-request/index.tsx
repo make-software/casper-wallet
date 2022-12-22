@@ -124,7 +124,6 @@ export function SignatureRequestPage() {
 
   return (
     <LayoutWindow
-      variant="default"
       renderHeader={() => <PopupHeader withConnectionStatus />}
       renderContent={() => <SignatureRequestContent deploy={deploy} />}
       renderFooter={() => (

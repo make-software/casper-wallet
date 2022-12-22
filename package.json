@@ -1,7 +1,7 @@
 {
   "name": "Casper Wallet",
   "description": "Casper Wallet - tool for signing transactions on the blockchain.",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "author": "MAKE LLC",
   "scripts": {
     "devtools:redux": "redux-devtools --hostname=localhost",

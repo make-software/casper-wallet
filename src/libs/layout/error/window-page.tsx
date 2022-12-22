@@ -38,7 +38,6 @@ export function WindowErrorPage({
 
   return (
     <LayoutWindow
-      variant="default"
       renderHeader={() => <PopupHeader />}
       renderContent={() => (
         <ErrorPageContent

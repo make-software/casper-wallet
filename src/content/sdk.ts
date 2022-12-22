@@ -185,16 +185,3 @@ declare global {
 
 window.CasperWalletEventTypes = SdkEventTypes;
 window.CasperWalletProvider = CasperWalletProvider;
-// for backward compatibility
-const casperWalletProviderInstance = CasperWalletProvider();
-window.casperlabsHelper = {
-  requestConnection: casperWalletProviderInstance.requestConnection,
-  disconnectFromSite: casperWalletProviderInstance.disconnectFromSite,
-  getActivePublicKey: casperWalletProviderInstance.getActivePublicKey as any,
-  getSelectedPublicKeyBase64:
-    casperWalletProviderInstance.getActivePublicKey as any,
-  getVersion: casperWalletProviderInstance.getVersion,
-  isConnected: casperWalletProviderInstance.isConnected,
-  sign: casperWalletProviderInstance.sign as any,
-  signMessage: casperWalletProviderInstance.signMessage
-};
