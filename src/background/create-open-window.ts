@@ -105,28 +105,35 @@ export function createOpenWindow({
         const crossPlatformWidthOffset = 16;
         const popupWidth = 360 + crossPlatformWidthOffset;
         const popupHeight = 700;
+        const newWindow =
+          currentWindow.state === 'fullscreen'
+            ? browser.windows.create({
+                url: getUrlByWindowApp(windowApp, searchParams),
+                type: 'popup',
+                focused: true
+              })
+            : browser.windows.create({
+                url: getUrlByWindowApp(windowApp, searchParams),
+                type: 'popup',
+                height: popupHeight,
+                width: popupWidth,
+                left: windowWidth + xOffset - popupWidth,
+                top: yOffset,
+                focused: true
+              });
 
-        return browser.windows
-          .create({
-            url: getUrlByWindowApp(windowApp, searchParams),
-            type: 'popup',
-            height: popupHeight,
-            width: popupWidth,
-            left: windowWidth + xOffset - popupWidth,
-            top: yOffset
-          })
-          .then(newWindow => {
-            if (newWindow.id) {
-              setWindowId(newWindow.id);
+        return newWindow.then(newWindow => {
+          if (newWindow.id) {
+            setWindowId(newWindow.id);
 
-              const handleCloseWindow = () => {
-                browser.windows.onRemoved.removeListener(handleCloseWindow);
-                clearWindowId();
-              };
-              browser.windows.onRemoved.addListener(handleCloseWindow);
-            }
-            return newWindow;
-          });
+            const handleCloseWindow = () => {
+              browser.windows.onRemoved.removeListener(handleCloseWindow);
+              clearWindowId();
+            };
+            browser.windows.onRemoved.addListener(handleCloseWindow);
+          }
+          return newWindow;
+        });
       });
     }
   };
