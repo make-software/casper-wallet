@@ -18,7 +18,6 @@ export function ImportAccountWithFilePage() {
 
   return (
     <LayoutWindow
-      variant="default"
       renderHeader={() => <PopupHeader />}
       renderContent={() => <ImportAccountWithFileContentPage />}
       renderFooter={() => (

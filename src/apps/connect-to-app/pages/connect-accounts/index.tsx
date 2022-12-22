@@ -35,7 +35,6 @@ export function ConnectAccountPage({
 
   return (
     <LayoutWindow
-      variant="default"
       renderHeader={() => (
         <PopupHeader
           renderSubmenuBarItems={() => (

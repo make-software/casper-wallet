@@ -11,7 +11,6 @@ import { SwitchAccountContent } from './content';
 export function SwitchAccountPage() {
   return (
     <LayoutWindow
-      variant="default"
       renderHeader={() => (
         <PopupHeader
           renderSubmenuBarItems={() => (
