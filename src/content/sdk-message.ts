@@ -24,6 +24,13 @@ export const sdkMessage = {
     boolean,
     Meta
   >(),
+  switchAccountRequest: createAction('CasperWalletProvider:SwitchAccount')<
+    { origin: string; title: string },
+    Meta
+  >(),
+  switchAccountResponse: createAction(
+    'CasperWalletProvider:SwitchAccount:Response'
+  )<boolean, Meta>(),
   isConnectedRequest: createAction('CasperWalletProvider:IsConnected')<
     string,
     Meta

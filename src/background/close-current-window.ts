@@ -1,7 +1,7 @@
 import browser from 'webextension-polyfill';
 // import { getWindowId } from '@src/background/redux/import-account-actions-should-be-removed';
 
-export async function closeActiveWindow() {
+export async function closeCurrentWindow() {
   try {
     // const windowId = await getWindowId();
     // if (windowId) {

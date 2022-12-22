@@ -32,14 +32,17 @@ const Row = styled(Container)({
 
 function App() {
   const {
-    connectSigner,
-    disconnect,
-    sign,
-    getVersion,
     activePublicKey,
     errorMessage,
-    logs
+    logs,
+    connect,
+    disconnect,
+    switchAccount,
+    getVersion,
+    sign
   } = useWalletService();
+
+  const isConnected = Boolean(activePublicKey);
 
   const handleSignDeploy = (
     accountPublicKey: string,
@@ -68,12 +71,12 @@ function App() {
     }
   };
 
-  const handleConnect = activePublicKey ? disconnect : connectSigner;
+  const handleConnect = isConnected ? disconnect : connect;
+  const connectButtonText = !isConnected ? `Connect` : 'Disconnect';
 
   const statusText = activePublicKey
     ? `${truncateKey(activePublicKey)}`
     : 'Disconnected';
-  const connectButtonText = !activePublicKey ? `Connect` : 'Disconnect';
 
   return (
     <Container>
@@ -86,6 +89,13 @@ function App() {
         Connected Account: {statusText}{' '}
         <Button variant="contained" onClick={handleConnect}>
           {connectButtonText}
+        </Button>
+        <Button
+          disabled={!isConnected}
+          variant="contained"
+          onClick={switchAccount}
+        >
+          Switch
         </Button>
         <Button
           variant="contained"

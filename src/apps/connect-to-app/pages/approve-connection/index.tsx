@@ -4,7 +4,7 @@ import { Trans } from 'react-i18next';
 import styled from 'styled-components';
 
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
-import { closeActiveWindow } from '@src/background/close-window';
+import { closeCurrentWindow } from '@src/background/close-current-window';
 import {
   FooterButtonsContainer,
   HeaderSubmenuBarNavLink,
@@ -67,7 +67,7 @@ export function ApproveConnectionPage({
               {selectedAccountNames.length > 1 ? t('accounts') : t('account')}
             </Trans>
           </Button>
-          <Button color="secondaryBlue" onClick={() => closeActiveWindow()}>
+          <Button color="secondaryBlue" onClick={() => closeCurrentWindow()}>
             <Trans t={t}>Cancel</Trans>
           </Button>
         </FooterButtonsContainer>

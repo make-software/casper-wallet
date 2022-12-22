@@ -5,7 +5,7 @@ import {
   CheckAccountNameIsTakenAction,
   CheckSecretKeyExistAction
 } from '@src/background/redux/import-account-actions-should-be-removed';
-import { getMainStoreSingleton } from '@src/background/redux/utils';
+import { getExistingMainStoreSingletonOrInit } from '@src/background/redux/utils';
 import {
   accountAdded,
   accountDisconnected,
@@ -39,7 +39,7 @@ import {
 import { selectWindowId } from '@src/background/redux/windowManagement/selectors';
 import { emitSdkEventToAllActiveTabs, sdkEvent } from '@src/content/sdk-event';
 import { isSDKMessage, SdkMessage, sdkMessage } from '@src/content/sdk-message';
-import { PurposeForOpening } from '@src/hooks';
+import { WindowApp } from '@src/hooks';
 import {
   enableOnboardingFlow,
   disableOnboardingFlow,
@@ -90,7 +90,7 @@ browser.browserAction &&
   browser.browserAction.onClicked.addListener(handleActionClick);
 
 async function isOnboardingCompleted() {
-  const store = await getMainStoreSingleton();
+  const store = await getExistingMainStoreSingletonOrInit();
   const state = store.getState();
 
   const keysDoesExist = selectKeysDoesExist(state);
@@ -130,7 +130,7 @@ browser.runtime.onInstalled.addListener(async () => {
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 browser.runtime.onMessage.addListener(
   async (action: RootAction | SdkMessage | ServiceMessage, sender) => {
-    const store = await getMainStoreSingleton();
+    const store = await getExistingMainStoreSingletonOrInit();
     return new Promise(async (sendResponse, sendError) => {
       // Popup comms handling
       if (isSDKMessage(action)) {
@@ -148,7 +148,7 @@ browser.runtime.onMessage.addListener(
             }
 
             openWindow({
-              purposeForOpening: PurposeForOpening.ConnectToApp,
+              windowApp: WindowApp.ConnectToApp,
               searchParams: query
             });
             success = true;
@@ -184,6 +184,28 @@ browser.runtime.onMessage.addListener(
             );
           }
 
+          case getType(sdkMessage.switchAccountRequest): {
+            let success = false;
+
+            const query: Record<string, string> = {
+              origin: action.payload.origin
+            };
+
+            if (action.payload.title != null) {
+              query.title = action.payload.title;
+            }
+
+            openWindow({
+              windowApp: WindowApp.SwitchAccount,
+              searchParams: query
+            });
+            success = true;
+
+            return sendResponse(
+              sdkMessage.switchAccountResponse(success, action.meta)
+            );
+          }
+
           case getType(sdkMessage.signRequest): {
             const { signingPublicKeyHex } = action.payload;
             let deployJson;
@@ -200,7 +222,7 @@ browser.runtime.onMessage.addListener(
               })
             );
             openWindow({
-              purposeForOpening: PurposeForOpening.SignatureRequest,
+              windowApp: WindowApp.SignatureRequest,
               searchParams: {
                 requestId: action.meta.requestId,
                 signingPublicKeyHex

@@ -8,7 +8,7 @@ import {
   LayoutWindow,
   PopupHeader
 } from '@libs/layout';
-import { closeActiveWindow } from '@src/background/close-window';
+import { closeCurrentWindow } from '@src/background/close-current-window';
 import { selectDeploysJsonById } from '@src/background/redux/deploys/selectors';
 import {
   selectConnectedAccountNamesWithOrigin,
@@ -107,7 +107,7 @@ export function SignatureRequestPage() {
         { requestId }
       )
     );
-    closeActiveWindow();
+    closeCurrentWindow();
   }, [
     signingAccount?.publicKey,
     signingAccount?.secretKey,
@@ -119,7 +119,7 @@ export function SignatureRequestPage() {
     emitSdkEventToAllActiveTabs(
       sdkMessage.signResponse({ cancelled: true }, { requestId })
     );
-    closeActiveWindow();
+    closeCurrentWindow();
   }, [requestId]);
 
   return (

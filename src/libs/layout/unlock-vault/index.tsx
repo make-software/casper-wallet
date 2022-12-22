@@ -96,9 +96,7 @@ export function UnlockVaultPageContent() {
           newVaultCipher,
           newEncryptionKeyHash
         })
-      ).finally(() => {
-        setIsLoading(false);
-      });
+      );
     };
 
     unlockVaultWorker.onerror = error => {

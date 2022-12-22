@@ -1,5 +1,6 @@
 export enum RouterPath {
-  SelectAccountsToConnect = '/',
+  SwitchAccount = '/',
+  ConnectAccount = '/',
   ApproveConnection = '/approve-connection',
   Connecting = '/connecting'
 }

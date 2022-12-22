@@ -3,7 +3,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import styled from 'styled-components';
 
 import { getFaviconUrlFromOrigin, SvgIcon, Typography } from '@libs/ui';
-import { closeActiveWindow } from '@src/background/close-window';
+import { closeCurrentWindow } from '@src/background/close-current-window';
 
 const PageContainer = styled.div`
   display: flex;
@@ -44,7 +44,7 @@ export function ConnectingContent() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    setTimeout(() => closeActiveWindow(), 1000);
+    setTimeout(() => closeCurrentWindow(), 1000);
   }, []);
 
   const faviconUrl = getFaviconUrlFromOrigin(origin);

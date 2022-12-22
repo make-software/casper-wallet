@@ -8,7 +8,7 @@ import {
 } from '@libs/layout';
 import { Button } from '@libs/ui';
 
-import { closeActiveWindow } from '@background/close-window';
+import { closeCurrentWindow } from '@src/background/close-current-window';
 
 import { ErrorPageContent } from './content';
 import { ErrorLocationState } from './types';
@@ -26,7 +26,7 @@ export function WindowErrorPage({
 }: ErrorPageProps) {
   const navigate = createTypedNavigate
     ? createTypedNavigate()
-    : closeActiveWindow;
+    : closeCurrentWindow;
   const location = createTypedLocation && createTypedLocation();
 
   const state: Required<ErrorLocationState> =
@@ -54,7 +54,7 @@ export function WindowErrorPage({
             onClick={() =>
               location?.state?.errorRedirectPath != null
                 ? navigate(location.state.errorRedirectPath)
-                : closeActiveWindow()
+                : closeCurrentWindow()
             }
           >
             {state.errorPrimaryButtonLabel}

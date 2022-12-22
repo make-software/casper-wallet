@@ -10,7 +10,7 @@ import {
 import { Button, Typography } from '@src/libs/ui';
 
 import { RouterPath, useTypedNavigate } from '../../router';
-import { AccountsSelectionContent } from './content';
+import { ConnectAccountContent } from './content';
 import styled from 'styled-components';
 
 const TextCentredContainer = styled.div`
@@ -24,7 +24,7 @@ export interface Props {
   title: string;
 }
 
-export function AccountsSelectionPage({
+export function ConnectAccountPage({
   selectedAccountNames,
   setSelectedAccountNames,
   origin,
@@ -44,7 +44,7 @@ export function AccountsSelectionPage({
         />
       )}
       renderContent={() => (
-        <AccountsSelectionContent
+        <ConnectAccountContent
           selectedAccountNames={selectedAccountNames}
           setSelectedAccountNames={setSelectedAccountNames}
           origin={origin}

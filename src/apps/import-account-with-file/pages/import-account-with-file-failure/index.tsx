@@ -14,7 +14,7 @@ import {
   useTypedLocation,
   useTypedNavigate
 } from '@src/apps/import-account-with-file/router';
-import { closeActiveWindow } from '@src/background/close-window';
+import { closeCurrentWindow } from '@src/background/close-current-window';
 
 export function ImportAccountWithFileFailureContentPage() {
   const { t } = useTranslation();
@@ -45,7 +45,7 @@ export function ImportAccountWithFileFailureContentPage() {
         <Button onClick={() => navigate(RouterPath.ImportAccountWithFile)}>
           <Trans t={t}>Try to import again</Trans>
         </Button>
-        <Button color="secondaryBlue" onClick={() => closeActiveWindow()}>
+        <Button color="secondaryBlue" onClick={() => closeCurrentWindow()}>
           <Trans t={t}>Maybe later</Trans>
         </Button>
       </FooterButtonsAbsoluteContainer>
