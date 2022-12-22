@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import { FlexColumn } from '@layout/containers';
 
 interface BaseLayoutWindowProps {
-  variant: 'form' | 'default';
   renderHeader?: () => JSX.Element;
   renderContent: () => JSX.Element;
   renderFooter?: () => JSX.Element;
@@ -16,7 +15,7 @@ interface LayoutWindowFormProps extends BaseLayoutWindowProps {
 }
 
 interface LayoutWindowDefaultProps extends BaseLayoutWindowProps {
-  variant: 'default';
+  variant?: undefined;
 }
 
 type LayoutWindowProps = LayoutWindowFormProps | LayoutWindowDefaultProps;
@@ -30,50 +29,29 @@ const PageContent = styled.div`
 
 const PageFooter = styled.footer``;
 
-export function LayoutWindow({
-  renderHeader,
-  renderContent,
-  renderFooter,
-  ...layoutContainerProps
-}: LayoutWindowProps) {
-  return (
-    <LayoutContainer {...layoutContainerProps}>
-      {renderHeader && <PageHeader>{renderHeader()}</PageHeader>}
-      <PageContent>{renderContent()}</PageContent>
-      {renderFooter && <PageFooter>{renderFooter()}</PageFooter>}
-    </LayoutContainer>
-  );
-}
-
 const Container = styled(FlexColumn)`
   height: 100%;
 `;
 
-interface LayoutFormProps {
-  variant: 'form';
-  onSubmit: () => void;
-}
+export function LayoutWindow({
+  renderHeader,
+  renderContent,
+  renderFooter,
+  ...restProps
+}: PropsWithChildren<LayoutWindowProps>) {
+  const formProps: any =
+    restProps.variant === 'form'
+      ? {
+          as: 'form',
+          onSubmit: restProps.onSubmit
+        }
+      : undefined;
 
-interface LayoutDefaultProps {
-  variant: 'default';
-}
-
-type LayoutContainerProps = LayoutDefaultProps | LayoutFormProps;
-
-function LayoutContainer({
-  children,
-  ...props
-}: PropsWithChildren<LayoutContainerProps>) {
-  switch (props.variant) {
-    case 'form':
-      return (
-        <Container as="form" onSubmit={props.onSubmit}>
-          {children}
-        </Container>
-      );
-    case 'default':
-      return <Container>{children}</Container>;
-    default:
-      throw new Error('Unknown layout variant');
-  }
+  return (
+    <Container {...formProps}>
+      {renderHeader && <PageHeader>{renderHeader()}</PageHeader>}
+      <PageContent>{renderContent()}</PageContent>
+      {renderFooter && <PageFooter>{renderFooter()}</PageFooter>}
+    </Container>
+  );
 }
