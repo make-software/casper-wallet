@@ -60,10 +60,11 @@ export function UnlockWalletPage({ saveIsLoggedIn }: UnlockWalletPageProps) {
         layoutContext="withIllustration"
         renderContent={() => (
           <UnlockWalletPageContent
-            retryLeft={retryLeft}
             register={register}
             errorMessage={errors.password?.message}
-          />
+          >
+            <Trans t={t}>You have 0 tries left</Trans>
+          </UnlockWalletPageContent>
         )}
         renderFooter={() => (
           <TabFooterContainer>
@@ -85,10 +86,14 @@ export function UnlockWalletPage({ saveIsLoggedIn }: UnlockWalletPageProps) {
         layoutContext="withIllustration"
         renderContent={() => (
           <UnlockWalletPageContent
-            retryLeft={retryLeft}
             register={register}
             errorMessage={errors.password?.message}
-          />
+          >
+            <Trans t={t}>
+              Please enter your password to unlock. You have{' '}
+              <b>{{ retryLeft }}</b> tries left.
+            </Trans>
+          </UnlockWalletPageContent>
         )}
         renderFooter={() => (
           <TabFooterContainer>

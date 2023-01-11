@@ -31,15 +31,15 @@ const GrayBackgroundContainer = styled(TabPageContainerBase)`
 `;
 
 interface LoginPageContentProps {
-  retryLeft: number;
   register: UseFormRegister<UnlockWalletFormValues>;
   errorMessage?: string;
+  children: React.ReactNode;
 }
 
 export function UnlockWalletPageContent({
-  retryLeft,
   register,
-  errorMessage
+  errorMessage,
+  children
 }: LoginPageContentProps) {
   const [passwordInputType, setPasswordInputType] =
     useState<PasswordInputType>('password');
@@ -60,10 +60,7 @@ export function UnlockWalletPageContent({
 
         <TabTextContainer>
           <Typography type="body" color="contentSecondary">
-            <Trans t={t}>
-              Please enter your password to unlock. You have{' '}
-              <b>{{ retryLeft }}</b> tries left.
-            </Trans>
+            {children}
           </Typography>
         </TabTextContainer>
 
