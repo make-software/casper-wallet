@@ -42,11 +42,12 @@ export function CreateVaultPasswordPageContent({
       <TabTextContainer>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            You’ll need a password to unlock your Casper Wallet. Use at least{' '}
+            To ensure a strong password use at least{' '}
             <Typography type="bodySemiBold" color="contentPrimary">
-              {{ minPasswordLength }} characters
+              {{ minPasswordLength }} characters.
             </Typography>{' '}
-            to ensure a strong password.
+            Think of a random and memorable passphrase. Avoid using personally
+            identifiable information.
           </Trans>
         </Typography>
       </TabTextContainer>
