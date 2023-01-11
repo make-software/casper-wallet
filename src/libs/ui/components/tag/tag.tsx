@@ -3,6 +3,11 @@ import styled from 'styled-components';
 
 interface TagProps {
   children: ReactNode;
+  margin?: string;
+}
+
+interface StyleTagContainerProps {
+  margin?: string;
 }
 
 const StyledTag = styled.span`
@@ -11,11 +16,20 @@ const StyledTag = styled.span`
   font-weight: ${({ theme }) => theme.typography.fontWeight.semiBold};
   font-size: 0.8rem;
   line-height: 1.6rem;
-  padding: 6px;
+  padding: 0 4px;
   border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
   text-transform: uppercase;
 `;
 
-export function Tag({ children }: TagProps) {
-  return <StyledTag>{children}</StyledTag>;
+const StyleTagContainer = styled.div<StyleTagContainerProps>`
+  display: inline-flex;
+  margin: ${({ margin }) => margin || '0'};
+`;
+
+export function Tag({ children, margin }: TagProps) {
+  return (
+    <StyleTagContainer margin={margin}>
+      <StyledTag>{children}</StyledTag>
+    </StyleTagContainer>
+  );
 }
