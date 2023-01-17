@@ -1,5 +1,9 @@
-import React from 'react';
-import { FieldErrors, UseFormRegister, UseFormSetValue } from 'react-hook-form';
+import React, { useEffect, useRef } from 'react';
+import {
+  FieldErrors,
+  UseFormRegister,
+  UseFormResetField
+} from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -9,22 +13,33 @@ import {
   TextContainer
 } from '@src/libs/layout';
 import { Input, SvgIcon, Typography } from '@src/libs/ui';
-import { ImportAccountFormValues } from '.';
+
+import { RouterPath, useTypedNavigate } from '../../router';
+
+import { ImportAccountFormValues } from './types';
 
 interface ImportAccountWithFilePageContentProps {
   register: UseFormRegister<ImportAccountFormValues>;
   errors: FieldErrors<ImportAccountFormValues>;
-  setValue: UseFormSetValue<ImportAccountFormValues>;
+  resetField: UseFormResetField<ImportAccountFormValues>;
   isFileLoaded: boolean;
 }
 
 export function ImportAccountWithFileUploadPageContent({
   register,
   errors,
-  setValue,
+  resetField,
   isFileLoaded
 }: ImportAccountWithFilePageContentProps) {
   const { t } = useTranslation();
+  const navigate = useTypedNavigate();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const { ref, ...rest } = register('secretKeyFile');
+
+  useEffect(() => {
+    inputRef.current?.click();
+  }, []);
 
   return (
     <ContentContainer>
@@ -44,14 +59,20 @@ export function ImportAccountWithFileUploadPageContent({
           suffixIcon={
             isFileLoaded && (
               <SvgIcon
-                onClick={() =>
-                  setValue('secretKeyFile', undefined, { shouldValidate: true })
-                }
+                onClick={() => {
+                  resetField('secretKeyFile');
+                  navigate(RouterPath.ImportAccountWithFile);
+                }}
                 src="assets/icons/close-filter.svg"
               />
             )
           }
-          {...register('secretKeyFile')}
+          {...rest}
+          ref={e => {
+            // https://react-hook-form.com/faqs#Howtosharerefusage
+            ref(e);
+            inputRef.current = e;
+          }}
           error={!!errors.secretKeyFile}
           validationText={errors.secretKeyFile?.message}
         />
