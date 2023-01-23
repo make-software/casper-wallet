@@ -13,11 +13,13 @@ export async function buildWebDriver(
     (process.env.SELENIUM_BROWSER as BrowserString) ||
     'chrome';
   const headless = !!process.env.SELENIUM_HEADLESS;
+  const host = process.env.SELENIUM_HOST || 'selenium';
 
   const { driver: seleniumDriver, extensionUrl } = await buildBrowserWebDriver({
     ...buildWebDriver,
     browser,
-    headless
+    headless,
+    host
   });
 
   return new Driver(seleniumDriver, browser, extensionUrl);
@@ -26,14 +28,15 @@ export async function buildWebDriver(
 async function buildBrowserWebDriver({
   browser,
   port,
-  headless
+  headless,
+  host
 }: BuildWebDriver) {
   switch (browser) {
     case Browser.CHROME: {
-      return await ChromeDriver.build(port, headless);
+      return await ChromeDriver.build(port, headless, host);
     }
     case Browser.FIREFOX: {
-      return await FirefoxDriver.build(port, headless);
+      return await FirefoxDriver.build(port, headless, host);
     }
     default: {
       throw new Error(`Unrecognized browser: ${browser}`);

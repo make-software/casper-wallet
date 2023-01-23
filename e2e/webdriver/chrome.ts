@@ -9,7 +9,8 @@ export class ChromeDriver {
 
   static async build(
     port: number | undefined,
-    headless: boolean
+    headless: boolean,
+    host: string
   ): Promise<WebDriverObject> {
     const options = new chrome.Options();
 
@@ -38,7 +39,7 @@ export class ChromeDriver {
       .setChromeOptions(options);
 
     if (headless) {
-      builder.usingServer('http://localhost:4444/');
+      builder.usingServer(`http://${host}:4444/`);
     }
 
     const service = new chrome.ServiceBuilder();

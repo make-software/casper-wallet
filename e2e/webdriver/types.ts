@@ -8,6 +8,7 @@ export interface BuildWebDriver {
   port?: number;
   browser: Browser;
   headless: boolean;
+  host: string;
 }
 
 export interface DriverKey {

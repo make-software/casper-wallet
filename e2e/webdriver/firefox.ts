@@ -18,7 +18,8 @@ export class FirefoxDriver {
 
   static async build(
     port: number | undefined,
-    headless: boolean
+    headless: boolean,
+    host: string
   ): Promise<WebDriverObject> {
     const templateProfile = fs.mkdtempSync(TEMP_PROFILE_PATH_PREFIX);
     const options = new firefox.Options().setProfile(templateProfile);
@@ -36,7 +37,7 @@ export class FirefoxDriver {
     }
 
     if (headless) {
-      builder.usingServer('http://localhost:4445/');
+      builder.usingServer(`http://${host}:4445/`);
     }
 
     const driver = builder.build();
