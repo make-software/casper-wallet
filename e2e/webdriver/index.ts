@@ -13,7 +13,7 @@ export async function buildWebDriver(
     (process.env.SELENIUM_BROWSER as BrowserString) ||
     'chrome';
   const headless = !!process.env.SELENIUM_HEADLESS;
-  const host = process.env.SELENIUM_HOST || 'selenium';
+  const host = process.env.SELENIUM_HOST || 'localhost';
 
   const { driver: seleniumDriver, extensionUrl } = await buildBrowserWebDriver({
     ...buildWebDriver,

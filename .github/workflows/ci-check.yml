@@ -36,7 +36,7 @@ jobs:
       fail-fast: false
       matrix:
 #        TODO: add firefox after the test for it will be fixed
-        browser: [ 'chrome' ]
+        browser: [ 'chrome', 'firefox' ]
         node-version: [ 16.x ]
 
     services:
@@ -59,11 +59,11 @@ jobs:
       - name: Run E2E test on ${{ matrix.browser }}
         run: npm run test:e2e:headless:${{ matrix.browser }}
         env:
-          BROWSER: ${{ matrix.browser }}
+          SELENIUM_HOST: selenium
 
-#      - name: Add screenshot
-#        uses: actions/upload-artifact@v3
-#        if: always()
-#        with:
-#          name: ${{ matrix.browser }}
-#          path: screenshots/
+      - name: Add screenshot
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: ${{ matrix.browser }}
+          path: screenshots/
