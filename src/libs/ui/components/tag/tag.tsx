@@ -3,11 +3,11 @@ import styled from 'styled-components';
 
 interface TagProps {
   children: ReactNode;
-  margin?: string;
+  displayContext?: 'accountList';
 }
 
 interface StyleTagContainerProps {
-  margin?: string;
+  displayContext?: 'accountList';
 }
 
 const StyledTag = styled.span`
@@ -23,12 +23,13 @@ const StyledTag = styled.span`
 
 const StyleTagContainer = styled.div<StyleTagContainerProps>`
   display: inline-flex;
-  margin: ${({ margin }) => margin || '0'};
+  margin: ${({ displayContext }) =>
+    displayContext === 'accountList' ? '0 0 0 4px' : '0'};
 `;
 
-export function Tag({ children, margin }: TagProps) {
+export function Tag({ children, displayContext }: TagProps) {
   return (
-    <StyleTagContainer margin={margin}>
+    <StyleTagContainer displayContext={displayContext}>
       <StyledTag>{children}</StyledTag>
     </StyleTagContainer>
   );

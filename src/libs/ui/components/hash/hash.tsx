@@ -50,7 +50,9 @@ export function Hash({
         <Typography type={variant} color={color || 'contentSecondary'}>
           {truncated ? truncateKey(value) : value}
         </Typography>
-        {withTag && <Tag margin="0 0 0 4px">{`${t('Imported')}`}</Tag>}
+        {withTag && (
+          <Tag displayContext="accountList">{`${t('Imported')}`}</Tag>
+        )}
       </>
     ),
     [color, truncated, value, variant, withTag]
