@@ -39,10 +39,9 @@ jobs:
         browser: [ 'chrome' ]
         node-version: [ 16.x ]
 
-    services:
-      selenium:
-        image: selenium/standalone-${{ matrix.browser }}
-        ports: 4444:4444
+#    services:
+#      selenium:
+#        image: selenium/standalone-${{ matrix.browser }}
 
     steps:
       - uses: actions/checkout@v3
@@ -56,6 +55,9 @@ jobs:
       - name: Install
         run: |
           npm install
+
+      - name: Build the stack
+        run: docker-compose up -d
 
       - name: Run E2E test on ${{ matrix.browser }}
         run: npm run test:e2e:headless:${{ matrix.browser }}
