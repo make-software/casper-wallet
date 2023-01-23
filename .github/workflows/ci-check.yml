@@ -42,7 +42,7 @@ jobs:
     services:
       selenium:
         image: selenium/standalone-${{ matrix.browser }}
-        ports: "4444:4444"
+        ports: 4444:4444
 
     steps:
       - uses: actions/checkout@v3
