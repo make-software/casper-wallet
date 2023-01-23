@@ -37,7 +37,7 @@ export class ChromeDriver {
       .forBrowser(Browser.CHROME)
       .setChromeOptions(options);
 
-    if (!headless) {
+    if (headless) {
       builder.usingServer('http://localhost:4444/');
     }
 
