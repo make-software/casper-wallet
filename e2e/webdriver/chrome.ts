@@ -31,7 +31,7 @@ export class ChromeDriver {
         }
       }
     });
-    options.addExtensions('chrome.crx');
+    options.addExtensions('e2e/chrome.crx');
     options.setAcceptInsecureCerts(true);
 
     const builder = new Builder()
@@ -55,6 +55,7 @@ export class ChromeDriver {
       service.setPort(port);
     }
     builder.setChromeService(service);
+
     const driver = builder.build();
     const chromeDriver = new ChromeDriver(driver);
     const extensionId = await chromeDriver.getExtensionIdByName(extensionName);

@@ -34,7 +34,7 @@
     "dependency:graph": "npx madge --ts-config=tsconfig.json --image=graph.svg src/background/index.ts",
     "dependency:circular": "npx madge --ts-config=tsconfig.json --circular src/background/index.ts",
     "dependency:orphans": "npx madge --ts-config=tsconfig.json --orphans src/**/*",
-    "pack-extension:chrome": "crx3 --keyPath e2e/crx3.pem output/chrome"
+    "pack-extension:chrome": "crx3 --crxPath e2e/chrome.crx --keyPath e2e/crx3.pem output/chrome"
   },
   "lint-staged": {
     "*.md": "markdownlint",
