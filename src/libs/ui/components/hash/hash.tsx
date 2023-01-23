@@ -55,7 +55,7 @@ export function Hash({
         )}
       </>
     ),
-    [color, truncated, value, variant, withTag]
+    [color, truncated, value, variant, withTag, t]
   );
 
   if (withCopyOnClick) {
