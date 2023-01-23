@@ -6,7 +6,8 @@ export type Browser = 'chrome' | 'firefox' | 'safari';
 
 export interface BuildWebDriver {
   port?: number;
-  browser?: Browser;
+  browser: Browser;
+  headless: boolean;
 }
 
 export interface DriverKey {

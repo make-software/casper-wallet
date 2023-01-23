@@ -16,10 +16,15 @@ const TEMP_PROFILE_PATH_PREFIX = path.join(
 export class FirefoxDriver {
   _driver: ThenableWebDriver;
 
-  static async build(port: number | undefined): Promise<WebDriverObject> {
+  static async build(
+    port: number | undefined,
+    headless: boolean
+  ): Promise<WebDriverObject> {
     const templateProfile = fs.mkdtempSync(TEMP_PROFILE_PATH_PREFIX);
     const options = new firefox.Options().setProfile(templateProfile);
+
     options.setAcceptInsecureCerts(true);
+    options.setPreference('dom.events.asyncClipboard.read', true);
 
     const builder = new Builder()
       .forBrowser(Browser.FIREFOX)
@@ -28,6 +33,10 @@ export class FirefoxDriver {
     if (port) {
       const service = new firefox.ServiceBuilder().setPort(port);
       builder.setFirefoxService(service);
+    }
+
+    if (headless) {
+      builder.usingServer('http://localhost:4445/');
     }
 
     const driver = builder.build();

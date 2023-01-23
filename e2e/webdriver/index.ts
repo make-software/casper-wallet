@@ -6,28 +6,34 @@ import { FirefoxDriver } from './firefox';
 import { BuildWebDriver, Browser as BrowserString } from './types';
 
 export async function buildWebDriver(
-  buildWebDriver: BuildWebDriver = {}
+  buildWebDriver?: BuildWebDriver
 ): Promise<Driver> {
   const browser: BrowserString =
-    buildWebDriver.browser ||
+    buildWebDriver?.browser ||
     (process.env.SELENIUM_BROWSER as BrowserString) ||
     'chrome';
+  const headless = !!process.env.SELENIUM_HEADLESS;
 
   const { driver: seleniumDriver, extensionUrl } = await buildBrowserWebDriver({
     ...buildWebDriver,
-    browser
+    browser,
+    headless
   });
 
   return new Driver(seleniumDriver, browser, extensionUrl);
 }
 
-async function buildBrowserWebDriver({ browser, port }: BuildWebDriver) {
+async function buildBrowserWebDriver({
+  browser,
+  port,
+  headless
+}: BuildWebDriver) {
   switch (browser) {
     case Browser.CHROME: {
-      return await ChromeDriver.build(port);
+      return await ChromeDriver.build(port, headless);
     }
     case Browser.FIREFOX: {
-      return await FirefoxDriver.build(port);
+      return await FirefoxDriver.build(port, headless);
     }
     default: {
       throw new Error(`Unrecognized browser: ${browser}`);
