@@ -27,7 +27,6 @@ jobs:
         npm install
         npm run ci-check
   e2e-test:
-    needs: build
     runs-on: ubuntu-latest
 
     container:
@@ -43,7 +42,7 @@ jobs:
     services:
       selenium:
         image: selenium/standalone-${{ matrix.browser }}
-        ports: "4444:4444"
+        ports: 4444:4444
 
     steps:
       - uses: actions/checkout@v3
