@@ -2,7 +2,13 @@ import React, { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { ContentColor, CopyToClipboard, SvgIcon, Typography } from '@libs/ui';
+import {
+  ContentColor,
+  CopyToClipboard,
+  SvgIcon,
+  Typography,
+  Tag
+} from '@libs/ui';
 import { CenteredFlexRow } from '@libs/layout';
 
 import { truncateKey } from './utils';
@@ -25,6 +31,7 @@ interface HashProps {
   truncated?: boolean;
   color?: ContentColor;
   withCopyOnClick?: boolean;
+  withTag?: boolean;
 }
 
 export function Hash({
@@ -32,17 +39,23 @@ export function Hash({
   variant,
   withCopyOnClick,
   truncated,
-  color
+  color,
+  withTag
 }: HashProps) {
   const { t } = useTranslation();
 
   const HashComponent = useMemo(
     () => (
-      <Typography type={variant} color={color || 'contentSecondary'}>
-        {truncated ? truncateKey(value) : value}
-      </Typography>
+      <>
+        <Typography type={variant} color={color || 'contentSecondary'}>
+          {truncated ? truncateKey(value) : value}
+        </Typography>
+        {withTag && (
+          <Tag displayContext="accountList">{`${t('Imported')}`}</Tag>
+        )}
+      </>
     ),
-    [color, truncated, value, variant]
+    [color, truncated, value, variant, withTag, t]
   );
 
   if (withCopyOnClick) {
