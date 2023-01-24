@@ -126,10 +126,7 @@ export function UnlockVaultPageContent() {
           </TextContainer>
           <TextContainer gap="medium">
             <Typography type="body" color="contentSecondary">
-              <Trans t={t}>
-                Please enter your password to unlock. You have{' '}
-                <b>{{ retryLeft }}</b> tries left.
-              </Trans>
+              <Trans t={t}>You have 0 tries left</Trans>
             </Typography>
           </TextContainer>
           <InputsContainer>
