@@ -13,7 +13,7 @@ const ConnectionStatusBadgeContainer = styled.div<ConnectionStatusBadgeProps>`
   width: fit-content;
   border-radius: ${({ theme }) => theme.borderRadius.ten}px;
   padding: ${({ displayContext }) =>
-    displayContext === 'accountList' ? '2px 0' : '2px 8px'};
+    displayContext === 'accountList' ? '0' : '2px 8px'};
 
   color: ${({ theme, isConnected }) =>
     isConnected ? theme.color.contentGreen : theme.color.contentSecondary};

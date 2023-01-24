@@ -16,7 +16,6 @@ import {
   ContentContainer,
   LeftAlignedFlexColumn,
   PageContainer,
-  SpaceBetweenFlexRow,
   FlexRow
 } from '@libs/layout';
 
@@ -58,6 +57,14 @@ const ListItemClickableContainer = styled(FlexRow)`
 // const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
 const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
   width: 100%;
+`;
+
+const ConnectionStatusBadgeContainer = styled.div`
+  margin-top: 8px;
+`;
+
+const HashContainer = styled.div`
+  margin-top: 4px;
 `;
 
 export interface AccountListRows extends Account {
@@ -127,27 +134,22 @@ export function AccountListPage() {
                   >
                     {account.name}
                   </Typography>
-                  <Hash
-                    value={account.publicKey}
-                    variant={HashVariant.CaptionHash}
-                    truncated
-                  />
-                  <SpaceBetweenFlexRow>
-                    {account.imported && (
-                      <Typography
-                        type="listSubtext"
-                        style={{ padding: '2px 0' }}
-                      >
-                        {`${t('Imported')}`}
-                      </Typography>
-                    )}
-                    {connectedAccountNames.includes(account.name) && (
+                  <HashContainer>
+                    <Hash
+                      value={account.publicKey}
+                      variant={HashVariant.CaptionHash}
+                      truncated
+                      withTag={account.imported}
+                    />
+                  </HashContainer>
+                  {connectedAccountNames.includes(account.name) && (
+                    <ConnectionStatusBadgeContainer>
                       <ConnectionStatusBadge
                         isConnected
                         displayContext="accountList"
                       />
-                    )}
-                  </SpaceBetweenFlexRow>
+                    </ConnectionStatusBadgeContainer>
+                  )}
                 </AccountNameWithHashListItemContainer>
                 {/* Hidden account balance until a solution for fetching many balances will be ready */}
                 {/*<AccountBalanceListItemContainer>*/}
