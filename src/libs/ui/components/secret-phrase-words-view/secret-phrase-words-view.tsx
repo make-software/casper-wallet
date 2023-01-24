@@ -205,7 +205,7 @@ export function SecretPhraseWordsView({
             </TextAndIconContainer>
           </BlurredSecretPhraseWordsViewOverlayContainer>
         )}
-        <WordListContainer>
+        <WordListContainer data-testId="word-list">
           {(confirmationMode ? partialPhrase : phrase).map((word, index) => {
             return (
               <WordTag
