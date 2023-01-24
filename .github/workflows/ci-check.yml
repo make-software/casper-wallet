@@ -35,8 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-#        TODO: add firefox after the test for it will be fixed
-        browser: [ 'chrome' ]
+        browser: [ 'chrome', 'firefox' ]
         node-version: [ 16.x ]
 
     services:
