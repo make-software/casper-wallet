@@ -37,6 +37,7 @@ export function ImportAccountWithFileUploadPageContent({
 
   const { ref, ...rest } = register('secretKeyFile');
 
+  // Here we open the upload file input after the component is mounted.
   useEffect(() => {
     inputRef.current?.click();
   }, []);
