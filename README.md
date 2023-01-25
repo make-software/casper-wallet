@@ -131,4 +131,11 @@ You should install Redux DevTools browser extension and connect it to Redux DevT
 
 Write tests into `e2e/tests` folder.
 
-Use npm scripts `test:e2e:chrome` and `test:e2e:firefox` depends on target browser
+There are a few options to run tests:
+
+1. In docker container
+   - Run docker and up containers. `docker compose up` or `docker-compose -f docker-compose.arm.yml up` for Apple M processors
+   - Use npm scripts `test:e2e:headless:chrome` or `test:e2e:headless:firefox` depends on target browser
+   - To see what is happening inside the container, open your web browser and navigate to the URL <http://localhost:7900> for Chrome and <http://localhost:7901> for Firefox, enter the password `secret`, and run your test again
+2. Locally on computer
+   - Use npm scripts `test:e2e:chrome` or `test:e2e:firefox` depends on target browser
