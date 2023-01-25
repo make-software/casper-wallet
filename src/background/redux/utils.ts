@@ -32,9 +32,9 @@ export const composeEnhancers =
       })
     : compose;
 
-export const VAULT_CIPHER_KEY = 'vault_cipher';
-export const KEYS_KEY = 'keys';
-export const LOGIN_RETRY_KEY = 'login_retry';
+export const VAULT_CIPHER_KEY = 'zazXu8w9GyCtxZ';
+export const KEYS_KEY = '2yNVAEQJB5rxMg';
+export const LOGIN_RETRY_KEY = '7ZVdMbk9yD8WGZ';
 
 type StorageState = {
   [VAULT_CIPHER_KEY]: string;
