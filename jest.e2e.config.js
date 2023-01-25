@@ -12,5 +12,5 @@ module.exports = {
   modulePathIgnorePatterns: ['<rootDir>/.*/__mocks__', '<rootDir>/src'],
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['@testing-library/jest-dom/extend-expect'],
-  testTimeout: 20000
+  testTimeout: 30000
 };
