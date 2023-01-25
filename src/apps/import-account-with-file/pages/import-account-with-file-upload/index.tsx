@@ -19,14 +19,10 @@ import { accountImported } from '@src/background/redux/vault/actions';
 import { checkAccountNameIsTaken } from '@src/background/redux/import-account-actions-should-be-removed';
 
 import { RouterPath, useTypedNavigate } from '../../router';
+
 import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
-
 import { ImportAccountWithFileUploadPageContent } from './content';
-
-export type ImportAccountFormValues = {
-  secretKeyFile: string | undefined;
-  name: string;
-};
+import { ImportAccountFormValues } from './types';
 
 export function ImportAccountWithFileUploadPage() {
   const navigate = useTypedNavigate();
@@ -94,7 +90,7 @@ export function ImportAccountWithFileUploadPage() {
     register,
     handleSubmit,
     watch,
-    setValue,
+    resetField,
     formState: { errors, isValid, isDirty }
   } = useForm<ImportAccountFormValues>(formOptions);
 
@@ -117,7 +113,7 @@ export function ImportAccountWithFileUploadPage() {
       renderContent={() => (
         <ImportAccountWithFileUploadPageContent
           register={register}
-          setValue={setValue}
+          resetField={resetField}
           isFileLoaded={isFileLoaded}
           errors={errors}
         />
