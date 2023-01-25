@@ -18,8 +18,10 @@
     "dev:firefox": "npm run dev:build:firefox && NODE_ENV=development BABEL_ENV=development BROWSER=firefox PORT=3002 node utils/webserver.js",
     "start:firefox": "concurrently -k -n start,redux \"npm run dev:firefox\" \"npm run devtools:redux -- --port=8001\"",
     "start:safari": "npm run dev:build:manifest:v2 && ./convert-web-extension.sh && NODE_ENV=development BABEL_ENV=development BROWSER=safari PORT=3003 node utils/webserver.js",
-    "test:e2e:chrome": "npm run dev:build:chrome && SELENIUM_BROWSER=chrome jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests",
-    "test:e2e:firefox": "npm run build:firefox && SELENIUM_BROWSER=firefox jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests",
+    "test:e2e:chrome": "npm run dev:build:chrome && npm run pack-extension:chrome && SELENIUM_BROWSER=chrome jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests && npm run remove-packed-extension:chrome",
+    "test:e2e:firefox": "npm run dev:build:firefox && SELENIUM_BROWSER=firefox jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests",
+    "test:e2e:chrome:headless": "npm run dev:build:chrome && npm run pack-extension:chrome && SELENIUM_BROWSER=chrome SELENIUM_HEADLESS=true jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests && npm run remove-packed-extension:chrome",
+    "test:e2e:firefox:headless": "npm run dev:build:firefox && SELENIUM_BROWSER=firefox SELENIUM_HEADLESS=true jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests",
     "format:check": "prettier --check 'src/*.{js,jsx,ts,tsx,json,md}'",
     "format:write": "prettier --write 'src/*.{js,jsx,ts,tsx,json,md}'",
     "lint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
@@ -31,7 +33,9 @@
     "ci-check": "npm run format:check && npm run lint && npm run tsc && npm run test",
     "dependency:graph": "npx madge --ts-config=tsconfig.json --image=graph.svg src/background/index.ts",
     "dependency:circular": "npx madge --ts-config=tsconfig.json --circular src/background/index.ts",
-    "dependency:orphans": "npx madge --ts-config=tsconfig.json --orphans src/**/*"
+    "dependency:orphans": "npx madge --ts-config=tsconfig.json --orphans src/**/*",
+    "pack-extension:chrome": "crx3 --keyPath e2e/crx3.pem output/chrome",
+    "remove-packed-extension:chrome": "rm -rf chrome.crx"
   },
   "lint-staged": {
     "*.md": "markdownlint",
@@ -54,6 +58,7 @@
     "base64-loader": "1.0.0",
     "big.js": "^6.2.1",
     "casper-js-sdk": "2.10.0",
+    "crx3": "^1.1.3",
     "facepaint": "^1.2.1",
     "i18next": "^21.9.1",
     "i18next-browser-languagedetector": "^6.1.5",
