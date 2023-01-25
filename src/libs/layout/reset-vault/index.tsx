@@ -45,8 +45,7 @@ export function ResetVaultPageContent() {
             <Trans t={t}>
               All accounts will be removed. Make sure you have securely stored
               your Casper Wallet’s secret recovery phrase and any legacy secret
-              key files. Without them you may be unable to access to the
-              accounts.
+              key files. Without them you may be unable to access the accounts.
             </Trans>
           </Typography>
         </TextContainer>
