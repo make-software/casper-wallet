@@ -57,6 +57,7 @@ jobs:
           npm install
 
       - name: Run E2E test on ${{ matrix.browser }}
-        run: npm run test:e2e:headless:${{ matrix.browser }}
+        run: npm run test:e2e:${{ matrix.browser }}:headless
         env:
           SELENIUM_HOST: selenium
+          SELENIUM_PORT: 4444

@@ -7,6 +7,7 @@ import { Builder, until, By } from 'selenium-webdriver';
 
 import { WebDriverObject } from './types';
 import { ExtensionBuildPath } from '../../constants';
+import { SeleniumPort } from './constants';
 
 const TEMP_PROFILE_PATH_PREFIX = path.join(
   os.tmpdir(),
@@ -19,7 +20,8 @@ export class FirefoxDriver {
   static async build(
     port: number | undefined,
     headless: boolean,
-    host: string
+    seleniumHost: string,
+    seleniumPort?: string
   ): Promise<WebDriverObject> {
     const templateProfile = fs.mkdtempSync(TEMP_PROFILE_PATH_PREFIX);
     const options = new firefox.Options().setProfile(templateProfile);
@@ -37,7 +39,9 @@ export class FirefoxDriver {
     }
 
     if (headless) {
-      builder.usingServer(`http://${host}:4445/`);
+      builder.usingServer(
+        `http://${seleniumHost}:${seleniumPort || SeleniumPort.Firefox}/`
+      );
     }
 
     const driver = builder.build();

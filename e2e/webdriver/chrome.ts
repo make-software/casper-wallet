@@ -3,6 +3,7 @@ import { Builder, ThenableWebDriver, Browser } from 'selenium-webdriver';
 
 import { WebDriverObject } from './types';
 import { extensionName } from '../../constants';
+import { SeleniumPort } from './constants';
 
 export class ChromeDriver {
   _driver: ThenableWebDriver;
@@ -10,7 +11,8 @@ export class ChromeDriver {
   static async build(
     port: number | undefined,
     headless: boolean,
-    host: string
+    seleniumHost: string,
+    seleniumPort?: string
   ): Promise<WebDriverObject> {
     const options = new chrome.Options();
 
@@ -39,7 +41,9 @@ export class ChromeDriver {
       .setChromeOptions(options);
 
     if (headless) {
-      builder.usingServer(`http://${host}:4444/`);
+      builder.usingServer(
+        `http://${seleniumHost}:${seleniumPort || SeleniumPort.Chrome}/`
+      );
     }
 
     const service = new chrome.ServiceBuilder();
