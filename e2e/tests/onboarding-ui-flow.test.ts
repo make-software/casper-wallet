@@ -1,10 +1,11 @@
-import { By } from 'selenium-webdriver';
+import { By, until } from 'selenium-webdriver';
 import { strict as assert } from 'assert';
-import { buildWebDriver } from '../webdriver';
 
+import { buildWebDriver } from '../webdriver';
 import { Driver } from '../webdriver/driver';
 import { AppRoutes } from '../app-routes';
 import { vaultPassword, recoverSecretPhrase } from '../__fixtures';
+import { getUrlPath } from '../utils/helpers';
 
 describe('Onboarding UI: confirm secret phrase flow [happy path]', () => {
   let driver: Driver;
@@ -12,6 +13,10 @@ describe('Onboarding UI: confirm secret phrase flow [happy path]', () => {
   beforeAll(async () => {
     driver = await buildWebDriver();
     await driver.navigate(AppRoutes.Onboarding);
+  });
+
+  afterAll(async () => {
+    await driver.quit();
   });
 
   describe('`Welcome` page', () => {
@@ -22,8 +27,8 @@ describe('Onboarding UI: confirm secret phrase flow [happy path]', () => {
 
       await getStartedButton.click();
       assert.equal(
-        await driver.driver.getCurrentUrl(),
-        'chrome-extension://aohghmighlieiainnegkcijnfilokake/onboarding.html#/create-vault-password'
+        await driver.driver.getCurrentUrl().then(getUrlPath),
+        'create-vault-password'
       );
     });
   });
@@ -46,9 +51,16 @@ describe('Onboarding UI: confirm secret phrase flow [happy path]', () => {
       );
       await driver.clickElement(By.xpath("//button[text()='Create password']"));
 
+      // Need to wait for the finishing script for creating the password
+      await driver.wait(
+        until.elementLocated(
+          By.xpath("//*[text()='Create secret recovery phrase']")
+        )
+      );
+
       assert.equal(
-        await driver.driver.getCurrentUrl(),
-        'chrome-extension://aohghmighlieiainnegkcijnfilokake/onboarding.html#/create-secret-phrase'
+        await driver.driver.getCurrentUrl().then(getUrlPath),
+        'create-secret-phrase'
       );
     });
   });
@@ -60,8 +72,8 @@ describe('Onboarding UI: confirm secret phrase flow [happy path]', () => {
       );
 
       assert.equal(
-        await driver.driver.getCurrentUrl(),
-        'chrome-extension://aohghmighlieiainnegkcijnfilokake/onboarding.html#/create-secret-phrase-confirmation'
+        await driver.driver.getCurrentUrl().then(getUrlPath),
+        'create-secret-phrase-confirmation'
       );
     });
   });
@@ -77,8 +89,8 @@ describe('Onboarding UI: confirm secret phrase flow [happy path]', () => {
       await driver.clickElement(By.xpath("//button[text()='Next']"));
 
       assert.equal(
-        await driver.driver.getCurrentUrl(),
-        'chrome-extension://aohghmighlieiainnegkcijnfilokake/onboarding.html#/write-down-secret-phrase'
+        await driver.driver.getCurrentUrl().then(getUrlPath),
+        'write-down-secret-phrase'
       );
     });
   });
@@ -109,8 +121,8 @@ describe('Onboarding UI: confirm secret phrase flow [happy path]', () => {
         await driver.clickElement(By.xpath("//button[text()='Next']"));
 
         assert.equal(
-          await driver.driver.getCurrentUrl(),
-          'chrome-extension://aohghmighlieiainnegkcijnfilokake/onboarding.html#/confirm-secret-phrase'
+          await driver.driver.getCurrentUrl().then(getUrlPath),
+          'confirm-secret-phrase'
         );
       });
     });
@@ -138,8 +150,8 @@ describe('Onboarding UI: confirm secret phrase flow [happy path]', () => {
         await driver.clickElement(By.xpath("//button[text()='Confirm']"));
 
         assert.equal(
-          await driver.driver.getCurrentUrl(),
-          'chrome-extension://aohghmighlieiainnegkcijnfilokake/onboarding.html#/confirm-secret-phrase-success'
+          await driver.driver.getCurrentUrl().then(getUrlPath),
+          'confirm-secret-phrase-success'
         );
       });
     });
@@ -150,8 +162,8 @@ describe('Onboarding UI: confirm secret phrase flow [happy path]', () => {
       await driver.clickElement(By.xpath("//button[text()='Done']"));
 
       assert.equal(
-        await driver.driver.getCurrentUrl(),
-        'chrome-extension://aohghmighlieiainnegkcijnfilokake/onboarding.html#/onboarding-success'
+        await driver.driver.getCurrentUrl().then(getUrlPath),
+        'onboarding-success'
       );
     });
   });
@@ -191,6 +203,10 @@ describe('Onboarding UI: recover secret phrase flow [happy path]', () => {
     await driver.clickElement(By.xpath("//button[text()='Create password']"));
   });
 
+  afterAll(async () => {
+    await driver.quit();
+  });
+
   describe('`Create Secret Phrase` page', () => {
     it('should navigate to `Recover From Secret Phrase` page by click on `Import an existing secret recovery phrase` button', async () => {
       await driver.clickElement(
@@ -198,8 +214,8 @@ describe('Onboarding UI: recover secret phrase flow [happy path]', () => {
       );
 
       assert.equal(
-        await driver.driver.getCurrentUrl(),
-        'chrome-extension://aohghmighlieiainnegkcijnfilokake/onboarding.html#/recover-from-secret-phrase'
+        await driver.driver.getCurrentUrl().then(getUrlPath),
+        'recover-from-secret-phrase'
       );
     });
   });
@@ -216,8 +232,8 @@ describe('Onboarding UI: recover secret phrase flow [happy path]', () => {
       );
 
       assert.notEqual(
-        await driver.driver.getCurrentUrl(),
-        'chrome-extension://aohghmighlieiainnegkcijnfilokake/onboarding.html#/error'
+        await driver.driver.getCurrentUrl().then(getUrlPath),
+        'error'
       );
     });
   });

@@ -25,3 +25,6 @@ build
 
 # secrets
 secrets.*.js
+
+# packed extension
+chrome.crx

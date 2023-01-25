@@ -1,0 +1,23 @@
+version: '3'
+services:
+  chrome:
+    image: selenium/standalone-chrome
+    container_name: selenium-chrome
+    ports:
+      - "4444:4444" # Selenium service
+      - "5900:5900" # VNC server
+      - "7900:7900" # VNC browser client
+  firefox:
+    image: selenium/standalone-firefox
+    container_name: selenium-firefox
+    ports:
+      - "4445:4444" # Selenium service
+      - "5901:5900" # VNC server
+      - "7901:7900" # VNC browser client
+  node:
+    image: node:16
+    container_name: node-16
+    volumes:
+      - ./../:/project
+    working_dir: /project
+    tty: true
