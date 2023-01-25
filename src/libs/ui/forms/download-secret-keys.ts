@@ -13,8 +13,13 @@ export function useDownloadSecretKeysForm(
   passwordHash: string,
   passwordSaltHash: string
 ) {
+  const isItNeedToIncrementLoginRetryCount = false;
   const formSchema = Yup.object().shape({
-    password: useVerifyPasswordAgainstHashRule(passwordHash, passwordSaltHash)
+    password: useVerifyPasswordAgainstHashRule(
+      passwordHash,
+      passwordSaltHash,
+      isItNeedToIncrementLoginRetryCount
+    )
   });
 
   const formOptions: UseFormProps<DownloadSecretKeysFormValues> = {

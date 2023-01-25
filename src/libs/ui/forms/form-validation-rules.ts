@@ -17,7 +17,8 @@ export function useCreatePasswordRule() {
 
 export function useVerifyPasswordAgainstHashRule(
   passwordHash: string,
-  passwordSaltHash: string
+  passwordSaltHash: string,
+  isItNeedToIncrementLoginRetryCount = true
 ) {
   const { t } = useTranslation();
   const errorMessage = t('Password is not correct');
@@ -28,9 +29,11 @@ export function useVerifyPasswordAgainstHashRule(
       passwordSaltHash,
       password
     );
-    if (result === false) {
+
+    if (!result && isItNeedToIncrementLoginRetryCount) {
       dispatchToMainStore(loginRetryCountIncrement());
     }
+
     return result;
   });
 }
