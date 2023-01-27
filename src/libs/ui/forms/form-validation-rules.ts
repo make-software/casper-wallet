@@ -28,9 +28,11 @@ export function useVerifyPasswordAgainstHashRule(
       passwordSaltHash,
       password
     );
-    if (result === false) {
+
+    if (!result) {
       dispatchToMainStore(loginRetryCountIncrement());
     }
+
     return result;
   });
 }
