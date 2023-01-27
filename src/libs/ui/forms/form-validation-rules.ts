@@ -4,7 +4,7 @@ import { verifyPasswordAgainstHash } from '@src/libs/crypto/hashing';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { loginRetryCountIncrement } from '@src/background/redux/login-retry-count/actions';
 
-export const minPasswordLength = 12;
+export const minPasswordLength = 16;
 
 export function useCreatePasswordRule() {
   const { t } = useTranslation();
