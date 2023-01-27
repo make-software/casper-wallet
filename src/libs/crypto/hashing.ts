@@ -37,9 +37,8 @@ export async function verifyPasswordAgainstHash(
   password: string | undefined
 ): Promise<boolean> {
   const digest = await encodePassword(password || '', passwordSaltHash);
-  const result = passwordHash === digest;
 
-  return result;
+  return passwordHash === digest;
 }
 
 export async function deriveEncryptionKey(

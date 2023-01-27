@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { FieldErrors, UseFormRegister } from 'react-hook-form';
 
@@ -15,26 +15,27 @@ import {
   SvgIcon,
   Typography
 } from '@libs/ui';
+import { useLockWallet } from './use-lock-wallet';
 
-interface BackupSecretPhrasePasswordFormValues {
+interface PasswordFormValues {
   password: string;
 }
 
-interface BackupSecretPhrasePasswordPageContentType {
-  passwordInputType: PasswordInputType;
-  setPasswordInputType: React.Dispatch<React.SetStateAction<PasswordInputType>>;
-  register: UseFormRegister<BackupSecretPhrasePasswordFormValues>;
-  errors: FieldErrors<BackupSecretPhrasePasswordFormValues>;
-  retryLeft: number;
+interface PasswordPageContentType {
+  register: UseFormRegister<PasswordFormValues>;
+  errors: FieldErrors<PasswordFormValues>;
+  description: string;
 }
-export const BackupSecretPhrasePasswordPageContent = ({
-  passwordInputType,
-  setPasswordInputType,
+export const UnlockProtectedPageContent = ({
   register,
   errors,
-  retryLeft
-}: BackupSecretPhrasePasswordPageContentType) => {
+  description
+}: PasswordPageContentType) => {
+  const [passwordInputType, setPasswordInputType] =
+    useState<PasswordInputType>('password');
+
   const { t } = useTranslation();
+  const retryLeft = useLockWallet();
 
   return (
     <ContentContainer>
@@ -48,13 +49,10 @@ export const BackupSecretPhrasePasswordPageContent = ({
       </TextContainer>
       <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
-          <Trans t={t}>
-            Enter your password to reveal your secret recovery phrase. You have{' '}
-            {{ retryLeft }} tries left.
-          </Trans>
+          {description}{' '}
+          <Trans t={t}>You have {{ retryLeft }} tries left.</Trans>
         </Typography>
       </TextContainer>
-
       <InputsContainer>
         <Input
           type={passwordInputType}
