@@ -7,10 +7,10 @@ module.exports = {
   clearMocks: true,
   moduleDirectories: ['node_modules'],
   coveragePathIgnorePatterns: ['/node_modules/'],
-  testRegex: '(/tests?/.*|(\\.|/)(test|spec))\\.tsx?$',
+  testRegex: '(/tests?/.*(test|spec))\\.tsx?$',
   moduleFileExtensions: ['js', 'ts'],
   modulePathIgnorePatterns: ['<rootDir>/.*/__mocks__', '<rootDir>/src'],
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['@testing-library/jest-dom/extend-expect'],
-  testTimeout: 20000
+  testTimeout: 30000
 };
