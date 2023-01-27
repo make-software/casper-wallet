@@ -15,7 +15,7 @@ import {
   SvgIcon,
   Typography
 } from '@libs/ui';
-import { useLockWallet } from '@libs/ui/hooks/use-lock-wallet';
+import { useLockWallet } from './use-lock-wallet';
 
 interface PasswordFormValues {
   password: string;
@@ -26,7 +26,7 @@ interface PasswordPageContentType {
   errors: FieldErrors<PasswordFormValues>;
   description: string;
 }
-export const PasswordPageContent = ({
+export const UnlockProtectedPageContent = ({
   register,
   errors,
   description
@@ -49,10 +49,8 @@ export const PasswordPageContent = ({
       </TextContainer>
       <TextContainer gap="medium">
         <Typography type="body" color="contentSecondary">
-          <Trans t={t}>
-            Enter your password to {{ description }}. You have {{ retryLeft }}{' '}
-            tries left.
-          </Trans>
+          {description}{' '}
+          <Trans t={t}>You have {{ retryLeft }} tries left.</Trans>
         </Typography>
       </TextContainer>
       <InputsContainer>

@@ -6,8 +6,10 @@ import {
   selectPasswordHash,
   selectPasswordSaltHash
 } from '@background/redux/keys/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { loginRetryCountReseted } from '@background/redux/login-retry-count/actions';
 
-import { PasswordPageContent } from '@popup/pages/password';
+import { UnlockProtectedPageContent } from '@layout/unlock-protected-page-content';
 
 import {
   FooterButtonsContainer,
@@ -18,8 +20,6 @@ import {
 import { Button } from '@libs/ui';
 import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
-import { dispatchToMainStore } from '@background/redux/utils';
-import { loginRetryCountReseted } from '@background/redux/login-retry-count/actions';
 
 interface BackupSecretPhrasePasswordPageType {
   setPasswordConfirmed: () => void;
@@ -67,10 +67,10 @@ export const BackupSecretPhrasePasswordPage = ({
         />
       )}
       renderContent={() => (
-        <PasswordPageContent
+        <UnlockProtectedPageContent
           errors={errors}
           register={register}
-          description="reveal your secret phrase"
+          description={t('Enter your password to reveal your secret phrase.')}
         />
       )}
       renderFooter={() => (

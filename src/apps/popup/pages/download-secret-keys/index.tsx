@@ -13,7 +13,7 @@ import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
 import { calculateSubmitButtonDisabled } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
 import { createAsymmetricKey } from '@src/libs/crypto/create-asymmetric-key';
 
-import { PasswordPageContent } from '@popup/pages/password';
+import { UnlockProtectedPageContent } from '@layout/unlock-protected-page-content';
 
 import { RouterPath, useTypedNavigate } from '@src/apps/popup/router';
 
@@ -22,10 +22,10 @@ import {
   selectPasswordHash,
   selectPasswordSaltHash
 } from '@src/background/redux/keys/selectors';
-
-import { downloadFile } from './utils';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { loginRetryCountReseted } from '@background/redux/login-retry-count/actions';
+
+import { downloadFile } from './utils';
 
 export function DownloadSecretKeysPage() {
   const navigate = useTypedNavigate();
@@ -92,10 +92,12 @@ export function DownloadSecretKeysPage() {
         />
       )}
       renderContent={() => (
-        <PasswordPageContent
+        <UnlockProtectedPageContent
           register={register}
           errors={errors}
-          description="download your secret key file"
+          description={t(
+            'Enter your password to download your secret key file.'
+          )}
         />
       )}
       renderFooter={() => (
