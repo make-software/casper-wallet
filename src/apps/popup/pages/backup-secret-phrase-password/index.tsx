@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
-import { dispatchToMainStore } from '@background/redux/utils';
-import { lockVault } from '@background/redux/sagas/actions';
 import {
   selectPasswordHash,
   selectPasswordSaltHash
 } from '@background/redux/keys/selectors';
 
-import { BackupSecretPhrasePasswordPageContent } from '@popup/pages/backup-secret-phrase-password/content';
+import { PasswordPageContent } from '@popup/pages/password';
 
 import {
   FooterButtonsContainer,
@@ -18,9 +15,11 @@ import {
   PopupHeader,
   PopupLayout
 } from '@libs/layout';
-import { Button, PasswordInputType } from '@libs/ui';
+import { Button } from '@libs/ui';
 import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { loginRetryCountReseted } from '@background/redux/login-retry-count/actions';
 
 interface BackupSecretPhrasePasswordPageType {
   setPasswordConfirmed: () => void;
@@ -29,12 +28,8 @@ interface BackupSecretPhrasePasswordPageType {
 export const BackupSecretPhrasePasswordPage = ({
   setPasswordConfirmed
 }: BackupSecretPhrasePasswordPageType) => {
-  const [passwordInputType, setPasswordInputType] =
-    useState<PasswordInputType>('password');
-
   const { t } = useTranslation();
 
-  const loginRetryCount = useSelector(selectLoginRetryCount);
   const passwordHash = useSelector(selectPasswordHash);
   const passwordSaltHash = useSelector(selectPasswordSaltHash);
 
@@ -54,13 +49,8 @@ export const BackupSecretPhrasePasswordPage = ({
 
   const onSubmit = () => {
     setPasswordConfirmed();
+    dispatchToMainStore(loginRetryCountReseted());
   };
-
-  const retryLeft = 5 - loginRetryCount;
-
-  if (retryLeft <= 0) {
-    dispatchToMainStore(lockVault());
-  }
 
   return (
     <PopupLayout
@@ -77,12 +67,10 @@ export const BackupSecretPhrasePasswordPage = ({
         />
       )}
       renderContent={() => (
-        <BackupSecretPhrasePasswordPageContent
-          passwordInputType={passwordInputType}
-          setPasswordInputType={setPasswordInputType}
+        <PasswordPageContent
           errors={errors}
           register={register}
-          retryLeft={retryLeft}
+          description="reveal your secret phrase"
         />
       )}
       renderFooter={() => (

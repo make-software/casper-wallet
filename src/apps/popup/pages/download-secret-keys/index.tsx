@@ -9,21 +9,23 @@ import {
   PopupLayout
 } from '@src/libs/layout';
 import { Button } from '@src/libs/ui';
-import { useDownloadSecretKeysForm } from '@src/libs/ui/forms/download-secret-keys';
+import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
 import { calculateSubmitButtonDisabled } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
 import { createAsymmetricKey } from '@src/libs/crypto/create-asymmetric-key';
+
+import { PasswordPageContent } from '@popup/pages/password';
 
 import { RouterPath, useTypedNavigate } from '@src/apps/popup/router';
 
 import { selectVaultImportedAccounts } from '@src/background/redux/vault/selectors';
-
-import { DownloadSecretKeysPageContent } from './content';
-
-import { downloadFile } from './utils';
 import {
   selectPasswordHash,
   selectPasswordSaltHash
 } from '@src/background/redux/keys/selectors';
+
+import { downloadFile } from './utils';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { loginRetryCountReseted } from '@background/redux/login-retry-count/actions';
 
 export function DownloadSecretKeysPage() {
   const navigate = useTypedNavigate();
@@ -40,7 +42,7 @@ export function DownloadSecretKeysPage() {
     register,
     handleSubmit,
     formState: { isDirty, errors }
-  } = useDownloadSecretKeysForm(passwordHash, passwordSaltHash);
+  } = useUnlockWalletForm(passwordHash, passwordSaltHash);
 
   const importedAccounts = useSelector(selectVaultImportedAccounts);
 
@@ -50,6 +52,7 @@ export function DownloadSecretKeysPage() {
   }
 
   const onSubmit = () => {
+    dispatchToMainStore(loginRetryCountReseted());
     try {
       importedAccounts.forEach(account => {
         const asymmetricKey = createAsymmetricKey(
@@ -89,9 +92,10 @@ export function DownloadSecretKeysPage() {
         />
       )}
       renderContent={() => (
-        <DownloadSecretKeysPageContent
+        <PasswordPageContent
           register={register}
-          errorMessage={errors.password?.message}
+          errors={errors}
+          description="download your secret key file"
         />
       )}
       renderFooter={() => (
