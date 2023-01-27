@@ -1,13 +1,20 @@
-name: cleanup caches by a branch
+name: Cleanup caches by a branch after PR was closed
+
 on:
   pull_request:
     types:
       - closed
   workflow_dispatch:
 
+#   The cache that we use is created directly for the branch and uses only there.
+#   So we need to delete it manually after PR was closed, or it will stay until a repository has reached its maximum cache storage and only after that, the cache eviction policy will start to delete the oldest cache.
+#   This script deletes the cache which was connected to this branch after PR was closed.
+#   More information can be found here - https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#force-deleting-cache-entries
+
 jobs:
   cleanup:
     runs-on: ubuntu-latest
+
     steps:
       - name: Check out code
         uses: actions/checkout@v3

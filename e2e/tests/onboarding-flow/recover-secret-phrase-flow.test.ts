@@ -5,7 +5,8 @@ import { Driver } from '../../webdriver/driver';
 import { buildWebDriver } from '../../webdriver';
 import { AppRoutes } from '../../app-routes';
 import { recoverSecretPhrase } from '../../__fixtures';
-import { createPassword, getUrlPath } from '../../utils/helpers';
+import { getUrlPath } from '../../utils/helpers';
+import { createPassword } from '../common';
 
 describe('Onboarding UI: recover secret phrase flow [happy path]', () => {
   let driver: Driver;
@@ -23,7 +24,6 @@ describe('Onboarding UI: recover secret phrase flow [happy path]', () => {
   afterAll(async () => {
     await driver.quit();
   });
-
   describe('`Create Secret Phrase` page', () => {
     it('should navigate to `Recover From Secret Phrase` page when the user clicked on `Import an existing secret recovery phrase` button', async () => {
       await driver.clickElement(

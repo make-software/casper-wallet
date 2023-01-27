@@ -7,7 +7,7 @@ module.exports = {
   clearMocks: true,
   moduleDirectories: ['node_modules'],
   coveragePathIgnorePatterns: ['/node_modules/'],
-  testRegex: '(/tests?/.*|(\\.|/)(test|spec))\\.tsx?$',
+  testRegex: '(/tests?/.*(test|spec))\\.tsx?$',
   moduleFileExtensions: ['js', 'ts'],
   modulePathIgnorePatterns: ['<rootDir>/.*/__mocks__', '<rootDir>/src'],
   testEnvironment: 'jsdom',
