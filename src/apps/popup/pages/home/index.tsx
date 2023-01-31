@@ -2,8 +2,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
-import Identicon from 'react-identicons';
-import styled, { css, useTheme } from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import {
   CenteredFlexColumn,
@@ -12,10 +11,18 @@ import {
 } from '@src/libs/layout/containers';
 import { LinkType, HeaderSubmenuBarNavLink } from '@libs/layout';
 
-import { Button, Hash, HashVariant, PageTile, Typography } from '@libs/ui';
+import {
+  Button,
+  Hash,
+  HashVariant,
+  PageTile,
+  Typography,
+  Avatar
+} from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
+import { selectActiveOrigin } from '@src/background/redux/session/selectors';
 import {
   selectIsActiveAccountConnectedWithOrigin,
   selectConnectedAccountsWithOrigin,
@@ -33,9 +40,13 @@ import {
   motesToCSPR,
   motesToCurrency
 } from '@libs/ui/utils/formatters';
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import {
+  getAccountInfoLogo,
+  getActiveAccountInfo
+} from '@libs/services/account-info';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
-import { selectActiveOrigin } from '@src/background/redux/session/selectors';
 
 export const HomePageContentContainer = styled(ContentContainer)`
   padding-bottom: ${({ theme }) => theme.padding[1.2]};
@@ -48,9 +59,6 @@ const fullWidthAndMarginTop = css`
   width: 100%;
 `;
 
-const AvatarContainer = styled(CenteredFlexColumn)`
-  ${fullWidthAndMarginTop};
-`;
 const NameAndAddressContainer = styled(CenteredFlexColumn)`
   ${fullWidthAndMarginTop};
 `;
@@ -83,12 +91,14 @@ const ButtonsContainer = styled.div`
 export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
-  const theme = useTheme();
 
   const [balance, setBalance] = useState<ActiveAccountBalance>({
     amount: '-',
     fiatAmount: '-'
   });
+  const [accountName, setAccountName] = useState('');
+  const [accountLogo, setAccountLogo] = useState('');
+  const [loadingAccountInfo, setLoadingAccountInfo] = useState(true);
 
   const activeOrigin = useSelector(selectActiveOrigin);
   const { disconnectAccountWithEvent: disconnectAccount } = useAccountManager();
@@ -130,6 +140,23 @@ export function HomePageContent() {
       .catch(error => {
         console.error('Balance request failed:', error);
       });
+
+    getActiveAccountInfo(getAccountHashFromPublicKey(activeAccount?.publicKey))
+      .then(({ payload: accountInfo }) => {
+        const accountName = accountInfo?.info?.owner?.name;
+        const logo = getAccountInfoLogo(accountInfo);
+
+        if (accountName) {
+          setAccountName(accountName);
+        }
+
+        if (logo) {
+          setAccountLogo(logo);
+        }
+      })
+      .finally(() => {
+        setLoadingAccountInfo(false);
+      });
   }, [activeAccount?.publicKey]);
 
   return (
@@ -140,15 +167,15 @@ export function HomePageContent() {
             isConnected={isActiveAccountConnected}
             displayContext="home"
           />
-          <AvatarContainer>
-            <Identicon
-              string={activeAccount.publicKey.toLowerCase()}
-              size={120}
-              bg={theme.color.backgroundPrimary}
-            />
-          </AvatarContainer>
+          <Avatar
+            publicKey={activeAccount.publicKey}
+            src={accountLogo}
+            loadingAccountInfo={loadingAccountInfo}
+          />
           <NameAndAddressContainer>
-            <Typography type="bodySemiBold">{activeAccount.name}</Typography>
+            <Typography type="bodySemiBold" loading={loadingAccountInfo}>
+              {accountName || activeAccount.name}
+            </Typography>
             <Hash
               value={activeAccount.publicKey}
               variant={HashVariant.CaptionHash}

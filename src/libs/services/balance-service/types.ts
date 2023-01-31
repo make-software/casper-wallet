@@ -15,7 +15,3 @@ export interface FetchBalanceResponse {
   balance: string | null;
   currencyRate: number | null;
 }
-
-export interface DataWithPayload<T> {
-  payload: T;
-}

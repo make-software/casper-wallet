@@ -49,6 +49,7 @@ import {
   getAccountBalance,
   getCurrencyRate
 } from '@libs/services/balance-service';
+import { getAccountInfo, getAccountsInfo } from '@libs/services/account-info';
 
 import { openWindow } from './open-window';
 import { deployPayloadReceived, deploysReseted } from './redux/deploys/actions';
@@ -350,6 +351,38 @@ browser.runtime.onMessage.addListener(
                   balance: balance?.data || null,
                   currencyRate: rate?.data || null
                 })
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchAccountInfoRequest): {
+            try {
+              const { data: accountInfo } = await getAccountInfo({
+                accountHash: action.payload.accountHash
+              });
+
+              return sendResponse(
+                serviceMessage.fetchAccountInfoResponse(accountInfo)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchAccountsInfoRequest): {
+            try {
+              const { data: accountsInfoList } = await getAccountsInfo({
+                accountsHash: action.payload.accountsHash
+              });
+
+              return sendResponse(
+                serviceMessage.fetchAccountsInfoResponse(accountsInfoList)
               );
             } catch (error) {
               console.error(error);

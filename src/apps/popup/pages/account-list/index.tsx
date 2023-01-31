@@ -18,6 +18,8 @@ import {
   PageContainer,
   FlexRow
 } from '@libs/layout';
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import { getAllAccountsInfo } from '@libs/services/account-info';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
@@ -100,10 +102,40 @@ export function AccountListPage() {
       connectedAccountNames
     ).map(account => ({
       ...account,
-      id: account.name
+      id: account.name,
+      accountHash: getAccountHashFromPublicKey(account.publicKey)
     }));
 
-    setAccountListRows(accountListRows);
+    const accountsHash = accountListRows.map(account => account.accountHash);
+
+    getAllAccountsInfo(accountsHash)
+      .then(({ payload: accountInfoList }) => {
+        if (accountInfoList.length) {
+          accountInfoList.forEach(accountInfo => {
+            const accountName = accountInfo?.info?.owner?.name;
+            const accountHash = accountInfo.account_hash;
+
+            const newAccountListRows = accountListRows.map(account => {
+              if (account.accountHash === accountHash) {
+                if (accountName != null) {
+                  account.name = accountName;
+                }
+              }
+
+              return account;
+            });
+
+            setAccountListRows(newAccountListRows);
+          });
+        } else {
+          setAccountListRows(accountListRows);
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        setAccountListRows(accountListRows);
+      });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

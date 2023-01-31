@@ -1,15 +1,20 @@
 import browser from 'webextension-polyfill';
 
+import { serviceMessage } from '@src/background/service-message';
+
+import { DataWithPayload } from '@libs/services/types';
+
+import { SECOND } from '@src/constants';
+
+import { handleError, toJson } from '../utils';
+import { queryClient } from '../query-client';
+
 import {
-  DataWithPayload,
   FetchBalanceResponse,
   GetAccountBalanceRequestResponse,
   GetCurrencyRateRequestResponse
 } from './types';
-import { CURRENCY_RATE_URL, getAccountBalanceUrl, SECOND } from './constants';
-import { handleError, toJson } from './utils';
-import { queryClient } from './query-client';
-import { serviceMessage } from '@src/background/service-message';
+import { CURRENCY_RATE_URL, getAccountBalanceUrl } from './constants';
 
 export const getCurrencyRateRequest =
   (): Promise<GetCurrencyRateRequestResponse> =>
