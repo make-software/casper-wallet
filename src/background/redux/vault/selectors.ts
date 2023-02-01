@@ -45,20 +45,14 @@ export const selectVaultAccountWithName = createSelector(
     accounts.find(account => account.name === accountName)
 );
 
-export const selectVaultActiveAccountName = (state: RootState) => {
-  const activeAccountName = state.vault.activeAccountName;
-  return activeAccountName;
-};
+export const selectVaultActiveAccountName = (state: RootState) =>
+  state.vault.activeAccountName;
 
 export const selectVaultActiveAccount = createSelector(
   selectVaultAccounts,
   selectVaultActiveAccountName,
-  (accounts, activeAccountName) => {
-    const activeAccount = accounts.find(
-      account => account.name === activeAccountName
-    );
-    return activeAccount;
-  }
+  (accounts, activeAccountName) =>
+    accounts.find(account => account.name === activeAccountName)
 );
 
 export const selectVaultAccountNamesByOriginDict = (state: RootState) =>
@@ -161,3 +155,15 @@ export const selectVaultAccountsSecretKeysBase64 = createSelector(
 export const selectVaultTimeoutDurationSetting = (
   state: RootState
 ): TimeoutDurationSetting => state.vault.timeoutDurationSetting;
+
+export const selectUnconnectedAccountsWithOrigin = createSelector(
+  selectVaultAccounts,
+  selectConnectedAccountsWithOrigin,
+  (accounts, connectedAccountsToActiveTab) =>
+    accounts.filter(
+      account =>
+        !connectedAccountsToActiveTab.find(
+          connectedAccount => connectedAccount.name === account.name
+        )
+    )
+);
