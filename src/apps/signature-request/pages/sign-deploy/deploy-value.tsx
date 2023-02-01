@@ -7,15 +7,15 @@ import {
   isKeyOfHashValue,
   isKeyOfCurrencyValue,
   isKeyOfTimestampValue
-} from './types';
+} from './deploy-types';
 import { CLValue } from 'casper-js-sdk';
 import {
   isDeployArgValueHash,
   isDeployArgValueNumber,
   parseDeployArgValue
-} from './deploy';
+} from './deploy-utils';
 
-export function SignatureRequestValue({
+export function DeployValue({
   id,
   value
 }: {

@@ -5,7 +5,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import {
   ContentContainer,
   IllustrationContainer,
-  TextContainer,
+  ParagraphContainer,
   InputsContainer
 } from '@src/libs/layout';
 import { SvgIcon, Typography, Input } from '@src/libs/ui';
@@ -27,19 +27,19 @@ export function CreateAccountPageContent({
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/create-account.svg" size={120} />
       </IllustrationContainer>
-      <TextContainer gap="medium">
+      <ParagraphContainer gap="medium">
         <Typography type="header">
           <Trans t={t}>Create account</Trans>
         </Typography>
-      </TextContainer>
-      <TextContainer gap="medium">
+      </ParagraphContainer>
+      <ParagraphContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             New accounts are recovered using your Casper Wallet’s secret
             recovery phrase.
           </Trans>
         </Typography>
-      </TextContainer>
+      </ParagraphContainer>
       <InputsContainer>
         <Input
           type="text"

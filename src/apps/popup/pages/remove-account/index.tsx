@@ -5,7 +5,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import {
   ContentContainer,
   IllustrationContainer,
-  TextContainer,
+  ParagraphContainer,
   FooterButtonsAbsoluteContainer
 } from '@src/libs/layout/containers';
 import { Button, Typography, SvgIcon } from '@src/libs/ui';
@@ -40,19 +40,19 @@ export function RemoveAccountPageContent() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/remove-account.svg" size={120} />
       </IllustrationContainer>
-      <TextContainer gap="big">
+      <ParagraphContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Remove account?</Trans>
         </Typography>
-      </TextContainer>
-      <TextContainer gap="medium">
+      </ParagraphContainer>
+      <ParagraphContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             Are you sure you want to remove this account? The action can’t be
             undone.
           </Trans>
         </Typography>
-      </TextContainer>
+      </ParagraphContainer>
       <FooterButtonsAbsoluteContainer>
         <Button color="primaryRed" onClick={handleRemoveAccount}>
           <Trans t={t}>Remove</Trans>

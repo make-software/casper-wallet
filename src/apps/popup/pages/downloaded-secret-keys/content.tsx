@@ -4,7 +4,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import {
   ContentContainer,
   IllustrationContainer,
-  TextContainer
+  ParagraphContainer
 } from '@src/libs/layout';
 import { SvgIcon, Typography } from '@src/libs/ui';
 
@@ -16,20 +16,20 @@ export function DownloadedSecretKeysPageContent() {
         <SvgIcon src="assets/illustrations/keys-downloaded.svg" size={120} />
       </IllustrationContainer>
 
-      <TextContainer gap="big">
+      <ParagraphContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Your secret key was downloaded</Trans>
         </Typography>
-      </TextContainer>
+      </ParagraphContainer>
 
-      <TextContainer gap="medium">
+      <ParagraphContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             Keep your account secret key file safe and secure. Do not share it
             with anyone.
           </Trans>
         </Typography>
-      </TextContainer>
+      </ParagraphContainer>
     </ContentContainer>
   );
 }

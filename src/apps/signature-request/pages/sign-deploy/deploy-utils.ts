@@ -18,7 +18,7 @@ import {
   encodeBase16
 } from 'casper-js-sdk';
 
-import { ArgDict, CasperDeploy, DeployType } from './types';
+import { ArgDict, CasperDeploy, DeployType } from './deploy-types';
 
 export function getDeployType(deploy: CasperDeploy): DeployType {
   if (deploy.isTransfer()) {

@@ -8,7 +8,7 @@ import {
   FooterButtonsAbsoluteContainer,
   IllustrationContainer,
   InputsContainer,
-  TextContainer
+  ParagraphContainer
 } from '@src/libs/layout/containers';
 import {
   PasswordInputType,
@@ -119,16 +119,16 @@ export function UnlockVaultPageContent() {
           <IllustrationContainer>
             <SvgIcon src="assets/illustrations/locked-wallet.svg" size={120} />
           </IllustrationContainer>
-          <TextContainer gap="big">
+          <ParagraphContainer gap="big">
             <Typography type="header">
               <Trans t={t}>Your wallet is locked</Trans>
             </Typography>
-          </TextContainer>
-          <TextContainer gap="medium">
+          </ParagraphContainer>
+          <ParagraphContainer gap="medium">
             <Typography type="body" color="contentSecondary">
               <Trans t={t}>You have 0 tries left</Trans>
             </Typography>
-          </TextContainer>
+          </ParagraphContainer>
           <InputsContainer>
             <Input
               type={passwordInputType}
@@ -164,19 +164,19 @@ export function UnlockVaultPageContent() {
         <IllustrationContainer>
           <SvgIcon src="assets/illustrations/locked-wallet.svg" size={120} />
         </IllustrationContainer>
-        <TextContainer gap="big">
+        <ParagraphContainer gap="big">
           <Typography type="header">
             <Trans t={t}>Your wallet is locked</Trans>
           </Typography>
-        </TextContainer>
-        <TextContainer gap="medium">
+        </ParagraphContainer>
+        <ParagraphContainer gap="medium">
           <Typography type="body" color="contentSecondary">
             <Trans t={t}>
               Please enter your password to unlock. You have {{ retryLeft }}{' '}
               tries left.
             </Trans>
           </Typography>
-        </TextContainer>
+        </ParagraphContainer>
         <InputsContainer>
           <Input
             type={passwordInputType}

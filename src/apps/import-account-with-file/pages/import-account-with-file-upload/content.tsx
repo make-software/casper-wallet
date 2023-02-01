@@ -10,7 +10,7 @@ import {
   ContentContainer,
   IllustrationContainer,
   InputsContainer,
-  TextContainer
+  ParagraphContainer
 } from '@src/libs/layout';
 import { Input, SvgIcon, Typography } from '@src/libs/ui';
 
@@ -47,11 +47,11 @@ export function ImportAccountWithFileUploadPageContent({
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/secret-key.svg" size={120} />
       </IllustrationContainer>
-      <TextContainer gap="big">
+      <ParagraphContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Import account from secret key file</Trans>
         </Typography>
-      </TextContainer>
+      </ParagraphContainer>
       <InputsContainer>
         <Input
           type="file"

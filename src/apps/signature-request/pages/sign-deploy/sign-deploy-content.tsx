@@ -5,18 +5,18 @@ import styled from 'styled-components';
 import {
   ContentContainer,
   PageContainer,
-  TextContainer,
+  ParagraphContainer,
   SpaceBetweenFlexRow
 } from '@layout/containers';
 import { Accordion, List, SvgIcon, Typography } from '@libs/ui';
 
-import { SignatureRequestValue } from './signature-request-value';
+import { DeployValue } from './deploy-value';
 import {
   CasperDeploy,
   SignatureRequestArguments,
   SignatureRequestFields,
   SignatureRequestKeys
-} from './types';
+} from './deploy-types';
 import { deriveDeployInfoFromDeployRaw } from './derive-deploy-info-from-deploy-raw';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
@@ -37,11 +37,11 @@ const AccordionItem = styled(CentredFlexRowSpaceBetweenContainer)`
   margin: 10px 16px;
 `;
 
-export interface SignatureRequestViewProps {
+export interface SignDeployContentProps {
   deploy?: CasperDeploy;
 }
 
-export function SignatureRequestContent({ deploy }: SignatureRequestViewProps) {
+export function SignDeployContent({ deploy }: SignDeployContentProps) {
   const { t } = useTranslation();
 
   if (deploy == null) {
@@ -90,11 +90,11 @@ export function SignatureRequestContent({ deploy }: SignatureRequestViewProps) {
   return (
     <PageContainer>
       <ContentContainer>
-        <TextContainer gap="big">
+        <ParagraphContainer gap="big">
           <Typography type="header">
             <Trans t={t}>Signature Request</Trans>
           </Typography>
-        </TextContainer>
+        </ParagraphContainer>
         <List
           rows={deployDetailRecords.map(([key, value]) => ({
             id: key,
@@ -106,7 +106,7 @@ export function SignatureRequestContent({ deploy }: SignatureRequestViewProps) {
               <Typography type="body" color="contentSecondary">
                 {label}
               </Typography>
-              <SignatureRequestValue id={id} value={value} />
+              <DeployValue id={id} value={value} />
             </ListItemContainer>
           )}
           renderFooter={() => (
@@ -120,7 +120,7 @@ export function SignatureRequestContent({ deploy }: SignatureRequestViewProps) {
                       <Typography type="body" color="contentSecondary">
                         {label}
                       </Typography>
-                      <SignatureRequestValue id={key} value={value} />
+                      <DeployValue id={key} value={value} />
                     </AccordionItem>
                   );
                 })

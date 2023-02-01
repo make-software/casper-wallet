@@ -170,8 +170,37 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         return res;
       });
     },
-    signMessage(message: string, signingPublicKey: string): Promise<string> {
-      throw Error('Not implementeed');
+    signMessage: (
+      message: string,
+      signingPublicKeyHex: string
+    ): Promise<
+      | { cancelled: true }
+      | { cancelled: false; signatureHex: string; signature: Uint8Array }
+    > => {
+      return fetchFromBackground<
+        ReturnType<typeof sdkMessage['signMessageResponse']>['payload']
+      >(
+        sdkMessage.signMessageRequest(
+          {
+            message,
+            signingPublicKeyHex
+          },
+          {
+            requestId: generateRequestId()
+          }
+        )
+      ).then(res => {
+        if (res.cancelled === false) {
+          const signature = convertHexToBytes(res.signatureHex);
+          return {
+            cancelled: res.cancelled,
+            signatureHex: res.signatureHex,
+            signature
+          };
+        }
+
+        return res;
+      });
     }
   };
 };

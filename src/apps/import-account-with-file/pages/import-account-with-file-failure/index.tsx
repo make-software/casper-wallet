@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
-  TextContainer,
+  ParagraphContainer,
   IllustrationContainer
 } from '@src/libs/layout';
 import { Button, SvgIcon, Typography } from '@src/libs/ui';
@@ -27,12 +27,12 @@ export function ImportAccountWithFileFailureContentPage() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/process-error.svg" size={120} />
       </IllustrationContainer>
-      <TextContainer gap="big">
+      <ParagraphContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Something went wrong</Trans>
         </Typography>
-      </TextContainer>
-      <TextContainer gap="medium">
+      </ParagraphContainer>
+      <ParagraphContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           {state?.importAccountStatusMessage
             ? state.importAccountStatusMessage
@@ -40,7 +40,7 @@ export function ImportAccountWithFileFailureContentPage() {
                 ': We couldn’t import your account. Please confirm that you’re importing a file containing your secret key (not to be confused with your public key).'
               )}
         </Typography>
-      </TextContainer>
+      </ParagraphContainer>
       <FooterButtonsAbsoluteContainer>
         <Button onClick={() => navigate(RouterPath.ImportAccountWithFile)}>
           <Trans t={t}>Try to import again</Trans>

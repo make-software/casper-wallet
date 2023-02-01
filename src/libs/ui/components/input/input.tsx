@@ -36,7 +36,6 @@ const InputContainer = styled('div')<InputProps>(
     },
 
     ...(disabled && {
-      opacity: 0.5,
       color: theme.color.contentSecondary
     })
   })

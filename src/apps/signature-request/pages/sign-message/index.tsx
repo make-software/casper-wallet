@@ -1,5 +1,4 @@
-import { DeployUtil } from 'casper-js-sdk';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -9,7 +8,6 @@ import {
   PopupHeader
 } from '@libs/layout';
 import { closeCurrentWindow } from '@src/background/close-current-window';
-import { selectDeploysJsonById } from '@src/background/redux/deploys/selectors';
 import {
   selectConnectedAccountNamesWithOrigin,
   selectVaultAccounts
@@ -18,22 +16,22 @@ import { emitSdkEventToAllActiveTabs } from '@src/content/sdk-event';
 import { sdkMessage } from '@src/content/sdk-message';
 import { Button } from '@src/libs/ui';
 
-import { SignatureRequestContent } from './signature-request-content';
-import { signDeploy } from '@src/libs/crypto';
-import { CasperDeploy } from './types';
+import { SignMessageContent } from './sign-message-content';
 import { convertBytesToHex } from '@src/libs/crypto/utils';
+import { signMessage } from '@src/libs/crypto/sign-message';
 
-export function SignatureRequestPage() {
+export function SignMessagePage() {
   const { t } = useTranslation();
-
-  const [deploy, setDeploy] = useState<undefined | CasperDeploy>(undefined);
 
   const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
+  const message = searchParams.get('message');
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
 
-  if (!requestId || !signingPublicKeyHex) {
-    const error = Error('Missing search param');
+  if (!requestId || !message || !signingPublicKeyHex) {
+    const error = Error(
+      `Missing search param: ${requestId} ${message} ${signingPublicKeyHex}`
+    );
     throw error;
   }
 
@@ -52,29 +50,10 @@ export function SignatureRequestPage() {
     renderDeps
   );
 
-  const deployJsonById = useSelector(selectDeploysJsonById);
-  useEffect(() => {
-    const deployJson = deployJsonById[requestId];
-    if (deployJson == null) {
-      return;
-    }
-
-    const res = DeployUtil.deployFromJson(deployJson);
-    if (!res.ok) {
-      const error = Error('Parsing deploy from json error');
-      emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
-      throw error;
-    }
-
-    setDeploy(res.val);
-
-    return () => {};
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, renderDeps);
-
   const signingAccount = accounts.find(
     a => a.publicKey === signingPublicKeyHex
   );
+
   // signing account should exist in wallet
   if (signingAccount == null) {
     const error = Error('No signing account');
@@ -92,17 +71,17 @@ export function SignatureRequestPage() {
   }
 
   const handleSign = useCallback(() => {
-    if (deploy?.hash == null) {
+    if (message == null) {
       return;
     }
 
-    const signature = signDeploy(
-      deploy.hash,
+    const signature = signMessage(
+      message,
       signingAccount.publicKey,
       signingAccount.secretKey
     );
     emitSdkEventToAllActiveTabs(
-      sdkMessage.signResponse(
+      sdkMessage.signMessageResponse(
         { signatureHex: convertBytesToHex(signature), cancelled: false },
         { requestId }
       )
@@ -111,7 +90,7 @@ export function SignatureRequestPage() {
   }, [
     signingAccount?.publicKey,
     signingAccount?.secretKey,
-    deploy?.hash,
+    message,
     requestId
   ]);
 
@@ -125,14 +104,15 @@ export function SignatureRequestPage() {
   return (
     <LayoutWindow
       renderHeader={() => <PopupHeader withConnectionStatus />}
-      renderContent={() => <SignatureRequestContent deploy={deploy} />}
+      renderContent={() => (
+        <SignMessageContent
+          message={message}
+          publicKeyHex={signingPublicKeyHex}
+        />
+      )}
       renderFooter={() => (
         <FooterButtonsContainer>
-          <Button
-            color="primaryRed"
-            disabled={deploy == null}
-            onClick={handleSign}
-          >
+          <Button color="primaryRed" onClick={handleSign}>
             <Trans t={t}>Sign</Trans>
           </Button>
           <Button color="secondaryBlue" onClick={handleCancel}>

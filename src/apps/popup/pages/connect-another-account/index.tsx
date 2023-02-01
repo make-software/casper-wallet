@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import {
   ContentContainer,
   LeftAlignedFlexColumn,
-  TextContainer,
+  ParagraphContainer,
   VerticalSpaceContainer
 } from '@src/libs/layout';
 import {
@@ -76,14 +76,14 @@ export function ConnectAnotherAccountPageContent() {
 
   return (
     <ContentContainer>
-      <TextContainer gap="big">
+      <ParagraphContainer gap="big">
         <SiteFaviconBadge origin={activeOrigin} />
         <VerticalSpaceContainer gap="medium">
           <Typography type="header">
             This account isn’t yet connected to this site
           </Typography>
         </VerticalSpaceContainer>
-      </TextContainer>
+      </ParagraphContainer>
       {targetAccount && (
         <PageTile>
           <CentredFlexRow>
