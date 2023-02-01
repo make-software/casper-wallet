@@ -36,7 +36,7 @@ export function SignMessageContent({
         <ParagraphContainer gap="big">
           <FormField label={LabelDict.casperMessage}>
             <Typography type="body">
-              <TextArea value={message} disabled rows={6} />
+              <TextArea value={message} readOnly style={{ minHeight: 260 }} />
             </Typography>
           </FormField>
         </ParagraphContainer>
@@ -45,7 +45,7 @@ export function SignMessageContent({
             <Typography type="body">
               <Input
                 value={truncateKey(publicKeyHex, { size: 'max' })}
-                disabled
+                readOnly
               />
             </Typography>
           </FormField>

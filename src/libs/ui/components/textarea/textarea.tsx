@@ -8,14 +8,17 @@ type Ref = HTMLTextAreaElement;
 const StyledTextArea = styled.textarea<{
   resize?: boolean;
   isDisabled?: boolean;
-}>(({ theme, resize, isDisabled }) => ({
+  readOnly?: boolean;
+}>(({ theme, resize, isDisabled, readOnly }) => ({
+  fontSize: '1.5rem',
   border: 'none',
   borderRadius: theme.borderRadius.base + 'px',
   resize: resize ? 'horizontal' : 'none',
+  height: '100%',
   width: '100%',
   padding: '12px 16px',
 
-  ...(isDisabled && {
+  ...((isDisabled || readOnly) && {
     color: theme.color.contentSecondary
   })
 }));
@@ -28,6 +31,7 @@ interface TextAreaProps extends BaseProps {
   resize?: boolean;
   placeholder?: string;
   disabled?: boolean;
+  readOnly?: boolean;
 }
 
 export const TextArea = forwardRef<Ref, TextAreaProps>(function TextArea(
