@@ -125,7 +125,7 @@ export function SwitchAccountContent() {
               )}
               marginLeftForItemSeparatorLine={60}
             />
-            {!!unconnectedAccountsList.length && (
+            {unconnectedAccountsList.length > 0 && (
               <List
                 headerLabel={t('Connect another account')}
                 rows={unconnectedAccountsList}

@@ -51,8 +51,13 @@ export const selectVaultActiveAccountName = (state: RootState) =>
 export const selectVaultActiveAccount = createSelector(
   selectVaultAccounts,
   selectVaultActiveAccountName,
-  (accounts, activeAccountName) =>
-    accounts.find(account => account.name === activeAccountName)
+  (accounts, activeAccountName) => {
+    const activeAccount = accounts.find(
+      account => account.name === activeAccountName
+    );
+
+    return activeAccount;
+  }
 );
 
 export const selectVaultAccountNamesByOriginDict = (state: RootState) =>
