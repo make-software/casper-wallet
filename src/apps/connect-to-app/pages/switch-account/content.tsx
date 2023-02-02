@@ -22,6 +22,7 @@ import {
 
 import {
   selectConnectedAccountsWithOrigin,
+  selectUnconnectedAccountsWithOrigin,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
 import { selectActiveOrigin } from '@src/background/redux/session/selectors';
@@ -50,13 +51,16 @@ export function SwitchAccountContent() {
   const { t } = useTranslation();
 
   const activeOrigin = useSelector(selectActiveOrigin);
-  const { changeActiveAccountWithEvent: changeActiveAccount } =
-    useAccountManager();
+  const {
+    changeActiveAccountWithEvent: changeActiveAccount,
+    connectAccountsWithEvent: connectAccounts
+  } = useAccountManager();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const connectedAccountsToActiveTab = useSelector(
     selectConnectedAccountsWithOrigin
   );
+  const unconnectedAccounts = useSelector(selectUnconnectedAccountsWithOrigin);
 
   const connectedAccountsListItems = connectedAccountsToActiveTab
     .filter(account => account.name !== activeAccount?.name)
@@ -64,6 +68,11 @@ export function SwitchAccountContent() {
       ...account,
       id: account.name
     }));
+
+  const unconnectedAccountsList = unconnectedAccounts.map(account => ({
+    ...account,
+    id: account.name
+  }));
 
   return (
     <PageContainer>
@@ -82,39 +91,82 @@ export function SwitchAccountContent() {
             </Typography>
           </TextContainer>
         ) : (
-          <List
-            rows={connectedAccountsListItems}
-            renderRow={account => (
-              <ListItemContainer key={account.name}>
-                <SpaceBetweenContainer>
-                  <LeftAlignedFlexColumn>
-                    <ConnectionStatusBadge
-                      isConnected
-                      displayContext="accountList"
-                    />
-                    <Typography type="body">{account.name}</Typography>
-                    <Hash
-                      value={account.publicKey}
-                      variant={HashVariant.CaptionHash}
-                      truncated
-                    />
-                  </LeftAlignedFlexColumn>
-                  <Button
-                    color="secondaryBlue"
-                    variant="inline"
-                    width="100"
-                    onClick={async () => {
-                      await changeActiveAccount(account.name);
-                      closeCurrentWindow();
-                    }}
-                  >
-                    <Trans t={t}>Switch</Trans>
-                  </Button>
-                </SpaceBetweenContainer>
-              </ListItemContainer>
+          <>
+            <List
+              rows={connectedAccountsListItems}
+              renderRow={account => (
+                <ListItemContainer key={account.name}>
+                  <SpaceBetweenContainer>
+                    <LeftAlignedFlexColumn>
+                      <ConnectionStatusBadge
+                        isConnected
+                        displayContext="accountList"
+                      />
+                      <Typography type="body">{account.name}</Typography>
+                      <Hash
+                        value={account.publicKey}
+                        variant={HashVariant.CaptionHash}
+                        truncated
+                      />
+                    </LeftAlignedFlexColumn>
+                    <Button
+                      color="secondaryBlue"
+                      variant="inline"
+                      width="100"
+                      onClick={async () => {
+                        await changeActiveAccount(account.name);
+                        closeCurrentWindow();
+                      }}
+                    >
+                      <Trans t={t}>Switch</Trans>
+                    </Button>
+                  </SpaceBetweenContainer>
+                </ListItemContainer>
+              )}
+              marginLeftForItemSeparatorLine={60}
+            />
+            {unconnectedAccountsList.length > 0 && (
+              <List
+                headerLabel={t('Connect another account')}
+                rows={unconnectedAccountsList}
+                renderRow={unconnectedAccount => (
+                  <ListItemContainer key={unconnectedAccount.name}>
+                    <SpaceBetweenContainer>
+                      <LeftAlignedFlexColumn>
+                        <ConnectionStatusBadge
+                          isConnected={false}
+                          displayContext="accountList"
+                        />
+                        <Typography type="body">
+                          {unconnectedAccount.name}
+                        </Typography>
+                        <Hash
+                          value={unconnectedAccount.publicKey}
+                          variant={HashVariant.CaptionHash}
+                          truncated
+                        />
+                      </LeftAlignedFlexColumn>
+                      <Button
+                        color="primaryRed"
+                        variant="inline"
+                        width="100"
+                        onClick={async () => {
+                          await connectAccounts(
+                            [unconnectedAccount.name],
+                            activeOrigin
+                          );
+                          closeCurrentWindow();
+                        }}
+                      >
+                        <Trans t={t}>Connect</Trans>
+                      </Button>
+                    </SpaceBetweenContainer>
+                  </ListItemContainer>
+                )}
+                marginLeftForItemSeparatorLine={60}
+              />
             )}
-            marginLeftForItemSeparatorLine={60}
-          />
+          </>
         )}
       </ContentContainer>
     </PageContainer>
