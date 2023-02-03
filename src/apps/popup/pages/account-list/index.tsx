@@ -19,7 +19,10 @@ import {
   FlexRow
 } from '@libs/layout';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import { getAllAccountsInfo } from '@libs/services/account-info';
+import {
+  dispatchAccountListInfo,
+  getAccountInfo
+} from '@libs/services/account-info';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
@@ -108,36 +111,31 @@ export function AccountListPage() {
 
     const accountsHash = accountListRows.map(account => account.accountHash);
 
-    getAllAccountsInfo(accountsHash)
+    dispatchAccountListInfo(accountsHash)
       .then(({ payload: accountInfoList }) => {
-        if (accountInfoList.length) {
-          accountInfoList.forEach(accountInfo => {
-            const accountName = accountInfo?.info?.owner?.name;
-            const accountHash = accountInfo.account_hash;
+        let newAccountListRows = accountListRows;
 
-            const newAccountListRows = accountListRows.map(account => {
-              if (account.accountHash === accountHash) {
-                if (accountName != null) {
-                  account.name = accountName;
-                }
+        accountInfoList.forEach(accountInfo => {
+          const { accountName, accountHash } = getAccountInfo(accountInfo);
+
+          newAccountListRows = accountListRows.map(account => {
+            if (account.accountHash === accountHash) {
+              if (accountName != null) {
+                account.name = accountName;
               }
+            }
 
-              return account;
-            });
-
-            setAccountListRows(newAccountListRows);
+            return account;
           });
-        } else {
-          setAccountListRows(accountListRows);
-        }
+        });
+
+        setAccountListRows(newAccountListRows);
       })
       .catch(error => {
         console.error(error);
         setAccountListRows(accountListRows);
       });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [accounts, activeAccountName, connectedAccountNames]);
 
   return (
     <PageContainer>

@@ -1,6 +1,5 @@
-import browser from 'webextension-polyfill';
-
 import { serviceMessage } from '@background/service-message';
+import { dispatchToMainStore } from '@background/redux/utils';
 
 import {
   ACCOUNTS_INFO_URL,
@@ -12,14 +11,14 @@ import { handleError, toJson } from '@libs/services/utils';
 import { queryClient } from '@libs/services/query-client';
 import { DataWithPayload } from '@libs/services/types';
 
-import { SECOND } from '@src/constants';
+import { FETCH_QUERY_OPTIONS } from '@src/constants';
 
-const getAccountInfoRequest = (
+const accountInfoRequest = (
   accountHash: string
 ): Promise<AccountInfoResponse<AccountInfo>> =>
   fetch(getAccountInfoUrl({ accountHash })).then(toJson).catch(handleError);
 
-const getAccountsInfoRequest = (
+const accountListInfoRequest = (
   accountsHash: string[]
 ): Promise<AccountInfoResponse<AccountInfo[]>> =>
   fetch(ACCOUNTS_INFO_URL, {
@@ -32,35 +31,35 @@ const getAccountsInfoRequest = (
     .then(toJson)
     .catch(handleError);
 
-export const getAccountInfo = ({ accountHash }: { accountHash: string }) =>
+export const fetchAccountInfo = ({ accountHash }: { accountHash: string }) =>
   queryClient.fetchQuery(
-    ['getAccountInfoRequest', accountHash],
-    () => getAccountInfoRequest(accountHash),
+    ['accountInfoRequest', accountHash],
+    () => accountInfoRequest(accountHash),
     {
-      // cached for 30 sec
-      staleTime: 30 * SECOND
+      staleTime: FETCH_QUERY_OPTIONS.apiCacheTime
     }
   );
 
-export const getAccountsInfo = ({ accountsHash }: { accountsHash: string[] }) =>
+export const fetchAccountListInfo = ({
+  accountsHash
+}: {
+  accountsHash: string[];
+}) =>
   queryClient.fetchQuery(
-    ['getAccountsInfoRequest', accountsHash],
-    () => getAccountsInfoRequest(accountsHash),
+    ['accountListInfoRequest', accountsHash],
+    () => accountListInfoRequest(accountsHash),
     {
-      // cached for 30 sec
-      staleTime: 30 * SECOND
+      staleTime: FETCH_QUERY_OPTIONS.apiCacheTime
     }
   );
-export const getActiveAccountInfo = (
+export const dispatchActiveAccountInfo = (
   accountHash: string
 ): Promise<DataWithPayload<AccountInfo>> =>
-  browser.runtime.sendMessage(
-    serviceMessage.fetchAccountInfoRequest({ accountHash })
-  );
+  dispatchToMainStore(serviceMessage.fetchAccountInfoRequest({ accountHash }));
 
-export const getAllAccountsInfo = (
+export const dispatchAccountListInfo = (
   accountsHash: string[]
 ): Promise<DataWithPayload<AccountInfo[]>> =>
-  browser.runtime.sendMessage(
-    serviceMessage.fetchAccountsInfoRequest({ accountsHash })
+  dispatchToMainStore(
+    serviceMessage.fetchAccountListInfoRequest({ accountsHash })
   );

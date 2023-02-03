@@ -32,7 +32,7 @@ import {
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import {
   ActiveAccountBalance,
-  getActiveAccountBalance
+  dispatchActiveAccountBalance
 } from '@libs/services/balance-service';
 import {
   formatCurrency,
@@ -43,7 +43,8 @@ import {
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   getAccountInfoLogo,
-  getActiveAccountInfo
+  dispatchActiveAccountInfo,
+  getAccountInfo
 } from '@libs/services/account-info';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
@@ -96,8 +97,8 @@ export function HomePageContent() {
     amount: '-',
     fiatAmount: '-'
   });
-  const [accountName, setAccountName] = useState('');
-  const [accountLogo, setAccountLogo] = useState('');
+  const [accountName, setAccountName] = useState<string | null>(null);
+  const [accountLogo, setAccountLogo] = useState<string | null>(null);
   const [loadingAccountInfo, setLoadingAccountInfo] = useState(true);
 
   const activeOrigin = useSelector(selectActiveOrigin);
@@ -124,7 +125,7 @@ export function HomePageContent() {
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
 
   useEffect(() => {
-    getActiveAccountBalance(activeAccount?.publicKey)
+    dispatchActiveAccountBalance(activeAccount?.publicKey)
       .then(({ payload: { balance, currencyRate } }) => {
         if (balance != null && currencyRate != null) {
           const amount = formatNumber(motesToCSPR(balance));
@@ -141,17 +142,19 @@ export function HomePageContent() {
         console.error('Balance request failed:', error);
       });
 
-    getActiveAccountInfo(getAccountHashFromPublicKey(activeAccount?.publicKey))
+    dispatchActiveAccountInfo(
+      getAccountHashFromPublicKey(activeAccount?.publicKey)
+    )
       .then(({ payload: accountInfo }) => {
-        const accountName = accountInfo?.info?.owner?.name;
-        const logo = getAccountInfoLogo(accountInfo);
+        const { accountName } = getAccountInfo(accountInfo);
+        const accountInfoLogo = getAccountInfoLogo(accountInfo);
 
         if (accountName) {
           setAccountName(accountName);
         }
 
-        if (logo) {
-          setAccountLogo(logo);
+        if (accountInfoLogo) {
+          setAccountLogo(accountInfoLogo);
         }
       })
       .finally(() => {
@@ -174,7 +177,7 @@ export function HomePageContent() {
           />
           <NameAndAddressContainer>
             <Typography type="bodySemiBold" loading={loadingAccountInfo}>
-              {accountName || activeAccount.name}
+              {accountName ?? activeAccount.name}
             </Typography>
             <Hash
               value={activeAccount.publicKey}

@@ -15,7 +15,7 @@ const AvatarContainer = styled(CenteredFlexColumn)`
 `;
 
 interface AvatarTypes {
-  src?: string;
+  src: string | null;
   publicKey: string;
   loadingAccountInfo: boolean;
 }

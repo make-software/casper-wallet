@@ -46,10 +46,13 @@ import {
   openOnboardingUi
 } from '@src/background/open-onboarding-flow';
 import {
-  getAccountBalance,
-  getCurrencyRate
+  fetchAccountBalance,
+  fetchCurrencyRate
 } from '@libs/services/balance-service';
-import { getAccountInfo, getAccountsInfo } from '@libs/services/account-info';
+import {
+  fetchAccountInfo,
+  fetchAccountListInfo
+} from '@libs/services/account-info';
 
 import { openWindow } from './open-window';
 import { deployPayloadReceived, deploysReseted } from './redux/deploys/actions';
@@ -342,8 +345,8 @@ browser.runtime.onMessage.addListener(
           case getType(serviceMessage.fetchBalanceRequest): {
             try {
               const [balance, rate] = await Promise.all([
-                getAccountBalance({ publicKey: action.payload.publicKey }),
-                getCurrencyRate()
+                fetchAccountBalance({ publicKey: action.payload.publicKey }),
+                fetchCurrencyRate()
               ]);
 
               return sendResponse(
@@ -361,7 +364,7 @@ browser.runtime.onMessage.addListener(
 
           case getType(serviceMessage.fetchAccountInfoRequest): {
             try {
-              const { data: accountInfo } = await getAccountInfo({
+              const { data: accountInfo } = await fetchAccountInfo({
                 accountHash: action.payload.accountHash
               });
 
@@ -375,14 +378,14 @@ browser.runtime.onMessage.addListener(
             return;
           }
 
-          case getType(serviceMessage.fetchAccountsInfoRequest): {
+          case getType(serviceMessage.fetchAccountListInfoRequest): {
             try {
-              const { data: accountsInfoList } = await getAccountsInfo({
+              const { data: accountsInfoList } = await fetchAccountListInfo({
                 accountsHash: action.payload.accountsHash
               });
 
               return sendResponse(
-                serviceMessage.fetchAccountsInfoResponse(accountsInfoList)
+                serviceMessage.fetchAccountListInfoResponse(accountsInfoList)
               );
             } catch (error) {
               console.error(error);
