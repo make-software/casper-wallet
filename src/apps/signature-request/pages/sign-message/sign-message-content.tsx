@@ -20,11 +20,6 @@ export function SignMessageContent({
 }: SignMessageContentProps) {
   const { t } = useTranslation();
 
-  const LabelDict = {
-    casperMessage: t('Casper Message:'),
-    signingKey: t('Signing Key:')
-  };
-
   return (
     <PageContainer>
       <ContentContainer>
@@ -34,14 +29,14 @@ export function SignMessageContent({
           </Typography>
         </ParagraphContainer>
         <ParagraphContainer gap="big">
-          <FormField label={LabelDict.casperMessage}>
+          <FormField label={t('Message:')}>
             <Typography type="body">
               <TextArea value={message} readOnly style={{ minHeight: 260 }} />
             </Typography>
           </FormField>
         </ParagraphContainer>
         <ParagraphContainer gap="small">
-          <FormField label={LabelDict.signingKey}>
+          <FormField label={t('Signing Key:')}>
             <Typography type="body">
               <Input
                 value={truncateKey(publicKeyHex, { size: 'max' })}
