@@ -37,12 +37,15 @@ async function handleSdkResponseOrEvent(message: SdkEvent | SdkMessage) {
     switch (message.type) {
       case getType(sdkMessage.signError):
       case getType(sdkMessage.signResponse):
+      case getType(sdkMessage.signMessageError):
+      case getType(sdkMessage.signMessageResponse):
         window.dispatchEvent(
           new CustomEvent(sdkMessageProxyEvents.SDKResponseAction, {
             detail: JSON.stringify(message)
           })
         );
         return;
+
       default:
         throw Error(
           'Content: handleOnMessage unknown sdk message: ' +

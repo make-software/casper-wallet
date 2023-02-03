@@ -57,7 +57,9 @@ export function SignMessagePage() {
   // signing account should exist in wallet
   if (signingAccount == null) {
     const error = Error('No signing account');
-    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
+    emitSdkEventToAllActiveTabs(
+      sdkMessage.signMessageError(error, { requestId })
+    );
     throw error;
   }
 
@@ -66,7 +68,9 @@ export function SignMessagePage() {
     const error = Error(
       'Account with signingPublicKeyHex is not connected to site'
     );
-    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
+    emitSdkEventToAllActiveTabs(
+      sdkMessage.signMessageError(error, { requestId })
+    );
     throw error;
   }
 
