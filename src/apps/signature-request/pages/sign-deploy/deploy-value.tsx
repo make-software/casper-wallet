@@ -3,19 +3,17 @@ import React from 'react';
 import { formatNumber, formatTimestamp } from '@libs/ui/utils/formatters';
 import { Hash, HashVariant, Typography } from '@src/libs/ui';
 
-import {
-  isKeyOfHashValue,
-  isKeyOfCurrencyValue,
-  isKeyOfTimestampValue
-} from './types';
 import { CLValue } from 'casper-js-sdk';
 import {
   isDeployArgValueHash,
   isDeployArgValueNumber,
+  isKeyOfHashValue,
+  isKeyOfCurrencyValue,
+  isKeyOfTimestampValue,
   parseDeployArgValue
-} from './deploy';
+} from './deploy-utils';
 
-export function SignatureRequestValue({
+export function DeployValue({
   id,
   value
 }: {

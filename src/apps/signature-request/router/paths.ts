@@ -1,4 +1,5 @@
 export enum RouterPath {
   Any = '*',
-  SignatureRequest = '/'
+  SignDeploy = '/sign-deploy',
+  SignMessage = '/sign-message'
 }

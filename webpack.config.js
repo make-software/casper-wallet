@@ -10,6 +10,8 @@ const webpack = require('webpack'),
 
 const { isChrome, ExtensionBuildPath, ManifestPath } = require('./constants');
 
+const isDev = env.NODE_ENV === 'development';
+
 const ASSET_PATH = process.env.ASSET_PATH || '/';
 const buildDir = isChrome
   ? ExtensionBuildPath.Chrome
@@ -159,7 +161,16 @@ const options = {
                 name: pkg.name,
                 version: pkg.version,
                 author: pkg.author,
-                description: pkg.description
+                description: pkg.description,
+                ...(isDev
+                  ? isChrome
+                    ? {
+                        content_security_policy: {}
+                      }
+                    : {
+                        content_security_policy: ''
+                      }
+                  : {})
               })
             );
           }
@@ -286,7 +297,7 @@ const options = {
   }
 };
 
-if (env.NODE_ENV === 'development') {
+if (isDev) {
   options.devtool = 'cheap-module-source-map';
 } else {
   options.optimization = {

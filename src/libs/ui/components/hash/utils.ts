@@ -1,6 +1,20 @@
-export function truncateKey(key: string): string {
-  const beginOfKey = key.slice(0, 5);
-  const endOfKey = key.slice(key.length - 5);
+export function truncateKey(
+  key: string,
+  options: { size?: 'small' | 'max' } = {}
+): string {
+  let beginOfKey, endOfKey;
+  switch (options.size) {
+    case 'small':
+    default:
+      beginOfKey = key.slice(0, 5);
+      endOfKey = key.slice(key.length - 5);
+      break;
+
+    case 'max':
+      beginOfKey = key.slice(0, 14);
+      endOfKey = key.slice(key.length - 14);
+      break;
+  }
 
   return `${beginOfKey}...${endOfKey}`;
 }

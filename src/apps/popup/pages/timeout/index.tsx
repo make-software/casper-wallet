@@ -5,7 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Typography, Checkbox, List } from '@libs/ui';
 import {
   ContentContainer,
-  TextContainer,
+  ParagraphContainer,
   ListItemClickableContainer
 } from '@src/libs/layout/containers';
 
@@ -41,19 +41,19 @@ export function TimeoutPageContent() {
 
   return (
     <ContentContainer>
-      <TextContainer gap="big">
+      <ParagraphContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Timeout</Trans>
         </Typography>
-      </TextContainer>
-      <TextContainer gap="medium">
+      </ParagraphContainer>
+      <ParagraphContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             Your wallet will automatically lock after some period of inactivity.
             Select the desired duration.
           </Trans>
         </Typography>
-      </TextContainer>
+      </ParagraphContainer>
       <List
         rows={timeoutsMenuItems}
         marginLeftForItemSeparatorLine={16}

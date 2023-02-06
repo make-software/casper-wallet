@@ -1,10 +1,12 @@
+import { RouterPath } from '@src/apps/signature-request/router';
 import browser from 'webextension-polyfill';
 
 export enum WindowApp {
   ImportAccount = 'ImportAccount',
   ConnectToApp = 'ConnectToApp',
   SwitchAccount = 'SwitchAccount',
-  SignatureRequest = 'SignatureRequest'
+  SignatureRequestDeploy = 'SignatureRequestDeploy',
+  SignatureRequestMessage = 'SignatureRequestMessage'
 }
 
 export type WindowSearchParams = Record<string, string>;
@@ -18,18 +20,20 @@ function getUrlByWindowApp(
 
   switch (windowApp) {
     case WindowApp.ImportAccount:
-      return 'import-account-with-file.html' + searchParamsWithPrefix;
+      return `import-account-with-file.html${searchParamsWithPrefix}`;
     case WindowApp.ConnectToApp:
-      return `connect-to-app.html` + searchParamsWithPrefix;
+      return `connect-to-app.html${searchParamsWithPrefix}`;
     case WindowApp.SwitchAccount:
       return (
         `connect-to-app.html?switchAccount=true` +
         (urlSearchParams && '&' + urlSearchParams)
       );
-    case WindowApp.SignatureRequest:
-      return 'signature-request.html' + searchParamsWithPrefix;
+    case WindowApp.SignatureRequestDeploy:
+      return `signature-request.html${searchParamsWithPrefix}#${RouterPath.SignDeploy}`;
+    case WindowApp.SignatureRequestMessage:
+      return `signature-request.html${searchParamsWithPrefix}#${RouterPath.SignMessage}`;
     default:
-      return 'popup.html?#/';
+      return 'popup.html';
   }
 }
 

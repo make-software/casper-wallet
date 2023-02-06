@@ -5,7 +5,7 @@ import {
   ContentContainer,
   IllustrationContainer,
   OnboardingIllustrationContainer,
-  TextContainer
+  ParagraphContainer
 } from '@src/libs/layout';
 import { SvgIcon, Typography } from '@src/libs/ui';
 
@@ -38,15 +38,15 @@ export function ErrorPageContent({
           </IllustrationContainer>
         )}
 
-        <TextContainer gap="big">
+        <ParagraphContainer gap="big">
           <Typography type="header">{errorHeaderText}</Typography>
-        </TextContainer>
+        </ParagraphContainer>
 
-        <TextContainer gap="medium">
+        <ParagraphContainer gap="medium">
           <Typography type="body" color="contentSecondary">
             {errorContentText}
           </Typography>
-        </TextContainer>
+        </ParagraphContainer>
       </ContentContainer>
     </PageContainer>
   );

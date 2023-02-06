@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
-  TextContainer,
+  ParagraphContainer,
   IllustrationContainer
 } from '@src/libs/layout';
 import { Button, SvgIcon, Typography } from '@src/libs/ui';
@@ -19,19 +19,19 @@ export function ImportAccountWithFileSuccessContentPage() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/account-imported.svg" size={120} />
       </IllustrationContainer>
-      <TextContainer gap="big">
+      <ParagraphContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Your account was successfully imported</Trans>
         </Typography>
-      </TextContainer>
-      <TextContainer gap="medium">
+      </ParagraphContainer>
+      <ParagraphContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             Imported accounts are distinguished by an ‘IMPORTED’ badge in the
             account lists.
           </Trans>
         </Typography>
-      </TextContainer>
+      </ParagraphContainer>
       <FooterButtonsAbsoluteContainer>
         <Button onClick={() => closeCurrentWindow()}>
           <Trans t={t}>Done</Trans>
