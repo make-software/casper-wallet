@@ -51,7 +51,7 @@ export function SignMessagePage() {
   );
 
   const signingAccount = accounts.find(
-    a => a.publicKey === signingPublicKeyHex
+    account => account.publicKey === signingPublicKeyHex
   );
 
   // signing account should exist in wallet
