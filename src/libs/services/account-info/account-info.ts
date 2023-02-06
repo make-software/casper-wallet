@@ -52,12 +52,12 @@ export const fetchAccountListInfo = ({
       staleTime: FETCH_QUERY_OPTIONS.apiCacheTime
     }
   );
-export const dispatchActiveAccountInfo = (
+export const dispatchFetchAccountInfoRequest = (
   accountHash: string
 ): Promise<DataWithPayload<AccountInfo>> =>
   dispatchToMainStore(serviceMessage.fetchAccountInfoRequest({ accountHash }));
 
-export const dispatchAccountListInfo = (
+export const dispatchFetchAccountListInfo = (
   accountsHash: string[]
 ): Promise<DataWithPayload<AccountInfo[]>> =>
   dispatchToMainStore(

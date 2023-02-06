@@ -13,7 +13,12 @@ import { CLPublicKey, encodeBase16 } from 'casper-js-sdk';
 const getRawPublicKey = (publicKeyHex: string): CLPublicKey =>
   CLPublicKey.fromHex(publicKeyHex);
 
-export const getAccountHashFromPublicKey = (publicKey = ''): string =>
-  publicKey === ''
-    ? ''
-    : encodeBase16(getRawPublicKey(publicKey).toAccountHash());
+export const getAccountHashFromPublicKey = (
+  publicKey: string | undefined
+): string => {
+  if (!publicKey) {
+    throw Error('Missing public key');
+  }
+
+  return encodeBase16(getRawPublicKey(publicKey).toAccountHash());
+};

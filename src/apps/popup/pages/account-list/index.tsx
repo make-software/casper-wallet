@@ -20,7 +20,7 @@ import {
 } from '@libs/layout';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
-  dispatchAccountListInfo,
+  dispatchFetchAccountListInfo,
   getAccountInfo
 } from '@libs/services/account-info';
 
@@ -111,7 +111,7 @@ export function AccountListPage() {
 
     const accountsHash = accountListRows.map(account => account.accountHash);
 
-    dispatchAccountListInfo(accountsHash)
+    dispatchFetchAccountListInfo(accountsHash)
       .then(({ payload: accountInfoList }) => {
         let newAccountListRows = accountListRows;
 

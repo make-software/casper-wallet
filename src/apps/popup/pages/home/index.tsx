@@ -32,7 +32,7 @@ import {
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import {
   ActiveAccountBalance,
-  dispatchActiveAccountBalance
+  dispatchFetchActiveAccountBalance
 } from '@libs/services/balance-service';
 import {
   formatCurrency,
@@ -43,7 +43,7 @@ import {
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   getAccountInfoLogo,
-  dispatchActiveAccountInfo,
+  dispatchFetchAccountInfoRequest,
   getAccountInfo
 } from '@libs/services/account-info';
 
@@ -125,7 +125,7 @@ export function HomePageContent() {
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
 
   useEffect(() => {
-    dispatchActiveAccountBalance(activeAccount?.publicKey)
+    dispatchFetchActiveAccountBalance(activeAccount?.publicKey)
       .then(({ payload: { balance, currencyRate } }) => {
         if (balance != null && currencyRate != null) {
           const amount = formatNumber(motesToCSPR(balance));
@@ -142,7 +142,7 @@ export function HomePageContent() {
         console.error('Balance request failed:', error);
       });
 
-    dispatchActiveAccountInfo(
+    dispatchFetchAccountInfoRequest(
       getAccountHashFromPublicKey(activeAccount?.publicKey)
     )
       .then(({ payload: accountInfo }) => {

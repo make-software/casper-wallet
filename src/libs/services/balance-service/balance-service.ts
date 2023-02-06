@@ -39,7 +39,7 @@ export const accountBalanceRequest = (
     .catch(handleError);
 };
 
-export const dispatchActiveAccountBalance = (
+export const dispatchFetchActiveAccountBalance = (
   publicKey = ''
 ): Promise<DataWithPayload<FetchBalanceResponse>> =>
   dispatchToMainStore(serviceMessage.fetchBalanceRequest({ publicKey }));
