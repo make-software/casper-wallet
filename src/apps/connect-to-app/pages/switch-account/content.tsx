@@ -15,7 +15,7 @@ import {
 import {
   PageContainer,
   ContentContainer,
-  TextContainer,
+  ParagraphContainer,
   LeftAlignedFlexColumn,
   VerticalSpaceContainer
 } from '@src/libs/layout';
@@ -77,19 +77,19 @@ export function SwitchAccountContent() {
   return (
     <PageContainer>
       <ContentContainer>
-        <TextContainer gap="big">
+        <ParagraphContainer gap="big">
           <SiteFaviconBadge origin={activeOrigin} />
           <VerticalSpaceContainer gap="medium">
             <Typography type="header">Switch to another account</Typography>
           </VerticalSpaceContainer>
-        </TextContainer>
+        </ParagraphContainer>
         {connectedAccountsListItems.length === 0 ? (
-          <TextContainer gap="big">
+          <ParagraphContainer gap="big">
             <Typography type="body">
               Only the active account is connected. To switch accounts you need
               to connect another account first from the wallet extension...
             </Typography>
-          </TextContainer>
+          </ParagraphContainer>
         ) : (
           <>
             <List

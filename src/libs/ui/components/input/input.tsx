@@ -13,7 +13,7 @@ const getThemeColorByError = (error?: boolean) => {
 };
 
 const InputContainer = styled('div')<InputProps>(
-  ({ theme, oneColoredIcons, disabled, error, monotype }) => ({
+  ({ theme, oneColoredIcons, disabled, error, monotype, readOnly }) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -35,8 +35,7 @@ const InputContainer = styled('div')<InputProps>(
         : theme.color[getThemeColorByError(error)]
     },
 
-    ...(disabled && {
-      opacity: 0.5,
+    ...((disabled || readOnly) && {
       color: theme.color.contentSecondary
     })
   })
@@ -95,6 +94,7 @@ export enum InputValidationType {
 export interface InputProps extends BaseProps {
   accept?: string;
   disabled?: boolean;
+  readOnly?: boolean;
   monotype?: boolean;
   placeholder?: string;
   value?: string | number;
@@ -146,6 +146,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
     oneColoredIcons,
     onFocus,
     dataTestId,
+    readOnly,
     ...restProps
   }: InputProps,
   ref
@@ -179,6 +180,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
     >
       <InputContainer
         disabled={disabled}
+        readOnly={readOnly}
         monotype={monotype}
         error={error}
         height={height}
@@ -192,6 +194,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
           ref={ref}
           onFocus={handleFocus}
           data-testid={dataTestId}
+          readOnly={readOnly}
         />
 
         {suffixIcon && <SuffixContainer>{suffixIcon}</SuffixContainer>}

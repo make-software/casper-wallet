@@ -63,7 +63,21 @@ export const sdkMessage = {
     { cancelled: true } | { cancelled: false; signatureHex: string },
     Meta
   >(),
-  signError: createAction('CasperWalletProvider:Sign:Error')<Error, Meta>()
+  signError: createAction('CasperWalletProvider:Sign:Error')<Error, Meta>(),
+  signMessageRequest: createAction('CasperWalletProvider:SignMessage')<
+    {
+      message: string;
+      signingPublicKeyHex: string;
+    },
+    Meta
+  >(),
+  signMessageResponse: createAction(
+    'CasperWalletProvider:SignMessage:Response'
+  )<{ cancelled: true } | { cancelled: false; signatureHex: string }, Meta>(),
+  signMessageError: createAction('CasperWalletProvider:SignMessage:Error')<
+    Error,
+    Meta
+  >()
 };
 
 export type SdkMessage = ActionType<typeof sdkMessage>;

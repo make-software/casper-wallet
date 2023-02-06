@@ -158,20 +158,51 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
           }
         )
       ).then(res => {
-        if (res.cancelled === false) {
-          const signature = convertHexToBytes(res.signatureHex);
-          return {
-            cancelled: res.cancelled,
-            signatureHex: res.signatureHex,
-            signature
-          };
+        // response empty because it was canceled
+        if (res.cancelled) {
+          return res;
         }
 
-        return res;
+        const signature = convertHexToBytes(res.signatureHex);
+        return {
+          cancelled: res.cancelled,
+          signatureHex: res.signatureHex,
+          signature
+        };
       });
     },
-    signMessage(message: string, signingPublicKey: string): Promise<string> {
-      throw Error('Not implementeed');
+    signMessage: (
+      message: string,
+      signingPublicKeyHex: string
+    ): Promise<
+      | { cancelled: true }
+      | { cancelled: false; signatureHex: string; signature: Uint8Array }
+    > => {
+      return fetchFromBackground<
+        ReturnType<typeof sdkMessage['signMessageResponse']>['payload']
+      >(
+        sdkMessage.signMessageRequest(
+          {
+            message,
+            signingPublicKeyHex
+          },
+          {
+            requestId: generateRequestId()
+          }
+        )
+      ).then(res => {
+        // response empty because it was canceled
+        if (res.cancelled) {
+          return res;
+        }
+
+        const signature = convertHexToBytes(res.signatureHex);
+        return {
+          cancelled: res.cancelled,
+          signatureHex: res.signatureHex,
+          signature
+        };
+      });
     }
   };
 };

@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import {
   ContentContainer,
-  TextContainer,
+  ParagraphContainer,
   IllustrationContainer
 } from '@src/libs/layout';
 import { SvgIcon, Tag, Typography } from '@libs/ui';
@@ -16,24 +16,24 @@ export function ImportAccountWithFileContentPage() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/secret-key.svg" size={120} />
       </IllustrationContainer>
-      <TextContainer gap="big">
+      <ParagraphContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Import account from secret key file</Trans>
         </Typography>
-      </TextContainer>
-      <TextContainer gap="medium">
+      </ParagraphContainer>
+      <ParagraphContainer gap="medium">
         <Tag>
           <Trans t={t}>Imported</Trans>
         </Tag>
-      </TextContainer>
-      <TextContainer gap="medium">
+      </ParagraphContainer>
+      <ParagraphContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             Please note, accounts imported with a file cannot be recovered using
             your Casper Wallet secret recovery phrase.
           </Trans>
         </Typography>
-      </TextContainer>
+      </ParagraphContainer>
     </ContentContainer>
   );
 }

@@ -18,7 +18,12 @@ import {
   encodeBase16
 } from 'casper-js-sdk';
 
-import { ArgDict, CasperDeploy, DeployType } from './types';
+import {
+  ArgDict,
+  CasperDeploy,
+  DeployType,
+  SignatureRequestKeys
+} from './deploy-types';
 
 export function getDeployType(deploy: CasperDeploy): DeployType {
   if (deploy.isTransfer()) {
@@ -256,3 +261,32 @@ export function parseDeployArgValue(value: CLValue): string | string[] {
       return value.value().toString();
   }
 }
+
+export const isKeyOfHashValue = (key: string) => {
+  const keysOfHashValues: SignatureRequestKeys[] = [
+    'signingKey',
+    'account',
+    'deployHash',
+    'delegator',
+    'validator',
+    'new_validator',
+    'recipient',
+    'recipientKey',
+    'recipientHash'
+  ];
+  return keysOfHashValues.includes(key as SignatureRequestKeys);
+};
+
+export const isKeyOfCurrencyValue = (key: string) => {
+  const keysOfPriceValues: SignatureRequestKeys[] = [
+    'amount',
+    'transactionFee'
+  ];
+
+  return keysOfPriceValues.includes(key as SignatureRequestKeys);
+};
+
+export const isKeyOfTimestampValue = (key: string) => {
+  const keysOfTimestampValues: SignatureRequestKeys[] = ['timestamp'];
+  return keysOfTimestampValues.includes(key as SignatureRequestKeys);
+};
