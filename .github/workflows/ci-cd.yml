@@ -1,4 +1,4 @@
-name: CI Check
+name: CI-CD
 
 on:
   push:
@@ -22,8 +22,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Install & Check
+    - name: Install
+      run: npm install
+
+    - name: build & Check
       run: |
-        npm install
         npm run build:all
-        ls -la 
+        ls -la
