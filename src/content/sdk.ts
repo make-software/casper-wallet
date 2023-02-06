@@ -158,16 +158,17 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
           }
         )
       ).then(res => {
-        if (res.cancelled === false) {
-          const signature = convertHexToBytes(res.signatureHex);
-          return {
-            cancelled: res.cancelled,
-            signatureHex: res.signatureHex,
-            signature
-          };
+        // response empty because it was canceled
+        if (res.cancelled) {
+          return res;
         }
 
-        return res;
+        const signature = convertHexToBytes(res.signatureHex);
+        return {
+          cancelled: res.cancelled,
+          signatureHex: res.signatureHex,
+          signature
+        };
       });
     },
     signMessage: (
@@ -190,16 +191,17 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
           }
         )
       ).then(res => {
-        if (res.cancelled === false) {
-          const signature = convertHexToBytes(res.signatureHex);
-          return {
-            cancelled: res.cancelled,
-            signatureHex: res.signatureHex,
-            signature
-          };
+        // response empty because it was canceled
+        if (res.cancelled) {
+          return res;
         }
 
-        return res;
+        const signature = convertHexToBytes(res.signatureHex);
+        return {
+          cancelled: res.cancelled,
+          signatureHex: res.signatureHex,
+          signature
+        };
       });
     }
   };
