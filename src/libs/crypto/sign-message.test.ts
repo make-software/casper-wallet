@@ -14,23 +14,32 @@ describe('sign-message', () => {
   const message = 'Correct';
   const wrongMessage = 'asdfsad';
 
-  it('should get correct signature for Ed25519 keyPair', () => {
-    const keyPair = Keys.Ed25519.new();
-    const signature = getMessageSignature(message, keyPair);
+  let keyPair: Keys.Ed25519, signature: Uint8Array;
+
+  beforeEach(() => {
+    keyPair = Keys.Ed25519.new();
+    signature = getMessageSignature(message, keyPair);
+  });
+
+  it('should pass verification of message for Ed25519 keyPair', () => {
     expect(
       keyPair.verify(signature, createMessageBytesWithHeaders(message))
     ).toBeTruthy();
+  });
+
+  it('should fail verification of wrong message for Ed25519 keyPair', () => {
     expect(
       keyPair.verify(signature, createMessageBytesWithHeaders(wrongMessage))
     ).toBeFalsy();
   });
 
-  it('should get correct signature for Secp256K1 keyPair', () => {
-    const keyPair = Keys.Secp256K1.new();
-    const signature = getMessageSignature(message, keyPair);
+  it('should pass verification of message for Secp256K1 keyPair', () => {
     expect(
       keyPair.verify(signature, createMessageBytesWithHeaders(message))
     ).toBeTruthy();
+  });
+
+  it('should fail verification of wrong message for Secp256K1 keyPair', () => {
     expect(
       keyPair.verify(signature, createMessageBytesWithHeaders(wrongMessage))
     ).toBeFalsy();
