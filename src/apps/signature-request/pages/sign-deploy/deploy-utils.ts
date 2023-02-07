@@ -25,6 +25,11 @@ import {
   SignatureRequestKeys
 } from './deploy-types';
 
+interface ParseDeployArgValue {
+  parsedValue: string;
+  type?: 'json';
+}
+
 export function getDeployType(deploy: CasperDeploy): DeployType {
   if (deploy.isTransfer()) {
     return DeployType.TransferCall;
@@ -66,12 +71,14 @@ export function getDeployArgs(deploy: CasperDeploy): ArgDict {
   return deployArgs;
 }
 
-function unwrapNestedLists(value: CLValue): string {
+function unwrapNestedLists(value: CLValue) {
   const parsedValue = parseDeployArgValue(value);
   if (Array.isArray(parsedValue)) {
     const parsedType = (value as CLList<CLValue>).vectorType;
-    return `<${parsedType}>[...]`;
+
+    return { parsedValue: `<${parsedType}>[...]` };
   }
+
   return parsedValue;
 }
 
@@ -182,12 +189,14 @@ export function isDeployArgValueNumber(value: CLValue): boolean {
   }
 }
 
-export function parseDeployArgValue(value: CLValue): string | string[] {
+export function parseDeployArgValue(
+  value: CLValue
+): ParseDeployArgValue | ParseDeployArgValue[] {
   const tag = value.clType().tag;
 
   switch (tag) {
     case CLTypeTag.Unit:
-      return String('CLValue Unit');
+      return { parsedValue: String('CLValue Unit') };
 
     case CLTypeTag.Key:
       const key = value as CLKey;
@@ -206,7 +215,7 @@ export function parseDeployArgValue(value: CLValue): string | string[] {
       throw new Error('Failed to parse key argument');
 
     case CLTypeTag.URef:
-      return (value as CLURef).toFormattedStr();
+      return { parsedValue: (value as CLURef).toFormattedStr() };
 
     case CLTypeTag.Option:
       const option = value as CLOption<CLValue>;
@@ -218,7 +227,7 @@ export function parseDeployArgValue(value: CLValue): string | string[] {
       // This will be the inner CLType of the CLOption e.g. '(bool)'
       const optionCLType = option.clType().toString().split(' ')[1];
       // The format ends up looking like `None (bool)`
-      return `${optionValue} ${optionCLType}`;
+      return { parsedValue: `${optionValue} ${optionCLType}` };
 
     case CLTypeTag.List:
       const list = (value as CLList<CLValue>).value();
@@ -226,17 +235,21 @@ export function parseDeployArgValue(value: CLValue): string | string[] {
 
     case CLTypeTag.ByteArray:
       const bytes = (value as CLByteArray).value();
-      return encodeBase16(bytes);
+      return { parsedValue: encodeBase16(bytes) };
 
     case CLTypeTag.Result:
       const result = value as CLResult<CLType, CLType>;
       const status = result.isOk() ? 'OK:' : 'ERR:';
       const parsed = parseDeployArgValue(result.value().val);
-      return `${status} ${parsed}`;
+      return { parsedValue: `${status} ${parsed}` };
 
     case CLTypeTag.Map:
       const map = value as CLMap<CLValue, CLValue>;
-      return map.value().toString();
+
+      return {
+        parsedValue: JSON.stringify(map.value(), null, 4),
+        type: 'json'
+      };
 
     case CLTypeTag.Tuple1:
       const tupleOne = value as CLTuple1;
@@ -251,14 +264,14 @@ export function parseDeployArgValue(value: CLValue): string | string[] {
       return tupleThree.value().map(member => unwrapNestedLists(member));
 
     case CLTypeTag.PublicKey:
-      return (value as CLPublicKey).toHex();
+      return { parsedValue: (value as CLPublicKey).toHex() };
 
     default:
       // Special handling as there is no CLTypeTag for CLAccountHash
       if (value instanceof CLAccountHash) {
-        return encodeBase16(value.value());
+        return { parsedValue: encodeBase16(value.value()) };
       }
-      return value.value().toString();
+      return { parsedValue: value.value().toString() };
   }
 }
 
@@ -289,4 +302,31 @@ export const isKeyOfCurrencyValue = (key: string) => {
 export const isKeyOfTimestampValue = (key: string) => {
   const keysOfTimestampValues: SignatureRequestKeys[] = ['timestamp'];
   return keysOfTimestampValues.includes(key as SignatureRequestKeys);
+};
+
+export const getDeployParsedValue = (
+  value: CLValue
+): { stringValue: string; isJsonType: boolean } => {
+  const parsedValue = parseDeployArgValue(value);
+  let isJsonType = false;
+
+  const stringValue = Array.isArray(parsedValue)
+    ? parsedValue.reduce((prev, cur, currentIndex) => {
+        if (cur.type === 'json') {
+          isJsonType = true;
+        }
+
+        if (currentIndex !== 0) {
+          prev += `, ${cur.parsedValue}`;
+
+          return prev;
+        } else {
+          prev += `${cur.parsedValue}`;
+
+          return prev;
+        }
+      }, '')
+    : parsedValue.parsedValue;
+
+  return { stringValue, isJsonType };
 };

@@ -13,11 +13,11 @@ import { Accordion, List, SvgIcon, Typography } from '@libs/ui';
 import { DeployValue } from './deploy-value';
 import {
   CasperDeploy,
-  SignatureRequestArguments,
   SignatureRequestFields,
   SignatureRequestKeys
 } from './deploy-types';
 import { deriveDeployInfoFromDeployRaw } from './derive-deploy-info-from-deploy-raw';
+import { getDeployParsedValue } from './deploy-utils';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
   margin: 16px;
@@ -35,6 +35,11 @@ const AccordionHeaderContainer = styled(CentredFlexRowSpaceBetweenContainer)`
 
 const AccordionItem = styled(CentredFlexRowSpaceBetweenContainer)`
   margin: 10px 16px;
+`;
+
+const JsonBlock = styled.textarea`
+  width: 100%;
+  resize: none;
 `;
 
 export interface SignDeployContentProps {
@@ -64,7 +69,8 @@ export function SignDeployContent({ deploy }: SignDeployContentProps) {
     chainName: t('Chain name'),
     recipientKey: t('Recipient (Key)'),
     recipientHash: t('Recipient (Hash)'),
-    entryPoint: t('Entry point')
+    entryPoint: t('Entry point'),
+    token_metas: t('Token metas')
   };
 
   const deployInfo = deriveDeployInfoFromDeployRaw(deploy);
@@ -83,7 +89,7 @@ export function SignDeployContent({ deploy }: SignDeployContentProps) {
     deployDetailRecords.push(['entryPoint', deployInfo.entryPoint]);
   }
 
-  const deployArguments: SignatureRequestArguments = {
+  const deployArguments = {
     ...deployInfo.deployArgs
   };
 
@@ -115,6 +121,29 @@ export function SignDeployContent({ deploy }: SignDeployContentProps) {
                 Object.entries(deployArguments).map(([key, value]) => {
                   const label =
                     LABEL_DICT[key as keyof typeof signatureRequest] || key;
+
+                  if (typeof value !== 'string') {
+                    const { stringValue, isJsonType } =
+                      getDeployParsedValue(value);
+
+                    if (isJsonType) {
+                      return (
+                        <>
+                          <AccordionItem>
+                            <Typography type="body" color="contentSecondary">
+                              {label}
+                            </Typography>
+                          </AccordionItem>
+                          <AccordionItem>
+                            <JsonBlock disabled rows={10}>
+                              {stringValue}
+                            </JsonBlock>
+                          </AccordionItem>
+                        </>
+                      );
+                    }
+                  }
+
                   return (
                     <AccordionItem key={key}>
                       <Typography type="body" color="contentSecondary">

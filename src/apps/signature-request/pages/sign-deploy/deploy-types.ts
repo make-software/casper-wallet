@@ -29,6 +29,7 @@ export type SignatureRequestArguments = {
   transferId?: string;
   recipientKey?: string;
   recipientHash?: string;
+  token_metas?: string;
 };
 
 export type SignatureRequestKeys =
