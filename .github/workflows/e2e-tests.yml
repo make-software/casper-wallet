@@ -16,8 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-#        TODO: add firefox after fixing CI error
-        browser: [ 'chrome' ]
+        browser: [ 'chrome', 'firefox' ]
         node-version: [ 16.x ]
 
     services:
