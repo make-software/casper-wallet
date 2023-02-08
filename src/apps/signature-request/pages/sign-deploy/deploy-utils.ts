@@ -22,13 +22,10 @@ import {
   ArgDict,
   CasperDeploy,
   DeployType,
-  SignatureRequestKeys
+  ParsedValueType,
+  SignatureRequestKeys,
+  ParsedDeployArgValue
 } from './deploy-types';
-
-interface ParsedDeployArgValue {
-  parsedValue: string;
-  type?: 'json';
-}
 
 export function getDeployType(deploy: CasperDeploy): DeployType {
   if (deploy.isTransfer()) {
@@ -248,7 +245,7 @@ export function parseDeployArgValue(
 
       return {
         parsedValue: JSON.stringify(map.value(), null, 4),
-        type: 'json'
+        type: ParsedValueType.json
       };
 
     case CLTypeTag.Tuple1:
@@ -306,12 +303,12 @@ export const isKeyOfTimestampValue = (key: string) => {
 
 export const getDeployParsedValue = (value: CLValue): ParsedDeployArgValue => {
   const parsedValue = parseDeployArgValue(value);
-  let type: 'json' | undefined;
+  let type: ParsedValueType.json | undefined;
 
   const stringValue = Array.isArray(parsedValue)
     ? parsedValue
         .reduce((acc: string[], cur) => {
-          if (cur.type === 'json') {
+          if (cur.type === ParsedValueType.json) {
             type = cur.type;
           }
           acc.push(cur.parsedValue);

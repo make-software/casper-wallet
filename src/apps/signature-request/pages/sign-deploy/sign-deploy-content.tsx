@@ -14,7 +14,8 @@ import { DeployValue } from './deploy-value';
 import {
   CasperDeploy,
   SignatureRequestFields,
-  SignatureRequestKeys
+  SignatureRequestKeys,
+  ParsedValueType
 } from './deploy-types';
 import { deriveDeployInfoFromDeployRaw } from './derive-deploy-info-from-deploy-raw';
 import { getDeployParsedValue } from './deploy-utils';
@@ -125,7 +126,7 @@ export function SignDeployContent({ deploy }: SignDeployContentProps) {
                   if (typeof value !== 'string') {
                     const { parsedValue, type } = getDeployParsedValue(value);
 
-                    if (type === 'json') {
+                    if (type === ParsedValueType.json) {
                       return (
                         <>
                           <AccordionItem>

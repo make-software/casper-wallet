@@ -37,3 +37,12 @@ export type SignatureRequestKeys =
   | keyof SignatureRequestArguments;
 
 export type CasperDeploy = Deploy;
+
+export enum ParsedValueType {
+  json = 'json'
+}
+
+export interface ParsedDeployArgValue {
+  parsedValue: string;
+  type?: ParsedValueType;
+}
