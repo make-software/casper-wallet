@@ -2,8 +2,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
-import Identicon from 'react-identicons';
-import styled, { css, useTheme } from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import {
   CenteredFlexColumn,
@@ -12,10 +11,18 @@ import {
 } from '@src/libs/layout/containers';
 import { LinkType, HeaderSubmenuBarNavLink } from '@libs/layout';
 
-import { Button, Hash, HashVariant, PageTile, Typography } from '@libs/ui';
+import {
+  Button,
+  Hash,
+  HashVariant,
+  PageTile,
+  Typography,
+  Avatar
+} from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
+import { selectActiveOrigin } from '@src/background/redux/session/selectors';
 import {
   selectIsActiveAccountConnectedWithOrigin,
   selectConnectedAccountsWithOrigin,
@@ -25,7 +32,7 @@ import {
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import {
   ActiveAccountBalance,
-  getActiveAccountBalance
+  dispatchFetchActiveAccountBalance
 } from '@libs/services/balance-service';
 import {
   formatCurrency,
@@ -33,9 +40,14 @@ import {
   motesToCSPR,
   motesToCurrency
 } from '@libs/ui/utils/formatters';
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import {
+  getAccountInfoLogo,
+  dispatchFetchAccountInfoRequest,
+  getAccountInfo
+} from '@libs/services/account-info';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
-import { selectActiveOrigin } from '@src/background/redux/session/selectors';
 
 export const HomePageContentContainer = styled(ContentContainer)`
   padding-bottom: ${({ theme }) => theme.padding[1.2]};
@@ -48,9 +60,6 @@ const fullWidthAndMarginTop = css`
   width: 100%;
 `;
 
-const AvatarContainer = styled(CenteredFlexColumn)`
-  ${fullWidthAndMarginTop};
-`;
 const NameAndAddressContainer = styled(CenteredFlexColumn)`
   ${fullWidthAndMarginTop};
 `;
@@ -83,12 +92,14 @@ const ButtonsContainer = styled.div`
 export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
-  const theme = useTheme();
 
   const [balance, setBalance] = useState<ActiveAccountBalance>({
     amount: '-',
     fiatAmount: '-'
   });
+  const [accountName, setAccountName] = useState<string | null>(null);
+  const [accountLogo, setAccountLogo] = useState<string | null>(null);
+  const [loadingAccountInfo, setLoadingAccountInfo] = useState(true);
 
   const activeOrigin = useSelector(selectActiveOrigin);
   const { disconnectAccountWithEvent: disconnectAccount } = useAccountManager();
@@ -114,7 +125,7 @@ export function HomePageContent() {
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
 
   useEffect(() => {
-    getActiveAccountBalance(activeAccount?.publicKey)
+    dispatchFetchActiveAccountBalance(activeAccount?.publicKey)
       .then(({ payload: { balance, currencyRate } }) => {
         if (balance != null && currencyRate != null) {
           const amount = formatNumber(motesToCSPR(balance));
@@ -130,6 +141,25 @@ export function HomePageContent() {
       .catch(error => {
         console.error('Balance request failed:', error);
       });
+
+    dispatchFetchAccountInfoRequest(
+      getAccountHashFromPublicKey(activeAccount?.publicKey)
+    )
+      .then(({ payload: accountInfo }) => {
+        const { accountName } = getAccountInfo(accountInfo);
+        const accountInfoLogo = getAccountInfoLogo(accountInfo);
+
+        if (accountName) {
+          setAccountName(accountName);
+        }
+
+        if (accountInfoLogo) {
+          setAccountLogo(accountInfoLogo);
+        }
+      })
+      .finally(() => {
+        setLoadingAccountInfo(false);
+      });
   }, [activeAccount?.publicKey]);
 
   return (
@@ -140,15 +170,15 @@ export function HomePageContent() {
             isConnected={isActiveAccountConnected}
             displayContext="home"
           />
-          <AvatarContainer>
-            <Identicon
-              string={activeAccount.publicKey.toLowerCase()}
-              size={120}
-              bg={theme.color.backgroundPrimary}
-            />
-          </AvatarContainer>
+          <Avatar
+            publicKey={activeAccount.publicKey}
+            src={accountLogo}
+            loadingAccountInfo={loadingAccountInfo}
+          />
           <NameAndAddressContainer>
-            <Typography type="bodySemiBold">{activeAccount.name}</Typography>
+            <Typography type="bodySemiBold" loading={loadingAccountInfo}>
+              {accountName ?? activeAccount.name}
+            </Typography>
             <Hash
               value={activeAccount.publicKey}
               variant={HashVariant.CaptionHash}

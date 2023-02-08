@@ -10,6 +10,7 @@
     "prettier",
     "react-hooks"
   ],
+  "parser": "@typescript-eslint/parser",
   "rules": {
     "semi": 1,
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
