@@ -113,19 +113,17 @@ export function AccountListPage() {
 
     dispatchFetchAccountListInfo(accountsHash)
       .then(({ payload: accountInfoList }) => {
-        let newAccountListRows = accountListRows;
+        const newAccountListRows = [...accountListRows];
 
         accountInfoList.forEach(accountInfo => {
           const { accountName, accountHash } = getAccountInfo(accountInfo);
 
-          newAccountListRows = accountListRows.map(account => {
+          newAccountListRows.forEach(account => {
             if (account.accountHash === accountHash) {
               if (accountName != null) {
                 account.name = accountName;
               }
             }
-
-            return account;
           });
         });
 
