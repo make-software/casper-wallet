@@ -2,8 +2,9 @@ const { Browser } = require('selenium-webdriver');
 const { NODE_ENV, BROWSER: browserEnvVar } = require('./utils/env');
 
 const extensionName = 'Casper Wallet';
-const buildRootDir =
-  NODE_ENV === 'production' || NODE_ENV === 'test' ? 'build' : 'output';
+const buildRootDir = ['test', 'production'].includes(NODE_ENV)
+  ? 'build'
+  : 'output';
 
 const ExtensionBuildPath = {
   Chrome: `${buildRootDir}/${Browser.CHROME}`,
