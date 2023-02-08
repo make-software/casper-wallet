@@ -226,10 +226,25 @@ browser.runtime.onMessage.addListener(
               })
             );
             openWindow({
-              windowApp: WindowApp.SignatureRequest,
+              windowApp: WindowApp.SignatureRequestDeploy,
               searchParams: {
                 requestId: action.meta.requestId,
                 signingPublicKeyHex
+              }
+            });
+
+            return sendResponse(undefined);
+          }
+
+          case getType(sdkMessage.signMessageRequest): {
+            const { signingPublicKeyHex, message } = action.payload;
+
+            openWindow({
+              windowApp: WindowApp.SignatureRequestMessage,
+              searchParams: {
+                requestId: action.meta.requestId,
+                signingPublicKeyHex,
+                message
               }
             });
 

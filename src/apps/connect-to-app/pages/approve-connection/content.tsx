@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import {
-  TextContainer,
+  ParagraphContainer,
   PageContainer,
   ContentContainer,
   BreakWordContainer,
@@ -44,14 +44,14 @@ export function ApproveConnectionContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <TextContainer gap="big">
+        <ParagraphContainer gap="big">
           <SiteFaviconBadge origin={origin} />
           <VerticalSpaceContainer gap="medium">
             <Typography type="header">
               <BreakWordContainer>{title}</BreakWordContainer>
             </Typography>
           </VerticalSpaceContainer>
-        </TextContainer>
+        </ParagraphContainer>
         <List
           headerLabel={t('allow this site to')}
           rows={listItems}

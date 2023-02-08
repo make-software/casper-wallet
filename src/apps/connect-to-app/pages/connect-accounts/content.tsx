@@ -15,7 +15,7 @@ import {
 import {
   PageContainer,
   ContentContainer,
-  TextContainer,
+  ParagraphContainer,
   ListItemClickableContainer,
   LeftAlignedFlexColumn,
   BreakWordContainer,
@@ -89,14 +89,14 @@ export function ConnectAccountContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <TextContainer gap="big">
+        <ParagraphContainer gap="big">
           <SiteFaviconBadge origin={origin} />
           <VerticalSpaceContainer gap="medium">
             <Typography type="header">
               <BreakWordContainer>{headerText}</BreakWordContainer>
             </Typography>
           </VerticalSpaceContainer>
-        </TextContainer>
+        </ParagraphContainer>
         <List
           headerLabel={t('select account(s)')}
           headerAction={headerAction}

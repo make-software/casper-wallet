@@ -1,10 +1,10 @@
-import { CasperDeploy } from './types';
+import { CasperDeploy } from './deploy-types';
 import {
   getDeployPayment,
   getDeployType,
   getDeployArgs,
   getEntryPoint
-} from './deploy';
+} from './deploy-utils';
 import { convertBytesToHex } from '@src/libs/crypto/utils';
 
 export function deriveDeployInfoFromDeployRaw(deploy: CasperDeploy) {

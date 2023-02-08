@@ -4,7 +4,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import {
   ContentContainer,
   IllustrationContainer,
-  TextContainer,
+  ParagraphContainer,
   FooterButtonsAbsoluteContainer
 } from '@src/libs/layout';
 import { Typography, SvgIcon, Button } from '@libs/ui';
@@ -20,19 +20,19 @@ export function NoConnectedAccountPageContent() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/no-connection.svg" size={120} />
       </IllustrationContainer>
-      <TextContainer gap="big">
+      <ParagraphContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Casper Wallet is not connected to this site yet</Trans>
         </Typography>
-      </TextContainer>
-      <TextContainer gap="medium">
+      </ParagraphContainer>
+      <ParagraphContainer gap="medium">
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             To connect to this site, click on the Connect/Sign In button on the
             site.
           </Trans>
         </Typography>
-      </TextContainer>
+      </ParagraphContainer>
 
       <FooterButtonsAbsoluteContainer>
         <Button onClick={() => navigate(RouterPath.Home)}>

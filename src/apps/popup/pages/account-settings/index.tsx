@@ -5,7 +5,10 @@ import { RootState } from 'typesafe-actions';
 
 import styled from 'styled-components';
 
-import { ContentContainer, TextContainer } from '@src/libs/layout/containers';
+import {
+  ContentContainer,
+  ParagraphContainer
+} from '@src/libs/layout/containers';
 import { SvgIcon, PageTile, Typography } from '@libs/ui';
 import {
   selectVaultAccountWithName,
@@ -29,9 +32,9 @@ export function AccountSettingsPageContent() {
   return (
     <ContentContainer>
       <PageTile>
-        <TextContainer gap="big">
+        <ParagraphContainer gap="big">
           <Typography type="header">{account.name}</Typography>
-        </TextContainer>
+        </ParagraphContainer>
       </PageTile>
     </ContentContainer>
   );

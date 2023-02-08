@@ -6,7 +6,7 @@ import { List, SvgIcon, Typography } from '@libs/ui';
 import {
   ContentContainer,
   IllustrationContainer,
-  TextContainer
+  ParagraphContainer
 } from '@src/libs/layout';
 
 import { selectVaultAccountsByOriginDict } from '@src/background/redux/vault/selectors';
@@ -37,30 +37,30 @@ export function ConnectedSitesPage() {
             size={120}
           />
         </IllustrationContainer>
-        <TextContainer gap="big">
+        <ParagraphContainer gap="big">
           <Typography type="header">
             <Trans t={t}>No connected sites yet</Trans>
           </Typography>
-        </TextContainer>
-        <TextContainer gap="medium">
+        </ParagraphContainer>
+        <ParagraphContainer gap="medium">
           <Typography type="body" color="contentSecondary">
             <Trans t={t}>
               When you connect an account to a site, the site and connected
               account will appear here.
             </Trans>
           </Typography>
-        </TextContainer>
+        </ParagraphContainer>
       </ContentContainer>
     );
   }
 
   return (
     <ContentContainer>
-      <TextContainer gap="big">
+      <ParagraphContainer gap="big">
         <Typography type="header">
           <Trans t={t}>Connected sites</Trans>
         </Typography>
-      </TextContainer>
+      </ParagraphContainer>
       {Object.entries(accountsByOrigin).map(([origin, accounts], index) => {
         const siteTitle = origin.split('://')[1];
         return (

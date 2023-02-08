@@ -82,7 +82,7 @@ export const ContentContainer = styled.div`
     ${({ theme }) => theme.padding[1.6]};
 `;
 
-export const TextContainer = styled(VerticalSpaceContainer)`
+export const ParagraphContainer = styled(VerticalSpaceContainer)`
   padding: 0 ${({ theme }) => theme.padding[1.6]} 0;
 `;
 
