@@ -18,7 +18,7 @@
     "dev:firefox": "npm run dev:build:firefox && NODE_ENV=development BABEL_ENV=development BROWSER=firefox PORT=3002 node utils/webserver.js",
     "start:firefox": "concurrently -k -n start,redux \"npm run dev:firefox\" \"npm run devtools:redux -- --port=8001\"",
     "start:safari": "npm run dev:build:manifest:v2 && ./convert-web-extension.sh && NODE_ENV=development BABEL_ENV=development BROWSER=safari PORT=3003 node utils/webserver.js",
-    "test:e2e:chrome": "npm run build:chrome && npm run pack-extension:dev:chrome && SELENIUM_BROWSER=chrome jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests && npm run remove-packed-extension:chrome",
+    "test:e2e:chrome": "npm run build:chrome && npm run pack-extension:chrome && SELENIUM_BROWSER=chrome jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests && npm run remove-packed-extension:chrome",
     "test:e2e:firefox": "npm run build:firefox && SELENIUM_BROWSER=firefox jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests",
     "test:e2e:chrome:headless": "npm run build:chrome && npm run pack-extension:chrome && SELENIUM_BROWSER=chrome SELENIUM_HEADLESS=true jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests && npm run remove-packed-extension:chrome",
     "test:e2e:firefox:headless": "npm run build:firefox && SELENIUM_BROWSER=firefox SELENIUM_HEADLESS=true jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests",
@@ -34,7 +34,6 @@
     "dependency:graph": "npx madge --ts-config=tsconfig.json --image=graph.svg src/background/index.ts",
     "dependency:circular": "npx madge --ts-config=tsconfig.json --circular src/background/index.ts",
     "dependency:orphans": "npx madge --ts-config=tsconfig.json --orphans src/**/*",
-    "pack-extension:dev:chrome": "crx3 --keyPath e2e/crx3.pem output/chrome",
     "pack-extension:chrome": "crx3 --keyPath e2e/crx3.pem build/chrome",
     "remove-packed-extension:chrome": "rm -rf chrome.crx"
   },
