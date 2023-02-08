@@ -8,6 +8,7 @@ import {
   PopupState,
   selectPopupState
 } from '@src/background/background-events';
+import { ServiceMessage } from '@background/service-message';
 
 import { ReduxAction } from './redux-action';
 import { RootState } from 'typesafe-actions';
@@ -98,7 +99,7 @@ export function createMainStoreReplica<T extends PopupState>(state: T) {
   return store;
 }
 
-export function dispatchToMainStore(action: ReduxAction) {
+export function dispatchToMainStore(action: ReduxAction | ServiceMessage) {
   return browser.runtime.sendMessage(action);
 }
 

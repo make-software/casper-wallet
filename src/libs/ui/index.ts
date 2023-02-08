@@ -22,6 +22,7 @@ export * from './components/password-visibility-icon/password-visibility-icon';
 export * from './components/copy-to-clipboard/copy-to-clipboard';
 export * from './components/secret-phrase-words-view/index';
 export * from './components/text-list/text-list';
+export * from './components/avatar/avatar';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

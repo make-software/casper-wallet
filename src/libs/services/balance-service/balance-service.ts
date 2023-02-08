@@ -1,21 +1,25 @@
-import browser from 'webextension-polyfill';
+import { serviceMessage } from '@src/background/service-message';
+import { dispatchToMainStore } from '@background/redux/utils';
+
+import { DataWithPayload } from '@libs/services/types';
+
+import { FETCH_QUERY_OPTIONS } from '@src/constants';
+
+import { handleError, toJson } from '../utils';
+import { queryClient } from '../query-client';
 
 import {
-  DataWithPayload,
   FetchBalanceResponse,
   GetAccountBalanceRequestResponse,
   GetCurrencyRateRequestResponse
 } from './types';
-import { CURRENCY_RATE_URL, getAccountBalanceUrl, SECOND } from './constants';
-import { handleError, toJson } from './utils';
-import { queryClient } from './query-client';
-import { serviceMessage } from '@src/background/service-message';
+import { CURRENCY_RATE_URL, getAccountBalanceUrl } from './constants';
 
-export const getCurrencyRateRequest =
+export const currencyRateRequest =
   (): Promise<GetCurrencyRateRequestResponse> =>
     fetch(CURRENCY_RATE_URL).then(toJson).catch(handleError);
 
-export const getAccountBalanceRequest = (
+export const accountBalanceRequest = (
   publicKey: string
 ): Promise<GetAccountBalanceRequestResponse> => {
   if (!publicKey) {
@@ -35,25 +39,21 @@ export const getAccountBalanceRequest = (
     .catch(handleError);
 };
 
-export const getActiveAccountBalance = (
+export const dispatchFetchActiveAccountBalance = (
   publicKey = ''
 ): Promise<DataWithPayload<FetchBalanceResponse>> =>
-  browser.runtime.sendMessage(
-    serviceMessage.fetchBalanceRequest({ publicKey })
-  );
+  dispatchToMainStore(serviceMessage.fetchBalanceRequest({ publicKey }));
 
-export const getAccountBalance = ({ publicKey }: { publicKey: string }) =>
+export const fetchAccountBalance = ({ publicKey }: { publicKey: string }) =>
   queryClient.fetchQuery(
     ['getAccountBalanceRequest', publicKey],
-    () => getAccountBalanceRequest(publicKey),
+    () => accountBalanceRequest(publicKey),
     {
-      // cached for 30 sec
-      staleTime: 30 * SECOND
+      staleTime: FETCH_QUERY_OPTIONS.apiCacheTime
     }
   );
 
-export const getCurrencyRate = () =>
-  queryClient.fetchQuery('getCurrencyRateRequest', getCurrencyRateRequest, {
-    // cached for 30 sec
-    staleTime: 30 * SECOND
+export const fetchCurrencyRate = () =>
+  queryClient.fetchQuery('getCurrencyRateRequest', currencyRateRequest, {
+    staleTime: FETCH_QUERY_OPTIONS.apiCacheTime
   });
