@@ -123,10 +123,9 @@ export function SignDeployContent({ deploy }: SignDeployContentProps) {
                     LABEL_DICT[key as keyof typeof signatureRequest] || key;
 
                   if (typeof value !== 'string') {
-                    const { stringValue, isJsonType } =
-                      getDeployParsedValue(value);
+                    const { parsedValue, type } = getDeployParsedValue(value);
 
-                    if (isJsonType) {
+                    if (type === 'json') {
                       return (
                         <>
                           <AccordionItem>
@@ -136,7 +135,7 @@ export function SignDeployContent({ deploy }: SignDeployContentProps) {
                           </AccordionItem>
                           <AccordionItem>
                             <JsonBlock disabled rows={10}>
-                              {stringValue}
+                              {parsedValue}
                             </JsonBlock>
                           </AccordionItem>
                         </>

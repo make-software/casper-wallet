@@ -25,7 +25,7 @@ import {
   SignatureRequestKeys
 } from './deploy-types';
 
-interface ParseDeployArgValue {
+interface ParsedDeployArgValue {
   parsedValue: string;
   type?: 'json';
 }
@@ -71,7 +71,7 @@ export function getDeployArgs(deploy: CasperDeploy): ArgDict {
   return deployArgs;
 }
 
-function unwrapNestedLists(value: CLValue) {
+function unwrapNestedLists(value: CLValue): ParsedDeployArgValue {
   const parsedValue = parseDeployArgValue(value);
   if (Array.isArray(parsedValue)) {
     const parsedType = (value as CLList<CLValue>).vectorType;
@@ -191,7 +191,7 @@ export function isDeployArgValueNumber(value: CLValue): boolean {
 
 export function parseDeployArgValue(
   value: CLValue
-): ParseDeployArgValue | ParseDeployArgValue[] {
+): ParsedDeployArgValue | ParsedDeployArgValue[] {
   const tag = value.clType().tag;
 
   switch (tag) {
@@ -304,29 +304,22 @@ export const isKeyOfTimestampValue = (key: string) => {
   return keysOfTimestampValues.includes(key as SignatureRequestKeys);
 };
 
-export const getDeployParsedValue = (
-  value: CLValue
-): { stringValue: string; isJsonType: boolean } => {
+export const getDeployParsedValue = (value: CLValue): ParsedDeployArgValue => {
   const parsedValue = parseDeployArgValue(value);
-  let isJsonType = false;
+  let type: 'json' | undefined;
 
   const stringValue = Array.isArray(parsedValue)
-    ? parsedValue.reduce((prev, cur, currentIndex) => {
-        if (cur.type === 'json') {
-          isJsonType = true;
-        }
+    ? parsedValue
+        .reduce((acc: string[], cur) => {
+          if (cur.type === 'json') {
+            type = cur.type;
+          }
+          acc.push(cur.parsedValue);
 
-        if (currentIndex !== 0) {
-          prev += `, ${cur.parsedValue}`;
-
-          return prev;
-        } else {
-          prev += `${cur.parsedValue}`;
-
-          return prev;
-        }
-      }, '')
+          return acc;
+        }, [])
+        .join(', ')
     : parsedValue.parsedValue;
 
-  return { stringValue, isJsonType };
+  return { parsedValue: stringValue, type };
 };
