@@ -18,6 +18,11 @@ import {
   PageContainer,
   FlexRow
 } from '@libs/layout';
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import {
+  dispatchFetchAccountListInfo,
+  getAccountInfo
+} from '@libs/services/account-info';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
@@ -100,12 +105,35 @@ export function AccountListPage() {
       connectedAccountNames
     ).map(account => ({
       ...account,
-      id: account.name
+      id: account.name,
+      accountHash: getAccountHashFromPublicKey(account.publicKey)
     }));
 
-    setAccountListRows(accountListRows);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const accountsHash = accountListRows.map(account => account.accountHash);
+
+    dispatchFetchAccountListInfo(accountsHash)
+      .then(({ payload: accountInfoList }) => {
+        const newAccountListRows = [...accountListRows];
+
+        accountInfoList.forEach(accountInfo => {
+          const { accountName, accountHash } = getAccountInfo(accountInfo);
+
+          newAccountListRows.forEach(account => {
+            if (account.accountHash === accountHash) {
+              if (accountName != null) {
+                account.name = accountName;
+              }
+            }
+          });
+        });
+
+        setAccountListRows(newAccountListRows);
+      })
+      .catch(error => {
+        console.error(error);
+        setAccountListRows(accountListRows);
+      });
+  }, [accounts, activeAccountName, connectedAccountNames]);
 
   return (
     <PageContainer>

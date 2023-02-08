@@ -19,7 +19,7 @@ export function ConfirmSecretPhraseSuccessPageContent() {
       key: 3,
       value: (
         <Trans>
-          Be careful of phishing! Casper Signer will{' '}
+          Be careful of phishing! Casper Wallet will{' '}
           <Underline>never</Underline> spontaneously ask for your secret phrase.
         </Trans>
       )
@@ -30,7 +30,7 @@ export function ConfirmSecretPhraseSuccessPageContent() {
         'If you need to back up your secret phrase again, you can find it in Settings.'
       )
     },
-    { key: 5, value: t('Casper Signer cannot recover your secret phrase.') }
+    { key: 5, value: t('Casper Wallet cannot recover your secret phrase.') }
   ];
 
   return (
