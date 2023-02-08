@@ -50,12 +50,12 @@ export function DeployValue({
     return <Typography type="body">{value}</Typography>;
   } else {
     // cl value args
-    const { stringValue } = getDeployParsedValue(value);
+    const { parsedValue } = getDeployParsedValue(value);
 
     if (isDeployArgValueHash(value)) {
       return (
         <Hash
-          value={stringValue}
+          value={parsedValue}
           variant={HashVariant.BodyHash}
           color="contentPrimary"
           truncated
@@ -66,13 +66,13 @@ export function DeployValue({
     if (isDeployArgValueNumber(value)) {
       return (
         <Hash
-          value={formatNumber(stringValue)}
+          value={formatNumber(parsedValue)}
           variant={HashVariant.BodyHash}
           color="contentPrimary"
         />
       );
     }
 
-    return <Typography type="body">{stringValue}</Typography>;
+    return <Typography type="body">{parsedValue}</Typography>;
   }
 }
