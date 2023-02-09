@@ -26,6 +26,5 @@ jobs:
       run: npm install
 
     - name: Build & Check
-      run: |
-        npm run build
-        ls -la
+      run: npm run build:all
+
