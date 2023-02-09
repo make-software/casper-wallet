@@ -1,7 +1,6 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
 
 import {
   SiteFaviconBadge,
@@ -30,37 +29,23 @@ import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-wit
 import { closeCurrentWindow } from '@src/background/close-current-window';
 import { ConnectionStatusBadge } from '@src/apps/popup/pages/home/components/connection-status-badge';
 
-const CentredFlexRow = styled.div`
-  display: flex;
-  width: 100%;
-
-  align-items: center;
-
-  gap: 18px;
-`;
-
-const ListItemContainer = styled(CentredFlexRow)`
-  padding: 14px 18px;
-`;
-
-export const SpaceBetweenContainer = styled(CentredFlexRow)`
-  justify-content: space-between;
-`;
+import {
+  UnconnectedAccountsList,
+  SpaceBetweenContainer,
+  ListItemContainer
+} from './unconnected-accounts-list';
 
 export function SwitchAccountContent() {
-  const { t } = useTranslation();
-
   const activeOrigin = useSelector(selectActiveOrigin);
-  const {
-    changeActiveAccountWithEvent: changeActiveAccount,
-    connectAccountsWithEvent: connectAccounts
-  } = useAccountManager();
-
   const activeAccount = useSelector(selectVaultActiveAccount);
   const connectedAccountsToActiveTab = useSelector(
     selectConnectedAccountsWithOrigin
   );
   const unconnectedAccounts = useSelector(selectUnconnectedAccountsWithOrigin);
+
+  const { t } = useTranslation();
+  const { changeActiveAccountWithEvent: changeActiveAccount } =
+    useAccountManager();
 
   const connectedAccountsListItems = connectedAccountsToActiveTab
     .filter(account => account.name !== activeAccount?.name)
@@ -74,6 +59,10 @@ export function SwitchAccountContent() {
     id: account.name
   }));
 
+  const isActiveAccountNotConnected: boolean = unconnectedAccountsList.some(
+    account => account.name === activeAccount?.name
+  );
+
   return (
     <PageContainer>
       <ContentContainer>
@@ -83,14 +72,44 @@ export function SwitchAccountContent() {
             <Typography type="header">Switch to another account</Typography>
           </VerticalSpaceContainer>
         </ParagraphContainer>
-        {connectedAccountsListItems.length === 0 ? (
+        {/*There is no connected account*/}
+        {isActiveAccountNotConnected && (
           <ParagraphContainer gap="big">
             <Typography type="body">
-              Only the active account is connected. To switch accounts you need
-              to connect another account first from the wallet extension...
+              <Trans t={t}>
+                There is no connected account. First you need to connect account
+                from the wallet extension.
+              </Trans>
             </Typography>
           </ParagraphContainer>
-        ) : (
+        )}
+        {/*There is only one connected account*/}
+        {connectedAccountsListItems.length === 0 &&
+          !isActiveAccountNotConnected && (
+            <>
+              <ParagraphContainer gap="big">
+                <Typography type="body">
+                  {unconnectedAccountsList.length > 0 ? (
+                    <Trans t={t}>
+                      Only the active account is connected. To switch accounts
+                      you need to connect another account.
+                    </Trans>
+                  ) : (
+                    <Trans t={t}>
+                      Only the active account is connected. To switch accounts
+                      you need to connect another account first from the wallet
+                      extension...
+                    </Trans>
+                  )}
+                </Typography>
+              </ParagraphContainer>
+              <UnconnectedAccountsList
+                unconnectedAccountsList={unconnectedAccountsList}
+              />
+            </>
+          )}
+        {/*Connected two or more accounts*/}
+        {connectedAccountsListItems.length >= 1 && (
           <>
             <List
               rows={connectedAccountsListItems}
@@ -125,47 +144,9 @@ export function SwitchAccountContent() {
               )}
               marginLeftForItemSeparatorLine={60}
             />
-            {unconnectedAccountsList.length > 0 && (
-              <List
-                headerLabel={t('Connect another account')}
-                rows={unconnectedAccountsList}
-                renderRow={unconnectedAccount => (
-                  <ListItemContainer key={unconnectedAccount.name}>
-                    <SpaceBetweenContainer>
-                      <LeftAlignedFlexColumn>
-                        <ConnectionStatusBadge
-                          isConnected={false}
-                          displayContext="accountList"
-                        />
-                        <Typography type="body">
-                          {unconnectedAccount.name}
-                        </Typography>
-                        <Hash
-                          value={unconnectedAccount.publicKey}
-                          variant={HashVariant.CaptionHash}
-                          truncated
-                        />
-                      </LeftAlignedFlexColumn>
-                      <Button
-                        color="primaryRed"
-                        variant="inline"
-                        width="100"
-                        onClick={async () => {
-                          await connectAccounts(
-                            [unconnectedAccount.name],
-                            activeOrigin
-                          );
-                          closeCurrentWindow();
-                        }}
-                      >
-                        <Trans t={t}>Connect</Trans>
-                      </Button>
-                    </SpaceBetweenContainer>
-                  </ListItemContainer>
-                )}
-                marginLeftForItemSeparatorLine={60}
-              />
-            )}
+            <UnconnectedAccountsList
+              unconnectedAccountsList={unconnectedAccountsList}
+            />
           </>
         )}
       </ContentContainer>
