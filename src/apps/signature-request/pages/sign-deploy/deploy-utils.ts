@@ -245,7 +245,7 @@ export function parseDeployArgValue(
 
       return {
         parsedValue: JSON.stringify(map.value(), null, 4),
-        type: ParsedValueType.json
+        type: ParsedValueType.Json
       };
 
     case CLTypeTag.Tuple1:
@@ -303,12 +303,12 @@ export const isKeyOfTimestampValue = (key: string) => {
 
 export const getDeployParsedValue = (value: CLValue): ParsedDeployArgValue => {
   const parsedValue = parseDeployArgValue(value);
-  let type: ParsedValueType.json | undefined;
+  let type: ParsedValueType.Json | undefined;
 
   const stringValue = Array.isArray(parsedValue)
     ? parsedValue
         .reduce((acc: string[], cur) => {
-          if (cur.type === ParsedValueType.json) {
+          if (cur.type === ParsedValueType.Json) {
             type = cur.type;
           }
           acc.push(cur.parsedValue);

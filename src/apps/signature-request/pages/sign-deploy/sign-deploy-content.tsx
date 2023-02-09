@@ -126,7 +126,7 @@ export function SignDeployContent({ deploy }: SignDeployContentProps) {
                   if (typeof value !== 'string') {
                     const { parsedValue, type } = getDeployParsedValue(value);
 
-                    if (type === ParsedValueType.json) {
+                    if (type === ParsedValueType.Json) {
                       return (
                         <>
                           <AccordionItem>
