@@ -1,16 +1,16 @@
 import React from 'react';
+import { CLValue } from 'casper-js-sdk';
 
 import { formatNumber, formatTimestamp } from '@libs/ui/utils/formatters';
 import { Hash, HashVariant, Typography } from '@src/libs/ui';
 
-import { CLValue } from 'casper-js-sdk';
 import {
   isDeployArgValueHash,
   isDeployArgValueNumber,
   isKeyOfHashValue,
   isKeyOfCurrencyValue,
   isKeyOfTimestampValue,
-  parseDeployArgValue
+  getDeployParsedValue
 } from './deploy-utils';
 
 export function DeployValue({
@@ -50,13 +50,12 @@ export function DeployValue({
     return <Typography type="body">{value}</Typography>;
   } else {
     // cl value args
-    const parsedVal = parseDeployArgValue(value);
-    const str = Array.isArray(parsedVal) ? parsedVal.join(', ') : parsedVal;
+    const { parsedValue } = getDeployParsedValue(value);
 
     if (isDeployArgValueHash(value)) {
       return (
         <Hash
-          value={str}
+          value={parsedValue}
           variant={HashVariant.BodyHash}
           color="contentPrimary"
           truncated
@@ -67,13 +66,13 @@ export function DeployValue({
     if (isDeployArgValueNumber(value)) {
       return (
         <Hash
-          value={formatNumber(str)}
+          value={formatNumber(parsedValue)}
           variant={HashVariant.BodyHash}
           color="contentPrimary"
         />
       );
     }
 
-    return <Typography type="body">{str}</Typography>;
+    return <Typography type="body">{parsedValue}</Typography>;
   }
 }

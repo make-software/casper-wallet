@@ -29,6 +29,7 @@ export type SignatureRequestArguments = {
   transferId?: string;
   recipientKey?: string;
   recipientHash?: string;
+  token_metas?: string;
 };
 
 export type SignatureRequestKeys =
@@ -36,3 +37,12 @@ export type SignatureRequestKeys =
   | keyof SignatureRequestArguments;
 
 export type CasperDeploy = Deploy;
+
+export enum ParsedValueType {
+  Json = 'json'
+}
+
+export interface ParsedDeployArgValue {
+  parsedValue: string;
+  type?: ParsedValueType;
+}
