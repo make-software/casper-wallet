@@ -1,42 +1,21 @@
 import { ActionType, createAction } from 'typesafe-actions';
-import browser from 'webextension-polyfill';
-import { SdkMessage } from './sdk-message';
+import { CasperWalletState } from './sdk-types';
 
 // Event emitted to connected sites
 
-export type WalletState = {
-  isLocked: boolean;
-  isConnected: boolean;
-  activeKey: string | null;
-};
-
 export const sdkEvent = {
-  connectedAccountEvent: createAction('connectedAccountEvent')<WalletState>(),
+  connectedAccountEvent: createAction(
+    'connectedAccountEvent'
+  )<CasperWalletState>(),
   disconnectedAccountEvent: createAction(
     'disconnectedAccountEvent'
-  )<WalletState>(),
-  changedTab: createAction('changedTabEvent')<WalletState>(),
+  )<CasperWalletState>(),
+  changedTab: createAction('changedTabEvent')<CasperWalletState>(),
   changedConnectedAccountEvent: createAction(
     'changedConnectedAccountEvent'
-  )<WalletState>(),
-  lockedEvent: createAction('lockedEvent')<WalletState>(),
-  unlockedEvent: createAction('unlockedEvent')<WalletState>()
+  )<CasperWalletState>(),
+  lockedEvent: createAction('lockedEvent')<CasperWalletState>(),
+  unlockedEvent: createAction('unlockedEvent')<CasperWalletState>()
 };
 
 export type SdkEvent = ActionType<typeof sdkEvent>;
-
-export async function emitSdkEventToAllActiveTabs(
-  action: SdkEvent | SdkMessage
-) {
-  const tabs = await browser.tabs.query({
-    active: true
-  });
-
-  tabs.forEach(async tab => {
-    if (tab.id) {
-      browser.tabs.sendMessage(tab.id, action);
-    } else {
-      throw Error('Tab without id: ' + tab);
-    }
-  });
-}
