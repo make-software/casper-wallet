@@ -6,6 +6,7 @@ import {
   ContentColor,
   CopyToClipboard,
   SvgIcon,
+  SvgIconHover,
   Typography,
   Tag
 } from '@libs/ui';
@@ -32,6 +33,8 @@ interface HashProps {
   color?: ContentColor;
   withCopyOnClick?: boolean;
   withTag?: boolean;
+  withHoverAndCopy?: boolean;
+  isHover?: boolean;
 }
 
 export function Hash({
@@ -40,7 +43,9 @@ export function Hash({
   withCopyOnClick,
   truncated,
   color,
-  withTag
+  withTag,
+  withHoverAndCopy,
+  isHover
 }: HashProps) {
   const { t } = useTranslation();
 
@@ -57,6 +62,46 @@ export function Hash({
     ),
     [color, truncated, value, variant, withTag, t]
   );
+
+  if (withHoverAndCopy) {
+    return (
+      <HashContainer>
+        <Typography type={variant} color={color || 'contentSecondary'}>
+          {truncated ? truncateKey(value) : value}
+        </Typography>
+        <CopyToClipboard
+          renderContent={({ isClicked }) => (
+            <>
+              {isClicked ? (
+                <SvgIcon
+                  color="contentGreen"
+                  src="assets/icons/checkbox-checked.svg"
+                  size={16}
+                  marginLeft
+                />
+              ) : (
+                isHover && (
+                  <>
+                    <SvgIconHover
+                      src="assets/icons/copy_v2.svg"
+                      color="contentTertiary"
+                      hoverColor="contentBlue"
+                      size={16}
+                      marginLeft
+                    />
+                  </>
+                )
+              )}
+            </>
+          )}
+          valueToCopy={value}
+        />
+        {withTag && (
+          <Tag displayContext="accountList">{`${t('Imported')}`}</Tag>
+        )}
+      </HashContainer>
+    );
+  }
 
   if (withCopyOnClick) {
     return (

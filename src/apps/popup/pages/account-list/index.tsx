@@ -78,6 +78,7 @@ export interface AccountListRows extends Account {
 
 export function AccountListPage() {
   const [accountListRows, setAccountListRows] = useState<AccountListRows[]>([]);
+  const [isHover, setIsHover] = useState<Record<string, boolean>>({});
 
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -141,7 +142,11 @@ export function AccountListPage() {
         <List
           rows={accountListRows}
           renderRow={account => (
-            <ListItemContainer key={account.name}>
+            <ListItemContainer
+              key={account.name}
+              onMouseEnter={() => setIsHover({ [account.name]: true })}
+              onMouseLeave={() => setIsHover({ [account.name]: false })}
+            >
               <ListItemClickableContainer
                 onClick={() => changeActiveAccount(account.name)}
               >
@@ -168,6 +173,8 @@ export function AccountListPage() {
                       variant={HashVariant.CaptionHash}
                       truncated
                       withTag={account.imported}
+                      withHoverAndCopy
+                      isHover={isHover[account.name]}
                     />
                   </HashContainer>
                   {connectedAccountNames.includes(account.name) && (

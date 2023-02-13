@@ -21,14 +21,19 @@ export function CopyToClipboard({
   const overlayTimeout = 2000;
   const [isClicked, setIsClicked] = useState(false);
 
-  const handleCopyOnClick = useCallback(async () => {
-    if (isClicked) {
-      return;
-    }
+  const handleCopyOnClick = useCallback(
+    async event => {
+      event.stopPropagation();
 
-    setIsClicked(true);
-    await navigator.clipboard.writeText(valueToCopy);
-  }, [isClicked, valueToCopy]);
+      if (isClicked) {
+        return;
+      }
+
+      setIsClicked(true);
+      await navigator.clipboard.writeText(valueToCopy);
+    },
+    [isClicked, valueToCopy]
+  );
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;

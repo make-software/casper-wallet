@@ -63,8 +63,8 @@ const Container = styled('div').withConfig({
     },
     transform: flipByAxis ? `rotate${flipByAxis}(180deg)` : 'none',
     transition: 'transform 500ms ease',
-    marginLeft: marginLeft ? 8 : 'initial',
-    marginRight: marginRight ? 8 : 'initial',
+    marginLeft: marginLeft ? 4 : 'initial',
+    marginRight: marginRight ? 4 : 'initial',
     cursor: onClick ? 'pointer' : 'inherit'
   })
 );
