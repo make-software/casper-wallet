@@ -14,14 +14,14 @@ import {
   selectConnectedAccountNamesWithOrigin,
   selectVaultAccounts
 } from '@src/background/redux/vault/selectors';
-import { emitSdkEventToAllActiveTabs } from '@src/content/sdk-event';
-import { sdkMessage } from '@src/content/sdk-message';
+import { sdkMethod } from '@src/content/sdk-method';
 import { Button } from '@src/libs/ui';
 
 import { SignDeployContent } from './sign-deploy-content';
 import { signDeploy } from '@src/libs/crypto';
 import { CasperDeploy } from './deploy-types';
 import { convertBytesToHex } from '@src/libs/crypto/utils';
+import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
 
 export function SignDeployPage() {
   const { t } = useTranslation();
@@ -62,7 +62,7 @@ export function SignDeployPage() {
     const res = DeployUtil.deployFromJson(deployJson);
     if (!res.ok) {
       const error = Error('Parsing deploy from json error');
-      emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
+      sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
       throw error;
     }
 
@@ -78,7 +78,7 @@ export function SignDeployPage() {
   // signing account should exist in wallet
   if (signingAccount == null) {
     const error = Error('No signing account');
-    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
+    sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
     throw error;
   }
 
@@ -87,7 +87,7 @@ export function SignDeployPage() {
     const error = Error(
       'Account with signingPublicKeyHex is not connected to site'
     );
-    emitSdkEventToAllActiveTabs(sdkMessage.signError(error, { requestId }));
+    sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
     throw error;
   }
 
@@ -101,8 +101,8 @@ export function SignDeployPage() {
       signingAccount.publicKey,
       signingAccount.secretKey
     );
-    emitSdkEventToAllActiveTabs(
-      sdkMessage.signResponse(
+    sendSdkResponseToSpecificTab(
+      sdkMethod.signResponse(
         { signatureHex: convertBytesToHex(signature), cancelled: false },
         { requestId }
       )
@@ -116,8 +116,8 @@ export function SignDeployPage() {
   ]);
 
   const handleCancel = useCallback(() => {
-    emitSdkEventToAllActiveTabs(
-      sdkMessage.signResponse({ cancelled: true }, { requestId })
+    sendSdkResponseToSpecificTab(
+      sdkMethod.signResponse({ cancelled: true }, { requestId })
     );
     closeCurrentWindow();
   }, [requestId]);

@@ -12,13 +12,13 @@ import {
   selectConnectedAccountNamesWithOrigin,
   selectVaultAccounts
 } from '@src/background/redux/vault/selectors';
-import { emitSdkEventToAllActiveTabs } from '@src/content/sdk-event';
-import { sdkMessage } from '@src/content/sdk-message';
+import { sdkMethod } from '@src/content/sdk-method';
 import { Button } from '@src/libs/ui';
 
 import { SignMessageContent } from './sign-message-content';
 import { convertBytesToHex } from '@src/libs/crypto/utils';
 import { signMessage } from '@src/libs/crypto/sign-message';
+import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
 
 export function SignMessagePage() {
   const { t } = useTranslation();
@@ -57,8 +57,8 @@ export function SignMessagePage() {
   // signing account should exist in wallet
   if (signingAccount == null) {
     const error = Error('No signing account');
-    emitSdkEventToAllActiveTabs(
-      sdkMessage.signMessageError(error, { requestId })
+    sendSdkResponseToSpecificTab(
+      sdkMethod.signMessageError(error, { requestId })
     );
     throw error;
   }
@@ -68,8 +68,8 @@ export function SignMessagePage() {
     const error = Error(
       'Account with signingPublicKeyHex is not connected to site'
     );
-    emitSdkEventToAllActiveTabs(
-      sdkMessage.signMessageError(error, { requestId })
+    sendSdkResponseToSpecificTab(
+      sdkMethod.signMessageError(error, { requestId })
     );
     throw error;
   }
@@ -84,8 +84,8 @@ export function SignMessagePage() {
       signingAccount.publicKey,
       signingAccount.secretKey
     );
-    emitSdkEventToAllActiveTabs(
-      sdkMessage.signMessageResponse(
+    sendSdkResponseToSpecificTab(
+      sdkMethod.signMessageResponse(
         { signatureHex: convertBytesToHex(signature), cancelled: false },
         { requestId }
       )
@@ -99,8 +99,8 @@ export function SignMessagePage() {
   ]);
 
   const handleCancel = useCallback(() => {
-    emitSdkEventToAllActiveTabs(
-      sdkMessage.signResponse({ cancelled: true }, { requestId })
+    sendSdkResponseToSpecificTab(
+      sdkMethod.signResponse({ cancelled: true }, { requestId })
     );
     closeCurrentWindow();
   }, [requestId]);

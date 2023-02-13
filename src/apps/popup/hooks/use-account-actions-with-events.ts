@@ -15,9 +15,10 @@ import {
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
 import { RootState } from 'typesafe-actions';
-import { emitSdkEventToAllActiveTabs, sdkEvent } from '@src/content/sdk-event';
+import { sdkEvent } from '@src/content/sdk-event';
 import { dispatchToMainStore } from '../../../background/redux/utils';
 import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
+import { emitSdkEventToAllActiveTabs } from '@src/background/emit-sdk-event-to-all-active-tabs';
 
 export function findAccountInAListClosestToGivenAccountFilteredByNames(
   accounts: Account[],

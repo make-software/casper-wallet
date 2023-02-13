@@ -37,8 +37,8 @@ import {
   windowIdCleared
 } from '@src/background/redux/windowManagement/actions';
 import { selectWindowId } from '@src/background/redux/windowManagement/selectors';
-import { emitSdkEventToAllActiveTabs, sdkEvent } from '@src/content/sdk-event';
-import { isSDKMessage, SdkMessage, sdkMessage } from '@src/content/sdk-message';
+import { sdkEvent } from '@src/content/sdk-event';
+import { isSDKMethod, SdkMethod, sdkMethod } from '@src/content/sdk-method';
 import { WindowApp } from '@src/hooks';
 import {
   enableOnboardingFlow,
@@ -84,6 +84,7 @@ import {
   loginRetryCountIncrement,
   loginRetryCountReseted
 } from './redux/login-retry-count/actions';
+import { emitSdkEventToAllActiveTabs } from './emit-sdk-event-to-all-active-tabs';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -133,14 +134,14 @@ browser.runtime.onInstalled.addListener(async () => {
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 browser.runtime.onMessage.addListener(
-  async (action: RootAction | SdkMessage | ServiceMessage, sender) => {
+  async (action: RootAction | SdkMethod | ServiceMessage, sender) => {
     const store = await getExistingMainStoreSingletonOrInit();
     return new Promise(async (sendResponse, sendError) => {
       // Popup comms handling
-      if (isSDKMessage(action)) {
+      if (isSDKMethod(action)) {
         // console.warn(`BACKEND SDK MESSAGE:`, JSON.stringify(action));
         switch (action.type) {
-          case getType(sdkMessage.connectRequest): {
+          case getType(sdkMethod.connectRequest): {
             let success = false;
 
             const query: Record<string, string> = {
@@ -158,11 +159,11 @@ browser.runtime.onMessage.addListener(
             success = true;
 
             return sendResponse(
-              sdkMessage.connectResponse(success, action.meta)
+              sdkMethod.connectResponse(success, action.meta)
             );
           }
 
-          case getType(sdkMessage.disconnectRequest): {
+          case getType(sdkMethod.disconnectRequest): {
             let success = false;
 
             const isLocked = selectVaultIsLocked(store.getState());
@@ -184,11 +185,11 @@ browser.runtime.onMessage.addListener(
             }
 
             return sendResponse(
-              sdkMessage.disconnectResponse(success, action.meta)
+              sdkMethod.disconnectResponse(success, action.meta)
             );
           }
 
-          case getType(sdkMessage.switchAccountRequest): {
+          case getType(sdkMethod.switchAccountRequest): {
             let success = false;
 
             const query: Record<string, string> = {
@@ -206,11 +207,11 @@ browser.runtime.onMessage.addListener(
             success = true;
 
             return sendResponse(
-              sdkMessage.switchAccountResponse(success, action.meta)
+              sdkMethod.switchAccountResponse(success, action.meta)
             );
           }
 
-          case getType(sdkMessage.signRequest): {
+          case getType(sdkMethod.signRequest): {
             const { signingPublicKeyHex } = action.payload;
             let deployJson;
             try {
@@ -236,7 +237,7 @@ browser.runtime.onMessage.addListener(
             return sendResponse(undefined);
           }
 
-          case getType(sdkMessage.signMessageRequest): {
+          case getType(sdkMethod.signMessageRequest): {
             const { signingPublicKeyHex, message } = action.payload;
 
             openWindow({
@@ -251,33 +252,33 @@ browser.runtime.onMessage.addListener(
             return sendResponse(undefined);
           }
 
-          case getType(sdkMessage.isConnectedRequest): {
+          case getType(sdkMethod.isConnectedRequest): {
             const isConnected = selectIsAnyAccountConnectedWithOrigin(
               store.getState()
             );
 
             return sendResponse(
-              sdkMessage.isConnectedResponse(isConnected, action.meta)
+              sdkMethod.isConnectedResponse(isConnected, action.meta)
             );
           }
 
-          case getType(sdkMessage.getActivePublicKeyRequest): {
+          case getType(sdkMethod.getActivePublicKeyRequest): {
             const activeAccount = selectVaultActiveAccount(store.getState());
 
             return sendResponse(
-              sdkMessage.getActivePublicKeyResponse(
+              sdkMethod.getActivePublicKeyResponse(
                 activeAccount?.publicKey,
                 action.meta
               )
             );
           }
 
-          case getType(sdkMessage.getVersionRequest): {
+          case getType(sdkMethod.getVersionRequest): {
             const manifestData = await chrome.runtime.getManifest();
             const version = manifestData.version;
 
             return sendResponse(
-              sdkMessage.getVersionResponse(version, action.meta)
+              sdkMethod.getVersionResponse(version, action.meta)
             );
           }
 
