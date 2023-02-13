@@ -72,18 +72,19 @@ export function SwitchAccountContent() {
             <Typography type="header">Switch to another account</Typography>
           </VerticalSpaceContainer>
         </ParagraphContainer>
-        {/*There is no connected account*/}
-        {isActiveAccountNotConnected && (
-          <ParagraphContainer gap="big">
-            <Typography type="body">
-              <Trans t={t}>
-                There is no connected account. First you need to connect account
-                from the wallet extension.
-              </Trans>
-            </Typography>
-          </ParagraphContainer>
-        )}
-        {/*There is only one connected account*/}
+        {/*The active account and other accounts are not connected*/}
+        {connectedAccountsListItems.length === 0 &&
+          isActiveAccountNotConnected && (
+            <ParagraphContainer gap="big">
+              <Typography type="body">
+                <Trans t={t}>
+                  There is no connected account. First you need to connect
+                  account from the wallet extension.
+                </Trans>
+              </Typography>
+            </ParagraphContainer>
+          )}
+        {/*There is only active account connected*/}
         {connectedAccountsListItems.length === 0 &&
           !isActiveAccountNotConnected && (
             <>
@@ -108,7 +109,7 @@ export function SwitchAccountContent() {
               />
             </>
           )}
-        {/*Connected two or more accounts*/}
+        {/*There are one or more connected accounts*/}
         {connectedAccountsListItems.length >= 1 && (
           <>
             <List
