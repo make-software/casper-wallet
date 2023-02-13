@@ -1,15 +1,15 @@
 import browser from 'webextension-polyfill';
 
 import {
-  sdkMessageProxyEvents,
-  isSDKMessage,
-  sdkMessage,
-  SdkMessage
-} from './sdk-message';
+  SdkMethodEventType,
+  isSDKMethod,
+  sdkMethod,
+  SdkMethod
+} from './sdk-method';
 import { sdkEvent, SdkEvent } from './sdk-event';
 import { getType } from 'typesafe-actions';
 import { activeOriginChanged } from '@src/background/redux/session/actions';
-import { SdkEventTypes } from './sdk-event-types';
+import { CasperWalletEventType } from './sdk-event-type';
 
 // Sync activeOrigin of active tab with store
 function syncActiveOriginWithStore() {
@@ -31,16 +31,16 @@ function syncActiveOriginWithStore() {
   }
 }
 
-async function handleSdkResponseOrEvent(message: SdkEvent | SdkMessage) {
+async function handleSdkResponseOrEvent(message: SdkEvent | SdkMethod) {
   // Todo for Piotr: design convention for delayed sdk request responses
-  if (isSDKMessage(message)) {
+  if (isSDKMethod(message)) {
     switch (message.type) {
-      case getType(sdkMessage.signError):
-      case getType(sdkMessage.signResponse):
-      case getType(sdkMessage.signMessageError):
-      case getType(sdkMessage.signMessageResponse):
+      case getType(sdkMethod.signError):
+      case getType(sdkMethod.signResponse):
+      case getType(sdkMethod.signMessageError):
+      case getType(sdkMethod.signMessageResponse):
         window.dispatchEvent(
-          new CustomEvent(sdkMessageProxyEvents.SDKResponseAction, {
+          new CustomEvent(SdkMethodEventType.Response, {
             detail: JSON.stringify(message)
           })
         );
@@ -63,27 +63,27 @@ function emitSdkEvent(message: SdkEvent) {
   let eventType: string;
   switch (message.type) {
     case getType(sdkEvent.connectedAccountEvent):
-      eventType = SdkEventTypes.Connected;
+      eventType = CasperWalletEventType.Connected;
       break;
 
     case getType(sdkEvent.disconnectedAccountEvent):
-      eventType = SdkEventTypes.Disconnected;
+      eventType = CasperWalletEventType.Disconnected;
       break;
 
     case getType(sdkEvent.changedConnectedAccountEvent):
-      eventType = SdkEventTypes.ActiveKeyChanged;
+      eventType = CasperWalletEventType.ActiveKeyChanged;
       break;
 
     case getType(sdkEvent.changedTab):
-      eventType = SdkEventTypes.TabChanged;
+      eventType = CasperWalletEventType.TabChanged;
       break;
 
     case getType(sdkEvent.lockedEvent):
-      eventType = SdkEventTypes.Locked;
+      eventType = CasperWalletEventType.Locked;
       break;
 
     case getType(sdkEvent.unlockedEvent):
-      eventType = SdkEventTypes.Unlocked;
+      eventType = CasperWalletEventType.Unlocked;
       break;
 
     default:
@@ -102,7 +102,7 @@ function emitSdkEvent(message: SdkEvent) {
 function handleSdkRequest(e: Event) {
   const requestAction = (e as CustomEvent).detail;
   // validation
-  if (!isSDKMessage(requestAction)) {
+  if (!isSDKMethod(requestAction)) {
     throw Error(
       'Content: invalid sdk requestAction: ' + JSON.stringify(requestAction)
     );
@@ -112,9 +112,9 @@ function handleSdkRequest(e: Event) {
     .sendMessage(requestAction)
     .then(message => {
       // if valid message send back response
-      if (isSDKMessage(message)) {
+      if (isSDKMethod(message)) {
         window.dispatchEvent(
-          new CustomEvent(sdkMessageProxyEvents.SDKResponseAction, {
+          new CustomEvent(SdkMethodEventType.Response, {
             detail: JSON.stringify(message)
           })
         );
@@ -155,10 +155,7 @@ function init() {
   window.addEventListener('blur', syncActiveOriginWithStore);
 
   browser.runtime.onMessage.addListener(handleSdkResponseOrEvent);
-  window.addEventListener(
-    sdkMessageProxyEvents.SDKRequestAction,
-    handleSdkRequest
-  );
+  window.addEventListener(SdkMethodEventType.Request, handleSdkRequest);
 }
 
 // cleanup logic
@@ -174,10 +171,7 @@ function cleanup() {
   window.removeEventListener('blur', syncActiveOriginWithStore);
 
   browser.runtime.onMessage.removeListener(handleSdkResponseOrEvent);
-  window.removeEventListener(
-    sdkMessageProxyEvents.SDKRequestAction,
-    handleSdkRequest
-  );
+  window.removeEventListener(SdkMethodEventType.Request, handleSdkRequest);
 }
 window.addEventListener(cleanupEventType, cleanup);
 
