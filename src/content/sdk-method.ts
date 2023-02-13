@@ -7,7 +7,6 @@ export const SdkMethodEventType = {
 
 type Meta = { requestId: string };
 
-// TODO: add docs
 export const sdkMethod = {
   connectRequest: createAction('CasperWalletProvider:Connect')<
     { origin: string; title: string },

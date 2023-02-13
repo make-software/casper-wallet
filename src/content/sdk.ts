@@ -83,6 +83,10 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
   };
 
   return {
+    /**
+     * Request the connect account interface with the Casper Wallet extension
+     * @returns `true` value when connection request is accepted by the user, `false` otherwise.
+     */
     requestConnection(): Promise<boolean> {
       return fetchFromBackground<
         ReturnType<typeof sdkMethod['connectResponse']>['payload']
@@ -96,6 +100,10 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         options
       );
     },
+    /**
+     * Disconnect the Casper Wallet extension
+     * @returns `true` value when successfully disconnected, `false` otherwise.
+     */
     disconnectFromSite(): Promise<boolean> {
       return fetchFromBackground<
         ReturnType<typeof sdkMethod['disconnectResponse']>['payload']
@@ -106,6 +114,10 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         options
       );
     },
+    /**
+     * Request the switch account interface with the Casper Wallet extension
+     * @returns `true` value when successfully switched account, `false` otherwise.
+     */
     requestSwitchAccount(): Promise<boolean> {
       return fetchFromBackground<
         ReturnType<typeof sdkMethod['switchAccountResponse']>['payload']
@@ -119,6 +131,10 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         options
       );
     },
+    /**
+     * Get the connection status of the Casper Wallet extension
+     * @returns `true` value when curently connected at least one account, `false` otherwise.
+     */
     isConnected(): Promise<boolean> {
       return fetchFromBackground<
         ReturnType<typeof sdkMethod['isConnectedResponse']>['payload']
@@ -129,6 +145,10 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         options
       );
     },
+    /**
+     * Get the active public key of the Casper Wallet extension
+     * @returns returns hex hash of the active public key.
+     */
     getActivePublicKey(): Promise<string | undefined> {
       return fetchFromBackground<
         ReturnType<typeof sdkMethod['getActivePublicKeyResponse']>['payload']
@@ -139,6 +159,10 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         options
       );
     },
+    /**
+     * Get version of the Casper Wallet extension
+     * @returns version of the installed wallet extension.
+     */
     getVersion(): Promise<string> {
       return fetchFromBackground<
         ReturnType<typeof sdkMethod['getVersionResponse']>['payload']
@@ -149,6 +173,12 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         options
       );
     },
+    /**
+     * Request the sign deploy interface with the Casper Wallet extension
+     * @param deployJson - stringified json of a deploy (use `DeployUtil.deployToJson` from `casper-js-sdk` and `JSON.stringify`)
+     * @param signingPublicKeyHex - public key hash (in hex format)
+     * @returns a payload response when user responded to transaction request, it will contain `signature` if approved, or `cancelled === true` flag when rejected.
+     */
     sign: (
       deployJson: string,
       signingPublicKeyHex: string
@@ -179,6 +209,12 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         };
       });
     },
+    /**
+     * Request the sign message interface with the Casper Wallet extension
+     * @param message - message to sign as string
+     * @param signingPublicKeyHex - public key hash (in hex format)
+     * @returns a payload response when user responded to transaction request, it will contain `signature` if approved, or `cancelled === true` flag when rejected.
+     */
     signMessage: (
       message: string,
       signingPublicKeyHex: string
