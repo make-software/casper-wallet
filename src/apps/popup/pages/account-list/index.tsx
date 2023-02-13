@@ -35,7 +35,7 @@ import {
   selectVaultActiveAccountName
 } from '@background/redux/vault/selectors';
 import { selectActiveOrigin } from '@background/redux/session/selectors';
-import { Account } from '@background/redux/vault/types';
+import { AccountListRows } from '@background/redux/vault/types';
 
 import { Popover } from './components/popover';
 
@@ -71,10 +71,6 @@ const ConnectionStatusBadgeContainer = styled.div`
 const HashContainer = styled.div`
   margin-top: 4px;
 `;
-
-export interface AccountListRows extends Account {
-  id: string;
-}
 
 export function AccountListPage() {
   const [accountListRows, setAccountListRows] = useState<AccountListRows[]>([]);
