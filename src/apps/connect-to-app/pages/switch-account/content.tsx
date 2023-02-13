@@ -59,8 +59,8 @@ export function SwitchAccountContent() {
     id: account.name
   }));
 
-  const isActiveAccountNotConnected: boolean = unconnectedAccountsList.some(
-    account => account.name === activeAccount?.name
+  const isActiveAccountConnected: boolean = unconnectedAccountsList.every(
+    account => account.name !== activeAccount?.name
   );
 
   return (
@@ -74,7 +74,7 @@ export function SwitchAccountContent() {
         </ParagraphContainer>
         {/*The active account and other accounts are not connected*/}
         {connectedAccountsListItems.length === 0 &&
-          isActiveAccountNotConnected && (
+          !isActiveAccountConnected && (
             <ParagraphContainer gap="big">
               <Typography type="body">
                 <Trans t={t}>
@@ -86,7 +86,7 @@ export function SwitchAccountContent() {
           )}
         {/*There is only active account connected*/}
         {connectedAccountsListItems.length === 0 &&
-          !isActiveAccountNotConnected && (
+          isActiveAccountConnected && (
             <>
               <ParagraphContainer gap="big">
                 <Typography type="body">
