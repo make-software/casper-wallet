@@ -7,6 +7,7 @@ import SvgIcon from './svg-icon';
 interface SvgIconHoverProps extends SvgIconProps {
   hoverColor: ContentColor;
 }
+
 export const SvgIconHover = ({
   color,
   hoverColor,

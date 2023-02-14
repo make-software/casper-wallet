@@ -6,7 +6,6 @@ import {
   ContentColor,
   CopyToClipboard,
   SvgIcon,
-  SvgIconHover,
   Typography,
   Tag
 } from '@libs/ui';
@@ -43,7 +42,7 @@ interface HashProps {
   withCopyOnClick?: boolean;
   withTag?: boolean;
   withHoverAndCopy?: boolean;
-  isHover?: boolean;
+  renderHoverIcon?: () => JSX.Element;
   displayContext?: 'home';
 }
 
@@ -55,7 +54,7 @@ export function Hash({
   color,
   withTag,
   withHoverAndCopy,
-  isHover,
+  renderHoverIcon,
   displayContext
 }: HashProps) {
   const { t } = useTranslation();
@@ -90,19 +89,9 @@ export function Hash({
                   size={16}
                   marginLeft
                 />
-              ) : (
-                isHover && (
-                  <>
-                    <SvgIconHover
-                      src="assets/icons/copy.svg"
-                      color="contentTertiary"
-                      hoverColor="contentBlue"
-                      size={16}
-                      marginLeft
-                    />
-                  </>
-                )
-              )}
+              ) : renderHoverIcon ? (
+                renderHoverIcon()
+              ) : null}
             </>
           )}
           valueToCopy={value}

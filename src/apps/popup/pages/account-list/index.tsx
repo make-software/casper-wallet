@@ -10,6 +10,7 @@ import {
   Link,
   List,
   SvgIcon,
+  SvgIconHover,
   Typography
 } from '@libs/ui';
 import {
@@ -41,9 +42,17 @@ import { Popover } from './components/popover';
 
 import { sortAccounts } from './utils';
 
+const HoverIcon = styled(SvgIconHover)`
+  display: none;
+`;
+
 const ListItemContainer = styled(FlexRow)`
   min-height: 50px;
   height: 100%;
+
+  &:hover ${HoverIcon} {
+    display: block;
+  }
 `;
 
 const ListItemClickableContainer = styled(FlexRow)`
@@ -74,7 +83,6 @@ const HashContainer = styled.div`
 
 export function AccountListPage() {
   const [accountListRows, setAccountListRows] = useState<AccountListRows[]>([]);
-  const [isHover, setIsHover] = useState<Record<string, boolean>>({});
 
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -138,11 +146,7 @@ export function AccountListPage() {
         <List
           rows={accountListRows}
           renderRow={account => (
-            <ListItemContainer
-              key={account.name}
-              onMouseEnter={() => setIsHover({ [account.name]: true })}
-              onMouseLeave={() => setIsHover({ [account.name]: false })}
-            >
+            <ListItemContainer key={account.name}>
               <ListItemClickableContainer
                 onClick={() => changeActiveAccount(account.name)}
               >
@@ -170,7 +174,15 @@ export function AccountListPage() {
                       truncated
                       withTag={account.imported}
                       withHoverAndCopy
-                      isHover={isHover[account.name]}
+                      renderHoverIcon={() => (
+                        <HoverIcon
+                          src="assets/icons/copy.svg"
+                          color="contentTertiary"
+                          hoverColor="contentBlue"
+                          size={16}
+                          marginLeft
+                        />
+                      )}
                     />
                   </HashContainer>
                   {connectedAccountNames.includes(account.name) && (
