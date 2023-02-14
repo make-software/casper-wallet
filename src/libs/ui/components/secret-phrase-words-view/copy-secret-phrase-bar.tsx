@@ -27,6 +27,7 @@ export function CopySecretPhraseBar({
                 ? 'assets/icons/checkbox-checked.svg'
                 : 'assets/icons/copy.svg'
             }
+            size={isClicked ? 24 : 16}
             color={isClicked ? 'contentGreen' : 'contentBlue'}
           />
           <Typography

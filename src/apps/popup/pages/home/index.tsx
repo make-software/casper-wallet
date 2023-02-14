@@ -184,6 +184,7 @@ export function HomePageContent() {
               variant={HashVariant.CaptionHash}
               truncated
               withCopyOnClick
+              displayContext="home"
             />
           </NameAndAddressContainer>
           <BalanceContainer>

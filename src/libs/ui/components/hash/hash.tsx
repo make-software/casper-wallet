@@ -14,7 +14,16 @@ import { CenteredFlexRow } from '@libs/layout';
 
 import { truncateKey } from './utils';
 
-const HashContainer = styled(CenteredFlexRow)``;
+interface HashContainerProps {
+  displayContext?: 'home';
+}
+
+const HashContainer = styled(CenteredFlexRow)<HashContainerProps>`
+  display: flex;
+  align-items: center;
+  height: ${({ displayContext }) =>
+    displayContext === 'home' ? '24px' : 'auto'};
+`;
 
 const CopyStatusContainer = styled.div`
   display: flex;
@@ -35,6 +44,7 @@ interface HashProps {
   withTag?: boolean;
   withHoverAndCopy?: boolean;
   isHover?: boolean;
+  displayContext?: 'home';
 }
 
 export function Hash({
@@ -45,7 +55,8 @@ export function Hash({
   color,
   withTag,
   withHoverAndCopy,
-  isHover
+  isHover,
+  displayContext
 }: HashProps) {
   const { t } = useTranslation();
 
@@ -65,7 +76,7 @@ export function Hash({
 
   if (withHoverAndCopy) {
     return (
-      <HashContainer>
+      <HashContainer displayContext={displayContext}>
         <Typography type={variant} color={color || 'contentSecondary'}>
           {truncated ? truncateKey(value) : value}
         </Typography>
@@ -83,7 +94,7 @@ export function Hash({
                 isHover && (
                   <>
                     <SvgIconHover
-                      src="assets/icons/copy_v2.svg"
+                      src="assets/icons/copy.svg"
                       color="contentTertiary"
                       hoverColor="contentBlue"
                       size={16}
@@ -119,10 +130,10 @@ export function Hash({
                 </Typography>
               </CopyStatusContainer>
             ) : (
-              <>
+              <HashContainer displayContext={displayContext}>
                 {HashComponent}
-                <SvgIcon src="assets/icons/copy.svg" />
-              </>
+                <SvgIcon src="assets/icons/copy.svg" size={16} marginLeft />
+              </HashContainer>
             )}
           </>
         )}
@@ -130,5 +141,9 @@ export function Hash({
       />
     );
   }
-  return <HashContainer>{HashComponent}</HashContainer>;
+  return (
+    <HashContainer displayContext={displayContext}>
+      {HashComponent}
+    </HashContainer>
+  );
 }
