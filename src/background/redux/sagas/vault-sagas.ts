@@ -51,7 +51,8 @@ import { keysUpdated } from '../keys/actions';
 import { vaultCipherCreated } from '../vault-cipher/actions';
 import { deploysReseted } from '../deploys/actions';
 import { loginRetryCountReseted } from '../login-retry-count/actions';
-import { emitSdkEventToAllActiveTabs, sdkEvent } from '@src/content/sdk-event';
+import { sdkEvent } from '@src/content/sdk-event';
+import { emitSdkEventToAllActiveTabs } from '@src/background/emit-sdk-event-to-all-active-tabs';
 
 export function* vaultSagas() {
   yield takeLatest(getType(lockVault), lockVaultSaga);

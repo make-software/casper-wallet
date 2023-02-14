@@ -1,13 +1,13 @@
 import { ActionType, createAction } from 'typesafe-actions';
 
-export const sdkMessageProxyEvents = {
-  SDKRequestAction: 'CasperWalletProviderEvent:SDKRequestAction',
-  SDKResponseAction: 'CasperWalletProviderEvent:SDKResponseAction'
+export const SdkMethodEventType = {
+  Request: 'CasperWalletMethod:Request',
+  Response: 'CasperWalletMethod:Response'
 };
 
 type Meta = { requestId: string };
 
-export const sdkMessage = {
+export const sdkMethod = {
   connectRequest: createAction('CasperWalletProvider:Connect')<
     { origin: string; title: string },
     Meta
@@ -80,12 +80,12 @@ export const sdkMessage = {
   >()
 };
 
-export type SdkMessage = ActionType<typeof sdkMessage>;
+export type SdkMethod = ActionType<typeof sdkMethod>;
 
-export function isSDKMessage(action?: {
+export function isSDKMethod(action?: {
   type?: unknown;
   meta?: unknown;
-}): action is SdkMessage {
+}): action is SdkMethod {
   return (
     typeof action?.type === 'string' &&
     typeof (action.meta as Meta | undefined)?.requestId === 'string'

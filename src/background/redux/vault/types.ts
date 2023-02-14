@@ -12,6 +12,10 @@ export interface Account extends KeyPair {
   imported?: boolean;
 }
 
+export interface AccountListRows extends Account {
+  id: string;
+}
+
 type AccountNamesByOriginDict = Record<string, string[]>;
 
 export type VaultState = {
