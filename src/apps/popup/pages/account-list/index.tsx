@@ -7,10 +7,10 @@ import {
   Checkbox,
   Hash,
   HashVariant,
+  HoverIcon,
   Link,
   List,
   SvgIcon,
-  SvgIconHover,
   Typography
 } from '@libs/ui';
 import {
@@ -41,10 +41,6 @@ import { AccountListRows } from '@background/redux/vault/types';
 import { Popover } from './components/popover';
 
 import { sortAccounts } from './utils';
-
-const HoverIcon = styled(SvgIconHover)`
-  display: none;
-`;
 
 const ListItemContainer = styled(FlexRow)`
   min-height: 50px;
@@ -173,16 +169,7 @@ export function AccountListPage() {
                       variant={HashVariant.CaptionHash}
                       truncated
                       withTag={account.imported}
-                      withHoverAndCopy
-                      renderHoverIcon={() => (
-                        <HoverIcon
-                          src="assets/icons/copy.svg"
-                          color="contentTertiary"
-                          hoverColor="contentBlue"
-                          size={16}
-                          marginLeft
-                        />
-                      )}
+                      withCopyIconOnHover
                     />
                   </HashContainer>
                   {connectedAccountNames.includes(account.name) && (

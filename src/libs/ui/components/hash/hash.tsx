@@ -7,7 +7,8 @@ import {
   CopyToClipboard,
   SvgIcon,
   Typography,
-  Tag
+  Tag,
+  SvgIconHover
 } from '@libs/ui';
 import { CenteredFlexRow } from '@libs/layout';
 
@@ -29,6 +30,10 @@ const CopyStatusContainer = styled.div`
   gap: 4px;
 `;
 
+export const HoverIcon = styled(SvgIconHover)`
+  display: none;
+`;
+
 export enum HashVariant {
   CaptionHash = 'captionHash',
   BodyHash = 'bodyHash'
@@ -39,22 +44,20 @@ interface HashProps {
   variant: HashVariant;
   truncated?: boolean;
   color?: ContentColor;
-  withCopyOnClick?: boolean;
+  withCopyOnSelfClick?: boolean;
   withTag?: boolean;
-  withHoverAndCopy?: boolean;
-  renderHoverIcon?: () => JSX.Element;
+  withCopyIconOnHover?: boolean;
   displayContext?: 'home';
 }
 
 export function Hash({
   value,
   variant,
-  withCopyOnClick,
+  withCopyOnSelfClick,
   truncated,
   color,
   withTag,
-  withHoverAndCopy,
-  renderHoverIcon,
+  withCopyIconOnHover,
   displayContext
 }: HashProps) {
   const { t } = useTranslation();
@@ -73,7 +76,7 @@ export function Hash({
     [color, truncated, value, variant, withTag, t]
   );
 
-  if (withHoverAndCopy) {
+  if (withCopyIconOnHover) {
     return (
       <HashContainer displayContext={displayContext}>
         <Typography type={variant} color={color || 'contentSecondary'}>
@@ -89,9 +92,15 @@ export function Hash({
                   size={16}
                   marginLeft
                 />
-              ) : renderHoverIcon ? (
-                renderHoverIcon()
-              ) : null}
+              ) : (
+                <HoverIcon
+                  src="assets/icons/copy.svg"
+                  color="contentTertiary"
+                  hoverColor="contentBlue"
+                  size={16}
+                  marginLeft
+                />
+              )}
             </>
           )}
           valueToCopy={value}
@@ -103,7 +112,7 @@ export function Hash({
     );
   }
 
-  if (withCopyOnClick) {
+  if (withCopyOnSelfClick) {
     return (
       <CopyToClipboard
         renderContent={({ isClicked }) => (

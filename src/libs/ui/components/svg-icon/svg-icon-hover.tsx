@@ -13,7 +13,7 @@ export const SvgIconHover = ({
   hoverColor,
   ...rest
 }: SvgIconHoverProps) => {
-  // In all SVG icons color sets as attribute and changes by js, so we can use CSS for styling.
+  // In all SVG icons color sets as attribute and changes by js, so we can't use CSS for styling.
   // This functionality helps us to change color props for SVG on hover
   const [isHover, setIsHover] = useState(false);
 
