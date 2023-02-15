@@ -7,7 +7,7 @@ import {
   Checkbox,
   Hash,
   HashVariant,
-  HoverIcon,
+  HoverCopyIcon,
   Link,
   List,
   SvgIcon,
@@ -46,7 +46,7 @@ const ListItemContainer = styled(FlexRow)`
   min-height: 50px;
   height: 100%;
 
-  &:hover ${HoverIcon} {
+  &:hover ${HoverCopyIcon} {
     display: inline-block;
   }
 `;

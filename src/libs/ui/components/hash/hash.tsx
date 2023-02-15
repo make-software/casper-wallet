@@ -29,11 +29,10 @@ const CopyStatusContainer = styled.div`
   gap: 4px;
 `;
 
-export const HoverIcon = styled(SvgIcon)`
+export const HoverCopyIcon = styled(SvgIcon)`
   display: none;
-  color: ${({ theme }) => theme.color.contentTertiary};
 
-  &:hover {
+  &:hover svg {
     color: ${({ theme }) => theme.color.contentBlue};
   }
 `;
@@ -97,9 +96,9 @@ export function Hash({
                   marginLeft
                 />
               ) : (
-                <HoverIcon
+                <HoverCopyIcon
                   src="assets/icons/copy.svg"
-                  currentColor
+                  color="contentTertiary"
                   size={16}
                   marginLeft
                 />

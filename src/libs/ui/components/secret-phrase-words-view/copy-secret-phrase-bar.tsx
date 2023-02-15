@@ -7,6 +7,7 @@ import { CopyToClipboard, SvgIcon, Typography } from '@src/libs/ui';
 
 const CopySecretPhraseContainer = styled(FlexRow)`
   gap: 4px;
+  align-items: center;
 `;
 
 interface CopySecretPhraseBarProps {

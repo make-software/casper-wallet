@@ -23,7 +23,6 @@ export interface SvgIconProps extends React.HTMLAttributes<Ref> {
   flipByAxis?: 'X' | 'Y';
   marginLeft?: boolean;
   marginRight?: boolean;
-  currentColor?: boolean;
 }
 
 const Container = styled('div').withConfig({
@@ -77,16 +76,7 @@ const StyledReactSVG = styled(ReactSVG)(({ theme }) => ({
 
 export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
   (
-    {
-      src,
-      alt,
-      size = 24,
-      color,
-      currentColor,
-      onClick,
-      flipByAxis,
-      ...props
-    }: SvgIconProps,
+    { src, alt, size = 24, color, onClick, flipByAxis, ...props }: SvgIconProps,
     ref
   ) => {
     const handleClick =
@@ -96,8 +86,6 @@ export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
       });
 
     const preProcessor = color
-      ? (code: string): string => code.replace(/fill=".*?"/g, `fill="${color}"`)
-      : currentColor
       ? (code: string): string =>
           code.replace(/fill=".*?"/g, 'fill="currentColor"')
       : (code: string): string => code;
