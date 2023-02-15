@@ -42,6 +42,7 @@ import {
 
 import {
   createAccount,
+  lockVaultForFiveMinutes,
   lockVault,
   startBackground,
   unlockVault
@@ -56,6 +57,10 @@ import { emitSdkEventToAllActiveTabs } from '@src/background/emit-sdk-event-to-a
 
 export function* vaultSagas() {
   yield takeLatest(getType(lockVault), lockVaultSaga);
+  yield takeLatest(
+    getType(lockVaultForFiveMinutes),
+    lockVaultForFiveMinutesSaga
+  );
   yield takeLatest(getType(unlockVault), unlockVaultSaga);
   yield takeLatest(
     [
@@ -101,6 +106,17 @@ function* lockVaultSaga(action: ReturnType<typeof lockVault>) {
   } catch (err) {
     console.error(err);
   }
+}
+
+function* lockVaultForFiveMinutesSaga() {
+  yield put(lockVault());
+
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  const timeoutDurationValue = MapTimeoutDurationSettingToValue['5 min'];
+
+  yield* sagaCall(delay, timeoutDurationValue);
+
+  yield put(loginRetryCountReseted());
 }
 
 /**

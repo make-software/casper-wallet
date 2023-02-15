@@ -67,6 +67,7 @@ import {
   createAccount,
   initKeys,
   initVault,
+  lockVaultForFiveMinutes,
   lockVault,
   resetVault,
   unlockVault
@@ -320,6 +321,7 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(lockVault):
+          case getType(lockVaultForFiveMinutes):
           case getType(unlockVault):
           case getType(initKeys):
           case getType(initVault):

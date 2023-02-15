@@ -31,9 +31,9 @@ import {
   selectPasswordSaltHash
 } from '@src/background/redux/keys/selectors';
 import { unlockVault } from '@src/background/redux/sagas/actions';
-import { selectLoginRetryCount } from '@src/background/redux/login-retry-count/selectors';
 import { selectVaultCipher } from '@background/redux/vault-cipher/selectors';
 import { UnlockVault } from '@background/redux/sagas/types';
+import { useLockWallet } from '@layout/unlock-protected-page-content/use-lock-wallet';
 
 import { LockedRouterPath } from '../locked-router';
 
@@ -49,7 +49,6 @@ export function UnlockVaultPageContent() {
   const [passwordInputType, setPasswordInputType] =
     useState<PasswordInputType>('password');
 
-  const loginRetryCount = useSelector(selectLoginRetryCount);
   const passwordHash = useSelector(selectPasswordHash);
   const passwordSaltHash = useSelector(selectPasswordSaltHash);
   const keyDerivationSaltHash = useSelector(selectKeyDerivationSaltHash);
@@ -62,6 +61,7 @@ export function UnlockVaultPageContent() {
   const {
     register,
     handleSubmit,
+    resetField,
     formState: { errors, isDirty, isSubmitting, isValidating }
   } = useUnlockWalletForm(passwordHash, passwordSaltHash);
 
@@ -110,50 +110,39 @@ export function UnlockVaultPageContent() {
     isSubmitting: isSubmitting || isValidating
   });
 
-  const retryLeft = 5 - loginRetryCount;
+  const retryLeft = useLockWallet(resetField);
 
   if (retryLeft <= 0) {
     return (
       <>
         <ContentContainer>
           <IllustrationContainer>
-            <SvgIcon src="assets/illustrations/locked-wallet.svg" size={120} />
+            <SvgIcon src="assets/illustrations/password-lock.svg" size={120} />
           </IllustrationContainer>
           <ParagraphContainer gap="big">
             <Typography type="header">
-              <Trans t={t}>Your wallet is locked</Trans>
+              <Trans t={t}>
+                Please wait before the next attempt to unlock your wallet
+              </Trans>
             </Typography>
           </ParagraphContainer>
           <ParagraphContainer gap="medium">
             <Typography type="body" color="contentSecondary">
-              <Trans t={t}>You have 0 tries left</Trans>
+              <Trans t={t}>
+                You’ve reached the maximum number of unlock attempts. For
+                security reasons, you will need to wait a brief while before you
+                can attempt again.
+              </Trans>
             </Typography>
           </ParagraphContainer>
-          <InputsContainer>
-            <Input
-              type={passwordInputType}
-              placeholder={t('Password')}
-              error={!!errors.password}
-              validationText={errors.password?.message}
-              suffixIcon={
-                <PasswordVisibilityIcon
-                  passwordInputType={passwordInputType}
-                  setPasswordInputType={setPasswordInputType}
-                />
-              }
-              {...register('password')}
-            />
-          </InputsContainer>
+          <ParagraphContainer gap="medium">
+            <Typography type="body" color="contentSecondary">
+              <Trans t={t}>
+                You can try again in <b>5 mins.</b>
+              </Trans>
+            </Typography>
+          </ParagraphContainer>
         </ContentContainer>
-        <FooterButtonsAbsoluteContainer>
-          <Button
-            type="button"
-            color="secondaryRed"
-            onClick={() => navigate(LockedRouterPath.ResetVault)}
-          >
-            {t('Reset wallet')}
-          </Button>
-        </FooterButtonsAbsoluteContainer>
       </>
     );
   }
