@@ -7,6 +7,7 @@ import {
   Checkbox,
   Hash,
   HashVariant,
+  HoverCopyIcon,
   Link,
   List,
   SvgIcon,
@@ -44,6 +45,10 @@ import { sortAccounts } from './utils';
 const ListItemContainer = styled(FlexRow)`
   min-height: 50px;
   height: 100%;
+
+  &:hover ${HoverCopyIcon} {
+    display: inline-block;
+  }
 `;
 
 const ListItemClickableContainer = styled(FlexRow)`
@@ -164,6 +169,7 @@ export function AccountListPage() {
                       variant={HashVariant.CaptionHash}
                       truncated
                       withTag={account.imported}
+                      withCopyIconOnHover
                     />
                   </HashContainer>
                   {connectedAccountNames.includes(account.name) && (

@@ -7,6 +7,7 @@ import { CopyToClipboard, SvgIcon, Typography } from '@src/libs/ui';
 
 const CopySecretPhraseContainer = styled(FlexRow)`
   gap: 4px;
+  align-items: center;
 `;
 
 interface CopySecretPhraseBarProps {
@@ -27,6 +28,7 @@ export function CopySecretPhraseBar({
                 ? 'assets/icons/checkbox-checked.svg'
                 : 'assets/icons/copy.svg'
             }
+            size={isClicked ? 24 : 16}
             color={isClicked ? 'contentGreen' : 'contentBlue'}
           />
           <Typography

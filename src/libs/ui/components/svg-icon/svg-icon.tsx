@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactSVG from 'react-inlinesvg';
 import styled from 'styled-components';
+
 import { ContentColor, getColorFromTheme } from '@src/libs/ui';
 
 type Ref = HTMLDivElement;
@@ -63,8 +64,8 @@ const Container = styled('div').withConfig({
     },
     transform: flipByAxis ? `rotate${flipByAxis}(180deg)` : 'none',
     transition: 'transform 500ms ease',
-    marginLeft: marginLeft ? 8 : 'initial',
-    marginRight: marginRight ? 8 : 'initial',
+    marginLeft: marginLeft ? 4 : 'initial',
+    marginRight: marginRight ? 4 : 'initial',
     cursor: onClick ? 'pointer' : 'inherit'
   })
 );
@@ -85,9 +86,9 @@ export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
       });
 
     const preProcessor = color
-      ? (code: string): string => code.replace(/fill=".*?"/g, `fill="${color}"`)
+      ? (code: string): string =>
+          code.replace(/fill=".*?"/g, 'fill="currentColor"')
       : (code: string): string => code;
-    // false ? code.replace(/fill=".*?"/g, 'fill="currentColor"') : code;
 
     return (
       <Container

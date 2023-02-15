@@ -183,7 +183,8 @@ export function HomePageContent() {
               value={activeAccount.publicKey}
               variant={HashVariant.CaptionHash}
               truncated
-              withCopyOnClick
+              withCopyOnSelfClick
+              displayContext="home"
             />
           </NameAndAddressContainer>
           <BalanceContainer>
