@@ -7,8 +7,7 @@ import {
   CopyToClipboard,
   SvgIcon,
   Typography,
-  Tag,
-  SvgIconHover
+  Tag
 } from '@libs/ui';
 import { CenteredFlexRow } from '@libs/layout';
 
@@ -30,8 +29,13 @@ const CopyStatusContainer = styled.div`
   gap: 4px;
 `;
 
-export const HoverIcon = styled(SvgIconHover)`
+export const HoverIcon = styled(SvgIcon)`
   display: none;
+  color: ${({ theme }) => theme.color.contentTertiary};
+
+  &:hover {
+    color: ${({ theme }) => theme.color.contentBlue};
+  }
 `;
 
 export enum HashVariant {
@@ -95,8 +99,7 @@ export function Hash({
               ) : (
                 <HoverIcon
                   src="assets/icons/copy.svg"
-                  color="contentTertiary"
-                  hoverColor="contentBlue"
+                  currentColor
                   size={16}
                   marginLeft
                 />

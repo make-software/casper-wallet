@@ -47,7 +47,7 @@ const ListItemContainer = styled(FlexRow)`
   height: 100%;
 
   &:hover ${HoverIcon} {
-    display: block;
+    display: inline-block;
   }
 `;
 
