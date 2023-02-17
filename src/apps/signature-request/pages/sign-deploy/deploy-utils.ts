@@ -28,6 +28,10 @@ import {
 } from './deploy-types';
 
 export function getDeployType(deploy: CasperDeploy): DeployType {
+  if (deploy?.session?.isModuleBytes()) {
+    return DeployType.ModuleBytes;
+  }
+
   if (deploy.isTransfer()) {
     return DeployType.TransferCall;
   }
