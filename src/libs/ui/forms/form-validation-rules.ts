@@ -25,14 +25,15 @@ export function useVerifyPasswordAgainstHashRule(
   const { t } = useTranslation();
   const loginRetryCount = useSelector(selectLoginRetryCount);
 
-  const retryLeft = 4 - loginRetryCount;
+  // We have 5 attempts, but we start showing error text after the user used one attempt and it lefts 4 attempts
+  const attemptsLeft = 4 - loginRetryCount;
   const errorMessage =
-    retryLeft === 1
+    attemptsLeft === 1
       ? t(
           'Password is incorrect. You’ve got last attempt, after that you’ll have to wait for 5 mins'
         )
       : t(
-          `Password is incorrect. You’ve got ${retryLeft} attempts, after that you’ll have to wait for 5 mins`
+          `Password is incorrect. You’ve got ${attemptsLeft} attempts, after that you’ll have to wait for 5 mins`
         );
 
   return Yup.string().test('authenticate', errorMessage, async password => {

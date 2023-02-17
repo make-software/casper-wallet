@@ -1,1 +1,1 @@
-export type LoginRetryLockoutTime = number | null;
+export type LoginRetryLockoutTimeState = number | null;

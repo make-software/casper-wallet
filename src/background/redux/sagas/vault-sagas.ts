@@ -1,4 +1,4 @@
-import { call, put, select, takeLatest, takeLeading } from 'redux-saga/effects';
+import { put, select, takeLatest } from 'redux-saga/effects';
 import { getType } from 'typesafe-actions';
 
 import { deriveKeyPair } from '@src/libs/crypto';
@@ -49,27 +49,26 @@ import {
   sessionReseted,
   vaultUnlocked
 } from '../session/actions';
-
-import {
-  createAccount,
-  lockVaultForFiveMinutes,
-  lockVault,
-  startBackground,
-  unlockVault
-} from './actions';
 import { selectVaultCipherDoesExist } from '../vault-cipher/selectors';
 import { keysUpdated } from '../keys/actions';
 import { vaultCipherCreated } from '../vault-cipher/actions';
 import { deploysReseted } from '../deploys/actions';
 import { loginRetryCountReseted } from '../login-retry-count/actions';
+import { popupWindowInit } from '../windowManagement/actions';
+
+import {
+  createAccount,
+  lockVault,
+  startBackground,
+  unlockVault
+} from './actions';
 
 export function* vaultSagas() {
   yield takeLatest(getType(lockVault), lockVaultSaga);
-  yield takeLeading(
-    getType(lockVaultForFiveMinutes),
-    lockVaultForFiveMinutesSaga
+  yield takeLatest(
+    [getType(loginRetryLockoutTimeSet), getType(popupWindowInit)],
+    setDelayForLockoutVaultSaga
   );
-  yield takeLatest(getType(startBackground), setDelayForLockoutVault);
   yield takeLatest(getType(unlockVault), unlockVaultSaga);
   yield takeLatest(
     [
@@ -117,27 +116,32 @@ function* lockVaultSaga(action: ReturnType<typeof lockVault>) {
   }
 }
 
-function* lockVaultForFiveMinutesSaga() {
+function* setDelayForLockoutVaultSaga() {
   const loginRetryLockoutTime: number | null = yield select(
     selectLoginRetryLockoutTime
   );
 
   if (loginRetryLockoutTime == null) {
-    const currentTime = Date.now();
-    yield put(loginRetryLockoutTimeSet(currentTime));
-
-    yield call(setDelayForLockoutVault);
+    return;
   }
-}
 
-function* setDelayForLockoutVault() {
-  const loginRetryLockoutTime: number = yield select(
-    selectLoginRetryLockoutTime
-  );
-  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  const currentTime = Date.now();
+  const isTimeoutExpired =
+    currentTime - loginRetryLockoutTime >= LOCK_VAULT_TIMEOUT;
 
-  if (loginRetryLockoutTime) {
-    yield* sagaCall(delay, LOCK_VAULT_TIMEOUT);
+  //  if the timeout expired we reset the count and lockout time
+  if (isTimeoutExpired) {
+    yield put(loginRetryCountReseted());
+    yield put(loginRetryLockoutTimeReseted());
+  }
+
+  //  if the timeout has not expired we set the timer with the time that is left
+  if (!isTimeoutExpired) {
+    const timeLeft = LOCK_VAULT_TIMEOUT - (currentTime - loginRetryLockoutTime);
+    const delay = (ms: number) =>
+      new Promise(resolve => setTimeout(resolve, ms));
+
+    yield* sagaCall(delay, timeLeft);
 
     yield put(loginRetryCountReseted());
     yield put(loginRetryLockoutTimeReseted());

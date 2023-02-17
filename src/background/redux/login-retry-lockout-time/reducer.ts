@@ -4,9 +4,9 @@ import {
   loginRetryLockoutTimeReseted,
   loginRetryLockoutTimeSet
 } from './actions';
-import { LoginRetryLockoutTime } from './types';
+import { LoginRetryLockoutTimeState } from './types';
 
-const initialState = null as LoginRetryLockoutTime;
+const initialState = null as LoginRetryLockoutTimeState;
 
 export const reducer = createReducer(initialState)
   .handleAction(loginRetryLockoutTimeReseted, () => initialState)

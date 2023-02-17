@@ -1,7 +1,13 @@
 import { RootState } from 'typesafe-actions';
+import { createSelector } from 'reselect';
 
-import { LoginRetryLockoutTime } from './types';
+import { LoginRetryLockoutTimeState } from './types';
 
 export const selectLoginRetryLockoutTime = (
   state: RootState
-): LoginRetryLockoutTime => state.loginRetryLockoutTime;
+): LoginRetryLockoutTimeState => state.loginRetryLockoutTime;
+
+export const selectIsLoginRetryLockout = createSelector(
+  selectLoginRetryLockoutTime,
+  loginRetryLockoutTime => loginRetryLockoutTime == null
+);

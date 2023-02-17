@@ -8,6 +8,7 @@ import { KeysState } from './redux/keys/types';
 import { LoginRetryCountState } from './redux/login-retry-count/reducer';
 import { SessionState } from './redux/session/types';
 import { VaultCipherState } from './redux/vault-cipher/types';
+import { LoginRetryLockoutTimeState } from './redux/login-retry-lockout-time/types';
 
 // General purpose events emitted by background to all extension windows
 
@@ -19,6 +20,7 @@ export type PopupState = {
   deploys: DeploysState;
   windowManagement: WindowManagementState;
   vaultCipher: VaultCipherState;
+  loginRetryLockoutTime: LoginRetryLockoutTimeState;
 };
 
 export const selectPopupState = (state: RootState): PopupState => {
@@ -30,7 +32,8 @@ export const selectPopupState = (state: RootState): PopupState => {
     vault: state.vault,
     deploys: state.deploys,
     windowManagement: state.windowManagement,
-    vaultCipher: state.vaultCipher
+    vaultCipher: state.vaultCipher,
+    loginRetryLockoutTime: state.loginRetryLockoutTime
   };
 };
 
