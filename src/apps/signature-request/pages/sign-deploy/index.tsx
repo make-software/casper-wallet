@@ -125,7 +125,12 @@ export function SignDeployPage() {
   return (
     <LayoutWindow
       renderHeader={() => <PopupHeader withConnectionStatus />}
-      renderContent={() => <SignDeployContent deploy={deploy} />}
+      renderContent={() => (
+        <SignDeployContent
+          deploy={deploy}
+          signingPublicKeyHex={signingAccount.publicKey}
+        />
+      )}
       renderFooter={() => (
         <FooterButtonsContainer>
           <Button

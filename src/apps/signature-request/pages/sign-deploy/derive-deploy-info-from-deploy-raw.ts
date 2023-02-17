@@ -18,7 +18,6 @@ export function deriveDeployInfoFromDeployRaw(deploy: CasperDeploy) {
   const entryPoint = getEntryPoint(deploy);
 
   return {
-    signingKey: account.toHex(),
     account: account.toHex(),
     deployHash: convertBytesToHex(deploy.hash),
     bodyHash: convertBytesToHex(bodyHash),
