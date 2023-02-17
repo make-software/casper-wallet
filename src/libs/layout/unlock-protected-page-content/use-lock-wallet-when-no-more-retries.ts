@@ -19,7 +19,7 @@ export const useLockWalletWhenNoMoreRetries = (
   const loginRetryLeft = 5 - loginRetryCount;
 
   useEffect(() => {
-    if (isLoginRetryLockout) {
+    if (isLoginRetryLockout && loginRetryLeft <= 0) {
       const currentTime = Date.now();
       dispatchToMainStore(loginRetryLockoutTimeSet(currentTime));
 
@@ -31,7 +31,7 @@ export const useLockWalletWhenNoMoreRetries = (
         resetField('password');
       }
     }
-  }, [isLocked, resetField, isLoginRetryLockout]);
+  }, [isLocked, resetField, isLoginRetryLockout, loginRetryLeft]);
 
   return { loginRetryLeft };
 };
