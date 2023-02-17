@@ -33,7 +33,7 @@ import {
 import { unlockVault } from '@src/background/redux/sagas/actions';
 import { selectVaultCipher } from '@background/redux/vault-cipher/selectors';
 import { UnlockVault } from '@background/redux/sagas/types';
-import { useLockWallet } from '@layout/unlock-protected-page-content/use-lock-wallet';
+import { useLockWalletWhenNoMoreRetries } from '@layout/unlock-protected-page-content/use-lock-wallet-when-no-more-retries';
 
 import { LockedRouterPath } from '../locked-router';
 
@@ -110,9 +110,9 @@ export function UnlockVaultPageContent() {
     isSubmitting: isSubmitting || isValidating
   });
 
-  const retryLeft = useLockWallet(resetField);
+  const { loginRetryLeft } = useLockWalletWhenNoMoreRetries(resetField);
 
-  if (retryLeft <= 0) {
+  if (loginRetryLeft <= 0) {
     return (
       <>
         <ContentContainer>
@@ -160,10 +160,7 @@ export function UnlockVaultPageContent() {
         </ParagraphContainer>
         <ParagraphContainer gap="medium">
           <Typography type="body" color="contentSecondary">
-            <Trans t={t}>
-              Please enter your password to unlock. You have {{ retryLeft }}{' '}
-              tries left.
-            </Trans>
+            <Trans t={t}>Please enter your password to unlock.</Trans>
           </Typography>
         </ParagraphContainer>
         <InputsContainer>

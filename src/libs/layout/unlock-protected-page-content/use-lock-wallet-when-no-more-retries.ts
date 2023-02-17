@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { UseFormResetField } from 'react-hook-form/dist/types/form';
 
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { lockVaultForFiveMinutes } from '@background/redux/sagas/actions';
-import { UseFormResetField } from 'react-hook-form/dist/types/form';
 
-export const useLockWallet = (
+export const useLockWalletWhenNoMoreRetries = (
   resetField?: UseFormResetField<{ password: string }>
 ) => {
   const loginRetryCount = useSelector(selectLoginRetryCount);
@@ -23,5 +23,5 @@ export const useLockWallet = (
     }
   }, [retryLeft, resetField]);
 
-  return retryLeft;
+  return { loginRetryLeft: retryLeft };
 };
