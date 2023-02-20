@@ -45,9 +45,13 @@ const JsonBlock = styled.textarea`
 
 export interface SignDeployContentProps {
   deploy?: CasperDeploy;
+  signingPublicKeyHex: string;
 }
 
-export function SignDeployContent({ deploy }: SignDeployContentProps) {
+export function SignDeployContent({
+  deploy,
+  signingPublicKeyHex
+}: SignDeployContentProps) {
   const { t } = useTranslation();
 
   if (deploy == null) {
@@ -77,7 +81,7 @@ export function SignDeployContent({ deploy }: SignDeployContentProps) {
   const deployInfo = deriveDeployInfoFromDeployRaw(deploy);
 
   let signatureRequest: SignatureRequestFields = {
-    signingKey: deployInfo.signingKey,
+    signingKey: signingPublicKeyHex,
     account: deployInfo.account,
     deployHash: deployInfo.deployHash,
     timestamp: deployInfo.timestamp,
