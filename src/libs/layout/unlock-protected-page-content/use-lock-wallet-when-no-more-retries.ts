@@ -8,6 +8,7 @@ import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lo
 import { loginRetryLockoutTimeSet } from '@background/redux/login-retry-lockout-time/actions';
 import { lockVault } from '@background/redux/sagas/actions';
 import { selectVaultIsLocked } from '@background/redux/session/selectors';
+import { LOGIN_RETRY_ATTEMPTS_LIMIT } from '@src/constants';
 
 export const useLockWalletWhenNoMoreRetries = (
   resetField?: UseFormResetField<{ password: string }>
@@ -16,7 +17,7 @@ export const useLockWalletWhenNoMoreRetries = (
   const hasLoginRetryLockoutTime = useSelector(selectHasLoginRetryLockoutTime);
   const isLocked = useSelector(selectVaultIsLocked);
 
-  const loginRetryLeft = 5 - loginRetryCount;
+  const loginRetryLeft = LOGIN_RETRY_ATTEMPTS_LIMIT - loginRetryCount;
 
   useEffect(() => {
     if (!hasLoginRetryLockoutTime && loginRetryLeft <= 0) {
