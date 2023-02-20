@@ -6,8 +6,11 @@ import { verifyPasswordAgainstHash } from '@src/libs/crypto/hashing';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { loginRetryCountIncrement } from '@src/background/redux/login-retry-count/actions';
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
+import { LOGIN_RETRY_ATTEMPTS_LIMIT } from '@src/constants';
 
 export const minPasswordLength = 16;
+
+const ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED = 1;
 
 export function useCreatePasswordRule() {
   const { t } = useTranslation();
@@ -25,8 +28,11 @@ export function useVerifyPasswordAgainstHashRule(
   const { t } = useTranslation();
   const loginRetryCount = useSelector(selectLoginRetryCount);
 
-  // We have 5 attempts, but we start showing error text after the user used one attempt and it lefts 4 attempts
-  const attemptsLeft = 4 - loginRetryCount;
+  const attemptsLeft =
+    LOGIN_RETRY_ATTEMPTS_LIMIT -
+    loginRetryCount -
+    ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED;
+
   const errorMessage =
     attemptsLeft === 1
       ? t(
