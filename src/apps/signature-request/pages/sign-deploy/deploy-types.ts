@@ -6,6 +6,7 @@ export type ArgDict = { [key: string]: string | CLValue };
 export enum DeployType {
   TransferCall = 'Transfer Call',
   ContractCall = 'Contract Call',
+  ModuleBytes = 'Module Bytes',
   Unknown = 'Unknown'
 }
 
