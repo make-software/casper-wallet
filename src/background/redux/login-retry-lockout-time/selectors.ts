@@ -7,7 +7,7 @@ export const selectLoginRetryLockoutTime = (
   state: RootState
 ): LoginRetryLockoutTimeState => state.loginRetryLockoutTime;
 
-export const selectIsLoginRetryLockout = createSelector(
+export const selectHasLoginRetryLockoutTime = createSelector(
   selectLoginRetryLockoutTime,
-  loginRetryLockoutTime => loginRetryLockoutTime == null
+  loginRetryLockoutTime => loginRetryLockoutTime != null
 );

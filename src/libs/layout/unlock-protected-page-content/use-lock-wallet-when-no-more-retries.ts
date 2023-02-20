@@ -4,7 +4,7 @@ import { UseFormResetField } from 'react-hook-form/dist/types/form';
 
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { selectIsLoginRetryLockout } from '@background/redux/login-retry-lockout-time/selectors';
+import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
 import { loginRetryLockoutTimeSet } from '@background/redux/login-retry-lockout-time/actions';
 import { lockVault } from '@background/redux/sagas/actions';
 import { selectVaultIsLocked } from '@background/redux/session/selectors';
@@ -13,13 +13,13 @@ export const useLockWalletWhenNoMoreRetries = (
   resetField?: UseFormResetField<{ password: string }>
 ) => {
   const loginRetryCount = useSelector(selectLoginRetryCount);
-  const isLoginRetryLockout = useSelector(selectIsLoginRetryLockout);
+  const hasLoginRetryLockoutTime = useSelector(selectHasLoginRetryLockoutTime);
   const isLocked = useSelector(selectVaultIsLocked);
 
   const loginRetryLeft = 5 - loginRetryCount;
 
   useEffect(() => {
-    if (isLoginRetryLockout && loginRetryLeft <= 0) {
+    if (!hasLoginRetryLockoutTime && loginRetryLeft <= 0) {
       const currentTime = Date.now();
       dispatchToMainStore(loginRetryLockoutTimeSet(currentTime));
 
@@ -31,7 +31,5 @@ export const useLockWalletWhenNoMoreRetries = (
         resetField('password');
       }
     }
-  }, [isLocked, resetField, isLoginRetryLockout, loginRetryLeft]);
-
-  return { loginRetryLeft };
+  }, [isLocked, resetField, hasLoginRetryLockoutTime, loginRetryLeft]);
 };

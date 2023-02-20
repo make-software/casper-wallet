@@ -34,6 +34,7 @@ import { unlockVault } from '@src/background/redux/sagas/actions';
 import { selectVaultCipher } from '@background/redux/vault-cipher/selectors';
 import { UnlockVault } from '@background/redux/sagas/types';
 import { useLockWalletWhenNoMoreRetries } from '@layout/unlock-protected-page-content/use-lock-wallet-when-no-more-retries';
+import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
 
 import { LockedRouterPath } from '../locked-router';
 
@@ -53,6 +54,7 @@ export function UnlockVaultPageContent() {
   const passwordSaltHash = useSelector(selectPasswordSaltHash);
   const keyDerivationSaltHash = useSelector(selectKeyDerivationSaltHash);
   const vaultCipher = useSelector(selectVaultCipher);
+  const hasLoginRetryLockoutTime = useSelector(selectHasLoginRetryLockoutTime);
 
   if (passwordHash == null || passwordSaltHash == null) {
     throw Error("Password doesn't exist");
@@ -110,9 +112,9 @@ export function UnlockVaultPageContent() {
     isSubmitting: isSubmitting || isValidating
   });
 
-  const { loginRetryLeft } = useLockWalletWhenNoMoreRetries(resetField);
+  useLockWalletWhenNoMoreRetries(resetField);
 
-  if (loginRetryLeft <= 0) {
+  if (hasLoginRetryLockoutTime) {
     return (
       <>
         <ContentContainer>
