@@ -1,6 +1,8 @@
 import { compose } from 'redux';
 import { composeWithDevTools } from 'remote-redux-devtools';
 import browser from 'webextension-polyfill';
+import { RootState } from 'typesafe-actions';
+import { select, call } from 'redux-saga/effects';
 
 import { createStore } from '@src/background/redux';
 import {
@@ -11,11 +13,11 @@ import {
 import { ServiceMessage } from '@background/service-message';
 
 import { ReduxAction } from './redux-action';
-import { RootState } from 'typesafe-actions';
-import { select, call } from 'redux-saga/effects';
 import { startBackground } from './sagas/actions';
 import { KeysState } from './keys/types';
 import { LoginRetryCountState } from './login-retry-count/reducer';
+import { SessionState } from './session/types';
+import { VaultState } from './vault/types';
 
 declare global {
   interface Window {
@@ -36,11 +38,15 @@ export const composeEnhancers =
 export const VAULT_CIPHER_KEY = 'zazXu8w9GyCtxZ';
 export const KEYS_KEY = '2yNVAEQJB5rxMg';
 export const LOGIN_RETRY_KEY = '7ZVdMbk9yD8WGZ';
+export const SESSION = 'nZA6p2r37TpTHC';
+export const VAULT = 'RYz7iaRf39uYHs';
 
 type StorageState = {
   [VAULT_CIPHER_KEY]: string;
   [KEYS_KEY]: KeysState;
   [LOGIN_RETRY_KEY]: LoginRetryCountState;
+  [SESSION]: SessionState;
+  [VAULT]: VaultState;
 };
 
 // this needs to be private
@@ -51,16 +57,26 @@ export async function getExistingMainStoreSingletonOrInit() {
   const {
     [VAULT_CIPHER_KEY]: vaultCipher,
     [KEYS_KEY]: keys,
-    [LOGIN_RETRY_KEY]: loginRetryCount
+    [LOGIN_RETRY_KEY]: loginRetryCount,
+    [SESSION]: session,
+    [VAULT]: vault
   } = (await browser.storage.local.get([
     VAULT_CIPHER_KEY,
     KEYS_KEY,
-    LOGIN_RETRY_KEY
+    LOGIN_RETRY_KEY,
+    SESSION,
+    VAULT
   ])) as StorageState;
 
   if (storeSingleton == null) {
     // console.warn('STORE INIT', state);
-    storeSingleton = createStore({ vaultCipher, keys, loginRetryCount });
+    storeSingleton = createStore({
+      vaultCipher,
+      keys,
+      loginRetryCount,
+      session,
+      vault
+    });
     // send start action
     storeSingleton.dispatch(startBackground());
     // on updates propagate new state to replicas and also persist encrypted vault
@@ -76,12 +92,14 @@ export async function getExistingMainStoreSingletonOrInit() {
         });
 
       // persist selected state
-      const { vaultCipher, keys, loginRetryCount } = state;
+      const { vaultCipher, keys, loginRetryCount, session, vault } = state;
       browser.storage.local
         .set({
           [VAULT_CIPHER_KEY]: vaultCipher,
           [KEYS_KEY]: keys,
-          [LOGIN_RETRY_KEY]: loginRetryCount
+          [LOGIN_RETRY_KEY]: loginRetryCount,
+          [SESSION]: session,
+          [VAULT]: vault
         })
         .catch(e => {
           console.error('Persist encrypted vault failed: ', e);
