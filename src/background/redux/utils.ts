@@ -37,7 +37,7 @@ export const composeEnhancers =
 export const VAULT_CIPHER_KEY = 'zazXu8w9GyCtxZ';
 export const KEYS_KEY = '2yNVAEQJB5rxMg';
 export const LOGIN_RETRY_KEY = '7ZVdMbk9yD8WGZ';
-export const LOGIN_VAULT_TIMER_KEY = 'F6SVs304JPa82';
+export const LOGIN_VAULT_TIMER_KEY = 'p6nnYiaxcsaNG3';
 
 type StorageState = {
   [VAULT_CIPHER_KEY]: string;
