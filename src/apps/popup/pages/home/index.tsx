@@ -184,7 +184,7 @@ export function HomePageContent() {
               href={getCSPRLiveUserAccountUrl(activeAccount.publicKey)}
               target="_blank"
               color="inherit"
-              title="View account in CSPR.live"
+              title={t('View account in CSPR.live')}
             >
               <SvgIcon src="assets/icons/external-link.svg" />
             </Link>

@@ -55,7 +55,7 @@ export const AccountSettingsPage = () => {
           <Button
             displayAsLinkTo={getCSPRLiveUserAccountUrl(account.publicKey)}
             color="secondaryBlue"
-            title="View account in CSPR.live"
+            title={t('View account in CSPR.live')}
           >
             <Trans t={t}>View on CSPR.live</Trans>
           </Button>

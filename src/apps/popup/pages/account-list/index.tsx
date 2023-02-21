@@ -244,7 +244,7 @@ export function AccountListPage() {
                     <HoverLink
                       target="_blank"
                       color="inherit"
-                      title="View account in CSPR.live"
+                      title={t('View account in CSPR.live')}
                       href={getCSPRLiveUserAccountUrl(account.publicKey)}
                     >
                       <SvgIcon
