@@ -7,6 +7,7 @@ import * as keys from './keys/actions';
 import * as deploys from './deploys/actions';
 import * as windowManagement from './windowManagement/actions';
 import * as session from './session/actions';
+import * as loginRetryLockoutTime from './login-retry-lockout-time/actions';
 
 const reduxAction = {
   sagas,
@@ -16,7 +17,8 @@ const reduxAction = {
   keys,
   deploys,
   windowManagement,
-  session
+  session,
+  loginRetryLockoutTime
 };
 
 export type ReduxAction = ActionType<typeof reduxAction>;
