@@ -66,7 +66,10 @@ export function AppRouter() {
             />
           }
         />
-        <Route path={RouterPath.Connecting} element={<ConnectingPage />} />
+        <Route
+          path={RouterPath.Connecting}
+          element={<ConnectingPage origin={origin} />}
+        />
       </Routes>
     </HashRouter>
   );
