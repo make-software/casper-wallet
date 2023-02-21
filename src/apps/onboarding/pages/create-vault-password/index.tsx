@@ -23,10 +23,15 @@ import { CreateVaultPasswordPageContent } from './content';
 import { useSelector } from 'react-redux';
 import { selectPasswordHash } from '@src/background/redux/keys/selectors';
 import { initKeys } from '@src/background/redux/sagas/actions';
+import styled from 'styled-components';
 
 interface CreateVaultPasswordPageProps {
   saveIsLoggedIn: (isLoggedIn: boolean) => void;
 }
+
+const TermsLink = styled.a`
+  text-decoration: none;
+`;
 
 export function CreateVaultPasswordPage({
   saveIsLoggedIn
@@ -49,6 +54,20 @@ export function CreateVaultPasswordPage({
     saveIsLoggedIn(true);
   }
 
+  const terms = (
+    <Trans>
+      I have read and agree to the{' '}
+      <TermsLink href="https://www.casperwallet.io/tos">
+        Casper Wallet Terms of Service
+      </TermsLink>{' '}
+      and{' '}
+      <TermsLink href="https://www.casperwallet.io/privacy">
+        Privacy Policy
+      </TermsLink>
+      .
+    </Trans>
+  );
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <LayoutTab
@@ -70,9 +89,7 @@ export function CreateVaultPasswordPage({
             <Checkbox
               checked={isChecked}
               onChange={() => setIsChecked(currentValue => !currentValue)}
-              label={t(
-                'I have read and agree to the Casper Wallet Terms of Service.'
-              )}
+              label={terms}
             />
             <Button disabled={!isChecked || !isDirty || isSubmitSuccessful}>
               <Trans t={t}>Create password</Trans>
