@@ -38,9 +38,9 @@ const PopoverContainer = styled.div<PopoverContainerProps>`
 `;
 
 const PopoverItemsContainer = styled(FlexColumn)`
-  gap: 12px;
+  gap: 4px;
 
-  padding: 16px 20px;
+  padding: 8px;
 
   background: ${({ theme }) => theme.color.fillWhite};
   box-shadow: 0 1px 8px rgba(132, 134, 140, 0.2);
@@ -63,7 +63,10 @@ export function Popover({
   const childrenContainerRef = useRef<HTMLDivElement>(null);
 
   const { ref: clickAwayRef } = useClickAway({
-    callback: () => isOpen && setIsOpen(false)
+    callback: (event: MouseEvent<HTMLAnchorElement>) => {
+      event.stopPropagation();
+      isOpen && setIsOpen(false);
+    }
   });
 
   const closePopover = (e: MouseEvent<HTMLAnchorElement>) => {

@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { BaseProps, Link } from '@src/libs/ui';
+import { BaseProps } from '@src/libs/ui';
 
 type ButtonVariant = 'inline' | 'fullWidth';
 
@@ -11,6 +11,7 @@ interface BaseButtonProps extends BaseProps {
   height?: '24' | '36' | '40';
   width?: '100' | '120' | '176' | '100%';
   variant?: ButtonVariant;
+  title?: string;
 }
 
 const BaseButton = styled.button<BaseButtonProps>(
@@ -161,6 +162,10 @@ const UtilityButton = styled(BaseButton)<BaseButtonProps>(
   })
 );
 
+const Link = styled.a`
+  text-decoration: none;
+`;
+
 const BUTTON_COMPONENT_BY_COLOR_DICT = {
   primaryBlue: PrimaryBlueButton,
   primaryRed: PrimaryRedButton,
@@ -193,24 +198,23 @@ export const Button = React.forwardRef<Ref, ButtonProps>(function Button(
   }: ButtonProps,
   ref
 ) {
+  const ButtonComponent =
+    BUTTON_COMPONENT_BY_COLOR_DICT[color] || PrimaryBlueButton;
+
   if (displayAsLinkTo) {
     return (
-      <Link
+      <ButtonComponent
         href={displayAsLinkTo}
-        color="fillRed"
-        onClick={ev => {
-          ev.preventDefault();
-          props.onClick && props.onClick(ev);
-        }}
+        target="_blank"
+        as={Link}
+        ref={ref}
+        variant={variant}
         data-testid={dataTestId}
-      >
-        <UtilityButton>{props.children}</UtilityButton>
-      </Link>
+        {...props}
+      />
     );
   }
 
-  const ButtonComponent =
-    BUTTON_COMPONENT_BY_COLOR_DICT[color] || PrimaryBlueButton;
   return (
     <ButtonComponent
       ref={ref}

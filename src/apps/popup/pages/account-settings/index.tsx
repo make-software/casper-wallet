@@ -1,24 +1,29 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import { RootState } from 'typesafe-actions';
-
-import styled from 'styled-components';
+import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
 import {
-  ContentContainer,
-  ParagraphContainer
-} from '@src/libs/layout/containers';
-import { SvgIcon, PageTile, Typography } from '@libs/ui';
-import {
-  selectVaultAccountWithName,
-  selectVaultImportedAccounts
-} from '@src/background/redux/vault/selectors';
-
+  FooterButtonsContainer,
+  HeaderSubmenuBarNavLink,
+  PopupHeader,
+  PopupLayout
+} from '@libs/layout';
+import { Button } from '@libs/ui';
+import { selectVaultAccountWithName } from '@background/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
+import { getCSPRLiveUserAccountUrl } from '@src/constants';
 
-export function AccountSettingsPageContent() {
+import {
+  AccountSettingsActionsGroup,
+  AccountSettingsPageContent
+} from './content';
+
+export const AccountSettingsPage = () => {
   const navigate = useTypedNavigate();
+  const { t } = useTranslation();
+
   const { accountName } = useParams();
   const account = useSelector((state: RootState) =>
     selectVaultAccountWithName(state, accountName || '')
@@ -30,73 +35,32 @@ export function AccountSettingsPageContent() {
   }
 
   return (
-    <ContentContainer>
-      <PageTile>
-        <ParagraphContainer gap="big">
-          <Typography type="header">{account.name}</Typography>
-        </ParagraphContainer>
-      </PageTile>
-    </ContentContainer>
-  );
-}
-
-interface AccountIconButtonProps {
-  type: 'rename' | 'remove';
-}
-
-function AccountIconButton({ type }: AccountIconButtonProps) {
-  const { accountName } = useParams();
-  const navigate = useTypedNavigate();
-
-  const handleNavigateToNextPage = useCallback(() => {
-    if (!accountName) {
-      return;
-    }
-
-    const path =
-      type === 'remove'
-        ? RouterPath.RemoveAccount.replace(':accountName', accountName)
-        : RouterPath.RenameAccount.replace(':accountName', accountName);
-
-    navigate(path);
-  }, [navigate, accountName, type]);
-
-  if (!accountName) {
-    return null;
-  }
-
-  return (
-    <SvgIcon
-      onClick={handleNavigateToNextPage}
-      color={type === 'remove' ? 'contentRed' : 'contentBlue'}
-      src={
-        type === 'remove' ? 'assets/icons/delete.svg' : 'assets/icons/edit.svg'
-      }
+    <PopupLayout
+      renderHeader={() => (
+        <PopupHeader
+          withLock
+          withMenu
+          withConnectionStatus
+          renderSubmenuBarItems={() => (
+            <>
+              <HeaderSubmenuBarNavLink linkType="close" />
+              <AccountSettingsActionsGroup />
+            </>
+          )}
+        />
+      )}
+      renderContent={() => <AccountSettingsPageContent />}
+      renderFooter={() => (
+        <FooterButtonsContainer>
+          <Button
+            displayAsLinkTo={getCSPRLiveUserAccountUrl(account.publicKey)}
+            color="secondaryBlue"
+            title="View account in CSPR.live"
+          >
+            <Trans t={t}>View on CSPR.live</Trans>
+          </Button>
+        </FooterButtonsContainer>
+      )}
     />
   );
-}
-
-const AccountSettingsActionsGroupContainer = styled.div`
-  display: flex;
-  gap: 28px;
-`;
-
-export function AccountSettingsActionsGroup() {
-  const { accountName } = useParams();
-  const importedAccountNames = useSelector(selectVaultImportedAccounts).map(
-    a => a.name
-  );
-
-  if (!accountName) {
-    return null;
-  }
-
-  const isImportedAccount = importedAccountNames.includes(accountName);
-
-  return (
-    <AccountSettingsActionsGroupContainer>
-      <AccountIconButton type="rename" />
-      {isImportedAccount && <AccountIconButton type="remove" />}
-    </AccountSettingsActionsGroupContainer>
-  );
-}
+};

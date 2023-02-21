@@ -13,15 +13,30 @@ import { CenteredFlexRow } from '@libs/layout';
 
 import { truncateKey } from './utils';
 
+export enum HashVariant {
+  CaptionHash = 'captionHash',
+  BodyHash = 'bodyHash'
+}
+
+export enum HashDisplayContext {
+  Home = 'home',
+  AccountInfo = 'accountInfo'
+}
+
 interface HashContainerProps {
-  displayContext?: 'home';
+  displayContext?: HashDisplayContext;
+}
+
+interface HashValueProps {
+  displayContext?: HashDisplayContext;
 }
 
 const HashContainer = styled(CenteredFlexRow)<HashContainerProps>`
-  display: flex;
+  display: ${({ displayContext }) =>
+    displayContext === HashDisplayContext.AccountInfo ? 'block' : 'flex'};
   align-items: center;
   height: ${({ displayContext }) =>
-    displayContext === 'home' ? '24px' : 'auto'};
+    displayContext === HashDisplayContext.Home ? '24px' : 'auto'};
 `;
 
 const CopyStatusContainer = styled.div`
@@ -37,10 +52,11 @@ export const HoverCopyIcon = styled(SvgIcon)`
   }
 `;
 
-export enum HashVariant {
-  CaptionHash = 'captionHash',
-  BodyHash = 'bodyHash'
-}
+const HashValue = styled(Typography)<HashValueProps>`
+  word-break: break-all;
+  line-height: ${({ displayContext }) =>
+    displayContext === HashDisplayContext.AccountInfo && '24px'};
+`;
 
 interface HashProps {
   value: string;
@@ -50,7 +66,7 @@ interface HashProps {
   withCopyOnSelfClick?: boolean;
   withTag?: boolean;
   withCopyIconOnHover?: boolean;
-  displayContext?: 'home';
+  displayContext?: HashDisplayContext;
 }
 
 export function Hash({
@@ -68,23 +84,27 @@ export function Hash({
   const HashComponent = useMemo(
     () => (
       <>
-        <Typography type={variant} color={color || 'contentSecondary'}>
+        <HashValue
+          displayContext={displayContext}
+          type={variant}
+          color={color || 'contentSecondary'}
+        >
           {truncated ? truncateKey(value) : value}
-        </Typography>
+        </HashValue>
         {withTag && (
           <Tag displayContext="accountList">{`${t('Imported')}`}</Tag>
         )}
       </>
     ),
-    [color, truncated, value, variant, withTag, t]
+    [color, truncated, value, variant, withTag, t, displayContext]
   );
 
   if (withCopyIconOnHover) {
     return (
       <HashContainer displayContext={displayContext}>
-        <Typography type={variant} color={color || 'contentSecondary'}>
+        <HashValue type={variant} color={color || 'contentSecondary'}>
           {truncated ? truncateKey(value) : value}
-        </Typography>
+        </HashValue>
         <CopyToClipboard
           renderContent={({ isClicked }) => (
             <>
@@ -93,14 +113,14 @@ export function Hash({
                   color="contentGreen"
                   src="assets/icons/checkbox-checked.svg"
                   size={16}
-                  marginLeft
+                  marginLeft="small"
                 />
               ) : (
                 <HoverCopyIcon
                   src="assets/icons/copy.svg"
                   color="contentTertiary"
                   size={16}
-                  marginLeft
+                  marginLeft="small"
                 />
               )}
             </>
@@ -132,7 +152,14 @@ export function Hash({
             ) : (
               <HashContainer displayContext={displayContext}>
                 {HashComponent}
-                <SvgIcon src="assets/icons/copy.svg" size={16} marginLeft />
+                <SvgIcon
+                  src="assets/icons/copy.svg"
+                  size={16}
+                  marginLeft="small"
+                  verticalAlign={
+                    displayContext === 'accountInfo' ? 'text-bottom' : null
+                  }
+                />
               </HashContainer>
             )}
           </>

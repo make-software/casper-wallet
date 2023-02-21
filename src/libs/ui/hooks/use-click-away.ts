@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 export type Props = {
   eventType?: 'click';
-  callback: () => void;
+  callback: (event: any) => void;
 };
 
 export function useClickAway({ eventType = 'click', callback }: Props) {
@@ -12,7 +12,7 @@ export function useClickAway({ eventType = 'click', callback }: Props) {
     (event: any) => {
       if (ref && ref.current) {
         if (!ref.current.contains(event.target)) {
-          callback();
+          callback(event);
         }
       }
     },
@@ -20,9 +20,9 @@ export function useClickAway({ eventType = 'click', callback }: Props) {
   );
 
   useEffect(() => {
-    document.addEventListener(eventType, handleClickOutside);
+    document.addEventListener(eventType, handleClickOutside, true);
     return () => {
-      document.removeEventListener(eventType, handleClickOutside, false);
+      document.removeEventListener(eventType, handleClickOutside, true);
     };
   }, [eventType, handleClickOutside]);
 

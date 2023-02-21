@@ -21,9 +21,21 @@ export interface SvgIconProps extends React.HTMLAttributes<Ref> {
   color?: ContentColor;
   tooltip?: string;
   flipByAxis?: 'X' | 'Y';
-  marginLeft?: boolean;
-  marginRight?: boolean;
+  marginLeft?: 'small' | 'medium';
+  marginRight?: 'small' | 'medium';
+  verticalAlign?: string | null;
 }
+
+const getMargin = (size?: 'small' | 'medium') => {
+  switch (size) {
+    case 'small':
+      return 4;
+    case 'medium':
+      return 8;
+    default:
+      return 'initial';
+  }
+};
 
 const Container = styled('div').withConfig({
   shouldForwardProp: (prop, defaultValidatorFn) =>
@@ -35,9 +47,10 @@ const Container = styled('div').withConfig({
   color?: ContentColor;
   active?: boolean;
   flipByAxis?: 'X' | 'Y';
-  marginLeft?: boolean;
-  marginRight?: boolean;
+  marginLeft?: 'small' | 'medium';
+  marginRight?: 'small' | 'medium';
   onClick?: (ev: any) => void;
+  verticalAlign?: string | null;
 }>(
   ({
     theme,
@@ -48,10 +61,11 @@ const Container = styled('div').withConfig({
     flipByAxis,
     marginLeft,
     marginRight,
+    verticalAlign,
     onClick
   }) => ({
     display: 'inline-block',
-    verticalAlign: 'middle',
+    verticalAlign: verticalAlign != null ? verticalAlign : 'middle',
     width: width != null ? width : size,
     height: height != null ? height : size,
     color: getColorFromTheme(theme, color),
@@ -64,8 +78,8 @@ const Container = styled('div').withConfig({
     },
     transform: flipByAxis ? `rotate${flipByAxis}(180deg)` : 'none',
     transition: 'transform 500ms ease',
-    marginLeft: marginLeft ? 4 : 'initial',
-    marginRight: marginRight ? 4 : 'initial',
+    marginLeft: getMargin(marginLeft),
+    marginRight: getMargin(marginRight),
     cursor: onClick ? 'pointer' : 'inherit'
   })
 );

@@ -37,6 +37,7 @@ import {
 } from '@background/redux/vault/selectors';
 import { selectActiveOrigin } from '@background/redux/session/selectors';
 import { AccountListRows } from '@background/redux/vault/types';
+import { getCSPRLiveUserAccountUrl } from '@src/constants';
 
 import { Popover } from './components/popover';
 
@@ -75,6 +76,19 @@ const ConnectionStatusBadgeContainer = styled.div`
 
 const HashContainer = styled.div`
   margin-top: 4px;
+`;
+
+const HoverLink = styled(Link)`
+  padding: 8px 8px 8px 10px;
+
+  &:hover,
+  &:hover svg {
+    color: ${({ theme }) => theme.color.contentBlue};
+  }
+
+  &:hover {
+    background-color: ${({ theme }) => theme.color.backgroundSecondary};
+  }
 `;
 
 export function AccountListPage() {
@@ -193,7 +207,7 @@ export function AccountListPage() {
                 renderMenuItems={({ closePopover }) => (
                   <>
                     {connectedAccountNames.includes(account.name) ? (
-                      <Link
+                      <HoverLink
                         color="inherit"
                         onClick={e => {
                           closePopover(e);
@@ -204,9 +218,9 @@ export function AccountListPage() {
                         <Typography type="body">
                           <Trans t={t}>Disconnect</Trans>
                         </Typography>
-                      </Link>
+                      </HoverLink>
                     ) : (
-                      <Link
+                      <HoverLink
                         color="inherit"
                         onClick={() =>
                           navigate(
@@ -216,12 +230,34 @@ export function AccountListPage() {
                           )
                         }
                       >
+                        <SvgIcon
+                          src="assets/icons/link.svg"
+                          marginRight="medium"
+                          color="contentTertiary"
+                          verticalAlign="bottom"
+                        />
                         <Typography type="body">
                           <Trans t={t}>Connect</Trans>
                         </Typography>
-                      </Link>
+                      </HoverLink>
                     )}
-                    <Link
+                    <HoverLink
+                      target="_blank"
+                      color="inherit"
+                      title="View account in CSPR.live"
+                      href={getCSPRLiveUserAccountUrl(account.publicKey)}
+                    >
+                      <SvgIcon
+                        src="assets/icons/external-link.svg"
+                        marginRight="medium"
+                        color="contentTertiary"
+                        verticalAlign="bottom"
+                      />
+                      <Typography type="body">
+                        <Trans t={t}>View on CSPR.live</Trans>
+                      </Typography>
+                    </HoverLink>
+                    <HoverLink
                       color="inherit"
                       onClick={() =>
                         navigate(
@@ -232,10 +268,16 @@ export function AccountListPage() {
                         )
                       }
                     >
+                      <SvgIcon
+                        src="assets/icons/settings.svg"
+                        marginRight="medium"
+                        color="contentTertiary"
+                        verticalAlign="bottom"
+                      />
                       <Typography type="body">
                         <Trans t={t}>Manage</Trans>
                       </Typography>
-                    </Link>
+                    </HoverLink>
                   </>
                 )}
               >

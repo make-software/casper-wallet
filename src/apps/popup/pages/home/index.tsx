@@ -17,7 +17,10 @@ import {
   HashVariant,
   PageTile,
   Typography,
-  Avatar
+  Avatar,
+  SvgIcon,
+  Link,
+  HashDisplayContext
 } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -46,6 +49,7 @@ import {
   dispatchFetchAccountInfoRequest,
   getAccountInfo
 } from '@libs/services/account-info';
+import { getCSPRLiveUserAccountUrl } from '@src/constants';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
@@ -87,6 +91,11 @@ const ButtonsContainer = styled.div`
   width: 100%;
 
   margin-top: 16px;
+`;
+
+const BadgeContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
 `;
 
 export function HomePageContent() {
@@ -166,10 +175,20 @@ export function HomePageContent() {
     <HomePageContentContainer>
       {activeAccount && (
         <PageTile>
-          <ConnectionStatusBadge
-            isConnected={isActiveAccountConnected}
-            displayContext="home"
-          />
+          <BadgeContainer>
+            <ConnectionStatusBadge
+              isConnected={isActiveAccountConnected}
+              displayContext="home"
+            />
+            <Link
+              href={getCSPRLiveUserAccountUrl(activeAccount.publicKey)}
+              target="_blank"
+              color="inherit"
+              title="View account in CSPR.live"
+            >
+              <SvgIcon src="assets/icons/external-link.svg" />
+            </Link>
+          </BadgeContainer>
           <Avatar
             publicKey={activeAccount.publicKey}
             src={accountLogo}
@@ -184,7 +203,7 @@ export function HomePageContent() {
               variant={HashVariant.CaptionHash}
               truncated
               withCopyOnSelfClick
-              displayContext="home"
+              displayContext={HashDisplayContext.Home}
             />
           </NameAndAddressContainer>
           <BalanceContainer>
