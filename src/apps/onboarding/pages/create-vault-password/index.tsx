@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
 import {
   HeaderSubmenuBarNavLink,
@@ -7,7 +8,7 @@ import {
   TabFooterContainer,
   TabHeaderContainer
 } from '@libs/layout';
-import { Button, Checkbox } from '@libs/ui';
+import { Button, Checkbox, Link } from '@libs/ui';
 import {
   CreatePasswordFormValues,
   useCreatePasswordForm
@@ -16,22 +17,15 @@ import {
 import { Stepper } from '@src/apps/onboarding/components/stepper';
 import { RouterPath } from '@src/apps/onboarding/router';
 import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-
+import { selectPasswordHash } from '@src/background/redux/keys/selectors';
+import { initKeys } from '@src/background/redux/sagas/actions';
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { CreateVaultPasswordPageContent } from './content';
-import { useSelector } from 'react-redux';
-import { selectPasswordHash } from '@src/background/redux/keys/selectors';
-import { initKeys } from '@src/background/redux/sagas/actions';
-import styled from 'styled-components';
 
 interface CreateVaultPasswordPageProps {
   saveIsLoggedIn: (isLoggedIn: boolean) => void;
 }
-
-const TermsLink = styled.a`
-  text-decoration: none;
-`;
 
 export function CreateVaultPasswordPage({
   saveIsLoggedIn
@@ -55,15 +49,23 @@ export function CreateVaultPasswordPage({
   }
 
   const terms = (
-    <Trans>
+    <Trans t={t}>
       I have read and agree to the{' '}
-      <TermsLink href="https://www.casperwallet.io/tos">
+      <Link
+        color="fillBlue"
+        target="_blank"
+        href="https://www.casperwallet.io/tos"
+      >
         Casper Wallet Terms of Service
-      </TermsLink>{' '}
+      </Link>{' '}
       and{' '}
-      <TermsLink href="https://www.casperwallet.io/privacy">
+      <Link
+        color="fillBlue"
+        target="_blank"
+        href="https://www.casperwallet.io/privacy"
+      >
         Privacy Policy
-      </TermsLink>
+      </Link>
       .
     </Trans>
   );
