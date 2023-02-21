@@ -90,6 +90,7 @@ export function CreateVaultPasswordPage({
               checked={isChecked}
               onChange={() => setIsChecked(currentValue => !currentValue)}
               label={terms}
+              dataTestId="terms-checkbox"
             />
             <Button disabled={!isChecked || !isDirty || isSubmitSuccessful}>
               <Trans t={t}>Create password</Trans>

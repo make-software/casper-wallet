@@ -13,10 +13,9 @@ export const createPassword = async (driver: Driver) => {
     vaultPassword
   );
 
-  await driver.clickElement(
-    By.xpath(
-      "//*[text()='I have read and agree to the Casper Wallet Terms of Service.']"
-    )
+  const checkbox = await driver.findElement(
+    By.xpath("//*[@data-testid='terms-checkbox']")
   );
+  await checkbox.click();
   await driver.clickElement(By.xpath("//button[text()='Create password']"));
 };
