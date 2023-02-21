@@ -40,6 +40,7 @@ export function SignMessageContent({
             <Typography type="body">
               <Input
                 value={truncateKey(publicKeyHex, { size: 'max' })}
+                monotype
                 readOnly
               />
             </Typography>
