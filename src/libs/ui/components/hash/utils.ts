@@ -12,7 +12,7 @@ export function truncateKey(
 
     case 'max':
       beginOfKey = key.slice(0, 13);
-      endOfKey = key.slice(key.length - 14);
+      endOfKey = key.slice(key.length - 13);
       break;
   }
 
