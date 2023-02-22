@@ -40,7 +40,11 @@ const AppLogoImg = styled.img`
   height: 40px;
 `;
 
-export function ConnectingContent() {
+interface ConnectingContentProps {
+  origin: string;
+}
+
+export function ConnectingContent({ origin }: ConnectingContentProps) {
   const { t } = useTranslation();
 
   useEffect(() => {

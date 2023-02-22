@@ -85,6 +85,7 @@ import {
   loginRetryCountReseted
 } from './redux/login-retry-count/actions';
 import { emitSdkEventToAllActiveTabs } from './emit-sdk-event-to-all-active-tabs';
+import { loginRetryLockoutTimeSet } from './redux/login-retry-lockout-time/actions';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -354,6 +355,7 @@ browser.runtime.onMessage.addListener(
           case getType(keysUpdated):
           case getType(loginRetryCountReseted):
           case getType(loginRetryCountIncrement):
+          case getType(loginRetryLockoutTimeSet):
             store.dispatch(action);
             return sendResponse(undefined);
 

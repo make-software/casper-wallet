@@ -1,10 +1,20 @@
-import { put, takeLatest } from 'redux-saga/effects';
+import { put, select, takeLatest } from 'redux-saga/effects';
 import { getType } from 'typesafe-actions';
 
 import { deriveKeyPair } from '@src/libs/crypto';
 import { encryptVault } from '@src/libs/crypto/vault';
 
-import { MapTimeoutDurationSettingToValue } from '@src/apps/popup/constants';
+import {
+  LOCK_VAULT_TIMEOUT,
+  MapTimeoutDurationSettingToValue
+} from '@src/apps/popup/constants';
+import { sdkEvent } from '@src/content/sdk-event';
+import { emitSdkEventToAllActiveTabs } from '@src/background/emit-sdk-event-to-all-active-tabs';
+import { selectLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
+import {
+  loginRetryLockoutTimeReseted,
+  loginRetryLockoutTimeSet
+} from '@background/redux/login-retry-lockout-time/actions';
 
 import {
   selectEncryptionKeyHash,
@@ -39,6 +49,12 @@ import {
   sessionReseted,
   vaultUnlocked
 } from '../session/actions';
+import { selectVaultCipherDoesExist } from '../vault-cipher/selectors';
+import { keysUpdated } from '../keys/actions';
+import { vaultCipherCreated } from '../vault-cipher/actions';
+import { deploysReseted } from '../deploys/actions';
+import { loginRetryCountReseted } from '../login-retry-count/actions';
+import { popupWindowInit } from '../windowManagement/actions';
 
 import {
   createAccount,
@@ -46,16 +62,13 @@ import {
   startBackground,
   unlockVault
 } from './actions';
-import { selectVaultCipherDoesExist } from '../vault-cipher/selectors';
-import { keysUpdated } from '../keys/actions';
-import { vaultCipherCreated } from '../vault-cipher/actions';
-import { deploysReseted } from '../deploys/actions';
-import { loginRetryCountReseted } from '../login-retry-count/actions';
-import { sdkEvent } from '@src/content/sdk-event';
-import { emitSdkEventToAllActiveTabs } from '@src/background/emit-sdk-event-to-all-active-tabs';
 
 export function* vaultSagas() {
   yield takeLatest(getType(lockVault), lockVaultSaga);
+  yield takeLatest(
+    [getType(loginRetryLockoutTimeSet), getType(popupWindowInit)],
+    setDelayForLockoutVaultSaga
+  );
   yield takeLatest(getType(unlockVault), unlockVaultSaga);
   yield takeLatest(
     [
@@ -100,6 +113,38 @@ function* lockVaultSaga(action: ReturnType<typeof lockVault>) {
     );
   } catch (err) {
     console.error(err);
+  }
+}
+
+function* setDelayForLockoutVaultSaga() {
+  const loginRetryLockoutTime: number | null = yield select(
+    selectLoginRetryLockoutTime
+  );
+
+  if (loginRetryLockoutTime == null) {
+    return;
+  }
+
+  const currentTime = Date.now();
+  const isTimeoutExpired =
+    currentTime - loginRetryLockoutTime >= LOCK_VAULT_TIMEOUT;
+
+  //  if the timeout expired we reset the count and lockout time
+  if (isTimeoutExpired) {
+    yield put(loginRetryCountReseted());
+    yield put(loginRetryLockoutTimeReseted());
+  }
+
+  //  if the timeout has not expired we set the timer with the time that is left
+  if (!isTimeoutExpired) {
+    const timeLeft = LOCK_VAULT_TIMEOUT - (currentTime - loginRetryLockoutTime);
+    const delay = (ms: number) =>
+      new Promise(resolve => setTimeout(resolve, ms));
+
+    yield* sagaCall(delay, timeLeft);
+
+    yield put(loginRetryCountReseted());
+    yield put(loginRetryLockoutTimeReseted());
   }
 }
 

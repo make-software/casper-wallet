@@ -11,3 +11,5 @@ export const FETCH_QUERY_OPTIONS = {
   // cached for 30 sec
   apiCacheTime: 30 * SECOND
 };
+
+export const LOGIN_RETRY_ATTEMPTS_LIMIT = 5;

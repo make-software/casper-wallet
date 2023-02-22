@@ -1,10 +1,16 @@
 import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+
 import { verifyPasswordAgainstHash } from '@src/libs/crypto/hashing';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { loginRetryCountIncrement } from '@src/background/redux/login-retry-count/actions';
+import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
+import { LOGIN_RETRY_ATTEMPTS_LIMIT } from '@src/constants';
 
 export const minPasswordLength = 16;
+
+const ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED = 1;
 
 export function useCreatePasswordRule() {
   const { t } = useTranslation();
@@ -20,7 +26,21 @@ export function useVerifyPasswordAgainstHashRule(
   passwordSaltHash: string
 ) {
   const { t } = useTranslation();
-  const errorMessage = t('Password is not correct');
+  const loginRetryCount = useSelector(selectLoginRetryCount);
+
+  const attemptsLeft =
+    LOGIN_RETRY_ATTEMPTS_LIMIT -
+    loginRetryCount -
+    ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED;
+
+  const errorMessage =
+    attemptsLeft === 1
+      ? t(
+          'Password is incorrect. You’ve got last attempt, after that you’ll have to wait for 5 mins'
+        )
+      : t(
+          `Password is incorrect. You’ve got ${attemptsLeft} attempts, after that you’ll have to wait for 5 mins`
+        );
 
   return Yup.string().test('authenticate', errorMessage, async password => {
     const result = await verifyPasswordAgainstHash(
