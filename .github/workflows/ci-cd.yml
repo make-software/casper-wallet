@@ -1,0 +1,54 @@
+name: CI-CD
+
+on:
+  push:
+    branches: [ ci-cd]
+  pull_request:
+    branches: [ ci-cd ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install
+      run: npm install
+
+    - name: Build
+      run: npm run build:chrome
+
+    - name: Package
+      run: npm run package:chrome
+
+    - name: Upload to Chrome Web Store
+      uses: mobilefirstllc/cws-publish@latest
+      with:
+        action: 'upload'  # one of: upload, publish, testers
+        client_id: ${{ secrets.CLIENT_ID }}
+        client_secret: ${{ secrets.CLIENT_SECRET }}
+        refresh_token: ${{ secrets.REFRESH_TOKEN }}
+        extension_id: ${{ secrets.EXTENSION_ID }}
+        zip_file: './web-ext-artifacts/*.zip'
+
+
+
+    # - name: Upload & Release
+    #   uses: mnao305/chrome-extension-upload@v4.0.1
+    #   with:
+    #     file-path: dist/*.zip
+    #     extension-id: hogefuga(extension id)
+    #     client-id: ${{ secrets.CLIENT_ID }}
+    #     client-secret: ${{ secrets.CLIENT_SECRET }}
+    #     refresh-token: ${{ secrets.REFRESH_TOKEN }}
+    #     glob: true
