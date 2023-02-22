@@ -25,15 +25,28 @@ jobs:
     - name: Install
       run: npm install
 
-    - name: Build & Check
+    - name: Build
       run: npm run build:chrome
 
-    - name: Upload & Release
-      uses: mnao305/chrome-extension-upload@v4.0.1
+    - name: Package
+      run: npm run package:chrome
+
+    # - name: Upload & Release
+    #   uses: mnao305/chrome-extension-upload@v4.0.1
+    #   with:
+    #     file-path: dist/*.zip
+    #     extension-id: hogefuga(extension id)
+    #     client-id: ${{ secrets.CLIENT_ID }}
+    #     client-secret: ${{ secrets.CLIENT_SECRET }}
+    #     refresh-token: ${{ secrets.REFRESH_TOKEN }}
+    #     glob: true
+
+    - name: Upload to Chrome Web Store
+      uses: mobilefirstllc/cws-publish@latest
       with:
-        file-path: dist/*.zip
-        extension-id: hogefuga(extension id)
-        client-id: ${{ secrets.CLIENT_ID }}
-        client-secret: ${{ secrets.CLIENT_SECRET }}
-        refresh-token: ${{ secrets.REFRESH_TOKEN }}
-        glob: true
+        action: 'upload'  # one of: upload, publish, testers
+        client_id: ${{ secrets.CLIENT_ID }}
+        client_secret: ${{ secrets.CLIENT_SECRET }}
+        refresh_token: ${{ secrets.REFRESH_TOKEN }}
+        extension_id: ${{ secrets.EXTENSION_ID }}
+        zip_file: './web-ext-artifacts/*.zip'
