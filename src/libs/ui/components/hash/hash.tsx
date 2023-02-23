@@ -15,7 +15,8 @@ import { truncateKey } from './utils';
 
 export enum HashVariant {
   CaptionHash = 'captionHash',
-  BodyHash = 'bodyHash'
+  BodyHash = 'bodyHash',
+  FullHash = 'fullHash'
 }
 
 export enum HashDisplayContext {
@@ -24,10 +25,6 @@ export enum HashDisplayContext {
 }
 
 interface HashContainerProps {
-  displayContext?: HashDisplayContext;
-}
-
-interface HashValueProps {
   displayContext?: HashDisplayContext;
 }
 
@@ -50,12 +47,6 @@ export const HoverCopyIcon = styled(SvgIcon)`
   &:hover svg {
     color: ${({ theme }) => theme.color.contentBlue};
   }
-`;
-
-const HashValue = styled(Typography)<HashValueProps>`
-  word-break: break-all;
-  line-height: ${({ displayContext }) =>
-    displayContext === HashDisplayContext.AccountInfo && '24px'};
 `;
 
 interface HashProps {
@@ -84,27 +75,31 @@ export function Hash({
   const HashComponent = useMemo(
     () => (
       <>
-        <HashValue
-          displayContext={displayContext}
+        <Typography
           type={variant}
+          workBreak={displayContext === HashDisplayContext.AccountInfo}
           color={color || 'contentSecondary'}
         >
           {truncated ? truncateKey(value) : value}
-        </HashValue>
+        </Typography>
         {withTag && (
           <Tag displayContext="accountList">{`${t('Imported')}`}</Tag>
         )}
       </>
     ),
-    [color, truncated, value, variant, withTag, t, displayContext]
+    [color, truncated, value, variant, withTag, t]
   );
 
   if (withCopyIconOnHover) {
     return (
       <HashContainer displayContext={displayContext}>
-        <HashValue type={variant} color={color || 'contentSecondary'}>
+        <Typography
+          type={variant}
+          workBreak={displayContext === HashDisplayContext.AccountInfo}
+          color={color || 'contentSecondary'}
+        >
           {truncated ? truncateKey(value) : value}
-        </HashValue>
+        </Typography>
         <CopyToClipboard
           renderContent={({ isClicked }) => (
             <>
@@ -156,9 +151,6 @@ export function Hash({
                   src="assets/icons/copy.svg"
                   size={16}
                   marginLeft="small"
-                  verticalAlign={
-                    displayContext === 'accountInfo' ? 'text-bottom' : null
-                  }
                 />
               </HashContainer>
             )}

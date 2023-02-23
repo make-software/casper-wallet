@@ -7,7 +7,8 @@ import styled, { css } from 'styled-components';
 import {
   CenteredFlexColumn,
   ContentContainer,
-  LeftAlignedFlexColumn
+  LeftAlignedFlexColumn,
+  SpaceBetweenFlexRow
 } from '@src/libs/layout/containers';
 import { LinkType, HeaderSubmenuBarNavLink } from '@libs/layout';
 
@@ -49,7 +50,7 @@ import {
   dispatchFetchAccountInfoRequest,
   getAccountInfo
 } from '@libs/services/account-info';
-import { getCSPRLiveUserAccountUrl } from '@src/constants';
+import { getBlockExplorerAccountUrl } from '@src/constants';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
@@ -91,11 +92,6 @@ const ButtonsContainer = styled.div`
   width: 100%;
 
   margin-top: 16px;
-`;
-
-const BadgeContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
 `;
 
 export function HomePageContent() {
@@ -175,20 +171,20 @@ export function HomePageContent() {
     <HomePageContentContainer>
       {activeAccount && (
         <PageTile>
-          <BadgeContainer>
+          <SpaceBetweenFlexRow>
             <ConnectionStatusBadge
               isConnected={isActiveAccountConnected}
               displayContext="home"
             />
             <Link
-              href={getCSPRLiveUserAccountUrl(activeAccount.publicKey)}
+              href={getBlockExplorerAccountUrl(activeAccount.publicKey)}
               target="_blank"
               color="inherit"
               title={t('View account in CSPR.live')}
             >
               <SvgIcon src="assets/icons/external-link.svg" />
             </Link>
-          </BadgeContainer>
+          </SpaceBetweenFlexRow>
           <Avatar
             publicKey={activeAccount.publicKey}
             src={accountLogo}

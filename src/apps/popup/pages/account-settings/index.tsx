@@ -13,7 +13,7 @@ import {
 import { Button } from '@libs/ui';
 import { selectVaultAccountWithName } from '@background/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import { getCSPRLiveUserAccountUrl } from '@src/constants';
+import { getBlockExplorerAccountUrl } from '@src/constants';
 
 import {
   AccountSettingsActionsGroup,
@@ -53,7 +53,7 @@ export const AccountSettingsPage = () => {
       renderFooter={() => (
         <FooterButtonsContainer>
           <Button
-            displayAsLinkTo={getCSPRLiveUserAccountUrl(account.publicKey)}
+            displayAsLinkTo={getBlockExplorerAccountUrl(account.publicKey)}
             color="secondaryBlue"
             title={t('View account in CSPR.live')}
           >

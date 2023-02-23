@@ -23,7 +23,6 @@ export interface SvgIconProps extends React.HTMLAttributes<Ref> {
   flipByAxis?: 'X' | 'Y';
   marginLeft?: 'small' | 'medium';
   marginRight?: 'small' | 'medium';
-  verticalAlign?: string | null;
 }
 
 const getMargin = (size?: 'small' | 'medium') => {
@@ -50,7 +49,6 @@ const Container = styled('div').withConfig({
   marginLeft?: 'small' | 'medium';
   marginRight?: 'small' | 'medium';
   onClick?: (ev: any) => void;
-  verticalAlign?: string | null;
 }>(
   ({
     theme,
@@ -61,21 +59,13 @@ const Container = styled('div').withConfig({
     flipByAxis,
     marginLeft,
     marginRight,
-    verticalAlign,
     onClick
   }) => ({
     display: 'inline-block',
-    verticalAlign: verticalAlign != null ? verticalAlign : 'middle',
+    verticalAlign: 'middle',
     width: width != null ? width : size,
     height: height != null ? height : size,
     color: getColorFromTheme(theme, color),
-    svg: {
-      display: 'block',
-      fill: 'currentColor',
-      color: getColorFromTheme(theme, color),
-      width: width != null ? width : size,
-      height: height != null ? height : size
-    },
     transform: flipByAxis ? `rotate${flipByAxis}(180deg)` : 'none',
     transition: 'transform 500ms ease',
     marginLeft: getMargin(marginLeft),
@@ -84,13 +74,28 @@ const Container = styled('div').withConfig({
   })
 );
 
-const StyledReactSVG = styled(ReactSVG)(({ theme }) => ({
-  display: 'flex'
-}));
+const StyledReactSVG = styled(ReactSVG)<SvgIconProps>(
+  ({ size, width, height }) => ({
+    display: 'flex',
+    fill: 'currentColor',
+    width: width != null ? width : size,
+    height: height != null ? height : size
+  })
+);
 
 export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
   (
-    { src, alt, size = 24, color, onClick, flipByAxis, ...props }: SvgIconProps,
+    {
+      src,
+      alt,
+      size = 24,
+      color,
+      onClick,
+      flipByAxis,
+      height,
+      width,
+      ...props
+    }: SvgIconProps,
     ref
   ) => {
     const handleClick =
@@ -114,7 +119,14 @@ export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
         onClick={handleClick}
         {...props}
       >
-        <StyledReactSVG src={src} preProcessor={preProcessor} cacheRequests />
+        <StyledReactSVG
+          src={src}
+          preProcessor={preProcessor}
+          cacheRequests
+          size={size}
+          height={height}
+          width={width}
+        />
       </Container>
     );
   }

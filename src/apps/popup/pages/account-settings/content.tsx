@@ -8,7 +8,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import {
   ContentContainer,
   FlexColumn,
-  LeftAlignedFlexColumn
+  VerticalSpaceContainer
 } from '@src/libs/layout/containers';
 import {
   Hash,
@@ -25,19 +25,11 @@ import {
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 
-const HeaderContainer = styled(LeftAlignedFlexColumn)`
-  margin: 8px 0;
-`;
-
-const HashContainer = styled.div`
-  display: flex;
-  flex-direction: column;
+const TextContainer = styled(FlexColumn)`
   gap: 8px;
-  margin: 16px 0 8px;
 `;
 
 export function AccountSettingsPageContent() {
-  const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
   const { accountName } = useParams();
@@ -46,8 +38,7 @@ export function AccountSettingsPageContent() {
   );
 
   if (!account) {
-    navigate(RouterPath.Home);
-    return null;
+    throw new Error("Account doesn't exist");
   }
 
   const accountHash = getAccountHashFromPublicKey(account.publicKey);
@@ -56,33 +47,35 @@ export function AccountSettingsPageContent() {
     <>
       <ContentContainer>
         <PageTile>
-          <FlexColumn>
-            <HeaderContainer>
-              <Typography type="header">{account.name}</Typography>
-            </HeaderContainer>
-            <HashContainer>
+          <VerticalSpaceContainer gap="none">
+            <Typography type="header">{account.name}</Typography>
+          </VerticalSpaceContainer>
+          <VerticalSpaceContainer gap="big">
+            <TextContainer>
               <Typography type="bodySemiBold">
                 <Trans t={t}>Public key</Trans>
               </Typography>
               <Hash
                 value={account.publicKey}
-                variant={HashVariant.CaptionHash}
+                variant={HashVariant.FullHash}
                 withCopyOnSelfClick
                 displayContext={HashDisplayContext.AccountInfo}
               />
-            </HashContainer>
-            <HashContainer>
+            </TextContainer>
+          </VerticalSpaceContainer>
+          <VerticalSpaceContainer gap="big">
+            <TextContainer>
               <Typography type="bodySemiBold">
                 <Trans t={t}>Account hash</Trans>
               </Typography>
               <Hash
                 value={accountHash}
-                variant={HashVariant.CaptionHash}
+                variant={HashVariant.FullHash}
                 withCopyOnSelfClick
                 displayContext={HashDisplayContext.AccountInfo}
               />
-            </HashContainer>
-          </FlexColumn>
+            </TextContainer>
+          </VerticalSpaceContainer>
         </PageTile>
       </ContentContainer>
     </>
@@ -102,12 +95,16 @@ function AccountIconButton({ type }: AccountIconButtonProps) {
       return;
     }
 
-    const path =
-      type === 'remove'
-        ? RouterPath.RemoveAccount.replace(':accountName', accountName)
-        : RouterPath.RenameAccount.replace(':accountName', accountName);
-
-    navigate(path);
+    switch (type) {
+      case 'remove':
+        navigate(RouterPath.RemoveAccount.replace(':accountName', accountName));
+        break;
+      case 'rename':
+        navigate(RouterPath.RenameAccount.replace(':accountName', accountName));
+        break;
+      default:
+        throw new Error('Not found');
+    }
   }, [navigate, accountName, type]);
 
   if (!accountName) {

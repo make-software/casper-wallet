@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { themeConfig } from '@src/libs/ui';
+import { ContentColor, getColorFromTheme, themeConfig } from '@src/libs/ui';
 
 type LinkColor = 'fillBlue' | 'fillRed' | 'inherit';
 
@@ -31,17 +31,21 @@ export interface LinkProps extends React.HTMLAttributes<Ref> {
   href?: string;
   target?: string;
   color: LinkColor;
+  hoverColor?: ContentColor;
 }
 
 type Ref = HTMLAnchorElement;
-const StyledLink = styled.a<LinkProps>(({ theme, color }) => {
+const StyledLink = styled.a<LinkProps>(({ theme, color, hoverColor }) => {
   const stateColor = getStateColor(color);
+  const hover = hoverColor && getColorFromTheme(theme, hoverColor);
+
   return {
+    display: 'flex',
     textDecoration: 'none',
     cursor: 'pointer',
     color: stateColor.color,
     '&:hover > *': {
-      color: stateColor.hover
+      color: hover || stateColor.hover
     },
     '&:active > *': {
       color: stateColor.active

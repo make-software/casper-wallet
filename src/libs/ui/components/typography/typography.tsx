@@ -18,7 +18,8 @@ export type TypographyType =
   | 'CSPRLight'
   | 'CSPRBold'
   | 'listSubtext'
-  | 'formFieldStatus'; // TODO: Temporary name. Make a better name
+  | 'formFieldStatus' // TODO: Temporary name. Make a better name
+  | 'fullHash';
 
 export interface BodyStylesProps extends BaseProps {
   color?: ContentColor;
@@ -26,6 +27,7 @@ export interface BodyStylesProps extends BaseProps {
   capitalize?: boolean;
   noWrap?: boolean;
   loading?: boolean;
+  workBreak?: boolean;
 }
 
 interface TypographyProps extends BodyStylesProps {
@@ -39,7 +41,8 @@ function getBodyStyles(
     color = 'inherit',
     uppercase = false,
     capitalize = false,
-    noWrap = false
+    noWrap = false,
+    workBreak = false
   }: BodyStylesProps
 ): CSSObject {
   return {
@@ -55,6 +58,9 @@ function getBodyStyles(
     }),
     ...(capitalize && {
       textTransform: 'capitalize'
+    }),
+    ...(workBreak && {
+      wordBreak: 'break-all'
     }),
     '-webkit-text-size-adjust': '100%'
   };
@@ -154,6 +160,14 @@ const StyledTypography = styled('span').withConfig({
         fontSize: '1rem',
         lineHeight: '1.2rem'
       };
+
+    case 'fullHash':
+      return {
+        ...captionBase,
+        verticalAlign: 'middle',
+        fontFamily: theme.typography.fontFamily.mono
+      };
+
     default:
       throw new Error('Unknown type of Typography');
   }
