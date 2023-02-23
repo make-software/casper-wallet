@@ -14,10 +14,12 @@ import { ErrorBoundary } from '@src/libs/layout/error';
 
 import {
   BackgroundEvent,
-  backgroundEvent,
-  PopupState
+  backgroundEvent
 } from '@src/background/background-events';
-import { createMainStoreReplica } from '../../background/redux/utils';
+import {
+  createMainStoreReplica,
+  PopupState
+} from '../../background/redux/utils';
 import { connectWindowInit } from '../../background/redux/windowManagement/actions';
 
 const Tree = () => {

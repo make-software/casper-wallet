@@ -8,6 +8,7 @@ import { reducer as deploys } from './deploys/reducer';
 import { reducer as windowManagement } from './windowManagement/reducer';
 import { reducer as session } from './session/reducer';
 import { reducer as loginRetryLockoutTime } from './login-retry-lockout-time/reducer';
+import { reducer as timeoutDurationSetting } from './timeout-duration-setting/reducer';
 
 const rootReducer = combineReducers({
   vaultCipher,
@@ -17,7 +18,8 @@ const rootReducer = combineReducers({
   deploys,
   windowManagement,
   session,
-  loginRetryLockoutTime
+  loginRetryLockoutTime,
+  timeoutDurationSetting
 });
 
 export default rootReducer;

@@ -5,11 +5,7 @@ import { RootState } from 'typesafe-actions';
 import { select, call } from 'redux-saga/effects';
 
 import { createStore } from '@src/background/redux';
-import {
-  backgroundEvent,
-  PopupState,
-  selectPopupState
-} from '@src/background/background-events';
+import { backgroundEvent } from '@src/background/background-events';
 import { ServiceMessage } from '@background/service-message';
 
 import { ReduxAction } from './redux-action';
@@ -17,6 +13,13 @@ import { startBackground } from './sagas/actions';
 import { KeysState } from './keys/types';
 import { LoginRetryCountState } from './login-retry-count/reducer';
 import { LoginRetryLockoutTimeState } from './login-retry-lockout-time/types';
+import { TimeoutDurationSetting } from '@src/apps/popup/constants';
+import { TimeoutDurationSettingState } from './timeout-duration-setting/reducer';
+import { VaultCipherState } from './vault-cipher/types';
+import { WindowManagementState } from './windowManagement/types';
+import { DeploysState } from './deploys/types';
+import { VaultState } from './vault/types';
+import { SessionState } from './session/types';
 
 declare global {
   interface Window {
@@ -38,12 +41,14 @@ export const VAULT_CIPHER_KEY = 'zazXu8w9GyCtxZ';
 export const KEYS_KEY = '2yNVAEQJB5rxMg';
 export const LOGIN_RETRY_KEY = '7ZVdMbk9yD8WGZ';
 export const LOGIN_VAULT_TIMER_KEY = 'p6nnYiaxcsaNG3';
+export const TIMEOUT_DURATION_SETTING = 'f53Co85Fgo2s6C';
 
 type StorageState = {
   [VAULT_CIPHER_KEY]: string;
   [KEYS_KEY]: KeysState;
   [LOGIN_RETRY_KEY]: LoginRetryCountState;
   [LOGIN_VAULT_TIMER_KEY]: LoginRetryLockoutTimeState;
+  [TIMEOUT_DURATION_SETTING]: TimeoutDurationSetting;
 };
 
 // this needs to be private
@@ -55,12 +60,14 @@ export async function getExistingMainStoreSingletonOrInit() {
     [VAULT_CIPHER_KEY]: vaultCipher,
     [KEYS_KEY]: keys,
     [LOGIN_RETRY_KEY]: loginRetryCount,
-    [LOGIN_VAULT_TIMER_KEY]: loginRetryLockoutTime
+    [LOGIN_VAULT_TIMER_KEY]: loginRetryLockoutTime,
+    [TIMEOUT_DURATION_SETTING]: timeoutDurationSetting
   } = (await browser.storage.local.get([
     VAULT_CIPHER_KEY,
     KEYS_KEY,
     LOGIN_RETRY_KEY,
-    LOGIN_VAULT_TIMER_KEY
+    LOGIN_VAULT_TIMER_KEY,
+    TIMEOUT_DURATION_SETTING
   ])) as StorageState;
 
   if (storeSingleton == null) {
@@ -69,7 +76,8 @@ export async function getExistingMainStoreSingletonOrInit() {
       vaultCipher,
       keys,
       loginRetryCount,
-      loginRetryLockoutTime
+      loginRetryLockoutTime,
+      timeoutDurationSetting
     });
     // send start action
     storeSingleton.dispatch(startBackground());
@@ -93,7 +101,8 @@ export async function getExistingMainStoreSingletonOrInit() {
           [VAULT_CIPHER_KEY]: vaultCipher,
           [KEYS_KEY]: keys,
           [LOGIN_RETRY_KEY]: loginRetryCount,
-          [LOGIN_VAULT_TIMER_KEY]: loginRetryLockoutTime
+          [LOGIN_VAULT_TIMER_KEY]: loginRetryLockoutTime,
+          [TIMEOUT_DURATION_SETTING]: timeoutDurationSetting
         })
         .catch(e => {
           console.error('Persist encrypted vault failed: ', e);
@@ -105,6 +114,34 @@ export async function getExistingMainStoreSingletonOrInit() {
 
   return storeSingleton;
 }
+
+export type PopupState = {
+  keys: KeysState;
+  session: SessionState;
+  loginRetryCount: LoginRetryCountState;
+  vault: VaultState;
+  deploys: DeploysState;
+  windowManagement: WindowManagementState;
+  vaultCipher: VaultCipherState;
+  loginRetryLockoutTime: LoginRetryLockoutTimeState;
+  timeoutDurationSetting: TimeoutDurationSettingState;
+};
+
+// These state keys will be passed to popups
+export const selectPopupState = (state: RootState): PopupState => {
+  // TODO: must sanitize state to not send private data back to front
+  return {
+    keys: state.keys,
+    loginRetryCount: state.loginRetryCount,
+    session: state.session,
+    vault: state.vault,
+    deploys: state.deploys,
+    windowManagement: state.windowManagement,
+    vaultCipher: state.vaultCipher,
+    loginRetryLockoutTime: state.loginRetryLockoutTime,
+    timeoutDurationSetting: state.timeoutDurationSetting
+  };
+};
 
 export function createMainStoreReplica<T extends PopupState>(state: T) {
   const store = createStore(state);

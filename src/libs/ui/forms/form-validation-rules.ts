@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 
 import { verifyPasswordAgainstHash } from '@src/libs/crypto/hashing';
 import { dispatchToMainStore } from '@src/background/redux/utils';
-import { loginRetryCountIncrement } from '@src/background/redux/login-retry-count/actions';
+import { loginRetryCountIncremented } from '@src/background/redux/login-retry-count/actions';
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
 import { LOGIN_RETRY_ATTEMPTS_LIMIT } from '@src/constants';
 
@@ -50,7 +50,7 @@ export function useVerifyPasswordAgainstHashRule(
     );
 
     if (!result) {
-      dispatchToMainStore(loginRetryCountIncrement());
+      dispatchToMainStore(loginRetryCountIncremented());
     }
 
     return result;

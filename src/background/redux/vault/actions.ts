@@ -1,5 +1,4 @@
 import { createAction } from 'typesafe-actions';
-import { TimeoutDurationSetting } from '@popup/constants';
 import { Account, VaultState } from '@src/background/redux/vault/types';
 import { SecretPhrase } from '@src/libs/crypto';
 
@@ -40,12 +39,3 @@ export const allAccountsDisconnected = createAction(
 export const activeAccountChanged = createAction(
   'ACTIVE_ACCOUNT_CHANGED'
 )<string>();
-
-export const timeoutDurationChanged = createAction(
-  'TIMEOUT_DURATION_CHANGED',
-  (payload: { timeoutDuration: TimeoutDurationSetting }) => ({
-    timeoutDuration: payload.timeoutDuration
-  })
-)<{
-  timeoutDuration: TimeoutDurationSetting;
-}>();

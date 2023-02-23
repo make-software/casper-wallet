@@ -1,7 +1,6 @@
 import { createSelector } from 'reselect';
 import { RootState } from 'typesafe-actions';
 
-import { TimeoutDurationSetting } from '@popup/constants';
 import { Account, VaultState } from '@src/background/redux/vault/types';
 import { SecretPhrase } from '@src/libs/crypto';
 import { selectActiveOrigin } from '../session/selectors';
@@ -156,10 +155,6 @@ export const selectVaultAccountsSecretKeysBase64 = createSelector(
   selectVaultAccounts,
   accounts => accounts.map(account => account.secretKey)
 );
-
-export const selectVaultTimeoutDurationSetting = (
-  state: RootState
-): TimeoutDurationSetting => state.vault.timeoutDurationSetting;
 
 export const selectUnconnectedAccountsWithOrigin = createSelector(
   selectVaultAccounts,

@@ -19,9 +19,9 @@ import { SvgIcon, Typography, List, Link } from '@src/libs/ui';
 
 import {
   selectCountOfConnectedSites,
-  selectVaultHasImportedAccount,
-  selectVaultTimeoutDurationSetting
+  selectVaultHasImportedAccount
 } from '@src/background/redux/vault/selectors';
+import { selectTimeoutDurationSetting } from '@src/background/redux/timeout-duration-setting/selectors';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;
@@ -58,7 +58,7 @@ export function NavigationMenuPageContent() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const timeoutDurationSetting = useSelector(selectVaultTimeoutDurationSetting);
+  const timeoutDurationSetting = useSelector(selectTimeoutDurationSetting);
   const countOfConnectedSites = useSelector(selectCountOfConnectedSites);
   const vaultHasImportedAccount = useSelector(selectVaultHasImportedAccount);
 

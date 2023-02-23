@@ -1,4 +1,3 @@
-import { TimeoutDurationSetting } from '@popup/constants';
 import { SecretPhrase } from '@src/libs/crypto';
 
 export interface KeyPair {
@@ -19,7 +18,6 @@ export interface AccountListRows extends Account {
 type AccountNamesByOriginDict = Record<string, string[]>;
 
 export type VaultState = {
-  timeoutDurationSetting: TimeoutDurationSetting;
   secretPhrase: null | SecretPhrase;
   accounts: Account[];
   accountNamesByOriginDict: AccountNamesByOriginDict;

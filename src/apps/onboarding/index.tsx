@@ -15,11 +15,10 @@ import { AppRouter } from '@src/apps/onboarding/app-router';
 
 import {
   backgroundEvent,
-  BackgroundEvent,
-  PopupState
+  BackgroundEvent
 } from '@background/background-events';
 import { onboardingAppInit } from '@background/redux/windowManagement/actions';
-import { createMainStoreReplica } from '@background/redux/utils';
+import { createMainStoreReplica, PopupState } from '@background/redux/utils';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);

@@ -10,13 +10,12 @@ import { GlobalStyle, themeConfig } from '@libs/ui';
 import { AppRouter } from './app-router';
 import {
   backgroundEvent,
-  BackgroundEvent,
-  PopupState
+  BackgroundEvent
 } from '@background/background-events';
 import { isActionOf } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 import { signWindowInit } from '@background/redux/windowManagement/actions';
-import { createMainStoreReplica } from '@background/redux/utils';
+import { createMainStoreReplica, PopupState } from '@background/redux/utils';
 import { Provider as ReduxProvider } from 'react-redux/es/exports';
 import { ErrorBoundary } from '@src/libs/layout/error';
 

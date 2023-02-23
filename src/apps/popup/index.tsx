@@ -12,11 +12,10 @@ import { GlobalStyle, themeConfig } from '@libs/ui';
 import { ErrorBoundary } from '@src/libs/layout/error';
 import {
   BackgroundEvent,
-  backgroundEvent,
-  PopupState
+  backgroundEvent
 } from '@background/background-events';
 
-import { createMainStoreReplica } from '@background/redux/utils';
+import { createMainStoreReplica, PopupState } from '@background/redux/utils';
 import { popupWindowInit } from '@background/redux/windowManagement/actions';
 
 import { AppRouter } from './app-router';

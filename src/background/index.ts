@@ -15,7 +15,6 @@ import {
   accountsConnected,
   activeAccountChanged,
   allAccountsDisconnected,
-  timeoutDurationChanged,
   vaultReseted,
   vaultLoaded,
   secretPhraseCreated
@@ -81,11 +80,12 @@ import { selectKeysDoesExist } from './redux/keys/selectors';
 import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
 import { ServiceMessage, serviceMessage } from './service-message';
 import {
-  loginRetryCountIncrement,
+  loginRetryCountIncremented,
   loginRetryCountReseted
 } from './redux/login-retry-count/actions';
 import { emitSdkEventToAllActiveTabs } from './emit-sdk-event-to-all-active-tabs';
 import { loginRetryLockoutTimeSet } from './redux/login-retry-lockout-time/actions';
+import { timeoutDurationSettingChanged } from './redux/timeout-duration-setting/actions';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -337,7 +337,7 @@ browser.runtime.onMessage.addListener(
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeAccountChanged):
-          case getType(timeoutDurationChanged):
+          case getType(timeoutDurationSettingChanged):
           case getType(lastActivityTimeRefreshed):
           case getType(accountsConnected):
           case getType(accountDisconnected):
@@ -354,7 +354,7 @@ browser.runtime.onMessage.addListener(
           case getType(keysReseted):
           case getType(keysUpdated):
           case getType(loginRetryCountReseted):
-          case getType(loginRetryCountIncrement):
+          case getType(loginRetryCountIncremented):
           case getType(loginRetryLockoutTimeSet):
             store.dispatch(action);
             return sendResponse(undefined);

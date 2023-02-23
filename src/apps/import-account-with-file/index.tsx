@@ -10,14 +10,16 @@ import { Provider as ReduxProvider } from 'react-redux';
 
 import {
   backgroundEvent,
-  BackgroundEvent,
-  PopupState
+  BackgroundEvent
 } from '@src/background/background-events';
 import { importWindowInit } from '@src/background/redux/windowManagement/actions';
 import browser from 'webextension-polyfill';
 import { AppRouter } from './app-router';
 import { isActionOf } from 'typesafe-actions';
-import { createMainStoreReplica } from '@src/background/redux/utils';
+import {
+  createMainStoreReplica,
+  PopupState
+} from '@src/background/redux/utils';
 import { ErrorBoundary } from '@src/libs/layout/error';
 
 const Tree = () => {
