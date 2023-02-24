@@ -4,13 +4,15 @@ import { LayoutWindow, PopupHeader } from '@src/libs/layout';
 
 import { ConnectingContent } from './content';
 
-export interface Props {}
+export interface ConnectingPageProps {
+  origin: string;
+}
 
-export function ConnectingPage() {
+export function ConnectingPage({ origin }: ConnectingPageProps) {
   return (
     <LayoutWindow
       renderHeader={() => <PopupHeader />}
-      renderContent={() => <ConnectingContent />}
+      renderContent={() => <ConnectingContent origin={origin} />}
     />
   );
 }

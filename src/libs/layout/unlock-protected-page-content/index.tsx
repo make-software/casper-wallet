@@ -16,7 +16,8 @@ import {
   SvgIcon,
   Typography
 } from '@libs/ui';
-import { useLockWallet } from './use-lock-wallet';
+
+import { useLockWalletWhenNoMoreRetries } from './use-lock-wallet-when-no-more-retries';
 
 interface PasswordFormValues {
   password: string;
@@ -36,7 +37,8 @@ export const UnlockProtectedPageContent = ({
     useState<PasswordInputType>('password');
 
   const { t } = useTranslation();
-  const retryLeft = useLockWallet();
+
+  useLockWalletWhenNoMoreRetries();
 
   return (
     <ContentContainer>
@@ -50,8 +52,7 @@ export const UnlockProtectedPageContent = ({
       </ParagraphContainer>
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
-          {description}{' '}
-          <Trans t={t}>You have {{ retryLeft }} tries left.</Trans>
+          {description}
         </Typography>
       </ParagraphContainer>
       <InputsContainer>
