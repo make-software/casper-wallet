@@ -18,7 +18,7 @@ const initialState: State = {
 };
 
 export const reducer = createReducer(initialState)
-  .handleAction([sessionReseted], (): State => initialState)
+  .handleAction(sessionReseted, (): State => initialState)
   .handleAction(
     vaultUnlocked,
     (state, { payload: { lastActivityTime } }): State => ({
@@ -28,7 +28,7 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    [encryptionKeyHashCreated],
+    encryptionKeyHashCreated,
     (state, action): State => ({
       ...state,
       encryptionKeyHash: action.payload.encryptionKeyHash

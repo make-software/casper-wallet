@@ -26,7 +26,25 @@ const initialState: State = {
 
 export const reducer = createReducer(initialState)
   .handleAction(vaultReseted, () => initialState)
-  .handleAction(vaultLoaded, (state, action) => action.payload)
+  .handleAction(
+    vaultLoaded,
+    (
+      state,
+      {
+        payload: {
+          accountNamesByOriginDict,
+          accounts,
+          activeAccountName,
+          secretPhrase
+        }
+      }
+    ) => ({
+      accountNamesByOriginDict,
+      accounts,
+      activeAccountName,
+      secretPhrase
+    })
+  )
   .handleAction(
     secretPhraseCreated,
     (state, action): State => ({
