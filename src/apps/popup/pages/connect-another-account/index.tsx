@@ -8,6 +8,8 @@ import {
   ContentContainer,
   LeftAlignedFlexColumn,
   ParagraphContainer,
+  SpacingSize,
+  TileContainer,
   VerticalSpaceContainer
 } from '@src/libs/layout';
 import {
@@ -16,9 +18,9 @@ import {
   Hash,
   HashVariant,
   List,
-  PageTile,
   SvgIcon,
-  Typography
+  Typography,
+  Tile
 } from '@libs/ui';
 
 import {
@@ -76,40 +78,42 @@ export function ConnectAnotherAccountPageContent() {
 
   return (
     <ContentContainer>
-      <ParagraphContainer gap="big">
+      <ParagraphContainer top={SpacingSize.Big}>
         <SiteFaviconBadge origin={activeOrigin} />
-        <VerticalSpaceContainer gap="medium">
+        <VerticalSpaceContainer top={SpacingSize.Medium}>
           <Typography type="header">
             This account isn’t yet connected to this site
           </Typography>
         </VerticalSpaceContainer>
       </ParagraphContainer>
       {targetAccount && (
-        <PageTile>
-          <CentredFlexRow>
-            <SvgIcon src="assets/icons/error.svg" color="contentYellow" />
-            <SpaceBetweenContainer>
-              <LeftAlignedFlexColumn>
-                <Typography type="body">{targetAccount.name}</Typography>
-                <Hash
-                  value={targetAccount.publicKey}
-                  variant={HashVariant.CaptionHash}
-                  truncated
-                />
-              </LeftAlignedFlexColumn>
-              <Button
-                variant="inline"
-                width="100"
-                onClick={async () => {
-                  await connectAccounts([targetAccount.name], activeOrigin);
-                  navigate(RouterPath.Home);
-                }}
-              >
-                <Trans t={t}>Connect</Trans>
-              </Button>
-            </SpaceBetweenContainer>
-          </CentredFlexRow>
-        </PageTile>
+        <Tile>
+          <TileContainer>
+            <CentredFlexRow>
+              <SvgIcon src="assets/icons/error.svg" color="contentYellow" />
+              <SpaceBetweenContainer>
+                <LeftAlignedFlexColumn>
+                  <Typography type="body">{targetAccount.name}</Typography>
+                  <Hash
+                    value={targetAccount.publicKey}
+                    variant={HashVariant.CaptionHash}
+                    truncated
+                  />
+                </LeftAlignedFlexColumn>
+                <Button
+                  inline
+                  width="100"
+                  onClick={async () => {
+                    await connectAccounts([targetAccount.name], activeOrigin);
+                    navigate(RouterPath.Home);
+                  }}
+                >
+                  <Trans t={t}>Connect</Trans>
+                </Button>
+              </SpaceBetweenContainer>
+            </CentredFlexRow>
+          </TileContainer>
+        </Tile>
       )}
       <List
         headerLabel={t('Switch to another account')}
@@ -132,7 +136,7 @@ export function ConnectAnotherAccountPageContent() {
               </LeftAlignedFlexColumn>
               <Button
                 color="secondaryBlue"
-                variant="inline"
+                inline
                 width="100"
                 onClick={async () => {
                   await changeActiveAccount(account.name);

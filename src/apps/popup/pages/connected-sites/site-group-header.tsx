@@ -6,6 +6,7 @@ import { Button, Typography } from '@src/libs/ui';
 import {
   AlignedSpaceBetweenFlexRow,
   SpaceBetweenFlexColumn,
+  SpacingSize,
   VerticalSpaceContainer
 } from '@src/libs/layout';
 
@@ -35,17 +36,12 @@ export function SiteGroupHeader({
           <Trans t={t}>Site</Trans> {siteOrder}
         </Typography>
 
-        <Button
-          width="120"
-          variant="inline"
-          color="primaryRed"
-          onClick={disconnectSite}
-        >
+        <Button width="120" inline color="primaryRed" onClick={disconnectSite}>
           <Trans t={t}>Disconnect site</Trans>
         </Button>
       </SiteGroupHeaderActionContainer>
 
-      <VerticalSpaceContainer gap="small">
+      <VerticalSpaceContainer top={SpacingSize.Small}>
         <Typography type="body" color="contentBlue">
           {siteTitle}
         </Typography>

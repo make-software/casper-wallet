@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import {
+  SpacingSize,
   TabPageContainer,
   TabTextContainer,
   VerticalSpaceContainer
@@ -52,7 +53,7 @@ export function ConfirmSecretPhraseSuccessPageContent() {
         </Typography>
       </TabTextContainer>
 
-      <VerticalSpaceContainer gap="medium">
+      <VerticalSpaceContainer top={SpacingSize.Medium}>
         <TextList items={items} />
       </VerticalSpaceContainer>
     </TabPageContainer>

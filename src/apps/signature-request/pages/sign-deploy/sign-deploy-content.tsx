@@ -6,7 +6,8 @@ import {
   ContentContainer,
   PageContainer,
   ParagraphContainer,
-  SpaceBetweenFlexRow
+  SpaceBetweenFlexRow,
+  SpacingSize
 } from '@layout/containers';
 import { Accordion, List, SvgIcon, Typography } from '@libs/ui';
 
@@ -101,7 +102,7 @@ export function SignDeployContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <ParagraphContainer gap="big">
+        <ParagraphContainer top={SpacingSize.Big}>
           <Typography type="header">
             <Trans t={t}>Signature Request</Trans>
           </Typography>

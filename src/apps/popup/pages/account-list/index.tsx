@@ -17,7 +17,8 @@ import {
   ContentContainer,
   LeftAlignedFlexColumn,
   PageContainer,
-  FlexRow
+  FlexRow,
+  AccountListItemsContainer
 } from '@libs/layout';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
@@ -37,6 +38,7 @@ import {
 } from '@background/redux/vault/selectors';
 import { selectActiveOrigin } from '@background/redux/session/selectors';
 import { AccountListRows } from '@background/redux/vault/types';
+import { getBlockExplorerAccountUrl } from '@src/constants';
 
 import { Popover } from './components/popover';
 
@@ -193,49 +195,86 @@ export function AccountListPage() {
                 renderMenuItems={({ closePopover }) => (
                   <>
                     {connectedAccountNames.includes(account.name) ? (
+                      <AccountListItemsContainer>
+                        <Link
+                          color="inherit"
+                          hoverColor="contentBlue"
+                          onClick={e => {
+                            closePopover(e);
+                            activeOrigin &&
+                              disconnectAccount(account.name, activeOrigin);
+                          }}
+                        >
+                          <Typography type="body">
+                            <Trans t={t}>Disconnect</Trans>
+                          </Typography>
+                        </Link>
+                      </AccountListItemsContainer>
+                    ) : (
+                      <AccountListItemsContainer>
+                        <Link
+                          color="inherit"
+                          hoverColor="contentBlue"
+                          onClick={() =>
+                            navigate(
+                              isAnyAccountConnected
+                                ? `${RouterPath.ConnectAnotherAccount}/${account.id}`
+                                : RouterPath.NoConnectedAccount
+                            )
+                          }
+                        >
+                          <SvgIcon
+                            src="assets/icons/link.svg"
+                            marginRight="medium"
+                            color="contentTertiary"
+                          />
+                          <Typography type="body">
+                            <Trans t={t}>Connect</Trans>
+                          </Typography>
+                        </Link>
+                      </AccountListItemsContainer>
+                    )}
+                    <AccountListItemsContainer>
                       <Link
+                        target="_blank"
                         color="inherit"
-                        onClick={e => {
-                          closePopover(e);
-                          activeOrigin &&
-                            disconnectAccount(account.name, activeOrigin);
-                        }}
+                        hoverColor="contentBlue"
+                        title={t('View account in CSPR.live')}
+                        href={getBlockExplorerAccountUrl(account.publicKey)}
                       >
+                        <SvgIcon
+                          src="assets/icons/external-link.svg"
+                          marginRight="medium"
+                          color="contentTertiary"
+                        />
                         <Typography type="body">
-                          <Trans t={t}>Disconnect</Trans>
+                          <Trans t={t}>View on CSPR.live</Trans>
                         </Typography>
                       </Link>
-                    ) : (
+                    </AccountListItemsContainer>
+                    <AccountListItemsContainer>
                       <Link
                         color="inherit"
+                        hoverColor="contentBlue"
                         onClick={() =>
                           navigate(
-                            isAnyAccountConnected
-                              ? `${RouterPath.ConnectAnotherAccount}/${account.id}`
-                              : RouterPath.NoConnectedAccount
+                            RouterPath.AccountSettings.replace(
+                              ':accountName',
+                              account.name
+                            )
                           )
                         }
                       >
+                        <SvgIcon
+                          src="assets/icons/settings.svg"
+                          marginRight="medium"
+                          color="contentTertiary"
+                        />
                         <Typography type="body">
-                          <Trans t={t}>Connect</Trans>
+                          <Trans t={t}>Manage</Trans>
                         </Typography>
                       </Link>
-                    )}
-                    <Link
-                      color="inherit"
-                      onClick={() =>
-                        navigate(
-                          RouterPath.AccountSettings.replace(
-                            ':accountName',
-                            account.name
-                          )
-                        )
-                      }
-                    >
-                      <Typography type="body">
-                        <Trans t={t}>Manage</Trans>
-                      </Typography>
-                    </Link>
+                    </AccountListItemsContainer>
                   </>
                 )}
               >

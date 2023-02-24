@@ -1,14 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
-import { FlexRow } from '@src/libs/layout';
+import { AlignedFlexRow, SpacingSize } from '@src/libs/layout';
 import { CopyToClipboard, SvgIcon, Typography } from '@src/libs/ui';
-
-const CopySecretPhraseContainer = styled(FlexRow)`
-  gap: 4px;
-  align-items: center;
-`;
 
 interface CopySecretPhraseBarProps {
   secretPhraseForCopy: string;
@@ -21,7 +15,7 @@ export function CopySecretPhraseBar({
   return (
     <CopyToClipboard
       renderContent={({ isClicked }) => (
-        <CopySecretPhraseContainer>
+        <AlignedFlexRow gap={SpacingSize.Tiny}>
           <SvgIcon
             src={
               isClicked
@@ -39,7 +33,7 @@ export function CopySecretPhraseBar({
               ? t('Copied to clipboard')
               : t('Copy secret recovery phrase')}
           </Typography>
-        </CopySecretPhraseContainer>
+        </AlignedFlexRow>
       )}
       valueToCopy={secretPhraseForCopy}
     />

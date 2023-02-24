@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Typography } from '@src/libs/ui';
-import { FlexRow } from '@src/libs/layout';
+import { FlexRow, SpacingSize } from '@src/libs/layout';
 
 interface IsEmptyWord {
   isEmptyWord?: boolean;
@@ -11,7 +11,6 @@ interface IsEmptyWord {
 type DisabledOrSelected = Pick<WordTagProps, 'selected' | 'disabled'>;
 
 const WordContainer = styled(FlexRow)<DisabledOrSelected & IsEmptyWord>`
-  gap: 4px;
   padding: 2px 8px;
   width: ${({ isEmptyWord }) => (isEmptyWord ? '72px' : 'unset')};
   background: ${({ theme, selected }) =>
@@ -56,6 +55,7 @@ export function WordTag({
 
   return (
     <WordContainer
+      gap={SpacingSize.Tiny}
       disabled={disabled}
       selected={selected}
       isEmptyWord={value == null}

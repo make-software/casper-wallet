@@ -6,7 +6,8 @@ import {
   ContentContainer,
   IllustrationContainer,
   ParagraphContainer,
-  InputsContainer
+  InputsContainer,
+  SpacingSize
 } from '@src/libs/layout';
 import { SvgIcon, Typography, Input } from '@src/libs/ui';
 import { CreateAccountFormValues } from '@src/libs/ui/forms/create-account';
@@ -27,12 +28,12 @@ export function CreateAccountPageContent({
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/create-account.svg" size={120} />
       </IllustrationContainer>
-      <ParagraphContainer gap="medium">
+      <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="header">
           <Trans t={t}>Create account</Trans>
         </Typography>
       </ParagraphContainer>
-      <ParagraphContainer gap="medium">
+      <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             New accounts are recovered using your Casper Wallet’s secret

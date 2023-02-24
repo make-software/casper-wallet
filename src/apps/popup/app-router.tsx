@@ -13,10 +13,7 @@ import { TimeoutPageContent } from '@popup/pages/timeout';
 import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
 import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
 import { ConnectedSitesPage } from '@popup/pages/connected-sites';
-import {
-  AccountSettingsPageContent,
-  AccountSettingsActionsGroup
-} from '@popup/pages/account-settings';
+import { AccountSettingsPage } from '@popup/pages/account-settings';
 import { RemoveAccountPageContent } from '@popup/pages/remove-account';
 import { RenameAccountPageContent } from '@popup/pages/rename-account';
 import { AccountListPage } from '@popup/pages/account-list';
@@ -119,24 +116,7 @@ function AppRoutes() {
       <Route path={RouterPath.CreateAccount} element={<CreateAccountPage />} />
       <Route
         path={RouterPath.AccountSettings}
-        element={
-          <PopupLayout
-            renderHeader={() => (
-              <PopupHeader
-                withLock
-                withMenu
-                withConnectionStatus
-                renderSubmenuBarItems={() => (
-                  <>
-                    <HeaderSubmenuBarNavLink linkType="close" />
-                    <AccountSettingsActionsGroup />
-                  </>
-                )}
-              />
-            )}
-            renderContent={() => <AccountSettingsPageContent />}
-          />
-        }
+        element={<AccountSettingsPage />}
       />
       <Route
         path={RouterPath.Timeout}

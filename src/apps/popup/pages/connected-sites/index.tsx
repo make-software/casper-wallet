@@ -6,7 +6,8 @@ import { List, SvgIcon, Typography } from '@libs/ui';
 import {
   ContentContainer,
   IllustrationContainer,
-  ParagraphContainer
+  ParagraphContainer,
+  SpacingSize
 } from '@src/libs/layout';
 
 import { selectVaultAccountsByOriginDict } from '@src/background/redux/vault/selectors';
@@ -37,12 +38,12 @@ export function ConnectedSitesPage() {
             size={120}
           />
         </IllustrationContainer>
-        <ParagraphContainer gap="big">
+        <ParagraphContainer top={SpacingSize.Big}>
           <Typography type="header">
             <Trans t={t}>No connected sites yet</Trans>
           </Typography>
         </ParagraphContainer>
-        <ParagraphContainer gap="medium">
+        <ParagraphContainer top={SpacingSize.Medium}>
           <Typography type="body" color="contentSecondary">
             <Trans t={t}>
               When you connect an account to a site, the site and connected
@@ -56,7 +57,7 @@ export function ConnectedSitesPage() {
 
   return (
     <ContentContainer>
-      <ParagraphContainer gap="big">
+      <ParagraphContainer top={SpacingSize.Big}>
         <Typography type="header">
           <Trans t={t}>Connected sites</Trans>
         </Typography>

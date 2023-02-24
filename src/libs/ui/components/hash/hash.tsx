@@ -9,24 +9,31 @@ import {
   Typography,
   Tag
 } from '@libs/ui';
-import { CenteredFlexRow } from '@libs/layout';
+import { CenteredFlexRow, FlexRow, SpacingSize } from '@libs/layout';
 
 import { truncateKey } from './utils';
 
+export enum HashVariant {
+  CaptionHash = 'captionHash',
+  BodyHash = 'bodyHash',
+  FullHash = 'fullHash'
+}
+
+export enum HashDisplayContext {
+  Home = 'home',
+  AccountInfo = 'accountInfo'
+}
+
 interface HashContainerProps {
-  displayContext?: 'home';
+  displayContext?: HashDisplayContext;
 }
 
 const HashContainer = styled(CenteredFlexRow)<HashContainerProps>`
-  display: flex;
+  display: ${({ displayContext }) =>
+    displayContext === HashDisplayContext.AccountInfo ? 'block' : 'flex'};
   align-items: center;
   height: ${({ displayContext }) =>
-    displayContext === 'home' ? '24px' : 'auto'};
-`;
-
-const CopyStatusContainer = styled.div`
-  display: flex;
-  gap: 4px;
+    displayContext === HashDisplayContext.Home ? '24px' : 'auto'};
 `;
 
 export const HoverCopyIcon = styled(SvgIcon)`
@@ -37,11 +44,6 @@ export const HoverCopyIcon = styled(SvgIcon)`
   }
 `;
 
-export enum HashVariant {
-  CaptionHash = 'captionHash',
-  BodyHash = 'bodyHash'
-}
-
 interface HashProps {
   value: string;
   variant: HashVariant;
@@ -50,7 +52,7 @@ interface HashProps {
   withCopyOnSelfClick?: boolean;
   withTag?: boolean;
   withCopyIconOnHover?: boolean;
-  displayContext?: 'home';
+  displayContext?: HashDisplayContext;
 }
 
 export function Hash({
@@ -68,7 +70,11 @@ export function Hash({
   const HashComponent = useMemo(
     () => (
       <>
-        <Typography type={variant} color={color || 'contentSecondary'}>
+        <Typography
+          type={variant}
+          wordBreak={displayContext === HashDisplayContext.AccountInfo}
+          color={color || 'contentSecondary'}
+        >
           {truncated ? truncateKey(value) : value}
         </Typography>
         {withTag && (
@@ -76,13 +82,17 @@ export function Hash({
         )}
       </>
     ),
-    [color, truncated, value, variant, withTag, t]
+    [color, truncated, value, variant, withTag, displayContext, t]
   );
 
   if (withCopyIconOnHover) {
     return (
       <HashContainer displayContext={displayContext}>
-        <Typography type={variant} color={color || 'contentSecondary'}>
+        <Typography
+          type={variant}
+          wordBreak={displayContext === HashDisplayContext.AccountInfo}
+          color={color || 'contentSecondary'}
+        >
           {truncated ? truncateKey(value) : value}
         </Typography>
         <CopyToClipboard
@@ -93,14 +103,14 @@ export function Hash({
                   color="contentGreen"
                   src="assets/icons/checkbox-checked.svg"
                   size={16}
-                  marginLeft
+                  marginLeft="small"
                 />
               ) : (
                 <HoverCopyIcon
                   src="assets/icons/copy.svg"
                   color="contentTertiary"
                   size={16}
-                  marginLeft
+                  marginLeft="small"
                 />
               )}
             </>
@@ -120,7 +130,7 @@ export function Hash({
         renderContent={({ isClicked }) => (
           <>
             {isClicked ? (
-              <CopyStatusContainer>
+              <FlexRow gap={SpacingSize.Tiny}>
                 <SvgIcon
                   color="contentGreen"
                   src="assets/icons/checkbox-checked.svg"
@@ -128,11 +138,15 @@ export function Hash({
                 <Typography type="body" color="contentGreen">
                   <Trans t={t}>Copied!</Trans>
                 </Typography>
-              </CopyStatusContainer>
+              </FlexRow>
             ) : (
               <HashContainer displayContext={displayContext}>
                 {HashComponent}
-                <SvgIcon src="assets/icons/copy.svg" size={16} marginLeft />
+                <SvgIcon
+                  src="assets/icons/copy.svg"
+                  size={16}
+                  marginLeft="small"
+                />
               </HashContainer>
             )}
           </>

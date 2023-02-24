@@ -19,7 +19,8 @@ import {
   ListItemClickableContainer,
   LeftAlignedFlexColumn,
   BreakWordContainer,
-  VerticalSpaceContainer
+  VerticalSpaceContainer,
+  SpacingSize
 } from '@src/libs/layout';
 
 import {
@@ -89,9 +90,9 @@ export function ConnectAccountContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <ParagraphContainer gap="big">
+        <ParagraphContainer top={SpacingSize.Big}>
           <SiteFaviconBadge origin={origin} />
-          <VerticalSpaceContainer gap="medium">
+          <VerticalSpaceContainer top={SpacingSize.Medium}>
             <Typography type="header">
               <BreakWordContainer>{headerText}</BreakWordContainer>
             </Typography>

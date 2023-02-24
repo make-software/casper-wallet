@@ -1,28 +1,83 @@
 import styled from 'styled-components';
 
+export enum SpacingSize {
+  None = 'none',
+  Tiny = 'tiny',
+  Small = 'small',
+  Medium = 'medium',
+  Big = 'big'
+}
+
+export const getSpacingSize = (size?: SpacingSize) => {
+  switch (size ?? SpacingSize.None) {
+    case SpacingSize.None:
+      return 'initial';
+    case SpacingSize.Tiny:
+      return '0.8rem';
+    case SpacingSize.Small:
+      return '1.2rem';
+    case SpacingSize.Medium:
+      return '1.6rem';
+    case SpacingSize.Big:
+      return '2.4rem';
+    default:
+      throw new Error('Unknown spacing size');
+  }
+};
+
 interface VerticalSpaceContainerProps {
-  gap: 'none' | 'small' | 'medium' | 'big';
+  top?: SpacingSize;
 }
 
 export const VerticalSpaceContainer = styled.div<VerticalSpaceContainerProps>`
-  margin-top: ${({ gap }) => {
-    switch (gap) {
-      case 'none':
-        return 0;
-      case 'small':
-        return '1.2rem';
-      case 'medium':
-        return '1.6rem';
-      case 'big':
-        return '2.4rem';
-      default:
-        throw new Error('Unknown gap');
-    }
-  }};
+  margin-top: ${({ top }) => getSpacingSize(top)};
 `;
 
-export const FlexRow = styled.div`
+export const ParagraphContainer = styled(VerticalSpaceContainer)`
+  padding: 0 ${({ theme }) => theme.padding[1.6]} 0;
+`;
+
+interface TileContainerProps extends VerticalSpaceContainerProps {
+  paddingVertical?: SpacingSize;
+  paddingHorizontal?: SpacingSize;
+}
+
+export const TileContainer = styled('div')<TileContainerProps>`
+  margin-top: 16px;
+  padding-top: ${({ paddingVertical }) =>
+    getSpacingSize(paddingVertical || SpacingSize.Medium)};
+  padding-bottom: ${({ paddingVertical }) =>
+    getSpacingSize(paddingVertical || SpacingSize.Medium)};
+  padding-left: ${({ paddingHorizontal }) =>
+    getSpacingSize(paddingHorizontal || SpacingSize.Medium)};
+  padding-right: ${({ paddingHorizontal }) =>
+    getSpacingSize(paddingHorizontal || SpacingSize.Medium)};
+`;
+
+const getGapSize = (gap?: SpacingSize) => {
+  switch (gap ?? SpacingSize.None) {
+    case SpacingSize.None:
+      return 'initial';
+    case SpacingSize.Tiny:
+      return '4px';
+    case SpacingSize.Small:
+      return '8px';
+    case SpacingSize.Medium:
+      return '12px';
+    case SpacingSize.Big:
+      return '16px';
+    default:
+      throw new Error('Unknown gap size');
+  }
+};
+
+interface FlexRowProps {
+  gap?: SpacingSize;
+}
+
+export const FlexRow = styled.div<FlexRowProps>`
   display: flex;
+  gap: ${({ gap }) => getGapSize(gap)};
 `;
 
 export const AlignedFlexRow = styled(FlexRow)`
@@ -62,6 +117,10 @@ export const SpaceBetweenFlexColumn = styled(FlexColumn)`
   justify-content: space-between;
 `;
 
+export const SpaceAroundFlexColumn = styled(FlexColumn)`
+  justify-content: space-around;
+`;
+
 export const HeaderContainer = styled(AlignedSpaceBetweenFlexRow)`
   background-color: ${({ theme }) => theme.color.backgroundRed};
   height: 72px;
@@ -80,10 +139,6 @@ export const LogoContainer = styled.div`
 export const ContentContainer = styled.div`
   padding: 0 ${({ theme }) => theme.padding[1.6]}
     ${({ theme }) => theme.padding[1.6]};
-`;
-
-export const ParagraphContainer = styled(VerticalSpaceContainer)`
-  padding: 0 ${({ theme }) => theme.padding[1.6]} 0;
 `;
 
 export const InputsContainer = styled.div`
@@ -168,4 +223,15 @@ export const IllustrationContainer = styled.div`
 
 export const OnboardingIllustrationContainer = styled(IllustrationContainer)`
   margin-top: 40px;
+`;
+
+export const ItemsContainer = styled.div`
+  padding: 8px;
+`;
+
+export const AccountListItemsContainer = styled(ItemsContainer)`
+  &:hover {
+    background-color: ${({ theme }) => theme.color.backgroundSecondary};
+    border-radius: ${({ theme }) => theme.borderRadius.base}px;
+  }
 `;
