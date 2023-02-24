@@ -63,7 +63,7 @@ export const UnconnectedAccountsList = ({
               </LeftAlignedFlexColumn>
               <Button
                 color="primaryRed"
-                variant="inline"
+                inline
                 width="100"
                 onClick={async () => {
                   await connectAccounts(

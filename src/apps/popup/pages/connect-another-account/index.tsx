@@ -98,7 +98,7 @@ export function ConnectAnotherAccountPageContent() {
                 />
               </LeftAlignedFlexColumn>
               <Button
-                variant="inline"
+                inline
                 width="100"
                 onClick={async () => {
                   await connectAccounts([targetAccount.name], activeOrigin);
@@ -132,7 +132,7 @@ export function ConnectAnotherAccountPageContent() {
               </LeftAlignedFlexColumn>
               <Button
                 color="secondaryBlue"
-                variant="inline"
+                inline
                 width="100"
                 onClick={async () => {
                   await changeActiveAccount(account.name);

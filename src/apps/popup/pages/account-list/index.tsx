@@ -17,7 +17,8 @@ import {
   ContentContainer,
   LeftAlignedFlexColumn,
   PageContainer,
-  FlexRow
+  FlexRow,
+  AccountListItemsContainer
 } from '@libs/layout';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
@@ -76,15 +77,6 @@ const ConnectionStatusBadgeContainer = styled.div`
 
 const HashContainer = styled.div`
   margin-top: 4px;
-`;
-
-const ItemsContainer = styled.div`
-  padding: 8px;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.color.backgroundSecondary};
-    border-radius: ${({ theme }) => theme.borderRadius.base}px;
-  }
 `;
 
 export function AccountListPage() {
@@ -203,7 +195,7 @@ export function AccountListPage() {
                 renderMenuItems={({ closePopover }) => (
                   <>
                     {connectedAccountNames.includes(account.name) ? (
-                      <ItemsContainer>
+                      <AccountListItemsContainer>
                         <Link
                           color="inherit"
                           hoverColor="contentBlue"
@@ -217,9 +209,9 @@ export function AccountListPage() {
                             <Trans t={t}>Disconnect</Trans>
                           </Typography>
                         </Link>
-                      </ItemsContainer>
+                      </AccountListItemsContainer>
                     ) : (
-                      <ItemsContainer>
+                      <AccountListItemsContainer>
                         <Link
                           color="inherit"
                           hoverColor="contentBlue"
@@ -240,9 +232,9 @@ export function AccountListPage() {
                             <Trans t={t}>Connect</Trans>
                           </Typography>
                         </Link>
-                      </ItemsContainer>
+                      </AccountListItemsContainer>
                     )}
-                    <ItemsContainer>
+                    <AccountListItemsContainer>
                       <Link
                         target="_blank"
                         color="inherit"
@@ -259,8 +251,8 @@ export function AccountListPage() {
                           <Trans t={t}>View on CSPR.live</Trans>
                         </Typography>
                       </Link>
-                    </ItemsContainer>
-                    <ItemsContainer>
+                    </AccountListItemsContainer>
+                    <AccountListItemsContainer>
                       <Link
                         color="inherit"
                         hoverColor="contentBlue"
@@ -282,7 +274,7 @@ export function AccountListPage() {
                           <Trans t={t}>Manage</Trans>
                         </Typography>
                       </Link>
-                    </ItemsContainer>
+                    </AccountListItemsContainer>
                   </>
                 )}
               >

@@ -4,6 +4,10 @@ interface VerticalSpaceContainerProps {
   gap: 'none' | 'small' | 'medium' | 'big';
 }
 
+interface FlexProps {
+  gap?: 'xs' | 'small' | 'medium' | 'big';
+}
+
 export const VerticalSpaceContainer = styled.div<VerticalSpaceContainerProps>`
   margin-top: ${({ gap }) => {
     switch (gap) {
@@ -21,8 +25,23 @@ export const VerticalSpaceContainer = styled.div<VerticalSpaceContainerProps>`
   }};
 `;
 
-export const FlexRow = styled.div`
+export const FlexRow = styled.div<FlexProps>`
   display: flex;
+
+  gap: ${({ gap }) => {
+    switch (gap) {
+      case 'xs':
+        return '4px';
+      case 'small':
+        return '8px';
+      case 'medium':
+        return '12px';
+      case 'big':
+        return '16px';
+      default:
+        return 0;
+    }
+  }};
 `;
 
 export const AlignedFlexRow = styled(FlexRow)`
@@ -60,6 +79,10 @@ export const LeftAlignedFlexColumn = styled(FlexColumn)`
 
 export const SpaceBetweenFlexColumn = styled(FlexColumn)`
   justify-content: space-between;
+`;
+
+export const SpaceAroundFlexColumn = styled(FlexColumn)`
+  justify-content: space-around;
 `;
 
 export const HeaderContainer = styled(AlignedSpaceBetweenFlexRow)`
@@ -168,4 +191,20 @@ export const IllustrationContainer = styled.div`
 
 export const OnboardingIllustrationContainer = styled(IllustrationContainer)`
   margin-top: 40px;
+`;
+
+export const ItemsContainer = styled.div`
+  padding: 8px;
+`;
+
+export const AccountListItemsContainer = styled(ItemsContainer)`
+  &:hover {
+    background-color: ${({ theme }) => theme.color.backgroundSecondary};
+    border-radius: ${({ theme }) => theme.borderRadius.base}px;
+  }
+`;
+
+export const AccountSettingsContainer = styled.div`
+  margin-top: 16px;
+  padding: 24px 0;
 `;

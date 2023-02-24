@@ -8,13 +8,14 @@ import { Trans, useTranslation } from 'react-i18next';
 import {
   ContentContainer,
   FlexColumn,
-  VerticalSpaceContainer
+  ParagraphContainer,
+  AccountSettingsContainer
 } from '@src/libs/layout/containers';
 import {
   Hash,
   HashDisplayContext,
   HashVariant,
-  PageTile,
+  Tile,
   SvgIcon,
   Typography
 } from '@libs/ui';
@@ -24,10 +25,6 @@ import {
 } from '@src/background/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-
-const TextContainer = styled(FlexColumn)`
-  gap: 8px;
-`;
 
 export function AccountSettingsPageContent() {
   const { t } = useTranslation();
@@ -46,37 +43,39 @@ export function AccountSettingsPageContent() {
   return (
     <>
       <ContentContainer>
-        <PageTile>
-          <VerticalSpaceContainer gap="none">
-            <Typography type="header">{account.name}</Typography>
-          </VerticalSpaceContainer>
-          <VerticalSpaceContainer gap="big">
-            <TextContainer>
-              <Typography type="bodySemiBold">
-                <Trans t={t}>Public key</Trans>
-              </Typography>
-              <Hash
-                value={account.publicKey}
-                variant={HashVariant.FullHash}
-                withCopyOnSelfClick
-                displayContext={HashDisplayContext.AccountInfo}
-              />
-            </TextContainer>
-          </VerticalSpaceContainer>
-          <VerticalSpaceContainer gap="big">
-            <TextContainer>
-              <Typography type="bodySemiBold">
-                <Trans t={t}>Account hash</Trans>
-              </Typography>
-              <Hash
-                value={accountHash}
-                variant={HashVariant.FullHash}
-                withCopyOnSelfClick
-                displayContext={HashDisplayContext.AccountInfo}
-              />
-            </TextContainer>
-          </VerticalSpaceContainer>
-        </PageTile>
+        <Tile>
+          <AccountSettingsContainer>
+            <ParagraphContainer gap="none">
+              <Typography type="header">{account.name}</Typography>
+            </ParagraphContainer>
+            <ParagraphContainer gap="big">
+              <FlexColumn gap="small">
+                <Typography type="bodySemiBold">
+                  <Trans t={t}>Public key</Trans>
+                </Typography>
+                <Hash
+                  value={account.publicKey}
+                  variant={HashVariant.FullHash}
+                  withCopyOnSelfClick
+                  displayContext={HashDisplayContext.AccountInfo}
+                />
+              </FlexColumn>
+            </ParagraphContainer>
+            <ParagraphContainer gap="big">
+              <FlexColumn gap="small">
+                <Typography type="bodySemiBold">
+                  <Trans t={t}>Account hash</Trans>
+                </Typography>
+                <Hash
+                  value={accountHash}
+                  variant={HashVariant.FullHash}
+                  withCopyOnSelfClick
+                  displayContext={HashDisplayContext.AccountInfo}
+                />
+              </FlexColumn>
+            </ParagraphContainer>
+          </AccountSettingsContainer>
+        </Tile>
       </ContentContainer>
     </>
   );

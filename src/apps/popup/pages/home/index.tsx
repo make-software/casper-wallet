@@ -7,7 +7,9 @@ import styled, { css } from 'styled-components';
 import {
   CenteredFlexColumn,
   ContentContainer,
+  FlexRow,
   LeftAlignedFlexColumn,
+  SpaceAroundFlexColumn,
   SpaceBetweenFlexRow
 } from '@src/libs/layout/containers';
 import { LinkType, HeaderSubmenuBarNavLink } from '@libs/layout';
@@ -78,19 +80,8 @@ const BalanceContainer = styled(CenteredFlexColumn)`
 
 // List of accounts
 
-const BalanceInCSPRsContainer = styled.div`
-  display: flex;
-  gap: 8px;
-`;
-
-const ButtonsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  gap: 16px;
-
+const ButtonsContainer = styled(SpaceAroundFlexColumn)`
   width: 100%;
-
   margin-top: 16px;
 `;
 
@@ -203,17 +194,17 @@ export function HomePageContent() {
             />
           </NameAndAddressContainer>
           <BalanceContainer>
-            <BalanceInCSPRsContainer>
+            <FlexRow gap="small">
               <Typography type="CSPRBold">{balance.amount}</Typography>
               <Typography type="CSPRLight" color="contentSecondary">
                 CSPR
               </Typography>
-            </BalanceInCSPRsContainer>
+            </FlexRow>
             <Typography type="body" color="contentSecondary">
               {balance.fiatAmount}
             </Typography>
           </BalanceContainer>
-          <ButtonsContainer>
+          <ButtonsContainer gap="big">
             {isActiveAccountConnected ? (
               <Button
                 disabled={activeOrigin == null}

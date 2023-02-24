@@ -131,7 +131,7 @@ export function SwitchAccountContent() {
                     </LeftAlignedFlexColumn>
                     <Button
                       color="secondaryBlue"
-                      variant="inline"
+                      inline
                       width="100"
                       onClick={async () => {
                         await changeActiveAccount(account.name);

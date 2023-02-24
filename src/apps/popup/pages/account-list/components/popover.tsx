@@ -38,8 +38,6 @@ const PopoverContainer = styled.div<PopoverContainerProps>`
 `;
 
 const PopoverItemsContainer = styled(FlexColumn)`
-  gap: 4px;
-
   padding: 8px;
 
   background: ${({ theme }) => theme.color.fillWhite};
@@ -89,7 +87,7 @@ export function Popover({
             ref={clickAwayRef}
             domRect={childrenContainerRef.current?.getBoundingClientRect()}
           >
-            <PopoverItemsContainer>
+            <PopoverItemsContainer gap="xs">
               {renderMenuItems({ closePopover })}
             </PopoverItemsContainer>
           </PopoverContainer>

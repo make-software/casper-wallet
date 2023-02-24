@@ -9,7 +9,7 @@ import {
   Typography,
   Tag
 } from '@libs/ui';
-import { CenteredFlexRow } from '@libs/layout';
+import { CenteredFlexRow, FlexRow } from '@libs/layout';
 
 import { truncateKey } from './utils';
 
@@ -34,11 +34,6 @@ const HashContainer = styled(CenteredFlexRow)<HashContainerProps>`
   align-items: center;
   height: ${({ displayContext }) =>
     displayContext === HashDisplayContext.Home ? '24px' : 'auto'};
-`;
-
-const CopyStatusContainer = styled.div`
-  display: flex;
-  gap: 4px;
 `;
 
 export const HoverCopyIcon = styled(SvgIcon)`
@@ -77,7 +72,7 @@ export function Hash({
       <>
         <Typography
           type={variant}
-          workBreak={displayContext === HashDisplayContext.AccountInfo}
+          wordBreak={displayContext === HashDisplayContext.AccountInfo}
           color={color || 'contentSecondary'}
         >
           {truncated ? truncateKey(value) : value}
@@ -95,7 +90,7 @@ export function Hash({
       <HashContainer displayContext={displayContext}>
         <Typography
           type={variant}
-          workBreak={displayContext === HashDisplayContext.AccountInfo}
+          wordBreak={displayContext === HashDisplayContext.AccountInfo}
           color={color || 'contentSecondary'}
         >
           {truncated ? truncateKey(value) : value}
@@ -135,7 +130,7 @@ export function Hash({
         renderContent={({ isClicked }) => (
           <>
             {isClicked ? (
-              <CopyStatusContainer>
+              <FlexRow gap="xs">
                 <SvgIcon
                   color="contentGreen"
                   src="assets/icons/checkbox-checked.svg"
@@ -143,7 +138,7 @@ export function Hash({
                 <Typography type="body" color="contentGreen">
                   <Trans t={t}>Copied!</Trans>
                 </Typography>
-              </CopyStatusContainer>
+              </FlexRow>
             ) : (
               <HashContainer displayContext={displayContext}>
                 {HashComponent}

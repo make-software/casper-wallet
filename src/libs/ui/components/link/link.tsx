@@ -56,5 +56,3 @@ const StyledLink = styled.a<LinkProps>(({ theme, color, hoverColor }) => {
 export const Link = React.forwardRef<Ref, LinkProps>(function Link(props, ref) {
   return <StyledLink ref={ref} target={props.target} {...props} />;
 });
-
-export default Link;

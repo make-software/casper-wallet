@@ -27,7 +27,7 @@ export interface BodyStylesProps extends BaseProps {
   capitalize?: boolean;
   noWrap?: boolean;
   loading?: boolean;
-  workBreak?: boolean;
+  wordBreak?: boolean;
 }
 
 interface TypographyProps extends BodyStylesProps {
@@ -42,7 +42,7 @@ function getBodyStyles(
     uppercase = false,
     capitalize = false,
     noWrap = false,
-    workBreak = false
+    wordBreak = false
   }: BodyStylesProps
 ): CSSObject {
   return {
@@ -59,7 +59,7 @@ function getBodyStyles(
     ...(capitalize && {
       textTransform: 'capitalize'
     }),
-    ...(workBreak && {
+    ...(wordBreak && {
       wordBreak: 'break-all'
     }),
     '-webkit-text-size-adjust': '100%'

@@ -11,7 +11,6 @@ interface IsEmptyWord {
 type DisabledOrSelected = Pick<WordTagProps, 'selected' | 'disabled'>;
 
 const WordContainer = styled(FlexRow)<DisabledOrSelected & IsEmptyWord>`
-  gap: 4px;
   padding: 2px 8px;
   width: ${({ isEmptyWord }) => (isEmptyWord ? '72px' : 'unset')};
   background: ${({ theme, selected }) =>
@@ -56,6 +55,7 @@ export function WordTag({
 
   return (
     <WordContainer
+      gap="xs"
       disabled={disabled}
       selected={selected}
       isEmptyWord={value == null}

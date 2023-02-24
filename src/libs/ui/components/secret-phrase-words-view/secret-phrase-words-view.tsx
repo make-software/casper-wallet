@@ -80,7 +80,6 @@ const TextAndIconContainer = styled(CenteredFlexColumn)`
 const WordListContainer = styled(FlexRow)`
   align-content: flex-start;
   flex-wrap: wrap;
-  gap: 8px;
 
   padding: ${({ theme }) => theme.padding[1.6]};
 `;
@@ -205,7 +204,7 @@ export function SecretPhraseWordsView({
             </TextAndIconContainer>
           </BlurredSecretPhraseWordsViewOverlayContainer>
         )}
-        <WordListContainer data-testId="word-list">
+        <WordListContainer gap="small" data-testId="word-list">
           {(confirmationMode ? partialPhrase : phrase).map((word, index) => {
             return (
               <WordTag

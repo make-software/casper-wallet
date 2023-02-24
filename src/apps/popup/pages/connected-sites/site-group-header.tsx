@@ -35,12 +35,7 @@ export function SiteGroupHeader({
           <Trans t={t}>Site</Trans> {siteOrder}
         </Typography>
 
-        <Button
-          width="120"
-          variant="inline"
-          color="primaryRed"
-          onClick={disconnectSite}
-        >
+        <Button width="120" inline color="primaryRed" onClick={disconnectSite}>
           <Trans t={t}>Disconnect site</Trans>
         </Button>
       </SiteGroupHeaderActionContainer>
