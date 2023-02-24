@@ -5,7 +5,8 @@ import {
   ContentContainer,
   IllustrationContainer,
   ParagraphContainer,
-  FooterButtonsAbsoluteContainer
+  FooterButtonsAbsoluteContainer,
+  SpacingSize
 } from '@src/libs/layout/containers';
 import { SvgIcon, Typography, Button, Checkbox } from '@src/libs/ui';
 
@@ -35,12 +36,12 @@ export function ResetVaultPageContent() {
         <IllustrationContainer>
           <SvgIcon src="assets/illustrations/reset-wallet.svg" size={120} />
         </IllustrationContainer>
-        <ParagraphContainer gap="big">
+        <ParagraphContainer top={SpacingSize.Big}>
           <Typography type="header">
             <Trans t={t}>Are you sure you want to reset your wallet?</Trans>
           </Typography>
         </ParagraphContainer>
-        <ParagraphContainer gap="medium">
+        <ParagraphContainer top={SpacingSize.Medium}>
           <Typography type="body" color="contentSecondary">
             <Trans t={t}>
               All accounts will be removed. Make sure you have securely stored

@@ -12,7 +12,8 @@ import {
   CenteredFlexColumn,
   AlignedFlexRow,
   FlexColumn,
-  FlexRow
+  FlexRow,
+  SpacingSize
 } from '@src/libs/layout';
 import { SvgIcon, Typography, WordTag, hexToRGBA } from '@src/libs/ui';
 import { SecretPhrase } from '@src/libs/crypto';
@@ -204,7 +205,7 @@ export function SecretPhraseWordsView({
             </TextAndIconContainer>
           </BlurredSecretPhraseWordsViewOverlayContainer>
         )}
-        <WordListContainer gap="small" data-testId="word-list">
+        <WordListContainer gap={SpacingSize.Small} data-testId="word-list">
           {(confirmationMode ? partialPhrase : phrase).map((word, index) => {
             return (
               <WordTag

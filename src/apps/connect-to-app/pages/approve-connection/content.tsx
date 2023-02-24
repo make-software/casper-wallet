@@ -8,7 +8,8 @@ import {
   ContentContainer,
   BreakWordContainer,
   VerticalSpaceContainer,
-  ListItemClickableContainer
+  ListItemClickableContainer,
+  SpacingSize
 } from '@src/libs/layout';
 import { SiteFaviconBadge, List, SvgIcon, Typography } from '@src/libs/ui';
 
@@ -44,9 +45,9 @@ export function ApproveConnectionContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <ParagraphContainer gap="big">
+        <ParagraphContainer top={SpacingSize.Big}>
           <SiteFaviconBadge origin={origin} />
-          <VerticalSpaceContainer gap="medium">
+          <VerticalSpaceContainer top={SpacingSize.Medium}>
             <Typography type="header">
               <BreakWordContainer>{title}</BreakWordContainer>
             </Typography>

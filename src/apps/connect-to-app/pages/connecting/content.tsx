@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 import { getFaviconUrlFromOrigin, SvgIcon, Typography } from '@libs/ui';
 import { closeCurrentWindow } from '@src/background/close-current-window';
-import { AlignedFlexRow } from '@libs/layout';
+import { AlignedFlexRow, SpacingSize } from '@libs/layout';
 
 const PageContainer = styled.div`
   display: flex;
@@ -51,7 +51,7 @@ export function ConnectingContent() {
       <Typography type="header">
         <Trans t={t}>Connecting</Trans>
       </Typography>
-      <IconsContainer gap="big">
+      <IconsContainer gap={SpacingSize.Big}>
         <LogoOverlay>
           <SvgIcon src="assets/icons/casper-wallet-logo.svg" size={40} />
         </LogoOverlay>

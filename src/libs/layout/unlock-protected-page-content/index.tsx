@@ -6,7 +6,8 @@ import {
   ContentContainer,
   IllustrationContainer,
   InputsContainer,
-  ParagraphContainer
+  ParagraphContainer,
+  SpacingSize
 } from '@libs/layout';
 import {
   Input,
@@ -42,12 +43,12 @@ export const UnlockProtectedPageContent = ({
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/password.svg" size={120} />
       </IllustrationContainer>
-      <ParagraphContainer gap="big">
+      <ParagraphContainer top={SpacingSize.Big}>
         <Typography type="header">
           <Trans t={t}>Wallet password required</Trans>
         </Typography>
       </ParagraphContainer>
-      <ParagraphContainer gap="medium">
+      <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
           {description}{' '}
           <Trans t={t}>You have {{ retryLeft }} tries left.</Trans>

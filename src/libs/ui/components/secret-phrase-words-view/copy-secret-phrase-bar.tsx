@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AlignedFlexRow } from '@src/libs/layout';
+import { AlignedFlexRow, SpacingSize } from '@src/libs/layout';
 import { CopyToClipboard, SvgIcon, Typography } from '@src/libs/ui';
 
 interface CopySecretPhraseBarProps {
@@ -15,7 +15,7 @@ export function CopySecretPhraseBar({
   return (
     <CopyToClipboard
       renderContent={({ isClicked }) => (
-        <AlignedFlexRow gap="xs">
+        <AlignedFlexRow gap={SpacingSize.Tiny}>
           <SvgIcon
             src={
               isClicked

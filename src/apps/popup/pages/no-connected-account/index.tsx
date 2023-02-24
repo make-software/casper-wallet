@@ -5,7 +5,8 @@ import {
   ContentContainer,
   IllustrationContainer,
   ParagraphContainer,
-  FooterButtonsAbsoluteContainer
+  FooterButtonsAbsoluteContainer,
+  SpacingSize
 } from '@src/libs/layout';
 import { Typography, SvgIcon, Button } from '@libs/ui';
 
@@ -20,12 +21,12 @@ export function NoConnectedAccountPageContent() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/no-connection.svg" size={120} />
       </IllustrationContainer>
-      <ParagraphContainer gap="big">
+      <ParagraphContainer top={SpacingSize.Big}>
         <Typography type="header">
           <Trans t={t}>Casper Wallet is not connected to this site yet</Trans>
         </Typography>
       </ParagraphContainer>
-      <ParagraphContainer gap="medium">
+      <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             To connect to this site, click on the Connect/Sign In button on the

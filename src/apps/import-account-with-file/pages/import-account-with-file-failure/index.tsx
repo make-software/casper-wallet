@@ -5,7 +5,8 @@ import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
   ParagraphContainer,
-  IllustrationContainer
+  IllustrationContainer,
+  SpacingSize
 } from '@src/libs/layout';
 import { Button, SvgIcon, Typography } from '@src/libs/ui';
 
@@ -27,12 +28,12 @@ export function ImportAccountWithFileFailureContentPage() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/process-error.svg" size={120} />
       </IllustrationContainer>
-      <ParagraphContainer gap="big">
+      <ParagraphContainer top={SpacingSize.Big}>
         <Typography type="header">
           <Trans t={t}>Something went wrong</Trans>
         </Typography>
       </ParagraphContainer>
-      <ParagraphContainer gap="medium">
+      <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
           {state?.importAccountStatusMessage
             ? state.importAccountStatusMessage

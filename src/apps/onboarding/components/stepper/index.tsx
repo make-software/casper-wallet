@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { FlexRow } from '@libs/layout';
+import { FlexRow, SpacingSize } from '@libs/layout';
 
 const StepperContainer = styled(FlexRow)`
   position: absolute;
@@ -35,7 +35,7 @@ interface StepperProps {
 
 export function Stepper({ length, activeIndex }: StepperProps) {
   return (
-    <StepperContainer gap="big">
+    <StepperContainer gap={SpacingSize.Big}>
       {createStepsArray(length).map(stepNumber => (
         <Step key={stepNumber} isActiveStep={stepNumber === activeIndex} />
       ))}

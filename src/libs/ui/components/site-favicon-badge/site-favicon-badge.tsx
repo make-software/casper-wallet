@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Typography } from '@libs/ui';
-import { AlignedSpaceBetweenFlexRow } from '@libs/layout';
+import { AlignedSpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
 
 const SiteFaviconAndHostnameContainer = styled(AlignedSpaceBetweenFlexRow)`
   width: fit-content;
@@ -44,7 +44,7 @@ export function SiteFaviconBadge({ origin }: SiteFaviconBadgeProps) {
   }
 
   return (
-    <SiteFaviconAndHostnameContainer gap="small">
+    <SiteFaviconAndHostnameContainer gap={SpacingSize.Small}>
       <FaviconImg src={faviconUrl} alt={`${hostName} favicon`} />
       {hostName && <Typography type="body">{hostName}</Typography>}
     </SiteFaviconAndHostnameContainer>

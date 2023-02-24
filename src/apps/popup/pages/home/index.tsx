@@ -10,7 +10,9 @@ import {
   FlexRow,
   LeftAlignedFlexColumn,
   SpaceAroundFlexColumn,
-  SpaceBetweenFlexRow
+  SpaceBetweenFlexRow,
+  SpacingSize,
+  TileContainer
 } from '@src/libs/layout/containers';
 import { LinkType, HeaderSubmenuBarNavLink } from '@libs/layout';
 
@@ -18,12 +20,12 @@ import {
   Button,
   Hash,
   HashVariant,
-  PageTile,
   Typography,
   Avatar,
   SvgIcon,
   Link,
-  HashDisplayContext
+  HashDisplayContext,
+  Tile
 } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -161,85 +163,87 @@ export function HomePageContent() {
   return (
     <HomePageContentContainer>
       {activeAccount && (
-        <PageTile>
-          <SpaceBetweenFlexRow>
-            <ConnectionStatusBadge
-              isConnected={isActiveAccountConnected}
-              displayContext="home"
+        <Tile>
+          <TileContainer>
+            <SpaceBetweenFlexRow>
+              <ConnectionStatusBadge
+                isConnected={isActiveAccountConnected}
+                displayContext="home"
+              />
+              <Link
+                href={getBlockExplorerAccountUrl(activeAccount.publicKey)}
+                target="_blank"
+                color="inherit"
+                title={t('View account in CSPR.live')}
+              >
+                <SvgIcon src="assets/icons/external-link.svg" />
+              </Link>
+            </SpaceBetweenFlexRow>
+            <Avatar
+              publicKey={activeAccount.publicKey}
+              src={accountLogo}
+              loadingAccountInfo={loadingAccountInfo}
             />
-            <Link
-              href={getBlockExplorerAccountUrl(activeAccount.publicKey)}
-              target="_blank"
-              color="inherit"
-              title={t('View account in CSPR.live')}
-            >
-              <SvgIcon src="assets/icons/external-link.svg" />
-            </Link>
-          </SpaceBetweenFlexRow>
-          <Avatar
-            publicKey={activeAccount.publicKey}
-            src={accountLogo}
-            loadingAccountInfo={loadingAccountInfo}
-          />
-          <NameAndAddressContainer>
-            <Typography type="bodySemiBold" loading={loadingAccountInfo}>
-              {accountName ?? activeAccount.name}
-            </Typography>
-            <Hash
-              value={activeAccount.publicKey}
-              variant={HashVariant.CaptionHash}
-              truncated
-              withCopyOnSelfClick
-              displayContext={HashDisplayContext.Home}
-            />
-          </NameAndAddressContainer>
-          <BalanceContainer>
-            <FlexRow gap="small">
-              <Typography type="CSPRBold">{balance.amount}</Typography>
-              <Typography type="CSPRLight" color="contentSecondary">
-                CSPR
+            <NameAndAddressContainer>
+              <Typography type="bodySemiBold" loading={loadingAccountInfo}>
+                {accountName ?? activeAccount.name}
               </Typography>
-            </FlexRow>
-            <Typography type="body" color="contentSecondary">
-              {balance.fiatAmount}
-            </Typography>
-          </BalanceContainer>
-          <ButtonsContainer gap="big">
-            {isActiveAccountConnected ? (
+              <Hash
+                value={activeAccount.publicKey}
+                variant={HashVariant.CaptionHash}
+                truncated
+                withCopyOnSelfClick
+                displayContext={HashDisplayContext.Home}
+              />
+            </NameAndAddressContainer>
+            <BalanceContainer>
+              <FlexRow gap={SpacingSize.Small}>
+                <Typography type="CSPRBold">{balance.amount}</Typography>
+                <Typography type="CSPRLight" color="contentSecondary">
+                  CSPR
+                </Typography>
+              </FlexRow>
+              <Typography type="body" color="contentSecondary">
+                {balance.fiatAmount}
+              </Typography>
+            </BalanceContainer>
+            <ButtonsContainer gap={SpacingSize.Big}>
+              {isActiveAccountConnected ? (
+                <Button
+                  disabled={activeOrigin == null}
+                  onClick={() =>
+                    activeOrigin &&
+                    disconnectAccount(activeAccount.name, activeOrigin)
+                  }
+                  color="secondaryRed"
+                >
+                  <Trans t={t}>Disconnect</Trans>
+                </Button>
+              ) : (
+                <Button
+                  disabled={activeOrigin == null}
+                  onClick={handleConnectAccount}
+                  color="primaryRed"
+                >
+                  <Trans t={t}>Connect</Trans>
+                </Button>
+              )}
               <Button
-                disabled={activeOrigin == null}
+                color="secondaryBlue"
                 onClick={() =>
-                  activeOrigin &&
-                  disconnectAccount(activeAccount.name, activeOrigin)
-                }
-                color="secondaryRed"
-              >
-                <Trans t={t}>Disconnect</Trans>
-              </Button>
-            ) : (
-              <Button
-                disabled={activeOrigin == null}
-                onClick={handleConnectAccount}
-                color="primaryRed"
-              >
-                <Trans t={t}>Connect</Trans>
-              </Button>
-            )}
-            <Button
-              color="secondaryBlue"
-              onClick={() =>
-                navigate(
-                  RouterPath.AccountSettings.replace(
-                    ':accountName',
-                    activeAccount.name
+                  navigate(
+                    RouterPath.AccountSettings.replace(
+                      ':accountName',
+                      activeAccount.name
+                    )
                   )
-                )
-              }
-            >
-              <Trans t={t}>Manage account</Trans>
-            </Button>
-          </ButtonsContainer>
-        </PageTile>
+                }
+              >
+                <Trans t={t}>Manage account</Trans>
+              </Button>
+            </ButtonsContainer>
+          </TileContainer>
+        </Tile>
       )}
     </HomePageContentContainer>
   );

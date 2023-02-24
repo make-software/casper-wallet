@@ -5,7 +5,8 @@ import {
   ContentContainer,
   IllustrationContainer,
   OnboardingIllustrationContainer,
-  ParagraphContainer
+  ParagraphContainer,
+  SpacingSize
 } from '@src/libs/layout';
 import { SvgIcon, Typography } from '@src/libs/ui';
 
@@ -38,11 +39,11 @@ export function ErrorPageContent({
           </IllustrationContainer>
         )}
 
-        <ParagraphContainer gap="big">
+        <ParagraphContainer top={SpacingSize.Big}>
           <Typography type="header">{errorHeaderText}</Typography>
         </ParagraphContainer>
 
-        <ParagraphContainer gap="medium">
+        <ParagraphContainer top={SpacingSize.Medium}>
           <Typography type="body" color="contentSecondary">
             {errorContentText}
           </Typography>

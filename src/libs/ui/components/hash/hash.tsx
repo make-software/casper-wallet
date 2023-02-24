@@ -9,7 +9,7 @@ import {
   Typography,
   Tag
 } from '@libs/ui';
-import { CenteredFlexRow, FlexRow } from '@libs/layout';
+import { CenteredFlexRow, FlexRow, SpacingSize } from '@libs/layout';
 
 import { truncateKey } from './utils';
 
@@ -130,7 +130,7 @@ export function Hash({
         renderContent={({ isClicked }) => (
           <>
             {isClicked ? (
-              <FlexRow gap="xs">
+              <FlexRow gap={SpacingSize.Tiny}>
                 <SvgIcon
                   color="contentGreen"
                   src="assets/icons/checkbox-checked.svg"

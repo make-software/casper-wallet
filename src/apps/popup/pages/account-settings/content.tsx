@@ -8,8 +8,9 @@ import { Trans, useTranslation } from 'react-i18next';
 import {
   ContentContainer,
   FlexColumn,
-  ParagraphContainer,
-  AccountSettingsContainer
+  SpacingSize,
+  TileContainer,
+  VerticalSpaceContainer
 } from '@src/libs/layout/containers';
 import {
   Hash,
@@ -44,12 +45,10 @@ export function AccountSettingsPageContent() {
     <>
       <ContentContainer>
         <Tile>
-          <AccountSettingsContainer>
-            <ParagraphContainer gap="none">
-              <Typography type="header">{account.name}</Typography>
-            </ParagraphContainer>
-            <ParagraphContainer gap="big">
-              <FlexColumn gap="small">
+          <TileContainer paddingVertical={SpacingSize.Big}>
+            <Typography type="header">{account.name}</Typography>
+            <VerticalSpaceContainer top={SpacingSize.Big}>
+              <FlexColumn gap={SpacingSize.Small}>
                 <Typography type="bodySemiBold">
                   <Trans t={t}>Public key</Trans>
                 </Typography>
@@ -60,9 +59,9 @@ export function AccountSettingsPageContent() {
                   displayContext={HashDisplayContext.AccountInfo}
                 />
               </FlexColumn>
-            </ParagraphContainer>
-            <ParagraphContainer gap="big">
-              <FlexColumn gap="small">
+            </VerticalSpaceContainer>
+            <VerticalSpaceContainer top={SpacingSize.Big}>
+              <FlexColumn gap={SpacingSize.Small}>
                 <Typography type="bodySemiBold">
                   <Trans t={t}>Account hash</Trans>
                 </Typography>
@@ -73,8 +72,8 @@ export function AccountSettingsPageContent() {
                   displayContext={HashDisplayContext.AccountInfo}
                 />
               </FlexColumn>
-            </ParagraphContainer>
-          </AccountSettingsContainer>
+            </VerticalSpaceContainer>
+          </TileContainer>
         </Tile>
       </ContentContainer>
     </>

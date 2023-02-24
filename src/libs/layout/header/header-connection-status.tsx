@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
 import { Typography, SvgIcon } from '@libs/ui';
-import { AlignedFlexRow } from '@libs/layout';
+import { AlignedFlexRow, SpacingSize } from '@libs/layout';
 import { selectCountOfConnectedAccounts } from '@src/background/redux/vault/selectors';
 
 const ConnectionStatusContainer = styled(AlignedFlexRow)`
@@ -20,7 +20,7 @@ export function HeaderConnectionStatus() {
   const countOfConnectedAccounts = useSelector(selectCountOfConnectedAccounts);
 
   return (
-    <ConnectionStatusContainer gap="xs">
+    <ConnectionStatusContainer gap={SpacingSize.Tiny}>
       {countOfConnectedAccounts > 0 && (
         <SvgIcon
           src="assets/icons/checkbox-checked.svg"

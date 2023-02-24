@@ -16,7 +16,8 @@ import {
   ContentContainer,
   ParagraphContainer,
   LeftAlignedFlexColumn,
-  VerticalSpaceContainer
+  VerticalSpaceContainer,
+  SpacingSize
 } from '@src/libs/layout';
 
 import {
@@ -66,16 +67,16 @@ export function SwitchAccountContent() {
   return (
     <PageContainer>
       <ContentContainer>
-        <ParagraphContainer gap="big">
+        <ParagraphContainer top={SpacingSize.Big}>
           <SiteFaviconBadge origin={activeOrigin} />
-          <VerticalSpaceContainer gap="medium">
+          <VerticalSpaceContainer top={SpacingSize.Medium}>
             <Typography type="header">Switch to another account</Typography>
           </VerticalSpaceContainer>
         </ParagraphContainer>
         {/*The active account and other accounts are not connected*/}
         {connectedAccountsListItems.length === 0 &&
           !isActiveAccountConnected && (
-            <ParagraphContainer gap="big">
+            <ParagraphContainer top={SpacingSize.Big}>
               <Typography type="body">
                 <Trans t={t}>
                   There is no connected account. First you need to connect
@@ -88,7 +89,7 @@ export function SwitchAccountContent() {
         {connectedAccountsListItems.length === 0 &&
           isActiveAccountConnected && (
             <>
-              <ParagraphContainer gap="big">
+              <ParagraphContainer top={SpacingSize.Big}>
                 <Typography type="body">
                   {unconnectedAccountsList.length > 0 ? (
                     <Trans t={t}>

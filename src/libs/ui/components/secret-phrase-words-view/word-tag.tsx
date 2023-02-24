@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Typography } from '@src/libs/ui';
-import { FlexRow } from '@src/libs/layout';
+import { FlexRow, SpacingSize } from '@src/libs/layout';
 
 interface IsEmptyWord {
   isEmptyWord?: boolean;
@@ -55,7 +55,7 @@ export function WordTag({
 
   return (
     <WordContainer
-      gap="xs"
+      gap={SpacingSize.Tiny}
       disabled={disabled}
       selected={selected}
       isEmptyWord={value == null}

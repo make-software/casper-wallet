@@ -6,6 +6,7 @@ import { Button, Typography } from '@src/libs/ui';
 import {
   AlignedSpaceBetweenFlexRow,
   SpaceBetweenFlexColumn,
+  SpacingSize,
   VerticalSpaceContainer
 } from '@src/libs/layout';
 
@@ -40,7 +41,7 @@ export function SiteGroupHeader({
         </Button>
       </SiteGroupHeaderActionContainer>
 
-      <VerticalSpaceContainer gap="small">
+      <VerticalSpaceContainer top={SpacingSize.Small}>
         <Typography type="body" color="contentBlue">
           {siteTitle}
         </Typography>
