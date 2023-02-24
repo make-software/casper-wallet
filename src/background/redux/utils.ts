@@ -94,8 +94,13 @@ export async function getExistingMainStoreSingletonOrInit() {
         });
 
       // persist selected state
-      const { vaultCipher, keys, loginRetryCount, loginRetryLockoutTime } =
-        state;
+      const {
+        vaultCipher,
+        keys,
+        loginRetryCount,
+        loginRetryLockoutTime,
+        timeoutDurationSetting
+      } = state;
       browser.storage.local
         .set({
           [VAULT_CIPHER_KEY]: vaultCipher,
