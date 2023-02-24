@@ -82,7 +82,7 @@ export function Hash({
         )}
       </>
     ),
-    [color, truncated, value, variant, withTag, t]
+    [color, truncated, value, variant, withTag, displayContext, t]
   );
 
   if (withCopyIconOnHover) {
