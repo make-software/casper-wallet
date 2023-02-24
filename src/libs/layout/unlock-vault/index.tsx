@@ -138,7 +138,7 @@ export function UnlockVaultPageContent() {
               </Trans>
             </Typography>
           </ParagraphContainer>
-          <ParagraphContainer gap="medium">
+          <ParagraphContainer top={SpacingSize.Medium}>
             <Typography type="body" color="contentSecondary">
               <Trans t={t}>
                 You can try again in <b>5 mins.</b>
