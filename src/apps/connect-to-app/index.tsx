@@ -11,7 +11,6 @@ import browser from 'webextension-polyfill';
 import { AppRouter } from '@src/apps/connect-to-app/app-router';
 import { GlobalStyle, themeConfig } from '@libs/ui';
 import { ErrorBoundary } from '@src/libs/layout/error';
-import { useSafariCSP } from '@hooks/use-safari-csp';
 
 import {
   BackgroundEvent,
@@ -23,8 +22,6 @@ import { connectWindowInit } from '@src/background/redux/windowManagement/action
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
-  // added content security policy meta tag to HTML for safari browser
-  useSafariCSP();
 
   // setup listener to state events
   useEffect(() => {

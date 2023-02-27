@@ -8,12 +8,7 @@ const webpack = require('webpack'),
   TerserPlugin = require('terser-webpack-plugin'),
   TsconfigPaths = require('tsconfig-paths-webpack-plugin');
 
-const {
-  isChrome,
-  isSafari,
-  ExtensionBuildPath,
-  ManifestPath
-} = require('./constants');
+const { isChrome, ExtensionBuildPath, ManifestPath } = require('./constants');
 
 const isDev = env.NODE_ENV === 'development';
 
@@ -155,11 +150,7 @@ const options = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: isChrome
-            ? ManifestPath.v3
-            : isSafari
-            ? ManifestPath.v2_Safari
-            : ManifestPath.v2,
+          from: isChrome ? ManifestPath.v3 : ManifestPath.v2,
           to: path.join(__dirname, buildDir, 'manifest.json'),
           force: true,
           transform: function (content) {

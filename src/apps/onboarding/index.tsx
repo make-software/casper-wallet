@@ -20,13 +20,9 @@ import {
 } from '@background/background-events';
 import { onboardingAppInit } from '@background/redux/windowManagement/actions';
 import { createMainStoreReplica } from '@background/redux/utils';
-import { useSafariCSP } from '@hooks/use-safari-csp';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
-
-  // added content security policy meta tag to HTML for safari browser
-  useSafariCSP();
 
   // setup listener to state events
   useEffect(() => {

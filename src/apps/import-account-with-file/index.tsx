@@ -17,15 +17,11 @@ import { importWindowInit } from '@src/background/redux/windowManagement/actions
 import { createMainStoreReplica } from '@src/background/redux/utils';
 import { GlobalStyle, themeConfig } from '@libs/ui';
 import { ErrorBoundary } from '@src/libs/layout/error';
-import { useSafariCSP } from '@hooks/use-safari-csp';
 
 import { AppRouter } from './app-router';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
-
-  // added content security policy meta tag to HTML for safari browser
-  useSafariCSP();
 
   // setup listener to state events
   useEffect(() => {
