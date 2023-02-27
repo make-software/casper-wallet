@@ -32,7 +32,7 @@ export function SignMessageContent({
         <ParagraphContainer top={SpacingSize.Big}>
           <FormField label={t('Message:')}>
             <Typography type="body">
-              <TextArea value={message} readOnly style={{ minHeight: 260 }} />
+              <TextArea value={message} readOnly style={{ minHeight: 250 }} />
             </Typography>
           </FormField>
         </ParagraphContainer>
