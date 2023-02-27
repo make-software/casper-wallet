@@ -8,6 +8,3 @@ export const selectActiveOrigin = (state: RootState): string | null =>
 
 export const selectVaultIsLocked = (state: RootState): boolean =>
   state.session.isLocked;
-
-export const selectVaultLastActivityTime = (state: RootState): number | null =>
-  state.session.lastActivityTime;

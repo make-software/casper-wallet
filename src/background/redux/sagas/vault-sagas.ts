@@ -18,8 +18,7 @@ import {
 
 import {
   selectEncryptionKeyHash,
-  selectVaultIsLocked,
-  selectVaultLastActivityTime
+  selectVaultIsLocked
 } from '../session/selectors';
 import { sagaCall, sagaSelect } from '../utils';
 import {
@@ -43,7 +42,6 @@ import {
 } from '../vault/selectors';
 import {
   encryptionKeyHashCreated,
-  lastActivityTimeRefreshed,
   sessionReseted,
   vaultUnlocked
 } from '../session/actions';
@@ -62,6 +60,8 @@ import {
 } from './actions';
 import { timeoutDurationSettingChanged } from '../timeout-duration-setting/actions';
 import { selectTimeoutDurationSetting } from '../timeout-duration-setting/selectors';
+import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
+import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
 
 export function* vaultSagas() {
   yield takeLatest(getType(lockVault), lockVaultSaga);

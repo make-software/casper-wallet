@@ -58,7 +58,6 @@ import { deployPayloadReceived, deploysReseted } from './redux/deploys/actions';
 import {
   activeOriginChanged,
   encryptionKeyHashCreated,
-  lastActivityTimeRefreshed,
   sessionReseted,
   vaultUnlocked
 } from './redux/session/actions';
@@ -86,6 +85,7 @@ import {
 import { emitSdkEventToAllActiveTabs } from './emit-sdk-event-to-all-active-tabs';
 import { loginRetryLockoutTimeSet } from './redux/login-retry-lockout-time/actions';
 import { timeoutDurationSettingChanged } from './redux/timeout-duration-setting/actions';
+import { lastActivityTimeRefreshed } from './redux/last-activity-time/actions';
 
 // setup default onboarding action
 async function handleActionClick() {
