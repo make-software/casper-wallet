@@ -40,7 +40,6 @@ export function OnboardingSuccessPageContent() {
             <Link
               color="fillBlue"
               target="_blank"
-              inline
               href="https://www.casperwallet.io/"
             >
               casperwallet.io

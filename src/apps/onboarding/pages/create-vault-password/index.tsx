@@ -54,7 +54,6 @@ export function CreateVaultPasswordPage({
       <Link
         color="fillBlue"
         target="_blank"
-        inline
         href="https://www.casperwallet.io/tos"
       >
         Casper Wallet Terms of Service
@@ -63,7 +62,6 @@ export function CreateVaultPasswordPage({
       <Link
         color="fillBlue"
         target="_blank"
-        inline
         href="https://www.casperwallet.io/privacy"
       >
         Privacy Policy
