@@ -12,6 +12,8 @@ import { LeftAlignedFlexColumn } from '@libs/layout';
 
 import { ConnectionStatusBadge } from '@popup/pages/home/components/connection-status-badge';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
+import { sdkMethod } from '@src/content/sdk-method';
 
 const CentredFlexRow = styled.div`
   display: flex;
@@ -31,10 +33,12 @@ export const SpaceBetweenContainer = styled(CentredFlexRow)`
 
 interface UnconnectedAccountsListProps {
   unconnectedAccountsList: AccountListRows[];
+  requestId: string;
 }
 
 export const UnconnectedAccountsList = ({
-  unconnectedAccountsList
+  unconnectedAccountsList,
+  requestId
 }: UnconnectedAccountsListProps) => {
   const activeOrigin = useSelector(selectActiveOrigin);
 
@@ -69,6 +73,9 @@ export const UnconnectedAccountsList = ({
                   await connectAccounts(
                     [unconnectedAccount.name],
                     activeOrigin
+                  );
+                  await sendSdkResponseToSpecificTab(
+                    sdkMethod.switchAccountResponse(false, { requestId })
                   );
                   closeCurrentWindow();
                 }}

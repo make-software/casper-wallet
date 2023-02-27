@@ -36,19 +36,19 @@ const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
   width: 100%;
 `;
 
-interface ConnectAccountContentProps {
+interface SelectAccountContentProps {
   selectedAccountNames: string[];
   setSelectedAccountNames: Dispatch<SetStateAction<string[]>>;
   origin: string;
   headerText: string;
 }
 
-export function ConnectAccountContent({
+export function SelectAccountContent({
   selectedAccountNames,
   setSelectedAccountNames,
   origin,
   headerText
-}: ConnectAccountContentProps) {
+}: SelectAccountContentProps) {
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);

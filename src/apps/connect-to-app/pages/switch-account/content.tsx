@@ -35,8 +35,12 @@ import {
   SpaceBetweenContainer,
   ListItemContainer
 } from './unconnected-accounts-list';
+import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
+import { sdkMethod } from '@src/content/sdk-method';
 
-export function SwitchAccountContent() {
+type SwitchAccountContentProps = { requestId: string };
+
+export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
   const activeOrigin = useSelector(selectActiveOrigin);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const connectedAccountsToActiveTab = useSelector(
@@ -106,6 +110,7 @@ export function SwitchAccountContent() {
                 </Typography>
               </ParagraphContainer>
               <UnconnectedAccountsList
+                requestId={requestId}
                 unconnectedAccountsList={unconnectedAccountsList}
               />
             </>
@@ -136,6 +141,9 @@ export function SwitchAccountContent() {
                       width="100"
                       onClick={async () => {
                         await changeActiveAccount(account.name);
+                        await sendSdkResponseToSpecificTab(
+                          sdkMethod.switchAccountResponse(true, { requestId })
+                        );
                         closeCurrentWindow();
                       }}
                     >
@@ -147,6 +155,7 @@ export function SwitchAccountContent() {
               marginLeftForItemSeparatorLine={60}
             />
             <UnconnectedAccountsList
+              requestId={requestId}
               unconnectedAccountsList={unconnectedAccountsList}
             />
           </>

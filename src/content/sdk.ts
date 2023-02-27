@@ -84,8 +84,8 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
 
   return {
     /**
-     * Request the connect account interface with the Casper Wallet extension
-     * @returns `true` value when connection request is accepted by the user, `false` otherwise.
+     * Request the connect interface with the Casper Wallet extension. Will not show UI for already connected accounts and return true immediately.
+     * @returns `true` value when connection request is accepted by the user or when account is already connected, `false` otherwise.
      */
     requestConnection(): Promise<boolean> {
       return fetchFromBackground<
@@ -97,20 +97,6 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
             requestId: generateRequestId()
           }
         ),
-        options
-      );
-    },
-    /**
-     * Disconnect the Casper Wallet extension
-     * @returns `true` value when successfully disconnected, `false` otherwise.
-     */
-    disconnectFromSite(): Promise<boolean> {
-      return fetchFromBackground<
-        ReturnType<typeof sdkMethod['disconnectResponse']>['payload']
-      >(
-        sdkMethod.disconnectRequest(window.location.origin, {
-          requestId: generateRequestId()
-        }),
         options
       );
     },
@@ -128,48 +114,6 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
             requestId: generateRequestId()
           }
         ),
-        options
-      );
-    },
-    /**
-     * Get the connection status of the Casper Wallet extension
-     * @returns `true` value when curently connected at least one account, `false` otherwise.
-     */
-    isConnected(): Promise<boolean> {
-      return fetchFromBackground<
-        ReturnType<typeof sdkMethod['isConnectedResponse']>['payload']
-      >(
-        sdkMethod.isConnectedRequest(window.location.origin, {
-          requestId: generateRequestId()
-        }),
-        options
-      );
-    },
-    /**
-     * Get the active public key of the Casper Wallet extension
-     * @returns returns hex hash of the active public key.
-     */
-    getActivePublicKey(): Promise<string | undefined> {
-      return fetchFromBackground<
-        ReturnType<typeof sdkMethod['getActivePublicKeyResponse']>['payload']
-      >(
-        sdkMethod.getActivePublicKeyRequest(undefined, {
-          requestId: generateRequestId()
-        }),
-        options
-      );
-    },
-    /**
-     * Get version of the Casper Wallet extension
-     * @returns version of the installed wallet extension.
-     */
-    getVersion(): Promise<string> {
-      return fetchFromBackground<
-        ReturnType<typeof sdkMethod['getVersionResponse']>['payload']
-      >(
-        sdkMethod.getVersionRequest(undefined, {
-          requestId: generateRequestId()
-        }),
         options
       );
     },
@@ -244,6 +188,62 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
           signature
         };
       });
+    },
+    /**
+     * Disconnect the Casper Wallet extension
+     * @returns `true` value when successfully disconnected, `false` otherwise.
+     */
+    disconnectFromSite(): Promise<boolean> {
+      return fetchFromBackground<
+        ReturnType<typeof sdkMethod['disconnectResponse']>['payload']
+      >(
+        sdkMethod.disconnectRequest(window.location.origin, {
+          requestId: generateRequestId()
+        }),
+        options
+      );
+    },
+    /**
+     * Get the connection status of the Casper Wallet extension
+     * @returns `true` value when curently connected at least one account, `false` otherwise.
+     */
+    isConnected(): Promise<boolean> {
+      return fetchFromBackground<
+        ReturnType<typeof sdkMethod['isConnectedResponse']>['payload']
+      >(
+        sdkMethod.isConnectedRequest(window.location.origin, {
+          requestId: generateRequestId()
+        }),
+        options
+      );
+    },
+    /**
+     * Get the active public key of the Casper Wallet extension
+     * @returns returns hex hash of the active public key.
+     */
+    getActivePublicKey(): Promise<string | undefined> {
+      return fetchFromBackground<
+        ReturnType<typeof sdkMethod['getActivePublicKeyResponse']>['payload']
+      >(
+        sdkMethod.getActivePublicKeyRequest(undefined, {
+          requestId: generateRequestId()
+        }),
+        options
+      );
+    },
+    /**
+     * Get version of the Casper Wallet extension
+     * @returns version of the installed wallet extension.
+     */
+    getVersion(): Promise<string> {
+      return fetchFromBackground<
+        ReturnType<typeof sdkMethod['getVersionResponse']>['payload']
+      >(
+        sdkMethod.getVersionRequest(undefined, {
+          requestId: generateRequestId()
+        }),
+        options
+      );
     }
   };
 };
