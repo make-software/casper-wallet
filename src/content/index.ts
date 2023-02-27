@@ -35,6 +35,10 @@ async function handleSdkResponseOrEvent(message: SdkEvent | SdkMethod) {
   // Todo for Piotr: design convention for delayed sdk request responses
   if (isSDKMethod(message)) {
     switch (message.type) {
+      case getType(sdkMethod.connectResponse):
+      case getType(sdkMethod.connectError):
+      case getType(sdkMethod.switchAccountResponse):
+      case getType(sdkMethod.switchAccountError):
       case getType(sdkMethod.signError):
       case getType(sdkMethod.signResponse):
       case getType(sdkMethod.signMessageError):
