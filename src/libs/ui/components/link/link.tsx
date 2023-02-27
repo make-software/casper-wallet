@@ -32,26 +32,29 @@ export interface LinkProps extends React.HTMLAttributes<Ref> {
   target?: string;
   color: LinkColor;
   hoverColor?: ContentColor;
+  inline?: boolean;
 }
 
 type Ref = HTMLAnchorElement;
-const StyledLink = styled.a<LinkProps>(({ theme, color, hoverColor }) => {
-  const stateColor = getStateColor(color);
-  const hover = hoverColor && getColorFromTheme(theme, hoverColor);
+const StyledLink = styled.a<LinkProps>(
+  ({ theme, color, hoverColor, inline }) => {
+    const stateColor = getStateColor(color);
+    const hover = hoverColor && getColorFromTheme(theme, hoverColor);
 
-  return {
-    display: 'flex',
-    textDecoration: 'none',
-    cursor: 'pointer',
-    color: stateColor.color,
-    '&:hover > *': {
-      color: hover || stateColor.hover
-    },
-    '&:active > *': {
-      color: stateColor.active
-    }
-  };
-});
+    return {
+      display: inline ? 'inline' : 'flex',
+      textDecoration: 'none',
+      cursor: 'pointer',
+      color: stateColor.color,
+      '&:hover > *': {
+        color: hover || stateColor.hover
+      },
+      '&:active > *': {
+        color: stateColor.active
+      }
+    };
+  }
+);
 
 export const Link = React.forwardRef<Ref, LinkProps>(function Link(props, ref) {
   return <StyledLink ref={ref} target={props.target} {...props} />;

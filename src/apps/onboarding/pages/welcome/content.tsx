@@ -28,6 +28,14 @@ export function WelcomePageContent() {
           </Trans>
         </Typography>
       </TabTextContainer>
+      <TabTextContainer>
+        <Typography type="body" color="contentSecondary">
+          <Trans t={t}>
+            Tip: Have a pen and paper handy. You’ll need to write down your
+            wallet’s secret recovery phrase.
+          </Trans>
+        </Typography>
+      </TabTextContainer>
     </TabPageContainer>
   );
 }
