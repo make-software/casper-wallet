@@ -12,7 +12,8 @@ import {
   CenteredFlexColumn,
   AlignedFlexRow,
   FlexColumn,
-  FlexRow
+  FlexRow,
+  SpacingSize
 } from '@src/libs/layout';
 import { SvgIcon, Typography, WordTag, hexToRGBA } from '@src/libs/ui';
 import { SecretPhrase } from '@src/libs/crypto';
@@ -80,7 +81,6 @@ const TextAndIconContainer = styled(CenteredFlexColumn)`
 const WordListContainer = styled(FlexRow)`
   align-content: flex-start;
   flex-wrap: wrap;
-  gap: 8px;
 
   padding: ${({ theme }) => theme.padding[1.6]};
 `;
@@ -205,7 +205,7 @@ export function SecretPhraseWordsView({
             </TextAndIconContainer>
           </BlurredSecretPhraseWordsViewOverlayContainer>
         )}
-        <WordListContainer data-testId="word-list">
+        <WordListContainer gap={SpacingSize.Small} data-testId="word-list">
           {(confirmationMode ? partialPhrase : phrase).map((word, index) => {
             return (
               <WordTag

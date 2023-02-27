@@ -4,7 +4,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import {
   ContentContainer,
   PageContainer,
-  ParagraphContainer
+  ParagraphContainer,
+  SpacingSize
 } from '@layout/containers';
 import { FormField, Input, TextArea, Typography } from '@libs/ui';
 import { truncateKey } from '@src/libs/ui/components/hash/utils';
@@ -23,19 +24,19 @@ export function SignMessageContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <ParagraphContainer gap="big">
+        <ParagraphContainer top={SpacingSize.Big}>
           <Typography type="header">
             <Trans t={t}>Signature Request</Trans>
           </Typography>
         </ParagraphContainer>
-        <ParagraphContainer gap="big">
+        <ParagraphContainer top={SpacingSize.Big}>
           <FormField label={t('Message:')}>
             <Typography type="body">
-              <TextArea value={message} readOnly style={{ minHeight: 260 }} />
+              <TextArea value={message} readOnly style={{ minHeight: 250 }} />
             </Typography>
           </FormField>
         </ParagraphContainer>
-        <ParagraphContainer gap="small">
+        <ParagraphContainer top={SpacingSize.Small}>
           <FormField label={t('Signing Key:')}>
             <Typography type="body">
               <Input

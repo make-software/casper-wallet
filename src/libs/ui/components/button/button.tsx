@@ -1,37 +1,32 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { BaseProps, Link } from '@src/libs/ui';
-
-type ButtonVariant = 'inline' | 'fullWidth';
+import { BaseProps } from '@src/libs/ui';
 
 interface BaseButtonProps extends BaseProps {
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
   height?: '24' | '36' | '40';
   width?: '100' | '120' | '176' | '100%';
-  variant?: ButtonVariant;
+  inline?: boolean;
+  title?: string;
 }
 
 const BaseButton = styled.button<BaseButtonProps>(
-  ({ theme, disabled, height = '40', variant, width = '100%' }) => ({
+  ({ theme, disabled, height = '40', width = '100%', inline = false }) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     border: 'none',
-    borderRadius:
-      variant === 'inline'
-        ? theme.borderRadius.hundred
-        : theme.borderRadius.base,
+    borderRadius: inline ? theme.borderRadius.hundred : theme.borderRadius.base,
     fontFamily: theme.typography.fontFamily.primary,
-    fontWeight:
-      variant === 'inline'
-        ? theme.typography.fontWeight.medium
-        : theme.typography.fontWeight.semiBold,
-    fontSize: variant === 'inline' ? '1.4rem' : '1.5rem',
-    minHeight: variant === 'inline' ? '3.2rem' : '4rem',
+    fontWeight: inline
+      ? theme.typography.fontWeight.medium
+      : theme.typography.fontWeight.semiBold,
+    fontSize: inline ? '1.4rem' : '1.5rem',
+    minHeight: inline ? '3.2rem' : '4rem',
     lineHeight: '2.4rem',
-    padding: variant === 'inline' ? '4px 12px' : 'unset',
+    padding: inline ? '4px 12px' : 'unset',
     width,
 
     ':focus': {
@@ -177,7 +172,7 @@ export interface ButtonProps extends BaseButtonProps {
     | 'secondaryBlue'
     | 'secondaryRed'
     | 'utility';
-  displayAsLinkTo?: string;
+  as?: (props: any) => JSX.Element;
   onClick?: (ev: any) => void;
 }
 
@@ -186,36 +181,22 @@ type Ref = HTMLButtonElement;
 export const Button = React.forwardRef<Ref, ButtonProps>(function Button(
   {
     color = 'primaryBlue',
-    variant = 'fullWidth',
-    displayAsLinkTo,
+    inline = false,
+    as,
     dataTestId,
     ...props
   }: ButtonProps,
   ref
 ) {
-  if (displayAsLinkTo) {
-    return (
-      <Link
-        href={displayAsLinkTo}
-        color="fillRed"
-        onClick={ev => {
-          ev.preventDefault();
-          props.onClick && props.onClick(ev);
-        }}
-        data-testid={dataTestId}
-      >
-        <UtilityButton>{props.children}</UtilityButton>
-      </Link>
-    );
-  }
-
   const ButtonComponent =
     BUTTON_COMPONENT_BY_COLOR_DICT[color] || PrimaryBlueButton;
+
   return (
     <ButtonComponent
       ref={ref}
-      variant={variant}
+      inline={inline}
       data-testid={dataTestId}
+      as={as}
       {...props}
     />
   );

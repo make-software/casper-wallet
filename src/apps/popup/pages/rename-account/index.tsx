@@ -8,7 +8,8 @@ import {
   ContentContainer,
   IllustrationContainer,
   ParagraphContainer,
-  InputsContainer
+  InputsContainer,
+  SpacingSize
 } from '@src/libs/layout';
 import { Button, Input, SvgIcon, Typography } from '@src/libs/ui';
 import {
@@ -51,7 +52,7 @@ export function RenameAccountPageContent() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/rename-account.svg" size={120} />
       </IllustrationContainer>
-      <ParagraphContainer gap="big">
+      <ParagraphContainer top={SpacingSize.Big}>
         <Typography type="header">
           <Trans t={t}>Rename account</Trans>
         </Typography>

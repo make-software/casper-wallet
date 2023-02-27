@@ -6,7 +6,8 @@ import { Typography, Checkbox, List } from '@libs/ui';
 import {
   ContentContainer,
   ParagraphContainer,
-  ListItemClickableContainer
+  ListItemClickableContainer,
+  SpacingSize
 } from '@src/libs/layout/containers';
 
 import { TimeoutDurationSetting } from '@popup/constants';
@@ -41,12 +42,12 @@ export function TimeoutPageContent() {
 
   return (
     <ContentContainer>
-      <ParagraphContainer gap="big">
+      <ParagraphContainer top={SpacingSize.Big}>
         <Typography type="header">
           <Trans t={t}>Timeout</Trans>
         </Typography>
       </ParagraphContainer>
-      <ParagraphContainer gap="medium">
+      <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             Your wallet will automatically lock after some period of inactivity.

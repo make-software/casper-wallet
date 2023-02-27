@@ -7,7 +7,12 @@ import styled, { css } from 'styled-components';
 import {
   CenteredFlexColumn,
   ContentContainer,
-  LeftAlignedFlexColumn
+  FlexRow,
+  LeftAlignedFlexColumn,
+  SpaceAroundFlexColumn,
+  SpaceBetweenFlexRow,
+  SpacingSize,
+  TileContainer
 } from '@src/libs/layout/containers';
 import { LinkType, HeaderSubmenuBarNavLink } from '@libs/layout';
 
@@ -15,9 +20,12 @@ import {
   Button,
   Hash,
   HashVariant,
-  PageTile,
   Typography,
-  Avatar
+  Avatar,
+  SvgIcon,
+  Link,
+  HashDisplayContext,
+  Tile
 } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -46,6 +54,7 @@ import {
   dispatchFetchAccountInfoRequest,
   getAccountInfo
 } from '@libs/services/account-info';
+import { getBlockExplorerAccountUrl } from '@src/constants';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
@@ -73,19 +82,8 @@ const BalanceContainer = styled(CenteredFlexColumn)`
 
 // List of accounts
 
-const BalanceInCSPRsContainer = styled.div`
-  display: flex;
-  gap: 8px;
-`;
-
-const ButtonsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  gap: 16px;
-
+const ButtonsContainer = styled(SpaceAroundFlexColumn)`
   width: 100%;
-
   margin-top: 16px;
 `;
 
@@ -165,75 +163,87 @@ export function HomePageContent() {
   return (
     <HomePageContentContainer>
       {activeAccount && (
-        <PageTile>
-          <ConnectionStatusBadge
-            isConnected={isActiveAccountConnected}
-            displayContext="home"
-          />
-          <Avatar
-            publicKey={activeAccount.publicKey}
-            src={accountLogo}
-            loadingAccountInfo={loadingAccountInfo}
-          />
-          <NameAndAddressContainer>
-            <Typography type="bodySemiBold" loading={loadingAccountInfo}>
-              {accountName ?? activeAccount.name}
-            </Typography>
-            <Hash
-              value={activeAccount.publicKey}
-              variant={HashVariant.CaptionHash}
-              truncated
-              withCopyOnSelfClick
-              displayContext="home"
+        <Tile>
+          <TileContainer>
+            <SpaceBetweenFlexRow>
+              <ConnectionStatusBadge
+                isConnected={isActiveAccountConnected}
+                displayContext="home"
+              />
+              <Link
+                href={getBlockExplorerAccountUrl(activeAccount.publicKey)}
+                target="_blank"
+                color="inherit"
+                title={t('View account in CSPR.live')}
+              >
+                <SvgIcon src="assets/icons/external-link.svg" />
+              </Link>
+            </SpaceBetweenFlexRow>
+            <Avatar
+              publicKey={activeAccount.publicKey}
+              src={accountLogo}
+              loadingAccountInfo={loadingAccountInfo}
             />
-          </NameAndAddressContainer>
-          <BalanceContainer>
-            <BalanceInCSPRsContainer>
-              <Typography type="CSPRBold">{balance.amount}</Typography>
-              <Typography type="CSPRLight" color="contentSecondary">
-                CSPR
+            <NameAndAddressContainer>
+              <Typography type="bodySemiBold" loading={loadingAccountInfo}>
+                {accountName ?? activeAccount.name}
               </Typography>
-            </BalanceInCSPRsContainer>
-            <Typography type="body" color="contentSecondary">
-              {balance.fiatAmount}
-            </Typography>
-          </BalanceContainer>
-          <ButtonsContainer>
-            {isActiveAccountConnected ? (
+              <Hash
+                value={activeAccount.publicKey}
+                variant={HashVariant.CaptionHash}
+                truncated
+                withCopyOnSelfClick
+                displayContext={HashDisplayContext.Home}
+              />
+            </NameAndAddressContainer>
+            <BalanceContainer>
+              <FlexRow gap={SpacingSize.Small}>
+                <Typography type="CSPRBold">{balance.amount}</Typography>
+                <Typography type="CSPRLight" color="contentSecondary">
+                  CSPR
+                </Typography>
+              </FlexRow>
+              <Typography type="body" color="contentSecondary">
+                {balance.fiatAmount}
+              </Typography>
+            </BalanceContainer>
+            <ButtonsContainer gap={SpacingSize.Big}>
+              {isActiveAccountConnected ? (
+                <Button
+                  disabled={activeOrigin == null}
+                  onClick={() =>
+                    activeOrigin &&
+                    disconnectAccount(activeAccount.name, activeOrigin)
+                  }
+                  color="secondaryRed"
+                >
+                  <Trans t={t}>Disconnect</Trans>
+                </Button>
+              ) : (
+                <Button
+                  disabled={activeOrigin == null}
+                  onClick={handleConnectAccount}
+                  color="primaryRed"
+                >
+                  <Trans t={t}>Connect</Trans>
+                </Button>
+              )}
               <Button
-                disabled={activeOrigin == null}
+                color="secondaryBlue"
                 onClick={() =>
-                  activeOrigin &&
-                  disconnectAccount(activeAccount.name, activeOrigin)
-                }
-                color="secondaryRed"
-              >
-                <Trans t={t}>Disconnect</Trans>
-              </Button>
-            ) : (
-              <Button
-                disabled={activeOrigin == null}
-                onClick={handleConnectAccount}
-                color="primaryRed"
-              >
-                <Trans t={t}>Connect</Trans>
-              </Button>
-            )}
-            <Button
-              color="secondaryBlue"
-              onClick={() =>
-                navigate(
-                  RouterPath.AccountSettings.replace(
-                    ':accountName',
-                    activeAccount.name
+                  navigate(
+                    RouterPath.AccountSettings.replace(
+                      ':accountName',
+                      activeAccount.name
+                    )
                   )
-                )
-              }
-            >
-              <Trans t={t}>Manage account</Trans>
-            </Button>
-          </ButtonsContainer>
-        </PageTile>
+                }
+              >
+                <Trans t={t}>Manage account</Trans>
+              </Button>
+            </ButtonsContainer>
+          </TileContainer>
+        </Tile>
       )}
     </HomePageContentContainer>
   );

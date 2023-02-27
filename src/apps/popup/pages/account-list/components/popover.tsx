@@ -1,7 +1,7 @@
 import React, { useState, useRef, PropsWithChildren, MouseEvent } from 'react';
 import styled from 'styled-components';
 
-import { AlignedFlexRow, FlexColumn } from '@libs/layout';
+import { AlignedFlexRow, FlexColumn, SpacingSize } from '@libs/layout';
 import { useClickAway } from '@libs/ui/hooks/use-click-away';
 
 import { PopoverPortal } from './popover-portal';
@@ -38,9 +38,7 @@ const PopoverContainer = styled.div<PopoverContainerProps>`
 `;
 
 const PopoverItemsContainer = styled(FlexColumn)`
-  gap: 12px;
-
-  padding: 16px 20px;
+  padding: 8px;
 
   background: ${({ theme }) => theme.color.fillWhite};
   box-shadow: 0 1px 8px rgba(132, 134, 140, 0.2);
@@ -63,7 +61,10 @@ export function Popover({
   const childrenContainerRef = useRef<HTMLDivElement>(null);
 
   const { ref: clickAwayRef } = useClickAway({
-    callback: () => isOpen && setIsOpen(false)
+    callback: (event: MouseEvent<HTMLAnchorElement>) => {
+      event.stopPropagation();
+      isOpen && setIsOpen(false);
+    }
   });
 
   const closePopover = (e: MouseEvent<HTMLAnchorElement>) => {
@@ -86,7 +87,7 @@ export function Popover({
             ref={clickAwayRef}
             domRect={childrenContainerRef.current?.getBoundingClientRect()}
           >
-            <PopoverItemsContainer>
+            <PopoverItemsContainer gap={SpacingSize.Tiny}>
               {renderMenuItems({ closePopover })}
             </PopoverItemsContainer>
           </PopoverContainer>

@@ -21,9 +21,20 @@ export interface SvgIconProps extends React.HTMLAttributes<Ref> {
   color?: ContentColor;
   tooltip?: string;
   flipByAxis?: 'X' | 'Y';
-  marginLeft?: boolean;
-  marginRight?: boolean;
+  marginLeft?: 'small' | 'medium';
+  marginRight?: 'small' | 'medium';
 }
+
+const getMargin = (size?: 'small' | 'medium') => {
+  switch (size) {
+    case 'small':
+      return 4;
+    case 'medium':
+      return 8;
+    default:
+      return 'initial';
+  }
+};
 
 const Container = styled('div').withConfig({
   shouldForwardProp: (prop, defaultValidatorFn) =>
@@ -35,8 +46,8 @@ const Container = styled('div').withConfig({
   color?: ContentColor;
   active?: boolean;
   flipByAxis?: 'X' | 'Y';
-  marginLeft?: boolean;
-  marginRight?: boolean;
+  marginLeft?: 'small' | 'medium';
+  marginRight?: 'small' | 'medium';
   onClick?: (ev: any) => void;
 }>(
   ({
@@ -55,28 +66,36 @@ const Container = styled('div').withConfig({
     width: width != null ? width : size,
     height: height != null ? height : size,
     color: getColorFromTheme(theme, color),
-    svg: {
-      display: 'block',
-      fill: 'currentColor',
-      color: getColorFromTheme(theme, color),
-      width: width != null ? width : size,
-      height: height != null ? height : size
-    },
     transform: flipByAxis ? `rotate${flipByAxis}(180deg)` : 'none',
     transition: 'transform 500ms ease',
-    marginLeft: marginLeft ? 4 : 'initial',
-    marginRight: marginRight ? 4 : 'initial',
+    marginLeft: getMargin(marginLeft),
+    marginRight: getMargin(marginRight),
     cursor: onClick ? 'pointer' : 'inherit'
   })
 );
 
-const StyledReactSVG = styled(ReactSVG)(({ theme }) => ({
-  display: 'flex'
-}));
+const StyledReactSVG = styled(ReactSVG)<SvgIconProps>(
+  ({ size, width, height }) => ({
+    display: 'flex',
+    fill: 'currentColor',
+    width: width != null ? width : size,
+    height: height != null ? height : size
+  })
+);
 
 export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
   (
-    { src, alt, size = 24, color, onClick, flipByAxis, ...props }: SvgIconProps,
+    {
+      src,
+      alt,
+      size = 24,
+      color,
+      onClick,
+      flipByAxis,
+      height,
+      width,
+      ...props
+    }: SvgIconProps,
     ref
   ) => {
     const handleClick =
@@ -100,7 +119,14 @@ export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
         onClick={handleClick}
         {...props}
       >
-        <StyledReactSVG src={src} preProcessor={preProcessor} cacheRequests />
+        <StyledReactSVG
+          src={src}
+          preProcessor={preProcessor}
+          cacheRequests
+          size={size}
+          height={height}
+          width={width}
+        />
       </Container>
     );
   }

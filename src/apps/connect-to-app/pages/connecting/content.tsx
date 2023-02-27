@@ -4,6 +4,7 @@ import styled from 'styled-components';
 
 import { getFaviconUrlFromOrigin, SvgIcon, Typography } from '@libs/ui';
 import { closeCurrentWindow } from '@src/background/close-current-window';
+import { AlignedFlexRow, SpacingSize } from '@libs/layout';
 
 const PageContainer = styled.div`
   display: flex;
@@ -15,12 +16,8 @@ const PageContainer = styled.div`
   width: 100%;
 `;
 
-const IconsContainer = styled.div`
-  display: flex;
-  align-items: center;
-
+const IconsContainer = styled(AlignedFlexRow)`
   margin-top: 32px;
-  gap: 16px;
 `;
 
 const LogoOverlay = styled.div`
@@ -58,7 +55,7 @@ export function ConnectingContent({ origin }: ConnectingContentProps) {
       <Typography type="header">
         <Trans t={t}>Connecting</Trans>
       </Typography>
-      <IconsContainer>
+      <IconsContainer gap={SpacingSize.Big}>
         <LogoOverlay>
           <SvgIcon src="assets/icons/casper-wallet-logo.svg" size={40} />
         </LogoOverlay>

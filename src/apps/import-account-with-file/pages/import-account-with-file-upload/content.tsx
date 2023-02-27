@@ -10,7 +10,8 @@ import {
   ContentContainer,
   IllustrationContainer,
   InputsContainer,
-  ParagraphContainer
+  ParagraphContainer,
+  SpacingSize
 } from '@src/libs/layout';
 import { Input, SvgIcon, Typography } from '@src/libs/ui';
 
@@ -47,7 +48,7 @@ export function ImportAccountWithFileUploadPageContent({
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/secret-key.svg" size={120} />
       </IllustrationContainer>
-      <ParagraphContainer gap="big">
+      <ParagraphContainer top={SpacingSize.Big}>
         <Typography type="header">
           <Trans t={t}>Import account from secret key file</Trans>
         </Typography>

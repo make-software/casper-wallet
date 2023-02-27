@@ -1,16 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
-
-import { Typography, SvgIcon } from '@libs/ui';
 import { useSelector } from 'react-redux';
-import { selectCountOfConnectedAccounts } from '@src/background/redux/vault/selectors';
 import { useTranslation } from 'react-i18next';
 
-const ConnectionStatusContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
+import { Typography, SvgIcon } from '@libs/ui';
+import { AlignedFlexRow, SpacingSize } from '@libs/layout';
+import { selectCountOfConnectedAccounts } from '@src/background/redux/vault/selectors';
 
+const ConnectionStatusContainer = styled(AlignedFlexRow)`
   width: fit-content;
 
   background-color: rgb(0, 0, 0, 0.16);
@@ -23,7 +20,7 @@ export function HeaderConnectionStatus() {
   const countOfConnectedAccounts = useSelector(selectCountOfConnectedAccounts);
 
   return (
-    <ConnectionStatusContainer>
+    <ConnectionStatusContainer gap={SpacingSize.Tiny}>
       {countOfConnectedAccounts > 0 && (
         <SvgIcon
           src="assets/icons/checkbox-checked.svg"

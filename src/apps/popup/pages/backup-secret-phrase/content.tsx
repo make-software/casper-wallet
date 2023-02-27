@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import {
   ContentContainer,
   ParagraphContainer,
+  SpacingSize,
   VerticalSpaceContainer
 } from '@src/libs/layout';
 import {
@@ -54,12 +55,12 @@ export function BackupSecretPhrasePageContent() {
 
   return (
     <ContentContainer>
-      <ParagraphContainer gap="big">
+      <ParagraphContainer top={SpacingSize.Big}>
         <Typography type="header">
           <Trans t={t}>Back up your secret recovery phrase</Trans>
         </Typography>
       </ParagraphContainer>
-      <ParagraphContainer gap="medium">
+      <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             Use your secret recovery phrase to recover access to your accounts.
@@ -74,11 +75,11 @@ export function BackupSecretPhrasePageContent() {
         )}
       />
 
-      <ParagraphContainer gap="big">
+      <ParagraphContainer top={SpacingSize.Big}>
         <Typography type="bodySemiBold">
           <Trans t={t}>Safety tips:</Trans>
         </Typography>
-        <VerticalSpaceContainer gap="small">
+        <VerticalSpaceContainer top={SpacingSize.Small}>
           <TextList items={items} />
         </VerticalSpaceContainer>
       </ParagraphContainer>
