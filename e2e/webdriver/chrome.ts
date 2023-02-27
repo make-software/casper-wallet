@@ -22,7 +22,7 @@ export class ChromeDriver {
         content_settings: {
           exceptions: {
             clipboard: {
-              'chrome-extension://aohghmighlieiainnegkcijnfilokake/,*': {
+              '[*.],*': {
                 expiration: '0',
                 last_modified: Date.now(),
                 model: 0,
