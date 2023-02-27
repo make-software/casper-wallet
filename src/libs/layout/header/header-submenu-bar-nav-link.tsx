@@ -81,7 +81,16 @@ export function HeaderSubmenuBarNavLink({
 
     case 'cancelWindow':
       return (
-        <NavLink label={t('Cancel')} onClick={() => closeCurrentWindow()} />
+        <NavLink
+          label={t('Cancel')}
+          onClick={() => {
+            if (onClick) {
+              onClick();
+            } else {
+              closeCurrentWindow();
+            }
+          }}
+        />
       );
 
     default:

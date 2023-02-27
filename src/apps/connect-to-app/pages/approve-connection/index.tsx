@@ -15,6 +15,8 @@ import { Button, Typography } from '@src/libs/ui';
 
 import { RouterPath, useTypedNavigate } from '../../router';
 import { ApproveConnectionContent } from './content';
+import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
+import { sdkMethod } from '@src/content/sdk-method';
 
 const TextCentredContainer = styled.div`
   text-align: center;
@@ -31,15 +33,34 @@ export function ApproveConnectionPage({
   origin,
   title
 }: Props) {
+  const searchParams = new URLSearchParams(document.location.search);
+  const requestId = searchParams.get('requestId');
+
+  if (!requestId) {
+    const error = Error(`Missing search param: ${requestId}`);
+    throw error;
+  }
+
+  const selectedAccountNamesLength = selectedAccountNames.length;
+
   const navigate = useTypedNavigate();
   const { connectAccountsWithEvent: connectAccounts } = useAccountManager();
 
-  const handleApproveConnection = () => {
-    connectAccounts(selectedAccountNames, origin);
+  const handleApproveConnection = async () => {
+    await connectAccounts(selectedAccountNames, origin);
+    await sendSdkResponseToSpecificTab(
+      sdkMethod.connectResponse(true, { requestId })
+    );
     navigate(RouterPath.Connecting);
   };
 
-  const selectedAccountNamesLength = selectedAccountNames.length;
+  const handleCancel = async () => {
+    await sendSdkResponseToSpecificTab(
+      sdkMethod.connectResponse(false, { requestId })
+    );
+    closeCurrentWindow();
+  };
+
   return (
     <LayoutWindow
       renderHeader={() => (
@@ -66,7 +87,7 @@ export function ApproveConnectionPage({
               {selectedAccountNames.length > 1 ? t('accounts') : t('account')}
             </Trans>
           </Button>
-          <Button color="secondaryBlue" onClick={() => closeCurrentWindow()}>
+          <Button color="secondaryBlue" onClick={handleCancel}>
             <Trans t={t}>Cancel</Trans>
           </Button>
         </FooterButtonsContainer>
