@@ -14,7 +14,8 @@ const ExtensionBuildPath = {
 
 const ManifestPath = {
   v3: 'src/manifest.v3.json',
-  v2: 'src/manifest.v2.json'
+  v2: 'src/manifest.v2.json',
+  v2_Safari: 'src/manifest.v2.safari.json'
 };
 
 const isSafari = browserEnvVar && browserEnvVar === Browser.SAFARI;

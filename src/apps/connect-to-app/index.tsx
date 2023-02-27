@@ -11,17 +11,20 @@ import browser from 'webextension-polyfill';
 import { AppRouter } from '@src/apps/connect-to-app/app-router';
 import { GlobalStyle, themeConfig } from '@libs/ui';
 import { ErrorBoundary } from '@src/libs/layout/error';
+import { useSafariCSP } from '@hooks/use-safari-csp';
 
 import {
   BackgroundEvent,
   backgroundEvent,
   PopupState
 } from '@src/background/background-events';
-import { createMainStoreReplica } from '../../background/redux/utils';
-import { connectWindowInit } from '../../background/redux/windowManagement/actions';
+import { createMainStoreReplica } from '@src/background/redux/utils';
+import { connectWindowInit } from '@src/background/redux/windowManagement/actions';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
+  // added content security policy meta tag to HTML for safari browser
+  useSafariCSP();
 
   // setup listener to state events
   useEffect(() => {

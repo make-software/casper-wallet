@@ -4,9 +4,9 @@ import 'mac-scrollbar/dist/mac-scrollbar.css';
 import React, { Suspense, useEffect, useState } from 'react';
 import { render } from 'react-dom';
 import { ThemeProvider } from 'styled-components';
-
-import { GlobalStyle, themeConfig } from '@libs/ui';
 import { Provider as ReduxProvider } from 'react-redux';
+import browser from 'webextension-polyfill';
+import { isActionOf } from 'typesafe-actions';
 
 import {
   backgroundEvent,
@@ -14,14 +14,18 @@ import {
   PopupState
 } from '@src/background/background-events';
 import { importWindowInit } from '@src/background/redux/windowManagement/actions';
-import browser from 'webextension-polyfill';
-import { AppRouter } from './app-router';
-import { isActionOf } from 'typesafe-actions';
 import { createMainStoreReplica } from '@src/background/redux/utils';
+import { GlobalStyle, themeConfig } from '@libs/ui';
 import { ErrorBoundary } from '@src/libs/layout/error';
+import { useSafariCSP } from '@hooks/use-safari-csp';
+
+import { AppRouter } from './app-router';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
+
+  // added content security policy meta tag to HTML for safari browser
+  useSafariCSP();
 
   // setup listener to state events
   useEffect(() => {
