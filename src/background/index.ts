@@ -143,60 +143,33 @@ browser.runtime.onMessage.addListener(
         // console.warn(`BACKEND SDK MESSAGE:`, JSON.stringify(action));
         switch (action.type) {
           case getType(sdkMethod.connectRequest): {
-            let success = false;
-
             const query: Record<string, string> = {
+              requestId: action.meta.requestId,
               origin: action.payload.origin
             };
-
             if (action.payload.title != null) {
               query.title = action.payload.title;
             }
 
-            openWindow({
-              windowApp: WindowApp.ConnectToApp,
-              searchParams: query
-            });
-            success = true;
-
-            return sendResponse(
-              sdkMethod.connectResponse(success, action.meta)
-            );
-          }
-
-          case getType(sdkMethod.disconnectRequest): {
-            let success = false;
-
-            const isLocked = selectVaultIsLocked(store.getState());
-            const activeAccount = selectVaultActiveAccount(store.getState());
-            if (activeAccount) {
-              emitSdkEventToAllActiveTabs(
-                sdkEvent.disconnectedAccountEvent({
-                  isConnected: false,
-                  isLocked: isLocked,
-                  activeKey: activeAccount?.publicKey
-                })
-              );
-              store.dispatch(
-                allAccountsDisconnected({
-                  siteOrigin: action.payload
-                })
-              );
-              success = true;
+            const isActiveAccountConnected =
+              selectIsActiveAccountConnectedWithOrigin(store.getState());
+            if (isActiveAccountConnected) {
+              return sendResponse(sdkMethod.connectResponse(true, action.meta));
+            } else {
+              openWindow({
+                windowApp: WindowApp.ConnectToApp,
+                searchParams: query
+              });
             }
 
-            return sendResponse(
-              sdkMethod.disconnectResponse(success, action.meta)
-            );
+            return sendResponse(undefined);
           }
 
           case getType(sdkMethod.switchAccountRequest): {
-            let success = false;
-
             const query: Record<string, string> = {
+              requestId: action.meta.requestId,
               origin: action.payload.origin
             };
-
             if (action.payload.title != null) {
               query.title = action.payload.title;
             }
@@ -205,11 +178,8 @@ browser.runtime.onMessage.addListener(
               windowApp: WindowApp.SwitchAccount,
               searchParams: query
             });
-            success = true;
 
-            return sendResponse(
-              sdkMethod.switchAccountResponse(success, action.meta)
-            );
+            return sendResponse(undefined);
           }
 
           case getType(sdkMethod.signRequest): {
@@ -251,6 +221,33 @@ browser.runtime.onMessage.addListener(
             });
 
             return sendResponse(undefined);
+          }
+
+          case getType(sdkMethod.disconnectRequest): {
+            let success = false;
+
+            const isLocked = selectVaultIsLocked(store.getState());
+            const activeAccount = selectVaultActiveAccount(store.getState());
+
+            if (activeAccount) {
+              emitSdkEventToAllActiveTabs(
+                sdkEvent.disconnectedAccountEvent({
+                  isConnected: false,
+                  isLocked: isLocked,
+                  activeKey: activeAccount?.publicKey
+                })
+              );
+              store.dispatch(
+                allAccountsDisconnected({
+                  siteOrigin: action.payload
+                })
+              );
+              success = true;
+            }
+
+            return sendResponse(
+              sdkMethod.disconnectResponse(success, action.meta)
+            );
           }
 
           case getType(sdkMethod.isConnectedRequest): {

@@ -16,12 +16,8 @@ export const sdkMethod = {
     boolean,
     Meta
   >(),
-  disconnectRequest: createAction('CasperWalletProvider:Disconnect')<
-    string,
-    Meta
-  >(),
-  disconnectResponse: createAction('CasperWalletProvider:Disconnect:Response')<
-    boolean,
+  connectError: createAction('CasperWalletProvider:Connect:Error')<
+    Error,
     Meta
   >(),
   switchAccountRequest: createAction('CasperWalletProvider:SwitchAccount')<
@@ -31,25 +27,8 @@ export const sdkMethod = {
   switchAccountResponse: createAction(
     'CasperWalletProvider:SwitchAccount:Response'
   )<boolean, Meta>(),
-  isConnectedRequest: createAction('CasperWalletProvider:IsConnected')<
-    string,
-    Meta
-  >(),
-  isConnectedResponse: createAction(
-    'CasperWalletProvider:IsConnected:Response'
-  )<boolean, Meta>(),
-  getActivePublicKeyRequest: createAction(
-    'CasperWalletProvider:GetActivePublicKey'
-  )<void, Meta>(),
-  getActivePublicKeyResponse: createAction(
-    'CasperWalletProvider:GetActivePublicKey:Response'
-  )<string | undefined, Meta>(),
-  getVersionRequest: createAction('CasperWalletProvider:GetVersion')<
-    void,
-    Meta
-  >(),
-  getVersionResponse: createAction('CasperWalletProvider:GetVersion:Response')<
-    string,
+  switchAccountError: createAction('CasperWalletProvider:SwitchAccount:Error')<
+    Error,
     Meta
   >(),
   signRequest: createAction('CasperWalletProvider:Sign')<
@@ -76,6 +55,35 @@ export const sdkMethod = {
   )<{ cancelled: true } | { cancelled: false; signatureHex: string }, Meta>(),
   signMessageError: createAction('CasperWalletProvider:SignMessage:Error')<
     Error,
+    Meta
+  >(),
+  disconnectRequest: createAction('CasperWalletProvider:Disconnect')<
+    string,
+    Meta
+  >(),
+  disconnectResponse: createAction('CasperWalletProvider:Disconnect:Response')<
+    boolean,
+    Meta
+  >(),
+  isConnectedRequest: createAction('CasperWalletProvider:IsConnected')<
+    string,
+    Meta
+  >(),
+  isConnectedResponse: createAction(
+    'CasperWalletProvider:IsConnected:Response'
+  )<boolean, Meta>(),
+  getActivePublicKeyRequest: createAction(
+    'CasperWalletProvider:GetActivePublicKey'
+  )<void, Meta>(),
+  getActivePublicKeyResponse: createAction(
+    'CasperWalletProvider:GetActivePublicKey:Response'
+  )<string | undefined, Meta>(),
+  getVersionRequest: createAction('CasperWalletProvider:GetVersion')<
+    void,
+    Meta
+  >(),
+  getVersionResponse: createAction('CasperWalletProvider:GetVersion:Response')<
+    string,
     Meta
   >()
 };

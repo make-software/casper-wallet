@@ -10,40 +10,76 @@ import {
 import { Button, Typography } from '@src/libs/ui';
 
 import { RouterPath, useTypedNavigate } from '../../router';
-import { ConnectAccountContent } from './content';
+import { SelectAccountContent } from './content';
 import styled from 'styled-components';
+import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
+import { sdkMethod } from '@src/content/sdk-method';
+import { closeCurrentWindow } from '@src/background/close-current-window';
+import { selectIsActiveAccountConnectedWithOrigin } from '@src/background/redux/vault/selectors';
+import { useSelector } from 'react-redux';
 
 const TextCentredContainer = styled.div`
   text-align: center;
 `;
 
-export interface Props {
+export interface SelectAccountPageProps {
   selectedAccountNames: string[];
   setSelectedAccountNames: Dispatch<SetStateAction<string[]>>;
   origin: string;
   title: string;
 }
 
-export function ConnectAccountPage({
+export function SelectAccountPage({
   selectedAccountNames,
   setSelectedAccountNames,
   origin,
   title
-}: Props) {
+}: SelectAccountPageProps) {
+  const searchParams = new URLSearchParams(document.location.search);
+  const requestId = searchParams.get('requestId');
+
+  if (!requestId) {
+    const error = Error(`Missing search param: ${requestId}`);
+    throw error;
+  }
+
+  const isActiveAccountConnected = useSelector(
+    selectIsActiveAccountConnectedWithOrigin
+  );
+  if (isActiveAccountConnected) {
+    sendSdkResponseToSpecificTab(
+      sdkMethod.connectResponse(true, { requestId })
+    ).then(() => {
+      closeCurrentWindow();
+    });
+  }
+
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
+
+  const handleCancel = async () => {
+    await sendSdkResponseToSpecificTab(
+      sdkMethod.connectResponse(false, { requestId })
+    );
+    closeCurrentWindow();
+  };
+
+  const handleAccountSelection = () => navigate(RouterPath.ApproveConnection);
 
   return (
     <LayoutWindow
       renderHeader={() => (
         <PopupHeader
           renderSubmenuBarItems={() => (
-            <HeaderSubmenuBarNavLink linkType="cancelWindow" />
+            <HeaderSubmenuBarNavLink
+              linkType="cancelWindow"
+              onClick={handleCancel}
+            />
           )}
         />
       )}
       renderContent={() => (
-        <ConnectAccountContent
+        <SelectAccountContent
           selectedAccountNames={selectedAccountNames}
           setSelectedAccountNames={setSelectedAccountNames}
           origin={origin}
@@ -59,7 +95,7 @@ export function ConnectAccountPage({
           </TextCentredContainer>
           <Button
             disabled={selectedAccountNames.length === 0}
-            onClick={() => navigate(RouterPath.ApproveConnection)}
+            onClick={handleAccountSelection}
           >
             <Trans t={t}>Next</Trans>
           </Button>
