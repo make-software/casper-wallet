@@ -155,24 +155,28 @@ const options = {
           force: true,
           transform: function (content, path) {
             // generates the manifest file using the package.json informations
-            return Buffer.from(
-              JSON.stringify({
-                ...JSON.parse(content.toString()),
-                name: pkg.name,
-                version: pkg.version,
-                author: pkg.author,
-                description: pkg.description,
-                ...(isDev
-                  ? isChrome
-                    ? {
-                        content_security_policy: {}
-                      }
-                    : {
-                        content_security_policy: ''
-                      }
-                  : {})
-              })
-            );
+            const manifest = {
+              ...JSON.parse(content.toString()),
+              name: pkg.name,
+              version: pkg.version,
+              author: pkg.author,
+              description: pkg.description,
+              ...(isDev
+                ? isChrome
+                  ? {
+                      content_security_policy: {}
+                    }
+                  : {
+                      content_security_policy: ''
+                    }
+                : {})
+            };
+            // Removing the key from manifest for Chrome production build
+            if (isChrome && !isDev) {
+              delete manifest.key;
+            }
+
+            return Buffer.from(JSON.stringify(manifest));
           }
         }
       ]
