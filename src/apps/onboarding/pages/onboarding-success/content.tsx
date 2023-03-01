@@ -27,20 +27,24 @@ export function OnboardingSuccessPageContent() {
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             Remember, if you ever lose access to your account you can always
-            reinstall Casper Wallet and enter your secret recovery phrase to
-            regain access. Never lose it!!
+            reinstall Casper Wallet and import your secret recovery phrase to
+            regain access. Store it in a safe place.
           </Trans>
         </Typography>
       </TabTextContainer>
       <TipContainer>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            Tip: If this is your first time using a cryptocurrency web wallet,
-            we highly recommend reading through the user guides on{' '}
-            <Link color="inherit" href="https://www.casperwallet.io/">
+            Tip: If this is your first time using a cryptocurrency web wallet we
+            highly recommend reading through the user guides on{' '}
+            <Link
+              color="fillBlue"
+              target="_blank"
+              href="https://www.casperwallet.io/"
+            >
               casperwallet.io
             </Link>{' '}
-            to learn the basics.
+            .
           </Trans>
         </Typography>
       </TipContainer>

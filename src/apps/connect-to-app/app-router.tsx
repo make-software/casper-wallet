@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { HashRouter } from 'react-router-dom';
 
 import { RouterPath } from '@src/apps/connect-to-app/router';
-import { ConnectAccountPage } from '@src/apps/connect-to-app/pages/connect-accounts';
+import { SelectAccountPage } from '@src/apps/connect-to-app/pages/select-account';
 import { ApproveConnectionPage } from '@src/apps/connect-to-app/pages/approve-connection';
 import { ConnectingPage } from '@src/apps/connect-to-app/pages/connecting';
 import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
@@ -16,8 +16,8 @@ import { SwitchAccountPage } from './pages/switch-account';
 export function AppRouter() {
   useUserActivityTracker();
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const switchAccount = urlParams.get('switchAccount');
+  const searchParams = new URLSearchParams(window.location.search);
+  const switchAccount = searchParams.get('switchAccount');
 
   const [selectedAccountNames, setSelectedAccountNames] = useState<string[]>(
     []
@@ -46,9 +46,9 @@ export function AppRouter() {
     <HashRouter>
       <Routes>
         <Route
-          path={RouterPath.ConnectAccount}
+          path={RouterPath.SelectAccount}
           element={
-            <ConnectAccountPage
+            <SelectAccountPage
               selectedAccountNames={selectedAccountNames}
               setSelectedAccountNames={setSelectedAccountNames}
               origin={origin}

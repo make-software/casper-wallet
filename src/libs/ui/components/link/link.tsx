@@ -40,7 +40,6 @@ const StyledLink = styled.a<LinkProps>(({ theme, color, hoverColor }) => {
   const hover = hoverColor && getColorFromTheme(theme, hoverColor);
 
   return {
-    display: 'flex',
     textDecoration: 'none',
     cursor: 'pointer',
     color: stateColor.color,

@@ -117,6 +117,8 @@ export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
         color={color}
         flipByAxis={flipByAxis}
         onClick={handleClick}
+        width={width}
+        height={height}
         {...props}
       >
         <StyledReactSVG

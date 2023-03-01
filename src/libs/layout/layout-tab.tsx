@@ -53,7 +53,11 @@ export function LayoutTab({
   return (
     <Container>
       <AbsoluteCenteredContainer>
-        <SvgIcon src="assets/icons/casper-wallet-logo.svg" size={80} />
+        <SvgIcon
+          src="assets/icons/casper-wallet-text-logo.svg"
+          width={164}
+          height={40}
+        />
         <MainContainer layoutContext={layoutContext}>
           {renderHeader && renderHeader()}
           {renderContent()}
