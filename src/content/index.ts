@@ -1,4 +1,7 @@
 import browser from 'webextension-polyfill';
+import { getType } from 'typesafe-actions';
+
+import { activeOriginChanged } from '@src/background/redux/session/actions';
 
 import {
   SdkMethodEventType,
@@ -7,9 +10,13 @@ import {
   SdkMethod
 } from './sdk-method';
 import { sdkEvent, SdkEvent } from './sdk-event';
-import { getType } from 'typesafe-actions';
-import { activeOriginChanged } from '@src/background/redux/session/actions';
 import { CasperWalletEventType } from './sdk-event-type';
+import {
+  walletRuntimeEvent,
+  WalletRuntimeEvent,
+  walletRuntimeEventList,
+  WalletRuntimeEventType
+} from './wallet-runtime-event';
 
 // Sync activeOrigin of active tab with store
 function syncActiveOriginWithStore() {
@@ -31,7 +38,26 @@ function syncActiveOriginWithStore() {
   }
 }
 
-async function handleSdkResponseOrEvent(message: SdkEvent | SdkMethod) {
+function handleWalletRuntimeEvent(message: WalletRuntimeEvent) {
+  let eventType: string;
+  switch (message.type) {
+    case getType(walletRuntimeEvent.updateActiveOrigin):
+      eventType = WalletRuntimeEventType.UpdateActiveOrigin;
+      break;
+    default:
+      throw Error(
+        'Content: unknown wallet runtime event action: ' +
+          JSON.stringify(message)
+      );
+  }
+  const event = new CustomEvent(eventType);
+
+  window.dispatchEvent(event);
+}
+
+async function handleSdkResponseOrEvent(
+  message: SdkEvent | SdkMethod | WalletRuntimeEvent
+) {
   // Todo for Piotr: design convention for delayed sdk request responses
   if (isSDKMethod(message)) {
     switch (message.type) {
@@ -56,8 +82,10 @@ async function handleSdkResponseOrEvent(message: SdkEvent | SdkMethod) {
             JSON.stringify(message)
         );
     }
+  } else if (walletRuntimeEventList.includes(message.type)) {
+    handleWalletRuntimeEvent(message as WalletRuntimeEvent);
   } else {
-    emitSdkEvent(message);
+    emitSdkEvent(message as SdkEvent);
   }
 }
 
@@ -153,6 +181,10 @@ function init() {
   // idempotent, doesn't need cleanup
   injectSdkScript();
 
+  window.addEventListener(
+    WalletRuntimeEventType.UpdateActiveOrigin,
+    syncActiveOriginWithStore
+  );
   window.addEventListener('load', syncActiveOriginWithStore);
   window.addEventListener('visibilitychange', syncActiveOriginWithStore);
   window.addEventListener('focus', syncActiveOriginWithStore);
@@ -169,6 +201,10 @@ function cleanup() {
   // console.error('CONTENT CLEANUP');
   document.removeEventListener(cleanupEventType, cleanup);
 
+  window.removeEventListener(
+    WalletRuntimeEventType.UpdateActiveOrigin,
+    syncActiveOriginWithStore
+  );
   window.removeEventListener('load', syncActiveOriginWithStore);
   window.removeEventListener('visibilitychange', syncActiveOriginWithStore);
   window.removeEventListener('focus', syncActiveOriginWithStore);

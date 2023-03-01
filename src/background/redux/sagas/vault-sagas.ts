@@ -15,6 +15,8 @@ import {
   loginRetryLockoutTimeReseted,
   loginRetryLockoutTimeSet
 } from '@background/redux/login-retry-lockout-time/actions';
+import { sendEventToCurrentActiveTab } from '@background/send-event-to-current-active-tab';
+import { walletRuntimeEvent } from '@content/wallet-runtime-event';
 
 import {
   selectEncryptionKeyHash,
@@ -193,6 +195,8 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
         })
       );
     }
+
+    sendEventToCurrentActiveTab(walletRuntimeEvent.updateActiveOrigin());
   } catch (err) {
     console.error(err);
   }
