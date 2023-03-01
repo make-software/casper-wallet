@@ -17,8 +17,8 @@ import {
   backgroundEvent,
   PopupState
 } from '@src/background/background-events';
-import { createMainStoreReplica } from '../../background/redux/utils';
-import { connectWindowInit } from '../../background/redux/windowManagement/actions';
+import { createMainStoreReplica } from '@src/background/redux/utils';
+import { connectWindowInit } from '@src/background/redux/windowManagement/actions';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);

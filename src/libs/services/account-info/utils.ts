@@ -1,10 +1,10 @@
 import { AccountInfo } from '@libs/services/account-info';
 
-export const getAccountInfo = (accountInfo: AccountInfo) => {
+export const getAccountInfo = (accountInfo?: AccountInfo) => {
   return {
-    logo: accountInfo.info?.owner?.branding?.logo,
+    logo: accountInfo?.info?.owner?.branding?.logo,
     accountName: accountInfo?.info?.owner?.name,
-    accountHash: accountInfo.account_hash
+    accountHash: accountInfo?.account_hash
   };
 };
 

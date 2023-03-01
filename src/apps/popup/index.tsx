@@ -8,7 +8,6 @@ import { isActionOf } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 
 import { GlobalStyle, themeConfig } from '@libs/ui';
-
 import { ErrorBoundary } from '@src/libs/layout/error';
 import {
   BackgroundEvent,
