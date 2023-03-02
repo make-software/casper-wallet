@@ -136,7 +136,9 @@ export function AccountListPage() {
         console.error(error);
         setAccountListRows(accountListRows);
       });
-  }, [accounts, activeAccountName, connectedAccountNames]);
+    // We need to sort the account list and fetch account info only on the component mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <PageContainer>
