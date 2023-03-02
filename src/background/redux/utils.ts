@@ -164,7 +164,9 @@ export function createMainStoreReplica<T extends PopupState>(state: T) {
 }
 
 export function dispatchToMainStore(action: ReduxAction | ServiceMessage) {
-  return browser.runtime.sendMessage(action);
+  return browser.runtime.sendMessage(action).catch(err => {
+    console.error('Dispatch to Main Store: ' + action.type);
+  });
 }
 
 export function* sagaSelect<Result>(selector: (state: RootState) => Result) {

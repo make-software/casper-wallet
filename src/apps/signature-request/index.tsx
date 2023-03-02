@@ -24,16 +24,18 @@ const Tree = () => {
 
   // setup listener to state events
   useEffect(() => {
-    function handleBackgroundMessage(message: BackgroundEvent) {
+    function handleStateUpdate(message: BackgroundEvent) {
       if (isActionOf(backgroundEvent.popupStateUpdated)(message)) {
         setState(message.payload);
       }
     }
-    browser.runtime.onMessage.addListener(handleBackgroundMessage);
-    browser.runtime.sendMessage(signWindowInit());
+    browser.runtime.onMessage.addListener(handleStateUpdate);
+    browser.runtime.sendMessage(signWindowInit()).catch(err => {
+      console.error('sign window init');
+    });
 
     return () => {
-      browser.runtime.onMessage.removeListener(handleBackgroundMessage);
+      browser.runtime.onMessage.removeListener(handleStateUpdate);
     };
   }, []);
 

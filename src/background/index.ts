@@ -451,3 +451,10 @@ browser.runtime.onMessage.addListener(
     });
   }
 );
+
+function ping() {
+  browser.runtime.sendMessage('ping').catch(err => {
+    // ping
+  });
+}
+setInterval(ping, 15000);
