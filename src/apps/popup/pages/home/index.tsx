@@ -155,6 +155,9 @@ export function HomePageContent() {
           setAccountLogo(accountInfoLogo);
         }
       })
+      .catch(error => {
+        console.error('Account info request failed:', error);
+      })
       .finally(() => {
         setLoadingAccountInfo(false);
       });

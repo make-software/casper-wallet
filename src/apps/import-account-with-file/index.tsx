@@ -4,23 +4,23 @@ import 'mac-scrollbar/dist/mac-scrollbar.css';
 import React, { Suspense, useEffect, useState } from 'react';
 import { render } from 'react-dom';
 import { ThemeProvider } from 'styled-components';
-
-import { GlobalStyle, themeConfig } from '@libs/ui';
 import { Provider as ReduxProvider } from 'react-redux';
+import browser from 'webextension-polyfill';
+import { isActionOf } from 'typesafe-actions';
 
 import {
   backgroundEvent,
   BackgroundEvent
 } from '@src/background/background-events';
 import { importWindowInit } from '@src/background/redux/windowManagement/actions';
-import browser from 'webextension-polyfill';
-import { AppRouter } from './app-router';
-import { isActionOf } from 'typesafe-actions';
 import {
   createMainStoreReplica,
   PopupState
 } from '@src/background/redux/utils';
+import { GlobalStyle, themeConfig } from '@libs/ui';
 import { ErrorBoundary } from '@src/libs/layout/error';
+
+import { AppRouter } from './app-router';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);

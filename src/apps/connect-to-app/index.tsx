@@ -19,8 +19,8 @@ import {
 import {
   createMainStoreReplica,
   PopupState
-} from '../../background/redux/utils';
-import { connectWindowInit } from '../../background/redux/windowManagement/actions';
+} from '@src/background/redux/utils';
+import { connectWindowInit } from '@src/background/redux/windowManagement/actions';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);

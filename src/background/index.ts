@@ -457,4 +457,4 @@ function ping() {
     // ping
   });
 }
-setInterval(ping, 15000);
+setInterval(ping, 5000);
