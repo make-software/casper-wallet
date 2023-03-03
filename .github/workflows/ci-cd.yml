@@ -31,16 +31,15 @@ jobs:
     - name: Package
       run: npm run package:chrome
 
-    # - name: Upload to Chrome Web Store
-    #   uses: mobilefirstllc/cws-publish@latest
-    #   with:
-    #     action: 'testers'  # one of: upload, publish, testers
-    #     client_id: ${{ secrets.CLIENT_ID }}
-    #     client_secret: ${{ secrets.CLIENT_SECRET }}
-    #     refresh_token: ${{ secrets.REFRESH_TOKEN }}
-    #     extension_id: ${{ secrets.EXTENSION_ID }}
-    #     zip_file: './web-ext-artifacts/casper_wallet-1.2.4.zip'
-
+    - name: Upload to Chrome Web Store
+      uses: mobilefirstllc/cws-publish@latest
+      with:
+        action: 'upload'  # one of: upload, publish, testers
+        client_id: ${{ secrets.CLIENT_ID }}
+        client_secret: ${{ secrets.CLIENT_SECRET }}
+        refresh_token: ${{ secrets.REFRESH_TOKEN }}
+        extension_id: ${{ secrets.EXTENSION_ID }}
+        zip_file: './web-ext-artifacts/casper_wallet-1.2.4.zip'
 
     # - name: Upload & release
     #   uses: mnao305/chrome-extension-upload@v4.0.1
@@ -52,11 +51,11 @@ jobs:
     #     refresh-token: ${{ secrets.REFRESH_TOKEN }}
     #     publish: false
 
-    - name: Publish Extension
-      uses: trmcnvn/chrome-addon@v2
-      with:
-        extension: ${{ secrets.EXTENSION_ID }}
-        zip: ./web-ext-artifacts/casper_wallet-1.2.4.zip
-        client-id: ${{ secrets.CLIENT_ID }}
-        client-secret: ${{ secrets.CLIENT_SECRET }}
-        refresh-token: ${{ secrets.REFRESH_TOKEN }}
+    # - name: Publish Extension
+    #   uses: trmcnvn/chrome-addon@v2
+    #   with:
+    #     extension: ${{ secrets.EXTENSION_ID }}
+    #     zip: ./web-ext-artifacts/casper_wallet-1.2.4.zip
+    #     client-id: ${{ secrets.CLIENT_ID }}
+    #     client-secret: ${{ secrets.CLIENT_SECRET }}
+    #     refresh-token: ${{ secrets.REFRESH_TOKEN }}
