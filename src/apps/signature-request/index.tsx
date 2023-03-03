@@ -11,11 +11,10 @@ import { Provider as ReduxProvider } from 'react-redux/es/exports';
 import { GlobalStyle, themeConfig } from '@libs/ui';
 import {
   backgroundEvent,
-  BackgroundEvent,
-  PopupState
+  BackgroundEvent
 } from '@background/background-events';
 import { signWindowInit } from '@background/redux/windowManagement/actions';
-import { createMainStoreReplica } from '@background/redux/utils';
+import { createMainStoreReplica, PopupState } from '@background/redux/utils';
 import { ErrorBoundary } from '@src/libs/layout/error';
 
 import { AppRouter } from './app-router';
@@ -25,16 +24,18 @@ const Tree = () => {
 
   // setup listener to state events
   useEffect(() => {
-    function handleBackgroundMessage(message: BackgroundEvent) {
+    function handleStateUpdate(message: BackgroundEvent) {
       if (isActionOf(backgroundEvent.popupStateUpdated)(message)) {
         setState(message.payload);
       }
     }
-    browser.runtime.onMessage.addListener(handleBackgroundMessage);
-    browser.runtime.sendMessage(signWindowInit());
+    browser.runtime.onMessage.addListener(handleStateUpdate);
+    browser.runtime.sendMessage(signWindowInit()).catch(err => {
+      console.error('sign window init');
+    });
 
     return () => {
-      browser.runtime.onMessage.removeListener(handleBackgroundMessage);
+      browser.runtime.onMessage.removeListener(handleStateUpdate);
     };
   }, []);
 

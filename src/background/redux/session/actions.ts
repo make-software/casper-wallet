@@ -14,15 +14,6 @@ export const vaultUnlocked = createAction('VAULT_UNLOCKED', () => ({
   lastActivityTime: number;
 }>();
 
-export const lastActivityTimeRefreshed = createAction(
-  'LAST_ACTIVITY_TIME_REFRESHED',
-  () => ({
-    lastActivityTime: Date.now()
-  })
-)<{
-  lastActivityTime: number;
-}>();
-
 export const activeOriginChanged = createAction('ACTIVE_ORIGIN_CHANGED')<
   string | null
 >();

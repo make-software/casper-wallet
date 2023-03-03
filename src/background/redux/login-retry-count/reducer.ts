@@ -1,5 +1,5 @@
 import { createReducer } from 'typesafe-actions';
-import { loginRetryCountReseted, loginRetryCountIncrement } from './actions';
+import { loginRetryCountReseted, loginRetryCountIncremented } from './actions';
 
 export type LoginRetryCountState = number;
 
@@ -11,6 +11,6 @@ export const reducer = createReducer(initialState)
     (state, action): LoginRetryCountState => initialState
   )
   .handleAction(
-    loginRetryCountIncrement,
+    loginRetryCountIncremented,
     (state, action): LoginRetryCountState => state + 1
   );

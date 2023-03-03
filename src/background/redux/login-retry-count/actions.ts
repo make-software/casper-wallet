@@ -4,6 +4,6 @@ export const loginRetryCountReseted = createAction(
   'LOGIN_RETRY_COUNT_RESETED'
 )<void>();
 
-export const loginRetryCountIncrement = createAction(
-  'LOGIN_RETRY_COUNT_INCREMENT'
+export const loginRetryCountIncremented = createAction(
+  'LOGIN_RETRY_COUNT_INCREMENTED'
 )<void>();

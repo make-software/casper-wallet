@@ -4,8 +4,8 @@ import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { dispatchToMainStore } from '../background/redux/utils';
 import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
-import { lastActivityTimeRefreshed } from '@src/background/redux/session/actions';
 import { selectKeysDoesExist } from '@src/background/redux/keys/selectors';
+import { lastActivityTimeRefreshed } from '@src/background/redux/last-activity-time/actions';
 
 export function useUserActivityTracker(): void {
   const keysDoesExist = useSelector(selectKeysDoesExist);

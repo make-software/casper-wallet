@@ -10,9 +10,9 @@ const initialState: State = {
 };
 
 export const reducer = createReducer(initialState)
-  .handleAction([deploysReseted], (): State => initialState)
+  .handleAction(deploysReseted, (): State => initialState)
   .handleAction(
-    [deployPayloadReceived],
+    deployPayloadReceived,
     (state, { payload }): State => ({
       ...state,
       jsonById: { [payload.id]: payload.json }

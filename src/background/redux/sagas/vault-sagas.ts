@@ -18,13 +18,11 @@ import {
 
 import {
   selectEncryptionKeyHash,
-  selectVaultIsLocked,
-  selectVaultLastActivityTime
+  selectVaultIsLocked
 } from '../session/selectors';
 import { sagaCall, sagaSelect } from '../utils';
 import {
   accountAdded,
-  timeoutDurationChanged,
   accountImported,
   accountRenamed,
   accountRemoved,
@@ -40,12 +38,10 @@ import {
   selectSecretPhrase,
   selectVault,
   selectVaultActiveAccount,
-  selectVaultDerivedAccounts,
-  selectVaultTimeoutDurationSetting
+  selectVaultDerivedAccounts
 } from '../vault/selectors';
 import {
   encryptionKeyHashCreated,
-  lastActivityTimeRefreshed,
   sessionReseted,
   vaultUnlocked
 } from '../session/actions';
@@ -62,6 +58,10 @@ import {
   startBackground,
   unlockVault
 } from './actions';
+import { timeoutDurationSettingChanged } from '../timeout-duration-setting/actions';
+import { selectTimeoutDurationSetting } from '../timeout-duration-setting/selectors';
+import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
+import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
 
 export function* vaultSagas() {
   yield takeLatest(getType(lockVault), lockVaultSaga);
@@ -74,7 +74,7 @@ export function* vaultSagas() {
     [
       getType(startBackground),
       getType(lastActivityTimeRefreshed),
-      getType(timeoutDurationChanged)
+      getType(timeoutDurationSettingChanged)
     ],
     timeoutCounterSaga
   );
@@ -88,7 +88,7 @@ export function* vaultSagas() {
       getType(accountDisconnected),
       getType(allAccountsDisconnected),
       getType(activeAccountChanged),
-      getType(timeoutDurationChanged)
+      getType(timeoutDurationSettingChanged)
     ],
     updateVaultCipher
   );
@@ -211,7 +211,7 @@ function* timeoutCounterSaga(action: any) {
       selectVaultLastActivityTime
     );
     const vaultTimeoutDurationSetting = yield* sagaSelect(
-      selectVaultTimeoutDurationSetting
+      selectTimeoutDurationSetting
     );
     const timeoutDurationValue =
       MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];

@@ -14,10 +14,12 @@ import { ErrorBoundary } from '@src/libs/layout/error';
 
 import {
   BackgroundEvent,
-  backgroundEvent,
-  PopupState
+  backgroundEvent
 } from '@src/background/background-events';
-import { createMainStoreReplica } from '@src/background/redux/utils';
+import {
+  createMainStoreReplica,
+  PopupState
+} from '@src/background/redux/utils';
 import { connectWindowInit } from '@src/background/redux/windowManagement/actions';
 
 const Tree = () => {
@@ -25,16 +27,18 @@ const Tree = () => {
 
   // setup listener to state events
   useEffect(() => {
-    function handleBackgroundMessage(message: BackgroundEvent) {
+    function handleStateUpdate(message: BackgroundEvent) {
       if (isActionOf(backgroundEvent.popupStateUpdated)(message)) {
         setState(message.payload);
       }
     }
-    browser.runtime.onMessage.addListener(handleBackgroundMessage);
-    browser.runtime.sendMessage(connectWindowInit());
+    browser.runtime.onMessage.addListener(handleStateUpdate);
+    browser.runtime.sendMessage(connectWindowInit()).catch(err => {
+      console.error('connect window init');
+    });
 
     return () => {
-      browser.runtime.onMessage.removeListener(handleBackgroundMessage);
+      browser.runtime.onMessage.removeListener(handleStateUpdate);
     };
   }, []);
 
