@@ -15,7 +15,6 @@ import {
   accountsConnected,
   activeAccountChanged,
   allAccountsDisconnected,
-  timeoutDurationChanged,
   vaultReseted,
   vaultLoaded,
   secretPhraseCreated
@@ -59,7 +58,6 @@ import { deployPayloadReceived, deploysReseted } from './redux/deploys/actions';
 import {
   activeOriginChanged,
   encryptionKeyHashCreated,
-  lastActivityTimeRefreshed,
   sessionReseted,
   vaultUnlocked
 } from './redux/session/actions';
@@ -81,11 +79,13 @@ import { selectKeysDoesExist } from './redux/keys/selectors';
 import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
 import { ServiceMessage, serviceMessage } from './service-message';
 import {
-  loginRetryCountIncrement,
+  loginRetryCountIncremented,
   loginRetryCountReseted
 } from './redux/login-retry-count/actions';
 import { emitSdkEventToAllActiveTabs } from './emit-sdk-event-to-all-active-tabs';
 import { loginRetryLockoutTimeSet } from './redux/login-retry-lockout-time/actions';
+import { timeoutDurationSettingChanged } from './redux/timeout-duration-setting/actions';
+import { lastActivityTimeRefreshed } from './redux/last-activity-time/actions';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -334,7 +334,7 @@ browser.runtime.onMessage.addListener(
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeAccountChanged):
-          case getType(timeoutDurationChanged):
+          case getType(timeoutDurationSettingChanged):
           case getType(lastActivityTimeRefreshed):
           case getType(accountsConnected):
           case getType(accountDisconnected):
@@ -351,7 +351,7 @@ browser.runtime.onMessage.addListener(
           case getType(keysReseted):
           case getType(keysUpdated):
           case getType(loginRetryCountReseted):
-          case getType(loginRetryCountIncrement):
+          case getType(loginRetryCountIncremented):
           case getType(loginRetryLockoutTimeSet):
             store.dispatch(action);
             return sendResponse(undefined);
@@ -451,3 +451,11 @@ browser.runtime.onMessage.addListener(
     });
   }
 );
+
+// ping mechanism to keep background script from destroing wallet session when it's unlocked
+function ping() {
+  browser.runtime.sendMessage('ping').catch(err => {
+    // ping
+  });
+}
+setInterval(ping, 5000);

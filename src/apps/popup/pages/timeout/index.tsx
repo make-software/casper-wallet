@@ -10,14 +10,14 @@ import {
   SpacingSize
 } from '@src/libs/layout/containers';
 
-import { selectVaultTimeoutDurationSetting } from '@src/background/redux/vault/selectors';
-import { timeoutDurationChanged } from '@src/background/redux/vault/actions';
 import { TimeoutDurationSetting } from '@popup/constants';
 import { dispatchToMainStore } from '../../../../background/redux/utils';
+import { selectTimeoutDurationSetting } from '@src/background/redux/timeout-duration-setting/selectors';
+import { timeoutDurationSettingChanged } from '@src/background/redux/timeout-duration-setting/actions';
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();
-  const timeoutDurationSetting = useSelector(selectVaultTimeoutDurationSetting);
+  const timeoutDurationSetting = useSelector(selectTimeoutDurationSetting);
 
   const timeoutsMenuItems = useMemo(() => {
     const timeoutDurationSettingTranslationDict = {
@@ -63,9 +63,9 @@ export function TimeoutPageContent() {
             key={menuItem.id}
             onClick={() => {
               dispatchToMainStore(
-                timeoutDurationChanged({
-                  timeoutDuration: TimeoutDurationSetting[menuItem.id]
-                })
+                timeoutDurationSettingChanged(
+                  TimeoutDurationSetting[menuItem.id]
+                )
               );
             }}
           >

@@ -15,27 +15,28 @@ import { AppRouter } from '@src/apps/onboarding/app-router';
 
 import {
   backgroundEvent,
-  BackgroundEvent,
-  PopupState
+  BackgroundEvent
 } from '@background/background-events';
 import { onboardingAppInit } from '@background/redux/windowManagement/actions';
-import { createMainStoreReplica } from '@background/redux/utils';
+import { createMainStoreReplica, PopupState } from '@background/redux/utils';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
 
   // setup listener to state events
   useEffect(() => {
-    function handleBackgroundMessage(message: BackgroundEvent) {
+    function handleStateUpdate(message: BackgroundEvent) {
       if (isActionOf(backgroundEvent.popupStateUpdated)(message)) {
         setState(message.payload);
       }
     }
-    browser.runtime.onMessage.addListener(handleBackgroundMessage);
-    browser.runtime.sendMessage(onboardingAppInit());
+    browser.runtime.onMessage.addListener(handleStateUpdate);
+    browser.runtime.sendMessage(onboardingAppInit()).catch(err => {
+      console.error('onboarding app init');
+    });
 
     return () => {
-      browser.runtime.onMessage.removeListener(handleBackgroundMessage);
+      browser.runtime.onMessage.removeListener(handleStateUpdate);
     };
   }, []);
 

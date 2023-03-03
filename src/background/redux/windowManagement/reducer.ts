@@ -10,7 +10,7 @@ const initialState: State = {
 
 export const reducer = createReducer(initialState)
   .handleAction(
-    [windowIdChanged],
+    windowIdChanged,
     (state, { payload }): State => ({
       ...state,
       windowId: payload

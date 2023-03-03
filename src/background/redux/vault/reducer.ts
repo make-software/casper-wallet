@@ -1,6 +1,5 @@
 import { createReducer } from 'typesafe-actions';
 
-import { TimeoutDurationSetting } from '@popup/constants';
 import {
   vaultReseted,
   vaultLoaded,
@@ -12,15 +11,13 @@ import {
   accountsConnected,
   accountDisconnected,
   allAccountsDisconnected,
-  activeAccountChanged,
-  timeoutDurationChanged
+  activeAccountChanged
 } from './actions';
 import { VaultState } from './types';
 
 type State = VaultState;
 
 const initialState: State = {
-  timeoutDurationSetting: TimeoutDurationSetting['5 min'],
   secretPhrase: null,
   accounts: [],
   accountNamesByOriginDict: {},
@@ -29,7 +26,25 @@ const initialState: State = {
 
 export const reducer = createReducer(initialState)
   .handleAction(vaultReseted, () => initialState)
-  .handleAction(vaultLoaded, (state, action) => action.payload)
+  .handleAction(
+    vaultLoaded,
+    (
+      state,
+      {
+        payload: {
+          accountNamesByOriginDict,
+          accounts,
+          activeAccountName,
+          secretPhrase
+        }
+      }
+    ) => ({
+      accountNamesByOriginDict,
+      accounts,
+      activeAccountName,
+      secretPhrase
+    })
+  )
   .handleAction(
     secretPhraseCreated,
     (state, action): State => ({
@@ -174,11 +189,4 @@ export const reducer = createReducer(initialState)
   .handleAction(activeAccountChanged, (state, { payload }) => ({
     ...state,
     activeAccountName: payload
-  }))
-  .handleAction(
-    timeoutDurationChanged,
-    (state, { payload: { timeoutDuration } }): State => ({
-      ...state,
-      timeoutDurationSetting: timeoutDuration
-    })
-  );
+  }));
