@@ -52,6 +52,9 @@ export function CreateVaultPasswordPage({
     <Trans t={t}>
       I have read and agree to the{' '}
       <Link
+        onClick={event => {
+          event.stopPropagation();
+        }}
         color="fillBlue"
         target="_blank"
         href="https://www.casperwallet.io/tos"
@@ -60,6 +63,9 @@ export function CreateVaultPasswordPage({
       </Link>{' '}
       and{' '}
       <Link
+        onClick={event => {
+          event.stopPropagation();
+        }}
         color="fillBlue"
         target="_blank"
         href="https://www.casperwallet.io/privacy"

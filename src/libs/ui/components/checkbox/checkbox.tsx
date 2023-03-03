@@ -1,11 +1,9 @@
 import React, { ChangeEvent } from 'react';
 import styled from 'styled-components';
 
-import { BaseProps } from '../../types';
+import { Typography, SvgIcon, BaseProps } from '@src/libs/ui';
 
 import FlexRow from '../flex-row/flex-row';
-import SvgIcon from '../svg-icon/svg-icon';
-import { Typography } from '@src/libs/ui';
 
 const StyledFlexRow = styled(FlexRow)<{
   checked?: boolean;
@@ -23,6 +21,10 @@ const StyledFlexRow = styled(FlexRow)<{
     color: theme.color.contentPrimary
   }
 }));
+
+const CheckboxSvgIcon = styled(SvgIcon)`
+  flex-shrink: 0;
+`;
 
 export interface CheckboxProps extends BaseProps {
   label?: string | JSX.Element;
@@ -60,7 +62,7 @@ export function Checkbox({
       onClick={handleClick}
       data-testid={dataTestId}
     >
-      <SvgIcon src={iconSrc} />
+      <CheckboxSvgIcon src={iconSrc} />
       {label && (
         <Typography type="body" color="contentPrimary">
           {label}

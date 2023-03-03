@@ -43,7 +43,7 @@ export function OnboardingSuccessPageContent() {
               href="https://www.casperwallet.io/"
             >
               casperwallet.io
-            </Link>{' '}
+            </Link>
             .
           </Trans>
         </Typography>
