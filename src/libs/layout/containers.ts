@@ -224,14 +224,3 @@ export const IllustrationContainer = styled.div`
 export const OnboardingIllustrationContainer = styled(IllustrationContainer)`
   margin-top: 40px;
 `;
-
-export const ItemsContainer = styled.div`
-  padding: 8px;
-`;
-
-export const AccountListItemsContainer = styled(ItemsContainer)`
-  &:hover {
-    background-color: ${({ theme }) => theme.color.backgroundSecondary};
-    border-radius: ${({ theme }) => theme.borderRadius.base}px;
-  }
-`;
