@@ -452,6 +452,7 @@ browser.runtime.onMessage.addListener(
   }
 );
 
+// ping mechanism to keep background script from destroing wallet session when it's unlocked
 function ping() {
   browser.runtime.sendMessage('ping').catch(err => {
     // ping
