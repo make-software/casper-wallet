@@ -59,7 +59,7 @@ import { getBlockExplorerAccountUrl } from '@src/constants';
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
 export const HomePageContentContainer = styled(ContentContainer)`
-  padding-bottom: ${({ theme }) => theme.padding[1.2]};
+  padding-bottom: 0;
 `;
 
 // Account info
@@ -84,7 +84,7 @@ const BalanceContainer = styled(CenteredFlexColumn)`
 
 const ButtonsContainer = styled(SpaceAroundFlexColumn)`
   width: 100%;
-  margin-top: 16px;
+  margin-top: 24px;
 `;
 
 export function HomePageContent() {
