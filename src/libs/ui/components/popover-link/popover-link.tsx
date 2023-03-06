@@ -29,7 +29,7 @@ const BlueLink = styled(BaseLink)<PopoverLinkProps>(({ theme }) => ({
     borderRadius: theme.borderRadius.base
   },
 
-  '&:hover > *': {
+  '&:hover svg': {
     color: theme.color.contentBlue
   }
 }));
