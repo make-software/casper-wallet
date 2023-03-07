@@ -99,6 +99,17 @@ export function SignDeployContent({
     ...deployInfo.deployArgs
   };
 
+  const getLabel = () => {
+    switch (signatureRequest.deployType) {
+      case 'Contract Call':
+        return 'Contract arguments';
+      case 'Module Bytes':
+        return 'Session arguments';
+      default:
+        return 'Transfer Data';
+    }
+  };
+
   return (
     <PageContainer>
       <ContentContainer>
@@ -161,11 +172,7 @@ export function SignDeployContent({
               }
               children={({ isOpen }) => (
                 <AccordionHeaderContainer>
-                  <Typography type="bodySemiBold">
-                    {signatureRequest.deployType === 'Contract Call'
-                      ? t('Contract arguments')
-                      : t('Transfer Data')}
-                  </Typography>
+                  <Typography type="bodySemiBold">{getLabel()}</Typography>
                   <SvgIcon
                     src="assets/icons/chevron-up.svg"
                     flipByAxis={isOpen ? undefined : 'X'}
