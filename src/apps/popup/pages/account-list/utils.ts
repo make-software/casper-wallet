@@ -1,7 +1,10 @@
-import { Account } from '@background/redux/vault/types';
+import {
+  Account,
+  AccountListRowsWithHash
+} from '@background/redux/vault/types';
 
 export function sortAccounts(
-  accounts: Account[],
+  accounts: AccountListRowsWithHash[],
   activeAccountName: string | null,
   connectedAccountNames: string[]
 ) {

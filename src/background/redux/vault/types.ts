@@ -9,10 +9,15 @@ export interface KeyPair {
 export interface Account extends KeyPair {
   name: string;
   imported?: boolean;
+  infoStandardName?: string;
 }
 
 export interface AccountListRows extends Account {
   id: string;
+}
+
+export interface AccountListRowsWithHash extends AccountListRows {
+  accountHash: string;
 }
 
 type AccountNamesByOriginDict = Record<string, string[]>;

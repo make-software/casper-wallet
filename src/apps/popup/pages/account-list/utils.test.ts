@@ -1,3 +1,5 @@
+import { AccountListRowsWithHash } from '@background/redux/vault/types';
+
 import { sortAccounts } from './utils';
 
 describe('sortAccount()', () => {
@@ -32,7 +34,7 @@ describe('sortAccount()', () => {
         '01f33224e945e601fec597b711abe1966abeddb41881954d281c99634df2698a7b',
       secretKey: 'KrwMFnKWZ4ASavxhzJ59g/+6KkZHXatLl6G3DzJ6uLA='
     }
-  ];
+  ] as AccountListRowsWithHash[];
 
   const connectedAccountNames = ['Test user 1', 'Test user 3', 'Test user 5'];
   const activeAccountName = 'Test user 3';

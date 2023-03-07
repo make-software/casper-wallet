@@ -15,9 +15,9 @@ import {
   PageContainer,
   ContentContainer,
   ParagraphContainer,
-  LeftAlignedFlexColumn,
   VerticalSpaceContainer,
-  SpacingSize
+  SpacingSize,
+  AccountListItemContainer
 } from '@src/libs/layout';
 
 import {
@@ -29,14 +29,16 @@ import { selectActiveOrigin } from '@src/background/redux/session/selectors';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import { closeCurrentWindow } from '@src/background/close-current-window';
 import { ConnectionStatusBadge } from '@src/apps/popup/pages/home/components/connection-status-badge';
+import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
+import { sdkMethod } from '@src/content/sdk-method';
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import { useAccountsInfoList } from '@hooks/use-account-list-info/use-accounts-info-list';
 
 import {
   UnconnectedAccountsList,
   SpaceBetweenContainer,
   ListItemContainer
 } from './unconnected-accounts-list';
-import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
-import { sdkMethod } from '@src/content/sdk-method';
 
 type SwitchAccountContentProps = { requestId: string };
 
@@ -52,17 +54,22 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
   const { changeActiveAccountWithEvent: changeActiveAccount } =
     useAccountManager();
 
-  const connectedAccountsListItems = connectedAccountsToActiveTab
+  const connectedAccountsList = connectedAccountsToActiveTab
     .filter(account => account.name !== activeAccount?.name)
     .map(account => ({
       ...account,
-      id: account.name
+      id: account.name,
+      accountHash: getAccountHashFromPublicKey(account.publicKey)
     }));
 
   const unconnectedAccountsList = unconnectedAccounts.map(account => ({
     ...account,
-    id: account.name
+    id: account.name,
+    accountHash: getAccountHashFromPublicKey(account.publicKey)
   }));
+
+  const { accountsInfoList: connectedAccountsListWithInfoStandardName } =
+    useAccountsInfoList(connectedAccountsList);
 
   const isActiveAccountConnected: boolean = unconnectedAccountsList.every(
     account => account.name !== activeAccount?.name
@@ -78,63 +85,66 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
           </VerticalSpaceContainer>
         </ParagraphContainer>
         {/*The active account and other accounts are not connected*/}
-        {connectedAccountsListItems.length === 0 &&
-          !isActiveAccountConnected && (
+        {connectedAccountsList.length === 0 && !isActiveAccountConnected && (
+          <ParagraphContainer top={SpacingSize.Big}>
+            <Typography type="body">
+              <Trans t={t}>
+                There is no connected account. First you need to connect account
+                from the wallet extension.
+              </Trans>
+            </Typography>
+          </ParagraphContainer>
+        )}
+        {/*There is only active account connected*/}
+        {connectedAccountsList.length === 0 && isActiveAccountConnected && (
+          <>
             <ParagraphContainer top={SpacingSize.Big}>
               <Typography type="body">
-                <Trans t={t}>
-                  There is no connected account. First you need to connect
-                  account from the wallet extension.
-                </Trans>
+                {unconnectedAccountsList.length > 0 ? (
+                  <Trans t={t}>
+                    Only the active account is connected. To switch accounts you
+                    need to connect another account.
+                  </Trans>
+                ) : (
+                  <Trans t={t}>
+                    Only the active account is connected. To switch accounts you
+                    need to connect another account first from the wallet
+                    extension...
+                  </Trans>
+                )}
               </Typography>
             </ParagraphContainer>
-          )}
-        {/*There is only active account connected*/}
-        {connectedAccountsListItems.length === 0 &&
-          isActiveAccountConnected && (
-            <>
-              <ParagraphContainer top={SpacingSize.Big}>
-                <Typography type="body">
-                  {unconnectedAccountsList.length > 0 ? (
-                    <Trans t={t}>
-                      Only the active account is connected. To switch accounts
-                      you need to connect another account.
-                    </Trans>
-                  ) : (
-                    <Trans t={t}>
-                      Only the active account is connected. To switch accounts
-                      you need to connect another account first from the wallet
-                      extension...
-                    </Trans>
-                  )}
-                </Typography>
-              </ParagraphContainer>
-              <UnconnectedAccountsList
-                requestId={requestId}
-                unconnectedAccountsList={unconnectedAccountsList}
-              />
-            </>
-          )}
+            <UnconnectedAccountsList
+              requestId={requestId}
+              unconnectedAccountsList={unconnectedAccountsList}
+            />
+          </>
+        )}
         {/*There are one or more connected accounts*/}
-        {connectedAccountsListItems.length >= 1 && (
+        {connectedAccountsList.length >= 1 && (
           <>
             <List
-              rows={connectedAccountsListItems}
+              rows={connectedAccountsListWithInfoStandardName}
               renderRow={account => (
                 <ListItemContainer key={account.name}>
                   <SpaceBetweenContainer>
-                    <LeftAlignedFlexColumn>
+                    <AccountListItemContainer>
                       <ConnectionStatusBadge
                         isConnected
                         displayContext="accountList"
                       />
                       <Typography type="body">{account.name}</Typography>
+                      {account?.infoStandardName && (
+                        <Typography type="bodyEllipsis">
+                          {account.infoStandardName}
+                        </Typography>
+                      )}
                       <Hash
                         value={account.publicKey}
                         variant={HashVariant.CaptionHash}
                         truncated
                       />
-                    </LeftAlignedFlexColumn>
+                    </AccountListItemContainer>
                     <Button
                       color="secondaryBlue"
                       inline

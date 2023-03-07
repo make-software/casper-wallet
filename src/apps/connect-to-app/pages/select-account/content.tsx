@@ -1,7 +1,6 @@
 import React, { useMemo, useCallback, SetStateAction, Dispatch } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
 
 import {
   Checkbox,
@@ -17,7 +16,7 @@ import {
   ContentContainer,
   ParagraphContainer,
   ListItemClickableContainer,
-  LeftAlignedFlexColumn,
+  AccountNameWithHashListItemContainer,
   BreakWordContainer,
   VerticalSpaceContainer,
   SpacingSize
@@ -28,13 +27,12 @@ import {
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import { useAccountsInfoList } from '@hooks/use-account-list-info/use-accounts-info-list';
 
 // Hidden account balance until a solution for fetching many balances will be ready
 // https://github.com/make-software/casper-wallet/issues/374
 // const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
-const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
-  width: 100%;
-`;
 
 interface SelectAccountContentProps {
   selectedAccountNames: string[];
@@ -84,8 +82,11 @@ export function SelectAccountContent({
 
   const accountsListItems = notConnectedAccounts.map(account => ({
     ...account,
-    id: account.name
+    id: account.name,
+    accountHash: getAccountHashFromPublicKey(account.publicKey)
   }));
+
+  const { accountsInfoList } = useAccountsInfoList(accountsListItems);
 
   return (
     <PageContainer>
@@ -101,7 +102,7 @@ export function SelectAccountContent({
         <List
           headerLabel={t('select account(s)')}
           headerAction={headerAction}
-          rows={accountsListItems}
+          rows={accountsInfoList}
           renderRow={account => (
             <ListItemClickableContainer
               onClick={() =>
@@ -128,6 +129,11 @@ export function SelectAccountContent({
                 >
                   {account.name}
                 </Typography>
+                {account?.infoStandardName && (
+                  <Typography type="bodyEllipsis">
+                    {account.infoStandardName}
+                  </Typography>
+                )}
                 <Hash
                   value={account.publicKey}
                   variant={HashVariant.CaptionHash}

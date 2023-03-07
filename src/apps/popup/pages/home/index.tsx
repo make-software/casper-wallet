@@ -2,7 +2,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import { RootState } from 'typesafe-actions';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import {
   CenteredFlexColumn,
@@ -48,43 +48,30 @@ import {
   motesToCSPR,
   motesToCurrency
 } from '@libs/ui/utils/formatters';
-import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import {
-  getAccountInfoLogo,
-  dispatchFetchAccountInfoRequest,
-  getAccountInfo
-} from '@libs/services/account-info';
 import { getBlockExplorerAccountUrl } from '@src/constants';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
+import { useAccountInfo } from '@hooks/use-account-info/use-account-info';
+
+interface AccountInfoStandard {
+  isAccountInfoStandardNameExist?: boolean;
+}
 
 export const HomePageContentContainer = styled(ContentContainer)`
   padding-bottom: 0;
 `;
 
-// Account info
-
-const fullWidthAndMarginTop = css`
-  margin-top: 16px;
+const AccountInfoContainer = styled(CenteredFlexColumn)<AccountInfoStandard>`
+  margin-top: ${({ isAccountInfoStandardNameExist }) =>
+    isAccountInfoStandardNameExist ? '8px' : '16px'};
   width: 100%;
+  text-align: center;
 `;
 
-const NameAndAddressContainer = styled(CenteredFlexColumn)`
-  ${fullWidthAndMarginTop};
-`;
-const BalanceContainer = styled(CenteredFlexColumn)`
-  ${fullWidthAndMarginTop};
-
-  & + Button {
-    margin-top: 24px;
-  }
-`;
-
-// List of accounts
-
-const ButtonsContainer = styled(SpaceAroundFlexColumn)`
+const ButtonsContainer = styled(SpaceAroundFlexColumn)<AccountInfoStandard>`
   width: 100%;
-  margin-top: 24px;
+  margin-top: ${({ isAccountInfoStandardNameExist }) =>
+    isAccountInfoStandardNameExist ? '16px' : '24px'};
 `;
 
 export function HomePageContent() {
@@ -95,9 +82,6 @@ export function HomePageContent() {
     amount: '-',
     fiatAmount: '-'
   });
-  const [accountName, setAccountName] = useState<string | null>(null);
-  const [accountLogo, setAccountLogo] = useState<string | null>(null);
-  const [loadingAccountInfo, setLoadingAccountInfo] = useState(true);
 
   const activeOrigin = useSelector(selectActiveOrigin);
   const { disconnectAccountWithEvent: disconnectAccount } = useAccountManager();
@@ -122,6 +106,9 @@ export function HomePageContent() {
     }
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
 
+  const { accountLogo, accountInfoStandardName, loadingAccountInfo } =
+    useAccountInfo(activeAccount);
+
   useEffect(() => {
     dispatchFetchActiveAccountBalance(activeAccount?.publicKey)
       .then(({ payload: { balance, currencyRate } }) => {
@@ -138,28 +125,6 @@ export function HomePageContent() {
       })
       .catch(error => {
         console.error('Balance request failed:', error);
-      });
-
-    dispatchFetchAccountInfoRequest(
-      getAccountHashFromPublicKey(activeAccount?.publicKey)
-    )
-      .then(({ payload: accountInfo }) => {
-        const { accountName } = getAccountInfo(accountInfo);
-        const accountInfoLogo = getAccountInfoLogo(accountInfo);
-
-        if (accountName) {
-          setAccountName(accountName);
-        }
-
-        if (accountInfoLogo) {
-          setAccountLogo(accountInfoLogo);
-        }
-      })
-      .catch(error => {
-        console.error('Account info request failed:', error);
-      })
-      .finally(() => {
-        setLoadingAccountInfo(false);
       });
   }, [activeAccount?.publicKey]);
 
@@ -187,10 +152,17 @@ export function HomePageContent() {
               src={accountLogo}
               loadingAccountInfo={loadingAccountInfo}
             />
-            <NameAndAddressContainer>
+            <AccountInfoContainer
+              isAccountInfoStandardNameExist={Boolean(accountInfoStandardName)}
+            >
               <Typography type="bodySemiBold" loading={loadingAccountInfo}>
-                {accountName ?? activeAccount.name}
+                {activeAccount.name}
               </Typography>
+              {accountInfoStandardName && (
+                <Typography type="bodyEllipsis" loading={loadingAccountInfo}>
+                  {accountInfoStandardName}
+                </Typography>
+              )}
               <Hash
                 value={activeAccount.publicKey}
                 variant={HashVariant.CaptionHash}
@@ -198,8 +170,10 @@ export function HomePageContent() {
                 withCopyOnSelfClick
                 displayContext={HashDisplayContext.Home}
               />
-            </NameAndAddressContainer>
-            <BalanceContainer>
+            </AccountInfoContainer>
+            <AccountInfoContainer
+              isAccountInfoStandardNameExist={Boolean(accountInfoStandardName)}
+            >
               <FlexRow gap={SpacingSize.Small}>
                 <Typography type="CSPRBold">{balance.amount}</Typography>
                 <Typography type="CSPRLight" color="contentSecondary">
@@ -209,8 +183,11 @@ export function HomePageContent() {
               <Typography type="body" color="contentSecondary">
                 {balance.fiatAmount}
               </Typography>
-            </BalanceContainer>
-            <ButtonsContainer gap={SpacingSize.Big}>
+            </AccountInfoContainer>
+            <ButtonsContainer
+              gap={SpacingSize.Big}
+              isAccountInfoStandardNameExist={Boolean(accountInfoStandardName)}
+            >
               {isActiveAccountConnected ? (
                 <Button
                   disabled={activeOrigin == null}

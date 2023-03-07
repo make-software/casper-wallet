@@ -3,17 +3,18 @@ import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { AccountListRows } from '@background/redux/vault/types';
+import { AccountListRowsWithHash } from '@background/redux/vault/types';
 import { closeCurrentWindow } from '@background/close-current-window';
 import { selectActiveOrigin } from '@background/redux/session/selectors';
 
 import { Button, Hash, HashVariant, List, Typography } from '@libs/ui';
-import { LeftAlignedFlexColumn } from '@libs/layout';
+import { AccountListItemContainer } from '@libs/layout';
 
 import { ConnectionStatusBadge } from '@popup/pages/home/components/connection-status-badge';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
 import { sdkMethod } from '@src/content/sdk-method';
+import { useAccountsInfoList } from '@hooks/use-account-list-info/use-accounts-info-list';
 
 const CentredFlexRow = styled.div`
   display: flex;
@@ -32,7 +33,7 @@ export const SpaceBetweenContainer = styled(CentredFlexRow)`
 `;
 
 interface UnconnectedAccountsListProps {
-  unconnectedAccountsList: AccountListRows[];
+  unconnectedAccountsList: AccountListRowsWithHash[];
   requestId: string;
 }
 
@@ -45,26 +46,34 @@ export const UnconnectedAccountsList = ({
   const { t } = useTranslation();
   const { connectAccountsWithEvent: connectAccounts } = useAccountManager();
 
+  const { accountsInfoList: unconnectedAccountsListWithInfoStandardName } =
+    useAccountsInfoList(unconnectedAccountsList);
+
   if (unconnectedAccountsList.length > 0) {
     return (
       <List
         headerLabel={t('Connect another account')}
-        rows={unconnectedAccountsList}
+        rows={unconnectedAccountsListWithInfoStandardName}
         renderRow={unconnectedAccount => (
           <ListItemContainer key={unconnectedAccount.name}>
             <SpaceBetweenContainer>
-              <LeftAlignedFlexColumn>
+              <AccountListItemContainer>
                 <ConnectionStatusBadge
                   isConnected={false}
                   displayContext="accountList"
                 />
                 <Typography type="body">{unconnectedAccount.name}</Typography>
+                {unconnectedAccount?.infoStandardName && (
+                  <Typography type="bodyEllipsis">
+                    {unconnectedAccount.infoStandardName}
+                  </Typography>
+                )}
                 <Hash
                   value={unconnectedAccount.publicKey}
                   variant={HashVariant.CaptionHash}
                   truncated
                 />
-              </LeftAlignedFlexColumn>
+              </AccountListItemContainer>
               <Button
                 color="primaryRed"
                 inline

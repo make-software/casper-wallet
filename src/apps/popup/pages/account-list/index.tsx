@@ -20,10 +20,6 @@ import {
   FlexRow
 } from '@libs/layout';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import {
-  dispatchFetchAccountListInfo,
-  getAccountInfo
-} from '@libs/services/account-info';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
@@ -36,8 +32,9 @@ import {
   selectVaultActiveAccountName
 } from '@background/redux/vault/selectors';
 import { selectActiveOrigin } from '@background/redux/session/selectors';
-import { AccountListRows } from '@background/redux/vault/types';
+import { AccountListRowsWithHash } from '@background/redux/vault/types';
 import { getBlockExplorerAccountUrl } from '@src/constants';
+import { useAccountsInfoList } from '@hooks/use-account-list-info/use-accounts-info-list';
 
 import { Popover } from './components/popover';
 
@@ -54,6 +51,7 @@ const ListItemContainer = styled(FlexRow)`
 
 const ListItemClickableContainer = styled(FlexRow)`
   width: 100%;
+  max-width: 268px;
   cursor: pointer;
   padding-top: 12px;
   padding-bottom: 12px;
@@ -79,7 +77,9 @@ const HashContainer = styled.div`
 `;
 
 export function AccountListPage() {
-  const [accountListRows, setAccountListRows] = useState<AccountListRows[]>([]);
+  const [accountListRows, setAccountListRows] = useState<
+    AccountListRowsWithHash[]
+  >([]);
 
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -100,44 +100,23 @@ export function AccountListPage() {
     selectConnectedAccountNamesWithOrigin
   );
 
+  const accountList: AccountListRowsWithHash[] = accounts.map(account => ({
+    ...account,
+    id: account.name,
+    accountHash: getAccountHashFromPublicKey(account.publicKey)
+  }));
+
+  const { accountsInfoList } = useAccountsInfoList(accountList);
+
   useEffect(() => {
-    const accountListRows = sortAccounts(
-      accounts,
+    const sortedAccountListRows = sortAccounts(
+      accountsInfoList,
       activeAccountName,
       connectedAccountNames
-    ).map(account => ({
-      ...account,
-      id: account.name,
-      accountHash: getAccountHashFromPublicKey(account.publicKey)
-    }));
-
-    const accountsHash = accountListRows.map(account => account.accountHash);
-
-    dispatchFetchAccountListInfo(accountsHash)
-      .then(({ payload: accountInfoList }) => {
-        const newAccountListRows = [...accountListRows];
-
-        accountInfoList.forEach(accountInfo => {
-          const { accountName, accountHash } = getAccountInfo(accountInfo);
-
-          newAccountListRows.forEach(account => {
-            if (account.accountHash === accountHash) {
-              if (accountName != null) {
-                account.name = accountName;
-              }
-            }
-          });
-        });
-
-        setAccountListRows(newAccountListRows);
-      })
-      .catch(error => {
-        console.error(error);
-        setAccountListRows(accountListRows);
-      });
-    // We need to sort the account list and fetch account info only on the component mount
+    );
+    setAccountListRows(sortedAccountListRows);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [accountsInfoList]);
 
   return (
     <PageContainer>
@@ -166,6 +145,11 @@ export function AccountListPage() {
                   >
                     {account.name}
                   </Typography>
+                  {account?.infoStandardName && (
+                    <Typography type="bodyEllipsis">
+                      {account.infoStandardName}
+                    </Typography>
+                  )}
                   <HashContainer>
                     <Hash
                       value={account.publicKey}

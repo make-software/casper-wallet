@@ -19,7 +19,8 @@ export type TypographyType =
   | 'CSPRBold'
   | 'listSubtext'
   | 'formFieldStatus' // TODO: Temporary name. Make a better name
-  | 'fullHash';
+  | 'fullHash'
+  | 'bodyEllipsis';
 
 export interface BodyStylesProps extends BaseProps {
   color?: ContentColor;
@@ -122,6 +123,15 @@ const StyledTypography = styled('span').withConfig({
       };
     case 'body':
       return bodyBase;
+
+    case 'bodyEllipsis':
+      return {
+        ...bodyBase,
+        width: '100%',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis'
+      };
 
     case 'bodySemiBold':
       return {

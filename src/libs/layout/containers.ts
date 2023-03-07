@@ -224,3 +224,16 @@ export const IllustrationContainer = styled.div`
 export const OnboardingIllustrationContainer = styled(IllustrationContainer)`
   margin-top: 40px;
 `;
+
+export const AccountNameWithHashListItemContainer = styled(
+  LeftAlignedFlexColumn
+)`
+  width: 100%;
+  max-width: 284px;
+`;
+
+export const AccountListItemContainer = styled(
+  AccountNameWithHashListItemContainer
+)`
+  max-width: 200px;
+`;
