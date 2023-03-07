@@ -54,7 +54,10 @@ export function getDeployPayment(deploy: CasperDeploy): string {
 
 export function getEntryPoint(deploy: CasperDeploy): string | undefined {
   const storedContractObj = getStoredContractObjFromSession(deploy.session);
-  return storedContractObj?.entryPoint;
+
+  return storedContractObj instanceof DeployUtil.ModuleBytes
+    ? undefined
+    : storedContractObj?.entryPoint;
 }
 
 export function getDeployArgs(deploy: CasperDeploy): ArgDict {
@@ -131,6 +134,7 @@ function getStoredContractObjFromSession(
   | DeployUtil.StoredContractByName
   | DeployUtil.StoredVersionedContractByHash
   | DeployUtil.StoredVersionedContractByName
+  | DeployUtil.ModuleBytes
   | undefined {
   if (session.storedContractByHash) {
     return session.storedContractByHash;
@@ -146,6 +150,10 @@ function getStoredContractObjFromSession(
 
   if (session.storedVersionedContractByName) {
     return session.storedVersionedContractByName;
+  }
+
+  if (session.moduleBytes) {
+    return session.moduleBytes;
   }
 
   return undefined;
@@ -308,19 +316,25 @@ export const isKeyOfTimestampValue = (key: string) => {
 export const getDeployParsedValue = (value: CLValue): ParsedDeployArgValue => {
   const parsedValue = parseDeployArgValue(value);
   let type: ParsedValueType.Json | undefined;
+  let stringValue: string;
 
-  const stringValue = Array.isArray(parsedValue)
-    ? parsedValue
-        .reduce((acc: string[], cur) => {
-          if (cur.type === ParsedValueType.Json) {
-            type = cur.type;
-          }
-          acc.push(cur.parsedValue);
+  if (Array.isArray(parsedValue)) {
+    stringValue = parsedValue
+      .reduce((acc: string[], cur) => {
+        if (cur.type === ParsedValueType.Json) {
+          type = cur.type;
+        }
+        acc.push(cur.parsedValue);
 
-          return acc;
-        }, [])
-        .join(', ')
-    : parsedValue.parsedValue;
+        return acc;
+      }, [])
+      .join(', ');
+  } else if (parsedValue?.type === ParsedValueType.Json) {
+    type = ParsedValueType.Json;
+    stringValue = parsedValue.parsedValue;
+  } else {
+    stringValue = parsedValue.parsedValue;
+  }
 
   return { parsedValue: stringValue, type };
 };
