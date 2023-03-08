@@ -1,43 +1,26 @@
 import 'mac-scrollbar/dist/mac-scrollbar.css';
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { render } from 'react-dom';
 import { Provider as ReduxProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
-import { isActionOf } from 'typesafe-actions';
-import browser from 'webextension-polyfill';
 
 import { GlobalStyle, themeConfig } from '@libs/ui';
 import { ErrorBoundary } from '@src/libs/layout/error';
-import {
-  BackgroundEvent,
-  backgroundEvent
-} from '@background/background-events';
 
 import { createMainStoreReplica, PopupState } from '@background/redux/utils';
 import { popupWindowInit } from '@background/redux/windowManagement/actions';
 
 import { AppRouter } from './app-router';
+import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
 
-  // setup listener to state events
-  useEffect(() => {
-    function handleStateUpdate(message: BackgroundEvent) {
-      if (isActionOf(backgroundEvent.popupStateUpdated)(message)) {
-        setState(message.payload);
-      }
-    }
-    browser.runtime.onMessage.addListener(handleStateUpdate);
-    browser.runtime.sendMessage(popupWindowInit()).catch(err => {
-      console.error('popup window init');
-    });
-
-    return () => {
-      browser.runtime.onMessage.removeListener(handleStateUpdate);
-    };
-  }, []);
+  useSubscribeToRedux({
+    windowInitAction: popupWindowInit,
+    setPopupState: setState
+  });
 
   if (state == null) {
     return null;
