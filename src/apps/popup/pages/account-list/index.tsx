@@ -35,7 +35,7 @@ import {
   selectVaultAccounts,
   selectVaultActiveAccountName
 } from '@background/redux/vault/selectors';
-import { selectActiveOrigin } from '@background/redux/session/selectors';
+import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import { AccountListRows } from '@background/redux/vault/types';
 import { getBlockExplorerAccountUrl } from '@src/constants';
 

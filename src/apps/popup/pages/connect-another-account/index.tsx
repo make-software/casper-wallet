@@ -30,7 +30,7 @@ import {
 } from '@src/background/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
-import { selectActiveOrigin } from '@src/background/redux/session/selectors';
+import { selectActiveOrigin } from '@src/background/redux/active-origin/selectors';
 
 const CentredFlexRow = styled.div`
   display: flex;
