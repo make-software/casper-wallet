@@ -83,8 +83,11 @@ import {
 } from './redux/login-retry-count/actions';
 import { emitSdkEventToAllActiveTabs } from './emit-sdk-event-to-all-active-tabs';
 import { loginRetryLockoutTimeSet } from './redux/login-retry-lockout-time/actions';
-import { timeoutDurationSettingChanged } from './redux/timeout-duration-setting/actions';
 import { lastActivityTimeRefreshed } from './redux/last-activity-time/actions';
+import {
+  activeNetworkSettingChanged,
+  activeTimeoutDurationSettingChanged
+} from './redux/settings/actions';
 import { activeOriginChanged } from './redux/active-origin/actions';
 
 // setup default onboarding action
@@ -334,7 +337,8 @@ browser.runtime.onMessage.addListener(
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeAccountChanged):
-          case getType(timeoutDurationSettingChanged):
+          case getType(activeTimeoutDurationSettingChanged):
+          case getType(activeNetworkSettingChanged):
           case getType(lastActivityTimeRefreshed):
           case getType(accountsConnected):
           case getType(accountDisconnected):
@@ -360,8 +364,11 @@ browser.runtime.onMessage.addListener(
           case getType(serviceMessage.fetchBalanceRequest): {
             try {
               const [balance, rate] = await Promise.all([
-                fetchAccountBalance({ publicKey: action.payload.publicKey }),
-                fetchCurrencyRate()
+                fetchAccountBalance({
+                  publicKey: action.payload.publicKey,
+                  casperApiUrl: action.payload.casperApiUrl
+                }),
+                fetchCurrencyRate({ casperApiUrl: action.payload.casperApiUrl })
               ]);
 
               return sendResponse(
@@ -380,7 +387,8 @@ browser.runtime.onMessage.addListener(
           case getType(serviceMessage.fetchAccountInfoRequest): {
             try {
               const { data: accountInfo } = await fetchAccountInfo({
-                accountHash: action.payload.accountHash
+                accountHash: action.payload.accountHash,
+                casperApiUrl: action.payload.casperApiUrl
               });
 
               return sendResponse(
@@ -396,7 +404,8 @@ browser.runtime.onMessage.addListener(
           case getType(serviceMessage.fetchAccountListInfoRequest): {
             try {
               const { data: accountsInfoList } = await fetchAccountListInfo({
-                accountsHash: action.payload.accountsHash
+                accountsHash: action.payload.accountsHash,
+                casperApiUrl: action.payload.casperApiUrl
               });
 
               return sendResponse(

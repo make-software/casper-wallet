@@ -58,10 +58,10 @@ import {
   startBackground,
   unlockVault
 } from './actions';
-import { timeoutDurationSettingChanged } from '../timeout-duration-setting/actions';
-import { selectTimeoutDurationSetting } from '../timeout-duration-setting/selectors';
 import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
 import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
+import { activeTimeoutDurationSettingChanged } from '../settings/actions';
+import { selectTimeoutDurationSetting } from '../settings/selectors';
 
 export function* vaultSagas() {
   yield takeLatest(getType(lockVault), lockVaultSaga);
@@ -74,7 +74,7 @@ export function* vaultSagas() {
     [
       getType(startBackground),
       getType(lastActivityTimeRefreshed),
-      getType(timeoutDurationSettingChanged)
+      getType(activeTimeoutDurationSettingChanged)
     ],
     timeoutCounterSaga
   );
@@ -88,7 +88,7 @@ export function* vaultSagas() {
       getType(accountDisconnected),
       getType(allAccountsDisconnected),
       getType(activeAccountChanged),
-      getType(timeoutDurationSettingChanged)
+      getType(activeTimeoutDurationSettingChanged)
     ],
     updateVaultCipher
   );

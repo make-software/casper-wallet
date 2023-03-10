@@ -8,8 +8,8 @@ import { reducer as deploys } from './deploys/reducer';
 import { reducer as windowManagement } from './windowManagement/reducer';
 import { reducer as session } from './session/reducer';
 import { reducer as loginRetryLockoutTime } from './login-retry-lockout-time/reducer';
-import { reducer as timeoutDurationSetting } from './timeout-duration-setting/reducer';
 import { reducer as lastActivityTime } from './last-activity-time/reducer';
+import { reducer as settings } from './settings/reducer';
 import { reducer as activeOrigin } from './active-origin/reducer';
 
 const rootReducer = combineReducers({
@@ -21,9 +21,9 @@ const rootReducer = combineReducers({
   windowManagement,
   session,
   loginRetryLockoutTime,
-  timeoutDurationSetting,
   lastActivityTime,
-  activeOrigin
+  activeOrigin,
+  settings
 });
 
 export default rootReducer;

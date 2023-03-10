@@ -2,7 +2,7 @@ import { serviceMessage } from '@background/service-message';
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import {
-  ACCOUNTS_INFO_URL,
+  getAccountsInfoUrl,
   getAccountInfoUrl,
   AccountInfo,
   AccountInfoResponse
@@ -14,14 +14,18 @@ import { DataWithPayload } from '@libs/services/types';
 import { FETCH_QUERY_OPTIONS } from '@src/constants';
 
 const accountInfoRequest = (
-  accountHash: string
+  accountHash: string,
+  casperApiUrl: string
 ): Promise<AccountInfoResponse<AccountInfo>> =>
-  fetch(getAccountInfoUrl({ accountHash })).then(toJson).catch(handleError);
+  fetch(getAccountInfoUrl({ accountHash, casperApiUrl }))
+    .then(toJson)
+    .catch(handleError);
 
 const accountListInfoRequest = (
-  accountsHash: string[]
+  accountsHash: string[],
+  casperApiUrl: string
 ): Promise<AccountInfoResponse<AccountInfo[]>> =>
-  fetch(ACCOUNTS_INFO_URL, {
+  fetch(getAccountsInfoUrl(casperApiUrl), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -31,35 +35,48 @@ const accountListInfoRequest = (
     .then(toJson)
     .catch(handleError);
 
-export const fetchAccountInfo = ({ accountHash }: { accountHash: string }) =>
+export const fetchAccountInfo = ({
+  accountHash,
+  casperApiUrl
+}: {
+  accountHash: string;
+  casperApiUrl: string;
+}) =>
   queryClient.fetchQuery(
-    ['accountInfoRequest', accountHash],
-    () => accountInfoRequest(accountHash),
+    ['accountInfoRequest', accountHash, casperApiUrl],
+    () => accountInfoRequest(accountHash, casperApiUrl),
     {
       staleTime: FETCH_QUERY_OPTIONS.apiCacheTime
     }
   );
 
 export const fetchAccountListInfo = ({
-  accountsHash
+  accountsHash,
+  casperApiUrl
 }: {
   accountsHash: string[];
+  casperApiUrl: string;
 }) =>
   queryClient.fetchQuery(
-    ['accountListInfoRequest', accountsHash],
-    () => accountListInfoRequest(accountsHash),
+    ['accountListInfoRequest', accountsHash, casperApiUrl],
+    () => accountListInfoRequest(accountsHash, casperApiUrl),
     {
       staleTime: FETCH_QUERY_OPTIONS.apiCacheTime
     }
   );
+
 export const dispatchFetchAccountInfoRequest = (
-  accountHash: string
+  accountHash: string,
+  casperApiUrl: string
 ): Promise<DataWithPayload<AccountInfo>> =>
-  dispatchToMainStore(serviceMessage.fetchAccountInfoRequest({ accountHash }));
+  dispatchToMainStore(
+    serviceMessage.fetchAccountInfoRequest({ accountHash, casperApiUrl })
+  );
 
 export const dispatchFetchAccountListInfo = (
-  accountsHash: string[]
+  accountsHash: string[],
+  casperApiUrl: string
 ): Promise<DataWithPayload<AccountInfo[]>> =>
   dispatchToMainStore(
-    serviceMessage.fetchAccountListInfoRequest({ accountsHash })
+    serviceMessage.fetchAccountListInfoRequest({ accountsHash, casperApiUrl })
   );
