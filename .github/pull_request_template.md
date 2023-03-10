@@ -1,15 +1,19 @@
-# Please review the following when creating a pull request
+_**Make sure to fill in all the below sections.**_
 
-- [ ] MANDATORY: Add a `#` link to a related ticket
+## Description
 
-Please fill here...
+// Provide a useful description of this PR, aimed at helping reviewers and contributors
 
-- [ ] MANDATORY: Provide a useful description of this PR, aimed at helping reviewers and contributors
+## Linked tickets
 
-Please fill here...
+// Add a `#XXX` link to a related ticket
 
-- [ ] If the PR adds any new text to the UI, make sure they are marked for translation
+## Checklist
 
-- [ ] Include a screenshot or recording if implementing significant UI changes
+- [ ] Make sure this PR title follows semantic release conventions: <https://semantic-release.gitbook.io/semantic-release/#commit-message-format>
+
+- [ ] If the PR adds any new text to the UI, make sure they are localized
+
+- [ ] Include a screenshot or recording if implementing significant UI or user flow change
 
 - [ ] When this PR affects architecture changes wait for review from Piotr before merging

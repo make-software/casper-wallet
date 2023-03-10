@@ -10,6 +10,7 @@ import * as session from './session/actions';
 import * as loginRetryLockoutTime from './login-retry-lockout-time/actions';
 import * as timeoutDurationSetting from './timeout-duration-setting/actions';
 import * as lastActivityTime from './last-activity-time/actions';
+import * as activeOrigin from './active-origin/actions';
 
 const reduxAction = {
   sagas,
@@ -22,7 +23,8 @@ const reduxAction = {
   session,
   loginRetryLockoutTime,
   timeoutDurationSetting,
-  lastActivityTime
+  lastActivityTime,
+  activeOrigin
 };
 
 export type ReduxAction = ActionType<typeof reduxAction>;

@@ -10,6 +10,7 @@ import { reducer as session } from './session/reducer';
 import { reducer as loginRetryLockoutTime } from './login-retry-lockout-time/reducer';
 import { reducer as timeoutDurationSetting } from './timeout-duration-setting/reducer';
 import { reducer as lastActivityTime } from './last-activity-time/reducer';
+import { reducer as activeOrigin } from './active-origin/reducer';
 
 const rootReducer = combineReducers({
   vaultCipher,
@@ -21,7 +22,8 @@ const rootReducer = combineReducers({
   session,
   loginRetryLockoutTime,
   timeoutDurationSetting,
-  lastActivityTime
+  lastActivityTime,
+  activeOrigin
 });
 
 export default rootReducer;

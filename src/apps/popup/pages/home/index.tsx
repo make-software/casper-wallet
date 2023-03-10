@@ -1,9 +1,10 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { RootState } from 'typesafe-actions';
+import { useSelector } from 'react-redux';
 import styled, { css } from 'styled-components';
+import { RootState } from 'typesafe-actions';
 
+import { HeaderSubmenuBarNavLink, LinkType } from '@libs/layout';
 import {
   CenteredFlexColumn,
   ContentContainer,
@@ -14,30 +15,27 @@ import {
   SpacingSize,
   TileContainer
 } from '@src/libs/layout/containers';
-import { LinkType, HeaderSubmenuBarNavLink } from '@libs/layout';
 
 import {
+  Avatar,
   Button,
   Hash,
-  HashVariant,
-  Typography,
-  Avatar,
-  SvgIcon,
-  Link,
   HashDisplayContext,
-  Tile
+  HashVariant,
+  Link,
+  SvgIcon,
+  Tile,
+  Typography
 } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { selectActiveOrigin } from '@src/background/redux/session/selectors';
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
-  selectIsActiveAccountConnectedWithOrigin,
-  selectConnectedAccountsWithOrigin,
-  selectVaultActiveAccount,
-  selectVaultCountOfAccounts
-} from '@src/background/redux/vault/selectors';
-import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
+  dispatchFetchAccountInfoRequest,
+  getAccountInfo,
+  getAccountInfoLogo
+} from '@libs/services/account-info';
 import {
   ActiveAccountBalance,
   dispatchFetchActiveAccountBalance
@@ -48,14 +46,16 @@ import {
   motesToCSPR,
   motesToCurrency
 } from '@libs/ui/utils/formatters';
-import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import {
-  getAccountInfoLogo,
-  dispatchFetchAccountInfoRequest,
-  getAccountInfo
-} from '@libs/services/account-info';
+import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import { getBlockExplorerAccountUrl } from '@src/constants';
 
+import {
+  selectActiveOrigin,
+  selectConnectedAccountsWithOrigin,
+  selectIsActiveAccountConnectedWithOrigin,
+  selectVaultActiveAccount,
+  selectVaultCountOfAccounts
+} from '@src/background/redux/root-selector';
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
 export const HomePageContentContainer = styled(ContentContainer)`

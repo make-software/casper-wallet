@@ -13,7 +13,3 @@ export const vaultUnlocked = createAction('VAULT_UNLOCKED', () => ({
 }))<{
   lastActivityTime: number;
 }>();
-
-export const activeOriginChanged = createAction('ACTIVE_ORIGIN_CHANGED')<
-  string | null
->();

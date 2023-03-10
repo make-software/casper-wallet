@@ -8,7 +8,7 @@ import {
 } from './sdk-method';
 import { sdkEvent, SdkEvent } from './sdk-event';
 import { getType } from 'typesafe-actions';
-import { activeOriginChanged } from '@src/background/redux/session/actions';
+import { activeOriginChanged } from 'src/background/redux/active-origin/actions';
 import { CasperWalletEventType } from './sdk-event-type';
 
 // Sync activeOrigin of active tab with store

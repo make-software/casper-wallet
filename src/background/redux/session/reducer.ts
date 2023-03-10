@@ -4,15 +4,13 @@ import { SessionState } from './types';
 import {
   sessionReseted,
   encryptionKeyHashCreated,
-  vaultUnlocked,
-  activeOriginChanged
+  vaultUnlocked
 } from './actions';
 type State = SessionState;
 
 const initialState: State = {
   encryptionKeyHash: null,
-  isLocked: true,
-  activeOrigin: null
+  isLocked: true
 };
 
 export const reducer = createReducer(initialState)
@@ -30,9 +28,4 @@ export const reducer = createReducer(initialState)
       ...state,
       encryptionKeyHash: action.payload.encryptionKeyHash
     })
-  )
-
-  .handleAction(activeOriginChanged, (state, { payload }) => ({
-    ...state,
-    activeOrigin: payload
-  }));
+  );

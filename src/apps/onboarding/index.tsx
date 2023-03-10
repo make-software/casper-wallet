@@ -1,10 +1,8 @@
 import '@libs/i18n/i18n';
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { render } from 'react-dom';
-import { isActionOf } from 'typesafe-actions';
 import { Provider as ReduxProvider } from 'react-redux';
-import browser from 'webextension-polyfill';
 import { ThemeProvider } from 'styled-components';
 
 import { ErrorBoundary } from '@src/libs/layout/error';
@@ -13,32 +11,17 @@ import { GlobalStyle, themeConfig } from '@libs/ui';
 
 import { AppRouter } from '@src/apps/onboarding/app-router';
 
-import {
-  backgroundEvent,
-  BackgroundEvent
-} from '@background/background-events';
 import { onboardingAppInit } from '@background/redux/windowManagement/actions';
 import { createMainStoreReplica, PopupState } from '@background/redux/utils';
+import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
 
-  // setup listener to state events
-  useEffect(() => {
-    function handleStateUpdate(message: BackgroundEvent) {
-      if (isActionOf(backgroundEvent.popupStateUpdated)(message)) {
-        setState(message.payload);
-      }
-    }
-    browser.runtime.onMessage.addListener(handleStateUpdate);
-    browser.runtime.sendMessage(onboardingAppInit()).catch(err => {
-      console.error('onboarding app init');
-    });
-
-    return () => {
-      browser.runtime.onMessage.removeListener(handleStateUpdate);
-    };
-  }, []);
+  useSubscribeToRedux({
+    windowInitAction: onboardingAppInit,
+    setPopupState: setState
+  });
 
   if (state == null) {
     return null;

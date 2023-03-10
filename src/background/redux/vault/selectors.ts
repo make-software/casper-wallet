@@ -3,7 +3,7 @@ import { RootState } from 'typesafe-actions';
 
 import { Account, VaultState } from '@src/background/redux/vault/types';
 import { SecretPhrase } from '@src/libs/crypto';
-import { selectActiveOrigin } from '../session/selectors';
+import { selectActiveOrigin } from '../active-origin/selectors';
 
 export const selectVault = (state: RootState): VaultState => state.vault;
 

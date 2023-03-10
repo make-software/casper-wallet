@@ -25,7 +25,7 @@ import {
   selectUnconnectedAccountsWithOrigin,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
-import { selectActiveOrigin } from '@src/background/redux/session/selectors';
+import { selectActiveOrigin } from '@src/background/redux/active-origin/selectors';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import { closeCurrentWindow } from '@src/background/close-current-window';
 import { ConnectionStatusBadge } from '@src/apps/popup/pages/home/components/connection-status-badge';

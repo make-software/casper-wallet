@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 import { AccountListRows } from '@background/redux/vault/types';
 import { closeCurrentWindow } from '@background/close-current-window';
-import { selectActiveOrigin } from '@background/redux/session/selectors';
+import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 
 import { Button, Hash, HashVariant, List, Typography } from '@libs/ui';
 import { LeftAlignedFlexColumn } from '@libs/layout';

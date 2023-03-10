@@ -21,6 +21,7 @@ import { DeploysState } from './deploys/types';
 import { VaultState } from './vault/types';
 import { SessionState } from './session/types';
 import { LastActivityTimeState } from './last-activity-time/reducer';
+import { ActiveOriginState } from './active-origin/types';
 
 declare global {
   interface Window {
@@ -41,15 +42,16 @@ export const composeEnhancers =
 export const VAULT_CIPHER_KEY = 'zazXu8w9GyCtxZ';
 export const KEYS_KEY = '2yNVAEQJB5rxMg';
 export const LOGIN_RETRY_KEY = '7ZVdMbk9yD8WGZ';
-export const LOGIN_VAULT_TIMER_KEY = 'p6nnYiaxcsaNG3';
+export const LOGIN_RETRY_LOCKOUT_KEY = 'p6nnYiaxcsaNG3';
 export const TIMEOUT_DURATION_SETTING = 'f53Co85Fgo2s6C';
 export const LAST_ACTIVITY_TIME = 'j8d1dusn76EdD';
+export const ACTIVE_ORIGIN = 'j8d1dusn76EdD';
 
 type StorageState = {
   [VAULT_CIPHER_KEY]: string;
   [KEYS_KEY]: KeysState;
   [LOGIN_RETRY_KEY]: LoginRetryCountState;
-  [LOGIN_VAULT_TIMER_KEY]: LoginRetryLockoutTimeState;
+  [LOGIN_RETRY_LOCKOUT_KEY]: LoginRetryLockoutTimeState;
   [TIMEOUT_DURATION_SETTING]: TimeoutDurationSetting;
   [LAST_ACTIVITY_TIME]: number;
 };
@@ -63,14 +65,14 @@ export async function getExistingMainStoreSingletonOrInit() {
     [VAULT_CIPHER_KEY]: vaultCipher,
     [KEYS_KEY]: keys,
     [LOGIN_RETRY_KEY]: loginRetryCount,
-    [LOGIN_VAULT_TIMER_KEY]: loginRetryLockoutTime,
+    [LOGIN_RETRY_LOCKOUT_KEY]: loginRetryLockoutTime,
     [TIMEOUT_DURATION_SETTING]: timeoutDurationSetting,
     [LAST_ACTIVITY_TIME]: lastActivityTime
   } = (await browser.storage.local.get([
     VAULT_CIPHER_KEY,
     KEYS_KEY,
     LOGIN_RETRY_KEY,
-    LOGIN_VAULT_TIMER_KEY,
+    LOGIN_RETRY_LOCKOUT_KEY,
     TIMEOUT_DURATION_SETTING,
     LAST_ACTIVITY_TIME
   ])) as StorageState;
@@ -113,7 +115,7 @@ export async function getExistingMainStoreSingletonOrInit() {
           [VAULT_CIPHER_KEY]: vaultCipher,
           [KEYS_KEY]: keys,
           [LOGIN_RETRY_KEY]: loginRetryCount,
-          [LOGIN_VAULT_TIMER_KEY]: loginRetryLockoutTime,
+          [LOGIN_RETRY_LOCKOUT_KEY]: loginRetryLockoutTime,
           [TIMEOUT_DURATION_SETTING]: timeoutDurationSetting,
           [LAST_ACTIVITY_TIME]: lastActivityTime
         })
@@ -139,6 +141,7 @@ export type PopupState = {
   loginRetryLockoutTime: LoginRetryLockoutTimeState;
   timeoutDurationSetting: TimeoutDurationSettingState;
   lastActivityTime: LastActivityTimeState;
+  activeOrigin: ActiveOriginState;
 };
 
 // These state keys will be passed to popups
@@ -154,7 +157,8 @@ export const selectPopupState = (state: RootState): PopupState => {
     vaultCipher: state.vaultCipher,
     loginRetryLockoutTime: state.loginRetryLockoutTime,
     timeoutDurationSetting: state.timeoutDurationSetting,
-    lastActivityTime: state.lastActivityTime
+    lastActivityTime: state.lastActivityTime,
+    activeOrigin: state.activeOrigin
   };
 };
 
