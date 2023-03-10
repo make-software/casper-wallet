@@ -1,12 +1,13 @@
-import { getCasperApiUrl } from '@src/constants';
-
 interface GetAccountBalanceUrl {
   publicKey: string;
+  casperApiUrl: string;
 }
 
-export const CURRENCY_RATE_URL = `${getCasperApiUrl()}/rates/1/amount`;
+export const getCurrencyRateUrl = (casperApiUrl: string) =>
+  `${casperApiUrl}/rates/1/amount`;
 
 export const getAccountBalanceUrl = ({
-  publicKey
+  publicKey,
+  casperApiUrl
 }: GetAccountBalanceUrl): string =>
-  `${getCasperApiUrl()}/accounts/${publicKey}/balance`;
+  `${casperApiUrl}/accounts/${publicKey}/balance`;

@@ -7,7 +7,7 @@ type Meta = void;
 
 export const serviceMessage = {
   fetchBalanceRequest: createAction('FETCH_ACCOUNT_BALANCE')<
-    { publicKey: string },
+    { publicKey: string; casperApiUrl: string },
     Meta
   >(),
   fetchBalanceResponse: createAction('FETCH_ACCOUNT_BALANCE_RESPONSE')<
@@ -15,7 +15,7 @@ export const serviceMessage = {
     Meta
   >(),
   fetchAccountInfoRequest: createAction('FETCH_ACCOUNT_INFO')<
-    { accountHash: string },
+    { accountHash: string; casperApiUrl: string },
     Meta
   >(),
   fetchAccountInfoResponse: createAction('FETCH_ACCOUNT_INFO_RESPONSE')<
@@ -23,7 +23,7 @@ export const serviceMessage = {
     Meta
   >(),
   fetchAccountListInfoRequest: createAction('FETCH_ACCOUNT_LIST_INFO')<
-    { accountsHash: string[] },
+    { accountsHash: string[]; casperApiUrl: string },
     Meta
   >(),
   fetchAccountListInfoResponse: createAction(

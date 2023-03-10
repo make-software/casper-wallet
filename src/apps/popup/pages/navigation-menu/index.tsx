@@ -6,7 +6,6 @@ import styled from 'styled-components';
 
 import { WindowApp, useWindowManager } from '@src/hooks';
 
-import { TimeoutDurationSetting } from '@src/apps/popup/constants';
 import { RouterPath, useNavigationMenu } from '@src/apps/popup/router';
 
 import {
@@ -21,7 +20,8 @@ import {
   selectCountOfConnectedSites,
   selectVaultHasImportedAccount
 } from '@src/background/redux/vault/selectors';
-import { selectTimeoutDurationSetting } from '@src/background/redux/timeout-duration-setting/selectors';
+import { selectTimeoutDurationSetting } from '@src/background/redux/settings/selectors';
+import { TimeoutDurationSetting } from '@src/background/redux/settings/types';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;

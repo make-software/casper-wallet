@@ -13,14 +13,13 @@ import { startBackground } from './sagas/actions';
 import { KeysState } from './keys/types';
 import { LoginRetryCountState } from './login-retry-count/reducer';
 import { LoginRetryLockoutTimeState } from './login-retry-lockout-time/types';
-import { TimeoutDurationSetting } from '@src/apps/popup/constants';
-import { TimeoutDurationSettingState } from './timeout-duration-setting/reducer';
 import { VaultCipherState } from './vault-cipher/types';
 import { WindowManagementState } from './windowManagement/types';
 import { DeploysState } from './deploys/types';
 import { VaultState } from './vault/types';
 import { SessionState } from './session/types';
 import { LastActivityTimeState } from './last-activity-time/reducer';
+import { SettingsState } from './settings/types';
 
 declare global {
   interface Window {
@@ -42,16 +41,16 @@ export const VAULT_CIPHER_KEY = 'zazXu8w9GyCtxZ';
 export const KEYS_KEY = '2yNVAEQJB5rxMg';
 export const LOGIN_RETRY_KEY = '7ZVdMbk9yD8WGZ';
 export const LOGIN_VAULT_TIMER_KEY = 'p6nnYiaxcsaNG3';
-export const TIMEOUT_DURATION_SETTING = 'f53Co85Fgo2s6C';
 export const LAST_ACTIVITY_TIME = 'j8d1dusn76EdD';
+export const VAULT_SETTINGS = 'Nmxd8BZh93MHus';
 
 type StorageState = {
   [VAULT_CIPHER_KEY]: string;
   [KEYS_KEY]: KeysState;
   [LOGIN_RETRY_KEY]: LoginRetryCountState;
   [LOGIN_VAULT_TIMER_KEY]: LoginRetryLockoutTimeState;
-  [TIMEOUT_DURATION_SETTING]: TimeoutDurationSetting;
   [LAST_ACTIVITY_TIME]: number;
+  [VAULT_SETTINGS]: SettingsState;
 };
 
 // this needs to be private
@@ -64,15 +63,15 @@ export async function getExistingMainStoreSingletonOrInit() {
     [KEYS_KEY]: keys,
     [LOGIN_RETRY_KEY]: loginRetryCount,
     [LOGIN_VAULT_TIMER_KEY]: loginRetryLockoutTime,
-    [TIMEOUT_DURATION_SETTING]: timeoutDurationSetting,
-    [LAST_ACTIVITY_TIME]: lastActivityTime
+    [LAST_ACTIVITY_TIME]: lastActivityTime,
+    [VAULT_SETTINGS]: settings
   } = (await browser.storage.local.get([
     VAULT_CIPHER_KEY,
     KEYS_KEY,
     LOGIN_RETRY_KEY,
     LOGIN_VAULT_TIMER_KEY,
-    TIMEOUT_DURATION_SETTING,
-    LAST_ACTIVITY_TIME
+    LAST_ACTIVITY_TIME,
+    VAULT_SETTINGS
   ])) as StorageState;
 
   if (storeSingleton == null) {
@@ -82,8 +81,8 @@ export async function getExistingMainStoreSingletonOrInit() {
       keys,
       loginRetryCount,
       loginRetryLockoutTime,
-      timeoutDurationSetting,
-      lastActivityTime
+      lastActivityTime,
+      settings
     });
     // send start action
     storeSingleton.dispatch(startBackground());
@@ -105,8 +104,8 @@ export async function getExistingMainStoreSingletonOrInit() {
         keys,
         loginRetryCount,
         loginRetryLockoutTime,
-        timeoutDurationSetting,
-        lastActivityTime
+        lastActivityTime,
+        settings
       } = state;
       browser.storage.local
         .set({
@@ -114,8 +113,8 @@ export async function getExistingMainStoreSingletonOrInit() {
           [KEYS_KEY]: keys,
           [LOGIN_RETRY_KEY]: loginRetryCount,
           [LOGIN_VAULT_TIMER_KEY]: loginRetryLockoutTime,
-          [TIMEOUT_DURATION_SETTING]: timeoutDurationSetting,
-          [LAST_ACTIVITY_TIME]: lastActivityTime
+          [LAST_ACTIVITY_TIME]: lastActivityTime,
+          [VAULT_SETTINGS]: settings
         })
         .catch(e => {
           console.error('Persist encrypted vault failed: ', e);
@@ -137,8 +136,8 @@ export type PopupState = {
   windowManagement: WindowManagementState;
   vaultCipher: VaultCipherState;
   loginRetryLockoutTime: LoginRetryLockoutTimeState;
-  timeoutDurationSetting: TimeoutDurationSettingState;
   lastActivityTime: LastActivityTimeState;
+  settings: SettingsState;
 };
 
 // These state keys will be passed to popups
@@ -153,8 +152,8 @@ export const selectPopupState = (state: RootState): PopupState => {
     windowManagement: state.windowManagement,
     vaultCipher: state.vaultCipher,
     loginRetryLockoutTime: state.loginRetryLockoutTime,
-    timeoutDurationSetting: state.timeoutDurationSetting,
-    lastActivityTime: state.lastActivityTime
+    lastActivityTime: state.lastActivityTime,
+    settings: state.settings
   };
 };
 

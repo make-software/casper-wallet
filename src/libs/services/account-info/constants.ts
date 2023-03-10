@@ -1,9 +1,10 @@
-import { getCasperApiUrl } from '@src/constants';
-
 export const getAccountInfoUrl = ({
-  accountHash
+  accountHash,
+  casperApiUrl
 }: {
   accountHash: string;
-}): string => `${getCasperApiUrl()}/accounts-info/${accountHash}`;
+  casperApiUrl: string;
+}): string => `${casperApiUrl}/accounts-info/${accountHash}`;
 
-export const ACCOUNTS_INFO_URL = `${getCasperApiUrl()}/accounts-info`;
+export const getAccountsInfoUrl = (casperApiUrl: string) =>
+  `${casperApiUrl}/accounts-info`;

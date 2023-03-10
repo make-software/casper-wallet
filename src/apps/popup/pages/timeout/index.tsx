@@ -10,10 +10,10 @@ import {
   SpacingSize
 } from '@src/libs/layout/containers';
 
-import { TimeoutDurationSetting } from '@popup/constants';
-import { dispatchToMainStore } from '../../../../background/redux/utils';
-import { selectTimeoutDurationSetting } from '@src/background/redux/timeout-duration-setting/selectors';
-import { timeoutDurationSettingChanged } from '@src/background/redux/timeout-duration-setting/actions';
+import { TimeoutDurationSetting } from '@src/background/redux/settings/types';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import { selectTimeoutDurationSetting } from '@src/background/redux/settings/selectors';
+import { activeTimeoutDurationSettingChanged } from '@src/background/redux/settings/actions';
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();
@@ -63,7 +63,7 @@ export function TimeoutPageContent() {
             key={menuItem.id}
             onClick={() => {
               dispatchToMainStore(
-                timeoutDurationSettingChanged(
+                activeTimeoutDurationSettingChanged(
                   TimeoutDurationSetting[menuItem.id]
                 )
               );

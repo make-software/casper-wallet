@@ -38,6 +38,7 @@ import {
 import { selectActiveOrigin } from '@background/redux/session/selectors';
 import { AccountListRows } from '@background/redux/vault/types';
 import { getBlockExplorerAccountUrl } from '@src/constants';
+import { selectCasperUrlsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
 
 import { Popover } from './components/popover';
 
@@ -95,6 +96,9 @@ export function AccountListPage() {
   const isAnyAccountConnected = useSelector(
     selectIsAnyAccountConnectedWithOrigin
   );
+  const { casperLiveUrl, casperApiUrl } = useSelector(
+    selectCasperUrlsBaseOnActiveNetworkSetting
+  );
 
   const connectedAccountNames = useSelector(
     selectConnectedAccountNamesWithOrigin
@@ -113,7 +117,7 @@ export function AccountListPage() {
 
     const accountsHash = accountListRows.map(account => account.accountHash);
 
-    dispatchFetchAccountListInfo(accountsHash)
+    dispatchFetchAccountListInfo(accountsHash, casperApiUrl)
       .then(({ payload: accountInfoList }) => {
         const newAccountListRows = [...accountListRows];
 
@@ -258,7 +262,10 @@ export function AccountListPage() {
                       target="_blank"
                       variant="contentBlue"
                       title={t('View account in CSPR.live')}
-                      href={getBlockExplorerAccountUrl(account.publicKey)}
+                      href={getBlockExplorerAccountUrl(
+                        casperLiveUrl,
+                        account.publicKey
+                      )}
                     >
                       <SvgIcon
                         src="assets/icons/external-link.svg"
