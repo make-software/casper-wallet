@@ -22,6 +22,8 @@ import {
 } from '@src/background/redux/vault/selectors';
 import { selectTimeoutDurationSetting } from '@src/background/redux/settings/selectors';
 import { TimeoutDurationSetting } from '@src/background/redux/settings/types';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import { lockVault } from '@src/background/redux/sagas/actions';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;
@@ -67,6 +69,20 @@ export function NavigationMenuPageContent() {
 
   const menuGroups: MenuGroup[] = useMemo(
     () => [
+      {
+        headerLabel: '',
+        items: [
+          {
+            id: 1,
+            title: t('Lock wallet'),
+            iconPath: 'assets/icons/lock.svg',
+            disabled: false,
+            handleOnClick: () => {
+              dispatchToMainStore(lockVault());
+            }
+          }
+        ]
+      },
       {
         headerLabel: t('Account'),
         items: [
