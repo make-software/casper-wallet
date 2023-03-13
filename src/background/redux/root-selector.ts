@@ -5,7 +5,6 @@ export * from './last-activity-time/selectors';
 export * from './login-retry-count/selectors';
 export * from './login-retry-lockout-time/selectors';
 export * from './session/selectors';
-export * from './timeout-duration-setting/selectors';
 export * from './vault/selectors';
 export * from './vault-cipher/selectors';
 export * from './windowManagement/selectors';
