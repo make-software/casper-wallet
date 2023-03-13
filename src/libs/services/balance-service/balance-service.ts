@@ -42,12 +42,9 @@ export const accountBalanceRequest = (
 };
 
 export const dispatchFetchActiveAccountBalance = (
-  publicKey = '',
-  casperApiUrl: string
+  publicKey = ''
 ): Promise<DataWithPayload<FetchBalanceResponse>> =>
-  dispatchToMainStore(
-    serviceMessage.fetchBalanceRequest({ publicKey, casperApiUrl })
-  );
+  dispatchToMainStore(serviceMessage.fetchBalanceRequest({ publicKey }));
 
 export const fetchAccountBalance = ({
   publicKey,

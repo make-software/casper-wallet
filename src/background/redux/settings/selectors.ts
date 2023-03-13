@@ -1,8 +1,7 @@
 import { RootState } from 'typesafe-actions';
 import { createSelector } from 'reselect';
 
-import { Network } from '@background/redux/settings/types';
-import { CasperApiUrl, CasperLiveUrl } from '@src/constants';
+import { CasperApiUrl, CasperLiveUrl, NetworkSetting } from '@src/constants';
 
 export const selectTimeoutDurationSetting = (state: RootState) =>
   state.settings.activeTimeoutDuration;
@@ -13,16 +12,19 @@ export const selectActiveNetworkSetting = (state: RootState) =>
 export const selectCasperUrlsBaseOnActiveNetworkSetting = createSelector(
   selectActiveNetworkSetting,
   activeNetwork => {
-    if (activeNetwork === Network.Mainnet) {
-      return {
-        casperLiveUrl: CasperLiveUrl.MainnetUrl,
-        casperApiUrl: CasperApiUrl.MainnetUrl
-      };
-    } else {
-      return {
-        casperLiveUrl: CasperLiveUrl.TestnetUrl,
-        casperApiUrl: CasperApiUrl.TestnetUrl
-      };
+    switch (activeNetwork) {
+      case NetworkSetting.Mainnet:
+        return {
+          casperLiveUrl: CasperLiveUrl.MainnetUrl,
+          casperApiUrl: CasperApiUrl.MainnetUrl
+        };
+      case NetworkSetting.Testnet:
+        return {
+          casperLiveUrl: CasperLiveUrl.TestnetUrl,
+          casperApiUrl: CasperApiUrl.TestnetUrl
+        };
+      default:
+        throw new Error(`Unknown network: ${activeNetwork}`);
     }
   }
 );

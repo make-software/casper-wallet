@@ -1,9 +1,7 @@
 import { createAction } from 'typesafe-actions';
 
-import {
-  Network,
-  TimeoutDurationSetting
-} from '@background/redux/settings/types';
+import { TimeoutDurationSetting } from '@popup/constants';
+import { NetworkSetting } from '@src/constants';
 
 export const activeTimeoutDurationSettingChanged = createAction(
   'ACTIVE_TIMEOUT_DURATION_SETTING_CHANGED'
@@ -11,4 +9,4 @@ export const activeTimeoutDurationSettingChanged = createAction(
 
 export const activeNetworkSettingChanged = createAction(
   'ACTIVE_NETWORK_SETTING_CHANGED'
-)<Network>();
+)<NetworkSetting>();

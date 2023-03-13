@@ -19,3 +19,8 @@ export enum CasperApiUrl {
   MainnetUrl = 'https://event-store-api-clarity-mainnet.make.services',
   TestnetUrl = 'https://event-store-api-clarity-testnet.make.services'
 }
+
+export enum NetworkSetting {
+  'Mainnet' = 'Mainnet',
+  'Testnet' = 'Testnet'
+}
