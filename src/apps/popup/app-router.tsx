@@ -65,7 +65,11 @@ function AppRoutes() {
           element={
             <PopupLayout
               renderHeader={() => (
-                <PopupHeader withConnectionStatus withMenu withLock />
+                <PopupHeader
+                  withConnectionStatus
+                  withMenu
+                  withNetworkSwitcher
+                />
               )}
               renderContent={() => <NavigationMenuPageContent />}
             />
@@ -83,7 +87,7 @@ function AppRoutes() {
           <PopupLayout
             renderHeader={() => (
               <PopupHeader
-                withLock
+                withNetworkSwitcher
                 withMenu
                 withConnectionStatus
                 renderSubmenuBarItems={() => (
@@ -101,7 +105,7 @@ function AppRoutes() {
           <PopupLayout
             renderHeader={() => (
               <PopupHeader
-                withLock
+                withNetworkSwitcher
                 withMenu
                 withConnectionStatus
                 renderSubmenuBarItems={() => (
@@ -124,7 +128,7 @@ function AppRoutes() {
           <PopupLayout
             renderHeader={() => (
               <PopupHeader
-                withLock
+                withNetworkSwitcher
                 withMenu
                 withConnectionStatus
                 renderSubmenuBarItems={() => (
@@ -142,7 +146,7 @@ function AppRoutes() {
           <PopupLayout
             renderHeader={() => (
               <PopupHeader
-                withLock
+                withNetworkSwitcher
                 withMenu
                 withConnectionStatus
                 renderSubmenuBarItems={() => (
@@ -160,7 +164,7 @@ function AppRoutes() {
           <PopupLayout
             renderHeader={() => (
               <PopupHeader
-                withLock
+                withNetworkSwitcher
                 withMenu
                 withConnectionStatus
                 renderSubmenuBarItems={() => (
@@ -177,7 +181,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader withLock withMenu withConnectionStatus />
+              <PopupHeader withNetworkSwitcher withMenu withConnectionStatus />
             )}
             renderContent={() => <NoConnectedAccountPageContent />}
           />
@@ -190,7 +194,7 @@ function AppRoutes() {
             renderHeader={() => (
               <PopupHeader
                 withMenu
-                withLock
+                withNetworkSwitcher
                 withConnectionStatus
                 renderSubmenuBarItems={() => (
                   <HeaderSubmenuBarNavLink linkType="back" />
@@ -207,7 +211,7 @@ function AppRoutes() {
           <PopupLayout
             renderHeader={() => (
               <PopupHeader
-                withLock
+                withNetworkSwitcher
                 withMenu
                 withConnectionStatus
                 renderSubmenuBarItems={() => (
@@ -225,7 +229,7 @@ function AppRoutes() {
           <PopupLayout
             renderHeader={() => (
               <PopupHeader
-                withLock
+                withNetworkSwitcher
                 withMenu
                 withConnectionStatus
                 renderSubmenuBarItems={() => (

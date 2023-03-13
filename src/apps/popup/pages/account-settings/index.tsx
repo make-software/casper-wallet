@@ -42,7 +42,7 @@ export const AccountSettingsPage = () => {
     <PopupLayout
       renderHeader={() => (
         <PopupHeader
-          withLock
+          withNetworkSwitcher
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={() => (

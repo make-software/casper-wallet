@@ -209,7 +209,7 @@ export function AccountListPage() {
                         }}
                       >
                         <SvgIcon
-                          src="assets/icons/link.svg"
+                          src="assets/icons/unlink.svg"
                           marginRight="medium"
                           color="contentTertiary"
                         />

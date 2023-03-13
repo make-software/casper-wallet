@@ -44,7 +44,7 @@ export const LOGIN_RETRY_KEY = '7ZVdMbk9yD8WGZ';
 export const LOGIN_RETRY_LOCKOUT_KEY = 'p6nnYiaxcsaNG3';
 export const LAST_ACTIVITY_TIME = 'j8d1dusn76EdD';
 export const ACTIVE_ORIGIN = 'j8d1dusn76EdD';
-export const VAULT_SETTINGS = 'Nmxd8BZh93MHus';
+export const VAULT_SETTINGS = 'Nmxd8BZh93MHua';
 
 type StorageState = {
   [VAULT_CIPHER_KEY]: string;

@@ -24,14 +24,14 @@ const SubmenuBarContainer = styled(AlignedSpaceBetweenFlexRow)`
 `;
 
 interface HeaderProps {
-  withLock?: boolean;
+  withNetworkSwitcher?: boolean;
   withMenu?: boolean;
   withConnectionStatus?: boolean;
   renderSubmenuBarItems?: () => JSX.Element;
 }
 
 export function PopupHeader({
-  withLock,
+  withNetworkSwitcher,
   withMenu,
   withConnectionStatus,
   renderSubmenuBarItems
@@ -46,8 +46,11 @@ export function PopupHeader({
           {withConnectionStatus && <HeaderConnectionStatus />}
         </LogoAndConnectionStatusContainer>
 
-        {(withMenu || withLock) && (
-          <HeaderActions withMenu={withMenu} withLock={withLock} />
+        {(withMenu || withNetworkSwitcher) && (
+          <HeaderActions
+            withMenu={withMenu}
+            withNetworkSwitcher={withNetworkSwitcher}
+          />
         )}
       </HeaderContainer>
       {renderSubmenuBarItems && (
