@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { FlexRow } from '@src/libs/layout';
 import { BaseProps, WordTag } from '@src/libs/ui';
 import { SecretPhrase } from '@src/libs/crypto';
+
+import { getWordsIndexListWithExtraIndexForPicker } from './utils';
 
 const WordPickerContainer = styled(FlexRow)`
   flex-wrap: wrap;
@@ -30,9 +32,18 @@ export function WordPicker({
   onHiddenWordClick,
   dataTestId
 }: WordPickerProps) {
+  const [wordsIndexList, setWordsIndexList] = useState<number[]>([]);
+
+  useEffect(() => {
+    const wordsIndexListWithExtraIndex =
+      getWordsIndexListWithExtraIndexForPicker(phrase, hiddenWordIndexes);
+
+    setWordsIndexList(wordsIndexListWithExtraIndex);
+  }, [hiddenWordIndexes, phrase]);
+
   return (
     <WordPickerContainer data-testid={dataTestId}>
-      {hiddenWordIndexes.map(wordIndex => (
+      {wordsIndexList.map(wordIndex => (
         <WordTag
           key={wordIndex}
           value={phrase[wordIndex]}
