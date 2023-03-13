@@ -122,12 +122,28 @@ describe('Onboarding UI: confirm secret phrase flow [happy path]', () => {
       By.xpath("//*[@data-testid='word-picker']")
     );
 
+    const wordList = await driver.findElement(
+      By.xpath("//*[@data-testid='word-list']")
+    );
+
     const hiddenWords = (await wordPicker.getText()).split('\n');
+
+    const partialPhrase = (await wordList.getText())
+      .split('\n')
+      .filter(word => isNaN(Number(word)));
+
+    const wordsWhichNotEnough = phrase.filter(
+      word => !partialPhrase.includes(word)
+    );
+
+    const wordsThatNeedToClick = hiddenWords.filter(word =>
+      wordsWhichNotEnough.includes(word)
+    );
 
     for (let i = 0; i < phrase.length; i++) {
       const word = phrase[i];
 
-      if (hiddenWords.includes(word)) {
+      if (wordsThatNeedToClick.includes(word)) {
         await wordPicker.findElement(By.xpath(`//*[text()='${word}']`)).click();
       }
     }
