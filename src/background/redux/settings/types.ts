@@ -1,6 +1,6 @@
 export enum Network {
-  'Mainnet' = 'mainnet',
-  'Testnet' = 'testnet'
+  'Mainnet' = 'Mainnet',
+  'Testnet' = 'Testnet'
 }
 
 export enum TimeoutDurationSetting {

@@ -58,7 +58,7 @@ export const BackupSecretPhrasePasswordPage = ({
       onSubmit={handleSubmit(onSubmit)}
       renderHeader={() => (
         <PopupHeader
-          withLock
+          withNetworkSwitcher
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={() => (

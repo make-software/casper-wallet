@@ -19,7 +19,7 @@ export function DownloadedSecretKeysPage() {
     <PopupLayout
       renderHeader={() => (
         <PopupHeader
-          withLock
+          withNetworkSwitcher
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={() => (
