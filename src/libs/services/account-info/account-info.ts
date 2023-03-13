@@ -66,17 +66,13 @@ export const fetchAccountListInfo = ({
   );
 
 export const dispatchFetchAccountInfoRequest = (
-  accountHash: string,
-  casperApiUrl: string
+  accountHash: string
 ): Promise<DataWithPayload<AccountInfo>> =>
-  dispatchToMainStore(
-    serviceMessage.fetchAccountInfoRequest({ accountHash, casperApiUrl })
-  );
+  dispatchToMainStore(serviceMessage.fetchAccountInfoRequest({ accountHash }));
 
 export const dispatchFetchAccountListInfo = (
-  accountsHash: string[],
-  casperApiUrl: string
+  accountsHash: string[]
 ): Promise<DataWithPayload<AccountInfo[]>> =>
   dispatchToMainStore(
-    serviceMessage.fetchAccountListInfoRequest({ accountsHash, casperApiUrl })
+    serviceMessage.fetchAccountListInfoRequest({ accountsHash })
   );

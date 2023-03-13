@@ -127,7 +127,7 @@ export function HomePageContent() {
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
 
   useEffect(() => {
-    dispatchFetchActiveAccountBalance(activeAccount?.publicKey, casperApiUrl)
+    dispatchFetchActiveAccountBalance(activeAccount?.publicKey)
       .then(({ payload: { balance, currencyRate } }) => {
         if (balance != null && currencyRate != null) {
           const amount = formatNumber(motesToCSPR(balance));
@@ -145,8 +145,7 @@ export function HomePageContent() {
       });
 
     dispatchFetchAccountInfoRequest(
-      getAccountHashFromPublicKey(activeAccount?.publicKey),
-      casperApiUrl
+      getAccountHashFromPublicKey(activeAccount?.publicKey)
     )
       .then(({ payload: accountInfo }) => {
         const { accountName } = getAccountInfo(accountInfo);

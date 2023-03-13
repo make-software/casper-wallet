@@ -89,6 +89,7 @@ import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged
 } from './redux/settings/actions';
+import { selectCasperUrlsBaseOnActiveNetworkSetting } from '@background/redux/settings/selectors';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -362,13 +363,17 @@ browser.runtime.onMessage.addListener(
 
           // SERVICE MESSAGE HANDLERS
           case getType(serviceMessage.fetchBalanceRequest): {
+            const { casperApiUrl } = selectCasperUrlsBaseOnActiveNetworkSetting(
+              store.getState()
+            );
+
             try {
               const [balance, rate] = await Promise.all([
                 fetchAccountBalance({
                   publicKey: action.payload.publicKey,
-                  casperApiUrl: action.payload.casperApiUrl
+                  casperApiUrl
                 }),
-                fetchCurrencyRate({ casperApiUrl: action.payload.casperApiUrl })
+                fetchCurrencyRate({ casperApiUrl })
               ]);
 
               return sendResponse(
@@ -385,10 +390,14 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchAccountInfoRequest): {
+            const { casperApiUrl } = selectCasperUrlsBaseOnActiveNetworkSetting(
+              store.getState()
+            );
+
             try {
               const { data: accountInfo } = await fetchAccountInfo({
                 accountHash: action.payload.accountHash,
-                casperApiUrl: action.payload.casperApiUrl
+                casperApiUrl
               });
 
               return sendResponse(
@@ -402,10 +411,14 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchAccountListInfoRequest): {
+            const { casperApiUrl } = selectCasperUrlsBaseOnActiveNetworkSetting(
+              store.getState()
+            );
+
             try {
               const { data: accountsInfoList } = await fetchAccountListInfo({
                 accountsHash: action.payload.accountsHash,
-                casperApiUrl: action.payload.casperApiUrl
+                casperApiUrl
               });
 
               return sendResponse(

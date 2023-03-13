@@ -21,9 +21,9 @@ import {
   selectVaultHasImportedAccount
 } from '@src/background/redux/vault/selectors';
 import { selectTimeoutDurationSetting } from '@src/background/redux/settings/selectors';
-import { TimeoutDurationSetting } from '@src/background/redux/settings/types';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { lockVault } from '@src/background/redux/sagas/actions';
+import { TimeoutDurationSetting } from '@popup/constants';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;

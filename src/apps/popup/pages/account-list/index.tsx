@@ -96,7 +96,7 @@ export function AccountListPage() {
   const isAnyAccountConnected = useSelector(
     selectIsAnyAccountConnectedWithOrigin
   );
-  const { casperLiveUrl, casperApiUrl } = useSelector(
+  const { casperLiveUrl } = useSelector(
     selectCasperUrlsBaseOnActiveNetworkSetting
   );
 
@@ -117,7 +117,7 @@ export function AccountListPage() {
 
     const accountsHash = accountListRows.map(account => account.accountHash);
 
-    dispatchFetchAccountListInfo(accountsHash, casperApiUrl)
+    dispatchFetchAccountListInfo(accountsHash)
       .then(({ payload: accountInfoList }) => {
         const newAccountListRows = [...accountListRows];
 

@@ -10,10 +10,10 @@ import {
   SpacingSize
 } from '@src/libs/layout/containers';
 
-import { TimeoutDurationSetting } from '@src/background/redux/settings/types';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { selectTimeoutDurationSetting } from '@src/background/redux/settings/selectors';
 import { activeTimeoutDurationSettingChanged } from '@src/background/redux/settings/actions';
+import { TimeoutDurationSetting } from '@popup/constants';
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();

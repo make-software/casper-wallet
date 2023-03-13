@@ -1,13 +1,16 @@
 import { createReducer } from 'typesafe-actions';
 
+import { TimeoutDurationSetting } from '@popup/constants';
+import { NetworkSetting } from '@src/constants';
+
 import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged
 } from './actions';
-import { Network, SettingsState, TimeoutDurationSetting } from './types';
+import { SettingsState } from './types';
 
 const initialState: SettingsState = {
-  activeNetwork: Network.Mainnet,
+  activeNetwork: NetworkSetting.Mainnet,
   activeTimeoutDuration: TimeoutDurationSetting['5 min']
 };
 
