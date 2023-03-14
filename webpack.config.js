@@ -168,6 +168,7 @@ const options = {
               ...JSON.parse(content.toString()),
               name: pkg.name,
               version: pkg.version,
+              version_name: 'Open Beta',
               author: pkg.author,
               description: pkg.description,
               ...(isDev
