@@ -37,7 +37,7 @@ export function BackupSecretPhrasePage() {
     <PopupLayout
       renderHeader={() => (
         <PopupHeader
-          withLock
+          withNetworkSwitcher
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={() => (

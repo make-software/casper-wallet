@@ -13,20 +13,22 @@ import {
   GetAccountBalanceRequestResponse,
   GetCurrencyRateRequestResponse
 } from './types';
-import { CURRENCY_RATE_URL, getAccountBalanceUrl } from './constants';
+import { getCurrencyRateUrl, getAccountBalanceUrl } from './constants';
 
-export const currencyRateRequest =
-  (): Promise<GetCurrencyRateRequestResponse> =>
-    fetch(CURRENCY_RATE_URL).then(toJson).catch(handleError);
+export const currencyRateRequest = (
+  casperApiUrl: string
+): Promise<GetCurrencyRateRequestResponse> =>
+  fetch(getCurrencyRateUrl(casperApiUrl)).then(toJson).catch(handleError);
 
 export const accountBalanceRequest = (
-  publicKey: string
+  publicKey: string,
+  casperApiUrl: string
 ): Promise<GetAccountBalanceRequestResponse> => {
   if (!publicKey) {
     throw Error('Missing public key');
   }
 
-  return fetch(getAccountBalanceUrl({ publicKey }))
+  return fetch(getAccountBalanceUrl({ publicKey, casperApiUrl }))
     .then(res => {
       if (res.status === 404) {
         return {
@@ -44,16 +46,26 @@ export const dispatchFetchActiveAccountBalance = (
 ): Promise<DataWithPayload<FetchBalanceResponse>> =>
   dispatchToMainStore(serviceMessage.fetchBalanceRequest({ publicKey }));
 
-export const fetchAccountBalance = ({ publicKey }: { publicKey: string }) =>
+export const fetchAccountBalance = ({
+  publicKey,
+  casperApiUrl
+}: {
+  publicKey: string;
+  casperApiUrl: string;
+}) =>
   queryClient.fetchQuery(
-    ['getAccountBalanceRequest', publicKey],
-    () => accountBalanceRequest(publicKey),
+    ['getAccountBalanceRequest', publicKey, casperApiUrl],
+    () => accountBalanceRequest(publicKey, casperApiUrl),
     {
       staleTime: FETCH_QUERY_OPTIONS.apiCacheTime
     }
   );
 
-export const fetchCurrencyRate = () =>
-  queryClient.fetchQuery('getCurrencyRateRequest', currencyRateRequest, {
-    staleTime: FETCH_QUERY_OPTIONS.apiCacheTime
-  });
+export const fetchCurrencyRate = ({ casperApiUrl }: { casperApiUrl: string }) =>
+  queryClient.fetchQuery(
+    'getCurrencyRateRequest',
+    () => currencyRateRequest(casperApiUrl),
+    {
+      staleTime: FETCH_QUERY_OPTIONS.apiCacheTime
+    }
+  );

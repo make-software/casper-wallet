@@ -4,33 +4,29 @@ import styled from 'styled-components';
 import { useNavigationMenu, useTypedLocation } from '@popup/router';
 
 import { SvgIcon } from '@libs/ui';
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { lockVault } from '@src/background/redux/sagas/actions';
+import { HeaderNetworkSwitcher } from '@layout/header/header-network-switcher';
 
 const Container = styled.div`
   display: flex;
   justify-content: space-between;
-  gap: 30px;
+  gap: 18px;
 `;
 
 interface MainmenuBarProps {
-  withLock?: boolean;
+  withNetworkSwitcher?: boolean;
   withMenu?: boolean;
 }
 
-export function HeaderActions({ withLock, withMenu }: MainmenuBarProps) {
+export function HeaderActions({
+  withNetworkSwitcher,
+  withMenu
+}: MainmenuBarProps) {
   const location = useTypedLocation();
   const { toggleNavigationMenu } = useNavigationMenu();
 
-  function handleLockVault() {
-    dispatchToMainStore(lockVault());
-  }
-
   return (
     <Container>
-      {withLock && (
-        <SvgIcon onClick={handleLockVault} src="assets/icons/unlock.svg" />
-      )}
+      {withNetworkSwitcher && <HeaderNetworkSwitcher />}
       {withMenu && (
         <SvgIcon
           onClick={toggleNavigationMenu}

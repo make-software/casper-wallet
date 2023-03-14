@@ -6,7 +6,6 @@ import styled from 'styled-components';
 
 import { WindowApp, useWindowManager } from '@src/hooks';
 
-import { TimeoutDurationSetting } from '@src/apps/popup/constants';
 import { RouterPath, useNavigationMenu } from '@src/apps/popup/router';
 
 import {
@@ -21,7 +20,10 @@ import {
   selectCountOfConnectedSites,
   selectVaultHasImportedAccount
 } from '@src/background/redux/vault/selectors';
-import { selectTimeoutDurationSetting } from '@src/background/redux/timeout-duration-setting/selectors';
+import { selectTimeoutDurationSetting } from '@src/background/redux/settings/selectors';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import { lockVault } from '@src/background/redux/sagas/actions';
+import { TimeoutDurationSetting } from '@popup/constants';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;
@@ -67,6 +69,20 @@ export function NavigationMenuPageContent() {
 
   const menuGroups: MenuGroup[] = useMemo(
     () => [
+      {
+        headerLabel: '',
+        items: [
+          {
+            id: 1,
+            title: t('Lock wallet'),
+            iconPath: 'assets/icons/lock.svg',
+            disabled: false,
+            handleOnClick: () => {
+              dispatchToMainStore(lockVault());
+            }
+          }
+        ]
+      },
       {
         headerLabel: t('Account'),
         items: [

@@ -38,6 +38,7 @@ import {
 import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import { AccountListRows } from '@background/redux/vault/types';
 import { getBlockExplorerAccountUrl } from '@src/constants';
+import { selectCasperUrlsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
 
 import { Popover } from './components/popover';
 
@@ -94,6 +95,9 @@ export function AccountListPage() {
   const activeAccountName = useSelector(selectVaultActiveAccountName);
   const isAnyAccountConnected = useSelector(
     selectIsAnyAccountConnectedWithOrigin
+  );
+  const { casperLiveUrl } = useSelector(
+    selectCasperUrlsBaseOnActiveNetworkSetting
   );
 
   const connectedAccountNames = useSelector(
@@ -205,7 +209,7 @@ export function AccountListPage() {
                         }}
                       >
                         <SvgIcon
-                          src="assets/icons/link.svg"
+                          src="assets/icons/unlink.svg"
                           marginRight="medium"
                           color="contentTertiary"
                         />
@@ -258,7 +262,10 @@ export function AccountListPage() {
                       target="_blank"
                       variant="contentBlue"
                       title={t('View account in CSPR.live')}
-                      href={getBlockExplorerAccountUrl(account.publicKey)}
+                      href={getBlockExplorerAccountUrl(
+                        casperLiveUrl,
+                        account.publicKey
+                      )}
                     >
                       <SvgIcon
                         src="assets/icons/external-link.svg"
