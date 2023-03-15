@@ -7,6 +7,7 @@ import { useClickAway } from '@libs/ui/hooks/use-click-away';
 import { PopoverPortal } from './popover-portal';
 
 const popoverOffsetFromChildren = 64;
+const contentHeight = 188;
 
 const ChildrenContainer = styled(AlignedFlexRow)`
   padding: 14px 18px;
@@ -25,11 +26,11 @@ const PopoverContainer = styled.div<PopoverContainerProps>`
       return '0px';
     }
 
-    const { top, bottom, height } = domRect;
+    const { top, bottom } = domRect;
 
     if (top && bottom) {
-      return bottom >= window.innerHeight - height
-        ? `${top - height}px`
+      return bottom >= window.innerHeight - contentHeight
+        ? `${top - contentHeight}px`
         : `${top + popoverOffsetFromChildren}px`;
     }
   }};
