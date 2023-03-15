@@ -1,4 +1,4 @@
-name: Manual trigger
+name: Manual trigger job
 
 on:
   workflow_dispatch:
@@ -14,4 +14,3 @@ jobs:
     steps:
     - name: Hello Step
       run: echo "Hello ${{ github.event.inputs.name }}"
-#
