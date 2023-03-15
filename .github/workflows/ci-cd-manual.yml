@@ -6,6 +6,14 @@ on:
       name:
         description: "Casper Wallet version in x.x.x format"
         default: "1.2.4"
+      action:
+        description: "Release action"
+        type: "choice"
+        default: "upload"
+        options:
+         - "testers"
+         - "upload"
+         - "publish"
 
 jobs:
   check_version:
@@ -42,7 +50,7 @@ jobs:
     - name: Upload to Chrome Web Store
       uses: mobilefirstllc/cws-publish@latest
       with:
-        action: 'upload'  # one of: upload, publish, testers
+        action: '${{ github.event.inputs.action }}'  # one of: upload, publish, testers
         client_id: ${{ secrets.CLIENT_ID }}
         client_secret: ${{ secrets.CLIENT_SECRET }}
         refresh_token: ${{ secrets.REFRESH_TOKEN }}
