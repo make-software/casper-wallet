@@ -90,6 +90,7 @@ interface RenderHeaderProps {
   hiddenWordIndexes: number[];
   selectedHiddenWordIndexes: number[];
   onHiddenWordClick: (index: number) => void;
+  handleResetPhrase: () => void;
 }
 
 interface RenderFooterProps {
@@ -179,6 +180,11 @@ export function SecretPhraseWordsView({
     ]);
   };
 
+  const handleResetPhrase = () => {
+    setSelectedHiddenWordIndexes([]);
+    setPartialPhrase(initialPartialPhrase);
+  };
+
   return (
     <SecretPhraseWordsViewContainer>
       {confirmationMode && renderHeader != null && (
@@ -187,7 +193,8 @@ export function SecretPhraseWordsView({
             phrase,
             hiddenWordIndexes,
             selectedHiddenWordIndexes,
-            onHiddenWordClick
+            onHiddenWordClick,
+            handleResetPhrase
           })}
         </HeaderContainer>
       )}
