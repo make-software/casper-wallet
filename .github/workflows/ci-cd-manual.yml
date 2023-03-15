@@ -47,6 +47,12 @@ jobs:
     - name: Package
       run: npm run package:chrome
 
+    - name: Check file
+      run: ls -la ./web-ext-artifacts/casper_wallet-${{ github.event.inputs.name }}.zip
+
+    - name: Sleep
+      run: sleep 36000
+
     - name: Upload to Chrome Web Store
       uses: mobilefirstllc/cws-publish@latest
       with:
