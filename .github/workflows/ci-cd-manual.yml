@@ -1,0 +1,54 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: "Casper Wallet version in x.x.x format"
+        default: "1.2.4"
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check version of Casper Wallet
+      run: echo "Version of Casper Wallet is ${{ github.event.inputs.name }}"
+
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install
+      run: npm install
+
+    - name: Build
+      run: npm run build:chrome
+
+    - name: Package
+      run: npm run package:chrome
+
+  upload:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Upload to Chrome Web Store
+      uses: mobilefirstllc/cws-publish@latest
+      with:
+        action: 'upload'  # one of: upload, publish, testers
+        client_id: ${{ secrets.CLIENT_ID }}
+        client_secret: ${{ secrets.CLIENT_SECRET }}
+        refresh_token: ${{ secrets.REFRESH_TOKEN }}
+        extension_id: ${{ secrets.EXTENSION_ID }}
+        zip_file: './web-ext-artifacts/casper_wallet-${{ github.event.inputs.name }}.zip'
