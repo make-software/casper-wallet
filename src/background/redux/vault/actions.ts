@@ -23,6 +23,7 @@ export const accountRenamed = createAction('ACCOUNT_RENAMEED')<{
 export const accountsConnected = createAction('ACCOUNTS_CONNECTED')<{
   siteOrigin: string;
   accountNames: string[];
+  siteTitle?: string;
 }>();
 
 export const accountDisconnected = createAction('ACCOUNT_DISCONNECTED')<{

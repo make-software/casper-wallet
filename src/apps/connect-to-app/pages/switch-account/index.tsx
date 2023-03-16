@@ -11,7 +11,11 @@ import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-
 import { sdkMethod } from '@src/content/sdk-method';
 import { closeCurrentWindow } from '@src/background/close-current-window';
 
-export function SwitchAccountPage() {
+interface SwitchAccountPageProps {
+  siteTitle: string;
+}
+
+export function SwitchAccountPage({ siteTitle }: SwitchAccountPageProps) {
   const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
 
@@ -39,7 +43,9 @@ export function SwitchAccountPage() {
           )}
         />
       )}
-      renderContent={() => <SwitchAccountContent requestId={requestId} />}
+      renderContent={() => (
+        <SwitchAccountContent requestId={requestId} siteTitle={siteTitle} />
+      )}
     />
   );
 }

@@ -18,12 +18,14 @@ const SiteGroupHeaderActionContainer = styled(AlignedSpaceBetweenFlexRow)``;
 
 interface SiteGroupHeaderProps {
   siteTitle: string;
+  siteOrigin: string;
   siteOrder: number;
   disconnectSite: () => void;
 }
 
 export function SiteGroupHeader({
   siteTitle,
+  siteOrigin,
   siteOrder,
   disconnectSite
 }: SiteGroupHeaderProps) {
@@ -33,17 +35,21 @@ export function SiteGroupHeader({
     <SiteGroupHeaderContainer>
       <SiteGroupHeaderActionContainer>
         <Typography type="bodySemiBold" color="contentPrimary">
-          <Trans t={t}>Site</Trans> {siteOrder}
+          {siteTitle || (
+            <>
+              <Trans t={t}>Site</Trans> {siteOrder}
+            </>
+          )}
         </Typography>
 
-        <Button width="120" inline color="primaryRed" onClick={disconnectSite}>
+        <Button width="auto" inline color="primaryRed" onClick={disconnectSite}>
           <Trans t={t}>Disconnect site</Trans>
         </Button>
       </SiteGroupHeaderActionContainer>
 
       <VerticalSpaceContainer top={SpacingSize.Small}>
         <Typography type="body" color="contentBlue">
-          {siteTitle}
+          {siteOrigin}
         </Typography>
       </VerticalSpaceContainer>
     </SiteGroupHeaderContainer>

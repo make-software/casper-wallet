@@ -16,10 +16,12 @@ export interface AccountListRows extends Account {
 }
 
 type AccountNamesByOriginDict = Record<string, string[]>;
+type SiteNameByOriginDict = Record<string, string>;
 
 export type VaultState = {
   secretPhrase: null | SecretPhrase;
   accounts: Account[];
   accountNamesByOriginDict: AccountNamesByOriginDict;
+  siteNameByOriginDict: SiteNameByOriginDict;
   activeAccountName: string | null;
 };

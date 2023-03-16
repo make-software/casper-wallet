@@ -34,11 +34,13 @@ export const SpaceBetweenContainer = styled(CentredFlexRow)`
 interface UnconnectedAccountsListProps {
   unconnectedAccountsList: AccountListRows[];
   requestId: string;
+  siteTitle: string;
 }
 
 export const UnconnectedAccountsList = ({
   unconnectedAccountsList,
-  requestId
+  requestId,
+  siteTitle
 }: UnconnectedAccountsListProps) => {
   const activeOrigin = useSelector(selectActiveOrigin);
 
@@ -68,11 +70,12 @@ export const UnconnectedAccountsList = ({
               <Button
                 color="primaryRed"
                 inline
-                width="100"
+                width="auto"
                 onClick={async () => {
                   await connectAccounts(
                     [unconnectedAccount.name],
-                    activeOrigin
+                    activeOrigin,
+                    siteTitle
                   );
                   await sendSdkResponseToSpecificTab(
                     sdkMethod.switchAccountResponse(false, { requestId })

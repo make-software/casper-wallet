@@ -102,7 +102,7 @@ export function ConnectAnotherAccountPageContent() {
                 </LeftAlignedFlexColumn>
                 <Button
                   inline
-                  width="100"
+                  width="auto"
                   onClick={async () => {
                     await connectAccounts([targetAccount.name], activeOrigin);
                     navigate(RouterPath.Home);
@@ -137,7 +137,7 @@ export function ConnectAnotherAccountPageContent() {
               <Button
                 color="secondaryBlue"
                 inline
-                width="100"
+                width="auto"
                 onClick={async () => {
                   await changeActiveAccount(account.name);
                   navigate(RouterPath.Home);

@@ -21,6 +21,7 @@ const initialState: State = {
   secretPhrase: null,
   accounts: [],
   accountNamesByOriginDict: {},
+  siteNameByOriginDict: {},
   activeAccountName: null
 };
 
@@ -33,6 +34,7 @@ export const reducer = createReducer(initialState)
       {
         payload: {
           accountNamesByOriginDict,
+          siteNameByOriginDict,
           accounts,
           activeAccountName,
           secretPhrase
@@ -40,6 +42,7 @@ export const reducer = createReducer(initialState)
       }
     ) => ({
       accountNamesByOriginDict,
+      siteNameByOriginDict,
       accounts,
       activeAccountName,
       secretPhrase
@@ -136,16 +139,24 @@ export const reducer = createReducer(initialState)
   )
   .handleAction(
     accountsConnected,
-    (state, { payload: { siteOrigin, accountNames } }) => ({
-      ...state,
-      accountNamesByOriginDict: {
-        ...state.accountNamesByOriginDict,
-        [siteOrigin]:
-          state.accountNamesByOriginDict[siteOrigin]?.length > 0
-            ? [...state.accountNamesByOriginDict[siteOrigin], ...accountNames]
-            : [...accountNames]
-      }
-    })
+    (state, { payload: { siteOrigin, accountNames, siteTitle } }) => {
+      const title = siteTitle || state?.siteNameByOriginDict[siteOrigin];
+
+      return {
+        ...state,
+        siteNameByOriginDict: {
+          ...state?.siteNameByOriginDict,
+          [siteOrigin]: title
+        },
+        accountNamesByOriginDict: {
+          ...state.accountNamesByOriginDict,
+          [siteOrigin]:
+            state.accountNamesByOriginDict[siteOrigin]?.length > 0
+              ? [...state.accountNamesByOriginDict[siteOrigin], ...accountNames]
+              : [...accountNames]
+        }
+      };
+    }
   )
   .handleAction(
     accountDisconnected,

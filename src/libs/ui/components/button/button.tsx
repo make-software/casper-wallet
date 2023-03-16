@@ -7,7 +7,7 @@ interface BaseButtonProps extends BaseProps {
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
   height?: '24' | '36' | '40';
-  width?: '100' | '120' | '176' | '100%';
+  width?: 'auto' | '100%';
   inline?: boolean;
   title?: string;
 }
@@ -28,6 +28,7 @@ const BaseButton = styled.button<BaseButtonProps>(
     lineHeight: '2.4rem',
     padding: inline ? '4px 12px' : 'unset',
     width,
+    flexShrink: 0,
 
     ':focus': {
       outline: 'none'

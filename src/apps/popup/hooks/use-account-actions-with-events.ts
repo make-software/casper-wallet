@@ -93,7 +93,7 @@ export function useAccountManager() {
   );
 
   const connectAccountsWithEvent = useCallback(
-    async (accountNames: string[], origin) => {
+    async (accountNames: string[], origin, siteTitle?: string) => {
       if (!activeAccount?.name || origin == null || isLocked) {
         return;
       }
@@ -110,7 +110,8 @@ export function useAccountManager() {
         dispatchToMainStore(
           accountsConnected({
             accountNames: accountNames,
-            siteOrigin: origin
+            siteOrigin: origin,
+            siteTitle
           })
         );
       } else {
@@ -139,7 +140,8 @@ export function useAccountManager() {
           dispatchToMainStore(
             accountsConnected({
               accountNames: accountNames,
-              siteOrigin: origin
+              siteOrigin: origin,
+              siteTitle
             })
           );
         }
@@ -213,9 +215,9 @@ export function useAccountManager() {
   );
 
   return {
-    changeActiveAccountWithEvent: changeActiveAccountWithEvent,
-    connectAccountsWithEvent: connectAccountsWithEvent,
-    disconnectAccountWithEvent: disconnectAccountWithEvent,
-    disconnectAllAccountsWithEvent: disconnectAllAccountsWithEvent
+    changeActiveAccountWithEvent,
+    connectAccountsWithEvent,
+    disconnectAccountWithEvent,
+    disconnectAllAccountsWithEvent
   };
 }

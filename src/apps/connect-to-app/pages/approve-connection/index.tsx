@@ -26,12 +26,14 @@ export interface Props {
   selectedAccountNames: string[];
   origin: string;
   title: string;
+  siteTitle: string;
 }
 
 export function ApproveConnectionPage({
   selectedAccountNames,
   origin,
-  title
+  title,
+  siteTitle
 }: Props) {
   const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
@@ -47,7 +49,7 @@ export function ApproveConnectionPage({
   const { connectAccountsWithEvent: connectAccounts } = useAccountManager();
 
   const handleApproveConnection = async () => {
-    await connectAccounts(selectedAccountNames, origin);
+    await connectAccounts(selectedAccountNames, origin, siteTitle);
     await sendSdkResponseToSpecificTab(
       sdkMethod.connectResponse(true, { requestId })
     );
