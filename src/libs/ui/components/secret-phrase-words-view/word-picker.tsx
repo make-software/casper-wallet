@@ -19,11 +19,6 @@ const WordPickerContainer = styled(FlexColumn)`
   padding: ${({ theme }) => theme.padding['1.6']};
 `;
 
-const WordTagContainer = styled(FlexRow)`
-  flex-wrap: wrap;
-  gap: 7px;
-`;
-
 const ResetContainer = styled(AlignedFlexRow)`
   cursor: pointer;
   width: fit-content;
@@ -49,7 +44,7 @@ export function WordPicker({
 
   return (
     <WordPickerContainer gap={SpacingSize.Big} data-testid={dataTestId}>
-      <WordTagContainer>
+      <FlexRow gap={SpacingSize.Small} wrap="wrap">
         {hiddenWordIndexes.map(wordIndex => (
           <WordTag
             key={wordIndex}
@@ -60,7 +55,7 @@ export function WordPicker({
             disabled={selectedHiddenWordIndexes.includes(wordIndex)}
           />
         ))}
-      </WordTagContainer>
+      </FlexRow>
       <ResetContainer
         gap={SpacingSize.Small}
         onClick={() => handleResetPhrase()}

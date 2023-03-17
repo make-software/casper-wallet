@@ -130,7 +130,7 @@ export function HomePageContent() {
     dispatchFetchActiveAccountBalance(activeAccount?.publicKey)
       .then(({ payload: { balance, currencyRate } }) => {
         if (balance != null && currencyRate != null) {
-          const amount = formatNumber(Number(motesToCSPR(balance)), {
+          const amount = formatNumber(motesToCSPR(balance), {
             precision: { max: 5 }
           });
           const fiatAmount = formatCurrency(
@@ -209,7 +209,7 @@ export function HomePageContent() {
               />
             </NameAndAddressContainer>
             <BalanceContainer>
-              <FlexRow gap={SpacingSize.Small}>
+              <FlexRow gap={SpacingSize.Small} wrap="wrap">
                 <Typography type="CSPRBold">{balance.amount}</Typography>
                 <Typography type="CSPRLight" color="contentSecondary">
                   CSPR

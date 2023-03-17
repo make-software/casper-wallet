@@ -33,7 +33,7 @@ export const formatTimestamp = (value: string): string => {
 };
 
 export const formatNumber = (
-  value: number,
+  value: number | string,
   {
     precision,
     notation,
@@ -44,7 +44,7 @@ export const formatNumber = (
     compactDisplay?: 'short' | 'long';
   } = {}
 ): string =>
-  intl.formatNumber(value, {
+  intl.formatNumber(value as number, {
     minimumFractionDigits: precision?.min || 0,
     maximumFractionDigits: precision?.max || 0,
     notation,
