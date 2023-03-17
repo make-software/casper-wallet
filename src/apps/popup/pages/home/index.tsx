@@ -130,7 +130,9 @@ export function HomePageContent() {
     dispatchFetchActiveAccountBalance(activeAccount?.publicKey)
       .then(({ payload: { balance, currencyRate } }) => {
         if (balance != null && currencyRate != null) {
-          const amount = formatNumber(motesToCSPR(balance));
+          const amount = formatNumber(Number(motesToCSPR(balance)), {
+            precision: { max: 5 }
+          });
           const fiatAmount = formatCurrency(
             motesToCurrency(balance, currencyRate),
             'USD',

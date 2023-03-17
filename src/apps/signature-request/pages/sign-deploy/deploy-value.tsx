@@ -36,7 +36,7 @@ export function DeployValue({
     if (isKeyOfCurrencyValue(id)) {
       return (
         <Hash
-          value={formatNumber(value)}
+          value={formatNumber(Number(value))}
           variant={HashVariant.BodyHash}
           color="contentPrimary"
         />
@@ -66,7 +66,7 @@ export function DeployValue({
     if (isDeployArgValueNumber(value)) {
       return (
         <Hash
-          value={formatNumber(parsedValue)}
+          value={formatNumber(Number(parsedValue))}
           variant={HashVariant.BodyHash}
           color="contentPrimary"
         />

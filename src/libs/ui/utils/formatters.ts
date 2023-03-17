@@ -33,24 +33,23 @@ export const formatTimestamp = (value: string): string => {
 };
 
 export const formatNumber = (
-  value: number | string,
+  value: number,
   {
     precision,
     notation,
     compactDisplay
   }: {
-    precision?: number;
+    precision?: { min?: number; max?: number };
     notation?: 'compact' | 'standard';
     compactDisplay?: 'short' | 'long';
   } = {}
-): string => {
-  return intl.formatNumber(value as number, {
-    minimumFractionDigits: precision || 0,
-    maximumFractionDigits: precision || 0,
+): string =>
+  intl.formatNumber(value, {
+    minimumFractionDigits: precision?.min || 0,
+    maximumFractionDigits: precision?.max || 0,
     notation,
     compactDisplay
   });
-};
 
 export function formatMotes(motes: string) {
   const int = Number.parseInt(motes);
