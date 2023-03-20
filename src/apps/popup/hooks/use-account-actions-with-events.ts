@@ -4,7 +4,8 @@ import {
   activeAccountChanged,
   accountsConnected,
   accountDisconnected,
-  allAccountsDisconnected
+  allAccountsDisconnected,
+  accountConnected
 } from '@src/background/redux/vault/actions';
 
 import { useSelector } from 'react-redux';
@@ -92,8 +93,8 @@ export function useAccountManager() {
     [activeAccount?.name, accounts, connectedAccountNames, isLocked]
   );
 
-  const connectAccountsWithEvent = useCallback(
-    async (accountNames: string[], origin, siteTitle?: string) => {
+  const connectSitesWithEvent = useCallback(
+    async (accountNames: string[], origin, siteTitle: string) => {
       if (!activeAccount?.name || origin == null || isLocked) {
         return;
       }
@@ -148,6 +149,62 @@ export function useAccountManager() {
       }
     },
     [activeAccount, isLocked, accounts]
+  );
+
+  const connectAnotherAccountWithEvent = useCallback(
+    async (accountName: string, origin) => {
+      if (!activeAccount?.name || origin == null || isLocked) {
+        return;
+      }
+
+      // connected accounts including active
+      if (accountName === activeAccount.name) {
+        emitSdkEventToAllActiveTabs(
+          sdkEvent.connectedAccountEvent({
+            isConnected: true,
+            isLocked: isLocked,
+            activeKey: activeAccount.publicKey
+          })
+        );
+        dispatchToMainStore(
+          accountConnected({
+            accountName,
+            siteOrigin: origin
+          })
+        );
+      } else {
+        // connected accounts not including active, so will switch active to connected
+        const newActiveAccountFromConnected =
+          findAccountInAListClosestToGivenAccountFilteredByNames(
+            accounts,
+            activeAccount,
+            [accountName]
+          );
+
+        if (
+          newActiveAccountFromConnected &&
+          newActiveAccountFromConnected.name !== activeAccount.name
+        ) {
+          emitSdkEventToAllActiveTabs(
+            sdkEvent.changedConnectedAccountEvent({
+              isLocked: isLocked,
+              isConnected: true,
+              activeKey: newActiveAccountFromConnected.publicKey
+            })
+          );
+          dispatchToMainStore(
+            activeAccountChanged(newActiveAccountFromConnected.name)
+          );
+          dispatchToMainStore(
+            accountConnected({
+              accountName,
+              siteOrigin: origin
+            })
+          );
+        }
+      }
+    },
+    [accounts, activeAccount, isLocked]
   );
 
   const disconnectAccountWithEvent = useCallback(
@@ -216,7 +273,8 @@ export function useAccountManager() {
 
   return {
     changeActiveAccountWithEvent,
-    connectAccountsWithEvent,
+    connectSitesWithEvent,
+    connectAnotherAccountWithEvent,
     disconnectAccountWithEvent,
     disconnectAllAccountsWithEvent
   };

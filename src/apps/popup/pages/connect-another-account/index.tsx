@@ -55,7 +55,7 @@ export function ConnectAnotherAccountPageContent() {
 
   const activeOrigin = useSelector(selectActiveOrigin);
   const {
-    connectAccountsWithEvent: connectAccounts,
+    connectAnotherAccountWithEvent: connectAccount,
     changeActiveAccountWithEvent: changeActiveAccount
   } = useAccountManager();
 
@@ -104,7 +104,7 @@ export function ConnectAnotherAccountPageContent() {
                   inline
                   minWidth="86"
                   onClick={async () => {
-                    await connectAccounts([targetAccount.name], activeOrigin);
+                    await connectAccount(targetAccount.name, activeOrigin);
                     navigate(RouterPath.Home);
                   }}
                 >

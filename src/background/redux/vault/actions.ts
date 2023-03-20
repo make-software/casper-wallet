@@ -15,7 +15,7 @@ export const accountAdded = createAction('ACCOUNT_ADDED')<Account>();
 export const accountRemoved = createAction('ACCOUNT_REMOVED')<{
   accountName: string;
 }>();
-export const accountRenamed = createAction('ACCOUNT_RENAMEED')<{
+export const accountRenamed = createAction('ACCOUNT_RENAMED')<{
   oldName: string;
   newName: string;
 }>();
@@ -23,7 +23,12 @@ export const accountRenamed = createAction('ACCOUNT_RENAMEED')<{
 export const accountsConnected = createAction('ACCOUNTS_CONNECTED')<{
   siteOrigin: string;
   accountNames: string[];
-  siteTitle?: string;
+  siteTitle: string;
+}>();
+
+export const accountConnected = createAction('ACCOUNT_CONNECTED')<{
+  siteOrigin: string;
+  accountName: string;
 }>();
 
 export const accountDisconnected = createAction('ACCOUNT_DISCONNECTED')<{

@@ -11,7 +11,8 @@ import {
   accountsConnected,
   accountDisconnected,
   allAccountsDisconnected,
-  activeAccountChanged
+  activeAccountChanged,
+  accountConnected
 } from './actions';
 import { VaultState } from './types';
 
@@ -139,24 +140,33 @@ export const reducer = createReducer(initialState)
   )
   .handleAction(
     accountsConnected,
-    (state, { payload: { siteOrigin, accountNames, siteTitle } }) => {
-      const title = siteTitle || state?.siteNameByOriginDict[siteOrigin];
-
-      return {
-        ...state,
-        siteNameByOriginDict: {
-          ...state?.siteNameByOriginDict,
-          [siteOrigin]: title
-        },
-        accountNamesByOriginDict: {
-          ...state.accountNamesByOriginDict,
-          [siteOrigin]:
-            state.accountNamesByOriginDict[siteOrigin]?.length > 0
-              ? [...state.accountNamesByOriginDict[siteOrigin], ...accountNames]
-              : [...accountNames]
-        }
-      };
-    }
+    (state, { payload: { siteOrigin, accountNames, siteTitle } }) => ({
+      ...state,
+      siteNameByOriginDict: {
+        ...state?.siteNameByOriginDict,
+        [siteOrigin]: siteTitle
+      },
+      accountNamesByOriginDict: {
+        ...state.accountNamesByOriginDict,
+        [siteOrigin]:
+          state.accountNamesByOriginDict[siteOrigin]?.length > 0
+            ? [...state.accountNamesByOriginDict[siteOrigin], ...accountNames]
+            : [...accountNames]
+      }
+    })
+  )
+  .handleAction(
+    accountConnected,
+    (state, { payload: { siteOrigin, accountName } }) => ({
+      ...state,
+      accountNamesByOriginDict: {
+        ...state.accountNamesByOriginDict,
+        [siteOrigin]:
+          state.accountNamesByOriginDict[siteOrigin]?.length > 0
+            ? [...state.accountNamesByOriginDict[siteOrigin], accountName]
+            : [accountName]
+      }
+    })
   )
   .handleAction(
     accountDisconnected,

@@ -38,12 +38,9 @@ import {
 import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
 import { sdkMethod } from '@src/content/sdk-method';
 
-type SwitchAccountContentProps = { requestId: string; siteTitle: string };
+type SwitchAccountContentProps = { requestId: string };
 
-export function SwitchAccountContent({
-  requestId,
-  siteTitle
-}: SwitchAccountContentProps) {
+export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
   const activeOrigin = useSelector(selectActiveOrigin);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const connectedAccountsToActiveTab = useSelector(
@@ -115,7 +112,6 @@ export function SwitchAccountContent({
               <UnconnectedAccountsList
                 requestId={requestId}
                 unconnectedAccountsList={unconnectedAccountsList}
-                siteTitle={siteTitle}
               />
             </>
           )}
@@ -161,7 +157,6 @@ export function SwitchAccountContent({
             <UnconnectedAccountsList
               requestId={requestId}
               unconnectedAccountsList={unconnectedAccountsList}
-              siteTitle={siteTitle}
             />
           </>
         )}

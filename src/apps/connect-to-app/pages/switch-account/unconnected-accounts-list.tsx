@@ -34,18 +34,17 @@ export const SpaceBetweenContainer = styled(CentredFlexRow)`
 interface UnconnectedAccountsListProps {
   unconnectedAccountsList: AccountListRows[];
   requestId: string;
-  siteTitle: string;
 }
 
 export const UnconnectedAccountsList = ({
   unconnectedAccountsList,
-  requestId,
-  siteTitle
+  requestId
 }: UnconnectedAccountsListProps) => {
   const activeOrigin = useSelector(selectActiveOrigin);
 
   const { t } = useTranslation();
-  const { connectAccountsWithEvent: connectAccounts } = useAccountManager();
+  const { connectAnotherAccountWithEvent: connectAccount } =
+    useAccountManager();
 
   if (unconnectedAccountsList.length > 0) {
     return (
@@ -72,11 +71,7 @@ export const UnconnectedAccountsList = ({
                 inline
                 minWidth="86"
                 onClick={async () => {
-                  await connectAccounts(
-                    [unconnectedAccount.name],
-                    activeOrigin,
-                    siteTitle
-                  );
+                  await connectAccount(unconnectedAccount.name, activeOrigin);
                   await sendSdkResponseToSpecificTab(
                     sdkMethod.switchAccountResponse(false, { requestId })
                   );

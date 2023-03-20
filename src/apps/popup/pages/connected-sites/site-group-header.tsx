@@ -17,7 +17,7 @@ const SiteGroupHeaderContainer = styled(SpaceBetweenFlexColumn)`
 const SiteGroupHeaderActionContainer = styled(AlignedSpaceBetweenFlexRow)``;
 
 interface SiteGroupHeaderProps {
-  siteTitle: string;
+  siteTitle: string | undefined;
   siteOrigin: string;
   siteOrder: number;
   disconnectSite: () => void;

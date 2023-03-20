@@ -31,7 +31,8 @@ import {
   allAccountsDisconnected,
   activeAccountChanged,
   vaultLoaded,
-  vaultReseted
+  vaultReseted,
+  accountConnected
 } from '../vault/actions';
 import {
   selectIsActiveAccountConnectedWithOrigin,
@@ -85,6 +86,7 @@ export function* vaultSagas() {
       getType(accountRemoved),
       getType(accountRenamed),
       getType(accountsConnected),
+      getType(accountConnected),
       getType(accountDisconnected),
       getType(allAccountsDisconnected),
       getType(activeAccountChanged),

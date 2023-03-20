@@ -35,7 +35,7 @@ export function AppRouter() {
         <Routes>
           <Route
             path={RouterPath.SwitchAccount}
-            element={<SwitchAccountPage siteTitle={siteTitle} />}
+            element={<SwitchAccountPage />}
           />
         </Routes>
       </HashRouter>

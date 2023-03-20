@@ -16,7 +16,7 @@ export interface AccountListRows extends Account {
 }
 
 type AccountNamesByOriginDict = Record<string, string[]>;
-type SiteNameByOriginDict = Record<string, string>;
+type SiteNameByOriginDict = Record<string, string | undefined>;
 
 export type VaultState = {
   secretPhrase: null | SecretPhrase;
