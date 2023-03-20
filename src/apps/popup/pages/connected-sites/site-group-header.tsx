@@ -42,8 +42,13 @@ export function SiteGroupHeader({
           )}
         </Typography>
 
-        <Button width="auto" inline color="primaryRed" onClick={disconnectSite}>
-          <Trans t={t}>Disconnect site</Trans>
+        <Button
+          minWidth="100"
+          inline
+          color="primaryRed"
+          onClick={disconnectSite}
+        >
+          <Trans t={t}>Disconnect</Trans>
         </Button>
       </SiteGroupHeaderActionContainer>
 

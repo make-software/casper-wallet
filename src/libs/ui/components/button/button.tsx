@@ -7,13 +7,13 @@ interface BaseButtonProps extends BaseProps {
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
   height?: '24' | '36' | '40';
-  width?: 'auto' | '100%';
+  minWidth?: '86' | '100';
   inline?: boolean;
   title?: string;
 }
 
 const BaseButton = styled.button<BaseButtonProps>(
-  ({ theme, disabled, height = '40', width = '100%', inline = false }) => ({
+  ({ theme, disabled, height = '40', inline = false, minWidth }) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -27,8 +27,8 @@ const BaseButton = styled.button<BaseButtonProps>(
     minHeight: inline ? '3.2rem' : '4rem',
     lineHeight: '2.4rem',
     padding: inline ? '4px 12px' : 'unset',
-    width,
-    flexShrink: 0,
+    width: minWidth ? undefined : '100%',
+    minWidth: minWidth ? `${minWidth}px` : undefined,
 
     ':focus': {
       outline: 'none'

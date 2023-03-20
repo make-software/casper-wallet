@@ -70,7 +70,7 @@ export const UnconnectedAccountsList = ({
               <Button
                 color="primaryRed"
                 inline
-                width="auto"
+                minWidth="86"
                 onClick={async () => {
                   await connectAccounts(
                     [unconnectedAccount.name],
