@@ -2,7 +2,9 @@
 
 ![signer logo](src/assets/img/logo128.png)
 
-Securely manage your CSPR tokens, interact with dapps and sign transactions with Casper Wallet, the Go-To self-custody wallet for the Casper blockchain.
+*Securely manage your CSPR tokens, interact with dapps and sign transactions with Casper Wallet, the Go-To self-custody wallet for the Casper blockchain.*
+
+---
 
 ## Testing Casper Wallet integration on **Casper Wallet Playground**
 
