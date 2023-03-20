@@ -27,7 +27,6 @@ const BaseButton = styled.button<BaseButtonProps>(
     minHeight: inline ? '3.2rem' : '4rem',
     lineHeight: '2.4rem',
     padding: inline ? '4px 12px' : 'unset',
-    width: minWidth ? undefined : '100%',
     minWidth: minWidth ? `${minWidth}px` : undefined,
 
     ':focus': {
