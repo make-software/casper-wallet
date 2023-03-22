@@ -73,11 +73,13 @@ const getGapSize = (gap?: SpacingSize) => {
 
 interface FlexRowProps {
   gap?: SpacingSize;
+  wrap?: 'wrap' | 'nowrap';
 }
 
 export const FlexRow = styled.div<FlexRowProps>`
   display: flex;
   gap: ${({ gap }) => getGapSize(gap)};
+  flex-wrap: ${({ wrap }) => wrap};
 `;
 
 export const AlignedFlexRow = styled(FlexRow)`

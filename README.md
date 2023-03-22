@@ -1,20 +1,23 @@
-# Signer 2
-
-built from [chrome-extension-boilerplate-react](https://github.com/lxieyang/chrome-extension-boilerplate-react)
+# Casper Wallet
 
 ![signer logo](src/assets/img/logo128.png)
 
-## Testing Casper Wallet integration with dApps (**Casper Wallet Playground**)
+*Securely manage your CSPR tokens, interact with dapps and sign transactions with Casper Wallet, the Go-To self-custody wallet for the Casper blockchain.*
+
+---
+
+## Testing Casper Wallet integration on **Casper Wallet Playground**
 
 *Casper Wallet Playground is a React webapp created as a developer tool to help test integration with various features available in Casper Wallet.*
 
-### Run Casper Wallet Playground site
+### Access Casper Wallet Playground repo
+
+Open <https://github.com/make-software/casper-wallet>
 
 Clone this repository and run following commands from the repo root folder.
 *NOTE: Node.js LTS is required.*
 
 ```shell
-cd playground
 npm install
 npm run start
 ```
