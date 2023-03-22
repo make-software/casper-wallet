@@ -2,10 +2,10 @@ import { useCallback } from 'react';
 import { Account } from '@src/background/redux/vault/types';
 import {
   activeAccountChanged,
-  accountsConnected,
+  siteConnected,
   accountDisconnected,
   allAccountsDisconnected,
-  accountConnected
+  anotherAccountConnected
 } from '@src/background/redux/vault/actions';
 
 import { useSelector } from 'react-redux';
@@ -99,7 +99,7 @@ export function useAccountManager() {
         return;
       }
 
-      // connected accounts including active
+      // new connected accounts including active
       if (accountNames.includes(activeAccount.name)) {
         emitSdkEventToAllActiveTabs(
           sdkEvent.connectedAccountEvent({
@@ -109,14 +109,15 @@ export function useAccountManager() {
           })
         );
         dispatchToMainStore(
-          accountsConnected({
+          siteConnected({
             accountNames: accountNames,
             siteOrigin: origin,
             siteTitle
           })
         );
       } else {
-        // connected accounts not including active, so will switch active to connected
+        // new connected accounts not including active
+        // we'll switch active account to closest new
         const newActiveAccountFromConnected =
           findAccountInAListClosestToGivenAccountFilteredByNames(
             accounts,
@@ -139,7 +140,7 @@ export function useAccountManager() {
             activeAccountChanged(newActiveAccountFromConnected.name)
           );
           dispatchToMainStore(
-            accountsConnected({
+            siteConnected({
               accountNames: accountNames,
               siteOrigin: origin,
               siteTitle
@@ -157,7 +158,7 @@ export function useAccountManager() {
         return;
       }
 
-      // connected accounts including active
+      // new connected account is active
       if (accountName === activeAccount.name) {
         emitSdkEventToAllActiveTabs(
           sdkEvent.connectedAccountEvent({
@@ -167,36 +168,29 @@ export function useAccountManager() {
           })
         );
         dispatchToMainStore(
-          accountConnected({
+          anotherAccountConnected({
             accountName,
             siteOrigin: origin
           })
         );
       } else {
-        // connected accounts not including active, so will switch active to connected
-        const newActiveAccountFromConnected =
-          findAccountInAListClosestToGivenAccountFilteredByNames(
-            accounts,
-            activeAccount,
-            [accountName]
-          );
+        // new connected account is not active
+        // we'll switch active account to new
+        const newActiveAccount = accounts.find(
+          account => account.name === accountName
+        );
 
-        if (
-          newActiveAccountFromConnected &&
-          newActiveAccountFromConnected.name !== activeAccount.name
-        ) {
+        if (newActiveAccount && newActiveAccount.name !== activeAccount.name) {
           emitSdkEventToAllActiveTabs(
             sdkEvent.changedConnectedAccountEvent({
               isLocked: isLocked,
               isConnected: true,
-              activeKey: newActiveAccountFromConnected.publicKey
+              activeKey: newActiveAccount.publicKey
             })
           );
+          dispatchToMainStore(activeAccountChanged(newActiveAccount.name));
           dispatchToMainStore(
-            activeAccountChanged(newActiveAccountFromConnected.name)
-          );
-          dispatchToMainStore(
-            accountConnected({
+            anotherAccountConnected({
               accountName,
               siteOrigin: origin
             })

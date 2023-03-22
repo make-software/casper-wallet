@@ -8,11 +8,11 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
-  accountsConnected,
+  siteConnected,
   accountDisconnected,
   allAccountsDisconnected,
   activeAccountChanged,
-  accountConnected
+  anotherAccountConnected
 } from './actions';
 import { VaultState } from './types';
 
@@ -139,7 +139,7 @@ export const reducer = createReducer(initialState)
     }
   )
   .handleAction(
-    accountsConnected,
+    siteConnected,
     (state, { payload: { siteOrigin, accountNames, siteTitle } }) => ({
       ...state,
       siteNameByOriginDict: {
@@ -156,7 +156,7 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    accountConnected,
+    anotherAccountConnected,
     (state, { payload: { siteOrigin, accountName } }) => ({
       ...state,
       accountNamesByOriginDict: {

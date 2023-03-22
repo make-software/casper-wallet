@@ -12,13 +12,13 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
-  accountsConnected,
+  siteConnected,
   activeAccountChanged,
   allAccountsDisconnected,
   vaultReseted,
   vaultLoaded,
   secretPhraseCreated,
-  accountConnected
+  anotherAccountConnected
 } from '@src/background/redux/vault/actions';
 import {
   selectIsActiveAccountConnectedWithOrigin,
@@ -342,8 +342,8 @@ browser.runtime.onMessage.addListener(
           case getType(activeTimeoutDurationSettingChanged):
           case getType(activeNetworkSettingChanged):
           case getType(lastActivityTimeRefreshed):
-          case getType(accountsConnected):
-          case getType(accountConnected):
+          case getType(siteConnected):
+          case getType(anotherAccountConnected):
           case getType(accountDisconnected):
           case getType(allAccountsDisconnected):
           case getType(windowIdChanged):

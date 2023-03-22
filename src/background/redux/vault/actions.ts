@@ -20,13 +20,15 @@ export const accountRenamed = createAction('ACCOUNT_RENAMED')<{
   newName: string;
 }>();
 
-export const accountsConnected = createAction('ACCOUNTS_CONNECTED')<{
+export const siteConnected = createAction('SITE_CONNECTED')<{
   siteOrigin: string;
   accountNames: string[];
   siteTitle: string;
 }>();
 
-export const accountConnected = createAction('ACCOUNT_CONNECTED')<{
+export const anotherAccountConnected = createAction(
+  'ANOTHER_ACCOUNT_CONNECTED'
+)<{
   siteOrigin: string;
   accountName: string;
 }>();
