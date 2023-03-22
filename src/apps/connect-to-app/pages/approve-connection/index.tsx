@@ -46,7 +46,7 @@ export function ApproveConnectionPage({
   const selectedAccountNamesLength = selectedAccountNames.length;
 
   const navigate = useTypedNavigate();
-  const { connectSitesWithEvent: connectAccounts } = useAccountManager();
+  const { connectSiteWithEvent: connectAccounts } = useAccountManager();
 
   const handleApproveConnection = async () => {
     await connectAccounts(selectedAccountNames, origin, siteTitle);

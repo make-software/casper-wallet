@@ -93,7 +93,7 @@ export function useAccountManager() {
     [activeAccount?.name, accounts, connectedAccountNames, isLocked]
   );
 
-  const connectSitesWithEvent = useCallback(
+  const connectSiteWithEvent = useCallback(
     async (accountNames: string[], origin, siteTitle: string) => {
       if (!activeAccount?.name || origin == null || isLocked) {
         return;
@@ -267,7 +267,7 @@ export function useAccountManager() {
 
   return {
     changeActiveAccountWithEvent,
-    connectSitesWithEvent,
+    connectSiteWithEvent,
     connectAnotherAccountWithEvent,
     disconnectAccountWithEvent,
     disconnectAllAccountsWithEvent
