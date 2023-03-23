@@ -17,7 +17,7 @@ export const themeConfig = {
   typography: {
     fontFamily: {
       primary: '"Inter", sans-serif',
-      mono: '"JetBrains Mono", serif'
+      mono: '"JetBrains Mono", monospace'
     },
     fontWeight: {
       light: 200,
