@@ -13,6 +13,9 @@ export const selectVaultHasAccounts = (state: RootState): boolean =>
 export const selectVaultAccounts = (state: RootState): Account[] =>
   state.vault.accounts;
 
+export const selectSiteNameByOriginDict = (state: RootState) =>
+  state.vault.siteNameByOriginDict;
+
 export const selectSecretPhrase = (state: RootState): null | SecretPhrase =>
   state.vault.secretPhrase;
 

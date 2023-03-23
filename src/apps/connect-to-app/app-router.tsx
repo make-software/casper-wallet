@@ -22,7 +22,7 @@ export function AppRouter() {
   const [selectedAccountNames, setSelectedAccountNames] = useState<string[]>(
     []
   );
-  const { origin, title } = useSiteRelatedData();
+  const { origin, title, siteTitle } = useSiteRelatedData();
 
   const isLocked = useSelector(selectVaultIsLocked);
   if (isLocked) {
@@ -63,6 +63,7 @@ export function AppRouter() {
               selectedAccountNames={selectedAccountNames}
               origin={origin}
               title={title}
+              siteTitle={siteTitle}
             />
           }
         />
@@ -87,12 +88,11 @@ function useSiteRelatedData() {
   }
 
   const connectWith = t('Connect with');
-  const title = `${connectWith} ${
-    siteTitle != null ? siteTitle : origin.split('://')[1]
-  }`;
+  const title = siteTitle != null ? siteTitle : origin.split('://')[1];
 
   return {
     origin,
-    title
+    title: `${connectWith} ${title}`,
+    siteTitle: title
   };
 }

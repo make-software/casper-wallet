@@ -55,7 +55,7 @@ export function ConnectAnotherAccountPageContent() {
 
   const activeOrigin = useSelector(selectActiveOrigin);
   const {
-    connectAccountsWithEvent: connectAccounts,
+    connectAnotherAccountWithEvent: connectAccount,
     changeActiveAccountWithEvent: changeActiveAccount
   } = useAccountManager();
 
@@ -102,9 +102,9 @@ export function ConnectAnotherAccountPageContent() {
                 </LeftAlignedFlexColumn>
                 <Button
                   inline
-                  width="100"
+                  minWidth="86"
                   onClick={async () => {
-                    await connectAccounts([targetAccount.name], activeOrigin);
+                    await connectAccount(targetAccount.name, activeOrigin);
                     navigate(RouterPath.Home);
                   }}
                 >
@@ -137,7 +137,7 @@ export function ConnectAnotherAccountPageContent() {
               <Button
                 color="secondaryBlue"
                 inline
-                width="100"
+                minWidth="86"
                 onClick={async () => {
                   await changeActiveAccount(account.name);
                   navigate(RouterPath.Home);

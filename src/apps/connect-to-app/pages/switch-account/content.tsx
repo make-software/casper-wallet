@@ -138,7 +138,7 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
                     <Button
                       color="secondaryBlue"
                       inline
-                      width="100"
+                      minWidth="86"
                       onClick={async () => {
                         await changeActiveAccount(account.name);
                         await sendSdkResponseToSpecificTab(
