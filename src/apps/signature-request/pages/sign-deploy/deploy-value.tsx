@@ -1,7 +1,11 @@
 import React from 'react';
 import { CLValue } from 'casper-js-sdk';
 
-import { formatNumber, formatTimestamp } from '@libs/ui/utils/formatters';
+import {
+  formatNumber,
+  formatTimestamp,
+  motesToCSPR
+} from '@libs/ui/utils/formatters';
 import { Hash, HashVariant, Typography } from '@src/libs/ui';
 
 import {
@@ -34,9 +38,13 @@ export function DeployValue({
     }
 
     if (isKeyOfCurrencyValue(id)) {
+      const cspr = `${formatNumber(motesToCSPR(value), {
+        precision: { max: 5 }
+      })} CSPR`;
+
       return (
         <Hash
-          value={formatNumber(value)}
+          value={cspr}
           variant={HashVariant.BodyHash}
           color="contentPrimary"
         />
@@ -64,9 +72,15 @@ export function DeployValue({
     }
 
     if (isDeployArgValueNumber(value)) {
+      const numbers = isKeyOfCurrencyValue(id)
+        ? `${formatNumber(motesToCSPR(parsedValue), {
+            precision: { max: 5 }
+          })} CSPR`
+        : formatNumber(parsedValue);
+
       return (
         <Hash
-          value={formatNumber(parsedValue)}
+          value={numbers}
           variant={HashVariant.BodyHash}
           color="contentPrimary"
         />
