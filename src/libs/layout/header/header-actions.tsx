@@ -31,6 +31,11 @@ export function HeaderActions({
         <SvgIcon
           onClick={toggleNavigationMenu}
           color="contentOnFill"
+          dataTestId={
+            location.state?.showNavigationMenu
+              ? 'close-menu-button'
+              : 'open-menu-button'
+          }
           src={
             location.state?.showNavigationMenu
               ? 'assets/icons/burger-close.svg'

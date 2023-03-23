@@ -23,6 +23,7 @@ export interface SvgIconProps extends React.HTMLAttributes<Ref> {
   flipByAxis?: 'X' | 'Y';
   marginLeft?: 'small' | 'medium';
   marginRight?: 'small' | 'medium';
+  dataTestId?: string;
 }
 
 const getMargin = (size?: 'small' | 'medium') => {
@@ -94,6 +95,7 @@ export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
       flipByAxis,
       height,
       width,
+      dataTestId,
       ...props
     }: SvgIconProps,
     ref
@@ -119,6 +121,7 @@ export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
         onClick={handleClick}
         width={width}
         height={height}
+        data-testid={dataTestId}
         {...props}
       >
         <StyledReactSVG

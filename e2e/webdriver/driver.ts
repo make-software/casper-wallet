@@ -2,11 +2,12 @@ import { promises as fs } from 'fs';
 import { strict as assert } from 'assert';
 import {
   error as webdriverError,
-  WebElementCondition,
   ThenableWebDriver,
   WebElement,
   until,
-  By
+  By,
+  Condition,
+  WebDriver
 } from 'selenium-webdriver';
 // @ts-ignore TODO: clarify types for package
 import cssToXPath from 'css-to-xpath';
@@ -114,7 +115,14 @@ export class Driver {
     await new Promise(resolve => setTimeout(resolve, time));
   }
 
-  async wait(condition: WebElementCondition, timeout = this.timeout) {
+  async wait<T>(
+    condition:
+      | PromiseLike<T>
+      | Condition<T>
+      | ((driver: WebDriver) => T | PromiseLike<T>)
+      | Function,
+    timeout = this.timeout
+  ) {
     await this.driver.wait(condition, timeout);
   }
 
@@ -258,6 +266,10 @@ export class Driver {
 
   async getAllWindowHandles() {
     return await this.driver.getAllWindowHandles();
+  }
+
+  async getWindowHandle() {
+    return await this.driver.getWindowHandle();
   }
 
   async waitUntilXWindowHandles(x: number, delayStep = 1000, timeout = 5000) {
