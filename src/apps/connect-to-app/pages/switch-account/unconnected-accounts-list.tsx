@@ -43,7 +43,8 @@ export const UnconnectedAccountsList = ({
   const activeOrigin = useSelector(selectActiveOrigin);
 
   const { t } = useTranslation();
-  const { connectAccountsWithEvent: connectAccounts } = useAccountManager();
+  const { connectAnotherAccountWithEvent: connectAccount } =
+    useAccountManager();
 
   if (unconnectedAccountsList.length > 0) {
     return (
@@ -68,12 +69,9 @@ export const UnconnectedAccountsList = ({
               <Button
                 color="primaryRed"
                 inline
-                width="100"
+                minWidth="86"
                 onClick={async () => {
-                  await connectAccounts(
-                    [unconnectedAccount.name],
-                    activeOrigin
-                  );
+                  await connectAccount(unconnectedAccount.name, activeOrigin);
                   await sendSdkResponseToSpecificTab(
                     sdkMethod.switchAccountResponse(false, { requestId })
                   );

@@ -10,7 +10,10 @@ import {
   SpacingSize
 } from '@src/libs/layout';
 
-import { selectVaultAccountsByOriginDict } from '@src/background/redux/vault/selectors';
+import {
+  selectSiteNameByOriginDict,
+  selectVaultAccountsByOriginDict
+} from '@src/background/redux/vault/selectors';
 
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 
@@ -26,6 +29,7 @@ export function ConnectedSitesPage() {
   } = useAccountManager();
 
   const accountsByOrigin = useSelector(selectVaultAccountsByOriginDict);
+  const siteNameByOriginDict = useSelector(selectSiteNameByOriginDict);
 
   const isNoSitesConnected = !Object.entries(accountsByOrigin).length;
 
@@ -63,7 +67,9 @@ export function ConnectedSitesPage() {
         </Typography>
       </ParagraphContainer>
       {Object.entries(accountsByOrigin).map(([origin, accounts], index) => {
-        const siteTitle = origin.split('://')[1];
+        const siteOrigin = origin.split('://')[1];
+        const siteTitle = siteNameByOriginDict[origin];
+
         return (
           <List
             key={origin + 'list'}
@@ -73,19 +79,21 @@ export function ConnectedSitesPage() {
                 key={origin + 'header'}
                 siteOrder={index + 1}
                 siteTitle={siteTitle}
+                siteOrigin={siteOrigin}
                 disconnectSite={async () => {
                   await disconnectAllAccounts(origin);
                 }}
               />
             )}
             renderRow={(account, index, array) => {
-              const { name, publicKey } = account;
+              const { name, publicKey, imported } = account;
 
               return (
                 <SiteGroupItem
                   key={name}
                   name={name}
                   publicKey={publicKey}
+                  imported={imported}
                   handleOnClick={async () => {
                     if (array == null || array.length === 0) {
                       return;

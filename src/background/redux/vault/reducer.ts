@@ -8,10 +8,11 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
-  accountsConnected,
+  siteConnected,
   accountDisconnected,
   allAccountsDisconnected,
-  activeAccountChanged
+  activeAccountChanged,
+  anotherAccountConnected
 } from './actions';
 import { VaultState } from './types';
 
@@ -21,6 +22,7 @@ const initialState: State = {
   secretPhrase: null,
   accounts: [],
   accountNamesByOriginDict: {},
+  siteNameByOriginDict: {},
   activeAccountName: null
 };
 
@@ -33,6 +35,7 @@ export const reducer = createReducer(initialState)
       {
         payload: {
           accountNamesByOriginDict,
+          siteNameByOriginDict,
           accounts,
           activeAccountName,
           secretPhrase
@@ -40,6 +43,7 @@ export const reducer = createReducer(initialState)
       }
     ) => ({
       accountNamesByOriginDict,
+      siteNameByOriginDict,
       accounts,
       activeAccountName,
       secretPhrase
@@ -135,15 +139,32 @@ export const reducer = createReducer(initialState)
     }
   )
   .handleAction(
-    accountsConnected,
-    (state, { payload: { siteOrigin, accountNames } }) => ({
+    siteConnected,
+    (state, { payload: { siteOrigin, accountNames, siteTitle } }) => ({
       ...state,
+      siteNameByOriginDict: {
+        ...state?.siteNameByOriginDict,
+        [siteOrigin]: siteTitle
+      },
       accountNamesByOriginDict: {
         ...state.accountNamesByOriginDict,
         [siteOrigin]:
           state.accountNamesByOriginDict[siteOrigin]?.length > 0
             ? [...state.accountNamesByOriginDict[siteOrigin], ...accountNames]
             : [...accountNames]
+      }
+    })
+  )
+  .handleAction(
+    anotherAccountConnected,
+    (state, { payload: { siteOrigin, accountName } }) => ({
+      ...state,
+      accountNamesByOriginDict: {
+        ...state.accountNamesByOriginDict,
+        [siteOrigin]:
+          state.accountNamesByOriginDict[siteOrigin]?.length > 0
+            ? [...state.accountNamesByOriginDict[siteOrigin], accountName]
+            : [accountName]
       }
     })
   )

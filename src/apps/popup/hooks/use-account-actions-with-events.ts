@@ -2,9 +2,10 @@ import { useCallback } from 'react';
 import { Account } from '@src/background/redux/vault/types';
 import {
   activeAccountChanged,
-  accountsConnected,
+  siteConnected,
   accountDisconnected,
-  allAccountsDisconnected
+  allAccountsDisconnected,
+  anotherAccountConnected
 } from '@src/background/redux/vault/actions';
 
 import { useSelector } from 'react-redux';
@@ -92,13 +93,13 @@ export function useAccountManager() {
     [activeAccount?.name, accounts, connectedAccountNames, isLocked]
   );
 
-  const connectAccountsWithEvent = useCallback(
-    async (accountNames: string[], origin) => {
+  const connectSiteWithEvent = useCallback(
+    async (accountNames: string[], origin, siteTitle: string) => {
       if (!activeAccount?.name || origin == null || isLocked) {
         return;
       }
 
-      // connected accounts including active
+      // new connected accounts including active
       if (accountNames.includes(activeAccount.name)) {
         emitSdkEventToAllActiveTabs(
           sdkEvent.connectedAccountEvent({
@@ -108,13 +109,15 @@ export function useAccountManager() {
           })
         );
         dispatchToMainStore(
-          accountsConnected({
+          siteConnected({
             accountNames: accountNames,
-            siteOrigin: origin
+            siteOrigin: origin,
+            siteTitle
           })
         );
       } else {
-        // connected accounts not including active, so will switch active to connected
+        // new connected accounts not including active
+        // we'll switch active account to closest new
         const newActiveAccountFromConnected =
           findAccountInAListClosestToGivenAccountFilteredByNames(
             accounts,
@@ -137,15 +140,65 @@ export function useAccountManager() {
             activeAccountChanged(newActiveAccountFromConnected.name)
           );
           dispatchToMainStore(
-            accountsConnected({
+            siteConnected({
               accountNames: accountNames,
-              siteOrigin: origin
+              siteOrigin: origin,
+              siteTitle
             })
           );
         }
       }
     },
     [activeAccount, isLocked, accounts]
+  );
+
+  const connectAnotherAccountWithEvent = useCallback(
+    async (accountName: string, origin) => {
+      if (!activeAccount?.name || origin == null || isLocked) {
+        return;
+      }
+
+      // new connected account is active
+      if (accountName === activeAccount.name) {
+        emitSdkEventToAllActiveTabs(
+          sdkEvent.connectedAccountEvent({
+            isConnected: true,
+            isLocked: isLocked,
+            activeKey: activeAccount.publicKey
+          })
+        );
+        dispatchToMainStore(
+          anotherAccountConnected({
+            accountName,
+            siteOrigin: origin
+          })
+        );
+      } else {
+        // new connected account is not active
+        // we'll switch active account to new
+        const newActiveAccount = accounts.find(
+          account => account.name === accountName
+        );
+
+        if (newActiveAccount && newActiveAccount.name !== activeAccount.name) {
+          emitSdkEventToAllActiveTabs(
+            sdkEvent.changedConnectedAccountEvent({
+              isLocked: isLocked,
+              isConnected: true,
+              activeKey: newActiveAccount.publicKey
+            })
+          );
+          dispatchToMainStore(activeAccountChanged(newActiveAccount.name));
+          dispatchToMainStore(
+            anotherAccountConnected({
+              accountName,
+              siteOrigin: origin
+            })
+          );
+        }
+      }
+    },
+    [accounts, activeAccount, isLocked]
   );
 
   const disconnectAccountWithEvent = useCallback(
@@ -213,9 +266,10 @@ export function useAccountManager() {
   );
 
   return {
-    changeActiveAccountWithEvent: changeActiveAccountWithEvent,
-    connectAccountsWithEvent: connectAccountsWithEvent,
-    disconnectAccountWithEvent: disconnectAccountWithEvent,
-    disconnectAllAccountsWithEvent: disconnectAllAccountsWithEvent
+    changeActiveAccountWithEvent,
+    connectSiteWithEvent,
+    connectAnotherAccountWithEvent,
+    disconnectAccountWithEvent,
+    disconnectAllAccountsWithEvent
   };
 }
