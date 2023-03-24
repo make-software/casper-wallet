@@ -1,0 +1,23 @@
+/* license is located relative to this file at './Inter-OFL.txt' */
+@font-face {
+  font-family: 'Inter';
+  src:
+    local('Inter Regular'),
+    local('Inter-Regular'),
+    url('./Inter-VariableFont.woff2') format('woff2'),
+    url('./Inter-VariableFont.woff') format('woff');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+/* license is located relative to this file at './JetBrainsMono-OFL.txt' */
+@font-face {
+  font-family: 'JetBrains Mono';
+  src:
+    local('JetBrains Mono'),
+    local('JetBrains-Mono'),
+    url('./JetBrainsMono-VariableFont.woff2') format('woff2'),
+    url('./JetBrainsMono-VariableFont.woff') format('woff');
+  font-weight: 100 900;
+  font-display: swap;
+}
