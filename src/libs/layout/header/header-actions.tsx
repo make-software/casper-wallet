@@ -33,8 +33,8 @@ export function HeaderActions({
           color="contentOnFill"
           dataTestId={
             location.state?.showNavigationMenu
-              ? 'close-menu-button'
-              : 'open-menu-button'
+              ? 'menu-close-icon'
+              : 'menu-open-icon'
           }
           src={
             location.state?.showNavigationMenu
