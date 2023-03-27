@@ -8,6 +8,16 @@ const webpack = require('webpack'),
   TerserPlugin = require('terser-webpack-plugin'),
   TsconfigPaths = require('tsconfig-paths-webpack-plugin');
 
+const htmlWebpackPluginOptions = {
+  cache: false,
+  showErrors: true,
+  minify: false
+};
+
+const htmlLoaderOptions = {
+  sources: false
+};
+
 const {
   isChrome,
   isSafari,
@@ -113,6 +123,7 @@ const options = {
       {
         test: /\.html$/,
         loader: 'html-loader',
+        options: htmlLoaderOptions,
         exclude: /node_modules/
       },
       { test: /\.css$/i, use: ['style-loader', 'css-loader'] },
@@ -151,7 +162,11 @@ const options = {
   plugins: [
     new webpack.ProgressPlugin(),
     // expose and write the allowed env vars on the compiled bundle
-    new webpack.EnvironmentPlugin(['NODE_ENV']),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+      'process.env.MOCK_STATE': JSON.stringify(process.env.MOCK_STATE)
+    }),
+    // manifest file generation
     new CopyWebpackPlugin({
       patterns: [
         {
@@ -168,6 +183,7 @@ const options = {
               ...JSON.parse(content.toString()),
               name: pkg.name,
               version: pkg.version,
+              version_name: pkg.version + ' (Open Beta)',
               author: pkg.author,
               description: pkg.description,
               ...(isDev
@@ -226,11 +242,22 @@ const options = {
         }
       ]
     }),
+    // copy locales
     new CopyWebpackPlugin({
       patterns: [
         {
           from: 'src/assets/locales',
           to: path.join(__dirname, buildDir, 'locales'),
+          force: true
+        }
+      ]
+    }),
+    // copy assets
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: 'src/assets/fonts',
+          to: path.join(__dirname, buildDir, 'assets/fonts'),
           force: true
         }
       ]
@@ -257,7 +284,7 @@ const options = {
       template: path.join(__dirname, 'src', 'apps', 'popup', 'index.html'),
       filename: 'popup.html',
       chunks: ['popup'],
-      cache: false
+      ...htmlWebpackPluginOptions
     }),
     new HtmlWebpackPlugin({
       template: path.join(
@@ -269,7 +296,7 @@ const options = {
       ),
       filename: 'import-account-with-file.html',
       chunks: ['importAccountWithFile'],
-      cache: false
+      ...htmlWebpackPluginOptions
     }),
     new HtmlWebpackPlugin({
       template: path.join(
@@ -281,7 +308,7 @@ const options = {
       ),
       filename: 'connect-to-app.html',
       chunks: ['connectToApp'],
-      cache: false
+      ...htmlWebpackPluginOptions
     }),
     new HtmlWebpackPlugin({
       template: path.join(
@@ -293,13 +320,13 @@ const options = {
       ),
       filename: 'signature-request.html',
       chunks: ['signatureRequest'],
-      cache: false
+      ...htmlWebpackPluginOptions
     }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, 'src', 'apps', 'onboarding', 'index.html'),
       filename: 'onboarding.html',
       chunks: ['onboarding'],
-      cache: false
+      ...htmlWebpackPluginOptions
     }),
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer']

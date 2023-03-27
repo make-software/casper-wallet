@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as firefox from 'selenium-webdriver/firefox';
 import { ThenableWebDriver, Browser } from 'selenium-webdriver';
 import { Builder, until, By } from 'selenium-webdriver';
+import remote from 'selenium-webdriver/remote';
 
 import { WebDriverObject } from './types';
 import { ExtensionBuildPath } from '../../constants';
@@ -50,6 +51,7 @@ export class FirefoxDriver {
       ExtensionBuildPath.Firefox
     );
     const internalExtensionId = await fxDriver.getInternalId();
+    driver.setFileDetector(new remote.FileDetector());
 
     return {
       driver,

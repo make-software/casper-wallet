@@ -80,7 +80,6 @@ const TextAndIconContainer = styled(CenteredFlexColumn)`
 
 const WordListContainer = styled(FlexRow)`
   align-content: flex-start;
-  flex-wrap: wrap;
 
   padding: ${({ theme }) => theme.padding[1.6]};
 `;
@@ -90,6 +89,7 @@ interface RenderHeaderProps {
   hiddenWordIndexes: number[];
   selectedHiddenWordIndexes: number[];
   onHiddenWordClick: (index: number) => void;
+  handleResetPhrase: () => void;
 }
 
 interface RenderFooterProps {
@@ -179,6 +179,11 @@ export function SecretPhraseWordsView({
     ]);
   };
 
+  const handleResetPhrase = () => {
+    setSelectedHiddenWordIndexes([]);
+    setPartialPhrase(initialPartialPhrase);
+  };
+
   return (
     <SecretPhraseWordsViewContainer>
       {confirmationMode && renderHeader != null && (
@@ -187,7 +192,8 @@ export function SecretPhraseWordsView({
             phrase,
             hiddenWordIndexes,
             selectedHiddenWordIndexes,
-            onHiddenWordClick
+            onHiddenWordClick,
+            handleResetPhrase
           })}
         </HeaderContainer>
       )}
@@ -205,7 +211,11 @@ export function SecretPhraseWordsView({
             </TextAndIconContainer>
           </BlurredSecretPhraseWordsViewOverlayContainer>
         )}
-        <WordListContainer gap={SpacingSize.Small} data-testid="word-list">
+        <WordListContainer
+          gap={SpacingSize.Small}
+          wrap="wrap"
+          data-testid="word-list"
+        >
           {(confirmationMode ? partialPhrase : phrase).map((word, index) => {
             return (
               <WordTag

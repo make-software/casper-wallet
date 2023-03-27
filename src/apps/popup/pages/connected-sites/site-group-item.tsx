@@ -20,18 +20,25 @@ interface SiteGroupItemProps {
   name: string;
   publicKey: string;
   handleOnClick: () => void;
+  imported?: boolean;
 }
 
 export function SiteGroupItem({
   name,
   publicKey,
-  handleOnClick
+  handleOnClick,
+  imported
 }: SiteGroupItemProps) {
   return (
     <SiteGroupItemContainer>
       <AccountNameAndPublicKeyContainer>
         <Typography type="body">{name}</Typography>
-        <Hash variant={HashVariant.CaptionHash} value={publicKey} truncated />
+        <Hash
+          variant={HashVariant.CaptionHash}
+          value={publicKey}
+          truncated
+          withTag={imported}
+        />
       </AccountNameAndPublicKeyContainer>
       <SvgIcon onClick={handleOnClick} src="assets/icons/close.svg" />
     </SiteGroupItemContainer>

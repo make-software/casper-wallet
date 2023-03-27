@@ -1,7 +1,7 @@
 {
   "name": "Casper Wallet",
-  "description": "Casper Wallet - tool for signing transactions on the blockchain.",
-  "version": "1.2.4",
+  "description": "Securely manage your CSPR tokens, interact with dapps and sign transactions with Casper Wallet, the Go-To self-custody wallet for the Casper blockchain.",
+  "version": "1.2.5",
   "author": "MAKE LLC",
   "scripts": {
     "devtools:redux": "redux-devtools --hostname=localhost",
@@ -26,8 +26,10 @@
     "start:safari": "npm run dev:build:manifest:v2:safari && ./convert-web-extension.sh && NODE_ENV=development BABEL_ENV=development BROWSER=safari PORT=3003 node utils/webserver.js",
     "test:e2e:chrome": "npm run build:chrome && npm run pack-extension:chrome && SELENIUM_BROWSER=chrome jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests && npm run remove-packed-extension:chrome",
     "test:e2e:firefox": "npm run build:firefox && SELENIUM_BROWSER=firefox jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests",
-    "test:e2e:chrome:headless": "npm run build:chrome && npm run pack-extension:chrome && SELENIUM_BROWSER=chrome SELENIUM_HEADLESS=true jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests && npm run remove-packed-extension:chrome",
-    "test:e2e:firefox:headless": "npm run build:firefox && SELENIUM_BROWSER=firefox SELENIUM_HEADLESS=true jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests",
+    "test:e2e:chrome:headless:onboarding": "npm run build:chrome && npm run pack-extension:chrome && SELENIUM_BROWSER=chrome SELENIUM_HEADLESS=true jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests/onboarding-flow && npm run remove-packed-extension:chrome",
+    "test:e2e:chrome:headless:popup": "MOCK_STATE=true npm run build:chrome && npm run pack-extension:chrome && SELENIUM_BROWSER=chrome SELENIUM_HEADLESS=true jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests/popup && npm run remove-packed-extension:chrome",
+    "test:e2e:firefox:headless:onboarding": "npm run build:firefox && SELENIUM_BROWSER=firefox SELENIUM_HEADLESS=true jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests/onboarding-flow",
+    "test:e2e:firefox:headless:popup": "MOCK_STATE=true npm run build:firefox && SELENIUM_BROWSER=firefox SELENIUM_HEADLESS=true jest --config=jest.e2e.config.js --detectOpenHandles e2e/tests/popup",
     "format:check": "prettier --check 'src/*.{js,jsx,ts,tsx,json,md}'",
     "format:write": "prettier --write 'src/*.{js,jsx,ts,tsx,json,md}'",
     "lint": "eslint ./src --ext .js,.jsx,.ts,.tsx",

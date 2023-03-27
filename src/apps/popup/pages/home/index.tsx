@@ -48,6 +48,7 @@ import {
 } from '@libs/ui/utils/formatters';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import { getBlockExplorerAccountUrl } from '@src/constants';
+import { selectCasperUrlsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
 
 import {
   selectActiveOrigin,
@@ -109,6 +110,9 @@ export function HomePageContent() {
   const connectedAccounts = useSelector((state: RootState) =>
     selectConnectedAccountsWithOrigin(state)
   );
+  const { casperLiveUrl, casperApiUrl } = useSelector(
+    selectCasperUrlsBaseOnActiveNetworkSetting
+  );
 
   const handleConnectAccount = useCallback(() => {
     if (!activeAccount || isActiveAccountConnected) {
@@ -126,7 +130,9 @@ export function HomePageContent() {
     dispatchFetchActiveAccountBalance(activeAccount?.publicKey)
       .then(({ payload: { balance, currencyRate } }) => {
         if (balance != null && currencyRate != null) {
-          const amount = formatNumber(motesToCSPR(balance));
+          const amount = formatNumber(motesToCSPR(balance), {
+            precision: { max: 5 }
+          });
           const fiatAmount = formatCurrency(
             motesToCurrency(balance, currencyRate),
             'USD',
@@ -161,7 +167,7 @@ export function HomePageContent() {
       .finally(() => {
         setLoadingAccountInfo(false);
       });
-  }, [activeAccount?.publicKey]);
+  }, [activeAccount?.publicKey, casperApiUrl]);
 
   return (
     <HomePageContentContainer>
@@ -174,7 +180,10 @@ export function HomePageContent() {
                 displayContext="home"
               />
               <Link
-                href={getBlockExplorerAccountUrl(activeAccount.publicKey)}
+                href={getBlockExplorerAccountUrl(
+                  casperLiveUrl,
+                  activeAccount.publicKey
+                )}
                 target="_blank"
                 color="inherit"
                 title={t('View account in CSPR.live')}
@@ -200,7 +209,7 @@ export function HomePageContent() {
               />
             </NameAndAddressContainer>
             <BalanceContainer>
-              <FlexRow gap={SpacingSize.Small}>
+              <FlexRow gap={SpacingSize.Small} wrap="wrap">
                 <Typography type="CSPRBold">{balance.amount}</Typography>
                 <Typography type="CSPRLight" color="contentSecondary">
                   CSPR

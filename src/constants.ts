@@ -1,16 +1,7 @@
-const BASE_URL_TESTNET =
-  'https://event-store-api-clarity-testnet.make.services';
-
-const CSPR_LIVE_URL = 'https://testnet.cspr.live';
-
 const SECOND = 1000;
 
-export function getCasperApiUrl() {
-  return BASE_URL_TESTNET;
-}
-
-export const getBlockExplorerAccountUrl = (hash: string) =>
-  `${CSPR_LIVE_URL}/account/${hash}`;
+export const getBlockExplorerAccountUrl = (baseUrl: string, hash: string) =>
+  `${baseUrl}/account/${hash}`;
 
 export const FETCH_QUERY_OPTIONS = {
   // cached for 30 sec
@@ -18,3 +9,18 @@ export const FETCH_QUERY_OPTIONS = {
 };
 
 export const LOGIN_RETRY_ATTEMPTS_LIMIT = 5;
+
+export enum CasperLiveUrl {
+  MainnetUrl = 'https://cspr.live',
+  TestnetUrl = 'https://testnet.cspr.live'
+}
+
+export enum CasperApiUrl {
+  MainnetUrl = 'https://event-store-api-clarity-mainnet.make.services',
+  TestnetUrl = 'https://event-store-api-clarity-testnet.make.services'
+}
+
+export enum NetworkSetting {
+  'Mainnet' = 'Mainnet',
+  'Testnet' = 'Testnet'
+}

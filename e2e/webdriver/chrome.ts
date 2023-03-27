@@ -1,5 +1,6 @@
 import * as chrome from 'selenium-webdriver/chrome';
 import { Builder, ThenableWebDriver, Browser } from 'selenium-webdriver';
+import remote from 'selenium-webdriver/remote';
 
 import { WebDriverObject } from './types';
 import { extensionName } from '../../constants';
@@ -63,6 +64,7 @@ export class ChromeDriver {
     const driver = builder.build();
     const chromeDriver = new ChromeDriver(driver);
     const extensionId = await chromeDriver.getExtensionIdByName(extensionName);
+    driver.setFileDetector(new remote.FileDetector());
 
     return {
       driver,

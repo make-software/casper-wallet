@@ -42,7 +42,8 @@ export function ConfirmSecretPhrasePageContent({
           phrase,
           hiddenWordIndexes,
           selectedHiddenWordIndexes,
-          onHiddenWordClick
+          onHiddenWordClick,
+          handleResetPhrase
         }) => (
           <WordPicker
             dataTestId="word-picker"
@@ -50,6 +51,7 @@ export function ConfirmSecretPhrasePageContent({
             hiddenWordIndexes={hiddenWordIndexes}
             selectedHiddenWordIndexes={selectedHiddenWordIndexes}
             onHiddenWordClick={onHiddenWordClick}
+            handleResetPhrase={handleResetPhrase}
           />
         )}
       />

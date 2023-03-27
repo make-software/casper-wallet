@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { getType, isActionOf } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 import {
@@ -17,11 +17,14 @@ export const useSubscribeToRedux = ({
   windowInitAction,
   setPopupState
 }: Props) => {
-  function handleStateUpdate(message: BackgroundEvent) {
-    if (isActionOf(backgroundEvent.popupStateUpdated)(message)) {
-      setPopupState(message.payload);
-    }
-  }
+  const handleStateUpdate = useCallback(
+    (message: BackgroundEvent) => {
+      if (isActionOf(backgroundEvent.popupStateUpdated)(message)) {
+        setPopupState(message.payload);
+      }
+    },
+    [setPopupState]
+  );
 
   useEffect(() => {
     if (!browser.runtime.onMessage.hasListener(handleStateUpdate)) {
@@ -35,5 +38,5 @@ export const useSubscribeToRedux = ({
     return () => {
       browser.runtime.onMessage.removeListener(handleStateUpdate);
     };
-  }, []);
+  }, [handleStateUpdate, windowInitAction]);
 };

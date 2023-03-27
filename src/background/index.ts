@@ -12,12 +12,13 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
-  accountsConnected,
+  siteConnected,
   activeAccountChanged,
   allAccountsDisconnected,
   vaultReseted,
   vaultLoaded,
-  secretPhraseCreated
+  secretPhraseCreated,
+  anotherAccountConnected
 } from '@src/background/redux/vault/actions';
 import {
   selectIsActiveAccountConnectedWithOrigin,
@@ -83,9 +84,13 @@ import {
 } from './redux/login-retry-count/actions';
 import { emitSdkEventToAllActiveTabs } from './emit-sdk-event-to-all-active-tabs';
 import { loginRetryLockoutTimeSet } from './redux/login-retry-lockout-time/actions';
-import { timeoutDurationSettingChanged } from './redux/timeout-duration-setting/actions';
 import { lastActivityTimeRefreshed } from './redux/last-activity-time/actions';
+import {
+  activeNetworkSettingChanged,
+  activeTimeoutDurationSettingChanged
+} from './redux/settings/actions';
 import { activeOriginChanged } from './redux/active-origin/actions';
+import { selectCasperUrlsBaseOnActiveNetworkSetting } from './redux/settings/selectors';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -334,9 +339,11 @@ browser.runtime.onMessage.addListener(
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeAccountChanged):
-          case getType(timeoutDurationSettingChanged):
+          case getType(activeTimeoutDurationSettingChanged):
+          case getType(activeNetworkSettingChanged):
           case getType(lastActivityTimeRefreshed):
-          case getType(accountsConnected):
+          case getType(siteConnected):
+          case getType(anotherAccountConnected):
           case getType(accountDisconnected):
           case getType(allAccountsDisconnected):
           case getType(windowIdChanged):
@@ -358,10 +365,17 @@ browser.runtime.onMessage.addListener(
 
           // SERVICE MESSAGE HANDLERS
           case getType(serviceMessage.fetchBalanceRequest): {
+            const { casperApiUrl } = selectCasperUrlsBaseOnActiveNetworkSetting(
+              store.getState()
+            );
+
             try {
               const [balance, rate] = await Promise.all([
-                fetchAccountBalance({ publicKey: action.payload.publicKey }),
-                fetchCurrencyRate()
+                fetchAccountBalance({
+                  publicKey: action.payload.publicKey,
+                  casperApiUrl
+                }),
+                fetchCurrencyRate({ casperApiUrl })
               ]);
 
               return sendResponse(
@@ -378,9 +392,14 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchAccountInfoRequest): {
+            const { casperApiUrl } = selectCasperUrlsBaseOnActiveNetworkSetting(
+              store.getState()
+            );
+
             try {
               const { data: accountInfo } = await fetchAccountInfo({
-                accountHash: action.payload.accountHash
+                accountHash: action.payload.accountHash,
+                casperApiUrl
               });
 
               return sendResponse(
@@ -394,9 +413,14 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchAccountListInfoRequest): {
+            const { casperApiUrl } = selectCasperUrlsBaseOnActiveNetworkSetting(
+              store.getState()
+            );
+
             try {
               const { data: accountsInfoList } = await fetchAccountListInfo({
-                accountsHash: action.payload.accountsHash
+                accountsHash: action.payload.accountsHash,
+                casperApiUrl
               });
 
               return sendResponse(
