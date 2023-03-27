@@ -1,3 +1,4 @@
 export enum AppRoutes {
-  Onboarding = 'onboarding'
+  Onboarding = 'onboarding',
+  Popup = 'popup'
 }

@@ -5,7 +5,7 @@ import { Driver } from '../../webdriver/driver';
 import { buildWebDriver } from '../../webdriver';
 import { AppRoutes } from '../../app-routes';
 import { recoverSecretPhrase } from '../../__fixtures';
-import { getUrlPath } from '../../utils/helpers';
+import { byText, getUrlPath } from '../../utils/helpers';
 import { createPassword } from '../common';
 
 describe('Onboarding UI: recover secret phrase flow [happy path]', () => {
@@ -16,7 +16,7 @@ describe('Onboarding UI: recover secret phrase flow [happy path]', () => {
     await driver.navigate(AppRoutes.Onboarding);
     // This testsuits should test a scenario for recovery wallet, so we should navigate to start place
     // Welcome page
-    await driver.clickElement(By.xpath("//*[text()='Get started']"));
+    await driver.clickElement(byText('Get started'));
     // Create password page
     await createPassword(driver);
   });
@@ -24,10 +24,11 @@ describe('Onboarding UI: recover secret phrase flow [happy path]', () => {
   afterAll(async () => {
     await driver.quit();
   });
+
   describe('`Create Secret Phrase` page', () => {
     it('should navigate to `Recover From Secret Phrase` page when the user clicked on `Import an existing secret recovery phrase` button', async () => {
       await driver.clickElement(
-        By.xpath("//*[text()='Import an existing secret recovery phrase']")
+        byText('Import an existing secret recovery phrase')
       );
 
       assert.equal(
@@ -44,9 +45,7 @@ describe('Onboarding UI: recover secret phrase flow [happy path]', () => {
         recoverSecretPhrase
       );
 
-      await driver.clickElement(
-        By.xpath("//button[text()='Recover my wallet']")
-      );
+      await driver.clickElement(byText('Recover my wallet'));
 
       assert.notEqual(
         await driver.driver.getCurrentUrl().then(getUrlPath),

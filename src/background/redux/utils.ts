@@ -22,6 +22,8 @@ import { LastActivityTimeState } from './last-activity-time/reducer';
 import { SettingsState } from './settings/types';
 import { ActiveOriginState } from './active-origin/types';
 
+import { initialStateForPopupTests } from '../../../e2e/__fixtures';
+
 declare global {
   interface Window {
     __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: any;
@@ -37,6 +39,8 @@ export const composeEnhancers =
         port: 8000
       })
     : compose;
+// If this flag is true, we initialize the initial state for the tests
+const isMockStateEnable = Boolean(process.env.MOCK_STATE);
 
 export const VAULT_CIPHER_KEY = 'zazXu8w9GyCtxZ';
 export const KEYS_KEY = '2yNVAEQJB5rxMg';
@@ -77,14 +81,16 @@ export async function getExistingMainStoreSingletonOrInit() {
 
   if (storeSingleton == null) {
     // console.warn('STORE INIT', state);
-    storeSingleton = createStore({
-      vaultCipher,
-      keys,
-      loginRetryCount,
-      loginRetryLockoutTime,
-      lastActivityTime,
-      settings
-    });
+    storeSingleton = isMockStateEnable
+      ? createStore(initialStateForPopupTests as PopupState)
+      : createStore({
+          vaultCipher,
+          keys,
+          loginRetryCount,
+          loginRetryLockoutTime,
+          lastActivityTime,
+          settings
+        });
     // send start action
     storeSingleton.dispatch(startBackground());
     // on updates propagate new state to replicas and also persist encrypted vault

@@ -162,7 +162,10 @@ const options = {
   plugins: [
     new webpack.ProgressPlugin(),
     // expose and write the allowed env vars on the compiled bundle
-    new webpack.EnvironmentPlugin(['NODE_ENV']),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+      'process.env.MOCK_STATE': JSON.stringify(process.env.MOCK_STATE)
+    }),
     // manifest file generation
     new CopyWebpackPlugin({
       patterns: [
