@@ -22,8 +22,6 @@ import { LastActivityTimeState } from './last-activity-time/reducer';
 import { SettingsState } from './settings/types';
 import { ActiveOriginState } from './active-origin/types';
 
-import { initialStateForPopupTests } from '../../../e2e/__fixtures';
-
 declare global {
   interface Window {
     __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: any;
@@ -81,16 +79,19 @@ export async function getExistingMainStoreSingletonOrInit() {
 
   if (storeSingleton == null) {
     // console.warn('STORE INIT', state);
-    storeSingleton = isMockStateEnable
-      ? createStore(initialStateForPopupTests as PopupState)
-      : createStore({
-          vaultCipher,
-          keys,
-          loginRetryCount,
-          loginRetryLockoutTime,
-          lastActivityTime,
-          settings
-        });
+    if (isMockStateEnable) {
+      const { initialStateForPopupTests } = await import('@src/constants');
+      storeSingleton = createStore(initialStateForPopupTests as PopupState);
+    } else {
+      storeSingleton = createStore({
+        vaultCipher,
+        keys,
+        loginRetryCount,
+        loginRetryLockoutTime,
+        lastActivityTime,
+        settings
+      });
+    }
     // send start action
     storeSingleton.dispatch(startBackground());
     // on updates propagate new state to replicas and also persist encrypted vault
