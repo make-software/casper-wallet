@@ -19,6 +19,7 @@ import {
 import {
   Avatar,
   Button,
+  getCSPRSize,
   Hash,
   HashDisplayContext,
   HashVariant,
@@ -210,8 +211,17 @@ export function HomePageContent() {
             </NameAndAddressContainer>
             <BalanceContainer>
               <FlexRow gap={SpacingSize.Small} wrap="wrap">
-                <Typography type="CSPRBold">{balance.amount}</Typography>
-                <Typography type="CSPRLight" color="contentSecondary">
+                <Typography
+                  type="CSPRBold"
+                  csprSize={getCSPRSize(balance.amount.length)}
+                >
+                  {balance.amount}
+                </Typography>
+                <Typography
+                  type="CSPRLight"
+                  color="contentSecondary"
+                  csprSize={getCSPRSize(balance.amount.length)}
+                >
                   CSPR
                 </Typography>
               </FlexRow>
