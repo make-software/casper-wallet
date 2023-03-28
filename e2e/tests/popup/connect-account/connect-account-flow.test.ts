@@ -27,10 +27,15 @@ describe('Popup UI: Connect account', () => {
     assert(await driver.findElement(byText('Casper Wallet Playground')));
   });
 
-  it('should open connect account window and unlock vault', async () => {
+  it('should open connect account window', async () => {
     playgroundWindow = await driver.getWindowHandle();
 
     await switchToNewWindow(driver, playgroundWindow, 'Connect');
+
+    assert.ok(await driver.findElement(byText('Your wallet is locked')));
+  });
+
+  it('should unlock vault', async () => {
     await unlockVault(driver);
 
     assert.ok(
