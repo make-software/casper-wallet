@@ -33,7 +33,7 @@ export interface BodyStylesProps extends BaseProps {
   fontSize?: CSPRSize;
 }
 
-export const getFontSize = (length: number) => {
+export const getFontSizeBasedOnTextLength = (length: number) => {
   if (length >= 21) {
     return '1.8rem';
   } else if (length >= 16) {
