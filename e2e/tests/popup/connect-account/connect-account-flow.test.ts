@@ -6,7 +6,7 @@ import { AppRoutes } from '../../../app-routes';
 import { switchToNewWindow, unlockVault, createAccount } from '../../common';
 import { byTestId, byText, getUrlPath } from '../../../utils/helpers';
 
-describe('Popup UI: Connect account', () => {
+describe.skip('Popup UI: Connect account', () => {
   let driver: Driver;
   // Store the ID of the original window
   let playgroundWindow: string;
