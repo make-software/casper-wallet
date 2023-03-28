@@ -80,7 +80,7 @@ export async function getExistingMainStoreSingletonOrInit() {
   if (storeSingleton == null) {
     // console.warn('STORE INIT', state);
     if (isMockStateEnable) {
-      const { initialStateForPopupTests } = await import('@src/constants');
+      const { initialStateForPopupTests } = await import('@src/fixtures');
       storeSingleton = createStore(initialStateForPopupTests as PopupState);
     } else {
       storeSingleton = createStore({
