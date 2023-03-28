@@ -19,7 +19,7 @@ import {
 import {
   Avatar,
   Button,
-  getCSPRSize,
+  getFontSize,
   Hash,
   HashDisplayContext,
   HashVariant,
@@ -213,14 +213,14 @@ export function HomePageContent() {
               <FlexRow gap={SpacingSize.Small} wrap="wrap">
                 <Typography
                   type="CSPRBold"
-                  csprSize={getCSPRSize(balance.amount.length)}
+                  fontSize={getFontSize(balance.amount.length)}
                 >
                   {balance.amount}
                 </Typography>
                 <Typography
                   type="CSPRLight"
                   color="contentSecondary"
-                  csprSize={getCSPRSize(balance.amount.length)}
+                  fontSize={getFontSize(balance.amount.length)}
                 >
                   CSPR
                 </Typography>
