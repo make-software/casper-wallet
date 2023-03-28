@@ -1,4 +1,5 @@
 import { strict as assert } from 'assert';
+import { until } from "selenium-webdriver";
 
 import { Driver } from '../../../webdriver/driver';
 import { buildWebDriver } from '../../../webdriver';
@@ -6,7 +7,7 @@ import { AppRoutes } from '../../../app-routes';
 import { switchToNewWindow, unlockVault, createAccount } from '../../common';
 import { byTestId, byText, getUrlPath } from '../../../utils/helpers';
 
-describe.skip('Popup UI: Connect account', () => {
+describe('Popup UI: Connect account', () => {
   let driver: Driver;
   // Store the ID of the original window
   let playgroundWindow: string;
@@ -37,6 +38,11 @@ describe.skip('Popup UI: Connect account', () => {
 
   it('should unlock vault', async () => {
     await unlockVault(driver);
+
+    // Need to wait for the finishing script for unlock vault
+    await driver.wait(
+      until.elementLocated(byText('Connect with Casper Wallet Playground'))
+    );
 
     assert.ok(
       await driver.findElement(byText('Connect with Casper Wallet Playground'))
