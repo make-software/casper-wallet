@@ -99,6 +99,10 @@ export class Driver {
     );
   }
 
+  async get(url: string) {
+    await this.driver.get(url);
+  }
+
   async fill(rawLocator: RawLocator, input: string) {
     const element = await this.findElement(rawLocator);
     await element.fill(input);

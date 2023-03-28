@@ -5,7 +5,7 @@ import { Driver } from '../../../webdriver/driver';
 import { buildWebDriver } from '../../../webdriver';
 import { AppRoutes } from '../../../app-routes';
 import { secretKeyPath } from '../../../__fixtures';
-import { unlockVault } from '../../common';
+import { switchToNewWindow, unlockVault } from '../../common';
 import { byText, byTestId, getUrlPath } from '../../../utils/helpers';
 
 describe('Popup UI: Import account with file', () => {
@@ -35,24 +35,7 @@ describe('Popup UI: Import account with file', () => {
   it('should open import account window', async () => {
     popupWindow = await driver.getWindowHandle();
 
-    // Check if there is one window open
-    assert((await driver.getAllWindowHandles()).length === 1);
-
-    await driver.clickElement(byText('Import account'));
-
-    // Wait for the new window
-    await driver.wait(
-      async () => (await driver.getAllWindowHandles()).length === 2,
-      10000
-    );
-
-    // Loop through until we find a new window handle
-    const windows = await driver.getAllWindowHandles();
-    for (const handle of windows) {
-      if (handle !== popupWindow) {
-        await driver.switchToWindow(handle);
-      }
-    }
+    await switchToNewWindow(driver, popupWindow, 'Import account');
 
     assert.ok(
       driver.findElement(byText('Import account from secret key file'))
