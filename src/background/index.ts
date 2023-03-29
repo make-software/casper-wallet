@@ -162,7 +162,7 @@ const updateOrigin = async (windowId: number) => {
   if (activeTabs.length === 1 && tab0.url && hasHttpPrefix(tab0.url)) {
     newActiveOrigin = getUrlOrigin(tab0.url);
   }
-  console.log(`origin changed: ${newActiveOrigin}`);
+
   store.dispatch(activeOriginChanged(newActiveOrigin));
 
   const state = store.getState();
@@ -172,11 +172,6 @@ const updateOrigin = async (windowId: number) => {
     const isActiveAccountConnected =
       selectIsActiveAccountConnectedWithOrigin(state);
     const isLocked = selectVaultIsLocked(state);
-    console.log(
-      `dispatch: locked ${isLocked} connected ${isActiveAccountConnected} key ${
-        isActiveAccountConnected && !isLocked ? activeAccount?.publicKey : null
-      } `
-    );
 
     emitSdkEventToActiveTabsWithOrigin(
       newActiveOrigin,

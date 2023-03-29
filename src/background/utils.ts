@@ -18,7 +18,6 @@ export async function emitSdkEventToActiveTabs(
         if (action == null) {
           return;
         }
-        console.log('EVENT::' + action.type + ' => ' + tab.url);
         browser.tabs.sendMessage(tab.id, action);
       }
     } else {
@@ -47,7 +46,6 @@ export async function emitSdkEventToActiveTabsWithOrigin(
         hasHttpPrefix(tab.url) &&
         getUrlOrigin(tab.url) === origin
       ) {
-        console.log('EVENT::' + action.type + ' => ' + tab.url);
         browser.tabs.sendMessage(tab.id, action);
       }
     } else {
