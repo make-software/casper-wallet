@@ -8,30 +8,12 @@ import {
 } from './sdk-method';
 import { sdkEvent, SdkEvent } from './sdk-event';
 import { getType } from 'typesafe-actions';
-import { activeOriginChanged } from 'src/background/redux/active-origin/actions';
 import { CasperWalletEventType } from './sdk-event-type';
 
-// Sync activeOrigin of active tab with store
-function syncActiveOriginWithStore() {
-  let activeOrigin: string | null = null;
-  if (document.visibilityState === 'visible') {
-    activeOrigin = window.location.origin;
-  }
-  // console.log('CONTENT ACTIVE ORIGIN:', activeOrigin);
-  if (chrome.runtime?.id) {
-    // update state
-    browser.runtime
-      .sendMessage(activeOriginChanged(activeOrigin))
-      .catch(err => {
-        console.error('Content: sync active origin:', err);
-      });
-  } else {
-    // cleanup();
-    // init();
-  }
-}
-
-async function handleSdkResponseOrEvent(message: SdkEvent | SdkMethod) {
+async function handleSdkResponseOrEvent(
+  message: SdkEvent | SdkMethod,
+  sender: browser.Runtime.MessageSender
+) {
   // Todo for Piotr: design convention for delayed sdk request responses
   if (isSDKMethod(message)) {
     switch (message.type) {
@@ -153,11 +135,6 @@ function init() {
   // idempotent, doesn't need cleanup
   injectSdkScript();
 
-  window.addEventListener('load', syncActiveOriginWithStore);
-  window.addEventListener('visibilitychange', syncActiveOriginWithStore);
-  window.addEventListener('focus', syncActiveOriginWithStore);
-  window.addEventListener('blur', syncActiveOriginWithStore);
-
   browser.runtime.onMessage.addListener(handleSdkResponseOrEvent);
   window.addEventListener(SdkMethodEventType.Request, handleSdkRequest);
 }
@@ -168,11 +145,6 @@ window.dispatchEvent(new CustomEvent(cleanupEventType));
 function cleanup() {
   // console.error('CONTENT CLEANUP');
   document.removeEventListener(cleanupEventType, cleanup);
-
-  window.removeEventListener('load', syncActiveOriginWithStore);
-  window.removeEventListener('visibilitychange', syncActiveOriginWithStore);
-  window.removeEventListener('focus', syncActiveOriginWithStore);
-  window.removeEventListener('blur', syncActiveOriginWithStore);
 
   browser.runtime.onMessage.removeListener(handleSdkResponseOrEvent);
   window.removeEventListener(SdkMethodEventType.Request, handleSdkRequest);

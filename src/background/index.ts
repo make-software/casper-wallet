@@ -14,7 +14,7 @@ import {
   accountRenamed,
   siteConnected,
   activeAccountChanged,
-  allAccountsDisconnected,
+  siteDisconnected,
   vaultReseted,
   vaultLoaded,
   secretPhraseCreated,
@@ -82,7 +82,7 @@ import {
   loginRetryCountIncremented,
   loginRetryCountReseted
 } from './redux/login-retry-count/actions';
-import { emitSdkEventToAllActiveTabs } from './emit-sdk-event-to-all-active-tabs';
+import { emitSdkEventToActiveTabsWithOrigin } from './utils';
 import { loginRetryLockoutTimeSet } from './redux/login-retry-lockout-time/actions';
 import { lastActivityTimeRefreshed } from './redux/last-activity-time/actions';
 import {
@@ -91,6 +91,8 @@ import {
 } from './redux/settings/actions';
 import { activeOriginChanged } from './redux/active-origin/actions';
 import { selectCasperUrlsBaseOnActiveNetworkSetting } from './redux/settings/selectors';
+import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
+import { selectActiveOrigin } from './redux/root-selector';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -137,6 +139,65 @@ browser.runtime.onInstalled.addListener(async () => {
     }
   });
 });
+
+const updateOrigin = async (windowId: number) => {
+  // skip when window lost focus
+  if (windowId === -1) {
+    return;
+  }
+
+  const window = await browser.windows.get(windowId);
+  // skip when non-normal windows
+  if (window.type !== 'normal') {
+    return;
+  }
+
+  const store = await getExistingMainStoreSingletonOrInit();
+
+  const activeTabs = await browser.tabs.query({ active: true, windowId });
+  const tab0 = activeTabs[0];
+
+  let newActiveOrigin = null;
+  // use only http based windows
+  if (activeTabs.length === 1 && tab0.url && hasHttpPrefix(tab0.url)) {
+    newActiveOrigin = getUrlOrigin(tab0.url);
+  }
+  console.log(`origin changed: ${newActiveOrigin}`);
+  store.dispatch(activeOriginChanged(newActiveOrigin));
+
+  const state = store.getState();
+  const activeAccount = selectVaultActiveAccount(state);
+
+  if (newActiveOrigin && activeAccount) {
+    const isActiveAccountConnected =
+      selectIsActiveAccountConnectedWithOrigin(state);
+    const isLocked = selectVaultIsLocked(state);
+    console.log(
+      `dispatch: locked ${isLocked} connected ${isActiveAccountConnected} key ${
+        isActiveAccountConnected && !isLocked ? activeAccount?.publicKey : null
+      } `
+    );
+
+    emitSdkEventToActiveTabsWithOrigin(
+      newActiveOrigin,
+      sdkEvent.changedTab({
+        isLocked: isLocked,
+        isConnected: isLocked ? null : isActiveAccountConnected,
+        activeKey:
+          !isLocked && isActiveAccountConnected ? activeAccount.publicKey : null
+      })
+    );
+  }
+};
+
+browser.windows.onFocusChanged.addListener(async (windowId: number) => {
+  updateOrigin(windowId);
+});
+browser.tabs.onActivated.addListener(
+  async ({ windowId, tabId }: browser.Tabs.OnActivatedActiveInfoType) => {
+    updateOrigin(windowId);
+  }
+);
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 browser.runtime.onMessage.addListener(
@@ -232,18 +293,20 @@ browser.runtime.onMessage.addListener(
             let success = false;
 
             const isLocked = selectVaultIsLocked(store.getState());
+            const activeOrigin = selectActiveOrigin(store.getState());
             const activeAccount = selectVaultActiveAccount(store.getState());
 
-            if (activeAccount) {
-              emitSdkEventToAllActiveTabs(
+            if (activeOrigin && activeAccount) {
+              emitSdkEventToActiveTabsWithOrigin(
+                activeOrigin,
                 sdkEvent.disconnectedAccountEvent({
-                  isConnected: false,
+                  isConnected: isLocked ? null : false,
                   isLocked: isLocked,
                   activeKey: activeAccount?.publicKey
                 })
               );
               store.dispatch(
-                allAccountsDisconnected({
+                siteDisconnected({
                   siteOrigin: action.payload
                 })
               );
@@ -299,29 +362,6 @@ browser.runtime.onMessage.addListener(
             return sendResponse(undefined);
           }
 
-          case getType(activeOriginChanged): {
-            store.dispatch(action);
-
-            const isActiveAccountConnected =
-              selectIsActiveAccountConnectedWithOrigin(store.getState());
-            const isLocked = selectVaultIsLocked(store.getState());
-            const activeAccount = selectVaultActiveAccount(store.getState());
-            if (activeAccount) {
-              emitSdkEventToAllActiveTabs(
-                sdkEvent.changedTab({
-                  isLocked: isLocked,
-                  isConnected: isActiveAccountConnected,
-                  activeKey:
-                    isActiveAccountConnected && !isLocked
-                      ? activeAccount.publicKey
-                      : null
-                })
-              );
-            }
-
-            return sendResponse(undefined);
-          }
-
           case getType(lockVault):
           case getType(unlockVault):
           case getType(initKeys):
@@ -345,7 +385,7 @@ browser.runtime.onMessage.addListener(
           case getType(siteConnected):
           case getType(anotherAccountConnected):
           case getType(accountDisconnected):
-          case getType(allAccountsDisconnected):
+          case getType(siteDisconnected):
           case getType(windowIdChanged):
           case getType(windowIdCleared):
           case getType(onboardingAppInit):
