@@ -4,22 +4,24 @@ import {
   activeAccountChanged,
   siteConnected,
   accountDisconnected,
-  allAccountsDisconnected,
+  siteDisconnected,
   anotherAccountConnected
 } from '@src/background/redux/vault/actions';
 
 import { useSelector } from 'react-redux';
 import {
-  selectConnectedAccountNamesWithOrigin,
   selectVaultAccountNamesByOriginDict,
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
-import { RootState } from 'typesafe-actions';
 import { sdkEvent } from '@src/content/sdk-event';
 import { dispatchToMainStore } from '../../../background/redux/utils';
 import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
-import { emitSdkEventToAllActiveTabs } from '@src/background/emit-sdk-event-to-all-active-tabs';
+import {
+  emitSdkEventToActiveTabs,
+  emitSdkEventToActiveTabsWithOrigin
+} from '@src/background/utils';
+import { getUrlOrigin } from '@src/utils';
 
 export function findAccountInAListClosestToGivenAccountFilteredByNames(
   accounts: Account[],
@@ -57,10 +59,20 @@ export function useAccountManager() {
   const accountNamesByOriginDict = useSelector(
     selectVaultAccountNamesByOriginDict
   );
-  const connectedAccountNames = useSelector((state: RootState) =>
-    selectConnectedAccountNamesWithOrigin(state)
+
+  const isAccountConnectedWithOrigin = useCallback(
+    (accountName: string, origin: string | null) => {
+      if (!origin) {
+        return false;
+      }
+      return accountNamesByOriginDict[origin].includes(accountName);
+    },
+    [accountNamesByOriginDict]
   );
 
+  /**
+   * change active account
+   */
   const changeActiveAccountWithEvent = useCallback(
     async (accountName: string) => {
       if (!activeAccount?.name || accountName === activeAccount.name) {
@@ -73,26 +85,35 @@ export function useAccountManager() {
       if (newActiveAccount == null) {
         throw Error('new active account should be found');
       }
-      const isActiveAccountConnected = connectedAccountNames.includes(
-        newActiveAccount.name
-      );
 
-      emitSdkEventToAllActiveTabs(
-        sdkEvent.changedConnectedAccountEvent({
+      emitSdkEventToActiveTabs(tab => {
+        if (!tab.url) {
+          return;
+        }
+
+        const isNewAccountConnectedWithTab = isAccountConnectedWithOrigin(
+          newActiveAccount.name,
+          getUrlOrigin(tab.url)
+        );
+
+        return sdkEvent.changedConnectedAccountEvent({
           isLocked: isLocked,
-          isConnected: isActiveAccountConnected,
+          isConnected: isLocked ? null : isNewAccountConnectedWithTab,
           activeKey:
-            isActiveAccountConnected && !isLocked
+            !isLocked && isNewAccountConnectedWithTab
               ? newActiveAccount.publicKey
               : null
-        })
-      );
+        });
+      });
 
       dispatchToMainStore(activeAccountChanged(newActiveAccount.name));
     },
-    [activeAccount?.name, accounts, connectedAccountNames, isLocked]
+    [activeAccount?.name, accounts, isLocked, isAccountConnectedWithOrigin]
   );
 
+  /**
+   *
+   */
   const connectSiteWithEvent = useCallback(
     async (accountNames: string[], origin, siteTitle: string) => {
       if (!activeAccount?.name || origin == null || isLocked) {
@@ -101,10 +122,11 @@ export function useAccountManager() {
 
       // new connected accounts including active
       if (accountNames.includes(activeAccount.name)) {
-        emitSdkEventToAllActiveTabs(
+        emitSdkEventToActiveTabsWithOrigin(
+          origin,
           sdkEvent.connectedAccountEvent({
-            isConnected: true,
             isLocked: isLocked,
+            isConnected: isLocked ? null : true,
             activeKey: activeAccount.publicKey
           })
         );
@@ -129,13 +151,24 @@ export function useAccountManager() {
           newActiveAccountFromConnected &&
           newActiveAccountFromConnected.name !== activeAccount.name
         ) {
-          emitSdkEventToAllActiveTabs(
-            sdkEvent.changedConnectedAccountEvent({
+          emitSdkEventToActiveTabs(tab => {
+            if (!tab.url) {
+              return;
+            }
+
+            const isNewAccountConnectedWithTab = isAccountConnectedWithOrigin(
+              newActiveAccountFromConnected.name,
+              getUrlOrigin(tab.url)
+            );
+
+            return sdkEvent.changedConnectedAccountEvent({
               isLocked: isLocked,
-              isConnected: true,
-              activeKey: newActiveAccountFromConnected.publicKey
-            })
-          );
+              isConnected: isLocked ? null : isNewAccountConnectedWithTab,
+              activeKey: isNewAccountConnectedWithTab
+                ? newActiveAccountFromConnected.publicKey
+                : null
+            });
+          });
           dispatchToMainStore(
             activeAccountChanged(newActiveAccountFromConnected.name)
           );
@@ -149,21 +182,25 @@ export function useAccountManager() {
         }
       }
     },
-    [activeAccount, isLocked, accounts]
+    [activeAccount, isLocked, accounts, isAccountConnectedWithOrigin]
   );
 
+  /**
+   *
+   */
   const connectAnotherAccountWithEvent = useCallback(
-    async (accountName: string, origin) => {
+    async (accountName: string, origin: string | null) => {
       if (!activeAccount?.name || origin == null || isLocked) {
         return;
       }
 
       // new connected account is active
       if (accountName === activeAccount.name) {
-        emitSdkEventToAllActiveTabs(
+        emitSdkEventToActiveTabsWithOrigin(
+          origin,
           sdkEvent.connectedAccountEvent({
-            isConnected: true,
             isLocked: isLocked,
+            isConnected: isLocked ? null : true,
             activeKey: activeAccount.publicKey
           })
         );
@@ -181,13 +218,24 @@ export function useAccountManager() {
         );
 
         if (newActiveAccount && newActiveAccount.name !== activeAccount.name) {
-          emitSdkEventToAllActiveTabs(
-            sdkEvent.changedConnectedAccountEvent({
+          emitSdkEventToActiveTabs(tab => {
+            if (!tab.url) {
+              return;
+            }
+
+            const isNewAccountConnectedWithTab = isAccountConnectedWithOrigin(
+              newActiveAccount.name,
+              getUrlOrigin(tab.url)
+            );
+
+            return sdkEvent.changedConnectedAccountEvent({
               isLocked: isLocked,
-              isConnected: true,
-              activeKey: newActiveAccount.publicKey
-            })
-          );
+              isConnected: isLocked ? null : isNewAccountConnectedWithTab,
+              activeKey: isNewAccountConnectedWithTab
+                ? newActiveAccount.publicKey
+                : null
+            });
+          });
           dispatchToMainStore(activeAccountChanged(newActiveAccount.name));
           dispatchToMainStore(
             anotherAccountConnected({
@@ -201,6 +249,9 @@ export function useAccountManager() {
     [accounts, activeAccount, isLocked]
   );
 
+  /**
+   *
+   */
   const disconnectAccountWithEvent = useCallback(
     async (accountName: string, origin: string) => {
       if (
@@ -214,10 +265,11 @@ export function useAccountManager() {
 
       // disconnected active account, so need to emit event
       if (accountName === activeAccount.name) {
-        emitSdkEventToAllActiveTabs(
+        emitSdkEventToActiveTabsWithOrigin(
+          origin,
           sdkEvent.disconnectedAccountEvent({
-            isConnected: false,
             isLocked: isLocked,
+            isConnected: isLocked ? null : false,
             activeKey: activeAccount?.publicKey
           })
         );
@@ -233,7 +285,10 @@ export function useAccountManager() {
     [accountNamesByOriginDict, activeAccount, isLocked]
   );
 
-  const disconnectAllAccountsWithEvent = useCallback(
+  /**
+   *
+   */
+  const disconnectSiteWithEvent = useCallback(
     async (origin: string) => {
       if (!activeAccount?.name || !origin || isLocked) {
         return;
@@ -242,17 +297,18 @@ export function useAccountManager() {
       const allAccountNames = accountNamesByOriginDict[origin];
 
       if (allAccountNames.includes(activeAccount.name)) {
-        await emitSdkEventToAllActiveTabs(
+        await emitSdkEventToActiveTabsWithOrigin(
+          origin,
           sdkEvent.disconnectedAccountEvent({
-            isConnected: false,
             isLocked: isLocked,
+            isConnected: isLocked ? null : false,
             activeKey: activeAccount?.publicKey
           })
         );
       }
 
       dispatchToMainStore(
-        allAccountsDisconnected({
+        siteDisconnected({
           siteOrigin: origin
         })
       );
@@ -270,6 +326,6 @@ export function useAccountManager() {
     connectSiteWithEvent,
     connectAnotherAccountWithEvent,
     disconnectAccountWithEvent,
-    disconnectAllAccountsWithEvent
+    disconnectSiteWithEvent
   };
 }
