@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { until } from "selenium-webdriver";
+import { until } from 'selenium-webdriver';
 
 import { Driver } from '../../../webdriver/driver';
 import { buildWebDriver } from '../../../webdriver';
@@ -69,10 +69,17 @@ describe('Popup UI: Connect account', () => {
     assert((await driver.getAllWindowHandles()).length === 1);
   });
 
-  it('should open navigation menu', async () => {
+  it('should find connecting status badges', async () => {
     await driver.switchToWindow(playgroundWindow);
+    await driver.switchToNewWindow('window');
+
     await driver.navigate(AppRoutes.Popup);
 
+    assert.ok(await driver.findElement(byText('Connected: 1')));
+    assert.ok(await driver.findElement(byText('• Connected')));
+  });
+
+  it('should open navigation menu', async () => {
     await driver.clickElement(byTestId('menu-open-icon'));
 
     assert.ok(await driver.findElement(byText('Connected sites')));
@@ -171,10 +178,17 @@ describe('Popup UI: Connect two accounts', () => {
     assert.equal((await driver.getAllWindowHandles()).length, 1);
   });
 
-  it('should open connected site page', async () => {
+  it('should find connecting status badges', async () => {
     await driver.switchToWindow(playgroundWindow);
+    await driver.switchToNewWindow('window');
+
     await driver.navigate(AppRoutes.Popup);
 
+    assert.ok(await driver.findElement(byText('Connected: 2')));
+    assert.ok(await driver.findElement(byText('• Connected')));
+  });
+
+  it('should open connected site page', async () => {
     await driver.clickElement(byTestId('menu-open-icon'));
     await driver.clickElement(byText('Connected sites'));
 

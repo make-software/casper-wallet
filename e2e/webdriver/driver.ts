@@ -268,6 +268,10 @@ export class Driver {
     await this.driver.switchTo().window(handle);
   }
 
+  async switchToNewWindow(handle: 'tab' | 'window') {
+    await this.driver.switchTo().newWindow(handle);
+  }
+
   async getAllWindowHandles() {
     return await this.driver.getAllWindowHandles();
   }
