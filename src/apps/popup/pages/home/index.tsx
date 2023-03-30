@@ -19,6 +19,7 @@ import {
 import {
   Avatar,
   Button,
+  getFontSizeBasedOnTextLength,
   Hash,
   HashDisplayContext,
   HashVariant,
@@ -210,8 +211,17 @@ export function HomePageContent() {
             </NameAndAddressContainer>
             <BalanceContainer>
               <FlexRow gap={SpacingSize.Small} wrap="wrap">
-                <Typography type="CSPRBold">{balance.amount}</Typography>
-                <Typography type="CSPRLight" color="contentSecondary">
+                <Typography
+                  type="CSPRBold"
+                  fontSize={getFontSizeBasedOnTextLength(balance.amount.length)}
+                >
+                  {balance.amount}
+                </Typography>
+                <Typography
+                  type="CSPRLight"
+                  color="contentSecondary"
+                  fontSize={getFontSizeBasedOnTextLength(balance.amount.length)}
+                >
                   CSPR
                 </Typography>
               </FlexRow>

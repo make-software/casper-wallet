@@ -25,7 +25,7 @@ export function ConnectedSitesPage() {
 
   const {
     disconnectAccountWithEvent: disconnectAccount,
-    disconnectAllAccountsWithEvent: disconnectAllAccounts
+    disconnectSiteWithEvent: disconnectAllAccounts
   } = useAccountManager();
 
   const accountsByOrigin = useSelector(selectVaultAccountsByOriginDict);

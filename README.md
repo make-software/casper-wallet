@@ -56,6 +56,8 @@ For more information please [follow the link](https://developer.apple.com/docume
 
 ## Development setup
 
+Working on any macOS or Linux machine with NodeJS LTS installed.
+
 ### Install dependencies
 
 Clone this repository and run following commands from the repo root folder.
@@ -94,6 +96,26 @@ npm run start:safari
 You can run all these commands in parallel.
 
 ### Build deliverable from sources (`build` folder)
+
+Chrome:
+
+```shell
+npm run build:chrome
+```
+
+Firefox:
+
+```shell
+npm run build:firefox
+```
+
+Safari:
+
+```shell
+npm run build:safari
+```
+
+All at once:
 
 ```shell
 npm run build:all
