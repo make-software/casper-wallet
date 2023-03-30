@@ -4,8 +4,8 @@
 export type CasperWalletState = {
   /** contain wallet is locked flag */
   isLocked: boolean;
-  /** contain active key is connected flag */
-  isConnected: boolean;
+  /** if unlocked contain connected status flag of active key otherwise null */
+  isConnected: boolean | null;
   /** if unlocked and connected contain active key otherwise null */
   activeKey: string | null;
 };

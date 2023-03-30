@@ -10,7 +10,7 @@ import {
   accountRenamed,
   siteConnected,
   accountDisconnected,
-  allAccountsDisconnected,
+  siteDisconnected,
   activeAccountChanged,
   anotherAccountConnected
 } from './actions';
@@ -196,17 +196,14 @@ export const reducer = createReducer(initialState)
       };
     }
   )
-  .handleAction(
-    allAccountsDisconnected,
-    (state, { payload: { siteOrigin } }) => ({
-      ...state,
-      accountNamesByOriginDict: Object.fromEntries(
-        Object.entries(state.accountNamesByOriginDict).filter(
-          ([origin]) => origin !== siteOrigin
-        )
+  .handleAction(siteDisconnected, (state, { payload: { siteOrigin } }) => ({
+    ...state,
+    accountNamesByOriginDict: Object.fromEntries(
+      Object.entries(state.accountNamesByOriginDict).filter(
+        ([origin]) => origin !== siteOrigin
       )
-    })
-  )
+    )
+  }))
   .handleAction(activeAccountChanged, (state, { payload }) => ({
     ...state,
     activeAccountName: payload
