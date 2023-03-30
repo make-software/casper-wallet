@@ -6,110 +6,16 @@ import { AppRoutes } from '../../../app-routes';
 import { switchToNewWindow, unlockVault, createAccount } from '../../common';
 import { byTestId, byText, getUrlPath } from '../../../utils/helpers';
 
-describe('Popup UI: Connect account', () => {
-  let driver: Driver;
-  // Store the ID of the original window
-  let playgroundWindow: string;
-
-  const playgroundUrl = 'https://casper-wallet-playground.make.services/';
-
-  beforeAll(async () => {
-    driver = await buildWebDriver();
-  });
-
-  afterAll(async () => {
-    await driver.quit();
-  });
-
-  it('should open playground app', async () => {
-    await driver.get(playgroundUrl);
-
-    assert(await driver.findElement(byText('Casper Wallet Playground')));
-  });
-
-  it('should open connect account window', async () => {
-    playgroundWindow = await driver.getWindowHandle();
-
-    await switchToNewWindow(driver, playgroundWindow, 'Connect');
-
-    assert.ok(await driver.findElement(byText('Your wallet is locked')));
-  });
-
-  it('should select account and navigate to the next page', async () => {
-    await unlockVault(driver);
-
-    await driver.clickElement(byText('Account 1'));
-    await driver.clickElement(byText('Next'));
-
-    assert.ok(await driver.findElement(byText('Connect to 1 account')));
-  });
-
-  it('should connect the account and close the window', async () => {
-    await driver.clickElement(byText('Connect to 1 account'));
-
-    // Wait for connecting
-    await driver.wait(
-      async () => (await driver.getAllWindowHandles()).length === 1,
-      10000
-    );
-
-    // Check if there is one window open
-    assert((await driver.getAllWindowHandles()).length === 1);
-  });
-
-  it('should find connecting status badges', async () => {
-    await driver.switchToWindow(playgroundWindow);
-    await driver.switchToNewWindow('window');
-
-    await driver.navigate(AppRoutes.Popup);
-
-    assert.ok(await driver.findElement(byText('Connected: 1')));
-    assert.ok(await driver.findElement(byText('• Connected')));
-  });
-
-  it('should open navigation menu', async () => {
-    await driver.clickElement(byTestId('menu-open-icon'));
-
-    assert.ok(await driver.findElement(byText('Connected sites')));
-  });
-
-  it('should open connected sites page', async () => {
-    await driver.clickElement(byText('Connected sites'));
-
-    assert.equal(
-      await driver.driver.getCurrentUrl().then(getUrlPath),
-      'connected-sites'
-    );
-  });
-
-  it('should find the connected site title', async () => {
-    const title = await driver.findElement(byText('Casper Wallet Playground'));
-
-    assert.ok(title);
-  });
-
-  it('should find the connected site URL', async () => {
-    const url = await driver.findElement(
-      byText('casper-wallet-playground.make.services')
-    );
-
-    assert.ok(url);
-  });
-
-  it('should find the account that connected to the site', async () => {
-    const accountName = await driver.findElement(byText('Account 1'));
-
-    assert.ok(accountName);
-  });
-
-  it('should find disconnect button', async () => {
-    const disconnectButton = await driver.findElement(byText('Disconnect'));
-
-    assert.ok(disconnectButton);
-  });
-});
-
-describe('Popup UI: Connect two accounts', () => {
+describe.each([
+  {
+    text: 'account',
+    selectAllAccounts: false
+  },
+  {
+    text: 'two accounts',
+    selectAllAccounts: true
+  }
+])(`Popup UI: Connect $text`, ({ selectAllAccounts }) => {
   let driver: Driver;
   // Store the ID of the original window
   let playgroundWindow: string;
@@ -121,23 +27,20 @@ describe('Popup UI: Connect two accounts', () => {
     driver = await buildWebDriver();
 
     await driver.navigate(AppRoutes.Popup);
+
     await unlockVault(driver);
     await createAccount(driver, newAccountName);
+
+    await driver.get(playgroundUrl);
+
+    playgroundWindow = await driver.getWindowHandle();
   });
 
   afterAll(async () => {
     await driver.quit();
   });
 
-  it('should open playground app', async () => {
-    await driver.get(playgroundUrl);
-
-    assert(await driver.findElement(byText('Casper Wallet Playground')));
-  });
-
   it('should open connect account window', async () => {
-    playgroundWindow = await driver.getWindowHandle();
-
     await switchToNewWindow(driver, playgroundWindow, 'Connect');
 
     assert.ok(
@@ -145,15 +48,32 @@ describe('Popup UI: Connect two accounts', () => {
     );
   });
 
-  it('should select accounts and navigate to the next page', async () => {
-    await driver.clickElement(byText('select all'));
+  it('should select all accounts and navigate to the next page', async () => {
+    if (selectAllAccounts) {
+      await driver.clickElement(byText('select all'));
+    } else {
+      await driver.clickElement(byText('Account 1'));
+    }
+
     await driver.clickElement(byText('Next'));
 
-    assert.ok(await driver.findElement(byText('Connect to 2 accounts')));
+    assert.ok(
+      await driver.findElement(
+        byText(
+          selectAllAccounts ? 'Connect to 2 accounts' : 'Connect to 1 account'
+        )
+      )
+    );
   });
 
-  it('should connect the accounts and close the window', async () => {
-    await driver.clickElement(byText('Connect to 2 accounts'));
+  it(`should connect the ${
+    selectAllAccounts ? 'accounts' : 'account'
+  } and close the window`, async () => {
+    await driver.clickElement(
+      byText(
+        selectAllAccounts ? 'Connect to 2 accounts' : 'Connect to 1 account'
+      )
+    );
 
     // Wait for connecting
     await driver.wait(
@@ -171,7 +91,11 @@ describe('Popup UI: Connect two accounts', () => {
 
     await driver.navigate(AppRoutes.Popup);
 
-    assert.ok(await driver.findElement(byText('Connected: 2')));
+    assert.ok(
+      await driver.findElement(
+        byText(selectAllAccounts ? 'Connected: 2' : 'Connected: 1')
+      )
+    );
     assert.ok(await driver.findElement(byText('• Connected')));
   });
 
@@ -185,8 +109,32 @@ describe('Popup UI: Connect two accounts', () => {
     );
   });
 
-  it('should find the accounts that connected to the site', async () => {
+  it(`should find the ${
+    selectAllAccounts ? 'accounts' : 'account'
+  } that connected to the site`, async () => {
+    if (selectAllAccounts) {
+      assert.ok(await driver.findElement(byText(newAccountName)));
+      assert.ok(await driver.findElement(byText('Account 1')));
+    } else {
+      assert.ok(await driver.findElement(byText('Account 1')));
+    }
+  });
+
+  it('should find the connected site title', async () => {
+    assert.ok(await driver.findElement(byText('Casper Wallet Playground')));
+  });
+
+  it('should find the connected site URL', async () => {
+    assert.ok(
+      await driver.findElement(byText('casper-wallet-playground.make.services'))
+    );
+  });
+
+  it('should find the account that connected to the site', async () => {
     assert.ok(await driver.findElement(byText('Account 1')));
-    assert.ok(await driver.findElement(byText(newAccountName)));
+  });
+
+  it('should find disconnect button', async () => {
+    assert.ok(await driver.findElement(byText('Disconnect')));
   });
 });
