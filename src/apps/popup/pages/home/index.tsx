@@ -139,7 +139,7 @@ export function HomePageContent() {
               ? formatCurrency(motesToCurrency(balance, currencyRate), 'USD', {
                   precision: 2
                 })
-              : '-';
+              : t('Currency service is offline...');
 
           setBalance({ amount, fiatAmount });
         }
