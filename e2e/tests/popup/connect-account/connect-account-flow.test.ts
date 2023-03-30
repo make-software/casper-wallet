@@ -1,5 +1,4 @@
 import { strict as assert } from 'assert';
-import { until } from 'selenium-webdriver';
 
 import { Driver } from '../../../webdriver/driver';
 import { buildWebDriver } from '../../../webdriver';
@@ -36,20 +35,9 @@ describe('Popup UI: Connect account', () => {
     assert.ok(await driver.findElement(byText('Your wallet is locked')));
   });
 
-  it('should unlock vault', async () => {
+  it('should select account and navigate to the next page', async () => {
     await unlockVault(driver);
 
-    // Need to wait for the finishing script for unlock vault
-    await driver.wait(
-      until.elementLocated(byText('Connect with Casper Wallet Playground'))
-    );
-
-    assert.ok(
-      await driver.findElement(byText('Connect with Casper Wallet Playground'))
-    );
-  });
-
-  it('should select account and navigate to the next page', async () => {
     await driver.clickElement(byText('Account 1'));
     await driver.clickElement(byText('Next'));
 
@@ -158,8 +146,7 @@ describe('Popup UI: Connect two accounts', () => {
   });
 
   it('should select accounts and navigate to the next page', async () => {
-    await driver.clickElement(byText('Account 1'));
-    await driver.clickElement(byText(newAccountName));
+    await driver.clickElement(byText('select all'));
     await driver.clickElement(byText('Next'));
 
     assert.ok(await driver.findElement(byText('Connect to 2 accounts')));
