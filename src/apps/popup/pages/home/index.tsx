@@ -19,6 +19,7 @@ import {
 import {
   Avatar,
   Button,
+  getFontSizeBasedOnTextLength,
   Hash,
   HashDisplayContext,
   HashVariant,
@@ -129,15 +130,16 @@ export function HomePageContent() {
   useEffect(() => {
     dispatchFetchActiveAccountBalance(activeAccount?.publicKey)
       .then(({ payload: { balance, currencyRate } }) => {
-        if (balance != null && currencyRate != null) {
+        if (balance != null) {
           const amount = formatNumber(motesToCSPR(balance), {
             precision: { max: 5 }
           });
-          const fiatAmount = formatCurrency(
-            motesToCurrency(balance, currencyRate),
-            'USD',
-            { precision: 2 }
-          );
+          const fiatAmount =
+            currencyRate != null
+              ? formatCurrency(motesToCurrency(balance, currencyRate), 'USD', {
+                  precision: 2
+                })
+              : t('Currency service is offline...');
 
           setBalance({ amount, fiatAmount });
         }
@@ -210,8 +212,17 @@ export function HomePageContent() {
             </NameAndAddressContainer>
             <BalanceContainer>
               <FlexRow gap={SpacingSize.Small} wrap="wrap">
-                <Typography type="CSPRBold">{balance.amount}</Typography>
-                <Typography type="CSPRLight" color="contentSecondary">
+                <Typography
+                  type="CSPRBold"
+                  fontSize={getFontSizeBasedOnTextLength(balance.amount.length)}
+                >
+                  {balance.amount}
+                </Typography>
+                <Typography
+                  type="CSPRLight"
+                  color="contentSecondary"
+                  fontSize={getFontSizeBasedOnTextLength(balance.amount.length)}
+                >
                   CSPR
                 </Typography>
               </FlexRow>

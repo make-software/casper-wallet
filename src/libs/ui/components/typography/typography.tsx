@@ -21,6 +21,8 @@ export type TypographyType =
   | 'formFieldStatus' // TODO: Temporary name. Make a better name
   | 'fullHash';
 
+export type CSPRSize = '2.8rem' | '2.4rem' | '2rem' | '1.8rem';
+
 export interface BodyStylesProps extends BaseProps {
   color?: ContentColor;
   uppercase?: boolean;
@@ -28,7 +30,20 @@ export interface BodyStylesProps extends BaseProps {
   noWrap?: boolean;
   loading?: boolean;
   wordBreak?: boolean;
+  fontSize?: CSPRSize;
 }
+
+export const getFontSizeBasedOnTextLength = (length: number) => {
+  if (length >= 21) {
+    return '1.8rem';
+  } else if (length >= 16) {
+    return '2rem';
+  } else if (length >= 13) {
+    return '2.4rem';
+  } else {
+    return '2.8rem';
+  }
+};
 
 interface TypographyProps extends BodyStylesProps {
   type: TypographyType;
@@ -69,7 +84,7 @@ function getBodyStyles(
 const StyledTypography = styled('span').withConfig({
   shouldForwardProp: (prop, defaultValidatorFn) =>
     !['loading'].includes(prop) && defaultValidatorFn(prop)
-})<TypographyProps>(({ theme, type, ...restProps }): CSSObject => {
+})<TypographyProps>(({ theme, type, fontSize, ...restProps }): CSSObject => {
   const base = getBodyStyles(theme, restProps);
 
   const bodyBase = {
@@ -91,7 +106,7 @@ const StyledTypography = styled('span').withConfig({
   const CSPRBase = {
     ...base,
     fontFamily: theme.typography.fontFamily.mono,
-    fontSize: '2.8rem',
+    fontSize: fontSize || '2.8rem',
     lineHeight: '4rem'
   };
 
