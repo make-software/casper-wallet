@@ -130,15 +130,16 @@ export function HomePageContent() {
   useEffect(() => {
     dispatchFetchActiveAccountBalance(activeAccount?.publicKey)
       .then(({ payload: { balance, currencyRate } }) => {
-        if (balance != null && currencyRate != null) {
+        if (balance != null) {
           const amount = formatNumber(motesToCSPR(balance), {
             precision: { max: 5 }
           });
-          const fiatAmount = formatCurrency(
-            motesToCurrency(balance, currencyRate),
-            'USD',
-            { precision: 2 }
-          );
+          const fiatAmount =
+            currencyRate != null
+              ? formatCurrency(motesToCurrency(balance, currencyRate), 'USD', {
+                  precision: 2
+                })
+              : t('Currency service is offline...');
 
           setBalance({ amount, fiatAmount });
         }
