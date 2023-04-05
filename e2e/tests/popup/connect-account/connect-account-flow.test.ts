@@ -88,7 +88,7 @@ describe.each([
           .findElement(byText('Connect with Casper Wallet Playground'))
           .catch(async () => {
             await driver.verboseReportOnFailure(
-              `Failed on: ${testName}/Connect with Casper Wallet Playground`
+              `Failed on - ${testName}/Connect with Casper Wallet Playground`
             );
           })
       );
@@ -98,7 +98,7 @@ describe.each([
       if (selectAllAccounts) {
         await driver.clickElement(byText('select all')).catch(async () => {
           await driver.verboseReportOnFailure(
-            `Failed on: ${testName}/select all`
+            `Failed on - ${testName}/select all`
           );
         });
       } else {
@@ -106,7 +106,7 @@ describe.each([
           .clickElement(byText(defaultAccountName))
           .catch(async () => {
             await driver.verboseReportOnFailure(
-              `Failed on: ${testName}/one account`
+              `Failed on - ${testName}/one account`
             );
           });
       }
