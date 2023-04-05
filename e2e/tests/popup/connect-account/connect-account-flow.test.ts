@@ -67,6 +67,11 @@ describe.each([
 
       await unlockVault(driver);
 
+      await driver.wait(
+        until.elementLocated(byText('Connect with Casper Wallet Playground')),
+        TIMEOUT
+      );
+
       assert.ok(
         await driver.findElement(
           byText('Connect with Casper Wallet Playground')
