@@ -7,7 +7,8 @@ import {
   until,
   By,
   Condition,
-  WebDriver
+  WebDriver,
+  WebElementCondition
 } from 'selenium-webdriver';
 // @ts-ignore TODO: clarify types for package
 import cssToXPath from 'css-to-xpath';
@@ -128,9 +129,22 @@ export class Driver {
     timeout = this.timeout,
     log?: () => void
   ) {
-    await this.driver.wait(condition, timeout).catch(() => {
-      log && log();
-    });
+    if (condition instanceof WebElementCondition) {
+      await this.driver
+        .wait(
+          condition,
+          timeout,
+          `Timed out after ${timeout / 1000} seconds`,
+          2000
+        )
+        .catch(() => {
+          log && log();
+        });
+    } else {
+      await this.driver.wait(condition, timeout).catch(() => {
+        log && log();
+      });
+    }
   }
 
   async waitForSelector(
