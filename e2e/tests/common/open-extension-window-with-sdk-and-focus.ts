@@ -17,14 +17,7 @@ export const openExtensionWindowWithSDKAndFocus = async (
   // Wait for the new window
   await driver.wait(
     async () => (await driver.getAllWindowHandles()).length === 2,
-    TIMEOUT,
-    async () => {
-      console.log(
-        `amount of windows: ${
-          (await driver.getAllWindowHandles()).length
-        }, should be 2`
-      );
-    }
+    TIMEOUT
   );
 
   // Loop through until we find a new window handle

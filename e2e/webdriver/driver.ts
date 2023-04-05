@@ -126,25 +126,17 @@ export class Driver {
       | Condition<T>
       | ((driver: WebDriver) => T | PromiseLike<T>)
       | Function,
-    timeout = this.timeout,
-    log?: () => void
+    timeout = this.timeout
   ) {
     if (condition instanceof WebElementCondition) {
-      await this.driver
-        .wait(
-          condition,
-          timeout,
-          `Timed out after ${timeout / 1000} seconds`,
-          1000
-        )
-        .catch(() => {
-          log && log();
-        });
-    } else {
-      await this.driver.wait(condition, timeout).catch(() => {
-        log && log();
-      });
+      return this.driver.wait(
+        condition,
+        timeout,
+        `Timed out after ${timeout / 1000} seconds`,
+        1000
+      );
     }
+    return await this.driver.wait(condition, timeout);
   }
 
   async waitForSelector(

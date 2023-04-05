@@ -62,27 +62,19 @@ describe.each([
 
       await driver.wait(
         until.elementLocated(byText('Your wallet is locked')),
-        TIMEOUT,
-        () => {
-          console.log('Failed on: Your wallet is locked');
-        }
+        TIMEOUT
       );
-      await driver.verboseReportOnFailure(`${testName}/Your wallet is locked`);
 
       await unlockVault(driver);
 
-      await driver.wait(
-        until.elementLocated(byText('Connect with Casper Wallet Playground')),
-        40000
-      );
-
-      await driver.verboseReportOnFailure(
-        `${testName}/Connect with Casper Wallet Playground`
-      );
-
       assert.ok(
         await driver
-          .findElement(byText('Connect with Casper Wallet Playground'))
+          .wait(
+            until.elementLocated(
+              byText('Connect with Casper Wallet Playground')
+            ),
+            40000
+          )
           .catch(async () => {
             await driver.verboseReportOnFailure(
               `Failed on - ${testName}/Connect with Casper Wallet Playground`
@@ -131,14 +123,7 @@ describe.each([
       // Wait for connecting
       await driver.wait(
         async () => (await driver.getAllWindowHandles()).length === 1,
-        TIMEOUT,
-        async () => {
-          console.log(
-            `amount of windows: ${
-              (await driver.getAllWindowHandles()).length
-            }, should be 1`
-          );
-        }
+        TIMEOUT
       );
 
       // Check if there is one window open
