@@ -4,20 +4,27 @@ import { Driver } from '../../webdriver/driver';
 import { byText } from '../../utils/helpers';
 import { TIMEOUT } from '../../constants';
 
-export const openExtensionWindowAndFocus = async (
+export const openExtensionWindowWithSDKAndFocus = async (
   driver: Driver,
   currentWindow: string,
   clickElement: string
 ) => {
   // Check if there is one window open
-  assert((await driver.getAllWindowHandles()).length === 1);
+  assert.equal((await driver.getAllWindowHandles()).length, 1);
 
   await driver.clickElement(byText(clickElement));
 
   // Wait for the new window
   await driver.wait(
     async () => (await driver.getAllWindowHandles()).length === 2,
-    TIMEOUT
+    TIMEOUT,
+    async () => {
+      console.log(
+        `amount of windows: ${
+          (await driver.getAllWindowHandles()).length
+        }, should be 2`
+      );
+    }
   );
 
   // Loop through until we find a new window handle

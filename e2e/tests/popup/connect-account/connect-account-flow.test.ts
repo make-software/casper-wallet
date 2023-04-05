@@ -1,12 +1,14 @@
 import { strict as assert } from 'assert';
+import { until } from 'selenium-webdriver';
 
 import { Driver } from '../../../webdriver/driver';
 import { buildWebDriver } from '../../../webdriver';
 import { AppRoutes } from '../../../app-routes';
 import {
-  openExtensionWindowAndFocus,
+  openExtensionWindowWithSDKAndFocus,
   unlockVault,
-  createAccount
+  createAccount,
+  lockVault
 } from '../../common';
 import { byTestId, byText, getUrlPath } from '../../../utils/helpers';
 import { ACCOUNT_NAMES, PLAYGROUND_URL, TIMEOUT } from '../../../constants';
@@ -36,8 +38,11 @@ describe.each([
 
       await driver.navigate(AppRoutes.Popup);
 
-      await unlockVault(driver);
-      await createAccount(driver, createdAccountName);
+      if (selectAllAccounts) {
+        await unlockVault(driver);
+        await createAccount(driver, createdAccountName);
+        await lockVault(driver);
+      }
 
       await driver.get(PLAYGROUND_URL);
 
@@ -48,8 +53,19 @@ describe.each([
       await driver.quit();
     });
 
-    it('should open connect account window', async () => {
-      await openExtensionWindowAndFocus(driver, playgroundWindow, 'Connect');
+    it('should open connect account window and unlock vault', async () => {
+      await openExtensionWindowWithSDKAndFocus(
+        driver,
+        playgroundWindow,
+        'Connect'
+      );
+
+      await driver.wait(
+        until.elementLocated(byText('Your wallet is locked')),
+        TIMEOUT
+      );
+
+      await unlockVault(driver);
 
       assert.ok(
         await driver.findElement(
@@ -88,7 +104,14 @@ describe.each([
       // Wait for connecting
       await driver.wait(
         async () => (await driver.getAllWindowHandles()).length === 1,
-        TIMEOUT
+        TIMEOUT,
+        async () => {
+          console.log(
+            `amount of windows: ${
+              (await driver.getAllWindowHandles()).length
+            }, should be 1`
+          );
+        }
       );
 
       // Check if there is one window open
@@ -97,7 +120,7 @@ describe.each([
 
     it('should open connected site page', async () => {
       await driver.switchToWindow(playgroundWindow);
-      await driver.switchToNewWindow('window');
+      await driver.createNewWindowOrTabAndSwitch('window');
 
       await driver.navigate(AppRoutes.Popup);
 

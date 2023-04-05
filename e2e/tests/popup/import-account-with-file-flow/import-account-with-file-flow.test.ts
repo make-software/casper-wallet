@@ -4,7 +4,7 @@ import { Driver } from '../../../webdriver/driver';
 import { buildWebDriver } from '../../../webdriver';
 import { AppRoutes } from '../../../app-routes';
 import { secretKeyPath } from '../../../__fixtures';
-import { openExtensionWindowAndFocus, unlockVault } from '../../common';
+import { openExtensionWindowWithSDKAndFocus, unlockVault } from '../../common';
 import {
   byText,
   byTestId,
@@ -41,7 +41,11 @@ describe('Popup UI: Import account with file', () => {
   it('should open import account window', async () => {
     popupWindow = await driver.getWindowHandle();
 
-    await openExtensionWindowAndFocus(driver, popupWindow, 'Import account');
+    await openExtensionWindowWithSDKAndFocus(
+      driver,
+      popupWindow,
+      'Import account'
+    );
 
     assert.ok(
       driver.findElement(byText('Import account from secret key file'))

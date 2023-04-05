@@ -125,9 +125,12 @@ export class Driver {
       | Condition<T>
       | ((driver: WebDriver) => T | PromiseLike<T>)
       | Function,
-    timeout = this.timeout
+    timeout = this.timeout,
+    log?: () => void
   ) {
-    await this.driver.wait(condition, timeout);
+    await this.driver.wait(condition, timeout).catch(() => {
+      log && log();
+    });
   }
 
   async waitForSelector(
@@ -269,7 +272,7 @@ export class Driver {
   }
 
   // https://www.selenium.dev/documentation/webdriver/interactions/windows/#create-new-window-or-new-tab-and-switch
-  async switchToNewWindow(handle: 'tab' | 'window') {
+  async createNewWindowOrTabAndSwitch(handle: 'tab' | 'window') {
     // Opens a new tab/window and switches to new tab/window
     await this.driver.switchTo().newWindow(handle);
   }
