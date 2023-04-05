@@ -71,34 +71,42 @@ describe.each([
 
       await unlockVault(driver);
 
-      if (driver.browser === 'firefox') {
-        expect(true);
-      } else {
-        await driver.wait(
-          until.elementLocated(byText('Connect with Casper Wallet Playground')),
-          TIMEOUT,
-          () => {
-            console.log('Failed on: Connect with Casper Wallet Playground');
-          }
-        );
+      await driver.wait(
+        until.elementLocated(byText('Connect with Casper Wallet Playground')),
+        TIMEOUT,
+        () => {
+          console.log('Failed on: Connect with Casper Wallet Playground');
+        }
+      );
 
-        await driver.verboseReportOnFailure(
-          'Connect with Casper Wallet Playground'
-        );
+      await driver.verboseReportOnFailure(
+        'Connect with Casper Wallet Playground'
+      );
 
-        assert.ok(
-          await driver.findElement(
-            byText('Connect with Casper Wallet Playground')
-          )
-        );
-      }
+      assert.ok(
+        await driver
+          .findElement(byText('Connect with Casper Wallet Playground'))
+          .catch(async () => {
+            await driver.verboseReportOnFailure(
+              'Failed on: Connect with Casper Wallet Playground'
+            );
+          })
+      );
     });
 
     it(`should select ${testName} and navigate to the next page`, async () => {
       if (selectAllAccounts) {
-        await driver.clickElement(byText('select all'));
+        await driver.clickElement(byText('select all')).catch(async () => {
+          await driver.verboseReportOnFailure('Failed on: select all');
+        });
       } else {
-        await driver.clickElement(byText(defaultAccountName));
+        await driver
+          .clickElement(byText(defaultAccountName))
+          .catch(async () => {
+            await driver.verboseReportOnFailure(
+              `Failed on: ${defaultAccountName}`
+            );
+          });
       }
 
       await driver.clickElement(byText('Next'));
