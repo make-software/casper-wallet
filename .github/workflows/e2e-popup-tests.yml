@@ -61,4 +61,4 @@ jobs:
         if: always()
         with:
           name: ${{ matrix.browser }}
-          path: screenshots/
+          path: test-artifacts/
