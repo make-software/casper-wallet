@@ -12,7 +12,7 @@ import {
   byInputName
 } from '../../../utils/helpers';
 import {
-  ACCOUNTS_NAME,
+  ACCOUNT_NAMES,
   TRUNCATED_PUBLIC_KEY_OF_IMPORTED_ACCOUNT
 } from '../../../constants';
 
@@ -56,7 +56,7 @@ describe('Popup UI: Import account with file', () => {
     const importButton = await driver.findElement(byText('Import'));
 
     await fileInput.fill(secretKeyPath);
-    await accountNameInput.fill(ACCOUNTS_NAME.importedAccountName);
+    await accountNameInput.fill(ACCOUNT_NAMES.importedAccountName);
 
     assert.ok(importButton.isEnabled());
   });
@@ -82,7 +82,7 @@ describe('Popup UI: Import account with file', () => {
 
   it('should find the imported account name in the accounts list', async () => {
     const importedAccount = await driver.findElement(
-      byText(ACCOUNTS_NAME.importedAccountName)
+      byText(ACCOUNT_NAMES.importedAccountName)
     );
 
     assert.ok(importedAccount);

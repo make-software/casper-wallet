@@ -1,4 +1,4 @@
-export const ACCOUNTS_NAME = {
+export const ACCOUNT_NAMES = {
   defaultAccountName: 'Account 1',
   createdAccountName: 'New account 1',
   importedAccountName: 'Imported account'

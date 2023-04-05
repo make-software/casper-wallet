@@ -9,20 +9,20 @@ import {
   createAccount
 } from '../../common';
 import { byTestId, byText, getUrlPath } from '../../../utils/helpers';
-import { ACCOUNTS_NAME, PLAYGROUND_URL, TIMEOUT } from '../../../constants';
+import { ACCOUNT_NAMES, PLAYGROUND_URL, TIMEOUT } from '../../../constants';
 
 describe.each([
   {
     testName: 'account',
     selectAllAccounts: false,
-    createdAccountName: ACCOUNTS_NAME.createdAccountName,
-    defaultAccountName: ACCOUNTS_NAME.defaultAccountName
+    createdAccountName: ACCOUNT_NAMES.createdAccountName,
+    defaultAccountName: ACCOUNT_NAMES.defaultAccountName
   },
   {
     testName: 'two accounts',
     selectAllAccounts: true,
-    createdAccountName: ACCOUNTS_NAME.createdAccountName,
-    defaultAccountName: ACCOUNTS_NAME.defaultAccountName
+    createdAccountName: ACCOUNT_NAMES.createdAccountName,
+    defaultAccountName: ACCOUNT_NAMES.defaultAccountName
   }
 ])(
   `Popup UI: Connect $testName`,
