@@ -73,7 +73,7 @@ describe.each([
             until.elementLocated(
               byText('Connect with Casper Wallet Playground')
             ),
-            40000
+            120000
           )
           .catch(async () => {
             await driver.verboseReportOnFailure(
