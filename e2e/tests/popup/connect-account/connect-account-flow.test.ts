@@ -103,9 +103,7 @@ describe.each([
         await driver
           .clickElement(byText(defaultAccountName))
           .catch(async () => {
-            await driver.verboseReportOnFailure(
-              `Failed on: ${defaultAccountName}`
-            );
+            await driver.verboseReportOnFailure(`Failed on: one account`);
           });
       }
 
