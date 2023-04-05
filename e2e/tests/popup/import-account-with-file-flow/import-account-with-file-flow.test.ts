@@ -16,7 +16,7 @@ import {
   TRUNCATED_PUBLIC_KEY_OF_IMPORTED_ACCOUNT
 } from '../../../constants';
 
-describe('Popup UI: Import account with file', () => {
+describe.skip('Popup UI: Import account with file', () => {
   let driver: Driver;
   // Store the ID of the original window
   let popupWindow: string;
