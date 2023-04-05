@@ -28,7 +28,7 @@ describe.each([
   }
 ])(
   `Popup UI: Connect $testName`,
-  ({ selectAllAccounts, defaultAccountName, createdAccountName }) => {
+  ({ selectAllAccounts, defaultAccountName, createdAccountName, testName }) => {
     let driver: Driver;
     // Store the ID of the original window
     let playgroundWindow: string;
@@ -67,6 +67,7 @@ describe.each([
           console.log('Failed on: Your wallet is locked');
         }
       );
+      await driver.verboseReportOnFailure('Your wallet is locked');
 
       await unlockVault(driver);
 
@@ -81,6 +82,10 @@ describe.each([
           }
         );
 
+        await driver.verboseReportOnFailure(
+          'Connect with Casper Wallet Playground'
+        );
+
         assert.ok(
           await driver.findElement(
             byText('Connect with Casper Wallet Playground')
@@ -89,7 +94,7 @@ describe.each([
       }
     });
 
-    it('should select all accounts and navigate to the next page', async () => {
+    it(`should select ${testName} and navigate to the next page`, async () => {
       if (selectAllAccounts) {
         await driver.clickElement(byText('select all'));
       } else {

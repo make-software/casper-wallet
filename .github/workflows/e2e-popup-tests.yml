@@ -55,3 +55,10 @@ jobs:
         env:
           SELENIUM_HOST: selenium
           SELENIUM_PORT: 4444
+
+      - name: Add screenshot
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: ${{ matrix.browser }}
+          path: screenshots/
