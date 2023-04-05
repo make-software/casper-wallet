@@ -3,25 +3,27 @@ import { strict as assert } from 'assert';
 import { Driver } from '../../../webdriver/driver';
 import { buildWebDriver } from '../../../webdriver';
 import { AppRoutes } from '../../../app-routes';
-import { switchToNewWindow, unlockVault, createAccount } from '../../common';
+import {
+  openExtensionWindowAndFocus,
+  unlockVault,
+  createAccount
+} from '../../common';
 import { byTestId, byText, getUrlPath } from '../../../utils/helpers';
+import { ACCOUNTS_NAME, PLAYGROUND_URL, TIMEOUT } from '../../../constants';
 
 describe.each([
   {
-    text: 'account',
+    testName: 'account',
     selectAllAccounts: false
   },
   {
-    text: 'two accounts',
+    testName: 'two accounts',
     selectAllAccounts: true
   }
-])(`Popup UI: Connect $text`, ({ selectAllAccounts }) => {
+])(`Popup UI: Connect $testName`, ({ selectAllAccounts }) => {
   let driver: Driver;
   // Store the ID of the original window
   let playgroundWindow: string;
-
-  const playgroundUrl = 'https://casper-wallet-playground.make.services/';
-  const newAccountName = 'New account 1';
 
   beforeAll(async () => {
     driver = await buildWebDriver();
@@ -29,9 +31,9 @@ describe.each([
     await driver.navigate(AppRoutes.Popup);
 
     await unlockVault(driver);
-    await createAccount(driver, newAccountName);
+    await createAccount(driver, ACCOUNTS_NAME.createdAccountName);
 
-    await driver.get(playgroundUrl);
+    await driver.get(PLAYGROUND_URL);
 
     playgroundWindow = await driver.getWindowHandle();
   });
@@ -41,7 +43,7 @@ describe.each([
   });
 
   it('should open connect account window', async () => {
-    await switchToNewWindow(driver, playgroundWindow, 'Connect');
+    await openExtensionWindowAndFocus(driver, playgroundWindow, 'Connect');
 
     assert.ok(
       await driver.findElement(byText('Connect with Casper Wallet Playground'))
@@ -52,7 +54,7 @@ describe.each([
     if (selectAllAccounts) {
       await driver.clickElement(byText('select all'));
     } else {
-      await driver.clickElement(byText('Account 1'));
+      await driver.clickElement(byText(ACCOUNTS_NAME.defaultAccountName));
     }
 
     await driver.clickElement(byText('Next'));
@@ -78,7 +80,7 @@ describe.each([
     // Wait for connecting
     await driver.wait(
       async () => (await driver.getAllWindowHandles()).length === 1,
-      10000
+      TIMEOUT
     );
 
     // Check if there is one window open
@@ -104,10 +106,16 @@ describe.each([
     selectAllAccounts ? 'accounts' : 'account'
   } that connected to the site`, async () => {
     if (selectAllAccounts) {
-      assert.ok(await driver.findElement(byText(newAccountName)));
-      assert.ok(await driver.findElement(byText('Account 1')));
+      assert.ok(
+        await driver.findElement(byText(ACCOUNTS_NAME.createdAccountName))
+      );
+      assert.ok(
+        await driver.findElement(byText(ACCOUNTS_NAME.defaultAccountName))
+      );
     } else {
-      assert.ok(await driver.findElement(byText('Account 1')));
+      assert.ok(
+        await driver.findElement(byText(ACCOUNTS_NAME.defaultAccountName))
+      );
     }
   });
 

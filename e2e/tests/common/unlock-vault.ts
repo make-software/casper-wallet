@@ -1,12 +1,8 @@
-import { By } from 'selenium-webdriver';
-
 import { Driver } from '../../webdriver/driver';
 import { vaultPassword } from '../../__fixtures';
+import { byButtonText, byInputName } from '../../utils/helpers';
 
 export const unlockVault = async (driver: Driver) => {
-  await driver.fill(
-    By.xpath("//input[@placeholder='Password']"),
-    vaultPassword
-  );
-  await driver.clickElement(By.xpath("//button[text()='Unlock wallet']"));
+  await driver.fill(byInputName('password'), vaultPassword);
+  await driver.clickElement(byButtonText('Unlock wallet'));
 };

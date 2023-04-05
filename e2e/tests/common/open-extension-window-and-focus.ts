@@ -2,8 +2,9 @@ import { strict as assert } from 'assert';
 
 import { Driver } from '../../webdriver/driver';
 import { byText } from '../../utils/helpers';
+import { TIMEOUT } from '../../constants';
 
-export const switchToNewWindow = async (
+export const openExtensionWindowAndFocus = async (
   driver: Driver,
   currentWindow: string,
   clickElement: string
@@ -16,7 +17,7 @@ export const switchToNewWindow = async (
   // Wait for the new window
   await driver.wait(
     async () => (await driver.getAllWindowHandles()).length === 2,
-    10000
+    TIMEOUT
   );
 
   // Loop through until we find a new window handle

@@ -268,14 +268,18 @@ export class Driver {
     await this.driver.switchTo().window(handle);
   }
 
+  // https://www.selenium.dev/documentation/webdriver/interactions/windows/#create-new-window-or-new-tab-and-switch
   async switchToNewWindow(handle: 'tab' | 'window') {
+    // Opens a new tab/window and switches to new tab/window
     await this.driver.switchTo().newWindow(handle);
   }
 
+  // Get the window handles of the all windows
   async getAllWindowHandles() {
     return await this.driver.getAllWindowHandles();
   }
 
+  // Get the window handle of the current window
   async getWindowHandle() {
     return await this.driver.getWindowHandle();
   }
