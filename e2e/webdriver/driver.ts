@@ -370,6 +370,11 @@ export class Driver {
       `${filepathBase}-state.json`,
       JSON.stringify(uiState, null, 2)
     );
+    const consoleErrors = await this.checkBrowserForConsoleErrors();
+    await fs.writeFile(
+      `${filepathBase}-console-errors.json`,
+      JSON.stringify(consoleErrors, null, 2)
+    );
   }
 
   async checkBrowserForConsoleErrors() {
