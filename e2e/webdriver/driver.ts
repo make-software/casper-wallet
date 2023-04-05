@@ -135,7 +135,7 @@ export class Driver {
           condition,
           timeout,
           `Timed out after ${timeout / 1000} seconds`,
-          2000
+          1000
         )
         .catch(() => {
           log && log();

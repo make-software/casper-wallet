@@ -62,14 +62,20 @@ describe.each([
 
       await driver.wait(
         until.elementLocated(byText('Your wallet is locked')),
-        TIMEOUT
+        TIMEOUT,
+        () => {
+          console.log('Failed on: Your wallet is locked');
+        }
       );
 
       await unlockVault(driver);
 
       await driver.wait(
         until.elementLocated(byText('Connect with Casper Wallet Playground')),
-        TIMEOUT
+        TIMEOUT,
+        () => {
+          console.log('Failed on: Connect with Casper Wallet Playground');
+        }
       );
 
       assert.ok(
