@@ -67,7 +67,7 @@ describe.each([
           console.log('Failed on: Your wallet is locked');
         }
       );
-      await driver.verboseReportOnFailure('Your wallet is locked');
+      await driver.verboseReportOnFailure(`${testName}/Your wallet is locked`);
 
       await unlockVault(driver);
 
@@ -80,7 +80,7 @@ describe.each([
       );
 
       await driver.verboseReportOnFailure(
-        'Connect with Casper Wallet Playground'
+        `${testName}/Connect with Casper Wallet Playground`
       );
 
       assert.ok(
@@ -88,7 +88,7 @@ describe.each([
           .findElement(byText('Connect with Casper Wallet Playground'))
           .catch(async () => {
             await driver.verboseReportOnFailure(
-              'Failed on: Connect with Casper Wallet Playground'
+              `Failed on: ${testName}/Connect with Casper Wallet Playground`
             );
           })
       );
@@ -97,13 +97,17 @@ describe.each([
     it(`should select ${testName} and navigate to the next page`, async () => {
       if (selectAllAccounts) {
         await driver.clickElement(byText('select all')).catch(async () => {
-          await driver.verboseReportOnFailure('Failed on: select all');
+          await driver.verboseReportOnFailure(
+            `Failed on: ${testName}/select all`
+          );
         });
       } else {
         await driver
           .clickElement(byText(defaultAccountName))
           .catch(async () => {
-            await driver.verboseReportOnFailure(`Failed on: one account`);
+            await driver.verboseReportOnFailure(
+              `Failed on: ${testName}/one account`
+            );
           });
       }
 
