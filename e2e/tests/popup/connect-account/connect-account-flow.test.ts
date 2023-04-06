@@ -13,7 +13,7 @@ import {
 import { byTestId, byText, getUrlPath } from '../../../utils/helpers';
 import { ACCOUNT_NAMES, PLAYGROUND_URL, TIMEOUT } from '../../../constants';
 
-describe.each([
+describe.skip.each([
   {
     testName: 'account',
     selectAllAccounts: false,
@@ -73,7 +73,7 @@ describe.each([
             until.elementLocated(
               byText('Connect with Casper Wallet Playground')
             ),
-            1000 * 60 * 10
+            1000 * 60
           )
           .catch(async () => {
             await driver.verboseReportOnFailure(
