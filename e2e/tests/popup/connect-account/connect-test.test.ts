@@ -43,7 +43,7 @@ describe('Test', () => {
 
   it('should lock vault', async () => {
     await driver.wait(
-      until.elementLocated(byText('Your wallet is locked')),
+      until.elementLocated(byText(ACCOUNT_NAMES.defaultAccountName)),
       TIMEOUT
     );
 
@@ -68,10 +68,7 @@ describe('Test', () => {
 
     assert.ok(
       await driver
-        .wait(
-          until.elementLocated(byText(ACCOUNT_NAMES.defaultAccountName)),
-          1000 * 60
-        )
+        .wait(until.elementLocated(byText('Lock wallet')), 1000 * 60)
         .catch(async () => {
           await driver.verboseReportOnFailure(
             `Failed on - account name (unlock)`
