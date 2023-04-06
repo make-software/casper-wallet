@@ -34,6 +34,10 @@ const ListItemClickableContainer = styled(
 )<ListItemClickableContainerProps>`
   align-items: center;
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+
+  &:hover svg {
+    color: ${({ theme }) => theme.color.contentBlue};
+  }
 `;
 
 export const SpaceBetweenContainer = styled(SpaceBetweenFlexRow)`
@@ -207,6 +211,9 @@ export function NavigationMenuPageContent() {
             <ListItemClickableContainer
               disabled={groupItem.disabled}
               key={groupLabel + groupItem.id}
+              as={groupItem.href ? Link : 'div'}
+              href={groupItem.href ? groupItem.href : undefined}
+              target={groupItem.href ? '_blank' : undefined}
               onClick={groupItem.disabled ? undefined : groupItem.handleOnClick}
             >
               <SvgIcon
@@ -230,10 +237,6 @@ export function NavigationMenuPageContent() {
                       {groupItem.description}
                     </Typography>
                   </FlexColumn>
-                ) : groupItem.href ? (
-                  <Link color="inherit" target="_blank" href={groupItem.href}>
-                    <Typography type="body">{groupItem.title}</Typography>
-                  </Link>
                 ) : (
                   <Typography type="body">{groupItem.title}</Typography>
                 )}
