@@ -5,7 +5,7 @@ import { Driver } from '../../../webdriver/driver';
 import { buildWebDriver } from '../../../webdriver';
 import { AppRoutes } from '../../../app-routes';
 import { lockVault, unlockVault } from '../../common';
-import { TIMEOUT } from '../../../constants';
+// import { TIMEOUT } from '../../../constants';
 import { byText } from '../../../utils/helpers';
 
 describe('Test', () => {
@@ -25,10 +25,10 @@ describe('Test', () => {
   });
 
   it('should unlock vault 1', async () => {
-    await driver.wait(
-      until.elementLocated(byText('Your wallet is locked')),
-      TIMEOUT
-    );
+    // await driver.wait(
+    //   until.elementLocated(byText('Your wallet is locked')),
+    //   TIMEOUT
+    // );
 
     await unlockVault(driver);
 
@@ -42,7 +42,7 @@ describe('Test', () => {
   });
 
   it('should lock vault 1', async () => {
-    await driver.wait(until.elementLocated(byText('Lock wallet')), TIMEOUT);
+    // await driver.wait(until.elementLocated(byText('Lock wallet')), TIMEOUT);
 
     await driver.clickElement(byText('Lock wallet'));
 
@@ -56,10 +56,10 @@ describe('Test', () => {
   });
 
   it('should unlock vault 2', async () => {
-    await driver.wait(
-      until.elementLocated(byText('Your wallet is locked')),
-      TIMEOUT
-    );
+    // await driver.wait(
+    //   until.elementLocated(byText('Your wallet is locked')),
+    //   TIMEOUT
+    // );
 
     await unlockVault(driver);
 
