@@ -21,6 +21,12 @@ export enum CasperApiUrl {
 }
 
 export enum NetworkSetting {
-  'Mainnet' = 'Mainnet',
-  'Testnet' = 'Testnet'
+  Mainnet = 'Mainnet',
+  Testnet = 'Testnet'
+}
+
+export enum Browser {
+  Safari = 'safari',
+  Chrome = 'chrome',
+  Firefox = 'firefox'
 }
