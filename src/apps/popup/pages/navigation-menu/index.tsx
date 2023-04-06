@@ -24,14 +24,17 @@ import { selectTimeoutDurationSetting } from '@src/background/redux/settings/sel
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { lockVault } from '@src/background/redux/sagas/actions';
 import { TimeoutDurationSetting } from '@popup/constants';
+import { isSafariBrowser } from '@src/utils';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;
+  hide?: boolean;
 }
 
 const ListItemClickableContainer = styled(
   BaseListItemClickableContainer
 )<ListItemClickableContainerProps>`
+  display: ${({ hide }) => hide && 'none'};
   align-items: center;
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 
@@ -53,6 +56,7 @@ interface MenuItem {
   disabled: boolean;
   currentValue?: string | number;
   handleOnClick?: () => void;
+  hide?: boolean;
 }
 
 interface MenuGroup {
@@ -161,6 +165,8 @@ export function NavigationMenuPageContent() {
             description: t('For all accounts imported via file'),
             iconPath: 'assets/icons/download.svg',
             disabled: !vaultHasImportedAccount,
+            // https://github.com/make-software/casper-wallet/issues/611
+            hide: isSafariBrowser,
             handleOnClick: () => {
               closeNavigationMenu();
               navigate(RouterPath.DownloadSecretKeys);
@@ -215,6 +221,7 @@ export function NavigationMenuPageContent() {
               href={groupItem.href ? groupItem.href : undefined}
               target={groupItem.href ? '_blank' : undefined}
               onClick={groupItem.disabled ? undefined : groupItem.handleOnClick}
+              hide={groupItem.hide}
             >
               <SvgIcon
                 src={groupItem.iconPath}
