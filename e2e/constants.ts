@@ -8,4 +8,7 @@ export const PLAYGROUND_URL = 'https://casper-wallet-playground.make.services/';
 
 export const TRUNCATED_PUBLIC_KEY_OF_IMPORTED_ACCOUNT = '0184f...dad55';
 
-export const TIMEOUT = 15000;
+export const TIMEOUT = {
+  '15sec': 1000 * 15,
+  '50sec': 1000 * 50
+};

@@ -8,7 +8,7 @@ import { recoverSecretPhrase } from '../../__fixtures';
 import { byText, getUrlPath } from '../../utils/helpers';
 import { createPassword } from '../common';
 
-describe.skip('Onboarding UI: recover secret phrase flow [happy path]', () => {
+describe('Onboarding UI: recover secret phrase flow [happy path]', () => {
   let driver: Driver;
 
   beforeAll(async () => {

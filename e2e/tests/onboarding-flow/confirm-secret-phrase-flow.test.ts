@@ -8,7 +8,7 @@ import { byText, byTestId, getUrlPath } from '../../utils/helpers';
 import { WebElementWithAPI } from '../../webdriver/WebElementWithAPI';
 import { createPassword } from '../common';
 
-describe.skip('Onboarding UI: confirm secret phrase flow [happy path]', () => {
+describe('Onboarding UI: confirm secret phrase flow [happy path]', () => {
   let driver: Driver;
   let copiedPhrase: string;
   let secretPhraseList: WebElementWithAPI;
