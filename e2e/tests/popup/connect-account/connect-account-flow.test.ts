@@ -191,6 +191,11 @@ describe('Popup UI: Connect account', () => {
 
   beforeAll(async () => {
     driver = await buildWebDriver();
+
+    await driver.navigate(AppRoutes.Popup);
+
+    await unlockVault(driver);
+    await driver.findElement(byText(ACCOUNT_NAMES.defaultAccountName));
   });
 
   afterAll(async () => {
@@ -213,18 +218,16 @@ describe('Popup UI: Connect account', () => {
 
     assert.ok(
       await driver
-        .findElement(byText('Your wallet is locked'))
+        .findElement(byText('Connect with Casper Wallet Playground'))
         .catch(async () => {
           await driver.verboseReportOnFailure(
-            `Failed on - Your wallet is locked`
+            `Failed on - Connect with Casper Wallet Playground`
           );
         })
     );
   });
 
-  it('should unlock vault, select account and navigate to the next page', async () => {
-    await unlockVault(driver);
-
+  it('should select account and navigate to the next page', async () => {
     await driver.clickElement(byText(ACCOUNT_NAMES.defaultAccountName));
     await driver.clickElement(byText('Next'));
 
