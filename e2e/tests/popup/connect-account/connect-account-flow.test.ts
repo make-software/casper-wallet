@@ -13,7 +13,7 @@ import {
 import { byTestId, byText, getUrlPath } from '../../../utils/helpers';
 import { ACCOUNT_NAMES, PLAYGROUND_URL, TIMEOUT } from '../../../constants';
 
-describe.each([
+describe.skip.each([
   {
     testName: 'account',
     selectAllAccounts: false,
@@ -183,3 +183,119 @@ describe.each([
     });
   }
 );
+
+describe('Popup UI: Connect account', () => {
+  let driver: Driver;
+  // Store the ID of the original window
+  let playgroundWindow: string;
+
+  beforeAll(async () => {
+    driver = await buildWebDriver();
+  });
+
+  afterAll(async () => {
+    await driver.quit();
+  });
+
+  it('should open playground app', async () => {
+    await driver.get(PLAYGROUND_URL);
+    playgroundWindow = await driver.getWindowHandle();
+
+    assert(await driver.findElement(byText('Casper Wallet Playground')));
+  });
+
+  it('should open connect account window', async () => {
+    await openExtensionWindowWithSDKAndFocus(
+      driver,
+      playgroundWindow,
+      'Connect'
+    );
+
+    assert.ok(
+      await driver
+        .wait(until.elementLocated(byText('Your wallet is locked')), 1000 * 60)
+        .catch(async () => {
+          await driver.verboseReportOnFailure(
+            `Failed on - Your wallet is locked`
+          );
+        })
+    );
+  });
+
+  it('should unlock vault', async () => {
+    await unlockVault(driver);
+
+    assert.ok(
+      await driver
+        .wait(
+          until.elementLocated(byText('Connect with Casper Wallet Playground')),
+          1000 * 60
+        )
+        .catch(async () => {
+          await driver.verboseReportOnFailure(
+            `Failed on - Connect with Casper Wallet Playground`
+          );
+        })
+    );
+  });
+
+  it('should select account and navigate to the next page', async () => {
+    await driver.clickElement(byText(ACCOUNT_NAMES.defaultAccountName));
+    await driver.clickElement(byText('Next'));
+
+    assert.ok(await driver.findElement(byText('Connect to 1 account')));
+  });
+
+  it('should connect the account and close the window', async () => {
+    await driver.clickElement(byText('Connect to 1 account'));
+
+    // Wait for connecting
+    await driver.wait(
+      async () => (await driver.getAllWindowHandles()).length === 1
+    );
+
+    // Check if there is one window open
+    assert((await driver.getAllWindowHandles()).length === 1);
+  });
+
+  it('should open navigation menu', async () => {
+    await driver.switchToWindow(playgroundWindow);
+    await driver.createNewWindowOrTabAndSwitch('window');
+
+    await driver.navigate(AppRoutes.Popup);
+
+    await driver.clickElement(byTestId('menu-open-icon'));
+
+    assert.ok(await driver.findElement(byText('Connected sites')));
+  });
+
+  it('should open connected sites page', async () => {
+    await driver.clickElement(byText('Connected sites'));
+
+    assert.equal(
+      await driver.driver.getCurrentUrl().then(getUrlPath),
+      'connected-sites'
+    );
+  });
+
+  it.each([
+    {
+      testName: 'the connected site title',
+      element: 'Casper Wallet Playground'
+    },
+    {
+      testName: 'the connected site URL',
+      element: 'casper-wallet-playground.make.services'
+    },
+    {
+      testName: 'the account that connected to the site',
+      element: ACCOUNT_NAMES.defaultAccountName
+    },
+    {
+      testName: 'the disconnect button',
+      element: 'Disconnect'
+    }
+  ])('should find $testName', async ({ element }) => {
+    assert.ok(await driver.findElement(byText(element)));
+  });
+});
