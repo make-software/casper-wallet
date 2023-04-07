@@ -191,15 +191,17 @@ describe('Popup UI: Connect account', () => {
 
   beforeAll(async () => {
     driver = await buildWebDriver();
-
-    await driver.navigate(AppRoutes.Popup);
-
-    await unlockVault(driver);
-    await driver.findElement(byText(ACCOUNT_NAMES.defaultAccountName));
   });
 
   afterAll(async () => {
     await driver.quit();
+  });
+
+  it('should unlock vault', async () => {
+    await driver.navigate(AppRoutes.Popup);
+
+    await unlockVault(driver);
+    await driver.findElement(byText(ACCOUNT_NAMES.defaultAccountName));
   });
 
   it('should open playground app', async () => {
