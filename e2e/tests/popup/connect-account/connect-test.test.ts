@@ -16,8 +16,12 @@ describe('Test', () => {
 
     await driver.navigate(AppRoutes.Popup);
 
-    await unlockVault(driver);
-    await lockVault(driver);
+    await unlockVault(driver).finally(async () => {
+      await driver.verboseReportOnFailure(`Unlock vault - 0`);
+    });
+    await lockVault(driver).finally(async () => {
+      await driver.verboseReportOnFailure(`Lock vault - 0`);
+    });
   });
 
   afterAll(async () => {
@@ -30,7 +34,9 @@ describe('Test', () => {
     //   TIMEOUT
     // );
 
-    await unlockVault(driver);
+    await unlockVault(driver).finally(async () => {
+      await driver.verboseReportOnFailure(`Unlock vault - 1`);
+    });
 
     assert.ok(
       await driver
@@ -44,7 +50,9 @@ describe('Test', () => {
   it('should lock vault 1', async () => {
     // await driver.wait(until.elementLocated(byText('Lock wallet')), TIMEOUT);
 
-    await driver.clickElement(byText('Lock wallet'));
+    await driver.clickElement(byText('Lock wallet')).finally(async () => {
+      await driver.verboseReportOnFailure(`Lock vault - 1`);
+    });
 
     assert.ok(
       await driver
@@ -61,7 +69,9 @@ describe('Test', () => {
     //   TIMEOUT
     // );
 
-    await unlockVault(driver);
+    await unlockVault(driver).finally(async () => {
+      await driver.verboseReportOnFailure(`Unlock vault - 2`);
+    });
 
     assert.ok(
       await driver
