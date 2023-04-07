@@ -13,19 +13,19 @@ import {
 import { byTestId, byText, getUrlPath } from '../../../utils/helpers';
 import { ACCOUNT_NAMES, PLAYGROUND_URL, TIMEOUT } from '../../../constants';
 
-describe.skip.each([
+describe.each([
   {
     testName: 'account',
     selectAllAccounts: false,
     createdAccountName: ACCOUNT_NAMES.createdAccountName,
     defaultAccountName: ACCOUNT_NAMES.defaultAccountName
-  },
-  {
-    testName: 'two accounts',
-    selectAllAccounts: true,
-    createdAccountName: ACCOUNT_NAMES.createdAccountName,
-    defaultAccountName: ACCOUNT_NAMES.defaultAccountName
   }
+  // {
+  //   testName: 'two accounts',
+  //   selectAllAccounts: true,
+  //   createdAccountName: ACCOUNT_NAMES.createdAccountName,
+  //   defaultAccountName: ACCOUNT_NAMES.defaultAccountName
+  // }
 ])(
   `Popup UI: Connect $testName`,
   ({ selectAllAccounts, defaultAccountName, createdAccountName, testName }) => {
