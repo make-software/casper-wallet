@@ -81,4 +81,32 @@ describe('Test', () => {
         })
     );
   });
+
+  it('should lock vault 2', async () => {
+    await driver.clickElement(byText('Lock wallet')).finally(async () => {
+      await driver.verboseReportOnFailure(`Lock vault - 2`);
+    });
+
+    assert.ok(
+      await driver
+        .wait(until.elementLocated(byText('Your wallet is locked')), 1000 * 60)
+        .catch(async () => {
+          await driver.verboseReportOnFailure(`Failed on - lock vault 2`);
+        })
+    );
+  });
+
+  it('should unlock vault 3', async () => {
+    await unlockVault(driver).finally(async () => {
+      await driver.verboseReportOnFailure(`Unlock vault - 3`);
+    });
+
+    assert.ok(
+      await driver
+        .wait(until.elementLocated(byText('Lock wallet')), 1000 * 60)
+        .catch(async () => {
+          await driver.verboseReportOnFailure(`Failed on - unlock vault 3`);
+        })
+    );
+  });
 });
