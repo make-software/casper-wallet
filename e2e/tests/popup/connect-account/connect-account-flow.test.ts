@@ -53,13 +53,28 @@ describe.each([
       await driver.quit();
     });
 
-    it('should open connect account window and unlock vault', async () => {
+    it('should open connect account window', async () => {
       await openExtensionWindowWithSDKAndFocus(
         driver,
         playgroundWindow,
         'Connect'
       );
 
+      assert.ok(
+        await driver
+          .wait(
+            until.elementLocated(byText('Your wallet is locked')),
+            1000 * 60
+          )
+          .catch(async () => {
+            await driver.verboseReportOnFailure(
+              `Failed on - ${testName}/Your wallet is locked`
+            );
+          })
+      );
+    });
+
+    it('should unlock vault', async () => {
       await unlockVault(driver);
 
       assert.ok(
