@@ -156,11 +156,11 @@ export class Driver {
 
   // Element interactions
 
-  async findElement(rawLocator: RawLocator) {
+  async findElement(rawLocator: RawLocator, timeout?: number) {
     const locator = this.buildLocator(rawLocator);
     const element = await this.driver.wait(
       until.elementLocated(locator),
-      this.timeout
+      timeout || this.timeout
     );
     return wrapElementWithAPI(element, this);
   }

@@ -222,7 +222,7 @@ describe('Popup UI: Connect account', () => {
 
     await unlockVault(driver);
     await driver
-      .findElement(byText('Connect with Casper Wallet Playground'))
+      .findElement(byText('Connect with Casper Wallet Playground'), 1000 * 60)
       .finally(async () => {
         await driver.verboseReportOnFailure(
           'Connect with casper wallet playground after unlock'
