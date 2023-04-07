@@ -9,7 +9,7 @@ import {
   MapTimeoutDurationSettingToValue
 } from '@src/apps/popup/constants';
 import { sdkEvent } from '@src/content/sdk-event';
-import { emitSdkEventToAllActiveTabs } from '@src/background/emit-sdk-event-to-all-active-tabs';
+import { emitSdkEventToActiveTabs } from '@src/background/utils';
 import { selectLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
 import {
   loginRetryLockoutTimeReseted,
@@ -28,16 +28,16 @@ import {
   accountRemoved,
   siteConnected,
   accountDisconnected,
-  allAccountsDisconnected,
+  siteDisconnected,
   activeAccountChanged,
   vaultLoaded,
   vaultReseted,
   anotherAccountConnected
 } from '../vault/actions';
 import {
-  selectIsActiveAccountConnectedWithOrigin,
   selectSecretPhrase,
   selectVault,
+  selectVaultAccountNamesByOriginDict,
   selectVaultActiveAccount,
   selectVaultDerivedAccounts
 } from '../vault/selectors';
@@ -63,6 +63,7 @@ import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
 import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
 import { activeTimeoutDurationSettingChanged } from '../settings/actions';
 import { selectTimeoutDurationSetting } from '../settings/selectors';
+import { getUrlOrigin } from '@src/utils';
 
 export function* vaultSagas() {
   yield takeLatest(getType(lockVault), lockVaultSaga);
@@ -88,7 +89,7 @@ export function* vaultSagas() {
       getType(siteConnected),
       getType(anotherAccountConnected),
       getType(accountDisconnected),
-      getType(allAccountsDisconnected),
+      getType(siteDisconnected),
       getType(activeAccountChanged),
       getType(activeTimeoutDurationSettingChanged)
     ],
@@ -106,13 +107,13 @@ function* lockVaultSaga(action: ReturnType<typeof lockVault>) {
     yield put(vaultReseted());
     yield put(deploysReseted());
 
-    emitSdkEventToAllActiveTabs(
-      sdkEvent.lockedEvent({
+    emitSdkEventToActiveTabs(tab => {
+      return sdkEvent.lockedEvent({
         isLocked: true,
-        isConnected: false,
+        isConnected: null,
         activeKey: null
-      })
-    );
+      });
+    });
   } catch (err) {
     console.error(err);
   }
@@ -181,19 +182,39 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
     );
     yield put(vaultUnlocked());
 
-    const isActiveAccountConnected = yield* sagaSelect(
-      selectIsActiveAccountConnectedWithOrigin
+    const accountNamesByOriginDict = yield* sagaSelect(
+      selectVaultAccountNamesByOriginDict
     );
+
+    const isActiveAccountConnectedWith = (origin: string | null) => {
+      if (!origin) {
+        return false;
+      }
+      return accountNamesByOriginDict[origin].includes(
+        activeAccount?.name || ''
+      );
+    };
+
     const activeAccount = yield* sagaSelect(selectVaultActiveAccount);
 
     if (activeAccount) {
-      emitSdkEventToAllActiveTabs(
-        sdkEvent.unlockedEvent({
+      emitSdkEventToActiveTabs(tab => {
+        if (!tab.url) {
+          return;
+        }
+
+        const isActiveAccountConnectedWithTab = isActiveAccountConnectedWith(
+          getUrlOrigin(tab.url)
+        );
+
+        return sdkEvent.unlockedEvent({
           isLocked: false,
-          isConnected: isActiveAccountConnected,
-          activeKey: isActiveAccountConnected ? activeAccount.publicKey : null
-        })
-      );
+          isConnected: isActiveAccountConnectedWithTab,
+          activeKey: isActiveAccountConnectedWithTab
+            ? activeAccount.publicKey
+            : null
+        });
+      });
     }
   } catch (err) {
     console.error(err);

@@ -38,9 +38,7 @@ export const accountDisconnected = createAction('ACCOUNT_DISCONNECTED')<{
   siteOrigin: string;
 }>();
 
-export const allAccountsDisconnected = createAction(
-  'ALL_ACCOUNTS_DISCONNECTED'
-)<{
+export const siteDisconnected = createAction('SITE_DISCONNECTED')<{
   siteOrigin: string;
 }>();
 

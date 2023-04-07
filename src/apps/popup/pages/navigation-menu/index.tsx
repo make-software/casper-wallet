@@ -24,16 +24,23 @@ import { selectTimeoutDurationSetting } from '@src/background/redux/settings/sel
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { lockVault } from '@src/background/redux/sagas/actions';
 import { TimeoutDurationSetting } from '@popup/constants';
+import { isSafariBrowser } from '@src/utils';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;
+  hide?: boolean;
 }
 
 const ListItemClickableContainer = styled(
   BaseListItemClickableContainer
 )<ListItemClickableContainerProps>`
+  display: ${({ hide }) => hide && 'none'};
   align-items: center;
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+
+  &:hover svg {
+    color: ${({ theme }) => theme.color.contentBlue};
+  }
 `;
 
 export const SpaceBetweenContainer = styled(SpaceBetweenFlexRow)`
@@ -49,6 +56,7 @@ interface MenuItem {
   disabled: boolean;
   currentValue?: string | number;
   handleOnClick?: () => void;
+  hide?: boolean;
 }
 
 interface MenuGroup {
@@ -157,6 +165,8 @@ export function NavigationMenuPageContent() {
             description: t('For all accounts imported via file'),
             iconPath: 'assets/icons/download.svg',
             disabled: !vaultHasImportedAccount,
+            // https://github.com/make-software/casper-wallet/issues/611
+            hide: isSafariBrowser,
             handleOnClick: () => {
               closeNavigationMenu();
               navigate(RouterPath.DownloadSecretKeys);
@@ -207,7 +217,11 @@ export function NavigationMenuPageContent() {
             <ListItemClickableContainer
               disabled={groupItem.disabled}
               key={groupLabel + groupItem.id}
+              as={groupItem.href ? Link : 'div'}
+              href={groupItem.href ? groupItem.href : undefined}
+              target={groupItem.href ? '_blank' : undefined}
               onClick={groupItem.disabled ? undefined : groupItem.handleOnClick}
+              hide={groupItem.hide}
             >
               <SvgIcon
                 src={groupItem.iconPath}
@@ -230,10 +244,6 @@ export function NavigationMenuPageContent() {
                       {groupItem.description}
                     </Typography>
                   </FlexColumn>
-                ) : groupItem.href ? (
-                  <Link color="inherit" target="_blank" href={groupItem.href}>
-                    <Typography type="body">{groupItem.title}</Typography>
-                  </Link>
                 ) : (
                   <Typography type="body">{groupItem.title}</Typography>
                 )}

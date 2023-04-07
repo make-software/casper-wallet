@@ -164,7 +164,8 @@ const options = {
     // expose and write the allowed env vars on the compiled bundle
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-      'process.env.MOCK_STATE': JSON.stringify(process.env.MOCK_STATE)
+      'process.env.MOCK_STATE': JSON.stringify(process.env.MOCK_STATE),
+      'process.env.BROWSER': JSON.stringify(process.env.BROWSER)
     }),
     // manifest file generation
     new CopyWebpackPlugin({
@@ -183,7 +184,7 @@ const options = {
               ...JSON.parse(content.toString()),
               name: pkg.name,
               version: pkg.version,
-              version_name: pkg.version + ' (Open Beta)',
+              version_name: pkg.version,
               author: pkg.author,
               description: pkg.description,
               ...(isDev
