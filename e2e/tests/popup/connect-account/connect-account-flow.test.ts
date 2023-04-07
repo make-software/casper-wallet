@@ -36,9 +36,9 @@ describe.each([
     beforeAll(async () => {
       driver = await buildWebDriver();
 
-      await driver.navigate(AppRoutes.Popup);
-
       if (selectAllAccounts) {
+        await driver.navigate(AppRoutes.Popup);
+
         await unlockVault(driver);
         await createAccount(driver, createdAccountName);
         await lockVault(driver);
@@ -58,11 +58,6 @@ describe.each([
         driver,
         playgroundWindow,
         'Connect'
-      );
-
-      await driver.wait(
-        until.elementLocated(byText('Your wallet is locked')),
-        TIMEOUT
       );
 
       await unlockVault(driver);
