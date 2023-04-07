@@ -11,4 +11,6 @@ export const createAccount = async (driver: Driver, newAccountName: string) => {
   await accountNameInput.fill(newAccountName);
 
   await driver.clickElement(byText('Create Account'));
+
+  await driver.findElement(byText(newAccountName));
 };

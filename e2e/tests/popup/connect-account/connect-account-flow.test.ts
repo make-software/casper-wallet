@@ -202,6 +202,7 @@ describe('Popup UI: Connect account', () => {
 
     await unlockVault(driver);
     await driver.findElement(byText(ACCOUNT_NAMES.defaultAccountName));
+    await createAccount(driver, ACCOUNT_NAMES.createdAccountName);
     await lockVault(driver);
     await unlockVault(driver);
     await driver.findElement(byText('Lock wallet'));
