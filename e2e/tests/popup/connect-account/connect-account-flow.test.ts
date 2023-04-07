@@ -202,6 +202,9 @@ describe('Popup UI: Connect account', () => {
 
     await unlockVault(driver);
     await driver.findElement(byText(ACCOUNT_NAMES.defaultAccountName));
+    await lockVault(driver);
+    await unlockVault(driver);
+    await driver.findElement(byText('Lock wallet'));
   });
 
   it('should open playground app', async () => {
