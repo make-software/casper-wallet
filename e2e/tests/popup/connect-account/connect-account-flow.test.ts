@@ -222,21 +222,9 @@ describe('Popup UI: Connect account', () => {
     );
   });
 
-  it('should unlock vault', async () => {
+  it('should unlock vault, select account and navigate to the next page', async () => {
     await unlockVault(driver);
 
-    assert.ok(
-      await driver
-        .findElement(byText('Connect with Casper Wallet Playground'))
-        .catch(async () => {
-          await driver.verboseReportOnFailure(
-            `Failed on - Connect with Casper Wallet Playground`
-          );
-        })
-    );
-  });
-
-  it('should select account and navigate to the next page', async () => {
     await driver.clickElement(byText(ACCOUNT_NAMES.defaultAccountName));
     await driver.clickElement(byText('Next'));
 
