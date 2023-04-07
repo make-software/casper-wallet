@@ -213,7 +213,7 @@ describe('Popup UI: Connect account', () => {
 
     assert.ok(
       await driver
-        .wait(until.elementLocated(byText('Your wallet is locked')), 1000 * 60)
+        .findElement(byText('Your wallet is locked'))
         .catch(async () => {
           await driver.verboseReportOnFailure(
             `Failed on - Your wallet is locked`
@@ -227,10 +227,7 @@ describe('Popup UI: Connect account', () => {
 
     assert.ok(
       await driver
-        .wait(
-          until.elementLocated(byText('Connect with Casper Wallet Playground')),
-          1000 * 60
-        )
+        .findElement(byText('Connect with Casper Wallet Playground'))
         .catch(async () => {
           await driver.verboseReportOnFailure(
             `Failed on - Connect with Casper Wallet Playground`
