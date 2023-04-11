@@ -99,6 +99,10 @@ export class Driver {
     );
   }
 
+  async get(url: string) {
+    await this.driver.get(url);
+  }
+
   async fill(rawLocator: RawLocator, input: string) {
     const element = await this.findElement(rawLocator);
     await element.fill(input);
@@ -123,7 +127,7 @@ export class Driver {
       | Function,
     timeout = this.timeout
   ) {
-    await this.driver.wait(condition, timeout);
+    return await this.driver.wait(condition, timeout);
   }
 
   async waitForSelector(
@@ -152,11 +156,11 @@ export class Driver {
 
   // Element interactions
 
-  async findElement(rawLocator: RawLocator) {
+  async findElement(rawLocator: RawLocator, timeout?: number) {
     const locator = this.buildLocator(rawLocator);
     const element = await this.driver.wait(
       until.elementLocated(locator),
-      this.timeout
+      timeout || this.timeout
     );
     return wrapElementWithAPI(element, this);
   }
@@ -264,10 +268,18 @@ export class Driver {
     await this.driver.switchTo().window(handle);
   }
 
+  // https://www.selenium.dev/documentation/webdriver/interactions/windows/#create-new-window-or-new-tab-and-switch
+  async createNewWindowOrTabAndSwitch(handle: 'tab' | 'window') {
+    // Opens a new tab/window and switches to new tab/window
+    await this.driver.switchTo().newWindow(handle);
+  }
+
+  // Get the window handles of the all windows
   async getAllWindowHandles() {
     return await this.driver.getAllWindowHandles();
   }
 
+  // Get the window handle of the current window
   async getWindowHandle() {
     return await this.driver.getWindowHandle();
   }

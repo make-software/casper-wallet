@@ -24,7 +24,7 @@ export class WebElementWithAPI
     await this.element.clear();
     await this.element.sendKeys(input);
   }
-  async waitForElementState(state: string, timeout: number): Promise<void> {
+  async waitForElementState(state: string, timeout: number): Promise<any> {
     switch (state) {
       case ElementState.Hidden:
         // @ts-ignore TODO: clarify Condition<boolean> case here
