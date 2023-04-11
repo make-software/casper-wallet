@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -10,8 +10,6 @@ import {
 } from '@src/libs/layout';
 import { BaseProps, SvgIcon, Typography, WordTag } from '@src/libs/ui';
 import { SecretPhrase } from '@src/libs/crypto';
-
-import { getWordsIndexListWithExtraIndexForPicker } from './utils';
 
 const WordPickerContainer = styled(FlexColumn)`
   color: ${({ theme }) => theme.color.contentBlue};
@@ -42,21 +40,12 @@ export function WordPicker({
   dataTestId,
   handleResetPhrase
 }: WordPickerProps) {
-  const [wordsIndexList, setWordsIndexList] = useState<number[]>([]);
-
   const { t } = useTranslation();
-
-  useEffect(() => {
-    const wordsIndexListWithExtraIndex =
-      getWordsIndexListWithExtraIndexForPicker(phrase, hiddenWordIndexes);
-
-    setWordsIndexList(wordsIndexListWithExtraIndex);
-  }, [hiddenWordIndexes, phrase]);
 
   return (
     <WordPickerContainer gap={SpacingSize.Big} data-testid={dataTestId}>
       <FlexRow gap={SpacingSize.Small} wrap="wrap">
-        {wordsIndexList.map(wordIndex => (
+        {hiddenWordIndexes.map(wordIndex => (
           <WordTag
             key={wordIndex}
             value={phrase[wordIndex]}

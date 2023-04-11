@@ -22,7 +22,7 @@ interface WordCollections {
 export function buildInitialWordsCollection(
   phrase: SecretPhrase
 ): WordCollections {
-  const collectionSize = 6;
+  const collectionSize = 7;
   const initialHiddenWordIndexes: number[] = [];
   const initialPartialPhrase: PartialPhraseArray = [...phrase];
 
@@ -33,35 +33,15 @@ export function buildInitialWordsCollection(
 
     if (initialPartialPhrase[index] != null) {
       initialHiddenWordIndexes.push(index);
-      initialPartialPhrase[index] = null;
+      if (i < collectionSize - 1) {
+        initialPartialPhrase[index] = null;
+      }
 
       i++;
     }
   }
 
+  shuffle(initialHiddenWordIndexes);
+
   return { initialHiddenWordIndexes, initialPartialPhrase };
 }
-
-export const getWordsIndexListWithExtraIndexForPicker = (
-  phrase: SecretPhrase,
-  hiddenWordIndexes: number[]
-) => {
-  const extraWordsIndex: number[] = [];
-
-  while (extraWordsIndex.length !== 6) {
-    const index = getRandomInt(0, phrase.length - 1);
-
-    if (
-      !hiddenWordIndexes.includes(index) &&
-      !extraWordsIndex.includes(index)
-    ) {
-      extraWordsIndex.push(index);
-    }
-  }
-
-  const combinedWordsIndexList = [...hiddenWordIndexes, ...extraWordsIndex];
-
-  shuffle(combinedWordsIndexList);
-
-  return combinedWordsIndexList;
-};
