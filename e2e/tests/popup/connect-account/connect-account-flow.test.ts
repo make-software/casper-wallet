@@ -8,9 +8,10 @@ import {
   openExtensionWindowWithSDKAndFocus,
   unlockVault,
   createAccount,
-  lockVault
+  lockVault,
+  openConnectedSitePage
 } from '../../common';
-import { byTestId, byText, getUrlPath } from '../../../utils/helpers';
+import { byText, getUrlPath, isElementPresent } from '../../../utils/helpers';
 import { ACCOUNT_NAMES, PLAYGROUND_URL, TIMEOUT } from '../../../constants';
 
 describe.each([
@@ -107,7 +108,8 @@ describe.each([
       await driver.clickElement(byText('Next'));
 
       assert.ok(
-        await driver.findElement(
+        await isElementPresent(
+          driver,
           byText(
             selectAllAccounts ? 'Connect to 2 accounts' : 'Connect to 1 account'
           )
@@ -136,12 +138,8 @@ describe.each([
 
     it('should open connected site page', async () => {
       await driver.switchToWindow(playgroundWindow);
-      await driver.createNewWindowOrTabAndSwitch('window');
 
-      await driver.navigate(AppRoutes.Popup);
-
-      await driver.clickElement(byTestId('menu-open-icon'));
-      await driver.clickElement(byText('Connected sites'));
+      await openConnectedSitePage(driver);
 
       assert.equal(
         await driver.driver.getCurrentUrl().then(getUrlPath),
@@ -153,27 +151,32 @@ describe.each([
       selectAllAccounts ? 'accounts' : 'account'
     } that connected to the site`, async () => {
       if (selectAllAccounts) {
-        assert.ok(await driver.findElement(byText(createdAccountName)));
-        assert.ok(await driver.findElement(byText(defaultAccountName)));
+        assert.ok(await isElementPresent(driver, byText(createdAccountName)));
+        assert.ok(await isElementPresent(driver, byText(defaultAccountName)));
       } else {
-        assert.ok(await driver.findElement(byText(defaultAccountName)));
+        assert.ok(await isElementPresent(driver, byText(defaultAccountName)));
+        assert.equal(
+          await isElementPresent(driver, byText(createdAccountName)),
+          false
+        );
       }
     });
 
-    it('should find the connected site title', async () => {
-      assert.ok(await driver.findElement(byText('Casper Wallet Playground')));
-    });
-
-    it('should find the connected site URL', async () => {
-      assert.ok(
-        await driver.findElement(
-          byText('casper-wallet-playground.make.services')
-        )
-      );
-    });
-
-    it('should find disconnect button', async () => {
-      assert.ok(await driver.findElement(byText('Disconnect')));
+    it.each([
+      {
+        describe: 'connected site title',
+        expectedElement: 'Casper Wallet Playground'
+      },
+      {
+        describe: 'connected site URL',
+        expectedElement: 'casper-wallet-playground.make.services'
+      },
+      {
+        describe: 'disconnect button',
+        expectedElement: 'Disconnect'
+      }
+    ])('should find the $describe', async ({ expectedElement }) => {
+      assert.ok(await isElementPresent(driver, byText(expectedElement)));
     });
   }
 );

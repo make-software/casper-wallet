@@ -82,7 +82,10 @@ export function ApproveConnectionPage({
               <Trans t={t}>Only connect with sites you trust</Trans>
             </Typography>
           </TextCentredContainer>
-          <Button onClick={handleApproveConnection}>
+          <Button
+            onClick={handleApproveConnection}
+            dataTestId="connect-accounts-button"
+          >
             {/* TODO: optimize text in Trans component below */}
             <Trans t={t}>
               Connect to {{ selectedAccountNamesLength }}{' '}

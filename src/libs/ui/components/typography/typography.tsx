@@ -202,7 +202,7 @@ const StyledHeader = styled('h1').withConfig({
 });
 
 export const Typography = forwardRef<Ref, TypographyProps>(function Typography(
-  { ...props },
+  { dataTestId, ...props },
   ref
 ) {
   const Component = props.type !== 'header' ? StyledTypography : StyledHeader;
@@ -215,5 +215,5 @@ export const Typography = forwardRef<Ref, TypographyProps>(function Typography(
     );
   }
 
-  return <Component ref={ref as any} {...props} />;
+  return <Component ref={ref as any} data-testid={dataTestId} {...props} />;
 });
