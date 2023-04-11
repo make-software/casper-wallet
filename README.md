@@ -160,7 +160,7 @@ There are a few options to run tests:
 
 1. In docker container
    - Run docker and up containers. `docker compose up` or `docker-compose -f docker-compose.arm.yml up` for Apple M processors
-   - Use npm scripts `npm run test:e2e:chrome:headless` or `npm run test:e2e:firefox:headless` depends on target browser
+   - Use npm scripts `npm run test:e2e:{chrome/firefox}:headless:{popup/onboarding}` depends on target browser and tests
    - To see what is happening inside the container, open your web browser and navigate to the URL <http://localhost:7900> for Chrome and <http://localhost:7901> for Firefox, enter the password `secret`, and run your test again
 2. Locally on computer
    - Use npm scripts `npm run test:e2e:chrome` or `npm run test:e2e:firefox` depends on target browser
