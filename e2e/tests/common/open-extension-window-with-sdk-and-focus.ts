@@ -4,7 +4,7 @@ import { Driver } from '../../webdriver/driver';
 import { byText } from '../../utils/helpers';
 import { TIMEOUT } from '../../constants';
 
-export const openExtensionWindowWithSDKAndFocus = async (
+export const clickButtonToOpenExtensionWindowAndFocus = async (
   driver: Driver,
   currentWindow: string,
   clickElement: string

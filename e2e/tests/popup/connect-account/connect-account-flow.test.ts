@@ -5,7 +5,7 @@ import { Driver } from '../../../webdriver/driver';
 import { buildWebDriver } from '../../../webdriver';
 import { AppRoutes } from '../../../app-routes';
 import {
-  openExtensionWindowWithSDKAndFocus,
+  clickButtonToOpenExtensionWindowAndFocus,
   unlockVault,
   createAccount,
   lockVault
@@ -60,7 +60,7 @@ describe.each([
     });
 
     it('should open connect account window and unlock vault', async () => {
-      await openExtensionWindowWithSDKAndFocus(
+      await clickButtonToOpenExtensionWindowAndFocus(
         driver,
         playgroundWindow,
         'Connect'
