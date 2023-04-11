@@ -77,7 +77,7 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
             <Typography type="header">Switch to another account</Typography>
           </VerticalSpaceContainer>
         </ParagraphContainer>
-        {/*The active account and other accounts are not connected*/}
+        {/*Neither active account nor other accounts are connected*/}
         {connectedAccountsListItems.length === 0 &&
           !isActiveAccountConnected && (
             <ParagraphContainer top={SpacingSize.Big}>

@@ -71,6 +71,89 @@ export function useAccountManager() {
   );
 
   /**
+   * connect site
+   */
+  const connectSiteWithEvent = useCallback(
+    async (accountNames: string[], origin: string, siteTitle: string) => {
+      if (!activeAccount?.name || origin == null || isLocked) {
+        return;
+      }
+
+      const selectedAccountsIncludeActive = accountNames.includes(
+        activeAccount.name
+      );
+
+      const account = selectedAccountsIncludeActive
+        ? activeAccount
+        : findAccountInAListClosestToGivenAccountFilteredByNames(
+            accounts,
+            activeAccount,
+            accountNames
+          );
+
+      if (account != null) {
+        emitSdkEventToActiveTabsWithOrigin(
+          origin,
+          sdkEvent.connectedAccountEvent({
+            isLocked: isLocked,
+            isConnected: isLocked ? null : true,
+            activeKey: isLocked ? null : account.publicKey
+          })
+        );
+        if (!selectedAccountsIncludeActive) {
+          dispatchToMainStore(activeAccountChanged(account.name));
+        }
+        dispatchToMainStore(
+          siteConnected({
+            accountNames: accountNames,
+            siteOrigin: origin,
+            siteTitle
+          })
+        );
+      }
+    },
+    [activeAccount, isLocked, accounts]
+  );
+
+  /**
+   * connect another account
+   */
+  const connectAnotherAccountWithEvent = useCallback(
+    async (accountName: string, origin: string | null) => {
+      if (!activeAccount?.name || origin == null || isLocked) {
+        return;
+      }
+
+      const selectedAccountIsActive = accountName === activeAccount.name;
+
+      const account = selectedAccountIsActive
+        ? activeAccount
+        : accounts.find(account => account.name === accountName);
+
+      if (account != null) {
+        emitSdkEventToActiveTabsWithOrigin(
+          origin,
+          sdkEvent.connectedAccountEvent({
+            isLocked: isLocked,
+            isConnected: isLocked ? null : true,
+            activeKey: isLocked ? null : account.publicKey
+          })
+        );
+        if (!selectedAccountIsActive) {
+          dispatchToMainStore(activeAccountChanged(account.name));
+        }
+        dispatchToMainStore(
+          anotherAccountConnected({
+            accountName: account.name,
+            siteOrigin: origin
+          })
+        );
+      }
+    },
+    [accounts, activeAccount, isLocked]
+  );
+
+  /**
    * change active account
    */
   const changeActiveAccountWithEvent = useCallback(
@@ -79,10 +162,8 @@ export function useAccountManager() {
         return;
       }
 
-      const newActiveAccount = accounts.find(
-        account => account.name === accountName
-      );
-      if (newActiveAccount == null) {
+      const account = accounts.find(account => account.name === accountName);
+      if (account == null) {
         throw Error('new active account should be found');
       }
 
@@ -91,166 +172,62 @@ export function useAccountManager() {
           return;
         }
 
-        const isNewAccountConnectedWithTab = isAccountConnectedWithOrigin(
-          newActiveAccount.name,
+        const isAccountConnectedWithTab = isAccountConnectedWithOrigin(
+          account.name,
           getUrlOrigin(tab.url)
         );
 
         return sdkEvent.changedConnectedAccountEvent({
           isLocked: isLocked,
-          isConnected: isLocked ? null : isNewAccountConnectedWithTab,
+          isConnected: isLocked ? null : isAccountConnectedWithTab,
           activeKey:
-            !isLocked && isNewAccountConnectedWithTab
-              ? newActiveAccount.publicKey
-              : null
+            isLocked || !isAccountConnectedWithTab ? null : account.publicKey
         });
       });
 
-      dispatchToMainStore(activeAccountChanged(newActiveAccount.name));
+      dispatchToMainStore(activeAccountChanged(account.name));
     },
     [activeAccount?.name, accounts, isLocked, isAccountConnectedWithOrigin]
   );
 
   /**
-   *
+   * disconnect site
    */
-  const connectSiteWithEvent = useCallback(
-    async (accountNames: string[], origin, siteTitle: string) => {
-      if (!activeAccount?.name || origin == null || isLocked) {
+  const disconnectSiteWithEvent = useCallback(
+    async (origin: string) => {
+      if (!activeAccount?.name || !origin || isLocked) {
         return;
       }
 
-      // new connected accounts including active
-      if (accountNames.includes(activeAccount.name)) {
-        emitSdkEventToActiveTabsWithOrigin(
+      const allAccountNames = accountNamesByOriginDict[origin];
+
+      if (allAccountNames.includes(activeAccount.name)) {
+        await emitSdkEventToActiveTabsWithOrigin(
           origin,
-          sdkEvent.connectedAccountEvent({
+          sdkEvent.disconnectedAccountEvent({
             isLocked: isLocked,
-            isConnected: isLocked ? null : true,
-            activeKey: activeAccount.publicKey
+            isConnected: isLocked ? null : false,
+            activeKey: isLocked ? null : activeAccount?.publicKey
           })
         );
-        dispatchToMainStore(
-          siteConnected({
-            accountNames: accountNames,
-            siteOrigin: origin,
-            siteTitle
-          })
-        );
-      } else {
-        // new connected accounts not including active
-        // we'll switch active account to closest new
-        const newActiveAccountFromConnected =
-          findAccountInAListClosestToGivenAccountFilteredByNames(
-            accounts,
-            activeAccount,
-            accountNames
-          );
-
-        if (
-          newActiveAccountFromConnected &&
-          newActiveAccountFromConnected.name !== activeAccount.name
-        ) {
-          emitSdkEventToActiveTabs(tab => {
-            if (!tab.url) {
-              return;
-            }
-
-            const isNewAccountConnectedWithTab = isAccountConnectedWithOrigin(
-              newActiveAccountFromConnected.name,
-              getUrlOrigin(tab.url)
-            );
-
-            return sdkEvent.changedConnectedAccountEvent({
-              isLocked: isLocked,
-              isConnected: isLocked ? null : isNewAccountConnectedWithTab,
-              activeKey: isNewAccountConnectedWithTab
-                ? newActiveAccountFromConnected.publicKey
-                : null
-            });
-          });
-          dispatchToMainStore(
-            activeAccountChanged(newActiveAccountFromConnected.name)
-          );
-          dispatchToMainStore(
-            siteConnected({
-              accountNames: accountNames,
-              siteOrigin: origin,
-              siteTitle
-            })
-          );
-        }
       }
+
+      dispatchToMainStore(
+        siteDisconnected({
+          siteOrigin: origin
+        })
+      );
     },
-    [activeAccount, isLocked, accounts, isAccountConnectedWithOrigin]
+    [
+      accountNamesByOriginDict,
+      activeAccount?.name,
+      activeAccount?.publicKey,
+      isLocked
+    ]
   );
 
   /**
-   *
-   */
-  const connectAnotherAccountWithEvent = useCallback(
-    async (accountName: string, origin: string | null) => {
-      if (!activeAccount?.name || origin == null || isLocked) {
-        return;
-      }
-
-      // new connected account is active
-      if (accountName === activeAccount.name) {
-        emitSdkEventToActiveTabsWithOrigin(
-          origin,
-          sdkEvent.connectedAccountEvent({
-            isLocked: isLocked,
-            isConnected: isLocked ? null : true,
-            activeKey: activeAccount.publicKey
-          })
-        );
-        dispatchToMainStore(
-          anotherAccountConnected({
-            accountName,
-            siteOrigin: origin
-          })
-        );
-      } else {
-        // new connected account is not active
-        // we'll switch active account to new
-        const newActiveAccount = accounts.find(
-          account => account.name === accountName
-        );
-
-        if (newActiveAccount && newActiveAccount.name !== activeAccount.name) {
-          emitSdkEventToActiveTabs(tab => {
-            if (!tab.url) {
-              return;
-            }
-
-            const isNewAccountConnectedWithTab = isAccountConnectedWithOrigin(
-              newActiveAccount.name,
-              getUrlOrigin(tab.url)
-            );
-
-            return sdkEvent.changedConnectedAccountEvent({
-              isLocked: isLocked,
-              isConnected: isLocked ? null : isNewAccountConnectedWithTab,
-              activeKey: isNewAccountConnectedWithTab
-                ? newActiveAccount.publicKey
-                : null
-            });
-          });
-          dispatchToMainStore(activeAccountChanged(newActiveAccount.name));
-          dispatchToMainStore(
-            anotherAccountConnected({
-              accountName,
-              siteOrigin: origin
-            })
-          );
-        }
-      }
-    },
-    [accounts, activeAccount, isLocked]
-  );
-
-  /**
-   *
+   * disconnect account
    */
   const disconnectAccountWithEvent = useCallback(
     async (accountName: string, origin: string) => {
@@ -270,7 +247,7 @@ export function useAccountManager() {
           sdkEvent.disconnectedAccountEvent({
             isLocked: isLocked,
             isConnected: isLocked ? null : false,
-            activeKey: activeAccount?.publicKey
+            activeKey: isLocked ? null : activeAccount?.publicKey
           })
         );
       }
@@ -285,47 +262,11 @@ export function useAccountManager() {
     [accountNamesByOriginDict, activeAccount, isLocked]
   );
 
-  /**
-   *
-   */
-  const disconnectSiteWithEvent = useCallback(
-    async (origin: string) => {
-      if (!activeAccount?.name || !origin || isLocked) {
-        return;
-      }
-
-      const allAccountNames = accountNamesByOriginDict[origin];
-
-      if (allAccountNames.includes(activeAccount.name)) {
-        await emitSdkEventToActiveTabsWithOrigin(
-          origin,
-          sdkEvent.disconnectedAccountEvent({
-            isLocked: isLocked,
-            isConnected: isLocked ? null : false,
-            activeKey: activeAccount?.publicKey
-          })
-        );
-      }
-
-      dispatchToMainStore(
-        siteDisconnected({
-          siteOrigin: origin
-        })
-      );
-    },
-    [
-      accountNamesByOriginDict,
-      activeAccount?.name,
-      activeAccount?.publicKey,
-      isLocked
-    ]
-  );
-
   return {
-    changeActiveAccountWithEvent,
     connectSiteWithEvent,
     connectAnotherAccountWithEvent,
-    disconnectAccountWithEvent,
-    disconnectSiteWithEvent
+    changeActiveAccountWithEvent,
+    disconnectSiteWithEvent,
+    disconnectAccountWithEvent
   };
 }
