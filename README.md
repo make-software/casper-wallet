@@ -12,7 +12,7 @@
 
 ### Access Casper Wallet Playground repo
 
-Open <https://github.com/make-software/casper-wallet>
+Open <https://github.com/make-software/casper-wallet-playground>
 
 Clone this repository and run following commands from the repo root folder.
 *NOTE: Node.js LTS is required.*
