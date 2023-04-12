@@ -39,7 +39,10 @@ describe('Popup UI: Import account with file', () => {
   it('should open navigation menu', async () => {
     await driver.clickElement(byTestId('menu-open-icon'));
 
-    assert.ok(await isElementPresent(driver, byText('Import account')));
+    assert.ok(
+      await isElementPresent(driver, byText('Import account')),
+      'Import account'
+    );
   });
 
   it('should open import account window', async () => {

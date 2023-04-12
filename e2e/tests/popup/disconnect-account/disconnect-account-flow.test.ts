@@ -57,7 +57,10 @@ describe('Popup UI: Disconnect account', () => {
     );
 
     assert.equal(areAnyAccountsConnected, false);
-    assert.ok(await isElementPresent(driver, byText('No connected sites yet')));
+    assert.ok(
+      await isElementPresent(driver, byText('No connected sites yet')),
+      'No connected sites yet'
+    );
   });
 
   it.each([
@@ -85,7 +88,10 @@ describe('Popup UI: Disconnect account', () => {
       );
 
       assert.equal(areAccountsPresent, areElementsExpected);
-      assert.ok(await isElementPresent(driver, byText(expectedElement)));
+      assert.ok(
+        await isElementPresent(driver, byText(expectedElement)),
+        expectedElement
+      );
     }
   );
 });

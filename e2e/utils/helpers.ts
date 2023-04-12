@@ -16,7 +16,11 @@ export const byInputName = (name: string) =>
 export const byButtonText = (text: string) =>
   By.xpath(`//button[text()='${text}']`);
 
-export const isElementPresent = async (driver: Driver, locatorKey: By) => {
+export const isElementPresent = async (
+  driver: Driver,
+  locatorKey: By,
+  elementName?: string
+) => {
   try {
     return Boolean(
       await driver.wait(
@@ -25,7 +29,7 @@ export const isElementPresent = async (driver: Driver, locatorKey: By) => {
       )
     );
   } catch (e) {
-    await driver.verboseReportOnFailure(`Can't find element - ${locatorKey}`);
+    await driver.verboseReportOnFailure(`Can't find element - ${elementName}`);
     return false;
   }
 };

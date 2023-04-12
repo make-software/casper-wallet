@@ -112,7 +112,8 @@ describe.each([
           driver,
           byText(
             selectAllAccounts ? 'Connect to 2 accounts' : 'Connect to 1 account'
-          )
+          ),
+          selectAllAccounts ? 'Connect to 2 accounts' : 'Connect to 1 account'
         )
       );
     });
@@ -151,10 +152,19 @@ describe.each([
       selectAllAccounts ? 'accounts' : 'account'
     } that connected to the site`, async () => {
       if (selectAllAccounts) {
-        assert.ok(await isElementPresent(driver, byText(createdAccountName)));
-        assert.ok(await isElementPresent(driver, byText(defaultAccountName)));
+        assert.ok(
+          await isElementPresent(driver, byText(createdAccountName)),
+          createdAccountName
+        );
+        assert.ok(
+          await isElementPresent(driver, byText(defaultAccountName)),
+          defaultAccountName
+        );
       } else {
-        assert.ok(await isElementPresent(driver, byText(defaultAccountName)));
+        assert.ok(
+          await isElementPresent(driver, byText(defaultAccountName)),
+          defaultAccountName
+        );
         assert.equal(
           await isElementPresent(driver, byText(createdAccountName)),
           false
@@ -176,7 +186,10 @@ describe.each([
         expectedElement: 'Disconnect'
       }
     ])('should find the $describe', async ({ expectedElement }) => {
-      assert.ok(await isElementPresent(driver, byText(expectedElement)));
+      assert.ok(
+        await isElementPresent(driver, byText(expectedElement)),
+        expectedElement
+      );
     });
   }
 );
