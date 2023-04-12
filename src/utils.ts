@@ -11,4 +11,4 @@ export const getUrlOrigin = (url: string) => {
   return new URL(url).origin;
 };
 
-export const isSafariBrowser = process.env.BROWSER === Browser.Safari;
+export const isSafariBuild = process.env.BROWSER === Browser.Safari;

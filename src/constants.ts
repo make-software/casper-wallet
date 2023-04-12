@@ -30,3 +30,8 @@ export enum Browser {
   Chrome = 'chrome',
   Firefox = 'firefox'
 }
+
+export enum TermsLink {
+  Tos = 'https://www.casperwallet.io/tos',
+  Privacy = 'https://www.casperwallet.io/privacy'
+}
