@@ -30,7 +30,7 @@ export const isElementPresent = async (driver: Driver, locatorKey: By) => {
   }
 };
 
-export const isElementsPresents = async (driver: Driver, locatorKey: By) => {
+export const areElementsPresent = async (driver: Driver, locatorKey: By) => {
   const elements = await driver.wait(
     () => driver.driver.findElements(locatorKey),
     TIMEOUT['15sec']
