@@ -58,7 +58,7 @@ jobs:
 
       - name: Add screenshot
         uses: actions/upload-artifact@v3
-        if: always()
+        if: failure()
         with:
           name: ${{ matrix.browser }}
           path: test-artifacts/
