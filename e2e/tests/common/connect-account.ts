@@ -1,5 +1,5 @@
 import { unlockVault } from './unlock-vault';
-import { openExtensionWindowWithSDKAndFocus } from './open-extension-window-with-sdk-and-focus';
+import { clickButtonToOpenExtensionWindowAndFocus } from './click-button-to-open-extension-window-and-focus';
 
 import { Driver } from '../../webdriver/driver';
 import { byTestId, byText, isElementPresent } from '../../utils/helpers';
@@ -14,7 +14,11 @@ export const connectAccount = async ({
   currentWindow: string;
   connectAllAccounts?: boolean;
 }) => {
-  await openExtensionWindowWithSDKAndFocus(driver, currentWindow, 'Connect');
+  await clickButtonToOpenExtensionWindowAndFocus(
+    driver,
+    currentWindow,
+    'Connect'
+  );
 
   const isWalletLocked = await isElementPresent(
     driver,

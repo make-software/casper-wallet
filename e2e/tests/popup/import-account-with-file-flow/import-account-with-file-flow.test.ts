@@ -4,7 +4,10 @@ import { Driver } from '../../../webdriver/driver';
 import { buildWebDriver } from '../../../webdriver';
 import { AppRoutes } from '../../../app-routes';
 import { secretKeyPath } from '../../../__fixtures';
-import { clickButtonToOpenExtensionWindowAndFocus, unlockVault } from '../../common';
+import {
+  clickButtonToOpenExtensionWindowAndFocus,
+  unlockVault
+} from '../../common';
 import {
   byText,
   byTestId,
