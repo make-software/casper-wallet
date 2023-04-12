@@ -23,6 +23,7 @@ export function buildInitialWordsCollection(
   phrase: SecretPhrase
 ): WordCollections {
   const collectionSize = 7;
+  const hiddenWordsCount = collectionSize - 1;
   const initialHiddenWordIndexes: number[] = [];
   const initialPartialPhrase: PartialPhraseArray = [...phrase];
 
@@ -33,7 +34,7 @@ export function buildInitialWordsCollection(
 
     if (initialPartialPhrase[index] != null) {
       initialHiddenWordIndexes.push(index);
-      if (i < collectionSize - 1) {
+      if (i < hiddenWordsCount) {
         initialPartialPhrase[index] = null;
       }
 
