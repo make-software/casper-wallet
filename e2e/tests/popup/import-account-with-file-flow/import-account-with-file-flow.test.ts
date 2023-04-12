@@ -12,8 +12,7 @@ import {
   byText,
   byTestId,
   getUrlPath,
-  byInputName,
-  isElementPresent
+  byInputName
 } from '../../../utils/helpers';
 import {
   ACCOUNT_NAMES,
@@ -40,7 +39,7 @@ describe('Popup UI: Import account with file', () => {
     await driver.clickElement(byTestId('menu-open-icon'));
 
     assert.ok(
-      await isElementPresent(driver, byText('Import account')),
+      await driver.isElementPresent(byText('Import account')),
       'Import account'
     );
   });
@@ -93,7 +92,7 @@ describe('Popup UI: Import account with file', () => {
 
   it.each([
     {
-      describe: 'imported account name in the accounts list',
+      describe: 'imported account name',
       expectedElement: ACCOUNT_NAMES.importedAccountName
     },
     {
@@ -104,7 +103,10 @@ describe('Popup UI: Import account with file', () => {
       describe: 'imported tag',
       expectedElement: 'Imported'
     }
-  ])('should find the $describe', async ({ expectedElement }) => {
-    assert.ok(await driver.findElement(byText(expectedElement)));
-  });
+  ])(
+    'should find the $describe on the accounts list',
+    async ({ expectedElement }) => {
+      assert.ok(await driver.findElement(byText(expectedElement)));
+    }
+  );
 });

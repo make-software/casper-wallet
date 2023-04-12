@@ -9,12 +9,7 @@ import {
   openConnectedSitePage,
   connectAccount
 } from '../../common';
-import {
-  byTestId,
-  byText,
-  isElementPresent,
-  areElementsPresent
-} from '../../../utils/helpers';
+import { byTestId, byText } from '../../../utils/helpers';
 import { ACCOUNT_NAMES, PLAYGROUND_URL } from '../../../constants';
 
 describe('Popup UI: Disconnect account', () => {
@@ -51,14 +46,13 @@ describe('Popup UI: Disconnect account', () => {
 
     await openConnectedSitePage(driver);
 
-    const areAnyAccountsConnected = await areElementsPresent(
-      driver,
+    const areAnyAccountsConnected = await driver.areElementsPresent(
       byTestId('account-name')
     );
 
     assert.equal(areAnyAccountsConnected, false);
     assert.ok(
-      await isElementPresent(driver, byText('No connected sites yet')),
+      await driver.isElementPresent(byText('No connected sites yet')),
       'No connected sites yet'
     );
   });
@@ -82,14 +76,13 @@ describe('Popup UI: Disconnect account', () => {
       await openConnectedSitePage(driver);
       await driver.clickElement(disconnectButton);
 
-      const areAccountsPresent = await areElementsPresent(
-        driver,
+      const areAccountsPresent = await driver.areElementsPresent(
         byTestId('account-name')
       );
 
       assert.equal(areAccountsPresent, areElementsExpected);
       assert.ok(
-        await isElementPresent(driver, byText(expectedElement)),
+        await driver.isElementPresent(byText(expectedElement)),
         expectedElement
       );
     }

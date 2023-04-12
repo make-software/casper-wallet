@@ -11,7 +11,7 @@ import {
   lockVault,
   openConnectedSitePage
 } from '../../common';
-import { byText, getUrlPath, isElementPresent } from '../../../utils/helpers';
+import { byText, getUrlPath } from '../../../utils/helpers';
 import { ACCOUNT_NAMES, PLAYGROUND_URL, TIMEOUT } from '../../../constants';
 
 describe.each([
@@ -108,8 +108,7 @@ describe.each([
       await driver.clickElement(byText('Next'));
 
       assert.ok(
-        await isElementPresent(
-          driver,
+        await driver.isElementPresent(
           byText(
             selectAllAccounts ? 'Connect to 2 accounts' : 'Connect to 1 account'
           ),
@@ -153,20 +152,20 @@ describe.each([
     } that connected to the site`, async () => {
       if (selectAllAccounts) {
         assert.ok(
-          await isElementPresent(driver, byText(createdAccountName)),
+          await driver.isElementPresent(byText(createdAccountName)),
           createdAccountName
         );
         assert.ok(
-          await isElementPresent(driver, byText(defaultAccountName)),
+          await driver.isElementPresent(byText(defaultAccountName)),
           defaultAccountName
         );
       } else {
         assert.ok(
-          await isElementPresent(driver, byText(defaultAccountName)),
+          await driver.isElementPresent(byText(defaultAccountName)),
           defaultAccountName
         );
         assert.equal(
-          await isElementPresent(driver, byText(createdAccountName)),
+          await driver.isElementPresent(byText(createdAccountName)),
           false
         );
       }
@@ -185,11 +184,14 @@ describe.each([
         describe: 'disconnect button',
         expectedElement: 'Disconnect'
       }
-    ])('should find the $describe', async ({ expectedElement }) => {
-      assert.ok(
-        await isElementPresent(driver, byText(expectedElement)),
-        expectedElement
-      );
-    });
+    ])(
+      'should find the $describe on the connected site list',
+      async ({ expectedElement }) => {
+        assert.ok(
+          await driver.isElementPresent(byText(expectedElement)),
+          expectedElement
+        );
+      }
+    );
   }
 );

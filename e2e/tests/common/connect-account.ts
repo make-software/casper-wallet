@@ -2,7 +2,7 @@ import { unlockVault } from './unlock-vault';
 import { clickButtonToOpenExtensionWindowAndFocus } from './click-button-to-open-extension-window-and-focus';
 
 import { Driver } from '../../webdriver/driver';
-import { byTestId, byText, isElementPresent } from '../../utils/helpers';
+import { byTestId, byText } from '../../utils/helpers';
 import { ACCOUNT_NAMES, TIMEOUT } from '../../constants';
 
 export const connectAccount = async ({
@@ -20,8 +20,7 @@ export const connectAccount = async ({
     'Connect'
   );
 
-  const isWalletLocked = await isElementPresent(
-    driver,
+  const isWalletLocked = await driver.isElementPresent(
     byText('Your wallet is locked')
   );
 
