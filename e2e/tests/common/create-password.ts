@@ -1,21 +1,12 @@
-import { By } from 'selenium-webdriver';
-
 import { Driver } from '../../webdriver/driver';
 import { vaultPassword } from '../../__fixtures';
+import { byButtonText, byInputName, byTestId } from '../../utils/helpers';
 
 export const createPassword = async (driver: Driver) => {
-  await driver.fill(
-    By.xpath("//input[@placeholder='Password']"),
-    vaultPassword
-  );
-  await driver.fill(
-    By.xpath("//input[@placeholder='Confirm password']"),
-    vaultPassword
-  );
+  await driver.fill(byInputName('password'), vaultPassword);
+  await driver.fill(byInputName('confirmPassword'), vaultPassword);
 
-  const checkbox = await driver.findElement(
-    By.xpath("//*[@data-testid='terms-checkbox']")
-  );
+  const checkbox = await driver.findElement(byTestId('terms-checkbox'));
   await checkbox.click();
-  await driver.clickElement(By.xpath("//button[text()='Create password']"));
+  await driver.clickElement(byButtonText('Create password'));
 };

@@ -1,19 +1,28 @@
-import { By } from 'selenium-webdriver';
 import { strict as assert } from 'assert';
 
 import { Driver } from '../../../webdriver/driver';
 import { buildWebDriver } from '../../../webdriver';
 import { AppRoutes } from '../../../app-routes';
 import { secretKeyPath } from '../../../__fixtures';
-import { unlockVault } from '../../common';
-import { byText, byTestId, getUrlPath } from '../../../utils/helpers';
+import {
+  clickButtonToOpenExtensionWindowAndFocus,
+  unlockVault
+} from '../../common';
+import {
+  byText,
+  byTestId,
+  getUrlPath,
+  byInputName
+} from '../../../utils/helpers';
+import {
+  ACCOUNT_NAMES,
+  TRUNCATED_PUBLIC_KEY_OF_IMPORTED_ACCOUNT
+} from '../../../constants';
 
 describe('Popup UI: Import account with file', () => {
   let driver: Driver;
   // Store the ID of the original window
   let popupWindow: string;
-  const accountName = 'Imported account';
-  const accountTruncatedPublicKey = '0184f...dad55';
 
   beforeAll(async () => {
     driver = await buildWebDriver();
@@ -35,24 +44,11 @@ describe('Popup UI: Import account with file', () => {
   it('should open import account window', async () => {
     popupWindow = await driver.getWindowHandle();
 
-    // Check if there is one window open
-    assert((await driver.getAllWindowHandles()).length === 1);
-
-    await driver.clickElement(byText('Import account'));
-
-    // Wait for the new window
-    await driver.wait(
-      async () => (await driver.getAllWindowHandles()).length === 2,
-      10000
+    await clickButtonToOpenExtensionWindowAndFocus(
+      driver,
+      popupWindow,
+      'Import account'
     );
-
-    // Loop through until we find a new window handle
-    const windows = await driver.getAllWindowHandles();
-    for (const handle of windows) {
-      if (handle !== popupWindow) {
-        await driver.switchToWindow(handle);
-      }
-    }
 
     assert.ok(
       driver.findElement(byText('Import account from secret key file'))
@@ -62,16 +58,12 @@ describe('Popup UI: Import account with file', () => {
   it('should upload the file and fill the account name', async () => {
     await driver.clickElement(byText('Upload your file'));
 
-    const fileInput = await driver.findElement(
-      By.xpath("//input[@type='file']")
-    );
-    const accountNameInput = await driver.findElement(
-      By.xpath("//input[@type='text']")
-    );
+    const fileInput = await driver.findElement(byInputName('secretKeyFile'));
+    const accountNameInput = await driver.findElement(byInputName('name'));
     const importButton = await driver.findElement(byText('Import'));
 
     await fileInput.fill(secretKeyPath);
-    await accountNameInput.fill(accountName);
+    await accountNameInput.fill(ACCOUNT_NAMES.importedAccountName);
 
     assert.ok(importButton.isEnabled());
   });
@@ -96,14 +88,16 @@ describe('Popup UI: Import account with file', () => {
   });
 
   it('should find the imported account name in the accounts list', async () => {
-    const importedAccount = await driver.findElement(byText(accountName));
+    const importedAccount = await driver.findElement(
+      byText(ACCOUNT_NAMES.importedAccountName)
+    );
 
     assert.ok(importedAccount);
   });
 
   it('should find the truncated public key of the imported account', async () => {
     const truncatedPublicKey = await driver.findElement(
-      byText(accountTruncatedPublicKey)
+      byText(TRUNCATED_PUBLIC_KEY_OF_IMPORTED_ACCOUNT)
     );
 
     assert.ok(truncatedPublicKey);

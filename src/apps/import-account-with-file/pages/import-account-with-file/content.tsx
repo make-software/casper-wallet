@@ -8,7 +8,7 @@ import {
   SpacingSize
 } from '@src/libs/layout';
 import { SvgIcon, Tag, Typography } from '@libs/ui';
-import { isSafariBrowser } from '@src/utils';
+import { isSafariBuild } from '@src/utils';
 
 export function ImportAccountWithFileContentPage() {
   const { t } = useTranslation();
@@ -37,7 +37,7 @@ export function ImportAccountWithFileContentPage() {
         </Typography>
       </ParagraphContainer>
       {/* https://github.com/make-software/casper-wallet/issues/611 */}
-      {isSafariBrowser && (
+      {isSafariBuild && (
         <ParagraphContainer top={SpacingSize.Small}>
           <Typography type="body" color="contentSecondary">
             <Trans t={t}>

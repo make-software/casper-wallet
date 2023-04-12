@@ -24,7 +24,7 @@ import { selectTimeoutDurationSetting } from '@src/background/redux/settings/sel
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { lockVault } from '@src/background/redux/sagas/actions';
 import { TimeoutDurationSetting } from '@popup/constants';
-import { isSafariBrowser } from '@src/utils';
+import { isSafariBuild } from '@src/utils';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;
@@ -166,7 +166,7 @@ export function NavigationMenuPageContent() {
             iconPath: 'assets/icons/download.svg',
             disabled: !vaultHasImportedAccount,
             // https://github.com/make-software/casper-wallet/issues/611
-            hide: isSafariBrowser,
+            hide: isSafariBuild,
             handleOnClick: () => {
               closeNavigationMenu();
               navigate(RouterPath.DownloadSecretKeys);

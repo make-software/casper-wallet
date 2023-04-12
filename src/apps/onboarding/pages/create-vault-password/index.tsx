@@ -20,6 +20,7 @@ import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate
 import { selectPasswordHash } from '@src/background/redux/keys/selectors';
 import { initKeys } from '@src/background/redux/sagas/actions';
 import { dispatchToMainStore } from '@background/redux/utils';
+import { TermsLink } from '@src/constants';
 
 import { CreateVaultPasswordPageContent } from './content';
 
@@ -54,10 +55,10 @@ export function CreateVaultPasswordPage({
       <Link
         onClick={event => {
           event.stopPropagation();
+          event.preventDefault();
+          window.open(TermsLink.Tos, '_blank');
         }}
         color="fillBlue"
-        target="_blank"
-        href="https://www.casperwallet.io/tos"
       >
         Casper Wallet Terms of Service
       </Link>{' '}
@@ -65,10 +66,10 @@ export function CreateVaultPasswordPage({
       <Link
         onClick={event => {
           event.stopPropagation();
+          event.preventDefault();
+          window.open(TermsLink.Privacy, '_blank');
         }}
         color="fillBlue"
-        target="_blank"
-        href="https://www.casperwallet.io/privacy"
       >
         Privacy Policy
       </Link>
