@@ -32,7 +32,9 @@ export function SiteGroupItem({
   return (
     <SiteGroupItemContainer>
       <AccountNameAndPublicKeyContainer>
-        <Typography type="body">{name}</Typography>
+        <Typography type="body" dataTestId="account-name">
+          {name}
+        </Typography>
         <Hash
           variant={HashVariant.CaptionHash}
           value={publicKey}
@@ -40,7 +42,11 @@ export function SiteGroupItem({
           withTag={imported}
         />
       </AccountNameAndPublicKeyContainer>
-      <SvgIcon onClick={handleOnClick} src="assets/icons/close.svg" />
+      <SvgIcon
+        dataTestId="disconnect-account-icon"
+        onClick={handleOnClick}
+        src="assets/icons/close.svg"
+      />
     </SiteGroupItemContainer>
   );
 }

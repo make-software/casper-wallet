@@ -38,7 +38,10 @@ describe('Popup UI: Import account with file', () => {
   it('should open navigation menu', async () => {
     await driver.clickElement(byTestId('menu-open-icon'));
 
-    assert.ok(await driver.findElement(byText('Import account')));
+    assert.ok(
+      await driver.isElementPresent(byText('Import account')),
+      'Import account'
+    );
   });
 
   it('should open import account window', async () => {
@@ -87,25 +90,23 @@ describe('Popup UI: Import account with file', () => {
     );
   });
 
-  it('should find the imported account name in the accounts list', async () => {
-    const importedAccount = await driver.findElement(
-      byText(ACCOUNT_NAMES.importedAccountName)
-    );
-
-    assert.ok(importedAccount);
-  });
-
-  it('should find the truncated public key of the imported account', async () => {
-    const truncatedPublicKey = await driver.findElement(
-      byText(TRUNCATED_PUBLIC_KEY_OF_IMPORTED_ACCOUNT)
-    );
-
-    assert.ok(truncatedPublicKey);
-  });
-
-  it('should find the imported tag', async () => {
-    const importedTag = await driver.findElement(byText('Imported'));
-
-    assert.ok(importedTag);
-  });
+  it.each([
+    {
+      describe: 'imported account name',
+      expectedElement: ACCOUNT_NAMES.importedAccountName
+    },
+    {
+      describe: 'truncated public key of the imported account',
+      expectedElement: TRUNCATED_PUBLIC_KEY_OF_IMPORTED_ACCOUNT
+    },
+    {
+      describe: 'imported tag',
+      expectedElement: 'Imported'
+    }
+  ])(
+    'should find the $describe on the accounts list',
+    async ({ expectedElement }) => {
+      assert.ok(await driver.findElement(byText(expectedElement)));
+    }
+  );
 });

@@ -16,6 +16,7 @@ import { WebElementWithAPI } from './WebElementWithAPI';
 
 import { DriverKey, PerformanceResults, RawLocator } from './types';
 import { ElementState } from './constants';
+import { TIMEOUT } from '../constants';
 
 function wrapElementWithAPI(
   element: WebElement,
@@ -242,6 +243,29 @@ export class Driver {
       );
     }
     assert.ok(!dataTab, 'Found element that should not be present');
+  }
+
+  async isElementPresent(locatorKey: By, elementName?: string) {
+    try {
+      return Boolean(
+        await this.wait(
+          () => this.driver.findElement(locatorKey),
+          TIMEOUT['15sec']
+        )
+      );
+    } catch (e) {
+      await this.verboseReportOnFailure(`Can't find element - ${elementName}`);
+      return false;
+    }
+  }
+
+  async areElementsPresent(locatorKey: By) {
+    const elements = await this.wait(
+      () => this.driver.findElements(locatorKey),
+      TIMEOUT['15sec']
+    );
+
+    return elements.length > 0;
   }
 
   // Navigation
