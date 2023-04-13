@@ -225,7 +225,8 @@ export function SecretPhraseWordsView({
                 selected={
                   confirmationMode &&
                   hiddenWordIndexes.includes(index) &&
-                  partialPhrase[index] != null
+                  partialPhrase[index] != null &&
+                  selectedHiddenWordIndexes.includes(index)
                 }
               />
             );

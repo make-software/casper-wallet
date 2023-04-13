@@ -108,8 +108,13 @@ describe('Onboarding UI: confirm secret phrase flow [happy path]', () => {
     const phrase = copiedPhrase?.split(' ') || secretPhrase;
 
     const wordPicker = await driver.findElement(byTestId('word-picker'));
+    const wordList = await driver.findElement(byTestId('word-list'));
 
-    const hiddenWords = (await wordPicker.getText()).split('\n');
+    const visibleWords = (await wordList.getText()).split('\n');
+
+    const hiddenWords = phrase.filter(
+      word => !visibleWords.includes(word) && isNaN(Number(word))
+    );
 
     for (let i = 0; i < phrase.length; i++) {
       const word = phrase[i];
@@ -188,12 +193,12 @@ describe('Onboarding UI: confirm secret phrase flow [unhappy path]', () => {
   it('should navigate to `Error` page when the user does not pass the puzzle test and clicked on `Confirm` button', async () => {
     const wordPicker = await driver.findElement(byTestId('word-picker'));
 
-    const hiddenWords = (await wordPicker.getText()).split('\n');
+    const pickerWords = (await wordPicker.getText()).split('\n');
 
     for (let i = secretPhrase.length; i > 0; i--) {
       const word = secretPhrase[i];
 
-      if (hiddenWords.includes(word)) {
+      if (pickerWords.includes(word)) {
         await wordPicker.findElement(byText(word)).click();
       }
     }

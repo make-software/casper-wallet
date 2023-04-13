@@ -7,6 +7,13 @@ function getRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min) + min);
 }
 
+function shuffle(list: number[]) {
+  for (let i = list.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+}
+
 interface WordCollections {
   initialHiddenWordIndexes: number[];
   initialPartialPhrase: PartialPhraseArray;
@@ -15,7 +22,8 @@ interface WordCollections {
 export function buildInitialWordsCollection(
   phrase: SecretPhrase
 ): WordCollections {
-  const collectionSize = 6;
+  const collectionSize = 7;
+  const hiddenWordsCount = collectionSize - 1;
   const initialHiddenWordIndexes: number[] = [];
   const initialPartialPhrase: PartialPhraseArray = [...phrase];
 
@@ -26,11 +34,15 @@ export function buildInitialWordsCollection(
 
     if (initialPartialPhrase[index] != null) {
       initialHiddenWordIndexes.push(index);
-      initialPartialPhrase[index] = null;
+      if (i < hiddenWordsCount) {
+        initialPartialPhrase[index] = null;
+      }
 
       i++;
     }
   }
+
+  shuffle(initialHiddenWordIndexes);
 
   return { initialHiddenWordIndexes, initialPartialPhrase };
 }
