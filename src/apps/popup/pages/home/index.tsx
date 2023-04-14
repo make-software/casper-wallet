@@ -31,12 +31,6 @@ import {
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import {
-  dispatchFetchAccountInfoRequest,
-  getAccountInfo,
-  getAccountInfoLogo
-} from '@libs/services/account-info';
 import {
   ActiveAccountBalance,
   dispatchFetchActiveAccountBalance
@@ -97,9 +91,6 @@ export function HomePageContent() {
     amount: '-',
     fiatAmount: '-'
   });
-  const [accountName, setAccountName] = useState<string | null>(null);
-  const [accountLogo, setAccountLogo] = useState<string | null>(null);
-  const [loadingAccountInfo, setLoadingAccountInfo] = useState(true);
 
   const activeOrigin = useSelector(selectActiveOrigin);
   const { disconnectAccountWithEvent: disconnectAccount } = useAccountManager();
@@ -147,29 +138,7 @@ export function HomePageContent() {
       .catch(error => {
         console.error('Balance request failed:', error);
       });
-
-    dispatchFetchAccountInfoRequest(
-      getAccountHashFromPublicKey(activeAccount?.publicKey)
-    )
-      .then(({ payload: accountInfo }) => {
-        const { accountName } = getAccountInfo(accountInfo);
-        const accountInfoLogo = getAccountInfoLogo(accountInfo);
-
-        if (accountName) {
-          setAccountName(accountName);
-        }
-
-        if (accountInfoLogo) {
-          setAccountLogo(accountInfoLogo);
-        }
-      })
-      .catch(error => {
-        console.error('Account info request failed:', error);
-      })
-      .finally(() => {
-        setLoadingAccountInfo(false);
-      });
-  }, [activeAccount?.publicKey, casperApiUrl]);
+  }, [activeAccount?.publicKey, casperApiUrl, t]);
 
   return (
     <HomePageContentContainer>
@@ -193,15 +162,9 @@ export function HomePageContent() {
                 <SvgIcon src="assets/icons/external-link.svg" />
               </Link>
             </SpaceBetweenFlexRow>
-            <Avatar
-              publicKey={activeAccount.publicKey}
-              src={accountLogo}
-              loadingAccountInfo={loadingAccountInfo}
-            />
+            <Avatar publicKey={activeAccount.publicKey} />
             <NameAndAddressContainer>
-              <Typography type="bodySemiBold" loading={loadingAccountInfo}>
-                {accountName ?? activeAccount.name}
-              </Typography>
+              <Typography type="bodySemiBold">{activeAccount.name}</Typography>
               <Hash
                 value={activeAccount.publicKey}
                 variant={HashVariant.CaptionHash}
