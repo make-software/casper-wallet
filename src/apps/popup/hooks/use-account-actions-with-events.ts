@@ -10,7 +10,7 @@ import {
 
 import { useSelector } from 'react-redux';
 import {
-  selectVaultAccountNamesByOriginDict,
+  selectAccountNamesByOriginDict,
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
@@ -56,16 +56,15 @@ export function useAccountManager() {
   const isLocked = useSelector(selectVaultIsLocked);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const accounts = useSelector(selectVaultAccounts);
-  const accountNamesByOriginDict = useSelector(
-    selectVaultAccountNamesByOriginDict
-  );
+  const accountNamesByOriginDict = useSelector(selectAccountNamesByOriginDict);
 
   const isAccountConnectedWithOrigin = useCallback(
-    (accountName: string, origin: string | null) => {
+    (origin: string | undefined, accountName: string) => {
       if (!origin) {
         return false;
       }
-      return accountNamesByOriginDict[origin].includes(accountName);
+
+      return (accountNamesByOriginDict[origin] || []).includes(accountName);
     },
     [accountNamesByOriginDict]
   );
@@ -96,8 +95,8 @@ export function useAccountManager() {
           origin,
           sdkEvent.connectedAccountEvent({
             isLocked: isLocked,
-            isConnected: isLocked ? null : true,
-            activeKey: isLocked ? null : account.publicKey
+            isConnected: isLocked ? undefined : true,
+            activeKey: isLocked ? undefined : account.publicKey
           })
         );
         if (!selectedAccountsIncludeActive) {
@@ -135,8 +134,8 @@ export function useAccountManager() {
           origin,
           sdkEvent.connectedAccountEvent({
             isLocked: isLocked,
-            isConnected: isLocked ? null : true,
-            activeKey: isLocked ? null : account.publicKey
+            isConnected: isLocked ? undefined : true,
+            activeKey: isLocked ? undefined : account.publicKey
           })
         );
         if (!selectedAccountIsActive) {
@@ -173,15 +172,17 @@ export function useAccountManager() {
         }
 
         const isAccountConnectedWithTab = isAccountConnectedWithOrigin(
-          account.name,
-          getUrlOrigin(tab.url)
+          getUrlOrigin(tab.url),
+          account.name
         );
 
         return sdkEvent.changedConnectedAccountEvent({
           isLocked: isLocked,
-          isConnected: isLocked ? null : isAccountConnectedWithTab,
+          isConnected: isLocked ? undefined : isAccountConnectedWithTab,
           activeKey:
-            isLocked || !isAccountConnectedWithTab ? null : account.publicKey
+            isLocked || !isAccountConnectedWithTab
+              ? undefined
+              : account.publicKey
         });
       });
 
@@ -199,15 +200,15 @@ export function useAccountManager() {
         return;
       }
 
-      const allAccountNames = accountNamesByOriginDict[origin];
+      const allAccountNames = accountNamesByOriginDict[origin] || [];
 
       if (allAccountNames.includes(activeAccount.name)) {
         await emitSdkEventToActiveTabsWithOrigin(
           origin,
           sdkEvent.disconnectedAccountEvent({
             isLocked: isLocked,
-            isConnected: isLocked ? null : false,
-            activeKey: isLocked ? null : activeAccount?.publicKey
+            isConnected: isLocked ? undefined : false,
+            activeKey: isLocked ? undefined : activeAccount?.publicKey
           })
         );
       }
@@ -234,7 +235,7 @@ export function useAccountManager() {
       if (
         !activeAccount?.name ||
         !origin ||
-        !accountNamesByOriginDict[origin].includes(accountName) ||
+        !(accountNamesByOriginDict[origin] || []).includes(accountName) ||
         isLocked
       ) {
         return;
@@ -246,8 +247,8 @@ export function useAccountManager() {
           origin,
           sdkEvent.disconnectedAccountEvent({
             isLocked: isLocked,
-            isConnected: isLocked ? null : false,
-            activeKey: isLocked ? null : activeAccount?.publicKey
+            isConnected: isLocked ? undefined : false,
+            activeKey: isLocked ? undefined : activeAccount?.publicKey
           })
         );
       }

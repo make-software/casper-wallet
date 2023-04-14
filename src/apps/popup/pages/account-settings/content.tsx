@@ -21,7 +21,7 @@ import {
   Typography
 } from '@libs/ui';
 import {
-  selectVaultAccountWithName,
+  selectVaultAccount,
   selectVaultImportedAccounts
 } from '@src/background/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -32,7 +32,7 @@ export function AccountSettingsPageContent() {
 
   const { accountName } = useParams();
   const account = useSelector((state: RootState) =>
-    selectVaultAccountWithName(state, accountName || '')
+    selectVaultAccount(state, accountName || '')
   );
 
   if (!account) {

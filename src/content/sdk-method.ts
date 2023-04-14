@@ -1,4 +1,5 @@
-import { ActionType, createAction } from 'typesafe-actions';
+import { ActionType, createAction, createCustomAction } from 'typesafe-actions';
+import { SdkError } from './sdk-errors';
 
 export const SdkMethodEventType = {
   Request: 'CasperWalletMethod:Request',
@@ -9,7 +10,7 @@ type Meta = { requestId: string };
 
 export const sdkMethod = {
   connectRequest: createAction('CasperWalletProvider:Connect')<
-    { origin: string; title: string },
+    { title: string },
     Meta
   >(),
   connectResponse: createAction('CasperWalletProvider:Connect:Response')<
@@ -21,7 +22,7 @@ export const sdkMethod = {
     Meta
   >(),
   switchAccountRequest: createAction('CasperWalletProvider:SwitchAccount')<
-    { origin: string; title: string },
+    { title: string },
     Meta
   >(),
   switchAccountResponse: createAction(
@@ -58,7 +59,7 @@ export const sdkMethod = {
     Meta
   >(),
   disconnectRequest: createAction('CasperWalletProvider:Disconnect')<
-    string,
+    void,
     Meta
   >(),
   disconnectResponse: createAction('CasperWalletProvider:Disconnect:Response')<
@@ -66,18 +67,26 @@ export const sdkMethod = {
     Meta
   >(),
   isConnectedRequest: createAction('CasperWalletProvider:IsConnected')<
-    string,
+    void,
     Meta
   >(),
   isConnectedResponse: createAction(
     'CasperWalletProvider:IsConnected:Response'
   )<boolean, Meta>(),
+  isConnectedError: createCustomAction(
+    'CasperWalletProvider:IsConnected:Error',
+    (payload: SdkError, meta: Meta) => ({ payload, meta, error: true })
+  ),
   getActivePublicKeyRequest: createAction(
     'CasperWalletProvider:GetActivePublicKey'
   )<void, Meta>(),
   getActivePublicKeyResponse: createAction(
     'CasperWalletProvider:GetActivePublicKey:Response'
-  )<string | undefined, Meta>(),
+  )<string, Meta>(),
+  getActivePublicKeyError: createCustomAction(
+    'CasperWalletProvider:GetActivePublicKey:Error',
+    (payload: SdkError, meta: Meta) => ({ payload, meta, error: true })
+  ),
   getVersionRequest: createAction('CasperWalletProvider:GetVersion')<
     void,
     Meta

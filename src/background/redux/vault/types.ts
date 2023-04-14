@@ -15,7 +15,7 @@ export interface AccountListRows extends Account {
   id: string;
 }
 
-type AccountNamesByOriginDict = Record<string, string[]>;
+type AccountNamesByOriginDict = Record<string, string[] | undefined>;
 type SiteNameByOriginDict = Record<string, string | undefined>;
 
 export type VaultState = {

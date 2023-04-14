@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Typography, SvgIcon } from '@libs/ui';
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import { selectCountOfConnectedAccounts } from '@src/background/redux/vault/selectors';
+import { selectCountOfConnectedAccountsWithActiveOrigin } from '@src/background/redux/vault/selectors';
 
 const ConnectionStatusContainer = styled(AlignedFlexRow)`
   width: fit-content;
@@ -17,7 +17,9 @@ const ConnectionStatusContainer = styled(AlignedFlexRow)`
 
 export function HeaderConnectionStatus() {
   const { t } = useTranslation();
-  const countOfConnectedAccounts = useSelector(selectCountOfConnectedAccounts);
+  const countOfConnectedAccounts = useSelector(
+    selectCountOfConnectedAccountsWithActiveOrigin
+  );
 
   return (
     <ConnectionStatusContainer gap={SpacingSize.Tiny}>
