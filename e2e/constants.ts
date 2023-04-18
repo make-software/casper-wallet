@@ -20,7 +20,7 @@ export const DEFAULT_ACCOUNT = {
   truncatedPublicKey: '02021...b9f9d'
 };
 
-export const TIMEOUT = {
-  '15sec': 1000 * 15,
-  '50sec': 1000 * 50
-};
+export enum TIMEOUT {
+  '15sec' = 1000 * 15,
+  '50sec' = 1000 * 50
+}

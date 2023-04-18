@@ -1,3 +1,5 @@
+import { strict as assert } from 'assert';
+
 import { unlockVault } from './unlock-vault';
 import { clickButtonToOpenExtensionWindowAndFocus } from './click-button-to-open-extension-window-and-focus';
 
@@ -26,6 +28,15 @@ export const connectAccount = async ({
 
   if (isWalletLocked) {
     await unlockVault(driver);
+
+    assert.ok(
+      await driver.isElementPresent(
+        byText('Connect with Casper Wallet Playground'),
+        'Connect with Casper Wallet Playground',
+        TIMEOUT['50sec']
+      ),
+      `Wallet still locked`
+    );
   }
 
   if (connectAllAccounts) {

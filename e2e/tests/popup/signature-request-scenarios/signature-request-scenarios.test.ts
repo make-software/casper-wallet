@@ -1,5 +1,5 @@
 import { until } from 'selenium-webdriver';
-import * as assert from 'assert';
+import { strict as assert } from 'assert';
 
 import { Driver } from '../../../webdriver/driver';
 import { buildWebDriver } from '../../../webdriver';
@@ -7,7 +7,7 @@ import {
   clickButtonToOpenExtensionWindowAndFocus,
   connectAccount
 } from '../../common';
-import { DEFAULT_ACCOUNT, PLAYGROUND_URL, TIMEOUT } from '../../../constants';
+import { DEFAULT_ACCOUNT, PLAYGROUND_URL } from '../../../constants';
 import { byText } from '../../../utils/helpers';
 
 describe('Popup UI: Signature request scenarios', () => {
@@ -34,7 +34,7 @@ describe('Popup UI: Signature request scenarios', () => {
     await driver.quit();
   });
 
-  it.each([
+  describe.each([
     {
       describe: 'transfer',
       clickElement: 'Transfer',
@@ -84,67 +84,71 @@ describe('Popup UI: Signature request scenarios', () => {
       }
     }
   ])(
-    'should sign $describe',
-    async ({
+    'should sign the $describe request',
+    ({
       clickElement,
       deployType,
       entryPoint,
       contractArguments,
-      clickOpenArgumentsElement
+      clickOpenArgumentsElement,
+      describe
     }) => {
-      await clickButtonToOpenExtensionWindowAndFocus(
-        driver,
-        playgroundWindow,
-        clickElement
-      );
-
-      await driver.wait(
-        until.elementLocated(byText('Signature Request')),
-        TIMEOUT['15sec']
-      );
-
-      await driver.clickElement(byText(clickOpenArgumentsElement));
-
-      assert.ok(
-        await driver.isElementPresent(byText(deployType)),
-        `Can't find - ${deployType}`
-      );
-
-      if (entryPoint) {
-        assert.ok(
-          await driver.isElementPresent(byText(entryPoint)),
-          `Can't find - ${entryPoint}`
+      it(`should click the ${describe} button on dapp and open signature request window`, async () => {
+        await clickButtonToOpenExtensionWindowAndFocus(
+          driver,
+          playgroundWindow,
+          clickElement
         );
-      }
 
-      for (const [key, value] of Object.entries(contractArguments)) {
         assert.ok(
-          await driver.isElementPresent(byText(key)),
-          `Can't find - ${key}`
+          await driver.isElementPresent(byText('Signature Request')),
+          "Can't find - Signature Request"
         );
+      });
+
+      it('should find signature request data', async () => {
+        await driver.clickElement(byText(clickOpenArgumentsElement));
+
         assert.ok(
-          await driver.isElementPresent(byText(value)),
-          `Can't find - ${value}`
+          await driver.isElementPresent(byText(deployType)),
+          `Can't find - ${deployType}`
         );
-      }
 
-      await driver.clickElement(byText('Sign'));
+        if (entryPoint) {
+          assert.ok(
+            await driver.isElementPresent(byText(entryPoint)),
+            `Can't find - ${entryPoint}`
+          );
+        }
 
-      await driver.switchToWindow(playgroundWindow);
+        for (const [key, value] of Object.entries(contractArguments)) {
+          assert.ok(
+            await driver.isElementPresent(byText(key)),
+            `Can't find - ${key}`
+          );
+          assert.ok(
+            await driver.isElementPresent(byText(value)),
+            `Can't find - ${value}`
+          );
+        }
+      });
 
-      // Wait for the alert to be displayed
-      await driver.wait(until.alertIsPresent());
+      it(`should successfully sign the ${describe} request`, async () => {
+        await driver.clickElement(byText('Sign'));
 
-      // Store the alert in a variable
-      const alert = await driver.driver.switchTo().alert();
+        await driver.switchToWindow(playgroundWindow);
 
-      //Store the alert text in a variable
-      const alertText = await alert.getText();
+        // Wait for the alert to be displayed
+        await driver.wait(until.alertIsPresent());
 
-      assert.match(alertText, /Sign successful/);
+        // Store the alert in a variable
+        const alert = await driver.driver.switchTo().alert();
 
-      //Press the OK button
-      await alert.accept();
+        const alertText = await alert.getText();
+
+        assert.match(alertText, /Sign successful/);
+        await alert.accept();
+      });
     }
   );
 });

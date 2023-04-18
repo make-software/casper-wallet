@@ -1,5 +1,4 @@
 import { strict as assert } from 'assert';
-import { until } from 'selenium-webdriver';
 
 import { Driver } from '../../../webdriver/driver';
 import { buildWebDriver } from '../../../webdriver';
@@ -73,18 +72,12 @@ describe.each([
       }
 
       assert.ok(
-        await driver
-          .wait(
-            until.elementLocated(
-              byText('Connect with Casper Wallet Playground')
-            ),
-            TIMEOUT['50sec']
-          )
-          .catch(async () => {
-            await driver.verboseReportOnFailure(
-              `Failed on - ${testName}/Connect with Casper Wallet Playground`
-            );
-          })
+        await driver.isElementPresent(
+          byText('Connect with Casper Wallet Playground'),
+          'Connect with Casper Wallet Playground',
+          TIMEOUT['50sec']
+        ),
+        `Wallet still locked`
       );
     });
 
