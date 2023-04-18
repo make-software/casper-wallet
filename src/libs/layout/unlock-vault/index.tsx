@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import {
+  CenteredFlexColumn,
   ContentContainer,
   FooterButtonsAbsoluteContainer,
   IllustrationContainer,
@@ -152,21 +153,37 @@ export function UnlockVaultPageContent() {
     );
   }
 
+  if (isLoading) {
+    return (
+      <ContentContainer>
+        <CenteredFlexColumn style={{}}>
+          <Player
+            speed={1}
+            autoplay
+            keepLastFrame
+            src={unlockAnimation}
+            style={{ width: '160px', marginTop: 40 }}
+          ></Player>
+          <ParagraphContainer top={SpacingSize.Medium}>
+            <Typography type="header">
+              <Trans t={t}>Just a moment</Trans>
+            </Typography>
+          </ParagraphContainer>
+          <ParagraphContainer top={SpacingSize.Medium}>
+            <Typography type="body" color="contentSecondary">
+              <Trans t={t}>We're unlocking your wallet</Trans>
+            </Typography>
+          </ParagraphContainer>
+        </CenteredFlexColumn>
+      </ContentContainer>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit(handleUnlockVault)}>
       <ContentContainer>
         <IllustrationContainer>
-          {isLoading ? (
-            <Player
-              speed={1}
-              autoplay
-              keepLastFrame
-              src={unlockAnimation}
-              style={{ height: '120px', width: '120px', margin: 0 }}
-            ></Player>
-          ) : (
-            <SvgIcon src="assets/illustrations/locked-wallet.svg" size={120} />
-          )}
+          <SvgIcon src="assets/illustrations/locked-wallet.svg" size={120} />
         </IllustrationContainer>
         <ParagraphContainer top={SpacingSize.Big}>
           <Typography type="header">
