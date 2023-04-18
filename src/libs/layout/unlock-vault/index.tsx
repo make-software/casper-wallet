@@ -1,3 +1,4 @@
+import { Player } from '@lottiefiles/react-lottie-player';
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -12,31 +13,32 @@ import {
   SpacingSize
 } from '@src/libs/layout/containers';
 import {
-  PasswordInputType,
-  Typography,
-  Input,
   Button,
+  Input,
+  PasswordInputType,
   PasswordVisibilityIcon,
-  SvgIcon
+  SvgIcon,
+  Typography
 } from '@src/libs/ui';
 
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import {
-  UnlockWalletFormValues,
-  useUnlockWalletForm
-} from '@src/libs/ui/forms/unlock-wallet';
-import { calculateSubmitButtonDisabled } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
+import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
+import { UnlockVault } from '@background/redux/sagas/types';
+import { selectVaultCipher } from '@background/redux/vault-cipher/selectors';
+import { useLockWalletWhenNoMoreRetries } from '@layout/unlock-protected-page-content/use-lock-wallet-when-no-more-retries';
 import {
   selectKeyDerivationSaltHash,
   selectPasswordHash,
   selectPasswordSaltHash
 } from '@src/background/redux/keys/selectors';
 import { unlockVault } from '@src/background/redux/sagas/actions';
-import { selectVaultCipher } from '@background/redux/vault-cipher/selectors';
-import { UnlockVault } from '@background/redux/sagas/types';
-import { useLockWalletWhenNoMoreRetries } from '@layout/unlock-protected-page-content/use-lock-wallet-when-no-more-retries';
-import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import { calculateSubmitButtonDisabled } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
+import {
+  UnlockWalletFormValues,
+  useUnlockWalletForm
+} from '@src/libs/ui/forms/unlock-wallet';
 
+import unlockAnimation from '@src/libs/animations/unlock_animation.json';
 import { LockedRouterPath } from '../locked-router';
 
 interface UnlockMessageEvent extends MessageEvent {
@@ -154,7 +156,17 @@ export function UnlockVaultPageContent() {
     <form onSubmit={handleSubmit(handleUnlockVault)}>
       <ContentContainer>
         <IllustrationContainer>
-          <SvgIcon src="assets/illustrations/locked-wallet.svg" size={120} />
+          {isLoading ? (
+            <Player
+              speed={1}
+              autoplay
+              keepLastFrame
+              src={unlockAnimation}
+              style={{ height: '120px', width: '120px', margin: 0 }}
+            ></Player>
+          ) : (
+            <SvgIcon src="assets/illustrations/locked-wallet.svg" size={120} />
+          )}
         </IllustrationContainer>
         <ParagraphContainer top={SpacingSize.Big}>
           <Typography type="header">
