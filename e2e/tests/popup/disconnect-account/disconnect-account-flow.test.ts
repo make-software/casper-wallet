@@ -53,7 +53,7 @@ describe('Popup UI: Disconnect account', () => {
     assert.equal(areAnyAccountsConnected, false);
     assert.ok(
       await driver.isElementPresent(byText('No connected sites yet')),
-      'No connected sites yet'
+      "Can't find - No connected sites yet"
     );
   });
 
@@ -83,7 +83,7 @@ describe('Popup UI: Disconnect account', () => {
       assert.equal(areAccountsPresent, areElementsExpected);
       assert.ok(
         await driver.isElementPresent(byText(expectedElement)),
-        expectedElement
+        `Can't find - ${expectedElement}`
       );
     }
   );

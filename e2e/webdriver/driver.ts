@@ -248,13 +248,15 @@ export class Driver {
   async isElementPresent(locatorKey: By, elementName?: string) {
     try {
       return Boolean(
-        await this.wait(
-          () => this.driver.findElement(locatorKey),
-          TIMEOUT['15sec']
-        )
+        await this.wait(until.elementLocated(locatorKey), TIMEOUT['15sec'])
       );
     } catch (e) {
-      await this.verboseReportOnFailure(`Can't find element - ${elementName}`);
+      if (elementName) {
+        await this.verboseReportOnFailure(
+          `Can't find element - ${elementName}`
+        );
+      }
+
       return false;
     }
   }

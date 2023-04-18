@@ -153,20 +153,21 @@ describe.each([
       if (selectAllAccounts) {
         assert.ok(
           await driver.isElementPresent(byText(createdAccountName)),
-          createdAccountName
+          `Can't find - ${createdAccountName}`
         );
         assert.ok(
           await driver.isElementPresent(byText(defaultAccountName)),
-          defaultAccountName
+          `Can't find - ${defaultAccountName}`
         );
       } else {
         assert.ok(
           await driver.isElementPresent(byText(defaultAccountName)),
-          defaultAccountName
+          `Can't find - ${defaultAccountName}`
         );
         assert.equal(
           await driver.isElementPresent(byText(createdAccountName)),
-          false
+          false,
+          `Found - ${createdAccountName}, but shouldn't`
         );
       }
     });
@@ -189,7 +190,7 @@ describe.each([
       async ({ expectedElement }) => {
         assert.ok(
           await driver.isElementPresent(byText(expectedElement)),
-          expectedElement
+          `Can't find - ${expectedElement}`
         );
       }
     );

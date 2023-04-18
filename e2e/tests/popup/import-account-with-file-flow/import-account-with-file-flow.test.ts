@@ -14,10 +14,7 @@ import {
   getUrlPath,
   byInputName
 } from '../../../utils/helpers';
-import {
-  ACCOUNT_NAMES,
-  TRUNCATED_PUBLIC_KEY_OF_IMPORTED_ACCOUNT
-} from '../../../constants';
+import { IMPORTED_ACCOUNT } from '../../../constants';
 
 describe('Popup UI: Import account with file', () => {
   let driver: Driver;
@@ -40,7 +37,7 @@ describe('Popup UI: Import account with file', () => {
 
     assert.ok(
       await driver.isElementPresent(byText('Import account')),
-      'Import account'
+      "Can't find - Import account"
     );
   });
 
@@ -54,7 +51,8 @@ describe('Popup UI: Import account with file', () => {
     );
 
     assert.ok(
-      driver.findElement(byText('Import account from secret key file'))
+      driver.isElementPresent(byText('Import account from secret key file')),
+      "Can't find - Import account from secret key file"
     );
   });
 
@@ -66,7 +64,7 @@ describe('Popup UI: Import account with file', () => {
     const importButton = await driver.findElement(byText('Import'));
 
     await fileInput.fill(secretKeyPath);
-    await accountNameInput.fill(ACCOUNT_NAMES.importedAccountName);
+    await accountNameInput.fill(IMPORTED_ACCOUNT.accountName);
 
     assert.ok(importButton.isEnabled());
   });
@@ -76,7 +74,7 @@ describe('Popup UI: Import account with file', () => {
 
     await driver.clickElement(byText('Done'));
 
-    assert((await driver.getAllWindowHandles()).length === 1);
+    assert.equal((await driver.getAllWindowHandles()).length, 1);
   });
 
   it('should open account list page', async () => {
@@ -93,11 +91,11 @@ describe('Popup UI: Import account with file', () => {
   it.each([
     {
       describe: 'imported account name',
-      expectedElement: ACCOUNT_NAMES.importedAccountName
+      expectedElement: IMPORTED_ACCOUNT.accountName
     },
     {
       describe: 'truncated public key of the imported account',
-      expectedElement: TRUNCATED_PUBLIC_KEY_OF_IMPORTED_ACCOUNT
+      expectedElement: IMPORTED_ACCOUNT.truncatedPublicKey
     },
     {
       describe: 'imported tag',
@@ -106,7 +104,10 @@ describe('Popup UI: Import account with file', () => {
   ])(
     'should find the $describe on the accounts list',
     async ({ expectedElement }) => {
-      assert.ok(await driver.findElement(byText(expectedElement)));
+      assert.ok(
+        await driver.isElementPresent(byText(expectedElement), expectedElement),
+        `Can't find - ${expectedElement}`
+      );
     }
   );
 });
