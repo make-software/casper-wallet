@@ -35,7 +35,7 @@ interface StepperProps {
 
 export function Stepper({ length, activeIndex }: StepperProps) {
   return (
-    <StepperContainer gap={SpacingSize.Big}>
+    <StepperContainer gap={SpacingSize.ExtraLarge}>
       {createStepsArray(length).map(stepNumber => (
         <Step key={stepNumber} isActiveStep={stepNumber === activeIndex} />
       ))}

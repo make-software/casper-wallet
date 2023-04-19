@@ -42,7 +42,7 @@ export function TimeoutPageContent() {
 
   return (
     <ContentContainer>
-      <ParagraphContainer top={SpacingSize.Big}>
+      <ParagraphContainer top={SpacingSize.ExtraLarge}>
         <Typography type="header">
           <Trans t={t}>Timeout</Trans>
         </Typography>

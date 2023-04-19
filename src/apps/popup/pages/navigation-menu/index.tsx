@@ -12,7 +12,8 @@ import {
   ContentContainer,
   ListItemClickableContainer as BaseListItemClickableContainer,
   FlexColumn,
-  SpaceBetweenFlexRow
+  SpaceBetweenFlexRow,
+  SpacingSize
 } from '@src/libs/layout';
 import { SvgIcon, Typography, List, Link } from '@src/libs/ui';
 
@@ -213,6 +214,8 @@ export function NavigationMenuPageContent() {
           headerLabel={groupLabel}
           rows={groupItems}
           marginLeftForItemSeparatorLine={60}
+          headerLabelSpaceSize={SpacingSize.Large}
+          contentSpaceSize={SpacingSize.Small}
           renderRow={groupItem => (
             <ListItemClickableContainer
               disabled={groupItem.disabled}

@@ -45,7 +45,7 @@ export function ApproveConnectionContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <ParagraphContainer top={SpacingSize.Big}>
+        <ParagraphContainer top={SpacingSize.ExtraLarge}>
           <SiteFaviconBadge origin={origin} />
           <VerticalSpaceContainer top={SpacingSize.Medium}>
             <Typography type="header">
@@ -56,6 +56,7 @@ export function ApproveConnectionContent({
         <List
           headerLabel={t('allow this site to')}
           rows={listItems}
+          contentSpaceSize={SpacingSize.Small}
           renderRow={listItem => (
             <ListItemContainer key={listItem.id}>
               <SvgIcon src={listItem.iconPath} color="contentTertiary" />

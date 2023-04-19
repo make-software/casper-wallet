@@ -8,7 +8,7 @@ import { closeCurrentWindow } from '@background/close-current-window';
 import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 
 import { Button, Hash, HashVariant, List, Typography } from '@libs/ui';
-import { LeftAlignedFlexColumn } from '@libs/layout';
+import { LeftAlignedFlexColumn, SpacingSize } from '@libs/layout';
 
 import { ConnectionStatusBadge } from '@popup/pages/home/components/connection-status-badge';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
@@ -51,6 +51,8 @@ export const UnconnectedAccountsList = ({
       <List
         headerLabel={t('Connect another account')}
         rows={unconnectedAccountsList}
+        headerLabelSpaceSize={SpacingSize.Large}
+        contentSpaceSize={SpacingSize.Small}
         renderRow={unconnectedAccount => (
           <ListItemContainer key={unconnectedAccount.name}>
             <SpaceBetweenContainer>
