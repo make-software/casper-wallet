@@ -47,16 +47,16 @@ describe('Onboarding UI: recover secret phrase flow [happy path]', () => {
 
       await driver.clickElement(byText('Recover my wallet'));
 
+      // Check if window is close
+      assert.equal((await driver.getAllWindowHandles()).length, 1);
+
       try {
         assert.notEqual(
           await driver.driver.getCurrentUrl().then(getUrlPath),
           'error'
         );
-        assert.notEqual(
-          await driver.driver.getCurrentUrl().then(getUrlPath),
-          'recover-from-secret-phrase'
-        );
       } catch (error) {
+        console.log(error);
         assert.ok(error instanceof webdriverError.NoSuchWindowError);
       }
     });
