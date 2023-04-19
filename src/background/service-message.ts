@@ -21,14 +21,7 @@ export const serviceMessage = {
   fetchAccountInfoResponse: createAction('FETCH_ACCOUNT_INFO_RESPONSE')<
     AccountInfo,
     Meta
-  >(),
-  fetchAccountListInfoRequest: createAction('FETCH_ACCOUNT_LIST_INFO')<
-    { accountsHash: string[] },
-    Meta
-  >(),
-  fetchAccountListInfoResponse: createAction(
-    'FETCH_ACCOUNT_LIST_INFO_RESPONSE'
-  )<AccountInfo[], Meta>()
+  >()
 };
 
 export type ServiceMessage = ActionType<typeof serviceMessage>;

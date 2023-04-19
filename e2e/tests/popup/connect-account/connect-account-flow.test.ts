@@ -1,5 +1,4 @@
 import { strict as assert } from 'assert';
-import { until } from 'selenium-webdriver';
 
 import { Driver } from '../../../webdriver/driver';
 import { buildWebDriver } from '../../../webdriver';
@@ -73,18 +72,12 @@ describe.each([
       }
 
       assert.ok(
-        await driver
-          .wait(
-            until.elementLocated(
-              byText('Connect with Casper Wallet Playground')
-            ),
-            TIMEOUT['50sec']
-          )
-          .catch(async () => {
-            await driver.verboseReportOnFailure(
-              `Failed on - ${testName}/Connect with Casper Wallet Playground`
-            );
-          })
+        await driver.isElementPresent(
+          byText('Connect with Casper Wallet Playground'),
+          'Connect with Casper Wallet Playground',
+          TIMEOUT['50sec']
+        ),
+        `Wallet still locked`
       );
     });
 
@@ -153,20 +146,21 @@ describe.each([
       if (selectAllAccounts) {
         assert.ok(
           await driver.isElementPresent(byText(createdAccountName)),
-          createdAccountName
+          `Can't find - ${createdAccountName}`
         );
         assert.ok(
           await driver.isElementPresent(byText(defaultAccountName)),
-          defaultAccountName
+          `Can't find - ${defaultAccountName}`
         );
       } else {
         assert.ok(
           await driver.isElementPresent(byText(defaultAccountName)),
-          defaultAccountName
+          `Can't find - ${defaultAccountName}`
         );
         assert.equal(
           await driver.isElementPresent(byText(createdAccountName)),
-          false
+          false,
+          `Found - ${createdAccountName}, but shouldn't`
         );
       }
     });
@@ -189,7 +183,7 @@ describe.each([
       async ({ expectedElement }) => {
         assert.ok(
           await driver.isElementPresent(byText(expectedElement)),
-          expectedElement
+          `Can't find - ${expectedElement}`
         );
       }
     );

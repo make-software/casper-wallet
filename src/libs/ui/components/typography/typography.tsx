@@ -31,6 +31,7 @@ export interface BodyStylesProps extends BaseProps {
   loading?: boolean;
   wordBreak?: boolean;
   fontSize?: CSPRSize;
+  ellipsis?: boolean;
 }
 
 export const getFontSizeBasedOnTextLength = (length: number) => {
@@ -57,7 +58,8 @@ function getBodyStyles(
     uppercase = false,
     capitalize = false,
     noWrap = false,
-    wordBreak = false
+    wordBreak = false,
+    ellipsis = false
   }: BodyStylesProps
 ): CSSObject {
   return {
@@ -77,7 +79,13 @@ function getBodyStyles(
     ...(wordBreak && {
       wordBreak: 'break-all'
     }),
-    '-webkit-text-size-adjust': '100%'
+    '-webkit-text-size-adjust': '100%',
+    ...(ellipsis && {
+      display: 'block',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis'
+    })
   };
 }
 
