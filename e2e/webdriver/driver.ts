@@ -44,7 +44,7 @@ export class Driver {
     driver: ThenableWebDriver,
     browser: string,
     extensionUrl: string,
-    timeout = 10000
+    timeout = 15000
   ) {
     this.driver = driver;
     this.browser = browser;
@@ -245,16 +245,25 @@ export class Driver {
     assert.ok(!dataTab, 'Found element that should not be present');
   }
 
-  async isElementPresent(locatorKey: By, elementName?: string) {
+  async isElementPresent(
+    locatorKey: By,
+    elementName?: string,
+    timeout?: TIMEOUT
+  ) {
     try {
       return Boolean(
         await this.wait(
-          () => this.driver.findElement(locatorKey),
-          TIMEOUT['15sec']
+          until.elementLocated(locatorKey),
+          timeout || this.timeout
         )
       );
     } catch (e) {
-      await this.verboseReportOnFailure(`Can't find element - ${elementName}`);
+      if (elementName) {
+        await this.verboseReportOnFailure(
+          `Can't find element - ${elementName}`
+        );
+      }
+
       return false;
     }
   }
