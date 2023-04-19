@@ -156,7 +156,7 @@ export function UnlockVaultPageContent() {
   if (isLoading) {
     return (
       <ContentContainer>
-        <CenteredFlexColumn style={{}}>
+        <CenteredFlexColumn>
           <Player
             speed={1}
             autoplay
