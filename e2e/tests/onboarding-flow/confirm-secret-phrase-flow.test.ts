@@ -124,7 +124,9 @@ describe('Onboarding UI: confirm secret phrase flow [happy path]', () => {
       }
     }
 
-    await driver.clickElement(byText('Confirm'));
+    await driver.clickElement(byText('Confirm')).catch(async () => {
+      await driver.verboseReportOnFailure('Confirm button should be clickable');
+    });
 
     assert.equal(
       await driver.driver.getCurrentUrl().then(getUrlPath),

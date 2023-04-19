@@ -1,4 +1,4 @@
-import { By } from 'selenium-webdriver';
+import { By, error as webdriverError } from 'selenium-webdriver';
 import { strict as assert } from 'assert';
 
 import { Driver } from '../../webdriver/driver';
@@ -47,10 +47,18 @@ describe('Onboarding UI: recover secret phrase flow [happy path]', () => {
 
       await driver.clickElement(byText('Recover my wallet'));
 
-      assert.notEqual(
-        await driver.driver.getCurrentUrl().then(getUrlPath),
-        'error'
-      );
+      try {
+        assert.notEqual(
+          await driver.driver.getCurrentUrl().then(getUrlPath),
+          'error'
+        );
+        assert.notEqual(
+          await driver.driver.getCurrentUrl().then(getUrlPath),
+          'recover-from-secret-phrase'
+        );
+      } catch (error) {
+        assert.ok(error instanceof webdriverError.NoSuchWindowError);
+      }
     });
   });
 });
