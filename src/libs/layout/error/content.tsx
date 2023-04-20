@@ -39,7 +39,7 @@ export function ErrorPageContent({
           </IllustrationContainer>
         )}
 
-        <ParagraphContainer top={SpacingSize.Big}>
+        <ParagraphContainer top={SpacingSize.ExtraLarge}>
           <Typography type="header">{errorHeaderText}</Typography>
         </ParagraphContainer>
 

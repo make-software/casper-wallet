@@ -55,7 +55,7 @@ export const HeaderNetworkSwitcher = () => {
               closeModal(event);
             }}
           >
-            <AlignedFlexRow gap={SpacingSize.Big}>
+            <AlignedFlexRow gap={SpacingSize.ExtraLarge}>
               <SvgIcon
                 src="assets/icons/network.svg"
                 size={24}
@@ -73,7 +73,7 @@ export const HeaderNetworkSwitcher = () => {
               closeModal(event);
             }}
           >
-            <AlignedFlexRow gap={SpacingSize.Big}>
+            <AlignedFlexRow gap={SpacingSize.ExtraLarge}>
               <SvgIcon
                 src="assets/icons/network.svg"
                 size={24}
