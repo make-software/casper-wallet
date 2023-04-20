@@ -8,6 +8,11 @@ const webpack = require('webpack'),
   TerserPlugin = require('terser-webpack-plugin'),
   TsconfigPaths = require('tsconfig-paths-webpack-plugin');
 
+const commitHash = require('child_process')
+  .execSync('git rev-parse --short HEAD')
+  .toString()
+  .trim();
+
 const htmlWebpackPluginOptions = {
   cache: false,
   showErrors: true,
@@ -184,7 +189,7 @@ const options = {
               ...JSON.parse(content.toString()),
               name: pkg.name,
               version: pkg.version,
-              version_name: pkg.version,
+              version_name: pkg.version + ` (${commitHash})`,
               author: pkg.author,
               description: pkg.description,
               ...(isDev

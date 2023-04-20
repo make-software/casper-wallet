@@ -23,7 +23,7 @@ web-ext-artifacts
 .env.test.local
 .env.production.local
 .history
-.xcode-project
+xcuserdata
 
 # secrets
 secrets.*.js
