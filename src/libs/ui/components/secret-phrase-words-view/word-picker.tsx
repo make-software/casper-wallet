@@ -43,7 +43,7 @@ export function WordPicker({
   const { t } = useTranslation();
 
   return (
-    <WordPickerContainer gap={SpacingSize.ExtraLarge} data-testid={dataTestId}>
+    <WordPickerContainer gap={SpacingSize.Big} data-testid={dataTestId}>
       <FlexRow gap={SpacingSize.Small} wrap="wrap">
         {hiddenWordIndexes.map(wordIndex => (
           <WordTag

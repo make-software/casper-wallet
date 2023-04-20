@@ -45,7 +45,7 @@ export const UnlockProtectedPageContent = ({
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/password.svg" size={120} />
       </IllustrationContainer>
-      <ParagraphContainer top={SpacingSize.ExtraLarge}>
+      <ParagraphContainer top={SpacingSize.Big}>
         <Typography type="header">
           <Trans t={t}>Wallet password required</Trans>
         </Typography>

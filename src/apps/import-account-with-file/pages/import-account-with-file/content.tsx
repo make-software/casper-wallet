@@ -18,7 +18,7 @@ export function ImportAccountWithFileContentPage() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/secret-key.svg" size={120} />
       </IllustrationContainer>
-      <ParagraphContainer top={SpacingSize.ExtraLarge}>
+      <ParagraphContainer top={SpacingSize.Big}>
         <Typography type="header">
           <Trans t={t}>Import account from secret key file</Trans>
         </Typography>

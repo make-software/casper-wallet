@@ -42,7 +42,7 @@ export function ConnectedSitesPage() {
             size={120}
           />
         </IllustrationContainer>
-        <ParagraphContainer top={SpacingSize.ExtraLarge}>
+        <ParagraphContainer top={SpacingSize.Big}>
           <Typography type="header">
             <Trans t={t}>No connected sites yet</Trans>
           </Typography>
@@ -61,7 +61,7 @@ export function ConnectedSitesPage() {
 
   return (
     <ContentContainer>
-      <ParagraphContainer top={SpacingSize.ExtraLarge}>
+      <ParagraphContainer top={SpacingSize.Big}>
         <Typography type="header">
           <Trans t={t}>Connected sites</Trans>
         </Typography>

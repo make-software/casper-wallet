@@ -68,8 +68,6 @@ interface ListProps<ListRow extends ListRowBase>
   renderHeader?: () => JSX.Element;
   headerLabel?: string;
   headerAction?: HeaderAction;
-  headerLabelSpaceSize?: SpacingSize;
-  contentSpaceSize?: SpacingSize;
 }
 
 export function List<ListRow extends ListRowBase>({
@@ -79,14 +77,12 @@ export function List<ListRow extends ListRowBase>({
   renderFooter,
   headerLabel,
   headerAction,
-  marginLeftForItemSeparatorLine,
-  headerLabelSpaceSize = SpacingSize.ExtraLarge,
-  contentSpaceSize = SpacingSize.ExtraLarge
+  marginLeftForItemSeparatorLine
 }: ListProps<ListRow>) {
   return (
     <>
       {headerLabel && (
-        <VerticalSpaceContainer top={headerLabelSpaceSize}>
+        <VerticalSpaceContainer top={SpacingSize.Big}>
           <SpacedBetweenFlexRox>
             <Typography type="labelMedium" color="contentSecondary">
               {headerLabel}
@@ -105,7 +101,7 @@ export function List<ListRow extends ListRowBase>({
           </SpacedBetweenFlexRox>
         </VerticalSpaceContainer>
       )}
-      <VerticalSpaceContainer top={contentSpaceSize}>
+      <VerticalSpaceContainer top={SpacingSize.Big}>
         <Tile>
           {renderHeader && (
             <ListHeaderContainer

@@ -24,12 +24,12 @@ export function SignMessageContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <ParagraphContainer top={SpacingSize.ExtraLarge}>
+        <ParagraphContainer top={SpacingSize.Big}>
           <Typography type="header">
             <Trans t={t}>Signature Request</Trans>
           </Typography>
         </ParagraphContainer>
-        <ParagraphContainer top={SpacingSize.ExtraLarge}>
+        <ParagraphContainer top={SpacingSize.Big}>
           <FormField label={t('Message:')}>
             <Typography type="body">
               <TextArea value={message} readOnly style={{ minHeight: 250 }} />

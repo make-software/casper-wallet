@@ -20,7 +20,7 @@ export function ImportAccountWithFileSuccessContentPage() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/account-imported.svg" size={120} />
       </IllustrationContainer>
-      <ParagraphContainer top={SpacingSize.ExtraLarge}>
+      <ParagraphContainer top={SpacingSize.Big}>
         <Typography type="header">
           <Trans t={t}>Your account was successfully imported</Trans>
         </Typography>

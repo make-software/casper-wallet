@@ -71,7 +71,7 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
   return (
     <PageContainer>
       <ContentContainer>
-        <ParagraphContainer top={SpacingSize.ExtraLarge}>
+        <ParagraphContainer top={SpacingSize.Big}>
           <SiteFaviconBadge origin={activeOrigin} />
           <VerticalSpaceContainer top={SpacingSize.Medium}>
             <Typography type="header">Switch to another account</Typography>
@@ -80,7 +80,7 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
         {/*Neither active account nor other accounts are connected*/}
         {connectedAccountsListItems.length === 0 &&
           !isActiveAccountConnected && (
-            <ParagraphContainer top={SpacingSize.ExtraLarge}>
+            <ParagraphContainer top={SpacingSize.Big}>
               <Typography type="body">
                 <Trans t={t}>
                   There is no connected account. First you need to connect
@@ -93,7 +93,7 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
         {connectedAccountsListItems.length === 0 &&
           isActiveAccountConnected && (
             <>
-              <ParagraphContainer top={SpacingSize.ExtraLarge}>
+              <ParagraphContainer top={SpacingSize.Big}>
                 <Typography type="body">
                   {unconnectedAccountsList.length > 0 ? (
                     <Trans t={t}>

@@ -90,7 +90,7 @@ export function SelectAccountContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <ParagraphContainer top={SpacingSize.ExtraLarge}>
+        <ParagraphContainer top={SpacingSize.Big}>
           <SiteFaviconBadge origin={origin} />
           <VerticalSpaceContainer top={SpacingSize.Medium}>
             <Typography type="header">
@@ -102,8 +102,6 @@ export function SelectAccountContent({
           headerLabel={t('select account(s)')}
           headerAction={headerAction}
           rows={accountsListItems}
-          headerLabelSpaceSize={SpacingSize.Large}
-          contentSpaceSize={SpacingSize.Small}
           renderRow={account => (
             <ListItemClickableContainer
               onClick={() =>

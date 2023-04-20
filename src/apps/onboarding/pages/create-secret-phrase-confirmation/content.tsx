@@ -47,7 +47,7 @@ export function CreateSecretPhraseConfirmationPageContent() {
         </Trans>
       </Typography>
 
-      <VerticalSpaceContainer top={SpacingSize.ExtraLarge}>
+      <VerticalSpaceContainer top={SpacingSize.Big}>
         <TextList items={items} />
       </VerticalSpaceContainer>
     </TabPageContainer>

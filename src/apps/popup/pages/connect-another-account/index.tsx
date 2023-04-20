@@ -78,7 +78,7 @@ export function ConnectAnotherAccountPageContent() {
 
   return (
     <ContentContainer>
-      <ParagraphContainer top={SpacingSize.ExtraLarge}>
+      <ParagraphContainer top={SpacingSize.Big}>
         <SiteFaviconBadge origin={activeOrigin} />
         <VerticalSpaceContainer top={SpacingSize.Medium}>
           <Typography type="header">
@@ -118,8 +118,6 @@ export function ConnectAnotherAccountPageContent() {
       <List
         headerLabel={t('Switch to another account')}
         rows={connectedAccountsListItems}
-        headerLabelSpaceSize={SpacingSize.Large}
-        contentSpaceSize={SpacingSize.Small}
         renderRow={account => (
           <ListItemContainer key={account.name}>
             <SvgIcon
