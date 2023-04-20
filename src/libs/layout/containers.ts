@@ -67,7 +67,7 @@ const getGapSize = (gap?: SpacingSize) => {
       return '8px';
     case SpacingSize.Medium:
       return '12px';
-    case SpacingSize.ExtraLarge:
+    case SpacingSize.Large:
       return '16px';
     default:
       throw new Error('Unknown gap size');

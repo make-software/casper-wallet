@@ -118,8 +118,8 @@ export function ConnectAnotherAccountPageContent() {
       <List
         headerLabel={t('Switch to another account')}
         rows={connectedAccountsListItems}
-        headerLabelSpaceSize={SpacingSize.Large}
-        contentSpaceSize={SpacingSize.Small}
+        headerLabelTop={SpacingSize.Large}
+        contentTop={SpacingSize.Small}
         renderRow={account => (
           <ListItemContainer key={account.name}>
             <SvgIcon

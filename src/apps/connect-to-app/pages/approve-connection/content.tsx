@@ -56,7 +56,7 @@ export function ApproveConnectionContent({
         <List
           headerLabel={t('allow this site to')}
           rows={listItems}
-          contentSpaceSize={SpacingSize.Small}
+          contentTop={SpacingSize.Small}
           renderRow={listItem => (
             <ListItemContainer key={listItem.id}>
               <SvgIcon src={listItem.iconPath} color="contentTertiary" />

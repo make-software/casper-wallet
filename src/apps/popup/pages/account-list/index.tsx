@@ -122,7 +122,7 @@ export function AccountListPage() {
       <ContentContainer>
         <List
           rows={accountListRows}
-          contentSpaceSize={SpacingSize.Small}
+          contentTop={SpacingSize.Small}
           renderRow={account => (
             <ListItemContainer key={account.name}>
               <ListItemClickableContainer

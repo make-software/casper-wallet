@@ -215,10 +215,8 @@ export function NavigationMenuPageContent() {
             headerLabel={groupLabel}
             rows={groupItems}
             marginLeftForItemSeparatorLine={60}
-            headerLabelSpaceSize={SpacingSize.Large}
-            contentSpaceSize={
-              index === 0 ? SpacingSize.Medium : SpacingSize.Small
-            }
+            headerLabelTop={SpacingSize.Large}
+            contentTop={index === 0 ? SpacingSize.Medium : SpacingSize.Small}
             renderRow={groupItem => (
               <ListItemClickableContainer
                 disabled={groupItem.disabled}

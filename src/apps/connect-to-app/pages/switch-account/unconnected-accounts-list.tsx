@@ -51,8 +51,8 @@ export const UnconnectedAccountsList = ({
       <List
         headerLabel={t('Connect another account')}
         rows={unconnectedAccountsList}
-        headerLabelSpaceSize={SpacingSize.Large}
-        contentSpaceSize={SpacingSize.Small}
+        headerLabelTop={SpacingSize.Large}
+        contentTop={SpacingSize.Small}
         renderRow={unconnectedAccount => (
           <ListItemContainer key={unconnectedAccount.name}>
             <SpaceBetweenContainer>

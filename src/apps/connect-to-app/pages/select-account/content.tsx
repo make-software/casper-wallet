@@ -102,8 +102,8 @@ export function SelectAccountContent({
           headerLabel={t('select account(s)')}
           headerAction={headerAction}
           rows={accountsListItems}
-          headerLabelSpaceSize={SpacingSize.Large}
-          contentSpaceSize={SpacingSize.Small}
+          headerLabelTop={SpacingSize.Large}
+          contentTop={SpacingSize.Small}
           renderRow={account => (
             <ListItemClickableContainer
               onClick={() =>
