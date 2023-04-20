@@ -208,58 +208,66 @@ export function NavigationMenuPageContent() {
 
   return (
     <ContentContainer>
-      {menuGroups.map(({ headerLabel: groupLabel, items: groupItems }) => (
-        <List
-          key={groupLabel}
-          headerLabel={groupLabel}
-          rows={groupItems}
-          marginLeftForItemSeparatorLine={60}
-          headerLabelSpaceSize={SpacingSize.Large}
-          contentSpaceSize={SpacingSize.Small}
-          renderRow={groupItem => (
-            <ListItemClickableContainer
-              disabled={groupItem.disabled}
-              key={groupLabel + groupItem.id}
-              as={groupItem.href ? Link : 'div'}
-              href={groupItem.href ? groupItem.href : undefined}
-              target={groupItem.href ? '_blank' : undefined}
-              onClick={groupItem.disabled ? undefined : groupItem.handleOnClick}
-              hide={groupItem.hide}
-            >
-              <SvgIcon
-                src={groupItem.iconPath}
-                color={groupItem.disabled ? 'contentSecondary' : 'contentBlue'}
-              />
-              <SpaceBetweenContainer>
-                {groupItem.description ? (
-                  <FlexColumn>
-                    <Typography
-                      type="body"
-                      color={
-                        groupItem.disabled
-                          ? 'contentSecondary'
-                          : 'contentPrimary'
-                      }
-                    >
-                      {groupItem.title}
+      {menuGroups.map(
+        ({ headerLabel: groupLabel, items: groupItems }, index) => (
+          <List
+            key={groupLabel}
+            headerLabel={groupLabel}
+            rows={groupItems}
+            marginLeftForItemSeparatorLine={60}
+            headerLabelSpaceSize={SpacingSize.Large}
+            contentSpaceSize={
+              index === 0 ? SpacingSize.Medium : SpacingSize.Small
+            }
+            renderRow={groupItem => (
+              <ListItemClickableContainer
+                disabled={groupItem.disabled}
+                key={groupLabel + groupItem.id}
+                as={groupItem.href ? Link : 'div'}
+                href={groupItem.href ? groupItem.href : undefined}
+                target={groupItem.href ? '_blank' : undefined}
+                onClick={
+                  groupItem.disabled ? undefined : groupItem.handleOnClick
+                }
+                hide={groupItem.hide}
+              >
+                <SvgIcon
+                  src={groupItem.iconPath}
+                  color={
+                    groupItem.disabled ? 'contentSecondary' : 'contentBlue'
+                  }
+                />
+                <SpaceBetweenContainer>
+                  {groupItem.description ? (
+                    <FlexColumn>
+                      <Typography
+                        type="body"
+                        color={
+                          groupItem.disabled
+                            ? 'contentSecondary'
+                            : 'contentPrimary'
+                        }
+                      >
+                        {groupItem.title}
+                      </Typography>
+                      <Typography type="listSubtext" color="contentSecondary">
+                        {groupItem.description}
+                      </Typography>
+                    </FlexColumn>
+                  ) : (
+                    <Typography type="body">{groupItem.title}</Typography>
+                  )}
+                  {groupItem.currentValue != null && (
+                    <Typography type="bodySemiBold" color="contentBlue">
+                      {groupItem.currentValue}
                     </Typography>
-                    <Typography type="listSubtext" color="contentSecondary">
-                      {groupItem.description}
-                    </Typography>
-                  </FlexColumn>
-                ) : (
-                  <Typography type="body">{groupItem.title}</Typography>
-                )}
-                {groupItem.currentValue != null && (
-                  <Typography type="bodySemiBold" color="contentBlue">
-                    {groupItem.currentValue}
-                  </Typography>
-                )}
-              </SpaceBetweenContainer>
-            </ListItemClickableContainer>
-          )}
-        />
-      ))}
+                  )}
+                </SpaceBetweenContainer>
+              </ListItemClickableContainer>
+            )}
+          />
+        )
+      )}
     </ContentContainer>
   );
 }
