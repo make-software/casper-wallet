@@ -13,6 +13,10 @@ const AvatarContainer = styled(CenteredFlexColumn)`
   ${fullWidthAndMarginTop};
 `;
 
+const RoundedIdenticon = styled(Identicon)`
+  border-radius: ${({ theme }) => theme.borderRadius.eight}px;
+`;
+
 interface AvatarTypes {
   publicKey: string;
 }
@@ -22,7 +26,7 @@ export const Avatar = ({ publicKey }: AvatarTypes) => {
 
   return (
     <AvatarContainer>
-      <Identicon
+      <RoundedIdenticon
         string={publicKey.toLowerCase()}
         size={120}
         bg={theme.color.backgroundPrimary}
