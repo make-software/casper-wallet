@@ -14,10 +14,10 @@ export function DownloadedSecretKeysPageContent() {
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <SvgIcon src="assets/illustrations/keys-downloaded.svg" size={120} />
+        <SvgIcon src="assets/illustrations/key-downloaded.svg" size={120} />
       </IllustrationContainer>
 
-      <ParagraphContainer top={SpacingSize.Big}>
+      <ParagraphContainer top={SpacingSize.ExtraLarge}>
         <Typography type="header">
           <Trans t={t}>Your secret key was downloaded</Trans>
         </Typography>

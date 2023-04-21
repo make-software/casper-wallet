@@ -193,7 +193,7 @@ export function HomePageContent() {
                 {balance.fiatAmount}
               </Typography>
             </BalanceContainer>
-            <ButtonsContainer gap={SpacingSize.Big}>
+            <ButtonsContainer gap={SpacingSize.Large}>
               {isActiveAccountConnected ? (
                 <Button
                   disabled={activeOrigin == null}
