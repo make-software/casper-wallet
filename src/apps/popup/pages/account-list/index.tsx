@@ -17,7 +17,8 @@ import {
   ContentContainer,
   LeftAlignedFlexColumn,
   PageContainer,
-  FlexRow
+  FlexRow,
+  SpacingSize
 } from '@libs/layout';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 
@@ -121,6 +122,7 @@ export function AccountListPage() {
       <ContentContainer>
         <List
           rows={accountListRows}
+          contentTop={SpacingSize.Small}
           renderRow={account => (
             <ListItemContainer key={account.name}>
               <ListItemClickableContainer
