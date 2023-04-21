@@ -24,7 +24,7 @@ import {
 } from '@src/libs/layout';
 
 import {
-  selectConnectedAccountNamesWithOrigin,
+  selectConnectedAccountNamesWithActiveOrigin,
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
@@ -54,11 +54,13 @@ export function SelectAccountContent({
   const activeAccount = useSelector(selectVaultActiveAccount);
   const accounts = useSelector(selectVaultAccounts);
   const connectedAccountNames = useSelector(
-    selectConnectedAccountNamesWithOrigin
+    selectConnectedAccountNamesWithActiveOrigin
   );
 
   const notConnectedAccounts = accounts.filter(
-    a => !connectedAccountNames.includes(a.name)
+    account =>
+      connectedAccountNames != null &&
+      !connectedAccountNames.includes(account.name)
   );
 
   const handleSelectAll = useCallback(() => {

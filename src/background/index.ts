@@ -21,8 +21,8 @@ import {
   anotherAccountConnected
 } from '@src/background/redux/vault/actions';
 import {
-  selectIsActiveAccountConnectedWithOrigin,
-  selectIsAnyAccountConnectedWithOrigin,
+  selectIsAccountConnected,
+  selectAccountNamesByOriginDict,
   selectVaultAccountsNames,
   selectVaultAccountsSecretKeysBase64,
   selectVaultActiveAccount
@@ -89,7 +89,14 @@ import {
 import { activeOriginChanged } from './redux/active-origin/actions';
 import { selectCasperUrlsBaseOnActiveNetworkSetting } from './redux/settings/selectors';
 import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
-import { selectActiveOrigin } from './redux/root-selector';
+import {
+  CannotGetActiveAccountError,
+  CannotGetSenderOriginError
+} from './internal-errors';
+import {
+  SiteNotConnectedError,
+  WalletLockedError
+} from '@src/content/sdk-errors';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -121,7 +128,6 @@ browser.runtime.onStartup.addListener(init);
 browser.management?.onEnabled?.addListener(init);
 
 browser.runtime.onInstalled.addListener(async () => {
-  // console.log('installed');
   // this will run on installation or update so
   // first clear previous rules, then register new rules
   // DEV MODE: clean store on installation
@@ -157,7 +163,7 @@ const updateOrigin = async (windowId: number) => {
   let newActiveOrigin = null;
   // use only http based windows
   if (activeTabs.length === 1 && tab0.url && hasHttpPrefix(tab0.url)) {
-    newActiveOrigin = getUrlOrigin(tab0.url);
+    newActiveOrigin = getUrlOrigin(tab0.url) || null;
   }
 
   store.dispatch(activeOriginChanged(newActiveOrigin));
@@ -166,17 +172,22 @@ const updateOrigin = async (windowId: number) => {
   const activeAccount = selectVaultActiveAccount(state);
 
   if (newActiveOrigin && activeAccount) {
-    const isActiveAccountConnected =
-      selectIsActiveAccountConnectedWithOrigin(state);
     const isLocked = selectVaultIsLocked(state);
+    const isActiveAccountConnected = selectIsAccountConnected(
+      state,
+      newActiveOrigin,
+      activeAccount.name
+    );
 
     emitSdkEventToActiveTabsWithOrigin(
       newActiveOrigin,
       sdkEvent.changedTab({
         isLocked: isLocked,
-        isConnected: isLocked ? null : isActiveAccountConnected,
+        isConnected: isLocked ? undefined : isActiveAccountConnected,
         activeKey:
-          !isLocked && isActiveAccountConnected ? activeAccount.publicKey : null
+          !isLocked && isActiveAccountConnected
+            ? activeAccount.publicKey
+            : undefined
       })
     );
   }
@@ -195,23 +206,32 @@ browser.tabs.onActivated.addListener(
 browser.runtime.onMessage.addListener(
   async (action: RootAction | SdkMethod | ServiceMessage, sender) => {
     const store = await getExistingMainStoreSingletonOrInit();
+
     return new Promise(async (sendResponse, sendError) => {
       // Popup comms handling
       if (isSDKMethod(action)) {
-        // console.warn(`BACKEND SDK MESSAGE:`, JSON.stringify(action));
         switch (action.type) {
           case getType(sdkMethod.connectRequest): {
+            const origin = getUrlOrigin(sender.url);
+            if (!origin) {
+              return sendError(CannotGetSenderOriginError());
+            }
+            const activeAccount = selectVaultActiveAccount(store.getState());
+
             const query: Record<string, string> = {
               requestId: action.meta.requestId,
-              origin: action.payload.origin
+              origin: origin
             };
             if (action.payload.title != null) {
               query.title = action.payload.title;
             }
+            const isAccountAlreadyConnected = selectIsAccountConnected(
+              store.getState(),
+              origin,
+              activeAccount?.name
+            );
 
-            const isActiveAccountConnected =
-              selectIsActiveAccountConnectedWithOrigin(store.getState());
-            if (isActiveAccountConnected) {
+            if (isAccountAlreadyConnected) {
               return sendResponse(sdkMethod.connectResponse(true, action.meta));
             } else {
               openWindow({
@@ -224,9 +244,14 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(sdkMethod.switchAccountRequest): {
+            const origin = getUrlOrigin(sender.url);
+            if (!origin) {
+              return sendError(CannotGetSenderOriginError());
+            }
+
             const query: Record<string, string> = {
               requestId: action.meta.requestId,
-              origin: action.payload.origin
+              origin: origin
             };
             if (action.payload.title != null) {
               query.title = action.payload.title;
@@ -241,6 +266,11 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(sdkMethod.signRequest): {
+            const origin = getUrlOrigin(sender.url);
+            if (!origin) {
+              return sendError(CannotGetSenderOriginError());
+            }
+
             const { signingPublicKeyHex } = action.payload;
             let deployJson;
             try {
@@ -267,6 +297,11 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(sdkMethod.signMessageRequest): {
+            const origin = getUrlOrigin(sender.url);
+            if (!origin) {
+              return sendError(CannotGetSenderOriginError());
+            }
+
             const { signingPublicKeyHex, message } = action.payload;
 
             openWindow({
@@ -282,28 +317,42 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(sdkMethod.disconnectRequest): {
+            const origin = getUrlOrigin(sender.url);
+            if (!origin) {
+              return sendError(CannotGetSenderOriginError());
+            }
+
             let success = false;
 
             const isLocked = selectVaultIsLocked(store.getState());
-            const activeOrigin = selectActiveOrigin(store.getState());
-            const activeAccount = selectVaultActiveAccount(store.getState());
 
-            if (activeOrigin && activeAccount) {
-              emitSdkEventToActiveTabsWithOrigin(
-                activeOrigin,
-                sdkEvent.disconnectedAccountEvent({
-                  isConnected: isLocked ? null : false,
-                  isLocked: isLocked,
-                  activeKey: activeAccount?.publicKey
-                })
-              );
-              store.dispatch(
-                siteDisconnected({
-                  siteOrigin: action.payload
-                })
-              );
-              success = true;
+            const activeAccount = selectVaultActiveAccount(store.getState());
+            if (activeAccount == null) {
+              return sendError(CannotGetActiveAccountError());
             }
+            const isActiveAccountConnected = selectIsAccountConnected(
+              store.getState(),
+              origin,
+              activeAccount.name
+            );
+
+            emitSdkEventToActiveTabsWithOrigin(
+              origin,
+              sdkEvent.disconnectedAccountEvent({
+                isLocked: isLocked,
+                isConnected: isLocked ? undefined : false,
+                activeKey:
+                  !isLocked && isActiveAccountConnected
+                    ? activeAccount.publicKey
+                    : undefined
+              })
+            );
+            store.dispatch(
+              siteDisconnected({
+                siteOrigin: origin
+              })
+            );
+            success = true;
 
             return sendResponse(
               sdkMethod.disconnectResponse(success, action.meta)
@@ -311,9 +360,21 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(sdkMethod.isConnectedRequest): {
-            const isConnected = selectIsAnyAccountConnectedWithOrigin(
+            const origin = getUrlOrigin(sender.url);
+            if (!origin) {
+              return sendError(CannotGetSenderOriginError());
+            }
+
+            const isLocked = selectVaultIsLocked(store.getState());
+            if (isLocked) {
+              return sendResponse(
+                sdkMethod.isConnectedError(WalletLockedError(), action.meta)
+              );
+            }
+            const accountNamesByOriginDict = selectAccountNamesByOriginDict(
               store.getState()
             );
+            const isConnected = Boolean(origin in accountNamesByOriginDict);
 
             return sendResponse(
               sdkMethod.isConnectedResponse(isConnected, action.meta)
@@ -321,11 +382,44 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(sdkMethod.getActivePublicKeyRequest): {
+            const origin = getUrlOrigin(sender.url);
+            if (!origin) {
+              return sendError(CannotGetSenderOriginError());
+            }
+
+            const isLocked = selectVaultIsLocked(store.getState());
+            if (isLocked) {
+              return sendResponse(
+                sdkMethod.getActivePublicKeyError(
+                  WalletLockedError(),
+                  action.meta
+                )
+              );
+            }
+
             const activeAccount = selectVaultActiveAccount(store.getState());
+            if (activeAccount == null) {
+              return sendError(CannotGetActiveAccountError());
+            }
+
+            const isConnected = selectIsAccountConnected(
+              store.getState(),
+              origin,
+              activeAccount?.name
+            );
+
+            if (!isConnected) {
+              return sendResponse(
+                sdkMethod.getActivePublicKeyError(
+                  SiteNotConnectedError(),
+                  action.meta
+                )
+              );
+            }
 
             return sendResponse(
               sdkMethod.getActivePublicKeyResponse(
-                activeAccount?.publicKey,
+                activeAccount.publicKey,
                 action.meta
               )
             );
@@ -346,7 +440,6 @@ browser.runtime.onMessage.addListener(
             );
         }
       } else if (action.type != null) {
-        // console.warn(`BACKEND REDUX ACTION:`, JSON.stringify(action));
         switch (action.type) {
           case getType(resetVault): {
             store.dispatch(action);

@@ -89,11 +89,11 @@ export const reducer = createReducer(initialState)
         Object.entries(state.accountNamesByOriginDict)
           // when last account for origin, remove group
           .filter(
-            ([origin, names]) =>
+            ([origin, names = []]) =>
               !(names.includes(accountName) && names.length === 1)
           )
           // otherwise just remove single account
-          .map(([origin, names]) => [
+          .map(([origin, names = []]) => [
             origin,
             names.filter(name => name !== accountName)
           ])
@@ -113,7 +113,7 @@ export const reducer = createReducer(initialState)
       const newAccountNamesByOriginDict = Object.fromEntries(
         Object.keys(state.accountNamesByOriginDict).map(origin => [
           origin,
-          state.accountNamesByOriginDict[origin].map(accountName =>
+          (state.accountNamesByOriginDict[origin] || []).map(accountName =>
             accountName === oldName ? newName : accountName
           )
         ])
@@ -149,8 +149,11 @@ export const reducer = createReducer(initialState)
       accountNamesByOriginDict: {
         ...state.accountNamesByOriginDict,
         [siteOrigin]:
-          state.accountNamesByOriginDict[siteOrigin]?.length > 0
-            ? [...state.accountNamesByOriginDict[siteOrigin], ...accountNames]
+          (state.accountNamesByOriginDict[siteOrigin] || []).length > 0
+            ? [
+                ...(state.accountNamesByOriginDict[siteOrigin] || []),
+                ...accountNames
+              ]
             : [...accountNames]
       }
     })
@@ -162,8 +165,11 @@ export const reducer = createReducer(initialState)
       accountNamesByOriginDict: {
         ...state.accountNamesByOriginDict,
         [siteOrigin]:
-          state.accountNamesByOriginDict[siteOrigin]?.length > 0
-            ? [...state.accountNamesByOriginDict[siteOrigin], accountName]
+          (state.accountNamesByOriginDict[siteOrigin] || []).length > 0
+            ? [
+                ...(state.accountNamesByOriginDict[siteOrigin] || []),
+                accountName
+              ]
             : [accountName]
       }
     })
@@ -175,7 +181,7 @@ export const reducer = createReducer(initialState)
         Object.entries(state.accountNamesByOriginDict)
           // when last account for origin, remove group
           .filter(
-            ([origin, names]) =>
+            ([origin, names = []]) =>
               !(
                 origin === siteOrigin &&
                 names.includes(accountName) &&
@@ -183,7 +189,7 @@ export const reducer = createReducer(initialState)
               )
           )
           // otherwise just remove single account
-          .map(([origin, names]) => [
+          .map(([origin, names = []]) => [
             origin,
             origin === siteOrigin
               ? names.filter(name => name !== accountName)

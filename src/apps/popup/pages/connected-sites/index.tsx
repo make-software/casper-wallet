@@ -12,7 +12,7 @@ import {
 
 import {
   selectSiteNameByOriginDict,
-  selectVaultAccountsByOriginDict
+  selectAccountsByOriginDict
 } from '@src/background/redux/vault/selectors';
 
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
@@ -28,7 +28,7 @@ export function ConnectedSitesPage() {
     disconnectSiteWithEvent: disconnectAllAccounts
   } = useAccountManager();
 
-  const accountsByOrigin = useSelector(selectVaultAccountsByOriginDict);
+  const accountsByOrigin = useSelector(selectAccountsByOriginDict);
   const siteNameByOriginDict = useSelector(selectSiteNameByOriginDict);
 
   const isNoSitesConnected = !Object.entries(accountsByOrigin).length;

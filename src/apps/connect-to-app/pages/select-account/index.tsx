@@ -15,7 +15,7 @@ import styled from 'styled-components';
 import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
 import { sdkMethod } from '@src/content/sdk-method';
 import { closeCurrentWindow } from '@src/background/close-current-window';
-import { selectIsActiveAccountConnectedWithOrigin } from '@src/background/redux/vault/selectors';
+import { selectIsActiveAccountConnectedWithActiveOrigin } from '@src/background/redux/vault/selectors';
 import { useSelector } from 'react-redux';
 
 const TextCentredContainer = styled.div`
@@ -44,7 +44,7 @@ export function SelectAccountPage({
   }
 
   const isActiveAccountConnected = useSelector(
-    selectIsActiveAccountConnectedWithOrigin
+    selectIsActiveAccountConnectedWithActiveOrigin
   );
   if (isActiveAccountConnected) {
     sendSdkResponseToSpecificTab(

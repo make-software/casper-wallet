@@ -47,10 +47,10 @@ import { selectCasperUrlsBaseOnActiveNetworkSetting } from '@src/background/redu
 
 import {
   selectActiveOrigin,
-  selectConnectedAccountsWithOrigin,
-  selectIsActiveAccountConnectedWithOrigin,
+  selectConnectedAccountsWithActiveOrigin,
+  selectIsActiveAccountConnectedWithActiveOrigin,
   selectVaultActiveAccount,
-  selectVaultCountOfAccounts
+  selectCountOfAccounts
 } from '@src/background/redux/root-selector';
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
@@ -95,12 +95,12 @@ export function HomePageContent() {
   const activeOrigin = useSelector(selectActiveOrigin);
   const { disconnectAccountWithEvent: disconnectAccount } = useAccountManager();
   const isActiveAccountConnected = useSelector(
-    selectIsActiveAccountConnectedWithOrigin
+    selectIsActiveAccountConnectedWithActiveOrigin
   );
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const connectedAccounts = useSelector((state: RootState) =>
-    selectConnectedAccountsWithOrigin(state)
+    selectConnectedAccountsWithActiveOrigin(state)
   );
   const { casperLiveUrl, casperApiUrl } = useSelector(
     selectCasperUrlsBaseOnActiveNetworkSetting
@@ -243,7 +243,7 @@ export function HomePageHeaderSubmenuItems({
   linkType
 }: HomePageHeaderSubmenuItemsProps) {
   const { t } = useTranslation();
-  const countOfAccounts = useSelector(selectVaultCountOfAccounts);
+  const countOfAccounts = useSelector(selectCountOfAccounts);
 
   return (
     <>

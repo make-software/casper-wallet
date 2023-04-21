@@ -37,7 +37,7 @@ import {
 import {
   selectSecretPhrase,
   selectVault,
-  selectVaultAccountNamesByOriginDict,
+  selectAccountNamesByOriginDict,
   selectVaultActiveAccount,
   selectVaultDerivedAccounts
 } from '../vault/selectors';
@@ -110,8 +110,8 @@ function* lockVaultSaga(action: ReturnType<typeof lockVault>) {
     emitSdkEventToActiveTabs(tab => {
       return sdkEvent.lockedEvent({
         isLocked: true,
-        isConnected: null,
-        activeKey: null
+        isConnected: undefined,
+        activeKey: undefined
       });
     });
   } catch (err) {
@@ -183,16 +183,15 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
     yield put(vaultUnlocked());
 
     const accountNamesByOriginDict = yield* sagaSelect(
-      selectVaultAccountNamesByOriginDict
+      selectAccountNamesByOriginDict
     );
 
-    const isActiveAccountConnectedWith = (origin: string | null) => {
-      if (!origin) {
+    const isActiveAccountConnectedWith = (origin: string | undefined) => {
+      const accountNames = origin && accountNamesByOriginDict[origin];
+      if (accountNames == null) {
         return false;
       }
-      return accountNamesByOriginDict[origin].includes(
-        activeAccount?.name || ''
-      );
+      return accountNames.includes(activeAccount?.name || '');
     };
 
     const activeAccount = yield* sagaSelect(selectVaultActiveAccount);
@@ -212,7 +211,7 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
           isConnected: isActiveAccountConnectedWithTab,
           activeKey: isActiveAccountConnectedWithTab
             ? activeAccount.publicKey
-            : null
+            : undefined
         });
       });
     }

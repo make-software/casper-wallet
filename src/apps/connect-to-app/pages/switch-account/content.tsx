@@ -21,8 +21,8 @@ import {
 } from '@src/libs/layout';
 
 import {
-  selectConnectedAccountsWithOrigin,
-  selectUnconnectedAccountsWithOrigin,
+  selectConnectedAccountsWithActiveOrigin,
+  selectUnconnectedAccountsWithActiveOrigin,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
 import { selectActiveOrigin } from '@src/background/redux/active-origin/selectors';
@@ -44,9 +44,11 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
   const activeOrigin = useSelector(selectActiveOrigin);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const connectedAccountsToActiveTab = useSelector(
-    selectConnectedAccountsWithOrigin
+    selectConnectedAccountsWithActiveOrigin
   );
-  const unconnectedAccounts = useSelector(selectUnconnectedAccountsWithOrigin);
+  const unconnectedAccounts = useSelector(
+    selectUnconnectedAccountsWithActiveOrigin
+  );
 
   const { t } = useTranslation();
   const { changeActiveAccountWithEvent: changeActiveAccount } =

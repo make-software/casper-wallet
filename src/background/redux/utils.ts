@@ -78,7 +78,6 @@ export async function getExistingMainStoreSingletonOrInit() {
   ])) as StorageState;
 
   if (storeSingleton == null) {
-    // console.warn('STORE INIT', state);
     if (isMockStateEnable) {
       const { initialStateForPopupTests } = await import(
         /* webpackMode: "eager" */ '@src/fixtures'
@@ -102,11 +101,9 @@ export async function getExistingMainStoreSingletonOrInit() {
 
       // propagate state to replicas
       const popupState = selectPopupState(state);
-      browser.runtime
-        .sendMessage(backgroundEvent.popupStateUpdated(popupState))
-        .catch(e => {
-          // console.log('STATE PROPAGATION FAILED: ', e);
-        });
+      browser.runtime.sendMessage(
+        backgroundEvent.popupStateUpdated(popupState)
+      );
 
       // persist selected state
       const {
@@ -130,8 +127,6 @@ export async function getExistingMainStoreSingletonOrInit() {
           console.error('Persist encrypted vault failed: ', e);
         });
     });
-  } else {
-    // console.log('STORE REUSED', state);
   }
 
   return storeSingleton;

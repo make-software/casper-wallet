@@ -24,7 +24,7 @@ import {
 } from '@libs/ui';
 
 import {
-  selectConnectedAccountsWithOrigin,
+  selectConnectedAccountsWithActiveOrigin,
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
@@ -60,7 +60,7 @@ export function ConnectAnotherAccountPageContent() {
   } = useAccountManager();
 
   const connectedAccountsToActiveTab = useSelector(
-    selectConnectedAccountsWithOrigin
+    selectConnectedAccountsWithActiveOrigin
   );
 
   const accounts = useSelector(selectVaultAccounts);

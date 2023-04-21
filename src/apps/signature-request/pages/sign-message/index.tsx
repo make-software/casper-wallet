@@ -9,7 +9,7 @@ import {
 } from '@libs/layout';
 import { closeCurrentWindow } from '@src/background/close-current-window';
 import {
-  selectConnectedAccountNamesWithOrigin,
+  selectConnectedAccountNamesWithActiveOrigin,
   selectVaultAccounts
 } from '@src/background/redux/vault/selectors';
 import { sdkMethod } from '@src/content/sdk-method';
@@ -42,7 +42,7 @@ export function SignMessagePage() {
   const accounts = useMemo(() => vaultAccounts, renderDeps);
 
   const connectedAccountNamesWithOrigin = useSelector(
-    selectConnectedAccountNamesWithOrigin
+    selectConnectedAccountNamesWithActiveOrigin
   );
   const connectedAccountNames = useMemo(
     () => connectedAccountNamesWithOrigin,
@@ -64,7 +64,10 @@ export function SignMessagePage() {
   }
 
   // signing account should be connected to site
-  if (!connectedAccountNames.includes(signingAccount.name)) {
+  if (
+    connectedAccountNames != null &&
+    !connectedAccountNames.includes(signingAccount.name)
+  ) {
     const error = Error(
       'Account with signingPublicKeyHex is not connected to site'
     );

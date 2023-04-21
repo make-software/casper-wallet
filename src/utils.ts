@@ -4,9 +4,9 @@ const httpPrefixRegex = /^https?:\/\//;
 
 export const hasHttpPrefix = (url: string) => httpPrefixRegex.test(url);
 
-export const getUrlOrigin = (url: string) => {
+export const getUrlOrigin = (url: string | undefined) => {
   if (!url) {
-    return null;
+    return undefined;
   }
   return new URL(url).origin;
 };

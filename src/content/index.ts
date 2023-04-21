@@ -10,11 +10,11 @@ import { sdkEvent, SdkEvent } from './sdk-event';
 import { getType } from 'typesafe-actions';
 import { CasperWalletEventType } from './sdk-event-type';
 
-async function handleSdkResponseOrEvent(
+async function handleSdkMessage(
   message: SdkEvent | SdkMethod,
   sender: browser.Runtime.MessageSender
 ) {
-  // Todo for Piotr: design convention for delayed sdk request responses
+  // delayed sdk request response
   if (isSDKMethod(message)) {
     switch (message.type) {
       case getType(sdkMethod.connectResponse):
@@ -45,7 +45,6 @@ async function handleSdkResponseOrEvent(
 
 // Proxy Wallet Events to connected site
 function emitSdkEvent(message: SdkEvent) {
-  // console.error('CONTENT EMIT SDK EVENT:', JSON.stringify(message));
   let eventType: string;
   switch (message.type) {
     case getType(sdkEvent.connectedAccountEvent):
@@ -85,7 +84,7 @@ function emitSdkEvent(message: SdkEvent) {
 }
 
 // SDK Message proxy to the backend
-function handleSdkRequest(e: Event) {
+function handleSdkRequestEvent(e: Event) {
   const requestAction = (e as CustomEvent).detail;
   // validation
   if (!isSDKMethod(requestAction)) {
@@ -107,7 +106,7 @@ function handleSdkRequest(e: Event) {
       }
     })
     .catch(err => {
-      throw Error('Content: sdk request send message: ' + err);
+      throw Error('Content: sdk request received error: ' + err);
     });
 }
 
@@ -130,24 +129,21 @@ function injectSdkScript() {
 }
 
 function init() {
-  // console.log('CONTENT INIT');
-
   // idempotent, doesn't need cleanup
   injectSdkScript();
 
-  browser.runtime.onMessage.addListener(handleSdkResponseOrEvent);
-  window.addEventListener(SdkMethodEventType.Request, handleSdkRequest);
+  browser.runtime.onMessage.addListener(handleSdkMessage);
+  window.addEventListener(SdkMethodEventType.Request, handleSdkRequestEvent);
 }
 
 // cleanup logic
 export const cleanupEventType = 'CasperWalletProvider:Cleanup';
 window.dispatchEvent(new CustomEvent(cleanupEventType));
 function cleanup() {
-  // console.error('CONTENT CLEANUP');
   document.removeEventListener(cleanupEventType, cleanup);
 
-  browser.runtime.onMessage.removeListener(handleSdkResponseOrEvent);
-  window.removeEventListener(SdkMethodEventType.Request, handleSdkRequest);
+  browser.runtime.onMessage.removeListener(handleSdkMessage);
+  window.removeEventListener(SdkMethodEventType.Request, handleSdkRequestEvent);
 }
 window.addEventListener(cleanupEventType, cleanup);
 
