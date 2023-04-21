@@ -8,7 +8,6 @@ import {
   VerticalSpaceContainer
 } from '@src/libs/layout';
 import { Typography, TextList } from '@src/libs/ui';
-import { Underline } from '@libs/ui/components/underline/underline';
 
 export function ConfirmSecretPhraseSuccessPageContent() {
   const { t } = useTranslation();
@@ -20,8 +19,8 @@ export function ConfirmSecretPhraseSuccessPageContent() {
       key: 3,
       value: (
         <Trans>
-          Be careful of phishing! Casper Wallet will{' '}
-          <Underline>never</Underline> spontaneously ask for your secret phrase.
+          Be careful of phishing! Casper Wallet will never spontaneously ask for
+          your secret phrase.
         </Trans>
       )
     },
