@@ -1,6 +1,6 @@
 const webpack = require('webpack');
 
-const { NODE_ENV, BROWSER } = require('./env');
+const { NODE_ENV } = require('./env');
 const config = require('../webpack.config');
 
 const { cleanUpBuildDir } = require('./build-dir-utils');

@@ -8,10 +8,10 @@ const webpack = require('webpack'),
   TerserPlugin = require('terser-webpack-plugin'),
   TsconfigPaths = require('tsconfig-paths-webpack-plugin');
 
-const commitHash = require('child_process')
-  .execSync('git rev-parse --short HEAD')
-  .toString()
-  .trim();
+const commitHash = process.env.HASH || process.env.GITHUB_SHA;
+if (!commitHash) {
+  throw Error('No commit hash env!');
+}
 
 const htmlWebpackPluginOptions = {
   cache: false,
@@ -189,7 +189,7 @@ const options = {
               ...JSON.parse(content.toString()),
               name: pkg.name,
               version: pkg.version,
-              version_name: pkg.version + ` (${commitHash})`,
+              version_name: pkg.version + ` (${commitHash.slice(0, 7)})`,
               author: pkg.author,
               description: pkg.description,
               ...(isDev
