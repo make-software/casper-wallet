@@ -55,7 +55,7 @@ export function BackupSecretPhrasePageContent() {
 
   return (
     <ContentContainer>
-      <ParagraphContainer top={SpacingSize.Big}>
+      <ParagraphContainer top={SpacingSize.ExtraLarge}>
         <Typography type="header">
           <Trans t={t}>Back up your secret recovery phrase</Trans>
         </Typography>
@@ -75,7 +75,7 @@ export function BackupSecretPhrasePageContent() {
         )}
       />
 
-      <ParagraphContainer top={SpacingSize.Big}>
+      <ParagraphContainer top={SpacingSize.ExtraLarge}>
         <Typography type="bodySemiBold">
           <Trans t={t}>Safety tips:</Trans>
         </Typography>

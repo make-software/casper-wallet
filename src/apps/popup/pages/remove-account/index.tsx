@@ -13,8 +13,8 @@ import { Button, Typography, SvgIcon } from '@src/libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { accountRemoved } from '@src/background/redux/vault/actions';
-import { dispatchToMainStore } from '../../../../background/redux/utils';
+import { accountRemoved } from '@background/redux/vault/actions';
+import { dispatchToMainStore } from '@background/redux/utils';
 
 export function RemoveAccountPageContent() {
   const navigate = useTypedNavigate();
@@ -41,7 +41,7 @@ export function RemoveAccountPageContent() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/remove-account.svg" size={120} />
       </IllustrationContainer>
-      <ParagraphContainer top={SpacingSize.Big}>
+      <ParagraphContainer top={SpacingSize.ExtraLarge}>
         <Typography type="header">
           <Trans t={t}>Remove account?</Trans>
         </Typography>
