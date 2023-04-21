@@ -5,7 +5,8 @@ export enum SpacingSize {
   Tiny = 'tiny',
   Small = 'small',
   Medium = 'medium',
-  Big = 'big'
+  Large = 'large',
+  ExtraLarge = 'extra large'
 }
 
 export const getSpacingSize = (size?: SpacingSize) => {
@@ -18,7 +19,9 @@ export const getSpacingSize = (size?: SpacingSize) => {
       return '1.2rem';
     case SpacingSize.Medium:
       return '1.6rem';
-    case SpacingSize.Big:
+    case SpacingSize.Large:
+      return '2rem';
+    case SpacingSize.ExtraLarge:
       return '2.4rem';
     default:
       throw new Error('Unknown spacing size');
@@ -64,7 +67,7 @@ const getGapSize = (gap?: SpacingSize) => {
       return '8px';
     case SpacingSize.Medium:
       return '12px';
-    case SpacingSize.Big:
+    case SpacingSize.Large:
       return '16px';
     default:
       throw new Error('Unknown gap size');

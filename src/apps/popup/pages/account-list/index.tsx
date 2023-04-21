@@ -17,13 +17,10 @@ import {
   ContentContainer,
   LeftAlignedFlexColumn,
   PageContainer,
-  FlexRow
+  FlexRow,
+  SpacingSize
 } from '@libs/layout';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import {
-  dispatchFetchAccountListInfo,
-  getAccountInfo
-} from '@libs/services/account-info';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
@@ -114,31 +111,8 @@ export function AccountListPage() {
       accountHash: getAccountHashFromPublicKey(account.publicKey)
     }));
 
-    const accountsHash = accountListRows.map(account => account.accountHash);
-
-    dispatchFetchAccountListInfo(accountsHash)
-      .then(({ payload: accountInfoList }) => {
-        const newAccountListRows = [...accountListRows];
-
-        accountInfoList.forEach(accountInfo => {
-          const { accountName, accountHash } = getAccountInfo(accountInfo);
-
-          newAccountListRows.forEach(account => {
-            if (account.accountHash === accountHash) {
-              if (accountName != null) {
-                account.name = accountName;
-              }
-            }
-          });
-        });
-
-        setAccountListRows(newAccountListRows);
-      })
-      .catch(error => {
-        console.error(error);
-        setAccountListRows(accountListRows);
-      });
-    // We need to sort the account list and fetch account info only on the component mount
+    setAccountListRows(accountListRows);
+    // We need to sort the account list only on the component mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -147,6 +121,7 @@ export function AccountListPage() {
       <ContentContainer>
         <List
           rows={accountListRows}
+          contentTop={SpacingSize.Small}
           renderRow={account => (
             <ListItemContainer key={account.name}>
               <ListItemClickableContainer

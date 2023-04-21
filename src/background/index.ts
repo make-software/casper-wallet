@@ -49,10 +49,7 @@ import {
   fetchAccountBalance,
   fetchCurrencyRate
 } from '@libs/services/balance-service';
-import {
-  fetchAccountInfo,
-  fetchAccountListInfo
-} from '@libs/services/account-info';
+import { fetchAccountInfo } from '@libs/services/account-info';
 
 import { openWindow } from './open-window';
 import { deployPayloadReceived, deploysReseted } from './redux/deploys/actions';
@@ -532,27 +529,6 @@ browser.runtime.onMessage.addListener(
 
               return sendResponse(
                 serviceMessage.fetchAccountInfoResponse(accountInfo)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchAccountListInfoRequest): {
-            const { casperApiUrl } = selectCasperUrlsBaseOnActiveNetworkSetting(
-              store.getState()
-            );
-
-            try {
-              const { data: accountsInfoList } = await fetchAccountListInfo({
-                accountsHash: action.payload.accountsHash,
-                casperApiUrl
-              });
-
-              return sendResponse(
-                serviceMessage.fetchAccountListInfoResponse(accountsInfoList)
               );
             } catch (error) {
               console.error(error);

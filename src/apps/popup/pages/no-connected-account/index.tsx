@@ -21,7 +21,7 @@ export function NoConnectedAccountPageContent() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/no-connection.svg" size={120} />
       </IllustrationContainer>
-      <ParagraphContainer top={SpacingSize.Big}>
+      <ParagraphContainer top={SpacingSize.ExtraLarge}>
         <Typography type="header">
           <Trans t={t}>Casper Wallet is not connected to this site yet</Trans>
         </Typography>

@@ -26,6 +26,7 @@ import {
 } from '@src/background/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import { useAccountInfo } from '@hooks/use-account-info';
 
 export function AccountSettingsPageContent() {
   const { t } = useTranslation();
@@ -40,14 +41,20 @@ export function AccountSettingsPageContent() {
   }
 
   const accountHash = getAccountHashFromPublicKey(account.publicKey);
+  const { accountInfoStandardName } = useAccountInfo(account);
 
   return (
     <>
       <ContentContainer>
         <Tile>
-          <TileContainer paddingVertical={SpacingSize.Big}>
+          <TileContainer paddingVertical={SpacingSize.ExtraLarge}>
             <Typography type="header">{account.name}</Typography>
-            <VerticalSpaceContainer top={SpacingSize.Big}>
+            {accountInfoStandardName && (
+              <Typography type="body" ellipsis>
+                {accountInfoStandardName}
+              </Typography>
+            )}
+            <VerticalSpaceContainer top={SpacingSize.ExtraLarge}>
               <FlexColumn gap={SpacingSize.Small}>
                 <Typography type="bodySemiBold">
                   <Trans t={t}>Public key</Trans>
@@ -60,7 +67,7 @@ export function AccountSettingsPageContent() {
                 />
               </FlexColumn>
             </VerticalSpaceContainer>
-            <VerticalSpaceContainer top={SpacingSize.Big}>
+            <VerticalSpaceContainer top={SpacingSize.ExtraLarge}>
               <FlexColumn gap={SpacingSize.Small}>
                 <Typography type="bodySemiBold">
                   <Trans t={t}>Account hash</Trans>

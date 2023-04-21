@@ -52,7 +52,7 @@ export function RenameAccountPageContent() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/rename-account.svg" size={120} />
       </IllustrationContainer>
-      <ParagraphContainer top={SpacingSize.Big}>
+      <ParagraphContainer top={SpacingSize.ExtraLarge}>
         <Typography type="header">
           <Trans t={t}>Rename account</Trans>
         </Typography>

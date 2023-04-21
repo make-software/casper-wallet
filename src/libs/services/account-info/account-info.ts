@@ -2,7 +2,6 @@ import { serviceMessage } from '@background/service-message';
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import {
-  getAccountsInfoUrl,
   getAccountInfoUrl,
   AccountInfo,
   AccountInfoResponse
@@ -21,20 +20,6 @@ const accountInfoRequest = (
     .then(toJson)
     .catch(handleError);
 
-const accountListInfoRequest = (
-  accountsHash: string[],
-  casperApiUrl: string
-): Promise<AccountInfoResponse<AccountInfo[]>> =>
-  fetch(getAccountsInfoUrl(casperApiUrl), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ account_hash: accountsHash })
-  })
-    .then(toJson)
-    .catch(handleError);
-
 export const fetchAccountInfo = ({
   accountHash,
   casperApiUrl
@@ -50,29 +35,7 @@ export const fetchAccountInfo = ({
     }
   );
 
-export const fetchAccountListInfo = ({
-  accountsHash,
-  casperApiUrl
-}: {
-  accountsHash: string[];
-  casperApiUrl: string;
-}) =>
-  queryClient.fetchQuery(
-    ['accountListInfoRequest', accountsHash, casperApiUrl],
-    () => accountListInfoRequest(accountsHash, casperApiUrl),
-    {
-      staleTime: FETCH_QUERY_OPTIONS.apiCacheTime
-    }
-  );
-
 export const dispatchFetchAccountInfoRequest = (
   accountHash: string
 ): Promise<DataWithPayload<AccountInfo>> =>
   dispatchToMainStore(serviceMessage.fetchAccountInfoRequest({ accountHash }));
-
-export const dispatchFetchAccountListInfo = (
-  accountsHash: string[]
-): Promise<DataWithPayload<AccountInfo[]>> =>
-  dispatchToMainStore(
-    serviceMessage.fetchAccountListInfoRequest({ accountsHash })
-  );
