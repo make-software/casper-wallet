@@ -15,7 +15,6 @@ import { LoginRetryCountState } from './login-retry-count/reducer';
 import { LoginRetryLockoutTimeState } from './login-retry-lockout-time/types';
 import { VaultCipherState } from './vault-cipher/types';
 import { WindowManagementState } from './windowManagement/types';
-import { DeploysState } from './deploys/types';
 import { VaultState } from './vault/types';
 import { SessionState } from './session/types';
 import { LastActivityTimeState } from './last-activity-time/reducer';
@@ -137,7 +136,6 @@ export type PopupState = {
   session: SessionState;
   loginRetryCount: LoginRetryCountState;
   vault: VaultState;
-  deploys: DeploysState;
   windowManagement: WindowManagementState;
   vaultCipher: VaultCipherState;
   loginRetryLockoutTime: LoginRetryLockoutTimeState;
@@ -154,7 +152,6 @@ export const selectPopupState = (state: RootState): PopupState => {
     loginRetryCount: state.loginRetryCount,
     session: state.session,
     vault: state.vault,
-    deploys: state.deploys,
     windowManagement: state.windowManagement,
     vaultCipher: state.vaultCipher,
     loginRetryLockoutTime: state.loginRetryLockoutTime,

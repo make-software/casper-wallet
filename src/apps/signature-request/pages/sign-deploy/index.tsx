@@ -9,9 +9,9 @@ import {
   PopupHeader
 } from '@libs/layout';
 import { closeCurrentWindow } from '@src/background/close-current-window';
-import { selectDeploysJsonById } from '@src/background/redux/deploys/selectors';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
+  selectDeploysJsonById,
   selectVaultAccounts
 } from '@src/background/redux/vault/selectors';
 import { sdkMethod } from '@src/content/sdk-method';

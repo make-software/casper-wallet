@@ -45,3 +45,10 @@ export const siteDisconnected = createAction('SITE_DISCONNECTED')<{
 export const activeAccountChanged = createAction(
   'ACTIVE_ACCOUNT_CHANGED'
 )<string>();
+
+export const deploysReseted = createAction('DEPLOYS_RESETED')<void>();
+
+export const deployPayloadReceived = createAction('DEPLOY_PAYLOAD_RECEIVED')<{
+  id: string;
+  json: string;
+}>();
