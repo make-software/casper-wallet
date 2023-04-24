@@ -31,15 +31,18 @@ export function ErrorPageContent({
       <ContentContainer>
         {illustrationType === 'onboarding' ? (
           <OnboardingIllustrationContainer>
-            <SvgIcon src="assets/illustrations/error.svg" size={140} />
+            <SvgIcon
+              src="assets/illustrations/wrong-secret-phrase.svg"
+              size={140}
+            />
           </OnboardingIllustrationContainer>
         ) : (
           <IllustrationContainer>
-            <SvgIcon src="assets/illustrations/process-error.svg" size={140} />
+            <SvgIcon src="assets/illustrations/error.svg" size={140} />
           </IllustrationContainer>
         )}
 
-        <ParagraphContainer top={SpacingSize.Big}>
+        <ParagraphContainer top={SpacingSize.ExtraLarge}>
           <Typography type="header">{errorHeaderText}</Typography>
         </ParagraphContainer>
 

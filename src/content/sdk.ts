@@ -35,7 +35,6 @@ function fetchFromBackground<T extends SdkMethod['payload']>(
       );
     }, options?.timeout || DefaultOptions.timeout);
 
-    // console.log('SDK SENT REQUEST:', JSON.stringify(requestAction));
     window.dispatchEvent(
       new CustomEvent(SdkMethodEventType.Request, {
         detail: requestAction
@@ -44,7 +43,7 @@ function fetchFromBackground<T extends SdkMethod['payload']>(
 
     const waitForResponseEvent = (e: Event) => {
       const message = JSON.parse((e as CustomEvent).detail);
-      // console.log('SDK GOT RESPONSE:', JSON.stringify(message));
+
       // filter out response events not for this request
       if (
         !isSDKMethod(message) ||
@@ -58,7 +57,7 @@ function fetchFromBackground<T extends SdkMethod['payload']>(
         waitForResponseEvent
       );
       // check for errors
-      if (message.payload instanceof Error) {
+      if ('error' in message && message.error) {
         reject(message.payload);
       } else {
         resolve(message.payload as T);
@@ -92,7 +91,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         ReturnType<typeof sdkMethod['connectResponse']>['payload']
       >(
         sdkMethod.connectRequest(
-          { origin: window.location.origin, title: document.title },
+          { title: document.title },
           {
             requestId: generateRequestId()
           }
@@ -109,7 +108,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         ReturnType<typeof sdkMethod['switchAccountResponse']>['payload']
       >(
         sdkMethod.switchAccountRequest(
-          { origin: window.location.origin, title: document.title },
+          { title: document.title },
           {
             requestId: generateRequestId()
           }
@@ -197,7 +196,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       return fetchFromBackground<
         ReturnType<typeof sdkMethod['disconnectResponse']>['payload']
       >(
-        sdkMethod.disconnectRequest(window.location.origin, {
+        sdkMethod.disconnectRequest(undefined, {
           requestId: generateRequestId()
         }),
         options
@@ -206,12 +205,13 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
     /**
      * Get the connection status of the Casper Wallet extension
      * @returns `true` value when curently connected at least one account, `false` otherwise.
+     * @throws when wallet is locked (err.code: 1)
      */
     isConnected(): Promise<boolean> {
       return fetchFromBackground<
         ReturnType<typeof sdkMethod['isConnectedResponse']>['payload']
       >(
-        sdkMethod.isConnectedRequest(window.location.origin, {
+        sdkMethod.isConnectedRequest(undefined, {
           requestId: generateRequestId()
         }),
         options
@@ -220,8 +220,10 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
     /**
      * Get the active public key of the Casper Wallet extension
      * @returns returns hex hash of the active public key.
+     * @throws when wallet is locked (err.code: 1)
+     * @throws when active account not approved to connect with the site (err.code: 2)
      */
-    getActivePublicKey(): Promise<string | undefined> {
+    getActivePublicKey(): Promise<string> {
       return fetchFromBackground<
         ReturnType<typeof sdkMethod['getActivePublicKeyResponse']>['payload']
       >(
@@ -232,7 +234,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       );
     },
     /**
-     * Get version of the Casper Wallet extension
+     * Get version of the installed Casper Wallet extension
      * @returns version of the installed wallet extension.
      */
     getVersion(): Promise<string> {

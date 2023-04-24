@@ -55,7 +55,7 @@ export function ConnectingContent({ origin }: ConnectingContentProps) {
       <Typography type="header">
         <Trans t={t}>Connecting</Trans>
       </Typography>
-      <IconsContainer gap={SpacingSize.Big}>
+      <IconsContainer gap={SpacingSize.Large}>
         <LogoOverlay>
           <SvgIcon src="assets/icons/casper-wallet-logo.svg" size={40} />
         </LogoOverlay>

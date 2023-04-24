@@ -3,13 +3,16 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { hexToRGBA, Typography } from '@libs/ui';
+import { AlignedFlexRow } from '@libs/layout';
 
 interface ConnectionStatusBadgeProps {
   isConnected: boolean;
   displayContext: 'accountList' | 'home';
 }
 
-const ConnectionStatusBadgeContainer = styled.div<ConnectionStatusBadgeProps>`
+const ConnectionStatusBadgeContainer = styled(
+  AlignedFlexRow
+)<ConnectionStatusBadgeProps>`
   width: fit-content;
   border-radius: ${({ theme }) => theme.borderRadius.ten}px;
   padding: ${({ displayContext }) =>

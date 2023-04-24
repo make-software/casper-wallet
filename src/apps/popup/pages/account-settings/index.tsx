@@ -11,7 +11,7 @@ import {
   PopupLayout
 } from '@libs/layout';
 import { Button, Link } from '@libs/ui';
-import { selectVaultAccountWithName } from '@background/redux/vault/selectors';
+import { selectVaultAccount } from '@background/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { getBlockExplorerAccountUrl } from '@src/constants';
 import { selectCasperUrlsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
@@ -27,7 +27,7 @@ export const AccountSettingsPage = () => {
 
   const { accountName } = useParams();
   const account = useSelector((state: RootState) =>
-    selectVaultAccountWithName(state, accountName || '')
+    selectVaultAccount(state, accountName || '')
   );
   const { casperLiveUrl } = useSelector(
     selectCasperUrlsBaseOnActiveNetworkSetting

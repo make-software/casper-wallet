@@ -21,7 +21,7 @@ import {
   Typography
 } from '@libs/ui';
 import {
-  selectVaultAccountWithName,
+  selectVaultAccount,
   selectVaultImportedAccounts
 } from '@src/background/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -33,7 +33,7 @@ export function AccountSettingsPageContent() {
 
   const { accountName } = useParams();
   const account = useSelector((state: RootState) =>
-    selectVaultAccountWithName(state, accountName || '')
+    selectVaultAccount(state, accountName || '')
   );
 
   if (!account) {
@@ -47,14 +47,14 @@ export function AccountSettingsPageContent() {
     <>
       <ContentContainer>
         <Tile>
-          <TileContainer paddingVertical={SpacingSize.Big}>
+          <TileContainer paddingVertical={SpacingSize.ExtraLarge}>
             <Typography type="header">{account.name}</Typography>
             {accountInfoStandardName && (
               <Typography type="body" ellipsis>
                 {accountInfoStandardName}
               </Typography>
             )}
-            <VerticalSpaceContainer top={SpacingSize.Big}>
+            <VerticalSpaceContainer top={SpacingSize.ExtraLarge}>
               <FlexColumn gap={SpacingSize.Small}>
                 <Typography type="bodySemiBold">
                   <Trans t={t}>Public key</Trans>
@@ -67,7 +67,7 @@ export function AccountSettingsPageContent() {
                 />
               </FlexColumn>
             </VerticalSpaceContainer>
-            <VerticalSpaceContainer top={SpacingSize.Big}>
+            <VerticalSpaceContainer top={SpacingSize.ExtraLarge}>
               <FlexColumn gap={SpacingSize.Small}>
                 <Typography type="bodySemiBold">
                   <Trans t={t}>Account hash</Trans>

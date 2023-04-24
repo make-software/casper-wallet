@@ -24,7 +24,7 @@ import {
 } from '@libs/ui';
 
 import {
-  selectConnectedAccountsWithOrigin,
+  selectConnectedAccountsWithActiveOrigin,
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
@@ -60,7 +60,7 @@ export function ConnectAnotherAccountPageContent() {
   } = useAccountManager();
 
   const connectedAccountsToActiveTab = useSelector(
-    selectConnectedAccountsWithOrigin
+    selectConnectedAccountsWithActiveOrigin
   );
 
   const accounts = useSelector(selectVaultAccounts);
@@ -78,7 +78,7 @@ export function ConnectAnotherAccountPageContent() {
 
   return (
     <ContentContainer>
-      <ParagraphContainer top={SpacingSize.Big}>
+      <ParagraphContainer top={SpacingSize.ExtraLarge}>
         <SiteFaviconBadge origin={activeOrigin} />
         <VerticalSpaceContainer top={SpacingSize.Medium}>
           <Typography type="header">
@@ -118,6 +118,8 @@ export function ConnectAnotherAccountPageContent() {
       <List
         headerLabel={t('Switch to another account')}
         rows={connectedAccountsListItems}
+        headerLabelTop={SpacingSize.Large}
+        contentTop={SpacingSize.Small}
         renderRow={account => (
           <ListItemContainer key={account.name}>
             <SvgIcon

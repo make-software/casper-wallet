@@ -21,8 +21,8 @@ import {
 } from '@src/libs/layout';
 
 import {
-  selectConnectedAccountsWithOrigin,
-  selectUnconnectedAccountsWithOrigin,
+  selectConnectedAccountsWithActiveOrigin,
+  selectUnconnectedAccountsWithActiveOrigin,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
 import { selectActiveOrigin } from '@src/background/redux/active-origin/selectors';
@@ -44,9 +44,11 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
   const activeOrigin = useSelector(selectActiveOrigin);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const connectedAccountsToActiveTab = useSelector(
-    selectConnectedAccountsWithOrigin
+    selectConnectedAccountsWithActiveOrigin
   );
-  const unconnectedAccounts = useSelector(selectUnconnectedAccountsWithOrigin);
+  const unconnectedAccounts = useSelector(
+    selectUnconnectedAccountsWithActiveOrigin
+  );
 
   const { t } = useTranslation();
   const { changeActiveAccountWithEvent: changeActiveAccount } =
@@ -71,7 +73,7 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
   return (
     <PageContainer>
       <ContentContainer>
-        <ParagraphContainer top={SpacingSize.Big}>
+        <ParagraphContainer top={SpacingSize.ExtraLarge}>
           <SiteFaviconBadge origin={activeOrigin} />
           <VerticalSpaceContainer top={SpacingSize.Medium}>
             <Typography type="header">Switch to another account</Typography>
@@ -80,7 +82,7 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
         {/*Neither active account nor other accounts are connected*/}
         {connectedAccountsListItems.length === 0 &&
           !isActiveAccountConnected && (
-            <ParagraphContainer top={SpacingSize.Big}>
+            <ParagraphContainer top={SpacingSize.ExtraLarge}>
               <Typography type="body">
                 <Trans t={t}>
                   There is no connected account. First you need to connect
@@ -93,7 +95,7 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
         {connectedAccountsListItems.length === 0 &&
           isActiveAccountConnected && (
             <>
-              <ParagraphContainer top={SpacingSize.Big}>
+              <ParagraphContainer top={SpacingSize.ExtraLarge}>
                 <Typography type="body">
                   {unconnectedAccountsList.length > 0 ? (
                     <Trans t={t}>

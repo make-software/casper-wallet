@@ -17,7 +17,8 @@ import {
   ContentContainer,
   LeftAlignedFlexColumn,
   PageContainer,
-  FlexRow
+  FlexRow,
+  SpacingSize
 } from '@libs/layout';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 
@@ -26,8 +27,8 @@ import { useAccountManager } from '@popup/hooks/use-account-actions-with-events'
 import { ConnectionStatusBadge } from '@popup/pages/home/components/connection-status-badge';
 
 import {
-  selectConnectedAccountNamesWithOrigin,
-  selectIsAnyAccountConnectedWithOrigin,
+  selectConnectedAccountNamesWithActiveOrigin,
+  selectIsAnyAccountConnectedWithActiveOrigin,
   selectVaultAccounts,
   selectVaultActiveAccountName
 } from '@background/redux/vault/selectors';
@@ -90,15 +91,14 @@ export function AccountListPage() {
   const activeOrigin = useSelector(selectActiveOrigin);
   const activeAccountName = useSelector(selectVaultActiveAccountName);
   const isAnyAccountConnected = useSelector(
-    selectIsAnyAccountConnectedWithOrigin
+    selectIsAnyAccountConnectedWithActiveOrigin
   );
   const { casperLiveUrl } = useSelector(
     selectCasperUrlsBaseOnActiveNetworkSetting
   );
 
-  const connectedAccountNames = useSelector(
-    selectConnectedAccountNamesWithOrigin
-  );
+  const connectedAccountNames =
+    useSelector(selectConnectedAccountNamesWithActiveOrigin) || [];
 
   useEffect(() => {
     const accountListRows = sortAccounts(
@@ -121,6 +121,7 @@ export function AccountListPage() {
       <ContentContainer>
         <List
           rows={accountListRows}
+          contentTop={SpacingSize.Small}
           renderRow={account => (
             <ListItemContainer key={account.name}>
               <ListItemClickableContainer

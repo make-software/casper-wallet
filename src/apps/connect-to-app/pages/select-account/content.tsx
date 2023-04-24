@@ -24,7 +24,7 @@ import {
 } from '@src/libs/layout';
 
 import {
-  selectConnectedAccountNamesWithOrigin,
+  selectConnectedAccountNamesWithActiveOrigin,
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
@@ -54,11 +54,13 @@ export function SelectAccountContent({
   const activeAccount = useSelector(selectVaultActiveAccount);
   const accounts = useSelector(selectVaultAccounts);
   const connectedAccountNames = useSelector(
-    selectConnectedAccountNamesWithOrigin
+    selectConnectedAccountNamesWithActiveOrigin
   );
 
   const notConnectedAccounts = accounts.filter(
-    a => !connectedAccountNames.includes(a.name)
+    account =>
+      connectedAccountNames != null &&
+      !connectedAccountNames.includes(account.name)
   );
 
   const handleSelectAll = useCallback(() => {
@@ -90,7 +92,7 @@ export function SelectAccountContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <ParagraphContainer top={SpacingSize.Big}>
+        <ParagraphContainer top={SpacingSize.ExtraLarge}>
           <SiteFaviconBadge origin={origin} />
           <VerticalSpaceContainer top={SpacingSize.Medium}>
             <Typography type="header">
@@ -102,6 +104,8 @@ export function SelectAccountContent({
           headerLabel={t('select account(s)')}
           headerAction={headerAction}
           rows={accountsListItems}
+          headerLabelTop={SpacingSize.Large}
+          contentTop={SpacingSize.Small}
           renderRow={account => (
             <ListItemClickableContainer
               onClick={() =>
