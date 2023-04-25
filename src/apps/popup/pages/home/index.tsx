@@ -44,7 +44,10 @@ import {
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import { getBlockExplorerAccountUrl } from '@src/constants';
 import { selectCasperUrlsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
-
+import {
+  makeNativeTransferDeploy,
+  signAndDeploy
+} from '@libs/services/transfer-service/transfer-service';
 import {
   selectActiveOrigin,
   selectConnectedAccountsWithActiveOrigin,
@@ -117,6 +120,19 @@ export function HomePageContent() {
       navigate(RouterPath.ConnectAnotherAccount);
     }
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
+
+  const makeTransfer = () => {
+    if (activeAccount) {
+      const deploy = makeNativeTransferDeploy(
+        activeAccount.publicKey,
+        '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5',
+        '5000000000',
+        '4'
+      );
+
+      signAndDeploy(deploy, activeAccount.publicKey, activeAccount.secretKey);
+    }
+  };
 
   useEffect(() => {
     dispatchFetchActiveAccountBalance(activeAccount?.publicKey)
@@ -226,6 +242,9 @@ export function HomePageContent() {
                 }
               >
                 <Trans t={t}>Manage account</Trans>
+              </Button>
+              <Button color="secondaryBlue" onClick={makeTransfer}>
+                Transfer
               </Button>
             </ButtonsContainer>
           </TileContainer>
