@@ -160,9 +160,8 @@ export function UnlockVaultPageContent() {
           <Player
             speed={1}
             autoplay
-            keepLastFrame
             src={unlockAnimation}
-            style={{ width: '160px', marginTop: 40 }}
+            style={{ width: '160px', marginTop: '80%' }}
           ></Player>
           <ParagraphContainer top={SpacingSize.Medium}>
             <Typography type="header">
