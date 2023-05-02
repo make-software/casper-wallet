@@ -18,7 +18,9 @@ import {
   vaultReseted,
   vaultLoaded,
   secretPhraseCreated,
-  anotherAccountConnected
+  anotherAccountConnected,
+  deployPayloadReceived,
+  deploysReseted
 } from '@src/background/redux/vault/actions';
 import {
   selectIsAccountConnected,
@@ -52,7 +54,6 @@ import {
 import { fetchAccountInfo } from '@libs/services/account-info';
 
 import { openWindow } from './open-window';
-import { deployPayloadReceived, deploysReseted } from './redux/deploys/actions';
 import {
   encryptionKeyHashCreated,
   sessionReseted,

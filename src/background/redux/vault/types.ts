@@ -24,4 +24,5 @@ export type VaultState = {
   accountNamesByOriginDict: AccountNamesByOriginDict;
   siteNameByOriginDict: SiteNameByOriginDict;
   activeAccountName: string | null;
+  jsonById: Record<string, string>;
 };
