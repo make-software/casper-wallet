@@ -157,6 +157,8 @@ const updateOrigin = async (windowId: number) => {
   }
 
   const store = await getExistingMainStoreSingletonOrInit();
+  const state = store.getState();
+  const activeOrigin = state.activeOrigin;
 
   const activeTabs = await browser.tabs.query({ active: true, windowId });
   const tab0 = activeTabs[0];
@@ -167,41 +169,49 @@ const updateOrigin = async (windowId: number) => {
     newActiveOrigin = getUrlOrigin(tab0.url) || null;
   }
 
-  store.dispatch(activeOriginChanged(newActiveOrigin));
+  if (activeOrigin !== newActiveOrigin) {
+    store.dispatch(activeOriginChanged(newActiveOrigin));
 
-  const state = store.getState();
-  const activeAccount = selectVaultActiveAccount(state);
+    const activeAccount = selectVaultActiveAccount(state);
 
-  if (newActiveOrigin && activeAccount) {
-    const isLocked = selectVaultIsLocked(state);
-    const isActiveAccountConnected = selectIsAccountConnected(
-      state,
-      newActiveOrigin,
-      activeAccount.name
-    );
+    if (newActiveOrigin && activeAccount) {
+      const isLocked = selectVaultIsLocked(state);
+      const isActiveAccountConnected = selectIsAccountConnected(
+        state,
+        newActiveOrigin,
+        activeAccount.name
+      );
 
-    emitSdkEventToActiveTabsWithOrigin(
-      newActiveOrigin,
-      sdkEvent.changedTab({
-        isLocked: isLocked,
-        isConnected: isLocked ? undefined : isActiveAccountConnected,
-        activeKey:
-          !isLocked && isActiveAccountConnected
-            ? activeAccount.publicKey
-            : undefined
-      })
-    );
+      emitSdkEventToActiveTabsWithOrigin(
+        newActiveOrigin,
+        sdkEvent.changedTab({
+          isLocked: isLocked,
+          isConnected: isLocked ? undefined : isActiveAccountConnected,
+          activeKey:
+            !isLocked && isActiveAccountConnected
+              ? activeAccount.publicKey
+              : undefined
+        })
+      );
+    }
   }
 };
 
 browser.windows.onFocusChanged.addListener(async (windowId: number) => {
   updateOrigin(windowId);
 });
+
 browser.tabs.onActivated.addListener(
   async ({ windowId, tabId }: browser.Tabs.OnActivatedActiveInfoType) => {
     updateOrigin(windowId);
   }
 );
+
+browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo && changeInfo.url && tab.windowId) {
+    updateOrigin(tab.windowId);
+  }
+});
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 browser.runtime.onMessage.addListener(
