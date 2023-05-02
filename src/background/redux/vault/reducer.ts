@@ -12,7 +12,9 @@ import {
   accountDisconnected,
   siteDisconnected,
   activeAccountChanged,
-  anotherAccountConnected
+  anotherAccountConnected,
+  deploysReseted,
+  deployPayloadReceived
 } from './actions';
 import { VaultState } from './types';
 
@@ -23,7 +25,8 @@ const initialState: State = {
   accounts: [],
   accountNamesByOriginDict: {},
   siteNameByOriginDict: {},
-  activeAccountName: null
+  activeAccountName: null,
+  jsonById: {}
 };
 
 export const reducer = createReducer(initialState)
@@ -38,7 +41,8 @@ export const reducer = createReducer(initialState)
           siteNameByOriginDict,
           accounts,
           activeAccountName,
-          secretPhrase
+          secretPhrase,
+          jsonById
         }
       }
     ) => ({
@@ -46,7 +50,8 @@ export const reducer = createReducer(initialState)
       siteNameByOriginDict,
       accounts,
       activeAccountName,
-      secretPhrase
+      secretPhrase,
+      jsonById
     })
   )
   .handleAction(
@@ -213,4 +218,12 @@ export const reducer = createReducer(initialState)
   .handleAction(activeAccountChanged, (state, { payload }) => ({
     ...state,
     activeAccountName: payload
-  }));
+  }))
+  .handleAction(deploysReseted, (): State => initialState)
+  .handleAction(
+    deployPayloadReceived,
+    (state, { payload }): State => ({
+      ...state,
+      jsonById: { [payload.id]: payload.json }
+    })
+  );

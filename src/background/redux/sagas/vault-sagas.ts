@@ -49,7 +49,7 @@ import {
 import { selectVaultCipherDoesExist } from '../vault-cipher/selectors';
 import { keysUpdated } from '../keys/actions';
 import { vaultCipherCreated } from '../vault-cipher/actions';
-import { deploysReseted } from '../deploys/actions';
+import { deploysReseted } from '../vault/actions';
 import { loginRetryCountReseted } from '../login-retry-count/actions';
 import { popupWindowInit } from '../windowManagement/actions';
 

@@ -7,6 +7,7 @@ import { deriveKeyPair, validateSecretPhrase } from '@src/libs/crypto';
 import { sagaCall } from '../utils';
 import {
   accountAdded,
+  deploysReseted,
   secretPhraseCreated,
   vaultReseted
 } from '../vault/actions';
@@ -22,7 +23,6 @@ import {
   vaultUnlocked
 } from '../session/actions';
 import { convertBytesToHex } from '@src/libs/crypto/utils';
-import { deploysReseted } from '../deploys/actions';
 import { initKeys, initVault, resetVault } from './actions';
 import { keysReseted, keysUpdated } from '../keys/actions';
 import { vaultCipherReseted } from '../vault-cipher/actions';

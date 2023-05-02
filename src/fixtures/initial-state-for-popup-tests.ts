@@ -38,7 +38,8 @@ export const initialStateForPopupTests = {
       }
     ],
     accountNamesByOriginDict: {},
-    activeAccountName: 'Account 1'
+    activeAccountName: 'Account 1',
+    jsonById: {}
   },
   keys: {
     passwordHash:
@@ -47,9 +48,6 @@ export const initialStateForPopupTests = {
       'b83ce544691efea5bf286afdf52f609fcc4ceac600ff07baa6108cf3ae076eac',
     keyDerivationSaltHash:
       '9b57a8338ab66be1947f7fa3c8afdbb34e3f55dd57d72ca198363fc728295acb'
-  },
-  deploys: {
-    jsonById: {}
   },
   windowManagement: {
     windowId: null

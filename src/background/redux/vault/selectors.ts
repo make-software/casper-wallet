@@ -182,3 +182,5 @@ export const selectCountOfConnectedSites = createSelector(
   selectAccountNamesByOriginDict,
   accountNamesByOriginDict => Object.keys(accountNamesByOriginDict).length
 );
+
+export const selectDeploysJsonById = (state: RootState) => state.vault.jsonById;
