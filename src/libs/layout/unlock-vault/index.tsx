@@ -158,8 +158,9 @@ export function UnlockVaultPageContent() {
       <ContentContainer>
         <CenteredFlexColumn>
           <Player
-            speed={1}
+            renderer={'svg'}
             autoplay
+            loop
             src={unlockAnimation}
             style={{ width: '160px', marginTop: '80%' }}
           ></Player>
