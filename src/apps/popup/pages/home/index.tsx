@@ -195,14 +195,6 @@ export function HomePageContent() {
               >
                 <Trans t={t}>Manage account</Trans>
               </Button>
-              <Button
-                color="secondaryBlue"
-                onClick={() => {
-                  navigate(RouterPath.Transfer);
-                }}
-              >
-                Transfer
-              </Button>
             </ButtonsContainer>
           </TileContainer>
         </Tile>
