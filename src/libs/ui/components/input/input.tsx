@@ -216,7 +216,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
         {list && (
           <datalist id={list}>
             {optionValues?.map(value => (
-              <option value={value}>
+              <option value={value} key={value}>
                 {truncateKey(value, { size: 'small' })}
               </option>
             ))}

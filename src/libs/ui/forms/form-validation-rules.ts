@@ -105,7 +105,18 @@ export function useAccountNameRule(
 }
 
 export const useTransferIdMemoRule = () => {
-  return Yup.string().optional();
+  const { t } = useTranslation();
+
+  return Yup.string().test({
+    name: 'validU64',
+    test: value => {
+      if (value) {
+        return isValidU64(value);
+      }
+      return true;
+    },
+    message: t(`Transfer ID is invalid`)
+  });
 };
 
 export const useRecipientPublicKeyRule = () => {
