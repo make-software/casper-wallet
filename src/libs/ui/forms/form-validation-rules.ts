@@ -6,7 +6,14 @@ import { verifyPasswordAgainstHash } from '@src/libs/crypto/hashing';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { loginRetryCountIncremented } from '@src/background/redux/login-retry-count/actions';
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
-import { LOGIN_RETRY_ATTEMPTS_LIMIT } from '@src/constants';
+import {
+  LOGIN_RETRY_ATTEMPTS_LIMIT,
+  TRANSFER_AMOUNT_MOTES,
+  TRANSFER_COST
+} from '@src/constants';
+import { isValidPublicKey, isValidU64 } from '@src/utils';
+import Big from 'big.js';
+import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 
 export const minPasswordLength = 16;
 
@@ -96,3 +103,70 @@ export function useAccountNameRule(
       isAccountNameIsTakenCallback(value)
     );
 }
+
+export const useTransferIdMemoRule = () => {
+  return Yup.string().optional();
+};
+
+export const useRecipientPublicKeyRule = () => {
+  const { t } = useTranslation();
+
+  return Yup.string()
+    .required(t('Recipient is required'))
+    .test({
+      name: 'recipientPublicKey',
+      test: value => (value ? isValidPublicKey(value) : false),
+      message: t('Recipient should be a valid public key')
+    });
+};
+
+export const useCsprAmountRule = (accountBalance: string) => {
+  const { t } = useTranslation();
+
+  const maxAmount: string =
+    accountBalance === '-'
+      ? '0'
+      : Big(CSPRtoMotes(accountBalance)).sub(TRANSFER_COST).toString();
+
+  return Yup.string()
+    .required(t('Amount is required'))
+    .test({
+      name: 'validU64',
+      test: csprAmountInputValue => {
+        if (csprAmountInputValue) {
+          return isValidU64(csprAmountInputValue);
+        }
+
+        return false;
+      },
+      message: t(`Amount is invalid`)
+    })
+    .test({
+      name: 'amountBelowMinTransfer',
+      test: csprAmountInputValue => {
+        if (csprAmountInputValue) {
+          return Big(CSPRtoMotes(csprAmountInputValue)).gte(
+            TRANSFER_AMOUNT_MOTES
+          );
+        }
+
+        return false;
+      },
+      message: t(
+        `Amount must be at least ${motesToCSPR(TRANSFER_AMOUNT_MOTES)} CSPR.`
+      )
+    })
+    .test({
+      name: 'amountAboveBalance',
+      test: csprAmountInputValue => {
+        if (csprAmountInputValue) {
+          return Big(CSPRtoMotes(csprAmountInputValue)).lt(maxAmount);
+        }
+
+        return false;
+      },
+      message: t(
+        'Your account balance is not high enough. Enter a smaller amount.'
+      )
+    });
+};

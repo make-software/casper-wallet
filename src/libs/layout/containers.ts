@@ -159,6 +159,10 @@ export const InputsContainer = styled.div`
   }
 `;
 
+export const TransferInputContainer = styled.div`
+  margin-top: 8px;
+`;
+
 // Default direction value is `column`
 interface Props {
   direction?: 'row' | 'column';
@@ -234,4 +238,11 @@ export const IllustrationContainer = styled.div`
 
 export const OnboardingIllustrationContainer = styled(IllustrationContainer)`
   margin-top: 40px;
+`;
+
+export const AvatarContainer = styled(CenteredFlexColumn)<{
+  top?: SpacingSize;
+}>`
+  margin-top: ${({ top }) => getSpacingSize(top)};
+  width: 100%;
 `;

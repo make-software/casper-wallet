@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { css } from 'styled-components';
@@ -31,24 +31,8 @@ import {
 
 import { selectCasperNetworkSettingsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
-
-import {
-  ActiveAccountBalance,
-  dispatchFetchActiveAccountBalance
-} from '@libs/services/balance-service';
-import {
-  formatCurrency,
-  formatNumber,
-  motesToCSPR,
-  motesToCurrency
-} from '@libs/ui/utils/formatters';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import { getBlockExplorerAccountUrl } from '@src/constants';
-import { selectCasperUrlsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
-import {
-  makeNativeTransferDeploy,
-  signAndDeploy
-} from '@libs/services/transfer-service/transfer-service';
 import {
   selectActiveOrigin,
   selectConnectedAccountsWithActiveOrigin,
@@ -56,6 +40,8 @@ import {
   selectVaultActiveAccount,
   selectCountOfAccounts
 } from '@src/background/redux/root-selector';
+import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
+
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
 export const HomePageContentContainer = styled(ContentContainer)`
@@ -91,11 +77,6 @@ export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
-  const [balance, setBalance] = useState<ActiveAccountBalance>({
-    amount: '-',
-    fiatAmount: '-'
-  });
-
   const activeOrigin = useSelector(selectActiveOrigin);
   const { disconnectAccountWithEvent: disconnectAccount } = useAccountManager();
   const isActiveAccountConnected = useSelector(
@@ -106,9 +87,11 @@ export function HomePageContent() {
   const connectedAccounts = useSelector((state: RootState) =>
     selectConnectedAccountsWithActiveOrigin(state)
   );
-  const { casperLiveUrl, casperApiUrl } = useSelector(
+  const { casperLiveUrl } = useSelector(
     selectCasperNetworkSettingsBaseOnActiveNetworkSetting
   );
+
+  const { balance } = useActiveAccountBalance();
 
   const handleConnectAccount = useCallback(() => {
     if (!activeAccount || isActiveAccountConnected) {
@@ -121,41 +104,6 @@ export function HomePageContent() {
       navigate(RouterPath.ConnectAnotherAccount);
     }
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
-
-  const makeTransfer = () => {
-    if (activeAccount) {
-      const deploy = makeNativeTransferDeploy(
-        activeAccount.publicKey,
-        '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5',
-        '5000000000',
-        '4'
-      );
-
-      signAndDeploy(deploy, activeAccount.publicKey, activeAccount.secretKey);
-    }
-  };
-
-  useEffect(() => {
-    dispatchFetchActiveAccountBalance(activeAccount?.publicKey)
-      .then(({ payload: { balance, currencyRate } }) => {
-        if (balance != null) {
-          const amount = formatNumber(motesToCSPR(balance), {
-            precision: { max: 5 }
-          });
-          const fiatAmount =
-            currencyRate != null
-              ? formatCurrency(motesToCurrency(balance, currencyRate), 'USD', {
-                  precision: 2
-                })
-              : t('Currency service is offline...');
-
-          setBalance({ amount, fiatAmount });
-        }
-      })
-      .catch(error => {
-        console.error('Balance request failed:', error);
-      });
-  }, [activeAccount?.publicKey, casperApiUrl, t]);
 
   return (
     <HomePageContentContainer>
@@ -179,7 +127,10 @@ export function HomePageContent() {
                 <SvgIcon src="assets/icons/external-link.svg" />
               </Link>
             </SpaceBetweenFlexRow>
-            <Avatar publicKey={activeAccount.publicKey} />
+            <Avatar
+              publicKey={activeAccount.publicKey}
+              top={SpacingSize.Medium}
+            />
             <NameAndAddressContainer>
               <Typography type="bodySemiBold">{activeAccount.name}</Typography>
               <Hash
@@ -244,7 +195,12 @@ export function HomePageContent() {
               >
                 <Trans t={t}>Manage account</Trans>
               </Button>
-              <Button color="secondaryBlue" onClick={makeTransfer}>
+              <Button
+                color="secondaryBlue"
+                onClick={() => {
+                  navigate(RouterPath.Transfer);
+                }}
+              >
                 Transfer
               </Button>
             </ButtonsContainer>

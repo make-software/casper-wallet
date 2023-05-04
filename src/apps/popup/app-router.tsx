@@ -30,6 +30,7 @@ import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
 import { selectKeysDoesExist } from '@src/background/redux/keys/selectors';
 import { LockedRouter } from '@src/libs/layout/locked-router';
+import { TransferPage } from '@popup/pages/transfer';
 
 export function AppRouter() {
   const isLocked = useSelector(selectVaultIsLocked);
@@ -253,6 +254,7 @@ function AppRoutes() {
         path={RouterPath.DownloadedSecretKeys}
         element={<DownloadedSecretKeysPage />}
       />
+      <Route path={RouterPath.Transfer} element={<TransferPage />} />
     </Routes>
   );
 }

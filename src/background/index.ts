@@ -98,6 +98,7 @@ import {
   SiteNotConnectedError,
   WalletLockedError
 } from '@src/content/sdk-errors';
+import { recipientPublicKeyAdded } from './redux/recipient-public-keys/actions';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -496,6 +497,7 @@ browser.runtime.onMessage.addListener(
           case getType(loginRetryCountReseted):
           case getType(loginRetryCountIncremented):
           case getType(loginRetryLockoutTimeSet):
+          case getType(recipientPublicKeyAdded):
             store.dispatch(action);
             return sendResponse(undefined);
 

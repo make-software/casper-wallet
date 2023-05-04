@@ -131,7 +131,7 @@ const StyledTypography = styled('span').withConfig({
     case 'captionHash':
       return {
         ...captionBase,
-        lineHeight: '1.6rem',
+        lineHeight: '2.4rem',
         fontFamily: theme.typography.fontFamily.mono
       };
 

@@ -1,17 +1,8 @@
 import Identicon from 'react-identicons';
 import React from 'react';
-import styled, { css, useTheme } from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
-import { CenteredFlexColumn } from '@libs/layout';
-
-const fullWidthAndMarginTop = css`
-  margin-top: 16px;
-  width: 100%;
-`;
-
-const AvatarContainer = styled(CenteredFlexColumn)`
-  ${fullWidthAndMarginTop};
-`;
+import { SpacingSize, AvatarContainer } from '@libs/layout';
 
 const RoundedIdenticon = styled(Identicon)`
   border-radius: ${({ theme }) => theme.borderRadius.eight}px;
@@ -19,16 +10,18 @@ const RoundedIdenticon = styled(Identicon)`
 
 interface AvatarTypes {
   publicKey: string;
+  size?: number;
+  top?: SpacingSize;
 }
 
-export const Avatar = ({ publicKey }: AvatarTypes) => {
+export const Avatar = ({ publicKey, size, top }: AvatarTypes) => {
   const theme = useTheme();
 
   return (
-    <AvatarContainer>
+    <AvatarContainer top={top}>
       <RoundedIdenticon
         string={publicKey.toLowerCase()}
-        size={120}
+        size={size || 120}
         bg={theme.color.backgroundPrimary}
       />
     </AvatarContainer>

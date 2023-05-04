@@ -1,6 +1,8 @@
 import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
 import styled from 'styled-components';
+
 import { BaseProps, FormField, FormFieldStatus } from '@src/libs/ui';
+import { truncateKey } from '@libs/ui/components/hash/utils';
 
 type Ref = HTMLInputElement;
 
@@ -26,6 +28,7 @@ const InputContainer = styled('div')<InputProps>(
     fontFamily: monotype
       ? theme.typography.fontFamily.mono
       : theme.typography.fontFamily.primary,
+    fontSize: '1.4rem',
     lineHeight: '2.4rem',
     height: '4rem',
 
@@ -77,15 +80,18 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
   // https://github.com/make-software/casper-wallet/issues/547
   '::-ms-reveal': {
     display: 'none'
+  },
+  '::-webkit-calendar-picker-indicator': {
+    visibility: 'hidden'
   }
 }));
 
 const PrefixContainer = styled('div')(({ theme }) => ({
-  marginRight: 16
+  marginRight: 8
 }));
 
 const SuffixContainer = styled('div')(({ theme }) => ({
-  marginLeft: 16
+  marginLeft: 8
 }));
 
 const SuffixTextContainer = styled(SuffixContainer)(({ theme }) => ({
@@ -121,7 +127,7 @@ export interface InputProps extends BaseProps {
   suffixIcon?: ReactNode | null;
   // TODO: make a better name 🙈
   oneColoredIcons?: boolean;
-  suffixText?: string | null;
+  suffixText?: string | null | ReactNode;
 
   type?: HTMLInputTypeAttribute;
   required?: boolean;
@@ -129,6 +135,8 @@ export interface InputProps extends BaseProps {
   validationType?: InputValidationType;
   validationText?: string | null;
   dataTestId?: string;
+  optionValues?: string[];
+  list?: string;
 }
 
 export const Input = React.forwardRef<Ref, InputProps>(function Input(
@@ -152,6 +160,8 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
     onFocus,
     dataTestId,
     readOnly,
+    optionValues,
+    list,
     ...restProps
   }: InputProps,
   ref
@@ -200,7 +210,18 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
           onFocus={handleFocus}
           data-testid={dataTestId}
           readOnly={readOnly}
+          list={list}
         />
+
+        {list && (
+          <datalist id={list}>
+            {optionValues?.map(value => (
+              <option value={value}>
+                {truncateKey(value, { size: 'small' })}
+              </option>
+            ))}
+          </datalist>
+        )}
 
         {suffixIcon && <SuffixContainer>{suffixIcon}</SuffixContainer>}
 
