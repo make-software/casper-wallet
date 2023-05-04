@@ -32,7 +32,8 @@ import {
   activeAccountChanged,
   vaultLoaded,
   vaultReseted,
-  anotherAccountConnected
+  anotherAccountConnected,
+  deployPayloadReceived
 } from '../vault/actions';
 import {
   selectSecretPhrase,
@@ -91,7 +92,8 @@ export function* vaultSagas() {
       getType(accountDisconnected),
       getType(siteDisconnected),
       getType(activeAccountChanged),
-      getType(activeTimeoutDurationSettingChanged)
+      getType(activeTimeoutDurationSettingChanged),
+      getType(deployPayloadReceived)
     ],
     updateVaultCipher
   );
