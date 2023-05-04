@@ -41,7 +41,7 @@ export function RemoveAccountPageContent() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/remove-account.svg" size={120} />
       </IllustrationContainer>
-      <ParagraphContainer top={SpacingSize.ExtraLarge}>
+      <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
           <Trans t={t}>Remove account?</Trans>
         </Typography>

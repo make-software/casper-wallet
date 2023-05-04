@@ -92,7 +92,7 @@ export function SelectAccountContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <ParagraphContainer top={SpacingSize.ExtraLarge}>
+        <ParagraphContainer top={SpacingSize.XL}>
           <SiteFaviconBadge origin={origin} />
           <VerticalSpaceContainer top={SpacingSize.Medium}>
             <Typography type="header">

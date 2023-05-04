@@ -29,6 +29,7 @@ import {
   Typography
 } from '@libs/ui';
 
+import { selectCasperNetworkSettingsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
@@ -106,7 +107,7 @@ export function HomePageContent() {
     selectConnectedAccountsWithActiveOrigin(state)
   );
   const { casperLiveUrl, casperApiUrl } = useSelector(
-    selectCasperUrlsBaseOnActiveNetworkSetting
+    selectCasperNetworkSettingsBaseOnActiveNetworkSetting
   );
 
   const handleConnectAccount = useCallback(() => {

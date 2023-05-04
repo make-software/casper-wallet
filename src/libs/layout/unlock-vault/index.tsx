@@ -122,7 +122,7 @@ export function UnlockVaultPageContent() {
           <IllustrationContainer>
             <SvgIcon src="assets/illustrations/password-lock.svg" size={120} />
           </IllustrationContainer>
-          <ParagraphContainer top={SpacingSize.ExtraLarge}>
+          <ParagraphContainer top={SpacingSize.XL}>
             <Typography type="header">
               <Trans t={t}>
                 Please wait before the next attempt to unlock your wallet
@@ -156,7 +156,7 @@ export function UnlockVaultPageContent() {
         <IllustrationContainer>
           <SvgIcon src="assets/illustrations/locked-wallet.svg" size={120} />
         </IllustrationContainer>
-        <ParagraphContainer top={SpacingSize.ExtraLarge}>
+        <ParagraphContainer top={SpacingSize.XL}>
           <Typography type="header">
             <Trans t={t}>Your wallet is locked</Trans>
           </Typography>

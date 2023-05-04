@@ -78,7 +78,7 @@ export function ConnectAnotherAccountPageContent() {
 
   return (
     <ContentContainer>
-      <ParagraphContainer top={SpacingSize.ExtraLarge}>
+      <ParagraphContainer top={SpacingSize.XL}>
         <SiteFaviconBadge origin={activeOrigin} />
         <VerticalSpaceContainer top={SpacingSize.Medium}>
           <Typography type="header">

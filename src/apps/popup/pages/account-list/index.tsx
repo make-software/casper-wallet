@@ -35,7 +35,7 @@ import {
 import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import { AccountListRows } from '@background/redux/vault/types';
 import { getBlockExplorerAccountUrl } from '@src/constants';
-import { selectCasperUrlsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
+import { selectCasperNetworkSettingsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
 
 import { Popover } from './components/popover';
 
@@ -94,7 +94,7 @@ export function AccountListPage() {
     selectIsAnyAccountConnectedWithActiveOrigin
   );
   const { casperLiveUrl } = useSelector(
-    selectCasperUrlsBaseOnActiveNetworkSetting
+    selectCasperNetworkSettingsBaseOnActiveNetworkSetting
   );
 
   const connectedAccountNames =

@@ -6,7 +6,9 @@ export enum SpacingSize {
   Small = 'small',
   Medium = 'medium',
   Large = 'large',
-  ExtraLarge = 'extra large'
+  XL = 'extra large',
+  XXL = 'double extra large',
+  XXXL = 'triple extra large'
 }
 
 export const getSpacingSize = (size?: SpacingSize) => {
@@ -21,8 +23,12 @@ export const getSpacingSize = (size?: SpacingSize) => {
       return '1.6rem';
     case SpacingSize.Large:
       return '2rem';
-    case SpacingSize.ExtraLarge:
+    case SpacingSize.XL:
       return '2.4rem';
+    case SpacingSize.XXL:
+      return '2.8rem';
+    case SpacingSize.XXXL:
+      return '3.2rem';
     default:
       throw new Error('Unknown spacing size');
   }

@@ -80,8 +80,8 @@ export function List<ListRow extends ListRowBase>({
   headerLabel,
   headerAction,
   marginLeftForItemSeparatorLine,
-  headerLabelTop = SpacingSize.ExtraLarge,
-  contentTop = SpacingSize.ExtraLarge
+  headerLabelTop = SpacingSize.XL,
+  contentTop = SpacingSize.XL
 }: ListProps<ListRow>) {
   return (
     <>

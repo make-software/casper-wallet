@@ -35,3 +35,17 @@ export enum TermsLink {
   Tos = 'https://www.casperwallet.io/tos',
   Privacy = 'https://www.casperwallet.io/privacy'
 }
+
+export enum GrpcUrl {
+  TestNetUrl = 'https://node-clarity-testnet.make.services/rpc',
+  MainnetUrl = 'https://node-clarity-mainnet.make.services/rpc'
+}
+
+export enum NetworkName {
+  Mainnet = 'casper',
+  Testnet = 'casper-test'
+}
+
+export const TRANSFER_COST = '100000000';
+
+export const TRANSFER_AMOUNT_MOTES = '2500000000';

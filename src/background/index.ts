@@ -88,7 +88,7 @@ import {
   activeTimeoutDurationSettingChanged
 } from './redux/settings/actions';
 import { activeOriginChanged } from './redux/active-origin/actions';
-import { selectCasperUrlsBaseOnActiveNetworkSetting } from './redux/settings/selectors';
+import { selectCasperNetworkSettingsBaseOnActiveNetworkSetting } from './redux/settings/selectors';
 import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
 import {
   CannotGetActiveAccountError,
@@ -501,9 +501,10 @@ browser.runtime.onMessage.addListener(
 
           // SERVICE MESSAGE HANDLERS
           case getType(serviceMessage.fetchBalanceRequest): {
-            const { casperApiUrl } = selectCasperUrlsBaseOnActiveNetworkSetting(
-              store.getState()
-            );
+            const { casperApiUrl } =
+              selectCasperNetworkSettingsBaseOnActiveNetworkSetting(
+                store.getState()
+              );
 
             try {
               const [balance, rate] = await Promise.all([
@@ -528,9 +529,10 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchAccountInfoRequest): {
-            const { casperApiUrl } = selectCasperUrlsBaseOnActiveNetworkSetting(
-              store.getState()
-            );
+            const { casperApiUrl } =
+              selectCasperNetworkSettingsBaseOnActiveNetworkSetting(
+                store.getState()
+              );
 
             try {
               const { data: accountInfo } = await fetchAccountInfo({
