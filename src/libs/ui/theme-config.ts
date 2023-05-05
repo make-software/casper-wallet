@@ -79,6 +79,8 @@ export const themeConfig = {
     eight: 8,
     ten: 10,
     twelve: 12,
+    sixteen: 16,
+    twenty: 20,
     eighty: 80,
     hundred: 100
   },

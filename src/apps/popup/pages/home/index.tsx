@@ -13,7 +13,8 @@ import {
   SpaceAroundFlexColumn,
   SpaceBetweenFlexRow,
   SpacingSize,
-  TileContainer
+  TileContainer,
+  VerticalSpaceContainer
 } from '@src/libs/layout/containers';
 
 import {
@@ -38,14 +39,13 @@ import {
 } from '@src/background/redux/root-selector';
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { AccountPopover } from '@libs/ui/components/account-popover/account-popover';
+import { Tab, Tabs } from '@libs/ui/components/tabs/tabs';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
 export const HomePageContentContainer = styled(ContentContainer)`
   padding-bottom: 0;
 `;
-
-// Account info
 
 const fullWidthAndMarginTop = css`
   margin-top: 16px;
@@ -62,8 +62,6 @@ const BalanceContainer = styled(CenteredFlexColumn)`
     margin-top: 24px;
   }
 `;
-
-// List of accounts
 
 const ButtonsContainer = styled(SpaceAroundFlexColumn)`
   width: 100%;
@@ -170,6 +168,13 @@ export function HomePageContent() {
           </TileContainer>
         </Tile>
       )}
+      <VerticalSpaceContainer top={SpacingSize.XL}>
+        <Tabs>
+          <Tab tabName="Tokens" />
+          <Tab tabName="Activity" />
+          <Tab tabName="NFTs" />
+        </Tabs>
+      </VerticalSpaceContainer>
     </HomePageContentContainer>
   );
 }
