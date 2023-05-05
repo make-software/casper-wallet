@@ -6,11 +6,10 @@ import { useClickAway } from '@libs/ui/hooks/use-click-away';
 
 import { PopoverPortal } from './popover-portal';
 
-const popoverOffsetFromChildren = 64;
+const popoverOffsetFromChildren = 8;
 const contentHeight = 188;
 
 const ChildrenContainer = styled(AlignedFlexRow)`
-  padding: 14px 18px;
   cursor: pointer;
 `;
 
@@ -26,12 +25,12 @@ const PopoverContainer = styled.div<PopoverContainerProps>`
       return '0px';
     }
 
-    const { top, bottom } = domRect;
+    const { top, bottom, height } = domRect;
 
     if (top && bottom) {
       return bottom >= window.innerHeight - contentHeight
         ? `${top - contentHeight}px`
-        : `${top + popoverOffsetFromChildren}px`;
+        : `${top + height + popoverOffsetFromChildren}px`;
     }
   }};
 

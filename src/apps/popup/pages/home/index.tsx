@@ -23,16 +23,12 @@ import {
   Hash,
   HashDisplayContext,
   HashVariant,
-  Link,
-  SvgIcon,
   Tile,
   Typography
 } from '@libs/ui';
 
-import { selectCasperNetworkSettingsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
-import { getBlockExplorerAccountUrl } from '@src/constants';
 import {
   selectActiveOrigin,
   selectConnectedAccountsWithActiveOrigin,
@@ -41,6 +37,7 @@ import {
   selectCountOfAccounts
 } from '@src/background/redux/root-selector';
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
+import { AccountPopover } from '@libs/ui/components/account-popover/account-popover';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
@@ -87,9 +84,6 @@ export function HomePageContent() {
   const connectedAccounts = useSelector((state: RootState) =>
     selectConnectedAccountsWithActiveOrigin(state)
   );
-  const { casperLiveUrl } = useSelector(
-    selectCasperNetworkSettingsBaseOnActiveNetworkSetting
-  );
 
   const { balance } = useActiveAccountBalance();
 
@@ -115,17 +109,7 @@ export function HomePageContent() {
                 isConnected={isActiveAccountConnected}
                 displayContext="home"
               />
-              <Link
-                href={getBlockExplorerAccountUrl(
-                  casperLiveUrl,
-                  activeAccount.publicKey
-                )}
-                target="_blank"
-                color="inherit"
-                title={t('View account in CSPR.live')}
-              >
-                <SvgIcon src="assets/icons/external-link.svg" />
-              </Link>
+              <AccountPopover account={activeAccount} />
             </SpaceBetweenFlexRow>
             <Avatar
               publicKey={activeAccount.publicKey}
@@ -182,19 +166,6 @@ export function HomePageContent() {
                   <Trans t={t}>Connect</Trans>
                 </Button>
               )}
-              <Button
-                color="secondaryBlue"
-                onClick={() =>
-                  navigate(
-                    RouterPath.AccountSettings.replace(
-                      ':accountName',
-                      activeAccount.name
-                    )
-                  )
-                }
-              >
-                <Trans t={t}>Manage account</Trans>
-              </Button>
             </ButtonsContainer>
           </TileContainer>
         </Tile>
