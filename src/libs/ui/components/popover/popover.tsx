@@ -17,6 +17,16 @@ interface PopoverContainerProps {
   domRect?: DOMRect;
 }
 
+const PopoverOverlay = styled.div`
+  position: fixed;
+  z-index: auto;
+  top: 0;
+  left: 0;
+
+  height: 100vh;
+  width: 100vw;
+`;
+
 const PopoverContainer = styled.div<PopoverContainerProps>`
   position: absolute;
   right: 16px;
@@ -83,14 +93,16 @@ export function Popover({
 
       {isOpen && (
         <PopoverPortal>
-          <PopoverContainer
-            ref={clickAwayRef}
-            domRect={childrenContainerRef.current?.getBoundingClientRect()}
-          >
-            <PopoverItemsContainer gap={SpacingSize.Tiny}>
-              {renderMenuItems({ closePopover })}
-            </PopoverItemsContainer>
-          </PopoverContainer>
+          <PopoverOverlay>
+            <PopoverContainer
+              ref={clickAwayRef}
+              domRect={childrenContainerRef.current?.getBoundingClientRect()}
+            >
+              <PopoverItemsContainer gap={SpacingSize.Tiny}>
+                {renderMenuItems({ closePopover })}
+              </PopoverItemsContainer>
+            </PopoverContainer>
+          </PopoverOverlay>
         </PopoverPortal>
       )}
     </>
