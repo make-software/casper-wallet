@@ -13,7 +13,8 @@ import {
   SpaceAroundFlexColumn,
   SpaceBetweenFlexRow,
   SpacingSize,
-  TileContainer
+  TileContainer,
+  VerticalSpaceContainer
 } from '@src/libs/layout/containers';
 
 import {
@@ -23,16 +24,12 @@ import {
   Hash,
   HashDisplayContext,
   HashVariant,
-  Link,
-  SvgIcon,
   Tile,
   Typography
 } from '@libs/ui';
 
-import { selectCasperNetworkSettingsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
-import { getBlockExplorerAccountUrl } from '@src/constants';
 import {
   selectActiveOrigin,
   selectConnectedAccountsWithActiveOrigin,
@@ -41,14 +38,14 @@ import {
   selectCountOfAccounts
 } from '@src/background/redux/root-selector';
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
+import { AccountPopover } from '@libs/ui/components/account-popover/account-popover';
+import { Tab, Tabs } from '@libs/ui/components/tabs/tabs';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
 export const HomePageContentContainer = styled(ContentContainer)`
   padding-bottom: 0;
 `;
-
-// Account info
 
 const fullWidthAndMarginTop = css`
   margin-top: 16px;
@@ -65,8 +62,6 @@ const BalanceContainer = styled(CenteredFlexColumn)`
     margin-top: 24px;
   }
 `;
-
-// List of accounts
 
 const ButtonsContainer = styled(SpaceAroundFlexColumn)`
   width: 100%;
@@ -86,9 +81,6 @@ export function HomePageContent() {
   const activeAccount = useSelector(selectVaultActiveAccount);
   const connectedAccounts = useSelector((state: RootState) =>
     selectConnectedAccountsWithActiveOrigin(state)
-  );
-  const { casperLiveUrl } = useSelector(
-    selectCasperNetworkSettingsBaseOnActiveNetworkSetting
   );
 
   const { balance } = useActiveAccountBalance();
@@ -115,17 +107,7 @@ export function HomePageContent() {
                 isConnected={isActiveAccountConnected}
                 displayContext="home"
               />
-              <Link
-                href={getBlockExplorerAccountUrl(
-                  casperLiveUrl,
-                  activeAccount.publicKey
-                )}
-                target="_blank"
-                color="inherit"
-                title={t('View account in CSPR.live')}
-              >
-                <SvgIcon src="assets/icons/external-link.svg" />
-              </Link>
+              <AccountPopover account={activeAccount} />
             </SpaceBetweenFlexRow>
             <Avatar
               publicKey={activeAccount.publicKey}
@@ -182,23 +164,17 @@ export function HomePageContent() {
                   <Trans t={t}>Connect</Trans>
                 </Button>
               )}
-              <Button
-                color="secondaryBlue"
-                onClick={() =>
-                  navigate(
-                    RouterPath.AccountSettings.replace(
-                      ':accountName',
-                      activeAccount.name
-                    )
-                  )
-                }
-              >
-                <Trans t={t}>Manage account</Trans>
-              </Button>
             </ButtonsContainer>
           </TileContainer>
         </Tile>
       )}
+      <VerticalSpaceContainer top={SpacingSize.XL}>
+        <Tabs>
+          <Tab tabName="Tokens" />
+          <Tab tabName="Activity" />
+          <Tab tabName="NFTs" />
+        </Tabs>
+      </VerticalSpaceContainer>
     </HomePageContentContainer>
   );
 }
