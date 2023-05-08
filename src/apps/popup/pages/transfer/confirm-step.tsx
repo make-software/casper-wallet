@@ -17,7 +17,7 @@ import {
 } from '@popup/pages/transfer/sender-details';
 import { truncateKey } from '@libs/ui/components/hash/utils';
 import {
-  formatFiat,
+  formatFiatAmount,
   formatNumber,
   motesToCSPR
 } from '@libs/ui/utils/formatters';
@@ -54,13 +54,13 @@ export const ConfirmStep = ({
       amount: formatNumber(amountInCSPR, {
         precision: { max: 5 }
       }),
-      fiatPrice: formatFiat(amountInCSPR, currencyRate)
+      fiatPrice: formatFiatAmount(amountInCSPR, currencyRate)
     },
     {
       id: 2,
       text: t('Transaction fee'),
       amount: transferCostInCSPR,
-      fiatPrice: formatFiat(transferCostInCSPR, currencyRate)
+      fiatPrice: formatFiatAmount(transferCostInCSPR, currencyRate, 3)
     },
     {
       id: 3,
@@ -68,7 +68,7 @@ export const ConfirmStep = ({
       amount: formatNumber(totalCSPR, {
         precision: { max: 5 }
       }),
-      fiatPrice: formatFiat(totalCSPR, currencyRate),
+      fiatPrice: formatFiatAmount(totalCSPR, currencyRate),
       bold: true
     }
   ];

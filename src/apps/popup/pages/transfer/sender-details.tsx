@@ -15,6 +15,7 @@ import { Avatar, Tile, Typography } from '@libs/ui';
 import { truncateKey } from '@libs/ui/components/hash/utils';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
+import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
 
 export const AmountContainer = styled(SpaceBetweenFlexColumn)`
   align-items: flex-end;
@@ -57,7 +58,13 @@ export const SenderDetails = () => {
               </SpaceBetweenFlexColumn>
             </AlignedFlexRow>
             <AmountContainer>
-              <Typography type="captionHash">{balance.amount}</Typography>
+              <Typography type="captionHash">
+                {balance.amountMotes == null
+                  ? '-'
+                  : formatNumber(motesToCSPR(balance.amountMotes), {
+                      precision: { max: 5 }
+                    })}
+              </Typography>
               <Typography type="captionHash">CSPR</Typography>
             </AmountContainer>
           </SpaceBetweenFlexRow>

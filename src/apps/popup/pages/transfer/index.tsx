@@ -55,7 +55,7 @@ export const TransferPage = () => {
       formState: recipientFormState,
       getValues: getValuesRecipientForm
     }
-  } = useTransferForm(balance.amount);
+  } = useTransferForm(balance.amountMotes);
 
   // event listener for enable/disable submit button
   useEffect(() => {

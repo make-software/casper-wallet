@@ -43,6 +43,7 @@ import { AccountActionsMenuPopover } from '@libs/ui/components/account-popover/a
 import { Tab, Tabs } from '@libs/ui/components/tabs/tabs';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
+import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
 
 export const HomePageContentContainer = styled(ContentContainer)`
   padding-bottom: 0;
@@ -128,20 +129,28 @@ export function HomePageContent() {
               <FlexRow gap={SpacingSize.Small} wrap="wrap">
                 <Typography
                   type="CSPRBold"
-                  fontSize={getFontSizeBasedOnTextLength(balance.amount.length)}
+                  fontSize={getFontSizeBasedOnTextLength(
+                    balance.amountMotes?.length || 1
+                  )}
                 >
-                  {balance.amount}
+                  {balance.amountMotes == null
+                    ? '-'
+                    : formatNumber(motesToCSPR(balance.amountMotes), {
+                        precision: { max: 5 }
+                      })}
                 </Typography>
                 <Typography
                   type="CSPRLight"
                   color="contentSecondary"
-                  fontSize={getFontSizeBasedOnTextLength(balance.amount.length)}
+                  fontSize={getFontSizeBasedOnTextLength(
+                    balance.amountMotes?.length || 1
+                  )}
                 >
                   CSPR
                 </Typography>
               </FlexRow>
               <Typography type="body" color="contentSecondary">
-                {balance.fiatAmount}
+                {balance.amountFiat}
               </Typography>
             </BalanceContainer>
             <ButtonsContainer gap={SpacingSize.Large}>

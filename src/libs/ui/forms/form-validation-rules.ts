@@ -131,13 +131,13 @@ export const useRecipientPublicKeyRule = () => {
     });
 };
 
-export const useCsprAmountRule = (accountBalance: string) => {
+export const useCsprAmountRule = (amountMotes: string | null) => {
   const { t } = useTranslation();
 
   const maxAmountMotes: string =
-    accountBalance === '-'
+    amountMotes == null
       ? '0'
-      : Big(CSPRtoMotes(accountBalance)).sub(TRANSFER_COST_MOTES).toString();
+      : Big(amountMotes).sub(TRANSFER_COST_MOTES).toString();
 
   return Yup.string()
     .required(t('Amount is required'))

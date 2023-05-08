@@ -112,7 +112,11 @@ export const formatCurrency = (
   });
 };
 
-export const formatFiat = (amount: string, currencyRate: number | null) => {
+export const formatFiatAmount = (
+  amount: string,
+  currencyRate: number | null,
+  precision: number = 2
+) => {
   if (!amount || currencyRate == null) {
     return null;
   }
@@ -121,7 +125,7 @@ export const formatFiat = (amount: string, currencyRate: number | null) => {
     motesToCurrency(CSPRtoMotes(amount), currencyRate),
     'USD',
     {
-      precision: 3
+      precision: precision
     }
   );
 };

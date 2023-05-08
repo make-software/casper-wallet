@@ -15,7 +15,7 @@ export type TransferFormValues = {
   transferIdMemo: string;
 };
 
-export function useTransferForm(accountBalance: string) {
+export function useTransferForm(amountMotes: string | null) {
   const recipientFormSchema = Yup.object().shape({
     recipientPublicKey: useRecipientPublicKeyRule()
   });
@@ -27,7 +27,7 @@ export function useTransferForm(accountBalance: string) {
   };
 
   const amountFormSchema = Yup.object().shape({
-    csprAmount: useCsprAmountRule(accountBalance),
+    csprAmount: useCsprAmountRule(amountMotes),
     transferIdMemo: useTransferIdMemoRule()
   });
 
