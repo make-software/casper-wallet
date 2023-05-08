@@ -73,6 +73,8 @@ export const ConfirmStep = ({
     }
   ];
 
+  const recipientLabel = t('To recipient');
+
   return (
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
@@ -81,15 +83,11 @@ export const ConfirmStep = ({
         </Typography>
       </ParagraphContainer>
       <SenderDetails />
-      <ParagraphContainer top={SpacingSize.XXXL}>
-        <Typography type="bodySemiBold">
-          <Trans t={t}>To recipient</Trans>
-        </Typography>
-      </ParagraphContainer>
       <TransferInputContainer>
         <Input
           monotype
           readOnly
+          label={recipientLabel}
           value={truncateKey(recipientPublicKey, { size: 'max' })}
         />
       </TransferInputContainer>

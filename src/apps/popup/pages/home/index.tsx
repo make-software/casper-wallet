@@ -24,6 +24,7 @@ import {
   Hash,
   HashDisplayContext,
   HashVariant,
+  Link,
   Tile,
   Typography
 } from '@libs/ui';
@@ -175,6 +176,9 @@ export function HomePageContent() {
           <Tab tabName="NFTs" />
         </Tabs>
       </VerticalSpaceContainer>
+      <Link color="inherit" onClick={() => navigate(RouterPath.Transfer)}>
+        Transfer Test
+      </Link>
     </HomePageContentContainer>
   );
 }

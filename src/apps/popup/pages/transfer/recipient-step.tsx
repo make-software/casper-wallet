@@ -29,6 +29,8 @@ export const RecipientStep = ({
     selectRecentRecipientPublicKeys
   );
 
+  const recipientLabel = t('To recipient');
+
   return (
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
@@ -37,14 +39,11 @@ export const RecipientStep = ({
         </Typography>
       </ParagraphContainer>
       <SenderDetails />
-      <ParagraphContainer top={SpacingSize.XXXL}>
-        <Typography type="bodySemiBold">
-          <Trans t={t}>To recipient</Trans>
-        </Typography>
-      </ParagraphContainer>
+
       <TransferInputContainer>
         <Input
           monotype
+          label={recipientLabel}
           placeholder={t('Recipient public address')}
           {...register('recipientPublicKey')}
           error={!!errors?.recipientPublicKey}

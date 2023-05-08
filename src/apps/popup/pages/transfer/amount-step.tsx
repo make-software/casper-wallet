@@ -5,7 +5,6 @@ import { FormState, UseFormRegister } from 'react-hook-form';
 import {
   ContentContainer,
   ParagraphContainer,
-  SpaceBetweenFlexRow,
   SpacingSize,
   TransferInputContainer
 } from '@libs/layout';
@@ -27,6 +26,9 @@ export const AmountStep = ({
 
   const { currencyRate } = useActiveAccountBalance();
 
+  const amountLabel = t('Amount');
+  const transferIdLabel = t('Transfer ID (memo)');
+
   return (
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
@@ -34,19 +36,13 @@ export const AmountStep = ({
           <Trans t={t}>Enter amount</Trans>
         </Typography>
       </ParagraphContainer>
-      <ParagraphContainer top={SpacingSize.XXL}>
-        <SpaceBetweenFlexRow>
-          <Typography type="bodySemiBold">
-            <Trans t={t}>Amount</Trans>
-          </Typography>
-          <Typography type="body">
-            {currencyRate != null &&
-              formatCurrency(currencyRate, 'USD', { precision: 4 })}
-          </Typography>
-        </SpaceBetweenFlexRow>
-      </ParagraphContainer>
+
       <TransferInputContainer>
         <Input
+          label={amountLabel}
+          rightLabel={formatCurrency(currencyRate || 0, 'USD', {
+            precision: 4
+          })}
           type="number"
           monotype
           placeholder={t('0.00')}
@@ -56,13 +52,10 @@ export const AmountStep = ({
           validationText={amountFormState.errors?.csprAmount?.message}
         />
       </TransferInputContainer>
-      <ParagraphContainer top={SpacingSize.XXXL}>
-        <Typography type="bodySemiBold">
-          <Trans t={t}>Transfer ID (memo)</Trans>
-        </Typography>
-      </ParagraphContainer>
+
       <TransferInputContainer>
         <Input
+          label={transferIdLabel}
           monotype
           placeholder={t('Enter numeric value')}
           {...amountFormRegister('transferIdMemo')}
