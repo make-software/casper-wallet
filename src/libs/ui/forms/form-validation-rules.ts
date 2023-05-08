@@ -8,8 +8,8 @@ import { loginRetryCountIncremented } from '@src/background/redux/login-retry-co
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
 import {
   LOGIN_RETRY_ATTEMPTS_LIMIT,
-  TRANSFER_AMOUNT_MOTES,
-  TRANSFER_COST
+  TRANSFER_MIN_AMOUNT_MOTES,
+  TRANSFER_COST_MOTES
 } from '@src/constants';
 import { isValidPublicKey, isValidU64 } from '@src/utils';
 import Big from 'big.js';
@@ -134,10 +134,10 @@ export const useRecipientPublicKeyRule = () => {
 export const useCsprAmountRule = (accountBalance: string) => {
   const { t } = useTranslation();
 
-  const maxAmount: string =
+  const maxAmountMotes: string =
     accountBalance === '-'
       ? '0'
-      : Big(CSPRtoMotes(accountBalance)).sub(TRANSFER_COST).toString();
+      : Big(CSPRtoMotes(accountBalance)).sub(TRANSFER_COST_MOTES).toString();
 
   return Yup.string()
     .required(t('Amount is required'))
@@ -157,21 +157,23 @@ export const useCsprAmountRule = (accountBalance: string) => {
       test: csprAmountInputValue => {
         if (csprAmountInputValue) {
           return Big(CSPRtoMotes(csprAmountInputValue)).gte(
-            TRANSFER_AMOUNT_MOTES
+            TRANSFER_MIN_AMOUNT_MOTES
           );
         }
 
         return false;
       },
       message: t(
-        `Amount must be at least ${motesToCSPR(TRANSFER_AMOUNT_MOTES)} CSPR.`
+        `Amount must be at least ${motesToCSPR(
+          TRANSFER_MIN_AMOUNT_MOTES
+        )} CSPR.`
       )
     })
     .test({
       name: 'amountAboveBalance',
       test: csprAmountInputValue => {
         if (csprAmountInputValue) {
-          return Big(CSPRtoMotes(csprAmountInputValue)).lt(maxAmount);
+          return Big(CSPRtoMotes(csprAmountInputValue)).lt(maxAmountMotes);
         }
 
         return false;

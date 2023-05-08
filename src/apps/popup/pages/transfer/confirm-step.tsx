@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import Big from 'big.js';
 
 import {
   ContentContainer,
@@ -16,14 +17,12 @@ import {
 } from '@popup/pages/transfer/sender-details';
 import { truncateKey } from '@libs/ui/components/hash/utils';
 import {
-  CSPRtoMotes,
-  formatCurrency,
+  formatFiat,
   formatNumber,
-  motesToCSPR,
-  motesToCurrency
+  motesToCSPR
 } from '@libs/ui/utils/formatters';
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
-import { TRANSFER_COST } from '@src/constants';
+import { TRANSFER_COST_MOTES } from '@src/constants';
 
 export const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;
@@ -41,40 +40,35 @@ export const ConfirmStep = ({
 
   const { currencyRate } = useActiveAccountBalance();
 
-  const transferCostInCSPR = formatNumber(motesToCSPR(TRANSFER_COST), {
+  const transferCostInCSPR = formatNumber(motesToCSPR(TRANSFER_COST_MOTES), {
     precision: { max: 5 }
   });
-  const totalPrice = String(Number(amountInCSPR) + Number(transferCostInCSPR));
+  const totalCSPR: string = Big(amountInCSPR)
+    .add(transferCostInCSPR)
+    .toString();
 
-  const getFiatPrice = (amount: string) =>
-    currencyRate != null &&
-    amount &&
-    formatCurrency(motesToCurrency(CSPRtoMotes(amount), currencyRate), 'USD', {
-      precision: 3
-    });
-
-  const transactionDate = [
+  const transactionDataRows = [
     {
       id: 1,
       text: t('Amount'),
       amount: formatNumber(amountInCSPR, {
         precision: { max: 5 }
       }),
-      fiatPrice: getFiatPrice(amountInCSPR)
+      fiatPrice: formatFiat(amountInCSPR, currencyRate)
     },
     {
       id: 2,
       text: t('Transaction fee'),
       amount: transferCostInCSPR,
-      fiatPrice: getFiatPrice(transferCostInCSPR)
+      fiatPrice: formatFiat(transferCostInCSPR, currencyRate)
     },
     {
       id: 3,
       text: t('Total'),
-      amount: formatNumber(totalPrice, {
+      amount: formatNumber(totalCSPR, {
         precision: { max: 5 }
       }),
-      fiatPrice: getFiatPrice(totalPrice),
+      fiatPrice: formatFiat(totalCSPR, currencyRate),
       bold: true
     }
   ];
@@ -101,7 +95,7 @@ export const ConfirmStep = ({
       </TransferInputContainer>
       <List
         contentTop={SpacingSize.XXXL}
-        rows={transactionDate}
+        rows={transactionDataRows}
         renderRow={listItems => (
           <ListItemContainer key={listItems.id}>
             <Typography type="body" color="contentSecondary">
@@ -112,7 +106,7 @@ export const ConfirmStep = ({
               <Typography
                 type={listItems.bold ? 'bodySemiBold' : 'captionMedium'}
               >
-                {listItems.fiatPrice}
+                {listItems.fiatPrice || 'API not available'}
               </Typography>
             </AmountContainer>
           </ListItemContainer>

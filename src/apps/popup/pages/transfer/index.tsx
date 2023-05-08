@@ -9,23 +9,21 @@ import {
   PopupLayout,
   SpaceBetweenFlexRow
 } from '@libs/layout';
-import {
-  makeNativeTransferDeploy,
-  signAndDeploy
-} from '@libs/services/transfer-service/transfer-service';
+import { makeNativeTransferDeploy } from '@libs/services/transfer-service/transfer-service';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { selectCasperNetworkSettingsBaseOnActiveNetworkSetting } from '@background/redux/settings/selectors';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { TransferPageContent } from '@popup/pages/transfer/content';
 import { useTransferForm } from '@libs/ui/forms/transfer';
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
-import { TransactionSteps } from '@popup/constants';
+import { TransactionSteps } from './utils';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { Button, Typography } from '@libs/ui';
-import { TRANSFER_COST } from '@src/constants';
+import { TRANSFER_COST_MOTES } from '@src/constants';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { recipientPublicKeyAdded } from '@background/redux/recipient-public-keys/actions';
+import { recipientPublicKeyAdded } from '@src/background/redux/recent-recipient-public-keys/actions';
+import { signAndDeploy } from '@src/libs/services/deployer-service';
 
 export const TransferPage = () => {
   const { t } = useTranslation();
@@ -41,7 +39,7 @@ export const TransferPage = () => {
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { networkName, grpcUrl } = useSelector(
-    selectCasperNetworkSettingsBaseOnActiveNetworkSetting
+    selectApiConfigBasedOnActiveNetwork
   );
 
   const { balance } = useActiveAccountBalance();
@@ -226,7 +224,7 @@ export const TransferPage = () => {
                 <Trans t={t}>Transaction fee</Trans>
               </Typography>
               <Typography type="captionHash">
-                {`${motesToCSPR(TRANSFER_COST)} CSPR`}
+                {`${motesToCSPR(TRANSFER_COST_MOTES)} CSPR`}
               </Typography>
             </SpaceBetweenFlexRow>
           )}

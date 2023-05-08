@@ -2,7 +2,7 @@ import React from 'react';
 import { FormState, UseFormRegister } from 'react-hook-form';
 
 import { TransferFormValues } from '@libs/ui/forms/transfer';
-import { TransactionSteps } from '@popup/constants';
+import { TransactionSteps } from './utils';
 import { RecipientStep } from '@popup/pages/transfer/recipient-step';
 import { AmountStep } from '@popup/pages/transfer/amount-step';
 import { ConfirmStep } from '@popup/pages/transfer/confirm-step';
@@ -53,7 +53,7 @@ export const TransferPageContent = ({
     }
 
     default: {
-      return null;
+      throw Error('Out of bound: TransactionSteps');
     }
   }
 };

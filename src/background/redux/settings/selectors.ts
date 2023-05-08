@@ -15,8 +15,9 @@ export const selectTimeoutDurationSetting = (state: RootState) =>
 export const selectActiveNetworkSetting = (state: RootState) =>
   state.settings.activeNetwork;
 
-export const selectCasperNetworkSettingsBaseOnActiveNetworkSetting =
-  createSelector(selectActiveNetworkSetting, activeNetwork => {
+export const selectApiConfigBasedOnActiveNetwork = createSelector(
+  selectActiveNetworkSetting,
+  activeNetwork => {
     switch (activeNetwork) {
       case NetworkSetting.Mainnet:
         return {
@@ -35,4 +36,5 @@ export const selectCasperNetworkSettingsBaseOnActiveNetworkSetting =
       default:
         throw new Error(`Unknown network: ${activeNetwork}`);
     }
-  });
+  }
+);

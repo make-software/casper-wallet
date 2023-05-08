@@ -135,8 +135,8 @@ export interface InputProps extends BaseProps {
   validationType?: InputValidationType;
   validationText?: string | null;
   dataTestId?: string;
-  optionValues?: string[];
-  list?: string;
+  listOptions?: string[];
+  listId?: string;
 }
 
 export const Input = React.forwardRef<Ref, InputProps>(function Input(
@@ -160,8 +160,8 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
     onFocus,
     dataTestId,
     readOnly,
-    optionValues,
-    list,
+    listOptions,
+    listId,
     ...restProps
   }: InputProps,
   ref
@@ -210,12 +210,12 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
           onFocus={handleFocus}
           data-testid={dataTestId}
           readOnly={readOnly}
-          list={list}
+          listId={listId}
         />
 
-        {list && (
-          <datalist id={list}>
-            {optionValues?.map(value => (
+        {listId && (
+          <datalist id={listId}>
+            {listOptions?.map(value => (
               <option value={value} key={value}>
                 {truncateKey(value, { size: 'small' })}
               </option>

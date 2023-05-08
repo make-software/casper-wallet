@@ -88,7 +88,7 @@ import {
   activeTimeoutDurationSettingChanged
 } from './redux/settings/actions';
 import { activeOriginChanged } from './redux/active-origin/actions';
-import { selectCasperNetworkSettingsBaseOnActiveNetworkSetting } from './redux/settings/selectors';
+import { selectApiConfigBasedOnActiveNetwork } from './redux/settings/selectors';
 import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
 import {
   CannotGetActiveAccountError,
@@ -98,7 +98,7 @@ import {
   SiteNotConnectedError,
   WalletLockedError
 } from '@src/content/sdk-errors';
-import { recipientPublicKeyAdded } from './redux/recipient-public-keys/actions';
+import { recipientPublicKeyAdded } from './redux/recent-recipient-public-keys/actions';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -503,10 +503,9 @@ browser.runtime.onMessage.addListener(
 
           // SERVICE MESSAGE HANDLERS
           case getType(serviceMessage.fetchBalanceRequest): {
-            const { casperApiUrl } =
-              selectCasperNetworkSettingsBaseOnActiveNetworkSetting(
-                store.getState()
-              );
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
 
             try {
               const [balance, rate] = await Promise.all([
@@ -531,10 +530,9 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchAccountInfoRequest): {
-            const { casperApiUrl } =
-              selectCasperNetworkSettingsBaseOnActiveNetworkSetting(
-                store.getState()
-              );
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
 
             try {
               const { data: accountInfo } = await fetchAccountInfo({

@@ -38,7 +38,7 @@ import {
   selectCountOfAccounts
 } from '@src/background/redux/root-selector';
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
-import { AccountPopover } from '@libs/ui/components/account-popover/account-popover';
+import { AccountActionsMenuPopover } from '@libs/ui/components/account-popover/account-popover';
 import { Tab, Tabs } from '@libs/ui/components/tabs/tabs';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
@@ -107,7 +107,7 @@ export function HomePageContent() {
                 isConnected={isActiveAccountConnected}
                 displayContext="home"
               />
-              <AccountPopover account={activeAccount} />
+              <AccountActionsMenuPopover account={activeAccount} />
             </SpaceBetweenFlexRow>
             <Avatar
               publicKey={activeAccount.publicKey}

@@ -111,3 +111,17 @@ export const formatCurrency = (
     maximumFractionDigits: precision
   });
 };
+
+export const formatFiat = (amount: string, currencyRate: number | null) => {
+  if (!amount || currencyRate == null) {
+    return null;
+  }
+
+  return formatCurrency(
+    motesToCurrency(CSPRtoMotes(amount), currencyRate),
+    'USD',
+    {
+      precision: 3
+    }
+  );
+};

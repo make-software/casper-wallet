@@ -1,9 +1,6 @@
-import { CasperServiceByJsonRPC, CLPublicKey, DeployUtil } from 'casper-js-sdk';
+import { CLPublicKey, DeployUtil } from 'casper-js-sdk';
 
-import { signDeploy } from '@libs/crypto';
-import { GrpcUrl, NetworkName, TRANSFER_COST } from '@src/constants';
-
-const casperService = (url: string) => new CasperServiceByJsonRPC(url);
+import { NetworkName, TRANSFER_COST_MOTES } from '@src/constants';
 
 export const makeNativeTransferDeploy = (
   senderPublicKeyHex: string,
@@ -28,33 +25,7 @@ export const makeNativeTransferDeploy = (
       transferIdMemo || undefined
     );
 
-  const payment = DeployUtil.standardPayment(TRANSFER_COST);
+  const payment = DeployUtil.standardPayment(TRANSFER_COST_MOTES);
 
   return DeployUtil.makeDeploy(deployParams, session, payment);
-};
-
-export const signAndDeploy = (
-  deploy: DeployUtil.Deploy,
-  senderPublicKeyHex: string,
-  senderSecretKeyHex: string,
-  url: GrpcUrl
-) => {
-  const signature = signDeploy(
-    deploy.hash,
-    senderPublicKeyHex,
-    senderSecretKeyHex
-  );
-
-  const signedDeploy = DeployUtil.setSignature(
-    deploy,
-    signature,
-    CLPublicKey.fromHex(senderPublicKeyHex)
-  );
-
-  return casperService(url)
-    .deploy(signedDeploy)
-    .then(res => res)
-    .catch(error => {
-      console.log(error);
-    });
 };

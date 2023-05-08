@@ -13,7 +13,7 @@ import {
 } from '@libs/ui/utils/formatters';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { useTranslation } from 'react-i18next';
-import { selectCasperNetworkSettingsBaseOnActiveNetworkSetting } from '@background/redux/settings/selectors';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
 export const useActiveAccountBalance = () => {
   const [balance, setBalance] = useState<ActiveAccountBalance>({
@@ -24,9 +24,7 @@ export const useActiveAccountBalance = () => {
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const { casperApiUrl } = useSelector(
-    selectCasperNetworkSettingsBaseOnActiveNetworkSetting
-  );
+  const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
 
   useEffect(() => {
     dispatchFetchActiveAccountBalance(activeAccount?.publicKey)

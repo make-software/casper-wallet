@@ -12,7 +12,7 @@ import {
 import { Input, Typography } from '@libs/ui';
 import { SenderDetails } from '@popup/pages/transfer/sender-details';
 import { TransferFormValues } from '@libs/ui/forms/transfer';
-import { selectRecipientPublicKeys } from '@background/redux/recipient-public-keys/selectors';
+import { selectRecentRecipientPublicKeys } from '@src/background/redux/recent-recipient-public-keys/selectors';
 
 interface RecipientStepProps {
   register: UseFormRegister<TransferFormValues>;
@@ -25,7 +25,9 @@ export const RecipientStep = ({
 }: RecipientStepProps) => {
   const { t } = useTranslation();
 
-  const recipientPublicKey = useSelector(selectRecipientPublicKeys);
+  const recentRecipientPublicKeys = useSelector(
+    selectRecentRecipientPublicKeys
+  );
 
   return (
     <ContentContainer>
@@ -47,8 +49,8 @@ export const RecipientStep = ({
           {...register('recipientPublicKey')}
           error={!!errors?.recipientPublicKey}
           validationText={errors?.recipientPublicKey?.message}
-          list="recipient-public-keys"
-          optionValues={recipientPublicKey}
+          listId="recipient-public-keys"
+          listOptions={recentRecipientPublicKeys}
         />
       </TransferInputContainer>
     </ContentContainer>

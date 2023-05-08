@@ -28,7 +28,7 @@ import {
   selectVaultActiveAccountName
 } from '@background/redux/vault/selectors';
 import { AccountListRows } from '@background/redux/vault/types';
-import { AccountPopover } from '@libs/ui/components/account-popover/account-popover';
+import { AccountActionsMenuPopover } from '@libs/ui/components/account-popover/account-popover';
 
 import { sortAccounts } from './utils';
 
@@ -147,7 +147,7 @@ export function AccountListPage() {
                 </AccountNameWithHashListItemContainer>
               </ListItemClickableContainer>
               <PopoverContainer>
-                <AccountPopover account={account} />
+                <AccountActionsMenuPopover account={account} />
               </PopoverContainer>
             </ListItemContainer>
           )}

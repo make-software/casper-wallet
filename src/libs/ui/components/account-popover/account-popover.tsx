@@ -12,13 +12,15 @@ import {
 } from '@background/redux/vault/selectors';
 import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
-import { selectCasperNetworkSettingsBaseOnActiveNetworkSetting } from '@background/redux/settings/selectors';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { Account } from '@background/redux/vault/types';
 
-interface AccountPopoverProps {
+interface AccountActionsMenuPopoverProps {
   account: Account;
 }
-export const AccountPopover = ({ account }: AccountPopoverProps) => {
+export const AccountActionsMenuPopover = ({
+  account
+}: AccountActionsMenuPopoverProps) => {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
   const { disconnectAccountWithEvent: disconnectAccount } = useAccountManager();
@@ -26,9 +28,7 @@ export const AccountPopover = ({ account }: AccountPopoverProps) => {
   const activeOrigin = useSelector(selectActiveOrigin);
   const connectedAccountNames =
     useSelector(selectConnectedAccountNamesWithActiveOrigin) || [];
-  const { casperLiveUrl } = useSelector(
-    selectCasperNetworkSettingsBaseOnActiveNetworkSetting
-  );
+  const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const isAnyAccountConnected = useSelector(
     selectIsAnyAccountConnectedWithActiveOrigin
   );

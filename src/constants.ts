@@ -46,6 +46,6 @@ export enum NetworkName {
   Testnet = 'casper-test'
 }
 
-export const TRANSFER_COST = '100000000';
+export const TRANSFER_COST_MOTES = '100000000';
 
-export const TRANSFER_AMOUNT_MOTES = '2500000000';
+export const TRANSFER_MIN_AMOUNT_MOTES = '2500000000';

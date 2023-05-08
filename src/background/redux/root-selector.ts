@@ -8,4 +8,4 @@ export * from './vault/selectors';
 export * from './vault-cipher/selectors';
 export * from './windowManagement/selectors';
 export * from './settings/selectors';
-export * from './recipient-public-keys/selectors';
+export * from './recent-recipient-public-keys/selectors';

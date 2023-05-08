@@ -9,16 +9,14 @@ import {
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 
 import { Account } from '@background/redux/vault/types';
-import { selectCasperNetworkSettingsBaseOnActiveNetworkSetting } from '@background/redux/settings/selectors';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
 export const useAccountInfo = (account: Account | undefined) => {
   const [accountInfoStandardName, setAccountInfoStandardName] = useState<
     string | null
   >(null);
   const [accountLogo, setAccountLogo] = useState<string | null>(null);
-  const { casperApiUrl } = useSelector(
-    selectCasperNetworkSettingsBaseOnActiveNetworkSetting
-  );
+  const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
 
   useEffect(() => {
     dispatchFetchAccountInfoRequest(
