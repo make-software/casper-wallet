@@ -4,9 +4,11 @@ import * as path from 'path';
 import * as firefox from 'selenium-webdriver/firefox';
 import { ThenableWebDriver, Browser } from 'selenium-webdriver';
 import { Builder, until, By } from 'selenium-webdriver';
+import remote from 'selenium-webdriver/remote';
 
 import { WebDriverObject } from './types';
 import { ExtensionBuildPath } from '../../constants';
+import { SeleniumPort } from './constants';
 
 const TEMP_PROFILE_PATH_PREFIX = path.join(
   os.tmpdir(),
@@ -16,10 +18,17 @@ const TEMP_PROFILE_PATH_PREFIX = path.join(
 export class FirefoxDriver {
   _driver: ThenableWebDriver;
 
-  static async build(port: number | undefined): Promise<WebDriverObject> {
+  static async build(
+    port: number | undefined,
+    headless: boolean,
+    seleniumHost: string,
+    seleniumPort?: string
+  ): Promise<WebDriverObject> {
     const templateProfile = fs.mkdtempSync(TEMP_PROFILE_PATH_PREFIX);
     const options = new firefox.Options().setProfile(templateProfile);
+
     options.setAcceptInsecureCerts(true);
+    options.setPreference('dom.events.asyncClipboard.read', true);
 
     const builder = new Builder()
       .forBrowser(Browser.FIREFOX)
@@ -30,12 +39,19 @@ export class FirefoxDriver {
       builder.setFirefoxService(service);
     }
 
+    if (headless) {
+      builder.usingServer(
+        `http://${seleniumHost}:${seleniumPort || SeleniumPort.Firefox}/`
+      );
+    }
+
     const driver = builder.build();
     const fxDriver = new FirefoxDriver(driver);
     const extensionId = await fxDriver.installExtension(
       ExtensionBuildPath.Firefox
     );
     const internalExtensionId = await fxDriver.getInternalId();
+    driver.setFileDetector(new remote.FileDetector());
 
     return {
       driver,

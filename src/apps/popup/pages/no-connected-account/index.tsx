@@ -1,20 +1,16 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import styled from 'styled-components';
 
 import {
   ContentContainer,
-  HeaderTextContainer,
-  TextContainer,
-  FooterButtonsAbsoluteContainer
+  IllustrationContainer,
+  ParagraphContainer,
+  FooterButtonsAbsoluteContainer,
+  SpacingSize
 } from '@src/libs/layout';
 import { Typography, SvgIcon, Button } from '@libs/ui';
 
 import { useTypedNavigate, RouterPath } from '@popup/router';
-
-const IllustrationContainer = styled.div`
-  margin: 24px 16px 0 16px;
-`;
 
 export function NoConnectedAccountPageContent() {
   const navigate = useTypedNavigate();
@@ -25,19 +21,19 @@ export function NoConnectedAccountPageContent() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/no-connection.svg" size={120} />
       </IllustrationContainer>
-      <HeaderTextContainer>
-        <Typography type="header" weight="bold">
-          <Trans t={t}>Casper Signer is not connected to this site yet</Trans>
+      <ParagraphContainer top={SpacingSize.ExtraLarge}>
+        <Typography type="header">
+          <Trans t={t}>Casper Wallet is not connected to this site yet</Trans>
         </Typography>
-      </HeaderTextContainer>
-      <TextContainer>
-        <Typography type="body" weight="regular" color="contentSecondary">
+      </ParagraphContainer>
+      <ParagraphContainer top={SpacingSize.Medium}>
+        <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            To connect to this site, find and click the connect button on the
-            site
+            To connect to this site, click on the Connect/Sign In button on the
+            site.
           </Trans>
         </Typography>
-      </TextContainer>
+      </ParagraphContainer>
 
       <FooterButtonsAbsoluteContainer>
         <Button onClick={() => navigate(RouterPath.Home)}>

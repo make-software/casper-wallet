@@ -13,7 +13,7 @@ const getThemeColorByError = (error?: boolean) => {
 };
 
 const InputContainer = styled('div')<InputProps>(
-  ({ theme, oneColoredIcons, disabled, error, monotype }) => ({
+  ({ theme, oneColoredIcons, disabled, error, monotype, readOnly }) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -35,8 +35,7 @@ const InputContainer = styled('div')<InputProps>(
         : theme.color[getThemeColorByError(error)]
     },
 
-    ...(disabled && {
-      opacity: 0.5,
+    ...((disabled || readOnly) && {
       color: theme.color.contentSecondary
     })
   })
@@ -59,16 +58,25 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
     }
   },
   '&[type=file]': {
+    display: 'flex',
     cursor: 'pointer',
     color: theme.color.contentSecondary,
-    height: '40px',
+    height: 'auto',
     lineHeight: '40px'
   },
   '&[type=file]::file-selector-button': {
-    display: 'none'
+    opacity: '0',
+    width: '0',
+    padding: '0',
+    border: '0'
   },
   '::placeholder': {
     color: theme.color.contentSecondary
+  },
+  // Hiding the password reveal button in the MS Edge
+  // https://github.com/make-software/casper-wallet/issues/547
+  '::-ms-reveal': {
+    display: 'none'
   }
 }));
 
@@ -91,6 +99,7 @@ export enum InputValidationType {
 export interface InputProps extends BaseProps {
   accept?: string;
   disabled?: boolean;
+  readOnly?: boolean;
   monotype?: boolean;
   placeholder?: string;
   value?: string | number;
@@ -119,6 +128,7 @@ export interface InputProps extends BaseProps {
   error?: boolean;
   validationType?: InputValidationType;
   validationText?: string | null;
+  dataTestId?: string;
 }
 
 export const Input = React.forwardRef<Ref, InputProps>(function Input(
@@ -140,6 +150,8 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
     validationText,
     oneColoredIcons,
     onFocus,
+    dataTestId,
+    readOnly,
     ...restProps
   }: InputProps,
   ref
@@ -173,6 +185,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
     >
       <InputContainer
         disabled={disabled}
+        readOnly={readOnly}
         monotype={monotype}
         error={error}
         height={height}
@@ -185,6 +198,8 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
           {...restProps}
           ref={ref}
           onFocus={handleFocus}
+          data-testid={dataTestId}
+          readOnly={readOnly}
         />
 
         {suffixIcon && <SuffixContainer>{suffixIcon}</SuffixContainer>}

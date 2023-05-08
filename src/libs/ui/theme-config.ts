@@ -17,7 +17,7 @@ export const themeConfig = {
   typography: {
     fontFamily: {
       primary: '"Inter", sans-serif',
-      mono: '"JetBrains Mono", serif'
+      mono: '"JetBrains Mono", monospace'
     },
     fontWeight: {
       light: 200,
@@ -31,6 +31,7 @@ export const themeConfig = {
     backgroundPrimary: '#FFFFFF',
     backgroundSecondary: '#F5F6F7',
     backgroundBlue: '#0A2EBF',
+    backgroundRed: '#C2000E',
 
     borderPrimary: '#E8E9EC',
 
@@ -65,17 +66,27 @@ export const themeConfig = {
     contentRed: '#CC000F',
     contentGreen: '#2DDC88',
     contentGreenOnFill: '#77FFBE',
-    contentYellow: '#E0BB38'
+    contentYellow: '#E0BB38',
+
+    brandRed: '#FF0012',
+    black: '#000000'
   },
   border: {
     separator: '0.5px solid #E8E9EC'
   },
   borderRadius: {
     base: 6,
+    eight: 8,
+    ten: 10,
+    twelve: 12,
+    eighty: 80,
     hundred: 100
   },
   padding: {
-    1.6: '1.6rem'
+    1.2: '1.2rem',
+    1.6: '1.6rem',
+    2.4: '2.4rem',
+    3.2: '3.2rem'
   }
 };
 

@@ -1,26 +1,36 @@
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 
-interface StyledTagProps {
-  enabled?: boolean;
-}
-
-interface TagProps extends StyledTagProps {
+interface TagProps {
   children: ReactNode;
+  displayContext?: 'accountList';
 }
 
-const StyledTag = styled.span<StyledTagProps>`
-  color: ${({ theme, enabled }) =>
-    enabled ? theme.color.contentOnFill : theme.color.contentPrimary};
-  background-color: ${({ theme, enabled }) =>
-    enabled ? theme.color.fillGreen : theme.color.fillSecondary};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.regular};
-  font-size: 1.2rem;
-  line-height: 2rem;
-  padding: 2px 8px;
-  border-radius: ${({ theme }) => theme.borderRadius.base}px;
+interface StyleTagContainerProps {
+  displayContext?: 'accountList';
+}
+
+const StyledTag = styled.span`
+  color: ${({ theme }) => theme.color.contentOnFill};
+  background-color: ${({ theme }) => theme.color.contentTertiary};
+  font-weight: ${({ theme }) => theme.typography.fontWeight.semiBold};
+  font-size: 0.8rem;
+  line-height: 1.6rem;
+  padding: 0 4px;
+  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
+  text-transform: uppercase;
 `;
 
-export function Tag({ children, enabled }: TagProps) {
-  return <StyledTag enabled={enabled}>{children}</StyledTag>;
+const StyleTagContainer = styled.div<StyleTagContainerProps>`
+  display: inline-flex;
+  margin: ${({ displayContext }) =>
+    displayContext === 'accountList' ? '0 0 0 4px' : '0'};
+`;
+
+export function Tag({ children, displayContext }: TagProps) {
+  return (
+    <StyleTagContainer displayContext={displayContext}>
+      <StyledTag>{children}</StyledTag>
+    </StyleTagContainer>
+  );
 }

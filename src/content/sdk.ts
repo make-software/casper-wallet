@@ -1,12 +1,28 @@
+import { convertHexToBytes } from '@src/libs/crypto/utils';
+import { CasperWalletEventType } from './sdk-event-type';
 import {
-  sdkMessageProxyEvents,
-  isSDKMessage,
-  sdkMessage,
-  SdkMessage
-} from './sdk-message';
+  SdkMethodEventType,
+  isSDKMethod,
+  sdkMethod,
+  SdkMethod
+} from './sdk-method';
 
-function fetchFromExtensionBackend<T extends SdkMessage['payload']>(
-  requestAction: SdkMessage,
+export type SignatureResponse =
+  | {
+      cancelled: true; // if sign was cancelled
+    }
+  | {
+      cancelled: false; // if sign was successfull
+      signatureHex: string; // signature as hex hash
+      signature: Uint8Array; // signature as byte array
+    };
+
+const DefaultOptions: CasperWalletProviderOptions = {
+  timeout: 30 * 60 * 1000 /** 30min */
+};
+
+function fetchFromBackground<T extends SdkMethod['payload']>(
+  requestAction: SdkMethod,
   options?: CasperWalletProviderOptions
 ): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -14,111 +30,222 @@ function fetchFromExtensionBackend<T extends SdkMessage['payload']>(
     const timeoutId = setTimeout(() => {
       reject(
         Error(
-          `SDK RESPONSE TIMEOUT: ${requestAction.type}:${requestAction.meta.id}`
+          `SDK RESPONSE TIMEOUT: ${requestAction.type}:${requestAction.meta.requestId}`
         )
       );
-    }, options?.timeout || 60000);
+    }, options?.timeout || DefaultOptions.timeout);
 
-    console.error('SDK SENT REQUEST:', JSON.stringify(requestAction));
     window.dispatchEvent(
-      new CustomEvent(sdkMessageProxyEvents.SDKRequestAction, {
+      new CustomEvent(SdkMethodEventType.Request, {
         detail: requestAction
       })
     );
 
     const waitForResponseEvent = (e: Event) => {
-      const responseAction = JSON.parse((e as CustomEvent).detail);
-      console.error('SDK GOT RESPONSE:', JSON.stringify(responseAction));
+      const message = JSON.parse((e as CustomEvent).detail);
+
       // filter out response events not for this request
       if (
-        !isSDKMessage(responseAction) ||
-        responseAction.meta.id !== requestAction.meta.id
+        !isSDKMethod(message) ||
+        message.meta.requestId !== requestAction.meta.requestId
       ) {
         return;
       }
 
       window.removeEventListener(
-        sdkMessageProxyEvents.SDKResponseAction,
+        SdkMethodEventType.Response,
         waitForResponseEvent
       );
-      resolve(responseAction.payload as T);
+      // check for errors
+      if ('error' in message && message.error) {
+        reject(message.payload);
+      } else {
+        resolve(message.payload as T);
+      }
+
       clearTimeout(timeoutId);
     };
 
-    window.addEventListener(
-      sdkMessageProxyEvents.SDKResponseAction,
-      waitForResponseEvent
-    );
+    window.addEventListener(SdkMethodEventType.Response, waitForResponseEvent);
   });
 }
 
 export type CasperWalletProviderOptions = {
-  timeout: number;
+  timeout: number; // timeout of request to extension (in ms)
 };
 
 export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
   let requestId = 0;
+  const generateRequestId = (): string => {
+    requestId = requestId + 1;
+    return requestId.toString();
+  };
 
   return {
-    requestConnection: async (): Promise<boolean> => {
-      return fetchFromExtensionBackend<
-        ReturnType<typeof sdkMessage['connectResponse']>['payload']
+    /**
+     * Request the connect interface with the Casper Wallet extension. Will not show UI for already connected accounts and return true immediately.
+     * @returns `true` value when connection request is accepted by the user or when account is already connected, `false` otherwise.
+     */
+    requestConnection(): Promise<boolean> {
+      return fetchFromBackground<
+        ReturnType<typeof sdkMethod['connectResponse']>['payload']
       >(
-        sdkMessage.connectRequest(window.location.origin, {
-          id: requestId++
-        }),
+        sdkMethod.connectRequest(
+          { title: document.title },
+          {
+            requestId: generateRequestId()
+          }
+        ),
         options
       );
     },
+    /**
+     * Request the switch account interface with the Casper Wallet extension
+     * @returns `true` value when successfully switched account, `false` otherwise.
+     */
+    requestSwitchAccount(): Promise<boolean> {
+      return fetchFromBackground<
+        ReturnType<typeof sdkMethod['switchAccountResponse']>['payload']
+      >(
+        sdkMethod.switchAccountRequest(
+          { title: document.title },
+          {
+            requestId: generateRequestId()
+          }
+        ),
+        options
+      );
+    },
+    /**
+     * Request the sign deploy interface with the Casper Wallet extension
+     * @param deployJson - stringified json of a deploy (use `DeployUtil.deployToJson` from `casper-js-sdk` and `JSON.stringify`)
+     * @param signingPublicKeyHex - public key hash (in hex format)
+     * @returns a payload response when user responded to transaction request, it will contain `signature` if approved, or `cancelled === true` flag when rejected.
+     */
+    sign: (
+      deployJson: string,
+      signingPublicKeyHex: string
+    ): Promise<SignatureResponse> => {
+      return fetchFromBackground<
+        ReturnType<typeof sdkMethod['signResponse']>['payload']
+      >(
+        sdkMethod.signRequest(
+          {
+            deployJson,
+            signingPublicKeyHex
+          },
+          {
+            requestId: generateRequestId()
+          }
+        )
+      ).then(res => {
+        // response empty because it was canceled
+        if (res.cancelled) {
+          return res;
+        }
+
+        const signature = convertHexToBytes(res.signatureHex);
+        return {
+          cancelled: res.cancelled,
+          signatureHex: res.signatureHex,
+          signature
+        };
+      });
+    },
+    /**
+     * Request the sign message interface with the Casper Wallet extension
+     * @param message - message to sign as string
+     * @param signingPublicKeyHex - public key hash (in hex format)
+     * @returns a payload response when user responded to transaction request, it will contain `signature` if approved, or `cancelled === true` flag when rejected.
+     */
+    signMessage: (
+      message: string,
+      signingPublicKeyHex: string
+    ): Promise<SignatureResponse> => {
+      return fetchFromBackground<
+        ReturnType<typeof sdkMethod['signMessageResponse']>['payload']
+      >(
+        sdkMethod.signMessageRequest(
+          {
+            message,
+            signingPublicKeyHex
+          },
+          {
+            requestId: generateRequestId()
+          }
+        )
+      ).then(res => {
+        // response empty because it was canceled
+        if (res.cancelled) {
+          return res;
+        }
+
+        const signature = convertHexToBytes(res.signatureHex);
+        return {
+          cancelled: res.cancelled,
+          signatureHex: res.signatureHex,
+          signature
+        };
+      });
+    },
+    /**
+     * Disconnect the Casper Wallet extension
+     * @returns `true` value when successfully disconnected, `false` otherwise.
+     */
     disconnectFromSite(): Promise<boolean> {
-      return fetchFromExtensionBackend<
-        ReturnType<typeof sdkMessage['disconnectResponse']>['payload']
+      return fetchFromBackground<
+        ReturnType<typeof sdkMethod['disconnectResponse']>['payload']
       >(
-        sdkMessage.disconnectRequest(window.location.origin, {
-          id: requestId++
+        sdkMethod.disconnectRequest(undefined, {
+          requestId: generateRequestId()
         }),
         options
       );
     },
+    /**
+     * Get the connection status of the Casper Wallet extension
+     * @returns `true` value when curently connected at least one account, `false` otherwise.
+     * @throws when wallet is locked (err.code: 1)
+     */
     isConnected(): Promise<boolean> {
-      return fetchFromExtensionBackend<
-        ReturnType<typeof sdkMessage['isConnectedResponse']>['payload']
+      return fetchFromBackground<
+        ReturnType<typeof sdkMethod['isConnectedResponse']>['payload']
       >(
-        sdkMessage.isConnectedRequest(window.location.origin, {
-          id: requestId++
+        sdkMethod.isConnectedRequest(undefined, {
+          requestId: generateRequestId()
         }),
         options
       );
     },
-    getActivePublicKey(): Promise<string | undefined> {
-      return fetchFromExtensionBackend<
-        ReturnType<typeof sdkMessage['getActivePublicKeyResponse']>['payload']
+    /**
+     * Get the active public key of the Casper Wallet extension
+     * @returns returns hex hash of the active public key.
+     * @throws when wallet is locked (err.code: 1)
+     * @throws when active account not approved to connect with the site (err.code: 2)
+     */
+    getActivePublicKey(): Promise<string> {
+      return fetchFromBackground<
+        ReturnType<typeof sdkMethod['getActivePublicKeyResponse']>['payload']
       >(
-        sdkMessage.getActivePublicKeyRequest(undefined, {
-          id: requestId++
+        sdkMethod.getActivePublicKeyRequest(undefined, {
+          requestId: generateRequestId()
         }),
         options
       );
     },
+    /**
+     * Get version of the installed Casper Wallet extension
+     * @returns version of the installed wallet extension.
+     */
     getVersion(): Promise<string> {
-      return fetchFromExtensionBackend<
-        ReturnType<typeof sdkMessage['getVersionResponse']>['payload']
+      return fetchFromBackground<
+        ReturnType<typeof sdkMethod['getVersionResponse']>['payload']
       >(
-        sdkMessage.getVersionRequest(undefined, {
-          id: requestId++
+        sdkMethod.getVersionRequest(undefined, {
+          requestId: generateRequestId()
         }),
         options
       );
-    },
-    sign(
-      deploy: { deploy: any },
-      signingPublicKeyHex: string,
-      targetPublicKeyHex: string | undefined
-    ): Promise<{ deploy: any }> {
-      throw Error('Not implementeed');
-    },
-    signMessage(rawMessage: string, signingPublicKey: string): Promise<string> {
-      throw Error('Not implementeed');
     }
   };
 };
@@ -126,20 +253,9 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
 declare global {
   interface Window {
     CasperWalletProvider: typeof CasperWalletProvider;
+    CasperWalletEventTypes: typeof CasperWalletEventType;
   }
 }
 
+window.CasperWalletEventTypes = CasperWalletEventType;
 window.CasperWalletProvider = CasperWalletProvider;
-// for backward compatibility
-const casperWalletProviderInstance = CasperWalletProvider();
-window.casperlabsHelper = {
-  requestConnection: casperWalletProviderInstance.requestConnection,
-  disconnectFromSite: casperWalletProviderInstance.disconnectFromSite,
-  getActivePublicKey: casperWalletProviderInstance.getActivePublicKey as any,
-  getSelectedPublicKeyBase64:
-    casperWalletProviderInstance.getActivePublicKey as any,
-  getVersion: casperWalletProviderInstance.getVersion,
-  isConnected: casperWalletProviderInstance.isConnected,
-  sign: casperWalletProviderInstance.sign,
-  signMessage: casperWalletProviderInstance.signMessage
-};

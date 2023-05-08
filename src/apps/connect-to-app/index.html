@@ -1,20 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@200;400;700&display=swap"
-    rel="stylesheet"
-  />
-  <title>Casper Wallet</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services"
+    />
 
-  <style>
-    div#connect-to-app-app-container {
-        height: 100%;
-    }
-  </style>
-</head>
-<body>
-  <div id="connect-to-app-app-container"></div>
-</body>
+    <link rel="stylesheet" href="/assets/fonts/fonts.css" />
+
+    <title>Casper Wallet: Connect to Site</title>
+  </head>
+  <body>
+    <div id="app-container"></div>
+  </body>
 </html>

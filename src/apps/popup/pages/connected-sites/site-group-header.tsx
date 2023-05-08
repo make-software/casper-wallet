@@ -2,41 +2,61 @@ import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import styled from 'styled-components';
 
-import { Button, Typography } from '@libs/ui';
+import { Button, Typography } from '@src/libs/ui';
+import {
+  AlignedSpaceBetweenFlexRow,
+  SpaceBetweenFlexColumn,
+  SpacingSize,
+  VerticalSpaceContainer
+} from '@src/libs/layout';
 
-const SiteGroupHeaderContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
+const SiteGroupHeaderContainer = styled(SpaceBetweenFlexColumn)`
   padding: ${({ theme }) => theme.padding[1.6]};
 `;
 
+const SiteGroupHeaderActionContainer = styled(AlignedSpaceBetweenFlexRow)``;
+
 interface SiteGroupHeaderProps {
-  siteTitle: string;
+  siteTitle: string | undefined;
+  siteOrigin: string;
+  siteOrder: number;
   disconnectSite: () => void;
 }
 
 export function SiteGroupHeader({
   siteTitle,
+  siteOrigin,
+  siteOrder,
   disconnectSite
 }: SiteGroupHeaderProps) {
   const { t } = useTranslation();
 
   return (
     <SiteGroupHeaderContainer>
-      <Typography type="body" color="contentBlue" weight="regular">
-        {siteTitle}
-      </Typography>
+      <SiteGroupHeaderActionContainer>
+        <Typography type="bodySemiBold" color="contentPrimary">
+          {siteTitle || (
+            <>
+              <Trans t={t}>Site</Trans> {siteOrder}
+            </>
+          )}
+        </Typography>
 
-      <Button
-        width="120"
-        variant="inline"
-        color="primaryRed"
-        onClick={disconnectSite}
-      >
-        <Trans t={t}>Disconnect site</Trans>
-      </Button>
+        <Button
+          minWidth="100"
+          inline
+          color="primaryRed"
+          onClick={disconnectSite}
+        >
+          <Trans t={t}>Disconnect</Trans>
+        </Button>
+      </SiteGroupHeaderActionContainer>
+
+      <VerticalSpaceContainer top={SpacingSize.Small}>
+        <Typography type="body" color="contentBlue">
+          {siteOrigin}
+        </Typography>
+      </VerticalSpaceContainer>
     </SiteGroupHeaderContainer>
   );
 }

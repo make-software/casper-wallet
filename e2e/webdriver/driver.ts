@@ -2,11 +2,12 @@ import { promises as fs } from 'fs';
 import { strict as assert } from 'assert';
 import {
   error as webdriverError,
-  WebElementCondition,
   ThenableWebDriver,
   WebElement,
   until,
-  By
+  By,
+  Condition,
+  WebDriver
 } from 'selenium-webdriver';
 // @ts-ignore TODO: clarify types for package
 import cssToXPath from 'css-to-xpath';
@@ -15,6 +16,7 @@ import { WebElementWithAPI } from './WebElementWithAPI';
 
 import { DriverKey, PerformanceResults, RawLocator } from './types';
 import { ElementState } from './constants';
+import { TIMEOUT } from '../constants';
 
 function wrapElementWithAPI(
   element: WebElement,
@@ -42,7 +44,7 @@ export class Driver {
     driver: ThenableWebDriver,
     browser: string,
     extensionUrl: string,
-    timeout = 10000
+    timeout = 15000
   ) {
     this.driver = driver;
     this.browser = browser;
@@ -98,6 +100,10 @@ export class Driver {
     );
   }
 
+  async get(url: string) {
+    await this.driver.get(url);
+  }
+
   async fill(rawLocator: RawLocator, input: string) {
     const element = await this.findElement(rawLocator);
     await element.fill(input);
@@ -114,8 +120,15 @@ export class Driver {
     await new Promise(resolve => setTimeout(resolve, time));
   }
 
-  async wait(condition: WebElementCondition, timeout = this.timeout) {
-    await this.driver.wait(condition, timeout);
+  async wait<T>(
+    condition:
+      | PromiseLike<T>
+      | Condition<T>
+      | ((driver: WebDriver) => T | PromiseLike<T>)
+      | Function,
+    timeout = this.timeout
+  ) {
+    return await this.driver.wait(condition, timeout);
   }
 
   async waitForSelector(
@@ -144,11 +157,11 @@ export class Driver {
 
   // Element interactions
 
-  async findElement(rawLocator: RawLocator) {
+  async findElement(rawLocator: RawLocator, timeout?: number) {
     const locator = this.buildLocator(rawLocator);
     const element = await this.driver.wait(
       until.elementLocated(locator),
-      this.timeout
+      timeout || this.timeout
     );
     return wrapElementWithAPI(element, this);
   }
@@ -232,6 +245,38 @@ export class Driver {
     assert.ok(!dataTab, 'Found element that should not be present');
   }
 
+  async isElementPresent(
+    locatorKey: By,
+    elementName?: string,
+    timeout?: TIMEOUT
+  ) {
+    try {
+      return Boolean(
+        await this.wait(
+          until.elementLocated(locatorKey),
+          timeout || this.timeout
+        )
+      );
+    } catch (e) {
+      if (elementName) {
+        await this.verboseReportOnFailure(
+          `Can't find element - ${elementName}`
+        );
+      }
+
+      return false;
+    }
+  }
+
+  async areElementsPresent(locatorKey: By) {
+    const elements = await this.wait(
+      () => this.driver.findElements(locatorKey),
+      TIMEOUT['15sec']
+    );
+
+    return elements.length > 0;
+  }
+
   // Navigation
 
   async navigate(page = Driver.PAGES.POPUP) {
@@ -256,8 +301,20 @@ export class Driver {
     await this.driver.switchTo().window(handle);
   }
 
+  // https://www.selenium.dev/documentation/webdriver/interactions/windows/#create-new-window-or-new-tab-and-switch
+  async createNewWindowOrTabAndSwitch(handle: 'tab' | 'window') {
+    // Opens a new tab/window and switches to new tab/window
+    await this.driver.switchTo().newWindow(handle);
+  }
+
+  // Get the window handles of the all windows
   async getAllWindowHandles() {
     return await this.driver.getAllWindowHandles();
+  }
+
+  // Get the window handle of the current window
+  async getWindowHandle() {
+    return await this.driver.getWindowHandle();
   }
 
   async waitUntilXWindowHandles(x: number, delayStep = 1000, timeout = 5000) {

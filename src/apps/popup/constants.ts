@@ -15,3 +15,5 @@ export const MapTimeoutDurationSettingToValue = {
   [TimeoutDurationSetting['1 hour']]: 1000 * 60 * 60,
   [TimeoutDurationSetting['24 hours']]: 1000 * 60 * 60 * 24
 };
+
+export const LOCK_VAULT_TIMEOUT = 1000 * 60 * 5;

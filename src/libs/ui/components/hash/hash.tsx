@@ -1,48 +1,163 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { SvgIcon, Typography } from '@libs/ui';
+import {
+  ContentColor,
+  CopyToClipboard,
+  SvgIcon,
+  Typography,
+  Tag
+} from '@libs/ui';
+import { CenteredFlexRow, FlexRow, SpacingSize } from '@libs/layout';
 
 import { truncateKey } from './utils';
 
-const HashContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
+export enum HashVariant {
+  CaptionHash = 'captionHash',
+  BodyHash = 'bodyHash',
+  FullHash = 'fullHash'
+}
 
-  & > span {
-    cursor: ${({ onClick }) => (onClick ? 'pointer' : 'cursor')};
-  }
+export enum HashDisplayContext {
+  Home = 'home',
+  AccountInfo = 'accountInfo'
+}
+
+interface HashContainerProps {
+  displayContext?: HashDisplayContext;
+}
+
+const HashContainer = styled(CenteredFlexRow)<HashContainerProps>`
+  display: ${({ displayContext }) =>
+    displayContext === HashDisplayContext.AccountInfo ? 'block' : 'flex'};
+  align-items: center;
+  height: ${({ displayContext }) =>
+    displayContext === HashDisplayContext.Home ? '24px' : 'auto'};
 `;
 
-export enum HashVariant {
-  CaptionHash = 'caption',
-  BodyHash = 'body'
-}
+export const HoverCopyIcon = styled(SvgIcon)`
+  display: none;
+
+  &:hover svg {
+    color: ${({ theme }) => theme.color.contentBlue};
+  }
+`;
 
 interface HashProps {
   value: string;
   variant: HashVariant;
   truncated?: boolean;
-  withCopy?: boolean;
+  color?: ContentColor;
+  withCopyOnSelfClick?: boolean;
+  withTag?: boolean;
+  withCopyIconOnHover?: boolean;
+  displayContext?: HashDisplayContext;
 }
 
-export function Hash({ value, variant, withCopy, truncated }: HashProps) {
+export function Hash({
+  value,
+  variant,
+  withCopyOnSelfClick,
+  truncated,
+  color,
+  withTag,
+  withCopyIconOnHover,
+  displayContext
+}: HashProps) {
+  const { t } = useTranslation();
+
+  const HashComponent = useMemo(
+    () => (
+      <>
+        <Typography
+          type={variant}
+          wordBreak={displayContext === HashDisplayContext.AccountInfo}
+          color={color || 'contentSecondary'}
+        >
+          {truncated ? truncateKey(value) : value}
+        </Typography>
+        {withTag && (
+          <Tag displayContext="accountList">{`${t('Imported')}`}</Tag>
+        )}
+      </>
+    ),
+    [color, truncated, value, variant, withTag, displayContext, t]
+  );
+
+  if (withCopyIconOnHover) {
+    return (
+      <HashContainer displayContext={displayContext}>
+        <Typography
+          type={variant}
+          wordBreak={displayContext === HashDisplayContext.AccountInfo}
+          color={color || 'contentSecondary'}
+        >
+          {truncated ? truncateKey(value) : value}
+        </Typography>
+        <CopyToClipboard
+          renderContent={({ isClicked }) => (
+            <>
+              {isClicked ? (
+                <SvgIcon
+                  color="contentGreen"
+                  src="assets/icons/checkbox-checked.svg"
+                  size={16}
+                  marginLeft="small"
+                />
+              ) : (
+                <HoverCopyIcon
+                  src="assets/icons/copy.svg"
+                  color="contentTertiary"
+                  size={16}
+                  marginLeft="small"
+                />
+              )}
+            </>
+          )}
+          valueToCopy={value}
+        />
+        {withTag && (
+          <Tag displayContext="accountList">{`${t('Imported')}`}</Tag>
+        )}
+      </HashContainer>
+    );
+  }
+
+  if (withCopyOnSelfClick) {
+    return (
+      <CopyToClipboard
+        renderContent={({ isClicked }) => (
+          <>
+            {isClicked ? (
+              <FlexRow gap={SpacingSize.Tiny}>
+                <SvgIcon
+                  color="contentGreen"
+                  src="assets/icons/checkbox-checked.svg"
+                />
+                <Typography type="body" color="contentGreen">
+                  <Trans t={t}>Copied!</Trans>
+                </Typography>
+              </FlexRow>
+            ) : (
+              <HashContainer displayContext={displayContext}>
+                {HashComponent}
+                <SvgIcon
+                  src="assets/icons/copy.svg"
+                  size={16}
+                  marginLeft="small"
+                />
+              </HashContainer>
+            )}
+          </>
+        )}
+        valueToCopy={value}
+      />
+    );
+  }
   return (
-    <HashContainer
-      onClick={
-        withCopy ? () => navigator.clipboard.writeText(value) : undefined
-      }
-    >
-      <Typography
-        asHash
-        type={variant}
-        weight="regular"
-        color="contentSecondary"
-      >
-        {truncated ? truncateKey(value) : value}
-      </Typography>
-      {withCopy && <SvgIcon src="assets/icons/copy.svg" size={24} />}
+    <HashContainer displayContext={displayContext}>
+      {HashComponent}
     </HashContainer>
   );
 }

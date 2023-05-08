@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2017",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": false,
+    "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -29,6 +29,6 @@
       "@testHelpers/*": ["__testHelpers__/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "playground/src/mocked-data.ts"],
   "exclude": ["build", "output", "node_modules"]
 }

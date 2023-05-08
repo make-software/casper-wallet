@@ -1,44 +1,29 @@
 import '@libs/i18n/i18n';
 import 'mac-scrollbar/dist/mac-scrollbar.css';
 
-import { GlobalScrollbar } from 'mac-scrollbar';
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { render } from 'react-dom';
 import { Provider as ReduxProvider } from 'react-redux';
-import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
-import { isActionOf } from 'typesafe-actions';
-import browser from 'webextension-polyfill';
 
-import { App } from '@connect-to-app/app';
+import { AppRouter } from '@src/apps/connect-to-app/app-router';
 import { GlobalStyle, themeConfig } from '@libs/ui';
-import { ErrorBoundary } from '@popup/error-boundary';
+import { ErrorBoundary } from '@src/libs/layout/error';
 
-import { createMainStoreReplica } from '../../background/redux/utils';
 import {
-  BackgroundEvent,
-  backgroundEvent,
+  createMainStoreReplica,
   PopupState
-} from '@src/background/background-events';
-import { connectWindowInit } from '../../background/redux/windowManagement/actions';
+} from '@src/background/redux/utils';
+import { connectWindowInit } from '@src/background/redux/windowManagement/actions';
+import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
 
-  // setup listener to state events
-  useEffect(() => {
-    function handleBackgroundMessage(message: BackgroundEvent) {
-      if (isActionOf(backgroundEvent.popupStateUpdated)(message)) {
-        setState(message.payload);
-      }
-    }
-    browser.runtime.onMessage.addListener(handleBackgroundMessage);
-    browser.runtime.sendMessage(connectWindowInit());
-
-    return () => {
-      browser.runtime.onMessage.removeListener(handleBackgroundMessage);
-    };
-  }, []);
+  useSubscribeToRedux({
+    windowInitAction: connectWindowInit,
+    setPopupState: setState
+  });
 
   if (state == null) {
     return null;
@@ -48,22 +33,16 @@ const Tree = () => {
 
   return (
     <Suspense fallback={null}>
-      <ErrorBoundary>
-        <ThemeProvider theme={themeConfig}>
-          <GlobalStyle />
-          <GlobalScrollbar />
-          <ReduxProvider store={store}>
-            <HashRouter>
-              <App />
-            </HashRouter>
-          </ReduxProvider>
-        </ThemeProvider>
-      </ErrorBoundary>
+      <ThemeProvider theme={themeConfig}>
+        <GlobalStyle />
+        <ReduxProvider store={store}>
+          <ErrorBoundary>
+            <AppRouter />
+          </ErrorBoundary>
+        </ReduxProvider>
+      </ThemeProvider>
     </Suspense>
   );
 };
 
-render(
-  <Tree />,
-  window.document.querySelector('#connect-to-app-app-container')
-);
+render(<Tree />, document.querySelector('#app-container'));

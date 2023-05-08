@@ -1,44 +1,39 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 import { Typography, SvgIcon } from '@libs/ui';
-import { useSelector } from 'react-redux';
-import { RootState } from 'typesafe-actions';
-import { selectIsActiveAccountConnectedWithOrigin } from '@src/background/redux/vault/selectors';
+import { AlignedFlexRow, SpacingSize } from '@libs/layout';
+import { selectCountOfConnectedAccountsWithActiveOrigin } from '@src/background/redux/vault/selectors';
 
-const ConnectionStatusContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-
+const ConnectionStatusContainer = styled(AlignedFlexRow)`
   width: fit-content;
 
   background-color: rgb(0, 0, 0, 0.16);
   padding: 4px 8px;
-  border-radius: 100px;
+  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
 
 export function HeaderConnectionStatus() {
-  const isActiveAccountConnected = useSelector((state: RootState) =>
-    selectIsActiveAccountConnectedWithOrigin(state)
+  const { t } = useTranslation();
+  const countOfConnectedAccounts = useSelector(
+    selectCountOfConnectedAccountsWithActiveOrigin
   );
 
   return (
-    <ConnectionStatusContainer>
-      {isActiveAccountConnected && (
+    <ConnectionStatusContainer gap={SpacingSize.Tiny}>
+      {countOfConnectedAccounts > 0 && (
         <SvgIcon
           src="assets/icons/checkbox-checked.svg"
           size={16}
           color="contentGreen"
         />
       )}
-      <Typography
-        uppercase
-        type="form-field-status"
-        weight="semiBold"
-        color="contentOnFill"
-      >
-        {isActiveAccountConnected ? 'Connected' : 'Disconnected'}
+      <Typography uppercase type="formFieldStatus" color="contentOnFill">
+        {countOfConnectedAccounts > 0
+          ? `${t('Connected')}: ${countOfConnectedAccounts}`
+          : t('Disconnected')}
       </Typography>
     </ConnectionStatusContainer>
   );

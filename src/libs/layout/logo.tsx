@@ -6,5 +6,12 @@ interface LogoProps {
 }
 
 export function Logo({ onClick }: LogoProps) {
-  return <SvgIcon onClick={onClick} size={40} src="assets/icons/logo.svg" />;
+  return (
+    <SvgIcon
+      onClick={onClick}
+      size={50}
+      color="contentOnFill"
+      src="assets/icons/casper-wallet-logo.svg"
+    />
+  );
 }

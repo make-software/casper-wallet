@@ -9,30 +9,45 @@ type Ref = HTMLSpanElement | HTMLHeadingElement;
 export type TypographyType =
   | 'header'
   | 'body'
-  | 'caption'
-  | 'label'
-  | 'CSPR'
-  | 'form-field-status'; // TODO: Temporary name. Make a better name
-export type TypographyWeight =
-  | 'regular'
-  | 'light'
-  | 'medium'
-  | 'semiBold'
-  | 'bold';
+  | 'bodySemiBold'
+  | 'bodyHash'
+  | 'captionRegular'
+  | 'captionMedium'
+  | 'captionHash'
+  | 'labelMedium'
+  | 'CSPRLight'
+  | 'CSPRBold'
+  | 'listSubtext'
+  | 'formFieldStatus' // TODO: Temporary name. Make a better name
+  | 'fullHash';
+
+export type CSPRSize = '2.8rem' | '2.4rem' | '2rem' | '1.8rem';
 
 export interface BodyStylesProps extends BaseProps {
   color?: ContentColor;
   uppercase?: boolean;
   capitalize?: boolean;
-  monospace?: boolean;
   noWrap?: boolean;
   loading?: boolean;
+  wordBreak?: boolean;
+  fontSize?: CSPRSize;
+  ellipsis?: boolean;
 }
+
+export const getFontSizeBasedOnTextLength = (length: number) => {
+  if (length >= 21) {
+    return '1.8rem';
+  } else if (length >= 16) {
+    return '2rem';
+  } else if (length >= 13) {
+    return '2.4rem';
+  } else {
+    return '2.8rem';
+  }
+};
 
 interface TypographyProps extends BodyStylesProps {
   type: TypographyType;
-  weight: TypographyWeight;
-  asHash?: boolean;
 }
 
 function getBodyStyles(
@@ -42,7 +57,9 @@ function getBodyStyles(
     color = 'inherit',
     uppercase = false,
     capitalize = false,
-    noWrap = false
+    noWrap = false,
+    wordBreak = false,
+    ellipsis = false
   }: BodyStylesProps
 ): CSSObject {
   return {
@@ -59,77 +76,125 @@ function getBodyStyles(
     ...(capitalize && {
       textTransform: 'capitalize'
     }),
-    '-webkit-text-size-adjust': '100%'
+    ...(wordBreak && {
+      wordBreak: 'break-all'
+    }),
+    '-webkit-text-size-adjust': '100%',
+    ...(ellipsis && {
+      display: 'block',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis'
+    })
   };
 }
 
 const StyledTypography = styled('span').withConfig({
   shouldForwardProp: (prop, defaultValidatorFn) =>
     !['loading'].includes(prop) && defaultValidatorFn(prop)
-})<TypographyProps>(
-  ({ theme, type, monospace, weight, asHash, ...restProps }): CSSObject => {
-    const body = getBodyStyles(theme, restProps);
+})<TypographyProps>(({ theme, type, fontSize, ...restProps }): CSSObject => {
+  const base = getBodyStyles(theme, restProps);
 
-    switch (type) {
-      case 'caption':
-        return {
-          ...body,
-          fontSize: '1.4rem',
-          lineHeight: asHash ? '1.6rem' : '2.4rem',
-          fontFamily: asHash
-            ? theme.typography.fontFamily.mono
-            : theme.typography.fontFamily.primary,
-          fontWeight:
-            weight === 'regular' || asHash
-              ? theme.typography.fontWeight.regular
-              : theme.typography.fontWeight.medium
-        };
-      case 'label':
-        return {
-          ...body,
-          fontSize: '1.2rem',
-          lineHeight: '1.6rem',
-          fontWeight: theme.typography.fontWeight.medium,
-          textTransform: 'uppercase'
-        };
-      case 'body':
-        return {
-          ...body,
-          fontFamily:
-            monospace || asHash
-              ? theme.typography.fontFamily.mono
-              : theme.typography.fontFamily.primary,
-          fontSize: '1.5rem',
-          lineHeight: '2.4rem',
-          fontWeight:
-            monospace || asHash
-              ? theme.typography.fontWeight.regular
-              : weight === 'regular'
-              ? theme.typography.fontWeight.regular
-              : theme.typography.fontWeight.semiBold
-        };
-      case 'CSPR':
-        return {
-          ...body,
-          fontFamily: theme.typography.fontFamily.mono,
-          fontSize: '2.8rem',
-          lineHeight: '4rem',
-          fontWeight:
-            weight === 'light'
-              ? theme.typography.fontWeight.light
-              : theme.typography.fontWeight.bold
-        };
-      case 'form-field-status':
-        return {
-          ...body,
-          fontSize: '1rem',
-          lineHeight: '1.2rem'
-        };
-      default:
-        throw new Error('Unknown type of Typography');
-    }
+  const bodyBase = {
+    ...base,
+    fontSize: '1.5rem',
+    lineHeight: '2.4rem',
+    fontFamily: theme.typography.fontFamily.primary,
+    fontWeight: theme.typography.fontWeight.regular
+  };
+
+  const captionBase = {
+    ...base,
+    fontSize: '1.4rem',
+    lineHeight: '2.4rem',
+    fontFamily: theme.typography.fontFamily.primary,
+    fontWeight: theme.typography.fontWeight.regular
+  };
+
+  const CSPRBase = {
+    ...base,
+    fontFamily: theme.typography.fontFamily.mono,
+    fontSize: fontSize || '2.8rem',
+    lineHeight: '4rem'
+  };
+
+  switch (type) {
+    case 'captionRegular':
+      return captionBase;
+
+    case 'captionMedium':
+      return {
+        ...captionBase,
+        fontWeight: theme.typography.fontWeight.medium
+      };
+
+    case 'captionHash':
+      return {
+        ...captionBase,
+        lineHeight: '1.6rem',
+        fontFamily: theme.typography.fontFamily.mono
+      };
+
+    case 'labelMedium':
+      return {
+        ...base,
+        fontSize: '1.2rem',
+        lineHeight: '1.6rem',
+        fontWeight: theme.typography.fontWeight.medium,
+        textTransform: 'uppercase'
+      };
+    case 'body':
+      return bodyBase;
+
+    case 'bodySemiBold':
+      return {
+        ...bodyBase,
+        fontWeight: theme.typography.fontWeight.semiBold
+      };
+
+    case 'bodyHash':
+      return {
+        ...bodyBase,
+        fontFamily: theme.typography.fontFamily.mono
+      };
+
+    case 'CSPRLight':
+      return {
+        ...CSPRBase,
+        fontWeight: theme.typography.fontWeight.light
+      };
+
+    case 'CSPRBold':
+      return {
+        ...CSPRBase,
+        fontWeight: theme.typography.fontWeight.bold
+      };
+
+    case 'listSubtext':
+      return {
+        ...base,
+        fontSize: '1.2rem',
+        lineHeight: '1.6rem'
+      };
+
+    case 'formFieldStatus':
+      return {
+        ...base,
+        fontSize: '1rem',
+        lineHeight: '1.2rem'
+      };
+
+    case 'fullHash':
+      return {
+        ...captionBase,
+        verticalAlign: 'middle',
+        fontFamily: theme.typography.fontFamily.mono
+      };
+
+    default:
+      throw new Error('Unknown type of Typography');
   }
-);
+});
 
 const StyledHeader = styled('h1').withConfig({
   shouldForwardProp: (prop, defaultValidatorFn) =>
@@ -145,7 +210,7 @@ const StyledHeader = styled('h1').withConfig({
 });
 
 export const Typography = forwardRef<Ref, TypographyProps>(function Typography(
-  { ...props },
+  { dataTestId, ...props },
   ref
 ) {
   const Component = props.type !== 'header' ? StyledTypography : StyledHeader;
@@ -158,5 +223,5 @@ export const Typography = forwardRef<Ref, TypographyProps>(function Typography(
     );
   }
 
-  return <Component ref={ref as any} {...props} />;
+  return <Component ref={ref as any} data-testid={dataTestId} {...props} />;
 });

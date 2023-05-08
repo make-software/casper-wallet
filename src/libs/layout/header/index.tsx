@@ -1,55 +1,63 @@
-import React, { ReactElement } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
-import { HeaderContainer, Logo, LogoContainer } from '@src/libs/layout';
+import {
+  HeaderContainer,
+  Logo,
+  LogoContainer,
+  AlignedSpaceBetweenFlexRow,
+  LeftAlignedCenteredFlexRow
+} from '@src/libs/layout';
 import { HeaderConnectionStatus } from '@src/libs/layout/header/header-connection-status';
 
 import { HeaderActions } from './header-actions';
-import { HeaderSubmenuBar } from './header-submenu-bar';
-import { SubmenuActionType } from '../types';
 
-const CentredFlexRow = styled.div`
-  display: flex;
-  width: 100%;
-
-  align-items: center;
+const LogoAndConnectionStatusContainer = styled(LeftAlignedCenteredFlexRow)`
+  gap: 18px;
 `;
 
-const SpaceBetweenContainer = styled(CentredFlexRow)`
-  justify-content: space-between;
-  padding-left: 20px;
+const SubmenuBarContainer = styled(AlignedSpaceBetweenFlexRow)`
+  height: 56px;
+  background-color: ${({ theme }) => theme.color.backgroundPrimary};
+  border-bottom: 0.5px solid ${({ theme }) => theme.color.borderPrimary};
+  padding: 8px ${({ theme }) => theme.padding[1.6]};
 `;
 
 interface HeaderProps {
-  withLock?: boolean;
+  withNetworkSwitcher?: boolean;
   withMenu?: boolean;
-  submenuActionType?: SubmenuActionType;
-  SubmenuActionGroup?: ReactElement;
+  withConnectionStatus?: boolean;
+  renderSubmenuBarItems?: () => JSX.Element;
 }
 
 export function PopupHeader({
-  withLock,
+  withNetworkSwitcher,
   withMenu,
-  submenuActionType,
-  SubmenuActionGroup
+  withConnectionStatus,
+  renderSubmenuBarItems
 }: HeaderProps) {
   return (
     <>
       <HeaderContainer>
-        <LogoContainer>
-          <Logo />
-        </LogoContainer>
-        <SpaceBetweenContainer>
-          <HeaderConnectionStatus />
-          <HeaderActions withMenu={withMenu} withLock={withLock} />
-        </SpaceBetweenContainer>
+        <LogoAndConnectionStatusContainer>
+          <LogoContainer>
+            <Logo />
+          </LogoContainer>
+          {withConnectionStatus && <HeaderConnectionStatus />}
+        </LogoAndConnectionStatusContainer>
+
+        {(withMenu || withNetworkSwitcher) && (
+          <HeaderActions
+            withMenu={withMenu}
+            withNetworkSwitcher={withNetworkSwitcher}
+          />
+        )}
       </HeaderContainer>
-      {submenuActionType && (
-        <HeaderSubmenuBar
-          actionType={submenuActionType}
-          ActionGroup={SubmenuActionGroup}
-        />
+      {renderSubmenuBarItems && (
+        <SubmenuBarContainer>{renderSubmenuBarItems()}</SubmenuBarContainer>
       )}
     </>
   );
 }
+
+export * from './header-submenu-bar-nav-link';

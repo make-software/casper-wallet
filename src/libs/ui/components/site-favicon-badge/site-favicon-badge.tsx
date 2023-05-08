@@ -2,19 +2,15 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Typography } from '@libs/ui';
+import { AlignedSpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
 
-const SiteFaviconAndHostnameContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-
+const SiteFaviconAndHostnameContainer = styled(AlignedSpaceBetweenFlexRow)`
   width: fit-content;
 
   padding: 4px 12px;
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
-  border-radius: 100px;
+  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
 
 const FaviconImg = styled.img`
@@ -48,13 +44,9 @@ export function SiteFaviconBadge({ origin }: SiteFaviconBadgeProps) {
   }
 
   return (
-    <SiteFaviconAndHostnameContainer>
+    <SiteFaviconAndHostnameContainer gap={SpacingSize.Small}>
       <FaviconImg src={faviconUrl} alt={`${hostName} favicon`} />
-      {hostName && (
-        <Typography type="body" weight="regular">
-          {hostName}
-        </Typography>
-      )}
+      {hostName && <Typography type="body">{hostName}</Typography>}
     </SiteFaviconAndHostnameContainer>
   );
 }

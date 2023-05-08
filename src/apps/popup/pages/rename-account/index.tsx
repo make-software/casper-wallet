@@ -2,25 +2,26 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { FieldValues, useForm } from 'react-hook-form';
-import { UseFormProps } from 'react-hook-form/dist/types/form';
-import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
-import * as Yup from 'yup';
-
-import { useFormValidations } from '@src/hooks';
 
 import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
-  HeaderTextContainer,
-  InputsContainer
-} from '@src/libs/layout/containers';
-import { Button, Input, Typography } from '@libs/ui';
+  IllustrationContainer,
+  ParagraphContainer,
+  InputsContainer,
+  SpacingSize
+} from '@src/libs/layout';
+import { Button, Input, SvgIcon, Typography } from '@src/libs/ui';
+import {
+  RenameAccountFormValues,
+  useRenameAccount
+} from '@src/libs/ui/forms/rename-account';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
+
 import { accountRenamed } from '@src/background/redux/vault/actions';
 import { selectVaultAccountsNames } from '@src/background/redux/vault/selectors';
-import { dispatchToMainStore } from '../../../../background/redux/utils';
+import { dispatchToMainStore } from '@src/background/redux/utils';
 
 export function RenameAccountPageContent() {
   const navigate = useTypedNavigate();
@@ -29,29 +30,13 @@ export function RenameAccountPageContent() {
 
   const existingAccountNames = useSelector(selectVaultAccountsNames);
 
-  const { createAccountNameValidation } = useFormValidations();
-
-  const formSchema = Yup.object().shape({
-    name: createAccountNameValidation(value => {
-      return !existingAccountNames.includes(value as string);
-    })
-  });
-
-  const formOptions: UseFormProps = {
-    reValidateMode: 'onChange',
-    resolver: yupResolver(formSchema),
-    defaultValues: {
-      name: accountName
-    }
-  };
-
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty }
-  } = useForm(formOptions);
+  } = useRenameAccount(accountName, existingAccountNames);
 
-  function onSubmit({ name }: FieldValues) {
+  function onSubmit({ name }: RenameAccountFormValues) {
     if (!accountName) {
       return;
     }
@@ -64,11 +49,14 @@ export function RenameAccountPageContent() {
 
   return (
     <ContentContainer>
-      <HeaderTextContainer>
-        <Typography type="header" weight="bold">
+      <IllustrationContainer>
+        <SvgIcon src="assets/illustrations/rename-account.svg" size={120} />
+      </IllustrationContainer>
+      <ParagraphContainer top={SpacingSize.ExtraLarge}>
+        <Typography type="header">
           <Trans t={t}>Rename account</Trans>
         </Typography>
-      </HeaderTextContainer>
+      </ParagraphContainer>
       <form onSubmit={handleSubmit(onSubmit)}>
         <InputsContainer>
           <Input

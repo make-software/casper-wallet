@@ -1,20 +1,52 @@
 import * as chrome from 'selenium-webdriver/chrome';
 import { Builder, ThenableWebDriver, Browser } from 'selenium-webdriver';
+import remote from 'selenium-webdriver/remote';
 
 import { WebDriverObject } from './types';
-import { ExtensionBuildPath, extensionName } from '../../constants';
+import { extensionName } from '../../constants';
+import { SeleniumPort } from './constants';
 
 export class ChromeDriver {
   _driver: ThenableWebDriver;
 
-  static async build(port: number | undefined): Promise<WebDriverObject> {
-    const args = [`load-extension=${ExtensionBuildPath.Chrome}`];
+  static async build(
+    port: number | undefined,
+    headless: boolean,
+    seleniumHost: string,
+    seleniumPort?: string
+  ): Promise<WebDriverObject> {
+    const options = new chrome.Options();
 
-    const options = new chrome.Options().addArguments(args.join(' '));
+    // Allow Selenium to use Chrome's clipboard for tests
+    options.setUserPreferences({
+      profile: {
+        content_settings: {
+          exceptions: {
+            clipboard: {
+              '[*.],*': {
+                expiration: '0',
+                last_modified: Date.now(),
+                model: 0,
+                setting: 1
+              }
+            }
+          }
+        }
+      }
+    });
+    options.addExtensions('chrome.crx');
     options.setAcceptInsecureCerts(true);
+
     const builder = new Builder()
       .forBrowser(Browser.CHROME)
       .setChromeOptions(options);
+
+    if (headless) {
+      builder.usingServer(
+        `http://${seleniumHost}:${seleniumPort || SeleniumPort.Chrome}/`
+      );
+    }
+
     const service = new chrome.ServiceBuilder();
 
     // Enables Chrome logging. Default: enabled
@@ -28,9 +60,11 @@ export class ChromeDriver {
       service.setPort(port);
     }
     builder.setChromeService(service);
+
     const driver = builder.build();
     const chromeDriver = new ChromeDriver(driver);
     const extensionId = await chromeDriver.getExtensionIdByName(extensionName);
+    driver.setFileDetector(new remote.FileDetector());
 
     return {
       driver,

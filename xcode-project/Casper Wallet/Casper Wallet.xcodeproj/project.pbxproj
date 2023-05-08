@@ -1,0 +1,661 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2439D77E29F0757A00F07C90 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2439D77D29F0757A00F07C90 /* AppDelegate.swift */; };
+		2439D78229F0757A00F07C90 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 2439D78029F0757A00F07C90 /* Main.html */; };
+		2439D78429F0757A00F07C90 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2439D78329F0757A00F07C90 /* Icon.png */; };
+		2439D78629F0757A00F07C90 /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = 2439D78529F0757A00F07C90 /* Style.css */; };
+		2439D78829F0757A00F07C90 /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D78729F0757A00F07C90 /* Script.js */; };
+		2439D78A29F0757A00F07C90 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2439D78929F0757A00F07C90 /* ViewController.swift */; };
+		2439D78D29F0757A00F07C90 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2439D78B29F0757A00F07C90 /* Main.storyboard */; };
+		2439D78F29F0757B00F07C90 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2439D78E29F0757B00F07C90 /* Assets.xcassets */; };
+		2439D79829F0757B00F07C90 /* Casper Wallet Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2439D79729F0757B00F07C90 /* Casper Wallet Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2439D79D29F0757B00F07C90 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2439D79C29F0757B00F07C90 /* SafariWebExtensionHandler.swift */; };
+		2439D7C029F0757C00F07C90 /* connectToApp.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7AA29F0757C00F07C90 /* connectToApp.bundle.js */; };
+		2439D7C129F0757C00F07C90 /* logo16.png in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7AB29F0757C00F07C90 /* logo16.png */; };
+		2439D7C229F0757C00F07C90 /* connect-to-app.html in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7AC29F0757C00F07C90 /* connect-to-app.html */; };
+		2439D7C329F0757C00F07C90 /* 909.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7AD29F0757C00F07C90 /* 909.bundle.js */; };
+		2439D7C429F0757C00F07C90 /* locales in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7AE29F0757C00F07C90 /* locales */; };
+		2439D7C529F0757C00F07C90 /* import-account-with-file.html in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7AF29F0757C00F07C90 /* import-account-with-file.html */; };
+		2439D7C629F0757C00F07C90 /* sdk.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B029F0757C00F07C90 /* sdk.bundle.js */; };
+		2439D7C729F0757C00F07C90 /* contentScript.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B129F0757C00F07C90 /* contentScript.bundle.js */; };
+		2439D7C829F0757C00F07C90 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B229F0757C00F07C90 /* popup.html */; };
+		2439D7C929F0757C00F07C90 /* background.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B329F0757C00F07C90 /* background.bundle.js */; };
+		2439D7CA29F0757C00F07C90 /* logo128.png in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B429F0757C00F07C90 /* logo128.png */; };
+		2439D7CB29F0757C00F07C90 /* logo64.png in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B529F0757C00F07C90 /* logo64.png */; };
+		2439D7CC29F0757C00F07C90 /* signatureRequest.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B629F0757C00F07C90 /* signatureRequest.bundle.js */; };
+		2439D7CD29F0757C00F07C90 /* importAccountWithFile.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B729F0757C00F07C90 /* importAccountWithFile.bundle.js */; };
+		2439D7CE29F0757C00F07C90 /* 125.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B829F0757C00F07C90 /* 125.bundle.js */; };
+		2439D7CF29F0757C00F07C90 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B929F0757C00F07C90 /* manifest.json */; };
+		2439D7D029F0757C00F07C90 /* onboarding.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7BA29F0757C00F07C90 /* onboarding.bundle.js */; };
+		2439D7D129F0757C00F07C90 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7BB29F0757C00F07C90 /* assets */; };
+		2439D7D229F0757C00F07C90 /* popup.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7BC29F0757C00F07C90 /* popup.bundle.js */; };
+		2439D7D329F0757C00F07C90 /* logo192.png in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7BD29F0757C00F07C90 /* logo192.png */; };
+		2439D7D429F0757C00F07C90 /* onboarding.html in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7BE29F0757C00F07C90 /* onboarding.html */; };
+		2439D7D529F0757C00F07C90 /* signature-request.html in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7BF29F0757C00F07C90 /* signature-request.html */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2439D79929F0757B00F07C90 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2439D77229F0757A00F07C90 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2439D79629F0757B00F07C90;
+			remoteInfo = "Casper Wallet Extension";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		2439D7A529F0757B00F07C90 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				2439D79829F0757B00F07C90 /* Casper Wallet Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		2439D77A29F0757A00F07C90 /* Casper Wallet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Casper Wallet.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2439D77D29F0757A00F07C90 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		2439D78129F0757A00F07C90 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = ../Base.lproj/Main.html; sourceTree = "<group>"; };
+		2439D78329F0757A00F07C90 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		2439D78529F0757A00F07C90 /* Style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
+		2439D78729F0757A00F07C90 /* Script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Script.js; sourceTree = "<group>"; };
+		2439D78929F0757A00F07C90 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		2439D78C29F0757A00F07C90 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		2439D78E29F0757B00F07C90 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2439D79029F0757B00F07C90 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2439D79129F0757B00F07C90 /* Casper_Wallet.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Casper_Wallet.entitlements; sourceTree = "<group>"; };
+		2439D79229F0757B00F07C90 /* Casper Wallet.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Casper Wallet.entitlements"; sourceTree = "<group>"; };
+		2439D79729F0757B00F07C90 /* Casper Wallet Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Casper Wallet Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2439D79C29F0757B00F07C90 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
+		2439D79E29F0757B00F07C90 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2439D79F29F0757B00F07C90 /* Casper_Wallet_Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Casper_Wallet_Extension.entitlements; sourceTree = "<group>"; };
+		2439D7AA29F0757C00F07C90 /* connectToApp.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = connectToApp.bundle.js; path = ../../../build/firefox/connectToApp.bundle.js; sourceTree = "<group>"; };
+		2439D7AB29F0757C00F07C90 /* logo16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo16.png; path = ../../../build/firefox/logo16.png; sourceTree = "<group>"; };
+		2439D7AC29F0757C00F07C90 /* connect-to-app.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = "connect-to-app.html"; path = "../../../build/firefox/connect-to-app.html"; sourceTree = "<group>"; };
+		2439D7AD29F0757C00F07C90 /* 909.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = 909.bundle.js; path = ../../../build/firefox/909.bundle.js; sourceTree = "<group>"; };
+		2439D7AE29F0757C00F07C90 /* locales */ = {isa = PBXFileReference; lastKnownFileType = folder; name = locales; path = ../../../build/firefox/locales; sourceTree = "<group>"; };
+		2439D7AF29F0757C00F07C90 /* import-account-with-file.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = "import-account-with-file.html"; path = "../../../build/firefox/import-account-with-file.html"; sourceTree = "<group>"; };
+		2439D7B029F0757C00F07C90 /* sdk.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = sdk.bundle.js; path = ../../../build/firefox/sdk.bundle.js; sourceTree = "<group>"; };
+		2439D7B129F0757C00F07C90 /* contentScript.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = contentScript.bundle.js; path = ../../../build/firefox/contentScript.bundle.js; sourceTree = "<group>"; };
+		2439D7B229F0757C00F07C90 /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = ../../../build/firefox/popup.html; sourceTree = "<group>"; };
+		2439D7B329F0757C00F07C90 /* background.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = background.bundle.js; path = ../../../build/firefox/background.bundle.js; sourceTree = "<group>"; };
+		2439D7B429F0757C00F07C90 /* logo128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo128.png; path = ../../../build/firefox/logo128.png; sourceTree = "<group>"; };
+		2439D7B529F0757C00F07C90 /* logo64.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo64.png; path = ../../../build/firefox/logo64.png; sourceTree = "<group>"; };
+		2439D7B629F0757C00F07C90 /* signatureRequest.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = signatureRequest.bundle.js; path = ../../../build/firefox/signatureRequest.bundle.js; sourceTree = "<group>"; };
+		2439D7B729F0757C00F07C90 /* importAccountWithFile.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = importAccountWithFile.bundle.js; path = ../../../build/firefox/importAccountWithFile.bundle.js; sourceTree = "<group>"; };
+		2439D7B829F0757C00F07C90 /* 125.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = 125.bundle.js; path = ../../../build/firefox/125.bundle.js; sourceTree = "<group>"; };
+		2439D7B929F0757C00F07C90 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = ../../../build/firefox/manifest.json; sourceTree = "<group>"; };
+		2439D7BA29F0757C00F07C90 /* onboarding.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = onboarding.bundle.js; path = ../../../build/firefox/onboarding.bundle.js; sourceTree = "<group>"; };
+		2439D7BB29F0757C00F07C90 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = ../../../build/firefox/assets; sourceTree = "<group>"; };
+		2439D7BC29F0757C00F07C90 /* popup.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = popup.bundle.js; path = ../../../build/firefox/popup.bundle.js; sourceTree = "<group>"; };
+		2439D7BD29F0757C00F07C90 /* logo192.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo192.png; path = ../../../build/firefox/logo192.png; sourceTree = "<group>"; };
+		2439D7BE29F0757C00F07C90 /* onboarding.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = onboarding.html; path = ../../../build/firefox/onboarding.html; sourceTree = "<group>"; };
+		2439D7BF29F0757C00F07C90 /* signature-request.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = "signature-request.html"; path = "../../../build/firefox/signature-request.html"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2439D77729F0757A00F07C90 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2439D79429F0757B00F07C90 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2439D77129F0757A00F07C90 = {
+			isa = PBXGroup;
+			children = (
+				2439D77C29F0757A00F07C90 /* Casper Wallet */,
+				2439D79B29F0757B00F07C90 /* Casper Wallet Extension */,
+				2439D77B29F0757A00F07C90 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2439D77B29F0757A00F07C90 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2439D77A29F0757A00F07C90 /* Casper Wallet.app */,
+				2439D79729F0757B00F07C90 /* Casper Wallet Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2439D77C29F0757A00F07C90 /* Casper Wallet */ = {
+			isa = PBXGroup;
+			children = (
+				2439D77D29F0757A00F07C90 /* AppDelegate.swift */,
+				2439D78929F0757A00F07C90 /* ViewController.swift */,
+				2439D78B29F0757A00F07C90 /* Main.storyboard */,
+				2439D78E29F0757B00F07C90 /* Assets.xcassets */,
+				2439D79029F0757B00F07C90 /* Info.plist */,
+				2439D79129F0757B00F07C90 /* Casper_Wallet.entitlements */,
+				2439D79229F0757B00F07C90 /* Casper Wallet.entitlements */,
+				2439D77F29F0757A00F07C90 /* Resources */,
+			);
+			path = "Casper Wallet";
+			sourceTree = "<group>";
+		};
+		2439D77F29F0757A00F07C90 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2439D78029F0757A00F07C90 /* Main.html */,
+				2439D78329F0757A00F07C90 /* Icon.png */,
+				2439D78529F0757A00F07C90 /* Style.css */,
+				2439D78729F0757A00F07C90 /* Script.js */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		2439D79B29F0757B00F07C90 /* Casper Wallet Extension */ = {
+			isa = PBXGroup;
+			children = (
+				2439D7A929F0757C00F07C90 /* Resources */,
+				2439D79C29F0757B00F07C90 /* SafariWebExtensionHandler.swift */,
+				2439D79E29F0757B00F07C90 /* Info.plist */,
+				2439D79F29F0757B00F07C90 /* Casper_Wallet_Extension.entitlements */,
+			);
+			path = "Casper Wallet Extension";
+			sourceTree = "<group>";
+		};
+		2439D7A929F0757C00F07C90 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2439D7AA29F0757C00F07C90 /* connectToApp.bundle.js */,
+				2439D7AB29F0757C00F07C90 /* logo16.png */,
+				2439D7AC29F0757C00F07C90 /* connect-to-app.html */,
+				2439D7AD29F0757C00F07C90 /* 909.bundle.js */,
+				2439D7AE29F0757C00F07C90 /* locales */,
+				2439D7AF29F0757C00F07C90 /* import-account-with-file.html */,
+				2439D7B029F0757C00F07C90 /* sdk.bundle.js */,
+				2439D7B129F0757C00F07C90 /* contentScript.bundle.js */,
+				2439D7B229F0757C00F07C90 /* popup.html */,
+				2439D7B329F0757C00F07C90 /* background.bundle.js */,
+				2439D7B429F0757C00F07C90 /* logo128.png */,
+				2439D7B529F0757C00F07C90 /* logo64.png */,
+				2439D7B629F0757C00F07C90 /* signatureRequest.bundle.js */,
+				2439D7B729F0757C00F07C90 /* importAccountWithFile.bundle.js */,
+				2439D7B829F0757C00F07C90 /* 125.bundle.js */,
+				2439D7B929F0757C00F07C90 /* manifest.json */,
+				2439D7BA29F0757C00F07C90 /* onboarding.bundle.js */,
+				2439D7BB29F0757C00F07C90 /* assets */,
+				2439D7BC29F0757C00F07C90 /* popup.bundle.js */,
+				2439D7BD29F0757C00F07C90 /* logo192.png */,
+				2439D7BE29F0757C00F07C90 /* onboarding.html */,
+				2439D7BF29F0757C00F07C90 /* signature-request.html */,
+			);
+			name = Resources;
+			path = "Casper Wallet Extension";
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2439D77929F0757A00F07C90 /* Casper Wallet */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2439D7A629F0757B00F07C90 /* Build configuration list for PBXNativeTarget "Casper Wallet" */;
+			buildPhases = (
+				2439D77629F0757A00F07C90 /* Sources */,
+				2439D77729F0757A00F07C90 /* Frameworks */,
+				2439D77829F0757A00F07C90 /* Resources */,
+				2439D7A529F0757B00F07C90 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2439D79A29F0757B00F07C90 /* PBXTargetDependency */,
+			);
+			name = "Casper Wallet";
+			productName = "Casper Wallet";
+			productReference = 2439D77A29F0757A00F07C90 /* Casper Wallet.app */;
+			productType = "com.apple.product-type.application";
+		};
+		2439D79629F0757B00F07C90 /* Casper Wallet Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2439D7A229F0757B00F07C90 /* Build configuration list for PBXNativeTarget "Casper Wallet Extension" */;
+			buildPhases = (
+				2439D79329F0757B00F07C90 /* Sources */,
+				2439D79429F0757B00F07C90 /* Frameworks */,
+				2439D79529F0757B00F07C90 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Casper Wallet Extension";
+			productName = "Casper Wallet Extension";
+			productReference = 2439D79729F0757B00F07C90 /* Casper Wallet Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2439D77229F0757A00F07C90 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1430;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					2439D77929F0757A00F07C90 = {
+						CreatedOnToolsVersion = 14.3;
+					};
+					2439D79629F0757B00F07C90 = {
+						CreatedOnToolsVersion = 14.3;
+					};
+				};
+			};
+			buildConfigurationList = 2439D77529F0757A00F07C90 /* Build configuration list for PBXProject "Casper Wallet" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 2439D77129F0757A00F07C90;
+			productRefGroup = 2439D77B29F0757A00F07C90 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2439D77929F0757A00F07C90 /* Casper Wallet */,
+				2439D79629F0757B00F07C90 /* Casper Wallet Extension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2439D77829F0757A00F07C90 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2439D78429F0757A00F07C90 /* Icon.png in Resources */,
+				2439D78D29F0757A00F07C90 /* Main.storyboard in Resources */,
+				2439D78829F0757A00F07C90 /* Script.js in Resources */,
+				2439D78229F0757A00F07C90 /* Main.html in Resources */,
+				2439D78F29F0757B00F07C90 /* Assets.xcassets in Resources */,
+				2439D78629F0757A00F07C90 /* Style.css in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2439D79529F0757B00F07C90 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2439D7D429F0757C00F07C90 /* onboarding.html in Resources */,
+				2439D7CB29F0757C00F07C90 /* logo64.png in Resources */,
+				2439D7D229F0757C00F07C90 /* popup.bundle.js in Resources */,
+				2439D7C029F0757C00F07C90 /* connectToApp.bundle.js in Resources */,
+				2439D7CE29F0757C00F07C90 /* 125.bundle.js in Resources */,
+				2439D7D129F0757C00F07C90 /* assets in Resources */,
+				2439D7C129F0757C00F07C90 /* logo16.png in Resources */,
+				2439D7C729F0757C00F07C90 /* contentScript.bundle.js in Resources */,
+				2439D7D329F0757C00F07C90 /* logo192.png in Resources */,
+				2439D7C429F0757C00F07C90 /* locales in Resources */,
+				2439D7D029F0757C00F07C90 /* onboarding.bundle.js in Resources */,
+				2439D7C829F0757C00F07C90 /* popup.html in Resources */,
+				2439D7C929F0757C00F07C90 /* background.bundle.js in Resources */,
+				2439D7C529F0757C00F07C90 /* import-account-with-file.html in Resources */,
+				2439D7C329F0757C00F07C90 /* 909.bundle.js in Resources */,
+				2439D7C629F0757C00F07C90 /* sdk.bundle.js in Resources */,
+				2439D7CD29F0757C00F07C90 /* importAccountWithFile.bundle.js in Resources */,
+				2439D7CF29F0757C00F07C90 /* manifest.json in Resources */,
+				2439D7CC29F0757C00F07C90 /* signatureRequest.bundle.js in Resources */,
+				2439D7CA29F0757C00F07C90 /* logo128.png in Resources */,
+				2439D7C229F0757C00F07C90 /* connect-to-app.html in Resources */,
+				2439D7D529F0757C00F07C90 /* signature-request.html in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2439D77629F0757A00F07C90 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2439D78A29F0757A00F07C90 /* ViewController.swift in Sources */,
+				2439D77E29F0757A00F07C90 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2439D79329F0757B00F07C90 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2439D79D29F0757B00F07C90 /* SafariWebExtensionHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2439D79A29F0757B00F07C90 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2439D79629F0757B00F07C90 /* Casper Wallet Extension */;
+			targetProxy = 2439D79929F0757B00F07C90 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		2439D78029F0757A00F07C90 /* Main.html */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2439D78129F0757A00F07C90 /* Base */,
+			);
+			name = Main.html;
+			sourceTree = "<group>";
+		};
+		2439D78B29F0757A00F07C90 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2439D78C29F0757A00F07C90 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		2439D7A029F0757B00F07C90 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.3;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		2439D7A129F0757B00F07C90 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		2439D7A329F0757B00F07C90 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Casper Wallet Extension/Casper_Wallet_Extension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 8;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Casper Wallet Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Casper Wallet Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.3.1;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "software.make.Casper-Wallet.Extension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		2439D7A429F0757B00F07C90 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Casper Wallet Extension/Casper_Wallet_Extension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 8;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Casper Wallet Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Casper Wallet Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.3.1;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "software.make.Casper-Wallet.Extension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		2439D7A729F0757B00F07C90 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Casper Wallet/Casper Wallet.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 8;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Casper Wallet/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Casper Wallet";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.3.1;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "software.make.Casper-Wallet";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		2439D7A829F0757B00F07C90 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Casper Wallet/Casper Wallet.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 8;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Casper Wallet/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Casper Wallet";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.3.1;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "software.make.Casper-Wallet";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2439D77529F0757A00F07C90 /* Build configuration list for PBXProject "Casper Wallet" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2439D7A029F0757B00F07C90 /* Debug */,
+				2439D7A129F0757B00F07C90 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2439D7A229F0757B00F07C90 /* Build configuration list for PBXNativeTarget "Casper Wallet Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2439D7A329F0757B00F07C90 /* Debug */,
+				2439D7A429F0757B00F07C90 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2439D7A629F0757B00F07C90 /* Build configuration list for PBXNativeTarget "Casper Wallet" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2439D7A729F0757B00F07C90 /* Debug */,
+				2439D7A829F0757B00F07C90 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 2439D77229F0757A00F07C90 /* Project object */;
+}

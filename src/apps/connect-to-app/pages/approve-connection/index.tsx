@@ -1,124 +1,102 @@
+import { t } from 'i18next';
 import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 import styled from 'styled-components';
 
-import { HeaderTextContainer } from '@src/libs/layout';
-
-import {
-  PageContainer,
-  ContentContainer,
-  FooterButtonsContainer
-} from '@src/libs/layout/containers';
-
-import { Button, SiteFaviconBadge, List, SvgIcon, Typography } from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@connect-to-app/router';
-import { closeWindow } from '@connect-to-app/utils/closeWindow';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
+import { closeCurrentWindow } from '@src/background/close-current-window';
+import {
+  FooterButtonsContainer,
+  HeaderSubmenuBarNavLink,
+  LayoutWindow,
+  PopupHeader
+} from '@src/libs/layout';
+import { Button, Typography } from '@src/libs/ui';
 
-const HeaderTextContent = styled.div`
-  margin-top: 16px;
-`;
+import { RouterPath, useTypedNavigate } from '../../router';
+import { ApproveConnectionContent } from './content';
+import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
+import { sdkMethod } from '@src/content/sdk-method';
 
 const TextCentredContainer = styled.div`
   text-align: center;
 `;
 
-const ListItemContainer = styled.div`
-  display: flex;
-
-  width: 100%;
-  padding: 14px 18px;
-
-  & > * + * {
-    padding-left: 18px;
-  }
-
-  & > span {
-    white-space: nowrap;
-  }
-`;
-
-interface ApproveConnectionPageProps {
+export interface Props {
   selectedAccountNames: string[];
   origin: string;
-  headerText: string;
+  title: string;
+  siteTitle: string;
 }
 
 export function ApproveConnectionPage({
   selectedAccountNames,
   origin,
-  headerText
-}: ApproveConnectionPageProps) {
-  const navigate = useTypedNavigate();
-  const { t } = useTranslation();
+  title,
+  siteTitle
+}: Props) {
+  const searchParams = new URLSearchParams(document.location.search);
+  const requestId = searchParams.get('requestId');
 
-  const { connectAccountsWithEvent: connectAccounts } = useAccountManager();
-
-  const handleApproveConnection = () => {
-    connectAccounts(selectedAccountNames, origin);
-    navigate(RouterPath.Connecting);
-  };
-  const listItems = [
-    {
-      id: 1,
-      text: t('See address, balance, activity'),
-      iconPath: 'assets/icons/show.svg'
-    },
-    {
-      id: 2,
-      text: t('Suggest transaction to approve'),
-      iconPath: 'assets/icons/thumb-up.svg'
-    }
-  ];
+  if (!requestId) {
+    const error = Error(`Missing search param: ${requestId}`);
+    throw error;
+  }
 
   const selectedAccountNamesLength = selectedAccountNames.length;
 
+  const navigate = useTypedNavigate();
+  const { connectSiteWithEvent: connectAccounts } = useAccountManager();
+
+  const handleApproveConnection = async () => {
+    await connectAccounts(selectedAccountNames, origin, siteTitle);
+    await sendSdkResponseToSpecificTab(
+      sdkMethod.connectResponse(true, { requestId })
+    );
+    navigate(RouterPath.Connecting);
+  };
+
+  const handleCancel = async () => {
+    await sendSdkResponseToSpecificTab(
+      sdkMethod.connectResponse(false, { requestId })
+    );
+    closeCurrentWindow();
+  };
+
   return (
-    <PageContainer>
-      <ContentContainer>
-        <HeaderTextContainer>
-          <SiteFaviconBadge origin={origin} />
-          <HeaderTextContent>
-            <Typography type="header" weight="bold">
-              <Trans t={t}>{headerText}</Trans>
-            </Typography>
-          </HeaderTextContent>
-        </HeaderTextContainer>
-        <List
-          headerLabel={t('allow this site to')}
-          rows={listItems}
-          renderRow={listItem => (
-            <ListItemContainer key={listItem.id}>
-              <SvgIcon
-                src={listItem.iconPath}
-                size={24}
-                color="contentTertiary"
-              />
-              <Typography type="body" weight="regular">
-                {listItem.text}
-              </Typography>
-            </ListItemContainer>
+    <LayoutWindow
+      renderHeader={() => (
+        <PopupHeader
+          renderSubmenuBarItems={() => (
+            <HeaderSubmenuBarNavLink linkType="back" />
           )}
-          marginLeftForItemSeparatorLine={60}
         />
-      </ContentContainer>
-      <FooterButtonsContainer>
-        <TextCentredContainer>
-          <Typography type="caption" weight="regular">
-            <Trans t={t}>Only connect with sites you trust</Trans>
-          </Typography>
-        </TextCentredContainer>
-        <Button onClick={handleApproveConnection}>
-          {/* TODO: optimize text in Trans component below */}
-          <Trans t={t}>
-            Connect to {{ selectedAccountNamesLength }}{' '}
-            {selectedAccountNames.length > 1 ? t('accounts') : t('account')}
-          </Trans>
-        </Button>
-        <Button color="secondaryBlue" onClick={() => closeWindow()}>
-          <Trans t={t}>Cancel</Trans>
-        </Button>
-      </FooterButtonsContainer>
-    </PageContainer>
+      )}
+      renderContent={() => (
+        <ApproveConnectionContent origin={origin} title={title} />
+      )}
+      renderFooter={() => (
+        <FooterButtonsContainer>
+          <TextCentredContainer>
+            <Typography type="captionRegular">
+              <Trans t={t}>Only connect with sites you trust</Trans>
+            </Typography>
+          </TextCentredContainer>
+          <Button
+            onClick={handleApproveConnection}
+            dataTestId="connect-accounts-button"
+          >
+            {/* TODO: optimize text in Trans component below */}
+            <Trans t={t}>
+              Connect to {{ selectedAccountNamesLength }}{' '}
+              {selectedAccountNames.length > 1 ? t('accounts') : t('account')}
+            </Trans>
+          </Button>
+          <Button color="secondaryBlue" onClick={handleCancel}>
+            <Trans t={t}>Cancel</Trans>
+          </Button>
+        </FooterButtonsContainer>
+      )}
+    />
   );
 }

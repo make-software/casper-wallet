@@ -2,10 +2,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { Tile, Typography } from '@libs/ui';
-
-const TopMarginContainer = styled.div`
-  margin-top: 16px;
-`;
+import { SpacingSize, VerticalSpaceContainer } from '@src/libs/layout';
 
 const SpacedBetweenFlexRox = styled.div`
   display: flex;
@@ -71,6 +68,8 @@ interface ListProps<ListRow extends ListRowBase>
   renderHeader?: () => JSX.Element;
   headerLabel?: string;
   headerAction?: HeaderAction;
+  headerLabelTop?: SpacingSize;
+  contentTop?: SpacingSize;
 }
 
 export function List<ListRow extends ListRowBase>({
@@ -80,21 +79,22 @@ export function List<ListRow extends ListRowBase>({
   renderFooter,
   headerLabel,
   headerAction,
-  marginLeftForItemSeparatorLine
+  marginLeftForItemSeparatorLine,
+  headerLabelTop = SpacingSize.ExtraLarge,
+  contentTop = SpacingSize.ExtraLarge
 }: ListProps<ListRow>) {
   return (
     <>
       {headerLabel && (
-        <TopMarginContainer>
+        <VerticalSpaceContainer top={headerLabelTop}>
           <SpacedBetweenFlexRox>
-            <Typography type="label" weight="medium" color="contentSecondary">
+            <Typography type="labelMedium" color="contentSecondary">
               {headerLabel}
             </Typography>
             {headerAction && (
               <PointerContainer>
                 <Typography
-                  type="label"
-                  weight="medium"
+                  type="labelMedium"
                   color="contentBlue"
                   onClick={headerAction.onClick}
                 >
@@ -103,9 +103,9 @@ export function List<ListRow extends ListRowBase>({
               </PointerContainer>
             )}
           </SpacedBetweenFlexRox>
-        </TopMarginContainer>
+        </VerticalSpaceContainer>
       )}
-      <TopMarginContainer>
+      <VerticalSpaceContainer top={contentTop}>
         <Tile>
           {renderHeader && (
             <ListHeaderContainer
@@ -131,7 +131,7 @@ export function List<ListRow extends ListRowBase>({
             </ListFooterContainer>
           )}
         </Tile>
-      </TopMarginContainer>
+      </VerticalSpaceContainer>
     </>
   );
 }

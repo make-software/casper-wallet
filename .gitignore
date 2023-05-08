@@ -7,12 +7,14 @@ node_modules
 
 # testing
 coverage
+test-artifacts
 
 # development
 output
 
 # production
 build
+web-ext-artifacts
 
 # misc
 .DS_Store
@@ -21,7 +23,10 @@ build
 .env.test.local
 .env.production.local
 .history
-.xcode-project
+xcuserdata
 
 # secrets
 secrets.*.js
+
+# packed extension
+chrome.crx

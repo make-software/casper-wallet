@@ -1,59 +1,48 @@
 import '@libs/i18n/i18n';
-
-import React, { Suspense } from 'react';
-import { render } from 'react-dom';
-import { ThemeProvider } from 'styled-components';
-import { GlobalScrollbar } from 'mac-scrollbar';
-import { HashRouter, Route, Routes } from 'react-router-dom';
-
 import 'mac-scrollbar/dist/mac-scrollbar.css';
 
+import React, { Suspense, useState } from 'react';
+import { render } from 'react-dom';
+import { ThemeProvider } from 'styled-components';
+import { Provider as ReduxProvider } from 'react-redux';
+
+import { importWindowInit } from '@src/background/redux/windowManagement/actions';
+import {
+  createMainStoreReplica,
+  PopupState
+} from '@src/background/redux/utils';
 import { GlobalStyle, themeConfig } from '@libs/ui';
+import { ErrorBoundary } from '@src/libs/layout/error';
 
-import { RouterPath } from './router';
+import { AppRouter } from './app-router';
+import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
 
-import { ImportAccountWithFileSuccessContentPage } from './pages/import-account-with-file-success';
-import { ImportAccountWithFileFailureContentPage } from './pages/import-account-with-file-failure';
-import { ImportAccountWithFileContentPage } from './pages/import-account-with-file';
-import { HeaderWindow_TO_BE_REMOVED, LayoutWindow } from '@src/libs/layout';
+const Tree = () => {
+  const [state, setState] = useState<PopupState | null>(null);
 
-render(
-  <Suspense fallback={null}>
-    <ThemeProvider theme={themeConfig}>
-      <GlobalStyle />
-      <GlobalScrollbar />
-      <HashRouter>
-        <Routes>
-          <Route
-            path={RouterPath.ImportAccountWithFile}
-            element={
-              <LayoutWindow
-                Header={<HeaderWindow_TO_BE_REMOVED />}
-                Content={<ImportAccountWithFileContentPage />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.ImportAccountWithFileSuccess}
-            element={
-              <LayoutWindow
-                Header={<HeaderWindow_TO_BE_REMOVED />}
-                Content={<ImportAccountWithFileSuccessContentPage />}
-              />
-            }
-          />
-          <Route
-            path={RouterPath.ImportAccountWithFileFailure}
-            element={
-              <LayoutWindow
-                Header={<HeaderWindow_TO_BE_REMOVED />}
-                Content={<ImportAccountWithFileFailureContentPage />}
-              />
-            }
-          />
-        </Routes>
-      </HashRouter>
-    </ThemeProvider>
-  </Suspense>,
-  document.querySelector('#import-account-with-file-app-container')
-);
+  useSubscribeToRedux({
+    windowInitAction: importWindowInit,
+    setPopupState: setState
+  });
+
+  if (state == null) {
+    return null;
+  }
+
+  const store = createMainStoreReplica(state);
+
+  return (
+    <Suspense fallback={null}>
+      <ThemeProvider theme={themeConfig}>
+        <GlobalStyle />
+        <ReduxProvider store={store}>
+          <ErrorBoundary>
+            <AppRouter />
+          </ErrorBoundary>
+        </ReduxProvider>
+      </ThemeProvider>
+    </Suspense>
+  );
+};
+
+render(<Tree />, document.querySelector('#app-container'));

@@ -1,24 +1,36 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import { RootState } from 'typesafe-actions';
-
-import styled from 'styled-components';
+import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
 import {
-  ContentContainer,
-  HeaderTextContainer
-} from '@src/libs/layout/containers';
-import { SvgIcon, PageTile, Typography } from '@libs/ui';
-import { selectVaultAccountWithName } from '@src/background/redux/vault/selectors';
-
+  FooterButtonsContainer,
+  HeaderSubmenuBarNavLink,
+  PopupHeader,
+  PopupLayout
+} from '@libs/layout';
+import { Button, Link } from '@libs/ui';
+import { selectVaultAccount } from '@background/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
+import { getBlockExplorerAccountUrl } from '@src/constants';
+import { selectCasperUrlsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
 
-export function AccountSettingsPageContent() {
+import {
+  AccountSettingsActionsGroup,
+  AccountSettingsPageContent
+} from './content';
+
+export const AccountSettingsPage = () => {
   const navigate = useTypedNavigate();
+  const { t } = useTranslation();
+
   const { accountName } = useParams();
   const account = useSelector((state: RootState) =>
-    selectVaultAccountWithName(state, accountName || '')
+    selectVaultAccount(state, accountName || '')
+  );
+  const { casperLiveUrl } = useSelector(
+    selectCasperUrlsBaseOnActiveNetworkSetting
   );
 
   if (!account) {
@@ -27,65 +39,42 @@ export function AccountSettingsPageContent() {
   }
 
   return (
-    <ContentContainer>
-      <PageTile>
-        <HeaderTextContainer>
-          <Typography type="header" weight="bold">
-            {account.name}
-          </Typography>
-        </HeaderTextContainer>
-      </PageTile>
-    </ContentContainer>
-  );
-}
-
-interface AccountIconButtonProps {
-  type: 'rename' | 'remove';
-}
-
-export function AccountIconButton({ type }: AccountIconButtonProps) {
-  const { accountName } = useParams();
-  const navigate = useTypedNavigate();
-
-  const handleNavigateToNextPage = useCallback(() => {
-    if (!accountName) {
-      return;
-    }
-
-    const path =
-      type === 'remove'
-        ? RouterPath.RemoveAccount.replace(':accountName', accountName)
-        : RouterPath.RenameAccount.replace(':accountName', accountName);
-
-    navigate(path);
-  }, [navigate, accountName, type]);
-
-  if (!accountName) {
-    return null;
-  }
-
-  return (
-    <SvgIcon
-      onClick={handleNavigateToNextPage}
-      color={type === 'remove' ? 'contentRed' : 'contentBlue'}
-      src={
-        type === 'remove' ? 'assets/icons/delete.svg' : 'assets/icons/edit.svg'
-      }
-      size={24}
+    <PopupLayout
+      renderHeader={() => (
+        <PopupHeader
+          withNetworkSwitcher
+          withMenu
+          withConnectionStatus
+          renderSubmenuBarItems={() => (
+            <>
+              <HeaderSubmenuBarNavLink linkType="close" />
+              <AccountSettingsActionsGroup />
+            </>
+          )}
+        />
+      )}
+      renderContent={() => <AccountSettingsPageContent />}
+      renderFooter={() => (
+        <FooterButtonsContainer>
+          <Button
+            as={props => (
+              <Link
+                color="fillBlue"
+                target="_blank"
+                href={getBlockExplorerAccountUrl(
+                  casperLiveUrl,
+                  account.publicKey
+                )}
+                {...props}
+              />
+            )}
+            color="secondaryBlue"
+            title={t('View account in CSPR.live')}
+          >
+            <Trans t={t}>View on CSPR.live</Trans>
+          </Button>
+        </FooterButtonsContainer>
+      )}
     />
   );
-}
-
-const AccountSettingsActionsGroupContainer = styled.div`
-  display: flex;
-  gap: 28px;
-`;
-
-export function AccountSettingsActionsGroup() {
-  return (
-    <AccountSettingsActionsGroupContainer>
-      <AccountIconButton type="rename" />
-      <AccountIconButton type="remove" />
-    </AccountSettingsActionsGroupContainer>
-  );
-}
+};

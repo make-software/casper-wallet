@@ -3,6 +3,7 @@
     "module": "commonjs",
     "target": "esnext",
     "jsx": "react",
+    "allowJs": true,
     "sourceMap": false,
     "experimentalDecorators": true,
     "noImplicitUseStrict": true,
@@ -14,6 +15,14 @@
     "baseUrl": "./",
     "paths": {
       "@src/*": ["src/*"],
+      "@popup/*": ["src/apps/popup/*"],
+      "@import-account-with-file/*": ["src/apps/import-account-with-file/*"],
+      "@connect-to-app/*": ["src/apps/connect-to-app/*"],
+      "@background/*": ["src/background/*"],
+      "@content/*": ["src/content/*"],
+      "@layout/*": ["src/libs/layout/*"],
+      "@libs/*": ["src/libs/*"],
+      "@hooks/*": ["src/hooks/*"],
       "@mocks/*": ["__mocks__/*"],
       "@testHelpers/*": ["__testHelpers__/*"]
     }

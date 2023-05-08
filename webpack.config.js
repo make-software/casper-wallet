@@ -8,7 +8,29 @@ const webpack = require('webpack'),
   TerserPlugin = require('terser-webpack-plugin'),
   TsconfigPaths = require('tsconfig-paths-webpack-plugin');
 
-const { isChrome, ExtensionBuildPath, ManifestPath } = require('./constants');
+const commitHash = process.env.HASH || process.env.GITHUB_SHA;
+if (!commitHash) {
+  throw Error('No commit hash env!');
+}
+
+const htmlWebpackPluginOptions = {
+  cache: false,
+  showErrors: true,
+  minify: false
+};
+
+const htmlLoaderOptions = {
+  sources: false
+};
+
+const {
+  isChrome,
+  isSafari,
+  ExtensionBuildPath,
+  ManifestPath
+} = require('./constants');
+
+const isDev = env.NODE_ENV === 'development';
 
 const ASSET_PATH = process.env.ASSET_PATH || '/';
 const buildDir = isChrome
@@ -40,6 +62,9 @@ if (fileSystem.existsSync(secretsPath)) {
 }
 
 const options = {
+  experiments: {
+    topLevelAwait: true
+  },
   mode: process.env.NODE_ENV || 'development',
   entry: {
     popup: path.join(__dirname, 'src', 'apps', 'popup', 'index.tsx'),
@@ -57,6 +82,14 @@ const options = {
       'connect-to-app',
       'index.tsx'
     ),
+    signatureRequest: path.join(
+      __dirname,
+      'src',
+      'apps',
+      'signature-request',
+      'index.tsx'
+    ),
+    onboarding: path.join(__dirname, 'src', 'apps', 'onboarding', 'index.tsx'),
     background: path.join(__dirname, 'src', 'background', 'index.ts'),
     contentScript: path.join(__dirname, 'src', 'content', 'index.ts'),
     sdk: path.join(__dirname, 'src', 'content', 'sdk.ts')
@@ -71,7 +104,19 @@ const options = {
     publicPath: ASSET_PATH
   },
   module: {
+    noParse: /\.wasm$/,
     rules: [
+      {
+        test: /\.wasm$/,
+        // Tells WebPack that this module should be included as
+        // base64-encoded binary file and not as code
+        loader: 'base64-loader',
+        // Disables WebPack's opinion where WebAssembly should be,
+        // makes it think that it's not WebAssembly
+        //
+        // Error: WebAssembly module is included in initial chunk.
+        type: 'javascript/auto'
+      },
       {
         test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
         loader: 'file-loader',
@@ -83,10 +128,15 @@ const options = {
       {
         test: /\.html$/,
         loader: 'html-loader',
+        options: htmlLoaderOptions,
         exclude: /node_modules/
       },
       { test: /\.css$/i, use: ['style-loader', 'css-loader'] },
-      { test: /\.(ts|tsx)$/, loader: 'ts-loader', exclude: /node_modules/ },
+      {
+        test: /\.tsx?$/,
+        loader: 'ts-loader',
+        exclude: /node_modules/
+      },
       {
         test: /\.(js|jsx)$/,
         use: [
@@ -106,29 +156,58 @@ const options = {
     extensions: fileExtensions
       .map(extension => '.' + extension)
       .concat(['.js', '.jsx', '.ts', '.tsx']),
-    plugins: [new TsconfigPaths.TsconfigPathsPlugin({})]
+    plugins: [new TsconfigPaths.TsconfigPathsPlugin({})],
+    fallback: {
+      path: false,
+      fs: false,
+      Buffer: false,
+      process: false
+    }
   },
   plugins: [
     new webpack.ProgressPlugin(),
     // expose and write the allowed env vars on the compiled bundle
-    new webpack.EnvironmentPlugin(['NODE_ENV']),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+      'process.env.MOCK_STATE': JSON.stringify(process.env.MOCK_STATE),
+      'process.env.BROWSER': JSON.stringify(process.env.BROWSER)
+    }),
+    // manifest file generation
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: isChrome ? ManifestPath.v3 : ManifestPath.v2,
+          from: isChrome
+            ? ManifestPath.v3
+            : isSafari
+            ? ManifestPath.v2_Safari
+            : ManifestPath.v2,
           to: path.join(__dirname, buildDir, 'manifest.json'),
           force: true,
-          transform: function (content, path) {
+          transform: function (content) {
             // generates the manifest file using the package.json informations
-            return Buffer.from(
-              JSON.stringify({
-                ...JSON.parse(content.toString()),
-                name: pkg.name,
-                version: pkg.version,
-                author: pkg.author,
-                description: pkg.description,
-              })
-            );
+            const manifest = {
+              ...JSON.parse(content.toString()),
+              name: pkg.name,
+              version: pkg.version,
+              version_name: pkg.version + ` (${commitHash.slice(0, 7)})`,
+              author: pkg.author,
+              description: pkg.description,
+              ...(isDev
+                ? isChrome
+                  ? {
+                      content_security_policy: {}
+                    }
+                  : {
+                      content_security_policy: ''
+                    }
+                : {})
+            };
+            // Removing the key from manifest for Chrome production build
+            if (isChrome && !isDev) {
+              delete manifest.key;
+            }
+
+            return Buffer.from(JSON.stringify(manifest));
           }
         }
       ]
@@ -169,11 +248,22 @@ const options = {
         }
       ]
     }),
+    // copy locales
     new CopyWebpackPlugin({
       patterns: [
         {
           from: 'src/assets/locales',
           to: path.join(__dirname, buildDir, 'locales'),
+          force: true
+        }
+      ]
+    }),
+    // copy assets
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: 'src/assets/fonts',
+          to: path.join(__dirname, buildDir, 'assets/fonts'),
           force: true
         }
       ]
@@ -200,7 +290,7 @@ const options = {
       template: path.join(__dirname, 'src', 'apps', 'popup', 'index.html'),
       filename: 'popup.html',
       chunks: ['popup'],
-      cache: false
+      ...htmlWebpackPluginOptions
     }),
     new HtmlWebpackPlugin({
       template: path.join(
@@ -212,7 +302,7 @@ const options = {
       ),
       filename: 'import-account-with-file.html',
       chunks: ['importAccountWithFile'],
-      cache: false
+      ...htmlWebpackPluginOptions
     }),
     new HtmlWebpackPlugin({
       template: path.join(
@@ -224,7 +314,25 @@ const options = {
       ),
       filename: 'connect-to-app.html',
       chunks: ['connectToApp'],
-      cache: false
+      ...htmlWebpackPluginOptions
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(
+        __dirname,
+        'src',
+        'apps',
+        'signature-request',
+        'index.html'
+      ),
+      filename: 'signature-request.html',
+      chunks: ['signatureRequest'],
+      ...htmlWebpackPluginOptions
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname, 'src', 'apps', 'onboarding', 'index.html'),
+      filename: 'onboarding.html',
+      chunks: ['onboarding'],
+      ...htmlWebpackPluginOptions
     }),
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer']
@@ -235,7 +343,7 @@ const options = {
   }
 };
 
-if (env.NODE_ENV === 'development') {
+if (isDev) {
   options.devtool = 'cheap-module-source-map';
 } else {
   options.optimization = {

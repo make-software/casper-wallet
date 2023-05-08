@@ -4,29 +4,37 @@ import { Trans, useTranslation } from 'react-i18next';
 import {
   FooterButtonsAbsoluteContainer,
   ContentContainer,
-  HeaderTextContainer,
-  TextContainer
-} from '@src/libs/layout/containers';
-import { Button, Typography } from '@libs/ui';
-import { closeWindow } from '@import-account-with-file/utils/close-window';
+  ParagraphContainer,
+  IllustrationContainer,
+  SpacingSize
+} from '@src/libs/layout';
+import { Button, SvgIcon, Typography } from '@src/libs/ui';
+
+import { closeCurrentWindow } from '@src/background/close-current-window';
 
 export function ImportAccountWithFileSuccessContentPage() {
   const { t } = useTranslation();
 
   return (
     <ContentContainer>
-      <HeaderTextContainer>
-        <Typography type="header" weight="bold">
+      <IllustrationContainer>
+        <SvgIcon src="assets/illustrations/account-imported.svg" size={120} />
+      </IllustrationContainer>
+      <ParagraphContainer top={SpacingSize.ExtraLarge}>
+        <Typography type="header">
           <Trans t={t}>Your account was successfully imported</Trans>
         </Typography>
-      </HeaderTextContainer>
-      <TextContainer>
-        <Typography type="body" weight="regular" color="contentSecondary">
-          <Trans t={t}>Now you can see it in your accounts list.</Trans>
+      </ParagraphContainer>
+      <ParagraphContainer top={SpacingSize.Medium}>
+        <Typography type="body" color="contentSecondary">
+          <Trans t={t}>
+            Imported accounts are distinguished by an ‘IMPORTED’ badge in the
+            account lists.
+          </Trans>
         </Typography>
-      </TextContainer>
+      </ParagraphContainer>
       <FooterButtonsAbsoluteContainer>
-        <Button onClick={() => closeWindow()}>
+        <Button onClick={() => closeCurrentWindow()}>
           <Trans t={t}>Done</Trans>
         </Button>
       </FooterButtonsAbsoluteContainer>

@@ -6,7 +6,10 @@ export type Browser = 'chrome' | 'firefox' | 'safari';
 
 export interface BuildWebDriver {
   port?: number;
-  browser?: Browser;
+  browser: Browser;
+  headless: boolean;
+  seleniumHost: string;
+  seleniumPort?: string;
 }
 
 export interface DriverKey {
