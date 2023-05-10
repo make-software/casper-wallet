@@ -1,5 +1,6 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import styled from 'styled-components';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Typography } from '@libs/ui';
 import { AlignedSpaceBetweenFlexRow, CenteredFlexRow } from '@libs/layout';
@@ -37,7 +38,9 @@ interface TabsProps {
 }
 
 export function Tabs({ children }: TabsProps) {
-  const [activeTabId, setActiveTabId] = React.useState(0);
+  const [activeTabId, setActiveTabId] = useState(0);
+
+  const { t } = useTranslation();
 
   return (
     <TabsContainer>
@@ -46,7 +49,9 @@ export function Tabs({ children }: TabsProps) {
 
         return activeTabId === index ? (
           <ActiveTabContainer title={tabName} key={tabName}>
-            <Typography type="captionMedium">{tabName}</Typography>
+            <Typography type="captionMedium">
+              <Trans t={t}>{tabName}</Trans>
+            </Typography>
           </ActiveTabContainer>
         ) : (
           <TabContainer
@@ -58,7 +63,9 @@ export function Tabs({ children }: TabsProps) {
             title={tabName === 'NFTs' ? 'Coming Soon' : tabName}
             key={tabName}
           >
-            <Typography type="captionRegular">{tabName}</Typography>
+            <Typography type="captionRegular">
+              <Trans t={t}>{tabName}</Trans>
+            </Typography>
           </TabContainer>
         );
       })}

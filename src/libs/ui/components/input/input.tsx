@@ -82,7 +82,8 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
     display: 'none'
   },
   '::-webkit-calendar-picker-indicator': {
-    visibility: 'hidden'
+    // Important flag needed because of the specificity of the CSS selector
+    display: 'none !important'
   }
 }));
 
@@ -210,7 +211,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
           onFocus={handleFocus}
           data-testid={dataTestId}
           readOnly={readOnly}
-          listId={listId}
+          list={listId}
         />
 
         {listId && (

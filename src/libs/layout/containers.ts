@@ -160,7 +160,7 @@ export const InputsContainer = styled.div`
 `;
 
 export const TransferInputContainer = styled.div`
-  margin-top: 8px;
+  margin-top: 28px;
 `;
 
 // Default direction value is `column`
