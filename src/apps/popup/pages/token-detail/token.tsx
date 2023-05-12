@@ -25,7 +25,7 @@ const FooterItemContainer = styled(CenteredFlexRow)`
   padding: 24px 0 16px;
 `;
 
-const ButtonCircleContainer = styled(CenteredFlexRow)`
+const IconCircleContainer = styled(CenteredFlexRow)`
   height: 48px;
   width: 48px;
 
@@ -94,21 +94,21 @@ export const Token = () => {
             gap={SpacingSize.Medium}
             onClick={() => navigate(RouterPath.Transfer)}
           >
-            <ButtonCircleContainer>
+            <IconCircleContainer>
               <SvgIcon src="assets/icons/transfer.svg" color="contentOnFill" />
-            </ButtonCircleContainer>
+            </IconCircleContainer>
             <Typography type="captionMedium" color="contentBlue">
               <Trans t={t}>Send</Trans>
             </Typography>
           </SendButtonContainer>
           <Link color="inherit" target="_blank" href={hrefToTokenOnCasperLive}>
             <CenteredFlexColumn gap={SpacingSize.Medium}>
-              <ButtonCircleContainer>
+              <IconCircleContainer>
                 <SvgIcon
                   src="assets/icons/external-link.svg"
                   color="contentOnFill"
                 />
-              </ButtonCircleContainer>
+              </IconCircleContainer>
               <Typography type="captionMedium" color="contentBlue">
                 CSPR.live
               </Typography>
