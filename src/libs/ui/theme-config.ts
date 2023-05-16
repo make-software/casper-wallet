@@ -67,6 +67,7 @@ export const themeConfig = {
     contentGreen: '#2DDC88',
     contentGreenOnFill: '#77FFBE',
     contentYellow: '#E0BB38',
+    contentLightBlue: '#7490FF',
 
     brandRed: '#FF0012',
     black: '#000000'

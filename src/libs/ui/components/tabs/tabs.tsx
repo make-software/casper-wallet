@@ -2,7 +2,7 @@ import React, { ReactNode, useState } from 'react';
 import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { Typography } from '@libs/ui';
+import { Typography, Tooltip } from '@libs/ui';
 import { AlignedSpaceBetweenFlexRow, CenteredFlexRow } from '@libs/layout';
 
 const TabsContainer = styled(AlignedSpaceBetweenFlexRow)`
@@ -27,6 +27,11 @@ const TabContainer = styled(CenteredFlexRow)<{ disable?: boolean }>`
 `;
 
 export const Tab = styled.div<TabProps>``;
+
+const ChildrenContainer = styled.div`
+  max-height: 350px;
+  overflow-y: auto;
+`;
 
 interface TabProps {
   tabName: string;
@@ -61,19 +66,22 @@ export function Tabs({ children }: TabsProps) {
                 setActiveTabId(index);
               }}
               disable={tabName === 'NFTs'}
-              title={tabName === 'NFTs' ? 'Coming Soon' : tabName}
               key={tabName}
             >
-              <Typography type="captionRegular">
-                <Trans t={t}>{tabName}</Trans>
-              </Typography>
+              <Tooltip title={tabName === 'NFTs' ? 'Coming Soon' : null}>
+                <Typography type="captionRegular">
+                  <Trans t={t}>{tabName}</Trans>
+                </Typography>
+              </Tooltip>
             </TabContainer>
           );
         })}
       </TabsContainer>
 
       {children.map((tab, index) =>
-        activeTabId === index ? tab.props.children : null
+        activeTabId === index ? (
+          <ChildrenContainer>{tab.props.children}</ChildrenContainer>
+        ) : null
       )}
     </>
   );

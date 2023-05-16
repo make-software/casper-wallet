@@ -24,8 +24,11 @@ import {
   Hash,
   HashDisplayContext,
   HashVariant,
+  List,
   Tile,
-  Typography
+  Typography,
+  TransactionPlate,
+  AccountActionsMenuPopover
 } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -38,10 +41,10 @@ import {
   selectCountOfAccounts
 } from '@src/background/redux/root-selector';
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
-import { AccountActionsMenuPopover } from '@libs/ui/components/account-popover/account-popover';
 import { Tab, Tabs } from '@libs/ui/components/tabs/tabs';
 import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
 import { TokensList } from '@popup/pages/home/components/tokens-list';
+import { useAccountTransactions } from '@hooks/use-account-transactions';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
@@ -82,6 +85,7 @@ export function HomePageContent() {
   );
 
   const { balance } = useActiveAccountBalance();
+  const { transactions } = useAccountTransactions();
 
   const handleConnectAccount = useCallback(() => {
     if (!activeAccount || isActiveAccountConnected) {
@@ -145,7 +149,11 @@ export function HomePageContent() {
                   CSPR
                 </Typography>
               </FlexRow>
-              <Typography type="body" color="contentSecondary">
+              <Typography
+                type="body"
+                color="contentSecondary"
+                loading={!balance.amountMotes}
+              >
                 {balance.amountFiat}
               </Typography>
             </BalanceContainer>
@@ -179,7 +187,16 @@ export function HomePageContent() {
           <Tab tabName="Tokens">
             <TokensList />
           </Tab>
-          <Tab tabName="Activity" />
+          <Tab tabName="Activity">
+            <List
+              contentTop={SpacingSize.Medium}
+              rows={transactions}
+              renderRow={transaction => (
+                <TransactionPlate transactionInfo={transaction} />
+              )}
+              marginLeftForItemSeparatorLine={54}
+            />
+          </Tab>
           <Tab tabName="NFTs" />
         </Tabs>
       </VerticalSpaceContainer>
