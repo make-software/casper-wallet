@@ -1,9 +1,13 @@
 export function truncateKey(
   key: string,
-  options: { size?: 'small' | 'max' } = {}
+  options: { size?: 'tiny' | 'small' | 'max' } = {}
 ): string {
   let beginOfKey, endOfKey;
   switch (options.size) {
+    case 'tiny':
+      beginOfKey = key.slice(0, 3);
+      endOfKey = key.slice(key.length - 3);
+      break;
     case 'small':
     default:
       beginOfKey = key.slice(0, 5);

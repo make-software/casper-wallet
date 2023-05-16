@@ -10,6 +10,7 @@ export type ContentColor =
   | 'contentRed'
   | 'contentGreen'
   | 'contentGreenOnFill'
+  | 'contentLightBlue'
   | 'contentYellow'
   | 'brandRed';
 
@@ -28,6 +29,7 @@ export function getColorFromTheme(theme: DefaultTheme, color: Color) {
     contentGreen: theme.color.contentGreen,
     contentGreenOnFill: theme.color.contentGreenOnFill,
     contentYellow: theme.color.contentYellow,
+    contentLightBlue: theme.color.contentLightBlue,
     brandRed: theme.color.brandRed
   }[color];
 }

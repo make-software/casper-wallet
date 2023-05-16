@@ -99,6 +99,7 @@ import {
   WalletLockedError
 } from '@src/content/sdk-errors';
 import { recipientPublicKeyAdded } from './redux/recent-recipient-public-keys/actions';
+import { fetchAccountTransactions } from '@libs/services/transactions-service';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -542,6 +543,30 @@ browser.runtime.onMessage.addListener(
 
               return sendResponse(
                 serviceMessage.fetchAccountInfoResponse(accountInfo)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchAccountTransactionsRequest): {
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const { data: accountTransactions } =
+                await fetchAccountTransactions({
+                  accountHash: action.payload.accountHash,
+                  casperApiUrl
+                });
+
+              return sendResponse(
+                serviceMessage.fetchAccountTransactionsResponse(
+                  accountTransactions
+                )
               );
             } catch (error) {
               console.error(error);

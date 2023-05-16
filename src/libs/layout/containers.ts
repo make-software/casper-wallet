@@ -124,6 +124,10 @@ export const LeftAlignedFlexColumn = styled(FlexColumn)`
   align-items: flex-start;
 `;
 
+export const RightAlignedFlexColumn = styled(FlexColumn)`
+  align-items: flex-end;
+`;
+
 export const SpaceBetweenFlexColumn = styled(FlexColumn)`
   justify-content: space-between;
 `;
