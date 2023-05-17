@@ -557,16 +557,14 @@ browser.runtime.onMessage.addListener(
             );
 
             try {
-              const { data: accountTransactions } =
-                await fetchAccountTransactions({
-                  accountHash: action.payload.accountHash,
-                  casperApiUrl
-                });
+              const data = await fetchAccountTransactions({
+                accountHash: action.payload.accountHash,
+                casperApiUrl,
+                page: action.payload.page
+              });
 
               return sendResponse(
-                serviceMessage.fetchAccountTransactionsResponse(
-                  accountTransactions
-                )
+                serviceMessage.fetchAccountTransactionsResponse(data)
               );
             } catch (error) {
               console.error(error);

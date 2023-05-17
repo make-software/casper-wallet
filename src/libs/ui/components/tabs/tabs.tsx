@@ -80,7 +80,9 @@ export function Tabs({ children }: TabsProps) {
 
       {children.map((tab, index) =>
         activeTabId === index ? (
-          <ChildrenContainer>{tab.props.children}</ChildrenContainer>
+          <ChildrenContainer key={index.toString()}>
+            {tab.props.children}
+          </ChildrenContainer>
         ) : null
       )}
     </>

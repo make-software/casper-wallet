@@ -25,6 +25,7 @@ export * from './components/avatar/avatar';
 export * from './components/tooltip/tooltip';
 export * from './components/transaction-plate/transaction-plate';
 export * from './components/account-popover/account-popover';
+export * from './components/activity-list/activity-list';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

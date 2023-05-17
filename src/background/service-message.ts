@@ -24,7 +24,7 @@ export const serviceMessage = {
     Meta
   >(),
   fetchAccountTransactionsRequest: createAction('FETCH_ACCOUNT_TRANSACTIONS')<
-    { accountHash: string },
+    { accountHash: string; page: number },
     Meta
   >(),
   fetchAccountTransactionsResponse: createAction(

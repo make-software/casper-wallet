@@ -25,11 +25,10 @@ import {
   HashDisplayContext,
   HashVariant,
   Link,
-  List,
   Tile,
   Typography,
-  TransactionPlate,
-  AccountActionsMenuPopover
+  AccountActionsMenuPopover,
+  ActivityList
 } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -44,7 +43,6 @@ import {
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { Tab, Tabs } from '@libs/ui/components/tabs/tabs';
 import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
-import { useAccountTransactions } from '@hooks/use-account-transactions';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
@@ -89,7 +87,6 @@ export function HomePageContent() {
   );
 
   const { balance } = useActiveAccountBalance();
-  const { transactions } = useAccountTransactions();
 
   const handleConnectAccount = useCallback(() => {
     if (!activeAccount || isActiveAccountConnected) {
@@ -190,14 +187,7 @@ export function HomePageContent() {
         <Tabs>
           <Tab tabName="Tokens" />
           <Tab tabName="Activity">
-            <List
-              contentTop={SpacingSize.Medium}
-              rows={transactions}
-              renderRow={transaction => (
-                <TransactionPlate transactionInfo={transaction} />
-              )}
-              marginLeftForItemSeparatorLine={54}
-            />
+            <ActivityList />
           </Tab>
           <Tab tabName="NFTs" />
         </Tabs>
