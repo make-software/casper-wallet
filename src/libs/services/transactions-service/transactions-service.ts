@@ -4,33 +4,37 @@ import { serviceMessage } from '@background/service-message';
 import { queryClient } from '@libs/services/query-client';
 import { DataWithPayload } from '@libs/services/types';
 import {
-  Transaction,
-  getAccountTransfersLink
+  getAccountTransfersLink,
+  GetAccountTransactionsResponse
 } from '@libs/services/transactions-service';
 
 export const transactionsRequest = (
   casperApiUrl: string,
-  accountHash: string
+  accountHash: string,
+  page: number
 ) =>
-  fetch(getAccountTransfersLink(accountHash, casperApiUrl))
+  fetch(getAccountTransfersLink(accountHash, casperApiUrl, page))
     .then(toJson)
     .catch(handleError);
 
 export const fetchAccountTransactions = ({
   accountHash,
-  casperApiUrl
+  casperApiUrl,
+  page
 }: {
   accountHash: string;
   casperApiUrl: string;
+  page: number;
 }) =>
   queryClient.fetchQuery(
-    ['accountTransactionsRequest', accountHash, casperApiUrl],
-    () => transactionsRequest(casperApiUrl, accountHash)
+    ['accountTransactionsRequest', accountHash, casperApiUrl, page],
+    () => transactionsRequest(casperApiUrl, accountHash, page)
   );
 
 export const dispatchFetchAccountTransactions = (
-  accountHash: string
-): Promise<DataWithPayload<Transaction[]>> =>
+  accountHash: string,
+  page: number
+): Promise<DataWithPayload<GetAccountTransactionsResponse>> =>
   dispatchToMainStore(
-    serviceMessage.fetchAccountTransactionsRequest({ accountHash })
+    serviceMessage.fetchAccountTransactionsRequest({ accountHash, page })
   );
