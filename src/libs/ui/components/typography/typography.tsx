@@ -140,8 +140,7 @@ const StyledTypography = styled('span').withConfig({
         ...base,
         fontSize: '1.2rem',
         lineHeight: '1.6rem',
-        fontWeight: theme.typography.fontWeight.medium,
-        textTransform: 'uppercase'
+        fontWeight: theme.typography.fontWeight.medium
       };
     case 'body':
       return bodyBase;

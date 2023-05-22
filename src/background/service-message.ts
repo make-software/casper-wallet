@@ -2,7 +2,11 @@ import { ActionType, createAction } from 'typesafe-actions';
 
 import { FetchBalanceResponse } from '@libs/services/balance-service';
 import { AccountInfo } from '@libs/services/account-info';
-import { GetAccountTransactionsResponse } from '@libs/services/transactions-service';
+import {
+  ExtendedDeployResult,
+  LedgerLiveDeploysResult
+} from 'src/libs/services/account-activity-service';
+import { PaginatedResponse } from '@libs/services/types';
 
 type Meta = void;
 
@@ -23,13 +27,21 @@ export const serviceMessage = {
     AccountInfo,
     Meta
   >(),
-  fetchAccountTransactionsRequest: createAction('FETCH_ACCOUNT_TRANSACTIONS')<
-    { accountHash: string; page: number },
+  fetchAccountActivityRequest: createAction('FETCH_ACCOUNT_ACTIVITY')<
+    { publicKey: string; page: number },
     Meta
   >(),
-  fetchAccountTransactionsResponse: createAction(
-    'FETCH_ACCOUNT_TRANSACTIONS_RESPONSE'
-  )<GetAccountTransactionsResponse, Meta>()
+  fetchAccountActivityResponse: createAction('FETCH_ACCOUNT_ACTIVITY_RESPONSE')<
+    PaginatedResponse<LedgerLiveDeploysResult>,
+    Meta
+  >(),
+  fetchExtendedDeploysInfoRequest: createAction('FETCH_EXTENDED_DEPLOYS_INFO')<
+    { deployHash: string },
+    Meta
+  >(),
+  fetchExtendedDeploysInfoResponse: createAction(
+    'FETCH_EXTENDED_DEPLOYS_INFO_RESPONSE'
+  )<ExtendedDeployResult, Meta>()
 };
 
 export type ServiceMessage = ActionType<typeof serviceMessage>;

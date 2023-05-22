@@ -3,6 +3,11 @@ const SECOND = 1000;
 export const getBlockExplorerAccountUrl = (baseUrl: string, hash: string) =>
   `${baseUrl}/account/${hash}`;
 
+export const getBlockExplorerDeployUrl = (
+  casperLiveUrl: string,
+  deployHash: string
+) => `${casperLiveUrl}/deploy/${deployHash}`;
+
 export const FETCH_QUERY_OPTIONS = {
   // cached for 30 sec
   apiCacheTime: 30 * SECOND

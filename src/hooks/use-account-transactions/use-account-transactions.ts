@@ -2,44 +2,44 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import {
-  dispatchFetchAccountTransactions,
-  Transaction
-} from '@libs/services/transactions-service';
-import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import {
+  LedgerLiveDeploysResult,
+  dispatchFetchAccountActivity
+} from '@libs/services/account-activity-service';
 
 export const useAccountTransactions = () => {
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<LedgerLiveDeploysResult[]>(
+    []
+  );
 
-  const observerElem = useRef(null);
+  const observerElement = useRef(null);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
 
   useEffect(() => {
-    dispatchFetchAccountTransactions(
-      getAccountHashFromPublicKey(activeAccount?.publicKey),
-      1
-    )
+    if (!activeAccount?.publicKey) return;
+
+    dispatchFetchAccountActivity(activeAccount?.publicKey, 1)
       .then(({ payload: { data: accountTransactions, pageCount } }) => {
         setTransactions(accountTransactions);
 
+        // Set page to 2, so we can fetch more transactions when the user scrolls down
         setPage(2);
         setPageCount(pageCount);
       })
       .catch(error => {
-        console.error('Account transactions request failed:', error);
+        console.error('Account activity request failed:', error);
       });
   }, [activeAccount?.publicKey, casperApiUrl]);
 
   const fetchMoreTransactions = useCallback(() => {
-    dispatchFetchAccountTransactions(
-      getAccountHashFromPublicKey(activeAccount?.publicKey),
-      page
-    )
+    if (!activeAccount?.publicKey) return;
+
+    dispatchFetchAccountActivity(activeAccount?.publicKey, page)
       .then(({ payload: { data: accountTransactions, pageCount } }) => {
         const newTransactions = [...transactions, ...accountTransactions];
 
@@ -49,7 +49,7 @@ export const useAccountTransactions = () => {
         setPageCount(pageCount);
       })
       .catch(error => {
-        console.error('Account transactions request failed:', error);
+        console.error('Account activity request failed:', error);
       });
   }, [activeAccount?.publicKey, page, transactions]);
 
@@ -65,7 +65,7 @@ export const useAccountTransactions = () => {
   );
 
   useEffect(() => {
-    const element = observerElem.current;
+    const element = observerElement.current;
     const option = { threshold: 0 };
 
     const observer = new IntersectionObserver(handleObserver, option);
@@ -82,8 +82,8 @@ export const useAccountTransactions = () => {
   return {
     transactions: transactions.map(transaction => ({
       ...transaction,
-      id: transaction.deployHash
+      id: transaction.deploy_hash
     })),
-    observerElem
+    observerElement
   };
 };

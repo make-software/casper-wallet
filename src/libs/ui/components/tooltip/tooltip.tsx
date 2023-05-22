@@ -6,25 +6,39 @@ import { Typography } from '@libs/ui';
 interface TooltipProps {
   title?: string | null;
   children: React.ReactNode;
+  placement?: Placement;
 }
+
+type Placement = 'center' | 'topLeft';
 
 type Ref = HTMLDivElement;
 
-const TooltipTip = styled.div`
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: -45px;
+const TooltipTip = styled.div<{ placement: Placement }>(
+  ({ theme, placement }) => ({
+    position: 'absolute',
 
-  padding: 8px 16px;
+    ...(placement === 'center' && {
+      left: '50%',
+      transform: 'translateX(-50%)',
+      top: '-45px'
+    }),
 
-  background-color: ${({ theme }) => theme.color.backgroundPrimary};
-  border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+    ...(placement === 'topLeft' && {
+      right: '0',
+      top: '-45px'
+    }),
 
-  transition: opacity 250ms ease-in-out;
-  opacity: 0;
-`;
+    padding: '8px 16px',
+
+    backgroundColor: `${theme.color.backgroundPrimary}`,
+    borderRadius: `${theme.borderRadius.twelve}px`,
+    boxShadow: '0 0 10px rgba(0, 0, 0, 0.08)',
+
+    transition: 'opacity 250ms ease-in-out',
+    opacity: '0',
+    visibility: 'hidden'
+  })
+);
 
 const Container = styled.div`
   position: relative;
@@ -33,11 +47,12 @@ const Container = styled.div`
 const ChildrenContainer = styled.div`
   &:hover + ${TooltipTip} {
     opacity: 1;
+    visibility: visible;
   }
 `;
 
 export const Tooltip = forwardRef<Ref, TooltipProps>(
-  ({ title, children }, ref) => {
+  ({ title, placement = 'center', children }, ref) => {
     if (title == null) {
       return <>{children}</>;
     }
@@ -45,7 +60,7 @@ export const Tooltip = forwardRef<Ref, TooltipProps>(
     return (
       <Container ref={ref}>
         <ChildrenContainer>{children}</ChildrenContainer>
-        <TooltipTip>
+        <TooltipTip placement={placement}>
           <Typography type="captionRegular" noWrap>
             {title}
           </Typography>
