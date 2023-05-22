@@ -1,8 +1,17 @@
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import { Tile, Typography } from '@libs/ui';
-import { SpacingSize, VerticalSpaceContainer } from '@src/libs/layout';
+import {
+  SpacingSize,
+  VerticalSpaceContainer,
+  borderBottomPseudoElementRules,
+  BorderBottomPseudoElementProps
+} from '@src/libs/layout';
+
+interface ScrollableProps extends BorderBottomPseudoElementProps {
+  scrollable?: boolean;
+}
 
 const SpacedBetweenFlexRox = styled.div`
   display: flex;
@@ -15,28 +24,17 @@ const PointerContainer = styled.div`
   cursor: pointer;
 `;
 
-interface BorderBottomPseudoElementProps {
-  marginLeftForItemSeparatorLine: number;
-}
-
-const borderBottomPseudoElementRules = css<BorderBottomPseudoElementProps>`
-  content: '';
-  width: ${({ marginLeftForItemSeparatorLine }) =>
-    `calc(100% - ${marginLeftForItemSeparatorLine}px)`};
-  margin-left: ${({ marginLeftForItemSeparatorLine }) =>
-    marginLeftForItemSeparatorLine}px;
-  border-bottom: ${({ theme }) => `0.5px solid ${theme.color.borderPrimary}`};
-`;
-
-const RowsContainer = styled.div`
-  & > * + *:before {
-    ${borderBottomPseudoElementRules};
-  }
-`;
-
 const FlexColumn = styled.div`
   display: flex;
   flex-direction: column;
+`;
+
+export const RowsContainer = styled.div<ScrollableProps>`
+  ${({ scrollable }) => scrollable && 'overflow-y: scroll; max-height: 350px;'};
+
+  & > * + *:before {
+    ${borderBottomPseudoElementRules};
+  }
 `;
 
 const RowContainer = styled(FlexColumn)``;
@@ -70,6 +68,7 @@ interface ListProps<ListRow extends ListRowBase>
   headerAction?: HeaderAction;
   headerLabelTop?: SpacingSize;
   contentTop?: SpacingSize;
+  scrollable?: boolean;
 }
 
 export function List<ListRow extends ListRowBase>({
@@ -81,20 +80,22 @@ export function List<ListRow extends ListRowBase>({
   headerAction,
   marginLeftForItemSeparatorLine,
   headerLabelTop = SpacingSize.XL,
-  contentTop = SpacingSize.XL
+  contentTop = SpacingSize.XL,
+  scrollable
 }: ListProps<ListRow>) {
   return (
     <>
       {headerLabel && (
         <VerticalSpaceContainer top={headerLabelTop}>
           <SpacedBetweenFlexRox>
-            <Typography type="labelMedium" color="contentSecondary">
+            <Typography type="labelMedium" uppercase color="contentSecondary">
               {headerLabel}
             </Typography>
             {headerAction && (
               <PointerContainer>
                 <Typography
                   type="labelMedium"
+                  uppercase
                   color="contentBlue"
                   onClick={headerAction.onClick}
                 >
@@ -115,6 +116,7 @@ export function List<ListRow extends ListRowBase>({
             </ListHeaderContainer>
           )}
           <RowsContainer
+            scrollable={scrollable}
             marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
           >
             {rows.map((row, index, array) => (

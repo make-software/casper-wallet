@@ -99,7 +99,10 @@ import {
   WalletLockedError
 } from '@src/content/sdk-errors';
 import { recipientPublicKeyAdded } from './redux/recent-recipient-public-keys/actions';
-import { fetchAccountTransactions } from '@libs/services/transactions-service';
+import {
+  fetchAccountActivity,
+  fetchExtendedDeploysInfo
+} from '@libs/services/account-activity-service';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -551,20 +554,36 @@ browser.runtime.onMessage.addListener(
             return;
           }
 
-          case getType(serviceMessage.fetchAccountTransactionsRequest): {
+          case getType(serviceMessage.fetchAccountActivityRequest): {
+            try {
+              const data = await fetchAccountActivity({
+                publicKey: action.payload.publicKey,
+                page: action.payload.page
+              });
+
+              return sendResponse(
+                serviceMessage.fetchAccountActivityResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchExtendedDeploysInfoRequest): {
             const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
-              const data = await fetchAccountTransactions({
-                accountHash: action.payload.accountHash,
-                casperApiUrl,
-                page: action.payload.page
+              const data = await fetchExtendedDeploysInfo({
+                deployHash: action.payload.deployHash,
+                casperApiUrl
               });
 
               return sendResponse(
-                serviceMessage.fetchAccountTransactionsResponse(data)
+                serviceMessage.fetchAccountActivityResponse(data)
               );
             } catch (error) {
               console.error(error);

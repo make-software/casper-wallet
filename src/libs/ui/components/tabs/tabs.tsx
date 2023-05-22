@@ -28,11 +28,6 @@ const TabContainer = styled(CenteredFlexRow)<{ disable?: boolean }>`
 
 export const Tab = styled.div<TabProps>``;
 
-const ChildrenContainer = styled.div`
-  max-height: 350px;
-  overflow-y: auto;
-`;
-
 interface TabProps {
   tabName: string;
   children?: ReactNode;
@@ -79,11 +74,7 @@ export function Tabs({ children }: TabsProps) {
       </TabsContainer>
 
       {children.map((tab, index) =>
-        activeTabId === index ? (
-          <ChildrenContainer key={index.toString()}>
-            {tab.props.children}
-          </ChildrenContainer>
-        ) : null
+        activeTabId === index ? tab.props.children : null
       )}
     </>
   );

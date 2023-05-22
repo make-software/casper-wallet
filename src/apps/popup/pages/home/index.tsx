@@ -46,10 +46,6 @@ import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
-export const HomePageContentContainer = styled(ContentContainer)`
-  padding-bottom: 0;
-`;
-
 const fullWidthAndMarginTop = css`
   margin-top: 16px;
   width: 100%;
@@ -101,7 +97,7 @@ export function HomePageContent() {
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
 
   return (
-    <HomePageContentContainer>
+    <ContentContainer>
       {activeAccount && (
         <Tile>
           <TileContainer>
@@ -195,7 +191,7 @@ export function HomePageContent() {
       <Link color="inherit" onClick={() => navigate(RouterPath.Transfer)}>
         Transfer Test
       </Link>
-    </HomePageContentContainer>
+    </ContentContainer>
   );
 }
 
