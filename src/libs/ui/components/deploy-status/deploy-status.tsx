@@ -106,7 +106,7 @@ export const DeployStatus = ({
 
   if (textWithIcon) {
     return (
-      <Tooltip title={message}>
+      <Tooltip title={message} placement="topRight">
         <StatusContainer status={status} gap={SpacingSize.Small}>
           <SvgIcon
             src={StatusIcons[status]}
@@ -124,7 +124,7 @@ export const DeployStatus = ({
   }
 
   return (
-    <Tooltip title={message}>
+    <Tooltip title={message} placement="bottomCenter">
       <Typography
         type="labelMedium"
         color={StatusColors[status] as ContentColor}
