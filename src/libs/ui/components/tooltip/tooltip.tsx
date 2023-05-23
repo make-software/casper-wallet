@@ -9,7 +9,7 @@ interface TooltipProps {
   placement?: Placement;
 }
 
-type Placement = 'center' | 'topLeft';
+type Placement = 'topCenter' | 'topLeft' | 'bottomCenter' | 'topRight';
 
 type Ref = HTMLDivElement;
 
@@ -17,7 +17,9 @@ const TooltipTip = styled.div<{ placement: Placement }>(
   ({ theme, placement }) => ({
     position: 'absolute',
 
-    ...(placement === 'center' && {
+    zIndex: 1,
+
+    ...(placement === 'topCenter' && {
       left: '50%',
       transform: 'translateX(-50%)',
       top: '-45px'
@@ -26,6 +28,17 @@ const TooltipTip = styled.div<{ placement: Placement }>(
     ...(placement === 'topLeft' && {
       right: '0',
       top: '-45px'
+    }),
+
+    ...(placement === 'topRight' && {
+      left: '0',
+      top: '-45px'
+    }),
+
+    ...(placement === 'bottomCenter' && {
+      left: '50%',
+      transform: 'translateX(-50%)',
+      top: '20px'
     }),
 
     padding: '8px 16px',
@@ -52,7 +65,7 @@ const ChildrenContainer = styled.div`
 `;
 
 export const Tooltip = forwardRef<Ref, TooltipProps>(
-  ({ title, placement = 'center', children }, ref) => {
+  ({ title, placement = 'topCenter', children }, ref) => {
     if (title == null) {
       return <>{children}</>;
     }
