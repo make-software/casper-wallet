@@ -24,7 +24,6 @@ import {
   Hash,
   HashDisplayContext,
   HashVariant,
-  Link,
   Tile,
   Typography
 } from '@libs/ui';
@@ -45,10 +44,6 @@ import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
 import { TokensList } from '@popup/pages/home/components/tokens-list';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
-
-export const HomePageContentContainer = styled(ContentContainer)`
-  padding-bottom: 0;
-`;
 
 const fullWidthAndMarginTop = css`
   margin-top: 16px;
@@ -101,7 +96,7 @@ export function HomePageContent() {
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
 
   return (
-    <HomePageContentContainer>
+    <ContentContainer>
       {activeAccount && (
         <Tile>
           <TileContainer>
@@ -188,10 +183,7 @@ export function HomePageContent() {
           <Tab tabName="NFTs" />
         </Tabs>
       </VerticalSpaceContainer>
-      <Link color="inherit" onClick={() => navigate(RouterPath.Transfer)}>
-        Transfer Test
-      </Link>
-    </HomePageContentContainer>
+    </ContentContainer>
   );
 }
 
