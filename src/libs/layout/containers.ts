@@ -258,14 +258,14 @@ export const AvatarContainer = styled(CenteredFlexColumn)<{
 `;
 
 export interface BorderBottomPseudoElementProps {
-  marginLeftForItemSeparatorLine: number;
+  marginLeftForSeparatorLine: number;
 }
 
 export const borderBottomPseudoElementRules = css<BorderBottomPseudoElementProps>`
   content: '';
-  width: ${({ marginLeftForItemSeparatorLine }) =>
-    `calc(100% - ${marginLeftForItemSeparatorLine}px)`};
-  margin-left: ${({ marginLeftForItemSeparatorLine }) =>
-    marginLeftForItemSeparatorLine}px;
+  width: ${({ marginLeftForSeparatorLine }) =>
+    `calc(100% - ${marginLeftForSeparatorLine}px)`};
+  margin-left: ${({ marginLeftForSeparatorLine }) =>
+    marginLeftForSeparatorLine}px;
   border-bottom: ${({ theme }) => `0.5px solid ${theme.color.borderPrimary}`};
 `;

@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import {
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
+  BorderBottomPseudoElementProps,
   borderBottomPseudoElementRules,
   ContentContainer,
   FlexColumn,
@@ -68,9 +69,7 @@ const CostContainer = styled(AlignedSpaceBetweenFlexRow)`
   padding: 8px 16px 8px 0;
 `;
 
-const RowsContainer = styled(FlexColumn)<{
-  marginLeftForItemSeparatorLine: number;
-}>`
+const RowsContainer = styled(FlexColumn)<BorderBottomPseudoElementProps>`
   margin-top: 12px;
 
   & > *:not(:last-child) {
@@ -78,8 +77,8 @@ const RowsContainer = styled(FlexColumn)<{
   }
 
   & > *:last-child {
-    padding-left: ${({ marginLeftForItemSeparatorLine }) =>
-      marginLeftForItemSeparatorLine}px;
+    padding-left: ${({ marginLeftForSeparatorLine }) =>
+      marginLeftForSeparatorLine}px;
   }
 `;
 
@@ -134,7 +133,7 @@ export const ActivityDetailsPageContent = ({
         </Typography>
       </ParagraphContainer>
       <Tile>
-        <RowsContainer marginLeftForItemSeparatorLine={16}>
+        <RowsContainer marginLeftForSeparatorLine={16}>
           <ItemContainer>
             <DeployStatus textWithIcon deployResult={deployInfo} />
             <Link
