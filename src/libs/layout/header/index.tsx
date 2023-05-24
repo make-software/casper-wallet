@@ -8,12 +8,15 @@ import {
   AlignedSpaceBetweenFlexRow,
   LeftAlignedCenteredFlexRow
 } from '@src/libs/layout';
-import { HeaderConnectionStatus } from '@src/libs/layout/header/header-connection-status';
+import { SvgIcon } from '@libs/ui';
 
+import { HeaderConnectionStatus } from './header-connection-status';
 import { HeaderActions } from './header-actions';
 
 const LogoAndConnectionStatusContainer = styled(LeftAlignedCenteredFlexRow)`
   gap: 18px;
+
+  z-index: 1;
 `;
 
 const SubmenuBarContainer = styled(AlignedSpaceBetweenFlexRow)`
@@ -21,6 +24,14 @@ const SubmenuBarContainer = styled(AlignedSpaceBetweenFlexRow)`
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
   border-bottom: 0.5px solid ${({ theme }) => theme.color.borderPrimary};
   padding: 8px ${({ theme }) => theme.padding[1.6]};
+`;
+
+const SvgIconContainer = styled.div`
+  position: absolute;
+  left: 0;
+
+  width: 53px;
+  height: 72px;
 `;
 
 interface HeaderProps {
@@ -39,6 +50,9 @@ export function PopupHeader({
   return (
     <>
       <HeaderContainer>
+        <SvgIconContainer>
+          <SvgIcon src="assets/icons/sign.svg" width={53} height={72} />
+        </SvgIconContainer>
         <LogoAndConnectionStatusContainer>
           <LogoContainer>
             <Logo />
