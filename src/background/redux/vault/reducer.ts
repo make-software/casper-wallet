@@ -51,7 +51,8 @@ export const reducer = createReducer(initialState)
       accounts,
       activeAccountName,
       secretPhrase,
-      jsonById
+      jsonById:
+        Object.keys(state.jsonById).length === 0 ? jsonById : state.jsonById
     })
   )
   .handleAction(
