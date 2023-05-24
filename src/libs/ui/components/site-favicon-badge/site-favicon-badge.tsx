@@ -5,8 +5,6 @@ import { Typography } from '@libs/ui';
 import { AlignedSpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
 
 const SiteFaviconAndHostnameContainer = styled(AlignedSpaceBetweenFlexRow)`
-  width: fit-content;
-
   padding: 4px 12px;
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
@@ -42,11 +40,15 @@ export function SiteFaviconBadge({ origin }: SiteFaviconBadgeProps) {
   if (faviconUrl === null) {
     return null;
   }
-
+  // TODO: change title to tooltip
   return (
-    <SiteFaviconAndHostnameContainer gap={SpacingSize.Small}>
+    <SiteFaviconAndHostnameContainer gap={SpacingSize.Small} title={hostName}>
       <FaviconImg src={faviconUrl} alt={`${hostName} favicon`} />
-      {hostName && <Typography type="body">{hostName}</Typography>}
+      {hostName && (
+        <Typography type="body" ellipsis>
+          {hostName}
+        </Typography>
+      )}
     </SiteFaviconAndHostnameContainer>
   );
 }
