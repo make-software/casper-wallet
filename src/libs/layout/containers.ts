@@ -75,6 +75,12 @@ const getGapSize = (gap?: SpacingSize) => {
       return '12px';
     case SpacingSize.Large:
       return '16px';
+    case SpacingSize.XL:
+      return '20px';
+    case SpacingSize.XXL:
+      return '24px';
+    case SpacingSize.XXXL:
+      return '28px';
     default:
       throw new Error('Unknown gap size');
   }
@@ -122,6 +128,10 @@ export const CenteredFlexColumn = styled(FlexColumn)`
 
 export const LeftAlignedFlexColumn = styled(FlexColumn)`
   align-items: flex-start;
+`;
+
+export const RightAlignedFlexColumn = styled(FlexColumn)`
+  align-items: flex-end;
 `;
 
 export const SpaceBetweenFlexColumn = styled(FlexColumn)`

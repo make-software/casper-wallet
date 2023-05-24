@@ -16,15 +16,15 @@ const PointerContainer = styled.div`
 `;
 
 interface BorderBottomPseudoElementProps {
-  marginLeftForItemSeparatorLine: number;
+  marginLeftForSeparatorLine: number;
 }
 
 const borderBottomPseudoElementRules = css<BorderBottomPseudoElementProps>`
   content: '';
-  width: ${({ marginLeftForItemSeparatorLine }) =>
-    `calc(100% - ${marginLeftForItemSeparatorLine}px)`};
-  margin-left: ${({ marginLeftForItemSeparatorLine }) =>
-    marginLeftForItemSeparatorLine}px;
+  width: ${({ marginLeftForSeparatorLine }) =>
+    `calc(100% - ${marginLeftForSeparatorLine}px)`};
+  margin-left: ${({ marginLeftForSeparatorLine }) =>
+    marginLeftForSeparatorLine}px;
   border-bottom: ${({ theme }) => `0.5px solid ${theme.color.borderPrimary}`};
 `;
 
@@ -60,8 +60,7 @@ interface ListRowBase {
   id: number | string;
 }
 
-interface ListProps<ListRow extends ListRowBase>
-  extends BorderBottomPseudoElementProps {
+interface ListProps<ListRow extends ListRowBase> {
   rows: ListRow[];
   renderRow: (row: ListRow, index: number, array: ListRow[]) => JSX.Element;
   renderFooter?: () => JSX.Element;
@@ -70,6 +69,8 @@ interface ListProps<ListRow extends ListRowBase>
   headerAction?: HeaderAction;
   headerLabelTop?: SpacingSize;
   contentTop?: SpacingSize;
+  marginLeftForHeaderSeparatorLine?: number;
+  marginLeftForItemSeparatorLine: number;
 }
 
 export function List<ListRow extends ListRowBase>({
@@ -80,6 +81,7 @@ export function List<ListRow extends ListRowBase>({
   headerLabel,
   headerAction,
   marginLeftForItemSeparatorLine,
+  marginLeftForHeaderSeparatorLine,
   headerLabelTop = SpacingSize.XL,
   contentTop = SpacingSize.XL
 }: ListProps<ListRow>) {
@@ -109,13 +111,16 @@ export function List<ListRow extends ListRowBase>({
         <Tile>
           {renderHeader && (
             <ListHeaderContainer
-              marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
+              marginLeftForSeparatorLine={
+                marginLeftForHeaderSeparatorLine ||
+                marginLeftForItemSeparatorLine
+              }
             >
               {renderHeader()}
             </ListHeaderContainer>
           )}
           <RowsContainer
-            marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
+            marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
           >
             {rows.map((row, index, array) => (
               <RowContainer key={row.id}>
@@ -125,7 +130,7 @@ export function List<ListRow extends ListRowBase>({
           </RowsContainer>
           {renderFooter && (
             <ListFooterContainer
-              marginLeftForItemSeparatorLine={marginLeftForItemSeparatorLine}
+              marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
             >
               {renderFooter()}
             </ListFooterContainer>

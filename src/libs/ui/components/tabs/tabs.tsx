@@ -43,32 +43,38 @@ export function Tabs({ children }: TabsProps) {
   const { t } = useTranslation();
 
   return (
-    <TabsContainer>
-      {children.map((tab, index) => {
-        const { tabName } = tab.props;
+    <>
+      <TabsContainer>
+        {children.map((tab, index) => {
+          const { tabName } = tab.props;
 
-        return activeTabId === index ? (
-          <ActiveTabContainer title={tabName} key={tabName}>
-            <Typography type="captionMedium">
-              <Trans t={t}>{tabName}</Trans>
-            </Typography>
-          </ActiveTabContainer>
-        ) : (
-          <TabContainer
-            onClick={() => {
-              if (tabName === 'NFTs') return;
-              setActiveTabId(index);
-            }}
-            disable={tabName === 'NFTs'}
-            title={tabName === 'NFTs' ? 'Coming Soon' : tabName}
-            key={tabName}
-          >
-            <Typography type="captionRegular">
-              <Trans t={t}>{tabName}</Trans>
-            </Typography>
-          </TabContainer>
-        );
-      })}
-    </TabsContainer>
+          return activeTabId === index ? (
+            <ActiveTabContainer title={tabName} key={tabName}>
+              <Typography type="captionMedium">
+                <Trans t={t}>{tabName}</Trans>
+              </Typography>
+            </ActiveTabContainer>
+          ) : (
+            <TabContainer
+              onClick={() => {
+                if (tabName === 'NFTs') return;
+                setActiveTabId(index);
+              }}
+              disable={tabName === 'NFTs'}
+              title={tabName === 'NFTs' ? 'Coming Soon' : tabName}
+              key={tabName}
+            >
+              <Typography type="captionRegular">
+                <Trans t={t}>{tabName}</Trans>
+              </Typography>
+            </TabContainer>
+          );
+        })}
+      </TabsContainer>
+
+      {children.map((tab, index) =>
+        activeTabId === index ? tab.props.children : null
+      )}
+    </>
   );
 }

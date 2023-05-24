@@ -24,7 +24,6 @@ import {
   Hash,
   HashDisplayContext,
   HashVariant,
-  Link,
   Tile,
   Typography
 } from '@libs/ui';
@@ -41,13 +40,10 @@ import {
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { AccountActionsMenuPopover } from '@libs/ui/components/account-popover/account-popover';
 import { Tab, Tabs } from '@libs/ui/components/tabs/tabs';
+import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
+import { TokensList } from '@popup/pages/home/components/tokens-list';
 
 import { ConnectionStatusBadge } from './components/connection-status-badge';
-import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
-
-export const HomePageContentContainer = styled(ContentContainer)`
-  padding-bottom: 0;
-`;
 
 const fullWidthAndMarginTop = css`
   margin-top: 16px;
@@ -100,7 +96,7 @@ export function HomePageContent() {
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
 
   return (
-    <HomePageContentContainer>
+    <ContentContainer>
       {activeAccount && (
         <Tile>
           <TileContainer>
@@ -180,15 +176,14 @@ export function HomePageContent() {
       )}
       <VerticalSpaceContainer top={SpacingSize.XL}>
         <Tabs>
-          <Tab tabName="Tokens" />
+          <Tab tabName="Tokens">
+            <TokensList />
+          </Tab>
           <Tab tabName="Activity" />
           <Tab tabName="NFTs" />
         </Tabs>
       </VerticalSpaceContainer>
-      <Link color="inherit" onClick={() => navigate(RouterPath.Transfer)}>
-        Transfer Test
-      </Link>
-    </HomePageContentContainer>
+    </ContentContainer>
   );
 }
 
