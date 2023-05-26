@@ -4,12 +4,25 @@ import { SpacingSize } from '@libs/layout';
 import { List, AccountActivityPlate } from '@libs/ui';
 import { useAccountTransactions } from '@src/hooks';
 
-export const ActivityList = () => {
+export enum ActivityListDisplayContext {
+  Home = 'home',
+  TokenDetails = 'token-details'
+}
+
+interface ActivityListProps {
+  displayContext: ActivityListDisplayContext;
+}
+
+export const ActivityList = ({ displayContext }: ActivityListProps) => {
   const { transactions, observerElement } = useAccountTransactions();
 
   return (
     <List
-      contentTop={SpacingSize.Medium}
+      contentTop={
+        displayContext === ActivityListDisplayContext.Home
+          ? SpacingSize.Medium
+          : SpacingSize.Small
+      }
       rows={transactions}
       scrollable
       renderRow={(transaction, index) => {

@@ -30,7 +30,7 @@ const FlexColumn = styled.div`
 `;
 
 export const RowsContainer = styled.div<ScrollableProps>`
-  ${({ scrollable }) => scrollable && 'overflow-y: scroll; max-height: 350px;'};
+  ${({ scrollable }) => scrollable && 'overflow-y: scroll; max-height: 412px;'};
 
   & > * + *:before {
     ${borderBottomPseudoElementRules};

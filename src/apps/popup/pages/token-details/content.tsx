@@ -6,8 +6,9 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { Typography } from '@libs/ui';
-import { Token } from '@popup/pages/token-detail/token';
+import { ActivityList, ActivityListDisplayContext, Typography } from '@libs/ui';
+
+import { Token } from './token';
 
 export const TokenPageContent = () => {
   const { t } = useTranslation();
@@ -20,6 +21,12 @@ export const TokenPageContent = () => {
         </Typography>
       </ParagraphContainer>
       <Token />
+      <ParagraphContainer top={SpacingSize.XL}>
+        <Typography type="header">
+          <Trans t={t}>Activity</Trans>
+        </Typography>
+      </ParagraphContainer>
+      <ActivityList displayContext={ActivityListDisplayContext.TokenDetails} />
     </ContentContainer>
   );
 };
