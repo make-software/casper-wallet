@@ -18,6 +18,9 @@ import {
 } from '@src/libs/layout/containers';
 
 import {
+  AccountActionsMenuPopover,
+  ActivityList,
+  ActivityListDisplayContext,
   Avatar,
   Button,
   getFontSizeBasedOnTextLength,
@@ -26,8 +29,8 @@ import {
   HashVariant,
   Tile,
   Typography,
-  AccountActionsMenuPopover,
-  ActivityList
+  Tab,
+  Tabs
 } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -35,15 +38,14 @@ import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-wit
 import {
   selectActiveOrigin,
   selectConnectedAccountsWithActiveOrigin,
+  selectCountOfAccounts,
   selectIsActiveAccountConnectedWithActiveOrigin,
-  selectVaultActiveAccount,
-  selectCountOfAccounts
+  selectVaultActiveAccount
 } from '@src/background/redux/root-selector';
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
-import { Tab, Tabs } from '@libs/ui/components/tabs/tabs';
 import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
-import { TokensList } from '@popup/pages/home/components/tokens-list';
 
+import { TokensList } from './components/tokens-list';
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
 const fullWidthAndMarginTop = css`
@@ -185,7 +187,7 @@ export function HomePageContent() {
             <TokensList />
           </Tab>
           <Tab tabName="Activity">
-            <ActivityList />
+            <ActivityList displayContext={ActivityListDisplayContext.Home} />
           </Tab>
           <Tab tabName="NFTs" />
         </Tabs>
