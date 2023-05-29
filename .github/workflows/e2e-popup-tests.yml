@@ -12,6 +12,7 @@ jobs:
 
     container:
       image: node:16
+      options: --shm-size=2gb
 
     strategy:
       fail-fast: false
