@@ -113,7 +113,7 @@ export function SignDeployContent({
   return (
     <PageContainer>
       <ContentContainer>
-        <ParagraphContainer top={SpacingSize.ExtraLarge}>
+        <ParagraphContainer top={SpacingSize.XL}>
           <Typography type="header">
             <Trans t={t}>Signature Request</Trans>
           </Typography>

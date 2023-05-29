@@ -28,7 +28,8 @@ const LabelContainer = styled('div')(({ theme }) => ({
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'space-between',
-  '& > *': { marginBottom: 4 }
+  padding: `0 ${theme.padding[1.6]} 0`,
+  '& > *': { marginBottom: 8 }
 }));
 
 const StatusTextContainer = styled('div')<FormFieldProps>(
@@ -57,8 +58,8 @@ export function FormField({
   return (
     <StyledContainer {...restProps}>
       <LabelContainer>
-        {label && <Typography type="labelMedium">{label}</Typography>}
-        {rightLabel && <Typography type="labelMedium">{rightLabel}</Typography>}
+        {label && <Typography type="bodySemiBold">{label}</Typography>}
+        {rightLabel && <Typography type="body">{rightLabel}</Typography>}
       </LabelContainer>
 
       {children}

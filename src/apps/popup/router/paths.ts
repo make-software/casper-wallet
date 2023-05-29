@@ -13,5 +13,8 @@ export enum RouterPath {
   ConnectedSites = '/connected-sites',
   BackupSecretPhrase = '/backup-secret-phrase',
   DownloadSecretKeys = '/download-secret-keys',
-  DownloadedSecretKeys = '/downloaded-secret-keys'
+  DownloadedSecretKeys = '/downloaded-secret-keys',
+  Transfer = '/transfer',
+  ActivityDetails = '/activity-details',
+  Token = '/token/:tokenName'
 }

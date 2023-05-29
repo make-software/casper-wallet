@@ -3,7 +3,7 @@ import { CLValue } from 'casper-js-sdk';
 
 import {
   formatNumber,
-  formatTimestamp,
+  formatDate,
   motesToCSPR
 } from '@libs/ui/utils/formatters';
 import { Hash, HashVariant, Typography } from '@src/libs/ui';
@@ -52,7 +52,7 @@ export function DeployValue({
     }
 
     if (isKeyOfTimestampValue(id)) {
-      return <Typography type="body">{formatTimestamp(value)}</Typography>;
+      return <Typography type="body">{formatDate(value)}</Typography>;
     }
 
     return <Typography type="body">{value}</Typography>;

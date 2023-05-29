@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { css } from 'styled-components';
@@ -13,52 +13,40 @@ import {
   SpaceAroundFlexColumn,
   SpaceBetweenFlexRow,
   SpacingSize,
-  TileContainer
+  TileContainer,
+  VerticalSpaceContainer
 } from '@src/libs/layout/containers';
 
 import {
+  AccountActionsMenuPopover,
+  ActivityList,
+  ActivityListDisplayContext,
   Avatar,
   Button,
   getFontSizeBasedOnTextLength,
   Hash,
   HashDisplayContext,
   HashVariant,
-  Link,
-  SvgIcon,
   Tile,
-  Typography
+  Typography,
+  Tab,
+  Tabs
 } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
-
-import {
-  ActiveAccountBalance,
-  dispatchFetchActiveAccountBalance
-} from '@libs/services/balance-service';
-import {
-  formatCurrency,
-  formatNumber,
-  motesToCSPR,
-  motesToCurrency
-} from '@libs/ui/utils/formatters';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
-import { getBlockExplorerAccountUrl } from '@src/constants';
-import { selectCasperUrlsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
-
 import {
   selectActiveOrigin,
   selectConnectedAccountsWithActiveOrigin,
+  selectCountOfAccounts,
   selectIsActiveAccountConnectedWithActiveOrigin,
-  selectVaultActiveAccount,
-  selectCountOfAccounts
+  selectVaultActiveAccount
 } from '@src/background/redux/root-selector';
+import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
+import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
+
+import { TokensList } from './components/tokens-list';
 import { ConnectionStatusBadge } from './components/connection-status-badge';
-
-export const HomePageContentContainer = styled(ContentContainer)`
-  padding-bottom: 0;
-`;
-
-// Account info
 
 const fullWidthAndMarginTop = css`
   margin-top: 16px;
@@ -76,8 +64,6 @@ const BalanceContainer = styled(CenteredFlexColumn)`
   }
 `;
 
-// List of accounts
-
 const ButtonsContainer = styled(SpaceAroundFlexColumn)`
   width: 100%;
   margin-top: 24px;
@@ -86,11 +72,6 @@ const ButtonsContainer = styled(SpaceAroundFlexColumn)`
 export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
-
-  const [balance, setBalance] = useState<ActiveAccountBalance>({
-    amount: '-',
-    fiatAmount: '-'
-  });
 
   const activeOrigin = useSelector(selectActiveOrigin);
   const { disconnectAccountWithEvent: disconnectAccount } = useAccountManager();
@@ -102,9 +83,8 @@ export function HomePageContent() {
   const connectedAccounts = useSelector((state: RootState) =>
     selectConnectedAccountsWithActiveOrigin(state)
   );
-  const { casperLiveUrl, casperApiUrl } = useSelector(
-    selectCasperUrlsBaseOnActiveNetworkSetting
-  );
+
+  const { balance } = useActiveAccountBalance();
 
   const handleConnectAccount = useCallback(() => {
     if (!activeAccount || isActiveAccountConnected) {
@@ -118,30 +98,8 @@ export function HomePageContent() {
     }
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
 
-  useEffect(() => {
-    dispatchFetchActiveAccountBalance(activeAccount?.publicKey)
-      .then(({ payload: { balance, currencyRate } }) => {
-        if (balance != null) {
-          const amount = formatNumber(motesToCSPR(balance), {
-            precision: { max: 5 }
-          });
-          const fiatAmount =
-            currencyRate != null
-              ? formatCurrency(motesToCurrency(balance, currencyRate), 'USD', {
-                  precision: 2
-                })
-              : t('Currency service is offline...');
-
-          setBalance({ amount, fiatAmount });
-        }
-      })
-      .catch(error => {
-        console.error('Balance request failed:', error);
-      });
-  }, [activeAccount?.publicKey, casperApiUrl, t]);
-
   return (
-    <HomePageContentContainer>
+    <ContentContainer>
       {activeAccount && (
         <Tile>
           <TileContainer>
@@ -150,19 +108,12 @@ export function HomePageContent() {
                 isConnected={isActiveAccountConnected}
                 displayContext="home"
               />
-              <Link
-                href={getBlockExplorerAccountUrl(
-                  casperLiveUrl,
-                  activeAccount.publicKey
-                )}
-                target="_blank"
-                color="inherit"
-                title={t('View account in CSPR.live')}
-              >
-                <SvgIcon src="assets/icons/external-link.svg" />
-              </Link>
+              <AccountActionsMenuPopover account={activeAccount} />
             </SpaceBetweenFlexRow>
-            <Avatar publicKey={activeAccount.publicKey} />
+            <Avatar
+              publicKey={activeAccount.publicKey}
+              top={SpacingSize.Medium}
+            />
             <NameAndAddressContainer>
               <Typography type="bodySemiBold">{activeAccount.name}</Typography>
               <Hash
@@ -177,20 +128,32 @@ export function HomePageContent() {
               <FlexRow gap={SpacingSize.Small} wrap="wrap">
                 <Typography
                   type="CSPRBold"
-                  fontSize={getFontSizeBasedOnTextLength(balance.amount.length)}
+                  fontSize={getFontSizeBasedOnTextLength(
+                    balance.amountMotes?.length || 1
+                  )}
                 >
-                  {balance.amount}
+                  {balance.amountMotes == null
+                    ? '-'
+                    : formatNumber(motesToCSPR(balance.amountMotes), {
+                        precision: { max: 5 }
+                      })}
                 </Typography>
                 <Typography
                   type="CSPRLight"
                   color="contentSecondary"
-                  fontSize={getFontSizeBasedOnTextLength(balance.amount.length)}
+                  fontSize={getFontSizeBasedOnTextLength(
+                    balance.amountMotes?.length || 1
+                  )}
                 >
                   CSPR
                 </Typography>
               </FlexRow>
-              <Typography type="body" color="contentSecondary">
-                {balance.fiatAmount}
+              <Typography
+                type="body"
+                color="contentSecondary"
+                loading={!balance.amountMotes}
+              >
+                {balance.amountFiat}
               </Typography>
             </BalanceContainer>
             <ButtonsContainer gap={SpacingSize.Large}>
@@ -214,24 +177,22 @@ export function HomePageContent() {
                   <Trans t={t}>Connect</Trans>
                 </Button>
               )}
-              <Button
-                color="secondaryBlue"
-                onClick={() =>
-                  navigate(
-                    RouterPath.AccountSettings.replace(
-                      ':accountName',
-                      activeAccount.name
-                    )
-                  )
-                }
-              >
-                <Trans t={t}>Manage account</Trans>
-              </Button>
             </ButtonsContainer>
           </TileContainer>
         </Tile>
       )}
-    </HomePageContentContainer>
+      <VerticalSpaceContainer top={SpacingSize.Small}>
+        <Tabs>
+          <Tab tabName="Tokens">
+            <TokensList />
+          </Tab>
+          <Tab tabName="Activity">
+            <ActivityList displayContext={ActivityListDisplayContext.Home} />
+          </Tab>
+          <Tab tabName="NFTs" />
+        </Tabs>
+      </VerticalSpaceContainer>
+    </ContentContainer>
   );
 }
 

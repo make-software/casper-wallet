@@ -22,6 +22,13 @@ export * from './components/copy-to-clipboard/copy-to-clipboard';
 export * from './components/secret-phrase-words-view/index';
 export * from './components/text-list/text-list';
 export * from './components/avatar/avatar';
+export * from './components/tooltip/tooltip';
+export * from './components/account-activity-plate/account-activity-plate';
+export * from './components/account-popover/account-popover';
+export * from './components/activity-list/activity-list';
+export * from './components/tabs/tabs';
+export * from './components/token-plate/tokenPlate';
+export * from './components/deploy-status/deploy-status';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

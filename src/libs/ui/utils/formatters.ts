@@ -1,4 +1,7 @@
 import Big from 'big.js';
+import { formatDistanceToNowStrict } from 'date-fns';
+import en from 'date-fns/locale/en-US';
+
 import { createIntl, createIntlCache } from '@formatjs/intl';
 
 import { MOTES_PER_CSPR_RATE } from '@libs/ui/utils/constants';
@@ -13,7 +16,34 @@ const intl = createIntl(
   cache
 );
 
+const formatDistanceTokens = {
+  lessThanXSeconds: 'second',
+  xSeconds: 'second',
+  lessThanXMinutes: 'minute',
+  xMinutes: 'minute',
+  xHours: 'hour',
+  xDays: 'day',
+  xMonths: 'month',
+  xYears: 'year'
+};
+
 export const formatTimestamp = (value: string): string => {
+  const date = new Date(value);
+  const locale = 'en';
+  const nativeIntl = new Intl.DateTimeFormat(locale, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    timeZoneName: 'short'
+  });
+
+  return `${nativeIntl.format(date)}`;
+};
+
+export const formatDate = (value: string): string => {
   const timestamp = Number.parseInt(value);
 
   if (Number.isNaN(timestamp) || !Number.isInteger(timestamp)) {
@@ -21,6 +51,7 @@ export const formatTimestamp = (value: string): string => {
   }
 
   const date = new Date(timestamp);
+
   return `${intl.formatDate(date, {
     month: 'short',
     day: 'numeric',
@@ -29,6 +60,34 @@ export const formatTimestamp = (value: string): string => {
     hour: 'numeric',
     minute: 'numeric',
     second: 'numeric'
+  })}`;
+};
+
+const formatDistance = (
+  token: keyof typeof formatDistanceTokens,
+  count: number,
+  options: any
+) => {
+  options = options || {};
+  const locale = options.locale.code || 'en';
+
+  return new (Intl as any).RelativeTimeFormat(locale, {
+    style: 'short'
+  })
+    .format(-count, formatDistanceTokens[token])
+    .replace('.', '');
+};
+
+export const formatTimestampAge = (value: string): string => {
+  const date = new Date(value);
+
+  return `${formatDistanceToNowStrict(date, {
+    addSuffix: true,
+    locale: {
+      ...en,
+      ...formatDistance
+    },
+    roundingMethod: 'floor'
   })}`;
 };
 
@@ -63,6 +122,10 @@ export function formatMotes(motes: string) {
 
 export const motesToCSPR = (motes: string): string => {
   return Big(motes).div(MOTES_PER_CSPR_RATE).toString();
+};
+
+export const CSPRtoMotes = (cspr: string): string => {
+  return Big(cspr).mul(MOTES_PER_CSPR_RATE).toString();
 };
 
 export const motesToCurrency = (
@@ -106,4 +169,22 @@ export const formatCurrency = (
     minimumFractionDigits: precision,
     maximumFractionDigits: precision
   });
+};
+
+export const formatFiatAmount = (
+  amount: string,
+  currencyRate: number | null,
+  precision: number = 2
+) => {
+  if (!amount || currencyRate == null) {
+    return null;
+  }
+
+  return formatCurrency(
+    motesToCurrency(CSPRtoMotes(amount), currencyRate),
+    'USD',
+    {
+      precision: precision
+    }
+  );
 };
