@@ -201,14 +201,20 @@ export const ActivityDetailsPageContent = ({
               <Trans t={t}>Deploy hash</Trans>
             </Typography>
             <HashContainer>
-              <Hash
-                value={deployInfo.deploy_hash}
-                variant={HashVariant.CaptionHash}
-                withCopyIconOnHover
-                truncated
-                truncatedSize="tiny"
-                color="contentBlue"
-              />
+              <Tooltip
+                title={deployInfo.deploy_hash}
+                overflowWrap
+                placement="bottomLeft"
+              >
+                <Hash
+                  value={deployInfo.deploy_hash}
+                  variant={HashVariant.CaptionHash}
+                  withCopyIconOnHover
+                  truncated
+                  truncatedSize="tiny"
+                  color="contentBlue"
+                />
+              </Tooltip>
             </HashContainer>
           </ItemContainer>
           <ItemContainer>
