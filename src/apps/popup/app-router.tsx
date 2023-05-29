@@ -31,7 +31,8 @@ import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
 import { selectKeysDoesExist } from '@src/background/redux/keys/selectors';
 import { LockedRouter } from '@src/libs/layout/locked-router';
 import { TransferPage } from '@popup/pages/transfer';
-import { TokenDetailPage } from 'src/apps/popup/pages/token-detail';
+import { TokenDetailPage } from 'src/apps/popup/pages/token-details';
+import { ActivityDetailsPage } from '@popup/pages/activity-details';
 
 export function AppRouter() {
   const isLocked = useSelector(selectVaultIsLocked);
@@ -256,6 +257,10 @@ function AppRoutes() {
         element={<DownloadedSecretKeysPage />}
       />
       <Route path={RouterPath.Transfer} element={<TransferPage />} />
+      <Route
+        path={RouterPath.ActivityDetails}
+        element={<ActivityDetailsPage />}
+      />
       <Route path={RouterPath.Token} element={<TokenDetailPage />} />
     </Routes>
   );

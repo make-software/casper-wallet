@@ -5,7 +5,8 @@ import {
   PopupHeader,
   PopupLayout
 } from '@libs/layout';
-import { TokenPageContent } from '@popup/pages/token-detail/content';
+
+import { TokenPageContent } from './content';
 
 export const TokenDetailPage = () => {
   return (

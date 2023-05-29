@@ -32,6 +32,9 @@ export const themeConfig = {
     backgroundSecondary: '#F5F6F7',
     backgroundBlue: '#0A2EBF',
     backgroundRed: '#C2000E',
+    backgroundLightGreen: '#77FFBE1F',
+    backgroundLightBlue: '#7490FF1F',
+    backgroundLightRed: '#CC000F14',
 
     borderPrimary: '#E8E9EC',
 
@@ -67,6 +70,7 @@ export const themeConfig = {
     contentGreen: '#2DDC88',
     contentGreenOnFill: '#77FFBE',
     contentYellow: '#E0BB38',
+    contentLightBlue: '#7490FF',
 
     brandRed: '#FF0012',
     black: '#000000'

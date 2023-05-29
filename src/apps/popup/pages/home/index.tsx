@@ -18,6 +18,9 @@ import {
 } from '@src/libs/layout/containers';
 
 import {
+  AccountActionsMenuPopover,
+  ActivityList,
+  ActivityListDisplayContext,
   Avatar,
   Button,
   getFontSizeBasedOnTextLength,
@@ -25,7 +28,9 @@ import {
   HashDisplayContext,
   HashVariant,
   Tile,
-  Typography
+  Typography,
+  Tab,
+  Tabs
 } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -33,16 +38,14 @@ import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-wit
 import {
   selectActiveOrigin,
   selectConnectedAccountsWithActiveOrigin,
+  selectCountOfAccounts,
   selectIsActiveAccountConnectedWithActiveOrigin,
-  selectVaultActiveAccount,
-  selectCountOfAccounts
+  selectVaultActiveAccount
 } from '@src/background/redux/root-selector';
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
-import { AccountActionsMenuPopover } from '@libs/ui/components/account-popover/account-popover';
-import { Tab, Tabs } from '@libs/ui/components/tabs/tabs';
 import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
-import { TokensList } from '@popup/pages/home/components/tokens-list';
 
+import { TokensList } from './components/tokens-list';
 import { ConnectionStatusBadge } from './components/connection-status-badge';
 
 const fullWidthAndMarginTop = css`
@@ -145,7 +148,11 @@ export function HomePageContent() {
                   CSPR
                 </Typography>
               </FlexRow>
-              <Typography type="body" color="contentSecondary">
+              <Typography
+                type="body"
+                color="contentSecondary"
+                loading={!balance.amountMotes}
+              >
                 {balance.amountFiat}
               </Typography>
             </BalanceContainer>
@@ -174,12 +181,14 @@ export function HomePageContent() {
           </TileContainer>
         </Tile>
       )}
-      <VerticalSpaceContainer top={SpacingSize.XL}>
+      <VerticalSpaceContainer top={SpacingSize.Small}>
         <Tabs>
           <Tab tabName="Tokens">
             <TokensList />
           </Tab>
-          <Tab tabName="Activity" />
+          <Tab tabName="Activity">
+            <ActivityList displayContext={ActivityListDisplayContext.Home} />
+          </Tab>
           <Tab tabName="NFTs" />
         </Tabs>
       </VerticalSpaceContainer>

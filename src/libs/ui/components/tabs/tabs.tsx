@@ -2,7 +2,7 @@ import React, { ReactNode, useState } from 'react';
 import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { Typography } from '@libs/ui';
+import { Typography, Tooltip } from '@libs/ui';
 import { AlignedSpaceBetweenFlexRow, CenteredFlexRow } from '@libs/layout';
 
 const TabsContainer = styled(AlignedSpaceBetweenFlexRow)`
@@ -10,6 +10,16 @@ const TabsContainer = styled(AlignedSpaceBetweenFlexRow)`
   background-color: ${({ theme }) => theme.color.fillSecondary};
   border-radius: ${({ theme }) => theme.borderRadius.twenty}px;
   padding: 4px;
+`;
+
+const StickyTabsContainer = styled.div`
+  position: sticky;
+  top: 0;
+  z-index: 1;
+
+  padding: 16px 0;
+
+  background-color: ${({ theme }) => theme.color.backgroundSecondary};
 `;
 
 const ActiveTabContainer = styled(CenteredFlexRow)`
@@ -44,33 +54,39 @@ export function Tabs({ children }: TabsProps) {
 
   return (
     <>
-      <TabsContainer>
-        {children.map((tab, index) => {
-          const { tabName } = tab.props;
+      <StickyTabsContainer>
+        <TabsContainer>
+          {children.map((tab, index) => {
+            const { tabName } = tab.props;
 
-          return activeTabId === index ? (
-            <ActiveTabContainer title={tabName} key={tabName}>
-              <Typography type="captionMedium">
-                <Trans t={t}>{tabName}</Trans>
-              </Typography>
-            </ActiveTabContainer>
-          ) : (
-            <TabContainer
-              onClick={() => {
-                if (tabName === 'NFTs') return;
-                setActiveTabId(index);
-              }}
-              disable={tabName === 'NFTs'}
-              title={tabName === 'NFTs' ? 'Coming Soon' : tabName}
-              key={tabName}
-            >
-              <Typography type="captionRegular">
-                <Trans t={t}>{tabName}</Trans>
-              </Typography>
-            </TabContainer>
-          );
-        })}
-      </TabsContainer>
+            return activeTabId === index ? (
+              <ActiveTabContainer title={tabName} key={tabName}>
+                <Typography type="captionMedium">
+                  <Trans t={t}>{tabName}</Trans>
+                </Typography>
+              </ActiveTabContainer>
+            ) : (
+              <TabContainer
+                onClick={() => {
+                  if (tabName === 'NFTs') return;
+                  setActiveTabId(index);
+                }}
+                disable={tabName === 'NFTs'}
+                key={tabName}
+              >
+                <Tooltip
+                  title={tabName === 'NFTs' ? 'Coming Soon' : null}
+                  noWrap
+                >
+                  <Typography type="captionRegular">
+                    <Trans t={t}>{tabName}</Trans>
+                  </Typography>
+                </Tooltip>
+              </TabContainer>
+            );
+          })}
+        </TabsContainer>
+      </StickyTabsContainer>
 
       {children.map((tab, index) =>
         activeTabId === index ? tab.props.children : null

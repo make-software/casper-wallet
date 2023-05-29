@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export enum SpacingSize {
   None = 'none',
@@ -255,4 +255,17 @@ export const AvatarContainer = styled(CenteredFlexColumn)<{
 }>`
   margin-top: ${({ top }) => getSpacingSize(top)};
   width: 100%;
+`;
+
+export interface BorderBottomPseudoElementProps {
+  marginLeftForSeparatorLine: number;
+}
+
+export const borderBottomPseudoElementRules = css<BorderBottomPseudoElementProps>`
+  content: '';
+  width: ${({ marginLeftForSeparatorLine }) =>
+    `calc(100% - ${marginLeftForSeparatorLine}px)`};
+  margin-left: ${({ marginLeftForSeparatorLine }) =>
+    marginLeftForSeparatorLine}px;
+  border-bottom: ${({ theme }) => `0.5px solid ${theme.color.borderPrimary}`};
 `;
