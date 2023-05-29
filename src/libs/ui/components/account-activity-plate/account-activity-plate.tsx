@@ -62,13 +62,13 @@ export enum TransferType {
   Unknown = 'Unknown'
 }
 
-const ShortTypeName = {
+export const ShortTypeName = {
   [TransferType.Sent]: 'Sent',
   [TransferType.Received]: 'Recv',
   [TransferType.Unknown]: 'Unk'
 };
 
-const TypeName = {
+export const TypeName = {
   [TransferType.Sent]: 'Sent',
   [TransferType.Received]: 'Received',
   [TransferType.Unknown]: 'Unknown'
@@ -135,7 +135,8 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
               activityDetailsData: {
                 fromAccountPublicKey,
                 toAccountPublicKey,
-                deployHash
+                deployHash,
+                type
               }
             }
           })
@@ -164,17 +165,26 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
           </AlignedSpaceBetweenFlexRow>
           <AlignedSpaceBetweenFlexRow>
             <AlignedFlexRow>
-              <Link
-                color="fillBlue"
-                href={getBlockExplorerDeployUrl(deployHash, casperLiveUrl)}
-                target="_blank"
-              >
-                <Typography type="captionHash">
-                  {truncateKey(deployHash, { size: 'tiny' })}
-                </Typography>
-              </Link>
+              <Tooltip title={deployHash} overflowWrap placement="bottomRight">
+                <Link
+                  color="fillBlue"
+                  onClick={event => {
+                    event.stopPropagation();
+                    event.preventDefault();
+
+                    window.open(
+                      getBlockExplorerDeployUrl(casperLiveUrl, deployHash),
+                      '_blank'
+                    );
+                  }}
+                >
+                  <Typography type="captionHash">
+                    {truncateKey(deployHash, { size: 'tiny' })}
+                  </Typography>
+                </Link>
+              </Tooltip>
               <Divider />
-              <Tooltip title={formatTimestamp(timestamp)}>
+              <Tooltip title={formatTimestamp(timestamp)} noWrap>
                 <Typography type="captionHash" color="contentSecondary" noWrap>
                   {formatTimestampAge(timestamp)}
                 </Typography>

@@ -102,7 +102,7 @@ export const DeployStatus = ({
   };
 
   const status = getDeployStatus(deployResult);
-  const message = deployResult?.error_message || StatusLabel[status];
+  const message = deployResult?.error_message;
 
   if (textWithIcon) {
     return (

@@ -25,6 +25,8 @@ import {
   SvgIcon,
   Tile,
   Tooltip,
+  TransferType,
+  TypeName,
   Typography
 } from '@libs/ui';
 import { truncateKey } from '@libs/ui/components/hash/utils';
@@ -37,7 +39,8 @@ import {
   formatNumber,
   formatTimestamp,
   formatTimestampAge,
-  motesToCSPR
+  motesToCSPR,
+  motesToCurrency
 } from '@libs/ui/utils/formatters';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { getBlockExplorerDeployUrl } from '@src/constants';
@@ -46,6 +49,7 @@ interface ActivityDetailsPageContentProps {
   fromAccountPublicKey: string;
   toAccountPublicKey: string;
   deployHash: string;
+  type: TransferType;
 }
 
 export const ExecutionTypesMap = {
@@ -65,7 +69,7 @@ const AddressContainer = styled(FlexColumn)`
   padding: 16px 12px 16px 0;
 `;
 
-const CostContainer = styled(AlignedSpaceBetweenFlexRow)`
+const AmountContainer = styled(AlignedSpaceBetweenFlexRow)`
   padding: 8px 16px 8px 0;
 `;
 
@@ -91,7 +95,8 @@ const HashContainer = styled.div`
 export const ActivityDetailsPageContent = ({
   fromAccountPublicKey,
   toAccountPublicKey,
-  deployHash
+  deployHash,
+  type
 }: ActivityDetailsPageContentProps) => {
   const [deployInfo, setDeployInfo] = useState<ExtendedDeployResult | null>(
     null
@@ -118,6 +123,11 @@ export const ActivityDetailsPageContent = ({
           precision: { min: 5, max: 5 }
         })
       : '-';
+  const transferAmountInUSD =
+    deployInfo.amount != null &&
+    formatCurrency(motesToCurrency(deployInfo.amount, deployInfo.rate), 'USD', {
+      precision: 5
+    });
   const costAmountInCSPR = formatNumber(motesToCSPR(deployInfo.cost), {
     precision: { min: 5, max: 5 }
   });
@@ -129,7 +139,7 @@ export const ActivityDetailsPageContent = ({
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          <Trans t={t}>Sent</Trans>
+          <Trans t={t}>{TypeName[type]}</Trans>
         </Typography>
       </ParagraphContainer>
       <Tile>
@@ -159,19 +169,31 @@ export const ActivityDetailsPageContent = ({
               </Typography>
             </SpaceBetweenFlexRow>
             <AlignedSpaceBetweenFlexRow>
-              <AlignedFlexRow gap={SpacingSize.Small}>
-                <Avatar publicKey={fromAccountPublicKey} size={24} />
-                <Typography type="captionHash" color="contentBlue">
-                  {truncateKey(fromAccountPublicKey, { size: 'tiny' })}
-                </Typography>
-              </AlignedFlexRow>
+              <Tooltip
+                title={fromAccountPublicKey}
+                placement="bottomRight"
+                overflowWrap
+              >
+                <AlignedFlexRow gap={SpacingSize.Small}>
+                  <Avatar publicKey={fromAccountPublicKey} size={24} />
+                  <Typography type="captionHash" color="contentBlue">
+                    {truncateKey(fromAccountPublicKey, { size: 'tiny' })}
+                  </Typography>
+                </AlignedFlexRow>
+              </Tooltip>
               <SvgIcon src="assets/icons/ic-arrow-with-tail.svg" size={16} />
-              <AlignedFlexRow gap={SpacingSize.Small}>
-                <Avatar publicKey={toAccountPublicKey} size={24} />
-                <Typography type="captionHash" color="contentBlue">
-                  {truncateKey(toAccountPublicKey, { size: 'tiny' })}
-                </Typography>
-              </AlignedFlexRow>
+              <Tooltip
+                title={toAccountPublicKey}
+                placement="bottomLeft"
+                overflowWrap
+              >
+                <AlignedFlexRow gap={SpacingSize.Small}>
+                  <Avatar publicKey={toAccountPublicKey} size={24} />
+                  <Typography type="captionHash" color="contentBlue">
+                    {truncateKey(toAccountPublicKey, { size: 'tiny' })}
+                  </Typography>
+                </AlignedFlexRow>
+              </Tooltip>
             </AlignedSpaceBetweenFlexRow>
           </AddressContainer>
           <ItemContainer>
@@ -196,6 +218,7 @@ export const ActivityDetailsPageContent = ({
             <Tooltip
               title={formatTimestamp(deployInfo.timestamp)}
               placement="topLeft"
+              noWrap
             >
               <Typography type="captionRegular">
                 {formatTimestampAge(deployInfo.timestamp)}
@@ -208,15 +231,20 @@ export const ActivityDetailsPageContent = ({
             </Typography>
             <Typography type="captionRegular">{deployType}</Typography>
           </ItemContainer>
-          <ItemContainer>
+          <AmountContainer>
             <Typography type="captionRegular" color="contentSecondary">
               <Trans t={t}>Amount</Trans>
             </Typography>
-            <Typography type="captionHash">
-              {`${transferAmountInCSPR} CSPR`}
-            </Typography>
-          </ItemContainer>
-          <CostContainer>
+            <RightAlignedFlexColumn>
+              <Typography type="captionHash">
+                {`${transferAmountInCSPR} CSPR`}
+              </Typography>
+              <Typography type="listSubtext" color="contentSecondary">
+                {transferAmountInUSD}
+              </Typography>
+            </RightAlignedFlexColumn>
+          </AmountContainer>
+          <AmountContainer>
             <Typography type="captionRegular" color="contentSecondary">
               <Trans t={t}>Cost</Trans>
             </Typography>
@@ -228,7 +256,7 @@ export const ActivityDetailsPageContent = ({
                 {costAmountInUSD}
               </Typography>
             </RightAlignedFlexColumn>
-          </CostContainer>
+          </AmountContainer>
         </RowsContainer>
       </Tile>
     </ContentContainer>

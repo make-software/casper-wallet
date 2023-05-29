@@ -38,6 +38,7 @@ export const ActivityDetailsPage = () => {
           fromAccountPublicKey={activityDetailsData?.fromAccountPublicKey}
           toAccountPublicKey={activityDetailsData?.toAccountPublicKey}
           deployHash={activityDetailsData?.deployHash}
+          type={activityDetailsData?.type}
         />
       )}
     />

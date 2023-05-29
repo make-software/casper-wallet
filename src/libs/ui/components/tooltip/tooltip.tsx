@@ -7,9 +7,17 @@ interface TooltipProps {
   title?: string | null;
   children: React.ReactNode;
   placement?: Placement;
+  noWrap?: boolean;
+  overflowWrap?: boolean;
 }
 
-type Placement = 'topCenter' | 'topLeft' | 'bottomCenter' | 'topRight';
+type Placement =
+  | 'topCenter'
+  | 'topLeft'
+  | 'bottomCenter'
+  | 'topRight'
+  | 'bottomRight'
+  | 'bottomLeft';
 
 type Ref = HTMLDivElement;
 
@@ -41,15 +49,28 @@ const TooltipTip = styled.div<{ placement: Placement }>(
       top: '20px'
     }),
 
+    ...(placement === 'bottomRight' && {
+      left: '0',
+      top: '20px'
+    }),
+
+    ...(placement === 'bottomLeft' && {
+      right: '0',
+      top: '20px'
+    }),
+
     padding: '8px 16px',
 
     backgroundColor: `${theme.color.backgroundPrimary}`,
     borderRadius: `${theme.borderRadius.twelve}px`,
     boxShadow: '0 0 10px rgba(0, 0, 0, 0.08)',
 
+    maxWidth: '275px',
+
     transition: 'opacity 250ms ease-in-out',
     opacity: '0',
-    visibility: 'hidden'
+    visibility: 'hidden',
+    display: 'none'
   })
 );
 
@@ -61,11 +82,12 @@ const ChildrenContainer = styled.div`
   &:hover + ${TooltipTip} {
     opacity: 1;
     visibility: visible;
+    display: block;
   }
 `;
 
 export const Tooltip = forwardRef<Ref, TooltipProps>(
-  ({ title, placement = 'topCenter', children }, ref) => {
+  ({ title, placement = 'topCenter', noWrap, overflowWrap, children }, ref) => {
     if (title == null) {
       return <>{children}</>;
     }
@@ -74,7 +96,11 @@ export const Tooltip = forwardRef<Ref, TooltipProps>(
       <Container ref={ref}>
         <ChildrenContainer>{children}</ChildrenContainer>
         <TooltipTip placement={placement}>
-          <Typography type="captionRegular" noWrap>
+          <Typography
+            type="captionRegular"
+            noWrap={noWrap}
+            overflowWrap={overflowWrap}
+          >
             {title}
           </Typography>
         </TooltipTip>
