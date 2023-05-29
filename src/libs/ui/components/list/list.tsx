@@ -9,8 +9,8 @@ import {
   BorderBottomPseudoElementProps
 } from '@src/libs/layout';
 
-interface ScrollableProps extends BorderBottomPseudoElementProps {
-  scrollable?: boolean;
+interface ListHeaderContainerProps extends BorderBottomPseudoElementProps {
+  stickyHeader?: boolean;
 }
 
 const SpacedBetweenFlexRox = styled.div`
@@ -29,16 +29,20 @@ const FlexColumn = styled.div`
   flex-direction: column;
 `;
 
-export const RowsContainer = styled.div<ScrollableProps>`
-  ${({ scrollable }) => scrollable && 'overflow-y: scroll; max-height: 412px;'};
-
+export const RowsContainer = styled.div<BorderBottomPseudoElementProps>`
   & > * + *:before {
     ${borderBottomPseudoElementRules};
   }
 `;
 
 const RowContainer = styled(FlexColumn)``;
-const ListHeaderContainer = styled(FlexColumn)`
+const ListHeaderContainer = styled(FlexColumn)<ListHeaderContainerProps>`
+  position: sticky;
+  top: 72px;
+  z-index: 1;
+
+  background: ${({ theme }) => theme.color.backgroundSecondary};
+
   &::after {
     ${borderBottomPseudoElementRules};
   }
@@ -69,7 +73,7 @@ interface ListProps<ListRow extends ListRowBase> {
   contentTop?: SpacingSize;
   marginLeftForHeaderSeparatorLine?: number;
   marginLeftForItemSeparatorLine: number;
-  scrollable?: boolean;
+  stickyHeader?: boolean;
 }
 
 export function List<ListRow extends ListRowBase>({
@@ -83,7 +87,7 @@ export function List<ListRow extends ListRowBase>({
   marginLeftForHeaderSeparatorLine,
   headerLabelTop = SpacingSize.XL,
   contentTop = SpacingSize.XL,
-  scrollable
+  stickyHeader
 }: ListProps<ListRow>) {
   return (
     <>
@@ -116,12 +120,12 @@ export function List<ListRow extends ListRowBase>({
                 marginLeftForHeaderSeparatorLine ||
                 marginLeftForItemSeparatorLine
               }
+              stickyHeader={stickyHeader}
             >
               {renderHeader()}
             </ListHeaderContainer>
           )}
           <RowsContainer
-            scrollable={scrollable}
             marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
           >
             {rows.map((row, index, array) => (

@@ -12,6 +12,16 @@ const TabsContainer = styled(AlignedSpaceBetweenFlexRow)`
   padding: 4px;
 `;
 
+const StickyTabsContainer = styled.div`
+  position: sticky;
+  top: 0;
+  z-index: 1;
+
+  padding: 16px 0;
+
+  background-color: ${({ theme }) => theme.color.backgroundSecondary};
+`;
+
 const ActiveTabContainer = styled(CenteredFlexRow)`
   cursor: pointer;
   width: calc(33% - 8px);
@@ -44,34 +54,39 @@ export function Tabs({ children }: TabsProps) {
 
   return (
     <>
-      <TabsContainer>
-        {children.map((tab, index) => {
-          const { tabName } = tab.props;
+      <StickyTabsContainer>
+        <TabsContainer>
+          {children.map((tab, index) => {
+            const { tabName } = tab.props;
 
-          return activeTabId === index ? (
-            <ActiveTabContainer title={tabName} key={tabName}>
-              <Typography type="captionMedium">
-                <Trans t={t}>{tabName}</Trans>
-              </Typography>
-            </ActiveTabContainer>
-          ) : (
-            <TabContainer
-              onClick={() => {
-                if (tabName === 'NFTs') return;
-                setActiveTabId(index);
-              }}
-              disable={tabName === 'NFTs'}
-              key={tabName}
-            >
-              <Tooltip title={tabName === 'NFTs' ? 'Coming Soon' : null}>
-                <Typography type="captionRegular">
+            return activeTabId === index ? (
+              <ActiveTabContainer title={tabName} key={tabName}>
+                <Typography type="captionMedium">
                   <Trans t={t}>{tabName}</Trans>
                 </Typography>
-              </Tooltip>
-            </TabContainer>
-          );
-        })}
-      </TabsContainer>
+              </ActiveTabContainer>
+            ) : (
+              <TabContainer
+                onClick={() => {
+                  if (tabName === 'NFTs') return;
+                  setActiveTabId(index);
+                }}
+                disable={tabName === 'NFTs'}
+                key={tabName}
+              >
+                <Tooltip
+                  title={tabName === 'NFTs' ? 'Coming Soon' : null}
+                  noWrap
+                >
+                  <Typography type="captionRegular">
+                    <Trans t={t}>{tabName}</Trans>
+                  </Typography>
+                </Tooltip>
+              </TabContainer>
+            );
+          })}
+        </TabsContainer>
+      </StickyTabsContainer>
 
       {children.map((tab, index) =>
         activeTabId === index ? tab.props.children : null

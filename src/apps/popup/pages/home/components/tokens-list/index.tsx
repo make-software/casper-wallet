@@ -9,6 +9,10 @@ import { TokenType, useCasperToken } from '@src/hooks';
 
 const TotalValueContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;
+
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  background-color: ${({ theme }) => theme.color.backgroundPrimary};
 `;
 
 export const TokensList = () => {
@@ -29,8 +33,9 @@ export const TokensList = () => {
 
   return (
     <List
-      contentTop={SpacingSize.Medium}
+      contentTop={SpacingSize.None}
       rows={tokensList}
+      stickyHeader
       renderHeader={() => (
         <TotalValueContainer>
           <SpaceBetweenFlexRow>

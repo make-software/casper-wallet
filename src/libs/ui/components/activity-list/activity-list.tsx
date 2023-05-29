@@ -20,11 +20,10 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
     <List
       contentTop={
         displayContext === ActivityListDisplayContext.Home
-          ? SpacingSize.Medium
+          ? SpacingSize.None
           : SpacingSize.Small
       }
       rows={transactions}
-      scrollable
       renderRow={(transaction, index) => {
         if (index === transactions.length - 1) {
           return (
