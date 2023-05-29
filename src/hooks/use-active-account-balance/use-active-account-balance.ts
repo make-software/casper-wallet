@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import {
@@ -9,8 +9,12 @@ import { formatCurrency, motesToCurrency } from '@libs/ui/utils/formatters';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { useTranslation } from 'react-i18next';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { useForceUpdate } from '@src/apps/popup/hooks/use-force-update';
+import { BALANCE_REFRESH_RATE } from '@src/constants';
 
 export const useActiveAccountBalance = () => {
+  const effectTimeoutRef = useRef<NodeJS.Timeout>();
+  const forceUpdate = useForceUpdate();
   const [balance, setBalance] = useState<ActiveAccountBalance>({
     amountMotes: null,
     amountFiat: null
@@ -40,7 +44,17 @@ export const useActiveAccountBalance = () => {
       .catch(error => {
         console.error('Balance request failed:', error);
       });
-  }, [activeAccount?.publicKey, casperApiUrl, t]);
+
+    // will cause effect to run again after timeout
+    effectTimeoutRef.current = setTimeout(() => {
+      forceUpdate();
+    }, BALANCE_REFRESH_RATE + 1);
+
+    return () => {
+      clearTimeout(effectTimeoutRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeAccount?.publicKey, casperApiUrl, t, forceUpdate]);
 
   return { balance, currencyRate };
 };
