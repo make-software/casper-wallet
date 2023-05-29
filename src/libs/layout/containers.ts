@@ -147,6 +147,8 @@ export const HeaderContainer = styled(AlignedSpaceBetweenFlexRow)`
   height: 72px;
 
   padding: 0 16px;
+
+  position: relative;
 `;
 
 export const PageContainer = styled(SpaceBetweenFlexColumn)`

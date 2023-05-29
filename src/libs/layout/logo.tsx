@@ -9,7 +9,8 @@ export function Logo({ onClick }: LogoProps) {
   return (
     <SvgIcon
       onClick={onClick}
-      size={50}
+      width={44}
+      height={32}
       color="contentOnFill"
       src="assets/icons/casper-wallet-logo.svg"
     />
