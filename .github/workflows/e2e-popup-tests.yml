@@ -12,7 +12,6 @@ jobs:
 
     container:
       image: node:16
-      options: --shm-size=2gb
 
     strategy:
       fail-fast: false
@@ -24,6 +23,7 @@ jobs:
     services:
       selenium:
         image: selenium/standalone-${{ matrix.browser }}
+        options: --shm-size=2gb
 
     steps:
       - uses: actions/checkout@v3
