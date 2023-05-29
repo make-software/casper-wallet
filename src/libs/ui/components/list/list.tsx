@@ -37,11 +37,10 @@ export const RowsContainer = styled.div<BorderBottomPseudoElementProps>`
 
 const RowContainer = styled(FlexColumn)``;
 const ListHeaderContainer = styled(FlexColumn)<ListHeaderContainerProps>`
-  position: sticky;
-  top: 72px;
-  z-index: 1;
-
-  background: ${({ theme }) => theme.color.backgroundSecondary};
+  ${({ stickyHeader, theme }) =>
+    stickyHeader
+      ? `position: sticky; top: 72px; z-index: 1; background: ${theme.color.backgroundSecondary}};`
+      : ''};
 
   &::after {
     ${borderBottomPseudoElementRules};
