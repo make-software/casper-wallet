@@ -25,7 +25,8 @@ export const useAccountTransactions = () => {
 
     dispatchFetchAccountActivity(activeAccount?.publicKey, 1)
       .then(({ payload: { data: accountTransactions, pageCount } }) => {
-        setTransactions(accountTransactions);
+        // Set an empty array to prevent frontend failure in case if request returns an error without the data object
+        setTransactions(accountTransactions || []);
 
         // Set page to 2, so we can fetch more transactions when the user scrolls down
         setPage(2);
@@ -80,7 +81,7 @@ export const useAccountTransactions = () => {
   }, [fetchMoreTransactions, handleObserver]);
 
   return {
-    transactions: transactions.map(transaction => ({
+    transactions: transactions?.map(transaction => ({
       ...transaction,
       id: transaction.deploy_hash
     })),
