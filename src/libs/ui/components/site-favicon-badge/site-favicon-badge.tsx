@@ -1,12 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Typography } from '@libs/ui';
+import { Tooltip, Typography } from '@libs/ui';
 import { AlignedSpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
 
 const SiteFaviconAndHostnameContainer = styled(AlignedSpaceBetweenFlexRow)`
-  width: fit-content;
-
   padding: 4px 12px;
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
@@ -44,9 +42,15 @@ export function SiteFaviconBadge({ origin }: SiteFaviconBadgeProps) {
   }
 
   return (
-    <SiteFaviconAndHostnameContainer gap={SpacingSize.Small}>
-      <FaviconImg src={faviconUrl} alt={`${hostName} favicon`} />
-      {hostName && <Typography type="body">{hostName}</Typography>}
-    </SiteFaviconAndHostnameContainer>
+    <Tooltip title={hostName} placement="bottomCenter">
+      <SiteFaviconAndHostnameContainer gap={SpacingSize.Small}>
+        <FaviconImg src={faviconUrl} alt={`${hostName} favicon`} />
+        {hostName && (
+          <Typography type="body" ellipsis>
+            {hostName}
+          </Typography>
+        )}
+      </SiteFaviconAndHostnameContainer>
+    </Tooltip>
   );
 }
