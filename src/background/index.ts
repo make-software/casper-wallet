@@ -555,8 +555,13 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchAccountActivityRequest): {
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
             try {
               const data = await fetchAccountActivity({
+                casperApiUrl,
                 publicKey: action.payload.publicKey,
                 page: action.payload.page
               });
