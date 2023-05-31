@@ -1,6 +1,9 @@
-// TODO: change link to casperApiUrl after endpoint will be ready for use at testnet and mainnet
-export const getAccountActivityLink = (publicKey: string, page: number) =>
-  `https://casper-api.dev.make.services/accounts/${publicKey}/ledgerlive-deploys?page=${page}&limit=10&execution_type_id=6`;
+export const getAccountActivityLink = (
+  casperApiUrl: string,
+  publicKey: string,
+  page: number
+) =>
+  `${casperApiUrl}/accounts/${publicKey}/ledgerlive-deploys?page=${page}&limit=10&execution_type_id=6`;
 
 export const getExtendedDeploysHashLink = (
   casperApiUrl: string,

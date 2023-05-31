@@ -181,7 +181,7 @@ export function HomePageContent() {
           </TileContainer>
         </Tile>
       )}
-      <VerticalSpaceContainer top={SpacingSize.Small}>
+      <VerticalSpaceContainer top={SpacingSize.Tiny}>
         <Tabs>
           <Tab tabName="Tokens">
             <TokensList />
