@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormState, UseFormRegister } from 'react-hook-form';
+import { Control, FormState, UseFormRegister } from 'react-hook-form';
 
 import { TransferFormValues } from '@libs/ui/forms/transfer';
 import { TransactionSteps } from './utils';
@@ -15,6 +15,7 @@ interface TransferPageContentProps {
   recipientFormState: FormState<TransferFormValues>;
   recipientPublicKey: string;
   amountInCSPR: string;
+  controlAmountForm: Control<TransferFormValues>;
 }
 
 export const TransferPageContent = ({
@@ -24,7 +25,8 @@ export const TransferPageContent = ({
   recipientFormRegister,
   recipientFormState,
   recipientPublicKey,
-  amountInCSPR
+  amountInCSPR,
+  controlAmountForm
 }: TransferPageContentProps) => {
   switch (transferStep) {
     case TransactionSteps.Recipient: {
@@ -40,6 +42,7 @@ export const TransferPageContent = ({
         <AmountStep
           amountFormRegister={amountFormRegister}
           amountFormState={amountFormState}
+          controlAmountForm={controlAmountForm}
         />
       );
     }
