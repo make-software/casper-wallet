@@ -7,6 +7,7 @@ import {
   LedgerLiveDeploysResult
 } from 'src/libs/services/account-activity-service';
 import { PaginatedResponse } from '@libs/services/types';
+import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 
 type Meta = void;
 
@@ -41,7 +42,15 @@ export const serviceMessage = {
   >(),
   fetchExtendedDeploysInfoResponse: createAction(
     'FETCH_EXTENDED_DEPLOYS_INFO_RESPONSE'
-  )<ExtendedDeployResult, Meta>()
+  )<ExtendedDeployResult, Meta>(),
+  fetchErc20TokensRequest: createAction('FETCH_ERC20_TOKENS')<
+    { accountHash: string },
+    Meta
+  >(),
+  fetchErc20TokensResponse: createAction('FETCH_ERC20_TOKENS_RESPONSE')<
+    ContractPackageWithBalance[],
+    Meta
+  >()
 };
 
 export type ServiceMessage = ActionType<typeof serviceMessage>;

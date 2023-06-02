@@ -9,6 +9,7 @@ interface TooltipProps {
   placement?: Placement;
   noWrap?: boolean;
   overflowWrap?: boolean;
+  fullWidth?: boolean;
 }
 
 type Placement =
@@ -21,6 +22,7 @@ type Placement =
 
 type Ref = HTMLDivElement;
 
+// TODO: Add dynamic positioning based on the content of the tooltip
 const TooltipTip = styled.div<{ placement: Placement }>(
   ({ theme, placement }) => ({
     position: 'absolute',
@@ -74,8 +76,10 @@ const TooltipTip = styled.div<{ placement: Placement }>(
   })
 );
 
-const Container = styled.div`
+const Container = styled.div<{ fullWidth?: boolean }>`
   position: relative;
+
+  width: ${({ fullWidth }) => (fullWidth ? '100%' : 'auto')};
 `;
 
 const ChildrenContainer = styled.div`
@@ -87,13 +91,23 @@ const ChildrenContainer = styled.div`
 `;
 
 export const Tooltip = forwardRef<Ref, TooltipProps>(
-  ({ title, placement = 'topCenter', noWrap, overflowWrap, children }, ref) => {
+  (
+    {
+      title,
+      placement = 'topCenter',
+      noWrap,
+      overflowWrap,
+      children,
+      fullWidth
+    },
+    ref
+  ) => {
     if (title == null) {
       return <>{children}</>;
     }
 
     return (
-      <Container ref={ref}>
+      <Container ref={ref} fullWidth={fullWidth}>
         <ChildrenContainer>{children}</ChildrenContainer>
         <TooltipTip placement={placement}>
           <Typography

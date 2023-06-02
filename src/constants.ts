@@ -7,6 +7,7 @@ export const FETCH_QUERY_OPTIONS = {
 
 export const BALANCE_REFRESH_RATE = 15 * SECOND;
 export const CURRENCY_REFRESH_RATE = 30 * SECOND;
+export const TOKENS_REFRESH_RATE = 15 * SECOND;
 
 export const LOGIN_RETRY_ATTEMPTS_LIMIT = 5;
 

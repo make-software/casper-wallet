@@ -109,6 +109,10 @@ export const LeftAlignedCenteredFlexRow = styled(AlignedFlexRow)`
   justify-content: flex-start;
 `;
 
+export const RightAlignedCenteredFlexRow = styled(AlignedFlexRow)`
+  justify-content: flex-end;
+`;
+
 export const SpaceBetweenFlexRow = styled(FlexRow)`
   width: 100%;
   justify-content: space-between;
