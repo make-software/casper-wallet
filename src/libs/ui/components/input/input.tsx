@@ -123,7 +123,7 @@ export interface InputProps extends BaseProps {
   name?: string;
   step?: string;
   label?: string;
-  rightLabel?: string;
+  rightLabel?: string | null;
   prefixIcon?: ReactNode | null;
   suffixIcon?: ReactNode | null;
   // TODO: make a better name 🙈

@@ -48,7 +48,8 @@ export const TransferPage = () => {
     amountForm: {
       register: amountFormRegister,
       formState: amountFormState,
-      getValues: getValuesAmountForm
+      getValues: getValuesAmountForm,
+      control: controlAmountForm
     },
     recipientForm: {
       register: recipientFormRegister,
@@ -214,6 +215,7 @@ export const TransferPage = () => {
           recipientFormRegister={recipientFormRegister}
           recipientPublicKey={recipientPublicKey}
           amountInCSPR={amountInCSPR}
+          controlAmountForm={controlAmountForm}
         />
       )}
       renderFooter={() => (

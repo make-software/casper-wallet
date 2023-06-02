@@ -42,7 +42,7 @@ const StatusTextContainer = styled('div')<FormFieldProps>(
 
 export interface FormFieldProps extends BaseProps {
   label?: string;
-  rightLabel?: string;
+  rightLabel?: string | null;
   status?: FormFieldStatus;
   statusText?: string | null;
 }
@@ -70,5 +70,3 @@ export function FormField({
     </StyledContainer>
   );
 }
-
-export default FormField;
