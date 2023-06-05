@@ -31,6 +31,7 @@ export const formatErc20TokenBalance = (
         name: token.contract_name,
         amount: erc20Amount,
         symbol: token.metadata.symbol,
+        decimals: token.metadata.decimals.toString(),
         amountFiat: null,
         icon: 'assets/icons/erc20-avatar.svg'
       };

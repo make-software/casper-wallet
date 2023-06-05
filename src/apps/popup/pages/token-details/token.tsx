@@ -92,7 +92,10 @@ export const Token = ({ erc20TokensData }: TokenProps) => {
       const token = erc20TokensList?.find(token => token.name === tokenName);
       if (token != null) {
         setTokenData(token);
-        setTokenInfoList([{ id: 1, name: 'Symbol', value: token.symbol }]);
+        setTokenInfoList([
+          { id: 1, name: 'Symbol', value: token.symbol },
+          { id: 2, name: 'Decimals', value: token.decimals }
+        ]);
         setHrefToTokenOnCasperLive(
           getBlockExplorerContractUrl(casperLiveUrl, token.id)
         );
