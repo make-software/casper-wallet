@@ -29,6 +29,10 @@ export const TransferPage = () => {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
+  // const searchParams = new URLSearchParams(document.location.search);
+  // const contractHash = searchParams.get('contractHash');
+  // TODO
+
   const [recipientPublicKey, setRecipientPublicKey] = useState('');
   const [amountInCSPR, setAmountInCSPR] = useState('');
   const [transferIdMemo, setTransferIdMemo] = useState('');

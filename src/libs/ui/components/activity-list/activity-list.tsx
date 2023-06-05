@@ -1,8 +1,9 @@
 import React from 'react';
 
 import { SpacingSize } from '@libs/layout';
-import { List, AccountActivityPlate } from '@libs/ui';
+import { List, AccountActivityPlate, Typography } from '@libs/ui';
 import { useAccountTransactions } from '@src/hooks';
+import { useParams } from 'react-router-dom';
 
 export enum ActivityListDisplayContext {
   Home = 'home',
@@ -15,6 +16,11 @@ interface ActivityListProps {
 
 export const ActivityList = ({ displayContext }: ActivityListProps) => {
   const { transactions, observerElement } = useAccountTransactions();
+  const { tokenName } = useParams();
+
+  if (tokenName !== 'Casper') {
+    return <Typography type="header">NOT IMPLEMENTED</Typography>;
+  }
 
   return (
     <List

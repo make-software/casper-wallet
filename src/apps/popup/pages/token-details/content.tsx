@@ -9,9 +9,12 @@ import {
 import { ActivityList, ActivityListDisplayContext, Typography } from '@libs/ui';
 
 import { Token } from './token';
+import { useErc20Tokens } from '@src/hooks';
 
 export const TokenPageContent = () => {
   const { t } = useTranslation();
+
+  const erc20Tokens = useErc20Tokens();
 
   return (
     <ContentContainer>
@@ -20,7 +23,7 @@ export const TokenPageContent = () => {
           <Trans t={t}>Token</Trans>
         </Typography>
       </ParagraphContainer>
-      <Token />
+      <Token erc20TokensData={erc20Tokens} />
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
           <Trans t={t}>Activity</Trans>
