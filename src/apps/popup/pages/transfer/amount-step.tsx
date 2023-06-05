@@ -1,6 +1,6 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { FormState, UseFormRegister } from 'react-hook-form';
+import { Control, FormState, UseFormRegister, useWatch } from 'react-hook-form';
 
 import {
   ContentContainer,
@@ -9,25 +9,33 @@ import {
   TransferInputContainer
 } from '@libs/layout';
 import { Input, Typography } from '@libs/ui';
-import { formatCurrency } from '@libs/ui/utils/formatters';
+import { formatFiatAmount } from '@libs/ui/utils/formatters';
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { TransferFormValues } from '@libs/ui/forms/transfer';
 
 interface AmountStepProps {
   amountFormRegister: UseFormRegister<TransferFormValues>;
   amountFormState: FormState<TransferFormValues>;
+  controlAmountForm: Control<TransferFormValues>;
 }
 
 export const AmountStep = ({
   amountFormRegister,
-  amountFormState
+  amountFormState,
+  controlAmountForm
 }: AmountStepProps) => {
   const { t } = useTranslation();
 
   const { currencyRate } = useActiveAccountBalance();
+  const csprAmount = useWatch({
+    control: controlAmountForm,
+    name: 'csprAmount'
+  });
 
   const amountLabel = t('Amount');
   const transferIdLabel = t('Transfer ID (memo)');
+
+  const fiatAmount = formatFiatAmount(csprAmount || '0', currencyRate);
 
   return (
     <ContentContainer>
@@ -40,9 +48,7 @@ export const AmountStep = ({
       <TransferInputContainer>
         <Input
           label={amountLabel}
-          rightLabel={formatCurrency(currencyRate || 0, 'USD', {
-            precision: 4
-          })}
+          rightLabel={fiatAmount}
           type="number"
           monotype
           placeholder={t('0.00')}
@@ -56,6 +62,7 @@ export const AmountStep = ({
       <TransferInputContainer>
         <Input
           label={transferIdLabel}
+          type="number"
           monotype
           placeholder={t('Enter numeric value')}
           {...amountFormRegister('transferIdMemo')}
