@@ -85,7 +85,7 @@ export const formatTimestampAge = (value: string): string => {
     addSuffix: true,
     locale: {
       ...en,
-      ...formatDistance
+      formatDistance
     },
     roundingMethod: 'floor'
   })}`;
