@@ -271,3 +271,15 @@ export const borderBottomPseudoElementRules = css<BorderBottomPseudoElementProps
     marginLeftForSeparatorLine}px;
   border-bottom: ${({ theme }) => `0.5px solid ${theme.color.borderPrimary}`};
 `;
+
+export const Overlay = styled.div`
+  position: fixed;
+  z-index: ${({ theme }) => theme.zIndex.modal};
+  top: 0;
+  left: 0;
+
+  height: 100vh;
+  width: 100vw;
+
+  background: rgba(0, 0, 0, 0.32);
+`;

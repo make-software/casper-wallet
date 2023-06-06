@@ -3,22 +3,10 @@ import styled from 'styled-components';
 
 import { useClickAway } from '@libs/ui/hooks/use-click-away';
 import { BaseProps } from '@libs/ui';
-import { AlignedFlexRow } from '@libs/layout';
+import { AlignedFlexRow, Overlay } from '@libs/layout';
 
 const ChildrenContainer = styled(AlignedFlexRow)`
   cursor: pointer;
-`;
-
-const ModalOverlay = styled.div`
-  position: fixed;
-  z-index: ${({ theme }) => theme.zIndex.modal};
-  top: 0;
-  left: 0;
-
-  height: 100vh;
-  width: 100vw;
-
-  background: rgba(0, 0, 0, 0.32);
 `;
 
 const ModalContainer = styled.div`
@@ -76,11 +64,11 @@ export const Modal = ({ children, renderContent }: ModalProps) => {
       </ChildrenContainer>
 
       {isOpen && (
-        <ModalOverlay>
+        <Overlay>
           <ModalContainer ref={clickAwayRef}>
             {renderContent({ closeModal })}
           </ModalContainer>
-        </ModalOverlay>
+        </Overlay>
       )}
     </>
   );
