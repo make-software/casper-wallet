@@ -32,17 +32,17 @@ const TooltipTip = styled.div<{ placement: Placement }>(
     ...(placement === 'topCenter' && {
       left: '50%',
       transform: 'translateX(-50%)',
-      top: '-45px'
+      bottom: '30px'
     }),
 
     ...(placement === 'topLeft' && {
       right: '0',
-      top: '-45px'
+      bottom: '30px'
     }),
 
     ...(placement === 'topRight' && {
       left: '0',
-      top: '-45px'
+      bottom: '30px'
     }),
 
     ...(placement === 'bottomCenter' && {

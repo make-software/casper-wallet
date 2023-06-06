@@ -11,14 +11,12 @@ import {
 import { SvgIcon, Tooltip, Typography } from '@libs/ui';
 import { TokenType } from '@src/hooks';
 
-const NameContainer = styled(AlignedFlexRow)`
-  flex-grow: 1;
-
-  max-width: 148px;
+const TokenAmountContainer = styled(RightAlignedFlexColumn)`
+  max-width: 120px;
 `;
 
-const TokenAmountContainer = styled(RightAlignedFlexColumn)`
-  width: 120px;
+const TokenNameContainer = styled.div`
+  max-width: 100px;
 `;
 
 const ListItemContainer = styled(AlignedSpaceBetweenFlexRow)<{
@@ -46,32 +44,44 @@ export const TokenPlate = ({
     onClick={handleOnClick}
     clickable={!!handleOnClick}
   >
-    <NameContainer gap={SpacingSize.Medium}>
+    <AlignedFlexRow gap={SpacingSize.Medium}>
       <SvgIcon src={token?.icon || ''} size={32} />
-      <Typography type="body">{token?.name}</Typography>
-    </NameContainer>
-    <TokenAmountContainer>
-      <Tooltip
-        title={
-          token?.amount && token.amount.length > 7 ? token?.amount : undefined
-        }
-        placement="topLeft"
-        overflowWrap
-        fullWidth
-      >
-        <RightAlignedCenteredFlexRow gap={SpacingSize.Small}>
-          <Typography type="bodyHash" ellipsis>
-            {token?.amount}
+      <TokenNameContainer>
+        <Tooltip
+          title={token?.name && token.name.length > 10 ? token.name : undefined}
+          fullWidth
+          overflowWrap
+        >
+          <Typography type="body" ellipsis>
+            {token?.name}
           </Typography>
-          <Typography type="bodyHash" color="contentSecondary">
-            {token?.symbol}
-          </Typography>
-        </RightAlignedCenteredFlexRow>
-      </Tooltip>
-      <Typography type="listSubtext" color="contentSecondary">
-        {token?.amountFiat}
-      </Typography>
-    </TokenAmountContainer>
-    {chevron && <SvgIcon src="assets/icons/chevron.svg" size={16} />}
+        </Tooltip>
+      </TokenNameContainer>
+    </AlignedFlexRow>
+    <AlignedFlexRow gap={SpacingSize.Small}>
+      <TokenAmountContainer>
+        <Tooltip
+          title={
+            token?.amount && token.amount.length > 7 ? token?.amount : undefined
+          }
+          placement="topLeft"
+          overflowWrap
+          fullWidth
+        >
+          <RightAlignedCenteredFlexRow gap={SpacingSize.Small}>
+            <Typography type="bodyHash" ellipsis>
+              {token?.amount}
+            </Typography>
+            <Typography type="bodyHash" color="contentSecondary">
+              {token?.symbol}
+            </Typography>
+          </RightAlignedCenteredFlexRow>
+        </Tooltip>
+        <Typography type="listSubtext" color="contentSecondary">
+          {token?.amountFiat}
+        </Typography>
+      </TokenAmountContainer>
+      {chevron && <SvgIcon src="assets/icons/chevron.svg" size={16} />}
+    </AlignedFlexRow>
   </ListItemContainer>
 );
