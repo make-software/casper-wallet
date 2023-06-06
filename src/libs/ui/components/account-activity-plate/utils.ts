@@ -11,7 +11,8 @@ export const getPublicKeyFormTarget = (
   let toAccountPublicKey = '';
 
   if (target.cl_type === 'PublicKey') {
-    toAccountPublicKey = target.parsed;
+    // sometimes we receive the public key in uppercase
+    toAccountPublicKey = target.parsed.toLowerCase();
   } else {
     if (publicKey) {
       const activeAccountHash = getAccountHashFromPublicKey(publicKey);
