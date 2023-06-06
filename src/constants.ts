@@ -17,6 +17,9 @@ export const TRANSFER_MIN_AMOUNT_MOTES = '2500000000';
 export const getBlockExplorerAccountUrl = (baseUrl: string, hash: string) =>
   `${baseUrl}/account/${hash}`;
 
+export const getBlockExplorerContractUrl = (baseUrl: string, hash: string) =>
+  `${baseUrl}/contract-package/${hash}`;
+
 export const getBlockExplorerDeployUrl = (
   casperLiveUrl: string,
   deployHash: string
