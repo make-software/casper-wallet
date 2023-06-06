@@ -23,7 +23,7 @@ export const TokenPageContent = () => {
           <Trans t={t}>Token</Trans>
         </Typography>
       </ParagraphContainer>
-      <Token erc20TokensData={erc20Tokens} />
+      <Token erc20Tokens={erc20Tokens} />
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
           <Trans t={t}>Activity</Trans>

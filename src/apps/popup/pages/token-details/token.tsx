@@ -12,7 +12,7 @@ import {
 } from '@libs/layout';
 import { Link, List, SvgIcon, TokenPlate, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import { TokenType, useCasperToken, useErc20Tokens } from '@src/hooks';
+import { TokenType, useCasperToken } from '@src/hooks';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import {
@@ -51,10 +51,10 @@ type TokenInfoList = {
 };
 
 type TokenProps = {
-  erc20TokensData: ContractPackageWithBalance[] | null;
+  erc20Tokens: ContractPackageWithBalance[] | null;
 };
 
-export const Token = ({ erc20TokensData }: TokenProps) => {
+export const Token = ({ erc20Tokens }: TokenProps) => {
   const [tokenData, setTokenData] = useState<TokenType | null>(null);
   const [tokenInfoList, setTokenInfoList] = useState<TokenInfoList[] | []>([]);
   const [hrefToTokenOnCasperLive, setHrefToTokenOnCasperLive] = useState<
@@ -66,7 +66,6 @@ export const Token = ({ erc20TokensData }: TokenProps) => {
   const { tokenName } = useParams();
 
   const casperToken = useCasperToken();
-  const erc20Tokens = useErc20Tokens();
 
   const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const activeAccount = useSelector(selectVaultActiveAccount);
