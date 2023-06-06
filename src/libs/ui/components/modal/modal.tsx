@@ -11,7 +11,7 @@ const ChildrenContainer = styled(AlignedFlexRow)`
 
 const ModalOverlay = styled.div`
   position: fixed;
-  z-index: auto;
+  z-index: ${({ theme }) => theme.zIndex.modal};
   top: 0;
   left: 0;
 
@@ -46,6 +46,7 @@ export interface ModalProps extends BaseProps {
   children: (renderProps: RenderChildrenProps) => React.ReactNode | string;
   renderContent: (renderProps: RenderContentProps) => React.ReactNode | string;
 }
+
 export const Modal = ({ children, renderContent }: ModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const childrenContainerRef = useRef<HTMLDivElement>(null);

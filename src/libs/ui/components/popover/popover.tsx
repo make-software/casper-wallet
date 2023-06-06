@@ -19,7 +19,7 @@ interface PopoverContainerProps {
 
 const PopoverOverlay = styled.div`
   position: fixed;
-  z-index: auto;
+  z-index: ${({ theme }) => theme.zIndex.modal};
   top: 0;
   left: 0;
 
