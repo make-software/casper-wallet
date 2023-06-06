@@ -1,7 +1,7 @@
 import React, { useState, useRef, PropsWithChildren, MouseEvent } from 'react';
 import styled from 'styled-components';
 
-import { AlignedFlexRow, FlexColumn, SpacingSize } from '@libs/layout';
+import { AlignedFlexRow, FlexColumn, Overlay, SpacingSize } from '@libs/layout';
 import { useClickAway } from '@libs/ui/hooks/use-click-away';
 
 import { PopoverPortal } from './popover-portal';
@@ -17,14 +17,8 @@ interface PopoverContainerProps {
   domRect?: DOMRect;
 }
 
-const PopoverOverlay = styled.div`
-  position: fixed;
-  z-index: auto;
-  top: 0;
-  left: 0;
-
-  height: 100vh;
-  width: 100vw;
+const PopoverOverlay = styled(Overlay)`
+  background: inherit;
 `;
 
 const PopoverContainer = styled.div<PopoverContainerProps>`
