@@ -3,8 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { AlignedFlexRow, SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
-import { SvgIcon, Typography } from '@libs/ui';
-import { Modal } from '@libs/ui/components/modal/modal';
+import { SvgIcon, Typography, Modal } from '@libs/ui';
 
 import { selectActiveNetworkSetting } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';

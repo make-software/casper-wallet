@@ -29,6 +29,7 @@ export * from './components/activity-list/activity-list';
 export * from './components/tabs/tabs';
 export * from './components/token-plate/tokenPlate';
 export * from './components/deploy-status/deploy-status';
+export * from './components/modal/modal';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

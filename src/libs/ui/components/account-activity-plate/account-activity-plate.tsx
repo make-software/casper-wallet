@@ -32,6 +32,8 @@ const AccountActivityPlateContainer = styled(AlignedSpaceBetweenFlexRow)`
 `;
 
 const IconCircleContainer = styled(CenteredFlexRow)`
+  min-width: 28px;
+
   width: 28px;
   height: 28px;
 
