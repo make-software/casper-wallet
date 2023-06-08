@@ -14,7 +14,6 @@ import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { TransferPageContent } from '@popup/pages/transfer/content';
 import { useTransferForm } from '@libs/ui/forms/transfer';
-import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 import { TransactionSteps } from './utils';
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -24,6 +23,7 @@ import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-
 import { dispatchToMainStore } from '@background/redux/utils';
 import { recipientPublicKeyAdded } from '@src/background/redux/recent-recipient-public-keys/actions';
 import { signAndDeploy } from '@src/libs/services/deployer-service';
+import { selectAccountBalance } from '@background/redux/account-info/selectors';
 
 export const TransferPage = () => {
   const { t } = useTranslation();
@@ -41,8 +41,7 @@ export const TransferPage = () => {
   const { networkName, grpcUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
-
-  const { balance } = useActiveAccountBalance();
+  const balance = useSelector(selectAccountBalance);
 
   const {
     amountForm: {

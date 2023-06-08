@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Control, FormState, UseFormRegister, useWatch } from 'react-hook-form';
+import { useSelector } from 'react-redux';
 
 import {
   ContentContainer,
@@ -10,8 +11,8 @@ import {
 } from '@libs/layout';
 import { Input, Typography } from '@libs/ui';
 import { formatFiatAmount } from '@libs/ui/utils/formatters';
-import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { TransferFormValues } from '@libs/ui/forms/transfer';
+import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 
 interface AmountStepProps {
   amountFormRegister: UseFormRegister<TransferFormValues>;
@@ -26,7 +27,8 @@ export const AmountStep = ({
 }: AmountStepProps) => {
   const { t } = useTranslation();
 
-  const { currencyRate } = useActiveAccountBalance();
+  const currencyRate = useSelector(selectAccountCurrencyRate);
+
   const csprAmount = useWatch({
     control: controlAmountForm,
     name: 'csprAmount'

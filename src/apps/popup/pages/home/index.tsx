@@ -33,6 +33,7 @@ import {
   Tabs
 } from '@libs/ui';
 
+import { useAccountTransactions } from '@src/hooks';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import {
@@ -44,6 +45,7 @@ import {
 } from '@src/background/redux/root-selector';
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
+import { selectAccountBalance } from '@background/redux/account-info/selectors';
 
 import { TokensList } from './components/tokens-list';
 import { ConnectionStatusBadge } from './components/connection-status-badge';
@@ -83,8 +85,10 @@ export function HomePageContent() {
   const connectedAccounts = useSelector((state: RootState) =>
     selectConnectedAccountsWithActiveOrigin(state)
   );
+  const balance = useSelector(selectAccountBalance);
 
-  const { balance } = useActiveAccountBalance();
+  useActiveAccountBalance();
+  useAccountTransactions();
 
   const handleConnectAccount = useCallback(() => {
     if (!activeAccount || isActiveAccountConnected) {

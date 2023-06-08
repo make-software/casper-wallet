@@ -42,20 +42,30 @@ export const TokenPlate = ({
   >
     <NameContainer gap={SpacingSize.Medium}>
       <SvgIcon src={token?.icon || ''} size={32} />
-      <Typography type="body">{token?.name}</Typography>
+      <Typography type="body" loading={!token?.name}>
+        {token?.name}
+      </Typography>
     </NameContainer>
     <RightAlignedFlexColumn>
       <AlignedFlexRow gap={SpacingSize.Small}>
-        <Typography type="bodyHash">
+        <Typography type="bodyHash" loading={!token?.amountMotes}>
           {token?.amountMotes == null
             ? '-'
             : formatNumber(motesToCSPR(token.amountMotes))}
         </Typography>
-        <Typography type="bodyHash" color="contentSecondary">
+        <Typography
+          type="bodyHash"
+          color="contentSecondary"
+          loading={!token?.symbol}
+        >
           {token?.symbol}
         </Typography>
       </AlignedFlexRow>
-      <Typography type="listSubtext" color="contentSecondary">
+      <Typography
+        type="listSubtext"
+        color="contentSecondary"
+        loading={!token?.amountMotes}
+      >
         {token?.amountFiat}
       </Typography>
     </RightAlignedFlexColumn>

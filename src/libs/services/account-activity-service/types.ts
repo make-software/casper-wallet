@@ -29,6 +29,10 @@ export interface LedgerLiveDeploysResult {
   };
 }
 
+export interface LedgerLiveDeploysWithId extends LedgerLiveDeploysResult {
+  id: string;
+}
+
 export type ExtendedDeployClTypeResult = {
   cl_type: CLTypeTypeResult;
   parsed: CLTypeParsedResult | string | null;

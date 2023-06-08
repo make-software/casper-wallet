@@ -103,6 +103,13 @@ import {
   fetchAccountActivity,
   fetchExtendedDeploysInfo
 } from '@libs/services/account-activity-service';
+import {
+  accountActivityChanged,
+  accountActivityReset,
+  accountActivityUpdated,
+  accountBalanceChanged,
+  accountCurrencyRateChanged
+} from '@background/redux/account-info/actions';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -502,6 +509,11 @@ browser.runtime.onMessage.addListener(
           case getType(loginRetryCountIncremented):
           case getType(loginRetryLockoutTimeSet):
           case getType(recipientPublicKeyAdded):
+          case getType(accountBalanceChanged):
+          case getType(accountCurrencyRateChanged):
+          case getType(accountActivityChanged):
+          case getType(accountActivityUpdated):
+          case getType(accountActivityReset):
             store.dispatch(action);
             return sendResponse(undefined);
 
