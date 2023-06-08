@@ -34,7 +34,6 @@ export const useAccountTransactions = () => {
         ({ payload: { data: accountTransactions, pageCount, itemCount } }) => {
           if (itemCount === activityListLength) return;
 
-          // Set an empty array to prevent frontend failure in case if request returns an error without the data object
           const transactions =
             accountTransactions?.map(transaction => ({
               ...transaction,
