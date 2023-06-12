@@ -1,6 +1,9 @@
+import { CasperServiceByJsonRPC, CLPublicKey, DeployUtil } from 'casper-js-sdk';
+
 import { signDeploy } from '@libs/crypto';
 import { GrpcUrl } from '@src/constants';
-import { CasperServiceByJsonRPC, CLPublicKey, DeployUtil } from 'casper-js-sdk';
+
+import { RPCResponse } from './types';
 
 const casperService = (url: string) => new CasperServiceByJsonRPC(url);
 
@@ -9,7 +12,7 @@ export const signAndDeploy = (
   senderPublicKeyHex: string,
   senderSecretKeyHex: string,
   url: GrpcUrl
-) => {
+): Promise<RPCResponse> => {
   const signature = signDeploy(
     deploy.hash,
     senderPublicKeyHex,
