@@ -10,12 +10,11 @@ import {
   SpacingSize,
   TransferInputContainer
 } from '@libs/layout';
-import { Input, List, Typography } from '@libs/ui';
+import { FormField, List, TextArea, Typography } from '@libs/ui';
 import {
   AmountContainer,
   SenderDetails
 } from '@popup/pages/transfer/sender-details';
-import { truncateKey } from '@libs/ui/components/hash/utils';
 import {
   formatFiatAmount,
   formatNumber,
@@ -84,12 +83,13 @@ export const ConfirmStep = ({
       </ParagraphContainer>
       <SenderDetails />
       <TransferInputContainer>
-        <Input
-          monotype
-          readOnly
-          label={recipientLabel}
-          value={truncateKey(recipientPublicKey, { size: 'max' })}
-        />
+        <FormField label={recipientLabel}>
+          <TextArea
+            value={recipientPublicKey}
+            readOnly
+            style={{ minHeight: '78px' }}
+          />
+        </FormField>
       </TransferInputContainer>
       <List
         contentTop={SpacingSize.XXXL}
