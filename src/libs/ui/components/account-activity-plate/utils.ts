@@ -1,23 +1,22 @@
-import { CLTypeTypeResult } from '@libs/types/cl';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import { ExtendedDeployClTypeResult } from '@libs/services/account-activity-service';
 
 export const getPublicKeyFormTarget = (
-  target: {
-    cl_type: CLTypeTypeResult;
-    parsed: string;
-  },
+  target?: ExtendedDeployClTypeResult,
   publicKey?: string
 ) => {
   let toAccountPublicKey = '';
 
-  if (target.cl_type === 'PublicKey') {
+  if (target && target.cl_type === 'PublicKey') {
     // sometimes we receive the public key in uppercase
-    toAccountPublicKey = target.parsed.toLowerCase();
+    toAccountPublicKey = (target.parsed as string).toLowerCase();
   } else {
-    if (publicKey) {
+    if (publicKey && target) {
       const activeAccountHash = getAccountHashFromPublicKey(publicKey);
       toAccountPublicKey =
-        activeAccountHash === target.parsed ? publicKey : target.parsed;
+        activeAccountHash === (target.parsed as string)
+          ? publicKey
+          : (target.parsed as string);
     }
   }
 

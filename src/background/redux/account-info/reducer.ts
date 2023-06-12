@@ -6,7 +6,9 @@ import {
   accountActivityReset,
   accountActivityUpdated,
   accountBalanceChanged,
-  accountCurrencyRateChanged
+  accountCurrencyRateChanged,
+  accountPendingTransactionsChanged,
+  accountPendingTransactionsRemove
 } from './actions';
 
 const initialState: AccountInfoState = {
@@ -15,7 +17,8 @@ const initialState: AccountInfoState = {
     amountFiat: null
   },
   currencyRate: null,
-  accountActivity: null
+  accountActivity: null,
+  pendingTransactions: []
 };
 
 export const reducer = createReducer(initialState)
@@ -47,4 +50,24 @@ export const reducer = createReducer(initialState)
       state.accountActivity != null
         ? [...state.accountActivity, ...payload]
         : payload
+  }))
+  .handleAction(accountPendingTransactionsChanged, (state, { payload }) => {
+    const pendingTransactions = {
+      ...payload,
+      id: payload.deploy_hash
+    };
+
+    return {
+      ...state,
+      pendingTransactions:
+        state.pendingTransactions?.length > 0
+          ? [pendingTransactions, ...state.pendingTransactions]
+          : [pendingTransactions]
+    };
+  })
+  .handleAction(accountPendingTransactionsRemove, (state, { payload }) => ({
+    ...state,
+    pendingTransactions: state.pendingTransactions.filter(
+      transaction => transaction.deploy_hash !== payload
+    )
   }));

@@ -1,7 +1,10 @@
 import { createAction } from 'typesafe-actions';
 
 import { ActiveAccountBalance } from '@libs/services/balance-service';
-import { LedgerLiveDeploysWithId } from '@libs/services/account-activity-service';
+import {
+  ExtendedDeployResult,
+  LedgerLiveDeploysWithId
+} from '@libs/services/account-activity-service';
 
 export const accountBalanceChanged = createAction(
   'ACCOUNT_BALANCE_CHANGED'
@@ -20,3 +23,11 @@ export const accountActivityUpdated = createAction('ACCOUNT_ACTIVITY_UPDATED')<
 >();
 
 export const accountActivityReset = createAction('ACCOUNT_ACTIVITY_RESET')();
+
+export const accountPendingTransactionsChanged = createAction(
+  'ACCOUNT_PENDING_TRANSACTIONS_CHANGED'
+)<ExtendedDeployResult>();
+
+export const accountPendingTransactionsRemove = createAction(
+  'ACCOUNT_PENDING_TRANSACTIONS_REMOVE'
+)<string>();
