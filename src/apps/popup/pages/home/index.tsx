@@ -33,7 +33,7 @@ import {
   Tabs
 } from '@libs/ui';
 
-import { RouterPath, useTypedNavigate } from '@popup/router';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import {
   selectActiveOrigin,
@@ -69,9 +69,18 @@ const ButtonsContainer = styled(SpaceAroundFlexColumn)`
   margin-top: 24px;
 `;
 
+export const HomePageTabsId = {
+  Tokens: 0,
+  Activity: 1,
+  NFTs: 2
+};
+
 export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
+  const location = useTypedLocation();
+
+  const state = location.state;
 
   const activeOrigin = useSelector(selectActiveOrigin);
   const { disconnectAccountWithEvent: disconnectAccount } = useAccountManager();
@@ -182,7 +191,7 @@ export function HomePageContent() {
         </Tile>
       )}
       <VerticalSpaceContainer top={SpacingSize.Tiny}>
-        <Tabs>
+        <Tabs preferActiveTabId={state?.activeTabId}>
           <Tab tabName="Tokens">
             <TokensList />
           </Tab>

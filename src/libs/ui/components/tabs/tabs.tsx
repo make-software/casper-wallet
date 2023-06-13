@@ -45,10 +45,12 @@ interface TabProps {
 
 interface TabsProps {
   children: React.ReactElement<TabProps>[];
+  preferActiveTabId?: number;
 }
 
-export function Tabs({ children }: TabsProps) {
-  const [activeTabId, setActiveTabId] = useState(0);
+export function Tabs({ children, preferActiveTabId }: TabsProps) {
+  // set preferActiveTabId as the default value if it is provided. We do not need to track props change, so we can set it directly in useState
+  const [activeTabId, setActiveTabId] = useState(preferActiveTabId || 0);
 
   const { t } = useTranslation();
 

@@ -2,10 +2,12 @@ import React from 'react';
 import { Control, FormState, UseFormRegister } from 'react-hook-form';
 
 import { TransferFormValues } from '@libs/ui/forms/transfer';
+
 import { TransactionSteps } from './utils';
-import { RecipientStep } from '@popup/pages/transfer/recipient-step';
-import { AmountStep } from '@popup/pages/transfer/amount-step';
-import { ConfirmStep } from '@popup/pages/transfer/confirm-step';
+import { RecipientStep } from './recipient-step';
+import { AmountStep } from './amount-step';
+import { ConfirmStep } from './confirm-step';
+import { SuccessStep } from './success-step';
 
 interface TransferPageContentProps {
   transferStep: TransactionSteps;
@@ -53,6 +55,10 @@ export const TransferPageContent = ({
           amountInCSPR={amountInCSPR}
         />
       );
+    }
+
+    case TransactionSteps.Success: {
+      return <SuccessStep />;
     }
 
     default: {
