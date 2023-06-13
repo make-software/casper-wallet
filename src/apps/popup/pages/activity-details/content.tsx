@@ -46,10 +46,10 @@ import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/
 import { getBlockExplorerDeployUrl } from '@src/constants';
 
 interface ActivityDetailsPageContentProps {
-  fromAccountPublicKey: string;
-  toAccountPublicKey: string;
-  deployHash: string;
-  type: TransferType;
+  fromAccountPublicKey?: string;
+  toAccountPublicKey?: string;
+  deployHash?: string;
+  type?: TransferType | null;
 }
 
 export const ExecutionTypesMap = {
@@ -106,7 +106,7 @@ export const ActivityDetailsPageContent = ({
   const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
 
   useEffect(() => {
-    dispatchFetchExtendedDeploysInfo(deployHash).then(
+    dispatchFetchExtendedDeploysInfo(deployHash || '').then(
       ({ payload: deployInfoResponse }) => {
         setDeployInfo(deployInfoResponse);
       }
@@ -139,7 +139,7 @@ export const ActivityDetailsPageContent = ({
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          <Trans t={t}>{TypeName[type]}</Trans>
+          {type && <Trans t={t}>{TypeName[type]}</Trans>}
         </Typography>
       </ParagraphContainer>
       <Tile>
@@ -175,9 +175,9 @@ export const ActivityDetailsPageContent = ({
                 overflowWrap
               >
                 <AlignedFlexRow gap={SpacingSize.Small}>
-                  <Avatar publicKey={fromAccountPublicKey} size={24} />
+                  <Avatar publicKey={fromAccountPublicKey || ''} size={24} />
                   <Typography type="captionHash" color="contentBlue">
-                    {truncateKey(fromAccountPublicKey, { size: 'tiny' })}
+                    {truncateKey(fromAccountPublicKey || '', { size: 'tiny' })}
                   </Typography>
                 </AlignedFlexRow>
               </Tooltip>
@@ -188,9 +188,9 @@ export const ActivityDetailsPageContent = ({
                 overflowWrap
               >
                 <AlignedFlexRow gap={SpacingSize.Small}>
-                  <Avatar publicKey={toAccountPublicKey} size={24} />
+                  <Avatar publicKey={toAccountPublicKey || ''} size={24} />
                   <Typography type="captionHash" color="contentBlue">
-                    {truncateKey(toAccountPublicKey, { size: 'tiny' })}
+                    {truncateKey(toAccountPublicKey || '', { size: 'tiny' })}
                   </Typography>
                 </AlignedFlexRow>
               </Tooltip>

@@ -1,10 +1,11 @@
 import { useLocation } from 'react-router-dom';
+import { Location } from '@remix-run/router';
+
 import { LocationState } from '@popup/router/types';
 
-export function useTypedLocation() {
-  const location = useLocation();
-
-  return location as typeof location & {
-    state?: LocationState;
-  };
+interface UseTypedLocation extends Location {
+  state: LocationState;
+}
+export function useTypedLocation(): UseTypedLocation {
+  return useLocation();
 }

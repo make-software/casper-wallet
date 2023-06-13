@@ -1,5 +1,6 @@
 export enum TransactionSteps {
   Recipient = 'recipient',
   Amount = 'amount',
-  Confirm = 'confirm'
+  Confirm = 'confirm',
+  Success = 'success'
 }
