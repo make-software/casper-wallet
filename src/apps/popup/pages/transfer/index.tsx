@@ -26,6 +26,7 @@ import { signAndDeploy } from '@src/libs/services/deployer-service';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
+import { HomePageTabsId } from '@popup/pages/home';
 
 export const TransferPage = () => {
   const { t } = useTranslation();
@@ -142,8 +143,7 @@ export const TransferPage = () => {
           //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
         }, 2000);
 
-        // TODO: change to token detail page after it will be implemented
-        navigate(RouterPath.Home);
+        setTransferStep(TransactionSteps.Success);
       });
     }
   };
@@ -187,6 +187,18 @@ export const TransferPage = () => {
           onClick: onSubmitSending
         };
       }
+      case TransactionSteps.Success: {
+        return {
+          onClick: () => {
+            navigate(RouterPath.Home, {
+              state: {
+                // set the active tab to activity
+                activeTabId: HomePageTabsId.Activity
+              }
+            });
+          }
+        };
+      }
     }
   };
   const handleBackButton = () => {
@@ -218,12 +230,16 @@ export const TransferPage = () => {
           withNetworkSwitcher
           withMenu
           withConnectionStatus
-          renderSubmenuBarItems={() => (
-            <HeaderSubmenuBarNavLink
-              linkType="back"
-              onClick={handleBackButton}
-            />
-          )}
+          renderSubmenuBarItems={
+            transferStep === TransactionSteps.Success
+              ? undefined
+              : () => (
+                  <HeaderSubmenuBarNavLink
+                    linkType="back"
+                    onClick={handleBackButton}
+                  />
+                )
+          }
         />
       )}
       renderContent={() => (
@@ -240,7 +256,8 @@ export const TransferPage = () => {
       )}
       renderFooter={() => (
         <FooterButtonsContainer>
-          {transferStep === TransactionSteps.Confirm ? null : (
+          {transferStep === TransactionSteps.Confirm ||
+          transferStep === TransactionSteps.Success ? null : (
             <SpaceBetweenFlexRow>
               <Typography type="captionRegular">
                 <Trans t={t}>Transaction fee</Trans>
@@ -252,7 +269,11 @@ export const TransferPage = () => {
           )}
           <Button color="primaryBlue" type="button" {...getButtonProps()}>
             <Trans t={t}>
-              {transferStep === TransactionSteps.Confirm ? 'Send' : 'Next'}
+              {transferStep === TransactionSteps.Confirm
+                ? 'Send'
+                : transferStep === TransactionSteps.Success
+                ? 'Done'
+                : 'Next'}
             </Trans>
           </Button>
         </FooterButtonsContainer>
