@@ -187,7 +187,11 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
               </Tooltip>
               <Divider />
               <Tooltip title={formatTimestamp(timestamp)} noWrap>
-                <Typography type="captionHash" color="contentSecondary" noWrap>
+                <Typography
+                  type="captionRegular"
+                  color="contentSecondary"
+                  noWrap
+                >
                   {formatTimestampAge(timestamp)}
                 </Typography>
               </Tooltip>
