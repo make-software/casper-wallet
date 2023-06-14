@@ -20,7 +20,10 @@ import {
 } from '@libs/ui/utils/formatters';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { LedgerLiveDeploysResult } from '@libs/services/account-activity-service';
+import {
+  ExtendedDeployResultWithId,
+  LedgerLiveDeploysResult
+} from '@libs/services/account-activity-service';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { getBlockExplorerDeployUrl } from '@src/constants';
 
@@ -83,7 +86,7 @@ const TypeIcons = {
 };
 
 interface AccountActivityPlateProps {
-  transactionInfo: LedgerLiveDeploysResult;
+  transactionInfo: LedgerLiveDeploysResult | ExtendedDeployResultWithId;
 }
 
 type Ref = HTMLDivElement;
@@ -102,16 +105,15 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
       deploy_hash: deployHash,
       caller_public_key: fromAccountPublicKey,
       timestamp,
-      args: {
-        amount: { parsed: amount },
-        target
-      }
+      args: { amount: parsedAmount, target }
     } = transactionInfo;
 
     const toAccountPublicKey = getPublicKeyFormTarget(
       target,
       activeAccount?.publicKey
     );
+
+    const amount = (parsedAmount?.parsed as string) || '';
 
     const amountInCSPR = formatNumber(motesToCSPR(amount), {
       precision: { min: 5, max: 5 }

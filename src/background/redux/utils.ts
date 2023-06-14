@@ -21,6 +21,7 @@ import { LastActivityTimeState } from './last-activity-time/reducer';
 import { SettingsState } from './settings/types';
 import { ActiveOriginState } from './active-origin/types';
 import { RecentRecipientPublicKeysState } from './recent-recipient-public-keys/types';
+import { AccountInfoState } from './account-info/types';
 
 declare global {
   interface Window {
@@ -151,6 +152,7 @@ export type PopupState = {
   settings: SettingsState;
   activeOrigin: ActiveOriginState;
   recentRecipientPublicKeys: RecentRecipientPublicKeysState;
+  accountInfo: AccountInfoState;
 };
 
 // These state keys will be passed to popups
@@ -167,7 +169,8 @@ export const selectPopupState = (state: RootState): PopupState => {
     lastActivityTime: state.lastActivityTime,
     activeOrigin: state.activeOrigin,
     settings: state.settings,
-    recentRecipientPublicKeys: state.recentRecipientPublicKeys
+    recentRecipientPublicKeys: state.recentRecipientPublicKeys,
+    accountInfo: state.accountInfo
   };
 };
 

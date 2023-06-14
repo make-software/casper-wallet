@@ -14,8 +14,8 @@ import {
 import { Avatar, Tile, Typography } from '@libs/ui';
 import { truncateKey } from '@libs/ui/components/hash/utils';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
+import { selectAccountBalance } from '@background/redux/account-info/selectors';
 
 export const AmountContainer = styled(SpaceBetweenFlexColumn)`
   align-items: flex-end;
@@ -29,8 +29,7 @@ export const SenderDetails = () => {
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-
-  const { balance } = useActiveAccountBalance();
+  const balance = useSelector(selectAccountBalance);
 
   if (!activeAccount) {
     return null;

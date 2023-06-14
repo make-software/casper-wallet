@@ -4,3 +4,4 @@ export * from './use-active-account-balance';
 export * from './use-casper-token';
 export * from './use-account-transactions';
 export * from './use-erc20-tokens';
+export * from './use-infinity-scroll';

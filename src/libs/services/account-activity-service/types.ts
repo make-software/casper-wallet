@@ -13,20 +13,11 @@ export interface LedgerLiveDeploysResult {
   timestamp: string;
   status: string;
   amount: null | string;
-  args: {
-    id: {
-      parsed: number;
-      cl_type: CLTypeTypeResult;
-    };
-    amount: {
-      parsed: string;
-      cl_type: CLTypeTypeResult;
-    };
-    target: {
-      parsed: string;
-      cl_type: CLTypeTypeResult;
-    };
-  };
+  args: ExtendedDeployArgsResult;
+}
+
+export interface LedgerLiveDeploysWithId extends LedgerLiveDeploysResult {
+  id: string;
 }
 
 export type ExtendedDeployClTypeResult = {
@@ -76,6 +67,10 @@ export interface ExtendedDeployResult {
   contract_package?: ExtendedDeployContractPackageResult;
   execution_type_id: 1 | 2 | 3 | 4 | 5 | 6;
   rate: number;
+}
+
+export interface ExtendedDeployResultWithId extends ExtendedDeployResult {
+  id: string;
 }
 
 export type ExtendedDeployContractPackageMetadata = {

@@ -2,6 +2,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import Big from 'big.js';
+import { useSelector } from 'react-redux';
 
 import {
   ContentContainer,
@@ -20,8 +21,8 @@ import {
   formatNumber,
   motesToCSPR
 } from '@libs/ui/utils/formatters';
-import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { TRANSFER_COST_MOTES } from '@src/constants';
+import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 
 export const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;
@@ -37,7 +38,7 @@ export const ConfirmStep = ({
 }: ConfirmStepProps) => {
   const { t } = useTranslation();
 
-  const { currencyRate } = useActiveAccountBalance();
+  const currencyRate = useSelector(selectAccountCurrencyRate);
 
   const transferCostInCSPR = formatNumber(motesToCSPR(TRANSFER_COST_MOTES), {
     precision: { max: 5 }

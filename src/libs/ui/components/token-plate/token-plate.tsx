@@ -52,7 +52,7 @@ export const TokenPlate = ({
           fullWidth
           overflowWrap
         >
-          <Typography type="body" ellipsis>
+          <Typography type="body" ellipsis loading={!token?.name}>
             {token?.name}
           </Typography>
         </Tooltip>
@@ -69,15 +69,23 @@ export const TokenPlate = ({
           fullWidth
         >
           <RightAlignedCenteredFlexRow gap={SpacingSize.Small}>
-            <Typography type="bodyHash" ellipsis>
+            <Typography type="bodyHash" ellipsis loading={!token?.amount}>
               {token?.amount}
             </Typography>
-            <Typography type="bodyHash" color="contentSecondary">
+            <Typography
+              type="bodyHash"
+              color="contentSecondary"
+              loading={!token?.symbol}
+            >
               {token?.symbol}
             </Typography>
           </RightAlignedCenteredFlexRow>
         </Tooltip>
-        <Typography type="listSubtext" color="contentSecondary">
+        <Typography
+          type="listSubtext"
+          color="contentSecondary"
+          loading={!token?.amountFiat}
+        >
           {token?.amountFiat}
         </Typography>
       </TokenAmountContainer>
