@@ -1,25 +1,22 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
-import {
-  ActiveAccountBalance,
-  dispatchFetchActiveAccountBalance
-} from '@libs/services/balance-service';
+import { dispatchFetchActiveAccountBalance } from '@libs/services/balance-service';
 import { formatCurrency, motesToCurrency } from '@libs/ui/utils/formatters';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { useTranslation } from 'react-i18next';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { useForceUpdate } from '@src/apps/popup/hooks/use-force-update';
 import { BALANCE_REFRESH_RATE } from '@src/constants';
+import { dispatchToMainStore } from '@background/redux/utils';
+import {
+  accountBalanceChanged,
+  accountCurrencyRateChanged
+} from '@background/redux/account-info/actions';
 
 export const useActiveAccountBalance = () => {
   const effectTimeoutRef = useRef<NodeJS.Timeout>();
   const forceUpdate = useForceUpdate();
-  const [balance, setBalance] = useState<ActiveAccountBalance>({
-    amountMotes: null,
-    amountFiat: null
-  });
-  const [currencyRate, setCurrencyRate] = useState<number | null>(null);
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
@@ -37,8 +34,13 @@ export const useActiveAccountBalance = () => {
                 })
               : t('Currency service is offline...');
 
-          setCurrencyRate(currencyRate);
-          setBalance({ amountMotes: amountMotes, amountFiat: amountFiat });
+          dispatchToMainStore(accountCurrencyRateChanged(currencyRate));
+          dispatchToMainStore(
+            accountBalanceChanged({
+              amountMotes: amountMotes,
+              amountFiat: amountFiat
+            })
+          );
         }
       })
       .catch(error => {
@@ -55,6 +57,4 @@ export const useActiveAccountBalance = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeAccount?.publicKey, casperApiUrl, t, forceUpdate]);
-
-  return { balance, currencyRate };
 };

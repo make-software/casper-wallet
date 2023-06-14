@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
-import { useActiveAccountBalance } from '@src/hooks';
+import { selectAccountBalance } from '@background/redux/account-info/selectors';
 
 export type TokenType = {
   id: number;
@@ -14,7 +15,7 @@ export type TokenType = {
 export const useCasperToken = () => {
   const [casperToken, setCasperToken] = useState<TokenType | null>(null);
 
-  const { balance } = useActiveAccountBalance();
+  const balance = useSelector(selectAccountBalance);
 
   useEffect(() => {
     setCasperToken({

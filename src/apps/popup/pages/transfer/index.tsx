@@ -14,7 +14,6 @@ import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { TransferPageContent } from '@popup/pages/transfer/content';
 import { useTransferForm } from '@libs/ui/forms/transfer';
-import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 import { TransactionSteps } from './utils';
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -24,6 +23,9 @@ import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-
 import { dispatchToMainStore } from '@background/redux/utils';
 import { recipientPublicKeyAdded } from '@src/background/redux/recent-recipient-public-keys/actions';
 import { signAndDeploy } from '@src/libs/services/deployer-service';
+import { selectAccountBalance } from '@background/redux/account-info/selectors';
+import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
+import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
 import { HomePageTabsId } from '@popup/pages/home';
 
 export const TransferPage = () => {
@@ -42,8 +44,7 @@ export const TransferPage = () => {
   const { networkName, grpcUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
-
-  const { balance } = useActiveAccountBalance();
+  const balance = useSelector(selectAccountBalance);
 
   const {
     amountForm: {
@@ -121,8 +122,26 @@ export const TransferPage = () => {
         activeAccount.publicKey,
         activeAccount.secretKey,
         grpcUrl
-      ).then(() => {
+      ).then(({ deploy_hash }) => {
         dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
+
+        let triesLeft = 10;
+
+        const interval = setInterval(async () => {
+          const { payload: extendedDeployInfo } =
+            await dispatchFetchExtendedDeploysInfo(deploy_hash);
+          if (extendedDeployInfo) {
+            dispatchToMainStore(
+              accountPendingTransactionsChanged(extendedDeployInfo)
+            );
+            clearInterval(interval);
+          } else if (triesLeft === 0) {
+            clearInterval(interval);
+          }
+
+          triesLeft--;
+          //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
+        }, 2000);
 
         setTransferStep(TransactionSteps.Success);
       });

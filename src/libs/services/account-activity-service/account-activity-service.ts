@@ -3,6 +3,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { handleError, toJson } from '@libs/services/utils';
 import { queryClient } from '@libs/services/query-client';
 import { DataWithPayload, PaginatedResponse } from '@libs/services/types';
+import { ACCOUNT_ACTIVITY_REFRESH_RATE } from '@src/constants';
 
 import { getAccountActivityLink } from './constants';
 import { LedgerLiveDeploysResult } from './types';
@@ -26,8 +27,9 @@ export const fetchAccountActivity = ({
   page: number;
 }) =>
   queryClient.fetchQuery(
-    ['accountTransactionsRequest', casperApiUrl, publicKey, page],
-    () => accountActivityRequest(casperApiUrl, publicKey, page)
+    ['accountActivityRequest', casperApiUrl, publicKey, page],
+    () => accountActivityRequest(casperApiUrl, publicKey, page),
+    { staleTime: ACCOUNT_ACTIVITY_REFRESH_RATE }
   );
 
 export const dispatchFetchAccountActivity = (

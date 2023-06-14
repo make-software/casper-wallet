@@ -27,7 +27,7 @@ export * from './components/account-activity-plate/account-activity-plate';
 export * from './components/account-popover/account-popover';
 export * from './components/activity-list/activity-list';
 export * from './components/tabs/tabs';
-export * from './components/token-plate/tokenPlate';
+export * from './components/token-plate/token-plate';
 export * from './components/deploy-status/deploy-status';
 export * from './components/modal/modal';
 

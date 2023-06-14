@@ -15,7 +15,7 @@ const TabsContainer = styled(AlignedSpaceBetweenFlexRow)`
 const StickyTabsContainer = styled.div`
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 5;
 
   padding: 16px 0;
 
