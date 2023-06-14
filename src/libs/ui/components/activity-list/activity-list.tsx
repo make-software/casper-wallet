@@ -67,8 +67,21 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
   const { t } = useTranslation();
   const { tokenName } = useParams();
 
-  if (tokenName !== 'Casper') {
-    return <Typography type="header">NOT IMPLEMENTED</Typography>;
+  if (
+    tokenName !== 'Casper' &&
+    displayContext === ActivityListDisplayContext.TokenDetails
+  ) {
+    return (
+      <VerticalSpaceContainer top={SpacingSize.Small}>
+        <Tile>
+          <Container>
+            <Typography type="body" color="contentSecondary">
+              <Trans t={t}>NOT IMPLEMENTED</Trans>
+            </Typography>
+          </Container>
+        </Tile>
+      </VerticalSpaceContainer>
+    );
   }
 
   if (

@@ -108,10 +108,6 @@ import {
 } from '@src/content/sdk-errors';
 import { recipientPublicKeyAdded } from './redux/recent-recipient-public-keys/actions';
 import {
-  fetchAccountActivity,
-  fetchExtendedDeploysInfo
-} from '@libs/services/account-activity-service';
-import {
   accountActivityChanged,
   accountActivityReset,
   accountActivityUpdated,
