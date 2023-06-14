@@ -11,11 +11,14 @@ import {
   SpacingSize,
   TransferInputContainer
 } from '@libs/layout';
-import { FormField, List, TextArea, Typography } from '@libs/ui';
 import {
-  AmountContainer,
-  SenderDetails
-} from '@popup/pages/transfer/sender-details';
+  FormField,
+  List,
+  TextArea,
+  Typography,
+  ActiveAccountPlate,
+  AmountContainer
+} from '@libs/ui';
 import {
   formatFiatAmount,
   formatNumber,
@@ -82,7 +85,7 @@ export const ConfirmStep = ({
           <Trans t={t}>Confirm send</Trans>
         </Typography>
       </ParagraphContainer>
-      <SenderDetails />
+      <ActiveAccountPlate label="From" />
       <TransferInputContainer>
         <FormField label={recipientLabel}>
           <TextArea

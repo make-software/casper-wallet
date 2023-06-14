@@ -9,8 +9,7 @@ import {
   SpacingSize,
   TransferInputContainer
 } from '@libs/layout';
-import { Input, Typography } from '@libs/ui';
-import { SenderDetails } from '@popup/pages/transfer/sender-details';
+import { Input, Typography, ActiveAccountPlate } from '@libs/ui';
 import { TransferFormValues } from '@libs/ui/forms/transfer';
 import { selectRecentRecipientPublicKeys } from '@src/background/redux/recent-recipient-public-keys/selectors';
 
@@ -38,7 +37,7 @@ export const RecipientStep = ({
           <Trans t={t}>Specify recipient</Trans>
         </Typography>
       </ParagraphContainer>
-      <SenderDetails />
+      <ActiveAccountPlate label="From" />
 
       <TransferInputContainer>
         <Input
