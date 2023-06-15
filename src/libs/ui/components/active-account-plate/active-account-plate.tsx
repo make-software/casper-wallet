@@ -55,7 +55,7 @@ export const ActiveAccountPlate = ({ label }: ActiveAccountPlateProps) => {
                 <Typography type="captionMedium">
                   {activeAccount.name}
                 </Typography>
-                <Typography type="captionHash">
+                <Typography type="captionHash" color="contentSecondary">
                   {truncateKey(activeAccount.publicKey)}
                 </Typography>
               </SpaceBetweenFlexColumn>

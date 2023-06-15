@@ -2,6 +2,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { QRCodeSVG } from 'qrcode.react';
 
 import {
   ContentContainer,
@@ -15,7 +16,7 @@ import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { useCopyToClipboard } from '@src/hooks';
 
 const Container = styled.div`
-  padding: 16px;
+  padding: 20px 16px;
 `;
 
 export const ReceivePageContent = () => {
@@ -39,6 +40,7 @@ export const ReceivePageContent = () => {
         <Tile>
           <Container>
             <FlexColumn gap={SpacingSize.Medium}>
+              <QRCodeSVG value={activeAccount?.publicKey || ''} size={240} />
               <Typography
                 type="captionHash"
                 color="contentSecondary"
