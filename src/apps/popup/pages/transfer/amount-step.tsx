@@ -29,15 +29,15 @@ export const AmountStep = ({ amountForm }: AmountStepProps) => {
     control
   } = amountForm;
 
-  const csprAmount = useWatch({
+  const amount = useWatch({
     control,
-    name: 'csprAmount'
+    name: 'amount'
   });
 
   const amountLabel = t('Amount');
   const transferIdLabel = t('Transfer ID (memo)');
 
-  const fiatAmount = formatFiatAmount(csprAmount || '0', currencyRate);
+  const fiatAmount = formatFiatAmount(amount || '0', currencyRate);
 
   return (
     <ContentContainer>
@@ -55,9 +55,9 @@ export const AmountStep = ({ amountForm }: AmountStepProps) => {
           monotype
           placeholder={t('0.00')}
           suffixText="CSPR"
-          {...register('csprAmount')}
-          error={!!errors?.csprAmount}
-          validationText={errors?.csprAmount?.message}
+          {...register('amount')}
+          error={!!errors?.amount}
+          validationText={errors?.amount?.message}
         />
       </TransferInputContainer>
 

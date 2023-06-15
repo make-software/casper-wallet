@@ -14,7 +14,8 @@ export enum RouterPath {
   BackupSecretPhrase = '/backup-secret-phrase',
   DownloadSecretKeys = '/download-secret-keys',
   DownloadedSecretKeys = '/downloaded-secret-keys',
-  Transfer = '/transfer',
+  TransferERC20 = '/transfer/:tokenContractHash',
+  TransferCSPR = '/transfer',
   ActivityDetails = '/activity-details',
   Token = '/token/:tokenName'
 }

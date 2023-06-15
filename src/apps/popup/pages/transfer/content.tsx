@@ -12,21 +12,31 @@ import { SuccessStep } from './success-step';
 interface TransferPageContentProps {
   transferStep: TransactionSteps;
   recipientPublicKey: string;
-  amountInCSPR: string;
   amountForm: UseFormReturn<TransferFormValues>;
   recipientForm: UseFormReturn<TransferFormValues>;
+  amount: string;
+  balance: string | null;
+  symbol: string | null;
 }
 
 export const TransferPageContent = ({
   transferStep,
   recipientPublicKey,
-  amountInCSPR,
   recipientForm,
-  amountForm
+  amountForm,
+  amount,
+  balance,
+  symbol
 }: TransferPageContentProps) => {
   switch (transferStep) {
     case TransactionSteps.Recipient: {
-      return <RecipientStep recipientForm={recipientForm} />;
+      return (
+        <RecipientStep
+          recipientForm={recipientForm}
+          symbol={symbol}
+          balance={balance}
+        />
+      );
     }
     case TransactionSteps.Amount: {
       return <AmountStep amountForm={amountForm} />;
@@ -35,7 +45,9 @@ export const TransferPageContent = ({
       return (
         <ConfirmStep
           recipientPublicKey={recipientPublicKey}
-          amountInCSPR={amountInCSPR}
+          amountInCSPR={amount}
+          balance={balance}
+          symbol={symbol}
         />
       );
     }

@@ -25,7 +25,7 @@ export const useCasperToken = () => {
 
   useEffect(() => {
     setCasperToken({
-      id: '1',
+      id: 'Casper',
       name: 'Casper',
       amount,
       amountFiat: balance.amountFiat,

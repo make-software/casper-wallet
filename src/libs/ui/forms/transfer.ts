@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 
 import {
   useCsprAmountRule,
+  useErc20AmountRule,
   useRecipientPublicKeyRule,
   useTransferIdMemoRule
 } from '@libs/ui/forms/form-validation-rules';
@@ -11,11 +12,15 @@ import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 
 export type TransferFormValues = {
   recipientPublicKey: string;
-  csprAmount: string;
+  amount: string;
   transferIdMemo: string;
 };
 
-export function useTransferForm(amountMotes: string | null) {
+export function useTransferForm(
+  balance: string | null,
+  decimals: number | null,
+  isErc20: boolean
+) {
   const recipientFormSchema = Yup.object().shape({
     recipientPublicKey: useRecipientPublicKeyRule()
   });
@@ -26,8 +31,10 @@ export function useTransferForm(amountMotes: string | null) {
     resolver: yupResolver(recipientFormSchema)
   };
 
+  const amountValidation = isErc20 ? useErc20AmountRule : useCsprAmountRule;
+
   const amountFormSchema = Yup.object().shape({
-    csprAmount: useCsprAmountRule(amountMotes),
+    amount: amountValidation(balance, decimals),
     transferIdMemo: useTransferIdMemoRule()
   });
 

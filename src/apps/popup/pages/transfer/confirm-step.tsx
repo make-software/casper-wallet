@@ -31,10 +31,14 @@ export const ListItemContainer = styled(SpaceBetweenFlexRow)`
 interface ConfirmStepProps {
   recipientPublicKey: string;
   amountInCSPR: string;
+  balance: string | null;
+  symbol: string | null;
 }
 export const ConfirmStep = ({
   recipientPublicKey,
-  amountInCSPR
+  amountInCSPR,
+  balance,
+  symbol
 }: ConfirmStepProps) => {
   const { t } = useTranslation();
 
@@ -82,7 +86,7 @@ export const ConfirmStep = ({
           <Trans t={t}>Confirm send</Trans>
         </Typography>
       </ParagraphContainer>
-      <SenderDetails />
+      <SenderDetails symbol={symbol} balance={balance} />
       <TransferInputContainer>
         <RecipientPlate
           recipientLabel={recipientLabel}

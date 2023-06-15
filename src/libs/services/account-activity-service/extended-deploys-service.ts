@@ -10,7 +10,7 @@ import { getExtendedDeploysHashLink } from './constants';
 export const extendedDeploysRequest = (
   casperApiUrl: string,
   deployHash: string
-) =>
+): Promise<ExtendedDeployResult> =>
   fetch(getExtendedDeploysHashLink(casperApiUrl, deployHash))
     .then(toJson)
     .catch(handleError);

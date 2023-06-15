@@ -131,13 +131,13 @@ export const useRecipientPublicKeyRule = () => {
     });
 };
 
-export const useCsprAmountRule = (amountMotes: string | null) => {
+export const useCsprAmountRule = (amountCspr: string | null) => {
   const { t } = useTranslation();
 
   const maxAmountMotes: string =
-    amountMotes == null
+    amountCspr == null
       ? '0'
-      : Big(amountMotes).sub(TRANSFER_COST_MOTES).toString();
+      : Big(CSPRtoMotes(amountCspr)).sub(TRANSFER_COST_MOTES).toString();
 
   return Yup.string()
     .required(t('Amount is required'))
@@ -174,6 +174,53 @@ export const useCsprAmountRule = (amountMotes: string | null) => {
       test: csprAmountInputValue => {
         if (csprAmountInputValue) {
           return Big(CSPRtoMotes(csprAmountInputValue)).lt(maxAmountMotes);
+        }
+
+        return false;
+      },
+      message: t(
+        'Your account balance is not high enough. Enter a smaller amount.'
+      )
+    });
+};
+
+export const useErc20AmountRule = (
+  amount: string | null,
+  decimals: number | null
+) => {
+  const { t } = useTranslation();
+
+  const maxAmount: string = amount == null ? '0' : Big(amount).toString();
+
+  return Yup.string()
+    .required(t('Amount is required'))
+    .test({
+      name: 'validU64',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          return isValidU64(amountInputValue);
+        }
+
+        return false;
+      },
+      message: t(`Amount is invalid`)
+    })
+    .test({
+      name: 'amountBelowMinTransfer',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          return Big(amountInputValue).gt('0');
+        }
+
+        return false;
+      },
+      message: t(`Amount must be greater than zero.`)
+    })
+    .test({
+      name: 'amountAboveBalance',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          return Big(amountInputValue).lte(maxAmount);
         }
 
         return false;
