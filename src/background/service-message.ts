@@ -4,7 +4,8 @@ import { FetchBalanceResponse } from '@libs/services/balance-service';
 import { AccountInfo } from '@libs/services/account-info';
 import {
   ExtendedDeployResult,
-  LedgerLiveDeploysResult
+  LedgerLiveDeploysResult,
+  Erc20TokenActionResult
 } from 'src/libs/services/account-activity-service';
 import { PaginatedResponse } from '@libs/services/types';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
@@ -36,6 +37,19 @@ export const serviceMessage = {
     PaginatedResponse<LedgerLiveDeploysResult>,
     Meta
   >(),
+  fetchErc20AccountActivityRequest: createAction(
+    'FETCH_ERC20_ACCOUNT_ACTIVITY'
+  )<{ publicKey: string; page: number }, Meta>(),
+  fetchErc20AccountActivityResponse: createAction(
+    'FETCH_ERC20_ACCOUNT_ACTIVITY_RESPONSE'
+  )<PaginatedResponse<Erc20TokenActionResult>, Meta>(),
+  fetchErc20TokenActivityRequest: createAction('FETCH_ERC20_TOKEN_ACTIVITY')<
+    { publicKey: string; page: number; contractPackageHash: string },
+    Meta
+  >(),
+  fetchErc20TokenActivityResponse: createAction(
+    'FETCH_ERC20_TOKEN_ACTIVITY_RESPONSE'
+  )<PaginatedResponse<Erc20TokenActionResult>, Meta>(),
   fetchExtendedDeploysInfoRequest: createAction('FETCH_EXTENDED_DEPLOYS_INFO')<
     { deployHash: string },
     Meta
