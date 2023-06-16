@@ -256,7 +256,6 @@ export const AvatarContainer = styled(CenteredFlexColumn)<{
   top?: SpacingSize;
 }>`
   margin-top: ${({ top }) => getSpacingSize(top)};
-  width: 100%;
 `;
 
 export interface BorderBottomPseudoElementProps {

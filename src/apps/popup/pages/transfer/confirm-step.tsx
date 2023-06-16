@@ -102,9 +102,7 @@ export const ConfirmStep = ({
             </Typography>
             <AmountContainer>
               <Typography type="captionHash">{`${listItems.amount} CSPR`}</Typography>
-              <Typography
-                type={listItems.bold ? 'bodySemiBold' : 'captionMedium'}
-              >
+              <Typography type={listItems.bold ? 'subtitle' : 'captionMedium'}>
                 {listItems.fiatPrice || 'API not available'}
               </Typography>
             </AmountContainer>

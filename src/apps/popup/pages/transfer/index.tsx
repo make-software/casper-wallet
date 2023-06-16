@@ -46,19 +46,12 @@ export const TransferPage = () => {
   );
   const balance = useSelector(selectAccountBalance);
 
-  const {
-    amountForm: {
-      register: amountFormRegister,
-      formState: amountFormState,
-      getValues: getValuesAmountForm,
-      control: controlAmountForm
-    },
-    recipientForm: {
-      register: recipientFormRegister,
-      formState: recipientFormState,
-      getValues: getValuesRecipientForm
-    }
-  } = useTransferForm(balance.amountMotes);
+  const { amountForm, recipientForm } = useTransferForm(balance.amountMotes);
+
+  const { formState: amountFormState, getValues: getValuesAmountForm } =
+    amountForm;
+  const { formState: recipientFormState, getValues: getValuesRecipientForm } =
+    recipientForm;
 
   // event listener for enable/disable submit button
   useEffect(() => {
@@ -245,13 +238,10 @@ export const TransferPage = () => {
       renderContent={() => (
         <TransferPageContent
           transferStep={transferStep}
-          amountFormRegister={amountFormRegister}
-          amountFormState={amountFormState}
-          recipientFormState={recipientFormState}
-          recipientFormRegister={recipientFormRegister}
+          recipientForm={recipientForm}
+          amountForm={amountForm}
           recipientPublicKey={recipientPublicKey}
           amountInCSPR={amountInCSPR}
-          controlAmountForm={controlAmountForm}
         />
       )}
       renderFooter={() => (
