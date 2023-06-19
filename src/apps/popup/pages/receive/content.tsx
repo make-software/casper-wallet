@@ -11,7 +11,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Button, Tile, Typography, ActiveAccountPlate } from '@libs/ui';
+import { Tile, Typography, ActiveAccountPlate } from '@libs/ui';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { useCopyToClipboard } from '@src/hooks';
 
@@ -19,12 +19,20 @@ const Container = styled.div`
   padding: 20px 16px;
 `;
 
+const HashContainer = styled.div`
+  cursor: pointer;
+
+  &:hover span {
+    color: ${({ theme }) => theme.color.contentBlue};
+  }
+`;
+
 export const ReceivePageContent = () => {
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
 
-  const { handleCopyOnClick } = useCopyToClipboard(
+  const { handleCopyOnClick, isClicked } = useCopyToClipboard(
     activeAccount?.publicKey || ''
   );
 
@@ -40,17 +48,22 @@ export const ReceivePageContent = () => {
         <Tile>
           <Container>
             <FlexColumn gap={SpacingSize.Medium}>
-              <QRCodeSVG value={activeAccount?.publicKey || ''} size={240} />
-              <Typography
-                type="captionHash"
-                color="contentSecondary"
-                overflowWrap
-              >
-                {activeAccount?.publicKey}
-              </Typography>
-              <Button color="secondaryBlue" onClick={handleCopyOnClick}>
-                <Trans t={t}>Copy account hash</Trans>
-              </Button>
+              <QRCodeSVG value={activeAccount?.publicKey || ''} size={296} />
+              {isClicked ? (
+                <Typography type="captionHash" color="contentGreen">
+                  <Trans t={t}>Address copied!</Trans>
+                </Typography>
+              ) : (
+                <HashContainer onClick={handleCopyOnClick}>
+                  <Typography
+                    type="captionHash"
+                    color="contentPrimary"
+                    overflowWrap
+                  >
+                    {activeAccount?.publicKey}
+                  </Typography>
+                </HashContainer>
+              )}
             </FlexColumn>
           </Container>
         </Tile>

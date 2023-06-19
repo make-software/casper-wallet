@@ -43,7 +43,7 @@ const IconCircleContainer = styled(CenteredFlexRow)<{ color: FillColor }>`
   border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
 
-const SendButtonContainer = styled(CenteredFlexColumn)`
+const ButtonContainer = styled(CenteredFlexColumn)`
   cursor: pointer;
 `;
 
@@ -98,7 +98,7 @@ export const Token = () => {
       )}
       renderFooter={() => (
         <FooterItemContainer gap={SpacingSize.XXXL}>
-          <SendButtonContainer
+          <ButtonContainer
             gap={SpacingSize.Medium}
             onClick={() => navigate(RouterPath.Transfer)}
           >
@@ -108,18 +108,18 @@ export const Token = () => {
             <Typography type="captionMedium" color="contentBlue">
               <Trans t={t}>Send</Trans>
             </Typography>
-          </SendButtonContainer>
-          <SendButtonContainer
+          </ButtonContainer>
+          <ButtonContainer
             gap={SpacingSize.Medium}
             onClick={() => navigate(RouterPath.Receive)}
           >
-            <IconCircleContainer color="fillGreen">
+            <IconCircleContainer color="fillBlue">
               <SvgIcon src="assets/icons/receive.svg" color="contentOnFill" />
             </IconCircleContainer>
             <Typography type="captionMedium" color="contentBlue">
               <Trans t={t}>Receive</Trans>
             </Typography>
-          </SendButtonContainer>
+          </ButtonContainer>
           <Link color="inherit" target="_blank" href={hrefToTokenOnCasperLive}>
             <CenteredFlexColumn gap={SpacingSize.Medium}>
               <IconCircleContainer color="fillBlue">
