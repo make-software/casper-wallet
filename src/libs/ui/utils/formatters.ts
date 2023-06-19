@@ -105,7 +105,7 @@ export const formatNumber = (
 ): string =>
   intl.formatNumber(value as number, {
     minimumFractionDigits: precision?.min || 0,
-    maximumFractionDigits: precision?.max || 0,
+    maximumFractionDigits: precision?.max || precision?.min || 0,
     notation,
     compactDisplay
   });

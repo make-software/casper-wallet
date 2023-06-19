@@ -19,7 +19,8 @@ export type TypographyType =
   | 'CSPRBold'
   | 'listSubtext'
   | 'formFieldStatus' // TODO: Temporary name. Make a better name
-  | 'fullHash';
+  | 'fullHash'
+  | 'subtitle';
 
 export type CSPRSize = '2.8rem' | '2.4rem' | '2rem' | '1.8rem';
 
@@ -193,6 +194,14 @@ const StyledTypography = styled('span').withConfig({
         ...captionBase,
         verticalAlign: 'middle',
         fontFamily: theme.typography.fontFamily.mono
+      };
+
+    case 'subtitle':
+      return {
+        ...captionBase,
+        fontSize: '1.8rem',
+        lineHeight: '2.4rem',
+        fontWeight: theme.typography.fontWeight.bold
       };
 
     default:

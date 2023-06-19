@@ -7,6 +7,7 @@ export const FETCH_QUERY_OPTIONS = {
 
 export const BALANCE_REFRESH_RATE = 15 * SECOND;
 export const CURRENCY_REFRESH_RATE = 30 * SECOND;
+export const TOKENS_REFRESH_RATE = 15 * SECOND;
 export const ACCOUNT_ACTIVITY_REFRESH_RATE = 30 * SECOND;
 
 export const LOGIN_RETRY_ATTEMPTS_LIMIT = 5;
@@ -16,6 +17,9 @@ export const TRANSFER_MIN_AMOUNT_MOTES = '2500000000';
 
 export const getBlockExplorerAccountUrl = (baseUrl: string, hash: string) =>
   `${baseUrl}/account/${hash}`;
+
+export const getBlockExplorerContractUrl = (baseUrl: string, hash: string) =>
+  `${baseUrl}/contract-package/${hash}`;
 
 export const getBlockExplorerDeployUrl = (
   casperLiveUrl: string,

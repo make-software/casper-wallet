@@ -23,7 +23,12 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 import { TokenType, useCasperToken } from '@src/hooks';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { getBlockExplorerAccountUrl } from '@src/constants';
+import {
+  getBlockExplorerAccountUrl,
+  getBlockExplorerContractUrl
+} from '@src/constants';
+import { formatErc20TokenBalance } from '../home/components/tokens-list/utils';
+import { ContractPackageWithBalance } from '@src/libs/services/erc20-service';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 16px;
@@ -53,26 +58,31 @@ type TokenInfoList = {
   value: string;
 };
 
-export const Token = () => {
-  const [token, setToken] = useState<TokenType | null>(null);
+type TokenProps = {
+  erc20Tokens: ContractPackageWithBalance[] | null;
+};
+
+export const Token = ({ erc20Tokens }: TokenProps) => {
+  const [tokenData, setTokenData] = useState<TokenType | null>(null);
   const [tokenInfoList, setTokenInfoList] = useState<TokenInfoList[] | []>([]);
   const [hrefToTokenOnCasperLive, setHrefToTokenOnCasperLive] = useState<
     string | undefined
   >();
 
   const { t } = useTranslation();
-  const { tokenName } = useParams();
-  const casperToken = useCasperToken();
   const navigate = useTypedNavigate();
+  const { tokenName } = useParams();
+
+  const casperToken = useCasperToken();
 
   const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const activeAccount = useSelector(selectVaultActiveAccount);
 
   useEffect(() => {
-    // TODO: update token, token info list and href for ERC20 tokens
     if (tokenName === 'Casper') {
+      // Casper Coin case
       if (casperToken && activeAccount) {
-        setToken(casperToken);
+        setTokenData(casperToken);
         setTokenInfoList([
           { id: 1, name: 'Symbol', value: casperToken.symbol }
         ]);
@@ -80,14 +90,31 @@ export const Token = () => {
           getBlockExplorerAccountUrl(casperLiveUrl, activeAccount.publicKey)
         );
       }
+    } else {
+      // ERC-20 token case
+      const erc20TokensList = formatErc20TokenBalance(erc20Tokens);
+      if (erc20TokensList == null) {
+        return;
+      }
+      const token = erc20TokensList?.find(token => token.name === tokenName);
+      if (token != null) {
+        setTokenData(token);
+        setTokenInfoList([
+          { id: 1, name: 'Symbol', value: token.symbol },
+          { id: 2, name: 'Decimals', value: token.decimals }
+        ]);
+        setHrefToTokenOnCasperLive(
+          getBlockExplorerContractUrl(casperLiveUrl, token.id)
+        );
+      }
     }
-  }, [tokenName, casperToken, activeAccount, casperLiveUrl]);
+  }, [tokenName, casperToken, activeAccount, casperLiveUrl, erc20Tokens]);
 
   return (
     <List
       contentTop={SpacingSize.Small}
       rows={tokenInfoList}
-      renderHeader={() => <TokenPlate token={token} />}
+      renderHeader={() => <TokenPlate token={tokenData} />}
       renderRow={({ name, value }) => (
         <ListItemContainer>
           <Typography type="captionRegular" color="contentSecondary">

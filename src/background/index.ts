@@ -52,6 +52,14 @@ import {
   fetchCurrencyRate
 } from '@libs/services/balance-service';
 import { fetchAccountInfo } from '@libs/services/account-info';
+import {
+  fetchAccountActivity,
+  fetchExtendedDeploysInfo
+} from '@libs/services/account-activity-service';
+import {
+  fetchContractPackage,
+  fetchErc20Tokens
+} from '@libs/services/erc20-service';
 
 import { openWindow } from './open-window';
 import {
@@ -89,7 +97,7 @@ import {
 } from './redux/settings/actions';
 import { activeOriginChanged } from './redux/active-origin/actions';
 import { selectApiConfigBasedOnActiveNetwork } from './redux/settings/selectors';
-import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
+import { getUrlOrigin, hasHttpPrefix, notEmpty } from '@src/utils';
 import {
   CannotGetActiveAccountError,
   CannotGetSenderOriginError
@@ -99,10 +107,6 @@ import {
   WalletLockedError
 } from '@src/content/sdk-errors';
 import { recipientPublicKeyAdded } from './redux/recent-recipient-public-keys/actions';
-import {
-  fetchAccountActivity,
-  fetchExtendedDeploysInfo
-} from '@libs/services/account-activity-service';
 import {
   accountActivityChanged,
   accountActivityReset,
@@ -605,6 +609,49 @@ browser.runtime.onMessage.addListener(
 
               return sendResponse(
                 serviceMessage.fetchExtendedDeploysInfoResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchErc20TokensRequest): {
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const { data: tokensList } = await fetchErc20Tokens({
+                casperApiUrl,
+                accountHash: action.payload.accountHash
+              });
+
+              const erc20Tokens = await Promise.allSettled(
+                tokensList?.map(token =>
+                  fetchContractPackage({
+                    casperApiUrl,
+                    contractPackageHash: token.contract_package_hash
+                  }).then(contractPackage => ({
+                    ...contractPackage,
+                    balance: token.balance
+                  }))
+                )
+              ).then(results =>
+                results
+                  .map(result => {
+                    if (result.status === 'fulfilled') {
+                      return result.value;
+                    } else {
+                      return null;
+                    }
+                  })
+                  .filter(notEmpty)
+              );
+
+              return sendResponse(
+                serviceMessage.fetchErc20TokensResponse(erc20Tokens)
               );
             } catch (error) {
               console.error(error);

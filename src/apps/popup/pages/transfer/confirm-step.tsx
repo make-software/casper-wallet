@@ -12,9 +12,8 @@ import {
   TransferInputContainer
 } from '@libs/layout';
 import {
-  FormField,
   List,
-  TextArea,
+  RecipientPlate,
   Typography,
   ActiveAccountPlate,
   AmountContainer
@@ -87,13 +86,11 @@ export const ConfirmStep = ({
       </ParagraphContainer>
       <ActiveAccountPlate label="From" />
       <TransferInputContainer>
-        <FormField label={recipientLabel}>
-          <TextArea
-            value={recipientPublicKey}
-            readOnly
-            style={{ minHeight: '78px' }}
-          />
-        </FormField>
+        <RecipientPlate
+          recipientLabel={recipientLabel}
+          publicKey={recipientPublicKey}
+          showFullPublicKey
+        />
       </TransferInputContainer>
       <List
         contentTop={SpacingSize.XXXL}
@@ -105,9 +102,7 @@ export const ConfirmStep = ({
             </Typography>
             <AmountContainer>
               <Typography type="captionHash">{`${listItems.amount} CSPR`}</Typography>
-              <Typography
-                type={listItems.bold ? 'bodySemiBold' : 'captionMedium'}
-              >
+              <Typography type={listItems.bold ? 'subtitle' : 'captionMedium'}>
                 {listItems.fiatPrice || 'API not available'}
               </Typography>
             </AmountContainer>

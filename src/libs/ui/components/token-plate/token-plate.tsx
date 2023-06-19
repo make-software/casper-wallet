@@ -4,15 +4,19 @@ import styled from 'styled-components';
 import {
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
+  RightAlignedCenteredFlexRow,
   RightAlignedFlexColumn,
   SpacingSize
 } from '@libs/layout';
-import { SvgIcon, Typography } from '@libs/ui';
-import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
+import { SvgIcon, Tooltip, Typography } from '@libs/ui';
 import { TokenType } from '@src/hooks';
 
-const NameContainer = styled(AlignedFlexRow)`
-  flex-grow: 1;
+const TokenAmountContainer = styled(RightAlignedFlexColumn)`
+  max-width: 120px;
+`;
+
+const TokenNameContainer = styled.div`
+  max-width: 100px;
 `;
 
 const ListItemContainer = styled(AlignedSpaceBetweenFlexRow)<{
@@ -40,35 +44,52 @@ export const TokenPlate = ({
     onClick={handleOnClick}
     clickable={!!handleOnClick}
   >
-    <NameContainer gap={SpacingSize.Medium}>
+    <AlignedFlexRow gap={SpacingSize.Medium}>
       <SvgIcon src={token?.icon || ''} size={32} />
-      <Typography type="body" loading={!token?.name}>
-        {token?.name}
-      </Typography>
-    </NameContainer>
-    <RightAlignedFlexColumn>
-      <AlignedFlexRow gap={SpacingSize.Small}>
-        <Typography type="bodyHash" loading={!token?.amountMotes}>
-          {token?.amountMotes == null
-            ? '-'
-            : formatNumber(motesToCSPR(token.amountMotes))}
-        </Typography>
-        <Typography
-          type="bodyHash"
-          color="contentSecondary"
-          loading={!token?.symbol}
+      <TokenNameContainer>
+        <Tooltip
+          title={token?.name && token.name.length > 10 ? token.name : undefined}
+          fullWidth
+          overflowWrap
         >
-          {token?.symbol}
+          <Typography type="body" ellipsis loading={!token?.name}>
+            {token?.name}
+          </Typography>
+        </Tooltip>
+      </TokenNameContainer>
+    </AlignedFlexRow>
+    <AlignedFlexRow gap={SpacingSize.Small}>
+      <TokenAmountContainer>
+        <Tooltip
+          title={
+            token?.amount && token.amount.length > 7 ? token?.amount : undefined
+          }
+          placement="topLeft"
+          overflowWrap
+          fullWidth
+        >
+          <RightAlignedCenteredFlexRow gap={SpacingSize.Small}>
+            <Typography type="bodyHash" ellipsis loading={!token?.amount}>
+              {token?.amount}
+            </Typography>
+            <Typography
+              type="bodyHash"
+              color="contentSecondary"
+              loading={!token?.symbol}
+            >
+              {token?.symbol}
+            </Typography>
+          </RightAlignedCenteredFlexRow>
+        </Tooltip>
+        <Typography
+          type="listSubtext"
+          color="contentSecondary"
+          loading={!token?.amountFiat}
+        >
+          {token?.amountFiat}
         </Typography>
-      </AlignedFlexRow>
-      <Typography
-        type="listSubtext"
-        color="contentSecondary"
-        loading={!token?.amountMotes}
-      >
-        {token?.amountFiat}
-      </Typography>
-    </RightAlignedFlexColumn>
-    {chevron && <SvgIcon src="assets/icons/chevron.svg" size={16} />}
+      </TokenAmountContainer>
+      {chevron && <SvgIcon src="assets/icons/chevron.svg" size={16} />}
+    </AlignedFlexRow>
   </ListItemContainer>
 );

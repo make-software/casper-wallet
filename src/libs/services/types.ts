@@ -8,3 +8,7 @@ export interface PaginatedResponse<T> {
   pageCount: number;
   pages: any[];
 }
+
+export interface DataResponse<T> {
+  data: T;
+}

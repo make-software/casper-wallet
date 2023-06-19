@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { useParams } from 'react-router-dom';
 
 import {
   CenteredFlexRow,
@@ -64,6 +65,24 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
   const { fetchMoreTransactions } = useAccountTransactions();
   const { observerElement } = useInfinityScroll(fetchMoreTransactions);
   const { t } = useTranslation();
+  const { tokenName } = useParams();
+
+  if (
+    tokenName !== 'Casper' &&
+    displayContext === ActivityListDisplayContext.TokenDetails
+  ) {
+    return (
+      <VerticalSpaceContainer top={SpacingSize.Small}>
+        <Tile>
+          <Container>
+            <Typography type="body" color="contentSecondary">
+              <Trans t={t}>NOT IMPLEMENTED</Trans>
+            </Typography>
+          </Container>
+        </Tile>
+      </VerticalSpaceContainer>
+    );
+  }
 
   if (
     activityListWithPendingTransactions == null ||
