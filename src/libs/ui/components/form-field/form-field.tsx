@@ -36,7 +36,7 @@ const StatusTextContainer = styled('div')<FormFieldProps>(
   ({ theme, status }) => ({
     // @ts-ignore
     color: theme.color[getThemeColor(status)],
-    margin: '4px 0 0 10px'
+    margin: '4px 0 0 16px'
   })
 );
 

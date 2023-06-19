@@ -1,7 +1,7 @@
 import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
 import styled from 'styled-components';
 
-import { BaseProps, FormField, FormFieldStatus } from '@src/libs/ui';
+import { BaseProps, FormField, FormFieldStatus, SvgIcon } from '@src/libs/ui';
 
 type Ref = HTMLInputElement;
 
@@ -208,9 +208,21 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
           readOnly={readOnly}
         />
 
+        {!suffixIcon && error && (
+          <SuffixContainer>
+            <SvgIcon
+              src="assets/icons/error.svg"
+              size={24}
+              color="contentRed"
+            />
+          </SuffixContainer>
+        )}
+
         {suffixIcon && <SuffixContainer>{suffixIcon}</SuffixContainer>}
 
-        {suffixText && <SuffixTextContainer>{suffixText}</SuffixTextContainer>}
+        {suffixText && !error && (
+          <SuffixTextContainer>{suffixText}</SuffixTextContainer>
+        )}
       </InputContainer>
     </FormField>
   );

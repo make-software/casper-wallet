@@ -11,7 +11,7 @@ import {
   SpacingSize,
   TransferInputContainer
 } from '@libs/layout';
-import { FormField, List, TextArea, Typography } from '@libs/ui';
+import { List, RecipientPlate, Typography } from '@libs/ui';
 import {
   AmountContainer,
   SenderDetails
@@ -84,13 +84,11 @@ export const ConfirmStep = ({
       </ParagraphContainer>
       <SenderDetails />
       <TransferInputContainer>
-        <FormField label={recipientLabel}>
-          <TextArea
-            value={recipientPublicKey}
-            readOnly
-            style={{ minHeight: '78px' }}
-          />
-        </FormField>
+        <RecipientPlate
+          recipientLabel={recipientLabel}
+          publicKey={recipientPublicKey}
+          showFullPublicKey
+        />
       </TransferInputContainer>
       <List
         contentTop={SpacingSize.XXXL}

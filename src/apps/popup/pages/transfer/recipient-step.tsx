@@ -1,21 +1,19 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
 
 import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize,
   TransferInputContainer,
-  FlexRow
+  VerticalSpaceContainer
 } from '@libs/layout';
-import { Avatar, Input, List, SvgIcon, Typography } from '@libs/ui';
+import { Input, List, RecipientPlate, SvgIcon, Typography } from '@libs/ui';
 import { SenderDetails } from '@popup/pages/transfer/sender-details';
 import { TransferFormValues } from '@libs/ui/forms/transfer';
 import { selectRecentRecipientPublicKeys } from '@src/background/redux/recent-recipient-public-keys/selectors';
-import { truncateKey } from '@libs/ui/components/hash/utils';
 import { useClickAway } from '@libs/ui/hooks/use-click-away';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
@@ -23,17 +21,12 @@ interface RecipientStepProps {
   recipientForm: UseFormReturn<TransferFormValues>;
 }
 
-const PublicKeyOptionContainer = styled(FlexRow)`
-  cursor: pointer;
-
-  padding: 8px 16px;
-`;
-
 export const RecipientStep = ({ recipientForm }: RecipientStepProps) => {
   const [
     isOpenRecentRecipientPublicKeysList,
     setIsOpenRecentRecipientPublicKeysList
   ] = useState(false);
+  const [showRecipientPlate, setShowRecipientPlate] = useState(false);
 
   const { t } = useTranslation();
 
@@ -42,23 +35,29 @@ export const RecipientStep = ({ recipientForm }: RecipientStepProps) => {
   );
   const activeAccount = useSelector(selectVaultActiveAccount);
 
-  const { ref: clickAwayRef } = useClickAway({
-    callback: () => {
-      setIsOpenRecentRecipientPublicKeysList(false);
-    }
-  });
-  const {
-    register,
-    formState: { errors },
-    setValue,
-    control,
-    trigger
-  } = recipientForm;
+  const { register, formState, setValue, control, trigger } = recipientForm;
+  const { errors } = formState;
 
   const inputValue = useWatch({
     control: control,
     name: 'recipientPublicKey'
   });
+  const { ref: clickAwayRef } = useClickAway({
+    callback: () => {
+      setIsOpenRecentRecipientPublicKeysList(false);
+      if (formState.isValid) {
+        setShowRecipientPlate(true);
+      }
+    }
+  });
+
+  useEffect(() => {
+    if (formState.isValid) {
+      setShowRecipientPlate(true);
+    }
+    //   This should trigger only once
+    //   eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const optionsRow = useMemo(
     () =>
@@ -83,45 +82,54 @@ export const RecipientStep = ({ recipientForm }: RecipientStepProps) => {
       </ParagraphContainer>
       <SenderDetails />
 
-      <TransferInputContainer
-        ref={clickAwayRef}
-        onFocus={() => {
-          setIsOpenRecentRecipientPublicKeysList(true);
-        }}
-      >
-        <Input
-          monotype
-          label={recipientLabel}
-          prefixIcon={<SvgIcon src="assets/icons/search.svg" size={24} />}
-          placeholder={t('Recipient public address')}
-          {...register('recipientPublicKey')}
-          error={!!errors?.recipientPublicKey}
-          validationText={errors?.recipientPublicKey?.message}
-        />
-        {isOpenRecentRecipientPublicKeysList && (
-          <List
-            contentTop={SpacingSize.Tiny}
-            rows={optionsRow}
-            renderRow={({ publicKey }) => (
-              <PublicKeyOptionContainer
-                gap={SpacingSize.Medium}
-                onClick={async () => {
-                  setValue('recipientPublicKey', publicKey);
-                  await trigger('recipientPublicKey');
-
-                  setIsOpenRecentRecipientPublicKeysList(false);
-                }}
-              >
-                <Avatar publicKey={publicKey} size={24} />
-                <Typography type="captionHash">
-                  {truncateKey(publicKey, { size: 'medium' })}
-                </Typography>
-              </PublicKeyOptionContainer>
-            )}
-            marginLeftForItemSeparatorLine={56}
+      {showRecipientPlate ? (
+        <VerticalSpaceContainer top={SpacingSize.XXL}>
+          <RecipientPlate
+            publicKey={inputValue}
+            recipientLabel={recipientLabel}
+            handleClick={() => {
+              setShowRecipientPlate(false);
+              setIsOpenRecentRecipientPublicKeysList(true);
+            }}
           />
-        )}
-      </TransferInputContainer>
+        </VerticalSpaceContainer>
+      ) : (
+        <TransferInputContainer
+          ref={clickAwayRef}
+          onFocus={() => {
+            setIsOpenRecentRecipientPublicKeysList(true);
+          }}
+        >
+          <Input
+            monotype
+            label={recipientLabel}
+            prefixIcon={<SvgIcon src="assets/icons/search.svg" size={24} />}
+            placeholder={t('Recipient public address')}
+            {...register('recipientPublicKey')}
+            error={!!errors?.recipientPublicKey}
+            validationText={errors?.recipientPublicKey?.message}
+          />
+          {isOpenRecentRecipientPublicKeysList && (
+            <List
+              contentTop={SpacingSize.Tiny}
+              rows={optionsRow}
+              renderRow={({ publicKey }) => (
+                <RecipientPlate
+                  publicKey={publicKey}
+                  handleClick={async () => {
+                    setValue('recipientPublicKey', publicKey);
+                    await trigger('recipientPublicKey');
+
+                    setIsOpenRecentRecipientPublicKeysList(false);
+                    setShowRecipientPlate(true);
+                  }}
+                />
+              )}
+              marginLeftForItemSeparatorLine={56}
+            />
+          )}
+        </TransferInputContainer>
+      )}
     </ContentContainer>
   );
 };
