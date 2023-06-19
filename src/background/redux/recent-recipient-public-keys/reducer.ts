@@ -1,12 +1,12 @@
 import { createReducer } from 'typesafe-actions';
-import { RecentRecipientPublicKeysState } from '@src/background/redux/recent-recipient-public-keys/types';
-import { recipientPublicKeyAdded } from '@src/background/redux/recent-recipient-public-keys/actions';
+
+import { RecentRecipientPublicKeysState } from './types';
+import { recipientPublicKeyAdded } from './actions';
 
 const initialState = [] as RecentRecipientPublicKeysState;
 
 export const reducer = createReducer(initialState).handleAction(
   recipientPublicKeyAdded,
-  (state, action) => {
-    return state.includes(action.payload) ? state : [...state, action.payload];
-  }
+  // This is a hack to make sure the most recent recipient is always at the top of the list.
+  (state, action) => [...new Set([action.payload, ...state])]
 );
