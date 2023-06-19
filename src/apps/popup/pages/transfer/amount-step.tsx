@@ -1,6 +1,6 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { Control, FormState, UseFormRegister, useWatch } from 'react-hook-form';
+import { UseFormReturn, useWatch } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 
 import {
@@ -15,22 +15,22 @@ import { TransferFormValues } from '@libs/ui/forms/transfer';
 import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 
 interface AmountStepProps {
-  amountFormRegister: UseFormRegister<TransferFormValues>;
-  amountFormState: FormState<TransferFormValues>;
-  controlAmountForm: Control<TransferFormValues>;
+  amountForm: UseFormReturn<TransferFormValues>;
 }
 
-export const AmountStep = ({
-  amountFormRegister,
-  amountFormState,
-  controlAmountForm
-}: AmountStepProps) => {
+export const AmountStep = ({ amountForm }: AmountStepProps) => {
   const { t } = useTranslation();
 
   const currencyRate = useSelector(selectAccountCurrencyRate);
 
+  const {
+    register,
+    formState: { errors },
+    control
+  } = amountForm;
+
   const csprAmount = useWatch({
-    control: controlAmountForm,
+    control,
     name: 'csprAmount'
   });
 
@@ -55,9 +55,9 @@ export const AmountStep = ({
           monotype
           placeholder={t('0.00')}
           suffixText="CSPR"
-          {...amountFormRegister('csprAmount')}
-          error={!!amountFormState.errors?.csprAmount}
-          validationText={amountFormState.errors?.csprAmount?.message}
+          {...register('csprAmount')}
+          error={!!errors?.csprAmount}
+          validationText={errors?.csprAmount?.message}
         />
       </TransferInputContainer>
 
@@ -67,9 +67,9 @@ export const AmountStep = ({
           type="number"
           monotype
           placeholder={t('Enter numeric value')}
-          {...amountFormRegister('transferIdMemo')}
-          error={!!amountFormState.errors?.transferIdMemo}
-          validationText={amountFormState.errors?.transferIdMemo?.message}
+          {...register('transferIdMemo')}
+          error={!!errors?.transferIdMemo}
+          validationText={errors?.transferIdMemo?.message}
         />
       </TransferInputContainer>
     </ContentContainer>
