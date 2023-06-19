@@ -20,10 +20,7 @@ import {
 } from '@libs/ui/utils/formatters';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import {
-  ExtendedDeployResultWithId,
-  LedgerLiveDeploysResult
-} from '@libs/services/account-activity-service';
+import { ExtendedDeployArgsResult } from '@libs/services/account-activity-service';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { getBlockExplorerDeployUrl } from '@src/constants';
 
@@ -86,7 +83,14 @@ const TypeIcons = {
 };
 
 interface AccountActivityPlateProps {
-  transactionInfo: LedgerLiveDeploysResult | ExtendedDeployResultWithId;
+  transactionInfo: {
+    deploy_hash: string;
+    caller_public_key: string;
+    timestamp: string;
+    args: ExtendedDeployArgsResult;
+    status: string;
+    error_message: string | null;
+  };
 }
 
 type Ref = HTMLDivElement;

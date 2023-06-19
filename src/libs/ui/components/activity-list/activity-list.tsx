@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
 
 import {
   CenteredFlexRow,
@@ -13,10 +12,19 @@ import { AccountActivityPlate, List, Tile, Typography } from '@libs/ui';
 import { useAccountTransactions, useInfinityScroll } from '@src/hooks';
 import {
   selectAccountActivity,
+  selectAccountErc20Activity,
   selectPendingTransactions
 } from '@background/redux/account-info/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { accountPendingTransactionsRemove } from '@background/redux/account-info/actions';
+import { useParams } from 'react-router-dom';
+import { ExtendedDeployArgsResult } from '@src/libs/services/account-activity-service';
+
+export enum ActivityListTransactionsType {
+  All = 'All',
+  Casper = 'Casper',
+  Erc20 = 'Erc20'
+}
 
 export enum ActivityListDisplayContext {
   Home = 'home',
@@ -31,10 +39,49 @@ const Container = styled(CenteredFlexRow)`
   padding: 20px;
 `;
 
+const renderNoActivityView = ({
+  displayContext,
+  t,
+  activityList
+}: {
+  displayContext: ActivityListDisplayContext;
+  t: any;
+  activityList: any;
+}) => {
+  return (
+    <VerticalSpaceContainer
+      top={
+        displayContext === ActivityListDisplayContext.Home
+          ? SpacingSize.None
+          : SpacingSize.Small
+      }
+    >
+      <Tile>
+        <Container>
+          <Typography type="body" color="contentSecondary">
+            {activityList == null && <Trans t={t}>Something went wrong</Trans>}
+            {activityList?.length === 0 && <Trans t={t}>No activity</Trans>}
+          </Typography>
+        </Container>
+      </Tile>
+    </VerticalSpaceContainer>
+  );
+};
+
 export const ActivityList = ({ displayContext }: ActivityListProps) => {
   const activityList = useSelector(selectAccountActivity);
+  const erc20ActivityList = useSelector(selectAccountErc20Activity);
   const pendingTransactions = useSelector(selectPendingTransactions);
+  const { tokenName } = useParams();
 
+  const transactionsType: ActivityListTransactionsType =
+    displayContext === ActivityListDisplayContext.Home
+      ? ActivityListTransactionsType.All
+      : tokenName === 'Casper'
+      ? ActivityListTransactionsType.Casper
+      : ActivityListTransactionsType.Erc20;
+
+  // validated pending transactions
   const filteredTransactions = useMemo(() => {
     return pendingTransactions?.filter(pendingTransaction => {
       if (activityList != null) {
@@ -55,73 +102,98 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
     });
   }, [activityList, pendingTransactions]);
 
-  const activityListWithPendingTransactions =
-    activityList != null
-      ? [...filteredTransactions, ...activityList]
-      : pendingTransactions.length > 0
-      ? pendingTransactions
-      : null;
-
-  const { fetchMoreTransactions } = useAccountTransactions();
+  const { fetchMoreTransactions } = useAccountTransactions(transactionsType);
   const { observerElement } = useInfinityScroll(fetchMoreTransactions);
   const { t } = useTranslation();
-  const { tokenName } = useParams();
 
-  if (
-    tokenName !== 'Casper' &&
-    displayContext === ActivityListDisplayContext.TokenDetails
-  ) {
-    return (
-      <VerticalSpaceContainer top={SpacingSize.Small}>
-        <Tile>
-          <Container>
-            <Typography type="body" color="contentSecondary">
-              <Trans t={t}>NOT IMPLEMENTED</Trans>
-            </Typography>
-          </Container>
-        </Tile>
-      </VerticalSpaceContainer>
-    );
-  }
+  if (ActivityListTransactionsType.All || ActivityListTransactionsType.Casper) {
+    const activityListWithPendingTransactions =
+      activityList != null
+        ? [...filteredTransactions, ...activityList]
+        : pendingTransactions.length > 0
+        ? pendingTransactions
+        : null;
+    const noActivityForAllAndCasper =
+      activityListWithPendingTransactions == null ||
+      activityListWithPendingTransactions?.length === 0;
 
-  if (
-    activityListWithPendingTransactions == null ||
-    activityListWithPendingTransactions?.length === 0
-  ) {
+    if (noActivityForAllAndCasper) {
+      renderNoActivityView({
+        t,
+        displayContext,
+        activityList: activityListWithPendingTransactions
+      });
+    }
+
+    // render all and casper activity list
     return (
-      <VerticalSpaceContainer
-        top={
+      <List
+        contentTop={
           displayContext === ActivityListDisplayContext.Home
             ? SpacingSize.None
             : SpacingSize.Small
         }
-      >
-        <Tile>
-          <Container>
-            <Typography type="body" color="contentSecondary">
-              {activityListWithPendingTransactions == null && (
-                <Trans t={t}>Something went wrong</Trans>
-              )}
-              {activityListWithPendingTransactions?.length === 0 && (
-                <Trans t={t}>No activity</Trans>
-              )}
-            </Typography>
-          </Container>
-        </Tile>
-      </VerticalSpaceContainer>
+        rows={activityListWithPendingTransactions!}
+        renderRow={(transaction, index) => {
+          if (index === activityListWithPendingTransactions!?.length - 1) {
+            return (
+              <AccountActivityPlate
+                ref={observerElement}
+                transactionInfo={transaction}
+              />
+            );
+          }
+
+          return <AccountActivityPlate transactionInfo={transaction} />;
+        }}
+        marginLeftForItemSeparatorLine={54}
+      />
     );
   }
 
+  const noActivityForErc20 =
+    (ActivityListTransactionsType.Erc20 && erc20ActivityList == null) ||
+    erc20ActivityList?.length === 0;
+
+  // no activity
+  if (noActivityForErc20) {
+    renderNoActivityView({
+      t,
+      displayContext,
+      activityList: erc20ActivityList
+    });
+  }
+
+  // render erc20 activity list
+  type Erc20Transfer = {
+    id: string;
+    deploy_hash: string;
+    caller_public_key: string;
+    timestamp: string;
+    args: ExtendedDeployArgsResult;
+    status: string;
+    error_message: string;
+  };
+
+  const erc20Transactions: Erc20Transfer[] =
+    erc20ActivityList?.map(transaction => {
+      return {
+        id: transaction.deploy_hash,
+        deploy_hash: transaction.deploy_hash,
+        caller_public_key: transaction.deploy?.caller_public_key || '-',
+        timestamp: transaction.deploy?.timestamp || '-',
+        args: transaction.deploy?.args || '-',
+        status: transaction.deploy?.status || '-',
+        error_message: transaction.deploy?.error_message || '-'
+      };
+    }) || [];
+
   return (
     <List
-      contentTop={
-        displayContext === ActivityListDisplayContext.Home
-          ? SpacingSize.None
-          : SpacingSize.Small
-      }
-      rows={activityListWithPendingTransactions}
+      contentTop={SpacingSize.Small}
+      rows={erc20Transactions}
       renderRow={(transaction, index) => {
-        if (index === activityListWithPendingTransactions?.length - 1) {
+        if (index === erc20Transactions?.length - 1) {
           return (
             <AccountActivityPlate
               ref={observerElement}

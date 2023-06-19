@@ -30,7 +30,8 @@ import {
   Tile,
   Typography,
   Tab,
-  Tabs
+  Tabs,
+  ActivityListTransactionsType
 } from '@libs/ui';
 
 import { useAccountTransactions } from '@src/hooks';
@@ -97,7 +98,7 @@ export function HomePageContent() {
   const balance = useSelector(selectAccountBalance);
 
   useActiveAccountBalance();
-  useAccountTransactions();
+  useAccountTransactions(ActivityListTransactionsType.All);
 
   const handleConnectAccount = useCallback(() => {
     if (!activeAccount || isActiveAccountConnected) {

@@ -7,13 +7,19 @@ import { dispatchFetchAccountActivity } from '@libs/services/account-activity-se
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
   accountActivityChanged,
-  accountActivityUpdated
+  accountActivityUpdated,
+  accountErc20ActivityChanged,
+  accountErc20ActivityUpdated
 } from '@background/redux/account-info/actions';
 import { selectAccountActivity } from '@background/redux/account-info/selectors';
 import { useForceUpdate } from '@popup/hooks/use-force-update';
 import { ACCOUNT_ACTIVITY_REFRESH_RATE } from '@src/constants';
+import { ActivityListTransactionsType } from '@src/libs/ui';
+import { dispatchFetchErc20AccountActivity } from '@src/libs/services/account-activity-service/erc20-account-activity-service';
 
-export const useAccountTransactions = () => {
+export const useAccountTransactions = (
+  transactionsType: ActivityListTransactionsType
+) => {
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
 
@@ -29,27 +35,64 @@ export const useAccountTransactions = () => {
   useEffect(() => {
     if (!activeAccount?.publicKey) return;
 
-    dispatchFetchAccountActivity(activeAccount?.publicKey, 1)
-      .then(
-        ({ payload: { data: accountTransactions, pageCount, itemCount } }) => {
-          if (itemCount === activityListLength) return;
+    // fetch all or casper
+    if (
+      transactionsType === ActivityListTransactionsType.All ||
+      transactionsType === ActivityListTransactionsType.Casper
+    ) {
+      dispatchFetchAccountActivity(activeAccount?.publicKey, 1)
+        .then(
+          ({
+            payload: { data: accountTransactions, pageCount, itemCount }
+          }) => {
+            if (itemCount === activityListLength) return;
 
-          const transactions =
-            accountTransactions?.map(transaction => ({
-              ...transaction,
-              id: transaction.deploy_hash
-            })) || null;
+            const transactions =
+              accountTransactions?.map(transaction => ({
+                ...transaction,
+                id: transaction.deploy_hash
+              })) || null;
 
-          dispatchToMainStore(accountActivityChanged(transactions));
+            dispatchToMainStore(accountActivityChanged(transactions));
 
-          // Set page to 2, so we can fetch more transactions when the user scrolls down
-          setPage(2);
-          setPageCount(pageCount);
-        }
-      )
-      .catch(error => {
-        console.error('Account activity request failed:', error);
-      });
+            // Set page to 2, so we can fetch more transactions when the user scrolls down
+            setPage(2);
+            setPageCount(pageCount);
+          }
+        )
+        .catch(error => {
+          console.error('Account activity request failed:', error);
+        });
+    }
+    // fetch all or erc20
+    if (
+      transactionsType === ActivityListTransactionsType.All ||
+      transactionsType === ActivityListTransactionsType.Erc20
+    ) {
+      dispatchFetchErc20AccountActivity(activeAccount?.publicKey, 1)
+        .then(
+          ({
+            payload: { data: accountTransactions, pageCount, itemCount }
+          }) => {
+            if (itemCount === activityListLength) return;
+
+            const transactions =
+              accountTransactions?.map(transaction => ({
+                ...transaction,
+                id: transaction.deploy_hash
+              })) || null;
+
+            dispatchToMainStore(accountErc20ActivityChanged(transactions));
+
+            // Set page to 2, so we can fetch more transactions when the user scrolls down
+            setPage(2);
+            setPageCount(pageCount);
+          }
+        )
+        .catch(error => {
+          console.error('Account activity request failed:', error);
+        });
+    }
 
     // will cause effect to run again after timeout
     effectTimeoutRef.current = setTimeout(() => {
@@ -67,28 +110,69 @@ export const useAccountTransactions = () => {
     // Prevent fetching more transactions if we already fetched all of them
     if (page > pageCount) return;
 
-    dispatchFetchAccountActivity(activeAccount?.publicKey, page)
-      .then(
-        ({ payload: { data: accountTransactions, pageCount, itemCount } }) => {
-          if (itemCount === activityListLength) return;
+    // fetch all or casper
+    if (
+      transactionsType === ActivityListTransactionsType.All ||
+      transactionsType === ActivityListTransactionsType.Casper
+    ) {
+      dispatchFetchAccountActivity(activeAccount?.publicKey, page)
+        .then(
+          ({
+            payload: { data: accountTransactions, pageCount, itemCount }
+          }) => {
+            if (itemCount === activityListLength) return;
 
-          const transactions =
-            accountTransactions?.map(transaction => ({
-              ...transaction,
-              id: transaction.deploy_hash
-            })) || [];
+            const transactions =
+              accountTransactions?.map(transaction => ({
+                ...transaction,
+                id: transaction.deploy_hash
+              })) || [];
 
-          dispatchToMainStore(accountActivityUpdated(transactions));
+            dispatchToMainStore(accountActivityUpdated(transactions));
 
-          setPage(page + 1);
-          setPageCount(pageCount);
-        }
-      )
-      .catch(error => {
-        console.error('Account activity request failed:', error);
-      });
-  }, [activeAccount?.publicKey, activityListLength, page, pageCount]);
+            setPage(page + 1);
+            setPageCount(pageCount);
+          }
+        )
+        .catch(error => {
+          console.error('Account activity request failed:', error);
+        });
+    }
+    // fetch all or casper
+    if (
+      transactionsType === ActivityListTransactionsType.All ||
+      transactionsType === ActivityListTransactionsType.Erc20
+    ) {
+      dispatchFetchErc20AccountActivity(activeAccount?.publicKey, page)
+        .then(
+          ({
+            payload: { data: accountTransactions, pageCount, itemCount }
+          }) => {
+            if (itemCount === activityListLength) return;
 
+            const transactions =
+              accountTransactions?.map(transaction => ({
+                ...transaction,
+                id: transaction.deploy_hash
+              })) || [];
+
+            dispatchToMainStore(accountErc20ActivityUpdated(transactions));
+
+            setPage(page + 1);
+            setPageCount(pageCount);
+          }
+        )
+        .catch(error => {
+          console.error('Account activity request failed:', error);
+        });
+    }
+  }, [
+    activeAccount?.publicKey,
+    activityListLength,
+    page,
+    pageCount,
+    transactionsType
+  ]);
   return {
     fetchMoreTransactions
   };
