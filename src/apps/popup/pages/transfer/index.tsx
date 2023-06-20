@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
-// import { CEP18Client } from 'casper-cep18-js-client';
+import { CLPublicKey } from 'casper-js-sdk';
+import { CEP18Client } from 'casper-cep18-js-client';
 
 import {
   FooterButtonsContainer,
@@ -18,7 +19,8 @@ import { useTransferForm } from '@libs/ui/forms/transfer';
 import {
   CSPRtoMotes,
   divideErc20Balance,
-  motesToCSPR
+  motesToCSPR,
+  multiplyErc20Balance
 } from '@libs/ui/utils/formatters';
 import { getIsErc20Transfer, TransactionSteps } from './utils';
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -34,6 +36,7 @@ import { selectAccountBalance } from '@src/background/redux/account-info/selecto
 import { dispatchFetchExtendedDeploysInfo } from '@src/libs/services/account-activity-service';
 import { accountPendingTransactionsChanged } from '@src/background/redux/account-info/actions';
 import { HomePageTabsId } from '../home';
+import { ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES } from '@src/libs/ui/utils/constants';
 
 export const TransferPage = () => {
   const { t } = useTranslation();
@@ -45,6 +48,9 @@ export const TransferPage = () => {
 
   const [recipientPublicKey, setRecipientPublicKey] = useState('');
   const [amount, setAmount] = useState('');
+  const [paymentAmount, setPaymentAmount] = useState(
+    motesToCSPR(ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES)
+  );
   const [transferIdMemo, setTransferIdMemo] = useState('');
   const [transferStep, setTransferStep] = useState<TransactionSteps>(
     TransactionSteps.Recipient
@@ -127,44 +133,51 @@ export const TransferPage = () => {
 
   const onSubmitSending = () => {
     if (activeAccount) {
+      const publicKeyFromHex = (publicKeyHex: string) => {
+        return CLPublicKey.fromHex(publicKeyHex);
+      };
+
       if (isErc20Transfer) {
-        // const cep18 = new CEP18Client(grpcUrl, networkName);
-        // cep18.setContractHash('hash-' + tokenContractHash);
-        // // create deploy
-        // const deploy = cep18.transfer(
-        //   { recipient: recipientPublicKey, amount: 50_000_000_000 },
-        //   5_000_000_000, // Payment amount
-        //   activeAccount.publicKey,
-        //   networkName
-        // );
-        // // sign and send deploy
-        // signAndDeploy(
-        //   deploy,
-        //   activeAccount.publicKey,
-        //   activeAccount.secretKey,
-        //   grpcUrl
-        // ).then(() => {
-        dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
+        const cep18 = new CEP18Client(grpcUrl, networkName);
+        cep18.setContractHash(`hash-${tokenContractHash}`);
+        // create deploy
+        const deploy = cep18.transfer(
+          {
+            recipient: publicKeyFromHex(recipientPublicKey),
+            amount: multiplyErc20Balance(amount, erc20Decimals) || '0'
+          },
+          paymentAmount,
+          publicKeyFromHex(activeAccount.publicKey),
+          networkName
+        );
+        // sign and send deploy
+        signAndDeploy(
+          deploy,
+          activeAccount.publicKey,
+          activeAccount.secretKey,
+          grpcUrl
+        ).then(({ deploy_hash }) => {
+          dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
-        // let triesLeft = 10;
-        // const interval = setInterval(async () => {
-        //   const { payload: extendedDeployInfo } =
-        //     await dispatchFetchExtendedDeploysInfo(deploy_hash);
-        //   if (extendedDeployInfo) {
-        //     dispatchToMainStore(
-        //       accountPendingTransactionsChanged(extendedDeployInfo)
-        //     );
-        //     clearInterval(interval);
-        //   } else if (triesLeft === 0) {
-        //     clearInterval(interval);
-        //   }
+          let triesLeft = 10;
+          const interval = setInterval(async () => {
+            const { payload: extendedDeployInfo } =
+              await dispatchFetchExtendedDeploysInfo(deploy_hash);
+            if (extendedDeployInfo) {
+              dispatchToMainStore(
+                accountPendingTransactionsChanged(extendedDeployInfo)
+              );
+              clearInterval(interval);
+            } else if (triesLeft === 0) {
+              clearInterval(interval);
+            }
 
-        //   triesLeft--;
-        //   //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-        // }, 2000);
+            triesLeft--;
+            //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
+          }, 2000);
 
-        setTransferStep(TransactionSteps.Success);
-        // });
+          setTransferStep(TransactionSteps.Success);
+        });
       } else {
         const motesAmount = CSPRtoMotes(amount);
 
@@ -232,9 +245,14 @@ export const TransferPage = () => {
         return {
           disabled: isButtonDisabled,
           onClick: () => {
-            const { transferIdMemo, amount: _amount } = getValuesAmountForm();
+            const {
+              transferIdMemo,
+              amount: _amount,
+              paymentAmount: _paymentAmount
+            } = getValuesAmountForm();
 
             setAmount(_amount);
+            setPaymentAmount(_paymentAmount);
             setTransferIdMemo(transferIdMemo);
             setTransferStep(TransactionSteps.Confirm);
           }
@@ -284,7 +302,7 @@ export const TransferPage = () => {
   };
 
   const transactionFee = isErc20Transfer
-    ? 'NOT IMPLEMENTED'
+    ? `${motesToCSPR(paymentAmount)} CSPR`
     : `${motesToCSPR(TRANSFER_COST_MOTES)} CSPR`;
 
   return (
@@ -313,6 +331,7 @@ export const TransferPage = () => {
           amountForm={amountForm}
           recipientPublicKey={recipientPublicKey}
           amount={amount}
+          paymentAmount={paymentAmount}
           balance={balance}
           symbol={symbol}
         />

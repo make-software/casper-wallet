@@ -16,9 +16,11 @@ import { selectAccountCurrencyRate } from '@background/redux/account-info/select
 
 interface AmountStepProps {
   amountForm: UseFormReturn<TransferFormValues>;
+  symbol: string | null;
+  isCSPR: boolean;
 }
 
-export const AmountStep = ({ amountForm }: AmountStepProps) => {
+export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
   const { t } = useTranslation();
 
   const currencyRate = useSelector(selectAccountCurrencyRate);
@@ -34,10 +36,20 @@ export const AmountStep = ({ amountForm }: AmountStepProps) => {
     name: 'amount'
   });
 
+  const paymentAmount = useWatch({
+    control,
+    name: 'paymentAmount'
+  });
+
   const amountLabel = t('Amount');
   const transferIdLabel = t('Transfer ID (memo)');
-
-  const fiatAmount = formatFiatAmount(amount || '0', currencyRate);
+  const paymentAmoutLabel = t('Set custom transaction fee');
+  const fiatAmount = isCSPR
+    ? formatFiatAmount(amount || '0', currencyRate)
+    : undefined;
+  const paymentFiatAmount = !isCSPR
+    ? formatFiatAmount(paymentAmount || '0', currencyRate)
+    : undefined;
 
   return (
     <ContentContainer>
@@ -46,7 +58,6 @@ export const AmountStep = ({ amountForm }: AmountStepProps) => {
           <Trans t={t}>Enter amount</Trans>
         </Typography>
       </ParagraphContainer>
-
       <TransferInputContainer>
         <Input
           label={amountLabel}
@@ -54,24 +65,43 @@ export const AmountStep = ({ amountForm }: AmountStepProps) => {
           type="number"
           monotype
           placeholder={t('0.00')}
-          suffixText="CSPR"
+          suffixText={symbol}
           {...register('amount')}
           error={!!errors?.amount}
           validationText={errors?.amount?.message}
         />
       </TransferInputContainer>
-
-      <TransferInputContainer>
-        <Input
-          label={transferIdLabel}
-          type="number"
-          monotype
-          placeholder={t('Enter numeric value')}
-          {...register('transferIdMemo')}
-          error={!!errors?.transferIdMemo}
-          validationText={errors?.transferIdMemo?.message}
-        />
-      </TransferInputContainer>
+      {/** transferIdMemo is only relevant for CSPR */}
+      {(isCSPR && (
+        <TransferInputContainer>
+          <Input
+            label={transferIdLabel}
+            type="number"
+            monotype
+            placeholder={t('Enter numeric value')}
+            {...register('transferIdMemo')}
+            error={!!errors?.transferIdMemo}
+            validationText={errors?.transferIdMemo?.message}
+          />
+        </TransferInputContainer>
+      )) || (
+        <TransferInputContainer>
+          <Input
+            label={paymentAmoutLabel}
+            rightLabel={paymentFiatAmount}
+            type="number"
+            monotype
+            placeholder={t('Enter transaction fee in CSPR')}
+            suffixText={'CSPR'}
+            {...register('paymentAmount')}
+            error={!!errors?.transferIdMemo}
+            validationText={
+              errors?.transferIdMemo?.message ||
+              "You'll be charged this amount in CSPR so please check it's correct. This cannot be reversed."
+            }
+          />
+        </TransferInputContainer>
+      )}
     </ContentContainer>
   );
 };

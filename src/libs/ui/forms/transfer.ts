@@ -13,6 +13,7 @@ import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 export type TransferFormValues = {
   recipientPublicKey: string;
   amount: string;
+  paymentAmount: string;
   transferIdMemo: string;
 };
 

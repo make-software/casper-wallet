@@ -139,6 +139,16 @@ export const divideErc20Balance = (
   return Big(balance).div(tokenDivider(decimals)).toString();
 };
 
+export const multiplyErc20Balance = (
+  balance: string | null,
+  decimals: number | null
+): string | null => {
+  if (balance == null) {
+    return null;
+  }
+  return Big(balance).mul(tokenDivider(decimals)).toString();
+};
+
 export const motesToCurrency = (
   motes: string,
   currencyPerCsprRate: number

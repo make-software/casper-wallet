@@ -17,6 +17,7 @@ interface TransferPageContentProps {
   amount: string;
   balance: string | null;
   symbol: string | null;
+  paymentAmount: string;
 }
 
 export const TransferPageContent = ({
@@ -26,8 +27,11 @@ export const TransferPageContent = ({
   amountForm,
   amount,
   balance,
-  symbol
+  symbol,
+  paymentAmount
 }: TransferPageContentProps) => {
+  const isCSPR = symbol === 'CSPR';
+
   switch (transferStep) {
     case TransactionSteps.Recipient: {
       return (
@@ -39,15 +43,19 @@ export const TransferPageContent = ({
       );
     }
     case TransactionSteps.Amount: {
-      return <AmountStep amountForm={amountForm} />;
+      return (
+        <AmountStep amountForm={amountForm} symbol={symbol} isCSPR={isCSPR} />
+      );
     }
     case TransactionSteps.Confirm: {
       return (
         <ConfirmStep
           recipientPublicKey={recipientPublicKey}
-          amountInCSPR={amount}
+          amount={amount}
           balance={balance}
           symbol={symbol}
+          isCSPR={isCSPR}
+          paymentAmount={paymentAmount}
         />
       );
     }

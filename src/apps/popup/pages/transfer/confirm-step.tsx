@@ -30,52 +30,83 @@ export const ListItemContainer = styled(SpaceBetweenFlexRow)`
 
 interface ConfirmStepProps {
   recipientPublicKey: string;
-  amountInCSPR: string;
+  amount: string;
   balance: string | null;
   symbol: string | null;
+  isCSPR: boolean;
+  paymentAmount: string;
 }
 export const ConfirmStep = ({
   recipientPublicKey,
-  amountInCSPR,
+  amount,
   balance,
-  symbol
+  symbol,
+  isCSPR,
+  paymentAmount
 }: ConfirmStepProps) => {
   const { t } = useTranslation();
 
   const currencyRate = useSelector(selectAccountCurrencyRate);
+  let transactionDataRows;
 
-  const transferCostInCSPR = formatNumber(motesToCSPR(TRANSFER_COST_MOTES), {
-    precision: { max: 5 }
-  });
-  const totalCSPR: string = Big(amountInCSPR)
-    .add(transferCostInCSPR)
-    .toString();
+  if (isCSPR) {
+    const transferCostInCSPR = formatNumber(motesToCSPR(TRANSFER_COST_MOTES), {
+      precision: { max: 5 }
+    });
+    const totalCSPR: string = Big(amount).add(transferCostInCSPR).toString();
 
-  const transactionDataRows = [
-    {
-      id: 1,
-      text: t('Amount'),
-      amount: formatNumber(amountInCSPR, {
-        precision: { max: 5 }
-      }),
-      fiatPrice: formatFiatAmount(amountInCSPR, currencyRate)
-    },
-    {
-      id: 2,
-      text: t('Transaction fee'),
-      amount: transferCostInCSPR,
-      fiatPrice: formatFiatAmount(transferCostInCSPR, currencyRate, 3)
-    },
-    {
-      id: 3,
-      text: t('Total'),
-      amount: formatNumber(totalCSPR, {
-        precision: { max: 5 }
-      }),
-      fiatPrice: formatFiatAmount(totalCSPR, currencyRate),
-      bold: true
-    }
-  ];
+    transactionDataRows = [
+      {
+        id: 1,
+        text: t('Amount'),
+        amount: formatNumber(amount, {
+          precision: { max: 5 }
+        }),
+        fiatPrice: formatFiatAmount(amount, currencyRate),
+        symbol
+      },
+      {
+        id: 2,
+        text: t('Transaction fee'),
+        amount: transferCostInCSPR,
+        fiatPrice: formatFiatAmount(transferCostInCSPR, currencyRate, 3),
+        symbol
+      },
+      {
+        id: 3,
+        text: t('Total'),
+        amount: formatNumber(totalCSPR, {
+          precision: { max: 5 }
+        }),
+        fiatPrice: formatFiatAmount(totalCSPR, currencyRate),
+        symbol,
+        bold: true
+      }
+    ];
+  } else {
+    const paymentAmountFormatted = formatNumber(motesToCSPR(paymentAmount), {
+      precision: { max: 5 }
+    });
+
+    transactionDataRows = [
+      {
+        id: 1,
+        text: t('Amount'),
+        amount: formatNumber(amount, {
+          precision: { max: 5 }
+        }),
+        fiatPrice: formatFiatAmount(amount, currencyRate),
+        symbol
+      },
+      {
+        id: 2,
+        text: t('Transaction fee'),
+        amount: paymentAmountFormatted,
+        fiatPrice: formatFiatAmount(paymentAmountFormatted, currencyRate, 3),
+        symbol: 'CSPR'
+      }
+    ];
+  }
 
   const recipientLabel = t('To recipient');
 
@@ -103,7 +134,7 @@ export const ConfirmStep = ({
               {listItems.text}
             </Typography>
             <AmountContainer>
-              <Typography type="captionHash">{`${listItems.amount} CSPR`}</Typography>
+              <Typography type="captionHash">{`${listItems.amount} ${listItems.symbol}`}</Typography>
               <Typography type={listItems.bold ? 'subtitle' : 'captionMedium'}>
                 {listItems.fiatPrice || 'API not available'}
               </Typography>
