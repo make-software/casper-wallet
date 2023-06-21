@@ -91,7 +91,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
             rightLabel={paymentFiatAmount}
             type="number"
             monotype
-            placeholder={t('Enter transaction fee in CSPR')}
+            placeholder={t('Enter transaction fee')}
             suffixText={'CSPR'}
             {...register('paymentAmount')}
             error={!!errors?.transferIdMemo}

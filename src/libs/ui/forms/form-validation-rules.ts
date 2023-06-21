@@ -230,3 +230,48 @@ export const useErc20AmountRule = (
       )
     });
 };
+
+export const usePaymentAmountRule = (csprBalance: string | null) => {
+  const { t } = useTranslation();
+
+  const maxAmountMotes: string =
+    csprBalance == null ? '0' : Big(csprBalance).toString();
+
+  return Yup.string()
+    .required(t('Payment amount is required'))
+    .test({
+      name: 'validU64',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          return isValidU64(amountInputValue);
+        }
+
+        return false;
+      },
+      message: t(`Amount is invalid`)
+    })
+    .test({
+      name: 'amountBelowMinTransfer',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          return Big(amountInputValue).gt('0');
+        }
+
+        return false;
+      },
+      message: t(`Amount must be greater than zero.`)
+    })
+    .test({
+      name: 'amountAboveBalance',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          return Big(CSPRtoMotes(amountInputValue)).lt(maxAmountMotes);
+        }
+
+        return false;
+      },
+      message: t(
+        'Your account balance is not high enough. Enter a smaller amount.'
+      )
+    });
+};

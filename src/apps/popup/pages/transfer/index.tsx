@@ -19,6 +19,7 @@ import { useTransferForm } from '@libs/ui/forms/transfer';
 import {
   CSPRtoMotes,
   divideErc20Balance,
+  formatNumber,
   motesToCSPR,
   multiplyErc20Balance
 } from '@libs/ui/utils/formatters';
@@ -78,7 +79,9 @@ export const TransferPage = () => {
   const { amountForm, recipientForm } = useTransferForm(
     balance,
     erc20Decimals,
-    isErc20Transfer
+    isErc20Transfer,
+    csprBalance.amountMotes,
+    paymentAmount
   );
 
   const { formState: amountFormState, getValues: getValuesAmountForm } =
@@ -138,6 +141,7 @@ export const TransferPage = () => {
       };
 
       if (isErc20Transfer) {
+        // ERC20 transfer
         const cep18 = new CEP18Client(grpcUrl, networkName);
         cep18.setContractHash(`hash-${tokenContractHash}`);
         // create deploy
@@ -146,11 +150,11 @@ export const TransferPage = () => {
             recipient: publicKeyFromHex(recipientPublicKey),
             amount: multiplyErc20Balance(amount, erc20Decimals) || '0'
           },
-          paymentAmount,
+          CSPRtoMotes(paymentAmount),
           publicKeyFromHex(activeAccount.publicKey),
           networkName
         );
-        // sign and send deploy
+
         signAndDeploy(
           deploy,
           activeAccount.publicKey,
@@ -159,26 +163,29 @@ export const TransferPage = () => {
         ).then(({ deploy_hash }) => {
           dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
-          let triesLeft = 10;
-          const interval = setInterval(async () => {
-            const { payload: extendedDeployInfo } =
-              await dispatchFetchExtendedDeploysInfo(deploy_hash);
-            if (extendedDeployInfo) {
-              dispatchToMainStore(
-                accountPendingTransactionsChanged(extendedDeployInfo)
-              );
-              clearInterval(interval);
-            } else if (triesLeft === 0) {
-              clearInterval(interval);
-            }
+          if (deploy_hash != null) {
+            let triesLeft = 10;
+            const interval = setInterval(async () => {
+              const { payload: extendedDeployInfo } =
+                await dispatchFetchExtendedDeploysInfo(deploy_hash);
+              if (extendedDeployInfo) {
+                dispatchToMainStore(
+                  accountPendingTransactionsChanged(extendedDeployInfo)
+                );
+                clearInterval(interval);
+              } else if (triesLeft === 0) {
+                clearInterval(interval);
+              }
 
-            triesLeft--;
-            //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-          }, 2000);
+              triesLeft--;
+              //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
+            }, 2000);
+          }
 
-          setTransferStep(TransactionSteps.Success);
+          // setTransferStep(TransactionSteps.Success);
         });
       } else {
+        // CSPR transfer
         const motesAmount = CSPRtoMotes(amount);
 
         const deploy = makeNativeTransferDeploy(
@@ -302,8 +309,8 @@ export const TransferPage = () => {
   };
 
   const transactionFee = isErc20Transfer
-    ? `${motesToCSPR(paymentAmount)} CSPR`
-    : `${motesToCSPR(TRANSFER_COST_MOTES)} CSPR`;
+    ? `${paymentAmount}`
+    : `${motesToCSPR(TRANSFER_COST_MOTES)}`;
 
   return (
     <PopupLayout
@@ -344,7 +351,12 @@ export const TransferPage = () => {
               <Typography type="captionRegular">
                 <Trans t={t}>Transaction fee</Trans>
               </Typography>
-              <Typography type="captionHash">{transactionFee}</Typography>
+              <Typography type="captionHash">
+                {formatNumber(transactionFee, {
+                  precision: { max: 5 }
+                })}{' '}
+                CSPR
+              </Typography>
             </SpaceBetweenFlexRow>
           )}
           <Button color="primaryBlue" type="button" {...getButtonProps()}>

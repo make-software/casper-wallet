@@ -84,10 +84,6 @@ export const ConfirmStep = ({
       }
     ];
   } else {
-    const paymentAmountFormatted = formatNumber(motesToCSPR(paymentAmount), {
-      precision: { max: 5 }
-    });
-
     transactionDataRows = [
       {
         id: 1,
@@ -95,14 +91,16 @@ export const ConfirmStep = ({
         amount: formatNumber(amount, {
           precision: { max: 5 }
         }),
-        fiatPrice: formatFiatAmount(amount, currencyRate),
+        fiatPrice: null,
         symbol
       },
       {
         id: 2,
         text: t('Transaction fee'),
-        amount: paymentAmountFormatted,
-        fiatPrice: formatFiatAmount(paymentAmountFormatted, currencyRate, 3),
+        amount: formatNumber(paymentAmount, {
+          precision: { max: 5 }
+        }),
+        fiatPrice: formatFiatAmount(paymentAmount, currencyRate, 3),
         symbol: 'CSPR'
       }
     ];
@@ -136,7 +134,9 @@ export const ConfirmStep = ({
             <AmountContainer>
               <Typography type="captionHash">{`${listItems.amount} ${listItems.symbol}`}</Typography>
               <Typography type={listItems.bold ? 'subtitle' : 'captionMedium'}>
-                {listItems.fiatPrice || 'API not available'}
+                {listItems.fiatPrice == null
+                  ? null
+                  : listItems.fiatPrice || 'Not available'}
               </Typography>
             </AmountContainer>
           </ListItemContainer>

@@ -67,6 +67,7 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
   const { t } = useTranslation();
   const { tokenName } = useParams();
 
+  // render ERC-20 tokens activity
   if (
     tokenName !== 'Casper' &&
     displayContext === ActivityListDisplayContext.TokenDetails
@@ -84,6 +85,7 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
     );
   }
 
+  // render empty activity list
   if (
     activityListWithPendingTransactions == null ||
     activityListWithPendingTransactions?.length === 0
@@ -112,6 +114,7 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
     );
   }
 
+  // render CSPR or Home activity list
   return (
     <List
       contentTop={

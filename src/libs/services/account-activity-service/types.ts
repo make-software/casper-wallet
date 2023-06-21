@@ -67,6 +67,7 @@ export interface ExtendedDeployResult {
   contract_package?: ExtendedDeployContractPackageResult;
   execution_type_id: 1 | 2 | 3 | 4 | 5 | 6;
   rate: number;
+  error?: { message: string };
 }
 
 export interface ExtendedDeployResultWithId extends ExtendedDeployResult {
