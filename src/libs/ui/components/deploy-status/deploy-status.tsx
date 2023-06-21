@@ -115,6 +115,7 @@ export const DeployStatus = ({
           <Typography
             type="labelMedium"
             color={StatusColors[status] as ContentColor}
+            uppercase
           >
             {StatusLabel[status]}
           </Typography>
