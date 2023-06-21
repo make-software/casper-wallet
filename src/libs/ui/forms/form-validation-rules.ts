@@ -109,12 +109,8 @@ export const useTransferIdMemoRule = () => {
 
   return Yup.string().test({
     name: 'validU64',
-    test: value => {
-      if (value) {
-        return isValidU64(value);
-      }
-      return true;
-    },
+    // this field is optional, so we set it to true if it's empty
+    test: value => (value ? isValidU64(value) : true),
     message: t(`Transfer ID is invalid`)
   });
 };

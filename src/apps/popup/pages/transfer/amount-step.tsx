@@ -29,6 +29,9 @@ export const AmountStep = ({ amountForm }: AmountStepProps) => {
     control
   } = amountForm;
 
+  const { onChange: onChangeTransferIdMemo } = register('transferIdMemo');
+  const { onChange: onChangeCSPRAmount } = register('csprAmount');
+
   const csprAmount = useWatch({
     control,
     name: 'csprAmount'
@@ -51,11 +54,17 @@ export const AmountStep = ({ amountForm }: AmountStepProps) => {
         <Input
           label={amountLabel}
           rightLabel={fiatAmount}
-          type="number"
           monotype
           placeholder={t('0.00')}
           suffixText="CSPR"
           {...register('csprAmount')}
+          onChange={e => {
+            // replace all non-numeric characters except decimal point
+            e.target.value = e.target.value.replace(/[^0-9.]/g, '');
+            // regex replace decimal point from beginning of string
+            e.target.value = e.target.value.replace(/^\./, '');
+            onChangeCSPRAmount(e);
+          }}
           error={!!errors?.csprAmount}
           validationText={errors?.csprAmount?.message}
         />
@@ -64,10 +73,14 @@ export const AmountStep = ({ amountForm }: AmountStepProps) => {
       <TransferInputContainer>
         <Input
           label={transferIdLabel}
-          type="number"
           monotype
           placeholder={t('Enter numeric value')}
           {...register('transferIdMemo')}
+          onChange={e => {
+            // replace all non-numeric characters
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            onChangeTransferIdMemo(e);
+          }}
           error={!!errors?.transferIdMemo}
           validationText={errors?.transferIdMemo?.message}
         />
