@@ -25,9 +25,17 @@ export const signAndDeploy = (
     CLPublicKey.fromHex(senderPublicKeyHex)
   );
 
+  console.log(
+    'signedDeploy',
+    JSON.stringify(DeployUtil.deployToJson(signedDeploy), null, 2)
+  );
+
   return casperService(url)
     .deploy(signedDeploy)
-    .then(res => res)
+    .then(function (res) {
+      console.log('res', res);
+      return res;
+    })
     .catch(error => {
       console.log(error);
       throw error;
