@@ -23,7 +23,7 @@ import {
   motesToCSPR,
   multiplyErc20Balance
 } from '@libs/ui/utils/formatters';
-import { getIsErc20Transfer, TransactionSteps } from './utils';
+import { findKeyFromAccountNamedKeys, getAccountInfo, getIsErc20Transfer, TransactionSteps } from './utils';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { Button, Typography } from '@libs/ui';
 import { TRANSFER_COST_MOTES } from '@src/constants';
@@ -143,7 +143,21 @@ export const TransferPage = () => {
       if (isErc20Transfer) {
         // ERC20 transfer
         const cep18 = new CEP18Client(grpcUrl, networkName);
-        cep18.setContractHash(`hash-${tokenContractHash}`);
+        const accountInfo = await getAccountInfo(grpcUrl, publicKeyFromHex(activeAccount.publicKey);
+
+        const res = await rpcClient.fetchStateGetItem(
+          stateRootHash,
+          tokenContractHash,
+          []
+        );
+        const contractHash = res.ContractPackage.versions[0].contract_hash;
+        const contractHashWithHashPrefix = contractHash.replace("contract-", "hash-");
+        console.log(` - Contract Hash: ${contractHashWithHashPrefix}`);
+      
+        cep18.setContractHash(contractHash, contractPackageHash);
+        console.log(`... Contract Hash: ${contractHash}`);
+        console.log(`... Contract Package Hash: ${contractPackageHash}`);
+
         // create deploy
         const deploy = cep18.transfer(
           {
