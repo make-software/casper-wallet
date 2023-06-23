@@ -7,7 +7,6 @@ import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize,
-  TransferInputContainer,
   VerticalSpaceContainer
 } from '@libs/layout';
 import {
@@ -89,7 +88,7 @@ export const RecipientStep = ({ recipientForm }: RecipientStepProps) => {
       <ActiveAccountPlate label="From" />
 
       {showRecipientPlate ? (
-        <VerticalSpaceContainer top={SpacingSize.XXL}>
+        <VerticalSpaceContainer top={SpacingSize.XL}>
           <RecipientPlate
             publicKey={inputValue}
             recipientLabel={recipientLabel}
@@ -100,7 +99,8 @@ export const RecipientStep = ({ recipientForm }: RecipientStepProps) => {
           />
         </VerticalSpaceContainer>
       ) : (
-        <TransferInputContainer
+        <VerticalSpaceContainer
+          top={SpacingSize.XL}
           ref={clickAwayRef}
           onFocus={() => {
             setIsOpenRecentRecipientPublicKeysList(true);
@@ -134,7 +134,7 @@ export const RecipientStep = ({ recipientForm }: RecipientStepProps) => {
               marginLeftForItemSeparatorLine={56}
             />
           )}
-        </TransferInputContainer>
+        </VerticalSpaceContainer>
       )}
     </ContentContainer>
   );
