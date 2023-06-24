@@ -9,14 +9,14 @@ import {
   ParagraphContainer,
   SpaceBetweenFlexRow,
   SpacingSize,
-  TransferInputContainer
+  VerticalSpaceContainer
 } from '@libs/layout';
 import {
+  ActiveAccountPlate,
+  AmountContainer,
   List,
   RecipientPlate,
-  Typography,
-  ActiveAccountPlate,
-  AmountContainer
+  Typography
 } from '@libs/ui';
 import {
   formatFiatAmount,
@@ -85,15 +85,15 @@ export const ConfirmStep = ({
         </Typography>
       </ParagraphContainer>
       <ActiveAccountPlate label="From" />
-      <TransferInputContainer>
+      <VerticalSpaceContainer top={SpacingSize.XL}>
         <RecipientPlate
           recipientLabel={recipientLabel}
           publicKey={recipientPublicKey}
           showFullPublicKey
         />
-      </TransferInputContainer>
+      </VerticalSpaceContainer>
       <List
-        contentTop={SpacingSize.XXXL}
+        contentTop={SpacingSize.XL}
         rows={transactionDataRows}
         renderRow={listItems => (
           <ListItemContainer key={listItems.id}>

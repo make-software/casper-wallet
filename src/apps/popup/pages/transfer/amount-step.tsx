@@ -7,7 +7,7 @@ import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize,
-  TransferInputContainer
+  VerticalSpaceContainer
 } from '@libs/layout';
 import { Input, Typography } from '@libs/ui';
 import { formatFiatAmount } from '@libs/ui/utils/formatters';
@@ -47,7 +47,7 @@ export const AmountStep = ({ amountForm }: AmountStepProps) => {
         </Typography>
       </ParagraphContainer>
 
-      <TransferInputContainer>
+      <VerticalSpaceContainer top={SpacingSize.XXL}>
         <Input
           label={amountLabel}
           rightLabel={fiatAmount}
@@ -59,9 +59,9 @@ export const AmountStep = ({ amountForm }: AmountStepProps) => {
           error={!!errors?.csprAmount}
           validationText={errors?.csprAmount?.message}
         />
-      </TransferInputContainer>
+      </VerticalSpaceContainer>
 
-      <TransferInputContainer>
+      <VerticalSpaceContainer top={SpacingSize.XL}>
         <Input
           label={transferIdLabel}
           type="number"
@@ -71,7 +71,7 @@ export const AmountStep = ({ amountForm }: AmountStepProps) => {
           error={!!errors?.transferIdMemo}
           validationText={errors?.transferIdMemo?.message}
         />
-      </TransferInputContainer>
+      </VerticalSpaceContainer>
     </ContentContainer>
   );
 };
