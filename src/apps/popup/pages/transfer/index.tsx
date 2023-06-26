@@ -23,7 +23,7 @@ import {
   motesToCSPR,
   multiplyErc20Balance
 } from '@libs/ui/utils/formatters';
-import { findKeyFromAccountNamedKeys, getAccountInfo, getIsErc20Transfer, TransactionSteps } from './utils';
+import { getIsErc20Transfer, TransactionSteps } from './utils';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { Button, Typography } from '@libs/ui';
 import { TRANSFER_COST_MOTES } from '@src/constants';
@@ -43,9 +43,9 @@ export const TransferPage = () => {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
-  const { tokenContractHash } = useParams();
+  const { tokenContractPackageHash, tokenContractHash } = useParams();
 
-  const isErc20Transfer = getIsErc20Transfer(tokenContractHash);
+  const isErc20Transfer = getIsErc20Transfer(tokenContractPackageHash);
 
   const [recipientPublicKey, setRecipientPublicKey] = useState('');
   const [amount, setAmount] = useState('');
@@ -65,7 +65,7 @@ export const TransferPage = () => {
 
   const csprBalance = useSelector(selectAccountBalance);
   const { tokens } = useActiveAccountErc20Tokens();
-  const token = tokens?.find(token => token.id === tokenContractHash);
+  const token = tokens?.find(token => token.id === tokenContractPackageHash);
 
   const symbol = isErc20Transfer ? token?.symbol || null : 'CSPR';
   const erc20Decimals = token?.decimals != null ? token.decimals : null;
@@ -143,20 +143,11 @@ export const TransferPage = () => {
       if (isErc20Transfer) {
         // ERC20 transfer
         const cep18 = new CEP18Client(grpcUrl, networkName);
-        const accountInfo = await getAccountInfo(grpcUrl, publicKeyFromHex(activeAccount.publicKey);
 
-        const res = await rpcClient.fetchStateGetItem(
-          stateRootHash,
-          tokenContractHash,
-          []
+        cep18.setContractHash(
+          `hash-${tokenContractHash}`,
+          `hash-${tokenContractPackageHash}`
         );
-        const contractHash = res.ContractPackage.versions[0].contract_hash;
-        const contractHashWithHashPrefix = contractHash.replace("contract-", "hash-");
-        console.log(` - Contract Hash: ${contractHashWithHashPrefix}`);
-      
-        cep18.setContractHash(contractHash, contractPackageHash);
-        console.log(`... Contract Hash: ${contractHash}`);
-        console.log(`... Contract Package Hash: ${contractPackageHash}`);
 
         // create deploy
         const deploy = cep18.transfer(
@@ -196,7 +187,7 @@ export const TransferPage = () => {
             }, 2000);
           }
 
-          // setTransferStep(TransactionSteps.Success);
+          setTransferStep(TransactionSteps.Success);
         });
       } else {
         // CSPR transfer

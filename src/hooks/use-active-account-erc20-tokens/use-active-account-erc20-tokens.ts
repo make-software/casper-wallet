@@ -9,6 +9,7 @@ import { BALANCE_REFRESH_RATE } from '@src/constants';
 import { dispatchFetchErc20TokensRequest } from '@src/libs/services/erc20-service';
 import { getAccountHashFromPublicKey } from '@src/libs/entities/Account';
 import { formatErc20TokenBalance } from '@src/apps/popup/pages/home/components/tokens-list/utils';
+import { TokenType } from '../use-casper-token';
 
 /**
  * Will get all active account erc20 tokens with automatic refresh
@@ -16,19 +17,7 @@ import { formatErc20TokenBalance } from '@src/apps/popup/pages/home/components/t
 export const useActiveAccountErc20Tokens = () => {
   const effectTimeoutRef = useRef<NodeJS.Timeout>();
   const forceUpdate = useForceUpdate();
-  const [tokens, setTokens] = useState<
-    | {
-        id: string;
-        name: string;
-        balance: string;
-        amount: string;
-        symbol: string;
-        decimals: number;
-        amountFiat: null;
-        icon: string;
-      }[]
-    | undefined
-  >(undefined);
+  const [tokens, setTokens] = useState<TokenType[] | undefined>(undefined);
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);

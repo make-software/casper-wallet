@@ -635,7 +635,8 @@ browser.runtime.onMessage.addListener(
                     contractPackageHash: token.contract_package_hash
                   }).then(contractPackage => ({
                     ...contractPackage,
-                    balance: token.balance
+                    balance: token.balance,
+                    contractHash: token.latest_contract?.contract_hash
                   }))
                 )
               ).then(results =>

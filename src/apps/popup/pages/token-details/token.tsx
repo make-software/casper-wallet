@@ -93,7 +93,7 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
         setTokenData(token);
         setTokenInfoList([
           { id: 1, name: 'Symbol', value: token.symbol },
-          { id: 2, name: 'Decimals', value: token.decimals.toString() }
+          { id: 2, name: 'Decimals', value: (token.decimals || 0).toString() }
         ]);
         setHrefToTokenOnCasperLive(
           getBlockExplorerContractUrl(casperLiveUrl, token.id)
@@ -123,8 +123,11 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
               navigate(
                 tokenData?.id
                   ? RouterPath.TransferERC20.replace(
-                      ':tokenContractHash',
+                      ':tokenContractPackageHash',
                       tokenData.id
+                    ).replace(
+                      ':tokenContractHash',
+                      tokenData.contractHash || 'null'
                     )
                   : RouterPath.TransferCSPR
               )

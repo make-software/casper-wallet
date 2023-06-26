@@ -2,6 +2,16 @@ export interface Erc20Token {
   account_hash: string;
   balance: string;
   contract_package_hash: string;
+  latest_contract?: {
+    contract_hash: string;
+    contract_package_hash: string;
+    deploy_hash: string;
+    contract_type_id: number;
+    contract_version: number;
+    is_disabled: boolean;
+    protocol_version: string;
+    timestamp: string;
+  };
 }
 
 export interface ContractPackage {
@@ -17,6 +27,7 @@ export interface ContractPackage {
   };
   owner_public_key: string;
   timestamp: string;
+  contractHash?: string;
 }
 
 export interface ContractPackageWithBalance extends ContractPackage {
