@@ -81,35 +81,24 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
         />
       </TransferInputContainer>
 
-      <TransferInputContainer>
-        <Input
-          label={transferIdLabel}
-          monotype
-          placeholder={t('Enter numeric value')}
-          {...register('transferIdMemo')}
-          onChange={e => {
-            // replace all non-numeric characters
-            e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            onChangeTransferIdMemo(e);
-          }}
-          error={!!errors?.transferIdMemo}
-          validationText={errors?.transferIdMemo?.message}
-        />
-      </TransferInputContainer>
       {/** transferIdMemo is only relevant for CSPR */}
-      {(isCSPR && (
+      {isCSPR ? (
         <TransferInputContainer>
           <Input
             label={transferIdLabel}
-            type="number"
             monotype
             placeholder={t('Enter numeric value')}
             {...register('transferIdMemo')}
+            onChange={e => {
+              // replace all non-numeric characters
+              e.target.value = e.target.value.replace(/[^0-9]/g, '');
+              onChangeTransferIdMemo(e);
+            }}
             error={!!errors?.transferIdMemo}
             validationText={errors?.transferIdMemo?.message}
           />
         </TransferInputContainer>
-      )) || (
+      ) : (
         <TransferInputContainer>
           <Input
             label={paymentAmoutLabel}
@@ -119,10 +108,10 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
             placeholder={t('Enter transaction fee')}
             suffixText={'CSPR'}
             {...register('paymentAmount')}
-            error={!!errors?.transferIdMemo}
+            error={!!errors?.paymentAmount}
             validationText={
-              errors?.transferIdMemo?.message ||
-              "You'll be charged this amount in CSPR so please check it's correct. This cannot be reversed."
+              errors?.paymentAmount?.message ||
+              "You'll be charged this amount in CSPR as a transaction fee. You can change it at your discretion."
             }
           />
         </TransferInputContainer>
