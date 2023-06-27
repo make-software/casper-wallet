@@ -25,7 +25,6 @@ import {
   Button,
   getFontSizeBasedOnTextLength,
   Hash,
-  HashDisplayContext,
   HashVariant,
   Tile,
   Typography,
@@ -133,8 +132,6 @@ export function HomePageContent() {
                 value={activeAccount.publicKey}
                 variant={HashVariant.CaptionHash}
                 truncated
-                withCopyOnSelfClick
-                displayContext={HashDisplayContext.Home}
               />
             </NameAndAddressContainer>
             <BalanceContainer>

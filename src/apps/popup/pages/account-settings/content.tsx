@@ -12,14 +12,7 @@ import {
   TileContainer,
   VerticalSpaceContainer
 } from '@src/libs/layout/containers';
-import {
-  Hash,
-  HashDisplayContext,
-  HashVariant,
-  Tile,
-  SvgIcon,
-  Typography
-} from '@libs/ui';
+import { Hash, HashVariant, Tile, SvgIcon, Typography } from '@libs/ui';
 import {
   selectVaultAccount,
   selectVaultImportedAccounts
@@ -61,9 +54,7 @@ export function AccountSettingsPageContent() {
                 </Typography>
                 <Hash
                   value={account.publicKey}
-                  variant={HashVariant.FullHash}
-                  withCopyOnSelfClick
-                  displayContext={HashDisplayContext.AccountInfo}
+                  variant={HashVariant.CaptionHash}
                 />
               </FlexColumn>
             </VerticalSpaceContainer>
@@ -72,12 +63,7 @@ export function AccountSettingsPageContent() {
                 <Typography type="bodySemiBold">
                   <Trans t={t}>Account hash</Trans>
                 </Typography>
-                <Hash
-                  value={accountHash}
-                  variant={HashVariant.FullHash}
-                  withCopyOnSelfClick
-                  displayContext={HashDisplayContext.AccountInfo}
-                />
+                <Hash value={accountHash} variant={HashVariant.CaptionHash} />
               </FlexColumn>
             </VerticalSpaceContainer>
           </TileContainer>
