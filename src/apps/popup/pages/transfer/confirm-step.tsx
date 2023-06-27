@@ -9,13 +9,15 @@ import {
   ParagraphContainer,
   SpaceBetweenFlexRow,
   SpacingSize,
-  TransferInputContainer
+  VerticalSpaceContainer
 } from '@libs/layout';
-import { List, RecipientPlate, Typography } from '@libs/ui';
 import {
+  ActiveAccountPlate,
   AmountContainer,
-  SenderDetails
-} from '@popup/pages/transfer/sender-details';
+  List,
+  RecipientPlate,
+  Typography
+} from '@libs/ui';
 import {
   formatFiatAmount,
   formatNumber,
@@ -82,16 +84,16 @@ export const ConfirmStep = ({
           <Trans t={t}>Confirm send</Trans>
         </Typography>
       </ParagraphContainer>
-      <SenderDetails />
-      <TransferInputContainer>
+      <ActiveAccountPlate label="From" />
+      <VerticalSpaceContainer top={SpacingSize.XL}>
         <RecipientPlate
           recipientLabel={recipientLabel}
           publicKey={recipientPublicKey}
           showFullPublicKey
         />
-      </TransferInputContainer>
+      </VerticalSpaceContainer>
       <List
-        contentTop={SpacingSize.XXXL}
+        contentTop={SpacingSize.XL}
         rows={transactionDataRows}
         renderRow={listItems => (
           <ListItemContainer key={listItems.id}>

@@ -16,5 +16,6 @@ export enum RouterPath {
   DownloadedSecretKeys = '/downloaded-secret-keys',
   Transfer = '/transfer',
   ActivityDetails = '/activity-details',
-  Token = '/token/:tokenName'
+  Token = '/token/:tokenName',
+  Receive = '/receive'
 }

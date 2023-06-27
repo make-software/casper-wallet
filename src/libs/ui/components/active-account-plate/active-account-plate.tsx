@@ -11,8 +11,7 @@ import {
   SpacingSize,
   TileContainer
 } from '@libs/layout';
-import { Avatar, Tile, Typography } from '@libs/ui';
-import { truncateKey } from '@libs/ui/components/hash/utils';
+import { Avatar, Hash, HashVariant, Tile, Typography } from '@libs/ui';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
@@ -25,7 +24,11 @@ export const Container = styled(TileContainer)`
   margin-top: 8px;
 `;
 
-export const SenderDetails = () => {
+interface ActiveAccountPlateProps {
+  label: string;
+}
+
+export const ActiveAccountPlate = ({ label }: ActiveAccountPlateProps) => {
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
@@ -39,7 +42,7 @@ export const SenderDetails = () => {
     <>
       <ParagraphContainer top={SpacingSize.XXL}>
         <Typography type="bodySemiBold">
-          <Trans t={t}>From</Trans>
+          <Trans t={t}>{label}</Trans>
         </Typography>
       </ParagraphContainer>
       <Tile>
@@ -51,9 +54,12 @@ export const SenderDetails = () => {
                 <Typography type="captionMedium">
                   {activeAccount.name}
                 </Typography>
-                <Typography type="captionHash">
-                  {truncateKey(activeAccount.publicKey)}
-                </Typography>
+                <Hash
+                  value={activeAccount.publicKey}
+                  variant={HashVariant.CaptionHash}
+                  color="contentSecondary"
+                  truncated
+                />
               </SpaceBetweenFlexColumn>
             </AlignedFlexRow>
             <AmountContainer>

@@ -10,7 +10,15 @@ import {
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
-import { Link, List, SvgIcon, TokenPlate, Typography } from '@libs/ui';
+import {
+  FillColor,
+  getColorFromTheme,
+  Link,
+  List,
+  SvgIcon,
+  TokenPlate,
+  Typography
+} from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { TokenType, useCasperToken } from '@src/hooks';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
@@ -30,17 +38,17 @@ const FooterItemContainer = styled(CenteredFlexRow)`
   padding: 24px 0 16px;
 `;
 
-const IconCircleContainer = styled(CenteredFlexRow)`
+const IconCircleContainer = styled(CenteredFlexRow)<{ color: FillColor }>`
   height: 48px;
   width: 48px;
 
   margin: 0 16px;
 
-  background-color: ${({ theme }) => theme.color.fillBlue};
+  background-color: ${({ theme, color }) => getColorFromTheme(theme, color)};
   border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
 
-const SendButtonContainer = styled(CenteredFlexColumn)`
+const ButtonContainer = styled(CenteredFlexColumn)`
   cursor: pointer;
 `;
 
@@ -117,20 +125,31 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
       )}
       renderFooter={() => (
         <FooterItemContainer gap={SpacingSize.XXXL}>
-          <SendButtonContainer
+          <ButtonContainer
             gap={SpacingSize.Medium}
             onClick={() => navigate(RouterPath.Transfer)}
           >
-            <IconCircleContainer>
+            <IconCircleContainer color="fillBlue">
               <SvgIcon src="assets/icons/transfer.svg" color="contentOnFill" />
             </IconCircleContainer>
             <Typography type="captionMedium" color="contentBlue">
               <Trans t={t}>Send</Trans>
             </Typography>
-          </SendButtonContainer>
+          </ButtonContainer>
+          <ButtonContainer
+            gap={SpacingSize.Medium}
+            onClick={() => navigate(RouterPath.Receive)}
+          >
+            <IconCircleContainer color="fillBlue">
+              <SvgIcon src="assets/icons/receive.svg" color="contentOnFill" />
+            </IconCircleContainer>
+            <Typography type="captionMedium" color="contentBlue">
+              <Trans t={t}>Receive</Trans>
+            </Typography>
+          </ButtonContainer>
           <Link color="inherit" target="_blank" href={hrefToTokenOnCasperLive}>
             <CenteredFlexColumn gap={SpacingSize.Medium}>
-              <IconCircleContainer>
+              <IconCircleContainer color="fillBlue">
                 <SvgIcon
                   src="assets/icons/external-link.svg"
                   color="contentOnFill"
