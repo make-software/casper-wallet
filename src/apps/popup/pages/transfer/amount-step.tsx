@@ -7,7 +7,7 @@ import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize,
-  TransferInputContainer
+  VerticalSpaceContainer
 } from '@libs/layout';
 import { Input, Typography } from '@libs/ui';
 import { formatFiatAmount } from '@libs/ui/utils/formatters';
@@ -61,7 +61,8 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
           <Trans t={t}>Enter amount</Trans>
         </Typography>
       </ParagraphContainer>
-      <TransferInputContainer>
+
+      <VerticalSpaceContainer top={SpacingSize.XXL}>
         <Input
           label={amountLabel}
           rightLabel={fiatAmount}
@@ -79,11 +80,11 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
           error={!!errors?.amount}
           validationText={errors?.amount?.message}
         />
-      </TransferInputContainer>
+      </VerticalSpaceContainer>
 
       {/** transferIdMemo is only relevant for CSPR */}
-      {isCSPR ? (
-        <TransferInputContainer>
+      <VerticalSpaceContainer top={SpacingSize.XL}>
+        {isCSPR ? (
           <Input
             label={transferIdLabel}
             monotype
@@ -97,9 +98,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
             error={!!errors?.transferIdMemo}
             validationText={errors?.transferIdMemo?.message}
           />
-        </TransferInputContainer>
-      ) : (
-        <TransferInputContainer>
+        ) : (
           <Input
             label={paymentAmoutLabel}
             rightLabel={paymentFiatAmount}
@@ -114,8 +113,8 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
               "You'll be charged this amount in CSPR as a transaction fee. You can change it at your discretion."
             }
           />
-        </TransferInputContainer>
-      )}
+        )}
+      </VerticalSpaceContainer>
     </ContentContainer>
   );
 };

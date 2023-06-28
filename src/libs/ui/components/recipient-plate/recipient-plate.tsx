@@ -2,8 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { FlexRow, SpacingSize } from '@libs/layout';
-import { Avatar, FormField, Typography } from '@libs/ui';
-import { truncateKey } from '@libs/ui/components/hash/utils';
+import { Avatar, FormField, Hash, HashVariant } from '@libs/ui';
 
 interface RecipientPlateProps {
   handleClick?: () => void;
@@ -35,11 +34,14 @@ export const RecipientPlate = ({
           onClick={handleClick}
         >
           <Avatar publicKey={publicKey} size={24} />
-          <Typography type="captionHash" wordBreak={showFullPublicKey}>
-            {showFullPublicKey
-              ? publicKey
-              : truncateKey(publicKey, { size: 'medium' })}
-          </Typography>
+          <Hash
+            value={publicKey}
+            variant={HashVariant.CaptionHash}
+            truncated={!showFullPublicKey}
+            truncatedSize="medium"
+            withCopyOnSelfClick={false}
+            color="contentPrimary"
+          />
         </PublicKeyOptionContainer>
       </FormField>
     );
@@ -48,11 +50,14 @@ export const RecipientPlate = ({
   return (
     <PublicKeyOptionContainer gap={SpacingSize.Medium} onClick={handleClick}>
       <Avatar publicKey={publicKey} size={24} />
-      <Typography type="captionHash" wordBreak={showFullPublicKey}>
-        {showFullPublicKey
-          ? publicKey
-          : truncateKey(publicKey, { size: 'medium' })}
-      </Typography>
+      <Hash
+        value={publicKey}
+        variant={HashVariant.CaptionHash}
+        truncated={!showFullPublicKey}
+        truncatedSize="medium"
+        withCopyOnSelfClick={false}
+        color="contentPrimary"
+      />
     </PublicKeyOptionContainer>
   );
 };

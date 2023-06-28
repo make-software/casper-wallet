@@ -24,7 +24,7 @@ export function DeployValue({
   id: string;
   value: string | CLValue;
 }) {
-  if (typeof value === 'string' || typeof value === 'number') {
+  if (typeof value === 'string') {
     // string args
     if (isKeyOfHashValue(id)) {
       return (
@@ -43,11 +43,9 @@ export function DeployValue({
       })} CSPR`;
 
       return (
-        <Hash
-          value={cspr}
-          variant={HashVariant.BodyHash}
-          color="contentPrimary"
-        />
+        <Typography type="bodyHash" color="contentPrimary">
+          {cspr}
+        </Typography>
       );
     }
 
@@ -79,11 +77,9 @@ export function DeployValue({
         : formatNumber(parsedValue);
 
       return (
-        <Hash
-          value={numbers}
-          variant={HashVariant.BodyHash}
-          color="contentPrimary"
-        />
+        <Typography type="bodyHash" color="contentPrimary">
+          {numbers}
+        </Typography>
       );
     }
 

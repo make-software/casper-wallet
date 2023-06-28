@@ -1,6 +1,8 @@
+export type TruncateKeySize = 'tiny' | 'small' | 'medium' | 'max';
+
 export function truncateKey(
   key: string,
-  options: { size?: 'tiny' | 'small' | 'medium' | 'max' } = {}
+  options: { size?: TruncateKeySize } = {}
 ): string {
   let beginOfKey, endOfKey;
   switch (options.size) {

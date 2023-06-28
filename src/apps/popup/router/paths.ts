@@ -17,5 +17,6 @@ export enum RouterPath {
   TransferERC20 = '/transfer/:tokenContractPackageHash/:tokenContractHash',
   TransferCSPR = '/transfer',
   ActivityDetails = '/activity-details',
-  Token = '/token/:tokenName'
+  Token = '/token/:tokenName',
+  Receive = '/receive'
 }

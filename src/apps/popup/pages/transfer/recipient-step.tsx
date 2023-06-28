@@ -7,11 +7,16 @@ import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize,
-  TransferInputContainer,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Input, List, RecipientPlate, SvgIcon, Typography } from '@libs/ui';
-import { SenderDetails } from '@popup/pages/transfer/sender-details';
+import {
+  Input,
+  List,
+  RecipientPlate,
+  SvgIcon,
+  Typography,
+  ActiveAccountPlate
+} from '@libs/ui';
 import { TransferFormValues } from '@libs/ui/forms/transfer';
 import { selectRecentRecipientPublicKeys } from '@src/background/redux/recent-recipient-public-keys/selectors';
 import { useClickAway } from '@libs/ui/hooks/use-click-away';
@@ -86,10 +91,10 @@ export const RecipientStep = ({
           <Trans t={t}>Specify recipient</Trans>
         </Typography>
       </ParagraphContainer>
-      <SenderDetails balance={balance} symbol={symbol} />
+      <ActiveAccountPlate label="From" balance={balance} symbol={symbol} />
 
       {showRecipientPlate ? (
-        <VerticalSpaceContainer top={SpacingSize.XXL}>
+        <VerticalSpaceContainer top={SpacingSize.XL}>
           <RecipientPlate
             publicKey={inputValue}
             recipientLabel={recipientLabel}
@@ -100,7 +105,8 @@ export const RecipientStep = ({
           />
         </VerticalSpaceContainer>
       ) : (
-        <TransferInputContainer
+        <VerticalSpaceContainer
+          top={SpacingSize.XL}
           ref={clickAwayRef}
           onFocus={() => {
             setIsOpenRecentRecipientPublicKeysList(true);
@@ -134,7 +140,7 @@ export const RecipientStep = ({
               marginLeftForItemSeparatorLine={56}
             />
           )}
-        </TransferInputContainer>
+        </VerticalSpaceContainer>
       )}
     </ContentContainer>
   );
