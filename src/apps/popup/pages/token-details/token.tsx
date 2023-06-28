@@ -130,14 +130,14 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
             onClick={() =>
               navigate(
                 tokenData?.id
-                  ? RouterPath.TransferERC20.replace(
+                  ? RouterPath.Transfer.replace(
                       ':tokenContractPackageHash',
                       tokenData.id
                     ).replace(
                       ':tokenContractHash',
                       tokenData.contractHash || 'null'
                     )
-                  : RouterPath.TransferCSPR
+                  : RouterPath.TransferNoParams
               )
             }
           >

@@ -257,7 +257,7 @@ function AppRoutes() {
         path={RouterPath.DownloadedSecretKeys}
         element={<DownloadedSecretKeysPage />}
       />
-      <Route path={RouterPath.TransferERC20} element={<TransferPage />} />
+      <Route path={RouterPath.Transfer} element={<TransferPage />} />
       <Route
         path={RouterPath.ActivityDetails}
         element={<ActivityDetailsPage />}
