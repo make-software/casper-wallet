@@ -114,7 +114,8 @@ import {
   accountBalanceChanged,
   accountCurrencyRateChanged,
   accountPendingTransactionsChanged,
-  accountPendingTransactionsRemove
+  accountPendingTransactionsRemove,
+  accountErc20Changed
 } from '@background/redux/account-info/actions';
 
 // setup default onboarding action
@@ -522,6 +523,7 @@ browser.runtime.onMessage.addListener(
           case getType(accountActivityReset):
           case getType(accountPendingTransactionsChanged):
           case getType(accountPendingTransactionsRemove):
+          case getType(accountErc20Changed):
             store.dispatch(action);
             return sendResponse(undefined);
 

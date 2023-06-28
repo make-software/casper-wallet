@@ -8,7 +8,8 @@ import {
   accountBalanceChanged,
   accountCurrencyRateChanged,
   accountPendingTransactionsChanged,
-  accountPendingTransactionsRemove
+  accountPendingTransactionsRemove,
+  accountErc20Changed
 } from './actions';
 
 const initialState: AccountInfoState = {
@@ -18,7 +19,8 @@ const initialState: AccountInfoState = {
   },
   currencyRate: null,
   accountActivity: null,
-  pendingTransactions: []
+  pendingTransactions: [],
+  erc20Tokens: []
 };
 
 export const reducer = createReducer(initialState)
@@ -35,6 +37,13 @@ export const reducer = createReducer(initialState)
     (state, { payload }): AccountInfoState => ({
       ...state,
       currencyRate: payload
+    })
+  )
+  .handleAction(
+    accountErc20Changed,
+    (state, { payload }): AccountInfoState => ({
+      ...state,
+      erc20Tokens: payload
     })
   )
   .handleAction(
