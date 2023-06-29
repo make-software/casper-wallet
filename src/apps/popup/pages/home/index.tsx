@@ -30,8 +30,7 @@ import {
   Tile,
   Typography,
   Tab,
-  Tabs,
-  ActivityListTransactionsType
+  Tabs
 } from '@libs/ui';
 
 import { useAccountTransactions } from '@src/hooks';
@@ -50,6 +49,7 @@ import { selectAccountBalance } from '@background/redux/account-info/selectors';
 
 import { TokensList } from './components/tokens-list';
 import { ConnectionStatusBadge } from './components/connection-status-badge';
+import { ActivityListTransactionsType } from '@src/constants';
 
 const fullWidthAndMarginTop = css`
   margin-top: 16px;

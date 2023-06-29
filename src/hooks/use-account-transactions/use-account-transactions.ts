@@ -13,8 +13,10 @@ import {
 } from '@background/redux/account-info/actions';
 import { selectAccountActivity } from '@background/redux/account-info/selectors';
 import { useForceUpdate } from '@popup/hooks/use-force-update';
-import { ACCOUNT_ACTIVITY_REFRESH_RATE } from '@src/constants';
-import { ActivityListTransactionsType } from '@src/libs/ui';
+import {
+  ACCOUNT_ACTIVITY_REFRESH_RATE,
+  ActivityListTransactionsType
+} from '@src/constants';
 import { dispatchFetchErc20AccountActivity } from '@src/libs/services/account-activity-service/erc20-account-activity-service';
 
 export const useAccountTransactions = (

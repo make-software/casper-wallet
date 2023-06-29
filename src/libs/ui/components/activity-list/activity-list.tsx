@@ -19,12 +19,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { accountPendingTransactionsRemove } from '@background/redux/account-info/actions';
 import { useParams } from 'react-router-dom';
 import { ExtendedDeployArgsResult } from '@src/libs/services/account-activity-service';
-
-export enum ActivityListTransactionsType {
-  All = 'All',
-  Casper = 'Casper',
-  Erc20 = 'Erc20'
-}
+import { ActivityListTransactionsType } from '@src/constants';
 
 export enum ActivityListDisplayContext {
   Home = 'home',
