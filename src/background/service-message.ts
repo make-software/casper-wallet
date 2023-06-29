@@ -39,7 +39,7 @@ export const serviceMessage = {
   >(),
   fetchErc20AccountActivityRequest: createAction(
     'FETCH_ERC20_ACCOUNT_ACTIVITY'
-  )<{ publicKey: string; page: number }, Meta>(),
+  )<{ accountHash: string; page: number }, Meta>(),
   fetchErc20AccountActivityResponse: createAction(
     'FETCH_ERC20_ACCOUNT_ACTIVITY_RESPONSE'
   )<PaginatedResponse<Erc20TokenActionResult>, Meta>(),

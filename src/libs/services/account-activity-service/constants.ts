@@ -7,10 +7,10 @@ export const getAccountActivityLink = (
 
 export const getErc20AccountActivityLink = (
   casperApiUrl: string,
-  publicKey: string,
+  account_hash: string,
   page: number
 ) =>
-  `${casperApiUrl}/accounts/${publicKey}/erc20-token-actions?page=${page}&limit=10&fields=deploy&with_amounts_in_currency_id=1`;
+  `${casperApiUrl}/accounts/${account_hash}/erc20-token-actions?page=${page}&limit=10&fields=deploy&with_amounts_in_currency_id=1`;
 
 export const getErc20TokenActivityLink = (
   casperApiUrl: string,

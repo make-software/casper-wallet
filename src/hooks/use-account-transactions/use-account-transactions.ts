@@ -18,6 +18,7 @@ import {
   ActivityListTransactionsType
 } from '@src/constants';
 import { dispatchFetchErc20AccountActivity } from '@src/libs/services/account-activity-service/erc20-account-activity-service';
+import { getAccountHashFromPublicKey } from '@src/libs/entities/Account';
 
 export const useAccountTransactions = (
   transactionsType: ActivityListTransactionsType
@@ -71,7 +72,10 @@ export const useAccountTransactions = (
       transactionsType === ActivityListTransactionsType.All ||
       transactionsType === ActivityListTransactionsType.Erc20
     ) {
-      dispatchFetchErc20AccountActivity(activeAccount?.publicKey, 1)
+      dispatchFetchErc20AccountActivity(
+        getAccountHashFromPublicKey(activeAccount?.publicKey),
+        1
+      )
         .then(
           ({
             payload: { data: accountTransactions, pageCount, itemCount }
@@ -145,7 +149,10 @@ export const useAccountTransactions = (
       transactionsType === ActivityListTransactionsType.All ||
       transactionsType === ActivityListTransactionsType.Erc20
     ) {
-      dispatchFetchErc20AccountActivity(activeAccount?.publicKey, page)
+      dispatchFetchErc20AccountActivity(
+        getAccountHashFromPublicKey(activeAccount?.publicKey),
+        page
+      )
         .then(
           ({
             payload: { data: accountTransactions, pageCount, itemCount }
