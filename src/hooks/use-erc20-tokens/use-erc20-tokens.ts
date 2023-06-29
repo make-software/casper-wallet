@@ -8,19 +8,24 @@ import {
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { selectErc20Tokens } from '@src/background/redux/account-info/selectors';
+import { accountErc20Changed } from '@src/background/redux/account-info/actions';
+import { dispatchToMainStore } from '@src/background/redux/utils';
 
 export const useErc20Tokens = () => {
-  const [erc20Tokens, setErc20Tokens] = useState<
-    ContractPackageWithBalance[] | null
-  >(null);
-
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+  const tokens = useSelector(selectErc20Tokens);
+
+  const [erc20Tokens, setErc20Tokens] = useState<
+    ContractPackageWithBalance[] | null
+  >(tokens);
 
   useEffect(() => {
     dispatchFetchErc20TokensRequest(
       getAccountHashFromPublicKey(activeAccount?.publicKey)
     ).then(({ payload: tokens }) => {
+      dispatchToMainStore(accountErc20Changed(tokens));
       setErc20Tokens(tokens);
     });
   }, [activeAccount?.publicKey, casperApiUrl]);

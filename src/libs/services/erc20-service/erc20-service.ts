@@ -50,7 +50,8 @@ export const fetchContractPackage = ({
 }) =>
   queryClient.fetchQuery(
     ['contractPackageRequest', casperApiUrl, contractPackageHash],
-    () => contractPackageRequest(casperApiUrl, contractPackageHash)
+    () => contractPackageRequest(casperApiUrl, contractPackageHash),
+    { staleTime: TOKENS_REFRESH_RATE }
   );
 
 export const dispatchFetchErc20TokensRequest = (

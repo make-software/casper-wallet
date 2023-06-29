@@ -6,10 +6,15 @@ import {
   ExtendedDeployResult,
   LedgerLiveDeploysWithId
 } from '@libs/services/account-activity-service';
+import { ContractPackageWithBalance } from '@src/libs/services/erc20-service';
 
 export const accountBalanceChanged = createAction(
   'ACCOUNT_BALANCE_CHANGED'
 )<ActiveAccountBalance>();
+
+export const accountErc20Changed = createAction('ACCOUNT_ERC20_CHANGED')<
+  ContractPackageWithBalance[]
+>();
 
 export const accountCurrencyRateChanged = createAction(
   'ACCOUNT_CURRENCY_RATE_CHANGED'

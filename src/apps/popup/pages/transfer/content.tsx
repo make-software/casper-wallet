@@ -12,30 +12,50 @@ import { SuccessStep } from './success-step';
 interface TransferPageContentProps {
   transferStep: TransactionSteps;
   recipientPublicKey: string;
-  amountInCSPR: string;
   amountForm: UseFormReturn<TransferFormValues>;
   recipientForm: UseFormReturn<TransferFormValues>;
+  amount: string;
+  balance: string | null;
+  symbol: string | null;
+  paymentAmount: string;
 }
 
 export const TransferPageContent = ({
   transferStep,
   recipientPublicKey,
-  amountInCSPR,
   recipientForm,
-  amountForm
+  amountForm,
+  amount,
+  balance,
+  symbol,
+  paymentAmount
 }: TransferPageContentProps) => {
+  const isCSPR = symbol === 'CSPR';
+
   switch (transferStep) {
     case TransactionSteps.Recipient: {
-      return <RecipientStep recipientForm={recipientForm} />;
+      return (
+        <RecipientStep
+          recipientForm={recipientForm}
+          symbol={symbol}
+          balance={balance}
+        />
+      );
     }
     case TransactionSteps.Amount: {
-      return <AmountStep amountForm={amountForm} />;
+      return (
+        <AmountStep amountForm={amountForm} symbol={symbol} isCSPR={isCSPR} />
+      );
     }
     case TransactionSteps.Confirm: {
       return (
         <ConfirmStep
           recipientPublicKey={recipientPublicKey}
-          amountInCSPR={amountInCSPR}
+          amount={amount}
+          balance={balance}
+          symbol={symbol}
+          isCSPR={isCSPR}
+          paymentAmount={paymentAmount}
         />
       );
     }

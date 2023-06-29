@@ -20,7 +20,6 @@ import {
   DeployStatus,
   Hash,
   HashVariant,
-  HoverCopyIcon,
   Link,
   SvgIcon,
   Tile,
@@ -29,7 +28,6 @@ import {
   TypeName,
   Typography
 } from '@libs/ui';
-import { truncateKey } from '@libs/ui/components/hash/utils';
 import {
   dispatchFetchExtendedDeploysInfo,
   ExtendedDeployResult
@@ -86,12 +84,6 @@ const RowsContainer = styled(FlexColumn)<BorderBottomPseudoElementProps>`
   }
 `;
 
-const HashContainer = styled.div`
-  & ${HoverCopyIcon} {
-    display: inline-block;
-  }
-`;
-
 export const ActivityDetailsPageContent = ({
   fromAccountPublicKey,
   toAccountPublicKey,
@@ -128,12 +120,16 @@ export const ActivityDetailsPageContent = ({
     formatCurrency(motesToCurrency(deployInfo.amount, deployInfo.rate), 'USD', {
       precision: 5
     });
-  const costAmountInCSPR = formatNumber(motesToCSPR(deployInfo.cost), {
+  const costAmountInCSPR = formatNumber(motesToCSPR(deployInfo.cost || '0'), {
     precision: { min: 5, max: 5 }
   });
-  const costAmountInUSD = formatCurrency(deployInfo.currency_cost, 'USD', {
-    precision: 5
-  });
+  const costAmountInUSD = formatCurrency(
+    deployInfo.currency_cost || '0',
+    'USD',
+    {
+      precision: 5
+    }
+  );
 
   return (
     <ContentContainer>
@@ -169,53 +165,40 @@ export const ActivityDetailsPageContent = ({
               </Typography>
             </SpaceBetweenFlexRow>
             <AlignedSpaceBetweenFlexRow>
-              <Tooltip
-                title={fromAccountPublicKey}
-                placement="bottomRight"
-                overflowWrap
-              >
-                <AlignedFlexRow gap={SpacingSize.Small}>
-                  <Avatar publicKey={fromAccountPublicKey || ''} size={24} />
-                  <Typography type="captionHash" color="contentBlue">
-                    {truncateKey(fromAccountPublicKey || '', { size: 'tiny' })}
-                  </Typography>
-                </AlignedFlexRow>
-              </Tooltip>
+              <AlignedFlexRow gap={SpacingSize.Small}>
+                <Avatar publicKey={fromAccountPublicKey || ''} size={24} />
+                <Hash
+                  value={fromAccountPublicKey || ''}
+                  variant={HashVariant.CaptionHash}
+                  truncated
+                  truncatedSize="tiny"
+                  color="contentPrimary"
+                />
+              </AlignedFlexRow>
               <SvgIcon src="assets/icons/ic-arrow-with-tail.svg" size={16} />
-              <Tooltip
-                title={toAccountPublicKey}
-                placement="bottomLeft"
-                overflowWrap
-              >
-                <AlignedFlexRow gap={SpacingSize.Small}>
-                  <Avatar publicKey={toAccountPublicKey || ''} size={24} />
-                  <Typography type="captionHash" color="contentBlue">
-                    {truncateKey(toAccountPublicKey || '', { size: 'tiny' })}
-                  </Typography>
-                </AlignedFlexRow>
-              </Tooltip>
+              <AlignedFlexRow gap={SpacingSize.Small}>
+                <Avatar publicKey={toAccountPublicKey || ''} size={24} />
+                <Hash
+                  value={toAccountPublicKey || ''}
+                  variant={HashVariant.CaptionHash}
+                  truncated
+                  truncatedSize="tiny"
+                  color="contentPrimary"
+                />
+              </AlignedFlexRow>
             </AlignedSpaceBetweenFlexRow>
           </AddressContainer>
           <ItemContainer>
             <Typography type="captionRegular" color="contentSecondary">
               <Trans t={t}>Deploy hash</Trans>
             </Typography>
-            <HashContainer>
-              <Tooltip
-                title={deployInfo.deploy_hash}
-                overflowWrap
-                placement="bottomLeft"
-              >
-                <Hash
-                  value={deployInfo.deploy_hash}
-                  variant={HashVariant.CaptionHash}
-                  withCopyIconOnHover
-                  truncated
-                  truncatedSize="tiny"
-                  color="contentBlue"
-                />
-              </Tooltip>
-            </HashContainer>
+            <Hash
+              value={deployInfo.deploy_hash}
+              variant={HashVariant.CaptionHash}
+              truncated
+              truncatedSize="tiny"
+              color="contentPrimary"
+            />
           </ItemContainer>
           <ItemContainer>
             <Typography type="captionRegular" color="contentSecondary">

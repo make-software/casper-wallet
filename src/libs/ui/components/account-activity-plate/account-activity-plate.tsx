@@ -10,19 +10,23 @@ import {
   FlexColumn,
   SpacingSize
 } from '@libs/layout';
-import { Link, SvgIcon, Typography, Tooltip, DeployStatus } from '@libs/ui';
-import { truncateKey } from '@libs/ui/components/hash/utils';
+import {
+  DeployStatus,
+  Hash,
+  HashVariant,
+  SvgIcon,
+  Tooltip,
+  Typography
+} from '@libs/ui';
 import {
   formatNumber,
+  formatTimestamp,
   formatTimestampAge,
-  motesToCSPR,
-  formatTimestamp
+  motesToCSPR
 } from '@libs/ui/utils/formatters';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { ExtendedDeployArgsResult } from '@libs/services/account-activity-service';
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import { getBlockExplorerDeployUrl } from '@src/constants';
 
 import { getPublicKeyFormTarget } from './utils';
 
@@ -103,7 +107,6 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
     const { t } = useTranslation();
 
     const activeAccount = useSelector(selectVaultActiveAccount);
-    const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
 
     const {
       deploy_hash: deployHash,
@@ -173,24 +176,13 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
           </AlignedSpaceBetweenFlexRow>
           <AlignedSpaceBetweenFlexRow>
             <AlignedFlexRow>
-              <Tooltip title={deployHash} overflowWrap placement="bottomRight">
-                <Link
-                  color="fillBlue"
-                  onClick={event => {
-                    event.stopPropagation();
-                    event.preventDefault();
-
-                    window.open(
-                      getBlockExplorerDeployUrl(casperLiveUrl, deployHash),
-                      '_blank'
-                    );
-                  }}
-                >
-                  <Typography type="captionHash">
-                    {truncateKey(deployHash, { size: 'tiny' })}
-                  </Typography>
-                </Link>
-              </Tooltip>
+              <Hash
+                value={deployHash}
+                variant={HashVariant.CaptionHash}
+                truncated
+                truncatedSize="tiny"
+                color="contentPrimary"
+              />
               <Divider />
               <Tooltip title={formatTimestamp(timestamp)} noWrap>
                 <Typography

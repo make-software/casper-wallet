@@ -64,9 +64,11 @@ export function FormField({
 
       {children}
 
-      <StatusTextContainer status={status}>
-        <Typography type="formFieldStatus">{statusText}</Typography>
-      </StatusTextContainer>
+      {statusText && (
+        <StatusTextContainer status={status}>
+          <Typography type="formFieldStatus">{statusText}</Typography>
+        </StatusTextContainer>
+      )}
     </StyledContainer>
   );
 }

@@ -101,7 +101,10 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
   const { observerElement } = useInfinityScroll(fetchMoreTransactions);
   const { t } = useTranslation();
 
-  if (ActivityListTransactionsType.All || ActivityListTransactionsType.Casper) {
+  if (
+    transactionsType === ActivityListTransactionsType.All ||
+    transactionsType === ActivityListTransactionsType.Casper
+  ) {
     const activityListWithPendingTransactions =
       activityList != null
         ? [...filteredTransactions, ...activityList]
