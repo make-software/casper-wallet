@@ -18,22 +18,22 @@ export class ChromeDriver {
     const options = new chrome.Options();
 
     // Allow Selenium to use Chrome's clipboard for tests
-    options.setUserPreferences({
-      profile: {
-        content_settings: {
-          exceptions: {
-            clipboard: {
-              '[*.],*': {
-                expiration: '0',
-                last_modified: Date.now(),
-                model: 0,
-                setting: 1
-              }
-            }
-          }
-        }
-      }
-    });
+    // options.setUserPreferences({
+    //   profile: {
+    //     content_settings: {
+    //       exceptions: {
+    //         clipboard: {
+    //           '[*.],*': {
+    //             expiration: '0',
+    //             last_modified: Date.now(),
+    //             model: 0,
+    //             setting: 1
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // });
     options.addExtensions('chrome.crx');
     options.setAcceptInsecureCerts(true);
 
