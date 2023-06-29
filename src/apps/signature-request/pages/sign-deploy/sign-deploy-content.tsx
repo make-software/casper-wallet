@@ -110,6 +110,8 @@ export function SignDeployContent({
     }
   };
 
+  const isContractCall = signatureRequest.deployType === 'Contract Call';
+
   return (
     <PageContainer>
       <ContentContainer>
@@ -165,7 +167,11 @@ export function SignDeployContent({
                       <Typography type="body" color="contentSecondary">
                         {label}
                       </Typography>
-                      <DeployValue id={key} value={value} />
+                      <DeployValue
+                        id={key}
+                        value={value}
+                        isContractCall={isContractCall}
+                      />
                     </AccordionItem>
                   );
                 })
