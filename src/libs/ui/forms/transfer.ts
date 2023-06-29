@@ -3,6 +3,8 @@ import { useForm } from 'react-hook-form';
 
 import {
   useCsprAmountRule,
+  useErc20AmountRule,
+  usePaymentAmountRule,
   useRecipientPublicKeyRule,
   useTransferIdMemoRule
 } from '@libs/ui/forms/form-validation-rules';
@@ -11,11 +13,18 @@ import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 
 export type TransferFormValues = {
   recipientPublicKey: string;
-  csprAmount: string;
+  amount: string;
+  paymentAmount: string;
   transferIdMemo: string;
 };
 
-export function useTransferForm(amountMotes: string | null) {
+export function useTransferForm(
+  balance: string | null,
+  decimals: number | null,
+  isErc20: boolean,
+  csprBalance: string | null,
+  paymentAmount: string
+) {
   const recipientFormSchema = Yup.object().shape({
     recipientPublicKey: useRecipientPublicKeyRule()
   });
@@ -26,15 +35,30 @@ export function useTransferForm(amountMotes: string | null) {
     resolver: yupResolver(recipientFormSchema)
   };
 
-  const amountFormSchema = Yup.object().shape({
-    csprAmount: useCsprAmountRule(amountMotes),
+  const erc20AmountFormSchema = Yup.object().shape({
+    amount: useErc20AmountRule(balance, decimals),
+    paymentAmount: usePaymentAmountRule(csprBalance),
     transferIdMemo: useTransferIdMemoRule()
   });
+
+  const csprAmountFormSchema = Yup.object().shape({
+    amount: useCsprAmountRule(balance),
+    transferIdMemo: useTransferIdMemoRule()
+  });
+
+  const amountFormSchema = isErc20
+    ? erc20AmountFormSchema
+    : csprAmountFormSchema;
 
   const amountFormOptions: UseFormProps<TransferFormValues> = {
     reValidateMode: 'onChange',
     mode: 'onChange',
-    resolver: yupResolver(amountFormSchema)
+    resolver: yupResolver(amountFormSchema),
+    defaultValues: isErc20
+      ? {
+          paymentAmount
+        }
+      : {}
   };
 
   return {

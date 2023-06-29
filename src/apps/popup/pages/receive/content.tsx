@@ -43,7 +43,7 @@ export const ReceivePageContent = () => {
           <Trans t={t}>Receive tokens</Trans>
         </Typography>
       </ParagraphContainer>
-      <ActiveAccountPlate label="To account" />
+      <ActiveAccountPlate label="To account" symbol={'CSPR'} balance={null} />
       <VerticalSpaceContainer top={SpacingSize.XXXL}>
         <Tile>
           <Container>

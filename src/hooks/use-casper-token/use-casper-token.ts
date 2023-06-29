@@ -6,10 +6,13 @@ import { selectAccountBalance } from '@background/redux/account-info/selectors';
 
 export type TokenType = {
   id: string;
+  contractHash?: string;
   name: string;
   amount: string;
   amountFiat: string | null;
   symbol: string;
+  decimals?: number;
+  balance?: string;
   icon: string;
 };
 
@@ -25,7 +28,8 @@ export const useCasperToken = () => {
 
   useEffect(() => {
     setCasperToken({
-      id: '1',
+      id: 'Casper',
+      contractHash: undefined,
       name: 'Casper',
       amount,
       amountFiat: balance.amountFiat,

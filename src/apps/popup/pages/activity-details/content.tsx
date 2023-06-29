@@ -120,12 +120,16 @@ export const ActivityDetailsPageContent = ({
     formatCurrency(motesToCurrency(deployInfo.amount, deployInfo.rate), 'USD', {
       precision: 5
     });
-  const costAmountInCSPR = formatNumber(motesToCSPR(deployInfo.cost), {
+  const costAmountInCSPR = formatNumber(motesToCSPR(deployInfo.cost || '0'), {
     precision: { min: 5, max: 5 }
   });
-  const costAmountInUSD = formatCurrency(deployInfo.currency_cost, 'USD', {
-    precision: 5
-  });
+  const costAmountInUSD = formatCurrency(
+    deployInfo.currency_cost || '0',
+    'USD',
+    {
+      precision: 5
+    }
+  );
 
   return (
     <ContentContainer>

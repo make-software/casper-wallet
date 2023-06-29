@@ -27,8 +27,10 @@ export const signAndDeploy = (
 
   return casperService(url)
     .deploy(signedDeploy)
-    .then(res => res)
+    .then(function (res) {
+      return res;
+    })
     .catch(error => {
-      console.log(error);
+      throw error;
     });
 };

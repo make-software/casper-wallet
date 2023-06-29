@@ -13,8 +13,7 @@ import {
 } from '@libs/layout';
 import { Avatar, Hash, HashVariant, Tile, Typography } from '@libs/ui';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
-import { selectAccountBalance } from '@background/redux/account-info/selectors';
+import { formatNumber } from '@src/libs/ui/utils/formatters';
 
 export const AmountContainer = styled(SpaceBetweenFlexColumn)`
   align-items: flex-end;
@@ -26,13 +25,18 @@ export const Container = styled(TileContainer)`
 
 interface ActiveAccountPlateProps {
   label: string;
+  balance: string | null;
+  symbol: string | null;
 }
 
-export const ActiveAccountPlate = ({ label }: ActiveAccountPlateProps) => {
+export const ActiveAccountPlate = ({
+  label,
+  symbol,
+  balance
+}: ActiveAccountPlateProps) => {
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const balance = useSelector(selectAccountBalance);
 
   if (!activeAccount) {
     return null;
@@ -64,13 +68,13 @@ export const ActiveAccountPlate = ({ label }: ActiveAccountPlateProps) => {
             </AlignedFlexRow>
             <AmountContainer>
               <Typography type="captionHash">
-                {balance.amountMotes == null
+                {balance == null
                   ? '-'
-                  : formatNumber(motesToCSPR(balance.amountMotes), {
+                  : formatNumber(balance, {
                       precision: { max: 5 }
                     })}
               </Typography>
-              <Typography type="captionHash">CSPR</Typography>
+              <Typography type="captionHash">{symbol || '-'}</Typography>
             </AmountContainer>
           </SpaceBetweenFlexRow>
         </Container>

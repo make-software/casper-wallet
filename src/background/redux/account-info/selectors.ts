@@ -11,3 +11,6 @@ export const selectAccountActivity = (state: RootState) =>
 
 export const selectPendingTransactions = (state: RootState) =>
   state.accountInfo.pendingTransactions;
+
+export const selectErc20Tokens = (state: RootState) =>
+  state.accountInfo.erc20Tokens;

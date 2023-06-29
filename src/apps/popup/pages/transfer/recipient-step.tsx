@@ -24,9 +24,15 @@ import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
 interface RecipientStepProps {
   recipientForm: UseFormReturn<TransferFormValues>;
+  balance: string | null;
+  symbol: string | null;
 }
 
-export const RecipientStep = ({ recipientForm }: RecipientStepProps) => {
+export const RecipientStep = ({
+  recipientForm,
+  balance,
+  symbol
+}: RecipientStepProps) => {
   const [
     isOpenRecentRecipientPublicKeysList,
     setIsOpenRecentRecipientPublicKeysList
@@ -85,7 +91,7 @@ export const RecipientStep = ({ recipientForm }: RecipientStepProps) => {
           <Trans t={t}>Specify recipient</Trans>
         </Typography>
       </ParagraphContainer>
-      <ActiveAccountPlate label="From" />
+      <ActiveAccountPlate label="From" balance={balance} symbol={symbol} />
 
       {showRecipientPlate ? (
         <VerticalSpaceContainer top={SpacingSize.XL}>
