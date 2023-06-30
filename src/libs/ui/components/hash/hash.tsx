@@ -48,6 +48,7 @@ interface HashProps {
   value: string;
   variant: HashVariant;
   truncated?: boolean;
+  truncatedSize?: 'tiny' | 'small' | 'max';
   color?: ContentColor;
   withCopyOnSelfClick?: boolean;
   withTag?: boolean;
@@ -63,7 +64,8 @@ export function Hash({
   color,
   withTag,
   withCopyIconOnHover,
-  displayContext
+  displayContext,
+  truncatedSize
 }: HashProps) {
   const { t } = useTranslation();
 
@@ -75,14 +77,23 @@ export function Hash({
           wordBreak={displayContext === HashDisplayContext.AccountInfo}
           color={color || 'contentSecondary'}
         >
-          {truncated ? truncateKey(value) : value}
+          {truncated ? truncateKey(value, { size: truncatedSize }) : value}
         </Typography>
         {withTag && (
           <Tag displayContext="accountList">{`${t('Imported')}`}</Tag>
         )}
       </>
     ),
-    [color, truncated, value, variant, withTag, displayContext, t]
+    [
+      truncatedSize,
+      color,
+      truncated,
+      value,
+      variant,
+      withTag,
+      displayContext,
+      t
+    ]
   );
 
   if (withCopyIconOnHover) {
@@ -93,7 +104,7 @@ export function Hash({
           wordBreak={displayContext === HashDisplayContext.AccountInfo}
           color={color || 'contentSecondary'}
         >
-          {truncated ? truncateKey(value) : value}
+          {truncated ? truncateKey(value, { size: truncatedSize }) : value}
         </Typography>
         <CopyToClipboard
           renderContent={({ isClicked }) => (

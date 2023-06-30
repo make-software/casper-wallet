@@ -10,6 +10,8 @@ import { reducer as loginRetryLockoutTime } from './login-retry-lockout-time/red
 import { reducer as lastActivityTime } from './last-activity-time/reducer';
 import { reducer as settings } from './settings/reducer';
 import { reducer as activeOrigin } from './active-origin/reducer';
+import { reducer as recentRecipientPublicKeys } from './recent-recipient-public-keys/reducer';
+import { reducer as accountInfo } from './account-info/reducer';
 
 const rootReducer = combineReducers({
   vaultCipher,
@@ -21,7 +23,9 @@ const rootReducer = combineReducers({
   loginRetryLockoutTime,
   lastActivityTime,
   activeOrigin,
-  settings
+  settings,
+  recentRecipientPublicKeys,
+  accountInfo
 });
 
 export default rootReducer;

@@ -52,7 +52,7 @@ export function PopupLayout({
   return (
     <Container {...asFormProps}>
       {renderHeader && <PageHeader>{renderHeader()}</PageHeader>}
-      <PageContent>{renderContent()}</PageContent>
+      <PageContent id="layout-content-container">{renderContent()}</PageContent>
       {renderFooter && <PageFooter>{renderFooter()}</PageFooter>}
     </Container>
   );

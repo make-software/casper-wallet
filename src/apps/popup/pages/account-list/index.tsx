@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -8,9 +7,7 @@ import {
   Hash,
   HashVariant,
   HoverCopyIcon,
-  PopoverLink,
   List,
-  SvgIcon,
   Typography
 } from '@libs/ui';
 import {
@@ -22,22 +19,16 @@ import {
 } from '@libs/layout';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 
-import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 import { ConnectionStatusBadge } from '@popup/pages/home/components/connection-status-badge';
 
 import {
   selectConnectedAccountNamesWithActiveOrigin,
-  selectIsAnyAccountConnectedWithActiveOrigin,
   selectVaultAccounts,
   selectVaultActiveAccountName
 } from '@background/redux/vault/selectors';
-import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import { AccountListRows } from '@background/redux/vault/types';
-import { getBlockExplorerAccountUrl } from '@src/constants';
-import { selectCasperUrlsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
-
-import { Popover } from './components/popover';
+import { AccountActionsMenuPopover } from '@libs/ui/components/account-popover/account-popover';
 
 import { sortAccounts } from './utils';
 
@@ -76,26 +67,18 @@ const HashContainer = styled.div`
   margin-top: 4px;
 `;
 
+const PopoverContainer = styled.div`
+  padding: 26px 8px 26px 0;
+`;
+
 export function AccountListPage() {
   const [accountListRows, setAccountListRows] = useState<AccountListRows[]>([]);
 
-  const navigate = useTypedNavigate();
-  const { t } = useTranslation();
-
-  const {
-    changeActiveAccountWithEvent: changeActiveAccount,
-    disconnectAccountWithEvent: disconnectAccount
-  } = useAccountManager();
+  const { changeActiveAccountWithEvent: changeActiveAccount } =
+    useAccountManager();
 
   const accounts = useSelector(selectVaultAccounts);
-  const activeOrigin = useSelector(selectActiveOrigin);
   const activeAccountName = useSelector(selectVaultActiveAccountName);
-  const isAnyAccountConnected = useSelector(
-    selectIsAnyAccountConnectedWithActiveOrigin
-  );
-  const { casperLiveUrl } = useSelector(
-    selectCasperUrlsBaseOnActiveNetworkSetting
-  );
 
   const connectedAccountNames =
     useSelector(selectConnectedAccountNamesWithActiveOrigin) || [];
@@ -162,119 +145,10 @@ export function AccountListPage() {
                     </ConnectionStatusBadgeContainer>
                   )}
                 </AccountNameWithHashListItemContainer>
-                {/* Hidden account balance until a solution for fetching many balances will be ready */}
-                {/*<AccountBalanceListItemContainer>*/}
-                {/*  <Typography type="bodyHash">2.1M</Typography>*/}
-                {/*  <Typography type="bodyHash" color="contentSecondary">*/}
-                {/*    CSPR*/}
-                {/*  </Typography>*/}
-                {/*</AccountBalanceListItemContainer>*/}
               </ListItemClickableContainer>
-              <Popover
-                renderMenuItems={({ closePopover }) => (
-                  <>
-                    {connectedAccountNames.includes(account.name) ? (
-                      <PopoverLink
-                        variant="contentBlue"
-                        onClick={e => {
-                          closePopover(e);
-                          activeOrigin &&
-                            disconnectAccount(account.name, activeOrigin);
-                        }}
-                      >
-                        <SvgIcon
-                          src="assets/icons/unlink.svg"
-                          marginRight="medium"
-                          color="contentTertiary"
-                        />
-                        <Typography type="body">
-                          <Trans t={t}>Disconnect</Trans>
-                        </Typography>
-                      </PopoverLink>
-                    ) : (
-                      <PopoverLink
-                        variant="contentBlue"
-                        onClick={() =>
-                          navigate(
-                            isAnyAccountConnected
-                              ? `${RouterPath.ConnectAnotherAccount}/${account.id}`
-                              : RouterPath.NoConnectedAccount
-                          )
-                        }
-                      >
-                        <SvgIcon
-                          src="assets/icons/link.svg"
-                          marginRight="medium"
-                          color="contentTertiary"
-                        />
-                        <Typography type="body">
-                          <Trans t={t}>Connect</Trans>
-                        </Typography>
-                      </PopoverLink>
-                    )}
-                    <PopoverLink
-                      variant="contentBlue"
-                      onClick={() =>
-                        navigate(
-                          RouterPath.RenameAccount.replace(
-                            ':accountName',
-                            account.name
-                          )
-                        )
-                      }
-                    >
-                      <SvgIcon
-                        src="assets/icons/edit.svg"
-                        marginRight="medium"
-                        color="contentTertiary"
-                      />
-                      <Typography type="body">
-                        <Trans t={t}>Rename</Trans>
-                      </Typography>
-                    </PopoverLink>
-                    <PopoverLink
-                      target="_blank"
-                      variant="contentBlue"
-                      title={t('View account in CSPR.live')}
-                      href={getBlockExplorerAccountUrl(
-                        casperLiveUrl,
-                        account.publicKey
-                      )}
-                    >
-                      <SvgIcon
-                        src="assets/icons/external-link.svg"
-                        marginRight="medium"
-                        color="contentTertiary"
-                      />
-                      <Typography type="body">
-                        <Trans t={t}>View on CSPR.live</Trans>
-                      </Typography>
-                    </PopoverLink>
-                    <PopoverLink
-                      variant="contentBlue"
-                      onClick={() =>
-                        navigate(
-                          RouterPath.AccountSettings.replace(
-                            ':accountName',
-                            account.name
-                          )
-                        )
-                      }
-                    >
-                      <SvgIcon
-                        src="assets/icons/settings.svg"
-                        marginRight="medium"
-                        color="contentTertiary"
-                      />
-                      <Typography type="body">
-                        <Trans t={t}>Manage</Trans>
-                      </Typography>
-                    </PopoverLink>
-                  </>
-                )}
-              >
-                <SvgIcon src="assets/icons/more.svg" />
-              </Popover>
+              <PopoverContainer>
+                <AccountActionsMenuPopover account={account} />
+              </PopoverContainer>
             </ListItemContainer>
           )}
           marginLeftForItemSeparatorLine={60}

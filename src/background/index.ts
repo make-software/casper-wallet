@@ -88,7 +88,7 @@ import {
   activeTimeoutDurationSettingChanged
 } from './redux/settings/actions';
 import { activeOriginChanged } from './redux/active-origin/actions';
-import { selectCasperUrlsBaseOnActiveNetworkSetting } from './redux/settings/selectors';
+import { selectApiConfigBasedOnActiveNetwork } from './redux/settings/selectors';
 import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
 import {
   CannotGetActiveAccountError,
@@ -98,6 +98,20 @@ import {
   SiteNotConnectedError,
   WalletLockedError
 } from '@src/content/sdk-errors';
+import { recipientPublicKeyAdded } from './redux/recent-recipient-public-keys/actions';
+import {
+  fetchAccountActivity,
+  fetchExtendedDeploysInfo
+} from '@libs/services/account-activity-service';
+import {
+  accountActivityChanged,
+  accountActivityReset,
+  accountActivityUpdated,
+  accountBalanceChanged,
+  accountCurrencyRateChanged,
+  accountPendingTransactionsChanged,
+  accountPendingTransactionsRemove
+} from '@background/redux/account-info/actions';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -496,12 +510,20 @@ browser.runtime.onMessage.addListener(
           case getType(loginRetryCountReseted):
           case getType(loginRetryCountIncremented):
           case getType(loginRetryLockoutTimeSet):
+          case getType(recipientPublicKeyAdded):
+          case getType(accountBalanceChanged):
+          case getType(accountCurrencyRateChanged):
+          case getType(accountActivityChanged):
+          case getType(accountActivityUpdated):
+          case getType(accountActivityReset):
+          case getType(accountPendingTransactionsChanged):
+          case getType(accountPendingTransactionsRemove):
             store.dispatch(action);
             return sendResponse(undefined);
 
           // SERVICE MESSAGE HANDLERS
           case getType(serviceMessage.fetchBalanceRequest): {
-            const { casperApiUrl } = selectCasperUrlsBaseOnActiveNetworkSetting(
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
@@ -528,7 +550,7 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchAccountInfoRequest): {
-            const { casperApiUrl } = selectCasperUrlsBaseOnActiveNetworkSetting(
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
@@ -540,6 +562,49 @@ browser.runtime.onMessage.addListener(
 
               return sendResponse(
                 serviceMessage.fetchAccountInfoResponse(accountInfo)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchAccountActivityRequest): {
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const data = await fetchAccountActivity({
+                casperApiUrl,
+                publicKey: action.payload.publicKey,
+                page: action.payload.page
+              });
+
+              return sendResponse(
+                serviceMessage.fetchAccountActivityResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchExtendedDeploysInfoRequest): {
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const data = await fetchExtendedDeploysInfo({
+                deployHash: action.payload.deployHash,
+                casperApiUrl
+              });
+
+              return sendResponse(
+                serviceMessage.fetchExtendedDeploysInfoResponse(data)
               );
             } catch (error) {
               console.error(error);

@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export enum SpacingSize {
   None = 'none',
@@ -6,7 +6,9 @@ export enum SpacingSize {
   Small = 'small',
   Medium = 'medium',
   Large = 'large',
-  ExtraLarge = 'extra large'
+  XL = 'extra large',
+  XXL = 'double extra large',
+  XXXL = 'triple extra large'
 }
 
 export const getSpacingSize = (size?: SpacingSize) => {
@@ -21,8 +23,12 @@ export const getSpacingSize = (size?: SpacingSize) => {
       return '1.6rem';
     case SpacingSize.Large:
       return '2rem';
-    case SpacingSize.ExtraLarge:
+    case SpacingSize.XL:
       return '2.4rem';
+    case SpacingSize.XXL:
+      return '2.8rem';
+    case SpacingSize.XXXL:
+      return '3.2rem';
     default:
       throw new Error('Unknown spacing size');
   }
@@ -69,6 +75,12 @@ const getGapSize = (gap?: SpacingSize) => {
       return '12px';
     case SpacingSize.Large:
       return '16px';
+    case SpacingSize.XL:
+      return '20px';
+    case SpacingSize.XXL:
+      return '24px';
+    case SpacingSize.XXXL:
+      return '28px';
     default:
       throw new Error('Unknown gap size');
   }
@@ -118,6 +130,10 @@ export const LeftAlignedFlexColumn = styled(FlexColumn)`
   align-items: flex-start;
 `;
 
+export const RightAlignedFlexColumn = styled(FlexColumn)`
+  align-items: flex-end;
+`;
+
 export const SpaceBetweenFlexColumn = styled(FlexColumn)`
   justify-content: space-between;
 `;
@@ -131,6 +147,8 @@ export const HeaderContainer = styled(AlignedSpaceBetweenFlexRow)`
   height: 72px;
 
   padding: 0 16px;
+
+  position: relative;
 `;
 
 export const PageContainer = styled(SpaceBetweenFlexColumn)`
@@ -151,6 +169,10 @@ export const InputsContainer = styled.div`
   & > div:nth-child(2) {
     margin-top: 16px;
   }
+`;
+
+export const TransferInputContainer = styled.div`
+  margin-top: 28px;
 `;
 
 // Default direction value is `column`
@@ -228,4 +250,36 @@ export const IllustrationContainer = styled.div`
 
 export const OnboardingIllustrationContainer = styled(IllustrationContainer)`
   margin-top: 40px;
+`;
+
+export const AvatarContainer = styled(CenteredFlexColumn)<{
+  top?: SpacingSize;
+}>`
+  margin-top: ${({ top }) => getSpacingSize(top)};
+  width: 100%;
+`;
+
+export interface BorderBottomPseudoElementProps {
+  marginLeftForSeparatorLine: number;
+}
+
+export const borderBottomPseudoElementRules = css<BorderBottomPseudoElementProps>`
+  content: '';
+  width: ${({ marginLeftForSeparatorLine }) =>
+    `calc(100% - ${marginLeftForSeparatorLine}px)`};
+  margin-left: ${({ marginLeftForSeparatorLine }) =>
+    marginLeftForSeparatorLine}px;
+  border-bottom: ${({ theme }) => `0.5px solid ${theme.color.borderPrimary}`};
+`;
+
+export const Overlay = styled.div`
+  position: fixed;
+  z-index: ${({ theme }) => theme.zIndex.modal};
+  top: 0;
+  left: 0;
+
+  height: 100vh;
+  width: 100vw;
+
+  background: rgba(0, 0, 0, 0.32);
 `;

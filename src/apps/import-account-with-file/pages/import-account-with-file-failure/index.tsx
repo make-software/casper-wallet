@@ -28,7 +28,7 @@ export function ImportAccountWithFileFailureContentPage() {
       <IllustrationContainer>
         <SvgIcon src="assets/illustrations/error.svg" size={120} />
       </IllustrationContainer>
-      <ParagraphContainer top={SpacingSize.ExtraLarge}>
+      <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
           <Trans t={t}>Something went wrong</Trans>
         </Typography>

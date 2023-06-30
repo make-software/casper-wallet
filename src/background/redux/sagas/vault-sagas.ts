@@ -32,7 +32,8 @@ import {
   activeAccountChanged,
   vaultLoaded,
   vaultReseted,
-  anotherAccountConnected
+  anotherAccountConnected,
+  deployPayloadReceived
 } from '../vault/actions';
 import {
   selectSecretPhrase,
@@ -64,6 +65,7 @@ import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
 import { activeTimeoutDurationSettingChanged } from '../settings/actions';
 import { selectTimeoutDurationSetting } from '../settings/selectors';
 import { getUrlOrigin } from '@src/utils';
+import { accountActivityReset } from '../account-info/actions';
 
 export function* vaultSagas() {
   yield takeLatest(getType(lockVault), lockVaultSaga);
@@ -91,7 +93,8 @@ export function* vaultSagas() {
       getType(accountDisconnected),
       getType(siteDisconnected),
       getType(activeAccountChanged),
-      getType(activeTimeoutDurationSettingChanged)
+      getType(activeTimeoutDurationSettingChanged),
+      getType(deployPayloadReceived)
     ],
     updateVaultCipher
   );
@@ -106,6 +109,7 @@ function* lockVaultSaga(action: ReturnType<typeof lockVault>) {
     yield put(sessionReseted());
     yield put(vaultReseted());
     yield put(deploysReseted());
+    yield put(accountActivityReset());
 
     emitSdkEventToActiveTabs(tab => {
       return sdkEvent.lockedEvent({

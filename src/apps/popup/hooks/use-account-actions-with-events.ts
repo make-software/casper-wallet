@@ -1,4 +1,6 @@
 import { useCallback } from 'react';
+import { useSelector } from 'react-redux';
+
 import { Account } from '@src/background/redux/vault/types';
 import {
   activeAccountChanged,
@@ -7,21 +9,20 @@ import {
   siteDisconnected,
   anotherAccountConnected
 } from '@src/background/redux/vault/actions';
-
-import { useSelector } from 'react-redux';
 import {
   selectAccountNamesByOriginDict,
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
 import { sdkEvent } from '@src/content/sdk-event';
-import { dispatchToMainStore } from '../../../background/redux/utils';
+import { dispatchToMainStore } from '@background/redux/utils';
 import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
 import {
   emitSdkEventToActiveTabs,
   emitSdkEventToActiveTabsWithOrigin
 } from '@src/background/utils';
 import { getUrlOrigin } from '@src/utils';
+import { accountActivityReset } from '@background/redux/account-info/actions';
 
 export function findAccountInAListClosestToGivenAccountFilteredByNames(
   accounts: Account[],
@@ -101,6 +102,7 @@ export function useAccountManager() {
         );
         if (!selectedAccountsIncludeActive) {
           dispatchToMainStore(activeAccountChanged(account.name));
+          dispatchToMainStore(accountActivityReset());
         }
         dispatchToMainStore(
           siteConnected({
@@ -140,6 +142,7 @@ export function useAccountManager() {
         );
         if (!selectedAccountIsActive) {
           dispatchToMainStore(activeAccountChanged(account.name));
+          dispatchToMainStore(accountActivityReset());
         }
         dispatchToMainStore(
           anotherAccountConnected({
@@ -187,6 +190,7 @@ export function useAccountManager() {
       });
 
       dispatchToMainStore(activeAccountChanged(account.name));
+      dispatchToMainStore(accountActivityReset());
     },
     [activeAccount?.name, accounts, isLocked, isAccountConnectedWithOrigin]
   );
