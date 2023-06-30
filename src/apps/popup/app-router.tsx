@@ -40,7 +40,7 @@ export function AppRouter() {
   useUserActivityTracker();
 
   if (isLocked) {
-    return <LockedRouter />;
+    return <LockedRouter popupLayout />;
   }
 
   return (
