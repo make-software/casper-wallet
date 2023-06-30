@@ -10,32 +10,32 @@ import { Erc20TokenActionResult } from './types';
 
 export const erc20AccountActivityRequest = (
   casperApiUrl: string,
-  accountHash: string,
+  publicKey: string,
   page: number
 ) =>
-  fetch(getErc20AccountActivityLink(casperApiUrl, accountHash, page))
+  fetch(getErc20AccountActivityLink(casperApiUrl, publicKey, page))
     .then(toJson)
     .catch(handleError);
 
 export const fetchErc20AccountActivity = ({
   casperApiUrl,
-  accountHash,
+  publicKey,
   page
 }: {
   casperApiUrl: string;
-  accountHash: string;
+  publicKey: string;
   page: number;
 }) =>
   queryClient.fetchQuery(
-    ['erc20AccountActivityRequest', casperApiUrl, accountHash, page],
-    () => erc20AccountActivityRequest(casperApiUrl, accountHash, page),
+    ['erc20AccountActivityRequest', casperApiUrl, publicKey, page],
+    () => erc20AccountActivityRequest(casperApiUrl, publicKey, page),
     { staleTime: ERC20_ACTIVITY_REFRESH_RATE }
   );
 
 export const dispatchFetchErc20AccountActivity = (
-  accountHash: string,
+  publicKey: string,
   page: number
 ): Promise<DataWithPayload<PaginatedResponse<Erc20TokenActionResult>>> =>
   dispatchToMainStore(
-    serviceMessage.fetchErc20AccountActivityRequest({ accountHash, page })
+    serviceMessage.fetchErc20AccountActivityRequest({ publicKey, page })
   );

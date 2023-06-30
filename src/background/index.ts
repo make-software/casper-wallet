@@ -677,7 +677,7 @@ browser.runtime.onMessage.addListener(
             try {
               const data = await fetchErc20AccountActivity({
                 casperApiUrl,
-                accountHash: action.payload.accountHash,
+                publicKey: action.payload.publicKey,
                 page: action.payload.page
               });
 
