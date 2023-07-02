@@ -100,7 +100,7 @@
     "@babel/plugin-proposal-class-properties": "7.18.6",
     "@babel/preset-env": "7.20.2",
     "@babel/preset-react": "7.18.6",
-    "@redux-devtools/cli": "^1.0.7",
+    "@redux-devtools/cli": "^2.0.0",
     "@testing-library/dom": "8.19.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^12.1.2",
