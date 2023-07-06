@@ -13,7 +13,6 @@ import {
 } from '@libs/layout';
 import { Avatar, Hash, HashVariant, Tile, Typography } from '@libs/ui';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { formatNumber } from '@src/libs/ui/utils/formatters';
 
 export const AmountContainer = styled(SpaceBetweenFlexColumn)`
   align-items: flex-end;
@@ -68,13 +67,11 @@ export const ActiveAccountPlate = ({
             </AlignedFlexRow>
             <AmountContainer>
               <Typography type="captionHash">
-                {balance == null
-                  ? '-'
-                  : formatNumber(balance, {
-                      precision: { max: 5 }
-                    })}
+                {balance == null ? '-' : balance}
               </Typography>
-              <Typography type="captionHash">{symbol || '-'}</Typography>
+              <Typography type="captionHash" color="contentSecondary">
+                {symbol || '-'}
+              </Typography>
             </AmountContainer>
           </SpaceBetweenFlexRow>
         </Container>

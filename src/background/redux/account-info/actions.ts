@@ -2,6 +2,7 @@ import { createAction } from 'typesafe-actions';
 
 import { ActiveAccountBalance } from '@libs/services/balance-service';
 import {
+  Erc20TokenActionResult,
   ExtendedDeployResult,
   LedgerLiveDeploysWithId
 } from '@libs/services/account-activity-service';
@@ -26,6 +27,14 @@ export const accountActivityChanged = createAction('ACCOUNT_ACTIVITY_CHANGED')<
 export const accountActivityUpdated = createAction('ACCOUNT_ACTIVITY_UPDATED')<
   LedgerLiveDeploysWithId[]
 >();
+
+export const accountErc20ActivityChanged = createAction(
+  'ACCOUNT_ERC20_ACTIVITY_CHANGED'
+)<Erc20TokenActionResult[] | null>();
+
+export const accountErc20ActivityUpdated = createAction(
+  'ACCOUNT_ERC20_ACTIVITY_UPDATED'
+)<Erc20TokenActionResult[]>();
 
 export const accountActivityReset = createAction('ACCOUNT_ACTIVITY_RESET')();
 

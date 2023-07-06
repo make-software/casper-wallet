@@ -33,6 +33,7 @@ import {
   ExtendedDeployResult
 } from '@libs/services/account-activity-service';
 import {
+  divideErc20Balance,
   formatCurrency,
   formatNumber,
   formatTimestamp,
@@ -108,20 +109,24 @@ export const ActivityDetailsPageContent = ({
   if (deployInfo == null) return null;
 
   const deployType: string = ExecutionTypesMap[deployInfo.execution_type_id];
+  const decimals = deployInfo.contract_package?.metadata?.decimals;
 
-  const transferAmountInCSPR =
+  const transferAmount =
     deployInfo.amount != null
-      ? formatNumber(motesToCSPR(deployInfo.amount), {
-          precision: { min: 5, max: 5 }
-        })
+      ? decimals
+        ? divideErc20Balance(deployInfo?.amount, decimals)
+        : motesToCSPR(deployInfo.amount)
       : '-';
+  const formattedTransferAmount = formatNumber(transferAmount || '', {
+    precision: { min: 5 }
+  });
   const transferAmountInUSD =
     deployInfo.amount != null &&
     formatCurrency(motesToCurrency(deployInfo.amount, deployInfo.rate), 'USD', {
       precision: 5
     });
   const costAmountInCSPR = formatNumber(motesToCSPR(deployInfo.cost || '0'), {
-    precision: { min: 5, max: 5 }
+    precision: { min: 5 }
   });
   const costAmountInUSD = formatCurrency(
     deployInfo.currency_cost || '0',
@@ -226,7 +231,9 @@ export const ActivityDetailsPageContent = ({
             </Typography>
             <RightAlignedFlexColumn>
               <Typography type="captionHash">
-                {`${transferAmountInCSPR} CSPR`}
+                {`${formattedTransferAmount} ${
+                  deployInfo.contract_package?.metadata?.symbol || 'CSPR'
+                }`}
               </Typography>
               <Typography type="listSubtext" color="contentSecondary">
                 {transferAmountInUSD}

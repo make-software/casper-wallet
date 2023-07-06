@@ -9,6 +9,9 @@ export const selectAccountCurrencyRate = (state: RootState) =>
 export const selectAccountActivity = (state: RootState) =>
   state.accountInfo.accountActivity;
 
+export const selectAccountErc20Activity = (state: RootState) =>
+  state.accountInfo.accountErc20Activity;
+
 export const selectPendingTransactions = (state: RootState) =>
   state.accountInfo.pendingTransactions;
 

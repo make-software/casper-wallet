@@ -14,6 +14,7 @@ import {
 import { Tile, Typography, ActiveAccountPlate } from '@libs/ui';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { useCopyToClipboard } from '@src/hooks';
+import { useTypedLocation } from '@popup/router';
 
 const Container = styled.div`
   padding: 20px 16px;
@@ -36,6 +37,9 @@ export const ReceivePageContent = () => {
     activeAccount?.publicKey || ''
   );
 
+  const location = useTypedLocation();
+  const { tokenData } = location?.state;
+
   return (
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
@@ -43,7 +47,11 @@ export const ReceivePageContent = () => {
           <Trans t={t}>Receive tokens</Trans>
         </Typography>
       </ParagraphContainer>
-      <ActiveAccountPlate label="To account" symbol={'CSPR'} balance={null} />
+      <ActiveAccountPlate
+        label="To account"
+        symbol={tokenData?.symbol || ''}
+        balance={tokenData?.amount || ''}
+      />
       <VerticalSpaceContainer top={SpacingSize.XXXL}>
         <Tile>
           <Container>

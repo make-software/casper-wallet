@@ -9,6 +9,7 @@ export const BALANCE_REFRESH_RATE = 15 * SECOND;
 export const CURRENCY_REFRESH_RATE = 30 * SECOND;
 export const TOKENS_REFRESH_RATE = 15 * SECOND;
 export const ACCOUNT_ACTIVITY_REFRESH_RATE = 30 * SECOND;
+export const ERC20_ACTIVITY_REFRESH_RATE = 30 * SECOND;
 
 export const LOGIN_RETRY_ATTEMPTS_LIMIT = 5;
 
@@ -60,4 +61,10 @@ export enum GrpcUrl {
 export enum NetworkName {
   Mainnet = 'casper',
   Testnet = 'casper-test'
+}
+
+export enum ActivityListTransactionsType {
+  All = 'All',
+  Casper = 'Casper',
+  Erc20 = 'Erc20'
 }

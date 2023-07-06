@@ -2,10 +2,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import {
-  ExtendedDeployResult,
-  LedgerLiveDeploysResult
-} from '@libs/services/account-activity-service';
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
 import {
   BackgroundColor,
@@ -49,7 +45,7 @@ const StatusBackgroundColors = {
 };
 
 const getDeployStatus = (
-  deployResult?: ExtendedDeployResult | LedgerLiveDeploysResult | null
+  deployResult?: { status: string; error_message: string | null } | null
 ): Status => {
   if (
     deployResult &&
@@ -68,8 +64,7 @@ const getDeployStatus = (
 
 export interface DeployStatusProps {
   deployResult:
-    | ExtendedDeployResult
-    | LedgerLiveDeploysResult
+    | { status: string; error_message: string | null }
     | null
     | undefined;
   textWithIcon?: boolean;

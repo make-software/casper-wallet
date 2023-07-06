@@ -7,6 +7,8 @@ import {
   accountActivityUpdated,
   accountBalanceChanged,
   accountCurrencyRateChanged,
+  accountErc20ActivityChanged,
+  accountErc20ActivityUpdated,
   accountPendingTransactionsChanged,
   accountPendingTransactionsRemove,
   accountErc20Changed
@@ -19,6 +21,7 @@ const initialState: AccountInfoState = {
   },
   currencyRate: null,
   accountActivity: null,
+  accountErc20Activity: null,
   pendingTransactions: [],
   erc20Tokens: []
 };
@@ -58,6 +61,20 @@ export const reducer = createReducer(initialState)
     accountActivity:
       state.accountActivity != null
         ? [...state.accountActivity, ...payload]
+        : payload
+  }))
+  .handleAction(
+    accountErc20ActivityChanged,
+    (state, { payload }): AccountInfoState => ({
+      ...state,
+      accountErc20Activity: payload
+    })
+  )
+  .handleAction(accountErc20ActivityUpdated, (state, { payload }) => ({
+    ...state,
+    accountErc20Activity:
+      state.accountErc20Activity != null
+        ? [...state.accountErc20Activity, ...payload]
         : payload
   }))
   .handleAction(accountPendingTransactionsChanged, (state, { payload }) => {
