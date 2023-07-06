@@ -1,6 +1,6 @@
 import Big from 'big.js';
 
-import { formatNumber } from '@libs/ui/utils/formatters';
+import { divideErc20Balance, formatNumber } from '@libs/ui/utils/formatters';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 import { TokenType } from '@src/hooks';
 
@@ -14,9 +14,7 @@ export const formatErc20TokenBalance = (
   return erc20Tokens
     ?.map(token => {
       const calculatedErc20Balance = token?.balance
-        ? Big(token?.balance || 0)
-            .div(tokenDivider(token.metadata?.decimals))
-            .toString()
+        ? divideErc20Balance(token?.balance, token.metadata?.decimals)
         : '0';
 
       const formattedErc20Amount = calculatedErc20Balance

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { useParams } from 'react-router-dom';
 
 import {
   CenteredFlexRow,
@@ -17,11 +18,11 @@ import {
 } from '@background/redux/account-info/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { accountPendingTransactionsRemove } from '@background/redux/account-info/actions';
-import { useParams } from 'react-router-dom';
 import {
-  ExtendedDeployArgsResult,
   ExtendedDeployResultWithId,
-  LedgerLiveDeploysWithId
+  LedgerLiveDeploysWithId,
+  Erc20TransferWithId,
+  Erc20TokenActionResult
 } from '@src/libs/services/account-activity-service';
 import { ActivityListTransactionsType } from '@src/constants';
 
@@ -38,15 +39,21 @@ const Container = styled(CenteredFlexRow)`
   padding: 20px;
 `;
 
-const renderNoActivityView = ({
+const RenderNoActivityView = ({
   displayContext,
-  t,
   activityList
 }: {
   displayContext: ActivityListDisplayContext;
-  t: any;
-  activityList: any;
+  activityList:
+    | (
+        | Erc20TransferWithId
+        | LedgerLiveDeploysWithId
+        | ExtendedDeployResultWithId
+      )[]
+    | Erc20TokenActionResult[];
 }) => {
+  const { t } = useTranslation();
+
   return (
     <VerticalSpaceContainer
       top={
@@ -67,6 +74,7 @@ const renderNoActivityView = ({
   );
 };
 
+// TODO: refactor this component
 export const ActivityList = ({ displayContext }: ActivityListProps) => {
   const activityList = useSelector(selectAccountActivity);
   const erc20ActivityList = useSelector(selectAccountErc20Activity) || [];
@@ -106,20 +114,8 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
     tokenName
   );
   const { observerElement } = useInfinityScroll(fetchMoreTransactions);
-  const { t } = useTranslation();
 
-  // render erc20 activity list
-  type Erc20Transfer = {
-    id: string;
-    deploy_hash: string;
-    caller_public_key: string;
-    timestamp: string;
-    args: ExtendedDeployArgsResult;
-    status: string;
-    error_message: string | null;
-  };
-
-  const erc20Transactions: Erc20Transfer[] =
+  const erc20Transactions: Erc20TransferWithId[] =
     erc20ActivityList?.map(transaction => {
       return {
         id: transaction.deploy_hash,
@@ -128,60 +124,36 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
         timestamp: transaction.deploy?.timestamp || '-',
         args: transaction.deploy?.args || '-',
         status: transaction.deploy?.status || '-',
-        error_message: transaction.deploy?.error_message || null
+        error_message: transaction.deploy?.error_message || null,
+        decimals: transaction.contract_package?.metadata.decimals,
+        symbol: transaction.contract_package?.metadata.symbol,
+        toPublicKey: transaction?.to_public_key
       };
     }) || [];
 
-  if (
-    transactionsType === ActivityListTransactionsType.All ||
-    transactionsType === ActivityListTransactionsType.Casper
-  ) {
+  if (transactionsType === ActivityListTransactionsType.All) {
+    // TODO: should render deploys https://make-software.atlassian.net/browse/WALLET-117
+    return null;
+  }
+
+  if (transactionsType === ActivityListTransactionsType.Casper) {
     const activityListWithPendingTransactions =
       activityList != null
-        ? [...filteredTransactions, ...activityList, ...erc20Transactions]
+        ? [...filteredTransactions, ...activityList]
         : pendingTransactions.length > 0
         ? pendingTransactions
         : [];
-    console.log(
-      'activityList',
-      JSON.stringify({
-        filteredTransactions: filteredTransactions?.map(
-          transaction => transaction.deploy_hash
-        ),
-        erc20Transactions: erc20Transactions?.map(
-          transaction => transaction.deploy_hash
-        )
-      })
-    );
 
-    // sort activityListWithPendingTransactions by timestamp property which is a date in a string format
-
-    const sortedActivityListByTimestamp =
-      activityListWithPendingTransactions.sort(
-        (
-          a:
-            | LedgerLiveDeploysWithId
-            | Erc20Transfer
-            | ExtendedDeployResultWithId,
-          b:
-            | LedgerLiveDeploysWithId
-            | Erc20Transfer
-            | ExtendedDeployResultWithId
-        ) => Date.parse(b.timestamp) - Date.parse(a.timestamp)
+    if (activityListWithPendingTransactions.length === 0) {
+      return (
+        <RenderNoActivityView
+          activityList={activityListWithPendingTransactions}
+          displayContext={displayContext}
+        />
       );
-
-    const noActivityForAllAndCasper =
-      sortedActivityListByTimestamp == null ||
-      sortedActivityListByTimestamp?.length === 0;
-    if (noActivityForAllAndCasper) {
-      renderNoActivityView({
-        t,
-        displayContext,
-        activityList: sortedActivityListByTimestamp
-      });
     }
 
-    // render all and casper activity list
+    // render casper activity list
     return (
       <List
         contentTop={
@@ -189,9 +161,9 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
             ? SpacingSize.None
             : SpacingSize.Small
         }
-        rows={sortedActivityListByTimestamp!}
+        rows={activityListWithPendingTransactions!}
         renderRow={(transaction, index) => {
-          if (index === sortedActivityListByTimestamp!?.length - 1) {
+          if (index === activityListWithPendingTransactions!?.length - 1) {
             return (
               <AccountActivityPlate
                 ref={observerElement}
@@ -207,35 +179,41 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
     );
   }
 
-  // render no activity for erc20
-  const noActivityForErc20 =
-    (ActivityListTransactionsType.Erc20 && erc20ActivityList == null) ||
-    erc20ActivityList?.length === 0;
-  if (noActivityForErc20) {
-    renderNoActivityView({
-      t,
-      displayContext,
-      activityList: erc20ActivityList
-    });
+  if (transactionsType === ActivityListTransactionsType.Erc20) {
+    // render no activity for erc20
+    const noActivityForErc20 =
+      (ActivityListTransactionsType.Erc20 && erc20ActivityList == null) ||
+      erc20ActivityList?.length === 0;
+
+    if (noActivityForErc20) {
+      return (
+        <RenderNoActivityView
+          activityList={erc20ActivityList}
+          displayContext={displayContext}
+        />
+      );
+    }
+
+    return (
+      <List
+        contentTop={SpacingSize.Small}
+        rows={erc20Transactions}
+        renderRow={(transaction, index) => {
+          if (index === erc20Transactions?.length - 1) {
+            return (
+              <AccountActivityPlate
+                ref={observerElement}
+                transactionInfo={transaction}
+              />
+            );
+          }
+
+          return <AccountActivityPlate transactionInfo={transaction} />;
+        }}
+        marginLeftForItemSeparatorLine={54}
+      />
+    );
   }
 
-  return (
-    <List
-      contentTop={SpacingSize.Small}
-      rows={erc20Transactions}
-      renderRow={(transaction, index) => {
-        if (index === erc20Transactions?.length - 1) {
-          return (
-            <AccountActivityPlate
-              ref={observerElement}
-              transactionInfo={transaction}
-            />
-          );
-        }
-
-        return <AccountActivityPlate transactionInfo={transaction} />;
-      }}
-      marginLeftForItemSeparatorLine={54}
-    />
-  );
+  return null;
 };

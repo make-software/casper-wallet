@@ -19,13 +19,18 @@ import {
   Typography
 } from '@libs/ui';
 import {
+  divideErc20Balance,
   formatNumber,
   formatTimestamp,
   formatTimestampAge,
   motesToCSPR
 } from '@libs/ui/utils/formatters';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { ExtendedDeployArgsResult } from '@libs/services/account-activity-service';
+import {
+  Erc20TransferWithId,
+  ExtendedDeployResultWithId,
+  LedgerLiveDeploysWithId
+} from '@libs/services/account-activity-service';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { getPublicKeyFormTarget } from './utils';
@@ -87,14 +92,10 @@ const TypeIcons = {
 };
 
 interface AccountActivityPlateProps {
-  transactionInfo: {
-    deploy_hash: string;
-    caller_public_key: string;
-    timestamp: string;
-    args: ExtendedDeployArgsResult;
-    status: string;
-    error_message: string | null;
-  };
+  transactionInfo:
+    | Erc20TransferWithId
+    | LedgerLiveDeploysWithId
+    | ExtendedDeployResultWithId;
 }
 
 type Ref = HTMLDivElement;
@@ -110,26 +111,47 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
 
     const {
       deploy_hash: deployHash,
-      caller_public_key: fromAccountPublicKey,
+      caller_public_key,
       timestamp,
-      args: { amount: parsedAmount, target }
+      args
     } = transactionInfo;
+    let decimals = null;
+    let symbol = null;
+    let toAccountPublicKey = '';
 
-    const toAccountPublicKey = getPublicKeyFormTarget(
-      target,
-      activeAccount?.publicKey
-    );
+    if ('decimals' in transactionInfo) {
+      decimals = transactionInfo?.decimals;
+    }
+    if ('symbol' in transactionInfo) {
+      symbol = transactionInfo?.symbol;
+    }
+    if ('toPublicKey' in transactionInfo) {
+      toAccountPublicKey = transactionInfo?.toPublicKey || '';
+    } else {
+      toAccountPublicKey = getPublicKeyFormTarget(
+        args.target,
+        activeAccount?.publicKey
+      );
+    }
 
-    const amount = (parsedAmount?.parsed as string) || '';
+    const fromAccountPublicKey = caller_public_key.toLowerCase();
 
-    const amountInCSPR = formatNumber(motesToCSPR(amount), {
-      precision: { min: 5, max: 5 }
+    const parsedAmount = (args.amount?.parsed as string) || '';
+
+    const amount = decimals
+      ? divideErc20Balance(parsedAmount, decimals)
+      : motesToCSPR(parsedAmount);
+
+    const formattedAmount = formatNumber(amount || '', {
+      precision: { min: 5 }
     });
 
     useEffect(() => {
-      if (fromAccountPublicKey === activeAccount?.publicKey) {
+      if (fromAccountPublicKey === activeAccount?.publicKey.toLowerCase()) {
         setType(TransferType.Sent);
-      } else if (toAccountPublicKey === activeAccount?.publicKey) {
+      } else if (
+        toAccountPublicKey === activeAccount?.publicKey.toLowerCase()
+      ) {
         setType(TransferType.Received);
       } else {
         setType(TransferType.Unknown);
@@ -162,7 +184,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
               <Typography type="bodySemiBold">
                 <Trans t={t}>
                   {type != null &&
-                    (amountInCSPR.length >= 13
+                    (formattedAmount.length >= 13
                       ? ShortTypeName[type]
                       : TypeName[type])}
                 </Trans>
@@ -171,7 +193,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
             </AlignedFlexRow>
             <Typography type="captionHash">
               {type === TransferType.Sent ? '-' : ''}
-              {amountInCSPR}
+              {formattedAmount}
             </Typography>
           </AlignedSpaceBetweenFlexRow>
           <AlignedSpaceBetweenFlexRow>
@@ -195,7 +217,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
               </Tooltip>
             </AlignedFlexRow>
             <Typography type="bodyHash" color="contentSecondary">
-              CSPR
+              {symbol || 'CSPR'}
             </Typography>
           </AlignedSpaceBetweenFlexRow>
         </ContentContainer>

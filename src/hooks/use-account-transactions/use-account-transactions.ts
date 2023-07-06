@@ -26,12 +26,16 @@ import { getAccountHashFromPublicKey } from '@src/libs/entities/Account';
 import { DataWithPayload, PaginatedResponse } from '@src/libs/services/types';
 import { dispatchFetchErc20TokenActivity } from '@src/libs/services/account-activity-service/erc20-token-activity-service';
 
+// TODO: refactor this hook
 export const useAccountTransactions = (
   transactionsType: ActivityListTransactionsType,
   contractPackageHash?: string
 ) => {
-  const [page, setPage] = useState(1);
-  const [pageCount, setPageCount] = useState(0);
+  const [accountActivityPage, setAccountActivityPage] = useState(1);
+  const [accountErc20ActivityPage, setAccountErc20ActivityPage] = useState(1);
+  const [accountActivityPageCount, setAccountActivityPageCount] = useState(0);
+  const [accountErc20ActivityPageCount, setAccountErc20ActivityPageCount] =
+    useState(0);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
@@ -46,7 +50,7 @@ export const useAccountTransactions = (
   );
 
   const createHandlePayload = useCallback(
-    (payloadAction: any, page = 1) =>
+    (payloadAction: any, page = 1, setPage, setPageCount) =>
       <
         T extends DataWithPayload<
           PaginatedResponse<Erc20TokenActionResult | LedgerLiveDeploysResult>
@@ -81,17 +85,38 @@ export const useAccountTransactions = (
     // fetch all
     if (transactionsType === ActivityListTransactionsType.All) {
       dispatchFetchAccountActivity(activeAccount?.publicKey, 1)
-        .then(createHandlePayload(accountActivityChanged, 1))
+        .then(
+          createHandlePayload(
+            accountActivityChanged,
+            1,
+            setAccountActivityPage,
+            setAccountActivityPageCount
+          )
+        )
         .catch(handleError);
       dispatchFetchErc20AccountActivity(activeAccountHash, 1)
-        .then(createHandlePayload(accountErc20ActivityChanged, 1))
+        .then(
+          createHandlePayload(
+            accountErc20ActivityChanged,
+            1,
+            setAccountErc20ActivityPage,
+            setAccountErc20ActivityPageCount
+          )
+        )
         .catch(handleError);
     }
 
     // fetch casper
     if (transactionsType === ActivityListTransactionsType.Casper) {
       dispatchFetchAccountActivity(activeAccount?.publicKey, 1)
-        .then(createHandlePayload(accountActivityChanged))
+        .then(
+          createHandlePayload(
+            accountActivityChanged,
+            1,
+            setAccountActivityPage,
+            setAccountActivityPageCount
+          )
+        )
         .catch(handleError);
     }
     // fetch erc20
@@ -100,7 +125,14 @@ export const useAccountTransactions = (
       contractPackageHash != null
     ) {
       dispatchFetchErc20TokenActivity(activeAccountHash, contractPackageHash, 1)
-        .then(createHandlePayload(accountErc20ActivityChanged))
+        .then(
+          createHandlePayload(
+            accountErc20ActivityChanged,
+            1,
+            setAccountErc20ActivityPage,
+            setAccountErc20ActivityPageCount
+          )
+        )
         .catch(handleError);
     }
 
@@ -117,22 +149,59 @@ export const useAccountTransactions = (
 
   const fetchMoreTransactions = useCallback(() => {
     if (!activeAccount?.publicKey) return;
-    // Prevent fetching more transactions if we already fetched all of them
-    if (page > pageCount) return;
 
     // fetch all
     if (transactionsType === ActivityListTransactionsType.All) {
-      dispatchFetchAccountActivity(activeAccount?.publicKey, page)
-        .then(createHandlePayload(accountActivityUpdated, page))
+      // Prevent fetching more transactions if we already fetched all of them
+      if (accountActivityPage > accountActivityPageCount) return;
+
+      dispatchFetchAccountActivity(
+        activeAccount?.publicKey,
+        accountActivityPage
+      )
+        .then(
+          createHandlePayload(
+            accountActivityUpdated,
+            accountActivityPage,
+            setAccountActivityPage,
+            setAccountActivityPageCount
+          )
+        )
         .catch(handleError);
-      dispatchFetchErc20AccountActivity(activeAccount?.publicKey, page)
-        .then(createHandlePayload(accountErc20ActivityUpdated, page))
+      // Prevent fetching more transactions if we already fetched all of them
+      if (accountErc20ActivityPage > accountErc20ActivityPageCount) return;
+
+      dispatchFetchErc20AccountActivity(
+        activeAccount?.publicKey,
+        accountErc20ActivityPage
+      )
+        .then(
+          createHandlePayload(
+            accountErc20ActivityUpdated,
+            accountErc20ActivityPage,
+            setAccountErc20ActivityPage,
+            setAccountErc20ActivityPageCount
+          )
+        )
         .catch(handleError);
     }
     // fetch casper
     if (transactionsType === ActivityListTransactionsType.Casper) {
-      dispatchFetchAccountActivity(activeAccount?.publicKey, page)
-        .then(createHandlePayload(accountActivityUpdated, page))
+      // Prevent fetching more transactions if we already fetched all of them
+      if (accountActivityPage > accountActivityPageCount) return;
+
+      dispatchFetchAccountActivity(
+        activeAccount?.publicKey,
+        accountActivityPage
+      )
+        .then(
+          createHandlePayload(
+            accountActivityUpdated,
+            accountActivityPage,
+            setAccountActivityPage,
+            setAccountActivityPageCount
+          )
+        )
         .catch(handleError);
     }
     // fetch erc20
@@ -140,22 +209,34 @@ export const useAccountTransactions = (
       transactionsType === ActivityListTransactionsType.Erc20 &&
       contractPackageHash != null
     ) {
+      // Prevent fetching more transactions if we already fetched all of them
+      if (accountErc20ActivityPage > accountErc20ActivityPageCount) return;
+
       dispatchFetchErc20TokenActivity(
         activeAccountHash,
         contractPackageHash,
-        page
+        accountErc20ActivityPage
       )
-        .then(createHandlePayload(accountErc20ActivityUpdated, page))
+        .then(
+          createHandlePayload(
+            accountErc20ActivityUpdated,
+            accountErc20ActivityPage,
+            setAccountErc20ActivityPage,
+            setAccountErc20ActivityPageCount
+          )
+        )
         .catch(handleError);
     }
   }, [
-    activeAccount?.publicKey,
-    activeAccountHash,
-    page,
-    pageCount,
     transactionsType,
+    activeAccount?.publicKey,
+    contractPackageHash,
+    accountActivityPage,
+    accountActivityPageCount,
     createHandlePayload,
-    contractPackageHash
+    accountErc20ActivityPage,
+    accountErc20ActivityPageCount,
+    activeAccountHash
   ]);
   return {
     fetchMoreTransactions

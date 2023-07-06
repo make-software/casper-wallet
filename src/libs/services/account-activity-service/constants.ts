@@ -10,7 +10,7 @@ export const getErc20AccountActivityLink = (
   account_hash: string,
   page: number
 ) =>
-  `${casperApiUrl}/accounts/${account_hash}/erc20-token-actions?page=${page}&limit=10&fields=deploy&with_amounts_in_currency_id=1`;
+  `${casperApiUrl}/accounts/${account_hash}/erc20-token-actions?page=${page}&limit=10&fields=contract_package,deploy&with_amounts_in_currency_id=1`;
 
 export const getErc20TokenActivityLink = (
   casperApiUrl: string,
@@ -18,7 +18,7 @@ export const getErc20TokenActivityLink = (
   contract_package_hash: string,
   page: number
 ) =>
-  `${casperApiUrl}/erc20-token-actions?contract_package_hash=${contract_package_hash}&account_hash=${account_hash}&page=${page}&limit=10&fields=deploy&with_amounts_in_currency_id=1`;
+  `${casperApiUrl}/erc20-token-actions?contract_package_hash=${contract_package_hash}&account_hash=${account_hash}&page=${page}&limit=10&fields=contract_package,deploy&with_amounts_in_currency_id=1`;
 
 export const getExtendedDeploysHashLink = (
   casperApiUrl: string,

@@ -636,32 +636,38 @@ browser.runtime.onMessage.addListener(
                 accountHash: action.payload.accountHash
               });
 
-              const erc20Tokens = await Promise.allSettled(
-                tokensList?.map(token =>
-                  fetchContractPackage({
-                    casperApiUrl,
-                    contractPackageHash: token.contract_package_hash
-                  }).then(contractPackage => ({
-                    ...contractPackage,
-                    balance: token.balance,
-                    contractHash: token.latest_contract?.contract_hash
-                  }))
-                )
-              ).then(results =>
-                results
-                  .map(result => {
-                    if (result.status === 'fulfilled') {
-                      return result.value;
-                    } else {
-                      return null;
-                    }
-                  })
-                  .filter(notEmpty)
-              );
+              if (tokensList) {
+                const erc20Tokens = await Promise.allSettled(
+                  tokensList?.map(token =>
+                    fetchContractPackage({
+                      casperApiUrl,
+                      contractPackageHash: token.contract_package_hash
+                    }).then(contractPackage => ({
+                      ...contractPackage,
+                      balance: token.balance,
+                      contractHash: token.latest_contract?.contract_hash
+                    }))
+                  )
+                ).then(results =>
+                  results
+                    .map(result => {
+                      if (result.status === 'fulfilled') {
+                        return result.value;
+                      } else {
+                        return null;
+                      }
+                    })
+                    .filter(notEmpty)
+                );
 
-              return sendResponse(
-                serviceMessage.fetchErc20TokensResponse(erc20Tokens)
-              );
+                return sendResponse(
+                  serviceMessage.fetchErc20TokensResponse(erc20Tokens)
+                );
+              } else {
+                return sendResponse(
+                  serviceMessage.fetchErc20TokensResponse([])
+                );
+              }
             } catch (error) {
               console.error(error);
             }

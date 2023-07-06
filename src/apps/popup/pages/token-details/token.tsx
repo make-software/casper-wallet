@@ -27,7 +27,7 @@ import {
   getBlockExplorerAccountUrl,
   getBlockExplorerContractUrl
 } from '@src/constants';
-import { formatErc20TokenBalance } from '../home/components/tokens-list/utils';
+import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
 import { ContractPackageWithBalance } from '@src/libs/services/erc20-service';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
@@ -150,7 +150,9 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
           </ButtonContainer>
           <ButtonContainer
             gap={SpacingSize.Medium}
-            onClick={() => navigate(RouterPath.Receive)}
+            onClick={() =>
+              navigate(RouterPath.Receive, { state: { tokenData } })
+            }
           >
             <IconCircleContainer color="fillBlue">
               <SvgIcon src="assets/icons/receive.svg" color="contentOnFill" />

@@ -15,10 +15,10 @@ export const getPublicKeyFormTarget = (
       const activeAccountHash = getAccountHashFromPublicKey(publicKey);
       toAccountPublicKey =
         activeAccountHash === (target.parsed as string)
-          ? publicKey
+          ? publicKey.toLowerCase()
           : (target.parsed as string);
     }
   }
 
-  return toAccountPublicKey;
+  return toAccountPublicKey.toLowerCase();
 };

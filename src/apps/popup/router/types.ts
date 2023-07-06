@@ -1,4 +1,5 @@
 import { TransferType } from '@libs/ui';
+import { TokenType } from '@src/hooks';
 
 export type LocationState = {
   showNavigationMenu?: boolean;
@@ -9,4 +10,5 @@ export type LocationState = {
     type: TransferType | null;
   };
   activeTabId?: number;
+  tokenData?: TokenType | null;
 };

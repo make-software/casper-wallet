@@ -75,9 +75,12 @@ export const TransferPage = () => {
   const balance = isErc20Transfer
     ? erc20Balance
     : csprBalance.amountMotes && motesToCSPR(csprBalance.amountMotes);
+  const formattedBalance = formatNumber(balance || '', {
+    precision: { max: 5 }
+  });
 
   const { amountForm, recipientForm } = useTransferForm(
-    balance,
+    erc20Balance,
     erc20Decimals,
     isErc20Transfer,
     csprBalance.amountMotes,
@@ -344,7 +347,7 @@ export const TransferPage = () => {
           recipientPublicKey={recipientPublicKey}
           amount={amount}
           paymentAmount={paymentAmount}
-          balance={balance}
+          balance={formattedBalance}
           symbol={symbol}
         />
       )}

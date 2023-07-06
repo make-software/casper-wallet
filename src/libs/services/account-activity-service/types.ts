@@ -162,3 +162,16 @@ export interface Metadata {
   balances_uref: string;
   total_supply_uref: string;
 }
+
+export type Erc20TransferWithId = {
+  id: string;
+  deploy_hash: string;
+  caller_public_key: string;
+  timestamp: string;
+  args: ExtendedDeployArgsResult;
+  status: string;
+  error_message: string | null;
+  decimals?: number;
+  symbol?: string;
+  toPublicKey?: string;
+};
