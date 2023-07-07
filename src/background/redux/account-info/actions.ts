@@ -4,6 +4,7 @@ import { ActiveAccountBalance } from '@libs/services/balance-service';
 import {
   Erc20TokenActionResult,
   ExtendedDeployResult,
+  ExtendedDeployResultWithId,
   LedgerLiveDeploysWithId
 } from '@libs/services/account-activity-service';
 import { ContractPackageWithBalance } from '@src/libs/services/erc20-service';
@@ -45,3 +46,11 @@ export const accountPendingTransactionsChanged = createAction(
 export const accountPendingTransactionsRemove = createAction(
   'ACCOUNT_PENDING_TRANSACTIONS_REMOVE'
 )<string>();
+
+export const accountDeployChanged = createAction('ACCOUNT_DEPLOY_CHANGED')<
+  ExtendedDeployResultWithId[]
+>();
+
+export const accountDeployUpdated = createAction('ACCOUNT_DEPLOY_UPDATED')<
+  ExtendedDeployResultWithId[]
+>();

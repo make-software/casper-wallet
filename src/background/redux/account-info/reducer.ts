@@ -11,7 +11,9 @@ import {
   accountErc20ActivityUpdated,
   accountPendingTransactionsChanged,
   accountPendingTransactionsRemove,
-  accountErc20Changed
+  accountErc20Changed,
+  accountDeployChanged,
+  accountDeployUpdated
 } from './actions';
 
 const initialState: AccountInfoState = {
@@ -23,7 +25,8 @@ const initialState: AccountInfoState = {
   accountActivity: null,
   accountErc20Activity: null,
   pendingTransactions: [],
-  erc20Tokens: []
+  erc20Tokens: [],
+  accountDeploys: null
 };
 
 export const reducer = createReducer(initialState)
@@ -96,4 +99,15 @@ export const reducer = createReducer(initialState)
     pendingTransactions: state.pendingTransactions.filter(
       transaction => transaction.deploy_hash !== payload
     )
+  }))
+  .handleAction(accountDeployChanged, (state, { payload }) => ({
+    ...state,
+    accountDeploys: payload
+  }))
+  .handleAction(accountDeployUpdated, (state, { payload }) => ({
+    ...state,
+    accountDeploys:
+      state.accountDeploys != null
+        ? [...state.accountDeploys, ...payload]
+        : payload
   }));

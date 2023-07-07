@@ -19,8 +19,6 @@ import {
 
 import {
   AccountActionsMenuPopover,
-  ActivityList,
-  ActivityListDisplayContext,
   Avatar,
   Button,
   getFontSizeBasedOnTextLength,
@@ -29,10 +27,11 @@ import {
   Tile,
   Typography,
   Tab,
-  Tabs
+  Tabs,
+  DeploysList
 } from '@libs/ui';
 
-import { useAccountTransactions } from '@src/hooks';
+import { useFetchAccountActivity, useFetchAccountDeploys } from '@src/hooks';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import {
@@ -45,10 +44,10 @@ import {
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
+import { ActivityListTransactionsType } from '@src/constants';
 
 import { TokensList } from './components/tokens-list';
 import { ConnectionStatusBadge } from './components/connection-status-badge';
-import { ActivityListTransactionsType } from '@src/constants';
 
 const fullWidthAndMarginTop = css`
   margin-top: 16px;
@@ -97,7 +96,8 @@ export function HomePageContent() {
   const balance = useSelector(selectAccountBalance);
 
   useActiveAccountBalance();
-  useAccountTransactions(ActivityListTransactionsType.All);
+  useFetchAccountActivity(ActivityListTransactionsType.All);
+  useFetchAccountDeploys();
 
   const handleConnectAccount = useCallback(() => {
     if (!activeAccount || isActiveAccountConnected) {
@@ -197,8 +197,8 @@ export function HomePageContent() {
           <Tab tabName="Tokens">
             <TokensList />
           </Tab>
-          <Tab tabName="Activity">
-            <ActivityList displayContext={ActivityListDisplayContext.Home} />
+          <Tab tabName="Deploys">
+            <DeploysList />
           </Tab>
           <Tab tabName="NFTs" />
         </Tabs>

@@ -54,6 +54,7 @@ import {
 import { fetchAccountInfo } from '@libs/services/account-info';
 import {
   fetchAccountActivity,
+  fetchAccountExtendedDeploys,
   fetchExtendedDeploysInfo
 } from '@libs/services/account-activity-service';
 import {
@@ -117,7 +118,9 @@ import {
   accountPendingTransactionsRemove,
   accountErc20Changed,
   accountErc20ActivityChanged,
-  accountErc20ActivityUpdated
+  accountErc20ActivityUpdated,
+  accountDeployChanged,
+  accountDeployUpdated
 } from '@background/redux/account-info/actions';
 import { fetchErc20AccountActivity } from '@src/libs/services/account-activity-service/erc20-account-activity-service';
 import { fetchErc20TokenActivity } from '@src/libs/services/account-activity-service/erc20-token-activity-service';
@@ -530,6 +533,8 @@ browser.runtime.onMessage.addListener(
           case getType(accountErc20Changed):
           case getType(accountErc20ActivityChanged):
           case getType(accountErc20ActivityUpdated):
+          case getType(accountDeployChanged):
+          case getType(accountDeployUpdated):
             store.dispatch(action);
             return sendResponse(undefined);
 
@@ -712,6 +717,28 @@ browser.runtime.onMessage.addListener(
 
               return sendResponse(
                 serviceMessage.fetchErc20TokenActivityResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchAccountExtendedDeploysRequest): {
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const data = await fetchAccountExtendedDeploys({
+                casperApiUrl,
+                publicKey: action.payload.publicKey,
+                page: action.payload.page
+              });
+
+              return sendResponse(
+                serviceMessage.fetchAccountExtendedDeploysResponse(data)
               );
             } catch (error) {
               console.error(error);

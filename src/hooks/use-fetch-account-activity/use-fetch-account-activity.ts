@@ -15,7 +15,6 @@ import {
   accountErc20ActivityChanged,
   accountErc20ActivityUpdated
 } from '@background/redux/account-info/actions';
-import { selectAccountActivity } from '@background/redux/account-info/selectors';
 import { useForceUpdate } from '@popup/hooks/use-force-update';
 import {
   ACCOUNT_ACTIVITY_REFRESH_RATE,
@@ -26,8 +25,7 @@ import { getAccountHashFromPublicKey } from '@src/libs/entities/Account';
 import { DataWithPayload, PaginatedResponse } from '@src/libs/services/types';
 import { dispatchFetchErc20TokenActivity } from '@src/libs/services/account-activity-service/erc20-token-activity-service';
 
-// TODO: refactor this hook
-export const useAccountTransactions = (
+export const useFetchAccountActivity = (
   transactionsType: ActivityListTransactionsType,
   contractPackageHash?: string
 ) => {
@@ -39,12 +37,10 @@ export const useAccountTransactions = (
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
-  const activityList = useSelector(selectAccountActivity);
 
   const effectTimeoutRef = useRef<NodeJS.Timeout>();
   const forceUpdate = useForceUpdate();
 
-  const activityListLength = activityList?.length || null;
   const activeAccountHash = getAccountHashFromPublicKey(
     activeAccount?.publicKey
   );
@@ -56,10 +52,8 @@ export const useAccountTransactions = (
           PaginatedResponse<Erc20TokenActionResult | LedgerLiveDeploysResult>
         >
       >({
-        payload: { data: accountTransactions, pageCount, itemCount }
+        payload: { data: accountTransactions, pageCount }
       }: T) => {
-        if (itemCount === activityListLength) return;
-
         const transactions =
           accountTransactions?.map(transaction => ({
             ...transaction,
@@ -72,7 +66,7 @@ export const useAccountTransactions = (
         setPage(page + 1);
         setPageCount(pageCount);
       },
-    [activityListLength]
+    []
   );
 
   const handleError = (error: Error) => {
@@ -150,41 +144,6 @@ export const useAccountTransactions = (
   const fetchMoreTransactions = useCallback(() => {
     if (!activeAccount?.publicKey) return;
 
-    // fetch all
-    if (transactionsType === ActivityListTransactionsType.All) {
-      // Prevent fetching more transactions if we already fetched all of them
-      if (accountActivityPage > accountActivityPageCount) return;
-
-      dispatchFetchAccountActivity(
-        activeAccount?.publicKey,
-        accountActivityPage
-      )
-        .then(
-          createHandlePayload(
-            accountActivityUpdated,
-            accountActivityPage,
-            setAccountActivityPage,
-            setAccountActivityPageCount
-          )
-        )
-        .catch(handleError);
-      // Prevent fetching more transactions if we already fetched all of them
-      if (accountErc20ActivityPage > accountErc20ActivityPageCount) return;
-
-      dispatchFetchErc20AccountActivity(
-        activeAccount?.publicKey,
-        accountErc20ActivityPage
-      )
-        .then(
-          createHandlePayload(
-            accountErc20ActivityUpdated,
-            accountErc20ActivityPage,
-            setAccountErc20ActivityPage,
-            setAccountErc20ActivityPageCount
-          )
-        )
-        .catch(handleError);
-    }
     // fetch casper
     if (transactionsType === ActivityListTransactionsType.Casper) {
       // Prevent fetching more transactions if we already fetched all of them

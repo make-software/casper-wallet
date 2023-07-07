@@ -13,4 +13,5 @@ export interface AccountInfoState {
   accountActivity: LedgerLiveDeploysWithId[] | null;
   accountErc20Activity: Erc20TokenActionResult[] | null;
   pendingTransactions: ExtendedDeployResultWithId[];
+  accountDeploys: ExtendedDeployResultWithId[] | null;
 }
