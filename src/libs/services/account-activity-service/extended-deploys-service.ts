@@ -5,7 +5,7 @@ import { queryClient } from '@libs/services/query-client';
 import { DataWithPayload, PaginatedResponse } from '@libs/services/types';
 import { ACCOUNT_DEPLOY_REFRESH_RATE } from '@src/constants';
 
-import { ExtendedDeployResult } from './types';
+import { ExtendedDeploy, ExtendedDeployResult } from './types';
 import {
   getAccountExtendedDeploysLink,
   getExtendedDeploysHashLink
@@ -33,7 +33,7 @@ export const fetchExtendedDeploysInfo = ({
 
 export const dispatchFetchExtendedDeploysInfo = (
   deployHash: string
-): Promise<DataWithPayload<ExtendedDeployResult>> =>
+): Promise<DataWithPayload<ExtendedDeploy>> =>
   dispatchToMainStore(
     serviceMessage.fetchExtendedDeploysInfoRequest({ deployHash })
   );
@@ -65,7 +65,7 @@ export const fetchAccountExtendedDeploys = ({
 export const dispatchFetchAccountExtendedDeploys = (
   publicKey: string,
   page: number
-): Promise<DataWithPayload<PaginatedResponse<ExtendedDeployResult>>> =>
+): Promise<DataWithPayload<PaginatedResponse<ExtendedDeploy>>> =>
   dispatchToMainStore(
     serviceMessage.fetchAccountExtendedDeploysRequest({ publicKey, page })
   );

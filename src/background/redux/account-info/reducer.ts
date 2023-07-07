@@ -2,9 +2,9 @@ import { createReducer } from 'typesafe-actions';
 
 import { AccountInfoState } from './types';
 import {
-  accountActivityChanged,
+  accountCasperActivityChanged,
   accountActivityReset,
-  accountActivityUpdated,
+  accountCasperActivityUpdated,
   accountBalanceChanged,
   accountCurrencyRateChanged,
   accountErc20ActivityChanged,
@@ -22,7 +22,7 @@ const initialState: AccountInfoState = {
     amountFiat: null
   },
   currencyRate: null,
-  accountActivity: null,
+  accountCasperActivity: null,
   accountErc20Activity: null,
   pendingTransactions: [],
   erc20Tokens: [],
@@ -53,17 +53,17 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    accountActivityChanged,
+    accountCasperActivityChanged,
     (state, { payload }): AccountInfoState => ({
       ...state,
-      accountActivity: payload
+      accountCasperActivity: payload
     })
   )
-  .handleAction(accountActivityUpdated, (state, { payload }) => ({
+  .handleAction(accountCasperActivityUpdated, (state, { payload }) => ({
     ...state,
-    accountActivity:
-      state.accountActivity != null
-        ? [...state.accountActivity, ...payload]
+    accountCasperActivity:
+      state.accountCasperActivity != null
+        ? [...state.accountCasperActivity, ...payload]
         : payload
   }))
   .handleAction(
@@ -83,7 +83,7 @@ export const reducer = createReducer(initialState)
   .handleAction(accountPendingTransactionsChanged, (state, { payload }) => {
     const pendingTransactions = {
       ...payload,
-      id: payload.deploy_hash
+      id: payload.deployHash
     };
 
     return {
@@ -97,7 +97,7 @@ export const reducer = createReducer(initialState)
   .handleAction(accountPendingTransactionsRemove, (state, { payload }) => ({
     ...state,
     pendingTransactions: state.pendingTransactions.filter(
-      transaction => transaction.deploy_hash !== payload
+      transaction => transaction.deployHash !== payload
     )
   }))
   .handleAction(accountDeploysChanged, (state, { payload }) => ({

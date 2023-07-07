@@ -12,7 +12,7 @@ export const erc20AccountActivityRequest = (
   casperApiUrl: string,
   publicKey: string,
   page: number
-) =>
+): Promise<PaginatedResponse<Erc20TokenActionResult>> =>
   fetch(getErc20AccountActivityLink(casperApiUrl, publicKey, page))
     .then(toJson)
     .catch(handleError);

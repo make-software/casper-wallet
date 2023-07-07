@@ -24,13 +24,11 @@ import {
   SvgIcon,
   Tile,
   Tooltip,
-  TransferType,
-  TypeName,
   Typography
 } from '@libs/ui';
 import {
   dispatchFetchExtendedDeploysInfo,
-  ExtendedDeployResult
+  ExtendedDeploy
 } from '@libs/services/account-activity-service';
 import {
   divideErc20Balance,
@@ -42,7 +40,11 @@ import {
   motesToCurrency
 } from '@libs/ui/utils/formatters';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { getBlockExplorerDeployUrl } from '@src/constants';
+import {
+  getBlockExplorerDeployUrl,
+  TransferType,
+  TypeName
+} from '@src/constants';
 
 interface ActivityDetailsPageContentProps {
   fromAccountPublicKey?: string;
@@ -91,9 +93,7 @@ export const ActivityDetailsPageContent = ({
   deployHash,
   type
 }: ActivityDetailsPageContentProps) => {
-  const [deployInfo, setDeployInfo] = useState<ExtendedDeployResult | null>(
-    null
-  );
+  const [deployInfo, setDeployInfo] = useState<ExtendedDeploy | null>(null);
 
   const { t } = useTranslation();
   const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
@@ -108,8 +108,8 @@ export const ActivityDetailsPageContent = ({
 
   if (deployInfo == null) return null;
 
-  const deployType: string = ExecutionTypesMap[deployInfo.execution_type_id];
-  const decimals = deployInfo.contract_package?.metadata?.decimals;
+  const deployType: string = ExecutionTypesMap[deployInfo.executionTypeId];
+  const decimals = deployInfo.contractPackage?.metadata?.decimals;
 
   const transferAmount =
     deployInfo.amount != null
@@ -129,7 +129,7 @@ export const ActivityDetailsPageContent = ({
     precision: { min: 5 }
   });
   const costAmountInUSD = formatCurrency(
-    deployInfo.currency_cost || '0',
+    deployInfo.currencyCost || '0',
     'USD',
     {
       precision: 5
@@ -152,7 +152,7 @@ export const ActivityDetailsPageContent = ({
               target="_blank"
               href={getBlockExplorerDeployUrl(
                 casperLiveUrl,
-                deployInfo.deploy_hash
+                deployInfo.deployHash
               )}
             >
               <Typography type="captionMedium">
@@ -198,7 +198,7 @@ export const ActivityDetailsPageContent = ({
               <Trans t={t}>Deploy hash</Trans>
             </Typography>
             <Hash
-              value={deployInfo.deploy_hash}
+              value={deployInfo.deployHash}
               variant={HashVariant.CaptionHash}
               truncated
               truncatedSize="tiny"
@@ -232,7 +232,7 @@ export const ActivityDetailsPageContent = ({
             <RightAlignedFlexColumn>
               <Typography type="captionHash">
                 {`${formattedTransferAmount} ${
-                  deployInfo.contract_package?.metadata?.symbol || 'CSPR'
+                  deployInfo.contractPackage?.metadata?.symbol || 'CSPR'
                 }`}
               </Typography>
               <Typography type="listSubtext" color="contentSecondary">

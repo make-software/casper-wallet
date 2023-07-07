@@ -1,4 +1,4 @@
-import { TransferType } from '@libs/ui';
+import { TransferType } from '@src/constants';
 import { TokenType } from '@src/hooks';
 
 export type LocationState = {

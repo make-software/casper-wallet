@@ -28,12 +28,16 @@ import {
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import {
   Erc20TransferWithId,
-  ExtendedDeployResultWithId,
-  LedgerLiveDeploysWithId
+  ExtendedDeployWithId
 } from '@libs/services/account-activity-service';
 import { RouterPath, useTypedNavigate } from '@popup/router';
-
-import { getPublicKeyFormTarget } from './utils';
+import {
+  ShortTypeName,
+  TransferType,
+  TypeIcons,
+  TypeName
+} from '@src/constants';
+import { getPublicKeyFormTarget } from '@libs/ui/utils/utils';
 
 const AccountActivityPlateContainer = styled(AlignedSpaceBetweenFlexRow)`
   cursor: pointer;
@@ -67,35 +71,8 @@ const Divider = styled.div`
   background-color: ${({ theme }) => theme.color.contentSecondary};
 `;
 
-export enum TransferType {
-  Sent = 'Sent',
-  Received = 'Received',
-  Unknown = 'Unknown'
-}
-
-export const ShortTypeName = {
-  [TransferType.Sent]: 'Sent',
-  [TransferType.Received]: 'Recv',
-  [TransferType.Unknown]: 'Unk'
-};
-
-export const TypeName = {
-  [TransferType.Sent]: 'Sent',
-  [TransferType.Received]: 'Received',
-  [TransferType.Unknown]: 'Unknown'
-};
-
-const TypeIcons = {
-  [TransferType.Sent]: 'assets/icons/transfer.svg',
-  [TransferType.Received]: 'assets/icons/receive.svg',
-  [TransferType.Unknown]: 'assets/icons/info.svg'
-};
-
 interface AccountActivityPlateProps {
-  transactionInfo:
-    | Erc20TransferWithId
-    | LedgerLiveDeploysWithId
-    | ExtendedDeployResultWithId;
+  transactionInfo: Erc20TransferWithId | ExtendedDeployWithId;
 }
 
 type Ref = HTMLDivElement;
@@ -109,21 +86,15 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
 
     const activeAccount = useSelector(selectVaultActiveAccount);
 
-    const {
-      deploy_hash: deployHash,
-      caller_public_key,
-      timestamp,
-      args
-    } = transactionInfo;
+    const { deployHash, callerPublicKey, timestamp, args } = transactionInfo;
     let decimals = null;
     let symbol = null;
     let toAccountPublicKey = '';
+    let toAccountHash = '';
 
-    if ('decimals' in transactionInfo) {
-      decimals = transactionInfo?.decimals;
-    }
-    if ('symbol' in transactionInfo) {
-      symbol = transactionInfo?.symbol;
+    if ('contractPackage' in transactionInfo) {
+      decimals = transactionInfo?.contractPackage?.metadata?.decimals;
+      symbol = transactionInfo?.contractPackage?.metadata?.symbol;
     }
     if ('toPublicKey' in transactionInfo) {
       toAccountPublicKey = transactionInfo?.toPublicKey || '';
@@ -134,7 +105,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
       );
     }
 
-    const fromAccountPublicKey = caller_public_key.toLowerCase();
+    const fromAccountPublicKey = callerPublicKey;
 
     const parsedAmount = (args.amount?.parsed as string) || '';
 
@@ -147,10 +118,14 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
     });
 
     useEffect(() => {
-      if (fromAccountPublicKey === activeAccount?.publicKey.toLowerCase()) {
+      if (
+        fromAccountPublicKey.toLowerCase() ===
+        activeAccount?.publicKey.toLowerCase()
+      ) {
         setType(TransferType.Sent);
       } else if (
-        toAccountPublicKey === activeAccount?.publicKey.toLowerCase()
+        toAccountPublicKey.toLowerCase() ===
+        activeAccount?.publicKey.toLowerCase()
       ) {
         setType(TransferType.Received);
       } else {
@@ -167,7 +142,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
             state: {
               activityDetailsData: {
                 fromAccountPublicKey,
-                toAccountPublicKey,
+                toAccountPublicKey: toAccountPublicKey || toAccountHash,
                 deployHash,
                 type
               }

@@ -9,7 +9,7 @@ export const BALANCE_REFRESH_RATE = 15 * SECOND;
 export const CURRENCY_REFRESH_RATE = 30 * SECOND;
 export const TOKENS_REFRESH_RATE = 15 * SECOND;
 export const ACCOUNT_DEPLOY_REFRESH_RATE = 30 * SECOND;
-export const ACCOUNT_ACTIVITY_REFRESH_RATE = 30 * SECOND;
+export const ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE = 30 * SECOND;
 export const ERC20_ACTIVITY_REFRESH_RATE = 30 * SECOND;
 
 export const LOGIN_RETRY_ATTEMPTS_LIMIT = 5;
@@ -69,3 +69,27 @@ export enum ActivityListTransactionsType {
   Casper = 'Casper',
   Erc20 = 'Erc20'
 }
+
+export enum TransferType {
+  Sent = 'Sent',
+  Received = 'Received',
+  Unknown = 'Unknown'
+}
+
+export const ShortTypeName = {
+  [TransferType.Sent]: 'Sent',
+  [TransferType.Received]: 'Recv',
+  [TransferType.Unknown]: 'Unk'
+};
+
+export const TypeName = {
+  [TransferType.Sent]: 'Sent',
+  [TransferType.Received]: 'Received',
+  [TransferType.Unknown]: 'Unknown'
+};
+
+export const TypeIcons = {
+  [TransferType.Sent]: 'assets/icons/transfer.svg',
+  [TransferType.Received]: 'assets/icons/receive.svg',
+  [TransferType.Unknown]: 'assets/icons/info.svg'
+};

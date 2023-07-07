@@ -32,3 +32,10 @@ export const getAccountExtendedDeploysLink = (
   page: number
 ) =>
   `${casperApiUrl}/accounts/${publicKey}/extended-deploys?page=${page}&limit=10&fields=entry_point,contract_package&with_amounts_in_currency_id=1`;
+
+export const getAccountTransferLink = (
+  casperApiUrl: string,
+  account_hash: string,
+  page: number
+) =>
+  `${casperApiUrl}/accounts/${account_hash}/transfers?page=${page}&limit=10&with_extended_info=1&with_amounts_in_currency_id=1`;

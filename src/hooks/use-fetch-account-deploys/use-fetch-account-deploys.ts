@@ -34,7 +34,7 @@ export const useFetchAccountDeploys = () => {
         const transactions =
           accountDeploys?.map(transaction => ({
             ...transaction,
-            id: transaction.deploy_hash
+            id: transaction.deployHash
           })) || [];
 
         dispatchToMainStore(accountDeploysChanged(transactions));
@@ -69,7 +69,7 @@ export const useFetchAccountDeploys = () => {
         const transactions =
           accountDeploys?.map(transaction => ({
             ...transaction,
-            id: transaction.deploy_hash
+            id: transaction.deployHash
           })) || [];
 
         dispatchToMainStore(accountDeploysUpdated(transactions));
