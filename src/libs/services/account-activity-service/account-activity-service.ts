@@ -12,7 +12,7 @@ export const accountActivityRequest = (
   casperApiUrl: string,
   publicKey: string,
   page: number
-) =>
+): Promise<PaginatedResponse<LedgerLiveDeploysResult>> =>
   fetch(getAccountActivityLink(casperApiUrl, publicKey, page))
     .then(toJson)
     .catch(handleError);

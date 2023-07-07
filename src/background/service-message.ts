@@ -64,7 +64,14 @@ export const serviceMessage = {
   fetchErc20TokensResponse: createAction('FETCH_ERC20_TOKENS_RESPONSE')<
     ContractPackageWithBalance[],
     Meta
-  >()
+  >(),
+  fetchAccountExtendedDeploysRequest: createAction('FETCH_ACCOUNT_DEPLOYS')<
+    { publicKey: string; page: number },
+    Meta
+  >(),
+  fetchAccountExtendedDeploysResponse: createAction(
+    'FETCH_ACCOUNT_DEPLOYS_RESPONSE'
+  )<PaginatedResponse<ExtendedDeployResult>, Meta>()
 };
 
 export type ServiceMessage = ActionType<typeof serviceMessage>;

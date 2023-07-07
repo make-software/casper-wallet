@@ -32,6 +32,7 @@ export * from './components/deploy-status/deploy-status';
 export * from './components/modal/modal';
 export * from './components/active-account-plate/active-account-plate';
 export * from './components/recipient-plate/recipient-plate';
+export * from './components/deploys-list/deploys-list';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

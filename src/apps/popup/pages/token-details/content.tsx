@@ -6,7 +6,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { ActivityList, ActivityListDisplayContext, Typography } from '@libs/ui';
+import { ActivityList, Typography } from '@libs/ui';
 
 import { Token } from './token';
 import { useErc20Tokens } from '@src/hooks';
@@ -29,7 +29,7 @@ export const TokenPageContent = () => {
           <Trans t={t}>Activity</Trans>
         </Typography>
       </ParagraphContainer>
-      <ActivityList displayContext={ActivityListDisplayContext.TokenDetails} />
+      <ActivityList />
     </ContentContainer>
   );
 };

@@ -10,7 +10,7 @@ import {
   VerticalSpaceContainer
 } from '@libs/layout';
 import { AccountActivityPlate, List, Tile, Typography } from '@libs/ui';
-import { useAccountTransactions, useInfinityScroll } from '@src/hooks';
+import { useFetchAccountActivity, useInfinityScroll } from '@src/hooks';
 import {
   selectAccountActivity,
   selectAccountErc20Activity,
@@ -19,49 +19,27 @@ import {
 import { dispatchToMainStore } from '@background/redux/utils';
 import { accountPendingTransactionsRemove } from '@background/redux/account-info/actions';
 import {
-  ExtendedDeployResultWithId,
   LedgerLiveDeploysWithId,
   Erc20TransferWithId,
   Erc20TokenActionResult
 } from '@src/libs/services/account-activity-service';
 import { ActivityListTransactionsType } from '@src/constants';
 
-export enum ActivityListDisplayContext {
-  Home = 'home',
-  TokenDetails = 'token-details'
-}
-
-interface ActivityListProps {
-  displayContext: ActivityListDisplayContext;
-}
-
 const Container = styled(CenteredFlexRow)`
   padding: 20px;
 `;
 
 const RenderNoActivityView = ({
-  displayContext,
   activityList
 }: {
-  displayContext: ActivityListDisplayContext;
   activityList:
-    | (
-        | Erc20TransferWithId
-        | LedgerLiveDeploysWithId
-        | ExtendedDeployResultWithId
-      )[]
+    | (Erc20TransferWithId | LedgerLiveDeploysWithId)[]
     | Erc20TokenActionResult[];
 }) => {
   const { t } = useTranslation();
 
   return (
-    <VerticalSpaceContainer
-      top={
-        displayContext === ActivityListDisplayContext.Home
-          ? SpacingSize.None
-          : SpacingSize.Small
-      }
-    >
+    <VerticalSpaceContainer top={SpacingSize.Small}>
       <Tile>
         <Container>
           <Typography type="body" color="contentSecondary">
@@ -75,16 +53,14 @@ const RenderNoActivityView = ({
 };
 
 // TODO: refactor this component
-export const ActivityList = ({ displayContext }: ActivityListProps) => {
+export const ActivityList = () => {
   const activityList = useSelector(selectAccountActivity);
   const erc20ActivityList = useSelector(selectAccountErc20Activity) || [];
   const pendingTransactions = useSelector(selectPendingTransactions);
   const { tokenName } = useParams();
 
   const transactionsType: ActivityListTransactionsType =
-    displayContext === ActivityListDisplayContext.Home
-      ? ActivityListTransactionsType.All
-      : tokenName === 'Casper'
+    tokenName === 'Casper'
       ? ActivityListTransactionsType.Casper
       : ActivityListTransactionsType.Erc20;
 
@@ -109,7 +85,7 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
     });
   }, [activityList, pendingTransactions]);
 
-  const { fetchMoreTransactions } = useAccountTransactions(
+  const { fetchMoreTransactions } = useFetchAccountActivity(
     transactionsType,
     tokenName
   );
@@ -131,11 +107,6 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
       };
     }) || [];
 
-  if (transactionsType === ActivityListTransactionsType.All) {
-    // TODO: should render deploys https://make-software.atlassian.net/browse/WALLET-117
-    return null;
-  }
-
   if (transactionsType === ActivityListTransactionsType.Casper) {
     const activityListWithPendingTransactions =
       activityList != null
@@ -148,7 +119,6 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
       return (
         <RenderNoActivityView
           activityList={activityListWithPendingTransactions}
-          displayContext={displayContext}
         />
       );
     }
@@ -156,11 +126,7 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
     // render casper activity list
     return (
       <List
-        contentTop={
-          displayContext === ActivityListDisplayContext.Home
-            ? SpacingSize.None
-            : SpacingSize.Small
-        }
+        contentTop={SpacingSize.Small}
         rows={activityListWithPendingTransactions!}
         renderRow={(transaction, index) => {
           if (index === activityListWithPendingTransactions!?.length - 1) {
@@ -186,12 +152,7 @@ export const ActivityList = ({ displayContext }: ActivityListProps) => {
       erc20ActivityList?.length === 0;
 
     if (noActivityForErc20) {
-      return (
-        <RenderNoActivityView
-          activityList={erc20ActivityList}
-          displayContext={displayContext}
-        />
-      );
+      return <RenderNoActivityView activityList={erc20ActivityList} />;
     }
 
     return (
