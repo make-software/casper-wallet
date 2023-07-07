@@ -5,8 +5,8 @@ import { useForceUpdate } from '@popup/hooks/use-force-update';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { dispatchFetchAccountExtendedDeploys } from '@libs/services/account-activity-service';
 import {
-  accountDeployChanged,
-  accountDeployUpdated
+  accountDeploysChanged,
+  accountDeploysUpdated
 } from '@background/redux/account-info/actions';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { ACCOUNT_DEPLOY_REFRESH_RATE } from '@src/constants';
@@ -37,7 +37,7 @@ export const useFetchAccountDeploys = () => {
             id: transaction.deploy_hash
           })) || [];
 
-        dispatchToMainStore(accountDeployChanged(transactions));
+        dispatchToMainStore(accountDeploysChanged(transactions));
 
         // Set page to 2, so we can fetch more transactions when the user scrolls down
         setAccountDeploysPage(accountDeploysPage + 1);
@@ -72,7 +72,7 @@ export const useFetchAccountDeploys = () => {
             id: transaction.deploy_hash
           })) || [];
 
-        dispatchToMainStore(accountDeployUpdated(transactions));
+        dispatchToMainStore(accountDeploysUpdated(transactions));
 
         // Set page to 2, so we can fetch more transactions when the user scrolls down
         setAccountDeploysPage(accountDeploysPage + 1);

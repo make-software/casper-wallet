@@ -47,10 +47,10 @@ export const accountPendingTransactionsRemove = createAction(
   'ACCOUNT_PENDING_TRANSACTIONS_REMOVE'
 )<string>();
 
-export const accountDeployChanged = createAction('ACCOUNT_DEPLOY_CHANGED')<
+export const accountDeploysChanged = createAction('ACCOUNT_DEPLOYS_CHANGED')<
   ExtendedDeployResultWithId[]
 >();
 
-export const accountDeployUpdated = createAction('ACCOUNT_DEPLOY_UPDATED')<
+export const accountDeploysUpdated = createAction('ACCOUNT_DEPLOYS_UPDATED')<
   ExtendedDeployResultWithId[]
 >();

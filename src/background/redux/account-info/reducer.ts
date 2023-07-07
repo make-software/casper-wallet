@@ -12,8 +12,8 @@ import {
   accountPendingTransactionsChanged,
   accountPendingTransactionsRemove,
   accountErc20Changed,
-  accountDeployChanged,
-  accountDeployUpdated
+  accountDeploysChanged,
+  accountDeploysUpdated
 } from './actions';
 
 const initialState: AccountInfoState = {
@@ -100,11 +100,11 @@ export const reducer = createReducer(initialState)
       transaction => transaction.deploy_hash !== payload
     )
   }))
-  .handleAction(accountDeployChanged, (state, { payload }) => ({
+  .handleAction(accountDeploysChanged, (state, { payload }) => ({
     ...state,
     accountDeploys: payload
   }))
-  .handleAction(accountDeployUpdated, (state, { payload }) => ({
+  .handleAction(accountDeploysUpdated, (state, { payload }) => ({
     ...state,
     accountDeploys:
       state.accountDeploys != null

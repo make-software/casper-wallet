@@ -119,8 +119,8 @@ import {
   accountErc20Changed,
   accountErc20ActivityChanged,
   accountErc20ActivityUpdated,
-  accountDeployChanged,
-  accountDeployUpdated
+  accountDeploysChanged,
+  accountDeploysUpdated
 } from '@background/redux/account-info/actions';
 import { fetchErc20AccountActivity } from '@src/libs/services/account-activity-service/erc20-account-activity-service';
 import { fetchErc20TokenActivity } from '@src/libs/services/account-activity-service/erc20-token-activity-service';
@@ -533,8 +533,8 @@ browser.runtime.onMessage.addListener(
           case getType(accountErc20Changed):
           case getType(accountErc20ActivityChanged):
           case getType(accountErc20ActivityUpdated):
-          case getType(accountDeployChanged):
-          case getType(accountDeployUpdated):
+          case getType(accountDeploysChanged):
+          case getType(accountDeploysUpdated):
             store.dispatch(action);
             return sendResponse(undefined);
 
