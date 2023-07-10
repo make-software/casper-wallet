@@ -4,14 +4,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import {
-  DeployStatus,
-  Hash,
-  HashVariant,
-  SvgIcon,
-  Tooltip,
-  Typography
-} from '@libs/ui';
+import { Hash, HashVariant, SvgIcon, Tooltip, Typography } from '@libs/ui';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import {
   formatNumber,
@@ -32,10 +25,7 @@ import {
   TypeIcons,
   TypeName
 } from '@src/constants';
-import {
-  MappedPendingTransaction,
-  TransferResultWithId
-} from '@libs/services/account-activity-service';
+import { TransferResultWithId } from '@libs/services/account-activity-service';
 
 const AccountActivityPlateContainer = styled(AlignedSpaceBetweenFlexRow)`
   cursor: pointer;
@@ -72,7 +62,7 @@ const Divider = styled.div`
 type Ref = HTMLDivElement;
 
 interface AccountCasperActivityPlateProps {
-  transactionInfo: TransferResultWithId | MappedPendingTransaction;
+  transactionInfo: TransferResultWithId;
 }
 export const AccountCasperActivityPlate = forwardRef<
   Ref,
@@ -144,9 +134,6 @@ export const AccountCasperActivityPlate = forwardRef<
                     : TypeName[type])}
               </Trans>
             </Typography>
-            {'status' in transactionInfo && (
-              <DeployStatus deployResult={transactionInfo} />
-            )}
           </AlignedFlexRow>
           <Typography type="captionHash">
             {type === TransferType.Sent ? '-' : ''}
