@@ -9,27 +9,17 @@ import {
   AccountCasperActivityPlate,
   NoActivityView
 } from '@libs/ui';
-import {
-  useAccountPendingTransactions,
-  useFetchAccountActivity,
-  useInfinityScroll
-} from '@src/hooks';
+import { useFetchAccountActivity, useInfinityScroll } from '@src/hooks';
 import {
   selectAccountCasperActivity,
   selectAccountErc20Activity
 } from '@background/redux/account-info/selectors';
-import {
-  Erc20TransferWithId,
-  TransferResultWithId
-} from '@src/libs/services/account-activity-service';
+import { Erc20TransferWithId } from '@src/libs/services/account-activity-service';
 import { ActivityListTransactionsType } from '@src/constants';
 
 export const ActivityList = () => {
   const accountCasperActivityList = useSelector(selectAccountCasperActivity);
   const erc20ActivityList = useSelector(selectAccountErc20Activity) || [];
-
-  const { accountActivityListWithPendingTransactions } =
-    useAccountPendingTransactions(accountCasperActivityList);
 
   const { tokenName } = useParams();
 
@@ -46,28 +36,19 @@ export const ActivityList = () => {
 
   if (transactionsType === ActivityListTransactionsType.Casper) {
     if (
-      accountActivityListWithPendingTransactions == null ||
-      accountActivityListWithPendingTransactions.length === 0
+      accountCasperActivityList == null ||
+      accountCasperActivityList.length === 0
     ) {
-      return (
-        <NoActivityView
-          activityList={accountActivityListWithPendingTransactions}
-        />
-      );
+      return <NoActivityView activityList={accountCasperActivityList} />;
     }
 
     // render casper activity list
     return (
       <List
         contentTop={SpacingSize.Small}
-        rows={
-          accountActivityListWithPendingTransactions! as TransferResultWithId[]
-        }
+        rows={accountCasperActivityList!}
         renderRow={(transaction, index) => {
-          if (
-            index ===
-            accountActivityListWithPendingTransactions!?.length - 1
-          ) {
+          if (index === accountCasperActivityList!?.length - 1) {
             return (
               <AccountCasperActivityPlate
                 ref={observerElement}

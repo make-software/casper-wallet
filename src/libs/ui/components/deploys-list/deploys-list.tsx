@@ -2,7 +2,6 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { selectAccountDeploys } from '@background/redux/account-info/selectors';
-import { ExtendedDeployWithId } from '@libs/services/account-activity-service';
 import { SpacingSize } from '@libs/layout';
 import { AccountActivityPlate, List, NoActivityView } from '@libs/ui';
 import {
@@ -14,19 +13,19 @@ import {
 export const DeploysList = () => {
   const accountDeploys = useSelector(selectAccountDeploys);
 
-  const { accountActivityListWithPendingTransactions } =
+  const { accountDeploysListWithPendingTransactions } =
     useAccountPendingTransactions(accountDeploys);
 
   const { fetchMoreTransactions } = useFetchAccountDeploys();
   const { observerElement } = useInfinityScroll(fetchMoreTransactions);
 
   if (
-    accountActivityListWithPendingTransactions == null ||
-    accountActivityListWithPendingTransactions.length === 0
+    accountDeploysListWithPendingTransactions == null ||
+    accountDeploysListWithPendingTransactions.length === 0
   ) {
     return (
       <NoActivityView
-        activityList={accountActivityListWithPendingTransactions}
+        activityList={accountDeploysListWithPendingTransactions}
       />
     );
   }
@@ -34,11 +33,9 @@ export const DeploysList = () => {
   return (
     <List
       contentTop={SpacingSize.None}
-      rows={
-        accountActivityListWithPendingTransactions as ExtendedDeployWithId[]
-      }
+      rows={accountDeploysListWithPendingTransactions}
       renderRow={(transaction, index) => {
-        if (index === accountActivityListWithPendingTransactions!?.length - 1) {
+        if (index === accountDeploysListWithPendingTransactions!?.length - 1) {
           return (
             <AccountActivityPlate
               ref={observerElement}
