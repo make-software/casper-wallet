@@ -99,6 +99,20 @@ export function SignDeployContent({
     ...deployInfo.deployArgs
   };
 
+  const showSimpleAmount = () => {
+    switch (deployInfo.entryPoint) {
+      case 'delegate':
+      case 'undelegate':
+      case 'redelegate':
+        return false;
+      default:
+        return true;
+    }
+  };
+
+  console.log(deployArguments, 'deployArguments');
+  console.log(deployInfo.entryPoint, 'deployInfo.entryPoint');
+
   const getLabel = () => {
     switch (signatureRequest.deployType) {
       case 'Contract Call':
@@ -171,6 +185,7 @@ export function SignDeployContent({
                         id={key}
                         value={value}
                         isContractCall={isContractCall}
+                        showSimpleAmount={showSimpleAmount()}
                       />
                     </AccordionItem>
                   );

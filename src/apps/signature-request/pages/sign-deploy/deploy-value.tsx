@@ -20,11 +20,13 @@ import {
 export function DeployValue({
   id,
   value,
-  isContractCall
+  isContractCall,
+  showSimpleAmount
 }: {
   id: string;
   value: string | CLValue;
   isContractCall?: boolean;
+  showSimpleAmount?: boolean;
 }) {
   if (typeof value === 'string' || typeof value === 'number') {
     // string args
@@ -74,7 +76,7 @@ export function DeployValue({
     }
 
     if (isDeployArgValueNumber(value)) {
-      if (isContractCall && id === 'amount') {
+      if (isContractCall && id === 'amount' && showSimpleAmount) {
         return (
           <Typography type="bodyHash">{formatNumber(parsedValue)}</Typography>
         );
