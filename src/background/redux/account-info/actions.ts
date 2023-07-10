@@ -3,9 +3,9 @@ import { createAction } from 'typesafe-actions';
 import { ActiveAccountBalance } from '@libs/services/balance-service';
 import {
   Erc20TokenActionResult,
-  ExtendedDeployResult,
-  ExtendedDeployResultWithId,
-  LedgerLiveDeploysWithId
+  ExtendedDeploy,
+  ExtendedDeployWithId,
+  TransferResultWithId
 } from '@libs/services/account-activity-service';
 import { ContractPackageWithBalance } from '@src/libs/services/erc20-service';
 
@@ -21,13 +21,13 @@ export const accountCurrencyRateChanged = createAction(
   'ACCOUNT_CURRENCY_RATE_CHANGED'
 )<number | null>();
 
-export const accountActivityChanged = createAction('ACCOUNT_ACTIVITY_CHANGED')<
-  LedgerLiveDeploysWithId[] | null
->();
+export const accountCasperActivityChanged = createAction(
+  'ACCOUNT_CASPER_ACTIVITY_CHANGED'
+)<TransferResultWithId[] | null>();
 
-export const accountActivityUpdated = createAction('ACCOUNT_ACTIVITY_UPDATED')<
-  LedgerLiveDeploysWithId[]
->();
+export const accountCasperActivityUpdated = createAction(
+  'ACCOUNT_CASPER_ACTIVITY_UPDATED'
+)<TransferResultWithId[]>();
 
 export const accountErc20ActivityChanged = createAction(
   'ACCOUNT_ERC20_ACTIVITY_CHANGED'
@@ -41,16 +41,16 @@ export const accountActivityReset = createAction('ACCOUNT_ACTIVITY_RESET')();
 
 export const accountPendingTransactionsChanged = createAction(
   'ACCOUNT_PENDING_TRANSACTIONS_CHANGED'
-)<ExtendedDeployResult>();
+)<ExtendedDeploy>();
 
 export const accountPendingTransactionsRemove = createAction(
   'ACCOUNT_PENDING_TRANSACTIONS_REMOVE'
 )<string>();
 
 export const accountDeploysChanged = createAction('ACCOUNT_DEPLOYS_CHANGED')<
-  ExtendedDeployResultWithId[]
+  ExtendedDeployWithId[]
 >();
 
 export const accountDeploysUpdated = createAction('ACCOUNT_DEPLOYS_UPDATED')<
-  ExtendedDeployResultWithId[]
+  ExtendedDeployWithId[]
 >();

@@ -53,9 +53,11 @@ import {
 } from '@libs/services/balance-service';
 import { fetchAccountInfo } from '@libs/services/account-info';
 import {
-  fetchAccountActivity,
+  fetchAccountCasperActivity,
   fetchAccountExtendedDeploys,
-  fetchExtendedDeploysInfo
+  fetchExtendedDeploysInfo,
+  MapExtendedDeploy,
+  MapPaginatedExtendedDeploys
 } from '@libs/services/account-activity-service';
 import {
   fetchContractPackage,
@@ -109,9 +111,9 @@ import {
 } from '@src/content/sdk-errors';
 import { recipientPublicKeyAdded } from './redux/recent-recipient-public-keys/actions';
 import {
-  accountActivityChanged,
+  accountCasperActivityChanged,
   accountActivityReset,
-  accountActivityUpdated,
+  accountCasperActivityUpdated,
   accountBalanceChanged,
   accountCurrencyRateChanged,
   accountPendingTransactionsChanged,
@@ -525,8 +527,8 @@ browser.runtime.onMessage.addListener(
           case getType(recipientPublicKeyAdded):
           case getType(accountBalanceChanged):
           case getType(accountCurrencyRateChanged):
-          case getType(accountActivityChanged):
-          case getType(accountActivityUpdated):
+          case getType(accountCasperActivityChanged):
+          case getType(accountCasperActivityUpdated):
           case getType(accountActivityReset):
           case getType(accountPendingTransactionsChanged):
           case getType(accountPendingTransactionsRemove):
@@ -587,28 +589,6 @@ browser.runtime.onMessage.addListener(
             return;
           }
 
-          case getType(serviceMessage.fetchAccountActivityRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchAccountActivity({
-                casperApiUrl,
-                publicKey: action.payload.publicKey,
-                page: action.payload.page
-              });
-
-              return sendResponse(
-                serviceMessage.fetchAccountActivityResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
           case getType(serviceMessage.fetchExtendedDeploysInfoRequest): {
             const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
@@ -621,7 +601,9 @@ browser.runtime.onMessage.addListener(
               });
 
               return sendResponse(
-                serviceMessage.fetchExtendedDeploysInfoResponse(data)
+                serviceMessage.fetchExtendedDeploysInfoResponse(
+                  MapExtendedDeploy(data)
+                )
               );
             } catch (error) {
               console.error(error);
@@ -738,12 +720,35 @@ browser.runtime.onMessage.addListener(
               });
 
               return sendResponse(
-                serviceMessage.fetchAccountExtendedDeploysResponse(data)
+                serviceMessage.fetchAccountExtendedDeploysResponse(
+                  MapPaginatedExtendedDeploys(data)
+                )
               );
             } catch (error) {
               console.error(error);
             }
 
+            return;
+          }
+
+          case getType(serviceMessage.fetchAccountCasperActivityRequest): {
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const data = await fetchAccountCasperActivity({
+                casperApiUrl,
+                accountHash: action.payload.accountHash,
+                page: action.payload.page
+              });
+
+              return sendResponse(
+                serviceMessage.fetchAccountCasperActivityResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
             return;
           }
 

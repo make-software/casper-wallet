@@ -45,7 +45,7 @@ const StatusBackgroundColors = {
 };
 
 const getDeployStatus = (
-  deployResult?: { status: string; error_message: string | null } | null
+  deployResult?: { status: string; errorMessage: string | null } | null
 ): Status => {
   if (
     deployResult &&
@@ -55,7 +55,7 @@ const getDeployStatus = (
     return deployResult?.status as Status;
   }
 
-  if (deployResult?.error_message) {
+  if (deployResult?.errorMessage) {
     return Status.Error;
   }
 
@@ -64,7 +64,7 @@ const getDeployStatus = (
 
 export interface DeployStatusProps {
   deployResult:
-    | { status: string; error_message: string | null }
+    | { status: string; errorMessage: string | null }
     | null
     | undefined;
   textWithIcon?: boolean;
@@ -97,7 +97,7 @@ export const DeployStatus = ({
   };
 
   const status = getDeployStatus(deployResult);
-  const message = deployResult?.error_message;
+  const message = deployResult?.errorMessage;
 
   if (textWithIcon) {
     return (

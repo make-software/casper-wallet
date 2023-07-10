@@ -5,19 +5,19 @@ import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import {
   Erc20TokenActionResult,
-  LedgerLiveDeploysResult,
-  dispatchFetchAccountActivity
+  dispatchFetchAccountCasperActivity,
+  TransferResult
 } from '@libs/services/account-activity-service';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
-  accountActivityChanged,
-  accountActivityUpdated,
+  accountCasperActivityChanged,
+  accountCasperActivityUpdated,
   accountErc20ActivityChanged,
   accountErc20ActivityUpdated
 } from '@background/redux/account-info/actions';
 import { useForceUpdate } from '@popup/hooks/use-force-update';
 import {
-  ACCOUNT_ACTIVITY_REFRESH_RATE,
+  ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE,
   ActivityListTransactionsType
 } from '@src/constants';
 import { dispatchFetchErc20AccountActivity } from '@src/libs/services/account-activity-service/erc20-account-activity-service';
@@ -29,9 +29,10 @@ export const useFetchAccountActivity = (
   transactionsType: ActivityListTransactionsType,
   contractPackageHash?: string
 ) => {
-  const [accountActivityPage, setAccountActivityPage] = useState(1);
+  const [accountCasperActivityPage, setAccountCasperActivityPage] = useState(1);
   const [accountErc20ActivityPage, setAccountErc20ActivityPage] = useState(1);
-  const [accountActivityPageCount, setAccountActivityPageCount] = useState(0);
+  const [accountCasperActivityPageCount, setAccountCasperActivityPageCount] =
+    useState(0);
   const [accountErc20ActivityPageCount, setAccountErc20ActivityPageCount] =
     useState(0);
 
@@ -49,16 +50,24 @@ export const useFetchAccountActivity = (
     (payloadAction: any, page = 1, setPage, setPageCount) =>
       <
         T extends DataWithPayload<
-          PaginatedResponse<Erc20TokenActionResult | LedgerLiveDeploysResult>
+          PaginatedResponse<Erc20TokenActionResult | TransferResult>
         >
       >({
         payload: { data: accountTransactions, pageCount }
       }: T) => {
         const transactions =
-          accountTransactions?.map(transaction => ({
-            ...transaction,
-            id: transaction.deploy_hash
-          })) || [];
+          accountTransactions?.map(transaction => {
+            let id;
+            if ('deploy_hash' in transaction) {
+              id = transaction.deploy_hash;
+            } else {
+              id = transaction.deployHash;
+            }
+            return {
+              ...transaction,
+              id
+            };
+          }) || [];
 
         dispatchToMainStore(payloadAction(transactions));
 
@@ -78,13 +87,13 @@ export const useFetchAccountActivity = (
 
     // fetch all
     if (transactionsType === ActivityListTransactionsType.All) {
-      dispatchFetchAccountActivity(activeAccount?.publicKey, 1)
+      dispatchFetchAccountCasperActivity(activeAccountHash, 1)
         .then(
           createHandlePayload(
-            accountActivityChanged,
+            accountCasperActivityChanged,
             1,
-            setAccountActivityPage,
-            setAccountActivityPageCount
+            setAccountCasperActivityPage,
+            setAccountCasperActivityPageCount
           )
         )
         .catch(handleError);
@@ -102,13 +111,13 @@ export const useFetchAccountActivity = (
 
     // fetch casper
     if (transactionsType === ActivityListTransactionsType.Casper) {
-      dispatchFetchAccountActivity(activeAccount?.publicKey, 1)
+      dispatchFetchAccountCasperActivity(activeAccountHash, 1)
         .then(
           createHandlePayload(
-            accountActivityChanged,
+            accountCasperActivityChanged,
             1,
-            setAccountActivityPage,
-            setAccountActivityPageCount
+            setAccountCasperActivityPage,
+            setAccountCasperActivityPageCount
           )
         )
         .catch(handleError);
@@ -133,7 +142,7 @@ export const useFetchAccountActivity = (
     // will cause effect to run again after timeout
     effectTimeoutRef.current = setTimeout(() => {
       forceUpdate();
-    }, ACCOUNT_ACTIVITY_REFRESH_RATE + 1);
+    }, ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE + 1);
 
     return () => {
       clearTimeout(effectTimeoutRef.current);
@@ -147,18 +156,18 @@ export const useFetchAccountActivity = (
     // fetch casper
     if (transactionsType === ActivityListTransactionsType.Casper) {
       // Prevent fetching more transactions if we already fetched all of them
-      if (accountActivityPage > accountActivityPageCount) return;
+      if (accountCasperActivityPage > accountCasperActivityPageCount) return;
 
-      dispatchFetchAccountActivity(
-        activeAccount?.publicKey,
-        accountActivityPage
+      dispatchFetchAccountCasperActivity(
+        activeAccountHash,
+        accountCasperActivityPage
       )
         .then(
           createHandlePayload(
-            accountActivityUpdated,
-            accountActivityPage,
-            setAccountActivityPage,
-            setAccountActivityPageCount
+            accountCasperActivityUpdated,
+            accountCasperActivityPage,
+            setAccountCasperActivityPage,
+            setAccountCasperActivityPageCount
           )
         )
         .catch(handleError);
@@ -190,8 +199,8 @@ export const useFetchAccountActivity = (
     transactionsType,
     activeAccount?.publicKey,
     contractPackageHash,
-    accountActivityPage,
-    accountActivityPageCount,
+    accountCasperActivityPage,
+    accountCasperActivityPageCount,
     createHandlePayload,
     accountErc20ActivityPage,
     accountErc20ActivityPageCount,
