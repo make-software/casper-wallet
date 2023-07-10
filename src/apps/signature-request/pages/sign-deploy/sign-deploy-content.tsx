@@ -110,9 +110,6 @@ export function SignDeployContent({
     }
   };
 
-  console.log(deployArguments, 'deployArguments');
-  console.log(deployInfo.entryPoint, 'deployInfo.entryPoint');
-
   const getLabel = () => {
     switch (signatureRequest.deployType) {
       case 'Contract Call':
