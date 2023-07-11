@@ -113,7 +113,7 @@ export const ActivityDetailsPageContent = ({
 
   const transferAmount =
     deployInfo.amount != null
-      ? decimals
+      ? Number.isInteger(decimals) && decimals != null
         ? divideErc20Balance(deployInfo?.amount, decimals)
         : motesToCSPR(deployInfo.amount)
       : '-';
