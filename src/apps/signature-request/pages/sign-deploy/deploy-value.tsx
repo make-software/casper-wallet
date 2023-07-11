@@ -19,10 +19,14 @@ import {
 
 export function DeployValue({
   id,
-  value
+  value,
+  isContractCall,
+  showSimpleAmount
 }: {
   id: string;
   value: string | CLValue;
+  isContractCall?: boolean;
+  showSimpleAmount?: boolean;
 }) {
   if (typeof value === 'string' || typeof value === 'number') {
     // string args
@@ -72,6 +76,12 @@ export function DeployValue({
     }
 
     if (isDeployArgValueNumber(value)) {
+      if (isContractCall && id === 'amount' && showSimpleAmount) {
+        return (
+          <Typography type="bodyHash">{formatNumber(parsedValue)}</Typography>
+        );
+      }
+
       const numbers = isKeyOfCurrencyValue(id)
         ? `${formatNumber(motesToCSPR(parsedValue), {
             precision: { max: 5 }
