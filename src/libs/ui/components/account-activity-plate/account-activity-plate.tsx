@@ -87,8 +87,8 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
     const activeAccount = useSelector(selectVaultActiveAccount);
 
     const { deployHash, callerPublicKey, timestamp, args } = transactionInfo;
-    let decimals = null;
-    let symbol = null;
+    let decimals: number | undefined;
+    let symbol: string | undefined;
     let toAccountPublicKey = '';
     let toAccountHash = '';
 
@@ -109,9 +109,10 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
 
     const parsedAmount = (args.amount?.parsed as string) || '';
 
-    const amount = decimals
-      ? divideErc20Balance(parsedAmount, decimals)
-      : motesToCSPR(parsedAmount);
+    const amount =
+      Number.isInteger(decimals) && decimals != null
+        ? divideErc20Balance(parsedAmount, decimals)
+        : motesToCSPR(parsedAmount);
 
     const formattedAmount = formatNumber(amount || '', {
       precision: { min: 5 }
