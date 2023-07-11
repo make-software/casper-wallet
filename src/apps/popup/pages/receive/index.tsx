@@ -44,7 +44,7 @@ export const ReceivePage = () => {
                 <Trans t={t}>Copied!</Trans>
               </Typography>
             ) : (
-              <Trans t={t}>Copy account hash</Trans>
+              <Trans t={t}>Copy public key</Trans>
             )}
           </Button>
         </FooterButtonsContainer>
