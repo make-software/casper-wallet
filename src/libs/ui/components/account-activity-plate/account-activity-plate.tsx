@@ -91,6 +91,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
     let symbol = null;
     let toAccountPublicKey = '';
     let toAccountHash = '';
+    let amount: string | null = null;
 
     if ('contractPackage' in transactionInfo) {
       decimals = transactionInfo?.contractPackage?.metadata?.decimals;
@@ -107,15 +108,22 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
 
     const fromAccountPublicKey = callerPublicKey;
 
-    const parsedAmount = (args.amount?.parsed as string) || '';
+    try {
+      const parsedAmount =
+        (typeof args.amount?.parsed === 'string' && args.amount?.parsed) || '';
 
-    const amount = decimals
-      ? divideErc20Balance(parsedAmount, decimals)
-      : motesToCSPR(parsedAmount);
+      amount = decimals
+        ? divideErc20Balance(parsedAmount, decimals)
+        : motesToCSPR(parsedAmount);
+    } catch (error) {
+      console.error(error);
+    }
 
-    const formattedAmount = formatNumber(amount || '', {
-      precision: { min: 5 }
-    });
+    const formattedAmount = amount
+      ? formatNumber(amount, {
+          precision: { min: 5 }
+        })
+      : '-';
 
     useEffect(() => {
       if (
@@ -167,8 +175,14 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
               <DeployStatus deployResult={transactionInfo} />
             </AlignedFlexRow>
             <Typography type="captionHash">
-              {type === TransferType.Sent ? '-' : ''}
-              {formattedAmount}
+              {formattedAmount === '-' ? (
+                formattedAmount
+              ) : (
+                <>
+                  {type === TransferType.Sent ? '-' : ''}
+                  {formattedAmount}
+                </>
+              )}
             </Typography>
           </AlignedSpaceBetweenFlexRow>
           <AlignedSpaceBetweenFlexRow>

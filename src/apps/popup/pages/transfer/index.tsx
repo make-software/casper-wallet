@@ -284,8 +284,8 @@ export const TransferPage = () => {
           onClick: () => {
             navigate(RouterPath.Home, {
               state: {
-                // set the active tab to activity
-                activeTabId: HomePageTabsId.Activity
+                // set the active tab to deploys
+                activeTabId: HomePageTabsId.Deploys
               }
             });
           }
