@@ -1,5 +1,3 @@
-import 'mac-scrollbar/dist/mac-scrollbar.css';
-
 import React, { Suspense, useState } from 'react';
 import { render } from 'react-dom';
 import { Provider as ReduxProvider } from 'react-redux';
