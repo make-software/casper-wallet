@@ -81,13 +81,15 @@ export const TokenPlate = ({
             </Typography>
           </RightAlignedCenteredFlexRow>
         </Tooltip>
-        <Typography
-          type="listSubtext"
-          color="contentSecondary"
-          loading={!token?.amountFiat}
-        >
-          {token?.amountFiat}
-        </Typography>
+        {token?.name === 'Casper' && (
+          <Typography
+            type="listSubtext"
+            color="contentSecondary"
+            loading={!token?.amountFiat}
+          >
+            {token?.amountFiat}
+          </Typography>
+        )}
       </TokenAmountContainer>
       {chevron && <SvgIcon src="assets/icons/chevron.svg" size={16} />}
     </AlignedFlexRow>
