@@ -13,7 +13,7 @@ export type TokenType = {
   symbol: string;
   decimals?: number;
   balance?: string;
-  icon: string;
+  icon: string | null;
 };
 
 export const useCasperToken = () => {
@@ -24,7 +24,9 @@ export const useCasperToken = () => {
   const amount =
     balance?.amountMotes == null
       ? '-'
-      : formatNumber(motesToCSPR(balance.amountMotes));
+      : formatNumber(motesToCSPR(balance.amountMotes), {
+          precision: { max: 5 }
+        });
 
   useEffect(() => {
     setCasperToken({

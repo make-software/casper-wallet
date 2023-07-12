@@ -24,7 +24,7 @@ export const SuccessStep = () => {
         <VerticalSpaceContainer top={SpacingSize.Medium}>
           <Typography type="body" color="contentSecondary">
             <Trans t={t}>
-              You can preview its status in the Activity tab on your Wallet home
+              You can check its status in the Deploys tab on your Wallet home
               page.
             </Trans>
           </Typography>
