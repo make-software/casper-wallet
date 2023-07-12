@@ -110,12 +110,14 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
 
     try {
       const parsedAmount =
-        (typeof args.amount?.parsed === 'string' && args.amount?.parsed) || '';
+        (typeof args.amount?.parsed === 'string' && args.amount?.parsed) || '-';
 
-      amount =
-        Number.isInteger(decimals) && decimals != null
-          ? divideErc20Balance(parsedAmount, decimals)
-          : motesToCSPR(parsedAmount);
+      if (parsedAmount !== '-') {
+        amount =
+          Number.isInteger(decimals) && decimals !== undefined
+            ? divideErc20Balance(parsedAmount, decimals)
+            : motesToCSPR(parsedAmount);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -206,9 +208,11 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
                 </Typography>
               </Tooltip>
             </AlignedFlexRow>
-            <Typography type="bodyHash" color="contentSecondary">
-              {symbol || 'CSPR'}
-            </Typography>
+            {formattedAmount !== '-' && (
+              <Typography type="bodyHash" color="contentSecondary">
+                {symbol || 'CSPR'}
+              </Typography>
+            )}
           </AlignedSpaceBetweenFlexRow>
         </ContentContainer>
         <SvgIcon src="assets/icons/chevron.svg" size={16} />

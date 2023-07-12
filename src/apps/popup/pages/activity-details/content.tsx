@@ -113,13 +113,16 @@ export const ActivityDetailsPageContent = ({
 
   const transferAmount =
     deployInfo.amount != null
-      ? Number.isInteger(decimals) && decimals != null
+      ? Number.isInteger(decimals) && decimals !== undefined
         ? divideErc20Balance(deployInfo?.amount, decimals)
         : motesToCSPR(deployInfo.amount)
-      : '-';
-  const formattedTransferAmount = formatNumber(transferAmount || '', {
-    precision: { min: 5 }
-  });
+      : null;
+
+  const formattedTransferAmount = transferAmount
+    ? formatNumber(transferAmount, {
+        precision: { min: 5 }
+      })
+    : '-';
   const transferAmountInUSD =
     deployInfo.amount != null &&
     formatCurrency(motesToCurrency(deployInfo.amount, deployInfo.rate), 'USD', {
@@ -232,7 +235,9 @@ export const ActivityDetailsPageContent = ({
             <RightAlignedFlexColumn>
               <Typography type="captionHash">
                 {`${formattedTransferAmount} ${
-                  deployInfo.contractPackage?.metadata?.symbol || 'CSPR'
+                  formattedTransferAmount !== '-'
+                    ? deployInfo.contractPackage?.metadata?.symbol || 'CSPR'
+                    : ''
                 }`}
               </Typography>
               <Typography type="listSubtext" color="contentSecondary">
