@@ -19,6 +19,7 @@ export interface ContractPackage {
   contract_name: string;
   contract_package_hash: string;
   contract_type_id: number;
+  icon_url: string | null;
   metadata: {
     balances_uref: string;
     decimals: number;

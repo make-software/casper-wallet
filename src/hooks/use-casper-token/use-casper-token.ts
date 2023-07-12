@@ -13,7 +13,7 @@ export type TokenType = {
   symbol: string;
   decimals?: number;
   balance?: string;
-  icon: string;
+  icon: string | null;
 };
 
 export const useCasperToken = () => {

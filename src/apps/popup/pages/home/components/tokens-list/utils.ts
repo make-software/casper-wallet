@@ -35,7 +35,7 @@ export const formatErc20TokenBalance = (
         symbol: token.metadata.symbol,
         decimals: token.metadata.decimals,
         amountFiat: null,
-        icon: 'assets/icons/erc20-avatar.svg'
+        icon: token.icon_url || 'assets/icons/erc20-avatar.svg'
       };
     })
     .sort((a, b) => {

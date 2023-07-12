@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "content_security_policy": {
-    "extension_pages": "default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://node-clarity-testnet.make.services/rpc https://node-clarity-mainnet.make.services/rpc"
+    "extension_pages": "default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://node-clarity-testnet.make.services/rpc https://node-clarity-mainnet.make.services/rpc https://casper-assets.s3.amazonaws.com/"
   },
   "icons": {
     "16": "logo16.png",
