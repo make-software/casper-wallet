@@ -1,5 +1,4 @@
 import '@libs/i18n/i18n';
-import 'mac-scrollbar/dist/mac-scrollbar.css';
 
 import React, { Suspense, useState } from 'react';
 import { render } from 'react-dom';
