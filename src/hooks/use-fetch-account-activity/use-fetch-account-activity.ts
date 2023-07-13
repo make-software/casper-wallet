@@ -12,18 +12,21 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import {
   accountCasperActivityChanged,
   accountCasperActivityUpdated,
-  accountErc20ActivityChanged,
-  accountErc20ActivityUpdated
+  accountErc20TokensActivityChanged,
+  accountErc20TokensActivityUpdated
 } from '@background/redux/account-info/actions';
 import { useForceUpdate } from '@popup/hooks/use-force-update';
 import {
   ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE,
   ActivityListTransactionsType
 } from '@src/constants';
-import { dispatchFetchErc20AccountActivity } from '@src/libs/services/account-activity-service/erc20-account-activity-service';
 import { getAccountHashFromPublicKey } from '@src/libs/entities/Account';
 import { DataWithPayload, PaginatedResponse } from '@src/libs/services/types';
 import { dispatchFetchErc20TokenActivity } from '@src/libs/services/account-activity-service/erc20-token-activity-service';
+import {
+  selectAccountCasperActivity,
+  selectAccountErc20TokensActivity
+} from '@background/redux/account-info/selectors';
 
 export const useFetchAccountActivity = (
   transactionsType: ActivityListTransactionsType,
@@ -38,6 +41,12 @@ export const useFetchAccountActivity = (
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+  const accountCasperActivityList = useSelector(selectAccountCasperActivity);
+  const erc20TokensActivityRecord =
+    useSelector(selectAccountErc20TokensActivity) || {};
+
+  const tokenActivityList =
+    erc20TokensActivityRecord[contractPackageHash || ''] || null;
 
   const effectTimeoutRef = useRef<NodeJS.Timeout>();
   const forceUpdate = useForceUpdate();
@@ -47,14 +56,16 @@ export const useFetchAccountActivity = (
   );
 
   const createHandlePayload = useCallback(
-    (payloadAction: any, page = 1, setPage, setPageCount) =>
+    (payloadAction: any, page = 1, setPage, setPageCount, activityListLength) =>
       <
         T extends DataWithPayload<
           PaginatedResponse<Erc20TokenActionResult | TransferResult>
         >
       >({
-        payload: { data: accountTransactions, pageCount }
+        payload: { data: accountTransactions, pageCount, itemCount }
       }: T) => {
+        if (itemCount === activityListLength) return;
+
         const transactions =
           accountTransactions?.map(transaction => {
             let id;
@@ -93,17 +104,8 @@ export const useFetchAccountActivity = (
             accountCasperActivityChanged,
             1,
             setAccountCasperActivityPage,
-            setAccountCasperActivityPageCount
-          )
-        )
-        .catch(handleError);
-      dispatchFetchErc20AccountActivity(activeAccountHash, 1)
-        .then(
-          createHandlePayload(
-            accountErc20ActivityChanged,
-            1,
-            setAccountErc20ActivityPage,
-            setAccountErc20ActivityPageCount
+            setAccountCasperActivityPageCount,
+            accountCasperActivityList?.length
           )
         )
         .catch(handleError);
@@ -117,7 +119,8 @@ export const useFetchAccountActivity = (
             accountCasperActivityChanged,
             1,
             setAccountCasperActivityPage,
-            setAccountCasperActivityPageCount
+            setAccountCasperActivityPageCount,
+            accountCasperActivityList?.length
           )
         )
         .catch(handleError);
@@ -129,12 +132,28 @@ export const useFetchAccountActivity = (
     ) {
       dispatchFetchErc20TokenActivity(activeAccountHash, contractPackageHash, 1)
         .then(
-          createHandlePayload(
-            accountErc20ActivityChanged,
-            1,
-            setAccountErc20ActivityPage,
-            setAccountErc20ActivityPageCount
-          )
+          ({
+            payload: { data: accountTransactions, pageCount, itemCount }
+          }) => {
+            if (itemCount === tokenActivityList?.length) return;
+
+            const transactions =
+              accountTransactions?.map(transaction => ({
+                ...transaction,
+                id: transaction.deploy_hash
+              })) || [];
+
+            dispatchToMainStore(
+              accountErc20TokensActivityChanged({
+                activityList: transactions,
+                contractPackageHash: contractPackageHash
+              })
+            );
+
+            // Set page to 2, so we can fetch more transactions when the user scrolls down
+            setAccountErc20ActivityPage(2);
+            setAccountErc20ActivityPageCount(pageCount);
+          }
         )
         .catch(handleError);
     }
@@ -167,7 +186,8 @@ export const useFetchAccountActivity = (
             accountCasperActivityUpdated,
             accountCasperActivityPage,
             setAccountCasperActivityPage,
-            setAccountCasperActivityPageCount
+            setAccountCasperActivityPageCount,
+            accountCasperActivityList?.length
           )
         )
         .catch(handleError);
@@ -186,25 +206,42 @@ export const useFetchAccountActivity = (
         accountErc20ActivityPage
       )
         .then(
-          createHandlePayload(
-            accountErc20ActivityUpdated,
-            accountErc20ActivityPage,
-            setAccountErc20ActivityPage,
-            setAccountErc20ActivityPageCount
-          )
+          ({
+            payload: { data: accountTransactions, pageCount, itemCount }
+          }) => {
+            if (itemCount === tokenActivityList?.length) return;
+
+            const transactions =
+              accountTransactions?.map(transaction => ({
+                ...transaction,
+                id: transaction.deploy_hash
+              })) || [];
+
+            dispatchToMainStore(
+              accountErc20TokensActivityUpdated({
+                activityList: transactions,
+                contractPackageHash: contractPackageHash
+              })
+            );
+
+            setAccountErc20ActivityPage(accountErc20ActivityPage + 1);
+            setAccountErc20ActivityPageCount(pageCount);
+          }
         )
         .catch(handleError);
     }
   }, [
-    transactionsType,
     activeAccount?.publicKey,
+    transactionsType,
     contractPackageHash,
     accountCasperActivityPage,
     accountCasperActivityPageCount,
+    activeAccountHash,
     createHandlePayload,
+    accountCasperActivityList?.length,
     accountErc20ActivityPage,
     accountErc20ActivityPageCount,
-    activeAccountHash
+    tokenActivityList?.length
   ]);
   return {
     fetchMoreTransactions

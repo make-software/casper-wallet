@@ -119,8 +119,8 @@ import {
   accountPendingTransactionsChanged,
   accountPendingTransactionsRemove,
   accountErc20Changed,
-  accountErc20ActivityChanged,
-  accountErc20ActivityUpdated,
+  accountErc20TokensActivityChanged,
+  accountErc20TokensActivityUpdated,
   accountDeploysChanged,
   accountDeploysUpdated
 } from '@background/redux/account-info/actions';
@@ -533,8 +533,8 @@ browser.runtime.onMessage.addListener(
           case getType(accountPendingTransactionsChanged):
           case getType(accountPendingTransactionsRemove):
           case getType(accountErc20Changed):
-          case getType(accountErc20ActivityChanged):
-          case getType(accountErc20ActivityUpdated):
+          case getType(accountErc20TokensActivityChanged):
+          case getType(accountErc20TokensActivityUpdated):
           case getType(accountDeploysChanged):
           case getType(accountDeploysUpdated):
             store.dispatch(action);

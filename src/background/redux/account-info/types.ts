@@ -11,7 +11,7 @@ export interface AccountInfoState {
   erc20Tokens: ContractPackageWithBalance[];
   currencyRate: number | null;
   accountCasperActivity: TransferResultWithId[] | null;
-  accountErc20Activity: Erc20TokenActionResult[] | null;
+  accountErc20TokensActivity: Record<string, Erc20TokenActionResult[]> | null;
   pendingTransactions: ExtendedDeployWithId[];
   accountDeploys: ExtendedDeployWithId[] | null;
 }

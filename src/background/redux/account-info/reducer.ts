@@ -7,8 +7,8 @@ import {
   accountCasperActivityUpdated,
   accountBalanceChanged,
   accountCurrencyRateChanged,
-  accountErc20ActivityChanged,
-  accountErc20ActivityUpdated,
+  accountErc20TokensActivityChanged,
+  accountErc20TokensActivityUpdated,
   accountPendingTransactionsChanged,
   accountPendingTransactionsRemove,
   accountErc20Changed,
@@ -23,7 +23,7 @@ const initialState: AccountInfoState = {
   },
   currencyRate: null,
   accountCasperActivity: null,
-  accountErc20Activity: null,
+  accountErc20TokensActivity: null,
   pendingTransactions: [],
   erc20Tokens: [],
   accountDeploys: null
@@ -67,19 +67,36 @@ export const reducer = createReducer(initialState)
         : payload
   }))
   .handleAction(
-    accountErc20ActivityChanged,
-    (state, { payload }): AccountInfoState => ({
-      ...state,
-      accountErc20Activity: payload
-    })
+    accountErc20TokensActivityChanged,
+    (state, { payload: { contractPackageHash, activityList } }) => {
+      const accountErc20TokensActivity = state.accountErc20TokensActivity || {};
+
+      accountErc20TokensActivity[contractPackageHash] = activityList;
+
+      return {
+        ...state,
+        accountErc20TokensActivity
+      };
+    }
   )
-  .handleAction(accountErc20ActivityUpdated, (state, { payload }) => ({
-    ...state,
-    accountErc20Activity:
-      state.accountErc20Activity != null
-        ? [...state.accountErc20Activity, ...payload]
-        : payload
-  }))
+  .handleAction(
+    accountErc20TokensActivityUpdated,
+    (state, { payload: { activityList, contractPackageHash } }) => {
+      const accountErc20TokensActivity = state.accountErc20TokensActivity || {};
+
+      accountErc20TokensActivity[contractPackageHash]
+        ? (accountErc20TokensActivity[contractPackageHash] = [
+            ...accountErc20TokensActivity[contractPackageHash],
+            ...activityList
+          ])
+        : (accountErc20TokensActivity[contractPackageHash] = activityList);
+
+      return {
+        ...state,
+        accountErc20TokensActivity
+      };
+    }
+  )
   .handleAction(accountPendingTransactionsChanged, (state, { payload }) => {
     const pendingTransactions = {
       ...payload,
