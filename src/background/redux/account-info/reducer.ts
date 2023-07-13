@@ -68,34 +68,30 @@ export const reducer = createReducer(initialState)
   }))
   .handleAction(
     accountErc20TokensActivityChanged,
-    (state, { payload: { contractPackageHash, activityList } }) => {
-      const accountErc20TokensActivity = state.accountErc20TokensActivity || {};
-
-      accountErc20TokensActivity[contractPackageHash] = activityList;
-
-      return {
-        ...state,
-        accountErc20TokensActivity
-      };
-    }
+    (state, { payload: { contractPackageHash, activityList } }) => ({
+      ...state,
+      accountErc20TokensActivity: {
+        ...state.accountErc20TokensActivity,
+        [contractPackageHash]: activityList
+      }
+    })
   )
   .handleAction(
     accountErc20TokensActivityUpdated,
-    (state, { payload: { activityList, contractPackageHash } }) => {
-      const accountErc20TokensActivity = state.accountErc20TokensActivity || {};
-
-      accountErc20TokensActivity[contractPackageHash]
-        ? (accountErc20TokensActivity[contractPackageHash] = [
-            ...accountErc20TokensActivity[contractPackageHash],
-            ...activityList
-          ])
-        : (accountErc20TokensActivity[contractPackageHash] = activityList);
-
-      return {
-        ...state,
-        accountErc20TokensActivity
-      };
-    }
+    (state, { payload: { activityList, contractPackageHash } }) => ({
+      ...state,
+      accountErc20TokensActivity: {
+        ...state.accountErc20TokensActivity,
+        [contractPackageHash]:
+          state.accountErc20TokensActivity &&
+          state.accountErc20TokensActivity[contractPackageHash]
+            ? [
+                ...state.accountErc20TokensActivity[contractPackageHash],
+                ...activityList
+              ]
+            : activityList
+      }
+    })
   )
   .handleAction(accountPendingTransactionsChanged, (state, { payload }) => {
     const pendingTransactions = {
