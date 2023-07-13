@@ -14,8 +14,9 @@ export const ERC20_ACTIVITY_REFRESH_RATE = 30 * SECOND;
 
 export const LOGIN_RETRY_ATTEMPTS_LIMIT = 5;
 
-export const TRANSFER_COST_MOTES = '100000000';
-export const TRANSFER_MIN_AMOUNT_MOTES = '2500000000';
+export const TRANSFER_COST_MOTES = '100000000'; // 0.1 CSPR
+export const TRANSFER_MIN_AMOUNT_MOTES = '2500000000'; // 2.5 CSPR
+export const ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES = '1500000000'; // 1.5 CSPR
 
 export const getBlockExplorerAccountUrl = (baseUrl: string, hash: string) =>
   `${baseUrl}/account/${hash}`;

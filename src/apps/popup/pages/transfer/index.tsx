@@ -26,7 +26,10 @@ import {
 import { getIsErc20Transfer, TransactionSteps } from './utils';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { Button, Typography } from '@libs/ui';
-import { TRANSFER_COST_MOTES } from '@src/constants';
+import {
+  ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES,
+  TRANSFER_COST_MOTES
+} from '@src/constants';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { recipientPublicKeyAdded } from '@src/background/redux/recent-recipient-public-keys/actions';
@@ -37,7 +40,6 @@ import { selectAccountBalance } from '@src/background/redux/account-info/selecto
 import { dispatchFetchExtendedDeploysInfo } from '@src/libs/services/account-activity-service';
 import { accountPendingTransactionsChanged } from '@src/background/redux/account-info/actions';
 import { HomePageTabsId } from '../home';
-import { ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES } from '@src/libs/ui/utils/constants';
 
 export const TransferPage = () => {
   const { t } = useTranslation();
