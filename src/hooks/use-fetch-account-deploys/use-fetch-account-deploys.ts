@@ -11,6 +11,7 @@ import {
 import { dispatchToMainStore } from '@background/redux/utils';
 import { ACCOUNT_DEPLOY_REFRESH_RATE } from '@src/constants';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { selectAccountDeploys } from '@background/redux/account-info/selectors';
 
 export const useFetchAccountDeploys = () => {
   const [accountDeploysPage, setAccountDeploysPage] = useState(1);
@@ -21,6 +22,7 @@ export const useFetchAccountDeploys = () => {
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+  const accountDeploys = useSelector(selectAccountDeploys);
 
   const handleError = (error: Error) => {
     console.error('Account deploys request failed:', error);
@@ -30,19 +32,23 @@ export const useFetchAccountDeploys = () => {
     if (!activeAccount?.publicKey) return;
 
     dispatchFetchAccountExtendedDeploys(activeAccount?.publicKey, 1)
-      .then(({ payload: { data: accountDeploys, pageCount } }) => {
-        const transactions =
-          accountDeploys?.map(transaction => ({
-            ...transaction,
-            id: transaction.deployHash
-          })) || [];
+      .then(
+        ({ payload: { data: accountDeploysList, pageCount, itemCount } }) => {
+          if (itemCount === accountDeploys?.length) return;
 
-        dispatchToMainStore(accountDeploysChanged(transactions));
+          const transactions =
+            accountDeploysList?.map(transaction => ({
+              ...transaction,
+              id: transaction.deployHash
+            })) || [];
 
-        // Set page to 2, so we can fetch more transactions when the user scrolls down
-        setAccountDeploysPage(accountDeploysPage + 1);
-        setAccountDeploysPageCount(pageCount);
-      })
+          dispatchToMainStore(accountDeploysChanged(transactions));
+
+          // Set page to 2, so we can fetch more transactions when the user scrolls down
+          setAccountDeploysPage(2);
+          setAccountDeploysPageCount(pageCount);
+        }
+      )
       .catch(handleError);
 
     // will cause effect to run again after timeout
