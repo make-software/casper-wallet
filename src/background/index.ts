@@ -124,7 +124,6 @@ import {
   accountDeploysChanged,
   accountDeploysUpdated
 } from '@background/redux/account-info/actions';
-import { fetchErc20AccountActivity } from '@src/libs/services/account-activity-service/erc20-account-activity-service';
 import { fetchErc20TokenActivity } from '@src/libs/services/account-activity-service/erc20-token-activity-service';
 
 // setup default onboarding action
@@ -655,28 +654,6 @@ browser.runtime.onMessage.addListener(
                   serviceMessage.fetchErc20TokensResponse([])
                 );
               }
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchErc20AccountActivityRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchErc20AccountActivity({
-                casperApiUrl,
-                publicKey: action.payload.publicKey,
-                page: action.payload.page
-              });
-
-              return sendResponse(
-                serviceMessage.fetchErc20AccountActivityResponse(data)
-              );
             } catch (error) {
               console.error(error);
             }

@@ -6,9 +6,10 @@ import { SpacingSize } from '@libs/layout';
 import { AccountActivityPlate, List, NoActivityView } from '@libs/ui';
 import {
   useAccountPendingTransactions,
-  useFetchAccountDeploys,
+  useFetchAccountActivity,
   useInfinityScroll
 } from '@src/hooks';
+import { ActivityListTransactionsType } from '@src/constants';
 
 export const DeploysList = () => {
   const accountDeploys = useSelector(selectAccountDeploys);
@@ -16,7 +17,9 @@ export const DeploysList = () => {
   const { accountDeploysListWithPendingTransactions } =
     useAccountPendingTransactions(accountDeploys);
 
-  const { fetchMoreTransactions } = useFetchAccountDeploys();
+  const { fetchMoreTransactions } = useFetchAccountActivity(
+    ActivityListTransactionsType.Deploys
+  );
   const { observerElement } = useInfinityScroll(fetchMoreTransactions);
 
   if (

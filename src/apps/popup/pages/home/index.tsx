@@ -31,7 +31,7 @@ import {
   DeploysList
 } from '@libs/ui';
 
-import { useFetchAccountActivity, useFetchAccountDeploys } from '@src/hooks';
+import { useFetchAccountActivity } from '@src/hooks';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import {
@@ -97,7 +97,6 @@ export function HomePageContent() {
 
   useActiveAccountBalance();
   useFetchAccountActivity(ActivityListTransactionsType.All);
-  useFetchAccountDeploys();
 
   const handleConnectAccount = useCallback(() => {
     if (!activeAccount || isActiveAccountConnected) {
