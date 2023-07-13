@@ -26,6 +26,7 @@ import {
   TypeName
 } from '@src/constants';
 import { TransferResultWithId } from '@libs/services/account-activity-service';
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 
 const AccountActivityPlateContainer = styled(AlignedSpaceBetweenFlexRow)`
   cursor: pointer;
@@ -74,13 +75,18 @@ export const AccountCasperActivityPlate = forwardRef<
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const activeAccountHash = getAccountHashFromPublicKey(
+    activeAccount?.publicKey
+  );
 
   const {
     deployHash,
     fromAccountPublicKey,
     timestamp,
     amount,
-    toAccountPublicKey
+    toAccountPublicKey,
+    toAccount,
+    fromAccount
   } = transactionInfo;
 
   const formattedAmount = formatNumber(motesToCSPR(amount), {
@@ -89,19 +95,28 @@ export const AccountCasperActivityPlate = forwardRef<
 
   useEffect(() => {
     if (
-      fromAccountPublicKey.toLowerCase() ===
-      activeAccount?.publicKey.toLowerCase()
+      fromAccountPublicKey?.toLowerCase() ===
+        activeAccount?.publicKey.toLowerCase() ||
+      fromAccount?.toLowerCase() === activeAccountHash?.toLowerCase()
     ) {
       setType(TransferType.Sent);
     } else if (
-      toAccountPublicKey.toLowerCase() ===
-      activeAccount?.publicKey.toLowerCase()
+      toAccountPublicKey?.toLowerCase() ===
+        activeAccount?.publicKey.toLowerCase() ||
+      toAccount?.toLowerCase() === activeAccountHash?.toLowerCase()
     ) {
       setType(TransferType.Received);
     } else {
       setType(TransferType.Unknown);
     }
-  }, [fromAccountPublicKey, activeAccount?.publicKey, toAccountPublicKey]);
+  }, [
+    fromAccountPublicKey,
+    activeAccount?.publicKey,
+    toAccountPublicKey,
+    fromAccount,
+    activeAccountHash,
+    toAccount
+  ]);
 
   return (
     <AccountActivityPlateContainer

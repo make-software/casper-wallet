@@ -44,7 +44,7 @@ import {
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
-import { ActivityListTransactionsType } from '@src/constants';
+import { ActivityListTransactionsType, HomePageTabName } from '@src/constants';
 
 import { TokensList } from './components/tokens-list';
 import { ConnectionStatusBadge } from './components/connection-status-badge';
@@ -72,7 +72,7 @@ const ButtonsContainer = styled(SpaceAroundFlexColumn)`
 
 export const HomePageTabsId = {
   Tokens: 0,
-  Activity: 1,
+  Deploys: 1,
   NFTs: 2
 };
 
@@ -194,13 +194,13 @@ export function HomePageContent() {
       )}
       <VerticalSpaceContainer top={SpacingSize.Tiny}>
         <Tabs preferActiveTabId={state?.activeTabId}>
-          <Tab tabName="Tokens">
+          <Tab tabName={HomePageTabName.Tokens}>
             <TokensList />
           </Tab>
-          <Tab tabName="Deploys">
+          <Tab tabName={HomePageTabName.Deploys}>
             <DeploysList />
           </Tab>
-          <Tab tabName="NFTs" />
+          <Tab tabName={HomePageTabName.NFTs} />
         </Tabs>
       </VerticalSpaceContainer>
     </ContentContainer>

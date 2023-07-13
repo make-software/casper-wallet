@@ -94,3 +94,9 @@ export const TypeIcons = {
   [TransferType.Received]: 'assets/icons/receive.svg',
   [TransferType.Unknown]: 'assets/icons/info.svg'
 };
+
+export enum HomePageTabName {
+  Tokens = 'Tokens',
+  Deploys = 'Deploys',
+  NFTs = 'NFTs'
+}

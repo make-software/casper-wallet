@@ -91,6 +91,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
     let symbol: string | undefined;
     let toAccountPublicKey = '';
     let toAccountHash = '';
+    let amount: string | null = null;
 
     if ('contractPackage' in transactionInfo) {
       decimals = transactionInfo?.contractPackage?.metadata?.decimals;
@@ -107,16 +108,25 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
 
     const fromAccountPublicKey = callerPublicKey;
 
-    const parsedAmount = (args.amount?.parsed as string) || '';
+    try {
+      const parsedAmount =
+        (typeof args.amount?.parsed === 'string' && args.amount?.parsed) || '-';
 
-    const amount =
-      Number.isInteger(decimals) && decimals != null
-        ? divideErc20Balance(parsedAmount, decimals)
-        : motesToCSPR(parsedAmount);
+      if (parsedAmount !== '-') {
+        amount =
+          Number.isInteger(decimals) && decimals !== undefined
+            ? divideErc20Balance(parsedAmount, decimals)
+            : motesToCSPR(parsedAmount);
+      }
+    } catch (error) {
+      console.error(error);
+    }
 
-    const formattedAmount = formatNumber(amount || '', {
-      precision: { min: 5 }
-    });
+    const formattedAmount = amount
+      ? formatNumber(amount, {
+          precision: { min: 5 }
+        })
+      : '-';
 
     useEffect(() => {
       if (
@@ -168,8 +178,14 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
               <DeployStatus deployResult={transactionInfo} />
             </AlignedFlexRow>
             <Typography type="captionHash">
-              {type === TransferType.Sent ? '-' : ''}
-              {formattedAmount}
+              {formattedAmount === '-' ? (
+                formattedAmount
+              ) : (
+                <>
+                  {type === TransferType.Sent ? '-' : ''}
+                  {formattedAmount}
+                </>
+              )}
             </Typography>
           </AlignedSpaceBetweenFlexRow>
           <AlignedSpaceBetweenFlexRow>
@@ -192,9 +208,11 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
                 </Typography>
               </Tooltip>
             </AlignedFlexRow>
-            <Typography type="bodyHash" color="contentSecondary">
-              {symbol || 'CSPR'}
-            </Typography>
+            {formattedAmount !== '-' && (
+              <Typography type="bodyHash" color="contentSecondary">
+                {symbol || 'CSPR'}
+              </Typography>
+            )}
           </AlignedSpaceBetweenFlexRow>
         </ContentContainer>
         <SvgIcon src="assets/icons/chevron.svg" size={16} />
