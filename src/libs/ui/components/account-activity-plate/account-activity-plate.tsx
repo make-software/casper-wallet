@@ -101,7 +101,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
       toAccountPublicKey = transactionInfo?.toPublicKey || '';
     } else {
       toAccountPublicKey = getPublicKeyFormTarget(
-        args.target,
+        args?.target,
         activeAccount?.publicKey
       );
     }
@@ -110,7 +110,8 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
 
     try {
       const parsedAmount =
-        (typeof args.amount?.parsed === 'string' && args.amount?.parsed) || '-';
+        (typeof args?.amount?.parsed === 'string' && args?.amount?.parsed) ||
+        '-';
 
       if (parsedAmount !== '-') {
         amount =
@@ -130,12 +131,12 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
 
     useEffect(() => {
       if (
-        fromAccountPublicKey.toLowerCase() ===
+        fromAccountPublicKey?.toLowerCase() ===
         activeAccount?.publicKey.toLowerCase()
       ) {
         setType(TransferType.Sent);
       } else if (
-        toAccountPublicKey.toLowerCase() ===
+        toAccountPublicKey?.toLowerCase() ===
         activeAccount?.publicKey.toLowerCase()
       ) {
         setType(TransferType.Received);
