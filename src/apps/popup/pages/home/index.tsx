@@ -11,7 +11,6 @@ import {
   ContentContainer,
   FlexRow,
   LeftAlignedFlexColumn,
-  SpaceAroundFlexColumn,
   SpaceBetweenFlexRow,
   SpacingSize,
   TileContainer,
@@ -72,9 +71,7 @@ const BalanceContainer = styled(CenteredFlexColumn)`
   }
 `;
 
-const ButtonsContainer = styled(SpaceAroundFlexColumn)`
-  flex-direction: row;
-  width: 100%;
+const ButtonsContainer = styled(SpaceBetweenFlexRow)`
   margin-top: 24px;
 `;
 

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 
-import { Link, Typography, SvgIcon } from '@libs/ui';
-import { CenteredFlexColumn, SpacingSize } from '@libs/layout';
+import { Link, SvgIcon, Typography } from '@libs/ui';
+import { AlignedFlexRow, CenteredFlexColumn, SpacingSize } from '@libs/layout';
 import {
   getBlockExplorerAccountUrl,
   getBlockExplorerContractUrl
@@ -13,12 +12,6 @@ import { useCasperToken } from '@src/hooks';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
-
-const LinkWithIconContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-`;
 
 interface HeaderViewInExplorerProps {
   erc20Tokens: ContractPackageWithBalance[] | null;
@@ -64,12 +57,12 @@ export function HeaderViewInExplorer({
   return (
     <Link color="inherit" target="_blank" href={hrefToTokenOnCasperLive}>
       <CenteredFlexColumn gap={SpacingSize.Medium}>
-        <LinkWithIconContainer>
+        <AlignedFlexRow gap={SpacingSize.Small}>
           <Typography type="bodySemiBold" color="contentBlue">
             CSPR.live
           </Typography>
           <SvgIcon src="assets/icons/external-link.svg" color="contentBlue" />
-        </LinkWithIconContainer>
+        </AlignedFlexRow>
       </CenteredFlexColumn>
     </Link>
   );
