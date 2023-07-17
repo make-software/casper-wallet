@@ -114,7 +114,7 @@ export const ConfirmStep = ({
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          <Trans t={t}>Confirm send</Trans>
+          <Trans t={t}>Confirm sending</Trans>
         </Typography>
       </ParagraphContainer>
       <ActiveAccountPlate label="From" symbol={symbol} balance={balance} />
