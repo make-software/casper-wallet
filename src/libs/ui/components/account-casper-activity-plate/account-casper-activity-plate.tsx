@@ -129,7 +129,9 @@ export const AccountCasperActivityPlate = forwardRef<
               fromAccountPublicKey,
               toAccountPublicKey,
               deployHash,
-              type
+              type,
+              amount: formattedAmount,
+              symbol: 'CSPR'
             }
           }
         })

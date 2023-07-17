@@ -39,6 +39,8 @@ export const ActivityDetailsPage = () => {
           toAccountPublicKey={activityDetailsData?.toAccountPublicKey}
           deployHash={activityDetailsData?.deployHash}
           type={activityDetailsData?.type}
+          amount={activityDetailsData?.amount}
+          symbol={activityDetailsData?.symbol}
         />
       )}
     />

@@ -8,6 +8,8 @@ export type LocationState = {
     toAccountPublicKey: string;
     deployHash: string;
     type: TransferType | null;
+    amount: string;
+    symbol: string;
   };
   activeTabId?: number;
   tokenData?: TokenType | null;

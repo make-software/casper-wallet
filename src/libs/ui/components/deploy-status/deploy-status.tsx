@@ -82,6 +82,8 @@ const StatusContainer = styled(AlignedFlexRow)<{ status: Status }>(
   })
 );
 
+export const isPendingStatus = (status: string) => status === Status.Pending;
+
 export const DeployStatus = ({
   deployResult,
   textWithIcon

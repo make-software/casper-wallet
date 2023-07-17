@@ -156,7 +156,9 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
                 fromAccountPublicKey,
                 toAccountPublicKey: toAccountPublicKey || toAccountHash,
                 deployHash,
-                type
+                type,
+                amount: formattedAmount,
+                symbol: symbol || ''
               }
             }
           })
