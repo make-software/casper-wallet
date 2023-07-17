@@ -56,7 +56,15 @@ export const ReceivePageContent = () => {
         <Tile>
           <Container>
             <FlexColumn gap={SpacingSize.Medium}>
-              <QRCodeSVG value={activeAccount?.publicKey || ''} size={296} />
+              <QRCodeSVG
+                value={activeAccount?.publicKey || ''}
+                style={{
+                  maxWidth: '296px',
+                  maxHeight: '296px',
+                  height: 'auto',
+                  width: 'auto'
+                }}
+              />
               {isClicked ? (
                 <Typography type="captionHash" color="contentGreen">
                   <Trans t={t}>Address copied!</Trans>
