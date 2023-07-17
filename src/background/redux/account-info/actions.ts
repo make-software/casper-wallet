@@ -29,13 +29,13 @@ export const accountCasperActivityUpdated = createAction(
   'ACCOUNT_CASPER_ACTIVITY_UPDATED'
 )<TransferResultWithId[]>();
 
-export const accountErc20ActivityChanged = createAction(
-  'ACCOUNT_ERC20_ACTIVITY_CHANGED'
-)<Erc20TokenActionResult[] | null>();
+export const accountErc20TokensActivityChanged = createAction(
+  'ACCOUNT_ERC20_TOKEN_ACTIVITY_CHANGED'
+)<{ activityList: Erc20TokenActionResult[]; contractPackageHash: string }>();
 
-export const accountErc20ActivityUpdated = createAction(
-  'ACCOUNT_ERC20_ACTIVITY_UPDATED'
-)<Erc20TokenActionResult[]>();
+export const accountErc20TokensActivityUpdated = createAction(
+  'ACCOUNT_ERC20_TOKEN_ACTIVITY_UPDATED'
+)<{ activityList: Erc20TokenActionResult[]; contractPackageHash: string }>();
 
 export const accountActivityReset = createAction('ACCOUNT_ACTIVITY_RESET')();
 

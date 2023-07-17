@@ -10,7 +10,7 @@ export const CURRENCY_REFRESH_RATE = 30 * SECOND;
 export const TOKENS_REFRESH_RATE = 15 * SECOND;
 export const ACCOUNT_DEPLOY_REFRESH_RATE = 30 * SECOND;
 export const ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE = 30 * SECOND;
-export const ERC20_ACTIVITY_REFRESH_RATE = 30 * SECOND;
+export const ERC20_TOKEN_ACTIVITY_REFRESH_RATE = 30 * SECOND;
 
 export const LOGIN_RETRY_ATTEMPTS_LIMIT = 5;
 
@@ -68,7 +68,8 @@ export enum NetworkName {
 export enum ActivityListTransactionsType {
   All = 'All',
   Casper = 'Casper',
-  Erc20 = 'Erc20'
+  Erc20 = 'Erc20',
+  Deploys = 'Deploys'
 }
 
 export enum TransferType {

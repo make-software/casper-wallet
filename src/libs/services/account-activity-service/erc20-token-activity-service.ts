@@ -3,7 +3,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { handleError, toJson } from '@libs/services/utils';
 import { queryClient } from '@libs/services/query-client';
 import { DataWithPayload, PaginatedResponse } from '@libs/services/types';
-import { ERC20_ACTIVITY_REFRESH_RATE } from '@src/constants';
+import { ERC20_TOKEN_ACTIVITY_REFRESH_RATE } from '@src/constants';
 
 import { getErc20TokenActivityLink } from './constants';
 import { Erc20TokenActionResult } from './types';
@@ -51,7 +51,7 @@ export const fetchErc20TokenActivity = ({
         contractPackageHash,
         page
       ),
-    { staleTime: ERC20_ACTIVITY_REFRESH_RATE }
+    { staleTime: ERC20_TOKEN_ACTIVITY_REFRESH_RATE }
   );
 
 export const dispatchFetchErc20TokenActivity = (

@@ -12,16 +12,20 @@ import {
 import { useFetchAccountActivity, useInfinityScroll } from '@src/hooks';
 import {
   selectAccountCasperActivity,
-  selectAccountErc20Activity
+  selectAccountErc20TokensActivity
 } from '@background/redux/account-info/selectors';
 import { Erc20TransferWithId } from '@src/libs/services/account-activity-service';
 import { ActivityListTransactionsType } from '@src/constants';
 
 export const ActivityList = () => {
   const accountCasperActivityList = useSelector(selectAccountCasperActivity);
-  const erc20ActivityList = useSelector(selectAccountErc20Activity) || [];
+  const erc20TokensActivityRecord =
+    useSelector(selectAccountErc20TokensActivity) || {};
 
   const { tokenName } = useParams();
+
+  const erc20TokenActivityList =
+    erc20TokensActivityRecord[tokenName || ''] || null;
 
   const transactionsType: ActivityListTransactionsType =
     tokenName === 'Casper'
@@ -66,7 +70,7 @@ export const ActivityList = () => {
 
   if (transactionsType === ActivityListTransactionsType.Erc20) {
     const erc20Transactions: Erc20TransferWithId[] =
-      erc20ActivityList?.map(transaction => {
+      erc20TokenActivityList?.map(transaction => {
         return {
           id: transaction.deploy_hash,
           deployHash: transaction.deploy_hash,
@@ -83,11 +87,11 @@ export const ActivityList = () => {
       }) || [];
 
     const noActivityForErc20 =
-      (ActivityListTransactionsType.Erc20 && erc20ActivityList == null) ||
-      erc20ActivityList?.length === 0;
+      (ActivityListTransactionsType.Erc20 && erc20TokenActivityList == null) ||
+      erc20TokenActivityList?.length === 0;
 
     if (noActivityForErc20) {
-      return <NoActivityView activityList={erc20ActivityList} />;
+      return <NoActivityView activityList={erc20TokenActivityList} />;
     }
 
     // render no activity for erc20
