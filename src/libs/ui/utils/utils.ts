@@ -18,9 +18,9 @@ export const getPublicKeyFormTarget = (
     if (publicKey && target) {
       const activeAccountHash = getAccountHashFromPublicKey(publicKey);
       toAccountPublicKey =
-        activeAccountHash === (target.parsed as string)
+        activeAccountHash === (target?.parsed as string)
           ? publicKey
-          : (target.parsed as string);
+          : (target?.parsed as string);
     }
   }
 
@@ -32,11 +32,11 @@ export const getMappedPendingTransactions = (
   publicKey: string
 ): MappedPendingTransaction[] =>
   pendingTransactions?.map(transaction => {
-    const parsedAmount = (transaction.args.amount?.parsed as string) || '';
+    const parsedAmount = (transaction?.args?.amount?.parsed as string) || '';
 
     const fromAccountPublicKey = transaction.callerPublicKey;
     const toAccountPublicKey = getPublicKeyFormTarget(
-      transaction.args.target,
+      transaction?.args?.target,
       publicKey
     );
 
