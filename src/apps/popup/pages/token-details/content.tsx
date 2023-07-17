@@ -7,14 +7,18 @@ import {
   SpacingSize
 } from '@libs/layout';
 import { ActivityList, Typography } from '@libs/ui';
+import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 
 import { Token } from './token';
-import { useErc20Tokens } from '@src/hooks';
 
-export const TokenPageContent = () => {
+interface TokenPageContentProps {
+  erc20Tokens: ContractPackageWithBalance[] | null;
+}
+
+export const TokenPageContent: React.FC<TokenPageContentProps> = ({
+  erc20Tokens
+}) => {
   const { t } = useTranslation();
-
-  const erc20Tokens = useErc20Tokens();
 
   return (
     <ContentContainer>

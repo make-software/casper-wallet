@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { css } from 'styled-components';
 import { RootState } from 'typesafe-actions';
+import browser from 'webextension-polyfill';
 
 import { HeaderSubmenuBarNavLink, LinkType } from '@libs/layout';
 import {
@@ -35,6 +36,7 @@ import { useFetchAccountActivity } from '@src/hooks';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import {
+  selectActiveNetworkSetting,
   selectActiveOrigin,
   selectConnectedAccountsWithActiveOrigin,
   selectCountOfAccounts,
@@ -44,7 +46,12 @@ import {
 import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
-import { ActivityListTransactionsType, HomePageTabName } from '@src/constants';
+import {
+  ActivityListTransactionsType,
+  getBuyWithTopperUrl,
+  HomePageTabName,
+  NetworkSetting
+} from '@src/constants';
 
 import { TokensList } from './components/tokens-list';
 import { ConnectionStatusBadge } from './components/connection-status-badge';
@@ -66,6 +73,7 @@ const BalanceContainer = styled(CenteredFlexColumn)`
 `;
 
 const ButtonsContainer = styled(SpaceAroundFlexColumn)`
+  flex-direction: row;
   width: 100%;
   margin-top: 24px;
 `;
@@ -88,6 +96,7 @@ export function HomePageContent() {
   const isActiveAccountConnected = useSelector(
     selectIsActiveAccountConnectedWithActiveOrigin
   );
+  const network = useSelector(selectActiveNetworkSetting);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const connectedAccounts = useSelector((state: RootState) =>
@@ -109,6 +118,15 @@ export function HomePageContent() {
       navigate(RouterPath.ConnectAnotherAccount);
     }
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
+
+  const handleBuyWithCSPR = useCallback(() => {
+    if (activeAccount?.publicKey && network === NetworkSetting.Mainnet) {
+      browser.tabs.create({
+        url: getBuyWithTopperUrl(activeAccount.publicKey),
+        active: true
+      });
+    }
+  }, [activeAccount?.publicKey, network]);
 
   return (
     <ContentContainer>
@@ -167,8 +185,18 @@ export function HomePageContent() {
               </Typography>
             </BalanceContainer>
             <ButtonsContainer gap={SpacingSize.Large}>
+              {network === NetworkSetting.Mainnet && (
+                <Button
+                  onClick={handleBuyWithCSPR}
+                  color="primaryBlue"
+                  flexWidth
+                >
+                  <Trans t={t}>Buy</Trans>
+                </Button>
+              )}
               {isActiveAccountConnected ? (
                 <Button
+                  flexWidth
                   disabled={activeOrigin == null}
                   onClick={() =>
                     activeOrigin &&
@@ -180,6 +208,7 @@ export function HomePageContent() {
                 </Button>
               ) : (
                 <Button
+                  flexWidth
                   disabled={activeOrigin == null}
                   onClick={handleConnectAccount}
                   color="primaryRed"
