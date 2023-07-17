@@ -20,6 +20,7 @@ import {
   DeployStatus,
   Hash,
   HashVariant,
+  isPendingStatus,
   Link,
   SvgIcon,
   Tile,
@@ -51,6 +52,8 @@ interface ActivityDetailsPageContentProps {
   toAccountPublicKey?: string;
   deployHash?: string;
   type?: TransferType | null;
+  amount?: string | null;
+  symbol?: string | null;
 }
 
 export const ExecutionTypesMap = {
@@ -91,7 +94,9 @@ export const ActivityDetailsPageContent = ({
   fromAccountPublicKey,
   toAccountPublicKey,
   deployHash,
-  type
+  type,
+  amount,
+  symbol
 }: ActivityDetailsPageContentProps) => {
   const [deployInfo, setDeployInfo] = useState<ExtendedDeploy | null>(null);
 
@@ -234,11 +239,13 @@ export const ActivityDetailsPageContent = ({
             </Typography>
             <RightAlignedFlexColumn>
               <Typography type="captionHash">
-                {`${formattedTransferAmount} ${
-                  formattedTransferAmount !== '-'
-                    ? deployInfo.contractPackage?.metadata?.symbol || 'CSPR'
-                    : ''
-                }`}
+                {isPendingStatus(deployInfo.status)
+                  ? `${amount} ${symbol}`
+                  : `${formattedTransferAmount} ${
+                      formattedTransferAmount !== '-'
+                        ? deployInfo.contractPackage?.metadata?.symbol || 'CSPR'
+                        : ''
+                    }`}
               </Typography>
               <Typography type="listSubtext" color="contentSecondary">
                 {transferAmountInUSD}
