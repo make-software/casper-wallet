@@ -75,3 +75,4 @@ export function PopupHeader({
 }
 
 export * from './header-submenu-bar-nav-link';
+export * from './header-view-in-explorer';

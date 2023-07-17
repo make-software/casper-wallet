@@ -21,12 +21,12 @@ import {
 } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { TokenType, useCasperToken } from '@src/hooks';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import {
-  getBlockExplorerAccountUrl,
-  getBlockExplorerContractUrl
-} from '@src/constants';
+  selectActiveNetworkSetting,
+  selectApiConfigBasedOnActiveNetwork
+} from '@background/redux/settings/selectors';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+import { getBuyWithTopperUrl, NetworkSetting } from '@src/constants';
 import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
 import { ContractPackageWithBalance } from '@src/libs/services/erc20-service';
 
@@ -65,9 +65,6 @@ type TokenProps = {
 export const Token = ({ erc20Tokens }: TokenProps) => {
   const [tokenData, setTokenData] = useState<TokenType | null>(null);
   const [tokenInfoList, setTokenInfoList] = useState<TokenInfoList[] | []>([]);
-  const [hrefToTokenOnCasperLive, setHrefToTokenOnCasperLive] = useState<
-    string | undefined
-  >();
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -77,6 +74,7 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
 
   const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const network = useSelector(selectActiveNetworkSetting);
 
   useEffect(() => {
     if (tokenName === 'Casper') {
@@ -86,9 +84,6 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
         setTokenInfoList([
           { id: 1, name: 'Symbol', value: casperToken.symbol }
         ]);
-        setHrefToTokenOnCasperLive(
-          getBlockExplorerAccountUrl(casperLiveUrl, activeAccount.publicKey)
-        );
       }
     } else {
       // ERC-20 token case
@@ -103,9 +98,6 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
           { id: 1, name: 'Symbol', value: token.symbol },
           { id: 2, name: 'Decimals', value: (token.decimals || 0).toString() }
         ]);
-        setHrefToTokenOnCasperLive(
-          getBlockExplorerContractUrl(casperLiveUrl, token.id)
-        );
       }
     }
   }, [tokenName, casperToken, activeAccount, casperLiveUrl, erc20Tokens]);
@@ -161,19 +153,27 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
               <Trans t={t}>Receive</Trans>
             </Typography>
           </ButtonContainer>
-          <Link color="inherit" target="_blank" href={hrefToTokenOnCasperLive}>
-            <CenteredFlexColumn gap={SpacingSize.Medium}>
-              <IconCircleContainer color="fillBlue">
-                <SvgIcon
-                  src="assets/icons/external-link.svg"
-                  color="contentOnFill"
-                />
-              </IconCircleContainer>
-              <Typography type="captionMedium" color="contentBlue">
-                CSPR.live
-              </Typography>
-            </CenteredFlexColumn>
-          </Link>
+          {tokenName === 'Casper' &&
+            network === NetworkSetting.Mainnet &&
+            activeAccount?.publicKey && (
+              <Link
+                color="inherit"
+                target="_blank"
+                href={getBuyWithTopperUrl(activeAccount.publicKey)}
+              >
+                <CenteredFlexColumn gap={SpacingSize.Medium}>
+                  <IconCircleContainer color="fillBlue">
+                    <SvgIcon
+                      src="assets/icons/card.svg"
+                      color="contentOnFill"
+                    />
+                  </IconCircleContainer>
+                  <Typography type="captionMedium" color="contentBlue">
+                    Buy
+                  </Typography>
+                </CenteredFlexColumn>
+              </Link>
+            )}
         </FooterItemContainer>
       )}
       marginLeftForItemSeparatorLine={16}

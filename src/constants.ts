@@ -29,6 +29,10 @@ export const getBlockExplorerDeployUrl = (
   deployHash: string
 ) => `${casperLiveUrl}/deploy/${deployHash}`;
 
+// TODO switch to prod url
+export const getBuyWithTopperUrl = (publicKey: string) =>
+  `https://casper-click-onramp-api.dev.make.services/api/topper/bootstrap-token?account=${publicKey}`;
+
 export enum CasperLiveUrl {
   MainnetUrl = 'https://cspr.live',
   TestnetUrl = 'https://testnet.cspr.live'

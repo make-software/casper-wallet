@@ -2,13 +2,19 @@ import React from 'react';
 
 import {
   HeaderSubmenuBarNavLink,
+  HeaderViewInExplorer,
   PopupHeader,
   PopupLayout
 } from '@libs/layout';
 
 import { TokenPageContent } from './content';
+import { useErc20Tokens } from '@src/hooks';
+import { useParams } from 'react-router-dom';
 
 export const TokenDetailPage = () => {
+  const erc20Tokens = useErc20Tokens();
+  const { tokenName } = useParams();
+
   return (
     <PopupLayout
       renderHeader={() => (
@@ -17,11 +23,17 @@ export const TokenDetailPage = () => {
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={() => (
-            <HeaderSubmenuBarNavLink linkType="back" />
+            <>
+              <HeaderSubmenuBarNavLink linkType="back" />
+              <HeaderViewInExplorer
+                tokenName={tokenName}
+                erc20Tokens={erc20Tokens}
+              />
+            </>
           )}
         />
       )}
-      renderContent={() => <TokenPageContent />}
+      renderContent={() => <TokenPageContent erc20Tokens={erc20Tokens} />}
     />
   );
 };
