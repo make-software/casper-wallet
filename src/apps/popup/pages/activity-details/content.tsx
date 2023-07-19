@@ -46,7 +46,6 @@ import {
   TransferType,
   TypeName
 } from '@src/constants';
-import { isValidPublicKey } from '@src/utils';
 
 interface ActivityDetailsPageContentProps {
   fromAccount?: string;
@@ -180,9 +179,7 @@ export const ActivityDetailsPageContent = ({
             </SpaceBetweenFlexRow>
             <AlignedSpaceBetweenFlexRow>
               <AlignedFlexRow gap={SpacingSize.Small}>
-                {isValidPublicKey(fromAccount) && (
-                  <Avatar publicKey={fromAccount} size={24} />
-                )}
+                <Avatar publicKey={fromAccount || ''} size={24} />
                 <Hash
                   value={fromAccount || ''}
                   variant={HashVariant.CaptionHash}
@@ -193,9 +190,7 @@ export const ActivityDetailsPageContent = ({
               </AlignedFlexRow>
               <SvgIcon src="assets/icons/ic-arrow-with-tail.svg" size={16} />
               <AlignedFlexRow gap={SpacingSize.Small}>
-                {isValidPublicKey(toAccount) && (
-                  <Avatar publicKey={toAccount} size={24} />
-                )}
+                <Avatar publicKey={toAccount || ''} size={24} />
                 <Hash
                   value={toAccount || ''}
                   variant={HashVariant.CaptionHash}

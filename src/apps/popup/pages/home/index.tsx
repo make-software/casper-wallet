@@ -138,6 +138,7 @@ export function HomePageContent() {
               <AccountActionsMenuPopover account={activeAccount} />
             </SpaceBetweenFlexRow>
             <Avatar
+              size={80}
               publicKey={activeAccount.publicKey}
               top={SpacingSize.Medium}
             />
