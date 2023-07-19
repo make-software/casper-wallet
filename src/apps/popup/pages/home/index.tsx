@@ -188,7 +188,7 @@ export function HomePageContent() {
                   color="primaryBlue"
                   flexWidth
                 >
-                  <Trans t={t}>Buy</Trans>
+                  <Trans t={t}>Buy CSPR</Trans>
                 </Button>
               )}
               {isActiveAccountConnected ? (
