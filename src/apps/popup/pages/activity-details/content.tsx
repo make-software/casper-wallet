@@ -46,10 +46,11 @@ import {
   TransferType,
   TypeName
 } from '@src/constants';
+import { isValidPublicKey } from '@src/utils';
 
 interface ActivityDetailsPageContentProps {
-  fromAccountPublicKey?: string;
-  toAccountPublicKey?: string;
+  fromAccount?: string;
+  toAccount?: string;
   deployHash?: string;
   type?: TransferType | null;
   amount?: string | null;
@@ -91,8 +92,8 @@ const RowsContainer = styled(FlexColumn)<BorderBottomPseudoElementProps>`
 `;
 
 export const ActivityDetailsPageContent = ({
-  fromAccountPublicKey,
-  toAccountPublicKey,
+  fromAccount,
+  toAccount,
   deployHash,
   type,
   amount,
@@ -179,9 +180,11 @@ export const ActivityDetailsPageContent = ({
             </SpaceBetweenFlexRow>
             <AlignedSpaceBetweenFlexRow>
               <AlignedFlexRow gap={SpacingSize.Small}>
-                <Avatar publicKey={fromAccountPublicKey || ''} size={24} />
+                {isValidPublicKey(fromAccount) && (
+                  <Avatar publicKey={fromAccount} size={24} />
+                )}
                 <Hash
-                  value={fromAccountPublicKey || ''}
+                  value={fromAccount || ''}
                   variant={HashVariant.CaptionHash}
                   truncated
                   truncatedSize="tiny"
@@ -190,9 +193,11 @@ export const ActivityDetailsPageContent = ({
               </AlignedFlexRow>
               <SvgIcon src="assets/icons/ic-arrow-with-tail.svg" size={16} />
               <AlignedFlexRow gap={SpacingSize.Small}>
-                <Avatar publicKey={toAccountPublicKey || ''} size={24} />
+                {isValidPublicKey(toAccount) && (
+                  <Avatar publicKey={toAccount} size={24} />
+                )}
                 <Hash
-                  value={toAccountPublicKey || ''}
+                  value={toAccount || ''}
                   variant={HashVariant.CaptionHash}
                   truncated
                   truncatedSize="tiny"

@@ -82,7 +82,10 @@ export const ActivityList = () => {
           decimals: transaction.contract_package?.metadata.decimals,
           symbol: transaction.contract_package?.metadata.symbol,
           toPublicKey: transaction?.to_public_key,
-          contractPackage: transaction?.contract_package
+          fromPublicKey: transaction?.from_public_key || null,
+          contractPackage: transaction?.contract_package,
+          toHash: transaction?.to_hash,
+          toType: transaction?.to_type
         };
       }) || [];
 

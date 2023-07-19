@@ -4,6 +4,7 @@ import {
   ExtendedDeployWithId,
   MappedPendingTransaction
 } from '@libs/services/account-activity-service';
+import { deriveSplitDataFromNamedKeyValue } from '@src/utils';
 
 export const getPublicKeyFormTarget = (
   target?: ExtendedDeployClTypeResult,
@@ -12,7 +13,6 @@ export const getPublicKeyFormTarget = (
   let toAccountPublicKey = '';
 
   if (target && target.cl_type === 'PublicKey') {
-    // sometimes we receive the public key in uppercase
     toAccountPublicKey = target.parsed as string;
   } else {
     if (publicKey && target) {
@@ -22,6 +22,24 @@ export const getPublicKeyFormTarget = (
           ? publicKey
           : (target?.parsed as string);
     }
+  }
+
+  return toAccountPublicKey;
+};
+
+export const getPublicKeyFormRecipient = (
+  recipient: ExtendedDeployClTypeResult,
+  publicKey?: string
+) => {
+  let toAccountPublicKey = '';
+
+  if (recipient.cl_type === 'Key' && publicKey) {
+    // @ts-ignore
+    const accountHash = recipient.parsed?.Account;
+    const activeAccountHash = getAccountHashFromPublicKey(publicKey);
+    let { hash } = deriveSplitDataFromNamedKeyValue(accountHash);
+
+    toAccountPublicKey = activeAccountHash === hash ? publicKey : hash;
   }
 
   return toAccountPublicKey;

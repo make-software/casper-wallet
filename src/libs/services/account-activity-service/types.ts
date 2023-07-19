@@ -239,5 +239,8 @@ export type Erc20TransferWithId = {
   decimals?: number;
   symbol?: string;
   toPublicKey?: string;
+  fromPublicKey?: string | null;
   contractPackage?: ContractPackage | null;
+  toHash: string | null;
+  toType: string | null;
 };

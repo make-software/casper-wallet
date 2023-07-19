@@ -35,8 +35,8 @@ export const ActivityDetailsPage = () => {
       )}
       renderContent={() => (
         <ActivityDetailsPageContent
-          fromAccountPublicKey={activityDetailsData?.fromAccountPublicKey}
-          toAccountPublicKey={activityDetailsData?.toAccountPublicKey}
+          fromAccount={activityDetailsData?.fromAccount}
+          toAccount={activityDetailsData?.toAccount}
           deployHash={activityDetailsData?.deployHash}
           type={activityDetailsData?.type}
           amount={activityDetailsData?.amount}
