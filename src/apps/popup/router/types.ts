@@ -4,12 +4,12 @@ import { TokenType } from '@src/hooks';
 export type LocationState = {
   showNavigationMenu?: boolean;
   activityDetailsData?: {
-    fromAccountPublicKey: string;
-    toAccountPublicKey: string;
+    fromAccount: string;
+    toAccount: string;
     deployHash: string;
     type: TransferType | null;
-    amount: string;
-    symbol: string;
+    amount?: string;
+    symbol?: string;
   };
   activeTabId?: number;
   tokenData?: TokenType | null;

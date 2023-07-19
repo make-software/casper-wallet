@@ -86,7 +86,8 @@ export const AccountCasperActivityPlate = forwardRef<
     amount,
     toAccountPublicKey,
     toAccount,
-    fromAccount
+    fromAccount,
+    targetPurse
   } = transactionInfo;
 
   const formattedAmount = formatNumber(motesToCSPR(amount), {
@@ -126,12 +127,10 @@ export const AccountCasperActivityPlate = forwardRef<
         navigate(RouterPath.ActivityDetails, {
           state: {
             activityDetailsData: {
-              fromAccountPublicKey,
-              toAccountPublicKey,
+              fromAccount: fromAccountPublicKey,
+              toAccount: toAccountPublicKey || toAccount || targetPurse,
               deployHash,
-              type,
-              amount: formattedAmount,
-              symbol: 'CSPR'
+              type
             }
           }
         })

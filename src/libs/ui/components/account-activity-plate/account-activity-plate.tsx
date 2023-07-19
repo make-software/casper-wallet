@@ -37,7 +37,11 @@ import {
   TypeIcons,
   TypeName
 } from '@src/constants';
-import { getPublicKeyFormTarget } from '@libs/ui/utils/utils';
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import {
+  getPublicKeyFormRecipient,
+  getPublicKeyFormTarget
+} from '@libs/ui/utils/utils';
 
 const AccountActivityPlateContainer = styled(AlignedSpaceBetweenFlexRow)`
   cursor: pointer;
@@ -86,6 +90,10 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
 
     const activeAccount = useSelector(selectVaultActiveAccount);
 
+    const activeAccountHash = getAccountHashFromPublicKey(
+      activeAccount?.publicKey
+    );
+
     const { deployHash, callerPublicKey, timestamp, args } = transactionInfo;
     let decimals: number | undefined;
     let symbol: string | undefined;
@@ -97,27 +105,55 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
       decimals = transactionInfo?.contractPackage?.metadata?.decimals;
       symbol = transactionInfo?.contractPackage?.metadata?.symbol;
     }
+
+    // check if the transaction is an erc20 transfer
     if ('toPublicKey' in transactionInfo) {
-      toAccountPublicKey = transactionInfo?.toPublicKey || '';
+      if (transactionInfo?.toPublicKey != null) {
+        toAccountPublicKey = transactionInfo?.toPublicKey;
+      } else if (
+        transactionInfo?.toType === 'account-hash' &&
+        transactionInfo?.toHash
+      ) {
+        toAccountHash = transactionInfo.toHash;
+      }
     } else {
-      toAccountPublicKey = getPublicKeyFormTarget(
-        args?.target,
-        activeAccount?.publicKey
-      );
+      if (args?.target) {
+        toAccountPublicKey = getPublicKeyFormTarget(
+          args.target,
+          activeAccount?.publicKey
+        );
+      } else if (args?.recipient) {
+        toAccountPublicKey = getPublicKeyFormRecipient(
+          args.recipient,
+          activeAccount?.publicKey
+        );
+      } else {
+        toAccountPublicKey = '';
+      }
     }
 
-    const fromAccountPublicKey = callerPublicKey;
+    const fromAccountPublicKey =
+      'fromPublicKey' in transactionInfo && transactionInfo.fromPublicKey
+        ? transactionInfo.fromPublicKey
+        : callerPublicKey;
 
     try {
       const parsedAmount =
-        (typeof args?.amount?.parsed === 'string' && args?.amount?.parsed) ||
+        ((typeof args?.amount?.parsed === 'string' ||
+          typeof args?.amount?.parsed === 'number') &&
+          args?.amount?.parsed) ||
         '-';
 
       if (parsedAmount !== '-') {
+        const stringAmount =
+          typeof parsedAmount === 'number'
+            ? parsedAmount.toString()
+            : parsedAmount;
+
         amount =
           Number.isInteger(decimals) && decimals !== undefined
-            ? divideErc20Balance(parsedAmount, decimals)
-            : motesToCSPR(parsedAmount);
+            ? divideErc20Balance(stringAmount, decimals)
+            : motesToCSPR(stringAmount);
       }
     } catch (error) {
       console.error(error);
@@ -137,13 +173,20 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
         setType(TransferType.Sent);
       } else if (
         toAccountPublicKey?.toLowerCase() ===
-        activeAccount?.publicKey.toLowerCase()
+          activeAccount?.publicKey.toLowerCase() ||
+        toAccountHash?.toLowerCase() === activeAccountHash?.toLowerCase()
       ) {
         setType(TransferType.Received);
       } else {
         setType(TransferType.Unknown);
       }
-    }, [fromAccountPublicKey, activeAccount?.publicKey, toAccountPublicKey]);
+    }, [
+      fromAccountPublicKey,
+      activeAccount?.publicKey,
+      toAccountPublicKey,
+      toAccountHash,
+      activeAccountHash
+    ]);
 
     return (
       <AccountActivityPlateContainer
@@ -153,8 +196,8 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
           navigate(RouterPath.ActivityDetails, {
             state: {
               activityDetailsData: {
-                fromAccountPublicKey,
-                toAccountPublicKey: toAccountPublicKey || toAccountHash,
+                fromAccount: fromAccountPublicKey,
+                toAccount: toAccountPublicKey || toAccountHash,
                 deployHash,
                 type,
                 amount: formattedAmount,

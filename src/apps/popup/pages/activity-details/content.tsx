@@ -48,8 +48,8 @@ import {
 } from '@src/constants';
 
 interface ActivityDetailsPageContentProps {
-  fromAccountPublicKey?: string;
-  toAccountPublicKey?: string;
+  fromAccount?: string;
+  toAccount?: string;
   deployHash?: string;
   type?: TransferType | null;
   amount?: string | null;
@@ -91,8 +91,8 @@ const RowsContainer = styled(FlexColumn)<BorderBottomPseudoElementProps>`
 `;
 
 export const ActivityDetailsPageContent = ({
-  fromAccountPublicKey,
-  toAccountPublicKey,
+  fromAccount,
+  toAccount,
   deployHash,
   type,
   amount,
@@ -130,9 +130,27 @@ export const ActivityDetailsPageContent = ({
     : '-';
   const transferAmountInUSD =
     deployInfo.amount != null &&
+    deployInfo.rate &&
     formatCurrency(motesToCurrency(deployInfo.amount, deployInfo.rate), 'USD', {
       precision: 5
     });
+
+  const paymentAmountInCSPR =
+    deployInfo.paymentAmount != null &&
+    formatNumber(motesToCSPR(deployInfo.paymentAmount), {
+      precision: { min: 5 }
+    });
+  const paymentAmountInUSD =
+    deployInfo.paymentAmount != null &&
+    deployInfo.rate &&
+    formatCurrency(
+      motesToCurrency(deployInfo.paymentAmount, deployInfo.rate),
+      'USD',
+      {
+        precision: 5
+      }
+    );
+
   const costAmountInCSPR = formatNumber(motesToCSPR(deployInfo.cost || '0'), {
     precision: { min: 5 }
   });
@@ -179,9 +197,9 @@ export const ActivityDetailsPageContent = ({
             </SpaceBetweenFlexRow>
             <AlignedSpaceBetweenFlexRow>
               <AlignedFlexRow gap={SpacingSize.Small}>
-                <Avatar publicKey={fromAccountPublicKey || ''} size={24} />
+                <Avatar publicKey={fromAccount || ''} size={24} />
                 <Hash
-                  value={fromAccountPublicKey || ''}
+                  value={fromAccount || ''}
                   variant={HashVariant.CaptionHash}
                   truncated
                   truncatedSize="tiny"
@@ -190,9 +208,9 @@ export const ActivityDetailsPageContent = ({
               </AlignedFlexRow>
               <SvgIcon src="assets/icons/ic-arrow-with-tail.svg" size={16} />
               <AlignedFlexRow gap={SpacingSize.Small}>
-                <Avatar publicKey={toAccountPublicKey || ''} size={24} />
+                <Avatar publicKey={toAccount || ''} size={24} />
                 <Hash
-                  value={toAccountPublicKey || ''}
+                  value={toAccount || ''}
                   variant={HashVariant.CaptionHash}
                   truncated
                   truncatedSize="tiny"
@@ -240,16 +258,39 @@ export const ActivityDetailsPageContent = ({
             <RightAlignedFlexColumn>
               <Typography type="captionHash">
                 {isPendingStatus(deployInfo.status)
-                  ? `${amount} ${symbol}`
+                  ? `${amount} ${symbol || 'CSPR'}`
                   : `${formattedTransferAmount} ${
                       formattedTransferAmount !== '-'
                         ? deployInfo.contractPackage?.metadata?.symbol || 'CSPR'
                         : ''
                     }`}
               </Typography>
-              <Typography type="listSubtext" color="contentSecondary">
-                {transferAmountInUSD}
-              </Typography>
+              {!deployInfo.contractPackage?.metadata?.symbol && (
+                <Typography type="listSubtext" color="contentSecondary">
+                  {transferAmountInUSD}
+                </Typography>
+              )}
+            </RightAlignedFlexColumn>
+          </AmountContainer>
+          <AmountContainer>
+            <Typography type="captionRegular" color="contentSecondary">
+              <Trans t={t}>Payment Amount</Trans>
+            </Typography>
+            <RightAlignedFlexColumn>
+              {isPendingStatus(deployInfo.status) ? (
+                <Typography type="captionHash">
+                  {`${paymentAmountInCSPR} CSPR`}
+                </Typography>
+              ) : (
+                <>
+                  <Typography type="captionHash">
+                    {`${paymentAmountInCSPR} CSPR`}
+                  </Typography>
+                  <Typography type="listSubtext" color="contentSecondary">
+                    {paymentAmountInUSD}
+                  </Typography>
+                </>
+              )}
             </RightAlignedFlexColumn>
           </AmountContainer>
           <AmountContainer>
@@ -257,12 +298,18 @@ export const ActivityDetailsPageContent = ({
               <Trans t={t}>Cost</Trans>
             </Typography>
             <RightAlignedFlexColumn>
-              <Typography type="captionHash">
-                {`${costAmountInCSPR} CSPR`}
-              </Typography>
-              <Typography type="listSubtext" color="contentSecondary">
-                {costAmountInUSD}
-              </Typography>
+              {isPendingStatus(deployInfo.status) ? (
+                <Typography type="captionHash">-</Typography>
+              ) : (
+                <>
+                  <Typography type="captionHash">
+                    {`${costAmountInCSPR} CSPR`}
+                  </Typography>
+                  <Typography type="listSubtext" color="contentSecondary">
+                    {costAmountInUSD}
+                  </Typography>
+                </>
+              )}
             </RightAlignedFlexColumn>
           </AmountContainer>
         </RowsContainer>
