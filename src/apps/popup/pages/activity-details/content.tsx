@@ -278,9 +278,9 @@ export const ActivityDetailsPageContent = ({
             </Typography>
             <RightAlignedFlexColumn>
               {isPendingStatus(deployInfo.status) ? (
-                <>
-                  <Typography type="captionHash">-</Typography>
-                </>
+                <Typography type="captionHash">
+                  {`${paymentAmountInCSPR} CSPR`}
+                </Typography>
               ) : (
                 <>
                   <Typography type="captionHash">
@@ -299,9 +299,7 @@ export const ActivityDetailsPageContent = ({
             </Typography>
             <RightAlignedFlexColumn>
               {isPendingStatus(deployInfo.status) ? (
-                <>
-                  <Typography type="captionHash">-</Typography>
-                </>
+                <Typography type="captionHash">-</Typography>
               ) : (
                 <>
                   <Typography type="captionHash">
