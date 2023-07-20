@@ -54,7 +54,7 @@ describe('Popup UI: Signature request scenarios', () => {
       clickOpenArgumentsElement: 'Contract arguments',
       contractArguments: {
         Delegator: DEFAULT_ACCOUNT.truncatedPublicKey,
-        Validator: '0106c...cA2cA',
+        Validator: '0106c...ca2ca',
         Amount: '2.5 CSPR'
       }
     },
@@ -66,7 +66,7 @@ describe('Popup UI: Signature request scenarios', () => {
       clickOpenArgumentsElement: 'Contract arguments',
       contractArguments: {
         Delegator: DEFAULT_ACCOUNT.truncatedPublicKey,
-        Validator: '0106c...cA2cA',
+        Validator: '0106c...ca2ca',
         Amount: '2.5 CSPR'
       }
     },
@@ -78,7 +78,7 @@ describe('Popup UI: Signature request scenarios', () => {
       clickOpenArgumentsElement: 'Contract arguments',
       contractArguments: {
         Delegator: DEFAULT_ACCOUNT.truncatedPublicKey,
-        Validator: '0106c...cA2cA',
+        Validator: '0106c...ca2ca',
         Amount: '2.5 CSPR',
         'New validator': '017d9...2009e'
       }
