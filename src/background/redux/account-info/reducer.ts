@@ -2,13 +2,18 @@ import { createReducer } from 'typesafe-actions';
 
 import { AccountInfoState } from './types';
 import {
-  accountActivityChanged,
+  accountCasperActivityChanged,
   accountActivityReset,
-  accountActivityUpdated,
+  accountCasperActivityUpdated,
   accountBalanceChanged,
   accountCurrencyRateChanged,
+  accountErc20TokensActivityChanged,
+  accountErc20TokensActivityUpdated,
   accountPendingTransactionsChanged,
-  accountPendingTransactionsRemove
+  accountPendingTransactionsRemove,
+  accountErc20Changed,
+  accountDeploysChanged,
+  accountDeploysUpdated
 } from './actions';
 
 const initialState: AccountInfoState = {
@@ -17,8 +22,11 @@ const initialState: AccountInfoState = {
     amountFiat: null
   },
   currencyRate: null,
-  accountActivity: null,
-  pendingTransactions: []
+  accountCasperActivity: null,
+  accountErc20TokensActivity: null,
+  pendingTransactions: [],
+  erc20Tokens: [],
+  accountDeploys: null
 };
 
 export const reducer = createReducer(initialState)
@@ -38,23 +46,57 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    accountActivityChanged,
+    accountErc20Changed,
     (state, { payload }): AccountInfoState => ({
       ...state,
-      accountActivity: payload
+      erc20Tokens: payload
     })
   )
-  .handleAction(accountActivityUpdated, (state, { payload }) => ({
+  .handleAction(
+    accountCasperActivityChanged,
+    (state, { payload }): AccountInfoState => ({
+      ...state,
+      accountCasperActivity: payload
+    })
+  )
+  .handleAction(accountCasperActivityUpdated, (state, { payload }) => ({
     ...state,
-    accountActivity:
-      state.accountActivity != null
-        ? [...state.accountActivity, ...payload]
+    accountCasperActivity:
+      state.accountCasperActivity != null
+        ? [...state.accountCasperActivity, ...payload]
         : payload
   }))
+  .handleAction(
+    accountErc20TokensActivityChanged,
+    (state, { payload: { contractPackageHash, activityList } }) => ({
+      ...state,
+      accountErc20TokensActivity: {
+        ...state.accountErc20TokensActivity,
+        [contractPackageHash]: activityList
+      }
+    })
+  )
+  .handleAction(
+    accountErc20TokensActivityUpdated,
+    (state, { payload: { activityList, contractPackageHash } }) => ({
+      ...state,
+      accountErc20TokensActivity: {
+        ...state.accountErc20TokensActivity,
+        [contractPackageHash]:
+          state.accountErc20TokensActivity &&
+          state.accountErc20TokensActivity[contractPackageHash]
+            ? [
+                ...state.accountErc20TokensActivity[contractPackageHash],
+                ...activityList
+              ]
+            : activityList
+      }
+    })
+  )
   .handleAction(accountPendingTransactionsChanged, (state, { payload }) => {
     const pendingTransactions = {
       ...payload,
-      id: payload.deploy_hash
+      id: payload.deployHash
     };
 
     return {
@@ -68,6 +110,17 @@ export const reducer = createReducer(initialState)
   .handleAction(accountPendingTransactionsRemove, (state, { payload }) => ({
     ...state,
     pendingTransactions: state.pendingTransactions.filter(
-      transaction => transaction.deploy_hash !== payload
+      transaction => transaction.deployHash !== payload
     )
+  }))
+  .handleAction(accountDeploysChanged, (state, { payload }) => ({
+    ...state,
+    accountDeploys: payload
+  }))
+  .handleAction(accountDeploysUpdated, (state, { payload }) => ({
+    ...state,
+    accountDeploys:
+      state.accountDeploys != null
+        ? [...state.accountDeploys, ...payload]
+        : payload
   }));

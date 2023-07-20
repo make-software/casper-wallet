@@ -2,10 +2,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import {
-  ExtendedDeployResult,
-  LedgerLiveDeploysResult
-} from '@libs/services/account-activity-service';
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
 import {
   BackgroundColor,
@@ -49,7 +45,7 @@ const StatusBackgroundColors = {
 };
 
 const getDeployStatus = (
-  deployResult?: ExtendedDeployResult | LedgerLiveDeploysResult | null
+  deployResult?: { status: string; errorMessage: string | null } | null
 ): Status => {
   if (
     deployResult &&
@@ -59,7 +55,7 @@ const getDeployStatus = (
     return deployResult?.status as Status;
   }
 
-  if (deployResult?.error_message) {
+  if (deployResult?.errorMessage) {
     return Status.Error;
   }
 
@@ -68,8 +64,7 @@ const getDeployStatus = (
 
 export interface DeployStatusProps {
   deployResult:
-    | ExtendedDeployResult
-    | LedgerLiveDeploysResult
+    | { status: string; errorMessage: string | null }
     | null
     | undefined;
   textWithIcon?: boolean;
@@ -87,6 +82,8 @@ const StatusContainer = styled(AlignedFlexRow)<{ status: Status }>(
   })
 );
 
+export const isPendingStatus = (status: string) => status === Status.Pending;
+
 export const DeployStatus = ({
   deployResult,
   textWithIcon
@@ -102,7 +99,7 @@ export const DeployStatus = ({
   };
 
   const status = getDeployStatus(deployResult);
-  const message = deployResult?.error_message;
+  const message = deployResult?.errorMessage;
 
   if (textWithIcon) {
     return (
@@ -115,6 +112,7 @@ export const DeployStatus = ({
           <Typography
             type="labelMedium"
             color={StatusColors[status] as ContentColor}
+            uppercase
           >
             {StatusLabel[status]}
           </Typography>

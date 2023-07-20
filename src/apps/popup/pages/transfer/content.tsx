@@ -1,5 +1,5 @@
 import React from 'react';
-import { Control, FormState, UseFormRegister } from 'react-hook-form';
+import { UseFormReturn } from 'react-hook-form';
 
 import { TransferFormValues } from '@libs/ui/forms/transfer';
 
@@ -11,48 +11,51 @@ import { SuccessStep } from './success-step';
 
 interface TransferPageContentProps {
   transferStep: TransactionSteps;
-  amountFormRegister: UseFormRegister<TransferFormValues>;
-  amountFormState: FormState<TransferFormValues>;
-  recipientFormRegister: UseFormRegister<TransferFormValues>;
-  recipientFormState: FormState<TransferFormValues>;
   recipientPublicKey: string;
-  amountInCSPR: string;
-  controlAmountForm: Control<TransferFormValues>;
+  amountForm: UseFormReturn<TransferFormValues>;
+  recipientForm: UseFormReturn<TransferFormValues>;
+  amount: string;
+  balance: string | null;
+  symbol: string | null;
+  paymentAmount: string;
 }
 
 export const TransferPageContent = ({
   transferStep,
-  amountFormRegister,
-  amountFormState,
-  recipientFormRegister,
-  recipientFormState,
   recipientPublicKey,
-  amountInCSPR,
-  controlAmountForm
+  recipientForm,
+  amountForm,
+  amount,
+  balance,
+  symbol,
+  paymentAmount
 }: TransferPageContentProps) => {
+  const isCSPR = symbol === 'CSPR';
+
   switch (transferStep) {
     case TransactionSteps.Recipient: {
       return (
         <RecipientStep
-          register={recipientFormRegister}
-          formState={recipientFormState}
+          recipientForm={recipientForm}
+          symbol={symbol}
+          balance={balance}
         />
       );
     }
     case TransactionSteps.Amount: {
       return (
-        <AmountStep
-          amountFormRegister={amountFormRegister}
-          amountFormState={amountFormState}
-          controlAmountForm={controlAmountForm}
-        />
+        <AmountStep amountForm={amountForm} symbol={symbol} isCSPR={isCSPR} />
       );
     }
     case TransactionSteps.Confirm: {
       return (
         <ConfirmStep
           recipientPublicKey={recipientPublicKey}
-          amountInCSPR={amountInCSPR}
+          amount={amount}
+          balance={balance}
+          symbol={symbol}
+          isCSPR={isCSPR}
+          paymentAmount={paymentAmount}
         />
       );
     }

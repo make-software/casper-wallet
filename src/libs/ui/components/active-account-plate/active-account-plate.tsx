@@ -11,11 +11,8 @@ import {
   SpacingSize,
   TileContainer
 } from '@libs/layout';
-import { Avatar, Tile, Typography } from '@libs/ui';
-import { truncateKey } from '@libs/ui/components/hash/utils';
+import { Avatar, Hash, HashVariant, Tile, Typography } from '@libs/ui';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
-import { selectAccountBalance } from '@background/redux/account-info/selectors';
 
 export const AmountContainer = styled(SpaceBetweenFlexColumn)`
   align-items: flex-end;
@@ -25,11 +22,20 @@ export const Container = styled(TileContainer)`
   margin-top: 8px;
 `;
 
-export const SenderDetails = () => {
+interface ActiveAccountPlateProps {
+  label: string;
+  balance: string | null;
+  symbol: string | null;
+}
+
+export const ActiveAccountPlate = ({
+  label,
+  symbol,
+  balance
+}: ActiveAccountPlateProps) => {
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const balance = useSelector(selectAccountBalance);
 
   if (!activeAccount) {
     return null;
@@ -39,7 +45,7 @@ export const SenderDetails = () => {
     <>
       <ParagraphContainer top={SpacingSize.XXL}>
         <Typography type="bodySemiBold">
-          <Trans t={t}>From</Trans>
+          <Trans t={t}>{label}</Trans>
         </Typography>
       </ParagraphContainer>
       <Tile>
@@ -51,20 +57,21 @@ export const SenderDetails = () => {
                 <Typography type="captionMedium">
                   {activeAccount.name}
                 </Typography>
-                <Typography type="captionHash">
-                  {truncateKey(activeAccount.publicKey)}
-                </Typography>
+                <Hash
+                  value={activeAccount.publicKey}
+                  variant={HashVariant.CaptionHash}
+                  color="contentSecondary"
+                  truncated
+                />
               </SpaceBetweenFlexColumn>
             </AlignedFlexRow>
             <AmountContainer>
               <Typography type="captionHash">
-                {balance.amountMotes == null
-                  ? '-'
-                  : formatNumber(motesToCSPR(balance.amountMotes), {
-                      precision: { max: 5 }
-                    })}
+                {balance == null ? '-' : balance}
               </Typography>
-              <Typography type="captionHash">CSPR</Typography>
+              <Typography type="captionHash" color="contentSecondary">
+                {symbol || '-'}
+              </Typography>
             </AmountContainer>
           </SpaceBetweenFlexRow>
         </Container>

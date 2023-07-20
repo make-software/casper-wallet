@@ -33,6 +33,7 @@ import { LockedRouter } from '@src/libs/layout/locked-router';
 import { TransferPage } from '@popup/pages/transfer';
 import { TokenDetailPage } from 'src/apps/popup/pages/token-details';
 import { ActivityDetailsPage } from '@popup/pages/activity-details';
+import { ReceivePage } from '@popup/pages/receive';
 
 export function AppRouter() {
   const isLocked = useSelector(selectVaultIsLocked);
@@ -262,6 +263,7 @@ function AppRoutes() {
         element={<ActivityDetailsPage />}
       />
       <Route path={RouterPath.Token} element={<TokenDetailPage />} />
+      <Route path={RouterPath.Receive} element={<ReceivePage />} />
     </Routes>
   );
 }

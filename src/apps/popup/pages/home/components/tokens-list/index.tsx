@@ -5,7 +5,9 @@ import styled from 'styled-components';
 import { List, Typography, TokenPlate } from '@libs/ui';
 import { SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import { TokenType, useCasperToken } from '@src/hooks';
+import { TokenType, useCasperToken, useErc20Tokens } from '@src/hooks';
+
+import { formatErc20TokenBalance } from './utils';
 
 const TotalValueContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;
@@ -20,16 +22,26 @@ export const TokensList = () => {
   const [totalAmountFiat, setTotalAmountFiat] = useState<string | null>(null);
 
   const casperToken = useCasperToken();
+  const erc20Tokens = useErc20Tokens();
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
   useEffect(() => {
-    // TODO: update token list and total amount for ERC20 tokens
+    const erc20TokensList = formatErc20TokenBalance(erc20Tokens);
+
+    const tokensList: TokenType[] = [];
+
     if (casperToken) {
-      setTokensList([casperToken]);
+      tokensList.push(casperToken);
       setTotalAmountFiat(casperToken.amountFiat);
     }
-  }, [casperToken]);
+
+    if (erc20TokensList) {
+      tokensList.push(...erc20TokensList);
+    }
+
+    setTokensList(tokensList);
+  }, [casperToken, erc20Tokens]);
 
   return (
     <List
@@ -52,7 +64,7 @@ export const TokensList = () => {
           token={token}
           chevron
           handleOnClick={() =>
-            navigate(RouterPath.Token.replace(':tokenName', token.name))
+            navigate(RouterPath.Token.replace(':tokenName', token.id))
           }
         />
       )}

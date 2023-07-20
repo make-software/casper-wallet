@@ -10,24 +10,38 @@ import {
   FlexColumn,
   SpacingSize
 } from '@libs/layout';
-import { Link, SvgIcon, Typography, Tooltip, DeployStatus } from '@libs/ui';
-import { truncateKey } from '@libs/ui/components/hash/utils';
 import {
+  DeployStatus,
+  Hash,
+  HashVariant,
+  SvgIcon,
+  Tooltip,
+  Typography
+} from '@libs/ui';
+import {
+  divideErc20Balance,
   formatNumber,
+  formatTimestamp,
   formatTimestampAge,
-  motesToCSPR,
-  formatTimestamp
+  motesToCSPR
 } from '@libs/ui/utils/formatters';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import {
-  ExtendedDeployResultWithId,
-  LedgerLiveDeploysResult
+  Erc20TransferWithId,
+  ExtendedDeployWithId
 } from '@libs/services/account-activity-service';
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import { getBlockExplorerDeployUrl } from '@src/constants';
-
-import { getPublicKeyFormTarget } from './utils';
+import {
+  ShortTypeName,
+  TransferType,
+  TypeIcons,
+  TypeName
+} from '@src/constants';
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import {
+  getPublicKeyFormRecipient,
+  getPublicKeyFormTarget
+} from '@libs/ui/utils/utils';
 
 const AccountActivityPlateContainer = styled(AlignedSpaceBetweenFlexRow)`
   cursor: pointer;
@@ -61,32 +75,8 @@ const Divider = styled.div`
   background-color: ${({ theme }) => theme.color.contentSecondary};
 `;
 
-export enum TransferType {
-  Sent = 'Sent',
-  Received = 'Received',
-  Unknown = 'Unknown'
-}
-
-export const ShortTypeName = {
-  [TransferType.Sent]: 'Sent',
-  [TransferType.Received]: 'Recv',
-  [TransferType.Unknown]: 'Unk'
-};
-
-export const TypeName = {
-  [TransferType.Sent]: 'Sent',
-  [TransferType.Received]: 'Received',
-  [TransferType.Unknown]: 'Unknown'
-};
-
-const TypeIcons = {
-  [TransferType.Sent]: 'assets/icons/transfer.svg',
-  [TransferType.Received]: 'assets/icons/receive.svg',
-  [TransferType.Unknown]: 'assets/icons/info.svg'
-};
-
 interface AccountActivityPlateProps {
-  transactionInfo: LedgerLiveDeploysResult | ExtendedDeployResultWithId;
+  transactionInfo: Erc20TransferWithId | ExtendedDeployWithId;
 }
 
 type Ref = HTMLDivElement;
@@ -99,35 +89,104 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
     const { t } = useTranslation();
 
     const activeAccount = useSelector(selectVaultActiveAccount);
-    const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
 
-    const {
-      deploy_hash: deployHash,
-      caller_public_key: fromAccountPublicKey,
-      timestamp,
-      args: { amount: parsedAmount, target }
-    } = transactionInfo;
-
-    const toAccountPublicKey = getPublicKeyFormTarget(
-      target,
+    const activeAccountHash = getAccountHashFromPublicKey(
       activeAccount?.publicKey
     );
 
-    const amount = (parsedAmount?.parsed as string) || '';
+    const { deployHash, callerPublicKey, timestamp, args } = transactionInfo;
+    let decimals: number | undefined;
+    let symbol: string | undefined;
+    let toAccountPublicKey = '';
+    let toAccountHash = '';
+    let amount: string | null = null;
 
-    const amountInCSPR = formatNumber(motesToCSPR(amount), {
-      precision: { min: 5, max: 5 }
-    });
+    if ('contractPackage' in transactionInfo) {
+      decimals = transactionInfo?.contractPackage?.metadata?.decimals;
+      symbol = transactionInfo?.contractPackage?.metadata?.symbol;
+    }
+
+    // check if the transaction is an erc20 transfer
+    if ('toPublicKey' in transactionInfo) {
+      if (transactionInfo?.toPublicKey != null) {
+        toAccountPublicKey = transactionInfo?.toPublicKey;
+      } else if (
+        transactionInfo?.toType === 'account-hash' &&
+        transactionInfo?.toHash
+      ) {
+        toAccountHash = transactionInfo.toHash;
+      }
+    } else {
+      if (args?.target) {
+        toAccountPublicKey = getPublicKeyFormTarget(
+          args.target,
+          activeAccount?.publicKey
+        );
+      } else if (args?.recipient) {
+        toAccountPublicKey = getPublicKeyFormRecipient(
+          args.recipient,
+          activeAccount?.publicKey
+        );
+      } else {
+        toAccountPublicKey = '';
+      }
+    }
+
+    const fromAccountPublicKey =
+      'fromPublicKey' in transactionInfo && transactionInfo.fromPublicKey
+        ? transactionInfo.fromPublicKey
+        : callerPublicKey;
+
+    try {
+      const parsedAmount =
+        ((typeof args?.amount?.parsed === 'string' ||
+          typeof args?.amount?.parsed === 'number') &&
+          args?.amount?.parsed) ||
+        '-';
+
+      if (parsedAmount !== '-') {
+        const stringAmount =
+          typeof parsedAmount === 'number'
+            ? parsedAmount.toString()
+            : parsedAmount;
+
+        amount =
+          Number.isInteger(decimals) && decimals !== undefined
+            ? divideErc20Balance(stringAmount, decimals)
+            : motesToCSPR(stringAmount);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+    const formattedAmount = amount
+      ? formatNumber(amount, {
+          precision: { min: 5 }
+        })
+      : '-';
 
     useEffect(() => {
-      if (fromAccountPublicKey === activeAccount?.publicKey) {
+      if (
+        fromAccountPublicKey?.toLowerCase() ===
+        activeAccount?.publicKey.toLowerCase()
+      ) {
         setType(TransferType.Sent);
-      } else if (toAccountPublicKey === activeAccount?.publicKey) {
+      } else if (
+        toAccountPublicKey?.toLowerCase() ===
+          activeAccount?.publicKey.toLowerCase() ||
+        toAccountHash?.toLowerCase() === activeAccountHash?.toLowerCase()
+      ) {
         setType(TransferType.Received);
       } else {
         setType(TransferType.Unknown);
       }
-    }, [fromAccountPublicKey, activeAccount?.publicKey, toAccountPublicKey]);
+    }, [
+      fromAccountPublicKey,
+      activeAccount?.publicKey,
+      toAccountPublicKey,
+      toAccountHash,
+      activeAccountHash
+    ]);
 
     return (
       <AccountActivityPlateContainer
@@ -137,10 +196,12 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
           navigate(RouterPath.ActivityDetails, {
             state: {
               activityDetailsData: {
-                fromAccountPublicKey,
-                toAccountPublicKey,
+                fromAccount: fromAccountPublicKey,
+                toAccount: toAccountPublicKey || toAccountHash,
                 deployHash,
-                type
+                type,
+                amount: formattedAmount,
+                symbol: symbol || ''
               }
             }
           })
@@ -155,7 +216,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
               <Typography type="bodySemiBold">
                 <Trans t={t}>
                   {type != null &&
-                    (amountInCSPR.length >= 13
+                    (formattedAmount.length >= 13
                       ? ShortTypeName[type]
                       : TypeName[type])}
                 </Trans>
@@ -163,30 +224,25 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
               <DeployStatus deployResult={transactionInfo} />
             </AlignedFlexRow>
             <Typography type="captionHash">
-              {type === TransferType.Sent ? '-' : ''}
-              {amountInCSPR}
+              {formattedAmount === '-' ? (
+                formattedAmount
+              ) : (
+                <>
+                  {type === TransferType.Sent ? '-' : ''}
+                  {formattedAmount}
+                </>
+              )}
             </Typography>
           </AlignedSpaceBetweenFlexRow>
           <AlignedSpaceBetweenFlexRow>
             <AlignedFlexRow>
-              <Tooltip title={deployHash} overflowWrap placement="bottomRight">
-                <Link
-                  color="fillBlue"
-                  onClick={event => {
-                    event.stopPropagation();
-                    event.preventDefault();
-
-                    window.open(
-                      getBlockExplorerDeployUrl(casperLiveUrl, deployHash),
-                      '_blank'
-                    );
-                  }}
-                >
-                  <Typography type="captionHash">
-                    {truncateKey(deployHash, { size: 'tiny' })}
-                  </Typography>
-                </Link>
-              </Tooltip>
+              <Hash
+                value={deployHash}
+                variant={HashVariant.CaptionHash}
+                truncated
+                truncatedSize="tiny"
+                color="contentPrimary"
+              />
               <Divider />
               <Tooltip title={formatTimestamp(timestamp)} noWrap>
                 <Typography
@@ -198,9 +254,11 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
                 </Typography>
               </Tooltip>
             </AlignedFlexRow>
-            <Typography type="bodyHash" color="contentSecondary">
-              CSPR
-            </Typography>
+            {formattedAmount !== '-' && (
+              <Typography type="bodyHash" color="contentSecondary">
+                {symbol || 'CSPR'}
+              </Typography>
+            )}
           </AlignedSpaceBetweenFlexRow>
         </ContentContainer>
         <SvgIcon src="assets/icons/chevron.svg" size={16} />

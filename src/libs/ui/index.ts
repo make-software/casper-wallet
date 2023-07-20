@@ -30,6 +30,11 @@ export * from './components/tabs/tabs';
 export * from './components/token-plate/token-plate';
 export * from './components/deploy-status/deploy-status';
 export * from './components/modal/modal';
+export * from './components/active-account-plate/active-account-plate';
+export * from './components/recipient-plate/recipient-plate';
+export * from './components/deploys-list/deploys-list';
+export * from './components/account-casper-activity-plate/account-casper-activity-plate';
+export * from './components/no-activity-view/no-activity-view';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

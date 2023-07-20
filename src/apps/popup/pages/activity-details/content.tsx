@@ -20,21 +20,19 @@ import {
   DeployStatus,
   Hash,
   HashVariant,
-  HoverCopyIcon,
+  isPendingStatus,
   Link,
   SvgIcon,
   Tile,
   Tooltip,
-  TransferType,
-  TypeName,
   Typography
 } from '@libs/ui';
-import { truncateKey } from '@libs/ui/components/hash/utils';
 import {
   dispatchFetchExtendedDeploysInfo,
-  ExtendedDeployResult
+  ExtendedDeploy
 } from '@libs/services/account-activity-service';
 import {
+  divideErc20Balance,
   formatCurrency,
   formatNumber,
   formatTimestamp,
@@ -43,13 +41,19 @@ import {
   motesToCurrency
 } from '@libs/ui/utils/formatters';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { getBlockExplorerDeployUrl } from '@src/constants';
+import {
+  getBlockExplorerDeployUrl,
+  TransferType,
+  TypeName
+} from '@src/constants';
 
 interface ActivityDetailsPageContentProps {
-  fromAccountPublicKey?: string;
-  toAccountPublicKey?: string;
+  fromAccount?: string;
+  toAccount?: string;
   deployHash?: string;
   type?: TransferType | null;
+  amount?: string | null;
+  symbol?: string | null;
 }
 
 export const ExecutionTypesMap = {
@@ -86,21 +90,15 @@ const RowsContainer = styled(FlexColumn)<BorderBottomPseudoElementProps>`
   }
 `;
 
-const HashContainer = styled.div`
-  & ${HoverCopyIcon} {
-    display: inline-block;
-  }
-`;
-
 export const ActivityDetailsPageContent = ({
-  fromAccountPublicKey,
-  toAccountPublicKey,
+  fromAccount,
+  toAccount,
   deployHash,
-  type
+  type,
+  amount,
+  symbol
 }: ActivityDetailsPageContentProps) => {
-  const [deployInfo, setDeployInfo] = useState<ExtendedDeployResult | null>(
-    null
-  );
+  const [deployInfo, setDeployInfo] = useState<ExtendedDeploy | null>(null);
 
   const { t } = useTranslation();
   const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
@@ -115,25 +113,54 @@ export const ActivityDetailsPageContent = ({
 
   if (deployInfo == null) return null;
 
-  const deployType: string = ExecutionTypesMap[deployInfo.execution_type_id];
+  const deployType: string = ExecutionTypesMap[deployInfo.executionTypeId];
+  const decimals = deployInfo.contractPackage?.metadata?.decimals;
 
-  const transferAmountInCSPR =
+  const transferAmount =
     deployInfo.amount != null
-      ? formatNumber(motesToCSPR(deployInfo.amount), {
-          precision: { min: 5, max: 5 }
-        })
-      : '-';
+      ? Number.isInteger(decimals) && decimals !== undefined
+        ? divideErc20Balance(deployInfo?.amount, decimals)
+        : motesToCSPR(deployInfo.amount)
+      : null;
+
+  const formattedTransferAmount = transferAmount
+    ? formatNumber(transferAmount, {
+        precision: { min: 5 }
+      })
+    : '-';
   const transferAmountInUSD =
     deployInfo.amount != null &&
+    deployInfo.rate &&
     formatCurrency(motesToCurrency(deployInfo.amount, deployInfo.rate), 'USD', {
       precision: 5
     });
-  const costAmountInCSPR = formatNumber(motesToCSPR(deployInfo.cost), {
-    precision: { min: 5, max: 5 }
+
+  const paymentAmountInCSPR =
+    deployInfo.paymentAmount != null &&
+    formatNumber(motesToCSPR(deployInfo.paymentAmount), {
+      precision: { min: 5 }
+    });
+  const paymentAmountInUSD =
+    deployInfo.paymentAmount != null &&
+    deployInfo.rate &&
+    formatCurrency(
+      motesToCurrency(deployInfo.paymentAmount, deployInfo.rate),
+      'USD',
+      {
+        precision: 5
+      }
+    );
+
+  const costAmountInCSPR = formatNumber(motesToCSPR(deployInfo.cost || '0'), {
+    precision: { min: 5 }
   });
-  const costAmountInUSD = formatCurrency(deployInfo.currency_cost, 'USD', {
-    precision: 5
-  });
+  const costAmountInUSD = formatCurrency(
+    deployInfo.currencyCost || '0',
+    'USD',
+    {
+      precision: 5
+    }
+  );
 
   return (
     <ContentContainer>
@@ -151,7 +178,7 @@ export const ActivityDetailsPageContent = ({
               target="_blank"
               href={getBlockExplorerDeployUrl(
                 casperLiveUrl,
-                deployInfo.deploy_hash
+                deployInfo.deployHash
               )}
             >
               <Typography type="captionMedium">
@@ -169,53 +196,40 @@ export const ActivityDetailsPageContent = ({
               </Typography>
             </SpaceBetweenFlexRow>
             <AlignedSpaceBetweenFlexRow>
-              <Tooltip
-                title={fromAccountPublicKey}
-                placement="bottomRight"
-                overflowWrap
-              >
-                <AlignedFlexRow gap={SpacingSize.Small}>
-                  <Avatar publicKey={fromAccountPublicKey || ''} size={24} />
-                  <Typography type="captionHash" color="contentBlue">
-                    {truncateKey(fromAccountPublicKey || '', { size: 'tiny' })}
-                  </Typography>
-                </AlignedFlexRow>
-              </Tooltip>
+              <AlignedFlexRow gap={SpacingSize.Small}>
+                <Avatar publicKey={fromAccount || ''} size={24} />
+                <Hash
+                  value={fromAccount || ''}
+                  variant={HashVariant.CaptionHash}
+                  truncated
+                  truncatedSize="tiny"
+                  color="contentPrimary"
+                />
+              </AlignedFlexRow>
               <SvgIcon src="assets/icons/ic-arrow-with-tail.svg" size={16} />
-              <Tooltip
-                title={toAccountPublicKey}
-                placement="bottomLeft"
-                overflowWrap
-              >
-                <AlignedFlexRow gap={SpacingSize.Small}>
-                  <Avatar publicKey={toAccountPublicKey || ''} size={24} />
-                  <Typography type="captionHash" color="contentBlue">
-                    {truncateKey(toAccountPublicKey || '', { size: 'tiny' })}
-                  </Typography>
-                </AlignedFlexRow>
-              </Tooltip>
+              <AlignedFlexRow gap={SpacingSize.Small}>
+                <Avatar publicKey={toAccount || ''} size={24} />
+                <Hash
+                  value={toAccount || ''}
+                  variant={HashVariant.CaptionHash}
+                  truncated
+                  truncatedSize="tiny"
+                  color="contentPrimary"
+                />
+              </AlignedFlexRow>
             </AlignedSpaceBetweenFlexRow>
           </AddressContainer>
           <ItemContainer>
             <Typography type="captionRegular" color="contentSecondary">
               <Trans t={t}>Deploy hash</Trans>
             </Typography>
-            <HashContainer>
-              <Tooltip
-                title={deployInfo.deploy_hash}
-                overflowWrap
-                placement="bottomLeft"
-              >
-                <Hash
-                  value={deployInfo.deploy_hash}
-                  variant={HashVariant.CaptionHash}
-                  withCopyIconOnHover
-                  truncated
-                  truncatedSize="tiny"
-                  color="contentBlue"
-                />
-              </Tooltip>
-            </HashContainer>
+            <Hash
+              value={deployInfo.deployHash}
+              variant={HashVariant.CaptionHash}
+              truncated
+              truncatedSize="tiny"
+              color="contentPrimary"
+            />
           </ItemContainer>
           <ItemContainer>
             <Typography type="captionRegular" color="contentSecondary">
@@ -243,11 +257,40 @@ export const ActivityDetailsPageContent = ({
             </Typography>
             <RightAlignedFlexColumn>
               <Typography type="captionHash">
-                {`${transferAmountInCSPR} CSPR`}
+                {isPendingStatus(deployInfo.status)
+                  ? `${amount} ${symbol || 'CSPR'}`
+                  : `${formattedTransferAmount} ${
+                      formattedTransferAmount !== '-'
+                        ? deployInfo.contractPackage?.metadata?.symbol || 'CSPR'
+                        : ''
+                    }`}
               </Typography>
-              <Typography type="listSubtext" color="contentSecondary">
-                {transferAmountInUSD}
-              </Typography>
+              {!deployInfo.contractPackage?.metadata?.symbol && (
+                <Typography type="listSubtext" color="contentSecondary">
+                  {transferAmountInUSD}
+                </Typography>
+              )}
+            </RightAlignedFlexColumn>
+          </AmountContainer>
+          <AmountContainer>
+            <Typography type="captionRegular" color="contentSecondary">
+              <Trans t={t}>Payment Amount</Trans>
+            </Typography>
+            <RightAlignedFlexColumn>
+              {isPendingStatus(deployInfo.status) ? (
+                <Typography type="captionHash">
+                  {`${paymentAmountInCSPR} CSPR`}
+                </Typography>
+              ) : (
+                <>
+                  <Typography type="captionHash">
+                    {`${paymentAmountInCSPR} CSPR`}
+                  </Typography>
+                  <Typography type="listSubtext" color="contentSecondary">
+                    {paymentAmountInUSD}
+                  </Typography>
+                </>
+              )}
             </RightAlignedFlexColumn>
           </AmountContainer>
           <AmountContainer>
@@ -255,12 +298,18 @@ export const ActivityDetailsPageContent = ({
               <Trans t={t}>Cost</Trans>
             </Typography>
             <RightAlignedFlexColumn>
-              <Typography type="captionHash">
-                {`${costAmountInCSPR} CSPR`}
-              </Typography>
-              <Typography type="listSubtext" color="contentSecondary">
-                {costAmountInUSD}
-              </Typography>
+              {isPendingStatus(deployInfo.status) ? (
+                <Typography type="captionHash">-</Typography>
+              ) : (
+                <>
+                  <Typography type="captionHash">
+                    {`${costAmountInCSPR} CSPR`}
+                  </Typography>
+                  <Typography type="listSubtext" color="contentSecondary">
+                    {costAmountInUSD}
+                  </Typography>
+                </>
+              )}
             </RightAlignedFlexColumn>
           </AmountContainer>
         </RowsContainer>

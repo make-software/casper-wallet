@@ -2,19 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import {
-  Checkbox,
-  Hash,
-  HashVariant,
-  HoverCopyIcon,
-  List,
-  Typography
-} from '@libs/ui';
+import { Checkbox, Hash, HashVariant, List, Typography } from '@libs/ui';
 import {
   ContentContainer,
+  FlexRow,
   LeftAlignedFlexColumn,
   PageContainer,
-  FlexRow,
   SpacingSize
 } from '@libs/layout';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
@@ -35,10 +28,6 @@ import { sortAccounts } from './utils';
 const ListItemContainer = styled(FlexRow)`
   min-height: 50px;
   height: 100%;
-
-  &:hover ${HoverCopyIcon} {
-    display: inline-block;
-  }
 `;
 
 const ListItemClickableContainer = styled(FlexRow)`
@@ -133,7 +122,6 @@ export function AccountListPage() {
                       variant={HashVariant.CaptionHash}
                       truncated
                       withTag={account.imported}
-                      withCopyIconOnHover
                     />
                   </HashContainer>
                   {connectedAccountNames.includes(account.name) && (

@@ -3,10 +3,12 @@ import { ActionType, createAction } from 'typesafe-actions';
 import { FetchBalanceResponse } from '@libs/services/balance-service';
 import { AccountInfo } from '@libs/services/account-info';
 import {
-  ExtendedDeployResult,
-  LedgerLiveDeploysResult
+  Erc20TokenActionResult,
+  TransferResult,
+  ExtendedDeploy
 } from 'src/libs/services/account-activity-service';
 import { PaginatedResponse } from '@libs/services/types';
+import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 
 type Meta = void;
 
@@ -32,16 +34,44 @@ export const serviceMessage = {
     Meta
   >(),
   fetchAccountActivityResponse: createAction('FETCH_ACCOUNT_ACTIVITY_RESPONSE')<
-    PaginatedResponse<LedgerLiveDeploysResult>,
+    PaginatedResponse<TransferResult>,
     Meta
   >(),
+  fetchErc20TokenActivityRequest: createAction('FETCH_ERC20_TOKEN_ACTIVITY')<
+    { publicKey: string; page: number; contractPackageHash: string },
+    Meta
+  >(),
+  fetchErc20TokenActivityResponse: createAction(
+    'FETCH_ERC20_TOKEN_ACTIVITY_RESPONSE'
+  )<PaginatedResponse<Erc20TokenActionResult>, Meta>(),
   fetchExtendedDeploysInfoRequest: createAction('FETCH_EXTENDED_DEPLOYS_INFO')<
     { deployHash: string },
     Meta
   >(),
   fetchExtendedDeploysInfoResponse: createAction(
     'FETCH_EXTENDED_DEPLOYS_INFO_RESPONSE'
-  )<ExtendedDeployResult, Meta>()
+  )<ExtendedDeploy, Meta>(),
+  fetchErc20TokensRequest: createAction('FETCH_ERC20_TOKENS')<
+    { accountHash: string },
+    Meta
+  >(),
+  fetchErc20TokensResponse: createAction('FETCH_ERC20_TOKENS_RESPONSE')<
+    ContractPackageWithBalance[],
+    Meta
+  >(),
+  fetchAccountExtendedDeploysRequest: createAction('FETCH_ACCOUNT_DEPLOYS')<
+    { publicKey: string; page: number },
+    Meta
+  >(),
+  fetchAccountExtendedDeploysResponse: createAction(
+    'FETCH_ACCOUNT_DEPLOYS_RESPONSE'
+  )<PaginatedResponse<ExtendedDeploy>, Meta>(),
+  fetchAccountCasperActivityRequest: createAction(
+    'FETCH_ACCOUNT_CASPER_ACTIVITY'
+  )<{ accountHash: string; page: number }, Meta>(),
+  fetchAccountCasperActivityResponse: createAction(
+    'FETCH_ACCOUNT_CASPER_ACTIVITY_RESPONSE'
+  )<PaginatedResponse<TransferResult>, Meta>()
 };
 
 export type ServiceMessage = ActionType<typeof serviceMessage>;

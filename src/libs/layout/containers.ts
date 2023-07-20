@@ -109,6 +109,10 @@ export const LeftAlignedCenteredFlexRow = styled(AlignedFlexRow)`
   justify-content: flex-start;
 `;
 
+export const RightAlignedCenteredFlexRow = styled(AlignedFlexRow)`
+  justify-content: flex-end;
+`;
+
 export const SpaceBetweenFlexRow = styled(FlexRow)`
   width: 100%;
   justify-content: space-between;
@@ -169,10 +173,6 @@ export const InputsContainer = styled.div`
   & > div:nth-child(2) {
     margin-top: 16px;
   }
-`;
-
-export const TransferInputContainer = styled.div`
-  margin-top: 28px;
 `;
 
 // Default direction value is `column`
@@ -256,7 +256,6 @@ export const AvatarContainer = styled(CenteredFlexColumn)<{
   top?: SpacingSize;
 }>`
   margin-top: ${({ top }) => getSpacingSize(top)};
-  width: 100%;
 `;
 
 export interface BorderBottomPseudoElementProps {

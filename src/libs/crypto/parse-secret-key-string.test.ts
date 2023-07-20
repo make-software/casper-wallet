@@ -27,7 +27,7 @@ it('should import key pair from the pem file, validate keys and generate the sam
 
     const keyPair = getKeyPairFromSecretKeyBase64(type, secretKeyBase64);
 
-    expect(keyPair.publicKey.toHex()).toBe(pemFilePublicKeyHex);
+    expect(keyPair.publicKey.toHex().toLowerCase()).toBe(pemFilePublicKeyHex);
     expect(keyPair.publicKey.toHex()).toBe(publicKeyHex);
     expect(keyPair.exportPrivateKeyInPem()).toBe(pemFileContents);
   });

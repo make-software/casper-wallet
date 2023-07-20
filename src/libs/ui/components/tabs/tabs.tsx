@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Typography, Tooltip } from '@libs/ui';
 import { AlignedSpaceBetweenFlexRow, CenteredFlexRow } from '@libs/layout';
+import { HomePageTabName } from '@src/constants';
 
 const TabsContainer = styled(AlignedSpaceBetweenFlexRow)`
   height: 40px;
@@ -70,14 +71,16 @@ export function Tabs({ children, preferActiveTabId }: TabsProps) {
             ) : (
               <TabContainer
                 onClick={() => {
-                  if (tabName === 'NFTs') return;
+                  if (tabName === HomePageTabName.NFTs) return;
                   setActiveTabId(index);
                 }}
-                disable={tabName === 'NFTs'}
+                disable={tabName === HomePageTabName.NFTs}
                 key={tabName}
               >
                 <Tooltip
-                  title={tabName === 'NFTs' ? 'Coming Soon' : null}
+                  title={
+                    tabName === HomePageTabName.NFTs ? 'Coming Soon' : null
+                  }
                   noWrap
                 >
                   <Typography type="captionRegular">
