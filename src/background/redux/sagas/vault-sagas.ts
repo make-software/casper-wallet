@@ -168,7 +168,7 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
       newVaultCipher,
       newEncryptionKeyHash
     } = action.payload;
-
+    console.log('unlockVaultSaga');
     yield put(loginRetryCountReseted());
     yield put(vaultLoaded(vault));
     yield put(
