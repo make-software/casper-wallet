@@ -92,6 +92,8 @@ export function UnlockVaultPageContent() {
         newEncryptionKeyHash
       } = event.data;
 
+      console.log(event.data, 'event.data');
+
       dispatchToMainStore(
         unlockVault({
           vault,

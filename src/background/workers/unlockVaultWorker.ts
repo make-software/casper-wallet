@@ -27,22 +27,27 @@ onmessage = async function (event: UnlockVaultMessageEvent) {
     password,
     keyDerivationSaltHash
   );
+  console.log(encryptionKeyBytes, 'encryptionKeyBytes');
 
   const encryptionKeyHash = convertBytesToHex(encryptionKeyBytes);
+  console.log(encryptionKeyHash, 'encryptionKeyHash');
   // decrypt cipher
   const vault = await decryptVault(encryptionKeyHash, vaultCipher);
+  console.log(vault, 'vault');
 
   // derive a new random encryption key
   const newKeyDerivationSaltHash = generateRandomSaltHex();
+  console.log(newKeyDerivationSaltHash, 'newKeyDerivationSaltHash');
   const newEncryptionKeyBytes = await deriveEncryptionKey(
     password,
     newKeyDerivationSaltHash
   );
+  console.log(newEncryptionKeyBytes, 'newEncryptionKeyBytes');
   const newEncryptionKeyHash = convertBytesToHex(newEncryptionKeyBytes);
-
+  console.log(newEncryptionKeyHash, 'newEncryptionKeyHash');
   // encrypt cipher with the new key
   const newVaultCipher = await encryptVault(newEncryptionKeyHash, vault);
-
+  console.log(newVaultCipher, 'newVaultCipher');
   postMessage({
     vault,
     newVaultCipher,
