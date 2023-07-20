@@ -16,4 +16,4 @@ _**Make sure to fill in all the below sections.**_
 
 - [ ] Include a screenshot or recording if implementing significant UI or user flow change
 
-- [ ] When this PR affects architecture changes wait for review from Piotr before merging
+- [ ] When this PR affects architecture changes wait for review from Dmytro before merging
