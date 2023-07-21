@@ -6,7 +6,14 @@ import { verifyPasswordAgainstHash } from '@src/libs/crypto/hashing';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { loginRetryCountIncremented } from '@src/background/redux/login-retry-count/actions';
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
-import { LOGIN_RETRY_ATTEMPTS_LIMIT } from '@src/constants';
+import {
+  LOGIN_RETRY_ATTEMPTS_LIMIT,
+  TRANSFER_MIN_AMOUNT_MOTES,
+  TRANSFER_COST_MOTES
+} from '@src/constants';
+import { isValidPublicKey, isValidU64 } from '@src/utils';
+import Big from 'big.js';
+import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 
 export const minPasswordLength = 16;
 
@@ -96,3 +103,171 @@ export function useAccountNameRule(
       isAccountNameIsTakenCallback(value)
     );
 }
+
+export const useTransferIdMemoRule = () => {
+  const { t } = useTranslation();
+
+  return Yup.string().test({
+    name: 'validU64',
+    // this field is optional, so we set it to true if it's empty
+    test: value => (value ? isValidU64(value) : true),
+    message: t(`Transfer ID is invalid`)
+  });
+};
+
+export const useRecipientPublicKeyRule = () => {
+  const { t } = useTranslation();
+
+  return Yup.string()
+    .required(t('Recipient is required'))
+    .test({
+      name: 'recipientPublicKey',
+      test: value => (value ? isValidPublicKey(value) : false),
+      message: t('Recipient should be a valid public key')
+    });
+};
+
+export const useCsprAmountRule = (amountMotes: string | null) => {
+  const { t } = useTranslation();
+
+  const maxAmountMotes: string =
+    amountMotes == null
+      ? '0'
+      : Big(amountMotes).sub(TRANSFER_COST_MOTES).toString();
+
+  return Yup.string()
+    .required(t('Amount is required'))
+    .test({
+      name: 'validU64',
+      test: csprAmountInputValue => {
+        if (csprAmountInputValue) {
+          return isValidU64(csprAmountInputValue);
+        }
+
+        return false;
+      },
+      message: t(`Amount is invalid`)
+    })
+    .test({
+      name: 'amountBelowMinTransfer',
+      test: csprAmountInputValue => {
+        if (csprAmountInputValue) {
+          return Big(CSPRtoMotes(csprAmountInputValue)).gte(
+            TRANSFER_MIN_AMOUNT_MOTES
+          );
+        }
+
+        return false;
+      },
+      message: t(
+        `Amount must be at least ${motesToCSPR(
+          TRANSFER_MIN_AMOUNT_MOTES
+        )} CSPR.`
+      )
+    })
+    .test({
+      name: 'amountAboveBalance',
+      test: csprAmountInputValue => {
+        if (csprAmountInputValue) {
+          return Big(CSPRtoMotes(csprAmountInputValue)).lt(maxAmountMotes);
+        }
+
+        return false;
+      },
+      message: t(
+        'Your account balance is not high enough. Enter a smaller amount.'
+      )
+    });
+};
+
+export const useErc20AmountRule = (
+  amount: string | null,
+  decimals: number | null
+) => {
+  const { t } = useTranslation();
+
+  const maxAmount: string = amount == null ? '0' : Big(amount).toString();
+
+  return Yup.string()
+    .required(t('Amount is required'))
+    .test({
+      name: 'validU64',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          return isValidU64(amountInputValue);
+        }
+
+        return false;
+      },
+      message: t(`Amount is invalid`)
+    })
+    .test({
+      name: 'amountBelowMinTransfer',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          return Big(amountInputValue).gt('0');
+        }
+
+        return false;
+      },
+      message: t(`Amount must be greater than zero.`)
+    })
+    .test({
+      name: 'amountAboveBalance',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          return Big(amountInputValue).lte(maxAmount);
+        }
+
+        return false;
+      },
+      message: t(
+        'Your account balance is not high enough. Enter a smaller amount.'
+      )
+    });
+};
+
+export const usePaymentAmountRule = (csprBalance: string | null) => {
+  const { t } = useTranslation();
+
+  const maxAmountMotes: string =
+    csprBalance == null ? '0' : Big(csprBalance).toString();
+
+  return Yup.string()
+    .required(t('Payment amount is required'))
+    .test({
+      name: 'validU64',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          return isValidU64(amountInputValue);
+        }
+
+        return false;
+      },
+      message: t(`Amount is invalid`)
+    })
+    .test({
+      name: 'amountBelowMinTransfer',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          return Big(amountInputValue).gt('0');
+        }
+
+        return false;
+      },
+      message: t(`Amount must be greater than zero.`)
+    })
+    .test({
+      name: 'amountAboveBalance',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          return Big(CSPRtoMotes(amountInputValue)).lt(maxAmountMotes);
+        }
+
+        return false;
+      },
+      message: t(
+        'Your account balance is not high enough. Enter a smaller amount.'
+      )
+    });
+};

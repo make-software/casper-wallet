@@ -1,6 +1,7 @@
 import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
 import styled from 'styled-components';
-import { BaseProps, FormField, FormFieldStatus } from '@src/libs/ui';
+
+import { BaseProps, FormField, FormFieldStatus, SvgIcon } from '@src/libs/ui';
 
 type Ref = HTMLInputElement;
 
@@ -26,6 +27,7 @@ const InputContainer = styled('div')<InputProps>(
     fontFamily: monotype
       ? theme.typography.fontFamily.mono
       : theme.typography.fontFamily.primary,
+    fontSize: '1.4rem',
     lineHeight: '2.4rem',
     height: '4rem',
 
@@ -77,15 +79,19 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
   // https://github.com/make-software/casper-wallet/issues/547
   '::-ms-reveal': {
     display: 'none'
+  },
+  '::-webkit-calendar-picker-indicator': {
+    // Important flag needed because of the specificity of the CSS selector
+    display: 'none !important'
   }
 }));
 
 const PrefixContainer = styled('div')(({ theme }) => ({
-  marginRight: 16
+  marginRight: 8
 }));
 
 const SuffixContainer = styled('div')(({ theme }) => ({
-  marginLeft: 16
+  marginLeft: 8
 }));
 
 const SuffixTextContainer = styled(SuffixContainer)(({ theme }) => ({
@@ -116,12 +122,12 @@ export interface InputProps extends BaseProps {
   name?: string;
   step?: string;
   label?: string;
-  rightLabel?: string;
+  rightLabel?: string | null;
   prefixIcon?: ReactNode | null;
   suffixIcon?: ReactNode | null;
   // TODO: make a better name 🙈
   oneColoredIcons?: boolean;
-  suffixText?: string | null;
+  suffixText?: string | null | ReactNode;
 
   type?: HTMLInputTypeAttribute;
   required?: boolean;
@@ -202,9 +208,21 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
           readOnly={readOnly}
         />
 
+        {!suffixIcon && error && (
+          <SuffixContainer>
+            <SvgIcon
+              src="assets/icons/error.svg"
+              size={24}
+              color="contentRed"
+            />
+          </SuffixContainer>
+        )}
+
         {suffixIcon && <SuffixContainer>{suffixIcon}</SuffixContainer>}
 
-        {suffixText && <SuffixTextContainer>{suffixText}</SuffixTextContainer>}
+        {suffixText && !error && (
+          <SuffixTextContainer>{suffixText}</SuffixTextContainer>
+        )}
       </InputContainer>
     </FormField>
   );

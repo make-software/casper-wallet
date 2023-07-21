@@ -19,7 +19,7 @@ export type TypographyType =
   | 'CSPRBold'
   | 'listSubtext'
   | 'formFieldStatus' // TODO: Temporary name. Make a better name
-  | 'fullHash';
+  | 'subtitle';
 
 export type CSPRSize = '2.8rem' | '2.4rem' | '2rem' | '1.8rem';
 
@@ -32,6 +32,7 @@ export interface BodyStylesProps extends BaseProps {
   wordBreak?: boolean;
   fontSize?: CSPRSize;
   ellipsis?: boolean;
+  overflowWrap?: boolean;
 }
 
 export const getFontSizeBasedOnTextLength = (length: number) => {
@@ -59,7 +60,8 @@ function getBodyStyles(
     capitalize = false,
     noWrap = false,
     wordBreak = false,
-    ellipsis = false
+    ellipsis = false,
+    overflowWrap = false
   }: BodyStylesProps
 ): CSSObject {
   return {
@@ -85,6 +87,9 @@ function getBodyStyles(
       overflow: 'hidden',
       whiteSpace: 'nowrap',
       textOverflow: 'ellipsis'
+    }),
+    ...(overflowWrap && {
+      overflowWrap: 'break-word'
     })
   };
 }
@@ -131,7 +136,7 @@ const StyledTypography = styled('span').withConfig({
     case 'captionHash':
       return {
         ...captionBase,
-        lineHeight: '1.6rem',
+        lineHeight: '2.4rem',
         fontFamily: theme.typography.fontFamily.mono
       };
 
@@ -140,8 +145,7 @@ const StyledTypography = styled('span').withConfig({
         ...base,
         fontSize: '1.2rem',
         lineHeight: '1.6rem',
-        fontWeight: theme.typography.fontWeight.medium,
-        textTransform: 'uppercase'
+        fontWeight: theme.typography.fontWeight.medium
       };
     case 'body':
       return bodyBase;
@@ -184,11 +188,12 @@ const StyledTypography = styled('span').withConfig({
         lineHeight: '1.2rem'
       };
 
-    case 'fullHash':
+    case 'subtitle':
       return {
         ...captionBase,
-        verticalAlign: 'middle',
-        fontFamily: theme.typography.fontFamily.mono
+        fontSize: '1.8rem',
+        lineHeight: '2.4rem',
+        fontWeight: theme.typography.fontWeight.bold
       };
 
     default:

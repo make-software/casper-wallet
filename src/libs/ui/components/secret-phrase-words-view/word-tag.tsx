@@ -64,6 +64,7 @@ export function WordTag({
       {!hideIndex && (
         <Typography
           type="labelMedium"
+          uppercase
           color={selected ? 'inherit' : 'contentSecondary'}
         >
           {index + 1}

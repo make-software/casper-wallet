@@ -7,8 +7,8 @@ export interface GetCurrencyRateRequestResponse {
 }
 
 export interface ActiveAccountBalance {
-  amount: string;
-  fiatAmount: string;
+  amountMotes: string | null;
+  amountFiat: string | null;
 }
 
 export interface FetchBalanceResponse {

@@ -3,7 +3,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 
 import { DataWithPayload } from '@libs/services/types';
 
-import { FETCH_QUERY_OPTIONS } from '@src/constants';
+import { BALANCE_REFRESH_RATE, CURRENCY_REFRESH_RATE } from '@src/constants';
 
 import { handleError, toJson } from '../utils';
 import { queryClient } from '../query-client';
@@ -57,7 +57,7 @@ export const fetchAccountBalance = ({
     ['getAccountBalanceRequest', publicKey, casperApiUrl],
     () => accountBalanceRequest(publicKey, casperApiUrl),
     {
-      staleTime: FETCH_QUERY_OPTIONS.apiCacheTime
+      staleTime: BALANCE_REFRESH_RATE
     }
   );
 
@@ -66,6 +66,6 @@ export const fetchCurrencyRate = ({ casperApiUrl }: { casperApiUrl: string }) =>
     'getCurrencyRateRequest',
     () => currencyRateRequest(casperApiUrl),
     {
-      staleTime: FETCH_QUERY_OPTIONS.apiCacheTime
+      staleTime: CURRENCY_REFRESH_RATE
     }
   );

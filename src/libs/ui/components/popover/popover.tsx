@@ -1,22 +1,25 @@
 import React, { useState, useRef, PropsWithChildren, MouseEvent } from 'react';
 import styled from 'styled-components';
 
-import { AlignedFlexRow, FlexColumn, SpacingSize } from '@libs/layout';
+import { AlignedFlexRow, FlexColumn, Overlay, SpacingSize } from '@libs/layout';
 import { useClickAway } from '@libs/ui/hooks/use-click-away';
 
 import { PopoverPortal } from './popover-portal';
 
-const popoverOffsetFromChildren = 64;
+const popoverOffsetFromChildren = 8;
 const contentHeight = 188;
 
 const ChildrenContainer = styled(AlignedFlexRow)`
-  padding: 14px 18px;
   cursor: pointer;
 `;
 
 interface PopoverContainerProps {
   domRect?: DOMRect;
 }
+
+const PopoverOverlay = styled(Overlay)`
+  background: inherit;
+`;
 
 const PopoverContainer = styled.div<PopoverContainerProps>`
   position: absolute;
@@ -26,12 +29,12 @@ const PopoverContainer = styled.div<PopoverContainerProps>`
       return '0px';
     }
 
-    const { top, bottom } = domRect;
+    const { top, bottom, height } = domRect;
 
     if (top && bottom) {
       return bottom >= window.innerHeight - contentHeight
         ? `${top - contentHeight}px`
-        : `${top + popoverOffsetFromChildren}px`;
+        : `${top + height + popoverOffsetFromChildren}px`;
     }
   }};
 
@@ -84,14 +87,16 @@ export function Popover({
 
       {isOpen && (
         <PopoverPortal>
-          <PopoverContainer
-            ref={clickAwayRef}
-            domRect={childrenContainerRef.current?.getBoundingClientRect()}
-          >
-            <PopoverItemsContainer gap={SpacingSize.Tiny}>
-              {renderMenuItems({ closePopover })}
-            </PopoverItemsContainer>
-          </PopoverContainer>
+          <PopoverOverlay>
+            <PopoverContainer
+              ref={clickAwayRef}
+              domRect={childrenContainerRef.current?.getBoundingClientRect()}
+            >
+              <PopoverItemsContainer gap={SpacingSize.Tiny}>
+                {renderMenuItems({ closePopover })}
+              </PopoverItemsContainer>
+            </PopoverContainer>
+          </PopoverOverlay>
         </PopoverPortal>
       )}
     </>

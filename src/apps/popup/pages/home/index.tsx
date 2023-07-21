@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { css } from 'styled-components';
 import { RootState } from 'typesafe-actions';
+import browser from 'webextension-polyfill';
 
 import { HeaderSubmenuBarNavLink, LinkType } from '@libs/layout';
 import {
@@ -10,55 +11,49 @@ import {
   ContentContainer,
   FlexRow,
   LeftAlignedFlexColumn,
-  SpaceAroundFlexColumn,
   SpaceBetweenFlexRow,
   SpacingSize,
-  TileContainer
+  TileContainer,
+  VerticalSpaceContainer
 } from '@src/libs/layout/containers';
 
 import {
+  AccountActionsMenuPopover,
   Avatar,
   Button,
   getFontSizeBasedOnTextLength,
   Hash,
-  HashDisplayContext,
   HashVariant,
-  Link,
-  SvgIcon,
   Tile,
-  Typography
+  Typography,
+  Tab,
+  Tabs,
+  DeploysList
 } from '@libs/ui';
 
-import { RouterPath, useTypedNavigate } from '@popup/router';
-
-import {
-  ActiveAccountBalance,
-  dispatchFetchActiveAccountBalance
-} from '@libs/services/balance-service';
-import {
-  formatCurrency,
-  formatNumber,
-  motesToCSPR,
-  motesToCurrency
-} from '@libs/ui/utils/formatters';
+import { useFetchAccountActivity } from '@src/hooks';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
-import { getBlockExplorerAccountUrl } from '@src/constants';
-import { selectCasperUrlsBaseOnActiveNetworkSetting } from '@src/background/redux/settings/selectors';
-
 import {
+  selectActiveNetworkSetting,
   selectActiveOrigin,
   selectConnectedAccountsWithActiveOrigin,
+  selectCountOfAccounts,
   selectIsActiveAccountConnectedWithActiveOrigin,
-  selectVaultActiveAccount,
-  selectCountOfAccounts
+  selectVaultActiveAccount
 } from '@src/background/redux/root-selector';
+import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
+import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
+import { selectAccountBalance } from '@background/redux/account-info/selectors';
+import {
+  ActivityListTransactionsType,
+  getBuyWithTopperUrl,
+  HomePageTabName,
+  NetworkSetting
+} from '@src/constants';
+
+import { TokensList } from './components/tokens-list';
 import { ConnectionStatusBadge } from './components/connection-status-badge';
-
-export const HomePageContentContainer = styled(ContentContainer)`
-  padding-bottom: 0;
-`;
-
-// Account info
 
 const fullWidthAndMarginTop = css`
   margin-top: 16px;
@@ -76,35 +71,38 @@ const BalanceContainer = styled(CenteredFlexColumn)`
   }
 `;
 
-// List of accounts
-
-const ButtonsContainer = styled(SpaceAroundFlexColumn)`
-  width: 100%;
+const ButtonsContainer = styled(SpaceBetweenFlexRow)`
   margin-top: 24px;
 `;
+
+export const HomePageTabsId = {
+  Tokens: 0,
+  Deploys: 1,
+  NFTs: 2
+};
 
 export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
+  const location = useTypedLocation();
 
-  const [balance, setBalance] = useState<ActiveAccountBalance>({
-    amount: '-',
-    fiatAmount: '-'
-  });
+  const state = location.state;
 
   const activeOrigin = useSelector(selectActiveOrigin);
   const { disconnectAccountWithEvent: disconnectAccount } = useAccountManager();
   const isActiveAccountConnected = useSelector(
     selectIsActiveAccountConnectedWithActiveOrigin
   );
+  const network = useSelector(selectActiveNetworkSetting);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const connectedAccounts = useSelector((state: RootState) =>
     selectConnectedAccountsWithActiveOrigin(state)
   );
-  const { casperLiveUrl, casperApiUrl } = useSelector(
-    selectCasperUrlsBaseOnActiveNetworkSetting
-  );
+  const balance = useSelector(selectAccountBalance);
+
+  useActiveAccountBalance();
+  useFetchAccountActivity(ActivityListTransactionsType.All);
 
   const handleConnectAccount = useCallback(() => {
     if (!activeAccount || isActiveAccountConnected) {
@@ -118,30 +116,17 @@ export function HomePageContent() {
     }
   }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
 
-  useEffect(() => {
-    dispatchFetchActiveAccountBalance(activeAccount?.publicKey)
-      .then(({ payload: { balance, currencyRate } }) => {
-        if (balance != null) {
-          const amount = formatNumber(motesToCSPR(balance), {
-            precision: { max: 5 }
-          });
-          const fiatAmount =
-            currencyRate != null
-              ? formatCurrency(motesToCurrency(balance, currencyRate), 'USD', {
-                  precision: 2
-                })
-              : t('Currency service is offline...');
-
-          setBalance({ amount, fiatAmount });
-        }
-      })
-      .catch(error => {
-        console.error('Balance request failed:', error);
+  const handleBuyWithCSPR = useCallback(() => {
+    if (activeAccount?.publicKey && network === NetworkSetting.Mainnet) {
+      browser.tabs.create({
+        url: getBuyWithTopperUrl(activeAccount.publicKey),
+        active: true
       });
-  }, [activeAccount?.publicKey, casperApiUrl, t]);
+    }
+  }, [activeAccount?.publicKey, network]);
 
   return (
-    <HomePageContentContainer>
+    <ContentContainer>
       {activeAccount && (
         <Tile>
           <TileContainer>
@@ -150,52 +135,66 @@ export function HomePageContent() {
                 isConnected={isActiveAccountConnected}
                 displayContext="home"
               />
-              <Link
-                href={getBlockExplorerAccountUrl(
-                  casperLiveUrl,
-                  activeAccount.publicKey
-                )}
-                target="_blank"
-                color="inherit"
-                title={t('View account in CSPR.live')}
-              >
-                <SvgIcon src="assets/icons/external-link.svg" />
-              </Link>
+              <AccountActionsMenuPopover account={activeAccount} />
             </SpaceBetweenFlexRow>
-            <Avatar publicKey={activeAccount.publicKey} />
+            <Avatar
+              size={80}
+              publicKey={activeAccount.publicKey}
+              top={SpacingSize.Medium}
+            />
             <NameAndAddressContainer>
               <Typography type="bodySemiBold">{activeAccount.name}</Typography>
               <Hash
                 value={activeAccount.publicKey}
                 variant={HashVariant.CaptionHash}
                 truncated
-                withCopyOnSelfClick
-                displayContext={HashDisplayContext.Home}
               />
             </NameAndAddressContainer>
             <BalanceContainer>
               <FlexRow gap={SpacingSize.Small} wrap="wrap">
                 <Typography
                   type="CSPRBold"
-                  fontSize={getFontSizeBasedOnTextLength(balance.amount.length)}
+                  fontSize={getFontSizeBasedOnTextLength(
+                    balance.amountMotes?.length || 1
+                  )}
                 >
-                  {balance.amount}
+                  {balance.amountMotes == null
+                    ? '-'
+                    : formatNumber(motesToCSPR(balance.amountMotes), {
+                        precision: { max: 5 }
+                      })}
                 </Typography>
                 <Typography
                   type="CSPRLight"
                   color="contentSecondary"
-                  fontSize={getFontSizeBasedOnTextLength(balance.amount.length)}
+                  fontSize={getFontSizeBasedOnTextLength(
+                    balance.amountMotes?.length || 1
+                  )}
                 >
                   CSPR
                 </Typography>
               </FlexRow>
-              <Typography type="body" color="contentSecondary">
-                {balance.fiatAmount}
+              <Typography
+                type="body"
+                color="contentSecondary"
+                loading={!balance.amountMotes}
+              >
+                {balance.amountFiat}
               </Typography>
             </BalanceContainer>
             <ButtonsContainer gap={SpacingSize.Large}>
+              {network === NetworkSetting.Mainnet && (
+                <Button
+                  onClick={handleBuyWithCSPR}
+                  color="primaryBlue"
+                  flexWidth
+                >
+                  <Trans t={t}>Buy CSPR</Trans>
+                </Button>
+              )}
               {isActiveAccountConnected ? (
                 <Button
+                  flexWidth
                   disabled={activeOrigin == null}
                   onClick={() =>
                     activeOrigin &&
@@ -207,6 +206,7 @@ export function HomePageContent() {
                 </Button>
               ) : (
                 <Button
+                  flexWidth
                   disabled={activeOrigin == null}
                   onClick={handleConnectAccount}
                   color="primaryRed"
@@ -214,24 +214,22 @@ export function HomePageContent() {
                   <Trans t={t}>Connect</Trans>
                 </Button>
               )}
-              <Button
-                color="secondaryBlue"
-                onClick={() =>
-                  navigate(
-                    RouterPath.AccountSettings.replace(
-                      ':accountName',
-                      activeAccount.name
-                    )
-                  )
-                }
-              >
-                <Trans t={t}>Manage account</Trans>
-              </Button>
             </ButtonsContainer>
           </TileContainer>
         </Tile>
       )}
-    </HomePageContentContainer>
+      <VerticalSpaceContainer top={SpacingSize.Tiny}>
+        <Tabs preferActiveTabId={state?.activeTabId}>
+          <Tab tabName={HomePageTabName.Tokens}>
+            <TokensList />
+          </Tab>
+          <Tab tabName={HomePageTabName.Deploys}>
+            <DeploysList />
+          </Tab>
+          <Tab tabName={HomePageTabName.NFTs} />
+        </Tabs>
+      </VerticalSpaceContainer>
+    </ContentContainer>
   );
 }
 

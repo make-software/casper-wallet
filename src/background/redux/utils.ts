@@ -20,6 +20,8 @@ import { SessionState } from './session/types';
 import { LastActivityTimeState } from './last-activity-time/reducer';
 import { SettingsState } from './settings/types';
 import { ActiveOriginState } from './active-origin/types';
+import { RecentRecipientPublicKeysState } from './recent-recipient-public-keys/types';
+import { AccountInfoState } from './account-info/types';
 
 declare global {
   interface Window {
@@ -45,6 +47,7 @@ export const LOGIN_RETRY_KEY = '7ZVdMbk9yD8WGZ';
 export const LOGIN_RETRY_LOCKOUT_KEY = 'p6nnYiaxcsaNG3';
 export const LAST_ACTIVITY_TIME = 'j8d1dusn76EdD';
 export const VAULT_SETTINGS = 'Nmxd8BZh93MHua';
+export const RECENT_RECIPIENT_PUBLIC_KEYS = '7c2WyRuGhEtaDX';
 
 type StorageState = {
   [VAULT_CIPHER_KEY]: string;
@@ -53,6 +56,7 @@ type StorageState = {
   [LOGIN_RETRY_LOCKOUT_KEY]: LoginRetryLockoutTimeState;
   [LAST_ACTIVITY_TIME]: number;
   [VAULT_SETTINGS]: SettingsState;
+  [RECENT_RECIPIENT_PUBLIC_KEYS]: RecentRecipientPublicKeysState;
 };
 
 // this needs to be private
@@ -66,14 +70,16 @@ export async function getExistingMainStoreSingletonOrInit() {
     [LOGIN_RETRY_KEY]: loginRetryCount,
     [LOGIN_RETRY_LOCKOUT_KEY]: loginRetryLockoutTime,
     [LAST_ACTIVITY_TIME]: lastActivityTime,
-    [VAULT_SETTINGS]: settings
+    [VAULT_SETTINGS]: settings,
+    [RECENT_RECIPIENT_PUBLIC_KEYS]: recentRecipientPublicKeys
   } = (await browser.storage.local.get([
     VAULT_CIPHER_KEY,
     KEYS_KEY,
     LOGIN_RETRY_KEY,
     LOGIN_RETRY_LOCKOUT_KEY,
     LAST_ACTIVITY_TIME,
-    VAULT_SETTINGS
+    VAULT_SETTINGS,
+    RECENT_RECIPIENT_PUBLIC_KEYS
   ])) as StorageState;
 
   if (storeSingleton == null) {
@@ -89,7 +95,8 @@ export async function getExistingMainStoreSingletonOrInit() {
         loginRetryCount,
         loginRetryLockoutTime,
         lastActivityTime,
-        settings
+        settings,
+        recentRecipientPublicKeys
       });
     }
     // send start action
@@ -111,7 +118,8 @@ export async function getExistingMainStoreSingletonOrInit() {
         loginRetryCount,
         loginRetryLockoutTime,
         lastActivityTime,
-        settings
+        settings,
+        recentRecipientPublicKeys
       } = state;
       browser.storage.local
         .set({
@@ -120,7 +128,8 @@ export async function getExistingMainStoreSingletonOrInit() {
           [LOGIN_RETRY_KEY]: loginRetryCount,
           [LOGIN_RETRY_LOCKOUT_KEY]: loginRetryLockoutTime,
           [LAST_ACTIVITY_TIME]: lastActivityTime,
-          [VAULT_SETTINGS]: settings
+          [VAULT_SETTINGS]: settings,
+          [RECENT_RECIPIENT_PUBLIC_KEYS]: recentRecipientPublicKeys
         })
         .catch(e => {
           console.error('Persist encrypted vault failed: ', e);
@@ -142,6 +151,8 @@ export type PopupState = {
   lastActivityTime: LastActivityTimeState;
   settings: SettingsState;
   activeOrigin: ActiveOriginState;
+  recentRecipientPublicKeys: RecentRecipientPublicKeysState;
+  accountInfo: AccountInfoState;
 };
 
 // These state keys will be passed to popups
@@ -157,7 +168,9 @@ export const selectPopupState = (state: RootState): PopupState => {
     loginRetryLockoutTime: state.loginRetryLockoutTime,
     lastActivityTime: state.lastActivityTime,
     activeOrigin: state.activeOrigin,
-    settings: state.settings
+    settings: state.settings,
+    recentRecipientPublicKeys: state.recentRecipientPublicKeys,
+    accountInfo: state.accountInfo
   };
 };
 

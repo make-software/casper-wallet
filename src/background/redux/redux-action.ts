@@ -10,6 +10,8 @@ import * as loginRetryLockoutTime from './login-retry-lockout-time/actions';
 import * as lastActivityTime from './last-activity-time/actions';
 import * as settings from './settings/actions';
 import * as activeOrigin from './active-origin/actions';
+import * as recentRecipientPublicKeys from './recent-recipient-public-keys/actions';
+import * as accountInfo from './account-info/actions';
 
 const reduxAction = {
   sagas,
@@ -22,7 +24,9 @@ const reduxAction = {
   loginRetryLockoutTime,
   lastActivityTime,
   activeOrigin,
-  settings
+  settings,
+  recentRecipientPublicKeys,
+  accountInfo
 };
 
 export type ReduxAction = ActionType<typeof reduxAction>;

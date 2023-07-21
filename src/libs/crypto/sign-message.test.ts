@@ -5,7 +5,7 @@ const getMessageSignature = (
   message: string,
   keyPair: Keys.Ed25519 | Keys.Secp256K1
 ) => {
-  const publicKeyHex = keyPair.publicKey.toHex();
+  const publicKeyHex = keyPair.publicKey.toHex(false);
   const privateKeyBase64 = Buffer.from(keyPair.privateKey).toString('base64');
   return signMessage(message, publicKeyHex, privateKeyBase64);
 };

@@ -28,20 +28,21 @@ const LabelContainer = styled('div')(({ theme }) => ({
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'space-between',
-  '& > *': { marginBottom: 4 }
+  padding: `0 ${theme.padding[1.6]} 0`,
+  '& > *': { marginBottom: 8 }
 }));
 
 const StatusTextContainer = styled('div')<FormFieldProps>(
   ({ theme, status }) => ({
     // @ts-ignore
     color: theme.color[getThemeColor(status)],
-    margin: '4px 0 0 10px'
+    margin: '4px 0 0 16px'
   })
 );
 
 export interface FormFieldProps extends BaseProps {
   label?: string;
-  rightLabel?: string;
+  rightLabel?: string | null;
   status?: FormFieldStatus;
   statusText?: string | null;
 }
@@ -57,17 +58,17 @@ export function FormField({
   return (
     <StyledContainer {...restProps}>
       <LabelContainer>
-        {label && <Typography type="labelMedium">{label}</Typography>}
-        {rightLabel && <Typography type="labelMedium">{rightLabel}</Typography>}
+        {label && <Typography type="bodySemiBold">{label}</Typography>}
+        {rightLabel && <Typography type="body">{rightLabel}</Typography>}
       </LabelContainer>
 
       {children}
 
-      <StatusTextContainer status={status}>
-        <Typography type="formFieldStatus">{statusText}</Typography>
-      </StatusTextContainer>
+      {statusText && (
+        <StatusTextContainer status={status}>
+          <Typography type="formFieldStatus">{statusText}</Typography>
+        </StatusTextContainer>
+      )}
     </StyledContainer>
   );
 }
-
-export default FormField;

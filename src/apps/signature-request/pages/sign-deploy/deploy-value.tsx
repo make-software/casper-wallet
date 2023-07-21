@@ -3,7 +3,7 @@ import { CLValue } from 'casper-js-sdk';
 
 import {
   formatNumber,
-  formatTimestamp,
+  formatDate,
   motesToCSPR
 } from '@libs/ui/utils/formatters';
 import { Hash, HashVariant, Typography } from '@src/libs/ui';
@@ -19,12 +19,16 @@ import {
 
 export function DeployValue({
   id,
-  value
+  value,
+  isContractCall,
+  showSimpleAmount
 }: {
   id: string;
   value: string | CLValue;
+  isContractCall?: boolean;
+  showSimpleAmount?: boolean;
 }) {
-  if (typeof value === 'string' || typeof value === 'number') {
+  if (typeof value === 'string') {
     // string args
     if (isKeyOfHashValue(id)) {
       return (
@@ -43,16 +47,14 @@ export function DeployValue({
       })} CSPR`;
 
       return (
-        <Hash
-          value={cspr}
-          variant={HashVariant.BodyHash}
-          color="contentPrimary"
-        />
+        <Typography type="bodyHash" color="contentPrimary">
+          {cspr}
+        </Typography>
       );
     }
 
     if (isKeyOfTimestampValue(id)) {
-      return <Typography type="body">{formatTimestamp(value)}</Typography>;
+      return <Typography type="body">{formatDate(value)}</Typography>;
     }
 
     return <Typography type="body">{value}</Typography>;
@@ -72,6 +74,12 @@ export function DeployValue({
     }
 
     if (isDeployArgValueNumber(value)) {
+      if (isContractCall && id === 'amount' && showSimpleAmount) {
+        return (
+          <Typography type="bodyHash">{formatNumber(parsedValue)}</Typography>
+        );
+      }
+
       const numbers = isKeyOfCurrencyValue(id)
         ? `${formatNumber(motesToCSPR(parsedValue), {
             precision: { max: 5 }
@@ -79,11 +87,9 @@ export function DeployValue({
         : formatNumber(parsedValue);
 
       return (
-        <Hash
-          value={numbers}
-          variant={HashVariant.BodyHash}
-          color="contentPrimary"
-        />
+        <Typography type="bodyHash" color="contentPrimary">
+          {numbers}
+        </Typography>
       );
     }
 

@@ -1,5 +1,8 @@
 import React, { PropsWithChildren } from 'react';
 import styled from 'styled-components';
+import { MacScrollbar } from 'mac-scrollbar';
+
+import 'mac-scrollbar/dist/mac-scrollbar.css';
 
 import { FlexColumn } from './containers';
 
@@ -29,10 +32,7 @@ const Container = styled(FlexColumn)`
 
 const PageHeader = styled.header``;
 
-const PageContent = styled.div`
-  flex-grow: 1;
-  overflow-y: auto;
-`;
+const PageContent = styled.div``;
 
 const PageFooter = styled.footer``;
 
@@ -52,7 +52,11 @@ export function PopupLayout({
   return (
     <Container {...asFormProps}>
       {renderHeader && <PageHeader>{renderHeader()}</PageHeader>}
-      <PageContent>{renderContent()}</PageContent>
+      <MacScrollbar>
+        <PageContent id="layout-content-container">
+          {renderContent()}
+        </PageContent>
+      </MacScrollbar>
       {renderFooter && <PageFooter>{renderFooter()}</PageFooter>}
     </Container>
   );

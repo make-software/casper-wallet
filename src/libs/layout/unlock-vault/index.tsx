@@ -34,6 +34,7 @@ import {
 import { unlockVault } from '@src/background/redux/sagas/actions';
 import { selectVaultCipher } from '@background/redux/vault-cipher/selectors';
 import { UnlockVault } from '@background/redux/sagas/types';
+import { VaultState } from '@background/redux/vault/types';
 import { useLockWalletWhenNoMoreRetries } from '@layout/unlock-protected-page-content/use-lock-wallet-when-no-more-retries';
 import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
 
@@ -92,14 +93,39 @@ export function UnlockVaultPageContent() {
         newEncryptionKeyHash
       } = event.data;
 
-      dispatchToMainStore(
-        unlockVault({
-          vault,
-          newKeyDerivationSaltHash,
-          newVaultCipher,
-          newEncryptionKeyHash
-        })
+      // We should not store checksummed public keys because of possible issues on connect apps
+      // that does not migrate to the new casper SDK behavior
+      const hasCheckSummedPublicKeys = vault.accounts.some(acc =>
+        /[A-Z]/.test(acc.publicKey)
       );
+
+      if (hasCheckSummedPublicKeys) {
+        const updatedVault: VaultState = {
+          ...vault,
+          accounts: vault.accounts.map(acc => ({
+            ...acc,
+            publicKey: acc.publicKey.toLowerCase()
+          }))
+        };
+
+        dispatchToMainStore(
+          unlockVault({
+            vault: updatedVault,
+            newKeyDerivationSaltHash,
+            newVaultCipher,
+            newEncryptionKeyHash
+          })
+        );
+      } else {
+        dispatchToMainStore(
+          unlockVault({
+            vault,
+            newKeyDerivationSaltHash,
+            newVaultCipher,
+            newEncryptionKeyHash
+          })
+        );
+      }
     };
 
     unlockVaultWorker.onerror = error => {
@@ -122,7 +148,7 @@ export function UnlockVaultPageContent() {
           <IllustrationContainer>
             <SvgIcon src="assets/illustrations/password-lock.svg" size={120} />
           </IllustrationContainer>
-          <ParagraphContainer top={SpacingSize.ExtraLarge}>
+          <ParagraphContainer top={SpacingSize.XL}>
             <Typography type="header">
               <Trans t={t}>
                 Please wait before the next attempt to unlock your wallet
@@ -156,7 +182,7 @@ export function UnlockVaultPageContent() {
         <IllustrationContainer>
           <SvgIcon src="assets/illustrations/locked-wallet.svg" size={120} />
         </IllustrationContainer>
-        <ParagraphContainer top={SpacingSize.ExtraLarge}>
+        <ParagraphContainer top={SpacingSize.XL}>
           <Typography type="header">
             <Trans t={t}>Your wallet is locked</Trans>
           </Typography>

@@ -3,8 +3,6 @@ import '@libs/i18n/i18n';
 import React from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
-import 'mac-scrollbar/dist/mac-scrollbar.css';
-
 import { RouterPath } from './router';
 
 import { ImportAccountWithFilePage } from './pages/import-account-with-file';
