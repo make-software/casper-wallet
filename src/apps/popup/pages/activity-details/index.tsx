@@ -1,15 +1,22 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   HeaderSubmenuBarNavLink,
+  HeaderViewInExplorer,
   PopupHeader,
   PopupLayout
 } from '@libs/layout';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { ActivityDetailsPageContent } from './content';
+import {
+  dispatchFetchExtendedDeploysInfo,
+  ExtendedDeploy
+} from '@libs/services/account-activity-service';
 
 export const ActivityDetailsPage = () => {
+  const [deployInfo, setDeployInfo] = useState<ExtendedDeploy | null>(null);
+
   const location = useTypedLocation();
   const navigate = useTypedNavigate();
 
@@ -21,6 +28,16 @@ export const ActivityDetailsPage = () => {
     }
   }, [activityDetailsData, navigate]);
 
+  useEffect(() => {
+    if (activityDetailsData?.deployHash) {
+      dispatchFetchExtendedDeploysInfo(activityDetailsData?.deployHash).then(
+        ({ payload: deployInfoResponse }) => {
+          setDeployInfo(deployInfoResponse);
+        }
+      );
+    }
+  }, [activityDetailsData?.deployHash]);
+
   return (
     <PopupLayout
       renderHeader={() => (
@@ -29,7 +46,10 @@ export const ActivityDetailsPage = () => {
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={() => (
-            <HeaderSubmenuBarNavLink linkType="back" />
+            <>
+              <HeaderSubmenuBarNavLink linkType="back" />
+              <HeaderViewInExplorer deployHash={deployInfo?.deployHash} />
+            </>
           )}
         />
       )}
@@ -37,10 +57,10 @@ export const ActivityDetailsPage = () => {
         <ActivityDetailsPageContent
           fromAccount={activityDetailsData?.fromAccount}
           toAccount={activityDetailsData?.toAccount}
-          deployHash={activityDetailsData?.deployHash}
           type={activityDetailsData?.type}
           amount={activityDetailsData?.amount}
           symbol={activityDetailsData?.symbol}
+          deployInfo={deployInfo}
         />
       )}
     />

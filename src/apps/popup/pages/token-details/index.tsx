@@ -25,10 +25,7 @@ export const TokenDetailPage = () => {
           renderSubmenuBarItems={() => (
             <>
               <HeaderSubmenuBarNavLink linkType="back" />
-              <HeaderViewInExplorer
-                tokenName={tokenName}
-                erc20Tokens={erc20Tokens}
-              />
+              <HeaderViewInExplorer tokenName={tokenName} />
             </>
           )}
         />

@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
 
 import {
   AlignedFlexRow,
@@ -21,16 +20,12 @@ import {
   Hash,
   HashVariant,
   isPendingStatus,
-  Link,
   SvgIcon,
   Tile,
   Tooltip,
   Typography
 } from '@libs/ui';
-import {
-  dispatchFetchExtendedDeploysInfo,
-  ExtendedDeploy
-} from '@libs/services/account-activity-service';
+import { ExtendedDeploy } from '@libs/services/account-activity-service';
 import {
   divideErc20Balance,
   formatCurrency,
@@ -40,17 +35,12 @@ import {
   motesToCSPR,
   motesToCurrency
 } from '@libs/ui/utils/formatters';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import {
-  getBlockExplorerDeployUrl,
-  TransferType,
-  TypeName
-} from '@src/constants';
+import { TransferType, TypeName } from '@src/constants';
 
 interface ActivityDetailsPageContentProps {
   fromAccount?: string;
   toAccount?: string;
-  deployHash?: string;
+  deployInfo?: ExtendedDeploy | null;
   type?: TransferType | null;
   amount?: string | null;
   symbol?: string | null;
@@ -93,23 +83,12 @@ const RowsContainer = styled(FlexColumn)<BorderBottomPseudoElementProps>`
 export const ActivityDetailsPageContent = ({
   fromAccount,
   toAccount,
-  deployHash,
+  deployInfo,
   type,
   amount,
   symbol
 }: ActivityDetailsPageContentProps) => {
-  const [deployInfo, setDeployInfo] = useState<ExtendedDeploy | null>(null);
-
   const { t } = useTranslation();
-  const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
-
-  useEffect(() => {
-    dispatchFetchExtendedDeploysInfo(deployHash || '').then(
-      ({ payload: deployInfoResponse }) => {
-        setDeployInfo(deployInfoResponse);
-      }
-    );
-  }, [deployHash]);
 
   if (deployInfo == null) return null;
 
@@ -173,18 +152,6 @@ export const ActivityDetailsPageContent = ({
         <RowsContainer marginLeftForSeparatorLine={16}>
           <ItemContainer>
             <DeployStatus textWithIcon deployResult={deployInfo} />
-            <Link
-              color="fillBlue"
-              target="_blank"
-              href={getBlockExplorerDeployUrl(
-                casperLiveUrl,
-                deployInfo.deployHash
-              )}
-            >
-              <Typography type="captionMedium">
-                <Trans t={t}>View on CSPR.live</Trans>
-              </Typography>
-            </Link>
           </ItemContainer>
           <AddressContainer gap={SpacingSize.Small}>
             <SpaceBetweenFlexRow>
