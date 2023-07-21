@@ -52,7 +52,7 @@ export const isValidPublicKey = (
   }
 
   try {
-    CLPublicKey.fromHex(publicKey).toHex();
+    CLPublicKey.fromHex(publicKey).toHex(false);
     return true;
   } catch (error) {
     return false;
