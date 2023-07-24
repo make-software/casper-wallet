@@ -121,6 +121,10 @@ export const DeployStatus = ({
     );
   }
 
+  if (status === Status.Success) {
+    return null;
+  }
+
   return (
     <Tooltip title={message} placement="bottomCenter">
       <Typography
