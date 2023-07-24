@@ -40,7 +40,7 @@ export const Avatar = ({ publicKey, size, top }: AvatarTypes) => {
     return (
       <AvatarContainer top={top}>
         <RoundedIdenticon
-          string={publicKey.toLowerCase()}
+          string={publicKey}
           size={size}
           bg={theme.color.backgroundPrimary}
         />
