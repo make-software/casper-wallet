@@ -9,6 +9,7 @@ import {
 } from 'src/libs/services/account-activity-service';
 import { PaginatedResponse } from '@libs/services/types';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
+import { NFTTokenResult } from '@libs/services/nft-service';
 
 type Meta = void;
 
@@ -71,7 +72,15 @@ export const serviceMessage = {
   )<{ accountHash: string; page: number }, Meta>(),
   fetchAccountCasperActivityResponse: createAction(
     'FETCH_ACCOUNT_CASPER_ACTIVITY_RESPONSE'
-  )<PaginatedResponse<TransferResult>, Meta>()
+  )<PaginatedResponse<TransferResult>, Meta>(),
+  fetchNftTokensRequest: createAction('FETCH_NFT_TOKENS')<
+    { accountHash: string; page: number },
+    Meta
+  >(),
+  fetchNftTokensResponse: createAction('FETCH_NFT_TOKENS_RESPONSE')<
+    PaginatedResponse<NFTTokenResult>,
+    Meta
+  >()
 };
 
 export type ServiceMessage = ActionType<typeof serviceMessage>;

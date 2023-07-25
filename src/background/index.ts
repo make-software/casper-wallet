@@ -125,6 +125,7 @@ import {
   accountDeploysUpdated
 } from '@background/redux/account-info/actions';
 import { fetchErc20TokenActivity } from '@src/libs/services/account-activity-service/erc20-token-activity-service';
+import { fetchNftTokens } from '@libs/services/nft-service';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -726,6 +727,24 @@ browser.runtime.onMessage.addListener(
             } catch (error) {
               console.error(error);
             }
+            return;
+          }
+
+          case getType(serviceMessage.fetchNftTokensRequest): {
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const data = await fetchNftTokens({
+                casperApiUrl,
+                accountHash: action.payload.accountHash,
+                page: action.payload.page
+              });
+
+              return sendResponse(serviceMessage.fetchNftTokensResponse(data));
+            } catch (error) {}
+
             return;
           }
 
