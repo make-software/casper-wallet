@@ -96,15 +96,13 @@ export const AccountCasperActivityPlate = forwardRef<
 
   useEffect(() => {
     if (
-      fromAccountPublicKey?.toLowerCase() ===
-        activeAccount?.publicKey.toLowerCase() ||
-      fromAccount?.toLowerCase() === activeAccountHash?.toLowerCase()
+      fromAccountPublicKey === activeAccount?.publicKey ||
+      fromAccount === activeAccountHash
     ) {
       setType(TransferType.Sent);
     } else if (
-      toAccountPublicKey?.toLowerCase() ===
-        activeAccount?.publicKey.toLowerCase() ||
-      toAccount?.toLowerCase() === activeAccountHash?.toLowerCase()
+      toAccountPublicKey === activeAccount?.publicKey ||
+      toAccount === activeAccountHash
     ) {
       setType(TransferType.Received);
     } else {

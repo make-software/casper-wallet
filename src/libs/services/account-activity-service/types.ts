@@ -50,6 +50,8 @@ export type ExtendedDeployArgsResult = {
   deadline?: ExtendedDeployClTypeResult;
   path?: ExtendedDeployClTypeResult;
   to?: ExtendedDeployClTypeResult;
+  validator?: ExtendedDeployClTypeResult;
+  new_validator?: ExtendedDeployClTypeResult;
 };
 
 export interface ExtendedDeployResult {

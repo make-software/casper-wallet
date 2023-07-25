@@ -179,7 +179,7 @@ export const ActivityDetailsPageContent = ({
                 <Hash
                   value={toAccount || ''}
                   variant={HashVariant.CaptionHash}
-                  truncated
+                  truncated={toAccount !== 'N/A'}
                   truncatedSize="tiny"
                   color="contentPrimary"
                 />

@@ -38,10 +38,7 @@ import {
   TypeName
 } from '@src/constants';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import {
-  getPublicKeyFormRecipient,
-  getPublicKeyFormTarget
-} from '@libs/ui/utils/utils';
+import { getRecipientAddressFromTransaction } from '@libs/ui/utils/utils';
 
 const AccountActivityPlateContainer = styled(AlignedSpaceBetweenFlexRow)`
   cursor: pointer;
@@ -97,8 +94,6 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
     const { deployHash, callerPublicKey, timestamp, args } = transactionInfo;
     let decimals: number | undefined;
     let symbol: string | undefined;
-    let toAccountPublicKey = '';
-    let toAccountHash = '';
     let amount: string | null = null;
 
     if ('contractPackage' in transactionInfo) {
@@ -106,31 +101,10 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
       symbol = transactionInfo?.contractPackage?.metadata?.symbol;
     }
 
-    // check if the transaction is an erc20 transfer
-    if ('toPublicKey' in transactionInfo) {
-      if (transactionInfo?.toPublicKey != null) {
-        toAccountPublicKey = transactionInfo?.toPublicKey;
-      } else if (
-        transactionInfo?.toType === 'account-hash' &&
-        transactionInfo?.toHash
-      ) {
-        toAccountHash = transactionInfo.toHash;
-      }
-    } else {
-      if (args?.target) {
-        toAccountPublicKey = getPublicKeyFormTarget(
-          args.target,
-          activeAccount?.publicKey
-        );
-      } else if (args?.recipient) {
-        toAccountPublicKey = getPublicKeyFormRecipient(
-          args.recipient,
-          activeAccount?.publicKey
-        );
-      } else {
-        toAccountPublicKey = '';
-      }
-    }
+    const { recipientAddress } = getRecipientAddressFromTransaction(
+      transactionInfo,
+      activeAccount?.publicKey || ''
+    );
 
     const fromAccountPublicKey =
       'fromPublicKey' in transactionInfo && transactionInfo.fromPublicKey
@@ -166,15 +140,11 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
       : '-';
 
     useEffect(() => {
-      if (
-        fromAccountPublicKey?.toLowerCase() ===
-        activeAccount?.publicKey.toLowerCase()
-      ) {
+      if (fromAccountPublicKey === activeAccount?.publicKey) {
         setType(TransferType.Sent);
       } else if (
-        toAccountPublicKey?.toLowerCase() ===
-          activeAccount?.publicKey.toLowerCase() ||
-        toAccountHash?.toLowerCase() === activeAccountHash?.toLowerCase()
+        recipientAddress === activeAccount?.publicKey ||
+        recipientAddress === activeAccountHash
       ) {
         setType(TransferType.Received);
       } else {
@@ -183,8 +153,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
     }, [
       fromAccountPublicKey,
       activeAccount?.publicKey,
-      toAccountPublicKey,
-      toAccountHash,
+      recipientAddress,
       activeAccountHash
     ]);
 
@@ -197,7 +166,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
             state: {
               activityDetailsData: {
                 fromAccount: fromAccountPublicKey,
-                toAccount: toAccountPublicKey || toAccountHash,
+                toAccount: recipientAddress,
                 deployHash,
                 type,
                 amount: formattedAmount,
