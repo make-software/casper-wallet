@@ -1,6 +1,6 @@
 import { getNftTokensUrl } from '@libs/services/nft-service/constants';
 import { handleError, toJson } from '@libs/services/utils';
-import { PaginatedResponse } from '@libs/services/types';
+import { DataWithPayload, PaginatedResponse } from '@libs/services/types';
 import { NFTTokenResult } from '@libs/services/nft-service/types';
 import { queryClient } from '@libs/services/query-client';
 import { NFT_TOKENS_REFRESH_RATE } from '@src/constants';
@@ -34,7 +34,7 @@ export const fetchNftTokens = ({
 export const dispatchFetchNftTokensRequest = (
   accountHash: string,
   page: number
-): Promise<PaginatedResponse<NFTTokenResult>> =>
+): Promise<DataWithPayload<PaginatedResponse<NFTTokenResult>>> =>
   dispatchToMainStore(
     serviceMessage.fetchNftTokensRequest({ accountHash, page })
   );

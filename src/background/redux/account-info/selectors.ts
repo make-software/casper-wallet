@@ -20,3 +20,6 @@ export const selectErc20Tokens = (state: RootState) =>
 
 export const selectAccountDeploys = (state: RootState) =>
   state.accountInfo.accountDeploys;
+
+export const selectAccountNftTokens = (state: RootState) =>
+  state.accountInfo.accountNftTokens;

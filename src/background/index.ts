@@ -112,7 +112,7 @@ import {
 import { recipientPublicKeyAdded } from './redux/recent-recipient-public-keys/actions';
 import {
   accountCasperActivityChanged,
-  accountActivityReset,
+  accountInfoReset,
   accountCasperActivityUpdated,
   accountBalanceChanged,
   accountCurrencyRateChanged,
@@ -122,7 +122,9 @@ import {
   accountErc20TokensActivityChanged,
   accountErc20TokensActivityUpdated,
   accountDeploysChanged,
-  accountDeploysUpdated
+  accountDeploysUpdated,
+  accountNftTokensAdded,
+  accountNftTokensUpdated
 } from '@background/redux/account-info/actions';
 import { fetchErc20TokenActivity } from '@src/libs/services/account-activity-service/erc20-token-activity-service';
 import { fetchNftTokens } from '@libs/services/nft-service';
@@ -529,7 +531,7 @@ browser.runtime.onMessage.addListener(
           case getType(accountCurrencyRateChanged):
           case getType(accountCasperActivityChanged):
           case getType(accountCasperActivityUpdated):
-          case getType(accountActivityReset):
+          case getType(accountInfoReset):
           case getType(accountPendingTransactionsChanged):
           case getType(accountPendingTransactionsRemove):
           case getType(accountErc20Changed):
@@ -537,6 +539,8 @@ browser.runtime.onMessage.addListener(
           case getType(accountErc20TokensActivityUpdated):
           case getType(accountDeploysChanged):
           case getType(accountDeploysUpdated):
+          case getType(accountNftTokensAdded):
+          case getType(accountNftTokensUpdated):
             store.dispatch(action);
             return sendResponse(undefined);
 
@@ -743,7 +747,9 @@ browser.runtime.onMessage.addListener(
               });
 
               return sendResponse(serviceMessage.fetchNftTokensResponse(data));
-            } catch (error) {}
+            } catch (error) {
+              console.log(error);
+            }
 
             return;
           }
