@@ -271,6 +271,12 @@ export const borderBottomPseudoElementRules = css<BorderBottomPseudoElementProps
   border-bottom: ${({ theme }) => `0.5px solid ${theme.color.borderPrimary}`};
 `;
 
+export const BorderContainer = styled.div`
+  & > *:last-child {
+    ${borderBottomPseudoElementRules};
+  }
+`;
+
 export const Overlay = styled.div`
   position: fixed;
   z-index: ${({ theme }) => theme.zIndex.modal};

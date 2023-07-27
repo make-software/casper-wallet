@@ -117,3 +117,15 @@ export const isValidAccountHash = (
   const validHashRegExp = new RegExp('^([0-9A-Fa-f]){64}$');
   return validHashRegExp.test(accountHash.trim());
 };
+
+export const mapToDictionary = <T, V extends Record<string, any>>(
+  data: V[]
+): T =>
+  data &&
+  data.reduce(
+    (prev, curr) => ({
+      ...prev,
+      [curr.key.trim()]: curr.value
+    }),
+    {} as T
+  );

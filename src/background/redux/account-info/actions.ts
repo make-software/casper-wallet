@@ -63,3 +63,7 @@ export const accountNftTokensAdded = createAction('ACCOUNT_NFT_TOKENS_ADDED')<
 export const accountNftTokensUpdated = createAction(
   'ACCOUNT_NFT_TOKENS_UPDATED'
 )<NFTTokenResult[]>();
+
+export const accountNftTokensCountChanged = createAction(
+  'ACCOUNT_NFT_TOKENS_COUNT_CHANGED'
+)<number>();

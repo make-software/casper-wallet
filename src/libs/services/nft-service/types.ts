@@ -5,6 +5,14 @@ export interface NFTTokenMetadataEntry {
   value: string;
 }
 
+export interface NFTTokenMetadata {
+  name?: string;
+  description?: string;
+  nftPreview?: string;
+  contentIpfs?: string;
+  pictureIpfs?: string;
+}
+
 export interface NFTTokenResult {
   tracking_id: string;
   token_standard_id: number;

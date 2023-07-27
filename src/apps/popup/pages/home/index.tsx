@@ -2,7 +2,6 @@ import React, { useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { css } from 'styled-components';
-import { RootState } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 
 import { HeaderSubmenuBarNavLink, LinkType } from '@libs/layout';
@@ -31,7 +30,7 @@ import {
   DeploysList
 } from '@libs/ui';
 
-import { useFetchAccountActivity } from '@src/hooks';
+import { useFetchAccountActivity, useNftTokens } from '@src/hooks';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import {
@@ -54,6 +53,7 @@ import {
 
 import { TokensList } from './components/tokens-list';
 import { ConnectionStatusBadge } from './components/connection-status-badge';
+import { NftList } from './components/nft-list';
 
 const fullWidthAndMarginTop = css`
   margin-top: 16px;
@@ -96,13 +96,14 @@ export function HomePageContent() {
   const network = useSelector(selectActiveNetworkSetting);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const connectedAccounts = useSelector((state: RootState) =>
-    selectConnectedAccountsWithActiveOrigin(state)
+  const connectedAccounts = useSelector(
+    selectConnectedAccountsWithActiveOrigin
   );
   const balance = useSelector(selectAccountBalance);
 
   useActiveAccountBalance();
   useFetchAccountActivity(ActivityListTransactionsType.All);
+  useNftTokens();
 
   const handleConnectAccount = useCallback(() => {
     if (!activeAccount || isActiveAccountConnected) {
@@ -226,7 +227,9 @@ export function HomePageContent() {
           <Tab tabName={HomePageTabName.Deploys}>
             <DeploysList />
           </Tab>
-          <Tab tabName={HomePageTabName.NFTs} />
+          <Tab tabName={HomePageTabName.NFTs}>
+            <NftList />
+          </Tab>
         </Tabs>
       </VerticalSpaceContainer>
     </ContentContainer>

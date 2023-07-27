@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { dispatchFetchNftTokensRequest } from '@libs/services/nft-service/nft-service';
+import { dispatchFetchNftTokensRequest } from '@libs/services/nft-service';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
   accountNftTokensAdded,
+  accountNftTokensCountChanged,
   accountNftTokensUpdated
 } from '@background/redux/account-info/actions';
-import { selectAccountNftTokens } from '@background/redux/account-info/selectors';
+import {
+  selectAccountNftTokens,
+  selectAccountNftTokensCount
+} from '@background/redux/account-info/selectors';
 import { ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE } from '@src/constants';
 import { useForceUpdate } from '@popup/hooks/use-force-update';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
@@ -17,11 +21,11 @@ import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/
 export const useNftTokens = () => {
   const [nftTokensPage, setNftTokensPage] = useState(1);
   const [nftTokensPageCount, setNftTokensPageCount] = useState(0);
-  const [nftTokensCount, setNftTokensCount] = useState(0);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const nftTokens = useSelector(selectAccountNftTokens);
   const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+  const nftTokensCount = useSelector(selectAccountNftTokensCount);
 
   const effectTimeoutRef = useRef<NodeJS.Timeout>();
   const forceUpdate = useForceUpdate();
@@ -33,15 +37,18 @@ export const useNftTokens = () => {
       getAccountHashFromPublicKey(activeAccount.publicKey),
       1
     )
-      .then(({ payload: { data: nftTokensList, pageCount, itemCount } }) => {
-        console.log(nftTokensList);
-        if (nftTokensList.length === nftTokens?.length) return;
+      .then(({ payload }) => {
+        if (payload) {
+          const { data: nftTokensList, pageCount, itemCount } = payload;
 
-        dispatchToMainStore(accountNftTokensAdded(nftTokensList));
+          if (itemCount === nftTokens?.length) return;
 
-        setNftTokensPageCount(pageCount);
-        setNftTokensPage(2);
-        setNftTokensCount(itemCount);
+          dispatchToMainStore(accountNftTokensAdded(nftTokensList));
+          dispatchToMainStore(accountNftTokensCountChanged(itemCount));
+
+          setNftTokensPageCount(pageCount);
+          setNftTokensPage(2);
+        }
       })
       .catch(error => {
         console.error('Account NFT request failed:', error);
@@ -67,17 +74,20 @@ export const useNftTokens = () => {
       getAccountHashFromPublicKey(activeAccount.publicKey),
       nftTokensPage
     )
-      .then(({ payload: { data: nftTokensList, pageCount, itemCount } }) => {
-        console.log(nftTokensList);
-        if (nftTokensList.length === nftTokens?.length) return;
+      .then(({ payload }) => {
+        if (payload) {
+          const { data: nftTokensList, pageCount, itemCount } = payload;
 
-        dispatchToMainStore(accountNftTokensUpdated(nftTokensList));
+          if (itemCount === nftTokens?.length) return;
 
-        setNftTokensPageCount(pageCount);
-        setNftTokensPage(nftTokensPage + 1);
+          dispatchToMainStore(accountNftTokensUpdated(nftTokensList));
 
-        if (nftTokensCount !== itemCount) {
-          setNftTokensCount(itemCount);
+          setNftTokensPageCount(pageCount);
+          setNftTokensPage(nftTokensPage + 1);
+
+          if (nftTokensCount !== itemCount) {
+            dispatchToMainStore(accountNftTokensCountChanged(itemCount));
+          }
         }
       })
       .catch(error => {
@@ -92,7 +102,6 @@ export const useNftTokens = () => {
   ]);
 
   return {
-    loadMoreNftTokens,
-    nftTokensCount
+    loadMoreNftTokens
   };
 };
