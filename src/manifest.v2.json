@@ -28,5 +28,10 @@
       "192": "logo192.png"
     }
   },
-  "web_accessible_resources": ["logo64.png", "sdk.bundle.js"]
+  "web_accessible_resources": ["logo64.png", "sdk.bundle.js"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{572bed9e-4473-4f4f-b45e-7f7fe94c321f}"
+    }
+  }
 }

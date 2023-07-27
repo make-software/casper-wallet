@@ -27,10 +27,12 @@ const {
   isChrome,
   isSafari,
   ExtensionBuildPath,
-  ManifestPath
+  ManifestPath,
+  isFirefox
 } = require('./constants');
 
 const isDev = env.NODE_ENV === 'development';
+const isQABuild = Boolean(env.QA);
 
 const ASSET_PATH = process.env.ASSET_PATH || '/';
 const buildDir = isChrome
@@ -170,7 +172,8 @@ const options = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
       'process.env.MOCK_STATE': JSON.stringify(process.env.MOCK_STATE),
-      'process.env.BROWSER': JSON.stringify(process.env.BROWSER)
+      'process.env.BROWSER': JSON.stringify(process.env.BROWSER),
+      'process.env.QA': JSON.stringify(process.env.QA)
     }),
     // manifest file generation
     new CopyWebpackPlugin({
@@ -203,8 +206,12 @@ const options = {
                 : {})
             };
             // Removing the key from manifest for Chrome production build
-            if (isChrome && !isDev) {
+            if (isChrome && !isDev && !isQABuild) {
               delete manifest.key;
+            }
+            // Removing the id from manifest for Firefox production build
+            if (isFirefox && !isDev && !isQABuild) {
+              delete manifest.browser_specific_settings.gecko.id;
             }
 
             return Buffer.from(JSON.stringify(manifest));
