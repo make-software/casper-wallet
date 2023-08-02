@@ -43,7 +43,7 @@ export const NftList = () => {
 
   const nftTokens = useSelector(selectAccountNftTokens);
   const nftTokensCount = useSelector(selectAccountNftTokensCount);
-  console.log(nftTokens);
+
   return (
     <Tile>
       <BorderContainer marginLeftForSeparatorLine={16}>

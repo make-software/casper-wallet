@@ -18,7 +18,11 @@ export const EmptyMediaPlaceholder = ({
   children?: JSX.Element;
 }) => (
   <ImageContainer>
-    <SvgIcon src="assets/icons/media-placeholder.svg" size={132} />
+    <SvgIcon
+      src="assets/icons/media-placeholder.svg"
+      height={145}
+      width={140}
+    />
     {children}
   </ImageContainer>
 );

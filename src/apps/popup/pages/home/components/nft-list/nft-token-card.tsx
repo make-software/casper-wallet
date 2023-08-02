@@ -1,27 +1,24 @@
-import React, { forwardRef, useEffect, useMemo, useState } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { NFTTokenResult } from '@libs/services/nft-service';
 import { FlexColumn, SpacingSize } from '@libs/layout';
-import { Typography } from '@libs/ui';
-
-import { NftPreviewImage } from './nft-preview-image';
+import { Typography, EmptyMediaPlaceholder } from '@libs/ui';
+import { RouterPath, useTypedNavigate } from '@popup/router';
 import {
-  EmptyMediaPlaceholder,
-  LoadingMediaPlaceholder
-} from './nft-media-placeholder';
-import {
-  deriveMediaType,
   findMediaPreview,
-  getImageProxyUrl,
   getMetadataKeyValue,
   getNftTokenMetadataWithLinks
-} from './utils';
+} from '@src/utils';
+
+import { NftPreviewImage } from './nft-preview-image';
 
 type Ref = HTMLDivElement;
 
 const NftTokenCardContainer = styled(FlexColumn)`
-  max-width: 140px;
+  width: 140px;
+
+  cursor: pointer;
 `;
 
 export const NftTokenCard = forwardRef<
@@ -30,12 +27,7 @@ export const NftTokenCard = forwardRef<
     nftToken: NFTTokenResult | null;
   }
 >(({ nftToken }, ref) => {
-  const [mediaType, setMediaType] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const RETINA_SCALE = 2;
-  const IMAGE_WIDTH = 376;
-  const CACHE_TTL = '2592000';
+  const navigate = useTypedNavigate();
 
   const nftTokenMetadataWithLinks = useMemo(
     () => getNftTokenMetadataWithLinks(nftToken),
@@ -49,22 +41,24 @@ export const NftTokenCard = forwardRef<
     [nftTokenMetadataWithLinks]
   );
 
-  const cachedUrl = getImageProxyUrl(preview?.value, {
-    ttl: CACHE_TTL,
-    width: IMAGE_WIDTH * RETINA_SCALE
-  });
-
-  useEffect(() => {
-    setLoading(true);
-    deriveMediaType(cachedUrl)
-      .then(media => setMediaType(media.type))
-      .finally(() => setLoading(false));
-  }, [cachedUrl]);
-
-  if (loading) {
+  if (preview) {
     return (
-      <NftTokenCardContainer gap={SpacingSize.Small} ref={ref}>
-        <LoadingMediaPlaceholder />
+      <NftTokenCardContainer
+        gap={SpacingSize.Small}
+        ref={ref}
+        onClick={() => {
+          navigate(
+            RouterPath.NftDetails.replace(
+              ':tokenId',
+              nftToken?.token_id || ''
+            ).replace(
+              ':contractPackageHash',
+              nftToken?.contract_package_hash || ''
+            )
+          );
+        }}
+      >
+        <NftPreviewImage url={preview.value} />
         <Typography type="captionRegular" ellipsis>
           {metadataKeyValue?.name}
         </Typography>
@@ -72,21 +66,22 @@ export const NftTokenCard = forwardRef<
     );
   }
 
-  if (preview && mediaType) {
-    if (mediaType.includes('image')) {
-      return (
-        <NftTokenCardContainer gap={SpacingSize.Small} ref={ref}>
-          <NftPreviewImage url={cachedUrl || ''} />
-          <Typography type="captionRegular" ellipsis>
-            {metadataKeyValue?.name}
-          </Typography>
-        </NftTokenCardContainer>
-      );
-    }
-  }
-
   return (
-    <NftTokenCardContainer gap={SpacingSize.Small} ref={ref}>
+    <NftTokenCardContainer
+      gap={SpacingSize.Small}
+      ref={ref}
+      onClick={() => {
+        navigate(
+          RouterPath.NftDetails.replace(
+            ':tokenId',
+            nftToken?.token_id || ''
+          ).replace(
+            ':contractPackageHash',
+            nftToken?.contract_package_hash || ''
+          )
+        );
+      }}
+    >
       <EmptyMediaPlaceholder />
       <Typography type="captionRegular" ellipsis>
         {metadataKeyValue?.name}

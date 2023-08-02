@@ -18,5 +18,6 @@ export enum RouterPath {
   TransferNoParams = '/transfer',
   ActivityDetails = '/activity-details',
   Token = '/token/:tokenName',
-  Receive = '/receive'
+  Receive = '/receive',
+  NftDetails = '/nft-details/:contractPackageHash/nfts/:tokenId'
 }
