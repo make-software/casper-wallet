@@ -30,7 +30,7 @@ import {
   MapNFTTokenStandardToName
 } from '@src/utils';
 
-const NftImageContainer = styled(CenteredFlexRow)<{ loadingImg?: boolean }>`
+const NftImageContainer = styled(CenteredFlexRow)`
   width: 100%;
   height: 100%;
   max-height: 328px;
