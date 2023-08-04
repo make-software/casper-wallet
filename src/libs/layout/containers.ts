@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components';
+import { FillColor, getColorFromTheme } from '@libs/ui';
 
 export enum SpacingSize {
   None = 'none',
@@ -281,4 +282,16 @@ export const Overlay = styled.div`
   width: 100vw;
 
   background: rgba(0, 0, 0, 0.32);
+`;
+
+export const IconCircleContainer = styled(CenteredFlexRow)<{
+  color: FillColor;
+}>`
+  height: 48px;
+  width: 48px;
+
+  margin: 0 16px;
+
+  background-color: ${({ theme, color }) => getColorFromTheme(theme, color)};
+  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;

@@ -7,18 +7,11 @@ import { useSelector } from 'react-redux';
 import {
   CenteredFlexColumn,
   CenteredFlexRow,
+  IconCircleContainer,
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
-import {
-  FillColor,
-  getColorFromTheme,
-  Link,
-  List,
-  SvgIcon,
-  TokenPlate,
-  Typography
-} from '@libs/ui';
+import { Link, List, SvgIcon, TokenPlate, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { TokenType, useCasperToken } from '@src/hooks';
 import {
@@ -36,16 +29,6 @@ const ListItemContainer = styled(SpaceBetweenFlexRow)`
 
 const FooterItemContainer = styled(CenteredFlexRow)`
   padding: 24px 0 16px;
-`;
-
-const IconCircleContainer = styled(CenteredFlexRow)<{ color: FillColor }>`
-  height: 48px;
-  width: 48px;
-
-  margin: 0 16px;
-
-  background-color: ${({ theme, color }) => getColorFromTheme(theme, color)};
-  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
 
 const ButtonContainer = styled(CenteredFlexColumn)`

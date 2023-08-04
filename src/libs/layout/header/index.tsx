@@ -1,14 +1,21 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useSelector } from 'react-redux';
 
 import {
+  AlignedSpaceBetweenFlexRow,
+  FlexRow,
   HeaderContainer,
+  LeftAlignedCenteredFlexRow,
   Logo,
   LogoContainer,
-  AlignedSpaceBetweenFlexRow,
-  LeftAlignedCenteredFlexRow
+  SpacingSize
 } from '@src/libs/layout';
-import { SvgIcon } from '@libs/ui';
+import { Avatar, SvgIcon } from '@libs/ui';
+import {
+  selectIsActiveAccountConnectedWithActiveOrigin,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
 
 import { HeaderConnectionStatus } from './header-connection-status';
 import { HeaderActions } from './header-actions';
@@ -47,18 +54,37 @@ export function PopupHeader({
   withConnectionStatus,
   renderSubmenuBarItems
 }: HeaderProps) {
+  const isActiveAccountConnected = useSelector(
+    selectIsActiveAccountConnectedWithActiveOrigin
+  );
+  const activeAccount = useSelector(selectVaultActiveAccount);
+
   return (
     <>
       <HeaderContainer>
-        <SvgIconContainer>
-          <SvgIcon src="assets/icons/sign.svg" width={53} height={72} />
-        </SvgIconContainer>
-        <LogoAndConnectionStatusContainer>
-          <LogoContainer>
-            <Logo />
-          </LogoContainer>
-          {withConnectionStatus && <HeaderConnectionStatus />}
-        </LogoAndConnectionStatusContainer>
+        {withConnectionStatus && activeAccount?.publicKey ? (
+          <FlexRow gap={SpacingSize.Small}>
+            <Avatar
+              size={32}
+              publicKey={activeAccount.publicKey}
+              withConnectedStatus
+              isConnected={isActiveAccountConnected}
+              displayContext="header"
+            />
+            <HeaderConnectionStatus />
+          </FlexRow>
+        ) : (
+          <>
+            <SvgIconContainer>
+              <SvgIcon src="assets/icons/sign.svg" width={53} height={72} />
+            </SvgIconContainer>
+            <LogoAndConnectionStatusContainer>
+              <LogoContainer>
+                <Logo />
+              </LogoContainer>
+            </LogoAndConnectionStatusContainer>
+          </>
+        )}
 
         {(withMenu || withNetworkSwitcher) && (
           <HeaderActions

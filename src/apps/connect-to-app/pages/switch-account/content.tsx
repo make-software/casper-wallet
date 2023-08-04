@@ -8,7 +8,8 @@ import {
   HashVariant,
   List,
   Typography,
-  Button
+  Button,
+  ConnectionStatusBadge
 } from '@src/libs/ui';
 
 import {
@@ -28,7 +29,6 @@ import {
 import { selectActiveOrigin } from '@src/background/redux/active-origin/selectors';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import { closeCurrentWindow } from '@src/background/close-current-window';
-import { ConnectionStatusBadge } from '@src/apps/popup/pages/home/components/connection-status-badge';
 
 import {
   UnconnectedAccountsList,
