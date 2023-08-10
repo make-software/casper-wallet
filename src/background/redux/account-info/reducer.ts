@@ -3,7 +3,7 @@ import { createReducer } from 'typesafe-actions';
 import { AccountInfoState } from './types';
 import {
   accountCasperActivityChanged,
-  accountActivityReset,
+  accountInfoReset,
   accountCasperActivityUpdated,
   accountBalanceChanged,
   accountCurrencyRateChanged,
@@ -13,7 +13,10 @@ import {
   accountPendingTransactionsRemove,
   accountErc20Changed,
   accountDeploysChanged,
-  accountDeploysUpdated
+  accountDeploysUpdated,
+  accountNftTokensAdded,
+  accountNftTokensUpdated,
+  accountNftTokensCountChanged
 } from './actions';
 
 const initialState: AccountInfoState = {
@@ -26,11 +29,13 @@ const initialState: AccountInfoState = {
   accountErc20TokensActivity: null,
   pendingTransactions: [],
   erc20Tokens: [],
-  accountDeploys: null
+  accountDeploys: null,
+  accountNftTokens: null,
+  nftTokensCount: 0
 };
 
 export const reducer = createReducer(initialState)
-  .handleAction(accountActivityReset, () => initialState)
+  .handleAction(accountInfoReset, () => initialState)
   .handleAction(
     accountBalanceChanged,
     (state, { payload }): AccountInfoState => ({
@@ -123,4 +128,19 @@ export const reducer = createReducer(initialState)
       state.accountDeploys != null
         ? [...state.accountDeploys, ...payload]
         : payload
+  }))
+  .handleAction(accountNftTokensAdded, (state, { payload }) => ({
+    ...state,
+    accountNftTokens: payload
+  }))
+  .handleAction(accountNftTokensUpdated, (state, { payload }) => ({
+    ...state,
+    accountNftTokens:
+      state.accountNftTokens != null
+        ? [...state.accountNftTokens, ...payload]
+        : payload
+  }))
+  .handleAction(accountNftTokensCountChanged, (state, { payload }) => ({
+    ...state,
+    nftTokensCount: payload
   }));

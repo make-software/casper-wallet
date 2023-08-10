@@ -2,9 +2,8 @@ import React, { ReactNode, useState } from 'react';
 import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { Typography, Tooltip } from '@libs/ui';
+import { Typography } from '@libs/ui';
 import { AlignedSpaceBetweenFlexRow, CenteredFlexRow } from '@libs/layout';
-import { HomePageTabName } from '@src/constants';
 
 const TabsContainer = styled(AlignedSpaceBetweenFlexRow)`
   height: 40px;
@@ -71,22 +70,13 @@ export function Tabs({ children, preferActiveTabId }: TabsProps) {
             ) : (
               <TabContainer
                 onClick={() => {
-                  if (tabName === HomePageTabName.NFTs) return;
                   setActiveTabId(index);
                 }}
-                disable={tabName === HomePageTabName.NFTs}
                 key={tabName}
               >
-                <Tooltip
-                  title={
-                    tabName === HomePageTabName.NFTs ? 'Coming Soon' : null
-                  }
-                  noWrap
-                >
-                  <Typography type="captionRegular">
-                    <Trans t={t}>{tabName}</Trans>
-                  </Typography>
-                </Tooltip>
+                <Typography type="captionRegular">
+                  <Trans t={t}>{tabName}</Trans>
+                </Typography>
               </TabContainer>
             );
           })}

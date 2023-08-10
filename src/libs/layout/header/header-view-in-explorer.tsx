@@ -6,7 +6,8 @@ import { AlignedFlexRow, CenteredFlexColumn, SpacingSize } from '@libs/layout';
 import {
   getBlockExplorerAccountUrl,
   getBlockExplorerContractUrl,
-  getBlockExplorerDeployUrl
+  getBlockExplorerDeployUrl,
+  getContractNftUrl
 } from '@src/constants';
 import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
 import { useCasperToken, useErc20Tokens } from '@src/hooks';
@@ -16,16 +17,23 @@ import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 interface HeaderViewInExplorerProps {
   tokenName?: string;
   deployHash?: string;
+  nftTokenId?: string;
+  contractHash?: string;
 }
 
 export function HeaderViewInExplorer({
   tokenName,
-  deployHash
+  deployHash,
+  nftTokenId,
+  contractHash
 }: HeaderViewInExplorerProps) {
   const [hrefToTokenOnCasperLive, setHrefToTokenOnCasperLive] = useState<
     string | undefined
   >();
   const [hrefToDeployOnCasperLive, setHrefToDeployOnCasperLive] = useState<
+    string | undefined
+  >();
+  const [hrefToNftOnCasperLive, setHrefToNftOnCasperLive] = useState<
     string | undefined
   >();
 
@@ -61,16 +69,28 @@ export function HeaderViewInExplorer({
         }
       }
     }
+
+    if (nftTokenId && contractHash) {
+      setHrefToNftOnCasperLive(
+        getContractNftUrl(casperLiveUrl, contractHash, nftTokenId)
+      );
+    }
   }, [
     tokenName,
     casperToken,
     activeAccount,
     casperLiveUrl,
     erc20Tokens,
-    deployHash
+    deployHash,
+    nftTokenId,
+    contractHash
   ]);
 
-  if (!hrefToTokenOnCasperLive && !hrefToDeployOnCasperLive) {
+  if (
+    !hrefToTokenOnCasperLive &&
+    !hrefToDeployOnCasperLive &&
+    !hrefToNftOnCasperLive
+  ) {
     return null;
   }
 
@@ -78,7 +98,11 @@ export function HeaderViewInExplorer({
     <Link
       color="inherit"
       target="_blank"
-      href={hrefToTokenOnCasperLive || hrefToDeployOnCasperLive}
+      href={
+        hrefToTokenOnCasperLive ||
+        hrefToDeployOnCasperLive ||
+        hrefToNftOnCasperLive
+      }
     >
       <CenteredFlexColumn gap={SpacingSize.Medium}>
         <AlignedFlexRow gap={SpacingSize.Small}>

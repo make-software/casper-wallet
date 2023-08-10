@@ -33,6 +33,7 @@ import { TransferPage } from '@popup/pages/transfer';
 import { TokenDetailPage } from 'src/apps/popup/pages/token-details';
 import { ActivityDetailsPage } from '@popup/pages/activity-details';
 import { ReceivePage } from '@popup/pages/receive';
+import { NftDetailsPage } from '@popup/pages/nft-details';
 
 export function AppRouter() {
   const isLocked = useSelector(selectVaultIsLocked);
@@ -238,6 +239,7 @@ function AppRoutes() {
       />
       <Route path={RouterPath.Token} element={<TokenDetailPage />} />
       <Route path={RouterPath.Receive} element={<ReceivePage />} />
+      <Route path={RouterPath.NftDetails} element={<NftDetailsPage />} />
     </Routes>
   );
 }

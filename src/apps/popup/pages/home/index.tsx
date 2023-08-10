@@ -36,7 +36,11 @@ import {
   Typography
 } from '@libs/ui';
 
-import { useCasperToken, useFetchAccountActivity } from '@src/hooks';
+import {
+  useCasperToken,
+  useFetchAccountActivity,
+  useNftTokens
+} from '@src/hooks';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import {
   selectActiveNetworkSetting,
@@ -55,6 +59,7 @@ import {
 } from '@src/constants';
 
 import { TokensList } from './components/tokens-list';
+import { NftList } from './components/nft-list';
 
 const DividerLine = styled.hr`
   margin: 16px 0;
@@ -94,6 +99,7 @@ export function HomePageContent() {
 
   useActiveAccountBalance();
   useFetchAccountActivity(ActivityListTransactionsType.All);
+  useNftTokens();
 
   const casperToken = useCasperToken();
 
@@ -233,7 +239,9 @@ export function HomePageContent() {
           <Tab tabName={HomePageTabName.Deploys}>
             <DeploysList />
           </Tab>
-          <Tab tabName={HomePageTabName.NFTs} />
+          <Tab tabName={HomePageTabName.NFTs}>
+            <NftList />
+          </Tab>
         </Tabs>
       </VerticalSpaceContainer>
     </ContentContainer>
