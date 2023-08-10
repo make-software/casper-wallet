@@ -111,6 +111,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
     <List
       rows={accountListRows}
       contentTop={SpacingSize.None}
+      maxHeight={380}
       renderRow={account => {
         const isConnected = connectedAccountNames.includes(account.name);
 
@@ -174,7 +175,8 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
             flexWidth
             onClick={() => {
               openWindow({
-                windowApp: WindowApp.ImportAccount
+                windowApp: WindowApp.ImportAccount,
+                isNewWindow: false
               }).catch(e => console.error(e));
             }}
           >
