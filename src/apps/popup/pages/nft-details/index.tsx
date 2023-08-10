@@ -9,11 +9,13 @@ import {
   PopupLayout
 } from '@libs/layout';
 import { selectAccountNftTokens } from '@background/redux/account-info/selectors';
+import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { NftDetailsContent } from './content';
 
 export const NftDetailsPage = () => {
   const { contractPackageHash, tokenId } = useParams();
+  const navigate = useTypedNavigate();
 
   const nftTokes = useSelector(selectAccountNftTokens);
 
@@ -36,7 +38,14 @@ export const NftDetailsPage = () => {
           withConnectionStatus
           renderSubmenuBarItems={() => (
             <>
-              <HeaderSubmenuBarNavLink linkType="back" />
+              <HeaderSubmenuBarNavLink
+                linkType="back"
+                onClick={() =>
+                  navigate(RouterPath.Home, {
+                    state: { activeTabId: 2 }
+                  })
+                }
+              />
               <HeaderViewInExplorer
                 nftTokenId={tokenId}
                 contractHash={contractPackageHash}

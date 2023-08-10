@@ -8,7 +8,8 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 import {
   findMediaPreview,
   getMetadataKeyValue,
-  getNftTokenMetadataWithLinks
+  getNftTokenMetadataWithLinks,
+  getImageProxyUrl
 } from '@src/utils';
 
 import { NftPreviewImage } from './nft-preview-image';
@@ -41,6 +42,8 @@ export const NftTokenCard = forwardRef<
     [nftTokenMetadataWithLinks]
   );
 
+  const cachedUrl = getImageProxyUrl(preview?.value);
+
   if (preview) {
     return (
       <NftTokenCardContainer
@@ -58,7 +61,7 @@ export const NftTokenCard = forwardRef<
           );
         }}
       >
-        <NftPreviewImage url={preview.value} />
+        <NftPreviewImage url={preview.value} cachedUrl={cachedUrl} />
         <Typography type="captionRegular" ellipsis>
           {metadataKeyValue?.name}
         </Typography>

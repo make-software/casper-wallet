@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
 import ReactPlayer from 'react-player';
@@ -25,6 +25,7 @@ import {
 import { NFTTokenResult } from '@libs/services/nft-service';
 import {
   findMediaPreview,
+  getImageProxyUrl,
   getMetadataKeyValue,
   getNftTokenMetadataWithLinks,
   MapNFTTokenStandardToName
@@ -66,7 +67,7 @@ interface NftDetailsContentProps {
 }
 
 export const NftDetailsContent = ({ nftToken }: NftDetailsContentProps) => {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
   const [showMedia, setShowMedia] = useState<boolean>(false);
 
@@ -78,6 +79,7 @@ export const NftDetailsContent = ({ nftToken }: NftDetailsContentProps) => {
   );
 
   const preview = nftTokenMetadataWithLinks?.find(findMediaPreview);
+  const cachedUrl = getImageProxyUrl(preview?.value);
 
   const metadataKeyValue = useMemo(
     () => getMetadataKeyValue(nftTokenMetadataWithLinks),
@@ -129,29 +131,6 @@ export const NftDetailsContent = ({ nftToken }: NftDetailsContentProps) => {
     ]
   );
 
-  useEffect(() => {
-    setLoading(true);
-    let isApiSubscribed = true;
-
-    if (isApiSubscribed) {
-      const image = new Image();
-      image.src = preview?.value || '';
-
-      image.onload = () => {
-        setLoading(false);
-      };
-
-      image.onerror = () => {
-        setShowMedia(true);
-        setLoading(false);
-      };
-    }
-
-    return () => {
-      isApiSubscribed = false;
-    };
-  }, [preview?.value]);
-
   return (
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
@@ -161,33 +140,35 @@ export const NftDetailsContent = ({ nftToken }: NftDetailsContentProps) => {
       </ParagraphContainer>
       <VerticalSpaceContainer top={SpacingSize.Small}>
         <Tile>
-          {loading ? (
-            <NftImageContainer>
-              <LoadingMediaPlaceholder />
-            </NftImageContainer>
-          ) : preview && !error ? (
-            <NftImageContainer>
-              {showMedia ? (
-                <Player
-                  url={preview?.value}
-                  controls={true}
-                  volume={0.5}
-                  width="auto"
-                  height="auto"
-                  onError={() => setError(true)}
-                />
-              ) : (
-                <NftImage
-                  src={preview?.value}
-                  alt={metadataKeyValue?.name || ''}
-                />
-              )}
-            </NftImageContainer>
-          ) : (
-            <NftImageContainer>
-              <EmptyMediaPlaceholder />
-            </NftImageContainer>
-          )}
+          <NftImageContainer>
+            {!showMedia && (
+              <NftImage
+                style={{ display: loading ? 'none' : 'inline-block' }}
+                src={cachedUrl || preview?.value}
+                alt={metadataKeyValue?.name || ''}
+                onLoad={() => {
+                  setLoading(false);
+                }}
+                onError={() => {
+                  setShowMedia(true);
+                }}
+              />
+            )}
+            {showMedia && (
+              <Player
+                style={{ display: loading ? 'none' : 'block' }}
+                url={cachedUrl || preview?.value}
+                controls={true}
+                volume={0.5}
+                width="auto"
+                height="auto"
+                onError={() => setError(true)}
+                onReady={() => setLoading(false)}
+              />
+            )}
+            {loading && !error && <LoadingMediaPlaceholder />}
+            {error && <EmptyMediaPlaceholder />}
+          </NftImageContainer>
         </Tile>
       </VerticalSpaceContainer>
       <List
