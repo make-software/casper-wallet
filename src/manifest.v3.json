@@ -9,7 +9,23 @@
     "128": "logo128.png",
     "192": "logo192.png"
   },
-  "permissions": ["background", "management", "storage", "tabs"],
+  "permissions": [
+    "background",
+    "management",
+    "storage",
+    "tabs",
+    "declarativeNetRequest"
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "rules",
+        "enabled": true,
+        "path": "declarative_net_request_rules.json"
+      }
+    ]
+  },
+  "host_permissions": ["https://image-proxy-cdn.make.services/*"],
   "background": {
     "service_worker": "./background.bundle.js"
   },

@@ -8,6 +8,7 @@ import {
   NFTTokenResult
 } from '@libs/services/nft-service';
 import { queryClient } from '@libs/services/query-client';
+import browser from 'webextension-polyfill';
 
 interface ImageProxyUrlProps {
   ttl: string;
@@ -226,15 +227,28 @@ export const deriveMediaType = async (url: string | undefined) => {
     type: ''
   };
 };
+
+export const isSafariExtension = browser.runtime.id.startsWith(
+  'software.make.Casper-Wallet.Extension'
+);
+
 export const getImageProxyUrl = (
   url: string | undefined,
-  { ttl, width }: ImageProxyUrlProps
+  { ttl, width }: ImageProxyUrlProps = {
+    ttl: CACHE_TTL,
+    width: IMAGE_WIDTH * RETINA_SCALE
+  }
 ) => {
   if (!url) {
     return undefined;
   }
 
-  return `https://image-proxy-cdn.dev.make.services/${width},fit,ttl${ttl}/${url}`;
+  // we not support image-proxy-cdn for safari because off issues with declarative_net_request
+  if (isSafariExtension) {
+    return url;
+  }
+
+  return `https://image-proxy-cdn.make.services/${width},fit,ttl${ttl}/${url}`;
 };
 
 export const RETINA_SCALE = 2;

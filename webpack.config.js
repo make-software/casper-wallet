@@ -215,6 +215,19 @@ const options = {
     new CopyWebpackPlugin({
       patterns: [
         {
+          from: 'src/declarative_net_request_rules.json',
+          to: path.join(
+            __dirname,
+            buildDir,
+            'declarative_net_request_rules.json'
+          ),
+          force: true
+        }
+      ]
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
           from: 'src/assets/img/logo16.png',
           to: path.join(__dirname, buildDir),
           force: true
