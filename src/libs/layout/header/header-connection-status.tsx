@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
-import { Typography, SvgIcon } from '@libs/ui';
+import { AccountList, Modal, SvgIcon, Typography } from '@libs/ui';
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
 import { selectCountOfConnectedAccountsWithActiveOrigin } from '@src/background/redux/vault/selectors';
 
@@ -22,19 +22,25 @@ export function HeaderConnectionStatus() {
   );
 
   return (
-    <ConnectionStatusContainer gap={SpacingSize.Tiny}>
-      {countOfConnectedAccounts > 0 && (
-        <SvgIcon
-          src="assets/icons/checkbox-checked.svg"
-          size={16}
-          color="contentGreen"
-        />
+    <Modal
+      renderContent={({ closeModal }) => (
+        <AccountList closeModal={closeModal} />
       )}
-      <Typography uppercase type="formFieldStatus" color="contentOnFill">
-        {countOfConnectedAccounts > 0
-          ? `${t('Connected')}: ${countOfConnectedAccounts}`
-          : t('Disconnected')}
-      </Typography>
-    </ConnectionStatusContainer>
+      children={({ isOpen }) => (
+        <ConnectionStatusContainer gap={SpacingSize.Tiny}>
+          <Typography uppercase type="formFieldStatus" color="contentOnFill">
+            {countOfConnectedAccounts > 0
+              ? `${countOfConnectedAccounts} ${t('Connected')}`
+              : t('Disconnected')}
+          </Typography>
+          <SvgIcon
+            size={16}
+            src="assets/icons/chevron-up.svg"
+            flipByAxis={isOpen ? undefined : 'X'}
+            color="contentOnFill"
+          />
+        </ConnectionStatusContainer>
+      )}
+    />
   );
 }

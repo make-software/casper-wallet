@@ -13,6 +13,10 @@ interface ListHeaderContainerProps extends BorderBottomPseudoElementProps {
   stickyHeader?: boolean;
 }
 
+interface RowsContainerProps extends BorderBottomPseudoElementProps {
+  maxHeight?: number;
+}
+
 const SpacedBetweenFlexRox = styled.div`
   display: flex;
   justify-content: space-between;
@@ -29,7 +33,9 @@ const FlexColumn = styled.div`
   flex-direction: column;
 `;
 
-export const RowsContainer = styled.div<BorderBottomPseudoElementProps>`
+export const RowsContainer = styled.div<RowsContainerProps>`
+  overflow-y: auto;
+  max-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : 'auto')};
   & > * + *:before {
     ${borderBottomPseudoElementRules};
   }
@@ -73,6 +79,7 @@ interface ListProps<ListRow extends ListRowBase> {
   marginLeftForHeaderSeparatorLine?: number;
   marginLeftForItemSeparatorLine: number;
   stickyHeader?: boolean;
+  maxHeight?: number;
 }
 
 export function List<ListRow extends ListRowBase>({
@@ -86,7 +93,8 @@ export function List<ListRow extends ListRowBase>({
   marginLeftForHeaderSeparatorLine,
   headerLabelTop = SpacingSize.XL,
   contentTop = SpacingSize.XL,
-  stickyHeader
+  stickyHeader,
+  maxHeight
 }: ListProps<ListRow>) {
   return (
     <>
@@ -126,6 +134,7 @@ export function List<ListRow extends ListRowBase>({
           )}
           <RowsContainer
             marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
+            maxHeight={maxHeight}
           >
             {rows.map((row, index, array) => (
               <RowContainer key={row.id}>

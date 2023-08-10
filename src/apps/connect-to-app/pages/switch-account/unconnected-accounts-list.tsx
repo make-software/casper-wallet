@@ -6,11 +6,15 @@ import styled from 'styled-components';
 import { AccountListRows } from '@background/redux/vault/types';
 import { closeCurrentWindow } from '@background/close-current-window';
 import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
-
-import { Button, Hash, HashVariant, List, Typography } from '@libs/ui';
+import {
+  Button,
+  Hash,
+  HashVariant,
+  List,
+  Typography,
+  ConnectionStatusBadge
+} from '@libs/ui';
 import { LeftAlignedFlexColumn, SpacingSize } from '@libs/layout';
-
-import { ConnectionStatusBadge } from '@popup/pages/home/components/connection-status-badge';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
 import { sdkMethod } from '@src/content/sdk-method';

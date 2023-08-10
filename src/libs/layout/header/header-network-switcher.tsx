@@ -16,6 +16,10 @@ const NetworkSwitcherContainer = styled(AlignedFlexRow)`
   border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
 
+const ModalContentContainer = styled.div`
+  padding: 8px;
+`;
+
 const ModalContentRow = styled(SpaceBetweenFlexRow)`
   cursor: pointer;
   padding: 8px;
@@ -47,7 +51,7 @@ export const HeaderNetworkSwitcher = () => {
   return (
     <Modal
       renderContent={({ closeModal }) => (
-        <>
+        <ModalContentContainer>
           <ModalContentRow
             onClick={event => {
               changeActiveNetworkToMainnet();
@@ -84,7 +88,7 @@ export const HeaderNetworkSwitcher = () => {
               <SvgIcon src="assets/icons/tick.svg" size={24} />
             )}
           </ModalContentRow>
-        </>
+        </ModalContentContainer>
       )}
       children={({ isOpen }) => (
         <NetworkSwitcherContainer gap={SpacingSize.Tiny}>
