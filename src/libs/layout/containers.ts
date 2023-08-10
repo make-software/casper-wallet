@@ -1,5 +1,8 @@
 import styled, { css } from 'styled-components';
-import { FillColor, getColorFromTheme } from '@libs/ui';
+import { FillColor } from '@libs/ui';
+
+// Be careful when importing dependencies here
+// Import of getColorFromTheme from '@libs/ui' cause huge problems with webpack bundle and lead to blank popups
 
 export enum SpacingSize {
   None = 'none',
@@ -292,6 +295,7 @@ export const IconCircleContainer = styled(CenteredFlexRow)<{
 
   margin: 0 16px;
 
-  background-color: ${({ theme, color }) => getColorFromTheme(theme, color)};
+  background-color: ${({ theme, color }) =>
+    color === 'inherit' ? 'inherit' : theme.color[color]};
   border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
