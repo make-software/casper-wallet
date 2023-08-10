@@ -8,6 +8,7 @@ export const FETCH_QUERY_OPTIONS = {
 export const BALANCE_REFRESH_RATE = 15 * SECOND;
 export const CURRENCY_REFRESH_RATE = 30 * SECOND;
 export const TOKENS_REFRESH_RATE = 15 * SECOND;
+export const NFT_TOKENS_REFRESH_RATE = 60 * SECOND;
 export const ACCOUNT_DEPLOY_REFRESH_RATE = 30 * SECOND;
 export const ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE = 30 * SECOND;
 export const ERC20_TOKEN_ACTIVITY_REFRESH_RATE = 30 * SECOND;
@@ -28,6 +29,12 @@ export const getBlockExplorerDeployUrl = (
   casperLiveUrl: string,
   deployHash: string
 ) => `${casperLiveUrl}/deploy/${deployHash}`;
+
+export const getContractNftUrl = (
+  casperLiveUrl: string,
+  contractHash: string,
+  tokenId: string
+) => `${casperLiveUrl}/contracts/${contractHash}/nfts/${tokenId}`;
 
 export const getBuyWithTopperUrl = (publicKey: string) =>
   `https://onramp-api.cspr.click/api/topper/bootstrap-token?account=${publicKey}&label=Your%20Public%20Key`;

@@ -167,6 +167,7 @@ export type ExtendedDeployContractPackageResult = {
   timestamp: string;
   deploys_num?: number;
   metadata?: ExtendedDeployContractPackageMetadata;
+  icon_url?: string;
 };
 
 export type ExtendedDeployEntryPointResult = {

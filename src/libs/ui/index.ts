@@ -35,6 +35,7 @@ export * from './components/recipient-plate/recipient-plate';
 export * from './components/deploys-list/deploys-list';
 export * from './components/account-casper-activity-plate/account-casper-activity-plate';
 export * from './components/no-activity-view/no-activity-view';
+export * from './components/nft-media-placeholder/nft-media-placeholder';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

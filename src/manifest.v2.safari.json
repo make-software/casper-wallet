@@ -6,7 +6,23 @@
     "128": "logo128.png",
     "192": "logo192.png"
   },
-  "permissions": ["management", "notifications", "storage", "tabs"],
+  "permissions": [
+    "management",
+    "notifications",
+    "storage",
+    "tabs",
+    "declarativeNetRequest",
+    "https://image-proxy-cdn.make.services/*"
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "rules",
+        "enabled": true,
+        "path": "declarative_net_request_rules.json"
+      }
+    ]
+  },
   "background": {
     "scripts": ["./background.bundle.js"],
     "persistent": true
