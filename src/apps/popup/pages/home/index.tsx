@@ -216,17 +216,22 @@ export function HomePageContent() {
                   <Trans t={t}>Receive</Trans>
                 </Typography>
               </ButtonContainer>
-              <ButtonContainer
-                gap={SpacingSize.Small}
-                onClick={handleBuyWithCSPR}
-              >
-                <IconCircleContainer color="fillBlue">
-                  <SvgIcon src="assets/icons/card.svg" color="contentOnFill" />
-                </IconCircleContainer>
-                <Typography type="captionMedium" color="contentBlue">
-                  <Trans t={t}>Buy</Trans>
-                </Typography>
-              </ButtonContainer>
+              {network === NetworkSetting.Mainnet && (
+                <ButtonContainer
+                  gap={SpacingSize.Small}
+                  onClick={handleBuyWithCSPR}
+                >
+                  <IconCircleContainer color="fillBlue">
+                    <SvgIcon
+                      src="assets/icons/card.svg"
+                      color="contentOnFill"
+                    />
+                  </IconCircleContainer>
+                  <Typography type="captionMedium" color="contentBlue">
+                    <Trans t={t}>Buy</Trans>
+                  </Typography>
+                </ButtonContainer>
+              )}
             </ButtonsContainer>
           </TileContainer>
         </Tile>
