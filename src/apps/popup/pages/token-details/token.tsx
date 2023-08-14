@@ -12,7 +12,7 @@ import {
   SpacingSize
 } from '@libs/layout';
 import { Link, List, SvgIcon, TokenPlate, Typography } from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@popup/router';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { TokenType, useCasperToken } from '@src/hooks';
 import {
   selectActiveNetworkSetting,
@@ -46,13 +46,15 @@ type TokenProps = {
 };
 
 export const Token = ({ erc20Tokens }: TokenProps) => {
-  const [tokenData, setTokenData] = useState<TokenType | null>(null);
+  const location = useTypedLocation();
+  const [tokenData, setTokenData] = useState<TokenType | null>(
+    location.state.tokenData ?? null
+  );
   const [tokenInfoList, setTokenInfoList] = useState<TokenInfoList[] | []>([]);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
   const { tokenName } = useParams();
-
   const casperToken = useCasperToken();
 
   const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
@@ -71,19 +73,36 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
     } else {
       // ERC-20 token case
       const erc20TokensList = formatErc20TokenBalance(erc20Tokens);
-      if (erc20TokensList == null) {
-        return;
-      }
+
       const token = erc20TokensList?.find(token => token.id === tokenName);
-      if (token != null) {
+
+      if (token) {
         setTokenData(token);
         setTokenInfoList([
           { id: 1, name: 'Symbol', value: token.symbol },
           { id: 2, name: 'Decimals', value: (token.decimals || 0).toString() }
         ]);
+      } else {
+        setTokenData(prev => (prev ? { ...prev, amount: '0' } : null));
+        setTokenInfoList([
+          { id: 1, name: 'Symbol', value: tokenData?.symbol ?? '' },
+          {
+            id: 2,
+            name: 'Decimals',
+            value: (tokenData?.decimals || 0).toString()
+          }
+        ]);
       }
     }
-  }, [tokenName, casperToken, activeAccount, casperLiveUrl, erc20Tokens]);
+  }, [
+    tokenName,
+    casperToken,
+    activeAccount,
+    casperLiveUrl,
+    erc20Tokens,
+    tokenData?.symbol,
+    tokenData?.decimals
+  ]);
 
   return (
     <List
@@ -112,7 +131,8 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
                       ':tokenContractHash',
                       tokenData.contractHash || 'null'
                     )
-                  : RouterPath.TransferNoParams
+                  : RouterPath.TransferNoParams,
+                { state: { tokenData } }
               )
             }
           >
