@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import browser from 'webextension-polyfill';
 
 import {
-  AlignedFlexRow,
+  CenteredFlexRow,
   FlexColumn,
   HeaderSubmenuBarNavLink,
   IconCircleContainer,
@@ -36,11 +36,7 @@ import {
   Typography
 } from '@libs/ui';
 
-import {
-  useCasperToken,
-  useFetchAccountActivity,
-  useNftTokens
-} from '@src/hooks';
+import { useCasperToken } from '@src/hooks';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import {
   selectActiveNetworkSetting,
@@ -48,11 +44,9 @@ import {
   selectIsActiveAccountConnectedWithActiveOrigin,
   selectVaultActiveAccount
 } from '@src/background/redux/root-selector';
-import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import {
-  ActivityListTransactionsType,
   getBuyWithTopperUrl,
   HomePageTabName,
   NetworkSetting
@@ -69,7 +63,7 @@ const DividerLine = styled.hr`
   background-color: ${({ theme }) => theme.color.borderPrimary};
 `;
 
-const ButtonsContainer = styled(AlignedFlexRow)`
+const ButtonsContainer = styled(CenteredFlexRow)`
   margin-top: 28px;
 `;
 
@@ -96,10 +90,6 @@ export function HomePageContent() {
   const network = useSelector(selectActiveNetworkSetting);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const balance = useSelector(selectAccountBalance);
-
-  useActiveAccountBalance();
-  useFetchAccountActivity(ActivityListTransactionsType.All);
-  useNftTokens();
 
   const casperToken = useCasperToken();
 
