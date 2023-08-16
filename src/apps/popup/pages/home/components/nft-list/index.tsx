@@ -55,18 +55,17 @@ export const NftList = () => {
         </TotalNftValueContainer>
       </BorderContainer>
 
-      {(nftTokens === null || nftTokens.length === 0) && (
+      {nftTokens.length === 0 && (
         <VerticalSpaceContainer top={SpacingSize.None}>
           <Container>
             <Typography type="body" color="contentSecondary">
-              {nftTokens == null && <Trans t={t}>Something went wrong</Trans>}
               {nftTokens?.length === 0 && <Trans t={t}>No NFT tokens</Trans>}
             </Typography>
           </Container>
         </VerticalSpaceContainer>
       )}
 
-      {nftTokens != null && nftTokens.length > 0 && (
+      {nftTokens.length > 0 && (
         <NftListContainer wrap="wrap">
           {nftTokens.map((nftToken, index) => {
             if (index === nftTokens.length - 1 && nftTokens.length >= 10) {
