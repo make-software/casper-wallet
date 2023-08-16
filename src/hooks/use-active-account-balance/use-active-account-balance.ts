@@ -43,6 +43,14 @@ export const useActiveAccountBalance = () => {
               amountFiat: amountFiat
             })
           );
+        } else {
+          dispatchToMainStore(accountCurrencyRateChanged(currencyRate));
+          dispatchToMainStore(
+            accountBalanceChanged({
+              amountMotes: null,
+              amountFiat: ''
+            })
+          );
         }
       })
       .catch(error => {
