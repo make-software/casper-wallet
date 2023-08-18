@@ -28,7 +28,6 @@ import {
   getImageProxyUrl,
   getMetadataKeyValue,
   getNftTokenMetadataWithLinks,
-  isSafariExtension,
   MapNFTTokenStandardToName
 } from '@src/utils';
 
@@ -154,12 +153,7 @@ export const NftDetailsContent = ({
                   setLoading(false);
                 }}
                 onError={() => {
-                  if (isSafariExtension) {
-                    setError(true);
-                    setLoading(false);
-                  } else {
-                    setShowMedia(true);
-                  }
+                  setShowMedia(true);
                 }}
               />
             )}
