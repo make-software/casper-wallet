@@ -8,7 +8,6 @@ import { Tile, Typography } from '@libs/ui';
 import {
   BorderContainer,
   CenteredFlexRow,
-  FlexRow,
   SpaceBetweenFlexRow,
   SpacingSize,
   VerticalSpaceContainer
@@ -24,11 +23,9 @@ const TotalNftValueContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px 12px 0;
 `;
 
-const NftListContainer = styled(FlexRow)`
+const NftListContainer = styled(SpaceBetweenFlexRow)`
   padding: 16px;
-
   row-gap: 24px;
-  column-gap: 16px;
 `;
 
 const Container = styled(CenteredFlexRow)`
