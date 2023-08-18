@@ -64,7 +64,9 @@ export const TokensList = () => {
           token={token}
           chevron
           handleOnClick={() =>
-            navigate(RouterPath.Token.replace(':tokenName', token.id))
+            navigate(RouterPath.Token.replace(':tokenName', token.id), {
+              state: { tokenData: token }
+            })
           }
         />
       )}
