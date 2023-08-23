@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
+import Skeleton from 'react-loading-skeleton';
 
 import { useInfinityScroll, useNftTokens } from '@src/hooks';
 import { Tile, Typography } from '@libs/ui';
@@ -35,24 +36,58 @@ const Container = styled(CenteredFlexRow)`
 export const NftList = () => {
   const { t } = useTranslation();
 
-  const { loadMoreNftTokens } = useNftTokens();
+  const { loadMoreNftTokens, loading } = useNftTokens();
   const { observerElement } = useInfinityScroll(loadMoreNftTokens);
 
   const nftTokens = useSelector(selectAccountNftTokens);
   const nftTokensCount = useSelector(selectAccountNftTokensCount);
 
+  useEffect(() => {
+    const container = document.querySelector('#ms-container');
+
+    const position = localStorage.getItem('nftTokenYPosition');
+
+    if (position) {
+      container?.scrollTo(0, Number(position));
+      localStorage.removeItem('nftTokenYPosition');
+    }
+  }, []);
+
+  const setNftTokeneYPosition = () => {
+    const container = document.querySelector('#ms-container');
+
+    localStorage.setItem(
+      'nftTokenYPosition',
+      container?.scrollTop.toString() || ''
+    );
+  };
+
   return (
     <Tile>
       <BorderContainer marginLeftForSeparatorLine={16}>
         <TotalNftValueContainer>
-          <Typography type="body">
+          <Typography
+            type="body"
+            style={loading ? { width: '100%' } : undefined}
+          >
             <Trans t={t}>Total amount</Trans>
           </Typography>
-          <Typography type="bodySemiBold">{nftTokensCount}</Typography>
+          <Typography type="bodySemiBold" loading={loading}>
+            {nftTokensCount}
+          </Typography>
         </TotalNftValueContainer>
       </BorderContainer>
 
-      {nftTokens.length === 0 && (
+      {loading && (
+        <VerticalSpaceContainer top={SpacingSize.None}>
+          <NftListContainer>
+            <Skeleton height={145} width={145} />
+            <Skeleton height={145} width={145} />
+          </NftListContainer>
+        </VerticalSpaceContainer>
+      )}
+
+      {nftTokens.length === 0 && !loading && (
         <VerticalSpaceContainer top={SpacingSize.None}>
           <Container>
             <Typography type="body" color="contentSecondary">
@@ -64,21 +99,18 @@ export const NftList = () => {
 
       {nftTokens.length > 0 && (
         <NftListContainer wrap="wrap">
-          {nftTokens.map((nftToken, index) => {
-            if (index === nftTokens.length - 1 && nftTokens.length >= 10) {
-              return (
-                <NftTokenCard
-                  nftToken={nftToken}
-                  key={nftToken.tracking_id}
-                  ref={observerElement}
-                />
-              );
-            }
-
-            return (
-              <NftTokenCard nftToken={nftToken} key={nftToken.tracking_id} />
-            );
-          })}
+          {nftTokens.map((nftToken, index) => (
+            <NftTokenCard
+              nftToken={nftToken}
+              key={nftToken.tracking_id}
+              ref={
+                index === nftTokens.length - 1 && nftTokens.length >= 10
+                  ? observerElement
+                  : null
+              }
+              onClick={setNftTokeneYPosition}
+            />
+          ))}
         </NftListContainer>
       )}
     </Tile>

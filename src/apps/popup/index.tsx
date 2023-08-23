@@ -12,6 +12,9 @@ import { popupWindowInit } from '@background/redux/windowManagement/actions';
 import { AppRouter } from './app-router';
 import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
 
+// skeleton styles
+import 'react-loading-skeleton/dist/skeleton.css';
+
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
 
