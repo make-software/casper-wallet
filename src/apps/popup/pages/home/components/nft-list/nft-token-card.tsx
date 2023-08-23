@@ -44,31 +44,6 @@ export const NftTokenCard = forwardRef<
 
   const cachedUrl = getImageProxyUrl(preview?.value);
 
-  if (preview) {
-    return (
-      <NftTokenCardContainer
-        gap={SpacingSize.Small}
-        ref={ref}
-        onClick={() => {
-          navigate(
-            RouterPath.NftDetails.replace(
-              ':tokenId',
-              nftToken?.token_id || ''
-            ).replace(
-              ':contractPackageHash',
-              nftToken?.contract_package_hash || ''
-            )
-          );
-        }}
-      >
-        <NftPreviewImage url={preview.value} cachedUrl={cachedUrl} />
-        <Typography type="captionRegular" ellipsis>
-          {metadataKeyValue?.name}
-        </Typography>
-      </NftTokenCardContainer>
-    );
-  }
-
   return (
     <NftTokenCardContainer
       gap={SpacingSize.Small}
@@ -85,7 +60,11 @@ export const NftTokenCard = forwardRef<
         );
       }}
     >
-      <EmptyMediaPlaceholder />
+      {preview ? (
+        <NftPreviewImage url={preview.value} cachedUrl={cachedUrl} />
+      ) : (
+        <EmptyMediaPlaceholder />
+      )}
       <Typography type="captionRegular" ellipsis>
         {metadataKeyValue?.name}
       </Typography>

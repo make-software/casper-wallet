@@ -10,6 +10,7 @@ import {
 } from '@libs/layout';
 import { selectAccountNftTokens } from '@background/redux/account-info/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
+import { HomePageTabsId } from '@libs/ui';
 
 import { NftDetailsContent } from './content';
 
@@ -42,7 +43,7 @@ export const NftDetailsPage = () => {
                 linkType="back"
                 onClick={() =>
                   navigate(RouterPath.Home, {
-                    state: { activeTabId: 2 }
+                    state: { activeTabId: HomePageTabsId.NFTs }
                   })
                 }
               />

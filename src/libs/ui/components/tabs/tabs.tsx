@@ -36,6 +36,12 @@ const TabContainer = styled(CenteredFlexRow)<{ disable?: boolean }>`
   padding: 4px 8px;
 `;
 
+export const HomePageTabsId = {
+  Tokens: 0,
+  Deploys: 1,
+  NFTs: 2
+};
+
 export const Tab = styled.div<TabProps>``;
 
 interface TabProps {

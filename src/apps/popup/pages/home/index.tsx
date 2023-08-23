@@ -71,12 +71,6 @@ const ButtonContainer = styled(CenteredFlexColumn)`
   cursor: pointer;
 `;
 
-export const HomePageTabsId = {
-  Tokens: 0,
-  Deploys: 1,
-  NFTs: 2
-};
-
 export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
