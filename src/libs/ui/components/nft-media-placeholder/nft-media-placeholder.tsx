@@ -6,11 +6,20 @@ import { SvgIcon } from '@libs/ui';
 import { CenteredFlexRow } from '@libs/layout';
 
 export const ImageContainer = styled(CenteredFlexRow)`
+  position: relative;
+
   width: 140px;
-  height: 145px;
+  height: 140px;
 
   border-radius: ${({ theme }) => theme.borderRadius.eight}px;
 `;
+
+const SvgIconWrapper = styled.span(({ theme }) => ({
+  position: 'absolute',
+  path: {
+    fill: theme.color.backgroundSecondary
+  }
+}));
 
 export const EmptyMediaPlaceholder = ({
   children
@@ -18,11 +27,13 @@ export const EmptyMediaPlaceholder = ({
   children?: JSX.Element;
 }) => (
   <ImageContainer>
-    <SvgIcon
-      src="assets/icons/media-placeholder.svg"
-      height={145}
-      width={140}
-    />
+    <SvgIconWrapper>
+      <SvgIcon
+        src="assets/icons/media-placeholder.svg"
+        height={140}
+        width={140}
+      />
+    </SvgIconWrapper>
     {children}
   </ImageContainer>
 );
@@ -33,8 +44,8 @@ export const LoadingMediaPlaceholder = () => {
   return (
     <EmptyMediaPlaceholder>
       <Skeleton
-        height="100%"
-        width="100%"
+        height="140px"
+        width="140px"
         baseColor="#ffffff00"
         highlightColor={theme.color.backgroundPrimary}
         borderRadius={18}

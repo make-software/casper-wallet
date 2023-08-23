@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -29,10 +29,9 @@ export function SignMessagePage() {
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
 
   if (!requestId || !message || !signingPublicKeyHex) {
-    const error = Error(
+    throw Error(
       `Missing search param: ${requestId} ${message} ${signingPublicKeyHex}`
     );
-    throw error;
   }
 
   const renderDeps = [requestId, signingPublicKeyHex];
@@ -107,6 +106,12 @@ export function SignMessagePage() {
     );
     closeCurrentWindow();
   }, [requestId]);
+
+  useEffect(() => {
+    window.addEventListener('beforeunload', handleCancel);
+
+    return () => window.removeEventListener('beforeunload', handleCancel);
+  }, [handleCancel]);
 
   return (
     <LayoutWindow

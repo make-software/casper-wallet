@@ -27,11 +27,10 @@ export const NftPreviewImage = ({
 }) => {
   const [error, setError] = useState(false);
   const [thumbnail, setThumbnail] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const onError = useCallback(async () => {
     try {
-      setLoading(true);
       // TODO: check this error. It`s happening when we load thumbnail for video
       // index.js:1 Uncaught TypeError: Failed to execute 'readAsDataURL' on 'FileReader': parameter 1 is not of type 'Blob'.
       const thumbnails = await generateVideoThumbnails(

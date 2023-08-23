@@ -33,8 +33,7 @@ export function SignDeployPage() {
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
 
   if (!requestId || !signingPublicKeyHex) {
-    const error = Error('Missing search param');
-    throw error;
+    throw Error('Missing search param');
   }
 
   const renderDeps = [requestId, signingPublicKeyHex];
@@ -124,6 +123,12 @@ export function SignDeployPage() {
     );
     closeCurrentWindow();
   }, [requestId]);
+
+  useEffect(() => {
+    window.addEventListener('beforeunload', handleCancel);
+
+    return () => window.removeEventListener('beforeunload', handleCancel);
+  }, [handleCancel]);
 
   return (
     <LayoutWindow
