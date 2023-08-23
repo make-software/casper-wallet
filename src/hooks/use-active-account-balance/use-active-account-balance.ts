@@ -23,6 +23,8 @@ export const useActiveAccountBalance = () => {
   const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
 
   useEffect(() => {
+    if (!activeAccount?.publicKey) return;
+
     dispatchFetchActiveAccountBalance(activeAccount?.publicKey)
       .then(({ payload: { balance, currencyRate } }) => {
         if (balance != null) {
@@ -39,6 +41,14 @@ export const useActiveAccountBalance = () => {
             accountBalanceChanged({
               amountMotes: amountMotes,
               amountFiat: amountFiat
+            })
+          );
+        } else {
+          dispatchToMainStore(accountCurrencyRateChanged(currencyRate));
+          dispatchToMainStore(
+            accountBalanceChanged({
+              amountMotes: null,
+              amountFiat: ''
             })
           );
         }

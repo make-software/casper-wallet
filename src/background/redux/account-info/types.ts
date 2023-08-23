@@ -15,6 +15,6 @@ export interface AccountInfoState {
   accountErc20TokensActivity: Record<string, Erc20TokenActionResult[]> | null;
   pendingTransactions: ExtendedDeployWithId[];
   accountDeploys: ExtendedDeployWithId[] | null;
-  accountNftTokens: NFTTokenResult[] | null;
+  accountNftTokens: NFTTokenResult[];
   nftTokensCount: number;
 }

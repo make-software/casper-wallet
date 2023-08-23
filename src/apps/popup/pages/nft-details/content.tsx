@@ -66,10 +66,13 @@ interface NftDetailsContentProps {
   nftToken: NFTTokenResult | null;
 }
 
-export const NftDetailsContent = ({ nftToken }: NftDetailsContentProps) => {
+export const NftDetailsContent = ({
+  nftToken: nftTokenParam
+}: NftDetailsContentProps) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
   const [showMedia, setShowMedia] = useState<boolean>(false);
+  const [nftToken] = useState(nftTokenParam);
 
   const { t } = useTranslation();
 

@@ -59,9 +59,9 @@ export const useFetchAccountActivity = (
   const effectTimeoutRef = useRef<NodeJS.Timeout>();
   const forceUpdate = useForceUpdate();
 
-  const activeAccountHash = getAccountHashFromPublicKey(
-    activeAccount?.publicKey
-  );
+  const activeAccountHash = activeAccount?.publicKey
+    ? getAccountHashFromPublicKey(activeAccount?.publicKey)
+    : null;
 
   const createHandlePayload = useCallback(
     (
@@ -120,7 +120,7 @@ export const useFetchAccountActivity = (
   };
 
   useEffect(() => {
-    if (!activeAccount?.publicKey) return;
+    if (!activeAccount?.publicKey || !activeAccountHash) return;
 
     // fetch all
     if (transactionsType === ActivityListTransactionsType.All) {
@@ -210,7 +210,7 @@ export const useFetchAccountActivity = (
   }, [activeAccount?.publicKey, casperApiUrl, forceUpdate]);
 
   const fetchMoreTransactions = useCallback(() => {
-    if (!activeAccount?.publicKey) return;
+    if (!activeAccount?.publicKey || !activeAccountHash) return;
 
     // fetch casper
     if (transactionsType === ActivityListTransactionsType.Casper) {

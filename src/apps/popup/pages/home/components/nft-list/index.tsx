@@ -8,7 +8,6 @@ import { Tile, Typography } from '@libs/ui';
 import {
   BorderContainer,
   CenteredFlexRow,
-  FlexRow,
   SpaceBetweenFlexRow,
   SpacingSize,
   VerticalSpaceContainer
@@ -24,11 +23,9 @@ const TotalNftValueContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px 12px 0;
 `;
 
-const NftListContainer = styled(FlexRow)`
+const NftListContainer = styled(SpaceBetweenFlexRow)`
   padding: 16px;
-
   row-gap: 24px;
-  column-gap: 16px;
 `;
 
 const Container = styled(CenteredFlexRow)`
@@ -55,18 +52,17 @@ export const NftList = () => {
         </TotalNftValueContainer>
       </BorderContainer>
 
-      {(nftTokens === null || nftTokens.length === 0) && (
+      {nftTokens.length === 0 && (
         <VerticalSpaceContainer top={SpacingSize.None}>
           <Container>
             <Typography type="body" color="contentSecondary">
-              {nftTokens == null && <Trans t={t}>Something went wrong</Trans>}
               {nftTokens?.length === 0 && <Trans t={t}>No NFT tokens</Trans>}
             </Typography>
           </Container>
         </VerticalSpaceContainer>
       )}
 
-      {nftTokens != null && nftTokens.length > 0 && (
+      {nftTokens.length > 0 && (
         <NftListContainer wrap="wrap">
           {nftTokens.map((nftToken, index) => {
             if (index === nftTokens.length - 1 && nftTokens.length >= 10) {
