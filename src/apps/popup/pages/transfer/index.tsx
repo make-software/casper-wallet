@@ -24,7 +24,7 @@ import {
   multiplyErc20Balance
 } from '@libs/ui/utils/formatters';
 import { getIsErc20Transfer, TransactionSteps } from './utils';
-import { RouterPath, useTypedNavigate } from '@popup/router';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { Button, Typography } from '@libs/ui';
 import {
   ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES,
@@ -44,6 +44,7 @@ import { HomePageTabsId } from '../home';
 export const TransferPage = () => {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
+  const location = useTypedLocation();
 
   const { tokenContractPackageHash, tokenContractHash } = useParams();
 
@@ -69,8 +70,11 @@ export const TransferPage = () => {
   const { tokens } = useActiveAccountErc20Tokens();
   const token = tokens?.find(token => token.id === tokenContractPackageHash);
 
-  const symbol = isErc20Transfer ? token?.symbol || null : 'CSPR';
-  const erc20Decimals = token?.decimals != null ? token.decimals : null;
+  const symbol = isErc20Transfer
+    ? token?.symbol || location.state?.tokenData?.symbol || null
+    : 'CSPR';
+  const erc20Decimals =
+    token?.decimals || location.state?.tokenData?.decimals || null;
   const erc20Balance =
     (token?.balance && divideErc20Balance(token?.balance, erc20Decimals)) ||
     null;
@@ -89,10 +93,27 @@ export const TransferPage = () => {
     paymentAmount
   );
 
-  const { formState: amountFormState, getValues: getValuesAmountForm } =
-    amountForm;
+  const {
+    formState: amountFormState,
+    getValues: getValuesAmountForm,
+    trigger
+  } = amountForm;
   const { formState: recipientFormState, getValues: getValuesRecipientForm } =
     recipientForm;
+
+  useEffect(() => {
+    if (amountFormState.touchedFields.amount) {
+      trigger();
+    }
+  }, [
+    networkName,
+    activeAccount?.publicKey,
+    trigger,
+    amountFormState.touchedFields.amount,
+    erc20Balance,
+    csprBalance.amountMotes,
+    paymentAmount
+  ]);
 
   // event listener for enable/disable submit button
   useEffect(() => {
@@ -238,14 +259,17 @@ export const TransferPage = () => {
   };
 
   const getButtonProps = () => {
+    const isRecipientFormButtonDisabled = calculateSubmitButtonDisabled({
+      isValid: recipientFormState.isValid
+    });
+    const isAmountFormButtonDisabled = calculateSubmitButtonDisabled({
+      isValid: amountFormState.isValid
+    });
+
     switch (transferStep) {
       case TransactionSteps.Recipient: {
-        const isButtonDisabled = calculateSubmitButtonDisabled({
-          isValid: recipientFormState.isValid
-        });
-
         return {
-          disabled: isButtonDisabled,
+          disabled: isRecipientFormButtonDisabled,
           onClick: () => {
             const { recipientPublicKey } = getValuesRecipientForm();
 
@@ -255,12 +279,8 @@ export const TransferPage = () => {
         };
       }
       case TransactionSteps.Amount: {
-        const isButtonDisabled = calculateSubmitButtonDisabled({
-          isValid: amountFormState.isValid
-        });
-
         return {
-          disabled: isButtonDisabled,
+          disabled: isAmountFormButtonDisabled,
           onClick: () => {
             const {
               transferIdMemo,
@@ -277,7 +297,10 @@ export const TransferPage = () => {
       }
       case TransactionSteps.Confirm: {
         return {
-          disabled: isSubmitButtonDisable,
+          disabled:
+            isSubmitButtonDisable ||
+            isRecipientFormButtonDisabled ||
+            isAmountFormButtonDisabled,
           onClick: onSubmitSending
         };
       }

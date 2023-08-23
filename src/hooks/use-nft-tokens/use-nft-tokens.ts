@@ -43,7 +43,7 @@ export const useNftTokens = () => {
 
           if (itemCount === nftTokens?.length) return;
 
-          dispatchToMainStore(accountNftTokensAdded(nftTokensList));
+          dispatchToMainStore(accountNftTokensAdded(nftTokensList ?? []));
           dispatchToMainStore(accountNftTokensCountChanged(itemCount));
 
           setNftTokensPageCount(pageCount);
@@ -80,7 +80,7 @@ export const useNftTokens = () => {
 
           if (itemCount === nftTokens?.length) return;
 
-          dispatchToMainStore(accountNftTokensUpdated(nftTokensList));
+          dispatchToMainStore(accountNftTokensUpdated(nftTokensList ?? []));
 
           setNftTokensPageCount(pageCount);
           setNftTokensPage(nftTokensPage + 1);

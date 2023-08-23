@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { shallowEqual, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -15,6 +15,12 @@ import { Tile, Typography, ActiveAccountPlate } from '@libs/ui';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { useCopyToClipboard } from '@src/hooks';
 import { useTypedLocation } from '@popup/router';
+import {
+  selectAccountBalance,
+  selectErc20Tokens
+} from '@background/redux/account-info/selectors';
+import { motesToCSPR } from '@libs/ui/utils/formatters';
+import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
 
 const Container = styled.div`
   padding: 20px 16px;
@@ -28,6 +34,11 @@ const HashContainer = styled.div`
   }
 `;
 
+interface ITokenData {
+  balance: string;
+  symbol: string;
+}
+
 export const ReceivePageContent = () => {
   const { t } = useTranslation();
 
@@ -38,7 +49,27 @@ export const ReceivePageContent = () => {
   );
 
   const location = useTypedLocation();
-  const { tokenData } = location?.state;
+  const [tokenData, setTokenData] = useState<ITokenData>({
+    balance: location?.state?.tokenData?.balance ?? '',
+    symbol: location?.state?.tokenData?.symbol ?? ''
+  });
+
+  const csprBalance = useSelector(selectAccountBalance, shallowEqual);
+  const tokens = useSelector(selectErc20Tokens, shallowEqual);
+
+  useEffect(() => {
+    if (tokenData.symbol === 'CSPR') {
+      const balance =
+        (csprBalance.amountMotes && motesToCSPR(csprBalance.amountMotes)) ||
+        '0';
+      setTokenData(prev => ({ ...prev, balance }));
+    } else {
+      const erc20Tokens = formatErc20TokenBalance(tokens);
+      const balance =
+        erc20Tokens?.find(t => t.symbol === tokenData.symbol)?.amount ?? '0';
+      setTokenData(prev => ({ ...prev, balance }));
+    }
+  }, [csprBalance, tokenData.symbol, tokens]);
 
   return (
     <ContentContainer>
@@ -49,8 +80,8 @@ export const ReceivePageContent = () => {
       </ParagraphContainer>
       <ActiveAccountPlate
         label="To account"
-        symbol={tokenData?.symbol || ''}
-        balance={tokenData?.amount || ''}
+        symbol={tokenData.symbol}
+        balance={tokenData.balance}
       />
       <VerticalSpaceContainer top={SpacingSize.XXXL}>
         <Tile>
