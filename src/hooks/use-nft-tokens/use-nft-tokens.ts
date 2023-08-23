@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { dispatchFetchNftTokensRequest } from '@libs/services/nft-service';
@@ -19,6 +19,7 @@ import { useForceUpdate } from '@popup/hooks/use-force-update';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
 export const useNftTokens = () => {
+  const [loading, setLoading] = React.useState(false);
   const [nftTokensPage, setNftTokensPage] = useState(1);
   const [nftTokensPageCount, setNftTokensPageCount] = useState(0);
 
@@ -33,6 +34,10 @@ export const useNftTokens = () => {
   useEffect(() => {
     if (!activeAccount?.publicKey) return;
 
+    if (nftTokens.length === 0) {
+      setLoading(true);
+    }
+
     dispatchFetchNftTokensRequest(
       getAccountHashFromPublicKey(activeAccount.publicKey),
       1
@@ -41,7 +46,9 @@ export const useNftTokens = () => {
         if (payload) {
           const { data: nftTokensList, pageCount, itemCount } = payload;
 
-          if (itemCount === nftTokens?.length) return;
+          if (itemCount === nftTokens?.length || itemCount === nftTokensCount) {
+            return;
+          }
 
           dispatchToMainStore(accountNftTokensAdded(nftTokensList ?? []));
           dispatchToMainStore(accountNftTokensCountChanged(itemCount));
@@ -52,6 +59,9 @@ export const useNftTokens = () => {
       })
       .catch(error => {
         console.error('Account NFT request failed:', error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
 
     // will cause effect to run again after timeout
@@ -102,6 +112,7 @@ export const useNftTokens = () => {
   ]);
 
   return {
-    loadMoreNftTokens
+    loadMoreNftTokens,
+    loading
   };
 };
