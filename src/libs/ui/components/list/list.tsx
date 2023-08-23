@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { MacScrollbar } from 'mac-scrollbar';
 
 import { Tile, Typography } from '@libs/ui';
 import {
@@ -132,16 +133,17 @@ export function List<ListRow extends ListRowBase>({
               {renderHeader()}
             </ListHeaderContainer>
           )}
-          <RowsContainer
-            marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
-            maxHeight={maxHeight}
-          >
-            {rows.map((row, index, array) => (
-              <RowContainer key={row.id}>
-                {renderRow(row, index, array)}
-              </RowContainer>
-            ))}
-          </RowsContainer>
+          <MacScrollbar style={{ maxHeight }}>
+            <RowsContainer
+              marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
+            >
+              {rows.map((row, index, array) => (
+                <RowContainer key={row.id}>
+                  {renderRow(row, index, array)}
+                </RowContainer>
+              ))}
+            </RowsContainer>
+          </MacScrollbar>
           {renderFooter && (
             <ListFooterContainer
               marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}

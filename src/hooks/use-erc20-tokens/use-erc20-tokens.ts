@@ -22,8 +22,10 @@ export const useErc20Tokens = () => {
   >(tokens);
 
   useEffect(() => {
+    if (!activeAccount?.publicKey) return;
+
     dispatchFetchErc20TokensRequest(
-      getAccountHashFromPublicKey(activeAccount?.publicKey)
+      getAccountHashFromPublicKey(activeAccount.publicKey)
     ).then(({ payload: tokens }) => {
       dispatchToMainStore(accountErc20Changed(tokens));
       setErc20Tokens(tokens);

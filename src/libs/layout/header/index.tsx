@@ -19,6 +19,7 @@ import {
 
 import { HeaderConnectionStatus } from './header-connection-status';
 import { HeaderActions } from './header-actions';
+import { HeaderDataUpdater } from './header-data-updater';
 
 const LogoAndConnectionStatusContainer = styled(LeftAlignedCenteredFlexRow)`
   gap: 18px;
@@ -58,6 +59,10 @@ export function PopupHeader({
     selectIsActiveAccountConnectedWithActiveOrigin
   );
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const headerDataUpdaterEnabled = Boolean(
+    activeAccount?.publicKey &&
+      (withMenu || withConnectionStatus || withNetworkSwitcher)
+  );
 
   return (
     <>
@@ -96,6 +101,7 @@ export function PopupHeader({
       {renderSubmenuBarItems && (
         <SubmenuBarContainer>{renderSubmenuBarItems()}</SubmenuBarContainer>
       )}
+      {headerDataUpdaterEnabled && <HeaderDataUpdater />}
     </>
   );
 }

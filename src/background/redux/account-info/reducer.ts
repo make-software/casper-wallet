@@ -30,7 +30,7 @@ const initialState: AccountInfoState = {
   pendingTransactions: [],
   erc20Tokens: [],
   accountDeploys: null,
-  accountNftTokens: null,
+  accountNftTokens: [],
   nftTokensCount: 0
 };
 
@@ -135,10 +135,7 @@ export const reducer = createReducer(initialState)
   }))
   .handleAction(accountNftTokensUpdated, (state, { payload }) => ({
     ...state,
-    accountNftTokens:
-      state.accountNftTokens != null
-        ? [...state.accountNftTokens, ...payload]
-        : payload
+    accountNftTokens: [...state.accountNftTokens, ...payload]
   }))
   .handleAction(accountNftTokensCountChanged, (state, { payload }) => ({
     ...state,
