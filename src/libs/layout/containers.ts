@@ -305,3 +305,13 @@ export const IconCircleContainer = styled(CenteredFlexRow)<{
     color === 'inherit' ? 'inherit' : theme.color[color]};
   border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
+
+export const AccountActivityPlateContainer = styled(AlignedSpaceBetweenFlexRow)`
+  cursor: pointer;
+  padding: 16px 12px;
+`;
+
+export const ActivityPlateContentContainer = styled(FlexColumn)`
+  flex-grow: 1;
+  gap: 2px;
+`;

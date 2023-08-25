@@ -97,7 +97,6 @@ export const ActivityList = () => {
       return <NoActivityView activityList={erc20TokenActivityList} />;
     }
 
-    // render no activity for erc20
     return (
       <List
         contentTop={SpacingSize.Small}

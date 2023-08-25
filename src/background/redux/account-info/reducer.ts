@@ -12,11 +12,12 @@ import {
   accountPendingTransactionsChanged,
   accountPendingTransactionsRemove,
   accountErc20Changed,
-  accountDeploysChanged,
+  accountDeploysAdded,
   accountDeploysUpdated,
   accountNftTokensAdded,
   accountNftTokensUpdated,
-  accountNftTokensCountChanged
+  accountNftTokensCountChanged,
+  accountDeploysCountChanged
 } from './actions';
 
 const initialState: AccountInfoState = {
@@ -31,7 +32,8 @@ const initialState: AccountInfoState = {
   erc20Tokens: [],
   accountDeploys: null,
   accountNftTokens: [],
-  nftTokensCount: 0
+  nftTokensCount: 0,
+  accountDeploysCount: 0
 };
 
 export const reducer = createReducer(initialState)
@@ -118,7 +120,7 @@ export const reducer = createReducer(initialState)
       transaction => transaction.deployHash !== payload
     )
   }))
-  .handleAction(accountDeploysChanged, (state, { payload }) => ({
+  .handleAction(accountDeploysAdded, (state, { payload }) => ({
     ...state,
     accountDeploys: payload
   }))
@@ -140,4 +142,8 @@ export const reducer = createReducer(initialState)
   .handleAction(accountNftTokensCountChanged, (state, { payload }) => ({
     ...state,
     nftTokensCount: payload
+  }))
+  .handleAction(accountDeploysCountChanged, (state, { payload }) => ({
+    ...state,
+    accountDeploysCount: payload
   }));

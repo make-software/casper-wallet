@@ -8,3 +8,4 @@ export * from './use-infinity-scroll';
 export * from './use-copy-to-clipboard';
 export * from './use-account-pending-transactions';
 export * from './use-nft-tokens';
+export * from './use-account-deploys';

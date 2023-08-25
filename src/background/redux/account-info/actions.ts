@@ -48,7 +48,7 @@ export const accountPendingTransactionsRemove = createAction(
   'ACCOUNT_PENDING_TRANSACTIONS_REMOVE'
 )<string>();
 
-export const accountDeploysChanged = createAction('ACCOUNT_DEPLOYS_CHANGED')<
+export const accountDeploysAdded = createAction('ACCOUNT_DEPLOYS_ADDED')<
   ExtendedDeployWithId[]
 >();
 
@@ -66,4 +66,8 @@ export const accountNftTokensUpdated = createAction(
 
 export const accountNftTokensCountChanged = createAction(
   'ACCOUNT_NFT_TOKENS_COUNT_CHANGED'
+)<number>();
+
+export const accountDeploysCountChanged = createAction(
+  'ACCOUNT_DEPLOYS_COUNT_CHANGED'
 )<number>();

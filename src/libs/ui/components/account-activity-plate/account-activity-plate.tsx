@@ -4,10 +4,11 @@ import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
+  AccountActivityPlateContainer,
+  ActivityPlateContentContainer,
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
   CenteredFlexRow,
-  FlexColumn,
   SpacingSize
 } from '@libs/layout';
 import {
@@ -40,11 +41,6 @@ import {
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { getRecipientAddressFromTransaction } from '@libs/ui/utils/utils';
 
-const AccountActivityPlateContainer = styled(AlignedSpaceBetweenFlexRow)`
-  cursor: pointer;
-  padding: 16px 12px;
-`;
-
 const IconCircleContainer = styled(CenteredFlexRow)`
   min-width: 28px;
 
@@ -55,11 +51,6 @@ const IconCircleContainer = styled(CenteredFlexRow)`
 
   background-color: ${({ theme }) => theme.color.fillSecondary};
   border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
-`;
-
-const ContentContainer = styled(FlexColumn)`
-  flex-grow: 1;
-  gap: 2px;
 `;
 
 const Divider = styled.div`
@@ -74,12 +65,14 @@ const Divider = styled.div`
 
 interface AccountActivityPlateProps {
   transactionInfo: Erc20TransferWithId | ExtendedDeployWithId;
+  onClick?: () => void;
+  isDeploysList?: boolean;
 }
 
 type Ref = HTMLDivElement;
 
 export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
-  ({ transactionInfo }, ref) => {
+  ({ transactionInfo, onClick, isDeploysList }, ref) => {
     const [type, setType] = useState<TransferType | null>(null);
 
     const navigate = useTypedNavigate();
@@ -161,7 +154,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
       <AccountActivityPlateContainer
         gap={SpacingSize.Small}
         ref={ref}
-        onClick={() =>
+        onClick={() => {
           navigate(RouterPath.ActivityDetails, {
             state: {
               activityDetailsData: {
@@ -170,16 +163,20 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
                 deployHash,
                 type,
                 amount: formattedAmount,
-                symbol: symbol || ''
+                symbol: symbol || '',
+                isDeploysList: isDeploysList
               }
             }
-          })
-        }
+          });
+          if (onClick) {
+            onClick();
+          }
+        }}
       >
         <IconCircleContainer>
           {type != null && <SvgIcon src={TypeIcons[type]} size={16} />}
         </IconCircleContainer>
-        <ContentContainer>
+        <ActivityPlateContentContainer>
           <AlignedSpaceBetweenFlexRow>
             <AlignedFlexRow gap={SpacingSize.Small}>
               <Typography type="bodySemiBold">
@@ -229,7 +226,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
               </Typography>
             )}
           </AlignedSpaceBetweenFlexRow>
-        </ContentContainer>
+        </ActivityPlateContentContainer>
         <SvgIcon src="assets/icons/chevron.svg" size={16} />
       </AccountActivityPlateContainer>
     );

@@ -53,7 +53,7 @@ export const NftList = () => {
     }
   }, []);
 
-  const setNftTokeneYPosition = () => {
+  const setNftTokenYPosition = () => {
     const container = document.querySelector('#ms-container');
 
     localStorage.setItem(
@@ -108,7 +108,7 @@ export const NftList = () => {
                   ? observerElement
                   : null
               }
-              onClick={setNftTokeneYPosition}
+              onClick={setNftTokenYPosition}
             />
           ))}
         </NftListContainer>

@@ -17,4 +17,5 @@ export interface AccountInfoState {
   accountDeploys: ExtendedDeployWithId[] | null;
   accountNftTokens: NFTTokenResult[];
   nftTokensCount: number;
+  accountDeploysCount: number;
 }

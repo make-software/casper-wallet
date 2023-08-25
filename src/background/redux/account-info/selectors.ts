@@ -26,3 +26,6 @@ export const selectAccountNftTokens = (state: RootState) =>
 
 export const selectAccountNftTokensCount = (state: RootState) =>
   state.accountInfo.nftTokensCount;
+
+export const selectAccountDeploysCount = (state: RootState) =>
+  state.accountInfo.accountDeploysCount;
