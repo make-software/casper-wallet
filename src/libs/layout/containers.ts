@@ -315,3 +315,25 @@ export const ActivityPlateContentContainer = styled(FlexColumn)`
   flex-grow: 1;
   gap: 2px;
 `;
+
+export const ActivityPlateIconCircleContainer = styled(CenteredFlexRow)`
+  min-width: 28px;
+
+  width: 28px;
+  height: 28px;
+
+  margin-right: 4px;
+
+  background-color: ${({ theme }) => theme.color.fillSecondary};
+  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
+`;
+
+export const ActivityPlateDivider = styled.div`
+  width: 2px;
+  height: 2px;
+
+  margin: 0 6px;
+
+  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
+  background-color: ${({ theme }) => theme.color.contentSecondary};
+`;

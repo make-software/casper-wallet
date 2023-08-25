@@ -234,7 +234,7 @@ browser.windows.onFocusChanged.addListener(async (windowId: number) => {
 });
 
 browser.tabs.onActivated.addListener(
-  async ({ windowId, tabId }: browser.Tabs.OnActivatedActiveInfoType) => {
+  async ({ windowId }: browser.Tabs.OnActivatedActiveInfoType) => {
     updateOrigin(windowId);
   }
 );
@@ -803,7 +803,7 @@ browser.runtime.onMessage.addListener(
 
 // ping mechanism to keep background script from destroing wallet session when it's unlocked
 function ping() {
-  browser.runtime.sendMessage('ping').catch(err => {
+  browser.runtime.sendMessage('ping').catch(() => {
     // ping
   });
 }

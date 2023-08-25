@@ -1,5 +1,4 @@
 import React, { forwardRef, useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -8,7 +7,8 @@ import {
   ActivityPlateContentContainer,
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
-  CenteredFlexRow,
+  ActivityPlateIconCircleContainer,
+  ActivityPlateDivider,
   SpacingSize
 } from '@libs/layout';
 import {
@@ -40,28 +40,6 @@ import {
 } from '@src/constants';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { getRecipientAddressFromTransaction } from '@libs/ui/utils/utils';
-
-const IconCircleContainer = styled(CenteredFlexRow)`
-  min-width: 28px;
-
-  width: 28px;
-  height: 28px;
-
-  margin-right: 4px;
-
-  background-color: ${({ theme }) => theme.color.fillSecondary};
-  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
-`;
-
-const Divider = styled.div`
-  width: 2px;
-  height: 2px;
-
-  margin: 0 6px;
-
-  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
-  background-color: ${({ theme }) => theme.color.contentSecondary};
-`;
 
 interface AccountActivityPlateProps {
   transactionInfo: Erc20TransferWithId | ExtendedDeployWithId;
@@ -173,9 +151,9 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
           }
         }}
       >
-        <IconCircleContainer>
+        <ActivityPlateIconCircleContainer>
           {type != null && <SvgIcon src={TypeIcons[type]} size={16} />}
-        </IconCircleContainer>
+        </ActivityPlateIconCircleContainer>
         <ActivityPlateContentContainer>
           <AlignedSpaceBetweenFlexRow>
             <AlignedFlexRow gap={SpacingSize.Small}>
@@ -209,7 +187,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
                 truncatedSize="tiny"
                 color="contentPrimary"
               />
-              <Divider />
+              <ActivityPlateDivider />
               <Tooltip title={formatTimestamp(timestamp)} noWrap>
                 <Typography
                   type="captionRegular"

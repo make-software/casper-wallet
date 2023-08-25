@@ -51,18 +51,16 @@ export const ActivityList = () => {
       <List
         contentTop={SpacingSize.Small}
         rows={accountCasperActivityList!}
-        renderRow={(transaction, index) => {
-          if (index === accountCasperActivityList!?.length - 1) {
-            return (
-              <AccountCasperActivityPlate
-                ref={observerElement}
-                transactionInfo={transaction}
-              />
-            );
-          }
-
-          return <AccountCasperActivityPlate transactionInfo={transaction} />;
-        }}
+        renderRow={(transaction, index) => (
+          <AccountCasperActivityPlate
+            ref={
+              index === accountCasperActivityList!?.length - 1
+                ? observerElement
+                : null
+            }
+            transactionInfo={transaction}
+          />
+        )}
         marginLeftForItemSeparatorLine={54}
       />
     );
@@ -101,18 +99,14 @@ export const ActivityList = () => {
       <List
         contentTop={SpacingSize.Small}
         rows={erc20Transactions}
-        renderRow={(transaction, index) => {
-          if (index === erc20Transactions?.length - 1) {
-            return (
-              <AccountActivityPlate
-                ref={observerElement}
-                transactionInfo={transaction}
-              />
-            );
-          }
-
-          return <AccountActivityPlate transactionInfo={transaction} />;
-        }}
+        renderRow={(transaction, index) => (
+          <AccountActivityPlate
+            ref={
+              index === erc20Transactions?.length - 1 ? observerElement : null
+            }
+            transactionInfo={transaction}
+          />
+        )}
         marginLeftForItemSeparatorLine={54}
       />
     );
