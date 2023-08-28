@@ -15,9 +15,6 @@ import { AppRouter } from './app-router';
 // skeleton styles
 import 'react-loading-skeleton/dist/skeleton.css';
 
-// skeleton styles
-import 'react-loading-skeleton/dist/skeleton.css';
-
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
 

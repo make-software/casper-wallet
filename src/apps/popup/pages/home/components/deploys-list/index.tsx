@@ -53,24 +53,22 @@ export const DeploysList = () => {
   }
 
   return (
-    <>
-      <List
-        contentTop={SpacingSize.None}
-        rows={accountDeploysListWithPendingTransactions}
-        renderRow={(transaction, index) => (
-          <AccountActivityPlate
-            ref={
-              index === accountDeploysListWithPendingTransactions!?.length - 1
-                ? observerElement
-                : null
-            }
-            transactionInfo={transaction}
-            onClick={setActivityPlateYPosition}
-            isDeploysList={true}
-          />
-        )}
-        marginLeftForItemSeparatorLine={54}
-      />
-    </>
+    <List
+      contentTop={SpacingSize.None}
+      rows={accountDeploysListWithPendingTransactions}
+      renderRow={(transaction, index) => (
+        <AccountActivityPlate
+          ref={
+            index === accountDeploysListWithPendingTransactions!?.length - 1
+              ? observerElement
+              : null
+          }
+          transactionInfo={transaction}
+          onClick={setActivityPlateYPosition}
+          isDeploysList={true}
+        />
+      )}
+      marginLeftForItemSeparatorLine={54}
+    />
   );
 };
