@@ -17,7 +17,8 @@ import {
   accountNftTokensAdded,
   accountNftTokensUpdated,
   accountNftTokensCountChanged,
-  accountDeploysCountChanged
+  accountDeploysCountChanged,
+  accountCasperActivityCountChanged
 } from './actions';
 
 const initialState: AccountInfoState = {
@@ -26,14 +27,15 @@ const initialState: AccountInfoState = {
     amountFiat: null
   },
   currencyRate: null,
-  accountCasperActivity: null,
+  accountCasperActivity: [],
   accountErc20TokensActivity: null,
   pendingTransactions: [],
   erc20Tokens: [],
-  accountDeploys: null,
+  accountDeploys: [],
   accountNftTokens: [],
   nftTokensCount: 0,
-  accountDeploysCount: 0
+  accountDeploysCount: 0,
+  accountCasperActivityCount: 0
 };
 
 export const reducer = createReducer(initialState)
@@ -146,4 +148,8 @@ export const reducer = createReducer(initialState)
   .handleAction(accountDeploysCountChanged, (state, { payload }) => ({
     ...state,
     accountDeploysCount: payload
+  }))
+  .handleAction(accountCasperActivityCountChanged, (state, { payload }) => ({
+    ...state,
+    accountCasperActivityCount: payload
   }));

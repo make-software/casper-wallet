@@ -38,6 +38,7 @@ export * from './components/no-activity-view/no-activity-view';
 export * from './components/nft-media-placeholder/nft-media-placeholder';
 export * from './components/account-list/account-list';
 export * from './components/connection-status-badge/connection-status-badge';
+export * from './components/casper-token-activity-list/casper-token-activity-list';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

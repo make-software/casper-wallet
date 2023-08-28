@@ -33,11 +33,12 @@ type Ref = HTMLDivElement;
 
 interface AccountCasperActivityPlateProps {
   transactionInfo: TransferResultWithId;
+  onClick?: () => void;
 }
 export const AccountCasperActivityPlate = forwardRef<
   Ref,
   AccountCasperActivityPlateProps
->(({ transactionInfo }, ref) => {
+>(({ transactionInfo, onClick }, ref) => {
   const [type, setType] = useState<TransferType | null>(null);
 
   const navigate = useTypedNavigate();
@@ -90,7 +91,7 @@ export const AccountCasperActivityPlate = forwardRef<
     <AccountActivityPlateContainer
       gap={SpacingSize.Small}
       ref={ref}
-      onClick={() =>
+      onClick={() => {
         navigate(RouterPath.ActivityDetails, {
           state: {
             activityDetailsData: {
@@ -100,8 +101,12 @@ export const AccountCasperActivityPlate = forwardRef<
               type
             }
           }
-        })
-      }
+        });
+
+        if (onClick) {
+          onClick();
+        }
+      }}
     >
       <ActivityPlateIconCircleContainer>
         {type != null && <SvgIcon src={TypeIcons[type]} size={16} />}

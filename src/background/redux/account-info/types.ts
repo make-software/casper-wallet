@@ -11,11 +11,12 @@ export interface AccountInfoState {
   balance: ActiveAccountBalance;
   erc20Tokens: ContractPackageWithBalance[];
   currencyRate: number | null;
-  accountCasperActivity: TransferResultWithId[] | null;
+  accountCasperActivity: TransferResultWithId[];
   accountErc20TokensActivity: Record<string, Erc20TokenActionResult[]> | null;
   pendingTransactions: ExtendedDeployWithId[];
-  accountDeploys: ExtendedDeployWithId[] | null;
+  accountDeploys: ExtendedDeployWithId[];
   accountNftTokens: NFTTokenResult[];
   nftTokensCount: number;
   accountDeploysCount: number;
+  accountCasperActivityCount: number;
 }

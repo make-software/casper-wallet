@@ -7,5 +7,6 @@ export * from './use-erc20-tokens';
 export * from './use-infinity-scroll';
 export * from './use-copy-to-clipboard';
 export * from './use-account-pending-transactions';
-export * from './use-nft-tokens';
-export * from './use-account-deploys';
+export * from './use-fetch-nft-tokens';
+export * from './use-fetch-account-deploys';
+export * from './use-fetch-casper-token-account-activity';

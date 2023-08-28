@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
@@ -17,10 +17,11 @@ import {
   accountDeploysUpdated
 } from '@background/redux/account-info/actions';
 
-export const useAccountDeploys = () => {
-  const [loading, setLoading] = React.useState(false);
+export const useFetchAccountDeploys = () => {
+  const [loading, setLoading] = useState(false);
   const [accountDeploysPage, setAccountDeploysPage] = useState(1);
   const [accountDeploysPageCount, setAccountDeploysPageCount] = useState(0);
+  const [downloadedOnce, setDownloadedOnce] = useState(false);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
@@ -37,7 +38,8 @@ export const useAccountDeploys = () => {
   useEffect(() => {
     if (!activeAccount?.publicKey) return;
 
-    if (accountDeploysList == null) {
+    // set loading to true only for the first time
+    if (accountDeploysList.length === 0 && !downloadedOnce) {
       setLoading(true);
     }
 
@@ -68,6 +70,7 @@ export const useAccountDeploys = () => {
       .catch(handleError)
       .finally(() => {
         setLoading(false);
+        setDownloadedOnce(true);
       });
 
     // will cause effect to run again after timeout
@@ -78,8 +81,14 @@ export const useAccountDeploys = () => {
     return () => {
       clearTimeout(effectTimeoutRef.current);
     };
-    //   eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeAccount?.publicKey, casperApiUrl, forceUpdate]);
+  }, [
+    downloadedOnce,
+    accountDeploysCount,
+    accountDeploysList?.length,
+    activeAccount?.publicKey,
+    casperApiUrl,
+    forceUpdate
+  ]);
 
   const loadMoreDeploys = useCallback(() => {
     if (

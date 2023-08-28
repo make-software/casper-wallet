@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { dispatchFetchNftTokensRequest } from '@libs/services/nft-service';
@@ -18,10 +18,11 @@ import { ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE } from '@src/constants';
 import { useForceUpdate } from '@popup/hooks/use-force-update';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
-export const useNftTokens = () => {
-  const [loading, setLoading] = React.useState(false);
+export const useFetchNftTokens = () => {
+  const [loading, setLoading] = useState(false);
   const [nftTokensPage, setNftTokensPage] = useState(1);
   const [nftTokensPageCount, setNftTokensPageCount] = useState(0);
+  const [downloadedOnce, setDownloadedOnce] = useState(false);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const nftTokens = useSelector(selectAccountNftTokens);
@@ -34,7 +35,8 @@ export const useNftTokens = () => {
   useEffect(() => {
     if (!activeAccount?.publicKey) return;
 
-    if (nftTokens.length === 0) {
+    // set loading to true only for the first time
+    if (nftTokens.length === 0 && !downloadedOnce) {
       setLoading(true);
     }
 
@@ -62,6 +64,7 @@ export const useNftTokens = () => {
       })
       .finally(() => {
         setLoading(false);
+        setDownloadedOnce(true);
       });
 
     // will cause effect to run again after timeout
@@ -72,8 +75,14 @@ export const useNftTokens = () => {
     return () => {
       clearTimeout(effectTimeoutRef.current);
     };
-    //   eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeAccount?.publicKey, casperApiUrl, forceUpdate]);
+  }, [
+    activeAccount?.publicKey,
+    casperApiUrl,
+    downloadedOnce,
+    forceUpdate,
+    nftTokens?.length,
+    nftTokensCount
+  ]);
 
   const loadMoreNftTokens = useCallback(() => {
     if (!activeAccount?.publicKey) return;

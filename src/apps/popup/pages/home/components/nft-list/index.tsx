@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import Skeleton from 'react-loading-skeleton';
 
-import { useInfinityScroll, useNftTokens } from '@src/hooks';
+import { useInfinityScroll, useFetchNftTokens } from '@src/hooks';
 import { Tile, Typography } from '@libs/ui';
 import {
   BorderContainer,
@@ -36,7 +36,7 @@ const Container = styled(CenteredFlexRow)`
 export const NftList = () => {
   const { t } = useTranslation();
 
-  const { loadMoreNftTokens, loading } = useNftTokens();
+  const { loadMoreNftTokens, loading } = useFetchNftTokens();
   const { observerElement } = useInfinityScroll(loadMoreNftTokens);
 
   const nftTokens = useSelector(selectAccountNftTokens);

@@ -24,7 +24,7 @@ export const accountCurrencyRateChanged = createAction(
 
 export const accountCasperActivityChanged = createAction(
   'ACCOUNT_CASPER_ACTIVITY_CHANGED'
-)<TransferResultWithId[] | null>();
+)<TransferResultWithId[]>();
 
 export const accountCasperActivityUpdated = createAction(
   'ACCOUNT_CASPER_ACTIVITY_UPDATED'
@@ -70,4 +70,8 @@ export const accountNftTokensCountChanged = createAction(
 
 export const accountDeploysCountChanged = createAction(
   'ACCOUNT_DEPLOYS_COUNT_CHANGED'
+)<number>();
+
+export const accountCasperActivityCountChanged = createAction(
+  'ACCOUNT_CASPER_ACTIVITY_COUNT_CHANGED'
 )<number>();
