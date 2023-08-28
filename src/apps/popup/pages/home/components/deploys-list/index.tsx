@@ -4,8 +4,11 @@ import { useSelector } from 'react-redux';
 import { selectAccountDeploys } from '@background/redux/account-info/selectors';
 import { SpacingSize } from '@libs/layout';
 import { AccountActivityPlate, List, NoActivityView } from '@libs/ui';
-import { useAccountPendingTransactions, useInfinityScroll } from '@src/hooks';
-import { useFetchAccountDeploys } from 'src/hooks/use-fetch-account-deploys';
+import {
+  useMapAccountDeploysListWithPendingTransactions,
+  useInfinityScroll,
+  useFetchAccountDeploys
+} from '@src/hooks';
 
 export const DeploysList = () => {
   const { loadMoreDeploys, loading } = useFetchAccountDeploys();
@@ -14,7 +17,7 @@ export const DeploysList = () => {
   const accountDeploysList = useSelector(selectAccountDeploys);
 
   const { accountDeploysListWithPendingTransactions } =
-    useAccountPendingTransactions(accountDeploysList);
+    useMapAccountDeploysListWithPendingTransactions(accountDeploysList);
 
   useEffect(() => {
     const container = document.querySelector('#ms-container');

@@ -12,7 +12,7 @@ import { selectErc20Tokens } from '@src/background/redux/account-info/selectors'
 import { accountErc20Changed } from '@src/background/redux/account-info/actions';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 
-export const useErc20Tokens = () => {
+export const useFetchErc20Tokens = () => {
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const tokens = useSelector(selectErc20Tokens);

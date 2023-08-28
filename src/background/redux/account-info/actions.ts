@@ -32,11 +32,19 @@ export const accountCasperActivityUpdated = createAction(
 
 export const accountErc20TokensActivityChanged = createAction(
   'ACCOUNT_ERC20_TOKEN_ACTIVITY_CHANGED'
-)<{ activityList: Erc20TokenActionResult[]; contractPackageHash: string }>();
+)<{
+  activityList: Erc20TokenActionResult[];
+  contractPackageHash: string;
+  tokenActivityCount: number;
+}>();
 
 export const accountErc20TokensActivityUpdated = createAction(
   'ACCOUNT_ERC20_TOKEN_ACTIVITY_UPDATED'
-)<{ activityList: Erc20TokenActionResult[]; contractPackageHash: string }>();
+)<{
+  activityList: Erc20TokenActionResult[];
+  contractPackageHash: string;
+  tokenActivityCount: number;
+}>();
 
 export const accountInfoReset = createAction('ACCOUNT_INFO_RESET')();
 

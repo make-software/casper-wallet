@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { List, Typography, TokenPlate } from '@libs/ui';
 import { SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import { TokenType, useCasperToken, useErc20Tokens } from '@src/hooks';
+import { TokenType, useCasperToken, useFetchErc20Tokens } from '@src/hooks';
 
 import { formatErc20TokenBalance } from './utils';
 
@@ -22,7 +22,7 @@ export const TokensList = () => {
   const [totalAmountFiat, setTotalAmountFiat] = useState<string | null>(null);
 
   const casperToken = useCasperToken();
-  const erc20Tokens = useErc20Tokens();
+  const erc20Tokens = useFetchErc20Tokens();
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 

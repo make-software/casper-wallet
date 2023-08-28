@@ -44,7 +44,11 @@ export const useFetchCasperTokenAccountActivity = () => {
   };
 
   useEffect(() => {
-    if (!activeAccount?.publicKey || !activeAccountHash) return;
+    setLoading(true);
+  }, [casperApiUrl, activeAccountHash]);
+
+  useEffect(() => {
+    if (!activeAccountHash) return;
 
     // set loading to true only for the first time
     if (accountCasperActivityList.length === 0 && !downloadedOnce) {
@@ -82,7 +86,9 @@ export const useFetchCasperTokenAccountActivity = () => {
       })
       .catch(handleError)
       .finally(() => {
-        setLoading(false);
+        setTimeout(() => {
+          setLoading(false);
+        }, 300);
         setDownloadedOnce(true);
       });
 
@@ -95,7 +101,6 @@ export const useFetchCasperTokenAccountActivity = () => {
       clearTimeout(effectTimeoutRef.current);
     };
   }, [
-    activeAccount?.publicKey,
     casperApiUrl,
     forceUpdate,
     activeAccountHash,
@@ -106,7 +111,7 @@ export const useFetchCasperTokenAccountActivity = () => {
   ]);
 
   const loadMoreAccountCasperActivity = useCallback(() => {
-    if (!activeAccount?.publicKey || !activeAccountHash) return;
+    if (!activeAccountHash) return;
 
     if (accountCasperActivityPage > accountCasperActivityPageCount) return;
 
@@ -145,7 +150,6 @@ export const useFetchCasperTokenAccountActivity = () => {
     accountCasperActivityList?.length,
     accountCasperActivityPage,
     accountCasperActivityPageCount,
-    activeAccount?.publicKey,
     activeAccountHash,
     casperTokenActivityCount
   ]);

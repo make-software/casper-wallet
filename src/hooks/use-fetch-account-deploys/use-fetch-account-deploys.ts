@@ -36,6 +36,10 @@ export const useFetchAccountDeploys = () => {
   };
 
   useEffect(() => {
+    setLoading(true);
+  }, [casperApiUrl, activeAccount?.publicKey]);
+
+  useEffect(() => {
     if (!activeAccount?.publicKey) return;
 
     // set loading to true only for the first time
@@ -69,7 +73,9 @@ export const useFetchAccountDeploys = () => {
       })
       .catch(handleError)
       .finally(() => {
-        setLoading(false);
+        setTimeout(() => {
+          setLoading(false);
+        }, 300);
         setDownloadedOnce(true);
       });
 

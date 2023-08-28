@@ -8,7 +8,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { accountPendingTransactionsRemove } from '@background/redux/account-info/actions';
 import { ExtendedDeployWithId } from '@libs/services/account-activity-service';
 
-export const useAccountPendingTransactions = (
+export const useMapAccountDeploysListWithPendingTransactions = (
   accountDeploys: ExtendedDeployWithId[] | null
 ) => {
   const pendingTransactions = useSelector(selectPendingTransactions);

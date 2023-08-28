@@ -7,7 +7,11 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { ActivityList, Typography, CasperTokenActivityList } from '@libs/ui';
+import {
+  Erc20TokenActivityList,
+  Typography,
+  CasperTokenActivityList
+} from '@libs/ui';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 
 import { Token } from './token';
@@ -36,7 +40,11 @@ export const TokenPageContent: React.FC<TokenPageContentProps> = ({
           <Trans t={t}>Activity</Trans>
         </Typography>
       </ParagraphContainer>
-      {tokenName === 'Casper' ? <CasperTokenActivityList /> : <ActivityList />}
+      {tokenName === 'Casper' ? (
+        <CasperTokenActivityList />
+      ) : (
+        <Erc20TokenActivityList />
+      )}
     </ContentContainer>
   );
 };

@@ -11,7 +11,7 @@ import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { Account } from '@background/redux/vault/types';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
-export const useAccountInfo = (account: Account | undefined) => {
+export const useFetchAccountInfo = (account: Account | undefined) => {
   const [accountInfoStandardName, setAccountInfoStandardName] = useState<
     string | null
   >(null);

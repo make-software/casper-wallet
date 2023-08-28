@@ -97,7 +97,7 @@ export const NftList = () => {
         </VerticalSpaceContainer>
       )}
 
-      {nftTokens.length > 0 && (
+      {nftTokens.length > 0 && !loading && (
         <NftListContainer wrap="wrap">
           {nftTokens.map((nftToken, index) => (
             <NftTokenCard
