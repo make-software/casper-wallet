@@ -26,7 +26,11 @@ export function ImportAccountWithFileFailureContentPage() {
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <SvgIcon src="assets/illustrations/error.svg" size={120} />
+        <SvgIcon
+          src="assets/illustrations/error.svg"
+          width={200}
+          height={120}
+        />
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">

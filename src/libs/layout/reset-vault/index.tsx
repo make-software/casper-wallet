@@ -34,7 +34,11 @@ export function ResetVaultPageContent() {
     <>
       <ContentContainer>
         <IllustrationContainer>
-          <SvgIcon src="assets/illustrations/reset-wallet.svg" size={120} />
+          <SvgIcon
+            src="assets/illustrations/reset-wallet.svg"
+            width={200}
+            height={120}
+          />
         </IllustrationContainer>
         <ParagraphContainer top={SpacingSize.XL}>
           <Typography type="header">
