@@ -1,21 +1,28 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import useInfiniteScroll from 'react-infinite-scroll-hook';
 
 import { selectAccountCasperActivity } from '@background/redux/account-info/selectors';
+import { useFetchCasperTokenAccountActivity } from '@src/hooks';
 import {
-  useFetchCasperTokenAccountActivity,
-  useInfinityScroll
-} from '@src/hooks';
-import { AccountCasperActivityPlate, List, NoActivityView } from '@libs/ui';
+  AccountCasperActivityPlate,
+  List,
+  LoadingActivityView,
+  NoActivityView
+} from '@libs/ui';
 import { SpacingSize } from '@libs/layout';
 
 export const CasperTokenActivityList = () => {
   const accountCasperActivityList = useSelector(selectAccountCasperActivity);
 
-  const { loading, loadMoreAccountCasperActivity } =
+  const { loading, loadMoreAccountCasperActivity, hasNextPage } =
     useFetchCasperTokenAccountActivity();
-  const { observerElement } = useInfinityScroll(loadMoreAccountCasperActivity);
-
+  const [sentryRef] = useInfiniteScroll({
+    loading,
+    hasNextPage,
+    onLoadMore: loadMoreAccountCasperActivity,
+    delayInMs: 0
+  });
   useEffect(() => {
     const container = document.querySelector('#ms-container');
 
@@ -36,34 +43,29 @@ export const CasperTokenActivityList = () => {
     );
   };
 
-  if (
-    accountCasperActivityList == null ||
-    accountCasperActivityList.length === 0
-  ) {
-    return (
-      <NoActivityView
-        activityList={accountCasperActivityList}
-        loading={loading}
-      />
-    );
-  }
-
   return (
-    <List
-      contentTop={SpacingSize.Small}
-      rows={accountCasperActivityList!}
-      renderRow={(transaction, index) => (
-        <AccountCasperActivityPlate
-          ref={
-            index === accountCasperActivityList!?.length - 1
-              ? observerElement
-              : null
-          }
-          transactionInfo={transaction}
-          onClick={setCasperTokenYPosition}
-        />
-      )}
-      marginLeftForItemSeparatorLine={54}
-    />
+    <>
+      {accountCasperActivityList != null &&
+        accountCasperActivityList.length > 0 && (
+          <List
+            contentTop={SpacingSize.Small}
+            rows={accountCasperActivityList!}
+            renderRow={transaction => (
+              <AccountCasperActivityPlate
+                transactionInfo={transaction}
+                onClick={setCasperTokenYPosition}
+              />
+            )}
+            marginLeftForItemSeparatorLine={54}
+          />
+        )}
+
+      {(loading || hasNextPage) && <LoadingActivityView ref={sentryRef} />}
+
+      {accountCasperActivityList == null ||
+        (accountCasperActivityList.length === 0 && !loading && (
+          <NoActivityView activityList={accountCasperActivityList} />
+        ))}
+    </>
   );
 };

@@ -20,10 +20,9 @@ import { dispatchToMainStore } from '@background/redux/utils';
 
 export const useFetchCasperTokenAccountActivity = () => {
   const [loading, setLoading] = useState(false);
-  const [accountCasperActivityPage, setAccountCasperActivityPage] = useState(1);
-  const [accountCasperActivityPageCount, setAccountCasperActivityPageCount] =
-    useState(0);
-  const [downloadedOnce, setDownloadedOnce] = useState(false);
+  const [accountCasperActivityPage, setAccountCasperActivityPage] = useState(2);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [isFirstPageLoad, setIsFirstPageLoad] = useState(false);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
@@ -44,14 +43,28 @@ export const useFetchCasperTokenAccountActivity = () => {
   };
 
   useEffect(() => {
-    setLoading(true);
-  }, [casperApiUrl, activeAccountHash]);
+    if (casperTokenActivityCount > accountCasperActivityList.length) {
+      setHasNextPage(true);
+    }
+
+    if (
+      casperTokenActivityCount === 0 &&
+      accountCasperActivityList.length === 0
+    ) {
+      setAccountCasperActivityPage(2);
+    }
+  }, [
+    activeAccountHash,
+    accountCasperActivityList.length,
+    accountCasperActivityPage,
+    casperTokenActivityCount
+  ]);
 
   useEffect(() => {
     if (!activeAccountHash) return;
 
     // set loading to true only for the first time
-    if (accountCasperActivityList.length === 0 && !downloadedOnce) {
+    if (accountCasperActivityList.length === 0 && !isFirstPageLoad) {
       setLoading(true);
     }
 
@@ -80,8 +93,9 @@ export const useFetchCasperTokenAccountActivity = () => {
           dispatchToMainStore(accountCasperActivityChanged(transactions));
           dispatchToMainStore(accountCasperActivityCountChanged(itemCount));
 
-          setAccountCasperActivityPageCount(pageCount);
-          setAccountCasperActivityPage(2);
+          if (pageCount > 1) {
+            setHasNextPage(true);
+          }
         }
       })
       .catch(handleError)
@@ -89,7 +103,7 @@ export const useFetchCasperTokenAccountActivity = () => {
         setTimeout(() => {
           setLoading(false);
         }, 300);
-        setDownloadedOnce(true);
+        setIsFirstPageLoad(true);
       });
 
     // will cause effect to run again after timeout
@@ -107,13 +121,13 @@ export const useFetchCasperTokenAccountActivity = () => {
     accountCasperActivityList.length,
     accountCasperActivityPage,
     casperTokenActivityCount,
-    downloadedOnce
+    isFirstPageLoad
   ]);
 
   const loadMoreAccountCasperActivity = useCallback(() => {
     if (!activeAccountHash) return;
 
-    if (accountCasperActivityPage > accountCasperActivityPageCount) return;
+    setLoading(true);
 
     dispatchFetchAccountCasperActivity(
       activeAccountHash,
@@ -127,7 +141,10 @@ export const useFetchCasperTokenAccountActivity = () => {
             itemCount
           } = payload;
 
-          if (itemCount === accountCasperActivityList?.length) return;
+          if (itemCount === accountCasperActivityList?.length) {
+            setHasNextPage(false);
+            return;
+          }
 
           const transactions =
             casperTokensActivityList?.map(transaction => ({
@@ -137,25 +154,32 @@ export const useFetchCasperTokenAccountActivity = () => {
 
           dispatchToMainStore(accountCasperActivityUpdated(transactions));
 
-          setAccountCasperActivityPageCount(pageCount);
-          setAccountCasperActivityPage(accountCasperActivityPage + 1);
+          if (accountCasperActivityPage + 1 <= pageCount) {
+            setAccountCasperActivityPage(accountCasperActivityPage + 1);
+          }
 
           if (casperTokenActivityCount !== itemCount) {
             dispatchToMainStore(accountCasperActivityCountChanged(itemCount));
           }
+          if (accountCasperActivityPage >= pageCount) {
+            setHasNextPage(false);
+          }
         }
       })
-      .catch(handleError);
+      .catch(handleError)
+      .finally(() => {
+        setLoading(false);
+      });
   }, [
     accountCasperActivityList?.length,
     accountCasperActivityPage,
-    accountCasperActivityPageCount,
     activeAccountHash,
     casperTokenActivityCount
   ]);
 
   return {
     loading,
-    loadMoreAccountCasperActivity
+    loadMoreAccountCasperActivity,
+    hasNextPage
   };
 };

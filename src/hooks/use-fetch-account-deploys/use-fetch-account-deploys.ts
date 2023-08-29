@@ -40,10 +40,9 @@ export const useFetchAccountDeploys = () => {
       setHasNextPage(true);
     }
 
-    const activePage = Math.ceil(accountDeploysList.length / 10);
-
-    if (activePage + 1 > accountDeploysPage) {
-      setAccountDeploysPage(activePage + 1);
+    if (accountDeploysList.length === 0 && accountDeploysCount === 0) {
+      setAccountDeploysPage(2);
+      return;
     }
   }, [accountDeploysList.length, accountDeploysCount, accountDeploysPage]);
 
@@ -109,7 +108,7 @@ export const useFetchAccountDeploys = () => {
     if (!activeAccount?.publicKey) return;
 
     setLoading(true);
-    console.log(accountDeploysPage, 'accountDeploysPage');
+
     dispatchFetchAccountExtendedDeploys(
       activeAccount?.publicKey,
       accountDeploysPage
@@ -117,8 +116,7 @@ export const useFetchAccountDeploys = () => {
       .then(({ payload }) => {
         if (payload) {
           const { data: deploysList, pageCount, itemCount } = payload;
-          console.log(accountDeploysList?.length, 'accountDeploysList?.length');
-          console.log(itemCount, 'itemCount');
+
           if (itemCount === accountDeploysList?.length) {
             setHasNextPage(false);
             return;
@@ -131,12 +129,14 @@ export const useFetchAccountDeploys = () => {
 
           dispatchToMainStore(accountDeploysUpdated(deploysListWithId));
 
-          setAccountDeploysPage(accountDeploysPage + 1);
+          if (accountDeploysPage + 1 <= pageCount) {
+            setAccountDeploysPage(accountDeploysPage + 1);
+          }
 
           if (accountDeploysCount !== itemCount) {
             dispatchToMainStore(accountDeploysCountChanged(itemCount));
           }
-          if (pageCount < accountDeploysPage) {
+          if (accountDeploysPage >= pageCount) {
             setHasNextPage(false);
           }
         }

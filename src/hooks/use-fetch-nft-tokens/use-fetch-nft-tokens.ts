@@ -37,10 +37,8 @@ export const useFetchNftTokens = () => {
       setHasNextPage(true);
     }
 
-    const activePage = Math.ceil(nftTokens.length / 10);
-
-    if (activePage + 1 > nftTokensPage) {
-      setNftTokensPage(activePage + 1);
+    if (nftTokensCount === 0 && nftTokens.length === 0) {
+      setNftTokensPage(2);
     }
   }, [nftTokens.length, nftTokensCount, nftTokensPage]);
 
@@ -119,7 +117,9 @@ export const useFetchNftTokens = () => {
 
           dispatchToMainStore(accountNftTokensUpdated(nftTokensList ?? []));
 
-          setNftTokensPage(nftTokensPage + 1);
+          if (nftTokensPage + 1 <= pageCount) {
+            setNftTokensPage(nftTokensPage + 1);
+          }
 
           if (nftTokensCount !== itemCount) {
             dispatchToMainStore(accountNftTokensCountChanged(itemCount));
