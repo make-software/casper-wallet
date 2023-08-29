@@ -20,9 +20,9 @@ import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/
 
 export const useFetchNftTokens = () => {
   const [loading, setLoading] = useState(false);
-  const [nftTokensPage, setNftTokensPage] = useState(1);
-  const [nftTokensPageCount, setNftTokensPageCount] = useState(0);
-  const [downloadedOnce, setDownloadedOnce] = useState(false);
+  const [nftTokensPage, setNftTokensPage] = useState(2);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [isFirstPageLoad, setIsFirstPageLoad] = useState(false);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const nftTokens = useSelector(selectAccountNftTokens);
@@ -33,14 +33,20 @@ export const useFetchNftTokens = () => {
   const forceUpdate = useForceUpdate();
 
   useEffect(() => {
-    setLoading(true);
-  }, [casperApiUrl, activeAccount?.publicKey]);
+    if (nftTokensCount > nftTokens.length) {
+      setHasNextPage(true);
+    }
+
+    const activePage = Math.ceil(nftTokens.length / 10);
+
+    setNftTokensPage(activePage + 1);
+  }, [nftTokens.length, nftTokensCount]);
 
   useEffect(() => {
     if (!activeAccount?.publicKey) return;
 
     // set loading to true only for the first time
-    if (nftTokens.length === 0 && !downloadedOnce) {
+    if (nftTokens.length === 0 && !isFirstPageLoad) {
       setLoading(true);
     }
 
@@ -50,7 +56,7 @@ export const useFetchNftTokens = () => {
     )
       .then(({ payload }) => {
         if (payload) {
-          const { data: nftTokensList, pageCount, itemCount } = payload;
+          const { data: nftTokensList, itemCount, pageCount } = payload;
 
           if (itemCount === nftTokens?.length || itemCount === nftTokensCount) {
             return;
@@ -59,8 +65,9 @@ export const useFetchNftTokens = () => {
           dispatchToMainStore(accountNftTokensAdded(nftTokensList ?? []));
           dispatchToMainStore(accountNftTokensCountChanged(itemCount));
 
-          setNftTokensPageCount(pageCount);
-          setNftTokensPage(2);
+          if (pageCount > 1) {
+            setHasNextPage(true);
+          }
         }
       })
       .catch(error => {
@@ -70,7 +77,7 @@ export const useFetchNftTokens = () => {
         setTimeout(() => {
           setLoading(false);
         }, 300);
-        setDownloadedOnce(true);
+        setIsFirstPageLoad(true);
       });
 
     // will cause effect to run again after timeout
@@ -84,16 +91,16 @@ export const useFetchNftTokens = () => {
   }, [
     activeAccount?.publicKey,
     casperApiUrl,
-    downloadedOnce,
     forceUpdate,
-    nftTokens?.length,
+    isFirstPageLoad,
+    nftTokens.length,
     nftTokensCount
   ]);
 
   const loadMoreNftTokens = useCallback(() => {
     if (!activeAccount?.publicKey) return;
 
-    if (nftTokensPage > nftTokensPageCount) return;
+    setLoading(true);
 
     dispatchFetchNftTokensRequest(
       getAccountHashFromPublicKey(activeAccount.publicKey),
@@ -103,31 +110,39 @@ export const useFetchNftTokens = () => {
         if (payload) {
           const { data: nftTokensList, pageCount, itemCount } = payload;
 
-          if (itemCount === nftTokens?.length) return;
+          if (itemCount === nftTokens?.length) {
+            setHasNextPage(false);
+            return;
+          }
 
           dispatchToMainStore(accountNftTokensUpdated(nftTokensList ?? []));
 
-          setNftTokensPageCount(pageCount);
           setNftTokensPage(nftTokensPage + 1);
 
           if (nftTokensCount !== itemCount) {
             dispatchToMainStore(accountNftTokensCountChanged(itemCount));
           }
+          if (nftTokensPage >= pageCount) {
+            setHasNextPage(false);
+          }
         }
       })
       .catch(error => {
         console.error('Account NFT request failed:', error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, [
     activeAccount?.publicKey,
     nftTokens?.length,
     nftTokensCount,
-    nftTokensPage,
-    nftTokensPageCount
+    nftTokensPage
   ]);
 
   return {
     loadMoreNftTokens,
-    loading
+    loading,
+    hasNextPage
   };
 };
