@@ -3,7 +3,6 @@ export * from './use-fetch-account-info';
 export * from './use-fetch-active-account-balance';
 export * from './use-casper-token';
 export * from './use-fetch-erc20-tokens';
-export * from './use-infinity-scroll';
 export * from './use-copy-to-clipboard';
 export * from './use-map-account-deploys-list-with-pending-transactions';
 export * from './use-fetch-nft-tokens';
