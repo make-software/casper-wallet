@@ -156,7 +156,10 @@ export const reducer = createReducer(initialState)
   }))
   .handleAction(accountNftTokensUpdated, (state, { payload }) => ({
     ...state,
-    accountNftTokens: [...state.accountNftTokens, ...payload]
+    accountNftTokens:
+      state.accountNftTokens != null
+        ? [...state.accountNftTokens, ...payload]
+        : payload
   }))
   .handleAction(accountNftTokensCountChanged, (state, { payload }) => ({
     ...state,

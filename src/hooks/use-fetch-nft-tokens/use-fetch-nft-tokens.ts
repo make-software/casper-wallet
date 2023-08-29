@@ -33,20 +33,20 @@ export const useFetchNftTokens = () => {
   const forceUpdate = useForceUpdate();
 
   useEffect(() => {
-    if (nftTokensCount > nftTokens.length) {
+    if (nftTokens && nftTokensCount > nftTokens.length) {
       setHasNextPage(true);
     }
 
-    if (nftTokensCount === 0 && nftTokens.length === 0) {
+    if (nftTokensCount === 0 && (nftTokens == null || nftTokens.length === 0)) {
       setNftTokensPage(2);
     }
-  }, [nftTokens.length, nftTokensCount, nftTokensPage]);
+  }, [nftTokens, nftTokens?.length, nftTokensCount, nftTokensPage]);
 
   useEffect(() => {
     if (!activeAccount?.publicKey) return;
 
     // set loading to true only for the first time
-    if (nftTokens.length === 0 && !isFirstPageLoad) {
+    if ((nftTokens == null || nftTokens.length === 0) && !isFirstPageLoad) {
       setLoading(true);
     }
 
@@ -55,9 +55,8 @@ export const useFetchNftTokens = () => {
       1
     )
       .then(({ payload }) => {
-        if (payload) {
-          const { data: nftTokensList, itemCount, pageCount } = payload;
-
+        if ('data' in payload) {
+          const { data: nftTokensList, pageCount, itemCount } = payload;
           if (itemCount === nftTokens?.length || itemCount === nftTokensCount) {
             return;
           }
@@ -68,6 +67,9 @@ export const useFetchNftTokens = () => {
           if (pageCount > 1) {
             setHasNextPage(true);
           }
+        } else {
+          dispatchToMainStore(accountNftTokensAdded(null));
+          setHasNextPage(false);
         }
       })
       .catch(error => {
@@ -93,7 +95,8 @@ export const useFetchNftTokens = () => {
     casperApiUrl,
     forceUpdate,
     isFirstPageLoad,
-    nftTokens.length,
+    nftTokens,
+    nftTokens?.length,
     nftTokensCount
   ]);
 
@@ -107,7 +110,7 @@ export const useFetchNftTokens = () => {
       nftTokensPage
     )
       .then(({ payload }) => {
-        if (payload) {
+        if ('data' in payload) {
           const { data: nftTokensList, pageCount, itemCount } = payload;
 
           if (itemCount === nftTokens?.length) {
@@ -128,6 +131,9 @@ export const useFetchNftTokens = () => {
           if (nftTokensPage >= pageCount) {
             setHasNextPage(false);
           }
+        } else {
+          dispatchToMainStore(accountNftTokensAdded(null));
+          setHasNextPage(false);
         }
       })
       .catch(error => {

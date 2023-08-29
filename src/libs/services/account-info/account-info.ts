@@ -4,7 +4,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { getAccountInfoUrl, AccountInfo } from '@libs/services/account-info';
 import { handleError, toJson } from '@libs/services/utils';
 import { queryClient } from '@libs/services/query-client';
-import { DataResponse, DataWithPayload } from '@libs/services/types';
+import { DataResponse, Payload } from '@libs/services/types';
 
 import { FETCH_QUERY_OPTIONS } from '@src/constants';
 
@@ -33,5 +33,5 @@ export const fetchAccountInfo = ({
 
 export const dispatchFetchAccountInfoRequest = (
   accountHash: string
-): Promise<DataWithPayload<AccountInfo>> =>
+): Promise<Payload<AccountInfo>> =>
   dispatchToMainStore(serviceMessage.fetchAccountInfoRequest({ accountHash }));

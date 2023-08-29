@@ -80,7 +80,7 @@ export const NftList = () => {
         </TotalNftValueContainer>
       </BorderContainer>
 
-      {nftTokens.length > 0 && (
+      {nftTokens != null && nftTokens.length > 0 && (
         <NftListContainer wrap="wrap">
           {nftTokens.map(nftToken => (
             <NftTokenCard
@@ -99,11 +99,12 @@ export const NftList = () => {
         </NftListContainer>
       )}
 
-      {nftTokens.length === 0 && !loading && (
+      {(nftTokens == null || nftTokens.length === 0) && !loading && (
         <VerticalSpaceContainer top={SpacingSize.None}>
           <Container>
             <Typography type="body" color="contentSecondary">
               {nftTokens?.length === 0 && <Trans t={t}>No NFT tokens</Trans>}
+              {nftTokens == null && <Trans t={t}>Something went wrong</Trans>}
             </Typography>
           </Container>
         </VerticalSpaceContainer>

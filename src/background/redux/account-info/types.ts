@@ -14,8 +14,8 @@ export interface AccountInfoState {
   accountCasperActivity: TransferResultWithId[];
   accountErc20TokensActivity: Record<string, AccountErc20TokenActivity> | null;
   pendingTransactions: ExtendedDeployWithId[];
-  accountDeploys: ExtendedDeployWithId[];
-  accountNftTokens: NFTTokenResult[];
+  accountDeploys: ExtendedDeployWithId[] | null;
+  accountNftTokens: NFTTokenResult[] | null;
   nftTokensCount: number;
   accountDeploysCount: number;
   accountCasperActivityCount: number;

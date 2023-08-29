@@ -36,27 +36,38 @@ export const useFetchAccountDeploys = () => {
   };
 
   useEffect(() => {
-    if (accountDeploysCount > accountDeploysList.length) {
+    if (accountDeploysList && accountDeploysCount > accountDeploysList.length) {
       setHasNextPage(true);
     }
 
-    if (accountDeploysList.length === 0 && accountDeploysCount === 0) {
+    if (
+      (accountDeploysList == null || accountDeploysList.length === 0) &&
+      accountDeploysCount === 0
+    ) {
       setAccountDeploysPage(2);
       return;
     }
-  }, [accountDeploysList.length, accountDeploysCount, accountDeploysPage]);
+  }, [
+    accountDeploysList,
+    accountDeploysList?.length,
+    accountDeploysCount,
+    accountDeploysPage
+  ]);
 
   useEffect(() => {
     if (!activeAccount?.publicKey) return;
 
     // set loading to true only for the first time
-    if (accountDeploysList.length === 0 && !isFirstPageLoad) {
+    if (
+      (accountDeploysList == null || accountDeploysList.length === 0) &&
+      !isFirstPageLoad
+    ) {
       setLoading(true);
     }
 
     dispatchFetchAccountExtendedDeploys(activeAccount?.publicKey, 1)
       .then(({ payload }) => {
-        if (payload) {
+        if ('data' in payload) {
           const { data: deploysList, pageCount, itemCount } = payload;
 
           if (
@@ -77,6 +88,9 @@ export const useFetchAccountDeploys = () => {
           if (pageCount > 1) {
             setHasNextPage(true);
           }
+        } else {
+          dispatchToMainStore(accountDeploysAdded(null));
+          setHasNextPage(false);
         }
       })
       .catch(handleError)
@@ -97,7 +111,8 @@ export const useFetchAccountDeploys = () => {
     };
   }, [
     accountDeploysCount,
-    accountDeploysList.length,
+    accountDeploysList,
+    accountDeploysList?.length,
     activeAccount?.publicKey,
     casperApiUrl,
     forceUpdate,
@@ -114,7 +129,7 @@ export const useFetchAccountDeploys = () => {
       accountDeploysPage
     )
       .then(({ payload }) => {
-        if (payload) {
+        if ('data' in payload) {
           const { data: deploysList, pageCount, itemCount } = payload;
 
           if (itemCount === accountDeploysList?.length) {
@@ -139,6 +154,9 @@ export const useFetchAccountDeploys = () => {
           if (accountDeploysPage >= pageCount) {
             setHasNextPage(false);
           }
+        } else {
+          dispatchToMainStore(accountDeploysAdded(null));
+          setHasNextPage(false);
         }
       })
       .catch(handleError)

@@ -1,5 +1,5 @@
 import { CLTypeParsedResult, CLTypeTypeResult } from '@libs/types/cl';
-import { PaginatedResponse } from '@libs/services/types';
+import { ErrorResponse, PaginatedResponse } from '@libs/services/types';
 
 export interface TransferResult {
   amount: string;
@@ -133,13 +133,20 @@ export const MapExtendedDeploy = ({
   rate: rate
 });
 
-export const MapPaginatedExtendedDeploys = ({
-  data,
-  ...rest
-}: PaginatedResponse<ExtendedDeployResult>): PaginatedResponse<ExtendedDeploy> => ({
-  ...rest,
-  data: data ? data.map(MapExtendedDeploy) : []
-});
+export const MapPaginatedExtendedDeploys = (
+  response: PaginatedResponse<ExtendedDeployResult> | ErrorResponse
+): PaginatedResponse<ExtendedDeploy> | ErrorResponse => {
+  if ('data' in response) {
+    return {
+      ...response,
+      data: response.data ? response.data.map(MapExtendedDeploy) : []
+    };
+  }
+
+  return {
+    ...response
+  };
+};
 
 export type ExtendedDeployContractPackageMetadata = {
   symbol: string;

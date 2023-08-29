@@ -7,7 +7,7 @@ import {
   TransferResult,
   ExtendedDeploy
 } from 'src/libs/services/account-activity-service';
-import { PaginatedResponse } from '@libs/services/types';
+import { ErrorResponse, PaginatedResponse } from '@libs/services/types';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 import { NFTTokenResult } from '@libs/services/nft-service';
 
@@ -66,7 +66,7 @@ export const serviceMessage = {
   >(),
   fetchAccountExtendedDeploysResponse: createAction(
     'FETCH_ACCOUNT_DEPLOYS_RESPONSE'
-  )<PaginatedResponse<ExtendedDeploy>, Meta>(),
+  )<PaginatedResponse<ExtendedDeploy> | ErrorResponse, Meta>(),
   fetchAccountCasperActivityRequest: createAction(
     'FETCH_ACCOUNT_CASPER_ACTIVITY'
   )<{ accountHash: string; page: number }, Meta>(),
@@ -78,7 +78,7 @@ export const serviceMessage = {
     Meta
   >(),
   fetchNftTokensResponse: createAction('FETCH_NFT_TOKENS_RESPONSE')<
-    PaginatedResponse<NFTTokenResult>,
+    PaginatedResponse<NFTTokenResult> | ErrorResponse,
     Meta
   >()
 };
