@@ -19,9 +19,9 @@ import {
 
 export const useFetchAccountDeploys = () => {
   const [loading, setLoading] = useState(false);
-  const [accountDeploysPage, setAccountDeploysPage] = useState(1);
-  const [accountDeploysPageCount, setAccountDeploysPageCount] = useState(0);
-  const [downloadedOnce, setDownloadedOnce] = useState(false);
+  const [accountDeploysPage, setAccountDeploysPage] = useState(2);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [isFirstPageLoad, setIsFirstPageLoad] = useState(false);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
@@ -36,14 +36,22 @@ export const useFetchAccountDeploys = () => {
   };
 
   useEffect(() => {
-    setLoading(true);
-  }, [casperApiUrl, activeAccount?.publicKey]);
+    if (accountDeploysCount > accountDeploysList.length) {
+      setHasNextPage(true);
+    }
+
+    const activePage = Math.ceil(accountDeploysList.length / 10);
+
+    if (activePage + 1 > accountDeploysPage) {
+      setAccountDeploysPage(activePage + 1);
+    }
+  }, [accountDeploysList.length, accountDeploysCount, accountDeploysPage]);
 
   useEffect(() => {
     if (!activeAccount?.publicKey) return;
 
     // set loading to true only for the first time
-    if (accountDeploysList.length === 0 && !downloadedOnce) {
+    if (accountDeploysList.length === 0 && !isFirstPageLoad) {
       setLoading(true);
     }
 
@@ -67,8 +75,9 @@ export const useFetchAccountDeploys = () => {
           dispatchToMainStore(accountDeploysAdded(deploysListWithId));
           dispatchToMainStore(accountDeploysCountChanged(itemCount));
 
-          setAccountDeploysPageCount(pageCount);
-          setAccountDeploysPage(2);
+          if (pageCount > 1) {
+            setHasNextPage(true);
+          }
         }
       })
       .catch(handleError)
@@ -76,7 +85,7 @@ export const useFetchAccountDeploys = () => {
         setTimeout(() => {
           setLoading(false);
         }, 300);
-        setDownloadedOnce(true);
+        setIsFirstPageLoad(true);
       });
 
     // will cause effect to run again after timeout
@@ -88,21 +97,19 @@ export const useFetchAccountDeploys = () => {
       clearTimeout(effectTimeoutRef.current);
     };
   }, [
-    downloadedOnce,
     accountDeploysCount,
-    accountDeploysList?.length,
+    accountDeploysList.length,
     activeAccount?.publicKey,
     casperApiUrl,
-    forceUpdate
+    forceUpdate,
+    isFirstPageLoad
   ]);
 
   const loadMoreDeploys = useCallback(() => {
-    if (
-      !activeAccount?.publicKey ||
-      accountDeploysPage > accountDeploysPageCount
-    )
-      return;
+    if (!activeAccount?.publicKey) return;
 
+    setLoading(true);
+    console.log(accountDeploysPage, 'accountDeploysPage');
     dispatchFetchAccountExtendedDeploys(
       activeAccount?.publicKey,
       accountDeploysPage
@@ -110,8 +117,12 @@ export const useFetchAccountDeploys = () => {
       .then(({ payload }) => {
         if (payload) {
           const { data: deploysList, pageCount, itemCount } = payload;
-
-          if (itemCount === accountDeploysList?.length) return;
+          console.log(accountDeploysList?.length, 'accountDeploysList?.length');
+          console.log(itemCount, 'itemCount');
+          if (itemCount === accountDeploysList?.length) {
+            setHasNextPage(false);
+            return;
+          }
 
           const deploysListWithId = deploysList.map(deploy => ({
             ...deploy,
@@ -120,25 +131,30 @@ export const useFetchAccountDeploys = () => {
 
           dispatchToMainStore(accountDeploysUpdated(deploysListWithId));
 
-          setAccountDeploysPageCount(pageCount);
           setAccountDeploysPage(accountDeploysPage + 1);
 
           if (accountDeploysCount !== itemCount) {
             dispatchToMainStore(accountDeploysCountChanged(itemCount));
           }
+          if (pageCount < accountDeploysPage) {
+            setHasNextPage(false);
+          }
         }
       })
-      .catch(handleError);
+      .catch(handleError)
+      .finally(() => {
+        setLoading(false);
+      });
   }, [
     accountDeploysCount,
     accountDeploysList?.length,
     accountDeploysPage,
-    accountDeploysPageCount,
     activeAccount?.publicKey
   ]);
 
   return {
     loadMoreDeploys,
-    loading
+    loading,
+    hasNextPage
   };
 };

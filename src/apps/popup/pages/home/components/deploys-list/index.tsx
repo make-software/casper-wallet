@@ -1,18 +1,28 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import useInfiniteScroll from 'react-infinite-scroll-hook';
 
 import { selectAccountDeploys } from '@background/redux/account-info/selectors';
 import { SpacingSize } from '@libs/layout';
-import { AccountActivityPlate, List, NoActivityView } from '@libs/ui';
 import {
-  useMapAccountDeploysListWithPendingTransactions,
-  useInfinityScroll,
-  useFetchAccountDeploys
+  AccountActivityPlate,
+  List,
+  LoadingActivityView,
+  NoActivityView
+} from '@libs/ui';
+import {
+  useFetchAccountDeploys,
+  useMapAccountDeploysListWithPendingTransactions
 } from '@src/hooks';
 
 export const DeploysList = () => {
-  const { loadMoreDeploys, loading } = useFetchAccountDeploys();
-  const { observerElement } = useInfinityScroll(loadMoreDeploys);
+  const { loadMoreDeploys, loading, hasNextPage } = useFetchAccountDeploys();
+  const [sentryRef] = useInfiniteScroll({
+    loading,
+    hasNextPage,
+    onLoadMore: loadMoreDeploys,
+    delayInMs: 0
+  });
 
   const accountDeploysList = useSelector(selectAccountDeploys);
 
@@ -39,36 +49,34 @@ export const DeploysList = () => {
     );
   };
 
-  if (
-    accountDeploysListWithPendingTransactions == null ||
-    accountDeploysListWithPendingTransactions.length === 0
-  ) {
-    return (
-      <NoActivityView
-        activityList={accountDeploysListWithPendingTransactions}
-        top={SpacingSize.None}
-        loading={loading}
-      />
-    );
-  }
-
   return (
-    <List
-      contentTop={SpacingSize.None}
-      rows={accountDeploysListWithPendingTransactions}
-      renderRow={(transaction, index) => (
-        <AccountActivityPlate
-          ref={
-            index === accountDeploysListWithPendingTransactions!?.length - 1
-              ? observerElement
-              : null
-          }
-          transactionInfo={transaction}
-          onClick={setActivityPlateYPosition}
-          isDeploysList={true}
-        />
-      )}
-      marginLeftForItemSeparatorLine={54}
-    />
+    <>
+      {accountDeploysListWithPendingTransactions != null &&
+        accountDeploysListWithPendingTransactions?.length > 0 && (
+          <List
+            contentTop={SpacingSize.None}
+            rows={accountDeploysListWithPendingTransactions}
+            renderRow={transaction => (
+              <AccountActivityPlate
+                transactionInfo={transaction}
+                onClick={setActivityPlateYPosition}
+                isDeploysList={true}
+              />
+            )}
+            marginLeftForItemSeparatorLine={54}
+          />
+        )}
+
+      {(loading || hasNextPage) && <LoadingActivityView ref={sentryRef} />}
+
+      {(accountDeploysListWithPendingTransactions == null ||
+        accountDeploysListWithPendingTransactions.length === 0) &&
+        !loading && (
+          <NoActivityView
+            activityList={accountDeploysListWithPendingTransactions}
+            top={SpacingSize.None}
+          />
+        )}
+    </>
   );
 };

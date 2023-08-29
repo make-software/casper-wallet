@@ -39,8 +39,10 @@ export const useFetchNftTokens = () => {
 
     const activePage = Math.ceil(nftTokens.length / 10);
 
-    setNftTokensPage(activePage + 1);
-  }, [nftTokens.length, nftTokensCount]);
+    if (activePage + 1 > nftTokensPage) {
+      setNftTokensPage(activePage + 1);
+    }
+  }, [nftTokens.length, nftTokensCount, nftTokensPage]);
 
   useEffect(() => {
     if (!activeAccount?.publicKey) return;
