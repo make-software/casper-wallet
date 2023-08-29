@@ -161,6 +161,7 @@ export const useFetchCasperTokenAccountActivity = () => {
           if (casperTokenActivityCount !== itemCount) {
             dispatchToMainStore(accountCasperActivityCountChanged(itemCount));
           }
+
           if (accountCasperActivityPage >= pageCount) {
             setHasNextPage(false);
           }

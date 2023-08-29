@@ -18,10 +18,9 @@ export const useFetchErc20TokenAccountActivity = (
   contractPackageHash: string
 ) => {
   const [loading, setLoading] = useState(false);
-  const [accountErc20ActivityPage, setAccountErc20ActivityPage] = useState(1);
-  const [accountErc20ActivityPageCount, setAccountErc20ActivityPageCount] =
-    useState(0);
-  const [downloadedOnce, setDownloadedOnce] = useState(false);
+  const [accountErc20ActivityPage, setAccountErc20ActivityPage] = useState(2);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [isFirstPageLoad, setIsFirstPageLoad] = useState(false);
 
   const erc20TokensActivityRecord =
     useSelector(selectAccountErc20TokensActivity) || {};
@@ -43,8 +42,23 @@ export const useFetchErc20TokenAccountActivity = (
   };
 
   useEffect(() => {
-    setLoading(true);
-  }, [casperApiUrl, activeAccountHash]);
+    if (
+      tokenActivity?.tokenActivityCount >
+      tokenActivity?.tokenActivityList.length
+    ) {
+      setHasNextPage(true);
+    }
+
+    if (
+      tokenActivity?.tokenActivityCount === 0 &&
+      tokenActivity?.tokenActivityList.length === 0
+    ) {
+      setAccountErc20ActivityPage(2);
+    }
+  }, [
+    tokenActivity?.tokenActivityCount,
+    tokenActivity?.tokenActivityList.length
+  ]);
 
   useEffect(() => {
     if (!activeAccountHash) return;
@@ -53,7 +67,7 @@ export const useFetchErc20TokenAccountActivity = (
     if (
       (tokenActivity?.tokenActivityList.length === 0 ||
         !tokenActivity?.tokenActivityList) &&
-      !downloadedOnce
+      !isFirstPageLoad
     ) {
       setLoading(true);
     }
@@ -82,8 +96,9 @@ export const useFetchErc20TokenAccountActivity = (
             })
           );
 
-          setAccountErc20ActivityPageCount(pageCount);
-          setAccountErc20ActivityPage(2);
+          if (pageCount > 1) {
+            setHasNextPage(true);
+          }
         }
       })
       .catch(handleError)
@@ -91,7 +106,7 @@ export const useFetchErc20TokenAccountActivity = (
         setTimeout(() => {
           setLoading(false);
         }, 300);
-        setDownloadedOnce(true);
+        setIsFirstPageLoad(true);
       });
 
     // will cause effect to run again after timeout
@@ -105,18 +120,18 @@ export const useFetchErc20TokenAccountActivity = (
   }, [
     activeAccountHash,
     contractPackageHash,
-    downloadedOnce,
     tokenActivity?.tokenActivityCount,
     tokenActivity?.tokenActivityList.length,
     casperApiUrl,
     forceUpdate,
-    tokenActivity?.tokenActivityList
+    tokenActivity?.tokenActivityList,
+    isFirstPageLoad
   ]);
 
   const loadMoreAccountErc20Activity = useCallback(() => {
     if (!activeAccountHash) return;
 
-    if (accountErc20ActivityPage > accountErc20ActivityPageCount) return;
+    setLoading(true);
 
     dispatchFetchErc20TokenActivity(
       activeAccountHash,
@@ -131,7 +146,10 @@ export const useFetchErc20TokenAccountActivity = (
             itemCount
           } = payload;
 
-          if (itemCount === tokenActivity?.tokenActivityList?.length) return;
+          if (itemCount === tokenActivity?.tokenActivityList?.length) {
+            setHasNextPage(false);
+            return;
+          }
 
           dispatchToMainStore(
             accountErc20TokensActivityUpdated({
@@ -141,14 +159,21 @@ export const useFetchErc20TokenAccountActivity = (
             })
           );
 
-          setAccountErc20ActivityPage(accountErc20ActivityPage + 1);
-          setAccountErc20ActivityPageCount(pageCount);
+          if (accountErc20ActivityPage + 1 <= pageCount) {
+            setAccountErc20ActivityPage(accountErc20ActivityPage + 1);
+          }
+
+          if (accountErc20ActivityPage >= pageCount) {
+            setHasNextPage(false);
+          }
         }
       })
-      .catch(handleError);
+      .catch(handleError)
+      .finally(() => {
+        setLoading(false);
+      });
   }, [
     accountErc20ActivityPage,
-    accountErc20ActivityPageCount,
     activeAccountHash,
     contractPackageHash,
     tokenActivity?.tokenActivityList?.length
@@ -156,6 +181,7 @@ export const useFetchErc20TokenAccountActivity = (
 
   return {
     loading,
-    loadMoreAccountErc20Activity
+    loadMoreAccountErc20Activity,
+    hasNextPage
   };
 };

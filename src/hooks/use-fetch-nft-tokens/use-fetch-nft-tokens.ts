@@ -124,6 +124,7 @@ export const useFetchNftTokens = () => {
           if (nftTokensCount !== itemCount) {
             dispatchToMainStore(accountNftTokensCountChanged(itemCount));
           }
+
           if (nftTokensPage >= pageCount) {
             setHasNextPage(false);
           }
