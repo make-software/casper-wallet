@@ -24,7 +24,7 @@ export const signAndDeploy = (
     signature,
     CLPublicKey.fromHex(senderPublicKeyHex)
   );
-  // TODO: this request failed due to the CORS policy in FF
+
   return casperService(url)
     .deploy(signedDeploy)
     .then(function (res) {
