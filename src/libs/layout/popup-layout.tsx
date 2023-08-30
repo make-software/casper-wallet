@@ -52,7 +52,7 @@ export function PopupLayout({
   return (
     <Container {...asFormProps}>
       {renderHeader && <PageHeader>{renderHeader()}</PageHeader>}
-      <MacScrollbar>
+      <MacScrollbar id="ms-container">
         <PageContent id="layout-content-container">
           {renderContent()}
         </PageContent>
