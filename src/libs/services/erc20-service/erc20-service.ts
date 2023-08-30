@@ -3,7 +3,7 @@ import { queryClient } from '@libs/services/query-client';
 import { TOKENS_REFRESH_RATE } from '@src/constants';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { serviceMessage } from '@background/service-message';
-import { DataResponse, DataWithPayload } from '@libs/services/types';
+import { DataResponse, Payload } from '@libs/services/types';
 
 import {
   ContractPackage,
@@ -56,5 +56,5 @@ export const fetchContractPackage = ({
 
 export const dispatchFetchErc20TokensRequest = (
   accountHash: string
-): Promise<DataWithPayload<ContractPackageWithBalance[]>> =>
+): Promise<Payload<ContractPackageWithBalance[]>> =>
   dispatchToMainStore(serviceMessage.fetchErc20TokensRequest({ accountHash }));

@@ -14,7 +14,7 @@ import {
   accountCurrencyRateChanged
 } from '@background/redux/account-info/actions';
 
-export const useActiveAccountBalance = () => {
+export const useFetchActiveAccountBalance = () => {
   const effectTimeoutRef = useRef<NodeJS.Timeout>();
   const forceUpdate = useForceUpdate();
   const { t } = useTranslation();

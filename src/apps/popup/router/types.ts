@@ -10,6 +10,7 @@ export type LocationState = {
     type: TransferType | null;
     amount?: string;
     symbol?: string;
+    isDeploysList?: boolean;
   };
   activeTabId?: number;
   tokenData?: TokenType | null;

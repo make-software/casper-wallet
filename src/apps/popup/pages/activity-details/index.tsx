@@ -6,13 +6,14 @@ import {
   PopupHeader,
   PopupLayout
 } from '@libs/layout';
+import { HomePageTabsId } from '@libs/ui';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
-
-import { ActivityDetailsPageContent } from './content';
 import {
   dispatchFetchExtendedDeploysInfo,
   ExtendedDeploy
 } from '@libs/services/account-activity-service';
+
+import { ActivityDetailsPageContent } from './content';
 
 export const ActivityDetailsPage = () => {
   const [deployInfo, setDeployInfo] = useState<ExtendedDeploy | null>(null);
@@ -47,7 +48,23 @@ export const ActivityDetailsPage = () => {
           withConnectionStatus
           renderSubmenuBarItems={() => (
             <>
-              <HeaderSubmenuBarNavLink linkType="back" />
+              <HeaderSubmenuBarNavLink
+                linkType="back"
+                onClick={
+                  activityDetailsData?.isDeploysList
+                    ? () => {
+                        if (activityDetailsData?.isDeploysList) {
+                          navigate(RouterPath.Home, {
+                            state: {
+                              // set the active tab to deploys
+                              activeTabId: HomePageTabsId.Deploys
+                            }
+                          });
+                        }
+                      }
+                    : undefined
+                }
+              />
               <HeaderViewInExplorer deployHash={deployInfo?.deployHash} />
             </>
           )}

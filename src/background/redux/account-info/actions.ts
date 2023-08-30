@@ -24,7 +24,7 @@ export const accountCurrencyRateChanged = createAction(
 
 export const accountCasperActivityChanged = createAction(
   'ACCOUNT_CASPER_ACTIVITY_CHANGED'
-)<TransferResultWithId[] | null>();
+)<TransferResultWithId[]>();
 
 export const accountCasperActivityUpdated = createAction(
   'ACCOUNT_CASPER_ACTIVITY_UPDATED'
@@ -32,11 +32,19 @@ export const accountCasperActivityUpdated = createAction(
 
 export const accountErc20TokensActivityChanged = createAction(
   'ACCOUNT_ERC20_TOKEN_ACTIVITY_CHANGED'
-)<{ activityList: Erc20TokenActionResult[]; contractPackageHash: string }>();
+)<{
+  activityList: Erc20TokenActionResult[];
+  contractPackageHash: string;
+  tokenActivityCount: number;
+}>();
 
 export const accountErc20TokensActivityUpdated = createAction(
   'ACCOUNT_ERC20_TOKEN_ACTIVITY_UPDATED'
-)<{ activityList: Erc20TokenActionResult[]; contractPackageHash: string }>();
+)<{
+  activityList: Erc20TokenActionResult[];
+  contractPackageHash: string;
+  tokenActivityCount: number;
+}>();
 
 export const accountInfoReset = createAction('ACCOUNT_INFO_RESET')();
 
@@ -48,8 +56,8 @@ export const accountPendingTransactionsRemove = createAction(
   'ACCOUNT_PENDING_TRANSACTIONS_REMOVE'
 )<string>();
 
-export const accountDeploysChanged = createAction('ACCOUNT_DEPLOYS_CHANGED')<
-  ExtendedDeployWithId[]
+export const accountDeploysAdded = createAction('ACCOUNT_DEPLOYS_ADDED')<
+  ExtendedDeployWithId[] | null
 >();
 
 export const accountDeploysUpdated = createAction('ACCOUNT_DEPLOYS_UPDATED')<
@@ -57,7 +65,7 @@ export const accountDeploysUpdated = createAction('ACCOUNT_DEPLOYS_UPDATED')<
 >();
 
 export const accountNftTokensAdded = createAction('ACCOUNT_NFT_TOKENS_ADDED')<
-  NFTTokenResult[]
+  NFTTokenResult[] | null
 >();
 
 export const accountNftTokensUpdated = createAction(
@@ -66,4 +74,12 @@ export const accountNftTokensUpdated = createAction(
 
 export const accountNftTokensCountChanged = createAction(
   'ACCOUNT_NFT_TOKENS_COUNT_CHANGED'
+)<number>();
+
+export const accountDeploysCountChanged = createAction(
+  'ACCOUNT_DEPLOYS_COUNT_CHANGED'
+)<number>();
+
+export const accountCasperActivityCountChanged = createAction(
+  'ACCOUNT_CASPER_ACTIVITY_COUNT_CHANGED'
 )<number>();
