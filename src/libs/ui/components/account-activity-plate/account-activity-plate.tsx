@@ -186,6 +186,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
                 truncated
                 truncatedSize="tiny"
                 color="contentPrimary"
+                placement="bottomRight"
               />
               <ActivityPlateDivider />
               <Tooltip title={formatTimestamp(timestamp)} noWrap>

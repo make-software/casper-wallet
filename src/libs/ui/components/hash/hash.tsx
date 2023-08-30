@@ -2,7 +2,14 @@ import React, { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { ContentColor, CopyToClipboard, Typography, Tag } from '@libs/ui';
+import {
+  ContentColor,
+  CopyToClipboard,
+  Typography,
+  Tag,
+  Tooltip,
+  Placement
+} from '@libs/ui';
 import { CenteredFlexRow } from '@libs/layout';
 
 import { truncateKey, TruncateKeySize } from './utils';
@@ -29,6 +36,8 @@ interface HashProps {
   color?: ContentColor;
   withCopyOnSelfClick?: boolean;
   withTag?: boolean;
+  placement?: Placement;
+  withoutTooltip?: boolean;
 }
 
 export function Hash({
@@ -38,26 +47,44 @@ export function Hash({
   truncated,
   color,
   withTag,
-  truncatedSize
+  truncatedSize,
+  placement,
+  withoutTooltip = false
 }: HashProps) {
   const { t } = useTranslation();
 
   const HashComponent = useMemo(
     () => (
       <>
-        <Typography
-          type={variant}
-          wordBreak={!truncated}
-          color={color || 'contentSecondary'}
+        <Tooltip
+          title={truncated && !withoutTooltip ? value : null}
+          overflowWrap
+          placement={placement}
         >
-          {truncated ? truncateKey(value, { size: truncatedSize }) : value}
-        </Typography>
+          <Typography
+            type={variant}
+            wordBreak={!truncated}
+            color={color || 'contentSecondary'}
+          >
+            {truncated ? truncateKey(value, { size: truncatedSize }) : value}
+          </Typography>
+        </Tooltip>
         {withTag && (
           <Tag displayContext="accountList">{`${t('Imported')}`}</Tag>
         )}
       </>
     ),
-    [truncatedSize, color, truncated, value, variant, withTag, t]
+    [
+      truncated,
+      withoutTooltip,
+      value,
+      placement,
+      variant,
+      color,
+      truncatedSize,
+      withTag,
+      t
+    ]
   );
 
   if (withCopyOnSelfClick) {

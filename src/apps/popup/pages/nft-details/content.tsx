@@ -192,6 +192,7 @@ export const NftDetailsContent = ({
                 variant={HashVariant.CaptionHash}
                 truncated
                 color="contentPrimary"
+                placement="bottomLeft"
               />
             ) : token.image ? (
               <AlignedFlexRow gap={SpacingSize.Small}>

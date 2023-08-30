@@ -136,6 +136,7 @@ export const AccountCasperActivityPlate = forwardRef<
               truncated
               truncatedSize="tiny"
               color="contentPrimary"
+              placement="bottomRight"
             />
             <ActivityPlateDivider />
             <Tooltip title={formatTimestamp(timestamp)} noWrap>

@@ -57,6 +57,7 @@ export const RecipientPlate = ({
         truncatedSize="medium"
         withCopyOnSelfClick={false}
         color="contentPrimary"
+        withoutTooltip
       />
     </PublicKeyOptionContainer>
   );

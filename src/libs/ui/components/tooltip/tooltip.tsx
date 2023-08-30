@@ -12,7 +12,7 @@ interface TooltipProps {
   fullWidth?: boolean;
 }
 
-type Placement =
+export type Placement =
   | 'topCenter'
   | 'topLeft'
   | 'bottomCenter'
@@ -67,7 +67,7 @@ const TooltipTip = styled.div<{ placement: Placement }>(
     borderRadius: `${theme.borderRadius.twelve}px`,
     boxShadow: '0 0 10px rgba(0, 0, 0, 0.08)',
 
-    maxWidth: '275px',
+    maxWidth: '270px',
 
     transition: 'opacity 250ms ease-in-out',
     opacity: '0',

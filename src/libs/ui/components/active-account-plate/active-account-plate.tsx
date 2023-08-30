@@ -62,6 +62,7 @@ export const ActiveAccountPlate = ({
                   variant={HashVariant.CaptionHash}
                   color="contentSecondary"
                   truncated
+                  placement="bottomRight"
                 />
               </SpaceBetweenFlexColumn>
             </AlignedFlexRow>
