@@ -19,16 +19,19 @@ const Container = styled(CenteredFlexRow)`
 `;
 
 export const NoActivityView = ({
-  activityList
+  activityList,
+  top
 }: {
   activityList:
     | (TransferResultWithId | Erc20TokenActionResult | ExtendedDeployWithId)[]
     | null;
+  top?: SpacingSize;
+  loading?: boolean;
 }) => {
   const { t } = useTranslation();
 
   return (
-    <VerticalSpaceContainer top={SpacingSize.Small}>
+    <VerticalSpaceContainer top={top || SpacingSize.Small}>
       <Tile>
         <Container>
           <Typography type="body" color="contentSecondary">

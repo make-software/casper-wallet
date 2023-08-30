@@ -18,9 +18,11 @@ import { ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE } from '@src/constants';
 import { useForceUpdate } from '@popup/hooks/use-force-update';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
-export const useNftTokens = () => {
-  const [nftTokensPage, setNftTokensPage] = useState(1);
-  const [nftTokensPageCount, setNftTokensPageCount] = useState(0);
+export const useFetchNftTokens = () => {
+  const [loading, setLoading] = useState(false);
+  const [nftTokensPage, setNftTokensPage] = useState(2);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [isFirstPageLoad, setIsFirstPageLoad] = useState(false);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const nftTokens = useSelector(selectAccountNftTokens);
@@ -31,27 +33,53 @@ export const useNftTokens = () => {
   const forceUpdate = useForceUpdate();
 
   useEffect(() => {
+    if (nftTokens && nftTokensCount > nftTokens.length) {
+      setHasNextPage(true);
+    }
+
+    if (nftTokensCount === 0 && (nftTokens == null || nftTokens.length === 0)) {
+      setNftTokensPage(2);
+    }
+  }, [nftTokens, nftTokens?.length, nftTokensCount, nftTokensPage]);
+
+  useEffect(() => {
     if (!activeAccount?.publicKey) return;
+
+    // set loading to true only for the first time
+    if ((nftTokens == null || nftTokens.length === 0) && !isFirstPageLoad) {
+      setLoading(true);
+    }
 
     dispatchFetchNftTokensRequest(
       getAccountHashFromPublicKey(activeAccount.publicKey),
       1
     )
       .then(({ payload }) => {
-        if (payload) {
+        if ('data' in payload) {
           const { data: nftTokensList, pageCount, itemCount } = payload;
-
-          if (itemCount === nftTokens?.length) return;
+          if (itemCount === nftTokens?.length || itemCount === nftTokensCount) {
+            return;
+          }
 
           dispatchToMainStore(accountNftTokensAdded(nftTokensList ?? []));
           dispatchToMainStore(accountNftTokensCountChanged(itemCount));
 
-          setNftTokensPageCount(pageCount);
-          setNftTokensPage(2);
+          if (pageCount > 1) {
+            setHasNextPage(true);
+          }
+        } else {
+          dispatchToMainStore(accountNftTokensAdded(null));
+          setHasNextPage(false);
         }
       })
       .catch(error => {
         console.error('Account NFT request failed:', error);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setLoading(false);
+        }, 300);
+        setIsFirstPageLoad(true);
       });
 
     // will cause effect to run again after timeout
@@ -62,46 +90,68 @@ export const useNftTokens = () => {
     return () => {
       clearTimeout(effectTimeoutRef.current);
     };
-    //   eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeAccount?.publicKey, casperApiUrl, forceUpdate]);
+  }, [
+    activeAccount?.publicKey,
+    casperApiUrl,
+    forceUpdate,
+    isFirstPageLoad,
+    nftTokens,
+    nftTokens?.length,
+    nftTokensCount
+  ]);
 
   const loadMoreNftTokens = useCallback(() => {
     if (!activeAccount?.publicKey) return;
 
-    if (nftTokensPage > nftTokensPageCount) return;
+    setLoading(true);
 
     dispatchFetchNftTokensRequest(
       getAccountHashFromPublicKey(activeAccount.publicKey),
       nftTokensPage
     )
       .then(({ payload }) => {
-        if (payload) {
+        if ('data' in payload) {
           const { data: nftTokensList, pageCount, itemCount } = payload;
 
-          if (itemCount === nftTokens?.length) return;
+          if (itemCount === nftTokens?.length) {
+            setHasNextPage(false);
+            return;
+          }
 
           dispatchToMainStore(accountNftTokensUpdated(nftTokensList ?? []));
 
-          setNftTokensPageCount(pageCount);
-          setNftTokensPage(nftTokensPage + 1);
+          if (nftTokensPage + 1 <= pageCount) {
+            setNftTokensPage(nftTokensPage + 1);
+          }
 
           if (nftTokensCount !== itemCount) {
             dispatchToMainStore(accountNftTokensCountChanged(itemCount));
           }
+
+          if (nftTokensPage >= pageCount) {
+            setHasNextPage(false);
+          }
+        } else {
+          dispatchToMainStore(accountNftTokensAdded(null));
+          setHasNextPage(false);
         }
       })
       .catch(error => {
         console.error('Account NFT request failed:', error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, [
     activeAccount?.publicKey,
     nftTokens?.length,
     nftTokensCount,
-    nftTokensPage,
-    nftTokensPageCount
+    nftTokensPage
   ]);
 
   return {
-    loadMoreNftTokens
+    loadMoreNftTokens,
+    loading,
+    hasNextPage
   };
 };

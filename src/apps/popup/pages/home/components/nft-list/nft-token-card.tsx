@@ -26,8 +26,9 @@ export const NftTokenCard = forwardRef<
   Ref,
   {
     nftToken: NFTTokenResult | null;
+    onClick?: () => void;
   }
->(({ nftToken }, ref) => {
+>(({ nftToken, onClick }, ref) => {
   const navigate = useTypedNavigate();
 
   const nftTokenMetadataWithLinks = useMemo(
@@ -58,6 +59,10 @@ export const NftTokenCard = forwardRef<
             nftToken?.contract_package_hash || ''
           )
         );
+
+        if (onClick) {
+          onClick();
+        }
       }}
     >
       {preview ? (

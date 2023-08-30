@@ -12,11 +12,13 @@ import {
   accountPendingTransactionsChanged,
   accountPendingTransactionsRemove,
   accountErc20Changed,
-  accountDeploysChanged,
+  accountDeploysAdded,
   accountDeploysUpdated,
   accountNftTokensAdded,
   accountNftTokensUpdated,
-  accountNftTokensCountChanged
+  accountNftTokensCountChanged,
+  accountDeploysCountChanged,
+  accountCasperActivityCountChanged
 } from './actions';
 
 const initialState: AccountInfoState = {
@@ -25,13 +27,15 @@ const initialState: AccountInfoState = {
     amountFiat: null
   },
   currencyRate: null,
-  accountCasperActivity: null,
+  accountCasperActivity: [],
   accountErc20TokensActivity: null,
   pendingTransactions: [],
   erc20Tokens: [],
-  accountDeploys: null,
+  accountDeploys: [],
   accountNftTokens: [],
-  nftTokensCount: 0
+  nftTokensCount: 0,
+  accountDeploysCount: 0,
+  accountCasperActivityCount: 0
 };
 
 export const reducer = createReducer(initialState)
@@ -73,30 +77,47 @@ export const reducer = createReducer(initialState)
   }))
   .handleAction(
     accountErc20TokensActivityChanged,
-    (state, { payload: { contractPackageHash, activityList } }) => ({
+    (
+      state,
+      { payload: { contractPackageHash, activityList, tokenActivityCount } }
+    ) => ({
       ...state,
       accountErc20TokensActivity: {
         ...state.accountErc20TokensActivity,
-        [contractPackageHash]: activityList
+        [contractPackageHash]: {
+          tokenActivityCount,
+          tokenActivityList: activityList
+        }
       }
     })
   )
   .handleAction(
     accountErc20TokensActivityUpdated,
-    (state, { payload: { activityList, contractPackageHash } }) => ({
-      ...state,
-      accountErc20TokensActivity: {
-        ...state.accountErc20TokensActivity,
-        [contractPackageHash]:
-          state.accountErc20TokensActivity &&
-          state.accountErc20TokensActivity[contractPackageHash]
-            ? [
-                ...state.accountErc20TokensActivity[contractPackageHash],
-                ...activityList
-              ]
-            : activityList
-      }
-    })
+    (
+      state,
+      { payload: { activityList, contractPackageHash, tokenActivityCount } }
+    ) => {
+      const tokensActivity = state.accountErc20TokensActivity || {};
+
+      return {
+        ...state,
+        accountErc20TokensActivity: {
+          ...state.accountErc20TokensActivity,
+          [contractPackageHash]: tokensActivity[contractPackageHash]
+            ? {
+                tokenActivityCount,
+                tokenActivityList: [
+                  ...tokensActivity[contractPackageHash].tokenActivityList,
+                  ...activityList
+                ]
+              }
+            : {
+                tokenActivityCount,
+                tokenActivityList: activityList
+              }
+        }
+      };
+    }
   )
   .handleAction(accountPendingTransactionsChanged, (state, { payload }) => {
     const pendingTransactions = {
@@ -118,7 +139,7 @@ export const reducer = createReducer(initialState)
       transaction => transaction.deployHash !== payload
     )
   }))
-  .handleAction(accountDeploysChanged, (state, { payload }) => ({
+  .handleAction(accountDeploysAdded, (state, { payload }) => ({
     ...state,
     accountDeploys: payload
   }))
@@ -135,9 +156,20 @@ export const reducer = createReducer(initialState)
   }))
   .handleAction(accountNftTokensUpdated, (state, { payload }) => ({
     ...state,
-    accountNftTokens: [...state.accountNftTokens, ...payload]
+    accountNftTokens:
+      state.accountNftTokens != null
+        ? [...state.accountNftTokens, ...payload]
+        : payload
   }))
   .handleAction(accountNftTokensCountChanged, (state, { payload }) => ({
     ...state,
     nftTokensCount: payload
+  }))
+  .handleAction(accountDeploysCountChanged, (state, { payload }) => ({
+    ...state,
+    accountDeploysCount: payload
+  }))
+  .handleAction(accountCasperActivityCountChanged, (state, { payload }) => ({
+    ...state,
+    accountCasperActivityCount: payload
   }));

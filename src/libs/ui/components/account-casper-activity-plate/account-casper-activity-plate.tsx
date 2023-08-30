@@ -1,7 +1,6 @@
 import React, { forwardRef, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { Hash, HashVariant, SvgIcon, Tooltip, Typography } from '@libs/ui';
@@ -15,8 +14,10 @@ import {
 import {
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
-  CenteredFlexRow,
-  FlexColumn,
+  AccountActivityPlateContainer,
+  ActivityPlateDivider,
+  ActivityPlateContentContainer,
+  ActivityPlateIconCircleContainer,
   SpacingSize
 } from '@libs/layout';
 import {
@@ -28,47 +29,16 @@ import {
 import { TransferResultWithId } from '@libs/services/account-activity-service';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 
-const AccountActivityPlateContainer = styled(AlignedSpaceBetweenFlexRow)`
-  cursor: pointer;
-  padding: 16px 12px;
-`;
-
-const IconCircleContainer = styled(CenteredFlexRow)`
-  min-width: 28px;
-
-  width: 28px;
-  height: 28px;
-
-  margin-right: 4px;
-
-  background-color: ${({ theme }) => theme.color.fillSecondary};
-  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
-`;
-
-const ContentContainer = styled(FlexColumn)`
-  flex-grow: 1;
-  gap: 2px;
-`;
-
-const Divider = styled.div`
-  width: 2px;
-  height: 2px;
-
-  margin: 0 6px;
-
-  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
-  background-color: ${({ theme }) => theme.color.contentSecondary};
-`;
-
 type Ref = HTMLDivElement;
 
 interface AccountCasperActivityPlateProps {
   transactionInfo: TransferResultWithId;
+  onClick?: () => void;
 }
 export const AccountCasperActivityPlate = forwardRef<
   Ref,
   AccountCasperActivityPlateProps
->(({ transactionInfo }, ref) => {
+>(({ transactionInfo, onClick }, ref) => {
   const [type, setType] = useState<TransferType | null>(null);
 
   const navigate = useTypedNavigate();
@@ -121,7 +91,7 @@ export const AccountCasperActivityPlate = forwardRef<
     <AccountActivityPlateContainer
       gap={SpacingSize.Small}
       ref={ref}
-      onClick={() =>
+      onClick={() => {
         navigate(RouterPath.ActivityDetails, {
           state: {
             activityDetailsData: {
@@ -131,13 +101,17 @@ export const AccountCasperActivityPlate = forwardRef<
               type
             }
           }
-        })
-      }
+        });
+
+        if (onClick) {
+          onClick();
+        }
+      }}
     >
-      <IconCircleContainer>
+      <ActivityPlateIconCircleContainer>
         {type != null && <SvgIcon src={TypeIcons[type]} size={16} />}
-      </IconCircleContainer>
-      <ContentContainer>
+      </ActivityPlateIconCircleContainer>
+      <ActivityPlateContentContainer>
         <AlignedSpaceBetweenFlexRow>
           <AlignedFlexRow gap={SpacingSize.Small}>
             <Typography type="bodySemiBold">
@@ -163,7 +137,7 @@ export const AccountCasperActivityPlate = forwardRef<
               truncatedSize="tiny"
               color="contentPrimary"
             />
-            <Divider />
+            <ActivityPlateDivider />
             <Tooltip title={formatTimestamp(timestamp)} noWrap>
               <Typography type="captionRegular" color="contentSecondary" noWrap>
                 {formatTimestampAge(timestamp)}
@@ -174,7 +148,7 @@ export const AccountCasperActivityPlate = forwardRef<
             CSPR
           </Typography>
         </AlignedSpaceBetweenFlexRow>
-      </ContentContainer>
+      </ActivityPlateContentContainer>
       <SvgIcon src="assets/icons/chevron.svg" size={16} />
     </AccountActivityPlateContainer>
   );
