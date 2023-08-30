@@ -14,7 +14,11 @@ export function OnboardingSuccessPageContent() {
 
   return (
     <TabPageContainer>
-      <SvgIcon src="assets/illustrations/wallet-connected.svg" size={140} />
+      <SvgIcon
+        src="assets/illustrations/wallet-connected.svg"
+        width={230}
+        height={120}
+      />
       <TabTextContainer>
         <Typography type="header">
           <Trans t={t}>

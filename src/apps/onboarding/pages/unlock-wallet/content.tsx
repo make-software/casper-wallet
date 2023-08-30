@@ -48,7 +48,11 @@ export function UnlockWalletPageContent({
   return (
     <TabPageContainer>
       <IllustrationContainer>
-        <SvgIcon src="assets/illustrations/locked-wallet.svg" size={120} />
+        <SvgIcon
+          src="assets/illustrations/locked-wallet.svg"
+          width={200}
+          height={120}
+        />
       </IllustrationContainer>
 
       <GrayBackgroundContainer>

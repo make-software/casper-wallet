@@ -10,7 +10,7 @@ import {
   getContractNftUrl
 } from '@src/constants';
 import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
-import { useCasperToken, useErc20Tokens } from '@src/hooks';
+import { useCasperToken, useFetchErc20Tokens } from '@src/hooks';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
@@ -41,7 +41,7 @@ export function HeaderViewInExplorer({
   const activeAccount = useSelector(selectVaultActiveAccount);
 
   const casperToken = useCasperToken();
-  const erc20Tokens = useErc20Tokens();
+  const erc20Tokens = useFetchErc20Tokens();
 
   useEffect(() => {
     if (!tokenName && deployHash) {

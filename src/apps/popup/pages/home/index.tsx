@@ -25,7 +25,6 @@ import {
 import {
   AccountActionsMenuPopover,
   Avatar,
-  DeploysList,
   getFontSizeBasedOnTextLength,
   Hash,
   HashVariant,
@@ -54,6 +53,7 @@ import {
 
 import { TokensList } from './components/tokens-list';
 import { NftList } from './components/nft-list';
+import { DeploysList } from './components/deploys-list';
 
 const DividerLine = styled.hr`
   margin: 16px 0;

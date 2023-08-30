@@ -146,7 +146,11 @@ export function UnlockVaultPageContent() {
       <>
         <ContentContainer>
           <IllustrationContainer>
-            <SvgIcon src="assets/illustrations/password-lock.svg" size={120} />
+            <SvgIcon
+              src="assets/illustrations/password-lock.svg"
+              width={210}
+              height={120}
+            />
           </IllustrationContainer>
           <ParagraphContainer top={SpacingSize.XL}>
             <Typography type="header">
@@ -180,7 +184,11 @@ export function UnlockVaultPageContent() {
     <form onSubmit={handleSubmit(handleUnlockVault)}>
       <ContentContainer>
         <IllustrationContainer>
-          <SvgIcon src="assets/illustrations/locked-wallet.svg" size={120} />
+          <SvgIcon
+            src="assets/illustrations/locked-wallet.svg"
+            width={200}
+            height={120}
+          />
         </IllustrationContainer>
         <ParagraphContainer top={SpacingSize.XL}>
           <Typography type="header">

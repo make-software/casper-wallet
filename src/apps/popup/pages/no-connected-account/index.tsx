@@ -19,7 +19,11 @@ export function NoConnectedAccountPageContent() {
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <SvgIcon src="assets/illustrations/no-connection.svg" size={120} />
+        <SvgIcon
+          src="assets/illustrations/no-connection.svg"
+          width={200}
+          height={120}
+        />
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">

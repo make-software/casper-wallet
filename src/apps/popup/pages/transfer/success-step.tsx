@@ -15,7 +15,11 @@ export const SuccessStep = () => {
   return (
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
-        <SvgIcon src="assets/illustrations/success.svg" size={120} />
+        <SvgIcon
+          src="assets/illustrations/success.svg"
+          width={200}
+          height={120}
+        />
         <VerticalSpaceContainer top={SpacingSize.XL}>
           <Typography type="header">
             <Trans t={t}>You submitted a transaction</Trans>
