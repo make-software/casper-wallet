@@ -50,7 +50,11 @@ export function RenameAccountPageContent() {
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <SvgIcon src="assets/illustrations/rename-account.svg" size={120} />
+        <SvgIcon
+          src="assets/illustrations/rename-account.svg"
+          width={200}
+          height={120}
+        />
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
