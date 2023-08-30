@@ -212,7 +212,7 @@ export const TransferPage = () => {
               //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
             }, 2000);
           }
-
+          // TODO: need UI in case when the transfer is failed
           setTransferStep(TransactionSteps.Success);
         });
       } else {
@@ -235,23 +235,25 @@ export const TransferPage = () => {
         ).then(({ deploy_hash }) => {
           dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
-          let triesLeft = 10;
-          const interval = setInterval(async () => {
-            const { payload: extendedDeployInfo } =
-              await dispatchFetchExtendedDeploysInfo(deploy_hash);
-            if (extendedDeployInfo) {
-              dispatchToMainStore(
-                accountPendingTransactionsChanged(extendedDeployInfo)
-              );
-              clearInterval(interval);
-            } else if (triesLeft === 0) {
-              clearInterval(interval);
-            }
+          if (deploy_hash != null) {
+            let triesLeft = 10;
+            const interval = setInterval(async () => {
+              const { payload: extendedDeployInfo } =
+                await dispatchFetchExtendedDeploysInfo(deploy_hash);
+              if (extendedDeployInfo) {
+                dispatchToMainStore(
+                  accountPendingTransactionsChanged(extendedDeployInfo)
+                );
+                clearInterval(interval);
+              } else if (triesLeft === 0) {
+                clearInterval(interval);
+              }
 
-            triesLeft--;
-            //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-          }, 2000);
-
+              triesLeft--;
+              //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
+            }, 2000);
+          }
+          // TODO: need UI in case when the transfer is failed
           setTransferStep(TransactionSteps.Success);
         });
       }
