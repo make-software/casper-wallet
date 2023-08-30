@@ -12,7 +12,10 @@
     "storage",
     "tabs",
     "declarativeNetRequest",
-    "https://image-proxy-cdn.make.services/*"
+    "https://image-proxy-cdn.make.services/*",
+    "https://node-clarity-testnet.make.services/*",
+    "https://node-clarity-mainnet.make.services/*",
+    "https://casper-assets.s3.amazonaws.com/*"
   ],
   "declarative_net_request": {
     "rule_resources": [
