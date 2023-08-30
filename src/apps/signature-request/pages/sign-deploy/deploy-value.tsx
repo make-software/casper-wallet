@@ -37,6 +37,7 @@ export function DeployValue({
           variant={HashVariant.BodyHash}
           color="contentPrimary"
           truncated
+          placement="bottomLeft"
         />
       );
     }
@@ -73,6 +74,7 @@ export function DeployValue({
           variant={HashVariant.BodyHash}
           color="contentPrimary"
           truncated
+          placement="bottomLeft"
         />
       );
     }

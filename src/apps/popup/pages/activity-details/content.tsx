@@ -171,6 +171,7 @@ export const ActivityDetailsPageContent = ({
                   truncated
                   truncatedSize="tiny"
                   color="contentPrimary"
+                  placement="topRight"
                 />
               </AlignedFlexRow>
               <SvgIcon src="assets/icons/ic-arrow-with-tail.svg" size={16} />
@@ -182,6 +183,7 @@ export const ActivityDetailsPageContent = ({
                   truncated={toAccount !== 'N/A'}
                   truncatedSize="tiny"
                   color="contentPrimary"
+                  placement="bottomLeft"
                 />
               </AlignedFlexRow>
             </AlignedSpaceBetweenFlexRow>
@@ -196,6 +198,7 @@ export const ActivityDetailsPageContent = ({
               truncated
               truncatedSize="tiny"
               color="contentPrimary"
+              placement="bottomLeft"
             />
           </ItemContainer>
           <ItemContainer>

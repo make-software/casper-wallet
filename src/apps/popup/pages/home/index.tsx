@@ -117,6 +117,7 @@ export function HomePageContent() {
                     value={activeAccount.publicKey}
                     variant={HashVariant.CaptionHash}
                     truncated
+                    placement="bottomCenter"
                   />
                 </LeftAlignedFlexColumn>
               </FlexRow>

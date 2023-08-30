@@ -100,7 +100,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
       rows={accountListRows}
       contentTop={SpacingSize.None}
       maxHeight={380}
-      renderRow={account => {
+      renderRow={(account, index) => {
         const isConnected = connectedAccountNames.includes(account.name);
 
         return (
@@ -134,6 +134,11 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
                     variant={HashVariant.CaptionHash}
                     truncated
                     withTag={account.imported}
+                    placement={
+                      index === accountListRows.length - 1
+                        ? 'topRight'
+                        : 'bottomRight'
+                    }
                   />
                 </AccountNameWithHashListItemContainer>
               </ListItemClickableContainer>

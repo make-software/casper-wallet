@@ -35,8 +35,6 @@ const FlexColumn = styled.div`
 `;
 
 export const RowsContainer = styled.div<RowsContainerProps>`
-  overflow-y: auto;
-  max-height: ${({ maxHeight }) => (maxHeight ? `${maxHeight}px` : 'auto')};
   & > * + *:before {
     ${borderBottomPseudoElementRules};
   }
@@ -133,7 +131,19 @@ export function List<ListRow extends ListRowBase>({
               {renderHeader()}
             </ListHeaderContainer>
           )}
-          <MacScrollbar style={{ maxHeight }}>
+          {maxHeight ? (
+            <MacScrollbar style={{ maxHeight }}>
+              <RowsContainer
+                marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
+              >
+                {rows.map((row, index, array) => (
+                  <RowContainer key={row.id}>
+                    {renderRow(row, index, array)}
+                  </RowContainer>
+                ))}
+              </RowsContainer>
+            </MacScrollbar>
+          ) : (
             <RowsContainer
               marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
             >
@@ -143,7 +153,8 @@ export function List<ListRow extends ListRowBase>({
                 </RowContainer>
               ))}
             </RowsContainer>
-          </MacScrollbar>
+          )}
+
           {renderFooter && (
             <ListFooterContainer
               marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
