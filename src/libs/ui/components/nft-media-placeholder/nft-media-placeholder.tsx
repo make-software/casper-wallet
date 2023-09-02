@@ -38,6 +38,26 @@ export const EmptyMediaPlaceholder = ({
   </ImageContainer>
 );
 
+export const AudioNftPlaceholder: React.FC = () => (
+  <ImageContainer>
+    <SvgIcon
+      src="assets/icons/audio-nft-placeholder.svg"
+      height={140}
+      width={140}
+    />
+  </ImageContainer>
+);
+
+export const VideoNftPlaceholder: React.FC = () => (
+  <ImageContainer>
+    <SvgIcon
+      src="assets/icons/video-nft-placeholder.svg"
+      height={140}
+      width={140}
+    />
+  </ImageContainer>
+);
+
 export const LoadingMediaPlaceholder = () => {
   const theme = useTheme();
 

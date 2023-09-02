@@ -1,15 +1,21 @@
-import React, { forwardRef, useMemo } from 'react';
+import React, { forwardRef, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { NFTTokenResult } from '@libs/services/nft-service';
 import { FlexColumn, SpacingSize } from '@libs/layout';
-import { Typography, EmptyMediaPlaceholder } from '@libs/ui';
+import {
+  Typography,
+  EmptyMediaPlaceholder,
+  LoadingMediaPlaceholder
+} from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import {
   findMediaPreview,
   getMetadataKeyValue,
   getNftTokenMetadataWithLinks,
-  getImageProxyUrl
+  getImageProxyUrl,
+  deriveMediaType,
+  ContentType
 } from '@src/utils';
 
 import { NftPreviewImage } from './nft-preview-image';
@@ -30,6 +36,8 @@ export const NftTokenCard = forwardRef<
   }
 >(({ nftToken, onClick }, ref) => {
   const navigate = useTypedNavigate();
+  const [contentType, setContentType] = useState<ContentType>('');
+  const [typeLoading, setTypeLoading] = useState<boolean>(true);
 
   const nftTokenMetadataWithLinks = useMemo(
     () => getNftTokenMetadataWithLinks(nftToken),
@@ -44,6 +52,14 @@ export const NftTokenCard = forwardRef<
   );
 
   const cachedUrl = getImageProxyUrl(preview?.value);
+
+  useEffect(() => {
+    (async () => {
+      const mediaType = await deriveMediaType(cachedUrl);
+      setContentType(mediaType);
+      setTypeLoading(false);
+    })();
+  }, [cachedUrl]);
 
   return (
     <NftTokenCardContainer
@@ -66,7 +82,14 @@ export const NftTokenCard = forwardRef<
       }}
     >
       {preview ? (
-        <NftPreviewImage url={preview.value} cachedUrl={cachedUrl} />
+        <>
+          {typeLoading && <LoadingMediaPlaceholder />}
+          <NftPreviewImage
+            url={preview.value}
+            cachedUrl={cachedUrl}
+            contentType={contentType}
+          />
+        </>
       ) : (
         <EmptyMediaPlaceholder />
       )}
