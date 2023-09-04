@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useMemo, useState } from 'react';
+import React, { forwardRef, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { NFTTokenResult } from '@libs/services/nft-service';
@@ -17,6 +17,7 @@ import {
   deriveMediaType,
   ContentType
 } from '@src/utils';
+import { useAsyncEffect } from '@src/hooks';
 
 import { NftPreviewImage } from './nft-preview-image';
 
@@ -53,13 +54,14 @@ export const NftTokenCard = forwardRef<
 
   const cachedUrl = getImageProxyUrl(preview?.value);
 
-  useEffect(() => {
-    (async () => {
-      const mediaType = await deriveMediaType(cachedUrl);
+  useAsyncEffect<string>(
+    () => deriveMediaType(cachedUrl),
+    mediaType => {
       setContentType(mediaType);
       setTypeLoading(false);
-    })();
-  }, [cachedUrl]);
+    },
+    [cachedUrl]
+  );
 
   return (
     <NftTokenCardContainer

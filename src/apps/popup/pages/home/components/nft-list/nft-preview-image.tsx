@@ -32,12 +32,12 @@ export const NftPreviewImage = ({
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const onError = useCallback(async () => {
+  const onError = useCallback(() => {
     setError(true);
     setLoading(false);
   }, []);
 
-  const onLoad = useCallback(async () => {
+  const onLoad = useCallback(() => {
     setLoading(false);
   }, []);
 

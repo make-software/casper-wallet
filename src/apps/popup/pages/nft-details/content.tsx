@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
 import ReactPlayer from 'react-player';
@@ -33,6 +33,7 @@ import {
   getNftTokenMetadataWithLinks,
   MapNFTTokenStandardToName
 } from '@src/utils';
+import { useAsyncEffect } from '@src/hooks';
 
 const NftImageContainer = styled(CenteredFlexRow)`
   width: 100%;
@@ -101,13 +102,14 @@ export const NftDetailsContent = ({
     [nftTokenMetadataWithLinks]
   );
 
-  useEffect(() => {
-    (async () => {
-      const mediaType = await deriveMediaType(cachedUrl);
+  useAsyncEffect<string>(
+    () => deriveMediaType(cachedUrl),
+    mediaType => {
       setContentType(mediaType);
       setTypeLoading(false);
-    })();
-  }, [cachedUrl]);
+    },
+    [cachedUrl]
+  );
 
   const tokenStandard = nftToken
     ? MapNFTTokenStandardToName[nftToken.token_standard_id]
