@@ -216,7 +216,9 @@ export const NftDetailsContent = ({
                 />
               </CenteredFlexColumn>
             )}
-            {(loading || typeLoading) && !error && <LoadingMediaPlaceholder />}
+            {((loading && !isAudio) || typeLoading) && !error && (
+              <LoadingMediaPlaceholder />
+            )}
             {(error || contentType === 'unknown') && <EmptyMediaPlaceholder />}
           </NftImageContainer>
         </Tile>
