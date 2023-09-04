@@ -1,12 +1,14 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { generateVideoThumbnails } from '@rajesh896/video-thumbnails-generator';
 
 import {
+  AudioNftPlaceholder,
   EmptyMediaPlaceholder,
   ImageContainer,
-  LoadingMediaPlaceholder
+  LoadingMediaPlaceholder,
+  VideoNftPlaceholder
 } from '@libs/ui';
+import { ContentType } from '@src/utils';
 
 const NftImage = styled.img`
   width: 100%;
@@ -20,46 +22,45 @@ const NftImage = styled.img`
 
 export const NftPreviewImage = ({
   url,
-  cachedUrl
+  cachedUrl,
+  contentType
 }: {
   url: string;
+  contentType: ContentType;
   cachedUrl?: string;
 }) => {
   const [error, setError] = useState(false);
-  const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const onError = useCallback(async () => {
-    try {
-      // TODO: check this error. It`s happening when we load thumbnail for video
-      // index.js:1 Uncaught TypeError: Failed to execute 'readAsDataURL' on 'FileReader': parameter 1 is not of type 'Blob'.
-      const thumbnails = await generateVideoThumbnails(
-        (cachedUrl || url) as any,
-        1,
-        'url'
-      );
-      setThumbnail(thumbnails[0]);
-      setLoading(false);
-    } catch (e) {
-      setError(true);
-    }
-  }, [cachedUrl, url]);
+  const onError = useCallback(() => {
+    setError(true);
+    setLoading(false);
+  }, []);
+
+  const onLoad = useCallback(() => {
+    setLoading(false);
+  }, []);
 
   if (error) {
     return <EmptyMediaPlaceholder />;
   }
 
   return (
-    <ImageContainer>
-      <NftImage
-        style={{ display: loading ? 'none' : 'inline-block' }}
-        src={thumbnail || cachedUrl || url}
-        onLoad={() => {
-          setLoading(false);
-        }}
-        onError={onError}
-      />
-      {loading && <LoadingMediaPlaceholder />}
-    </ImageContainer>
+    <>
+      {contentType.startsWith('image') && (
+        <ImageContainer>
+          <NftImage
+            style={{ display: loading ? 'none' : 'inline-block' }}
+            src={cachedUrl || url}
+            onLoad={onLoad}
+            onError={onError}
+          />
+          {loading && <LoadingMediaPlaceholder />}
+        </ImageContainer>
+      )}
+      {contentType.startsWith('audio') && <AudioNftPlaceholder />}
+      {contentType.startsWith('video') && <VideoNftPlaceholder />}
+      {contentType === 'unknown' && <EmptyMediaPlaceholder />}
+    </>
   );
 };
