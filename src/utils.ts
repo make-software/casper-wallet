@@ -157,9 +157,14 @@ export const NFTTokenStandards = {
   CEP78: 2
 };
 
+export enum NFTTokenStandard {
+  CEP47 = 'CEP-47',
+  CEP78 = 'CEP-78'
+}
+
 export const MapNFTTokenStandardToName = {
-  [NFTTokenStandards.CEP47]: 'CEP-47',
-  [NFTTokenStandards.CEP78]: 'CEP-78'
+  [NFTTokenStandards.CEP47]: NFTTokenStandard.CEP47,
+  [NFTTokenStandards.CEP78]: NFTTokenStandard.CEP78
 };
 
 export const tryParseJSONObject = (jsonString: any) => {
@@ -272,7 +277,7 @@ export const deriveMetadataFromToken = (
 };
 
 export const getNftTokenMetadataWithLinks = (
-  nftToken: NFTTokenResult | null
+  nftToken: NFTTokenResult | null | undefined
 ) => {
   return !nftToken
     ? []
