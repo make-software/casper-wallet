@@ -1,4 +1,5 @@
 import { CLPublicKey, DeployUtil } from 'casper-js-sdk';
+import { sub } from 'date-fns';
 
 import { NetworkName, TRANSFER_COST_MOTES } from '@src/constants';
 
@@ -14,7 +15,11 @@ export const makeNativeTransferDeploy = (
 
   const deployParams = new DeployUtil.DeployParams(
     senderPublicKey,
-    networkName
+    networkName,
+    undefined,
+    undefined,
+    undefined,
+    sub(new Date(), { seconds: 2 }).getTime() // https://github.com/casper-network/casper-node/issues/4152
   );
 
   const session =

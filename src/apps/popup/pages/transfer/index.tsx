@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
-import { CLPublicKey } from 'casper-js-sdk';
+import { CLPublicKey, DeployUtil } from 'casper-js-sdk';
 import { CEP18Client } from 'casper-cep18-js-client';
 import { useParams } from 'react-router-dom';
+import { sub } from 'date-fns';
 
 import {
   FooterButtonsContainer,
@@ -176,7 +177,7 @@ export const TransferPage = () => {
         );
 
         // create deploy
-        const deploy = cep18.transfer(
+        const tempDeploy = cep18.transfer(
           {
             recipient: publicKeyFromHex(recipientPublicKey),
             amount: multiplyErc20Balance(amount, erc20Decimals) || '0'
@@ -184,6 +185,21 @@ export const TransferPage = () => {
           CSPRtoMotes(paymentAmount),
           publicKeyFromHex(activeAccount.publicKey),
           networkName
+        );
+
+        const deployParams = new DeployUtil.DeployParams(
+          publicKeyFromHex(activeAccount.publicKey),
+          networkName,
+          undefined,
+          undefined,
+          undefined,
+          sub(new Date(), { seconds: 2 }).getTime() // https://github.com/casper-network/casper-node/issues/4152
+        );
+
+        const deploy = DeployUtil.makeDeploy(
+          deployParams,
+          tempDeploy.session,
+          tempDeploy.payment
         );
 
         signAndDeploy(
