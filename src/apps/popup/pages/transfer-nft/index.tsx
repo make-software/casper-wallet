@@ -2,9 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
-import { CLPublicKey, CLPublicKeyTag, Keys } from 'casper-js-sdk';
-import { CEP47Client } from 'casper-cep47-js-client';
-import { CEP78Client, OwnerReverseLookupMode } from 'casper-cep78-js-client';
+import { Keys } from 'casper-js-sdk';
 
 import {
   FooterButtonsContainer,
@@ -17,30 +15,37 @@ import {
   selectAccountBalance,
   selectAccountNftTokens
 } from '@background/redux/account-info/selectors';
-import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
-import { ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES } from '@src/constants';
+import { CSPRtoMotes } from '@libs/ui/utils/formatters';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { MapNFTTokenStandardToName, NFTTokenStandard } from '@src/utils';
+import { MapNFTTokenStandardToName } from '@src/utils';
 import { getRawPublicKey } from '@libs/entities/Account';
 import { useTransferNftForm } from '@libs/ui/forms/transfer-nft';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { HomePageTabsId, TransferSuccessScreen, Button } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
-
-// TODO: move to utils or service
-const getContractHash = (url: string, contractPackageHash: string) =>
-  fetch(
-    `${url}/contracts?contract_package_hash=${contractPackageHash}&order_by=timestamp&order_direction=desc`
-  )
-    .then(res => res.json())
-    .then(res => res.data[0].contract_hash);
+import {
+  getDefaultPaymentAmountBasedOnNftTokenStandard,
+  getRuntimeArgs,
+  getSignatureAlgorithm,
+  signNftDeploy
+} from '@popup/pages/transfer-nft/utils';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
+import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
+import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
 
 export const TransferNftPage = () => {
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
+  const [haveReverseOwnerLookUp, setHaveReverseOwnerLookUp] = useState(false);
   const { contractPackageHash, tokenId } = useParams();
 
   const nftTokes = useSelector(selectAccountNftTokens);
+  const csprBalance = useSelector(selectAccountBalance);
+  const activeAccount = useSelector(selectVaultActiveAccount);
+  const { networkName, nodeUrl } = useSelector(
+    selectApiConfigBasedOnActiveNetwork
+  );
 
   const nftToken = useMemo(
     () =>
@@ -55,140 +60,88 @@ export const TransferNftPage = () => {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
-  const csprBalance = useSelector(selectAccountBalance);
-  const activeAccount = useSelector(selectVaultActiveAccount);
-  const { networkName, casperApiUrl } = useSelector(
-    selectApiConfigBasedOnActiveNetwork
-  );
-
-  const { recipientForm, amountForm } = useTransferNftForm(
-    csprBalance.amountMotes,
-    // TODO: use right payment amount
-    motesToCSPR(ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES)
-  );
+  useEffect(() => {
+    if (nftToken?.contract_package?.metadata?.owner_reverse_lookup_mode) {
+      setHaveReverseOwnerLookUp(true);
+    }
+  }, [nftToken]);
 
   const tokenStandard = nftToken
     ? MapNFTTokenStandardToName[nftToken.token_standard_id]
     : '';
 
-  // TODO: move to utils
-  const getSignatureAlgorithm = (rawPublicKey: CLPublicKey) => {
-    switch (rawPublicKey.tag) {
-      case CLPublicKeyTag.ED25519:
-        return Keys.SignatureAlgorithm.Ed25519;
-      case CLPublicKeyTag.SECP256K1:
-        return Keys.SignatureAlgorithm.Secp256K1;
-      default:
-        throw Error('Unknown Signature type.');
-    }
-  };
+  const paymentAmount = useMemo(
+    () => getDefaultPaymentAmountBasedOnNftTokenStandard(tokenStandard),
+    [tokenStandard]
+  );
+
+  const { recipientForm, amountForm } = useTransferNftForm(
+    csprBalance.amountMotes,
+    paymentAmount
+  );
 
   useEffect(() => {
     amountForm.trigger('paymentAmount');
   }, [amountForm]);
 
   const isButtonDisabled = calculateSubmitButtonDisabled({
-    isValid: recipientForm.formState.isValid && amountForm.formState.isValid
+    isValid:
+      recipientForm.formState.isValid &&
+      amountForm.formState.isValid &&
+      !haveReverseOwnerLookUp
   });
 
   const submitTransfer = async () => {
-    if (tokenStandard === NFTTokenStandard.CEP47) {
-      if (activeAccount) {
-        const { recipientPublicKey } = recipientForm.getValues();
-        const { paymentAmount } = amountForm.getValues();
-        const rawPublicKey = getRawPublicKey(activeAccount.publicKey);
+    if (haveReverseOwnerLookUp) return;
 
-        const cep47 = new CEP47Client(`${casperApiUrl}/rpc`, networkName);
+    if (activeAccount) {
+      const { recipientPublicKey } = recipientForm.getValues();
 
-        const contractHash = await getContractHash(
-          casperApiUrl,
-          nftToken?.contract_package_hash!
-        );
+      const rawPublicKey = getRawPublicKey(activeAccount.publicKey);
+      const KEYS = Keys.getKeysFromHexPrivKey(
+        activeAccount.secretKey,
+        getSignatureAlgorithm(rawPublicKey)
+      );
 
-        cep47.setContractHash(
-          `hash-${contractHash}`,
-          `hash-${nftToken?.contract_package?.contract_package_hash!}`
-        );
+      const args = {
+        tokenId: nftToken?.token_id!,
+        source: KEYS.publicKey,
+        target: getRawPublicKey(recipientPublicKey)
+      };
 
-        const KEYS = Keys.getKeysFromHexPrivKey(
-          activeAccount.secretKey,
-          getSignatureAlgorithm(rawPublicKey)
-        );
+      const signDeploy = signNftDeploy(
+        getRuntimeArgs(tokenStandard, args),
+        CSPRtoMotes(paymentAmount),
+        KEYS.publicKey,
+        networkName,
+        nftToken?.contract_package_hash!,
+        [KEYS]
+      );
 
-        const transferOneDeploy = await cep47.transfer(
-          getRawPublicKey(recipientPublicKey),
-          [nftToken?.token_id!],
-          CSPRtoMotes(paymentAmount),
-          KEYS.publicKey,
-          [KEYS]
-        );
+      signDeploy.send(nodeUrl).then((deployHash: string) => {
+        dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
-        console.log(transferOneDeploy);
+        if (deployHash) {
+          let triesLeft = 10;
+          const interval = setInterval(async () => {
+            const { payload: extendedDeployInfo } =
+              await dispatchFetchExtendedDeploysInfo(deployHash);
+            if (extendedDeployInfo) {
+              dispatchToMainStore(
+                accountPendingTransactionsChanged(extendedDeployInfo)
+              );
+              clearInterval(interval);
+            } else if (triesLeft === 0) {
+              clearInterval(interval);
+            }
 
-        // const res = await transferOneDeploy.send(`${casperApiUrl}/rpc`);
+            triesLeft--;
+            //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
+          }, 2000);
+        }
+      });
 
-        // console.log(res);
-      }
-    } else if (tokenStandard === NFTTokenStandard.CEP78) {
-      if (activeAccount) {
-        const { recipientPublicKey } = recipientForm.getValues();
-        const { paymentAmount } = amountForm.getValues();
-        console.log(paymentAmount);
-        const rawPublicKey = getRawPublicKey(activeAccount.publicKey);
-        // 'https://rpc.testnet.casperlabs.io/rpc' - works
-        // 'https://casper-node-proxy.dev.make.services/rpc' - 503
-        // 'https://cspr-node-proxy.dev.make.services/rpc' - 502
-        // 'https://cspr-testnet-node-proxy.make.services/rpc' - 502
-
-        // Creating a new instance of the CEP78Client
-        const cep78 = new CEP78Client(
-          `https://rpc.testnet.casperlabs.io/rpc`,
-          networkName
-        );
-
-        const KEYS = Keys.getKeysFromHexPrivKey(
-          activeAccount.secretKey,
-          getSignatureAlgorithm(rawPublicKey)
-        );
-
-        console.log(nftToken);
-
-        const contractHash = await getContractHash(
-          casperApiUrl,
-          nftToken?.contract_package_hash!
-        );
-        console.log(contractHash);
-
-        // set the contract hash on the CEP78Client instance
-        cep78.setContractHash(`hash-${contractHash}`);
-
-        console.log(await cep78.getReportingModeConfig());
-
-        // get the owner reverse lookup mode setting
-        const ownerReverseLookupModeSetting =
-          nftToken?.contract_package?.metadata?.owner_reverse_lookup_mode;
-        console.log(`OwnerReverseLookupMode: ${ownerReverseLookupModeSetting}`);
-
-        const useSessionCode =
-          ownerReverseLookupModeSetting ===
-          OwnerReverseLookupMode[OwnerReverseLookupMode.Complete];
-
-        const transferDeploy = cep78.transfer(
-          {
-            tokenId: nftToken?.token_id!,
-            source: KEYS.publicKey,
-            target: getRawPublicKey(recipientPublicKey)
-          },
-          { useSessionCode },
-          CSPRtoMotes(paymentAmount),
-          KEYS.publicKey,
-          [KEYS]
-        );
-
-        console.log(transferDeploy, 'transferDeploy');
-
-        setShowSuccessScreen(true);
-      }
+      setShowSuccessScreen(true);
     }
   };
 
@@ -212,6 +165,7 @@ export const TransferNftPage = () => {
             nftToken={nftToken}
             recipientForm={recipientForm}
             amountForm={amountForm}
+            haveReverseOwnerLookUp={haveReverseOwnerLookUp}
           />
         )
       }

@@ -44,12 +44,14 @@ interface TransferNftContentProps {
   nftToken: NFTTokenResult | undefined;
   recipientForm: UseFormReturn<TransferNftRecipientFormValues>;
   amountForm: UseFormReturn<TransferNftAmountFormValues>;
+  haveReverseOwnerLookUp: boolean;
 }
 
 export const TransferNftContent = ({
   nftToken,
   recipientForm,
-  amountForm
+  amountForm,
+  haveReverseOwnerLookUp
 }: TransferNftContentProps) => {
   const { t } = useTranslation();
   const location = useTypedLocation();
@@ -95,7 +97,7 @@ export const TransferNftContent = ({
           <Trans t={t}>Send NFT</Trans>
         </Typography>
       </ParagraphContainer>
-      <ParagraphContainer top={SpacingSize.XXL}>
+      <VerticalSpaceContainer top={SpacingSize.XXL}>
         <Tile>
           <Container>
             <AlignedFlexRow gap={SpacingSize.Medium}>
@@ -125,7 +127,16 @@ export const TransferNftContent = ({
             </AlignedFlexRow>
           </Container>
         </Tile>
-      </ParagraphContainer>
+      </VerticalSpaceContainer>
+      {haveReverseOwnerLookUp && (
+        <ParagraphContainer top={SpacingSize.Tiny}>
+          <Typography type="listSubtext" color="contentRed">
+            <Trans t={t}>
+              For now we doesn't support we don’t the reverse look up modality
+            </Trans>
+          </Typography>
+        </ParagraphContainer>
+      )}
       <RecipientDropdownInput recipientForm={recipientForm} />
       <VerticalSpaceContainer top={SpacingSize.XXL}>
         <Input
@@ -137,7 +148,10 @@ export const TransferNftContent = ({
           suffixText={'CSPR'}
           {...register('paymentAmount')}
           error={!!errors?.paymentAmount}
-          validationText={errors?.paymentAmount?.message}
+          validationText={
+            errors?.paymentAmount?.message ||
+            "You'll be charged this amount in CSPR as a transaction fee. You can change it at your discretion."
+          }
         />
       </VerticalSpaceContainer>
     </ContentContainer>
