@@ -1,6 +1,7 @@
 import React, { forwardRef, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 import {
   AccountActivityPlateContainer,
@@ -9,7 +10,8 @@ import {
   AlignedSpaceBetweenFlexRow,
   ActivityPlateIconCircleContainer,
   ActivityPlateDivider,
-  SpacingSize
+  SpacingSize,
+  RightAlignedCenteredFlexRow
 } from '@libs/layout';
 import {
   DeployStatus,
@@ -40,6 +42,10 @@ import {
 } from '@src/constants';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { getRecipientAddressFromTransaction } from '@libs/ui/utils/utils';
+
+const SymbolContainer = styled(RightAlignedCenteredFlexRow)`
+  max-width: 80px;
+`;
 
 interface AccountActivityPlateProps {
   transactionInfo: Erc20TransferWithId | ExtendedDeployWithId;
@@ -200,9 +206,13 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
               </Tooltip>
             </AlignedFlexRow>
             {formattedAmount !== '-' && (
-              <Typography type="bodyHash" color="contentSecondary">
-                {symbol || 'CSPR'}
-              </Typography>
+              <Tooltip title={symbol && symbol.length > 8 ? symbol : undefined}>
+                <SymbolContainer>
+                  <Typography type="bodyHash" color="contentSecondary" ellipsis>
+                    {symbol || 'CSPR'}
+                  </Typography>
+                </SymbolContainer>
+              </Tooltip>
             )}
           </AlignedSpaceBetweenFlexRow>
         </ActivityPlateContentContainer>
