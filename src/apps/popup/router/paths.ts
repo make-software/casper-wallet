@@ -19,5 +19,6 @@ export enum RouterPath {
   ActivityDetails = '/activity-details',
   Token = '/token/:tokenName',
   Receive = '/receive',
-  NftDetails = '/nft-details/:contractPackageHash/nfts/:tokenId'
+  NftDetails = '/nft-details/:contractPackageHash/nfts/:tokenId',
+  GenerateWalletQRCode = '/generate-wallet-qr-code'
 }

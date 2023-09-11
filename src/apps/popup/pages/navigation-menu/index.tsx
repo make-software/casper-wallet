@@ -162,6 +162,19 @@ export function NavigationMenuPageContent() {
           },
           {
             id: 2,
+            title: t('Generate wallet QR code'),
+            description: t('Scan to import your wallet on mobile'),
+            iconPath: 'assets/icons/qr.svg',
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              // TODO: implement generate wallet QR code page
+              // https://make-software.atlassian.net/browse/WALLET-181
+              navigate(RouterPath.GenerateWalletQRCode);
+            }
+          },
+          {
+            id: 3,
             title: t('Download account keys'),
             description: t('For all accounts imported via file'),
             iconPath: 'assets/icons/download.svg',
