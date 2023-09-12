@@ -20,7 +20,6 @@ export type TransferFormValues = {
 
 export function useTransferForm(
   erc20Balance: string | null,
-  decimals: number | null,
   isErc20: boolean,
   amountMotes: string | null,
   paymentAmount: string
@@ -36,7 +35,7 @@ export function useTransferForm(
   };
 
   const erc20AmountFormSchema = Yup.object().shape({
-    amount: useErc20AmountRule(erc20Balance, decimals),
+    amount: useErc20AmountRule(erc20Balance),
     paymentAmount: usePaymentAmountRule(amountMotes),
     transferIdMemo: useTransferIdMemoRule()
   });

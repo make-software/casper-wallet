@@ -88,7 +88,6 @@ export const TransferPage = () => {
 
   const { amountForm, recipientForm } = useTransferForm(
     erc20Balance,
-    erc20Decimals,
     isErc20Transfer,
     csprBalance.amountMotes,
     paymentAmount

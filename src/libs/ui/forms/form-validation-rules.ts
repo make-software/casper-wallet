@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import Big from 'big.js';
 
 import { verifyPasswordAgainstHash } from '@src/libs/crypto/hashing';
 import { dispatchToMainStore } from '@src/background/redux/utils';
@@ -12,10 +13,10 @@ import {
   TRANSFER_COST_MOTES
 } from '@src/constants';
 import { isValidPublicKey, isValidU64 } from '@src/utils';
-import Big from 'big.js';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 
 export const minPasswordLength = 16;
+export const minQrCodePasswordLength = 8;
 
 const ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED = 1;
 
@@ -180,10 +181,7 @@ export const useCsprAmountRule = (amountMotes: string | null) => {
     });
 };
 
-export const useErc20AmountRule = (
-  amount: string | null,
-  decimals: number | null
-) => {
+export const useErc20AmountRule = (amount: string | null) => {
   const { t } = useTranslation();
 
   const maxAmount: string = amount == null ? '0' : Big(amount).toString();
@@ -270,4 +268,19 @@ export const usePaymentAmountRule = (csprBalance: string | null) => {
         'Your account balance is not high enough. Enter a smaller amount.'
       )
     });
+};
+
+export const useCreatePasswordForQrCodeRule = () => {
+  const { t } = useTranslation();
+
+  return Yup.string()
+    .required(t('Password is required'))
+    .max(
+      minQrCodePasswordLength,
+      `Should be no more than ${minQrCodePasswordLength} characters`
+    )
+    .matches(
+      /^[A-Za-z0-9]*$/,
+      t('Password can only contain letters and numbers')
+    );
 };

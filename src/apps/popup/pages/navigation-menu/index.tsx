@@ -168,8 +168,7 @@ export function NavigationMenuPageContent() {
             disabled: false,
             handleOnClick: () => {
               closeNavigationMenu();
-              // TODO: implement generate wallet QR code page
-              // https://make-software.atlassian.net/browse/WALLET-181
+
               navigate(RouterPath.GenerateWalletQRCode);
             }
           },
