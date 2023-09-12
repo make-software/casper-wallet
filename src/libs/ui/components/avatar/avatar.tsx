@@ -14,7 +14,7 @@ import { SvgIcon } from '@libs/ui';
 const RoundedIdenticon = styled(Identicon)<{ displayContext?: 'header' }>`
   border-radius: ${({ theme, displayContext }) =>
     displayContext ? theme.borderRadius.base : theme.borderRadius.eight}px;
-  border: ${({ displayContext, theme }) =>
+  border: ${({ displayContext }) =>
     displayContext ? `0.5px solid #1A191929` : 'none'};
 `;
 
@@ -64,7 +64,7 @@ const ConnectionStatusBadge = styled.div<{
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 2;
+    z-index: 1;
   }
 `;
 
