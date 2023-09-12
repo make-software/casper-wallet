@@ -14,4 +14,8 @@ export type LocationState = {
   };
   activeTabId?: number;
   tokenData?: TokenType | null;
+  nftData?: {
+    contentType: string;
+    url?: string;
+  };
 };

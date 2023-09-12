@@ -62,9 +62,12 @@ export const TokenPlate = ({
       <TokenAmountContainer>
         <Tooltip
           title={
-            token?.amount && token.amount.length > 7 ? token?.amount : undefined
+            (token?.amount && token.amount.length > 7) ||
+            (token?.symbol && token.symbol.length > 6)
+              ? `${token?.amount} ${token?.symbol}`
+              : undefined
           }
-          placement="topLeft"
+          placement="bottomLeft"
           overflowWrap
           fullWidth
         >
@@ -75,6 +78,7 @@ export const TokenPlate = ({
             <Typography
               type="bodyHash"
               color="contentSecondary"
+              ellipsis={!!(token?.symbol && token.symbol.length > 6)}
               loading={!token?.symbol}
             >
               {token?.symbol}
