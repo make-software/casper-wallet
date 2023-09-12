@@ -12,21 +12,14 @@ import {
   TileContainer,
   VerticalSpaceContainer
 } from '@src/libs/layout/containers';
-import {
-  Hash,
-  HashDisplayContext,
-  HashVariant,
-  Tile,
-  SvgIcon,
-  Typography
-} from '@libs/ui';
+import { Hash, HashVariant, Tile, SvgIcon, Typography } from '@libs/ui';
 import {
   selectVaultAccount,
   selectVaultImportedAccounts
 } from '@src/background/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import { useAccountInfo } from '@hooks/use-account-info';
+import { useFetchAccountInfo } from '@src/hooks';
 
 export function AccountSettingsPageContent() {
   const { t } = useTranslation();
@@ -41,7 +34,7 @@ export function AccountSettingsPageContent() {
   }
 
   const accountHash = getAccountHashFromPublicKey(account.publicKey);
-  const { accountInfoStandardName } = useAccountInfo(account);
+  const { accountInfoStandardName } = useFetchAccountInfo(account);
 
   return (
     <>
@@ -61,9 +54,7 @@ export function AccountSettingsPageContent() {
                 </Typography>
                 <Hash
                   value={account.publicKey}
-                  variant={HashVariant.FullHash}
-                  withCopyOnSelfClick
-                  displayContext={HashDisplayContext.AccountInfo}
+                  variant={HashVariant.CaptionHash}
                 />
               </FlexColumn>
             </VerticalSpaceContainer>
@@ -72,12 +63,7 @@ export function AccountSettingsPageContent() {
                 <Typography type="bodySemiBold">
                   <Trans t={t}>Account hash</Trans>
                 </Typography>
-                <Hash
-                  value={accountHash}
-                  variant={HashVariant.FullHash}
-                  withCopyOnSelfClick
-                  displayContext={HashDisplayContext.AccountInfo}
-                />
+                <Hash value={accountHash} variant={HashVariant.CaptionHash} />
               </FlexColumn>
             </VerticalSpaceContainer>
           </TileContainer>

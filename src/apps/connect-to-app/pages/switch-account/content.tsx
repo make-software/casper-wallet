@@ -8,7 +8,8 @@ import {
   HashVariant,
   List,
   Typography,
-  Button
+  Button,
+  ConnectionStatusBadge
 } from '@src/libs/ui';
 
 import {
@@ -28,7 +29,6 @@ import {
 import { selectActiveOrigin } from '@src/background/redux/active-origin/selectors';
 import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import { closeCurrentWindow } from '@src/background/close-current-window';
-import { ConnectionStatusBadge } from '@src/apps/popup/pages/home/components/connection-status-badge';
 
 import {
   UnconnectedAccountsList,
@@ -122,7 +122,7 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
           <>
             <List
               rows={connectedAccountsListItems}
-              renderRow={account => (
+              renderRow={(account, index) => (
                 <ListItemContainer key={account.name}>
                   <SpaceBetweenContainer>
                     <LeftAlignedFlexColumn>
@@ -135,6 +135,11 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
                         value={account.publicKey}
                         variant={HashVariant.CaptionHash}
                         truncated
+                        placement={
+                          index === connectedAccountsListItems.length - 1
+                            ? 'topRight'
+                            : 'bottomRight'
+                        }
                       />
                     </LeftAlignedFlexColumn>
                     <Button

@@ -22,7 +22,7 @@ import {
   emitSdkEventToActiveTabsWithOrigin
 } from '@src/background/utils';
 import { getUrlOrigin } from '@src/utils';
-import { accountActivityReset } from '@background/redux/account-info/actions';
+import { accountInfoReset } from '@background/redux/account-info/actions';
 
 export function findAccountInAListClosestToGivenAccountFilteredByNames(
   accounts: Account[],
@@ -102,7 +102,7 @@ export function useAccountManager() {
         );
         if (!selectedAccountsIncludeActive) {
           dispatchToMainStore(activeAccountChanged(account.name));
-          dispatchToMainStore(accountActivityReset());
+          dispatchToMainStore(accountInfoReset());
         }
         dispatchToMainStore(
           siteConnected({
@@ -142,7 +142,7 @@ export function useAccountManager() {
         );
         if (!selectedAccountIsActive) {
           dispatchToMainStore(activeAccountChanged(account.name));
-          dispatchToMainStore(accountActivityReset());
+          dispatchToMainStore(accountInfoReset());
         }
         dispatchToMainStore(
           anotherAccountConnected({
@@ -190,7 +190,7 @@ export function useAccountManager() {
       });
 
       dispatchToMainStore(activeAccountChanged(account.name));
-      dispatchToMainStore(accountActivityReset());
+      dispatchToMainStore(accountInfoReset());
     },
     [activeAccount?.name, accounts, isLocked, isAccountConnectedWithOrigin]
   );

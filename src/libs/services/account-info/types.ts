@@ -1,7 +1,3 @@
-export interface AccountInfoResponse<T> {
-  data: T;
-}
-
 export interface AccountInfo {
   account_hash: string;
   url: string;

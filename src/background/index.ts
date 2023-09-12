@@ -52,6 +52,17 @@ import {
   fetchCurrencyRate
 } from '@libs/services/balance-service';
 import { fetchAccountInfo } from '@libs/services/account-info';
+import {
+  fetchAccountCasperActivity,
+  fetchAccountExtendedDeploys,
+  fetchExtendedDeploysInfo,
+  MapExtendedDeploy,
+  MapPaginatedExtendedDeploys
+} from '@libs/services/account-activity-service';
+import {
+  fetchContractPackage,
+  fetchErc20Tokens
+} from '@libs/services/erc20-service';
 
 import { openWindow } from './open-window';
 import {
@@ -89,7 +100,7 @@ import {
 } from './redux/settings/actions';
 import { activeOriginChanged } from './redux/active-origin/actions';
 import { selectApiConfigBasedOnActiveNetwork } from './redux/settings/selectors';
-import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
+import { getUrlOrigin, hasHttpPrefix, notEmpty } from '@src/utils';
 import {
   CannotGetActiveAccountError,
   CannotGetSenderOriginError
@@ -100,18 +111,26 @@ import {
 } from '@src/content/sdk-errors';
 import { recipientPublicKeyAdded } from './redux/recent-recipient-public-keys/actions';
 import {
-  fetchAccountActivity,
-  fetchExtendedDeploysInfo
-} from '@libs/services/account-activity-service';
-import {
-  accountActivityChanged,
-  accountActivityReset,
-  accountActivityUpdated,
+  accountCasperActivityChanged,
+  accountInfoReset,
+  accountCasperActivityUpdated,
   accountBalanceChanged,
   accountCurrencyRateChanged,
   accountPendingTransactionsChanged,
-  accountPendingTransactionsRemove
+  accountPendingTransactionsRemove,
+  accountErc20Changed,
+  accountErc20TokensActivityChanged,
+  accountErc20TokensActivityUpdated,
+  accountDeploysAdded,
+  accountDeploysUpdated,
+  accountNftTokensAdded,
+  accountNftTokensUpdated,
+  accountNftTokensCountChanged,
+  accountDeploysCountChanged,
+  accountCasperActivityCountChanged
 } from '@background/redux/account-info/actions';
+import { fetchErc20TokenActivity } from '@src/libs/services/account-activity-service/erc20-token-activity-service';
+import { fetchNftTokens } from '@libs/services/nft-service';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -216,7 +235,7 @@ browser.windows.onFocusChanged.addListener(async (windowId: number) => {
 });
 
 browser.tabs.onActivated.addListener(
-  async ({ windowId, tabId }: browser.Tabs.OnActivatedActiveInfoType) => {
+  async ({ windowId }: browser.Tabs.OnActivatedActiveInfoType) => {
     updateOrigin(windowId);
   }
 );
@@ -513,11 +532,21 @@ browser.runtime.onMessage.addListener(
           case getType(recipientPublicKeyAdded):
           case getType(accountBalanceChanged):
           case getType(accountCurrencyRateChanged):
-          case getType(accountActivityChanged):
-          case getType(accountActivityUpdated):
-          case getType(accountActivityReset):
+          case getType(accountCasperActivityChanged):
+          case getType(accountCasperActivityUpdated):
+          case getType(accountInfoReset):
           case getType(accountPendingTransactionsChanged):
           case getType(accountPendingTransactionsRemove):
+          case getType(accountErc20Changed):
+          case getType(accountErc20TokensActivityChanged):
+          case getType(accountErc20TokensActivityUpdated):
+          case getType(accountDeploysAdded):
+          case getType(accountDeploysUpdated):
+          case getType(accountNftTokensAdded):
+          case getType(accountNftTokensUpdated):
+          case getType(accountNftTokensCountChanged):
+          case getType(accountDeploysCountChanged):
+          case getType(accountCasperActivityCountChanged):
             store.dispatch(action);
             return sendResponse(undefined);
 
@@ -570,28 +599,6 @@ browser.runtime.onMessage.addListener(
             return;
           }
 
-          case getType(serviceMessage.fetchAccountActivityRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchAccountActivity({
-                casperApiUrl,
-                publicKey: action.payload.publicKey,
-                page: action.payload.page
-              });
-
-              return sendResponse(
-                serviceMessage.fetchAccountActivityResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
           case getType(serviceMessage.fetchExtendedDeploysInfoRequest): {
             const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
@@ -604,8 +611,148 @@ browser.runtime.onMessage.addListener(
               });
 
               return sendResponse(
-                serviceMessage.fetchExtendedDeploysInfoResponse(data)
+                serviceMessage.fetchExtendedDeploysInfoResponse(
+                  MapExtendedDeploy(data)
+                )
               );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchErc20TokensRequest): {
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const { data: tokensList } = await fetchErc20Tokens({
+                casperApiUrl,
+                accountHash: action.payload.accountHash
+              });
+
+              if (tokensList) {
+                const erc20Tokens = await Promise.allSettled(
+                  tokensList?.map(token =>
+                    fetchContractPackage({
+                      casperApiUrl,
+                      contractPackageHash: token.contract_package_hash
+                    }).then(contractPackage => ({
+                      ...contractPackage,
+                      balance: token.balance,
+                      contractHash: token.latest_contract?.contract_hash
+                    }))
+                  )
+                ).then(results =>
+                  results
+                    .map(result => {
+                      if (result.status === 'fulfilled') {
+                        return result.value;
+                      } else {
+                        return null;
+                      }
+                    })
+                    .filter(notEmpty)
+                );
+
+                return sendResponse(
+                  serviceMessage.fetchErc20TokensResponse(erc20Tokens)
+                );
+              } else {
+                return sendResponse(
+                  serviceMessage.fetchErc20TokensResponse([])
+                );
+              }
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchErc20TokenActivityRequest): {
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const data = await fetchErc20TokenActivity({
+                casperApiUrl,
+                publicKey: action.payload.publicKey,
+                page: action.payload.page,
+                contractPackageHash: action.payload.contractPackageHash
+              });
+
+              return sendResponse(
+                serviceMessage.fetchErc20TokenActivityResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchAccountExtendedDeploysRequest): {
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const data = await fetchAccountExtendedDeploys({
+                casperApiUrl,
+                publicKey: action.payload.publicKey,
+                page: action.payload.page
+              });
+
+              return sendResponse(
+                serviceMessage.fetchAccountExtendedDeploysResponse(
+                  MapPaginatedExtendedDeploys(data)
+                )
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchAccountCasperActivityRequest): {
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const data = await fetchAccountCasperActivity({
+                casperApiUrl,
+                accountHash: action.payload.accountHash,
+                page: action.payload.page
+              });
+
+              return sendResponse(
+                serviceMessage.fetchAccountCasperActivityResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+            return;
+          }
+
+          case getType(serviceMessage.fetchNftTokensRequest): {
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const data = await fetchNftTokens({
+                casperApiUrl,
+                accountHash: action.payload.accountHash,
+                page: action.payload.page
+              });
+
+              return sendResponse(serviceMessage.fetchNftTokensResponse(data));
             } catch (error) {
               console.error(error);
             }
@@ -658,7 +805,7 @@ browser.runtime.onMessage.addListener(
 
 // ping mechanism to keep background script from destroing wallet session when it's unlocked
 function ping() {
-  browser.runtime.sendMessage('ping').catch(err => {
+  browser.runtime.sendMessage('ping').catch(() => {
     // ping
   });
 }

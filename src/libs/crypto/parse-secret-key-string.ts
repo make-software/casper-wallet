@@ -49,7 +49,7 @@ export function parseSecretKeyString(fileContents: string): {
 
   return {
     secretKeyBase64: privateKeyBytesToBase64(keyPair.privateKey),
-    publicKeyHex: keyPair.publicKey.toHex()
+    publicKeyHex: keyPair.publicKey.toHex(false)
   };
 }
 

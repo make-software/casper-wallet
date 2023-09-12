@@ -29,9 +29,6 @@ import {
   selectVaultActiveAccount
 } from '@src/background/redux/vault/selectors';
 
-// Hidden account balance until a solution for fetching many balances will be ready
-// https://github.com/make-software/casper-wallet/issues/374
-// const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
 const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
   width: 100%;
 `;
@@ -106,7 +103,7 @@ export function SelectAccountContent({
           rows={accountsListItems}
           headerLabelTop={SpacingSize.Large}
           contentTop={SpacingSize.Small}
-          renderRow={account => (
+          renderRow={(account, index) => (
             <ListItemClickableContainer
               onClick={() =>
                 setSelectedAccountNames(selectedAccountNames =>
@@ -136,15 +133,13 @@ export function SelectAccountContent({
                   value={account.publicKey}
                   variant={HashVariant.CaptionHash}
                   truncated
+                  placement={
+                    index === accountsListItems.length - 1
+                      ? 'topRight'
+                      : 'bottomRight'
+                  }
                 />
               </AccountNameWithHashListItemContainer>
-              {/* Hidden account balance until a solution for fetching many balances will be ready */}
-              {/*<AccountBalanceListItemContainer>*/}
-              {/*  <Typography type="bodyHash">2.1M</Typography>*/}
-              {/*  <Typography type="bodyHash" color="contentSecondary">*/}
-              {/*    CSPR*/}
-              {/*  </Typography>*/}
-              {/*</AccountBalanceListItemContainer>*/}
             </ListItemClickableContainer>
           )}
           marginLeftForItemSeparatorLine={60}

@@ -1,4 +1,4 @@
-export interface DataWithPayload<T> {
+export interface Payload<T> {
   payload: T;
 }
 
@@ -7,4 +7,14 @@ export interface PaginatedResponse<T> {
   itemCount: number;
   pageCount: number;
   pages: any[];
+}
+
+export interface DataResponse<T> {
+  data: T;
+}
+
+export interface ErrorResponse {
+  error: {
+    message: string;
+  };
 }

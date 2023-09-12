@@ -1,7 +1,10 @@
 import React, { PropsWithChildren } from 'react';
 import styled from 'styled-components';
+import { MacScrollbar } from 'mac-scrollbar';
 
-import { FlexColumn } from '@layout/containers';
+import 'mac-scrollbar/dist/mac-scrollbar.css';
+
+import { FlexColumn } from './containers';
 
 interface BaseLayoutWindowProps {
   renderHeader?: () => JSX.Element;
@@ -24,7 +27,6 @@ const PageHeader = styled.header``;
 
 const PageContent = styled.div`
   height: 100%;
-  overflow-y: auto;
 `;
 
 const PageFooter = styled.footer``;
@@ -50,7 +52,9 @@ export function LayoutWindow({
   return (
     <Container {...formProps}>
       {renderHeader && <PageHeader>{renderHeader()}</PageHeader>}
-      <PageContent>{renderContent()}</PageContent>
+      <MacScrollbar>
+        <PageContent>{renderContent()}</PageContent>
+      </MacScrollbar>
       {renderFooter && <PageFooter>{renderFooter()}</PageFooter>}
     </Container>
   );

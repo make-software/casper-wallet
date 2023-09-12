@@ -43,7 +43,11 @@ export const UnlockProtectedPageContent = ({
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <SvgIcon src="assets/illustrations/password.svg" size={120} />
+        <SvgIcon
+          src="assets/illustrations/password.svg"
+          width={200}
+          height={120}
+        />
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
