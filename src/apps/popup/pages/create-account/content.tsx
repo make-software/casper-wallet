@@ -26,7 +26,11 @@ export function CreateAccountPageContent({
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <SvgIcon src="assets/illustrations/create-account.svg" size={120} />
+        <SvgIcon
+          src="assets/illustrations/create-account.svg"
+          width={195}
+          height={120}
+        />
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="header">

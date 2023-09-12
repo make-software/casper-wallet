@@ -10,11 +10,20 @@ interface BaseButtonProps extends BaseProps {
   minWidth?: '86' | '100';
   inline?: boolean;
   title?: string;
+  flexWidth?: boolean;
 }
 
 const BaseButton = styled.button<BaseButtonProps>(
-  ({ theme, disabled, height = '40', inline = false, minWidth }) => ({
+  ({
+    theme,
+    disabled,
+    height = '40',
+    inline = false,
+    minWidth,
+    flexWidth = false
+  }) => ({
     display: 'flex',
+    ...(flexWidth ? { flex: 1 } : {}),
     alignItems: 'center',
     justifyContent: 'center',
     border: 'none',

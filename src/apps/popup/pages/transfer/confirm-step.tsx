@@ -9,13 +9,15 @@ import {
   ParagraphContainer,
   SpaceBetweenFlexRow,
   SpacingSize,
-  TransferInputContainer
+  VerticalSpaceContainer
 } from '@libs/layout';
-import { FormField, List, TextArea, Typography } from '@libs/ui';
 import {
+  ActiveAccountPlate,
   AmountContainer,
-  SenderDetails
-} from '@popup/pages/transfer/sender-details';
+  List,
+  RecipientPlate,
+  Typography
+} from '@libs/ui';
 import {
   formatFiatAmount,
   formatNumber,
@@ -30,48 +32,81 @@ export const ListItemContainer = styled(SpaceBetweenFlexRow)`
 
 interface ConfirmStepProps {
   recipientPublicKey: string;
-  amountInCSPR: string;
+  amount: string;
+  balance: string | null;
+  symbol: string | null;
+  isCSPR: boolean;
+  paymentAmount: string;
 }
 export const ConfirmStep = ({
   recipientPublicKey,
-  amountInCSPR
+  amount,
+  balance,
+  symbol,
+  isCSPR,
+  paymentAmount
 }: ConfirmStepProps) => {
   const { t } = useTranslation();
 
   const currencyRate = useSelector(selectAccountCurrencyRate);
+  let transactionDataRows;
 
-  const transferCostInCSPR = formatNumber(motesToCSPR(TRANSFER_COST_MOTES), {
-    precision: { max: 5 }
-  });
-  const totalCSPR: string = Big(amountInCSPR)
-    .add(transferCostInCSPR)
-    .toString();
+  if (isCSPR) {
+    const transferCostInCSPR = formatNumber(motesToCSPR(TRANSFER_COST_MOTES), {
+      precision: { max: 5 }
+    });
+    const totalCSPR: string = Big(amount).add(transferCostInCSPR).toString();
 
-  const transactionDataRows = [
-    {
-      id: 1,
-      text: t('Amount'),
-      amount: formatNumber(amountInCSPR, {
-        precision: { max: 5 }
-      }),
-      fiatPrice: formatFiatAmount(amountInCSPR, currencyRate)
-    },
-    {
-      id: 2,
-      text: t('Transaction fee'),
-      amount: transferCostInCSPR,
-      fiatPrice: formatFiatAmount(transferCostInCSPR, currencyRate, 3)
-    },
-    {
-      id: 3,
-      text: t('Total'),
-      amount: formatNumber(totalCSPR, {
-        precision: { max: 5 }
-      }),
-      fiatPrice: formatFiatAmount(totalCSPR, currencyRate),
-      bold: true
-    }
-  ];
+    transactionDataRows = [
+      {
+        id: 1,
+        text: t('Amount'),
+        amount: formatNumber(amount, {
+          precision: { max: 5 }
+        }),
+        fiatPrice: formatFiatAmount(amount, currencyRate),
+        symbol
+      },
+      {
+        id: 2,
+        text: t('Transaction fee'),
+        amount: transferCostInCSPR,
+        fiatPrice: formatFiatAmount(transferCostInCSPR, currencyRate, 3),
+        symbol
+      },
+      {
+        id: 3,
+        text: t('Total'),
+        amount: formatNumber(totalCSPR, {
+          precision: { max: 5 }
+        }),
+        fiatPrice: formatFiatAmount(totalCSPR, currencyRate),
+        symbol,
+        bold: true
+      }
+    ];
+  } else {
+    transactionDataRows = [
+      {
+        id: 1,
+        text: t('Amount'),
+        amount: formatNumber(amount, {
+          precision: { max: 5 }
+        }),
+        fiatPrice: null,
+        symbol
+      },
+      {
+        id: 2,
+        text: t('Transaction fee'),
+        amount: formatNumber(paymentAmount, {
+          precision: { max: 5 }
+        }),
+        fiatPrice: formatFiatAmount(paymentAmount, currencyRate, 3),
+        symbol: 'CSPR'
+      }
+    ];
+  }
 
   const recipientLabel = t('To recipient');
 
@@ -79,21 +114,19 @@ export const ConfirmStep = ({
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          <Trans t={t}>Confirm send</Trans>
+          <Trans t={t}>Confirm sending</Trans>
         </Typography>
       </ParagraphContainer>
-      <SenderDetails />
-      <TransferInputContainer>
-        <FormField label={recipientLabel}>
-          <TextArea
-            value={recipientPublicKey}
-            readOnly
-            style={{ minHeight: '78px' }}
-          />
-        </FormField>
-      </TransferInputContainer>
+      <ActiveAccountPlate label="From" symbol={symbol} balance={balance} />
+      <VerticalSpaceContainer top={SpacingSize.XL}>
+        <RecipientPlate
+          recipientLabel={recipientLabel}
+          publicKey={recipientPublicKey}
+          showFullPublicKey
+        />
+      </VerticalSpaceContainer>
       <List
-        contentTop={SpacingSize.XXXL}
+        contentTop={SpacingSize.XL}
         rows={transactionDataRows}
         renderRow={listItems => (
           <ListItemContainer key={listItems.id}>
@@ -101,11 +134,11 @@ export const ConfirmStep = ({
               {listItems.text}
             </Typography>
             <AmountContainer>
-              <Typography type="captionHash">{`${listItems.amount} CSPR`}</Typography>
-              <Typography
-                type={listItems.bold ? 'bodySemiBold' : 'captionMedium'}
-              >
-                {listItems.fiatPrice || 'API not available'}
+              <Typography type="captionHash">{`${listItems.amount} ${listItems.symbol}`}</Typography>
+              <Typography type={listItems.bold ? 'subtitle' : 'captionMedium'}>
+                {listItems.fiatPrice == null
+                  ? null
+                  : listItems.fiatPrice || 'Not available'}
               </Typography>
             </AmountContainer>
           </ListItemContainer>

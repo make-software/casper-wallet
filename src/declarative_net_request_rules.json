@@ -1,0 +1,19 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://casperwallet.io"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "https://image-proxy-cdn.make.services"
+    }
+  }
+]

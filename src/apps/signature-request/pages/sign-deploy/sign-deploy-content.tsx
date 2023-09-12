@@ -99,6 +99,17 @@ export function SignDeployContent({
     ...deployInfo.deployArgs
   };
 
+  const showSimpleAmount = () => {
+    switch (deployInfo.entryPoint) {
+      case 'delegate':
+      case 'undelegate':
+      case 'redelegate':
+        return false;
+      default:
+        return true;
+    }
+  };
+
   const getLabel = () => {
     switch (signatureRequest.deployType) {
       case 'Contract Call':
@@ -109,6 +120,8 @@ export function SignDeployContent({
         return 'Transfer Data';
     }
   };
+
+  const isContractCall = signatureRequest.deployType === 'Contract Call';
 
   return (
     <PageContainer>
@@ -165,7 +178,12 @@ export function SignDeployContent({
                       <Typography type="body" color="contentSecondary">
                         {label}
                       </Typography>
-                      <DeployValue id={key} value={value} />
+                      <DeployValue
+                        id={key}
+                        value={value}
+                        isContractCall={isContractCall}
+                        showSimpleAmount={showSimpleAmount()}
+                      />
                     </AccordionItem>
                   );
                 })

@@ -2,7 +2,7 @@ import React, { ReactNode, useState } from 'react';
 import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { Typography, Tooltip } from '@libs/ui';
+import { Typography } from '@libs/ui';
 import { AlignedSpaceBetweenFlexRow, CenteredFlexRow } from '@libs/layout';
 
 const TabsContainer = styled(AlignedSpaceBetweenFlexRow)`
@@ -35,6 +35,12 @@ const TabContainer = styled(CenteredFlexRow)<{ disable?: boolean }>`
   width: calc(33% - 8px);
   padding: 4px 8px;
 `;
+
+export const HomePageTabsId = {
+  Tokens: 0,
+  Deploys: 1,
+  NFTs: 2
+};
 
 export const Tab = styled.div<TabProps>``;
 
@@ -70,20 +76,13 @@ export function Tabs({ children, preferActiveTabId }: TabsProps) {
             ) : (
               <TabContainer
                 onClick={() => {
-                  if (tabName === 'NFTs') return;
                   setActiveTabId(index);
                 }}
-                disable={tabName === 'NFTs'}
                 key={tabName}
               >
-                <Tooltip
-                  title={tabName === 'NFTs' ? 'Coming Soon' : null}
-                  noWrap
-                >
-                  <Typography type="captionRegular">
-                    <Trans t={t}>{tabName}</Trans>
-                  </Typography>
-                </Tooltip>
+                <Typography type="captionRegular">
+                  <Trans t={t}>{tabName}</Trans>
+                </Typography>
               </TabContainer>
             );
           })}

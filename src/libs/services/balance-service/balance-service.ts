@@ -1,7 +1,7 @@
 import { serviceMessage } from '@src/background/service-message';
 import { dispatchToMainStore } from '@background/redux/utils';
 
-import { DataWithPayload } from '@libs/services/types';
+import { Payload } from '@libs/services/types';
 
 import { BALANCE_REFRESH_RATE, CURRENCY_REFRESH_RATE } from '@src/constants';
 
@@ -43,7 +43,7 @@ export const accountBalanceRequest = (
 
 export const dispatchFetchActiveAccountBalance = (
   publicKey = ''
-): Promise<DataWithPayload<FetchBalanceResponse>> =>
+): Promise<Payload<FetchBalanceResponse>> =>
   dispatchToMainStore(serviceMessage.fetchBalanceRequest({ publicKey }));
 
 export const fetchAccountBalance = ({

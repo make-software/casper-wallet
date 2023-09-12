@@ -5,6 +5,7 @@ import en from 'date-fns/locale/en-US';
 import { createIntl, createIntlCache } from '@formatjs/intl';
 
 import { MOTES_PER_CSPR_RATE } from '@libs/ui/utils/constants';
+import { tokenDivider } from '@src/apps/popup/pages/home/components/tokens-list/utils';
 
 const cache = createIntlCache();
 const intl = createIntl(
@@ -105,7 +106,7 @@ export const formatNumber = (
 ): string =>
   intl.formatNumber(value as number, {
     minimumFractionDigits: precision?.min || 0,
-    maximumFractionDigits: precision?.max || 0,
+    maximumFractionDigits: precision?.max || precision?.min || 0,
     notation,
     compactDisplay
   });
@@ -126,6 +127,26 @@ export const motesToCSPR = (motes: string): string => {
 
 export const CSPRtoMotes = (cspr: string): string => {
   return Big(cspr).mul(MOTES_PER_CSPR_RATE).toString();
+};
+
+export const divideErc20Balance = (
+  balance: string | null,
+  decimals: number | null
+): string | null => {
+  if (balance == null) {
+    return null;
+  }
+  return Big(balance).div(tokenDivider(decimals)).toString();
+};
+
+export const multiplyErc20Balance = (
+  balance: string | null,
+  decimals: number | null
+): string | null => {
+  if (balance == null) {
+    return null;
+  }
+  return Big(balance).mul(tokenDivider(decimals)).toString();
 };
 
 export const motesToCurrency = (

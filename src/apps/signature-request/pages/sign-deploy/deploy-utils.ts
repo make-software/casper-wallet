@@ -103,7 +103,7 @@ function getDeployArgsForTransfer(
     // If deploy is created using version of SDK gte than 2.7.0
     // In fact this logic can be removed in future as well as pkHex param
     case CLTypeTag.PublicKey:
-      args.recipientKey = (targetFromDeploy as CLPublicKey).toHex();
+      args.recipientKey = (targetFromDeploy as CLPublicKey).toHex(false);
       break;
     default: {
       throw new Error(
@@ -273,7 +273,7 @@ export function parseDeployArgValue(
       return tupleThree.value().map(member => unwrapNestedLists(member));
 
     case CLTypeTag.PublicKey:
-      return { parsedValue: (value as CLPublicKey).toHex() };
+      return { parsedValue: (value as CLPublicKey).toHex(false) };
 
     default:
       // Special handling as there is no CLTypeTag for CLAccountHash

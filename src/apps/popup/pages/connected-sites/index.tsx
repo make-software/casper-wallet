@@ -39,7 +39,8 @@ export function ConnectedSitesPage() {
         <IllustrationContainer>
           <SvgIcon
             src="assets/illustrations/no-connected-sites.svg"
-            size={120}
+            width={200}
+            height={120}
           />
         </IllustrationContainer>
         <ParagraphContainer top={SpacingSize.XL}>

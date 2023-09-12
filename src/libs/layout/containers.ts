@@ -1,4 +1,8 @@
 import styled, { css } from 'styled-components';
+import { FillColor } from '@libs/ui';
+
+// Be careful when importing dependencies here
+// Import of getColorFromTheme from '@libs/ui' cause huge problems with webpack bundle and lead to blank popups
 
 export enum SpacingSize {
   None = 'none',
@@ -109,6 +113,10 @@ export const LeftAlignedCenteredFlexRow = styled(AlignedFlexRow)`
   justify-content: flex-start;
 `;
 
+export const RightAlignedCenteredFlexRow = styled(AlignedFlexRow)`
+  justify-content: flex-end;
+`;
+
 export const SpaceBetweenFlexRow = styled(FlexRow)`
   width: 100%;
   justify-content: space-between;
@@ -169,10 +177,6 @@ export const InputsContainer = styled.div`
   & > div:nth-child(2) {
     margin-top: 16px;
   }
-`;
-
-export const TransferInputContainer = styled.div`
-  margin-top: 28px;
 `;
 
 // Default direction value is `column`
@@ -256,7 +260,6 @@ export const AvatarContainer = styled(CenteredFlexColumn)<{
   top?: SpacingSize;
 }>`
   margin-top: ${({ top }) => getSpacingSize(top)};
-  width: 100%;
 `;
 
 export interface BorderBottomPseudoElementProps {
@@ -272,6 +275,12 @@ export const borderBottomPseudoElementRules = css<BorderBottomPseudoElementProps
   border-bottom: ${({ theme }) => `0.5px solid ${theme.color.borderPrimary}`};
 `;
 
+export const BorderContainer = styled.div`
+  & > *:last-child {
+    ${borderBottomPseudoElementRules};
+  }
+`;
+
 export const Overlay = styled.div`
   position: fixed;
   z-index: ${({ theme }) => theme.zIndex.modal};
@@ -282,4 +291,49 @@ export const Overlay = styled.div`
   width: 100vw;
 
   background: rgba(0, 0, 0, 0.32);
+`;
+
+export const IconCircleContainer = styled(CenteredFlexRow)<{
+  color: FillColor;
+}>`
+  height: 48px;
+  width: 48px;
+
+  margin: 0 16px;
+
+  background-color: ${({ theme, color }) =>
+    color === 'inherit' ? 'inherit' : theme.color[color]};
+  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
+`;
+
+export const AccountActivityPlateContainer = styled(AlignedSpaceBetweenFlexRow)`
+  cursor: pointer;
+  padding: 16px 12px;
+`;
+
+export const ActivityPlateContentContainer = styled(FlexColumn)`
+  flex-grow: 1;
+  gap: 2px;
+`;
+
+export const ActivityPlateIconCircleContainer = styled(CenteredFlexRow)`
+  min-width: 28px;
+
+  width: 28px;
+  height: 28px;
+
+  margin-right: 4px;
+
+  background-color: ${({ theme }) => theme.color.fillSecondary};
+  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
+`;
+
+export const ActivityPlateDivider = styled.div`
+  width: 2px;
+  height: 2px;
+
+  margin: 0 6px;
+
+  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
+  background-color: ${({ theme }) => theme.color.contentSecondary};
 `;

@@ -40,6 +40,7 @@ export function SiteGroupItem({
           value={publicKey}
           truncated
           withTag={imported}
+          placement="bottomRight"
         />
       </AccountNameAndPublicKeyContainer>
       <SvgIcon

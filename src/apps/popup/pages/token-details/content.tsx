@@ -1,17 +1,31 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 
 import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { ActivityList, ActivityListDisplayContext, Typography } from '@libs/ui';
+import {
+  Erc20TokenActivityList,
+  Typography,
+  CasperTokenActivityList
+} from '@libs/ui';
+import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 
 import { Token } from './token';
 
-export const TokenPageContent = () => {
+interface TokenPageContentProps {
+  erc20Tokens: ContractPackageWithBalance[] | null;
+}
+
+export const TokenPageContent: React.FC<TokenPageContentProps> = ({
+  erc20Tokens
+}) => {
   const { t } = useTranslation();
+
+  const { tokenName } = useParams();
 
   return (
     <ContentContainer>
@@ -20,13 +34,17 @@ export const TokenPageContent = () => {
           <Trans t={t}>Token</Trans>
         </Typography>
       </ParagraphContainer>
-      <Token />
+      <Token erc20Tokens={erc20Tokens} />
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
           <Trans t={t}>Activity</Trans>
         </Typography>
       </ParagraphContainer>
-      <ActivityList displayContext={ActivityListDisplayContext.TokenDetails} />
+      {tokenName === 'Casper' ? (
+        <CasperTokenActivityList />
+      ) : (
+        <Erc20TokenActivityList />
+      )}
     </ContentContainer>
   );
 };
