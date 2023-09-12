@@ -4,7 +4,7 @@ import { createSelector } from 'reselect';
 import {
   CasperApiUrl,
   CasperLiveUrl,
-  GrpcUrl,
+  CasperNodeUrl,
   NetworkName,
   NetworkSetting
 } from '@src/constants';
@@ -23,15 +23,15 @@ export const selectApiConfigBasedOnActiveNetwork = createSelector(
         return {
           casperLiveUrl: CasperLiveUrl.MainnetUrl,
           casperApiUrl: CasperApiUrl.MainnetUrl,
-          grpcUrl: GrpcUrl.MainnetUrl,
-          networkName: NetworkName.Mainnet
+          networkName: NetworkName.Mainnet,
+          nodeUrl: CasperNodeUrl.MainnetUrl
         };
       case NetworkSetting.Testnet:
         return {
           casperLiveUrl: CasperLiveUrl.TestnetUrl,
           casperApiUrl: CasperApiUrl.TestnetUrl,
-          grpcUrl: GrpcUrl.TestNetUrl,
-          networkName: NetworkName.Testnet
+          networkName: NetworkName.Testnet,
+          nodeUrl: CasperNodeUrl.TestnetUrl
         };
       default:
         throw new Error(`Unknown network: ${activeNetwork}`);

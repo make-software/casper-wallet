@@ -9,6 +9,7 @@ import {
   CenteredFlexColumn,
   CenteredFlexRow,
   ContentContainer,
+  IconCircleContainer,
   ParagraphContainer,
   SpacingSize,
   VerticalSpaceContainer
@@ -33,6 +34,7 @@ import {
   getNftTokenMetadataWithLinks,
   MapNFTTokenStandardToName
 } from '@src/utils';
+import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAsyncEffect } from '@src/hooks';
 
 const NftImageContainer = styled(CenteredFlexRow)`
@@ -64,6 +66,14 @@ const Container = styled(AlignedSpaceBetweenFlexRow)<{ withIcon: boolean }>`
   padding: ${({ withIcon }) => (withIcon ? '14px 16px' : '18px 16px')};
 `;
 
+const ButtonsContainer = styled(CenteredFlexRow)`
+  margin: 20px 0;
+`;
+
+const ButtonContainer = styled(CenteredFlexColumn)`
+  cursor: pointer;
+`;
+
 const Player = styled(ReactPlayer)`
   max-height: 312px;
   max-width: 312px;
@@ -88,6 +98,7 @@ export const NftDetailsContent = ({
   const [typeLoading, setTypeLoading] = useState<boolean>(true);
 
   const { t } = useTranslation();
+  const navigate = useTypedNavigate();
 
   const nftTokenMetadataWithLinks = useMemo(
     () => getNftTokenMetadataWithLinks(nftToken),
@@ -226,6 +237,39 @@ export const NftDetailsContent = ({
       <List
         contentTop={SpacingSize.Medium}
         rows={tokenDetails}
+        renderHeader={() => (
+          <ButtonsContainer>
+            <ButtonContainer
+              gap={SpacingSize.Small}
+              onClick={() =>
+                navigate(
+                  RouterPath.TransferNft.replace(
+                    ':tokenId',
+                    nftToken?.token_id || ''
+                  ).replace(
+                    ':contractPackageHash',
+                    nftToken?.contract_package_hash || ''
+                  ),
+                  {
+                    state: {
+                      nftData: { contentType, url: cachedUrl || preview?.value }
+                    }
+                  }
+                )
+              }
+            >
+              <IconCircleContainer color="fillBlue">
+                <SvgIcon
+                  src="assets/icons/transfer.svg"
+                  color="contentOnFill"
+                />
+              </IconCircleContainer>
+              <Typography type="captionMedium" color="contentBlue">
+                <Trans t={t}>Send</Trans>
+              </Typography>
+            </ButtonContainer>
+          </ButtonsContainer>
+        )}
         renderRow={token => (
           <Container
             wrap="wrap"
