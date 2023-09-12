@@ -37,11 +37,16 @@ export function DeployValue({
           variant={HashVariant.BodyHash}
           color="contentPrimary"
           truncated
+          placement="bottomLeft"
         />
       );
     }
 
     if (isKeyOfCurrencyValue(id)) {
+      if (isContractCall && id === 'amount' && showSimpleAmount) {
+        return <Typography type="bodyHash">{formatNumber(value)}</Typography>;
+      }
+
       const cspr = `${formatNumber(motesToCSPR(value), {
         precision: { max: 5 }
       })} CSPR`;
@@ -69,6 +74,7 @@ export function DeployValue({
           variant={HashVariant.BodyHash}
           color="contentPrimary"
           truncated
+          placement="bottomLeft"
         />
       );
     }

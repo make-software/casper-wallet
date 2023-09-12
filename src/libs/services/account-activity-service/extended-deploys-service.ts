@@ -2,7 +2,11 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { serviceMessage } from '@background/service-message';
 import { handleError, toJson } from '@libs/services/utils';
 import { queryClient } from '@libs/services/query-client';
-import { DataWithPayload, PaginatedResponse } from '@libs/services/types';
+import {
+  Payload,
+  PaginatedResponse,
+  ErrorResponse
+} from '@libs/services/types';
 import { ACCOUNT_DEPLOY_REFRESH_RATE } from '@src/constants';
 
 import { ExtendedDeploy, ExtendedDeployResult } from './types';
@@ -33,7 +37,7 @@ export const fetchExtendedDeploysInfo = ({
 
 export const dispatchFetchExtendedDeploysInfo = (
   deployHash: string
-): Promise<DataWithPayload<ExtendedDeploy>> =>
+): Promise<Payload<ExtendedDeploy>> =>
   dispatchToMainStore(
     serviceMessage.fetchExtendedDeploysInfoRequest({ deployHash })
   );
@@ -55,7 +59,7 @@ export const fetchAccountExtendedDeploys = ({
   casperApiUrl: string;
   publicKey: string;
   page: number;
-}) =>
+}): Promise<PaginatedResponse<ExtendedDeployResult> | ErrorResponse> =>
   queryClient.fetchQuery(
     ['accountDeploysRequest', casperApiUrl, publicKey, page],
     () => accountExtendedDeploysRequest(casperApiUrl, publicKey, page),
@@ -65,7 +69,7 @@ export const fetchAccountExtendedDeploys = ({
 export const dispatchFetchAccountExtendedDeploys = (
   publicKey: string,
   page: number
-): Promise<DataWithPayload<PaginatedResponse<ExtendedDeploy>>> =>
+): Promise<Payload<PaginatedResponse<ExtendedDeploy> | ErrorResponse>> =>
   dispatchToMainStore(
     serviceMessage.fetchAccountExtendedDeploysRequest({ publicKey, page })
   );

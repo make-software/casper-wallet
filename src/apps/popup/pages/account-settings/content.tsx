@@ -19,7 +19,7 @@ import {
 } from '@src/background/redux/vault/selectors';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import { useAccountInfo } from '@hooks/use-account-info';
+import { useFetchAccountInfo } from '@src/hooks';
 
 export function AccountSettingsPageContent() {
   const { t } = useTranslation();
@@ -34,7 +34,7 @@ export function AccountSettingsPageContent() {
   }
 
   const accountHash = getAccountHashFromPublicKey(account.publicKey);
-  const { accountInfoStandardName } = useAccountInfo(account);
+  const { accountInfoStandardName } = useFetchAccountInfo(account);
 
   return (
     <>

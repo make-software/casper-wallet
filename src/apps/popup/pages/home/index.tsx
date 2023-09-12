@@ -25,7 +25,6 @@ import {
 import {
   AccountActionsMenuPopover,
   Avatar,
-  DeploysList,
   getFontSizeBasedOnTextLength,
   Hash,
   HashVariant,
@@ -54,6 +53,7 @@ import {
 
 import { TokensList } from './components/tokens-list';
 import { NftList } from './components/nft-list';
+import { DeploysList } from './components/deploys-list';
 
 const DividerLine = styled.hr`
   margin: 16px 0;
@@ -70,12 +70,6 @@ const ButtonsContainer = styled(CenteredFlexRow)`
 const ButtonContainer = styled(CenteredFlexColumn)`
   cursor: pointer;
 `;
-
-export const HomePageTabsId = {
-  Tokens: 0,
-  Deploys: 1,
-  NFTs: 2
-};
 
 export function HomePageContent() {
   const navigate = useTypedNavigate();
@@ -123,6 +117,7 @@ export function HomePageContent() {
                     value={activeAccount.publicKey}
                     variant={HashVariant.CaptionHash}
                     truncated
+                    placement="bottomCenter"
                   />
                 </LeftAlignedFlexColumn>
               </FlexRow>

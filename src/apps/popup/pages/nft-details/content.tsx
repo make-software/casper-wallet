@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
 import ReactPlayer from 'react-player';
@@ -6,6 +6,7 @@ import ReactPlayer from 'react-player';
 import {
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
+  CenteredFlexColumn,
   CenteredFlexRow,
   ContentContainer,
   ParagraphContainer,
@@ -24,12 +25,15 @@ import {
 } from '@libs/ui';
 import { NFTTokenResult } from '@libs/services/nft-service';
 import {
+  ContentType,
+  deriveMediaType,
   findMediaPreview,
   getImageProxyUrl,
   getMetadataKeyValue,
   getNftTokenMetadataWithLinks,
   MapNFTTokenStandardToName
 } from '@src/utils';
+import { useAsyncEffect } from '@src/hooks';
 
 const NftImageContainer = styled(CenteredFlexRow)`
   width: 100%;
@@ -46,6 +50,14 @@ const NftImage = styled.img`
   object-fit: contain;
   object-position: center;
   border-radius: ${({ theme }) => theme.borderRadius.eight}px;
+`;
+
+const AudioNftContainer = styled(CenteredFlexRow)`
+  width: 100%;
+  height: 120px;
+
+  border-radius: ${({ theme }) => theme.borderRadius.eight}px;
+  background-color: ${({ theme }) => theme.color.backgroundSecondary};
 `;
 
 const Container = styled(AlignedSpaceBetweenFlexRow)<{ withIcon: boolean }>`
@@ -71,8 +83,9 @@ export const NftDetailsContent = ({
 }: NftDetailsContentProps) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
-  const [showMedia, setShowMedia] = useState<boolean>(false);
   const [nftToken] = useState(nftTokenParam);
+  const [contentType, setContentType] = useState<ContentType>('');
+  const [typeLoading, setTypeLoading] = useState<boolean>(true);
 
   const { t } = useTranslation();
 
@@ -87,6 +100,15 @@ export const NftDetailsContent = ({
   const metadataKeyValue = useMemo(
     () => getMetadataKeyValue(nftTokenMetadataWithLinks),
     [nftTokenMetadataWithLinks]
+  );
+
+  useAsyncEffect<string>(
+    () => deriveMediaType(cachedUrl),
+    mediaType => {
+      setContentType(mediaType);
+      setTypeLoading(false);
+    },
+    [cachedUrl]
   );
 
   const tokenStandard = nftToken
@@ -134,6 +156,19 @@ export const NftDetailsContent = ({
     ]
   );
 
+  const onLoad = useCallback(() => {
+    setLoading(false);
+  }, []);
+
+  const onError = useCallback(() => {
+    setError(true);
+    setLoading(false);
+  }, []);
+
+  const isImage = contentType.startsWith('image');
+  const isVideo = contentType.startsWith('video');
+  const isAudio = contentType.startsWith('audio');
+
   return (
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
@@ -144,33 +179,47 @@ export const NftDetailsContent = ({
       <VerticalSpaceContainer top={SpacingSize.Small}>
         <Tile>
           <NftImageContainer>
-            {!showMedia && (
+            {isImage && (
               <NftImage
                 style={{ display: loading ? 'none' : 'inline-block' }}
                 src={cachedUrl || preview?.value}
                 alt={metadataKeyValue?.name || ''}
-                onLoad={() => {
-                  setLoading(false);
-                }}
-                onError={() => {
-                  setShowMedia(true);
-                }}
+                onLoad={onLoad}
+                onError={onError}
               />
             )}
-            {showMedia && (
-              <Player
-                style={{ display: loading ? 'none' : 'block' }}
-                url={cachedUrl || preview?.value}
-                controls={true}
-                volume={0.5}
-                width="auto"
-                height="auto"
-                onError={() => setError(true)}
-                onReady={() => setLoading(false)}
-              />
+            {(isAudio || isVideo) && (
+              <CenteredFlexColumn>
+                {isAudio && (
+                  <AudioNftContainer>
+                    <SvgIcon
+                      src="assets/icons/audio-nft-placeholder.svg"
+                      height={120}
+                      width={120}
+                    />
+                  </AudioNftContainer>
+                )}
+                <Player
+                  style={
+                    isVideo
+                      ? { display: loading ? 'none' : 'block' }
+                      : undefined
+                  }
+                  url={cachedUrl || preview?.value}
+                  controls={true}
+                  volume={0.5}
+                  width={isVideo ? 'auto' : undefined}
+                  height={isVideo ? 'auto' : 70}
+                  onError={onError}
+                  onReady={onLoad}
+                  config={{ file: { forceAudio: isAudio } }}
+                />
+              </CenteredFlexColumn>
             )}
-            {loading && !error && <LoadingMediaPlaceholder />}
-            {error && <EmptyMediaPlaceholder />}
+            {((loading && !isAudio) || typeLoading) && !error && (
+              <LoadingMediaPlaceholder />
+            )}
+            {(error || contentType === 'unknown') && <EmptyMediaPlaceholder />}
           </NftImageContainer>
         </Tile>
       </VerticalSpaceContainer>
@@ -192,6 +241,7 @@ export const NftDetailsContent = ({
                 variant={HashVariant.CaptionHash}
                 truncated
                 color="contentPrimary"
+                placement="bottomLeft"
               />
             ) : token.image ? (
               <AlignedFlexRow gap={SpacingSize.Small}>

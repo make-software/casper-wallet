@@ -37,18 +37,15 @@ import { useWindowManager } from '@src/hooks';
 const ListItemContainer = styled(FlexColumn)`
   min-height: 68px;
   height: 100%;
+
+  padding: 12px 8px 12px 16px;
 `;
 
-const ListItemClickableContainer = styled(FlexRow)<{ isConnected: boolean }>`
+const ListItemClickableContainer = styled(FlexRow)`
   width: 100%;
   cursor: pointer;
-  padding-top: 12px;
-  padding-bottom: ${({ isConnected }) => (isConnected ? '8px' : '12px')};
-  padding-left: 16px;
 `;
-// Hidden account balance until a solution for fetching many balances will be ready
-// https://github.com/make-software/casper-wallet/issues/374
-// const AccountBalanceListItemContainer = styled(LeftAlignedFlexColumn)``;
+
 const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
   width: 100%;
 
@@ -56,16 +53,7 @@ const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
 `;
 
 const ConnectionStatusBadgeContainer = styled.div`
-  padding-bottom: 8px;
-  margin-left: 56px;
-`;
-
-const HashContainer = styled.div`
-  //margin-top: 4px;
-`;
-
-const PopoverContainer = styled.div`
-  padding-right: 8px;
+  margin-left: 44px;
 `;
 
 const ButtonContainer = styled(CenteredFlexRow)`
@@ -112,7 +100,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
       rows={accountListRows}
       contentTop={SpacingSize.None}
       maxHeight={380}
-      renderRow={account => {
+      renderRow={(account, index) => {
         const isConnected = connectedAccountNames.includes(account.name);
 
         return (
@@ -123,7 +111,6 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
                   changeActiveAccount(account.name);
                   closeModal(event);
                 }}
-                isConnected={isConnected}
               >
                 <Checkbox
                   checked={
@@ -132,7 +119,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
                       : false
                   }
                 />
-                <AccountNameWithHashListItemContainer gap={SpacingSize.Tiny}>
+                <AccountNameWithHashListItemContainer>
                   <Typography
                     type={
                       activeAccountName && activeAccountName === account.name
@@ -142,19 +129,20 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
                   >
                     {account.name}
                   </Typography>
-                  <HashContainer>
-                    <Hash
-                      value={account.publicKey}
-                      variant={HashVariant.CaptionHash}
-                      truncated
-                      withTag={account.imported}
-                    />
-                  </HashContainer>
+                  <Hash
+                    value={account.publicKey}
+                    variant={HashVariant.CaptionHash}
+                    truncated
+                    withTag={account.imported}
+                    placement={
+                      index === accountListRows.length - 1
+                        ? 'topRight'
+                        : 'bottomRight'
+                    }
+                  />
                 </AccountNameWithHashListItemContainer>
               </ListItemClickableContainer>
-              <PopoverContainer>
-                <AccountActionsMenuPopover account={account} />
-              </PopoverContainer>
+              <AccountActionsMenuPopover account={account} />
             </AlignedFlexRow>
             {isConnected && (
               <ConnectionStatusBadgeContainer>

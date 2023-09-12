@@ -39,7 +39,11 @@ export function RemoveAccountPageContent() {
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <SvgIcon src="assets/illustrations/remove-account.svg" size={120} />
+        <SvgIcon
+          src="assets/illustrations/remove-account.svg"
+          width={200}
+          height={120}
+        />
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">

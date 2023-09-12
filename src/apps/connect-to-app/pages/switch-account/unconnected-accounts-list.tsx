@@ -57,7 +57,7 @@ export const UnconnectedAccountsList = ({
         rows={unconnectedAccountsList}
         headerLabelTop={SpacingSize.Large}
         contentTop={SpacingSize.Small}
-        renderRow={unconnectedAccount => (
+        renderRow={(unconnectedAccount, index) => (
           <ListItemContainer key={unconnectedAccount.name}>
             <SpaceBetweenContainer>
               <LeftAlignedFlexColumn>
@@ -70,6 +70,11 @@ export const UnconnectedAccountsList = ({
                   value={unconnectedAccount.publicKey}
                   variant={HashVariant.CaptionHash}
                   truncated
+                  placement={
+                    index === unconnectedAccountsList.length - 1
+                      ? 'topRight'
+                      : 'bottomRight'
+                  }
                 />
               </LeftAlignedFlexColumn>
               <Button

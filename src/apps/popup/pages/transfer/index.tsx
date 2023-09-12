@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
-import { CLPublicKey } from 'casper-js-sdk';
+import { CLPublicKey, DeployUtil } from 'casper-js-sdk';
 import { CEP18Client } from 'casper-cep18-js-client';
+import { useParams } from 'react-router-dom';
+import { sub } from 'date-fns';
 
 import {
   FooterButtonsContainer,
@@ -23,9 +25,8 @@ import {
   motesToCSPR,
   multiplyErc20Balance
 } from '@libs/ui/utils/formatters';
-import { getIsErc20Transfer, TransactionSteps } from './utils';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
-import { Button, Typography } from '@libs/ui';
+import { Button, HomePageTabsId, Typography } from '@libs/ui';
 import {
   ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES,
   TRANSFER_COST_MOTES
@@ -34,12 +35,12 @@ import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-
 import { dispatchToMainStore } from '@background/redux/utils';
 import { recipientPublicKeyAdded } from '@src/background/redux/recent-recipient-public-keys/actions';
 import { signAndDeploy } from '@src/libs/services/deployer-service';
-import { useParams } from 'react-router-dom';
 import { useActiveAccountErc20Tokens } from '@src/hooks/use-active-account-erc20-tokens';
 import { selectAccountBalance } from '@src/background/redux/account-info/selectors';
 import { dispatchFetchExtendedDeploysInfo } from '@src/libs/services/account-activity-service';
 import { accountPendingTransactionsChanged } from '@src/background/redux/account-info/actions';
-import { HomePageTabsId } from '../home';
+
+import { getIsErc20Transfer, TransactionSteps } from './utils';
 
 export const TransferPage = () => {
   const { t } = useTranslation();
@@ -176,7 +177,7 @@ export const TransferPage = () => {
         );
 
         // create deploy
-        const deploy = cep18.transfer(
+        const tempDeploy = cep18.transfer(
           {
             recipient: publicKeyFromHex(recipientPublicKey),
             amount: multiplyErc20Balance(amount, erc20Decimals) || '0'
@@ -184,6 +185,21 @@ export const TransferPage = () => {
           CSPRtoMotes(paymentAmount),
           publicKeyFromHex(activeAccount.publicKey),
           networkName
+        );
+
+        const deployParams = new DeployUtil.DeployParams(
+          publicKeyFromHex(activeAccount.publicKey),
+          networkName,
+          undefined,
+          undefined,
+          undefined,
+          sub(new Date(), { seconds: 2 }).getTime() // https://github.com/casper-network/casper-node/issues/4152
+        );
+
+        const deploy = DeployUtil.makeDeploy(
+          deployParams,
+          tempDeploy.session,
+          tempDeploy.payment
         );
 
         signAndDeploy(
@@ -212,7 +228,7 @@ export const TransferPage = () => {
               //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
             }, 2000);
           }
-
+          // TODO: need UI in case when the transfer is failed
           setTransferStep(TransactionSteps.Success);
         });
       } else {
@@ -235,23 +251,25 @@ export const TransferPage = () => {
         ).then(({ deploy_hash }) => {
           dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
-          let triesLeft = 10;
-          const interval = setInterval(async () => {
-            const { payload: extendedDeployInfo } =
-              await dispatchFetchExtendedDeploysInfo(deploy_hash);
-            if (extendedDeployInfo) {
-              dispatchToMainStore(
-                accountPendingTransactionsChanged(extendedDeployInfo)
-              );
-              clearInterval(interval);
-            } else if (triesLeft === 0) {
-              clearInterval(interval);
-            }
+          if (deploy_hash != null) {
+            let triesLeft = 10;
+            const interval = setInterval(async () => {
+              const { payload: extendedDeployInfo } =
+                await dispatchFetchExtendedDeploysInfo(deploy_hash);
+              if (extendedDeployInfo) {
+                dispatchToMainStore(
+                  accountPendingTransactionsChanged(extendedDeployInfo)
+                );
+                clearInterval(interval);
+              } else if (triesLeft === 0) {
+                clearInterval(interval);
+              }
 
-            triesLeft--;
-            //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-          }, 2000);
-
+              triesLeft--;
+              //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
+            }, 2000);
+          }
+          // TODO: need UI in case when the transfer is failed
           setTransferStep(TransactionSteps.Success);
         });
       }

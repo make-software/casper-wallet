@@ -75,13 +75,6 @@ export enum NetworkName {
   Testnet = 'casper-test'
 }
 
-export enum ActivityListTransactionsType {
-  All = 'All',
-  Casper = 'Casper',
-  Erc20 = 'Erc20',
-  Deploys = 'Deploys'
-}
-
 export enum TransferType {
   Sent = 'Sent',
   Received = 'Received',

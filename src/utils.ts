@@ -203,7 +203,11 @@ export const convertIpfsSourceAsLink = (
   };
 };
 
-export const deriveMediaType = async (url: string | undefined) => {
+export type ContentType = string | 'unknown';
+
+export const deriveMediaType = async (
+  url: string | undefined
+): Promise<ContentType> => {
   if (url) {
     try {
       const response = await queryClient.fetchQuery(
@@ -215,17 +219,19 @@ export const deriveMediaType = async (url: string | undefined) => {
       );
       const type = response.headers.get('Content-Type');
 
-      return {
-        type: type
-      };
+      if (!type) {
+        return 'unknown';
+      }
+
+      const isKnownType = /^(image|video|audio)/.test(type);
+
+      return isKnownType ? type : 'unknown';
     } catch (error) {
       console.error(error);
     }
   }
 
-  return {
-    type: ''
-  };
+  return 'unknown';
 };
 
 export const isSafariExtension = browser.runtime.id.startsWith(
@@ -241,11 +247,6 @@ export const getImageProxyUrl = (
 ) => {
   if (!url) {
     return undefined;
-  }
-
-  // we not support image-proxy-cdn for safari because off issues with declarative_net_request
-  if (isSafariExtension) {
-    return url;
   }
 
   return `https://image-proxy-cdn.make.services/${width},fit,ttl${ttl}/${url}`;

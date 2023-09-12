@@ -1,4 +1,5 @@
 import React from 'react';
+import { useParams } from 'react-router-dom';
 
 import {
   HeaderSubmenuBarNavLink,
@@ -6,13 +7,12 @@ import {
   PopupHeader,
   PopupLayout
 } from '@libs/layout';
+import { useFetchErc20Tokens } from '@src/hooks';
 
 import { TokenPageContent } from './content';
-import { useErc20Tokens } from '@src/hooks';
-import { useParams } from 'react-router-dom';
 
 export const TokenDetailPage = () => {
-  const erc20Tokens = useErc20Tokens();
+  const erc20Tokens = useFetchErc20Tokens();
   const { tokenName } = useParams();
 
   return (
