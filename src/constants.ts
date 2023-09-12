@@ -18,6 +18,8 @@ export const LOGIN_RETRY_ATTEMPTS_LIMIT = 5;
 export const TRANSFER_COST_MOTES = '100000000'; // 0.1 CSPR
 export const TRANSFER_MIN_AMOUNT_MOTES = '2500000000'; // 2.5 CSPR
 export const ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES = '1500000000'; // 1.5 CSPR
+export const NFT_CEP47_PAYMENT_AMOUNT_AVERAGE_MOTES = '1000000000'; // 1 CSPR
+export const NFT_CEP78_PAYMENT_AMOUNT_AVERAGE_MOTES = '3000000000'; // 3 CSPR
 
 export const getBlockExplorerAccountUrl = (baseUrl: string, hash: string) =>
   `${baseUrl}/account/${hash}`;
@@ -65,9 +67,9 @@ export enum TermsLink {
   Privacy = 'https://www.casperwallet.io/privacy'
 }
 
-export enum GrpcUrl {
-  TestNetUrl = 'https://node-clarity-testnet.make.services/rpc',
-  MainnetUrl = 'https://node-clarity-mainnet.make.services/rpc'
+export enum CasperNodeUrl {
+  MainnetUrl = 'https://casper-node-proxy.make.services/rpc',
+  TestnetUrl = 'https://casper-testnet-node-proxy.make.services/rpc'
 }
 
 export enum NetworkName {

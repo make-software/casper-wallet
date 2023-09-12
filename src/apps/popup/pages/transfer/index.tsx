@@ -63,7 +63,7 @@ export const TransferPage = () => {
   const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(true);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const { networkName, grpcUrl } = useSelector(
+  const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
 
@@ -168,7 +168,7 @@ export const TransferPage = () => {
 
       if (isErc20Transfer) {
         // ERC20 transfer
-        const cep18 = new CEP18Client(grpcUrl, networkName);
+        const cep18 = new CEP18Client(nodeUrl, networkName);
 
         cep18.setContractHash(
           `hash-${tokenContractHash}`,
@@ -205,7 +205,7 @@ export const TransferPage = () => {
           deploy,
           activeAccount.publicKey,
           activeAccount.secretKey,
-          grpcUrl
+          nodeUrl
         ).then(({ deploy_hash }) => {
           dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
@@ -246,7 +246,7 @@ export const TransferPage = () => {
           deploy,
           activeAccount.publicKey,
           activeAccount.secretKey,
-          grpcUrl
+          nodeUrl
         ).then(({ deploy_hash }) => {
           dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 

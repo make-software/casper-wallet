@@ -35,6 +35,7 @@ import { ActivityDetailsPage } from '@popup/pages/activity-details';
 import { ReceivePage } from '@popup/pages/receive';
 import { NftDetailsPage } from '@popup/pages/nft-details';
 import { WalletQrCodePage } from '@popup/pages/wallet-qr-code';
+import { TransferNftPage } from '@popup/pages/transfer-nft';
 
 export function AppRouter() {
   const isLocked = useSelector(selectVaultIsLocked);
@@ -245,6 +246,7 @@ function AppRoutes() {
         path={RouterPath.GenerateWalletQRCode}
         element={<WalletQrCodePage />}
       />
+      <Route path={RouterPath.TransferNft} element={<TransferNftPage />} />
     </Routes>
   );
 }

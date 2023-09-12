@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
+import { UseFormProps } from 'react-hook-form/dist/types/form';
 
 import {
   useCsprAmountRule,
@@ -8,11 +9,13 @@ import {
   useRecipientPublicKeyRule,
   useTransferIdMemoRule
 } from '@libs/ui/forms/form-validation-rules';
-import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 
-export type TransferFormValues = {
+export type TransferRecipientFormValues = {
   recipientPublicKey: string;
+};
+
+export type TransferAmountFormValues = {
   amount: string;
   paymentAmount: string;
   transferIdMemo: string;
@@ -28,7 +31,7 @@ export function useTransferForm(
     recipientPublicKey: useRecipientPublicKeyRule()
   });
 
-  const recipientFormOptions: UseFormProps<TransferFormValues> = {
+  const recipientFormOptions: UseFormProps<TransferRecipientFormValues> = {
     reValidateMode: 'onChange',
     mode: 'onChange',
     resolver: yupResolver(recipientFormSchema)
@@ -49,7 +52,7 @@ export function useTransferForm(
     ? erc20AmountFormSchema
     : csprAmountFormSchema;
 
-  const amountFormOptions: UseFormProps<TransferFormValues> = {
+  const amountFormOptions: UseFormProps<TransferAmountFormValues> = {
     reValidateMode: 'onChange',
     mode: 'onChange',
     resolver: yupResolver(amountFormSchema),
@@ -61,7 +64,7 @@ export function useTransferForm(
   };
 
   return {
-    recipientForm: useForm<TransferFormValues>(recipientFormOptions),
-    amountForm: useForm<TransferFormValues>(amountFormOptions)
+    recipientForm: useForm<TransferRecipientFormValues>(recipientFormOptions),
+    amountForm: useForm<TransferAmountFormValues>(amountFormOptions)
   };
 }
