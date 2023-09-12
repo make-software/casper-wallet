@@ -152,9 +152,11 @@ export const TransferNftPage = () => {
           withNetworkSwitcher
           withMenu
           withConnectionStatus
-          renderSubmenuBarItems={() => (
-            <HeaderSubmenuBarNavLink linkType="back" />
-          )}
+          renderSubmenuBarItems={
+            showSuccessScreen
+              ? undefined
+              : () => <HeaderSubmenuBarNavLink linkType="back" />
+          }
         />
       )}
       renderContent={() =>
