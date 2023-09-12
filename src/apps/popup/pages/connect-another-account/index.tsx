@@ -98,6 +98,7 @@ export function ConnectAnotherAccountPageContent() {
                     value={targetAccount.publicKey}
                     variant={HashVariant.CaptionHash}
                     truncated
+                    placement="bottomRight"
                   />
                 </LeftAlignedFlexColumn>
                 <Button
@@ -120,7 +121,7 @@ export function ConnectAnotherAccountPageContent() {
         rows={connectedAccountsListItems}
         headerLabelTop={SpacingSize.Large}
         contentTop={SpacingSize.Small}
-        renderRow={account => (
+        renderRow={(account, index) => (
           <ListItemContainer key={account.name}>
             <SvgIcon
               src="assets/icons/checkbox-checked.svg"
@@ -134,6 +135,11 @@ export function ConnectAnotherAccountPageContent() {
                   value={account.publicKey}
                   variant={HashVariant.CaptionHash}
                   truncated
+                  placement={
+                    index === connectedAccountsListItems.length - 1
+                      ? 'topRight'
+                      : 'bottomRight'
+                  }
                 />
               </LeftAlignedFlexColumn>
               <Button

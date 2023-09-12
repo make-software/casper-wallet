@@ -23,8 +23,21 @@ export type BackgroundColor =
   | 'backgroundLightGreen'
   | 'backgroundLightBlue'
   | 'backgroundLightRed';
+
+export type FillColor =
+  | 'inherit'
+  | 'fillBlue'
+  | 'fillRed'
+  | 'fillGreen'
+  | 'fillBlueHover'
+  | 'fillBlueClick'
+  | 'fillRedHover'
+  | 'fillRedClick'
+  | 'fillWhite'
+  | 'fillSecondary'
+  | 'fillTertiary';
 // can extend more color types later here if needed (like FillColor etc.) the utility below can be generic and can work with all of them
-export type Color = ContentColor | BackgroundColor;
+export type Color = ContentColor | BackgroundColor | FillColor;
 
 export function getColorFromTheme(theme: DefaultTheme, color: Color) {
   return {
@@ -46,6 +59,16 @@ export function getColorFromTheme(theme: DefaultTheme, color: Color) {
     contentGreenOnFill: theme.color.contentGreenOnFill,
     contentYellow: theme.color.contentYellow,
     contentLightBlue: theme.color.contentLightBlue,
-    brandRed: theme.color.brandRed
+    brandRed: theme.color.brandRed,
+    fillBlue: theme.color.fillBlue,
+    fillRed: theme.color.fillRed,
+    fillGreen: theme.color.fillGreen,
+    fillBlueHover: theme.color.fillBlueHover,
+    fillBlueClick: theme.color.fillBlueClick,
+    fillRedHover: theme.color.fillRedHover,
+    fillRedClick: theme.color.fillRedClick,
+    fillWhite: theme.color.fillWhite,
+    fillSecondary: theme.color.fillSecondary,
+    fillTertiary: theme.color.fillTertiary
   }[color];
 }

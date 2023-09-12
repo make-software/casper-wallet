@@ -1,81 +1,75 @@
 import React, { useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import styled, { css } from 'styled-components';
-import { RootState } from 'typesafe-actions';
+import styled from 'styled-components';
+import browser from 'webextension-polyfill';
 
-import { HeaderSubmenuBarNavLink, LinkType } from '@libs/layout';
+import {
+  CenteredFlexRow,
+  FlexColumn,
+  HeaderSubmenuBarNavLink,
+  IconCircleContainer,
+  LinkType,
+  SpacingSize
+} from '@libs/layout';
 import {
   CenteredFlexColumn,
   ContentContainer,
   FlexRow,
   LeftAlignedFlexColumn,
-  SpaceAroundFlexColumn,
   SpaceBetweenFlexRow,
-  SpacingSize,
   TileContainer,
   VerticalSpaceContainer
 } from '@src/libs/layout/containers';
 
 import {
   AccountActionsMenuPopover,
-  ActivityList,
-  ActivityListDisplayContext,
   Avatar,
-  Button,
   getFontSizeBasedOnTextLength,
   Hash,
-  HashDisplayContext,
   HashVariant,
-  Tile,
-  Typography,
+  SvgIcon,
   Tab,
-  Tabs
+  Tabs,
+  Tile,
+  Typography
 } from '@libs/ui';
 
-import { useAccountTransactions } from '@src/hooks';
+import { useCasperToken } from '@src/hooks';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
-import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
 import {
-  selectActiveOrigin,
-  selectConnectedAccountsWithActiveOrigin,
+  selectActiveNetworkSetting,
   selectCountOfAccounts,
   selectIsActiveAccountConnectedWithActiveOrigin,
   selectVaultActiveAccount
 } from '@src/background/redux/root-selector';
-import { useActiveAccountBalance } from '@hooks/use-active-account-balance';
 import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
+import {
+  getBuyWithTopperUrl,
+  HomePageTabName,
+  NetworkSetting
+} from '@src/constants';
 
 import { TokensList } from './components/tokens-list';
-import { ConnectionStatusBadge } from './components/connection-status-badge';
+import { NftList } from './components/nft-list';
+import { DeploysList } from './components/deploys-list';
 
-const fullWidthAndMarginTop = css`
-  margin-top: 16px;
-  width: 100%;
+const DividerLine = styled.hr`
+  margin: 16px 0;
+
+  border-width: 0;
+  height: 0.5px;
+  background-color: ${({ theme }) => theme.color.borderPrimary};
 `;
 
-const NameAndAddressContainer = styled(CenteredFlexColumn)`
-  ${fullWidthAndMarginTop};
-`;
-const BalanceContainer = styled(CenteredFlexColumn)`
-  ${fullWidthAndMarginTop};
-
-  & + Button {
-    margin-top: 24px;
-  }
+const ButtonsContainer = styled(CenteredFlexRow)`
+  margin-top: 28px;
 `;
 
-const ButtonsContainer = styled(SpaceAroundFlexColumn)`
-  width: 100%;
-  margin-top: 24px;
+const ButtonContainer = styled(CenteredFlexColumn)`
+  cursor: pointer;
 `;
-
-export const HomePageTabsId = {
-  Tokens: 0,
-  Activity: 1,
-  NFTs: 2
-};
 
 export function HomePageContent() {
   const navigate = useTypedNavigate();
@@ -84,32 +78,23 @@ export function HomePageContent() {
 
   const state = location.state;
 
-  const activeOrigin = useSelector(selectActiveOrigin);
-  const { disconnectAccountWithEvent: disconnectAccount } = useAccountManager();
   const isActiveAccountConnected = useSelector(
     selectIsActiveAccountConnectedWithActiveOrigin
   );
-
+  const network = useSelector(selectActiveNetworkSetting);
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const connectedAccounts = useSelector((state: RootState) =>
-    selectConnectedAccountsWithActiveOrigin(state)
-  );
   const balance = useSelector(selectAccountBalance);
 
-  useActiveAccountBalance();
-  useAccountTransactions();
+  const casperToken = useCasperToken();
 
-  const handleConnectAccount = useCallback(() => {
-    if (!activeAccount || isActiveAccountConnected) {
-      return;
+  const handleBuyWithCSPR = useCallback(() => {
+    if (activeAccount?.publicKey && network === NetworkSetting.Mainnet) {
+      browser.tabs.create({
+        url: getBuyWithTopperUrl(activeAccount.publicKey),
+        active: true
+      });
     }
-
-    if (connectedAccounts.length === 0) {
-      navigate(RouterPath.NoConnectedAccount);
-    } else {
-      navigate(RouterPath.ConnectAnotherAccount);
-    }
-  }, [navigate, activeAccount, connectedAccounts, isActiveAccountConnected]);
+  }, [activeAccount?.publicKey, network]);
 
   return (
     <ContentContainer>
@@ -117,28 +102,30 @@ export function HomePageContent() {
         <Tile>
           <TileContainer>
             <SpaceBetweenFlexRow>
-              <ConnectionStatusBadge
-                isConnected={isActiveAccountConnected}
-                displayContext="home"
-              />
+              <FlexRow gap={SpacingSize.Large}>
+                <Avatar
+                  size={44}
+                  publicKey={activeAccount.publicKey}
+                  withConnectedStatus
+                  isConnected={isActiveAccountConnected}
+                />
+                <LeftAlignedFlexColumn>
+                  <Typography type="bodySemiBold">
+                    {activeAccount.name}
+                  </Typography>
+                  <Hash
+                    value={activeAccount.publicKey}
+                    variant={HashVariant.CaptionHash}
+                    truncated
+                    placement="bottomCenter"
+                  />
+                </LeftAlignedFlexColumn>
+              </FlexRow>
               <AccountActionsMenuPopover account={activeAccount} />
             </SpaceBetweenFlexRow>
-            <Avatar
-              publicKey={activeAccount.publicKey}
-              top={SpacingSize.Medium}
-            />
-            <NameAndAddressContainer>
-              <Typography type="bodySemiBold">{activeAccount.name}</Typography>
-              <Hash
-                value={activeAccount.publicKey}
-                variant={HashVariant.CaptionHash}
-                truncated
-                withCopyOnSelfClick
-                displayContext={HashDisplayContext.Home}
-              />
-            </NameAndAddressContainer>
-            <BalanceContainer>
-              <FlexRow gap={SpacingSize.Small} wrap="wrap">
+            <DividerLine />
+            <FlexColumn gap={SpacingSize.Tiny}>
+              <FlexRow gap={SpacingSize.Small}>
                 <Typography
                   type="CSPRBold"
                   fontSize={getFontSizeBasedOnTextLength(
@@ -168,27 +155,67 @@ export function HomePageContent() {
               >
                 {balance.amountFiat}
               </Typography>
-            </BalanceContainer>
-            <ButtonsContainer gap={SpacingSize.Large}>
-              {isActiveAccountConnected ? (
-                <Button
-                  disabled={activeOrigin == null}
-                  onClick={() =>
-                    activeOrigin &&
-                    disconnectAccount(activeAccount.name, activeOrigin)
-                  }
-                  color="secondaryRed"
+            </FlexColumn>
+            <ButtonsContainer gap={SpacingSize.XXXL}>
+              <ButtonContainer
+                gap={SpacingSize.Small}
+                onClick={() =>
+                  navigate(
+                    casperToken?.id
+                      ? RouterPath.Transfer.replace(
+                          ':tokenContractPackageHash',
+                          casperToken.id
+                        ).replace(
+                          ':tokenContractHash',
+                          casperToken.contractHash || 'null'
+                        )
+                      : RouterPath.TransferNoParams
+                  )
+                }
+              >
+                <IconCircleContainer color="fillBlue">
+                  <SvgIcon
+                    src="assets/icons/transfer.svg"
+                    color="contentOnFill"
+                  />
+                </IconCircleContainer>
+                <Typography type="captionMedium" color="contentBlue">
+                  <Trans t={t}>Send</Trans>
+                </Typography>
+              </ButtonContainer>
+              <ButtonContainer
+                gap={SpacingSize.Small}
+                onClick={() =>
+                  navigate(RouterPath.Receive, {
+                    state: { tokenData: casperToken }
+                  })
+                }
+              >
+                <IconCircleContainer color="fillBlue">
+                  <SvgIcon
+                    src="assets/icons/receive.svg"
+                    color="contentOnFill"
+                  />
+                </IconCircleContainer>
+                <Typography type="captionMedium" color="contentBlue">
+                  <Trans t={t}>Receive</Trans>
+                </Typography>
+              </ButtonContainer>
+              {network === NetworkSetting.Mainnet && (
+                <ButtonContainer
+                  gap={SpacingSize.Small}
+                  onClick={handleBuyWithCSPR}
                 >
-                  <Trans t={t}>Disconnect</Trans>
-                </Button>
-              ) : (
-                <Button
-                  disabled={activeOrigin == null}
-                  onClick={handleConnectAccount}
-                  color="primaryRed"
-                >
-                  <Trans t={t}>Connect</Trans>
-                </Button>
+                  <IconCircleContainer color="fillBlue">
+                    <SvgIcon
+                      src="assets/icons/card.svg"
+                      color="contentOnFill"
+                    />
+                  </IconCircleContainer>
+                  <Typography type="captionMedium" color="contentBlue">
+                    <Trans t={t}>Buy</Trans>
+                  </Typography>
+                </ButtonContainer>
               )}
             </ButtonsContainer>
           </TileContainer>
@@ -196,13 +223,15 @@ export function HomePageContent() {
       )}
       <VerticalSpaceContainer top={SpacingSize.Tiny}>
         <Tabs preferActiveTabId={state?.activeTabId}>
-          <Tab tabName="Tokens">
+          <Tab tabName={HomePageTabName.Tokens}>
             <TokensList />
           </Tab>
-          <Tab tabName="Activity">
-            <ActivityList displayContext={ActivityListDisplayContext.Home} />
+          <Tab tabName={HomePageTabName.Deploys}>
+            <DeploysList />
           </Tab>
-          <Tab tabName="NFTs" />
+          <Tab tabName={HomePageTabName.NFTs}>
+            <NftList />
+          </Tab>
         </Tabs>
       </VerticalSpaceContainer>
     </ContentContainer>

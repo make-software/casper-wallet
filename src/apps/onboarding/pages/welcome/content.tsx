@@ -10,8 +10,8 @@ export function WelcomePageContent() {
     <TabPageContainer>
       <SvgIcon
         src="assets/illustrations/welcome.svg"
-        width={264}
-        height={140}
+        width={225}
+        height={120}
       />
       <TabTextContainer>
         <Typography type="header">

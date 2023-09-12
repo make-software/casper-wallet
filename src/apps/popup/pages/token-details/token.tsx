@@ -7,15 +7,21 @@ import { useSelector } from 'react-redux';
 import {
   CenteredFlexColumn,
   CenteredFlexRow,
+  IconCircleContainer,
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
 import { Link, List, SvgIcon, TokenPlate, Typography } from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@popup/router';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { TokenType, useCasperToken } from '@src/hooks';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import {
+  selectActiveNetworkSetting,
+  selectApiConfigBasedOnActiveNetwork
+} from '@background/redux/settings/selectors';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { getBlockExplorerAccountUrl } from '@src/constants';
+import { getBuyWithTopperUrl, NetworkSetting } from '@src/constants';
+import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
+import { ContractPackageWithBalance } from '@src/libs/services/erc20-service';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 16px;
@@ -25,17 +31,7 @@ const FooterItemContainer = styled(CenteredFlexRow)`
   padding: 24px 0 16px;
 `;
 
-const IconCircleContainer = styled(CenteredFlexRow)`
-  height: 48px;
-  width: 48px;
-
-  margin: 0 16px;
-
-  background-color: ${({ theme }) => theme.color.fillBlue};
-  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
-`;
-
-const SendButtonContainer = styled(CenteredFlexColumn)`
+const ButtonContainer = styled(CenteredFlexColumn)`
   cursor: pointer;
 `;
 
@@ -45,41 +41,74 @@ type TokenInfoList = {
   value: string;
 };
 
-export const Token = () => {
-  const [token, setToken] = useState<TokenType | null>(null);
+type TokenProps = {
+  erc20Tokens: ContractPackageWithBalance[] | null;
+};
+
+export const Token = ({ erc20Tokens }: TokenProps) => {
+  const location = useTypedLocation();
+  const [tokenData, setTokenData] = useState<TokenType | null>(
+    location.state.tokenData ?? null
+  );
   const [tokenInfoList, setTokenInfoList] = useState<TokenInfoList[] | []>([]);
-  const [hrefToTokenOnCasperLive, setHrefToTokenOnCasperLive] = useState<
-    string | undefined
-  >();
 
   const { t } = useTranslation();
+  const navigate = useTypedNavigate();
   const { tokenName } = useParams();
   const casperToken = useCasperToken();
-  const navigate = useTypedNavigate();
 
   const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const network = useSelector(selectActiveNetworkSetting);
 
   useEffect(() => {
-    // TODO: update token, token info list and href for ERC20 tokens
     if (tokenName === 'Casper') {
+      // Casper Coin case
       if (casperToken && activeAccount) {
-        setToken(casperToken);
+        setTokenData(casperToken);
         setTokenInfoList([
           { id: 1, name: 'Symbol', value: casperToken.symbol }
         ]);
-        setHrefToTokenOnCasperLive(
-          getBlockExplorerAccountUrl(casperLiveUrl, activeAccount.publicKey)
-        );
+      }
+    } else {
+      // ERC-20 token case
+      const erc20TokensList = formatErc20TokenBalance(erc20Tokens);
+
+      const token = erc20TokensList?.find(token => token.id === tokenName);
+
+      if (token) {
+        setTokenData(token);
+        setTokenInfoList([
+          { id: 1, name: 'Symbol', value: token.symbol },
+          { id: 2, name: 'Decimals', value: (token.decimals || 0).toString() }
+        ]);
+      } else {
+        setTokenData(prev => (prev ? { ...prev, amount: '0' } : null));
+        setTokenInfoList([
+          { id: 1, name: 'Symbol', value: tokenData?.symbol ?? '' },
+          {
+            id: 2,
+            name: 'Decimals',
+            value: (tokenData?.decimals || 0).toString()
+          }
+        ]);
       }
     }
-  }, [tokenName, casperToken, activeAccount, casperLiveUrl]);
+  }, [
+    tokenName,
+    casperToken,
+    activeAccount,
+    casperLiveUrl,
+    erc20Tokens,
+    tokenData?.symbol,
+    tokenData?.decimals
+  ]);
 
   return (
     <List
       contentTop={SpacingSize.Small}
       rows={tokenInfoList}
-      renderHeader={() => <TokenPlate token={token} />}
+      renderHeader={() => <TokenPlate token={tokenData} />}
       renderRow={({ name, value }) => (
         <ListItemContainer>
           <Typography type="captionRegular" color="contentSecondary">
@@ -90,30 +119,64 @@ export const Token = () => {
       )}
       renderFooter={() => (
         <FooterItemContainer gap={SpacingSize.XXXL}>
-          <SendButtonContainer
+          <ButtonContainer
             gap={SpacingSize.Medium}
-            onClick={() => navigate(RouterPath.Transfer)}
+            onClick={() =>
+              navigate(
+                tokenData?.id
+                  ? RouterPath.Transfer.replace(
+                      ':tokenContractPackageHash',
+                      tokenData.id
+                    ).replace(
+                      ':tokenContractHash',
+                      tokenData.contractHash || 'null'
+                    )
+                  : RouterPath.TransferNoParams,
+                { state: { tokenData } }
+              )
+            }
           >
-            <IconCircleContainer>
+            <IconCircleContainer color="fillBlue">
               <SvgIcon src="assets/icons/transfer.svg" color="contentOnFill" />
             </IconCircleContainer>
             <Typography type="captionMedium" color="contentBlue">
               <Trans t={t}>Send</Trans>
             </Typography>
-          </SendButtonContainer>
-          <Link color="inherit" target="_blank" href={hrefToTokenOnCasperLive}>
-            <CenteredFlexColumn gap={SpacingSize.Medium}>
-              <IconCircleContainer>
-                <SvgIcon
-                  src="assets/icons/external-link.svg"
-                  color="contentOnFill"
-                />
-              </IconCircleContainer>
-              <Typography type="captionMedium" color="contentBlue">
-                CSPR.live
-              </Typography>
-            </CenteredFlexColumn>
-          </Link>
+          </ButtonContainer>
+          <ButtonContainer
+            gap={SpacingSize.Medium}
+            onClick={() =>
+              navigate(RouterPath.Receive, { state: { tokenData } })
+            }
+          >
+            <IconCircleContainer color="fillBlue">
+              <SvgIcon src="assets/icons/receive.svg" color="contentOnFill" />
+            </IconCircleContainer>
+            <Typography type="captionMedium" color="contentBlue">
+              <Trans t={t}>Receive</Trans>
+            </Typography>
+          </ButtonContainer>
+          {tokenName === 'Casper' &&
+            network === NetworkSetting.Mainnet &&
+            activeAccount?.publicKey && (
+              <Link
+                color="inherit"
+                target="_blank"
+                href={getBuyWithTopperUrl(activeAccount.publicKey)}
+              >
+                <CenteredFlexColumn gap={SpacingSize.Medium}>
+                  <IconCircleContainer color="fillBlue">
+                    <SvgIcon
+                      src="assets/icons/card.svg"
+                      color="contentOnFill"
+                    />
+                  </IconCircleContainer>
+                  <Typography type="captionMedium" color="contentBlue">
+                    Buy
+                  </Typography>
+                </CenteredFlexColumn>
+              </Link>
+            )}
         </FooterItemContainer>
       )}
       marginLeftForItemSeparatorLine={16}

@@ -65,7 +65,7 @@ import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
 import { activeTimeoutDurationSettingChanged } from '../settings/actions';
 import { selectTimeoutDurationSetting } from '../settings/selectors';
 import { getUrlOrigin } from '@src/utils';
-import { accountActivityReset } from '../account-info/actions';
+import { accountInfoReset } from '../account-info/actions';
 
 export function* vaultSagas() {
   yield takeLatest(getType(lockVault), lockVaultSaga);
@@ -109,7 +109,7 @@ function* lockVaultSaga(action: ReturnType<typeof lockVault>) {
     yield put(sessionReseted());
     yield put(vaultReseted());
     yield put(deploysReseted());
-    yield put(accountActivityReset());
+    yield put(accountInfoReset());
 
     emitSdkEventToActiveTabs(tab => {
       return sdkEvent.lockedEvent({

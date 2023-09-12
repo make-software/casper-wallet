@@ -19,12 +19,16 @@ import {
 
 export function DeployValue({
   id,
-  value
+  value,
+  isContractCall,
+  showSimpleAmount
 }: {
   id: string;
   value: string | CLValue;
+  isContractCall?: boolean;
+  showSimpleAmount?: boolean;
 }) {
-  if (typeof value === 'string' || typeof value === 'number') {
+  if (typeof value === 'string') {
     // string args
     if (isKeyOfHashValue(id)) {
       return (
@@ -33,21 +37,24 @@ export function DeployValue({
           variant={HashVariant.BodyHash}
           color="contentPrimary"
           truncated
+          placement="bottomLeft"
         />
       );
     }
 
     if (isKeyOfCurrencyValue(id)) {
+      if (isContractCall && id === 'amount' && showSimpleAmount) {
+        return <Typography type="bodyHash">{formatNumber(value)}</Typography>;
+      }
+
       const cspr = `${formatNumber(motesToCSPR(value), {
         precision: { max: 5 }
       })} CSPR`;
 
       return (
-        <Hash
-          value={cspr}
-          variant={HashVariant.BodyHash}
-          color="contentPrimary"
-        />
+        <Typography type="bodyHash" color="contentPrimary">
+          {cspr}
+        </Typography>
       );
     }
 
@@ -67,11 +74,18 @@ export function DeployValue({
           variant={HashVariant.BodyHash}
           color="contentPrimary"
           truncated
+          placement="bottomLeft"
         />
       );
     }
 
     if (isDeployArgValueNumber(value)) {
+      if (isContractCall && id === 'amount' && showSimpleAmount) {
+        return (
+          <Typography type="bodyHash">{formatNumber(parsedValue)}</Typography>
+        );
+      }
+
       const numbers = isKeyOfCurrencyValue(id)
         ? `${formatNumber(motesToCSPR(parsedValue), {
             precision: { max: 5 }
@@ -79,11 +93,9 @@ export function DeployValue({
         : formatNumber(parsedValue);
 
       return (
-        <Hash
-          value={numbers}
-          variant={HashVariant.BodyHash}
-          color="contentPrimary"
-        />
+        <Typography type="bodyHash" color="contentPrimary">
+          {numbers}
+        </Typography>
       );
     }
 
