@@ -4,8 +4,6 @@ import styled from 'styled-components';
 import { AlignedFlexRow, FlexColumn, Overlay, SpacingSize } from '@libs/layout';
 import { useClickAway } from '@libs/ui/hooks/use-click-away';
 
-import { PopoverPortal } from './popover-portal';
-
 const popoverOffsetFromChildren = 8;
 const contentHeight = 188;
 
@@ -86,18 +84,16 @@ export function Popover({
       </ChildrenContainer>
 
       {isOpen && (
-        <PopoverPortal>
-          <PopoverOverlay>
-            <PopoverContainer
-              ref={clickAwayRef}
-              domRect={childrenContainerRef.current?.getBoundingClientRect()}
-            >
-              <PopoverItemsContainer gap={SpacingSize.Tiny}>
-                {renderMenuItems({ closePopover })}
-              </PopoverItemsContainer>
-            </PopoverContainer>
-          </PopoverOverlay>
-        </PopoverPortal>
+        <PopoverOverlay>
+          <PopoverContainer
+            ref={clickAwayRef}
+            domRect={childrenContainerRef.current?.getBoundingClientRect()}
+          >
+            <PopoverItemsContainer gap={SpacingSize.Tiny}>
+              {renderMenuItems({ closePopover })}
+            </PopoverItemsContainer>
+          </PopoverContainer>
+        </PopoverOverlay>
       )}
     </>
   );

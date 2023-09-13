@@ -1,35 +1,31 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { FormState, UseFormRegister } from 'react-hook-form';
-import { useSelector } from 'react-redux';
+import { UseFormReturn } from 'react-hook-form';
 
 import {
   ContentContainer,
   ParagraphContainer,
-  SpacingSize,
-  TransferInputContainer
+  SpacingSize
 } from '@libs/layout';
-import { Input, Typography } from '@libs/ui';
-import { SenderDetails } from '@popup/pages/transfer/sender-details';
-import { TransferFormValues } from '@libs/ui/forms/transfer';
-import { selectRecentRecipientPublicKeys } from '@src/background/redux/recent-recipient-public-keys/selectors';
+import {
+  Typography,
+  ActiveAccountPlate,
+  RecipientDropdownInput
+} from '@libs/ui';
+import { TransferRecipientFormValues } from '@libs/ui/forms/transfer';
 
 interface RecipientStepProps {
-  register: UseFormRegister<TransferFormValues>;
-  formState: FormState<TransferFormValues>;
+  recipientForm: UseFormReturn<TransferRecipientFormValues>;
+  balance: string | null;
+  symbol: string | null;
 }
 
 export const RecipientStep = ({
-  register,
-  formState: { errors }
+  recipientForm,
+  balance,
+  symbol
 }: RecipientStepProps) => {
   const { t } = useTranslation();
-
-  const recentRecipientPublicKeys = useSelector(
-    selectRecentRecipientPublicKeys
-  );
-
-  const recipientLabel = t('To recipient');
 
   return (
     <ContentContainer>
@@ -38,20 +34,9 @@ export const RecipientStep = ({
           <Trans t={t}>Specify recipient</Trans>
         </Typography>
       </ParagraphContainer>
-      <SenderDetails />
+      <ActiveAccountPlate label="From" balance={balance} symbol={symbol} />
 
-      <TransferInputContainer>
-        <Input
-          monotype
-          label={recipientLabel}
-          placeholder={t('Recipient public address')}
-          {...register('recipientPublicKey')}
-          error={!!errors?.recipientPublicKey}
-          validationText={errors?.recipientPublicKey?.message}
-          listId="recipient-public-keys"
-          listOptions={recentRecipientPublicKeys}
-        />
-      </TransferInputContainer>
+      <RecipientDropdownInput recipientForm={recipientForm} />
     </ContentContainer>
   );
 };

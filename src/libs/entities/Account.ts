@@ -10,7 +10,7 @@ import { CLPublicKey, encodeBase16 } from 'casper-js-sdk';
 // ED = 01 public keys should be 66 chars long (with the prefix)
 // SEC = 02 public keys should be 68 chars long (with the prefix)
 
-const getRawPublicKey = (publicKeyHex: string): CLPublicKey =>
+export const getRawPublicKey = (publicKeyHex: string): CLPublicKey =>
   CLPublicKey.fromHex(publicKeyHex);
 
 export const getAccountHashFromPublicKey = (

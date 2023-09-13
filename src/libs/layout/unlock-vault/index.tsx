@@ -38,6 +38,7 @@ import {
   UnlockWalletFormValues,
   useUnlockWalletForm
 } from '@src/libs/ui/forms/unlock-wallet';
+import { VaultState } from '@background/redux/vault/types';
 
 import unlockAnimation from '@src/libs/animations/unlock_animation.json';
 import { LockedRouterPath } from '../locked-router';
@@ -95,14 +96,39 @@ export function UnlockVaultPageContent() {
         newEncryptionKeyHash
       } = event.data;
 
-      dispatchToMainStore(
-        unlockVault({
-          vault,
-          newKeyDerivationSaltHash,
-          newVaultCipher,
-          newEncryptionKeyHash
-        })
+      // We should not store checksummed public keys because of possible issues on connect apps
+      // that does not migrate to the new casper SDK behavior
+      const hasCheckSummedPublicKeys = vault.accounts.some(acc =>
+        /[A-Z]/.test(acc.publicKey)
       );
+
+      if (hasCheckSummedPublicKeys) {
+        const updatedVault: VaultState = {
+          ...vault,
+          accounts: vault.accounts.map(acc => ({
+            ...acc,
+            publicKey: acc.publicKey.toLowerCase()
+          }))
+        };
+
+        dispatchToMainStore(
+          unlockVault({
+            vault: updatedVault,
+            newKeyDerivationSaltHash,
+            newVaultCipher,
+            newEncryptionKeyHash
+          })
+        );
+      } else {
+        dispatchToMainStore(
+          unlockVault({
+            vault,
+            newKeyDerivationSaltHash,
+            newVaultCipher,
+            newEncryptionKeyHash
+          })
+        );
+      }
     };
 
     unlockVaultWorker.onerror = error => {
@@ -123,7 +149,11 @@ export function UnlockVaultPageContent() {
       <>
         <ContentContainer>
           <IllustrationContainer>
-            <SvgIcon src="assets/illustrations/password-lock.svg" size={120} />
+            <SvgIcon
+              src="assets/illustrations/password-lock.svg"
+              width={210}
+              height={120}
+            />
           </IllustrationContainer>
           <ParagraphContainer top={SpacingSize.XL}>
             <Typography type="header">
@@ -183,7 +213,11 @@ export function UnlockVaultPageContent() {
     <form onSubmit={handleSubmit(handleUnlockVault)}>
       <ContentContainer>
         <IllustrationContainer>
-          <SvgIcon src="assets/illustrations/locked-wallet.svg" size={120} />
+          <SvgIcon
+            src="assets/illustrations/locked-wallet.svg"
+            width={200}
+            height={120}
+          />
         </IllustrationContainer>
         <ParagraphContainer top={SpacingSize.XL}>
           <Typography type="header">

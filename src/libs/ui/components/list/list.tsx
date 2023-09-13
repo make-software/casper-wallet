@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { MacScrollbar } from 'mac-scrollbar';
 
 import { Tile, Typography } from '@libs/ui';
 import {
@@ -11,6 +12,10 @@ import {
 
 interface ListHeaderContainerProps extends BorderBottomPseudoElementProps {
   stickyHeader?: boolean;
+}
+
+interface RowsContainerProps extends BorderBottomPseudoElementProps {
+  maxHeight?: number;
 }
 
 const SpacedBetweenFlexRox = styled.div`
@@ -29,7 +34,7 @@ const FlexColumn = styled.div`
   flex-direction: column;
 `;
 
-export const RowsContainer = styled.div<BorderBottomPseudoElementProps>`
+export const RowsContainer = styled.div<RowsContainerProps>`
   & > * + *:before {
     ${borderBottomPseudoElementRules};
   }
@@ -73,6 +78,7 @@ interface ListProps<ListRow extends ListRowBase> {
   marginLeftForHeaderSeparatorLine?: number;
   marginLeftForItemSeparatorLine: number;
   stickyHeader?: boolean;
+  maxHeight?: number;
 }
 
 export function List<ListRow extends ListRowBase>({
@@ -86,7 +92,8 @@ export function List<ListRow extends ListRowBase>({
   marginLeftForHeaderSeparatorLine,
   headerLabelTop = SpacingSize.XL,
   contentTop = SpacingSize.XL,
-  stickyHeader
+  stickyHeader,
+  maxHeight
 }: ListProps<ListRow>) {
   return (
     <>
@@ -124,15 +131,30 @@ export function List<ListRow extends ListRowBase>({
               {renderHeader()}
             </ListHeaderContainer>
           )}
-          <RowsContainer
-            marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
-          >
-            {rows.map((row, index, array) => (
-              <RowContainer key={row.id}>
-                {renderRow(row, index, array)}
-              </RowContainer>
-            ))}
-          </RowsContainer>
+          {maxHeight ? (
+            <MacScrollbar style={{ maxHeight }}>
+              <RowsContainer
+                marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
+              >
+                {rows.map((row, index, array) => (
+                  <RowContainer key={row.id}>
+                    {renderRow(row, index, array)}
+                  </RowContainer>
+                ))}
+              </RowsContainer>
+            </MacScrollbar>
+          ) : (
+            <RowsContainer
+              marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
+            >
+              {rows.map((row, index, array) => (
+                <RowContainer key={row.id}>
+                  {renderRow(row, index, array)}
+                </RowContainer>
+              ))}
+            </RowsContainer>
+          )}
+
           {renderFooter && (
             <ListFooterContainer
               marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}

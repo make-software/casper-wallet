@@ -5,7 +5,7 @@ const getSignature = (
   hash: Uint8Array,
   keyPair: Keys.Ed25519 | Keys.Secp256K1
 ) => {
-  const publicKeyHex = keyPair.publicKey.toHex();
+  const publicKeyHex = keyPair.publicKey.toHex(false);
   const privateKeyBase64 = Buffer.from(keyPair.privateKey).toString('base64');
   return signDeploy(hash, publicKeyHex, privateKeyBase64);
 };

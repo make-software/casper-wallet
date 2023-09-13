@@ -2,40 +2,40 @@ import { serviceMessage } from '@background/service-message';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { handleError, toJson } from '@libs/services/utils';
 import { queryClient } from '@libs/services/query-client';
-import { DataWithPayload, PaginatedResponse } from '@libs/services/types';
-import { ACCOUNT_ACTIVITY_REFRESH_RATE } from '@src/constants';
+import { Payload, PaginatedResponse } from '@libs/services/types';
+import { ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE } from '@src/constants';
+import { TransferResult } from '@libs/services/account-activity-service/types';
 
-import { getAccountActivityLink } from './constants';
-import { LedgerLiveDeploysResult } from './types';
+import { getAccountTransferLink } from './constants';
 
-export const accountActivityRequest = (
+export const accountCasperActivityRequest = (
   casperApiUrl: string,
-  publicKey: string,
+  accountHash: string,
   page: number
-) =>
-  fetch(getAccountActivityLink(casperApiUrl, publicKey, page))
+): Promise<PaginatedResponse<TransferResult>> =>
+  fetch(getAccountTransferLink(casperApiUrl, accountHash, page))
     .then(toJson)
     .catch(handleError);
 
-export const fetchAccountActivity = ({
+export const fetchAccountCasperActivity = ({
   casperApiUrl,
-  publicKey,
+  accountHash,
   page
 }: {
   casperApiUrl: string;
-  publicKey: string;
+  accountHash: string;
   page: number;
 }) =>
   queryClient.fetchQuery(
-    ['accountActivityRequest', casperApiUrl, publicKey, page],
-    () => accountActivityRequest(casperApiUrl, publicKey, page),
-    { staleTime: ACCOUNT_ACTIVITY_REFRESH_RATE }
+    ['accountCasperActivityRequest', casperApiUrl, accountHash, page],
+    () => accountCasperActivityRequest(casperApiUrl, accountHash, page),
+    { staleTime: ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE }
   );
 
-export const dispatchFetchAccountActivity = (
-  publicKey: string,
+export const dispatchFetchAccountCasperActivity = (
+  accountHash: string,
   page: number
-): Promise<DataWithPayload<PaginatedResponse<LedgerLiveDeploysResult>>> =>
+): Promise<Payload<PaginatedResponse<TransferResult>>> =>
   dispatchToMainStore(
-    serviceMessage.fetchAccountActivityRequest({ publicKey, page })
+    serviceMessage.fetchAccountCasperActivityRequest({ accountHash, page })
   );

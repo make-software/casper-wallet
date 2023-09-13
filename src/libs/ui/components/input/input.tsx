@@ -1,8 +1,7 @@
 import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
 import styled from 'styled-components';
 
-import { BaseProps, FormField, FormFieldStatus } from '@src/libs/ui';
-import { truncateKey } from '@libs/ui/components/hash/utils';
+import { BaseProps, FormField, FormFieldStatus, SvgIcon } from '@src/libs/ui';
 
 type Ref = HTMLInputElement;
 
@@ -136,8 +135,6 @@ export interface InputProps extends BaseProps {
   validationType?: InputValidationType;
   validationText?: string | null;
   dataTestId?: string;
-  listOptions?: string[];
-  listId?: string;
 }
 
 export const Input = React.forwardRef<Ref, InputProps>(function Input(
@@ -161,8 +158,6 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
     onFocus,
     dataTestId,
     readOnly,
-    listOptions,
-    listId,
     ...restProps
   }: InputProps,
   ref
@@ -211,22 +206,23 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
           onFocus={handleFocus}
           data-testid={dataTestId}
           readOnly={readOnly}
-          list={listId}
         />
 
-        {listId && (
-          <datalist id={listId}>
-            {listOptions?.map(value => (
-              <option value={value} key={value}>
-                {truncateKey(value, { size: 'small' })}
-              </option>
-            ))}
-          </datalist>
+        {!suffixIcon && error && (
+          <SuffixContainer>
+            <SvgIcon
+              src="assets/icons/error.svg"
+              size={24}
+              color="contentRed"
+            />
+          </SuffixContainer>
         )}
 
         {suffixIcon && <SuffixContainer>{suffixIcon}</SuffixContainer>}
 
-        {suffixText && <SuffixTextContainer>{suffixText}</SuffixTextContainer>}
+        {suffixText && !error && (
+          <SuffixTextContainer>{suffixText}</SuffixTextContainer>
+        )}
       </InputContainer>
     </FormField>
   );

@@ -9,9 +9,10 @@ interface TooltipProps {
   placement?: Placement;
   noWrap?: boolean;
   overflowWrap?: boolean;
+  fullWidth?: boolean;
 }
 
-type Placement =
+export type Placement =
   | 'topCenter'
   | 'topLeft'
   | 'bottomCenter'
@@ -21,6 +22,7 @@ type Placement =
 
 type Ref = HTMLDivElement;
 
+// TODO: Add dynamic positioning based on the content of the tooltip
 const TooltipTip = styled.div<{ placement: Placement }>(
   ({ theme, placement }) => ({
     position: 'absolute',
@@ -30,17 +32,17 @@ const TooltipTip = styled.div<{ placement: Placement }>(
     ...(placement === 'topCenter' && {
       left: '50%',
       transform: 'translateX(-50%)',
-      top: '-45px'
+      bottom: '30px'
     }),
 
     ...(placement === 'topLeft' && {
       right: '0',
-      top: '-45px'
+      bottom: '30px'
     }),
 
     ...(placement === 'topRight' && {
       left: '0',
-      top: '-45px'
+      bottom: '30px'
     }),
 
     ...(placement === 'bottomCenter' && {
@@ -65,7 +67,7 @@ const TooltipTip = styled.div<{ placement: Placement }>(
     borderRadius: `${theme.borderRadius.twelve}px`,
     boxShadow: '0 0 10px rgba(0, 0, 0, 0.08)',
 
-    maxWidth: '275px',
+    maxWidth: '270px',
 
     transition: 'opacity 250ms ease-in-out',
     opacity: '0',
@@ -74,8 +76,10 @@ const TooltipTip = styled.div<{ placement: Placement }>(
   })
 );
 
-const Container = styled.div`
+const Container = styled.div<{ fullWidth?: boolean }>`
   position: relative;
+
+  width: ${({ fullWidth }) => (fullWidth ? '100%' : 'auto')};
 `;
 
 const ChildrenContainer = styled.div`
@@ -87,13 +91,23 @@ const ChildrenContainer = styled.div`
 `;
 
 export const Tooltip = forwardRef<Ref, TooltipProps>(
-  ({ title, placement = 'topCenter', noWrap, overflowWrap, children }, ref) => {
+  (
+    {
+      title,
+      placement = 'topCenter',
+      noWrap,
+      overflowWrap,
+      children,
+      fullWidth
+    },
+    ref
+  ) => {
     if (title == null) {
       return <>{children}</>;
     }
 
     return (
-      <Container ref={ref}>
+      <Container ref={ref} fullWidth={fullWidth}>
         <ChildrenContainer>{children}</ChildrenContainer>
         <TooltipTip placement={placement}>
           <Typography

@@ -33,12 +33,17 @@ export function ErrorPageContent({
           <OnboardingIllustrationContainer>
             <SvgIcon
               src="assets/illustrations/wrong-secret-phrase.svg"
-              size={140}
+              width={200}
+              height={120}
             />
           </OnboardingIllustrationContainer>
         ) : (
           <IllustrationContainer>
-            <SvgIcon src="assets/illustrations/error.svg" size={140} />
+            <SvgIcon
+              src="assets/illustrations/error.svg"
+              width={200}
+              height={120}
+            />
           </IllustrationContainer>
         )}
 

@@ -7,7 +7,7 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import { HeaderSubmenuBarNavLink, PopupLayout } from '@libs/layout';
 import { PopupHeader } from '@libs/layout/header';
 
-import { HomePageContent, HomePageHeaderSubmenuItems } from '@popup/pages/home';
+import { HomePageContent } from '@popup/pages/home';
 import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
 import { TimeoutPageContent } from '@popup/pages/timeout';
 import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
@@ -16,7 +16,6 @@ import { ConnectedSitesPage } from '@popup/pages/connected-sites';
 import { AccountSettingsPage } from '@popup/pages/account-settings';
 import { RemoveAccountPageContent } from '@popup/pages/remove-account';
 import { RenameAccountPageContent } from '@popup/pages/rename-account';
-import { AccountListPage } from '@popup/pages/account-list';
 import { BackupSecretPhrasePage } from '@popup/pages/backup-secret-phrase';
 import { CreateAccountPage } from '@src/apps/popup/pages/create-account';
 import { DownloadSecretKeysPage } from '@popup/pages/download-secret-keys';
@@ -33,6 +32,9 @@ import { LockedRouter } from '@src/libs/layout/locked-router';
 import { TransferPage } from '@popup/pages/transfer';
 import { TokenDetailPage } from 'src/apps/popup/pages/token-details';
 import { ActivityDetailsPage } from '@popup/pages/activity-details';
+import { ReceivePage } from '@popup/pages/receive';
+import { NftDetailsPage } from '@popup/pages/nft-details';
+import { TransferNftPage } from '@popup/pages/transfer-nft';
 
 export function AppRouter() {
   const isLocked = useSelector(selectVaultIsLocked);
@@ -89,34 +91,9 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader
-                withNetworkSwitcher
-                withMenu
-                withConnectionStatus
-                renderSubmenuBarItems={() => (
-                  <HomePageHeaderSubmenuItems linkType="switchAccount" />
-                )}
-              />
+              <PopupHeader withNetworkSwitcher withMenu withConnectionStatus />
             )}
             renderContent={() => <HomePageContent />}
-          />
-        }
-      />
-      <Route
-        path={RouterPath.AccountList}
-        element={
-          <PopupLayout
-            renderHeader={() => (
-              <PopupHeader
-                withNetworkSwitcher
-                withMenu
-                withConnectionStatus
-                renderSubmenuBarItems={() => (
-                  <HomePageHeaderSubmenuItems linkType="done" />
-                )}
-              />
-            )}
-            renderContent={() => <AccountListPage />}
           />
         }
       />
@@ -262,6 +239,9 @@ function AppRoutes() {
         element={<ActivityDetailsPage />}
       />
       <Route path={RouterPath.Token} element={<TokenDetailPage />} />
+      <Route path={RouterPath.Receive} element={<ReceivePage />} />
+      <Route path={RouterPath.NftDetails} element={<NftDetailsPage />} />
+      <Route path={RouterPath.TransferNft} element={<TransferNftPage />} />
     </Routes>
   );
 }
