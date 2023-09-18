@@ -90,7 +90,7 @@
     "react-inlinesvg": "^3.0.1",
     "react-loading-skeleton": "^3.1.0",
     "react-player": "^2.13.0",
-    "react-query": "^3.39.2",
+    "react-query": "^3.39.3",
     "react-redux": "8.0.5",
     "react-router-dom": "6.4.4",
     "redux": "4.2.1",
