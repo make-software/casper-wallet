@@ -20,7 +20,9 @@ const ModalContainer = styled.div`
   max-width: 328px;
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04), 0 15px 50px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.04),
+    0 15px 50px rgba(0, 0, 0, 0.1);
   border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
 `;
 interface RenderChildrenProps {
