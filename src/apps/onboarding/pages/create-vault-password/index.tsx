@@ -8,7 +8,7 @@ import {
   TabFooterContainer,
   TabHeaderContainer
 } from '@libs/layout';
-import { Button, Checkbox, Link } from '@libs/ui';
+import { Button, Checkbox, Link, PasswordInputs } from '@libs/ui';
 import {
   CreatePasswordFormValues,
   useCreatePasswordForm
@@ -36,8 +36,12 @@ export function CreateVaultPasswordPage({
   const { t } = useTranslation();
   const passwordHash = useSelector(selectPasswordHash);
 
-  const { register, handleSubmit, formState } = useCreatePasswordForm();
-  const { isDirty, isSubmitSuccessful } = formState;
+  const {
+    register,
+    handleSubmit,
+    formState: { isDirty, isSubmitSuccessful, errors }
+  } = useCreatePasswordForm();
+
   useEffect(() => {
     if (passwordHash) {
       navigate(RouterPath.CreateSecretPhrase);
@@ -88,10 +92,9 @@ export function CreateVaultPasswordPage({
           </TabHeaderContainer>
         )}
         renderContent={() => (
-          <CreateVaultPasswordPageContent
-            formState={formState}
-            register={register}
-          />
+          <CreateVaultPasswordPageContent>
+            <PasswordInputs register={register} errors={errors} />
+          </CreateVaultPasswordPageContent>
         )}
         renderFooter={() => (
           <TabFooterContainer>

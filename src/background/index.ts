@@ -71,6 +71,7 @@ import {
   vaultUnlocked
 } from './redux/session/actions';
 import {
+  changePassword,
   createAccount,
   initKeys,
   initVault,
@@ -547,6 +548,7 @@ browser.runtime.onMessage.addListener(
           case getType(accountNftTokensCountChanged):
           case getType(accountDeploysCountChanged):
           case getType(accountCasperActivityCountChanged):
+          case getType(changePassword):
             store.dispatch(action);
             return sendResponse(undefined);
 

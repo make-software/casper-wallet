@@ -42,6 +42,7 @@ export * from './components/loading-activity-view/loading-activity-view';
 export * from './components/recipient-dropdown-input/recipient-dropdown-input';
 export * from './components/transfer-success-screen/transfer-succeess-screen';
 export * from './components/contract-icon/contract-icon';
+export * from './components/password-inputs/password-inputs';
 
 export * from './utils/match-media';
 export * from './utils/match-size';
