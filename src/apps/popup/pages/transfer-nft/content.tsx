@@ -142,7 +142,6 @@ export const TransferNftContent = ({
         <Input
           label={t('Transaction fee')}
           rightLabel={paymentFiatAmount}
-          type="number"
           monotype
           placeholder={t('Enter transaction fee')}
           suffixText={'CSPR'}
