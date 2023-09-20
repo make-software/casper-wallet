@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
-import { Keys } from 'casper-js-sdk';
 
 import {
   FooterButtonsContainer,
@@ -27,13 +26,13 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 import {
   getDefaultPaymentAmountBasedOnNftTokenStandard,
   getRuntimeArgs,
-  getSignatureAlgorithm,
   signNftDeploy
 } from '@popup/pages/transfer-nft/utils';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
+import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 
 export const TransferNftPage = () => {
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
@@ -97,10 +96,9 @@ export const TransferNftPage = () => {
     if (activeAccount) {
       const { recipientPublicKey } = recipientForm.getValues();
 
-      const rawPublicKey = getRawPublicKey(activeAccount.publicKey);
-      const KEYS = Keys.getKeysFromHexPrivKey(
-        activeAccount.secretKey,
-        getSignatureAlgorithm(rawPublicKey)
+      const KEYS = createAsymmetricKey(
+        activeAccount.publicKey,
+        activeAccount.secretKey
       );
 
       const args = {
