@@ -10,9 +10,10 @@ import { FETCH_QUERY_OPTIONS } from '@src/constants';
 
 const accountInfoRequest = (
   accountHash: string,
-  casperApiUrl: string
+  casperApiUrl: string,
+  signal?: AbortSignal
 ): Promise<DataResponse<AccountInfo>> =>
-  fetch(getAccountInfoUrl({ accountHash, casperApiUrl }))
+  fetch(getAccountInfoUrl({ accountHash, casperApiUrl }), { signal })
     .then(toJson)
     .catch(handleError);
 
@@ -25,7 +26,7 @@ export const fetchAccountInfo = ({
 }) =>
   queryClient.fetchQuery(
     ['accountInfoRequest', accountHash, casperApiUrl],
-    () => accountInfoRequest(accountHash, casperApiUrl),
+    ({ signal }) => accountInfoRequest(accountHash, casperApiUrl, signal),
     {
       staleTime: FETCH_QUERY_OPTIONS.apiCacheTime
     }

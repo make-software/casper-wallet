@@ -51,7 +51,7 @@ export const getDefaultPaymentAmountBasedOnNftTokenStandard = (
     case NFTTokenStandard.CEP78:
       return motesToCSPR(NFT_CEP78_PAYMENT_AMOUNT_AVERAGE_MOTES);
     default:
-      throw new Error('Unknown token standard.');
+      return '0';
   }
 };
 
