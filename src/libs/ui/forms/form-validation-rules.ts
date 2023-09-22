@@ -275,7 +275,7 @@ export const useCreatePasswordForQrCodeRule = () => {
 
   return Yup.string()
     .required(t('Password is required'))
-    .max(
+    .min(
       minQrCodePasswordLength,
       `Should be no more than ${minQrCodePasswordLength} characters`
     )

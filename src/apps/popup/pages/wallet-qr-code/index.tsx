@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { shallowEqual, useSelector } from 'react-redux';
 
 import {
   FooterButtonsContainer,
@@ -12,9 +13,22 @@ import { useTypedNavigate } from '@popup/router';
 import { Button } from '@libs/ui';
 import { useCreatePasswordForQRCodeForm } from '@libs/ui/forms/create-password-for-qr-code';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
+import {
+  selectSecretPhrase,
+  selectVaultDerivedAccounts,
+  selectVaultImportedAccounts
+} from '@background/redux/vault/selectors';
+import { generateSyncWalletQrData } from '@libs/crypto';
 
 export const WalletQrCodePage = () => {
-  const [isQRGenerated, setIsQRGenerated] = useState(false);
+  const [qrString, setQrString] = useState('');
+
+  const secretPhrase = useSelector(selectSecretPhrase);
+  const derivedAccounts = useSelector(selectVaultDerivedAccounts, shallowEqual);
+  const importedAccounts = useSelector(
+    selectVaultImportedAccounts,
+    shallowEqual
+  );
 
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -28,12 +42,19 @@ export const WalletQrCodePage = () => {
     isValid
   });
 
-  // TODO: add functionality
-  const generateQRCode = () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const generateQRCode = async () => {
     const { password } = getValues();
 
-    setIsQRGenerated(true);
+    if (secretPhrase) {
+      const qr = await generateSyncWalletQrData(
+        password,
+        secretPhrase,
+        derivedAccounts,
+        importedAccounts
+      );
+
+      setQrString(qr);
+    }
   };
 
   return (
@@ -47,8 +68,8 @@ export const WalletQrCodePage = () => {
             <HeaderSubmenuBarNavLink
               linkType="back"
               onClick={() => {
-                if (isQRGenerated) {
-                  setIsQRGenerated(false);
+                if (qrString) {
+                  setQrString('');
                 } else {
                   navigate(-1);
                 }
@@ -59,13 +80,13 @@ export const WalletQrCodePage = () => {
       )}
       renderContent={() => (
         <WalletQrCodePageContent
-          isQRGenerated={isQRGenerated}
+          qrString={qrString}
           register={register}
           errors={errors}
         />
       )}
       renderFooter={
-        isQRGenerated
+        qrString
           ? undefined
           : () => (
               <FooterButtonsContainer>
