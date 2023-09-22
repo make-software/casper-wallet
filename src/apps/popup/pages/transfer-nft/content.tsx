@@ -132,7 +132,7 @@ export const TransferNftContent = ({
         <ParagraphContainer top={SpacingSize.Tiny}>
           <Typography type="listSubtext" color="contentRed">
             <Trans t={t}>
-              For now we doesn't support we don’t the reverse look up modality
+              Sorry, but we don’t support the reverse look-up modality
             </Trans>
           </Typography>
         </ParagraphContainer>

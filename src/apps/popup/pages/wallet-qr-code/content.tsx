@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { FieldErrors, UseFormRegister } from 'react-hook-form';
 import { QRCodeCanvas } from 'qrcode.react';
+import { useTheme } from 'styled-components';
 
 import {
   ContentContainer,
@@ -30,6 +31,7 @@ export const WalletQrCodePageContent = ({
 }: WalletQrCodePageContentProps) => {
   const [passwordInputType, setPasswordInputType] =
     useState<PasswordInputType>('password');
+  const theme = useTheme();
 
   const { t } = useTranslation();
 
@@ -57,7 +59,7 @@ export const WalletQrCodePageContent = ({
             id="qrCode"
             value={qrString}
             size={300}
-            bgColor={'#ffffff'}
+            bgColor={theme.color.backgroundPrimary}
             level={'H'}
           />
         ) : (
