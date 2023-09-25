@@ -17,9 +17,10 @@ import {
 
 export const extendedDeploysRequest = (
   casperApiUrl: string,
-  deployHash: string
+  deployHash: string,
+  signal?: AbortSignal
 ): Promise<ExtendedDeployResult> =>
-  fetch(getExtendedDeploysHashLink(casperApiUrl, deployHash))
+  fetch(getExtendedDeploysHashLink(casperApiUrl, deployHash), { signal })
     .then(toJson)
     .catch(handleError);
 
@@ -32,7 +33,7 @@ export const fetchExtendedDeploysInfo = ({
 }) =>
   queryClient.fetchQuery(
     ['accountTransactionsRequest', casperApiUrl, deployHash],
-    () => extendedDeploysRequest(casperApiUrl, deployHash)
+    ({ signal }) => extendedDeploysRequest(casperApiUrl, deployHash, signal)
   );
 
 export const dispatchFetchExtendedDeploysInfo = (
@@ -45,9 +46,12 @@ export const dispatchFetchExtendedDeploysInfo = (
 export const accountExtendedDeploysRequest = (
   casperApiUrl: string,
   publicKey: string,
-  page: number
+  page: number,
+  signal?: AbortSignal
 ): Promise<PaginatedResponse<ExtendedDeployResult>> =>
-  fetch(getAccountExtendedDeploysLink(casperApiUrl, publicKey, page))
+  fetch(getAccountExtendedDeploysLink(casperApiUrl, publicKey, page), {
+    signal
+  })
     .then(toJson)
     .catch(handleError);
 
@@ -62,7 +66,8 @@ export const fetchAccountExtendedDeploys = ({
 }): Promise<PaginatedResponse<ExtendedDeployResult> | ErrorResponse> =>
   queryClient.fetchQuery(
     ['accountDeploysRequest', casperApiUrl, publicKey, page],
-    () => accountExtendedDeploysRequest(casperApiUrl, publicKey, page),
+    ({ signal }) =>
+      accountExtendedDeploysRequest(casperApiUrl, publicKey, page, signal),
     { staleTime: ACCOUNT_DEPLOY_REFRESH_RATE }
   );
 

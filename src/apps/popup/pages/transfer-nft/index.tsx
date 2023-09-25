@@ -39,25 +39,31 @@ export const TransferNftPage = () => {
   const [haveReverseOwnerLookUp, setHaveReverseOwnerLookUp] = useState(false);
   const { contractPackageHash, tokenId } = useParams();
 
-  const nftTokes = useSelector(selectAccountNftTokens);
+  const nftTokens = useSelector(selectAccountNftTokens);
   const csprBalance = useSelector(selectAccountBalance);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
 
+  const { t } = useTranslation();
+  const navigate = useTypedNavigate();
+
   const nftToken = useMemo(
     () =>
-      nftTokes?.find(
+      nftTokens?.find(
         token =>
           token.token_id === tokenId &&
           token.contract_package_hash === contractPackageHash
       ),
-    [contractPackageHash, nftTokes, tokenId]
+    [contractPackageHash, nftTokens, tokenId]
   );
 
-  const { t } = useTranslation();
-  const navigate = useTypedNavigate();
+  useEffect(() => {
+    if (!nftToken) {
+      navigate(RouterPath.Home);
+    }
+  }, [navigate, nftToken]);
 
   useEffect(() => {
     if (nftToken?.contract_package?.metadata?.owner_reverse_lookup_mode) {

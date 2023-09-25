@@ -14,9 +14,10 @@ import { getContractPackageUrl, getErc20TokensUrl } from './constants';
 
 export const erc20TokensRequest = (
   casperApiUrl: string,
-  accountHash: string
+  accountHash: string,
+  signal?: AbortSignal
 ): Promise<DataResponse<Erc20Token[]>> =>
-  fetch(getErc20TokensUrl(casperApiUrl, accountHash))
+  fetch(getErc20TokensUrl(casperApiUrl, accountHash), { signal })
     .then(toJson)
     .catch(handleError);
 
@@ -29,15 +30,16 @@ export const fetchErc20Tokens = ({
 }) =>
   queryClient.fetchQuery(
     ['getErc20Tokens', accountHash, casperApiUrl],
-    () => erc20TokensRequest(casperApiUrl, accountHash),
+    ({ signal }) => erc20TokensRequest(casperApiUrl, accountHash, signal),
     { staleTime: TOKENS_REFRESH_RATE }
   );
 
 export const contractPackageRequest = (
   casperApiUrl: string,
-  contractPackageHash: string
+  contractPackageHash: string,
+  signal?: AbortSignal
 ): Promise<ContractPackage> =>
-  fetch(getContractPackageUrl(casperApiUrl, contractPackageHash))
+  fetch(getContractPackageUrl(casperApiUrl, contractPackageHash), { signal })
     .then(toJson)
     .catch(handleError);
 
@@ -50,7 +52,8 @@ export const fetchContractPackage = ({
 }) =>
   queryClient.fetchQuery(
     ['contractPackageRequest', casperApiUrl, contractPackageHash],
-    () => contractPackageRequest(casperApiUrl, contractPackageHash),
+    ({ signal }) =>
+      contractPackageRequest(casperApiUrl, contractPackageHash, signal),
     { staleTime: TOKENS_REFRESH_RATE }
   );
 

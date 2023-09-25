@@ -248,8 +248,8 @@ export const BreakWordContainer = styled.div`
 `;
 
 export const IllustrationContainer = styled.div`
-  margin-top: 24px;
-  margin-left: 16px;
+  padding-top: 24px;
+  padding-left: 16px;
 `;
 
 export const OnboardingIllustrationContainer = styled(IllustrationContainer)`
