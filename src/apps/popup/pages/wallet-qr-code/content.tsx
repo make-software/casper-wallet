@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { FieldErrors, UseFormRegister } from 'react-hook-form';
 import { QRCodeCanvas } from 'qrcode.react';
-import { useTheme } from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 import {
+  CenteredFlexRow,
   ContentContainer,
   ParagraphContainer,
   SpacingSize,
@@ -17,6 +18,13 @@ import {
   Typography
 } from '@libs/ui';
 import { CreatePasswordForQRCodeFormValues } from '@libs/ui/forms/create-password-for-qr-code';
+
+const QRContainer = styled(CenteredFlexRow)`
+  padding: 20px 16px;
+  background-color: ${({ theme }) => theme.color.backgroundPrimary};
+  border-radius: ${({ theme }) => theme.borderRadius.base}px;
+  margin-top: 20px;
+`;
 
 interface WalletQrCodePageContentProps {
   qrString: string;
@@ -53,16 +61,18 @@ export const WalletQrCodePageContent = ({
           </Trans>
         </Typography>
       </ParagraphContainer>
-      <VerticalSpaceContainer top={SpacingSize.Large}>
-        {qrString ? (
+      {qrString ? (
+        <QRContainer>
           <QRCodeCanvas
             id="qrCode"
             value={qrString}
-            size={300}
+            size={296}
             bgColor={theme.color.backgroundPrimary}
             level={'H'}
           />
-        ) : (
+        </QRContainer>
+      ) : (
+        <VerticalSpaceContainer top={SpacingSize.Large}>
           <Input
             type={passwordInputType}
             placeholder={t('Password')}
@@ -76,8 +86,8 @@ export const WalletQrCodePageContent = ({
             }
             {...register('password')}
           />
-        )}
-      </VerticalSpaceContainer>
+        </VerticalSpaceContainer>
+      )}
     </ContentContainer>
   );
 };

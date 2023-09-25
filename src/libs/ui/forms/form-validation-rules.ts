@@ -16,7 +16,7 @@ import { isValidPublicKey, isValidU64 } from '@src/utils';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 
 export const minPasswordLength = 16;
-export const minQrCodePasswordLength = 8;
+export const maxQrCodePasswordLength = 8;
 
 const ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED = 1;
 
@@ -275,9 +275,9 @@ export const useCreatePasswordForQrCodeRule = () => {
 
   return Yup.string()
     .required(t('Password is required'))
-    .min(
-      minQrCodePasswordLength,
-      `Should be no more than ${minQrCodePasswordLength} characters`
+    .max(
+      maxQrCodePasswordLength,
+      `Should be no more than ${maxQrCodePasswordLength} characters`
     )
     .matches(
       /^[A-Za-z0-9]*$/,

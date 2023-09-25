@@ -9,7 +9,7 @@ import {
   PopupLayout
 } from '@libs/layout';
 import { WalletQrCodePageContent } from '@popup/pages/wallet-qr-code/content';
-import { useTypedNavigate } from '@popup/router';
+import { RouterPath, useTypedNavigate } from '@popup/router';
 import { Button } from '@libs/ui';
 import { useCreatePasswordForQRCodeForm } from '@libs/ui/forms/create-password-for-qr-code';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
@@ -35,7 +35,8 @@ export const WalletQrCodePage = () => {
   const {
     register,
     formState: { errors, isValid },
-    getValues
+    getValues,
+    handleSubmit
   } = useCreatePasswordForQRCodeForm();
 
   const isButtonDisabled = calculateSubmitButtonDisabled({
@@ -59,6 +60,8 @@ export const WalletQrCodePage = () => {
 
   return (
     <PopupLayout
+      variant="form"
+      onSubmit={handleSubmit(generateQRCode)}
       renderHeader={() => (
         <PopupHeader
           withNetworkSwitcher
@@ -85,21 +88,19 @@ export const WalletQrCodePage = () => {
           errors={errors}
         />
       )}
-      renderFooter={
-        qrString
-          ? undefined
-          : () => (
-              <FooterButtonsContainer>
-                <Button
-                  color="primaryBlue"
-                  disabled={isButtonDisabled}
-                  onClick={generateQRCode}
-                >
-                  <Trans t={t}>See QR code</Trans>
-                </Button>
-              </FooterButtonsContainer>
-            )
-      }
+      renderFooter={() => (
+        <FooterButtonsContainer>
+          {qrString ? (
+            <Button onClick={() => navigate(RouterPath.Home)}>
+              <Trans t={t}>Done</Trans>
+            </Button>
+          ) : (
+            <Button disabled={isButtonDisabled}>
+              <Trans t={t}>See QR code</Trans>
+            </Button>
+          )}
+        </FooterButtonsContainer>
+      )}
     />
   );
 };
