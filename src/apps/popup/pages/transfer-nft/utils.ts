@@ -1,7 +1,6 @@
 import {
   CLKeyParameters,
   CLPublicKey,
-  CLPublicKeyTag,
   CLValueBuilder,
   DeployUtil,
   Keys,
@@ -30,17 +29,6 @@ export type TransferArgs = {
   target: CLKeyParameters;
   source: CLKeyParameters;
 } & TokenArgs;
-
-export const getSignatureAlgorithm = (rawPublicKey: CLPublicKey) => {
-  switch (rawPublicKey.tag) {
-    case CLPublicKeyTag.ED25519:
-      return Keys.SignatureAlgorithm.Ed25519;
-    case CLPublicKeyTag.SECP256K1:
-      return Keys.SignatureAlgorithm.Secp256K1;
-    default:
-      throw Error('Unknown Signature type.');
-  }
-};
 
 export const getDefaultPaymentAmountBasedOnNftTokenStandard = (
   tokenStandard: NFTTokenStandard | ''
