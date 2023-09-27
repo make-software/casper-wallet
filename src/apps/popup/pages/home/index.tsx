@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -95,6 +95,14 @@ export function HomePageContent() {
       });
     }
   }, [activeAccount?.publicKey, network]);
+
+  useEffect(() => {
+    if (!state?.activeTabId) {
+      const container = document.querySelector('#ms-container');
+
+      container?.scrollTo(0, 0);
+    }
+  }, [state?.activeTabId]);
 
   return (
     <ContentContainer>

@@ -102,7 +102,6 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
           <Input
             label={paymentAmoutLabel}
             rightLabel={paymentFiatAmount}
-            type="number"
             monotype
             placeholder={t('Enter transaction fee')}
             suffixText={'CSPR'}
