@@ -269,18 +269,3 @@ export const usePaymentAmountRule = (csprBalance: string | null) => {
       )
     });
 };
-
-export const useCreatePasswordForQrCodeRule = () => {
-  const { t } = useTranslation();
-
-  return Yup.string()
-    .required(t('Password is required'))
-    .max(
-      maxQrCodePasswordLength,
-      `Should be no more than ${maxQrCodePasswordLength} characters`
-    )
-    .matches(
-      /^[A-Za-z0-9]*$/,
-      t('Password can only contain letters and numbers')
-    );
-};

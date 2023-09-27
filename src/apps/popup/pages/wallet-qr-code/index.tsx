@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 
@@ -11,17 +11,18 @@ import {
 import { WalletQrCodePageContent } from '@popup/pages/wallet-qr-code/content';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { Button } from '@libs/ui';
-import { useCreatePasswordForQRCodeForm } from '@libs/ui/forms/create-password-for-qr-code';
-import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import {
   selectSecretPhrase,
   selectVaultDerivedAccounts,
   selectVaultImportedAccounts
 } from '@background/redux/vault/selectors';
 import { generateSyncWalletQrData } from '@libs/crypto';
+import { BackupSecretPhrasePasswordPage } from '@popup/pages/backup-secret-phrase-password';
 
 export const WalletQrCodePage = () => {
   const [qrString, setQrString] = useState('');
+  const [isPasswordConfirmed, setIsPasswordConfirmed] =
+    useState<boolean>(false);
 
   const secretPhrase = useSelector(selectSecretPhrase);
   const derivedAccounts = useSelector(selectVaultDerivedAccounts, shallowEqual);
@@ -32,20 +33,12 @@ export const WalletQrCodePage = () => {
 
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
-  const {
-    register,
-    formState: { errors, isValid },
-    getValues,
-    handleSubmit
-  } = useCreatePasswordForQRCodeForm();
 
-  const isButtonDisabled = calculateSubmitButtonDisabled({
-    isValid
-  });
+  const setPasswordConfirmed = useCallback(() => {
+    setIsPasswordConfirmed(true);
+  }, []);
 
-  const generateQRCode = async () => {
-    const { password } = getValues();
-
+  const generateQRCode = async (password: string) => {
     if (secretPhrase) {
       const qr = await generateSyncWalletQrData(
         password,
@@ -58,47 +51,33 @@ export const WalletQrCodePage = () => {
     }
   };
 
+  if (!isPasswordConfirmed) {
+    return (
+      <BackupSecretPhrasePasswordPage
+        setPasswordConfirmed={setPasswordConfirmed}
+        onClick={generateQRCode}
+      />
+    );
+  }
+
   return (
     <PopupLayout
-      variant="form"
-      onSubmit={handleSubmit(generateQRCode)}
       renderHeader={() => (
         <PopupHeader
           withNetworkSwitcher
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={() => (
-            <HeaderSubmenuBarNavLink
-              linkType="back"
-              onClick={() => {
-                if (qrString) {
-                  setQrString('');
-                } else {
-                  navigate(-1);
-                }
-              }}
-            />
+            <HeaderSubmenuBarNavLink linkType="back" />
           )}
         />
       )}
-      renderContent={() => (
-        <WalletQrCodePageContent
-          qrString={qrString}
-          register={register}
-          errors={errors}
-        />
-      )}
+      renderContent={() => <WalletQrCodePageContent qrString={qrString} />}
       renderFooter={() => (
         <FooterButtonsContainer>
-          {qrString ? (
-            <Button onClick={() => navigate(RouterPath.Home)}>
-              <Trans t={t}>Done</Trans>
-            </Button>
-          ) : (
-            <Button disabled={isButtonDisabled}>
-              <Trans t={t}>See QR code</Trans>
-            </Button>
-          )}
+          <Button onClick={() => navigate(RouterPath.Home)}>
+            <Trans t={t}>I'm done</Trans>
+          </Button>
         </FooterButtonsContainer>
       )}
     />

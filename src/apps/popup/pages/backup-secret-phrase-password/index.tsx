@@ -23,10 +23,12 @@ import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-
 
 interface BackupSecretPhrasePasswordPageType {
   setPasswordConfirmed: () => void;
+  onClick?: (password: string) => Promise<void>;
 }
 
 export const BackupSecretPhrasePasswordPage = ({
-  setPasswordConfirmed
+  setPasswordConfirmed,
+  onClick
 }: BackupSecretPhrasePasswordPageType) => {
   const { t } = useTranslation();
 
@@ -40,7 +42,8 @@ export const BackupSecretPhrasePasswordPage = ({
   const {
     register,
     handleSubmit,
-    formState: { errors, isDirty }
+    formState: { errors, isDirty },
+    getValues
   } = useUnlockWalletForm(passwordHash, passwordSaltHash);
 
   const isSubmitButtonDisabled = calculateSubmitButtonDisabled({
@@ -48,8 +51,17 @@ export const BackupSecretPhrasePasswordPage = ({
   });
 
   const onSubmit = () => {
-    setPasswordConfirmed();
-    dispatchToMainStore(loginRetryCountReseted());
+    if (onClick) {
+      const { password } = getValues();
+
+      onClick(password).then(() => {
+        setPasswordConfirmed();
+        dispatchToMainStore(loginRetryCountReseted());
+      });
+    } else {
+      setPasswordConfirmed();
+      dispatchToMainStore(loginRetryCountReseted());
+    }
   };
 
   return (
