@@ -14,9 +14,10 @@ import { serviceMessage } from '@background/service-message';
 export const nftTokensRequest = (
   casperApiUrl: string,
   accountHash: string,
-  page: number
+  page: number,
+  signal?: AbortSignal
 ): Promise<PaginatedResponse<NFTTokenResult>> =>
-  fetch(getNftTokensUrl(casperApiUrl, accountHash, page))
+  fetch(getNftTokensUrl(casperApiUrl, accountHash, page), { signal })
     .then(toJson)
     .catch(handleError);
 
@@ -31,7 +32,7 @@ export const fetchNftTokens = ({
 }): Promise<PaginatedResponse<NFTTokenResult> | ErrorResponse> =>
   queryClient.fetchQuery(
     ['getNftTokens', accountHash, casperApiUrl, page],
-    () => nftTokensRequest(casperApiUrl, accountHash, page),
+    ({ signal }) => nftTokensRequest(casperApiUrl, accountHash, page, signal),
     { staleTime: NFT_TOKENS_REFRESH_RATE }
   );
 

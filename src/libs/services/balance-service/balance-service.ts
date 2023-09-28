@@ -16,19 +16,23 @@ import {
 import { getCurrencyRateUrl, getAccountBalanceUrl } from './constants';
 
 export const currencyRateRequest = (
-  casperApiUrl: string
+  casperApiUrl: string,
+  signal?: AbortSignal
 ): Promise<GetCurrencyRateRequestResponse> =>
-  fetch(getCurrencyRateUrl(casperApiUrl)).then(toJson).catch(handleError);
+  fetch(getCurrencyRateUrl(casperApiUrl), { signal })
+    .then(toJson)
+    .catch(handleError);
 
 export const accountBalanceRequest = (
   publicKey: string,
-  casperApiUrl: string
+  casperApiUrl: string,
+  signal?: AbortSignal
 ): Promise<GetAccountBalanceRequestResponse> => {
   if (!publicKey) {
     throw Error('Missing public key');
   }
 
-  return fetch(getAccountBalanceUrl({ publicKey, casperApiUrl }))
+  return fetch(getAccountBalanceUrl({ publicKey, casperApiUrl }), { signal })
     .then(res => {
       if (res.status === 404) {
         return {
@@ -55,7 +59,7 @@ export const fetchAccountBalance = ({
 }) =>
   queryClient.fetchQuery(
     ['getAccountBalanceRequest', publicKey, casperApiUrl],
-    () => accountBalanceRequest(publicKey, casperApiUrl),
+    ({ signal }) => accountBalanceRequest(publicKey, casperApiUrl, signal),
     {
       staleTime: BALANCE_REFRESH_RATE
     }
@@ -64,7 +68,7 @@ export const fetchAccountBalance = ({
 export const fetchCurrencyRate = ({ casperApiUrl }: { casperApiUrl: string }) =>
   queryClient.fetchQuery(
     'getCurrencyRateRequest',
-    () => currencyRateRequest(casperApiUrl),
+    ({ signal }) => currencyRateRequest(casperApiUrl, signal),
     {
       staleTime: CURRENCY_REFRESH_RATE
     }
