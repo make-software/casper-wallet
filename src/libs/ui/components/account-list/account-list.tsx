@@ -133,6 +133,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
                     value={account.publicKey}
                     variant={HashVariant.CaptionHash}
                     truncated
+                    withoutTooltip={accountListRows.length === 1}
                     withTag={account.imported}
                     placement={
                       index === accountListRows.length - 1
