@@ -1,10 +1,12 @@
 import { randomBytes } from '@noble/hashes/utils';
-import { pbkdf2Async } from '@noble/hashes/pbkdf2';
-import { sha256 } from '@noble/hashes/sha256';
-import { CLPublicKey } from 'casper-js-sdk';
 import { aes_256_cbc } from '@noble/ciphers/webcrypto/aes';
-import { convertBytesToBase64 } from '@libs/crypto/utils';
+import { scryptAsync } from '@noble/hashes/scrypt';
+import { CLPublicKey } from 'casper-js-sdk';
+
 import { Account } from '@background/redux/vault/types';
+
+import { convertBytesToBase64 } from './utils';
+import { createScryptOptions } from './hashing';
 
 export const generateSyncWalletQrData = async (
   password: string,
@@ -14,10 +16,8 @@ export const generateSyncWalletQrData = async (
 ) => {
   const salt = randomBytes(16);
   const iv = randomBytes(16);
-  const key = await pbkdf2Async(sha256, password, salt, {
-    c: 5000,
-    dkLen: 32
-  });
+
+  const key = await scryptAsync(password, salt, createScryptOptions());
 
   const qrDataString = JSON.stringify([
     secretPhrase.join(' '),

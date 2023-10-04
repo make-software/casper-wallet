@@ -22,6 +22,7 @@ import { generateSyncWalletQrData } from '@libs/crypto';
 
 export const WalletQrCodePage = () => {
   const [qrString, setQrString] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const secretPhrase = useSelector(selectSecretPhrase);
   const derivedAccounts = useSelector(selectVaultDerivedAccounts, shallowEqual);
@@ -46,6 +47,7 @@ export const WalletQrCodePage = () => {
     const { password } = getValues();
 
     if (secretPhrase) {
+      setLoading(true);
       const qr = await generateSyncWalletQrData(
         password,
         secretPhrase,
@@ -53,6 +55,7 @@ export const WalletQrCodePage = () => {
         importedAccounts
       );
 
+      setLoading(false);
       setQrString(qr);
     }
   };
@@ -92,7 +95,8 @@ export const WalletQrCodePage = () => {
               <FooterButtonsContainer>
                 <Button
                   color="primaryBlue"
-                  disabled={isButtonDisabled}
+                  // TODO add loading state
+                  disabled={isButtonDisabled || loading}
                   onClick={generateQRCode}
                 >
                   <Trans t={t}>See QR code</Trans>
