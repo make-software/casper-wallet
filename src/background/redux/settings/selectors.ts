@@ -38,3 +38,6 @@ export const selectApiConfigBasedOnActiveNetwork = createSelector(
     }
   }
 );
+
+export const selectDarkModeSetting = (state: RootState) =>
+  state.settings.isDarkMode;

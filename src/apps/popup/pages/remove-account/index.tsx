@@ -9,7 +9,7 @@ import {
   FooterButtonsAbsoluteContainer,
   SpacingSize
 } from '@src/libs/layout/containers';
-import { Button, Typography, SvgIcon } from '@src/libs/ui';
+import { Button, Typography } from '@src/libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
@@ -39,10 +39,11 @@ export function RemoveAccountPageContent() {
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <SvgIcon
-          src="assets/illustrations/remove-account.svg"
+        <img
+          src="assets/illustrations/remove-account.png"
           width={200}
           height={120}
+          alt="remove account"
         />
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>

@@ -11,7 +11,6 @@ import {
 import {
   PasswordInputType,
   Input,
-  SvgIcon,
   Typography,
   InputValidationType,
   PasswordVisibilityIcon
@@ -48,10 +47,11 @@ export function UnlockWalletPageContent({
   return (
     <TabPageContainer>
       <IllustrationContainer>
-        <SvgIcon
-          src="assets/illustrations/locked-wallet.svg"
+        <img
+          src="assets/illustrations/locked-wallet.png"
           width={200}
           height={120}
+          alt="locked wallet"
         />
       </IllustrationContainer>
 

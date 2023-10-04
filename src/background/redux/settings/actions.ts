@@ -10,3 +10,7 @@ export const activeTimeoutDurationSettingChanged = createAction(
 export const activeNetworkSettingChanged = createAction(
   'ACTIVE_NETWORK_SETTING_CHANGED'
 )<NetworkSetting>();
+
+export const darkModeSettingChanged = createAction(
+  'DARK_MODE_SETTING_CHANGED'
+)();

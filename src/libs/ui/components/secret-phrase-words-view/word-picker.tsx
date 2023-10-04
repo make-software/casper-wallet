@@ -12,7 +12,7 @@ import { BaseProps, SvgIcon, Typography, WordTag } from '@src/libs/ui';
 import { SecretPhrase } from '@src/libs/crypto';
 
 const WordPickerContainer = styled(FlexColumn)`
-  color: ${({ theme }) => theme.color.contentBlue};
+  color: ${({ theme }) => theme.color.contentAction};
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
   border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
 
@@ -60,8 +60,8 @@ export function WordPicker({
         gap={SpacingSize.Small}
         onClick={() => handleResetPhrase()}
       >
-        <SvgIcon src="assets/icons/reset.svg" />
-        <Typography type="bodySemiBold" color="contentBlue">
+        <SvgIcon src="assets/icons/reset.svg" color="contentAction" />
+        <Typography type="bodySemiBold" color="contentAction">
           <Trans t={t}>Reset</Trans>
         </Typography>
       </ResetContainer>

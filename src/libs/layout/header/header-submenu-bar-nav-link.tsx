@@ -106,7 +106,7 @@ interface NavLinkProps {
 
 function NavLink({ label, onClick, withLeftChevronIcon }: NavLinkProps) {
   const LinkComponent = (
-    <Link color="fillBlue" onClick={onClick}>
+    <Link color="contentAction" onClick={onClick}>
       {label}
     </Link>
   );
@@ -118,7 +118,7 @@ function NavLink({ label, onClick, withLeftChevronIcon }: NavLinkProps) {
           <SvgIcon
             onClick={onClick}
             src="assets/icons/chevron.svg"
-            color="contentBlue"
+            color="contentAction"
             flipByAxis="Y"
           />
           {LinkComponent}

@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { TabPageContainer, TabTextContainer } from '@libs/layout';
-import { Link, SvgIcon, Typography } from '@libs/ui';
+import { Link, Typography } from '@libs/ui';
 
 const TipContainer = styled.div`
   margin-top: 12px;
@@ -14,10 +14,11 @@ export function OnboardingSuccessPageContent() {
 
   return (
     <TabPageContainer>
-      <SvgIcon
-        src="assets/illustrations/wallet-connected.svg"
+      <img
+        src="assets/illustrations/wallet-connected.png"
         width={230}
         height={120}
+        alt="wallet connected"
       />
       <TabTextContainer>
         <Typography type="header">
@@ -42,7 +43,7 @@ export function OnboardingSuccessPageContent() {
             Tip: If this is your first time using a cryptocurrency web wallet we
             highly recommend reading through the user guides on{' '}
             <Link
-              color="fillBlue"
+              color="contentAction"
               target="_blank"
               href="https://www.casperwallet.io/"
             >

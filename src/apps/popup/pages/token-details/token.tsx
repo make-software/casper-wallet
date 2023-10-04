@@ -136,10 +136,10 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
               )
             }
           >
-            <IconCircleContainer color="fillBlue">
+            <IconCircleContainer color="fillPrimary">
               <SvgIcon src="assets/icons/transfer.svg" color="contentOnFill" />
             </IconCircleContainer>
-            <Typography type="captionMedium" color="contentBlue">
+            <Typography type="captionMedium" color="contentAction">
               <Trans t={t}>Send</Trans>
             </Typography>
           </ButtonContainer>
@@ -149,10 +149,10 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
               navigate(RouterPath.Receive, { state: { tokenData } })
             }
           >
-            <IconCircleContainer color="fillBlue">
+            <IconCircleContainer color="fillPrimary">
               <SvgIcon src="assets/icons/receive.svg" color="contentOnFill" />
             </IconCircleContainer>
-            <Typography type="captionMedium" color="contentBlue">
+            <Typography type="captionMedium" color="contentAction">
               <Trans t={t}>Receive</Trans>
             </Typography>
           </ButtonContainer>
@@ -165,13 +165,13 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
                 href={getBuyWithTopperUrl(activeAccount.publicKey)}
               >
                 <CenteredFlexColumn gap={SpacingSize.Medium}>
-                  <IconCircleContainer color="fillBlue">
+                  <IconCircleContainer color="fillPrimary">
                     <SvgIcon
                       src="assets/icons/card.svg"
                       color="contentOnFill"
                     />
                   </IconCircleContainer>
-                  <Typography type="captionMedium" color="contentBlue">
+                  <Typography type="captionMedium" color="contentAction">
                     Buy
                   </Typography>
                 </CenteredFlexColumn>

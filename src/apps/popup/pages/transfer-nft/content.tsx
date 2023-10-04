@@ -130,7 +130,7 @@ export const TransferNftContent = ({
       </VerticalSpaceContainer>
       {haveReverseOwnerLookUp && (
         <ParagraphContainer top={SpacingSize.Tiny}>
-          <Typography type="listSubtext" color="contentRed">
+          <Typography type="listSubtext" color="contentActionCritical">
             <Trans t={t}>
               Sorry, but we don’t support the reverse look-up modality
             </Trans>

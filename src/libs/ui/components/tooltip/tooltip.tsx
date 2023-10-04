@@ -65,7 +65,7 @@ const TooltipTip = styled.div<{ placement: Placement }>(
 
     backgroundColor: `${theme.color.backgroundPrimary}`,
     borderRadius: `${theme.borderRadius.twelve}px`,
-    boxShadow: '0 0 10px rgba(0, 0, 0, 0.08)',
+    boxShadow: `${theme.shadow.tooltip}`,
 
     maxWidth: '270px',
 

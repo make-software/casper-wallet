@@ -8,7 +8,7 @@ import {
   IllustrationContainer,
   SpacingSize
 } from '@src/libs/layout';
-import { Button, SvgIcon, Typography } from '@src/libs/ui';
+import { Button, Typography } from '@src/libs/ui';
 
 import { closeCurrentWindow } from '@src/background/close-current-window';
 
@@ -18,10 +18,11 @@ export function ImportAccountWithFileSuccessContentPage() {
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <SvgIcon
-          src="assets/illustrations/account-imported.svg"
+        <img
+          src="assets/illustrations/account-imported.png"
           width={200}
           height={120}
+          alt="account imported"
         />
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>

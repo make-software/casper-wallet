@@ -8,7 +8,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@src/libs/layout';
-import { SvgIcon, Typography } from '@src/libs/ui';
+import { Typography } from '@src/libs/ui';
 
 import { ErrorContent } from './types';
 
@@ -31,18 +31,20 @@ export function ErrorPageContent({
       <ContentContainer>
         {illustrationType === 'onboarding' ? (
           <OnboardingIllustrationContainer>
-            <SvgIcon
-              src="assets/illustrations/wrong-secret-phrase.svg"
+            <img
+              src="assets/illustrations/wrong-secret-phrase.png"
               width={200}
               height={120}
+              alt="wrong secret phrase"
             />
           </OnboardingIllustrationContainer>
         ) : (
           <IllustrationContainer>
-            <SvgIcon
-              src="assets/illustrations/error.svg"
+            <img
+              src="assets/illustrations/error.png"
               width={200}
               height={120}
+              alt="error"
             />
           </IllustrationContainer>
         )}

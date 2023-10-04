@@ -36,7 +36,7 @@ export const useCasperToken = () => {
       amount,
       amountFiat: balance.amountFiat,
       symbol: 'CSPR',
-      icon: '/assets/illustrations/casper.svg'
+      icon: '/assets/icons/casper.svg'
     });
   }, [amount, balance]);
 

@@ -1,4 +1,5 @@
 import { withMedia } from './utils/match-media';
+import { hexToRGBA } from './utils/hex-to-rgba';
 
 const PAGE_MIN_WIDTH = 320;
 const PAGE_MAX_WIDTH = 1176;
@@ -27,57 +28,6 @@ export const themeConfig = {
       bold: 700
     }
   },
-  color: {
-    backgroundPrimary: '#FFFFFF',
-    backgroundSecondary: '#F5F6F7',
-    backgroundBlue: '#0A2EBF',
-    backgroundRed: '#C2000E',
-    backgroundLightGreen: '#77FFBE1F',
-    backgroundLightBlue: '#7490FF1F',
-    backgroundLightRed: '#CC000F14',
-
-    borderPrimary: '#E8E9EC',
-
-    fillWhite: '#FFFFFF',
-    fillSecondary: '#E8E9EC',
-    fillTertiary: '#BCBDC1',
-
-    fillGradientIn: {
-      from: '#EFF0F2',
-      to: '#F5F6F7'
-    },
-    fillGradientOut: {
-      from: '#F3F4F5',
-      to: '#EFF0F2'
-    },
-
-    fillBlue: '#0A2EBF',
-    fillBlueHover: '#001C8C',
-    fillBlueClick: '#001773',
-
-    fillRed: '#CC000F',
-    fillRedHover: '#B2000D',
-    fillRedClick: '#99000B',
-
-    fillGreen: '#2DDC88',
-
-    contentPrimary: '#1A1919',
-    contentSecondary: '#84868C',
-    contentTertiary: '#BCBDC1',
-    contentOnFill: '#FFFFFF',
-    contentBlue: '#0A2EBF',
-    contentRed: '#CC000F',
-    contentGreen: '#2DDC88',
-    contentGreenOnFill: '#77FFBE',
-    contentYellow: '#E0BB38',
-    contentLightBlue: '#7490FF',
-
-    brandRed: '#FF0012',
-    black: '#000000'
-  },
-  border: {
-    separator: '0.5px solid #E8E9EC'
-  },
   borderRadius: {
     base: 6,
     eight: 8,
@@ -96,8 +46,113 @@ export const themeConfig = {
   }
 };
 
-type ThemeConfig = typeof themeConfig;
+export const lightTheme = {
+  ...themeConfig,
+  color: {
+    backgroundPrimary: '#FFFFFF',
+    backgroundSecondary: '#F5F6F7',
+    backgroundRed: {
+      deg: '148deg',
+      from: '#E93240 6.78%',
+      to: '#C2000E 71.85%'
+    },
+
+    contentPrimary: '#1A1919',
+    contentSecondary: '#84868C',
+    contentDisabled: '#BCBDC1',
+    contentAction: '#0A2EBF',
+    contentActionCritical: '#CC000F',
+    contentOnFill: '#FFFFFF',
+    contentWarning: '#E0BB38',
+    contentPositive: '#2DDC88',
+    contentGreenStatus: '#77FFBE',
+    contentLightBlue: '#7490FF',
+
+    fillPrimary: '#0A2EBF',
+    fillPrimaryHover: '#001C8C',
+    fillPrimaryClick: '#001773',
+    fillCritical: '#CC000F',
+    fillCriticalHover: '#B2000D',
+    fillCriticalClick: '#99000B',
+    fillSecondary: {
+      deg: '180deg',
+      from: '#F5F5F7 0%',
+      to: '#F0F0F2 100%'
+    },
+    fillSecondaryHover: {
+      deg: '180deg',
+      from: '#EFF0F2 0%',
+      to: '#F5F6F7 100%'
+    },
+    fillNeutral: '#E8E9EC',
+    fillPositive: '#2DDC88',
+
+    borderPrimary: hexToRGBA('#1A1919', '0.12'),
+
+    brandRed: '#FF0012',
+    black: '#000000'
+  },
+  border: {
+    separator: '0.5px solid #E8E9EC'
+  },
+  shadow: {
+    contextMenu:
+      '0 15px 50px rgba(0, 0, 0, 0.1), 0 2px 10px rgba(0, 0, 0, 0.04)',
+    tooltip: '0px 0px 10px 0px rgba(0, 0, 0, 0.08)'
+  }
+};
+
+export const darkTheme = {
+  ...themeConfig,
+  color: {
+    backgroundPrimary: '#262730',
+    backgroundSecondary: '#18181F',
+    backgroundRed: {
+      deg: '148deg',
+      from: '#B82832 6.78%',
+      to: '#99000B 71.85%'
+    },
+
+    contentPrimary: '#FFFFFF',
+    contentSecondary: '#A9AAAD',
+    contentDisabled: '#84868C',
+    contentAction: '#4D70FF',
+    contentActionCritical: '#FF3342',
+    contentOnFill: '#FFFFFF',
+    contentWarning: '#FF9F0A',
+    contentPositive: '#2DDC88',
+    contentGreenStatus: '#77FFBE',
+    contentLightBlue: '#7490FF',
+
+    fillPrimary: '#153CD6',
+    fillPrimaryHover: '#0929AC',
+    fillPrimaryClick: '#07218A',
+    fillCritical: '#C2000E',
+    fillCriticalHover: '#B2000D',
+    fillCriticalClick: '#99000B',
+    fillSecondary: '#34363D',
+    fillSecondaryHover: '#3D3F47',
+    fillNeutral: '#3C3E47',
+    fillPositive: '#2DDC88',
+
+    borderPrimary: hexToRGBA('#FFF', '0.12'),
+
+    brandRed: '#FF0012',
+    black: '#000000'
+  },
+  border: {
+    separator: '0.5px solid #3C3E47'
+  },
+  shadow: {
+    contextMenu:
+      '0px 15px 50px 0px rgba(0, 0, 0, 0.32), 0px 2px 10px 0px rgba(0, 0, 0, 0.12)',
+    tooltip: '0px 0px 10px 0px rgba(0, 0, 0, 0.32)'
+  }
+};
+
+export type LightTheme = typeof lightTheme;
+export type DarkTheme = typeof darkTheme;
 
 declare module 'styled-components' {
-  export interface DefaultTheme extends ThemeConfig {}
+  export interface DefaultTheme extends LightTheme, DarkTheme {}
 }

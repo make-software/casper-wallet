@@ -4,4 +4,5 @@ import { NetworkSetting } from '@src/constants';
 export interface SettingsState {
   activeTimeoutDuration: TimeoutDurationSetting;
   activeNetwork: NetworkSetting;
+  isDarkMode: boolean;
 }

@@ -13,7 +13,6 @@ import {
   Input,
   PasswordInputType,
   PasswordVisibilityIcon,
-  SvgIcon,
   Typography
 } from '@libs/ui';
 
@@ -43,10 +42,11 @@ export const UnlockProtectedPageContent = ({
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <SvgIcon
-          src="assets/illustrations/password.svg"
+        <img
+          src="assets/illustrations/password.png"
           width={200}
           height={120}
+          alt="password"
         />
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>

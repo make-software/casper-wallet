@@ -58,7 +58,7 @@ export function CreateVaultPasswordPage({
           event.preventDefault();
           window.open(TermsLink.Tos, '_blank');
         }}
-        color="fillBlue"
+        color="contentAction"
       >
         Casper Wallet Terms of Service
       </Link>{' '}
@@ -69,7 +69,7 @@ export function CreateVaultPasswordPage({
           event.preventDefault();
           window.open(TermsLink.Privacy, '_blank');
         }}
-        color="fillBlue"
+        color="contentAction"
       >
         Privacy Policy
       </Link>

@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { List, SvgIcon, Typography } from '@libs/ui';
+import { List, Typography } from '@libs/ui';
 import {
   ContentContainer,
   IllustrationContainer,
@@ -37,10 +37,11 @@ export function ConnectedSitesPage() {
     return (
       <ContentContainer>
         <IllustrationContainer>
-          <SvgIcon
-            src="assets/illustrations/no-connected-sites.svg"
+          <img
+            src="assets/illustrations/no-connected-sites.png"
             width={200}
             height={120}
+            alt="no connected sites"
           />
         </IllustrationContainer>
         <ParagraphContainer top={SpacingSize.XL}>

@@ -9,7 +9,7 @@ import {
   InputsContainer,
   SpacingSize
 } from '@src/libs/layout';
-import { SvgIcon, Typography, Input } from '@src/libs/ui';
+import { Typography, Input } from '@src/libs/ui';
 import { CreateAccountFormValues } from '@src/libs/ui/forms/create-account';
 
 interface CreateAccountPageContentProps {
@@ -26,10 +26,11 @@ export function CreateAccountPageContent({
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <SvgIcon
-          src="assets/illustrations/create-account.svg"
+        <img
+          src="assets/illustrations/create-account.png"
           width={195}
           height={120}
+          alt="create account"
         />
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.Medium}>

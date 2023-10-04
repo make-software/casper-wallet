@@ -260,13 +260,13 @@ export const NftDetailsContent = ({
                 )
               }
             >
-              <IconCircleContainer color="fillBlue">
+              <IconCircleContainer color="fillPrimary">
                 <SvgIcon
                   src="assets/icons/transfer.svg"
                   color="contentOnFill"
                 />
               </IconCircleContainer>
-              <Typography type="captionMedium" color="contentBlue">
+              <Typography type="captionMedium" color="contentAction">
                 <Trans t={t}>Send</Trans>
               </Typography>
             </ButtonContainer>

@@ -7,7 +7,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@src/libs/layout';
-import { SvgIcon, Typography } from '@libs/ui';
+import { Typography } from '@libs/ui';
 
 interface TransferSuccessScreenProps {
   isNftTransfer?: boolean;
@@ -21,10 +21,11 @@ export const TransferSuccessScreen = ({
   return (
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
-        <SvgIcon
-          src="assets/illustrations/success.svg"
+        <img
+          src="assets/illustrations/success.png"
           width={200}
           height={120}
+          alt="success"
         />
         <VerticalSpaceContainer top={SpacingSize.XL}>
           <Typography type="header">

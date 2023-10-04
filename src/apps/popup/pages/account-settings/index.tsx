@@ -57,7 +57,7 @@ export const AccountSettingsPage = () => {
           <Button
             as={props => (
               <Link
-                color="fillBlue"
+                color="contentAction"
                 target="_blank"
                 href={getBlockExplorerAccountUrl(
                   casperLiveUrl,

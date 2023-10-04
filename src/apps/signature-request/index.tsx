@@ -5,7 +5,7 @@ import { render } from 'react-dom';
 import { ThemeProvider } from 'styled-components';
 import { Provider as ReduxProvider } from 'react-redux/es/exports';
 
-import { GlobalStyle, themeConfig } from '@libs/ui';
+import { darkTheme, GlobalStyle, lightTheme } from '@libs/ui';
 
 import { signWindowInit } from '@background/redux/windowManagement/actions';
 import { createMainStoreReplica, PopupState } from '@background/redux/utils';
@@ -13,6 +13,7 @@ import { ErrorBoundary } from '@src/libs/layout/error';
 
 import { AppRouter } from './app-router';
 import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
+import { selectDarkModeSetting } from '@background/redux/settings/selectors';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
@@ -28,9 +29,12 @@ const Tree = () => {
 
   const store = createMainStoreReplica(state);
 
+  const isDarkMode = selectDarkModeSetting(store.getState());
+
   return (
     <Suspense fallback={null}>
-      <ThemeProvider theme={themeConfig}>
+      {/*// @ts-ignore*/}
+      <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
         <GlobalStyle />
         <ReduxProvider store={store}>
           <ErrorBoundary>
