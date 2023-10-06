@@ -124,11 +124,12 @@ export function SecretPhraseWordsView({
   >([]);
 
   const strPhrase = phrase.toString();
-  const { initialPartialPhrase, initialHiddenWordIndexes } = useMemo(
-    () => buildInitialWordsCollection(phrase),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [strPhrase]
-  );
+  const { initialPartialPhrase, initialHiddenWordIndexes, extraWordIndex } =
+    useMemo(
+      () => buildInitialWordsCollection(phrase),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [strPhrase]
+    );
 
   if (partialPhrase.length === 0) {
     setPartialPhrase(initialPartialPhrase);
@@ -226,7 +227,7 @@ export function SecretPhraseWordsView({
                   confirmationMode &&
                   hiddenWordIndexes.includes(index) &&
                   partialPhrase[index] != null &&
-                  selectedHiddenWordIndexes.includes(index)
+                  index !== extraWordIndex
                 }
               />
             );
