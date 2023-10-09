@@ -8,7 +8,6 @@ import {
   CenteredFlexRow,
   FlexColumn,
   HeaderSubmenuBarNavLink,
-  IconCircleContainer,
   LinkType,
   SpacingSize
 } from '@libs/layout';
@@ -25,6 +24,7 @@ import {
 import {
   AccountActionsMenuPopover,
   Avatar,
+  Button,
   getFontSizeBasedOnTextLength,
   Hash,
   HashVariant,
@@ -181,12 +181,12 @@ export function HomePageContent() {
                   )
                 }
               >
-                <IconCircleContainer color="fillBlue">
+                <Button circle>
                   <SvgIcon
                     src="assets/icons/transfer.svg"
                     color="contentOnFill"
                   />
-                </IconCircleContainer>
+                </Button>
                 <Typography type="captionMedium" color="contentBlue">
                   <Trans t={t}>Send</Trans>
                 </Typography>
@@ -199,12 +199,12 @@ export function HomePageContent() {
                   })
                 }
               >
-                <IconCircleContainer color="fillBlue">
+                <Button circle>
                   <SvgIcon
                     src="assets/icons/receive.svg"
                     color="contentOnFill"
                   />
-                </IconCircleContainer>
+                </Button>
                 <Typography type="captionMedium" color="contentBlue">
                   <Trans t={t}>Receive</Trans>
                 </Typography>
@@ -214,12 +214,12 @@ export function HomePageContent() {
                   gap={SpacingSize.Small}
                   onClick={handleBuyWithCSPR}
                 >
-                  <IconCircleContainer color="fillBlue">
+                  <Button circle>
                     <SvgIcon
                       src="assets/icons/card.svg"
                       color="contentOnFill"
                     />
-                  </IconCircleContainer>
+                  </Button>
                   <Typography type="captionMedium" color="contentBlue">
                     <Trans t={t}>Buy</Trans>
                   </Typography>
