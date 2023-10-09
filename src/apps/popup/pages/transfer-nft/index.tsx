@@ -31,7 +31,10 @@ import {
 import { dispatchToMainStore } from '@background/redux/utils';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
+import {
+  accountPendingTransactionsChanged,
+  accountTrackingIdOfSentNftTokensChanged
+} from '@background/redux/account-info/actions';
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 
 export const TransferNftPage = () => {
@@ -97,10 +100,11 @@ export const TransferNftPage = () => {
   });
 
   const submitTransfer = async () => {
-    if (haveReverseOwnerLookUp) return;
+    if (haveReverseOwnerLookUp || !nftToken) return;
 
     if (activeAccount) {
       const { recipientPublicKey } = recipientForm.getValues();
+      const { paymentAmount } = amountForm.getValues();
 
       const KEYS = createAsymmetricKey(
         activeAccount.publicKey,
@@ -108,7 +112,7 @@ export const TransferNftPage = () => {
       );
 
       const args = {
-        tokenId: nftToken?.token_id!,
+        tokenId: nftToken.token_id,
         source: KEYS.publicKey,
         target: getRawPublicKey(recipientPublicKey)
       };
@@ -126,6 +130,13 @@ export const TransferNftPage = () => {
         dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
         if (deployHash) {
+          dispatchToMainStore(
+            accountTrackingIdOfSentNftTokensChanged({
+              trackingId: nftToken.tracking_id,
+              deployHash
+            })
+          );
+
           let triesLeft = 10;
           const interval = setInterval(async () => {
             const { payload: extendedDeployInfo } =

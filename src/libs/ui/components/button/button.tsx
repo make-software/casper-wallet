@@ -11,6 +11,7 @@ interface BaseButtonProps extends BaseProps {
   inline?: boolean;
   title?: string;
   flexWidth?: boolean;
+  circle?: boolean;
 }
 
 const BaseButton = styled.button<BaseButtonProps>(
@@ -20,7 +21,8 @@ const BaseButton = styled.button<BaseButtonProps>(
     height = '40',
     inline = false,
     minWidth,
-    flexWidth = false
+    flexWidth = false,
+    circle = false
   }) => ({
     display: 'flex',
     ...(flexWidth ? { flex: 1 } : {}),
@@ -37,6 +39,12 @@ const BaseButton = styled.button<BaseButtonProps>(
     lineHeight: '2.4rem',
     padding: inline ? '4px 12px' : 'unset',
     minWidth: minWidth ? `${minWidth}px` : undefined,
+
+    ...(circle && {
+      borderRadius: '24px',
+      margin: '0 16px',
+      padding: '12px'
+    }),
 
     ':focus': {
       outline: 'none'
@@ -165,6 +173,7 @@ export interface ButtonProps extends BaseButtonProps {
     | 'utility';
   as?: (props: any) => JSX.Element;
   onClick?: (ev: any) => void;
+  circle?: boolean;
 }
 
 type Ref = HTMLButtonElement;
@@ -175,6 +184,7 @@ export const Button = React.forwardRef<Ref, ButtonProps>(function Button(
     inline = false,
     as,
     dataTestId,
+    circle,
     ...props
   }: ButtonProps,
   ref
@@ -187,10 +197,9 @@ export const Button = React.forwardRef<Ref, ButtonProps>(function Button(
       ref={ref}
       inline={inline}
       data-testid={dataTestId}
+      circle={circle}
       as={as}
       {...props}
     />
   );
 });
-
-export default Button;

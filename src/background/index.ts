@@ -128,7 +128,9 @@ import {
   accountNftTokensUpdated,
   accountNftTokensCountChanged,
   accountDeploysCountChanged,
-  accountCasperActivityCountChanged
+  accountCasperActivityCountChanged,
+  accountTrackingIdOfSentNftTokensChanged,
+  accountTrackingIdOfSentNftTokensRemoved
 } from '@background/redux/account-info/actions';
 import { fetchErc20TokenActivity } from '@src/libs/services/account-activity-service/erc20-token-activity-service';
 import { fetchNftTokens } from '@libs/services/nft-service';
@@ -549,6 +551,8 @@ browser.runtime.onMessage.addListener(
           case getType(accountNftTokensCountChanged):
           case getType(accountDeploysCountChanged):
           case getType(accountCasperActivityCountChanged):
+          case getType(accountTrackingIdOfSentNftTokensChanged):
+          case getType(accountTrackingIdOfSentNftTokensRemoved):
             store.dispatch(action);
             return sendResponse(undefined);
 

@@ -1,5 +1,4 @@
 import styled, { css } from 'styled-components';
-import { FillColor } from '@libs/ui';
 import { getLinearGradientColor } from '@libs/ui/utils/get-linear-gradient-color';
 import { hexToRGBA } from '@libs/ui/utils/hex-to-rgba';
 
@@ -295,19 +294,6 @@ export const Overlay = styled.div`
   width: 100vw;
 
   background: ${({ theme }) => hexToRGBA(theme.color.black, '0.32')};
-`;
-
-export const IconCircleContainer = styled(CenteredFlexRow)<{
-  color: FillColor;
-}>`
-  height: 48px;
-  width: 48px;
-
-  margin: 0 16px;
-
-  background-color: ${({ theme, color }) =>
-    color === 'inherit' ? 'inherit' : theme.color[color]};
-  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
 
 export const AccountActivityPlateContainer = styled(AlignedSpaceBetweenFlexRow)`
