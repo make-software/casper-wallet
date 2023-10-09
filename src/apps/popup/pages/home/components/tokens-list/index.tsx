@@ -43,6 +43,12 @@ export const TokensList = () => {
     setTokensList(tokensList);
   }, [casperToken, erc20Tokens]);
 
+  useEffect(() => {
+    const container = document.querySelector('#ms-container');
+
+    container?.scrollTo(0, 0);
+  }, []);
+
   return (
     <List
       contentTop={SpacingSize.None}
