@@ -7,11 +7,10 @@ import { useSelector } from 'react-redux';
 import {
   CenteredFlexColumn,
   CenteredFlexRow,
-  IconCircleContainer,
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
-import { Link, List, SvgIcon, TokenPlate, Typography } from '@libs/ui';
+import { Button, Link, List, SvgIcon, TokenPlate, Typography } from '@libs/ui';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { TokenType, useCasperToken } from '@src/hooks';
 import {
@@ -136,9 +135,9 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
               )
             }
           >
-            <IconCircleContainer color="fillBlue">
+            <Button circle>
               <SvgIcon src="assets/icons/transfer.svg" color="contentOnFill" />
-            </IconCircleContainer>
+            </Button>
             <Typography type="captionMedium" color="contentBlue">
               <Trans t={t}>Send</Trans>
             </Typography>
@@ -149,9 +148,9 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
               navigate(RouterPath.Receive, { state: { tokenData } })
             }
           >
-            <IconCircleContainer color="fillBlue">
+            <Button circle>
               <SvgIcon src="assets/icons/receive.svg" color="contentOnFill" />
-            </IconCircleContainer>
+            </Button>
             <Typography type="captionMedium" color="contentBlue">
               <Trans t={t}>Receive</Trans>
             </Typography>
@@ -165,12 +164,12 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
                 href={getBuyWithTopperUrl(activeAccount.publicKey)}
               >
                 <CenteredFlexColumn gap={SpacingSize.Medium}>
-                  <IconCircleContainer color="fillBlue">
+                  <Button circle>
                     <SvgIcon
                       src="assets/icons/card.svg"
                       color="contentOnFill"
                     />
-                  </IconCircleContainer>
+                  </Button>
                   <Typography type="captionMedium" color="contentBlue">
                     Buy
                   </Typography>
