@@ -1,21 +1,32 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { FieldErrors, UseFormRegister } from 'react-hook-form';
 
 import {
   Input,
   InputValidationType,
   PasswordInputType,
-  PasswordVisibilityIcon
+  PasswordVisibilityIcon,
+  Typography
 } from '@libs/ui';
-import { InputsContainer } from '@libs/layout';
+import {
+  InputsContainer,
+  SpacingSize,
+  VerticalSpaceContainer
+} from '@libs/layout';
 import { CreatePasswordFormValues } from '@libs/ui/forms/create-password';
+import { minPasswordLength } from '@libs/ui/forms/form-validation-rules';
 
 interface PasswordInputsProps {
   register: UseFormRegister<CreatePasswordFormValues>;
   errors: FieldErrors<CreatePasswordFormValues>;
+  passwordLength: number;
 }
-export const PasswordInputs = ({ register, errors }: PasswordInputsProps) => {
+export const PasswordInputs = ({
+  register,
+  errors,
+  passwordLength
+}: PasswordInputsProps) => {
   const [passwordInputType, setPasswordInputType] =
     useState<PasswordInputType>('password');
   const [confirmPasswordInputType, setConfirmPasswordInputType] =
@@ -23,37 +34,62 @@ export const PasswordInputs = ({ register, errors }: PasswordInputsProps) => {
 
   const { t } = useTranslation();
 
+  const needToAddMoreCharacters = minPasswordLength - passwordLength;
+
   return (
-    <InputsContainer>
-      <Input
-        validationType={InputValidationType.Password}
-        type={passwordInputType}
-        placeholder={t('Password')}
-        oneColoredIcons
-        suffixIcon={
-          <PasswordVisibilityIcon
-            passwordInputType={passwordInputType}
-            setPasswordInputType={setPasswordInputType}
-          />
-        }
-        {...register('password')}
-        error={!!errors.password}
-        validationText={errors.password?.message}
-      />
-      <Input
-        type={confirmPasswordInputType}
-        placeholder={t('Confirm password')}
-        oneColoredIcons
-        suffixIcon={
-          <PasswordVisibilityIcon
-            passwordInputType={confirmPasswordInputType}
-            setPasswordInputType={setConfirmPasswordInputType}
-          />
-        }
-        {...register('confirmPassword')}
-        error={!!errors.confirmPassword}
-        validationText={errors.confirmPassword?.message}
-      />
-    </InputsContainer>
+    <>
+      <VerticalSpaceContainer top={SpacingSize.Tiny}>
+        <Typography type="body" color="contentSecondary">
+          {needToAddMoreCharacters <= 0 ? (
+            <Trans t={t}>
+              Your password length is -{' '}
+              <Typography type="bodySemiBold" color="contentPrimary">
+                {{ passwordLength }} characters.
+              </Typography>
+            </Trans>
+          ) : (
+            <Trans t={t}>
+              You need to add at least{' '}
+              <Typography type="bodySemiBold" color="contentPrimary">
+                {{ needToAddMoreCharacters }} characters
+              </Typography>{' '}
+              more.
+            </Trans>
+          )}
+        </Typography>
+      </VerticalSpaceContainer>
+
+      <InputsContainer>
+        <Input
+          validationType={InputValidationType.Password}
+          type={passwordInputType}
+          placeholder={t('Password')}
+          oneColoredIcons
+          suffixIcon={
+            <PasswordVisibilityIcon
+              passwordInputType={passwordInputType}
+              setPasswordInputType={setPasswordInputType}
+            />
+          }
+          {...register('password')}
+          error={!!errors.password}
+          validationText={errors.password?.message}
+        />
+        <Input
+          type={confirmPasswordInputType}
+          placeholder={t('Confirm password')}
+          oneColoredIcons
+          suffixIcon={
+            <PasswordVisibilityIcon
+              passwordInputType={confirmPasswordInputType}
+              setPasswordInputType={setConfirmPasswordInputType}
+            />
+          }
+          {...register('confirmPassword')}
+          error={!!errors.confirmPassword}
+          validationText={errors.confirmPassword?.message}
+        />
+      </InputsContainer>
+    </>
   );
 };

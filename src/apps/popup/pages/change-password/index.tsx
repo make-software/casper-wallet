@@ -17,6 +17,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { changePassword } from '@background/redux/sagas/actions';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { ChangePasswordPageContent } from '@popup/pages/change-password/content';
+import { useWatch } from 'react-hook-form';
 
 export const ChangePasswordPage = () => {
   const { t } = useTranslation();
@@ -25,8 +26,14 @@ export const ChangePasswordPage = () => {
   const {
     register,
     handleSubmit,
-    formState: { isDirty, errors }
+    formState: { isDirty, errors },
+    control
   } = useCreatePasswordForm();
+
+  const password = useWatch({
+    control,
+    name: 'password'
+  });
 
   const isSubmitButtonDisabled = calculateSubmitButtonDisabled({
     isDirty
@@ -53,7 +60,11 @@ export const ChangePasswordPage = () => {
       )}
       renderContent={() => (
         <ChangePasswordPageContent>
-          <PasswordInputs register={register} errors={errors} />
+          <PasswordInputs
+            register={register}
+            errors={errors}
+            passwordLength={password?.length || 0}
+          />
         </ChangePasswordPageContent>
       )}
       renderFooter={() => (
