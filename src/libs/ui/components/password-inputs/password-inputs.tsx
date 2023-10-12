@@ -9,11 +9,7 @@ import {
   PasswordVisibilityIcon,
   Typography
 } from '@libs/ui';
-import {
-  InputsContainer,
-  SpacingSize,
-  VerticalSpaceContainer
-} from '@libs/layout';
+import { InputsContainer, ParagraphContainer, SpacingSize } from '@libs/layout';
 import { CreatePasswordFormValues } from '@libs/ui/forms/create-password';
 import { minPasswordLength } from '@libs/ui/forms/form-validation-rules';
 
@@ -38,7 +34,7 @@ export const PasswordInputs = ({
 
   return (
     <>
-      <VerticalSpaceContainer top={SpacingSize.Tiny}>
+      <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
           {needToAddMoreCharacters <= 0 ? (
             <Trans t={t}>
@@ -57,7 +53,7 @@ export const PasswordInputs = ({
             </Trans>
           )}
         </Typography>
-      </VerticalSpaceContainer>
+      </ParagraphContainer>
 
       <InputsContainer>
         <Input

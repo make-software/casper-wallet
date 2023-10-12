@@ -24,13 +24,6 @@ export const ChangePasswordPageContent = ({
           <Trans t={t}>Change Password</Trans>
         </Typography>
       </ParagraphContainer>
-      <ParagraphContainer top={SpacingSize.Medium}>
-        <Typography type="body" color="contentSecondary">
-          <Trans t={t}>
-            Password must be at least 16 characters in length.
-          </Trans>
-        </Typography>
-      </ParagraphContainer>
 
       {children}
     </ContentContainer>
