@@ -208,6 +208,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
           onFocus={handleFocus}
           data-testid={dataTestId}
           readOnly={readOnly}
+          disabled={disabled}
           autoComplete={autoComplete}
         />
 

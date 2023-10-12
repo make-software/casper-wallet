@@ -3,6 +3,12 @@ import { getType } from 'typesafe-actions';
 
 import { deriveKeyPair } from '@src/libs/crypto';
 import { encryptVault } from '@src/libs/crypto/vault';
+import {
+  deriveEncryptionKey,
+  encodePassword,
+  generateRandomSaltHex
+} from '@libs/crypto/hashing';
+import { convertBytesToHex } from '@libs/crypto/utils';
 
 import {
   LOCK_VAULT_TIMEOUT,
@@ -55,6 +61,7 @@ import { loginRetryCountReseted } from '../login-retry-count/actions';
 import { popupWindowInit } from '../windowManagement/actions';
 
 import {
+  changePassword,
   createAccount,
   lockVault,
   startBackground,
@@ -99,19 +106,20 @@ export function* vaultSagas() {
     updateVaultCipher
   );
   yield takeLatest(getType(createAccount), createAccountSaga);
+  yield takeLatest(getType(changePassword), changePasswordSaga);
 }
 
 /**
  * on lock destroy session, vault and deploys
  */
-function* lockVaultSaga(action: ReturnType<typeof lockVault>) {
+function* lockVaultSaga() {
   try {
     yield put(sessionReseted());
     yield put(vaultReseted());
     yield put(deploysReseted());
     yield put(accountInfoReset());
 
-    emitSdkEventToActiveTabs(tab => {
+    emitSdkEventToActiveTabs(() => {
       return sdkEvent.lockedEvent({
         isLocked: true,
         isConnected: undefined,
@@ -227,7 +235,7 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
 /**
  *
  */
-function* timeoutCounterSaga(action: any) {
+function* timeoutCounterSaga() {
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   try {
@@ -264,7 +272,7 @@ function* timeoutCounterSaga(action: any) {
 /**
  * update vault cipher on each vault update
  */
-function* updateVaultCipher(action: any) {
+function* updateVaultCipher() {
   try {
     // get current encryption key
     const encryptionKeyHash = yield* sagaSelect(selectEncryptionKeyHash);
@@ -312,6 +320,48 @@ function* createAccountSaga(action: ReturnType<typeof createAccount>) {
     };
 
     yield put(accountAdded(account));
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
+  try {
+    const { password } = action.payload;
+
+    const passwordSaltHash = generateRandomSaltHex();
+    const passwordHash = yield* sagaCall(() =>
+      encodePassword(password, passwordSaltHash)
+    );
+    const keyDerivationSaltHash = generateRandomSaltHex();
+    const newEncryptionKeyBytes = yield* sagaCall(() =>
+      deriveEncryptionKey(password, keyDerivationSaltHash)
+    );
+    const newEncryptionKeyHash = convertBytesToHex(newEncryptionKeyBytes);
+
+    yield put(
+      keysUpdated({
+        passwordHash,
+        passwordSaltHash,
+        keyDerivationSaltHash
+      })
+    );
+    yield put(
+      encryptionKeyHashCreated({ encryptionKeyHash: newEncryptionKeyHash })
+    );
+
+    const vault = yield* sagaSelect(selectVault);
+
+    // encrypt cipher with the new key
+    const newVaultCipher = yield* sagaCall(() =>
+      encryptVault(newEncryptionKeyHash, vault)
+    );
+
+    yield put(
+      vaultCipherCreated({
+        vaultCipher: newVaultCipher
+      })
+    );
   } catch (err) {
     console.error(err);
   }

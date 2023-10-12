@@ -193,6 +193,16 @@ export function NavigationMenuPageContent() {
               closeNavigationMenu();
               navigate(RouterPath.DownloadSecretKeys);
             }
+          },
+          {
+            id: 3,
+            title: t('Change Password'),
+            iconPath: 'assets/icons/secure.svg',
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.ChangePassword);
+            }
           }
         ]
       },
