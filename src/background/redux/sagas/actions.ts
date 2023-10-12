@@ -26,3 +26,7 @@ export const initVault = createAction('INIT_VAULT_SAGA')<{
 export const createAccount = createAction('CREATE_ACCOUNT_SAGA')<{
   name?: string;
 }>();
+
+export const changePassword = createAction('CHANGE_PASSWORD_SAGA')<{
+  password: string;
+}>();

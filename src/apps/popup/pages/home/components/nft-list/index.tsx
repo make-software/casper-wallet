@@ -57,6 +57,8 @@ export const NftList = () => {
     if (position) {
       container?.scrollTo(0, Number(position));
       localStorage.removeItem('nftTokenYPosition');
+    } else {
+      container?.scrollTo(0, 0);
     }
   }, []);
 
