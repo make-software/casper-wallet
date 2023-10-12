@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { useWatch } from 'react-hook-form';
 
 import {
   HeaderSubmenuBarNavLink,
@@ -39,8 +40,14 @@ export function CreateVaultPasswordPage({
   const {
     register,
     handleSubmit,
-    formState: { isDirty, isSubmitSuccessful, errors }
+    formState: { isDirty, isSubmitSuccessful, errors },
+    control
   } = useCreatePasswordForm();
+
+  const password = useWatch({
+    control,
+    name: 'password'
+  });
 
   useEffect(() => {
     if (passwordHash) {
@@ -93,7 +100,11 @@ export function CreateVaultPasswordPage({
         )}
         renderContent={() => (
           <CreateVaultPasswordPageContent>
-            <PasswordInputs register={register} errors={errors} />
+            <PasswordInputs
+              register={register}
+              errors={errors}
+              passwordLength={password?.length || 0}
+            />
           </CreateVaultPasswordPageContent>
         )}
         renderFooter={() => (

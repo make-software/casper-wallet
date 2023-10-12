@@ -135,6 +135,7 @@ export interface InputProps extends BaseProps {
   validationType?: InputValidationType;
   validationText?: string | null;
   dataTestId?: string;
+  autoComplete?: string;
 }
 
 export const Input = React.forwardRef<Ref, InputProps>(function Input(
@@ -158,6 +159,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
     onFocus,
     dataTestId,
     readOnly,
+    autoComplete,
     ...restProps
   }: InputProps,
   ref
@@ -206,6 +208,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
           onFocus={handleFocus}
           data-testid={dataTestId}
           readOnly={readOnly}
+          autoComplete={autoComplete}
         />
 
         {!suffixIcon && error && (

@@ -14,6 +14,13 @@ export function CreateVaultPasswordPageContent({
 }: CreatePasswordPageContentProps) {
   const { t } = useTranslation();
 
+  const needToAddMoreCharacters = minPasswordLength - passwordLength;
+
+  const [passwordInputType, setPasswordInputType] =
+    useState<PasswordInputType>('password');
+  const [confirmPasswordInputType, setConfirmPasswordInputType] =
+    useState<PasswordInputType>('password');
+
   return (
     <TabPageContainer>
       <Typography type="header">
@@ -32,6 +39,27 @@ export function CreateVaultPasswordPageContent({
           </Trans>
         </Typography>
       </TabTextContainer>
+
+      <VerticalSpaceContainer top={SpacingSize.Tiny}>
+        <Typography type="body" color="contentSecondary">
+          {needToAddMoreCharacters <= 0 ? (
+            <Trans t={t}>
+              Your password length is -{' '}
+              <Typography type="bodySemiBold" color="contentPrimary">
+                {{ passwordLength }} characters.
+              </Typography>
+            </Trans>
+          ) : (
+            <Trans t={t}>
+              You need to add at least{' '}
+              <Typography type="bodySemiBold" color="contentPrimary">
+                {{ needToAddMoreCharacters }} characters
+              </Typography>{' '}
+              more.
+            </Trans>
+          )}
+        </Typography>
+      </VerticalSpaceContainer>
 
       {children}
     </TabPageContainer>
