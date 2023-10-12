@@ -9,7 +9,7 @@ import {
   TabFooterContainer,
   TabHeaderContainer
 } from '@libs/layout';
-import { Button, Checkbox, Link } from '@libs/ui';
+import { Button, Checkbox, Link, PasswordInputs } from '@libs/ui';
 import {
   CreatePasswordFormValues,
   useCreatePasswordForm
@@ -37,9 +37,13 @@ export function CreateVaultPasswordPage({
   const { t } = useTranslation();
   const passwordHash = useSelector(selectPasswordHash);
 
-  const { register, handleSubmit, formState, control } =
-    useCreatePasswordForm();
-  const { isDirty, isSubmitSuccessful } = formState;
+  const {
+    register,
+    handleSubmit,
+    formState: { isDirty, isSubmitSuccessful, errors },
+    control
+  } = useCreatePasswordForm();
+
   const password = useWatch({
     control,
     name: 'password'
@@ -95,11 +99,13 @@ export function CreateVaultPasswordPage({
           </TabHeaderContainer>
         )}
         renderContent={() => (
-          <CreateVaultPasswordPageContent
-            formState={formState}
-            register={register}
-            passwordLength={password?.length || 0}
-          />
+          <CreateVaultPasswordPageContent>
+            <PasswordInputs
+              register={register}
+              errors={errors}
+              passwordLength={password?.length || 0}
+            />
+          </CreateVaultPasswordPageContent>
         )}
         renderFooter={() => (
           <TabFooterContainer>
