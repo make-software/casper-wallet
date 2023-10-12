@@ -18,7 +18,9 @@ import {
   accountNftTokensUpdated,
   accountNftTokensCountChanged,
   accountDeploysCountChanged,
-  accountCasperActivityCountChanged
+  accountCasperActivityCountChanged,
+  accountTrackingIdOfSentNftTokensChanged,
+  accountTrackingIdOfSentNftTokensRemoved
 } from './actions';
 
 const initialState: AccountInfoState = {
@@ -35,7 +37,8 @@ const initialState: AccountInfoState = {
   accountNftTokens: [],
   nftTokensCount: 0,
   accountDeploysCount: 0,
-  accountCasperActivityCount: 0
+  accountCasperActivityCount: 0,
+  accountTrackingIdOfSentNftTokens: {}
 };
 
 export const reducer = createReducer(initialState)
@@ -172,4 +175,28 @@ export const reducer = createReducer(initialState)
   .handleAction(accountCasperActivityCountChanged, (state, { payload }) => ({
     ...state,
     accountCasperActivityCount: payload
-  }));
+  }))
+  .handleAction(
+    accountTrackingIdOfSentNftTokensChanged,
+    (state, { payload: { trackingId, deployHash } }) => ({
+      ...state,
+      accountTrackingIdOfSentNftTokens: {
+        ...state.accountTrackingIdOfSentNftTokens,
+        [trackingId]: deployHash
+      }
+    })
+  )
+  .handleAction(
+    accountTrackingIdOfSentNftTokensRemoved,
+    (state, { payload }) => {
+      const accountTrackingIdOfSentNftTokens = {
+        ...state.accountTrackingIdOfSentNftTokens
+      };
+      delete accountTrackingIdOfSentNftTokens[payload];
+
+      return {
+        ...state,
+        accountTrackingIdOfSentNftTokens
+      };
+    }
+  );
