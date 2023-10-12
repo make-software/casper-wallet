@@ -7,7 +7,8 @@ import FlexRow from '../flex-row/flex-row';
 
 const StyledFlexRow = styled(FlexRow)<{
   checked?: boolean;
-}>(({ theme, checked }) => ({
+  disabled?: boolean;
+}>(({ theme, checked, disabled }) => ({
   cursor: 'pointer',
   width: 'fit-content',
   pointerEvents: 'auto',
@@ -18,7 +19,7 @@ const StyledFlexRow = styled(FlexRow)<{
     }
   },
   span: {
-    color: theme.color.contentPrimary
+    color: disabled ? theme.color.contentSecondary : theme.color.contentPrimary
   }
 }));
 
@@ -39,9 +40,12 @@ export function Checkbox({
   onChange,
   label,
   variant = 'circle',
-  dataTestId
+  dataTestId,
+  disabled
 }: CheckboxProps) {
   const handleClick = (ev: ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
+
     onChange && onChange(!checked);
   };
 
@@ -61,6 +65,7 @@ export function Checkbox({
       checked={checked}
       onClick={handleClick}
       data-testid={dataTestId}
+      disabled={disabled}
     >
       <CheckboxSvgIcon src={iconSrc} />
       {label && (
