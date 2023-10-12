@@ -9,7 +9,7 @@ import { PopupState } from '@src/background/redux/utils';
 import { rootAction } from '@src/background/redux';
 
 type Props = {
-  windowInitAction: typeof rootAction['windowManagement'][keyof typeof rootAction['windowManagement']];
+  windowInitAction: (typeof rootAction)['windowManagement'][keyof (typeof rootAction)['windowManagement']];
   setPopupState: React.Dispatch<React.SetStateAction<PopupState | null>>;
 };
 
@@ -31,7 +31,7 @@ export const useSubscribeToRedux = ({
       browser.runtime.onMessage.addListener(handleStateUpdate);
     }
 
-    browser.runtime.sendMessage((windowInitAction as any)()).catch(err => {
+    browser.runtime.sendMessage((windowInitAction as any)()).catch(() => {
       console.error('window init: ' + getType(windowInitAction));
     });
 

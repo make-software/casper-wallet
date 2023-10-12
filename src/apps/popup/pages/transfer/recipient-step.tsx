@@ -1,29 +1,21 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { UseFormReturn, useWatch } from 'react-hook-form';
-import { useSelector } from 'react-redux';
+import { UseFormReturn } from 'react-hook-form';
 
 import {
   ContentContainer,
   ParagraphContainer,
-  SpacingSize,
-  VerticalSpaceContainer
+  SpacingSize
 } from '@libs/layout';
 import {
-  Input,
-  List,
-  RecipientPlate,
-  SvgIcon,
   Typography,
-  ActiveAccountPlate
+  ActiveAccountPlate,
+  RecipientDropdownInput
 } from '@libs/ui';
-import { TransferFormValues } from '@libs/ui/forms/transfer';
-import { selectRecentRecipientPublicKeys } from '@src/background/redux/recent-recipient-public-keys/selectors';
-import { useClickAway } from '@libs/ui/hooks/use-click-away';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+import { TransferRecipientFormValues } from '@libs/ui/forms/transfer';
 
 interface RecipientStepProps {
-  recipientForm: UseFormReturn<TransferFormValues>;
+  recipientForm: UseFormReturn<TransferRecipientFormValues>;
   balance: string | null;
   symbol: string | null;
 }
@@ -33,56 +25,7 @@ export const RecipientStep = ({
   balance,
   symbol
 }: RecipientStepProps) => {
-  const [
-    isOpenRecentRecipientPublicKeysList,
-    setIsOpenRecentRecipientPublicKeysList
-  ] = useState(false);
-  const [showRecipientPlate, setShowRecipientPlate] = useState(false);
-
   const { t } = useTranslation();
-
-  const recentRecipientPublicKeys = useSelector(
-    selectRecentRecipientPublicKeys
-  );
-  const activeAccount = useSelector(selectVaultActiveAccount);
-
-  const { register, formState, setValue, control, trigger } = recipientForm;
-  const { errors } = formState;
-
-  const inputValue = useWatch({
-    control: control,
-    name: 'recipientPublicKey'
-  });
-  const { ref: clickAwayRef } = useClickAway({
-    callback: () => {
-      setIsOpenRecentRecipientPublicKeysList(false);
-      if (formState.isValid) {
-        setShowRecipientPlate(true);
-      }
-    }
-  });
-
-  useEffect(() => {
-    if (formState.isValid) {
-      setShowRecipientPlate(true);
-    }
-    //   This should trigger only once
-    //   eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const optionsRow = useMemo(
-    () =>
-      recentRecipientPublicKeys
-        .filter(item => item !== activeAccount?.publicKey)
-        .map((item, index) => ({
-          publicKey: item,
-          id: index
-        }))
-        .filter(item => item.publicKey.includes(inputValue || '')),
-    [activeAccount?.publicKey, inputValue, recentRecipientPublicKeys]
-  );
-
-  const recipientLabel = t('To recipient');
 
   return (
     <ContentContainer>
@@ -93,55 +36,7 @@ export const RecipientStep = ({
       </ParagraphContainer>
       <ActiveAccountPlate label="From" balance={balance} symbol={symbol} />
 
-      {showRecipientPlate ? (
-        <VerticalSpaceContainer top={SpacingSize.XL}>
-          <RecipientPlate
-            publicKey={inputValue}
-            recipientLabel={recipientLabel}
-            handleClick={() => {
-              setShowRecipientPlate(false);
-              setIsOpenRecentRecipientPublicKeysList(true);
-            }}
-          />
-        </VerticalSpaceContainer>
-      ) : (
-        <VerticalSpaceContainer
-          top={SpacingSize.XL}
-          ref={clickAwayRef}
-          onFocus={() => {
-            setIsOpenRecentRecipientPublicKeysList(true);
-          }}
-        >
-          <Input
-            monotype
-            label={recipientLabel}
-            prefixIcon={<SvgIcon src="assets/icons/search.svg" size={24} />}
-            placeholder={t('Recipient public address')}
-            {...register('recipientPublicKey')}
-            error={!!errors?.recipientPublicKey}
-            validationText={errors?.recipientPublicKey?.message}
-          />
-          {isOpenRecentRecipientPublicKeysList && (
-            <List
-              contentTop={SpacingSize.Tiny}
-              rows={optionsRow}
-              renderRow={({ publicKey }) => (
-                <RecipientPlate
-                  publicKey={publicKey}
-                  handleClick={async () => {
-                    setValue('recipientPublicKey', publicKey);
-                    await trigger('recipientPublicKey');
-
-                    setIsOpenRecentRecipientPublicKeysList(false);
-                    setShowRecipientPlate(true);
-                  }}
-                />
-              )}
-              marginLeftForItemSeparatorLine={56}
-            />
-          )}
-        </VerticalSpaceContainer>
-      )}
+      <RecipientDropdownInput recipientForm={recipientForm} />
     </ContentContainer>
   );
 };

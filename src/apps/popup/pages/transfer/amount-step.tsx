@@ -11,11 +11,11 @@ import {
 } from '@libs/layout';
 import { Input, Typography } from '@libs/ui';
 import { formatFiatAmount } from '@libs/ui/utils/formatters';
-import { TransferFormValues } from '@libs/ui/forms/transfer';
+import { TransferAmountFormValues } from '@libs/ui/forms/transfer';
 import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 
 interface AmountStepProps {
-  amountForm: UseFormReturn<TransferFormValues>;
+  amountForm: UseFormReturn<TransferAmountFormValues>;
   symbol: string | null;
   isCSPR: boolean;
 }
@@ -102,7 +102,6 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
           <Input
             label={paymentAmoutLabel}
             rightLabel={paymentFiatAmount}
-            type="number"
             monotype
             placeholder={t('Enter transaction fee')}
             suffixText={'CSPR'}

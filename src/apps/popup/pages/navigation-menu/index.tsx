@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -75,6 +75,12 @@ export function NavigationMenuPageContent() {
 
   const { openWindow } = useWindowManager();
   const { closeNavigationMenu } = useNavigationMenu();
+
+  useEffect(() => {
+    const container = document.querySelector('#ms-container');
+
+    container?.scrollTo(0, 0);
+  }, []);
 
   const menuGroups: MenuGroup[] = useMemo(
     () => [

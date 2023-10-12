@@ -1,7 +1,8 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
 import ReactPlayer from 'react-player';
+import { useSelector } from 'react-redux';
 
 import {
   AlignedFlexRow,
@@ -21,7 +22,9 @@ import {
   Tile,
   Typography,
   EmptyMediaPlaceholder,
-  LoadingMediaPlaceholder
+  LoadingMediaPlaceholder,
+  Button,
+  Status
 } from '@libs/ui';
 import { NFTTokenResult } from '@libs/services/nft-service';
 import {
@@ -33,7 +36,12 @@ import {
   getNftTokenMetadataWithLinks,
   MapNFTTokenStandardToName
 } from '@src/utils';
+import { RouterPath, useTypedNavigate } from '@popup/router';
 import { useAsyncEffect } from '@src/hooks';
+import { selectAccountTrackingIdOfSentNftTokens } from '@background/redux/account-info/selectors';
+import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { accountTrackingIdOfSentNftTokensRemoved } from '@background/redux/account-info/actions';
 
 const NftImageContainer = styled(CenteredFlexRow)`
   width: 100%;
@@ -64,6 +72,14 @@ const Container = styled(AlignedSpaceBetweenFlexRow)<{ withIcon: boolean }>`
   padding: ${({ withIcon }) => (withIcon ? '14px 16px' : '18px 16px')};
 `;
 
+const ButtonsContainer = styled(CenteredFlexRow)`
+  margin: 20px 0;
+`;
+
+const ButtonContainer = styled(CenteredFlexColumn)<{ disabled: boolean }>`
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+`;
+
 const Player = styled(ReactPlayer)`
   max-height: 312px;
   max-width: 312px;
@@ -87,7 +103,16 @@ export const NftDetailsContent = ({
   const [contentType, setContentType] = useState<ContentType>('');
   const [typeLoading, setTypeLoading] = useState<boolean>(true);
 
+  const accountTrackingIdOfSentNftTokens = useSelector(
+    selectAccountTrackingIdOfSentNftTokens
+  );
+
+  const isButtonDisabled = Boolean(
+    accountTrackingIdOfSentNftTokens[nftToken?.tracking_id!]
+  );
+
   const { t } = useTranslation();
+  const navigate = useTypedNavigate();
 
   const nftTokenMetadataWithLinks = useMemo(
     () => getNftTokenMetadataWithLinks(nftToken),
@@ -111,6 +136,27 @@ export const NftDetailsContent = ({
     [cachedUrl]
   );
 
+  useEffect(() => {
+    const deployHash = accountTrackingIdOfSentNftTokens[nftToken?.tracking_id!];
+
+    const interval = setInterval(async () => {
+      const { payload: extendedDeployInfo } =
+        await dispatchFetchExtendedDeploysInfo(deployHash);
+
+      if (extendedDeployInfo) {
+        if (extendedDeployInfo.status === Status.Executed) {
+          dispatchToMainStore(
+            accountTrackingIdOfSentNftTokensRemoved(nftToken?.tracking_id!)
+          );
+
+          clearInterval(interval);
+        }
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [accountTrackingIdOfSentNftTokens, nftToken?.tracking_id]);
+
   const tokenStandard = nftToken
     ? MapNFTTokenStandardToName[nftToken.token_standard_id]
     : '';
@@ -126,7 +172,9 @@ export const NftDetailsContent = ({
         id: 2,
         title: t('Collection'),
         value: nftToken?.contract_package?.contract_name,
-        image: nftToken?.contract_package?.icon_url
+        image:
+          nftToken?.contract_package?.icon_url ||
+          'assets/icons/nft-contract-icon.svg'
       },
       {
         id: 3,
@@ -226,6 +274,46 @@ export const NftDetailsContent = ({
       <List
         contentTop={SpacingSize.Medium}
         rows={tokenDetails}
+        renderHeader={() => (
+          <ButtonsContainer>
+            <ButtonContainer
+              gap={SpacingSize.Small}
+              disabled={isButtonDisabled}
+              onClick={() => {
+                if (isButtonDisabled) return;
+
+                navigate(
+                  RouterPath.TransferNft.replace(
+                    ':tokenId',
+                    nftToken?.token_id || ''
+                  ).replace(
+                    ':contractPackageHash',
+                    nftToken?.contract_package_hash || ''
+                  ),
+                  {
+                    state: {
+                      nftData: { contentType, url: cachedUrl || preview?.value }
+                    }
+                  }
+                );
+              }}
+            >
+              <Button circle disabled={isButtonDisabled}>
+                <SvgIcon
+                  src="assets/icons/transfer.svg"
+                  color="contentOnFill"
+                />
+              </Button>
+              {/* rename color names after dark mode will be merge */}
+              <Typography
+                type="captionMedium"
+                color={isButtonDisabled ? 'contentTertiary' : 'contentBlue'}
+              >
+                <Trans t={t}>Send</Trans>
+              </Typography>
+            </ButtonContainer>
+          </ButtonsContainer>
+        )}
         renderRow={token => (
           <Container
             wrap="wrap"

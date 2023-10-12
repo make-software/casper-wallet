@@ -14,7 +14,7 @@ interface RecipientPlateProps {
 const PublicKeyOptionContainer = styled(FlexRow)<{ onClick?: () => void }>`
   cursor: ${({ onClick }) => (onClick ? 'pointer' : 'initial')};
 
-  padding: 8px 16px;
+  padding: 12px 16px;
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
   border-radius: ${({ theme }) => theme.borderRadius.eight}px;

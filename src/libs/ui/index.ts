@@ -39,6 +39,9 @@ export * from './components/account-list/account-list';
 export * from './components/connection-status-badge/connection-status-badge';
 export * from './components/casper-token-activity-list/casper-token-activity-list';
 export * from './components/loading-activity-view/loading-activity-view';
+export * from './components/recipient-dropdown-input/recipient-dropdown-input';
+export * from './components/transfer-success-screen/transfer-succeess-screen';
+export * from './components/contract-icon/contract-icon';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

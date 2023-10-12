@@ -1,19 +1,22 @@
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 
-import { TransferFormValues } from '@libs/ui/forms/transfer';
+import {
+  TransferAmountFormValues,
+  TransferRecipientFormValues
+} from '@libs/ui/forms/transfer';
+import { TransferSuccessScreen } from '@libs/ui';
 
 import { TransactionSteps } from './utils';
 import { RecipientStep } from './recipient-step';
 import { AmountStep } from './amount-step';
 import { ConfirmStep } from './confirm-step';
-import { SuccessStep } from './success-step';
 
 interface TransferPageContentProps {
   transferStep: TransactionSteps;
   recipientPublicKey: string;
-  amountForm: UseFormReturn<TransferFormValues>;
-  recipientForm: UseFormReturn<TransferFormValues>;
+  amountForm: UseFormReturn<TransferAmountFormValues>;
+  recipientForm: UseFormReturn<TransferRecipientFormValues>;
   amount: string;
   balance: string | null;
   symbol: string | null;
@@ -61,7 +64,7 @@ export const TransferPageContent = ({
     }
 
     case TransactionSteps.Success: {
-      return <SuccessStep />;
+      return <TransferSuccessScreen isNftTransfer={false} />;
     }
 
     default: {

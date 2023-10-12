@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -8,7 +8,6 @@ import {
   CenteredFlexRow,
   FlexColumn,
   HeaderSubmenuBarNavLink,
-  IconCircleContainer,
   LinkType,
   SpacingSize
 } from '@libs/layout';
@@ -25,6 +24,7 @@ import {
 import {
   AccountActionsMenuPopover,
   Avatar,
+  Button,
   getFontSizeBasedOnTextLength,
   Hash,
   HashVariant,
@@ -95,6 +95,14 @@ export function HomePageContent() {
       });
     }
   }, [activeAccount?.publicKey, network]);
+
+  useEffect(() => {
+    if (!state?.activeTabId) {
+      const container = document.querySelector('#ms-container');
+
+      container?.scrollTo(0, 0);
+    }
+  }, [state?.activeTabId]);
 
   return (
     <ContentContainer>
@@ -173,12 +181,12 @@ export function HomePageContent() {
                   )
                 }
               >
-                <IconCircleContainer color="fillBlue">
+                <Button circle>
                   <SvgIcon
                     src="assets/icons/transfer.svg"
                     color="contentOnFill"
                   />
-                </IconCircleContainer>
+                </Button>
                 <Typography type="captionMedium" color="contentBlue">
                   <Trans t={t}>Send</Trans>
                 </Typography>
@@ -191,12 +199,12 @@ export function HomePageContent() {
                   })
                 }
               >
-                <IconCircleContainer color="fillBlue">
+                <Button circle>
                   <SvgIcon
                     src="assets/icons/receive.svg"
                     color="contentOnFill"
                   />
-                </IconCircleContainer>
+                </Button>
                 <Typography type="captionMedium" color="contentBlue">
                   <Trans t={t}>Receive</Trans>
                 </Typography>
@@ -206,12 +214,12 @@ export function HomePageContent() {
                   gap={SpacingSize.Small}
                   onClick={handleBuyWithCSPR}
                 >
-                  <IconCircleContainer color="fillBlue">
+                  <Button circle>
                     <SvgIcon
                       src="assets/icons/card.svg"
                       color="contentOnFill"
                     />
-                  </IconCircleContainer>
+                  </Button>
                   <Typography type="captionMedium" color="contentBlue">
                     <Trans t={t}>Buy</Trans>
                   </Typography>
