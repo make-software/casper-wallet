@@ -19,6 +19,7 @@ export interface AccountInfoState {
   nftTokensCount: number;
   accountDeploysCount: number;
   accountCasperActivityCount: number;
+  accountTrackingIdOfSentNftTokens: Record<string, string>;
 }
 
 interface AccountErc20TokenActivity {

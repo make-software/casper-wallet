@@ -32,3 +32,6 @@ export const selectAccountDeploysCount = (state: RootState) =>
 
 export const selectAccountCasperActivityCount = (state: RootState) =>
   state.accountInfo.accountCasperActivityCount;
+
+export const selectAccountTrackingIdOfSentNftTokens = (state: RootState) =>
+  state.accountInfo.accountTrackingIdOfSentNftTokens;
