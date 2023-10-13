@@ -7,18 +7,17 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@src/libs/layout';
-import { Typography } from '@src/libs/ui';
+import { SvgIcon, Typography } from '@src/libs/ui';
 
 export function DownloadedSecretKeysPageContent() {
   const { t } = useTranslation();
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <img
-          src="assets/illustrations/key-downloaded.png"
+        <SvgIcon
+          src="assets/illustrations/key-downloaded.svg"
           width={190}
           height={120}
-          alt="key downloaded"
         />
       </IllustrationContainer>
 

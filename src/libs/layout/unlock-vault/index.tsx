@@ -16,7 +16,8 @@ import {
   Typography,
   Input,
   Button,
-  PasswordVisibilityIcon
+  PasswordVisibilityIcon,
+  SvgIcon
 } from '@src/libs/ui';
 
 import { dispatchToMainStore } from '@src/background/redux/utils';
@@ -145,11 +146,10 @@ export function UnlockVaultPageContent() {
       <>
         <ContentContainer>
           <IllustrationContainer>
-            <img
-              src="assets/illustrations/password-lock.png"
+            <SvgIcon
+              src="assets/illustrations/password-lock.svg"
               width={210}
               height={120}
-              alt="password lock"
             />
           </IllustrationContainer>
           <ParagraphContainer top={SpacingSize.XL}>
@@ -184,11 +184,10 @@ export function UnlockVaultPageContent() {
     <form onSubmit={handleSubmit(handleUnlockVault)}>
       <ContentContainer>
         <IllustrationContainer>
-          <img
-            src="assets/illustrations/locked-wallet.png"
+          <SvgIcon
+            src="assets/illustrations/locked-wallet.svg"
             width={200}
             height={120}
-            alt="locked wallet"
           />
         </IllustrationContainer>
         <ParagraphContainer top={SpacingSize.XL}>

@@ -8,7 +8,7 @@ import {
   IllustrationContainer,
   SpacingSize
 } from '@src/libs/layout';
-import { Button, Typography } from '@src/libs/ui';
+import { Button, SvgIcon, Typography } from '@src/libs/ui';
 
 import {
   RouterPath,
@@ -26,11 +26,10 @@ export function ImportAccountWithFileFailureContentPage() {
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <img
-          src="assets/illustrations/error.png"
+        <SvgIcon
+          src="assets/illustrations/error.svg"
           width={200}
           height={120}
-          alt="error"
         />
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>

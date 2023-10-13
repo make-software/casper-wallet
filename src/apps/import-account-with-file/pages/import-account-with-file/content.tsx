@@ -7,7 +7,7 @@ import {
   IllustrationContainer,
   SpacingSize
 } from '@src/libs/layout';
-import { Tag, Typography } from '@libs/ui';
+import { SvgIcon, Tag, Typography } from '@libs/ui';
 import { isSafariBuild } from '@src/utils';
 
 export function ImportAccountWithFileContentPage() {
@@ -16,11 +16,10 @@ export function ImportAccountWithFileContentPage() {
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <img
-          src="assets/illustrations/secret-key.png"
+        <SvgIcon
+          src="assets/illustrations/import-secret-key.svg"
           width={200}
           height={120}
-          alt="secret key"
         />
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>

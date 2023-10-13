@@ -11,7 +11,7 @@ import {
   InputsContainer,
   SpacingSize
 } from '@src/libs/layout';
-import { Button, Input, Typography } from '@src/libs/ui';
+import { Button, Input, SvgIcon, Typography } from '@src/libs/ui';
 import {
   RenameAccountFormValues,
   useRenameAccount
@@ -50,11 +50,10 @@ export function RenameAccountPageContent() {
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <img
-          src="assets/illustrations/rename-account.png"
+        <SvgIcon
+          src="assets/illustrations/rename-account.svg"
           width={200}
           height={120}
-          alt="rename account"
         />
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>

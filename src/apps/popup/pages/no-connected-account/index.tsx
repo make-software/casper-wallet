@@ -8,7 +8,7 @@ import {
   FooterButtonsAbsoluteContainer,
   SpacingSize
 } from '@src/libs/layout';
-import { Typography, Button } from '@libs/ui';
+import { Typography, Button, SvgIcon } from '@libs/ui';
 
 import { useTypedNavigate, RouterPath } from '@popup/router';
 
@@ -19,11 +19,10 @@ export function NoConnectedAccountPageContent() {
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <img
-          src="assets/illustrations/no-connection.png"
+        <SvgIcon
+          src="assets/illustrations/no-connection.svg"
           width={200}
           height={120}
-          alt="no connection"
         />
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>

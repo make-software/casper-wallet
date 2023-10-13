@@ -13,7 +13,8 @@ import {
   Input,
   Typography,
   InputValidationType,
-  PasswordVisibilityIcon
+  PasswordVisibilityIcon,
+  SvgIcon
 } from '@libs/ui';
 import { UnlockWalletFormValues } from '@src/libs/ui/forms/unlock-wallet';
 
@@ -47,11 +48,10 @@ export function UnlockWalletPageContent({
   return (
     <TabPageContainer>
       <IllustrationContainer>
-        <img
-          src="assets/illustrations/locked-wallet.png"
+        <SvgIcon
+          src="assets/illustrations/locked-wallet.svg"
           width={200}
           height={120}
-          alt="locked wallet"
         />
       </IllustrationContainer>
 

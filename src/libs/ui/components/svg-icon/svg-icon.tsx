@@ -76,7 +76,6 @@ const Container = styled('div').withConfig({
 const StyledReactSVG = styled(ReactSVG)<SvgIconProps>(
   ({ size, width, height }) => ({
     display: 'flex',
-    fill: 'currentColor',
     width: width != null ? width : size,
     height: height != null ? height : size
   })

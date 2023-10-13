@@ -8,7 +8,7 @@ import {
   FooterButtonsAbsoluteContainer,
   SpacingSize
 } from '@src/libs/layout/containers';
-import { Typography, Button, Checkbox } from '@src/libs/ui';
+import { Typography, Button, Checkbox, SvgIcon } from '@src/libs/ui';
 
 import { useTypedNavigate } from '@popup/router';
 import { dispatchToMainStore } from '@src/background/redux/utils';
@@ -34,11 +34,10 @@ export function ResetVaultPageContent() {
     <>
       <ContentContainer>
         <IllustrationContainer>
-          <img
-            src="assets/illustrations/reset-wallet.png"
+          <SvgIcon
+            src="assets/illustrations/reset-wallet.svg"
             width={200}
             height={120}
-            alt="reset wallet"
           />
         </IllustrationContainer>
         <ParagraphContainer top={SpacingSize.XL}>

@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { TabPageContainer, TabTextContainer } from '@libs/layout';
-import { Link, Typography } from '@libs/ui';
+import { Link, SvgIcon, Typography } from '@libs/ui';
 
 const TipContainer = styled.div`
   margin-top: 12px;
@@ -14,11 +14,10 @@ export function OnboardingSuccessPageContent() {
 
   return (
     <TabPageContainer>
-      <img
-        src="assets/illustrations/wallet-connected.png"
+      <SvgIcon
+        src="assets/illustrations/wallet-ready.svg"
         width={230}
         height={120}
-        alt="wallet connected"
       />
       <TabTextContainer>
         <Typography type="header">

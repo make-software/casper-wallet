@@ -46,11 +46,10 @@ export function ImportAccountWithFileUploadPageContent({
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <img
-          src="assets/illustrations/secret-key.png"
+        <SvgIcon
+          src="assets/illustrations/import-secret-key.svg"
           width={200}
           height={120}
-          alt="secret key"
         />
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>

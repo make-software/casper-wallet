@@ -1,18 +1,17 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
-import { Typography } from '@libs/ui';
+import { SvgIcon, Typography } from '@libs/ui';
 import { TabPageContainer, TabTextContainer } from '@src/libs/layout';
 
 export function WelcomePageContent() {
   const { t } = useTranslation();
   return (
     <TabPageContainer>
-      <img
-        src="assets/illustrations/welcome.png"
+      <SvgIcon
+        src="assets/illustrations/welcome.svg"
         width={225}
         height={120}
-        alt="welcome"
       />
       <TabTextContainer>
         <Typography type="header">
