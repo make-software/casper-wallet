@@ -8,7 +8,7 @@ import {
   FooterButtonsAbsoluteContainer,
   SpacingSize
 } from '@src/libs/layout/containers';
-import { SvgIcon, Typography, Button, Checkbox } from '@src/libs/ui';
+import { Typography, Button, Checkbox, SvgIcon } from '@src/libs/ui';
 
 import { useTypedNavigate } from '@popup/router';
 import { dispatchToMainStore } from '@src/background/redux/utils';

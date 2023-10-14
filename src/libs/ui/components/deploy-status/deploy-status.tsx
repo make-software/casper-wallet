@@ -3,14 +3,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import {
-  BackgroundColor,
-  ContentColor,
-  getColorFromTheme,
-  SvgIcon,
-  Tooltip,
-  Typography
-} from '@libs/ui';
+import { ContentColor, SvgIcon, Tooltip, Typography } from '@libs/ui';
 
 export enum Status {
   Success = 'success',
@@ -29,19 +22,20 @@ const StatusIcons = {
 };
 
 const StatusColors = {
-  [Status.Success]: 'contentGreen',
-  [Status.Executed]: 'contentGreen',
+  [Status.Success]: 'contentPositive',
+  [Status.Executed]: 'contentPositive',
   [Status.Pending]: 'contentLightBlue',
-  [Status.Error]: 'contentRed',
-  [Status.Expired]: 'contentRed'
+  [Status.Error]: 'contentActionCritical',
+  [Status.Expired]: 'contentActionCritical'
 };
 
+// TODO: replace with theme colors and use hexToRGBA
 const StatusBackgroundColors = {
-  [Status.Success]: 'backgroundLightGreen',
-  [Status.Executed]: 'backgroundLightGreen',
-  [Status.Pending]: 'backgroundLightBlue',
-  [Status.Error]: 'backgroundLightRed',
-  [Status.Expired]: 'backgroundLightRed'
+  [Status.Success]: 'rgba(119, 255, 190, 0.12)',
+  [Status.Executed]: 'rgba(119, 255, 190, 0.12)',
+  [Status.Pending]: 'rgba(116, 144, 255, 0.12)',
+  [Status.Error]: 'rgba(204, 0, 15, 0.08)',
+  [Status.Expired]: 'rgba(204, 0, 15, 0.08)'
 };
 
 const getDeployStatus = (
@@ -74,10 +68,7 @@ const StatusContainer = styled(AlignedFlexRow)<{ status: Status }>(
   ({ theme, status }) => ({
     padding: '4px 8px',
 
-    backgroundColor: getColorFromTheme(
-      theme,
-      StatusBackgroundColors[status] as BackgroundColor
-    ),
+    backgroundColor: StatusBackgroundColors[status],
     borderRadius: theme.borderRadius.hundred
   })
 );

@@ -8,7 +8,7 @@ import {
   FooterButtonsAbsoluteContainer,
   SpacingSize
 } from '@src/libs/layout';
-import { Typography, SvgIcon, Button } from '@libs/ui';
+import { Typography, Button, SvgIcon } from '@libs/ui';
 
 import { useTypedNavigate, RouterPath } from '@popup/router';
 

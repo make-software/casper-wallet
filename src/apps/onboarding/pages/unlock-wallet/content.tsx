@@ -11,10 +11,10 @@ import {
 import {
   PasswordInputType,
   Input,
-  SvgIcon,
   Typography,
   InputValidationType,
-  PasswordVisibilityIcon
+  PasswordVisibilityIcon,
+  SvgIcon
 } from '@libs/ui';
 import { UnlockWalletFormValues } from '@src/libs/ui/forms/unlock-wallet';
 

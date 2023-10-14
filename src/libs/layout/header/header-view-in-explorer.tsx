@@ -111,10 +111,10 @@ export function HeaderViewInExplorer({
     >
       <CenteredFlexColumn gap={SpacingSize.Medium}>
         <AlignedFlexRow gap={SpacingSize.Small}>
-          <Typography type="bodySemiBold" color="contentBlue">
+          <Typography type="bodySemiBold" color="contentAction">
             CSPR.live
           </Typography>
-          <SvgIcon src="assets/icons/external-link.svg" color="contentBlue" />
+          <SvgIcon src="assets/icons/external-link.svg" color="contentAction" />
         </AlignedFlexRow>
       </CenteredFlexColumn>
     </Link>

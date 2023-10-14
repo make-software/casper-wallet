@@ -30,7 +30,7 @@ const HashContainer = styled.div`
   cursor: pointer;
 
   &:hover span {
-    color: ${({ theme }) => theme.color.contentBlue};
+    color: ${({ theme }) => theme.color.contentAction};
   }
 `;
 
@@ -97,7 +97,7 @@ export const ReceivePageContent = () => {
                 }}
               />
               {isClicked ? (
-                <Typography type="captionHash" color="contentGreen">
+                <Typography type="captionHash" color="contentPositive">
                   <Trans t={t}>Address copied!</Trans>
                 </Typography>
               ) : (

@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import browser from 'webextension-polyfill';
 
 import {
+  AlignedFlexRow,
   CenteredFlexRow,
   FlexColumn,
   HeaderSubmenuBarNavLink,
@@ -110,7 +111,7 @@ export function HomePageContent() {
         <Tile>
           <TileContainer>
             <SpaceBetweenFlexRow>
-              <FlexRow gap={SpacingSize.Large}>
+              <AlignedFlexRow gap={SpacingSize.Large}>
                 <Avatar
                   size={44}
                   publicKey={activeAccount.publicKey}
@@ -128,7 +129,7 @@ export function HomePageContent() {
                     placement="bottomCenter"
                   />
                 </LeftAlignedFlexColumn>
-              </FlexRow>
+              </AlignedFlexRow>
               <AccountActionsMenuPopover account={activeAccount} />
             </SpaceBetweenFlexRow>
             <DividerLine />
@@ -187,7 +188,7 @@ export function HomePageContent() {
                     color="contentOnFill"
                   />
                 </Button>
-                <Typography type="captionMedium" color="contentBlue">
+                <Typography type="captionMedium" color="contentAction">
                   <Trans t={t}>Send</Trans>
                 </Typography>
               </ButtonContainer>
@@ -205,7 +206,7 @@ export function HomePageContent() {
                     color="contentOnFill"
                   />
                 </Button>
-                <Typography type="captionMedium" color="contentBlue">
+                <Typography type="captionMedium" color="contentAction">
                   <Trans t={t}>Receive</Trans>
                 </Typography>
               </ButtonContainer>
@@ -220,7 +221,7 @@ export function HomePageContent() {
                       color="contentOnFill"
                     />
                   </Button>
-                  <Typography type="captionMedium" color="contentBlue">
+                  <Typography type="captionMedium" color="contentAction">
                     <Trans t={t}>Buy</Trans>
                   </Typography>
                 </ButtonContainer>

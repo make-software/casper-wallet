@@ -1,7 +1,10 @@
 import styled, { css } from 'styled-components';
+import { getLinearGradientColor } from '@libs/ui/utils/get-linear-gradient-color';
+import { hexToRGBA } from '@libs/ui/utils/hex-to-rgba';
 
 // Be careful when importing dependencies here
-// Import of getColorFromTheme from '@libs/ui' cause huge problems with webpack bundle and lead to blank popups
+// Import of getColorFromTheme or getLinearGradientColor from '@libs/ui'
+// cause huge problems with webpack bundle and lead to blank popups
 
 export enum SpacingSize {
   None = 'none',
@@ -150,7 +153,8 @@ export const SpaceAroundFlexColumn = styled(FlexColumn)`
 `;
 
 export const HeaderContainer = styled(AlignedSpaceBetweenFlexRow)`
-  background-color: ${({ theme }) => theme.color.backgroundRed};
+  background: ${({ theme }) =>
+    getLinearGradientColor(theme.color.backgroundRed)};
   height: 72px;
 
   padding: 0 16px;
@@ -289,7 +293,7 @@ export const Overlay = styled.div`
   height: 100vh;
   width: 100vw;
 
-  background: rgba(0, 0, 0, 0.32);
+  background: ${({ theme }) => hexToRGBA(theme.color.black, '0.32')};
 `;
 
 export const AccountActivityPlateContainer = styled(AlignedSpaceBetweenFlexRow)`
@@ -310,7 +314,7 @@ export const ActivityPlateIconCircleContainer = styled(CenteredFlexRow)`
 
   margin-right: 4px;
 
-  background-color: ${({ theme }) => theme.color.fillSecondary};
+  background: ${({ theme }) => theme.color.fillNeutral};
   border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
 

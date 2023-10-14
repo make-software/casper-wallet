@@ -15,17 +15,21 @@ import {
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@src/libs/layout';
-import { SvgIcon, Typography, List, Link } from '@src/libs/ui';
+import { SvgIcon, Typography, List, Link, Toggle } from '@src/libs/ui';
 
 import {
   selectCountOfConnectedSites,
   selectVaultHasImportedAccount
 } from '@src/background/redux/vault/selectors';
-import { selectTimeoutDurationSetting } from '@src/background/redux/settings/selectors';
+import {
+  selectDarkModeSetting,
+  selectTimeoutDurationSetting
+} from '@src/background/redux/settings/selectors';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { lockVault } from '@src/background/redux/sagas/actions';
 import { TimeoutDurationSetting } from '@popup/constants';
 import { isSafariBuild } from '@src/utils';
+import { darkModeSettingChanged } from '@background/redux/settings/actions';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;
@@ -40,7 +44,7 @@ const ListItemClickableContainer = styled(
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 
   &:hover svg {
-    color: ${({ theme }) => theme.color.contentBlue};
+    color: ${({ theme }) => theme.color.contentAction};
   }
 `;
 
@@ -58,6 +62,7 @@ interface MenuItem {
   currentValue?: string | number;
   handleOnClick?: () => void;
   hide?: boolean;
+  toggleButton?: boolean;
 }
 
 interface MenuGroup {
@@ -72,6 +77,7 @@ export function NavigationMenuPageContent() {
   const timeoutDurationSetting = useSelector(selectTimeoutDurationSetting);
   const countOfConnectedSites = useSelector(selectCountOfConnectedSites);
   const vaultHasImportedAccount = useSelector(selectVaultHasImportedAccount);
+  const isDarkMode = useSelector(selectDarkModeSetting);
 
   const { openWindow } = useWindowManager();
   const { closeNavigationMenu } = useNavigationMenu();
@@ -150,6 +156,15 @@ export function NavigationMenuPageContent() {
               closeNavigationMenu();
               navigate(RouterPath.Timeout);
             }
+          },
+          {
+            id: 3,
+            title: t('Dark mode'),
+            iconPath: isDarkMode
+              ? 'assets/icons/sun.svg'
+              : 'assets/icons/moon.svg',
+            toggleButton: true,
+            disabled: false
           }
         ]
       },
@@ -213,12 +228,13 @@ export function NavigationMenuPageContent() {
     ],
     [
       t,
-      navigate,
-      openWindow,
-      closeNavigationMenu,
       countOfConnectedSites,
       timeoutDurationSetting,
-      vaultHasImportedAccount
+      isDarkMode,
+      vaultHasImportedAccount,
+      closeNavigationMenu,
+      navigate,
+      openWindow
     ]
   );
 
@@ -248,7 +264,7 @@ export function NavigationMenuPageContent() {
                 <SvgIcon
                   src={groupItem.iconPath}
                   color={
-                    groupItem.disabled ? 'contentSecondary' : 'contentBlue'
+                    groupItem.disabled ? 'contentSecondary' : 'contentAction'
                   }
                 />
                 <SpaceBetweenContainer>
@@ -272,9 +288,17 @@ export function NavigationMenuPageContent() {
                     <Typography type="body">{groupItem.title}</Typography>
                   )}
                   {groupItem.currentValue != null && (
-                    <Typography type="bodySemiBold" color="contentBlue">
+                    <Typography type="bodySemiBold" color="contentAction">
                       {groupItem.currentValue}
                     </Typography>
+                  )}
+                  {groupItem.toggleButton && (
+                    <Toggle
+                      toggled={isDarkMode}
+                      onClick={() =>
+                        dispatchToMainStore(darkModeSettingChanged())
+                      }
+                    />
                   )}
                 </SpaceBetweenContainer>
               </ListItemClickableContainer>

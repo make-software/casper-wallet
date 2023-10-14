@@ -9,7 +9,7 @@ import {
   InputsContainer,
   SpacingSize
 } from '@src/libs/layout';
-import { SvgIcon, Typography, Input } from '@src/libs/ui';
+import { Typography, Input, SvgIcon } from '@src/libs/ui';
 import { CreateAccountFormValues } from '@src/libs/ui/forms/create-account';
 
 interface CreateAccountPageContentProps {

@@ -1,22 +1,24 @@
 import React from 'react';
-import styled from 'styled-components';
-import { ContentColor, getColorFromTheme, themeConfig } from '@src/libs/ui';
+import styled, { DefaultTheme } from 'styled-components';
 
-type LinkColor = 'fillBlue' | 'fillRed' | 'inherit';
+import { getColorFromTheme } from '@src/libs/ui';
 
-const getStateColor = (color: LinkColor) => {
+type LinkColor = 'contentAction' | 'fillCritical' | 'inherit';
+
+// TODO: do we need this?
+const getStateColor = (theme: DefaultTheme, color: LinkColor) => {
   return (
     // @ts-ignore
     {
-      fillBlue: {
-        color: themeConfig.color.fillBlue,
-        hover: themeConfig.color.fillBlueHover,
-        active: themeConfig.color.fillBlueClick
+      contentAction: {
+        color: getColorFromTheme(theme, 'contentAction'),
+        hover: getColorFromTheme(theme, 'contentAction'),
+        active: getColorFromTheme(theme, 'contentAction')
       },
-      fillRed: {
-        color: themeConfig.color.fillRed,
-        hover: themeConfig.color.fillRedHover,
-        active: themeConfig.color.fillRedClick
+      fillCritical: {
+        color: getColorFromTheme(theme, 'fillCritical'),
+        hover: getColorFromTheme(theme, 'fillCriticalHover'),
+        active: getColorFromTheme(theme, 'fillCriticalClick')
       }
     }[color] || {
       color: 'inherit',
@@ -26,25 +28,22 @@ const getStateColor = (color: LinkColor) => {
   );
 };
 
-/* eslint-disable-next-line */
 export interface LinkProps extends React.HTMLAttributes<Ref> {
   href?: string;
   target?: string;
   color: LinkColor;
-  hoverColor?: ContentColor;
 }
 
 type Ref = HTMLAnchorElement;
-const StyledLink = styled.a<LinkProps>(({ theme, color, hoverColor }) => {
-  const stateColor = getStateColor(color);
-  const hover = hoverColor && getColorFromTheme(theme, hoverColor);
+const StyledLink = styled.a<LinkProps>(({ theme, color }) => {
+  const stateColor = getStateColor(theme, color);
 
   return {
     textDecoration: 'none',
     cursor: 'pointer',
     color: stateColor.color,
     '&:hover > *': {
-      color: hover || stateColor.hover
+      color: stateColor.hover
     },
     '&:active > *': {
       color: stateColor.active

@@ -101,6 +101,12 @@ export const TypeIcons = {
   [TransferType.Unknown]: 'assets/icons/info.svg'
 };
 
+export const TypeColors = {
+  [TransferType.Sent]: 'contentAction',
+  [TransferType.Received]: 'contentPositive',
+  [TransferType.Unknown]: 'contentDisabled'
+};
+
 export enum HomePageTabName {
   Tokens = 'Tokens',
   Deploys = 'Deploys',

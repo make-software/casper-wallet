@@ -18,8 +18,8 @@ const Step = styled.div<StepProps>`
   width: 8px;
   height: 8px;
 
-  background-color: ${({ theme, isActiveStep }) =>
-    isActiveStep ? theme.color.fillRed : theme.color.fillSecondary};
+  background: ${({ theme, isActiveStep }) =>
+    isActiveStep ? theme.color.fillCritical : theme.color.fillNeutral};
 
   border-radius: ${({ theme }) => theme.borderRadius.eight}px;
 `;

@@ -92,7 +92,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
 
       {isCSPR && disabled && (
         <ParagraphContainer top={SpacingSize.Small}>
-          <Typography type="body" color="contentRed">
+          <Typography type="body" color="contentActionCritical">
             <Trans t={t}>
               You don't have enough CSPR to cover the transfer minimum amount
               and the transaction fee.

@@ -138,7 +138,7 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
             <Button circle>
               <SvgIcon src="assets/icons/transfer.svg" color="contentOnFill" />
             </Button>
-            <Typography type="captionMedium" color="contentBlue">
+            <Typography type="captionMedium" color="contentAction">
               <Trans t={t}>Send</Trans>
             </Typography>
           </ButtonContainer>
@@ -151,7 +151,7 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
             <Button circle>
               <SvgIcon src="assets/icons/receive.svg" color="contentOnFill" />
             </Button>
-            <Typography type="captionMedium" color="contentBlue">
+            <Typography type="captionMedium" color="contentAction">
               <Trans t={t}>Receive</Trans>
             </Typography>
           </ButtonContainer>
@@ -170,7 +170,7 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
                       color="contentOnFill"
                     />
                   </Button>
-                  <Typography type="captionMedium" color="contentBlue">
+                  <Typography type="captionMedium" color="contentAction">
                     Buy
                   </Typography>
                 </CenteredFlexColumn>

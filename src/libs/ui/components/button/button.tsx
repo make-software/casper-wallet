@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { BaseProps } from '@src/libs/ui';
+import { BaseProps, getLinearGradientColor } from '@src/libs/ui';
 
 interface BaseButtonProps extends BaseProps {
   type?: 'button' | 'submit' | 'reset';
@@ -62,113 +62,95 @@ const BaseButton = styled.button<BaseButtonProps>(
 
 const PrimaryBlueButton = styled(BaseButton)<BaseButtonProps>(
   ({ theme, disabled }) => ({
-    color: theme.color.backgroundPrimary,
-    background: theme.color.fillBlue,
+    color: theme.color.contentOnFill,
+    background: theme.color.fillPrimary,
 
     ': hover': {
-      background: theme.color.fillBlueHover
+      background: theme.color.fillPrimaryHover
     },
     ': active': {
-      background: theme.color.fillBlueClick
+      background: theme.color.fillPrimaryClick
     },
 
     ...(disabled && {
-      color: theme.color.backgroundPrimary,
-      background: theme.color.fillTertiary
+      color: theme.color.contentDisabled,
+      background: getLinearGradientColor(theme.color.fillSecondary)
     })
   })
 );
 
 const PrimaryRedButton = styled(BaseButton)<BaseButtonProps>(
   ({ theme, disabled }) => ({
-    color: theme.color.backgroundPrimary,
-    background: theme.color.fillRed,
+    color: theme.color.contentOnFill,
+    background: theme.color.fillCritical,
 
     ': hover': {
-      background: theme.color.fillRedHover
+      background: theme.color.fillCriticalHover
     },
     ': active': {
-      background: theme.color.fillRedClick
+      background: theme.color.fillCriticalClick
     },
 
     ...(disabled && {
-      color: theme.color.backgroundPrimary,
-      background: theme.color.fillTertiary
+      color: theme.color.contentDisabled,
+      background: getLinearGradientColor(theme.color.fillSecondary)
     })
   })
 );
 
 const SecondaryBlueButton = styled(BaseButton)<BaseButtonProps>(
   ({ theme, disabled }) => ({
-    color: theme.color.contentBlue,
-    background: `linear-gradient(
-      ${theme.color.fillGradientOut.from},
-      ${theme.color.fillGradientOut.to}
-    )`,
+    color: theme.color.contentAction,
+    background: getLinearGradientColor(theme.color.fillSecondary),
 
     ': hover': {
-      background: `linear-gradient(
-        ${theme.color.fillGradientIn.from},
-        ${theme.color.fillGradientIn.to}
-      )`
+      background: getLinearGradientColor(theme.color.fillSecondaryHover)
     },
     ': active': {
-      background: theme.color.fillSecondary
+      background: theme.color.fillNeutral
     },
 
     ...(disabled && {
       color: theme.color.contentSecondary,
-      background: `linear-gradient(
-        ${theme.color.fillGradientOut.from},
-        ${theme.color.fillGradientOut.to}
-      )`
+      background: getLinearGradientColor(theme.color.fillSecondary)
     })
   })
 );
 
 const SecondaryRedButton = styled(BaseButton)<BaseButtonProps>(
   ({ theme, disabled }) => ({
-    color: theme.color.fillRed,
-    background: `linear-gradient(
-      ${theme.color.fillGradientOut.from},
-      ${theme.color.fillGradientOut.to}
-    )`,
+    color: theme.color.fillCritical,
+    background: getLinearGradientColor(theme.color.fillSecondary),
 
     ': hover': {
-      background: `linear-gradient(
-        ${theme.color.fillGradientIn.from},
-        ${theme.color.fillGradientIn.to}
-      )`
+      background: getLinearGradientColor(theme.color.fillSecondaryHover)
     },
     ': active': {
-      background: theme.color.fillSecondary
+      background: theme.color.fillNeutral
     },
 
     ...(disabled && {
       color: theme.color.contentSecondary,
-      background: `linear-gradient(
-        ${theme.color.fillGradientOut.from},
-        ${theme.color.fillGradientOut.to}
-      )`
+      background: getLinearGradientColor(theme.color.fillSecondary)
     })
   })
 );
 
 const UtilityButton = styled(BaseButton)<BaseButtonProps>(
   ({ theme, disabled }) => ({
-    color: theme.color.backgroundPrimary,
-    background: theme.color.fillBlue,
+    color: theme.color.contentOnFill,
+    background: theme.color.fillPrimary,
 
     ': hover': {
-      background: theme.color.fillBlueHover
+      background: theme.color.fillPrimaryHover
     },
     ': active': {
-      background: theme.color.fillBlueClick
+      background: theme.color.fillPrimaryClick
     },
 
     ...(disabled && {
-      color: theme.color.backgroundPrimary,
-      background: theme.color.fillTertiary
+      color: theme.color.contentDisabled,
+      background: getLinearGradientColor(theme.color.fillSecondary)
     })
   })
 );
