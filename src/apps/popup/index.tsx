@@ -34,7 +34,6 @@ const Tree = () => {
 
   return (
     <Suspense fallback={null}>
-      {/*// @ts-ignore*/}
       <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
         <GlobalStyle />
         <ReduxProvider store={store}>
