@@ -74,7 +74,7 @@
     "facepaint": "^1.2.1",
     "i18next": "^23.5.1",
     "i18next-browser-languagedetector": "^6.1.5",
-    "i18next-http-backend": "^1.4.0",
+    "i18next-http-backend": "^2.2.2",
     "i18next-parser": "^6.3.0",
     "lodash.throttle": "4.1.1",
     "mac-scrollbar": "^0.10.3",
