@@ -44,6 +44,7 @@ export * from './components/transfer-success-screen/transfer-succeess-screen';
 export * from './components/contract-icon/contract-icon';
 export * from './components/password-inputs/password-inputs';
 export * from './components/toggle/toggle';
+export * from './components/skeleton/skeleton';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

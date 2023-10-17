@@ -1,5 +1,4 @@
 import React, { forwardRef } from 'react';
-import Skeleton from 'react-loading-skeleton';
 
 import {
   AccountActivityPlateContainer,
@@ -7,7 +6,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Tile } from '@libs/ui';
+import { Skeleton, Tile } from '@libs/ui';
 
 type Ref = HTMLDivElement;
 
