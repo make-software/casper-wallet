@@ -28,6 +28,8 @@ export const GlobalStyle = createGlobalStyle<{ theme: any }>`
     min-height: 600px;
     background: ${props => props.theme.color.backgroundSecondary};
     border-radius: 16px;
+    
+    color: ${props => props.theme.color.contentPrimary};
   }
   
   * {

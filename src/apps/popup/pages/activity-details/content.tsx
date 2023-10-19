@@ -257,7 +257,7 @@ export const ActivityDetailsPageContent = ({
                   />
                   <Link
                     target="_blank"
-                    color="fillBlue"
+                    color="contentAction"
                     href={getBlockExplorerContractUrl(
                       casperLiveUrl,
                       deployInfo.contractPackageHash!
@@ -273,6 +273,7 @@ export const ActivityDetailsPageContent = ({
                         <SvgIcon
                           src="assets/icons/tick-in-circle.svg"
                           size={16}
+                          color="contentPositive"
                         />
                       ) : (
                         <SvgIcon src="assets/icons/copy.svg" size={16} />

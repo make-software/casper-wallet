@@ -71,6 +71,7 @@ import {
   vaultUnlocked
 } from './redux/session/actions';
 import {
+  changePassword,
   createAccount,
   initKeys,
   initVault,
@@ -96,7 +97,8 @@ import { loginRetryLockoutTimeSet } from './redux/login-retry-lockout-time/actio
 import { lastActivityTimeRefreshed } from './redux/last-activity-time/actions';
 import {
   activeNetworkSettingChanged,
-  activeTimeoutDurationSettingChanged
+  activeTimeoutDurationSettingChanged,
+  darkModeSettingChanged
 } from './redux/settings/actions';
 import { activeOriginChanged } from './redux/active-origin/actions';
 import { selectApiConfigBasedOnActiveNetwork } from './redux/settings/selectors';
@@ -512,6 +514,7 @@ browser.runtime.onMessage.addListener(
           case getType(activeAccountChanged):
           case getType(activeTimeoutDurationSettingChanged):
           case getType(activeNetworkSettingChanged):
+          case getType(darkModeSettingChanged):
           case getType(lastActivityTimeRefreshed):
           case getType(siteConnected):
           case getType(anotherAccountConnected):
@@ -551,6 +554,7 @@ browser.runtime.onMessage.addListener(
           case getType(accountCasperActivityCountChanged):
           case getType(accountTrackingIdOfSentNftTokensChanged):
           case getType(accountTrackingIdOfSentNftTokensRemoved):
+          case getType(changePassword):
             store.dispatch(action);
             return sendResponse(undefined);
 

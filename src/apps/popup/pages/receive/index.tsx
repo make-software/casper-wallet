@@ -40,7 +40,7 @@ export const ReceivePage = () => {
         <FooterButtonsContainer>
           <Button color="secondaryBlue" onClick={handleCopyOnClick}>
             {isClicked ? (
-              <Typography type="bodySemiBold" color="contentGreen">
+              <Typography type="bodySemiBold" color="contentPositive">
                 <Trans t={t}>Copied!</Trans>
               </Typography>
             ) : (

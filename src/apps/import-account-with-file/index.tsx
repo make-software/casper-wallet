@@ -10,11 +10,12 @@ import {
   createMainStoreReplica,
   PopupState
 } from '@src/background/redux/utils';
-import { GlobalStyle, themeConfig } from '@libs/ui';
+import { darkTheme, GlobalStyle, lightTheme } from '@libs/ui';
 import { ErrorBoundary } from '@src/libs/layout/error';
 
 import { AppRouter } from './app-router';
 import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
+import { selectDarkModeSetting } from '@background/redux/settings/selectors';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
@@ -30,9 +31,11 @@ const Tree = () => {
 
   const store = createMainStoreReplica(state);
 
+  const isDarkMode = selectDarkModeSetting(store.getState());
+
   return (
     <Suspense fallback={null}>
-      <ThemeProvider theme={themeConfig}>
+      <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
         <GlobalStyle />
         <ReduxProvider store={store}>
           <ErrorBoundary>

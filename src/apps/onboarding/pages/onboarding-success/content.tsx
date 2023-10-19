@@ -15,7 +15,7 @@ export function OnboardingSuccessPageContent() {
   return (
     <TabPageContainer>
       <SvgIcon
-        src="assets/illustrations/wallet-connected.svg"
+        src="assets/illustrations/wallet-ready.svg"
         width={230}
         height={120}
       />
@@ -42,7 +42,7 @@ export function OnboardingSuccessPageContent() {
             Tip: If this is your first time using a cryptocurrency web wallet we
             highly recommend reading through the user guides on{' '}
             <Link
-              color="fillBlue"
+              color="contentAction"
               target="_blank"
               href="https://www.casperwallet.io/"
             >

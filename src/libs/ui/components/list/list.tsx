@@ -108,7 +108,7 @@ export function List<ListRow extends ListRowBase>({
                 <Typography
                   type="labelMedium"
                   uppercase
-                  color="contentBlue"
+                  color="contentAction"
                   onClick={headerAction.onClick}
                 >
                   {headerAction.caption}

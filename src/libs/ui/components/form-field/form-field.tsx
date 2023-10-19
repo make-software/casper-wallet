@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Typography, BaseProps } from '@src/libs/ui';
+import { FlexColumn } from '@libs/layout';
 
 export enum FormFieldStatus {
   Error = 'error',
@@ -13,15 +14,10 @@ const getThemeColor = (status?: FormFieldStatus | null) => {
   }
 
   return {
-    [FormFieldStatus.Error]: 'fillRed',
-    [FormFieldStatus.Success]: 'fillGreen'
+    [FormFieldStatus.Error]: 'fillCritical',
+    [FormFieldStatus.Success]: 'fillPositive'
   }[status];
 };
-
-const StyledContainer = styled('div')(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column'
-}));
 
 const LabelContainer = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -56,7 +52,7 @@ export function FormField({
   ...restProps
 }: FormFieldProps) {
   return (
-    <StyledContainer {...restProps}>
+    <FlexColumn {...restProps}>
       <LabelContainer>
         {label && <Typography type="bodySemiBold">{label}</Typography>}
         {rightLabel && <Typography type="body">{rightLabel}</Typography>}
@@ -69,6 +65,6 @@ export function FormField({
           <Typography type="formFieldStatus">{statusText}</Typography>
         </StatusTextContainer>
       )}
-    </StyledContainer>
+    </FlexColumn>
   );
 }

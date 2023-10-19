@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { useWatch } from 'react-hook-form';
 
 import {
   HeaderSubmenuBarNavLink,
@@ -8,7 +9,7 @@ import {
   TabFooterContainer,
   TabHeaderContainer
 } from '@libs/layout';
-import { Button, Checkbox, Link } from '@libs/ui';
+import { Button, Checkbox, Link, PasswordInputs } from '@libs/ui';
 import {
   CreatePasswordFormValues,
   useCreatePasswordForm
@@ -36,8 +37,18 @@ export function CreateVaultPasswordPage({
   const { t } = useTranslation();
   const passwordHash = useSelector(selectPasswordHash);
 
-  const { register, handleSubmit, formState } = useCreatePasswordForm();
-  const { isDirty, isSubmitSuccessful } = formState;
+  const {
+    register,
+    handleSubmit,
+    formState: { isDirty, isSubmitSuccessful, errors },
+    control
+  } = useCreatePasswordForm();
+
+  const password = useWatch({
+    control,
+    name: 'password'
+  });
+
   useEffect(() => {
     if (passwordHash) {
       navigate(RouterPath.CreateSecretPhrase);
@@ -58,7 +69,7 @@ export function CreateVaultPasswordPage({
           event.preventDefault();
           window.open(TermsLink.Tos, '_blank');
         }}
-        color="fillBlue"
+        color="contentAction"
       >
         Casper Wallet Terms of Service
       </Link>{' '}
@@ -69,7 +80,7 @@ export function CreateVaultPasswordPage({
           event.preventDefault();
           window.open(TermsLink.Privacy, '_blank');
         }}
-        color="fillBlue"
+        color="contentAction"
       >
         Privacy Policy
       </Link>
@@ -88,10 +99,13 @@ export function CreateVaultPasswordPage({
           </TabHeaderContainer>
         )}
         renderContent={() => (
-          <CreateVaultPasswordPageContent
-            formState={formState}
-            register={register}
-          />
+          <CreateVaultPasswordPageContent>
+            <PasswordInputs
+              register={register}
+              errors={errors}
+              passwordLength={password?.length || 0}
+            />
+          </CreateVaultPasswordPageContent>
         )}
         renderFooter={() => (
           <TabFooterContainer>

@@ -304,10 +304,9 @@ export const NftDetailsContent = ({
                   color="contentOnFill"
                 />
               </Button>
-              {/* rename color names after dark mode will be merge */}
               <Typography
                 type="captionMedium"
-                color={isButtonDisabled ? 'contentTertiary' : 'contentBlue'}
+                color={isButtonDisabled ? 'contentDisabled' : 'contentAction'}
               >
                 <Trans t={t}>Send</Trans>
               </Typography>

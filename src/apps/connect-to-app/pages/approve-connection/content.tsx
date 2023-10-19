@@ -59,7 +59,7 @@ export function ApproveConnectionContent({
           contentTop={SpacingSize.Small}
           renderRow={listItem => (
             <ListItemContainer key={listItem.id}>
-              <SvgIcon src={listItem.iconPath} color="contentTertiary" />
+              <SvgIcon src={listItem.iconPath} color="contentDisabled" />
               <Typography type="body">{listItem.text}</Typography>
             </ListItemContainer>
           )}

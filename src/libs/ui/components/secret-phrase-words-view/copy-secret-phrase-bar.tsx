@@ -23,11 +23,11 @@ export function CopySecretPhraseBar({
                 : 'assets/icons/copy.svg'
             }
             size={isClicked ? 24 : 16}
-            color={isClicked ? 'contentGreen' : 'contentBlue'}
+            color={isClicked ? 'contentPositive' : 'contentAction'}
           />
           <Typography
             type="captionMedium"
-            color={isClicked ? 'contentGreen' : 'contentBlue'}
+            color={isClicked ? 'contentPositive' : 'contentAction'}
           >
             {isClicked
               ? t('Copied to clipboard')

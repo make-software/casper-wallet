@@ -18,6 +18,9 @@ const StyledTextArea = styled.textarea<{
   width: '100%',
   padding: '12px 16px',
 
+  backgroundColor: theme.color.backgroundPrimary,
+  color: theme.color.contentPrimary,
+
   ...((isDisabled || readOnly) && {
     color: theme.color.contentSecondary
   })

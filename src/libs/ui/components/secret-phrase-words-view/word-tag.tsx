@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Typography } from '@src/libs/ui';
+import { getLinearGradientColor, Typography } from '@src/libs/ui';
 import { FlexRow, SpacingSize } from '@src/libs/layout';
 
 interface IsEmptyWord {
@@ -15,11 +15,8 @@ const WordContainer = styled(FlexRow)<DisabledOrSelected & IsEmptyWord>`
   width: ${({ isEmptyWord }) => (isEmptyWord ? '72px' : 'unset')};
   background: ${({ theme, selected }) =>
     selected
-      ? theme.color.backgroundBlue
-      : `linear-gradient(
-        ${theme.color.fillGradientOut.from},
-        ${theme.color.fillGradientOut.to}
-  )`};
+      ? theme.color.fillPrimary
+      : getLinearGradientColor(theme.color.fillSecondary)};
   color: ${({ theme, disabled, selected }) =>
     disabled
       ? theme.color.contentSecondary

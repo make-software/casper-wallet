@@ -14,6 +14,7 @@ import {
   RightAlignedCenteredFlexRow
 } from '@libs/layout';
 import {
+  ContentColor,
   DeployStatus,
   Hash,
   HashVariant,
@@ -37,6 +38,7 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 import {
   ShortTypeName,
   TransferType,
+  TypeColors,
   TypeIcons,
   TypeName
 } from '@src/constants';
@@ -158,7 +160,13 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
         }}
       >
         <ActivityPlateIconCircleContainer>
-          {type != null && <SvgIcon src={TypeIcons[type]} size={16} />}
+          {type != null && (
+            <SvgIcon
+              src={TypeIcons[type]}
+              size={16}
+              color={TypeColors[type] as ContentColor}
+            />
+          )}
         </ActivityPlateIconCircleContainer>
         <ActivityPlateContentContainer>
           <AlignedSpaceBetweenFlexRow>

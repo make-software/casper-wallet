@@ -63,7 +63,7 @@ export function ConnectingContent({ origin }: ConnectingContentProps) {
             size={40}
           />
         </LogoOverlay>
-        <SvgIcon src="assets/illustrations/connection.svg" size={76} />
+        <SvgIcon src="assets/icons/connection.svg" size={76} />
         <LogoOverlay>
           {/* TODO: handle null-favicon-url case */}
           {faviconUrl && <AppLogoImg src={faviconUrl} alt="favicon" />}

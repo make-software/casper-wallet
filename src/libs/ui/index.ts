@@ -42,6 +42,9 @@ export * from './components/loading-activity-view/loading-activity-view';
 export * from './components/recipient-dropdown-input/recipient-dropdown-input';
 export * from './components/transfer-success-screen/transfer-succeess-screen';
 export * from './components/contract-icon/contract-icon';
+export * from './components/password-inputs/password-inputs';
+export * from './components/toggle/toggle';
+export * from './components/skeleton/skeleton';
 
 export * from './utils/match-media';
 export * from './utils/match-size';
@@ -50,3 +53,4 @@ export * from './utils/get-color-from-theme';
 export * from './theme-config';
 export * from './global-style';
 export * from './types';
+export * from './utils/get-linear-gradient-color';
