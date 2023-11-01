@@ -6,6 +6,10 @@
 
 ---
 
+## Integrate Casper Wallet Into Your App
+
+The recommended way of integrating Casper Wallet into your app is through [CSPR.click](https://CSPR.click), which provides a combined integration of major wallets in the Casper ecosystem, all at once, without the burden of maintaining multiple integrations at the same time. Please head over to [the CSPR.click documentation](https://docs.cspr.click) to start.
+
 ## Testing Casper Wallet integration on **Casper Wallet Playground**
 
 *Casper Wallet Playground is a React webapp created as a developer tool to help test integration with various features available in Casper Wallet.*
