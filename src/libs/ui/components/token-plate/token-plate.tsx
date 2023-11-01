@@ -79,7 +79,7 @@ export const TokenPlate = ({
               type="bodyHash"
               color="contentSecondary"
               ellipsis={!!(token?.symbol && token.symbol.length > 6)}
-              loading={!token?.symbol}
+              loading={!token?.symbol && token?.symbol !== ''}
             >
               {token?.symbol}
             </Typography>
