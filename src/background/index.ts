@@ -59,10 +59,7 @@ import {
   MapExtendedDeploy,
   MapPaginatedExtendedDeploys
 } from '@libs/services/account-activity-service';
-import {
-  fetchContractPackage,
-  fetchErc20Tokens
-} from '@libs/services/erc20-service';
+import { fetchErc20Tokens } from '@libs/services/erc20-service';
 
 import { openWindow } from './open-window';
 import {
@@ -102,7 +99,7 @@ import {
 } from './redux/settings/actions';
 import { activeOriginChanged } from './redux/active-origin/actions';
 import { selectApiConfigBasedOnActiveNetwork } from './redux/settings/selectors';
-import { getUrlOrigin, hasHttpPrefix, notEmpty } from '@src/utils';
+import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
 import {
   CannotGetActiveAccountError,
   CannotGetSenderOriginError
@@ -642,28 +639,11 @@ browser.runtime.onMessage.addListener(
               });
 
               if (tokensList) {
-                const erc20Tokens = await Promise.allSettled(
-                  tokensList?.map(token =>
-                    fetchContractPackage({
-                      casperApiUrl,
-                      contractPackageHash: token.contract_package_hash
-                    }).then(contractPackage => ({
-                      ...contractPackage,
-                      balance: token.balance,
-                      contractHash: token.latest_contract?.contract_hash
-                    }))
-                  )
-                ).then(results =>
-                  results
-                    .map(result => {
-                      if (result.status === 'fulfilled') {
-                        return result.value;
-                      } else {
-                        return null;
-                      }
-                    })
-                    .filter(notEmpty)
-                );
+                const erc20Tokens = tokensList.map(token => ({
+                  balance: token.balance,
+                  contractHash: token.latest_contract?.contract_hash,
+                  ...(token?.contract_package ?? {})
+                }));
 
                 return sendResponse(
                   serviceMessage.fetchErc20TokensResponse(erc20Tokens)
