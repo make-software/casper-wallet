@@ -12,6 +12,7 @@ export interface Erc20Token {
     protocol_version: string;
     timestamp: string;
   };
+  contract_package: ContractPackage;
 }
 
 export interface ContractPackage {
