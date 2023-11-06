@@ -170,7 +170,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
       : {
           [InputValidationType.Password]: {
             type: 'password',
-            min: '12',
+            min: '16',
             max: '0',
             step: '0'
           }
@@ -231,5 +231,3 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
     </FormField>
   );
 });
-
-export default Input;

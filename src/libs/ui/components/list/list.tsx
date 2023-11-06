@@ -79,6 +79,7 @@ interface ListProps<ListRow extends ListRowBase> {
   marginLeftForItemSeparatorLine: number;
   stickyHeader?: boolean;
   maxHeight?: number;
+  borderRadius?: 'base';
 }
 
 export function List<ListRow extends ListRowBase>({
@@ -93,8 +94,14 @@ export function List<ListRow extends ListRowBase>({
   headerLabelTop = SpacingSize.XL,
   contentTop = SpacingSize.XL,
   stickyHeader,
-  maxHeight
+  maxHeight,
+  borderRadius
 }: ListProps<ListRow>) {
+  const separatorLine =
+    marginLeftForHeaderSeparatorLine || marginLeftForHeaderSeparatorLine === 0
+      ? marginLeftForHeaderSeparatorLine
+      : marginLeftForItemSeparatorLine;
+
   return (
     <>
       {headerLabel && (
@@ -119,13 +126,10 @@ export function List<ListRow extends ListRowBase>({
         </VerticalSpaceContainer>
       )}
       <VerticalSpaceContainer top={contentTop}>
-        <Tile>
+        <Tile borderRadius={borderRadius}>
           {renderHeader && (
             <ListHeaderContainer
-              marginLeftForSeparatorLine={
-                marginLeftForHeaderSeparatorLine ||
-                marginLeftForItemSeparatorLine
-              }
+              marginLeftForSeparatorLine={separatorLine}
               stickyHeader={stickyHeader}
             >
               {renderHeader()}

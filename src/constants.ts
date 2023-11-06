@@ -12,6 +12,7 @@ export const NFT_TOKENS_REFRESH_RATE = 60 * SECOND;
 export const ACCOUNT_DEPLOY_REFRESH_RATE = 30 * SECOND;
 export const ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE = 30 * SECOND;
 export const ERC20_TOKEN_ACTIVITY_REFRESH_RATE = 30 * SECOND;
+export const VALIDATORS_REFRESH_RATE = 30 * SECOND;
 
 export const LOGIN_RETRY_ATTEMPTS_LIMIT = 5;
 
@@ -20,6 +21,9 @@ export const TRANSFER_MIN_AMOUNT_MOTES = '2500000000'; // 2.5 CSPR
 export const ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES = '1500000000'; // 1.5 CSPR
 export const NFT_CEP47_PAYMENT_AMOUNT_AVERAGE_MOTES = '1000000000'; // 1 CSPR
 export const NFT_CEP78_PAYMENT_AMOUNT_AVERAGE_MOTES = '3000000000'; // 3 CSPR
+export const STAKE_COST_MOTES = '2500000000'; // 2.5 CSPR
+export const DELEGATION_MIN_AMOUNT_MOTES = '500000000000'; // 500 CSPR
+export const MAX_DELEGATORS = 1200;
 
 export const getBlockExplorerAccountUrl = (baseUrl: string, hash: string) =>
   `${baseUrl}/account/${hash}`;
@@ -77,6 +81,11 @@ export enum NetworkName {
   Testnet = 'casper-test'
 }
 
+export enum AuctionManagerContractHash {
+  Mainnet = 'ccb576d6ce6dec84a551e48f0d0b7af89ddba44c7390b690036257a04a3ae9ea',
+  Testnet = '93d923e336b20a4c4ca14d592b60e5bd3fe330775618290104f9beb326db7ae2'
+}
+
 export enum TransferType {
   Sent = 'Sent',
   Received = 'Received',
@@ -111,4 +120,11 @@ export enum HomePageTabName {
   Tokens = 'Tokens',
   Deploys = 'Deploys',
   NFTs = 'NFTs'
+}
+
+export enum StakeSteps {
+  Validator = 'validator',
+  Amount = 'amount',
+  Confirm = 'confirm',
+  Success = 'success'
 }

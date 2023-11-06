@@ -45,6 +45,9 @@ export * from './components/contract-icon/contract-icon';
 export * from './components/password-inputs/password-inputs';
 export * from './components/toggle/toggle';
 export * from './components/skeleton/skeleton';
+export * from './components/validator-dropdown-input/validator-dropdown-input';
+export * from './components/validator-plate/validator-plate';
+export * from './components/error/error';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

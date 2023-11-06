@@ -36,6 +36,7 @@ import { ReceivePage } from '@popup/pages/receive';
 import { NftDetailsPage } from '@popup/pages/nft-details';
 import { TransferNftPage } from '@popup/pages/transfer-nft';
 import { ChangePasswordPage } from '@popup/pages/change-password';
+import { StakesPage } from '@popup/pages/stakes';
 
 export function AppRouter() {
   const isLocked = useSelector(selectVaultIsLocked);
@@ -247,6 +248,8 @@ function AppRoutes() {
         path={RouterPath.ChangePassword}
         element={<ChangePasswordPage />}
       />
+      <Route path={RouterPath.Delegate} element={<StakesPage />} />
+      <Route path={RouterPath.Undelegate} element={<StakesPage />} />
     </Routes>
   );
 }

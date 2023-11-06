@@ -1,19 +1,23 @@
 import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import Big from 'big.js';
 
 import { verifyPasswordAgainstHash } from '@src/libs/crypto/hashing';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { loginRetryCountIncremented } from '@src/background/redux/login-retry-count/actions';
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
 import {
+  STAKE_COST_MOTES,
+  DELEGATION_MIN_AMOUNT_MOTES,
   LOGIN_RETRY_ATTEMPTS_LIMIT,
-  TRANSFER_MIN_AMOUNT_MOTES,
-  TRANSFER_COST_MOTES
+  MAX_DELEGATORS,
+  TRANSFER_COST_MOTES,
+  TRANSFER_MIN_AMOUNT_MOTES
 } from '@src/constants';
 import { isValidPublicKey, isValidU64 } from '@src/utils';
-import Big from 'big.js';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
+import { AuctionManagerEntryPoint } from '@libs/services/deployer-service';
 
 export const minPasswordLength = 16;
 
@@ -127,7 +131,7 @@ export const useRecipientPublicKeyRule = () => {
     });
 };
 
-export const useCsprAmountRule = (amountMotes: string | null) => {
+export const useCSPRTransferAmountRule = (amountMotes: string | null) => {
   const { t } = useTranslation();
 
   const maxAmountMotes: string =
@@ -180,10 +184,7 @@ export const useCsprAmountRule = (amountMotes: string | null) => {
     });
 };
 
-export const useErc20AmountRule = (
-  amount: string | null,
-  decimals: number | null
-) => {
+export const useErc20AmountRule = (amount: string | null) => {
   const { t } = useTranslation();
 
   const maxAmount: string = amount == null ? '0' : Big(amount).toString();
@@ -268,6 +269,120 @@ export const usePaymentAmountRule = (csprBalance: string | null) => {
       },
       message: t(
         'Your account balance is not high enough. Enter a smaller amount.'
+      )
+    });
+};
+
+export const useCSPRStakeAmountRule = (
+  amountMotes: string | null,
+  mode: AuctionManagerEntryPoint,
+  stakeAmountMotes: string
+) => {
+  const { t } = useTranslation();
+
+  const getStakeMinAmountMotes = () => {
+    switch (mode) {
+      case AuctionManagerEntryPoint.delegate: {
+        return DELEGATION_MIN_AMOUNT_MOTES;
+      }
+      case AuctionManagerEntryPoint.undelegate: {
+        return '0';
+      }
+
+      default: {
+        return DELEGATION_MIN_AMOUNT_MOTES;
+      }
+    }
+  };
+
+  const maxAmountMotes: string =
+    amountMotes == null
+      ? '0'
+      : Big(amountMotes).sub(STAKE_COST_MOTES).toString();
+
+  return Yup.string()
+    .required({
+      header: t('Amount is required'),
+      description: t('You need to enter an amount to stake')
+    })
+    .test({
+      name: 'validU64',
+      test: csprAmountInputValue => {
+        if (csprAmountInputValue) {
+          return isValidU64(csprAmountInputValue);
+        }
+
+        return false;
+      },
+      message: {
+        header: t(`Amount is invalid`),
+        description: t(`You need to enter a valid amount`)
+      }
+    })
+    .test({
+      name: 'amountBelowMinTransfer',
+      test: csprAmountInputValue => {
+        if (csprAmountInputValue) {
+          return Big(CSPRtoMotes(csprAmountInputValue)).gte(
+            getStakeMinAmountMotes()
+          );
+        }
+
+        return false;
+      },
+      message: {
+        header: t('You can’t delegate this amount'),
+        description: t(
+          `The minimum required delegation amount is ${motesToCSPR(
+            getStakeMinAmountMotes()
+          )} CSPR.`
+        )
+      }
+    })
+    .test({
+      name: 'amountAboveBalance',
+      test: csprAmountInputValue => {
+        if (csprAmountInputValue) {
+          if (mode === AuctionManagerEntryPoint.undelegate) {
+            return Big(CSPRtoMotes(csprAmountInputValue)).lte(
+              Big(stakeAmountMotes).sub(getStakeMinAmountMotes()).toString()
+            );
+          }
+          return Big(CSPRtoMotes(csprAmountInputValue)).lte(maxAmountMotes);
+        }
+
+        return false;
+      },
+      message:
+        mode === AuctionManagerEntryPoint.undelegate
+          ? {
+              header: t('You can’t undelegate this amount'),
+              description: t('Amount must be less than staked CSPR.')
+            }
+          : {
+              header: t('Your account balance is not high enough'),
+              description: t(
+                'Your account balance is not high enough. Enter a smaller amount.'
+              )
+            }
+    });
+};
+
+export const useValidatorPublicKeyRule = (delegatorsNumber?: number) => {
+  const { t } = useTranslation();
+
+  return Yup.string()
+    .required(t('Recipient is required'))
+    .test({
+      name: 'validatorPublicKey',
+      test: value => (value ? isValidPublicKey(value) : false),
+      message: t('Recipient should be a valid public key')
+    })
+    .test({
+      name: 'maxDelegators',
+      test: () => !(delegatorsNumber && delegatorsNumber >= MAX_DELEGATORS),
+      message: t(
+        'This validator has reached the network limit for total delegators and therefore cannot be delegated to by new accounts. Please select another validator with fewer than 1200 total delegators'
       )
     });
 };
