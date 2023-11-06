@@ -23,6 +23,7 @@ export function HeaderConnectionStatus() {
 
   return (
     <Modal
+      placement="top"
       renderContent={({ closeModal }) => (
         <AccountList closeModal={closeModal} />
       )}

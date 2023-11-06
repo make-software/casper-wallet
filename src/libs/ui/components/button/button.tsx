@@ -42,7 +42,6 @@ const BaseButton = styled.button<BaseButtonProps>(
 
     ...(circle && {
       borderRadius: '24px',
-      margin: '0 16px',
       padding: '12px'
     }),
 
