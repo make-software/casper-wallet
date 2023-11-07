@@ -17,9 +17,11 @@ import { Account } from '@background/redux/vault/types';
 
 interface AccountActionsMenuPopoverProps {
   account: Account;
+  onClick?: (e: React.MouseEvent) => void;
 }
 export const AccountActionsMenuPopover = ({
-  account
+  account,
+  onClick
 }: AccountActionsMenuPopoverProps) => {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -40,9 +42,13 @@ export const AccountActionsMenuPopover = ({
           {connectedAccountNames.includes(account.name) ? (
             <PopoverLink
               variant="contentAction"
-              onClick={e => {
-                closePopover(e);
+              onClick={event => {
+                closePopover(event);
                 activeOrigin && disconnectAccount(account.name, activeOrigin);
+
+                if (onClick) {
+                  onClick(event);
+                }
               }}
             >
               <SvgIcon
@@ -57,13 +63,17 @@ export const AccountActionsMenuPopover = ({
           ) : (
             <PopoverLink
               variant="contentAction"
-              onClick={() =>
+              onClick={event => {
                 navigate(
                   isAnyAccountConnected
                     ? `${RouterPath.ConnectAnotherAccount}/${account.name}`
                     : RouterPath.NoConnectedAccount
-                )
-              }
+                );
+
+                if (onClick) {
+                  onClick(event);
+                }
+              }}
             >
               <SvgIcon
                 src="assets/icons/link.svg"
@@ -77,11 +87,15 @@ export const AccountActionsMenuPopover = ({
           )}
           <PopoverLink
             variant="contentAction"
-            onClick={() =>
+            onClick={event => {
               navigate(
                 RouterPath.RenameAccount.replace(':accountName', account.name)
-              )
-            }
+              );
+
+              if (onClick) {
+                onClick(event);
+              }
+            }}
           >
             <SvgIcon
               src="assets/icons/edit.svg"
@@ -109,11 +123,15 @@ export const AccountActionsMenuPopover = ({
           </PopoverLink>
           <PopoverLink
             variant="contentAction"
-            onClick={() =>
+            onClick={event => {
               navigate(
                 RouterPath.AccountSettings.replace(':accountName', account.name)
-              )
-            }
+              );
+
+              if (onClick) {
+                onClick(event);
+              }
+            }}
           >
             <SvgIcon
               src="assets/icons/settings.svg"
