@@ -3,11 +3,15 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import {
+  CenteredFlexRow,
+  ContentContainer,
   FooterButtonsContainer,
   HeaderSubmenuBarNavLink,
+  ParagraphContainer,
   PopupHeader,
   PopupLayout,
-  SpaceBetweenFlexRow
+  SpaceBetweenFlexRow,
+  SpacingSize
 } from '@libs/layout';
 import { StakesPageContent } from '@popup/pages/stakes/content';
 import { Button, HomePageTabsId, Typography } from '@libs/ui';
@@ -36,6 +40,7 @@ import {
   dispatchFetchAuctionValidatorsRequest,
   dispatchFetchValidatorsDetailsDataRequest
 } from '@libs/services/validators-service';
+import { NoDelegations } from '@popup/pages/stakes/no-delegations';
 
 export const StakesPage = () => {
   const [stakeStep, setStakeStep] = useState(StakeSteps.Validator);
@@ -52,13 +57,12 @@ export const StakesPage = () => {
   const [validatorList, setValidatorList] = useState<
     ValidatorResultWithId[] | null
   >(null);
+  const [loading, setLoading] = useState(true);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const { networkName, nodeUrl, auctionManagerContractHash } = useSelector(
-    selectApiConfigBasedOnActiveNetwork
-  );
+  const { networkName, nodeUrl, auctionManagerContractHash, casperApiUrl } =
+    useSelector(selectApiConfigBasedOnActiveNetwork);
   const csprBalance = useSelector(selectAccountBalance);
-  const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -69,24 +73,28 @@ export const StakesPage = () => {
     if (pathname.split('/')[1] === AuctionManagerEntryPoint.delegate) {
       setStakesType(AuctionManagerEntryPoint.delegate);
 
-      dispatchFetchAuctionValidatorsRequest().then(({ payload }) => {
-        if ('data' in payload) {
-          const { data } = payload;
+      dispatchFetchAuctionValidatorsRequest()
+        .then(({ payload }) => {
+          if ('data' in payload) {
+            const { data } = payload;
 
-          const validatorListWithId = data.map(validator => ({
-            ...validator,
-            id: validator.public_key
-          }));
+            const validatorListWithId = data.map(validator => ({
+              ...validator,
+              id: validator.public_key
+            }));
 
-          setValidatorList(validatorListWithId);
-        }
-      });
+            setValidatorList(validatorListWithId);
+          }
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     } else if (pathname.split('/')[1] === AuctionManagerEntryPoint.undelegate) {
       setStakesType(AuctionManagerEntryPoint.undelegate);
 
       if (activeAccount) {
-        dispatchFetchValidatorsDetailsDataRequest(activeAccount.publicKey).then(
-          ({ payload }) => {
+        dispatchFetchValidatorsDetailsDataRequest(activeAccount.publicKey)
+          .then(({ payload }) => {
             if ('data' in payload) {
               const { data } = payload;
 
@@ -98,8 +106,10 @@ export const StakesPage = () => {
 
               setValidatorList(validatorListWithId);
             }
-          }
-        );
+          })
+          .finally(() => {
+            setLoading(false);
+          });
       }
     }
   }, [activeAccount, pathname, casperApiUrl]);
@@ -290,6 +300,51 @@ export const StakesPage = () => {
       }
     }
   };
+
+  if (loading) {
+    return (
+      <PopupLayout
+        renderHeader={() => (
+          <PopupHeader withNetworkSwitcher withMenu withConnectionStatus />
+        )}
+        renderContent={() => (
+          <ContentContainer>
+            <ParagraphContainer top={SpacingSize.XL}>
+              <CenteredFlexRow>
+                <Typography type="body">Loading...</Typography>
+              </CenteredFlexRow>
+            </ParagraphContainer>
+          </ContentContainer>
+        )}
+      />
+    );
+  }
+
+  if (
+    stakesType === AuctionManagerEntryPoint.undelegate &&
+    validatorList !== null &&
+    validatorList.length === 0
+  ) {
+    return (
+      <PopupLayout
+        renderHeader={() => (
+          <PopupHeader withNetworkSwitcher withMenu withConnectionStatus />
+        )}
+        renderContent={() => <NoDelegations />}
+        renderFooter={() => (
+          <FooterButtonsContainer>
+            <Button
+              color="primaryBlue"
+              type="button"
+              onClick={() => navigate(RouterPath.Home)}
+            >
+              <Trans t={t}>Understood</Trans>
+            </Button>
+          </FooterButtonsContainer>
+        )}
+      />
+    );
+  }
 
   return (
     <PopupLayout

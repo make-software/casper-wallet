@@ -43,7 +43,7 @@ export const ValidatorDropdownInput = ({
   stakesType
 }: ValidatorDropdownInputProps) => {
   const [isOpenValidatorPublicKeysList, setIsOpenValidatorPublicKeysList] =
-    useState(false);
+    useState(true);
   const [showValidatorPlate, setShowValidatorPlate] = useState(false);
   const [label, setLabel] = useState('');
 
