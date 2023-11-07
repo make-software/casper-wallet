@@ -10,17 +10,11 @@ import { sub } from 'date-fns';
 
 import { signDeploy } from '@libs/crypto';
 import { getRawPublicKey } from '@libs/entities/Account';
-import { STAKE_COST_MOTES } from '@src/constants';
+import { AuctionManagerEntryPoint, STAKE_COST_MOTES } from '@src/constants';
 
 import { RPCResponse } from './types';
 
 const casperService = (url: string) => new CasperServiceByJsonRPC(url);
-
-export enum AuctionManagerEntryPoint {
-  delegate = 'delegate',
-  undelegate = 'undelegate',
-  redelegate = 'redelegate'
-}
 
 export const getAuctionManagerDeployCost = (
   entryPoint: AuctionManagerEntryPoint

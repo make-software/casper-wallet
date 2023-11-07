@@ -18,14 +18,15 @@ import { Button, HomePageTabsId, Typography } from '@libs/ui';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { STAKE_COST_MOTES, StakeSteps } from '@src/constants';
+import {
+  AuctionManagerEntryPoint,
+  STAKE_COST_MOTES,
+  StakeSteps
+} from '@src/constants';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import {
-  AuctionManagerEntryPoint,
-  makeAuctionManagerDeploy
-} from '@libs/services/deployer-service';
+import { makeAuctionManagerDeploy } from '@libs/services/deployer-service';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { useStakesForm } from '@libs/ui/forms/stakes-form';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';

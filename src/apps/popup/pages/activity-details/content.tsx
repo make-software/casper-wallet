@@ -41,8 +41,9 @@ import {
 } from '@libs/ui/utils/formatters';
 import {
   getBlockExplorerContractUrl,
-  TransferType,
-  TypeName
+  ActivityType,
+  ActivityTypeName,
+  AuctionManagerEntryPoint
 } from '@src/constants';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
@@ -50,7 +51,7 @@ interface ActivityDetailsPageContentProps {
   fromAccount?: string;
   toAccount?: string;
   deployInfo?: ExtendedDeploy | null;
-  type?: TransferType | null;
+  type?: ActivityType | null;
   amount?: string | null;
   symbol?: string | null;
 }
@@ -80,8 +81,11 @@ const AddressContainer = styled(FlexColumn)`
   padding: 16px 12px 16px 0;
 `;
 
-const AmountContainer = styled(AlignedSpaceBetweenFlexRow)`
-  padding: 8px 16px 8px 0;
+const AmountContainer = styled(AlignedSpaceBetweenFlexRow)<{
+  emptyAmount?: boolean;
+}>`
+  padding: ${({ emptyAmount }) =>
+    emptyAmount ? '16px 16px 16px 0' : '8px 16px 8px 0'};
 `;
 
 const RowsContainer = styled(FlexColumn)<BorderBottomPseudoElementProps>`
@@ -117,7 +121,10 @@ export const ActivityDetailsPageContent = ({
     [Erc20EventType.erc20_transfer_from]: t('Transfer from'),
     [Erc20EventType.erc20_approve]: t('Approve of'),
     [Erc20EventType.erc20_burn]: t('Burn of'),
-    [Erc20EventType.erc20_mint]: t('Mint of')
+    [Erc20EventType.erc20_mint]: t('Mint of'),
+    [AuctionManagerEntryPoint.delegate]: t('Delegate with'),
+    [AuctionManagerEntryPoint.undelegate]: t('Undelegate with'),
+    [AuctionManagerEntryPoint.redelegate]: t('Redelegate with')
   };
 
   const decimals = deployInfo.contractPackage?.metadata?.decimals;
@@ -173,7 +180,7 @@ export const ActivityDetailsPageContent = ({
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          {type && <Trans t={t}>{TypeName[type]}</Trans>}
+          {type && <Trans t={t}>{ActivityTypeName[type]}</Trans>}
         </Typography>
       </ParagraphContainer>
       <Tile>
@@ -285,7 +292,11 @@ export const ActivityDetailsPageContent = ({
                     }
                   />
                   <Typography type="captionRegular">
-                    <Trans t={t}>contract</Trans>
+                    <Trans t={t}>
+                      {deployInfo.contractPackage.contract_name === 'Auction'
+                        ? 'System Contract'
+                        : 'contract'}
+                    </Trans>
                   </Typography>
                 </AlignedFlexRow>
               </RightAlignedFlexColumn>
@@ -295,7 +306,7 @@ export const ActivityDetailsPageContent = ({
               </Typography>
             )}
           </ItemContainer>
-          <AmountContainer>
+          <AmountContainer emptyAmount={formattedTransferAmount === '-'}>
             <Typography type="captionRegular" color="contentSecondary">
               <Trans t={t}>Amount</Trans>
             </Typography>

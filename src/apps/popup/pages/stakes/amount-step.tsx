@@ -19,15 +19,9 @@ import {
   selectAccountBalance,
   selectAccountCurrencyRate
 } from '@background/redux/account-info/selectors';
-import { STAKE_COST_MOTES } from '@src/constants';
-import { AuctionManagerEntryPoint } from '@libs/services/deployer-service';
+import { AuctionManagerEntryPoint, STAKE_COST_MOTES } from '@src/constants';
 
-const StakeMaxButton = styled.div`
-  background: ${({ theme }) => theme.color.backgroundPrimary};
-  border-radius: ${({ theme }) => theme.borderRadius.base}px;
-
-  padding: 4px 12px;
-
+const StakeMaxButton = styled(AlignedFlexRow)`
   cursor: pointer;
 `;
 
@@ -37,7 +31,7 @@ interface AmountStepProps {
   stakeAmountMotes: string;
   headerText: string;
   amountStepText: string;
-  amountStepMaxButtonText: string;
+  amountStepMaxAmountValue: string | null;
 }
 
 export const AmountStep = ({
@@ -46,7 +40,7 @@ export const AmountStep = ({
   stakeAmountMotes,
   headerText,
   amountStepText,
-  amountStepMaxButtonText
+  amountStepMaxAmountValue
 }: AmountStepProps) => {
   const [maxAmountMotes, setMaxAmountMotes] = useState('0');
 
@@ -117,21 +111,22 @@ export const AmountStep = ({
         />
       </VerticalSpaceContainer>
       <ParagraphContainer top={SpacingSize.Small}>
-        <AlignedFlexRow gap={SpacingSize.Small}>
-          <Typography type="captionRegular" color="contentSecondary">
-            <Trans t={t}>{amountStepText}</Trans>
+        <StakeMaxButton
+          gap={SpacingSize.Small}
+          onClick={() => {
+            setValue('amount', motesToCSPR(maxAmountMotes));
+            trigger('amount');
+          }}
+        >
+          <Typography type="captionRegular" color="contentAction">
+            {amountStepText}
           </Typography>
-          <StakeMaxButton
-            onClick={() => {
-              setValue('amount', motesToCSPR(maxAmountMotes));
-              trigger('amount');
-            }}
-          >
+          {amountStepMaxAmountValue && (
             <Typography type="captionHash" color="contentAction">
-              {amountStepMaxButtonText}
+              {amountStepMaxAmountValue}
             </Typography>
-          </StakeMaxButton>
-        </AlignedFlexRow>
+          )}
+        </StakeMaxButton>
       </ParagraphContainer>
       {errors.amount && (
         <VerticalSpaceContainer top={SpacingSize.XL}>

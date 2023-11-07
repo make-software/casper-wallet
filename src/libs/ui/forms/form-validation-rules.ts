@@ -13,11 +13,11 @@ import {
   LOGIN_RETRY_ATTEMPTS_LIMIT,
   MAX_DELEGATORS,
   TRANSFER_COST_MOTES,
-  TRANSFER_MIN_AMOUNT_MOTES
+  TRANSFER_MIN_AMOUNT_MOTES,
+  AuctionManagerEntryPoint
 } from '@src/constants';
 import { isValidPublicKey, isValidU64 } from '@src/utils';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
-import { AuctionManagerEntryPoint } from '@libs/services/deployer-service';
 
 export const minPasswordLength = 16;
 

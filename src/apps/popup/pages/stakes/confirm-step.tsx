@@ -19,10 +19,8 @@ import {
 } from '@libs/ui/utils/formatters';
 import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 import { ValidatorResult } from '@libs/services/validators-service/types';
-import {
-  AuctionManagerEntryPoint,
-  getAuctionManagerDeployCost
-} from '@libs/services/deployer-service';
+import { getAuctionManagerDeployCost } from '@libs/services/deployer-service';
+import { AuctionManagerEntryPoint } from '@src/constants';
 
 export const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;

@@ -9,9 +9,8 @@ import {
 } from '@libs/ui/forms/stakes-form';
 import { ConfirmStep } from '@popup/pages/stakes/confirm-step';
 import { TransferSuccessScreen, ValidatorDropdownInput } from '@libs/ui';
-import { StakeSteps } from '@src/constants';
+import { AuctionManagerEntryPoint, StakeSteps } from '@src/constants';
 import { ValidatorResultWithId } from '@libs/services/validators-service/types';
-import { AuctionManagerEntryPoint } from '@libs/services/deployer-service';
 import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
 
 interface DelegateStakePageContentProps {
@@ -47,11 +46,14 @@ export const StakesPageContent = ({
   const [successStepHeaderText, setSuccessStepHeaderText] = useState('');
   const [confirmStepText, setConfirmStepText] = useState('');
   const [amountStepText, setAmountStepText] = useState('');
-  const [amountStepMaxButtonText, setAmountStepMaxButtonText] = useState('');
+  const [amountStepMaxAmountValue, setAmountStepMaxAmountValue] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     const formattedAmountCSPR =
-      stakeAmountMotes && formatNumber(motesToCSPR(stakeAmountMotes));
+      stakeAmountMotes &&
+      formatNumber(motesToCSPR(stakeAmountMotes), { precision: { max: 4 } });
 
     switch (stakesType) {
       case AuctionManagerEntryPoint.delegate: {
@@ -60,8 +62,7 @@ export const StakesPageContent = ({
         setConfirmStepHeaderText('Confirm delegation');
         setSuccessStepHeaderText('You’ve submitted a delegation');
 
-        setAmountStepText('Delegate:');
-        setAmountStepMaxButtonText('Max');
+        setAmountStepText('Delegate max');
         setConfirmStepText('You’ll delegate');
         break;
       }
@@ -72,7 +73,7 @@ export const StakesPageContent = ({
         setSuccessStepHeaderText('You’ve submitted an undelegation');
 
         setAmountStepText('Undelegate max:');
-        setAmountStepMaxButtonText(`${formattedAmountCSPR} CSPR`);
+        setAmountStepMaxAmountValue(`${formattedAmountCSPR} CSPR`);
         setConfirmStepText('You’ll undelegate');
         break;
       }
@@ -105,7 +106,7 @@ export const StakesPageContent = ({
           stakeAmountMotes={stakeAmountMotes}
           headerText={amountStepHeaderText}
           amountStepText={amountStepText}
-          amountStepMaxButtonText={amountStepMaxButtonText}
+          amountStepMaxAmountValue={amountStepMaxAmountValue}
         />
       );
     }

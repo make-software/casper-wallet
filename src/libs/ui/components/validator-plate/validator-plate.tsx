@@ -35,7 +35,7 @@ const ValidatorPlateContainer = styled(AlignedSpaceBetweenFlexRow)<{
 `;
 
 const NameContainer = styled(FlexColumn)`
-  max-width: 110px;
+  max-width: 93px;
 `;
 
 const IconContainer = styled.div`
@@ -84,6 +84,17 @@ export const ValidatorPlate = ({
   const formattedFee = formatNumber(fee, {
     precision: { min: 2 }
   });
+  const getFormattedDelegatorsNumber = () => {
+    if (delegatorsNumber && delegatorsNumber >= 1000) {
+      return (
+        formatNumber(delegatorsNumber / 1000, {
+          precision: { max: 2 }
+        }) + 'k'
+      );
+    }
+
+    return delegatorsNumber;
+  };
 
   const plateWithFullPublicKey = (
     <ValidatorPlateContainer onClick={handleClick} withBackground>
@@ -140,15 +151,17 @@ export const ValidatorPlate = ({
         </NameContainer>
       </AlignedFlexRow>
       <RightAlignedFlexColumn>
-        <Typography type="captionRegular" color="contentPrimary">
+        <Typography type="captionHash" color="contentPrimary">
           {`${formattedTotalStake} CSPR`}
         </Typography>
-        <Typography type="captionRegular" color="contentSecondary">
-          {`${formattedFee}% fee`}
-        </Typography>
-        <Typography type="captionRegular" color="contentSecondary">
-          {delegatorsNumber} delegators
-        </Typography>
+        <AlignedFlexRow gap={SpacingSize.Small}>
+          <Typography type="listSubtext" color="contentSecondary">
+            {`${formattedFee}% fee`}
+          </Typography>
+          <Typography type="listSubtext" color="contentSecondary">
+            {getFormattedDelegatorsNumber()} delegators
+          </Typography>
+        </AlignedFlexRow>
       </RightAlignedFlexColumn>
     </ValidatorPlateContainer>
   );

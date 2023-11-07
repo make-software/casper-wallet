@@ -86,34 +86,59 @@ export enum AuctionManagerContractHash {
   Testnet = '93d923e336b20a4c4ca14d592b60e5bd3fe330775618290104f9beb326db7ae2'
 }
 
-export enum TransferType {
+export enum ActivityType {
   Sent = 'Sent',
   Received = 'Received',
-  Unknown = 'Unknown'
+  Unknown = 'Unknown',
+  Delegated = 'Delegated',
+  Undelegated = 'Undelegated',
+  Redelegated = 'Redelegated',
+  Mint = 'Mint',
+  Burn = 'Burn'
 }
 
-export const ShortTypeName = {
-  [TransferType.Sent]: 'Sent',
-  [TransferType.Received]: 'Recv',
-  [TransferType.Unknown]: 'Unk'
+export const ActivityShortTypeName = {
+  [ActivityType.Sent]: 'Sent',
+  [ActivityType.Received]: 'Recv',
+  [ActivityType.Unknown]: 'Unk',
+  [ActivityType.Delegated]: 'Deleg',
+  [ActivityType.Undelegated]: 'Undeleg',
+  [ActivityType.Redelegated]: 'Redeleg',
+  [ActivityType.Mint]: 'Mint',
+  [ActivityType.Burn]: 'Burn'
 };
 
-export const TypeName = {
-  [TransferType.Sent]: 'Sent',
-  [TransferType.Received]: 'Received',
-  [TransferType.Unknown]: 'Unknown'
+export const ActivityTypeName = {
+  [ActivityType.Sent]: 'Sent',
+  [ActivityType.Received]: 'Received',
+  [ActivityType.Unknown]: 'Unknown',
+  [ActivityType.Delegated]: 'Delegated',
+  [ActivityType.Undelegated]: 'Undelegated',
+  [ActivityType.Redelegated]: 'Redelegated',
+  [ActivityType.Mint]: 'Mint',
+  [ActivityType.Burn]: 'Burn'
 };
 
-export const TypeIcons = {
-  [TransferType.Sent]: 'assets/icons/transfer.svg',
-  [TransferType.Received]: 'assets/icons/receive.svg',
-  [TransferType.Unknown]: 'assets/icons/info.svg'
+export const ActivityTypeIcons = {
+  [ActivityType.Sent]: 'assets/icons/transfer.svg',
+  [ActivityType.Received]: 'assets/icons/receive.svg',
+  [ActivityType.Unknown]: 'assets/icons/info.svg',
+  [ActivityType.Delegated]: 'assets/icons/delegate.svg',
+  [ActivityType.Undelegated]: 'assets/icons/undelegate.svg',
+  [ActivityType.Redelegated]: 'assets/icons/undelegate.svg',
+  [ActivityType.Mint]: 'assets/icons/info.svg',
+  [ActivityType.Burn]: 'assets/icons/burn.svg'
 };
 
-export const TypeColors = {
-  [TransferType.Sent]: 'contentAction',
-  [TransferType.Received]: 'contentPositive',
-  [TransferType.Unknown]: 'contentDisabled'
+export const ActivityTypeColors = {
+  [ActivityType.Sent]: 'contentAction',
+  [ActivityType.Received]: 'contentPositive',
+  [ActivityType.Unknown]: 'contentDisabled',
+  [ActivityType.Delegated]: 'contentAction',
+  [ActivityType.Undelegated]: 'contentAction',
+  [ActivityType.Redelegated]: 'contentAction',
+  [ActivityType.Mint]: 'contentDisabled',
+  [ActivityType.Burn]: 'contentAction'
 };
 
 export enum HomePageTabName {
@@ -127,4 +152,15 @@ export enum StakeSteps {
   Amount = 'amount',
   Confirm = 'confirm',
   Success = 'success'
+}
+
+export enum AuctionManagerEntryPoint {
+  delegate = 'delegate',
+  undelegate = 'undelegate',
+  redelegate = 'redelegate'
+}
+
+export enum TokenEntryPoint {
+  mint = 'mint',
+  burn = 'burn'
 }

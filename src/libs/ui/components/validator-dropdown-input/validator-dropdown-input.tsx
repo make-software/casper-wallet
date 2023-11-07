@@ -12,7 +12,7 @@ import { SvgIcon, Input, List, ValidatorPlate, Typography } from '@libs/ui';
 import { StakeValidatorFormValues } from '@libs/ui/forms/stakes-form';
 import { useClickAway } from '@libs/ui/hooks/use-click-away';
 import { ValidatorResultWithId } from '@libs/services/validators-service/types';
-import { AuctionManagerEntryPoint } from '@libs/services/deployer-service';
+import { AuctionManagerEntryPoint } from '@src/constants';
 
 const DropDownHeader = styled(AlignedSpaceBetweenFlexRow)`
   padding: 8px 16px;
@@ -199,7 +199,7 @@ export const ValidatorDropdownInput = ({
                 <Trans t={t}>Validator</Trans>
               </Typography>
               <Typography type="labelMedium" color="contentSecondary">
-                <Trans t={t}>Total stake & fee</Trans>
+                <Trans t={t}>Total stake, fee, delegators</Trans>
               </Typography>
             </DropDownHeader>
           )}

@@ -7,7 +7,7 @@ import {
   useCSPRStakeAmountRule,
   useValidatorPublicKeyRule
 } from '@libs/ui/forms/form-validation-rules';
-import { AuctionManagerEntryPoint } from '@libs/services/deployer-service';
+import { AuctionManagerEntryPoint } from '@src/constants';
 
 export type StakeValidatorFormValues = {
   validatorPublicKey: string;
