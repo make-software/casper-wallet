@@ -42,13 +42,13 @@ export const test = base.extend<{
   extensionId: string;
   createPassword: () => Promise<void>;
 }>({
+  // eslint-disable-next-line no-empty-pattern
   context: async ({}, use) => {
     const { browser } = getBrowserConfig();
     const pathToExtension = path.join(__dirname, `../build/${browser}`);
     const context = await chromium.launchPersistentContext('', {
       headless: false,
       args: [
-        `--headless=new`,
         `--disable-extensions-except=${pathToExtension}`,
         `--load-extension=${pathToExtension}`
       ]
@@ -178,11 +178,14 @@ export const onboarding = test.extend<{
 
     await use(copySecretPhrase);
   },
-  confirmSecretPhraseSuccess: async ({ page }, use, phrase) => {
+  confirmSecretPhraseSuccess: async ({ page }, use) => {
     const confirmSecretPhraseSuccess = async (phrase: string[]) => {
       await onboardingExpect(
         page.getByText('Confirm your secret recovery phrase')
       ).toBeVisible();
+      onboardingExpect(
+        page.getByRole('button', { name: 'Confirm' }).isDisabled()
+      );
 
       const wordPicker = page.getByTestId('word-picker');
       const visibleWords = (
@@ -201,16 +204,23 @@ export const onboarding = test.extend<{
         }
       }
 
+      onboardingExpect(
+        page.getByRole('button', { name: 'Confirm' }).isEnabled()
+      );
+
       await page.getByRole('button', { name: 'Confirm' }).click();
     };
 
     await use(confirmSecretPhraseSuccess);
   },
-  confirmSecretPhraseFailure: async ({ page }, use, phrase) => {
+  confirmSecretPhraseFailure: async ({ page }, use) => {
     const confirmSecretPhraseFailure = async (phrase: string[]) => {
       await onboardingExpect(
         page.getByText('Confirm your secret recovery phrase')
       ).toBeVisible();
+      onboardingExpect(
+        page.getByRole('button', { name: 'Confirm' }).isDisabled()
+      );
 
       const wordPicker = page.getByTestId('word-picker');
       const pickerWords = (await wordPicker.innerText()).split('\n');
@@ -222,6 +232,10 @@ export const onboarding = test.extend<{
           await wordPicker.getByText(word, { exact: true }).click();
         }
       }
+
+      onboardingExpect(
+        page.getByRole('button', { name: 'Confirm' }).isEnabled()
+      );
 
       await page.getByRole('button', { name: 'Confirm' }).click();
     };
