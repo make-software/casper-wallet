@@ -1,11 +1,11 @@
-name: Playwright Tests
+name: E2E onboarding tests
 on:
   push:
     branches: [ master, develop ]
   pull_request:
     branches: [ master, develop ]
 jobs:
-  test:
+  e2e-onboarding-tests:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
