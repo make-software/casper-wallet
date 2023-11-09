@@ -1,26 +1,34 @@
 name: E2E onboarding tests
+
 on:
   push:
     branches: [ master, develop ]
   pull_request:
     branches: [ master, develop ]
+
 jobs:
   e2e-onboarding-tests:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-node@v3
       with:
         node-version: 18
+
     - name: Install dependencies
       run: npm ci
+
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+
     - name: Run Chrome tests
       run: npm run e2e:chrome:headless:onboarding
+
     - name: Run Firefox tests
       run: npm run e2e:firefox:headless:onboarding
+
     - uses: actions/upload-artifact@v3
       if: always()
       with:
