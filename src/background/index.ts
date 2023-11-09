@@ -59,10 +59,7 @@ import {
   MapExtendedDeploy,
   MapPaginatedExtendedDeploys
 } from '@libs/services/account-activity-service';
-import {
-  fetchContractPackage,
-  fetchErc20Tokens
-} from '@libs/services/erc20-service';
+import { fetchErc20Tokens } from '@libs/services/erc20-service';
 
 import { openWindow } from './open-window';
 import {
@@ -71,6 +68,7 @@ import {
   vaultUnlocked
 } from './redux/session/actions';
 import {
+  changePassword,
   createAccount,
   initKeys,
   initVault,
@@ -96,11 +94,12 @@ import { loginRetryLockoutTimeSet } from './redux/login-retry-lockout-time/actio
 import { lastActivityTimeRefreshed } from './redux/last-activity-time/actions';
 import {
   activeNetworkSettingChanged,
-  activeTimeoutDurationSettingChanged
+  activeTimeoutDurationSettingChanged,
+  darkModeSettingChanged
 } from './redux/settings/actions';
 import { activeOriginChanged } from './redux/active-origin/actions';
 import { selectApiConfigBasedOnActiveNetwork } from './redux/settings/selectors';
-import { getUrlOrigin, hasHttpPrefix, notEmpty } from '@src/utils';
+import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
 import {
   CannotGetActiveAccountError,
   CannotGetSenderOriginError
@@ -127,7 +126,9 @@ import {
   accountNftTokensUpdated,
   accountNftTokensCountChanged,
   accountDeploysCountChanged,
-  accountCasperActivityCountChanged
+  accountCasperActivityCountChanged,
+  accountTrackingIdOfSentNftTokensChanged,
+  accountTrackingIdOfSentNftTokensRemoved
 } from '@background/redux/account-info/actions';
 import { fetchErc20TokenActivity } from '@src/libs/services/account-activity-service/erc20-token-activity-service';
 import { fetchNftTokens } from '@libs/services/nft-service';
@@ -510,6 +511,7 @@ browser.runtime.onMessage.addListener(
           case getType(activeAccountChanged):
           case getType(activeTimeoutDurationSettingChanged):
           case getType(activeNetworkSettingChanged):
+          case getType(darkModeSettingChanged):
           case getType(lastActivityTimeRefreshed):
           case getType(siteConnected):
           case getType(anotherAccountConnected):
@@ -547,6 +549,9 @@ browser.runtime.onMessage.addListener(
           case getType(accountNftTokensCountChanged):
           case getType(accountDeploysCountChanged):
           case getType(accountCasperActivityCountChanged):
+          case getType(accountTrackingIdOfSentNftTokensChanged):
+          case getType(accountTrackingIdOfSentNftTokensRemoved):
+          case getType(changePassword):
             store.dispatch(action);
             return sendResponse(undefined);
 
@@ -634,28 +639,11 @@ browser.runtime.onMessage.addListener(
               });
 
               if (tokensList) {
-                const erc20Tokens = await Promise.allSettled(
-                  tokensList?.map(token =>
-                    fetchContractPackage({
-                      casperApiUrl,
-                      contractPackageHash: token.contract_package_hash
-                    }).then(contractPackage => ({
-                      ...contractPackage,
-                      balance: token.balance,
-                      contractHash: token.latest_contract?.contract_hash
-                    }))
-                  )
-                ).then(results =>
-                  results
-                    .map(result => {
-                      if (result.status === 'fulfilled') {
-                        return result.value;
-                      } else {
-                        return null;
-                      }
-                    })
-                    .filter(notEmpty)
-                );
+                const erc20Tokens = tokensList.map(token => ({
+                  balance: token.balance,
+                  contractHash: token.latest_contract?.contract_hash,
+                  ...(token?.contract_package ?? {})
+                }));
 
                 return sendResponse(
                   serviceMessage.fetchErc20TokensResponse(erc20Tokens)

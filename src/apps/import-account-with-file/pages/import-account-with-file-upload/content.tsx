@@ -47,7 +47,7 @@ export function ImportAccountWithFileUploadPageContent({
     <ContentContainer>
       <IllustrationContainer>
         <SvgIcon
-          src="assets/illustrations/secret-key.svg"
+          src="assets/illustrations/import-secret-key.svg"
           width={200}
           height={120}
         />

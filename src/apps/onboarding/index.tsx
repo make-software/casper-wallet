@@ -7,7 +7,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { ErrorBoundary } from '@src/libs/layout/error';
 
-import { GlobalStyle, themeConfig } from '@libs/ui';
+import { GlobalStyle, lightTheme } from '@libs/ui';
 
 import { AppRouter } from '@src/apps/onboarding/app-router';
 
@@ -31,7 +31,7 @@ const Tree = () => {
 
   return (
     <Suspense fallback={null}>
-      <ThemeProvider theme={themeConfig}>
+      <ThemeProvider theme={lightTheme}>
         <GlobalStyle />
         <ReduxProvider store={store}>
           <ErrorBoundary>

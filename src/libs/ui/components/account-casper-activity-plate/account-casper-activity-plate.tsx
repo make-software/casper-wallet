@@ -3,7 +3,14 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import { Hash, HashVariant, SvgIcon, Tooltip, Typography } from '@libs/ui';
+import {
+  ContentColor,
+  Hash,
+  HashVariant,
+  SvgIcon,
+  Tooltip,
+  Typography
+} from '@libs/ui';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import {
   formatNumber,
@@ -23,6 +30,7 @@ import {
 import {
   ShortTypeName,
   TransferType,
+  TypeColors,
   TypeIcons,
   TypeName
 } from '@src/constants';
@@ -109,7 +117,13 @@ export const AccountCasperActivityPlate = forwardRef<
       }}
     >
       <ActivityPlateIconCircleContainer>
-        {type != null && <SvgIcon src={TypeIcons[type]} size={16} />}
+        {type != null && (
+          <SvgIcon
+            src={TypeIcons[type]}
+            size={16}
+            color={TypeColors[type] as ContentColor}
+          />
+        )}
       </ActivityPlateIconCircleContainer>
       <ActivityPlateContentContainer>
         <AlignedSpaceBetweenFlexRow>

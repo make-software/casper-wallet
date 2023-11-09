@@ -39,7 +39,7 @@ export const AccountActionsMenuPopover = ({
         <>
           {connectedAccountNames.includes(account.name) ? (
             <PopoverLink
-              variant="contentBlue"
+              variant="contentAction"
               onClick={e => {
                 closePopover(e);
                 activeOrigin && disconnectAccount(account.name, activeOrigin);
@@ -48,7 +48,7 @@ export const AccountActionsMenuPopover = ({
               <SvgIcon
                 src="assets/icons/unlink.svg"
                 marginRight="medium"
-                color="contentTertiary"
+                color="contentDisabled"
               />
               <Typography type="body">
                 <Trans t={t}>Disconnect</Trans>
@@ -56,7 +56,7 @@ export const AccountActionsMenuPopover = ({
             </PopoverLink>
           ) : (
             <PopoverLink
-              variant="contentBlue"
+              variant="contentAction"
               onClick={() =>
                 navigate(
                   isAnyAccountConnected
@@ -68,7 +68,7 @@ export const AccountActionsMenuPopover = ({
               <SvgIcon
                 src="assets/icons/link.svg"
                 marginRight="medium"
-                color="contentTertiary"
+                color="contentDisabled"
               />
               <Typography type="body">
                 <Trans t={t}>Connect</Trans>
@@ -76,7 +76,7 @@ export const AccountActionsMenuPopover = ({
             </PopoverLink>
           )}
           <PopoverLink
-            variant="contentBlue"
+            variant="contentAction"
             onClick={() =>
               navigate(
                 RouterPath.RenameAccount.replace(':accountName', account.name)
@@ -86,7 +86,7 @@ export const AccountActionsMenuPopover = ({
             <SvgIcon
               src="assets/icons/edit.svg"
               marginRight="medium"
-              color="contentTertiary"
+              color="contentDisabled"
             />
             <Typography type="body">
               <Trans t={t}>Rename</Trans>
@@ -94,21 +94,21 @@ export const AccountActionsMenuPopover = ({
           </PopoverLink>
           <PopoverLink
             target="_blank"
-            variant="contentBlue"
+            variant="contentAction"
             title={t('View account in CSPR.live')}
             href={getBlockExplorerAccountUrl(casperLiveUrl, account.publicKey)}
           >
             <SvgIcon
               src="assets/icons/external-link.svg"
               marginRight="medium"
-              color="contentTertiary"
+              color="contentDisabled"
             />
             <Typography type="body">
               <Trans t={t}>View on CSPR.live</Trans>
             </Typography>
           </PopoverLink>
           <PopoverLink
-            variant="contentBlue"
+            variant="contentAction"
             onClick={() =>
               navigate(
                 RouterPath.AccountSettings.replace(':accountName', account.name)
@@ -118,7 +118,7 @@ export const AccountActionsMenuPopover = ({
             <SvgIcon
               src="assets/icons/settings.svg"
               marginRight="medium"
-              color="contentTertiary"
+              color="contentDisabled"
             />
             <Typography type="body">
               <Trans t={t}>Manage</Trans>

@@ -37,6 +37,8 @@ export const DeploysList = () => {
     if (position) {
       container?.scrollTo(0, Number(position));
       localStorage.removeItem('activityPlateYPosition');
+    } else {
+      container?.scrollTo(0, 0);
     }
   }, []);
 

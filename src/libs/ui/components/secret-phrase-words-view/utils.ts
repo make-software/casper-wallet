@@ -17,6 +17,7 @@ function shuffle(list: number[]) {
 interface WordCollections {
   initialHiddenWordIndexes: number[];
   initialPartialPhrase: PartialPhraseArray;
+  extraWordIndex: number;
 }
 
 export function buildInitialWordsCollection(
@@ -41,8 +42,9 @@ export function buildInitialWordsCollection(
       i++;
     }
   }
+  const extraWordIndex = initialHiddenWordIndexes[6];
 
   shuffle(initialHiddenWordIndexes);
 
-  return { initialHiddenWordIndexes, initialPartialPhrase };
+  return { initialHiddenWordIndexes, initialPartialPhrase, extraWordIndex };
 }

@@ -12,7 +12,7 @@ interface StyleTagContainerProps {
 
 const StyledTag = styled.span`
   color: ${({ theme }) => theme.color.contentOnFill};
-  background-color: ${({ theme }) => theme.color.contentTertiary};
+  background-color: ${({ theme }) => theme.color.contentDisabled};
   font-weight: ${({ theme }) => theme.typography.fontWeight.semiBold};
   font-size: 0.8rem;
   line-height: 1.6rem;

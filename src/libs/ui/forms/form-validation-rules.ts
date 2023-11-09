@@ -170,7 +170,7 @@ export const useCsprAmountRule = (amountMotes: string | null) => {
       name: 'amountAboveBalance',
       test: csprAmountInputValue => {
         if (csprAmountInputValue) {
-          return Big(CSPRtoMotes(csprAmountInputValue)).lt(maxAmountMotes);
+          return Big(CSPRtoMotes(csprAmountInputValue)).lte(maxAmountMotes);
         }
 
         return false;

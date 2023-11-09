@@ -7,10 +7,10 @@ type Ref = HTMLInputElement;
 
 const getThemeColorByError = (error?: boolean) => {
   if (error == null || !error) {
-    return 'contentTertiary';
+    return 'contentDisabled';
   }
 
-  return 'fillRed';
+  return 'fillCritical';
 };
 
 const InputContainer = styled('div')<InputProps>(
@@ -23,7 +23,7 @@ const InputContainer = styled('div')<InputProps>(
     borderRadius: theme.borderRadius.base,
     color: theme.color.contentPrimary,
     background: theme.color.backgroundPrimary,
-    caretColor: theme.color.fillRed,
+    caretColor: theme.color.fillCritical,
     fontFamily: monotype
       ? theme.typography.fontFamily.mono
       : theme.typography.fontFamily.primary,
@@ -33,7 +33,7 @@ const InputContainer = styled('div')<InputProps>(
 
     path: {
       fill: oneColoredIcons
-        ? theme.color.contentTertiary
+        ? theme.color.contentDisabled
         : theme.color[getThemeColorByError(error)]
     },
 
@@ -86,13 +86,13 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
   }
 }));
 
-const PrefixContainer = styled('div')(({ theme }) => ({
-  marginRight: 8
-}));
+const PrefixContainer = styled('div')`
+  margin-right: 8px;
+`;
 
-const SuffixContainer = styled('div')(({ theme }) => ({
-  marginLeft: 8
-}));
+const SuffixContainer = styled('div')`
+  margin-left: 8px;
+`;
 
 const SuffixTextContainer = styled(SuffixContainer)(({ theme }) => ({
   color: theme.color.contentSecondary
@@ -135,6 +135,7 @@ export interface InputProps extends BaseProps {
   validationType?: InputValidationType;
   validationText?: string | null;
   dataTestId?: string;
+  autoComplete?: string;
 }
 
 export const Input = React.forwardRef<Ref, InputProps>(function Input(
@@ -158,6 +159,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
     onFocus,
     dataTestId,
     readOnly,
+    autoComplete,
     ...restProps
   }: InputProps,
   ref
@@ -206,6 +208,8 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
           onFocus={handleFocus}
           data-testid={dataTestId}
           readOnly={readOnly}
+          disabled={disabled}
+          autoComplete={autoComplete}
         />
 
         {!suffixIcon && error && (
@@ -213,7 +217,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
             <SvgIcon
               src="assets/icons/error.svg"
               size={24}
-              color="contentRed"
+              color="contentActionCritical"
             />
           </SuffixContainer>
         )}

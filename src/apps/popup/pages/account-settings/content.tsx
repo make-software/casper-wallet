@@ -105,7 +105,7 @@ function AccountIconButton({ type }: AccountIconButtonProps) {
   return (
     <SvgIcon
       onClick={handleNavigateToNextPage}
-      color={type === 'remove' ? 'contentRed' : 'contentBlue'}
+      color={type === 'remove' ? 'contentActionCritical' : 'contentAction'}
       src={
         type === 'remove' ? 'assets/icons/delete.svg' : 'assets/icons/edit.svg'
       }

@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { Typography, SvgIcon, BaseProps } from '@src/libs/ui';
@@ -7,18 +7,19 @@ import FlexRow from '../flex-row/flex-row';
 
 const StyledFlexRow = styled(FlexRow)<{
   checked?: boolean;
-}>(({ theme, checked }) => ({
+  disabled?: boolean;
+}>(({ theme, checked, disabled }) => ({
   cursor: 'pointer',
   width: 'fit-content',
   pointerEvents: 'auto',
   svg: {
-    fill: checked ? theme.color.fillBlue : 'none',
+    fill: checked ? theme.color.fillPrimary : 'none',
     rect: {
-      stroke: checked ? theme.color.fillBlue : theme.color.fillTertiary
+      stroke: checked ? theme.color.fillPrimary : theme.color.contentDisabled
     }
   },
   span: {
-    color: theme.color.contentPrimary
+    color: disabled ? theme.color.contentSecondary : theme.color.contentPrimary
   }
 }));
 
@@ -39,9 +40,12 @@ export function Checkbox({
   onChange,
   label,
   variant = 'circle',
-  dataTestId
+  dataTestId,
+  disabled
 }: CheckboxProps) {
-  const handleClick = (ev: ChangeEvent<HTMLInputElement>) => {
+  const handleClick = () => {
+    if (disabled) return;
+
     onChange && onChange(!checked);
   };
 
@@ -61,8 +65,9 @@ export function Checkbox({
       checked={checked}
       onClick={handleClick}
       data-testid={dataTestId}
+      disabled={disabled}
     >
-      <CheckboxSvgIcon src={iconSrc} />
+      <CheckboxSvgIcon src={iconSrc} color="contentAction" />
       {label && (
         <Typography type="body" color="contentPrimary">
           {label}

@@ -32,7 +32,7 @@ export const formatErc20TokenBalance = (
         name: token.contract_name,
         balance: token.balance,
         amount: erc20Amount,
-        symbol: token?.metadata?.symbol,
+        symbol: token?.metadata?.symbol || '',
         decimals: token?.metadata?.decimals,
         amountFiat: null,
         icon: token.icon_url || 'assets/icons/erc20-avatar.svg'

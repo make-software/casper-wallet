@@ -25,7 +25,7 @@ interface HashContainerProps {
 
 const HashContainer = styled(CenteredFlexRow)<HashContainerProps>`
   ${({ withHover, theme }) =>
-    withHover && ` &:hover > span { color: ${theme.color.contentBlue}; }`};
+    withHover && ` &:hover > span { color: ${theme.color.contentAction}; }`};
 `;
 
 interface HashProps {
@@ -93,7 +93,7 @@ export function Hash({
         renderContent={({ isClicked }) => (
           <>
             {isClicked ? (
-              <Typography type="captionHash" color="contentGreen">
+              <Typography type="captionHash" color="contentPositive">
                 <Trans t={t}>Copied!</Trans>
               </Typography>
             ) : (

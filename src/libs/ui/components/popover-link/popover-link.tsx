@@ -6,7 +6,7 @@ type Ref = HTMLAnchorElement;
 export interface PopoverLinkProps extends React.HTMLAttributes<Ref> {
   href?: string;
   target?: string;
-  variant: 'contentBlue';
+  variant: 'contentAction';
 }
 
 const BaseLink = styled.a<PopoverLinkProps>(({ theme }) => ({
@@ -24,18 +24,18 @@ const BlueLink = styled(BaseLink)<PopoverLinkProps>(({ theme }) => ({
   backgroundColor: 'inherit',
 
   '&:hover': {
-    color: theme.color.contentBlue,
+    color: theme.color.contentAction,
     backgroundColor: theme.color.backgroundSecondary,
     borderRadius: theme.borderRadius.base
   },
 
   '&:hover svg': {
-    color: theme.color.contentBlue
+    color: theme.color.contentAction
   }
 }));
 
 const LINK_COMPONENT_BY_COLOR_DICT = {
-  contentBlue: BlueLink
+  contentAction: BlueLink
 };
 
 export const PopoverLink = React.forwardRef<Ref, PopoverLinkProps>(
