@@ -58,7 +58,7 @@ export const ReceivePageContent = () => {
   const tokens = useSelector(selectErc20Tokens, shallowEqual);
 
   useEffect(() => {
-    if (tokenData.symbol === 'CSPR') {
+    if (tokenData?.symbol === 'CSPR') {
       const balance =
         (csprBalance.amountMotes && motesToCSPR(csprBalance.amountMotes)) ||
         '0';
@@ -66,10 +66,10 @@ export const ReceivePageContent = () => {
     } else {
       const erc20Tokens = formatErc20TokenBalance(tokens);
       const balance =
-        erc20Tokens?.find(t => t.symbol === tokenData.symbol)?.amount ?? '0';
+        erc20Tokens?.find(t => t?.symbol === tokenData?.symbol)?.amount ?? '0';
       setTokenData(prev => ({ ...prev, balance }));
     }
-  }, [csprBalance, tokenData.symbol, tokens]);
+  }, [csprBalance, tokenData?.symbol, tokens]);
 
   return (
     <ContentContainer>
@@ -80,7 +80,7 @@ export const ReceivePageContent = () => {
       </ParagraphContainer>
       <ActiveAccountPlate
         label="To account"
-        symbol={tokenData.symbol}
+        symbol={tokenData?.symbol}
         balance={tokenData.balance}
       />
       <VerticalSpaceContainer top={SpacingSize.XXXL}>
