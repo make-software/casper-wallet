@@ -47,7 +47,6 @@
     "remove-packed-extension:chrome": "rm -rf chrome.crx",
     "e2e:chrome:headless:onboarding": "npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test --project chromium",
     "e2e:firefox:headless:onboarding": "npm run build:firefox && PLAYWRIGHT_BROWSER=firefox npx playwright test --project firefox"
-
   },
   "lint-staged": {
     "*.md": "markdownlint",

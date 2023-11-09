@@ -22,12 +22,6 @@ const getBrowserConfig = () => {
         manifest: 2
       };
     }
-    case 'webkit': {
-      return {
-        browser: 'safari',
-        manifest: 2
-      };
-    }
     default: {
       return {
         browser: 'chrome',
