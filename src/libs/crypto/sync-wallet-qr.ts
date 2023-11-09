@@ -44,6 +44,9 @@ export const generateSyncWalletQrData = async (
 
   const qrBytes = Uint8Array.from(Buffer.from(qrString));
   const qrData = convertBytesToBase64(qrBytes);
+  const qrDataArray = qrData.match(/.{1,200}/g);
 
-  return qrData;
+  return (qrDataArray ?? [qrData]).map(
+    (qr, i, arr) => `${i + 1}$${arr.length}$${qr}`
+  );
 };

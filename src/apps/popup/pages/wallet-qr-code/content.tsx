@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { QRCodeCanvas } from 'qrcode.react';
 import styled, { useTheme } from 'styled-components';
@@ -19,13 +19,30 @@ const QRContainer = styled(CenteredFlexRow)`
 `;
 
 interface WalletQrCodePageContentProps {
-  qrString: string;
+  qrStrings: string[];
 }
 
 export const WalletQrCodePageContent = ({
-  qrString
+  qrStrings
 }: WalletQrCodePageContentProps) => {
   const theme = useTheme();
+  const [currentQrIndex, setCurrentQrIndex] = useState<number>(0);
+
+  useEffect(() => {
+    const int = setInterval(() => {
+      setCurrentQrIndex(prev => {
+        const next = prev + 1;
+
+        if (next === qrStrings.length) {
+          return 0;
+        }
+
+        return next;
+      });
+    }, 500);
+
+    return () => clearInterval(int);
+  }, [qrStrings.length]);
 
   const { t } = useTranslation();
 
@@ -44,8 +61,9 @@ export const WalletQrCodePageContent = ({
       <QRContainer>
         <QRCodeCanvas
           id="qrCode"
-          value={qrString}
+          value={qrStrings[currentQrIndex]}
           size={296}
+          fgColor={theme.color.contentPrimary}
           bgColor={theme.color.backgroundPrimary}
           level={'H'}
         />

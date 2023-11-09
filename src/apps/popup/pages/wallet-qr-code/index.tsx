@@ -20,9 +20,10 @@ import { generateSyncWalletQrData } from '@libs/crypto';
 import { BackupSecretPhrasePasswordPage } from '@popup/pages/backup-secret-phrase-password';
 
 export const WalletQrCodePage = () => {
-  const [qrString, setQrString] = useState('');
+  const [qrStrings, setQrStrings] = useState<string[]>([]);
   const [isPasswordConfirmed, setIsPasswordConfirmed] =
     useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
 
   const secretPhrase = useSelector(selectSecretPhrase);
   const derivedAccounts = useSelector(selectVaultDerivedAccounts, shallowEqual);
@@ -41,7 +42,7 @@ export const WalletQrCodePage = () => {
   const generateQRCode = async (password: string) => {
     if (secretPhrase) {
       setLoading(true);
-      const qr = await generateSyncWalletQrData(
+      const data = await generateSyncWalletQrData(
         password,
         secretPhrase,
         derivedAccounts,
@@ -49,7 +50,7 @@ export const WalletQrCodePage = () => {
       );
 
       setLoading(false);
-      setQrString(qr);
+      setQrStrings(data);
     }
   };
 
@@ -58,6 +59,7 @@ export const WalletQrCodePage = () => {
       <BackupSecretPhrasePasswordPage
         setPasswordConfirmed={setPasswordConfirmed}
         onClick={generateQRCode}
+        loading={loading}
       />
     );
   }
@@ -74,7 +76,7 @@ export const WalletQrCodePage = () => {
           )}
         />
       )}
-      renderContent={() => <WalletQrCodePageContent qrString={qrString} />}
+      renderContent={() => <WalletQrCodePageContent qrStrings={qrStrings} />}
       renderFooter={() => (
         <FooterButtonsContainer>
           <Button onClick={() => navigate(RouterPath.Home)}>

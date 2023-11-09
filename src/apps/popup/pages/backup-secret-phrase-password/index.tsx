@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import {
   selectPasswordHash,
@@ -24,11 +24,13 @@ import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-
 interface BackupSecretPhrasePasswordPageType {
   setPasswordConfirmed: () => void;
   onClick?: (password: string) => Promise<void>;
+  loading?: boolean;
 }
 
 export const BackupSecretPhrasePasswordPage = ({
   setPasswordConfirmed,
-  onClick
+  onClick,
+  loading = false
 }: BackupSecretPhrasePasswordPageType) => {
   const { t } = useTranslation();
 
@@ -87,8 +89,8 @@ export const BackupSecretPhrasePasswordPage = ({
       )}
       renderFooter={() => (
         <FooterButtonsContainer>
-          <Button disabled={isSubmitButtonDisabled}>
-            <Trans t={t}>Continue</Trans>
+          <Button disabled={isSubmitButtonDisabled || loading}>
+            {loading ? t('Loading') : t('Continue')}
           </Button>
         </FooterButtonsContainer>
       )}
