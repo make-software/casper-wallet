@@ -23,6 +23,7 @@ export function HeaderConnectionStatus() {
 
   return (
     <Modal
+      dataTestId="connection-status-modal"
       renderContent={({ closeModal }) => (
         <AccountList closeModal={closeModal} />
       )}

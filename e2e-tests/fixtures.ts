@@ -240,3 +240,47 @@ export const onboarding = test.extend<{
 });
 
 export const onboardingExpect = onboarding.expect;
+
+export const popup = test.extend<{
+  unlockVault: () => Promise<void>;
+  lockVault: () => Promise<void>;
+  createAccount: (newAccountName: string) => Promise<void>;
+}>({
+  page: async ({ extensionId, page }, use) => {
+    await page.goto(`chrome-extension://${extensionId}/popup.html`);
+    await use(page);
+  },
+  unlockVault: async ({ page }, use) => {
+    const unlockVault = async () => {
+      await page
+        .getByPlaceholder('Password', { exact: true })
+        .fill(vaultPassword);
+      await page.getByRole('button', { name: 'Unlock wallet' }).click();
+    };
+
+    await use(unlockVault);
+  },
+  lockVault: async ({ page }, use) => {
+    const lockVault = async () => {
+      await page.getByTestId('menu-open-icon').click();
+      await page.getByText('Lock wallet').click();
+    };
+
+    await use(lockVault);
+  },
+  createAccount: async ({ page }, use) => {
+    const createAccount = async (newAccountName: string) => {
+      await page.getByTestId('menu-open-icon').click();
+      await page.getByText('Create account').click();
+
+      await page
+        .getByPlaceholder('Account name', { exact: true })
+        .fill(newAccountName);
+      await page.getByRole('button', { name: 'Create account' }).click();
+    };
+
+    await use(createAccount);
+  }
+});
+
+export const popupExpect = popup.expect;

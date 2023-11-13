@@ -1,4 +1,9 @@
-export const initialStateForPopupTests = {
+import { RootState } from 'typesafe-actions';
+
+import { NetworkSetting } from '@src/constants';
+import { TimeoutDurationSetting } from '@popup/constants';
+
+export const initialStateForPopupTests: RootState = {
   vaultCipher:
     'Z+mTlwWz7PHWEKcAUF9wq9VNyFYg+Z4Jxa8ZDMdWciRfeup0U/H8s/xqXlafslgdVL1JXlOrL07ifLq8DJ1hmR7SbGSNcJFDdlMJCebTC2MCLq469AffZOeFSYqbd0DgJhMy18yoVMrldYgwWuBcdilub4vko3dI3LNszgoDIKL2mj4Ze3H7LOEB69wN/rsCxGRc+8yPGlJFw/h+7R31bHt2Rgd2pNRUSxBHWga/UVsUMA0bKS28AEb6iF8RiVjWveciNAru0CQdMrFrrudD/AUgKo1a2X8Wv/d0jJ26keGJzWIab8vioym7rml111WGXs6/64mL7jdZ7Z/Wf/mhrJrxhGvHG84QFq56unZ6kmW+5vchUmExSAmxddXpziTeXUgAN5RMRD2Oc28l3EZqkTbVFyj/ZQebodQq7+pSvAZiLVAOE4HpMMJZvhv0v1CW/9H1sQYNllFLlSuCnxnhcstCWNFoTng8xM5vy1E6z3Fqd7xq49Nn40Xv4T4bXiEJvLECfwZNH2jaB687YOffTzKwAlIGp3uNtEMDFipILwWTGlBQP1jMEJeaF/sNo8lfqyAUitUHvpZkkWKMAgH3gC7bj/X5z/YkPhaCdA34fRoApGmQcLZhqVlEzPab4KDzMZ0HFCNQzA==',
   loginRetryCount: 0,
@@ -39,7 +44,8 @@ export const initialStateForPopupTests = {
     ],
     accountNamesByOriginDict: {},
     activeAccountName: 'Account 1',
-    jsonById: {}
+    jsonById: {},
+    siteNameByOriginDict: {}
   },
   keys: {
     passwordHash:
@@ -61,7 +67,26 @@ export const initialStateForPopupTests = {
   lastActivityTime: null,
   activeOrigin: null,
   settings: {
-    activeNetwork: 'Mainnet',
-    activeTimeoutDuration: '5 min'
+    activeNetwork: NetworkSetting.Testnet,
+    activeTimeoutDuration: TimeoutDurationSetting['5 min'],
+    isDarkMode: false
+  },
+  recentRecipientPublicKeys: [],
+  accountInfo: {
+    balance: {
+      amountMotes: null,
+      amountFiat: null
+    },
+    currencyRate: null,
+    accountCasperActivity: [],
+    accountErc20TokensActivity: null,
+    pendingTransactions: [],
+    erc20Tokens: [],
+    accountDeploys: [],
+    accountNftTokens: [],
+    nftTokensCount: 0,
+    accountDeploysCount: 0,
+    accountCasperActivityCount: 0,
+    accountTrackingIdOfSentNftTokens: {}
   }
 };
