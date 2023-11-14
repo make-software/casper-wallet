@@ -1,4 +1,4 @@
-name: E2E onboarding tests
+name: E2E popup tests
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ master, develop ]
 
 jobs:
-  e2e-onboarding-tests:
+  e2e-popup-tests:
     timeout-minutes: 60
     runs-on: ubuntu-latest
 
