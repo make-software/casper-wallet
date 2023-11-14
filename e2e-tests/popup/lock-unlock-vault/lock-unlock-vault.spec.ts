@@ -4,18 +4,22 @@ import { ACCOUNT_NAMES } from '../../common';
 popup.describe('Popup UI: lock/unlock vault', () => {
   popup(
     'should unlock and lock vault',
-    async ({ page, unlockVault, lockVault }) => {
-      await popupExpect(page.getByText('Your wallet is locked')).toBeVisible();
+    async ({ popupPage, unlockVault, lockVault }) => {
+      await popupExpect(
+        popupPage.getByText('Your wallet is locked')
+      ).toBeVisible();
 
       await unlockVault();
 
       await popupExpect(
-        page.getByText(ACCOUNT_NAMES.defaultAccountName)
+        popupPage.getByText(ACCOUNT_NAMES.defaultFirstAccountName)
       ).toBeVisible();
 
       await lockVault();
 
-      await popupExpect(page.getByText('Your wallet is locked')).toBeVisible();
+      await popupExpect(
+        popupPage.getByText('Your wallet is locked')
+      ).toBeVisible();
     }
   );
 });

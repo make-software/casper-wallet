@@ -4,30 +4,32 @@ import { ACCOUNT_NAMES } from '../../common';
 popup.describe('Popup UI: rename account', () => {
   popup(
     'should rename account from account popover',
-    async ({ page, unlockVault }) => {
+    async ({ popupPage, unlockVault }) => {
       await unlockVault();
 
-      await page.getByTestId('popover-children-container').click();
+      await popupPage.getByTestId('popover-children-container').click();
 
-      await page.getByText('Rename').click();
+      await popupPage.getByText('Rename').click();
 
       await popupExpect(
-        page.getByRole('heading', { name: 'Rename account' })
+        popupPage.getByRole('heading', { name: 'Rename account' })
       ).toBeVisible();
 
-      await page
+      await popupPage
         .getByPlaceholder('New account name', { exact: true })
         .fill(ACCOUNT_NAMES.renamedAccountName);
-      await page.getByRole('button', { name: 'Update' }).click();
+      await popupPage.getByRole('button', { name: 'Update' }).click();
 
       await popupExpect(
-        page.getByRole('heading', { name: ACCOUNT_NAMES.renamedAccountName })
+        popupPage.getByRole('heading', {
+          name: ACCOUNT_NAMES.renamedAccountName
+        })
       ).toBeVisible();
 
-      await page.getByText('Close').click();
+      await popupPage.getByText('Close').click();
 
       await popupExpect(
-        page.getByText(ACCOUNT_NAMES.renamedAccountName)
+        popupPage.getByText(ACCOUNT_NAMES.renamedAccountName)
       ).toBeVisible();
     }
   );

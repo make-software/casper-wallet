@@ -6,7 +6,7 @@ import {
 } from '@playwright/test';
 import path from 'path';
 
-import { vaultPassword } from './common';
+import { PLAYGROUND_URL, vaultPassword } from './common';
 
 const getBrowserConfig = () => {
   switch (process.env.PLAYWRIGHT_BROWSER) {
@@ -242,20 +242,29 @@ export const onboarding = test.extend<{
 export const onboardingExpect = onboarding.expect;
 
 export const popup = test.extend<{
-  unlockVault: () => Promise<void>;
+  popupPage: Page;
+  playgroundPage: Page;
+  unlockVault: (popupPage?: Page) => Promise<void>;
   lockVault: () => Promise<void>;
   createAccount: (newAccountName: string) => Promise<void>;
+  connectAccounts: () => Promise<void>;
 }>({
-  page: async ({ extensionId, page }, use) => {
+  popupPage: async ({ extensionId, page }, use) => {
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
     await use(page);
   },
+  playgroundPage: async ({ page }, use) => {
+    await page.goto(PLAYGROUND_URL);
+    await use(page);
+  },
   unlockVault: async ({ page }, use) => {
-    const unlockVault = async () => {
-      await page
+    const unlockVault = async popupPage => {
+      const currentPage = popupPage || page;
+
+      await currentPage
         .getByPlaceholder('Password', { exact: true })
         .fill(vaultPassword);
-      await page.getByRole('button', { name: 'Unlock wallet' }).click();
+      await currentPage.getByRole('button', { name: 'Unlock wallet' }).click();
     };
 
     await use(unlockVault);
@@ -280,6 +289,27 @@ export const popup = test.extend<{
     };
 
     await use(createAccount);
+  },
+  connectAccounts: async ({ page, unlockVault, context }, use) => {
+    const connectAccounts = async () => {
+      await page.goto(PLAYGROUND_URL);
+
+      const [connectAccountPage] = await Promise.all([
+        context.waitForEvent('page'),
+        page.getByRole('button', { name: 'Connect', exact: true }).click()
+      ]);
+
+      await unlockVault(connectAccountPage);
+
+      await connectAccountPage.getByText('select all', { exact: true }).click();
+
+      await connectAccountPage.getByRole('button', { name: 'Next' }).click();
+      await connectAccountPage
+        .getByRole('button', { name: 'Connect to 2 accounts' })
+        .click();
+    };
+
+    await use(connectAccounts);
   }
 });
 

@@ -4,65 +4,71 @@ import { NetworkSetting } from '@src/constants';
 import { TimeoutDurationSetting } from '@popup/constants';
 
 export const initialStateForPopupTests: RootState = {
-  vaultCipher:
-    'Z+mTlwWz7PHWEKcAUF9wq9VNyFYg+Z4Jxa8ZDMdWciRfeup0U/H8s/xqXlafslgdVL1JXlOrL07ifLq8DJ1hmR7SbGSNcJFDdlMJCebTC2MCLq469AffZOeFSYqbd0DgJhMy18yoVMrldYgwWuBcdilub4vko3dI3LNszgoDIKL2mj4Ze3H7LOEB69wN/rsCxGRc+8yPGlJFw/h+7R31bHt2Rgd2pNRUSxBHWga/UVsUMA0bKS28AEb6iF8RiVjWveciNAru0CQdMrFrrudD/AUgKo1a2X8Wv/d0jJ26keGJzWIab8vioym7rml111WGXs6/64mL7jdZ7Z/Wf/mhrJrxhGvHG84QFq56unZ6kmW+5vchUmExSAmxddXpziTeXUgAN5RMRD2Oc28l3EZqkTbVFyj/ZQebodQq7+pSvAZiLVAOE4HpMMJZvhv0v1CW/9H1sQYNllFLlSuCnxnhcstCWNFoTng8xM5vy1E6z3Fqd7xq49Nn40Xv4T4bXiEJvLECfwZNH2jaB687YOffTzKwAlIGp3uNtEMDFipILwWTGlBQP1jMEJeaF/sNo8lfqyAUitUHvpZkkWKMAgH3gC7bj/X5z/YkPhaCdA34fRoApGmQcLZhqVlEzPab4KDzMZ0HFCNQzA==',
+  keys: {
+    passwordHash:
+      '83a08650bfee28f7c8fa850828cfa9800590f0385d964d03d1cd1b2ef05f42a8',
+    passwordSaltHash:
+      '088da9fc6cc474e408acfc9a2d4a2f83776332d53008b1c3ee0b9f52f10c8201',
+    keyDerivationSaltHash:
+      '5a92932f02799e90c2e6b994b6b8b23220dd3022570c43837f318e1d0379f1e2'
+  },
   loginRetryCount: 0,
+  session: {
+    encryptionKeyHash:
+      '7b55663cb7cd7d96765373ce0ee8d6901244de1ed241d20f9afe18a81149ea71',
+    isLocked: true
+  },
   vault: {
     secretPhrase: [
-      'garlic',
-      'mean',
-      'depth',
-      'spider',
       'hold',
-      'stereo',
-      'mask',
-      'thing',
-      'office',
-      'congress',
-      'amateur',
-      'body',
-      'meadow',
-      'tone',
-      'robust',
-      'furnace',
-      'wrong',
-      'remember',
-      'receive',
-      'bounce',
-      'opera',
-      'bind',
-      'bench',
-      'own'
+      'matrix',
+      'spider',
+      'subway',
+      'bottom',
+      'jazz',
+      'charge',
+      'fire',
+      'lawn',
+      'valley',
+      'stay',
+      'coil',
+      'moral',
+      'hospital',
+      'dream',
+      'cycle',
+      'multiply',
+      'december',
+      'agree',
+      'huge',
+      'major',
+      'tower',
+      'devote',
+      'old'
     ],
     accounts: [
       {
         publicKey:
-          '02021006f7e7ecba9dda1fbd68bd88b0b509ce07a24c4ce8a96c62d44bec4beb9f9d',
-        secretKey: 'cuS+FaNCqTlbuQq9FSn8W9SCBS1WbJt/e4AAhHwTGb0=',
+          '0202b1943511b8c23b1b2b8ed7ddcedffcc7be70d9366a5005c7beab08a81b7ae633',
+        secretKey: 'Go8sSp3u/hSaDFCjFK6wdM4VZuWjqxEaNB38RaZHLA0=',
         name: 'Account 1'
+      },
+      {
+        publicKey:
+          '0203b2e05f074452f5e69ba512310deceaca152ebd3394eadcec26c6e68e91aa7724',
+        secretKey: 'TCDeehVWtWeWP2PM/UKh2gQ6hgUpZ6v1D6lzmonYpm4=',
+        name: 'Account 2'
       }
     ],
     accountNamesByOriginDict: {},
+    siteNameByOriginDict: {},
     activeAccountName: 'Account 1',
-    jsonById: {},
-    siteNameByOriginDict: {}
-  },
-  keys: {
-    passwordHash:
-      'dcaa2a91cfc3517e2c8757b47c6e7e7a643da17f83c6a612aed80c81a32fdc2e',
-    passwordSaltHash:
-      'b83ce544691efea5bf286afdf52f609fcc4ceac600ff07baa6108cf3ae076eac',
-    keyDerivationSaltHash:
-      '9b57a8338ab66be1947f7fa3c8afdbb34e3f55dd57d72ca198363fc728295acb'
+    jsonById: {}
   },
   windowManagement: {
     windowId: null
   },
-  session: {
-    encryptionKeyHash:
-      '7a87c30acf34ccff836495f2935e11ac4a82e3e1517d2146bc9624f87238d7ee',
-    isLocked: true
-  },
+  vaultCipher:
+    'G89IRk1Zc+l46uPzkhTwSy09IUM5Q4R1JoIfOCeyMZEn47OnFK7Rk1fSPJ9gsSVsiq+d00AqKuW/lTV+s1OTGOucftVqKBF6XSyR9tG7P2sgRyJ6o5vS/h+tVSyqHt6wHFuTcee1IResAfxPJEjiKbMMm7gN1eFosvqM8utdBOgIkR17+HiojfvdI0Q07kWZXy0SuUceSxnXGHZU2LdMikZI2JmkaEgk+Qgm/nNzqlN2hAKxQRhr+68opUiIN/lpOYPLS64nZou6vuqSKu+Uogd8znNZOcFA+4+1zXlbJEp8HksSqy+fblAxDALpauljIogoPfwLIaSPU1GSwTfG63yuCiMVlAE+FwOAt31J+m0N++obOTomfp6ZjN0uOG700Kfm5NSWMMXqCp/f/M8C466/ONqsl0og/R1KXOw0nPYybzmgXCyS35yZyOXmxzKrKtXRdYVTBz79pjMbR8p1CCDnVLHJyKKIGbsGrX3ADjwkJHmBEjGPL2Qb4Ez7ATzcQ/XEdcK+VfzbNkJivssPMBV+6ETNWrwPbIR4BxfN12TbmdAej7nbP+oaM1plKhcoW1hp0oD60Ngwh8D1ztD9i+3R9yDGVNwjh56ytvk5E1Fo7e02NYBJgjvHFoBz+fX4iHlliHczRRVC3OVceZcPPMCeVuigkz7wirqscxBfnrc+EBXrziOrEc4NobSKJI33UEZAMLjxLZSD8CR9J9RrJzFCrda44P65uSypiSyw49EPdsG4etW9Eop2iHNO5Ny7oCr7mITsFvFkGtXDh+tQ4r6D4b7ZGe2AD2Jm/4t9jcBsPO3wHxPfS7eIHq8RUJZUK7DL90s8gt0wXzIFgIeMIc+mcK0HigU+zYaBHO9O+PUfetEHZANmSwsRu3nmiHogEZaPJAT+ATY3+3GjNMQ=',
   loginRetryLockoutTime: null,
   lastActivityTime: null,
   activeOrigin: null,
