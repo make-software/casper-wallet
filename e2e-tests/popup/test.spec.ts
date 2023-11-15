@@ -1,5 +1,5 @@
 import { test } from '../fixtures';
-import { DEFAULT_FIRST_ACCOUNT, vaultPassword } from '../common';
+import { vaultPassword } from '../common';
 
 test('test', async ({ extensionId, context, page }) => {
   await page.goto(`chrome-extension://${extensionId}/popup.html`);
@@ -9,12 +9,16 @@ test('test', async ({ extensionId, context, page }) => {
 
   await page.getByTestId('popover-children-container').click();
 
-  const [cspr] = await Promise.all([
+  const [importAccount] = await Promise.all([
     context.waitForEvent('page'),
     await page.getByText('View on CSPR.live').click()
   ]);
 
   await test
-    .expect(cspr.getByText(DEFAULT_FIRST_ACCOUNT.truncatedPublicKey))
+    .expect(
+      importAccount.getByRole('heading', {
+        name: 'Import account from secret key file'
+      })
+    )
     .toBeVisible();
 });

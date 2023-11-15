@@ -14,7 +14,8 @@ import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { Account } from '@background/redux/vault/types';
-import browser from 'webextension-polyfill';
+import { WindowApp } from '@background/create-open-window';
+import { useWindowManager } from '@src/hooks';
 
 interface AccountActionsMenuPopoverProps {
   account: Account;
@@ -33,6 +34,7 @@ export const AccountActionsMenuPopover = ({
   const isAnyAccountConnected = useSelector(
     selectIsAnyAccountConnectedWithActiveOrigin
   );
+  const { openWindow } = useWindowManager();
 
   return (
     <Popover
@@ -99,18 +101,9 @@ export const AccountActionsMenuPopover = ({
             title={t('View account in CSPR.live')}
             // href={getBlockExplorerAccountUrl(casperLiveUrl, account.publicKey)}
             onClick={() => {
-              browser.windows.create({
-                url: getBlockExplorerAccountUrl(
-                  casperLiveUrl,
-                  account.publicKey
-                ),
-                type: 'popup'
-              });
-              // window.open(
-              //   getBlockExplorerAccountUrl(casperLiveUrl, account.publicKey),
-              //   '_blank',
-              //   'popup'
-              // );
+              openWindow({
+                windowApp: WindowApp.ImportAccount
+              }).catch(e => console.error(e));
             }}
           >
             <SvgIcon
