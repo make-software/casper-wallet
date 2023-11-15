@@ -4,12 +4,13 @@ import { popup, popupExpect } from '../../fixtures';
 popup.describe('Popup UI: import account with file', () => {
   popup(
     'should import account with file',
-    async ({ unlockVault, popupPage, context, browser }) => {
-      await unlockVault(popupPage);
+    async ({ unlockVault, context, page, extensionId }) => {
+      await page.goto(`chrome-extension://${extensionId}/popup.html`);
+      await unlockVault();
 
-      await popupPage.getByTestId('menu-open-icon').click();
+      await page.getByTestId('menu-open-icon').click();
 
-      await popupPage.getByText('Import account').click();
+      await page.getByText('Import account').click();
       const importAccountPage = await context.waitForEvent('page');
 
       // const [importAccountPage] = await Promise.all([
