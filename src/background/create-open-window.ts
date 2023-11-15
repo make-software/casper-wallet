@@ -142,6 +142,7 @@ export function createOpenWindow({
           }
           return newWindow;
         });
+        console.log(currentWindow.state);
 
         try {
           console.log(await window, 'window');
