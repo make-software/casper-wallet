@@ -45,11 +45,8 @@
     "dependency:orphans": "npx madge --ts-config=tsconfig.json --orphans src/**/*",
     "pack-extension:chrome": "crx3 --keyPath e2e/crx3.pem build/chrome",
     "remove-packed-extension:chrome": "rm -rf chrome.crx",
-    "e2e:chrome:headless:onboarding": "npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/onboarding-flow --project chromium",
-    "e2e:firefox:headless:onboarding": "npm run build:firefox && PLAYWRIGHT_BROWSER=firefox npx playwright test e2e-tests/onboarding-flow --project firefox",
-    "e2e:chrome:headless:popup": "TEST_ENV=true MOCK_STATE=true npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/popup --project chromium",
-    "e2e:firefox:headless:popup": "MOCK_STATE=true npm run build:firefox && PLAYWRIGHT_BROWSER=firefox npx playwright test e2e-tests/popup --project firefox"
-
+    "e2e:chrome:headless:onboarding": "TEST_ENV=true npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/onboarding-flow --project chromium",
+    "e2e:chrome:headless:popup": "TEST_ENV=true MOCK_STATE=true npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/popup --project chromium"
   },
   "lint-staged": {
     "*.md": "markdownlint",

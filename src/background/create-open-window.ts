@@ -70,7 +70,7 @@ export function createOpenWindow({
         return window;
       }
     }
-    console.log(await openNewWindow());
+
     return openNewWindow();
 
     // helpers
@@ -134,13 +134,7 @@ export function createOpenWindow({
                 focused: true
               });
 
-        console.log(
-          currentWindow.state === 'fullscreen' || isTestEnv,
-          `currentWindow.state - ${currentWindow.state}`,
-          `isTestEnv - ${isTestEnv}`
-        );
-
-        const window = newWindow.then(newWindow => {
+        return newWindow.then(newWindow => {
           if (newWindow.id) {
             setWindowId(newWindow.id);
 
@@ -152,14 +146,6 @@ export function createOpenWindow({
           }
           return newWindow;
         });
-
-        try {
-          console.log(await window, 'window');
-        } catch (error) {
-          console.log(error, 'error');
-        }
-
-        return window;
       });
     }
   };
