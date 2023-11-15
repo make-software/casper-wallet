@@ -1,5 +1,5 @@
 import { test } from '../fixtures';
-import { DEFAULT_FIRST_ACCOUNT, vaultPassword } from '../common';
+import { vaultPassword } from '../common';
 
 test('test', async ({ extensionId, context, page }) => {
   await page.goto(`chrome-extension://${extensionId}/popup.html`);
@@ -7,14 +7,18 @@ test('test', async ({ extensionId, context, page }) => {
   await page.getByPlaceholder('Password', { exact: true }).fill(vaultPassword);
   await page.getByRole('button', { name: 'Unlock wallet' }).click();
 
-  await page.getByTestId('popover-children-container').click();
+  await page.getByTestId('menu-open-icon').click();
 
-  const [cspr] = await Promise.all([
+  const [importAccountPage] = await Promise.all([
     context.waitForEvent('page'),
-    await page.getByText('View on CSPR.live').click()
+    await page.getByText('Import account').click()
   ]);
 
   await test
-    .expect(cspr.getByText(DEFAULT_FIRST_ACCOUNT.truncatedPublicKey))
+    .expect(
+      importAccountPage.getByRole('heading', {
+        name: 'Import account from secret key file'
+      })
+    )
     .toBeVisible();
 });
