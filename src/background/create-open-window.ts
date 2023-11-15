@@ -1,4 +1,3 @@
-import * as process from 'process';
 import browser from 'webextension-polyfill';
 
 import { RouterPath } from '@src/apps/signature-request/router';
