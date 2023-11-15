@@ -93,10 +93,17 @@ export const AccountActionsMenuPopover = ({
             </Typography>
           </PopoverLink>
           <PopoverLink
-            target="_blank"
+            // target="_blank"
             variant="contentAction"
             title={t('View account in CSPR.live')}
-            href={getBlockExplorerAccountUrl(casperLiveUrl, account.publicKey)}
+            // href={getBlockExplorerAccountUrl(casperLiveUrl, account.publicKey)}
+            onClick={() => {
+              window.open(
+                getBlockExplorerAccountUrl(casperLiveUrl, account.publicKey),
+                '_blank',
+                'popup'
+              );
+            }}
           >
             <SvgIcon
               src="assets/icons/external-link.svg"

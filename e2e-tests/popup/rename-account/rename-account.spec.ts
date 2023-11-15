@@ -1,7 +1,7 @@
 import { popup, popupExpect } from '../../fixtures';
 import { ACCOUNT_NAMES } from '../../common';
 
-popup.describe.skip('Popup UI: rename account', () => {
+popup.describe('Popup UI: rename account', () => {
   popup(
     'should rename account from account popover',
     async ({ popupPage, unlockVault }) => {
