@@ -11,11 +11,5 @@ test('test', async ({ browser }) => {
     await page.locator("//a[@aria-label='GitHub repository']").click()
   ]);
 
-  await test
-    .expect(
-      github.getByText(
-        'Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.'
-      )
-    )
-    .toBeVisible();
+  await test.expect(github.locator('#user-content--playwright')).toBeVisible();
 });
