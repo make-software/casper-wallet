@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { PopoverLink, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import { getBlockExplorerAccountUrl } from '@src/constants';
+// import { getBlockExplorerAccountUrl } from '@src/constants';
 import { Popover } from '@libs/ui/components/popover/popover';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
@@ -12,7 +12,7 @@ import {
 } from '@background/redux/vault/selectors';
 import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+// import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { Account } from '@background/redux/vault/types';
 import { WindowApp } from '@background/create-open-window';
 import { useWindowManager } from '@src/hooks';
@@ -30,7 +30,7 @@ export const AccountActionsMenuPopover = ({
   const activeOrigin = useSelector(selectActiveOrigin);
   const connectedAccountNames =
     useSelector(selectConnectedAccountNamesWithActiveOrigin) || [];
-  const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+  // const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const isAnyAccountConnected = useSelector(
     selectIsAnyAccountConnectedWithActiveOrigin
   );
