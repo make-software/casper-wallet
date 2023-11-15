@@ -104,31 +104,32 @@ export function createOpenWindow({
 
     async function openNewWindow(): Promise<browser.Windows.Window> {
       return browser.windows.getCurrent().then(async currentWindow => {
-        const windowWidth = currentWindow.width ?? 0;
-        const xOffset = currentWindow.left ?? 0;
-        const yOffset = currentWindow.top ?? 0;
-        const crossPlatformWidthOffset = 16;
-        const popupWidth = 360 + crossPlatformWidthOffset;
-        const popupHeight = 700;
+        // const windowWidth = currentWindow.width ?? 0;
+        // const xOffset = currentWindow.left ?? 0;
+        // const yOffset = currentWindow.top ?? 0;
+        // const crossPlatformWidthOffset = 16;
+        // const popupWidth = 360 + crossPlatformWidthOffset;
+        // const popupHeight = 700;
         const newWindow =
           // We need this check for Firefox. If the Firefox browser is in fullscreen mode it ignores the width and height that we set and opens a popup in a small size.
           // So we check it and if it is in a fullscreen mode we didn't set width and height, and the popup will also open in fullscreen mode.
           // This is a default behavior for Safari and Chrome, but Firefox doesn't do this, so we need to do this manually for it.
-          currentWindow.state === 'fullscreen'
-            ? browser.windows.create({
-                url: getUrlByWindowApp(windowApp, searchParams),
-                type: 'popup',
-                focused: true
-              })
-            : browser.windows.create({
-                url: getUrlByWindowApp(windowApp, searchParams),
-                type: 'popup',
-                height: popupHeight,
-                width: popupWidth,
-                left: windowWidth + xOffset - popupWidth,
-                top: yOffset,
-                focused: true
-              });
+          // currentWindow.state === 'fullscreen'
+          //   ?
+          browser.windows.create({
+            url: getUrlByWindowApp(windowApp, searchParams),
+            type: 'popup',
+            focused: true
+          });
+        // : browser.windows.create({
+        //     url: getUrlByWindowApp(windowApp, searchParams),
+        //     type: 'popup',
+        //     height: popupHeight,
+        //     width: popupWidth,
+        //     left: windowWidth + xOffset - popupWidth,
+        //     top: yOffset,
+        //     focused: true
+        //   });
 
         const window = newWindow.then(newWindow => {
           if (newWindow.id) {
