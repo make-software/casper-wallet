@@ -4,15 +4,14 @@ import { ACCOUNT_NAMES, IMPORTED_ACCOUNT, secretKeyPath } from '../../common';
 popup.describe('Popup UI: import account with file', () => {
   popup(
     'should import account with file',
-    async ({ unlockVault, context, page, extensionId }) => {
-      await page.goto(`chrome-extension://${extensionId}/popup.html`);
+    async ({ unlockVault, context, popupPage }) => {
       await unlockVault();
 
-      await page.getByTestId('menu-open-icon').click();
+      await popupPage.getByTestId('menu-open-icon').click();
 
       const [importAccountPage] = await Promise.all([
         context.waitForEvent('page'),
-        page.getByText('Import account').click()
+        popupPage.getByText('Import account').click()
       ]);
 
       const fileChooserPromise = importAccountPage.waitForEvent('filechooser');
@@ -44,16 +43,16 @@ popup.describe('Popup UI: import account with file', () => {
 
       await importAccountPage.getByRole('button', { name: 'Done' }).click();
 
-      await page.getByTestId('connection-status-modal').click();
+      await popupPage.getByTestId('connection-status-modal').click();
 
       await popupExpect(
-        page.getByText(ACCOUNT_NAMES.importedAccountName)
+        popupPage.getByText(ACCOUNT_NAMES.importedAccountName)
       ).toBeVisible();
       await popupExpect(
-        page.getByText(IMPORTED_ACCOUNT.truncatedPublicKey)
+        popupPage.getByText(IMPORTED_ACCOUNT.truncatedPublicKey)
       ).toBeVisible();
       await popupExpect(
-        page.getByText('Imported', { exact: true })
+        popupPage.getByText('Imported', { exact: true })
       ).toBeVisible();
     }
   );
