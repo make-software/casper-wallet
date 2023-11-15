@@ -10,6 +10,8 @@ jobs:
   e2e-popup-tests:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.39.0-jammy
 
     steps:
       - uses: actions/checkout@v3
