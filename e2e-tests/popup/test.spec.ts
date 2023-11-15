@@ -1,15 +1,20 @@
 import { test } from '../fixtures';
+import { DEFAULT_FIRST_ACCOUNT, vaultPassword } from '../common';
 
-test('test', async ({ browser, context, page }) => {
-  // const context = await browser.newContext();
-  // const page = await context.newPage();
+test('test', async ({ extensionId, context, page }) => {
+  await page.goto(`chrome-extension://${extensionId}/popup.html`);
 
-  await page.goto('https://playwright.dev/');
+  await page.getByPlaceholder('Password', { exact: true }).fill(vaultPassword);
+  await page.getByRole('button', { name: 'Unlock wallet' }).click();
 
-  const [github] = await Promise.all([
+  await page.getByTestId('popover-children-container').click();
+
+  const [cspr] = await Promise.all([
     context.waitForEvent('page'),
-    await page.locator("//a[@aria-label='GitHub repository']").click()
+    await page.getByText('View on CSPR.live').click()
   ]);
 
-  await test.expect(github.locator('#user-content--playwright')).toBeVisible();
+  await test
+    .expect(cspr.getByText(DEFAULT_FIRST_ACCOUNT.truncatedPublicKey))
+    .toBeVisible();
 });

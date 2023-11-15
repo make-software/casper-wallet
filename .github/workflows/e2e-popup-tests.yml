@@ -26,9 +26,6 @@ jobs:
       - name: Run Chrome tests
         run: npm run e2e:chrome:headless:popup
 
-      - name: Run Firefox tests
-        run: npm run e2e:firefox:headless:popup
-
       - uses: actions/upload-artifact@v3
         if: always()
         with:
