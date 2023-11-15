@@ -4,29 +4,31 @@ import { popup, popupExpect } from '../../fixtures';
 popup.describe('Popup UI: import account with file', () => {
   popup(
     'should import account with file',
-    async ({ unlockVault, context, page, extensionId }) => {
-      await page.goto(`chrome-extension://${extensionId}/popup.html`);
-      await unlockVault();
+    async ({ unlockVault, context, page, extensionId, browser }) => {
+      // const newContext = await browser.newContext();
+      // const page2 = await newContext.newPage();
+      await page.goto(
+        `chrome-extension://${extensionId}/import-account-with-file.html`
+      );
+      // await unlockVault();
 
-      await page.getByTestId('menu-open-icon').click();
+      // await page.getByTestId('menu-open-icon').click();
 
-      const [importAccountPage] = await Promise.all([
-        context.waitForEvent('page'),
-        await page.getByText('Import account').click()
-      ]);
+      // const [importAccountPage] = await Promise.all([
+      //   context.waitForEvent('page'),
+      //   page.getByText('Import account').click()
+      // ]);
 
-      // const fileChooserPromise = importAccountPage.waitForEvent('filechooser');
+      // const fileChooserPromise = page.waitForEvent('filechooser');
 
       await popupExpect(
-        importAccountPage.getByRole('heading', {
+        page.getByRole('heading', {
           name: 'Import account from secret key file'
         })
       ).toBeVisible();
-      //
-      // await importAccountPage
-      //   .getByRole('button', { name: 'Upload your file' })
-      //   .click();
-      //
+
+      // await page.getByRole('button', { name: 'Upload your file' }).click();
+
       // const fileChooser = await fileChooserPromise;
       // await fileChooser.setFiles(secretKeyPath);
       //
@@ -43,17 +45,17 @@ popup.describe('Popup UI: import account with file', () => {
       // ).toBeVisible();
       //
       // await importAccountPage.getByRole('button', { name: 'Done' }).click();
-      //
-      // await popupPage.getByTestId('connection-status-modal').click();
+
+      // await page.getByTestId('connection-status-modal').click();
       //
       // await popupExpect(
-      //   popupPage.getByText(ACCOUNT_NAMES.importedAccountName)
+      //   page.getByText(ACCOUNT_NAMES.importedAccountName)
       // ).toBeVisible();
       // await popupExpect(
-      //   popupPage.getByText(IMPORTED_ACCOUNT.truncatedPublicKey)
+      //   page.getByText(IMPORTED_ACCOUNT.truncatedPublicKey)
       // ).toBeVisible();
       // await popupExpect(
-      //   popupPage.getByText('Imported', { exact: true })
+      //   page.getByText('Imported', { exact: true })
       // ).toBeVisible();
     }
   );
