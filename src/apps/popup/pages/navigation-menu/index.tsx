@@ -123,9 +123,9 @@ export function NavigationMenuPageContent() {
             description: t('From Signer secret key file'),
             iconPath: 'assets/icons/upload.svg',
             disabled: false,
-            handleOnClick: () => {
+            handleOnClick: async () => {
               closeNavigationMenu();
-              openWindow({
+              await openWindow({
                 windowApp: WindowApp.ImportAccount
               }).catch(e => console.error(e));
             }

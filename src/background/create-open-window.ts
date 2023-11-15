@@ -69,7 +69,7 @@ export function createOpenWindow({
         return window;
       }
     }
-
+    console.log(await openNewWindow());
     return openNewWindow();
 
     // helpers
