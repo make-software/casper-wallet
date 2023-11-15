@@ -1,7 +1,7 @@
 import { popup, popupExpect } from '../../fixtures';
 import { ACCOUNT_NAMES } from '../../common';
 
-popup.describe.skip('Popup UI: lock/unlock vault', () => {
+popup.describe('Popup UI: lock/unlock vault', () => {
   popup(
     'should unlock and lock vault',
     async ({ popupPage, unlockVault, lockVault }) => {

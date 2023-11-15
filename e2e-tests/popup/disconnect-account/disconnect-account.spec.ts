@@ -1,7 +1,7 @@
 import { popup, popupExpect } from '../../fixtures';
 import { ACCOUNT_NAMES, PLAYGROUND_URL } from '../../common';
 
-popup.describe.skip('Popup UI: disconnect account', () => {
+popup.describe('Popup UI: disconnect account', () => {
   popup.beforeEach(async ({ connectAccounts }) => {
     await connectAccounts();
   });
