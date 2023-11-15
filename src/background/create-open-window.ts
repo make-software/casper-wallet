@@ -134,6 +134,12 @@ export function createOpenWindow({
                 focused: true
               });
 
+        console.log(
+          currentWindow.state === 'fullscreen' || isTestEnv,
+          `currentWindow.state - ${currentWindow.state}`,
+          `isTestEnv - ${isTestEnv}`
+        );
+
         const window = newWindow.then(newWindow => {
           if (newWindow.id) {
             setWindowId(newWindow.id);
