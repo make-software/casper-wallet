@@ -9,9 +9,14 @@ popup.describe('Popup UI: import account with file', () => {
 
       await popupPage.getByTestId('menu-open-icon').click();
 
-      const newPagePromise = context.waitForEvent('page');
-      await popupPage.getByText('Import account').click();
-      const importAccountPage = await newPagePromise;
+      // const newPagePromise = context.waitForEvent('page');
+      // await popupPage.getByText('Import account').click();
+      // const importAccountPage = await newPagePromise;
+
+      const [importAccountPage] = await Promise.all([
+        context.waitForEvent('page', { timeout: 5000 }),
+        popupPage.getByText('Import account').click()
+      ]);
 
       const fileChooserPromise = importAccountPage.waitForEvent('filechooser');
 

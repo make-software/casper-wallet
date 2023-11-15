@@ -258,7 +258,7 @@ export const popup = test.extend<{
     await use(page);
   },
   unlockVault: async ({ page }, use) => {
-    const unlockVault = async popupPage => {
+    const unlockVault = async (popupPage?: Page) => {
       const currentPage = popupPage || page;
 
       await currentPage
