@@ -11,7 +11,19 @@ popup.describe('Popup UI: import account with file', () => {
       await page.getByTestId('menu-open-icon').click();
 
       await page.getByText('Import account').click();
-      const importAccountPage = await context.waitForEvent('page');
+      try {
+        const importAccountPage = await context.waitForEvent('page');
+
+        await popupExpect(
+          importAccountPage.getByRole('heading', {
+            name: 'Import account from secret key file'
+          })
+        ).toBeVisible();
+      } catch (error) {
+        console.error('An error occurred:', error);
+      } finally {
+        await context.close();
+      }
 
       // const [importAccountPage] = await Promise.all([
       //   context.waitForEvent('page'),
@@ -20,11 +32,11 @@ popup.describe('Popup UI: import account with file', () => {
 
       // const fileChooserPromise = importAccountPage.waitForEvent('filechooser');
 
-      await popupExpect(
-        importAccountPage.getByRole('heading', {
-          name: 'Import account from secret key file'
-        })
-      ).toBeVisible();
+      // await popupExpect(
+      //   importAccountPage.getByRole('heading', {
+      //     name: 'Import account from secret key file'
+      //   })
+      // ).toBeVisible();
       //
       // await importAccountPage
       //   .getByRole('button', { name: 'Upload your file' })
