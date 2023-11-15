@@ -1,8 +1,8 @@
 import { test } from '../fixtures';
 
-test('test', async ({ browser }) => {
-  const context = await browser.newContext();
-  const page = await context.newPage();
+test('test', async ({ browser, context, page }) => {
+  // const context = await browser.newContext();
+  // const page = await context.newPage();
 
   await page.goto('https://playwright.dev/');
 
