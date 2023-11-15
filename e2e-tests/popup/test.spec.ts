@@ -1,7 +1,7 @@
 import { test } from '../fixtures';
 import { vaultPassword } from '../common';
 
-test('test', async ({ extensionId, context, page }) => {
+test.skip('test', async ({ extensionId, context, page }) => {
   await page.goto(`chrome-extension://${extensionId}/popup.html`);
 
   await page.getByPlaceholder('Password', { exact: true }).fill(vaultPassword);

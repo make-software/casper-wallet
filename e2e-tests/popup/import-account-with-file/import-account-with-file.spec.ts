@@ -1,7 +1,7 @@
 import { popup, popupExpect } from '../../fixtures';
 import { ACCOUNT_NAMES, IMPORTED_ACCOUNT, secretKeyPath } from '../../common';
 
-popup.describe.skip('Popup UI: import account with file', () => {
+popup.describe('Popup UI: import account with file', () => {
   popup(
     'should import account with file',
     async ({ unlockVault, context, page, extensionId }) => {

@@ -61,9 +61,10 @@ export function createOpenWindow({
     searchParams
   }: OpenWindowProps): Promise<browser.Windows.Window> {
     const id = isNewWindow ? null : windowId;
-
+    console.log(id, 'id');
     if (id != null) {
       const window = await reuseExistingWindow(id);
+      console.log(window, 'window');
       if (window != null) {
         return window;
       }

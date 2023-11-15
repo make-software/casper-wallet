@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { PopoverLink, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
-// import { getBlockExplorerAccountUrl } from '@src/constants';
+import { getBlockExplorerAccountUrl } from '@src/constants';
 import { Popover } from '@libs/ui/components/popover/popover';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
@@ -12,10 +12,8 @@ import {
 } from '@background/redux/vault/selectors';
 import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
-// import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { Account } from '@background/redux/vault/types';
-import browser from 'webextension-polyfill';
-import { getUrlByWindowApp, WindowApp } from '@background/create-open-window';
 
 interface AccountActionsMenuPopoverProps {
   account: Account;
@@ -30,7 +28,7 @@ export const AccountActionsMenuPopover = ({
   const activeOrigin = useSelector(selectActiveOrigin);
   const connectedAccountNames =
     useSelector(selectConnectedAccountNamesWithActiveOrigin) || [];
-  // const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+  const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const isAnyAccountConnected = useSelector(
     selectIsAnyAccountConnectedWithActiveOrigin
   );
@@ -95,22 +93,10 @@ export const AccountActionsMenuPopover = ({
             </Typography>
           </PopoverLink>
           <PopoverLink
-            // target="_blank"
+            target="_blank"
             variant="contentAction"
             title={t('View account in CSPR.live')}
-            // href={getBlockExplorerAccountUrl(casperLiveUrl, account.publicKey)}
-            onClick={() => {
-              browser.windows.create({
-                url: getUrlByWindowApp(WindowApp.ImportAccount),
-                type: 'popup',
-                focused: true
-              });
-              // window.open(
-              //   getBlockExplorerAccountUrl(casperLiveUrl, account.publicKey),
-              //   '_blank',
-              //   'popup'
-              // );
-            }}
+            href={getBlockExplorerAccountUrl(casperLiveUrl, account.publicKey)}
           >
             <SvgIcon
               src="assets/icons/external-link.svg"
