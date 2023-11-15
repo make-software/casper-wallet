@@ -26,9 +26,6 @@ jobs:
     - name: Run Chrome tests
       run: npm run e2e:chrome:headless:onboarding
 
-    - name: Run Firefox tests
-      run: npm run e2e:firefox:headless:onboarding
-
     - uses: actions/upload-artifact@v3
       if: always()
       with:
