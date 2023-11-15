@@ -103,7 +103,7 @@ export function createOpenWindow({
     }
 
     async function openNewWindow(): Promise<browser.Windows.Window> {
-      return browser.windows.getCurrent().then(currentWindow => {
+      return browser.windows.getCurrent().then(async currentWindow => {
         const windowWidth = currentWindow.width ?? 0;
         const xOffset = currentWindow.left ?? 0;
         const yOffset = currentWindow.top ?? 0;
@@ -130,7 +130,7 @@ export function createOpenWindow({
                 focused: true
               });
 
-        return newWindow.then(newWindow => {
+        const window = newWindow.then(newWindow => {
           if (newWindow.id) {
             setWindowId(newWindow.id);
 
@@ -142,6 +142,14 @@ export function createOpenWindow({
           }
           return newWindow;
         });
+
+        try {
+          console.log(await window, 'window');
+        } catch (error) {
+          console.log(error, 'error');
+        }
+
+        return window;
       });
     }
   };
