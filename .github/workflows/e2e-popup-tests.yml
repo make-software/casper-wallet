@@ -27,8 +27,6 @@ jobs:
 
       - name: Run Chrome tests
         run: npm run e2e:chrome:headless:popup
-        env:
-          TEST_ENV: true
 
       - uses: actions/upload-artifact@v3
         if: always()
