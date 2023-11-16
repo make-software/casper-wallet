@@ -50,6 +50,7 @@ export const HeaderNetworkSwitcher = () => {
 
   return (
     <Modal
+      placement="top"
       renderContent={({ closeModal }) => (
         <ModalContentContainer>
           <ModalContentRow

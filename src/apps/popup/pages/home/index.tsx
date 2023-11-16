@@ -55,6 +55,7 @@ import {
 import { TokensList } from './components/tokens-list';
 import { NftList } from './components/nft-list';
 import { DeploysList } from './components/deploys-list';
+import { MoreButtonsModal } from './components/more-buttons-modal';
 
 const DividerLine = styled.hr`
   margin: 16px 0;
@@ -65,11 +66,13 @@ const DividerLine = styled.hr`
 `;
 
 const ButtonsContainer = styled(CenteredFlexRow)`
-  margin-top: 28px;
+  margin-top: 16px;
 `;
 
 const ButtonContainer = styled(CenteredFlexColumn)`
   cursor: pointer;
+
+  padding: 0 16px;
 `;
 
 export function HomePageContent() {
@@ -166,6 +169,22 @@ export function HomePageContent() {
               </Typography>
             </FlexColumn>
             <ButtonsContainer gap={SpacingSize.XXXL}>
+              {network === NetworkSetting.Mainnet && (
+                <ButtonContainer
+                  gap={SpacingSize.Small}
+                  onClick={handleBuyWithCSPR}
+                >
+                  <Button circle>
+                    <SvgIcon
+                      src="assets/icons/card.svg"
+                      color="contentOnFill"
+                    />
+                  </Button>
+                  <Typography type="captionMedium" color="contentAction">
+                    <Trans t={t}>Buy</Trans>
+                  </Typography>
+                </ButtonContainer>
+              )}
               <ButtonContainer
                 gap={SpacingSize.Small}
                 onClick={() =>
@@ -192,40 +211,7 @@ export function HomePageContent() {
                   <Trans t={t}>Send</Trans>
                 </Typography>
               </ButtonContainer>
-              <ButtonContainer
-                gap={SpacingSize.Small}
-                onClick={() =>
-                  navigate(RouterPath.Receive, {
-                    state: { tokenData: casperToken }
-                  })
-                }
-              >
-                <Button circle>
-                  <SvgIcon
-                    src="assets/icons/receive.svg"
-                    color="contentOnFill"
-                  />
-                </Button>
-                <Typography type="captionMedium" color="contentAction">
-                  <Trans t={t}>Receive</Trans>
-                </Typography>
-              </ButtonContainer>
-              {network === NetworkSetting.Mainnet && (
-                <ButtonContainer
-                  gap={SpacingSize.Small}
-                  onClick={handleBuyWithCSPR}
-                >
-                  <Button circle>
-                    <SvgIcon
-                      src="assets/icons/card.svg"
-                      color="contentOnFill"
-                    />
-                  </Button>
-                  <Typography type="captionMedium" color="contentAction">
-                    <Trans t={t}>Buy</Trans>
-                  </Typography>
-                </ButtonContainer>
-              )}
+              <MoreButtonsModal handleBuyWithCSPR={handleBuyWithCSPR} />
             </ButtonsContainer>
           </TileContainer>
         </Tile>

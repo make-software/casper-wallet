@@ -12,6 +12,7 @@ export const NFT_TOKENS_REFRESH_RATE = 60 * SECOND;
 export const ACCOUNT_DEPLOY_REFRESH_RATE = 30 * SECOND;
 export const ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE = 30 * SECOND;
 export const ERC20_TOKEN_ACTIVITY_REFRESH_RATE = 30 * SECOND;
+export const VALIDATORS_REFRESH_RATE = 30 * SECOND;
 
 export const LOGIN_RETRY_ATTEMPTS_LIMIT = 5;
 
@@ -20,6 +21,9 @@ export const TRANSFER_MIN_AMOUNT_MOTES = '2500000000'; // 2.5 CSPR
 export const ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES = '1500000000'; // 1.5 CSPR
 export const NFT_CEP47_PAYMENT_AMOUNT_AVERAGE_MOTES = '1000000000'; // 1 CSPR
 export const NFT_CEP78_PAYMENT_AMOUNT_AVERAGE_MOTES = '3000000000'; // 3 CSPR
+export const STAKE_COST_MOTES = '2500000000'; // 2.5 CSPR
+export const DELEGATION_MIN_AMOUNT_MOTES = '500000000000'; // 500 CSPR
+export const MAX_DELEGATORS = 1200;
 
 export const getBlockExplorerAccountUrl = (baseUrl: string, hash: string) =>
   `${baseUrl}/account/${hash}`;
@@ -77,38 +81,86 @@ export enum NetworkName {
   Testnet = 'casper-test'
 }
 
-export enum TransferType {
-  Sent = 'Sent',
-  Received = 'Received',
-  Unknown = 'Unknown'
+export enum AuctionManagerContractHash {
+  Mainnet = 'ccb576d6ce6dec84a551e48f0d0b7af89ddba44c7390b690036257a04a3ae9ea',
+  Testnet = '93d923e336b20a4c4ca14d592b60e5bd3fe330775618290104f9beb326db7ae2'
 }
 
-export const ShortTypeName = {
-  [TransferType.Sent]: 'Sent',
-  [TransferType.Received]: 'Recv',
-  [TransferType.Unknown]: 'Unk'
+export enum ActivityType {
+  Sent = 'Sent',
+  Received = 'Received',
+  Unknown = 'Unknown',
+  Delegated = 'Delegated',
+  Undelegated = 'Undelegated',
+  Redelegated = 'Redelegated',
+  Mint = 'Mint',
+  Burn = 'Burn'
+}
+
+export const ActivityShortTypeName = {
+  [ActivityType.Sent]: 'Sent',
+  [ActivityType.Received]: 'Recv',
+  [ActivityType.Unknown]: 'Unk',
+  [ActivityType.Delegated]: 'Deleg',
+  [ActivityType.Undelegated]: 'Undeleg',
+  [ActivityType.Redelegated]: 'Redeleg',
+  [ActivityType.Mint]: 'Mint',
+  [ActivityType.Burn]: 'Burn'
 };
 
-export const TypeName = {
-  [TransferType.Sent]: 'Sent',
-  [TransferType.Received]: 'Received',
-  [TransferType.Unknown]: 'Unknown'
+export const ActivityTypeName = {
+  [ActivityType.Sent]: 'Sent',
+  [ActivityType.Received]: 'Received',
+  [ActivityType.Unknown]: 'Unknown',
+  [ActivityType.Delegated]: 'Delegated',
+  [ActivityType.Undelegated]: 'Undelegated',
+  [ActivityType.Redelegated]: 'Redelegated',
+  [ActivityType.Mint]: 'Mint',
+  [ActivityType.Burn]: 'Burn'
 };
 
-export const TypeIcons = {
-  [TransferType.Sent]: 'assets/icons/transfer.svg',
-  [TransferType.Received]: 'assets/icons/receive.svg',
-  [TransferType.Unknown]: 'assets/icons/info.svg'
+export const ActivityTypeIcons = {
+  [ActivityType.Sent]: 'assets/icons/transfer.svg',
+  [ActivityType.Received]: 'assets/icons/receive.svg',
+  [ActivityType.Unknown]: 'assets/icons/info.svg',
+  [ActivityType.Delegated]: 'assets/icons/delegate.svg',
+  [ActivityType.Undelegated]: 'assets/icons/undelegate.svg',
+  [ActivityType.Redelegated]: 'assets/icons/undelegate.svg',
+  [ActivityType.Mint]: 'assets/icons/info.svg',
+  [ActivityType.Burn]: 'assets/icons/burn.svg'
 };
 
-export const TypeColors = {
-  [TransferType.Sent]: 'contentAction',
-  [TransferType.Received]: 'contentPositive',
-  [TransferType.Unknown]: 'contentDisabled'
+export const ActivityTypeColors = {
+  [ActivityType.Sent]: 'contentAction',
+  [ActivityType.Received]: 'contentPositive',
+  [ActivityType.Unknown]: 'contentDisabled',
+  [ActivityType.Delegated]: 'contentAction',
+  [ActivityType.Undelegated]: 'contentAction',
+  [ActivityType.Redelegated]: 'contentAction',
+  [ActivityType.Mint]: 'contentDisabled',
+  [ActivityType.Burn]: 'contentAction'
 };
 
 export enum HomePageTabName {
   Tokens = 'Tokens',
   Deploys = 'Deploys',
   NFTs = 'NFTs'
+}
+
+export enum StakeSteps {
+  Validator = 'validator',
+  Amount = 'amount',
+  Confirm = 'confirm',
+  Success = 'success'
+}
+
+export enum AuctionManagerEntryPoint {
+  delegate = 'delegate',
+  undelegate = 'undelegate',
+  redelegate = 'redelegate'
+}
+
+export enum TokenEntryPoint {
+  mint = 'mint',
+  burn = 'burn'
 }
