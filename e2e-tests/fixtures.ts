@@ -6,7 +6,7 @@ import {
 } from '@playwright/test';
 import path from 'path';
 
-import { PLAYGROUND_URL, vaultPassword } from './common';
+import { PLAYGROUND_URL, vaultPassword } from './constants';
 
 const getBrowserConfig = () => {
   switch (process.env.PLAYWRIGHT_BROWSER) {
