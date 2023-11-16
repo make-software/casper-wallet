@@ -127,7 +127,7 @@
     "babel-eslint": "^10.1.0",
     "babel-loader": "9.1.0",
     "babel-preset-react-app": "^10.0.0",
-    "chromedriver": "^107.0.3",
+    "chromedriver": "^119.0.1",
     "concurrently": "7.6.0",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "6.8.1",
