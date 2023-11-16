@@ -1,5 +1,5 @@
 import { popup, popupExpect } from '../../fixtures';
-import { ACCOUNT_NAMES } from '../../common';
+import { ACCOUNT_NAMES } from '../../constants';
 
 popup.describe('Popup UI: create account', () => {
   popup.beforeEach(async ({ unlockVault, popupPage }) => {

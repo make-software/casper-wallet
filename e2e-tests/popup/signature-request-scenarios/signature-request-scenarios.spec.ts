@@ -1,5 +1,5 @@
 import { popup, popupExpect } from '../../fixtures';
-import { DEFAULT_FIRST_ACCOUNT, PLAYGROUND_URL } from '../../common';
+import { DEFAULT_FIRST_ACCOUNT, PLAYGROUND_URL } from '../../constants';
 
 popup.describe('Popup UI: signature request scenarios', () => {
   popup.beforeEach(async ({ connectAccounts, page }) => {

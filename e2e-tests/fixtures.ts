@@ -105,7 +105,9 @@ export const onboarding = test.extend<{
   createOnboardingPassword: async ({ page, createPassword }, use) => {
     const createOnboardingPassword = async () => {
       await onboardingExpect(
-        page.getByText('Ready to create your new wallet?')
+        page.getByRole('heading', {
+          name: 'Ready to create your new wallet?'
+        })
       ).toBeVisible();
 
       await page.getByRole('button', { name: 'Get started' }).click();

@@ -1,14 +1,16 @@
 import { onboardingExpect, onboarding } from '../fixtures';
+import { DEFAULT_FIRST_ACCOUNT } from '../constants';
 
 onboarding.describe('Onboarding UI: confirm secret phrase flow', () => {
   onboarding(
-    'should confirm secret phrase flow when the user entered the correct secret phrase',
+    'should create a new vault when the user enters the correct secret phrase',
     async ({
       page,
       createOnboardingPassword,
       createSecretPhrase,
       copySecretPhrase,
-      confirmSecretPhraseSuccess
+      confirmSecretPhraseSuccess,
+      extensionId
     }) => {
       await createOnboardingPassword();
       await createSecretPhrase();
@@ -22,11 +24,17 @@ onboarding.describe('Onboarding UI: confirm secret phrase flow', () => {
       await page.getByRole('button', { name: 'Done' }).click();
 
       await onboardingExpect(page.getByText('Got it')).toBeVisible();
+
+      await page.goto(`chrome-extension://${extensionId}/popup.html`);
+
+      await onboardingExpect(
+        page.getByText(DEFAULT_FIRST_ACCOUNT.accountName)
+      ).toBeVisible();
     }
   );
 
   onboarding(
-    'should NOT confirm secret phrase flow when the user entered the wrong secret phrase',
+    'should NOT create a vault when the user entered the wrong secret phrase',
     async ({
       page,
       createOnboardingPassword,

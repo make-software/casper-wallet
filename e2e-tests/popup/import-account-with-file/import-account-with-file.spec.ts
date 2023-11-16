@@ -1,5 +1,9 @@
 import { popup, popupExpect } from '../../fixtures';
-import { ACCOUNT_NAMES, IMPORTED_ACCOUNT, secretKeyPath } from '../../common';
+import {
+  ACCOUNT_NAMES,
+  IMPORTED_ACCOUNT,
+  secretKeyPath
+} from '../../constants';
 
 popup.describe('Popup UI: import account with file', () => {
   popup(

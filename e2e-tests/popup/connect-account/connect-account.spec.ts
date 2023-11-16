@@ -1,7 +1,7 @@
 import { Page } from '@playwright/test';
 
 import { popup, popupExpect } from '../../fixtures';
-import { ACCOUNT_NAMES, PLAYGROUND_URL } from '../../common';
+import { ACCOUNT_NAMES, PLAYGROUND_URL } from '../../constants';
 
 popup.describe('Popup UI: connect account', () => {
   let connectAccountPage: Page;
