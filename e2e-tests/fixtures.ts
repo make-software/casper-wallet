@@ -243,7 +243,6 @@ export const onboardingExpect = onboarding.expect;
 
 export const popup = test.extend<{
   popupPage: Page;
-  playgroundPage: Page;
   unlockVault: (popupPage?: Page) => Promise<void>;
   lockVault: () => Promise<void>;
   createAccount: (newAccountName: string) => Promise<void>;
@@ -251,10 +250,6 @@ export const popup = test.extend<{
 }>({
   popupPage: async ({ extensionId, page }, use) => {
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
-    await use(page);
-  },
-  playgroundPage: async ({ page }, use) => {
-    await page.goto(PLAYGROUND_URL);
     await use(page);
   },
   unlockVault: async ({ page }, use) => {

@@ -48,7 +48,6 @@
     "e2e:chrome:headless:onboarding": "TEST_ENV=true npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/onboarding-flow --project chromium",
     "e2e:chrome:headless:popup": "TEST_ENV=true MOCK_STATE=true npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/popup --project chromium",
     "e2e:chrome:ui:popup": "TEST_ENV=true MOCK_STATE=true npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/popup --ui --project chromium"
-
   },
   "lint-staged": {
     "*.md": "markdownlint",

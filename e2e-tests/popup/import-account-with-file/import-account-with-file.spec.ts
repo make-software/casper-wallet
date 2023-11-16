@@ -3,7 +3,7 @@ import { ACCOUNT_NAMES, IMPORTED_ACCOUNT, secretKeyPath } from '../../common';
 
 popup.describe('Popup UI: import account with file', () => {
   popup(
-    'should import account with file',
+    'should import account via a file',
     async ({ unlockVault, context, popupPage }) => {
       await unlockVault();
 
