@@ -29,7 +29,7 @@ onboarding.describe('Onboarding UI: recover secret phrase flow', () => {
         page.getByText(DEFAULT_FIRST_ACCOUNT.accountName)
       ).toBeVisible();
       await onboardingExpect(
-        page.getByText(DEFAULT_FIRST_ACCOUNT.truncatedPublicKey)
+        page.getByText(DEFAULT_FIRST_ACCOUNT.truncatedPublicKey).nth(0)
       ).toBeVisible();
     }
   );
