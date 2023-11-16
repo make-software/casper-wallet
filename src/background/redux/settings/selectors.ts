@@ -2,6 +2,7 @@ import { RootState } from 'typesafe-actions';
 import { createSelector } from 'reselect';
 
 import {
+  AuctionManagerContractHash,
   CasperApiUrl,
   CasperLiveUrl,
   CasperNodeUrl,
@@ -24,14 +25,16 @@ export const selectApiConfigBasedOnActiveNetwork = createSelector(
           casperLiveUrl: CasperLiveUrl.MainnetUrl,
           casperApiUrl: CasperApiUrl.MainnetUrl,
           networkName: NetworkName.Mainnet,
-          nodeUrl: CasperNodeUrl.MainnetUrl
+          nodeUrl: CasperNodeUrl.MainnetUrl,
+          auctionManagerContractHash: AuctionManagerContractHash.Mainnet
         };
       case NetworkSetting.Testnet:
         return {
           casperLiveUrl: CasperLiveUrl.TestnetUrl,
           casperApiUrl: CasperApiUrl.TestnetUrl,
           networkName: NetworkName.Testnet,
-          nodeUrl: CasperNodeUrl.TestnetUrl
+          nodeUrl: CasperNodeUrl.TestnetUrl,
+          auctionManagerContractHash: AuctionManagerContractHash.Testnet
         };
       default:
         throw new Error(`Unknown network: ${activeNetwork}`);

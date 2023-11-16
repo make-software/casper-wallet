@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
 
 import {
-  useCsprAmountRule,
+  useCSPRTransferAmountRule,
   useErc20AmountRule,
   usePaymentAmountRule,
   useRecipientPublicKeyRule,
@@ -46,7 +46,7 @@ export function useTransferForm(
   });
 
   const csprAmountFormSchema = Yup.object().shape({
-    amount: useCsprAmountRule(amountMotes),
+    amount: useCSPRTransferAmountRule(amountMotes),
     transferIdMemo: useTransferIdMemoRule()
   });
 

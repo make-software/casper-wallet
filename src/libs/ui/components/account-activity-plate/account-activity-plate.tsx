@@ -6,12 +6,12 @@ import styled from 'styled-components';
 import {
   AccountActivityPlateContainer,
   ActivityPlateContentContainer,
+  ActivityPlateDivider,
+  ActivityPlateIconCircleContainer,
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
-  ActivityPlateIconCircleContainer,
-  ActivityPlateDivider,
-  SpacingSize,
-  RightAlignedCenteredFlexRow
+  RightAlignedCenteredFlexRow,
+  SpacingSize
 } from '@libs/layout';
 import {
   ContentColor,
@@ -36,11 +36,13 @@ import {
 } from '@libs/services/account-activity-service';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import {
-  ShortTypeName,
-  TransferType,
-  TypeColors,
-  TypeIcons,
-  TypeName
+  ActivityShortTypeName,
+  ActivityType,
+  ActivityTypeColors,
+  ActivityTypeIcons,
+  ActivityTypeName,
+  AuctionManagerEntryPoint,
+  TokenEntryPoint
 } from '@src/constants';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { getRecipientAddressFromTransaction } from '@libs/ui/utils/utils';
@@ -59,7 +61,11 @@ type Ref = HTMLDivElement;
 
 export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
   ({ transactionInfo, onClick, isDeploysList }, ref) => {
-    const [type, setType] = useState<TransferType | null>(null);
+    const [type, setType] = useState<ActivityType | null>(null);
+    const [fromAccount, setFromAccount] = useState<string | undefined>(
+      undefined
+    );
+    const [toAccount, setToAccount] = useState<string | undefined>(undefined);
 
     const navigate = useTypedNavigate();
     const { t } = useTranslation();
@@ -119,21 +125,57 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
       : '-';
 
     useEffect(() => {
+      if ('entryPoint' in transactionInfo) {
+        switch (transactionInfo.entryPoint?.name) {
+          case AuctionManagerEntryPoint.undelegate: {
+            setType(ActivityType.Undelegated);
+            setFromAccount(transactionInfo.args.validator?.parsed as string);
+            setToAccount(transactionInfo.args.delegator?.parsed as string);
+            return;
+          }
+          case AuctionManagerEntryPoint.delegate: {
+            setType(ActivityType.Delegated);
+            setFromAccount(transactionInfo.args.delegator?.parsed as string);
+            setToAccount(transactionInfo.args.validator?.parsed as string);
+            return;
+          }
+          case AuctionManagerEntryPoint.redelegate: {
+            setType(ActivityType.Redelegated);
+            setFromAccount(transactionInfo.args.validator?.parsed as string);
+            setToAccount(transactionInfo.args.new_validator?.parsed as string);
+            return;
+          }
+          case TokenEntryPoint.mint: {
+            setType(ActivityType.Mint);
+            setFromAccount(transactionInfo.callerPublicKey);
+            setToAccount(recipientAddress);
+            return;
+          }
+          case TokenEntryPoint.burn: {
+            setType(ActivityType.Burn);
+            setFromAccount(transactionInfo.callerPublicKey);
+            setToAccount(undefined);
+            return;
+          }
+        }
+      }
+
       if (fromAccountPublicKey === activeAccount?.publicKey) {
-        setType(TransferType.Sent);
+        setType(ActivityType.Sent);
       } else if (
         recipientAddress === activeAccount?.publicKey ||
         recipientAddress === activeAccountHash
       ) {
-        setType(TransferType.Received);
+        setType(ActivityType.Received);
       } else {
-        setType(TransferType.Unknown);
+        setType(ActivityType.Unknown);
       }
     }, [
       fromAccountPublicKey,
       activeAccount?.publicKey,
       recipientAddress,
-      activeAccountHash
+      activeAccountHash,
+      transactionInfo
     ]);
 
     return (
@@ -144,8 +186,8 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
           navigate(RouterPath.ActivityDetails, {
             state: {
               activityDetailsData: {
-                fromAccount: fromAccountPublicKey,
-                toAccount: recipientAddress,
+                fromAccount: fromAccount || fromAccountPublicKey,
+                toAccount: toAccount || recipientAddress,
                 deployHash,
                 type,
                 amount: formattedAmount,
@@ -162,9 +204,9 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
         <ActivityPlateIconCircleContainer>
           {type != null && (
             <SvgIcon
-              src={TypeIcons[type]}
+              src={ActivityTypeIcons[type]}
               size={16}
-              color={TypeColors[type] as ContentColor}
+              color={ActivityTypeColors[type] as ContentColor}
             />
           )}
         </ActivityPlateIconCircleContainer>
@@ -175,8 +217,8 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
                 <Trans t={t}>
                   {type != null &&
                     (formattedAmount.length >= 13
-                      ? ShortTypeName[type]
-                      : TypeName[type])}
+                      ? ActivityShortTypeName[type]
+                      : ActivityTypeName[type])}
                 </Trans>
               </Typography>
               <DeployStatus deployResult={transactionInfo} />
@@ -186,7 +228,9 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
                 formattedAmount
               ) : (
                 <>
-                  {type === TransferType.Sent ? '-' : ''}
+                  {type === ActivityType.Sent || type === ActivityType.Delegated
+                    ? '-'
+                    : ''}
                   {formattedAmount}
                 </>
               )}

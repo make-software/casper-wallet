@@ -52,6 +52,7 @@ export type ExtendedDeployArgsResult = {
   to?: ExtendedDeployClTypeResult;
   validator?: ExtendedDeployClTypeResult;
   new_validator?: ExtendedDeployClTypeResult;
+  delegator?: ExtendedDeployClTypeResult;
 };
 
 export interface ExtendedDeployResult {

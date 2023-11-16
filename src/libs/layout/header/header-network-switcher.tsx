@@ -12,7 +12,7 @@ import { NetworkSetting } from '@src/constants';
 
 const NetworkSwitcherContainer = styled(AlignedFlexRow)`
   background-color: ${({ theme }) => hexToRGBA(theme.color.black, '0.16')};
-  padding: 4px 8px;
+  padding: 6px 8px;
   border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
 
@@ -50,6 +50,7 @@ export const HeaderNetworkSwitcher = () => {
 
   return (
     <Modal
+      placement="top"
       renderContent={({ closeModal }) => (
         <ModalContentContainer>
           <ModalContentRow

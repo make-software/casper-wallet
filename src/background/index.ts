@@ -132,6 +132,10 @@ import {
 } from '@background/redux/account-info/actions';
 import { fetchErc20TokenActivity } from '@src/libs/services/account-activity-service/erc20-token-activity-service';
 import { fetchNftTokens } from '@libs/services/nft-service';
+import {
+  fetchAuctionValidators,
+  fetchValidatorsDetailsData
+} from '@libs/services/validators-service';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -741,6 +745,45 @@ browser.runtime.onMessage.addListener(
               });
 
               return sendResponse(serviceMessage.fetchNftTokensResponse(data));
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchAuctionValidatorsRequest): {
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const data = await fetchAuctionValidators({ casperApiUrl });
+
+              return sendResponse(
+                serviceMessage.fetchAuctionValidatorsResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchValidatorsDetailsDataRequest): {
+            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const data = await fetchValidatorsDetailsData({
+                casperApiUrl,
+                publicKey: action.payload.publicKey
+              });
+
+              return sendResponse(
+                serviceMessage.fetchValidatorsDetailsDataResponse(data)
+              );
             } catch (error) {
               console.error(error);
             }

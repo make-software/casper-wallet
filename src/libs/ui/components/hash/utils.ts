@@ -12,8 +12,8 @@ export function truncateKey(
       break;
     case 'small':
     default:
-      beginOfKey = key.slice(0, 5);
-      endOfKey = key.slice(key.length - 5);
+      beginOfKey = key.slice(0, 4);
+      endOfKey = key.slice(key.length - 4);
       break;
 
     case 'medium':
