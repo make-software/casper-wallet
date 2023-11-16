@@ -17,7 +17,7 @@ const PublicKeyOptionContainer = styled(FlexRow)<{ onClick?: () => void }>`
   padding: 12px 16px;
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
-  border-radius: ${({ theme }) => theme.borderRadius.eight}px;
+  border-radius: ${({ theme }) => theme.borderRadius.base}px;
 `;
 
 export const RecipientPlate = ({

@@ -10,6 +10,10 @@ import {
 import { ErrorResponse, PaginatedResponse } from '@libs/services/types';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 import { NFTTokenResult } from '@libs/services/nft-service';
+import {
+  DelegatorResult,
+  ValidatorResult
+} from '@libs/services/validators-service';
 
 type Meta = void;
 
@@ -80,7 +84,19 @@ export const serviceMessage = {
   fetchNftTokensResponse: createAction('FETCH_NFT_TOKENS_RESPONSE')<
     PaginatedResponse<NFTTokenResult> | ErrorResponse,
     Meta
-  >()
+  >(),
+  fetchAuctionValidatorsRequest: createAction(
+    'FETCH_AUCTION_VALIDATORS'
+  )<Meta>(),
+  fetchAuctionValidatorsResponse: createAction(
+    'FETCH_AUCTION_VALIDATORS_RESPONSE'
+  )<PaginatedResponse<ValidatorResult> | ErrorResponse, Meta>(),
+  fetchValidatorsDetailsDataRequest: createAction(
+    'FETCH_VALIDATORS_DETAILS_DATA'
+  )<{ publicKey: string }, Meta>(),
+  fetchValidatorsDetailsDataResponse: createAction(
+    'FETCH_VALIDATORS_DETAILS_DATA_RESPONSE'
+  )<PaginatedResponse<DelegatorResult> | ErrorResponse, Meta>()
 };
 
 export type ServiceMessage = ActionType<typeof serviceMessage>;

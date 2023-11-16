@@ -117,9 +117,7 @@ export const TransferPage = () => {
 
   // event listener for enable/disable submit button
   useEffect(() => {
-    const layoutContentContainer = document.querySelector(
-      '#layout-content-container'
-    );
+    const layoutContentContainer = document.querySelector('#ms-container');
 
     // if the content is not scrollable, we can enable the submit button
     if (

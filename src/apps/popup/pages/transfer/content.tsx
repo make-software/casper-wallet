@@ -64,7 +64,7 @@ export const TransferPageContent = ({
     }
 
     case TransactionSteps.Success: {
-      return <TransferSuccessScreen isNftTransfer={false} />;
+      return <TransferSuccessScreen headerText="You submitted a transaction" />;
     }
 
     default: {
