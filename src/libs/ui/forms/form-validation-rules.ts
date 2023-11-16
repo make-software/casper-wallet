@@ -20,6 +20,7 @@ import { isValidPublicKey, isValidU64 } from '@src/utils';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 
 export const minPasswordLength = 16;
+export const maxQrCodePasswordLength = 8;
 
 const ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED = 1;
 

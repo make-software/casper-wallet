@@ -34,6 +34,7 @@ import { TokenDetailPage } from 'src/apps/popup/pages/token-details';
 import { ActivityDetailsPage } from '@popup/pages/activity-details';
 import { ReceivePage } from '@popup/pages/receive';
 import { NftDetailsPage } from '@popup/pages/nft-details';
+import { WalletQrCodePage } from '@popup/pages/wallet-qr-code';
 import { TransferNftPage } from '@popup/pages/transfer-nft';
 import { ChangePasswordPage } from '@popup/pages/change-password';
 import { StakesPage } from '@popup/pages/stakes';
@@ -243,6 +244,10 @@ function AppRoutes() {
       <Route path={RouterPath.Token} element={<TokenDetailPage />} />
       <Route path={RouterPath.Receive} element={<ReceivePage />} />
       <Route path={RouterPath.NftDetails} element={<NftDetailsPage />} />
+      <Route
+        path={RouterPath.GenerateWalletQRCode}
+        element={<WalletQrCodePage />}
+      />
       <Route path={RouterPath.TransferNft} element={<TransferNftPage />} />
       <Route
         path={RouterPath.ChangePassword}
