@@ -1,5 +1,10 @@
 import { popup, popupExpect } from '../../fixtures';
-import { DEFAULT_FIRST_ACCOUNT, PLAYGROUND_URL } from '../../constants';
+import {
+  DEFAULT_FIRST_ACCOUNT,
+  NEW_VALIDATOR,
+  PLAYGROUND_URL,
+  VALIDATOR
+} from '../../constants';
 
 popup.describe('Popup UI: signature request scenarios', () => {
   popup.beforeEach(async ({ connectAccounts, page }) => {
@@ -30,7 +35,7 @@ popup.describe('Popup UI: signature request scenarios', () => {
       signatureRequestPage.getByText('Recipient (Key)')
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText('0106c...ca2ca')
+      signatureRequestPage.getByText(VALIDATOR.truncatedPublicKey)
     ).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('Amount')).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('2.5 CSPR')).toBeVisible();
@@ -76,10 +81,10 @@ popup.describe('Popup UI: signature request scenarios', () => {
         .nth(2)
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText('Validator')
+      signatureRequestPage.getByText(VALIDATOR.name)
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText('0106c...ca2ca')
+      signatureRequestPage.getByText(VALIDATOR.truncatedPublicKey)
     ).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('Amount')).toBeVisible();
     await popupExpect(
@@ -125,10 +130,10 @@ popup.describe('Popup UI: signature request scenarios', () => {
         .nth(2)
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText('Validator')
+      signatureRequestPage.getByText(VALIDATOR.name)
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText('0106c...ca2ca')
+      signatureRequestPage.getByText(VALIDATOR.truncatedPublicKey)
     ).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('Amount')).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('2.5 CSPR')).toBeVisible();
@@ -172,18 +177,18 @@ popup.describe('Popup UI: signature request scenarios', () => {
         .nth(2)
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText('Validator', { exact: true })
+      signatureRequestPage.getByText(VALIDATOR.name, { exact: true })
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText('0106c...ca2ca')
+      signatureRequestPage.getByText(VALIDATOR.truncatedPublicKey)
     ).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('Amount')).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('2.5 CSPR')).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText('New validator')
+      signatureRequestPage.getByText(NEW_VALIDATOR.name)
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText('017d9...2009e')
+      signatureRequestPage.getByText(NEW_VALIDATOR.truncatedPublicKey)
     ).toBeVisible();
 
     page.on('dialog', async dialog => {
