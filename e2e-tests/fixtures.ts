@@ -8,29 +8,6 @@ import path from 'path';
 
 import { PLAYGROUND_URL, vaultPassword } from './constants';
 
-const getBrowserConfig = () => {
-  switch (process.env.PLAYWRIGHT_BROWSER) {
-    case 'chromium': {
-      return {
-        browser: 'chrome',
-        manifest: 3
-      };
-    }
-    case 'firefox': {
-      return {
-        browser: 'firefox',
-        manifest: 2
-      };
-    }
-    default: {
-      return {
-        browser: 'chrome',
-        manifest: 3
-      };
-    }
-  }
-};
-
 export const test = base.extend<{
   context: BrowserContext;
   extensionId: string;
@@ -38,8 +15,9 @@ export const test = base.extend<{
 }>({
   // eslint-disable-next-line no-empty-pattern
   context: async ({}, use) => {
-    const { browser } = getBrowserConfig();
-    const pathToExtension = path.join(__dirname, `../build/${browser}`);
+    // For now playwright only support chrome extensions
+    // https://github.com/microsoft/playwright/issues/7297
+    const pathToExtension = path.join(__dirname, `../build/chrome`);
     const context = await chromium.launchPersistentContext('', {
       headless: false,
       args: [
@@ -53,21 +31,10 @@ export const test = base.extend<{
     await context.close();
   },
   extensionId: async ({ context }, use) => {
-    const { manifest } = getBrowserConfig();
-    let background;
+    let [background] = context.serviceWorkers();
 
-    if (manifest === 3) {
-      [background] = context.serviceWorkers();
-
-      if (!background) {
-        background = await context.waitForEvent('serviceworker');
-      }
-    } else {
-      [background] = context.backgroundPages();
-
-      if (!background) {
-        background = await context.waitForEvent('backgroundpage');
-      }
+    if (!background) {
+      background = await context.waitForEvent('serviceworker');
     }
 
     const extensionId = background.url().split('/')[2];
