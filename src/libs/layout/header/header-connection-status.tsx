@@ -1,25 +1,25 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next';
 
-import { AccountList, Modal, SvgIcon, Typography } from '@libs/ui';
+import { AccountList, Hash, HashVariant, Modal, SvgIcon } from '@libs/ui';
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import { selectCountOfConnectedAccountsWithActiveOrigin } from '@src/background/redux/vault/selectors';
+import { selectVaultActiveAccount } from '@src/background/redux/vault/selectors';
 
 const ConnectionStatusContainer = styled(AlignedFlexRow)`
   width: fit-content;
 
   background-color: rgb(0, 0, 0, 0.16);
-  padding: 4px 8px;
-  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
+  padding: 6px 8px 6px 14px;
+  border-top-right-radius: ${({ theme }) => theme.borderRadius.hundred}px;
+  border-bottom-right-radius: ${({ theme }) => theme.borderRadius.hundred}px;
+
+  position: relative;
+  left: -2px;
 `;
 
 export function HeaderConnectionStatus() {
-  const { t } = useTranslation();
-  const countOfConnectedAccounts = useSelector(
-    selectCountOfConnectedAccountsWithActiveOrigin
-  );
+  const activeAccount = useSelector(selectVaultActiveAccount);
 
   return (
     <Modal
@@ -29,11 +29,15 @@ export function HeaderConnectionStatus() {
       )}
       children={({ isOpen }) => (
         <ConnectionStatusContainer gap={SpacingSize.Tiny}>
-          <Typography uppercase type="formFieldStatus" color="contentOnFill">
-            {countOfConnectedAccounts > 0
-              ? `${countOfConnectedAccounts} ${t('Connected')}`
-              : t('Disconnected')}
-          </Typography>
+          <Hash
+            value={activeAccount?.publicKey!}
+            variant={HashVariant.ListSubtextHash}
+            truncatedSize="small"
+            truncated
+            withoutTooltip
+            color="contentOnFill"
+            withCopyOnSelfClick={false}
+          />
           <SvgIcon
             size={16}
             src="assets/icons/chevron-up.svg"

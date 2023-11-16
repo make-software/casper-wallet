@@ -34,6 +34,7 @@ const IconHashWrapper = styled(CenteredFlexRow)(({ theme }) => ({
 
 const ConnectionStatusBadgeContainer = styled(AlignedFlexRow)`
   position: relative;
+  z-index: 1;
 `;
 
 export const BackgroundWrapper = styled.div(
