@@ -3,13 +3,12 @@ import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 
 import {
+  AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
-  FlexRow,
   HeaderContainer,
   LeftAlignedCenteredFlexRow,
   Logo,
-  LogoContainer,
-  SpacingSize
+  LogoContainer
 } from '@src/libs/layout';
 import { Avatar, SvgIcon } from '@libs/ui';
 import {
@@ -68,7 +67,7 @@ export function PopupHeader({
     <>
       <HeaderContainer>
         {withConnectionStatus && activeAccount?.publicKey ? (
-          <FlexRow gap={SpacingSize.Small}>
+          <AlignedFlexRow>
             <Avatar
               size={32}
               publicKey={activeAccount.publicKey}
@@ -77,7 +76,7 @@ export function PopupHeader({
               displayContext="header"
             />
             <HeaderConnectionStatus />
-          </FlexRow>
+          </AlignedFlexRow>
         ) : (
           <>
             <SvgIconContainer>

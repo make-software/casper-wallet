@@ -1,11 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
-import { Link, Typography, SvgIcon } from '@libs/ui';
+import { Link, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { closeCurrentWindow } from '@src/background/close-current-window';
+import { selectAccountBalance } from '@background/redux/account-info/selectors';
+import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
+import { AlignedFlexRow, SpacingSize } from '@libs/layout';
 
 const LinkWithIconContainer = styled.div`
   display: flex;
@@ -23,14 +27,22 @@ export type LinkType =
 interface HeaderSubmenuBarNavLinkProps {
   linkType: LinkType;
   onClick?: () => void;
+  backTypeWithBalance?: boolean;
 }
 
 export function HeaderSubmenuBarNavLink({
   linkType,
-  onClick
+  onClick,
+  backTypeWithBalance
 }: HeaderSubmenuBarNavLinkProps) {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
+
+  const balance = useSelector(selectAccountBalance);
+
+  const formattedBalance = formatNumber(
+    (balance.amountMotes && motesToCSPR(balance.amountMotes)) || ''
+  );
 
   switch (linkType) {
     case 'close':
@@ -52,7 +64,29 @@ export function HeaderSubmenuBarNavLink({
       );
 
     case 'back':
-      return (
+      return backTypeWithBalance ? (
+        <>
+          <NavLink
+            label={t('Back')}
+            onClick={() => {
+              if (onClick) {
+                onClick();
+              } else {
+                navigate(-1);
+              }
+            }}
+            withLeftChevronIcon
+          />
+          <AlignedFlexRow gap={SpacingSize.Small}>
+            <Typography type="captionRegular" color="contentSecondary">
+              <Trans t={t}>Balance:</Trans>
+            </Typography>
+            <Typography type="captionHash">
+              {`${formattedBalance} CSPR`}
+            </Typography>
+          </AlignedFlexRow>
+        </>
+      ) : (
         <NavLink
           label={t('Back')}
           onClick={() => {

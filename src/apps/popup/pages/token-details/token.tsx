@@ -66,7 +66,7 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
       if (casperToken && activeAccount) {
         setTokenData(casperToken);
         setTokenInfoList([
-          { id: 1, name: 'Symbol', value: casperToken.symbol }
+          { id: 1, name: 'Symbol', value: casperToken?.symbol }
         ]);
       }
     } else {
@@ -78,8 +78,8 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
       if (token) {
         setTokenData(token);
         setTokenInfoList([
-          { id: 1, name: 'Symbol', value: token.symbol },
-          { id: 2, name: 'Decimals', value: (token.decimals || 0).toString() }
+          { id: 1, name: 'Symbol', value: token?.symbol },
+          { id: 2, name: 'Decimals', value: (token?.decimals || 0).toString() }
         ]);
       } else {
         setTokenData(prev => (prev ? { ...prev, amount: '0' } : null));

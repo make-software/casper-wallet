@@ -1,4 +1,4 @@
-import { TransferType } from '@src/constants';
+import { ActivityType } from '@src/constants';
 import { TokenType } from '@src/hooks';
 
 export type LocationState = {
@@ -7,7 +7,7 @@ export type LocationState = {
     fromAccount: string;
     toAccount: string;
     deployHash: string;
-    type: TransferType | null;
+    type: ActivityType | null;
     amount?: string;
     symbol?: string;
     isDeploysList?: boolean;

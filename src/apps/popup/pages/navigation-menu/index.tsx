@@ -183,6 +183,18 @@ export function NavigationMenuPageContent() {
           },
           {
             id: 2,
+            title: t('Generate wallet QR code'),
+            description: t('Scan to import your wallet on mobile'),
+            iconPath: 'assets/icons/qr.svg',
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+
+              navigate(RouterPath.GenerateWalletQRCode);
+            }
+          },
+          {
+            id: 3,
             title: t('Download account keys'),
             description: t('For all accounts imported via file'),
             iconPath: 'assets/icons/download.svg',
