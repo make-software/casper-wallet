@@ -32,7 +32,7 @@ interface RenderChildrenProps {
 }
 
 interface RenderContentProps {
-  closeModal: (e: MouseEvent<HTMLDivElement>) => void;
+  closeModal: (e: MouseEvent) => void;
 }
 
 export interface ModalProps extends BaseProps {
@@ -52,7 +52,7 @@ export const Modal = ({ children, renderContent, placement }: ModalProps) => {
     }
   });
 
-  const closeModal = (e: MouseEvent<HTMLDivElement>) => {
+  const closeModal = (e: MouseEvent) => {
     e.stopPropagation();
     setIsOpen(false);
   };
