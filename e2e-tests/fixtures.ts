@@ -11,7 +11,6 @@ import { PLAYGROUND_URL, vaultPassword } from './constants';
 export const test = base.extend<{
   context: BrowserContext;
   extensionId: string;
-  createPassword: () => Promise<void>;
 }>({
   // eslint-disable-next-line no-empty-pattern
   context: async ({}, use) => {
@@ -40,20 +39,6 @@ export const test = base.extend<{
     const extensionId = background.url().split('/')[2];
 
     await use(extensionId);
-  },
-  createPassword: async ({ page }, use) => {
-    const createPassword = async () => {
-      await page
-        .getByPlaceholder('Password', { exact: true })
-        .fill(vaultPassword);
-      await page
-        .getByPlaceholder('Confirm password', { exact: true })
-        .fill(vaultPassword);
-      await page.getByTestId('terms-checkbox').click();
-      await page.getByRole('button', { name: 'Create password' }).click();
-    };
-
-    await use(createPassword);
   }
 });
 
@@ -69,7 +54,7 @@ export const onboarding = test.extend<{
     await page.goto(`chrome-extension://${extensionId}/onboarding.html`);
     await use(page);
   },
-  createOnboardingPassword: async ({ page, createPassword }, use) => {
+  createOnboardingPassword: async ({ page }, use) => {
     const createOnboardingPassword = async () => {
       await onboardingExpect(
         page.getByRole('heading', {
@@ -81,8 +66,14 @@ export const onboarding = test.extend<{
 
       await onboardingExpect(page).toHaveURL(/.*create-vault-password/);
 
-      // Create password
-      await createPassword();
+      await page
+        .getByPlaceholder('Password', { exact: true })
+        .fill(vaultPassword);
+      await page
+        .getByPlaceholder('Confirm password', { exact: true })
+        .fill(vaultPassword);
+      await page.getByTestId('terms-checkbox').click();
+      await page.getByRole('button', { name: 'Create password' }).click();
     };
 
     await use(createOnboardingPassword);

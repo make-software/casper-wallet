@@ -23,8 +23,7 @@ popup.describe('Popup UI: lock/unlock/reset wallet', () => {
     }
   );
 
-  popup('should reset wallet', async ({ context, popupPage, extensionId }) => {
-    await popupPage.goto(`chrome-extension://${extensionId}/popup.html`);
+  popup('should reset wallet', async ({ context, popupPage }) => {
     await popupExpect(
       popupPage.getByText('Your wallet is locked')
     ).toBeVisible();
@@ -56,4 +55,27 @@ popup.describe('Popup UI: lock/unlock/reset wallet', () => {
       })
     ).toBeVisible();
   });
+
+  popup(
+    'should lock wallet for 5 minutes when user types wrong password 5 times',
+    async ({ popupPage }) => {
+      await popupExpect(
+        popupPage.getByText('Your wallet is locked')
+      ).toBeVisible();
+
+      await popupPage
+        .getByPlaceholder('Password', { exact: true })
+        .fill('wrong password');
+
+      for (let i = 0; i < 5; i++) {
+        await popupPage.getByRole('button', { name: 'Unlock wallet' }).click();
+      }
+
+      await popupExpect(
+        popupPage.getByRole('heading', {
+          name: 'Please wait before the next attempt to unlock your wallet'
+        })
+      ).toBeVisible();
+    }
+  );
 });
