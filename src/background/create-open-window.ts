@@ -12,7 +12,7 @@ export enum WindowApp {
 
 export type WindowSearchParams = Record<string, string>;
 
-export function getUrlByWindowApp(
+function getUrlByWindowApp(
   windowApp: WindowApp,
   searchParams?: WindowSearchParams
 ) {
@@ -104,7 +104,7 @@ export function createOpenWindow({
 
     async function openNewWindow(): Promise<browser.Windows.Window> {
       return browser.windows.getCurrent().then(async currentWindow => {
-        // If this flag is true, we initialize the initial state for the tests
+        // If this flag is true, we create a new window without any size and positions.
         const isTestEnv = Boolean(process.env.TEST_ENV);
 
         const windowWidth = currentWindow.width ?? 0;
