@@ -10,11 +10,11 @@ import {
 import { SvgIcon, Typography } from '@libs/ui';
 
 interface TransferSuccessScreenProps {
-  isNftTransfer?: boolean;
+  headerText: string;
 }
 
 export const TransferSuccessScreen = ({
-  isNftTransfer = false
+  headerText
 }: TransferSuccessScreenProps) => {
   const { t } = useTranslation();
 
@@ -28,11 +28,7 @@ export const TransferSuccessScreen = ({
         />
         <VerticalSpaceContainer top={SpacingSize.XL}>
           <Typography type="header">
-            <Trans t={t}>
-              {isNftTransfer
-                ? 'You’ve sent the NFT'
-                : 'You submitted a transaction'}
-            </Trans>
+            <Trans t={t}>{headerText}</Trans>
           </Typography>
         </VerticalSpaceContainer>
         <VerticalSpaceContainer top={SpacingSize.Medium}>

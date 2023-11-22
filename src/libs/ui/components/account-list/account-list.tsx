@@ -61,7 +61,7 @@ const ButtonContainer = styled(CenteredFlexRow)`
 `;
 
 interface AccountListProps {
-  closeModal: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  closeModal: (e: React.MouseEvent) => void;
 }
 
 export const AccountList = ({ closeModal }: AccountListProps) => {
@@ -143,7 +143,10 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
                   />
                 </AccountNameWithHashListItemContainer>
               </ListItemClickableContainer>
-              <AccountActionsMenuPopover account={account} />
+              <AccountActionsMenuPopover
+                account={account}
+                onClick={closeModal}
+              />
             </AlignedFlexRow>
             {isConnected && (
               <ConnectionStatusBadgeContainer>

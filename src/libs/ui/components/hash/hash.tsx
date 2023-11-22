@@ -16,7 +16,8 @@ import { truncateKey, TruncateKeySize } from './utils';
 
 export enum HashVariant {
   CaptionHash = 'captionHash',
-  BodyHash = 'bodyHash'
+  BodyHash = 'bodyHash',
+  ListSubtextHash = 'listSubtextHash'
 }
 
 interface HashContainerProps {
