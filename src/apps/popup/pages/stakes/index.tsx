@@ -42,6 +42,7 @@ import {
   dispatchFetchValidatorsDetailsDataRequest
 } from '@libs/services/validators-service';
 import { NoDelegations } from '@popup/pages/stakes/no-delegations';
+import { createErrorLocationState, ErrorPath } from '@layout/error';
 
 export const StakesPage = () => {
   const [stakeStep, setStakeStep] = useState(StakeSteps.Validator);
@@ -204,10 +205,22 @@ export const StakesPage = () => {
             triesLeft--;
             //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
           }, 2000);
+
+          setStakeStep(StakeSteps.Success);
+        } else {
+          navigate(
+            ErrorPath,
+            createErrorLocationState({
+              errorHeaderText: t('Something went wrong'),
+              errorContentText: t(
+                'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+              ),
+              errorPrimaryButtonLabel: t('Close'),
+              errorRedirectPath: RouterPath.Home
+            })
+          );
         }
       });
-      // TODO: need UI in case when the delegation request is failed
-      setStakeStep(StakeSteps.Success);
     }
   };
 
