@@ -6,7 +6,7 @@ _**Make sure to fill in all the below sections.**_
 
 ## Linked tickets
 
-// Add a `#XXX` link to a related ticket
+[WALLET-XXX](https://make-software.atlassian.net/browse/WALLET-XXX)
 
 ## Checklist
 
