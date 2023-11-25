@@ -78,6 +78,7 @@ export function Popover({
     <>
       <ChildrenContainer
         ref={childrenContainerRef}
+        data-testid="popover-children-container"
         onClick={() => setIsOpen(true)}
       >
         {children}
