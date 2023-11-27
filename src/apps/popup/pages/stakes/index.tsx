@@ -414,8 +414,8 @@ export const StakesPage = () => {
               {stakeStep === StakeSteps.Confirm
                 ? getConfirmButtonText()
                 : stakeStep === StakeSteps.Success
-                ? 'Done'
-                : 'Next'}
+                  ? 'Done'
+                  : 'Next'}
             </Trans>
           </Button>
         </FooterButtonsContainer>
