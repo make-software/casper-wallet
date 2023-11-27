@@ -33,7 +33,6 @@ export function HeaderConnectionStatus() {
           <Hash
             value={activeAccount?.publicKey!}
             variant={HashVariant.ListSubtextHash}
-            truncatedSize="small"
             truncated
             withoutTooltip
             color="contentOnFill"
