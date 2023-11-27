@@ -1,6 +1,6 @@
 import browser from 'webextension-polyfill';
 
-import { isSafariBuild } from '@src/utils';
+import { isFirefoxBuild, isSafariBuild } from '@src/utils';
 
 // It's hacky for Safari browser => browser.runtime.reload();
 // window.close() method can only be called on windows that were opened by a script using the Window.open() method.
@@ -9,6 +9,11 @@ import { isSafariBuild } from '@src/utils';
 // WARNING: IT WILL RELOAD ENTIRE EXTENSION
 export function closeWindowByReloadExtension() {
   if (isSafariBuild) {
+    browser.tabs.create({ url: 'onboarding.html', active: true });
+    browser.runtime.reload();
+    return;
+  }
+  if (isFirefoxBuild) {
     browser.runtime.reload();
     return;
   }

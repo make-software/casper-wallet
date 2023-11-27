@@ -437,8 +437,8 @@ export const TransferPage = () => {
               {transferStep === TransactionSteps.Confirm
                 ? 'Send'
                 : transferStep === TransactionSteps.Success
-                ? 'Done'
-                : 'Next'}
+                  ? 'Done'
+                  : 'Next'}
             </Trans>
           </Button>
         </FooterButtonsContainer>

@@ -72,8 +72,8 @@ export const Avatar = ({
       ? 'assets/icons/connected-dark.svg'
       : 'assets/icons/connected-dark-big.svg'
     : displayContext === 'header'
-    ? 'assets/icons/connected-light.svg'
-    : 'assets/icons/connected-light-big.svg';
+      ? 'assets/icons/connected-light.svg'
+      : 'assets/icons/connected-light-big.svg';
 
   if (withConnectedStatus && isConnected !== undefined) {
     return (

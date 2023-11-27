@@ -25,8 +25,8 @@ const ConnectionStatusBadgeContainer = styled(
     displayContext === 'accountList'
       ? null
       : isConnected
-      ? hexToRGBA(theme.color.contentPositive, '.12')
-      : theme.color.backgroundSecondary};
+        ? hexToRGBA(theme.color.contentPositive, '.12')
+        : theme.color.backgroundSecondary};
 `;
 
 export function ConnectionStatusBadge({

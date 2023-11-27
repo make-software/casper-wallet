@@ -21,8 +21,8 @@ const WordContainer = styled(FlexRow)<DisabledOrSelected & IsEmptyWord>`
     disabled
       ? theme.color.contentSecondary
       : selected
-      ? theme.color.contentOnFill
-      : 'inherit'};
+        ? theme.color.contentOnFill
+        : 'inherit'};
   border-radius: 6px;
   cursor: ${({ onClick, disabled }) =>
     onClick && !disabled ? 'pointer' : 'auto'};
