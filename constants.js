@@ -1,4 +1,3 @@
-const { Browser } = require('selenium-webdriver');
 const { NODE_ENV, BROWSER: browserEnvVar } = require('./utils/env');
 
 const extensionName = 'Casper Wallet';
@@ -7,9 +6,9 @@ const buildRootDir = ['test', 'production'].includes(NODE_ENV)
   : 'output';
 
 const ExtensionBuildPath = {
-  Chrome: `${buildRootDir}/${Browser.CHROME}`,
-  Firefox: `${buildRootDir}/${Browser.FIREFOX}`,
-  Safari: `${buildRootDir}/${Browser.SAFARI}/${extensionName}`
+  Chrome: `${buildRootDir}/chrome`,
+  Firefox: `${buildRootDir}/firefox`,
+  Safari: `${buildRootDir}/safari/${extensionName}`
 };
 
 const ManifestPath = {
@@ -18,16 +17,15 @@ const ManifestPath = {
   v2_Safari: 'src/manifest.v2.safari.json'
 };
 
-const isSafari = browserEnvVar && browserEnvVar === Browser.SAFARI;
-const isChrome = browserEnvVar && browserEnvVar === Browser.CHROME;
-const isFirefox = browserEnvVar && browserEnvVar === Browser.FIREFOX;
+const isSafari = browserEnvVar && browserEnvVar === 'safari';
+const isChrome = browserEnvVar && browserEnvVar === 'chrome';
+const isFirefox = browserEnvVar && browserEnvVar === 'firefox';
 
 module.exports = {
   ExtensionBuildPath,
   extensionName,
   browserEnvVar,
   ManifestPath,
-  Browser,
   isFirefox,
   isSafari,
   isChrome

@@ -38,10 +38,16 @@ interface RenderContentProps {
 export interface ModalProps extends BaseProps {
   children: (renderProps: RenderChildrenProps) => React.ReactNode | string;
   renderContent: (renderProps: RenderContentProps) => React.ReactNode | string;
+  dataTestId?: string;
   placement: 'top' | 'bottom';
 }
 
-export const Modal = ({ children, renderContent, placement }: ModalProps) => {
+export const Modal = ({
+  children,
+  renderContent,
+  placement,
+  dataTestId
+}: ModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const childrenContainerRef = useRef<HTMLDivElement>(null);
 
@@ -61,6 +67,7 @@ export const Modal = ({ children, renderContent, placement }: ModalProps) => {
     <>
       <ChildrenContainer
         ref={childrenContainerRef}
+        data-testid={dataTestId}
         onClick={event => {
           event.stopPropagation();
           setIsOpen(true);

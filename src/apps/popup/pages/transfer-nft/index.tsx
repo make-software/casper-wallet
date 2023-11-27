@@ -36,6 +36,7 @@ import {
   accountTrackingIdOfSentNftTokensChanged
 } from '@background/redux/account-info/actions';
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
+import { createErrorLocationState, ErrorPath } from '@layout/error';
 
 export const TransferNftPage = () => {
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
@@ -153,10 +154,22 @@ export const TransferNftPage = () => {
             triesLeft--;
             //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
           }, 2000);
+
+          setShowSuccessScreen(true);
+        } else {
+          navigate(
+            ErrorPath,
+            createErrorLocationState({
+              errorHeaderText: t('Something went wrong'),
+              errorContentText: t(
+                'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+              ),
+              errorPrimaryButtonLabel: t('Close'),
+              errorRedirectPath: RouterPath.Home
+            })
+          );
         }
       });
-
-      setShowSuccessScreen(true);
     }
   };
 

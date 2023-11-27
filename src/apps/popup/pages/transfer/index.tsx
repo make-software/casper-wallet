@@ -39,6 +39,7 @@ import { useActiveAccountErc20Tokens } from '@src/hooks/use-active-account-erc20
 import { selectAccountBalance } from '@src/background/redux/account-info/selectors';
 import { dispatchFetchExtendedDeploysInfo } from '@src/libs/services/account-activity-service';
 import { accountPendingTransactionsChanged } from '@src/background/redux/account-info/actions';
+import { createErrorLocationState, ErrorPath } from '@layout/error';
 
 import { getIsErc20Transfer, TransactionSteps } from './utils';
 
@@ -224,9 +225,21 @@ export const TransferPage = () => {
               triesLeft--;
               //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
             }, 2000);
+
+            setTransferStep(TransactionSteps.Success);
+          } else {
+            navigate(
+              ErrorPath,
+              createErrorLocationState({
+                errorHeaderText: t('Something went wrong'),
+                errorContentText: t(
+                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                ),
+                errorPrimaryButtonLabel: t('Close'),
+                errorRedirectPath: RouterPath.Home
+              })
+            );
           }
-          // TODO: need UI in case when the transfer is failed
-          setTransferStep(TransactionSteps.Success);
         });
       } else {
         // CSPR transfer
@@ -265,9 +278,21 @@ export const TransferPage = () => {
               triesLeft--;
               //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
             }, 2000);
+
+            setTransferStep(TransactionSteps.Success);
+          } else {
+            navigate(
+              ErrorPath,
+              createErrorLocationState({
+                errorHeaderText: t('Something went wrong'),
+                errorContentText: t(
+                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                ),
+                errorPrimaryButtonLabel: t('Close'),
+                errorRedirectPath: RouterPath.Home
+              })
+            );
           }
-          // TODO: need UI in case when the transfer is failed
-          setTransferStep(TransactionSteps.Success);
         });
       }
     }

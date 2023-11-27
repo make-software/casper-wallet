@@ -21,7 +21,7 @@ import { CreateAccountPage } from '@src/apps/popup/pages/create-account';
 import { DownloadSecretKeysPage } from '@popup/pages/download-secret-keys';
 import { DownloadedSecretKeysPage } from '@popup/pages/downloaded-secret-keys';
 
-import { RouterPath, useTypedLocation } from '@popup/router';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { selectVaultHasAccounts } from '@background/redux/vault/selectors';
 
@@ -38,6 +38,7 @@ import { WalletQrCodePage } from '@popup/pages/wallet-qr-code';
 import { TransferNftPage } from '@popup/pages/transfer-nft';
 import { ChangePasswordPage } from '@popup/pages/change-password';
 import { StakesPage } from '@popup/pages/stakes';
+import { ErrorPath, WindowErrorPage } from '@layout/error';
 
 export function AppRouter() {
   const isLocked = useSelector(selectVaultIsLocked);
@@ -255,6 +256,15 @@ function AppRoutes() {
       />
       <Route path={RouterPath.Delegate} element={<StakesPage />} />
       <Route path={RouterPath.Undelegate} element={<StakesPage />} />
+      <Route
+        path={ErrorPath}
+        element={
+          <WindowErrorPage
+            createTypedLocation={useTypedLocation}
+            createTypedNavigate={useTypedNavigate}
+          />
+        }
+      />
     </Routes>
   );
 }

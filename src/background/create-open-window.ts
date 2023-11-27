@@ -1,5 +1,6 @@
-import { RouterPath } from '@src/apps/signature-request/router';
 import browser from 'webextension-polyfill';
+
+import { RouterPath } from '@src/apps/signature-request/router';
 
 export enum WindowApp {
   ImportAccount = 'ImportAccount',
@@ -102,7 +103,10 @@ export function createOpenWindow({
     }
 
     async function openNewWindow(): Promise<browser.Windows.Window> {
-      return browser.windows.getCurrent().then(currentWindow => {
+      return browser.windows.getCurrent().then(async currentWindow => {
+        // If this flag is true, we create a new window without any size and positions.
+        const isTestEnv = Boolean(process.env.TEST_ENV);
+
         const windowWidth = currentWindow.width ?? 0;
         const xOffset = currentWindow.left ?? 0;
         const yOffset = currentWindow.top ?? 0;
@@ -113,7 +117,7 @@ export function createOpenWindow({
           // We need this check for Firefox. If the Firefox browser is in fullscreen mode it ignores the width and height that we set and opens a popup in a small size.
           // So we check it and if it is in a fullscreen mode we didn't set width and height, and the popup will also open in fullscreen mode.
           // This is a default behavior for Safari and Chrome, but Firefox doesn't do this, so we need to do this manually for it.
-          currentWindow.state === 'fullscreen'
+          currentWindow.state === 'fullscreen' || isTestEnv
             ? browser.windows.create({
                 url: getUrlByWindowApp(windowApp, searchParams),
                 type: 'popup',
