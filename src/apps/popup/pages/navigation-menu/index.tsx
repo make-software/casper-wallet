@@ -207,7 +207,7 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 3,
+            id: 4,
             title: t('Change Password'),
             iconPath: 'assets/icons/secure.svg',
             disabled: false,
