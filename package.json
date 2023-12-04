@@ -102,7 +102,7 @@
     "@babel/preset-env": "7.23.2",
     "@babel/preset-react": "7.18.6",
     "@playwright/test": "^1.39.0",
-    "@redux-devtools/cli": "^3.0.1",
+    "@redux-devtools/cli": "^3.0.2",
     "@testing-library/dom": "8.19.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^12.1.2",
