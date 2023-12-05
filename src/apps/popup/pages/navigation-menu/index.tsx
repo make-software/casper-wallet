@@ -30,6 +30,7 @@ import { lockVault } from '@src/background/redux/sagas/actions';
 import { TimeoutDurationSetting } from '@popup/constants';
 import { isSafariBuild } from '@src/utils';
 import { darkModeSettingChanged } from '@background/redux/settings/actions';
+import { selectCountOfContacts } from '@background/redux/contacts/selectors';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;
@@ -78,6 +79,7 @@ export function NavigationMenuPageContent() {
   const countOfConnectedSites = useSelector(selectCountOfConnectedSites);
   const vaultHasImportedAccount = useSelector(selectVaultHasImportedAccount);
   const isDarkMode = useSelector(selectDarkModeSetting);
+  const countOfContacts = useSelector(selectCountOfContacts);
 
   const { openWindow } = useWindowManager();
   const { closeNavigationMenu } = useNavigationMenu();
@@ -137,6 +139,17 @@ export function NavigationMenuPageContent() {
         items: [
           {
             id: 1,
+            title: t('Contacts list'),
+            iconPath: 'assets/icons/team.svg',
+            currentValue: countOfContacts,
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.ContactList);
+            }
+          },
+          {
+            id: 2,
             title: t('Connected sites'),
             iconPath: 'assets/icons/link.svg',
             currentValue: countOfConnectedSites,
@@ -147,7 +160,7 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 2,
+            id: 3,
             title: t('Timeout'),
             iconPath: 'assets/icons/lock.svg',
             currentValue: TimeoutDurationSetting[timeoutDurationSetting],
@@ -158,7 +171,7 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 3,
+            id: 4,
             title: t('Dark mode'),
             iconPath: isDarkMode
               ? 'assets/icons/sun.svg'
@@ -240,6 +253,7 @@ export function NavigationMenuPageContent() {
     ],
     [
       t,
+      countOfContacts,
       countOfConnectedSites,
       timeoutDurationSetting,
       isDarkMode,

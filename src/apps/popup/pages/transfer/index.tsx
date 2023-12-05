@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import { CLPublicKey, DeployUtil } from 'casper-js-sdk';
@@ -40,6 +40,7 @@ import { selectAccountBalance } from '@src/background/redux/account-info/selecto
 import { dispatchFetchExtendedDeploysInfo } from '@src/libs/services/account-activity-service';
 import { accountPendingTransactionsChanged } from '@src/background/redux/account-info/actions';
 import { createErrorLocationState, ErrorPath } from '@layout/error';
+import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
 
 import { getIsErc20Transfer, TransactionSteps } from './utils';
 
@@ -67,11 +68,12 @@ export const TransferPage = () => {
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
-
   const csprBalance = useSelector(selectAccountBalance);
-  const { tokens } = useActiveAccountErc20Tokens();
-  const token = tokens?.find(token => token.id === tokenContractPackageHash);
+  const contactPublicKeys = useSelector(selectAllPublicKeys);
 
+  const { tokens } = useActiveAccountErc20Tokens();
+
+  const token = tokens?.find(token => token.id === tokenContractPackageHash);
   const symbol = isErc20Transfer
     ? token?.symbol || location.state?.tokenData?.symbol || null
     : 'CSPR';
@@ -86,6 +88,10 @@ export const TransferPage = () => {
   const formattedBalance = formatNumber(balance || '', {
     precision: { max: 5 }
   });
+  const isRecipientPublicKeyInContact = useMemo(
+    () => contactPublicKeys.includes(recipientPublicKey),
+    [contactPublicKeys, recipientPublicKey]
+  );
 
   const { amountForm, recipientForm } = useTransferForm(
     erc20Balance,
@@ -441,6 +447,21 @@ export const TransferPage = () => {
                   : 'Next'}
             </Trans>
           </Button>
+          {transferStep === TransactionSteps.Success &&
+            !isRecipientPublicKeyInContact && (
+              <Button
+                color="secondaryBlue"
+                onClick={() =>
+                  navigate(RouterPath.AddContact, {
+                    state: {
+                      recipientPublicKey: recipientPublicKey
+                    }
+                  })
+                }
+              >
+                <Trans t={t}>Add recipient to list of contacts</Trans>
+              </Button>
+            )}
         </FooterButtonsContainer>
       )}
     />

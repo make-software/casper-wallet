@@ -16,7 +16,8 @@ export const initialStateForPopupTests: RootState = {
   session: {
     encryptionKeyHash:
       '7b55663cb7cd7d96765373ce0ee8d6901244de1ed241d20f9afe18a81149ea71',
-    isLocked: true
+    isLocked: true,
+    isContactEditingAllowed: false
   },
   vault: {
     secretPhrase: [
@@ -94,5 +95,9 @@ export const initialStateForPopupTests: RootState = {
     accountDeploysCount: 0,
     accountCasperActivityCount: 0,
     accountTrackingIdOfSentNftTokens: {}
+  },
+  contacts: {
+    contacts: [],
+    lastModified: null
   }
 };

@@ -17,7 +17,7 @@ import {
   selectVaultImportedAccounts
 } from '@background/redux/vault/selectors';
 import { generateSyncWalletQrData } from '@libs/crypto';
-import { BackupSecretPhrasePasswordPage } from '@popup/pages/backup-secret-phrase-password';
+import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
 
 export const WalletQrCodePage = () => {
   const [qrStrings, setQrStrings] = useState<string[]>([]);
@@ -56,7 +56,7 @@ export const WalletQrCodePage = () => {
 
   if (!isPasswordConfirmed) {
     return (
-      <BackupSecretPhrasePasswordPage
+      <PasswordProtectionPage
         setPasswordConfirmed={setPasswordConfirmed}
         onClick={generateQRCode}
         loading={loading}

@@ -387,3 +387,39 @@ export const useValidatorPublicKeyRule = (delegatorsNumber?: number) => {
       )
     });
 };
+
+export const useContactNameRule = (
+  isContactNameIsTakenCallback: (
+    value: string | undefined
+  ) => Promise<boolean> | boolean
+) => {
+  const { t } = useTranslation();
+
+  return Yup.string()
+    .required(t('Name is required'))
+    .max(20, t('This name is too long. Let’s keep it within 20 characters'))
+    .test(
+      'empty',
+      t("Name can't be empty"),
+      value => value != null && value.trim() !== ''
+    )
+    .test(
+      'unique',
+      t(
+        'You’ve already got a contact with this name. Please find a new name for this one'
+      ),
+      value => isContactNameIsTakenCallback(value)
+    );
+};
+
+export const useContactPublicKeyRule = () => {
+  const { t } = useTranslation();
+
+  return Yup.string()
+    .required(t('Public address is required'))
+    .test({
+      name: 'contactPublicKey',
+      test: value => (value ? isValidPublicKey(value) : false),
+      message: t('Public address should be a valid public key')
+    });
+};

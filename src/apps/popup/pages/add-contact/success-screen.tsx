@@ -6,36 +6,30 @@ import {
   ParagraphContainer,
   SpacingSize,
   VerticalSpaceContainer
-} from '@src/libs/layout';
-import { HomePageTabsId, SvgIcon, Typography } from '@libs/ui';
+} from '@libs/layout';
+import { SvgIcon, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-interface TransferSuccessScreenProps {
-  headerText: string;
+interface SuccessScreenProps {
+  needToRedirectToHome: boolean;
 }
 
-export const TransferSuccessScreen = ({
-  headerText
-}: TransferSuccessScreenProps) => {
+export const SuccessScreen = ({ needToRedirectToHome }: SuccessScreenProps) => {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
   useEffect(() => {
     const keyDownHandler = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
-        navigate(RouterPath.Home, {
-          state: {
-            // set the active tab to deploys
-            activeTabId: HomePageTabsId.Deploys
-          }
-        });
+        needToRedirectToHome
+          ? navigate(RouterPath.Home)
+          : navigate(RouterPath.ContactList);
       }
     };
-
     window.addEventListener('keydown', keyDownHandler);
 
     return () => window.removeEventListener('keydown', keyDownHandler);
-  }, [navigate]);
+  }, [navigate, needToRedirectToHome]);
 
   return (
     <ContentContainer>
@@ -47,14 +41,14 @@ export const TransferSuccessScreen = ({
         />
         <VerticalSpaceContainer top={SpacingSize.XL}>
           <Typography type="header">
-            <Trans t={t}>{headerText}</Trans>
+            <Trans t={t}>All done!</Trans>
           </Typography>
         </VerticalSpaceContainer>
         <VerticalSpaceContainer top={SpacingSize.Medium}>
           <Typography type="body" color="contentSecondary">
             <Trans t={t}>
-              You can check its status in the Deploys tab on your Wallet home
-              page.
+              You will see this contact’s details and select it when you
+              transfer or delegate tokens.
             </Trans>
           </Typography>
         </VerticalSpaceContainer>

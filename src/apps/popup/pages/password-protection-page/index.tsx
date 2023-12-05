@@ -27,7 +27,7 @@ interface BackupSecretPhrasePasswordPageType {
   loading?: boolean;
 }
 
-export const BackupSecretPhrasePasswordPage = ({
+export const PasswordProtectionPage = ({
   setPasswordConfirmed,
   onClick,
   loading = false
@@ -81,11 +81,7 @@ export const BackupSecretPhrasePasswordPage = ({
         />
       )}
       renderContent={() => (
-        <UnlockProtectedPageContent
-          errors={errors}
-          register={register}
-          description={t('Enter your password to reveal your secret phrase.')}
-        />
+        <UnlockProtectedPageContent errors={errors} register={register} />
       )}
       renderFooter={() => (
         <FooterButtonsContainer>
