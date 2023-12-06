@@ -1,16 +1,12 @@
 import React, { useCallback, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 
 import {
-  FooterButtonsContainer,
   HeaderSubmenuBarNavLink,
   PopupHeader,
   PopupLayout
 } from '@libs/layout';
 import { WalletQrCodePageContent } from '@popup/pages/wallet-qr-code/content';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import { Button } from '@libs/ui';
 import {
   selectSecretPhrase,
   selectVaultDerivedAccounts,
@@ -31,9 +27,6 @@ export const WalletQrCodePage = () => {
     selectVaultImportedAccounts,
     shallowEqual
   );
-
-  const navigate = useTypedNavigate();
-  const { t } = useTranslation();
 
   const setPasswordConfirmed = useCallback(() => {
     setIsPasswordConfirmed(true);
@@ -77,13 +70,6 @@ export const WalletQrCodePage = () => {
         />
       )}
       renderContent={() => <WalletQrCodePageContent qrStrings={qrStrings} />}
-      renderFooter={() => (
-        <FooterButtonsContainer>
-          <Button onClick={() => navigate(RouterPath.Home)}>
-            <Trans t={t}>I'm done</Trans>
-          </Button>
-        </FooterButtonsContainer>
-      )}
     />
   );
 };
