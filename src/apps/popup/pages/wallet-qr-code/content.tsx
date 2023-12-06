@@ -15,7 +15,7 @@ const QRContainer = styled(CenteredFlexRow)`
   padding: 20px 16px;
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
   border-radius: ${({ theme }) => theme.borderRadius.base}px;
-  margin-top: 20px;
+  margin-top: 24px;
 `;
 
 interface WalletQrCodePageContentProps {
