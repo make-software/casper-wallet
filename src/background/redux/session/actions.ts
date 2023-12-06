@@ -13,3 +13,7 @@ export const vaultUnlocked = createAction('VAULT_UNLOCKED', () => ({
 }))<{
   lastActivityTime: number;
 }>();
+
+export const contactEditingPermissionChanged = createAction(
+  'CONTACT_EDITING_PERMISSION_CHANGED'
+)();

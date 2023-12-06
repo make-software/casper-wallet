@@ -44,6 +44,20 @@ export const formatTimestamp = (value: string): string => {
   return `${nativeIntl.format(date)}`;
 };
 
+export const formatShortTimestamp = (value: string): string => {
+  const date = new Date(value);
+  const locale = 'en';
+  const nativeIntl = new Intl.DateTimeFormat(locale, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric'
+  });
+
+  return `${nativeIntl.format(date)}`;
+};
+
 export const formatDate = (value: string): string => {
   const timestamp = Number.parseInt(value);
 

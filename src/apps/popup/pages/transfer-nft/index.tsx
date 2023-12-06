@@ -37,6 +37,7 @@ import {
 } from '@background/redux/account-info/actions';
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import { createErrorLocationState, ErrorPath } from '@layout/error';
+import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
 
 export const TransferNftPage = () => {
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
@@ -49,6 +50,7 @@ export const TransferNftPage = () => {
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
+  const contactPublicKeys = useSelector(selectAllPublicKeys);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -99,6 +101,11 @@ export const TransferNftPage = () => {
       amountForm.formState.isValid &&
       !haveReverseOwnerLookUp
   });
+  const { recipientPublicKey } = recipientForm.getValues();
+  const isRecipientPublicKeyInContact = useMemo(
+    () => contactPublicKeys.includes(recipientPublicKey),
+    [contactPublicKeys, recipientPublicKey]
+  );
 
   const submitTransfer = async () => {
     if (haveReverseOwnerLookUp || !nftToken) return;
@@ -202,20 +209,39 @@ export const TransferNftPage = () => {
       renderFooter={() => (
         <FooterButtonsContainer>
           {showSuccessScreen ? (
-            <Button
-              color="primaryBlue"
-              type="button"
-              onClick={() => {
-                navigate(RouterPath.Home, {
-                  state: {
-                    // set the active tab to deploys
-                    activeTabId: HomePageTabsId.Deploys
-                  }
-                });
-              }}
-            >
-              <Trans t={t}>Done</Trans>
-            </Button>
+            <>
+              <Button
+                color="primaryBlue"
+                type="button"
+                onClick={() => {
+                  navigate(RouterPath.Home, {
+                    state: {
+                      // set the active tab to deploys
+                      activeTabId: HomePageTabsId.Deploys
+                    }
+                  });
+                }}
+              >
+                <Trans t={t}>Done</Trans>
+              </Button>
+
+              {!isRecipientPublicKeyInContact && (
+                <Button
+                  color="secondaryBlue"
+                  onClick={() => {
+                    const { recipientPublicKey } = recipientForm.getValues();
+
+                    navigate(RouterPath.AddContact, {
+                      state: {
+                        recipientPublicKey: recipientPublicKey
+                      }
+                    });
+                  }}
+                >
+                  <Trans t={t}>Add recipient to list of contacts</Trans>
+                </Button>
+              )}
+            </>
           ) : (
             <Button
               color="primaryBlue"

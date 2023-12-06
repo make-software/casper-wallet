@@ -39,6 +39,9 @@ import { TransferNftPage } from '@popup/pages/transfer-nft';
 import { ChangePasswordPage } from '@popup/pages/change-password';
 import { StakesPage } from '@popup/pages/stakes';
 import { ErrorPath, WindowErrorPage } from '@layout/error';
+import { ContactsBookPage } from '@popup/pages/contacts';
+import { AddContactPage } from '@popup/pages/add-contact';
+import { ContactDetailsPage } from '@popup/pages/contact-details';
 
 export function AppRouter() {
   const isLocked = useSelector(selectVaultIsLocked);
@@ -264,6 +267,12 @@ function AppRoutes() {
             createTypedNavigate={useTypedNavigate}
           />
         }
+      />
+      <Route path={RouterPath.ContactList} element={<ContactsBookPage />} />
+      <Route path={RouterPath.AddContact} element={<AddContactPage />} />
+      <Route
+        path={RouterPath.ContactDetails}
+        element={<ContactDetailsPage />}
       />
     </Routes>
   );

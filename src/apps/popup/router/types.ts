@@ -19,4 +19,5 @@ export interface LocationState extends ErrorLocationState {
     contentType: string;
     url?: string;
   };
+  recipientPublicKey?: string;
 }

@@ -9,7 +9,8 @@ const StyledTextArea = styled.textarea<{
   resize?: boolean;
   isDisabled?: boolean;
   readOnly?: boolean;
-}>(({ theme, resize, isDisabled, readOnly }) => ({
+  type?: 'captionHash';
+}>(({ theme, resize, isDisabled, type, readOnly }) => ({
   fontSize: '1.5rem',
   border: 'none',
   borderRadius: theme.borderRadius.base + 'px',
@@ -23,6 +24,12 @@ const StyledTextArea = styled.textarea<{
 
   ...((isDisabled || readOnly) && {
     color: theme.color.contentSecondary
+  }),
+
+  ...(type === 'captionHash' && {
+    fontSize: '1.4rem',
+    lineHeight: '2.4rem',
+    fontFamily: theme.typography.fontFamily.mono
   })
 }));
 
@@ -35,6 +42,7 @@ interface TextAreaProps extends BaseProps {
   placeholder?: string;
   disabled?: boolean;
   readOnly?: boolean;
+  type?: 'captionHash';
 }
 
 export const TextArea = forwardRef<Ref, TextAreaProps>(function TextArea(

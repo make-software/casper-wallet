@@ -63,6 +63,7 @@ import { fetchErc20Tokens } from '@libs/services/erc20-service';
 
 import { openWindow } from './open-window';
 import {
+  contactEditingPermissionChanged,
   encryptionKeyHashCreated,
   sessionReseted,
   vaultUnlocked
@@ -136,6 +137,11 @@ import {
   fetchAuctionValidators,
   fetchValidatorsDetailsData
 } from '@libs/services/validators-service';
+import {
+  contactRemoved,
+  contactUpdated,
+  newContactAdded
+} from '@background/redux/contacts/actions';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -556,6 +562,10 @@ browser.runtime.onMessage.addListener(
           case getType(accountTrackingIdOfSentNftTokensChanged):
           case getType(accountTrackingIdOfSentNftTokensRemoved):
           case getType(changePassword):
+          case getType(newContactAdded):
+          case getType(contactRemoved):
+          case getType(contactEditingPermissionChanged):
+          case getType(contactUpdated):
             store.dispatch(action);
             return sendResponse(undefined);
 
