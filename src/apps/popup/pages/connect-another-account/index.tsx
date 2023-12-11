@@ -124,7 +124,7 @@ export function ConnectAnotherAccountPageContent() {
         renderRow={(account, index) => (
           <ListItemContainer key={account.name}>
             <SvgIcon
-              src="assets/icons/checkbox-checked.svg"
+              src="assets/icons/radio-button-on.svg"
               color="contentPositive"
             />
 

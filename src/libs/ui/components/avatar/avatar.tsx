@@ -11,7 +11,9 @@ import {
 import { isValidAccountHash, isValidPublicKey } from '@src/utils';
 import { hexToRGBA, SvgIcon } from '@libs/ui';
 import { useSelector } from 'react-redux';
-import { selectDarkModeSetting } from '@background/redux/settings/selectors';
+import { selectThemeModeSetting } from '@background/redux/settings/selectors';
+import { ThemeMode } from '@background/redux/settings/types';
+import { useSystemThemeDetector } from '@src/hooks';
 
 const RoundedIdenticon = styled(Identicon)<{
   displayContext?: 'header';
@@ -65,7 +67,14 @@ export const Avatar = ({
 }: AvatarTypes) => {
   const theme = useTheme();
 
-  const isDarkMode = useSelector(selectDarkModeSetting);
+  const themeMode = useSelector(selectThemeModeSetting);
+
+  const isSystemDarkTheme = useSystemThemeDetector();
+
+  const isDarkMode =
+    themeMode === ThemeMode.SYSTEM
+      ? isSystemDarkTheme
+      : themeMode === ThemeMode.DARK;
 
   const connectIcon = isDarkMode
     ? displayContext === 'header'
