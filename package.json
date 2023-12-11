@@ -1,7 +1,7 @@
 {
   "name": "Casper Wallet",
   "description": "Securely manage your CSPR tokens and interact with dapps with the self-custody wallet for the Casper blockchain.",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "author": "MAKE LLC",
   "scripts": {
     "devtools:redux": "redux-devtools --hostname=localhost",
@@ -158,7 +158,7 @@
     "tsconfig-paths-webpack-plugin": "^4.1.0",
     "typescript": "4.9.3",
     "url-loader": "^4.1.1",
-    "web-ext": "7.6.2",
+    "web-ext": "7.8.0",
     "webextension-polyfill": "0.10.0",
     "webpack": "5.88.2",
     "webpack-cli": "5.1.4",
