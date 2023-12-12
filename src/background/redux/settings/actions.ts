@@ -14,3 +14,5 @@ export const activeNetworkSettingChanged = createAction(
 export const darkModeSettingChanged = createAction(
   'DARK_MODE_SETTING_CHANGED'
 )();
+
+export const vaultSettingsReseted = createAction('VAULT_SETTINGS_RESETED')();

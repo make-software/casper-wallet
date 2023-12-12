@@ -6,7 +6,8 @@ import { NetworkSetting } from '@src/constants';
 import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged,
-  darkModeSettingChanged
+  darkModeSettingChanged,
+  vaultSettingsReseted
 } from './actions';
 import { SettingsState } from './types';
 
@@ -17,6 +18,7 @@ const initialState: SettingsState = {
 };
 
 export const reducer = createReducer(initialState)
+  .handleAction(vaultSettingsReseted, (): SettingsState => initialState)
   .handleAction(
     activeTimeoutDurationSettingChanged,
     (state, { payload }): SettingsState => ({
