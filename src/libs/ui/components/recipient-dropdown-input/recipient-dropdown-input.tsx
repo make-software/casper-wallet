@@ -136,7 +136,7 @@ export const RecipientDropdownInput = ({
         <List
           contentTop={SpacingSize.Tiny}
           rows={optionsRow}
-          maxHeight={192}
+          maxHeight={193}
           renderRow={row => (
             <RecipientPlate
               publicKey={row.publicKey}
