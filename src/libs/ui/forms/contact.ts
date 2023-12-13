@@ -20,7 +20,8 @@ export const useContactForm = (
 ) => {
   const newContactFormSchema = Yup.object().shape({
     name: useContactNameRule(
-      value => value != null && !existingContactNames.includes(value)
+      value =>
+        value?.trim() != null && !existingContactNames.includes(value?.trim())
     ),
     publicKey: useContactPublicKeyRule()
   });

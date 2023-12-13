@@ -88,11 +88,13 @@ export const ContactDetailsPage = () => {
 
     const { name: newName, publicKey } = getValues();
 
+    const trimmedName = newName.trim();
+
     dispatchToMainStore(
       contactUpdated({
         oldName: contact.name,
-        name: newName,
-        publicKey: publicKey,
+        name: trimmedName,
+        publicKey,
         lastModified: lastModified
       })
     ).finally(() => {

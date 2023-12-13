@@ -36,8 +36,14 @@ export const AddContactPage = () => {
   const onSubmit = ({ name, publicKey }: ContactFromValues) => {
     const lastModified = new Date().toISOString();
 
+    const trimmedName = name.trim();
+
     dispatchToMainStore(
-      newContactAdded({ name, publicKey, lastModified: lastModified })
+      newContactAdded({
+        name: trimmedName,
+        publicKey,
+        lastModified
+      })
     ).finally(() => {
       setShowSuccessScreen(true);
     });
