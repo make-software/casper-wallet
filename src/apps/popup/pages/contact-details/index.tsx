@@ -95,7 +95,7 @@ export const ContactDetailsPage = () => {
         oldName: contact.name,
         name: trimmedName,
         publicKey,
-        lastModified: lastModified
+        lastModified
       })
     ).finally(() => {
       navigate(RouterPath.ContactList);
