@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { useSelector } from 'react-redux';
+import Big from 'big.js';
 
 import {
   ContentContainer,
@@ -9,10 +10,14 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Input, Typography } from '@libs/ui';
-import { formatFiatAmount } from '@libs/ui/utils/formatters';
+import { Checkbox, Input, Typography } from '@libs/ui';
+import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils/formatters';
 import { TransferAmountFormValues } from '@libs/ui/forms/transfer';
-import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
+import {
+  selectAccountBalance,
+  selectAccountCurrencyRate
+} from '@background/redux/account-info/selectors';
+import { TRANSFER_COST_MOTES, TRANSFER_MIN_AMOUNT_MOTES } from '@src/constants';
 
 interface AmountStepProps {
   amountForm: UseFormReturn<TransferAmountFormValues>;
@@ -21,14 +26,37 @@ interface AmountStepProps {
 }
 
 export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
+  const [isChecked, setIsChecked] = useState(false);
+  const [disabled, setDisabled] = useState(false);
+  const [maxAmountMotes, setMaxAmountMotes] = useState('0');
+
   const { t } = useTranslation();
 
   const currencyRate = useSelector(selectAccountCurrencyRate);
+  const csprBalance = useSelector(selectAccountBalance);
+
+  useEffect(() => {
+    const maxAmountMotes: string =
+      csprBalance.amountMotes == null
+        ? '0'
+        : Big(csprBalance.amountMotes).sub(TRANSFER_COST_MOTES).toString();
+
+    const hasEnoughBalance = Big(maxAmountMotes).gte(TRANSFER_MIN_AMOUNT_MOTES);
+    const isMaxAmountEqualMinAmount = Big(maxAmountMotes).eq(
+      TRANSFER_MIN_AMOUNT_MOTES
+    );
+
+    setIsChecked(isMaxAmountEqualMinAmount);
+    setMaxAmountMotes(maxAmountMotes);
+    setDisabled(!hasEnoughBalance);
+  }, [csprBalance.amountMotes]);
 
   const {
     register,
     formState: { errors },
-    control
+    control,
+    setValue,
+    trigger
   } = amountForm;
 
   const { onChange: onChangeTransferIdMemo } = register('transferIdMemo');
@@ -62,6 +90,17 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
         </Typography>
       </ParagraphContainer>
 
+      {isCSPR && disabled && (
+        <ParagraphContainer top={SpacingSize.Small}>
+          <Typography type="body" color="contentActionCritical">
+            <Trans t={t}>
+              You don't have enough CSPR to cover the transfer minimum amount
+              and the transaction fee.
+            </Trans>
+          </Typography>
+        </ParagraphContainer>
+      )}
+
       <VerticalSpaceContainer top={SpacingSize.XXL}>
         <Input
           label={amountLabel}
@@ -70,6 +109,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
           placeholder={t('0.00')}
           suffixText={symbol}
           {...register('amount')}
+          disabled={isCSPR && disabled}
           onChange={e => {
             // replace all non-numeric characters except decimal point
             e.target.value = e.target.value.replace(/[^0-9.]/g, '');
@@ -82,6 +122,26 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
         />
       </VerticalSpaceContainer>
 
+      {isCSPR && (
+        <VerticalSpaceContainer top={SpacingSize.Small}>
+          <Checkbox
+            variant="square"
+            label={t('Send max amount')}
+            checked={isChecked}
+            disabled={disabled}
+            onChange={() => {
+              if (isChecked) {
+                setValue('amount', motesToCSPR(TRANSFER_MIN_AMOUNT_MOTES));
+              } else {
+                setValue('amount', motesToCSPR(maxAmountMotes));
+              }
+              trigger('amount');
+              setIsChecked(!isChecked);
+            }}
+          />
+        </VerticalSpaceContainer>
+      )}
+
       {/** transferIdMemo is only relevant for CSPR */}
       <VerticalSpaceContainer top={SpacingSize.XL}>
         {isCSPR ? (
@@ -90,6 +150,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
             monotype
             placeholder={t('Enter numeric value')}
             {...register('transferIdMemo')}
+            disabled={disabled}
             onChange={e => {
               // replace all non-numeric characters
               e.target.value = e.target.value.replace(/[^0-9]/g, '');
@@ -102,7 +163,6 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
           <Input
             label={paymentAmoutLabel}
             rightLabel={paymentFiatAmount}
-            type="number"
             monotype
             placeholder={t('Enter transaction fee')}
             suffixText={'CSPR'}

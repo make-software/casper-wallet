@@ -53,7 +53,7 @@ export function SiteGroupHeader({
       </SiteGroupHeaderActionContainer>
 
       <VerticalSpaceContainer top={SpacingSize.Small}>
-        <Typography type="body" color="contentBlue">
+        <Typography type="body" color="contentAction">
           {siteOrigin}
         </Typography>
       </VerticalSpaceContainer>

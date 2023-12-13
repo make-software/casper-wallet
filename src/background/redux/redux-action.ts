@@ -12,6 +12,7 @@ import * as settings from './settings/actions';
 import * as activeOrigin from './active-origin/actions';
 import * as recentRecipientPublicKeys from './recent-recipient-public-keys/actions';
 import * as accountInfo from './account-info/actions';
+import * as contacts from './contacts/actions';
 
 const reduxAction = {
   sagas,
@@ -26,7 +27,8 @@ const reduxAction = {
   activeOrigin,
   settings,
   recentRecipientPublicKeys,
-  accountInfo
+  accountInfo,
+  contacts
 };
 
 export type ReduxAction = ActionType<typeof reduxAction>;

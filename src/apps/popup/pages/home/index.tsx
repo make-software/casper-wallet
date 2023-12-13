@@ -1,14 +1,14 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import browser from 'webextension-polyfill';
 
 import {
+  AlignedFlexRow,
   CenteredFlexRow,
   FlexColumn,
   HeaderSubmenuBarNavLink,
-  IconCircleContainer,
   LinkType,
   SpacingSize
 } from '@libs/layout';
@@ -25,6 +25,7 @@ import {
 import {
   AccountActionsMenuPopover,
   Avatar,
+  Button,
   getFontSizeBasedOnTextLength,
   Hash,
   HashVariant,
@@ -54,6 +55,7 @@ import {
 import { TokensList } from './components/tokens-list';
 import { NftList } from './components/nft-list';
 import { DeploysList } from './components/deploys-list';
+import { MoreButtonsModal } from './components/more-buttons-modal';
 
 const DividerLine = styled.hr`
   margin: 16px 0;
@@ -64,11 +66,13 @@ const DividerLine = styled.hr`
 `;
 
 const ButtonsContainer = styled(CenteredFlexRow)`
-  margin-top: 28px;
+  margin-top: 16px;
 `;
 
 const ButtonContainer = styled(CenteredFlexColumn)`
   cursor: pointer;
+
+  padding: 0 16px;
 `;
 
 export function HomePageContent() {
@@ -96,13 +100,21 @@ export function HomePageContent() {
     }
   }, [activeAccount?.publicKey, network]);
 
+  useEffect(() => {
+    if (!state?.activeTabId) {
+      const container = document.querySelector('#ms-container');
+
+      container?.scrollTo(0, 0);
+    }
+  }, [state?.activeTabId]);
+
   return (
     <ContentContainer>
       {activeAccount && (
         <Tile>
           <TileContainer>
             <SpaceBetweenFlexRow>
-              <FlexRow gap={SpacingSize.Large}>
+              <AlignedFlexRow gap={SpacingSize.Large}>
                 <Avatar
                   size={44}
                   publicKey={activeAccount.publicKey}
@@ -120,7 +132,7 @@ export function HomePageContent() {
                     placement="bottomCenter"
                   />
                 </LeftAlignedFlexColumn>
-              </FlexRow>
+              </AlignedFlexRow>
               <AccountActionsMenuPopover account={activeAccount} />
             </SpaceBetweenFlexRow>
             <DividerLine />
@@ -157,6 +169,22 @@ export function HomePageContent() {
               </Typography>
             </FlexColumn>
             <ButtonsContainer gap={SpacingSize.XXXL}>
+              {network === NetworkSetting.Mainnet && (
+                <ButtonContainer
+                  gap={SpacingSize.Small}
+                  onClick={handleBuyWithCSPR}
+                >
+                  <Button circle>
+                    <SvgIcon
+                      src="assets/icons/card.svg"
+                      color="contentOnFill"
+                    />
+                  </Button>
+                  <Typography type="captionMedium" color="contentAction">
+                    <Trans t={t}>Buy</Trans>
+                  </Typography>
+                </ButtonContainer>
+              )}
               <ButtonContainer
                 gap={SpacingSize.Small}
                 onClick={() =>
@@ -173,50 +201,17 @@ export function HomePageContent() {
                   )
                 }
               >
-                <IconCircleContainer color="fillBlue">
+                <Button circle>
                   <SvgIcon
                     src="assets/icons/transfer.svg"
                     color="contentOnFill"
                   />
-                </IconCircleContainer>
-                <Typography type="captionMedium" color="contentBlue">
+                </Button>
+                <Typography type="captionMedium" color="contentAction">
                   <Trans t={t}>Send</Trans>
                 </Typography>
               </ButtonContainer>
-              <ButtonContainer
-                gap={SpacingSize.Small}
-                onClick={() =>
-                  navigate(RouterPath.Receive, {
-                    state: { tokenData: casperToken }
-                  })
-                }
-              >
-                <IconCircleContainer color="fillBlue">
-                  <SvgIcon
-                    src="assets/icons/receive.svg"
-                    color="contentOnFill"
-                  />
-                </IconCircleContainer>
-                <Typography type="captionMedium" color="contentBlue">
-                  <Trans t={t}>Receive</Trans>
-                </Typography>
-              </ButtonContainer>
-              {network === NetworkSetting.Mainnet && (
-                <ButtonContainer
-                  gap={SpacingSize.Small}
-                  onClick={handleBuyWithCSPR}
-                >
-                  <IconCircleContainer color="fillBlue">
-                    <SvgIcon
-                      src="assets/icons/card.svg"
-                      color="contentOnFill"
-                    />
-                  </IconCircleContainer>
-                  <Typography type="captionMedium" color="contentBlue">
-                    <Trans t={t}>Buy</Trans>
-                  </Typography>
-                </ButtonContainer>
-              )}
+              <MoreButtonsModal handleBuyWithCSPR={handleBuyWithCSPR} />
             </ButtonsContainer>
           </TileContainer>
         </Tile>

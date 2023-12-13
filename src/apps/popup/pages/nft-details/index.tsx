@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -29,6 +29,12 @@ export const NftDetailsPage = () => {
       ),
     [contractPackageHash, nftTokes, tokenId]
   );
+
+  useEffect(() => {
+    if (!nftToken) {
+      navigate(RouterPath.Home);
+    }
+  }, [navigate, nftToken]);
 
   return (
     <PopupLayout

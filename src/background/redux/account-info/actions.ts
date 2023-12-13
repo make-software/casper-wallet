@@ -83,3 +83,14 @@ export const accountDeploysCountChanged = createAction(
 export const accountCasperActivityCountChanged = createAction(
   'ACCOUNT_CASPER_ACTIVITY_COUNT_CHANGED'
 )<number>();
+
+export const accountTrackingIdOfSentNftTokensChanged = createAction(
+  'ACCOUNT_TRACKING_ID_OF_SENT_NFT_TOKENS_CHANGED'
+)<{
+  trackingId: string;
+  deployHash: string;
+}>();
+
+export const accountTrackingIdOfSentNftTokensRemoved = createAction(
+  'ACCOUNT_TRACKING_ID_OF_SENT_NFT_TOKENS_REMOVED'
+)<string>();

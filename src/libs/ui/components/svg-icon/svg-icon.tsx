@@ -2,11 +2,9 @@ import React from 'react';
 import ReactSVG from 'react-inlinesvg';
 import styled from 'styled-components';
 
-import { ContentColor, getColorFromTheme } from '@src/libs/ui';
+import { Color, getColorFromTheme } from '@src/libs/ui';
 
 type Ref = HTMLDivElement;
-
-/* eslint-disable-next-line */
 
 export interface SvgIconProps extends React.HTMLAttributes<Ref> {
   className?: string;
@@ -18,7 +16,7 @@ export interface SvgIconProps extends React.HTMLAttributes<Ref> {
   alt?: string;
   onClick?: (ev: any) => void;
   onMouseDown?: (ev: any) => void;
-  color?: ContentColor;
+  color?: Color;
   tooltip?: string;
   flipByAxis?: 'X' | 'Y';
   marginLeft?: 'small' | 'medium';
@@ -44,7 +42,7 @@ const Container = styled('div').withConfig({
   size: number;
   width?: string | number;
   height?: string | number;
-  color?: ContentColor;
+  color?: Color;
   active?: boolean;
   flipByAxis?: 'X' | 'Y';
   marginLeft?: 'small' | 'medium';
@@ -78,7 +76,6 @@ const Container = styled('div').withConfig({
 const StyledReactSVG = styled(ReactSVG)<SvgIconProps>(
   ({ size, width, height }) => ({
     display: 'flex',
-    fill: 'currentColor',
     width: width != null ? width : size,
     height: height != null ? height : size
   })
@@ -136,5 +133,3 @@ export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
     );
   }
 );
-
-export default SvgIcon;

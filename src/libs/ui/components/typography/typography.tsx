@@ -1,8 +1,12 @@
 import React, { forwardRef } from 'react';
-import Skeleton from 'react-loading-skeleton';
 import styled, { CSSObject, DefaultTheme } from 'styled-components';
 
-import { BaseProps, ContentColor, getColorFromTheme } from '@src/libs/ui';
+import {
+  BaseProps,
+  ContentColor,
+  getColorFromTheme,
+  Skeleton
+} from '@src/libs/ui';
 
 type Ref = HTMLSpanElement | HTMLHeadingElement;
 
@@ -19,7 +23,8 @@ export type TypographyType =
   | 'CSPRBold'
   | 'listSubtext'
   | 'formFieldStatus' // TODO: Temporary name. Make a better name
-  | 'subtitle';
+  | 'subtitle'
+  | 'listSubtextHash';
 
 export type CSPRSize = '2.8rem' | '2.4rem' | '2rem' | '1.8rem';
 
@@ -194,6 +199,14 @@ const StyledTypography = styled('span').withConfig({
         fontSize: '1.8rem',
         lineHeight: '2.4rem',
         fontWeight: theme.typography.fontWeight.bold
+      };
+
+    case 'listSubtextHash':
+      return {
+        ...CSPRBase,
+        fontSize: '1.2rem',
+        lineHeight: '1.6rem',
+        fontWeight: theme.typography.fontWeight.medium
       };
 
     default:

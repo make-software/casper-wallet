@@ -27,13 +27,16 @@ function fetchFromBackground<T extends SdkMethod['payload']>(
 ): Promise<T> {
   return new Promise((resolve, reject) => {
     // timeout & cleanup to prevent memory leaks
-    const timeoutId = setTimeout(() => {
-      reject(
-        Error(
-          `SDK RESPONSE TIMEOUT: ${requestAction.type}:${requestAction.meta.requestId}`
-        )
-      );
-    }, options?.timeout || DefaultOptions.timeout);
+    const timeoutId = setTimeout(
+      () => {
+        reject(
+          Error(
+            `SDK RESPONSE TIMEOUT: ${requestAction.type}:${requestAction.meta.requestId}`
+          )
+        );
+      },
+      options?.timeout || DefaultOptions.timeout
+    );
 
     window.dispatchEvent(
       new CustomEvent(SdkMethodEventType.Request, {
@@ -88,7 +91,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
      */
     requestConnection(): Promise<boolean> {
       return fetchFromBackground<
-        ReturnType<typeof sdkMethod['connectResponse']>['payload']
+        ReturnType<(typeof sdkMethod)['connectResponse']>['payload']
       >(
         sdkMethod.connectRequest(
           { title: document.title },
@@ -105,7 +108,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
      */
     requestSwitchAccount(): Promise<boolean> {
       return fetchFromBackground<
-        ReturnType<typeof sdkMethod['switchAccountResponse']>['payload']
+        ReturnType<(typeof sdkMethod)['switchAccountResponse']>['payload']
       >(
         sdkMethod.switchAccountRequest(
           { title: document.title },
@@ -127,7 +130,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       signingPublicKeyHex: string
     ): Promise<SignatureResponse> => {
       return fetchFromBackground<
-        ReturnType<typeof sdkMethod['signResponse']>['payload']
+        ReturnType<(typeof sdkMethod)['signResponse']>['payload']
       >(
         sdkMethod.signRequest(
           {
@@ -163,7 +166,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       signingPublicKeyHex: string
     ): Promise<SignatureResponse> => {
       return fetchFromBackground<
-        ReturnType<typeof sdkMethod['signMessageResponse']>['payload']
+        ReturnType<(typeof sdkMethod)['signMessageResponse']>['payload']
       >(
         sdkMethod.signMessageRequest(
           {
@@ -194,7 +197,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
      */
     disconnectFromSite(): Promise<boolean> {
       return fetchFromBackground<
-        ReturnType<typeof sdkMethod['disconnectResponse']>['payload']
+        ReturnType<(typeof sdkMethod)['disconnectResponse']>['payload']
       >(
         sdkMethod.disconnectRequest(undefined, {
           requestId: generateRequestId()
@@ -209,7 +212,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
      */
     isConnected(): Promise<boolean> {
       return fetchFromBackground<
-        ReturnType<typeof sdkMethod['isConnectedResponse']>['payload']
+        ReturnType<(typeof sdkMethod)['isConnectedResponse']>['payload']
       >(
         sdkMethod.isConnectedRequest(undefined, {
           requestId: generateRequestId()
@@ -225,7 +228,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
      */
     getActivePublicKey(): Promise<string> {
       return fetchFromBackground<
-        ReturnType<typeof sdkMethod['getActivePublicKeyResponse']>['payload']
+        ReturnType<(typeof sdkMethod)['getActivePublicKeyResponse']>['payload']
       >(
         sdkMethod.getActivePublicKeyRequest(undefined, {
           requestId: generateRequestId()
@@ -239,7 +242,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
      */
     getVersion(): Promise<string> {
       return fetchFromBackground<
-        ReturnType<typeof sdkMethod['getVersionResponse']>['payload']
+        ReturnType<(typeof sdkMethod)['getVersionResponse']>['payload']
       >(
         sdkMethod.getVersionRequest(undefined, {
           requestId: generateRequestId()

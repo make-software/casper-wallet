@@ -7,11 +7,10 @@ import { useSelector } from 'react-redux';
 import {
   CenteredFlexColumn,
   CenteredFlexRow,
-  IconCircleContainer,
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
-import { Link, List, SvgIcon, TokenPlate, Typography } from '@libs/ui';
+import { Button, Link, List, SvgIcon, TokenPlate, Typography } from '@libs/ui';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { TokenType, useCasperToken } from '@src/hooks';
 import {
@@ -33,6 +32,8 @@ const FooterItemContainer = styled(CenteredFlexRow)`
 
 const ButtonContainer = styled(CenteredFlexColumn)`
   cursor: pointer;
+
+  padding: 0 16px;
 `;
 
 type TokenInfoList = {
@@ -67,7 +68,7 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
       if (casperToken && activeAccount) {
         setTokenData(casperToken);
         setTokenInfoList([
-          { id: 1, name: 'Symbol', value: casperToken.symbol }
+          { id: 1, name: 'Symbol', value: casperToken?.symbol }
         ]);
       }
     } else {
@@ -79,8 +80,8 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
       if (token) {
         setTokenData(token);
         setTokenInfoList([
-          { id: 1, name: 'Symbol', value: token.symbol },
-          { id: 2, name: 'Decimals', value: (token.decimals || 0).toString() }
+          { id: 1, name: 'Symbol', value: token?.symbol },
+          { id: 2, name: 'Decimals', value: (token?.decimals || 0).toString() }
         ]);
       } else {
         setTokenData(prev => (prev ? { ...prev, amount: '0' } : null));
@@ -136,10 +137,10 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
               )
             }
           >
-            <IconCircleContainer color="fillBlue">
+            <Button circle>
               <SvgIcon src="assets/icons/transfer.svg" color="contentOnFill" />
-            </IconCircleContainer>
-            <Typography type="captionMedium" color="contentBlue">
+            </Button>
+            <Typography type="captionMedium" color="contentAction">
               <Trans t={t}>Send</Trans>
             </Typography>
           </ButtonContainer>
@@ -149,10 +150,10 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
               navigate(RouterPath.Receive, { state: { tokenData } })
             }
           >
-            <IconCircleContainer color="fillBlue">
+            <Button circle>
               <SvgIcon src="assets/icons/receive.svg" color="contentOnFill" />
-            </IconCircleContainer>
-            <Typography type="captionMedium" color="contentBlue">
+            </Button>
+            <Typography type="captionMedium" color="contentAction">
               <Trans t={t}>Receive</Trans>
             </Typography>
           </ButtonContainer>
@@ -164,17 +165,17 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
                 target="_blank"
                 href={getBuyWithTopperUrl(activeAccount.publicKey)}
               >
-                <CenteredFlexColumn gap={SpacingSize.Medium}>
-                  <IconCircleContainer color="fillBlue">
+                <ButtonContainer gap={SpacingSize.Medium}>
+                  <Button circle>
                     <SvgIcon
                       src="assets/icons/card.svg"
                       color="contentOnFill"
                     />
-                  </IconCircleContainer>
-                  <Typography type="captionMedium" color="contentBlue">
-                    Buy
+                  </Button>
+                  <Typography type="captionMedium" color="contentAction">
+                    <Trans t={t}>Buy</Trans>
                   </Typography>
-                </CenteredFlexColumn>
+                </ButtonContainer>
               </Link>
             )}
         </FooterItemContainer>

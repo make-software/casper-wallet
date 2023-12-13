@@ -11,7 +11,7 @@ export function generateRandomSaltHex() {
   return convertBytesToHex(generateRandomSaltBytes());
 }
 
-const createScryptOptions = () => {
+export const createScryptOptions = () => {
   const options = { N: 2 ** 18, r: 8, p: 1, dkLen: 32 };
   return options;
 };

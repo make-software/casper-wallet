@@ -130,9 +130,9 @@ export const TransferNftContent = ({
       </VerticalSpaceContainer>
       {haveReverseOwnerLookUp && (
         <ParagraphContainer top={SpacingSize.Tiny}>
-          <Typography type="listSubtext" color="contentRed">
+          <Typography type="listSubtext" color="contentActionCritical">
             <Trans t={t}>
-              For now we doesn't support we don’t the reverse look up modality
+              Sorry, but we don’t support the reverse look-up modality
             </Trans>
           </Typography>
         </ParagraphContainer>
@@ -142,7 +142,6 @@ export const TransferNftContent = ({
         <Input
           label={t('Transaction fee')}
           rightLabel={paymentFiatAmount}
-          type="number"
           monotype
           placeholder={t('Enter transaction fee')}
           suffixText={'CSPR'}

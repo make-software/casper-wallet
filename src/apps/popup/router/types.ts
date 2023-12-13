@@ -1,13 +1,14 @@
-import { TransferType } from '@src/constants';
+import { ActivityType } from '@src/constants';
 import { TokenType } from '@src/hooks';
+import { ErrorLocationState } from '@layout/error';
 
-export type LocationState = {
+export interface LocationState extends ErrorLocationState {
   showNavigationMenu?: boolean;
   activityDetailsData?: {
     fromAccount: string;
     toAccount: string;
     deployHash: string;
-    type: TransferType | null;
+    type: ActivityType | null;
     amount?: string;
     symbol?: string;
     isDeploysList?: boolean;
@@ -18,4 +19,5 @@ export type LocationState = {
     contentType: string;
     url?: string;
   };
-};
+  recipientPublicKey?: string;
+}

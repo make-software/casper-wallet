@@ -3,7 +3,14 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import { Hash, HashVariant, SvgIcon, Tooltip, Typography } from '@libs/ui';
+import {
+  ContentColor,
+  Hash,
+  HashVariant,
+  SvgIcon,
+  Tooltip,
+  Typography
+} from '@libs/ui';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import {
   formatNumber,
@@ -21,10 +28,11 @@ import {
   SpacingSize
 } from '@libs/layout';
 import {
-  ShortTypeName,
-  TransferType,
-  TypeIcons,
-  TypeName
+  ActivityShortTypeName,
+  ActivityType,
+  ActivityTypeColors,
+  ActivityTypeIcons,
+  ActivityTypeName
 } from '@src/constants';
 import { TransferResultWithId } from '@libs/services/account-activity-service';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
@@ -39,7 +47,7 @@ export const AccountCasperActivityPlate = forwardRef<
   Ref,
   AccountCasperActivityPlateProps
 >(({ transactionInfo, onClick }, ref) => {
-  const [type, setType] = useState<TransferType | null>(null);
+  const [type, setType] = useState<ActivityType | null>(null);
 
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -69,14 +77,14 @@ export const AccountCasperActivityPlate = forwardRef<
       fromAccountPublicKey === activeAccount?.publicKey ||
       fromAccount === activeAccountHash
     ) {
-      setType(TransferType.Sent);
+      setType(ActivityType.Sent);
     } else if (
       toAccountPublicKey === activeAccount?.publicKey ||
       toAccount === activeAccountHash
     ) {
-      setType(TransferType.Received);
+      setType(ActivityType.Received);
     } else {
-      setType(TransferType.Unknown);
+      setType(ActivityType.Unknown);
     }
   }, [
     fromAccountPublicKey,
@@ -109,7 +117,13 @@ export const AccountCasperActivityPlate = forwardRef<
       }}
     >
       <ActivityPlateIconCircleContainer>
-        {type != null && <SvgIcon src={TypeIcons[type]} size={16} />}
+        {type != null && (
+          <SvgIcon
+            src={ActivityTypeIcons[type]}
+            size={16}
+            color={ActivityTypeColors[type] as ContentColor}
+          />
+        )}
       </ActivityPlateIconCircleContainer>
       <ActivityPlateContentContainer>
         <AlignedSpaceBetweenFlexRow>
@@ -118,13 +132,13 @@ export const AccountCasperActivityPlate = forwardRef<
               <Trans t={t}>
                 {type != null &&
                   (formattedAmount.length >= 13
-                    ? ShortTypeName[type]
-                    : TypeName[type])}
+                    ? ActivityShortTypeName[type]
+                    : ActivityTypeName[type])}
               </Trans>
             </Typography>
           </AlignedFlexRow>
           <Typography type="captionHash">
-            {type === TransferType.Sent ? '-' : ''}
+            {type === ActivityType.Sent ? '-' : ''}
             {formattedAmount}
           </Typography>
         </AlignedSpaceBetweenFlexRow>

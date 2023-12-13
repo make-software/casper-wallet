@@ -20,5 +20,12 @@ export enum RouterPath {
   Token = '/token/:tokenName',
   Receive = '/receive',
   NftDetails = '/nft-details/:contractPackageHash/nfts/:tokenId',
-  TransferNft = '/transfer-nft/:contractPackageHash/nfts/:tokenId'
+  GenerateWalletQRCode = '/generate-wallet-qr-code',
+  TransferNft = '/transfer-nft/:contractPackageHash/nfts/:tokenId',
+  ChangePassword = '/change-password',
+  Delegate = '/delegate',
+  Undelegate = '/undelegate',
+  ContactList = '/contact-list',
+  AddContact = '/add-contact',
+  ContactDetails = '/contact-list/:contactName'
 }

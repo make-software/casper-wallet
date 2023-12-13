@@ -12,8 +12,8 @@ import { formatErc20TokenBalance } from './utils';
 const TotalValueContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;
 
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
+  border-top-left-radius: ${({ theme }) => theme.borderRadius.twelve}px;
+  border-top-right-radius: ${({ theme }) => theme.borderRadius.twelve}px;
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
 `;
 
@@ -43,6 +43,12 @@ export const TokensList = () => {
     setTokensList(tokensList);
   }, [casperToken, erc20Tokens]);
 
+  useEffect(() => {
+    const container = document.querySelector('#ms-container');
+
+    container?.scrollTo(0, 0);
+  }, []);
+
   return (
     <List
       contentTop={SpacingSize.None}
@@ -71,7 +77,7 @@ export const TokensList = () => {
         />
       )}
       marginLeftForItemSeparatorLine={56}
-      marginLeftForHeaderSeparatorLine={16}
+      marginLeftForHeaderSeparatorLine={0}
     />
   );
 };

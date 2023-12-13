@@ -1,6 +1,7 @@
 import Identicon from 'react-identicons';
 import React from 'react';
 import styled, { DefaultTheme, useTheme } from 'styled-components';
+import { useSelector } from 'react-redux';
 
 import {
   SpacingSize,
@@ -10,13 +11,33 @@ import {
 } from '@libs/layout';
 import { isValidAccountHash, isValidPublicKey } from '@src/utils';
 import { SvgIcon } from '@libs/ui';
+import { selectDarkModeSetting } from '@background/redux/settings/selectors';
 
-const RoundedIdenticon = styled(Identicon)<{ displayContext?: 'header' }>`
-  border-radius: ${({ theme, displayContext }) =>
-    displayContext ? theme.borderRadius.base : theme.borderRadius.eight}px;
-  border: ${({ displayContext }) =>
-    displayContext ? `0.5px solid #1A191929` : 'none'};
-`;
+const RoundedIdenticon = styled(Identicon)(
+  ({
+    theme,
+    displayContext,
+    isActiveAccount,
+    isConnected
+  }: {
+    theme: DefaultTheme;
+    displayContext?: 'header' | 'accountList';
+    isActiveAccount?: boolean;
+    isConnected?: boolean;
+  }) => ({
+    borderRadius: theme.borderRadius.base,
+
+    ...(displayContext === 'accountList' && {
+      border: isActiveAccount
+        ? `3px solid ${
+            isConnected
+              ? theme.color.contentPositive
+              : theme.color.contentDisabled
+          }`
+        : `3px solid ${theme.color.backgroundPrimary}`
+    })
+  })
+);
 
 const IconHashWrapper = styled(CenteredFlexRow)(({ theme }) => ({
   color: theme.color.contentOnFill,
@@ -25,6 +46,7 @@ const IconHashWrapper = styled(CenteredFlexRow)(({ theme }) => ({
 
 const ConnectionStatusBadgeContainer = styled(AlignedFlexRow)`
   position: relative;
+  z-index: 1;
 `;
 
 export const BackgroundWrapper = styled.div(
@@ -32,41 +54,9 @@ export const BackgroundWrapper = styled.div(
     borderRadius: theme.borderRadius.eight,
     height: `${size}px`,
     width: `${size}px`,
-    backgroundColor: theme.color.contentTertiary
+    backgroundColor: theme.color.contentDisabled
   })
 );
-
-const ConnectionStatusBadge = styled.div<{
-  isConnected: boolean;
-  displayContext?: 'header';
-}>`
-  width: ${({ displayContext }) => (displayContext ? '14px' : '16px')};
-  height: ${({ displayContext }) => (displayContext ? '14px' : '16px')};
-  border-radius: 50%;
-
-  background-color: ${({ theme, displayContext }) =>
-    displayContext ? theme.color.backgroundRed : theme.color.backgroundPrimary};
-
-  position: absolute;
-  bottom: -4px;
-  right: -4px;
-
-  &:after {
-    content: '';
-    width: ${({ displayContext }) => (displayContext ? '8px' : '10px')};
-    height: ${({ displayContext }) => (displayContext ? '8px' : '10px')};
-    border-radius: 50%;
-
-    background-color: ${({ isConnected, theme }) =>
-      isConnected ? theme.color.contentGreen : theme.color.contentTertiary};
-
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1;
-  }
-`;
 
 interface AvatarTypes {
   publicKey: string;
@@ -74,7 +64,8 @@ interface AvatarTypes {
   top?: SpacingSize;
   withConnectedStatus?: boolean;
   isConnected?: boolean;
-  displayContext?: 'header';
+  displayContext?: 'header' | 'accountList';
+  isActiveAccount?: boolean;
 }
 
 export const Avatar = ({
@@ -83,9 +74,20 @@ export const Avatar = ({
   top,
   withConnectedStatus,
   isConnected,
-  displayContext
+  displayContext,
+  isActiveAccount
 }: AvatarTypes) => {
   const theme = useTheme();
+
+  const isDarkMode = useSelector(selectDarkModeSetting);
+
+  const connectIcon = isDarkMode
+    ? displayContext === 'header'
+      ? 'assets/icons/connected-dark.svg'
+      : 'assets/icons/connected-dark-big.svg'
+    : displayContext === 'header'
+      ? 'assets/icons/connected-light.svg'
+      : 'assets/icons/connected-light-big.svg';
 
   if (withConnectedStatus && isConnected !== undefined) {
     return (
@@ -93,12 +95,34 @@ export const Avatar = ({
         <RoundedIdenticon
           string={publicKey}
           size={size}
-          bg={theme.color.backgroundPrimary}
+          bg={theme.color.contentOnFill}
           displayContext={displayContext}
-        />
-        <ConnectionStatusBadge
+          isActiveAccount={isActiveAccount}
           isConnected={isConnected}
-          displayContext={displayContext}
+        />
+        <SvgIcon
+          src={connectIcon}
+          size={
+            displayContext === 'header' || displayContext === 'accountList'
+              ? 12
+              : 16
+          }
+          style={{
+            position: 'absolute',
+            bottom:
+              displayContext === 'header'
+                ? '-4px'
+                : displayContext === 'accountList'
+                  ? '-2px'
+                  : '-5px',
+            right:
+              displayContext === 'header'
+                ? '-4px'
+                : displayContext === 'accountList'
+                  ? '-2px'
+                  : '-5px'
+          }}
+          color={isConnected ? 'contentPositive' : 'contentDisabled'}
         />
       </ConnectionStatusBadgeContainer>
     );
@@ -110,7 +134,8 @@ export const Avatar = ({
         <RoundedIdenticon
           string={publicKey}
           size={size}
-          bg={theme.color.backgroundPrimary}
+          bg={theme.color.contentOnFill}
+          isDarkMode={isDarkMode}
         />
       </AvatarContainer>
     );

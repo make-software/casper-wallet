@@ -1,8 +1,7 @@
 import React from 'react';
-import Skeleton from 'react-loading-skeleton';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
-import { SvgIcon } from '@libs/ui';
+import { Skeleton, SvgIcon } from '@libs/ui';
 import { CenteredFlexRow } from '@libs/layout';
 
 export const ImageContainer = styled(CenteredFlexRow)`
@@ -59,17 +58,9 @@ export const VideoNftPlaceholder: React.FC = () => (
 );
 
 export const LoadingMediaPlaceholder = () => {
-  const theme = useTheme();
-
   return (
     <EmptyMediaPlaceholder>
-      <Skeleton
-        height="140px"
-        width="140px"
-        baseColor="#ffffff00"
-        highlightColor={theme.color.backgroundPrimary}
-        borderRadius={18}
-      />
+      <Skeleton height="140px" width="140px" borderRadius={18} />
     </EmptyMediaPlaceholder>
   );
 };

@@ -95,9 +95,7 @@ export function DownloadSecretKeysPage() {
         <UnlockProtectedPageContent
           register={register}
           errors={errors}
-          description={t(
-            'Enter your password to download your secret key file.'
-          )}
+          title={t('Enter your password to download your secret key file')}
         />
       )}
       renderFooter={() => (

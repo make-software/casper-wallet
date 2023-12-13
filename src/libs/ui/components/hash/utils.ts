@@ -1,4 +1,4 @@
-export type TruncateKeySize = 'tiny' | 'small' | 'medium' | 'max';
+export type TruncateKeySize = 'tiny' | 'small' | 'base' | 'medium' | 'max';
 
 export function truncateKey(
   key: string,
@@ -10,7 +10,13 @@ export function truncateKey(
       beginOfKey = key.slice(0, 3);
       endOfKey = key.slice(key.length - 3);
       break;
+
     case 'small':
+      beginOfKey = key.slice(0, 4);
+      endOfKey = key.slice(key.length - 4);
+      break;
+
+    case 'base':
     default:
       beginOfKey = key.slice(0, 5);
       endOfKey = key.slice(key.length - 5);

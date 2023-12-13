@@ -12,6 +12,7 @@ import { reducer as settings } from './settings/reducer';
 import { reducer as activeOrigin } from './active-origin/reducer';
 import { reducer as recentRecipientPublicKeys } from './recent-recipient-public-keys/reducer';
 import { reducer as accountInfo } from './account-info/reducer';
+import { reducer as contacts } from './contacts/reducer';
 
 const rootReducer = combineReducers({
   vaultCipher,
@@ -25,7 +26,8 @@ const rootReducer = combineReducers({
   activeOrigin,
   settings,
   recentRecipientPublicKeys,
-  accountInfo
+  accountInfo,
+  contacts
 });
 
 export default rootReducer;

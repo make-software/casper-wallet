@@ -5,13 +5,15 @@ import { NetworkSetting } from '@src/constants';
 
 import {
   activeNetworkSettingChanged,
-  activeTimeoutDurationSettingChanged
+  activeTimeoutDurationSettingChanged,
+  darkModeSettingChanged
 } from './actions';
 import { SettingsState } from './types';
 
 const initialState: SettingsState = {
   activeNetwork: NetworkSetting.Mainnet,
-  activeTimeoutDuration: TimeoutDurationSetting['5 min']
+  activeTimeoutDuration: TimeoutDurationSetting['5 min'],
+  isDarkMode: false
 };
 
 export const reducer = createReducer(initialState)
@@ -27,5 +29,12 @@ export const reducer = createReducer(initialState)
     (state, { payload }): SettingsState => ({
       ...state,
       activeNetwork: payload
+    })
+  )
+  .handleAction(
+    darkModeSettingChanged,
+    (state): SettingsState => ({
+      ...state,
+      isDarkMode: !state.isDarkMode
     })
   );

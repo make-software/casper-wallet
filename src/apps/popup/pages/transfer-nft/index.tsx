@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
-import { Keys } from 'casper-js-sdk';
 
 import {
   FooterButtonsContainer,
@@ -27,38 +26,50 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 import {
   getDefaultPaymentAmountBasedOnNftTokenStandard,
   getRuntimeArgs,
-  getSignatureAlgorithm,
   signNftDeploy
 } from '@popup/pages/transfer-nft/utils';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
+import {
+  accountPendingTransactionsChanged,
+  accountTrackingIdOfSentNftTokensChanged
+} from '@background/redux/account-info/actions';
+import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
+import { createErrorLocationState, ErrorPath } from '@layout/error';
+import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
 
 export const TransferNftPage = () => {
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
   const [haveReverseOwnerLookUp, setHaveReverseOwnerLookUp] = useState(false);
   const { contractPackageHash, tokenId } = useParams();
 
-  const nftTokes = useSelector(selectAccountNftTokens);
+  const nftTokens = useSelector(selectAccountNftTokens);
   const csprBalance = useSelector(selectAccountBalance);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
+  const contactPublicKeys = useSelector(selectAllPublicKeys);
+
+  const { t } = useTranslation();
+  const navigate = useTypedNavigate();
 
   const nftToken = useMemo(
     () =>
-      nftTokes?.find(
+      nftTokens?.find(
         token =>
           token.token_id === tokenId &&
           token.contract_package_hash === contractPackageHash
       ),
-    [contractPackageHash, nftTokes, tokenId]
+    [contractPackageHash, nftTokens, tokenId]
   );
 
-  const { t } = useTranslation();
-  const navigate = useTypedNavigate();
+  useEffect(() => {
+    if (!nftToken) {
+      navigate(RouterPath.Home);
+    }
+  }, [navigate, nftToken]);
 
   useEffect(() => {
     if (nftToken?.contract_package?.metadata?.owner_reverse_lookup_mode) {
@@ -90,21 +101,26 @@ export const TransferNftPage = () => {
       amountForm.formState.isValid &&
       !haveReverseOwnerLookUp
   });
+  const { recipientPublicKey } = recipientForm.getValues();
+  const isRecipientPublicKeyInContact = useMemo(
+    () => contactPublicKeys.includes(recipientPublicKey),
+    [contactPublicKeys, recipientPublicKey]
+  );
 
   const submitTransfer = async () => {
-    if (haveReverseOwnerLookUp) return;
+    if (haveReverseOwnerLookUp || !nftToken) return;
 
     if (activeAccount) {
       const { recipientPublicKey } = recipientForm.getValues();
+      const { paymentAmount } = amountForm.getValues();
 
-      const rawPublicKey = getRawPublicKey(activeAccount.publicKey);
-      const KEYS = Keys.getKeysFromHexPrivKey(
-        activeAccount.secretKey,
-        getSignatureAlgorithm(rawPublicKey)
+      const KEYS = createAsymmetricKey(
+        activeAccount.publicKey,
+        activeAccount.secretKey
       );
 
       const args = {
-        tokenId: nftToken?.token_id!,
+        tokenId: nftToken.token_id,
         source: KEYS.publicKey,
         target: getRawPublicKey(recipientPublicKey)
       };
@@ -122,6 +138,13 @@ export const TransferNftPage = () => {
         dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
         if (deployHash) {
+          dispatchToMainStore(
+            accountTrackingIdOfSentNftTokensChanged({
+              trackingId: nftToken.tracking_id,
+              deployHash
+            })
+          );
+
           let triesLeft = 10;
           const interval = setInterval(async () => {
             const { payload: extendedDeployInfo } =
@@ -138,10 +161,22 @@ export const TransferNftPage = () => {
             triesLeft--;
             //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
           }, 2000);
+
+          setShowSuccessScreen(true);
+        } else {
+          navigate(
+            ErrorPath,
+            createErrorLocationState({
+              errorHeaderText: t('Something went wrong'),
+              errorContentText: t(
+                'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+              ),
+              errorPrimaryButtonLabel: t('Close'),
+              errorRedirectPath: RouterPath.Home
+            })
+          );
         }
       });
-
-      setShowSuccessScreen(true);
     }
   };
 
@@ -161,7 +196,7 @@ export const TransferNftPage = () => {
       )}
       renderContent={() =>
         showSuccessScreen ? (
-          <TransferSuccessScreen isNftTransfer={true} />
+          <TransferSuccessScreen headerText="You’ve sent the NFT" />
         ) : (
           <TransferNftContent
             nftToken={nftToken}
@@ -174,20 +209,39 @@ export const TransferNftPage = () => {
       renderFooter={() => (
         <FooterButtonsContainer>
           {showSuccessScreen ? (
-            <Button
-              color="primaryBlue"
-              type="button"
-              onClick={() => {
-                navigate(RouterPath.Home, {
-                  state: {
-                    // set the active tab to deploys
-                    activeTabId: HomePageTabsId.Deploys
-                  }
-                });
-              }}
-            >
-              <Trans t={t}>Done</Trans>
-            </Button>
+            <>
+              <Button
+                color="primaryBlue"
+                type="button"
+                onClick={() => {
+                  navigate(RouterPath.Home, {
+                    state: {
+                      // set the active tab to deploys
+                      activeTabId: HomePageTabsId.Deploys
+                    }
+                  });
+                }}
+              >
+                <Trans t={t}>Done</Trans>
+              </Button>
+
+              {!isRecipientPublicKeyInContact && (
+                <Button
+                  color="secondaryBlue"
+                  onClick={() => {
+                    const { recipientPublicKey } = recipientForm.getValues();
+
+                    navigate(RouterPath.AddContact, {
+                      state: {
+                        recipientPublicKey: recipientPublicKey
+                      }
+                    });
+                  }}
+                >
+                  <Trans t={t}>Add recipient to list of contacts</Trans>
+                </Button>
+              )}
+            </>
           ) : (
             <Button
               color="primaryBlue"

@@ -41,6 +41,14 @@ export * from './components/casper-token-activity-list/casper-token-activity-lis
 export * from './components/loading-activity-view/loading-activity-view';
 export * from './components/recipient-dropdown-input/recipient-dropdown-input';
 export * from './components/transfer-success-screen/transfer-succeess-screen';
+export * from './components/contract-icon/contract-icon';
+export * from './components/password-inputs/password-inputs';
+export * from './components/toggle/toggle';
+export * from './components/skeleton/skeleton';
+export * from './components/validator-dropdown-input/validator-dropdown-input';
+export * from './components/validator-plate/validator-plate';
+export * from './components/error/error';
+export * from './components/contacts-plate/contacts-plate';
 
 export * from './utils/match-media';
 export * from './utils/match-size';
@@ -49,3 +57,4 @@ export * from './utils/get-color-from-theme';
 export * from './theme-config';
 export * from './global-style';
 export * from './types';
+export * from './utils/get-linear-gradient-color';

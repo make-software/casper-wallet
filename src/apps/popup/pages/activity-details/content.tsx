@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { useSelector } from 'react-redux';
 
 import {
   AlignedFlexRow,
@@ -16,10 +17,13 @@ import {
 } from '@libs/layout';
 import {
   Avatar,
+  ContractIcon,
+  CopyToClipboard,
   DeployStatus,
   Hash,
   HashVariant,
   isPendingStatus,
+  Link,
   SvgIcon,
   Tile,
   Tooltip,
@@ -35,13 +39,19 @@ import {
   motesToCSPR,
   motesToCurrency
 } from '@libs/ui/utils/formatters';
-import { TransferType, TypeName } from '@src/constants';
+import {
+  getBlockExplorerContractUrl,
+  ActivityType,
+  ActivityTypeName,
+  AuctionManagerEntryPoint
+} from '@src/constants';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
 interface ActivityDetailsPageContentProps {
   fromAccount?: string;
   toAccount?: string;
   deployInfo?: ExtendedDeploy | null;
-  type?: TransferType | null;
+  type?: ActivityType | null;
   amount?: string | null;
   symbol?: string | null;
 }
@@ -55,6 +65,14 @@ export const ExecutionTypesMap = {
   6: 'Transfer'
 };
 
+const Erc20EventType = {
+  erc20_approve: 'approve',
+  erc20_transfer: 'transfer',
+  erc20_transfer_from: 'transfer_from',
+  erc20_mint: 'mint',
+  erc20_burn: 'burn'
+};
+
 const ItemContainer = styled(AlignedSpaceBetweenFlexRow)`
   padding: 16px 16px 16px 0;
 `;
@@ -63,8 +81,11 @@ const AddressContainer = styled(FlexColumn)`
   padding: 16px 12px 16px 0;
 `;
 
-const AmountContainer = styled(AlignedSpaceBetweenFlexRow)`
-  padding: 8px 16px 8px 0;
+const AmountContainer = styled(AlignedSpaceBetweenFlexRow)<{
+  emptyAmount?: boolean;
+}>`
+  padding: ${({ emptyAmount }) =>
+    emptyAmount ? '16px 16px 16px 0' : '8px 16px 8px 0'};
 `;
 
 const RowsContainer = styled(FlexColumn)<BorderBottomPseudoElementProps>`
@@ -90,10 +111,24 @@ export const ActivityDetailsPageContent = ({
 }: ActivityDetailsPageContentProps) => {
   const { t } = useTranslation();
 
+  const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+
   if (deployInfo == null) return null;
 
-  const deployType: string = ExecutionTypesMap[deployInfo.executionTypeId];
+  // TODO: update when activity will be added for NFT
+  const EVENT_TYPE_LOCALE = {
+    [Erc20EventType.erc20_transfer]: t('Transfer of'),
+    [Erc20EventType.erc20_transfer_from]: t('Transfer from'),
+    [Erc20EventType.erc20_approve]: t('Approve of'),
+    [Erc20EventType.erc20_burn]: t('Burn of'),
+    [Erc20EventType.erc20_mint]: t('Mint of'),
+    [AuctionManagerEntryPoint.delegate]: t('Delegate with'),
+    [AuctionManagerEntryPoint.undelegate]: t('Undelegate with'),
+    [AuctionManagerEntryPoint.redelegate]: t('Redelegate with')
+  };
+
   const decimals = deployInfo.contractPackage?.metadata?.decimals;
+  const eventType = EVENT_TYPE_LOCALE[deployInfo.entryPoint?.name!];
 
   const transferAmount =
     deployInfo.amount != null
@@ -145,7 +180,7 @@ export const ActivityDetailsPageContent = ({
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          {type && <Trans t={t}>{TypeName[type]}</Trans>}
+          {type && <Trans t={t}>{ActivityTypeName[type]}</Trans>}
         </Typography>
       </ParagraphContainer>
       <Tile>
@@ -219,9 +254,59 @@ export const ActivityDetailsPageContent = ({
             <Typography type="captionRegular" color="contentSecondary">
               <Trans t={t}>Action</Trans>
             </Typography>
-            <Typography type="captionRegular">{deployType}</Typography>
+            {deployInfo.contractPackage && eventType ? (
+              <RightAlignedFlexColumn>
+                <Typography type="captionRegular">{eventType}</Typography>
+                <AlignedFlexRow gap={SpacingSize.Tiny}>
+                  <ContractIcon
+                    src={deployInfo.contractPackage?.icon_url}
+                    contractTypeId={deployInfo.contractPackage.contract_type_id}
+                  />
+                  <Link
+                    target="_blank"
+                    color="contentAction"
+                    href={getBlockExplorerContractUrl(
+                      casperLiveUrl,
+                      deployInfo.contractPackageHash!
+                    )}
+                  >
+                    <Typography type="captionRegular">
+                      {deployInfo.contractPackage.contract_name}
+                    </Typography>
+                  </Link>
+                  <CopyToClipboard
+                    renderContent={({ isClicked }) =>
+                      isClicked ? (
+                        <SvgIcon
+                          src="assets/icons/tick-in-circle.svg"
+                          size={16}
+                          color="contentPositive"
+                        />
+                      ) : (
+                        <SvgIcon src="assets/icons/copy.svg" size={16} />
+                      )
+                    }
+                    valueToCopy={
+                      deployInfo.contractPackage.contract_package_hash ||
+                      deployInfo.contractHash!
+                    }
+                  />
+                  <Typography type="captionRegular">
+                    <Trans t={t}>
+                      {deployInfo.contractPackage.contract_name === 'Auction'
+                        ? 'System Contract'
+                        : 'contract'}
+                    </Trans>
+                  </Typography>
+                </AlignedFlexRow>
+              </RightAlignedFlexColumn>
+            ) : (
+              <Typography type="captionRegular">
+                {ExecutionTypesMap[deployInfo.executionTypeId]}
+              </Typography>
+            )}
           </ItemContainer>
-          <AmountContainer>
+          <AmountContainer emptyAmount={formattedTransferAmount === '-'}>
             <Typography type="captionRegular" color="contentSecondary">
               <Trans t={t}>Amount</Trans>
             </Typography>

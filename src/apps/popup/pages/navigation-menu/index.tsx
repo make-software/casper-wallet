@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -15,17 +15,22 @@ import {
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@src/libs/layout';
-import { SvgIcon, Typography, List, Link } from '@src/libs/ui';
+import { SvgIcon, Typography, List, Link, Toggle } from '@src/libs/ui';
 
 import {
   selectCountOfConnectedSites,
   selectVaultHasImportedAccount
 } from '@src/background/redux/vault/selectors';
-import { selectTimeoutDurationSetting } from '@src/background/redux/settings/selectors';
+import {
+  selectDarkModeSetting,
+  selectTimeoutDurationSetting
+} from '@src/background/redux/settings/selectors';
 import { dispatchToMainStore } from '@src/background/redux/utils';
 import { lockVault } from '@src/background/redux/sagas/actions';
 import { TimeoutDurationSetting } from '@popup/constants';
 import { isSafariBuild } from '@src/utils';
+import { darkModeSettingChanged } from '@background/redux/settings/actions';
+import { selectCountOfContacts } from '@background/redux/contacts/selectors';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;
@@ -40,7 +45,7 @@ const ListItemClickableContainer = styled(
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 
   &:hover svg {
-    color: ${({ theme }) => theme.color.contentBlue};
+    color: ${({ theme }) => theme.color.contentAction};
   }
 `;
 
@@ -58,6 +63,7 @@ interface MenuItem {
   currentValue?: string | number;
   handleOnClick?: () => void;
   hide?: boolean;
+  toggleButton?: boolean;
 }
 
 interface MenuGroup {
@@ -72,9 +78,17 @@ export function NavigationMenuPageContent() {
   const timeoutDurationSetting = useSelector(selectTimeoutDurationSetting);
   const countOfConnectedSites = useSelector(selectCountOfConnectedSites);
   const vaultHasImportedAccount = useSelector(selectVaultHasImportedAccount);
+  const isDarkMode = useSelector(selectDarkModeSetting);
+  const countOfContacts = useSelector(selectCountOfContacts);
 
   const { openWindow } = useWindowManager();
   const { closeNavigationMenu } = useNavigationMenu();
+
+  useEffect(() => {
+    const container = document.querySelector('#ms-container');
+
+    container?.scrollTo(0, 0);
+  }, []);
 
   const menuGroups: MenuGroup[] = useMemo(
     () => [
@@ -125,6 +139,17 @@ export function NavigationMenuPageContent() {
         items: [
           {
             id: 1,
+            title: t('Contacts list'),
+            iconPath: 'assets/icons/team.svg',
+            currentValue: countOfContacts,
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.ContactList);
+            }
+          },
+          {
+            id: 2,
             title: t('Connected sites'),
             iconPath: 'assets/icons/link.svg',
             currentValue: countOfConnectedSites,
@@ -135,7 +160,7 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 2,
+            id: 3,
             title: t('Timeout'),
             iconPath: 'assets/icons/lock.svg',
             currentValue: TimeoutDurationSetting[timeoutDurationSetting],
@@ -144,6 +169,15 @@ export function NavigationMenuPageContent() {
               closeNavigationMenu();
               navigate(RouterPath.Timeout);
             }
+          },
+          {
+            id: 4,
+            title: t('Dark mode'),
+            iconPath: isDarkMode
+              ? 'assets/icons/sun.svg'
+              : 'assets/icons/moon.svg',
+            toggleButton: true,
+            disabled: false
           }
         ]
       },
@@ -162,6 +196,18 @@ export function NavigationMenuPageContent() {
           },
           {
             id: 2,
+            title: t('Generate wallet QR code'),
+            description: t('Scan to import your wallet on mobile'),
+            iconPath: 'assets/icons/qr.svg',
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+
+              navigate(RouterPath.GenerateWalletQRCode);
+            }
+          },
+          {
+            id: 3,
             title: t('Download account keys'),
             description: t('For all accounts imported via file'),
             iconPath: 'assets/icons/download.svg',
@@ -171,6 +217,16 @@ export function NavigationMenuPageContent() {
             handleOnClick: () => {
               closeNavigationMenu();
               navigate(RouterPath.DownloadSecretKeys);
+            }
+          },
+          {
+            id: 4,
+            title: t('Change Password'),
+            iconPath: 'assets/icons/secure.svg',
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.ChangePassword);
             }
           }
         ]
@@ -197,12 +253,14 @@ export function NavigationMenuPageContent() {
     ],
     [
       t,
-      navigate,
-      openWindow,
-      closeNavigationMenu,
+      countOfContacts,
       countOfConnectedSites,
       timeoutDurationSetting,
-      vaultHasImportedAccount
+      isDarkMode,
+      vaultHasImportedAccount,
+      closeNavigationMenu,
+      navigate,
+      openWindow
     ]
   );
 
@@ -232,7 +290,7 @@ export function NavigationMenuPageContent() {
                 <SvgIcon
                   src={groupItem.iconPath}
                   color={
-                    groupItem.disabled ? 'contentSecondary' : 'contentBlue'
+                    groupItem.disabled ? 'contentSecondary' : 'contentAction'
                   }
                 />
                 <SpaceBetweenContainer>
@@ -256,9 +314,17 @@ export function NavigationMenuPageContent() {
                     <Typography type="body">{groupItem.title}</Typography>
                   )}
                   {groupItem.currentValue != null && (
-                    <Typography type="bodySemiBold" color="contentBlue">
+                    <Typography type="bodySemiBold" color="contentAction">
                       {groupItem.currentValue}
                     </Typography>
+                  )}
+                  {groupItem.toggleButton && (
+                    <Toggle
+                      toggled={isDarkMode}
+                      onClick={() =>
+                        dispatchToMainStore(darkModeSettingChanged())
+                      }
+                    />
                   )}
                 </SpaceBetweenContainer>
               </ListItemClickableContainer>

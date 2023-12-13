@@ -2,11 +2,10 @@ import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
-import Skeleton from 'react-loading-skeleton';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 
 import { useFetchNftTokens } from '@src/hooks';
-import { Tile, Typography } from '@libs/ui';
+import { Skeleton, Tile, Typography } from '@libs/ui';
 import {
   BorderContainer,
   CenteredFlexRow,
@@ -57,6 +56,8 @@ export const NftList = () => {
     if (position) {
       container?.scrollTo(0, Number(position));
       localStorage.removeItem('nftTokenYPosition');
+    } else {
+      container?.scrollTo(0, 0);
     }
   }, []);
 

@@ -3,13 +3,15 @@ import { useForm } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form/dist/types/form';
 
 import {
-  useCsprAmountRule,
+  useCSPRTransferAmountRule,
   useErc20AmountRule,
   usePaymentAmountRule,
   useRecipientPublicKeyRule,
   useTransferIdMemoRule
 } from '@libs/ui/forms/form-validation-rules';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
+import { motesToCSPR } from '@libs/ui/utils/formatters';
+import { TRANSFER_MIN_AMOUNT_MOTES } from '@src/constants';
 
 export type TransferRecipientFormValues = {
   recipientPublicKey: string;
@@ -23,7 +25,6 @@ export type TransferAmountFormValues = {
 
 export function useTransferForm(
   erc20Balance: string | null,
-  decimals: number | null,
   isErc20: boolean,
   amountMotes: string | null,
   paymentAmount: string
@@ -39,13 +40,13 @@ export function useTransferForm(
   };
 
   const erc20AmountFormSchema = Yup.object().shape({
-    amount: useErc20AmountRule(erc20Balance, decimals),
+    amount: useErc20AmountRule(erc20Balance),
     paymentAmount: usePaymentAmountRule(amountMotes),
     transferIdMemo: useTransferIdMemoRule()
   });
 
   const csprAmountFormSchema = Yup.object().shape({
-    amount: useCsprAmountRule(amountMotes),
+    amount: useCSPRTransferAmountRule(amountMotes),
     transferIdMemo: useTransferIdMemoRule()
   });
 
@@ -61,7 +62,9 @@ export function useTransferForm(
       ? {
           paymentAmount
         }
-      : {}
+      : {
+          amount: motesToCSPR(TRANSFER_MIN_AMOUNT_MOTES)
+        }
   };
 
   return {

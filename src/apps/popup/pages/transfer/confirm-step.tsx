@@ -134,7 +134,7 @@ export const ConfirmStep = ({
               {listItems.text}
             </Typography>
             <AmountContainer>
-              <Typography type="captionHash">{`${listItems.amount} ${listItems.symbol}`}</Typography>
+              <Typography type="captionHash">{`${listItems.amount} ${listItems?.symbol}`}</Typography>
               <Typography type={listItems.bold ? 'subtitle' : 'captionMedium'}>
                 {listItems.fiatPrice == null
                   ? null

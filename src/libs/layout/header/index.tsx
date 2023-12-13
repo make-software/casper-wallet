@@ -3,13 +3,9 @@ import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 
 import {
+  AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
-  FlexRow,
-  HeaderContainer,
-  LeftAlignedCenteredFlexRow,
-  Logo,
-  LogoContainer,
-  SpacingSize
+  HeaderContainer
 } from '@src/libs/layout';
 import { Avatar, SvgIcon } from '@libs/ui';
 import {
@@ -21,25 +17,11 @@ import { HeaderConnectionStatus } from './header-connection-status';
 import { HeaderActions } from './header-actions';
 import { HeaderDataUpdater } from './header-data-updater';
 
-const LogoAndConnectionStatusContainer = styled(LeftAlignedCenteredFlexRow)`
-  gap: 18px;
-
-  z-index: 1;
-`;
-
 const SubmenuBarContainer = styled(AlignedSpaceBetweenFlexRow)`
   height: 56px;
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
   border-bottom: 0.5px solid ${({ theme }) => theme.color.borderPrimary};
   padding: 8px ${({ theme }) => theme.padding[1.6]};
-`;
-
-const SvgIconContainer = styled.div`
-  position: absolute;
-  left: 0;
-
-  width: 53px;
-  height: 72px;
 `;
 
 interface HeaderProps {
@@ -68,7 +50,7 @@ export function PopupHeader({
     <>
       <HeaderContainer>
         {withConnectionStatus && activeAccount?.publicKey ? (
-          <FlexRow gap={SpacingSize.Small}>
+          <AlignedFlexRow>
             <Avatar
               size={32}
               publicKey={activeAccount.publicKey}
@@ -77,18 +59,13 @@ export function PopupHeader({
               displayContext="header"
             />
             <HeaderConnectionStatus />
-          </FlexRow>
+          </AlignedFlexRow>
         ) : (
-          <>
-            <SvgIconContainer>
-              <SvgIcon src="assets/icons/sign.svg" width={53} height={72} />
-            </SvgIconContainer>
-            <LogoAndConnectionStatusContainer>
-              <LogoContainer>
-                <Logo />
-              </LogoContainer>
-            </LogoAndConnectionStatusContainer>
-          </>
+          <SvgIcon
+            src="assets/icons/wallet-original-on-white.svg"
+            width={113}
+            height={28}
+          />
         )}
 
         {(withMenu || withNetworkSwitcher) && (

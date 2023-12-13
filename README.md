@@ -6,6 +6,10 @@
 
 ---
 
+## Integrate Casper Wallet Into Your App
+
+The recommended way of integrating Casper Wallet into your app is through [CSPR.click](https://CSPR.click), which provides a combined integration of major wallets in the Casper ecosystem, all at once, without the burden of maintaining multiple integrations at the same time. Please head over to [the CSPR.click documentation](https://docs.cspr.click) to start.
+
 ## Testing Casper Wallet integration on **Casper Wallet Playground**
 
 *Casper Wallet Playground is a React webapp created as a developer tool to help test integration with various features available in Casper Wallet.*
@@ -154,13 +158,10 @@ You should install Redux DevTools browser extension and connect it to Redux DevT
 
 ## E2E tests
 
-Write tests into `e2e/tests` folder.
+Write tests into `e2e-tests` folder.
 
-There are a few options to run tests:
+To run e2e tests, you must use npm script `npm run e2e:chrome:ui:popup` or `e2e:chrome:ui:onboarding`.
+Tests are run in UI mode.
 
-1. In docker container
-   - Run docker and up containers. `docker compose up` or `docker-compose -f docker-compose.arm.yml up` for Apple M processors
-   - Use npm scripts `npm run test:e2e:{chrome/firefox}:headless:{popup/onboarding}` depends on target browser and tests
-   - To see what is happening inside the container, open your web browser and navigate to the URL <http://localhost:7900> for Chrome and <http://localhost:7901> for Firefox, enter the password `secret`, and run your test again
-2. Locally on computer
-   - Use npm scripts `npm run test:e2e:chrome` or `npm run test:e2e:firefox` depends on target browser
+All information
+about how to run and debug tests can be found in [playwright docs](https://playwright.dev/docs/running-tests).

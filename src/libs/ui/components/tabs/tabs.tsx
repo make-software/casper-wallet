@@ -7,7 +7,7 @@ import { AlignedSpaceBetweenFlexRow, CenteredFlexRow } from '@libs/layout';
 
 const TabsContainer = styled(AlignedSpaceBetweenFlexRow)`
   height: 40px;
-  background-color: ${({ theme }) => theme.color.fillSecondary};
+  background: ${({ theme }) => theme.color.fillNeutral};
   border-radius: ${({ theme }) => theme.borderRadius.twenty}px;
   padding: 4px;
 `;
@@ -26,7 +26,7 @@ const ActiveTabContainer = styled(CenteredFlexRow)`
   cursor: pointer;
   width: calc(33% - 8px);
   border-radius: ${({ theme }) => theme.borderRadius.sixteen}px;
-  background-color: ${({ theme }) => theme.color.fillWhite};
+  background-color: ${({ theme }) => theme.color.backgroundPrimary};
   padding: 4px 8px;
 `;
 

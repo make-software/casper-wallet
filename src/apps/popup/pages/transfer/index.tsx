@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
 import { CLPublicKey, DeployUtil } from 'casper-js-sdk';
@@ -39,6 +39,8 @@ import { useActiveAccountErc20Tokens } from '@src/hooks/use-active-account-erc20
 import { selectAccountBalance } from '@src/background/redux/account-info/selectors';
 import { dispatchFetchExtendedDeploysInfo } from '@src/libs/services/account-activity-service';
 import { accountPendingTransactionsChanged } from '@src/background/redux/account-info/actions';
+import { createErrorLocationState, ErrorPath } from '@layout/error';
+import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
 
 import { getIsErc20Transfer, TransactionSteps } from './utils';
 
@@ -66,11 +68,12 @@ export const TransferPage = () => {
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
-
   const csprBalance = useSelector(selectAccountBalance);
-  const { tokens } = useActiveAccountErc20Tokens();
-  const token = tokens?.find(token => token.id === tokenContractPackageHash);
+  const contactPublicKeys = useSelector(selectAllPublicKeys);
 
+  const { tokens } = useActiveAccountErc20Tokens();
+
+  const token = tokens?.find(token => token.id === tokenContractPackageHash);
   const symbol = isErc20Transfer
     ? token?.symbol || location.state?.tokenData?.symbol || null
     : 'CSPR';
@@ -85,10 +88,13 @@ export const TransferPage = () => {
   const formattedBalance = formatNumber(balance || '', {
     precision: { max: 5 }
   });
+  const isRecipientPublicKeyInContact = useMemo(
+    () => contactPublicKeys.includes(recipientPublicKey),
+    [contactPublicKeys, recipientPublicKey]
+  );
 
   const { amountForm, recipientForm } = useTransferForm(
     erc20Balance,
-    erc20Decimals,
     isErc20Transfer,
     csprBalance.amountMotes,
     paymentAmount
@@ -118,9 +124,7 @@ export const TransferPage = () => {
 
   // event listener for enable/disable submit button
   useEffect(() => {
-    const layoutContentContainer = document.querySelector(
-      '#layout-content-container'
-    );
+    const layoutContentContainer = document.querySelector('#ms-container');
 
     // if the content is not scrollable, we can enable the submit button
     if (
@@ -227,9 +231,21 @@ export const TransferPage = () => {
               triesLeft--;
               //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
             }, 2000);
+
+            setTransferStep(TransactionSteps.Success);
+          } else {
+            navigate(
+              ErrorPath,
+              createErrorLocationState({
+                errorHeaderText: t('Something went wrong'),
+                errorContentText: t(
+                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                ),
+                errorPrimaryButtonLabel: t('Close'),
+                errorRedirectPath: RouterPath.Home
+              })
+            );
           }
-          // TODO: need UI in case when the transfer is failed
-          setTransferStep(TransactionSteps.Success);
         });
       } else {
         // CSPR transfer
@@ -268,9 +284,21 @@ export const TransferPage = () => {
               triesLeft--;
               //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
             }, 2000);
+
+            setTransferStep(TransactionSteps.Success);
+          } else {
+            navigate(
+              ErrorPath,
+              createErrorLocationState({
+                errorHeaderText: t('Something went wrong'),
+                errorContentText: t(
+                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                ),
+                errorPrimaryButtonLabel: t('Close'),
+                errorRedirectPath: RouterPath.Home
+              })
+            );
           }
-          // TODO: need UI in case when the transfer is failed
-          setTransferStep(TransactionSteps.Success);
         });
       }
     }
@@ -415,10 +443,25 @@ export const TransferPage = () => {
               {transferStep === TransactionSteps.Confirm
                 ? 'Send'
                 : transferStep === TransactionSteps.Success
-                ? 'Done'
-                : 'Next'}
+                  ? 'Done'
+                  : 'Next'}
             </Trans>
           </Button>
+          {transferStep === TransactionSteps.Success &&
+            !isRecipientPublicKeyInContact && (
+              <Button
+                color="secondaryBlue"
+                onClick={() =>
+                  navigate(RouterPath.AddContact, {
+                    state: {
+                      recipientPublicKey: recipientPublicKey
+                    }
+                  })
+                }
+              >
+                <Trans t={t}>Add recipient to list of contacts</Trans>
+              </Button>
+            )}
         </FooterButtonsContainer>
       )}
     />

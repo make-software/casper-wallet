@@ -19,14 +19,14 @@ const ConnectionStatusBadgeContainer = styled(
     displayContext === 'accountList' ? '0' : '2px 8px'};
 
   color: ${({ theme, isConnected }) =>
-    isConnected ? theme.color.contentGreen : theme.color.contentSecondary};
+    isConnected ? theme.color.contentPositive : theme.color.contentSecondary};
 
   background-color: ${({ theme, isConnected, displayContext }) =>
     displayContext === 'accountList'
       ? null
       : isConnected
-      ? hexToRGBA(theme.color.contentGreen, '.12')
-      : theme.color.backgroundSecondary};
+        ? hexToRGBA(theme.color.contentPositive, '.12')
+        : theme.color.backgroundSecondary};
 `;
 
 export function ConnectionStatusBadge({

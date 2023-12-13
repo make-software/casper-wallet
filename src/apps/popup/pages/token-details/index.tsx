@@ -1,5 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 import {
   HeaderSubmenuBarNavLink,
@@ -7,12 +8,12 @@ import {
   PopupHeader,
   PopupLayout
 } from '@libs/layout';
-import { useFetchErc20Tokens } from '@src/hooks';
+import { selectErc20Tokens } from '@background/redux/account-info/selectors';
 
 import { TokenPageContent } from './content';
 
 export const TokenDetailPage = () => {
-  const erc20Tokens = useFetchErc20Tokens();
+  const erc20Tokens = useSelector(selectErc20Tokens);
   const { tokenName } = useParams();
 
   return (
@@ -25,7 +26,10 @@ export const TokenDetailPage = () => {
           renderSubmenuBarItems={() => (
             <>
               <HeaderSubmenuBarNavLink linkType="back" />
-              <HeaderViewInExplorer tokenName={tokenName} />
+              <HeaderViewInExplorer
+                tokenName={tokenName}
+                erc20Tokens={erc20Tokens}
+              />
             </>
           )}
         />

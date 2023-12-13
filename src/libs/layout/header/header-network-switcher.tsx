@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { AlignedFlexRow, SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
-import { SvgIcon, Typography, Modal } from '@libs/ui';
+import { SvgIcon, Typography, Modal, hexToRGBA } from '@libs/ui';
 
 import { selectActiveNetworkSetting } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
@@ -11,8 +11,8 @@ import { activeNetworkSettingChanged } from '@background/redux/settings/actions'
 import { NetworkSetting } from '@src/constants';
 
 const NetworkSwitcherContainer = styled(AlignedFlexRow)`
-  background-color: rgb(0, 0, 0, 0.16);
-  padding: 4px 8px;
+  background-color: ${({ theme }) => hexToRGBA(theme.color.black, '0.16')};
+  padding: 6px 8px;
   border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
 
@@ -50,6 +50,7 @@ export const HeaderNetworkSwitcher = () => {
 
   return (
     <Modal
+      placement="top"
       renderContent={({ closeModal }) => (
         <ModalContentContainer>
           <ModalContentRow
@@ -62,12 +63,16 @@ export const HeaderNetworkSwitcher = () => {
               <SvgIcon
                 src="assets/icons/network.svg"
                 size={24}
-                color="contentRed"
+                color="contentActionCritical"
               />
               <Typography type="body">{NetworkSetting.Mainnet}</Typography>
             </AlignedFlexRow>
             {activeNetwork === NetworkSetting.Mainnet && (
-              <SvgIcon src="assets/icons/tick.svg" size={24} />
+              <SvgIcon
+                src="assets/icons/tick.svg"
+                size={24}
+                color="contentAction"
+              />
             )}
           </ModalContentRow>
           <ModalContentRow
@@ -80,12 +85,16 @@ export const HeaderNetworkSwitcher = () => {
               <SvgIcon
                 src="assets/icons/network.svg"
                 size={24}
-                color="contentBlue"
+                color="contentAction"
               />
               <Typography type="body">{NetworkSetting.Testnet}</Typography>
             </AlignedFlexRow>
             {activeNetwork === NetworkSetting.Testnet && (
-              <SvgIcon src="assets/icons/tick.svg" size={24} />
+              <SvgIcon
+                src="assets/icons/tick.svg"
+                size={24}
+                color="contentAction"
+              />
             )}
           </ModalContentRow>
         </ModalContentContainer>

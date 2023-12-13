@@ -9,34 +9,45 @@ const ChildrenContainer = styled(AlignedFlexRow)`
   cursor: pointer;
 `;
 
-const ModalContainer = styled.div`
-  position: fixed;
-  top: 88px;
-  left: 0;
-  right: 0;
+const ModalContainer = styled.div<{ placement: 'top' | 'bottom' }>(
+  ({ theme, placement }) => ({
+    position: 'fixed',
+    top: placement === 'top' ? '88px' : undefined,
+    bottom: placement === 'bottom' ? '16px' : undefined,
+    left: 0,
+    right: 0,
 
-  margin: 0 16px;
+    margin: '0 16px',
 
-  max-width: 328px;
+    maxWidth: '328px',
 
-  background-color: ${({ theme }) => theme.color.backgroundPrimary};
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04), 0 15px 50px rgba(0, 0, 0, 0.1);
-  border-radius: ${({ theme }) => theme.borderRadius.twelve}px;
-`;
+    backgroundColor: theme.color.backgroundPrimary,
+    boxShadow: theme.shadow.contextMenu,
+    borderRadius: `${theme.borderRadius.twelve}px`
+  })
+);
+
 interface RenderChildrenProps {
   isOpen: boolean;
 }
 
 interface RenderContentProps {
-  closeModal: (e: MouseEvent<HTMLDivElement>) => void;
+  closeModal: (e: MouseEvent) => void;
 }
 
 export interface ModalProps extends BaseProps {
   children: (renderProps: RenderChildrenProps) => React.ReactNode | string;
   renderContent: (renderProps: RenderContentProps) => React.ReactNode | string;
+  dataTestId?: string;
+  placement: 'top' | 'bottom';
 }
 
-export const Modal = ({ children, renderContent }: ModalProps) => {
+export const Modal = ({
+  children,
+  renderContent,
+  placement,
+  dataTestId
+}: ModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const childrenContainerRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +58,7 @@ export const Modal = ({ children, renderContent }: ModalProps) => {
     }
   });
 
-  const closeModal = (e: MouseEvent<HTMLDivElement>) => {
+  const closeModal = (e: MouseEvent) => {
     e.stopPropagation();
     setIsOpen(false);
   };
@@ -56,6 +67,7 @@ export const Modal = ({ children, renderContent }: ModalProps) => {
     <>
       <ChildrenContainer
         ref={childrenContainerRef}
+        data-testid={dataTestId}
         onClick={event => {
           event.stopPropagation();
           setIsOpen(true);
@@ -66,7 +78,7 @@ export const Modal = ({ children, renderContent }: ModalProps) => {
 
       {isOpen && (
         <Overlay>
-          <ModalContainer ref={clickAwayRef}>
+          <ModalContainer ref={clickAwayRef} placement={placement}>
             {renderContent({ closeModal })}
           </ModalContainer>
         </Overlay>

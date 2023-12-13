@@ -17,9 +17,11 @@ import { Account } from '@background/redux/vault/types';
 
 interface AccountActionsMenuPopoverProps {
   account: Account;
+  onClick?: (e: React.MouseEvent) => void;
 }
 export const AccountActionsMenuPopover = ({
-  account
+  account,
+  onClick
 }: AccountActionsMenuPopoverProps) => {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -39,16 +41,20 @@ export const AccountActionsMenuPopover = ({
         <>
           {connectedAccountNames.includes(account.name) ? (
             <PopoverLink
-              variant="contentBlue"
-              onClick={e => {
-                closePopover(e);
+              variant="contentAction"
+              onClick={event => {
+                closePopover(event);
                 activeOrigin && disconnectAccount(account.name, activeOrigin);
+
+                if (onClick) {
+                  onClick(event);
+                }
               }}
             >
               <SvgIcon
                 src="assets/icons/unlink.svg"
                 marginRight="medium"
-                color="contentTertiary"
+                color="contentDisabled"
               />
               <Typography type="body">
                 <Trans t={t}>Disconnect</Trans>
@@ -56,19 +62,23 @@ export const AccountActionsMenuPopover = ({
             </PopoverLink>
           ) : (
             <PopoverLink
-              variant="contentBlue"
-              onClick={() =>
+              variant="contentAction"
+              onClick={event => {
                 navigate(
                   isAnyAccountConnected
                     ? `${RouterPath.ConnectAnotherAccount}/${account.name}`
                     : RouterPath.NoConnectedAccount
-                )
-              }
+                );
+
+                if (onClick) {
+                  onClick(event);
+                }
+              }}
             >
               <SvgIcon
                 src="assets/icons/link.svg"
                 marginRight="medium"
-                color="contentTertiary"
+                color="contentDisabled"
               />
               <Typography type="body">
                 <Trans t={t}>Connect</Trans>
@@ -76,17 +86,21 @@ export const AccountActionsMenuPopover = ({
             </PopoverLink>
           )}
           <PopoverLink
-            variant="contentBlue"
-            onClick={() =>
+            variant="contentAction"
+            onClick={event => {
               navigate(
                 RouterPath.RenameAccount.replace(':accountName', account.name)
-              )
-            }
+              );
+
+              if (onClick) {
+                onClick(event);
+              }
+            }}
           >
             <SvgIcon
               src="assets/icons/edit.svg"
               marginRight="medium"
-              color="contentTertiary"
+              color="contentDisabled"
             />
             <Typography type="body">
               <Trans t={t}>Rename</Trans>
@@ -94,31 +108,35 @@ export const AccountActionsMenuPopover = ({
           </PopoverLink>
           <PopoverLink
             target="_blank"
-            variant="contentBlue"
+            variant="contentAction"
             title={t('View account in CSPR.live')}
             href={getBlockExplorerAccountUrl(casperLiveUrl, account.publicKey)}
           >
             <SvgIcon
               src="assets/icons/external-link.svg"
               marginRight="medium"
-              color="contentTertiary"
+              color="contentDisabled"
             />
             <Typography type="body">
               <Trans t={t}>View on CSPR.live</Trans>
             </Typography>
           </PopoverLink>
           <PopoverLink
-            variant="contentBlue"
-            onClick={() =>
+            variant="contentAction"
+            onClick={event => {
               navigate(
                 RouterPath.AccountSettings.replace(':accountName', account.name)
-              )
-            }
+              );
+
+              if (onClick) {
+                onClick(event);
+              }
+            }}
           >
             <SvgIcon
               src="assets/icons/settings.svg"
               marginRight="medium"
-              color="contentTertiary"
+              color="contentDisabled"
             />
             <Typography type="body">
               <Trans t={t}>Manage</Trans>
