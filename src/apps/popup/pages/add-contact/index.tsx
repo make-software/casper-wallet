@@ -36,11 +36,9 @@ export const AddContactPage = () => {
   const onSubmit = ({ name, publicKey }: ContactFromValues) => {
     const lastModified = new Date().toISOString();
 
-    const trimmedName = name.trim();
-
     dispatchToMainStore(
       newContactAdded({
-        name: trimmedName,
+        name: name.trim(),
         publicKey,
         lastModified
       })
