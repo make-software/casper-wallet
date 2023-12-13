@@ -11,14 +11,20 @@ import { ErrorBoundary } from '@src/libs/layout/error';
 
 import {
   createMainStoreReplica,
+  dispatchToMainStore,
   PopupState
 } from '@src/background/redux/utils';
 import { connectWindowInit } from '@src/background/redux/windowManagement/actions';
 import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
-import { selectDarkModeSetting } from '@background/redux/settings/selectors';
+import { selectThemeModeSetting } from '@background/redux/settings/selectors';
+import { useSystemThemeDetector } from '@src/hooks';
+import { themeModeSettingChanged } from '@background/redux/settings/actions';
+import { ThemeMode } from '@background/redux/settings/types';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
+
+  const isSystemDarkTheme = useSystemThemeDetector();
 
   useSubscribeToRedux({
     windowInitAction: connectWindowInit,
@@ -31,7 +37,17 @@ const Tree = () => {
 
   const store = createMainStoreReplica(state);
 
-  const isDarkMode = selectDarkModeSetting(store.getState());
+  const themeMode = selectThemeModeSetting(store.getState());
+
+  // Set theme mode to system if it is no present in the store
+  if (themeMode === undefined) {
+    dispatchToMainStore(themeModeSettingChanged(ThemeMode.SYSTEM));
+  }
+
+  const isDarkMode =
+    themeMode === ThemeMode.SYSTEM
+      ? isSystemDarkTheme
+      : themeMode === ThemeMode.DARK;
 
   return (
     <Suspense fallback={null}>
