@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 
 import {
@@ -33,6 +33,8 @@ export const TransferPageContent = ({
   symbol,
   paymentAmount
 }: TransferPageContentProps) => {
+  const [recipientName, setRecipientName] = useState('');
+
   const isCSPR = symbol === 'CSPR';
 
   switch (transferStep) {
@@ -42,6 +44,8 @@ export const TransferPageContent = ({
           recipientForm={recipientForm}
           symbol={symbol}
           balance={balance}
+          setRecipientName={setRecipientName}
+          recipientName={recipientName}
         />
       );
     }
@@ -59,6 +63,7 @@ export const TransferPageContent = ({
           symbol={symbol}
           isCSPR={isCSPR}
           paymentAmount={paymentAmount}
+          recipientName={recipientName}
         />
       );
     }

@@ -10,15 +10,20 @@ import { TransferRecipientFormValues } from '@libs/ui/forms/transfer';
 import { useClickAway } from '@libs/ui/hooks/use-click-away';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { TransferNftRecipientFormValues } from '@libs/ui/forms/transfer-nft';
+import { selectAllContacts } from '@background/redux/contacts/selectors';
 
 interface RecipientDropdownInputProps {
   recipientForm: UseFormReturn<
     TransferRecipientFormValues | TransferNftRecipientFormValues
   >;
+  setRecipientName: React.Dispatch<React.SetStateAction<string>>;
+  recipientName: string;
 }
 
 export const RecipientDropdownInput = ({
-  recipientForm
+  recipientForm,
+  setRecipientName,
+  recipientName
 }: RecipientDropdownInputProps) => {
   const [
     isOpenRecentRecipientPublicKeysList,
@@ -32,6 +37,7 @@ export const RecipientDropdownInput = ({
     selectRecentRecipientPublicKeys
   );
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const contacts = useSelector(selectAllContacts);
 
   const { register, formState, setValue, control, trigger } = recipientForm;
   const { errors } = formState;
@@ -57,17 +63,41 @@ export const RecipientDropdownInput = ({
     //   eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const optionsRow = useMemo(
+  const recentRecipient = useMemo(
     () =>
-      recentRecipientPublicKeys
-        .filter(item => item !== activeAccount?.publicKey)
-        .map((item, index) => ({
-          publicKey: item,
-          id: index
-        }))
-        .filter(item => item.publicKey.includes(inputValue || '')),
-    [activeAccount?.publicKey, inputValue, recentRecipientPublicKeys]
+      recentRecipientPublicKeys.map(key => {
+        const contact = contacts.find(contact => contact.publicKey === key);
+        if (contact) {
+          return {
+            name: contact.name,
+            publicKey: key,
+            isContact: false
+          };
+        }
+        return {
+          name: '',
+          publicKey: key,
+          isContact: false
+        };
+      }),
+    [contacts, recentRecipientPublicKeys]
   );
+
+  const getUniquePublicKeyItemsWithId = useMemo(() => {
+    const items = [...recentRecipient, ...contacts].filter(
+      item => item.publicKey !== activeAccount?.publicKey
+    );
+
+    return items.map((item, index) => ({ ...item, id: index }));
+  }, [activeAccount?.publicKey, contacts, recentRecipient]);
+
+  const optionsRow = useMemo(() => {
+    return getUniquePublicKeyItemsWithId.filter(
+      item =>
+        item.publicKey.includes(inputValue || '') ||
+        item.name.includes(inputValue || '')
+    );
+  }, [getUniquePublicKeyItemsWithId, inputValue]);
 
   const recipientLabel = t('To recipient');
 
@@ -75,6 +105,7 @@ export const RecipientDropdownInput = ({
     <VerticalSpaceContainer top={SpacingSize.XL}>
       <RecipientPlate
         publicKey={inputValue}
+        name={recipientName}
         recipientLabel={recipientLabel}
         showFullPublicKey
         handleClick={() => {
@@ -95,7 +126,7 @@ export const RecipientDropdownInput = ({
         monotype
         label={recipientLabel}
         prefixIcon={<SvgIcon src="assets/icons/search.svg" size={24} />}
-        placeholder={t('Recipient public address')}
+        placeholder={t('Public address or contact name')}
         {...register('recipientPublicKey')}
         error={!!errors?.recipientPublicKey}
         validationText={errors?.recipientPublicKey?.message}
@@ -105,15 +136,20 @@ export const RecipientDropdownInput = ({
         <List
           contentTop={SpacingSize.Tiny}
           rows={optionsRow}
-          renderRow={({ publicKey }) => (
+          maxHeight={193}
+          renderRow={row => (
             <RecipientPlate
-              publicKey={publicKey}
+              publicKey={row.publicKey}
+              name={row.name}
+              isContact={!('isContact' in row)}
               handleClick={async () => {
-                setValue('recipientPublicKey', publicKey);
-                await trigger('recipientPublicKey');
+                setValue('recipientPublicKey', row.publicKey);
 
                 setIsOpenRecentRecipientPublicKeysList(false);
                 setShowRecipientPlate(true);
+                setRecipientName(row.name);
+
+                await trigger('recipientPublicKey');
               }}
             />
           )}
