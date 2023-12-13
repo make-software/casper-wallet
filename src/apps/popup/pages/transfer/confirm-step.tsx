@@ -37,6 +37,7 @@ interface ConfirmStepProps {
   symbol: string | null;
   isCSPR: boolean;
   paymentAmount: string;
+  recipientName?: string;
 }
 export const ConfirmStep = ({
   recipientPublicKey,
@@ -44,7 +45,8 @@ export const ConfirmStep = ({
   balance,
   symbol,
   isCSPR,
-  paymentAmount
+  paymentAmount,
+  recipientName
 }: ConfirmStepProps) => {
   const { t } = useTranslation();
 
@@ -123,6 +125,7 @@ export const ConfirmStep = ({
           recipientLabel={recipientLabel}
           publicKey={recipientPublicKey}
           showFullPublicKey
+          name={recipientName}
         />
       </VerticalSpaceContainer>
       <List

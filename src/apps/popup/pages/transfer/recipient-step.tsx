@@ -18,12 +18,16 @@ interface RecipientStepProps {
   recipientForm: UseFormReturn<TransferRecipientFormValues>;
   balance: string | null;
   symbol: string | null;
+  setRecipientName: React.Dispatch<React.SetStateAction<string>>;
+  recipientName: string;
 }
 
 export const RecipientStep = ({
   recipientForm,
   balance,
-  symbol
+  symbol,
+  setRecipientName,
+  recipientName
 }: RecipientStepProps) => {
   const { t } = useTranslation();
 
@@ -36,7 +40,11 @@ export const RecipientStep = ({
       </ParagraphContainer>
       <ActiveAccountPlate label="From" balance={balance} symbol={symbol} />
 
-      <RecipientDropdownInput recipientForm={recipientForm} />
+      <RecipientDropdownInput
+        recipientForm={recipientForm}
+        setRecipientName={setRecipientName}
+        recipientName={recipientName}
+      />
     </ContentContainer>
   );
 };

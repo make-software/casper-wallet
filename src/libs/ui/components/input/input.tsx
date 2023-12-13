@@ -73,7 +73,9 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
     border: '0'
   },
   '::placeholder': {
-    color: theme.color.contentSecondary
+    color: theme.color.contentSecondary,
+    fontFamily: theme.typography.fontFamily.primary,
+    fontSize: '1.5rem'
   },
   // Hiding the password reveal button in the MS Edge
   // https://github.com/make-software/casper-wallet/issues/547

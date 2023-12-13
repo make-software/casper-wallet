@@ -10,3 +10,4 @@ export * from './use-fetch-account-deploys';
 export * from './use-fetch-casper-token-account-activity';
 export * from './use-fetch-erc20-token-account-activity';
 export * from './use-async-effect';
+export * from './use-system-theme-detector';
