@@ -37,7 +37,11 @@ export const AddContactPage = () => {
     const lastModified = new Date().toISOString();
 
     dispatchToMainStore(
-      newContactAdded({ name, publicKey, lastModified: lastModified })
+      newContactAdded({
+        name: name.trim(),
+        publicKey,
+        lastModified
+      })
     ).finally(() => {
       setShowSuccessScreen(true);
     });
