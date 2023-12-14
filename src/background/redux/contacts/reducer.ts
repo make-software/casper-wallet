@@ -2,6 +2,7 @@ import { createReducer } from 'typesafe-actions';
 
 import {
   contactRemoved,
+  contactsReseted,
   contactUpdated,
   newContactAdded
 } from '@background/redux/contacts/actions';
@@ -10,6 +11,7 @@ import { ContactsState } from '@background/redux/contacts/types';
 const initialState = { contacts: [], lastModified: null } as ContactsState;
 
 export const reducer = createReducer(initialState)
+  .handleAction(contactsReseted, () => initialState)
   .handleAction(newContactAdded, (state, action) => {
     const sortedContacts = [...state.contacts, action.payload].sort((a, b) =>
       a.name.localeCompare(b.name)

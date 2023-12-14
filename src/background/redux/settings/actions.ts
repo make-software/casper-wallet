@@ -15,3 +15,5 @@ export const activeNetworkSettingChanged = createAction(
 export const themeModeSettingChanged = createAction(
   'THEME_MODE_SETTING_CHANGED'
 )<ThemeMode>();
+
+export const vaultSettingsReseted = createAction('VAULT_SETTINGS_RESETED')();
