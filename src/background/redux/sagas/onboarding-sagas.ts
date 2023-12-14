@@ -27,6 +27,9 @@ import { initKeys, initVault, resetVault } from './actions';
 import { keysReseted, keysUpdated } from '../keys/actions';
 import { vaultCipherReseted } from '../vault-cipher/actions';
 import { loginRetryCountReseted } from '../login-retry-count/actions';
+import { recipientPublicKeyReseted } from '@background/redux/recent-recipient-public-keys/actions';
+import { contactsReseted } from '@background/redux/contacts/actions';
+import { vaultSettingsReseted } from '@background/redux/settings/actions';
 
 export function* onboardingSagas() {
   yield takeLatest(getType(resetVault), resetVaultSaga);
@@ -45,6 +48,10 @@ function* resetVaultSaga(action: ReturnType<typeof resetVault>) {
     yield put(sessionReseted());
     yield put(deploysReseted());
     yield put(loginRetryCountReseted());
+    yield put(recipientPublicKeyReseted());
+    yield put(contactsReseted());
+    yield put(vaultSettingsReseted());
+
     browser.storage.local.clear();
   } catch (err) {
     console.error(err);

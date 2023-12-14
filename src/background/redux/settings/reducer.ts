@@ -6,7 +6,8 @@ import { NetworkSetting } from '@src/constants';
 import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged,
-  themeModeSettingChanged
+  themeModeSettingChanged,
+  vaultSettingsReseted
 } from './actions';
 import { SettingsState, ThemeMode } from './types';
 
@@ -18,6 +19,7 @@ const initialState: SettingsState = {
 };
 
 export const reducer = createReducer(initialState)
+  .handleAction(vaultSettingsReseted, (): SettingsState => initialState)
   .handleAction(
     activeTimeoutDurationSettingChanged,
     (state, { payload }): SettingsState => ({

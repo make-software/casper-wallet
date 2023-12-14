@@ -96,6 +96,7 @@ import { lastActivityTimeRefreshed } from './redux/last-activity-time/actions';
 import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged,
+  vaultSettingsReseted,
   themeModeSettingChanged
 } from './redux/settings/actions';
 import { activeOriginChanged } from './redux/active-origin/actions';
@@ -109,7 +110,10 @@ import {
   SiteNotConnectedError,
   WalletLockedError
 } from '@src/content/sdk-errors';
-import { recipientPublicKeyAdded } from './redux/recent-recipient-public-keys/actions';
+import {
+  recipientPublicKeyAdded,
+  recipientPublicKeyReseted
+} from './redux/recent-recipient-public-keys/actions';
 import {
   accountCasperActivityChanged,
   accountInfoReset,
@@ -139,6 +143,7 @@ import {
 } from '@libs/services/validators-service';
 import {
   contactRemoved,
+  contactsReseted,
   contactUpdated,
   newContactAdded
 } from '@background/redux/contacts/actions';
@@ -521,6 +526,7 @@ browser.runtime.onMessage.addListener(
           case getType(activeAccountChanged):
           case getType(activeTimeoutDurationSettingChanged):
           case getType(activeNetworkSettingChanged):
+          case getType(vaultSettingsReseted):
           case getType(themeModeSettingChanged):
           case getType(lastActivityTimeRefreshed):
           case getType(siteConnected):
@@ -542,6 +548,7 @@ browser.runtime.onMessage.addListener(
           case getType(loginRetryCountIncremented):
           case getType(loginRetryLockoutTimeSet):
           case getType(recipientPublicKeyAdded):
+          case getType(recipientPublicKeyReseted):
           case getType(accountBalanceChanged):
           case getType(accountCurrencyRateChanged):
           case getType(accountCasperActivityChanged):
@@ -566,6 +573,7 @@ browser.runtime.onMessage.addListener(
           case getType(contactRemoved):
           case getType(contactEditingPermissionChanged):
           case getType(contactUpdated):
+          case getType(contactsReseted):
             store.dispatch(action);
             return sendResponse(undefined);
 
