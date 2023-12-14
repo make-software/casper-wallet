@@ -155,7 +155,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
             onClick={() => {
               openWindow({
                 windowApp: WindowApp.ImportAccount,
-                isNewWindow: false
+                isNewWindow: true
               }).catch(e => console.error(e));
             }}
           >

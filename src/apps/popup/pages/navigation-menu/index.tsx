@@ -136,7 +136,8 @@ export function NavigationMenuPageContent() {
             handleOnClick: () => {
               closeNavigationMenu();
               openWindow({
-                windowApp: WindowApp.ImportAccount
+                windowApp: WindowApp.ImportAccount,
+                isNewWindow: true
               }).catch(e => console.error(e));
             }
           }
