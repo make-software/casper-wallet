@@ -37,6 +37,12 @@ export const TransferSuccessScreen = ({
     return () => window.removeEventListener('keydown', keyDownHandler);
   }, [navigate]);
 
+  useEffect(() => {
+    const container = document.querySelector('#ms-container');
+
+    container?.scrollTo(0, 0);
+  }, []);
+
   return (
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
