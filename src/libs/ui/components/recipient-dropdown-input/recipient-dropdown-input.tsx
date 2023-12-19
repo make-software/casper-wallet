@@ -111,6 +111,8 @@ export const RecipientDropdownInput = ({
         handleClick={() => {
           setShowRecipientPlate(false);
           setIsOpenRecentRecipientPublicKeysList(true);
+
+          trigger('recipientPublicKey');
         }}
       />
     </VerticalSpaceContainer>
@@ -142,14 +144,14 @@ export const RecipientDropdownInput = ({
               publicKey={row.publicKey}
               name={row.name}
               isContact={!('isContact' in row)}
-              handleClick={async () => {
+              handleClick={() => {
                 setValue('recipientPublicKey', row.publicKey);
 
                 setIsOpenRecentRecipientPublicKeysList(false);
                 setShowRecipientPlate(true);
                 setRecipientName(row.name);
 
-                await trigger('recipientPublicKey');
+                trigger('recipientPublicKey');
               }}
             />
           )}

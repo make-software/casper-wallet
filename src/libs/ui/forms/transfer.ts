@@ -34,9 +34,10 @@ export function useTransferForm(
   });
 
   const recipientFormOptions: UseFormProps<TransferRecipientFormValues> = {
-    reValidateMode: 'onChange',
-    mode: 'onChange',
-    resolver: yupResolver(recipientFormSchema)
+    reValidateMode: 'onBlur',
+    mode: 'onBlur',
+    resolver: yupResolver(recipientFormSchema),
+    delayError: 500
   };
 
   const erc20AmountFormSchema = Yup.object().shape({
