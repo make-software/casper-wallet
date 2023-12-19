@@ -1,16 +1,25 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { UseFormReturn, useWatch } from 'react-hook-form';
+import styled from 'styled-components';
 
 import { selectRecentRecipientPublicKeys } from '@background/redux/recent-recipient-public-keys/selectors';
-import { SpacingSize, VerticalSpaceContainer } from '@libs/layout';
-import { Input, List, RecipientPlate, SvgIcon } from '@libs/ui';
+import {
+  AlignedFlexRow,
+  SpacingSize,
+  VerticalSpaceContainer
+} from '@libs/layout';
+import { Input, List, RecipientPlate, SvgIcon, Typography } from '@libs/ui';
 import { TransferRecipientFormValues } from '@libs/ui/forms/transfer';
 import { useClickAway } from '@libs/ui/hooks/use-click-away';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { TransferNftRecipientFormValues } from '@libs/ui/forms/transfer-nft';
 import { selectAllContacts } from '@background/redux/contacts/selectors';
+
+const SeparatorContainer = styled(AlignedFlexRow)`
+  padding: 8px 16px;
+`;
 
 interface RecipientDropdownInputProps {
   recipientForm: UseFormReturn<
@@ -70,23 +79,43 @@ export const RecipientDropdownInput = ({
         if (contact) {
           return {
             name: contact.name,
-            publicKey: key,
-            isContact: false
+            publicKey: key
           };
         }
         return {
           name: '',
-          publicKey: key,
-          isContact: false
+          publicKey: key
         };
       }),
     [contacts, recentRecipientPublicKeys]
   );
 
   const getUniquePublicKeyItemsWithId = useMemo(() => {
-    const items = [...recentRecipient, ...contacts].filter(
-      item => item.publicKey !== activeAccount?.publicKey
-    );
+    const recentRecipientWithSeparator = recentRecipient.length
+      ? [
+          {
+            name: '',
+            publicKey: '',
+            isResentSeparator: true
+          },
+          ...recentRecipient
+        ]
+      : [...recentRecipient];
+    const contactsWithSeparator = contacts.length
+      ? [
+          {
+            name: '',
+            publicKey: '',
+            isContactsSeparator: true
+          },
+          ...contacts
+        ]
+      : [];
+
+    const items = [
+      ...recentRecipientWithSeparator,
+      ...contactsWithSeparator
+    ].filter(item => item.publicKey !== activeAccount?.publicKey);
 
     return items.map((item, index) => ({ ...item, id: index }));
   }, [activeAccount?.publicKey, contacts, recentRecipient]);
@@ -138,23 +167,43 @@ export const RecipientDropdownInput = ({
         <List
           contentTop={SpacingSize.Tiny}
           rows={optionsRow}
-          maxHeight={193}
-          renderRow={row => (
-            <RecipientPlate
-              publicKey={row.publicKey}
-              name={row.name}
-              isContact={!('isContact' in row)}
-              handleClick={() => {
-                setValue('recipientPublicKey', row.publicKey);
+          maxHeight={161}
+          renderRow={row => {
+            if ('isResentSeparator' in row) {
+              return (
+                <SeparatorContainer>
+                  <Typography type="labelMedium" color="contentSecondary">
+                    <Trans t={t}>Recent</Trans>
+                  </Typography>
+                </SeparatorContainer>
+              );
+            }
+            if ('isContactsSeparator' in row) {
+              return (
+                <SeparatorContainer>
+                  <Typography type="labelMedium" color="contentSecondary">
+                    <Trans t={t}>Contacts</Trans>
+                  </Typography>
+                </SeparatorContainer>
+              );
+            }
 
-                setIsOpenRecentRecipientPublicKeysList(false);
-                setShowRecipientPlate(true);
-                setRecipientName(row.name);
+            return (
+              <RecipientPlate
+                publicKey={row.publicKey}
+                name={row.name}
+                handleClick={() => {
+                  setValue('recipientPublicKey', row.publicKey);
 
-                trigger('recipientPublicKey');
-              }}
-            />
-          )}
+                  setIsOpenRecentRecipientPublicKeysList(false);
+                  setShowRecipientPlate(true);
+                  setRecipientName(row.name);
+
+                  trigger('recipientPublicKey');
+                }}
+              />
+            );
+          }}
           marginLeftForItemSeparatorLine={56}
         />
       )}
