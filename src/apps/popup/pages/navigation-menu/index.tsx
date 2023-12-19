@@ -148,7 +148,7 @@ export function NavigationMenuPageContent() {
         items: [
           {
             id: 1,
-            title: t('Contacts list'),
+            title: t('Contacts'),
             iconPath: 'assets/icons/team.svg',
             currentValue: countOfContacts,
             disabled: false,
