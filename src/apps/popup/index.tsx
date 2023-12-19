@@ -16,6 +16,7 @@ import { selectThemeModeSetting } from '@background/redux/settings/selectors';
 import { ThemeMode } from '@background/redux/settings/types';
 import { useSystemThemeDetector } from '@src/hooks';
 import { themeModeSettingChanged } from '@background/redux/settings/actions';
+import { isSafariBuild } from '@src/utils';
 
 import { AppRouter } from './app-router';
 
@@ -41,8 +42,10 @@ const Tree = () => {
   const themeMode = selectThemeModeSetting(store.getState());
 
   // Set theme mode to system if it is no present in the store
-  if (themeMode === undefined) {
+  if (themeMode === undefined && !isSafariBuild) {
     dispatchToMainStore(themeModeSettingChanged(ThemeMode.SYSTEM));
+  } else if (themeMode === undefined && isSafariBuild) {
+    dispatchToMainStore(themeModeSettingChanged(ThemeMode.LIGHT));
   }
 
   const isDarkMode =
