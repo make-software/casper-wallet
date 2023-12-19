@@ -91,9 +91,9 @@ export const ContactDetailsPage = () => {
     dispatchToMainStore(
       contactUpdated({
         oldName: contact.name,
-        name: newName,
-        publicKey: publicKey,
-        lastModified: lastModified
+        name: newName.trim(),
+        publicKey,
+        lastModified
       })
     ).finally(() => {
       navigate(RouterPath.ContactList);

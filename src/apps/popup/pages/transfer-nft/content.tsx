@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { UseFormReturn, useWatch } from 'react-hook-form';
@@ -53,6 +53,8 @@ export const TransferNftContent = ({
   amountForm,
   haveReverseOwnerLookUp
 }: TransferNftContentProps) => {
+  const [recipientName, setRecipientName] = useState('');
+
   const { t } = useTranslation();
   const location = useTypedLocation();
 
@@ -137,7 +139,11 @@ export const TransferNftContent = ({
           </Typography>
         </ParagraphContainer>
       )}
-      <RecipientDropdownInput recipientForm={recipientForm} />
+      <RecipientDropdownInput
+        recipientForm={recipientForm}
+        recipientName={recipientName}
+        setRecipientName={setRecipientName}
+      />
       <VerticalSpaceContainer top={SpacingSize.XXL}>
         <Input
           label={t('Transaction fee')}

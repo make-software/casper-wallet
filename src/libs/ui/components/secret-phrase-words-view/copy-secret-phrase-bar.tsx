@@ -19,7 +19,7 @@ export function CopySecretPhraseBar({
           <SvgIcon
             src={
               isClicked
-                ? 'assets/icons/checkbox-checked.svg'
+                ? 'assets/icons/radio-button-on.svg'
                 : 'assets/icons/copy.svg'
             }
             size={isClicked ? 24 : 16}

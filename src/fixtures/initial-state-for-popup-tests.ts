@@ -2,6 +2,7 @@ import { RootState } from 'typesafe-actions';
 
 import { NetworkSetting } from '@src/constants';
 import { TimeoutDurationSetting } from '@popup/constants';
+import { ThemeMode } from '@background/redux/settings/types';
 
 export const initialStateForPopupTests: RootState = {
   keys: {
@@ -76,7 +77,8 @@ export const initialStateForPopupTests: RootState = {
   settings: {
     activeNetwork: NetworkSetting.Testnet,
     activeTimeoutDuration: TimeoutDurationSetting['5 min'],
-    isDarkMode: false
+    isDarkMode: false,
+    themeMode: ThemeMode.SYSTEM
   },
   recentRecipientPublicKeys: [],
   accountInfo: {
