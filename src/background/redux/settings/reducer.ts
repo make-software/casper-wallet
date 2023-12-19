@@ -2,6 +2,7 @@ import { createReducer } from 'typesafe-actions';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 import { NetworkSetting } from '@src/constants';
+import { isSafariBuild } from '@src/utils';
 
 import {
   activeNetworkSettingChanged,
@@ -14,8 +15,8 @@ import { SettingsState, ThemeMode } from './types';
 const initialState: SettingsState = {
   activeNetwork: NetworkSetting.Mainnet,
   activeTimeoutDuration: TimeoutDurationSetting['5 min'],
-  isDarkMode: false,
-  themeMode: ThemeMode.SYSTEM
+  isDarkMode: false, // Deprecated
+  themeMode: isSafariBuild ? ThemeMode.LIGHT : ThemeMode.SYSTEM
 };
 
 export const reducer = createReducer(initialState)

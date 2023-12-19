@@ -180,8 +180,8 @@ const options = {
           from: isChrome
             ? ManifestPath.v3
             : isSafari
-            ? ManifestPath.v2_Safari
-            : ManifestPath.v2,
+              ? ManifestPath.v2_Safari
+              : ManifestPath.v2,
           to: path.join(__dirname, buildDir, 'manifest.json'),
           force: true,
           transform: function (content) {
