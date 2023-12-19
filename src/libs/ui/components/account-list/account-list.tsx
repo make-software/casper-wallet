@@ -92,7 +92,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
       rows={accountListRows}
       contentTop={SpacingSize.None}
       maxHeight={402}
-      renderRow={(account, index) => {
+      renderRow={account => {
         const isConnected = connectedAccountNames.includes(account.name);
         const isActiveAccount = activeAccountName === account.name;
 
@@ -128,13 +128,8 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
                     value={account.publicKey}
                     variant={HashVariant.CaptionHash}
                     truncated
-                    withoutTooltip={accountListRows.length === 1}
+                    withoutTooltip
                     withTag={account.imported}
-                    placement={
-                      index === accountListRows.length - 1
-                        ? 'topRight'
-                        : 'bottomRight'
-                    }
                   />
                 </AccountNameWithHashListItemContainer>
               </ListItemClickableContainer>
