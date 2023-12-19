@@ -369,7 +369,10 @@ export const useCSPRStakeAmountRule = (
     });
 };
 
-export const useValidatorPublicKeyRule = (delegatorsNumber?: number) => {
+export const useValidatorPublicKeyRule = (
+  stakesType: AuctionManagerEntryPoint,
+  delegatorsNumber?: number
+) => {
   const { t } = useTranslation();
 
   return Yup.string()
@@ -381,7 +384,16 @@ export const useValidatorPublicKeyRule = (delegatorsNumber?: number) => {
     })
     .test({
       name: 'maxDelegators',
-      test: () => !(delegatorsNumber && delegatorsNumber >= MAX_DELEGATORS),
+      test: () => {
+        if (stakesType === AuctionManagerEntryPoint.undelegate) {
+          return true;
+        }
+        if (delegatorsNumber) {
+          return delegatorsNumber < MAX_DELEGATORS;
+        }
+
+        return false;
+      },
       message: t(
         'This validator has reached the network limit for total delegators and therefore cannot be delegated to by new accounts. Please select another validator with fewer than 1200 total delegators'
       )
