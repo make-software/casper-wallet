@@ -22,7 +22,6 @@ interface RecipientPlateProps {
   recipientLabel?: string;
   showFullPublicKey?: boolean;
   name?: string;
-  isContact?: boolean;
 }
 
 const PublicKeyOptionContainer = styled(FlexRow)<{ onClick?: () => void }>`
@@ -47,8 +46,7 @@ export const RecipientPlate = ({
   publicKey,
   recipientLabel,
   showFullPublicKey,
-  name,
-  isContact
+  name
 }: RecipientPlateProps) => {
   if (recipientLabel) {
     return (
@@ -93,7 +91,7 @@ export const RecipientPlate = ({
         />
         {name && (
           <AlignedFlexRow gap={SpacingSize.Tiny}>
-            {isContact && <SvgIcon src="assets/icons/contact.svg" size={16} />}
+            <SvgIcon src="assets/icons/contact.svg" size={16} />
             <Typography type="captionRegular" color="contentSecondary">
               {name}
             </Typography>
