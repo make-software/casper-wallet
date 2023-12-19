@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import {
-  CenteredFlexColumn,
+  AlignedFlexRow,
   ContentContainer,
   FooterButtonsAbsoluteContainer,
   IllustrationContainer,
@@ -33,14 +33,13 @@ import {
 } from '@src/background/redux/keys/selectors';
 import { unlockVault } from '@src/background/redux/sagas/actions';
 import { dispatchToMainStore } from '@src/background/redux/utils';
-import { calculateSubmitButtonDisabled } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
 import {
   UnlockWalletFormValues,
   useUnlockWalletForm
 } from '@src/libs/ui/forms/unlock-wallet';
 import { VaultState } from '@background/redux/vault/types';
+import unlockAnimation from '@libs/animations/unlock_animation.json';
 
-import unlockAnimation from '@src/libs/animations/unlock_animation.json';
 import { LockedRouterPath } from '../locked-router';
 
 interface UnlockMessageEvent extends MessageEvent {
@@ -69,10 +68,12 @@ export function UnlockVaultPageContent() {
     register,
     handleSubmit,
     resetField,
-    formState: { errors, isDirty, isSubmitting, isValidating }
+    formState: { errors }
   } = useUnlockWalletForm(passwordHash, passwordSaltHash);
 
   async function handleUnlockVault({ password }: UnlockWalletFormValues) {
+    if (isLoading) return;
+
     setIsLoading(true);
     const unlockVaultWorker = new Worker(
       new URL('@src/background/workers/unlockVaultWorker.ts', import.meta.url)
@@ -137,11 +138,6 @@ export function UnlockVaultPageContent() {
     };
   }
 
-  const submitButtonDisabled = calculateSubmitButtonDisabled({
-    isDirty,
-    isSubmitting: isSubmitting || isValidating
-  });
-
   useLockWalletWhenNoMoreRetries(resetField);
 
   if (hasLoginRetryLockoutTime) {
@@ -183,32 +179,6 @@ export function UnlockVaultPageContent() {
     );
   }
 
-  if (isLoading) {
-    return (
-      <ContentContainer>
-        <CenteredFlexColumn>
-          <Player
-            renderer={'svg'}
-            autoplay
-            loop
-            src={unlockAnimation}
-            style={{ width: '160px', marginTop: '80%' }}
-          ></Player>
-          <ParagraphContainer top={SpacingSize.Medium}>
-            <Typography type="header">
-              <Trans t={t}>Just a moment</Trans>
-            </Typography>
-          </ParagraphContainer>
-          <ParagraphContainer top={SpacingSize.Medium}>
-            <Typography type="body" color="contentSecondary">
-              <Trans t={t}>We're unlocking your wallet</Trans>
-            </Typography>
-          </ParagraphContainer>
-        </CenteredFlexColumn>
-      </ContentContainer>
-    );
-  }
-
   return (
     <form onSubmit={handleSubmit(handleUnlockVault)}>
       <ContentContainer>
@@ -246,8 +216,25 @@ export function UnlockVaultPageContent() {
         </InputsContainer>
       </ContentContainer>
       <FooterButtonsAbsoluteContainer>
-        <Button disabled={isLoading || submitButtonDisabled} type="submit">
-          {isLoading ? t('Loading') : t('Unlock wallet')}
+        <Button type="submit">
+          {isLoading ? (
+            <AlignedFlexRow gap={SpacingSize.Small}>
+              <Player
+                renderer={'svg'}
+                autoplay
+                loop
+                src={unlockAnimation}
+                style={{ width: '24px', height: '24px' }}
+              />
+              <Typography type="bodySemiBold">
+                <Trans t={t}>Unlocking...</Trans>
+              </Typography>
+            </AlignedFlexRow>
+          ) : (
+            <Typography type="bodySemiBold">
+              <Trans t={t}>Unlock wallet</Trans>
+            </Typography>
+          )}
         </Button>
         <Button
           disabled={isLoading}
