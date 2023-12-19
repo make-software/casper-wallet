@@ -17,6 +17,7 @@ import { selectThemeModeSetting } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { themeModeSettingChanged } from '@background/redux/settings/actions';
 import { Button, List, SvgIcon, Typography } from '@libs/ui';
+import { isSafariBuild } from '@src/utils';
 
 const Container = styled(FlexColumn)`
   padding-top: 24px;
@@ -42,26 +43,42 @@ export const ThemeSwitcher = ({ closeSwitcher }: ThemeSwitcherProps) => {
   const themeMode = useSelector(selectThemeModeSetting);
 
   const listOfThemes = useMemo(
-    () => [
-      {
-        id: 1,
-        name: ThemeMode.SYSTEM,
-        icon: 'assets/icons/theme.svg',
-        isActive: themeMode === ThemeMode.SYSTEM
-      },
-      {
-        id: 2,
-        name: ThemeMode.DARK,
-        icon: 'assets/icons/moon.svg',
-        isActive: themeMode === ThemeMode.DARK
-      },
-      {
-        id: 3,
-        name: ThemeMode.LIGHT,
-        icon: 'assets/icons/sun.svg',
-        isActive: themeMode === ThemeMode.LIGHT
-      }
-    ],
+    () =>
+      isSafariBuild
+        ? [
+            {
+              id: 1,
+              name: ThemeMode.DARK,
+              icon: 'assets/icons/moon.svg',
+              isActive: themeMode === ThemeMode.DARK
+            },
+            {
+              id: 2,
+              name: ThemeMode.LIGHT,
+              icon: 'assets/icons/sun.svg',
+              isActive: themeMode === ThemeMode.LIGHT
+            }
+          ]
+        : [
+            {
+              id: 1,
+              name: ThemeMode.SYSTEM,
+              icon: 'assets/icons/theme.svg',
+              isActive: themeMode === ThemeMode.SYSTEM
+            },
+            {
+              id: 2,
+              name: ThemeMode.DARK,
+              icon: 'assets/icons/moon.svg',
+              isActive: themeMode === ThemeMode.DARK
+            },
+            {
+              id: 3,
+              name: ThemeMode.LIGHT,
+              icon: 'assets/icons/sun.svg',
+              isActive: themeMode === ThemeMode.LIGHT
+            }
+          ],
     [themeMode]
   );
 
