@@ -32,6 +32,8 @@ const FooterItemContainer = styled(CenteredFlexRow)`
 
 const ButtonContainer = styled(CenteredFlexColumn)`
   cursor: pointer;
+
+  padding: 0 16px;
 `;
 
 type TokenInfoList = {
@@ -163,7 +165,7 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
                 target="_blank"
                 href={getBuyWithTopperUrl(activeAccount.publicKey)}
               >
-                <CenteredFlexColumn gap={SpacingSize.Medium}>
+                <ButtonContainer gap={SpacingSize.Medium}>
                   <Button circle>
                     <SvgIcon
                       src="assets/icons/card.svg"
@@ -171,9 +173,9 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
                     />
                   </Button>
                   <Typography type="captionMedium" color="contentAction">
-                    Buy
+                    <Trans t={t}>Buy</Trans>
                   </Typography>
-                </CenteredFlexColumn>
+                </ButtonContainer>
               </Link>
             )}
         </FooterItemContainer>

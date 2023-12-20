@@ -1,7 +1,8 @@
 import { ActivityType } from '@src/constants';
 import { TokenType } from '@src/hooks';
+import { ErrorLocationState } from '@layout/error';
 
-export type LocationState = {
+export interface LocationState extends ErrorLocationState {
   showNavigationMenu?: boolean;
   activityDetailsData?: {
     fromAccount: string;
@@ -18,4 +19,5 @@ export type LocationState = {
     contentType: string;
     url?: string;
   };
-};
+  recipientPublicKey?: string;
+}

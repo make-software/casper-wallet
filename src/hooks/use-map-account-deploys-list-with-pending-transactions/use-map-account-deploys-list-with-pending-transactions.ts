@@ -44,8 +44,8 @@ export const useMapAccountDeploysListWithPendingTransactions = (
     accountDeploys != null
       ? [...filteredTransactions, ...accountDeploys]
       : mappedPendingTransactions.length > 0
-      ? mappedPendingTransactions
-      : null;
+        ? mappedPendingTransactions
+        : null;
 
   return {
     accountDeploysListWithPendingTransactions

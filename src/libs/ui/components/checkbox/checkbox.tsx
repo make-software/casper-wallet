@@ -55,8 +55,8 @@ export function Checkbox({
         ? 'assets/icons/checkbox-square-checked.svg'
         : 'assets/icons/checkbox-square.svg'
       : checked
-      ? 'assets/icons/checkbox-checked.svg'
-      : 'assets/icons/checkbox.svg';
+        ? 'assets/icons/radio-button-on.svg'
+        : 'assets/icons/radio-button-off.svg';
 
   return (
     <StyledFlexRow

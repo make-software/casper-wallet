@@ -2,21 +2,25 @@ import { createReducer } from 'typesafe-actions';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 import { NetworkSetting } from '@src/constants';
+import { isSafariBuild } from '@src/utils';
 
 import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged,
-  darkModeSettingChanged
+  themeModeSettingChanged,
+  vaultSettingsReseted
 } from './actions';
-import { SettingsState } from './types';
+import { SettingsState, ThemeMode } from './types';
 
 const initialState: SettingsState = {
   activeNetwork: NetworkSetting.Mainnet,
   activeTimeoutDuration: TimeoutDurationSetting['5 min'],
-  isDarkMode: false
+  isDarkMode: false, // Deprecated
+  themeMode: isSafariBuild ? ThemeMode.LIGHT : ThemeMode.SYSTEM
 };
 
 export const reducer = createReducer(initialState)
+  .handleAction(vaultSettingsReseted, (): SettingsState => initialState)
   .handleAction(
     activeTimeoutDurationSettingChanged,
     (state, { payload }): SettingsState => ({
@@ -32,9 +36,9 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    darkModeSettingChanged,
-    (state): SettingsState => ({
+    themeModeSettingChanged,
+    (state, { payload }): SettingsState => ({
       ...state,
-      isDarkMode: !state.isDarkMode
+      themeMode: payload
     })
   );

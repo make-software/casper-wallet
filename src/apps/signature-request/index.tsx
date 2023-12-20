@@ -8,15 +8,25 @@ import { Provider as ReduxProvider } from 'react-redux/es/exports';
 import { darkTheme, GlobalStyle, lightTheme } from '@libs/ui';
 
 import { signWindowInit } from '@background/redux/windowManagement/actions';
-import { createMainStoreReplica, PopupState } from '@background/redux/utils';
+import {
+  createMainStoreReplica,
+  dispatchToMainStore,
+  PopupState
+} from '@background/redux/utils';
 import { ErrorBoundary } from '@src/libs/layout/error';
 
 import { AppRouter } from './app-router';
 import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
-import { selectDarkModeSetting } from '@background/redux/settings/selectors';
+import { selectThemeModeSetting } from '@background/redux/settings/selectors';
+import { useSystemThemeDetector } from '@src/hooks';
+import { themeModeSettingChanged } from '@background/redux/settings/actions';
+import { ThemeMode } from '@background/redux/settings/types';
+import { isSafariBuild } from '@src/utils';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
+
+  const isSystemDarkTheme = useSystemThemeDetector();
 
   useSubscribeToRedux({
     windowInitAction: signWindowInit,
@@ -29,7 +39,19 @@ const Tree = () => {
 
   const store = createMainStoreReplica(state);
 
-  const isDarkMode = selectDarkModeSetting(store.getState());
+  const themeMode = selectThemeModeSetting(store.getState());
+
+  // Set theme mode to system if it is no present in the store
+  if (themeMode === undefined && !isSafariBuild) {
+    dispatchToMainStore(themeModeSettingChanged(ThemeMode.SYSTEM));
+  } else if (themeMode === undefined && isSafariBuild) {
+    dispatchToMainStore(themeModeSettingChanged(ThemeMode.LIGHT));
+  }
+
+  const isDarkMode =
+    themeMode === ThemeMode.SYSTEM
+      ? isSystemDarkTheme
+      : themeMode === ThemeMode.DARK;
 
   return (
     <Suspense fallback={null}>

@@ -27,6 +27,7 @@ export const getUrlOrigin = (url: string | undefined) => {
 };
 
 export const isSafariBuild = process.env.BROWSER === Browser.Safari;
+export const isFirefoxBuild = process.env.BROWSER === Browser.Firefox;
 
 export const isValidU64 = (value?: string): boolean => {
   if (!value) {

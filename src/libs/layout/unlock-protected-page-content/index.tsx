@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { FieldErrors, UseFormRegister } from 'react-hook-form';
+import { useSelector } from 'react-redux';
 
 import {
   ContentContainer,
@@ -16,6 +17,7 @@ import {
   SvgIcon,
   Typography
 } from '@libs/ui';
+import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
 
 import { useLockWalletWhenNoMoreRetries } from './use-lock-wallet-when-no-more-retries';
 
@@ -26,19 +28,23 @@ interface PasswordFormValues {
 interface PasswordPageContentType {
   register: UseFormRegister<PasswordFormValues>;
   errors: FieldErrors<PasswordFormValues>;
-  description: string;
+  title?: string;
 }
 export const UnlockProtectedPageContent = ({
   register,
   errors,
-  description
+  title
 }: PasswordPageContentType) => {
   const [passwordInputType, setPasswordInputType] =
     useState<PasswordInputType>('password');
 
   const { t } = useTranslation();
 
+  const loginRetryCount = useSelector(selectLoginRetryCount);
+
   useLockWalletWhenNoMoreRetries();
+
+  const retryLeft = 5 - loginRetryCount;
 
   return (
     <ContentContainer>
@@ -51,12 +57,14 @@ export const UnlockProtectedPageContent = ({
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          <Trans t={t}>Wallet password required</Trans>
+          <Trans t={t}>{title || 'Enter your password'}</Trans>
         </Typography>
       </ParagraphContainer>
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
-          {description}
+          <Trans t={t}>
+            You have <b>{{ retryLeft }}</b> tries left.
+          </Trans>
         </Typography>
       </ParagraphContainer>
       <InputsContainer>

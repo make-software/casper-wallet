@@ -10,7 +10,7 @@ import {
 import { Button } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import { BackupSecretPhrasePasswordPage } from '@popup/pages/backup-secret-phrase-password';
+import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
 
 import { BackupSecretPhrasePageContent } from './content';
 
@@ -27,9 +27,7 @@ export function BackupSecretPhrasePage() {
 
   if (!isPasswordConfirmed) {
     return (
-      <BackupSecretPhrasePasswordPage
-        setPasswordConfirmed={setPasswordConfirmed}
-      />
+      <PasswordProtectionPage setPasswordConfirmed={setPasswordConfirmed} />
     );
   }
 

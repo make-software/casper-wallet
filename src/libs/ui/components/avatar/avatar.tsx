@@ -1,6 +1,7 @@
 import Identicon from 'react-identicons';
 import React from 'react';
 import styled, { DefaultTheme, useTheme } from 'styled-components';
+import { useSelector } from 'react-redux';
 
 import {
   SpacingSize,
@@ -9,23 +10,36 @@ import {
   CenteredFlexRow
 } from '@libs/layout';
 import { isValidAccountHash, isValidPublicKey } from '@src/utils';
-import { hexToRGBA, SvgIcon } from '@libs/ui';
-import { useSelector } from 'react-redux';
-import { selectDarkModeSetting } from '@background/redux/settings/selectors';
+import { SvgIcon } from '@libs/ui';
+import { selectThemeModeSetting } from '@background/redux/settings/selectors';
+import { ThemeMode } from '@background/redux/settings/types';
+import { useSystemThemeDetector } from '@src/hooks';
 
-const RoundedIdenticon = styled(Identicon)<{
-  displayContext?: 'header';
-  isDarkMode: boolean;
-}>`
-  border-radius: ${({ theme, displayContext }) =>
-    displayContext ? theme.borderRadius.base : theme.borderRadius.eight}px;
-  border: ${({ displayContext, isDarkMode, theme }) =>
-    displayContext
-      ? isDarkMode
-        ? `0.5px solid ${theme.color.contentDisabled}}`
-        : `0.5px solid ${hexToRGBA(theme.color.black, '0.16')}`
-      : 'none'};
-`;
+const RoundedIdenticon = styled(Identicon)(
+  ({
+    theme,
+    displayContext,
+    isActiveAccount,
+    isConnected
+  }: {
+    theme: DefaultTheme;
+    displayContext?: 'header' | 'accountList';
+    isActiveAccount?: boolean;
+    isConnected?: boolean;
+  }) => ({
+    borderRadius: theme.borderRadius.base,
+
+    ...(displayContext === 'accountList' && {
+      border: isActiveAccount
+        ? `3px solid ${
+            isConnected
+              ? theme.color.contentPositive
+              : theme.color.contentDisabled
+          }`
+        : `3px solid ${theme.color.backgroundPrimary}`
+    })
+  })
+);
 
 const IconHashWrapper = styled(CenteredFlexRow)(({ theme }) => ({
   color: theme.color.contentOnFill,
@@ -52,7 +66,8 @@ interface AvatarTypes {
   top?: SpacingSize;
   withConnectedStatus?: boolean;
   isConnected?: boolean;
-  displayContext?: 'header';
+  displayContext?: 'header' | 'accountList';
+  isActiveAccount?: boolean;
 }
 
 export const Avatar = ({
@@ -61,19 +76,27 @@ export const Avatar = ({
   top,
   withConnectedStatus,
   isConnected,
-  displayContext
+  displayContext,
+  isActiveAccount
 }: AvatarTypes) => {
   const theme = useTheme();
 
-  const isDarkMode = useSelector(selectDarkModeSetting);
+  const themeMode = useSelector(selectThemeModeSetting);
+
+  const isSystemDarkTheme = useSystemThemeDetector();
+
+  const isDarkMode =
+    themeMode === ThemeMode.SYSTEM
+      ? isSystemDarkTheme
+      : themeMode === ThemeMode.DARK;
 
   const connectIcon = isDarkMode
     ? displayContext === 'header'
       ? 'assets/icons/connected-dark.svg'
       : 'assets/icons/connected-dark-big.svg'
     : displayContext === 'header'
-    ? 'assets/icons/connected-light.svg'
-    : 'assets/icons/connected-light-big.svg';
+      ? 'assets/icons/connected-light.svg'
+      : 'assets/icons/connected-light-big.svg';
 
   if (withConnectedStatus && isConnected !== undefined) {
     return (
@@ -83,15 +106,30 @@ export const Avatar = ({
           size={size}
           bg={theme.color.contentOnFill}
           displayContext={displayContext}
-          isDarkMode={isDarkMode}
+          isActiveAccount={isActiveAccount}
+          isConnected={isConnected}
         />
         <SvgIcon
           src={connectIcon}
-          size={displayContext === 'header' ? 14 : 16}
+          size={
+            displayContext === 'header' || displayContext === 'accountList'
+              ? 12
+              : 16
+          }
           style={{
             position: 'absolute',
-            bottom: displayContext === 'header' ? '-4px' : '-5px',
-            right: displayContext === 'header' ? '-4px' : '-5px'
+            bottom:
+              displayContext === 'header'
+                ? '-4px'
+                : displayContext === 'accountList'
+                  ? '-2px'
+                  : '-5px',
+            right:
+              displayContext === 'header'
+                ? '-4px'
+                : displayContext === 'accountList'
+                  ? '-2px'
+                  : '-5px'
           }}
           color={isConnected ? 'contentPositive' : 'contentDisabled'}
         />

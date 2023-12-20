@@ -1,9 +1,11 @@
+import { Player } from '@lottiefiles/react-lottie-player';
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import {
+  AlignedFlexRow,
   ContentContainer,
   FooterButtonsAbsoluteContainer,
   IllustrationContainer,
@@ -12,31 +14,31 @@ import {
   SpacingSize
 } from '@src/libs/layout/containers';
 import {
-  PasswordInputType,
-  Typography,
-  Input,
   Button,
+  Input,
+  PasswordInputType,
   PasswordVisibilityIcon,
-  SvgIcon
+  SvgIcon,
+  Typography
 } from '@src/libs/ui';
 
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import {
-  UnlockWalletFormValues,
-  useUnlockWalletForm
-} from '@src/libs/ui/forms/unlock-wallet';
-import { calculateSubmitButtonDisabled } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
+import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
+import { UnlockVault } from '@background/redux/sagas/types';
+import { selectVaultCipher } from '@background/redux/vault-cipher/selectors';
+import { useLockWalletWhenNoMoreRetries } from '@layout/unlock-protected-page-content/use-lock-wallet-when-no-more-retries';
 import {
   selectKeyDerivationSaltHash,
   selectPasswordHash,
   selectPasswordSaltHash
 } from '@src/background/redux/keys/selectors';
 import { unlockVault } from '@src/background/redux/sagas/actions';
-import { selectVaultCipher } from '@background/redux/vault-cipher/selectors';
-import { UnlockVault } from '@background/redux/sagas/types';
+import { dispatchToMainStore } from '@src/background/redux/utils';
+import {
+  UnlockWalletFormValues,
+  useUnlockWalletForm
+} from '@src/libs/ui/forms/unlock-wallet';
 import { VaultState } from '@background/redux/vault/types';
-import { useLockWalletWhenNoMoreRetries } from '@layout/unlock-protected-page-content/use-lock-wallet-when-no-more-retries';
-import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
+import unlockAnimation from '@libs/animations/unlock_animation.json';
 
 import { LockedRouterPath } from '../locked-router';
 
@@ -66,10 +68,12 @@ export function UnlockVaultPageContent() {
     register,
     handleSubmit,
     resetField,
-    formState: { errors, isDirty, isSubmitting, isValidating }
+    formState: { errors }
   } = useUnlockWalletForm(passwordHash, passwordSaltHash);
 
   async function handleUnlockVault({ password }: UnlockWalletFormValues) {
+    if (isLoading) return;
+
     setIsLoading(true);
     const unlockVaultWorker = new Worker(
       new URL('@src/background/workers/unlockVaultWorker.ts', import.meta.url)
@@ -133,11 +137,6 @@ export function UnlockVaultPageContent() {
       setIsLoading(false);
     };
   }
-
-  const submitButtonDisabled = calculateSubmitButtonDisabled({
-    isDirty,
-    isSubmitting: isSubmitting || isValidating
-  });
 
   useLockWalletWhenNoMoreRetries(resetField);
 
@@ -217,8 +216,25 @@ export function UnlockVaultPageContent() {
         </InputsContainer>
       </ContentContainer>
       <FooterButtonsAbsoluteContainer>
-        <Button disabled={isLoading || submitButtonDisabled} type="submit">
-          {isLoading ? t('Loading') : t('Unlock wallet')}
+        <Button type="submit">
+          {isLoading ? (
+            <AlignedFlexRow gap={SpacingSize.Small}>
+              <Player
+                renderer={'svg'}
+                autoplay
+                loop
+                src={unlockAnimation}
+                style={{ width: '24px', height: '24px' }}
+              />
+              <Typography type="bodySemiBold">
+                <Trans t={t}>Unlocking...</Trans>
+              </Typography>
+            </AlignedFlexRow>
+          ) : (
+            <Typography type="bodySemiBold">
+              <Trans t={t}>Unlock wallet</Trans>
+            </Typography>
+          )}
         </Button>
         <Button
           disabled={isLoading}

@@ -63,6 +63,7 @@ import { fetchErc20Tokens } from '@libs/services/erc20-service';
 
 import { openWindow } from './open-window';
 import {
+  contactEditingPermissionChanged,
   encryptionKeyHashCreated,
   sessionReseted,
   vaultUnlocked
@@ -95,7 +96,8 @@ import { lastActivityTimeRefreshed } from './redux/last-activity-time/actions';
 import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged,
-  darkModeSettingChanged
+  vaultSettingsReseted,
+  themeModeSettingChanged
 } from './redux/settings/actions';
 import { activeOriginChanged } from './redux/active-origin/actions';
 import { selectApiConfigBasedOnActiveNetwork } from './redux/settings/selectors';
@@ -108,7 +110,10 @@ import {
   SiteNotConnectedError,
   WalletLockedError
 } from '@src/content/sdk-errors';
-import { recipientPublicKeyAdded } from './redux/recent-recipient-public-keys/actions';
+import {
+  recipientPublicKeyAdded,
+  recipientPublicKeyReseted
+} from './redux/recent-recipient-public-keys/actions';
 import {
   accountCasperActivityChanged,
   accountInfoReset,
@@ -136,6 +141,12 @@ import {
   fetchAuctionValidators,
   fetchValidatorsDetailsData
 } from '@libs/services/validators-service';
+import {
+  contactRemoved,
+  contactsReseted,
+  contactUpdated,
+  newContactAdded
+} from '@background/redux/contacts/actions';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -515,7 +526,8 @@ browser.runtime.onMessage.addListener(
           case getType(activeAccountChanged):
           case getType(activeTimeoutDurationSettingChanged):
           case getType(activeNetworkSettingChanged):
-          case getType(darkModeSettingChanged):
+          case getType(vaultSettingsReseted):
+          case getType(themeModeSettingChanged):
           case getType(lastActivityTimeRefreshed):
           case getType(siteConnected):
           case getType(anotherAccountConnected):
@@ -536,6 +548,7 @@ browser.runtime.onMessage.addListener(
           case getType(loginRetryCountIncremented):
           case getType(loginRetryLockoutTimeSet):
           case getType(recipientPublicKeyAdded):
+          case getType(recipientPublicKeyReseted):
           case getType(accountBalanceChanged):
           case getType(accountCurrencyRateChanged):
           case getType(accountCasperActivityChanged):
@@ -556,6 +569,11 @@ browser.runtime.onMessage.addListener(
           case getType(accountTrackingIdOfSentNftTokensChanged):
           case getType(accountTrackingIdOfSentNftTokensRemoved):
           case getType(changePassword):
+          case getType(newContactAdded):
+          case getType(contactRemoved):
+          case getType(contactEditingPermissionChanged):
+          case getType(contactUpdated):
+          case getType(contactsReseted):
             store.dispatch(action);
             return sendResponse(undefined);
 

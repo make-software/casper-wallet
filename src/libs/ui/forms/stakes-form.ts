@@ -24,7 +24,7 @@ export const useStakesForm = (
   delegatorsNumber?: number
 ) => {
   const validatorFormSchema = Yup.object().shape({
-    validatorPublicKey: useValidatorPublicKeyRule(delegatorsNumber)
+    validatorPublicKey: useValidatorPublicKeyRule(stakesType, delegatorsNumber)
   });
 
   const validatorFormOptions: UseFormProps<StakeValidatorFormValues> = {

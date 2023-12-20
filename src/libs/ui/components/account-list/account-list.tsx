@@ -7,7 +7,6 @@ import {
   AlignedFlexRow,
   CenteredFlexRow,
   FlexColumn,
-  FlexRow,
   LeftAlignedFlexColumn,
   SpacingSize
 } from '@libs/layout';
@@ -22,13 +21,12 @@ import { sortAccounts } from '@libs/ui/components/account-list/utils';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   AccountActionsMenuPopover,
+  Avatar,
   Button,
-  Checkbox,
   Hash,
   HashVariant,
   List,
-  Typography,
-  ConnectionStatusBadge
+  Typography
 } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 import { WindowApp } from '@background/create-open-window';
@@ -38,22 +36,16 @@ const ListItemContainer = styled(FlexColumn)`
   min-height: 68px;
   height: 100%;
 
-  padding: 12px 8px 12px 16px;
+  padding: 16px 8px 16px 16px;
 `;
 
-const ListItemClickableContainer = styled(FlexRow)`
+const ListItemClickableContainer = styled(AlignedFlexRow)`
   width: 100%;
   cursor: pointer;
 `;
 
 const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
   width: 100%;
-
-  padding-left: 16px;
-`;
-
-const ConnectionStatusBadgeContainer = styled.div`
-  margin-left: 44px;
 `;
 
 const ButtonContainer = styled(CenteredFlexRow)`
@@ -91,17 +83,18 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
     }));
 
     setAccountListRows(accountListRows);
-    // We need to sort the account list only on the component mount
+    // We need to sort the account list only on the component mount and when new accounts are added
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [accounts]);
 
   return (
     <List
       rows={accountListRows}
       contentTop={SpacingSize.None}
-      maxHeight={380}
-      renderRow={(account, index) => {
+      maxHeight={402}
+      renderRow={account => {
         const isConnected = connectedAccountNames.includes(account.name);
+        const isActiveAccount = activeAccountName === account.name;
 
         return (
           <ListItemContainer key={account.name}>
@@ -111,13 +104,15 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
                   changeActiveAccount(account.name);
                   closeModal(event);
                 }}
+                gap={SpacingSize.Medium}
               >
-                <Checkbox
-                  checked={
-                    activeAccountName
-                      ? activeAccountName === account.name
-                      : false
-                  }
+                <Avatar
+                  size={38}
+                  publicKey={account.publicKey}
+                  withConnectedStatus
+                  isConnected={isConnected}
+                  displayContext="accountList"
+                  isActiveAccount={isActiveAccount}
                 />
                 <AccountNameWithHashListItemContainer>
                   <Typography
@@ -133,13 +128,8 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
                     value={account.publicKey}
                     variant={HashVariant.CaptionHash}
                     truncated
-                    withoutTooltip={accountListRows.length === 1}
+                    withoutTooltip
                     withTag={account.imported}
-                    placement={
-                      index === accountListRows.length - 1
-                        ? 'topRight'
-                        : 'bottomRight'
-                    }
                   />
                 </AccountNameWithHashListItemContainer>
               </ListItemClickableContainer>
@@ -148,18 +138,10 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
                 onClick={closeModal}
               />
             </AlignedFlexRow>
-            {isConnected && (
-              <ConnectionStatusBadgeContainer>
-                <ConnectionStatusBadge
-                  isConnected
-                  displayContext="accountList"
-                />
-              </ConnectionStatusBadgeContainer>
-            )}
           </ListItemContainer>
         );
       }}
-      marginLeftForItemSeparatorLine={60}
+      marginLeftForItemSeparatorLine={70}
       renderFooter={() => (
         <ButtonContainer gap={SpacingSize.Large}>
           <Button
@@ -168,7 +150,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
             onClick={() => {
               openWindow({
                 windowApp: WindowApp.ImportAccount,
-                isNewWindow: false
+                isNewWindow: true
               }).catch(e => console.error(e));
             }}
           >

@@ -369,7 +369,10 @@ export const useCSPRStakeAmountRule = (
     });
 };
 
-export const useValidatorPublicKeyRule = (delegatorsNumber?: number) => {
+export const useValidatorPublicKeyRule = (
+  stakesType: AuctionManagerEntryPoint,
+  delegatorsNumber?: number
+) => {
   const { t } = useTranslation();
 
   return Yup.string()
@@ -381,9 +384,54 @@ export const useValidatorPublicKeyRule = (delegatorsNumber?: number) => {
     })
     .test({
       name: 'maxDelegators',
-      test: () => !(delegatorsNumber && delegatorsNumber >= MAX_DELEGATORS),
+      test: () => {
+        if (stakesType === AuctionManagerEntryPoint.undelegate) {
+          return true;
+        }
+        if (delegatorsNumber) {
+          return delegatorsNumber < MAX_DELEGATORS;
+        }
+
+        return false;
+      },
       message: t(
         'This validator has reached the network limit for total delegators and therefore cannot be delegated to by new accounts. Please select another validator with fewer than 1200 total delegators'
       )
+    });
+};
+
+export const useContactNameRule = (
+  isContactNameIsTakenCallback: (
+    value: string | undefined
+  ) => Promise<boolean> | boolean
+) => {
+  const { t } = useTranslation();
+
+  return Yup.string()
+    .required(t('Name is required'))
+    .max(20, t('This name is too long. Let’s keep it within 20 characters'))
+    .test(
+      'empty',
+      t("Name can't be empty"),
+      value => value != null && value.trim() !== ''
+    )
+    .test(
+      'unique',
+      t(
+        'You’ve already got a contact with this name. Please find a new name for this one'
+      ),
+      value => isContactNameIsTakenCallback(value)
+    );
+};
+
+export const useContactPublicKeyRule = () => {
+  const { t } = useTranslation();
+
+  return Yup.string()
+    .required(t('Public address is required'))
+    .test({
+      name: 'contactPublicKey',
+      test: value => (value ? isValidPublicKey(value) : false),
+      message: t('Public address should be a valid public key')
     });
 };

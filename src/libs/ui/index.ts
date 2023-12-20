@@ -48,6 +48,8 @@ export * from './components/skeleton/skeleton';
 export * from './components/validator-dropdown-input/validator-dropdown-input';
 export * from './components/validator-plate/validator-plate';
 export * from './components/error/error';
+export * from './components/contacts-plate/contacts-plate';
+export * from './components/theme-switcher/theme-switcher';
 
 export * from './utils/match-media';
 export * from './utils/match-size';

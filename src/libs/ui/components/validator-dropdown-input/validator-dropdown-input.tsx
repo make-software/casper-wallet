@@ -8,7 +8,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@src/libs/layout';
-import { SvgIcon, Input, List, ValidatorPlate, Typography } from '@libs/ui';
+import { Input, List, SvgIcon, Typography, ValidatorPlate } from '@libs/ui';
 import { StakeValidatorFormValues } from '@libs/ui/forms/stakes-form';
 import { useClickAway } from '@libs/ui/hooks/use-click-away';
 import { ValidatorResultWithId } from '@libs/services/validators-service/types';
@@ -152,7 +152,12 @@ export const ValidatorDropdownInput = ({
         fee={validator.fee}
         name={validator?.account_info?.info?.owner?.name}
         logo={validator?.account_info?.info?.owner?.branding?.logo?.svg}
-        totalStake={validator.total_stake}
+        // TODO: remove user_stake after we merge recipient and amount steps for undelegation
+        totalStake={
+          stakesType === AuctionManagerEntryPoint.undelegate
+            ? validator.user_stake
+            : validator.total_stake
+        }
         delegatorsNumber={validator?.delegators_number}
         validatorLabel={label}
         error={errors?.validatorPublicKey}
@@ -209,7 +214,12 @@ export const ValidatorDropdownInput = ({
               fee={validator.fee}
               name={validator?.account_info?.info?.owner?.name}
               logo={validator?.account_info?.info?.owner?.branding?.logo?.svg}
-              totalStake={validator.total_stake}
+              // TODO: remove user_stake after we merge recipient and amount steps for undelegation
+              totalStake={
+                stakesType === AuctionManagerEntryPoint.undelegate
+                  ? validator.user_stake
+                  : validator.total_stake
+              }
               delegatorsNumber={validator?.delegators_number}
               handleClick={async () => {
                 setValue('validatorPublicKey', validator.public_key);
