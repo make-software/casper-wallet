@@ -124,11 +124,13 @@ export const ContactDetailsPage = () => {
                     onClick={openEditContact}
                     color="contentAction"
                     src="assets/icons/edit.svg"
+                    dataTestId="edit-contact-button"
                   />
                   <SvgIcon
                     onClick={openDeleteContact}
                     color="contentActionCritical"
                     src="assets/icons/delete.svg"
+                    dataTestId="delete-contact-button"
                   />
                 </AlignedFlexRow>
               )}

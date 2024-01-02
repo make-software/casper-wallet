@@ -12,19 +12,19 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
-  siteConnected,
   activeAccountChanged,
-  siteDisconnected,
-  vaultReseted,
-  vaultLoaded,
-  secretPhraseCreated,
   anotherAccountConnected,
   deployPayloadReceived,
-  deploysReseted
+  deploysReseted,
+  secretPhraseCreated,
+  siteConnected,
+  siteDisconnected,
+  vaultLoaded,
+  vaultReseted
 } from '@src/background/redux/vault/actions';
 import {
-  selectIsAccountConnected,
   selectAccountNamesByOriginDict,
+  selectIsAccountConnected,
   selectVaultAccountsNames,
   selectVaultAccountsSecretKeysBase64,
   selectVaultActiveAccount
@@ -43,8 +43,8 @@ import { sdkEvent } from '@src/content/sdk-event';
 import { isSDKMethod, SdkMethod, sdkMethod } from '@src/content/sdk-method';
 import { WindowApp } from '@src/hooks';
 import {
-  enableOnboardingFlow,
   disableOnboardingFlow,
+  enableOnboardingFlow,
   openOnboardingUi
 } from '@src/background/open-onboarding-flow';
 import {
@@ -96,8 +96,8 @@ import { lastActivityTimeRefreshed } from './redux/last-activity-time/actions';
 import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged,
-  vaultSettingsReseted,
-  themeModeSettingChanged
+  themeModeSettingChanged,
+  vaultSettingsReseted
 } from './redux/settings/actions';
 import { activeOriginChanged } from './redux/active-origin/actions';
 import { selectApiConfigBasedOnActiveNetwork } from './redux/settings/selectors';
@@ -115,23 +115,23 @@ import {
   recipientPublicKeyReseted
 } from './redux/recent-recipient-public-keys/actions';
 import {
-  accountCasperActivityChanged,
-  accountInfoReset,
-  accountCasperActivityUpdated,
   accountBalanceChanged,
+  accountCasperActivityChanged,
+  accountCasperActivityCountChanged,
+  accountCasperActivityUpdated,
   accountCurrencyRateChanged,
-  accountPendingTransactionsChanged,
-  accountPendingTransactionsRemove,
+  accountDeploysAdded,
+  accountDeploysCountChanged,
+  accountDeploysUpdated,
   accountErc20Changed,
   accountErc20TokensActivityChanged,
   accountErc20TokensActivityUpdated,
-  accountDeploysAdded,
-  accountDeploysUpdated,
+  accountInfoReset,
   accountNftTokensAdded,
-  accountNftTokensUpdated,
   accountNftTokensCountChanged,
-  accountDeploysCountChanged,
-  accountCasperActivityCountChanged,
+  accountNftTokensUpdated,
+  accountPendingTransactionsChanged,
+  accountPendingTransactionsRemove,
   accountTrackingIdOfSentNftTokensChanged,
   accountTrackingIdOfSentNftTokensRemoved
 } from '@background/redux/account-info/actions';
