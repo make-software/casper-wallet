@@ -130,7 +130,7 @@ popup.describe('Popup UI: contacts', () => {
   );
 
   popup(
-    'should show error message for duplicate contact name during contact addition',
+    'should show contact details on contact selection',
     async ({ popupPage, unlockVault, addContact }) => {
       await unlockVault();
       await addContact();
