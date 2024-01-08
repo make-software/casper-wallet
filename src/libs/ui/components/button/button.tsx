@@ -18,7 +18,6 @@ const BaseButton = styled.button<BaseButtonProps>(
   ({
     theme,
     disabled,
-    height = '40',
     inline = false,
     minWidth,
     flexWidth = false,

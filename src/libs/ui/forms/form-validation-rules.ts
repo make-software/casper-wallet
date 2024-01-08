@@ -22,7 +22,6 @@ import { verifyPasswordAgainstHash } from '@libs/crypto/hashing';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 
 export const minPasswordLength = 16;
-export const maxQrCodePasswordLength = 8;
 
 const ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED = 1;
 

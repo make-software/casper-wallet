@@ -26,7 +26,7 @@ export async function encodePassword(
     createScryptOptions()
   )
     .then(convertBytesToHex)
-    .catch(err => {
+    .catch(() => {
       throw Error('encodePassword failed!');
     });
 }

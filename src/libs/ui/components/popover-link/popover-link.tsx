@@ -9,7 +9,7 @@ export interface PopoverLinkProps extends React.HTMLAttributes<Ref> {
   variant: 'contentAction';
 }
 
-const BaseLink = styled.a<PopoverLinkProps>(({ theme }) => ({
+const BaseLink = styled.a<PopoverLinkProps>(() => ({
   display: 'flex',
   alignItems: 'center',
 

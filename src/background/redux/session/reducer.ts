@@ -20,7 +20,7 @@ export const reducer = createReducer(initialState)
   .handleAction(sessionReseted, (): State => initialState)
   .handleAction(
     vaultUnlocked,
-    (state, { payload: { lastActivityTime } }): State => ({
+    (state): State => ({
       ...state,
       isLocked: false
     })

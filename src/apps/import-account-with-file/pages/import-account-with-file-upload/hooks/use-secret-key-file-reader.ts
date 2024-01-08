@@ -25,7 +25,7 @@ export function useSecretKeyFileReader({
       const reader = new FileReader();
       reader.readAsText(secretKeyFile);
 
-      reader.onload = async e => {
+      reader.onload = async () => {
         const fileContents = reader.result as string;
 
         try {

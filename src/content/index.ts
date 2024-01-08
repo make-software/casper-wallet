@@ -10,10 +10,7 @@ import {
   sdkMethod
 } from './sdk-method';
 
-async function handleSdkMessage(
-  message: SdkEvent | SdkMethod,
-  sender: browser.Runtime.MessageSender
-) {
+async function handleSdkMessage(message: SdkEvent | SdkMethod) {
   // delayed sdk request response
   if (isSDKMethod(message)) {
     switch (message.type) {

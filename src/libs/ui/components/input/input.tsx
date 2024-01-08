@@ -153,7 +153,6 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
     prefixIcon,
     suffixIcon,
     suffixText,
-    required,
     error,
     validationType,
     validationText,

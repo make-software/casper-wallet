@@ -190,7 +190,7 @@ export function createMainStoreReplica<T extends PopupState>(state: T) {
 }
 
 export function dispatchToMainStore(action: ReduxAction | ServiceMessage) {
-  return browser.runtime.sendMessage(action).catch(err => {
+  return browser.runtime.sendMessage(action).catch(() => {
     console.error('Dispatch to Main Store: ' + action.type);
   });
 }

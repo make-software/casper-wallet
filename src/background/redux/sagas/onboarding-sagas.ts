@@ -41,7 +41,7 @@ export function* onboardingSagas() {
 /**
  *
  */
-function* resetVaultSaga(action: ReturnType<typeof resetVault>) {
+function* resetVaultSaga() {
   try {
     yield put(vaultReseted());
     yield put(vaultCipherReseted());
