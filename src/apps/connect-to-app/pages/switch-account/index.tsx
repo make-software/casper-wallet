@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { sdkMethod } from '@src/content/sdk-method';
-
 import { closeCurrentWindow } from '@background/close-current-window';
 import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+
+import { sdkMethod } from '@content/sdk-method';
 
 import {
   HeaderSubmenuBarNavLink,

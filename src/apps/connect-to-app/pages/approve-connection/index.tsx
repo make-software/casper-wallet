@@ -3,12 +3,12 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import styled from 'styled-components';
 
-import { sdkMethod } from '@src/content/sdk-method';
-
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
 import { closeCurrentWindow } from '@background/close-current-window';
 import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+
+import { sdkMethod } from '@content/sdk-method';
 
 import {
   FooterButtonsContainer,

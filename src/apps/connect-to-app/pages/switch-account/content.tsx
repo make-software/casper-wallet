@@ -2,8 +2,6 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import { sdkMethod } from '@src/content/sdk-method';
-
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
 import { closeCurrentWindow } from '@background/close-current-window';
@@ -14,6 +12,8 @@ import {
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
 import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+
+import { sdkMethod } from '@content/sdk-method';
 
 import {
   ContentContainer,

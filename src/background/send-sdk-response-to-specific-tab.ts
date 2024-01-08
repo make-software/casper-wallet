@@ -1,6 +1,6 @@
 import browser from 'webextension-polyfill';
 
-import { SdkMethod } from '@src/content/sdk-method';
+import { SdkMethod } from '@content/sdk-method';
 
 // TODO: should use tab id to send back to specific tab
 export async function sendSdkResponseToSpecificTab(action: SdkMethod) {

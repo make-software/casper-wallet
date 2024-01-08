@@ -1,7 +1,6 @@
 import { put, select, takeLatest } from 'redux-saga/effects';
 import { getType } from 'typesafe-actions';
 
-import { sdkEvent } from '@src/content/sdk-event';
 import { getUrlOrigin } from '@src/utils';
 
 import {
@@ -15,6 +14,8 @@ import {
 } from '@background/redux/login-retry-lockout-time/actions';
 import { selectLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
 import { emitSdkEventToActiveTabs } from '@background/utils';
+
+import { sdkEvent } from '@content/sdk-event';
 
 import { deriveKeyPair } from '@libs/crypto';
 import {

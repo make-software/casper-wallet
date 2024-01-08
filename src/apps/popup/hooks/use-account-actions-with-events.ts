@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 
-import { sdkEvent } from '@src/content/sdk-event';
 import { getUrlOrigin } from '@src/utils';
 
 import { accountInfoReset } from '@background/redux/account-info/actions';
@@ -24,6 +23,8 @@ import {
   emitSdkEventToActiveTabs,
   emitSdkEventToActiveTabsWithOrigin
 } from '@background/utils';
+
+import { sdkEvent } from '@content/sdk-event';
 
 export function findAccountInAListClosestToGivenAccountFilteredByNames(
   accounts: Account[],

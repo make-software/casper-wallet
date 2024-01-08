@@ -1,12 +1,6 @@
 import { RootAction, getType } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 
-import {
-  SiteNotConnectedError,
-  WalletLockedError
-} from '@src/content/sdk-errors';
-import { sdkEvent } from '@src/content/sdk-event';
-import { SdkMethod, isSDKMethod, sdkMethod } from '@src/content/sdk-method';
 import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
 
 import { WindowApp } from '@background/create-open-window';
@@ -80,6 +74,10 @@ import {
   windowIdCleared
 } from '@background/redux/windowManagement/actions';
 import { selectWindowId } from '@background/redux/windowManagement/selectors';
+
+import { SiteNotConnectedError, WalletLockedError } from '@content/sdk-errors';
+import { sdkEvent } from '@content/sdk-event';
+import { SdkMethod, isSDKMethod, sdkMethod } from '@content/sdk-method';
 
 import {
   MapExtendedDeploy,

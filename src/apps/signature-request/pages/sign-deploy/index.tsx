@@ -3,8 +3,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import { sdkMethod } from '@src/content/sdk-method';
-
 import { closeCurrentWindow } from '@background/close-current-window';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
@@ -12,6 +10,8 @@ import {
   selectVaultAccounts
 } from '@background/redux/vault/selectors';
 import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+
+import { sdkMethod } from '@content/sdk-method';
 
 import { signDeploy } from '@libs/crypto';
 import { convertBytesToHex } from '@libs/crypto/utils';

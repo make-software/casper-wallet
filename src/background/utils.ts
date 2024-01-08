@@ -1,7 +1,8 @@
 import browser from 'webextension-polyfill';
 
-import { SdkEvent } from '@src/content/sdk-event';
 import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
+
+import { SdkEvent } from '@content/sdk-event';
 
 export async function emitSdkEventToActiveTabs(
   callback: (tab: browser.Tabs.Tab) => SdkEvent | undefined

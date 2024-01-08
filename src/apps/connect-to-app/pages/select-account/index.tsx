@@ -3,11 +3,11 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { sdkMethod } from '@src/content/sdk-method';
-
 import { closeCurrentWindow } from '@background/close-current-window';
 import { selectIsActiveAccountConnectedWithActiveOrigin } from '@background/redux/vault/selectors';
 import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+
+import { sdkMethod } from '@content/sdk-method';
 
 import {
   FooterButtonsContainer,
