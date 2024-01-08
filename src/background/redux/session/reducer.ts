@@ -1,12 +1,12 @@
 import { createReducer } from 'typesafe-actions';
 
-import { SessionState } from './types';
 import {
-  sessionReseted,
+  contactEditingPermissionChanged,
   encryptionKeyHashCreated,
-  vaultUnlocked,
-  contactEditingPermissionChanged
+  sessionReseted,
+  vaultUnlocked
 } from './actions';
+import { SessionState } from './types';
 
 type State = SessionState;
 

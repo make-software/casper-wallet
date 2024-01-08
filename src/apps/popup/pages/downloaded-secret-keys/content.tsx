@@ -1,13 +1,13 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
   ContentContainer,
   IllustrationContainer,
   ParagraphContainer,
   SpacingSize
-} from '@src/libs/layout';
-import { SvgIcon, Typography } from '@src/libs/ui';
+} from '@libs/layout';
+import { SvgIcon, Typography } from '@libs/ui';
 
 export function DownloadedSecretKeysPageContent() {
   const { t } = useTranslation();

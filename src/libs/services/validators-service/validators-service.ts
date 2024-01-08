@@ -1,21 +1,23 @@
-import {
-  getAuctionValidatorsUrl,
-  getValidatorsDetailsDataUrl
-} from '@libs/services/validators-service/constants';
-import { handleError, toJson } from '@libs/services/utils';
-import { queryClient } from '@libs/services/query-client';
+import { VALIDATORS_REFRESH_RATE } from '@src/constants';
+
 import { dispatchToMainStore } from '@background/redux/utils';
+import { serviceMessage } from '@background/service-message';
+
+import { queryClient } from '@libs/services/query-client';
 import {
   ErrorResponse,
   PaginatedResponse,
   Payload
 } from '@libs/services/types';
+import { handleError, toJson } from '@libs/services/utils';
+import {
+  getAuctionValidatorsUrl,
+  getValidatorsDetailsDataUrl
+} from '@libs/services/validators-service/constants';
 import {
   DelegatorResult,
   ValidatorResult
 } from '@libs/services/validators-service/types';
-import { serviceMessage } from '@background/service-message';
-import { VALIDATORS_REFRESH_RATE } from '@src/constants';
 
 export const auctionValidatorsRequest = (
   casperApiUrl: string,

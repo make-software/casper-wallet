@@ -1,7 +1,9 @@
 import { createAction } from 'typesafe-actions';
 
-import { TimeoutDurationSetting } from '@popup/constants';
 import { NetworkSetting } from '@src/constants';
+
+import { TimeoutDurationSetting } from '@popup/constants';
+
 import { ThemeMode } from '@background/redux/settings/types';
 
 export const activeTimeoutDurationSettingChanged = createAction(

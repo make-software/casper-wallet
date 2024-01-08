@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components';
+
 import { getLinearGradientColor } from '@libs/ui/utils/get-linear-gradient-color';
 import { hexToRGBA } from '@libs/ui/utils/hex-to-rgba';
 

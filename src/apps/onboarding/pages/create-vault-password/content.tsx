@@ -1,8 +1,8 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
-import { Typography } from '@libs/ui';
 import { TabPageContainer, TabTextContainer } from '@libs/layout';
+import { Typography } from '@libs/ui';
 import { minPasswordLength } from '@libs/ui/forms/form-validation-rules';
 
 interface CreatePasswordPageContentProps {

@@ -1,14 +1,15 @@
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { UseFormResetField } from 'react-hook-form/dist/types/form';
+import { useSelector } from 'react-redux';
+
+import { LOGIN_RETRY_ATTEMPTS_LIMIT } from '@src/constants';
 
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
-import { dispatchToMainStore } from '@background/redux/utils';
-import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
 import { loginRetryLockoutTimeSet } from '@background/redux/login-retry-lockout-time/actions';
+import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
 import { lockVault } from '@background/redux/sagas/actions';
 import { selectVaultIsLocked } from '@background/redux/session/selectors';
-import { LOGIN_RETRY_ATTEMPTS_LIMIT } from '@src/constants';
+import { dispatchToMainStore } from '@background/redux/utils';
 
 export const useLockWalletWhenNoMoreRetries = (
   resetField?: UseFormResetField<{ password: string }>

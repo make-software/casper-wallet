@@ -1,5 +1,5 @@
-import { randomBytes } from '@noble/hashes/utils';
 import { scryptAsync } from '@noble/hashes/scrypt';
+import { randomBytes } from '@noble/hashes/utils';
 
 import { convertBytesToHex, convertHexToBytes } from './utils';
 

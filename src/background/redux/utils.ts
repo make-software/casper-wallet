@@ -1,28 +1,28 @@
 import { compose } from 'redux';
+import { call, select } from 'redux-saga/effects';
 import { composeWithDevTools } from 'remote-redux-devtools';
-import browser from 'webextension-polyfill';
 import { RootState } from 'typesafe-actions';
-import { select, call } from 'redux-saga/effects';
+import browser from 'webextension-polyfill';
 
-import { createStore } from '@src/background/redux';
-import { backgroundEvent } from '@src/background/background-events';
+import { backgroundEvent } from '@background/background-events';
+import { createStore } from '@background/redux';
 import { ServiceMessage } from '@background/service-message';
 
-import { ReduxAction } from './redux-action';
-import { startBackground } from './sagas/actions';
+import { AccountInfoState } from './account-info/types';
+import { ActiveOriginState } from './active-origin/types';
+import { ContactsState } from './contacts/types';
 import { KeysState } from './keys/types';
+import { LastActivityTimeState } from './last-activity-time/reducer';
 import { LoginRetryCountState } from './login-retry-count/reducer';
 import { LoginRetryLockoutTimeState } from './login-retry-lockout-time/types';
-import { VaultCipherState } from './vault-cipher/types';
-import { WindowManagementState } from './windowManagement/types';
-import { VaultState } from './vault/types';
-import { SessionState } from './session/types';
-import { LastActivityTimeState } from './last-activity-time/reducer';
-import { SettingsState } from './settings/types';
-import { ActiveOriginState } from './active-origin/types';
 import { RecentRecipientPublicKeysState } from './recent-recipient-public-keys/types';
-import { AccountInfoState } from './account-info/types';
-import { ContactsState } from './contacts/types';
+import { ReduxAction } from './redux-action';
+import { startBackground } from './sagas/actions';
+import { SessionState } from './session/types';
+import { SettingsState } from './settings/types';
+import { VaultCipherState } from './vault-cipher/types';
+import { VaultState } from './vault/types';
+import { WindowManagementState } from './windowManagement/types';
 
 declare global {
   interface Window {

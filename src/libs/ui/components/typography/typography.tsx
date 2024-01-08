@@ -1,12 +1,7 @@
 import React, { forwardRef } from 'react';
 import styled, { CSSObject, DefaultTheme } from 'styled-components';
 
-import {
-  BaseProps,
-  ContentColor,
-  getColorFromTheme,
-  Skeleton
-} from '@src/libs/ui';
+import { BaseProps, ContentColor, Skeleton, getColorFromTheme } from '@libs/ui';
 
 type Ref = HTMLSpanElement | HTMLHeadingElement;
 

@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { SetFormState } from '@onboarding/app-router';
+import { Stepper } from '@onboarding/components/stepper';
+import { RouterPath } from '@onboarding/router';
+import { useTypedNavigate } from '@onboarding/router/use-typed-navigate';
+
+import { generateSecretPhrase } from '@libs/crypto';
 import {
+  HeaderSubmenuBarNavLink,
   LayoutTab,
-  TabHeaderContainer,
   TabFooterContainer,
-  HeaderSubmenuBarNavLink
+  TabHeaderContainer
 } from '@libs/layout';
 import { Button, Checkbox } from '@libs/ui';
 
-import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { RouterPath } from '@src/apps/onboarding/router';
-import { Stepper } from '@src/apps/onboarding/components/stepper';
-import { SetFormState } from '@src/apps/onboarding/app-router';
-
 import { CreateSecretPhraseConfirmationPageContent } from './content';
-import { generateSecretPhrase } from '@src/libs/crypto';
 
 interface CreateSecretPhraseConfirmationPageProps {
   setFormState: SetFormState;

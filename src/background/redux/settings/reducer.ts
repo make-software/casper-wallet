@@ -1,8 +1,9 @@
 import { createReducer } from 'typesafe-actions';
 
-import { TimeoutDurationSetting } from '@popup/constants';
 import { NetworkSetting } from '@src/constants';
 import { isSafariBuild } from '@src/utils';
+
+import { TimeoutDurationSetting } from '@popup/constants';
 
 import {
   activeNetworkSettingChanged,

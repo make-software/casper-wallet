@@ -1,8 +1,12 @@
+import Big from 'big.js';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import Big from 'big.js';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+
+import { AuctionManagerEntryPoint } from '@src/constants';
+
+import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 
 import {
   ContentContainer,
@@ -11,16 +15,14 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { getAuctionManagerDeployCost } from '@libs/services/deployer-service';
+import { ValidatorResult } from '@libs/services/validators-service/types';
 import { AmountContainer, List, Typography, ValidatorPlate } from '@libs/ui';
 import {
   formatFiatAmount,
   formatNumber,
   motesToCSPR
 } from '@libs/ui/utils/formatters';
-import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
-import { ValidatorResult } from '@libs/services/validators-service/types';
-import { getAuctionManagerDeployCost } from '@libs/services/deployer-service';
-import { AuctionManagerEntryPoint } from '@src/constants';
 
 export const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;

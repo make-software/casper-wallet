@@ -1,14 +1,14 @@
 import React from 'react';
 import { NavigateFunction } from 'react-router';
 
+import { closeCurrentWindow } from '@background/close-current-window';
+
 import {
+  FooterButtonsContainer,
   LayoutWindow,
-  PopupHeader,
-  FooterButtonsContainer
+  PopupHeader
 } from '@libs/layout';
 import { Button } from '@libs/ui';
-
-import { closeCurrentWindow } from '@src/background/close-current-window';
 
 import { ErrorPageContent } from './content';
 import { ErrorLocationState } from './types';

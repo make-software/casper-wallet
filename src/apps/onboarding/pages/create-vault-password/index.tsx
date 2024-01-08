@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from 'react';
+import { useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useWatch } from 'react-hook-form';
+
+import { TermsLink } from '@src/constants';
+
+import { Stepper } from '@onboarding/components/stepper';
+import { RouterPath } from '@onboarding/router';
+import { useTypedNavigate } from '@onboarding/router/use-typed-navigate';
+
+import { selectPasswordHash } from '@background/redux/keys/selectors';
+import { initKeys } from '@background/redux/sagas/actions';
+import { dispatchToMainStore } from '@background/redux/utils';
 
 import {
   HeaderSubmenuBarNavLink,
@@ -14,14 +24,6 @@ import {
   CreatePasswordFormValues,
   useCreatePasswordForm
 } from '@libs/ui/forms/create-password';
-
-import { Stepper } from '@src/apps/onboarding/components/stepper';
-import { RouterPath } from '@src/apps/onboarding/router';
-import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { selectPasswordHash } from '@src/background/redux/keys/selectors';
-import { initKeys } from '@src/background/redux/sagas/actions';
-import { dispatchToMainStore } from '@background/redux/utils';
-import { TermsLink } from '@src/constants';
 
 import { CreateVaultPasswordPageContent } from './content';
 

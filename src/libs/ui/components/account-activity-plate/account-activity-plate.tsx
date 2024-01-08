@@ -1,8 +1,23 @@
 import React, { forwardRef, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import {
+  ActivityShortTypeName,
+  ActivityType,
+  ActivityTypeColors,
+  ActivityTypeIcons,
+  ActivityTypeName,
+  AuctionManagerEntryPoint,
+  TokenEntryPoint
+} from '@src/constants';
+
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   AccountActivityPlateContainer,
   ActivityPlateContentContainer,
@@ -13,6 +28,10 @@ import {
   RightAlignedCenteredFlexRow,
   SpacingSize
 } from '@libs/layout';
+import {
+  Erc20TransferWithId,
+  ExtendedDeployWithId
+} from '@libs/services/account-activity-service';
 import {
   ContentColor,
   DeployStatus,
@@ -29,22 +48,6 @@ import {
   formatTimestampAge,
   motesToCSPR
 } from '@libs/ui/utils/formatters';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import {
-  Erc20TransferWithId,
-  ExtendedDeployWithId
-} from '@libs/services/account-activity-service';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import {
-  ActivityShortTypeName,
-  ActivityType,
-  ActivityTypeColors,
-  ActivityTypeIcons,
-  ActivityTypeName,
-  AuctionManagerEntryPoint,
-  TokenEntryPoint
-} from '@src/constants';
-import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { getRecipientAddressFromTransaction } from '@libs/ui/utils/utils';
 
 const SymbolContainer = styled(RightAlignedCenteredFlexRow)`

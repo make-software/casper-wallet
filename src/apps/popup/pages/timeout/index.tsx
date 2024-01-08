@@ -1,19 +1,20 @@
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
-import { Typography, Checkbox, List } from '@libs/ui';
+import { TimeoutDurationSetting } from '@popup/constants';
+
+import { activeTimeoutDurationSettingChanged } from '@background/redux/settings/actions';
+import { selectTimeoutDurationSetting } from '@background/redux/settings/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+
 import {
   ContentContainer,
-  ParagraphContainer,
   ListItemClickableContainer,
+  ParagraphContainer,
   SpacingSize
-} from '@src/libs/layout/containers';
-
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { selectTimeoutDurationSetting } from '@src/background/redux/settings/selectors';
-import { activeTimeoutDurationSettingChanged } from '@src/background/redux/settings/actions';
-import { TimeoutDurationSetting } from '@popup/constants';
+} from '@libs/layout';
+import { Checkbox, List, Typography } from '@libs/ui';
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();

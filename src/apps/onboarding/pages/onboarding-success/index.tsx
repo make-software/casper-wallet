@@ -1,10 +1,10 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
+
+import { closeActiveTab } from '@onboarding/utils/close-active-tab';
 
 import { LayoutTab, TabFooterContainer } from '@libs/layout';
 import { Button } from '@libs/ui';
-
-import { closeActiveTab } from '@src/apps/onboarding/utils/close-active-tab';
 
 import { OnboardingSuccessPageContent } from './content';
 

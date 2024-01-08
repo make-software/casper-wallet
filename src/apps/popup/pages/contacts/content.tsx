@@ -2,17 +2,19 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
+import { EmptyContacts } from '@popup/pages/contacts/empty-contacts';
+
+import {
+  selectAllContacts,
+  selectLastModified
+} from '@background/redux/contacts/selectors';
+
 import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { List, Typography, ContactsPlate } from '@libs/ui';
-import {
-  selectAllContacts,
-  selectLastModified
-} from '@background/redux/contacts/selectors';
-import { EmptyContacts } from '@popup/pages/contacts/empty-contacts';
+import { ContactsPlate, List, Typography } from '@libs/ui';
 import { formatShortTimestamp } from '@libs/ui/utils/formatters';
 
 export const ContactsBookPageContent = () => {

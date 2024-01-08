@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { List, Typography, TokenPlate } from '@libs/ui';
-import { SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import { TokenType, useCasperToken, useFetchErc20Tokens } from '@src/hooks';
+
+import { TokenType, useCasperToken } from '@hooks/use-casper-token';
+import { useFetchErc20Tokens } from '@hooks/use-fetch-erc20-tokens';
+
+import { SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
+import { List, TokenPlate, Typography } from '@libs/ui';
 
 import { formatErc20TokenBalance } from './utils';
 

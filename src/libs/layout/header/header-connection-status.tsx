@@ -1,10 +1,11 @@
 import React from 'react';
-import styled from 'styled-components';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 
-import { AccountList, Hash, HashVariant, Modal, SvgIcon } from '@libs/ui';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import { selectVaultActiveAccount } from '@src/background/redux/vault/selectors';
+import { AccountList, Hash, HashVariant, Modal, SvgIcon } from '@libs/ui';
 
 const ConnectionStatusContainer = styled(AlignedFlexRow)`
   width: fit-content;

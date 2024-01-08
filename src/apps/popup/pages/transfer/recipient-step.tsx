@@ -1,6 +1,6 @@
 import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 import { UseFormReturn } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
   ContentContainer,
@@ -8,9 +8,9 @@ import {
   SpacingSize
 } from '@libs/layout';
 import {
-  Typography,
   ActiveAccountPlate,
-  RecipientDropdownInput
+  RecipientDropdownInput,
+  Typography
 } from '@libs/ui';
 import { TransferRecipientFormValues } from '@libs/ui/forms/transfer';
 

@@ -1,20 +1,21 @@
 import React from 'react';
-import styled from 'styled-components';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 
-import {
-  AlignedFlexRow,
-  AlignedSpaceBetweenFlexRow,
-  HeaderContainer
-} from '@src/libs/layout';
-import { Avatar, SvgIcon } from '@libs/ui';
 import {
   selectIsActiveAccountConnectedWithActiveOrigin,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
 
-import { HeaderConnectionStatus } from './header-connection-status';
+import {
+  AlignedFlexRow,
+  AlignedSpaceBetweenFlexRow,
+  HeaderContainer
+} from '@libs/layout';
+import { Avatar, SvgIcon } from '@libs/ui';
+
 import { HeaderActions } from './header-actions';
+import { HeaderConnectionStatus } from './header-connection-status';
 import { HeaderDataUpdater } from './header-data-updater';
 
 const SubmenuBarContainer = styled(AlignedSpaceBetweenFlexRow)`
@@ -85,3 +86,4 @@ export function PopupHeader({
 
 export * from './header-submenu-bar-nav-link';
 export * from './header-view-in-explorer';
+export * from './header-network-switcher';

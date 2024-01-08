@@ -1,9 +1,9 @@
 import React, { Dispatch, SetStateAction } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
-import { TabPageContainer, TabTextContainer } from '@src/libs/layout';
-import { Typography, SecretPhraseWordsView, WordPicker } from '@src/libs/ui';
-import { SecretPhrase } from '@src/libs/crypto';
+import { SecretPhrase } from '@libs/crypto';
+import { TabPageContainer, TabTextContainer } from '@libs/layout';
+import { SecretPhraseWordsView, Typography, WordPicker } from '@libs/ui';
 
 interface ConfirmSecretPhrasePageContentProps {
   phrase: SecretPhrase;

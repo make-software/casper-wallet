@@ -1,31 +1,30 @@
 import React, { useState } from 'react';
-import { HashRouter, Route, Routes } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { HashRouter, Route, Routes } from 'react-router-dom';
 
-import { SecretPhrase } from '@src/libs/crypto';
-import { ErrorPath, TabErrorPage } from '@src/libs/layout/error';
-
+import { useSessionStorage } from '@onboarding/hooks/use-session-storage';
+import { ConfirmSecretPhrasePage } from '@onboarding/pages/confirm-secret-phrase';
+import { ConfirmSecretPhraseSuccessPage } from '@onboarding/pages/confirm-secret-phrase-success';
+import { CreateSecretPhrasePage } from '@onboarding/pages/create-secret-phrase';
+import { CreateSecretPhraseConfirmationPage } from '@onboarding/pages/create-secret-phrase-confirmation';
+import { CreateVaultPasswordPage } from '@onboarding/pages/create-vault-password';
+import { OnboardingSuccessPage } from '@onboarding/pages/onboarding-success';
+import { RecoverFromSecretPhrasePage } from '@onboarding/pages/recover-from-secret-phrase';
+import { ResetWalletPage } from '@onboarding/pages/reset-wallet';
+import { UnlockWalletPage } from '@onboarding/pages/unlock-wallet';
+import { WelcomePage } from '@onboarding/pages/welcome';
+import { WriteDownSecretPhrasePage } from '@onboarding/pages/write-down-secret-phrase';
 import {
   RouterPath,
   useTypedLocation,
   useTypedNavigate
-} from '@src/apps/onboarding/router';
+} from '@onboarding/router';
 
-import { useSessionStorage } from '@src/apps/onboarding/hooks/use-session-storage';
+import { selectKeysDoesExist } from '@background/redux/keys/selectors';
+import { selectEncryptionKeyHash } from '@background/redux/session/selectors';
 
-import { UnlockWalletPage } from '@src/apps/onboarding/pages/unlock-wallet';
-import { ResetWalletPage } from '@src/apps/onboarding/pages/reset-wallet';
-import { WelcomePage } from '@src/apps/onboarding/pages/welcome';
-import { CreateVaultPasswordPage } from '@src/apps/onboarding/pages/create-vault-password';
-import { CreateSecretPhrasePage } from '@src/apps/onboarding/pages/create-secret-phrase';
-import { RecoverFromSecretPhrasePage } from '@src/apps/onboarding/pages/recover-from-secret-phrase';
-import { CreateSecretPhraseConfirmationPage } from '@src/apps/onboarding/pages/create-secret-phrase-confirmation';
-import { WriteDownSecretPhrasePage } from '@src/apps/onboarding/pages/write-down-secret-phrase';
-import { ConfirmSecretPhrasePage } from '@src/apps/onboarding/pages/confirm-secret-phrase';
-import { ConfirmSecretPhraseSuccessPage } from '@src/apps/onboarding/pages/confirm-secret-phrase-success';
-import { OnboardingSuccessPage } from '@src/apps/onboarding/pages/onboarding-success';
-import { selectKeysDoesExist } from '@src/background/redux/keys/selectors';
-import { selectEncryptionKeyHash } from '@src/background/redux/session/selectors';
+import { SecretPhrase } from '@libs/crypto';
+import { ErrorPath, TabErrorPage } from '@libs/layout';
 
 export interface FormState {
   secretPhrase: SecretPhrase | null;

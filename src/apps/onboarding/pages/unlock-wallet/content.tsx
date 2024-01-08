@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 import { UseFormRegister } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import {
+  InputsContainer,
   TabPageContainer as TabPageContainerBase,
-  TabTextContainer,
-  InputsContainer
-} from '@src/libs/layout';
+  TabTextContainer
+} from '@libs/layout';
 import {
-  PasswordInputType,
   Input,
-  Typography,
   InputValidationType,
+  PasswordInputType,
   PasswordVisibilityIcon,
-  SvgIcon
+  SvgIcon,
+  Typography
 } from '@libs/ui';
-import { UnlockWalletFormValues } from '@src/libs/ui/forms/unlock-wallet';
+import { UnlockWalletFormValues } from '@libs/ui/forms/unlock-wallet';
 
 // Design of this page is temporary. Should be changed after it will be done in Figma
 const TabPageContainer = styled.div`

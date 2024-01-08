@@ -51,8 +51,6 @@ export * from './components/error/error';
 export * from './components/contacts-plate/contacts-plate';
 export * from './components/theme-switcher/theme-switcher';
 
-export * from './utils/match-media';
-export * from './utils/match-size';
 export * from './utils/hex-to-rgba';
 export * from './utils/get-color-from-theme';
 export * from './theme-config';

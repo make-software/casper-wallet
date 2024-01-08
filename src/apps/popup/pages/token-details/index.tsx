@@ -1,6 +1,8 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+
+import { selectErc20Tokens } from '@background/redux/account-info/selectors';
 
 import {
   HeaderSubmenuBarNavLink,
@@ -8,7 +10,6 @@ import {
   PopupHeader,
   PopupLayout
 } from '@libs/layout';
-import { selectErc20Tokens } from '@background/redux/account-info/selectors';
 
 import { TokenPageContent } from './content';
 

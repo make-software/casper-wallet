@@ -1,4 +1,5 @@
 import { createReducer } from 'typesafe-actions';
+
 import { vaultCipherCreated, vaultCipherReseted } from './actions';
 import { VaultCipherState } from './types';
 

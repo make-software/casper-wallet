@@ -1,28 +1,29 @@
 import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 
-import { Account } from '@src/background/redux/vault/types';
+import { sdkEvent } from '@src/content/sdk-event';
+import { getUrlOrigin } from '@src/utils';
+
+import { accountInfoReset } from '@background/redux/account-info/actions';
+import { selectVaultIsLocked } from '@background/redux/session/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
 import {
-  activeAccountChanged,
-  siteConnected,
   accountDisconnected,
-  siteDisconnected,
-  anotherAccountConnected
-} from '@src/background/redux/vault/actions';
+  activeAccountChanged,
+  anotherAccountConnected,
+  siteConnected,
+  siteDisconnected
+} from '@background/redux/vault/actions';
 import {
   selectAccountNamesByOriginDict,
   selectVaultAccounts,
   selectVaultActiveAccount
-} from '@src/background/redux/vault/selectors';
-import { sdkEvent } from '@src/content/sdk-event';
-import { dispatchToMainStore } from '@background/redux/utils';
-import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
+} from '@background/redux/vault/selectors';
+import { Account } from '@background/redux/vault/types';
 import {
   emitSdkEventToActiveTabs,
   emitSdkEventToActiveTabsWithOrigin
-} from '@src/background/utils';
-import { getUrlOrigin } from '@src/utils';
-import { accountInfoReset } from '@background/redux/account-info/actions';
+} from '@background/utils';
 
 export function findAccountInAListClosestToGivenAccountFilteredByNames(
   accounts: Account[],

@@ -1,14 +1,15 @@
 import Big from 'big.js';
 import { CLPublicKey } from 'casper-js-sdk';
+import browser from 'webextension-polyfill';
 
 import { Browser, NFT_TOKENS_REFRESH_RATE } from '@src/constants';
+
 import {
   NFTTokenMetadata,
   NFTTokenMetadataEntry,
   NFTTokenResult
 } from '@libs/services/nft-service';
 import { queryClient } from '@libs/services/query-client';
-import browser from 'webextension-polyfill';
 
 interface ImageProxyUrlProps {
   ttl: string;

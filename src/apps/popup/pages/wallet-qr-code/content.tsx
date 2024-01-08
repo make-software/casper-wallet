@@ -1,6 +1,6 @@
+import { QRCodeCanvas } from 'qrcode.react';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { QRCodeCanvas } from 'qrcode.react';
 import styled, { useTheme } from 'styled-components';
 
 import {

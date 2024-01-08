@@ -5,57 +5,57 @@ import styled from 'styled-components';
 import browser from 'webextension-polyfill';
 
 import {
-  AlignedFlexRow,
-  CenteredFlexRow,
-  FlexColumn,
-  HeaderSubmenuBarNavLink,
-  LinkType,
-  SpacingSize
-} from '@libs/layout';
+  HomePageTabName,
+  NetworkSetting,
+  getBuyWithTopperUrl
+} from '@src/constants';
+
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
+
+import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import {
+  selectActiveNetworkSetting,
+  selectCountOfAccounts,
+  selectIsActiveAccountConnectedWithActiveOrigin,
+  selectVaultActiveAccount
+} from '@background/redux/root-selector';
+
+import { useCasperToken } from '@hooks/use-casper-token';
+
+import {
+  AlignedFlexRow,
   CenteredFlexColumn,
+  CenteredFlexRow,
   ContentContainer,
+  FlexColumn,
   FlexRow,
+  HeaderSubmenuBarNavLink,
   LeftAlignedFlexColumn,
+  LinkType,
   SpaceBetweenFlexRow,
+  SpacingSize,
   TileContainer,
   VerticalSpaceContainer
-} from '@src/libs/layout/containers';
-
+} from '@libs/layout';
 import {
   AccountActionsMenuPopover,
   Avatar,
   Button,
-  getFontSizeBasedOnTextLength,
   Hash,
   HashVariant,
   SvgIcon,
   Tab,
   Tabs,
   Tile,
-  Typography
+  Typography,
+  getFontSizeBasedOnTextLength
 } from '@libs/ui';
+import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
 
-import { useCasperToken } from '@src/hooks';
-import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
-import {
-  selectActiveNetworkSetting,
-  selectCountOfAccounts,
-  selectIsActiveAccountConnectedWithActiveOrigin,
-  selectVaultActiveAccount
-} from '@src/background/redux/root-selector';
-import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
-import { selectAccountBalance } from '@background/redux/account-info/selectors';
-import {
-  getBuyWithTopperUrl,
-  HomePageTabName,
-  NetworkSetting
-} from '@src/constants';
-
-import { TokensList } from './components/tokens-list';
-import { NftList } from './components/nft-list';
 import { DeploysList } from './components/deploys-list';
 import { MoreButtonsModal } from './components/more-buttons-modal';
+import { NftList } from './components/nft-list';
+import { TokensList } from './components/tokens-list';
 
 const DividerLine = styled.hr`
   margin: 16px 0;

@@ -1,12 +1,13 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { getMappedPendingTransactions } from '@libs/ui/utils/utils';
+import { accountPendingTransactionsRemove } from '@background/redux/account-info/actions';
 import { selectPendingTransactions } from '@background/redux/account-info/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { accountPendingTransactionsRemove } from '@background/redux/account-info/actions';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
 import { ExtendedDeployWithId } from '@libs/services/account-activity-service';
+import { getMappedPendingTransactions } from '@libs/ui/utils/utils';
 
 export const useMapAccountDeploysListWithPendingTransactions = (
   accountDeploys: ExtendedDeployWithId[] | null

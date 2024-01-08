@@ -3,15 +3,15 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import {
-  ParagraphContainer,
-  PageContainer,
-  ContentContainer,
   BreakWordContainer,
-  VerticalSpaceContainer,
+  ContentContainer,
   ListItemClickableContainer,
-  SpacingSize
-} from '@src/libs/layout';
-import { SiteFaviconBadge, List, SvgIcon, Typography } from '@src/libs/ui';
+  PageContainer,
+  ParagraphContainer,
+  SpacingSize,
+  VerticalSpaceContainer
+} from '@libs/layout';
+import { List, SiteFaviconBadge, SvgIcon, Typography } from '@libs/ui';
 
 const ListItemContainer = styled(ListItemClickableContainer)`
   cursor: unset;

@@ -3,8 +3,8 @@ import styled from 'styled-components';
 
 import { useNavigationMenu, useTypedLocation } from '@popup/router';
 
+import { HeaderNetworkSwitcher } from '@libs/layout';
 import { SvgIcon } from '@libs/ui';
-import { HeaderNetworkSwitcher } from '@layout/header/header-network-switcher';
 
 const Container = styled.div`
   display: flex;

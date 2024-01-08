@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { dispatchFetchNftTokensRequest } from '@libs/services/nft-service';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import { dispatchToMainStore } from '@background/redux/utils';
+import { ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE } from '@src/constants';
+
+import { useForceUpdate } from '@popup/hooks/use-force-update';
+
 import {
   accountNftTokensAdded,
   accountNftTokensCountChanged,
@@ -14,9 +14,12 @@ import {
   selectAccountNftTokens,
   selectAccountNftTokensCount
 } from '@background/redux/account-info/selectors';
-import { ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE } from '@src/constants';
-import { useForceUpdate } from '@popup/hooks/use-force-update';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import { dispatchFetchNftTokensRequest } from '@libs/services/nft-service';
 
 export const useFetchNftTokens = () => {
   const [loading, setLoading] = useState(false);

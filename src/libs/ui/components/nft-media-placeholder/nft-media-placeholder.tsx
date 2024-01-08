@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Skeleton, SvgIcon } from '@libs/ui';
 import { CenteredFlexRow } from '@libs/layout';
+import { Skeleton, SvgIcon } from '@libs/ui';
 
 export const ImageContainer = styled(CenteredFlexRow)`
   position: relative;

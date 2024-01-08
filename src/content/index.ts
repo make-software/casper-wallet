@@ -1,14 +1,14 @@
+import { getType } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 
+import { SdkEvent, sdkEvent } from './sdk-event';
+import { CasperWalletEventType } from './sdk-event-type';
 import {
+  SdkMethod,
   SdkMethodEventType,
   isSDKMethod,
-  sdkMethod,
-  SdkMethod
+  sdkMethod
 } from './sdk-method';
-import { sdkEvent, SdkEvent } from './sdk-event';
-import { getType } from 'typesafe-actions';
-import { CasperWalletEventType } from './sdk-event-type';
 
 async function handleSdkMessage(
   message: SdkEvent | SdkMethod,

@@ -1,27 +1,29 @@
 import React, { Suspense, useState } from 'react';
 import { render } from 'react-dom';
+// skeleton styles
+import 'react-loading-skeleton/dist/skeleton.css';
 import { Provider as ReduxProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
-import { darkTheme, GlobalStyle, lightTheme } from '@libs/ui';
-import { ErrorBoundary } from '@src/libs/layout/error';
-import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
-import {
-  createMainStoreReplica,
-  dispatchToMainStore,
-  PopupState
-} from '@background/redux/utils';
-import { popupWindowInit } from '@background/redux/windowManagement/actions';
-import { selectThemeModeSetting } from '@background/redux/settings/selectors';
-import { ThemeMode } from '@background/redux/settings/types';
-import { useSystemThemeDetector } from '@src/hooks';
-import { themeModeSettingChanged } from '@background/redux/settings/actions';
 import { isSafariBuild } from '@src/utils';
 
-import { AppRouter } from './app-router';
+import { themeModeSettingChanged } from '@background/redux/settings/actions';
+import { selectThemeModeSetting } from '@background/redux/settings/selectors';
+import { ThemeMode } from '@background/redux/settings/types';
+import {
+  PopupState,
+  createMainStoreReplica,
+  dispatchToMainStore
+} from '@background/redux/utils';
+import { popupWindowInit } from '@background/redux/windowManagement/actions';
 
-// skeleton styles
-import 'react-loading-skeleton/dist/skeleton.css';
+import { useSubscribeToRedux } from '@hooks/use-subscribe-to-redux';
+import { useSystemThemeDetector } from '@hooks/use-system-theme-detector';
+
+import { ErrorBoundary } from '@libs/layout';
+import { GlobalStyle, darkTheme, lightTheme } from '@libs/ui';
+
+import { AppRouter } from './app-router';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);

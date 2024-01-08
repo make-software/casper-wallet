@@ -1,7 +1,7 @@
 import React from 'react';
 import styled, { DefaultTheme } from 'styled-components';
 
-import { getColorFromTheme } from '@src/libs/ui';
+import { getColorFromTheme } from '@libs/ui';
 
 type LinkColor = 'contentAction' | 'fillCritical' | 'inherit';
 

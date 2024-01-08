@@ -1,15 +1,17 @@
 import React from 'react';
 
+import { sdkMethod } from '@src/content/sdk-method';
+
+import { closeCurrentWindow } from '@background/close-current-window';
+import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+
 import {
   HeaderSubmenuBarNavLink,
   LayoutWindow,
   PopupHeader
-} from '@src/libs/layout';
+} from '@libs/layout';
 
 import { SwitchAccountContent } from './content';
-import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
-import { sdkMethod } from '@src/content/sdk-method';
-import { closeCurrentWindow } from '@src/background/close-current-window';
 
 export function SwitchAccountPage() {
   const searchParams = new URLSearchParams(document.location.search);

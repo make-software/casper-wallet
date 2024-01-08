@@ -2,6 +2,10 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { useCopyToClipboard } from '@hooks/use-copy-to-clipboard';
+
 import {
   FooterButtonsContainer,
   HeaderSubmenuBarNavLink,
@@ -9,8 +13,6 @@ import {
   PopupLayout
 } from '@libs/layout';
 import { Button, Typography } from '@libs/ui';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { useCopyToClipboard } from '@src/hooks';
 
 import { ReceivePageContent } from './content';
 

@@ -1,24 +1,23 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
-import { List, SvgIcon, Typography } from '@libs/ui';
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+import { SiteGroupHeader } from '@popup/pages/connected-sites/site-group-header';
+import { SiteGroupItem } from '@popup/pages/connected-sites/site-group-item';
+
+import {
+  selectAccountsByOriginDict,
+  selectSiteNameByOriginDict
+} from '@background/redux/vault/selectors';
+
 import {
   ContentContainer,
   IllustrationContainer,
   ParagraphContainer,
   SpacingSize
-} from '@src/libs/layout';
-
-import {
-  selectSiteNameByOriginDict,
-  selectAccountsByOriginDict
-} from '@src/background/redux/vault/selectors';
-
-import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
-
-import { SiteGroupHeader } from '@popup/pages/connected-sites/site-group-header';
-import { SiteGroupItem } from '@popup/pages/connected-sites/site-group-item';
+} from '@libs/layout';
+import { List, SvgIcon, Typography } from '@libs/ui';
 
 export function ConnectedSitesPage() {
   const { t } = useTranslation();

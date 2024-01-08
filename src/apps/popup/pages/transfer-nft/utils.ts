@@ -8,12 +8,13 @@ import {
 } from 'casper-js-sdk';
 import { sub } from 'date-fns';
 
-import { NFTTokenStandard } from '@src/utils';
-import { motesToCSPR } from '@libs/ui/utils/formatters';
 import {
   NFT_CEP47_PAYMENT_AMOUNT_AVERAGE_MOTES,
   NFT_CEP78_PAYMENT_AMOUNT_AVERAGE_MOTES
 } from '@src/constants';
+import { NFTTokenStandard } from '@src/utils';
+
+import { motesToCSPR } from '@libs/ui/utils/formatters';
 
 export interface TokenArgs {
   tokenId?: string;

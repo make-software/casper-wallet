@@ -1,14 +1,15 @@
 import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
 import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize,
   VerticalSpaceContainer
-} from '@src/libs/layout';
+} from '@libs/layout';
 import { HomePageTabsId, SvgIcon, Typography } from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@popup/router';
 
 interface TransferSuccessScreenProps {
   headerText: string;

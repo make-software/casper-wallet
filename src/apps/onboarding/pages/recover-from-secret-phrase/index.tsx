@@ -1,29 +1,31 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Stepper } from '@onboarding/components/stepper';
+import { RouterPath } from '@onboarding/router';
+import { useTypedNavigate } from '@onboarding/router/use-typed-navigate';
+import { closeActiveTab } from '@onboarding/utils/close-active-tab';
+
+import { initVault } from '@background/redux/sagas/actions';
+import { dispatchToMainStore } from '@background/redux/utils';
+
+import { validateSecretPhrase } from '@libs/crypto';
 import {
+  ErrorPath,
   HeaderSubmenuBarNavLink,
   LayoutTab,
   TabFooterContainer,
-  TabHeaderContainer
-} from '@src/libs/layout';
-import { createErrorLocationState, ErrorPath } from '@src/libs/layout/error';
-import { Button } from '@src/libs/ui';
+  TabHeaderContainer,
+  createErrorLocationState
+} from '@libs/layout';
+import { Button } from '@libs/ui';
+import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import {
   RecoverSecretPhraseFormValues,
   useRecoverFromSecretPhraseForm
-} from '@src/libs/ui/forms/recover-from-secret-phrase';
-
-import { Stepper } from '@src/apps/onboarding/components/stepper';
-import { RouterPath } from '@src/apps/onboarding/router';
-import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { closeActiveTab } from '@src/apps/onboarding/utils/close-active-tab';
+} from '@libs/ui/forms/recover-from-secret-phrase';
 
 import { RecoverFromSecretPhrasePageContent } from './content';
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { calculateSubmitButtonDisabled } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
-import { validateSecretPhrase } from '@src/libs/crypto';
-import { initVault } from '@src/background/redux/sagas/actions';
 
 export function RecoverFromSecretPhrasePage() {
   const navigate = useTypedNavigate();

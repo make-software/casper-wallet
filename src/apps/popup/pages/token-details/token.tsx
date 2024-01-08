@@ -1,8 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
+
+import { NetworkSetting, getBuyWithTopperUrl } from '@src/constants';
+
+import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
+
+import {
+  selectActiveNetworkSetting,
+  selectApiConfigBasedOnActiveNetwork
+} from '@background/redux/settings/selectors';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { TokenType, useCasperToken } from '@hooks/use-casper-token';
 
 import {
   CenteredFlexColumn,
@@ -10,17 +23,8 @@ import {
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
+import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 import { Button, Link, List, SvgIcon, TokenPlate, Typography } from '@libs/ui';
-import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
-import { TokenType, useCasperToken } from '@src/hooks';
-import {
-  selectActiveNetworkSetting,
-  selectApiConfigBasedOnActiveNetwork
-} from '@background/redux/settings/selectors';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { getBuyWithTopperUrl, NetworkSetting } from '@src/constants';
-import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
-import { ContractPackageWithBalance } from '@src/libs/services/erc20-service';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 16px;

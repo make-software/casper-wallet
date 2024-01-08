@@ -1,17 +1,17 @@
 import React from 'react';
-import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
-import {
-  Erc20TokenActionResult,
-  ExtendedDeployWithId,
-  TransferResultWithId
-} from '@libs/services/account-activity-service';
 import {
   CenteredFlexRow,
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import {
+  Erc20TokenActionResult,
+  ExtendedDeployWithId,
+  TransferResultWithId
+} from '@libs/services/account-activity-service';
 import { Tile, Typography } from '@libs/ui';
 
 const Container = styled(CenteredFlexRow)`

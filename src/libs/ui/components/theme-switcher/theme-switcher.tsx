@@ -1,7 +1,14 @@
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
-import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+
+import { isSafariBuild } from '@src/utils';
+
+import { themeModeSettingChanged } from '@background/redux/settings/actions';
+import { selectThemeModeSetting } from '@background/redux/settings/selectors';
+import { ThemeMode } from '@background/redux/settings/types';
+import { dispatchToMainStore } from '@background/redux/utils';
 
 import {
   AlignedFlexRow,
@@ -12,12 +19,7 @@ import {
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
-import { ThemeMode } from '@background/redux/settings/types';
-import { selectThemeModeSetting } from '@background/redux/settings/selectors';
-import { dispatchToMainStore } from '@background/redux/utils';
-import { themeModeSettingChanged } from '@background/redux/settings/actions';
 import { Button, List, SvgIcon, Typography } from '@libs/ui';
-import { isSafariBuild } from '@src/utils';
 
 const Container = styled(FlexColumn)`
   padding-top: 24px;

@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { KeyValueItem, Typography } from '@src/libs/ui';
+import { KeyValueItem, Typography } from '@libs/ui';
 
 const UnorderedList = styled.ul`
   padding-inline-start: unset;

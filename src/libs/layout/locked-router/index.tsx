@@ -1,9 +1,12 @@
 import React from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
-import { ResetVaultPageContent } from '@src/libs/layout/reset-vault';
-import { UnlockVaultPageContent } from '@src/libs/layout/unlock-vault';
-import { PopupLayout, LayoutWindow } from '@libs/layout';
+import {
+  LayoutWindow,
+  PopupLayout,
+  ResetVaultPageContent,
+  UnlockVaultPageContent
+} from '@libs/layout';
 
 import { PopupHeader } from '../header';
 

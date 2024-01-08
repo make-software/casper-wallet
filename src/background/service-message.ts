@@ -1,15 +1,15 @@
-import { ActionType, createAction } from 'typesafe-actions';
-
-import { FetchBalanceResponse } from '@libs/services/balance-service';
-import { AccountInfo } from '@libs/services/account-info';
 import {
   Erc20TokenActionResult,
-  TransferResult,
-  ExtendedDeploy
+  ExtendedDeploy,
+  TransferResult
 } from 'src/libs/services/account-activity-service';
-import { ErrorResponse, PaginatedResponse } from '@libs/services/types';
+import { ActionType, createAction } from 'typesafe-actions';
+
+import { AccountInfo } from '@libs/services/account-info';
+import { FetchBalanceResponse } from '@libs/services/balance-service';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 import { NFTTokenResult } from '@libs/services/nft-service';
+import { ErrorResponse, PaginatedResponse } from '@libs/services/types';
 import {
   DelegatorResult,
   ValidatorResult

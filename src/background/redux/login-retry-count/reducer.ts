@@ -1,5 +1,6 @@
 import { createReducer } from 'typesafe-actions';
-import { loginRetryCountReseted, loginRetryCountIncremented } from './actions';
+
+import { loginRetryCountIncremented, loginRetryCountReseted } from './actions';
 
 export type LoginRetryCountState = number;
 

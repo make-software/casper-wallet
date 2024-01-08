@@ -1,8 +1,22 @@
 import React, { useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { Trans, useTranslation } from 'react-i18next';
 
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { WindowApp } from '@background/create-open-window';
+import {
+  selectConnectedAccountNamesWithActiveOrigin,
+  selectVaultAccounts,
+  selectVaultActiveAccountName
+} from '@background/redux/vault/selectors';
+import { AccountListRows } from '@background/redux/vault/types';
+
+import { useWindowManager } from '@hooks/use-window-manager';
+
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   AlignedFlexRow,
   CenteredFlexRow,
@@ -10,15 +24,6 @@ import {
   LeftAlignedFlexColumn,
   SpacingSize
 } from '@libs/layout';
-import { AccountListRows } from '@background/redux/vault/types';
-import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
-import {
-  selectConnectedAccountNamesWithActiveOrigin,
-  selectVaultAccounts,
-  selectVaultActiveAccountName
-} from '@background/redux/vault/selectors';
-import { sortAccounts } from '@libs/ui/components/account-list/utils';
-import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   AccountActionsMenuPopover,
   Avatar,
@@ -28,9 +33,7 @@ import {
   List,
   Typography
 } from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import { WindowApp } from '@background/create-open-window';
-import { useWindowManager } from '@src/hooks';
+import { sortAccounts } from '@libs/ui/components/account-list/utils';
 
 const ListItemContainer = styled(FlexColumn)`
   min-height: 68px;

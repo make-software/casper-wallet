@@ -1,27 +1,28 @@
-import '@libs/i18n/i18n';
-
 import React, { Suspense, useState } from 'react';
 import { render } from 'react-dom';
-import { ThemeProvider } from 'styled-components';
 import { Provider as ReduxProvider } from 'react-redux/es/exports';
+import { ThemeProvider } from 'styled-components';
 
-import { darkTheme, GlobalStyle, lightTheme } from '@libs/ui';
+import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
+import { isSafariBuild } from '@src/utils';
 
-import { signWindowInit } from '@background/redux/windowManagement/actions';
+import { themeModeSettingChanged } from '@background/redux/settings/actions';
+import { selectThemeModeSetting } from '@background/redux/settings/selectors';
+import { ThemeMode } from '@background/redux/settings/types';
 import {
+  PopupState,
   createMainStoreReplica,
-  dispatchToMainStore,
-  PopupState
+  dispatchToMainStore
 } from '@background/redux/utils';
-import { ErrorBoundary } from '@src/libs/layout/error';
+import { signWindowInit } from '@background/redux/windowManagement/actions';
+
+import { useSystemThemeDetector } from '@hooks/use-system-theme-detector';
+
+import '@libs/i18n/i18n';
+import { ErrorBoundary } from '@libs/layout';
+import { GlobalStyle, darkTheme, lightTheme } from '@libs/ui';
 
 import { AppRouter } from './app-router';
-import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
-import { selectThemeModeSetting } from '@background/redux/settings/selectors';
-import { useSystemThemeDetector } from '@src/hooks';
-import { themeModeSettingChanged } from '@background/redux/settings/actions';
-import { ThemeMode } from '@background/redux/settings/types';
-import { isSafariBuild } from '@src/utils';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);

@@ -1,16 +1,16 @@
 import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import {
-  PopupLayout,
-  PopupHeader,
-  HeaderSubmenuBarNavLink,
-  FooterButtonsContainer
-} from '@src/libs/layout';
-import { Button } from '@libs/ui';
-
-import { RouterPath, useTypedNavigate } from '@popup/router';
 import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import {
+  FooterButtonsContainer,
+  HeaderSubmenuBarNavLink,
+  PopupHeader,
+  PopupLayout
+} from '@libs/layout';
+import { Button } from '@libs/ui';
 
 import { BackupSecretPhrasePageContent } from './content';
 

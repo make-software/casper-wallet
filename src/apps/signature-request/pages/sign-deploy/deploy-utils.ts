@@ -22,9 +22,9 @@ import {
   ArgDict,
   CasperDeploy,
   DeployType,
+  ParsedDeployArgValue,
   ParsedValueType,
-  SignatureRequestKeys,
-  ParsedDeployArgValue
+  SignatureRequestKeys
 } from './deploy-types';
 
 export function getDeployType(deploy: CasperDeploy): DeployType {

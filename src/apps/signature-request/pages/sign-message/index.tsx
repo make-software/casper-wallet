@@ -2,23 +2,25 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
+import { sdkMethod } from '@src/content/sdk-method';
+
+import { closeCurrentWindow } from '@background/close-current-window';
+import {
+  selectConnectedAccountNamesWithActiveOrigin,
+  selectVaultAccounts
+} from '@background/redux/vault/selectors';
+import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+
+import { signMessage } from '@libs/crypto/sign-message';
+import { convertBytesToHex } from '@libs/crypto/utils';
 import {
   FooterButtonsContainer,
   LayoutWindow,
   PopupHeader
 } from '@libs/layout';
-import { closeCurrentWindow } from '@src/background/close-current-window';
-import {
-  selectConnectedAccountNamesWithActiveOrigin,
-  selectVaultAccounts
-} from '@src/background/redux/vault/selectors';
-import { sdkMethod } from '@src/content/sdk-method';
-import { Button } from '@src/libs/ui';
+import { Button } from '@libs/ui';
 
 import { SignMessageContent } from './sign-message-content';
-import { convertBytesToHex } from '@src/libs/crypto/utils';
-import { signMessage } from '@src/libs/crypto/sign-message';
-import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
 
 export function SignMessagePage() {
   const { t } = useTranslation();

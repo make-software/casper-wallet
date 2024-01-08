@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { CenteredFlexColumn } from '@libs/layout';
 import { SvgIcon } from '@libs/ui';
-import { CenteredFlexColumn } from '@src/libs/layout';
 
 const Container = styled.div`
   width: 100%;

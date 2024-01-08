@@ -2,23 +2,25 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router-dom';
 
+import { Stepper } from '@onboarding/components/stepper';
+import { RouterPath } from '@onboarding/router';
+import { useTypedNavigate } from '@onboarding/router/use-typed-navigate';
+
+import { initVault } from '@background/redux/sagas/actions';
+import { dispatchToMainStore } from '@background/redux/utils';
+
+import { SecretPhrase } from '@libs/crypto';
 import {
+  ErrorPath,
   HeaderSubmenuBarNavLink,
   LayoutTab,
   TabFooterContainer,
-  TabHeaderContainer
-} from '@src/libs/layout';
-import { createErrorLocationState, ErrorPath } from '@src/libs/layout/error';
-import { Button } from '@src/libs/ui';
-import { SecretPhrase } from '@src/libs/crypto';
-
-import { Stepper } from '@src/apps/onboarding/components/stepper';
-import { RouterPath } from '@src/apps/onboarding/router';
-import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
+  TabHeaderContainer,
+  createErrorLocationState
+} from '@libs/layout';
+import { Button } from '@libs/ui';
 
 import { ConfirmSecretPhrasePageContent } from './content';
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { initVault } from '@src/background/redux/sagas/actions';
 
 interface ConfirmSecretPhrasePageProps {
   phrase: SecretPhrase | null;

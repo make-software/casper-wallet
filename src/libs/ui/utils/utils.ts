@@ -1,3 +1,5 @@
+import { deriveSplitDataFromNamedKeyValue } from '@src/utils';
+
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   Erc20TransferWithId,
@@ -6,7 +8,6 @@ import {
   ExtendedDeployWithId,
   MappedPendingTransaction
 } from '@libs/services/account-activity-service';
-import { deriveSplitDataFromNamedKeyValue } from '@src/utils';
 
 export const getPublicKeyFormTarget = (
   target?: ExtendedDeployClTypeResult,

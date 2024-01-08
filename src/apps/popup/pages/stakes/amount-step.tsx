@@ -1,9 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-import { UseFormReturn, useWatch } from 'react-hook-form';
-import { useSelector } from 'react-redux';
 import Big from 'big.js';
+import React, { useEffect, useState } from 'react';
+import { UseFormReturn, useWatch } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+
+import { AuctionManagerEntryPoint, STAKE_COST_MOTES } from '@src/constants';
+
+import {
+  selectAccountBalance,
+  selectAccountCurrencyRate
+} from '@background/redux/account-info/selectors';
 
 import {
   AlignedFlexRow,
@@ -15,11 +22,6 @@ import {
 import { Error, Input, Typography } from '@libs/ui';
 import { StakeAmountFormValues } from '@libs/ui/forms/stakes-form';
 import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils/formatters';
-import {
-  selectAccountBalance,
-  selectAccountCurrencyRate
-} from '@background/redux/account-info/selectors';
-import { AuctionManagerEntryPoint, STAKE_COST_MOTES } from '@src/constants';
 
 const StakeMaxButton = styled(AlignedFlexRow)`
   cursor: pointer;

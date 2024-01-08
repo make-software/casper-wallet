@@ -2,41 +2,42 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import {
-  SiteFaviconBadge,
-  Hash,
-  HashVariant,
-  List,
-  Typography,
-  Button,
-  ConnectionStatusBadge
-} from '@src/libs/ui';
+import { sdkMethod } from '@src/content/sdk-method';
 
-import {
-  PageContainer,
-  ContentContainer,
-  ParagraphContainer,
-  LeftAlignedFlexColumn,
-  VerticalSpaceContainer,
-  SpacingSize
-} from '@src/libs/layout';
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
+import { closeCurrentWindow } from '@background/close-current-window';
+import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import {
   selectConnectedAccountsWithActiveOrigin,
   selectUnconnectedAccountsWithActiveOrigin,
   selectVaultActiveAccount
-} from '@src/background/redux/vault/selectors';
-import { selectActiveOrigin } from '@src/background/redux/active-origin/selectors';
-import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
-import { closeCurrentWindow } from '@src/background/close-current-window';
+} from '@background/redux/vault/selectors';
+import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
 
 import {
-  UnconnectedAccountsList,
+  ContentContainer,
+  LeftAlignedFlexColumn,
+  PageContainer,
+  ParagraphContainer,
+  SpacingSize,
+  VerticalSpaceContainer
+} from '@libs/layout';
+import {
+  Button,
+  ConnectionStatusBadge,
+  Hash,
+  HashVariant,
+  List,
+  SiteFaviconBadge,
+  Typography
+} from '@libs/ui';
+
+import {
+  ListItemContainer,
   SpaceBetweenContainer,
-  ListItemContainer
+  UnconnectedAccountsList
 } from './unconnected-accounts-list';
-import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
-import { sdkMethod } from '@src/content/sdk-method';
 
 type SwitchAccountContentProps = { requestId: string };
 

@@ -1,24 +1,25 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+
+import { UnlockWalletPageContent } from '@onboarding/pages/unlock-wallet/content';
+import { RouterPath, useTypedNavigate } from '@onboarding/router';
+
+import {
+  selectPasswordHash,
+  selectPasswordSaltHash
+} from '@background/redux/keys/selectors';
+import { loginRetryCountReseted } from '@background/redux/login-retry-count/actions';
+import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
 
 import {
   LayoutTab,
   TabFooterContainer as TabFooterContainerBase
 } from '@libs/layout';
-import { Button } from '@src/libs/ui';
+import { Button } from '@libs/ui';
 import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
-
-import { RouterPath, useTypedNavigate } from '@src/apps/onboarding/router';
-import { UnlockWalletPageContent } from '@src/apps/onboarding/pages/unlock-wallet/content';
-import {
-  selectPasswordHash,
-  selectPasswordSaltHash
-} from '@src/background/redux/keys/selectors';
-import { selectLoginRetryCount } from '@src/background/redux/login-retry-count/selectors';
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { loginRetryCountReseted } from '@src/background/redux/login-retry-count/actions';
 
 // Design of this page is temporary. Should be changed after it will be done in Figma
 const TabFooterContainer = styled(TabFooterContainerBase)`

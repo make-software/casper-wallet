@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { checkSecretKeyExist } from '@src/background/redux/import-account-actions-should-be-removed';
-import { Account } from '@src/background/redux/vault/types';
-import { parseSecretKeyString } from '@src/libs/crypto';
+import { checkSecretKeyExist } from '@background/redux/import-account-actions-should-be-removed';
+import { Account } from '@background/redux/vault/types';
+
+import { parseSecretKeyString } from '@libs/crypto';
 
 type OnSuccess = (accountData: Account) => void;
 type OnFailure = (message?: string) => void;

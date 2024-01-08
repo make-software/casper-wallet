@@ -1,6 +1,5 @@
 import {
-  applyMiddleware,
-  // TODO: Move to actual `createStore`
+  applyMiddleware, // TODO: Move to actual `createStore`
   legacy_createStore as createStoreRedux
 } from 'redux';
 import createSagaMiddleware from 'redux-saga';
@@ -9,7 +8,6 @@ import { RootState } from 'typesafe-actions';
 import reduxAction from './redux-action';
 import rootReducer from './root-reducer';
 import rootSaga from './root-saga';
-
 import { composeEnhancers } from './utils';
 
 export const createStore = (initialState: Partial<RootState>) => {

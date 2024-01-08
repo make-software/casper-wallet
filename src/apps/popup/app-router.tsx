@@ -1,47 +1,49 @@
-import '@libs/i18n/i18n';
-
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
-import { HeaderSubmenuBarNavLink, PopupLayout } from '@libs/layout';
-import { PopupHeader } from '@libs/layout/header';
+import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 
-import { HomePageContent } from '@popup/pages/home';
-import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
-import { TimeoutPageContent } from '@popup/pages/timeout';
-import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
-import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
-import { ConnectedSitesPage } from '@popup/pages/connected-sites';
 import { AccountSettingsPage } from '@popup/pages/account-settings';
-import { RemoveAccountPageContent } from '@popup/pages/remove-account';
-import { RenameAccountPageContent } from '@popup/pages/rename-account';
+import { ActivityDetailsPage } from '@popup/pages/activity-details';
+import { AddContactPage } from '@popup/pages/add-contact';
 import { BackupSecretPhrasePage } from '@popup/pages/backup-secret-phrase';
-import { CreateAccountPage } from '@src/apps/popup/pages/create-account';
+import { ChangePasswordPage } from '@popup/pages/change-password';
+import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
+import { ConnectedSitesPage } from '@popup/pages/connected-sites';
+import { ContactDetailsPage } from '@popup/pages/contact-details';
+import { ContactsBookPage } from '@popup/pages/contacts';
+import { CreateAccountPage } from '@popup/pages/create-account';
 import { DownloadSecretKeysPage } from '@popup/pages/download-secret-keys';
 import { DownloadedSecretKeysPage } from '@popup/pages/downloaded-secret-keys';
-
+import { HomePageContent } from '@popup/pages/home';
+import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
+import { NftDetailsPage } from '@popup/pages/nft-details';
+import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
+import { ReceivePage } from '@popup/pages/receive';
+import { RemoveAccountPageContent } from '@popup/pages/remove-account';
+import { RenameAccountPageContent } from '@popup/pages/rename-account';
+import { StakesPage } from '@popup/pages/stakes';
+import { TimeoutPageContent } from '@popup/pages/timeout';
+import { TokenDetailPage } from '@popup/pages/token-details';
+import { TransferPage } from '@popup/pages/transfer';
+import { TransferNftPage } from '@popup/pages/transfer-nft';
+import { WalletQrCodePage } from '@popup/pages/wallet-qr-code';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
+import { selectKeysDoesExist } from '@background/redux/keys/selectors';
+import { selectVaultIsLocked } from '@background/redux/session/selectors';
 import { selectVaultHasAccounts } from '@background/redux/vault/selectors';
 
-import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
-import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
-import { selectKeysDoesExist } from '@src/background/redux/keys/selectors';
-import { LockedRouter } from '@src/libs/layout/locked-router';
-import { TransferPage } from '@popup/pages/transfer';
-import { TokenDetailPage } from 'src/apps/popup/pages/token-details';
-import { ActivityDetailsPage } from '@popup/pages/activity-details';
-import { ReceivePage } from '@popup/pages/receive';
-import { NftDetailsPage } from '@popup/pages/nft-details';
-import { WalletQrCodePage } from '@popup/pages/wallet-qr-code';
-import { TransferNftPage } from '@popup/pages/transfer-nft';
-import { ChangePasswordPage } from '@popup/pages/change-password';
-import { StakesPage } from '@popup/pages/stakes';
-import { ErrorPath, WindowErrorPage } from '@layout/error';
-import { ContactsBookPage } from '@popup/pages/contacts';
-import { AddContactPage } from '@popup/pages/add-contact';
-import { ContactDetailsPage } from '@popup/pages/contact-details';
+import '@libs/i18n/i18n';
+import {
+  ErrorPath,
+  HeaderSubmenuBarNavLink,
+  LockedRouter,
+  PopupHeader,
+  PopupLayout,
+  WindowErrorPage
+} from '@libs/layout';
 
 export function AppRouter() {
   const isLocked = useSelector(selectVaultIsLocked);

@@ -1,12 +1,13 @@
 import { useCallback, useEffect } from 'react';
 import { getType, isActionOf } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
+
 import {
-  backgroundEvent,
-  BackgroundEvent
+  BackgroundEvent,
+  backgroundEvent
 } from '@background/background-events';
-import { PopupState } from '@src/background/redux/utils';
-import { rootAction } from '@src/background/redux';
+import { rootAction } from '@background/redux';
+import { PopupState } from '@background/redux/utils';
 
 type Props = {
   windowInitAction: (typeof rootAction)['windowManagement'][keyof (typeof rootAction)['windowManagement']];

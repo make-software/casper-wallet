@@ -1,31 +1,31 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useTranslation, Trans } from 'react-i18next';
 
-import {
-  PopupLayout,
-  PopupHeader,
-  HeaderSubmenuBarNavLink,
-  FooterButtonsContainer
-} from '@src/libs/layout';
-import { Button } from '@src/libs/ui';
-import {
-  useCreateAccountForm,
-  getDefaultName,
-  CreateAccountFormValues
-} from '@src/libs/ui/forms/create-account';
+import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { RouterPath, useTypedNavigate } from '@src/apps/popup/router';
-
+import { createAccount } from '@background/redux/sagas/actions';
+import { dispatchToMainStore } from '@background/redux/utils';
 import {
   selectVaultAccountsNames,
   selectVaultDerivedAccounts
-} from '@src/background/redux/vault/selectors';
-import { dispatchToMainStore } from '@src/background/redux/utils';
+} from '@background/redux/vault/selectors';
+
+import {
+  FooterButtonsContainer,
+  HeaderSubmenuBarNavLink,
+  PopupHeader,
+  PopupLayout
+} from '@libs/layout';
+import { Button } from '@libs/ui';
+import {
+  CreateAccountFormValues,
+  getDefaultName,
+  useCreateAccountForm
+} from '@libs/ui/forms/create-account';
+import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 
 import { CreateAccountPageContent } from './content';
-import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
-import { createAccount } from '@src/background/redux/sagas/actions';
 
 export function CreateAccountPage() {
   const navigate = useTypedNavigate();

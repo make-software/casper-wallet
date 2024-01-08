@@ -1,19 +1,22 @@
-import Identicon from 'react-identicons';
 import React from 'react';
-import styled, { DefaultTheme, useTheme } from 'styled-components';
+import Identicon from 'react-identicons';
 import { useSelector } from 'react-redux';
+import styled, { DefaultTheme, useTheme } from 'styled-components';
 
-import {
-  SpacingSize,
-  AvatarContainer,
-  AlignedFlexRow,
-  CenteredFlexRow
-} from '@libs/layout';
 import { isValidAccountHash, isValidPublicKey } from '@src/utils';
-import { SvgIcon } from '@libs/ui';
+
 import { selectThemeModeSetting } from '@background/redux/settings/selectors';
 import { ThemeMode } from '@background/redux/settings/types';
-import { useSystemThemeDetector } from '@src/hooks';
+
+import { useSystemThemeDetector } from '@hooks/use-system-theme-detector';
+
+import {
+  AlignedFlexRow,
+  AvatarContainer,
+  CenteredFlexRow,
+  SpacingSize
+} from '@libs/layout';
+import { SvgIcon } from '@libs/ui';
 
 const RoundedIdenticon = styled(Identicon)(
   ({

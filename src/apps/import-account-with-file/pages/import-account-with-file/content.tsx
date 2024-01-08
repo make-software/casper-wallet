@@ -1,14 +1,15 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { isSafariBuild } from '@src/utils';
+
 import {
   ContentContainer,
-  ParagraphContainer,
   IllustrationContainer,
+  ParagraphContainer,
   SpacingSize
-} from '@src/libs/layout';
+} from '@libs/layout';
 import { SvgIcon, Tag, Typography } from '@libs/ui';
-import { isSafariBuild } from '@src/utils';
 
 export function ImportAccountWithFileContentPage() {
   const { t } = useTranslation();

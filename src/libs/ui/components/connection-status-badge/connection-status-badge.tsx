@@ -2,8 +2,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { hexToRGBA, Typography } from '@libs/ui';
 import { AlignedFlexRow } from '@libs/layout';
+import { Typography, hexToRGBA } from '@libs/ui';
 
 interface ConnectionStatusBadgeProps {
   isConnected: boolean;

@@ -1,6 +1,8 @@
 import { createAction } from 'typesafe-actions';
-import { Account, VaultState } from '@src/background/redux/vault/types';
-import { SecretPhrase } from '@src/libs/crypto';
+
+import { Account, VaultState } from '@background/redux/vault/types';
+
+import { SecretPhrase } from '@libs/crypto';
 
 export const vaultReseted = createAction('VAULT_RESETED')<void>();
 

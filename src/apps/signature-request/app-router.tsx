@@ -2,15 +2,17 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
+import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
+
 import {
   RouterPath,
   useTypedLocation,
   useTypedNavigate
-} from '@src/apps/signature-request/router';
-import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
-import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
-import { ErrorPath, WindowErrorPage } from '@src/libs/layout/error';
-import { LockedRouter } from '@src/libs/layout/locked-router';
+} from '@signature-request/router';
+
+import { selectVaultIsLocked } from '@background/redux/session/selectors';
+
+import { ErrorPath, LockedRouter, WindowErrorPage } from '@libs/layout';
 
 import { SignDeployPage } from './pages/sign-deploy';
 import { SignMessagePage } from './pages/sign-message';

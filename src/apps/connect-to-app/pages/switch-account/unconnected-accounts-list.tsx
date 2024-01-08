@@ -1,23 +1,26 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { AccountListRows } from '@background/redux/vault/types';
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+
 import { closeCurrentWindow } from '@background/close-current-window';
 import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
+import { AccountListRows } from '@background/redux/vault/types';
+import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+
+import { sdkMethod } from '@content/sdk-method';
+
+import { LeftAlignedFlexColumn, SpacingSize } from '@libs/layout';
 import {
   Button,
+  ConnectionStatusBadge,
   Hash,
   HashVariant,
   List,
-  Typography,
-  ConnectionStatusBadge
+  Typography
 } from '@libs/ui';
-import { LeftAlignedFlexColumn, SpacingSize } from '@libs/layout';
-import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
-import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
-import { sdkMethod } from '@src/content/sdk-method';
 
 const CentredFlexRow = styled.div`
   display: flex;

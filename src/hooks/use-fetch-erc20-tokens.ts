@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import {
-  dispatchFetchErc20TokensRequest,
-  ContractPackageWithBalance
-} from '@libs/services/erc20-service';
-import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+import { accountErc20Changed } from '@background/redux/account-info/actions';
+import { selectErc20Tokens } from '@background/redux/account-info/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { selectErc20Tokens } from '@src/background/redux/account-info/selectors';
-import { accountErc20Changed } from '@src/background/redux/account-info/actions';
-import { dispatchToMainStore } from '@src/background/redux/utils';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import {
+  ContractPackageWithBalance,
+  dispatchFetchErc20TokensRequest
+} from '@libs/services/erc20-service';
 
 export const useFetchErc20Tokens = () => {
   const activeAccount = useSelector(selectVaultActiveAccount);

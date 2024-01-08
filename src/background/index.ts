@@ -1,34 +1,75 @@
-import { getType, RootAction } from 'typesafe-actions';
+import { RootAction, getType } from 'typesafe-actions';
 import browser from 'webextension-polyfill';
 
 import {
+  SiteNotConnectedError,
+  WalletLockedError
+} from '@src/content/sdk-errors';
+import { sdkEvent } from '@src/content/sdk-event';
+import { SdkMethod, isSDKMethod, sdkMethod } from '@src/content/sdk-method';
+import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
+
+import { WindowApp } from '@background/create-open-window';
+import {
+  disableOnboardingFlow,
+  enableOnboardingFlow,
+  openOnboardingUi
+} from '@background/open-onboarding-flow';
+import {
+  accountBalanceChanged,
+  accountCasperActivityChanged,
+  accountCasperActivityCountChanged,
+  accountCasperActivityUpdated,
+  accountCurrencyRateChanged,
+  accountDeploysAdded,
+  accountDeploysCountChanged,
+  accountDeploysUpdated,
+  accountErc20Changed,
+  accountErc20TokensActivityChanged,
+  accountErc20TokensActivityUpdated,
+  accountInfoReset,
+  accountNftTokensAdded,
+  accountNftTokensCountChanged,
+  accountNftTokensUpdated,
+  accountPendingTransactionsChanged,
+  accountPendingTransactionsRemove,
+  accountTrackingIdOfSentNftTokensChanged,
+  accountTrackingIdOfSentNftTokensRemoved
+} from '@background/redux/account-info/actions';
+import {
+  contactRemoved,
+  contactUpdated,
+  contactsReseted,
+  newContactAdded
+} from '@background/redux/contacts/actions';
+import {
   CheckAccountNameIsTakenAction,
   CheckSecretKeyExistAction
-} from '@src/background/redux/import-account-actions-should-be-removed';
-import { getExistingMainStoreSingletonOrInit } from '@src/background/redux/utils';
+} from '@background/redux/import-account-actions-should-be-removed';
+import { getExistingMainStoreSingletonOrInit } from '@background/redux/utils';
 import {
   accountAdded,
   accountDisconnected,
   accountImported,
   accountRemoved,
   accountRenamed,
-  siteConnected,
   activeAccountChanged,
-  siteDisconnected,
-  vaultReseted,
-  vaultLoaded,
-  secretPhraseCreated,
   anotherAccountConnected,
   deployPayloadReceived,
-  deploysReseted
-} from '@src/background/redux/vault/actions';
+  deploysReseted,
+  secretPhraseCreated,
+  siteConnected,
+  siteDisconnected,
+  vaultLoaded,
+  vaultReseted
+} from '@background/redux/vault/actions';
 import {
-  selectIsAccountConnected,
   selectAccountNamesByOriginDict,
+  selectIsAccountConnected,
   selectVaultAccountsNames,
   selectVaultAccountsSecretKeysBase64,
   selectVaultActiveAccount
-} from '@src/background/redux/vault/selectors';
+} from '@background/redux/vault/selectors';
 import {
   connectWindowInit,
   importWindowInit,
@@ -37,37 +78,47 @@ import {
   signWindowInit,
   windowIdChanged,
   windowIdCleared
-} from '@src/background/redux/windowManagement/actions';
-import { selectWindowId } from '@src/background/redux/windowManagement/selectors';
-import { sdkEvent } from '@src/content/sdk-event';
-import { isSDKMethod, SdkMethod, sdkMethod } from '@src/content/sdk-method';
-import { WindowApp } from '@src/hooks';
+} from '@background/redux/windowManagement/actions';
+import { selectWindowId } from '@background/redux/windowManagement/selectors';
+
 import {
-  enableOnboardingFlow,
-  disableOnboardingFlow,
-  openOnboardingUi
-} from '@src/background/open-onboarding-flow';
+  MapExtendedDeploy,
+  MapPaginatedExtendedDeploys,
+  fetchAccountCasperActivity,
+  fetchAccountExtendedDeploys,
+  fetchExtendedDeploysInfo
+} from '@libs/services/account-activity-service';
+import { fetchErc20TokenActivity } from '@libs/services/account-activity-service/erc20-token-activity-service';
+import { fetchAccountInfo } from '@libs/services/account-info';
 import {
   fetchAccountBalance,
   fetchCurrencyRate
 } from '@libs/services/balance-service';
-import { fetchAccountInfo } from '@libs/services/account-info';
-import {
-  fetchAccountCasperActivity,
-  fetchAccountExtendedDeploys,
-  fetchExtendedDeploysInfo,
-  MapExtendedDeploy,
-  MapPaginatedExtendedDeploys
-} from '@libs/services/account-activity-service';
 import { fetchErc20Tokens } from '@libs/services/erc20-service';
-
-import { openWindow } from './open-window';
+import { fetchNftTokens } from '@libs/services/nft-service';
 import {
-  contactEditingPermissionChanged,
-  encryptionKeyHashCreated,
-  sessionReseted,
-  vaultUnlocked
-} from './redux/session/actions';
+  fetchAuctionValidators,
+  fetchValidatorsDetailsData
+} from '@libs/services/validators-service';
+
+import {
+  CannotGetActiveAccountError,
+  CannotGetSenderOriginError
+} from './internal-errors';
+import { openWindow } from './open-window';
+import { activeOriginChanged } from './redux/active-origin/actions';
+import { keysReseted, keysUpdated } from './redux/keys/actions';
+import { selectKeysDoesExist } from './redux/keys/selectors';
+import { lastActivityTimeRefreshed } from './redux/last-activity-time/actions';
+import {
+  loginRetryCountIncremented,
+  loginRetryCountReseted
+} from './redux/login-retry-count/actions';
+import { loginRetryLockoutTimeSet } from './redux/login-retry-lockout-time/actions';
+import {
+  recipientPublicKeyAdded,
+  recipientPublicKeyReseted
+} from './redux/recent-recipient-public-keys/actions';
 import {
   changePassword,
   createAccount,
@@ -78,75 +129,26 @@ import {
   unlockVault
 } from './redux/sagas/actions';
 import {
-  vaultCipherCreated,
-  vaultCipherReseted
-} from './redux/vault-cipher/actions';
-import { keysReseted, keysUpdated } from './redux/keys/actions';
+  contactEditingPermissionChanged,
+  encryptionKeyHashCreated,
+  sessionReseted,
+  vaultUnlocked
+} from './redux/session/actions';
 import { selectVaultIsLocked } from './redux/session/selectors';
-import { selectKeysDoesExist } from './redux/keys/selectors';
-import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
-import { ServiceMessage, serviceMessage } from './service-message';
-import {
-  loginRetryCountIncremented,
-  loginRetryCountReseted
-} from './redux/login-retry-count/actions';
-import { emitSdkEventToActiveTabsWithOrigin } from './utils';
-import { loginRetryLockoutTimeSet } from './redux/login-retry-lockout-time/actions';
-import { lastActivityTimeRefreshed } from './redux/last-activity-time/actions';
 import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged,
-  vaultSettingsReseted,
-  themeModeSettingChanged
+  themeModeSettingChanged,
+  vaultSettingsReseted
 } from './redux/settings/actions';
-import { activeOriginChanged } from './redux/active-origin/actions';
 import { selectApiConfigBasedOnActiveNetwork } from './redux/settings/selectors';
-import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
 import {
-  CannotGetActiveAccountError,
-  CannotGetSenderOriginError
-} from './internal-errors';
-import {
-  SiteNotConnectedError,
-  WalletLockedError
-} from '@src/content/sdk-errors';
-import {
-  recipientPublicKeyAdded,
-  recipientPublicKeyReseted
-} from './redux/recent-recipient-public-keys/actions';
-import {
-  accountCasperActivityChanged,
-  accountInfoReset,
-  accountCasperActivityUpdated,
-  accountBalanceChanged,
-  accountCurrencyRateChanged,
-  accountPendingTransactionsChanged,
-  accountPendingTransactionsRemove,
-  accountErc20Changed,
-  accountErc20TokensActivityChanged,
-  accountErc20TokensActivityUpdated,
-  accountDeploysAdded,
-  accountDeploysUpdated,
-  accountNftTokensAdded,
-  accountNftTokensUpdated,
-  accountNftTokensCountChanged,
-  accountDeploysCountChanged,
-  accountCasperActivityCountChanged,
-  accountTrackingIdOfSentNftTokensChanged,
-  accountTrackingIdOfSentNftTokensRemoved
-} from '@background/redux/account-info/actions';
-import { fetchErc20TokenActivity } from '@src/libs/services/account-activity-service/erc20-token-activity-service';
-import { fetchNftTokens } from '@libs/services/nft-service';
-import {
-  fetchAuctionValidators,
-  fetchValidatorsDetailsData
-} from '@libs/services/validators-service';
-import {
-  contactRemoved,
-  contactsReseted,
-  contactUpdated,
-  newContactAdded
-} from '@background/redux/contacts/actions';
+  vaultCipherCreated,
+  vaultCipherReseted
+} from './redux/vault-cipher/actions';
+import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
+import { ServiceMessage, serviceMessage } from './service-message';
+import { emitSdkEventToActiveTabsWithOrigin } from './utils';
 
 // setup default onboarding action
 async function handleActionClick() {

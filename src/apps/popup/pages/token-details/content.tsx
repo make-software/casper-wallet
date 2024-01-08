@@ -7,12 +7,12 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import {
-  Erc20TokenActivityList,
-  Typography,
-  CasperTokenActivityList
-} from '@libs/ui';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
+import {
+  CasperTokenActivityList,
+  Erc20TokenActivityList,
+  Typography
+} from '@libs/ui';
 
 import { Token } from './token';
 

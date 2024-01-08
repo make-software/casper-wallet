@@ -1,20 +1,20 @@
 import { createReducer } from 'typesafe-actions';
 
 import {
-  vaultReseted,
-  vaultLoaded,
-  secretPhraseCreated,
   accountAdded,
+  accountDisconnected,
   accountImported,
   accountRemoved,
   accountRenamed,
-  siteConnected,
-  accountDisconnected,
-  siteDisconnected,
   activeAccountChanged,
   anotherAccountConnected,
+  deployPayloadReceived,
   deploysReseted,
-  deployPayloadReceived
+  secretPhraseCreated,
+  siteConnected,
+  siteDisconnected,
+  vaultLoaded,
+  vaultReseted
 } from './actions';
 import { VaultState } from './types';
 

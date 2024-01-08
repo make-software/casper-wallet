@@ -1,14 +1,14 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { Button, Typography } from '@src/libs/ui';
 import {
   AlignedSpaceBetweenFlexRow,
   SpaceBetweenFlexColumn,
   SpacingSize,
   VerticalSpaceContainer
-} from '@src/libs/layout';
+} from '@libs/layout';
+import { Button, Typography } from '@libs/ui';
 
 const SiteGroupHeaderContainer = styled(SpaceBetweenFlexColumn)`
   padding: ${({ theme }) => theme.padding[1.6]};

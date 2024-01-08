@@ -1,9 +1,9 @@
 import React, { ReactNode, useState } from 'react';
-import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
-import { Typography } from '@libs/ui';
 import { AlignedSpaceBetweenFlexRow, CenteredFlexRow } from '@libs/layout';
+import { Typography } from '@libs/ui';
 
 const TabsContainer = styled(AlignedSpaceBetweenFlexRow)`
   height: 40px;

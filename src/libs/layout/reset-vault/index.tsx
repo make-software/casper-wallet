@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { useTypedNavigate } from '@popup/router';
+
+import { closeWindowByReloadExtension } from '@background/close-window-by-reload-extension';
+import { resetVault } from '@background/redux/sagas/actions';
+import { dispatchToMainStore } from '@background/redux/utils';
+
 import {
   ContentContainer,
+  FooterButtonsAbsoluteContainer,
   IllustrationContainer,
   ParagraphContainer,
-  FooterButtonsAbsoluteContainer,
   SpacingSize
-} from '@src/libs/layout/containers';
-import { Typography, Button, Checkbox, SvgIcon } from '@src/libs/ui';
-
-import { useTypedNavigate } from '@popup/router';
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { resetVault } from '@src/background/redux/sagas/actions';
-import { closeWindowByReloadExtension } from '@src/background/close-window-by-reload-extension';
+} from '@libs/layout';
+import { Button, Checkbox, SvgIcon, Typography } from '@libs/ui';
 
 export function ResetVaultPageContent() {
   const [isChecked, setIsChecked] = useState(false);

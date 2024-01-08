@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
 import {
   ContentContainer,
   ParagraphContainer,
@@ -8,7 +10,6 @@ import {
   VerticalSpaceContainer
 } from '@libs/layout';
 import { SvgIcon, Typography } from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@popup/router';
 
 interface SuccessScreenProps {
   needToRedirectToHome: boolean;

@@ -1,6 +1,9 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { ContactsBookPageContent } from '@popup/pages/contacts/content';
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
 import {
   FooterButtonsContainer,
   HeaderSubmenuBarNavLink,
@@ -8,8 +11,6 @@ import {
   PopupLayout
 } from '@libs/layout';
 import { Button } from '@libs/ui';
-import { ContactsBookPageContent } from '@popup/pages/contacts/content';
-import { RouterPath, useTypedNavigate } from '@popup/router';
 
 export const ContactsBookPage = () => {
   const { t } = useTranslation();

@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { BaseProps, getLinearGradientColor } from '@src/libs/ui';
+import { BaseProps, getLinearGradientColor } from '@libs/ui';
 
 interface BaseButtonProps extends BaseProps {
   type?: 'button' | 'submit' | 'reset';

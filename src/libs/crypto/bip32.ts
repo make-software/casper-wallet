@@ -1,5 +1,7 @@
 import { HDKey } from '@scure/bip32';
-import { KeyPair } from '@src/background/redux/vault/types';
+
+import { KeyPair } from '@background/redux/vault/types';
+
 import { secretPhraseToSeed, validateSecretPhrase } from './bip39';
 import { getBip44Path } from './bip44';
 import { privateKeyBytesToBase64, publicKeyBytesToHex } from './utils';

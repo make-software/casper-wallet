@@ -1,16 +1,16 @@
 import React from 'react';
 import { UseFormRegister } from 'react-hook-form';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
   ContentContainer,
   IllustrationContainer,
-  ParagraphContainer,
   InputsContainer,
+  ParagraphContainer,
   SpacingSize
-} from '@src/libs/layout';
-import { Typography, Input, SvgIcon } from '@src/libs/ui';
-import { CreateAccountFormValues } from '@src/libs/ui/forms/create-account';
+} from '@libs/layout';
+import { Input, SvgIcon, Typography } from '@libs/ui';
+import { CreateAccountFormValues } from '@libs/ui/forms/create-account';
 
 interface CreateAccountPageContentProps {
   register: UseFormRegister<CreateAccountFormValues>;

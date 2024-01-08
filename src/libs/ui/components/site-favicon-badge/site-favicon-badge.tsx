@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Tooltip, Typography } from '@libs/ui';
 import { AlignedSpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
+import { Tooltip, Typography } from '@libs/ui';
 
 const SiteFaviconAndHostnameContainer = styled(AlignedSpaceBetweenFlexRow)`
   padding: 4px 12px;

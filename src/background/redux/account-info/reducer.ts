@@ -1,27 +1,27 @@
 import { createReducer } from 'typesafe-actions';
 
-import { AccountInfoState } from './types';
 import {
-  accountCasperActivityChanged,
-  accountInfoReset,
-  accountCasperActivityUpdated,
   accountBalanceChanged,
+  accountCasperActivityChanged,
+  accountCasperActivityCountChanged,
+  accountCasperActivityUpdated,
   accountCurrencyRateChanged,
+  accountDeploysAdded,
+  accountDeploysCountChanged,
+  accountDeploysUpdated,
+  accountErc20Changed,
   accountErc20TokensActivityChanged,
   accountErc20TokensActivityUpdated,
+  accountInfoReset,
+  accountNftTokensAdded,
+  accountNftTokensCountChanged,
+  accountNftTokensUpdated,
   accountPendingTransactionsChanged,
   accountPendingTransactionsRemove,
-  accountErc20Changed,
-  accountDeploysAdded,
-  accountDeploysUpdated,
-  accountNftTokensAdded,
-  accountNftTokensUpdated,
-  accountNftTokensCountChanged,
-  accountDeploysCountChanged,
-  accountCasperActivityCountChanged,
   accountTrackingIdOfSentNftTokensChanged,
   accountTrackingIdOfSentNftTokensRemoved
 } from './actions';
+import { AccountInfoState } from './types';
 
 const initialState: AccountInfoState = {
   balance: {

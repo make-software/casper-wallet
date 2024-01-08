@@ -1,9 +1,11 @@
-import { serviceMessage } from '@background/service-message';
-import { dispatchToMainStore } from '@background/redux/utils';
-import { handleError, toJson } from '@libs/services/utils';
-import { queryClient } from '@libs/services/query-client';
-import { Payload, PaginatedResponse } from '@libs/services/types';
 import { ERC20_TOKEN_ACTIVITY_REFRESH_RATE } from '@src/constants';
+
+import { dispatchToMainStore } from '@background/redux/utils';
+import { serviceMessage } from '@background/service-message';
+
+import { queryClient } from '@libs/services/query-client';
+import { PaginatedResponse, Payload } from '@libs/services/types';
+import { handleError, toJson } from '@libs/services/utils';
 
 import { getErc20TokenActivityLink } from './constants';
 import { Erc20TokenActionResult } from './types';

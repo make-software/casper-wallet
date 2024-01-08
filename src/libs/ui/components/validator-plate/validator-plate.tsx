@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { FieldError } from 'react-hook-form';
+import styled from 'styled-components';
+
+import { getImageProxyUrl } from '@src/utils';
 
 import {
   AlignedFlexRow,
@@ -20,7 +22,6 @@ import {
   Typography
 } from '@libs/ui';
 import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
-import { getImageProxyUrl } from '@src/utils';
 
 const ValidatorPlateContainer = styled(AlignedSpaceBetweenFlexRow)<{
   onClick?: () => void;

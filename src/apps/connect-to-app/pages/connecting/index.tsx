@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { LayoutWindow, PopupHeader } from '@src/libs/layout';
+import { LayoutWindow, PopupHeader } from '@libs/layout';
 
 import { ConnectingContent } from './content';
 

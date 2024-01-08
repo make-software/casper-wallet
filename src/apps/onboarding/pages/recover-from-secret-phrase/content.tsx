@@ -1,14 +1,14 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
 import { UseFormRegister } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
+  InputsContainer,
   TabPageContainer,
-  TabTextContainer,
-  InputsContainer
+  TabTextContainer
 } from '@libs/layout';
 import { FormField, FormFieldStatus, TextArea, Typography } from '@libs/ui';
-import { RecoverSecretPhraseFormValues } from '@src/libs/ui/forms/recover-from-secret-phrase';
+import { RecoverSecretPhraseFormValues } from '@libs/ui/forms/recover-from-secret-phrase';
 
 interface RecoverFromSecretPhrasePageContentProps {
   register: UseFormRegister<RecoverSecretPhraseFormValues>;

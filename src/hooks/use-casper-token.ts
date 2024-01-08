@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
+
+import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
 
 export type TokenType = {
   id: string;

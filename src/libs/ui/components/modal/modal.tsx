@@ -1,9 +1,10 @@
 import React, { MouseEvent, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { useClickAway } from '@libs/ui/hooks/use-click-away';
-import { BaseProps } from '@libs/ui';
+import { useClickAway } from '@hooks/use-click-away';
+
 import { AlignedFlexRow, Overlay } from '@libs/layout';
+import { BaseProps } from '@libs/ui';
 
 const ChildrenContainer = styled(AlignedFlexRow)`
   cursor: pointer;

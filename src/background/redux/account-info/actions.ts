@@ -1,13 +1,13 @@
 import { createAction } from 'typesafe-actions';
 
-import { ActiveAccountBalance } from '@libs/services/balance-service';
 import {
   Erc20TokenActionResult,
   ExtendedDeploy,
   ExtendedDeployWithId,
   TransferResultWithId
 } from '@libs/services/account-activity-service';
-import { ContractPackageWithBalance } from '@src/libs/services/erc20-service';
+import { ActiveAccountBalance } from '@libs/services/balance-service';
+import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 import { NFTTokenResult } from '@libs/services/nft-service';
 
 export const accountBalanceChanged = createAction(

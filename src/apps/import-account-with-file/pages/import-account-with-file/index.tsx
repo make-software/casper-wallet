@@ -1,6 +1,6 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import {
   FooterButtonsContainer,
@@ -8,8 +8,8 @@ import {
   PopupHeader
 } from '@libs/layout';
 import { Button } from '@libs/ui';
-import { RouterPath } from '../../router';
 
+import { RouterPath } from '../../router';
 import { ImportAccountWithFileContentPage } from './content';
 
 export function ImportAccountWithFilePage() {

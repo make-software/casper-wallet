@@ -1,10 +1,11 @@
-import { convertHexToBytes } from '@src/libs/crypto/utils';
+import { convertHexToBytes } from '@libs/crypto/utils';
+
 import { CasperWalletEventType } from './sdk-event-type';
 import {
+  SdkMethod,
   SdkMethodEventType,
   isSDKMethod,
-  sdkMethod,
-  SdkMethod
+  sdkMethod
 } from './sdk-method';
 
 export type SignatureResponse =

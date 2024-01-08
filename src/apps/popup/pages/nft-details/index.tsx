@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { selectAccountNftTokens } from '@background/redux/account-info/selectors';
 
 import {
   HeaderSubmenuBarNavLink,
@@ -8,8 +12,6 @@ import {
   PopupHeader,
   PopupLayout
 } from '@libs/layout';
-import { selectAccountNftTokens } from '@background/redux/account-info/selectors';
-import { RouterPath, useTypedNavigate } from '@popup/router';
 import { HomePageTabsId } from '@libs/ui';
 
 import { NftDetailsContent } from './content';

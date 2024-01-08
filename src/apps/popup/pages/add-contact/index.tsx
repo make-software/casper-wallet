@@ -2,6 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
+import { AddContactPageContent } from '@popup/pages/add-contact/content';
+import { SuccessScreen } from '@popup/pages/add-contact/success-screen';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
+
+import { newContactAdded } from '@background/redux/contacts/actions';
+import { selectAllContactsNames } from '@background/redux/contacts/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+
 import {
   FooterButtonsContainer,
   HeaderSubmenuBarNavLink,
@@ -9,14 +17,8 @@ import {
   PopupLayout
 } from '@libs/layout';
 import { Button } from '@libs/ui';
-import { AddContactPageContent } from '@popup/pages/add-contact/content';
 import { ContactFromValues, useContactForm } from '@libs/ui/forms/contact';
-import { selectAllContactsNames } from '@background/redux/contacts/selectors';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
-import { dispatchToMainStore } from '@background/redux/utils';
-import { newContactAdded } from '@background/redux/contacts/actions';
-import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
-import { SuccessScreen } from '@popup/pages/add-contact/success-screen';
 
 export const AddContactPage = () => {
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);

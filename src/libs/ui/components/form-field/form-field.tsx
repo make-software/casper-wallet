@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Typography, BaseProps } from '@src/libs/ui';
+
 import { FlexColumn } from '@libs/layout';
+import { BaseProps, Typography } from '@libs/ui';
 
 export enum FormFieldStatus {
   Error = 'error',

@@ -1,12 +1,12 @@
-import { serviceMessage } from '@background/service-message';
-import { dispatchToMainStore } from '@background/redux/utils';
+import { FETCH_QUERY_OPTIONS } from '@src/constants';
 
-import { getAccountInfoUrl, AccountInfo } from '@libs/services/account-info';
-import { handleError, toJson } from '@libs/services/utils';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { serviceMessage } from '@background/service-message';
+
+import { AccountInfo, getAccountInfoUrl } from '@libs/services/account-info';
 import { queryClient } from '@libs/services/query-client';
 import { DataResponse, Payload } from '@libs/services/types';
-
-import { FETCH_QUERY_OPTIONS } from '@src/constants';
+import { handleError, toJson } from '@libs/services/utils';
 
 const accountInfoRequest = (
   accountHash: string,

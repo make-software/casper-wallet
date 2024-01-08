@@ -1,8 +1,15 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
-import { RootState } from 'typesafe-actions';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { RootState } from 'typesafe-actions';
+
+import { getBlockExplorerAccountUrl } from '@src/constants';
+
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { selectVaultAccount } from '@background/redux/vault/selectors';
 
 import {
   FooterButtonsContainer,
@@ -11,10 +18,6 @@ import {
   PopupLayout
 } from '@libs/layout';
 import { Button, Link } from '@libs/ui';
-import { selectVaultAccount } from '@background/redux/vault/selectors';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import { getBlockExplorerAccountUrl } from '@src/constants';
-import { selectApiConfigBasedOnActiveNetwork } from '@src/background/redux/settings/selectors';
 
 import {
   AccountSettingsActionsGroup,

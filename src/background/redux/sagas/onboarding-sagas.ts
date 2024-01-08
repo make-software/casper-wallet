@@ -1,35 +1,36 @@
-import browser from 'webextension-polyfill';
 import { put, takeLatest } from 'redux-saga/effects';
 import { getType } from 'typesafe-actions';
+import browser from 'webextension-polyfill';
 
-import { deriveKeyPair, validateSecretPhrase } from '@src/libs/crypto';
+import { disableOnboardingFlow } from '@background/open-onboarding-flow';
+import { contactsReseted } from '@background/redux/contacts/actions';
+import { recipientPublicKeyReseted } from '@background/redux/recent-recipient-public-keys/actions';
+import { vaultSettingsReseted } from '@background/redux/settings/actions';
 
+import { deriveKeyPair, validateSecretPhrase } from '@libs/crypto';
+import {
+  deriveEncryptionKey,
+  encodePassword,
+  generateRandomSaltHex
+} from '@libs/crypto/hashing';
+import { convertBytesToHex } from '@libs/crypto/utils';
+
+import { keysReseted, keysUpdated } from '../keys/actions';
+import { loginRetryCountReseted } from '../login-retry-count/actions';
+import {
+  encryptionKeyHashCreated,
+  sessionReseted,
+  vaultUnlocked
+} from '../session/actions';
 import { sagaCall } from '../utils';
+import { vaultCipherReseted } from '../vault-cipher/actions';
 import {
   accountAdded,
   deploysReseted,
   secretPhraseCreated,
   vaultReseted
 } from '../vault/actions';
-import {
-  deriveEncryptionKey,
-  encodePassword,
-  generateRandomSaltHex
-} from '@src/libs/crypto/hashing';
-import { disableOnboardingFlow } from '@src/background/open-onboarding-flow';
-import {
-  encryptionKeyHashCreated,
-  sessionReseted,
-  vaultUnlocked
-} from '../session/actions';
-import { convertBytesToHex } from '@src/libs/crypto/utils';
 import { initKeys, initVault, resetVault } from './actions';
-import { keysReseted, keysUpdated } from '../keys/actions';
-import { vaultCipherReseted } from '../vault-cipher/actions';
-import { loginRetryCountReseted } from '../login-retry-count/actions';
-import { recipientPublicKeyReseted } from '@background/redux/recent-recipient-public-keys/actions';
-import { contactsReseted } from '@background/redux/contacts/actions';
-import { vaultSettingsReseted } from '@background/redux/settings/actions';
 
 export function* onboardingSagas() {
   yield takeLatest(getType(resetVault), resetVaultSaga);

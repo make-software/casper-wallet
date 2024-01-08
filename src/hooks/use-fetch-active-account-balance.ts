@@ -1,18 +1,21 @@
 import { useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
-import { dispatchFetchActiveAccountBalance } from '@libs/services/balance-service';
-import { formatCurrency, motesToCurrency } from '@libs/ui/utils/formatters';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { useForceUpdate } from '@src/apps/popup/hooks/use-force-update';
 import { BALANCE_REFRESH_RATE } from '@src/constants';
-import { dispatchToMainStore } from '@background/redux/utils';
+
+import { useForceUpdate } from '@popup/hooks/use-force-update';
+
 import {
   accountBalanceChanged,
   accountCurrencyRateChanged
 } from '@background/redux/account-info/actions';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { dispatchFetchActiveAccountBalance } from '@libs/services/balance-service';
+import { formatCurrency, motesToCurrency } from '@libs/ui/utils/formatters';
 
 export const useFetchActiveAccountBalance = () => {
   const effectTimeoutRef = useRef<NodeJS.Timeout>();

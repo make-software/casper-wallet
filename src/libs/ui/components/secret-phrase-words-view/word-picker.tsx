@@ -1,15 +1,10 @@
 import React from 'react';
-import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
-import {
-  AlignedFlexRow,
-  FlexColumn,
-  FlexRow,
-  SpacingSize
-} from '@src/libs/layout';
-import { BaseProps, SvgIcon, Typography, WordTag } from '@src/libs/ui';
-import { SecretPhrase } from '@src/libs/crypto';
+import { SecretPhrase } from '@libs/crypto';
+import { AlignedFlexRow, FlexColumn, FlexRow, SpacingSize } from '@libs/layout';
+import { BaseProps, SvgIcon, Typography, WordTag } from '@libs/ui';
 
 const WordPickerContainer = styled(FlexColumn)`
   color: ${({ theme }) => theme.color.contentAction};

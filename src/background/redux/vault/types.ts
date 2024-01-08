@@ -1,4 +1,4 @@
-import { SecretPhrase } from '@src/libs/crypto';
+import { SecretPhrase } from '@libs/crypto';
 
 export interface KeyPair {
   secretKey: string;

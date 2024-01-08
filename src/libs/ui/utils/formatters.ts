@@ -1,11 +1,11 @@
+import { createIntl, createIntlCache } from '@formatjs/intl';
 import Big from 'big.js';
 import { formatDistanceToNowStrict } from 'date-fns';
 import en from 'date-fns/locale/en-US';
 
-import { createIntl, createIntlCache } from '@formatjs/intl';
+import { MOTES_PER_CSPR_RATE } from '@src/constants';
 
-import { MOTES_PER_CSPR_RATE } from '@libs/ui/utils/constants';
-import { tokenDivider } from '@src/apps/popup/pages/home/components/tokens-list/utils';
+import { tokenDivider } from '@popup/pages/home/components/tokens-list/utils';
 
 const cache = createIntlCache();
 const intl = createIntl(

@@ -1,8 +1,9 @@
 import Big from 'big.js';
 
-import { divideErc20Balance, formatNumber } from '@libs/ui/utils/formatters';
+import { TokenType } from '@hooks/use-casper-token';
+
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
-import { TokenType } from '@src/hooks';
+import { divideErc20Balance, formatNumber } from '@libs/ui/utils/formatters';
 
 export const tokenDivider = (decimals: number | null) =>
   Big(10).pow(decimals || 0);

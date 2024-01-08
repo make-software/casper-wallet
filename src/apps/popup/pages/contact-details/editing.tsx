@@ -1,6 +1,6 @@
 import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 import { FieldErrors, UseFormRegister } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
   ContentContainer,

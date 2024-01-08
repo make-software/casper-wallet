@@ -12,11 +12,10 @@ import {
   InputsContainer,
   ParagraphContainer,
   SpacingSize
-} from '@src/libs/layout';
-import { Input, SvgIcon, Typography } from '@src/libs/ui';
+} from '@libs/layout';
+import { Input, SvgIcon, Typography } from '@libs/ui';
 
 import { RouterPath, useTypedNavigate } from '../../router';
-
 import { ImportAccountFormValues } from './types';
 
 interface ImportAccountWithFilePageContentProps {

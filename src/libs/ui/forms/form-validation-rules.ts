@@ -1,22 +1,24 @@
 import * as Yup from 'yup';
+import Big from 'big.js';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import Big from 'big.js';
 
-import { verifyPasswordAgainstHash } from '@src/libs/crypto/hashing';
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { loginRetryCountIncremented } from '@src/background/redux/login-retry-count/actions';
-import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
 import {
-  STAKE_COST_MOTES,
+  AuctionManagerEntryPoint,
   DELEGATION_MIN_AMOUNT_MOTES,
   LOGIN_RETRY_ATTEMPTS_LIMIT,
   MAX_DELEGATORS,
+  STAKE_COST_MOTES,
   TRANSFER_COST_MOTES,
-  TRANSFER_MIN_AMOUNT_MOTES,
-  AuctionManagerEntryPoint
+  TRANSFER_MIN_AMOUNT_MOTES
 } from '@src/constants';
 import { isValidPublicKey, isValidU64 } from '@src/utils';
+
+import { loginRetryCountIncremented } from '@background/redux/login-retry-count/actions';
+import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+
+import { verifyPasswordAgainstHash } from '@libs/crypto/hashing';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 
 export const minPasswordLength = 16;

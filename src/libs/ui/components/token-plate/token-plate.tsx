@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { TokenType } from '@hooks/use-casper-token';
+
 import {
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
@@ -9,7 +11,6 @@ import {
   SpacingSize
 } from '@libs/layout';
 import { SvgIcon, Tooltip, Typography } from '@libs/ui';
-import { TokenType } from '@src/hooks';
 
 const TokenAmountContainer = styled(RightAlignedFlexColumn)`
   max-width: 120px;

@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { selectAccountErc20TokensActivity } from '@background/redux/account-info/selectors';
-import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import { dispatchFetchErc20TokenActivity } from '@libs/services/account-activity-service/erc20-token-activity-service';
-import { dispatchToMainStore } from '@background/redux/utils';
+import { ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE } from '@src/constants';
+
+import { useForceUpdate } from '@popup/hooks/use-force-update';
+
 import {
   accountErc20TokensActivityChanged,
   accountErc20TokensActivityUpdated
 } from '@background/redux/account-info/actions';
-import { ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE } from '@src/constants';
-import { useForceUpdate } from '@popup/hooks/use-force-update';
+import { selectAccountErc20TokensActivity } from '@background/redux/account-info/selectors';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import { dispatchFetchErc20TokenActivity } from '@libs/services/account-activity-service/erc20-token-activity-service';
 
 export const useFetchErc20TokenAccountActivity = (
   contractPackageHash: string

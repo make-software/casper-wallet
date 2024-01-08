@@ -1,14 +1,15 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
+
+import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
-  PopupHeader,
   FooterButtonsContainer,
   HeaderSubmenuBarNavLink,
+  PopupHeader,
   PopupLayout
-} from '@src/libs/layout';
-import { Button } from '@src/libs/ui';
-import { useTypedNavigate, RouterPath } from '@src/apps/popup/router';
+} from '@libs/layout';
+import { Button } from '@libs/ui';
 
 import { DownloadedSecretKeysPageContent } from './content';
 

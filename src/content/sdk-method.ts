@@ -1,4 +1,5 @@
 import { ActionType, createAction, createCustomAction } from 'typesafe-actions';
+
 import { SdkError } from './sdk-errors';
 
 export const SdkMethodEventType = {

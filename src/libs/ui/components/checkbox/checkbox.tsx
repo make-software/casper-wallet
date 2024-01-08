@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Typography, SvgIcon, BaseProps } from '@src/libs/ui';
+import { BaseProps, SvgIcon, Typography } from '@libs/ui';
 
 import FlexRow from '../flex-row/flex-row';
 

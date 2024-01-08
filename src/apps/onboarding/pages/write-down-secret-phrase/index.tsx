@@ -2,18 +2,18 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router-dom';
 
-import {
-  LayoutTab,
-  TabHeaderContainer,
-  TabFooterContainer,
-  HeaderSubmenuBarNavLink
-} from '@src/libs/layout';
-import { Button, Checkbox } from '@src/libs/ui';
-import { SecretPhrase } from '@src/libs/crypto';
+import { Stepper } from '@onboarding/components/stepper';
+import { RouterPath } from '@onboarding/router';
+import { useTypedNavigate } from '@onboarding/router/use-typed-navigate';
 
-import { RouterPath } from '@src/apps/onboarding/router';
-import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { Stepper } from '@src/apps/onboarding/components/stepper';
+import { SecretPhrase } from '@libs/crypto';
+import {
+  HeaderSubmenuBarNavLink,
+  LayoutTab,
+  TabFooterContainer,
+  TabHeaderContainer
+} from '@libs/layout';
+import { Button, Checkbox } from '@libs/ui';
 
 import { WriteDownSecretPhrasePageContent } from './content';
 

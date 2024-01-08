@@ -1,15 +1,16 @@
 import React from 'react';
-import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 
-import { Link, SvgIcon, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { closeCurrentWindow } from '@src/background/close-current-window';
+import { closeCurrentWindow } from '@background/close-current-window';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
-import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
+
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
+import { Link, SvgIcon, Typography } from '@libs/ui';
+import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
 
 const LinkWithIconContainer = styled.div`
   display: flex;

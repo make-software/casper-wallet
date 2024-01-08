@@ -1,13 +1,13 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
   SpacingSize,
   TabPageContainer,
   TabTextContainer,
   VerticalSpaceContainer
-} from '@src/libs/layout';
-import { Typography, TextList } from '@src/libs/ui';
+} from '@libs/layout';
+import { TextList, Typography } from '@libs/ui';
 
 export function ConfirmSecretPhraseSuccessPageContent() {
   const { t } = useTranslation();

@@ -1,8 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-import { UseFormReturn, useWatch } from 'react-hook-form';
-import { useSelector } from 'react-redux';
 import Big from 'big.js';
+import React, { useEffect, useState } from 'react';
+import { UseFormReturn, useWatch } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+
+import { TRANSFER_COST_MOTES, TRANSFER_MIN_AMOUNT_MOTES } from '@src/constants';
+
+import {
+  selectAccountBalance,
+  selectAccountCurrencyRate
+} from '@background/redux/account-info/selectors';
 
 import {
   ContentContainer,
@@ -11,13 +18,8 @@ import {
   VerticalSpaceContainer
 } from '@libs/layout';
 import { Checkbox, Input, Typography } from '@libs/ui';
-import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils/formatters';
 import { TransferAmountFormValues } from '@libs/ui/forms/transfer';
-import {
-  selectAccountBalance,
-  selectAccountCurrencyRate
-} from '@background/redux/account-info/selectors';
-import { TRANSFER_COST_MOTES, TRANSFER_MIN_AMOUNT_MOTES } from '@src/constants';
+import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils/formatters';
 
 interface AmountStepProps {
   amountForm: UseFormReturn<TransferAmountFormValues>;

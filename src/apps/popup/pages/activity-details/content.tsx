@@ -1,20 +1,30 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+
+import {
+  ActivityType,
+  ActivityTypeName,
+  AuctionManagerEntryPoint,
+  getBlockExplorerContractUrl
+} from '@src/constants';
+
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
 import {
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
   BorderBottomPseudoElementProps,
-  borderBottomPseudoElementRules,
   ContentContainer,
   FlexColumn,
   ParagraphContainer,
   RightAlignedFlexColumn,
   SpaceBetweenFlexRow,
-  SpacingSize
+  SpacingSize,
+  borderBottomPseudoElementRules
 } from '@libs/layout';
+import { ExtendedDeploy } from '@libs/services/account-activity-service';
 import {
   Avatar,
   ContractIcon,
@@ -22,14 +32,13 @@ import {
   DeployStatus,
   Hash,
   HashVariant,
-  isPendingStatus,
   Link,
   SvgIcon,
   Tile,
   Tooltip,
-  Typography
+  Typography,
+  isPendingStatus
 } from '@libs/ui';
-import { ExtendedDeploy } from '@libs/services/account-activity-service';
 import {
   divideErc20Balance,
   formatCurrency,
@@ -39,13 +48,6 @@ import {
   motesToCSPR,
   motesToCurrency
 } from '@libs/ui/utils/formatters';
-import {
-  getBlockExplorerContractUrl,
-  ActivityType,
-  ActivityTypeName,
-  AuctionManagerEntryPoint
-} from '@src/constants';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
 interface ActivityDetailsPageContentProps {
   fromAccount?: string;

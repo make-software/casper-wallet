@@ -1,4 +1,5 @@
 import { ActionType, createAction } from 'typesafe-actions';
+
 import { PopupState } from './redux/utils';
 
 // General purpose events emitted by background to all extension windows

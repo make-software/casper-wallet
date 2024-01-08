@@ -2,7 +2,7 @@ import React from 'react';
 import ReactSVG from 'react-inlinesvg';
 import styled from 'styled-components';
 
-import { Color, getColorFromTheme } from '@src/libs/ui';
+import { Color, getColorFromTheme } from '@libs/ui';
 
 type Ref = HTMLDivElement;
 
