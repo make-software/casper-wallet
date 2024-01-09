@@ -159,7 +159,11 @@ export const ValidatorDropdownInput = ({
         publicKey={validator.public_key}
         fee={validator.fee}
         name={validator?.account_info?.info?.owner?.name}
-        logo={validator?.account_info?.info?.owner?.branding?.logo?.svg}
+        logo={
+          validator?.account_info?.info?.owner?.branding?.logo?.svg ||
+          validator?.account_info?.info?.owner?.branding?.logo?.png_256 ||
+          validator?.account_info?.info?.owner?.branding?.logo?.png_1024
+        }
         // TODO: remove user_stake after we merge recipient and amount steps for undelegation
         totalStake={
           stakesType === AuctionManagerEntryPoint.undelegate
@@ -216,30 +220,37 @@ export const ValidatorDropdownInput = ({
               </Typography>
             </DropDownHeader>
           )}
-          renderRow={validator => (
-            <ValidatorPlate
-              publicKey={validator?.public_key}
-              fee={validator.fee}
-              name={validator?.account_info?.info?.owner?.name}
-              logo={validator?.account_info?.info?.owner?.branding?.logo?.svg}
-              // TODO: remove user_stake after we merge recipient and amount steps for undelegation
-              totalStake={
-                stakesType === AuctionManagerEntryPoint.undelegate
-                  ? validator.user_stake
-                  : validator.total_stake
-              }
-              delegatorsNumber={validator?.delegators_number}
-              handleClick={async () => {
-                setValue('validatorPublicKey', validator.public_key);
-                setStakeAmount(validator.user_stake!);
+          renderRow={validator => {
+            const logo =
+              validator?.account_info?.info?.owner?.branding?.logo?.svg ||
+              validator?.account_info?.info?.owner?.branding?.logo?.png_256 ||
+              validator?.account_info?.info?.owner?.branding?.logo?.png_1024;
 
-                setValidator(validator);
+            return (
+              <ValidatorPlate
+                publicKey={validator?.public_key}
+                fee={validator.fee}
+                name={validator?.account_info?.info?.owner?.name}
+                logo={logo}
+                // TODO: remove user_stake after we merge recipient and amount steps for undelegation
+                totalStake={
+                  stakesType === AuctionManagerEntryPoint.undelegate
+                    ? validator.user_stake
+                    : validator.total_stake
+                }
+                delegatorsNumber={validator?.delegators_number}
+                handleClick={async () => {
+                  setValue('validatorPublicKey', validator.public_key);
+                  setStakeAmount(validator.user_stake!);
 
-                setIsOpenValidatorPublicKeysList(false);
-                setShowValidatorPlate(true);
-              }}
-            />
-          )}
+                  setValidator(validator);
+
+                  setIsOpenValidatorPublicKeysList(false);
+                  setShowValidatorPlate(true);
+                }}
+              />
+            );
+          }}
           marginLeftForItemSeparatorLine={56}
           marginLeftForHeaderSeparatorLine={0}
         />
