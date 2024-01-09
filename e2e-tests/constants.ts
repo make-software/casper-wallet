@@ -19,21 +19,24 @@ export const IMPORTED_ACCOUNT = {
   accountName: ACCOUNT_NAMES.importedAccountName,
   publicKey:
     '0184f6d260f4ee6869ddb36affe15456de6ae045278fa2f467bb677561ce0dad55',
-  truncatedPublicKey: '0184f...dad55'
+  truncatedPublicKey: '0184f...dad55',
+  mediumTruncatedPublicKey: '0184f6d260...561ce0dad55'
 };
 
 export const DEFAULT_FIRST_ACCOUNT = {
   accountName: ACCOUNT_NAMES.defaultFirstAccountName,
   publicKey:
     '0202b1943511b8c23b1b2b8ed7ddcedffcc7be70d9366a5005c7beab08a81b7ae633',
-  truncatedPublicKey: '0202b...ae633'
+  truncatedPublicKey: '0202b...ae633',
+  mediumTruncatedPublicKey: '0202b19435...a81b7ae633'
 };
 
 export const DEFAULT_SECOND_ACCOUNT = {
   accountName: ACCOUNT_NAMES.defaultSecondAccountName,
   publicKey:
     '0203b2e05f074452f5e69ba512310deceaca152ebd3394eadcec26c6e68e91aa7724',
-  truncatedPublicKey: '0203b...a7724'
+  truncatedPublicKey: '0203b...a7724',
+  mediumTruncatedPublicKey: '0203b2e05f...8e91aa7724'
 };
 
 export const VALIDATOR = {

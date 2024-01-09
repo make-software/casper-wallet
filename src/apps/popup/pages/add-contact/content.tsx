@@ -49,7 +49,7 @@ export const AddContactPageContent = ({
         >
           <TextArea
             {...register('publicKey')}
-            placeholder={t('0x')}
+            placeholder={t('Public key')}
             type="captionHash"
           />
         </FormField>
