@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigateFunction } from 'react-router';
 
 import { FooterButtonsContainer, LayoutTab } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 
 import { ErrorPageContent } from './content';
 

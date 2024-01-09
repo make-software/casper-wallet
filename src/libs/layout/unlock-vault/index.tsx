@@ -36,7 +36,7 @@ import {
   PasswordVisibilityIcon,
   SvgIcon,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 import {
   UnlockWalletFormValues,
   useUnlockWalletForm

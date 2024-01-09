@@ -1,4 +1,4 @@
-import { ExtendedDeployContractPackageResult } from '@libs/services/account-activity-service';
+import { ExtendedDeployContractPackageResult } from '../account-activity-service/types';
 
 export interface NFTTokenMetadataEntry {
   key: string;

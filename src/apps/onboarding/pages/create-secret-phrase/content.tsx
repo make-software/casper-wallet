@@ -2,7 +2,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { TabPageContainer, TabTextContainer } from '@libs/layout';
-import { Typography } from '@libs/ui';
+import { Typography } from '@libs/ui/components';
 
 export function CreateSecretPhraseContent() {
   const { t } = useTranslation();

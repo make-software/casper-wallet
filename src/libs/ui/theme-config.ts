@@ -1,4 +1,4 @@
-import { hexToRGBA } from './utils/hex-to-rgba';
+import { hexToRGBA } from '@libs/ui/utils';
 
 const PAGE_MIN_WIDTH = 320;
 const PAGE_MAX_WIDTH = 1176;

@@ -16,7 +16,8 @@ import {
   FlexRow,
   SpacingSize
 } from '@libs/layout';
-import { SvgIcon, Typography, WordTag, hexToRGBA } from '@libs/ui';
+import { SvgIcon, Typography, WordTag } from '@libs/ui/components';
+import { hexToRGBA } from '@libs/ui/utils';
 
 import { PartialPhraseArray } from './types';
 import { buildInitialWordsCollection } from './utils';

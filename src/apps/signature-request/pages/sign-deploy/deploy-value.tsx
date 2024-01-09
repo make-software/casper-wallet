@@ -1,12 +1,8 @@
 import { CLValue } from 'casper-js-sdk';
 import React from 'react';
 
-import { Hash, HashVariant, Typography } from '@libs/ui';
-import {
-  formatDate,
-  formatNumber,
-  motesToCSPR
-} from '@libs/ui/utils/formatters';
+import { Hash, HashVariant, Typography } from '@libs/ui/components';
+import { formatDate, formatNumber, motesToCSPR } from '@libs/ui/utils';
 
 import {
   getDeployParsedValue,

@@ -9,7 +9,7 @@ import {
   PasswordInputType,
   PasswordVisibilityIcon,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 import { CreatePasswordFormValues } from '@libs/ui/forms/create-password';
 import { minPasswordLength } from '@libs/ui/forms/form-validation-rules';
 

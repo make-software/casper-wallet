@@ -31,7 +31,7 @@ import {
   SvgIcon,
   Tile,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 const CentredFlexRow = styled.div`
   display: flex;

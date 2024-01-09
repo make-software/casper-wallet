@@ -15,10 +15,10 @@ import { signMessage } from '@libs/crypto/sign-message';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import {
   FooterButtonsContainer,
-  LayoutWindow,
-  PopupHeader
+  HeaderPopup,
+  LayoutWindow
 } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 
 import { SignMessageContent } from './sign-message-content';
 
@@ -117,7 +117,7 @@ export function SignMessagePage() {
 
   return (
     <LayoutWindow
-      renderHeader={() => <PopupHeader withConnectionStatus />}
+      renderHeader={() => <HeaderPopup withConnectionStatus />}
       renderContent={() => (
         <SignMessageContent
           message={message}

@@ -8,7 +8,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { SvgIcon, Typography } from '@libs/ui';
+import { SvgIcon, Typography } from '@libs/ui/components';
 
 import { ErrorContent } from './types';
 

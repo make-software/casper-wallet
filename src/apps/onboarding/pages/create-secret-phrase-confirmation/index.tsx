@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { SetFormState } from '@onboarding/app-router';
 import { Stepper } from '@onboarding/components/stepper';
+import { SetFormState } from '@onboarding/hooks/use-onboarding-form-state';
 import { RouterPath } from '@onboarding/router';
 import { useTypedNavigate } from '@onboarding/router/use-typed-navigate';
 
@@ -13,7 +13,7 @@ import {
   TabFooterContainer,
   TabHeaderContainer
 } from '@libs/layout';
-import { Button, Checkbox } from '@libs/ui';
+import { Button, Checkbox } from '@libs/ui/components';
 
 import { CreateSecretPhraseConfirmationPageContent } from './content';
 

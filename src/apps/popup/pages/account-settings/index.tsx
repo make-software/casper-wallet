@@ -13,11 +13,11 @@ import { selectVaultAccount } from '@background/redux/vault/selectors';
 
 import {
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupHeader,
   PopupLayout
 } from '@libs/layout';
-import { Button, Link } from '@libs/ui';
+import { Button, Link } from '@libs/ui/components';
 
 import {
   AccountSettingsActionsGroup,
@@ -42,7 +42,7 @@ export const AccountSettingsPage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

@@ -1,21 +1,20 @@
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import React, { useCallback } from 'react';
-import { FieldValues, useForm } from 'react-hook-form';
-import { UseFormProps } from 'react-hook-form/dist/types/form';
+import { FieldValues, UseFormProps, useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { checkAccountNameIsTaken } from '@background/redux/import-account-actions-should-be-removed';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { accountImported } from '@background/redux/vault/actions';
-import { Account } from '@background/redux/vault/types';
 
 import {
   FooterButtonsContainer,
-  LayoutWindow,
-  PopupHeader
+  HeaderPopup,
+  LayoutWindow
 } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Account } from '@libs/types/account';
+import { Button } from '@libs/ui/components';
 import { useAccountNameRule } from '@libs/ui/forms/form-validation-rules';
 
 import { RouterPath, useTypedNavigate } from '../../router';
@@ -108,7 +107,7 @@ export function ImportAccountWithFileUploadPage() {
     <LayoutWindow
       variant="form"
       onSubmit={handleSubmit(onSubmit)}
-      renderHeader={() => <PopupHeader />}
+      renderHeader={() => <HeaderPopup />}
       renderContent={() => (
         <ImportAccountWithFileUploadPageContent
           register={register}

@@ -7,7 +7,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
 import { ExtendedDeployWithId } from '@libs/services/account-activity-service';
-import { getMappedPendingTransactions } from '@libs/ui/utils/utils';
+import { getMappedPendingTransactions } from '@libs/ui/utils';
 
 export const useMapAccountDeploysListWithPendingTransactions = (
   accountDeploys: ExtendedDeployWithId[] | null

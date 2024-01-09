@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { Route, Routes } from 'react-router-dom';
-import { HashRouter } from 'react-router-dom';
+import { HashRouter, Route, Routes } from 'react-router-dom';
 
 import { ApproveConnectionPage } from '@connect-to-app/pages/approve-connection';
 import { ConnectingPage } from '@connect-to-app/pages/connecting';

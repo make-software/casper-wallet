@@ -11,7 +11,7 @@ import {
   ActiveAccountPlate,
   RecipientDropdownInput,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 import { TransferRecipientFormValues } from '@libs/ui/forms/transfer';
 
 interface RecipientStepProps {

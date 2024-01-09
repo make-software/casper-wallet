@@ -17,7 +17,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { List, SvgIcon, Typography } from '@libs/ui';
+import { List, SvgIcon, Typography } from '@libs/ui/components';
 
 export function ConnectedSitesPage() {
   const { t } = useTranslation();

@@ -12,11 +12,11 @@ import { sdkMethod } from '@content/sdk-method';
 
 import {
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  LayoutWindow,
-  PopupHeader
+  LayoutWindow
 } from '@libs/layout';
-import { Button, Typography } from '@libs/ui';
+import { Button, Typography } from '@libs/ui/components';
 
 import { RouterPath, useTypedNavigate } from '../../router';
 import { ApproveConnectionContent } from './content';
@@ -69,7 +69,7 @@ export function ApproveConnectionPage({
   return (
     <LayoutWindow
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           renderSubmenuBarItems={() => (
             <HeaderSubmenuBarNavLink linkType="back" />
           )}

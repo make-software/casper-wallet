@@ -14,8 +14,8 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { ContactsPlate, List, Typography } from '@libs/ui';
-import { formatShortTimestamp } from '@libs/ui/utils/formatters';
+import { ContactsPlate, List, Typography } from '@libs/ui/components';
+import { formatShortTimestamp } from '@libs/ui/utils';
 
 export const ContactsBookPageContent = () => {
   const { t } = useTranslation();

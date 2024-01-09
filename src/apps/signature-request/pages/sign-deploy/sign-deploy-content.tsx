@@ -9,7 +9,7 @@ import {
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
-import { Accordion, List, SvgIcon, Typography } from '@libs/ui';
+import { Accordion, List, SvgIcon, Typography } from '@libs/ui/components';
 
 import {
   CasperDeploy,

@@ -5,10 +5,10 @@ import { closeCurrentWindow } from '@background/close-current-window';
 
 import {
   FooterButtonsContainer,
-  LayoutWindow,
-  PopupHeader
+  HeaderPopup,
+  LayoutWindow
 } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 
 import { ErrorPageContent } from './content';
 import { ErrorLocationState } from './types';
@@ -38,7 +38,7 @@ export function WindowErrorPage({
 
   return (
     <LayoutWindow
-      renderHeader={() => <PopupHeader />}
+      renderHeader={() => <HeaderPopup />}
       renderContent={() => (
         <ErrorPageContent
           errorHeaderText={state.errorHeaderText}

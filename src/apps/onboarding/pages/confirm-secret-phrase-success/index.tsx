@@ -11,7 +11,7 @@ import {
   TabFooterContainer,
   TabHeaderContainer
 } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 
 import { ConfirmSecretPhraseSuccessPageContent } from './content';
 

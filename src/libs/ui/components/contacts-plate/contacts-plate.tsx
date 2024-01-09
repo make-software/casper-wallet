@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { AlignedFlexRow, FlexColumn, SpacingSize } from '@libs/layout';
-import { Avatar, Hash, HashVariant, Typography } from '@libs/ui';
+import { Avatar, Hash, HashVariant, Typography } from '@libs/ui/components';
 
 const Container = styled(AlignedFlexRow)`
   cursor: pointer;

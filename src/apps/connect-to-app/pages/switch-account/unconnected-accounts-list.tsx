@@ -7,12 +7,12 @@ import { useAccountManager } from '@popup/hooks/use-account-actions-with-events'
 
 import { closeCurrentWindow } from '@background/close-current-window';
 import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
-import { AccountListRows } from '@background/redux/vault/types';
 import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
 
 import { sdkMethod } from '@content/sdk-method';
 
 import { LeftAlignedFlexColumn, SpacingSize } from '@libs/layout';
+import { AccountListRows } from '@libs/types/account';
 import {
   Button,
   ConnectionStatusBadge,
@@ -20,7 +20,7 @@ import {
   HashVariant,
   List,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 const CentredFlexRow = styled.div`
   display: flex;

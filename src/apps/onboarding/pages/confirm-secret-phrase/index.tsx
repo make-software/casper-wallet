@@ -18,7 +18,7 @@ import {
   TabHeaderContainer,
   createErrorLocationState
 } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 
 import { ConfirmSecretPhrasePageContent } from './content';
 

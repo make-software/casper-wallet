@@ -14,7 +14,7 @@ import {
   Input,
   TextArea,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 import { ContactFromValues } from '@libs/ui/forms/contact';
 
 interface EditingContactPageContentProps {

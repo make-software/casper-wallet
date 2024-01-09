@@ -4,13 +4,13 @@ import styled from 'styled-components';
 
 import { CenteredFlexRow } from '@libs/layout';
 import {
-  ContentColor,
   CopyToClipboard,
   Placement,
   Tag,
   Tooltip,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
+import { ContentColor } from '@libs/ui/utils';
 
 import { TruncateKeySize, truncateKey } from './utils';
 

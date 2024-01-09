@@ -5,10 +5,10 @@ import {
   ExtendedDeploy,
   ExtendedDeployWithId,
   TransferResultWithId
-} from '@libs/services/account-activity-service';
-import { ActiveAccountBalance } from '@libs/services/balance-service';
-import { ContractPackageWithBalance } from '@libs/services/erc20-service';
-import { NFTTokenResult } from '@libs/services/nft-service';
+} from '@libs/services/account-activity-service/types';
+import { ActiveAccountBalance } from '@libs/services/balance-service/types';
+import { ContractPackageWithBalance } from '@libs/services/erc20-service/types';
+import { NFTTokenResult } from '@libs/services/nft-service/types';
 
 export const accountBalanceChanged = createAction(
   'ACCOUNT_BALANCE_CHANGED'

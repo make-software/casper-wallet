@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 
 import {
   FooterButtonsContainer,
-  LayoutWindow,
-  PopupHeader
+  HeaderPopup,
+  LayoutWindow
 } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 
 import { RouterPath } from '../../router';
 import { ImportAccountWithFileContentPage } from './content';
@@ -18,7 +18,7 @@ export function ImportAccountWithFilePage() {
 
   return (
     <LayoutWindow
-      renderHeader={() => <PopupHeader />}
+      renderHeader={() => <HeaderPopup />}
       renderContent={() => <ImportAccountWithFileContentPage />}
       renderFooter={() => (
         <FooterButtonsContainer>

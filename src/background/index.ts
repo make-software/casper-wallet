@@ -1,5 +1,13 @@
 import { RootAction, getType } from 'typesafe-actions';
-import browser from 'webextension-polyfill';
+import {
+  Tabs,
+  action,
+  browserAction,
+  management,
+  runtime,
+  tabs,
+  windows
+} from 'webextension-polyfill';
 
 import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
 
@@ -36,11 +44,11 @@ import {
   contactsReseted,
   newContactAdded
 } from '@background/redux/contacts/actions';
+import { getExistingMainStoreSingletonOrInit } from '@background/redux/get-main-store';
 import {
   CheckAccountNameIsTakenAction,
   CheckSecretKeyExistAction
 } from '@background/redux/import-account-actions-should-be-removed';
-import { getExistingMainStoreSingletonOrInit } from '@background/redux/utils';
 import {
   accountAdded,
   accountDisconnected,
@@ -152,9 +160,8 @@ import { emitSdkEventToActiveTabsWithOrigin } from './utils';
 async function handleActionClick() {
   await openOnboardingUi();
 }
-browser.action && browser.action.onClicked.addListener(handleActionClick);
-browser.browserAction &&
-  browser.browserAction.onClicked.addListener(handleActionClick);
+action && action.onClicked.addListener(handleActionClick);
+browserAction && browserAction.onClicked.addListener(handleActionClick);
 
 async function isOnboardingCompleted() {
   const store = await getExistingMainStoreSingletonOrInit();
@@ -174,14 +181,14 @@ const init = () => {
     }
   });
 };
-browser.runtime.onStartup.addListener(init);
-browser.management?.onEnabled?.addListener(init);
+runtime.onStartup.addListener(init);
+management?.onEnabled?.addListener(init);
 
-browser.runtime.onInstalled.addListener(async () => {
+runtime.onInstalled.addListener(async () => {
   // this will run on installation or update so
   // first clear previous rules, then register new rules
   // DEV MODE: clean store on installation
-  // browser.storage.local.remove([REDUX_STORAGE_KEY]);
+  // storage.local.remove([REDUX_STORAGE_KEY]);
   //
   // after installation/update check if onboarding is completed
   isOnboardingCompleted().then(yes => {
@@ -199,7 +206,7 @@ const updateOrigin = async (windowId: number) => {
     return;
   }
 
-  const window = await browser.windows.get(windowId);
+  const window = await windows.get(windowId);
   // skip when non-normal windows
   if (window.type !== 'normal') {
     return;
@@ -209,7 +216,7 @@ const updateOrigin = async (windowId: number) => {
   const state = store.getState();
   const activeOrigin = state.activeOrigin;
 
-  const activeTabs = await browser.tabs.query({ active: true, windowId });
+  const activeTabs = await tabs.query({ active: true, windowId });
   const tab0 = activeTabs[0];
 
   let newActiveOrigin = null;
@@ -246,24 +253,24 @@ const updateOrigin = async (windowId: number) => {
   }
 };
 
-browser.windows.onFocusChanged.addListener(async (windowId: number) => {
+windows.onFocusChanged.addListener(async (windowId: number) => {
   updateOrigin(windowId);
 });
 
-browser.tabs.onActivated.addListener(
-  async ({ windowId }: browser.Tabs.OnActivatedActiveInfoType) => {
+tabs.onActivated.addListener(
+  async ({ windowId }: Tabs.OnActivatedActiveInfoType) => {
     updateOrigin(windowId);
   }
 );
 
-browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo && changeInfo.url && tab.windowId) {
     updateOrigin(tab.windowId);
   }
 });
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
-browser.runtime.onMessage.addListener(
+runtime.onMessage.addListener(
   async (action: RootAction | SdkMethod | ServiceMessage, sender) => {
     const store = await getExistingMainStoreSingletonOrInit();
 
@@ -854,7 +861,7 @@ browser.runtime.onMessage.addListener(
 
 // ping mechanism to keep background script from destroing wallet session when it's unlocked
 function ping() {
-  browser.runtime.sendMessage('ping').catch(() => {
+  runtime.sendMessage('ping').catch(() => {
     // ping
   });
 }

@@ -8,7 +8,7 @@ import { resetVault } from '@background/redux/sagas/actions';
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { LayoutTab, TabFooterContainer } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 
 import { WelcomePageContent } from './content';
 

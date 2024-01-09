@@ -17,10 +17,10 @@ import { signDeploy } from '@libs/crypto';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import {
   FooterButtonsContainer,
-  LayoutWindow,
-  PopupHeader
+  HeaderPopup,
+  LayoutWindow
 } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 
 import { CasperDeploy } from './deploy-types';
 import { SignDeployContent } from './sign-deploy-content';
@@ -134,7 +134,7 @@ export function SignDeployPage() {
 
   return (
     <LayoutWindow
-      renderHeader={() => <PopupHeader withConnectionStatus />}
+      renderHeader={() => <HeaderPopup withConnectionStatus />}
       renderContent={() => (
         <SignDeployContent
           deploy={deploy}

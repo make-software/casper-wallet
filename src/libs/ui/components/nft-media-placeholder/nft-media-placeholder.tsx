@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { CenteredFlexRow } from '@libs/layout';
-import { Skeleton, SvgIcon } from '@libs/ui';
+import { Skeleton, SvgIcon } from '@libs/ui/components';
 
 export const ImageContainer = styled(CenteredFlexRow)`
   position: relative;

@@ -9,7 +9,8 @@ import { selectActiveNetworkSetting } from '@background/redux/settings/selectors
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { AlignedFlexRow, SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
-import { Modal, SvgIcon, Typography, hexToRGBA } from '@libs/ui';
+import { Modal, SvgIcon, Typography } from '@libs/ui/components';
+import { hexToRGBA } from '@libs/ui/utils';
 
 const NetworkSwitcherContainer = styled(AlignedFlexRow)`
   background-color: ${({ theme }) => hexToRGBA(theme.color.black, '0.16')};

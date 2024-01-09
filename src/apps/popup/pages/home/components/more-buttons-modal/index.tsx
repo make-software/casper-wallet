@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { CenteredFlexColumn, SpacingSize } from '@libs/layout';
-import { Button, Modal, SvgIcon, Typography } from '@libs/ui';
+import { Button, Modal, SvgIcon, Typography } from '@libs/ui/components';
 
 import { ModalButtons } from './modal-buttons';
 

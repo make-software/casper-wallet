@@ -14,7 +14,7 @@ import {
   HashVariant,
   SvgIcon,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 interface RecipientPlateProps {
   handleClick?: () => void;

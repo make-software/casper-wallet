@@ -8,7 +8,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Button, Typography } from '@libs/ui';
+import { Button, Typography } from '@libs/ui/components';
 
 const SiteGroupHeaderContainer = styled(SpaceBetweenFlexColumn)`
   padding: ${({ theme }) => theme.padding[1.6]};

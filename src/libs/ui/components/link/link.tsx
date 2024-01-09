@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { HTMLAttributes, forwardRef } from 'react';
 import styled, { DefaultTheme } from 'styled-components';
 
-import { getColorFromTheme } from '@libs/ui';
+import { getColorFromTheme } from '@libs/ui/utils';
 
 type LinkColor = 'contentAction' | 'fillCritical' | 'inherit';
 
@@ -28,7 +28,7 @@ const getStateColor = (theme: DefaultTheme, color: LinkColor) => {
   );
 };
 
-export interface LinkProps extends React.HTMLAttributes<Ref> {
+export interface LinkProps extends HTMLAttributes<Ref> {
   href?: string;
   target?: string;
   color: LinkColor;
@@ -51,6 +51,6 @@ const StyledLink = styled.a<LinkProps>(({ theme, color }) => {
   };
 });
 
-export const Link = React.forwardRef<Ref, LinkProps>(function Link(props, ref) {
+export const Link = forwardRef<Ref, LinkProps>(function Link(props, ref) {
   return <StyledLink ref={ref} target={props.target} {...props} />;
 });

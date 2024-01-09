@@ -15,7 +15,7 @@ import { useCasperToken } from '@hooks/use-casper-token';
 
 import { AlignedFlexRow, CenteredFlexColumn, SpacingSize } from '@libs/layout';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
-import { Link, SvgIcon, Typography } from '@libs/ui';
+import { Link, SvgIcon, Typography } from '@libs/ui/components';
 
 interface HeaderViewInExplorerProps {
   tokenName?: string;

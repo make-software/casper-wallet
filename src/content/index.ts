@@ -1,5 +1,5 @@
 import { getType } from 'typesafe-actions';
-import browser from 'webextension-polyfill';
+import { runtime } from 'webextension-polyfill';
 
 import { SdkEvent, sdkEvent } from './sdk-event';
 import { CasperWalletEventType } from './sdk-event-type';
@@ -90,7 +90,7 @@ function handleSdkRequestEvent(e: Event) {
     );
   }
 
-  browser.runtime
+  runtime
     .sendMessage(requestAction)
     .then(message => {
       // if valid message send back response
@@ -115,7 +115,7 @@ function injectSdkScript() {
 
     const scriptTag = document.createElement('script');
     scriptTag.setAttribute('type', 'text/javascript');
-    scriptTag.src = browser.runtime.getURL(inpageScriptPath);
+    scriptTag.src = runtime.getURL(inpageScriptPath);
     scriptTag.onload = function () {
       documentHeadOrRoot.removeChild(scriptTag);
     };
@@ -129,7 +129,7 @@ function init() {
   // idempotent, doesn't need cleanup
   injectSdkScript();
 
-  browser.runtime.onMessage.addListener(handleSdkMessage);
+  runtime.onMessage.addListener(handleSdkMessage);
   window.addEventListener(SdkMethodEventType.Request, handleSdkRequestEvent);
 }
 
@@ -139,7 +139,7 @@ window.dispatchEvent(new CustomEvent(cleanupEventType));
 function cleanup() {
   document.removeEventListener(cleanupEventType, cleanup);
 
-  browser.runtime.onMessage.removeListener(handleSdkMessage);
+  runtime.onMessage.removeListener(handleSdkMessage);
   window.removeEventListener(SdkMethodEventType.Request, handleSdkRequestEvent);
 }
 window.addEventListener(cleanupEventType, cleanup);

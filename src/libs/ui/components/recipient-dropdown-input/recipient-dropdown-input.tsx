@@ -15,7 +15,13 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Input, List, RecipientPlate, SvgIcon, Typography } from '@libs/ui';
+import {
+  Input,
+  List,
+  RecipientPlate,
+  SvgIcon,
+  Typography
+} from '@libs/ui/components';
 import { TransferRecipientFormValues } from '@libs/ui/forms/transfer';
 import { TransferNftRecipientFormValues } from '@libs/ui/forms/transfer-nft';
 

@@ -12,7 +12,7 @@ import {
   CasperTokenActivityList,
   Erc20TokenActivityList,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 import { Token } from './token';
 

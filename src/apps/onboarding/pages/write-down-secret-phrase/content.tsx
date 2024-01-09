@@ -7,7 +7,7 @@ import {
   CopySecretPhraseBar,
   SecretPhraseWordsView,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 interface WriteDownSecretPhrasePageContentProps {
   phrase: SecretPhrase;

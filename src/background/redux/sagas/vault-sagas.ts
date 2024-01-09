@@ -54,12 +54,12 @@ import {
   activeAccountChanged,
   anotherAccountConnected,
   deployPayloadReceived,
+  deploysReseted,
   siteConnected,
   siteDisconnected,
   vaultLoaded,
   vaultReseted
 } from '../vault/actions';
-import { deploysReseted } from '../vault/actions';
 import {
   selectAccountNamesByOriginDict,
   selectSecretPhrase,

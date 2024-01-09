@@ -9,7 +9,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { SvgIcon, Tag, Typography } from '@libs/ui';
+import { SvgIcon, Tag, Typography } from '@libs/ui/components';
 
 export function ImportAccountWithFileContentPage() {
   const { t } = useTranslation();

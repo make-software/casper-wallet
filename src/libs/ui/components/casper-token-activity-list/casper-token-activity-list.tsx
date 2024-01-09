@@ -12,7 +12,7 @@ import {
   List,
   LoadingActivityView,
   NoActivityView
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 export const CasperTokenActivityList = () => {
   const accountCasperActivityList = useSelector(selectAccountCasperActivity);

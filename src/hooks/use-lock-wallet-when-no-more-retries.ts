@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { UseFormResetField } from 'react-hook-form/dist/types/form';
+import { UseFormResetField } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 
 import { LOGIN_RETRY_ATTEMPTS_LIMIT } from '@src/constants';

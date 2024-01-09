@@ -12,8 +12,8 @@ import {
 
 import { generateSyncWalletQrData } from '@libs/crypto';
 import {
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupHeader,
   PopupLayout
 } from '@libs/layout';
 
@@ -62,7 +62,7 @@ export const WalletQrCodePage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

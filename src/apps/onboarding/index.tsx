@@ -7,7 +7,8 @@ import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
 
 import { AppRouter } from '@onboarding/app-router';
 
-import { PopupState, createMainStoreReplica } from '@background/redux/utils';
+import { createMainStoreReplica } from '@background/redux/get-main-store';
+import { PopupState } from '@background/redux/types';
 import { onboardingAppInit } from '@background/redux/windowManagement/actions';
 
 import '@libs/i18n/i18n';

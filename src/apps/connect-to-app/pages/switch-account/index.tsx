@@ -6,9 +6,9 @@ import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-s
 import { sdkMethod } from '@content/sdk-method';
 
 import {
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  LayoutWindow,
-  PopupHeader
+  LayoutWindow
 } from '@libs/layout';
 
 import { SwitchAccountContent } from './content';
@@ -32,7 +32,7 @@ export function SwitchAccountPage() {
   return (
     <LayoutWindow
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           renderSubmenuBarItems={() => (
             <HeaderSubmenuBarNavLink
               linkType="cancelWindow"

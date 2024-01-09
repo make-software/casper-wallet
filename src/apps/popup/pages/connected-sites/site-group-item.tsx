@@ -5,7 +5,7 @@ import {
   AlignedSpaceBetweenFlexRow,
   LeftAlignedFlexColumn
 } from '@libs/layout';
-import { Hash, HashVariant, SvgIcon, Typography } from '@libs/ui';
+import { Hash, HashVariant, SvgIcon, Typography } from '@libs/ui/components';
 
 const SiteGroupItemContainer = styled(AlignedSpaceBetweenFlexRow)`
   gap: 18px;

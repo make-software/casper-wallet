@@ -18,7 +18,7 @@ import {
   LayoutTab,
   TabFooterContainer as TabFooterContainerBase
 } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
 
 // Design of this page is temporary. Should be changed after it will be done in Figma

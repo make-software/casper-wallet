@@ -1,6 +1,6 @@
 import { HDKey } from '@scure/bip32';
 
-import { KeyPair } from '@background/redux/vault/types';
+import { KeyPair } from '@libs/types/account';
 
 import { secretPhraseToSeed, validateSecretPhrase } from './bip39';
 import { getBip44Path } from './bip44';

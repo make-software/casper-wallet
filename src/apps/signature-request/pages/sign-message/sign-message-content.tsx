@@ -7,7 +7,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { FormField, Input, TextArea, Typography } from '@libs/ui';
+import { FormField, Input, TextArea, Typography } from '@libs/ui/components';
 import { truncateKey } from '@libs/ui/components/hash/utils';
 
 export interface SignMessageContentProps {

@@ -8,7 +8,7 @@ import { TokenType, useCasperToken } from '@hooks/use-casper-token';
 import { useFetchErc20Tokens } from '@hooks/use-fetch-erc20-tokens';
 
 import { SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
-import { List, TokenPlate, Typography } from '@libs/ui';
+import { List, TokenPlate, Typography } from '@libs/ui/components';
 
 import { formatErc20TokenBalance } from './utils';
 

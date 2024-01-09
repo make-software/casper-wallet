@@ -10,11 +10,11 @@ import { dispatchToMainStore } from '@background/redux/utils';
 
 import {
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupHeader,
   PopupLayout
 } from '@libs/layout';
-import { Button, PasswordInputs } from '@libs/ui';
+import { Button, PasswordInputs } from '@libs/ui/components';
 import {
   CreatePasswordFormValues,
   useCreatePasswordForm
@@ -51,7 +51,7 @@ export const ChangePasswordPage = () => {
       variant="form"
       onSubmit={handleSubmit(onSubmit)}
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

@@ -6,7 +6,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { Typography } from '@libs/ui';
+import { Typography } from '@libs/ui/components';
 
 interface ValidatorStepProps {
   children?: React.ReactNode;

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { Account } from '@background/redux/vault/types';
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
@@ -10,6 +9,7 @@ import {
   getAccountInfo,
   getAccountInfoLogo
 } from '@libs/services/account-info';
+import { Account } from '@libs/types/account';
 
 export const useFetchAccountInfo = (account: Account | undefined) => {
   const [accountInfoStandardName, setAccountInfoStandardName] = useState<

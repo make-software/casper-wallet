@@ -9,7 +9,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { SvgIcon, Typography } from '@libs/ui';
+import { SvgIcon, Typography } from '@libs/ui/components';
 
 interface SuccessScreenProps {
   needToRedirectToHome: boolean;

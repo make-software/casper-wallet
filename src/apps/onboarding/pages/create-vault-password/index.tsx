@@ -19,7 +19,7 @@ import {
   TabFooterContainer,
   TabHeaderContainer
 } from '@libs/layout';
-import { Button, Checkbox, Link, PasswordInputs } from '@libs/ui';
+import { Button, Checkbox, Link, PasswordInputs } from '@libs/ui/components';
 import {
   CreatePasswordFormValues,
   useCreatePasswordForm

@@ -19,9 +19,9 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Error, Input, Typography } from '@libs/ui';
+import { Error, Input, Typography } from '@libs/ui/components';
 import { StakeAmountFormValues } from '@libs/ui/forms/stakes-form';
-import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils/formatters';
+import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils';
 
 const StakeMaxButton = styled(AlignedFlexRow)`
   cursor: pointer;

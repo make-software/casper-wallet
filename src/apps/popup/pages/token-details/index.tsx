@@ -5,9 +5,9 @@ import { useParams } from 'react-router-dom';
 import { selectErc20Tokens } from '@background/redux/account-info/selectors';
 
 import {
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
   HeaderViewInExplorer,
-  PopupHeader,
   PopupLayout
 } from '@libs/layout';
 
@@ -20,7 +20,7 @@ export const TokenDetailPage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

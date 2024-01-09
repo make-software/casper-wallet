@@ -21,12 +21,8 @@ import {
   List,
   RecipientPlate,
   Typography
-} from '@libs/ui';
-import {
-  formatFiatAmount,
-  formatNumber,
-  motesToCSPR
-} from '@libs/ui/utils/formatters';
+} from '@libs/ui/components';
+import { formatFiatAmount, formatNumber, motesToCSPR } from '@libs/ui/utils';
 
 export const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;

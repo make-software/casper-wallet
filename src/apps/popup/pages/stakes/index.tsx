@@ -24,9 +24,9 @@ import {
   ContentContainer,
   ErrorPath,
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
   ParagraphContainer,
-  PopupHeader,
   PopupLayout,
   SpaceBetweenFlexRow,
   SpacingSize,
@@ -39,14 +39,10 @@ import {
   dispatchFetchValidatorsDetailsDataRequest
 } from '@libs/services/validators-service';
 import { ValidatorResultWithId } from '@libs/services/validators-service/types';
-import { Button, HomePageTabsId, Typography } from '@libs/ui';
+import { Button, HomePageTabsId, Typography } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useStakesForm } from '@libs/ui/forms/stakes-form';
-import {
-  CSPRtoMotes,
-  formatNumber,
-  motesToCSPR
-} from '@libs/ui/utils/formatters';
+import { CSPRtoMotes, formatNumber, motesToCSPR } from '@libs/ui/utils';
 
 export const StakesPage = () => {
   const [stakeStep, setStakeStep] = useState(StakeSteps.Validator);
@@ -323,7 +319,7 @@ export const StakesPage = () => {
     return (
       <PopupLayout
         renderHeader={() => (
-          <PopupHeader withNetworkSwitcher withMenu withConnectionStatus />
+          <HeaderPopup withNetworkSwitcher withMenu withConnectionStatus />
         )}
         renderContent={() => (
           <ContentContainer>
@@ -346,7 +342,7 @@ export const StakesPage = () => {
     return (
       <PopupLayout
         renderHeader={() => (
-          <PopupHeader withNetworkSwitcher withMenu withConnectionStatus />
+          <HeaderPopup withNetworkSwitcher withMenu withConnectionStatus />
         )}
         renderContent={() => <NoDelegations />}
         renderFooter={() => (
@@ -367,7 +363,7 @@ export const StakesPage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

@@ -13,7 +13,7 @@ import {
   List,
   LoadingActivityView,
   NoActivityView
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 export const DeploysList = () => {
   const { loadMoreDeploys, loading, hasNextPage } = useFetchAccountDeploys();

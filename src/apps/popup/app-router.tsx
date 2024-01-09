@@ -38,9 +38,9 @@ import { selectVaultHasAccounts } from '@background/redux/vault/selectors';
 import '@libs/i18n/i18n';
 import {
   ErrorPath,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
   LockedRouter,
-  PopupHeader,
   PopupLayout,
   WindowErrorPage
 } from '@libs/layout';
@@ -79,7 +79,7 @@ function AppRoutes() {
           element={
             <PopupLayout
               renderHeader={() => (
-                <PopupHeader
+                <HeaderPopup
                   withConnectionStatus
                   withMenu
                   withNetworkSwitcher
@@ -100,7 +100,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader withNetworkSwitcher withMenu withConnectionStatus />
+              <HeaderPopup withNetworkSwitcher withMenu withConnectionStatus />
             )}
             renderContent={() => <HomePageContent />}
           />
@@ -116,7 +116,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader
+              <HeaderPopup
                 withNetworkSwitcher
                 withMenu
                 withConnectionStatus
@@ -134,7 +134,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader
+              <HeaderPopup
                 withNetworkSwitcher
                 withMenu
                 withConnectionStatus
@@ -152,7 +152,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader
+              <HeaderPopup
                 withNetworkSwitcher
                 withMenu
                 withConnectionStatus
@@ -170,7 +170,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader withNetworkSwitcher withMenu withConnectionStatus />
+              <HeaderPopup withNetworkSwitcher withMenu withConnectionStatus />
             )}
             renderContent={() => <NoConnectedAccountPageContent />}
           />
@@ -181,7 +181,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader
+              <HeaderPopup
                 withMenu
                 withNetworkSwitcher
                 withConnectionStatus
@@ -199,7 +199,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader
+              <HeaderPopup
                 withNetworkSwitcher
                 withMenu
                 withConnectionStatus
@@ -217,7 +217,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader
+              <HeaderPopup
                 withNetworkSwitcher
                 withMenu
                 withConnectionStatus

@@ -18,13 +18,14 @@ import {
   selectVaultAccounts,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
-import { Account } from '@background/redux/vault/types';
 import {
   emitSdkEventToActiveTabs,
   emitSdkEventToActiveTabsWithOrigin
 } from '@background/utils';
 
 import { sdkEvent } from '@content/sdk-event';
+
+import { Account } from '@libs/types/account';
 
 export function findAccountInAListClosestToGivenAccountFilteredByNames(
   accounts: Account[],

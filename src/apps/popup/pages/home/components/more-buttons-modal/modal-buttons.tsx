@@ -12,7 +12,7 @@ import { selectActiveNetworkSetting } from '@background/redux/settings/selectors
 import { useCasperToken } from '@hooks/use-casper-token';
 
 import { AlignedFlexRow, FlexColumn, SpacingSize } from '@libs/layout';
-import { Button, SvgIcon, Typography } from '@libs/ui';
+import { Button, SvgIcon, Typography } from '@libs/ui/components';
 
 const ButtonContainer = styled(AlignedFlexRow)`
   cursor: pointer;

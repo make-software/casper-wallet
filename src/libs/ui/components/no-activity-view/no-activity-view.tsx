@@ -12,7 +12,7 @@ import {
   ExtendedDeployWithId,
   TransferResultWithId
 } from '@libs/services/account-activity-service';
-import { Tile, Typography } from '@libs/ui';
+import { Tile, Typography } from '@libs/ui/components';
 
 const Container = styled(CenteredFlexRow)`
   padding: 20px;

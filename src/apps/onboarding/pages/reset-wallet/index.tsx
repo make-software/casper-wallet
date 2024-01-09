@@ -7,7 +7,7 @@ import { resetVault } from '@background/redux/sagas/actions';
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { LayoutTab, TabFooterContainer } from '@libs/layout';
-import { Button, Checkbox } from '@libs/ui';
+import { Button, Checkbox } from '@libs/ui/components';
 
 import { ResetWalletPageContent } from './content';
 

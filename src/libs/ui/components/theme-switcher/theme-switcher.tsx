@@ -19,7 +19,7 @@ import {
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
-import { Button, List, SvgIcon, Typography } from '@libs/ui';
+import { Button, List, SvgIcon, Typography } from '@libs/ui/components';
 
 const Container = styled(FlexColumn)`
   padding-top: 24px;

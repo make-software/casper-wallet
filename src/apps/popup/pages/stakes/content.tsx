@@ -8,12 +8,15 @@ import { ConfirmStep } from '@popup/pages/stakes/confirm-step';
 import { ValidatorStep } from '@popup/pages/stakes/validator-step';
 
 import { ValidatorResultWithId } from '@libs/services/validators-service/types';
-import { TransferSuccessScreen, ValidatorDropdownInput } from '@libs/ui';
+import {
+  TransferSuccessScreen,
+  ValidatorDropdownInput
+} from '@libs/ui/components';
 import {
   StakeAmountFormValues,
   StakeValidatorFormValues
 } from '@libs/ui/forms/stakes-form';
-import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
+import { formatNumber, motesToCSPR } from '@libs/ui/utils';
 
 interface DelegateStakePageContentProps {
   stakeStep: StakeSteps;

@@ -1,6 +1,6 @@
 import Big from 'big.js';
 import { CLPublicKey } from 'casper-js-sdk';
-import browser from 'webextension-polyfill';
+import { runtime } from 'webextension-polyfill';
 
 import { Browser, NFT_TOKENS_REFRESH_RATE } from '@src/constants';
 
@@ -241,7 +241,7 @@ export const deriveMediaType = async (
   return 'unknown';
 };
 
-export const isSafariExtension = browser.runtime.id.startsWith(
+export const isSafariExtension = runtime.id.startsWith(
   'software.make.Casper-Wallet.Extension'
 );
 

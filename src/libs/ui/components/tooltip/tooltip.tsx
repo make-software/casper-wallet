@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 
-import { Typography } from '@libs/ui';
+import { Typography } from '@libs/ui/components';
 
 interface TooltipProps {
   title?: string | null;

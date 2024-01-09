@@ -17,7 +17,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { Button, Input, SvgIcon, Typography } from '@libs/ui';
+import { Button, Input, SvgIcon, Typography } from '@libs/ui/components';
 import {
   RenameAccountFormValues,
   useRenameAccount

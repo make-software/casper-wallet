@@ -26,7 +26,7 @@ import {
   List,
   SiteFaviconBadge,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
   width: 100%;

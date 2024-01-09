@@ -26,8 +26,8 @@ import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import {
   ErrorPath,
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupHeader,
   PopupLayout,
   SpaceBetweenFlexRow,
   createErrorLocationState
@@ -35,7 +35,7 @@ import {
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import { signAndDeploy } from '@libs/services/deployer-service';
 import { makeNativeTransferDeploy } from '@libs/services/transfer-service/transfer-service';
-import { Button, HomePageTabsId, Typography } from '@libs/ui';
+import { Button, HomePageTabsId, Typography } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useTransferForm } from '@libs/ui/forms/transfer';
 import {
@@ -44,7 +44,7 @@ import {
   formatNumber,
   motesToCSPR,
   multiplyErc20Balance
-} from '@libs/ui/utils/formatters';
+} from '@libs/ui/utils';
 
 import { TransactionSteps, getIsErc20Transfer } from './utils';
 
@@ -398,7 +398,7 @@ export const TransferPage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

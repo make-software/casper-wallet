@@ -1,4 +1,4 @@
-import { ErrorLocationState } from '@libs/layout';
+import { ErrorLocationState } from './types';
 
 export const ErrorPath = '/error';
 

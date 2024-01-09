@@ -14,7 +14,7 @@ import {
 } from '@src/constants';
 import { NFTTokenStandard } from '@src/utils';
 
-import { motesToCSPR } from '@libs/ui/utils/formatters';
+import { motesToCSPR } from '@libs/ui/utils';
 
 export interface TokenArgs {
   tokenId?: string;

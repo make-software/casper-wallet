@@ -26,19 +26,19 @@ import {
 } from '@libs/layout';
 import { TransferResultWithId } from '@libs/services/account-activity-service';
 import {
-  ContentColor,
   Hash,
   HashVariant,
   SvgIcon,
   Tooltip,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 import {
+  ContentColor,
   formatNumber,
   formatTimestamp,
   formatTimestampAge,
   motesToCSPR
-} from '@libs/ui/utils/formatters';
+} from '@libs/ui/utils';
 
 type Ref = HTMLDivElement;
 

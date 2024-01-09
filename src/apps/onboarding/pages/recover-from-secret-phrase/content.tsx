@@ -7,7 +7,12 @@ import {
   TabPageContainer,
   TabTextContainer
 } from '@libs/layout';
-import { FormField, FormFieldStatus, TextArea, Typography } from '@libs/ui';
+import {
+  FormField,
+  FormFieldStatus,
+  TextArea,
+  Typography
+} from '@libs/ui/components';
 import { RecoverSecretPhraseFormValues } from '@libs/ui/forms/recover-from-secret-phrase';
 
 interface RecoverFromSecretPhrasePageContentProps {

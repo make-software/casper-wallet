@@ -10,7 +10,7 @@ import {
   RightAlignedFlexColumn,
   SpacingSize
 } from '@libs/layout';
-import { SvgIcon, Tooltip, Typography } from '@libs/ui';
+import { SvgIcon, Tooltip, Typography } from '@libs/ui/components';
 
 const TokenAmountContainer = styled(RightAlignedFlexColumn)`
   max-width: 120px;

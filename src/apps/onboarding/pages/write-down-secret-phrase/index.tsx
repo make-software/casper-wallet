@@ -13,7 +13,7 @@ import {
   TabFooterContainer,
   TabHeaderContainer
 } from '@libs/layout';
-import { Button, Checkbox } from '@libs/ui';
+import { Button, Checkbox } from '@libs/ui/components';
 
 import { WriteDownSecretPhrasePageContent } from './content';
 

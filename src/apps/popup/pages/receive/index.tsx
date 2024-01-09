@@ -8,11 +8,11 @@ import { useCopyToClipboard } from '@hooks/use-copy-to-clipboard';
 
 import {
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupHeader,
   PopupLayout
 } from '@libs/layout';
-import { Button, Typography } from '@libs/ui';
+import { Button, Typography } from '@libs/ui/components';
 
 import { ReceivePageContent } from './content';
 
@@ -28,7 +28,7 @@ export const ReceivePage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

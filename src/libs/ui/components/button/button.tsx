@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 
-import { BaseProps, getLinearGradientColor } from '@libs/ui';
+import { BaseProps } from '@libs/ui/types';
+import { getLinearGradientColor } from '@libs/ui/utils/get-linear-gradient-color';
 
 interface BaseButtonProps extends BaseProps {
   type?: 'button' | 'submit' | 'reset';
@@ -176,7 +177,7 @@ export interface ButtonProps extends BaseButtonProps {
 
 type Ref = HTMLButtonElement;
 
-export const Button = React.forwardRef<Ref, ButtonProps>(function Button(
+export const Button = forwardRef<Ref, ButtonProps>(function Button(
   {
     color = 'primaryBlue',
     inline = false,

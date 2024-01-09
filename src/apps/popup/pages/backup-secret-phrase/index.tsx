@@ -6,11 +6,11 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupHeader,
   PopupLayout
 } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 
 import { BackupSecretPhrasePageContent } from './content';
 
@@ -34,7 +34,7 @@ export function BackupSecretPhrasePage() {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

@@ -6,7 +6,7 @@ import {
   TabPageContainer,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { TextList, Typography } from '@libs/ui';
+import { TextList, Typography } from '@libs/ui/components';
 
 export function CreateSecretPhraseConfirmationPageContent() {
   const { t } = useTranslation();

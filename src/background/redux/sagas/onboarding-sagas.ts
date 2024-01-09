@@ -1,6 +1,6 @@
 import { put, takeLatest } from 'redux-saga/effects';
 import { getType } from 'typesafe-actions';
-import browser from 'webextension-polyfill';
+import { storage } from 'webextension-polyfill';
 
 import { disableOnboardingFlow } from '@background/open-onboarding-flow';
 import { contactsReseted } from '@background/redux/contacts/actions';
@@ -53,7 +53,7 @@ function* resetVaultSaga() {
     yield put(contactsReseted());
     yield put(vaultSettingsReseted());
 
-    browser.storage.local.clear();
+    storage.local.clear();
   } catch (err) {
     console.error(err);
   }

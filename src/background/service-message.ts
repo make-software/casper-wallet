@@ -1,19 +1,19 @@
+import { ActionType, createAction } from 'typesafe-actions';
+
 import {
   Erc20TokenActionResult,
   ExtendedDeploy,
   TransferResult
-} from 'src/libs/services/account-activity-service';
-import { ActionType, createAction } from 'typesafe-actions';
-
-import { AccountInfo } from '@libs/services/account-info';
-import { FetchBalanceResponse } from '@libs/services/balance-service';
-import { ContractPackageWithBalance } from '@libs/services/erc20-service';
-import { NFTTokenResult } from '@libs/services/nft-service';
+} from '@libs/services/account-activity-service/types';
+import { AccountInfo } from '@libs/services/account-info/types';
+import { FetchBalanceResponse } from '@libs/services/balance-service/types';
+import { ContractPackageWithBalance } from '@libs/services/erc20-service/types';
+import { NFTTokenResult } from '@libs/services/nft-service/types';
 import { ErrorResponse, PaginatedResponse } from '@libs/services/types';
 import {
   DelegatorResult,
   ValidatorResult
-} from '@libs/services/validators-service';
+} from '@libs/services/validators-service/types';
 
 type Meta = void;
 

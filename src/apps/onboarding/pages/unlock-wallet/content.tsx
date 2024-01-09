@@ -15,7 +15,7 @@ import {
   PasswordVisibilityIcon,
   SvgIcon,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 import { UnlockWalletFormValues } from '@libs/ui/forms/unlock-wallet';
 
 // Design of this page is temporary. Should be changed after it will be done in Figma

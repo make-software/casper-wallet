@@ -5,7 +5,13 @@ import styled from 'styled-components';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import { AccountList, Hash, HashVariant, Modal, SvgIcon } from '@libs/ui';
+import {
+  AccountList,
+  Hash,
+  HashVariant,
+  Modal,
+  SvgIcon
+} from '@libs/ui/components';
 
 const ConnectionStatusContainer = styled(AlignedFlexRow)`
   width: fit-content;

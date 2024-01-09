@@ -22,8 +22,8 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { ActiveAccountPlate, Tile, Typography } from '@libs/ui';
-import { motesToCSPR } from '@libs/ui/utils/formatters';
+import { ActiveAccountPlate, Tile, Typography } from '@libs/ui/components';
+import { motesToCSPR } from '@libs/ui/utils';
 
 const Container = styled.div`
   padding: 20px 16px;

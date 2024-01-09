@@ -16,7 +16,7 @@ import {
   CenteredFlexRow,
   SpacingSize
 } from '@libs/layout';
-import { SvgIcon } from '@libs/ui';
+import { SvgIcon } from '@libs/ui/components';
 
 const RoundedIdenticon = styled(Identicon)(
   ({

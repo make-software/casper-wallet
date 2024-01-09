@@ -17,9 +17,9 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Checkbox, Input, Typography } from '@libs/ui';
+import { Checkbox, Input, Typography } from '@libs/ui/components';
 import { TransferAmountFormValues } from '@libs/ui/forms/transfer';
-import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils/formatters';
+import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils';
 
 interface AmountStepProps {
   amountForm: UseFormReturn<TransferAmountFormValues>;

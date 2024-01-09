@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { useNavigationMenu, useTypedLocation } from '@popup/router';
 
 import { HeaderNetworkSwitcher } from '@libs/layout';
-import { SvgIcon } from '@libs/ui';
+import { SvgIcon } from '@libs/ui/components';
 
 const Container = styled.div`
   display: flex;
@@ -12,7 +12,7 @@ const Container = styled.div`
   gap: 18px;
 `;
 
-interface MainmenuBarProps {
+interface MainMenuBarProps {
   withNetworkSwitcher?: boolean;
   withMenu?: boolean;
 }
@@ -20,7 +20,7 @@ interface MainmenuBarProps {
 export function HeaderActions({
   withNetworkSwitcher,
   withMenu
-}: MainmenuBarProps) {
+}: MainMenuBarProps) {
   const location = useTypedLocation();
   const { toggleNavigationMenu } = useNavigationMenu();
 

@@ -14,7 +14,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { Checkbox, List, Typography } from '@libs/ui';
+import { Checkbox, List, Typography } from '@libs/ui/components';
 
 export function TimeoutPageContent() {
   const { t } = useTranslation();

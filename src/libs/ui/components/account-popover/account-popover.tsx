@@ -13,9 +13,9 @@ import {
   selectConnectedAccountNamesWithActiveOrigin,
   selectIsAnyAccountConnectedWithActiveOrigin
 } from '@background/redux/vault/selectors';
-import { Account } from '@background/redux/vault/types';
 
-import { PopoverLink, SvgIcon, Typography } from '@libs/ui';
+import { Account } from '@libs/types/account';
+import { PopoverLink, SvgIcon, Typography } from '@libs/ui/components';
 import { Popover } from '@libs/ui/components/popover/popover';
 
 interface AccountActionsMenuPopoverProps {

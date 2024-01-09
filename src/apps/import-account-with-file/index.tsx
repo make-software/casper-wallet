@@ -6,14 +6,12 @@ import { ThemeProvider } from 'styled-components';
 import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
 import { isSafariBuild } from '@src/utils';
 
+import { createMainStoreReplica } from '@background/redux/get-main-store';
 import { themeModeSettingChanged } from '@background/redux/settings/actions';
 import { selectThemeModeSetting } from '@background/redux/settings/selectors';
 import { ThemeMode } from '@background/redux/settings/types';
-import {
-  PopupState,
-  createMainStoreReplica,
-  dispatchToMainStore
-} from '@background/redux/utils';
+import { PopupState } from '@background/redux/types';
+import { dispatchToMainStore } from '@background/redux/utils';
 import { importWindowInit } from '@background/redux/windowManagement/actions';
 
 import { useSystemThemeDetector } from '@hooks/use-system-theme-detector';

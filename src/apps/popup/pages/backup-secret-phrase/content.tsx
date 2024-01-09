@@ -15,7 +15,7 @@ import {
   SecretPhraseWordsView,
   TextList,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 export function BackupSecretPhrasePageContent() {
   const { t } = useTranslation();

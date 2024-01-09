@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { useClickAway } from '@hooks/use-click-away';
 
 import { AlignedFlexRow, Overlay } from '@libs/layout';
-import { BaseProps } from '@libs/ui';
+import { BaseProps } from '@libs/ui/types';
 
 const ChildrenContainer = styled(AlignedFlexRow)`
   cursor: pointer;

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import browser from 'webextension-polyfill';
+import { tabs } from 'webextension-polyfill';
 
 import {
   HomePageTabName,
@@ -15,7 +15,6 @@ import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import {
   selectActiveNetworkSetting,
-  selectCountOfAccounts,
   selectIsActiveAccountConnectedWithActiveOrigin,
   selectVaultActiveAccount
 } from '@background/redux/root-selector';
@@ -29,9 +28,7 @@ import {
   ContentContainer,
   FlexColumn,
   FlexRow,
-  HeaderSubmenuBarNavLink,
   LeftAlignedFlexColumn,
-  LinkType,
   SpaceBetweenFlexRow,
   SpacingSize,
   TileContainer,
@@ -49,8 +46,8 @@ import {
   Tile,
   Typography,
   getFontSizeBasedOnTextLength
-} from '@libs/ui';
-import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
+} from '@libs/ui/components';
+import { formatNumber, motesToCSPR } from '@libs/ui/utils';
 
 import { DeploysList } from './components/deploys-list';
 import { MoreButtonsModal } from './components/more-buttons-modal';
@@ -93,7 +90,7 @@ export function HomePageContent() {
 
   const handleBuyWithCSPR = useCallback(() => {
     if (activeAccount?.publicKey && network === NetworkSetting.Mainnet) {
-      browser.tabs.create({
+      tabs.create({
         url: getBuyWithTopperUrl(activeAccount.publicKey),
         active: true
       });
@@ -230,32 +227,5 @@ export function HomePageContent() {
         </Tabs>
       </VerticalSpaceContainer>
     </ContentContainer>
-  );
-}
-
-interface HomePageHeaderSubmenuItemsProps {
-  linkType: LinkType;
-}
-
-export function HomePageHeaderSubmenuItems({
-  linkType
-}: HomePageHeaderSubmenuItemsProps) {
-  const { t } = useTranslation();
-  const countOfAccounts = useSelector(selectCountOfAccounts);
-
-  return (
-    <>
-      <LeftAlignedFlexColumn>
-        <Typography type="body">
-          <Trans t={t}>Accounts list</Trans>
-        </Typography>
-
-        <Typography type="listSubtext" color="contentSecondary">
-          {countOfAccounts} {countOfAccounts > 1 ? t('accounts') : t('account')}
-        </Typography>
-      </LeftAlignedFlexColumn>
-
-      <HeaderSubmenuBarNavLink linkType={linkType} />
-    </>
   );
 }

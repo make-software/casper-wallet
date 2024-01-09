@@ -32,16 +32,20 @@ import { getRawPublicKey } from '@libs/entities/Account';
 import {
   ErrorPath,
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupHeader,
   PopupLayout,
   createErrorLocationState
 } from '@libs/layout';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import { Button, HomePageTabsId, TransferSuccessScreen } from '@libs/ui';
+import {
+  Button,
+  HomePageTabsId,
+  TransferSuccessScreen
+} from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useTransferNftForm } from '@libs/ui/forms/transfer-nft';
-import { CSPRtoMotes } from '@libs/ui/utils/formatters';
+import { CSPRtoMotes } from '@libs/ui/utils';
 
 export const TransferNftPage = () => {
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
@@ -187,7 +191,7 @@ export const TransferNftPage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

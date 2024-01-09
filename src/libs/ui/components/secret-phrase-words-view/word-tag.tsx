@@ -2,7 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { FlexRow, SpacingSize } from '@libs/layout';
-import { Typography, getLinearGradientColor } from '@libs/ui';
+import { Typography } from '@libs/ui/components';
+import { getLinearGradientColor } from '@libs/ui/utils/get-linear-gradient-color';
 
 interface IsEmptyWord {
   isEmptyWord?: boolean;

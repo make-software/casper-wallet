@@ -31,7 +31,7 @@ import {
   List,
   SiteFaviconBadge,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 import {
   ListItemContainer,

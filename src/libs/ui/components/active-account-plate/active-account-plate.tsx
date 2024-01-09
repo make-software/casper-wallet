@@ -13,7 +13,13 @@ import {
   SpacingSize,
   TileContainer
 } from '@libs/layout';
-import { Avatar, Hash, HashVariant, Tile, Typography } from '@libs/ui';
+import {
+  Avatar,
+  Hash,
+  HashVariant,
+  Tile,
+  Typography
+} from '@libs/ui/components';
 
 export const AmountContainer = styled(SpaceBetweenFlexColumn)`
   align-items: flex-end;

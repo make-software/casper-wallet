@@ -5,11 +5,11 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupHeader,
   PopupLayout
 } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 
 import { DownloadedSecretKeysPageContent } from './content';
 
@@ -19,7 +19,7 @@ export function DownloadedSecretKeysPage() {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

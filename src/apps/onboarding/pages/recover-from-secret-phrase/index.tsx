@@ -18,7 +18,7 @@ import {
   TabHeaderContainer,
   createErrorLocationState
 } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import {
   RecoverSecretPhraseFormValues,

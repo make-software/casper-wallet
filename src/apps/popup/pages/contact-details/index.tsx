@@ -27,12 +27,12 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import {
   AlignedFlexRow,
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupHeader,
   PopupLayout,
   SpacingSize
 } from '@libs/layout';
-import { Button, Link, SvgIcon } from '@libs/ui';
+import { Button, Link, SvgIcon } from '@libs/ui/components';
 import { useContactForm } from '@libs/ui/forms/contact';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 
@@ -112,7 +112,7 @@ export const ContactDetailsPage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

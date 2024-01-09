@@ -3,13 +3,14 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { RouterPath, useTypedNavigate } from '@popup/router';
+import { RouterPath } from '@popup/router/paths';
+import { useTypedNavigate } from '@popup/router/use-typed-navigate';
 
 import { closeCurrentWindow } from '@background/close-current-window';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
 
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import { Link, SvgIcon, Typography } from '@libs/ui';
+import { Link, SvgIcon, Typography } from '@libs/ui/components';
 import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
 
 const LinkWithIconContainer = styled.div`
@@ -17,7 +18,7 @@ const LinkWithIconContainer = styled.div`
   align-items: center;
 `;
 
-export type LinkType =
+type LinkType =
   | 'back'
   | 'close'
   | 'cancel'

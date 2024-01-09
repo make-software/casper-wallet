@@ -1,5 +1,5 @@
 import { EmptyAction, PayloadAction } from 'typesafe-actions';
-import browser from 'webextension-polyfill';
+import { runtime } from 'webextension-polyfill';
 
 // WARNING: legacy to be refactored, don't reuse!
 
@@ -20,7 +20,7 @@ export const checkAccountNameIsTaken = (value: string): Promise<boolean> => {
       accountName: value
     }
   };
-  return browser.runtime.sendMessage(action);
+  return runtime.sendMessage(action);
 };
 
 export type CheckSecretKeyExistAction = PayloadAction<
@@ -36,12 +36,12 @@ export const checkSecretKeyExist = (
       secretKeyBase64
     }
   };
-  return browser.runtime.sendMessage(action);
+  return runtime.sendMessage(action);
 };
 
 export type GetWindowIdAction = EmptyAction<'get-window-id'>;
 
 export const getWindowId = (): Promise<number | null> => {
   const action: GetWindowIdAction = { type: 'get-window-id' };
-  return browser.runtime.sendMessage(action);
+  return runtime.sendMessage(action);
 };

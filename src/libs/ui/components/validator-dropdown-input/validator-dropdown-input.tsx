@@ -13,7 +13,13 @@ import {
   VerticalSpaceContainer
 } from '@libs/layout';
 import { ValidatorResultWithId } from '@libs/services/validators-service/types';
-import { Input, List, SvgIcon, Typography, ValidatorPlate } from '@libs/ui';
+import {
+  Input,
+  List,
+  SvgIcon,
+  Typography,
+  ValidatorPlate
+} from '@libs/ui/components';
 import { StakeValidatorFormValues } from '@libs/ui/forms/stakes-form';
 
 const DropDownHeader = styled(AlignedSpaceBetweenFlexRow)`

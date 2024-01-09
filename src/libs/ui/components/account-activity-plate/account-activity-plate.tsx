@@ -33,14 +33,17 @@ import {
   ExtendedDeployWithId
 } from '@libs/services/account-activity-service';
 import {
-  ContentColor,
   DeployStatus,
   Hash,
   HashVariant,
   SvgIcon,
   Tooltip,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
+import {
+  ContentColor,
+  getRecipientAddressFromTransaction
+} from '@libs/ui/utils';
 import {
   divideErc20Balance,
   formatNumber,
@@ -48,7 +51,6 @@ import {
   formatTimestampAge,
   motesToCSPR
 } from '@libs/ui/utils/formatters';
-import { getRecipientAddressFromTransaction } from '@libs/ui/utils/utils';
 
 const SymbolContainer = styled(RightAlignedCenteredFlexRow)`
   max-width: 80px;

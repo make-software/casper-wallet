@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { useClickAway } from '@hooks/use-click-away';
 
-import { BaseProps } from '@libs/ui';
+import { BaseProps } from '@libs/ui/types';
 
 export interface AccordionProps extends BaseProps {
   children: (renderProps: RenderProps) => React.ReactNode | string;

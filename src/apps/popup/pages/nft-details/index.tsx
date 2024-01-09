@@ -7,12 +7,12 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 import { selectAccountNftTokens } from '@background/redux/account-info/selectors';
 
 import {
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
   HeaderViewInExplorer,
-  PopupHeader,
   PopupLayout
 } from '@libs/layout';
-import { HomePageTabsId } from '@libs/ui';
+import { HomePageTabsId } from '@libs/ui/components';
 
 import { NftDetailsContent } from './content';
 
@@ -41,7 +41,7 @@ export const NftDetailsPage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

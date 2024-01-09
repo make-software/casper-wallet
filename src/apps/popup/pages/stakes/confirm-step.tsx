@@ -17,12 +17,13 @@ import {
 } from '@libs/layout';
 import { getAuctionManagerDeployCost } from '@libs/services/deployer-service';
 import { ValidatorResult } from '@libs/services/validators-service/types';
-import { AmountContainer, List, Typography, ValidatorPlate } from '@libs/ui';
 import {
-  formatFiatAmount,
-  formatNumber,
-  motesToCSPR
-} from '@libs/ui/utils/formatters';
+  AmountContainer,
+  List,
+  Typography,
+  ValidatorPlate
+} from '@libs/ui/components';
+import { formatFiatAmount, formatNumber, motesToCSPR } from '@libs/ui/utils';
 
 export const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;

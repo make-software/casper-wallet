@@ -20,7 +20,7 @@ import {
   PasswordVisibilityIcon,
   SvgIcon,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 interface PasswordFormValues {
   password: string;

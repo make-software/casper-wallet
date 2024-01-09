@@ -14,7 +14,7 @@ import {
   List,
   LoadingActivityView,
   NoActivityView
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 export const Erc20TokenActivityList = () => {
   const erc20TokensActivityRecord =

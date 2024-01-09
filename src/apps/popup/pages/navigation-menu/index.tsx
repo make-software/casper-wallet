@@ -39,7 +39,7 @@ import {
   SvgIcon,
   ThemeSwitcher,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;

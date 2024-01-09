@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 
-import { TransferSuccessScreen } from '@libs/ui';
+import { TransferSuccessScreen } from '@libs/ui/components';
 import {
   TransferAmountFormValues,
   TransferRecipientFormValues

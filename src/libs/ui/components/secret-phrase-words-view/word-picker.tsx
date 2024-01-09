@@ -4,7 +4,8 @@ import styled from 'styled-components';
 
 import { SecretPhrase } from '@libs/crypto';
 import { AlignedFlexRow, FlexColumn, FlexRow, SpacingSize } from '@libs/layout';
-import { BaseProps, SvgIcon, Typography, WordTag } from '@libs/ui';
+import { SvgIcon, Typography, WordTag } from '@libs/ui/components';
+import { BaseProps } from '@libs/ui/types';
 
 const WordPickerContainer = styled(FlexColumn)`
   color: ${({ theme }) => theme.color.contentAction};

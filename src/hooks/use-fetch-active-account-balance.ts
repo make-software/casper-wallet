@@ -15,7 +15,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
 import { dispatchFetchActiveAccountBalance } from '@libs/services/balance-service';
-import { formatCurrency, motesToCurrency } from '@libs/ui/utils/formatters';
+import { formatCurrency, motesToCurrency } from '@libs/ui/utils';
 
 export const useFetchActiveAccountBalance = () => {
   const effectTimeoutRef = useRef<NodeJS.Timeout>();

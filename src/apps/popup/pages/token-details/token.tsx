@@ -24,7 +24,14 @@ import {
   SpacingSize
 } from '@libs/layout';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
-import { Button, Link, List, SvgIcon, TokenPlate, Typography } from '@libs/ui';
+import {
+  Button,
+  Link,
+  List,
+  SvgIcon,
+  TokenPlate,
+  Typography
+} from '@libs/ui/components';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 16px;

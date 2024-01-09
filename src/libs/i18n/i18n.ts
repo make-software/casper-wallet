@@ -8,6 +8,7 @@ import detector from './language-detector';
 const languageDetector = new LanguageDetector();
 languageDetector.addDetector(detector);
 
+// eslint-disable-next-line import/no-named-as-default-member
 i18n
   // loads translations from your server
   .use(Backend)

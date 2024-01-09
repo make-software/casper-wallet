@@ -12,7 +12,6 @@ import {
   selectVaultAccounts,
   selectVaultActiveAccountName
 } from '@background/redux/vault/selectors';
-import { AccountListRows } from '@background/redux/vault/types';
 
 import { useWindowManager } from '@hooks/use-window-manager';
 
@@ -24,6 +23,7 @@ import {
   LeftAlignedFlexColumn,
   SpacingSize
 } from '@libs/layout';
+import { AccountListRows } from '@libs/types/account';
 import {
   AccountActionsMenuPopover,
   Avatar,
@@ -32,7 +32,7 @@ import {
   HashVariant,
   List,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 import { sortAccounts } from '@libs/ui/components/account-list/utils';
 
 const ListItemContainer = styled(FlexColumn)`

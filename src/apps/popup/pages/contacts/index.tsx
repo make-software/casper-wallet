@@ -6,11 +6,11 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupHeader,
   PopupLayout
 } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 
 export const ContactsBookPage = () => {
   const { t } = useTranslation();
@@ -19,7 +19,7 @@ export const ContactsBookPage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

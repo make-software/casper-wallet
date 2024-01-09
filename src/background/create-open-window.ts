@@ -1,4 +1,4 @@
-import browser from 'webextension-polyfill';
+import { Windows, tabs, windows } from 'webextension-polyfill';
 
 import { RouterPath } from '@signature-request/router';
 
@@ -60,7 +60,7 @@ export function createOpenWindow({
     windowApp,
     isNewWindow,
     searchParams
-  }: OpenWindowProps): Promise<browser.Windows.Window> {
+  }: OpenWindowProps): Promise<Windows.Window> {
     const id = isNewWindow ? null : windowId;
 
     if (id != null) {
@@ -76,22 +76,22 @@ export function createOpenWindow({
 
     async function reuseExistingWindow(
       id: number
-    ): Promise<browser.Windows.Window | undefined> {
-      const allWindows = await browser.windows.getAll();
+    ): Promise<Windows.Window | undefined> {
+      const allWindows = await windows.getAll();
       const existingWindow = allWindows.find(window => window.id === id);
 
       if (existingWindow) {
-        const window = await browser.windows.get(id, { populate: true });
+        const window = await windows.get(id, { populate: true });
         if (window?.id != null) {
           // Bring popup window to the front
-          await browser.windows.update(window.id, {
+          await windows.update(window.id, {
             focused: true,
             drawAttention: true
           });
           // update tab url
           const tab = window.tabs?.[0];
           if (tab?.id != null) {
-            await browser.tabs.update({
+            await tabs.update({
               url: getUrlByWindowApp(windowApp, searchParams)
             });
           }
@@ -102,8 +102,8 @@ export function createOpenWindow({
       }
     }
 
-    async function openNewWindow(): Promise<browser.Windows.Window> {
-      return browser.windows.getCurrent().then(async currentWindow => {
+    async function openNewWindow(): Promise<Windows.Window> {
+      return windows.getCurrent().then(async currentWindow => {
         // If this flag is true, we create a new window without any size and positions.
         const isTestEnv = Boolean(process.env.TEST_ENV);
 
@@ -118,12 +118,12 @@ export function createOpenWindow({
           // So we check it and if it is in a fullscreen mode we didn't set width and height, and the popup will also open in fullscreen mode.
           // This is a default behavior for Safari and Chrome, but Firefox doesn't do this, so we need to do this manually for it.
           currentWindow.state === 'fullscreen' || isTestEnv
-            ? browser.windows.create({
+            ? windows.create({
                 url: getUrlByWindowApp(windowApp, searchParams),
                 type: 'popup',
                 focused: true
               })
-            : browser.windows.create({
+            : windows.create({
                 url: getUrlByWindowApp(windowApp, searchParams),
                 type: 'popup',
                 height: popupHeight,
@@ -138,10 +138,10 @@ export function createOpenWindow({
             setWindowId(newWindow.id);
 
             const handleCloseWindow = () => {
-              browser.windows.onRemoved.removeListener(handleCloseWindow);
+              windows.onRemoved.removeListener(handleCloseWindow);
               clearWindowId();
             };
-            browser.windows.onRemoved.addListener(handleCloseWindow);
+            windows.onRemoved.addListener(handleCloseWindow);
           }
           return newWindow;
         });

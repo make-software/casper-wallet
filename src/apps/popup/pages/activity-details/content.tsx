@@ -38,7 +38,7 @@ import {
   Tooltip,
   Typography,
   isPendingStatus
-} from '@libs/ui';
+} from '@libs/ui/components';
 import {
   divideErc20Balance,
   formatCurrency,
@@ -47,7 +47,7 @@ import {
   formatTimestampAge,
   motesToCSPR,
   motesToCurrency
-} from '@libs/ui/utils/formatters';
+} from '@libs/ui/utils';
 
 interface ActivityDetailsPageContentProps {
   fromAccount?: string;

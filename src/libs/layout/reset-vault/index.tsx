@@ -14,7 +14,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { Button, Checkbox, SvgIcon, Typography } from '@libs/ui';
+import { Button, Checkbox, SvgIcon, Typography } from '@libs/ui/components';
 
 export function ResetVaultPageContent() {
   const [isChecked, setIsChecked] = useState(false);

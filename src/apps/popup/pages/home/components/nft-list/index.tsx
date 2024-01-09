@@ -18,7 +18,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Skeleton, Tile, Typography } from '@libs/ui';
+import { Skeleton, Tile, Typography } from '@libs/ui/components';
 
 import { NftTokenCard } from './nft-token-card';
 

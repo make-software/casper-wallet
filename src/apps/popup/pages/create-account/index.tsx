@@ -13,11 +13,11 @@ import {
 
 import {
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupHeader,
   PopupLayout
 } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 import {
   CreateAccountFormValues,
   getDefaultName,
@@ -60,7 +60,7 @@ export function CreateAccountPage() {
       variant="form"
       onSubmit={handleSubmit(onSubmit)}
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

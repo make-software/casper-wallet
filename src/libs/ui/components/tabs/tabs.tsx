@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { AlignedSpaceBetweenFlexRow, CenteredFlexRow } from '@libs/layout';
-import { Typography } from '@libs/ui';
+import { Typography } from '@libs/ui/components';
 
 const TabsContainer = styled(AlignedSpaceBetweenFlexRow)`
   height: 40px;

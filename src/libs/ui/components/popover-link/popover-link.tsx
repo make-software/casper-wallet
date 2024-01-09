@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { HTMLAttributes, forwardRef } from 'react';
 import styled from 'styled-components';
 
 type Ref = HTMLAnchorElement;
 
-export interface PopoverLinkProps extends React.HTMLAttributes<Ref> {
+export interface PopoverLinkProps extends HTMLAttributes<Ref> {
   href?: string;
   target?: string;
   variant: 'contentAction';
@@ -38,10 +38,8 @@ const LINK_COMPONENT_BY_COLOR_DICT = {
   contentAction: BlueLink
 };
 
-export const PopoverLink = React.forwardRef<Ref, PopoverLinkProps>(
-  (props, ref) => {
-    const LinkComponent = LINK_COMPONENT_BY_COLOR_DICT[props.variant];
+export const PopoverLink = forwardRef<Ref, PopoverLinkProps>((props, ref) => {
+  const LinkComponent = LINK_COMPONENT_BY_COLOR_DICT[props.variant];
 
-    return <LinkComponent ref={ref} target={props.target} {...props} />;
-  }
-);
+  return <LinkComponent ref={ref} target={props.target} {...props} />;
+});

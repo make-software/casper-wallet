@@ -1,9 +1,10 @@
 import { createSelector } from 'reselect';
 import { RootState } from 'typesafe-actions';
 
-import { Account, VaultState } from '@background/redux/vault/types';
+import { VaultState } from '@background/redux/vault/types';
 
 import { SecretPhrase } from '@libs/crypto';
+import { Account } from '@libs/types/account';
 
 import { selectActiveOrigin } from '../active-origin/selectors';
 

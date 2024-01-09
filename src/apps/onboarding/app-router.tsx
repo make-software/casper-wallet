@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
+import {
+  FormState,
+  SetFormState,
+  useOnboardingFormState
+} from '@onboarding/hooks/use-onboarding-form-state';
 import { useSessionStorage } from '@onboarding/hooks/use-session-storage';
 import { ConfirmSecretPhrasePage } from '@onboarding/pages/confirm-secret-phrase';
 import { ConfirmSecretPhraseSuccessPage } from '@onboarding/pages/confirm-secret-phrase-success';
@@ -23,28 +28,13 @@ import {
 import { selectKeysDoesExist } from '@background/redux/keys/selectors';
 import { selectEncryptionKeyHash } from '@background/redux/session/selectors';
 
-import { SecretPhrase } from '@libs/crypto';
 import { ErrorPath, TabErrorPage } from '@libs/layout';
 
-export interface FormState {
-  secretPhrase: SecretPhrase | null;
-}
-
-export type SetFormState = (name: keyof FormState, value: any) => void;
-
 export function AppRouter() {
-  const [onboardingFormState, setOnboardingFormState] = useState<FormState>({
-    secretPhrase: null
-  });
+  const { onboardingFormState, setFormState } = useOnboardingFormState();
 
   const { loadIsLoggedIn, saveIsLoggedIn } = useSessionStorage();
   const isLoggedIn = loadIsLoggedIn();
-
-  const setFormState: SetFormState = (name, value) =>
-    setOnboardingFormState(prevOnboardingFormState => ({
-      ...prevOnboardingFormState,
-      [name]: value
-    }));
 
   const keysDoesExist = useSelector(selectKeysDoesExist);
   const encryptionKeyHash = useSelector(selectEncryptionKeyHash);

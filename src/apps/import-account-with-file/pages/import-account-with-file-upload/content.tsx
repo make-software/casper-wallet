@@ -13,7 +13,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { Input, SvgIcon, Typography } from '@libs/ui';
+import { Input, SvgIcon, Typography } from '@libs/ui/components';
 
 import { RouterPath, useTypedNavigate } from '../../router';
 import { ImportAccountFormValues } from './types';

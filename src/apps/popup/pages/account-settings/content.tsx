@@ -22,7 +22,13 @@ import {
   TileContainer,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Hash, HashVariant, SvgIcon, Tile, Typography } from '@libs/ui';
+import {
+  Hash,
+  HashVariant,
+  SvgIcon,
+  Tile,
+  Typography
+} from '@libs/ui/components';
 
 export function AccountSettingsPageContent() {
   const { t } = useTranslation();

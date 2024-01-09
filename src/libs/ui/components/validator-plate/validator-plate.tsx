@@ -20,7 +20,7 @@ import {
   Hash,
   HashVariant,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
 
 const ValidatorPlateContainer = styled(AlignedSpaceBetweenFlexRow)<{

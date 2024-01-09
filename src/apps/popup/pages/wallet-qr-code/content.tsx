@@ -9,7 +9,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { Typography } from '@libs/ui';
+import { Typography } from '@libs/ui/components';
 
 const QRContainer = styled(CenteredFlexRow)`
   padding: 20px 16px;

@@ -9,7 +9,7 @@ import {
   ImageContainer,
   LoadingMediaPlaceholder,
   VideoNftPlaceholder
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 const NftImage = styled.img`
   width: 100%;

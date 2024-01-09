@@ -15,12 +15,12 @@ import { selectVaultImportedAccounts } from '@background/redux/vault/selectors';
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import {
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupHeader,
   PopupLayout,
   UnlockProtectedPageContent
 } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
 
@@ -81,7 +81,7 @@ export function DownloadSecretKeysPage() {
       variant="form"
       onSubmit={handleSubmit(onSubmit)}
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

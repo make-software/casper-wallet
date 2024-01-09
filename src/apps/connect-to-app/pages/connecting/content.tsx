@@ -5,7 +5,11 @@ import styled from 'styled-components';
 import { closeCurrentWindow } from '@background/close-current-window';
 
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import { SvgIcon, Typography, getFaviconUrlFromOrigin } from '@libs/ui';
+import {
+  SvgIcon,
+  Typography,
+  getFaviconUrlFromOrigin
+} from '@libs/ui/components';
 
 const PageContainer = styled.div`
   display: flex;

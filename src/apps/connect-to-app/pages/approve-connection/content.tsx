@@ -11,7 +11,12 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { List, SiteFaviconBadge, SvgIcon, Typography } from '@libs/ui';
+import {
+  List,
+  SiteFaviconBadge,
+  SvgIcon,
+  Typography
+} from '@libs/ui/components';
 
 const ListItemContainer = styled(ListItemClickableContainer)`
   cursor: unset;

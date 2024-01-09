@@ -11,12 +11,12 @@ import { dispatchToMainStore } from '@background/redux/utils';
 
 import {
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupHeader,
   PopupLayout,
   UnlockProtectedPageContent
 } from '@libs/layout';
-import { Button } from '@libs/ui';
+import { Button } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
 
@@ -70,7 +70,7 @@ export const PasswordProtectionPage = ({
       variant="form"
       onSubmit={handleSubmit(onSubmit)}
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

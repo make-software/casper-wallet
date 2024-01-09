@@ -3,7 +3,11 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { SecretPhrase } from '@libs/crypto';
 import { TabPageContainer, TabTextContainer } from '@libs/layout';
-import { SecretPhraseWordsView, Typography, WordPicker } from '@libs/ui';
+import {
+  SecretPhraseWordsView,
+  Typography,
+  WordPicker
+} from '@libs/ui/components';
 
 interface ConfirmSecretPhrasePageContentProps {
   phrase: SecretPhrase;

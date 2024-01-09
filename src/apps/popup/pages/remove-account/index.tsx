@@ -14,7 +14,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { Button, SvgIcon, Typography } from '@libs/ui';
+import { Button, SvgIcon, Typography } from '@libs/ui/components';
 
 export function RemoveAccountPageContent() {
   const navigate = useTypedNavigate();

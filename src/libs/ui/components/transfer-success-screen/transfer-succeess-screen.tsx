@@ -9,7 +9,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { HomePageTabsId, SvgIcon, Typography } from '@libs/ui';
+import { HomePageTabsId, SvgIcon, Typography } from '@libs/ui/components';
 
 interface TransferSuccessScreenProps {
   headerText: string;

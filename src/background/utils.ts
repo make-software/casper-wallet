@@ -1,17 +1,17 @@
-import browser from 'webextension-polyfill';
+import { Tabs, tabs } from 'webextension-polyfill';
 
 import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
 
 import { SdkEvent } from '@content/sdk-event';
 
 export async function emitSdkEventToActiveTabs(
-  callback: (tab: browser.Tabs.Tab) => SdkEvent | undefined
+  callback: (tab: Tabs.Tab) => SdkEvent | undefined
 ) {
-  const tabs = await browser.tabs.query({
+  const tabsList = await tabs.query({
     active: true
   });
 
-  tabs.forEach(async tab => {
+  tabsList.forEach(async tab => {
     if (tab.id) {
       // skip non http windows
       if (tab.url && hasHttpPrefix(tab.url)) {
@@ -19,7 +19,7 @@ export async function emitSdkEventToActiveTabs(
         if (action == null) {
           return;
         }
-        browser.tabs.sendMessage(tab.id, action);
+        tabs.sendMessage(tab.id, action);
       }
     } else {
       throw Error('Tab without id: ' + tab);
@@ -35,11 +35,11 @@ export async function emitSdkEventToActiveTabsWithOrigin(
     return;
   }
 
-  const tabs = await browser.tabs.query({
+  const tabsList = await tabs.query({
     active: true
   });
 
-  tabs.forEach(async tab => {
+  tabsList.forEach(async tab => {
     if (tab.id) {
       // skip non http windows
       if (
@@ -47,7 +47,7 @@ export async function emitSdkEventToActiveTabsWithOrigin(
         hasHttpPrefix(tab.url) &&
         getUrlOrigin(tab.url) === origin
       ) {
-        browser.tabs.sendMessage(tab.id, action);
+        tabs.sendMessage(tab.id, action);
       }
     } else {
       throw Error('Tab without id: ' + tab);

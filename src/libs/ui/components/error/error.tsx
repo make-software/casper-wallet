@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { AlignedFlexRow, FlexColumn, SpacingSize } from '@libs/layout';
-import { SvgIcon, Typography } from '@libs/ui';
+import { SvgIcon, Typography } from '@libs/ui/components';
 
 const ErrorContainer = styled(FlexColumn)`
   padding: 12px 16px;

@@ -45,7 +45,7 @@ import {
   SvgIcon,
   Tile,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 const NftImageContainer = styled(CenteredFlexRow)`
   width: 100%;

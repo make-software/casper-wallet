@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 
-import { BaseProps } from '../../types';
+import { BaseProps } from '@libs/ui/types';
 
 /* eslint-disable-next-line */
 export interface FlexBoxProps extends BaseProps {
@@ -51,7 +51,7 @@ const StyledFlexBox = styled('div')<FlexBoxProps>(
   })
 );
 
-export const FlexBox = React.forwardRef<HTMLDivElement, FlexBoxProps>(
+export const FlexBox = forwardRef<HTMLDivElement, FlexBoxProps>(
   (props, ref) => <StyledFlexBox ref={ref} {...props} />
 );
 

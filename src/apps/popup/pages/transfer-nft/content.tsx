@@ -25,12 +25,12 @@ import {
   SvgIcon,
   Tile,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 import {
   TransferNftAmountFormValues,
   TransferNftRecipientFormValues
 } from '@libs/ui/forms/transfer-nft';
-import { formatFiatAmount } from '@libs/ui/utils/formatters';
+import { formatFiatAmount } from '@libs/ui/utils';
 
 const Container = styled.div`
   padding: 16px;

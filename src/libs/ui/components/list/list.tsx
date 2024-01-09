@@ -8,7 +8,7 @@ import {
   VerticalSpaceContainer,
   borderBottomPseudoElementRules
 } from '@libs/layout';
-import { Tile, Typography } from '@libs/ui';
+import { Tile, Typography } from '@libs/ui/components';
 
 interface ListHeaderContainerProps extends BorderBottomPseudoElementProps {
   stickyHeader?: boolean;

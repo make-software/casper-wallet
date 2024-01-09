@@ -20,7 +20,7 @@ import {
   EmptyMediaPlaceholder,
   LoadingMediaPlaceholder,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 
 import { NftPreviewImage } from './nft-preview-image';
 
