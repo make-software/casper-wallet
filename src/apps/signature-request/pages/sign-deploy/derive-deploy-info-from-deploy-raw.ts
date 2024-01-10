@@ -3,7 +3,9 @@ import {
   getDeployPayment,
   getDeployType,
   getDeployArgs,
-  getEntryPoint
+  getEntryPoint,
+  getContractHash,
+  getContractName
 } from './deploy-utils';
 import { convertBytesToHex } from '@src/libs/crypto/utils';
 
@@ -16,6 +18,11 @@ export function deriveDeployInfoFromDeployRaw(deploy: CasperDeploy) {
   const deployType = getDeployType(deploy);
   const deployArgs = getDeployArgs(deploy);
   const entryPoint = getEntryPoint(deploy);
+  const contractHashBytes = getContractHash(deploy);
+  const contractName = getContractName(deploy);
+  const contractHash = contractHashBytes
+    ? convertBytesToHex(contractHashBytes)
+    : undefined;
 
   return {
     account: account.toHex(false),
@@ -23,6 +30,8 @@ export function deriveDeployInfoFromDeployRaw(deploy: CasperDeploy) {
     bodyHash: convertBytesToHex(bodyHash),
     gasPrice: gasPrice.toString(),
     timestamp: timestamp.toString(),
+    contractHash,
+    contractName,
     chainName,
     deployType,
     payment,

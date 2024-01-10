@@ -19,6 +19,8 @@ export type SignatureRequestFields = {
   chainName: string;
   deployType: DeployType;
   entryPoint?: string;
+  contractHash?: string;
+  contractName?: string;
 };
 
 export type SignatureRequestArguments = {
