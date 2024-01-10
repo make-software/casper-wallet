@@ -115,7 +115,7 @@ export function SignMessagePage() {
 
   return (
     <LayoutWindow
-      renderHeader={() => <PopupHeader withConnectionStatus />}
+      renderHeader={() => <PopupHeader />}
       renderContent={() => (
         <SignMessageContent
           message={message}
