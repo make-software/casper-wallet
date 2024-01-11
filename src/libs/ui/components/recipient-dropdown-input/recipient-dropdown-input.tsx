@@ -1,21 +1,29 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { UseFormReturn, useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { UseFormReturn, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 
+import { selectAllContacts } from '@background/redux/contacts/selectors';
 import { selectRecentRecipientPublicKeys } from '@background/redux/recent-recipient-public-keys/selectors';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { useClickAway } from '@hooks/use-click-away';
+
 import {
   AlignedFlexRow,
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Input, List, RecipientPlate, SvgIcon, Typography } from '@libs/ui';
+import {
+  Input,
+  List,
+  RecipientPlate,
+  SvgIcon,
+  Typography
+} from '@libs/ui/components';
 import { TransferRecipientFormValues } from '@libs/ui/forms/transfer';
-import { useClickAway } from '@libs/ui/hooks/use-click-away';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { TransferNftRecipientFormValues } from '@libs/ui/forms/transfer-nft';
-import { selectAllContacts } from '@background/redux/contacts/selectors';
 
 const SeparatorContainer = styled(AlignedFlexRow)`
   padding: 8px 16px;

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { SvgIcon } from '@libs/ui';
+import { SvgIcon } from '@libs/ui/components';
 
 export interface ContractIconProps {
   src?: string | null;

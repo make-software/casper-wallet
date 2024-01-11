@@ -1,4 +1,5 @@
-import { VaultState } from '@src/background/redux/vault/types';
+import { VaultState } from '@background/redux/vault/types';
+
 import { aesDecryptString, aesEncryptString } from './aes';
 
 export async function encryptVault(

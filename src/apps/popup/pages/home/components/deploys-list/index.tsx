@@ -1,19 +1,19 @@
 import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
+import { useSelector } from 'react-redux';
 
 import { selectAccountDeploys } from '@background/redux/account-info/selectors';
+
+import { useFetchAccountDeploys } from '@hooks/use-fetch-account-deploys';
+import { useMapAccountDeploysListWithPendingTransactions } from '@hooks/use-map-account-deploys-list-with-pending-transactions';
+
 import { SpacingSize } from '@libs/layout';
 import {
   AccountActivityPlate,
   List,
   LoadingActivityView,
   NoActivityView
-} from '@libs/ui';
-import {
-  useFetchAccountDeploys,
-  useMapAccountDeploysListWithPendingTransactions
-} from '@src/hooks';
+} from '@libs/ui/components';
 
 export const DeploysList = () => {
   const { loadMoreDeploys, loading, hasNextPage } = useFetchAccountDeploys();

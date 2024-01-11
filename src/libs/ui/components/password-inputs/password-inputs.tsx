@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 import { FieldErrors, UseFormRegister } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { InputsContainer, ParagraphContainer, SpacingSize } from '@libs/layout';
 import {
   Input,
   InputValidationType,
   PasswordInputType,
   PasswordVisibilityIcon,
   Typography
-} from '@libs/ui';
-import { InputsContainer, ParagraphContainer, SpacingSize } from '@libs/layout';
+} from '@libs/ui/components';
 import { CreatePasswordFormValues } from '@libs/ui/forms/create-password';
 import { minPasswordLength } from '@libs/ui/forms/form-validation-rules';
 

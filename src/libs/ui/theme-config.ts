@@ -1,5 +1,4 @@
-import { withMedia } from './utils/match-media';
-import { hexToRGBA } from './utils/hex-to-rgba';
+import { hexToRGBA } from '@libs/ui/utils';
 
 const PAGE_MIN_WIDTH = 320;
 const PAGE_MAX_WIDTH = 1176;
@@ -7,9 +6,6 @@ const PAGE_MAX_WIDTH = 1176;
 export const themeConfig = {
   minWidth: PAGE_MIN_WIDTH,
   maxWidth: PAGE_MAX_WIDTH,
-  // do not use for now, let's see if we need it at all
-  // media: MediaQueries,
-  withMedia: withMedia,
   zIndex: {
     dropdown: 10,
     modal: 15,

@@ -1,13 +1,13 @@
 import * as Yup from 'yup';
-import { useForm } from 'react-hook-form';
-import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
+import { UseFormProps, useForm } from 'react-hook-form';
+
+import { AuctionManagerEntryPoint } from '@src/constants';
 
 import {
   useCSPRStakeAmountRule,
   useValidatorPublicKeyRule
 } from '@libs/ui/forms/form-validation-rules';
-import { AuctionManagerEntryPoint } from '@src/constants';
 
 export type StakeValidatorFormValues = {
   validatorPublicKey: string;

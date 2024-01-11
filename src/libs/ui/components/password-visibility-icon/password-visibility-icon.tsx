@@ -1,5 +1,6 @@
-import { SvgIcon } from '@libs/ui';
 import React from 'react';
+
+import { SvgIcon } from '@libs/ui/components';
 
 export type PasswordInputType = 'password' | 'text';
 

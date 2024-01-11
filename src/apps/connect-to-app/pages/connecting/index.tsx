@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { LayoutWindow, PopupHeader } from '@src/libs/layout';
+import { HeaderPopup, LayoutWindow } from '@libs/layout';
 
 import { ConnectingContent } from './content';
 
@@ -11,7 +11,7 @@ export interface ConnectingPageProps {
 export function ConnectingPage({ origin }: ConnectingPageProps) {
   return (
     <LayoutWindow
-      renderHeader={() => <PopupHeader />}
+      renderHeader={() => <HeaderPopup />}
       renderContent={() => <ConnectingContent origin={origin} />}
     />
   );

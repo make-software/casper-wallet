@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 
+import { TransferSuccessScreen } from '@libs/ui/components';
 import {
   TransferAmountFormValues,
   TransferRecipientFormValues
 } from '@libs/ui/forms/transfer';
-import { TransferSuccessScreen } from '@libs/ui';
 
-import { TransactionSteps } from './utils';
-import { RecipientStep } from './recipient-step';
 import { AmountStep } from './amount-step';
 import { ConfirmStep } from './confirm-step';
+import { RecipientStep } from './recipient-step';
+import { TransactionSteps } from './utils';
 
 interface TransferPageContentProps {
   transferStep: TransactionSteps;

@@ -1,14 +1,14 @@
+import { MacScrollbar } from 'mac-scrollbar';
 import React from 'react';
 import styled from 'styled-components';
-import { MacScrollbar } from 'mac-scrollbar';
 
-import { Tile, Typography } from '@libs/ui';
 import {
+  BorderBottomPseudoElementProps,
   SpacingSize,
   VerticalSpaceContainer,
-  borderBottomPseudoElementRules,
-  BorderBottomPseudoElementProps
-} from '@src/libs/layout';
+  borderBottomPseudoElementRules
+} from '@libs/layout';
+import { Tile, Typography } from '@libs/ui/components';
 
 interface ListHeaderContainerProps extends BorderBottomPseudoElementProps {
   stickyHeader?: boolean;

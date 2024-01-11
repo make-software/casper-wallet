@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { HTMLAttributes, forwardRef } from 'react';
 import ReactSVG from 'react-inlinesvg';
 import styled from 'styled-components';
 
-import { Color, getColorFromTheme } from '@src/libs/ui';
+import { Color, getColorFromTheme } from '@libs/ui/utils';
 
 type Ref = HTMLDivElement;
 
-export interface SvgIconProps extends React.HTMLAttributes<Ref> {
+export interface SvgIconProps extends HTMLAttributes<Ref> {
   className?: string;
   style?: React.CSSProperties;
   size?: number;
@@ -81,7 +81,7 @@ const StyledReactSVG = styled(ReactSVG)<SvgIconProps>(
   })
 );
 
-export const SvgIcon = React.forwardRef<Ref, SvgIconProps>(
+export const SvgIcon = forwardRef<Ref, SvgIconProps>(
   (
     {
       src,

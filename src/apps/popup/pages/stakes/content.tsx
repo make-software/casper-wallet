@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 
-import { ValidatorStep } from '@popup/pages/stakes/validator-step';
+import { AuctionManagerEntryPoint, StakeSteps } from '@src/constants';
+
 import { AmountStep } from '@popup/pages/stakes/amount-step';
+import { ConfirmStep } from '@popup/pages/stakes/confirm-step';
+import { ValidatorStep } from '@popup/pages/stakes/validator-step';
+
+import { ValidatorResultWithId } from '@libs/services/validators-service/types';
+import {
+  TransferSuccessScreen,
+  ValidatorDropdownInput
+} from '@libs/ui/components';
 import {
   StakeAmountFormValues,
   StakeValidatorFormValues
 } from '@libs/ui/forms/stakes-form';
-import { ConfirmStep } from '@popup/pages/stakes/confirm-step';
-import { TransferSuccessScreen, ValidatorDropdownInput } from '@libs/ui';
-import { AuctionManagerEntryPoint, StakeSteps } from '@src/constants';
-import { ValidatorResultWithId } from '@libs/services/validators-service/types';
-import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
+import { formatNumber, motesToCSPR } from '@libs/ui/utils';
 
 interface DelegateStakePageContentProps {
   stakeStep: StakeSteps;

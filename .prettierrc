@@ -1,5 +1,10 @@
 {
-"singleQuote": true,
-"arrowParens": "avoid",
-"trailingComma": "none"
+  "singleQuote": true,
+  "arrowParens": "avoid",
+  "trailingComma": "none",
+  "importOrder": ["<THIRD_PARTY_MODULES>", "@src/*", "@popup/*", "@import-account-with-file/*", "@connect-to-app/*", "@signature-request/*", "@onboarding/*", "@background/*", "@hooks/*", "@content/*", "@libs/*", "^[./]"],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
+  "importOrderGroupNamespaceSpecifiers": true,
+  "plugins": ["@trivago/prettier-plugin-sort-imports"]
 }

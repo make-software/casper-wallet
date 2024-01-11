@@ -1,16 +1,18 @@
-import { handleError, toJson } from '@libs/services/utils';
-import { queryClient } from '@libs/services/query-client';
 import { TOKENS_REFRESH_RATE } from '@src/constants';
+
 import { dispatchToMainStore } from '@background/redux/utils';
 import { serviceMessage } from '@background/service-message';
-import { DataResponse, Payload } from '@libs/services/types';
 
+import { queryClient } from '@libs/services/query-client';
+import { DataResponse, Payload } from '@libs/services/types';
+import { handleError, toJson } from '@libs/services/utils';
+
+import { getContractPackageUrl, getErc20TokensUrl } from './constants';
 import {
   ContractPackage,
   ContractPackageWithBalance,
   Erc20Token
 } from './types';
-import { getContractPackageUrl, getErc20TokensUrl } from './constants';
 
 export const erc20TokensRequest = (
   casperApiUrl: string,

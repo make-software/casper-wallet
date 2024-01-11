@@ -1,7 +1,7 @@
 import {
   FIXED_ENCRYPTION_CIPHER_TEXT,
-  FIXED_ENCRYPTION_PLAIN_TEXT,
-  FIXED_ENCRYPTION_KEY_HASH
+  FIXED_ENCRYPTION_KEY_HASH,
+  FIXED_ENCRYPTION_PLAIN_TEXT
 } from './__fixtures';
 import { aesDecryptString, aesEncryptString } from './aes';
 

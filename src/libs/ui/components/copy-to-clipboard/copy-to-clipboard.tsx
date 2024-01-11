@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { useCopyToClipboard } from '@src/hooks';
+import { useCopyToClipboard } from '@hooks/use-copy-to-clipboard';
 
 const Container = styled.div`
   cursor: ${({ onClick }) => (onClick != null ? 'pointer' : 'auto')};

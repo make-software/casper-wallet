@@ -1,12 +1,12 @@
-import { randomBytes } from '@noble/hashes/utils';
 import { aes_256_cbc } from '@noble/ciphers/webcrypto/aes';
 import { scryptAsync } from '@noble/hashes/scrypt';
+import { randomBytes } from '@noble/hashes/utils';
 import { CLPublicKey } from 'casper-js-sdk';
 
-import { Account } from '@background/redux/vault/types';
+import { Account } from '@libs/types/account';
 
-import { convertBytesToBase64 } from './utils';
 import { createScryptOptions } from './hashing';
+import { convertBytesToBase64 } from './utils';
 
 export const generateSyncWalletQrData = async (
   password: string,

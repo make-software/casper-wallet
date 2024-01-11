@@ -1,4 +1,5 @@
 import { createReducer } from 'typesafe-actions';
+
 import { vaultUnlocked } from '../session/actions';
 import { lastActivityTimeRefreshed } from './actions';
 

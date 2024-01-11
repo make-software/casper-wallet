@@ -1,43 +1,51 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { Trans, useTranslation } from 'react-i18next';
 
-import {
-  FooterButtonsContainer,
-  HeaderSubmenuBarNavLink,
-  PopupHeader,
-  PopupLayout
-} from '@libs/layout';
-import { TransferNftContent } from '@popup/pages/transfer-nft/content';
-import {
-  selectAccountBalance,
-  selectAccountNftTokens
-} from '@background/redux/account-info/selectors';
-import { CSPRtoMotes } from '@libs/ui/utils/formatters';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { MapNFTTokenStandardToName } from '@src/utils';
-import { getRawPublicKey } from '@libs/entities/Account';
-import { useTransferNftForm } from '@libs/ui/forms/transfer-nft';
-import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
-import { HomePageTabsId, TransferSuccessScreen, Button } from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { TransferNftContent } from '@popup/pages/transfer-nft/content';
 import {
   getDefaultPaymentAmountBasedOnNftTokenStandard,
   getRuntimeArgs,
   signNftDeploy
 } from '@popup/pages/transfer-nft/utils';
-import { dispatchToMainStore } from '@background/redux/utils';
-import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
-import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
 import {
   accountPendingTransactionsChanged,
   accountTrackingIdOfSentNftTokensChanged
 } from '@background/redux/account-info/actions';
-import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
-import { createErrorLocationState, ErrorPath } from '@layout/error';
+import {
+  selectAccountBalance,
+  selectAccountNftTokens
+} from '@background/redux/account-info/selectors';
 import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
+import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
+import { getRawPublicKey } from '@libs/entities/Account';
+import {
+  ErrorPath,
+  FooterButtonsContainer,
+  HeaderPopup,
+  HeaderSubmenuBarNavLink,
+  PopupLayout,
+  createErrorLocationState
+} from '@libs/layout';
+import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
+import {
+  Button,
+  HomePageTabsId,
+  TransferSuccessScreen
+} from '@libs/ui/components';
+import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
+import { useTransferNftForm } from '@libs/ui/forms/transfer-nft';
+import { CSPRtoMotes } from '@libs/ui/utils';
 
 export const TransferNftPage = () => {
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
@@ -183,7 +191,7 @@ export const TransferNftPage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

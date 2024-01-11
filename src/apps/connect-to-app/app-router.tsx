@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { HashRouter } from 'react-router-dom';
-
-import { RouterPath } from '@src/apps/connect-to-app/router';
-import { SelectAccountPage } from '@src/apps/connect-to-app/pages/select-account';
-import { ApproveConnectionPage } from '@src/apps/connect-to-app/pages/approve-connection';
-import { ConnectingPage } from '@src/apps/connect-to-app/pages/connecting';
-import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 import { useSelector } from 'react-redux';
-import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
-import { LockedRouter } from '@src/libs/layout/locked-router';
+import { HashRouter, Route, Routes } from 'react-router-dom';
+
+import { ApproveConnectionPage } from '@connect-to-app/pages/approve-connection';
+import { ConnectingPage } from '@connect-to-app/pages/connecting';
+import { SelectAccountPage } from '@connect-to-app/pages/select-account';
+import { RouterPath } from '@connect-to-app/router';
+
+import { selectVaultIsLocked } from '@background/redux/session/selectors';
+
+import { useUserActivityTracker } from '@hooks/use-user-activity-tracker';
+
+import { LockedRouter } from '@libs/layout';
+
 import { SwitchAccountPage } from './pages/switch-account';
 
 export function AppRouter() {

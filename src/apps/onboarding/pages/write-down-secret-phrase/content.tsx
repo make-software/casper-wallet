@@ -1,13 +1,13 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
-import { TabPageContainer, TabTextContainer } from '@src/libs/layout';
+import { SecretPhrase } from '@libs/crypto';
+import { TabPageContainer, TabTextContainer } from '@libs/layout';
 import {
-  Typography,
+  CopySecretPhraseBar,
   SecretPhraseWordsView,
-  CopySecretPhraseBar
-} from '@src/libs/ui';
-import { SecretPhrase } from '@src/libs/crypto';
+  Typography
+} from '@libs/ui/components';
 
 interface WriteDownSecretPhrasePageContentProps {
   phrase: SecretPhrase;

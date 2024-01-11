@@ -1,8 +1,14 @@
 import React, { useMemo, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { UseFormReturn, useWatch } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+
+import { getMetadataKeyValue, getNftTokenMetadataWithLinks } from '@src/utils';
+
+import { useTypedLocation } from '@popup/router';
+
+import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 
 import {
   AlignedFlexRow,
@@ -12,22 +18,19 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { NFTTokenResult } from '@libs/services/nft-service';
 import {
   Input,
   RecipientDropdownInput,
   SvgIcon,
   Tile,
   Typography
-} from '@libs/ui';
-import { NFTTokenResult } from '@libs/services/nft-service';
-import { useTypedLocation } from '@popup/router';
-import { getMetadataKeyValue, getNftTokenMetadataWithLinks } from '@src/utils';
+} from '@libs/ui/components';
 import {
   TransferNftAmountFormValues,
   TransferNftRecipientFormValues
 } from '@libs/ui/forms/transfer-nft';
-import { formatFiatAmount } from '@libs/ui/utils/formatters';
-import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
+import { formatFiatAmount } from '@libs/ui/utils';
 
 const Container = styled.div`
   padding: 16px;

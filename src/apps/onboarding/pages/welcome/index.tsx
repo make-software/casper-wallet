@@ -1,15 +1,16 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { Button } from '@libs/ui';
-import { LayoutTab, TabFooterContainer } from '@src/libs/layout';
+import { RouterPath } from '@onboarding/router';
+import { useTypedNavigate } from '@onboarding/router/use-typed-navigate';
 
-import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { RouterPath } from '@src/apps/onboarding/router';
+import { resetVault } from '@background/redux/sagas/actions';
+import { dispatchToMainStore } from '@background/redux/utils';
+
+import { LayoutTab, TabFooterContainer } from '@libs/layout';
+import { Button } from '@libs/ui/components';
 
 import { WelcomePageContent } from './content';
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { resetVault } from '@src/background/redux/sagas/actions';
 
 export function WelcomePage() {
   const navigate = useTypedNavigate();

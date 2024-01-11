@@ -3,20 +3,23 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import styled from 'styled-components';
 
-import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
-import { closeCurrentWindow } from '@src/background/close-current-window';
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+
+import { closeCurrentWindow } from '@background/close-current-window';
+import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+
+import { sdkMethod } from '@content/sdk-method';
+
 import {
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  LayoutWindow,
-  PopupHeader
-} from '@src/libs/layout';
-import { Button, Typography } from '@src/libs/ui';
+  LayoutWindow
+} from '@libs/layout';
+import { Button, Typography } from '@libs/ui/components';
 
 import { RouterPath, useTypedNavigate } from '../../router';
 import { ApproveConnectionContent } from './content';
-import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
-import { sdkMethod } from '@src/content/sdk-method';
 
 const TextCentredContainer = styled.div`
   text-align: center;
@@ -66,7 +69,7 @@ export function ApproveConnectionPage({
   return (
     <LayoutWindow
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           renderSubmenuBarItems={() => (
             <HeaderSubmenuBarNavLink linkType="back" />
           )}

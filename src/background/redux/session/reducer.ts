@@ -1,12 +1,12 @@
 import { createReducer } from 'typesafe-actions';
 
-import { SessionState } from './types';
 import {
-  sessionReseted,
+  contactEditingPermissionChanged,
   encryptionKeyHashCreated,
-  vaultUnlocked,
-  contactEditingPermissionChanged
+  sessionReseted,
+  vaultUnlocked
 } from './actions';
+import { SessionState } from './types';
 
 type State = SessionState;
 
@@ -20,7 +20,7 @@ export const reducer = createReducer(initialState)
   .handleAction(sessionReseted, (): State => initialState)
   .handleAction(
     vaultUnlocked,
-    (state, { payload: { lastActivityTime } }): State => ({
+    (state): State => ({
       ...state,
       isLocked: false
     })

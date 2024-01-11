@@ -1,29 +1,28 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import {
-  HeaderSubmenuBarNavLink,
-  PopupHeader,
-  FooterButtonsContainer,
-  PopupLayout
-} from '@src/libs/layout';
-import { Button } from '@src/libs/ui';
-import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
-import { calculateSubmitButtonDisabled } from '@src/libs/ui/forms/get-submit-button-state-from-validation';
-import { createAsymmetricKey } from '@src/libs/crypto/create-asymmetric-key';
+import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { UnlockProtectedPageContent } from '@layout/unlock-protected-page-content';
-
-import { RouterPath, useTypedNavigate } from '@src/apps/popup/router';
-
-import { selectVaultImportedAccounts } from '@src/background/redux/vault/selectors';
 import {
   selectPasswordHash,
   selectPasswordSaltHash
-} from '@src/background/redux/keys/selectors';
-import { dispatchToMainStore } from '@background/redux/utils';
+} from '@background/redux/keys/selectors';
 import { loginRetryCountReseted } from '@background/redux/login-retry-count/actions';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { selectVaultImportedAccounts } from '@background/redux/vault/selectors';
+
+import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
+import {
+  FooterButtonsContainer,
+  HeaderPopup,
+  HeaderSubmenuBarNavLink,
+  PopupLayout,
+  UnlockProtectedPageContent
+} from '@libs/layout';
+import { Button } from '@libs/ui/components';
+import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
+import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
 
 import { downloadFile } from './utils';
 
@@ -82,7 +81,7 @@ export function DownloadSecretKeysPage() {
       variant="form"
       onSubmit={handleSubmit(onSubmit)}
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

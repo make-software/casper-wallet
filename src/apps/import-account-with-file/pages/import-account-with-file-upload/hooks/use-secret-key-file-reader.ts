@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { checkSecretKeyExist } from '@src/background/redux/import-account-actions-should-be-removed';
-import { Account } from '@src/background/redux/vault/types';
-import { parseSecretKeyString } from '@src/libs/crypto';
+import { checkSecretKeyExist } from '@background/redux/import-account-actions-should-be-removed';
+
+import { parseSecretKeyString } from '@libs/crypto';
+import { Account } from '@libs/types/account';
 
 type OnSuccess = (accountData: Account) => void;
 type OnFailure = (message?: string) => void;
@@ -20,49 +21,56 @@ export function useSecretKeyFileReader({
   const { t } = useTranslation();
 
   const secretKeyFileReader = useCallback(
-    (name: string, secretKeyFile: Blob) => {
-      const reader = new FileReader();
-      reader.readAsText(secretKeyFile);
-
-      reader.onload = async e => {
-        const fileContents = reader.result as string;
-
-        try {
-          if (!fileContents || fileContents.includes('PUBLIC KEY')) {
-            throw Error(
-              t(
-                'A private key was not detected. Try importing a different file.'
-              )
-            );
-          }
-
-          const { publicKeyHex, secretKeyBase64 } =
-            parseSecretKeyString(fileContents);
-
-          const doesSecretKeyExist =
-            secretKeyBase64 && (await checkSecretKeyExist(secretKeyBase64));
-          if (doesSecretKeyExist) {
-            throw Error(
-              t('This account already exists. Try importing a different file.')
-            );
-          }
-
-          return onSuccess({
-            imported: true,
-            name,
-            publicKey: publicKeyHex,
-            secretKey: secretKeyBase64
-          });
-        } catch (err) {
-          if (err instanceof Error) {
-            return onFailure(err.message);
-          } else {
-            console.error(err);
-          }
+    async (name: string, secretKeyFile: Blob) => {
+      const isFileValid = (fileContents: string): Error | undefined => {
+        if (!fileContents || fileContents.includes('PUBLIC KEY')) {
+          return new Error(
+            t('A private key was not detected. Try importing a different file.')
+          );
         }
       };
+
+      const doesSecretKeyExist = async (
+        secretKeyBase64: string
+      ): Promise<Error | undefined> => {
+        const existence =
+          secretKeyBase64 && (await checkSecretKeyExist(secretKeyBase64));
+        if (existence) {
+          return new Error(
+            t('This account already exists. Try importing a different file.')
+          );
+        }
+      };
+
+      const reader = new FileReader();
+
+      reader.readAsText(secretKeyFile);
+
+      reader.onload = async () => {
+        const fileContents = reader.result as string;
+
+        const fileValidationError = isFileValid(fileContents);
+        if (fileValidationError) {
+          return onFailure(fileValidationError.message);
+        }
+
+        const { publicKeyHex, secretKeyBase64 } =
+          parseSecretKeyString(fileContents);
+
+        const secretKeyError = await doesSecretKeyExist(secretKeyBase64);
+        if (secretKeyError) {
+          return onFailure(secretKeyError.message);
+        }
+
+        return onSuccess({
+          imported: true,
+          name,
+          publicKey: publicKeyHex,
+          secretKey: secretKeyBase64
+        });
+      };
     },
-    [t, onFailure, onSuccess]
+    [t, onSuccess, onFailure]
   );
 
   return { secretKeyFileReader };

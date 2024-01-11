@@ -1,21 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import {
-  selectAccountDeploys,
-  selectAccountDeploysCount
-} from '@background/redux/account-info/selectors';
-import { useForceUpdate } from '@popup/hooks/use-force-update';
-import { dispatchFetchAccountExtendedDeploys } from '@libs/services/account-activity-service';
 import { ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE } from '@src/constants';
-import { dispatchToMainStore } from '@background/redux/utils';
+
+import { useForceUpdate } from '@popup/hooks/use-force-update';
+
 import {
   accountDeploysAdded,
   accountDeploysCountChanged,
   accountDeploysUpdated
 } from '@background/redux/account-info/actions';
+import {
+  selectAccountDeploys,
+  selectAccountDeploysCount
+} from '@background/redux/account-info/selectors';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { dispatchFetchAccountExtendedDeploys } from '@libs/services/account-activity-service';
 
 export const useFetchAccountDeploys = () => {
   const [loading, setLoading] = useState(false);

@@ -1,7 +1,8 @@
 import { createReducer } from 'typesafe-actions';
 
+import { windowIdChanged, windowIdCleared } from './actions';
 import { WindowManagementState } from './types';
-import { windowIdCleared, windowIdChanged } from './actions';
+
 type State = WindowManagementState;
 
 const initialState: State = {

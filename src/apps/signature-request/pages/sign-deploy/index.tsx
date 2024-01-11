@@ -3,25 +3,27 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import {
-  FooterButtonsContainer,
-  LayoutWindow,
-  PopupHeader
-} from '@libs/layout';
-import { closeCurrentWindow } from '@src/background/close-current-window';
+import { closeCurrentWindow } from '@background/close-current-window';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
   selectDeploysJsonById,
   selectVaultAccounts
-} from '@src/background/redux/vault/selectors';
-import { sdkMethod } from '@src/content/sdk-method';
-import { Button } from '@src/libs/ui';
+} from '@background/redux/vault/selectors';
+import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
 
-import { SignDeployContent } from './sign-deploy-content';
-import { signDeploy } from '@src/libs/crypto';
+import { sdkMethod } from '@content/sdk-method';
+
+import { signDeploy } from '@libs/crypto';
+import { convertBytesToHex } from '@libs/crypto/utils';
+import {
+  FooterButtonsContainer,
+  HeaderPopup,
+  LayoutWindow
+} from '@libs/layout';
+import { Button } from '@libs/ui/components';
+
 import { CasperDeploy } from './deploy-types';
-import { convertBytesToHex } from '@src/libs/crypto/utils';
-import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
+import { SignDeployContent } from './sign-deploy-content';
 
 export function SignDeployPage() {
   const { t } = useTranslation();
@@ -132,7 +134,7 @@ export function SignDeployPage() {
 
   return (
     <LayoutWindow
-      renderHeader={() => <PopupHeader withConnectionStatus />}
+      renderHeader={() => <HeaderPopup withConnectionStatus />}
       renderContent={() => (
         <SignDeployContent
           deploy={deploy}

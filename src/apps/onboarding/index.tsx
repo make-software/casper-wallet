@@ -1,19 +1,19 @@
-import '@libs/i18n/i18n';
-
 import React, { Suspense, useState } from 'react';
 import { render } from 'react-dom';
 import { Provider as ReduxProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
-import { ErrorBoundary } from '@src/libs/layout/error';
-
-import { GlobalStyle, lightTheme } from '@libs/ui';
-
-import { AppRouter } from '@src/apps/onboarding/app-router';
-
-import { onboardingAppInit } from '@background/redux/windowManagement/actions';
-import { createMainStoreReplica, PopupState } from '@background/redux/utils';
 import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
+
+import { AppRouter } from '@onboarding/app-router';
+
+import { createMainStoreReplica } from '@background/redux/get-main-store';
+import { PopupState } from '@background/redux/types';
+import { onboardingAppInit } from '@background/redux/windowManagement/actions';
+
+import '@libs/i18n/i18n';
+import { ErrorBoundary } from '@libs/layout';
+import { GlobalStyle, lightTheme } from '@libs/ui';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);

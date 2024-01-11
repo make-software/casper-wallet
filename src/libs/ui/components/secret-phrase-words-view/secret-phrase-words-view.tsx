@@ -5,18 +5,19 @@ import React, {
   useMemo,
   useState
 } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import styled, { css } from 'styled-components';
 
+import { SecretPhrase } from '@libs/crypto';
 import {
-  CenteredFlexColumn,
   AlignedFlexRow,
+  CenteredFlexColumn,
   FlexColumn,
   FlexRow,
   SpacingSize
-} from '@src/libs/layout';
-import { SvgIcon, Typography, WordTag, hexToRGBA } from '@src/libs/ui';
-import { SecretPhrase } from '@src/libs/crypto';
+} from '@libs/layout';
+import { SvgIcon, Typography, WordTag } from '@libs/ui/components';
+import { hexToRGBA } from '@libs/ui/utils';
 
 import { PartialPhraseArray } from './types';
 import { buildInitialWordsCollection } from './utils';

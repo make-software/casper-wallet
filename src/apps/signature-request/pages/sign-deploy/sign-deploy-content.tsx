@@ -8,18 +8,18 @@ import {
   ParagraphContainer,
   SpaceBetweenFlexRow,
   SpacingSize
-} from '@layout/containers';
-import { Accordion, List, SvgIcon, Typography } from '@libs/ui';
+} from '@libs/layout';
+import { Accordion, List, SvgIcon, Typography } from '@libs/ui/components';
 
-import { DeployValue } from './deploy-value';
 import {
   CasperDeploy,
+  ParsedValueType,
   SignatureRequestFields,
-  SignatureRequestKeys,
-  ParsedValueType
+  SignatureRequestKeys
 } from './deploy-types';
-import { deriveDeployInfoFromDeployRaw } from './derive-deploy-info-from-deploy-raw';
 import { getDeployParsedValue } from './deploy-utils';
+import { DeployValue } from './deploy-value';
+import { deriveDeployInfoFromDeployRaw } from './derive-deploy-info-from-deploy-raw';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
   margin: 16px;

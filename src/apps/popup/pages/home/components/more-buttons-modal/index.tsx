@@ -2,8 +2,8 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { Button, Modal, SvgIcon, Typography } from '@libs/ui';
 import { CenteredFlexColumn, SpacingSize } from '@libs/layout';
+import { Button, Modal, SvgIcon, Typography } from '@libs/ui/components';
 
 import { ModalButtons } from './modal-buttons';
 

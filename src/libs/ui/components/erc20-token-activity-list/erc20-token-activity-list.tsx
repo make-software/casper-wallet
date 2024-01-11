@@ -1,18 +1,20 @@
 import React, { useEffect } from 'react';
+import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import useInfiniteScroll from 'react-infinite-scroll-hook';
+
+import { selectAccountErc20TokensActivity } from '@background/redux/account-info/selectors';
+
+import { useFetchErc20TokenAccountActivity } from '@hooks/use-fetch-erc20-token-account-activity';
 
 import { SpacingSize } from '@libs/layout';
+import { Erc20TransferWithId } from '@libs/services/account-activity-service';
 import {
   AccountActivityPlate,
   List,
   LoadingActivityView,
   NoActivityView
-} from '@libs/ui';
-import { useFetchErc20TokenAccountActivity } from '@src/hooks';
-import { selectAccountErc20TokensActivity } from '@background/redux/account-info/selectors';
-import { Erc20TransferWithId } from '@src/libs/services/account-activity-service';
+} from '@libs/ui/components';
 
 export const Erc20TokenActivityList = () => {
   const erc20TokensActivityRecord =

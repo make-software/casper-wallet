@@ -1,15 +1,15 @@
 import {
+  FIXED_ENCRYPTION_KEY_HASH,
+  FIXED_ENCRYPTION_SALT,
+  FIXED_PASSWORD_HASH,
+  FIXED_PASSWORD_SALT,
+  FIXED_PASSWORD_TEXT
+} from './__fixtures';
+import {
   deriveEncryptionKey,
   encodePassword,
   verifyPasswordAgainstHash
 } from './hashing';
-import {
-  FIXED_ENCRYPTION_KEY_HASH,
-  FIXED_PASSWORD_HASH,
-  FIXED_PASSWORD_TEXT,
-  FIXED_ENCRYPTION_SALT,
-  FIXED_PASSWORD_SALT
-} from './__fixtures';
 
 describe('crypto.hashing', () => {
   it('should verify fixtures of hashed password matches the text password ', async () => {

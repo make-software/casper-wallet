@@ -1,20 +1,20 @@
 import { createReducer } from 'typesafe-actions';
 
 import {
-  vaultReseted,
-  vaultLoaded,
-  secretPhraseCreated,
   accountAdded,
+  accountDisconnected,
   accountImported,
   accountRemoved,
   accountRenamed,
-  siteConnected,
-  accountDisconnected,
-  siteDisconnected,
   activeAccountChanged,
   anotherAccountConnected,
+  deployPayloadReceived,
   deploysReseted,
-  deployPayloadReceived
+  secretPhraseCreated,
+  siteConnected,
+  siteDisconnected,
+  vaultLoaded,
+  vaultReseted
 } from './actions';
 import { VaultState } from './types';
 
@@ -95,7 +95,7 @@ export const reducer = createReducer(initialState)
         Object.entries(state.accountNamesByOriginDict)
           // when last account for origin, remove group
           .filter(
-            ([origin, names = []]) =>
+            ([, names = []]) =>
               !(names.includes(accountName) && names.length === 1)
           )
           // otherwise just remove single account

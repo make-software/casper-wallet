@@ -3,16 +3,24 @@ import { UseFormReturn, useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { AuctionManagerEntryPoint } from '@src/constants';
+
+import { useClickAway } from '@hooks/use-click-away';
+
 import {
   AlignedSpaceBetweenFlexRow,
   SpacingSize,
   VerticalSpaceContainer
-} from '@src/libs/layout';
-import { Input, List, SvgIcon, Typography, ValidatorPlate } from '@libs/ui';
-import { StakeValidatorFormValues } from '@libs/ui/forms/stakes-form';
-import { useClickAway } from '@libs/ui/hooks/use-click-away';
+} from '@libs/layout';
 import { ValidatorResultWithId } from '@libs/services/validators-service/types';
-import { AuctionManagerEntryPoint } from '@src/constants';
+import {
+  Input,
+  List,
+  SvgIcon,
+  Typography,
+  ValidatorPlate
+} from '@libs/ui/components';
+import { StakeValidatorFormValues } from '@libs/ui/forms/stakes-form';
 
 const DropDownHeader = styled(AlignedSpaceBetweenFlexRow)`
   padding: 8px 16px;
