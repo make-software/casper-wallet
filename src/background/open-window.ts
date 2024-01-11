@@ -1,5 +1,8 @@
 // TODO: Remake it after background store will be complete
-import { createOpenWindow, OpenWindowProps } from '@src/hooks';
+import {
+  OpenWindowProps,
+  createOpenWindow
+} from '@background/create-open-window';
 
 let windowId: number | null = null;
 

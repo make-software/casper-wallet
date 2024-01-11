@@ -4,40 +4,42 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { WindowApp, useWindowManager } from '@src/hooks';
+import { isSafariBuild } from '@src/utils';
 
-import { RouterPath, useNavigationMenu } from '@src/apps/popup/router';
+import { TimeoutDurationSetting } from '@popup/constants';
+import { RouterPath, useNavigationMenu } from '@popup/router';
 
-import {
-  ContentContainer,
-  ListItemClickableContainer as BaseListItemClickableContainer,
-  FlexColumn,
-  SpaceBetweenFlexRow,
-  SpacingSize
-} from '@src/libs/layout';
-import {
-  SvgIcon,
-  Typography,
-  List,
-  Link,
-  Modal,
-  ThemeSwitcher
-} from '@src/libs/ui';
-
-import {
-  selectCountOfConnectedSites,
-  selectVaultHasImportedAccount
-} from '@src/background/redux/vault/selectors';
+import { WindowApp } from '@background/create-open-window';
+import { selectCountOfContacts } from '@background/redux/contacts/selectors';
+import { lockVault } from '@background/redux/sagas/actions';
 import {
   selectThemeModeSetting,
   selectTimeoutDurationSetting
-} from '@src/background/redux/settings/selectors';
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { lockVault } from '@src/background/redux/sagas/actions';
-import { TimeoutDurationSetting } from '@popup/constants';
-import { isSafariBuild } from '@src/utils';
-import { selectCountOfContacts } from '@background/redux/contacts/selectors';
+} from '@background/redux/settings/selectors';
 import { ThemeMode } from '@background/redux/settings/types';
+import { dispatchToMainStore } from '@background/redux/utils';
+import {
+  selectCountOfConnectedSites,
+  selectVaultHasImportedAccount
+} from '@background/redux/vault/selectors';
+
+import { useWindowManager } from '@hooks/use-window-manager';
+
+import {
+  ListItemClickableContainer as BaseListItemClickableContainer,
+  ContentContainer,
+  FlexColumn,
+  SpaceBetweenFlexRow,
+  SpacingSize
+} from '@libs/layout';
+import {
+  Link,
+  List,
+  Modal,
+  SvgIcon,
+  ThemeSwitcher,
+  Typography
+} from '@libs/ui/components';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;

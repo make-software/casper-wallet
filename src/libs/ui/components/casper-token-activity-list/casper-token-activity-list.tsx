@@ -1,16 +1,18 @@
 import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
+import { useSelector } from 'react-redux';
 
 import { selectAccountCasperActivity } from '@background/redux/account-info/selectors';
-import { useFetchCasperTokenAccountActivity } from '@src/hooks';
+
+import { useFetchCasperTokenAccountActivity } from '@hooks/use-fetch-casper-token-account-activity';
+
+import { SpacingSize } from '@libs/layout';
 import {
   AccountCasperActivityPlate,
   List,
   LoadingActivityView,
   NoActivityView
-} from '@libs/ui';
-import { SpacingSize } from '@libs/layout';
+} from '@libs/ui/components';
 
 export const CasperTokenActivityList = () => {
   const accountCasperActivityList = useSelector(selectAccountCasperActivity);

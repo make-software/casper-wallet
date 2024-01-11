@@ -2,8 +2,8 @@ import { createReducer } from 'typesafe-actions';
 
 import {
   contactRemoved,
-  contactsReseted,
   contactUpdated,
+  contactsReseted,
   newContactAdded
 } from '@background/redux/contacts/actions';
 import { ContactsState } from '@background/redux/contacts/types';

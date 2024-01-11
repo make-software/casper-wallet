@@ -1,11 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Hash, HashVariant, SvgIcon, Typography } from '@src/libs/ui';
 import {
   AlignedSpaceBetweenFlexRow,
   LeftAlignedFlexColumn
-} from '@src/libs/layout';
+} from '@libs/layout';
+import { Hash, HashVariant, SvgIcon, Typography } from '@libs/ui/components';
 
 const SiteGroupItemContainer = styled(AlignedSpaceBetweenFlexRow)`
   gap: 18px;

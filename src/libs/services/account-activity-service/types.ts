@@ -1,5 +1,5 @@
-import { CLTypeParsedResult, CLTypeTypeResult } from '@libs/types/cl';
 import { ErrorResponse, PaginatedResponse } from '@libs/services/types';
+import { CLTypeParsedResult, CLTypeTypeResult } from '@libs/types/cl';
 
 export interface TransferResult {
   amount: string;

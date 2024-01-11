@@ -1,7 +1,7 @@
 import { createReducer } from 'typesafe-actions';
 
-import { RecentRecipientPublicKeysState } from './types';
 import { recipientPublicKeyAdded, recipientPublicKeyReseted } from './actions';
+import { RecentRecipientPublicKeysState } from './types';
 
 const initialState = [] as RecentRecipientPublicKeysState;
 

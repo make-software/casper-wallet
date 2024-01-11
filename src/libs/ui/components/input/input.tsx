@@ -1,7 +1,8 @@
-import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
+import React, { HTMLInputTypeAttribute, ReactNode, forwardRef } from 'react';
 import styled from 'styled-components';
 
-import { BaseProps, FormField, FormFieldStatus, SvgIcon } from '@src/libs/ui';
+import { FormField, FormFieldStatus, SvgIcon } from '@libs/ui/components';
+import { BaseProps } from '@libs/ui/types';
 
 type Ref = HTMLInputElement;
 
@@ -140,7 +141,7 @@ export interface InputProps extends BaseProps {
   autoComplete?: string;
 }
 
-export const Input = React.forwardRef<Ref, InputProps>(function Input(
+export const Input = forwardRef<Ref, InputProps>(function Input(
   {
     id,
     className,
@@ -153,7 +154,6 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
     prefixIcon,
     suffixIcon,
     suffixText,
-    required,
     error,
     validationType,
     validationText,

@@ -1,15 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { useTranslation } from 'react-i18next';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { useForceUpdate } from '@src/apps/popup/hooks/use-force-update';
 import { BALANCE_REFRESH_RATE } from '@src/constants';
-import { dispatchFetchErc20TokensRequest } from '@src/libs/services/erc20-service';
-import { getAccountHashFromPublicKey } from '@src/libs/entities/Account';
-import { formatErc20TokenBalance } from '@src/apps/popup/pages/home/components/tokens-list/utils';
-import { TokenType } from '../use-casper-token';
+
+import { useForceUpdate } from '@popup/hooks/use-force-update';
+import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
+
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { TokenType } from '@hooks/use-casper-token';
+
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import { dispatchFetchErc20TokensRequest } from '@libs/services/erc20-service';
 
 /**
  * Will get all active account erc20 tokens with automatic refresh

@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 import { FieldErrors, UseFormRegister } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+
+import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
+
+import { useLockWalletWhenNoMoreRetries } from '@hooks/use-lock-wallet-when-no-more-retries';
 
 import {
   ContentContainer,
@@ -16,10 +20,7 @@ import {
   PasswordVisibilityIcon,
   SvgIcon,
   Typography
-} from '@libs/ui';
-import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
-
-import { useLockWalletWhenNoMoreRetries } from './use-lock-wallet-when-no-more-retries';
+} from '@libs/ui/components';
 
 interface PasswordFormValues {
   password: string;

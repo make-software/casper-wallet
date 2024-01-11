@@ -1,4 +1,4 @@
-import { CLPublicKey, CLPublicKeyTag, decodeBase64, Keys } from 'casper-js-sdk';
+import { CLPublicKey, CLPublicKeyTag, Keys, decodeBase64 } from 'casper-js-sdk';
 
 export const CASPER_MESSAGE_HEADER = `Casper Message:\n`;
 

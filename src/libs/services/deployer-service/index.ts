@@ -1,16 +1,17 @@
 import {
-  CasperServiceByJsonRPC,
   CLPublicKey,
   CLValueBuilder,
-  decodeBase16,
+  CasperServiceByJsonRPC,
   DeployUtil,
-  RuntimeArgs
+  RuntimeArgs,
+  decodeBase16
 } from 'casper-js-sdk';
 import { sub } from 'date-fns';
 
+import { AuctionManagerEntryPoint, STAKE_COST_MOTES } from '@src/constants';
+
 import { signDeploy } from '@libs/crypto';
 import { getRawPublicKey } from '@libs/entities/Account';
-import { AuctionManagerEntryPoint, STAKE_COST_MOTES } from '@src/constants';
 
 import { RPCResponse } from './types';
 

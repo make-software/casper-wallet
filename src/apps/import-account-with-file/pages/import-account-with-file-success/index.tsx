@@ -1,16 +1,16 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import {
-  FooterButtonsAbsoluteContainer,
-  ContentContainer,
-  ParagraphContainer,
-  IllustrationContainer,
-  SpacingSize
-} from '@src/libs/layout';
-import { Button, SvgIcon, Typography } from '@src/libs/ui';
+import { closeCurrentWindow } from '@background/close-current-window';
 
-import { closeCurrentWindow } from '@src/background/close-current-window';
+import {
+  ContentContainer,
+  FooterButtonsAbsoluteContainer,
+  IllustrationContainer,
+  ParagraphContainer,
+  SpacingSize
+} from '@libs/layout';
+import { Button, SvgIcon, Typography } from '@libs/ui/components';
 
 export function ImportAccountWithFileSuccessContentPage() {
   const { t } = useTranslation();

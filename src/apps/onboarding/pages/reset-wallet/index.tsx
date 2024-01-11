@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
-import { LayoutTab, TabFooterContainer } from '@libs/layout';
-import { Button, Checkbox } from '@libs/ui';
+import { useTypedNavigate } from '@onboarding/router';
 
+import { resetVault } from '@background/redux/sagas/actions';
 import { dispatchToMainStore } from '@background/redux/utils';
 
+import { LayoutTab, TabFooterContainer } from '@libs/layout';
+import { Button, Checkbox } from '@libs/ui/components';
+
 import { ResetWalletPageContent } from './content';
-import { useTypedNavigate } from '@src/apps/onboarding/router';
-import { resetVault } from '@src/background/redux/sagas/actions';
 
 // Design of this page is temporary. Should be changed after it will be done in Figma
 

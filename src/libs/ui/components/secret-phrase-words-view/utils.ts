@@ -1,4 +1,5 @@
-import { SecretPhrase } from '@src/libs/crypto';
+import { SecretPhrase } from '@libs/crypto';
+
 import { PartialPhraseArray } from './types';
 
 function getRandomInt(min: number, max: number): number {

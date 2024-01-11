@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   dispatchFetchAccountInfoRequest,
   getAccountInfo,
   getAccountInfoLogo
 } from '@libs/services/account-info';
-import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-
-import { Account } from '@background/redux/vault/types';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { Account } from '@libs/types/account';
 
 export const useFetchAccountInfo = (account: Account | undefined) => {
   const [accountInfoStandardName, setAccountInfoStandardName] = useState<

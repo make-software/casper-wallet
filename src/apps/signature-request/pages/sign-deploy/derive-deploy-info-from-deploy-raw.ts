@@ -1,13 +1,14 @@
+import { convertBytesToHex } from '@libs/crypto/utils';
+
 import { CasperDeploy } from './deploy-types';
 import {
+  getContractHash,
+  getContractName,
+  getDeployArgs,
   getDeployPayment,
   getDeployType,
-  getDeployArgs,
-  getEntryPoint,
-  getContractHash,
-  getContractName
+  getEntryPoint
 } from './deploy-utils';
-import { convertBytesToHex } from '@src/libs/crypto/utils';
 
 export function deriveDeployInfoFromDeployRaw(deploy: CasperDeploy) {
   const {

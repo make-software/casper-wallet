@@ -1,8 +1,8 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
-import { SvgIcon, Typography } from '@libs/ui';
-import { TabPageContainer, TabTextContainer } from '@src/libs/layout';
+import { TabPageContainer, TabTextContainer } from '@libs/layout';
+import { SvgIcon, Typography } from '@libs/ui/components';
 
 export function WelcomePageContent() {
   const { t } = useTranslation();

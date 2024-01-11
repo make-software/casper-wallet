@@ -1,25 +1,34 @@
 import React, { useCallback } from 'react';
-import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { RootState } from 'typesafe-actions';
-import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
+import { RootState } from 'typesafe-actions';
 
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import {
+  selectVaultAccount,
+  selectVaultImportedAccounts
+} from '@background/redux/vault/selectors';
+
+import { useFetchAccountInfo } from '@hooks/use-fetch-account-info';
+
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   ContentContainer,
   FlexColumn,
   SpacingSize,
   TileContainer,
   VerticalSpaceContainer
-} from '@src/libs/layout/containers';
-import { Hash, HashVariant, Tile, SvgIcon, Typography } from '@libs/ui';
+} from '@libs/layout';
 import {
-  selectVaultAccount,
-  selectVaultImportedAccounts
-} from '@src/background/redux/vault/selectors';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import { useFetchAccountInfo } from '@src/hooks';
+  Hash,
+  HashVariant,
+  SvgIcon,
+  Tile,
+  Typography
+} from '@libs/ui/components';
 
 export function AccountSettingsPageContent() {
   const { t } = useTranslation();

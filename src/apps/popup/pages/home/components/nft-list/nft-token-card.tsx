@@ -1,23 +1,26 @@
 import React, { forwardRef, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { NFTTokenResult } from '@libs/services/nft-service';
-import { FlexColumn, SpacingSize } from '@libs/layout';
 import {
-  Typography,
-  EmptyMediaPlaceholder,
-  LoadingMediaPlaceholder
-} from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import {
-  findMediaPreview,
-  getMetadataKeyValue,
-  getNftTokenMetadataWithLinks,
-  getImageProxyUrl,
+  ContentType,
   deriveMediaType,
-  ContentType
+  findMediaPreview,
+  getImageProxyUrl,
+  getMetadataKeyValue,
+  getNftTokenMetadataWithLinks
 } from '@src/utils';
-import { useAsyncEffect } from '@src/hooks';
+
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { useAsyncEffect } from '@hooks/use-async-effect';
+
+import { FlexColumn, SpacingSize } from '@libs/layout';
+import { NFTTokenResult } from '@libs/services/nft-service';
+import {
+  EmptyMediaPlaceholder,
+  LoadingMediaPlaceholder,
+  Typography
+} from '@libs/ui/components';
 
 import { NftPreviewImage } from './nft-preview-image';
 

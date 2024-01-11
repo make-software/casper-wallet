@@ -1,19 +1,22 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
-import { PopoverLink, SvgIcon, Typography } from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@popup/router';
 import { getBlockExplorerAccountUrl } from '@src/constants';
-import { Popover } from '@libs/ui/components/popover/popover';
+
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
   selectIsAnyAccountConnectedWithActiveOrigin
 } from '@background/redux/vault/selectors';
-import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
-import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { Account } from '@background/redux/vault/types';
+
+import { Account } from '@libs/types/account';
+import { PopoverLink, SvgIcon, Typography } from '@libs/ui/components';
+import { Popover } from '@libs/ui/components/popover/popover';
 
 interface AccountActionsMenuPopoverProps {
   account: Account;

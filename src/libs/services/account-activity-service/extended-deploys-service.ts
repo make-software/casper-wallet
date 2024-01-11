@@ -1,19 +1,21 @@
-import { dispatchToMainStore } from '@background/redux/utils';
-import { serviceMessage } from '@background/service-message';
-import { handleError, toJson } from '@libs/services/utils';
-import { queryClient } from '@libs/services/query-client';
-import {
-  Payload,
-  PaginatedResponse,
-  ErrorResponse
-} from '@libs/services/types';
 import { ACCOUNT_DEPLOY_REFRESH_RATE } from '@src/constants';
 
-import { ExtendedDeploy, ExtendedDeployResult } from './types';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { serviceMessage } from '@background/service-message';
+
+import { queryClient } from '@libs/services/query-client';
+import {
+  ErrorResponse,
+  PaginatedResponse,
+  Payload
+} from '@libs/services/types';
+import { handleError, toJson } from '@libs/services/utils';
+
 import {
   getAccountExtendedDeploysLink,
   getExtendedDeploysHashLink
 } from './constants';
+import { ExtendedDeploy, ExtendedDeployResult } from './types';
 
 export const extendedDeploysRequest = (
   casperApiUrl: string,

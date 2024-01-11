@@ -1,11 +1,11 @@
 /**
  * USE CASES ACTIONS - don't update state in reducer, invoke state reducer events (imperative mode)
  */
-
 import { createAction } from 'typesafe-actions';
 
-import { SecretPhrase } from '@src/libs/crypto';
 import { UnlockVault } from '@background/redux/sagas/types';
+
+import { SecretPhrase } from '@libs/crypto';
 
 export const startBackground = createAction('START_BACKGROUND_SAGA')<void>();
 

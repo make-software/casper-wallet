@@ -1,22 +1,24 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+
+import { closeCurrentWindow } from '@background/close-current-window';
+import { selectIsActiveAccountConnectedWithActiveOrigin } from '@background/redux/vault/selectors';
+import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+
+import { sdkMethod } from '@content/sdk-method';
 
 import {
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  LayoutWindow,
-  PopupHeader
-} from '@src/libs/layout';
-import { Button, Typography } from '@src/libs/ui';
+  LayoutWindow
+} from '@libs/layout';
+import { Button, Typography } from '@libs/ui/components';
 
 import { RouterPath, useTypedNavigate } from '../../router';
 import { SelectAccountContent } from './content';
-import styled from 'styled-components';
-import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
-import { sdkMethod } from '@src/content/sdk-method';
-import { closeCurrentWindow } from '@src/background/close-current-window';
-import { selectIsActiveAccountConnectedWithActiveOrigin } from '@src/background/redux/vault/selectors';
-import { useSelector } from 'react-redux';
 
 const TextCentredContainer = styled.div`
   text-align: center;
@@ -69,7 +71,7 @@ export function SelectAccountPage({
   return (
     <LayoutWindow
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           renderSubmenuBarItems={() => (
             <HeaderSubmenuBarNavLink
               linkType="cancelWindow"

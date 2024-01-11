@@ -1,19 +1,21 @@
 import React, { useCallback, useState } from 'react';
 import { shallowEqual, useSelector } from 'react-redux';
 
-import {
-  HeaderSubmenuBarNavLink,
-  PopupHeader,
-  PopupLayout
-} from '@libs/layout';
+import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
 import { WalletQrCodePageContent } from '@popup/pages/wallet-qr-code/content';
+
 import {
   selectSecretPhrase,
   selectVaultDerivedAccounts,
   selectVaultImportedAccounts
 } from '@background/redux/vault/selectors';
+
 import { generateSyncWalletQrData } from '@libs/crypto';
-import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
+import {
+  HeaderPopup,
+  HeaderSubmenuBarNavLink,
+  PopupLayout
+} from '@libs/layout';
 
 export const WalletQrCodePage = () => {
   const [qrStrings, setQrStrings] = useState<string[]>([]);
@@ -60,7 +62,7 @@ export const WalletQrCodePage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

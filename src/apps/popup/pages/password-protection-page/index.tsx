@@ -1,25 +1,24 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
 import {
   selectPasswordHash,
   selectPasswordSaltHash
 } from '@background/redux/keys/selectors';
-import { dispatchToMainStore } from '@background/redux/utils';
 import { loginRetryCountReseted } from '@background/redux/login-retry-count/actions';
-
-import { UnlockProtectedPageContent } from '@layout/unlock-protected-page-content';
+import { dispatchToMainStore } from '@background/redux/utils';
 
 import {
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupHeader,
-  PopupLayout
+  PopupLayout,
+  UnlockProtectedPageContent
 } from '@libs/layout';
-import { Button } from '@libs/ui';
-import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
+import { Button } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
+import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
 
 interface BackupSecretPhrasePasswordPageType {
   setPasswordConfirmed: () => void;
@@ -71,7 +70,7 @@ export const PasswordProtectionPage = ({
       variant="form"
       onSubmit={handleSubmit(onSubmit)}
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

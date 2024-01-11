@@ -1,20 +1,16 @@
-import React from 'react';
 import { CLValue } from 'casper-js-sdk';
+import React from 'react';
+
+import { Hash, HashVariant, Typography } from '@libs/ui/components';
+import { formatDate, formatNumber, motesToCSPR } from '@libs/ui/utils';
 
 import {
-  formatNumber,
-  formatDate,
-  motesToCSPR
-} from '@libs/ui/utils/formatters';
-import { Hash, HashVariant, Typography } from '@src/libs/ui';
-
-import {
+  getDeployParsedValue,
   isDeployArgValueHash,
   isDeployArgValueNumber,
-  isKeyOfHashValue,
   isKeyOfCurrencyValue,
-  isKeyOfTimestampValue,
-  getDeployParsedValue
+  isKeyOfHashValue,
+  isKeyOfTimestampValue
 } from './deploy-utils';
 
 export function DeployValue({

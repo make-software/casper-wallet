@@ -1,10 +1,15 @@
 import React, { useEffect } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { getFaviconUrlFromOrigin, SvgIcon, Typography } from '@libs/ui';
-import { closeCurrentWindow } from '@src/background/close-current-window';
+import { closeCurrentWindow } from '@background/close-current-window';
+
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
+import {
+  SvgIcon,
+  Typography,
+  getFaviconUrlFromOrigin
+} from '@libs/ui/components';
 
 const PageContainer = styled.div`
   display: flex;

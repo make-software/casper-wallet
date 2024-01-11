@@ -1,18 +1,19 @@
 import { ActionType } from 'typesafe-actions';
-import * as sagas from './sagas/actions';
-import * as vault from './vault/actions';
-import * as vaultCipher from './vault-cipher/actions';
-import * as loginRetryCount from './login-retry-count/actions';
-import * as keys from './keys/actions';
-import * as windowManagement from './windowManagement/actions';
-import * as session from './session/actions';
-import * as loginRetryLockoutTime from './login-retry-lockout-time/actions';
-import * as lastActivityTime from './last-activity-time/actions';
-import * as settings from './settings/actions';
-import * as activeOrigin from './active-origin/actions';
-import * as recentRecipientPublicKeys from './recent-recipient-public-keys/actions';
+
 import * as accountInfo from './account-info/actions';
+import * as activeOrigin from './active-origin/actions';
 import * as contacts from './contacts/actions';
+import * as keys from './keys/actions';
+import * as lastActivityTime from './last-activity-time/actions';
+import * as loginRetryCount from './login-retry-count/actions';
+import * as loginRetryLockoutTime from './login-retry-lockout-time/actions';
+import * as recentRecipientPublicKeys from './recent-recipient-public-keys/actions';
+import * as sagas from './sagas/actions';
+import * as session from './session/actions';
+import * as settings from './settings/actions';
+import * as vaultCipher from './vault-cipher/actions';
+import * as vault from './vault/actions';
+import * as windowManagement from './windowManagement/actions';
 
 const reduxAction = {
   sagas,

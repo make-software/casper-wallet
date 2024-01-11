@@ -1,19 +1,18 @@
-import { serviceMessage } from '@src/background/service-message';
+import { BALANCE_REFRESH_RATE, CURRENCY_REFRESH_RATE } from '@src/constants';
+
 import { dispatchToMainStore } from '@background/redux/utils';
+import { serviceMessage } from '@background/service-message';
 
 import { Payload } from '@libs/services/types';
 
-import { BALANCE_REFRESH_RATE, CURRENCY_REFRESH_RATE } from '@src/constants';
-
-import { handleError, toJson } from '../utils';
 import { queryClient } from '../query-client';
-
+import { handleError, toJson } from '../utils';
+import { getAccountBalanceUrl, getCurrencyRateUrl } from './constants';
 import {
   FetchBalanceResponse,
   GetAccountBalanceRequestResponse,
   GetCurrencyRateRequestResponse
 } from './types';
-import { getCurrencyRateUrl, getAccountBalanceUrl } from './constants';
 
 export const currencyRateRequest = (
   casperApiUrl: string,

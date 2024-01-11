@@ -5,14 +5,30 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import {
+  selectKeyDerivationSaltHash,
+  selectPasswordHash,
+  selectPasswordSaltHash
+} from '@background/redux/keys/selectors';
+import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
+import { unlockVault } from '@background/redux/sagas/actions';
+import { UnlockVault } from '@background/redux/sagas/types';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { selectVaultCipher } from '@background/redux/vault-cipher/selectors';
+import { VaultState } from '@background/redux/vault/types';
+
+import { useLockWalletWhenNoMoreRetries } from '@hooks/use-lock-wallet-when-no-more-retries';
+
+import unlockAnimation from '@libs/animations/unlock_animation.json';
+import {
   AlignedFlexRow,
   ContentContainer,
   FooterButtonsAbsoluteContainer,
   IllustrationContainer,
   InputsContainer,
+  LockedRouterPath,
   ParagraphContainer,
   SpacingSize
-} from '@src/libs/layout/containers';
+} from '@libs/layout';
 import {
   Button,
   Input,
@@ -20,27 +36,11 @@ import {
   PasswordVisibilityIcon,
   SvgIcon,
   Typography
-} from '@src/libs/ui';
-
-import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
-import { UnlockVault } from '@background/redux/sagas/types';
-import { selectVaultCipher } from '@background/redux/vault-cipher/selectors';
-import { useLockWalletWhenNoMoreRetries } from '@layout/unlock-protected-page-content/use-lock-wallet-when-no-more-retries';
-import {
-  selectKeyDerivationSaltHash,
-  selectPasswordHash,
-  selectPasswordSaltHash
-} from '@src/background/redux/keys/selectors';
-import { unlockVault } from '@src/background/redux/sagas/actions';
-import { dispatchToMainStore } from '@src/background/redux/utils';
+} from '@libs/ui/components';
 import {
   UnlockWalletFormValues,
   useUnlockWalletForm
-} from '@src/libs/ui/forms/unlock-wallet';
-import { VaultState } from '@background/redux/vault/types';
-import unlockAnimation from '@libs/animations/unlock_animation.json';
-
-import { LockedRouterPath } from '../locked-router';
+} from '@libs/ui/forms/unlock-wallet';
 
 interface UnlockMessageEvent extends MessageEvent {
   data: UnlockVault;
@@ -76,7 +76,7 @@ export function UnlockVaultPageContent() {
 
     setIsLoading(true);
     const unlockVaultWorker = new Worker(
-      new URL('@src/background/workers/unlockVaultWorker.ts', import.meta.url)
+      new URL('@background/workers/unlockVaultWorker.ts', import.meta.url)
     );
 
     if (keyDerivationSaltHash == null) {

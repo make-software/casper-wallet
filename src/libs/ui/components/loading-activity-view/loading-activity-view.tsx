@@ -6,7 +6,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Skeleton, Tile } from '@libs/ui';
+import { Skeleton, Tile } from '@libs/ui/components';
 
 type Ref = HTMLDivElement;
 

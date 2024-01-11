@@ -1,5 +1,6 @@
-import { decodeBase64, Keys } from 'casper-js-sdk';
+import { Keys, decodeBase64 } from 'casper-js-sdk';
 import fs from 'fs';
+
 import { parseSecretKeyString } from './parse-secret-key-string';
 
 /** manual testing should confirm that imported keys have the same public key and private key than legacy signer */

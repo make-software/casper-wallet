@@ -1,4 +1,4 @@
-import { Account } from '@background/redux/vault/types';
+import { Account } from '@libs/types/account';
 
 export function sortAccounts(
   accounts: Account[],

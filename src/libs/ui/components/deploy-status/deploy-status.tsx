@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import { ContentColor, SvgIcon, Tooltip, Typography } from '@libs/ui';
+import { SvgIcon, Tooltip, Typography } from '@libs/ui/components';
+import { ContentColor } from '@libs/ui/utils';
 
 export enum Status {
   Success = 'success',
