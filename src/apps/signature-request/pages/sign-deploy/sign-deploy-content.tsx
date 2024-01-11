@@ -76,7 +76,9 @@ export function SignDeployContent({
     recipientKey: t('Recipient (Key)'),
     recipientHash: t('Recipient (Hash)'),
     entryPoint: t('Entry point'),
-    token_metas: t('Token metas')
+    token_metas: t('Token metas'),
+    contractHash: t('Contract hash'),
+    contractName: t('Contract name')
   };
 
   const deployInfo = deriveDeployInfoFromDeployRaw(deploy);
@@ -91,7 +93,14 @@ export function SignDeployContent({
     deployType: deployInfo.deployType
   };
   const deployDetailRecords = Object.entries(signatureRequest);
-  if (deployInfo.entryPoint != null) {
+
+  if (deployInfo.contractName) {
+    deployDetailRecords.push(['contractName', deployInfo.contractName]);
+  }
+  if (deployInfo.contractHash) {
+    deployDetailRecords.push(['contractHash', deployInfo.contractHash]);
+  }
+  if (deployInfo.entryPoint) {
     deployDetailRecords.push(['entryPoint', deployInfo.entryPoint]);
   }
 

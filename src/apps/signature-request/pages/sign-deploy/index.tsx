@@ -134,7 +134,7 @@ export function SignDeployPage() {
 
   return (
     <LayoutWindow
-      renderHeader={() => <HeaderPopup withConnectionStatus />}
+      renderHeader={() => <HeaderPopup />}
       renderContent={() => (
         <SignDeployContent
           deploy={deploy}
