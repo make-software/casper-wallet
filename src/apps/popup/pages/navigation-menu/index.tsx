@@ -172,17 +172,6 @@ export function NavigationMenuPageContent() {
           },
           {
             id: 3,
-            title: t('Timeout'),
-            iconPath: 'assets/icons/lock.svg',
-            currentValue: TimeoutDurationSetting[timeoutDurationSetting],
-            disabled: false,
-            handleOnClick: () => {
-              closeNavigationMenu();
-              navigate(RouterPath.Timeout);
-            }
-          },
-          {
-            id: 4,
             title: t('Theme'),
             iconPath:
               themeMode === ThemeMode.SYSTEM
@@ -201,6 +190,17 @@ export function NavigationMenuPageContent() {
         items: [
           {
             id: 1,
+            title: t('Timeout'),
+            iconPath: 'assets/icons/lock.svg',
+            currentValue: TimeoutDurationSetting[timeoutDurationSetting],
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.Timeout);
+            }
+          },
+          {
+            id: 2,
             title: t('Back up your secret recovery phrase'),
             iconPath: 'assets/icons/secure.svg',
             disabled: false,
@@ -210,7 +210,7 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 2,
+            id: 3,
             title: t('Generate wallet QR code'),
             description: t('Scan to import your wallet on mobile'),
             iconPath: 'assets/icons/qr.svg',
@@ -222,7 +222,7 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 3,
+            id: 4,
             title: t('Download account keys'),
             description: t('For all accounts imported via file'),
             iconPath: 'assets/icons/download.svg',
@@ -235,7 +235,7 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 4,
+            id: 5,
             title: t('Change Password'),
             iconPath: 'assets/icons/secure.svg',
             disabled: false,
