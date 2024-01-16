@@ -216,7 +216,7 @@ export function UnlockVaultPageContent() {
         </InputsContainer>
       </ContentContainer>
       <FooterButtonsAbsoluteContainer>
-        <Button type="submit">
+        <Button type="submit" disabled={isLoading}>
           {isLoading ? (
             <AlignedFlexRow gap={SpacingSize.Small}>
               <Player
