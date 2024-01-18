@@ -85,8 +85,11 @@ export const initialStateForPopupTests: RootState = {
   recentRecipientPublicKeys: [],
   accountInfo: {
     balance: {
-      amountMotes: null,
-      amountFiat: null
+      liquidMotes: null,
+      delegatedMotes: null,
+      undelegatingMotes: null,
+      totalBalanceMotes: null,
+      totalBalanceFiat: null
     },
     currencyRate: null,
     accountCasperActivity: [],

@@ -3,7 +3,8 @@ import { RootState } from 'typesafe-actions';
 
 import {
   AuctionManagerContractHash,
-  CasperApiUrl,
+  CasperClarityApiUrl,
+  CasperCloudApiUrl,
   CasperLiveUrl,
   CasperNodeUrl,
   NetworkName,
@@ -23,7 +24,8 @@ export const selectApiConfigBasedOnActiveNetwork = createSelector(
       case NetworkSetting.Mainnet:
         return {
           casperLiveUrl: CasperLiveUrl.MainnetUrl,
-          casperApiUrl: CasperApiUrl.MainnetUrl,
+          casperClarityApiUrl: CasperClarityApiUrl.MainnetUrl,
+          casperCloudApiUrl: CasperCloudApiUrl.MainnetUrl,
           networkName: NetworkName.Mainnet,
           nodeUrl: CasperNodeUrl.MainnetUrl,
           auctionManagerContractHash: AuctionManagerContractHash.Mainnet
@@ -31,7 +33,8 @@ export const selectApiConfigBasedOnActiveNetwork = createSelector(
       case NetworkSetting.Testnet:
         return {
           casperLiveUrl: CasperLiveUrl.TestnetUrl,
-          casperApiUrl: CasperApiUrl.TestnetUrl,
+          casperClarityApiUrl: CasperClarityApiUrl.TestnetUrl,
+          casperCloudApiUrl: CasperCloudApiUrl.TestnetUrl,
           networkName: NetworkName.Testnet,
           nodeUrl: CasperNodeUrl.TestnetUrl,
           auctionManagerContractHash: AuctionManagerContractHash.Testnet

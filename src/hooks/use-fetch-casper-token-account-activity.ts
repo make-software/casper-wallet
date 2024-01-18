@@ -28,7 +28,9 @@ export const useFetchCasperTokenAccountActivity = () => {
   const [isFirstPageLoad, setIsFirstPageLoad] = useState(false);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+  const { casperClarityApiUrl } = useSelector(
+    selectApiConfigBasedOnActiveNetwork
+  );
   const accountCasperActivityList = useSelector(selectAccountCasperActivity);
   const casperTokenActivityCount = useSelector(
     selectAccountCasperActivityCount
@@ -118,7 +120,7 @@ export const useFetchCasperTokenAccountActivity = () => {
       clearTimeout(effectTimeoutRef.current);
     };
   }, [
-    casperApiUrl,
+    casperClarityApiUrl,
     forceUpdate,
     activeAccountHash,
     accountCasperActivityList.length,

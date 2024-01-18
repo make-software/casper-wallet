@@ -586,22 +586,21 @@ runtime.onMessage.addListener(
 
           // SERVICE MESSAGE HANDLERS
           case getType(serviceMessage.fetchBalanceRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
+            const { casperCloudApiUrl, casperClarityApiUrl } =
+              selectApiConfigBasedOnActiveNetwork(store.getState());
 
             try {
-              const [balance, rate] = await Promise.all([
+              const [accountData, rate] = await Promise.all([
                 fetchAccountBalance({
-                  publicKey: action.payload.publicKey,
-                  casperApiUrl
+                  accountHash: action.payload.accountHash,
+                  casperCloudApiUrl
                 }),
-                fetchCurrencyRate({ casperApiUrl })
+                fetchCurrencyRate({ casperClarityApiUrl })
               ]);
 
               return sendResponse(
                 serviceMessage.fetchBalanceResponse({
-                  balance: balance?.data || null,
+                  accountData: accountData?.data || null,
                   currencyRate: rate?.data || null
                 })
               );
@@ -613,14 +612,14 @@ runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchAccountInfoRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const { data: accountInfo } = await fetchAccountInfo({
                 accountHash: action.payload.accountHash,
-                casperApiUrl
+                casperClarityApiUrl
               });
 
               return sendResponse(
@@ -634,14 +633,14 @@ runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchExtendedDeploysInfoRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const data = await fetchExtendedDeploysInfo({
                 deployHash: action.payload.deployHash,
-                casperApiUrl
+                casperClarityApiUrl
               });
 
               return sendResponse(
@@ -657,13 +656,13 @@ runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchErc20TokensRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const { data: tokensList } = await fetchErc20Tokens({
-                casperApiUrl,
+                casperClarityApiUrl,
                 accountHash: action.payload.accountHash
               });
 
@@ -690,13 +689,13 @@ runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchErc20TokenActivityRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const data = await fetchErc20TokenActivity({
-                casperApiUrl,
+                casperClarityApiUrl,
                 publicKey: action.payload.publicKey,
                 page: action.payload.page,
                 contractPackageHash: action.payload.contractPackageHash
@@ -713,13 +712,13 @@ runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchAccountExtendedDeploysRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const data = await fetchAccountExtendedDeploys({
-                casperApiUrl,
+                casperClarityApiUrl,
                 publicKey: action.payload.publicKey,
                 page: action.payload.page
               });
@@ -737,13 +736,13 @@ runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchAccountCasperActivityRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const data = await fetchAccountCasperActivity({
-                casperApiUrl,
+                casperClarityApiUrl,
                 accountHash: action.payload.accountHash,
                 page: action.payload.page
               });
@@ -758,13 +757,13 @@ runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchNftTokensRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const data = await fetchNftTokens({
-                casperApiUrl,
+                casperClarityApiUrl,
                 accountHash: action.payload.accountHash,
                 page: action.payload.page
               });
@@ -778,12 +777,14 @@ runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchAuctionValidatorsRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
-              const data = await fetchAuctionValidators({ casperApiUrl });
+              const data = await fetchAuctionValidators({
+                casperClarityApiUrl
+              });
 
               return sendResponse(
                 serviceMessage.fetchAuctionValidatorsResponse(data)
@@ -796,13 +797,13 @@ runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchValidatorsDetailsDataRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const data = await fetchValidatorsDetailsData({
-                casperApiUrl,
+                casperClarityApiUrl,
                 publicKey: action.payload.publicKey
               });
 

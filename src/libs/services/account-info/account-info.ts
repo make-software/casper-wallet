@@ -10,23 +10,26 @@ import { handleError, toJson } from '@libs/services/utils';
 
 const accountInfoRequest = (
   accountHash: string,
-  casperApiUrl: string,
+  casperClarityApiUrl: string,
   signal?: AbortSignal
 ): Promise<DataResponse<AccountInfo>> =>
-  fetch(getAccountInfoUrl({ accountHash, casperApiUrl }), { signal })
+  fetch(getAccountInfoUrl({ accountHash, casperClarityApiUrl }), {
+    signal
+  })
     .then(toJson)
     .catch(handleError);
 
 export const fetchAccountInfo = ({
   accountHash,
-  casperApiUrl
+  casperClarityApiUrl
 }: {
   accountHash: string;
-  casperApiUrl: string;
+  casperClarityApiUrl: string;
 }) =>
   queryClient.fetchQuery(
-    ['accountInfoRequest', accountHash, casperApiUrl],
-    ({ signal }) => accountInfoRequest(accountHash, casperApiUrl, signal),
+    ['accountInfoRequest', accountHash, casperClarityApiUrl],
+    ({ signal }) =>
+      accountInfoRequest(accountHash, casperClarityApiUrl, signal),
     {
       staleTime: FETCH_QUERY_OPTIONS.apiCacheTime
     }

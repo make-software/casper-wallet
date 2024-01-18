@@ -3,71 +3,70 @@ import { BALANCE_REFRESH_RATE, CURRENCY_REFRESH_RATE } from '@src/constants';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { serviceMessage } from '@background/service-message';
 
-import { Payload } from '@libs/services/types';
+import { PaginatedResponse, Payload } from '@libs/services/types';
 
 import { queryClient } from '../query-client';
 import { handleError, toJson } from '../utils';
 import { getAccountBalanceUrl, getCurrencyRateUrl } from './constants';
 import {
+  AccountData,
   FetchBalanceResponse,
-  GetAccountBalanceRequestResponse,
   GetCurrencyRateRequestResponse
 } from './types';
 
 export const currencyRateRequest = (
-  casperApiUrl: string,
+  casperClarityApiUrl: string,
   signal?: AbortSignal
 ): Promise<GetCurrencyRateRequestResponse> =>
-  fetch(getCurrencyRateUrl(casperApiUrl), { signal })
+  fetch(getCurrencyRateUrl(casperClarityApiUrl), { signal })
     .then(toJson)
     .catch(handleError);
 
 export const accountBalanceRequest = (
-  publicKey: string,
-  casperApiUrl: string,
+  accountHash: string,
+  casperCloudApiUrl: string,
   signal?: AbortSignal
-): Promise<GetAccountBalanceRequestResponse> => {
-  if (!publicKey) {
-    throw Error('Missing public key');
+): Promise<AccountData> => {
+  if (!accountHash) {
+    throw Error('Missing account hash');
   }
 
-  return fetch(getAccountBalanceUrl({ publicKey, casperApiUrl }), { signal })
-    .then(res => {
-      if (res.status === 404) {
-        return {
-          data: '0'
-        };
-      }
-
-      return toJson(res);
-    })
+  return fetch(getAccountBalanceUrl({ accountHash, casperCloudApiUrl }), {
+    signal
+  })
+    .then(toJson)
     .catch(handleError);
 };
 
 export const dispatchFetchActiveAccountBalance = (
-  publicKey = ''
+  accountHash = ''
 ): Promise<Payload<FetchBalanceResponse>> =>
-  dispatchToMainStore(serviceMessage.fetchBalanceRequest({ publicKey }));
+  dispatchToMainStore(serviceMessage.fetchBalanceRequest({ accountHash }));
 
 export const fetchAccountBalance = ({
-  publicKey,
-  casperApiUrl
+  accountHash,
+  casperCloudApiUrl
 }: {
-  publicKey: string;
-  casperApiUrl: string;
-}) =>
+  accountHash: string;
+  casperCloudApiUrl: string;
+}): Promise<PaginatedResponse<AccountData>> =>
   queryClient.fetchQuery(
-    ['getAccountBalanceRequest', publicKey, casperApiUrl],
-    ({ signal }) => accountBalanceRequest(publicKey, casperApiUrl, signal),
+    ['getAccountBalanceRequest', accountHash, casperCloudApiUrl],
+    ({ signal }) =>
+      accountBalanceRequest(accountHash, casperCloudApiUrl, signal),
     {
       staleTime: BALANCE_REFRESH_RATE
     }
   );
 
-export const fetchCurrencyRate = ({ casperApiUrl }: { casperApiUrl: string }) =>
+export const fetchCurrencyRate = ({
+  casperClarityApiUrl
+}: {
+  casperClarityApiUrl: string;
+}) =>
   queryClient.fetchQuery(
     'getCurrencyRateRequest',
-    ({ signal }) => currencyRateRequest(casperApiUrl, signal),
+    ({ signal }) => currencyRateRequest(casperClarityApiUrl, signal),
     {
       staleTime: CURRENCY_REFRESH_RATE
     }

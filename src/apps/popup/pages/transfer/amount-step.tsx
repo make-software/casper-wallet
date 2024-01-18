@@ -39,9 +39,9 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
 
   useEffect(() => {
     const maxAmountMotes: string =
-      csprBalance.amountMotes == null
+      csprBalance.liquidMotes == null
         ? '0'
-        : Big(csprBalance.amountMotes).sub(TRANSFER_COST_MOTES).toString();
+        : Big(csprBalance.liquidMotes).sub(TRANSFER_COST_MOTES).toString();
 
     const hasEnoughBalance = Big(maxAmountMotes).gte(TRANSFER_MIN_AMOUNT_MOTES);
     const isMaxAmountEqualMinAmount = Big(maxAmountMotes).eq(
@@ -51,7 +51,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
     setIsChecked(isMaxAmountEqualMinAmount);
     setMaxAmountMotes(maxAmountMotes);
     setDisabled(!hasEnoughBalance);
-  }, [csprBalance.amountMotes]);
+  }, [csprBalance.liquidMotes]);
 
   const {
     register,

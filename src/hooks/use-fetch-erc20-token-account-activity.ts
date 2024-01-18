@@ -31,7 +31,9 @@ export const useFetchErc20TokenAccountActivity = (
   const tokenActivity = erc20TokensActivityRecord[contractPackageHash || ''];
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+  const { casperClarityApiUrl } = useSelector(
+    selectApiConfigBasedOnActiveNetwork
+  );
 
   const effectTimeoutRef = useRef<NodeJS.Timeout>();
   const forceUpdate = useForceUpdate();
@@ -125,7 +127,7 @@ export const useFetchErc20TokenAccountActivity = (
     contractPackageHash,
     tokenActivity?.tokenActivityCount,
     tokenActivity?.tokenActivityList.length,
-    casperApiUrl,
+    casperClarityApiUrl,
     forceUpdate,
     tokenActivity?.tokenActivityList,
     isFirstPageLoad
