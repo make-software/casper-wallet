@@ -398,7 +398,7 @@ export const StakesPage = () => {
         <FooterButtonsContainer>
           {stakeStep === StakeSteps.Amount ? (
             <SpaceBetweenFlexRow>
-              <Typography type="captionRegular">
+              <Typography type="captionRegular" color="contentSecondary">
                 <Trans t={t}>Transaction fee</Trans>
               </Typography>
               <Typography type="captionHash">
