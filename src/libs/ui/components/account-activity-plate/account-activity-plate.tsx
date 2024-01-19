@@ -162,6 +162,17 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
             setToAccount(undefined);
             return;
           }
+          case TokenEntryPoint.transfer: {
+            if (
+              transactionInfo?.args?.token_ids ||
+              transactionInfo?.args?.token_id
+            ) {
+              setType(ActivityType.TransferNft);
+              setFromAccount(transactionInfo.callerPublicKey);
+              setToAccount(recipientAddress);
+              return;
+            }
+          }
         }
       }
 
@@ -229,9 +240,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
               <DeployStatus deployResult={transactionInfo} />
             </AlignedFlexRow>
             <Typography type="captionHash">
-              {formattedAmount === '-' ? (
-                formattedAmount
-              ) : (
+              {formattedAmount === '-' ? null : (
                 <>
                   {type === ActivityType.Sent || type === ActivityType.Delegated
                     ? '-'
