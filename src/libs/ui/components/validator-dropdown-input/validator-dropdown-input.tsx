@@ -8,6 +8,7 @@ import { AuctionManagerEntryPoint } from '@src/constants';
 import { useClickAway } from '@hooks/use-click-away';
 
 import {
+  AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
   SpacingSize,
   VerticalSpaceContainer
@@ -193,11 +194,20 @@ export const ValidatorDropdownInput = ({
         label={label}
         prefixIcon={<SvgIcon src="assets/icons/search.svg" size={24} />}
         suffixIcon={
-          <SvgIcon
-            src="assets/icons/chevron-up.svg"
-            flipByAxis={isOpenValidatorPublicKeysList ? undefined : 'X'}
-            size={24}
-          />
+          <AlignedFlexRow gap={SpacingSize.Small}>
+            {inputValue && (
+              <SvgIcon
+                src="assets/icons/cross.svg"
+                size={16}
+                onClick={() => setValue('validatorPublicKey', '')}
+              />
+            )}
+            <SvgIcon
+              src="assets/icons/chevron-up.svg"
+              flipByAxis={isOpenValidatorPublicKeysList ? undefined : 'X'}
+              size={16}
+            />
+          </AlignedFlexRow>
         }
         placeholder={t('Validator public address')}
         {...register('validatorPublicKey')}

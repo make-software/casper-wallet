@@ -152,14 +152,14 @@ export const ValidatorPlate = ({
         </NameContainer>
       </AlignedFlexRow>
       <RightAlignedFlexColumn>
-        <Typography type="captionHash" color="contentPrimary">
+        <Typography type="captionHash">
           {`${formattedTotalStake} CSPR`}
         </Typography>
         <AlignedFlexRow gap={SpacingSize.Small}>
           <Typography type="listSubtext" color="contentSecondary">
             {`${formattedFee}% fee`}
           </Typography>
-          <Typography type="listSubtext" color="contentSecondary">
+          <Typography type="listSubtext">
             {getFormattedDelegatorsNumber()} delegators
           </Typography>
         </AlignedFlexRow>

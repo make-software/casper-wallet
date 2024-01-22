@@ -57,7 +57,11 @@ export function FormField({
     <FlexColumn {...restProps}>
       <LabelContainer>
         {label && <Typography type="bodySemiBold">{label}</Typography>}
-        {rightLabel && <Typography type="body">{rightLabel}</Typography>}
+        {rightLabel && (
+          <Typography type="captionRegular" color="contentSecondary">
+            {rightLabel}
+          </Typography>
+        )}
       </LabelContainer>
 
       {children}
