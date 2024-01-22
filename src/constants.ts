@@ -95,7 +95,8 @@ export enum ActivityType {
   Undelegated = 'Undelegated',
   Redelegated = 'Redelegated',
   Mint = 'Mint',
-  Burn = 'Burn'
+  Burn = 'Burn',
+  TransferNft = 'Transfer NFT'
 }
 
 export const ActivityShortTypeName = {
@@ -105,8 +106,9 @@ export const ActivityShortTypeName = {
   [ActivityType.Delegated]: 'Deleg',
   [ActivityType.Undelegated]: 'Undeleg',
   [ActivityType.Redelegated]: 'Redeleg',
-  [ActivityType.Mint]: 'Mint',
-  [ActivityType.Burn]: 'Burn'
+  [ActivityType.Mint]: 'Mint NFT',
+  [ActivityType.Burn]: 'Burn NFT',
+  [ActivityType.TransferNft]: 'Transfer NFT'
 };
 
 export const ActivityTypeName = {
@@ -116,8 +118,9 @@ export const ActivityTypeName = {
   [ActivityType.Delegated]: 'Delegated',
   [ActivityType.Undelegated]: 'Undelegated',
   [ActivityType.Redelegated]: 'Redelegated',
-  [ActivityType.Mint]: 'Mint',
-  [ActivityType.Burn]: 'Burn'
+  [ActivityType.Mint]: 'Mint NFT',
+  [ActivityType.Burn]: 'Burn NFT',
+  [ActivityType.TransferNft]: 'Transfer NFT'
 };
 
 export const ActivityTypeIcons = {
@@ -128,7 +131,8 @@ export const ActivityTypeIcons = {
   [ActivityType.Undelegated]: 'assets/icons/undelegate.svg',
   [ActivityType.Redelegated]: 'assets/icons/undelegate.svg',
   [ActivityType.Mint]: 'assets/icons/info.svg',
-  [ActivityType.Burn]: 'assets/icons/burn.svg'
+  [ActivityType.Burn]: 'assets/icons/burn.svg',
+  [ActivityType.TransferNft]: 'assets/icons/transfer.svg'
 };
 
 export const ActivityTypeColors = {
@@ -139,7 +143,8 @@ export const ActivityTypeColors = {
   [ActivityType.Undelegated]: 'contentAction',
   [ActivityType.Redelegated]: 'contentAction',
   [ActivityType.Mint]: 'contentDisabled',
-  [ActivityType.Burn]: 'contentAction'
+  [ActivityType.Burn]: 'contentActionCritical',
+  [ActivityType.TransferNft]: 'contentAction'
 };
 
 export enum HomePageTabName {
@@ -163,5 +168,6 @@ export enum AuctionManagerEntryPoint {
 
 export enum TokenEntryPoint {
   mint = 'mint',
-  burn = 'burn'
+  burn = 'burn',
+  transfer = 'transfer'
 }
