@@ -16,7 +16,7 @@ export const DeleteContactPageContent = () => {
     <ContentContainer>
       <IllustrationContainer>
         <SvgIcon
-          src="assets/illustrations/remove-wallet.svg"
+          src="assets/illustrations/remove-account.svg"
           width={183}
           height={120}
         />
