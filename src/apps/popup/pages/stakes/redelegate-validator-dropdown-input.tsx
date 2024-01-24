@@ -1,15 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
-import { AuctionManagerEntryPoint } from '@src/constants';
+import { useFilteredValidators } from '@popup/pages/stakes/utils';
 
 import { useClickAway } from '@hooks/use-click-away';
 
 import {
   AlignedFlexRow,
-  AlignedSpaceBetweenFlexRow,
+  DropdownHeader,
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
@@ -21,76 +20,67 @@ import {
   Typography,
   ValidatorPlate
 } from '@libs/ui/components';
-import { StakeValidatorFormValues } from '@libs/ui/forms/stakes-form';
-
-const DropDownHeader = styled(AlignedSpaceBetweenFlexRow)`
-  padding: 8px 16px;
-
-  border-top-left-radius: ${({ theme }) => theme.borderRadius.base}px;
-  border-top-right-radius: ${({ theme }) => theme.borderRadius.base}px;
-
-  background-color: ${({ theme }) => theme.color.backgroundPrimary};
-`;
+import { StakeNewValidatorFormValues } from '@libs/ui/forms/stakes-form';
 
 interface ValidatorDropdownInputProps {
-  validatorForm: UseFormReturn<StakeValidatorFormValues>;
+  newValidatorForm: UseFormReturn<StakeNewValidatorFormValues>;
   validatorList: ValidatorResultWithId[] | null;
   validator: ValidatorResultWithId | null;
   setValidator: React.Dispatch<
     React.SetStateAction<ValidatorResultWithId | null>
   >;
   setStakeAmount: React.Dispatch<React.SetStateAction<string>>;
-  stakesType: AuctionManagerEntryPoint;
 }
 
-export const ValidatorDropdownInput = ({
-  validatorForm,
+export const RedelegateValidatorDropdownInput = ({
+  newValidatorForm,
   validatorList,
   validator,
   setValidator,
-  setStakeAmount,
-  stakesType
+  setStakeAmount
 }: ValidatorDropdownInputProps) => {
   const [isOpenValidatorPublicKeysList, setIsOpenValidatorPublicKeysList] =
     useState(true);
   const [showValidatorPlate, setShowValidatorPlate] = useState(false);
-  const [label, setLabel] = useState('');
 
   const { t } = useTranslation();
 
-  const { register, formState, setValue, control, trigger } = validatorForm;
+  const { register, formState, setValue, control, trigger } = newValidatorForm;
   const { errors } = formState;
 
   const inputValue = useWatch({
     control: control,
-    name: 'validatorPublicKey'
+    name: 'newValidatorPublicKey'
   });
 
   const { ref: clickAwayRef } = useClickAway({
     callback: async () => {
+      const resetAndTriggerPublicKey = async (value: string) => {
+        setValue('newValidatorPublicKey', value);
+        await trigger('newValidatorPublicKey');
+      };
+
       setIsOpenValidatorPublicKeysList(false);
 
-      if (validator && inputValue !== '') {
-        setShowValidatorPlate(true);
-        setValue('validatorPublicKey', validator.public_key);
-        setStakeAmount(validator.user_stake!);
-        await trigger('validatorPublicKey');
-        return;
-      } else if (validator && inputValue === '') {
-        setShowValidatorPlate(false);
-        setValue('validatorPublicKey', '');
-        setValidator(null);
-        await trigger('validatorPublicKey');
-        return;
+      if (validator) {
+        if (inputValue !== '') {
+          setShowValidatorPlate(true);
+          setValue('newValidatorPublicKey', validator.public_key);
+          setStakeAmount(validator.user_stake!);
+          await resetAndTriggerPublicKey(validator.public_key);
+        } else {
+          setShowValidatorPlate(false);
+          setValidator(null);
+          await resetAndTriggerPublicKey('');
+        }
+      } else {
+        await resetAndTriggerPublicKey('');
       }
-
-      setValue('validatorPublicKey', '');
-      await trigger('validatorPublicKey');
     }
   });
 
   useEffect(() => {
-    trigger('validatorPublicKey');
+    trigger('newValidatorPublicKey');
   }, [trigger, validator]);
 
   useEffect(() => {
@@ -101,58 +91,10 @@ export const ValidatorDropdownInput = ({
     //   eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const useFilteredValidators = (
-    inputValue: string,
-    validatorList: ValidatorResultWithId[] | null
-  ) => {
-    const filterValidators = useCallback(
-      (
-        inputValue: string,
-        validatorList: ValidatorResultWithId[] | null
-      ): ValidatorResultWithId[] | [] => {
-        if (!validatorList) return [];
-        if (!inputValue) return validatorList;
-
-        return validatorList.filter(validator => {
-          const { public_key } = validator;
-          if (validator?.account_info?.info?.owner?.name) {
-            const { name } = validator.account_info.info.owner;
-
-            return (
-              name?.toLowerCase().includes(inputValue?.toLowerCase()) ||
-              public_key?.toLowerCase().includes(inputValue?.toLowerCase())
-            );
-          }
-
-          return public_key?.toLowerCase().includes(inputValue?.toLowerCase());
-        });
-      },
-      []
-    );
-
-    return filterValidators(inputValue, validatorList);
-  };
-
   const filteredValidatorsList = useFilteredValidators(
     inputValue,
     validatorList
   );
-
-  useEffect(() => {
-    switch (stakesType) {
-      case AuctionManagerEntryPoint.delegate: {
-        setLabel('To validator');
-        break;
-      }
-      case AuctionManagerEntryPoint.undelegate: {
-        setLabel('From validator');
-        break;
-      }
-
-      default:
-        throw Error('fetch validator: unknown stakes type');
-    }
-  }, [stakesType]);
 
   return showValidatorPlate && validator ? (
     <VerticalSpaceContainer top={SpacingSize.XL}>
@@ -165,15 +107,10 @@ export const ValidatorDropdownInput = ({
           validator?.account_info?.info?.owner?.branding?.logo?.png_256 ||
           validator?.account_info?.info?.owner?.branding?.logo?.png_1024
         }
-        // TODO: remove user_stake after we merge recipient and amount steps for undelegation
-        totalStake={
-          stakesType === AuctionManagerEntryPoint.undelegate
-            ? validator.user_stake
-            : validator.total_stake
-        }
+        totalStake={validator.user_stake}
         delegatorsNumber={validator?.delegators_number}
-        validatorLabel={label}
-        error={errors?.validatorPublicKey}
+        validatorLabel={t('To validator')}
+        error={errors?.newValidatorPublicKey}
         handleClick={() => {
           setShowValidatorPlate(false);
           setIsOpenValidatorPublicKeysList(true);
@@ -191,7 +128,7 @@ export const ValidatorDropdownInput = ({
       {/*TODO: create Select component and rewrite this*/}
       <Input
         monotype
-        label={label}
+        label={t('To validator')}
         prefixIcon={<SvgIcon src="assets/icons/search.svg" size={24} />}
         suffixIcon={
           <AlignedFlexRow gap={SpacingSize.Small}>
@@ -199,7 +136,7 @@ export const ValidatorDropdownInput = ({
               <SvgIcon
                 src="assets/icons/cross.svg"
                 size={16}
-                onClick={() => setValue('validatorPublicKey', '')}
+                onClick={() => setValue('newValidatorPublicKey', '')}
               />
             )}
             <SvgIcon
@@ -210,7 +147,7 @@ export const ValidatorDropdownInput = ({
           </AlignedFlexRow>
         }
         placeholder={t('Validator public address')}
-        {...register('validatorPublicKey')}
+        {...register('newValidatorPublicKey')}
         autoComplete="off"
       />
       {isOpenValidatorPublicKeysList && (
@@ -221,14 +158,14 @@ export const ValidatorDropdownInput = ({
           stickyHeader
           borderRadius="base"
           renderHeader={() => (
-            <DropDownHeader>
+            <DropdownHeader>
               <Typography type="labelMedium" color="contentSecondary">
                 <Trans t={t}>Validator</Trans>
               </Typography>
               <Typography type="labelMedium" color="contentSecondary">
                 <Trans t={t}>Total stake, fee, delegators</Trans>
               </Typography>
-            </DropDownHeader>
+            </DropdownHeader>
           )}
           renderRow={validator => {
             const logo =
@@ -242,15 +179,10 @@ export const ValidatorDropdownInput = ({
                 fee={validator.fee}
                 name={validator?.account_info?.info?.owner?.name}
                 logo={logo}
-                // TODO: remove user_stake after we merge recipient and amount steps for undelegation
-                totalStake={
-                  stakesType === AuctionManagerEntryPoint.undelegate
-                    ? validator.user_stake
-                    : validator.total_stake
-                }
+                totalStake={validator.user_stake}
                 delegatorsNumber={validator?.delegators_number}
-                handleClick={async () => {
-                  setValue('validatorPublicKey', validator.public_key);
+                handleClick={() => {
+                  setValue('newValidatorPublicKey', validator.public_key);
                   setStakeAmount(validator.user_stake!);
 
                   setValidator(validator);

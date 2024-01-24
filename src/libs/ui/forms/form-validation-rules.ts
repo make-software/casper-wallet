@@ -284,7 +284,8 @@ export const useCSPRStakeAmountRule = (
 
   const getStakeMinAmountMotes = () => {
     switch (mode) {
-      case AuctionManagerEntryPoint.delegate: {
+      case AuctionManagerEntryPoint.delegate:
+      case AuctionManagerEntryPoint.redelegate: {
         return DELEGATION_MIN_AMOUNT_MOTES;
       }
       case AuctionManagerEntryPoint.undelegate: {
@@ -332,25 +333,45 @@ export const useCSPRStakeAmountRule = (
 
         return false;
       },
-      message: {
-        header: t('You can’t delegate this amount'),
-        description: t(
-          `The minimum required delegation amount is ${motesToCSPR(
-            getStakeMinAmountMotes()
-          )} CSPR.`
-        )
-      }
+      message:
+        mode === AuctionManagerEntryPoint.delegate
+          ? {
+              header: t('You can’t delegate this amount'),
+              description: t(
+                `The minimum required delegation amount is ${motesToCSPR(
+                  getStakeMinAmountMotes()
+                )} CSPR.`
+              )
+            }
+          : {
+              header: t('You can’t redelegate this amount'),
+              description: t(
+                `The minimum required redelegation amount is ${motesToCSPR(
+                  getStakeMinAmountMotes()
+                )} CSPR.`
+              )
+            }
     })
     .test({
       name: 'amountAboveBalance',
       test: csprAmountInputValue => {
         if (csprAmountInputValue) {
-          if (mode === AuctionManagerEntryPoint.undelegate) {
-            return Big(CSPRtoMotes(csprAmountInputValue)).lte(
-              Big(stakeAmountMotes).sub(getStakeMinAmountMotes()).toString()
-            );
+          switch (mode) {
+            case AuctionManagerEntryPoint.undelegate: {
+              return Big(CSPRtoMotes(csprAmountInputValue)).lte(
+                Big(stakeAmountMotes).sub(getStakeMinAmountMotes()).toString()
+              );
+            }
+            case AuctionManagerEntryPoint.redelegate: {
+              return Big(CSPRtoMotes(csprAmountInputValue)).lte(
+                Big(stakeAmountMotes).toString()
+              );
+            }
+            case AuctionManagerEntryPoint.delegate:
+            default: {
+              return Big(CSPRtoMotes(csprAmountInputValue)).lte(maxAmountMotes);
+            }
           }
-          return Big(CSPRtoMotes(csprAmountInputValue)).lte(maxAmountMotes);
         }
 
         return false;
@@ -361,12 +382,17 @@ export const useCSPRStakeAmountRule = (
               header: t('You can’t undelegate this amount'),
               description: t('Amount must be less than staked CSPR.')
             }
-          : {
-              header: t('Your account balance is not high enough'),
-              description: t(
-                'Your account balance is not high enough. Enter a smaller amount.'
-              )
-            }
+          : mode === AuctionManagerEntryPoint.redelegate
+            ? {
+                header: t('You can’t redelegate this amount'),
+                description: t('Amount must be less than staked CSPR.')
+              }
+            : {
+                header: t('Your account balance is not high enough'),
+                description: t(
+                  'Your account balance is not high enough. Enter a smaller amount.'
+                )
+              }
     });
 };
 
@@ -386,9 +412,37 @@ export const useValidatorPublicKeyRule = (
     .test({
       name: 'maxDelegators',
       test: () => {
-        if (stakesType === AuctionManagerEntryPoint.undelegate) {
+        if (
+          stakesType === AuctionManagerEntryPoint.undelegate ||
+          stakesType === AuctionManagerEntryPoint.redelegate
+        ) {
           return true;
         }
+        if (delegatorsNumber) {
+          return delegatorsNumber < MAX_DELEGATORS;
+        }
+
+        return false;
+      },
+      message: t(
+        'This validator has reached the network limit for total delegators and therefore cannot be delegated to by new accounts. Please select another validator with fewer than 1200 total delegators'
+      )
+    });
+};
+
+export const useNewValidatorPublicKeyRule = (delegatorsNumber?: number) => {
+  const { t } = useTranslation();
+
+  return Yup.string()
+    .required(t('Recipient is required'))
+    .test({
+      name: 'newValidatorPublicKey',
+      test: value => (value ? isValidPublicKey(value) : false),
+      message: t('Recipient should be a valid public key')
+    })
+    .test({
+      name: 'maxDelegators',
+      test: () => {
         if (delegatorsNumber) {
           return delegatorsNumber < MAX_DELEGATORS;
         }

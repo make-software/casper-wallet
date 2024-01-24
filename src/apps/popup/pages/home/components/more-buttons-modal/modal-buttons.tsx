@@ -64,7 +64,7 @@ export const ModalButtons = ({ handleBuyWithCSPR }: ButtonsProps) => {
           )
         }
       >
-        <Button circle>
+        <Button circle style={{ padding: '8px' }}>
           <SvgIcon src="assets/icons/transfer.svg" color="contentOnFill" />
         </Button>
         <FlexColumn>
@@ -84,7 +84,7 @@ export const ModalButtons = ({ handleBuyWithCSPR }: ButtonsProps) => {
           })
         }
       >
-        <Button circle>
+        <Button circle style={{ padding: '8px' }}>
           <SvgIcon src="assets/icons/receive.svg" color="contentOnFill" />
         </Button>
         <FlexColumn>
@@ -100,23 +100,49 @@ export const ModalButtons = ({ handleBuyWithCSPR }: ButtonsProps) => {
         gap={SpacingSize.Large}
         onClick={() => navigate(RouterPath.Delegate)}
       >
-        <Button circle>
+        <Button circle style={{ padding: '8px' }}>
           <SvgIcon src="assets/icons/delegate.svg" color="contentOnFill" />
         </Button>
-        <Typography type="bodySemiBold">
-          <Trans t={t}>Delegate</Trans>
-        </Typography>
+        <FlexColumn>
+          <Typography type="bodySemiBold">
+            <Trans t={t}>Delegate</Trans>
+          </Typography>
+          <Typography type="captionRegular" color="contentSecondary">
+            <Trans t={t}>Stake CSPR to validator</Trans>
+          </Typography>
+        </FlexColumn>
       </ButtonContainer>
       <ButtonContainer
         gap={SpacingSize.Large}
         onClick={() => navigate(RouterPath.Undelegate)}
       >
-        <Button circle>
+        <Button circle style={{ padding: '8px' }}>
           <SvgIcon src="assets/icons/undelegate.svg" color="contentOnFill" />
         </Button>
-        <Typography type="bodySemiBold">
-          <Trans t={t}>Undelegate</Trans>
-        </Typography>
+        <FlexColumn>
+          <Typography type="bodySemiBold">
+            <Trans t={t}>Undelegate</Trans>
+          </Typography>
+          <Typography type="captionRegular" color="contentSecondary">
+            <Trans t={t}>Remove your stake</Trans>
+          </Typography>
+        </FlexColumn>
+      </ButtonContainer>
+      <ButtonContainer
+        gap={SpacingSize.Large}
+        onClick={() => navigate(RouterPath.Redelegate)}
+      >
+        <Button circle style={{ padding: '8px' }}>
+          <SvgIcon src="assets/icons/redelegate.svg" color="contentOnFill" />
+        </Button>
+        <FlexColumn>
+          <Typography type="bodySemiBold">
+            <Trans t={t}>Redelegate</Trans>
+          </Typography>
+          <Typography type="captionRegular" color="contentSecondary">
+            <Trans t={t}>Move your stake</Trans>
+          </Typography>
+        </FlexColumn>
       </ButtonContainer>
     </FlexColumn>
   );

@@ -1,7 +1,7 @@
 import Big from 'big.js';
 import React, { useEffect, useState } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -14,7 +14,6 @@ import {
 
 import {
   AlignedFlexRow,
-  ContentContainer,
   ParagraphContainer,
   SpacingSize,
   VerticalSpaceContainer
@@ -31,7 +30,6 @@ interface AmountStepProps {
   amountForm: UseFormReturn<StakeAmountFormValues>;
   stakesType: AuctionManagerEntryPoint;
   stakeAmountMotes: string;
-  headerText: string;
   amountStepText: string;
   amountStepMaxAmountValue: string | null;
 }
@@ -40,7 +38,6 @@ export const AmountStep = ({
   amountForm,
   stakesType,
   stakeAmountMotes,
-  headerText,
   amountStepText,
   amountStepMaxAmountValue
 }: AmountStepProps) => {
@@ -62,7 +59,8 @@ export const AmountStep = ({
         setMaxAmountMotes(maxAmountMotes);
         break;
       }
-      case AuctionManagerEntryPoint.undelegate: {
+      case AuctionManagerEntryPoint.undelegate:
+      case AuctionManagerEntryPoint.redelegate: {
         setMaxAmountMotes(stakeAmountMotes);
       }
     }
@@ -88,13 +86,7 @@ export const AmountStep = ({
   const fiatAmount = formatFiatAmount(amount || '0', currencyRate);
 
   return (
-    <ContentContainer>
-      <ParagraphContainer top={SpacingSize.XL}>
-        <Typography type="header">
-          <Trans t={t}>{headerText}</Trans>
-        </Typography>
-      </ParagraphContainer>
-
+    <>
       <VerticalSpaceContainer top={SpacingSize.XXL}>
         <Input
           label={amountLabel}
@@ -140,6 +132,6 @@ export const AmountStep = ({
           />
         </VerticalSpaceContainer>
       )}
-    </ContentContainer>
+    </>
   );
 };

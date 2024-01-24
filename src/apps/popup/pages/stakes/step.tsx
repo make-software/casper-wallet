@@ -12,7 +12,7 @@ interface ValidatorStepProps {
   children?: React.ReactNode;
   headerText: string;
 }
-export const ValidatorStep = ({ headerText, children }: ValidatorStepProps) => {
+export const Step = ({ headerText, children }: ValidatorStepProps) => {
   const { t } = useTranslation();
 
   return (

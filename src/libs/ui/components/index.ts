@@ -45,7 +45,6 @@ export * from './contract-icon/contract-icon';
 export * from './password-inputs/password-inputs';
 export * from './toggle/toggle';
 export * from './skeleton/skeleton';
-export * from './validator-dropdown-input/validator-dropdown-input';
 export * from './validator-plate/validator-plate';
 export * from './error/error';
 export * from './contacts-plate/contacts-plate';

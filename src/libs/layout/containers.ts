@@ -325,3 +325,12 @@ export const ActivityPlateDivider = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
   background-color: ${({ theme }) => theme.color.contentSecondary};
 `;
+
+export const DropdownHeader = styled(AlignedSpaceBetweenFlexRow)`
+  padding: 8px 16px;
+
+  border-top-left-radius: ${({ theme }) => theme.borderRadius.base}px;
+  border-top-right-radius: ${({ theme }) => theme.borderRadius.base}px;
+
+  background-color: ${({ theme }) => theme.color.backgroundPrimary};
+`;
