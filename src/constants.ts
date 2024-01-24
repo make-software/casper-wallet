@@ -155,6 +155,7 @@ export enum HomePageTabName {
 
 export enum StakeSteps {
   Validator = 'validator',
+  NewValidator = 'new validator',
   Amount = 'amount',
   Confirm = 'confirm',
   Success = 'success'

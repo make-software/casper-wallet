@@ -1,6 +1,6 @@
 import Big from 'big.js';
 import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -9,7 +9,6 @@ import { AuctionManagerEntryPoint } from '@src/constants';
 import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 
 import {
-  ContentContainer,
   ParagraphContainer,
   SpaceBetweenFlexRow,
   SpacingSize,
@@ -32,15 +31,15 @@ export const ListItemContainer = styled(SpaceBetweenFlexRow)`
 interface ConfirmStepProps {
   inputAmountCSPR: string;
   validator: ValidatorResult | null;
+  newValidator: ValidatorResult | null;
   stakesType: AuctionManagerEntryPoint;
-  headerText: string;
   confirmStepText: string;
 }
 export const ConfirmStep = ({
   inputAmountCSPR,
   validator,
+  newValidator,
   stakesType,
-  headerText,
   confirmStepText
 }: ConfirmStepProps) => {
   const { t } = useTranslation();
@@ -85,29 +84,50 @@ export const ConfirmStep = ({
     }
   ];
 
-  const validatorLabel = t('To validator');
-
   if (!validator) {
     return null;
   }
 
   return (
-    <ContentContainer>
-      <ParagraphContainer top={SpacingSize.XL}>
-        <Typography type="header">
-          <Trans t={t}>{headerText}</Trans>
-        </Typography>
-      </ParagraphContainer>
+    <>
       <VerticalSpaceContainer top={SpacingSize.XL}>
         <ValidatorPlate
           publicKey={validator?.public_key}
           fee={validator.fee}
           name={validator?.account_info?.info?.owner?.name}
-          logo={validator?.account_info?.info?.owner?.branding?.logo?.svg}
+          logo={
+            validator?.account_info?.info?.owner?.branding?.logo?.svg ||
+            validator?.account_info?.info?.owner?.branding?.logo?.png_256 ||
+            validator?.account_info?.info?.owner?.branding?.logo?.png_1024
+          }
           delegatorsNumber={validator?.delegators_number}
-          validatorLabel={validatorLabel}
+          validatorLabel={
+            stakesType === AuctionManagerEntryPoint.redelegate
+              ? t('From validator')
+              : t('To validator')
+          }
           showFullPublicKey
         />
+
+        {newValidator && (
+          <VerticalSpaceContainer top={SpacingSize.XL}>
+            <ValidatorPlate
+              publicKey={newValidator?.public_key}
+              fee={newValidator.fee}
+              name={newValidator?.account_info?.info?.owner?.name}
+              logo={
+                newValidator?.account_info?.info?.owner?.branding?.logo?.svg ||
+                newValidator?.account_info?.info?.owner?.branding?.logo
+                  ?.png_256 ||
+                newValidator?.account_info?.info?.owner?.branding?.logo
+                  ?.png_1024
+              }
+              delegatorsNumber={newValidator?.delegators_number}
+              validatorLabel={t('To validator')}
+              showFullPublicKey
+            />
+          </VerticalSpaceContainer>
+        )}
       </VerticalSpaceContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="bodySemiBold">{t('Amount and fee')}</Typography>
@@ -132,6 +152,6 @@ export const ConfirmStep = ({
         )}
         marginLeftForItemSeparatorLine={8}
       />
-    </ContentContainer>
+    </>
   );
 };

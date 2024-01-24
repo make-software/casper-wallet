@@ -261,6 +261,7 @@ function AppRoutes() {
       />
       <Route path={RouterPath.Delegate} element={<StakesPage />} />
       <Route path={RouterPath.Undelegate} element={<StakesPage />} />
+      <Route path={RouterPath.Redelegate} element={<StakesPage />} />
       <Route
         path={ErrorPath}
         element={

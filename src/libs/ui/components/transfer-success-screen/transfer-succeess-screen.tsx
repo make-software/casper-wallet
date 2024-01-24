@@ -13,10 +13,12 @@ import { HomePageTabsId, SvgIcon, Typography } from '@libs/ui/components';
 
 interface TransferSuccessScreenProps {
   headerText: string;
+  children?: React.ReactNode;
 }
 
 export const TransferSuccessScreen = ({
-  headerText
+  headerText,
+  children
 }: TransferSuccessScreenProps) => {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -65,6 +67,7 @@ export const TransferSuccessScreen = ({
             </Trans>
           </Typography>
         </VerticalSpaceContainer>
+        {children}
       </ParagraphContainer>
     </ContentContainer>
   );
