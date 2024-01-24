@@ -52,9 +52,9 @@ export const AmountStep = ({
     switch (stakesType) {
       case AuctionManagerEntryPoint.delegate: {
         const maxAmountMotes: string =
-          csprBalance.amountMotes == null
+          csprBalance.liquidMotes == null
             ? '0'
-            : Big(csprBalance.amountMotes).sub(STAKE_COST_MOTES).toString();
+            : Big(csprBalance.liquidMotes).sub(STAKE_COST_MOTES).toString();
 
         setMaxAmountMotes(maxAmountMotes);
         break;
@@ -64,7 +64,7 @@ export const AmountStep = ({
         setMaxAmountMotes(stakeAmountMotes);
       }
     }
-  }, [csprBalance.amountMotes, stakeAmountMotes, stakesType]);
+  }, [csprBalance.liquidMotes, stakeAmountMotes, stakesType]);
 
   const {
     register,

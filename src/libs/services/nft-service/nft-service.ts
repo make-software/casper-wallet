@@ -14,27 +14,28 @@ import {
 import { handleError, toJson } from '@libs/services/utils';
 
 export const nftTokensRequest = (
-  casperApiUrl: string,
+  casperClarityApiUrl: string,
   accountHash: string,
   page: number,
   signal?: AbortSignal
 ): Promise<PaginatedResponse<NFTTokenResult>> =>
-  fetch(getNftTokensUrl(casperApiUrl, accountHash, page), { signal })
+  fetch(getNftTokensUrl(casperClarityApiUrl, accountHash, page), { signal })
     .then(toJson)
     .catch(handleError);
 
 export const fetchNftTokens = ({
-  casperApiUrl,
+  casperClarityApiUrl,
   accountHash,
   page
 }: {
-  casperApiUrl: string;
+  casperClarityApiUrl: string;
   accountHash: string;
   page: number;
 }): Promise<PaginatedResponse<NFTTokenResult> | ErrorResponse> =>
   queryClient.fetchQuery(
-    ['getNftTokens', accountHash, casperApiUrl, page],
-    ({ signal }) => nftTokensRequest(casperApiUrl, accountHash, page, signal),
+    ['getNftTokens', accountHash, casperClarityApiUrl, page],
+    ({ signal }) =>
+      nftTokensRequest(casperClarityApiUrl, accountHash, page, signal),
     { staleTime: NFT_TOKENS_REFRESH_RATE }
   );
 

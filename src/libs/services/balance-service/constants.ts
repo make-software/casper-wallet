@@ -1,13 +1,13 @@
 interface GetAccountBalanceUrl {
-  publicKey: string;
-  casperApiUrl: string;
+  accountHash: string;
+  casperWalletApiUrl: string;
 }
 
-export const getCurrencyRateUrl = (casperApiUrl: string) =>
-  `${casperApiUrl}/rates/1/amount`;
+export const getCurrencyRateUrl = (casperClarityApiUrl: string) =>
+  `${casperClarityApiUrl}/rates/1/amount`;
 
 export const getAccountBalanceUrl = ({
-  publicKey,
-  casperApiUrl
-}: GetAccountBalanceUrl): string =>
-  `${casperApiUrl}/accounts/${publicKey}/balance`;
+  accountHash,
+  casperWalletApiUrl
+}: GetAccountBalanceUrl) =>
+  `${casperWalletApiUrl}/accounts/${accountHash}?includes=delegated_balance,undelegating_balance`;

@@ -63,7 +63,7 @@ export const ReceivePageContent = () => {
   useEffect(() => {
     if (tokenData?.symbol === 'CSPR') {
       const balance =
-        (csprBalance.amountMotes && motesToCSPR(csprBalance.amountMotes)) ||
+        (csprBalance.liquidMotes && motesToCSPR(csprBalance.liquidMotes)) ||
         '0';
       setTokenData(prev => ({ ...prev, balance }));
     } else {
@@ -72,7 +72,7 @@ export const ReceivePageContent = () => {
         erc20Tokens?.find(t => t?.symbol === tokenData?.symbol)?.amount ?? '0';
       setTokenData(prev => ({ ...prev, balance }));
     }
-  }, [csprBalance, tokenData?.symbol, tokens]);
+  }, [csprBalance.liquidMotes, tokenData?.symbol, tokens]);
 
   return (
     <ContentContainer>

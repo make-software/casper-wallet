@@ -12,7 +12,6 @@ import {
 
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
-import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import {
   selectActiveNetworkSetting,
   selectIsActiveAccountConnectedWithActiveOrigin,
@@ -26,8 +25,6 @@ import {
   CenteredFlexColumn,
   CenteredFlexRow,
   ContentContainer,
-  FlexColumn,
-  FlexRow,
   LeftAlignedFlexColumn,
   SpaceBetweenFlexRow,
   SpacingSize,
@@ -44,11 +41,10 @@ import {
   Tab,
   Tabs,
   Tile,
-  Typography,
-  getFontSizeBasedOnTextLength
+  Typography
 } from '@libs/ui/components';
-import { formatNumber, motesToCSPR } from '@libs/ui/utils';
 
+import { AccountBalance } from './components/account-balance';
 import { DeploysList } from './components/deploys-list';
 import { MoreButtonsModal } from './components/more-buttons-modal';
 import { NftList } from './components/nft-list';
@@ -63,7 +59,7 @@ const DividerLine = styled.hr`
 `;
 
 const ButtonsContainer = styled(CenteredFlexRow)`
-  margin-top: 16px;
+  margin-top: 24px;
 `;
 
 const ButtonContainer = styled(CenteredFlexColumn)`
@@ -84,7 +80,6 @@ export function HomePageContent() {
   );
   const network = useSelector(selectActiveNetworkSetting);
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const balance = useSelector(selectAccountBalance);
 
   const casperToken = useCasperToken();
 
@@ -133,38 +128,7 @@ export function HomePageContent() {
               <AccountActionsMenuPopover account={activeAccount} />
             </SpaceBetweenFlexRow>
             <DividerLine />
-            <FlexColumn gap={SpacingSize.Tiny}>
-              <FlexRow gap={SpacingSize.Small}>
-                <Typography
-                  type="CSPRBold"
-                  fontSize={getFontSizeBasedOnTextLength(
-                    balance.amountMotes?.length || 1
-                  )}
-                >
-                  {balance.amountMotes == null
-                    ? '-'
-                    : formatNumber(motesToCSPR(balance.amountMotes), {
-                        precision: { max: 5 }
-                      })}
-                </Typography>
-                <Typography
-                  type="CSPRLight"
-                  color="contentSecondary"
-                  fontSize={getFontSizeBasedOnTextLength(
-                    balance.amountMotes?.length || 1
-                  )}
-                >
-                  CSPR
-                </Typography>
-              </FlexRow>
-              <Typography
-                type="body"
-                color="contentSecondary"
-                loading={!balance.amountMotes}
-              >
-                {balance.amountFiat}
-              </Typography>
-            </FlexColumn>
+            <AccountBalance />
             <ButtonsContainer gap={SpacingSize.XXXL}>
               {network === NetworkSetting.Mainnet && (
                 <ButtonContainer

@@ -43,7 +43,7 @@ export function HeaderSubmenuBarNavLink({
   const balance = useSelector(selectAccountBalance);
 
   const formattedBalance = formatNumber(
-    (balance.amountMotes && motesToCSPR(balance.amountMotes)) || ''
+    (balance.liquidMotes && motesToCSPR(balance.liquidMotes)) || ''
   );
 
   switch (linkType) {

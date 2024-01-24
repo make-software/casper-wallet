@@ -69,8 +69,12 @@ export const StakesPage = () => {
   const [loading, setLoading] = useState(true);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const { networkName, nodeUrl, auctionManagerContractHash, casperApiUrl } =
-    useSelector(selectApiConfigBasedOnActiveNetwork);
+  const {
+    networkName,
+    nodeUrl,
+    auctionManagerContractHash,
+    casperClarityApiUrl
+  } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const csprBalance = useSelector(selectAccountBalance);
 
   const { t } = useTranslation();
@@ -156,10 +160,10 @@ export const StakesPage = () => {
           });
       }
     }
-  }, [activeAccount, pathname, casperApiUrl]);
+  }, [activeAccount, pathname, casperClarityApiUrl]);
 
   const { amountForm, validatorForm, newValidatorForm } = useStakesForm(
-    csprBalance.amountMotes,
+    csprBalance.liquidMotes,
     stakesType,
     stakeAmountMotes,
     validator?.delegators_number,

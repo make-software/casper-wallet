@@ -16,7 +16,9 @@ export const useFetchAccountInfo = (account: Account | undefined) => {
     string | null
   >(null);
   const [accountLogo, setAccountLogo] = useState<string | null>(null);
-  const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+  const { casperClarityApiUrl } = useSelector(
+    selectApiConfigBasedOnActiveNetwork
+  );
 
   useEffect(() => {
     dispatchFetchAccountInfoRequest(
@@ -37,7 +39,7 @@ export const useFetchAccountInfo = (account: Account | undefined) => {
       .catch(error => {
         console.error('Account info request failed:', error);
       });
-  }, [account?.publicKey, casperApiUrl]);
+  }, [account?.publicKey, casperClarityApiUrl]);
 
   return {
     accountLogo,

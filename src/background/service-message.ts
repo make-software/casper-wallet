@@ -19,7 +19,7 @@ type Meta = void;
 
 export const serviceMessage = {
   fetchBalanceRequest: createAction('FETCH_ACCOUNT_BALANCE')<
-    { publicKey: string },
+    { accountHash: string },
     Meta
   >(),
   fetchBalanceResponse: createAction('FETCH_ACCOUNT_BALANCE_RESPONSE')<

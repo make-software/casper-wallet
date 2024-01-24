@@ -88,7 +88,7 @@ export const TransferPage = () => {
     null;
   const balance = isErc20Transfer
     ? erc20Balance
-    : csprBalance.amountMotes && motesToCSPR(csprBalance.amountMotes);
+    : csprBalance.liquidMotes && motesToCSPR(csprBalance.liquidMotes);
   const formattedBalance = formatNumber(balance || '', {
     precision: { max: 5 }
   });
@@ -100,7 +100,7 @@ export const TransferPage = () => {
   const { amountForm, recipientForm } = useTransferForm(
     erc20Balance,
     isErc20Transfer,
-    csprBalance.amountMotes,
+    csprBalance.liquidMotes,
     paymentAmount
   );
 
@@ -122,7 +122,7 @@ export const TransferPage = () => {
     trigger,
     amountFormState.touchedFields.amount,
     erc20Balance,
-    csprBalance.amountMotes,
+    csprBalance.liquidMotes,
     paymentAmount
   ]);
 
