@@ -33,8 +33,8 @@ export const useFetchActiveAccountBalance = () => {
 
     const accountHash = getAccountHashFromPublicKey(activeAccount.publicKey);
 
-    dispatchFetchActiveAccountBalance(accountHash).then(
-      ({ payload: { accountData, currencyRate } }) => {
+    dispatchFetchActiveAccountBalance(accountHash)
+      .then(({ payload: { accountData, currencyRate } }) => {
         if (accountData != null) {
           const liquidBalance = accountData?.balance || 0;
           const delegatedBalance = accountData?.delegated_balance || 0;
@@ -75,8 +75,10 @@ export const useFetchActiveAccountBalance = () => {
             })
           );
         }
-      }
-    );
+      })
+      .catch(error => {
+        console.error('Balance request failed:', error);
+      });
 
     // will cause effect to run again after timeout
     effectTimeoutRef.current = setTimeout(() => {

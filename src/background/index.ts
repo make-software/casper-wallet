@@ -586,14 +586,14 @@ runtime.onMessage.addListener(
 
           // SERVICE MESSAGE HANDLERS
           case getType(serviceMessage.fetchBalanceRequest): {
-            const { casperCloudApiUrl, casperClarityApiUrl } =
+            const { casperWalletApiUrl, casperClarityApiUrl } =
               selectApiConfigBasedOnActiveNetwork(store.getState());
 
             try {
               const [accountData, rate] = await Promise.all([
                 fetchAccountBalance({
                   accountHash: action.payload.accountHash,
-                  casperCloudApiUrl
+                  casperWalletApiUrl
                 }),
                 fetchCurrencyRate({ casperClarityApiUrl })
               ]);

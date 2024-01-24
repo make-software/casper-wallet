@@ -56,7 +56,7 @@ export enum CasperClarityApiUrl {
   TestnetUrl = 'https://event-store-api-clarity-testnet.make.services'
 }
 
-export enum CasperCloudApiUrl {
+export enum CasperWalletApiUrl {
   MainnetUrl = 'https://api.casperwallet.io',
   TestnetUrl = 'https://cspr-wallet-api.dev.make.services'
 }

@@ -24,14 +24,14 @@ export const currencyRateRequest = (
 
 export const accountBalanceRequest = (
   accountHash: string,
-  casperCloudApiUrl: string,
+  casperWalletApiUrl: string,
   signal?: AbortSignal
 ): Promise<AccountData> => {
   if (!accountHash) {
     throw Error('Missing account hash');
   }
 
-  return fetch(getAccountBalanceUrl({ accountHash, casperCloudApiUrl }), {
+  return fetch(getAccountBalanceUrl({ accountHash, casperWalletApiUrl }), {
     signal
   })
     .then(res => {
@@ -55,15 +55,15 @@ export const dispatchFetchActiveAccountBalance = (
 
 export const fetchAccountBalance = ({
   accountHash,
-  casperCloudApiUrl
+  casperWalletApiUrl
 }: {
   accountHash: string;
-  casperCloudApiUrl: string;
+  casperWalletApiUrl: string;
 }): Promise<DataResponse<AccountData>> =>
   queryClient.fetchQuery(
-    ['getAccountBalanceRequest', accountHash, casperCloudApiUrl],
+    ['getAccountBalanceRequest', accountHash, casperWalletApiUrl],
     ({ signal }) =>
-      accountBalanceRequest(accountHash, casperCloudApiUrl, signal),
+      accountBalanceRequest(accountHash, casperWalletApiUrl, signal),
     {
       staleTime: BALANCE_REFRESH_RATE
     }
