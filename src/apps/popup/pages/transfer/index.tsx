@@ -431,7 +431,7 @@ export const TransferPage = () => {
           {transferStep === TransactionSteps.Confirm ||
           transferStep === TransactionSteps.Success ? null : (
             <SpaceBetweenFlexRow>
-              <Typography type="captionRegular">
+              <Typography type="captionRegular" color="contentSecondary">
                 <Trans t={t}>Transaction fee</Trans>
               </Typography>
               <Typography type="captionHash">
