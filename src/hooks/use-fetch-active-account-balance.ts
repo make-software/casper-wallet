@@ -36,9 +36,9 @@ export const useFetchActiveAccountBalance = () => {
     dispatchFetchActiveAccountBalance(accountHash).then(
       ({ payload: { accountData, currencyRate } }) => {
         if (accountData != null) {
-          const liquidBalance = accountData[0]?.balance || 0;
-          const delegatedBalance = accountData[0]?.delegated_balance || 0;
-          const undelegatingBalance = accountData[0]?.undelegating_balance || 0;
+          const liquidBalance = accountData?.balance || 0;
+          const delegatedBalance = accountData?.delegated_balance || 0;
+          const undelegatingBalance = accountData?.undelegating_balance || 0;
 
           const totalAmountMotes =
             liquidBalance + delegatedBalance + undelegatingBalance;

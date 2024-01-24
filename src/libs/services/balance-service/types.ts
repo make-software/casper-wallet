@@ -13,7 +13,7 @@ export interface AccountData {
 
 export interface FetchBalanceResponse {
   currencyRate: number | null;
-  accountData: AccountData[] | null;
+  accountData: AccountData | null;
 }
 
 export interface AccountBalance {

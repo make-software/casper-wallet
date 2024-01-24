@@ -3,7 +3,7 @@ import { BALANCE_REFRESH_RATE, CURRENCY_REFRESH_RATE } from '@src/constants';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { serviceMessage } from '@background/service-message';
 
-import { PaginatedResponse, Payload } from '@libs/services/types';
+import { DataResponse, Payload } from '@libs/services/types';
 
 import { queryClient } from '../query-client';
 import { handleError, toJson } from '../utils';
@@ -34,7 +34,17 @@ export const accountBalanceRequest = (
   return fetch(getAccountBalanceUrl({ accountHash, casperCloudApiUrl }), {
     signal
   })
-    .then(toJson)
+    .then(res => {
+      if (res.status === 404) {
+        return {
+          data: {
+            balance: 0
+          } as AccountData
+        };
+      }
+
+      return toJson(res);
+    })
     .catch(handleError);
 };
 
@@ -49,7 +59,7 @@ export const fetchAccountBalance = ({
 }: {
   accountHash: string;
   casperCloudApiUrl: string;
-}): Promise<PaginatedResponse<AccountData>> =>
+}): Promise<DataResponse<AccountData>> =>
   queryClient.fetchQuery(
     ['getAccountBalanceRequest', accountHash, casperCloudApiUrl],
     ({ signal }) =>
