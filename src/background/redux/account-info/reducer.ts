@@ -25,8 +25,11 @@ import { AccountInfoState } from './types';
 
 const initialState: AccountInfoState = {
   balance: {
-    amountMotes: null,
-    amountFiat: null
+    liquidMotes: null,
+    delegatedMotes: null,
+    undelegatingMotes: null,
+    totalBalanceMotes: null,
+    totalBalanceFiat: null
   },
   currencyRate: null,
   accountCasperActivity: [],
@@ -43,13 +46,10 @@ const initialState: AccountInfoState = {
 
 export const reducer = createReducer(initialState)
   .handleAction(accountInfoReset, () => initialState)
-  .handleAction(
-    accountBalanceChanged,
-    (state, { payload }): AccountInfoState => ({
-      ...state,
-      balance: payload
-    })
-  )
+  .handleAction(accountBalanceChanged, (state, { payload }) => ({
+    ...state,
+    balance: payload
+  }))
   .handleAction(
     accountCurrencyRateChanged,
     (state, { payload }): AccountInfoState => ({

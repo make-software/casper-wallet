@@ -25,7 +25,9 @@ export const useActiveAccountErc20Tokens = () => {
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+  const { casperClarityApiUrl } = useSelector(
+    selectApiConfigBasedOnActiveNetwork
+  );
 
   useEffect(() => {
     dispatchFetchErc20TokensRequest(
@@ -49,7 +51,7 @@ export const useActiveAccountErc20Tokens = () => {
       clearTimeout(effectTimeoutRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeAccount?.publicKey, casperApiUrl, t, forceUpdate]);
+  }, [activeAccount?.publicKey, casperClarityApiUrl, t, forceUpdate]);
 
   return { tokens: tokens };
 };

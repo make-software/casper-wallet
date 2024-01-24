@@ -15,7 +15,9 @@ import {
 
 export const useFetchErc20Tokens = () => {
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+  const { casperClarityApiUrl } = useSelector(
+    selectApiConfigBasedOnActiveNetwork
+  );
   const tokens = useSelector(selectErc20Tokens);
 
   const [erc20Tokens, setErc20Tokens] = useState<
@@ -31,7 +33,7 @@ export const useFetchErc20Tokens = () => {
       dispatchToMainStore(accountErc20Changed(tokens));
       setErc20Tokens(tokens);
     });
-  }, [activeAccount?.publicKey, casperApiUrl]);
+  }, [activeAccount?.publicKey, casperClarityApiUrl]);
 
   return erc20Tokens;
 };

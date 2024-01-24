@@ -27,7 +27,9 @@ export const useFetchAccountDeploys = () => {
   const [isFirstPageLoad, setIsFirstPageLoad] = useState(false);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+  const { casperClarityApiUrl } = useSelector(
+    selectApiConfigBasedOnActiveNetwork
+  );
   const accountDeploysList = useSelector(selectAccountDeploys);
   const accountDeploysCount = useSelector(selectAccountDeploysCount);
 
@@ -117,7 +119,7 @@ export const useFetchAccountDeploys = () => {
     accountDeploysList,
     accountDeploysList?.length,
     activeAccount?.publicKey,
-    casperApiUrl,
+    casperClarityApiUrl,
     forceUpdate,
     isFirstPageLoad
   ]);

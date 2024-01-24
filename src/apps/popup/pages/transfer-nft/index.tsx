@@ -95,7 +95,7 @@ export const TransferNftPage = () => {
   );
 
   const { recipientForm, amountForm } = useTransferNftForm(
-    csprBalance.amountMotes,
+    csprBalance.liquidMotes,
     paymentAmount
   );
 

@@ -3,12 +3,12 @@ import {
   ExtendedDeployWithId,
   TransferResultWithId
 } from '@libs/services/account-activity-service';
-import { ActiveAccountBalance } from '@libs/services/balance-service';
+import { AccountBalance } from '@libs/services/balance-service';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 import { NFTTokenResult } from '@libs/services/nft-service';
 
 export interface AccountInfoState {
-  balance: ActiveAccountBalance;
+  balance: AccountBalance;
   erc20Tokens: ContractPackageWithBalance[];
   currencyRate: number | null;
   accountCasperActivity: TransferResultWithId[];

@@ -1,7 +1,7 @@
 export const getAccountInfoUrl = ({
   accountHash,
-  casperApiUrl
+  casperClarityApiUrl
 }: {
   accountHash: string;
-  casperApiUrl: string;
-}): string => `${casperApiUrl}/accounts-info/${accountHash}`;
+  casperClarityApiUrl: string;
+}): string => `${casperClarityApiUrl}/accounts-info/${accountHash}`;

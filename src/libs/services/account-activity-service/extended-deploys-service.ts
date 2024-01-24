@@ -18,24 +18,25 @@ import {
 import { ExtendedDeploy, ExtendedDeployResult } from './types';
 
 export const extendedDeploysRequest = (
-  casperApiUrl: string,
+  casperClarityApiUrl: string,
   deployHash: string,
   signal?: AbortSignal
 ): Promise<ExtendedDeployResult> =>
-  fetch(getExtendedDeploysHashLink(casperApiUrl, deployHash), { signal })
+  fetch(getExtendedDeploysHashLink(casperClarityApiUrl, deployHash), { signal })
     .then(toJson)
     .catch(handleError);
 
 export const fetchExtendedDeploysInfo = ({
-  casperApiUrl,
+  casperClarityApiUrl,
   deployHash
 }: {
-  casperApiUrl: string;
+  casperClarityApiUrl: string;
   deployHash: string;
 }) =>
   queryClient.fetchQuery(
-    ['accountTransactionsRequest', casperApiUrl, deployHash],
-    ({ signal }) => extendedDeploysRequest(casperApiUrl, deployHash, signal)
+    ['accountTransactionsRequest', casperClarityApiUrl, deployHash],
+    ({ signal }) =>
+      extendedDeploysRequest(casperClarityApiUrl, deployHash, signal)
   );
 
 export const dispatchFetchExtendedDeploysInfo = (
@@ -46,30 +47,35 @@ export const dispatchFetchExtendedDeploysInfo = (
   );
 
 export const accountExtendedDeploysRequest = (
-  casperApiUrl: string,
+  casperClarityApiUrl: string,
   publicKey: string,
   page: number,
   signal?: AbortSignal
 ): Promise<PaginatedResponse<ExtendedDeployResult>> =>
-  fetch(getAccountExtendedDeploysLink(casperApiUrl, publicKey, page), {
+  fetch(getAccountExtendedDeploysLink(casperClarityApiUrl, publicKey, page), {
     signal
   })
     .then(toJson)
     .catch(handleError);
 
 export const fetchAccountExtendedDeploys = ({
-  casperApiUrl,
+  casperClarityApiUrl,
   publicKey,
   page
 }: {
-  casperApiUrl: string;
+  casperClarityApiUrl: string;
   publicKey: string;
   page: number;
 }): Promise<PaginatedResponse<ExtendedDeployResult> | ErrorResponse> =>
   queryClient.fetchQuery(
-    ['accountDeploysRequest', casperApiUrl, publicKey, page],
+    ['accountDeploysRequest', casperClarityApiUrl, publicKey, page],
     ({ signal }) =>
-      accountExtendedDeploysRequest(casperApiUrl, publicKey, page, signal),
+      accountExtendedDeploysRequest(
+        casperClarityApiUrl,
+        publicKey,
+        page,
+        signal
+      ),
     { staleTime: ACCOUNT_DEPLOY_REFRESH_RATE }
   );
 

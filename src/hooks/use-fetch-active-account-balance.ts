@@ -14,6 +14,7 @@ import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/
 import { dispatchToMainStore } from '@background/redux/utils';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { dispatchFetchActiveAccountBalance } from '@libs/services/balance-service';
 import { formatCurrency, motesToCurrency } from '@libs/ui/utils';
 
@@ -23,35 +24,54 @@ export const useFetchActiveAccountBalance = () => {
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+  const { casperClarityApiUrl } = useSelector(
+    selectApiConfigBasedOnActiveNetwork
+  );
 
   useEffect(() => {
     if (!activeAccount?.publicKey) return;
 
-    dispatchFetchActiveAccountBalance(activeAccount?.publicKey)
-      .then(({ payload: { balance, currencyRate } }) => {
-        if (balance != null) {
-          const amountMotes = balance;
-          const amountFiat =
+    const accountHash = getAccountHashFromPublicKey(activeAccount.publicKey);
+
+    dispatchFetchActiveAccountBalance(accountHash)
+      .then(({ payload: { accountData, currencyRate } }) => {
+        if (accountData != null) {
+          const liquidBalance = accountData?.balance || 0;
+          const delegatedBalance = accountData?.delegated_balance || 0;
+          const undelegatingBalance = accountData?.undelegating_balance || 0;
+
+          const totalAmountMotes =
+            liquidBalance + delegatedBalance + undelegatingBalance;
+          const totalBalanceFiat =
             currencyRate != null
-              ? formatCurrency(motesToCurrency(balance, currencyRate), 'USD', {
-                  precision: 2
-                })
+              ? formatCurrency(
+                  motesToCurrency(String(totalAmountMotes), currencyRate),
+                  'USD',
+                  {
+                    precision: 2
+                  }
+                )
               : t('Currency service is offline...');
 
           dispatchToMainStore(accountCurrencyRateChanged(currencyRate));
           dispatchToMainStore(
             accountBalanceChanged({
-              amountMotes: amountMotes,
-              amountFiat: amountFiat
+              liquidMotes: String(liquidBalance),
+              delegatedMotes: String(delegatedBalance),
+              undelegatingMotes: String(undelegatingBalance),
+              totalBalanceMotes: String(totalAmountMotes),
+              totalBalanceFiat: totalBalanceFiat
             })
           );
         } else {
           dispatchToMainStore(accountCurrencyRateChanged(currencyRate));
           dispatchToMainStore(
             accountBalanceChanged({
-              amountMotes: null,
-              amountFiat: ''
+              liquidMotes: null,
+              undelegatingMotes: null,
+              delegatedMotes: null,
+              totalBalanceMotes: null,
+              totalBalanceFiat: null
             })
           );
         }
@@ -69,5 +89,5 @@ export const useFetchActiveAccountBalance = () => {
       clearTimeout(effectTimeoutRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeAccount?.publicKey, casperApiUrl, t, forceUpdate]);
+  }, [activeAccount?.publicKey, casperClarityApiUrl, t, forceUpdate]);
 };

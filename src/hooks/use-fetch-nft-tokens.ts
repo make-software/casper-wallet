@@ -29,7 +29,9 @@ export const useFetchNftTokens = () => {
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const nftTokens = useSelector(selectAccountNftTokens);
-  const { casperApiUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+  const { casperClarityApiUrl } = useSelector(
+    selectApiConfigBasedOnActiveNetwork
+  );
   const nftTokensCount = useSelector(selectAccountNftTokensCount);
 
   const effectTimeoutRef = useRef<NodeJS.Timeout>();
@@ -95,7 +97,7 @@ export const useFetchNftTokens = () => {
     };
   }, [
     activeAccount?.publicKey,
-    casperApiUrl,
+    casperClarityApiUrl,
     forceUpdate,
     isFirstPageLoad,
     nftTokens,

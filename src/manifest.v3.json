@@ -25,7 +25,11 @@
       }
     ]
   },
-  "host_permissions": ["https://image-proxy-cdn.make.services/*"],
+  "host_permissions": [
+    "https://image-proxy-cdn.make.services/*",
+    "https://cspr-wallet-api.dev.make.services/*",
+    "https://api.casperwallet.io/*"
+  ],
   "background": {
     "service_worker": "./background.bundle.js"
   },
