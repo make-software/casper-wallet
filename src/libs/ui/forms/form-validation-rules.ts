@@ -79,10 +79,16 @@ export function useRepeatPasswordRule(inputName: string) {
 
 export function useValidSecretPhraseRule() {
   const { t } = useTranslation();
-  const errorMessage = t('There should be 24 words in a valid secret phrase.');
+  const errorMessage = t(
+    'There should be 12 or 24 words in a valid secret phrase.'
+  );
 
   return Yup.string().test('unique', errorMessage, value => {
-    return value != null && value.trim().split(' ').length === 24;
+    return (
+      value != null &&
+      (value.trim().split(' ').length === 24 ||
+        value.trim().split(' ').length === 12)
+    );
   });
 }
 

@@ -34,8 +34,8 @@ export function RecoverFromSecretPhrasePageContent({
       <TabTextContainer>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            Recover your wallet by entering each word of your 24-word secret
-            recovery phrase, separated by spaces.
+            Recover your wallet by entering each word of your 12-word or 24-word
+            secret recovery phrase, separated by spaces.
           </Trans>
         </Typography>
       </TabTextContainer>
