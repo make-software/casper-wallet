@@ -204,7 +204,7 @@ export const TransferNftPage = () => {
       )}
       renderContent={() =>
         showSuccessScreen ? (
-          <TransferSuccessScreen headerText="You’ve sent the NFT" />
+          <TransferSuccessScreen headerText="You submitted a transaction" />
         ) : (
           <TransferNftContent
             nftToken={nftToken}
