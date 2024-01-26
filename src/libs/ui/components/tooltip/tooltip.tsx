@@ -27,7 +27,7 @@ const TooltipTip = styled.div<{ placement: Placement }>(
   ({ theme, placement }) => ({
     position: 'absolute',
 
-    zIndex: 1,
+    zIndex: 2,
 
     ...(placement === 'topCenter' && {
       left: '50%',
