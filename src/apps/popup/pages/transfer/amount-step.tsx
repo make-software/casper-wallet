@@ -118,6 +118,10 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
             // regex replace decimal point from beginning of string
             e.target.value = e.target.value.replace(/^\./, '');
             onChangeCSPRAmount(e);
+
+            if (isChecked) {
+              setIsChecked(false);
+            }
           }}
           error={!!errors?.amount}
           validationText={errors?.amount?.message}
