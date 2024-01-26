@@ -59,7 +59,7 @@ export const lightTheme = {
     contentAction: '#0A2EBF',
     contentActionCritical: '#CC000F',
     contentOnFill: '#FFFFFF',
-    contentWarning: '#E0BB38',
+    contentWarning: '#FF9500',
     contentPositive: '#2DDC88',
     contentGreenStatus: '#77FFBE',
     contentLightBlue: '#7490FF',
