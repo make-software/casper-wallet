@@ -171,7 +171,7 @@ export const RecipientDropdownInput = ({
         validationText={errors?.recipientPublicKey?.message}
         autoComplete="off"
       />
-      {isOpenRecentRecipientPublicKeysList && (
+      {isOpenRecentRecipientPublicKeysList && optionsRow.length ? (
         <List
           contentTop={SpacingSize.Tiny}
           rows={optionsRow}
@@ -214,7 +214,7 @@ export const RecipientDropdownInput = ({
           }}
           marginLeftForItemSeparatorLine={56}
         />
-      )}
+      ) : null}
     </VerticalSpaceContainer>
   );
 };
