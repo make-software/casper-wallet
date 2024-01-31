@@ -10,6 +10,7 @@ import {
   NFTTokenResult
 } from '@libs/services/nft-service';
 import { queryClient } from '@libs/services/query-client';
+import { Account } from '@libs/types/account';
 
 interface ImageProxyUrlProps {
   ttl: string;
@@ -309,3 +310,15 @@ export const findMediaPreview = (metadata: NFTTokenMetadataEntry): boolean => {
 
   return hasImageExtension || knownImageKey;
 };
+
+const isEqualCaseInsensitive = (key1: string, key2: string) => {
+  return key1.toLowerCase() === key2.toLowerCase();
+};
+
+export const getSigningAccount = (
+  accounts: Account[],
+  signingPublicKeyHex: string
+) =>
+  accounts.find(account =>
+    isEqualCaseInsensitive(account.publicKey, signingPublicKeyHex)
+  );
