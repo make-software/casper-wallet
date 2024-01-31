@@ -4,7 +4,7 @@ import { Provider as ReduxProvider } from 'react-redux/es/exports';
 import { ThemeProvider } from 'styled-components';
 
 import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
-import { isSafariBuild } from '@src/utils';
+import { isSafariBuild, setCSPForSafari } from '@src/utils';
 
 import { createMainStoreReplica } from '@background/redux/get-main-store';
 import { themeModeSettingChanged } from '@background/redux/settings/actions';
@@ -24,6 +24,8 @@ import { AppRouter } from './app-router';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
+
+  setCSPForSafari();
 
   const isSystemDarkTheme = useSystemThemeDetector();
 
