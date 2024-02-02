@@ -1,11 +1,13 @@
 import React from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
-import { ResetVaultPageContent } from '@src/libs/layout/reset-vault';
-import { UnlockVaultPageContent } from '@src/libs/layout/unlock-vault';
-import { PopupLayout, LayoutWindow } from '@libs/layout';
-
-import { PopupHeader } from '../header';
+import {
+  LayoutWindow,
+  PopupLayout,
+  ResetVaultPageContent,
+  UnlockVaultPageContent
+} from '@libs/layout';
+import { HeaderPopup } from '@libs/layout/header/header-popup';
 
 export const LockedRouterPath = {
   Any: '*',
@@ -25,12 +27,12 @@ export function LockedRouter({ popupLayout }: LockedRouterProps) {
           element={
             popupLayout ? (
               <PopupLayout
-                renderHeader={() => <PopupHeader />}
+                renderHeader={() => <HeaderPopup />}
                 renderContent={() => <UnlockVaultPageContent />}
               />
             ) : (
               <LayoutWindow
-                renderHeader={() => <PopupHeader />}
+                renderHeader={() => <HeaderPopup />}
                 renderContent={() => <UnlockVaultPageContent />}
               />
             )
@@ -41,12 +43,12 @@ export function LockedRouter({ popupLayout }: LockedRouterProps) {
           element={
             popupLayout ? (
               <PopupLayout
-                renderHeader={() => <PopupHeader />}
+                renderHeader={() => <HeaderPopup />}
                 renderContent={() => <ResetVaultPageContent />}
               />
             ) : (
               <LayoutWindow
-                renderHeader={() => <PopupHeader />}
+                renderHeader={() => <HeaderPopup />}
                 renderContent={() => <ResetVaultPageContent />}
               />
             )

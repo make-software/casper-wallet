@@ -1,11 +1,16 @@
 import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { useSelector } from 'react-redux';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 
-import { useFetchNftTokens } from '@src/hooks';
-import { Skeleton, Tile, Typography } from '@libs/ui';
+import {
+  selectAccountNftTokens,
+  selectAccountNftTokensCount
+} from '@background/redux/account-info/selectors';
+
+import { useFetchNftTokens } from '@hooks/use-fetch-nft-tokens';
+
 import {
   BorderContainer,
   CenteredFlexRow,
@@ -13,10 +18,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import {
-  selectAccountNftTokens,
-  selectAccountNftTokensCount
-} from '@background/redux/account-info/selectors';
+import { Skeleton, Tile, Typography } from '@libs/ui/components';
 
 import { NftTokenCard } from './nft-token-card';
 

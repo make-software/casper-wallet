@@ -1,16 +1,16 @@
 import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import {
-  PopupLayout,
-  PopupHeader,
-  HeaderSubmenuBarNavLink,
-  FooterButtonsContainer
-} from '@src/libs/layout';
-import { Button } from '@libs/ui';
-
-import { RouterPath, useTypedNavigate } from '@popup/router';
 import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import {
+  FooterButtonsContainer,
+  HeaderPopup,
+  HeaderSubmenuBarNavLink,
+  PopupLayout
+} from '@libs/layout';
+import { Button } from '@libs/ui/components';
 
 import { BackupSecretPhrasePageContent } from './content';
 
@@ -34,7 +34,7 @@ export function BackupSecretPhrasePage() {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

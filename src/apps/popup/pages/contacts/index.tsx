@@ -1,15 +1,16 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import {
-  FooterButtonsContainer,
-  HeaderSubmenuBarNavLink,
-  PopupHeader,
-  PopupLayout
-} from '@libs/layout';
-import { Button } from '@libs/ui';
 import { ContactsBookPageContent } from '@popup/pages/contacts/content';
 import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import {
+  FooterButtonsContainer,
+  HeaderPopup,
+  HeaderSubmenuBarNavLink,
+  PopupLayout
+} from '@libs/layout';
+import { Button } from '@libs/ui/components';
 
 export const ContactsBookPage = () => {
   const { t } = useTranslation();
@@ -18,7 +19,7 @@ export const ContactsBookPage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

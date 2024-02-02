@@ -16,6 +16,7 @@ export const VALIDATORS_REFRESH_RATE = 30 * SECOND;
 
 export const LOGIN_RETRY_ATTEMPTS_LIMIT = 5;
 
+export const MOTES_PER_CSPR_RATE = '1000000000'; // 1 000 000 000 MOTES === 1 CSPR
 export const TRANSFER_COST_MOTES = '100000000'; // 0.1 CSPR
 export const TRANSFER_MIN_AMOUNT_MOTES = '2500000000'; // 2.5 CSPR
 export const ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES = '1500000000'; // 1.5 CSPR
@@ -50,9 +51,14 @@ export enum CasperLiveUrl {
   TestnetUrl = 'https://testnet.cspr.live'
 }
 
-export enum CasperApiUrl {
+export enum CasperClarityApiUrl {
   MainnetUrl = 'https://event-store-api-clarity-mainnet.make.services',
   TestnetUrl = 'https://event-store-api-clarity-testnet.make.services'
+}
+
+export enum CasperWalletApiUrl {
+  MainnetUrl = 'https://api.casperwallet.io',
+  TestnetUrl = 'https://cspr-wallet-api.dev.make.services'
 }
 
 export enum NetworkSetting {
@@ -94,7 +100,8 @@ export enum ActivityType {
   Undelegated = 'Undelegated',
   Redelegated = 'Redelegated',
   Mint = 'Mint',
-  Burn = 'Burn'
+  Burn = 'Burn',
+  TransferNft = 'Transfer NFT'
 }
 
 export const ActivityShortTypeName = {
@@ -104,8 +111,9 @@ export const ActivityShortTypeName = {
   [ActivityType.Delegated]: 'Deleg',
   [ActivityType.Undelegated]: 'Undeleg',
   [ActivityType.Redelegated]: 'Redeleg',
-  [ActivityType.Mint]: 'Mint',
-  [ActivityType.Burn]: 'Burn'
+  [ActivityType.Mint]: 'Mint NFT',
+  [ActivityType.Burn]: 'Burn NFT',
+  [ActivityType.TransferNft]: 'Transfer NFT'
 };
 
 export const ActivityTypeName = {
@@ -115,8 +123,9 @@ export const ActivityTypeName = {
   [ActivityType.Delegated]: 'Delegated',
   [ActivityType.Undelegated]: 'Undelegated',
   [ActivityType.Redelegated]: 'Redelegated',
-  [ActivityType.Mint]: 'Mint',
-  [ActivityType.Burn]: 'Burn'
+  [ActivityType.Mint]: 'Mint NFT',
+  [ActivityType.Burn]: 'Burn NFT',
+  [ActivityType.TransferNft]: 'Transfer NFT'
 };
 
 export const ActivityTypeIcons = {
@@ -127,7 +136,8 @@ export const ActivityTypeIcons = {
   [ActivityType.Undelegated]: 'assets/icons/undelegate.svg',
   [ActivityType.Redelegated]: 'assets/icons/undelegate.svg',
   [ActivityType.Mint]: 'assets/icons/info.svg',
-  [ActivityType.Burn]: 'assets/icons/burn.svg'
+  [ActivityType.Burn]: 'assets/icons/burn.svg',
+  [ActivityType.TransferNft]: 'assets/icons/transfer.svg'
 };
 
 export const ActivityTypeColors = {
@@ -138,7 +148,8 @@ export const ActivityTypeColors = {
   [ActivityType.Undelegated]: 'contentAction',
   [ActivityType.Redelegated]: 'contentAction',
   [ActivityType.Mint]: 'contentDisabled',
-  [ActivityType.Burn]: 'contentAction'
+  [ActivityType.Burn]: 'contentActionCritical',
+  [ActivityType.TransferNft]: 'contentAction'
 };
 
 export enum HomePageTabName {
@@ -149,6 +160,7 @@ export enum HomePageTabName {
 
 export enum StakeSteps {
   Validator = 'validator',
+  NewValidator = 'new validator',
   Amount = 'amount',
   Confirm = 'confirm',
   Success = 'success'
@@ -162,5 +174,6 @@ export enum AuctionManagerEntryPoint {
 
 export enum TokenEntryPoint {
   mint = 'mint',
-  burn = 'burn'
+  burn = 'burn',
+  transfer = 'transfer'
 }

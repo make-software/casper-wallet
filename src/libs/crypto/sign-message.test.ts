@@ -1,4 +1,5 @@
 import { Keys } from 'casper-js-sdk';
+
 import { createMessageBytesWithHeaders, signMessage } from './sign-message';
 
 const getMessageSignature = (

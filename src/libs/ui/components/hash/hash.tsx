@@ -2,17 +2,17 @@ import React, { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { CenteredFlexRow } from '@libs/layout';
 import {
-  ContentColor,
   CopyToClipboard,
-  Typography,
+  Placement,
   Tag,
   Tooltip,
-  Placement
-} from '@libs/ui';
-import { CenteredFlexRow } from '@libs/layout';
+  Typography
+} from '@libs/ui/components';
+import { ContentColor } from '@libs/ui/utils';
 
-import { truncateKey, TruncateKeySize } from './utils';
+import { TruncateKeySize, truncateKey } from './utils';
 
 export enum HashVariant {
   CaptionHash = 'captionHash',

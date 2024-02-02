@@ -1,6 +1,6 @@
 import {
-  encodeSeed,
   decodeSeed,
+  encodeSeed,
   generateSecretPhrase,
   validateSecretPhrase
 } from './bip39';

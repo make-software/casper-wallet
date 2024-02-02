@@ -1,16 +1,21 @@
 import * as Yup from 'yup';
-import { useForm } from 'react-hook-form';
-import { UseFormProps } from 'react-hook-form/dist/types/form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
+import { UseFormProps, useForm } from 'react-hook-form';
+
+import { AuctionManagerEntryPoint } from '@src/constants';
 
 import {
   useCSPRStakeAmountRule,
+  useNewValidatorPublicKeyRule,
   useValidatorPublicKeyRule
 } from '@libs/ui/forms/form-validation-rules';
-import { AuctionManagerEntryPoint } from '@src/constants';
 
 export type StakeValidatorFormValues = {
   validatorPublicKey: string;
+};
+
+export type StakeNewValidatorFormValues = {
+  newValidatorPublicKey: string;
 };
 
 export type StakeAmountFormValues = {
@@ -21,7 +26,8 @@ export const useStakesForm = (
   amountMotes: string | null,
   stakesType: AuctionManagerEntryPoint,
   stakeAmountMotes: string,
-  delegatorsNumber?: number
+  delegatorsNumber?: number,
+  delegatorsNumberForNewValidator?: number
 ) => {
   const validatorFormSchema = Yup.object().shape({
     validatorPublicKey: useValidatorPublicKeyRule(stakesType, delegatorsNumber)
@@ -31,6 +37,18 @@ export const useStakesForm = (
     reValidateMode: 'onChange',
     mode: 'onChange',
     resolver: yupResolver(validatorFormSchema)
+  };
+
+  const newValidatorFromSchema = Yup.object().shape({
+    newValidatorPublicKey: useNewValidatorPublicKeyRule(
+      delegatorsNumberForNewValidator
+    )
+  });
+
+  const newValidatorFormOptions: UseFormProps<StakeNewValidatorFormValues> = {
+    reValidateMode: 'onChange',
+    mode: 'onChange',
+    resolver: yupResolver(newValidatorFromSchema)
   };
 
   const amountFormSchema = Yup.object().shape({
@@ -45,6 +63,9 @@ export const useStakesForm = (
 
   return {
     validatorForm: useForm<StakeValidatorFormValues>(validatorFormOptions),
-    amountForm: useForm<StakeAmountFormValues>(amountFormOptions)
+    amountForm: useForm<StakeAmountFormValues>(amountFormOptions),
+    newValidatorForm: useForm<StakeNewValidatorFormValues>(
+      newValidatorFormOptions
+    )
   };
 };

@@ -1,5 +1,5 @@
-import { RootState } from 'typesafe-actions';
 import { createSelector } from 'reselect';
+import { RootState } from 'typesafe-actions';
 
 import { LoginRetryLockoutTimeState } from './types';
 

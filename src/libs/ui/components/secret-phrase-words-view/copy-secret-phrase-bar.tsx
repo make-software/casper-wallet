@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AlignedFlexRow, SpacingSize } from '@src/libs/layout';
-import { CopyToClipboard, SvgIcon, Typography } from '@src/libs/ui';
+import { AlignedFlexRow, SpacingSize } from '@libs/layout';
+import { CopyToClipboard, SvgIcon, Typography } from '@libs/ui/components';
 
 interface CopySecretPhraseBarProps {
   secretPhraseForCopy: string;

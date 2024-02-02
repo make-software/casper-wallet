@@ -7,7 +7,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { SvgIcon, Typography } from '@libs/ui';
+import { SvgIcon, Typography } from '@libs/ui/components';
 
 export const DeleteContactPageContent = () => {
   const { t } = useTranslation();
@@ -16,7 +16,7 @@ export const DeleteContactPageContent = () => {
     <ContentContainer>
       <IllustrationContainer>
         <SvgIcon
-          src="assets/illustrations/remove-wallet.svg"
+          src="assets/illustrations/remove-account.svg"
           width={183}
           height={120}
         />

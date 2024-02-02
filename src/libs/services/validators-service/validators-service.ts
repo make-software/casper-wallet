@@ -1,63 +1,65 @@
-import {
-  getAuctionValidatorsUrl,
-  getValidatorsDetailsDataUrl
-} from '@libs/services/validators-service/constants';
-import { handleError, toJson } from '@libs/services/utils';
-import { queryClient } from '@libs/services/query-client';
+import { VALIDATORS_REFRESH_RATE } from '@src/constants';
+
 import { dispatchToMainStore } from '@background/redux/utils';
+import { serviceMessage } from '@background/service-message';
+
+import { queryClient } from '@libs/services/query-client';
 import {
   ErrorResponse,
   PaginatedResponse,
   Payload
 } from '@libs/services/types';
+import { handleError, toJson } from '@libs/services/utils';
+import {
+  getAuctionValidatorsUrl,
+  getValidatorsDetailsDataUrl
+} from '@libs/services/validators-service/constants';
 import {
   DelegatorResult,
   ValidatorResult
 } from '@libs/services/validators-service/types';
-import { serviceMessage } from '@background/service-message';
-import { VALIDATORS_REFRESH_RATE } from '@src/constants';
 
 export const auctionValidatorsRequest = (
-  casperApiUrl: string,
+  casperClarityApiUrl: string,
   signal?: AbortSignal
 ) =>
-  fetch(getAuctionValidatorsUrl(casperApiUrl), { signal })
+  fetch(getAuctionValidatorsUrl(casperClarityApiUrl), { signal })
     .then(toJson)
     .catch(handleError);
 
 export const validatorsDetailsDataRequest = (
-  casperApiUrl: string,
+  casperClarityApiUrl: string,
   publicKey: string,
   signal?: AbortSignal
 ) =>
-  fetch(getValidatorsDetailsDataUrl(casperApiUrl, publicKey), { signal })
+  fetch(getValidatorsDetailsDataUrl(casperClarityApiUrl, publicKey), { signal })
     .then(toJson)
     .catch(handleError);
 
 export const fetchAuctionValidators = ({
-  casperApiUrl
+  casperClarityApiUrl
 }: {
-  casperApiUrl: string;
+  casperClarityApiUrl: string;
 }): Promise<PaginatedResponse<ValidatorResult> | ErrorResponse> =>
   queryClient.fetchQuery(
-    ['getAuctionValidators', casperApiUrl],
-    ({ signal }) => auctionValidatorsRequest(casperApiUrl, signal),
+    ['getAuctionValidators', casperClarityApiUrl],
+    ({ signal }) => auctionValidatorsRequest(casperClarityApiUrl, signal),
     {
       staleTime: VALIDATORS_REFRESH_RATE
     }
   );
 
 export const fetchValidatorsDetailsData = ({
-  casperApiUrl,
+  casperClarityApiUrl,
   publicKey
 }: {
-  casperApiUrl: string;
+  casperClarityApiUrl: string;
   publicKey: string;
 }): Promise<PaginatedResponse<DelegatorResult> | ErrorResponse> =>
   queryClient.fetchQuery(
-    ['getDelegations', casperApiUrl, publicKey],
+    ['getDelegations', casperClarityApiUrl, publicKey],
     ({ signal }) =>
-      validatorsDetailsDataRequest(casperApiUrl, publicKey, signal),
+      validatorsDetailsDataRequest(casperClarityApiUrl, publicKey, signal),
     {
       staleTime: VALIDATORS_REFRESH_RATE
     }

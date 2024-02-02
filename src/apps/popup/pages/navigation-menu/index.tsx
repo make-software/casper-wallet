@@ -4,40 +4,42 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { WindowApp, useWindowManager } from '@src/hooks';
+import { isSafariBuild } from '@src/utils';
 
-import { RouterPath, useNavigationMenu } from '@src/apps/popup/router';
+import { TimeoutDurationSetting } from '@popup/constants';
+import { RouterPath, useNavigationMenu } from '@popup/router';
 
-import {
-  ContentContainer,
-  ListItemClickableContainer as BaseListItemClickableContainer,
-  FlexColumn,
-  SpaceBetweenFlexRow,
-  SpacingSize
-} from '@src/libs/layout';
-import {
-  SvgIcon,
-  Typography,
-  List,
-  Link,
-  Modal,
-  ThemeSwitcher
-} from '@src/libs/ui';
-
-import {
-  selectCountOfConnectedSites,
-  selectVaultHasImportedAccount
-} from '@src/background/redux/vault/selectors';
+import { WindowApp } from '@background/create-open-window';
+import { selectCountOfContacts } from '@background/redux/contacts/selectors';
+import { lockVault } from '@background/redux/sagas/actions';
 import {
   selectThemeModeSetting,
   selectTimeoutDurationSetting
-} from '@src/background/redux/settings/selectors';
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { lockVault } from '@src/background/redux/sagas/actions';
-import { TimeoutDurationSetting } from '@popup/constants';
-import { isSafariBuild } from '@src/utils';
-import { selectCountOfContacts } from '@background/redux/contacts/selectors';
+} from '@background/redux/settings/selectors';
 import { ThemeMode } from '@background/redux/settings/types';
+import { dispatchToMainStore } from '@background/redux/utils';
+import {
+  selectCountOfConnectedSites,
+  selectVaultHasImportedAccount
+} from '@background/redux/vault/selectors';
+
+import { useWindowManager } from '@hooks/use-window-manager';
+
+import {
+  ListItemClickableContainer as BaseListItemClickableContainer,
+  ContentContainer,
+  FlexColumn,
+  SpaceBetweenFlexRow,
+  SpacingSize
+} from '@libs/layout';
+import {
+  Link,
+  List,
+  Modal,
+  SvgIcon,
+  ThemeSwitcher,
+  Typography
+} from '@libs/ui/components';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;
@@ -170,17 +172,6 @@ export function NavigationMenuPageContent() {
           },
           {
             id: 3,
-            title: t('Timeout'),
-            iconPath: 'assets/icons/lock.svg',
-            currentValue: TimeoutDurationSetting[timeoutDurationSetting],
-            disabled: false,
-            handleOnClick: () => {
-              closeNavigationMenu();
-              navigate(RouterPath.Timeout);
-            }
-          },
-          {
-            id: 4,
             title: t('Theme'),
             iconPath:
               themeMode === ThemeMode.SYSTEM
@@ -199,6 +190,17 @@ export function NavigationMenuPageContent() {
         items: [
           {
             id: 1,
+            title: t('Timeout'),
+            iconPath: 'assets/icons/lock.svg',
+            currentValue: TimeoutDurationSetting[timeoutDurationSetting],
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.Timeout);
+            }
+          },
+          {
+            id: 2,
             title: t('Back up your secret recovery phrase'),
             iconPath: 'assets/icons/secure.svg',
             disabled: false,
@@ -208,7 +210,7 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 2,
+            id: 3,
             title: t('Generate wallet QR code'),
             description: t('Scan to import your wallet on mobile'),
             iconPath: 'assets/icons/qr.svg',
@@ -220,7 +222,7 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 3,
+            id: 4,
             title: t('Download account keys'),
             description: t('For all accounts imported via file'),
             iconPath: 'assets/icons/download.svg',
@@ -233,7 +235,7 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 4,
+            id: 5,
             title: t('Change Password'),
             iconPath: 'assets/icons/secure.svg',
             disabled: false,

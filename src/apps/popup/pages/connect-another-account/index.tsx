@@ -1,8 +1,18 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
+import {
+  selectConnectedAccountsWithActiveOrigin,
+  selectVaultAccounts,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
 
 import {
   ContentContainer,
@@ -11,26 +21,17 @@ import {
   SpacingSize,
   TileContainer,
   VerticalSpaceContainer
-} from '@src/libs/layout';
+} from '@libs/layout';
 import {
   Button,
-  SiteFaviconBadge,
   Hash,
   HashVariant,
   List,
+  SiteFaviconBadge,
   SvgIcon,
-  Typography,
-  Tile
-} from '@libs/ui';
-
-import {
-  selectConnectedAccountsWithActiveOrigin,
-  selectVaultAccounts,
-  selectVaultActiveAccount
-} from '@src/background/redux/vault/selectors';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import { useAccountManager } from '@src/apps/popup/hooks/use-account-actions-with-events';
-import { selectActiveOrigin } from '@src/background/redux/active-origin/selectors';
+  Tile,
+  Typography
+} from '@libs/ui/components';
 
 const CentredFlexRow = styled.div`
   display: flex;

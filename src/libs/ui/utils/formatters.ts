@@ -1,11 +1,11 @@
+import { createIntl, createIntlCache } from '@formatjs/intl';
 import Big from 'big.js';
+// eslint-disable-next-line import/no-duplicates
 import { formatDistanceToNowStrict } from 'date-fns';
+// eslint-disable-next-line import/no-duplicates
 import en from 'date-fns/locale/en-US';
 
-import { createIntl, createIntlCache } from '@formatjs/intl';
-
-import { MOTES_PER_CSPR_RATE } from '@libs/ui/utils/constants';
-import { tokenDivider } from '@src/apps/popup/pages/home/components/tokens-list/utils';
+import { MOTES_PER_CSPR_RATE } from '@src/constants';
 
 const cache = createIntlCache();
 const intl = createIntl(
@@ -142,6 +142,9 @@ export const motesToCSPR = (motes: string): string => {
 export const CSPRtoMotes = (cspr: string): string => {
   return Big(cspr).mul(MOTES_PER_CSPR_RATE).toString();
 };
+
+export const tokenDivider = (decimals: number | null) =>
+  Big(10).pow(decimals || 0);
 
 export const divideErc20Balance = (
   balance: string | null,

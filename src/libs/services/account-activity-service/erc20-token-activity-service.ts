@@ -1,22 +1,24 @@
-import { serviceMessage } from '@background/service-message';
-import { dispatchToMainStore } from '@background/redux/utils';
-import { handleError, toJson } from '@libs/services/utils';
-import { queryClient } from '@libs/services/query-client';
-import { Payload, PaginatedResponse } from '@libs/services/types';
 import { ERC20_TOKEN_ACTIVITY_REFRESH_RATE } from '@src/constants';
+
+import { dispatchToMainStore } from '@background/redux/utils';
+import { serviceMessage } from '@background/service-message';
+
+import { queryClient } from '@libs/services/query-client';
+import { PaginatedResponse, Payload } from '@libs/services/types';
+import { handleError, toJson } from '@libs/services/utils';
 
 import { getErc20TokenActivityLink } from './constants';
 import { Erc20TokenActionResult } from './types';
 
 export const erc20TokenActivityRequest = (
-  casperApiUrl: string,
+  casperClarityApiUrl: string,
   publicKey: string,
   contractPackageHash: string,
   page: number
 ) =>
   fetch(
     getErc20TokenActivityLink(
-      casperApiUrl,
+      casperClarityApiUrl,
       publicKey,
       contractPackageHash,
       page
@@ -26,12 +28,12 @@ export const erc20TokenActivityRequest = (
     .catch(handleError);
 
 export const fetchErc20TokenActivity = ({
-  casperApiUrl,
+  casperClarityApiUrl,
   publicKey,
   contractPackageHash,
   page
 }: {
-  casperApiUrl: string;
+  casperClarityApiUrl: string;
   publicKey: string;
   contractPackageHash: string;
   page: number;
@@ -39,14 +41,14 @@ export const fetchErc20TokenActivity = ({
   queryClient.fetchQuery(
     [
       'erc20TokenActivityRequest',
-      casperApiUrl,
+      casperClarityApiUrl,
       publicKey,
       contractPackageHash,
       page
     ],
     () =>
       erc20TokenActivityRequest(
-        casperApiUrl,
+        casperClarityApiUrl,
         publicKey,
         contractPackageHash,
         page

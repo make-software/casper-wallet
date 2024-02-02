@@ -1,7 +1,9 @@
 import { RootState } from 'typesafe-actions';
 
 import { NetworkSetting } from '@src/constants';
+
 import { TimeoutDurationSetting } from '@popup/constants';
+
 import { ThemeMode } from '@background/redux/settings/types';
 
 export const initialStateForPopupTests: RootState = {
@@ -83,8 +85,11 @@ export const initialStateForPopupTests: RootState = {
   recentRecipientPublicKeys: [],
   accountInfo: {
     balance: {
-      amountMotes: null,
-      amountFiat: null
+      liquidMotes: null,
+      delegatedMotes: null,
+      undelegatingMotes: null,
+      totalBalanceMotes: null,
+      totalBalanceFiat: null
     },
     currencyRate: null,
     accountCasperActivity: [],

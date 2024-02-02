@@ -1,15 +1,17 @@
 import React from 'react';
 
+import { closeCurrentWindow } from '@background/close-current-window';
+import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+
+import { sdkMethod } from '@content/sdk-method';
+
 import {
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  LayoutWindow,
-  PopupHeader
-} from '@src/libs/layout';
+  LayoutWindow
+} from '@libs/layout';
 
 import { SwitchAccountContent } from './content';
-import { sendSdkResponseToSpecificTab } from '@src/background/send-sdk-response-to-specific-tab';
-import { sdkMethod } from '@src/content/sdk-method';
-import { closeCurrentWindow } from '@src/background/close-current-window';
 
 export function SwitchAccountPage() {
   const searchParams = new URLSearchParams(document.location.search);
@@ -30,7 +32,7 @@ export function SwitchAccountPage() {
   return (
     <LayoutWindow
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           renderSubmenuBarItems={() => (
             <HeaderSubmenuBarNavLink
               linkType="cancelWindow"

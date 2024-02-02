@@ -1,21 +1,24 @@
 import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
 import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize,
   VerticalSpaceContainer
-} from '@src/libs/layout';
-import { HomePageTabsId, SvgIcon, Typography } from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@popup/router';
+} from '@libs/layout';
+import { HomePageTabsId, SvgIcon, Typography } from '@libs/ui/components';
 
 interface TransferSuccessScreenProps {
   headerText: string;
+  children?: React.ReactNode;
 }
 
 export const TransferSuccessScreen = ({
-  headerText
+  headerText,
+  children
 }: TransferSuccessScreenProps) => {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -64,6 +67,7 @@ export const TransferSuccessScreen = ({
             </Trans>
           </Typography>
         </VerticalSpaceContainer>
+        {children}
       </ParagraphContainer>
     </ContentContainer>
   );

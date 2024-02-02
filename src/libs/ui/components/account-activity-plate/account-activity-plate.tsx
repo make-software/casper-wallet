@@ -1,8 +1,23 @@
 import React, { forwardRef, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import {
+  ActivityShortTypeName,
+  ActivityType,
+  ActivityTypeColors,
+  ActivityTypeIcons,
+  ActivityTypeName,
+  AuctionManagerEntryPoint,
+  TokenEntryPoint
+} from '@src/constants';
+
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   AccountActivityPlateContainer,
   ActivityPlateContentContainer,
@@ -14,14 +29,21 @@ import {
   SpacingSize
 } from '@libs/layout';
 import {
-  ContentColor,
+  Erc20TransferWithId,
+  ExtendedDeployWithId
+} from '@libs/services/account-activity-service';
+import {
   DeployStatus,
   Hash,
   HashVariant,
   SvgIcon,
   Tooltip,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
+import {
+  ContentColor,
+  getRecipientAddressFromTransaction
+} from '@libs/ui/utils';
 import {
   divideErc20Balance,
   formatNumber,
@@ -29,23 +51,6 @@ import {
   formatTimestampAge,
   motesToCSPR
 } from '@libs/ui/utils/formatters';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import {
-  Erc20TransferWithId,
-  ExtendedDeployWithId
-} from '@libs/services/account-activity-service';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import {
-  ActivityShortTypeName,
-  ActivityType,
-  ActivityTypeColors,
-  ActivityTypeIcons,
-  ActivityTypeName,
-  AuctionManagerEntryPoint,
-  TokenEntryPoint
-} from '@src/constants';
-import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import { getRecipientAddressFromTransaction } from '@libs/ui/utils/utils';
 
 const SymbolContainer = styled(RightAlignedCenteredFlexRow)`
   max-width: 80px;
@@ -157,6 +162,17 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
             setToAccount(undefined);
             return;
           }
+          case TokenEntryPoint.transfer: {
+            if (
+              transactionInfo?.args?.token_ids ||
+              transactionInfo?.args?.token_id
+            ) {
+              setType(ActivityType.TransferNft);
+              setFromAccount(transactionInfo.callerPublicKey);
+              setToAccount(recipientAddress);
+              return;
+            }
+          }
         }
       }
 
@@ -224,9 +240,7 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
               <DeployStatus deployResult={transactionInfo} />
             </AlignedFlexRow>
             <Typography type="captionHash">
-              {formattedAmount === '-' ? (
-                formattedAmount
-              ) : (
+              {formattedAmount === '-' ? null : (
                 <>
                   {type === ActivityType.Sent || type === ActivityType.Delegated
                     ? '-'

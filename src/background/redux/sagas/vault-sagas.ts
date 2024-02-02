@@ -1,65 +1,73 @@
 import { put, select, takeLatest } from 'redux-saga/effects';
 import { getType } from 'typesafe-actions';
 
-import { deriveKeyPair } from '@src/libs/crypto';
-import { encryptVault } from '@src/libs/crypto/vault';
+import { getUrlOrigin } from '@src/utils';
+
+import {
+  LOCK_VAULT_TIMEOUT,
+  MapTimeoutDurationSettingToValue
+} from '@popup/constants';
+
+import {
+  loginRetryLockoutTimeReseted,
+  loginRetryLockoutTimeSet
+} from '@background/redux/login-retry-lockout-time/actions';
+import { selectLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
+import { emitSdkEventToActiveTabs } from '@background/utils';
+
+import { sdkEvent } from '@content/sdk-event';
+
+import { deriveKeyPair } from '@libs/crypto';
 import {
   deriveEncryptionKey,
   encodePassword,
   generateRandomSaltHex
 } from '@libs/crypto/hashing';
 import { convertBytesToHex } from '@libs/crypto/utils';
+import { encryptVault } from '@libs/crypto/vault';
 
-import {
-  LOCK_VAULT_TIMEOUT,
-  MapTimeoutDurationSettingToValue
-} from '@src/apps/popup/constants';
-import { sdkEvent } from '@src/content/sdk-event';
-import { emitSdkEventToActiveTabs } from '@src/background/utils';
-import { selectLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
-import {
-  loginRetryLockoutTimeReseted,
-  loginRetryLockoutTimeSet
-} from '@background/redux/login-retry-lockout-time/actions';
-
-import {
-  selectEncryptionKeyHash,
-  selectVaultIsLocked
-} from '../session/selectors';
-import { sagaCall, sagaSelect } from '../utils';
-import {
-  accountAdded,
-  accountImported,
-  accountRenamed,
-  accountRemoved,
-  siteConnected,
-  accountDisconnected,
-  siteDisconnected,
-  activeAccountChanged,
-  vaultLoaded,
-  vaultReseted,
-  anotherAccountConnected,
-  deployPayloadReceived
-} from '../vault/actions';
-import {
-  selectSecretPhrase,
-  selectVault,
-  selectAccountNamesByOriginDict,
-  selectVaultActiveAccount,
-  selectVaultDerivedAccounts
-} from '../vault/selectors';
+import { accountInfoReset } from '../account-info/actions';
+import { keysUpdated } from '../keys/actions';
+import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
+import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
+import { loginRetryCountReseted } from '../login-retry-count/actions';
 import {
   encryptionKeyHashCreated,
   sessionReseted,
   vaultUnlocked
 } from '../session/actions';
-import { selectVaultCipherDoesExist } from '../vault-cipher/selectors';
-import { keysUpdated } from '../keys/actions';
+import {
+  selectEncryptionKeyHash,
+  selectVaultIsLocked
+} from '../session/selectors';
+import { activeTimeoutDurationSettingChanged } from '../settings/actions';
+import { selectTimeoutDurationSetting } from '../settings/selectors';
+import { sagaCall, sagaSelect } from '../utils';
 import { vaultCipherCreated } from '../vault-cipher/actions';
-import { deploysReseted } from '../vault/actions';
-import { loginRetryCountReseted } from '../login-retry-count/actions';
+import { selectVaultCipherDoesExist } from '../vault-cipher/selectors';
+import {
+  accountAdded,
+  accountDisconnected,
+  accountImported,
+  accountRemoved,
+  accountRenamed,
+  activeAccountChanged,
+  anotherAccountConnected,
+  deployPayloadReceived,
+  deploysReseted,
+  siteConnected,
+  siteDisconnected,
+  vaultLoaded,
+  vaultReseted
+} from '../vault/actions';
+import {
+  selectAccountNamesByOriginDict,
+  selectSecretPhrase,
+  selectVault,
+  selectVaultActiveAccount,
+  selectVaultDerivedAccounts
+} from '../vault/selectors';
 import { popupWindowInit } from '../windowManagement/actions';
-
 import {
   changePassword,
   createAccount,
@@ -67,12 +75,6 @@ import {
   startBackground,
   unlockVault
 } from './actions';
-import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
-import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
-import { activeTimeoutDurationSettingChanged } from '../settings/actions';
-import { selectTimeoutDurationSetting } from '../settings/selectors';
-import { getUrlOrigin } from '@src/utils';
-import { accountInfoReset } from '../account-info/actions';
 
 export function* vaultSagas() {
   yield takeLatest(getType(lockVault), lockVaultSaga);

@@ -1,9 +1,9 @@
-import { decodeBase16, Keys } from 'casper-js-sdk';
-
 import ASN1 from '@lapo/asn1js';
 import Base64 from '@lapo/asn1js/base64';
+import { Keys, decodeBase16 } from 'casper-js-sdk';
 // These libraries are required for backward compatibility with Legacy Signer
 import { t } from 'i18next';
+
 import { privateKeyBytesToBase64 } from './utils';
 
 export function parseSecretKeyString(fileContents: string): {

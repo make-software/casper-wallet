@@ -1,4 +1,5 @@
-import { useTypedLocation, useTypedNavigate } from '@popup/router';
+import { useTypedLocation } from './use-typed-location';
+import { useTypedNavigate } from './use-typed-navigate';
 
 export function useNavigationMenu() {
   const navigate = useTypedNavigate();

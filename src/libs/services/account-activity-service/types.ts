@@ -1,5 +1,5 @@
-import { CLTypeParsedResult, CLTypeTypeResult } from '@libs/types/cl';
 import { ErrorResponse, PaginatedResponse } from '@libs/services/types';
+import { CLTypeParsedResult, CLTypeTypeResult } from '@libs/types/cl';
 
 export interface TransferResult {
   amount: string;
@@ -37,6 +37,7 @@ export type ExtendedDeployArgsResult = {
   contract_hash_str?: ExtendedDeployClTypeResult;
   recipient?: ExtendedDeployClTypeResult;
   token_id?: ExtendedDeployClTypeResult;
+  token_ids?: ExtendedDeployClTypeResult;
   token_meta?: ExtendedDeployClTypeResult;
   id?: ExtendedDeployClTypeResult;
   target?: ExtendedDeployClTypeResult;

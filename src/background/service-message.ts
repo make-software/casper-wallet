@@ -1,25 +1,25 @@
 import { ActionType, createAction } from 'typesafe-actions';
 
-import { FetchBalanceResponse } from '@libs/services/balance-service';
-import { AccountInfo } from '@libs/services/account-info';
 import {
   Erc20TokenActionResult,
-  TransferResult,
-  ExtendedDeploy
-} from 'src/libs/services/account-activity-service';
+  ExtendedDeploy,
+  TransferResult
+} from '@libs/services/account-activity-service/types';
+import { AccountInfo } from '@libs/services/account-info/types';
+import { FetchBalanceResponse } from '@libs/services/balance-service/types';
+import { ContractPackageWithBalance } from '@libs/services/erc20-service/types';
+import { NFTTokenResult } from '@libs/services/nft-service/types';
 import { ErrorResponse, PaginatedResponse } from '@libs/services/types';
-import { ContractPackageWithBalance } from '@libs/services/erc20-service';
-import { NFTTokenResult } from '@libs/services/nft-service';
 import {
   DelegatorResult,
   ValidatorResult
-} from '@libs/services/validators-service';
+} from '@libs/services/validators-service/types';
 
 type Meta = void;
 
 export const serviceMessage = {
   fetchBalanceRequest: createAction('FETCH_ACCOUNT_BALANCE')<
-    { publicKey: string },
+    { accountHash: string },
     Meta
   >(),
   fetchBalanceResponse: createAction('FETCH_ACCOUNT_BALANCE_RESPONSE')<

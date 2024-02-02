@@ -3,55 +3,59 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import {
-  CenteredFlexRow,
-  ContentContainer,
-  FooterButtonsContainer,
-  HeaderSubmenuBarNavLink,
-  ParagraphContainer,
-  PopupHeader,
-  PopupLayout,
-  SpaceBetweenFlexRow,
-  SpacingSize
-} from '@libs/layout';
-import { StakesPageContent } from '@popup/pages/stakes/content';
-import { Button, HomePageTabsId, Typography } from '@libs/ui';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import {
   AuctionManagerEntryPoint,
   STAKE_COST_MOTES,
   StakeSteps
 } from '@src/constants';
-import { dispatchToMainStore } from '@background/redux/utils';
+
+import { StakesPageContent } from '@popup/pages/stakes/content';
+import { NoDelegations } from '@popup/pages/stakes/no-delegations';
+import { useConfirmationButtonText } from '@popup/pages/stakes/utils';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
+
 import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
+import { selectAccountBalance } from '@background/redux/account-info/selectors';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
+import {
+  CenteredFlexRow,
+  ContentContainer,
+  ErrorPath,
+  FooterButtonsContainer,
+  HeaderPopup,
+  HeaderSubmenuBarNavLink,
+  ParagraphContainer,
+  PopupLayout,
+  SpaceBetweenFlexRow,
+  SpacingSize,
+  createErrorLocationState
+} from '@libs/layout';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import { makeAuctionManagerDeploy } from '@libs/services/deployer-service';
-import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
-import { useStakesForm } from '@libs/ui/forms/stakes-form';
-import { selectAccountBalance } from '@background/redux/account-info/selectors';
-import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
-import {
-  CSPRtoMotes,
-  formatNumber,
-  motesToCSPR
-} from '@libs/ui/utils/formatters';
-import { ValidatorResultWithId } from '@libs/services/validators-service/types';
 import {
   dispatchFetchAuctionValidatorsRequest,
   dispatchFetchValidatorsDetailsDataRequest
 } from '@libs/services/validators-service';
-import { NoDelegations } from '@popup/pages/stakes/no-delegations';
-import { createErrorLocationState, ErrorPath } from '@layout/error';
+import { ValidatorResultWithId } from '@libs/services/validators-service/types';
+import { Button, HomePageTabsId, Typography } from '@libs/ui/components';
+import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
+import { useStakesForm } from '@libs/ui/forms/stakes-form';
+import { CSPRtoMotes, formatNumber, motesToCSPR } from '@libs/ui/utils';
 
 export const StakesPage = () => {
   const [stakeStep, setStakeStep] = useState(StakeSteps.Validator);
   const [validatorPublicKey, setValidatorPublicKey] = useState('');
+  const [newValidatorPublicKey, setNewValidatorPublicKey] = useState('');
   const [inputAmountCSPR, setInputAmountCSPR] = useState('');
   const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(true);
   const [validator, setValidator] = useState<ValidatorResultWithId | null>(
     null
   );
+  const [newValidator, setNewValidator] =
+    useState<ValidatorResultWithId | null>(null);
   const [stakesType, setStakesType] = useState<AuctionManagerEntryPoint>(
     AuctionManagerEntryPoint.delegate
   );
@@ -59,11 +63,18 @@ export const StakesPage = () => {
   const [validatorList, setValidatorList] = useState<
     ValidatorResultWithId[] | null
   >(null);
+  const [undelegateValidatorList, setUndelegateValidatorList] = useState<
+    ValidatorResultWithId[] | null
+  >(null);
   const [loading, setLoading] = useState(true);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const { networkName, nodeUrl, auctionManagerContractHash, casperApiUrl } =
-    useSelector(selectApiConfigBasedOnActiveNetwork);
+  const {
+    networkName,
+    nodeUrl,
+    auctionManagerContractHash,
+    casperClarityApiUrl
+  } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const csprBalance = useSelector(selectAccountBalance);
 
   const { t } = useTranslation();
@@ -106,7 +117,42 @@ export const StakesPage = () => {
                 user_stake: delegator.stake
               }));
 
+              setUndelegateValidatorList(validatorListWithId);
+            }
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }
+    } else if (pathname.split('/')[1] === AuctionManagerEntryPoint.redelegate) {
+      setStakesType(AuctionManagerEntryPoint.redelegate);
+
+      if (activeAccount) {
+        Promise.all([
+          dispatchFetchAuctionValidatorsRequest(),
+          dispatchFetchValidatorsDetailsDataRequest(activeAccount.publicKey)
+        ])
+          .then(([allValidatorsResp, undelegateValidatorResp]) => {
+            if ('data' in allValidatorsResp.payload) {
+              const { data } = allValidatorsResp.payload;
+
+              const validatorListWithId = data.map(validator => ({
+                ...validator,
+                id: validator.public_key
+              }));
+
               setValidatorList(validatorListWithId);
+            }
+            if ('data' in undelegateValidatorResp.payload) {
+              const { data } = undelegateValidatorResp.payload;
+
+              const validatorListWithId = data.map(delegator => ({
+                ...delegator.validator,
+                id: delegator.validator_public_key,
+                user_stake: delegator.stake
+              }));
+
+              setUndelegateValidatorList(validatorListWithId);
             }
           })
           .finally(() => {
@@ -114,18 +160,23 @@ export const StakesPage = () => {
           });
       }
     }
-  }, [activeAccount, pathname, casperApiUrl]);
+  }, [activeAccount, pathname, casperClarityApiUrl]);
 
-  const { amountForm, validatorForm } = useStakesForm(
-    csprBalance.amountMotes,
+  const { amountForm, validatorForm, newValidatorForm } = useStakesForm(
+    csprBalance.liquidMotes,
     stakesType,
     stakeAmountMotes,
-    validator?.delegators_number
+    validator?.delegators_number,
+    newValidator?.delegators_number
   );
   const { formState: amountFormState, getValues: getValuesAmountForm } =
     amountForm;
   const { formState: validatorFormState, getValues: getValuesValidatorForm } =
     validatorForm;
+  const {
+    formState: newValidatorFormState,
+    getValues: getValuesNewValidatorForm
+  } = newValidatorForm;
 
   // event listener for enable/disable submit button
   useEffect(() => {
@@ -179,7 +230,7 @@ export const StakesPage = () => {
         stakesType,
         activeAccount.publicKey,
         validatorPublicKey,
-        null,
+        newValidatorPublicKey || null,
         motesAmount,
         networkName,
         auctionManagerContractHash
@@ -231,6 +282,9 @@ export const StakesPage = () => {
     const isAmountFormButtonDisabled = calculateSubmitButtonDisabled({
       isValid: amountFormState.isValid
     });
+    const isNewValidatorFormButtonDisabled = calculateSubmitButtonDisabled({
+      isValid: newValidatorFormState.isValid
+    });
 
     switch (stakeStep) {
       case StakeSteps.Validator: {
@@ -251,6 +305,22 @@ export const StakesPage = () => {
             const { amount: _amount } = getValuesAmountForm();
 
             setInputAmountCSPR(_amount);
+            if (stakesType === AuctionManagerEntryPoint.redelegate) {
+              setStakeStep(StakeSteps.NewValidator);
+            } else {
+              setStakeStep(StakeSteps.Confirm);
+            }
+          }
+        };
+      }
+      case StakeSteps.NewValidator: {
+        return {
+          disabled: isNewValidatorFormButtonDisabled,
+          onClick: () => {
+            const { newValidatorPublicKey: _newValidatorPublicKey } =
+              getValuesNewValidatorForm();
+
+            setNewValidatorPublicKey(_newValidatorPublicKey);
             setStakeStep(StakeSteps.Confirm);
           }
         };
@@ -289,8 +359,16 @@ export const StakesPage = () => {
         setStakeStep(StakeSteps.Validator);
         break;
       }
-      case StakeSteps.Confirm: {
+      case StakeSteps.NewValidator: {
         setStakeStep(StakeSteps.Amount);
+        break;
+      }
+      case StakeSteps.Confirm: {
+        if (stakesType === AuctionManagerEntryPoint.redelegate) {
+          setStakeStep(StakeSteps.NewValidator);
+        } else {
+          setStakeStep(StakeSteps.Amount);
+        }
         break;
       }
 
@@ -301,31 +379,21 @@ export const StakesPage = () => {
     }
   };
 
-  const getConfirmButtonText = () => {
-    switch (stakesType) {
-      case AuctionManagerEntryPoint.delegate: {
-        return t('Confirm delegation');
-      }
-      case AuctionManagerEntryPoint.undelegate: {
-        return t('Confirm undelegation');
-      }
-      default: {
-        return t('Confirm');
-      }
-    }
-  };
+  const confirmButtonText = useConfirmationButtonText(stakesType);
 
   if (loading) {
     return (
       <PopupLayout
         renderHeader={() => (
-          <PopupHeader withNetworkSwitcher withMenu withConnectionStatus />
+          <HeaderPopup withNetworkSwitcher withMenu withConnectionStatus />
         )}
         renderContent={() => (
           <ContentContainer>
             <ParagraphContainer top={SpacingSize.XL}>
               <CenteredFlexRow>
-                <Typography type="body">Loading...</Typography>
+                <Typography type="body">
+                  <Trans t={t}>Loading...</Trans>
+                </Typography>
               </CenteredFlexRow>
             </ParagraphContainer>
           </ContentContainer>
@@ -335,14 +403,15 @@ export const StakesPage = () => {
   }
 
   if (
-    stakesType === AuctionManagerEntryPoint.undelegate &&
-    validatorList !== null &&
-    validatorList.length === 0
+    (stakesType === AuctionManagerEntryPoint.undelegate ||
+      stakesType === AuctionManagerEntryPoint.redelegate) &&
+    undelegateValidatorList !== null &&
+    undelegateValidatorList.length === 0
   ) {
     return (
       <PopupLayout
         renderHeader={() => (
-          <PopupHeader withNetworkSwitcher withMenu withConnectionStatus />
+          <HeaderPopup withNetworkSwitcher withMenu withConnectionStatus />
         )}
         renderContent={() => <NoDelegations />}
         renderFooter={() => (
@@ -363,7 +432,7 @@ export const StakesPage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus
@@ -385,20 +454,24 @@ export const StakesPage = () => {
           stakeStep={stakeStep}
           validatorForm={validatorForm}
           amountForm={amountForm}
+          newValidatorForm={newValidatorForm}
           inputAmountCSPR={inputAmountCSPR}
           validator={validator}
           setValidator={setValidator}
+          newValidator={newValidator}
+          setNewValidator={setNewValidator}
           stakesType={stakesType}
           stakeAmountMotes={stakeAmountMotes}
           setStakeAmount={setStakeAmountMotes}
           validatorList={validatorList}
+          undelegateValidatorList={undelegateValidatorList}
         />
       )}
       renderFooter={() => (
         <FooterButtonsContainer>
           {stakeStep === StakeSteps.Amount ? (
             <SpaceBetweenFlexRow>
-              <Typography type="captionRegular">
+              <Typography type="captionRegular" color="contentSecondary">
                 <Trans t={t}>Transaction fee</Trans>
               </Typography>
               <Typography type="captionHash">
@@ -412,7 +485,7 @@ export const StakesPage = () => {
           <Button color="primaryBlue" type="button" {...getButtonProps()}>
             <Trans t={t}>
               {stakeStep === StakeSteps.Confirm
-                ? getConfirmButtonText()
+                ? confirmButtonText
                 : stakeStep === StakeSteps.Success
                   ? 'Done'
                   : 'Next'}

@@ -1,8 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-import { UseFormReturn, useWatch } from 'react-hook-form';
-import { useSelector } from 'react-redux';
 import Big from 'big.js';
+import React, { useEffect, useState } from 'react';
+import { UseFormReturn, useWatch } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+
+import { TRANSFER_COST_MOTES, TRANSFER_MIN_AMOUNT_MOTES } from '@src/constants';
+
+import {
+  selectAccountBalance,
+  selectAccountCurrencyRate
+} from '@background/redux/account-info/selectors';
 
 import {
   ContentContainer,
@@ -10,14 +17,9 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Checkbox, Input, Typography } from '@libs/ui';
-import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils/formatters';
+import { Checkbox, Input, Typography } from '@libs/ui/components';
 import { TransferAmountFormValues } from '@libs/ui/forms/transfer';
-import {
-  selectAccountBalance,
-  selectAccountCurrencyRate
-} from '@background/redux/account-info/selectors';
-import { TRANSFER_COST_MOTES, TRANSFER_MIN_AMOUNT_MOTES } from '@src/constants';
+import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils';
 
 interface AmountStepProps {
   amountForm: UseFormReturn<TransferAmountFormValues>;
@@ -37,9 +39,9 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
 
   useEffect(() => {
     const maxAmountMotes: string =
-      csprBalance.amountMotes == null
+      csprBalance.liquidMotes == null
         ? '0'
-        : Big(csprBalance.amountMotes).sub(TRANSFER_COST_MOTES).toString();
+        : Big(csprBalance.liquidMotes).sub(TRANSFER_COST_MOTES).toString();
 
     const hasEnoughBalance = Big(maxAmountMotes).gte(TRANSFER_MIN_AMOUNT_MOTES);
     const isMaxAmountEqualMinAmount = Big(maxAmountMotes).eq(
@@ -49,7 +51,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
     setIsChecked(isMaxAmountEqualMinAmount);
     setMaxAmountMotes(maxAmountMotes);
     setDisabled(!hasEnoughBalance);
-  }, [csprBalance.amountMotes]);
+  }, [csprBalance.liquidMotes]);
 
   const {
     register,
@@ -116,6 +118,10 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
             // regex replace decimal point from beginning of string
             e.target.value = e.target.value.replace(/^\./, '');
             onChangeCSPRAmount(e);
+
+            if (isChecked) {
+              setIsChecked(false);
+            }
           }}
           error={!!errors?.amount}
           validationText={errors?.amount?.message}

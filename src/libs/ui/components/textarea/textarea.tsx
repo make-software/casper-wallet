@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 
-import { BaseProps } from '@libs/ui';
+import { BaseProps } from '@libs/ui/types';
 
 type Ref = HTMLTextAreaElement;
 

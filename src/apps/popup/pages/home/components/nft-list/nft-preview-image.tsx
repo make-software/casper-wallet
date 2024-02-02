@@ -1,14 +1,15 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
+import { ContentType } from '@src/utils';
+
 import {
   AudioNftPlaceholder,
   EmptyMediaPlaceholder,
   ImageContainer,
   LoadingMediaPlaceholder,
   VideoNftPlaceholder
-} from '@libs/ui';
-import { ContentType } from '@src/utils';
+} from '@libs/ui/components';
 
 const NftImage = styled.img`
   width: 100%;
