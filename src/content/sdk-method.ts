@@ -41,7 +41,9 @@ export const sdkMethod = {
     Meta
   >(),
   signResponse: createAction('CasperWalletProvider:Sign:Response')<
-    { cancelled: true } | { cancelled: false; signatureHex: string },
+    | { cancelled: true }
+    | { cancelled: true; message: string }
+    | { cancelled: false; signatureHex: string },
     Meta
   >(),
   signError: createAction('CasperWalletProvider:Sign:Error')<Error, Meta>(),
