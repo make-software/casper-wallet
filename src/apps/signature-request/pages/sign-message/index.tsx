@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
+import { getSigningAccount } from '@src/utils';
+
 import { closeCurrentWindow } from '@background/close-current-window';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
@@ -51,9 +53,7 @@ export function SignMessagePage() {
     renderDeps
   );
 
-  const signingAccount = accounts.find(
-    account => account.publicKey === signingPublicKeyHex
-  );
+  const signingAccount = getSigningAccount(accounts, signingPublicKeyHex);
 
   // signing account should exist in wallet
   if (signingAccount == null) {

@@ -10,6 +10,7 @@ import {
   NFTTokenResult
 } from '@libs/services/nft-service';
 import { queryClient } from '@libs/services/query-client';
+import { Account } from '@libs/types/account';
 
 interface ImageProxyUrlProps {
   ttl: string;
@@ -29,6 +30,7 @@ export const getUrlOrigin = (url: string | undefined) => {
 
 export const isSafariBuild = process.env.BROWSER === Browser.Safari;
 export const isFirefoxBuild = process.env.BROWSER === Browser.Firefox;
+export const isChromeBuild = process.env.BROWSER === Browser.Chrome;
 
 export const isValidU64 = (value?: string): boolean => {
   if (!value) {
@@ -308,4 +310,34 @@ export const findMediaPreview = (metadata: NFTTokenMetadataEntry): boolean => {
   ).test(metadata.key);
 
   return hasImageExtension || knownImageKey;
+};
+
+const isEqualCaseInsensitive = (key1: string, key2: string) => {
+  return key1.toLowerCase() === key2.toLowerCase();
+};
+
+export const getSigningAccount = (
+  accounts: Account[],
+  signingPublicKeyHex: string
+) =>
+  accounts.find(account =>
+    isEqualCaseInsensitive(account.publicKey, signingPublicKeyHex)
+  );
+
+export const setCSPForSafari = () => {
+  if (isSafariBuild) {
+    const metaTag = document.querySelector('[http-equiv]');
+
+    if (metaTag == null) {
+      const meta = document.createElement('meta');
+
+      meta.setAttribute('http-equiv', 'Content-Security-Policy');
+      meta.setAttribute(
+        'content',
+        `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://casper-testnet-node-proxy.make.services/rpc https://casper-node-proxy.make.services/rpc https://cspr-wallet-api.dev.make.services/ https://api.casperwallet.io/`
+      );
+
+      document.getElementsByTagName('head')[0].appendChild(meta);
+    }
+  }
 };

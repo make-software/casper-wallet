@@ -13,6 +13,10 @@ import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
 
 import { CasperDeploy } from '@signature-request/pages/sign-deploy/deploy-types';
 
+import {
+  backgroundEvent,
+  popupStateUpdated
+} from '@background/background-events';
 import { WindowApp } from '@background/create-open-window';
 import {
   disableOnboardingFlow,
@@ -273,7 +277,10 @@ tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 runtime.onMessage.addListener(
-  async (action: RootAction | SdkMethod | ServiceMessage, sender) => {
+  async (
+    action: RootAction | SdkMethod | ServiceMessage | popupStateUpdated,
+    sender
+  ) => {
     const store = await getExistingMainStoreSingletonOrInit();
 
     return new Promise(async (sendResponse, sendError) => {
@@ -607,6 +614,10 @@ runtime.onMessage.addListener(
             store.dispatch(action);
             return sendResponse(undefined);
 
+          case getType(backgroundEvent.popupStateUpdated):
+            // do nothing
+            return;
+
           // SERVICE MESSAGE HANDLERS
           case getType(serviceMessage.fetchBalanceRequest): {
             const { casperWalletApiUrl, casperClarityApiUrl } =
@@ -877,6 +888,9 @@ runtime.onMessage.addListener(
             );
         }
       } else {
+        if (action === 'ping') {
+          return;
+        }
         throw Error('Background: Unknown message: ' + JSON.stringify(action));
       }
     });
@@ -889,4 +903,4 @@ function ping() {
     // ping
   });
 }
-setInterval(ping, 5000);
+setInterval(ping, 15000);

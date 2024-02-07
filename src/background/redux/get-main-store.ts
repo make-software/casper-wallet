@@ -58,87 +58,90 @@ export const selectPopupState = (state: RootState): PopupState => {
 const isMockStateEnable = Boolean(process.env.MOCK_STATE);
 
 export async function getExistingMainStoreSingletonOrInit() {
-  // load selected state
-  const {
-    [VAULT_CIPHER_KEY]: vaultCipher,
-    [KEYS_KEY]: keys,
-    [LOGIN_RETRY_KEY]: loginRetryCount,
-    [LOGIN_RETRY_LOCKOUT_KEY]: loginRetryLockoutTime,
-    [LAST_ACTIVITY_TIME]: lastActivityTime,
-    [VAULT_SETTINGS]: settings,
-    [RECENT_RECIPIENT_PUBLIC_KEYS]: recentRecipientPublicKeys,
-    [CONTACTS_KEY]: contacts
-  } = (await storage.local.get([
-    VAULT_CIPHER_KEY,
-    KEYS_KEY,
-    LOGIN_RETRY_KEY,
-    LOGIN_RETRY_LOCKOUT_KEY,
-    LAST_ACTIVITY_TIME,
-    VAULT_SETTINGS,
-    RECENT_RECIPIENT_PUBLIC_KEYS,
-    CONTACTS_KEY
-  ])) as StorageState;
+  try {
+    // load selected state
+    const {
+      [VAULT_CIPHER_KEY]: vaultCipher,
+      [KEYS_KEY]: keys,
+      [LOGIN_RETRY_KEY]: loginRetryCount,
+      [LOGIN_RETRY_LOCKOUT_KEY]: loginRetryLockoutTime,
+      [LAST_ACTIVITY_TIME]: lastActivityTime,
+      [VAULT_SETTINGS]: settings,
+      [RECENT_RECIPIENT_PUBLIC_KEYS]: recentRecipientPublicKeys,
+      [CONTACTS_KEY]: contacts
+    } = (await storage.local.get([
+      VAULT_CIPHER_KEY,
+      KEYS_KEY,
+      LOGIN_RETRY_KEY,
+      LOGIN_RETRY_LOCKOUT_KEY,
+      LAST_ACTIVITY_TIME,
+      VAULT_SETTINGS,
+      RECENT_RECIPIENT_PUBLIC_KEYS,
+      CONTACTS_KEY
+    ])) as StorageState;
 
-  if (storeSingleton == null) {
-    if (isMockStateEnable) {
-      const { initialStateForPopupTests } = await import(
-        /* webpackMode: "eager" */ '@src/fixtures'
-      );
-      storeSingleton = createStore(initialStateForPopupTests as PopupState);
-    } else {
-      storeSingleton = createStore({
-        vaultCipher,
-        keys,
-        loginRetryCount,
-        loginRetryLockoutTime,
-        lastActivityTime,
-        settings,
-        recentRecipientPublicKeys,
-        contacts
+    if (storeSingleton == null) {
+      if (isMockStateEnable) {
+        const { initialStateForPopupTests } = await import(
+          /* webpackMode: "eager" */ '@src/fixtures'
+        );
+        storeSingleton = createStore(initialStateForPopupTests as PopupState);
+      } else {
+        storeSingleton = createStore({
+          vaultCipher,
+          keys,
+          loginRetryCount,
+          loginRetryLockoutTime,
+          lastActivityTime,
+          settings,
+          recentRecipientPublicKeys,
+          contacts
+        });
+      }
+      // send start action
+      storeSingleton.dispatch(startBackground());
+      // on updates propagate new state to replicas and also persist encrypted vault
+      storeSingleton.subscribe(() => {
+        const state = storeSingleton.getState();
+
+        // propagate state to replicas
+        const popupState = selectPopupState(state);
+        runtime.sendMessage(backgroundEvent.popupStateUpdated(popupState));
+
+        // persist selected state
+        const {
+          vaultCipher,
+          keys,
+          loginRetryCount,
+          loginRetryLockoutTime,
+          lastActivityTime,
+          settings,
+          recentRecipientPublicKeys,
+          contacts
+        } = state;
+        storage.local
+          .set({
+            [VAULT_CIPHER_KEY]: vaultCipher,
+            [KEYS_KEY]: keys,
+            [LOGIN_RETRY_KEY]: loginRetryCount,
+            [LOGIN_RETRY_LOCKOUT_KEY]: loginRetryLockoutTime,
+            [LAST_ACTIVITY_TIME]: lastActivityTime,
+            [VAULT_SETTINGS]: settings,
+            [RECENT_RECIPIENT_PUBLIC_KEYS]: recentRecipientPublicKeys,
+            [CONTACTS_KEY]: contacts
+          })
+          .catch(e => {
+            console.error('Persist encrypted vault failed: ', e);
+          });
       });
     }
-    // send start action
-    storeSingleton.dispatch(startBackground());
-    // on updates propagate new state to replicas and also persist encrypted vault
-    storeSingleton.subscribe(() => {
-      const state = storeSingleton.getState();
-
-      // propagate state to replicas
-      const popupState = selectPopupState(state);
-      runtime.sendMessage(backgroundEvent.popupStateUpdated(popupState));
-
-      // persist selected state
-      const {
-        vaultCipher,
-        keys,
-        loginRetryCount,
-        loginRetryLockoutTime,
-        lastActivityTime,
-        settings,
-        recentRecipientPublicKeys,
-        contacts
-      } = state;
-      storage.local
-        .set({
-          [VAULT_CIPHER_KEY]: vaultCipher,
-          [KEYS_KEY]: keys,
-          [LOGIN_RETRY_KEY]: loginRetryCount,
-          [LOGIN_RETRY_LOCKOUT_KEY]: loginRetryLockoutTime,
-          [LAST_ACTIVITY_TIME]: lastActivityTime,
-          [VAULT_SETTINGS]: settings,
-          [RECENT_RECIPIENT_PUBLIC_KEYS]: recentRecipientPublicKeys,
-          [CONTACTS_KEY]: contacts
-        })
-        .catch(e => {
-          console.error('Persist encrypted vault failed: ', e);
-        });
-    });
+  } catch (e) {
+    console.error('Failed to retrieve data from local storage: ', e);
   }
 
   return storeSingleton;
 }
 
 export function createMainStoreReplica<T extends PopupState>(state: T) {
-  const store = createStore(state);
-  return store;
+  return createStore(state);
 }
