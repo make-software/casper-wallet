@@ -9,7 +9,11 @@ import {
   windows
 } from 'webextension-polyfill';
 
-import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
+import {
+  getUrlOrigin,
+  hasHttpPrefix,
+  isEqualCaseInsensitive
+} from '@src/utils';
 
 import { CasperDeploy } from '@signature-request/pages/sign-deploy/deploy-types';
 
@@ -359,8 +363,7 @@ runtime.onMessage.addListener(
 
             const isDeployAlreadySigningWithThisAccount = deploy.approvals.some(
               approvals =>
-                approvals.signer.toLowerCase() ===
-                signingPublicKeyHex.toLowerCase()
+                isEqualCaseInsensitive(approvals.signer, signingPublicKeyHex)
             );
 
             if (isDeployAlreadySigningWithThisAccount) {

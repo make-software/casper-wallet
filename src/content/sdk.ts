@@ -11,6 +11,7 @@ import {
 export type SignatureResponse =
   | {
       cancelled: true; // if sign was cancelled
+      message?: string;
     }
   | {
       cancelled: false; // if sign was successfull
