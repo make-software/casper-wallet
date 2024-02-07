@@ -9,7 +9,13 @@ import {
   windows
 } from 'webextension-polyfill';
 
-import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
+import {
+  getUrlOrigin,
+  hasHttpPrefix,
+  isEqualCaseInsensitive
+} from '@src/utils';
+
+import { CasperDeploy } from '@signature-request/pages/sign-deploy/deploy-types';
 
 import {
   backgroundEvent,
@@ -353,12 +359,32 @@ runtime.onMessage.addListener(
               return sendError(Error('Desploy json string parse error'));
             }
 
+            const deploy: CasperDeploy = deployJson.deploy;
+
+            const isDeployAlreadySigningWithThisAccount = deploy.approvals.some(
+              approvals =>
+                isEqualCaseInsensitive(approvals.signer, signingPublicKeyHex)
+            );
+
+            if (isDeployAlreadySigningWithThisAccount) {
+              return sendResponse(
+                sdkMethod.signResponse(
+                  {
+                    cancelled: true,
+                    message: 'This deploy already sign by this account'
+                  },
+                  { requestId: action.meta.requestId }
+                )
+              );
+            }
+
             store.dispatch(
               deployPayloadReceived({
                 id: action.meta.requestId,
                 json: deployJson
               })
             );
+
             openWindow({
               windowApp: WindowApp.SignatureRequestDeploy,
               searchParams: {
