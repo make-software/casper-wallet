@@ -3,6 +3,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
+import { getSigningAccount } from '@src/utils';
+
 import { closeCurrentWindow } from '@background/close-current-window';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
@@ -73,9 +75,8 @@ export function SignDeployPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, renderDeps);
 
-  const signingAccount = accounts.find(
-    a => a.publicKey === signingPublicKeyHex
-  );
+  const signingAccount = getSigningAccount(accounts, signingPublicKeyHex);
+
   // signing account should exist in wallet
   if (signingAccount == null) {
     const error = Error('No signing account');
