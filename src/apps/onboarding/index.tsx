@@ -4,6 +4,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
 import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
+import { setCSPForSafari } from '@src/utils';
 
 import { AppRouter } from '@onboarding/app-router';
 
@@ -17,6 +18,8 @@ import { GlobalStyle, lightTheme } from '@libs/ui';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
+
+  setCSPForSafari();
 
   useSubscribeToRedux({
     windowInitAction: onboardingAppInit,
