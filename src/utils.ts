@@ -30,6 +30,7 @@ export const getUrlOrigin = (url: string | undefined) => {
 
 export const isSafariBuild = process.env.BROWSER === Browser.Safari;
 export const isFirefoxBuild = process.env.BROWSER === Browser.Firefox;
+export const isChromeBuild = process.env.BROWSER === Browser.Chrome;
 
 export const isValidU64 = (value?: string): boolean => {
   if (!value) {
@@ -322,3 +323,21 @@ export const getSigningAccount = (
   accounts.find(account =>
     isEqualCaseInsensitive(account.publicKey, signingPublicKeyHex)
   );
+
+export const setCSPForSafari = () => {
+  if (isSafariBuild) {
+    const metaTag = document.querySelector('[http-equiv]');
+
+    if (metaTag == null) {
+      const meta = document.createElement('meta');
+
+      meta.setAttribute('http-equiv', 'Content-Security-Policy');
+      meta.setAttribute(
+        'content',
+        `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://casper-testnet-node-proxy.make.services/rpc https://casper-node-proxy.make.services/rpc https://cspr-wallet-api.dev.make.services/ https://api.casperwallet.io/`
+      );
+
+      document.getElementsByTagName('head')[0].appendChild(meta);
+    }
+  }
+};

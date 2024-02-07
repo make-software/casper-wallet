@@ -9,6 +9,9 @@ export const backgroundEvent = {
 };
 
 export type BackgroundEvent = ActionType<typeof backgroundEvent>;
+export type popupStateUpdated = ActionType<
+  typeof backgroundEvent.popupStateUpdated
+>;
 
 export function isBackgroundEvent(action?: {
   type?: unknown;

@@ -27,7 +27,8 @@ const {
   isChrome,
   isSafari,
   ExtensionBuildPath,
-  ManifestPath
+  ManifestPath,
+  isFirefox
 } = require('./constants');
 
 const isDev = env.NODE_ENV === 'development';
@@ -60,6 +61,25 @@ const fileExtensions = [
 if (fileSystem.existsSync(secretsPath)) {
   alias['secrets'] = secretsPath;
 }
+
+const getCSP = () => {
+  const csp =
+    "default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://casper-testnet-node-proxy.make.services/rpc https://casper-node-proxy.make.services/rpc https://cspr-wallet-api.dev.make.services/ https://api.casperwallet.io/";
+
+  if (isFirefox) {
+    return csp;
+  }
+
+  if (isChrome) {
+    return isDev
+      ? {
+          extension_pages: `${csp} ws://localhost:8000/socketcluster/ ws://localhost:3001/ws`
+        }
+      : {
+          extension_pages: csp
+        };
+  }
+};
 
 const options = {
   experiments: {
@@ -193,15 +213,7 @@ const options = {
               version_name: pkg.version + ` (${commitHash.slice(0, 7)})`,
               author: pkg.author,
               description: pkg.description,
-              ...(isDev
-                ? isChrome
-                  ? {
-                      content_security_policy: {}
-                    }
-                  : {
-                      content_security_policy: ''
-                    }
-                : {})
+              content_security_policy: getCSP()
             };
             // Removing the key from manifest for Chrome production build
             if (isChrome && !isDev) {
