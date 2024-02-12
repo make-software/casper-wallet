@@ -106,5 +106,9 @@ export const initialStateForPopupTests: RootState = {
   contacts: {
     contacts: [],
     lastModified: null
+  },
+  rateApp: {
+    ratedInStore: false,
+    askForReviewAfter: null
   }
 };

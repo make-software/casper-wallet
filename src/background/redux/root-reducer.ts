@@ -7,6 +7,7 @@ import { reducer as keys } from './keys/reducer';
 import { reducer as lastActivityTime } from './last-activity-time/reducer';
 import { reducer as loginRetryCount } from './login-retry-count/reducer';
 import { reducer as loginRetryLockoutTime } from './login-retry-lockout-time/reducer';
+import { reducer as rateApp } from './rate-app/reducer';
 import { reducer as recentRecipientPublicKeys } from './recent-recipient-public-keys/reducer';
 import { reducer as session } from './session/reducer';
 import { reducer as settings } from './settings/reducer';
@@ -27,7 +28,8 @@ const rootReducer = combineReducers({
   settings,
   recentRecipientPublicKeys,
   accountInfo,
-  contacts
+  contacts,
+  rateApp
 });
 
 export default rootReducer;
