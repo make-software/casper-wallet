@@ -35,6 +35,7 @@ import {
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import { signAndDeploy } from '@libs/services/deployer-service';
 import { makeNativeTransferDeploy } from '@libs/services/transfer-service/transfer-service';
+import { Account } from '@libs/types/account';
 import { Button, HomePageTabsId, Typography } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useTransferForm } from '@libs/ui/forms/transfer';
@@ -169,6 +170,56 @@ export const TransferPage = () => {
     };
   }, [isSubmitButtonDisable, transferStep]);
 
+  const submitDeploy = (
+    deploy: DeployUtil.Deploy,
+    activeAccount: Account,
+    nodeUrl: string
+  ) => {
+    signAndDeploy(
+      deploy,
+      activeAccount.publicKey,
+      activeAccount.secretKey,
+      nodeUrl
+    ).then(resp => {
+      dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
+
+      if ('deploy_hash' in resp) {
+        let triesLeft = 10;
+        const interval = setInterval(async () => {
+          const { payload: extendedDeployInfo } =
+            await dispatchFetchExtendedDeploysInfo(resp.deploy_hash);
+          if (extendedDeployInfo) {
+            dispatchToMainStore(
+              accountPendingTransactionsChanged(extendedDeployInfo)
+            );
+            clearInterval(interval);
+          } else if (triesLeft === 0) {
+            clearInterval(interval);
+          }
+
+          triesLeft--;
+          //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
+        }, 2000);
+
+        setTransferStep(TransactionSteps.Success);
+      } else {
+        navigate(
+          ErrorPath,
+          createErrorLocationState({
+            errorHeaderText: resp.message || t('Something went wrong'),
+            errorContentText:
+              resp.data ||
+              t(
+                'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+              ),
+            errorPrimaryButtonLabel: t('Close'),
+            errorRedirectPath: RouterPath.Home
+          })
+        );
+      }
+    });
+  };
+
   const onSubmitSending = () => {
     if (activeAccount) {
       const publicKeyFromHex = (publicKeyHex: string) => {
@@ -210,47 +261,7 @@ export const TransferPage = () => {
           tempDeploy.payment
         );
 
-        signAndDeploy(
-          deploy,
-          activeAccount.publicKey,
-          activeAccount.secretKey,
-          nodeUrl
-        ).then(({ deploy_hash }) => {
-          dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
-
-          if (deploy_hash != null) {
-            let triesLeft = 10;
-            const interval = setInterval(async () => {
-              const { payload: extendedDeployInfo } =
-                await dispatchFetchExtendedDeploysInfo(deploy_hash);
-              if (extendedDeployInfo) {
-                dispatchToMainStore(
-                  accountPendingTransactionsChanged(extendedDeployInfo)
-                );
-                clearInterval(interval);
-              } else if (triesLeft === 0) {
-                clearInterval(interval);
-              }
-
-              triesLeft--;
-              //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-            }, 2000);
-
-            setTransferStep(TransactionSteps.Success);
-          } else {
-            navigate(
-              ErrorPath,
-              createErrorLocationState({
-                errorHeaderText: t('Something went wrong'),
-                errorContentText: t(
-                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                ),
-                errorPrimaryButtonLabel: t('Close'),
-                errorRedirectPath: RouterPath.Home
-              })
-            );
-          }
-        });
+        submitDeploy(deploy, activeAccount, nodeUrl);
       } else {
         // CSPR transfer
         const motesAmount = CSPRtoMotes(amount);
@@ -263,47 +274,7 @@ export const TransferPage = () => {
           transferIdMemo
         );
 
-        signAndDeploy(
-          deploy,
-          activeAccount.publicKey,
-          activeAccount.secretKey,
-          nodeUrl
-        ).then(({ deploy_hash }) => {
-          dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
-
-          if (deploy_hash != null) {
-            let triesLeft = 10;
-            const interval = setInterval(async () => {
-              const { payload: extendedDeployInfo } =
-                await dispatchFetchExtendedDeploysInfo(deploy_hash);
-              if (extendedDeployInfo) {
-                dispatchToMainStore(
-                  accountPendingTransactionsChanged(extendedDeployInfo)
-                );
-                clearInterval(interval);
-              } else if (triesLeft === 0) {
-                clearInterval(interval);
-              }
-
-              triesLeft--;
-              //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-            }, 2000);
-
-            setTransferStep(TransactionSteps.Success);
-          } else {
-            navigate(
-              ErrorPath,
-              createErrorLocationState({
-                errorHeaderText: t('Something went wrong'),
-                errorContentText: t(
-                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                ),
-                errorPrimaryButtonLabel: t('Close'),
-                errorRedirectPath: RouterPath.Home
-              })
-            );
-          }
-        });
+        submitDeploy(deploy, activeAccount, nodeUrl);
       }
     }
   };
