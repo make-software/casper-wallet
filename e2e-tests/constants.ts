@@ -5,8 +5,14 @@ export const twentyFourWordsSecretPhrase =
   'hold matrix spider subway bottom jazz charge fire lawn valley stay coil moral hospital dream cycle multiply december agree huge major tower devote old';
 export const twelveWordsSecretPhrase =
   'small vendor member cry motion lava hurdle gravity cry sentence medal seminar';
-export const secretKeyPath = path.join(__dirname, './account_secret_key.pem');
-export const secretCerKeyPath = path.join(__dirname, './cer_secret_key.cer');
+export const secretKeyPathForPEM = path.join(
+  __dirname,
+  './account_secret_key.pem'
+);
+export const secretKeyPathForCER = path.join(
+  __dirname,
+  './account_secret_key.cer'
+);
 
 export const ACCOUNT_NAMES = {
   defaultFirstAccountName: 'Account 1',

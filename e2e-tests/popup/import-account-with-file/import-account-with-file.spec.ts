@@ -2,8 +2,8 @@ import {
   ACCOUNT_NAMES,
   IMPORTED_CER_ACCOUNT,
   IMPORTED_PEM_ACCOUNT,
-  secretCerKeyPath,
-  secretKeyPath
+  secretKeyPathForCER,
+  secretKeyPathForPEM
 } from '../../constants';
 import { popup, popupExpect } from '../../fixtures';
 
@@ -33,7 +33,7 @@ popup.describe('Popup UI: import account with file', () => {
         .click();
 
       const fileChooser = await fileChooserPromise;
-      await fileChooser.setFiles(secretKeyPath);
+      await fileChooser.setFiles(secretKeyPathForPEM);
 
       await importAccountPage
         .getByPlaceholder('Account name', { exact: true })
@@ -87,7 +87,7 @@ popup.describe('Popup UI: import account with file', () => {
         .click();
 
       const fileChooser = await fileChooserPromise;
-      await fileChooser.setFiles(secretCerKeyPath);
+      await fileChooser.setFiles(secretKeyPathForCER);
 
       await importAccountPage
         .getByPlaceholder('Account name', { exact: true })
