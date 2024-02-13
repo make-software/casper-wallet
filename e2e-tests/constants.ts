@@ -6,23 +6,33 @@ export const twentyFourWordsSecretPhrase =
 export const twelveWordsSecretPhrase =
   'small vendor member cry motion lava hurdle gravity cry sentence medal seminar';
 export const secretKeyPath = path.join(__dirname, './account_secret_key.pem');
+export const secretCerKeyPath = path.join(__dirname, './cer_secret_key.cer');
 
 export const ACCOUNT_NAMES = {
   defaultFirstAccountName: 'Account 1',
   defaultSecondAccountName: 'Account 2',
   createdAccountName: 'New account 1',
-  importedAccountName: 'Imported account',
-  renamedAccountName: 'Renamed account'
+  importedPemAccountName: 'Imported pem account',
+  renamedAccountName: 'Renamed account',
+  importedCerAccountName: 'Imported cer account'
 };
 
 export const PLAYGROUND_URL = 'https://casper-wallet-playground.make.services/';
 
-export const IMPORTED_ACCOUNT = {
-  accountName: ACCOUNT_NAMES.importedAccountName,
+export const IMPORTED_PEM_ACCOUNT = {
+  accountName: ACCOUNT_NAMES.importedPemAccountName,
   publicKey:
     '0184f6d260f4ee6869ddb36affe15456de6ae045278fa2f467bb677561ce0dad55',
   truncatedPublicKey: '0184f...dad55',
   mediumTruncatedPublicKey: '0184f6d260...561ce0dad55'
+};
+
+export const IMPORTED_CER_ACCOUNT = {
+  accountName: ACCOUNT_NAMES.importedCerAccountName,
+  publicKey:
+    '01a8d1042fa244f39fe4caa1660fc6dce522b3afe649dbe61f7d16e240168e6ff2',
+  truncatedPublicKey: '01a8d...e6ff2',
+  mediumTruncatedPublicKey: '01a8d1042f...40168e6ff2'
 };
 
 export const DEFAULT_FIRST_ACCOUNT = {
