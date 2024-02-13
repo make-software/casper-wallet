@@ -38,9 +38,7 @@ const buildDir = isChrome
   ? ExtensionBuildPath.Chrome
   : ExtensionBuildPath.Firefox;
 
-const alias = {
-  'react-dom': '@hot-loader/react-dom'
-};
+const alias = {};
 
 // load the secrets
 const secretsPath = path.join(__dirname, 'secrets.' + env.NODE_ENV + '.js');

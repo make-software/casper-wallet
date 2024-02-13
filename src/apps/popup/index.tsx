@@ -1,5 +1,5 @@
 import React, { Suspense, useState } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 // skeleton styles
 import 'react-loading-skeleton/dist/skeleton.css';
 import { Provider as ReduxProvider } from 'react-redux';
@@ -69,4 +69,7 @@ const Tree = () => {
   );
 };
 
-render(<Tree />, document.querySelector('#app-container'));
+const container = document.querySelector('#app-container');
+const root = createRoot(container!);
+
+root.render(<Tree />);
