@@ -36,7 +36,7 @@ export const ContactDetails = ({ contact }: ContactDetailsProps) => {
     <ContentContainer>
       <Tile>
         <Container>
-          <Avatar publicKey={contact.publicKey} size={89} />
+          <Avatar publicKey={contact.publicKey} size={88} borderRadius={12} />
           <LeftAlignedFlexColumn gap={SpacingSize.Large}>
             <Typography type="header">{contact.name}</Typography>
             <Hash
