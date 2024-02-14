@@ -44,6 +44,7 @@ interface DelegateStakePageContentProps {
   setStakeAmount: React.Dispatch<React.SetStateAction<string>>;
   validatorList: ValidatorResultWithId[] | null;
   undelegateValidatorList: ValidatorResultWithId[] | null;
+  loading: boolean;
 }
 
 export const StakesPageContent = ({
@@ -60,7 +61,8 @@ export const StakesPageContent = ({
   stakeAmountMotes,
   setStakeAmount,
   validatorList,
-  undelegateValidatorList
+  undelegateValidatorList,
+  loading
 }: DelegateStakePageContentProps) => {
   const { t } = useTranslation();
 
@@ -87,6 +89,7 @@ export const StakesPageContent = ({
             setValidator={setValidator}
             setStakeAmount={setStakeAmount}
             stakesType={stakesType}
+            loading={loading}
           />
         </Step>
       );
