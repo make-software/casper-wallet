@@ -25,16 +25,12 @@ import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import {
-  CenteredFlexRow,
-  ContentContainer,
   ErrorPath,
   FooterButtonsContainer,
   HeaderPopup,
   HeaderSubmenuBarNavLink,
-  ParagraphContainer,
   PopupLayout,
   SpaceBetweenFlexRow,
-  SpacingSize,
   createErrorLocationState
 } from '@libs/layout';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
@@ -401,32 +397,10 @@ export const StakesPage = () => {
 
   const confirmButtonText = useConfirmationButtonText(stakesType);
 
-  if (loading) {
-    return (
-      <PopupLayout
-        renderHeader={() => (
-          <HeaderPopup withNetworkSwitcher withMenu withConnectionStatus />
-        )}
-        renderContent={() => (
-          <ContentContainer>
-            <ParagraphContainer top={SpacingSize.XL}>
-              <CenteredFlexRow>
-                <Typography type="body">
-                  <Trans t={t}>Loading...</Trans>
-                </Typography>
-              </CenteredFlexRow>
-            </ParagraphContainer>
-          </ContentContainer>
-        )}
-      />
-    );
-  }
-
   if (
     (stakesType === AuctionManagerEntryPoint.undelegate ||
       stakesType === AuctionManagerEntryPoint.redelegate) &&
-    undelegateValidatorList !== null &&
-    undelegateValidatorList.length === 0
+    (csprBalance.delegatedMotes == null || csprBalance.delegatedMotes === '0')
   ) {
     return (
       <PopupLayout
@@ -485,6 +459,7 @@ export const StakesPage = () => {
           setStakeAmount={setStakeAmountMotes}
           validatorList={validatorList}
           undelegateValidatorList={undelegateValidatorList}
+          loading={loading}
         />
       )}
       renderFooter={() => (
