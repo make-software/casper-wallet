@@ -263,6 +263,8 @@ export const StakesPage = () => {
           }
         })
         .catch(error => {
+          console.error(error, 'staking request error');
+
           navigate(
             ErrorPath,
             createErrorLocationState({

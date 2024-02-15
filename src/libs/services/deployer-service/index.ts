@@ -54,7 +54,7 @@ export const signAndDeploy = (
   return casperService(url)
     .deploy(signedDeploy)
     .catch((error: RPCErrorResponse) => {
-      console.log(error, 'error');
+      console.error(error, 'deploy request error');
       return error;
     });
 };

@@ -176,6 +176,8 @@ export const TransferNftPage = () => {
           }
         })
         .catch(error => {
+          console.error(error, 'nft transfer request error');
+
           navigate(
             ErrorPath,
             createErrorLocationState({
