@@ -9,3 +9,4 @@ export * from './vault-cipher/selectors';
 export * from './windowManagement/selectors';
 export * from './settings/selectors';
 export * from './recent-recipient-public-keys/selectors';
+export * from './rate-app/selectors';

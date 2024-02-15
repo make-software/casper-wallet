@@ -20,6 +20,7 @@ import { HomePageContent } from '@popup/pages/home';
 import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
 import { NftDetailsPage } from '@popup/pages/nft-details';
 import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
+import { RateAppPage } from '@popup/pages/rate-app';
 import { ReceivePage } from '@popup/pages/receive';
 import { RemoveAccountPageContent } from '@popup/pages/remove-account';
 import { RenameAccountPageContent } from '@popup/pages/rename-account';
@@ -277,6 +278,7 @@ function AppRoutes() {
         path={RouterPath.ContactDetails}
         element={<ContactDetailsPage />}
       />
+      <Route path={RouterPath.RateApp} element={<RateAppPage />} />
     </Routes>
   );
 }

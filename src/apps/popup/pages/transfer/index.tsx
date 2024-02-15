@@ -18,6 +18,10 @@ import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
+import {
+  selectAskForReviewAfter,
+  selectRatedInStore
+} from '@background/redux/rate-app/selectors';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
@@ -74,6 +78,8 @@ export const TransferPage = () => {
   );
   const csprBalance = useSelector(selectAccountBalance);
   const contactPublicKeys = useSelector(selectAllPublicKeys);
+  const ratedInStore = useSelector(selectRatedInStore);
+  const askForReviewAfter = useSelector(selectAskForReviewAfter);
 
   const { tokens } = useActiveAccountErc20Tokens();
 
@@ -357,12 +363,25 @@ export const TransferPage = () => {
       case TransactionSteps.Success: {
         return {
           onClick: () => {
-            navigate(RouterPath.Home, {
-              state: {
-                // set the active tab to deploys
-                activeTabId: HomePageTabsId.Deploys
-              }
-            });
+            const currentDate = Date.now();
+
+            const shouldAskForReview =
+              askForReviewAfter == null || currentDate < askForReviewAfter;
+
+            if (ratedInStore || !shouldAskForReview) {
+              const homeRoutesState = {
+                state: {
+                  // set the active tab to deploys
+                  activeTabId: HomePageTabsId.Deploys
+                }
+              };
+
+              // Navigate to "Home" with the pre-defined state
+              navigate(RouterPath.Home, homeRoutesState);
+            } else {
+              // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
+              navigate(RouterPath.RateApp);
+            }
           }
         };
       }
