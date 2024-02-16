@@ -57,8 +57,8 @@ export enum CasperClarityApiUrl {
 }
 
 export enum CasperWalletApiUrl {
-  MainnetUrl = 'https://api.casperwallet.io',
-  TestnetUrl = 'https://cspr-wallet-api.dev.make.services'
+  MainnetUrl = 'https://api.mainnet.casperwallet.io',
+  TestnetUrl = 'https://api.testnet.casperwallet.io'
 }
 
 export enum NetworkSetting {
