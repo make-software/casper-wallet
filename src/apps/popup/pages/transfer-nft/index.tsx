@@ -148,49 +148,56 @@ export const TransferNftPage = () => {
         [KEYS]
       );
 
-      signDeploy.send(nodeUrl).then((deployHash: string) => {
-        dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
+      signDeploy
+        .send(nodeUrl)
+        .then((deployHash: string) => {
+          dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
-        if (deployHash) {
-          dispatchToMainStore(
-            accountTrackingIdOfSentNftTokensChanged({
-              trackingId: nftToken.tracking_id,
-              deployHash
-            })
-          );
+          if (deployHash) {
+            dispatchToMainStore(
+              accountTrackingIdOfSentNftTokensChanged({
+                trackingId: nftToken.tracking_id,
+                deployHash
+              })
+            );
 
-          let triesLeft = 10;
-          const interval = setInterval(async () => {
-            const { payload: extendedDeployInfo } =
-              await dispatchFetchExtendedDeploysInfo(deployHash);
-            if (extendedDeployInfo) {
-              dispatchToMainStore(
-                accountPendingTransactionsChanged(extendedDeployInfo)
-              );
-              clearInterval(interval);
-            } else if (triesLeft === 0) {
-              clearInterval(interval);
-            }
+            let triesLeft = 10;
+            const interval = setInterval(async () => {
+              const { payload: extendedDeployInfo } =
+                await dispatchFetchExtendedDeploysInfo(deployHash);
+              if (extendedDeployInfo) {
+                dispatchToMainStore(
+                  accountPendingTransactionsChanged(extendedDeployInfo)
+                );
+                clearInterval(interval);
+              } else if (triesLeft === 0) {
+                clearInterval(interval);
+              }
 
-            triesLeft--;
-            //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-          }, 2000);
+              triesLeft--;
+              //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
+            }, 2000);
 
-          setShowSuccessScreen(true);
-        } else {
+            setShowSuccessScreen(true);
+          }
+        })
+        .catch(error => {
+          console.error(error, 'nft transfer request error');
+
           navigate(
             ErrorPath,
             createErrorLocationState({
-              errorHeaderText: t('Something went wrong'),
-              errorContentText: t(
-                'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-              ),
+              errorHeaderText: error.message || t('Something went wrong'),
+              errorContentText:
+                error.data ||
+                t(
+                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                ),
               errorPrimaryButtonLabel: t('Close'),
               errorRedirectPath: RouterPath.Home
             })
           );
-        }
-      });
+        });
     }
   };
 

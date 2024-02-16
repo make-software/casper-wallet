@@ -13,7 +13,7 @@ import { AuctionManagerEntryPoint, STAKE_COST_MOTES } from '@src/constants';
 import { signDeploy } from '@libs/crypto';
 import { getRawPublicKey } from '@libs/entities/Account';
 
-import { RPCResponse } from './types';
+import { RPCErrorResponse, RPCResponse } from './types';
 
 const casperService = (url: string) => new CasperServiceByJsonRPC(url);
 
@@ -36,7 +36,7 @@ export const signAndDeploy = (
   senderPublicKeyHex: string,
   senderSecretKeyHex: string,
   url: string
-): Promise<RPCResponse> => {
+): Promise<RPCResponse | RPCErrorResponse> => {
   const signature = signDeploy(
     deploy.hash,
     senderPublicKeyHex,
@@ -51,11 +51,9 @@ export const signAndDeploy = (
 
   return casperService(url)
     .deploy(signedDeploy)
-    .then(function (res) {
-      return res;
-    })
-    .catch(error => {
-      throw error;
+    .catch((error: RPCErrorResponse) => {
+      console.error(error, 'deploy request error');
+      return error;
     });
 };
 

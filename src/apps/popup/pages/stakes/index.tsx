@@ -240,40 +240,47 @@ export const StakesPage = () => {
 
       const signDeploy = deploy.sign([KEYS]);
 
-      signDeploy.send(nodeUrl).then((deployHash: string) => {
-        if (deployHash) {
-          let triesLeft = 10;
-          const interval = setInterval(async () => {
-            const { payload: extendedDeployInfo } =
-              await dispatchFetchExtendedDeploysInfo(deployHash);
-            if (extendedDeployInfo) {
-              dispatchToMainStore(
-                accountPendingTransactionsChanged(extendedDeployInfo)
-              );
-              clearInterval(interval);
-            } else if (triesLeft === 0) {
-              clearInterval(interval);
-            }
+      signDeploy
+        .send(nodeUrl)
+        .then((deployHash: string) => {
+          if (deployHash) {
+            let triesLeft = 10;
+            const interval = setInterval(async () => {
+              const { payload: extendedDeployInfo } =
+                await dispatchFetchExtendedDeploysInfo(deployHash);
+              if (extendedDeployInfo) {
+                dispatchToMainStore(
+                  accountPendingTransactionsChanged(extendedDeployInfo)
+                );
+                clearInterval(interval);
+              } else if (triesLeft === 0) {
+                clearInterval(interval);
+              }
 
-            triesLeft--;
-            //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-          }, 2000);
+              triesLeft--;
+              //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
+            }, 2000);
 
-          setStakeStep(StakeSteps.Success);
-        } else {
+            setStakeStep(StakeSteps.Success);
+          }
+        })
+        .catch(error => {
+          console.error(error, 'staking request error');
+
           navigate(
             ErrorPath,
             createErrorLocationState({
-              errorHeaderText: t('Something went wrong'),
-              errorContentText: t(
-                'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-              ),
+              errorHeaderText: error.message || t('Something went wrong'),
+              errorContentText:
+                error.data ||
+                t(
+                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                ),
               errorPrimaryButtonLabel: t('Close'),
               errorRedirectPath: RouterPath.Home
             })
           );
-        }
-      });
+        });
     }
   };
 
