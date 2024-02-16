@@ -46,9 +46,7 @@ export const signAndDeploy = (
   const signedDeploy = DeployUtil.setSignature(
     deploy,
     signature,
-    CLPublicKey.fromHex(
-      '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5'
-    )
+    CLPublicKey.fromHex(senderPublicKeyHex)
   );
 
   return casperService(url)
