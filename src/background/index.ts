@@ -60,6 +60,10 @@ import {
   CheckSecretKeyExistAction
 } from '@background/redux/import-account-actions-should-be-removed';
 import {
+  askForReviewAfterChanged,
+  ratedInStoreChanged
+} from '@background/redux/rate-app/actions';
+import {
   accountAdded,
   accountDisconnected,
   accountImported,
@@ -614,6 +618,8 @@ runtime.onMessage.addListener(
           case getType(contactEditingPermissionChanged):
           case getType(contactUpdated):
           case getType(contactsReseted):
+          case getType(ratedInStoreChanged):
+          case getType(askForReviewAfterChanged):
             store.dispatch(action);
             return sendResponse(undefined);
 

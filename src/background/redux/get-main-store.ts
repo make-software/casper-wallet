@@ -7,6 +7,7 @@ import { createStore } from '@background/redux/index';
 import { KeysState } from '@background/redux/keys/types';
 import { LoginRetryCountState } from '@background/redux/login-retry-count/reducer';
 import { LoginRetryLockoutTimeState } from '@background/redux/login-retry-lockout-time/types';
+import { RateAppState } from '@background/redux/rate-app/types';
 import { RecentRecipientPublicKeysState } from '@background/redux/recent-recipient-public-keys/types';
 import { startBackground } from '@background/redux/sagas/actions';
 import { SettingsState } from '@background/redux/settings/types';
@@ -20,6 +21,7 @@ export const LAST_ACTIVITY_TIME = 'j8d1dusn76EdD';
 export const VAULT_SETTINGS = 'Nmxd8BZh93MHua';
 export const RECENT_RECIPIENT_PUBLIC_KEYS = '7c2WyRuGhEtaDX';
 export const CONTACTS_KEY = 'teuwe6zH3A72gc';
+export const RATE_APP = 'p4cGYubbwnd9ke';
 
 type StorageState = {
   [VAULT_CIPHER_KEY]: string;
@@ -30,6 +32,7 @@ type StorageState = {
   [VAULT_SETTINGS]: SettingsState;
   [RECENT_RECIPIENT_PUBLIC_KEYS]: RecentRecipientPublicKeysState;
   [CONTACTS_KEY]: ContactsState;
+  [RATE_APP]: RateAppState;
 };
 // this needs to be private
 let storeSingleton: ReturnType<typeof createStore>;
@@ -50,7 +53,8 @@ export const selectPopupState = (state: RootState): PopupState => {
     settings: state.settings,
     recentRecipientPublicKeys: state.recentRecipientPublicKeys,
     accountInfo: state.accountInfo,
-    contacts: state.contacts
+    contacts: state.contacts,
+    rateApp: state.rateApp
   };
 };
 
@@ -68,7 +72,8 @@ export async function getExistingMainStoreSingletonOrInit() {
       [LAST_ACTIVITY_TIME]: lastActivityTime,
       [VAULT_SETTINGS]: settings,
       [RECENT_RECIPIENT_PUBLIC_KEYS]: recentRecipientPublicKeys,
-      [CONTACTS_KEY]: contacts
+      [CONTACTS_KEY]: contacts,
+      [RATE_APP]: rateApp
     } = (await storage.local.get([
       VAULT_CIPHER_KEY,
       KEYS_KEY,
@@ -77,7 +82,8 @@ export async function getExistingMainStoreSingletonOrInit() {
       LAST_ACTIVITY_TIME,
       VAULT_SETTINGS,
       RECENT_RECIPIENT_PUBLIC_KEYS,
-      CONTACTS_KEY
+      CONTACTS_KEY,
+      RATE_APP
     ])) as StorageState;
 
     if (storeSingleton == null) {
@@ -95,7 +101,8 @@ export async function getExistingMainStoreSingletonOrInit() {
           lastActivityTime,
           settings,
           recentRecipientPublicKeys,
-          contacts
+          contacts,
+          rateApp
         });
       }
       // send start action
@@ -117,7 +124,8 @@ export async function getExistingMainStoreSingletonOrInit() {
           lastActivityTime,
           settings,
           recentRecipientPublicKeys,
-          contacts
+          contacts,
+          rateApp
         } = state;
         storage.local
           .set({
@@ -128,7 +136,8 @@ export async function getExistingMainStoreSingletonOrInit() {
             [LAST_ACTIVITY_TIME]: lastActivityTime,
             [VAULT_SETTINGS]: settings,
             [RECENT_RECIPIENT_PUBLIC_KEYS]: recentRecipientPublicKeys,
-            [CONTACTS_KEY]: contacts
+            [CONTACTS_KEY]: contacts,
+            [RATE_APP]: rateApp
           })
           .catch(e => {
             console.error('Persist encrypted vault failed: ', e);

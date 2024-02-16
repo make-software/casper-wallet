@@ -59,7 +59,7 @@ export function ImportAccountWithFileUploadPageContent({
       <InputsContainer>
         <Input
           type="file"
-          accept=".pem"
+          accept="application/x-x509-ca-cert"
           prefixIcon={<SvgIcon src="assets/icons/file.svg" />}
           suffixIcon={
             isFileLoaded && (

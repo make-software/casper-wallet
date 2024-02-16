@@ -15,22 +15,22 @@ import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
+import {
+  selectAskForReviewAfter,
+  selectRatedInStore
+} from '@background/redux/rate-app/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import {
-  CenteredFlexRow,
-  ContentContainer,
   ErrorPath,
   FooterButtonsContainer,
   HeaderPopup,
   HeaderSubmenuBarNavLink,
-  ParagraphContainer,
   PopupLayout,
   SpaceBetweenFlexRow,
-  SpacingSize,
   createErrorLocationState
 } from '@libs/layout';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
@@ -76,6 +76,8 @@ export const StakesPage = () => {
     casperClarityApiUrl
   } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const csprBalance = useSelector(selectAccountBalance);
+  const ratedInStore = useSelector(selectRatedInStore);
+  const askForReviewAfter = useSelector(selectAskForReviewAfter);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -344,12 +346,26 @@ export const StakesPage = () => {
       case StakeSteps.Success: {
         return {
           onClick: () => {
-            navigate(RouterPath.Home, {
-              state: {
-                // set the active tab to deploys
-                activeTabId: HomePageTabsId.Deploys
-              }
-            });
+            const currentDate = Date.now();
+
+            const shouldAskForReview =
+              askForReviewAfter == null || currentDate < askForReviewAfter;
+
+            if (ratedInStore || !shouldAskForReview) {
+              const homeRoutesState = {
+                state: {
+                  // set the active tab to deploys
+                  activeTabId: HomePageTabsId.Deploys
+                }
+              };
+
+              // Navigate "Home" with the pre-defined state
+              navigate(RouterPath.Home, homeRoutesState);
+            } else {
+              // Navigate to "RateApp" when the application has not been rated in the store,
+              // and it's time to ask for a review.
+              navigate(RouterPath.RateApp);
+            }
           }
         };
       }
@@ -388,32 +404,10 @@ export const StakesPage = () => {
 
   const confirmButtonText = useConfirmationButtonText(stakesType);
 
-  if (loading) {
-    return (
-      <PopupLayout
-        renderHeader={() => (
-          <HeaderPopup withNetworkSwitcher withMenu withConnectionStatus />
-        )}
-        renderContent={() => (
-          <ContentContainer>
-            <ParagraphContainer top={SpacingSize.XL}>
-              <CenteredFlexRow>
-                <Typography type="body">
-                  <Trans t={t}>Loading...</Trans>
-                </Typography>
-              </CenteredFlexRow>
-            </ParagraphContainer>
-          </ContentContainer>
-        )}
-      />
-    );
-  }
-
   if (
     (stakesType === AuctionManagerEntryPoint.undelegate ||
       stakesType === AuctionManagerEntryPoint.redelegate) &&
-    undelegateValidatorList !== null &&
-    undelegateValidatorList.length === 0
+    (csprBalance.delegatedMotes == null || csprBalance.delegatedMotes === '0')
   ) {
     return (
       <PopupLayout
@@ -472,6 +466,7 @@ export const StakesPage = () => {
           setStakeAmount={setStakeAmountMotes}
           validatorList={validatorList}
           undelegateValidatorList={undelegateValidatorList}
+          loading={loading}
         />
       )}
       renderFooter={() => (

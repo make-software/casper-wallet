@@ -65,7 +65,7 @@
     "base64-loader": "1.0.0",
     "big.js": "^6.2.1",
     "casper-cep18-js-client": "1.0.2",
-    "casper-js-sdk": "2.14.0",
+    "casper-js-sdk": "2.15.4",
     "date-fns": "^2.30.0",
     "i18next": "^23.5.1",
     "i18next-browser-languagedetector": "^6.1.5",

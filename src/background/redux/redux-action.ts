@@ -7,6 +7,7 @@ import * as keys from './keys/actions';
 import * as lastActivityTime from './last-activity-time/actions';
 import * as loginRetryCount from './login-retry-count/actions';
 import * as loginRetryLockoutTime from './login-retry-lockout-time/actions';
+import * as rateApp from './rate-app/actions';
 import * as recentRecipientPublicKeys from './recent-recipient-public-keys/actions';
 import * as sagas from './sagas/actions';
 import * as session from './session/actions';
@@ -29,7 +30,8 @@ const reduxAction = {
   settings,
   recentRecipientPublicKeys,
   accountInfo,
-  contacts
+  contacts,
+  rateApp
 };
 
 export type ReduxAction = ActionType<typeof reduxAction>;
