@@ -30,7 +30,7 @@
       ]
     },
     "condition": {
-      "urlFilter": "https://cspr-wallet-api.dev.make.services"
+      "urlFilter": "https://api.testnet.casperwallet.io"
     }
   },
   {
@@ -47,7 +47,7 @@
       ]
     },
     "condition": {
-      "urlFilter": "https://api.casperwallet.io"
+      "urlFilter": "https://api.mainnet.casperwallet.io"
     }
   }
 ]

@@ -62,7 +62,7 @@ if (fileSystem.existsSync(secretsPath)) {
 
 const getCSP = () => {
   const csp =
-    "default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://casper-testnet-node-proxy.make.services/rpc https://casper-node-proxy.make.services/rpc https://cspr-wallet-api.dev.make.services/ https://api.casperwallet.io/";
+    "default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://casper-testnet-node-proxy.make.services/rpc https://casper-node-proxy.make.services/rpc https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/";
 
   if (isFirefox) {
     return csp;
