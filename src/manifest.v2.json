@@ -15,8 +15,8 @@
     "https://casper-assets.s3.amazonaws.com/*",
     "https://casper-testnet-node-proxy.make.services/*",
     "https://casper-node-proxy.make.services/*",
-    "https://cspr-wallet-api.dev.make.services/*",
-    "https://api.casperwallet.io/*"
+    "https://api.testnet.casperwallet.io/*",
+    "https://api.mainnet.casperwallet.io/*"
   ],
   "declarative_net_request": {
     "rule_resources": [

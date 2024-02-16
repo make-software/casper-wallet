@@ -13,8 +13,8 @@
     "tabs",
     "declarativeNetRequest",
     "https://image-proxy-cdn.make.services/*",
-    "https://cspr-wallet-api.dev.make.services/*",
-    "https://api.casperwallet.io/*"
+    "https://api.testnet.casperwallet.io/*",
+    "https://api.mainnet.casperwallet.io/*"
   ],
   "declarative_net_request": {
     "rule_resources": [
