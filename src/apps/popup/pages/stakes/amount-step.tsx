@@ -1,11 +1,15 @@
 import Big from 'big.js';
 import React, { useEffect, useState } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { AuctionManagerEntryPoint, STAKE_COST_MOTES } from '@src/constants';
+import {
+  AuctionManagerEntryPoint,
+  DELEGATION_MIN_AMOUNT_MOTES,
+  STAKE_COST_MOTES
+} from '@src/constants';
 
 import {
   selectAccountBalance,
@@ -22,8 +26,8 @@ import { Error, Input, Typography } from '@libs/ui/components';
 import { StakeAmountFormValues } from '@libs/ui/forms/stakes-form';
 import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils';
 
-const StakeMaxButton = styled(AlignedFlexRow)`
-  cursor: pointer;
+const StakeMaxButton = styled(AlignedFlexRow)<{ disabled: boolean }>`
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 `;
 
 interface AmountStepProps {
@@ -42,6 +46,7 @@ export const AmountStep = ({
   amountStepMaxAmountValue
 }: AmountStepProps) => {
   const [maxAmountMotes, setMaxAmountMotes] = useState('0');
+  const [disabled, setDisabled] = useState(false);
 
   const { t } = useTranslation();
 
@@ -55,8 +60,12 @@ export const AmountStep = ({
           csprBalance.liquidMotes == null
             ? '0'
             : Big(csprBalance.liquidMotes).sub(STAKE_COST_MOTES).toString();
+        const hasEnoughBalance = Big(maxAmountMotes).gte(
+          DELEGATION_MIN_AMOUNT_MOTES
+        );
 
         setMaxAmountMotes(maxAmountMotes);
+        setDisabled(!hasEnoughBalance);
         break;
       }
       case AuctionManagerEntryPoint.undelegate:
@@ -87,6 +96,17 @@ export const AmountStep = ({
 
   return (
     <>
+      {disabled && (
+        <ParagraphContainer top={SpacingSize.Small}>
+          <Typography type="body" color="contentActionCritical">
+            <Trans t={t}>
+              You don't have enough CSPR to cover the delegate minimum amount
+              and the transaction fee.
+            </Trans>
+          </Typography>
+        </ParagraphContainer>
+      )}
+
       <VerticalSpaceContainer top={SpacingSize.XXL}>
         <Input
           label={amountLabel}
@@ -107,7 +127,10 @@ export const AmountStep = ({
       <ParagraphContainer top={SpacingSize.Small}>
         <StakeMaxButton
           gap={SpacingSize.Small}
+          disabled={disabled}
           onClick={() => {
+            if (disabled) return;
+
             setValue('amount', motesToCSPR(maxAmountMotes));
             trigger('amount');
           }}
