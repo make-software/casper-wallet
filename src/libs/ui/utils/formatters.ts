@@ -174,10 +174,17 @@ export const motesToCurrency = (
     throw new Error('motesToCurrency: the CSPR rate cannot be zero');
   }
 
-  return Big(motes)
-    .div(MOTES_PER_CSPR_RATE)
-    .mul(currencyPerCsprRate)
-    .toString();
+  const amount = Big(motes).div(MOTES_PER_CSPR_RATE).mul(currencyPerCsprRate);
+
+  const billion = new Big(10).pow(9);
+
+  if (amount.gte(billion)) {
+    // If the value is greater than or equal to 10^9, return empty string.
+    // TODO: Clarify future behavior for large fiat amount
+    return '';
+  }
+
+  return amount.toString();
 };
 
 export function snakeAndKebabToCamel(str: string): string {
