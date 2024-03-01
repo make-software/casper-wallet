@@ -142,6 +142,16 @@ export function NavigationMenuPageContent() {
                 isNewWindow: true
               }).catch(e => console.error(e));
             }
+          },
+          {
+            id: 3,
+            title: t('Connect Ledger'),
+            iconPath: 'assets/icons/ledger-blue.svg',
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.ImportAccountFromLedger);
+            }
           }
         ]
       },

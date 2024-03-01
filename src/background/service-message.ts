@@ -6,7 +6,10 @@ import {
   TransferResult
 } from '@libs/services/account-activity-service/types';
 import { AccountInfo } from '@libs/services/account-info/types';
-import { FetchBalanceResponse } from '@libs/services/balance-service/types';
+import {
+  AccountData,
+  FetchBalanceResponse
+} from '@libs/services/balance-service/types';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service/types';
 import { NFTTokenResult } from '@libs/services/nft-service/types';
 import { ErrorResponse, PaginatedResponse } from '@libs/services/types';
@@ -24,6 +27,14 @@ export const serviceMessage = {
   >(),
   fetchBalanceResponse: createAction('FETCH_ACCOUNT_BALANCE_RESPONSE')<
     FetchBalanceResponse,
+    Meta
+  >(),
+  fetchAccountsBalanceRequest: createAction('FETCH_ACCOUNTS_BALANCE')<
+    { accountHashes: string },
+    Meta
+  >(),
+  fetchAccountsBalanceResponse: createAction('FETCH_ACCOUNTS_BALANCE_RESPONSE')<
+    PaginatedResponse<AccountData> | ErrorResponse,
     Meta
   >(),
   fetchAccountInfoRequest: createAction('FETCH_ACCOUNT_INFO')<

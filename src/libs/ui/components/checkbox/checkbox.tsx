@@ -77,5 +77,3 @@ export function Checkbox({
     </StyledFlexRow>
   );
 }
-
-export default Checkbox;

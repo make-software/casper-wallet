@@ -51,3 +51,5 @@ export * from './contacts-plate/contacts-plate';
 export * from './theme-switcher/theme-switcher';
 export * from './identicon/identicon';
 export * from './spinner/spinner';
+export * from './review-with-ledger/review-with-ledger';
+export * from './no-connected-ledger/no-connected-ledger';

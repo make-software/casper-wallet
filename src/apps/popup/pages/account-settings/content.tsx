@@ -9,7 +9,8 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
   selectVaultAccount,
-  selectVaultImportedAccounts
+  selectVaultImportedAccountsNames,
+  selectVaultLedgerAccountNames
 } from '@background/redux/vault/selectors';
 
 import { useFetchAccountInfo } from '@hooks/use-fetch-account-info';
@@ -129,20 +130,22 @@ const AccountSettingsActionsGroupContainer = styled.div`
 
 export function AccountSettingsActionsGroup() {
   const { accountName } = useParams();
-  const importedAccountNames = useSelector(selectVaultImportedAccounts).map(
-    a => a.name
-  );
+  const importedAccountNames = useSelector(selectVaultImportedAccountsNames);
+  const ledgerAccountNames = useSelector(selectVaultLedgerAccountNames);
 
   if (!accountName) {
     return null;
   }
 
   const isImportedAccount = importedAccountNames.includes(accountName);
+  const isLedgerAccount = ledgerAccountNames.includes(accountName);
 
   return (
     <AccountSettingsActionsGroupContainer>
       <AccountIconButton type="rename" />
-      {isImportedAccount && <AccountIconButton type="remove" />}
+      {(isImportedAccount || isLedgerAccount) && (
+        <AccountIconButton type="remove" />
+      )}
     </AccountSettingsActionsGroupContainer>
   );
 }

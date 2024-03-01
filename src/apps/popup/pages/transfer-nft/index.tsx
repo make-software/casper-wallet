@@ -29,22 +29,30 @@ import {
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+import {
+  selectIsActiveAccountFromLedger,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
 
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import { getRawPublicKey } from '@libs/entities/Account';
 import {
+  AlignedFlexRow,
   ErrorPath,
   FooterButtonsContainer,
   HeaderPopup,
   HeaderSubmenuBarNavLink,
   PopupLayout,
+  SpacingSize,
   createErrorLocationState
 } from '@libs/layout';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import {
   Button,
   HomePageTabsId,
+  NoConnectedLedger,
+  ReviewWithLedger,
+  SvgIcon,
   TransferSuccessScreen
 } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
@@ -54,11 +62,18 @@ import { CSPRtoMotes } from '@libs/ui/utils';
 export const TransferNftPage = () => {
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
   const [haveReverseOwnerLookUp, setHaveReverseOwnerLookUp] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isLedgerConnected, setIsLedgerConnected] = useState(false);
+  const [showLedgerConfirm, setShowLedgerConfirm] = useState(false);
+
   const { contractPackageHash, tokenId } = useParams();
 
   const nftTokens = useSelector(selectAccountNftTokens);
   const csprBalance = useSelector(selectAccountBalance);
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const isActiveAccountFromLedger = useSelector(
+    selectIsActiveAccountFromLedger
+  );
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
@@ -120,6 +135,10 @@ export const TransferNftPage = () => {
     () => contactPublicKeys.includes(recipientPublicKey),
     [contactPublicKeys, recipientPublicKey]
   );
+
+  const submitStakeWithLedger = () => {
+    setShowLedgerConfirm(true);
+  };
 
   const submitTransfer = async () => {
     if (haveReverseOwnerLookUp || !nftToken) return;
@@ -209,15 +228,27 @@ export const TransferNftPage = () => {
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={
-            showSuccessScreen
+            showSuccessScreen || (showLedgerConfirm && !isLedgerConnected)
               ? undefined
-              : () => <HeaderSubmenuBarNavLink linkType="back" />
+              : showLedgerConfirm && isLedgerConnected
+                ? () => <HeaderSubmenuBarNavLink linkType="cancel" />
+                : () => <HeaderSubmenuBarNavLink linkType="back" />
           }
         />
       )}
       renderContent={() =>
         showSuccessScreen ? (
           <TransferSuccessScreen headerText="You submitted a transaction" />
+        ) : showLedgerConfirm ? (
+          isLedgerConnected ? (
+            <ReviewWithLedger
+              txnHash={
+                '017666eff4fcc0fd656c58dfe2e8fc22b765c05dc8a1be524b1ae4d90634ba9ab5'
+              }
+            />
+          ) : (
+            <NoConnectedLedger />
+          )
         ) : (
           <TransferNftContent
             nftToken={nftToken}
@@ -227,68 +258,86 @@ export const TransferNftPage = () => {
           />
         )
       }
-      renderFooter={() => (
-        <FooterButtonsContainer>
-          {showSuccessScreen ? (
-            <>
-              <Button
-                color="primaryBlue"
-                type="button"
-                onClick={() => {
-                  const currentDate = Date.now();
+      renderFooter={
+        showLedgerConfirm
+          ? undefined
+          : () => (
+              <FooterButtonsContainer>
+                {showSuccessScreen ? (
+                  <>
+                    <Button
+                      color="primaryBlue"
+                      type="button"
+                      onClick={() => {
+                        const currentDate = Date.now();
 
-                  const shouldAskForReview =
-                    askForReviewAfter == null ||
-                    currentDate < askForReviewAfter;
+                        const shouldAskForReview =
+                          askForReviewAfter == null ||
+                          currentDate < askForReviewAfter;
 
-                  if (ratedInStore || !shouldAskForReview) {
-                    const homeRoutesState = {
-                      state: {
-                        // set the active tab to deploys
-                        activeTabId: HomePageTabsId.Deploys
-                      }
-                    };
+                        if (ratedInStore || !shouldAskForReview) {
+                          const homeRoutesState = {
+                            state: {
+                              // set the active tab to deploys
+                              activeTabId: HomePageTabsId.Deploys
+                            }
+                          };
 
-                    // Navigate to "Home" with the pre-defined state
-                    navigate(RouterPath.Home, homeRoutesState);
-                  } else {
-                    // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
-                    navigate(RouterPath.RateApp);
-                  }
-                }}
-              >
-                <Trans t={t}>Done</Trans>
-              </Button>
+                          // Navigate to "Home" with the pre-defined state
+                          navigate(RouterPath.Home, homeRoutesState);
+                        } else {
+                          // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
+                          navigate(RouterPath.RateApp);
+                        }
+                      }}
+                    >
+                      <Trans t={t}>Done</Trans>
+                    </Button>
 
-              {!isRecipientPublicKeyInContact && (
-                <Button
-                  color="secondaryBlue"
-                  onClick={() => {
-                    const { recipientPublicKey } = recipientForm.getValues();
+                    {!isRecipientPublicKeyInContact && (
+                      <Button
+                        color="secondaryBlue"
+                        onClick={() => {
+                          const { recipientPublicKey } =
+                            recipientForm.getValues();
 
-                    navigate(RouterPath.AddContact, {
-                      state: {
-                        recipientPublicKey: recipientPublicKey
-                      }
-                    });
-                  }}
-                >
-                  <Trans t={t}>Add recipient to list of contacts</Trans>
-                </Button>
-              )}
-            </>
-          ) : (
-            <Button
-              color="primaryBlue"
-              type="button"
-              disabled={isButtonDisabled}
-              onClick={submitTransfer}
-            >
-              <Trans t={t}>Confirm send</Trans>
-            </Button>
-          )}
-        </FooterButtonsContainer>
-      )}
+                          navigate(RouterPath.AddContact, {
+                            state: {
+                              recipientPublicKey: recipientPublicKey
+                            }
+                          });
+                        }}
+                      >
+                        <Trans t={t}>Add recipient to list of contacts</Trans>
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  <Button
+                    color={
+                      isActiveAccountFromLedger ? 'primaryRed' : 'primaryBlue'
+                    }
+                    type="button"
+                    disabled={isButtonDisabled}
+                    onClick={
+                      isActiveAccountFromLedger
+                        ? submitStakeWithLedger
+                        : submitTransfer
+                    }
+                  >
+                    {isActiveAccountFromLedger ? (
+                      <AlignedFlexRow gap={SpacingSize.Small}>
+                        <SvgIcon src="assets/icons/ledger-white.svg" />
+                        <Trans t={t}>Confirm send</Trans>
+                      </AlignedFlexRow>
+                    ) : (
+                      <Trans t={t}>Confirm send</Trans>
+                    )}
+                  </Button>
+                )}
+              </FooterButtonsContainer>
+            )
+      }
     />
   );
 };

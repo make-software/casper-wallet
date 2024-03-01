@@ -164,6 +164,7 @@ export enum StakeSteps {
   NewValidator = 'new validator',
   Amount = 'amount',
   Confirm = 'confirm',
+  ConfirmWithLedger = 'confirm with ledger',
   Success = 'success'
 }
 
