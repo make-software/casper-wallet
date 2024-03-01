@@ -41,7 +41,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
     const maxAmountMotes: string =
       csprBalance.liquidMotes == null
         ? '0'
-        : Big(csprBalance.liquidMotes).sub(TRANSFER_COST_MOTES).toString();
+        : Big(csprBalance.liquidMotes).sub(TRANSFER_COST_MOTES).toFixed();
 
     const hasEnoughBalance = Big(maxAmountMotes).gte(TRANSFER_MIN_AMOUNT_MOTES);
     const isMaxAmountEqualMinAmount = Big(maxAmountMotes).eq(
