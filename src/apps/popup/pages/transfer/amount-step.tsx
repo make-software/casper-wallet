@@ -63,6 +63,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
 
   const { onChange: onChangeTransferIdMemo } = register('transferIdMemo');
   const { onChange: onChangeCSPRAmount } = register('amount');
+  const { onChange: onChangePaymentAmount } = register('paymentAmount');
 
   const amount = useWatch({
     control,
@@ -173,6 +174,14 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
             placeholder={t('Enter transaction fee')}
             suffixText={'CSPR'}
             {...register('paymentAmount')}
+            onChange={e => {
+              // replace all non-numeric characters except decimal point
+              e.target.value = e.target.value.replace(/[^0-9.]/g, '');
+              // regex replace decimal point from beginning of string
+              e.target.value = e.target.value.replace(/^\./, '');
+
+              onChangePaymentAmount(e);
+            }}
             error={!!errors?.paymentAmount}
             validationText={
               errors?.paymentAmount?.message ||
