@@ -56,6 +56,10 @@ const SymbolContainer = styled(RightAlignedCenteredFlexRow)`
   max-width: 80px;
 `;
 
+const AmountContainer = styled(RightAlignedCenteredFlexRow)`
+  max-width: 120px;
+`;
+
 interface AccountActivityPlateProps {
   transactionInfo: Erc20TransferWithId | ExtendedDeployWithId;
   onClick?: () => void;
@@ -239,16 +243,24 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
               </Typography>
               <DeployStatus deployResult={transactionInfo} />
             </AlignedFlexRow>
-            <Typography type="captionHash">
-              {formattedAmount === '-' ? null : (
-                <>
-                  {type === ActivityType.Sent || type === ActivityType.Delegated
-                    ? '-'
-                    : ''}
-                  {formattedAmount}
-                </>
-              )}
-            </Typography>
+            <Tooltip
+              overflowWrap
+              title={formattedAmount.length > 11 ? formattedAmount : undefined}
+            >
+              <AmountContainer>
+                <Typography type="captionHash" ellipsis>
+                  {formattedAmount === '-' ? null : (
+                    <>
+                      {type === ActivityType.Sent ||
+                      type === ActivityType.Delegated
+                        ? '-'
+                        : ''}
+                      {formattedAmount}
+                    </>
+                  )}
+                </Typography>
+              </AmountContainer>
+            </Tooltip>
           </AlignedSpaceBetweenFlexRow>
           <AlignedSpaceBetweenFlexRow>
             <AlignedFlexRow>
