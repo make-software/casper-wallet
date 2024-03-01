@@ -136,11 +136,11 @@ export function formatMotes(motes: string) {
 }
 
 export const motesToCSPR = (motes: string): string => {
-  return Big(motes).div(MOTES_PER_CSPR_RATE).toString();
+  return Big(motes).div(MOTES_PER_CSPR_RATE).toFixed();
 };
 
 export const CSPRtoMotes = (cspr: string): string => {
-  return Big(cspr).mul(MOTES_PER_CSPR_RATE).toString();
+  return Big(cspr).mul(MOTES_PER_CSPR_RATE).toFixed();
 };
 
 export const tokenDivider = (decimals: number | null) =>
@@ -153,7 +153,7 @@ export const divideErc20Balance = (
   if (balance == null) {
     return null;
   }
-  return Big(balance).div(tokenDivider(decimals)).toString();
+  return Big(balance).div(tokenDivider(decimals)).toFixed();
 };
 
 export const multiplyErc20Balance = (
@@ -163,7 +163,7 @@ export const multiplyErc20Balance = (
   if (balance == null) {
     return null;
   }
-  return Big(balance).mul(tokenDivider(decimals)).toString();
+  return Big(balance).mul(tokenDivider(decimals)).toFixed();
 };
 
 export const motesToCurrency = (
@@ -174,10 +174,7 @@ export const motesToCurrency = (
     throw new Error('motesToCurrency: the CSPR rate cannot be zero');
   }
 
-  return Big(motes)
-    .div(MOTES_PER_CSPR_RATE)
-    .mul(currencyPerCsprRate)
-    .toString();
+  return Big(motes).div(MOTES_PER_CSPR_RATE).mul(currencyPerCsprRate).toFixed();
 };
 
 export function snakeAndKebabToCamel(str: string): string {

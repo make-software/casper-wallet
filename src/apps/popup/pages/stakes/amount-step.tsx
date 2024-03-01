@@ -54,7 +54,7 @@ export const AmountStep = ({
         const maxAmountMotes: string =
           csprBalance.liquidMotes == null
             ? '0'
-            : Big(csprBalance.liquidMotes).sub(STAKE_COST_MOTES).toString();
+            : Big(csprBalance.liquidMotes).sub(STAKE_COST_MOTES).toFixed();
 
         setMaxAmountMotes(maxAmountMotes);
         break;
