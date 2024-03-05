@@ -66,7 +66,8 @@ export function useSecretKeyFileReader({
           imported: true,
           name,
           publicKey: publicKeyHex,
-          secretKey: secretKeyBase64
+          secretKey: secretKeyBase64,
+          hidden: false
         });
       };
     },

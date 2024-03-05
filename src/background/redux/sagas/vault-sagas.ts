@@ -318,7 +318,8 @@ function* createAccountSaga(action: ReturnType<typeof createAccount>) {
     const keyPair = deriveKeyPair(secretPhrase, accountCount);
     const account = {
       ...keyPair,
-      name
+      name,
+      hidden: false
     };
 
     yield put(accountAdded(account));

@@ -7,6 +7,7 @@ import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 import { AccountSettingsPage } from '@popup/pages/account-settings';
 import { ActivityDetailsPage } from '@popup/pages/activity-details';
 import { AddContactPage } from '@popup/pages/add-contact';
+import { AllAccountsPage } from '@popup/pages/all-accounts';
 import { BackupSecretPhrasePage } from '@popup/pages/backup-secret-phrase';
 import { ChangePasswordPage } from '@popup/pages/change-password';
 import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
@@ -279,6 +280,7 @@ function AppRoutes() {
         element={<ContactDetailsPage />}
       />
       <Route path={RouterPath.RateApp} element={<RateAppPage />} />
+      <Route path={RouterPath.AllAccountsList} element={<AllAccountsPage />} />
     </Routes>
   );
 }
