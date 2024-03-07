@@ -1,5 +1,4 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import styled, { DefaultTheme, useTheme } from 'styled-components';
 
 import { isValidAccountHash, isValidPublicKey } from '@src/utils';
