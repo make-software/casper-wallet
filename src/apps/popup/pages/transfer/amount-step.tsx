@@ -19,7 +19,11 @@ import {
 } from '@libs/layout';
 import { Checkbox, Input, Typography } from '@libs/ui/components';
 import { TransferAmountFormValues } from '@libs/ui/forms/transfer';
-import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils';
+import {
+  formatFiatAmount,
+  formatInputAmountValue,
+  motesToCSPR
+} from '@libs/ui/utils';
 
 interface AmountStepProps {
   amountForm: UseFormReturn<TransferAmountFormValues>;
@@ -114,10 +118,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
           {...register('amount')}
           disabled={isCSPR && disabled}
           onChange={e => {
-            // replace all non-numeric characters except decimal point
-            e.target.value = e.target.value.replace(/[^0-9.]/g, '');
-            // regex replace decimal point from beginning of string
-            e.target.value = e.target.value.replace(/^\./, '');
+            formatInputAmountValue(e);
             onChangeCSPRAmount(e);
 
             if (isChecked) {
