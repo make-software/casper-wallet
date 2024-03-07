@@ -273,7 +273,7 @@ export const TransferNftPage = () => {
 
                         const shouldAskForReview =
                           askForReviewAfter == null ||
-                          currentDate < askForReviewAfter;
+                          currentDate > askForReviewAfter;
 
                         if (ratedInStore || !shouldAskForReview) {
                           const homeRoutesState = {

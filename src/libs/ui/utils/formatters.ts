@@ -4,6 +4,7 @@ import Big from 'big.js';
 import { formatDistanceToNowStrict } from 'date-fns';
 // eslint-disable-next-line import/no-duplicates
 import en from 'date-fns/locale/en-US';
+import { ChangeEvent } from 'react';
 
 import { MOTES_PER_CSPR_RATE } from '@src/constants';
 
@@ -136,11 +137,11 @@ export function formatMotes(motes: string) {
 }
 
 export const motesToCSPR = (motes: string): string => {
-  return Big(motes).div(MOTES_PER_CSPR_RATE).toString();
+  return Big(motes).div(MOTES_PER_CSPR_RATE).toFixed();
 };
 
 export const CSPRtoMotes = (cspr: string): string => {
-  return Big(cspr).mul(MOTES_PER_CSPR_RATE).toString();
+  return Big(cspr).mul(MOTES_PER_CSPR_RATE).toFixed();
 };
 
 export const tokenDivider = (decimals: number | null) =>
@@ -153,7 +154,7 @@ export const divideErc20Balance = (
   if (balance == null) {
     return null;
   }
-  return Big(balance).div(tokenDivider(decimals)).toString();
+  return Big(balance).div(tokenDivider(decimals)).toFixed();
 };
 
 export const multiplyErc20Balance = (
@@ -163,7 +164,7 @@ export const multiplyErc20Balance = (
   if (balance == null) {
     return null;
   }
-  return Big(balance).mul(tokenDivider(decimals)).toString();
+  return Big(balance).mul(tokenDivider(decimals)).toFixed();
 };
 
 export const motesToCurrency = (
@@ -174,10 +175,7 @@ export const motesToCurrency = (
     throw new Error('motesToCurrency: the CSPR rate cannot be zero');
   }
 
-  return Big(motes)
-    .div(MOTES_PER_CSPR_RATE)
-    .mul(currencyPerCsprRate)
-    .toString();
+  return Big(motes).div(MOTES_PER_CSPR_RATE).mul(currencyPerCsprRate).toFixed();
 };
 
 export function snakeAndKebabToCamel(str: string): string {
@@ -225,4 +223,42 @@ export const formatFiatAmount = (
       precision: precision
     }
   );
+};
+
+/**
+ * This function formats the input value of an HTMLInputElement in an onChange event handler for input type="text".
+ * It removes all non-digit characters and allows just one decimal point.
+ * The result is set to the value of the event target.
+ *
+ * @param {ChangeEvent<HTMLInputElement>} event - The onChange event from an HTMLInputElement.
+ */
+export const formatInputAmountValue = (
+  event: ChangeEvent<HTMLInputElement>
+) => {
+  // Get the original input value from the event target
+  const original = event.target.value;
+
+  // Prepare a clean string to hold the formatted value
+  let clean = '';
+
+  // Track whether a decimal point has been encountered
+  let seenDot = false;
+
+  // Loop through each character of the original value
+  for (let i = 0; i < original.length; i++) {
+    // If the character is a digit, it's added to the clean string
+    if (original[i] >= '0' && original[i] <= '9') {
+      clean += original[i];
+    }
+    // If the character is a dot and we haven't seen a dot before,
+    // it's added to the clean string and the seenDot flag is set to true
+    else if (original[i] === '.' && !seenDot) {
+      clean += original[i];
+      seenDot = true;
+    }
+    // If the character is neither a digit nor the first dot, it's ignored
+  }
+
+  // Set the cleaned value to the input element that fired the event
+  event.target.value = clean;
 };
