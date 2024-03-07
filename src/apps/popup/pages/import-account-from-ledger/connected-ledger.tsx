@@ -1,3 +1,4 @@
+import { Player } from '@lottiefiles/react-lottie-player';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -9,6 +10,10 @@ import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/
 import { dispatchToMainStore } from '@background/redux/utils';
 import { accountsImported } from '@background/redux/vault/actions';
 
+import { useIsDarkMode } from '@hooks/use-is-dark-mode';
+
+import spinnerDarkModeAnimation from '@libs/animations/spinner_dark_mode.json';
+import spinnerLightModeAnimation from '@libs/animations/spinner_light_mode.json';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   CenteredFlexColumn,
@@ -76,9 +81,11 @@ export const ConnectedLedger = () => {
     }[]
   >([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [maxItemsToRender, setMaxItemsToRender] = useState(5);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
+  const isDarkMode = useIsDarkMode();
 
   const { casperWalletApiUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
@@ -170,7 +177,17 @@ export const ConnectedLedger = () => {
             <VerticalSpaceContainer top={SpacingSize.XL}>
               <Tile>
                 <AnimationContainer gap={SpacingSize.XXL}>
-                  animation
+                  <Player
+                    renderer={'svg'}
+                    autoplay
+                    loop
+                    src={
+                      isDarkMode
+                        ? spinnerDarkModeAnimation
+                        : spinnerLightModeAnimation
+                    }
+                    style={{ width: '56px', height: '56px' }}
+                  />
                   <CenteredFlexColumn gap={SpacingSize.Small}>
                     <Typography type="subtitle">
                       <Trans t={t}>Just a moment</Trans>
@@ -194,6 +211,8 @@ export const ConnectedLedger = () => {
               setIsButtonDisabled={setIsButtonDisabled}
               selectedAccounts={selectedAccounts}
               setSelectedAccounts={setSelectedAccounts}
+              maxItemsToRender={maxItemsToRender}
+              setMaxItemsToRender={setMaxItemsToRender}
             />
           )}
         </ContentContainer>

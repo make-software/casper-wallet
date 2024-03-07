@@ -52,16 +52,18 @@ interface ListProps {
   setSelectedAccounts: React.Dispatch<
     React.SetStateAction<{ id: number; publicKey: string; name: string }[]>
   >;
+  maxItemsToRender: number;
+  setMaxItemsToRender: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const LedgerAccountsList = ({
   ledgerAccountsWithBalance,
   setIsButtonDisabled,
   selectedAccounts,
-  setSelectedAccounts
+  setSelectedAccounts,
+  maxItemsToRender,
+  setMaxItemsToRender
 }: ListProps) => {
-  const [maxItemsToRender, setMaxItemsToRender] = useState(5);
-
   const { t } = useTranslation();
 
   const {
@@ -201,23 +203,17 @@ export const LedgerAccountsList = ({
         );
       }}
       marginLeftForItemSeparatorLine={56}
-      renderFooter={
-        ledgerAccountsWithBalance.length > maxItemsToRender
-          ? () => (
-              <FooterContainer>
-                <MoreItem
-                  type="captionRegular"
-                  color="contentAction"
-                  onClick={() =>
-                    setMaxItemsToRender(prevState => prevState + 5)
-                  }
-                >
-                  <Trans t={t}>Show next 5 accounts</Trans>
-                </MoreItem>
-              </FooterContainer>
-            )
-          : undefined
-      }
+      renderFooter={() => (
+        <FooterContainer>
+          <MoreItem
+            type="captionRegular"
+            color="contentAction"
+            onClick={() => setMaxItemsToRender(prevState => prevState + 5)}
+          >
+            <Trans t={t}>Show next 5 accounts</Trans>
+          </MoreItem>
+        </FooterContainer>
+      )}
     />
   );
 };

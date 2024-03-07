@@ -1,7 +1,12 @@
+import { Player } from '@lottiefiles/react-lottie-player';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { useIsDarkMode } from '@hooks/use-is-dark-mode';
+
+import dotsDarkModeAnimation from '@libs/animations/dots_dark_mode.json';
+import dotsLightModeAnimation from '@libs/animations/dots_light_mode.json';
 import {
   CenteredFlexColumn,
   ContentContainer,
@@ -21,6 +26,7 @@ const AnimationContainer = styled(CenteredFlexColumn)`
 
 export const ReviewWithLedger = ({ txnHash }: ReviewWithLedgerProps) => {
   const { t } = useTranslation();
+  const isDarkMode = useIsDarkMode();
 
   return (
     <ContentContainer>
@@ -42,7 +48,15 @@ export const ReviewWithLedger = ({ txnHash }: ReviewWithLedgerProps) => {
           <TextArea value={txnHash} readOnly rows={2} type="captionHash" />
         </FormField>
       </VerticalSpaceContainer>
-      <AnimationContainer>animation</AnimationContainer>
+      <AnimationContainer>
+        <Player
+          renderer={'svg'}
+          autoplay
+          loop
+          src={isDarkMode ? dotsDarkModeAnimation : dotsLightModeAnimation}
+          style={{ width: '56px', height: '24px' }}
+        />
+      </AnimationContainer>
     </ContentContainer>
   );
 };

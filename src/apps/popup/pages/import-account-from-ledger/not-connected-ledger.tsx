@@ -1,7 +1,14 @@
+import { Player } from '@lottiefiles/react-lottie-player';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { ledgerSupportLink } from '@src/constants';
+
+import { useIsDarkMode } from '@hooks/use-is-dark-mode';
+
+import dotsDarkModeAnimation from '@libs/animations/dots_dark_mode.json';
+import dotsLightModeAnimation from '@libs/animations/dots_light_mode.json';
 import {
   CenteredFlexColumn,
   ContentContainer,
@@ -14,15 +21,13 @@ import {
 } from '@libs/layout';
 import { Link, SvgIcon, Typography } from '@libs/ui/components';
 
-const ledgerSupportLink =
-  'https://support.ledger.com/hc/en-us/articles/4416379141009-Casper-CSPR?docs=true';
-
 const AnimationContainer = styled(CenteredFlexColumn)`
   margin-top: 60px;
 `;
 
 export const NotConnectedLedger = () => {
   const { t } = useTranslation();
+  const isDarkMode = useIsDarkMode();
 
   return (
     <PopupLayout
@@ -63,7 +68,15 @@ export const NotConnectedLedger = () => {
               </Link>
             </Typography>
           </ParagraphContainer>
-          <AnimationContainer>animation</AnimationContainer>
+          <AnimationContainer>
+            <Player
+              renderer={'svg'}
+              autoplay
+              loop
+              src={isDarkMode ? dotsDarkModeAnimation : dotsLightModeAnimation}
+              style={{ width: '56px', height: '24px' }}
+            />
+          </AnimationContainer>
         </ContentContainer>
       )}
     />
