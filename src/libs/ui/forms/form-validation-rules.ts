@@ -145,7 +145,7 @@ export const useCSPRTransferAmountRule = (amountMotes: string | null) => {
   const maxAmountMotes: string =
     amountMotes == null
       ? '0'
-      : Big(amountMotes).sub(TRANSFER_COST_MOTES).toString();
+      : Big(amountMotes).sub(TRANSFER_COST_MOTES).toFixed();
 
   return Yup.string()
     .required(t('Amount is required'))
@@ -195,7 +195,7 @@ export const useCSPRTransferAmountRule = (amountMotes: string | null) => {
 export const useErc20AmountRule = (amount: string | null) => {
   const { t } = useTranslation();
 
-  const maxAmount: string = amount == null ? '0' : Big(amount).toString();
+  const maxAmount: string = amount == null ? '0' : Big(amount).toFixed();
 
   return Yup.string()
     .required(t('Amount is required'))
@@ -240,7 +240,7 @@ export const usePaymentAmountRule = (csprBalance: string | null) => {
   const { t } = useTranslation();
 
   const maxAmountMotes: string =
-    csprBalance == null ? '0' : Big(csprBalance).toString();
+    csprBalance == null ? '0' : Big(csprBalance).toFixed();
 
   return Yup.string()
     .required(t('Payment amount is required'))
@@ -307,7 +307,7 @@ export const useCSPRStakeAmountRule = (
   const maxAmountMotes: string =
     amountMotes == null
       ? '0'
-      : Big(amountMotes).sub(STAKE_COST_MOTES).toString();
+      : Big(amountMotes).sub(STAKE_COST_MOTES).toFixed();
 
   return Yup.string()
     .required({
@@ -365,12 +365,12 @@ export const useCSPRStakeAmountRule = (
           switch (mode) {
             case AuctionManagerEntryPoint.undelegate: {
               return Big(CSPRtoMotes(csprAmountInputValue)).lte(
-                Big(stakeAmountMotes).sub(getStakeMinAmountMotes()).toString()
+                Big(stakeAmountMotes).sub(getStakeMinAmountMotes()).toFixed()
               );
             }
             case AuctionManagerEntryPoint.redelegate: {
               return Big(CSPRtoMotes(csprAmountInputValue)).lte(
-                Big(stakeAmountMotes).toString()
+                Big(stakeAmountMotes).toFixed()
               );
             }
             case AuctionManagerEntryPoint.delegate:

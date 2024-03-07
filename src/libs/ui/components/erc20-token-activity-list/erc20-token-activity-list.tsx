@@ -54,9 +54,9 @@ export const Erc20TokenActivityList = () => {
   };
 
   const erc20Transactions: Erc20TransferWithId[] =
-    tokenActivity?.tokenActivityList?.map(transaction => {
+    tokenActivity?.tokenActivityList?.map((transaction, index) => {
       return {
-        id: transaction.deploy_hash,
+        id: String(index),
         deployHash: transaction.deploy_hash,
         callerPublicKey: transaction.deploy?.caller_public_key || '-',
         timestamp: transaction.deploy?.timestamp || '-',

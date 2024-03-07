@@ -349,7 +349,7 @@ export const StakesPage = () => {
             const currentDate = Date.now();
 
             const shouldAskForReview =
-              askForReviewAfter == null || currentDate < askForReviewAfter;
+              askForReviewAfter == null || currentDate > askForReviewAfter;
 
             if (ratedInStore || !shouldAskForReview) {
               const homeRoutesState = {

@@ -19,7 +19,11 @@ import {
 } from '@libs/layout';
 import { Checkbox, Input, Typography } from '@libs/ui/components';
 import { TransferAmountFormValues } from '@libs/ui/forms/transfer';
-import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils';
+import {
+  formatFiatAmount,
+  formatInputAmountValue,
+  motesToCSPR
+} from '@libs/ui/utils';
 
 interface AmountStepProps {
   amountForm: UseFormReturn<TransferAmountFormValues>;
@@ -41,7 +45,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
     const maxAmountMotes: string =
       csprBalance.liquidMotes == null
         ? '0'
-        : Big(csprBalance.liquidMotes).sub(TRANSFER_COST_MOTES).toString();
+        : Big(csprBalance.liquidMotes).sub(TRANSFER_COST_MOTES).toFixed();
 
     const hasEnoughBalance = Big(maxAmountMotes).gte(TRANSFER_MIN_AMOUNT_MOTES);
     const isMaxAmountEqualMinAmount = Big(maxAmountMotes).eq(
@@ -63,6 +67,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
 
   const { onChange: onChangeTransferIdMemo } = register('transferIdMemo');
   const { onChange: onChangeCSPRAmount } = register('amount');
+  const { onChange: onChangePaymentAmount } = register('paymentAmount');
 
   const amount = useWatch({
     control,
@@ -113,10 +118,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
           {...register('amount')}
           disabled={isCSPR && disabled}
           onChange={e => {
-            // replace all non-numeric characters except decimal point
-            e.target.value = e.target.value.replace(/[^0-9.]/g, '');
-            // regex replace decimal point from beginning of string
-            e.target.value = e.target.value.replace(/^\./, '');
+            formatInputAmountValue(e);
             onChangeCSPRAmount(e);
 
             if (isChecked) {
@@ -173,6 +175,14 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
             placeholder={t('Enter transaction fee')}
             suffixText={'CSPR'}
             {...register('paymentAmount')}
+            onChange={e => {
+              // replace all non-numeric characters except decimal point
+              e.target.value = e.target.value.replace(/[^0-9.]/g, '');
+              // regex replace decimal point from beginning of string
+              e.target.value = e.target.value.replace(/^\./, '');
+
+              onChangePaymentAmount(e);
+            }}
             error={!!errors?.paymentAmount}
             validationText={
               errors?.paymentAmount?.message ||

@@ -24,7 +24,11 @@ import {
 } from '@libs/layout';
 import { Error, Input, Typography } from '@libs/ui/components';
 import { StakeAmountFormValues } from '@libs/ui/forms/stakes-form';
-import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils';
+import {
+  formatFiatAmount,
+  formatInputAmountValue,
+  motesToCSPR
+} from '@libs/ui/utils';
 
 const StakeMaxButton = styled(AlignedFlexRow)<{ disabled: boolean }>`
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
@@ -59,7 +63,7 @@ export const AmountStep = ({
         const maxAmountMotes: string =
           csprBalance.liquidMotes == null
             ? '0'
-            : Big(csprBalance.liquidMotes).sub(STAKE_COST_MOTES).toString();
+            : Big(csprBalance.liquidMotes).sub(STAKE_COST_MOTES).toFixed();
         const hasEnoughBalance = Big(maxAmountMotes).gte(
           DELEGATION_MIN_AMOUNT_MOTES
         );
@@ -116,10 +120,7 @@ export const AmountStep = ({
           suffixText={'CSPR'}
           {...register('amount')}
           onChange={e => {
-            // replace all non-numeric characters except decimal point
-            e.target.value = e.target.value.replace(/[^0-9.]/g, '');
-            // regex replace decimal point from beginning of string
-            e.target.value = e.target.value.replace(/^\./, '');
+            formatInputAmountValue(e);
             onChangeCSPRAmount(e);
           }}
         />
