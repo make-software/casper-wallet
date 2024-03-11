@@ -86,7 +86,7 @@ export function ConnectedSitesPage() {
               />
             )}
             renderRow={(account, index, array) => {
-              const { name, publicKey, imported } = account;
+              const { name, publicKey, imported, hardware } = account;
 
               return (
                 <SiteGroupItem
@@ -94,6 +94,7 @@ export function ConnectedSitesPage() {
                   name={name}
                   publicKey={publicKey}
                   imported={imported}
+                  hardware={hardware}
                   handleOnClick={async () => {
                     if (array == null || array.length === 0) {
                       return;

@@ -12,7 +12,8 @@ export type ContentColor =
   | 'contentPositive'
   | 'contentGreenStatus'
   | 'contentLightBlue'
-  | 'brandRed';
+  | 'brandRed'
+  | 'black';
 
 export type BackgroundColor =
   | 'inherit'
@@ -55,6 +56,7 @@ export function getColorFromTheme(theme: DefaultTheme, color: Color) {
     fillPrimaryClick: theme.color.fillPrimaryClick,
     fillCriticalHover: theme.color.fillCriticalHover,
     fillCriticalClick: theme.color.fillCriticalClick,
-    fillNeutral: theme.color.fillNeutral
+    fillNeutral: theme.color.fillNeutral,
+    black: theme.color.black
   }[color];
 }

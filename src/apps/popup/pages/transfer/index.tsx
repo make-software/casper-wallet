@@ -25,22 +25,32 @@ import {
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+import {
+  selectIsActiveAccountFromLedger,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
 
 import {
+  AlignedFlexRow,
   ErrorPath,
   FooterButtonsContainer,
   HeaderPopup,
   HeaderSubmenuBarNavLink,
   PopupLayout,
   SpaceBetweenFlexRow,
+  SpacingSize,
   createErrorLocationState
 } from '@libs/layout';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import { signAndDeploy } from '@libs/services/deployer-service';
 import { makeNativeTransferDeploy } from '@libs/services/transfer-service/transfer-service';
 import { Account } from '@libs/types/account';
-import { Button, HomePageTabsId, Typography } from '@libs/ui/components';
+import {
+  Button,
+  HomePageTabsId,
+  SvgIcon,
+  Typography
+} from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useTransferForm } from '@libs/ui/forms/transfer';
 import {
@@ -72,8 +82,13 @@ export const TransferPage = () => {
     TransactionSteps.Recipient
   );
   const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isLedgerConnected, setIsLedgerConnected] = useState(false);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const isActiveAccountFromLedger = useSelector(
+    selectIsActiveAccountFromLedger
+  );
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
@@ -285,6 +300,10 @@ export const TransferPage = () => {
     }
   };
 
+  const submitStakeWithLedger = () => {
+    setTransferStep(TransactionSteps.ConfirmWithLedger);
+  };
+
   const getButtonProps = () => {
     const isRecipientFormButtonDisabled = calculateSubmitButtonDisabled({
       isValid: recipientFormState.isValid
@@ -328,7 +347,9 @@ export const TransferPage = () => {
             isSubmitButtonDisable ||
             isRecipientFormButtonDisabled ||
             isAmountFormButtonDisabled,
-          onClick: onSubmitSending
+          onClick: isActiveAccountFromLedger
+            ? submitStakeWithLedger
+            : onSubmitSending
         };
       }
       case TransactionSteps.Success: {
@@ -359,26 +380,26 @@ export const TransferPage = () => {
     }
   };
 
-  const handleBackButton = () => {
-    switch (transferStep) {
-      case TransactionSteps.Recipient: {
-        navigate(-1);
-        break;
-      }
-      case TransactionSteps.Amount: {
-        setTransferStep(TransactionSteps.Recipient);
-        break;
-      }
-      case TransactionSteps.Confirm: {
-        setTransferStep(TransactionSteps.Amount);
-        break;
-      }
-
-      default: {
-        navigate(-1);
-        break;
-      }
-    }
+  const getBackButton = {
+    [TransactionSteps.Recipient]: () => (
+      <HeaderSubmenuBarNavLink linkType="back" onClick={() => navigate(-1)} />
+    ),
+    [TransactionSteps.Amount]: () => (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        onClick={() => setTransferStep(TransactionSteps.Recipient)}
+      />
+    ),
+    [TransactionSteps.Confirm]: () => (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        onClick={() => setTransferStep(TransactionSteps.Amount)}
+      />
+    ),
+    [TransactionSteps.ConfirmWithLedger]: isLedgerConnected
+      ? () => <HeaderSubmenuBarNavLink linkType="cancel" />
+      : undefined,
+    [TransactionSteps.Success]: undefined
   };
 
   const transactionFee = isErc20Transfer
@@ -392,16 +413,7 @@ export const TransferPage = () => {
           withNetworkSwitcher
           withMenu
           withConnectionStatus
-          renderSubmenuBarItems={
-            transferStep === TransactionSteps.Success
-              ? undefined
-              : () => (
-                  <HeaderSubmenuBarNavLink
-                    linkType="back"
-                    onClick={handleBackButton}
-                  />
-                )
-          }
+          renderSubmenuBarItems={getBackButton[transferStep]}
         />
       )}
       renderContent={() => (
@@ -414,50 +426,63 @@ export const TransferPage = () => {
           paymentAmount={paymentAmount}
           balance={formattedBalance}
           symbol={symbol}
+          isLedgerConnected={isLedgerConnected}
         />
       )}
-      renderFooter={() => (
-        <FooterButtonsContainer>
-          {transferStep === TransactionSteps.Confirm ||
-          transferStep === TransactionSteps.Success ? null : (
-            <SpaceBetweenFlexRow>
-              <Typography type="captionRegular" color="contentSecondary">
-                <Trans t={t}>Transaction fee</Trans>
-              </Typography>
-              <Typography type="captionHash">
-                {formatNumber(transactionFee, {
-                  precision: { max: 5 }
-                })}{' '}
-                CSPR
-              </Typography>
-            </SpaceBetweenFlexRow>
-          )}
-          <Button color="primaryBlue" type="button" {...getButtonProps()}>
-            <Trans t={t}>
-              {transferStep === TransactionSteps.Confirm
-                ? 'Send'
-                : transferStep === TransactionSteps.Success
-                  ? 'Done'
-                  : 'Next'}
-            </Trans>
-          </Button>
-          {transferStep === TransactionSteps.Success &&
-            !isRecipientPublicKeyInContact && (
-              <Button
-                color="secondaryBlue"
-                onClick={() =>
-                  navigate(RouterPath.AddContact, {
-                    state: {
-                      recipientPublicKey: recipientPublicKey
-                    }
-                  })
-                }
-              >
-                <Trans t={t}>Add recipient to list of contacts</Trans>
-              </Button>
-            )}
-        </FooterButtonsContainer>
-      )}
+      renderFooter={
+        transferStep === TransactionSteps.ConfirmWithLedger
+          ? undefined
+          : () => (
+              <FooterButtonsContainer>
+                {transferStep === TransactionSteps.Confirm ||
+                transferStep === TransactionSteps.Success ? null : (
+                  <SpaceBetweenFlexRow>
+                    <Typography type="captionRegular" color="contentSecondary">
+                      <Trans t={t}>Transaction fee</Trans>
+                    </Typography>
+                    <Typography type="captionHash">
+                      {formatNumber(transactionFee, {
+                        precision: { max: 5 }
+                      })}{' '}
+                      CSPR
+                    </Typography>
+                  </SpaceBetweenFlexRow>
+                )}
+                <Button color="primaryBlue" type="button" {...getButtonProps()}>
+                  {isActiveAccountFromLedger &&
+                  transferStep === TransactionSteps.Confirm ? (
+                    <AlignedFlexRow gap={SpacingSize.Small}>
+                      <SvgIcon src="assets/icons/ledger-white.svg" />
+                      <Trans t={t}>Send</Trans>
+                    </AlignedFlexRow>
+                  ) : (
+                    <Trans t={t}>
+                      {transferStep === TransactionSteps.Confirm
+                        ? 'Send'
+                        : transferStep === TransactionSteps.Success
+                          ? 'Done'
+                          : 'Next'}
+                    </Trans>
+                  )}
+                </Button>
+                {transferStep === TransactionSteps.Success &&
+                  !isRecipientPublicKeyInContact && (
+                    <Button
+                      color="secondaryBlue"
+                      onClick={() =>
+                        navigate(RouterPath.AddContact, {
+                          state: {
+                            recipientPublicKey: recipientPublicKey
+                          }
+                        })
+                      }
+                    >
+                      <Trans t={t}>Add recipient to list of contacts</Trans>
+                    </Button>
+                  )}
+              </FooterButtonsContainer>
+            )
+      }
     />
   );
 };

@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isSafariBuild } from '@src/utils';
 
 import { TimeoutDurationSetting } from '@popup/constants';
-import { RouterPath, useNavigationMenu } from '@popup/router';
+import { RouterPath, useNavigationMenu, useTypedNavigate } from '@popup/router';
 
 import { WindowApp } from '@background/create-open-window';
 import { selectCountOfContacts } from '@background/redux/contacts/selectors';
@@ -82,7 +81,7 @@ interface MenuGroup {
 }
 
 export function NavigationMenuPageContent() {
-  const navigate = useNavigate();
+  const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
   const timeoutDurationSetting = useSelector(selectTimeoutDurationSetting);
@@ -141,6 +140,16 @@ export function NavigationMenuPageContent() {
                 windowApp: WindowApp.ImportAccount,
                 isNewWindow: true
               }).catch(e => console.error(e));
+            }
+          },
+          {
+            id: 3,
+            title: t('Connect Ledger'),
+            iconPath: 'assets/icons/ledger-blue.svg',
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.ImportAccountFromLedger);
             }
           }
         ]

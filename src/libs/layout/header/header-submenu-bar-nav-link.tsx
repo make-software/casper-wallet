@@ -61,7 +61,9 @@ export function HeaderSubmenuBarNavLink({
       return (
         <NavLink
           label={t('Cancel')}
-          onClick={() => navigate(RouterPath.Home)}
+          onClick={() =>
+            onClick != null ? onClick() : navigate(RouterPath.Home)
+          }
         />
       );
 

@@ -18,12 +18,11 @@ import { useWindowManager } from '@hooks/use-window-manager';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   AlignedFlexRow,
-  CenteredFlexRow,
   FlexColumn,
   LeftAlignedFlexColumn,
   SpacingSize
 } from '@libs/layout';
-import { AccountListRows } from '@libs/types/account';
+import { AccountListRows, HardwareWalletType } from '@libs/types/account';
 import {
   AccountActionsMenuPopover,
   Avatar,
@@ -51,7 +50,7 @@ const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
   width: 100%;
 `;
 
-const ButtonContainer = styled(CenteredFlexRow)`
+const ButtonContainer = styled(FlexColumn)`
   padding: 16px;
 `;
 
@@ -132,7 +131,8 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
                     variant={HashVariant.CaptionHash}
                     truncated
                     withoutTooltip
-                    withTag={account.imported}
+                    isImported={account.imported}
+                    isLedger={account.hardware === HardwareWalletType.Ledger}
                   />
                 </AccountNameWithHashListItemContainer>
               </ListItemClickableContainer>
@@ -149,7 +149,14 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
         <ButtonContainer gap={SpacingSize.Large}>
           <Button
             color="secondaryBlue"
-            flexWidth
+            onClick={() => {
+              navigate(RouterPath.CreateAccount);
+            }}
+          >
+            <Trans t={t}>Create account</Trans>
+          </Button>
+          <Button
+            color="secondaryBlue"
             onClick={() => {
               openWindow({
                 windowApp: WindowApp.ImportAccount,
@@ -157,16 +164,15 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
               }).catch(e => console.error(e));
             }}
           >
-            <Trans t={t}>Import</Trans>
+            <Trans t={t}>Import account</Trans>
           </Button>
           <Button
             color="secondaryBlue"
-            flexWidth
             onClick={() => {
-              navigate(RouterPath.CreateAccount);
+              navigate(RouterPath.ImportAccountFromLedger);
             }}
           >
-            <Trans t={t}>Create</Trans>
+            <Trans t={t}>Connect Ledger</Trans>
           </Button>
         </ButtonContainer>
       )}

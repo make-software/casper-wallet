@@ -58,7 +58,7 @@ popup.describe('Popup UI: import account with file', () => {
         popupPage.getByText(IMPORTED_PEM_ACCOUNT.truncatedPublicKey)
       ).toBeVisible();
       await popupExpect(
-        popupPage.getByText('Imported', { exact: true })
+        popupPage.getByTestId('import-account-icon')
       ).toBeVisible();
     }
   );
@@ -112,7 +112,7 @@ popup.describe('Popup UI: import account with file', () => {
         popupPage.getByText(IMPORTED_CER_ACCOUNT.truncatedPublicKey)
       ).toBeVisible();
       await popupExpect(
-        popupPage.getByText('Imported', { exact: true })
+        popupPage.getByTestId('import-account-icon')
       ).toBeVisible();
     }
   );

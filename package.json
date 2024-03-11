@@ -71,6 +71,7 @@
     "i18next-browser-languagedetector": "^6.1.5",
     "i18next-http-backend": "^2.4.1",
     "i18next-parser": "^6.3.0",
+    "lodash.debounce": "^4.0.8",
     "lodash.throttle": "4.1.1",
     "mac-scrollbar": "^0.13.6",
     "md5": "^2.3.0",

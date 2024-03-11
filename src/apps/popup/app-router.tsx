@@ -17,6 +17,7 @@ import { CreateAccountPage } from '@popup/pages/create-account';
 import { DownloadSecretKeysPage } from '@popup/pages/download-secret-keys';
 import { DownloadedSecretKeysPage } from '@popup/pages/downloaded-secret-keys';
 import { HomePageContent } from '@popup/pages/home';
+import { ImportAccountFromLedgerPage } from '@popup/pages/import-account-from-ledger';
 import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
 import { NftDetailsPage } from '@popup/pages/nft-details';
 import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
@@ -279,6 +280,10 @@ function AppRoutes() {
         element={<ContactDetailsPage />}
       />
       <Route path={RouterPath.RateApp} element={<RateAppPage />} />
+      <Route
+        path={RouterPath.ImportAccountFromLedger}
+        element={<ImportAccountFromLedgerPage />}
+      />
     </Routes>
   );
 }

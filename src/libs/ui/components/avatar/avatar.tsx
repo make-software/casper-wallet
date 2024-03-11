@@ -1,13 +1,9 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import styled, { DefaultTheme, useTheme } from 'styled-components';
 
 import { isValidAccountHash, isValidPublicKey } from '@src/utils';
 
-import { selectThemeModeSetting } from '@background/redux/settings/selectors';
-import { ThemeMode } from '@background/redux/settings/types';
-
-import { useSystemThemeDetector } from '@hooks/use-system-theme-detector';
+import { useIsDarkMode } from '@hooks/use-is-dark-mode';
 
 import {
   AlignedFlexRow,
@@ -59,14 +55,7 @@ export const Avatar = ({
 }: AvatarTypes) => {
   const theme = useTheme();
 
-  const themeMode = useSelector(selectThemeModeSetting);
-
-  const isSystemDarkTheme = useSystemThemeDetector();
-
-  const isDarkMode =
-    themeMode === ThemeMode.SYSTEM
-      ? isSystemDarkTheme
-      : themeMode === ThemeMode.DARK;
+  const isDarkMode = useIsDarkMode();
 
   const connectIcon = isDarkMode
     ? displayContext === 'header'

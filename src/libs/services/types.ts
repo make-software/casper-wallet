@@ -16,5 +16,7 @@ export interface DataResponse<T> {
 export interface ErrorResponse {
   error: {
     message: string;
+    description: string;
+    code: string;
   };
 }

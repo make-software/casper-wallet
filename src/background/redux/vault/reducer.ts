@@ -6,6 +6,7 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
+  accountsImported,
   activeAccountChanged,
   anotherAccountConnected,
   deployPayloadReceived,
@@ -44,7 +45,7 @@ export const reducer = createReducer(initialState)
           secretPhrase,
           jsonById
         }
-      }
+      }: ReturnType<typeof vaultLoaded>
     ) => ({
       accountNamesByOriginDict,
       siteNameByOriginDict,
@@ -57,31 +58,50 @@ export const reducer = createReducer(initialState)
   )
   .handleAction(
     secretPhraseCreated,
-    (state, action): State => ({
+    (state, action: ReturnType<typeof secretPhraseCreated>): State => ({
       ...state,
       secretPhrase: action.payload
     })
   )
-  .handleAction(accountAdded, (state, action): State => {
-    const account = action.payload;
+  .handleAction(
+    accountAdded,
+    (state, action: ReturnType<typeof accountAdded>): State => {
+      const account = action.payload;
 
-    return {
-      ...state,
-      accounts: [...state.accounts, account],
-      activeAccountName: account.name
-    };
-  })
-  .handleAction(accountImported, (state, { payload: account }): State => {
-    return {
+      return {
+        ...state,
+        accounts: [...state.accounts, account],
+        activeAccountName: account.name
+      };
+    }
+  )
+  .handleAction(
+    accountImported,
+    (
+      state,
+      { payload: account }: ReturnType<typeof accountImported>
+    ): State => ({
       ...state,
       accounts: [...state.accounts, account],
       activeAccountName:
         state.accounts.length === 0 ? account.name : state.activeAccountName
-    };
-  })
+    })
+  )
+  .handleAction(
+    accountsImported,
+    (state, { payload: accounts }: ReturnType<typeof accountsImported>) => ({
+      ...state,
+      accounts: [...state.accounts, ...accounts],
+      activeAccountName:
+        state.accounts.length === 0 ? accounts[0].name : state.activeAccountName
+    })
+  )
   .handleAction(
     accountRemoved,
-    (state, { payload: { accountName } }): State => {
+    (
+      state,
+      { payload: { accountName } }: ReturnType<typeof accountRemoved>
+    ): State => {
       const newAccounts = state.accounts.filter(
         account => account.name !== accountName
       );
@@ -115,7 +135,10 @@ export const reducer = createReducer(initialState)
   )
   .handleAction(
     accountRenamed,
-    (state, { payload: { oldName, newName } }): State => {
+    (
+      state,
+      { payload: { oldName, newName } }: ReturnType<typeof accountRenamed>
+    ): State => {
       const newAccountNamesByOriginDict = Object.fromEntries(
         Object.keys(state.accountNamesByOriginDict).map(origin => [
           origin,
@@ -146,7 +169,12 @@ export const reducer = createReducer(initialState)
   )
   .handleAction(
     siteConnected,
-    (state, { payload: { siteOrigin, accountNames, siteTitle } }) => ({
+    (
+      state,
+      {
+        payload: { siteOrigin, accountNames, siteTitle }
+      }: ReturnType<typeof siteConnected>
+    ) => ({
       ...state,
       siteNameByOriginDict: {
         ...state?.siteNameByOriginDict,
@@ -166,7 +194,12 @@ export const reducer = createReducer(initialState)
   )
   .handleAction(
     anotherAccountConnected,
-    (state, { payload: { siteOrigin, accountName } }) => ({
+    (
+      state,
+      {
+        payload: { siteOrigin, accountName }
+      }: ReturnType<typeof anotherAccountConnected>
+    ) => ({
       ...state,
       accountNamesByOriginDict: {
         ...state.accountNamesByOriginDict,
@@ -182,7 +215,12 @@ export const reducer = createReducer(initialState)
   )
   .handleAction(
     accountDisconnected,
-    (state, { payload: { siteOrigin, accountName } }) => {
+    (
+      state,
+      {
+        payload: { siteOrigin, accountName }
+      }: ReturnType<typeof accountDisconnected>
+    ) => {
       const newAccountNamesByOriginDict = Object.fromEntries(
         Object.entries(state.accountNamesByOriginDict)
           // when last account for origin, remove group
@@ -208,22 +246,31 @@ export const reducer = createReducer(initialState)
       };
     }
   )
-  .handleAction(siteDisconnected, (state, { payload: { siteOrigin } }) => ({
-    ...state,
-    accountNamesByOriginDict: Object.fromEntries(
-      Object.entries(state.accountNamesByOriginDict).filter(
-        ([origin]) => origin !== siteOrigin
+  .handleAction(
+    siteDisconnected,
+    (
+      state,
+      { payload: { siteOrigin } }: ReturnType<typeof siteDisconnected>
+    ) => ({
+      ...state,
+      accountNamesByOriginDict: Object.fromEntries(
+        Object.entries(state.accountNamesByOriginDict).filter(
+          ([origin]) => origin !== siteOrigin
+        )
       )
-    )
-  }))
-  .handleAction(activeAccountChanged, (state, { payload }) => ({
-    ...state,
-    activeAccountName: payload
-  }))
+    })
+  )
+  .handleAction(
+    activeAccountChanged,
+    (state, { payload }: ReturnType<typeof activeAccountChanged>) => ({
+      ...state,
+      activeAccountName: payload
+    })
+  )
   .handleAction(deploysReseted, (): State => initialState)
   .handleAction(
     deployPayloadReceived,
-    (state, { payload }): State => ({
+    (state, { payload }: ReturnType<typeof deployPayloadReceived>): State => ({
       ...state,
       jsonById: { [payload.id]: payload.json }
     })

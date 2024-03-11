@@ -21,16 +21,21 @@ import {
 } from '@background/redux/rate-app/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+import {
+  selectIsActiveAccountFromLedger,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
 
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import {
+  AlignedFlexRow,
   ErrorPath,
   FooterButtonsContainer,
   HeaderPopup,
   HeaderSubmenuBarNavLink,
   PopupLayout,
   SpaceBetweenFlexRow,
+  SpacingSize,
   createErrorLocationState
 } from '@libs/layout';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
@@ -40,7 +45,12 @@ import {
   dispatchFetchValidatorsDetailsDataRequest
 } from '@libs/services/validators-service';
 import { ValidatorResultWithId } from '@libs/services/validators-service/types';
-import { Button, HomePageTabsId, Typography } from '@libs/ui/components';
+import {
+  Button,
+  HomePageTabsId,
+  SvgIcon,
+  Typography
+} from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useStakesForm } from '@libs/ui/forms/stakes-form';
 import { CSPRtoMotes, formatNumber, motesToCSPR } from '@libs/ui/utils';
@@ -67,8 +77,13 @@ export const StakesPage = () => {
     ValidatorResultWithId[] | null
   >(null);
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isLedgerConnected, setIsLedgerConnected] = useState(false);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const isActiveAccountFromLedger = useSelector(
+    selectIsActiveAccountFromLedger
+  );
   const {
     networkName,
     nodeUrl,
@@ -284,6 +299,10 @@ export const StakesPage = () => {
     }
   };
 
+  const submitStakeWithLedger = () => {
+    setStakeStep(StakeSteps.ConfirmWithLedger);
+  };
+
   const getButtonProps = () => {
     const isValidatorFormButtonDisabled = calculateSubmitButtonDisabled({
       isValid: validatorFormState.isValid
@@ -340,7 +359,9 @@ export const StakesPage = () => {
             isSubmitButtonDisable ||
             isValidatorFormButtonDisabled ||
             isAmountFormButtonDisabled,
-          onClick: submitStake
+          onClick: isActiveAccountFromLedger
+            ? submitStakeWithLedger
+            : submitStake
         };
       }
       case StakeSteps.Success: {
@@ -372,34 +393,43 @@ export const StakesPage = () => {
     }
   };
 
-  const handleBackButton = () => {
-    switch (stakeStep) {
-      case StakeSteps.Validator: {
-        navigate(-1);
-        break;
-      }
-      case StakeSteps.Amount: {
-        setStakeStep(StakeSteps.Validator);
-        break;
-      }
-      case StakeSteps.NewValidator: {
-        setStakeStep(StakeSteps.Amount);
-        break;
-      }
-      case StakeSteps.Confirm: {
-        if (stakesType === AuctionManagerEntryPoint.redelegate) {
-          setStakeStep(StakeSteps.NewValidator);
-        } else {
-          setStakeStep(StakeSteps.Amount);
+  const getBackButton = {
+    [StakeSteps.Validator]: () => (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        backTypeWithBalance
+        onClick={() => navigate(-1)}
+      />
+    ),
+    [StakeSteps.Amount]: () => (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        backTypeWithBalance
+        onClick={() => setStakeStep(StakeSteps.Validator)}
+      />
+    ),
+    [StakeSteps.NewValidator]: () => (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        backTypeWithBalance
+        onClick={() => setStakeStep(StakeSteps.Amount)}
+      />
+    ),
+    [StakeSteps.Confirm]: () => (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        backTypeWithBalance
+        onClick={() =>
+          stakesType === AuctionManagerEntryPoint.redelegate
+            ? setStakeStep(StakeSteps.NewValidator)
+            : setStakeStep(StakeSteps.Amount)
         }
-        break;
-      }
-
-      default: {
-        navigate(-1);
-        break;
-      }
-    }
+      />
+    ),
+    [StakeSteps.ConfirmWithLedger]: isLedgerConnected
+      ? () => <HeaderSubmenuBarNavLink linkType="cancel" />
+      : undefined,
+    [StakeSteps.Success]: undefined
   };
 
   const confirmButtonText = useConfirmationButtonText(stakesType);
@@ -437,17 +467,7 @@ export const StakesPage = () => {
           withNetworkSwitcher
           withMenu
           withConnectionStatus
-          renderSubmenuBarItems={
-            stakeStep === StakeSteps.Success
-              ? undefined
-              : () => (
-                  <HeaderSubmenuBarNavLink
-                    linkType="back"
-                    onClick={handleBackButton}
-                    backTypeWithBalance
-                  />
-                )
-          }
+          renderSubmenuBarItems={getBackButton[stakeStep]}
         />
       )}
       renderContent={() => (
@@ -467,34 +487,47 @@ export const StakesPage = () => {
           validatorList={validatorList}
           undelegateValidatorList={undelegateValidatorList}
           loading={loading}
+          isLedgerConnected={isLedgerConnected}
         />
       )}
-      renderFooter={() => (
-        <FooterButtonsContainer>
-          {stakeStep === StakeSteps.Amount ? (
-            <SpaceBetweenFlexRow>
-              <Typography type="captionRegular" color="contentSecondary">
-                <Trans t={t}>Transaction fee</Trans>
-              </Typography>
-              <Typography type="captionHash">
-                {formatNumber(motesToCSPR(STAKE_COST_MOTES), {
-                  precision: { max: 5 }
-                })}{' '}
-                CSPR
-              </Typography>
-            </SpaceBetweenFlexRow>
-          ) : null}
-          <Button color="primaryBlue" type="button" {...getButtonProps()}>
-            <Trans t={t}>
-              {stakeStep === StakeSteps.Confirm
-                ? confirmButtonText
-                : stakeStep === StakeSteps.Success
-                  ? 'Done'
-                  : 'Next'}
-            </Trans>
-          </Button>
-        </FooterButtonsContainer>
-      )}
+      renderFooter={
+        stakeStep === StakeSteps.ConfirmWithLedger
+          ? undefined
+          : () => (
+              <FooterButtonsContainer>
+                {stakeStep === StakeSteps.Amount ? (
+                  <SpaceBetweenFlexRow>
+                    <Typography type="captionRegular" color="contentSecondary">
+                      <Trans t={t}>Transaction fee</Trans>
+                    </Typography>
+                    <Typography type="captionHash">
+                      {formatNumber(motesToCSPR(STAKE_COST_MOTES), {
+                        precision: { max: 5 }
+                      })}{' '}
+                      CSPR
+                    </Typography>
+                  </SpaceBetweenFlexRow>
+                ) : null}
+                <Button color="primaryBlue" type="button" {...getButtonProps()}>
+                  {isActiveAccountFromLedger &&
+                  stakeStep === StakeSteps.Confirm ? (
+                    <AlignedFlexRow gap={SpacingSize.Small}>
+                      <SvgIcon src="assets/icons/ledger-white.svg" />
+                      <Trans t={t}>{confirmButtonText}</Trans>
+                    </AlignedFlexRow>
+                  ) : (
+                    <Trans t={t}>
+                      {stakeStep === StakeSteps.Confirm
+                        ? confirmButtonText
+                        : stakeStep === StakeSteps.Success
+                          ? 'Done'
+                          : 'Next'}
+                    </Trans>
+                  )}
+                </Button>
+              </FooterButtonsContainer>
+            )
+      }
     />
   );
 };
