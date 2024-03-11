@@ -20,8 +20,9 @@ interface ReviewWithLedgerProps {
   txnHash: string;
 }
 
-const AnimationContainer = styled(CenteredFlexColumn)`
-  margin-top: 60px;
+const HeaderTextContainer = styled(ParagraphContainer)`
+  //  We are using this instead of 'top' prop in <ParagraphContainer>, because there is a problem with height when we call it in layout window
+  padding-top: 24px;
 `;
 
 export const ReviewWithLedger = ({ txnHash }: ReviewWithLedgerProps) => {
@@ -30,11 +31,11 @@ export const ReviewWithLedger = ({ txnHash }: ReviewWithLedgerProps) => {
 
   return (
     <ContentContainer>
-      <ParagraphContainer top={SpacingSize.XL}>
+      <HeaderTextContainer>
         <Typography type="header">
           <Trans t={t}>Review and sign with Ledger </Trans>
         </Typography>
-      </ParagraphContainer>
+      </HeaderTextContainer>
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
@@ -48,15 +49,15 @@ export const ReviewWithLedger = ({ txnHash }: ReviewWithLedgerProps) => {
           <TextArea value={txnHash} readOnly rows={2} type="captionHash" />
         </FormField>
       </VerticalSpaceContainer>
-      <AnimationContainer>
+      <CenteredFlexColumn>
         <Player
-          renderer={'svg'}
+          renderer="svg"
           autoplay
           loop
           src={isDarkMode ? dotsDarkModeAnimation : dotsLightModeAnimation}
-          style={{ width: '56px', height: '24px' }}
+          style={{ height: '142px' }}
         />
-      </AnimationContainer>
+      </CenteredFlexColumn>
     </ContentContainer>
   );
 };

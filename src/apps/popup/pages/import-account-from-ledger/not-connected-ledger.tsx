@@ -1,7 +1,6 @@
 import { Player } from '@lottiefiles/react-lottie-player';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import { ledgerSupportLink } from '@src/constants';
 
@@ -20,10 +19,6 @@ import {
   SpacingSize
 } from '@libs/layout';
 import { Link, SvgIcon, Typography } from '@libs/ui/components';
-
-const AnimationContainer = styled(CenteredFlexColumn)`
-  margin-top: 60px;
-`;
 
 export const NotConnectedLedger = () => {
   const { t } = useTranslation();
@@ -68,15 +63,15 @@ export const NotConnectedLedger = () => {
               </Link>
             </Typography>
           </ParagraphContainer>
-          <AnimationContainer>
+          <CenteredFlexColumn>
             <Player
-              renderer={'svg'}
+              renderer="svg"
               autoplay
               loop
               src={isDarkMode ? dotsDarkModeAnimation : dotsLightModeAnimation}
-              style={{ width: '56px', height: '24px' }}
+              style={{ height: '142px' }}
             />
-          </AnimationContainer>
+          </CenteredFlexColumn>
         </ContentContainer>
       )}
     />

@@ -220,7 +220,7 @@ export function UnlockVaultPageContent() {
           {isLoading ? (
             <AlignedFlexRow gap={SpacingSize.Small}>
               <Player
-                renderer={'svg'}
+                renderer="svg"
                 autoplay
                 loop
                 src={unlockAnimation}

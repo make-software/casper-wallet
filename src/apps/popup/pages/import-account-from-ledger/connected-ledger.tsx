@@ -33,7 +33,7 @@ import { Button, Tile, Typography } from '@libs/ui/components';
 import { LedgerAccountsList } from './ledger-accounts-list';
 
 const AnimationContainer = styled(CenteredFlexColumn)`
-  padding: 52px 16px;
+  padding: 0 16px 52px;
 `;
 
 const list = [
@@ -176,9 +176,9 @@ export const ConnectedLedger = () => {
           {isLoading ? (
             <VerticalSpaceContainer top={SpacingSize.XL}>
               <Tile>
-                <AnimationContainer gap={SpacingSize.XXL}>
+                <AnimationContainer>
                   <Player
-                    renderer={'svg'}
+                    renderer="svg"
                     autoplay
                     loop
                     src={
@@ -186,7 +186,7 @@ export const ConnectedLedger = () => {
                         ? spinnerDarkModeAnimation
                         : spinnerLightModeAnimation
                     }
-                    style={{ width: '56px', height: '56px' }}
+                    style={{ height: '130px' }}
                   />
                   <CenteredFlexColumn gap={SpacingSize.Small}>
                     <Typography type="subtitle">
