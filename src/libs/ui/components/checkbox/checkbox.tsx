@@ -10,7 +10,7 @@ const StyledFlexRow = styled(FlexRow)<{
   checked?: boolean;
   disabled?: boolean;
 }>(({ theme, checked, disabled }) => ({
-  cursor: 'pointer',
+  cursor: disabled ? 'not-allowed' : 'pointer',
   width: 'fit-content',
   pointerEvents: 'auto',
   svg: {
@@ -68,7 +68,10 @@ export function Checkbox({
       data-testid={dataTestId}
       disabled={disabled}
     >
-      <CheckboxSvgIcon src={iconSrc} color="contentAction" />
+      <CheckboxSvgIcon
+        src={iconSrc}
+        color={disabled ? 'contentSecondary' : 'contentAction'}
+      />
       {label && (
         <Typography type="body" color="contentPrimary">
           {label}

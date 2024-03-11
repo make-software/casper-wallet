@@ -2,7 +2,10 @@ import debounce from 'lodash.debounce';
 import React, { useEffect } from 'react';
 import { Controller } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+
+import { selectVaultLedgerAccounts } from '@background/redux/vault/selectors';
 
 import {
   CenteredFlexRow,
@@ -25,10 +28,10 @@ import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-
 import { useImportLedgerAccountsForm } from '@libs/ui/forms/import-ledger-account';
 import { formatNumber, motesToCSPR } from '@libs/ui/utils';
 
-const ListItemContainer = styled(FlexColumn)`
+const ListItemContainer = styled(FlexColumn)<{ disabled?: boolean }>`
   padding: 20px 16px;
 
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 `;
 const FooterContainer = styled(LeftAlignedCenteredFlexRow)`
   padding: 18px 16px;
@@ -65,6 +68,8 @@ export const LedgerAccountsList = ({
   setMaxItemsToRender
 }: ListProps) => {
   const { t } = useTranslation();
+
+  const alreadyConnectedLedgerAccounts = useSelector(selectVaultLedgerAccounts);
 
   const {
     control,
@@ -103,13 +108,28 @@ export const LedgerAccountsList = ({
           precision: { max: 0 }
         });
 
+        const isAlreadyConnected = alreadyConnectedLedgerAccounts.find(
+          alreadyConnectedAccount =>
+            alreadyConnectedAccount.publicKey === account.publicKey
+        );
+
         return (
-          <ListItemContainer gap={SpacingSize.Medium}>
+          <ListItemContainer
+            gap={SpacingSize.Medium}
+            disabled={!!isAlreadyConnected}
+            title={
+              isAlreadyConnected
+                ? 'This account already connected to the wallet'
+                : undefined
+            }
+          >
             <Controller
               control={control}
               render={({ field }) => (
                 <SpaceBetweenFlexRow
                   onClick={() => {
+                    if (isAlreadyConnected) return;
+
                     const accountIndex = selectedAccounts.findIndex(
                       alreadySelectedAccount =>
                         alreadySelectedAccount.id === account.id
@@ -169,7 +189,11 @@ export const LedgerAccountsList = ({
                         CSPR
                       </Typography>
                     </AmountContainer>
-                    <Checkbox checked={!!field.value} variant="square" />
+                    <Checkbox
+                      checked={!!(isAlreadyConnected || field.value)}
+                      variant="square"
+                      disabled={!!isAlreadyConnected}
+                    />
                   </CenteredFlexRow>
                 </SpaceBetweenFlexRow>
               )}
