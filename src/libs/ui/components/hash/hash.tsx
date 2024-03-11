@@ -72,7 +72,13 @@ export function Hash({
             {truncated ? truncateKey(value, { size: truncatedSize }) : value}
           </Typography>
         </Tooltip>
-        {isImported && <SvgIcon src="assets/icons/upload.svg" size={20} />}
+        {isImported && (
+          <SvgIcon
+            src="assets/icons/upload.svg"
+            dataTestId="import-account-icon"
+            size={20}
+          />
+        )}
         {isLedger && (
           <SvgIcon src="assets/icons/ledger-blue.svg" size={20} color="black" />
         )}
