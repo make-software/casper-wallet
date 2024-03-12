@@ -55,7 +55,7 @@ export const ConfirmStep = ({
     const transferCostInCSPR = formatNumber(motesToCSPR(TRANSFER_COST_MOTES), {
       precision: { max: 5 }
     });
-    const totalCSPR: string = Big(amount).add(transferCostInCSPR).toString();
+    const totalCSPR: string = Big(amount).add(transferCostInCSPR).toFixed();
 
     transactionDataRows = [
       {
