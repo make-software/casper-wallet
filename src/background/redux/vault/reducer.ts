@@ -6,6 +6,7 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
+  accountsBalanceChanged,
   activeAccountChanged,
   anotherAccountConnected,
   deployPayloadReceived,
@@ -159,6 +160,13 @@ export const reducer = createReducer(initialState)
         accountNamesByOriginDict: newAccountNamesByOriginDict
       };
     }
+  )
+  .handleAction(
+    accountsBalanceChanged,
+    (state, action: ReturnType<typeof accountsBalanceChanged>) => ({
+      ...state,
+      accounts: action.payload
+    })
   )
   .handleAction(
     siteConnected,
