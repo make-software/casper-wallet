@@ -68,7 +68,9 @@ export function WordTag({
           {index + 1}
         </Typography>
       )}
-      <Typography type="body">{value}</Typography>
+      <Typography translate="no" type="body">
+        {value}
+      </Typography>
     </WordContainer>
   );
 }
