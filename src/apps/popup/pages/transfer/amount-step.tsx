@@ -17,7 +17,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Checkbox, Input, Typography } from '@libs/ui/components';
+import { Checkbox, Error, Input, Typography } from '@libs/ui/components';
 import { TransferAmountFormValues } from '@libs/ui/forms/transfer';
 import {
   formatFiatAmount,
@@ -98,14 +98,13 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
       </ParagraphContainer>
 
       {isCSPR && disabled && (
-        <ParagraphContainer top={SpacingSize.Small}>
-          <Typography type="body" color="contentActionCritical">
-            <Trans t={t}>
-              You don't have enough CSPR to cover the transfer minimum amount
-              and the transaction fee.
-            </Trans>
-          </Typography>
-        </ParagraphContainer>
+        <VerticalSpaceContainer top={SpacingSize.XL}>
+          <Error
+            header="Not enough CSPR"
+            description="You don't have enough CSPR to cover the transfer minimum amount
+              and the transaction fee."
+          />
+        </VerticalSpaceContainer>
       )}
 
       <VerticalSpaceContainer top={SpacingSize.XXL}>
