@@ -1,7 +1,7 @@
 import Big from 'big.js';
 import React, { useEffect, useState } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -30,8 +30,8 @@ import {
   motesToCSPR
 } from '@libs/ui/utils';
 
-const StakeMaxButton = styled(AlignedFlexRow)<{ disabled: boolean }>`
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+const StakeMaxButton = styled(AlignedFlexRow)<{ disabled?: boolean }>`
+  cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
 `;
 
 interface AmountStepProps {
@@ -64,9 +64,14 @@ export const AmountStep = ({
           csprBalance.liquidMotes == null
             ? '0'
             : Big(csprBalance.liquidMotes).sub(STAKE_COST_MOTES).toFixed();
-        const hasEnoughBalance = Big(maxAmountMotes).gte(
-          DELEGATION_MIN_AMOUNT_MOTES
-        );
+        const minAmount = Big(STAKE_COST_MOTES)
+          .add(DELEGATION_MIN_AMOUNT_MOTES)
+          .toFixed();
+        const hasEnoughBalance =
+          csprBalance.liquidMotes != null &&
+          Big(csprBalance.liquidMotes).gte(minAmount);
+
+        setDisabled(!hasEnoughBalance);
 
         setMaxAmountMotes(maxAmountMotes);
         setDisabled(!hasEnoughBalance);
@@ -74,6 +79,11 @@ export const AmountStep = ({
       }
       case AuctionManagerEntryPoint.undelegate:
       case AuctionManagerEntryPoint.redelegate: {
+        const hasEnoughBalance =
+          csprBalance.liquidMotes != null &&
+          Big(csprBalance.liquidMotes).gte(STAKE_COST_MOTES);
+
+        setDisabled(!hasEnoughBalance);
         setMaxAmountMotes(stakeAmountMotes);
       }
     }
@@ -101,16 +111,18 @@ export const AmountStep = ({
   return (
     <>
       {disabled && (
-        <ParagraphContainer top={SpacingSize.Small}>
-          <Typography type="body" color="contentActionCritical">
-            <Trans t={t}>
-              You don't have enough CSPR to cover the delegate minimum amount
-              and the transaction fee.
-            </Trans>
-          </Typography>
-        </ParagraphContainer>
+        <VerticalSpaceContainer top={SpacingSize.XL}>
+          <Error
+            header="Not enough CSPR"
+            description={
+              stakesType === AuctionManagerEntryPoint.delegate
+                ? "You don't have enough CSPR to cover the delegation minimum amount\n" +
+                  '              and the transaction fee.'
+                : "You don't have enough CSPR to cover the transaction fee."
+            }
+          />
+        </VerticalSpaceContainer>
       )}
-
       <VerticalSpaceContainer top={SpacingSize.XXL}>
         <Input
           label={amountLabel}
@@ -119,6 +131,7 @@ export const AmountStep = ({
           placeholder={t('0.00')}
           suffixText={'CSPR'}
           {...register('amount')}
+          disabled={disabled}
           onChange={e => {
             formatInputAmountValue(e);
             onChangeCSPRAmount(e);
@@ -127,8 +140,8 @@ export const AmountStep = ({
       </VerticalSpaceContainer>
       <ParagraphContainer top={SpacingSize.Small}>
         <StakeMaxButton
-          gap={SpacingSize.Small}
           disabled={disabled}
+          gap={SpacingSize.Small}
           onClick={() => {
             if (disabled) return;
 
@@ -136,11 +149,17 @@ export const AmountStep = ({
             trigger('amount');
           }}
         >
-          <Typography type="captionRegular" color="contentAction">
+          <Typography
+            type="captionRegular"
+            color={disabled ? 'contentSecondary' : 'contentAction'}
+          >
             {amountStepText}
           </Typography>
           {amountStepMaxAmountValue && (
-            <Typography type="captionHash" color="contentAction">
+            <Typography
+              type="captionHash"
+              color={disabled ? 'contentSecondary' : 'contentAction'}
+            >
               {amountStepMaxAmountValue}
             </Typography>
           )}
