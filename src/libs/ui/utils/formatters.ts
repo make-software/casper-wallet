@@ -175,7 +175,16 @@ export const motesToCurrency = (
     throw new Error('motesToCurrency: the CSPR rate cannot be zero');
   }
 
-  return Big(motes).div(MOTES_PER_CSPR_RATE).mul(currencyPerCsprRate).toFixed();
+  const amount = Big(motes).div(MOTES_PER_CSPR_RATE).mul(currencyPerCsprRate);
+
+  const billion = new Big(10).pow(9);
+
+  if (amount.gte(billion)) {
+    // If the value is greater than or equal to 10^9, return one billion string.
+    return '1000000000';
+  }
+
+  return amount.toFixed();
 };
 
 export function snakeAndKebabToCamel(str: string): string {
@@ -191,7 +200,7 @@ export function capitalizeString(str: string): string {
 }
 
 export const formatCurrency = (
-  value: number | string,
+  value: string,
   code: string,
   {
     precision
@@ -199,12 +208,16 @@ export const formatCurrency = (
     precision?: number;
   } = {}
 ): string => {
-  return intl.formatNumber(value as number, {
+  const formattedValue = intl.formatNumber(Number(value), {
     style: 'currency',
     currency: code,
     minimumFractionDigits: precision,
     maximumFractionDigits: precision
   });
+  // Check if the original value is '1000000000'
+  // If yes, append a '+' sign to the end of the formatted value
+  // Otherwise, return the formatted value as is
+  return value === '1000000000' ? `${formattedValue}+` : formattedValue;
 };
 
 export const formatFiatAmount = (
