@@ -35,6 +35,7 @@ export interface BodyStylesProps extends BaseProps {
   fontSize?: CSPRSize;
   ellipsis?: boolean;
   overflowWrap?: boolean;
+  translate?: 'yes' | 'no';
 }
 
 export const getFontSizeBasedOnTextLength = (length: number) => {
