@@ -5,6 +5,7 @@ export interface KeyPair {
 export interface Account extends KeyPair {
   name: string;
   imported?: boolean;
+  hidden: boolean;
 }
 
 export interface AccountListRows extends Account {

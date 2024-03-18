@@ -29,5 +29,6 @@ export enum RouterPath {
   ContactList = '/contact-list',
   AddContact = '/add-contact',
   ContactDetails = '/contact-list/:contactName',
-  RateApp = '/rate-app'
+  RateApp = '/rate-app',
+  AllAccountsList = '/accounts-list'
 }

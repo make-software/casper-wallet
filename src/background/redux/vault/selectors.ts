@@ -19,6 +19,11 @@ export const selectSecretPhrase = (state: RootState): null | SecretPhrase =>
 export const selectVaultAccounts = (state: RootState): Account[] =>
   state.vault.accounts;
 
+export const selectVaultCountsOfAccounts = createSelector(
+  selectVaultAccounts,
+  accounts => accounts.length
+);
+
 export const selectVaultHasAccounts = (state: RootState): boolean =>
   state.vault.accounts.length > 0;
 
@@ -30,6 +35,26 @@ export const selectVaultAccountsNames = createSelector(
 export const selectVaultImportedAccounts = createSelector(
   selectVaultAccounts,
   accounts => accounts.filter(account => account.imported)
+);
+
+export const selectVaultImportedAccountNames = createSelector(
+  selectVaultImportedAccounts,
+  accounts => accounts.map(account => account.name)
+);
+
+export const selectVaultVisibleAccounts = createSelector(
+  selectVaultAccounts,
+  accounts => accounts.filter(account => !account.hidden)
+);
+
+export const selectVaultHiddenAccounts = createSelector(
+  selectVaultAccounts,
+  accounts => accounts.filter(account => account.hidden)
+);
+
+export const selectVaultHiddenAccountsNames = createSelector(
+  selectVaultHiddenAccounts,
+  accounts => accounts.map(account => account.name)
 );
 
 export const selectVaultHasImportedAccount = createSelector(

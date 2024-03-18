@@ -9,6 +9,8 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { hideAccountFromListChange } from '@background/redux/vault/actions';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
   selectIsAnyAccountConnectedWithActiveOrigin
@@ -21,10 +23,12 @@ import { Popover } from '@libs/ui/components/popover/popover';
 interface AccountActionsMenuPopoverProps {
   account: Account;
   onClick?: (e: React.MouseEvent) => void;
+  showHideAccountItem?: boolean;
 }
 export const AccountActionsMenuPopover = ({
   account,
-  onClick
+  onClick,
+  showHideAccountItem
 }: AccountActionsMenuPopoverProps) => {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -124,6 +128,33 @@ export const AccountActionsMenuPopover = ({
               <Trans t={t}>View on CSPR.live</Trans>
             </Typography>
           </PopoverLink>
+          {showHideAccountItem && (
+            <PopoverLink
+              variant="contentAction"
+              onClick={() => {
+                dispatchToMainStore(
+                  hideAccountFromListChange({ accountName: account.name })
+                );
+              }}
+            >
+              <SvgIcon
+                src={
+                  account.hidden
+                    ? 'assets/icons/show.svg'
+                    : 'assets/icons/hide.svg'
+                }
+                marginRight="medium"
+                color="contentDisabled"
+              />
+              <Typography type="body">
+                {account.hidden ? (
+                  <Trans t={t}>Show in list</Trans>
+                ) : (
+                  <Trans t={t}>Hide from list</Trans>
+                )}
+              </Typography>
+            </PopoverLink>
+          )}
           <PopoverLink
             variant="contentAction"
             onClick={event => {

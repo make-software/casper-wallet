@@ -104,7 +104,8 @@ function* initVaultSaga(action: ReturnType<typeof initVault>) {
     const keyPair = deriveKeyPair(secretPhrase, 0);
     const account = {
       ...keyPair,
-      name: 'Account 1'
+      name: 'Account 1',
+      hidden: false
     };
 
     yield put(secretPhraseCreated(secretPhrase));
