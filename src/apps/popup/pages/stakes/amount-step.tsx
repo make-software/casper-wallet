@@ -74,7 +74,6 @@ export const AmountStep = ({
         setDisabled(!hasEnoughBalance);
 
         setMaxAmountMotes(maxAmountMotes);
-        setDisabled(!hasEnoughBalance);
         break;
       }
       case AuctionManagerEntryPoint.undelegate:
