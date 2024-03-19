@@ -69,6 +69,7 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
+  accountsBalanceChanged,
   activeAccountChanged,
   anotherAccountConnected,
   deployPayloadReceived,
@@ -113,6 +114,7 @@ import { fetchErc20TokenActivity } from '@libs/services/account-activity-service
 import { fetchAccountInfo } from '@libs/services/account-info';
 import {
   fetchAccountBalance,
+  fetchAccountsBalance,
   fetchCurrencyRate
 } from '@libs/services/balance-service';
 import { fetchErc20Tokens } from '@libs/services/erc20-service';
@@ -569,6 +571,7 @@ runtime.onMessage.addListener(
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeAccountChanged):
+          case getType(accountsBalanceChanged):
           case getType(hideAccountFromListChange):
           case getType(activeTimeoutDurationSettingChanged):
           case getType(activeNetworkSettingChanged):
@@ -648,6 +651,27 @@ runtime.onMessage.addListener(
                   accountData: accountData?.data || null,
                   currencyRate: rate?.data || null
                 })
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchAccountsBalanceRequest): {
+            const { casperWalletApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const data = await fetchAccountsBalance({
+                accountHashes: action.payload.accountHashes,
+                casperWalletApiUrl
+              });
+
+              return sendResponse(
+                serviceMessage.fetchAccountsBalanceResponse(data)
               );
             } catch (error) {
               console.error(error);

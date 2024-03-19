@@ -319,7 +319,10 @@ function* createAccountSaga(action: ReturnType<typeof createAccount>) {
     const account = {
       ...keyPair,
       name,
-      hidden: false
+      hidden: false,
+      balance: {
+        liquidMotes: null
+      }
     };
 
     yield put(accountAdded(account));

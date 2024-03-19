@@ -55,14 +55,20 @@ export const initialStateForPopupTests: RootState = {
           '0202b1943511b8c23b1b2b8ed7ddcedffcc7be70d9366a5005c7beab08a81b7ae633',
         secretKey: 'Go8sSp3u/hSaDFCjFK6wdM4VZuWjqxEaNB38RaZHLA0=',
         name: 'Account 1',
-        hidden: false
+        hidden: false,
+        balance: {
+          liquidMotes: null
+        }
       },
       {
         publicKey:
           '0203b2e05f074452f5e69ba512310deceaca152ebd3394eadcec26c6e68e91aa7724',
         secretKey: 'TCDeehVWtWeWP2PM/UKh2gQ6hgUpZ6v1D6lzmonYpm4=',
         name: 'Account 2',
-        hidden: false
+        hidden: false,
+        balance: {
+          liquidMotes: null
+        }
       }
     ],
     accountNamesByOriginDict: {},

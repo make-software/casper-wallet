@@ -105,7 +105,8 @@ function* initVaultSaga(action: ReturnType<typeof initVault>) {
     const account = {
       ...keyPair,
       name: 'Account 1',
-      hidden: false
+      hidden: false,
+      balance: { liquidMotes: null }
     };
 
     yield put(secretPhraseCreated(secretPhrase));
