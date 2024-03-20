@@ -139,7 +139,7 @@ export const TransferNftPage = () => {
         target: getRawPublicKey(recipientPublicKey)
       };
 
-      const signDeploy = signNftDeploy(
+      const signDeploy = await signNftDeploy(
         getRuntimeArgs(tokenStandard, args),
         CSPRtoMotes(paymentAmount),
         KEYS.publicKey,

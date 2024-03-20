@@ -334,7 +334,7 @@ export const setCSPForSafari = () => {
       meta.setAttribute('http-equiv', 'Content-Security-Policy');
       meta.setAttribute(
         'content',
-        `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://casper-testnet-node-proxy.make.services/rpc https://casper-node-proxy.make.services/rpc https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/`
+        `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://casper-testnet-node-proxy.make.services/ https://casper-node-proxy.make.services/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/`
       );
 
       document.getElementsByTagName('head')[0].appendChild(meta);
