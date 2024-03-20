@@ -1,12 +1,11 @@
-import { CEP18Client } from 'casper-cep18-js-client';
-import { CLPublicKey, DeployUtil } from 'casper-js-sdk';
-import { sub } from 'date-fns';
+import { DeployUtil } from 'casper-js-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import {
+  CasperNodeUrl,
   ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES,
   TRANSFER_COST_MOTES
 } from '@src/constants';
@@ -37,8 +36,11 @@ import {
   createErrorLocationState
 } from '@libs/layout';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import { signAndDeploy } from '@libs/services/deployer-service';
-import { makeNativeTransferDeploy } from '@libs/services/transfer-service/transfer-service';
+import {
+  makeCep18TransferDeploy,
+  makeNativeTransferDeploy,
+  signAndDeploy
+} from '@libs/services/deployer-service';
 import { Account } from '@libs/types/account';
 import { Button, HomePageTabsId, Typography } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
@@ -47,8 +49,7 @@ import {
   CSPRtoMotes,
   divideErc20Balance,
   formatNumber,
-  motesToCSPR,
-  multiplyErc20Balance
+  motesToCSPR
 } from '@libs/ui/utils';
 
 import { TransactionSteps, getIsErc20Transfer } from './utils';
@@ -179,7 +180,7 @@ export const TransferPage = () => {
   const submitDeploy = (
     deploy: DeployUtil.Deploy,
     activeAccount: Account,
-    nodeUrl: string
+    nodeUrl: CasperNodeUrl
   ) => {
     signAndDeploy(
       deploy,
@@ -226,45 +227,20 @@ export const TransferPage = () => {
     });
   };
 
-  const onSubmitSending = () => {
+  const onSubmitSending = async () => {
     if (activeAccount) {
-      const publicKeyFromHex = (publicKeyHex: string) => {
-        return CLPublicKey.fromHex(publicKeyHex);
-      };
-
       if (isErc20Transfer) {
         // ERC20 transfer
-        const cep18 = new CEP18Client(nodeUrl, networkName);
-
-        cep18.setContractHash(
-          `hash-${tokenContractHash}`,
-          `hash-${tokenContractPackageHash}`
-        );
-
-        // create deploy
-        const tempDeploy = cep18.transfer(
-          {
-            recipient: publicKeyFromHex(recipientPublicKey),
-            amount: multiplyErc20Balance(amount, erc20Decimals) || '0'
-          },
-          CSPRtoMotes(paymentAmount),
-          publicKeyFromHex(activeAccount.publicKey),
-          networkName
-        );
-
-        const deployParams = new DeployUtil.DeployParams(
-          publicKeyFromHex(activeAccount.publicKey),
+        const deploy = await makeCep18TransferDeploy(
+          nodeUrl,
           networkName,
-          undefined,
-          undefined,
-          undefined,
-          sub(new Date(), { seconds: 2 }).getTime() // https://github.com/casper-network/casper-node/issues/4152
-        );
-
-        const deploy = DeployUtil.makeDeploy(
-          deployParams,
-          tempDeploy.session,
-          tempDeploy.payment
+          tokenContractHash,
+          tokenContractPackageHash,
+          recipientPublicKey,
+          amount,
+          erc20Decimals,
+          paymentAmount,
+          activeAccount
         );
 
         submitDeploy(deploy, activeAccount, nodeUrl);
@@ -272,7 +248,7 @@ export const TransferPage = () => {
         // CSPR transfer
         const motesAmount = CSPRtoMotes(amount);
 
-        const deploy = makeNativeTransferDeploy(
+        const deploy = await makeNativeTransferDeploy(
           activeAccount.publicKey,
           recipientPublicKey,
           motesAmount,

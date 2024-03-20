@@ -219,7 +219,7 @@ export const StakesPage = () => {
     };
   }, [isSubmitButtonDisable, stakeStep]);
 
-  const submitStake = () => {
+  const submitStake = async () => {
     if (activeAccount) {
       const motesAmount = CSPRtoMotes(inputAmountCSPR);
 
@@ -228,7 +228,7 @@ export const StakesPage = () => {
         activeAccount.secretKey
       );
 
-      const deploy = makeAuctionManagerDeploy(
+      const deploy = await makeAuctionManagerDeploy(
         stakesType,
         activeAccount.publicKey,
         validatorPublicKey,
