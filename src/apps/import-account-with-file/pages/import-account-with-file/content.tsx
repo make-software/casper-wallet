@@ -9,7 +9,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { SvgIcon, Tag, Typography } from '@libs/ui/components';
+import { SvgIcon, Typography } from '@libs/ui/components';
 
 export function ImportAccountWithFileContentPage() {
   const { t } = useTranslation();
@@ -27,11 +27,6 @@ export function ImportAccountWithFileContentPage() {
         <Typography type="header">
           <Trans t={t}>Import account from secret key file</Trans>
         </Typography>
-      </ParagraphContainer>
-      <ParagraphContainer top={SpacingSize.Medium}>
-        <Tag>
-          <Trans t={t}>Imported</Trans>
-        </Tag>
       </ParagraphContainer>
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
