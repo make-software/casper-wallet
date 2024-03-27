@@ -64,7 +64,7 @@ export function useSecretKeyFileReader({
 
         return onSuccess({
           imported: true,
-          name,
+          name: name.trim(),
           publicKey: publicKeyHex,
           secretKey: secretKeyBase64
         });

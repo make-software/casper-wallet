@@ -1,7 +1,7 @@
 import { Page } from '@playwright/test';
 
-import { popup, popupExpect } from '../../fixtures';
 import { ACCOUNT_NAMES, PLAYGROUND_URL } from '../../constants';
+import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI: connect account', () => {
   let connectAccountPage: Page;
@@ -50,7 +50,7 @@ popup.describe('Popup UI: connect account', () => {
         page.getByText('Casper Wallet Playground')
       ).toBeVisible();
       await popupExpect(
-        page.getByText('casper-wallet-playground.make.services')
+        page.getByText('cspr-wallet-playground.dev.make.services')
       ).toBeVisible();
       await popupExpect(
         page.getByRole('button', { name: 'Disconnect' })
@@ -92,7 +92,7 @@ popup.describe('Popup UI: connect account', () => {
         page.getByText('Casper Wallet Playground')
       ).toBeVisible();
       await popupExpect(
-        page.getByText('casper-wallet-playground.make.services')
+        page.getByText('cspr-wallet-playground.dev.make.services')
       ).toBeVisible();
       await popupExpect(
         page.getByRole('button', { name: 'Disconnect' })

@@ -32,7 +32,7 @@ export const formatErc20TokenBalance = (
         symbol: token?.metadata?.symbol || '',
         decimals: token?.metadata?.decimals,
         amountFiat: null,
-        icon: token.icon_url || 'assets/icons/erc20-avatar.svg'
+        icon: token.icon_url || 'assets/icons/cep18-contract-icon.svg'
       };
     })
     .sort((a, b) => {

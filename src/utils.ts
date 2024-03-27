@@ -1,5 +1,5 @@
 import Big from 'big.js';
-import { CLPublicKey } from 'casper-js-sdk';
+import { CLPublicKey, Keys, decodeBase16 } from 'casper-js-sdk';
 import { runtime } from 'webextension-polyfill';
 
 import { Browser, NFT_TOKENS_REFRESH_RATE } from '@src/constants';
@@ -98,6 +98,8 @@ export const hashPrefixRegEx = new RegExp(
   'i'
 );
 
+const validHashRegExp = new RegExp('^([0-9A-Fa-f]){64}$');
+
 export interface SplitDataType {
   prefix: string;
   hash: string;
@@ -128,8 +130,31 @@ export const isValidAccountHash = (
     return false;
   }
 
-  const validHashRegExp = new RegExp('^([0-9A-Fa-f]){64}$');
   return validHashRegExp.test(accountHash.trim());
+};
+
+/*
+ * This function checks if the provided secretKey is a valid hash key.
+ * Firstly, it checks if the secretKey is not an empty string.
+ * Then, it tests the secretKey against the defined regular expression using test() method.
+ * If the secretKey passes these checks, it attempts to parse and decode it as a 'raw' type private key.
+ * If no exceptions occur during parsing and decoding, the function returns true indicating the secretKey is valid.
+ * If the secretKey fails any of these checks or an exception is caught during parsing/decoding,
+ * false is returned indicating the secretKey is invalid.
+ */
+export const isValidSecretKeyHash = (secretKey: string) => {
+  if (!secretKey) {
+    return false;
+  }
+  if (!validHashRegExp.test(secretKey.trim())) {
+    return false;
+  }
+  try {
+    Keys.Secp256K1.parsePrivateKey(decodeBase16(secretKey), 'raw');
+    return true;
+  } catch (error) {
+    return false;
+  }
 };
 
 export const mapToDictionary = <T, V extends Record<string, any>>(
