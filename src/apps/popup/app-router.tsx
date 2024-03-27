@@ -18,6 +18,7 @@ import { CreateAccountPage } from '@popup/pages/create-account';
 import { DownloadSecretKeysPage } from '@popup/pages/download-secret-keys';
 import { DownloadedSecretKeysPage } from '@popup/pages/downloaded-secret-keys';
 import { HomePageContent } from '@popup/pages/home';
+import { ImportAccountFromTorusPage } from '@popup/pages/import-account-from-torus';
 import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
 import { NftDetailsPage } from '@popup/pages/nft-details';
 import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
@@ -281,6 +282,10 @@ function AppRoutes() {
       />
       <Route path={RouterPath.RateApp} element={<RateAppPage />} />
       <Route path={RouterPath.AllAccountsList} element={<AllAccountsPage />} />
+      <Route
+        path={RouterPath.ImportAccountFromTorus}
+        element={<ImportAccountFromTorusPage />}
+      />
     </Routes>
   );
 }
