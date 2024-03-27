@@ -37,7 +37,7 @@ export const NoConnectedLedger = () => {
     <ContentContainer>
       <IllustrationContainer>
         <SvgIcon
-          src="assets/illustrations/ledger-connect.svg"
+          src="assets/illustrations/ledger-not-connected.svg"
           width={296}
           height={120}
         />
