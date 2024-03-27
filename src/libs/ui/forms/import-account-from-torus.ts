@@ -4,7 +4,7 @@ import { UseFormProps, useForm } from 'react-hook-form';
 
 import {
   useAccountNameRule,
-  useTorusSecretKEyRule
+  useTorusSecretKeyRule
 } from './form-validation-rules';
 
 export type ImportAccountFromTorusFromValues = {
@@ -17,7 +17,7 @@ export const useImportAccountFromTorus = (existingAccountNames: string[]) => {
     name: useAccountNameRule(value => {
       return value != null && !existingAccountNames.includes(value);
     }),
-    secretKey: useTorusSecretKEyRule()
+    secretKey: useTorusSecretKeyRule()
   });
 
   const formOptions: UseFormProps<ImportAccountFromTorusFromValues> = {

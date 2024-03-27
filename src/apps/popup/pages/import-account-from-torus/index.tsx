@@ -78,11 +78,9 @@ export const ImportAccountFromTorusPage = () => {
     [ImportAccountSteps.Form]: (
       <Button
         disabled={isButtonDisabled}
-        onClick={() => {
-          handleSubmit(({ secretKey, name }) => {
-            importTorusAccount(name, secretKey);
-          })();
-        }}
+        onClick={handleSubmit(({ secretKey, name }) => {
+          importTorusAccount(name, secretKey);
+        })}
       >
         <Trans t={t}>Import</Trans>
       </Button>

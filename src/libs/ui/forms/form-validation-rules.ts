@@ -12,7 +12,7 @@ import {
   TRANSFER_COST_MOTES,
   TRANSFER_MIN_AMOUNT_MOTES
 } from '@src/constants';
-import { isValidAccountHash, isValidPublicKey, isValidU64 } from '@src/utils';
+import { isValidPublicKey, isValidSecretKeyHash, isValidU64 } from '@src/utils';
 
 import { loginRetryCountIncremented } from '@background/redux/login-retry-count/actions';
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
@@ -497,14 +497,14 @@ export const useContactPublicKeyRule = () => {
     });
 };
 
-export const useTorusSecretKEyRule = () => {
+export const useTorusSecretKeyRule = () => {
   const { t } = useTranslation();
 
   return Yup.string()
     .required(t('Secret key is required'))
     .test({
       name: 'secret key',
-      test: value => (value ? isValidAccountHash(value) : false),
+      test: value => (value ? isValidSecretKeyHash(value) : false),
       message: t('This secret key doesn’t look right')
     });
 };
