@@ -132,7 +132,7 @@ export function NavigationMenuPageContent() {
           {
             id: 2,
             title: t('Import account'),
-            description: t('From Signer secret key file'),
+            description: t('From secret key file'),
             iconPath: 'assets/icons/upload.svg',
             disabled: false,
             handleOnClick: () => {
@@ -141,6 +141,16 @@ export function NavigationMenuPageContent() {
                 windowApp: WindowApp.ImportAccount,
                 isNewWindow: true
               }).catch(e => console.error(e));
+            }
+          },
+          {
+            id: 4,
+            title: t('Import Torus account'),
+            iconPath: 'assets/icons/torus.svg',
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.ImportAccountFromTorus);
             }
           }
         ]
