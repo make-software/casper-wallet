@@ -15,7 +15,7 @@ export const secretKeyPathForCER = path.join(
 );
 
 export const torusSecretKeyHex =
-  '0f7e7bb1cfd213fd70b4fb60079c15f4588bfe2c6451d22964056e0d10cbd607';
+  '1ac774d1b4e05a5546ddc8345e8ccf1d7ef3d19b0e5cd722f161260e6bf1d35d';
 
 export const ACCOUNT_NAMES = {
   defaultFirstAccountName: 'Account 1',
@@ -49,9 +49,9 @@ export const IMPORTED_CER_ACCOUNT = {
 export const IMPORTED_TORUS_ACCOUNT = {
   accountName: ACCOUNT_NAMES.importedTorusAccountName,
   publicKey:
-    '0202cc6aae3d7687a429ff32989c4bd712ffd29280f4205abbc9a1c8623ef401b93b',
-  truncatedPublicKey: '0202c...1b93b',
-  mediumTruncatedPublicKey: '0202cc6aae...3ef401b93b'
+    '02029fcc5bb34a6b2768086ac3bad7ccab6870e980df2c53f26ec06a8865182ffd4f',
+  truncatedPublicKey: '02029...ffd4f',
+  mediumTruncatedPublicKey: '02029fcc5b...65182ffd4f'
 };
 
 export const DEFAULT_FIRST_ACCOUNT = {
