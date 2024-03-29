@@ -1,18 +1,15 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { closeCurrentWindow } from '@background/close-current-window';
-
 import {
   ContentContainer,
-  FooterButtonsAbsoluteContainer,
   IllustrationContainer,
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { Button, SvgIcon, Typography } from '@libs/ui/components';
+import { SvgIcon, Typography } from '@libs/ui/components';
 
-export function ImportAccountWithFileSuccessContentPage() {
+export const ImportTorusAccountSuccess = () => {
   const { t } = useTranslation();
 
   return (
@@ -20,7 +17,7 @@ export function ImportAccountWithFileSuccessContentPage() {
       <IllustrationContainer>
         <SvgIcon
           src="assets/illustrations/account-imported.svg"
-          width={200}
+          width={296}
           height={120}
         />
       </IllustrationContainer>
@@ -37,11 +34,6 @@ export function ImportAccountWithFileSuccessContentPage() {
           </Trans>
         </Typography>
       </ParagraphContainer>
-      <FooterButtonsAbsoluteContainer>
-        <Button onClick={() => closeCurrentWindow()}>
-          <Trans t={t}>Done</Trans>
-        </Button>
-      </FooterButtonsAbsoluteContainer>
     </ContentContainer>
   );
-}
+};

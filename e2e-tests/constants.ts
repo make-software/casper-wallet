@@ -7,15 +7,21 @@ export const twelveWordsSecretPhrase =
   'small vendor member cry motion lava hurdle gravity cry sentence medal seminar';
 export const secretKeyPath = path.join(__dirname, './account_secret_key.pem');
 
+export const torusSecretKeyHex =
+  '1ac774d1b4e05a5546ddc8345e8ccf1d7ef3d19b0e5cd722f161260e6bf1d35d';
+
 export const ACCOUNT_NAMES = {
   defaultFirstAccountName: 'Account 1',
   defaultSecondAccountName: 'Account 2',
   createdAccountName: 'New account 1',
   importedAccountName: 'Imported account',
-  renamedAccountName: 'Renamed account'
+  renamedAccountName: 'Renamed account',
+  importedPemAccountName: 'Imported pem account',
+  importedTorusAccountName: 'Torus account'
 };
 
-export const PLAYGROUND_URL = 'https://casper-wallet-playground.make.services/';
+export const PLAYGROUND_URL =
+  'https://cspr-wallet-playground.dev.make.services/';
 
 export const IMPORTED_ACCOUNT = {
   accountName: ACCOUNT_NAMES.importedAccountName,
@@ -23,6 +29,14 @@ export const IMPORTED_ACCOUNT = {
     '0184f6d260f4ee6869ddb36affe15456de6ae045278fa2f467bb677561ce0dad55',
   truncatedPublicKey: '0184f...dad55',
   mediumTruncatedPublicKey: '0184f6d260...561ce0dad55'
+};
+
+export const IMPORTED_TORUS_ACCOUNT = {
+  accountName: ACCOUNT_NAMES.importedTorusAccountName,
+  publicKey:
+    '02029fcc5bb34a6b2768086ac3bad7ccab6870e980df2c53f26ec06a8865182ffd4f',
+  truncatedPublicKey: '02029...ffd4f',
+  mediumTruncatedPublicKey: '02029fcc5b...65182ffd4f'
 };
 
 export const DEFAULT_FIRST_ACCOUNT = {

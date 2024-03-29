@@ -28,5 +28,6 @@ export enum RouterPath {
   Redelegate = '/redelegate',
   ContactList = '/contact-list',
   AddContact = '/add-contact',
-  ContactDetails = '/contact-list/:contactName'
+  ContactDetails = '/contact-list/:contactName',
+  ImportAccountFromTorus = '/import-account-from-torus'
 }
