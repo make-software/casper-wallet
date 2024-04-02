@@ -34,7 +34,7 @@ const NameContainer = styled(SpaceBetweenFlexColumn)`
   max-width: 120px;
 `;
 
-export const Container = styled(TileContainer)`
+const Container = styled(TileContainer)`
   margin-top: 8px;
 `;
 

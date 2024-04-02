@@ -36,6 +36,7 @@ export interface BodyStylesProps extends BaseProps {
   ellipsis?: boolean;
   overflowWrap?: boolean;
   translate?: 'yes' | 'no';
+  textAlign?: 'center' | 'left' | 'right' | 'inherit';
 }
 
 export const getFontSizeBasedOnTextLength = (length: number) => {
@@ -64,7 +65,8 @@ function getBodyStyles(
     noWrap = false,
     wordBreak = false,
     ellipsis = false,
-    overflowWrap = false
+    overflowWrap = false,
+    textAlign
   }: BodyStylesProps
 ): CSSObject {
   return {
@@ -93,6 +95,9 @@ function getBodyStyles(
     }),
     ...(overflowWrap && {
       overflowWrap: 'break-word'
+    }),
+    ...(textAlign && {
+      textAlign: textAlign
     })
   };
 }

@@ -117,6 +117,11 @@ import {
   fetchAccountsBalance,
   fetchCurrencyRate
 } from '@libs/services/balance-service';
+import {
+  fetchOnRampOptionGet,
+  fetchOnRampOptionPost,
+  fetchOnRampSelectionPost
+} from '@libs/services/buy-cspr-service';
 import { fetchErc20Tokens } from '@libs/services/erc20-service';
 import { fetchNftTokens } from '@libs/services/nft-service';
 import {
@@ -878,6 +883,48 @@ runtime.onMessage.addListener(
 
               return sendResponse(
                 serviceMessage.fetchValidatorsDetailsDataResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchOnRampGetOptionRequest): {
+            try {
+              const data = await fetchOnRampOptionGet();
+
+              return sendResponse(
+                serviceMessage.fetchOnRampGetOptionResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchOnRampPostOptionRequest): {
+            try {
+              const data = await fetchOnRampOptionPost(action.payload);
+
+              return sendResponse(
+                serviceMessage.fetchOnRampPostOptionResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchOnRampPostSelectionRequest): {
+            try {
+              const data = await fetchOnRampSelectionPost(action.payload);
+
+              return sendResponse(
+                serviceMessage.fetchOnRampPostSelectionResponse(data)
               );
             } catch (error) {
               console.error(error);

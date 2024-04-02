@@ -16,7 +16,8 @@
     "https://casper-testnet-node-proxy.make.services/*",
     "https://casper-node-proxy.make.services/*",
     "https://api.testnet.casperwallet.io/*",
-    "https://api.mainnet.casperwallet.io/*"
+    "https://api.mainnet.casperwallet.io/*",
+    "https://onramp-api.cspr.click/api/*"
   ],
   "declarative_net_request": {
     "rule_resources": [
