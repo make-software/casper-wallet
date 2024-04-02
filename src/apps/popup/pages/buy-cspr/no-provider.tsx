@@ -19,12 +19,6 @@ export const NoProvider = ({ countryName, currencyCode }: NoProviderProps) => {
 
   return (
     <ContentContainer>
-      <ParagraphContainer top={SpacingSize.XL}>
-        <Typography type="header">
-          <Trans t={t}>No available provider</Trans>
-        </Typography>
-      </ParagraphContainer>
-
       <IllustrationContainer>
         <SvgIcon
           src="assets/illustrations/empty-state.svg"
@@ -32,6 +26,12 @@ export const NoProvider = ({ countryName, currencyCode }: NoProviderProps) => {
           width={200}
         />
       </IllustrationContainer>
+
+      <ParagraphContainer top={SpacingSize.XL}>
+        <Typography type="header">
+          <Trans t={t}>No available provider</Trans>
+        </Typography>
+      </ParagraphContainer>
 
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
