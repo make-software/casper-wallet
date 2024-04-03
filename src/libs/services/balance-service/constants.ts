@@ -3,7 +3,7 @@ interface GetAccountBalanceUrl {
   casperWalletApiUrl: string;
 }
 
-interface GetAccountsBalanceUrl {
+interface GetAccountBalancesUrl {
   accountHashes: string;
   casperWalletApiUrl: string;
 }
@@ -17,8 +17,8 @@ export const getAccountBalanceUrl = ({
 }: GetAccountBalanceUrl) =>
   `${casperWalletApiUrl}/accounts/${accountHash}?includes=delegated_balance,undelegating_balance`;
 
-export const getAccountsBalanceUrl = ({
+export const getAccountBalancesUrl = ({
   accountHashes,
   casperWalletApiUrl
-}: GetAccountsBalanceUrl) =>
+}: GetAccountBalancesUrl) =>
   `${casperWalletApiUrl}/accounts?account_hash=${accountHashes}&page=1&page_size=100&includes=delegated_balance,undelegating_balance`;

@@ -6,16 +6,15 @@ import { BALANCE_REFRESH_RATE } from '@src/constants';
 
 import { useForceUpdate } from '@popup/hooks/use-force-update';
 
+import { accountBalancesChanged } from '@background/redux/account-balances/actions';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { accountsBalanceChanged } from '@background/redux/vault/actions';
 import { selectVaultAccounts } from '@background/redux/vault/selectors';
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import { dispatchFetchAccountsBalance } from '@libs/services/balance-service';
-import { Account } from '@libs/types/account';
+import { dispatchFetchAccountBalances } from '@libs/services/balance-service';
 
-export const useFetchAccountsBalance = () => {
+export const useFetchAccountBalances = () => {
   const effectTimeoutRef = useRef<NodeJS.Timeout>();
   const forceUpdate = useForceUpdate();
   const { t } = useTranslation();
@@ -37,34 +36,12 @@ export const useFetchAccountsBalance = () => {
       ''
     );
 
-    dispatchFetchAccountsBalance(hashes)
+    dispatchFetchAccountBalances(hashes)
       .then(({ payload }) => {
         if ('data' in payload) {
-          const accountsWithBalance: Account[] = accounts.map(account => {
-            const accountWithBalance = payload.data.find(
-              ac => ac.public_key === account.publicKey
-            );
-
-            return {
-              ...account,
-              balance: {
-                liquidMotes: String(accountWithBalance?.balance || '0')
-              }
-            };
-          });
-
-          dispatchToMainStore(accountsBalanceChanged(accountsWithBalance));
+          dispatchToMainStore(accountBalancesChanged(payload.data));
         } else {
-          const accountsWithoutBalance: Account[] = accounts.map(account => {
-            return {
-              ...account,
-              balance: {
-                liquidMotes: null
-              }
-            };
-          });
-
-          dispatchToMainStore(accountsBalanceChanged(accountsWithoutBalance));
+          dispatchToMainStore(accountBalancesChanged([]));
         }
       })
       .catch(error => {
@@ -79,5 +56,5 @@ export const useFetchAccountsBalance = () => {
     return () => {
       clearTimeout(effectTimeoutRef.current);
     };
-  }, [casperClarityApiUrl, forceUpdate, accounts.length]);
+  }, [casperClarityApiUrl, forceUpdate, accounts.length, accounts, t]);
 };

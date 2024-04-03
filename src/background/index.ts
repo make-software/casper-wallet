@@ -28,6 +28,10 @@ import {
   openOnboardingUi
 } from '@background/open-onboarding-flow';
 import {
+  accountBalancesChanged,
+  accountBalancesReseted
+} from '@background/redux/account-balances/actions';
+import {
   accountBalanceChanged,
   accountCasperActivityChanged,
   accountCasperActivityCountChanged,
@@ -69,7 +73,6 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
-  accountsBalanceChanged,
   activeAccountChanged,
   anotherAccountConnected,
   deployPayloadReceived,
@@ -114,7 +117,7 @@ import { fetchErc20TokenActivity } from '@libs/services/account-activity-service
 import { fetchAccountInfo } from '@libs/services/account-info';
 import {
   fetchAccountBalance,
-  fetchAccountsBalance,
+  fetchAccountBalances,
   fetchCurrencyRate
 } from '@libs/services/balance-service';
 import { fetchErc20Tokens } from '@libs/services/erc20-service';
@@ -571,7 +574,6 @@ runtime.onMessage.addListener(
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeAccountChanged):
-          case getType(accountsBalanceChanged):
           case getType(hideAccountFromListChange):
           case getType(activeTimeoutDurationSettingChanged):
           case getType(activeNetworkSettingChanged):
@@ -625,6 +627,8 @@ runtime.onMessage.addListener(
           case getType(contactsReseted):
           case getType(ratedInStoreChanged):
           case getType(askForReviewAfterChanged):
+          case getType(accountBalancesChanged):
+          case getType(accountBalancesReseted):
             store.dispatch(action);
             return sendResponse(undefined);
 
@@ -659,19 +663,19 @@ runtime.onMessage.addListener(
             return;
           }
 
-          case getType(serviceMessage.fetchAccountsBalanceRequest): {
+          case getType(serviceMessage.fetchAccountBalancesRequest): {
             const { casperWalletApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
-              const data = await fetchAccountsBalance({
+              const data = await fetchAccountBalances({
                 accountHashes: action.payload.accountHashes,
                 casperWalletApiUrl
               });
 
               return sendResponse(
-                serviceMessage.fetchAccountsBalanceResponse(data)
+                serviceMessage.fetchAccountBalancesResponse(data)
               );
             } catch (error) {
               console.error(error);

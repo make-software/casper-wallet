@@ -29,11 +29,11 @@ export const serviceMessage = {
     FetchBalanceResponse,
     Meta
   >(),
-  fetchAccountsBalanceRequest: createAction('FETCH_ACCOUNTS_BALANCE')<
+  fetchAccountBalancesRequest: createAction('FETCH_ACCOUNT_BALANCES')<
     { accountHashes: string },
     Meta
   >(),
-  fetchAccountsBalanceResponse: createAction('FETCH_ACCOUNTS_BALANCE_RESPONSE')<
+  fetchAccountBalancesResponse: createAction('FETCH_ACCOUNT_BALANCES_RESPONSE')<
     PaginatedResponse<AccountData> | ErrorResponse,
     Meta
   >(),

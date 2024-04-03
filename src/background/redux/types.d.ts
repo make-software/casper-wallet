@@ -1,5 +1,6 @@
 import { ActionType, StateType } from 'typesafe-actions';
 
+import { AccountBalancesState } from '@background/redux/account-balances/types';
 import { AccountInfoState } from '@background/redux/account-info/types';
 import { ActiveOriginState } from '@background/redux/active-origin/types';
 import { ContactsState } from '@background/redux/contacts/types';
@@ -47,4 +48,5 @@ export type PopupState = {
   accountInfo: AccountInfoState;
   contacts: ContactsState;
   rateApp: RateAppState;
+  accountBalances: AccountBalancesState;
 };

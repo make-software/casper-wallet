@@ -23,10 +23,6 @@ export const accountRenamed = createAction('ACCOUNT_RENAMED')<{
   newName: string;
 }>();
 
-export const accountsBalanceChanged = createAction('ACCOUNTS_BALANCE_CHANGED')<
-  Account[]
->();
-
 export const siteConnected = createAction('SITE_CONNECTED')<{
   siteOrigin: string;
   accountNames: string[];
