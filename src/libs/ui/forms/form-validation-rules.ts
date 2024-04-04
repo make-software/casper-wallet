@@ -508,3 +508,21 @@ export const useTorusSecretKeyRule = () => {
       message: t('This secret key doesn’t look right')
     });
 };
+
+export const useBuyCSPRKeyRule = () => {
+  const { t } = useTranslation();
+
+  return Yup.string()
+    .required(t('Amount is required'))
+    .test({
+      name: 'validU64',
+      test: csprAmountInputValue => {
+        if (csprAmountInputValue) {
+          return isValidU64(csprAmountInputValue);
+        }
+
+        return false;
+      },
+      message: t(`Amount is invalid`)
+    });
+};

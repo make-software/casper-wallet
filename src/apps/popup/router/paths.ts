@@ -31,5 +31,6 @@ export enum RouterPath {
   ContactDetails = '/contact-list/:contactName',
   RateApp = '/rate-app',
   AllAccountsList = '/accounts-list',
-  ImportAccountFromTorus = '/import-account-from-torus'
+  ImportAccountFromTorus = '/import-account-from-torus',
+  BuyCSPR = '/buy-cspr'
 }

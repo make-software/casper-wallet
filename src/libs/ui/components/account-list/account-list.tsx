@@ -59,6 +59,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
 
     setAccountListRows(accountListRows);
     // We need to sort the account list only on the component mount and when new accounts are added
+    //   eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleAccounts]);
 
   return (
