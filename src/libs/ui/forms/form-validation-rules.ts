@@ -21,7 +21,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { verifyPasswordAgainstHash } from '@libs/crypto/hashing';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 
-export const minPasswordLength = 1;
+export const minPasswordLength = 16;
 
 const ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED = 1;
 
