@@ -9,6 +9,7 @@ import { ActivityDetailsPage } from '@popup/pages/activity-details';
 import { AddContactPage } from '@popup/pages/add-contact';
 import { AllAccountsPage } from '@popup/pages/all-accounts';
 import { BackupSecretPhrasePage } from '@popup/pages/backup-secret-phrase';
+import { BuyCSPRPage } from '@popup/pages/buy-cspr';
 import { ChangePasswordPage } from '@popup/pages/change-password';
 import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
 import { ConnectedSitesPage } from '@popup/pages/connected-sites';
@@ -286,6 +287,7 @@ function AppRoutes() {
         path={RouterPath.ImportAccountFromTorus}
         element={<ImportAccountFromTorusPage />}
       />
+      <Route path={RouterPath.BuyCSPR} element={<BuyCSPRPage />} />
     </Routes>
   );
 }

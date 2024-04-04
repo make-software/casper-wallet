@@ -43,9 +43,6 @@ export const getContractNftUrl = (
   tokenId: string
 ) => `${casperLiveUrl}/contracts/${contractHash}/nfts/${tokenId}`;
 
-export const getBuyWithTopperUrl = (publicKey: string) =>
-  `https://onramp-api.cspr.click/api/topper/bootstrap-token?account=${publicKey}&label=Your%20Public%20Key`;
-
 export enum CasperLiveUrl {
   MainnetUrl = 'https://cspr.live',
   TestnetUrl = 'https://testnet.cspr.live'
