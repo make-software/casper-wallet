@@ -49,10 +49,7 @@ export const useImportTorusAccount = ({
         name: name.trim(),
         publicKey: publicKeyHex,
         secretKey: secretKeyBase64,
-        hidden: false,
-        balance: {
-          liquidMotes: null
-        }
+        hidden: false
       });
     },
     [onFailure, onSuccess]

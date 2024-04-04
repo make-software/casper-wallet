@@ -67,10 +67,7 @@ export function useSecretKeyFileReader({
           name: name.trim(),
           publicKey: publicKeyHex,
           secretKey: secretKeyBase64,
-          hidden: false,
-          balance: {
-            liquidMotes: null
-          }
+          hidden: false
         });
       };
     },

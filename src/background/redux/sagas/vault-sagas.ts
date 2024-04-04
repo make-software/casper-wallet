@@ -8,6 +8,7 @@ import {
   MapTimeoutDurationSettingToValue
 } from '@popup/constants';
 
+import { accountBalancesReseted } from '@background/redux/account-balances/actions';
 import {
   loginRetryLockoutTimeReseted,
   loginRetryLockoutTimeSet
@@ -120,6 +121,7 @@ function* lockVaultSaga() {
     yield put(vaultReseted());
     yield put(deploysReseted());
     yield put(accountInfoReset());
+    yield put(accountBalancesReseted());
 
     emitSdkEventToActiveTabs(() => {
       return sdkEvent.lockedEvent({
@@ -319,10 +321,7 @@ function* createAccountSaga(action: ReturnType<typeof createAccount>) {
     const account = {
       ...keyPair,
       name,
-      hidden: false,
-      balance: {
-        liquidMotes: null
-      }
+      hidden: false
     };
 
     yield put(accountAdded(account));
