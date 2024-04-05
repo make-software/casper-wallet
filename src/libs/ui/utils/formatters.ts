@@ -239,39 +239,22 @@ export const formatFiatAmount = (
 };
 
 /**
- * This function formats the input value of an HTMLInputElement in an onChange event handler for input type="text".
- * It removes all non-digit characters and allows just one decimal point.
- * The result is set to the value of the event target.
+ * This function is an event handler for the onKeyDown event for HTML input elements of type "number".
+ * It prevents the user from entering 'e', 'E', '+', and '-' in the input field.
+ * These are valid inputs for the HTML input type "number" because they are used in scientific notation.
+ * For instance, a user could enter "1e-10" (0.0000000001), which is a valid number but might not be
+ * desirable for a form input because it's an unexpected format.
+ * Addition symbol '+' and minus '-' are also valid inputs for the HTML input type "number".
+ * If you want to allow these symbols but restrict 'e', 'E', you need to remove them from the included list.
  *
- * @param {ChangeEvent<HTMLInputElement>} event - The onChange event from an HTMLInputElement.
+ * @param {React.KeyboardEvent<HTMLInputElement>} event - The Keyboard event object from React.
+ * This object contains various properties related to the keydown event,
+ * including info about which key is pressed, whether shift/ctrl/etc. keys are held down,
+ * what the target element is, and many others.
  */
-export const formatInputAmountValue = (
-  event: ChangeEvent<HTMLInputElement>
-) => {
-  // Get the original input value from the event target
-  const original = event.target.value;
-
-  // Prepare a clean string to hold the formatted value
-  let clean = '';
-
-  // Track whether a decimal point has been encountered
-  let seenDot = false;
-
-  // Loop through each character of the original value
-  for (let i = 0; i < original.length; i++) {
-    // If the character is a digit, it's added to the clean string
-    if (original[i] >= '0' && original[i] <= '9') {
-      clean += original[i];
-    }
-    // If the character is a dot and we haven't seen a dot before,
-    // it's added to the clean string and the seenDot flag is set to true
-    else if (original[i] === '.' && !seenDot) {
-      clean += original[i];
-      seenDot = true;
-    }
-    // If the character is neither a digit nor the first dot, it's ignored
+export const handleNumericInput = (event: KeyboardEvent) => {
+  // Prevent 'e' (and '+', '-') from being entered into a number input field
+  if (['e', 'E', '+', '-'].includes(event.key)) {
+    event.preventDefault();
   }
-
-  // Set the cleaned value to the input element that fired the event
-  event.target.value = clean;
 };

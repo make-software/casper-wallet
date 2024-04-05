@@ -26,7 +26,7 @@ import { Error, Input, Typography } from '@libs/ui/components';
 import { StakeAmountFormValues } from '@libs/ui/forms/stakes-form';
 import {
   formatFiatAmount,
-  formatInputAmountValue,
+  handleNumericInput,
   motesToCSPR
 } from '@libs/ui/utils';
 
@@ -96,8 +96,6 @@ export const AmountStep = ({
     trigger
   } = amountForm;
 
-  const { onChange: onChangeCSPRAmount } = register('amount');
-
   const amount = useWatch({
     control,
     name: 'amount'
@@ -126,15 +124,13 @@ export const AmountStep = ({
         <Input
           label={amountLabel}
           rightLabel={fiatAmount}
+          type="number"
           monotype
           placeholder={t('0.00')}
           suffixText={'CSPR'}
           {...register('amount')}
+          onKeyDown={handleNumericInput}
           disabled={disabled}
-          onChange={e => {
-            formatInputAmountValue(e);
-            onChangeCSPRAmount(e);
-          }}
         />
       </VerticalSpaceContainer>
       <ParagraphContainer top={SpacingSize.Small}>
