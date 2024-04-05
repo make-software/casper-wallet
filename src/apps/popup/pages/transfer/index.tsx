@@ -75,7 +75,7 @@ export const TransferPage = () => {
   const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(true);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const { networkName, nodeUrl } = useSelector(
+  const { networkName, nodeUrl, nodeStatusUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
   const csprBalance = useSelector(selectAccountBalance);
@@ -215,10 +215,11 @@ export const TransferPage = () => {
           createErrorLocationState({
             errorHeaderText: resp.message || t('Something went wrong'),
             errorContentText:
-              resp.data ||
-              t(
-                'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-              ),
+              typeof resp.data === 'string'
+                ? resp.data
+                : t(
+                    'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                  ),
             errorPrimaryButtonLabel: t('Close'),
             errorRedirectPath: RouterPath.Home
           })
@@ -240,7 +241,8 @@ export const TransferPage = () => {
           amount,
           erc20Decimals,
           paymentAmount,
-          activeAccount
+          activeAccount,
+          nodeStatusUrl
         );
 
         submitDeploy(deploy, activeAccount, nodeUrl);
@@ -253,6 +255,7 @@ export const TransferPage = () => {
           recipientPublicKey,
           motesAmount,
           networkName,
+          nodeStatusUrl,
           transferIdMemo
         );
 

@@ -5,6 +5,7 @@ import {
   AuctionManagerContractHash,
   CasperClarityApiUrl,
   CasperLiveUrl,
+  CasperNodeStatusUrl,
   CasperNodeUrl,
   CasperWalletApiUrl,
   NetworkName,
@@ -28,7 +29,8 @@ export const selectApiConfigBasedOnActiveNetwork = createSelector(
           casperWalletApiUrl: CasperWalletApiUrl.MainnetUrl,
           networkName: NetworkName.Mainnet,
           nodeUrl: CasperNodeUrl.MainnetUrl,
-          auctionManagerContractHash: AuctionManagerContractHash.Mainnet
+          auctionManagerContractHash: AuctionManagerContractHash.Mainnet,
+          nodeStatusUrl: CasperNodeStatusUrl.MainnetUrl
         };
       case NetworkSetting.Testnet:
         return {
@@ -37,7 +39,8 @@ export const selectApiConfigBasedOnActiveNetwork = createSelector(
           casperWalletApiUrl: CasperWalletApiUrl.TestnetUrl,
           networkName: NetworkName.Testnet,
           nodeUrl: CasperNodeUrl.TestnetUrl,
-          auctionManagerContractHash: AuctionManagerContractHash.Testnet
+          auctionManagerContractHash: AuctionManagerContractHash.Testnet,
+          nodeStatusUrl: CasperNodeStatusUrl.TestnetUrl
         };
       default:
         throw new Error(`Unknown network: ${activeNetwork}`);

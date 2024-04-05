@@ -115,10 +115,11 @@ export const BuyCSPRPage = () => {
           createErrorLocationState({
             errorHeaderText: error.message || t('Something went wrong'),
             errorContentText:
-              error.data ||
-              t(
-                'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-              ),
+              typeof error.data === 'string'
+                ? error.data
+                : t(
+                    'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                  ),
             errorPrimaryButtonLabel: t('Close'),
             errorRedirectPath: RouterPath.Home
           })
@@ -172,10 +173,11 @@ export const BuyCSPRPage = () => {
           createErrorLocationState({
             errorHeaderText: error.message || t('Something went wrong'),
             errorContentText:
-              error.data ||
-              t(
-                'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-              ),
+              typeof error.data === 'string'
+                ? error.data
+                : t(
+                    'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                  ),
             errorPrimaryButtonLabel: t('Close'),
             errorRedirectPath: RouterPath.Home
           })
@@ -224,10 +226,11 @@ export const BuyCSPRPage = () => {
             createErrorLocationState({
               errorHeaderText: error.message || t('Something went wrong'),
               errorContentText:
-                error.data ||
-                t(
-                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                ),
+                typeof error.data === 'string'
+                  ? error.data
+                  : t(
+                      'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                    ),
               errorPrimaryButtonLabel: t('Close'),
               errorRedirectPath: RouterPath.Home
             })

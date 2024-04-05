@@ -6,5 +6,5 @@ export interface RPCResponse {
 export interface RPCErrorResponse {
   code: number;
   message: string;
-  data: string;
+  data: string | any;
 }

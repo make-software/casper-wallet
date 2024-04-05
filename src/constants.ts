@@ -80,6 +80,11 @@ export enum CasperNodeUrl {
   TestnetUrl = 'https://casper-testnet-node-proxy.make.services/rpc'
 }
 
+export enum CasperNodeStatusUrl {
+  MainnetUrl = 'https://casper-node-proxy.make.services/status',
+  TestnetUrl = 'https://casper-testnet-node-proxy.make.services/status'
+}
+
 export enum NetworkName {
   Mainnet = 'casper',
   Testnet = 'casper-test'

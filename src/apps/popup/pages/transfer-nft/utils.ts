@@ -101,11 +101,12 @@ export const signNftDeploy = async (
   deploySender: CLPublicKey,
   networkName: NetworkName,
   contractPackageHash: string,
+  nodeStatusUrl: string,
   keys: Keys.AsymmetricKey[]
 ) => {
   const hash = Uint8Array.from(Buffer.from(contractPackageHash, 'hex'));
 
-  const date = await getDateForDeploy();
+  const date = await getDateForDeploy(nodeStatusUrl);
 
   const deployParams = new DeployUtil.DeployParams(
     deploySender,

@@ -59,7 +59,7 @@ export const TransferNftPage = () => {
   const nftTokens = useSelector(selectAccountNftTokens);
   const csprBalance = useSelector(selectAccountBalance);
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const { networkName, nodeUrl } = useSelector(
+  const { networkName, nodeUrl, nodeStatusUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
   const contactPublicKeys = useSelector(selectAllPublicKeys);
@@ -145,6 +145,7 @@ export const TransferNftPage = () => {
         KEYS.publicKey,
         networkName,
         nftToken?.contract_package_hash!,
+        nodeStatusUrl,
         [KEYS]
       );
 
@@ -189,10 +190,11 @@ export const TransferNftPage = () => {
             createErrorLocationState({
               errorHeaderText: error.message || t('Something went wrong'),
               errorContentText:
-                error.data ||
-                t(
-                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                ),
+                typeof error.data === 'string'
+                  ? error.data
+                  : t(
+                      'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                    ),
               errorPrimaryButtonLabel: t('Close'),
               errorRedirectPath: RouterPath.Home
             })

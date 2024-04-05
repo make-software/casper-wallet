@@ -73,7 +73,8 @@ export const StakesPage = () => {
     networkName,
     nodeUrl,
     auctionManagerContractHash,
-    casperClarityApiUrl
+    casperClarityApiUrl,
+    nodeStatusUrl
   } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const csprBalance = useSelector(selectAccountBalance);
   const ratedInStore = useSelector(selectRatedInStore);
@@ -235,7 +236,8 @@ export const StakesPage = () => {
         newValidatorPublicKey || null,
         motesAmount,
         networkName,
-        auctionManagerContractHash
+        auctionManagerContractHash,
+        nodeStatusUrl
       );
 
       const signDeploy = deploy.sign([KEYS]);
@@ -272,10 +274,11 @@ export const StakesPage = () => {
             createErrorLocationState({
               errorHeaderText: error.message || t('Something went wrong'),
               errorContentText:
-                error.data ||
-                t(
-                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                ),
+                typeof error.data === 'string'
+                  ? error.data
+                  : t(
+                      'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                    ),
               errorPrimaryButtonLabel: t('Close'),
               errorRedirectPath: RouterPath.Home
             })

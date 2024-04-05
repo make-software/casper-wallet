@@ -40,14 +40,16 @@ export const getAuctionManagerDeployCost = (
   }
 };
 
-export const getCasperNodeTimestamp = async (): Promise<string> =>
-  fetch('https://casper-node-proxy.make.services/status')
+export const getCasperNodeTimestamp = async (
+  nodeStatusUrl: string
+): Promise<string> =>
+  fetch(nodeStatusUrl)
     .then(toJson)
     .then(resp => resp.last_progress)
     .catch(handleError);
 
-export const getDateForDeploy = async () => {
-  const casperNodeTimestamp = await getCasperNodeTimestamp();
+export const getDateForDeploy = async (nodeStatusUrl: string) => {
+  const casperNodeTimestamp = await getCasperNodeTimestamp(nodeStatusUrl);
 
   return new Date(casperNodeTimestamp).getTime();
 };
@@ -85,7 +87,8 @@ export const makeAuctionManagerDeploy = async (
   redelegateValidatorPublicKeyHex: string | null,
   amountMotes: string,
   networkName: NetworkName,
-  auctionManagerContractHash: string
+  auctionManagerContractHash: string,
+  nodeStatusUrl: string
 ) => {
   const hash = decodeBase16(auctionManagerContractHash);
 
@@ -104,7 +107,7 @@ export const makeAuctionManagerDeploy = async (
     })
   });
 
-  const date = await getDateForDeploy();
+  const date = await getDateForDeploy(nodeStatusUrl);
 
   const deployParams = new DeployUtil.DeployParams(
     delegatorPublicKey,
@@ -128,6 +131,41 @@ export const makeAuctionManagerDeploy = async (
   return DeployUtil.makeDeploy(deployParams, session, payment);
 };
 
+export const makeNativeTransferDeploy = async (
+  senderPublicKeyHex: string,
+  recipientPublicKeyHex: string,
+  amountMotes: string,
+  networkName: NetworkName,
+  nodeStatusUrl: string,
+  transferIdMemo?: string
+) => {
+  const senderPublicKey = CLPublicKey.fromHex(senderPublicKeyHex);
+  const recipientPublicKey = CLPublicKey.fromHex(recipientPublicKeyHex);
+
+  const date = await getDateForDeploy(nodeStatusUrl);
+
+  const deployParams = new DeployUtil.DeployParams(
+    senderPublicKey,
+    networkName,
+    undefined,
+    undefined,
+    undefined,
+    date // https://github.com/casper-network/casper-node/issues/4152
+  );
+
+  const session =
+    DeployUtil.ExecutableDeployItem.newTransferWithOptionalTransferId(
+      amountMotes,
+      recipientPublicKey,
+      undefined,
+      transferIdMemo || undefined
+    );
+
+  const payment = DeployUtil.standardPayment(TRANSFER_COST_MOTES);
+
+  return DeployUtil.makeDeploy(deployParams, session, payment);
+};
+
 export const makeCep18TransferDeploy = async (
   nodeUrl: CasperNodeUrl,
   networkName: NetworkName,
@@ -137,11 +175,12 @@ export const makeCep18TransferDeploy = async (
   amount: string,
   erc20Decimals: number | null,
   paymentAmount: string,
-  activeAccount: Account
+  activeAccount: Account,
+  nodeStatusUrl: string
 ) => {
   const cep18 = new CEP18Client(nodeUrl, networkName);
 
-  const date = await getDateForDeploy();
+  const date = await getDateForDeploy(nodeStatusUrl);
 
   cep18.setContractHash(
     `hash-${tokenContractHash}`,
@@ -173,38 +212,4 @@ export const makeCep18TransferDeploy = async (
     tempDeploy.session,
     tempDeploy.payment
   );
-};
-
-export const makeNativeTransferDeploy = async (
-  senderPublicKeyHex: string,
-  recipientPublicKeyHex: string,
-  amountMotes: string,
-  networkName: NetworkName,
-  transferIdMemo?: string
-) => {
-  const senderPublicKey = CLPublicKey.fromHex(senderPublicKeyHex);
-  const recipientPublicKey = CLPublicKey.fromHex(recipientPublicKeyHex);
-
-  const date = await getDateForDeploy();
-
-  const deployParams = new DeployUtil.DeployParams(
-    senderPublicKey,
-    networkName,
-    undefined,
-    undefined,
-    undefined,
-    date // https://github.com/casper-network/casper-node/issues/4152
-  );
-
-  const session =
-    DeployUtil.ExecutableDeployItem.newTransferWithOptionalTransferId(
-      amountMotes,
-      recipientPublicKey,
-      undefined,
-      transferIdMemo || undefined
-    );
-
-  const payment = DeployUtil.standardPayment(TRANSFER_COST_MOTES);
-
-  return DeployUtil.makeDeploy(deployParams, session, payment);
 };
