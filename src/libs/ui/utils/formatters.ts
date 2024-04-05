@@ -4,7 +4,6 @@ import Big from 'big.js';
 import { formatDistanceToNowStrict } from 'date-fns';
 // eslint-disable-next-line import/no-duplicates
 import en from 'date-fns/locale/en-US';
-import { ChangeEvent } from 'react';
 
 import { MOTES_PER_CSPR_RATE } from '@src/constants';
 
