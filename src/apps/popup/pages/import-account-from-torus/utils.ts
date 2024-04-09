@@ -57,3 +57,24 @@ export const useImportTorusAccount = ({
 
   return { importTorusAccount };
 };
+
+export const instructionList = [
+  {
+    id: 1,
+    header: 'Open Settings in Torus Wallet'
+  },
+  {
+    id: 2,
+    header: 'Click ‘Account Details’',
+    description: 'In ‘Privacy and Security’ section'
+  },
+  {
+    id: 3,
+    header: 'Click ‘Show your private key’'
+  },
+  {
+    id: 4,
+    header: 'Click ‘Account Details’',
+    description: 'You’ll need to paste it on the next screen'
+  }
+];

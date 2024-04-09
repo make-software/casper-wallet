@@ -16,8 +16,7 @@ import { ConnectedSitesPage } from '@popup/pages/connected-sites';
 import { ContactDetailsPage } from '@popup/pages/contact-details';
 import { ContactsBookPage } from '@popup/pages/contacts';
 import { CreateAccountPage } from '@popup/pages/create-account';
-import { DownloadSecretKeysPage } from '@popup/pages/download-secret-keys';
-import { DownloadedSecretKeysPage } from '@popup/pages/downloaded-secret-keys';
+import { DownloadAccountKeysPage } from '@popup/pages/download-account-keys';
 import { HomePageContent } from '@popup/pages/home';
 import { ImportAccountFromTorusPage } from '@popup/pages/import-account-from-torus';
 import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
@@ -239,12 +238,8 @@ function AppRoutes() {
         element={<BackupSecretPhrasePage />}
       />
       <Route
-        path={RouterPath.DownloadSecretKeys}
-        element={<DownloadSecretKeysPage />}
-      />
-      <Route
-        path={RouterPath.DownloadedSecretKeys}
-        element={<DownloadedSecretKeysPage />}
+        path={RouterPath.DownloadAccountKeys}
+        element={<DownloadAccountKeysPage />}
       />
       <Route path={RouterPath.Transfer} element={<TransferPage />} />
       <Route

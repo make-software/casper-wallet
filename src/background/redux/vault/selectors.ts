@@ -85,11 +85,6 @@ export const selectVaultHiddenAccountsNames = createSelector(
   accounts => accounts.map(account => account.name)
 );
 
-export const selectVaultHasImportedAccount = createSelector(
-  selectVaultImportedAccounts,
-  importedAccounts => importedAccounts.length > 0
-);
-
 export const selectVaultDerivedAccounts = createSelector(
   selectVaultAccountsWithBalances,
   accounts => accounts.filter(account => !account.imported)
@@ -114,11 +109,7 @@ export const selectVaultActiveAccount = createSelector(
   selectVaultAccountsWithBalances,
   selectVaultActiveAccountName,
   (accounts, activeAccountName) => {
-    const activeAccount = accounts.find(
-      account => account.name === activeAccountName
-    );
-
-    return activeAccount;
+    return accounts.find(account => account.name === activeAccountName);
   }
 );
 
@@ -161,7 +152,8 @@ export const selectIsAccountConnected = createSelector(
     accountName: string | undefined
   ) => [origin, accountName],
   (accountNamesByOriginDict, [origin, accountName]) => {
-    const accountNames = origin && accountNamesByOriginDict[origin];
+    const accountNames: '' | string[] | undefined =
+      origin && accountNamesByOriginDict[origin];
     if (accountNames == null || !accountName) {
       return false;
     }
@@ -181,7 +173,8 @@ export const selectIsActiveAccountConnectedWithActiveOrigin = createSelector(
   selectVaultActiveAccountName,
   selectAccountNamesByOriginDict,
   (origin, activeAccountName, accountNamesByOriginDict) => {
-    const accountNames = origin && accountNamesByOriginDict[origin];
+    const accountNames: '' | string[] | null | undefined =
+      origin && accountNamesByOriginDict[origin];
     if (accountNames == null || activeAccountName == null) {
       return false;
     } else {
