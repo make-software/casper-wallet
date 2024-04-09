@@ -16,7 +16,7 @@ import {
 import { ResponseCurrencyProps } from '@libs/services/buy-cspr-service/types';
 import { Input, List, Modal, SvgIcon, Typography } from '@libs/ui/components';
 import { useBuyCSPR } from '@libs/ui/forms/buy-cspr';
-import { formatNumber } from '@libs/ui/utils';
+import { formatNumber, handleNumericInput } from '@libs/ui/utils';
 
 import { CurrencyRow } from './components/currency-row';
 import { ListRow } from './components/list-row';
@@ -115,6 +115,7 @@ export const Amount = ({
               onChangeFiatAmount(event);
               setPaymentAmount(Number(event.target.value));
             }}
+            onKeyDown={handleNumericInput}
             style={{ maxWidth: '200px' }}
           />
           <Modal

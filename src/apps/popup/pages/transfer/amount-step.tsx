@@ -21,7 +21,7 @@ import { Checkbox, Error, Input, Typography } from '@libs/ui/components';
 import { TransferAmountFormValues } from '@libs/ui/forms/transfer';
 import {
   formatFiatAmount,
-  formatInputAmountValue,
+  handleNumericInput,
   motesToCSPR
 } from '@libs/ui/utils';
 
@@ -67,7 +67,6 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
 
   const { onChange: onChangeTransferIdMemo } = register('transferIdMemo');
   const { onChange: onChangeCSPRAmount } = register('amount');
-  const { onChange: onChangePaymentAmount } = register('paymentAmount');
 
   const amount = useWatch({
     control,
@@ -112,18 +111,19 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
           label={amountLabel}
           rightLabel={fiatAmount}
           monotype
+          type="number"
           placeholder={t('0.00')}
           suffixText={symbol}
           {...register('amount')}
           disabled={isCSPR && disabled}
           onChange={e => {
-            formatInputAmountValue(e);
             onChangeCSPRAmount(e);
 
             if (isChecked) {
               setIsChecked(false);
             }
           }}
+          onKeyDown={handleNumericInput}
           error={!!errors?.amount}
           validationText={errors?.amount?.message}
         />
@@ -171,18 +171,12 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
             label={paymentAmoutLabel}
             rightLabel={paymentFiatAmount}
             monotype
+            type="number"
             placeholder={t('Enter transaction fee')}
             suffixText={'CSPR'}
             {...register('paymentAmount')}
-            onChange={e => {
-              // replace all non-numeric characters except decimal point
-              e.target.value = e.target.value.replace(/[^0-9.]/g, '');
-              // regex replace decimal point from beginning of string
-              e.target.value = e.target.value.replace(/^\./, '');
-
-              onChangePaymentAmount(e);
-            }}
             error={!!errors?.paymentAmount}
+            onKeyDown={handleNumericInput}
             validationText={
               errors?.paymentAmount?.message ||
               "You'll be charged this amount in CSPR as a transaction fee. You can change it at your discretion."
