@@ -37,20 +37,22 @@ export const PasswordInputs = ({
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
           {needToAddMoreCharacters <= 0 ? (
-            <Trans t={t}>
-              Your password length is -{' '}
-              <Typography type="bodySemiBold" color="contentPrimary">
-                {{ passwordLength }} characters.
-              </Typography>
-            </Trans>
+            <Trans
+              defaults="Your password length is - <t>{{passwordLength}} characters.</t>"
+              values={{ passwordLength }}
+              components={{
+                t: <Typography type="bodySemiBold" color="contentPrimary" />
+              }}
+            />
           ) : (
-            <Trans t={t}>
-              You need to add at least{' '}
-              <Typography type="bodySemiBold" color="contentPrimary">
-                {{ needToAddMoreCharacters }} characters
-              </Typography>{' '}
-              more.
-            </Trans>
+            <Trans
+              t={t}
+              defaults="You need to add at least <t>{{needToAddMoreCharacters}} characters</t> more"
+              values={{ needToAddMoreCharacters }}
+              components={{
+                t: <Typography type="bodySemiBold" color="contentPrimary" />
+              }}
+            />
           )}
         </Typography>
       </ParagraphContainer>

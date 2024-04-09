@@ -35,11 +35,14 @@ export const NoProvider = ({ countryName, currencyCode }: NoProviderProps) => {
 
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
-          <Trans t={t}>
-            Oops, currently we can't offer you an on-ramp provider that operates
-            in <b>{{ countryName }}</b> with <b>{{ currencyCode }}</b>. Try a
-            different currency like "USD", "EUR" or "GBP".
-          </Trans>
+          <Trans
+            defaults="Oops, currently we can't offer you an on-ramp provider that operates in <bold>{{countryName}}</bold> with <bold>{{ currencyCode }}</bold>. Try a different currency like 'USD', 'EUR' or 'GBP'."
+            values={{
+              countryName,
+              currencyCode
+            }}
+            components={{ bold: <strong /> }}
+          />
         </Typography>
       </ParagraphContainer>
     </ContentContainer>
