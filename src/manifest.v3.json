@@ -25,7 +25,9 @@
   "host_permissions": [
     "https://image-proxy-cdn.make.services/*",
     "https://api.testnet.casperwallet.io/*",
-    "https://api.mainnet.casperwallet.io/*"
+    "https://api.mainnet.casperwallet.io/*",
+    "https://node.cspr.cloud/*",
+    "https://node.testnet.cspr.cloud/*"
   ],
   "background": {
     "service_worker": "./background.bundle.js"

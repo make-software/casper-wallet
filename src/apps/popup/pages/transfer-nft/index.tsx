@@ -8,8 +8,7 @@ import { MapNFTTokenStandardToName } from '@src/utils';
 import { TransferNftContent } from '@popup/pages/transfer-nft/content';
 import {
   getDefaultPaymentAmountBasedOnNftTokenStandard,
-  getRuntimeArgs,
-  signNftDeploy
+  getRuntimeArgs
 } from '@popup/pages/transfer-nft/utils';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
@@ -42,6 +41,7 @@ import {
   createErrorLocationState
 } from '@libs/layout';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
+import { makeNFTDeployAndSign } from '@libs/services/deployer-service';
 import {
   Button,
   HomePageTabsId,
@@ -139,12 +139,13 @@ export const TransferNftPage = () => {
         target: getRawPublicKey(recipientPublicKey)
       };
 
-      const signDeploy = await signNftDeploy(
+      const signDeploy = await makeNFTDeployAndSign(
         getRuntimeArgs(tokenStandard, args),
         CSPRtoMotes(paymentAmount),
         KEYS.publicKey,
         networkName,
         nftToken?.contract_package_hash!,
+        nodeUrl,
         [KEYS]
       );
 
@@ -189,10 +190,11 @@ export const TransferNftPage = () => {
             createErrorLocationState({
               errorHeaderText: error.message || t('Something went wrong'),
               errorContentText:
-                error.data ||
-                t(
-                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                ),
+                typeof error.data === 'string'
+                  ? error.data
+                  : t(
+                      'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                    ),
               errorPrimaryButtonLabel: t('Close'),
               errorRedirectPath: RouterPath.Home
             })
