@@ -5,7 +5,6 @@ import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import {
-  CasperNodeUrl,
   ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES,
   TRANSFER_COST_MOTES
 } from '@src/constants';
