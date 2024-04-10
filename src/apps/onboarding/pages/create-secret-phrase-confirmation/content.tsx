@@ -16,11 +16,8 @@ export function CreateSecretPhraseConfirmationPageContent() {
     { key: 2, value: t('Never share the phrase with anyone.') },
     {
       key: 3,
-      value: (
-        <Trans>
-          Be careful of phishing! Casper Wallet will never spontaneously ask you
-          for your secret recovery phrase.
-        </Trans>
+      value: t(
+        'Be careful of phishing! Casper Wallet will never spontaneously ask you for your secret recovery phrase.'
       )
     },
     {

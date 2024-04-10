@@ -63,9 +63,13 @@ export const UnlockProtectedPageContent = ({
       </ParagraphContainer>
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
-          <Trans t={t}>
-            You have <b>{{ retryLeft }}</b> tries left.
-          </Trans>
+          <Trans
+            defaults="You have <bold>{{retryLeft}}</bold> tries left."
+            values={{
+              retryLeft
+            }}
+            components={{ bold: <strong /> }}
+          />
         </Typography>
       </ParagraphContainer>
       <InputsContainer>
