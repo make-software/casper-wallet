@@ -7,39 +7,35 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { SvgIcon, Tips, Typography } from '@libs/ui/components';
+import { SvgIcon, Typography } from '@libs/ui/components';
 
-import { instructionList } from './utils';
-
-export const Instruction = () => {
+export const Success = () => {
   const { t } = useTranslation();
 
   return (
     <ContentContainer>
       <IllustrationContainer>
         <SvgIcon
-          src="assets/illustrations/import-account-from-torus.svg"
-          width={296}
+          src="assets/illustrations/key-downloaded.svg"
+          width={190}
           height={120}
         />
       </IllustrationContainer>
 
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          <Trans t={t}>Import account from Torus Wallet</Trans>
+          <Trans t={t}>You downloaded account private key(s)</Trans>
         </Typography>
       </ParagraphContainer>
 
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            Please note, that accounts imported with a secret key cannot be
-            recovered using your Casper Wallet secret recovery phrase.
+            Keep your account private key file(s) safe and secure. Do not share
+            it with anyone.
           </Trans>
         </Typography>
       </ParagraphContainer>
-
-      <Tips list={instructionList} />
     </ContentContainer>
   );
 };

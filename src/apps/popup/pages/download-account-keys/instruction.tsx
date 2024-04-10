@@ -3,38 +3,37 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import {
   ContentContainer,
-  IllustrationContainer,
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { SvgIcon, Typography } from '@libs/ui/components';
+import { Tips, Typography } from '@libs/ui/components';
 
-export function DownloadedSecretKeysPageContent() {
+import { safetyTips } from './utils';
+
+export const Instruction = () => {
   const { t } = useTranslation();
+
   return (
     <ContentContainer>
-      <IllustrationContainer>
-        <SvgIcon
-          src="assets/illustrations/key-downloaded.svg"
-          width={190}
-          height={120}
-        />
-      </IllustrationContainer>
-
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          <Trans t={t}>Your secret key was downloaded</Trans>
+          <Trans t={t}>Please remember</Trans>
         </Typography>
       </ParagraphContainer>
 
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            Keep your account secret key file safe and secure. Do not share it
-            with anyone.
+            Private key files are needed to recover access to your accounts.
           </Trans>
         </Typography>
       </ParagraphContainer>
+
+      <Tips
+        list={safetyTips}
+        contentTop={SpacingSize.Small}
+        label={t('Safety tips')}
+      />
     </ContentContainer>
   );
-}
+};
