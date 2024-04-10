@@ -38,19 +38,22 @@ export const PasswordInputs = ({
         <Typography type="body" color="contentSecondary">
           {needToAddMoreCharacters <= 0 ? (
             <Trans
-              defaults="Your password length is - <t>{{passwordLength}} characters.</t>"
+              // spase at the end required to prevent error on browser auto-translate
+              defaults="Your password length is - <t><nt> {{passwordLength}} </nt> characters.</t> "
               values={{ passwordLength }}
               components={{
-                t: <Typography type="bodySemiBold" color="contentPrimary" />
+                t: <Typography type="bodySemiBold" color="contentPrimary" />,
+                nt: <span translate="no" />
               }}
             />
           ) : (
             <Trans
               t={t}
-              defaults="You need to add at least <t>{{needToAddMoreCharacters}} characters</t> more"
+              defaults="You need to add at least <t><nt> {{needToAddMoreCharacters}} </nt> characters</t> more"
               values={{ needToAddMoreCharacters }}
               components={{
-                t: <Typography type="bodySemiBold" color="contentPrimary" />
+                t: <Typography type="bodySemiBold" color="contentPrimary" />,
+                nt: <span translate="no" />
               }}
             />
           )}
