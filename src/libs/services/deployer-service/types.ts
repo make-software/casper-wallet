@@ -8,3 +8,7 @@ export interface RPCErrorResponse {
   message: string;
   data: string | any;
 }
+
+export interface ICasperNodeStatusResponse {
+  last_progress: string;
+}

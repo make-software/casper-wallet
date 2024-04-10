@@ -76,13 +76,8 @@ export enum TermsLink {
 }
 
 export enum CasperNodeUrl {
-  MainnetUrl = 'https://casper-node-proxy.make.services/rpc',
-  TestnetUrl = 'https://casper-testnet-node-proxy.make.services/rpc'
-}
-
-export enum CasperNodeStatusUrl {
-  MainnetUrl = 'https://casper-node-proxy.make.services/status',
-  TestnetUrl = 'https://casper-testnet-node-proxy.make.services/status'
+  MainnetUrl = 'https://node.cspr.cloud/rpc',
+  TestnetUrl = 'https://node.testnet.cspr.cloud/rpc'
 }
 
 export enum NetworkName {

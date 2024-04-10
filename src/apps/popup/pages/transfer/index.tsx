@@ -26,6 +26,7 @@ import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/
 import { dispatchToMainStore } from '@background/redux/utils';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
+import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import {
   ErrorPath,
   FooterButtonsContainer,
@@ -37,11 +38,9 @@ import {
 } from '@libs/layout';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import {
-  makeCep18TransferDeploy,
-  makeNativeTransferDeploy,
-  signAndDeploy
+  makeCep18TransferDeployAndSign,
+  makeNativeTransferDeployAndSign
 } from '@libs/services/deployer-service';
-import { Account } from '@libs/types/account';
 import { Button, HomePageTabsId, Typography } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useTransferForm } from '@libs/ui/forms/transfer';
@@ -75,7 +74,7 @@ export const TransferPage = () => {
   const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(true);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const { networkName, nodeUrl, nodeStatusUrl } = useSelector(
+  const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
   const csprBalance = useSelector(selectAccountBalance);
@@ -177,46 +176,43 @@ export const TransferPage = () => {
     };
   }, [isSubmitButtonDisable, transferStep]);
 
-  const submitDeploy = (
-    deploy: DeployUtil.Deploy,
-    activeAccount: Account,
-    nodeUrl: CasperNodeUrl
-  ) => {
-    signAndDeploy(
-      deploy,
-      activeAccount.publicKey,
-      activeAccount.secretKey,
-      nodeUrl
-    ).then(resp => {
-      dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
+  const sendDeploy = (signDeploy: DeployUtil.Deploy) => {
+    signDeploy
+      .send(nodeUrl)
+      .then((deployHash: string) => {
+        dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
-      if ('deploy_hash' in resp) {
-        let triesLeft = 10;
-        const interval = setInterval(async () => {
-          const { payload: extendedDeployInfo } =
-            await dispatchFetchExtendedDeploysInfo(resp.deploy_hash);
-          if (extendedDeployInfo) {
-            dispatchToMainStore(
-              accountPendingTransactionsChanged(extendedDeployInfo)
-            );
-            clearInterval(interval);
-          } else if (triesLeft === 0) {
-            clearInterval(interval);
-          }
+        if (deployHash) {
+          let triesLeft = 10;
+          const interval = setInterval(async () => {
+            const { payload: extendedDeployInfo } =
+              await dispatchFetchExtendedDeploysInfo(deployHash);
+            if (extendedDeployInfo) {
+              dispatchToMainStore(
+                accountPendingTransactionsChanged(extendedDeployInfo)
+              );
+              clearInterval(interval);
+            } else if (triesLeft === 0) {
+              clearInterval(interval);
+            }
 
-          triesLeft--;
-          //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-        }, 2000);
+            triesLeft--;
+            //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
+          }, 2000);
 
-        setTransferStep(TransactionSteps.Success);
-      } else {
+          setTransferStep(TransactionSteps.Success);
+        }
+      })
+      .catch(error => {
+        console.error(error, 'transfer request error');
+
         navigate(
           ErrorPath,
           createErrorLocationState({
-            errorHeaderText: resp.message || t('Something went wrong'),
+            errorHeaderText: error.message || t('Something went wrong'),
             errorContentText:
-              typeof resp.data === 'string'
-                ? resp.data
+              typeof error.data === 'string'
+                ? error.data
                 : t(
                     'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
                   ),
@@ -224,15 +220,18 @@ export const TransferPage = () => {
             errorRedirectPath: RouterPath.Home
           })
         );
-      }
-    });
+      });
   };
 
   const onSubmitSending = async () => {
     if (activeAccount) {
+      const KEYS = createAsymmetricKey(
+        activeAccount.publicKey,
+        activeAccount.secretKey
+      );
       if (isErc20Transfer) {
         // ERC20 transfer
-        const deploy = await makeCep18TransferDeploy(
+        const signDeploy = await makeCep18TransferDeployAndSign(
           nodeUrl,
           networkName,
           tokenContractHash,
@@ -242,24 +241,25 @@ export const TransferPage = () => {
           erc20Decimals,
           paymentAmount,
           activeAccount,
-          nodeStatusUrl
+          [KEYS]
         );
 
-        submitDeploy(deploy, activeAccount, nodeUrl);
+        sendDeploy(signDeploy);
       } else {
         // CSPR transfer
         const motesAmount = CSPRtoMotes(amount);
 
-        const deploy = await makeNativeTransferDeploy(
+        const signDeploy = await makeNativeTransferDeployAndSign(
           activeAccount.publicKey,
           recipientPublicKey,
           motesAmount,
           networkName,
-          nodeStatusUrl,
+          nodeUrl,
+          [KEYS],
           transferIdMemo
         );
 
-        submitDeploy(deploy, activeAccount, nodeUrl);
+        sendDeploy(signDeploy);
       }
     }
   };

@@ -34,7 +34,7 @@ import {
   createErrorLocationState
 } from '@libs/layout';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import { makeAuctionManagerDeploy } from '@libs/services/deployer-service';
+import { makeAuctionManagerDeployAndSing } from '@libs/services/deployer-service';
 import {
   dispatchFetchAuctionValidatorsRequest,
   dispatchFetchValidatorsDetailsDataRequest
@@ -73,8 +73,7 @@ export const StakesPage = () => {
     networkName,
     nodeUrl,
     auctionManagerContractHash,
-    casperClarityApiUrl,
-    nodeStatusUrl
+    casperClarityApiUrl
   } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const csprBalance = useSelector(selectAccountBalance);
   const ratedInStore = useSelector(selectRatedInStore);
@@ -229,7 +228,7 @@ export const StakesPage = () => {
         activeAccount.secretKey
       );
 
-      const deploy = await makeAuctionManagerDeploy(
+      const signDeploy = await makeAuctionManagerDeployAndSing(
         stakesType,
         activeAccount.publicKey,
         validatorPublicKey,
@@ -237,10 +236,9 @@ export const StakesPage = () => {
         motesAmount,
         networkName,
         auctionManagerContractHash,
-        nodeStatusUrl
+        nodeUrl,
+        [KEYS]
       );
-
-      const signDeploy = deploy.sign([KEYS]);
 
       signDeploy
         .send(nodeUrl)
