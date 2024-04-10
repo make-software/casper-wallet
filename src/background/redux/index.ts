@@ -15,7 +15,7 @@ import rootSaga from './root-saga';
 
 // export const composeEnhancers = compose;
 export const composeEnhancers =
-  process.env.NODE_ENV !== 'development' && isChromeBuild
+  process.env.NODE_ENV === 'development' && isChromeBuild
     ? composeWithDevTools({
         name: 'Casper Wallet',
         hostname: 'localhost',
