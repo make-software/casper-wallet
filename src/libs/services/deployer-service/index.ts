@@ -13,6 +13,7 @@ import {
   AuctionManagerEntryPoint,
   CasperNodeUrl,
   NetworkName,
+  ReferrerUrl,
   STAKE_COST_MOTES,
   TRANSFER_COST_MOTES
 } from '@src/constants';
@@ -22,7 +23,11 @@ import { toJson } from '@libs/services/utils';
 import { Account } from '@libs/types/account';
 import { CSPRtoMotes, multiplyErc20Balance } from '@libs/ui/utils';
 
-import { ICasperNodeStatusResponse } from './types';
+import {
+  ICasperNetworkSendDeployErrorResponse,
+  ICasperNetworkSendDeployResponse,
+  ICasperNodeStatusResponse
+} from './types';
 
 export const getAuctionManagerDeployCost = (
   entryPoint: AuctionManagerEntryPoint
@@ -43,7 +48,10 @@ export const getDateForDeploy = async (nodeUrl: CasperNodeUrl) => {
 
   try {
     const casperNodeTimestamp: ICasperNodeStatusResponse = await fetch(
-      `${nodeUrl}/info_get_status`
+      `${nodeUrl}/info_get_status`,
+      {
+        referrer: ReferrerUrl
+      }
     ).then(toJson);
 
     return casperNodeTimestamp?.last_progress
@@ -228,4 +236,31 @@ export const makeNFTDeployAndSign = async (
   const deploy = DeployUtil.makeDeploy(deployParams, session, payment);
 
   return deploy.sign(keys);
+};
+
+export const sendSignDeploy = (
+  deploy: DeployUtil.Deploy,
+  nodeUrl: CasperNodeUrl
+): Promise<
+  ICasperNetworkSendDeployResponse | ICasperNetworkSendDeployErrorResponse
+> => {
+  const oneMegaByte = 1048576;
+  const size = DeployUtil.deploySizeInBytes(deploy);
+
+  if (size > oneMegaByte) {
+    throw new Error(
+      `Deploy can not be send, because it's too large: ${size} bytes. Max size is 1 megabyte.`
+    );
+  }
+
+  return fetch(nodeUrl, {
+    method: 'POST',
+    referrer: ReferrerUrl,
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      method: 'account_put_deploy',
+      params: [DeployUtil.deployToJson(deploy).deploy],
+      id: new Date().getTime()
+    })
+  }).then(toJson);
 };

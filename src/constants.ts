@@ -80,6 +80,8 @@ export enum CasperNodeUrl {
   TestnetUrl = 'https://node.testnet.cspr.cloud/rpc'
 }
 
+export const ReferrerUrl = 'https://casperwallet.io';
+
 export enum NetworkName {
   Mainnet = 'casper',
   Testnet = 'casper-test'
