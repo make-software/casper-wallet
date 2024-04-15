@@ -38,7 +38,8 @@ import {
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import {
   makeCep18TransferDeployAndSign,
-  makeNativeTransferDeployAndSign
+  makeNativeTransferDeployAndSign,
+  sendSignDeploy
 } from '@libs/services/deployer-service';
 import { Button, HomePageTabsId, Typography } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
@@ -176,9 +177,8 @@ export const TransferPage = () => {
   }, [isSubmitButtonDisable, transferStep]);
 
   const sendDeploy = (signDeploy: DeployUtil.Deploy) => {
-    signDeploy
-      .send(nodeUrl)
-      .then((deployHash: string) => {
+    sendSignDeploy(signDeploy, nodeUrl)
+      .then(({ result: { deploy_hash: deployHash } }) => {
         dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
         if (deployHash) {

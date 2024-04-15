@@ -34,7 +34,10 @@ import {
   createErrorLocationState
 } from '@libs/layout';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import { makeAuctionManagerDeployAndSing } from '@libs/services/deployer-service';
+import {
+  makeAuctionManagerDeployAndSing,
+  sendSignDeploy
+} from '@libs/services/deployer-service';
 import {
   dispatchFetchAuctionValidatorsRequest,
   dispatchFetchValidatorsDetailsDataRequest
@@ -240,9 +243,8 @@ export const StakesPage = () => {
         [KEYS]
       );
 
-      signDeploy
-        .send(nodeUrl)
-        .then((deployHash: string) => {
+      sendSignDeploy(signDeploy, nodeUrl)
+        .then(({ result: { deploy_hash: deployHash } }) => {
           if (deployHash) {
             let triesLeft = 10;
             const interval = setInterval(async () => {

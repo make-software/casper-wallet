@@ -41,7 +41,10 @@ import {
   createErrorLocationState
 } from '@libs/layout';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import { makeNFTDeployAndSign } from '@libs/services/deployer-service';
+import {
+  makeNFTDeployAndSign,
+  sendSignDeploy
+} from '@libs/services/deployer-service';
 import {
   Button,
   HomePageTabsId,
@@ -149,9 +152,8 @@ export const TransferNftPage = () => {
         [KEYS]
       );
 
-      signDeploy
-        .send(nodeUrl)
-        .then((deployHash: string) => {
+      sendSignDeploy(signDeploy, nodeUrl)
+        .then(({ result: { deploy_hash: deployHash } }) => {
           dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
           if (deployHash) {
