@@ -21,3 +21,13 @@ export interface ICasperNetworkSendDeployResponse {
     deploy_hash: string;
   };
 }
+
+export interface ICasperNetworkSendDeployErrorResponse {
+  error: {
+    code: number;
+    data: string;
+    message: string;
+  };
+  id: number;
+  jsonrpc: string;
+}

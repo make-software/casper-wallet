@@ -24,6 +24,7 @@ import { Account } from '@libs/types/account';
 import { CSPRtoMotes, multiplyErc20Balance } from '@libs/ui/utils';
 
 import {
+  ICasperNetworkSendDeployErrorResponse,
   ICasperNetworkSendDeployResponse,
   ICasperNodeStatusResponse
 } from './types';
@@ -240,7 +241,9 @@ export const makeNFTDeployAndSign = async (
 export const sendSignDeploy = (
   deploy: DeployUtil.Deploy,
   nodeUrl: CasperNodeUrl
-): Promise<ICasperNetworkSendDeployResponse> => {
+): Promise<
+  ICasperNetworkSendDeployResponse | ICasperNetworkSendDeployErrorResponse
+> => {
   const oneMegaByte = 1048576;
   const size = DeployUtil.deploySizeInBytes(deploy);
 

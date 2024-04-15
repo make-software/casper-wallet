@@ -3,7 +3,10 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import { MapNFTTokenStandardToName } from '@src/utils';
+import {
+  MapNFTTokenStandardToName,
+  fetchAndDispatchExtendedDeployInfo
+} from '@src/utils';
 
 import { TransferNftContent } from '@popup/pages/transfer-nft/content';
 import {
@@ -12,10 +15,7 @@ import {
 } from '@popup/pages/transfer-nft/utils';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import {
-  accountPendingTransactionsChanged,
-  accountTrackingIdOfSentNftTokensChanged
-} from '@background/redux/account-info/actions';
+import { accountTrackingIdOfSentNftTokensChanged } from '@background/redux/account-info/actions';
 import {
   selectAccountBalance,
   selectAccountNftTokens
@@ -40,7 +40,6 @@ import {
   PopupLayout,
   createErrorLocationState
 } from '@libs/layout';
-import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import {
   makeNFTDeployAndSign,
   sendSignDeploy
@@ -153,10 +152,12 @@ export const TransferNftPage = () => {
       );
 
       sendSignDeploy(signDeploy, nodeUrl)
-        .then(({ result: { deploy_hash: deployHash } }) => {
+        .then(resp => {
           dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
-          if (deployHash) {
+          if ('result' in resp) {
+            const deployHash = resp.result.deploy_hash;
+
             dispatchToMainStore(
               accountTrackingIdOfSentNftTokensChanged({
                 trackingId: nftToken.tracking_id,
@@ -164,24 +165,24 @@ export const TransferNftPage = () => {
               })
             );
 
-            let triesLeft = 10;
-            const interval = setInterval(async () => {
-              const { payload: extendedDeployInfo } =
-                await dispatchFetchExtendedDeploysInfo(deployHash);
-              if (extendedDeployInfo) {
-                dispatchToMainStore(
-                  accountPendingTransactionsChanged(extendedDeployInfo)
-                );
-                clearInterval(interval);
-              } else if (triesLeft === 0) {
-                clearInterval(interval);
-              }
-
-              triesLeft--;
-              //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-            }, 2000);
+            fetchAndDispatchExtendedDeployInfo(deployHash);
 
             setShowSuccessScreen(true);
+          } else {
+            navigate(
+              ErrorPath,
+              createErrorLocationState({
+                errorHeaderText:
+                  resp.error.message || t('Something went wrong'),
+                errorContentText:
+                  resp.error.data ||
+                  t(
+                    'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                  ),
+                errorPrimaryButtonLabel: t('Close'),
+                errorRedirectPath: RouterPath.Home
+              })
+            );
           }
         })
         .catch(error => {
