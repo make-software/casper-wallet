@@ -7,20 +7,19 @@ import {
   STAKE_COST_MOTES,
   StakeSteps
 } from '@src/constants';
+import { fetchAndDispatchExtendedDeployInfo } from '@src/utils';
 
 import { StakesPageContent } from '@popup/pages/stakes/content';
 import { NoDelegations } from '@popup/pages/stakes/no-delegations';
 import { useConfirmationButtonText } from '@popup/pages/stakes/utils';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
-import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import {
   selectAskForReviewAfter,
   selectRatedInStore
 } from '@background/redux/rate-app/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { dispatchToMainStore } from '@background/redux/utils';
 import {
   selectIsActiveAccountFromLedger,
   selectVaultActiveAccount
@@ -38,8 +37,10 @@ import {
   SpacingSize,
   createErrorLocationState
 } from '@libs/layout';
-import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import { makeAuctionManagerDeployAndSing } from '@libs/services/deployer-service';
+import {
+  makeAuctionManagerDeployAndSing,
+  sendSignDeploy
+} from '@libs/services/deployer-service';
 import {
   dispatchFetchAuctionValidatorsRequest,
   dispatchFetchValidatorsDetailsDataRequest
@@ -255,28 +256,27 @@ export const StakesPage = () => {
         [KEYS]
       );
 
-      signDeploy
-        .send(nodeUrl)
-        .then((deployHash: string) => {
-          if (deployHash) {
-            let triesLeft = 10;
-            const interval = setInterval(async () => {
-              const { payload: extendedDeployInfo } =
-                await dispatchFetchExtendedDeploysInfo(deployHash);
-              if (extendedDeployInfo) {
-                dispatchToMainStore(
-                  accountPendingTransactionsChanged(extendedDeployInfo)
-                );
-                clearInterval(interval);
-              } else if (triesLeft === 0) {
-                clearInterval(interval);
-              }
-
-              triesLeft--;
-              //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-            }, 2000);
+      sendSignDeploy(signDeploy, nodeUrl)
+        .then(resp => {
+          if ('result' in resp) {
+            fetchAndDispatchExtendedDeployInfo(resp.result.deploy_hash);
 
             setStakeStep(StakeSteps.Success);
+          } else {
+            navigate(
+              ErrorPath,
+              createErrorLocationState({
+                errorHeaderText:
+                  resp.error.message || t('Something went wrong'),
+                errorContentText:
+                  resp.error.data ||
+                  t(
+                    'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                  ),
+                errorPrimaryButtonLabel: t('Close'),
+                errorRedirectPath: RouterPath.Home
+              })
+            );
           }
         })
         .catch(error => {

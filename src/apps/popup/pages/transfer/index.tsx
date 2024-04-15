@@ -9,11 +9,11 @@ import {
   TRANSFER_COST_MOTES
 } from '@src/constants';
 import { useActiveAccountErc20Tokens } from '@src/hooks/use-active-account-erc20-tokens';
+import { fetchAndDispatchExtendedDeployInfo } from '@src/utils';
 
 import { TransferPageContent } from '@popup/pages/transfer/content';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
-import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
 import {
@@ -40,10 +40,10 @@ import {
   SpacingSize,
   createErrorLocationState
 } from '@libs/layout';
-import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import {
   makeCep18TransferDeployAndSign,
-  makeNativeTransferDeployAndSign
+  makeNativeTransferDeployAndSign,
+  sendSignDeploy
 } from '@libs/services/deployer-service';
 import {
   Button,
@@ -191,30 +191,28 @@ export const TransferPage = () => {
   }, [isSubmitButtonDisable, transferStep]);
 
   const sendDeploy = (signDeploy: DeployUtil.Deploy) => {
-    signDeploy
-      .send(nodeUrl)
-      .then((deployHash: string) => {
+    sendSignDeploy(signDeploy, nodeUrl)
+      .then(resp => {
         dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
-        if (deployHash) {
-          let triesLeft = 10;
-          const interval = setInterval(async () => {
-            const { payload: extendedDeployInfo } =
-              await dispatchFetchExtendedDeploysInfo(deployHash);
-            if (extendedDeployInfo) {
-              dispatchToMainStore(
-                accountPendingTransactionsChanged(extendedDeployInfo)
-              );
-              clearInterval(interval);
-            } else if (triesLeft === 0) {
-              clearInterval(interval);
-            }
-
-            triesLeft--;
-            //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-          }, 2000);
+        if ('result' in resp) {
+          fetchAndDispatchExtendedDeployInfo(resp.result.deploy_hash);
 
           setTransferStep(TransactionSteps.Success);
+        } else {
+          navigate(
+            ErrorPath,
+            createErrorLocationState({
+              errorHeaderText: resp.error.message || t('Something went wrong'),
+              errorContentText:
+                resp.error.data ||
+                t(
+                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                ),
+              errorPrimaryButtonLabel: t('Close'),
+              errorRedirectPath: RouterPath.Home
+            })
+          );
         }
       })
       .catch(error => {
