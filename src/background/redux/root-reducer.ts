@@ -1,5 +1,6 @@
 import { combineReducers } from 'redux';
 
+import { reducer as accountBalances } from './account-balances/reducer';
 import { reducer as accountInfo } from './account-info/reducer';
 import { reducer as activeOrigin } from './active-origin/reducer';
 import { reducer as contacts } from './contacts/reducer';
@@ -29,7 +30,8 @@ const rootReducer = combineReducers({
   recentRecipientPublicKeys,
   accountInfo,
   contacts,
-  rateApp
+  rateApp,
+  accountBalances
 });
 
 export default rootReducer;

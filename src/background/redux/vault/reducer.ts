@@ -11,6 +11,7 @@ import {
   anotherAccountConnected,
   deployPayloadReceived,
   deploysReseted,
+  hideAccountFromListChange,
   secretPhraseCreated,
   siteConnected,
   siteDisconnected,
@@ -274,4 +275,35 @@ export const reducer = createReducer(initialState)
       ...state,
       jsonById: { [payload.id]: payload.json }
     })
+  )
+  .handleAction(
+    hideAccountFromListChange,
+    (
+      state,
+      { payload: { accountName } }: ReturnType<typeof hideAccountFromListChange>
+    ) => {
+      const visibleAccounts = state.accounts.filter(
+        account => !account.hidden && account.name !== accountName
+      );
+
+      const newActiveAccount =
+        state.activeAccountName === accountName
+          ? (state.accounts.length > 1 && visibleAccounts[0].name) || null
+          : state.activeAccountName;
+
+      return {
+        ...state,
+        activeAccountName: newActiveAccount,
+        accounts: state.accounts.map(account => {
+          if (account.name === accountName) {
+            return {
+              ...account,
+              hidden: !account.hidden
+            };
+          }
+
+          return account;
+        })
+      };
+    }
   );

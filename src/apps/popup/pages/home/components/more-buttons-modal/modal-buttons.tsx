@@ -20,11 +20,7 @@ const ButtonContainer = styled(AlignedFlexRow)`
   padding: 14px 16px;
 `;
 
-interface ButtonsProps {
-  handleBuyWithCSPR: () => void;
-}
-
-export const ModalButtons = ({ handleBuyWithCSPR }: ButtonsProps) => {
+export const ModalButtons = () => {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
   const casperToken = useCasperToken();
@@ -34,8 +30,11 @@ export const ModalButtons = ({ handleBuyWithCSPR }: ButtonsProps) => {
   return (
     <FlexColumn>
       {network === NetworkSetting.Mainnet && (
-        <ButtonContainer gap={SpacingSize.Large} onClick={handleBuyWithCSPR}>
-          <Button circle>
+        <ButtonContainer
+          gap={SpacingSize.Large}
+          onClick={() => navigate(RouterPath.BuyCSPR)}
+        >
+          <Button circle style={{ padding: '8px' }}>
             <SvgIcon src="assets/icons/card.svg" color="contentOnFill" />
           </Button>
           <FlexColumn>

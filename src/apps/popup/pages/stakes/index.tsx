@@ -39,7 +39,7 @@ import {
   createErrorLocationState
 } from '@libs/layout';
 import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import { makeAuctionManagerDeploy } from '@libs/services/deployer-service';
+import { makeAuctionManagerDeployAndSing } from '@libs/services/deployer-service';
 import {
   dispatchFetchAuctionValidatorsRequest,
   dispatchFetchValidatorsDetailsDataRequest
@@ -234,7 +234,7 @@ export const StakesPage = () => {
     };
   }, [isSubmitButtonDisable, stakeStep]);
 
-  const submitStake = () => {
+  const submitStake = async () => {
     if (activeAccount) {
       const motesAmount = CSPRtoMotes(inputAmountCSPR);
 
@@ -243,17 +243,17 @@ export const StakesPage = () => {
         activeAccount.secretKey
       );
 
-      const deploy = makeAuctionManagerDeploy(
+      const signDeploy = await makeAuctionManagerDeployAndSing(
         stakesType,
         activeAccount.publicKey,
         validatorPublicKey,
         newValidatorPublicKey || null,
         motesAmount,
         networkName,
-        auctionManagerContractHash
+        auctionManagerContractHash,
+        nodeUrl,
+        [KEYS]
       );
-
-      const signDeploy = deploy.sign([KEYS]);
 
       signDeploy
         .send(nodeUrl)
@@ -287,10 +287,11 @@ export const StakesPage = () => {
             createErrorLocationState({
               errorHeaderText: error.message || t('Something went wrong'),
               errorContentText:
-                error.data ||
-                t(
-                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                ),
+                typeof error.data === 'string'
+                  ? error.data
+                  : t(
+                      'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                    ),
               errorPrimaryButtonLabel: t('Close'),
               errorRedirectPath: RouterPath.Home
             })

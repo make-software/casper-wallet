@@ -1,7 +1,7 @@
-import { Account } from '@libs/types/account';
+import { Account, AccountWithBalance } from '@libs/types/account';
 
 export function sortAccounts(
-  accounts: Account[],
+  accounts: AccountWithBalance[],
   activeAccountName: string | null,
   connectedAccountNames: string[]
 ) {

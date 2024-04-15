@@ -95,16 +95,22 @@ const getGapSize = (gap?: SpacingSize) => {
 interface FlexRowProps {
   gap?: SpacingSize;
   wrap?: 'wrap' | 'nowrap';
+  flexGrow?: number;
 }
 
 export const FlexRow = styled.div<FlexRowProps>`
   display: flex;
   gap: ${({ gap }) => getGapSize(gap)};
   flex-wrap: ${({ wrap }) => wrap};
+  flex-grow: ${({ flexGrow }) => flexGrow || 'inherit'};
 `;
 
 export const AlignedFlexRow = styled(FlexRow)`
   align-items: center;
+`;
+
+export const BaseLineFlexRow = styled(FlexRow)`
+  align-items: baseline;
 `;
 
 export const CenteredFlexRow = styled(AlignedFlexRow)`

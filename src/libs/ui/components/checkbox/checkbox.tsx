@@ -10,7 +10,7 @@ const StyledFlexRow = styled(FlexRow)<{
   checked?: boolean;
   disabled?: boolean;
 }>(({ theme, checked, disabled }) => ({
-  cursor: disabled ? 'not-allowed' : 'pointer',
+  cursor: disabled ? 'default' : 'pointer',
   width: 'fit-content',
   pointerEvents: 'auto',
   svg: {

@@ -6,12 +6,19 @@ export interface Account extends KeyPair {
   name: string;
   imported?: boolean;
   hardware?: HardwareWalletType;
+  hidden: boolean;
 }
 
 export enum HardwareWalletType {
   Ledger = 'Ledger'
 }
 
-export interface AccountListRows extends Account {
+export interface AccountWithBalance extends Account {
+  balance: {
+    liquidMotes: string | null;
+  };
+}
+
+export interface AccountListRows extends AccountWithBalance {
   id: string;
 }

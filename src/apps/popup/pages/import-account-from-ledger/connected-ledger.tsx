@@ -26,7 +26,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { dispatchFetchAccountsBalance } from '@libs/services/balance-service';
+import { dispatchFetchAccountBalances } from '@libs/services/balance-service';
 import { Account, HardwareWalletType } from '@libs/types/account';
 import { Button, Tile, Typography } from '@libs/ui/components';
 
@@ -113,7 +113,7 @@ export const ConnectedLedger = () => {
       ''
     );
 
-    dispatchFetchAccountsBalance(hashes)
+    dispatchFetchAccountBalances(hashes)
       .then(({ payload }) => {
         if ('data' in payload) {
           const accountsWithBalance = accountsFromLedger.map(account => {
@@ -140,7 +140,8 @@ export const ConnectedLedger = () => {
       name: account.name,
       publicKey: account.publicKey,
       secretKey: '',
-      hardware: HardwareWalletType.Ledger
+      hardware: HardwareWalletType.Ledger,
+      hidden: false
     }));
 
     dispatchToMainStore(accountsImported(accounts)).then(() =>

@@ -103,10 +103,23 @@ export function UnlockVaultPageContent() {
         /[A-Z]/.test(acc.publicKey)
       );
 
+      // Mapping through vault accounts to update missing hidden property
+      const updatedVaultWithHiddenProp = vault.accounts.map(acc => {
+        // If the hidden property is undefined, set it to false
+        if (acc.hidden === undefined) {
+          return {
+            ...acc,
+            hidden: false
+          };
+        }
+
+        return acc;
+      });
+
       if (hasCheckSummedPublicKeys) {
         const updatedVault: VaultState = {
           ...vault,
-          accounts: vault.accounts.map(acc => ({
+          accounts: updatedVaultWithHiddenProp.map(acc => ({
             ...acc,
             publicKey: acc.publicKey.toLowerCase()
           }))
@@ -123,7 +136,7 @@ export function UnlockVaultPageContent() {
       } else {
         dispatchToMainStore(
           unlockVault({
-            vault,
+            vault: { ...vault, accounts: updatedVaultWithHiddenProp },
             newKeyDerivationSaltHash,
             newVaultCipher,
             newEncryptionKeyHash

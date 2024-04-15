@@ -7,17 +7,19 @@ import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 import { AccountSettingsPage } from '@popup/pages/account-settings';
 import { ActivityDetailsPage } from '@popup/pages/activity-details';
 import { AddContactPage } from '@popup/pages/add-contact';
+import { AllAccountsPage } from '@popup/pages/all-accounts';
 import { BackupSecretPhrasePage } from '@popup/pages/backup-secret-phrase';
+import { BuyCSPRPage } from '@popup/pages/buy-cspr';
 import { ChangePasswordPage } from '@popup/pages/change-password';
 import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
 import { ConnectedSitesPage } from '@popup/pages/connected-sites';
 import { ContactDetailsPage } from '@popup/pages/contact-details';
 import { ContactsBookPage } from '@popup/pages/contacts';
 import { CreateAccountPage } from '@popup/pages/create-account';
-import { DownloadSecretKeysPage } from '@popup/pages/download-secret-keys';
-import { DownloadedSecretKeysPage } from '@popup/pages/downloaded-secret-keys';
+import { DownloadAccountKeysPage } from '@popup/pages/download-account-keys';
 import { HomePageContent } from '@popup/pages/home';
 import { ImportAccountFromLedgerPage } from '@popup/pages/import-account-from-ledger';
+import { ImportAccountFromTorusPage } from '@popup/pages/import-account-from-torus';
 import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
 import { NftDetailsPage } from '@popup/pages/nft-details';
 import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
@@ -237,12 +239,8 @@ function AppRoutes() {
         element={<BackupSecretPhrasePage />}
       />
       <Route
-        path={RouterPath.DownloadSecretKeys}
-        element={<DownloadSecretKeysPage />}
-      />
-      <Route
-        path={RouterPath.DownloadedSecretKeys}
-        element={<DownloadedSecretKeysPage />}
+        path={RouterPath.DownloadAccountKeys}
+        element={<DownloadAccountKeysPage />}
       />
       <Route path={RouterPath.Transfer} element={<TransferPage />} />
       <Route
@@ -280,6 +278,12 @@ function AppRoutes() {
         element={<ContactDetailsPage />}
       />
       <Route path={RouterPath.RateApp} element={<RateAppPage />} />
+      <Route path={RouterPath.AllAccountsList} element={<AllAccountsPage />} />
+      <Route
+        path={RouterPath.ImportAccountFromTorus}
+        element={<ImportAccountFromTorusPage />}
+      />
+      <Route path={RouterPath.BuyCSPR} element={<BuyCSPRPage />} />
       <Route
         path={RouterPath.ImportAccountFromLedger}
         element={<ImportAccountFromLedgerPage />}

@@ -121,7 +121,10 @@ export const useFetchAccountDeploys = () => {
     activeAccount?.publicKey,
     casperClarityApiUrl,
     forceUpdate,
-    isFirstPageLoad
+    isFirstPageLoad,
+    setLoading,
+    setIsFirstPageLoad,
+    setHasNextPage
   ]);
 
   const loadMoreDeploys = useCallback(() => {
@@ -172,7 +175,10 @@ export const useFetchAccountDeploys = () => {
     accountDeploysCount,
     accountDeploysList?.length,
     accountDeploysPage,
-    activeAccount?.publicKey
+    activeAccount?.publicKey,
+    setLoading,
+    setHasNextPage,
+    setAccountDeploysPage
   ]);
 
   return {

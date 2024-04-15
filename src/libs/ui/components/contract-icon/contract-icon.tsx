@@ -21,8 +21,8 @@ export const ContractTypeId = {
 
 const ContractIconsPath = {
   [ContractTypeId.System]: 'assets/icons/bid-contract-icon.svg',
-  [ContractTypeId.Erc20]: 'assets/icons/erc20-contract-icon.svg',
-  [ContractTypeId.CustomErc20]: 'assets/icons/erc20-contract-icon.svg',
+  [ContractTypeId.Erc20]: 'assets/icons/cep18-contract-icon.svg',
+  [ContractTypeId.CustomErc20]: 'assets/icons/cep18-contract-icon.svg',
   [ContractTypeId.CEP47Nft]: 'assets/icons/nft-contract-icon.svg',
   [ContractTypeId.CustomCEP47Nft]: 'assets/icons/nft-contract-icon.svg',
   [ContractTypeId.CEP78Nft]: 'assets/icons/nft-contract-icon.svg',

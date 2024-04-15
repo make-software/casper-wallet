@@ -14,7 +14,7 @@ import { queryClient } from '../query-client';
 import { handleError, toJson } from '../utils';
 import {
   getAccountBalanceUrl,
-  getAccountsBalanceUrl,
+  getAccountBalancesUrl,
   getCurrencyRateUrl
 } from './constants';
 import {
@@ -57,14 +57,20 @@ export const accountBalanceRequest = (
     .catch(handleError);
 };
 
-export const accountsBalanceRequest = (
+export const accountBalancesRequest = (
   accountHashes: string,
   casperWalletApiUrl: string,
   signal?: AbortSignal
 ): Promise<PaginatedResponse<AccountData> | ErrorResponse> =>
-  fetch(getAccountsBalanceUrl({ accountHashes, casperWalletApiUrl }), {
-    signal
-  })
+  fetch(
+    getAccountBalancesUrl({
+      accountHashes,
+      casperWalletApiUrl
+    }),
+    {
+      signal
+    }
+  )
     .then(toJson)
     .catch(handleError);
 
@@ -73,11 +79,11 @@ export const dispatchFetchActiveAccountBalance = (
 ): Promise<Payload<FetchBalanceResponse>> =>
   dispatchToMainStore(serviceMessage.fetchBalanceRequest({ accountHash }));
 
-export const dispatchFetchAccountsBalance = (
+export const dispatchFetchAccountBalances = (
   accountHashes = ''
 ): Promise<Payload<PaginatedResponse<AccountData> | ErrorResponse>> =>
   dispatchToMainStore(
-    serviceMessage.fetchAccountsBalanceRequest({ accountHashes })
+    serviceMessage.fetchAccountBalancesRequest({ accountHashes })
   );
 
 export const fetchAccountBalance = ({
@@ -109,7 +115,7 @@ export const fetchCurrencyRate = ({
     }
   );
 
-export const fetchAccountsBalance = ({
+export const fetchAccountBalances = ({
   accountHashes,
   casperWalletApiUrl
 }: {
@@ -117,9 +123,9 @@ export const fetchAccountsBalance = ({
   casperWalletApiUrl: string;
 }) =>
   queryClient.fetchQuery(
-    'getAccountsBalanceRequest',
+    ['getAccountBalancesRequest', accountHashes, casperWalletApiUrl],
     ({ signal }) =>
-      accountsBalanceRequest(accountHashes, casperWalletApiUrl, signal),
+      accountBalancesRequest(accountHashes, casperWalletApiUrl, signal),
     {
       staleTime: BALANCE_REFRESH_RATE
     }

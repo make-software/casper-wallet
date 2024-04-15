@@ -90,10 +90,13 @@ export function UnlockWalletPage({ saveIsLoggedIn }: UnlockWalletPageProps) {
             register={register}
             errorMessage={errors.password?.message}
           >
-            <Trans t={t}>
-              Please enter your password to unlock. You have{' '}
-              <b>{{ retryLeft }}</b> tries left.
-            </Trans>
+            <Trans
+              defaults="Please enter your password to unlock. You have <bold>{{retryLeft}}</bold> tries left."
+              values={{
+                retryLeft
+              }}
+              components={{ bold: <strong /> }}
+            />
           </UnlockWalletPageContent>
         )}
         renderFooter={() => (
