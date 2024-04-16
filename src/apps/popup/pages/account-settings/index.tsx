@@ -17,7 +17,7 @@ import {
   HeaderSubmenuBarNavLink,
   PopupLayout
 } from '@libs/layout';
-import { Button, Link } from '@libs/ui/components';
+import { Button } from '@libs/ui/components';
 
 import {
   AccountSettingsActionsGroup,
@@ -58,17 +58,12 @@ export const AccountSettingsPage = () => {
       renderFooter={() => (
         <FooterButtonsContainer>
           <Button
-            as={props => (
-              <Link
-                color="contentAction"
-                target="_blank"
-                href={getBlockExplorerAccountUrl(
-                  casperLiveUrl,
-                  account.publicKey
-                )}
-                {...props}
-              />
-            )}
+            onClick={() => {
+              window.open(
+                getBlockExplorerAccountUrl(casperLiveUrl, account.publicKey),
+                '_blank'
+              );
+            }}
             color="secondaryBlue"
             title={t('View account in CSPR.live')}
           >
