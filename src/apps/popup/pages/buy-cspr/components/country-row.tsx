@@ -60,7 +60,11 @@ export const CountryRow = ({ country, onClick }: CountryRowProps) => {
               height="18"
               onError={handleError}
             />
-            <Typography type="body" loading={!country.name}>
+            <Typography
+              type="body"
+              loading={!country.name}
+              dataTestId="country-row"
+            >
               {country.name}
             </Typography>
           </AlignedFlexRow>
