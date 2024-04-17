@@ -71,7 +71,7 @@ const getCSP = () => {
   if (isChrome) {
     return isDev
       ? {
-          extension_pages: `${csp} ws://localhost:8000/socketcluster/ ws://localhost:3001/ws`
+          extension_pages: `${csp} ws://localhost:3001/ws`
         }
       : {
           extension_pages: csp
