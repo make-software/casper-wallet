@@ -1,5 +1,6 @@
 import { ActionType, StateType } from 'typesafe-actions';
 
+import { AccountBalancesState } from '@background/redux/account-balances/types';
 import { AccountInfoState } from '@background/redux/account-info/types';
 import { ActiveOriginState } from '@background/redux/active-origin/types';
 import { ContactsState } from '@background/redux/contacts/types';
@@ -7,6 +8,7 @@ import { KeysState } from '@background/redux/keys/types';
 import { LastActivityTimeState } from '@background/redux/last-activity-time/reducer';
 import { LoginRetryCountState } from '@background/redux/login-retry-count/reducer';
 import { LoginRetryLockoutTimeState } from '@background/redux/login-retry-lockout-time/types';
+import { RateAppState } from '@background/redux/rate-app/types';
 import { RecentRecipientPublicKeysState } from '@background/redux/recent-recipient-public-keys/types';
 import { SessionState } from '@background/redux/session/types';
 import { SettingsState } from '@background/redux/settings/types';
@@ -45,4 +47,6 @@ export type PopupState = {
   recentRecipientPublicKeys: RecentRecipientPublicKeysState;
   accountInfo: AccountInfoState;
   contacts: ContactsState;
+  rateApp: RateAppState;
+  accountBalances: AccountBalancesState;
 };

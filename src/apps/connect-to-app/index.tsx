@@ -1,10 +1,10 @@
 import React, { Suspense, useState } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
 import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
-import { isSafariBuild } from '@src/utils';
+import { isSafariBuild, setCSPForSafari } from '@src/utils';
 
 import { AppRouter } from '@connect-to-app/app-router';
 
@@ -24,6 +24,8 @@ import { GlobalStyle, darkTheme, lightTheme } from '@libs/ui';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
+
+  setCSPForSafari();
 
   const isSystemDarkTheme = useSystemThemeDetector();
 
@@ -66,4 +68,7 @@ const Tree = () => {
   );
 };
 
-render(<Tree />, document.querySelector('#app-container'));
+const container = document.querySelector('#app-container');
+const root = createRoot(container!);
+
+root.render(<Tree />);

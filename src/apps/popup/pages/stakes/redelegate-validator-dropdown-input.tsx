@@ -154,7 +154,7 @@ export const RedelegateValidatorDropdownInput = ({
         <List
           contentTop={SpacingSize.Tiny}
           rows={filteredValidatorsList}
-          maxHeight={192}
+          maxHeight={193}
           stickyHeader
           borderRadius="base"
           renderHeader={() => (

@@ -12,7 +12,7 @@ module.exports = {
   moduleNameMapper: {
     '^@src/(.*)$': '<rootDir>/src/$1'
   },
-  setupFilesAfterEnv: ['@testing-library/jest-dom/extend-expect'],
+  setupFilesAfterEnv: ['@testing-library/jest-dom'],
   coverageReporters: ['json', 'text'],
   coverageThreshold: {
     global: {

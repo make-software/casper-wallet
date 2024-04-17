@@ -9,47 +9,19 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 import { WindowApp } from '@background/create-open-window';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
-  selectVaultAccounts,
-  selectVaultActiveAccountName
+  selectVaultActiveAccountName,
+  selectVaultVisibleAccounts
 } from '@background/redux/vault/selectors';
 
 import { useWindowManager } from '@hooks/use-window-manager';
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import {
-  AlignedFlexRow,
-  CenteredFlexRow,
-  FlexColumn,
-  LeftAlignedFlexColumn,
-  SpacingSize
-} from '@libs/layout';
+import { CenteredFlexRow, SpacingSize } from '@libs/layout';
 import { AccountListRows } from '@libs/types/account';
-import {
-  AccountActionsMenuPopover,
-  Avatar,
-  Button,
-  Hash,
-  HashVariant,
-  List,
-  Typography
-} from '@libs/ui/components';
+import { Button, List } from '@libs/ui/components';
 import { sortAccounts } from '@libs/ui/components/account-list/utils';
 
-const ListItemContainer = styled(FlexColumn)`
-  min-height: 68px;
-  height: 100%;
-
-  padding: 16px 8px 16px 16px;
-`;
-
-const ListItemClickableContainer = styled(AlignedFlexRow)`
-  width: 100%;
-  cursor: pointer;
-`;
-
-const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
-  width: 100%;
-`;
+import { AccountListItem } from './account-list-item';
 
 const ButtonContainer = styled(CenteredFlexRow)`
   padding: 16px;
@@ -68,7 +40,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
   const navigate = useTypedNavigate();
   const { openWindow } = useWindowManager();
 
-  const accounts = useSelector(selectVaultAccounts);
+  const visibleAccounts = useSelector(selectVaultVisibleAccounts);
   const activeAccountName = useSelector(selectVaultActiveAccountName);
 
   const connectedAccountNames =
@@ -76,7 +48,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
 
   useEffect(() => {
     const accountListRows = sortAccounts(
-      accounts,
+      visibleAccounts,
       activeAccountName,
       connectedAccountNames
     ).map(account => ({
@@ -87,8 +59,8 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
 
     setAccountListRows(accountListRows);
     // We need to sort the account list only on the component mount and when new accounts are added
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accounts]);
+    //   eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleAccounts]);
 
   return (
     <List
@@ -100,48 +72,16 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
         const isActiveAccount = activeAccountName === account.name;
 
         return (
-          <ListItemContainer key={account.name}>
-            <AlignedFlexRow>
-              <ListItemClickableContainer
-                onClick={event => {
-                  changeActiveAccount(account.name);
-                  closeModal(event);
-                }}
-                gap={SpacingSize.Medium}
-              >
-                <Avatar
-                  size={38}
-                  publicKey={account.publicKey}
-                  withConnectedStatus
-                  isConnected={isConnected}
-                  displayContext="accountList"
-                  isActiveAccount={isActiveAccount}
-                />
-                <AccountNameWithHashListItemContainer>
-                  <Typography
-                    type={
-                      activeAccountName && activeAccountName === account.name
-                        ? 'bodySemiBold'
-                        : 'body'
-                    }
-                  >
-                    {account.name}
-                  </Typography>
-                  <Hash
-                    value={account.publicKey}
-                    variant={HashVariant.CaptionHash}
-                    truncated
-                    withoutTooltip
-                    withTag={account.imported}
-                  />
-                </AccountNameWithHashListItemContainer>
-              </ListItemClickableContainer>
-              <AccountActionsMenuPopover
-                account={account}
-                onClick={closeModal}
-              />
-            </AlignedFlexRow>
-          </ListItemContainer>
+          <AccountListItem
+            account={account}
+            isActiveAccount={isActiveAccount}
+            isConnected={isConnected}
+            closeModal={closeModal}
+            onClick={event => {
+              changeActiveAccount(account.name);
+              closeModal(event);
+            }}
+          />
         );
       }}
       marginLeftForItemSeparatorLine={70}

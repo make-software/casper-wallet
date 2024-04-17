@@ -49,3 +49,6 @@ export * from './validator-plate/validator-plate';
 export * from './error/error';
 export * from './contacts-plate/contacts-plate';
 export * from './theme-switcher/theme-switcher';
+export * from './identicon/identicon';
+export * from './spinner/spinner';
+export * from './tips/tips';

@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { NetworkSetting, getBuyWithTopperUrl } from '@src/constants';
+import { NetworkSetting } from '@src/constants';
 
 import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
@@ -26,7 +26,6 @@ import {
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 import {
   Button,
-  Link,
   List,
   SvgIcon,
   TokenPlate,
@@ -168,27 +167,19 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
               <Trans t={t}>Receive</Trans>
             </Typography>
           </ButtonContainer>
-          {tokenName === 'Casper' &&
-            network === NetworkSetting.Mainnet &&
-            activeAccount?.publicKey && (
-              <Link
-                color="inherit"
-                target="_blank"
-                href={getBuyWithTopperUrl(activeAccount.publicKey)}
-              >
-                <ButtonContainer gap={SpacingSize.Medium}>
-                  <Button circle>
-                    <SvgIcon
-                      src="assets/icons/card.svg"
-                      color="contentOnFill"
-                    />
-                  </Button>
-                  <Typography type="captionMedium" color="contentAction">
-                    <Trans t={t}>Buy</Trans>
-                  </Typography>
-                </ButtonContainer>
-              </Link>
-            )}
+          {tokenName === 'Casper' && network === NetworkSetting.Mainnet && (
+            <ButtonContainer
+              gap={SpacingSize.Medium}
+              onClick={() => navigate(RouterPath.BuyCSPR)}
+            >
+              <Button circle>
+                <SvgIcon src="assets/icons/card.svg" color="contentOnFill" />
+              </Button>
+              <Typography type="captionMedium" color="contentAction">
+                <Trans t={t}>Buy</Trans>
+              </Typography>
+            </ButtonContainer>
+          )}
         </FooterItemContainer>
       )}
       marginLeftForItemSeparatorLine={16}

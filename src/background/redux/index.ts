@@ -1,11 +1,13 @@
+import { composeWithDevTools } from '@redux-devtools/remote';
 import {
   applyMiddleware, // TODO: Move to actual `createStore`
   compose,
   legacy_createStore as createStoreRedux
 } from 'redux';
 import createSagaMiddleware from 'redux-saga';
-import { composeWithDevTools } from 'remote-redux-devtools';
 import { RootState } from 'typesafe-actions';
+
+import { isChromeBuild } from '@src/utils';
 
 import reduxAction from './redux-action';
 import rootReducer from './root-reducer';
@@ -13,7 +15,7 @@ import rootSaga from './root-saga';
 
 // export const composeEnhancers = compose;
 export const composeEnhancers =
-  process.env.NODE_ENV === 'development'
+  process.env.NODE_ENV === 'development' && isChromeBuild
     ? composeWithDevTools({
         name: 'Casper Wallet',
         hostname: 'localhost',
@@ -24,10 +26,12 @@ export const composeEnhancers =
 export const createStore = (initialState: Partial<RootState>) => {
   const sagaMiddleware = createSagaMiddleware();
   // configure middlewares
-  const middlewares: any[] = [sagaMiddleware];
+  const middlewares = [sagaMiddleware];
   // compose enhancers
+  // @ts-ignore
   const enhancer = composeEnhancers(applyMiddleware(...middlewares));
   // create store
+  // @ts-ignore
   const store = createStoreRedux(rootReducer, initialState, enhancer);
   // run sagas
   sagaMiddleware.run(rootSaga);

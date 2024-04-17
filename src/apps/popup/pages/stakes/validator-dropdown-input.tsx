@@ -18,6 +18,7 @@ import { ValidatorResultWithId } from '@libs/services/validators-service/types';
 import {
   Input,
   List,
+  Spinner,
   SvgIcon,
   Typography,
   ValidatorPlate
@@ -34,6 +35,7 @@ interface ValidatorDropdownInputProps {
   setStakeAmount: React.Dispatch<React.SetStateAction<string>>;
   stakesType: AuctionManagerEntryPoint;
   undelegateValidatorList: ValidatorResultWithId[] | null;
+  loading: boolean;
 }
 
 export const ValidatorDropdownInput = ({
@@ -43,7 +45,8 @@ export const ValidatorDropdownInput = ({
   setValidator,
   setStakeAmount,
   stakesType,
-  undelegateValidatorList
+  undelegateValidatorList,
+  loading
 }: ValidatorDropdownInputProps) => {
   const [isOpenValidatorPublicKeysList, setIsOpenValidatorPublicKeysList] =
     useState(true);
@@ -114,9 +117,6 @@ export const ValidatorDropdownInput = ({
         setLabel('From validator');
         break;
       }
-
-      default:
-        throw Error('fetch validator: unknown stakes type');
     }
   }, [stakesType]);
 
@@ -179,11 +179,12 @@ export const ValidatorDropdownInput = ({
         {...register('validatorPublicKey')}
         autoComplete="off"
       />
-      {isOpenValidatorPublicKeysList && (
+      {loading && <Spinner />}
+      {isOpenValidatorPublicKeysList && !loading && (
         <List
           contentTop={SpacingSize.Tiny}
           rows={filteredValidatorsList}
-          maxHeight={192}
+          maxHeight={193}
           stickyHeader
           borderRadius="base"
           renderHeader={() => (

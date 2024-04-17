@@ -7,9 +7,12 @@ import { RootState } from 'typesafe-actions';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
+import { dispatchToMainStore } from '@background/redux/utils';
+import { hideAccountFromListChange } from '@background/redux/vault/actions';
 import {
   selectVaultAccount,
-  selectVaultImportedAccounts
+  selectVaultHiddenAccountsNames,
+  selectVaultImportedAccountNames
 } from '@background/redux/vault/selectors';
 
 import { useFetchAccountInfo } from '@hooks/use-fetch-account-info';
@@ -83,12 +86,19 @@ export function AccountSettingsPageContent() {
 }
 
 interface AccountIconButtonProps {
-  type: 'rename' | 'remove';
+  type: 'rename' | 'remove' | 'hide' | 'show';
 }
 
 function AccountIconButton({ type }: AccountIconButtonProps) {
   const { accountName } = useParams();
   const navigate = useTypedNavigate();
+
+  const icons = {
+    remove: 'assets/icons/delete.svg',
+    rename: 'assets/icons/edit.svg',
+    show: 'assets/icons/show.svg',
+    hide: 'assets/icons/hide.svg'
+  };
 
   const handleNavigateToNextPage = useCallback(() => {
     if (!accountName) {
@@ -102,10 +112,14 @@ function AccountIconButton({ type }: AccountIconButtonProps) {
       case 'rename':
         navigate(RouterPath.RenameAccount.replace(':accountName', accountName));
         break;
+      case 'hide':
+      case 'show':
+        dispatchToMainStore(hideAccountFromListChange({ accountName }));
+        break;
       default:
         throw new Error('Not found');
     }
-  }, [navigate, accountName, type]);
+  }, [accountName, type, navigate]);
 
   if (!accountName) {
     return null;
@@ -115,33 +129,32 @@ function AccountIconButton({ type }: AccountIconButtonProps) {
     <SvgIcon
       onClick={handleNavigateToNextPage}
       color={type === 'remove' ? 'contentActionCritical' : 'contentAction'}
-      src={
-        type === 'remove' ? 'assets/icons/delete.svg' : 'assets/icons/edit.svg'
-      }
+      src={icons[type]}
     />
   );
 }
 
 const AccountSettingsActionsGroupContainer = styled.div`
   display: flex;
-  gap: 28px;
+  gap: 24px;
 `;
 
 export function AccountSettingsActionsGroup() {
   const { accountName } = useParams();
-  const importedAccountNames = useSelector(selectVaultImportedAccounts).map(
-    a => a.name
-  );
+  const importedAccountNames = useSelector(selectVaultImportedAccountNames);
+  const hiddenAccountsNames = useSelector(selectVaultHiddenAccountsNames);
 
   if (!accountName) {
     return null;
   }
 
   const isImportedAccount = importedAccountNames.includes(accountName);
+  const isAccountHidden = hiddenAccountsNames.includes(accountName);
 
   return (
     <AccountSettingsActionsGroupContainer>
       <AccountIconButton type="rename" />
+      <AccountIconButton type={isAccountHidden ? 'show' : 'hide'} />
       {isImportedAccount && <AccountIconButton type="remove" />}
     </AccountSettingsActionsGroupContainer>
   );

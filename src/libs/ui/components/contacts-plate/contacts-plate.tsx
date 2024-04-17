@@ -27,7 +27,7 @@ export const ContactsPlate = ({ publicKey, name }: ContactsPlateProps) => {
         navigate(RouterPath.ContactDetails.replace(':contactName', name));
       }}
     >
-      <Avatar publicKey={publicKey} size={24} />
+      <Avatar publicKey={publicKey} size={24} borderRadius={2} />
       <FlexColumn>
         <Typography type="captionRegular">{name}</Typography>
         <Hash

@@ -7,34 +7,35 @@ import {
   STAKE_COST_MOTES,
   StakeSteps
 } from '@src/constants';
+import { fetchAndDispatchExtendedDeployInfo } from '@src/utils';
 
 import { StakesPageContent } from '@popup/pages/stakes/content';
 import { NoDelegations } from '@popup/pages/stakes/no-delegations';
 import { useConfirmationButtonText } from '@popup/pages/stakes/utils';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
-import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
+import {
+  selectAskForReviewAfter,
+  selectRatedInStore
+} from '@background/redux/rate-app/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { dispatchToMainStore } from '@background/redux/utils';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import {
-  CenteredFlexRow,
-  ContentContainer,
   ErrorPath,
   FooterButtonsContainer,
   HeaderPopup,
   HeaderSubmenuBarNavLink,
-  ParagraphContainer,
   PopupLayout,
   SpaceBetweenFlexRow,
-  SpacingSize,
   createErrorLocationState
 } from '@libs/layout';
-import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import { makeAuctionManagerDeploy } from '@libs/services/deployer-service';
+import {
+  makeAuctionManagerDeployAndSing,
+  sendSignDeploy
+} from '@libs/services/deployer-service';
 import {
   dispatchFetchAuctionValidatorsRequest,
   dispatchFetchValidatorsDetailsDataRequest
@@ -76,6 +77,8 @@ export const StakesPage = () => {
     casperClarityApiUrl
   } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const csprBalance = useSelector(selectAccountBalance);
+  const ratedInStore = useSelector(selectRatedInStore);
+  const askForReviewAfter = useSelector(selectAskForReviewAfter);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -217,7 +220,7 @@ export const StakesPage = () => {
     };
   }, [isSubmitButtonDisable, stakeStep]);
 
-  const submitStake = () => {
+  const submitStake = async () => {
     if (activeAccount) {
       const motesAmount = CSPRtoMotes(inputAmountCSPR);
 
@@ -226,52 +229,59 @@ export const StakesPage = () => {
         activeAccount.secretKey
       );
 
-      const deploy = makeAuctionManagerDeploy(
+      const signDeploy = await makeAuctionManagerDeployAndSing(
         stakesType,
         activeAccount.publicKey,
         validatorPublicKey,
         newValidatorPublicKey || null,
         motesAmount,
         networkName,
-        auctionManagerContractHash
+        auctionManagerContractHash,
+        nodeUrl,
+        [KEYS]
       );
 
-      const signDeploy = deploy.sign([KEYS]);
+      sendSignDeploy(signDeploy, nodeUrl)
+        .then(resp => {
+          if ('result' in resp) {
+            fetchAndDispatchExtendedDeployInfo(resp.result.deploy_hash);
 
-      signDeploy.send(nodeUrl).then((deployHash: string) => {
-        if (deployHash) {
-          let triesLeft = 10;
-          const interval = setInterval(async () => {
-            const { payload: extendedDeployInfo } =
-              await dispatchFetchExtendedDeploysInfo(deployHash);
-            if (extendedDeployInfo) {
-              dispatchToMainStore(
-                accountPendingTransactionsChanged(extendedDeployInfo)
-              );
-              clearInterval(interval);
-            } else if (triesLeft === 0) {
-              clearInterval(interval);
-            }
+            setStakeStep(StakeSteps.Success);
+          } else {
+            navigate(
+              ErrorPath,
+              createErrorLocationState({
+                errorHeaderText:
+                  resp.error.message || t('Something went wrong'),
+                errorContentText:
+                  resp.error.data ||
+                  t(
+                    'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                  ),
+                errorPrimaryButtonLabel: t('Close'),
+                errorRedirectPath: RouterPath.Home
+              })
+            );
+          }
+        })
+        .catch(error => {
+          console.error(error, 'staking request error');
 
-            triesLeft--;
-            //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-          }, 2000);
-
-          setStakeStep(StakeSteps.Success);
-        } else {
           navigate(
             ErrorPath,
             createErrorLocationState({
-              errorHeaderText: t('Something went wrong'),
-              errorContentText: t(
-                'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-              ),
+              errorHeaderText: error.message || t('Something went wrong'),
+              errorContentText:
+                typeof error.data === 'string'
+                  ? error.data
+                  : t(
+                      'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                    ),
               errorPrimaryButtonLabel: t('Close'),
               errorRedirectPath: RouterPath.Home
             })
           );
-        }
-      });
+        });
     }
   };
 
@@ -337,12 +347,26 @@ export const StakesPage = () => {
       case StakeSteps.Success: {
         return {
           onClick: () => {
-            navigate(RouterPath.Home, {
-              state: {
-                // set the active tab to deploys
-                activeTabId: HomePageTabsId.Deploys
-              }
-            });
+            const currentDate = Date.now();
+
+            const shouldAskForReview =
+              askForReviewAfter == null || currentDate > askForReviewAfter;
+
+            if (ratedInStore || !shouldAskForReview) {
+              const homeRoutesState = {
+                state: {
+                  // set the active tab to deploys
+                  activeTabId: HomePageTabsId.Deploys
+                }
+              };
+
+              // Navigate "Home" with the pre-defined state
+              navigate(RouterPath.Home, homeRoutesState);
+            } else {
+              // Navigate to "RateApp" when the application has not been rated in the store,
+              // and it's time to ask for a review.
+              navigate(RouterPath.RateApp);
+            }
           }
         };
       }
@@ -381,32 +405,10 @@ export const StakesPage = () => {
 
   const confirmButtonText = useConfirmationButtonText(stakesType);
 
-  if (loading) {
-    return (
-      <PopupLayout
-        renderHeader={() => (
-          <HeaderPopup withNetworkSwitcher withMenu withConnectionStatus />
-        )}
-        renderContent={() => (
-          <ContentContainer>
-            <ParagraphContainer top={SpacingSize.XL}>
-              <CenteredFlexRow>
-                <Typography type="body">
-                  <Trans t={t}>Loading...</Trans>
-                </Typography>
-              </CenteredFlexRow>
-            </ParagraphContainer>
-          </ContentContainer>
-        )}
-      />
-    );
-  }
-
   if (
     (stakesType === AuctionManagerEntryPoint.undelegate ||
       stakesType === AuctionManagerEntryPoint.redelegate) &&
-    undelegateValidatorList !== null &&
-    undelegateValidatorList.length === 0
+    (csprBalance.delegatedMotes == null || csprBalance.delegatedMotes === '0')
   ) {
     return (
       <PopupLayout
@@ -465,6 +467,7 @@ export const StakesPage = () => {
           setStakeAmount={setStakeAmountMotes}
           validatorList={validatorList}
           undelegateValidatorList={undelegateValidatorList}
+          loading={loading}
         />
       )}
       renderFooter={() => (

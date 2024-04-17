@@ -4,12 +4,17 @@ import { runtime } from 'webextension-polyfill';
 
 import { Browser, NFT_TOKENS_REFRESH_RATE } from '@src/constants';
 
+import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
+import { dispatchToMainStore } from '@background/redux/utils';
+
+import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import {
   NFTTokenMetadata,
   NFTTokenMetadataEntry,
   NFTTokenResult
 } from '@libs/services/nft-service';
 import { queryClient } from '@libs/services/query-client';
+import { Account } from '@libs/types/account';
 
 interface ImageProxyUrlProps {
   ttl: string;
@@ -29,6 +34,7 @@ export const getUrlOrigin = (url: string | undefined) => {
 
 export const isSafariBuild = process.env.BROWSER === Browser.Safari;
 export const isFirefoxBuild = process.env.BROWSER === Browser.Firefox;
+export const isChromeBuild = process.env.BROWSER === Browser.Chrome;
 
 export const isValidU64 = (value?: string): boolean => {
   if (!value) {
@@ -333,4 +339,55 @@ export const findMediaPreview = (metadata: NFTTokenMetadataEntry): boolean => {
   ).test(metadata.key);
 
   return hasImageExtension || knownImageKey;
+};
+
+export const isEqualCaseInsensitive = (key1: string, key2: string) => {
+  return key1.toLowerCase() === key2.toLowerCase();
+};
+
+export const getSigningAccount = (
+  accounts: Account[],
+  signingPublicKeyHex: string
+) =>
+  accounts.find(account =>
+    isEqualCaseInsensitive(account.publicKey, signingPublicKeyHex)
+  );
+
+export const setCSPForSafari = () => {
+  if (isSafariBuild) {
+    const metaTag = document.querySelector('[http-equiv]');
+
+    if (metaTag == null) {
+      const meta = document.createElement('meta');
+
+      meta.setAttribute('http-equiv', 'Content-Security-Policy');
+      meta.setAttribute(
+        'content',
+        `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://onramp-api.cspr.click/api/`
+      );
+
+      document.getElementsByTagName('head')[0].appendChild(meta);
+    }
+  }
+};
+
+export const fetchAndDispatchExtendedDeployInfo = (deployHash: string) => {
+  let triesLeft = 10;
+
+  const interval = setInterval(async () => {
+    const { payload: extendedDeployInfo } =
+      await dispatchFetchExtendedDeploysInfo(deployHash);
+
+    if (extendedDeployInfo) {
+      dispatchToMainStore(
+        accountPendingTransactionsChanged(extendedDeployInfo)
+      );
+      clearInterval(interval);
+    } else if (triesLeft === 0) {
+      clearInterval(interval);
+    }
+
+    triesLeft--;
+    // Note: this timeout is needed because the deploy is not immediately visible in the explorer
+  }, 2000);
 };

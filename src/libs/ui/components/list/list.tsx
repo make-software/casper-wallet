@@ -80,6 +80,7 @@ interface ListProps<ListRow extends ListRowBase> {
   stickyHeader?: boolean;
   maxHeight?: number;
   borderRadius?: 'base';
+  height?: number;
 }
 
 export function List<ListRow extends ListRowBase>({
@@ -95,7 +96,8 @@ export function List<ListRow extends ListRowBase>({
   contentTop = SpacingSize.XL,
   stickyHeader,
   maxHeight,
-  borderRadius
+  borderRadius,
+  height
 }: ListProps<ListRow>) {
   const separatorLine =
     marginLeftForHeaderSeparatorLine || marginLeftForHeaderSeparatorLine === 0
@@ -135,8 +137,8 @@ export function List<ListRow extends ListRowBase>({
               {renderHeader()}
             </ListHeaderContainer>
           )}
-          {maxHeight ? (
-            <MacScrollbar style={{ maxHeight }}>
+          {maxHeight || height ? (
+            <MacScrollbar style={{ maxHeight, height }}>
               <RowsContainer
                 marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
               >

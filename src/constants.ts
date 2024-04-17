@@ -43,9 +43,6 @@ export const getContractNftUrl = (
   tokenId: string
 ) => `${casperLiveUrl}/contracts/${contractHash}/nfts/${tokenId}`;
 
-export const getBuyWithTopperUrl = (publicKey: string) =>
-  `https://onramp-api.cspr.click/api/topper/bootstrap-token?account=${publicKey}&label=Your%20Public%20Key`;
-
 export enum CasperLiveUrl {
   MainnetUrl = 'https://cspr.live',
   TestnetUrl = 'https://testnet.cspr.live'
@@ -57,8 +54,8 @@ export enum CasperClarityApiUrl {
 }
 
 export enum CasperWalletApiUrl {
-  MainnetUrl = 'https://api.casperwallet.io',
-  TestnetUrl = 'https://cspr-wallet-api.dev.make.services'
+  MainnetUrl = 'https://api.mainnet.casperwallet.io',
+  TestnetUrl = 'https://api.testnet.casperwallet.io'
 }
 
 export enum NetworkSetting {
@@ -69,7 +66,8 @@ export enum NetworkSetting {
 export enum Browser {
   Safari = 'safari',
   Chrome = 'chrome',
-  Firefox = 'firefox'
+  Firefox = 'firefox',
+  Edge = 'edge'
 }
 
 export enum TermsLink {
@@ -78,9 +76,11 @@ export enum TermsLink {
 }
 
 export enum CasperNodeUrl {
-  MainnetUrl = 'https://casper-node-proxy.make.services/rpc',
-  TestnetUrl = 'https://casper-testnet-node-proxy.make.services/rpc'
+  MainnetUrl = 'https://node.cspr.cloud/rpc',
+  TestnetUrl = 'https://node.testnet.cspr.cloud/rpc'
 }
+
+export const ReferrerUrl = 'https://casperwallet.io';
 
 export enum NetworkName {
   Mainnet = 'casper',

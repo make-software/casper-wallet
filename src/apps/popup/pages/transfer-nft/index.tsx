@@ -3,25 +3,28 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import { MapNFTTokenStandardToName } from '@src/utils';
+import {
+  MapNFTTokenStandardToName,
+  fetchAndDispatchExtendedDeployInfo
+} from '@src/utils';
 
 import { TransferNftContent } from '@popup/pages/transfer-nft/content';
 import {
   getDefaultPaymentAmountBasedOnNftTokenStandard,
-  getRuntimeArgs,
-  signNftDeploy
+  getRuntimeArgs
 } from '@popup/pages/transfer-nft/utils';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import {
-  accountPendingTransactionsChanged,
-  accountTrackingIdOfSentNftTokensChanged
-} from '@background/redux/account-info/actions';
+import { accountTrackingIdOfSentNftTokensChanged } from '@background/redux/account-info/actions';
 import {
   selectAccountBalance,
   selectAccountNftTokens
 } from '@background/redux/account-info/selectors';
 import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
+import {
+  selectAskForReviewAfter,
+  selectRatedInStore
+} from '@background/redux/rate-app/selectors';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
@@ -37,7 +40,10 @@ import {
   PopupLayout,
   createErrorLocationState
 } from '@libs/layout';
-import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
+import {
+  makeNFTDeployAndSign,
+  sendSignDeploy
+} from '@libs/services/deployer-service';
 import {
   Button,
   HomePageTabsId,
@@ -59,6 +65,8 @@ export const TransferNftPage = () => {
     selectApiConfigBasedOnActiveNetwork
   );
   const contactPublicKeys = useSelector(selectAllPublicKeys);
+  const ratedInStore = useSelector(selectRatedInStore);
+  const askForReviewAfter = useSelector(selectAskForReviewAfter);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -133,58 +141,68 @@ export const TransferNftPage = () => {
         target: getRawPublicKey(recipientPublicKey)
       };
 
-      const signDeploy = signNftDeploy(
+      const signDeploy = await makeNFTDeployAndSign(
         getRuntimeArgs(tokenStandard, args),
         CSPRtoMotes(paymentAmount),
         KEYS.publicKey,
         networkName,
         nftToken?.contract_package_hash!,
+        nodeUrl,
         [KEYS]
       );
 
-      signDeploy.send(nodeUrl).then((deployHash: string) => {
-        dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
+      sendSignDeploy(signDeploy, nodeUrl)
+        .then(resp => {
+          dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
-        if (deployHash) {
-          dispatchToMainStore(
-            accountTrackingIdOfSentNftTokensChanged({
-              trackingId: nftToken.tracking_id,
-              deployHash
-            })
-          );
+          if ('result' in resp) {
+            const deployHash = resp.result.deploy_hash;
 
-          let triesLeft = 10;
-          const interval = setInterval(async () => {
-            const { payload: extendedDeployInfo } =
-              await dispatchFetchExtendedDeploysInfo(deployHash);
-            if (extendedDeployInfo) {
-              dispatchToMainStore(
-                accountPendingTransactionsChanged(extendedDeployInfo)
-              );
-              clearInterval(interval);
-            } else if (triesLeft === 0) {
-              clearInterval(interval);
-            }
+            dispatchToMainStore(
+              accountTrackingIdOfSentNftTokensChanged({
+                trackingId: nftToken.tracking_id,
+                deployHash
+              })
+            );
 
-            triesLeft--;
-            //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-          }, 2000);
+            fetchAndDispatchExtendedDeployInfo(deployHash);
 
-          setShowSuccessScreen(true);
-        } else {
+            setShowSuccessScreen(true);
+          } else {
+            navigate(
+              ErrorPath,
+              createErrorLocationState({
+                errorHeaderText:
+                  resp.error.message || t('Something went wrong'),
+                errorContentText:
+                  resp.error.data ||
+                  t(
+                    'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                  ),
+                errorPrimaryButtonLabel: t('Close'),
+                errorRedirectPath: RouterPath.Home
+              })
+            );
+          }
+        })
+        .catch(error => {
+          console.error(error, 'nft transfer request error');
+
           navigate(
             ErrorPath,
             createErrorLocationState({
-              errorHeaderText: t('Something went wrong'),
-              errorContentText: t(
-                'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-              ),
+              errorHeaderText: error.message || t('Something went wrong'),
+              errorContentText:
+                typeof error.data === 'string'
+                  ? error.data
+                  : t(
+                      'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                    ),
               errorPrimaryButtonLabel: t('Close'),
               errorRedirectPath: RouterPath.Home
             })
           );
-        }
-      });
+        });
     }
   };
 
@@ -222,12 +240,26 @@ export const TransferNftPage = () => {
                 color="primaryBlue"
                 type="button"
                 onClick={() => {
-                  navigate(RouterPath.Home, {
-                    state: {
-                      // set the active tab to deploys
-                      activeTabId: HomePageTabsId.Deploys
-                    }
-                  });
+                  const currentDate = Date.now();
+
+                  const shouldAskForReview =
+                    askForReviewAfter == null ||
+                    currentDate > askForReviewAfter;
+
+                  if (ratedInStore || !shouldAskForReview) {
+                    const homeRoutesState = {
+                      state: {
+                        // set the active tab to deploys
+                        activeTabId: HomePageTabsId.Deploys
+                      }
+                    };
+
+                    // Navigate to "Home" with the pre-defined state
+                    navigate(RouterPath.Home, homeRoutesState);
+                  } else {
+                    // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
+                    navigate(RouterPath.RateApp);
+                  }
                 }}
               >
                 <Trans t={t}>Done</Trans>

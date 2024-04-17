@@ -30,7 +30,7 @@
       ]
     },
     "condition": {
-      "urlFilter": "https://cspr-wallet-api.dev.make.services"
+      "urlFilter": "https://api.testnet.casperwallet.io"
     }
   },
   {
@@ -47,7 +47,41 @@
       ]
     },
     "condition": {
-      "urlFilter": "https://api.casperwallet.io"
+      "urlFilter": "https://api.mainnet.casperwallet.io"
+    }
+  },
+  {
+    "id": 4,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://casperwallet.io"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "https://node.testnet.cspr.cloud"
+    }
+  },
+  {
+    "id": 5,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://casperwallet.io"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "https://node.cspr.cloud"
     }
   }
 ]

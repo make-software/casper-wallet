@@ -20,7 +20,7 @@ import { ThemeMode } from '@background/redux/settings/types';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
   selectCountOfConnectedSites,
-  selectVaultHasImportedAccount
+  selectVaultCountsOfAccounts
 } from '@background/redux/vault/selectors';
 
 import { useWindowManager } from '@hooks/use-window-manager';
@@ -87,9 +87,9 @@ export function NavigationMenuPageContent() {
 
   const timeoutDurationSetting = useSelector(selectTimeoutDurationSetting);
   const countOfConnectedSites = useSelector(selectCountOfConnectedSites);
-  const vaultHasImportedAccount = useSelector(selectVaultHasImportedAccount);
   const countOfContacts = useSelector(selectCountOfContacts);
   const themeMode = useSelector(selectThemeModeSetting);
+  const countOfAccounts = useSelector(selectVaultCountsOfAccounts);
 
   const { openWindow } = useWindowManager();
   const { closeNavigationMenu } = useNavigationMenu();
@@ -121,6 +121,17 @@ export function NavigationMenuPageContent() {
         items: [
           {
             id: 1,
+            title: t('All accounts'),
+            iconPath: 'assets/icons/accounts.svg',
+            currentValue: countOfAccounts,
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.AllAccountsList);
+            }
+          },
+          {
+            id: 2,
             title: t('Create account'),
             iconPath: 'assets/icons/plus.svg',
             disabled: false,
@@ -130,7 +141,7 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 2,
+            id: 3,
             title: t('Import account'),
             description: t('From secret key file'),
             iconPath: 'assets/icons/upload.svg',
@@ -234,14 +245,13 @@ export function NavigationMenuPageContent() {
           {
             id: 4,
             title: t('Download account keys'),
-            description: t('For all accounts imported via file'),
             iconPath: 'assets/icons/download.svg',
-            disabled: !vaultHasImportedAccount,
+            disabled: false,
             // https://github.com/make-software/casper-wallet/issues/611
             hide: isSafariBuild,
             handleOnClick: () => {
               closeNavigationMenu();
-              navigate(RouterPath.DownloadSecretKeys);
+              navigate(RouterPath.DownloadAccountKeys);
             }
           },
           {
@@ -278,11 +288,11 @@ export function NavigationMenuPageContent() {
     ],
     [
       t,
+      countOfAccounts,
       countOfContacts,
       countOfConnectedSites,
-      timeoutDurationSetting,
       themeMode,
-      vaultHasImportedAccount,
+      timeoutDurationSetting,
       closeNavigationMenu,
       navigate,
       openWindow

@@ -107,6 +107,7 @@ export const HeaderNetworkSwitcher = () => {
             src="assets/icons/network.svg"
             size={16}
             color="contentOnFill"
+            dataTestId="network-switcher"
           />
           <Typography type="listSubtext" color="contentOnFill">
             {activeNetwork}

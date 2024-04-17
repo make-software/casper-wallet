@@ -175,7 +175,7 @@ export const ActivityDetailsPageContent = ({
     precision: { min: 5 }
   });
   const costAmountInUSD = formatCurrency(
-    deployInfo.currencyCost || '0',
+    String(deployInfo.currencyCost) || '0',
     'USD',
     {
       precision: 5

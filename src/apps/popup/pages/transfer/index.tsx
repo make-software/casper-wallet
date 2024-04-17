@@ -1,6 +1,4 @@
-import { CEP18Client } from 'casper-cep18-js-client';
-import { CLPublicKey, DeployUtil } from 'casper-js-sdk';
-import { sub } from 'date-fns';
+import { DeployUtil } from 'casper-js-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -11,18 +9,23 @@ import {
   TRANSFER_COST_MOTES
 } from '@src/constants';
 import { useActiveAccountErc20Tokens } from '@src/hooks/use-active-account-erc20-tokens';
+import { fetchAndDispatchExtendedDeployInfo } from '@src/utils';
 
 import { TransferPageContent } from '@popup/pages/transfer/content';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
-import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
+import {
+  selectAskForReviewAfter,
+  selectRatedInStore
+} from '@background/redux/rate-app/selectors';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
+import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import {
   ErrorPath,
   FooterButtonsContainer,
@@ -32,9 +35,11 @@ import {
   SpaceBetweenFlexRow,
   createErrorLocationState
 } from '@libs/layout';
-import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import { signAndDeploy } from '@libs/services/deployer-service';
-import { makeNativeTransferDeploy } from '@libs/services/transfer-service/transfer-service';
+import {
+  makeCep18TransferDeployAndSign,
+  makeNativeTransferDeployAndSign,
+  sendSignDeploy
+} from '@libs/services/deployer-service';
 import { Button, HomePageTabsId, Typography } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useTransferForm } from '@libs/ui/forms/transfer';
@@ -42,8 +47,7 @@ import {
   CSPRtoMotes,
   divideErc20Balance,
   formatNumber,
-  motesToCSPR,
-  multiplyErc20Balance
+  motesToCSPR
 } from '@libs/ui/utils';
 
 import { TransactionSteps, getIsErc20Transfer } from './utils';
@@ -74,6 +78,8 @@ export const TransferPage = () => {
   );
   const csprBalance = useSelector(selectAccountBalance);
   const contactPublicKeys = useSelector(selectAllPublicKeys);
+  const ratedInStore = useSelector(selectRatedInStore);
+  const askForReviewAfter = useSelector(selectAskForReviewAfter);
 
   const { tokens } = useActiveAccountErc20Tokens();
 
@@ -169,141 +175,88 @@ export const TransferPage = () => {
     };
   }, [isSubmitButtonDisable, transferStep]);
 
-  const onSubmitSending = () => {
-    if (activeAccount) {
-      const publicKeyFromHex = (publicKeyHex: string) => {
-        return CLPublicKey.fromHex(publicKeyHex);
-      };
+  const sendDeploy = (signDeploy: DeployUtil.Deploy) => {
+    sendSignDeploy(signDeploy, nodeUrl)
+      .then(resp => {
+        dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
-      if (isErc20Transfer) {
-        // ERC20 transfer
-        const cep18 = new CEP18Client(nodeUrl, networkName);
+        if ('result' in resp) {
+          fetchAndDispatchExtendedDeployInfo(resp.result.deploy_hash);
 
-        cep18.setContractHash(
-          `hash-${tokenContractHash}`,
-          `hash-${tokenContractPackageHash}`
-        );
-
-        // create deploy
-        const tempDeploy = cep18.transfer(
-          {
-            recipient: publicKeyFromHex(recipientPublicKey),
-            amount: multiplyErc20Balance(amount, erc20Decimals) || '0'
-          },
-          CSPRtoMotes(paymentAmount),
-          publicKeyFromHex(activeAccount.publicKey),
-          networkName
-        );
-
-        const deployParams = new DeployUtil.DeployParams(
-          publicKeyFromHex(activeAccount.publicKey),
-          networkName,
-          undefined,
-          undefined,
-          undefined,
-          sub(new Date(), { seconds: 2 }).getTime() // https://github.com/casper-network/casper-node/issues/4152
-        );
-
-        const deploy = DeployUtil.makeDeploy(
-          deployParams,
-          tempDeploy.session,
-          tempDeploy.payment
-        );
-
-        signAndDeploy(
-          deploy,
-          activeAccount.publicKey,
-          activeAccount.secretKey,
-          nodeUrl
-        ).then(({ deploy_hash }) => {
-          dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
-
-          if (deploy_hash != null) {
-            let triesLeft = 10;
-            const interval = setInterval(async () => {
-              const { payload: extendedDeployInfo } =
-                await dispatchFetchExtendedDeploysInfo(deploy_hash);
-              if (extendedDeployInfo) {
-                dispatchToMainStore(
-                  accountPendingTransactionsChanged(extendedDeployInfo)
-                );
-                clearInterval(interval);
-              } else if (triesLeft === 0) {
-                clearInterval(interval);
-              }
-
-              triesLeft--;
-              //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-            }, 2000);
-
-            setTransferStep(TransactionSteps.Success);
-          } else {
-            navigate(
-              ErrorPath,
-              createErrorLocationState({
-                errorHeaderText: t('Something went wrong'),
-                errorContentText: t(
+          setTransferStep(TransactionSteps.Success);
+        } else {
+          navigate(
+            ErrorPath,
+            createErrorLocationState({
+              errorHeaderText: resp.error.message || t('Something went wrong'),
+              errorContentText:
+                resp.error.data ||
+                t(
                   'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
                 ),
-                errorPrimaryButtonLabel: t('Close'),
-                errorRedirectPath: RouterPath.Home
-              })
-            );
-          }
-        });
+              errorPrimaryButtonLabel: t('Close'),
+              errorRedirectPath: RouterPath.Home
+            })
+          );
+        }
+      })
+      .catch(error => {
+        console.error(error, 'transfer request error');
+
+        navigate(
+          ErrorPath,
+          createErrorLocationState({
+            errorHeaderText: error.message || t('Something went wrong'),
+            errorContentText:
+              typeof error.data === 'string'
+                ? error.data
+                : t(
+                    'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                  ),
+            errorPrimaryButtonLabel: t('Close'),
+            errorRedirectPath: RouterPath.Home
+          })
+        );
+      });
+  };
+
+  const onSubmitSending = async () => {
+    if (activeAccount) {
+      const KEYS = createAsymmetricKey(
+        activeAccount.publicKey,
+        activeAccount.secretKey
+      );
+      if (isErc20Transfer) {
+        // ERC20 transfer
+        const signDeploy = await makeCep18TransferDeployAndSign(
+          nodeUrl,
+          networkName,
+          tokenContractHash,
+          tokenContractPackageHash,
+          recipientPublicKey,
+          amount,
+          erc20Decimals,
+          paymentAmount,
+          activeAccount,
+          [KEYS]
+        );
+
+        sendDeploy(signDeploy);
       } else {
         // CSPR transfer
         const motesAmount = CSPRtoMotes(amount);
 
-        const deploy = makeNativeTransferDeploy(
+        const signDeploy = await makeNativeTransferDeployAndSign(
           activeAccount.publicKey,
           recipientPublicKey,
           motesAmount,
           networkName,
+          nodeUrl,
+          [KEYS],
           transferIdMemo
         );
 
-        signAndDeploy(
-          deploy,
-          activeAccount.publicKey,
-          activeAccount.secretKey,
-          nodeUrl
-        ).then(({ deploy_hash }) => {
-          dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
-
-          if (deploy_hash != null) {
-            let triesLeft = 10;
-            const interval = setInterval(async () => {
-              const { payload: extendedDeployInfo } =
-                await dispatchFetchExtendedDeploysInfo(deploy_hash);
-              if (extendedDeployInfo) {
-                dispatchToMainStore(
-                  accountPendingTransactionsChanged(extendedDeployInfo)
-                );
-                clearInterval(interval);
-              } else if (triesLeft === 0) {
-                clearInterval(interval);
-              }
-
-              triesLeft--;
-              //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-            }, 2000);
-
-            setTransferStep(TransactionSteps.Success);
-          } else {
-            navigate(
-              ErrorPath,
-              createErrorLocationState({
-                errorHeaderText: t('Something went wrong'),
-                errorContentText: t(
-                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                ),
-                errorPrimaryButtonLabel: t('Close'),
-                errorRedirectPath: RouterPath.Home
-              })
-            );
-          }
-        });
+        sendDeploy(signDeploy);
       }
     }
   };
@@ -357,12 +310,25 @@ export const TransferPage = () => {
       case TransactionSteps.Success: {
         return {
           onClick: () => {
-            navigate(RouterPath.Home, {
-              state: {
-                // set the active tab to deploys
-                activeTabId: HomePageTabsId.Deploys
-              }
-            });
+            const currentDate = Date.now();
+
+            const shouldAskForReview =
+              askForReviewAfter == null || currentDate > askForReviewAfter;
+
+            if (ratedInStore || !shouldAskForReview) {
+              const homeRoutesState = {
+                state: {
+                  // set the active tab to deploys
+                  activeTabId: HomePageTabsId.Deploys
+                }
+              };
+
+              // Navigate to "Home" with the pre-defined state
+              navigate(RouterPath.Home, homeRoutesState);
+            } else {
+              // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
+              navigate(RouterPath.RateApp);
+            }
           }
         };
       }

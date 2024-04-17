@@ -9,14 +9,28 @@ import {
   windows
 } from 'webextension-polyfill';
 
-import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
+import {
+  getUrlOrigin,
+  hasHttpPrefix,
+  isEqualCaseInsensitive
+} from '@src/utils';
 
+import { CasperDeploy } from '@signature-request/pages/sign-deploy/deploy-types';
+
+import {
+  backgroundEvent,
+  popupStateUpdated
+} from '@background/background-events';
 import { WindowApp } from '@background/create-open-window';
 import {
   disableOnboardingFlow,
   enableOnboardingFlow,
   openOnboardingUi
 } from '@background/open-onboarding-flow';
+import {
+  accountBalancesChanged,
+  accountBalancesReseted
+} from '@background/redux/account-balances/actions';
 import {
   accountBalanceChanged,
   accountCasperActivityChanged,
@@ -50,6 +64,10 @@ import {
   CheckSecretKeyExistAction
 } from '@background/redux/import-account-actions-should-be-removed';
 import {
+  askForReviewAfterChanged,
+  ratedInStoreChanged
+} from '@background/redux/rate-app/actions';
+import {
   accountAdded,
   accountDisconnected,
   accountImported,
@@ -59,6 +77,7 @@ import {
   anotherAccountConnected,
   deployPayloadReceived,
   deploysReseted,
+  hideAccountFromListChange,
   secretPhraseCreated,
   siteConnected,
   siteDisconnected,
@@ -98,8 +117,14 @@ import { fetchErc20TokenActivity } from '@libs/services/account-activity-service
 import { fetchAccountInfo } from '@libs/services/account-info';
 import {
   fetchAccountBalance,
+  fetchAccountBalances,
   fetchCurrencyRate
 } from '@libs/services/balance-service';
+import {
+  fetchOnRampOptionGet,
+  fetchOnRampOptionPost,
+  fetchOnRampSelectionPost
+} from '@libs/services/buy-cspr-service';
 import { fetchErc20Tokens } from '@libs/services/erc20-service';
 import { fetchNftTokens } from '@libs/services/nft-service';
 import {
@@ -271,7 +296,10 @@ tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 runtime.onMessage.addListener(
-  async (action: RootAction | SdkMethod | ServiceMessage, sender) => {
+  async (
+    action: RootAction | SdkMethod | ServiceMessage | popupStateUpdated,
+    sender
+  ) => {
     const store = await getExistingMainStoreSingletonOrInit();
 
     return new Promise(async (sendResponse, sendError) => {
@@ -346,12 +374,32 @@ runtime.onMessage.addListener(
               return sendError(Error('Desploy json string parse error'));
             }
 
+            const deploy: CasperDeploy = deployJson.deploy;
+
+            const isDeployAlreadySigningWithThisAccount = deploy.approvals.some(
+              approvals =>
+                isEqualCaseInsensitive(approvals.signer, signingPublicKeyHex)
+            );
+
+            if (isDeployAlreadySigningWithThisAccount) {
+              return sendResponse(
+                sdkMethod.signResponse(
+                  {
+                    cancelled: true,
+                    message: 'This deploy already sign by this account'
+                  },
+                  { requestId: action.meta.requestId }
+                )
+              );
+            }
+
             store.dispatch(
               deployPayloadReceived({
                 id: action.meta.requestId,
                 json: deployJson
               })
             );
+
             openWindow({
               windowApp: WindowApp.SignatureRequestDeploy,
               searchParams: {
@@ -531,6 +579,7 @@ runtime.onMessage.addListener(
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeAccountChanged):
+          case getType(hideAccountFromListChange):
           case getType(activeTimeoutDurationSettingChanged):
           case getType(activeNetworkSettingChanged):
           case getType(vaultSettingsReseted):
@@ -581,8 +630,16 @@ runtime.onMessage.addListener(
           case getType(contactEditingPermissionChanged):
           case getType(contactUpdated):
           case getType(contactsReseted):
+          case getType(ratedInStoreChanged):
+          case getType(askForReviewAfterChanged):
+          case getType(accountBalancesChanged):
+          case getType(accountBalancesReseted):
             store.dispatch(action);
             return sendResponse(undefined);
+
+          case getType(backgroundEvent.popupStateUpdated):
+            // do nothing
+            return;
 
           // SERVICE MESSAGE HANDLERS
           case getType(serviceMessage.fetchBalanceRequest): {
@@ -603,6 +660,27 @@ runtime.onMessage.addListener(
                   accountData: accountData?.data || null,
                   currencyRate: rate?.data || null
                 })
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchAccountBalancesRequest): {
+            const { casperWalletApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const data = await fetchAccountBalances({
+                accountHashes: action.payload.accountHashes,
+                casperWalletApiUrl
+              });
+
+              return sendResponse(
+                serviceMessage.fetchAccountBalancesResponse(data)
               );
             } catch (error) {
               console.error(error);
@@ -817,6 +895,48 @@ runtime.onMessage.addListener(
             return;
           }
 
+          case getType(serviceMessage.fetchOnRampGetOptionRequest): {
+            try {
+              const data = await fetchOnRampOptionGet();
+
+              return sendResponse(
+                serviceMessage.fetchOnRampGetOptionResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchOnRampPostOptionRequest): {
+            try {
+              const data = await fetchOnRampOptionPost(action.payload);
+
+              return sendResponse(
+                serviceMessage.fetchOnRampPostOptionResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchOnRampPostSelectionRequest): {
+            try {
+              const data = await fetchOnRampSelectionPost(action.payload);
+
+              return sendResponse(
+                serviceMessage.fetchOnRampPostSelectionResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
           // TODO: All below should be removed when Import Account is integrated with window
           case 'check-secret-key-exist' as any: {
             const { secretKeyBase64 } = (
@@ -854,6 +974,9 @@ runtime.onMessage.addListener(
             );
         }
       } else {
+        if (action === 'ping') {
+          return;
+        }
         throw Error('Background: Unknown message: ' + JSON.stringify(action));
       }
     });
@@ -866,4 +989,4 @@ function ping() {
     // ping
   });
 }
-setInterval(ping, 5000);
+setInterval(ping, 15000);

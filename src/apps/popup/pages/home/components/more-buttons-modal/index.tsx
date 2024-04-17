@@ -13,21 +13,13 @@ const MoreButton = styled(CenteredFlexColumn)`
   padding: 0 16px;
 `;
 
-interface MoreButtonsModalProps {
-  handleBuyWithCSPR: () => void;
-}
-
-export const MoreButtonsModal = ({
-  handleBuyWithCSPR
-}: MoreButtonsModalProps) => {
+export const MoreButtonsModal = () => {
   const { t } = useTranslation();
 
   return (
     <Modal
       placement="bottom"
-      renderContent={() => (
-        <ModalButtons handleBuyWithCSPR={handleBuyWithCSPR} />
-      )}
+      renderContent={() => <ModalButtons />}
       children={() => (
         <MoreButton gap={SpacingSize.Small}>
           <Button circle>
