@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useTheme } from 'styled-components';
 
 import { Browser } from '@src/constants';
 
@@ -18,7 +17,7 @@ import {
   HeaderSubmenuBarNavLink,
   PopupLayout
 } from '@libs/layout';
-import { Button, Link } from '@libs/ui/components';
+import { Button } from '@libs/ui/components';
 
 import { Content } from './content';
 import { RateAppLinks, RateAppSteps, getBrowserFromUserAgent } from './utils';
@@ -40,7 +39,6 @@ export const RateAppPage = () => {
     setBrowser(getBrowserFromUserAgent());
   }, []);
 
-  const theme = useTheme();
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
@@ -93,19 +91,10 @@ export const RateAppPage = () => {
     ),
     [RateAppSteps.Rate]: (
       <Button
-        as={props => (
-          <Link
-            color="inherit"
-            style={{ color: theme.color.contentOnFill }}
-            target="_blank"
-            href={RateAppLinks[browser]}
-            {...props}
-          />
-        )}
         onClick={() => {
           dispatchToMainStore(ratedInStoreChanged(true));
 
-          navigate(RouterPath.Home);
+          window.open(RateAppLinks[browser], '_blank');
         }}
       >
         <Trans t={t}>Leave a review</Trans>
@@ -114,15 +103,6 @@ export const RateAppPage = () => {
     [RateAppSteps.Support]: (
       <>
         <Button
-          as={props => (
-            <Link
-              color="inherit"
-              style={{ color: theme.color.contentOnFill }}
-              target="_blank"
-              href="https://t.me/CSPRhub/4689"
-              {...props}
-            />
-          )}
           onClick={() => {
             const date = new Date(); // This will get current date
             const datePlusFourMonth = date.setMonth(date.getMonth() + 4); //This will set date 4 month ahead.
@@ -130,7 +110,7 @@ export const RateAppPage = () => {
             dispatchToMainStore(ratedInStoreChanged(false));
             dispatchToMainStore(askForReviewAfterChanged(datePlusFourMonth));
 
-            navigate(RouterPath.Home);
+            window.open('https://t.me/CSPRhub/4689', '_blank');
           }}
         >
           <Trans t={t}>Get in touch</Trans>

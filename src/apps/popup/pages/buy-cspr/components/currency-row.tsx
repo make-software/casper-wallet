@@ -28,7 +28,11 @@ export const CurrencyRow = ({
       </Typography>
       <Tile borderRadius="base">
         <Container>
-          <Typography type="bodySemiBold" color="contentAction">
+          <Typography
+            type="bodySemiBold"
+            color="contentAction"
+            dataTestId="currency-row"
+          >
             {selectedCurrency.code}
           </Typography>
         </Container>

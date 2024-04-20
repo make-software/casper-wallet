@@ -1,5 +1,5 @@
-import { popup, popupExpect } from '../../fixtures';
 import { ACCOUNT_NAMES, PLAYGROUND_URL } from '../../constants';
+import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI: disconnect account', () => {
   popup.beforeEach(async ({ connectAccounts }) => {

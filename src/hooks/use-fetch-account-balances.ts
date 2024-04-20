@@ -24,18 +24,18 @@ export const useFetchAccountBalances = () => {
   );
   const accounts = useSelector(selectVaultAccounts);
 
+  const hashes = accounts.reduce(
+    (previousValue, currentValue, currentIndex) => {
+      const hash = getAccountHashFromPublicKey(currentValue.publicKey);
+
+      return accounts.length === currentIndex + 1
+        ? previousValue + `${hash}`
+        : previousValue + `${hash},`;
+    },
+    ''
+  );
+
   useEffect(() => {
-    const hashes = accounts.reduce(
-      (previousValue, currentValue, currentIndex) => {
-        const hash = getAccountHashFromPublicKey(currentValue.publicKey);
-
-        return accounts.length === currentIndex + 1
-          ? previousValue + `${hash}`
-          : previousValue + `${hash},`;
-      },
-      ''
-    );
-
     dispatchFetchAccountBalances(hashes)
       .then(({ payload }) => {
         if ('data' in payload) {
@@ -56,5 +56,5 @@ export const useFetchAccountBalances = () => {
     return () => {
       clearTimeout(effectTimeoutRef.current);
     };
-  }, [casperClarityApiUrl, forceUpdate, accounts.length, accounts, t]);
+  }, [casperClarityApiUrl, forceUpdate, t, hashes]);
 };
