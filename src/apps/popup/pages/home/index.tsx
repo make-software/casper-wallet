@@ -13,8 +13,6 @@ import {
   selectVaultActiveAccount
 } from '@background/redux/root-selector';
 
-import { useCasperToken } from '@hooks/use-casper-token';
-
 import {
   AlignedFlexRow,
   CenteredFlexColumn,
@@ -75,8 +73,6 @@ export function HomePageContent() {
   );
   const network = useSelector(selectActiveNetworkSetting);
   const activeAccount = useSelector(selectVaultActiveAccount);
-
-  const casperToken = useCasperToken();
 
   useEffect(() => {
     if (!state?.activeTabId) {
