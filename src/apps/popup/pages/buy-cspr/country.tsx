@@ -7,21 +7,24 @@ import { selectAccountBalance } from '@background/redux/account-info/selectors';
 
 import {
   ContentContainer,
+  InputsContainer,
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
 import { ResponseCountryPropsWithId } from '@libs/services/buy-cspr-service/types';
 import {
   ActiveAccountPlate,
+  Input,
   List,
   Modal,
+  ModalSwitcher,
+  SvgIcon,
   Typography
 } from '@libs/ui/components';
 import { motesToCSPR } from '@libs/ui/utils';
 
 import { CountryRow } from './components/country-row';
 import { ListRow } from './components/list-row';
-import { Switcher } from './components/switcher';
 import { sortCountries } from './utils';
 
 interface CountryProps {
@@ -82,12 +85,14 @@ export const Country = ({
 
       <Modal
         renderContent={({ closeModal }) => (
-          <Switcher
-            closeSwitcher={closeModal}
-            label="Country"
-            register={register}
-            searchName="countryNameSearch"
-          >
+          <ModalSwitcher closeSwitcher={closeModal} label="Country">
+            <InputsContainer>
+              <Input
+                prefixIcon={<SvgIcon src="assets/icons/search.svg" size={24} />}
+                placeholder={t('Search')}
+                {...register('countryNameSearch')}
+              />
+            </InputsContainer>
             <List
               contentTop={SpacingSize.Medium}
               rows={sortedCountries}
@@ -113,7 +118,7 @@ export const Country = ({
               }}
               marginLeftForItemSeparatorLine={54}
             />
-          </Switcher>
+          </ModalSwitcher>
         )}
         placement="fullBottom"
         children={() => (

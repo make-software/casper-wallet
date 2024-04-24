@@ -49,19 +49,7 @@ export const ModalButtons = () => {
       )}
       <ButtonContainer
         gap={SpacingSize.Large}
-        onClick={() =>
-          navigate(
-            casperToken?.id
-              ? RouterPath.Transfer.replace(
-                  ':tokenContractPackageHash',
-                  casperToken.id
-                ).replace(
-                  ':tokenContractHash',
-                  casperToken.contractHash || 'null'
-                )
-              : RouterPath.TransferNoParams
-          )
-        }
+        onClick={() => navigate(RouterPath.Transfer)}
       >
         <Button circle style={{ padding: '8px' }}>
           <SvgIcon src="assets/icons/transfer.svg" color="contentOnFill" />

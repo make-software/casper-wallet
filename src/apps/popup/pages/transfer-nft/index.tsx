@@ -8,12 +8,12 @@ import {
   fetchAndDispatchExtendedDeployInfo
 } from '@src/utils';
 
-import { TransferNftContent } from '@popup/pages/transfer-nft/content';
 import {
+  TransferNFTSteps,
   getDefaultPaymentAmountBasedOnNftTokenStandard,
   getRuntimeArgs
 } from '@popup/pages/transfer-nft/utils';
-import { RouterPath, useTypedNavigate } from '@popup/router';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { accountTrackingIdOfSentNftTokensChanged } from '@background/redux/account-info/actions';
 import {
@@ -53,8 +53,16 @@ import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-
 import { useTransferNftForm } from '@libs/ui/forms/transfer-nft';
 import { CSPRtoMotes } from '@libs/ui/utils';
 
+import { ConfirmStep } from './confirm-step';
+import { RecipientStep } from './recipient-step';
+import { ReviewStep } from './review-step';
+
 export const TransferNftPage = () => {
-  const [showSuccessScreen, setShowSuccessScreen] = useState(false);
+  const [transferNFTStep, setTransferNFTStep] = useState(
+    TransferNFTSteps.Review
+  );
+  const [recipientName, setRecipientName] = useState('');
+  const [paymentAmount, setPaymentAmount] = useState('');
   const [haveReverseOwnerLookUp, setHaveReverseOwnerLookUp] = useState(false);
   const { contractPackageHash, tokenId } = useParams();
 
@@ -70,6 +78,9 @@ export const TransferNftPage = () => {
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
+  const location = useTypedLocation();
+
+  const { nftData } = location.state;
 
   const nftToken = useMemo(
     () =>
@@ -97,26 +108,29 @@ export const TransferNftPage = () => {
     ? MapNFTTokenStandardToName[nftToken.token_standard_id]
     : '';
 
-  const paymentAmount = useMemo(
+  const defaultPaymentAmount = useMemo(
     () => getDefaultPaymentAmountBasedOnNftTokenStandard(tokenStandard),
     [tokenStandard]
   );
 
   const { recipientForm, amountForm } = useTransferNftForm(
     csprBalance.liquidMotes,
-    paymentAmount
+    defaultPaymentAmount
   );
 
-  useEffect(() => {
-    amountForm.trigger('paymentAmount');
-  }, [amountForm]);
+  const { getValues, trigger } = amountForm;
 
-  const isButtonDisabled = calculateSubmitButtonDisabled({
-    isValid:
-      recipientForm.formState.isValid &&
-      amountForm.formState.isValid &&
-      !haveReverseOwnerLookUp
+  useEffect(() => {
+    trigger('paymentAmount');
+  }, [trigger]);
+
+  const isRecipientFormButtonDisabled = calculateSubmitButtonDisabled({
+    isValid: recipientForm.formState.isValid && !haveReverseOwnerLookUp
   });
+  const isAmountFormButtonDisabled = calculateSubmitButtonDisabled({
+    isValid: amountForm.formState.isValid
+  });
+
   const { recipientPublicKey } = recipientForm.getValues();
   const isRecipientPublicKeyInContact = useMemo(
     () => contactPublicKeys.includes(recipientPublicKey),
@@ -167,7 +181,7 @@ export const TransferNftPage = () => {
 
             fetchAndDispatchExtendedDeployInfo(deployHash);
 
-            setShowSuccessScreen(true);
+            setTransferNFTStep(TransferNFTSteps.Success);
           } else {
             navigate(
               ErrorPath,
@@ -206,6 +220,129 @@ export const TransferNftPage = () => {
     }
   };
 
+  const content = {
+    [TransferNFTSteps.Review]: (
+      <ReviewStep
+        nftToken={nftToken}
+        haveReverseOwnerLookUp={haveReverseOwnerLookUp}
+        amountForm={amountForm}
+        nftData={nftData}
+      />
+    ),
+    [TransferNFTSteps.Recipient]: (
+      <RecipientStep
+        recipientForm={recipientForm}
+        setRecipientName={setRecipientName}
+        recipientName={recipientName}
+      />
+    ),
+    [TransferNFTSteps.Confirm]: (
+      <ConfirmStep
+        paymentAmount={paymentAmount}
+        recipientName={recipientName}
+        nftToken={nftToken}
+        nftData={nftData}
+        recipientPublicKey={recipientPublicKey}
+      />
+    ),
+    [TransferNFTSteps.Success]: (
+      <TransferSuccessScreen headerText="You submitted a transaction" />
+    )
+  };
+
+  const headerButtons = {
+    [TransferNFTSteps.Review]: <HeaderSubmenuBarNavLink linkType="back" />,
+    [TransferNFTSteps.Recipient]: (
+      <HeaderSubmenuBarNavLink
+        onClick={() => setTransferNFTStep(TransferNFTSteps.Review)}
+        linkType="back"
+      />
+    ),
+    [TransferNFTSteps.Confirm]: (
+      <HeaderSubmenuBarNavLink
+        onClick={() => setTransferNFTStep(TransferNFTSteps.Recipient)}
+        linkType="back"
+      />
+    )
+  };
+
+  const footerButtons = {
+    [TransferNFTSteps.Review]: (
+      <Button
+        disabled={isAmountFormButtonDisabled}
+        onClick={() => {
+          const { paymentAmount } = getValues();
+
+          setPaymentAmount(paymentAmount);
+          setTransferNFTStep(TransferNFTSteps.Recipient);
+        }}
+      >
+        <Trans t={t}>Next</Trans>
+      </Button>
+    ),
+    [TransferNFTSteps.Recipient]: (
+      <Button
+        disabled={isRecipientFormButtonDisabled}
+        onClick={() => setTransferNFTStep(TransferNFTSteps.Confirm)}
+      >
+        <Trans t={t}>Next</Trans>
+      </Button>
+    ),
+    [TransferNFTSteps.Confirm]: (
+      <Button color="primaryRed" type="button" onClick={submitTransfer}>
+        <Trans t={t}>Confirm send</Trans>
+      </Button>
+    ),
+    [TransferNFTSteps.Success]: (
+      <>
+        <Button
+          color="primaryBlue"
+          type="button"
+          onClick={() => {
+            const currentDate = Date.now();
+
+            const shouldAskForReview =
+              askForReviewAfter == null || currentDate > askForReviewAfter;
+
+            if (ratedInStore || !shouldAskForReview) {
+              const homeRoutesState = {
+                state: {
+                  // set the active tab to deploys
+                  activeTabId: HomePageTabsId.Deploys
+                }
+              };
+
+              // Navigate to "Home" with the pre-defined state
+              navigate(RouterPath.Home, homeRoutesState);
+            } else {
+              // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
+              navigate(RouterPath.RateApp);
+            }
+          }}
+        >
+          <Trans t={t}>Done</Trans>
+        </Button>
+
+        {!isRecipientPublicKeyInContact && (
+          <Button
+            color="secondaryBlue"
+            onClick={() => {
+              const { recipientPublicKey } = recipientForm.getValues();
+
+              navigate(RouterPath.AddContact, {
+                state: {
+                  recipientPublicKey: recipientPublicKey
+                }
+              });
+            }}
+          >
+            <Trans t={t}>Add recipient to list of contacts</Trans>
+          </Button>
+        )}
+      </>
+    )
+  };
+
   return (
     <PopupLayout
       renderHeader={() => (
@@ -214,84 +351,16 @@ export const TransferNftPage = () => {
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={
-            showSuccessScreen
+            transferNFTStep === TransferNFTSteps.Success
               ? undefined
-              : () => <HeaderSubmenuBarNavLink linkType="back" />
+              : () => headerButtons[transferNFTStep]
           }
         />
       )}
-      renderContent={() =>
-        showSuccessScreen ? (
-          <TransferSuccessScreen headerText="You submitted a transaction" />
-        ) : (
-          <TransferNftContent
-            nftToken={nftToken}
-            recipientForm={recipientForm}
-            amountForm={amountForm}
-            haveReverseOwnerLookUp={haveReverseOwnerLookUp}
-          />
-        )
-      }
+      renderContent={() => content[transferNFTStep]}
       renderFooter={() => (
         <FooterButtonsContainer>
-          {showSuccessScreen ? (
-            <>
-              <Button
-                color="primaryBlue"
-                type="button"
-                onClick={() => {
-                  const currentDate = Date.now();
-
-                  const shouldAskForReview =
-                    askForReviewAfter == null ||
-                    currentDate > askForReviewAfter;
-
-                  if (ratedInStore || !shouldAskForReview) {
-                    const homeRoutesState = {
-                      state: {
-                        // set the active tab to deploys
-                        activeTabId: HomePageTabsId.Deploys
-                      }
-                    };
-
-                    // Navigate to "Home" with the pre-defined state
-                    navigate(RouterPath.Home, homeRoutesState);
-                  } else {
-                    // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
-                    navigate(RouterPath.RateApp);
-                  }
-                }}
-              >
-                <Trans t={t}>Done</Trans>
-              </Button>
-
-              {!isRecipientPublicKeyInContact && (
-                <Button
-                  color="secondaryBlue"
-                  onClick={() => {
-                    const { recipientPublicKey } = recipientForm.getValues();
-
-                    navigate(RouterPath.AddContact, {
-                      state: {
-                        recipientPublicKey: recipientPublicKey
-                      }
-                    });
-                  }}
-                >
-                  <Trans t={t}>Add recipient to list of contacts</Trans>
-                </Button>
-              )}
-            </>
-          ) : (
-            <Button
-              color="primaryBlue"
-              type="button"
-              disabled={isButtonDisabled}
-              onClick={submitTransfer}
-            >
-              <Trans t={t}>Confirm send</Trans>
-            </Button>
-          )}
+          {footerButtons[transferNFTStep]}
         </FooterButtonsContainer>
       )}
     />

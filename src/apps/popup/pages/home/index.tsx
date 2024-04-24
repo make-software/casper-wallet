@@ -134,19 +134,7 @@ export function HomePageContent() {
               )}
               <ButtonContainer
                 gap={SpacingSize.Small}
-                onClick={() =>
-                  navigate(
-                    casperToken?.id
-                      ? RouterPath.Transfer.replace(
-                          ':tokenContractPackageHash',
-                          casperToken.id
-                        ).replace(
-                          ':tokenContractHash',
-                          casperToken.contractHash || 'null'
-                        )
-                      : RouterPath.TransferNoParams
-                  )
-                }
+                onClick={() => navigate(RouterPath.Transfer)}
               >
                 <Button circle>
                   <SvgIcon

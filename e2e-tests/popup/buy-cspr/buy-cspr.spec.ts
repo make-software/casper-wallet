@@ -43,7 +43,6 @@ popup.describe('Popup UI: buy cspr', () => {
 
       await new Promise(r => setTimeout(r, 2000));
 
-      console.log(torusPage.url());
       popupExpect(torusPage.url()).toContain('https://app.topperpay.com/');
     }
   );
@@ -90,7 +89,6 @@ popup.describe('Popup UI: buy cspr', () => {
 
       await new Promise(r => setTimeout(r, 2000));
 
-      console.log(rampPage.url());
       popupExpect(rampPage.url()).toContain('https://app.ramp.network/');
     }
   );

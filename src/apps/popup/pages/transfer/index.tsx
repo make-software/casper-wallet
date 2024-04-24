@@ -2,19 +2,12 @@ import { DeployUtil } from 'casper-js-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
 
-import {
-  ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES,
-  TRANSFER_COST_MOTES
-} from '@src/constants';
-import { useActiveAccountErc20Tokens } from '@src/hooks/use-active-account-erc20-tokens';
+import { ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES } from '@src/constants';
 import { fetchAndDispatchExtendedDeployInfo } from '@src/utils';
 
-import { TransferPageContent } from '@popup/pages/transfer/content';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
-import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
 import {
   selectAskForReviewAfter,
@@ -25,6 +18,8 @@ import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/
 import { dispatchToMainStore } from '@background/redux/utils';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
+import { TokenType, useCasperToken } from '@hooks/use-casper-token';
+
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import {
   ErrorPath,
@@ -32,35 +27,35 @@ import {
   HeaderPopup,
   HeaderSubmenuBarNavLink,
   PopupLayout,
-  SpaceBetweenFlexRow,
   createErrorLocationState
 } from '@libs/layout';
+import { HeaderSubmenuBarBuyCSPRLink } from '@libs/layout/header/header-submenu-bar-buy-cspr-link';
 import {
   makeCep18TransferDeployAndSign,
   makeNativeTransferDeployAndSign,
   sendSignDeploy
 } from '@libs/services/deployer-service';
-import { Button, HomePageTabsId, Typography } from '@libs/ui/components';
-import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
-import { useTransferForm } from '@libs/ui/forms/transfer';
 import {
-  CSPRtoMotes,
-  divideErc20Balance,
-  formatNumber,
-  motesToCSPR
-} from '@libs/ui/utils';
+  Button,
+  HomePageTabsId,
+  TransferSuccessScreen
+} from '@libs/ui/components';
+import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils';
 
-import { TransactionSteps, getIsErc20Transfer } from './utils';
+import { AmountStep } from './amount-step';
+import { ConfirmStep } from './confirm-step';
+import { RecipientStep } from './recipient-step';
+import { TokenStep } from './token-step';
+import { TransactionSteps } from './utils';
 
 export const TransferPage = () => {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
   const location = useTypedLocation();
 
-  const { tokenContractPackageHash, tokenContractHash } = useParams();
-
-  const isErc20Transfer = getIsErc20Transfer(tokenContractPackageHash);
-
+  const [isErc20Transfer, setIsErc20Transfer] = useState<boolean>(false);
+  const [selectedToken, setSelectedToken] = useState<TokenType | null>();
+  const [recipientName, setRecipientName] = useState('');
   const [recipientPublicKey, setRecipientPublicKey] = useState('');
   const [amount, setAmount] = useState('');
   const [paymentAmount, setPaymentAmount] = useState(
@@ -68,69 +63,52 @@ export const TransferPage = () => {
   );
   const [transferIdMemo, setTransferIdMemo] = useState('');
   const [transferStep, setTransferStep] = useState<TransactionSteps>(
-    TransactionSteps.Recipient
+    TransactionSteps.Token
   );
+  const [isRecipientFormButtonDisabled, setIsRecipientFormButtonDisabled] =
+    useState(true);
+  const [isAmountFormButtonDisabled, setIsAmountFormButtonDisabled] =
+    useState(false);
   const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(true);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
-  const csprBalance = useSelector(selectAccountBalance);
   const contactPublicKeys = useSelector(selectAllPublicKeys);
   const ratedInStore = useSelector(selectRatedInStore);
   const askForReviewAfter = useSelector(selectAskForReviewAfter);
 
-  const { tokens } = useActiveAccountErc20Tokens();
+  const casperToken = useCasperToken();
 
-  const token = tokens?.find(token => token.id === tokenContractPackageHash);
-  const symbol = isErc20Transfer
-    ? token?.symbol || location.state?.tokenData?.symbol || null
-    : 'CSPR';
-  const erc20Decimals =
-    token?.decimals || location.state?.tokenData?.decimals || null;
-  const erc20Balance =
-    (token?.balance && divideErc20Balance(token?.balance, erc20Decimals)) ||
-    null;
-  const balance = isErc20Transfer
-    ? erc20Balance
-    : csprBalance.liquidMotes && motesToCSPR(csprBalance.liquidMotes);
-  const formattedBalance = formatNumber(balance || '', {
-    precision: { max: 5 }
-  });
+  useEffect(() => {
+    const tokenData = location?.state?.tokenData;
+
+    if (selectedToken) {
+      return;
+    }
+
+    if (tokenData) {
+      setIsErc20Transfer(true);
+      setSelectedToken(tokenData);
+    } else {
+      setIsErc20Transfer(false);
+      setSelectedToken(casperToken);
+    }
+  }, [casperToken, location?.state?.tokenData, selectedToken]);
+
+  useEffect(() => {
+    if (isErc20Transfer) {
+      setIsAmountFormButtonDisabled(false);
+    } else {
+      setIsAmountFormButtonDisabled(true);
+    }
+  }, [isErc20Transfer, setIsAmountFormButtonDisabled]);
+
   const isRecipientPublicKeyInContact = useMemo(
     () => contactPublicKeys.includes(recipientPublicKey),
     [contactPublicKeys, recipientPublicKey]
   );
-
-  const { amountForm, recipientForm } = useTransferForm(
-    erc20Balance,
-    isErc20Transfer,
-    csprBalance.liquidMotes,
-    paymentAmount
-  );
-
-  const {
-    formState: amountFormState,
-    getValues: getValuesAmountForm,
-    trigger
-  } = amountForm;
-  const { formState: recipientFormState, getValues: getValuesRecipientForm } =
-    recipientForm;
-
-  useEffect(() => {
-    if (amountFormState.touchedFields.amount) {
-      trigger();
-    }
-  }, [
-    networkName,
-    activeAccount?.publicKey,
-    trigger,
-    amountFormState.touchedFields.amount,
-    erc20Balance,
-    csprBalance.liquidMotes,
-    paymentAmount
-  ]);
 
   // event listener for enable/disable submit button
   useEffect(() => {
@@ -231,11 +209,11 @@ export const TransferPage = () => {
         const signDeploy = await makeCep18TransferDeployAndSign(
           nodeUrl,
           networkName,
-          tokenContractHash,
-          tokenContractPackageHash,
+          selectedToken?.contractHash,
+          selectedToken?.id,
           recipientPublicKey,
           amount,
-          erc20Decimals,
+          selectedToken?.decimals || null,
           paymentAmount,
           activeAccount,
           [KEYS]
@@ -261,55 +239,142 @@ export const TransferPage = () => {
     }
   };
 
-  const getButtonProps = () => {
-    const isRecipientFormButtonDisabled = calculateSubmitButtonDisabled({
-      isValid: recipientFormState.isValid
-    });
-    const isAmountFormButtonDisabled = calculateSubmitButtonDisabled({
-      isValid: amountFormState.isValid
-    });
+  const content = {
+    [TransactionSteps.Token]: (
+      <TokenStep
+        setSelectedToken={setSelectedToken}
+        setIsErc20Transfer={setIsErc20Transfer}
+        selectedToken={selectedToken}
+      />
+    ),
+    [TransactionSteps.Recipient]: (
+      <RecipientStep
+        setRecipientName={setRecipientName}
+        recipientName={recipientName}
+        setRecipientPublicKey={setRecipientPublicKey}
+        setIsRecipientFormButtonDisabled={setIsRecipientFormButtonDisabled}
+      />
+    ),
+    [TransactionSteps.Amount]: (
+      <AmountStep
+        isErc20Transfer={isErc20Transfer}
+        paymentAmount={paymentAmount}
+        selectedToken={selectedToken}
+        setAmount={setAmount}
+        setPaymentAmount={setPaymentAmount}
+        setTransferIdMemo={setTransferIdMemo}
+        setIsAmountFormButtonDisabled={setIsAmountFormButtonDisabled}
+      />
+    ),
+    [TransactionSteps.Confirm]: (
+      <ConfirmStep
+        recipientPublicKey={recipientPublicKey}
+        amount={amount}
+        balance={selectedToken?.amount || null}
+        symbol={selectedToken?.symbol || null}
+        isErc20Transfer={isErc20Transfer}
+        paymentAmount={paymentAmount}
+        recipientName={recipientName}
+      />
+    ),
+    [TransactionSteps.Success]: (
+      <TransferSuccessScreen headerText="You submitted a transaction" />
+    )
+  };
 
-    switch (transferStep) {
-      case TransactionSteps.Recipient: {
-        return {
-          disabled: isRecipientFormButtonDisabled,
-          onClick: () => {
-            const { recipientPublicKey } = getValuesRecipientForm();
+  const headerButtons = {
+    [TransactionSteps.Token]: (
+      <>
+        <HeaderSubmenuBarNavLink linkType="back" />
+        <HeaderSubmenuBarBuyCSPRLink />
+      </>
+    ),
+    [TransactionSteps.Recipient]: (
+      <>
+        <HeaderSubmenuBarNavLink
+          linkType="back"
+          onClick={() => setTransferStep(TransactionSteps.Token)}
+        />
+        <HeaderSubmenuBarBuyCSPRLink />
+      </>
+    ),
+    [TransactionSteps.Amount]: (
+      <>
+        <HeaderSubmenuBarNavLink
+          linkType="back"
+          onClick={() => setTransferStep(TransactionSteps.Recipient)}
+        />
+        <HeaderSubmenuBarBuyCSPRLink />
+      </>
+    ),
+    [TransactionSteps.Confirm]: (
+      <>
+        <HeaderSubmenuBarNavLink
+          linkType="back"
+          onClick={() => setTransferStep(TransactionSteps.Amount)}
+        />
+        <HeaderSubmenuBarBuyCSPRLink />
+      </>
+    )
+  };
 
-            setTransferStep(TransactionSteps.Amount);
-            setRecipientPublicKey(recipientPublicKey);
-          }
-        };
-      }
-      case TransactionSteps.Amount: {
-        return {
-          disabled: isAmountFormButtonDisabled,
-          onClick: () => {
-            const {
-              transferIdMemo,
-              amount: _amount,
-              paymentAmount: _paymentAmount
-            } = getValuesAmountForm();
-
-            setAmount(_amount);
-            setPaymentAmount(_paymentAmount);
-            setTransferIdMemo(transferIdMemo);
-            setTransferStep(TransactionSteps.Confirm);
-          }
-        };
-      }
-      case TransactionSteps.Confirm: {
-        return {
-          disabled:
-            isSubmitButtonDisable ||
-            isRecipientFormButtonDisabled ||
-            isAmountFormButtonDisabled,
-          onClick: onSubmitSending
-        };
-      }
-      case TransactionSteps.Success: {
-        return {
-          onClick: () => {
+  const footerButtons = {
+    [TransactionSteps.Token]: (
+      <Button
+        color="primaryBlue"
+        type="button"
+        onClick={() => {
+          setTransferStep(TransactionSteps.Recipient);
+        }}
+      >
+        <Trans t={t}>Next</Trans>
+      </Button>
+    ),
+    [TransactionSteps.Recipient]: (
+      <Button
+        color="primaryBlue"
+        type="button"
+        disabled={isRecipientFormButtonDisabled}
+        onClick={() => {
+          setTransferStep(TransactionSteps.Amount);
+        }}
+      >
+        <Trans t={t}>Next</Trans>
+      </Button>
+    ),
+    [TransactionSteps.Amount]: (
+      <Button
+        color="primaryBlue"
+        type="button"
+        disabled={isAmountFormButtonDisabled}
+        onClick={() => {
+          setTransferStep(TransactionSteps.Confirm);
+        }}
+      >
+        <Trans t={t}>Next</Trans>
+      </Button>
+    ),
+    [TransactionSteps.Confirm]: (
+      <Button
+        color="primaryBlue"
+        type="button"
+        disabled={
+          isSubmitButtonDisable ||
+          isRecipientFormButtonDisabled ||
+          isAmountFormButtonDisabled
+        }
+        onClick={onSubmitSending}
+      >
+        <Trans t={t}>Confirm send</Trans>
+      </Button>
+    ),
+    [TransactionSteps.Success]: (
+      <>
+        <Button
+          color="primaryBlue"
+          type="button"
+          disabled={isAmountFormButtonDisabled}
+          onClick={() => {
             const currentDate = Date.now();
 
             const shouldAskForReview =
@@ -329,37 +394,27 @@ export const TransferPage = () => {
               // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
               navigate(RouterPath.RateApp);
             }
-          }
-        };
-      }
-    }
+          }}
+        >
+          <Trans t={t}>Done</Trans>
+        </Button>
+        {isRecipientPublicKeyInContact && (
+          <Button
+            color="secondaryBlue"
+            onClick={() =>
+              navigate(RouterPath.AddContact, {
+                state: {
+                  recipientPublicKey: recipientPublicKey
+                }
+              })
+            }
+          >
+            <Trans t={t}>Add recipient to list of contacts</Trans>
+          </Button>
+        )}
+      </>
+    )
   };
-
-  const handleBackButton = () => {
-    switch (transferStep) {
-      case TransactionSteps.Recipient: {
-        navigate(-1);
-        break;
-      }
-      case TransactionSteps.Amount: {
-        setTransferStep(TransactionSteps.Recipient);
-        break;
-      }
-      case TransactionSteps.Confirm: {
-        setTransferStep(TransactionSteps.Amount);
-        break;
-      }
-
-      default: {
-        navigate(-1);
-        break;
-      }
-    }
-  };
-
-  const transactionFee = isErc20Transfer
-    ? `${paymentAmount}`
-    : `${motesToCSPR(TRANSFER_COST_MOTES)}`;
 
   return (
     <PopupLayout
@@ -369,69 +424,16 @@ export const TransferPage = () => {
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={
-            transferStep === TransactionSteps.Success
+            TransactionSteps.Success === transferStep
               ? undefined
-              : () => (
-                  <HeaderSubmenuBarNavLink
-                    linkType="back"
-                    onClick={handleBackButton}
-                  />
-                )
+              : () => headerButtons[transferStep]
           }
         />
       )}
-      renderContent={() => (
-        <TransferPageContent
-          transferStep={transferStep}
-          recipientForm={recipientForm}
-          amountForm={amountForm}
-          recipientPublicKey={recipientPublicKey}
-          amount={amount}
-          paymentAmount={paymentAmount}
-          balance={formattedBalance}
-          symbol={symbol}
-        />
-      )}
+      renderContent={() => content[transferStep]}
       renderFooter={() => (
         <FooterButtonsContainer>
-          {transferStep === TransactionSteps.Confirm ||
-          transferStep === TransactionSteps.Success ? null : (
-            <SpaceBetweenFlexRow>
-              <Typography type="captionRegular" color="contentSecondary">
-                <Trans t={t}>Transaction fee</Trans>
-              </Typography>
-              <Typography type="captionHash">
-                {formatNumber(transactionFee, {
-                  precision: { max: 5 }
-                })}{' '}
-                CSPR
-              </Typography>
-            </SpaceBetweenFlexRow>
-          )}
-          <Button color="primaryBlue" type="button" {...getButtonProps()}>
-            <Trans t={t}>
-              {transferStep === TransactionSteps.Confirm
-                ? 'Send'
-                : transferStep === TransactionSteps.Success
-                  ? 'Done'
-                  : 'Next'}
-            </Trans>
-          </Button>
-          {transferStep === TransactionSteps.Success &&
-            !isRecipientPublicKeyInContact && (
-              <Button
-                color="secondaryBlue"
-                onClick={() =>
-                  navigate(RouterPath.AddContact, {
-                    state: {
-                      recipientPublicKey: recipientPublicKey
-                    }
-                  })
-                }
-              >
-                <Trans t={t}>Add recipient to list of contacts</Trans>
-              </Button>
-            )}
+          {footerButtons[transferStep]}
         </FooterButtonsContainer>
       )}
     />
