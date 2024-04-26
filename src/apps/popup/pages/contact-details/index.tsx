@@ -32,7 +32,7 @@ import {
   PopupLayout,
   SpacingSize
 } from '@libs/layout';
-import { Button, Link, SvgIcon } from '@libs/ui/components';
+import { Button, SvgIcon } from '@libs/ui/components';
 import { useContactForm } from '@libs/ui/forms/contact';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 
@@ -173,17 +173,12 @@ export const ContactDetailsPage = () => {
           )}
           {!isDeleting && !isEditing && (
             <Button
-              as={props => (
-                <Link
-                  color="contentAction"
-                  target="_blank"
-                  href={getBlockExplorerAccountUrl(
-                    casperLiveUrl,
-                    contact.publicKey
-                  )}
-                  {...props}
-                />
-              )}
+              onClick={() => {
+                window.open(
+                  getBlockExplorerAccountUrl(casperLiveUrl, contact.publicKey),
+                  '_blank'
+                );
+              }}
               color="secondaryBlue"
               title={t('View account in CSPR.live')}
             >
