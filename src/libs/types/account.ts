@@ -7,6 +7,7 @@ export interface Account extends KeyPair {
   imported?: boolean;
   hardware?: HardwareWalletType;
   hidden: boolean;
+  derivationIndex?: number;
 }
 
 export enum HardwareWalletType {

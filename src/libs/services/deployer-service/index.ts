@@ -20,9 +20,14 @@ import {
 
 import { getRawPublicKey } from '@libs/entities/Account';
 import { toJson } from '@libs/services/utils';
-import { Account } from '@libs/types/account';
+import {
+  Account,
+  AccountWithBalance,
+  HardwareWalletType
+} from '@libs/types/account';
 import { CSPRtoMotes, multiplyErc20Balance } from '@libs/ui/utils';
 
+import { ledger } from '../ledger';
 import {
   ICasperNetworkSendDeployErrorResponse,
   ICasperNetworkSendDeployResponse,
@@ -62,6 +67,23 @@ export const getDateForDeploy = async (nodeUrl: CasperNodeUrl) => {
   }
 };
 
+export const signLedgerDeploy = async (
+  deploy: DeployUtil.Deploy,
+  activeAccount: Account
+) => {
+  const resp = await ledger.singDeploy(deploy, {
+    index: activeAccount.derivationIndex,
+    publicKey: activeAccount.publicKey
+  });
+
+  const approval = new DeployUtil.Approval();
+  approval.signer = activeAccount.publicKey;
+  approval.signature = resp.signatureHex;
+  deploy.approvals.push(approval);
+
+  return deploy;
+};
+
 export const makeAuctionManagerDeployAndSing = async (
   contractEntryPoint: AuctionManagerEntryPoint,
   delegatorPublicKeyHex: string,
@@ -71,7 +93,8 @@ export const makeAuctionManagerDeployAndSing = async (
   networkName: NetworkName,
   auctionManagerContractHash: string,
   nodeUrl: CasperNodeUrl,
-  keys: Keys.AsymmetricKey[]
+  keys: Keys.AsymmetricKey[],
+  activeAccount: Account
 ) => {
   const hash = decodeBase16(auctionManagerContractHash);
 
@@ -113,11 +136,15 @@ export const makeAuctionManagerDeployAndSing = async (
 
   const deploy = DeployUtil.makeDeploy(deployParams, session, payment);
 
+  if (activeAccount.hardware === HardwareWalletType.Ledger) {
+    return signLedgerDeploy(deploy, activeAccount);
+  }
+
   return deploy.sign(keys);
 };
 
 export const makeNativeTransferDeployAndSign = async (
-  senderPublicKeyHex: string,
+  activeAccount: AccountWithBalance,
   recipientPublicKeyHex: string,
   amountMotes: string,
   networkName: NetworkName,
@@ -125,7 +152,7 @@ export const makeNativeTransferDeployAndSign = async (
   keys: Keys.AsymmetricKey[],
   transferIdMemo?: string
 ) => {
-  const senderPublicKey = CLPublicKey.fromHex(senderPublicKeyHex);
+  const senderPublicKey = CLPublicKey.fromHex(activeAccount.publicKey);
   const recipientPublicKey = CLPublicKey.fromHex(recipientPublicKeyHex);
 
   const date = await getDateForDeploy(nodeUrl);
@@ -150,6 +177,10 @@ export const makeNativeTransferDeployAndSign = async (
   const payment = DeployUtil.standardPayment(TRANSFER_COST_MOTES);
 
   const deploy = DeployUtil.makeDeploy(deployParams, session, payment);
+
+  if (activeAccount?.hardware === HardwareWalletType.Ledger) {
+    return signLedgerDeploy(deploy, activeAccount);
+  }
 
   return deploy.sign(keys);
 };
@@ -201,6 +232,10 @@ export const makeCep18TransferDeployAndSign = async (
     tempDeploy.payment
   );
 
+  if (activeAccount?.hardware === HardwareWalletType.Ledger) {
+    return signLedgerDeploy(deploy, activeAccount);
+  }
+
   return deploy.sign(keys);
 };
 
@@ -211,7 +246,8 @@ export const makeNFTDeployAndSign = async (
   networkName: NetworkName,
   contractPackageHash: string,
   nodeUrl: CasperNodeUrl,
-  keys: Keys.AsymmetricKey[]
+  keys: Keys.AsymmetricKey[],
+  activeAccount: Account
 ) => {
   const hash = Uint8Array.from(Buffer.from(contractPackageHash, 'hex'));
 
@@ -234,6 +270,10 @@ export const makeNFTDeployAndSign = async (
     );
   const payment = DeployUtil.standardPayment(paymentAmount);
   const deploy = DeployUtil.makeDeploy(deployParams, session, payment);
+
+  if (activeAccount.hardware === HardwareWalletType.Ledger) {
+    return signLedgerDeploy(deploy, activeAccount);
+  }
 
   return deploy.sign(keys);
 };

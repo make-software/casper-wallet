@@ -342,6 +342,10 @@ export const findMediaPreview = (metadata: NFTTokenMetadataEntry): boolean => {
 };
 
 export const isEqualCaseInsensitive = (key1: string, key2: string) => {
+  if (!(key1 && key2)) {
+    return false;
+  }
+
   return key1.toLowerCase() === key2.toLowerCase();
 };
 
