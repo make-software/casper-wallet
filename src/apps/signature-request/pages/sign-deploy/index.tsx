@@ -13,6 +13,8 @@ import {
 } from '@background/redux/vault/selectors';
 import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
 
+import { useLedger } from '@hooks/use-ledger';
+
 import { sdkMethod } from '@content/sdk-method';
 
 import { signDeploy } from '@libs/crypto';
@@ -25,12 +27,13 @@ import {
   LayoutWindow,
   SpacingSize
 } from '@libs/layout';
+import { ledger } from '@libs/services/ledger';
 import { HardwareWalletType } from '@libs/types/account';
 import {
   Button,
-  NoConnectedLedger,
-  ReviewWithLedger,
-  SvgIcon
+  LedgerEventView,
+  SvgIcon,
+  renderLedgerFooter
 } from '@libs/ui/components';
 
 import { CasperDeploy } from './deploy-types';
@@ -43,8 +46,6 @@ export function SignDeployPage() {
   const [isSigningAccountFromLedger, setIsSigningAccountFromLedger] =
     useState(false);
   const [showLedgerConfirm, setShowLedgerConfirm] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isLedgerConnected, setIsLedgerConnected] = useState(false);
 
   const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
@@ -78,6 +79,7 @@ export function SignDeployPage() {
   }, [accounts, signingPublicKeyHex]);
 
   const deployJsonById = useSelector(selectDeploysJsonById);
+
   useEffect(() => {
     const deployJson = deployJsonById[requestId];
     if (deployJson == null) {
@@ -118,16 +120,32 @@ export function SignDeployPage() {
     throw error;
   }
 
-  const handleSign = useCallback(() => {
+  const handleSign = useCallback(async () => {
     if (deploy?.hash == null) {
       return;
     }
 
-    const signature = signDeploy(
-      deploy.hash,
-      signingAccount.publicKey,
-      signingAccount.secretKey
-    );
+    let signature: Uint8Array;
+
+    if (signingAccount.hardware === HardwareWalletType.Ledger) {
+      const resp = await ledger.singDeploy(deploy, {
+        index: signingAccount.derivationIndex,
+        publicKey: signingAccount.publicKey
+      });
+
+      signature = resp.signature;
+    } else {
+      signature = signDeploy(
+        deploy.hash,
+        signingAccount.publicKey,
+        signingAccount.secretKey
+      );
+    }
+
+    if (!signature) {
+      return;
+    }
+
     sendSdkResponseToSpecificTab(
       sdkMethod.signResponse(
         { signatureHex: convertBytesToHex(signature), cancelled: false },
@@ -136,9 +154,11 @@ export function SignDeployPage() {
     );
     closeCurrentWindow();
   }, [
-    signingAccount?.publicKey,
-    signingAccount?.secretKey,
-    deploy?.hash,
+    deploy,
+    signingAccount.hardware,
+    signingAccount.derivationIndex,
+    signingAccount.publicKey,
+    signingAccount.secretKey,
     requestId
   ]);
 
@@ -149,26 +169,61 @@ export function SignDeployPage() {
     closeCurrentWindow();
   }, [requestId]);
 
-  const handleSignWithLedger = () => {
-    setShowLedgerConfirm(true);
-  };
-
   useEffect(() => {
     window.addEventListener('beforeunload', handleCancel);
 
     return () => window.removeEventListener('beforeunload', handleCancel);
   }, [handleCancel]);
 
+  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+    ledgerAction: handleSign,
+    beforeLedgerActionCb: () => setShowLedgerConfirm(true)
+  });
+
+  const renderFooter = () => {
+    if (showLedgerConfirm) {
+      return renderLedgerFooter({
+        onConnect: makeSubmitLedgerAction,
+        onErrorCtaPressed: () => setShowLedgerConfirm(false),
+        event: ledgerEventStatusToRender
+      });
+    }
+
+    return () => (
+      <FooterButtonsContainer>
+        <Button
+          color="primaryRed"
+          disabled={deploy == null}
+          onClick={
+            isSigningAccountFromLedger ? makeSubmitLedgerAction() : handleSign
+          }
+        >
+          {isSigningAccountFromLedger ? (
+            <AlignedFlexRow gap={SpacingSize.Small}>
+              <SvgIcon src="assets/icons/ledger-white.svg" />
+              <Trans t={t}>Sign with Ledger</Trans>
+            </AlignedFlexRow>
+          ) : (
+            <Trans t={t}>Sign</Trans>
+          )}
+        </Button>
+        <Button color="secondaryBlue" onClick={handleCancel}>
+          <Trans t={t}>Cancel</Trans>
+        </Button>
+      </FooterButtonsContainer>
+    );
+  };
+
   return (
     <LayoutWindow
       renderHeader={() => (
         <HeaderPopup
           renderSubmenuBarItems={
-            showLedgerConfirm && isLedgerConnected
+            showLedgerConfirm
               ? () => (
                   <HeaderSubmenuBarNavLink
-                    linkType="cancel"
-                    onClick={closeCurrentWindow}
+                    linkType="back"
+                    onClick={() => setShowLedgerConfirm(false)}
                   />
                 )
               : undefined
@@ -177,15 +232,7 @@ export function SignDeployPage() {
       )}
       renderContent={() =>
         showLedgerConfirm ? (
-          isLedgerConnected ? (
-            <ReviewWithLedger
-              txnHash={
-                '017666eff4fcc0fd656c58dfe2e8fc22b765c05dc8a1be524b1ae4d90634ba9ab5'
-              }
-            />
-          ) : (
-            <NoConnectedLedger />
-          )
+          <LedgerEventView event={ledgerEventStatusToRender} />
         ) : (
           <SignDeployContent
             deploy={deploy}
@@ -193,35 +240,7 @@ export function SignDeployPage() {
           />
         )
       }
-      renderFooter={
-        showLedgerConfirm
-          ? undefined
-          : () => (
-              <FooterButtonsContainer>
-                <Button
-                  color="primaryRed"
-                  disabled={deploy == null}
-                  onClick={
-                    isSigningAccountFromLedger
-                      ? handleSignWithLedger
-                      : handleSign
-                  }
-                >
-                  {isSigningAccountFromLedger ? (
-                    <AlignedFlexRow gap={SpacingSize.Small}>
-                      <SvgIcon src="assets/icons/ledger-white.svg" />
-                      <Trans t={t}>Sign with Ledger</Trans>
-                    </AlignedFlexRow>
-                  ) : (
-                    <Trans t={t}>Sign</Trans>
-                  )}
-                </Button>
-                <Button color="secondaryBlue" onClick={handleCancel}>
-                  <Trans t={t}>Cancel</Trans>
-                </Button>
-              </FooterButtonsContainer>
-            )
-      }
+      renderFooter={renderFooter()}
     />
   );
 }

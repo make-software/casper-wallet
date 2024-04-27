@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 
-import {
-  NoConnectedLedger,
-  ReviewWithLedger,
-  TransferSuccessScreen
-} from '@libs/ui/components';
+import { ILedgerEvent } from '@libs/services/ledger';
+import { LedgerEventView, TransferSuccessScreen } from '@libs/ui/components';
 import {
   TransferAmountFormValues,
   TransferRecipientFormValues
@@ -25,7 +22,7 @@ interface TransferPageContentProps {
   balance: string | null;
   symbol: string | null;
   paymentAmount: string;
-  isLedgerConnected: boolean;
+  LedgerEventStatus: ILedgerEvent;
 }
 
 export const TransferPageContent = ({
@@ -37,7 +34,7 @@ export const TransferPageContent = ({
   balance,
   symbol,
   paymentAmount,
-  isLedgerConnected
+  LedgerEventStatus
 }: TransferPageContentProps) => {
   const [recipientName, setRecipientName] = useState('');
 
@@ -67,14 +64,8 @@ export const TransferPageContent = ({
         recipientName={recipientName}
       />
     ),
-    [TransactionSteps.ConfirmWithLedger]: isLedgerConnected ? (
-      <ReviewWithLedger
-        txnHash={
-          '017666eff4fcc0fd656c58dfe2e8fc22b765c05dc8a1be524b1ae4d90634ba9ab5'
-        }
-      />
-    ) : (
-      <NoConnectedLedger />
+    [TransactionSteps.ConfirmWithLedger]: (
+      <LedgerEventView event={LedgerEventStatus} />
     ),
     [TransactionSteps.Success]: (
       <TransferSuccessScreen headerText="You submitted a transaction" />

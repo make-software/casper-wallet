@@ -1,18 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+
+import { useLedger } from '@hooks/use-ledger';
+
+import { LedgerEventStatus } from '@libs/services/ledger';
 
 import { ConnectedLedger } from './connected-ledger';
 import { NotConnectedLedger } from './not-connected-ledger';
 
 export const ImportAccountFromLedgerPage = () => {
-  const [isLedgerConnected, setIsLedgerConnected] = useState(false);
+  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+    ledgerAction: async () => {},
+    shouldLoadAccountList: true,
+    beforeLedgerActionCb: () => {},
+    initialEventToRender: { status: LedgerEventStatus.Disconnected },
+    withWaitingEventOnDisconnect: false
+  });
 
-  useEffect(() => {
-    const interval = setTimeout(() => {
-      setIsLedgerConnected(true);
-    }, 1500);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return isLedgerConnected ? <ConnectedLedger /> : <NotConnectedLedger />;
+  return ledgerEventStatusToRender.status ===
+    LedgerEventStatus.AccountListUpdated ||
+    ledgerEventStatusToRender.status ===
+      LedgerEventStatus.LoadingAccountsList ? (
+    <ConnectedLedger />
+  ) : (
+    <NotConnectedLedger
+      event={ledgerEventStatusToRender}
+      onConnect={makeSubmitLedgerAction}
+    />
+  );
 };

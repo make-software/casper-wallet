@@ -4,21 +4,26 @@ import { UseFormProps, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import { selectVaultAccountsNames } from '@background/redux/vault/selectors';
+import { isEqualCaseInsensitive } from '@src/utils';
+
+import { ILedgerAccountListItem } from '@popup/pages/import-account-from-ledger/types';
+
+import {
+  selectVaultAccountsNames,
+  selectVaultLedgerAccounts
+} from '@background/redux/vault/selectors';
+
+import { AccountWithBalance } from '@libs/types/account';
 
 export type ImportLedgerAccountsFromValue = Record<string, string>;
 
 export const useImportLedgerAccountsForm = (
-  ledgerAccountsWithBalance: {
-    id: number;
-    publicKey: string;
-    name?: string;
-    balance: number | undefined;
-  }[]
+  ledgerAccountsWithBalance: ILedgerAccountListItem[]
 ) => {
   const { t } = useTranslation();
 
   const existingAccountNames = useSelector(selectVaultAccountsNames);
+  const existingLedgerAccounts = useSelector(selectVaultLedgerAccounts);
 
   const formSchema = Yup.object().shape(
     ledgerAccountsWithBalance.reduce((shape, _, index) => {
@@ -74,7 +79,8 @@ export const useImportLedgerAccountsForm = (
     resolver: yupResolver(formSchema),
     defaultValues: getDefaultAccountName(
       ledgerAccountsWithBalance,
-      existingAccountNames
+      existingAccountNames,
+      existingLedgerAccounts
     )
   };
 
@@ -82,28 +88,38 @@ export const useImportLedgerAccountsForm = (
 };
 
 export function getDefaultAccountName(
-  ledgerAccountsWithBalance: {
-    id: number;
-    publicKey: string;
-    name?: string;
-    balance: number | undefined;
-  }[],
-  existingAccountNames: string[]
+  ledgerAccountsWithBalance: ILedgerAccountListItem[],
+  existingAccountNames: string[],
+  existingLedgerAccounts: AccountWithBalance[]
 ) {
   const accountString = 'Ledger account';
   let sequenceNumber = 1;
 
-  return ledgerAccountsWithBalance.reduce((previousValue, _, currentIndex) => {
-    let defaultName = `${accountString} ${sequenceNumber + currentIndex}`;
+  return ledgerAccountsWithBalance.reduce(
+    (previousValue, cur, currentIndex) => {
+      let defaultName = `${accountString} ${sequenceNumber + currentIndex}`;
 
-    while (existingAccountNames.includes(defaultName)) {
-      sequenceNumber++;
-      defaultName = `${accountString} ${sequenceNumber + currentIndex}`;
-    }
+      const existingLedgerAcc = existingLedgerAccounts.find(acc =>
+        isEqualCaseInsensitive(cur.publicKey, acc.publicKey)
+      );
 
-    return {
-      ...previousValue,
-      [`name-${currentIndex}`]: defaultName
-    };
-  }, {});
+      if (existingLedgerAcc) {
+        return {
+          ...previousValue,
+          [`name-${currentIndex}`]: existingLedgerAcc?.name ?? defaultName
+        };
+      }
+
+      while (existingAccountNames.includes(defaultName)) {
+        sequenceNumber++;
+        defaultName = `${accountString} ${sequenceNumber + currentIndex}`;
+      }
+
+      return {
+        ...previousValue,
+        [`name-${currentIndex}`]: defaultName
+      };
+    },
+    {}
+  );
 }

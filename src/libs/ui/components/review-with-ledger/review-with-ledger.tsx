@@ -17,7 +17,8 @@ import {
 import { FormField, TextArea, Typography } from '@libs/ui/components';
 
 interface ReviewWithLedgerProps {
-  txnHash: string;
+  hash: string;
+  hashLabel: string;
 }
 
 const HeaderTextContainer = styled(ParagraphContainer)`
@@ -25,7 +26,10 @@ const HeaderTextContainer = styled(ParagraphContainer)`
   padding-top: 24px;
 `;
 
-export const ReviewWithLedger = ({ txnHash }: ReviewWithLedgerProps) => {
+export const ReviewWithLedger = ({
+  hash,
+  hashLabel
+}: ReviewWithLedgerProps) => {
   const { t } = useTranslation();
   const isDarkMode = useIsDarkMode();
 
@@ -38,15 +42,15 @@ export const ReviewWithLedger = ({ txnHash }: ReviewWithLedgerProps) => {
       </HeaderTextContainer>
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
-          <Trans t={t}>
-            Compare the transaction hash on your Ledger device with the value
-            below and approve or reject the signature.
-          </Trans>
+          <Trans
+            t={t}
+          >{`Compare the ${hashLabel.toLowerCase()} on your Ledger device with the value
+            below and approve or reject the signature.`}</Trans>
         </Typography>
       </ParagraphContainer>
       <VerticalSpaceContainer top={SpacingSize.Large}>
-        <FormField label={t('Txn hash')}>
-          <TextArea value={txnHash} readOnly rows={2} type="captionHash" />
+        <FormField label={t(hashLabel)}>
+          <TextArea value={hash} readOnly rows={2} type="captionHash" />
         </FormField>
       </VerticalSpaceContainer>
       <CenteredFlexColumn>

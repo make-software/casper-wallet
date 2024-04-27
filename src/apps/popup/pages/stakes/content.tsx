@@ -17,10 +17,10 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { ILedgerEvent } from '@libs/services/ledger';
 import { ValidatorResultWithId } from '@libs/services/validators-service/types';
 import {
-  NoConnectedLedger,
-  ReviewWithLedger,
+  LedgerEventView,
   TransferSuccessScreen,
   Typography
 } from '@libs/ui/components';
@@ -50,7 +50,7 @@ interface DelegateStakePageContentProps {
   validatorList: ValidatorResultWithId[] | null;
   undelegateValidatorList: ValidatorResultWithId[] | null;
   loading: boolean;
-  isLedgerConnected: boolean;
+  LedgerEventStatus: ILedgerEvent;
 }
 
 export const StakesPageContent = ({
@@ -69,7 +69,7 @@ export const StakesPageContent = ({
   validatorList,
   undelegateValidatorList,
   loading,
-  isLedgerConnected
+  LedgerEventStatus
 }: DelegateStakePageContentProps) => {
   const { t } = useTranslation();
 
@@ -140,14 +140,8 @@ export const StakesPageContent = ({
         />
       </Step>
     ),
-    [StakeSteps.ConfirmWithLedger]: isLedgerConnected ? (
-      <ReviewWithLedger
-        txnHash={
-          '017666eff4fcc0fd656c58dfe2e8fc22b765c05dc8a1be524b1ae4d90634ba9ab5'
-        }
-      />
-    ) : (
-      <NoConnectedLedger />
+    [StakeSteps.ConfirmWithLedger]: (
+      <LedgerEventView event={LedgerEventStatus} />
     ),
     [StakeSteps.Success]: (
       <TransferSuccessScreen headerText={successStepHeaderText}>

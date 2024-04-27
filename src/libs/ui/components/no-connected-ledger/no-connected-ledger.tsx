@@ -1,15 +1,24 @@
+import { Player } from '@lottiefiles/react-lottie-player';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { ledgerSupportLink } from '@src/constants';
+
+import { useIsDarkMode } from '@hooks/use-is-dark-mode';
+
+import dotsDarkModeAnimation from '@libs/animations/dots_dark_mode.json';
+import dotsLightModeAnimation from '@libs/animations/dots_light_mode.json';
 import {
   AlignedFlexRow,
+  CenteredFlexColumn,
   ContentContainer,
   IllustrationContainer,
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { List, SvgIcon, Typography } from '@libs/ui/components';
+import { ILedgerEvent, LedgerEventStatus } from '@libs/services/ledger';
+import { Link, List, SvgIcon, Typography } from '@libs/ui/components';
 
 const ItemContainer = styled(AlignedFlexRow)`
   padding: 16px;
@@ -30,45 +39,100 @@ const steps = [
   }
 ];
 
-export const NoConnectedLedger = () => {
+interface INoConnectedLedgerProps {
+  event?: ILedgerEvent;
+}
+
+export const NoConnectedLedger: React.FC<INoConnectedLedgerProps> = ({
+  event
+}) => {
   const { t } = useTranslation();
+  const isDarkMode = useIsDarkMode();
+
+  if (
+    !(
+      event?.status === LedgerEventStatus.Disconnected ||
+      event?.status === LedgerEventStatus.WaitingResponseFromDevice
+    )
+  ) {
+    return null;
+  }
 
   return (
     <ContentContainer>
       <IllustrationContainer>
-        <SvgIcon
-          src="assets/illustrations/ledger-not-connected.svg"
-          width={296}
-          height={120}
-        />
+        {event.status === LedgerEventStatus.WaitingResponseFromDevice ? (
+          <SvgIcon
+            src="assets/illustrations/ledger-not-connected.svg"
+            width={296}
+            height={120}
+          />
+        ) : (
+          <SvgIcon
+            src="assets/illustrations/ledger-connect.svg"
+            width={296}
+            height={120}
+          />
+        )}
       </IllustrationContainer>
-
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          <Trans t={t}>Looks like your Ledger is not connected</Trans>
+          {event.status === LedgerEventStatus.WaitingResponseFromDevice ? (
+            <Trans t={t}>Ledger is connecting</Trans>
+          ) : (
+            <Trans t={t}>Now please open Casper app on your Ledger</Trans>
+          )}
         </Typography>
       </ParagraphContainer>
       <ParagraphContainer top={SpacingSize.Medium}>
-        <Typography type="body" color="contentSecondary">
-          <Trans t={t}>
-            Follow the steps to be able to [Sign/Confirm] transaction with
-            Ledger.
-          </Trans>
-        </Typography>
+        {event.status === LedgerEventStatus.WaitingResponseFromDevice ? (
+          <Typography type="body" color="contentSecondary">
+            <Trans t={t}>
+              Follow the steps to be able to [Sign/Confirm] transaction with
+              Ledger.
+            </Trans>
+          </Typography>
+        ) : (
+          <Typography type="body" color="contentSecondary">
+            <Trans t={t}>to connect with Casper Wallet.</Trans>{' '}
+            <Link
+              color="contentAction"
+              target="_blank"
+              href={ledgerSupportLink}
+              title={t('Learn more about Ledger')}
+            >
+              <Trans t={t}>Learn more about Ledger</Trans>
+            </Link>
+          </Typography>
+        )}
       </ParagraphContainer>
 
-      <List
-        rows={steps}
-        renderRow={({ text }) => (
-          <ItemContainer gap={SpacingSize.Large}>
-            <SvgIcon src="assets/icons/radio-button-on.svg" />
-            <Typography type="body">
-              <Trans t={t}>{text}</Trans>
-            </Typography>
-          </ItemContainer>
-        )}
-        marginLeftForItemSeparatorLine={56}
-      />
+      {event.status === LedgerEventStatus.WaitingResponseFromDevice && (
+        <List
+          rows={steps}
+          renderRow={({ text }) => (
+            <ItemContainer gap={SpacingSize.Large}>
+              <SvgIcon src="assets/icons/radio-button-on.svg" />
+              <Typography type="body">
+                <Trans t={t}>{text}</Trans>
+              </Typography>
+            </ItemContainer>
+          )}
+          marginLeftForItemSeparatorLine={56}
+        />
+      )}
+
+      {event.status === LedgerEventStatus.WaitingResponseFromDevice && (
+        <CenteredFlexColumn>
+          <Player
+            renderer="svg"
+            autoplay
+            loop
+            src={isDarkMode ? dotsDarkModeAnimation : dotsLightModeAnimation}
+            style={{ height: '130px' }}
+          />
+        </CenteredFlexColumn>
+      )}
     </ContentContainer>
   );
 };

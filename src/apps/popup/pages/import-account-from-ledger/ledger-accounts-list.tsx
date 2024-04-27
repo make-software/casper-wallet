@@ -1,3 +1,4 @@
+import { Player } from '@lottiefiles/react-lottie-player';
 import debounce from 'lodash.debounce';
 import React, { useEffect } from 'react';
 import { Controller } from 'react-hook-form';
@@ -5,8 +6,14 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { isEqualCaseInsensitive } from '@src/utils';
+
 import { selectVaultLedgerAccounts } from '@background/redux/vault/selectors';
 
+import { useIsDarkMode } from '@hooks/use-is-dark-mode';
+
+import dotsDarkModeAnimation from '@libs/animations/dots_dark_mode.json';
+import dotsLightModeAnimation from '@libs/animations/dots_light_mode.json';
 import {
   CenteredFlexRow,
   FlexColumn,
@@ -28,6 +35,8 @@ import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-
 import { useImportLedgerAccountsForm } from '@libs/ui/forms/import-ledger-account';
 import { formatNumber, motesToCSPR } from '@libs/ui/utils';
 
+import { ILedgerAccountListItem } from './types';
+
 const ListItemContainer = styled(FlexColumn)<{ disabled?: boolean }>`
   padding: 20px 16px;
 
@@ -44,19 +53,15 @@ const AmountContainer = styled(FlexColumn)`
 `;
 
 interface ListProps {
-  ledgerAccountsWithBalance: {
-    id: number;
-    publicKey: string;
-    name?: string;
-    balance: number | undefined;
-  }[];
+  ledgerAccountsWithBalance: ILedgerAccountListItem[];
   setIsButtonDisabled: React.Dispatch<React.SetStateAction<boolean>>;
-  selectedAccounts: { id: number; publicKey: string; name: string }[];
+  selectedAccounts: ILedgerAccountListItem[];
   setSelectedAccounts: React.Dispatch<
-    React.SetStateAction<{ id: number; publicKey: string; name: string }[]>
+    React.SetStateAction<ILedgerAccountListItem[]>
   >;
   maxItemsToRender: number;
-  setMaxItemsToRender: React.Dispatch<React.SetStateAction<number>>;
+  onLoadMore: () => void;
+  isLoadingMore: boolean;
 }
 
 export const LedgerAccountsList = ({
@@ -65,9 +70,11 @@ export const LedgerAccountsList = ({
   selectedAccounts,
   setSelectedAccounts,
   maxItemsToRender,
-  setMaxItemsToRender
+  onLoadMore,
+  isLoadingMore
 }: ListProps) => {
   const { t } = useTranslation();
+  const isDarkMode = useIsDarkMode();
 
   const alreadyConnectedLedgerAccounts = useSelector(selectVaultLedgerAccounts);
 
@@ -76,12 +83,15 @@ export const LedgerAccountsList = ({
     getValues,
     formState: { isValid }
   } = useImportLedgerAccountsForm(ledgerAccountsWithBalance);
+  // TODO https://react-hook-form.com/docs/usefieldarray because of issues with new fields addition
 
-  const handleInputChange = (id: number, newValue: string) => {
+  const handleInputChange = (id: string, newValue: string) => {
     // Update the state with the new value
     setSelectedAccounts(prevItems =>
       prevItems.map(item =>
-        item.id === id ? { ...item, name: newValue.trim() } : item
+        isEqualCaseInsensitive(item.id, id)
+          ? { ...item, name: newValue.trim() }
+          : item
       )
     );
   };
@@ -97,20 +107,26 @@ export const LedgerAccountsList = ({
   }, [isValid, setIsButtonDisabled]);
 
   return (
-    <List
+    <List<ILedgerAccountListItem>
       rows={ledgerAccountsWithBalance}
       contentTop={SpacingSize.XL}
       maxItemsToRender={maxItemsToRender}
       renderRow={(account, index) => {
         const inputFieldName = `name-${index}`;
         const checkBoxFieldName = `name-${index} + Check`;
-        const balance = formatNumber(motesToCSPR(String(account.balance)), {
-          precision: { max: 0 }
-        });
+        const balance = formatNumber(
+          motesToCSPR(String(account.balance.liquidMotes)),
+          {
+            precision: { max: 0 }
+          }
+        );
 
         const isAlreadyConnected = alreadyConnectedLedgerAccounts.find(
           alreadyConnectedAccount =>
-            alreadyConnectedAccount.publicKey === account.publicKey
+            isEqualCaseInsensitive(
+              alreadyConnectedAccount.publicKey,
+              account.publicKey
+            )
         );
 
         return (
@@ -125,6 +141,8 @@ export const LedgerAccountsList = ({
           >
             <Controller
               control={control}
+              //@ts-ignore
+              defaultValue={isAlreadyConnected ? true : undefined}
               render={({ field }) => (
                 <SpaceBetweenFlexRow
                   onClick={() => {
@@ -132,7 +150,10 @@ export const LedgerAccountsList = ({
 
                     const accountIndex = selectedAccounts.findIndex(
                       alreadySelectedAccount =>
-                        alreadySelectedAccount.id === account.id
+                        isEqualCaseInsensitive(
+                          alreadySelectedAccount.id,
+                          account.id
+                        )
                     );
                     const accountName: string = getValues(inputFieldName);
 
@@ -199,7 +220,7 @@ export const LedgerAccountsList = ({
               )}
               name={checkBoxFieldName}
             />
-            {getValues(checkBoxFieldName) && (
+            {(getValues(checkBoxFieldName) || isAlreadyConnected) && (
               <Controller
                 control={control}
                 render={({
@@ -208,6 +229,7 @@ export const LedgerAccountsList = ({
                 }) => (
                   <Input
                     secondaryBackground
+                    disabled={Boolean(isAlreadyConnected)}
                     style={{
                       paddingLeft: '44px'
                     }}
@@ -227,17 +249,27 @@ export const LedgerAccountsList = ({
         );
       }}
       marginLeftForItemSeparatorLine={56}
-      renderFooter={() => (
-        <FooterContainer>
-          <MoreItem
-            type="captionRegular"
-            color="contentAction"
-            onClick={() => setMaxItemsToRender(prevState => prevState + 5)}
-          >
-            <Trans t={t}>Show next 5 accounts</Trans>
-          </MoreItem>
-        </FooterContainer>
-      )}
+      renderFooter={() =>
+        isLoadingMore ? (
+          <Player
+            renderer="svg"
+            autoplay
+            loop
+            src={isDarkMode ? dotsDarkModeAnimation : dotsLightModeAnimation}
+            style={{ height: '80px' }}
+          />
+        ) : (
+          <FooterContainer>
+            <MoreItem
+              type="captionRegular"
+              color="contentAction"
+              onClick={onLoadMore}
+            >
+              <Trans t={t}>Show next 5 accounts</Trans>
+            </MoreItem>
+          </FooterContainer>
+        )
+      }
     />
   );
 };

@@ -28,6 +28,8 @@ import {
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
 
+import { useLedger } from '@hooks/use-ledger';
+
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import {
   AlignedFlexRow,
@@ -49,7 +51,8 @@ import {
   Button,
   HomePageTabsId,
   SvgIcon,
-  Typography
+  Typography,
+  renderLedgerFooter
 } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useTransferForm } from '@libs/ui/forms/transfer';
@@ -81,8 +84,6 @@ export const TransferPage = () => {
     TransactionSteps.Recipient
   );
   const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isLedgerConnected, setIsLedgerConnected] = useState(false);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isActiveAccountFromLedger = useSelector(
@@ -241,6 +242,7 @@ export const TransferPage = () => {
         activeAccount.publicKey,
         activeAccount.secretKey
       );
+
       if (isErc20Transfer) {
         // ERC20 transfer
         const signDeploy = await makeCep18TransferDeployAndSign(
@@ -262,7 +264,7 @@ export const TransferPage = () => {
         const motesAmount = CSPRtoMotes(amount);
 
         const signDeploy = await makeNativeTransferDeployAndSign(
-          activeAccount.publicKey,
+          activeAccount,
           recipientPublicKey,
           motesAmount,
           networkName,
@@ -276,9 +278,11 @@ export const TransferPage = () => {
     }
   };
 
-  const submitStakeWithLedger = () => {
-    setTransferStep(TransactionSteps.ConfirmWithLedger);
-  };
+  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+    ledgerAction: onSubmitSending,
+    beforeLedgerActionCb: () =>
+      setTransferStep(TransactionSteps.ConfirmWithLedger)
+  });
 
   const getButtonProps = () => {
     const isRecipientFormButtonDisabled = calculateSubmitButtonDisabled({
@@ -324,7 +328,7 @@ export const TransferPage = () => {
             isRecipientFormButtonDisabled ||
             isAmountFormButtonDisabled,
           onClick: isActiveAccountFromLedger
-            ? submitStakeWithLedger
+            ? makeSubmitLedgerAction()
             : onSubmitSending
         };
       }
@@ -372,15 +376,83 @@ export const TransferPage = () => {
         onClick={() => setTransferStep(TransactionSteps.Amount)}
       />
     ),
-    [TransactionSteps.ConfirmWithLedger]: isLedgerConnected
-      ? () => <HeaderSubmenuBarNavLink linkType="cancel" />
-      : undefined,
+    [TransactionSteps.ConfirmWithLedger]: () => (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        onClick={() => setTransferStep(TransactionSteps.Confirm)}
+      />
+    ),
     [TransactionSteps.Success]: undefined
   };
 
   const transactionFee = isErc20Transfer
     ? `${paymentAmount}`
     : `${motesToCSPR(TRANSFER_COST_MOTES)}`;
+
+  const renderFooter = () => {
+    if (transferStep === TransactionSteps.ConfirmWithLedger) {
+      return renderLedgerFooter({
+        onConnect: makeSubmitLedgerAction,
+        event: ledgerEventStatusToRender,
+        onErrorCtaPressed: () => {
+          setTransferStep(TransactionSteps.Confirm);
+        }
+      });
+    }
+
+    return () => {
+      return (
+        <FooterButtonsContainer>
+          {transferStep === TransactionSteps.Confirm ||
+          transferStep === TransactionSteps.Success ? null : (
+            <SpaceBetweenFlexRow>
+              <Typography type="captionRegular" color="contentSecondary">
+                <Trans t={t}>Transaction fee</Trans>
+              </Typography>
+              <Typography type="captionHash">
+                {formatNumber(transactionFee, {
+                  precision: { max: 5 }
+                })}{' '}
+                CSPR
+              </Typography>
+            </SpaceBetweenFlexRow>
+          )}
+          <Button color="primaryBlue" type="button" {...getButtonProps()}>
+            {isActiveAccountFromLedger &&
+            transferStep === TransactionSteps.Confirm ? (
+              <AlignedFlexRow gap={SpacingSize.Small}>
+                <SvgIcon src="assets/icons/ledger-white.svg" />
+                <Trans t={t}>Send</Trans>
+              </AlignedFlexRow>
+            ) : (
+              <Trans t={t}>
+                {transferStep === TransactionSteps.Confirm
+                  ? 'Send'
+                  : transferStep === TransactionSteps.Success
+                    ? 'Done'
+                    : 'Next'}
+              </Trans>
+            )}
+          </Button>
+          {transferStep === TransactionSteps.Success &&
+            !isRecipientPublicKeyInContact && (
+              <Button
+                color="secondaryBlue"
+                onClick={() =>
+                  navigate(RouterPath.AddContact, {
+                    state: {
+                      recipientPublicKey: recipientPublicKey
+                    }
+                  })
+                }
+              >
+                <Trans t={t}>Add recipient to list of contacts</Trans>
+              </Button>
+            )}
+        </FooterButtonsContainer>
+      );
+    };
+  };
 
   return (
     <PopupLayout
@@ -402,63 +474,10 @@ export const TransferPage = () => {
           paymentAmount={paymentAmount}
           balance={formattedBalance}
           symbol={symbol}
-          isLedgerConnected={isLedgerConnected}
+          LedgerEventStatus={ledgerEventStatusToRender}
         />
       )}
-      renderFooter={
-        transferStep === TransactionSteps.ConfirmWithLedger
-          ? undefined
-          : () => (
-              <FooterButtonsContainer>
-                {transferStep === TransactionSteps.Confirm ||
-                transferStep === TransactionSteps.Success ? null : (
-                  <SpaceBetweenFlexRow>
-                    <Typography type="captionRegular" color="contentSecondary">
-                      <Trans t={t}>Transaction fee</Trans>
-                    </Typography>
-                    <Typography type="captionHash">
-                      {formatNumber(transactionFee, {
-                        precision: { max: 5 }
-                      })}{' '}
-                      CSPR
-                    </Typography>
-                  </SpaceBetweenFlexRow>
-                )}
-                <Button color="primaryBlue" type="button" {...getButtonProps()}>
-                  {isActiveAccountFromLedger &&
-                  transferStep === TransactionSteps.Confirm ? (
-                    <AlignedFlexRow gap={SpacingSize.Small}>
-                      <SvgIcon src="assets/icons/ledger-white.svg" />
-                      <Trans t={t}>Send</Trans>
-                    </AlignedFlexRow>
-                  ) : (
-                    <Trans t={t}>
-                      {transferStep === TransactionSteps.Confirm
-                        ? 'Send'
-                        : transferStep === TransactionSteps.Success
-                          ? 'Done'
-                          : 'Next'}
-                    </Trans>
-                  )}
-                </Button>
-                {transferStep === TransactionSteps.Success &&
-                  !isRecipientPublicKeyInContact && (
-                    <Button
-                      color="secondaryBlue"
-                      onClick={() =>
-                        navigate(RouterPath.AddContact, {
-                          state: {
-                            recipientPublicKey: recipientPublicKey
-                          }
-                        })
-                      }
-                    >
-                      <Trans t={t}>Add recipient to list of contacts</Trans>
-                    </Button>
-                  )}
-              </FooterButtonsContainer>
-            )
-      }
+      renderFooter={renderFooter()}
     />
   );
 };

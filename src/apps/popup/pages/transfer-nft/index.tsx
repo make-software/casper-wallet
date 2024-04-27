@@ -33,6 +33,8 @@ import {
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
 
+import { useLedger } from '@hooks/use-ledger';
+
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import { getRawPublicKey } from '@libs/entities/Account';
 import {
@@ -52,10 +54,10 @@ import {
 import {
   Button,
   HomePageTabsId,
-  NoConnectedLedger,
-  ReviewWithLedger,
+  LedgerEventView,
   SvgIcon,
-  TransferSuccessScreen
+  TransferSuccessScreen,
+  renderLedgerFooter
 } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useTransferNftForm } from '@libs/ui/forms/transfer-nft';
@@ -64,8 +66,6 @@ import { CSPRtoMotes } from '@libs/ui/utils';
 export const TransferNftPage = () => {
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
   const [haveReverseOwnerLookUp, setHaveReverseOwnerLookUp] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isLedgerConnected, setIsLedgerConnected] = useState(false);
   const [showLedgerConfirm, setShowLedgerConfirm] = useState(false);
 
   const { contractPackageHash, tokenId } = useParams();
@@ -138,10 +138,6 @@ export const TransferNftPage = () => {
     [contactPublicKeys, recipientPublicKey]
   );
 
-  const submitStakeWithLedger = () => {
-    setShowLedgerConfirm(true);
-  };
-
   const submitTransfer = async () => {
     if (haveReverseOwnerLookUp || !nftToken) return;
 
@@ -167,7 +163,8 @@ export const TransferNftPage = () => {
         networkName,
         nftToken?.contract_package_hash!,
         nodeUrl,
-        [KEYS]
+        [KEYS],
+        activeAccount
       );
 
       sendSignDeploy(signDeploy, nodeUrl)
@@ -225,6 +222,94 @@ export const TransferNftPage = () => {
     }
   };
 
+  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+    ledgerAction: submitTransfer,
+    beforeLedgerActionCb: () => setShowLedgerConfirm(true)
+  });
+
+  const renderFooter = () => {
+    if (showLedgerConfirm && !showSuccessScreen) {
+      return renderLedgerFooter({
+        onConnect: makeSubmitLedgerAction,
+        event: ledgerEventStatusToRender,
+        onErrorCtaPressed: () => setShowLedgerConfirm(false)
+      });
+    }
+
+    return () => (
+      <FooterButtonsContainer>
+        {showSuccessScreen ? (
+          <>
+            <Button
+              color="primaryBlue"
+              type="button"
+              onClick={() => {
+                const currentDate = Date.now();
+
+                const shouldAskForReview =
+                  askForReviewAfter == null || currentDate > askForReviewAfter;
+
+                if (ratedInStore || !shouldAskForReview) {
+                  const homeRoutesState = {
+                    state: {
+                      // set the active tab to deploys
+                      activeTabId: HomePageTabsId.Deploys
+                    }
+                  };
+
+                  // Navigate to "Home" with the pre-defined state
+                  navigate(RouterPath.Home, homeRoutesState);
+                } else {
+                  // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
+                  navigate(RouterPath.RateApp);
+                }
+              }}
+            >
+              <Trans t={t}>Done</Trans>
+            </Button>
+
+            {!isRecipientPublicKeyInContact && (
+              <Button
+                color="secondaryBlue"
+                onClick={() => {
+                  const { recipientPublicKey } = recipientForm.getValues();
+
+                  navigate(RouterPath.AddContact, {
+                    state: {
+                      recipientPublicKey: recipientPublicKey
+                    }
+                  });
+                }}
+              >
+                <Trans t={t}>Add recipient to list of contacts</Trans>
+              </Button>
+            )}
+          </>
+        ) : (
+          <Button
+            color={isActiveAccountFromLedger ? 'primaryRed' : 'primaryBlue'}
+            type="button"
+            disabled={isButtonDisabled}
+            onClick={
+              isActiveAccountFromLedger
+                ? makeSubmitLedgerAction()
+                : submitTransfer
+            }
+          >
+            {isActiveAccountFromLedger ? (
+              <AlignedFlexRow gap={SpacingSize.Small}>
+                <SvgIcon src="assets/icons/ledger-white.svg" />
+                <Trans t={t}>Confirm send</Trans>
+              </AlignedFlexRow>
+            ) : (
+              <Trans t={t}>Confirm send</Trans>
+            )}
+          </Button>
+        )}
+      </FooterButtonsContainer>
+    );
+  };
+
   return (
     <PopupLayout
       renderHeader={() => (
@@ -233,10 +318,15 @@ export const TransferNftPage = () => {
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={
-            showSuccessScreen || (showLedgerConfirm && !isLedgerConnected)
+            showSuccessScreen
               ? undefined
-              : showLedgerConfirm && isLedgerConnected
-                ? () => <HeaderSubmenuBarNavLink linkType="cancel" />
+              : showLedgerConfirm
+                ? () => (
+                    <HeaderSubmenuBarNavLink
+                      linkType="back"
+                      onClick={() => setShowLedgerConfirm(false)}
+                    />
+                  )
                 : () => <HeaderSubmenuBarNavLink linkType="back" />
           }
         />
@@ -245,15 +335,7 @@ export const TransferNftPage = () => {
         showSuccessScreen ? (
           <TransferSuccessScreen headerText="You submitted a transaction" />
         ) : showLedgerConfirm ? (
-          isLedgerConnected ? (
-            <ReviewWithLedger
-              txnHash={
-                '017666eff4fcc0fd656c58dfe2e8fc22b765c05dc8a1be524b1ae4d90634ba9ab5'
-              }
-            />
-          ) : (
-            <NoConnectedLedger />
-          )
+          <LedgerEventView event={ledgerEventStatusToRender} />
         ) : (
           <TransferNftContent
             nftToken={nftToken}
@@ -263,86 +345,7 @@ export const TransferNftPage = () => {
           />
         )
       }
-      renderFooter={
-        showLedgerConfirm
-          ? undefined
-          : () => (
-              <FooterButtonsContainer>
-                {showSuccessScreen ? (
-                  <>
-                    <Button
-                      color="primaryBlue"
-                      type="button"
-                      onClick={() => {
-                        const currentDate = Date.now();
-
-                        const shouldAskForReview =
-                          askForReviewAfter == null ||
-                          currentDate > askForReviewAfter;
-
-                        if (ratedInStore || !shouldAskForReview) {
-                          const homeRoutesState = {
-                            state: {
-                              // set the active tab to deploys
-                              activeTabId: HomePageTabsId.Deploys
-                            }
-                          };
-
-                          // Navigate to "Home" with the pre-defined state
-                          navigate(RouterPath.Home, homeRoutesState);
-                        } else {
-                          // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
-                          navigate(RouterPath.RateApp);
-                        }
-                      }}
-                    >
-                      <Trans t={t}>Done</Trans>
-                    </Button>
-
-                    {!isRecipientPublicKeyInContact && (
-                      <Button
-                        color="secondaryBlue"
-                        onClick={() => {
-                          const { recipientPublicKey } =
-                            recipientForm.getValues();
-
-                          navigate(RouterPath.AddContact, {
-                            state: {
-                              recipientPublicKey: recipientPublicKey
-                            }
-                          });
-                        }}
-                      >
-                        <Trans t={t}>Add recipient to list of contacts</Trans>
-                      </Button>
-                    )}
-                  </>
-                ) : (
-                  <Button
-                    color={
-                      isActiveAccountFromLedger ? 'primaryRed' : 'primaryBlue'
-                    }
-                    type="button"
-                    disabled={isButtonDisabled}
-                    onClick={
-                      isActiveAccountFromLedger
-                        ? submitStakeWithLedger
-                        : submitTransfer
-                    }
-                  >
-                    {isActiveAccountFromLedger ? (
-                      <AlignedFlexRow gap={SpacingSize.Small}>
-                        <SvgIcon src="assets/icons/ledger-white.svg" />
-                        <Trans t={t}>Confirm send</Trans>
-                      </AlignedFlexRow>
-                    ) : (
-                      <Trans t={t}>Confirm send</Trans>
-                    )}
-                  </Button>
-                )}
-              </FooterButtonsContainer>
-            )
-      }
+      renderFooter={renderFooter()}
     />
   );
 };

@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { useIsDarkMode } from '@hooks/use-is-dark-mode';
+
 import { CenteredFlexRow, SpacingSize } from '@libs/layout';
 import {
   CopyToClipboard,
@@ -55,6 +57,7 @@ export function Hash({
   isLedger
 }: HashProps) {
   const { t } = useTranslation();
+  const isDarkMode = useIsDarkMode();
 
   const HashComponent = useMemo(
     () => (
@@ -80,11 +83,19 @@ export function Hash({
           />
         )}
         {isLedger && (
-          <SvgIcon src="assets/icons/ledger-blue.svg" size={20} color="black" />
+          <SvgIcon
+            src={
+              isDarkMode
+                ? 'assets/icons/ledger-white.svg'
+                : 'assets/icons/ledger-blue.svg'
+            }
+            size={20}
+          />
         )}
       </>
     ),
     [
+      isDarkMode,
       truncated,
       withoutTooltip,
       value,

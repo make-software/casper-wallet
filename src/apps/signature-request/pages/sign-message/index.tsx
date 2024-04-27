@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -11,21 +11,36 @@ import {
 } from '@background/redux/vault/selectors';
 import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
 
+import { useLedger } from '@hooks/use-ledger';
+
 import { sdkMethod } from '@content/sdk-method';
 
 import { signMessage } from '@libs/crypto/sign-message';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import {
+  AlignedFlexRow,
   FooterButtonsContainer,
   HeaderPopup,
-  LayoutWindow
+  HeaderSubmenuBarNavLink,
+  LayoutWindow,
+  SpacingSize
 } from '@libs/layout';
-import { Button } from '@libs/ui/components';
+import { ledger } from '@libs/services/ledger';
+import { HardwareWalletType } from '@libs/types/account';
+import {
+  Button,
+  LedgerEventView,
+  SvgIcon,
+  renderLedgerFooter
+} from '@libs/ui/components';
 
 import { SignMessageContent } from './sign-message-content';
 
 export function SignMessagePage() {
   const { t } = useTranslation();
+  const [isSigningAccountFromLedger, setIsSigningAccountFromLedger] =
+    useState(false);
+  const [showLedgerConfirm, setShowLedgerConfirm] = useState(false);
 
   const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
@@ -53,6 +68,14 @@ export function SignMessagePage() {
     renderDeps
   );
 
+  useEffect(() => {
+    const signingAccount = getSigningAccount(accounts, signingPublicKeyHex);
+
+    setIsSigningAccountFromLedger(
+      signingAccount?.hardware === HardwareWalletType.Ledger
+    );
+  }, [accounts, signingPublicKeyHex]);
+
   const signingAccount = getSigningAccount(accounts, signingPublicKeyHex);
 
   // signing account should exist in wallet
@@ -78,16 +101,32 @@ export function SignMessagePage() {
     throw error;
   }
 
-  const handleSign = useCallback(() => {
+  const handleSign = useCallback(async () => {
     if (message == null) {
       return;
     }
 
-    const signature = signMessage(
-      message,
-      signingAccount.publicKey,
-      signingAccount.secretKey
-    );
+    let signature: Uint8Array;
+
+    if (signingAccount.hardware === HardwareWalletType.Ledger) {
+      const resp = await ledger.signMessage(message, {
+        index: signingAccount.derivationIndex,
+        publicKey: signingAccount.publicKey
+      });
+
+      signature = resp.signature;
+    } else {
+      signature = signMessage(
+        message,
+        signingAccount.publicKey,
+        signingAccount.secretKey
+      );
+    }
+
+    if (!signature) {
+      return;
+    }
+
     sendSdkResponseToSpecificTab(
       sdkMethod.signMessageResponse(
         { signatureHex: convertBytesToHex(signature), cancelled: false },
@@ -96,11 +135,51 @@ export function SignMessagePage() {
     );
     closeCurrentWindow();
   }, [
-    signingAccount?.publicKey,
-    signingAccount?.secretKey,
     message,
+    signingAccount.hardware,
+    signingAccount.derivationIndex,
+    signingAccount.publicKey,
+    signingAccount.secretKey,
     requestId
   ]);
+
+  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+    ledgerAction: handleSign,
+    beforeLedgerActionCb: () => setShowLedgerConfirm(true)
+  });
+
+  const renderFooter = () => {
+    if (showLedgerConfirm) {
+      return renderLedgerFooter({
+        onConnect: makeSubmitLedgerAction,
+        onErrorCtaPressed: () => setShowLedgerConfirm(false),
+        event: ledgerEventStatusToRender
+      });
+    }
+
+    return () => (
+      <FooterButtonsContainer>
+        <Button
+          color="primaryRed"
+          onClick={
+            isSigningAccountFromLedger ? makeSubmitLedgerAction() : handleSign
+          }
+        >
+          {isSigningAccountFromLedger ? (
+            <AlignedFlexRow gap={SpacingSize.Small}>
+              <SvgIcon src="assets/icons/ledger-white.svg" />
+              <Trans t={t}>Sign with Ledger</Trans>
+            </AlignedFlexRow>
+          ) : (
+            <Trans t={t}>Sign</Trans>
+          )}
+        </Button>
+        <Button color="secondaryBlue" onClick={handleCancel}>
+          <Trans t={t}>Cancel</Trans>
+        </Button>
+      </FooterButtonsContainer>
+    );
+  };
 
   const handleCancel = useCallback(() => {
     sendSdkResponseToSpecificTab(
@@ -117,23 +196,31 @@ export function SignMessagePage() {
 
   return (
     <LayoutWindow
-      renderHeader={() => <HeaderPopup />}
-      renderContent={() => (
-        <SignMessageContent
-          message={message}
-          publicKeyHex={signingPublicKeyHex}
+      renderHeader={() => (
+        <HeaderPopup
+          renderSubmenuBarItems={
+            showLedgerConfirm
+              ? () => (
+                  <HeaderSubmenuBarNavLink
+                    linkType="back"
+                    onClick={() => setShowLedgerConfirm(false)}
+                  />
+                )
+              : undefined
+          }
         />
       )}
-      renderFooter={() => (
-        <FooterButtonsContainer>
-          <Button color="primaryRed" onClick={handleSign}>
-            <Trans t={t}>Sign</Trans>
-          </Button>
-          <Button color="secondaryBlue" onClick={handleCancel}>
-            <Trans t={t}>Cancel</Trans>
-          </Button>
-        </FooterButtonsContainer>
-      )}
+      renderContent={() =>
+        showLedgerConfirm ? (
+          <LedgerEventView event={ledgerEventStatusToRender} />
+        ) : (
+          <SignMessageContent
+            message={message}
+            publicKeyHex={signingPublicKeyHex}
+          />
+        )
+      }
+      renderFooter={renderFooter()}
     />
   );
 }

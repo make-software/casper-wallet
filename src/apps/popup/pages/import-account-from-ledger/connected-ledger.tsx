@@ -4,6 +4,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { isEqualCaseInsensitive } from '@src/utils';
+
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
@@ -27,60 +29,34 @@ import {
   VerticalSpaceContainer
 } from '@libs/layout';
 import { dispatchFetchAccountBalances } from '@libs/services/balance-service';
+import {
+  LedgerAccount,
+  LedgerEventStatus,
+  ledger
+} from '@libs/services/ledger';
 import { Account, HardwareWalletType } from '@libs/types/account';
 import { Button, Tile, Typography } from '@libs/ui/components';
 
 import { LedgerAccountsList } from './ledger-accounts-list';
+import { ILedgerAccountListItem } from './types';
 
 const AnimationContainer = styled(CenteredFlexColumn)`
   padding: 0 16px 52px;
 `;
 
-const list = [
-  {
-    id: 1,
-    publicKey:
-      '018afa98ca4be12d613617f7339a2d576950a2f9a92102ca4d6508ee31b54d2c02'
-  },
-  {
-    id: 2,
-    publicKey:
-      '012811bf2816b9950097d8338ff4766fedd8a05ba5bb42bfeaff53eafb67f7ebb3'
-  },
-  {
-    id: 3,
-    publicKey:
-      '01b9700dcdd39e23b51548e3ea9092e36f8ea2151f088e28a6f36449437361eb28'
-  },
-  {
-    id: 4,
-    publicKey:
-      '020389bd333fa1d4523d8d210d91743cb5b4ffc037a20ee25a20afa6770fecc2ff91'
-  },
-  {
-    id: 5,
-    publicKey:
-      '01d73b00baec14ff4805bd77ab13abca15806d628bd743d9b71062917270bb9a27'
-  }
-];
-
 export const ConnectedLedger = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [selectedAccounts, setSelectedAccounts] = useState<
-    { id: number; publicKey: string; name: string }[]
+    ILedgerAccountListItem[]
   >([]);
-  const [accountsFromLedger, setAccountsFromLedger] = useState<
-    { id: number; publicKey: string }[]
-  >([]);
+  const [accountsFromLedger, setAccountsFromLedger] = useState<LedgerAccount[]>(
+    []
+  );
   const [ledgerAccountsWithBalance, setLedgerAccountsWithBalance] = useState<
-    {
-      id: number;
-      publicKey: string;
-      name?: string;
-      balance: number | undefined;
-    }[]
+    ILedgerAccountListItem[]
   >([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [maxItemsToRender, setMaxItemsToRender] = useState(5);
 
   const { t } = useTranslation();
@@ -92,11 +68,19 @@ export const ConnectedLedger = () => {
   );
 
   useEffect(() => {
-    const interval = setTimeout(() => {
-      setAccountsFromLedger(list);
-    }, 1500);
+    ledger.getAccountList({ size: 5, offset: 0 });
+  }, []);
 
-    return () => clearInterval(interval);
+  useEffect(() => {
+    const sub = ledger.subscribeToLedgerEventStatuss(event => {
+      if (event.status === LedgerEventStatus.AccountListUpdated) {
+        setAccountsFromLedger(prev => {
+          return [...prev, ...(event.accounts ?? [])];
+        });
+      }
+    });
+
+    return () => sub.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -116,22 +100,29 @@ export const ConnectedLedger = () => {
     dispatchFetchAccountBalances(hashes)
       .then(({ payload }) => {
         if ('data' in payload) {
-          const accountsWithBalance = accountsFromLedger.map(account => {
-            const accountWithBalance = payload.data.find(
-              ac => ac.public_key === account.publicKey
-            );
+          const accountsWithBalance =
+            accountsFromLedger.map<ILedgerAccountListItem>(account => {
+              const accountWithBalance = payload.data.find(ac =>
+                isEqualCaseInsensitive(ac.public_key, account.publicKey)
+              );
 
-            return {
-              ...account,
-              balance: accountWithBalance?.balance || 0
-            };
-          });
+              return {
+                publicKey: account.publicKey,
+                derivationIndex: account.index,
+                name: '',
+                id: account.publicKey,
+                balance: {
+                  liquidMotes: `${accountWithBalance?.balance ?? '0'}`
+                }
+              };
+            });
 
           setLedgerAccountsWithBalance(accountsWithBalance);
         }
       })
       .finally(() => {
         setIsLoading(false);
+        setIsLoadingMore(false);
       });
   }, [casperWalletApiUrl, accountsFromLedger]);
 
@@ -141,12 +132,27 @@ export const ConnectedLedger = () => {
       publicKey: account.publicKey,
       secretKey: '',
       hardware: HardwareWalletType.Ledger,
-      hidden: false
+      hidden: false,
+      derivationIndex: account.derivationIndex
     }));
 
     dispatchToMainStore(accountsImported(accounts)).then(() =>
       navigate(RouterPath.Home)
     );
+  };
+
+  const onLoadMore = () => {
+    try {
+      setIsLoadingMore(true);
+      ledger.getAccountList({
+        size: 5,
+        offset: ledgerAccountsWithBalance.length
+      });
+      setMaxItemsToRender(prevState => prevState + 5);
+    } catch (e) {
+      console.log('-------- e', JSON.stringify(e, null, ' '));
+      setIsLoadingMore(false);
+    }
   };
 
   return (
@@ -213,7 +219,8 @@ export const ConnectedLedger = () => {
               selectedAccounts={selectedAccounts}
               setSelectedAccounts={setSelectedAccounts}
               maxItemsToRender={maxItemsToRender}
-              setMaxItemsToRender={setMaxItemsToRender}
+              onLoadMore={onLoadMore}
+              isLoadingMore={isLoadingMore}
             />
           )}
         </ContentContainer>
