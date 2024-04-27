@@ -24,6 +24,7 @@ export async function enableOnboardingFlow() {
 export async function openOnboardingUi() {
   const { tabId, windowId } = await loadState();
   let tabExist = false;
+
   if (tabId != null && windowId != null) {
     try {
       const tab = await tabs.get(tabId);
@@ -38,7 +39,19 @@ export async function openOnboardingUi() {
     }
   }
 
-  if (!tabExist) {
+  // this needed for case when the user goes to another url from onboarding
+  // and then click on Casper Wallet from the extension menu
+  const tab =
+    tabId != null &&
+    (await tabs.get(tabId).catch(() => {
+      // catch error if the tab does not exist
+    }));
+  // check if the tab URL is the onboarding URL
+  const isOnboardingUrl = tab && tab.url?.includes('onboarding.html');
+
+  // create a tab if it does not exist or if it's not an onboarding URL
+  if (!tabExist || !isOnboardingUrl) {
+    console.log(123);
     tabs
       .create({ url: 'onboarding.html', active: true })
       .then(tab => {
