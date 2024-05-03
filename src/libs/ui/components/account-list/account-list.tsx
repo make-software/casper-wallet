@@ -66,7 +66,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
     <List
       rows={accountListRows}
       contentTop={SpacingSize.None}
-      maxHeight={402}
+      maxHeight={322}
       renderRow={account => {
         const isConnected = connectedAccountNames.includes(account.name);
         const isActiveAccount = activeAccountName === account.name;
