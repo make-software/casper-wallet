@@ -403,7 +403,7 @@ export const useCSPRStakeAmountRule = (
 };
 
 export const useValidatorPublicKeyRule = (
-  stakesType: AuctionManagerEntryPoint,
+  stakeType: AuctionManagerEntryPoint,
   delegatorsNumber?: number
 ) => {
   const { t } = useTranslation();
@@ -419,8 +419,8 @@ export const useValidatorPublicKeyRule = (
       name: 'maxDelegators',
       test: () => {
         if (
-          stakesType === AuctionManagerEntryPoint.undelegate ||
-          stakesType === AuctionManagerEntryPoint.redelegate
+          stakeType === AuctionManagerEntryPoint.undelegate ||
+          stakeType === AuctionManagerEntryPoint.redelegate
         ) {
           return true;
         }

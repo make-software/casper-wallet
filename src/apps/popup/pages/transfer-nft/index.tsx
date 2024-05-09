@@ -64,6 +64,8 @@ export const TransferNftPage = () => {
   const [recipientName, setRecipientName] = useState('');
   const [paymentAmount, setPaymentAmount] = useState('');
   const [haveReverseOwnerLookUp, setHaveReverseOwnerLookUp] = useState(false);
+  const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(false);
+
   const { contractPackageHash, tokenId } = useParams();
 
   const nftTokens = useSelector(selectAccountNftTokens);
@@ -139,6 +141,8 @@ export const TransferNftPage = () => {
 
   const submitTransfer = async () => {
     if (haveReverseOwnerLookUp || !nftToken) return;
+
+    setIsSubmitButtonDisable(true);
 
     if (activeAccount) {
       const { recipientPublicKey } = recipientForm.getValues();
@@ -289,7 +293,12 @@ export const TransferNftPage = () => {
       </Button>
     ),
     [TransferNFTSteps.Confirm]: (
-      <Button color="primaryRed" type="button" onClick={submitTransfer}>
+      <Button
+        color="primaryRed"
+        type="button"
+        onClick={submitTransfer}
+        disabled={isSubmitButtonDisable}
+      >
         <Trans t={t}>Confirm send</Trans>
       </Button>
     ),

@@ -36,7 +36,7 @@ const StakeMaxButton = styled(AlignedFlexRow)<{ disabled?: boolean }>`
 
 interface AmountStepProps {
   amountForm: UseFormReturn<StakeAmountFormValues>;
-  stakesType: AuctionManagerEntryPoint;
+  stakeType: AuctionManagerEntryPoint;
   stakeAmountMotes: string;
   amountStepText: string;
   amountStepMaxAmountValue: string | null;
@@ -44,7 +44,7 @@ interface AmountStepProps {
 
 export const AmountStep = ({
   amountForm,
-  stakesType,
+  stakeType,
   stakeAmountMotes,
   amountStepText,
   amountStepMaxAmountValue
@@ -58,7 +58,7 @@ export const AmountStep = ({
   const csprBalance = useSelector(selectAccountBalance);
 
   useEffect(() => {
-    switch (stakesType) {
+    switch (stakeType) {
       case AuctionManagerEntryPoint.delegate: {
         const maxAmountMotes: string =
           csprBalance.liquidMotes == null
@@ -86,7 +86,7 @@ export const AmountStep = ({
         setMaxAmountMotes(stakeAmountMotes);
       }
     }
-  }, [csprBalance.liquidMotes, stakeAmountMotes, stakesType]);
+  }, [csprBalance.liquidMotes, stakeAmountMotes, stakeType]);
 
   const {
     register,
@@ -112,7 +112,7 @@ export const AmountStep = ({
           <Error
             header="Not enough CSPR"
             description={
-              stakesType === AuctionManagerEntryPoint.delegate
+              stakeType === AuctionManagerEntryPoint.delegate
                 ? "You don't have enough CSPR to cover the delegation minimum amount\n" +
                   '              and the transaction fee.'
                 : "You don't have enough CSPR to cover the transaction fee."

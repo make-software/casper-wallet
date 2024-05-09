@@ -19,6 +19,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
 import { TokenType, useCasperToken } from '@hooks/use-casper-token';
+import { useSubmitButton } from '@hooks/use-submit-button';
 
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import {
@@ -69,7 +70,6 @@ export const TransferPage = () => {
     useState(true);
   const [isAmountFormButtonDisabled, setIsAmountFormButtonDisabled] =
     useState(false);
-  const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(true);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { networkName, nodeUrl } = useSelector(
@@ -110,48 +110,9 @@ export const TransferPage = () => {
     [contactPublicKeys, recipientPublicKey]
   );
 
-  // event listener for enable/disable submit button
-  useEffect(() => {
-    const layoutContentContainer = document.querySelector('#ms-container');
-
-    // if the content is not scrollable, we can enable the submit button
-    if (
-      layoutContentContainer &&
-      layoutContentContainer.clientHeight ===
-        layoutContentContainer.scrollHeight &&
-      transferStep === TransactionSteps.Confirm &&
-      isSubmitButtonDisable
-    ) {
-      setIsSubmitButtonDisable(false);
-    }
-
-    const handleScroll = () => {
-      if (
-        layoutContentContainer &&
-        transferStep === TransactionSteps.Confirm &&
-        isSubmitButtonDisable
-      ) {
-        const bottom =
-          Math.ceil(
-            layoutContentContainer.clientHeight +
-              layoutContentContainer.scrollTop
-          ) >= layoutContentContainer.scrollHeight;
-
-        if (bottom) {
-          // we are at the bottom of the page
-          setIsSubmitButtonDisable(false);
-        }
-      }
-    };
-
-    // add event listener to the scrollable container
-    layoutContentContainer?.addEventListener('scroll', handleScroll);
-
-    // remove event listener on cleanup
-    return () => {
-      layoutContentContainer?.removeEventListener('scroll', handleScroll);
-    };
-  }, [isSubmitButtonDisable, transferStep]);
+  const { isSubmitButtonDisable, setIsSubmitButtonDisable } = useSubmitButton(
+    transferStep === TransactionSteps.Confirm
+  );
 
   const sendDeploy = (signDeploy: DeployUtil.Deploy) => {
     sendSignDeploy(signDeploy, nodeUrl)
@@ -199,6 +160,8 @@ export const TransferPage = () => {
   };
 
   const onSubmitSending = async () => {
+    setIsSubmitButtonDisable(true);
+
     if (activeAccount) {
       const KEYS = createAsymmetricKey(
         activeAccount.publicKey,

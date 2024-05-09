@@ -5,11 +5,3 @@ export enum TransactionSteps {
   Confirm = 'confirm',
   Success = 'success'
 }
-
-export const getIsErc20Transfer = (
-  tokenContractPackageHash: string | undefined
-) => {
-  return (
-    tokenContractPackageHash != null && tokenContractPackageHash !== 'Casper'
-  );
-};
