@@ -1,5 +1,5 @@
 import { Player } from '@lottiefiles/react-lottie-player';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -48,6 +48,12 @@ export const NoConnectedLedger: React.FC<INoConnectedLedgerProps> = ({
 }) => {
   const { t } = useTranslation();
   const isDarkMode = useIsDarkMode();
+
+  useEffect(() => {
+    const container = document.querySelector('#ms-container');
+
+    container?.scrollTo(0, 0);
+  }, []);
 
   if (
     !(
