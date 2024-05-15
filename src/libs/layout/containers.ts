@@ -203,16 +203,6 @@ export const FooterButtonsContainer = styled(SpaceBetweenFlexRow)<Props>`
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
 `;
 
-/**
- * @deprecated to be replaced by FooterButtonsContainer when Popup layout is refactored
- * to be the same as window layout
- */
-export const FooterButtonsAbsoluteContainer = styled(FooterButtonsContainer)`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-`;
-
 export const ListItemClickableContainer = styled(SpaceBetweenFlexRow)`
   cursor: pointer;
 
@@ -293,9 +283,11 @@ export const Overlay = styled.div`
   z-index: ${({ theme }) => theme.zIndex.modal};
   top: 0;
   left: 0;
+  bottom: 0;
+  right: 0;
 
   height: 100vh;
-  width: 100vw;
+  max-width: 360px;
 
   background: ${({ theme }) => hexToRGBA(theme.color.black, '0.32')};
 `;

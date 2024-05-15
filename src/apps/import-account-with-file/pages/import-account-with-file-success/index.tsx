@@ -4,44 +4,28 @@ import { Trans, useTranslation } from 'react-i18next';
 import { closeCurrentWindow } from '@background/close-current-window';
 
 import {
-  ContentContainer,
-  FooterButtonsAbsoluteContainer,
-  IllustrationContainer,
-  ParagraphContainer,
-  SpacingSize
+  FooterButtonsContainer,
+  HeaderPopup,
+  LayoutWindow
 } from '@libs/layout';
-import { Button, SvgIcon, Typography } from '@libs/ui/components';
+import { Button } from '@libs/ui/components';
 
-export function ImportAccountWithFileSuccessContentPage() {
+import { ImportAccountWithFileSuccessContentPage } from './content';
+
+export const ImportAccountWithFileSuccessPage = () => {
   const { t } = useTranslation();
 
   return (
-    <ContentContainer>
-      <IllustrationContainer>
-        <SvgIcon
-          src="assets/illustrations/account-imported.svg"
-          width={200}
-          height={120}
-        />
-      </IllustrationContainer>
-      <ParagraphContainer top={SpacingSize.XL}>
-        <Typography type="header">
-          <Trans t={t}>Your account was successfully imported</Trans>
-        </Typography>
-      </ParagraphContainer>
-      <ParagraphContainer top={SpacingSize.Medium}>
-        <Typography type="body" color="contentSecondary">
-          <Trans t={t}>
-            Imported accounts are distinguished by an ‘IMPORTED’ icon in the
-            account lists.
-          </Trans>
-        </Typography>
-      </ParagraphContainer>
-      <FooterButtonsAbsoluteContainer>
-        <Button onClick={() => closeCurrentWindow()}>
-          <Trans t={t}>Done</Trans>
-        </Button>
-      </FooterButtonsAbsoluteContainer>
-    </ContentContainer>
+    <LayoutWindow
+      renderHeader={() => <HeaderPopup />}
+      renderContent={() => <ImportAccountWithFileSuccessContentPage />}
+      renderFooter={() => (
+        <FooterButtonsContainer>
+          <Button onClick={closeCurrentWindow}>
+            <Trans t={t}>Done</Trans>
+          </Button>
+        </FooterButtonsContainer>
+      )}
+    />
   );
-}
+};

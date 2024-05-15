@@ -33,7 +33,7 @@ const slideOutToBottom = keyframes`
 const ModalContainer = styled.div<{
   placement: 'top' | 'bottom' | 'fullBottom';
 }>(({ theme, placement }) => ({
-  position: 'fixed',
+  position: 'absolute',
 
   margin: '0 16px',
 
