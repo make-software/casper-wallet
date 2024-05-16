@@ -1,5 +1,4 @@
 import { Player } from '@lottiefiles/react-lottie-player';
-import debounce from 'lodash.debounce';
 import React, { useEffect, useState } from 'react';
 import {
   Controller,
@@ -138,8 +137,6 @@ export const LedgerAccountsList = ({
       )
     );
   };
-
-  const debounceInputChange = debounce(handleInputChange, 1000);
 
   useEffect(() => {
     const isButtonDisabled = calculateSubmitButtonDisabled({
@@ -288,13 +285,19 @@ export const LedgerAccountsList = ({
                           }}
                           onChange={event => {
                             inputControllerField.onChange(event);
-                            debounceInputChange(account.id, event.target.value);
 
                             // manually trigger validation in case when a few inputs have the same name
                             // and user change one of them.
                             // So we validate all of them to remove error from the fields.
                             // This is an edge case.
-                            trigger();
+                            trigger().then(isValid => {
+                              if (isValid) {
+                                handleInputChange(
+                                  account.id,
+                                  event.target.value
+                                );
+                              }
+                            });
                           }}
                           error={
                             !!inputControllerFormState.errors.accountNames?.[
