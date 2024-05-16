@@ -19,9 +19,10 @@ export const ledgerErrorsData: Record<LedgerEventStatus, ILedgerErrorData> = {
     title: 'Unable to connect to the Ledger device',
     description: 'Check the Ledger device connection and try again'
   },
-  [LedgerEventStatus.TransportOpenUserCancelled]: {
-    title: 'You have rejected the connection to the Ledger device',
-    description: null
+  [LedgerEventStatus.LedgerPermissionRequired]: {
+    title: 'Please provide permission to connect your Ledger device',
+    description:
+      'This permission is needed for each new device when connecting to the browser.'
   },
   [LedgerEventStatus.MsgSignatureFailed]: {
     title: 'Error when signing a message',
@@ -57,6 +58,11 @@ export const ledgerErrorsData: Record<LedgerEventStatus, ILedgerErrorData> = {
     description:
       'Consider switching to latest versions of Chrome or Edge browsers'
   },
+  [LedgerEventStatus.WaitingToSignPrevDeploy]: {
+    title: 'Your have pending signing action on your Ledger device',
+    description: 'Handle the previous signing action and then make a new one'
+  },
+  'ledger-ask-permission': { title: null, description: null },
   'ledger-account-list-updated': { title: null, description: null },
   'ledger-connected': { title: null, description: null },
   'ledger-disconnected': { title: null, description: null },

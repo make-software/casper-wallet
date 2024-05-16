@@ -1,3 +1,4 @@
+import { DeployUtil } from 'casper-js-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -21,6 +22,10 @@ import {
   selectAccountNftTokens
 } from '@background/redux/account-info/selectors';
 import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
+import {
+  ledgerDeployChanged,
+  ledgerRecipientToSaveOnSuccessChanged
+} from '@background/redux/ledger/actions';
 import {
   selectAskForReviewAfter,
   selectRatedInStore
@@ -48,8 +53,9 @@ import {
   createErrorLocationState
 } from '@libs/layout';
 import {
-  makeNFTDeployAndSign,
-  sendSignDeploy
+  makeNFTDeploy,
+  sendSignDeploy,
+  signDeploy
 } from '@libs/services/deployer-service';
 import {
   Button,
@@ -156,18 +162,18 @@ export const TransferNftPage = () => {
         target: getRawPublicKey(recipientPublicKey)
       };
 
-      const signDeploy = await makeNFTDeployAndSign(
+      const deploy = await makeNFTDeploy(
         getRuntimeArgs(tokenStandard, args),
         CSPRtoMotes(paymentAmount),
         KEYS.publicKey,
         networkName,
         nftToken?.contract_package_hash!,
-        nodeUrl,
-        [KEYS],
-        activeAccount
+        nodeUrl
       );
 
-      sendSignDeploy(signDeploy, nodeUrl)
+      const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
+
+      sendSignDeploy(signedDeploy, nodeUrl)
         .then(resp => {
           dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
@@ -222,9 +228,42 @@ export const TransferNftPage = () => {
     }
   };
 
+  const beforeLedgerActionCb = async () => {
+    setShowLedgerConfirm(true);
+
+    if (haveReverseOwnerLookUp || !nftToken || !activeAccount) return;
+
+    const KEYS = createAsymmetricKey(
+      activeAccount.publicKey,
+      activeAccount.secretKey
+    );
+
+    const args = {
+      tokenId: nftToken.token_id,
+      source: KEYS.publicKey,
+      target: getRawPublicKey(recipientPublicKey)
+    };
+
+    const deploy = await makeNFTDeploy(
+      getRuntimeArgs(tokenStandard, args),
+      CSPRtoMotes(paymentAmount),
+      KEYS.publicKey,
+      networkName,
+      nftToken?.contract_package_hash!,
+      nodeUrl
+    );
+
+    dispatchToMainStore(
+      ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+    );
+    dispatchToMainStore(
+      ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
+    );
+  };
+
   const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
     ledgerAction: submitTransfer,
-    beforeLedgerActionCb: () => setShowLedgerConfirm(true)
+    beforeLedgerActionCb
   });
 
   const renderFooter = () => {

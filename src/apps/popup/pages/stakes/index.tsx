@@ -1,3 +1,4 @@
+import { DeployUtil } from 'casper-js-sdk';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -15,11 +16,13 @@ import { useConfirmationButtonText } from '@popup/pages/stakes/utils';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
+import { ledgerDeployChanged } from '@background/redux/ledger/actions';
 import {
   selectAskForReviewAfter,
   selectRatedInStore
 } from '@background/redux/rate-app/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
 import {
   selectIsActiveAccountFromLedger,
   selectVaultActiveAccount
@@ -40,8 +43,9 @@ import {
   createErrorLocationState
 } from '@libs/layout';
 import {
-  makeAuctionManagerDeployAndSing,
-  sendSignDeploy
+  makeAuctionManagerDeploy,
+  sendSignDeploy,
+  signDeploy
 } from '@libs/services/deployer-service';
 import {
   dispatchFetchAuctionValidatorsRequest,
@@ -245,7 +249,7 @@ export const StakesPage = () => {
         activeAccount.secretKey
       );
 
-      const signDeploy = await makeAuctionManagerDeployAndSing(
+      const deploy = await makeAuctionManagerDeploy(
         stakesType,
         activeAccount.publicKey,
         validatorPublicKey,
@@ -253,12 +257,12 @@ export const StakesPage = () => {
         motesAmount,
         networkName,
         auctionManagerContractHash,
-        nodeUrl,
-        [KEYS],
-        activeAccount
+        nodeUrl
       );
 
-      sendSignDeploy(signDeploy, nodeUrl)
+      const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
+
+      sendSignDeploy(signedDeploy, nodeUrl)
         .then(resp => {
           if ('result' in resp) {
             fetchAndDispatchExtendedDeployInfo(resp.result.deploy_hash);
@@ -302,9 +306,32 @@ export const StakesPage = () => {
     }
   };
 
+  const beforeLedgerActionCb = async () => {
+    setStakeStep(StakeSteps.ConfirmWithLedger);
+
+    if (activeAccount) {
+      const motesAmount = CSPRtoMotes(inputAmountCSPR);
+
+      const deploy = await makeAuctionManagerDeploy(
+        stakesType,
+        activeAccount.publicKey,
+        validatorPublicKey,
+        newValidatorPublicKey || null,
+        motesAmount,
+        networkName,
+        auctionManagerContractHash,
+        nodeUrl
+      );
+
+      dispatchToMainStore(
+        ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+      );
+    }
+  };
+
   const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
     ledgerAction: submitStake,
-    beforeLedgerActionCb: () => setStakeStep(StakeSteps.ConfirmWithLedger)
+    beforeLedgerActionCb
   });
 
   const getButtonProps = () => {

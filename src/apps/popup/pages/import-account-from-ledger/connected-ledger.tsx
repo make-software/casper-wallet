@@ -44,7 +44,13 @@ const AnimationContainer = styled(CenteredFlexColumn)`
   padding: 0 16px 52px;
 `;
 
-export const ConnectedLedger = () => {
+interface IConnectedLedgerProps {
+  onClose: () => void;
+}
+
+export const ConnectedLedger: React.FC<IConnectedLedgerProps> = ({
+  onClose
+}) => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [selectedAccounts, setSelectedAccounts] = useState<
     ILedgerAccountListItem[]
@@ -136,9 +142,10 @@ export const ConnectedLedger = () => {
       derivationIndex: account.derivationIndex
     }));
 
-    dispatchToMainStore(accountsImported(accounts)).then(() =>
-      navigate(RouterPath.Home)
-    );
+    dispatchToMainStore(accountsImported(accounts)).then(() => {
+      onClose();
+      navigate(RouterPath.Home);
+    });
   };
 
   const onLoadMore = () => {

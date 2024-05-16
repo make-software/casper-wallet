@@ -58,7 +58,8 @@ export const NoConnectedLedger: React.FC<INoConnectedLedgerProps> = ({
   if (
     !(
       event?.status === LedgerEventStatus.Disconnected ||
-      event?.status === LedgerEventStatus.WaitingResponseFromDevice
+      event?.status === LedgerEventStatus.WaitingResponseFromDevice ||
+      event?.status === LedgerEventStatus.LedgerAskPermission
     )
   ) {
     return null;
@@ -83,22 +84,29 @@ export const NoConnectedLedger: React.FC<INoConnectedLedgerProps> = ({
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          {event.status === LedgerEventStatus.WaitingResponseFromDevice ? (
+          {event.status === LedgerEventStatus.WaitingResponseFromDevice && (
             <Trans t={t}>Ledger is connecting</Trans>
-          ) : (
-            <Trans t={t}>Now please open Casper app on your Ledger</Trans>
+          )}
+          {event.status === LedgerEventStatus.Disconnected && (
+            <Trans t={t}>Open the Casper app on your Ledger device</Trans>
+          )}
+          {event.status === LedgerEventStatus.LedgerAskPermission && (
+            <Trans t={t}>
+              Now please provide permission to connect Ledger device
+            </Trans>
           )}
         </Typography>
       </ParagraphContainer>
       <ParagraphContainer top={SpacingSize.Medium}>
-        {event.status === LedgerEventStatus.WaitingResponseFromDevice ? (
+        {event.status === LedgerEventStatus.WaitingResponseFromDevice && (
           <Typography type="body" color="contentSecondary">
             <Trans t={t}>
               Follow the steps to be able to [Sign/Confirm] transaction with
               Ledger.
             </Trans>
           </Typography>
-        ) : (
+        )}
+        {event.status === LedgerEventStatus.Disconnected && (
           <Typography type="body" color="contentSecondary">
             <Trans t={t}>to connect with Casper Wallet.</Trans>{' '}
             <Link

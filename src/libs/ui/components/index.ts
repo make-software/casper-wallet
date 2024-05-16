@@ -57,3 +57,4 @@ export * from './no-connected-ledger/no-connected-ledger';
 export * from './ledger-footer/ledger-footer';
 export * from './ledger-error-view/ledger-error-view';
 export * from './ledger-event-view/ledger-event-view';
+export * from './ledger-connection-view/ledger-connection-view';

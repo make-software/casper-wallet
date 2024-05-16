@@ -36,6 +36,10 @@ export const isSafariBuild = process.env.BROWSER === Browser.Safari;
 export const isFirefoxBuild = process.env.BROWSER === Browser.Firefox;
 export const isChromeBuild = process.env.BROWSER === Browser.Chrome;
 
+export const isLedgerAvailable =
+  process.env.BROWSER === Browser.Chrome ||
+  process.env.BROWSER === Browser.Edge;
+
 export const isValidU64 = (value?: string): boolean => {
   if (!value) {
     return false;

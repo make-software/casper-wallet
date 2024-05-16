@@ -3,6 +3,7 @@ export enum LedgerEventStatus {
   NotAvailable = 'ledger-not-available',
   DeviceLocked = 'ledger-device-locked',
   WaitingResponseFromDevice = 'ledger-waiting-response-from-device',
+  WaitingToSignPrevDeploy = 'waiting-to-sign-prev-deploy',
   CasperAppNotLoaded = 'ledger-casper-app-not-loaded',
   Connected = 'ledger-connected',
   LoadingAccountsList = 'ledger-loading-accounts-list',
@@ -16,7 +17,8 @@ export enum LedgerEventStatus {
   MsgSignatureCompleted = 'ledger-msg-signature-completed',
   MsgSignatureCanceled = 'ledger-msg-signature-cancelled',
   MsgSignatureFailed = 'ledger-msg-signature-failed',
-  TransportOpenUserCancelled = 'ledger-transport-open-user-cancelled',
+  LedgerPermissionRequired = 'ledger-permission-required',
+  LedgerAskPermission = 'ledger-ask-permission',
   ErrorOpeningDevice = 'ledger-error-opening-device',
   Timeout = 'ledger-timeout',
   InvalidIndex = 'ledger-invalid-index'

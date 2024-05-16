@@ -27,6 +27,7 @@ import { RateAppPage } from '@popup/pages/rate-app';
 import { ReceivePage } from '@popup/pages/receive';
 import { RemoveAccountPageContent } from '@popup/pages/remove-account';
 import { RenameAccountPageContent } from '@popup/pages/rename-account';
+import { SignWithLedgerInNewWindowPage } from '@popup/pages/sign-with-ledger-in-new-window';
 import { StakesPage } from '@popup/pages/stakes';
 import { TimeoutPageContent } from '@popup/pages/timeout';
 import { TokenDetailPage } from '@popup/pages/token-details';
@@ -287,6 +288,10 @@ function AppRoutes() {
       <Route
         path={RouterPath.ImportAccountFromLedger}
         element={<ImportAccountFromLedgerPage />}
+      />
+      <Route
+        path={RouterPath.SignWithLedgerInNewWindow}
+        element={<SignWithLedgerInNewWindowPage />}
       />
     </Routes>
   );

@@ -17,6 +17,10 @@ import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
 import {
+  ledgerDeployChanged,
+  ledgerRecipientToSaveOnSuccessChanged
+} from '@background/redux/ledger/actions';
+import {
   selectAskForReviewAfter,
   selectRatedInStore
 } from '@background/redux/rate-app/selectors';
@@ -43,10 +47,12 @@ import {
   createErrorLocationState
 } from '@libs/layout';
 import {
-  makeCep18TransferDeployAndSign,
-  makeNativeTransferDeployAndSign,
-  sendSignDeploy
+  makeCep18TransferDeploy,
+  makeNativeTransferDeploy,
+  sendSignDeploy,
+  signDeploy
 } from '@libs/services/deployer-service';
+import { HardwareWalletType } from '@libs/types/account';
 import {
   Button,
   HomePageTabsId,
@@ -245,7 +251,7 @@ export const TransferPage = () => {
 
       if (isErc20Transfer) {
         // ERC20 transfer
-        const signDeploy = await makeCep18TransferDeployAndSign(
+        const deploy = await makeCep18TransferDeploy(
           nodeUrl,
           networkName,
           tokenContractHash,
@@ -254,34 +260,80 @@ export const TransferPage = () => {
           amount,
           erc20Decimals,
           paymentAmount,
-          activeAccount,
-          [KEYS]
+          activeAccount
         );
 
-        sendDeploy(signDeploy);
+        const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
+
+        sendDeploy(signedDeploy);
       } else {
         // CSPR transfer
         const motesAmount = CSPRtoMotes(amount);
 
-        const signDeploy = await makeNativeTransferDeployAndSign(
+        const deploy = await makeNativeTransferDeploy(
           activeAccount,
           recipientPublicKey,
           motesAmount,
           networkName,
           nodeUrl,
-          [KEYS],
           transferIdMemo
         );
 
-        sendDeploy(signDeploy);
+        const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
+
+        sendDeploy(signedDeploy);
+      }
+    }
+  };
+
+  const beforeLedgerActionCb = async () => {
+    setTransferStep(TransactionSteps.ConfirmWithLedger);
+
+    if (activeAccount?.hardware === HardwareWalletType.Ledger) {
+      if (isErc20Transfer) {
+        const deploy = await makeCep18TransferDeploy(
+          nodeUrl,
+          networkName,
+          tokenContractHash,
+          tokenContractPackageHash,
+          recipientPublicKey,
+          amount,
+          erc20Decimals,
+          paymentAmount,
+          activeAccount
+        );
+
+        dispatchToMainStore(
+          ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+        );
+        dispatchToMainStore(
+          ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
+        );
+      } else {
+        const motesAmount = CSPRtoMotes(amount);
+
+        const deploy = await makeNativeTransferDeploy(
+          activeAccount,
+          recipientPublicKey,
+          motesAmount,
+          networkName,
+          nodeUrl,
+          transferIdMemo
+        );
+
+        dispatchToMainStore(
+          ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+        );
+        dispatchToMainStore(
+          ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
+        );
       }
     }
   };
 
   const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
     ledgerAction: onSubmitSending,
-    beforeLedgerActionCb: () =>
-      setTransferStep(TransactionSteps.ConfirmWithLedger)
+    beforeLedgerActionCb
   });
 
   const getButtonProps = () => {

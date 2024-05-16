@@ -5,7 +5,9 @@ import TransportWebHID from '@ledgerhq/hw-transport-webhid';
 import TransportWebUsb from '@ledgerhq/hw-transport-webusb';
 import { getLedgerDevices } from '@ledgerhq/hw-transport-webusb/lib/webusb';
 
-import { SelectedTransport } from './types';
+import { LedgerError } from '@libs/services/ledger/ledger';
+
+import { LedgerEventStatus, SelectedTransport } from './types';
 
 export const IsUsbLedgerTransportAvailable = async (): Promise<boolean> => {
   const hidAvailable = await TransportWebHID.isSupported();
@@ -43,6 +45,12 @@ export const usbTransportCreator = async (): Promise<Transport> => {
     return connected || (await TransportWebHID.request());
   } else if (await TransportWebUsb.isSupported()) {
     const connected = await TransportWebUsb.openConnected();
+
+    if (!connected) {
+      throw new LedgerError({
+        status: LedgerEventStatus.LedgerPermissionRequired
+      });
+    }
 
     return connected || (await TransportWebUsb.request());
   } else {

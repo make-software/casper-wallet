@@ -149,3 +149,44 @@ export function createOpenWindow({
     }
   };
 }
+
+export interface IOpenNewSeparateWindowParams {
+  url: string;
+}
+
+export async function openNewSeparateWindow({
+  url
+}: IOpenNewSeparateWindowParams): Promise<Windows.Window> {
+  const currentWindow = await windows.getCurrent();
+
+  // If this flag is true, we create a new window without any size and positions.
+  const isTestEnv = Boolean(process.env.TEST_ENV);
+
+  const windowWidth = currentWindow.width ?? 0;
+  const xOffset = currentWindow.left ?? 0;
+  const yOffset = currentWindow.top ?? 0;
+  const crossPlatformWidthOffset = 16;
+  const popupWidth = 360 + crossPlatformWidthOffset;
+  const popupHeight = 800;
+  const newWindow =
+    // We need this check for Firefox. If the Firefox browser is in fullscreen mode it ignores the width and height that we set and opens a popup in a small size.
+    // So we check it and if it is in a fullscreen mode we didn't set width and height, and the popup will also open in fullscreen mode.
+    // This is a default behavior for Safari and Chrome, but Firefox doesn't do this, so we need to do this manually for it.
+    currentWindow.state === 'fullscreen' || isTestEnv
+      ? await windows.create({
+          url,
+          type: 'normal',
+          focused: true
+        })
+      : await windows.create({
+          url,
+          type: 'normal',
+          height: popupHeight,
+          width: popupWidth,
+          left: windowWidth + xOffset - popupWidth,
+          top: yOffset,
+          focused: true
+        });
+
+  return newWindow;
+}

@@ -93,7 +93,7 @@ export class Ledger {
         this.#ledgerApp = new LedgerCasperApp(this.#transport);
       } catch (e) {
         if (!this.#transport) {
-          const evt = { status: LedgerEventStatus.TransportOpenUserCancelled };
+          const evt = { status: LedgerEventStatus.LedgerPermissionRequired };
           this.#LedgerEventStatussSubject.next(evt);
           reject(new LedgerError(evt));
           return;
@@ -129,15 +129,22 @@ export class Ledger {
     return this.#ledgerConnected;
   }
 
-  async isUnlocked(): Promise<boolean> {
+  async checkAppInfo(): Promise<LedgerEventStatus | null> {
     if (this.#ledgerConnected && this.#ledgerApp) {
       const appInfo = await this.#ledgerApp?.getAppInfo();
+      console.log('-------- appInfo', appInfo);
       await this.#processDelayAfterAction();
 
-      return appInfo.returnCode === 0x9000 && appInfo.appName === 'Casper';
+      if (appInfo.returnCode === 65535) {
+        return LedgerEventStatus.WaitingToSignPrevDeploy;
+      }
+
+      return appInfo.returnCode === 0x9000 && appInfo.appName === 'Casper'
+        ? null
+        : LedgerEventStatus.WaitingResponseFromDevice;
     }
 
-    return false;
+    return LedgerEventStatus.WaitingResponseFromDevice;
   }
 
   /** @throws {LedgerError} message - ILedgerEvent JSON */
@@ -418,8 +425,12 @@ export class Ledger {
       evt = { status: LedgerEventStatus.InvalidIndex };
     } else if (!this.#ledgerConnected) {
       evt = { status: LedgerEventStatus.CasperAppNotLoaded };
-    } else if (!(await this.isUnlocked())) {
-      evt = { status: LedgerEventStatus.DeviceLocked };
+    } else {
+      const status = await this.checkAppInfo();
+
+      if (status) {
+        evt = { status };
+      }
     }
 
     if (evt) {

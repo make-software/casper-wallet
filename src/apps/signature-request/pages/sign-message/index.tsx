@@ -4,6 +4,8 @@ import { useSelector } from 'react-redux';
 
 import { getSigningAccount } from '@src/utils';
 
+import { RouterPath } from '@signature-request/router';
+
 import { closeCurrentWindow } from '@background/close-current-window';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
@@ -25,7 +27,7 @@ import {
   LayoutWindow,
   SpacingSize
 } from '@libs/layout';
-import { ledger } from '@libs/services/ledger';
+import { LedgerEventStatus, ledger } from '@libs/services/ledger';
 import { HardwareWalletType } from '@libs/types/account';
 import {
   Button,
@@ -38,14 +40,19 @@ import { SignMessageContent } from './sign-message-content';
 
 export function SignMessagePage() {
   const { t } = useTranslation();
+  const searchParams = new URLSearchParams(document.location.search);
+  const isLedgerNewWindow = Boolean(searchParams.get('initialEventToRender'));
   const [isSigningAccountFromLedger, setIsSigningAccountFromLedger] =
     useState(false);
-  const [showLedgerConfirm, setShowLedgerConfirm] = useState(false);
+  const [showLedgerConfirm, setShowLedgerConfirm] =
+    useState<boolean>(isLedgerNewWindow);
 
-  const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
   const message = searchParams.get('message');
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
+  const initialEventToRender =
+    (searchParams.get('initialEventToRender') as LedgerEventStatus) ??
+    LedgerEventStatus.Disconnected;
 
   if (!requestId || !message || !signingPublicKeyHex) {
     throw Error(
@@ -90,7 +97,8 @@ export function SignMessagePage() {
   // signing account should be connected to site
   if (
     connectedAccountNames != null &&
-    !connectedAccountNames.includes(signingAccount.name)
+    !connectedAccountNames.includes(signingAccount.name) &&
+    !isLedgerNewWindow
   ) {
     const error = Error(
       'Account with signingPublicKeyHex is not connected to site'
@@ -143,16 +151,36 @@ export function SignMessagePage() {
     requestId
   ]);
 
-  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+  const {
+    ledgerEventStatusToRender,
+    makeSubmitLedgerAction,
+    closeNewLedgerWindowsAndClearState
+  } = useLedger({
     ledgerAction: handleSign,
-    beforeLedgerActionCb: () => setShowLedgerConfirm(true)
+    beforeLedgerActionCb: async () => setShowLedgerConfirm(true),
+    withWaitingEventOnDisconnect: false,
+    initialEventToRender: { status: initialEventToRender },
+    askPermissionUrlData: {
+      domain: 'signature-request.html',
+      params: {
+        requestId,
+        signingPublicKeyHex,
+        message
+      },
+      hash: RouterPath.SignMessage
+    }
   });
+
+  const onErrorCtaPressed = () => {
+    setShowLedgerConfirm(false);
+    closeNewLedgerWindowsAndClearState();
+  };
 
   const renderFooter = () => {
     if (showLedgerConfirm) {
       return renderLedgerFooter({
         onConnect: makeSubmitLedgerAction,
-        onErrorCtaPressed: () => setShowLedgerConfirm(false),
+        onErrorCtaPressed,
         event: ledgerEventStatusToRender
       });
     }
@@ -203,7 +231,7 @@ export function SignMessagePage() {
               ? () => (
                   <HeaderSubmenuBarNavLink
                     linkType="back"
-                    onClick={() => setShowLedgerConfirm(false)}
+                    onClick={onErrorCtaPressed}
                   />
                 )
               : undefined

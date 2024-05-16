@@ -13,13 +13,20 @@ import { LedgerEventView, renderLedgerFooter } from '@libs/ui/components';
 interface INotConnectedLedgerProps {
   event: ILedgerEvent;
   onConnect: (tr?: LedgerTransport) => () => Promise<void>;
+  closeNewLedgerWindowsAndClearState: () => void;
 }
 
-export const NotConnectedLedger: React.FC<INotConnectedLedgerProps> = ({
+export const LedgerConnectionView: React.FC<INotConnectedLedgerProps> = ({
   event,
-  onConnect
+  onConnect,
+  closeNewLedgerWindowsAndClearState
 }) => {
   const navigate = useTypedNavigate();
+
+  const onErrorCtaPressed = () => {
+    closeNewLedgerWindowsAndClearState();
+    navigate(RouterPath.Home);
+  };
 
   return (
     <PopupLayout
@@ -29,7 +36,10 @@ export const NotConnectedLedger: React.FC<INotConnectedLedgerProps> = ({
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={() => (
-            <HeaderSubmenuBarNavLink linkType="close" />
+            <HeaderSubmenuBarNavLink
+              linkType="close"
+              onClick={onErrorCtaPressed}
+            />
           )}
         />
       )}
@@ -37,9 +47,7 @@ export const NotConnectedLedger: React.FC<INotConnectedLedgerProps> = ({
       renderFooter={renderLedgerFooter({
         event,
         onConnect,
-        onErrorCtaPressed: () => {
-          navigate(RouterPath.Home);
-        }
+        onErrorCtaPressed
       })}
     />
   );

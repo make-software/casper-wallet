@@ -3,6 +3,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { isLedgerAvailable } from '@src/utils';
+
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
@@ -106,14 +108,16 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
           >
             <Trans t={t}>Import account</Trans>
           </Button>
-          <Button
-            color="secondaryBlue"
-            onClick={() => {
-              navigate(RouterPath.ImportAccountFromLedger);
-            }}
-          >
-            <Trans t={t}>Connect Ledger</Trans>
-          </Button>
+          {isLedgerAvailable && (
+            <Button
+              color="secondaryBlue"
+              onClick={() => {
+                navigate(RouterPath.ImportAccountFromLedger);
+              }}
+            >
+              <Trans t={t}>Connect Ledger</Trans>
+            </Button>
+          )}
         </ButtonContainer>
       )}
     />

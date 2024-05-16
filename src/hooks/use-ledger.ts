@@ -1,9 +1,20 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { windows } from 'webextension-polyfill';
+
+import { RouterPath } from '@popup/router';
+
+import { openNewSeparateWindow } from '@background/create-open-window';
+import {
+  ledgerNewWindowIdChanged,
+  ledgerStateCleared
+} from '@background/redux/ledger/actions';
+import { selectLedgerNewWindowId } from '@background/redux/ledger/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
 
 import {
   ILedgerEvent,
   IsBluetoothLedgerTransportAvailable,
-  LedgerError,
   LedgerEventStatus,
   LedgerTransport,
   SelectedTransport,
@@ -17,10 +28,16 @@ import {
 
 interface IUseLedgerParams {
   ledgerAction: () => Promise<void>;
-  beforeLedgerActionCb: () => void;
+  beforeLedgerActionCb: () => Promise<void>;
   initialEventToRender?: ILedgerEvent;
   shouldLoadAccountList?: boolean;
   withWaitingEventOnDisconnect?: boolean;
+  /** We have to open new browser window to handle device permission */
+  askPermissionUrlData?: {
+    domain: string;
+    params?: Record<string, string>;
+    hash: string;
+  };
 }
 
 export const useLedger = ({
@@ -30,16 +47,37 @@ export const useLedger = ({
     status: LedgerEventStatus.WaitingResponseFromDevice
   },
   withWaitingEventOnDisconnect = true,
-  shouldLoadAccountList = false
+  shouldLoadAccountList = false,
+  askPermissionUrlData = {
+    domain: 'popup.html',
+    params: {},
+    hash: RouterPath.SignWithLedgerInNewWindow
+  }
 }: IUseLedgerParams) => {
   const [isLedgerConnected, setIsLedgerConnected] = useState(
     ledger.isConnected
   );
   const [ledgerEventStatusToRender, setLedgerEventStatusToRender] =
     useState<ILedgerEvent>(initialEventToRender);
+  const windowId = useSelector(selectLedgerNewWindowId);
   const shouldTrySignAfterConnectRef = useRef<boolean>(false);
   const selectedTransportRef = useRef<SelectedTransport>(undefined);
   const isFirstEventRef = useRef<boolean>(true);
+  const triggeredRef = useRef(false);
+
+  const params = new URLSearchParams({
+    ...(askPermissionUrlData.params ?? {}),
+    initialEventToRender: LedgerEventStatus.LedgerAskPermission,
+    ...(selectedTransportRef.current
+      ? { ledgerTransport: selectedTransportRef.current }
+      : {})
+  }).toString();
+
+  const url = useMemo(
+    () =>
+      `${askPermissionUrlData.domain}?${params}#${askPermissionUrlData.hash}`,
+    [askPermissionUrlData.domain, askPermissionUrlData.hash, params]
+  );
 
   const makeSubmitLedgerAction = (transport?: LedgerTransport) => async () => {
     if (!transport && !selectedTransportRef.current) {
@@ -53,7 +91,8 @@ export const useLedger = ({
     setLedgerEventStatusToRender({
       status: LedgerEventStatus.WaitingResponseFromDevice
     });
-    beforeLedgerActionCb();
+
+    await beforeLedgerActionCb();
 
     if (isLedgerConnected) {
       ledgerAction();
@@ -82,14 +121,6 @@ export const useLedger = ({
         }
       } catch (e) {
         console.log('-------- e', e);
-        if (e instanceof LedgerError) {
-          const event = JSON.parse(e.message);
-
-          if (event.status === LedgerEventStatus.TransportOpenUserCancelled) {
-            selectedTransportRef.current = undefined;
-          }
-        }
-
         setIsLedgerConnected(false);
       }
     }
@@ -139,9 +170,65 @@ export const useLedger = ({
     }
   }, [isLedgerConnected, makeSubmitLedgerAction]);
 
+  /** We have to open new browser window to handle device permission */
+  useEffect(() => {
+    (async () => {
+      if (
+        ledgerEventStatusToRender.status ===
+          LedgerEventStatus.LedgerPermissionRequired &&
+        !windowId &&
+        !triggeredRef.current
+      ) {
+        const w = await openNewSeparateWindow({ url });
+
+        if (w.id) {
+          dispatchToMainStore(ledgerNewWindowIdChanged(w.id));
+          triggeredRef.current = true;
+
+          const handleCloseWindow = () => {
+            dispatchToMainStore(ledgerStateCleared());
+            windows.onRemoved.removeListener(handleCloseWindow);
+          };
+
+          windows.onRemoved.addListener(handleCloseWindow);
+        }
+      }
+    })();
+  }, [ledgerEventStatusToRender.status, url, windowId]);
+
+  const closeNewLedgerWindowsAndClearState = useCallback(async () => {
+    if (windowId) {
+      const all = await windows.getAll({ windowTypes: ['popup'] });
+      all.forEach(w => w.id && windows.remove(w.id));
+      dispatchToMainStore(ledgerStateCleared());
+      await windows.remove(windowId);
+    }
+  }, [windowId]);
+
+  useEffect(() => {
+    if (windowId && askPermissionUrlData?.domain !== 'popup.html') {
+      const sub = ledger.subscribeToLedgerEventStatuss(event => {
+        if (
+          event.status === LedgerEventStatus.SignatureCompleted ||
+          event.status === LedgerEventStatus.MsgSignatureCompleted
+        ) {
+          closeNewLedgerWindowsAndClearState();
+        }
+      });
+
+      return () => sub.unsubscribe();
+    }
+  }, [
+    askPermissionUrlData?.domain,
+    closeNewLedgerWindowsAndClearState,
+    windowId
+  ]);
+
   return {
     ledgerEventStatusToRender,
     isLedgerConnected,
-    makeSubmitLedgerAction
+    makeSubmitLedgerAction,
+    closeNewLedgerWindowsAndClearState,
+    windowId
   };
 };

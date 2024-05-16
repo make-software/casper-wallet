@@ -23,7 +23,10 @@ export const renderLedgerFooter = ({
   onErrorCtaPressed,
   onConnect
 }: IRenderLedgerFooterParams) => {
-  if (event?.status === LedgerEventStatus.Disconnected) {
+  if (
+    event?.status === LedgerEventStatus.Disconnected ||
+    event?.status === LedgerEventStatus.LedgerAskPermission
+  ) {
     return () => <LedgerDisconnectedFooter onConnect={onConnect} />;
   } else if (isLedgerError(event)) {
     return () => <LedgerErrorFooter onErrorCtaPressed={onErrorCtaPressed} />;

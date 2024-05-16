@@ -5,6 +5,8 @@ import { useSelector } from 'react-redux';
 
 import { getSigningAccount } from '@src/utils';
 
+import { RouterPath } from '@signature-request/router';
+
 import { closeCurrentWindow } from '@background/close-current-window';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
@@ -27,7 +29,7 @@ import {
   LayoutWindow,
   SpacingSize
 } from '@libs/layout';
-import { ledger } from '@libs/services/ledger';
+import { LedgerEventStatus, ledger } from '@libs/services/ledger';
 import { HardwareWalletType } from '@libs/types/account';
 import {
   Button,
@@ -45,11 +47,16 @@ export function SignDeployPage() {
   const [deploy, setDeploy] = useState<undefined | CasperDeploy>(undefined);
   const [isSigningAccountFromLedger, setIsSigningAccountFromLedger] =
     useState(false);
-  const [showLedgerConfirm, setShowLedgerConfirm] = useState(false);
 
   const searchParams = new URLSearchParams(document.location.search);
+  const isLedgerNewWindow = Boolean(searchParams.get('initialEventToRender'));
   const requestId = searchParams.get('requestId');
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
+  const initialEventToRender =
+    (searchParams.get('initialEventToRender') as LedgerEventStatus) ??
+    LedgerEventStatus.Disconnected;
+  const [showLedgerConfirm, setShowLedgerConfirm] =
+    useState<boolean>(isLedgerNewWindow);
 
   if (!requestId || !signingPublicKeyHex) {
     throw Error('Missing search param');
@@ -111,7 +118,8 @@ export function SignDeployPage() {
   // signing account should be connected to site
   if (
     connectedAccountNames != null &&
-    !connectedAccountNames.includes(signingAccount.name)
+    !connectedAccountNames.includes(signingAccount.name) &&
+    !isLedgerNewWindow
   ) {
     const error = Error(
       'Account with signingPublicKeyHex is not connected to site'
@@ -175,16 +183,35 @@ export function SignDeployPage() {
     return () => window.removeEventListener('beforeunload', handleCancel);
   }, [handleCancel]);
 
-  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+  const {
+    ledgerEventStatusToRender,
+    makeSubmitLedgerAction,
+    closeNewLedgerWindowsAndClearState
+  } = useLedger({
     ledgerAction: handleSign,
-    beforeLedgerActionCb: () => setShowLedgerConfirm(true)
+    beforeLedgerActionCb: async () => setShowLedgerConfirm(true),
+    initialEventToRender: { status: initialEventToRender },
+    withWaitingEventOnDisconnect: false,
+    askPermissionUrlData: {
+      domain: 'signature-request.html',
+      params: {
+        requestId,
+        signingPublicKeyHex
+      },
+      hash: RouterPath.SignDeploy
+    }
   });
+
+  const onErrorCtaPressed = () => {
+    setShowLedgerConfirm(false);
+    closeNewLedgerWindowsAndClearState();
+  };
 
   const renderFooter = () => {
     if (showLedgerConfirm) {
       return renderLedgerFooter({
         onConnect: makeSubmitLedgerAction,
-        onErrorCtaPressed: () => setShowLedgerConfirm(false),
+        onErrorCtaPressed,
         event: ledgerEventStatusToRender
       });
     }
@@ -223,7 +250,7 @@ export function SignDeployPage() {
               ? () => (
                   <HeaderSubmenuBarNavLink
                     linkType="back"
-                    onClick={() => setShowLedgerConfirm(false)}
+                    onClick={onErrorCtaPressed}
                   />
                 )
               : undefined
