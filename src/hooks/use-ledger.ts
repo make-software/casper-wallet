@@ -120,7 +120,6 @@ export const useLedger = ({
           });
         }
       } catch (e) {
-        console.log('-------- e', e);
         setIsLedgerConnected(false);
       }
     }
@@ -157,7 +156,7 @@ export const useLedger = ({
       }
 
       isFirstEventRef.current = false;
-      console.log('-------- event', JSON.stringify(event, null, ' '));
+      console.log('-------- event', JSON.stringify(event.status, null, ' '));
     });
 
     return () => sub.unsubscribe();

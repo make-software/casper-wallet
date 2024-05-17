@@ -157,7 +157,6 @@ export const ConnectedLedger: React.FC<IConnectedLedgerProps> = ({
       });
       setMaxItemsToRender(prevState => prevState + 5);
     } catch (e) {
-      console.log('-------- e', JSON.stringify(e, null, ' '));
       setIsLoadingMore(false);
     }
   };

@@ -1,5 +1,5 @@
 import { Player } from '@lottiefiles/react-lottie-player';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -24,30 +24,37 @@ const ItemContainer = styled(AlignedFlexRow)`
   padding: 16px;
 `;
 
-const steps = [
-  {
-    id: 1,
-    text: 'Plug in your Ledger to the device'
-  },
-  {
-    id: 2,
-    text: 'Open Casper app on your Ledger'
-  },
-  {
-    id: 3,
-    text: 'Get back here to see txn details'
-  }
-];
-
 interface INoConnectedLedgerProps {
   event?: ILedgerEvent;
+  isAccountSelection: boolean;
 }
 
 export const NoConnectedLedger: React.FC<INoConnectedLedgerProps> = ({
-  event
+  event,
+  isAccountSelection
 }) => {
   const { t } = useTranslation();
   const isDarkMode = useIsDarkMode();
+
+  const steps = useMemo(
+    () => [
+      {
+        id: 1,
+        text: 'Connect Ledger to your device'
+      },
+      {
+        id: 2,
+        text: 'Open Casper app on your Ledger'
+      },
+      {
+        id: 3,
+        text: isAccountSelection
+          ? 'Get back here to see list of accounts'
+          : 'Get back here to see Txn hash'
+      }
+    ],
+    [isAccountSelection]
+  );
 
   useEffect(() => {
     const container = document.querySelector('#ms-container');
@@ -91,9 +98,7 @@ export const NoConnectedLedger: React.FC<INoConnectedLedgerProps> = ({
             <Trans t={t}>Open the Casper app on your Ledger device</Trans>
           )}
           {event.status === LedgerEventStatus.LedgerAskPermission && (
-            <Trans t={t}>
-              Now please provide permission to connect Ledger device
-            </Trans>
+            <Trans t={t}>Next, approve access to your Ledger device</Trans>
           )}
         </Typography>
       </ParagraphContainer>
@@ -108,7 +113,6 @@ export const NoConnectedLedger: React.FC<INoConnectedLedgerProps> = ({
         )}
         {event.status === LedgerEventStatus.Disconnected && (
           <Typography type="body" color="contentSecondary">
-            <Trans t={t}>to connect with Casper Wallet.</Trans>{' '}
             <Link
               color="contentAction"
               target="_blank"

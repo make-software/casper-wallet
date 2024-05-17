@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { isLedgerAvailable } from '@src/utils';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
-import { RouterPath, useTypedNavigate } from '@popup/router';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { WindowApp } from '@background/create-open-window';
 import {
@@ -34,8 +34,8 @@ interface AccountListProps {
 }
 
 export const AccountList = ({ closeModal }: AccountListProps) => {
+  const { pathname } = useTypedLocation();
   const [accountListRows, setAccountListRows] = useState<AccountListRows[]>([]);
-
   const { changeActiveAccountWithEvent: changeActiveAccount } =
     useAccountManager();
   const { t } = useTranslation();
@@ -111,8 +111,12 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
           {isLedgerAvailable && (
             <Button
               color="secondaryBlue"
-              onClick={() => {
-                navigate(RouterPath.ImportAccountFromLedger);
+              onClick={evt => {
+                if (pathname === RouterPath.ImportAccountFromLedger) {
+                  closeModal(evt);
+                } else {
+                  navigate(RouterPath.ImportAccountFromLedger);
+                }
               }}
             >
               <Trans t={t}>Connect Ledger</Trans>

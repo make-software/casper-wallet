@@ -8,4 +8,4 @@ export const selectLedgerDeploy = (state: RootState): string | null =>
 
 export const selectLedgerRecipientToSaveOnSuccess = (
   state: RootState
-): string | null => state.ledger.deploy;
+): string | null => state.ledger.recipientToSaveOnSuccess;

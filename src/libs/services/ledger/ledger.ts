@@ -88,7 +88,6 @@ export class Ledger {
 
       try {
         this.#transport = await transportCreator();
-        console.log('-------- this.#transport', this.#transport);
         this.#transport?.on('disconnect', this.#onDisconnect);
         this.#ledgerApp = new LedgerCasperApp(this.#transport);
       } catch (e) {
@@ -132,7 +131,7 @@ export class Ledger {
   async checkAppInfo(): Promise<LedgerEventStatus | null> {
     if (this.#ledgerConnected && this.#ledgerApp) {
       const appInfo = await this.#ledgerApp?.getAppInfo();
-      console.log('-------- appInfo', appInfo);
+
       await this.#processDelayAfterAction();
 
       if (appInfo.returnCode === 65535) {
@@ -174,7 +173,6 @@ export class Ledger {
             status: LedgerEventStatus.CasperAppNotLoaded
           });
         } else {
-          console.log('-------- get acc response', response);
           this.#processError({ status: LedgerEventStatus.AccountListFailed });
         }
       }
@@ -491,7 +489,7 @@ export class Ledger {
         try {
           const appInfo = await this.#ledgerApp.getAppInfo();
           await this.#processDelayAfterAction();
-          console.log('-------- appInfo', JSON.stringify(appInfo, null, ' '));
+
           if (appInfo.returnCode === 0xffff || appInfo.returnCode === 21781) {
             subscriber.next({ status: LedgerEventStatus.DeviceLocked });
 
@@ -504,7 +502,6 @@ export class Ledger {
           }
 
           if (appInfo.appName !== 'Casper') {
-            console.debug('Ledger device app info:' + appInfo.appName, appInfo);
             subscriber.next({ status: LedgerEventStatus.CasperAppNotLoaded });
 
             return false;
@@ -515,7 +512,7 @@ export class Ledger {
 
           return true;
         } catch (err) {
-          console.debug('-------- err', err);
+          console.error('-------- err', err);
         }
 
         return false;

@@ -76,7 +76,7 @@ export const LedgerDisconnectedFooter: React.FC<
                 }}
               >
                 <Trans t={t}>
-                  {ledgerTransport ? 'Continue with USB' : 'Connect via USB'}
+                  {ledgerTransport ? 'Continue' : 'Connect via USB'}
                 </Trans>
               </Button>
             )}
@@ -100,9 +100,7 @@ export const LedgerDisconnectedFooter: React.FC<
                 }}
               >
                 <Trans t={t}>
-                  {ledgerTransport
-                    ? 'Continue with Bluetooth'
-                    : 'Connect via Bluetooth'}
+                  {ledgerTransport ? 'Continue' : 'Connect via Bluetooth'}
                 </Trans>
               </Button>
             )}

@@ -14,12 +14,14 @@ interface INotConnectedLedgerProps {
   event: ILedgerEvent;
   onConnect: (tr?: LedgerTransport) => () => Promise<void>;
   closeNewLedgerWindowsAndClearState: () => void;
+  isAccountSelection?: boolean;
 }
 
 export const LedgerConnectionView: React.FC<INotConnectedLedgerProps> = ({
   event,
   onConnect,
-  closeNewLedgerWindowsAndClearState
+  closeNewLedgerWindowsAndClearState,
+  isAccountSelection = false
 }) => {
   const navigate = useTypedNavigate();
 
@@ -43,7 +45,12 @@ export const LedgerConnectionView: React.FC<INotConnectedLedgerProps> = ({
           )}
         />
       )}
-      renderContent={() => <LedgerEventView event={event} />}
+      renderContent={() => (
+        <LedgerEventView
+          event={event}
+          isAccountSelection={isAccountSelection}
+        />
+      )}
       renderFooter={renderLedgerFooter({
         event,
         onConnect,

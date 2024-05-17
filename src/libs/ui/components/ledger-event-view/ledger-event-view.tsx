@@ -14,9 +14,13 @@ import {
 
 interface ILedgerEventViewProps {
   event: ILedgerEvent;
+  isAccountSelection?: boolean;
 }
 
-export const LedgerEventView: React.FC<ILedgerEventViewProps> = ({ event }) => {
+export const LedgerEventView: React.FC<ILedgerEventViewProps> = ({
+  event,
+  isAccountSelection = false
+}) => {
   const [available, setAvailable] = useState(true);
 
   useEffect(() => {
@@ -47,5 +51,7 @@ export const LedgerEventView: React.FC<ILedgerEventViewProps> = ({ event }) => {
     return <LedgerErrorView event={event} />;
   }
 
-  return <NoConnectedLedger event={event} />;
+  return (
+    <NoConnectedLedger event={event} isAccountSelection={isAccountSelection} />
+  );
 };

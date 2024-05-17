@@ -47,7 +47,7 @@ export const ledgerErrorsData: Record<LedgerEventStatus, ILedgerErrorData> = {
   [LedgerEventStatus.CasperAppNotLoaded]: {
     title: 'Casper app isn’t open on Ledger',
     description:
-      'Please make sure to open Casper app on your ledger and try connecting again.'
+      'Please make sure to open Casper app on your Ledger and try connecting again.'
   },
   [LedgerEventStatus.DeviceLocked]: {
     title: 'The Ledger device is locked',

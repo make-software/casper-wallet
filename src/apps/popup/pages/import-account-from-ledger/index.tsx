@@ -39,6 +39,7 @@ export const ImportAccountFromLedgerPage = () => {
     <ConnectedLedger onClose={closeNewLedgerWindowsAndClearState} />
   ) : (
     <LedgerConnectionView
+      isAccountSelection
       event={ledgerEventStatusToRender}
       onConnect={makeSubmitLedgerAction}
       closeNewLedgerWindowsAndClearState={closeNewLedgerWindowsAndClearState}
