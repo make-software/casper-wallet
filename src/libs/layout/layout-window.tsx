@@ -32,6 +32,7 @@ const PageFooter = styled.footer``;
 
 const Container = styled(FlexColumn)`
   height: 100%;
+  width: 100%;
 `;
 
 export function LayoutWindow({
