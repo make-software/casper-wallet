@@ -64,6 +64,12 @@ import {
   CheckSecretKeyExistAction
 } from '@background/redux/import-account-actions-should-be-removed';
 import {
+  ledgerDeployChanged,
+  ledgerNewWindowIdChanged,
+  ledgerRecipientToSaveOnSuccessChanged,
+  ledgerStateCleared
+} from '@background/redux/ledger/actions';
+import {
   askForReviewAfterChanged,
   ratedInStoreChanged
 } from '@background/redux/rate-app/actions';
@@ -73,6 +79,7 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
+  accountsImported,
   activeAccountChanged,
   anotherAccountConnected,
   deployPayloadReceived,
@@ -575,6 +582,7 @@ runtime.onMessage.addListener(
           case getType(vaultReseted):
           case getType(secretPhraseCreated):
           case getType(accountImported):
+          case getType(accountsImported):
           case getType(accountAdded):
           case getType(accountRemoved):
           case getType(accountRenamed):
@@ -634,6 +642,10 @@ runtime.onMessage.addListener(
           case getType(askForReviewAfterChanged):
           case getType(accountBalancesChanged):
           case getType(accountBalancesReseted):
+          case getType(ledgerNewWindowIdChanged):
+          case getType(ledgerStateCleared):
+          case getType(ledgerDeployChanged):
+          case getType(ledgerRecipientToSaveOnSuccessChanged):
             store.dispatch(action);
             return sendResponse(undefined);
 

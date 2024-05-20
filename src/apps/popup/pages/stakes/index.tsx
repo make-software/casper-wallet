@@ -1,3 +1,4 @@
+import { DeployUtil } from 'casper-js-sdk';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -15,33 +16,49 @@ import { useConfirmationButtonText } from '@popup/pages/stakes/utils';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
+import { ledgerDeployChanged } from '@background/redux/ledger/actions';
 import {
   selectAskForReviewAfter,
   selectRatedInStore
 } from '@background/redux/rate-app/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+import {
+  selectIsActiveAccountFromLedger,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
+
+import { useLedger } from '@hooks/use-ledger';
 
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import {
+  AlignedFlexRow,
   ErrorPath,
   FooterButtonsContainer,
   HeaderPopup,
   HeaderSubmenuBarNavLink,
   PopupLayout,
   SpaceBetweenFlexRow,
+  SpacingSize,
   createErrorLocationState
 } from '@libs/layout';
 import {
-  makeAuctionManagerDeployAndSing,
-  sendSignDeploy
+  makeAuctionManagerDeploy,
+  sendSignDeploy,
+  signDeploy
 } from '@libs/services/deployer-service';
 import {
   dispatchFetchAuctionValidatorsRequest,
   dispatchFetchValidatorsDetailsDataRequest
 } from '@libs/services/validators-service';
 import { ValidatorResultWithId } from '@libs/services/validators-service/types';
-import { Button, HomePageTabsId, Typography } from '@libs/ui/components';
+import {
+  Button,
+  HomePageTabsId,
+  SvgIcon,
+  Typography,
+  renderLedgerFooter
+} from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useStakesForm } from '@libs/ui/forms/stakes-form';
 import { CSPRtoMotes, formatNumber, motesToCSPR } from '@libs/ui/utils';
@@ -70,6 +87,9 @@ export const StakesPage = () => {
   const [loading, setLoading] = useState(true);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const isActiveAccountFromLedger = useSelector(
+    selectIsActiveAccountFromLedger
+  );
   const {
     networkName,
     nodeUrl,
@@ -229,7 +249,7 @@ export const StakesPage = () => {
         activeAccount.secretKey
       );
 
-      const signDeploy = await makeAuctionManagerDeployAndSing(
+      const deploy = await makeAuctionManagerDeploy(
         stakesType,
         activeAccount.publicKey,
         validatorPublicKey,
@@ -237,11 +257,12 @@ export const StakesPage = () => {
         motesAmount,
         networkName,
         auctionManagerContractHash,
-        nodeUrl,
-        [KEYS]
+        nodeUrl
       );
 
-      sendSignDeploy(signDeploy, nodeUrl)
+      const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
+
+      sendSignDeploy(signedDeploy, nodeUrl)
         .then(resp => {
           if ('result' in resp) {
             fetchAndDispatchExtendedDeployInfo(resp.result.deploy_hash);
@@ -284,6 +305,34 @@ export const StakesPage = () => {
         });
     }
   };
+
+  const beforeLedgerActionCb = async () => {
+    setStakeStep(StakeSteps.ConfirmWithLedger);
+
+    if (activeAccount) {
+      const motesAmount = CSPRtoMotes(inputAmountCSPR);
+
+      const deploy = await makeAuctionManagerDeploy(
+        stakesType,
+        activeAccount.publicKey,
+        validatorPublicKey,
+        newValidatorPublicKey || null,
+        motesAmount,
+        networkName,
+        auctionManagerContractHash,
+        nodeUrl
+      );
+
+      dispatchToMainStore(
+        ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+      );
+    }
+  };
+
+  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+    ledgerAction: submitStake,
+    beforeLedgerActionCb
+  });
 
   const getButtonProps = () => {
     const isValidatorFormButtonDisabled = calculateSubmitButtonDisabled({
@@ -341,7 +390,9 @@ export const StakesPage = () => {
             isSubmitButtonDisable ||
             isValidatorFormButtonDisabled ||
             isAmountFormButtonDisabled,
-          onClick: submitStake
+          onClick: isActiveAccountFromLedger
+            ? makeSubmitLedgerAction()
+            : submitStake
         };
       }
       case StakeSteps.Success: {
@@ -373,34 +424,46 @@ export const StakesPage = () => {
     }
   };
 
-  const handleBackButton = () => {
-    switch (stakeStep) {
-      case StakeSteps.Validator: {
-        navigate(-1);
-        break;
-      }
-      case StakeSteps.Amount: {
-        setStakeStep(StakeSteps.Validator);
-        break;
-      }
-      case StakeSteps.NewValidator: {
-        setStakeStep(StakeSteps.Amount);
-        break;
-      }
-      case StakeSteps.Confirm: {
-        if (stakesType === AuctionManagerEntryPoint.redelegate) {
-          setStakeStep(StakeSteps.NewValidator);
-        } else {
-          setStakeStep(StakeSteps.Amount);
+  const getBackButton = {
+    [StakeSteps.Validator]: () => (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        backTypeWithBalance
+        onClick={() => navigate(-1)}
+      />
+    ),
+    [StakeSteps.Amount]: () => (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        backTypeWithBalance
+        onClick={() => setStakeStep(StakeSteps.Validator)}
+      />
+    ),
+    [StakeSteps.NewValidator]: () => (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        backTypeWithBalance
+        onClick={() => setStakeStep(StakeSteps.Amount)}
+      />
+    ),
+    [StakeSteps.Confirm]: () => (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        backTypeWithBalance
+        onClick={() =>
+          stakesType === AuctionManagerEntryPoint.redelegate
+            ? setStakeStep(StakeSteps.NewValidator)
+            : setStakeStep(StakeSteps.Amount)
         }
-        break;
-      }
-
-      default: {
-        navigate(-1);
-        break;
-      }
-    }
+      />
+    ),
+    [StakeSteps.ConfirmWithLedger]: () => (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        onClick={() => setStakeStep(StakeSteps.Confirm)}
+      />
+    ),
+    [StakeSteps.Success]: undefined
   };
 
   const confirmButtonText = useConfirmationButtonText(stakesType);
@@ -431,6 +494,50 @@ export const StakesPage = () => {
     );
   }
 
+  const renderFooter = () => {
+    if (stakeStep === StakeSteps.ConfirmWithLedger) {
+      return renderLedgerFooter({
+        onConnect: makeSubmitLedgerAction,
+        event: ledgerEventStatusToRender,
+        onErrorCtaPressed: () => setStakeStep(StakeSteps.Confirm)
+      });
+    }
+
+    return () => (
+      <FooterButtonsContainer>
+        {stakeStep === StakeSteps.Amount ? (
+          <SpaceBetweenFlexRow>
+            <Typography type="captionRegular" color="contentSecondary">
+              <Trans t={t}>Transaction fee</Trans>
+            </Typography>
+            <Typography type="captionHash">
+              {formatNumber(motesToCSPR(STAKE_COST_MOTES), {
+                precision: { max: 5 }
+              })}{' '}
+              CSPR
+            </Typography>
+          </SpaceBetweenFlexRow>
+        ) : null}
+        <Button color="primaryBlue" type="button" {...getButtonProps()}>
+          {isActiveAccountFromLedger && stakeStep === StakeSteps.Confirm ? (
+            <AlignedFlexRow gap={SpacingSize.Small}>
+              <SvgIcon src="assets/icons/ledger-white.svg" />
+              <Trans t={t}>{confirmButtonText}</Trans>
+            </AlignedFlexRow>
+          ) : (
+            <Trans t={t}>
+              {stakeStep === StakeSteps.Confirm
+                ? confirmButtonText
+                : stakeStep === StakeSteps.Success
+                  ? 'Done'
+                  : 'Next'}
+            </Trans>
+          )}
+        </Button>
+      </FooterButtonsContainer>
+    );
+  };
+
   return (
     <PopupLayout
       renderHeader={() => (
@@ -438,17 +545,7 @@ export const StakesPage = () => {
           withNetworkSwitcher
           withMenu
           withConnectionStatus
-          renderSubmenuBarItems={
-            stakeStep === StakeSteps.Success
-              ? undefined
-              : () => (
-                  <HeaderSubmenuBarNavLink
-                    linkType="back"
-                    onClick={handleBackButton}
-                    backTypeWithBalance
-                  />
-                )
-          }
+          renderSubmenuBarItems={getBackButton[stakeStep]}
         />
       )}
       renderContent={() => (
@@ -468,34 +565,10 @@ export const StakesPage = () => {
           validatorList={validatorList}
           undelegateValidatorList={undelegateValidatorList}
           loading={loading}
+          LedgerEventStatus={ledgerEventStatusToRender}
         />
       )}
-      renderFooter={() => (
-        <FooterButtonsContainer>
-          {stakeStep === StakeSteps.Amount ? (
-            <SpaceBetweenFlexRow>
-              <Typography type="captionRegular" color="contentSecondary">
-                <Trans t={t}>Transaction fee</Trans>
-              </Typography>
-              <Typography type="captionHash">
-                {formatNumber(motesToCSPR(STAKE_COST_MOTES), {
-                  precision: { max: 5 }
-                })}{' '}
-                CSPR
-              </Typography>
-            </SpaceBetweenFlexRow>
-          ) : null}
-          <Button color="primaryBlue" type="button" {...getButtonProps()}>
-            <Trans t={t}>
-              {stakeStep === StakeSteps.Confirm
-                ? confirmButtonText
-                : stakeStep === StakeSteps.Success
-                  ? 'Done'
-                  : 'Next'}
-            </Trans>
-          </Button>
-        </FooterButtonsContainer>
-      )}
+      renderFooter={renderFooter()}
     />
   );
 };

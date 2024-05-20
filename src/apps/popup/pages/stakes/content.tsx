@@ -17,8 +17,13 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { ILedgerEvent } from '@libs/services/ledger';
 import { ValidatorResultWithId } from '@libs/services/validators-service/types';
-import { TransferSuccessScreen, Typography } from '@libs/ui/components';
+import {
+  LedgerEventView,
+  TransferSuccessScreen,
+  Typography
+} from '@libs/ui/components';
 import {
   StakeAmountFormValues,
   StakeNewValidatorFormValues,
@@ -45,6 +50,7 @@ interface DelegateStakePageContentProps {
   validatorList: ValidatorResultWithId[] | null;
   undelegateValidatorList: ValidatorResultWithId[] | null;
   loading: boolean;
+  LedgerEventStatus: ILedgerEvent;
 }
 
 export const StakesPageContent = ({
@@ -62,7 +68,8 @@ export const StakesPageContent = ({
   setStakeAmount,
   validatorList,
   undelegateValidatorList,
-  loading
+  loading,
+  LedgerEventStatus
 }: DelegateStakePageContentProps) => {
   const { t } = useTranslation();
 
@@ -77,89 +84,81 @@ export const StakesPageContent = ({
     amountStepMaxAmountValue
   } = useStakeActionTexts(stakesType, stakeAmountMotes);
 
-  switch (stakeStep) {
-    case StakeSteps.Validator: {
-      return (
-        <Step headerText={validatorStepHeaderText}>
-          <ValidatorDropdownInput
-            validatorForm={validatorForm}
-            validatorList={validatorList}
-            undelegateValidatorList={undelegateValidatorList}
-            validator={validator}
-            setValidator={setValidator}
-            setStakeAmount={setStakeAmount}
-            stakesType={stakesType}
-            loading={loading}
-          />
-        </Step>
-      );
-    }
-    case StakeSteps.Amount: {
-      return (
-        <Step headerText={amountStepHeaderText}>
-          <AmountStep
-            amountForm={amountForm}
-            stakesType={stakesType}
-            stakeAmountMotes={stakeAmountMotes}
-            amountStepText={amountStepText}
-            amountStepMaxAmountValue={amountStepMaxAmountValue}
-          />
-        </Step>
-      );
-    }
-    case StakeSteps.NewValidator: {
-      return (
-        <Step headerText={newValidatorStepHeaderText!}>
-          <ParagraphContainer top={SpacingSize.Medium}>
-            <AlignedFlexRow gap={SpacingSize.Small}>
-              <Typography type="body" color="contentSecondary">
-                <Trans t={t}>Amount:</Trans>
-              </Typography>
-              <Typography type="bodyHash">{`${inputAmountCSPR} CSPR`}</Typography>
-            </AlignedFlexRow>
-          </ParagraphContainer>
-          <RedelegateValidatorDropdownInput
-            newValidatorForm={newValidatorForm}
-            validatorList={validatorList}
-            validator={newValidator}
-            setValidator={setNewValidator}
-            setStakeAmount={setStakeAmount}
-          />
-        </Step>
-      );
-    }
-    case StakeSteps.Confirm: {
-      return (
-        <Step headerText={confirmStepHeaderText}>
-          <ConfirmStep
-            newValidator={newValidator}
-            validator={validator}
-            inputAmountCSPR={inputAmountCSPR}
-            stakesType={stakesType}
-            confirmStepText={confirmStepText}
-          />
-        </Step>
-      );
-    }
-    case StakeSteps.Success: {
-      return (
-        <TransferSuccessScreen headerText={successStepHeaderText}>
-          {stakesType === AuctionManagerEntryPoint.redelegate ? (
-            <VerticalSpaceContainer top={SpacingSize.Medium}>
-              <Typography type="body" color="contentSecondary">
-                <Trans t={t}>
-                  I usually takes around{' '}
-                  <Typography type="bodySemiBold">14 to 16 hours</Typography>{' '}
-                  for this operation to complete.
-                </Trans>
-              </Typography>
-            </VerticalSpaceContainer>
-          ) : null}
-        </TransferSuccessScreen>
-      );
-    }
-    default: {
-      throw Error('Out of bound: StakeSteps');
-    }
-  }
+  const getContent = {
+    [StakeSteps.Validator]: (
+      <Step headerText={validatorStepHeaderText}>
+        <ValidatorDropdownInput
+          validatorForm={validatorForm}
+          validatorList={validatorList}
+          undelegateValidatorList={undelegateValidatorList}
+          validator={validator}
+          setValidator={setValidator}
+          setStakeAmount={setStakeAmount}
+          stakesType={stakesType}
+          loading={loading}
+        />
+      </Step>
+    ),
+    [StakeSteps.Amount]: (
+      <Step headerText={amountStepHeaderText}>
+        <AmountStep
+          amountForm={amountForm}
+          stakesType={stakesType}
+          stakeAmountMotes={stakeAmountMotes}
+          amountStepText={amountStepText}
+          amountStepMaxAmountValue={amountStepMaxAmountValue}
+        />
+      </Step>
+    ),
+    [StakeSteps.NewValidator]: (
+      <Step headerText={newValidatorStepHeaderText!}>
+        <ParagraphContainer top={SpacingSize.Medium}>
+          <AlignedFlexRow gap={SpacingSize.Small}>
+            <Typography type="body" color="contentSecondary">
+              <Trans t={t}>Amount:</Trans>
+            </Typography>
+            <Typography type="bodyHash">{`${inputAmountCSPR} CSPR`}</Typography>
+          </AlignedFlexRow>
+        </ParagraphContainer>
+        <RedelegateValidatorDropdownInput
+          newValidatorForm={newValidatorForm}
+          validatorList={validatorList}
+          validator={newValidator}
+          setValidator={setNewValidator}
+          setStakeAmount={setStakeAmount}
+        />
+      </Step>
+    ),
+    [StakeSteps.Confirm]: (
+      <Step headerText={confirmStepHeaderText}>
+        <ConfirmStep
+          newValidator={newValidator}
+          validator={validator}
+          inputAmountCSPR={inputAmountCSPR}
+          stakesType={stakesType}
+          confirmStepText={confirmStepText}
+        />
+      </Step>
+    ),
+    [StakeSteps.ConfirmWithLedger]: (
+      <LedgerEventView event={LedgerEventStatus} />
+    ),
+    [StakeSteps.Success]: (
+      <TransferSuccessScreen headerText={successStepHeaderText}>
+        {stakesType === AuctionManagerEntryPoint.redelegate ? (
+          <VerticalSpaceContainer top={SpacingSize.Medium}>
+            <Typography type="body" color="contentSecondary">
+              <Trans t={t}>
+                I usually takes around{' '}
+                <Typography type="bodySemiBold">14 to 16 hours</Typography> for
+                this operation to complete.
+              </Trans>
+            </Typography>
+          </VerticalSpaceContainer>
+        ) : null}
+      </TransferSuccessScreen>
+    )
+  };
+
+  return getContent[stakeStep];
 };
