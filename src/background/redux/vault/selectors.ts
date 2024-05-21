@@ -5,7 +5,11 @@ import { selectAccountBalances } from '@background/redux/account-balances/select
 import { VaultState } from '@background/redux/vault/types';
 
 import { SecretPhrase } from '@libs/crypto';
-import { Account, AccountWithBalance } from '@libs/types/account';
+import {
+  Account,
+  AccountWithBalance,
+  HardwareWalletType
+} from '@libs/types/account';
 
 import { selectActiveOrigin } from '../active-origin/selectors';
 
@@ -85,9 +89,25 @@ export const selectVaultHiddenAccountsNames = createSelector(
   accounts => accounts.map(account => account.name)
 );
 
+export const selectVaultHasImportedAccount = createSelector(
+  selectVaultImportedAccounts,
+  importedAccounts => importedAccounts.length > 0
+);
+
 export const selectVaultDerivedAccounts = createSelector(
   selectVaultAccountsWithBalances,
-  accounts => accounts.filter(account => !account.imported)
+  accounts => accounts.filter(account => !account.imported && !account.hardware)
+);
+
+export const selectVaultLedgerAccounts = createSelector(
+  selectVaultAccountsWithBalances,
+  accounts =>
+    accounts.filter(account => account.hardware === HardwareWalletType.Ledger)
+);
+
+export const selectVaultLedgerAccountNames = createSelector(
+  selectVaultLedgerAccounts,
+  accounts => accounts.map(account => account.name)
 );
 
 export const selectVaultAccountsSecretKeysBase64 = createSelector(
@@ -111,6 +131,11 @@ export const selectVaultActiveAccount = createSelector(
   (accounts, activeAccountName) => {
     return accounts.find(account => account.name === activeAccountName);
   }
+);
+
+export const selectIsActiveAccountFromLedger = createSelector(
+  selectVaultActiveAccount,
+  account => Boolean(account && account.hardware === HardwareWalletType.Ledger)
 );
 
 export const selectAccountNamesByOriginDict = (state: RootState) =>

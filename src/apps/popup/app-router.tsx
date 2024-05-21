@@ -18,6 +18,7 @@ import { ContactsBookPage } from '@popup/pages/contacts';
 import { CreateAccountPage } from '@popup/pages/create-account';
 import { DownloadAccountKeysPage } from '@popup/pages/download-account-keys';
 import { HomePageContent } from '@popup/pages/home';
+import { ImportAccountFromLedgerPage } from '@popup/pages/import-account-from-ledger';
 import { ImportAccountFromTorusPage } from '@popup/pages/import-account-from-torus';
 import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
 import { NftDetailsPage } from '@popup/pages/nft-details';
@@ -26,6 +27,7 @@ import { RateAppPage } from '@popup/pages/rate-app';
 import { ReceivePage } from '@popup/pages/receive';
 import { RemoveAccountPageContent } from '@popup/pages/remove-account';
 import { RenameAccountPageContent } from '@popup/pages/rename-account';
+import { SignWithLedgerInNewWindowPage } from '@popup/pages/sign-with-ledger-in-new-window';
 import { StakesPage } from '@popup/pages/stakes';
 import { TimeoutPageContent } from '@popup/pages/timeout';
 import { TokenDetailPage } from '@popup/pages/token-details';
@@ -283,6 +285,14 @@ function AppRoutes() {
         element={<ImportAccountFromTorusPage />}
       />
       <Route path={RouterPath.BuyCSPR} element={<BuyCSPRPage />} />
+      <Route
+        path={RouterPath.ImportAccountFromLedger}
+        element={<ImportAccountFromLedgerPage />}
+      />
+      <Route
+        path={RouterPath.SignWithLedgerInNewWindow}
+        element={<SignWithLedgerInNewWindowPage />}
+      />
     </Routes>
   );
 }
