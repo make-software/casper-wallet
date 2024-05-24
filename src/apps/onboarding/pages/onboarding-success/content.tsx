@@ -1,6 +1,5 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import { TabPageContainer, TabTextContainer } from '@libs/layout';
 import { Link, SvgIcon, Typography } from '@libs/ui/components';
