@@ -4,8 +4,10 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import {
   InputsContainer,
+  SpacingSize,
   TabPageContainer,
-  TabTextContainer
+  TabTextContainer,
+  VerticalSpaceContainer
 } from '@libs/layout';
 import {
   FormField,
@@ -27,9 +29,14 @@ export function RecoverFromSecretPhrasePageContent({
   const { t } = useTranslation();
   return (
     <TabPageContainer>
-      <Typography type="header">
-        <Trans t={t}>Please enter your secret recovery phrase</Trans>
+      <Typography type="captionMedium" color="contentActionCritical" uppercase>
+        <Trans t={t}>Step 3</Trans>
       </Typography>
+      <VerticalSpaceContainer top={SpacingSize.Tiny}>
+        <Typography type="headerBig">
+          <Trans t={t}>Please enter your secret recovery phrase</Trans>
+        </Typography>
+      </VerticalSpaceContainer>
 
       <TabTextContainer>
         <Typography type="body" color="contentSecondary">

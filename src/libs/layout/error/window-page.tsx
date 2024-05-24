@@ -43,7 +43,7 @@ export function WindowErrorPage({
         <ErrorPageContent
           errorHeaderText={state.errorHeaderText}
           errorContentText={state.errorContentText}
-          illustrationType="general"
+          pageType="general"
         />
       )}
       renderFooter={() => (

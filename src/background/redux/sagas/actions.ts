@@ -6,6 +6,7 @@ import { createAction } from 'typesafe-actions';
 import { UnlockVault } from '@background/redux/sagas/types';
 
 import { SecretPhrase } from '@libs/crypto';
+import { Account } from '@libs/types/account';
 
 export const startBackground = createAction('START_BACKGROUND_SAGA')<void>();
 
@@ -21,6 +22,11 @@ export const initKeys = createAction('INIT_KEYS_SAGA')<{
 
 export const initVault = createAction('INIT_VAULT_SAGA')<{
   secretPhrase: SecretPhrase;
+}>();
+
+export const recoverVault = createAction('RECOVER_VAULT_SAGA')<{
+  secretPhrase: SecretPhrase;
+  accounts: Account[];
 }>();
 
 export const createAccount = createAction('CREATE_ACCOUNT_SAGA')<{

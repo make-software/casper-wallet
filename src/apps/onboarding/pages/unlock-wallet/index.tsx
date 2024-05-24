@@ -59,6 +59,7 @@ export function UnlockWalletPage({ saveIsLoggedIn }: UnlockWalletPageProps) {
     return (
       <LayoutTab
         layoutContext="withIllustration"
+        minHeight="auto"
         renderContent={() => (
           <UnlockWalletPageContent
             register={register}

@@ -1,7 +1,12 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { TabPageContainer, TabTextContainer } from '@libs/layout';
+import {
+  SpacingSize,
+  TabPageContainer,
+  TabTextContainer,
+  VerticalSpaceContainer
+} from '@libs/layout';
 import { Typography } from '@libs/ui/components';
 import { minPasswordLength } from '@libs/ui/forms/form-validation-rules';
 
@@ -16,9 +21,14 @@ export function CreateVaultPasswordPageContent({
 
   return (
     <TabPageContainer>
-      <Typography type="header">
-        <Trans t={t}>Create password</Trans>
+      <Typography type="captionMedium" color="contentActionCritical" uppercase>
+        <Trans t={t}>Step 1</Trans>
       </Typography>
+      <VerticalSpaceContainer top={SpacingSize.Tiny}>
+        <Typography type="headerBig">
+          <Trans t={t}>Create password</Trans>
+        </Typography>
+      </VerticalSpaceContainer>
 
       <TabTextContainer>
         <Typography type="body" color="contentSecondary">

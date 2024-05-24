@@ -17,6 +17,8 @@ export const accountImported = createAction('ACCOUNT_IMPORTED')<Account>();
 
 export const accountAdded = createAction('ACCOUNT_ADDED')<Account>();
 
+export const accountsAdded = createAction('ACCOUNTS_ADDED')<Account[]>();
+
 export const accountsImported = createAction('ACCOUNTS_IMPORTED')<Account[]>();
 
 export const accountRemoved = createAction('ACCOUNT_REMOVED')<{

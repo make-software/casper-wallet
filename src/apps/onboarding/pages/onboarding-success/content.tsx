@@ -5,10 +5,6 @@ import styled from 'styled-components';
 import { TabPageContainer, TabTextContainer } from '@libs/layout';
 import { Link, SvgIcon, Typography } from '@libs/ui/components';
 
-const TipContainer = styled.div`
-  margin-top: 12px;
-`;
-
 export function OnboardingSuccessPageContent() {
   const { t } = useTranslation();
 
@@ -20,7 +16,7 @@ export function OnboardingSuccessPageContent() {
         height={120}
       />
       <TabTextContainer>
-        <Typography type="header">
+        <Typography type="headerBig">
           <Trans t={t}>
             Congrats! Your Casper Wallet is set up and ready to go
           </Trans>
@@ -36,7 +32,7 @@ export function OnboardingSuccessPageContent() {
           </Trans>
         </Typography>
       </TabTextContainer>
-      <TipContainer>
+      <TabTextContainer>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
             Tip: If this is your first time using a cryptocurrency web wallet we
@@ -51,7 +47,7 @@ export function OnboardingSuccessPageContent() {
             .
           </Trans>
         </Typography>
-      </TipContainer>
+      </TabTextContainer>
     </TabPageContainer>
   );
 }

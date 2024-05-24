@@ -26,16 +26,18 @@ import { sagaCall } from '../utils';
 import { vaultCipherReseted } from '../vault-cipher/actions';
 import {
   accountAdded,
+  accountsAdded,
   deploysReseted,
   secretPhraseCreated,
   vaultReseted
 } from '../vault/actions';
-import { initKeys, initVault, resetVault } from './actions';
+import { initKeys, initVault, recoverVault, resetVault } from './actions';
 
 export function* onboardingSagas() {
   yield takeLatest(getType(resetVault), resetVaultSaga);
   yield takeLatest(getType(initKeys), initKeysSage);
   yield takeLatest(getType(initVault), initVaultSaga);
+  yield takeLatest(getType(recoverVault), recoverVaultSaga);
 }
 
 /**
@@ -110,6 +112,23 @@ function* initVaultSaga(action: ReturnType<typeof initVault>) {
 
     yield put(secretPhraseCreated(secretPhrase));
     yield put(accountAdded(account));
+    yield put(vaultUnlocked());
+    // cleanup and disabling action handler
+    disableOnboardingFlow();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function* recoverVaultSaga(action: ReturnType<typeof recoverVault>) {
+  try {
+    const { secretPhrase, accounts } = action.payload;
+    if (!validateSecretPhrase(secretPhrase)) {
+      throw Error('Invalid secret phrase.');
+    }
+
+    yield put(secretPhraseCreated(secretPhrase));
+    yield put(accountsAdded(accounts));
     yield put(vaultUnlocked());
     // cleanup and disabling action handler
     disableOnboardingFlow();

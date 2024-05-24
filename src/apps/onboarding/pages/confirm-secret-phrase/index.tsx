@@ -80,7 +80,7 @@ export function ConfirmSecretPhrasePage({
         />
       )}
       renderFooter={() => (
-        <TabFooterContainer>
+        <TabFooterContainer style={{ marginTop: '28px' }}>
           <Button disabled={!isFormValid} onClick={handleSubmit}>
             <Trans t={t}>Confirm</Trans>
           </Button>

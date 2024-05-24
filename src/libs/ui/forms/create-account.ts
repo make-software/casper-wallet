@@ -2,6 +2,9 @@ import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import { UseFormProps, useForm } from 'react-hook-form';
 
+import { SecretPhrase, deriveKeyPair } from '@libs/crypto';
+import { AccountWithBalance } from '@libs/types/account';
+
 import { useAccountNameRule } from './form-validation-rules';
 
 export type CreateAccountFormValues = {
@@ -30,12 +33,28 @@ export function useCreateAccountForm(
 }
 
 export function getDefaultName(
-  derivedAccountsCount: number,
-  existingAccountNames: string[]
+  existingAccountNames: string[],
+  derivedAccounts: AccountWithBalance[],
+  secretPhrase: SecretPhrase | null
 ) {
   const accountString = 'Account';
 
-  let sequenceNumber = derivedAccountsCount + 1;
+  let isAccountAlreadyAdded = true;
+  let i = 0;
+
+  while (isAccountAlreadyAdded) {
+    const keyPair = deriveKeyPair(secretPhrase, i);
+
+    if (
+      !derivedAccounts.some(account => account.publicKey === keyPair.publicKey)
+    ) {
+      isAccountAlreadyAdded = false;
+      break;
+    }
+    i++;
+  }
+
+  let sequenceNumber = i + 1;
   let defaultName = `${accountString} ${sequenceNumber}`;
 
   while (existingAccountNames.includes(defaultName)) {
