@@ -10,36 +10,51 @@ import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
 import {
+  ledgerDeployChanged,
+  ledgerRecipientToSaveOnSuccessChanged
+} from '@background/redux/ledger/actions';
+import {
   selectAskForReviewAfter,
   selectRatedInStore
 } from '@background/redux/rate-app/selectors';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+import {
+  selectIsActiveAccountFromLedger,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
 
 import { TokenType, useCasperToken } from '@hooks/use-casper-token';
+import { useLedger } from '@hooks/use-ledger';
 import { useSubmitButton } from '@hooks/use-submit-button';
 
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import {
+  AlignedFlexRow,
   ErrorPath,
   FooterButtonsContainer,
   HeaderPopup,
   HeaderSubmenuBarNavLink,
   PopupLayout,
+  SpacingSize,
   createErrorLocationState
 } from '@libs/layout';
 import { HeaderSubmenuBarBuyCSPRLink } from '@libs/layout/header/header-submenu-bar-buy-cspr-link';
 import {
-  makeCep18TransferDeployAndSign,
-  makeNativeTransferDeployAndSign,
-  sendSignDeploy
+  makeCep18TransferDeploy,
+  makeNativeTransferDeploy,
+  sendSignDeploy,
+  signDeploy
 } from '@libs/services/deployer-service';
+import { HardwareWalletType } from '@libs/types/account';
 import {
   Button,
   HomePageTabsId,
-  TransferSuccessScreen
+  LedgerEventView,
+  SvgIcon,
+  TransferSuccessScreen,
+  renderLedgerFooter
 } from '@libs/ui/components';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils';
 
@@ -72,6 +87,9 @@ export const TransferPage = () => {
     useState(false);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const isActiveAccountFromLedger = useSelector(
+    selectIsActiveAccountFromLedger
+  );
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
@@ -167,9 +185,10 @@ export const TransferPage = () => {
         activeAccount.publicKey,
         activeAccount.secretKey
       );
+
       if (isErc20Transfer) {
         // ERC20 transfer
-        const signDeploy = await makeCep18TransferDeployAndSign(
+        const deploy = await makeCep18TransferDeploy(
           nodeUrl,
           networkName,
           selectedToken?.contractHash,
@@ -178,29 +197,81 @@ export const TransferPage = () => {
           amount,
           selectedToken?.decimals || null,
           paymentAmount,
-          activeAccount,
-          [KEYS]
+          activeAccount
         );
 
-        sendDeploy(signDeploy);
+        const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
+
+        sendDeploy(signedDeploy);
       } else {
         // CSPR transfer
         const motesAmount = CSPRtoMotes(amount);
 
-        const signDeploy = await makeNativeTransferDeployAndSign(
-          activeAccount.publicKey,
+        const deploy = await makeNativeTransferDeploy(
+          activeAccount,
           recipientPublicKey,
           motesAmount,
           networkName,
           nodeUrl,
-          [KEYS],
           transferIdMemo
         );
 
-        sendDeploy(signDeploy);
+        const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
+
+        sendDeploy(signedDeploy);
       }
     }
   };
+
+  const beforeLedgerActionCb = async () => {
+    setTransferStep(TransactionSteps.ConfirmWithLedger);
+
+    if (activeAccount?.hardware === HardwareWalletType.Ledger) {
+      if (isErc20Transfer) {
+        const deploy = await makeCep18TransferDeploy(
+          nodeUrl,
+          networkName,
+          selectedToken?.contractHash,
+          selectedToken?.id,
+          recipientPublicKey,
+          amount,
+          selectedToken?.decimals || null,
+          paymentAmount,
+          activeAccount
+        );
+
+        dispatchToMainStore(
+          ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+        );
+        dispatchToMainStore(
+          ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
+        );
+      } else {
+        const motesAmount = CSPRtoMotes(amount);
+
+        const deploy = await makeNativeTransferDeploy(
+          activeAccount,
+          recipientPublicKey,
+          motesAmount,
+          networkName,
+          nodeUrl,
+          transferIdMemo
+        );
+
+        dispatchToMainStore(
+          ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+        );
+        dispatchToMainStore(
+          ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
+        );
+      }
+    }
+  };
+
+  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+    ledgerAction: onSubmitSending,
+    beforeLedgerActionCb
+  });
 
   const content = {
     [TransactionSteps.Token]: (
@@ -228,6 +299,9 @@ export const TransferPage = () => {
         setTransferIdMemo={setTransferIdMemo}
         setIsAmountFormButtonDisabled={setIsAmountFormButtonDisabled}
       />
+    ),
+    [TransactionSteps.ConfirmWithLedger]: (
+      <LedgerEventView event={ledgerEventStatusToRender} />
     ),
     [TransactionSteps.Confirm]: (
       <ConfirmStep
@@ -278,61 +352,99 @@ export const TransferPage = () => {
         />
         <HeaderSubmenuBarBuyCSPRLink />
       </>
+    ),
+    [TransactionSteps.ConfirmWithLedger]: (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        onClick={() => setTransferStep(TransactionSteps.Confirm)}
+      />
     )
   };
 
+  const ledgerFooterButton = renderLedgerFooter({
+    onConnect: makeSubmitLedgerAction,
+    event: ledgerEventStatusToRender,
+    onErrorCtaPressed: () => {
+      setTransferStep(TransactionSteps.Confirm);
+    }
+  });
+
   const footerButtons = {
     [TransactionSteps.Token]: (
-      <Button
-        color="primaryBlue"
-        type="button"
-        onClick={() => {
-          setTransferStep(TransactionSteps.Recipient);
-        }}
-      >
-        <Trans t={t}>Next</Trans>
-      </Button>
+      <FooterButtonsContainer>
+        <Button
+          color="primaryBlue"
+          type="button"
+          onClick={() => {
+            setTransferStep(TransactionSteps.Recipient);
+          }}
+        >
+          <Trans t={t}>Next</Trans>
+        </Button>
+      </FooterButtonsContainer>
     ),
     [TransactionSteps.Recipient]: (
-      <Button
-        color="primaryBlue"
-        type="button"
-        disabled={isRecipientFormButtonDisabled}
-        onClick={() => {
-          setTransferStep(TransactionSteps.Amount);
-        }}
-      >
-        <Trans t={t}>Next</Trans>
-      </Button>
+      <FooterButtonsContainer>
+        <Button
+          color="primaryBlue"
+          type="button"
+          disabled={isRecipientFormButtonDisabled}
+          onClick={() => {
+            setTransferStep(TransactionSteps.Amount);
+          }}
+        >
+          <Trans t={t}>Next</Trans>
+        </Button>
+      </FooterButtonsContainer>
     ),
     [TransactionSteps.Amount]: (
-      <Button
-        color="primaryBlue"
-        type="button"
-        disabled={isAmountFormButtonDisabled}
-        onClick={() => {
-          setTransferStep(TransactionSteps.Confirm);
-        }}
-      >
-        <Trans t={t}>Next</Trans>
-      </Button>
+      <FooterButtonsContainer>
+        <Button
+          color={isActiveAccountFromLedger ? 'primaryRed' : 'primaryBlue'}
+          type="button"
+          disabled={isAmountFormButtonDisabled}
+          onClick={() => {
+            setTransferStep(TransactionSteps.Confirm);
+          }}
+        >
+          <Trans t={t}>Next</Trans>
+        </Button>
+      </FooterButtonsContainer>
+    ),
+    [TransactionSteps.ConfirmWithLedger]: ledgerFooterButton ? (
+      ledgerFooterButton()
+    ) : (
+      <></>
     ),
     [TransactionSteps.Confirm]: (
-      <Button
-        color="primaryBlue"
-        type="button"
-        disabled={
-          isSubmitButtonDisable ||
-          isRecipientFormButtonDisabled ||
-          isAmountFormButtonDisabled
-        }
-        onClick={onSubmitSending}
-      >
-        <Trans t={t}>Confirm send</Trans>
-      </Button>
+      <FooterButtonsContainer>
+        <Button
+          color="primaryBlue"
+          type="button"
+          disabled={
+            isSubmitButtonDisable ||
+            isRecipientFormButtonDisabled ||
+            isAmountFormButtonDisabled
+          }
+          onClick={
+            isActiveAccountFromLedger
+              ? makeSubmitLedgerAction()
+              : onSubmitSending
+          }
+        >
+          {isActiveAccountFromLedger ? (
+            <AlignedFlexRow gap={SpacingSize.Small}>
+              <SvgIcon src="assets/icons/ledger-white.svg" />
+              <Trans t={t}>Confirm send</Trans>
+            </AlignedFlexRow>
+          ) : (
+            <Trans t={t}>Confirm send</Trans>
+          )}
+        </Button>
+      </FooterButtonsContainer>
     ),
     [TransactionSteps.Success]: (
-      <>
+      <FooterButtonsContainer>
         <Button
           color="primaryBlue"
           type="button"
@@ -375,7 +487,7 @@ export const TransferPage = () => {
             <Trans t={t}>Add recipient to list of contacts</Trans>
           </Button>
         )}
-      </>
+      </FooterButtonsContainer>
     )
   };
 
@@ -394,11 +506,7 @@ export const TransferPage = () => {
         />
       )}
       renderContent={() => content[transferStep]}
-      renderFooter={() => (
-        <FooterButtonsContainer>
-          {footerButtons[transferStep]}
-        </FooterButtonsContainer>
-      )}
+      renderFooter={() => footerButtons[transferStep]}
     />
   );
 };

@@ -90,6 +90,7 @@ export enum TransferNFTSteps {
   Review = 'review',
   Recipient = 'recipient',
   Confirm = 'confirm',
+  ConfirmWithLedger = 'confirm with ledger',
   Success = 'success'
 }
 

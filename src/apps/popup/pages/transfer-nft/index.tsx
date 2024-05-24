@@ -1,3 +1,4 @@
+import { DeployUtil } from 'casper-js-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -22,32 +23,47 @@ import {
 } from '@background/redux/account-info/selectors';
 import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
 import {
+  ledgerDeployChanged,
+  ledgerRecipientToSaveOnSuccessChanged
+} from '@background/redux/ledger/actions';
+import {
   selectAskForReviewAfter,
   selectRatedInStore
 } from '@background/redux/rate-app/selectors';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+import {
+  selectIsActiveAccountFromLedger,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
+
+import { useLedger } from '@hooks/use-ledger';
 
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import { getRawPublicKey } from '@libs/entities/Account';
 import {
+  AlignedFlexRow,
   ErrorPath,
   FooterButtonsContainer,
   HeaderPopup,
   HeaderSubmenuBarNavLink,
   PopupLayout,
+  SpacingSize,
   createErrorLocationState
 } from '@libs/layout';
 import {
-  makeNFTDeployAndSign,
-  sendSignDeploy
+  makeNFTDeploy,
+  sendSignDeploy,
+  signDeploy
 } from '@libs/services/deployer-service';
 import {
   Button,
   HomePageTabsId,
-  TransferSuccessScreen
+  LedgerEventView,
+  SvgIcon,
+  TransferSuccessScreen,
+  renderLedgerFooter
 } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useTransferNftForm } from '@libs/ui/forms/transfer-nft';
@@ -71,6 +87,9 @@ export const TransferNftPage = () => {
   const nftTokens = useSelector(selectAccountNftTokens);
   const csprBalance = useSelector(selectAccountBalance);
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const isActiveAccountFromLedger = useSelector(
+    selectIsActiveAccountFromLedger
+  );
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
@@ -159,17 +178,18 @@ export const TransferNftPage = () => {
         target: getRawPublicKey(recipientPublicKey)
       };
 
-      const signDeploy = await makeNFTDeployAndSign(
+      const deploy = await makeNFTDeploy(
         getRuntimeArgs(tokenStandard, args),
         CSPRtoMotes(paymentAmount),
         KEYS.publicKey,
         networkName,
         nftToken?.contract_package_hash!,
-        nodeUrl,
-        [KEYS]
+        nodeUrl
       );
 
-      sendSignDeploy(signDeploy, nodeUrl)
+      const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
+
+      sendSignDeploy(signedDeploy, nodeUrl)
         .then(resp => {
           dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
@@ -224,6 +244,44 @@ export const TransferNftPage = () => {
     }
   };
 
+  const beforeLedgerActionCb = async () => {
+    setTransferNFTStep(TransferNFTSteps.ConfirmWithLedger);
+
+    if (haveReverseOwnerLookUp || !nftToken || !activeAccount) return;
+
+    const KEYS = createAsymmetricKey(
+      activeAccount.publicKey,
+      activeAccount.secretKey
+    );
+
+    const args = {
+      tokenId: nftToken.token_id,
+      source: KEYS.publicKey,
+      target: getRawPublicKey(recipientPublicKey)
+    };
+
+    const deploy = await makeNFTDeploy(
+      getRuntimeArgs(tokenStandard, args),
+      CSPRtoMotes(paymentAmount),
+      KEYS.publicKey,
+      networkName,
+      nftToken?.contract_package_hash!,
+      nodeUrl
+    );
+
+    dispatchToMainStore(
+      ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+    );
+    dispatchToMainStore(
+      ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
+    );
+  };
+
+  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+    ledgerAction: submitTransfer,
+    beforeLedgerActionCb
+  });
+
   const content = {
     [TransferNFTSteps.Review]: (
       <ReviewStep
@@ -249,6 +307,9 @@ export const TransferNftPage = () => {
         recipientPublicKey={recipientPublicKey}
       />
     ),
+    [TransferNFTSteps.ConfirmWithLedger]: (
+      <LedgerEventView event={ledgerEventStatusToRender} />
+    ),
     [TransferNFTSteps.Success]: (
       <TransferSuccessScreen headerText="You submitted a transaction" />
     )
@@ -267,43 +328,77 @@ export const TransferNftPage = () => {
         onClick={() => setTransferNFTStep(TransferNFTSteps.Recipient)}
         linkType="back"
       />
+    ),
+    [TransferNFTSteps.ConfirmWithLedger]: (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        onClick={() => setTransferNFTStep(TransferNFTSteps.Confirm)}
+      />
     )
   };
 
+  const ledgerFooterButton = renderLedgerFooter({
+    onConnect: makeSubmitLedgerAction,
+    event: ledgerEventStatusToRender,
+    onErrorCtaPressed: () => setTransferNFTStep(TransferNFTSteps.Confirm)
+  });
+
   const footerButtons = {
     [TransferNFTSteps.Review]: (
-      <Button
-        disabled={isAmountFormButtonDisabled}
-        onClick={() => {
-          const { paymentAmount } = getValues();
+      <FooterButtonsContainer>
+        <Button
+          disabled={isAmountFormButtonDisabled}
+          onClick={() => {
+            const { paymentAmount } = getValues();
 
-          setPaymentAmount(paymentAmount);
-          setTransferNFTStep(TransferNFTSteps.Recipient);
-        }}
-      >
-        <Trans t={t}>Next</Trans>
-      </Button>
+            setPaymentAmount(paymentAmount);
+            setTransferNFTStep(TransferNFTSteps.Recipient);
+          }}
+        >
+          <Trans t={t}>Next</Trans>
+        </Button>
+      </FooterButtonsContainer>
     ),
     [TransferNFTSteps.Recipient]: (
-      <Button
-        disabled={isRecipientFormButtonDisabled}
-        onClick={() => setTransferNFTStep(TransferNFTSteps.Confirm)}
-      >
-        <Trans t={t}>Next</Trans>
-      </Button>
+      <FooterButtonsContainer>
+        <Button
+          disabled={isRecipientFormButtonDisabled}
+          onClick={() => setTransferNFTStep(TransferNFTSteps.Confirm)}
+        >
+          <Trans t={t}>Next</Trans>
+        </Button>
+      </FooterButtonsContainer>
     ),
     [TransferNFTSteps.Confirm]: (
-      <Button
-        color="primaryRed"
-        type="button"
-        onClick={submitTransfer}
-        disabled={isSubmitButtonDisable}
-      >
-        <Trans t={t}>Confirm send</Trans>
-      </Button>
+      <FooterButtonsContainer>
+        <Button
+          color={isActiveAccountFromLedger ? 'primaryRed' : 'primaryBlue'}
+          type="button"
+          onClick={
+            isActiveAccountFromLedger
+              ? makeSubmitLedgerAction()
+              : submitTransfer
+          }
+          disabled={isSubmitButtonDisable}
+        >
+          {isActiveAccountFromLedger ? (
+            <AlignedFlexRow gap={SpacingSize.Small}>
+              <SvgIcon src="assets/icons/ledger-white.svg" />
+              <Trans t={t}>Confirm send</Trans>
+            </AlignedFlexRow>
+          ) : (
+            <Trans t={t}>Confirm send</Trans>
+          )}
+        </Button>
+      </FooterButtonsContainer>
+    ),
+    [TransferNFTSteps.ConfirmWithLedger]: ledgerFooterButton ? (
+      ledgerFooterButton()
+    ) : (
+      <></>
     ),
     [TransferNFTSteps.Success]: (
-      <>
+      <FooterButtonsContainer>
         <Button
           color="primaryBlue"
           type="button"
@@ -348,7 +443,7 @@ export const TransferNftPage = () => {
             <Trans t={t}>Add recipient to list of contacts</Trans>
           </Button>
         )}
-      </>
+      </FooterButtonsContainer>
     )
   };
 
@@ -367,11 +462,7 @@ export const TransferNftPage = () => {
         />
       )}
       renderContent={() => content[transferNFTStep]}
-      renderFooter={() => (
-        <FooterButtonsContainer>
-          {footerButtons[transferNFTStep]}
-        </FooterButtonsContainer>
-      )}
+      renderFooter={() => footerButtons[transferNFTStep]}
     />
   );
 };

@@ -7,7 +7,15 @@ import { BaseProps } from '@libs/ui/types';
 type Ref = HTMLInputElement;
 
 const InputContainer = styled('div')<InputProps>(
-  ({ theme, oneColoredIcons, disabled, error, monotype, readOnly }) => ({
+  ({
+    theme,
+    oneColoredIcons,
+    disabled,
+    error,
+    monotype,
+    readOnly,
+    secondaryBackground
+  }) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -15,7 +23,9 @@ const InputContainer = styled('div')<InputProps>(
     padding: '0 16px',
     borderRadius: theme.borderRadius.base,
     color: theme.color.contentPrimary,
-    background: theme.color.backgroundPrimary,
+    background: secondaryBackground
+      ? theme.color.backgroundSecondary
+      : theme.color.backgroundPrimary,
     caretColor: theme.color.fillCritical,
     fontFamily: monotype
       ? theme.typography.fontFamily.mono
@@ -133,6 +143,7 @@ export interface InputProps extends BaseProps {
   validationText?: string | null;
   dataTestId?: string;
   autoComplete?: string;
+  secondaryBackground?: boolean;
 }
 
 export const Input = forwardRef<Ref, InputProps>(function Input(
@@ -156,6 +167,7 @@ export const Input = forwardRef<Ref, InputProps>(function Input(
     dataTestId,
     readOnly,
     autoComplete,
+    secondaryBackground,
     ...restProps
   }: InputProps,
   ref
@@ -194,6 +206,7 @@ export const Input = forwardRef<Ref, InputProps>(function Input(
         error={error}
         height={height}
         oneColoredIcons={oneColoredIcons}
+        secondaryBackground={secondaryBackground}
       >
         {prefixIcon && <PrefixContainer>{prefixIcon}</PrefixContainer>}
 
