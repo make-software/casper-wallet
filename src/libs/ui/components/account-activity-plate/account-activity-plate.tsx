@@ -106,22 +106,29 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
         : callerPublicKey;
 
     try {
-      const parsedAmount =
-        ((typeof args?.amount?.parsed === 'string' ||
-          typeof args?.amount?.parsed === 'number') &&
-          args?.amount?.parsed) ||
-        '-';
-
-      if (parsedAmount !== '-') {
-        const stringAmount =
-          typeof parsedAmount === 'number'
-            ? parsedAmount.toString()
-            : parsedAmount;
-
+      if (transactionInfo.amount) {
         amount =
           Number.isInteger(decimals) && decimals !== undefined
-            ? divideErc20Balance(stringAmount, decimals)
-            : motesToCSPR(stringAmount);
+            ? divideErc20Balance(transactionInfo.amount, decimals)
+            : motesToCSPR(transactionInfo.amount);
+      } else {
+        const parsedAmount =
+          ((typeof args?.amount?.parsed === 'string' ||
+            typeof args?.amount?.parsed === 'number') &&
+            args?.amount?.parsed) ||
+          '-';
+
+        if (parsedAmount !== '-') {
+          const stringAmount =
+            typeof parsedAmount === 'number'
+              ? parsedAmount.toString()
+              : parsedAmount;
+
+          amount =
+            Number.isInteger(decimals) && decimals !== undefined
+              ? divideErc20Balance(stringAmount, decimals)
+              : motesToCSPR(stringAmount);
+        }
       }
     } catch (error) {
       console.error(error);

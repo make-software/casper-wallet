@@ -57,6 +57,7 @@ export const Erc20TokenActivityList = () => {
     tokenActivity?.tokenActivityList?.map((transaction, index) => {
       return {
         id: String(index),
+        amount: transaction.amount,
         deployHash: transaction.deploy_hash,
         callerPublicKey: transaction.deploy?.caller_public_key || '-',
         timestamp: transaction.deploy?.timestamp || '-',
