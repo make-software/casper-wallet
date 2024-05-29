@@ -27,7 +27,8 @@ const {
   isChrome,
   isSafari,
   ExtensionBuildPath,
-  ManifestPath
+  ManifestPath,
+  isFirefox
 } = require('./constants');
 
 const isDev = env.NODE_ENV === 'development';
@@ -37,9 +38,7 @@ const buildDir = isChrome
   ? ExtensionBuildPath.Chrome
   : ExtensionBuildPath.Firefox;
 
-const alias = {
-  'react-dom': '@hot-loader/react-dom'
-};
+const alias = {};
 
 // load the secrets
 const secretsPath = path.join(__dirname, 'secrets.' + env.NODE_ENV + '.js');
@@ -60,6 +59,25 @@ const fileExtensions = [
 if (fileSystem.existsSync(secretsPath)) {
   alias['secrets'] = secretsPath;
 }
+
+const getCSP = () => {
+  const csp =
+    "default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://onramp-api.cspr.click/api/";
+
+  if (isFirefox) {
+    return csp;
+  }
+
+  if (isChrome) {
+    return isDev
+      ? {
+          extension_pages: `${csp} ws://localhost:8000/socketcluster/ ws://localhost:3001/ws`
+        }
+      : {
+          extension_pages: csp
+        };
+  }
+};
 
 const options = {
   experiments: {
@@ -180,8 +198,8 @@ const options = {
           from: isChrome
             ? ManifestPath.v3
             : isSafari
-            ? ManifestPath.v2_Safari
-            : ManifestPath.v2,
+              ? ManifestPath.v2_Safari
+              : ManifestPath.v2,
           to: path.join(__dirname, buildDir, 'manifest.json'),
           force: true,
           transform: function (content) {
@@ -193,15 +211,7 @@ const options = {
               version_name: pkg.version + ` (${commitHash.slice(0, 7)})`,
               author: pkg.author,
               description: pkg.description,
-              ...(isDev
-                ? isChrome
-                  ? {
-                      content_security_policy: {}
-                    }
-                  : {
-                      content_security_policy: ''
-                    }
-                : {})
+              content_security_policy: getCSP()
             };
             // Removing the key from manifest for Chrome production build
             if (isChrome && !isDev) {

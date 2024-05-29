@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { FieldError } from 'react-hook-form';
+import styled from 'styled-components';
+
+import { getImageProxyUrl } from '@src/utils';
 
 import {
   AlignedFlexRow,
@@ -18,9 +20,8 @@ import {
   Hash,
   HashVariant,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
-import { getImageProxyUrl } from '@src/utils';
 
 const ValidatorPlateContainer = styled(AlignedSpaceBetweenFlexRow)<{
   onClick?: () => void;
@@ -151,14 +152,14 @@ export const ValidatorPlate = ({
         </NameContainer>
       </AlignedFlexRow>
       <RightAlignedFlexColumn>
-        <Typography type="captionHash" color="contentPrimary">
+        <Typography type="captionHash">
           {`${formattedTotalStake} CSPR`}
         </Typography>
         <AlignedFlexRow gap={SpacingSize.Small}>
           <Typography type="listSubtext" color="contentSecondary">
             {`${formattedFee}% fee`}
           </Typography>
-          <Typography type="listSubtext" color="contentSecondary">
+          <Typography type="listSubtext">
             {getFormattedDelegatorsNumber()} delegators
           </Typography>
         </AlignedFlexRow>

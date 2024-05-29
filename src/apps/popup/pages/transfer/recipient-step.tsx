@@ -1,6 +1,6 @@
 import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 import { UseFormReturn } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
   ContentContainer,
@@ -8,22 +8,26 @@ import {
   SpacingSize
 } from '@libs/layout';
 import {
-  Typography,
   ActiveAccountPlate,
-  RecipientDropdownInput
-} from '@libs/ui';
+  RecipientDropdownInput,
+  Typography
+} from '@libs/ui/components';
 import { TransferRecipientFormValues } from '@libs/ui/forms/transfer';
 
 interface RecipientStepProps {
   recipientForm: UseFormReturn<TransferRecipientFormValues>;
   balance: string | null;
   symbol: string | null;
+  setRecipientName: React.Dispatch<React.SetStateAction<string>>;
+  recipientName: string;
 }
 
 export const RecipientStep = ({
   recipientForm,
   balance,
-  symbol
+  symbol,
+  setRecipientName,
+  recipientName
 }: RecipientStepProps) => {
   const { t } = useTranslation();
 
@@ -36,7 +40,11 @@ export const RecipientStep = ({
       </ParagraphContainer>
       <ActiveAccountPlate label="From" balance={balance} symbol={symbol} />
 
-      <RecipientDropdownInput recipientForm={recipientForm} />
+      <RecipientDropdownInput
+        recipientForm={recipientForm}
+        setRecipientName={setRecipientName}
+        recipientName={recipientName}
+      />
     </ContentContainer>
   );
 };

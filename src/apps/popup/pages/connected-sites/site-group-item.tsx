@@ -1,11 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Hash, HashVariant, SvgIcon, Typography } from '@src/libs/ui';
 import {
   AlignedSpaceBetweenFlexRow,
   LeftAlignedFlexColumn
-} from '@src/libs/layout';
+} from '@libs/layout';
+import { HardwareWalletType } from '@libs/types/account';
+import { Hash, HashVariant, SvgIcon, Typography } from '@libs/ui/components';
 
 const SiteGroupItemContainer = styled(AlignedSpaceBetweenFlexRow)`
   gap: 18px;
@@ -21,13 +22,15 @@ interface SiteGroupItemProps {
   publicKey: string;
   handleOnClick: () => void;
   imported?: boolean;
+  hardware?: HardwareWalletType;
 }
 
 export function SiteGroupItem({
   name,
   publicKey,
   handleOnClick,
-  imported
+  imported,
+  hardware
 }: SiteGroupItemProps) {
   return (
     <SiteGroupItemContainer>
@@ -39,7 +42,8 @@ export function SiteGroupItem({
           variant={HashVariant.CaptionHash}
           value={publicKey}
           truncated
-          withTag={imported}
+          isImported={imported}
+          isLedger={hardware === HardwareWalletType.Ledger}
           placement="bottomRight"
         />
       </AccountNameAndPublicKeyContainer>

@@ -1,31 +1,17 @@
-import Identicon from 'react-identicons';
 import React from 'react';
 import styled, { DefaultTheme, useTheme } from 'styled-components';
 
-import {
-  SpacingSize,
-  AvatarContainer,
-  AlignedFlexRow,
-  CenteredFlexRow
-} from '@libs/layout';
 import { isValidAccountHash, isValidPublicKey } from '@src/utils';
-import { hexToRGBA, SvgIcon } from '@libs/ui';
-import { useSelector } from 'react-redux';
-import { selectDarkModeSetting } from '@background/redux/settings/selectors';
 
-const RoundedIdenticon = styled(Identicon)<{
-  displayContext?: 'header';
-  isDarkMode: boolean;
-}>`
-  border-radius: ${({ theme, displayContext }) =>
-    displayContext ? theme.borderRadius.base : theme.borderRadius.eight}px;
-  border: ${({ displayContext, isDarkMode, theme }) =>
-    displayContext
-      ? isDarkMode
-        ? `0.5px solid ${theme.color.contentDisabled}}`
-        : `0.5px solid ${hexToRGBA(theme.color.black, '0.16')}`
-      : 'none'};
-`;
+import { useIsDarkMode } from '@hooks/use-is-dark-mode';
+
+import {
+  AlignedFlexRow,
+  AvatarContainer,
+  CenteredFlexRow,
+  SpacingSize
+} from '@libs/layout';
+import { Identicon, SvgIcon } from '@libs/ui/components';
 
 const IconHashWrapper = styled(CenteredFlexRow)(({ theme }) => ({
   color: theme.color.contentOnFill,
@@ -52,7 +38,9 @@ interface AvatarTypes {
   top?: SpacingSize;
   withConnectedStatus?: boolean;
   isConnected?: boolean;
-  displayContext?: 'header';
+  displayContext?: 'header' | 'accountList';
+  isActiveAccount?: boolean;
+  borderRadius?: number;
 }
 
 export const Avatar = ({
@@ -61,11 +49,13 @@ export const Avatar = ({
   top,
   withConnectedStatus,
   isConnected,
-  displayContext
+  displayContext,
+  isActiveAccount,
+  borderRadius
 }: AvatarTypes) => {
   const theme = useTheme();
 
-  const isDarkMode = useSelector(selectDarkModeSetting);
+  const isDarkMode = useIsDarkMode();
 
   const connectIcon = isDarkMode
     ? displayContext === 'header'
@@ -78,20 +68,36 @@ export const Avatar = ({
   if (withConnectedStatus && isConnected !== undefined) {
     return (
       <ConnectionStatusBadgeContainer>
-        <RoundedIdenticon
-          string={publicKey}
+        <Identicon
+          value={publicKey}
           size={size}
-          bg={theme.color.contentOnFill}
+          background={theme.color.contentOnFill}
           displayContext={displayContext}
-          isDarkMode={isDarkMode}
+          isActiveAccount={isActiveAccount}
+          isConnected={isConnected}
+          borderRadius={borderRadius}
         />
         <SvgIcon
           src={connectIcon}
-          size={displayContext === 'header' ? 14 : 16}
+          size={
+            displayContext === 'header' || displayContext === 'accountList'
+              ? 12
+              : 16
+          }
           style={{
             position: 'absolute',
-            bottom: displayContext === 'header' ? '-4px' : '-5px',
-            right: displayContext === 'header' ? '-4px' : '-5px'
+            bottom:
+              displayContext === 'header'
+                ? '-4px'
+                : displayContext === 'accountList'
+                  ? '-2px'
+                  : '-5px',
+            right:
+              displayContext === 'header'
+                ? '-4px'
+                : displayContext === 'accountList'
+                  ? '-2px'
+                  : '-5px'
           }}
           color={isConnected ? 'contentPositive' : 'contentDisabled'}
         />
@@ -102,11 +108,11 @@ export const Avatar = ({
   if (isValidPublicKey(publicKey)) {
     return (
       <AvatarContainer top={top}>
-        <RoundedIdenticon
-          string={publicKey}
+        <Identicon
+          value={publicKey}
           size={size}
-          bg={theme.color.contentOnFill}
-          isDarkMode={isDarkMode}
+          background={theme.color.contentOnFill}
+          borderRadius={borderRadius}
         />
       </AvatarContainer>
     );

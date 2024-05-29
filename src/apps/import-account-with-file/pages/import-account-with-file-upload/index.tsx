@@ -1,27 +1,25 @@
-import React, { useCallback } from 'react';
-import { UseFormProps } from 'react-hook-form/dist/types/form';
-import { FieldValues, useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import * as Yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
+import React, { useCallback } from 'react';
+import { FieldValues, UseFormProps, useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 
-import {
-  LayoutWindow,
-  PopupHeader,
-  FooterButtonsContainer
-} from '@src/libs/layout';
-import { Button } from '@src/libs/ui';
-import { useAccountNameRule } from '@src/libs/ui/forms/form-validation-rules';
+import { checkAccountNameIsTaken } from '@background/redux/import-account-actions-should-be-removed';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { accountImported } from '@background/redux/vault/actions';
 
-import { Account } from '@src/background/redux/vault/types';
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { accountImported } from '@src/background/redux/vault/actions';
-import { checkAccountNameIsTaken } from '@src/background/redux/import-account-actions-should-be-removed';
+import {
+  FooterButtonsContainer,
+  HeaderPopup,
+  LayoutWindow
+} from '@libs/layout';
+import { Account } from '@libs/types/account';
+import { Button } from '@libs/ui/components';
+import { useAccountNameRule } from '@libs/ui/forms/form-validation-rules';
 
 import { RouterPath, useTypedNavigate } from '../../router';
-
-import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
 import { ImportAccountWithFileUploadPageContent } from './content';
+import { useSecretKeyFileReader } from './hooks/use-secret-key-file-reader';
 import { ImportAccountFormValues } from './types';
 
 export function ImportAccountWithFileUploadPage() {
@@ -61,10 +59,10 @@ export function ImportAccountWithFileUploadPage() {
       )
       .test(
         'fileType',
-        t('Please upload a PEM file containing private key.'),
+        t('Please upload a PEM or CER file containing a private key.'),
         filesArray => {
           if (filesArray != null && filesArray.length > 0) {
-            return /\.pem$/.test(filesArray[0].name);
+            return /\.pem$|\.cer$/.test(filesArray[0].name);
           }
           return false;
         }
@@ -109,7 +107,7 @@ export function ImportAccountWithFileUploadPage() {
     <LayoutWindow
       variant="form"
       onSubmit={handleSubmit(onSubmit)}
-      renderHeader={() => <PopupHeader />}
+      renderHeader={() => <HeaderPopup />}
       renderContent={() => (
         <ImportAccountWithFileUploadPageContent
           register={register}

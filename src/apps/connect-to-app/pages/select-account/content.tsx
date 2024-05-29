@@ -1,33 +1,32 @@
-import React, { useMemo, useCallback, SetStateAction, Dispatch } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import {
-  Checkbox,
-  SiteFaviconBadge,
-  Hash,
-  HashVariant,
-  List,
-  Typography
-} from '@src/libs/ui';
-
-import {
-  PageContainer,
-  ContentContainer,
-  ParagraphContainer,
-  ListItemClickableContainer,
-  LeftAlignedFlexColumn,
-  BreakWordContainer,
-  VerticalSpaceContainer,
-  SpacingSize
-} from '@src/libs/layout';
-
-import {
   selectConnectedAccountNamesWithActiveOrigin,
   selectVaultAccounts,
   selectVaultActiveAccount
-} from '@src/background/redux/vault/selectors';
+} from '@background/redux/vault/selectors';
+
+import {
+  BreakWordContainer,
+  ContentContainer,
+  LeftAlignedFlexColumn,
+  ListItemClickableContainer,
+  PageContainer,
+  ParagraphContainer,
+  SpacingSize,
+  VerticalSpaceContainer
+} from '@libs/layout';
+import {
+  Checkbox,
+  Hash,
+  HashVariant,
+  List,
+  SiteFaviconBadge,
+  Typography
+} from '@libs/ui/components';
 
 const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
   width: 100%;

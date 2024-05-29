@@ -3,18 +3,39 @@
     "react-app",
     "plugin:jsx-a11y/recommended",
     "plugin:react-hooks/recommended",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript"
   ],
   "plugins": [
     "jsx-a11y",
-    "react-hooks"
+    "react-hooks",
+    "import"
   ],
   "parser": "@typescript-eslint/parser",
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      }
+    }
+  },
   "rules": {
     "semi": 1,
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
     "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": ["error"],
-    "jsx-a11y/no-autofocus": "off"
+    "@typescript-eslint/no-unused-vars": ["error", {
+      "args": "after-used"
+    }],
+    "jsx-a11y/no-autofocus": "off",
+    "import/no-cycle": [
+      1,
+      {
+        "maxDepth": 10,
+        "ignoreExternal": true
+      }
+    ],
+    "import/no-named-as-default": 0,
+    "import/export": 1
   }
 }

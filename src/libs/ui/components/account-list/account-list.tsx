@@ -1,62 +1,31 @@
 import React, { useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { Trans, useTranslation } from 'react-i18next';
 
-import {
-  AlignedFlexRow,
-  CenteredFlexRow,
-  FlexColumn,
-  FlexRow,
-  LeftAlignedFlexColumn,
-  SpacingSize
-} from '@libs/layout';
-import { AccountListRows } from '@background/redux/vault/types';
+import { isLedgerAvailable } from '@src/utils';
+
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
+
+import { WindowApp } from '@background/create-open-window';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
-  selectVaultAccounts,
-  selectVaultActiveAccountName
+  selectVaultActiveAccountName,
+  selectVaultVisibleAccounts
 } from '@background/redux/vault/selectors';
-import { sortAccounts } from '@libs/ui/components/account-list/utils';
+
+import { useWindowManager } from '@hooks/use-window-manager';
+
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import {
-  AccountActionsMenuPopover,
-  Button,
-  Checkbox,
-  Hash,
-  HashVariant,
-  List,
-  Typography,
-  ConnectionStatusBadge
-} from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import { WindowApp } from '@background/create-open-window';
-import { useWindowManager } from '@src/hooks';
+import { FlexColumn, SpacingSize } from '@libs/layout';
+import { AccountListRows } from '@libs/types/account';
+import { Button, List } from '@libs/ui/components';
+import { sortAccounts } from '@libs/ui/components/account-list/utils';
 
-const ListItemContainer = styled(FlexColumn)`
-  min-height: 68px;
-  height: 100%;
+import { AccountListItem } from './account-list-item';
 
-  padding: 12px 8px 12px 16px;
-`;
-
-const ListItemClickableContainer = styled(FlexRow)`
-  width: 100%;
-  cursor: pointer;
-`;
-
-const AccountNameWithHashListItemContainer = styled(LeftAlignedFlexColumn)`
-  width: 100%;
-
-  padding-left: 16px;
-`;
-
-const ConnectionStatusBadgeContainer = styled.div`
-  margin-left: 44px;
-`;
-
-const ButtonContainer = styled(CenteredFlexRow)`
+const ButtonContainer = styled(FlexColumn)`
   padding: 16px;
 `;
 
@@ -65,15 +34,15 @@ interface AccountListProps {
 }
 
 export const AccountList = ({ closeModal }: AccountListProps) => {
+  const { pathname } = useTypedLocation();
   const [accountListRows, setAccountListRows] = useState<AccountListRows[]>([]);
-
   const { changeActiveAccountWithEvent: changeActiveAccount } =
     useAccountManager();
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
   const { openWindow } = useWindowManager();
 
-  const accounts = useSelector(selectVaultAccounts);
+  const visibleAccounts = useSelector(selectVaultVisibleAccounts);
   const activeAccountName = useSelector(selectVaultActiveAccountName);
 
   const connectedAccountNames =
@@ -81,7 +50,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
 
   useEffect(() => {
     const accountListRows = sortAccounts(
-      accounts,
+      visibleAccounts,
       activeAccountName,
       connectedAccountNames
     ).map(account => ({
@@ -91,98 +60,68 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
     }));
 
     setAccountListRows(accountListRows);
-    // We need to sort the account list only on the component mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // We need to sort the account list only on the component mount and when new accounts are added
+    //   eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleAccounts]);
 
   return (
     <List
       rows={accountListRows}
       contentTop={SpacingSize.None}
-      maxHeight={380}
-      renderRow={(account, index) => {
+      maxHeight={322}
+      renderRow={account => {
         const isConnected = connectedAccountNames.includes(account.name);
+        const isActiveAccount = activeAccountName === account.name;
 
         return (
-          <ListItemContainer key={account.name}>
-            <AlignedFlexRow>
-              <ListItemClickableContainer
-                onClick={event => {
-                  changeActiveAccount(account.name);
-                  closeModal(event);
-                }}
-              >
-                <Checkbox
-                  checked={
-                    activeAccountName
-                      ? activeAccountName === account.name
-                      : false
-                  }
-                />
-                <AccountNameWithHashListItemContainer>
-                  <Typography
-                    type={
-                      activeAccountName && activeAccountName === account.name
-                        ? 'bodySemiBold'
-                        : 'body'
-                    }
-                  >
-                    {account.name}
-                  </Typography>
-                  <Hash
-                    value={account.publicKey}
-                    variant={HashVariant.CaptionHash}
-                    truncated
-                    withoutTooltip={accountListRows.length === 1}
-                    withTag={account.imported}
-                    placement={
-                      index === accountListRows.length - 1
-                        ? 'topRight'
-                        : 'bottomRight'
-                    }
-                  />
-                </AccountNameWithHashListItemContainer>
-              </ListItemClickableContainer>
-              <AccountActionsMenuPopover
-                account={account}
-                onClick={closeModal}
-              />
-            </AlignedFlexRow>
-            {isConnected && (
-              <ConnectionStatusBadgeContainer>
-                <ConnectionStatusBadge
-                  isConnected
-                  displayContext="accountList"
-                />
-              </ConnectionStatusBadgeContainer>
-            )}
-          </ListItemContainer>
+          <AccountListItem
+            account={account}
+            isActiveAccount={isActiveAccount}
+            isConnected={isConnected}
+            closeModal={closeModal}
+            onClick={event => {
+              changeActiveAccount(account.name);
+              closeModal(event);
+            }}
+          />
         );
       }}
-      marginLeftForItemSeparatorLine={60}
+      marginLeftForItemSeparatorLine={70}
       renderFooter={() => (
         <ButtonContainer gap={SpacingSize.Large}>
           <Button
             color="secondaryBlue"
-            flexWidth
-            onClick={() => {
-              openWindow({
-                windowApp: WindowApp.ImportAccount,
-                isNewWindow: false
-              }).catch(e => console.error(e));
-            }}
-          >
-            <Trans t={t}>Import</Trans>
-          </Button>
-          <Button
-            color="secondaryBlue"
-            flexWidth
             onClick={() => {
               navigate(RouterPath.CreateAccount);
             }}
           >
-            <Trans t={t}>Create</Trans>
+            <Trans t={t}>Create account</Trans>
           </Button>
+          <Button
+            color="secondaryBlue"
+            onClick={() => {
+              openWindow({
+                windowApp: WindowApp.ImportAccount,
+                isNewWindow: true
+              }).catch(e => console.error(e));
+            }}
+          >
+            <Trans t={t}>Import account</Trans>
+          </Button>
+          {isLedgerAvailable && (
+            <Button
+              color="secondaryBlue"
+              onClick={evt => {
+                if (pathname === RouterPath.ImportAccountFromLedger) {
+                  closeModal(evt);
+                } else {
+                  navigate(RouterPath.ImportAccountFromLedger);
+                }
+              }}
+            >
+              <Trans t={t}>Connect Ledger</Trans>
+            </Button>
+          )}
         </ButtonContainer>
       )}
     />

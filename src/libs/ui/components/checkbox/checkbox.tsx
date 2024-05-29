@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Typography, SvgIcon, BaseProps } from '@src/libs/ui';
+import { SvgIcon, Typography } from '@libs/ui/components';
+import { BaseProps } from '@libs/ui/types';
 
 import FlexRow from '../flex-row/flex-row';
 
@@ -9,7 +10,7 @@ const StyledFlexRow = styled(FlexRow)<{
   checked?: boolean;
   disabled?: boolean;
 }>(({ theme, checked, disabled }) => ({
-  cursor: 'pointer',
+  cursor: disabled ? 'default' : 'pointer',
   width: 'fit-content',
   pointerEvents: 'auto',
   svg: {
@@ -55,8 +56,8 @@ export function Checkbox({
         ? 'assets/icons/checkbox-square-checked.svg'
         : 'assets/icons/checkbox-square.svg'
       : checked
-        ? 'assets/icons/checkbox-checked.svg'
-        : 'assets/icons/checkbox.svg';
+        ? 'assets/icons/radio-button-on.svg'
+        : 'assets/icons/radio-button-off.svg';
 
   return (
     <StyledFlexRow
@@ -67,7 +68,10 @@ export function Checkbox({
       data-testid={dataTestId}
       disabled={disabled}
     >
-      <CheckboxSvgIcon src={iconSrc} color="contentAction" />
+      <CheckboxSvgIcon
+        src={iconSrc}
+        color={disabled ? 'contentSecondary' : 'contentAction'}
+      />
       {label && (
         <Typography type="body" color="contentPrimary">
           {label}
@@ -76,5 +80,3 @@ export function Checkbox({
     </StyledFlexRow>
   );
 }
-
-export default Checkbox;

@@ -1,5 +1,5 @@
-import { popup, popupExpect } from '../../fixtures';
 import { ACCOUNT_NAMES } from '../../constants';
+import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI: rename account', () => {
   popup(

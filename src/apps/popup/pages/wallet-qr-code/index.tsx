@@ -1,23 +1,21 @@
 import React, { useCallback, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 
-import {
-  FooterButtonsContainer,
-  HeaderSubmenuBarNavLink,
-  PopupHeader,
-  PopupLayout
-} from '@libs/layout';
+import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
 import { WalletQrCodePageContent } from '@popup/pages/wallet-qr-code/content';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import { Button } from '@libs/ui';
+
 import {
   selectSecretPhrase,
   selectVaultDerivedAccounts,
   selectVaultImportedAccounts
 } from '@background/redux/vault/selectors';
+
 import { generateSyncWalletQrData } from '@libs/crypto';
-import { BackupSecretPhrasePasswordPage } from '@popup/pages/backup-secret-phrase-password';
+import {
+  HeaderPopup,
+  HeaderSubmenuBarNavLink,
+  PopupLayout
+} from '@libs/layout';
 
 export const WalletQrCodePage = () => {
   const [qrStrings, setQrStrings] = useState<string[]>([]);
@@ -31,9 +29,6 @@ export const WalletQrCodePage = () => {
     selectVaultImportedAccounts,
     shallowEqual
   );
-
-  const navigate = useTypedNavigate();
-  const { t } = useTranslation();
 
   const setPasswordConfirmed = useCallback(() => {
     setIsPasswordConfirmed(true);
@@ -56,7 +51,7 @@ export const WalletQrCodePage = () => {
 
   if (!isPasswordConfirmed) {
     return (
-      <BackupSecretPhrasePasswordPage
+      <PasswordProtectionPage
         setPasswordConfirmed={setPasswordConfirmed}
         onClick={generateQRCode}
         loading={loading}
@@ -67,7 +62,7 @@ export const WalletQrCodePage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus
@@ -77,13 +72,6 @@ export const WalletQrCodePage = () => {
         />
       )}
       renderContent={() => <WalletQrCodePageContent qrStrings={qrStrings} />}
-      renderFooter={() => (
-        <FooterButtonsContainer>
-          <Button onClick={() => navigate(RouterPath.Home)}>
-            <Trans t={t}>I'm done</Trans>
-          </Button>
-        </FooterButtonsContainer>
-      )}
     />
   );
 };

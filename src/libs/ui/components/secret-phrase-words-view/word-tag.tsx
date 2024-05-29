@@ -1,8 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { getLinearGradientColor, Typography } from '@src/libs/ui';
-import { FlexRow, SpacingSize } from '@src/libs/layout';
+import { FlexRow, SpacingSize } from '@libs/layout';
+import { Typography } from '@libs/ui/components';
+import { getLinearGradientColor } from '@libs/ui/utils/get-linear-gradient-color';
 
 interface IsEmptyWord {
   isEmptyWord?: boolean;
@@ -67,7 +68,9 @@ export function WordTag({
           {index + 1}
         </Typography>
       )}
-      <Typography type="body">{value}</Typography>
+      <Typography translate="no" type="body">
+        {value}
+      </Typography>
     </WordContainer>
   );
 }

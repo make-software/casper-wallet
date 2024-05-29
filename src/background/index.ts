@@ -1,34 +1,103 @@
-import { getType, RootAction } from 'typesafe-actions';
-import browser from 'webextension-polyfill';
+import { RootAction, getType } from 'typesafe-actions';
+import {
+  Tabs,
+  action,
+  browserAction,
+  management,
+  runtime,
+  tabs,
+  windows
+} from 'webextension-polyfill';
 
+import {
+  getUrlOrigin,
+  hasHttpPrefix,
+  isEqualCaseInsensitive
+} from '@src/utils';
+
+import { CasperDeploy } from '@signature-request/pages/sign-deploy/deploy-types';
+
+import {
+  backgroundEvent,
+  popupStateUpdated
+} from '@background/background-events';
+import { WindowApp } from '@background/create-open-window';
+import {
+  disableOnboardingFlow,
+  enableOnboardingFlow,
+  openOnboardingUi
+} from '@background/open-onboarding-flow';
+import {
+  accountBalancesChanged,
+  accountBalancesReseted
+} from '@background/redux/account-balances/actions';
+import {
+  accountBalanceChanged,
+  accountCasperActivityChanged,
+  accountCasperActivityCountChanged,
+  accountCasperActivityUpdated,
+  accountCurrencyRateChanged,
+  accountDeploysAdded,
+  accountDeploysCountChanged,
+  accountDeploysUpdated,
+  accountErc20Changed,
+  accountErc20TokensActivityChanged,
+  accountErc20TokensActivityUpdated,
+  accountInfoReset,
+  accountNftTokensAdded,
+  accountNftTokensCountChanged,
+  accountNftTokensUpdated,
+  accountPendingTransactionsChanged,
+  accountPendingTransactionsRemove,
+  accountTrackingIdOfSentNftTokensChanged,
+  accountTrackingIdOfSentNftTokensRemoved
+} from '@background/redux/account-info/actions';
+import {
+  contactRemoved,
+  contactUpdated,
+  contactsReseted,
+  newContactAdded
+} from '@background/redux/contacts/actions';
+import { getExistingMainStoreSingletonOrInit } from '@background/redux/get-main-store';
 import {
   CheckAccountNameIsTakenAction,
   CheckSecretKeyExistAction
-} from '@src/background/redux/import-account-actions-should-be-removed';
-import { getExistingMainStoreSingletonOrInit } from '@src/background/redux/utils';
+} from '@background/redux/import-account-actions-should-be-removed';
+import {
+  ledgerDeployChanged,
+  ledgerNewWindowIdChanged,
+  ledgerRecipientToSaveOnSuccessChanged,
+  ledgerStateCleared
+} from '@background/redux/ledger/actions';
+import {
+  askForReviewAfterChanged,
+  ratedInStoreChanged
+} from '@background/redux/rate-app/actions';
 import {
   accountAdded,
   accountDisconnected,
   accountImported,
   accountRemoved,
   accountRenamed,
-  siteConnected,
+  accountsImported,
   activeAccountChanged,
-  siteDisconnected,
-  vaultReseted,
-  vaultLoaded,
-  secretPhraseCreated,
   anotherAccountConnected,
   deployPayloadReceived,
-  deploysReseted
-} from '@src/background/redux/vault/actions';
+  deploysReseted,
+  hideAccountFromListChange,
+  secretPhraseCreated,
+  siteConnected,
+  siteDisconnected,
+  vaultLoaded,
+  vaultReseted
+} from '@background/redux/vault/actions';
 import {
-  selectIsAccountConnected,
   selectAccountNamesByOriginDict,
+  selectIsAccountConnected,
   selectVaultAccountsNames,
   selectVaultAccountsSecretKeysBase64,
   selectVaultActiveAccount
-} from '@src/background/redux/vault/selectors';
+} from '@background/redux/vault/selectors';
 import {
   connectWindowInit,
   importWindowInit,
@@ -37,36 +106,57 @@ import {
   signWindowInit,
   windowIdChanged,
   windowIdCleared
-} from '@src/background/redux/windowManagement/actions';
-import { selectWindowId } from '@src/background/redux/windowManagement/selectors';
-import { sdkEvent } from '@src/content/sdk-event';
-import { isSDKMethod, SdkMethod, sdkMethod } from '@src/content/sdk-method';
-import { WindowApp } from '@src/hooks';
+} from '@background/redux/windowManagement/actions';
+import { selectWindowId } from '@background/redux/windowManagement/selectors';
+
+import { SiteNotConnectedError, WalletLockedError } from '@content/sdk-errors';
+import { sdkEvent } from '@content/sdk-event';
+import { SdkMethod, isSDKMethod, sdkMethod } from '@content/sdk-method';
+
 import {
-  enableOnboardingFlow,
-  disableOnboardingFlow,
-  openOnboardingUi
-} from '@src/background/open-onboarding-flow';
-import {
-  fetchAccountBalance,
-  fetchCurrencyRate
-} from '@libs/services/balance-service';
-import { fetchAccountInfo } from '@libs/services/account-info';
-import {
+  MapExtendedDeploy,
+  MapPaginatedExtendedDeploys,
   fetchAccountCasperActivity,
   fetchAccountExtendedDeploys,
-  fetchExtendedDeploysInfo,
-  MapExtendedDeploy,
-  MapPaginatedExtendedDeploys
+  fetchExtendedDeploysInfo
 } from '@libs/services/account-activity-service';
-import { fetchErc20Tokens } from '@libs/services/erc20-service';
-
-import { openWindow } from './open-window';
+import { fetchErc20TokenActivity } from '@libs/services/account-activity-service/erc20-token-activity-service';
+import { fetchAccountInfo } from '@libs/services/account-info';
 import {
-  encryptionKeyHashCreated,
-  sessionReseted,
-  vaultUnlocked
-} from './redux/session/actions';
+  fetchAccountBalance,
+  fetchAccountBalances,
+  fetchCurrencyRate
+} from '@libs/services/balance-service';
+import {
+  fetchOnRampOptionGet,
+  fetchOnRampOptionPost,
+  fetchOnRampSelectionPost
+} from '@libs/services/buy-cspr-service';
+import { fetchErc20Tokens } from '@libs/services/erc20-service';
+import { fetchNftTokens } from '@libs/services/nft-service';
+import {
+  fetchAuctionValidators,
+  fetchValidatorsDetailsData
+} from '@libs/services/validators-service';
+
+import {
+  CannotGetActiveAccountError,
+  CannotGetSenderOriginError
+} from './internal-errors';
+import { openWindow } from './open-window';
+import { activeOriginChanged } from './redux/active-origin/actions';
+import { keysReseted, keysUpdated } from './redux/keys/actions';
+import { selectKeysDoesExist } from './redux/keys/selectors';
+import { lastActivityTimeRefreshed } from './redux/last-activity-time/actions';
+import {
+  loginRetryCountIncremented,
+  loginRetryCountReseted
+} from './redux/login-retry-count/actions';
+import { loginRetryLockoutTimeSet } from './redux/login-retry-lockout-time/actions';
+import {
+  recipientPublicKeyAdded,
+  recipientPublicKeyReseted
+} from './redux/recent-recipient-public-keys/actions';
 import {
   changePassword,
   createAccount,
@@ -77,73 +167,33 @@ import {
   unlockVault
 } from './redux/sagas/actions';
 import {
-  vaultCipherCreated,
-  vaultCipherReseted
-} from './redux/vault-cipher/actions';
-import { keysReseted, keysUpdated } from './redux/keys/actions';
+  contactEditingPermissionChanged,
+  encryptionKeyHashCreated,
+  sessionReseted,
+  vaultUnlocked
+} from './redux/session/actions';
 import { selectVaultIsLocked } from './redux/session/selectors';
-import { selectKeysDoesExist } from './redux/keys/selectors';
-import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
-import { ServiceMessage, serviceMessage } from './service-message';
-import {
-  loginRetryCountIncremented,
-  loginRetryCountReseted
-} from './redux/login-retry-count/actions';
-import { emitSdkEventToActiveTabsWithOrigin } from './utils';
-import { loginRetryLockoutTimeSet } from './redux/login-retry-lockout-time/actions';
-import { lastActivityTimeRefreshed } from './redux/last-activity-time/actions';
 import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged,
-  darkModeSettingChanged
+  themeModeSettingChanged,
+  vaultSettingsReseted
 } from './redux/settings/actions';
-import { activeOriginChanged } from './redux/active-origin/actions';
 import { selectApiConfigBasedOnActiveNetwork } from './redux/settings/selectors';
-import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
 import {
-  CannotGetActiveAccountError,
-  CannotGetSenderOriginError
-} from './internal-errors';
-import {
-  SiteNotConnectedError,
-  WalletLockedError
-} from '@src/content/sdk-errors';
-import { recipientPublicKeyAdded } from './redux/recent-recipient-public-keys/actions';
-import {
-  accountCasperActivityChanged,
-  accountInfoReset,
-  accountCasperActivityUpdated,
-  accountBalanceChanged,
-  accountCurrencyRateChanged,
-  accountPendingTransactionsChanged,
-  accountPendingTransactionsRemove,
-  accountErc20Changed,
-  accountErc20TokensActivityChanged,
-  accountErc20TokensActivityUpdated,
-  accountDeploysAdded,
-  accountDeploysUpdated,
-  accountNftTokensAdded,
-  accountNftTokensUpdated,
-  accountNftTokensCountChanged,
-  accountDeploysCountChanged,
-  accountCasperActivityCountChanged,
-  accountTrackingIdOfSentNftTokensChanged,
-  accountTrackingIdOfSentNftTokensRemoved
-} from '@background/redux/account-info/actions';
-import { fetchErc20TokenActivity } from '@src/libs/services/account-activity-service/erc20-token-activity-service';
-import { fetchNftTokens } from '@libs/services/nft-service';
-import {
-  fetchAuctionValidators,
-  fetchValidatorsDetailsData
-} from '@libs/services/validators-service';
+  vaultCipherCreated,
+  vaultCipherReseted
+} from './redux/vault-cipher/actions';
+import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
+import { ServiceMessage, serviceMessage } from './service-message';
+import { emitSdkEventToActiveTabsWithOrigin } from './utils';
 
 // setup default onboarding action
 async function handleActionClick() {
   await openOnboardingUi();
 }
-browser.action && browser.action.onClicked.addListener(handleActionClick);
-browser.browserAction &&
-  browser.browserAction.onClicked.addListener(handleActionClick);
+action && action.onClicked.addListener(handleActionClick);
+browserAction && browserAction.onClicked.addListener(handleActionClick);
 
 async function isOnboardingCompleted() {
   const store = await getExistingMainStoreSingletonOrInit();
@@ -163,14 +213,14 @@ const init = () => {
     }
   });
 };
-browser.runtime.onStartup.addListener(init);
-browser.management?.onEnabled?.addListener(init);
+runtime.onStartup.addListener(init);
+management?.onEnabled?.addListener(init);
 
-browser.runtime.onInstalled.addListener(async () => {
+runtime.onInstalled.addListener(async () => {
   // this will run on installation or update so
   // first clear previous rules, then register new rules
   // DEV MODE: clean store on installation
-  // browser.storage.local.remove([REDUX_STORAGE_KEY]);
+  // storage.local.remove([REDUX_STORAGE_KEY]);
   //
   // after installation/update check if onboarding is completed
   isOnboardingCompleted().then(yes => {
@@ -188,7 +238,7 @@ const updateOrigin = async (windowId: number) => {
     return;
   }
 
-  const window = await browser.windows.get(windowId);
+  const window = await windows.get(windowId);
   // skip when non-normal windows
   if (window.type !== 'normal') {
     return;
@@ -198,7 +248,7 @@ const updateOrigin = async (windowId: number) => {
   const state = store.getState();
   const activeOrigin = state.activeOrigin;
 
-  const activeTabs = await browser.tabs.query({ active: true, windowId });
+  const activeTabs = await tabs.query({ active: true, windowId });
   const tab0 = activeTabs[0];
 
   let newActiveOrigin = null;
@@ -235,25 +285,28 @@ const updateOrigin = async (windowId: number) => {
   }
 };
 
-browser.windows.onFocusChanged.addListener(async (windowId: number) => {
+windows.onFocusChanged.addListener(async (windowId: number) => {
   updateOrigin(windowId);
 });
 
-browser.tabs.onActivated.addListener(
-  async ({ windowId }: browser.Tabs.OnActivatedActiveInfoType) => {
+tabs.onActivated.addListener(
+  async ({ windowId }: Tabs.OnActivatedActiveInfoType) => {
     updateOrigin(windowId);
   }
 );
 
-browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo && changeInfo.url && tab.windowId) {
     updateOrigin(tab.windowId);
   }
 });
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
-browser.runtime.onMessage.addListener(
-  async (action: RootAction | SdkMethod | ServiceMessage, sender) => {
+runtime.onMessage.addListener(
+  async (
+    action: RootAction | SdkMethod | ServiceMessage | popupStateUpdated,
+    sender
+  ) => {
     const store = await getExistingMainStoreSingletonOrInit();
 
     return new Promise(async (sendResponse, sendError) => {
@@ -328,12 +381,32 @@ browser.runtime.onMessage.addListener(
               return sendError(Error('Desploy json string parse error'));
             }
 
+            const deploy: CasperDeploy = deployJson.deploy;
+
+            const isDeployAlreadySigningWithThisAccount = deploy.approvals.some(
+              approvals =>
+                isEqualCaseInsensitive(approvals.signer, signingPublicKeyHex)
+            );
+
+            if (isDeployAlreadySigningWithThisAccount) {
+              return sendResponse(
+                sdkMethod.signResponse(
+                  {
+                    cancelled: true,
+                    message: 'This deploy already sign by this account'
+                  },
+                  { requestId: action.meta.requestId }
+                )
+              );
+            }
+
             store.dispatch(
               deployPayloadReceived({
                 id: action.meta.requestId,
                 json: deployJson
               })
             );
+
             openWindow({
               windowApp: WindowApp.SignatureRequestDeploy,
               searchParams: {
@@ -509,13 +582,16 @@ browser.runtime.onMessage.addListener(
           case getType(vaultReseted):
           case getType(secretPhraseCreated):
           case getType(accountImported):
+          case getType(accountsImported):
           case getType(accountAdded):
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeAccountChanged):
+          case getType(hideAccountFromListChange):
           case getType(activeTimeoutDurationSettingChanged):
           case getType(activeNetworkSettingChanged):
-          case getType(darkModeSettingChanged):
+          case getType(vaultSettingsReseted):
+          case getType(themeModeSettingChanged):
           case getType(lastActivityTimeRefreshed):
           case getType(siteConnected):
           case getType(anotherAccountConnected):
@@ -536,6 +612,7 @@ browser.runtime.onMessage.addListener(
           case getType(loginRetryCountIncremented):
           case getType(loginRetryLockoutTimeSet):
           case getType(recipientPublicKeyAdded):
+          case getType(recipientPublicKeyReseted):
           case getType(accountBalanceChanged):
           case getType(accountCurrencyRateChanged):
           case getType(accountCasperActivityChanged):
@@ -556,27 +633,43 @@ browser.runtime.onMessage.addListener(
           case getType(accountTrackingIdOfSentNftTokensChanged):
           case getType(accountTrackingIdOfSentNftTokensRemoved):
           case getType(changePassword):
+          case getType(newContactAdded):
+          case getType(contactRemoved):
+          case getType(contactEditingPermissionChanged):
+          case getType(contactUpdated):
+          case getType(contactsReseted):
+          case getType(ratedInStoreChanged):
+          case getType(askForReviewAfterChanged):
+          case getType(accountBalancesChanged):
+          case getType(accountBalancesReseted):
+          case getType(ledgerNewWindowIdChanged):
+          case getType(ledgerStateCleared):
+          case getType(ledgerDeployChanged):
+          case getType(ledgerRecipientToSaveOnSuccessChanged):
             store.dispatch(action);
             return sendResponse(undefined);
 
+          case getType(backgroundEvent.popupStateUpdated):
+            // do nothing
+            return;
+
           // SERVICE MESSAGE HANDLERS
           case getType(serviceMessage.fetchBalanceRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
+            const { casperWalletApiUrl, casperClarityApiUrl } =
+              selectApiConfigBasedOnActiveNetwork(store.getState());
 
             try {
-              const [balance, rate] = await Promise.all([
+              const [accountData, rate] = await Promise.all([
                 fetchAccountBalance({
-                  publicKey: action.payload.publicKey,
-                  casperApiUrl
+                  accountHash: action.payload.accountHash,
+                  casperWalletApiUrl
                 }),
-                fetchCurrencyRate({ casperApiUrl })
+                fetchCurrencyRate({ casperClarityApiUrl })
               ]);
 
               return sendResponse(
                 serviceMessage.fetchBalanceResponse({
-                  balance: balance?.data || null,
+                  accountData: accountData?.data || null,
                   currencyRate: rate?.data || null
                 })
               );
@@ -587,15 +680,36 @@ browser.runtime.onMessage.addListener(
             return;
           }
 
+          case getType(serviceMessage.fetchAccountBalancesRequest): {
+            const { casperWalletApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const data = await fetchAccountBalances({
+                accountHashes: action.payload.accountHashes,
+                casperWalletApiUrl
+              });
+
+              return sendResponse(
+                serviceMessage.fetchAccountBalancesResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
           case getType(serviceMessage.fetchAccountInfoRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const { data: accountInfo } = await fetchAccountInfo({
                 accountHash: action.payload.accountHash,
-                casperApiUrl
+                casperClarityApiUrl
               });
 
               return sendResponse(
@@ -609,14 +723,14 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchExtendedDeploysInfoRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const data = await fetchExtendedDeploysInfo({
                 deployHash: action.payload.deployHash,
-                casperApiUrl
+                casperClarityApiUrl
               });
 
               return sendResponse(
@@ -632,13 +746,13 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchErc20TokensRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const { data: tokensList } = await fetchErc20Tokens({
-                casperApiUrl,
+                casperClarityApiUrl,
                 accountHash: action.payload.accountHash
               });
 
@@ -665,13 +779,13 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchErc20TokenActivityRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const data = await fetchErc20TokenActivity({
-                casperApiUrl,
+                casperClarityApiUrl,
                 publicKey: action.payload.publicKey,
                 page: action.payload.page,
                 contractPackageHash: action.payload.contractPackageHash
@@ -688,13 +802,13 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchAccountExtendedDeploysRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const data = await fetchAccountExtendedDeploys({
-                casperApiUrl,
+                casperClarityApiUrl,
                 publicKey: action.payload.publicKey,
                 page: action.payload.page
               });
@@ -712,13 +826,13 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchAccountCasperActivityRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const data = await fetchAccountCasperActivity({
-                casperApiUrl,
+                casperClarityApiUrl,
                 accountHash: action.payload.accountHash,
                 page: action.payload.page
               });
@@ -733,13 +847,13 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchNftTokensRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const data = await fetchNftTokens({
-                casperApiUrl,
+                casperClarityApiUrl,
                 accountHash: action.payload.accountHash,
                 page: action.payload.page
               });
@@ -753,12 +867,14 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchAuctionValidatorsRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
-              const data = await fetchAuctionValidators({ casperApiUrl });
+              const data = await fetchAuctionValidators({
+                casperClarityApiUrl
+              });
 
               return sendResponse(
                 serviceMessage.fetchAuctionValidatorsResponse(data)
@@ -771,18 +887,60 @@ browser.runtime.onMessage.addListener(
           }
 
           case getType(serviceMessage.fetchValidatorsDetailsDataRequest): {
-            const { casperApiUrl } = selectApiConfigBasedOnActiveNetwork(
+            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
             );
 
             try {
               const data = await fetchValidatorsDetailsData({
-                casperApiUrl,
+                casperClarityApiUrl,
                 publicKey: action.payload.publicKey
               });
 
               return sendResponse(
                 serviceMessage.fetchValidatorsDetailsDataResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchOnRampGetOptionRequest): {
+            try {
+              const data = await fetchOnRampOptionGet();
+
+              return sendResponse(
+                serviceMessage.fetchOnRampGetOptionResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchOnRampPostOptionRequest): {
+            try {
+              const data = await fetchOnRampOptionPost(action.payload);
+
+              return sendResponse(
+                serviceMessage.fetchOnRampPostOptionResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchOnRampPostSelectionRequest): {
+            try {
+              const data = await fetchOnRampSelectionPost(action.payload);
+
+              return sendResponse(
+                serviceMessage.fetchOnRampPostSelectionResponse(data)
               );
             } catch (error) {
               console.error(error);
@@ -828,6 +986,9 @@ browser.runtime.onMessage.addListener(
             );
         }
       } else {
+        if (action === 'ping') {
+          return;
+        }
         throw Error('Background: Unknown message: ' + JSON.stringify(action));
       }
     });
@@ -836,8 +997,8 @@ browser.runtime.onMessage.addListener(
 
 // ping mechanism to keep background script from destroing wallet session when it's unlocked
 function ping() {
-  browser.runtime.sendMessage('ping').catch(() => {
+  runtime.sendMessage('ping').catch(() => {
     // ping
   });
 }
-setInterval(ping, 5000);
+setInterval(ping, 15000);

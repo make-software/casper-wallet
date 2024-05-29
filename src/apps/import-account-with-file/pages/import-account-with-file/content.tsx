@@ -1,14 +1,15 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { isSafariBuild } from '@src/utils';
+
 import {
   ContentContainer,
-  ParagraphContainer,
   IllustrationContainer,
+  ParagraphContainer,
   SpacingSize
-} from '@src/libs/layout';
-import { SvgIcon, Tag, Typography } from '@libs/ui';
-import { isSafariBuild } from '@src/utils';
+} from '@libs/layout';
+import { SvgIcon, Typography } from '@libs/ui/components';
 
 export function ImportAccountWithFileContentPage() {
   const { t } = useTranslation();
@@ -26,11 +27,6 @@ export function ImportAccountWithFileContentPage() {
         <Typography type="header">
           <Trans t={t}>Import account from secret key file</Trans>
         </Typography>
-      </ParagraphContainer>
-      <ParagraphContainer top={SpacingSize.Medium}>
-        <Tag>
-          <Trans t={t}>Imported</Trans>
-        </Tag>
       </ParagraphContainer>
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">

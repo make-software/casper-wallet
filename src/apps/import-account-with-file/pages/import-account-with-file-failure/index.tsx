@@ -2,20 +2,21 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
-  FooterButtonsAbsoluteContainer,
-  ContentContainer,
-  ParagraphContainer,
-  IllustrationContainer,
-  SpacingSize
-} from '@src/libs/layout';
-import { Button, SvgIcon, Typography } from '@src/libs/ui';
-
-import {
   RouterPath,
   useTypedLocation,
   useTypedNavigate
-} from '@src/apps/import-account-with-file/router';
-import { closeCurrentWindow } from '@src/background/close-current-window';
+} from '@import-account-with-file/router';
+
+import { closeCurrentWindow } from '@background/close-current-window';
+
+import {
+  ContentContainer,
+  FooterButtonsAbsoluteContainer,
+  IllustrationContainer,
+  ParagraphContainer,
+  SpacingSize
+} from '@libs/layout';
+import { Button, SvgIcon, Typography } from '@libs/ui/components';
 
 export function ImportAccountWithFileFailureContentPage() {
   const { t } = useTranslation();

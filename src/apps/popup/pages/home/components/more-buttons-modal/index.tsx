@@ -2,8 +2,8 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { Button, Modal, SvgIcon, Typography } from '@libs/ui';
 import { CenteredFlexColumn, SpacingSize } from '@libs/layout';
+import { Button, Modal, SvgIcon, Typography } from '@libs/ui/components';
 
 import { ModalButtons } from './modal-buttons';
 
@@ -13,21 +13,13 @@ const MoreButton = styled(CenteredFlexColumn)`
   padding: 0 16px;
 `;
 
-interface MoreButtonsModalProps {
-  handleBuyWithCSPR: () => void;
-}
-
-export const MoreButtonsModal = ({
-  handleBuyWithCSPR
-}: MoreButtonsModalProps) => {
+export const MoreButtonsModal = () => {
   const { t } = useTranslation();
 
   return (
     <Modal
       placement="bottom"
-      renderContent={() => (
-        <ModalButtons handleBuyWithCSPR={handleBuyWithCSPR} />
-      )}
+      renderContent={() => <ModalButtons />}
       children={() => (
         <MoreButton gap={SpacingSize.Small}>
           <Button circle>

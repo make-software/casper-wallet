@@ -1,24 +1,33 @@
-import '@libs/i18n/i18n';
-
 import React, { Suspense, useState } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
-import { AppRouter } from '@src/apps/connect-to-app/app-router';
-import { GlobalStyle, lightTheme, darkTheme } from '@libs/ui';
-import { ErrorBoundary } from '@src/libs/layout/error';
-
-import {
-  createMainStoreReplica,
-  PopupState
-} from '@src/background/redux/utils';
-import { connectWindowInit } from '@src/background/redux/windowManagement/actions';
 import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
-import { selectDarkModeSetting } from '@background/redux/settings/selectors';
+import { isSafariBuild, setCSPForSafari } from '@src/utils';
+
+import { AppRouter } from '@connect-to-app/app-router';
+
+import { createMainStoreReplica } from '@background/redux/get-main-store';
+import { themeModeSettingChanged } from '@background/redux/settings/actions';
+import { selectThemeModeSetting } from '@background/redux/settings/selectors';
+import { ThemeMode } from '@background/redux/settings/types';
+import { PopupState } from '@background/redux/types';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { connectWindowInit } from '@background/redux/windowManagement/actions';
+
+import { useSystemThemeDetector } from '@hooks/use-system-theme-detector';
+
+import '@libs/i18n/i18n';
+import { ErrorBoundary } from '@libs/layout';
+import { GlobalStyle, darkTheme, lightTheme } from '@libs/ui';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
+
+  setCSPForSafari();
+
+  const isSystemDarkTheme = useSystemThemeDetector();
 
   useSubscribeToRedux({
     windowInitAction: connectWindowInit,
@@ -31,7 +40,19 @@ const Tree = () => {
 
   const store = createMainStoreReplica(state);
 
-  const isDarkMode = selectDarkModeSetting(store.getState());
+  const themeMode = selectThemeModeSetting(store.getState());
+
+  // Set theme mode to system if it is no present in the store
+  if (themeMode === undefined && !isSafariBuild) {
+    dispatchToMainStore(themeModeSettingChanged(ThemeMode.SYSTEM));
+  } else if (themeMode === undefined && isSafariBuild) {
+    dispatchToMainStore(themeModeSettingChanged(ThemeMode.LIGHT));
+  }
+
+  const isDarkMode =
+    themeMode === ThemeMode.SYSTEM
+      ? isSystemDarkTheme
+      : themeMode === ThemeMode.DARK;
 
   return (
     <Suspense fallback={null}>
@@ -47,4 +68,7 @@ const Tree = () => {
   );
 };
 
-render(<Tree />, document.querySelector('#app-container'));
+const container = document.querySelector('#app-container');
+const root = createRoot(container!);
+
+root.render(<Tree />);

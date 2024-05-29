@@ -1,6 +1,8 @@
 import { ActivityType } from '@src/constants';
-import { TokenType } from '@src/hooks';
-import { ErrorLocationState } from '@layout/error';
+
+import { TokenType } from '@hooks/use-casper-token';
+
+import { ErrorLocationState } from '@libs/layout';
 
 export interface LocationState extends ErrorLocationState {
   showNavigationMenu?: boolean;
@@ -19,4 +21,5 @@ export interface LocationState extends ErrorLocationState {
     contentType: string;
     url?: string;
   };
+  recipientPublicKey?: string;
 }

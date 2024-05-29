@@ -8,15 +8,13 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import {
   ContentContainer,
-  IllustrationContainer,
   InputsContainer,
   ParagraphContainer,
   SpacingSize
-} from '@src/libs/layout';
-import { Input, SvgIcon, Typography } from '@src/libs/ui';
+} from '@libs/layout';
+import { Input, SvgIcon, Typography } from '@libs/ui/components';
 
 import { RouterPath, useTypedNavigate } from '../../router';
-
 import { ImportAccountFormValues } from './types';
 
 interface ImportAccountWithFilePageContentProps {
@@ -45,22 +43,15 @@ export function ImportAccountWithFileUploadPageContent({
 
   return (
     <ContentContainer>
-      <IllustrationContainer>
-        <SvgIcon
-          src="assets/illustrations/import-secret-key.svg"
-          width={200}
-          height={120}
-        />
-      </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          <Trans t={t}>Import account from secret key file</Trans>
+          <Trans t={t}>Account details</Trans>
         </Typography>
       </ParagraphContainer>
       <InputsContainer>
         <Input
           type="file"
-          accept=".pem"
+          accept=".pem, .cer"
           prefixIcon={<SvgIcon src="assets/icons/file.svg" />}
           suffixIcon={
             isFileLoaded && (

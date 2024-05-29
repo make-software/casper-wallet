@@ -1,7 +1,8 @@
-import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
+import React, { HTMLInputTypeAttribute, ReactNode, forwardRef } from 'react';
 import styled from 'styled-components';
 
-import { BaseProps, FormField, FormFieldStatus, SvgIcon } from '@src/libs/ui';
+import { FormField, FormFieldStatus, SvgIcon } from '@libs/ui/components';
+import { BaseProps } from '@libs/ui/types';
 
 type Ref = HTMLInputElement;
 
@@ -14,7 +15,15 @@ const getThemeColorByError = (error?: boolean) => {
 };
 
 const InputContainer = styled('div')<InputProps>(
-  ({ theme, oneColoredIcons, disabled, error, monotype, readOnly }) => ({
+  ({
+    theme,
+    oneColoredIcons,
+    disabled,
+    error,
+    monotype,
+    readOnly,
+    secondaryBackground
+  }) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -22,7 +31,9 @@ const InputContainer = styled('div')<InputProps>(
     padding: '0 16px',
     borderRadius: theme.borderRadius.base,
     color: theme.color.contentPrimary,
-    background: theme.color.backgroundPrimary,
+    background: secondaryBackground
+      ? theme.color.backgroundSecondary
+      : theme.color.backgroundPrimary,
     caretColor: theme.color.fillCritical,
     fontFamily: monotype
       ? theme.typography.fontFamily.mono
@@ -73,7 +84,9 @@ const StyledInput = styled('input')<InputProps>(({ theme }) => ({
     border: '0'
   },
   '::placeholder': {
-    color: theme.color.contentSecondary
+    color: theme.color.contentSecondary,
+    fontFamily: theme.typography.fontFamily.primary,
+    fontSize: '1.5rem'
   },
   // Hiding the password reveal button in the MS Edge
   // https://github.com/make-software/casper-wallet/issues/547
@@ -136,9 +149,10 @@ export interface InputProps extends BaseProps {
   validationText?: string | null;
   dataTestId?: string;
   autoComplete?: string;
+  secondaryBackground?: boolean;
 }
 
-export const Input = React.forwardRef<Ref, InputProps>(function Input(
+export const Input = forwardRef<Ref, InputProps>(function Input(
   {
     id,
     className,
@@ -151,7 +165,6 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
     prefixIcon,
     suffixIcon,
     suffixText,
-    required,
     error,
     validationType,
     validationText,
@@ -160,6 +173,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
     dataTestId,
     readOnly,
     autoComplete,
+    secondaryBackground,
     ...restProps
   }: InputProps,
   ref
@@ -198,6 +212,7 @@ export const Input = React.forwardRef<Ref, InputProps>(function Input(
         error={error}
         height={height}
         oneColoredIcons={oneColoredIcons}
+        secondaryBackground={secondaryBackground}
       >
         {prefixIcon && <PrefixContainer>{prefixIcon}</PrefixContainer>}
 

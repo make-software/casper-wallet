@@ -1,12 +1,9 @@
 import React, { forwardRef } from 'react';
 import styled, { CSSObject, DefaultTheme } from 'styled-components';
 
-import {
-  BaseProps,
-  ContentColor,
-  getColorFromTheme,
-  Skeleton
-} from '@src/libs/ui';
+import { Skeleton } from '@libs/ui/components';
+import { BaseProps } from '@libs/ui/types';
+import { ContentColor, getColorFromTheme } from '@libs/ui/utils';
 
 type Ref = HTMLSpanElement | HTMLHeadingElement;
 
@@ -38,6 +35,8 @@ export interface BodyStylesProps extends BaseProps {
   fontSize?: CSPRSize;
   ellipsis?: boolean;
   overflowWrap?: boolean;
+  translate?: 'yes' | 'no';
+  textAlign?: 'center' | 'left' | 'right' | 'inherit';
 }
 
 export const getFontSizeBasedOnTextLength = (length: number) => {
@@ -66,7 +65,8 @@ function getBodyStyles(
     noWrap = false,
     wordBreak = false,
     ellipsis = false,
-    overflowWrap = false
+    overflowWrap = false,
+    textAlign
   }: BodyStylesProps
 ): CSSObject {
   return {
@@ -95,6 +95,9 @@ function getBodyStyles(
     }),
     ...(overflowWrap && {
       overflowWrap: 'break-word'
+    }),
+    ...(textAlign && {
+      textAlign: textAlign
     })
   };
 }

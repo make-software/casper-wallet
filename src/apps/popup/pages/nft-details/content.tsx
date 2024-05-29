@@ -1,8 +1,26 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
 import ReactPlayer from 'react-player';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+
+import {
+  ContentType,
+  MapNFTTokenStandardToName,
+  deriveMediaType,
+  findMediaPreview,
+  getImageProxyUrl,
+  getMetadataKeyValue,
+  getNftTokenMetadataWithLinks
+} from '@src/utils';
+
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { accountTrackingIdOfSentNftTokensRemoved } from '@background/redux/account-info/actions';
+import { selectAccountTrackingIdOfSentNftTokens } from '@background/redux/account-info/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+
+import { useAsyncEffect } from '@hooks/use-async-effect';
 
 import {
   AlignedFlexRow,
@@ -14,34 +32,20 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
+import { NFTTokenResult } from '@libs/services/nft-service';
 import {
+  Button,
+  EmptyMediaPlaceholder,
   Hash,
   HashVariant,
   List,
+  LoadingMediaPlaceholder,
+  Status,
   SvgIcon,
   Tile,
-  Typography,
-  EmptyMediaPlaceholder,
-  LoadingMediaPlaceholder,
-  Button,
-  Status
-} from '@libs/ui';
-import { NFTTokenResult } from '@libs/services/nft-service';
-import {
-  ContentType,
-  deriveMediaType,
-  findMediaPreview,
-  getImageProxyUrl,
-  getMetadataKeyValue,
-  getNftTokenMetadataWithLinks,
-  MapNFTTokenStandardToName
-} from '@src/utils';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import { useAsyncEffect } from '@src/hooks';
-import { selectAccountTrackingIdOfSentNftTokens } from '@background/redux/account-info/selectors';
-import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import { dispatchToMainStore } from '@background/redux/utils';
-import { accountTrackingIdOfSentNftTokensRemoved } from '@background/redux/account-info/actions';
+  Typography
+} from '@libs/ui/components';
 
 const NftImageContainer = styled(CenteredFlexRow)`
   width: 100%;

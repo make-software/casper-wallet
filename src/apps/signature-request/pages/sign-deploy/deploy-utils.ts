@@ -22,9 +22,9 @@ import {
   ArgDict,
   CasperDeploy,
   DeployType,
+  ParsedDeployArgValue,
   ParsedValueType,
-  SignatureRequestKeys,
-  ParsedDeployArgValue
+  SignatureRequestKeys
 } from './deploy-types';
 
 export function getDeployType(deploy: CasperDeploy): DeployType {
@@ -59,6 +59,24 @@ export function getEntryPoint(deploy: CasperDeploy): string | undefined {
     ? undefined
     : storedContractObj?.entryPoint;
 }
+
+export const getContractHash = (deploy: CasperDeploy) => {
+  const storedContractObj = getStoredContractObjFromSession(deploy.session);
+
+  return storedContractObj instanceof DeployUtil.StoredContractByHash ||
+    storedContractObj instanceof DeployUtil.StoredVersionedContractByHash
+    ? storedContractObj.hash
+    : undefined;
+};
+
+export const getContractName = (deploy: CasperDeploy) => {
+  const storedContractObj = getStoredContractObjFromSession(deploy.session);
+
+  return storedContractObj instanceof DeployUtil.StoredContractByName ||
+    storedContractObj instanceof DeployUtil.StoredVersionedContractByName
+    ? storedContractObj.name
+    : undefined;
+};
 
 export function getDeployArgs(deploy: CasperDeploy): ArgDict {
   if (deploy.session.transfer) {
@@ -294,7 +312,8 @@ export const isKeyOfHashValue = (key: string) => {
     'new_validator',
     'recipient',
     'recipientKey',
-    'recipientHash'
+    'recipientHash',
+    'contractHash'
   ];
   return keysOfHashValues.includes(key as SignatureRequestKeys);
 };

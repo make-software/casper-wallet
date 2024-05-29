@@ -1,44 +1,54 @@
-import '@libs/i18n/i18n';
-
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
-import { HeaderSubmenuBarNavLink, PopupLayout } from '@libs/layout';
-import { PopupHeader } from '@libs/layout/header';
+import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 
-import { HomePageContent } from '@popup/pages/home';
-import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
-import { TimeoutPageContent } from '@popup/pages/timeout';
-import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
-import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
-import { ConnectedSitesPage } from '@popup/pages/connected-sites';
 import { AccountSettingsPage } from '@popup/pages/account-settings';
+import { ActivityDetailsPage } from '@popup/pages/activity-details';
+import { AddContactPage } from '@popup/pages/add-contact';
+import { AllAccountsPage } from '@popup/pages/all-accounts';
+import { BackupSecretPhrasePage } from '@popup/pages/backup-secret-phrase';
+import { BuyCSPRPage } from '@popup/pages/buy-cspr';
+import { ChangePasswordPage } from '@popup/pages/change-password';
+import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
+import { ConnectedSitesPage } from '@popup/pages/connected-sites';
+import { ContactDetailsPage } from '@popup/pages/contact-details';
+import { ContactsBookPage } from '@popup/pages/contacts';
+import { CreateAccountPage } from '@popup/pages/create-account';
+import { DownloadAccountKeysPage } from '@popup/pages/download-account-keys';
+import { HomePageContent } from '@popup/pages/home';
+import { ImportAccountFromLedgerPage } from '@popup/pages/import-account-from-ledger';
+import { ImportAccountFromTorusPage } from '@popup/pages/import-account-from-torus';
+import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
+import { NftDetailsPage } from '@popup/pages/nft-details';
+import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
+import { RateAppPage } from '@popup/pages/rate-app';
+import { ReceivePage } from '@popup/pages/receive';
 import { RemoveAccountPageContent } from '@popup/pages/remove-account';
 import { RenameAccountPageContent } from '@popup/pages/rename-account';
-import { BackupSecretPhrasePage } from '@popup/pages/backup-secret-phrase';
-import { CreateAccountPage } from '@src/apps/popup/pages/create-account';
-import { DownloadSecretKeysPage } from '@popup/pages/download-secret-keys';
-import { DownloadedSecretKeysPage } from '@popup/pages/downloaded-secret-keys';
-
+import { SignWithLedgerInNewWindowPage } from '@popup/pages/sign-with-ledger-in-new-window';
+import { StakesPage } from '@popup/pages/stakes';
+import { TimeoutPageContent } from '@popup/pages/timeout';
+import { TokenDetailPage } from '@popup/pages/token-details';
+import { TransferPage } from '@popup/pages/transfer';
+import { TransferNftPage } from '@popup/pages/transfer-nft';
+import { WalletQrCodePage } from '@popup/pages/wallet-qr-code';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
+import { selectKeysDoesExist } from '@background/redux/keys/selectors';
+import { selectVaultIsLocked } from '@background/redux/session/selectors';
 import { selectVaultHasAccounts } from '@background/redux/vault/selectors';
 
-import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
-import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
-import { selectKeysDoesExist } from '@src/background/redux/keys/selectors';
-import { LockedRouter } from '@src/libs/layout/locked-router';
-import { TransferPage } from '@popup/pages/transfer';
-import { TokenDetailPage } from 'src/apps/popup/pages/token-details';
-import { ActivityDetailsPage } from '@popup/pages/activity-details';
-import { ReceivePage } from '@popup/pages/receive';
-import { NftDetailsPage } from '@popup/pages/nft-details';
-import { WalletQrCodePage } from '@popup/pages/wallet-qr-code';
-import { TransferNftPage } from '@popup/pages/transfer-nft';
-import { ChangePasswordPage } from '@popup/pages/change-password';
-import { StakesPage } from '@popup/pages/stakes';
-import { ErrorPath, WindowErrorPage } from '@layout/error';
+import '@libs/i18n/i18n';
+import {
+  ErrorPath,
+  HeaderPopup,
+  HeaderSubmenuBarNavLink,
+  LockedRouter,
+  PopupLayout,
+  WindowErrorPage
+} from '@libs/layout';
 
 export function AppRouter() {
   const isLocked = useSelector(selectVaultIsLocked);
@@ -74,7 +84,7 @@ function AppRoutes() {
           element={
             <PopupLayout
               renderHeader={() => (
-                <PopupHeader
+                <HeaderPopup
                   withConnectionStatus
                   withMenu
                   withNetworkSwitcher
@@ -95,7 +105,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader withNetworkSwitcher withMenu withConnectionStatus />
+              <HeaderPopup withNetworkSwitcher withMenu withConnectionStatus />
             )}
             renderContent={() => <HomePageContent />}
           />
@@ -111,7 +121,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader
+              <HeaderPopup
                 withNetworkSwitcher
                 withMenu
                 withConnectionStatus
@@ -129,7 +139,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader
+              <HeaderPopup
                 withNetworkSwitcher
                 withMenu
                 withConnectionStatus
@@ -147,7 +157,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader
+              <HeaderPopup
                 withNetworkSwitcher
                 withMenu
                 withConnectionStatus
@@ -165,7 +175,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader withNetworkSwitcher withMenu withConnectionStatus />
+              <HeaderPopup withNetworkSwitcher withMenu withConnectionStatus />
             )}
             renderContent={() => <NoConnectedAccountPageContent />}
           />
@@ -176,7 +186,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader
+              <HeaderPopup
                 withMenu
                 withNetworkSwitcher
                 withConnectionStatus
@@ -194,7 +204,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader
+              <HeaderPopup
                 withNetworkSwitcher
                 withMenu
                 withConnectionStatus
@@ -212,7 +222,7 @@ function AppRoutes() {
         element={
           <PopupLayout
             renderHeader={() => (
-              <PopupHeader
+              <HeaderPopup
                 withNetworkSwitcher
                 withMenu
                 withConnectionStatus
@@ -230,12 +240,8 @@ function AppRoutes() {
         element={<BackupSecretPhrasePage />}
       />
       <Route
-        path={RouterPath.DownloadSecretKeys}
-        element={<DownloadSecretKeysPage />}
-      />
-      <Route
-        path={RouterPath.DownloadedSecretKeys}
-        element={<DownloadedSecretKeysPage />}
+        path={RouterPath.DownloadAccountKeys}
+        element={<DownloadAccountKeysPage />}
       />
       <Route path={RouterPath.Transfer} element={<TransferPage />} />
       <Route
@@ -256,6 +262,7 @@ function AppRoutes() {
       />
       <Route path={RouterPath.Delegate} element={<StakesPage />} />
       <Route path={RouterPath.Undelegate} element={<StakesPage />} />
+      <Route path={RouterPath.Redelegate} element={<StakesPage />} />
       <Route
         path={ErrorPath}
         element={
@@ -264,6 +271,27 @@ function AppRoutes() {
             createTypedNavigate={useTypedNavigate}
           />
         }
+      />
+      <Route path={RouterPath.ContactList} element={<ContactsBookPage />} />
+      <Route path={RouterPath.AddContact} element={<AddContactPage />} />
+      <Route
+        path={RouterPath.ContactDetails}
+        element={<ContactDetailsPage />}
+      />
+      <Route path={RouterPath.RateApp} element={<RateAppPage />} />
+      <Route path={RouterPath.AllAccountsList} element={<AllAccountsPage />} />
+      <Route
+        path={RouterPath.ImportAccountFromTorus}
+        element={<ImportAccountFromTorusPage />}
+      />
+      <Route path={RouterPath.BuyCSPR} element={<BuyCSPRPage />} />
+      <Route
+        path={RouterPath.ImportAccountFromLedger}
+        element={<ImportAccountFromLedgerPage />}
+      />
+      <Route
+        path={RouterPath.SignWithLedgerInNewWindow}
+        element={<SignWithLedgerInNewWindowPage />}
       />
     </Routes>
   );

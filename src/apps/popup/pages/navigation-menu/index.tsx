@@ -1,35 +1,44 @@
 import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { WindowApp, useWindowManager } from '@src/hooks';
+import { isLedgerAvailable, isSafariBuild } from '@src/utils';
 
-import { RouterPath, useNavigationMenu } from '@src/apps/popup/router';
+import { TimeoutDurationSetting } from '@popup/constants';
+import { RouterPath, useNavigationMenu, useTypedNavigate } from '@popup/router';
+
+import { WindowApp } from '@background/create-open-window';
+import { selectCountOfContacts } from '@background/redux/contacts/selectors';
+import { lockVault } from '@background/redux/sagas/actions';
+import {
+  selectThemeModeSetting,
+  selectTimeoutDurationSetting
+} from '@background/redux/settings/selectors';
+import { ThemeMode } from '@background/redux/settings/types';
+import { dispatchToMainStore } from '@background/redux/utils';
+import {
+  selectCountOfConnectedSites,
+  selectVaultCountsOfAccounts
+} from '@background/redux/vault/selectors';
+
+import { useWindowManager } from '@hooks/use-window-manager';
 
 import {
-  ContentContainer,
   ListItemClickableContainer as BaseListItemClickableContainer,
+  ContentContainer,
   FlexColumn,
   SpaceBetweenFlexRow,
   SpacingSize
-} from '@src/libs/layout';
-import { SvgIcon, Typography, List, Link, Toggle } from '@src/libs/ui';
-
+} from '@libs/layout';
 import {
-  selectCountOfConnectedSites,
-  selectVaultHasImportedAccount
-} from '@src/background/redux/vault/selectors';
-import {
-  selectDarkModeSetting,
-  selectTimeoutDurationSetting
-} from '@src/background/redux/settings/selectors';
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { lockVault } from '@src/background/redux/sagas/actions';
-import { TimeoutDurationSetting } from '@popup/constants';
-import { isSafariBuild } from '@src/utils';
-import { darkModeSettingChanged } from '@background/redux/settings/actions';
+  Link,
+  List,
+  Modal,
+  SvgIcon,
+  ThemeSwitcher,
+  Typography
+} from '@libs/ui/components';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;
@@ -63,6 +72,7 @@ interface MenuItem {
   handleOnClick?: () => void;
   hide?: boolean;
   toggleButton?: boolean;
+  isModalWindow?: boolean;
 }
 
 interface MenuGroup {
@@ -71,13 +81,14 @@ interface MenuGroup {
 }
 
 export function NavigationMenuPageContent() {
-  const navigate = useNavigate();
+  const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
   const timeoutDurationSetting = useSelector(selectTimeoutDurationSetting);
   const countOfConnectedSites = useSelector(selectCountOfConnectedSites);
-  const vaultHasImportedAccount = useSelector(selectVaultHasImportedAccount);
-  const isDarkMode = useSelector(selectDarkModeSetting);
+  const countOfContacts = useSelector(selectCountOfContacts);
+  const themeMode = useSelector(selectThemeModeSetting);
+  const countOfAccounts = useSelector(selectVaultCountsOfAccounts);
 
   const { openWindow } = useWindowManager();
   const { closeNavigationMenu } = useNavigationMenu();
@@ -109,6 +120,17 @@ export function NavigationMenuPageContent() {
         items: [
           {
             id: 1,
+            title: t('All accounts'),
+            iconPath: 'assets/icons/accounts.svg',
+            currentValue: countOfAccounts,
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.AllAccountsList);
+            }
+          },
+          {
+            id: 2,
             title: t('Create account'),
             iconPath: 'assets/icons/plus.svg',
             disabled: false,
@@ -118,18 +140,43 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 2,
+            id: 3,
             title: t('Import account'),
-            description: t('From Signer secret key file'),
+            description: t('From secret key file'),
             iconPath: 'assets/icons/upload.svg',
             disabled: false,
             handleOnClick: () => {
               closeNavigationMenu();
               openWindow({
-                windowApp: WindowApp.ImportAccount
+                windowApp: WindowApp.ImportAccount,
+                isNewWindow: true
               }).catch(e => console.error(e));
             }
-          }
+          },
+          {
+            id: 4,
+            title: t('Import Torus account'),
+            iconPath: 'assets/icons/torus.svg',
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.ImportAccountFromTorus);
+            }
+          },
+          ...(isLedgerAvailable
+            ? [
+                {
+                  id: 5,
+                  title: t('Connect Ledger'),
+                  iconPath: 'assets/icons/ledger-blue.svg',
+                  disabled: false,
+                  handleOnClick: () => {
+                    closeNavigationMenu();
+                    navigate(RouterPath.ImportAccountFromLedger);
+                  }
+                }
+              ]
+            : [])
         ]
       },
       {
@@ -137,6 +184,17 @@ export function NavigationMenuPageContent() {
         items: [
           {
             id: 1,
+            title: t('Contacts'),
+            iconPath: 'assets/icons/team.svg',
+            currentValue: countOfContacts,
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.ContactList);
+            }
+          },
+          {
+            id: 2,
             title: t('Connected sites'),
             iconPath: 'assets/icons/link.svg',
             currentValue: countOfConnectedSites,
@@ -147,7 +205,25 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 2,
+            id: 3,
+            title: t('Theme'),
+            iconPath:
+              themeMode === ThemeMode.SYSTEM
+                ? 'assets/icons/theme.svg'
+                : themeMode === ThemeMode.DARK
+                  ? 'assets/icons/moon.svg'
+                  : 'assets/icons/sun.svg',
+            currentValue: themeMode,
+            disabled: false,
+            isModalWindow: true
+          }
+        ]
+      },
+      {
+        headerLabel: t('Security'),
+        items: [
+          {
+            id: 1,
             title: t('Timeout'),
             iconPath: 'assets/icons/lock.svg',
             currentValue: TimeoutDurationSetting[timeoutDurationSetting],
@@ -158,21 +234,7 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 3,
-            title: t('Dark mode'),
-            iconPath: isDarkMode
-              ? 'assets/icons/sun.svg'
-              : 'assets/icons/moon.svg',
-            toggleButton: true,
-            disabled: false
-          }
-        ]
-      },
-      {
-        headerLabel: t('Security'),
-        items: [
-          {
-            id: 1,
+            id: 2,
             title: t('Back up your secret recovery phrase'),
             iconPath: 'assets/icons/secure.svg',
             disabled: false,
@@ -182,7 +244,7 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 2,
+            id: 3,
             title: t('Generate wallet QR code'),
             description: t('Scan to import your wallet on mobile'),
             iconPath: 'assets/icons/qr.svg',
@@ -194,20 +256,19 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 3,
+            id: 4,
             title: t('Download account keys'),
-            description: t('For all accounts imported via file'),
             iconPath: 'assets/icons/download.svg',
-            disabled: !vaultHasImportedAccount,
+            disabled: false,
             // https://github.com/make-software/casper-wallet/issues/611
             hide: isSafariBuild,
             handleOnClick: () => {
               closeNavigationMenu();
-              navigate(RouterPath.DownloadSecretKeys);
+              navigate(RouterPath.DownloadAccountKeys);
             }
           },
           {
-            id: 4,
+            id: 5,
             title: t('Change Password'),
             iconPath: 'assets/icons/secure.svg',
             disabled: false,
@@ -240,14 +301,54 @@ export function NavigationMenuPageContent() {
     ],
     [
       t,
+      countOfAccounts,
+      countOfContacts,
       countOfConnectedSites,
+      themeMode,
       timeoutDurationSetting,
-      isDarkMode,
-      vaultHasImportedAccount,
       closeNavigationMenu,
       navigate,
       openWindow
     ]
+  );
+
+  const listItem = (groupItem: MenuItem, groupLabel: string) => (
+    <ListItemClickableContainer
+      disabled={groupItem.disabled}
+      key={groupLabel + groupItem.id}
+      as={groupItem.href ? Link : 'div'}
+      href={groupItem.href ? groupItem.href : undefined}
+      target={groupItem.href ? '_blank' : undefined}
+      onClick={groupItem.disabled ? undefined : groupItem.handleOnClick}
+      hide={groupItem.hide}
+    >
+      <SvgIcon
+        src={groupItem.iconPath}
+        color={groupItem.disabled ? 'contentSecondary' : 'contentAction'}
+      />
+      <SpaceBetweenContainer>
+        {groupItem.description ? (
+          <FlexColumn>
+            <Typography
+              type="body"
+              color={groupItem.disabled ? 'contentSecondary' : 'contentPrimary'}
+            >
+              {groupItem.title}
+            </Typography>
+            <Typography type="listSubtext" color="contentSecondary">
+              {groupItem.description}
+            </Typography>
+          </FlexColumn>
+        ) : (
+          <Typography type="body">{groupItem.title}</Typography>
+        )}
+        {groupItem.currentValue != null && (
+          <Typography type="bodySemiBold" color="contentAction">
+            {groupItem.currentValue}
+          </Typography>
+        )}
+      </SpaceBetweenContainer>
+    </ListItemClickableContainer>
   );
 
   return (
@@ -261,60 +362,21 @@ export function NavigationMenuPageContent() {
             marginLeftForItemSeparatorLine={60}
             headerLabelTop={SpacingSize.Large}
             contentTop={index === 0 ? SpacingSize.Medium : SpacingSize.Small}
-            renderRow={groupItem => (
-              <ListItemClickableContainer
-                disabled={groupItem.disabled}
-                key={groupLabel + groupItem.id}
-                as={groupItem.href ? Link : 'div'}
-                href={groupItem.href ? groupItem.href : undefined}
-                target={groupItem.href ? '_blank' : undefined}
-                onClick={
-                  groupItem.disabled ? undefined : groupItem.handleOnClick
-                }
-                hide={groupItem.hide}
-              >
-                <SvgIcon
-                  src={groupItem.iconPath}
-                  color={
-                    groupItem.disabled ? 'contentSecondary' : 'contentAction'
-                  }
-                />
-                <SpaceBetweenContainer>
-                  {groupItem.description ? (
-                    <FlexColumn>
-                      <Typography
-                        type="body"
-                        color={
-                          groupItem.disabled
-                            ? 'contentSecondary'
-                            : 'contentPrimary'
-                        }
-                      >
-                        {groupItem.title}
-                      </Typography>
-                      <Typography type="listSubtext" color="contentSecondary">
-                        {groupItem.description}
-                      </Typography>
-                    </FlexColumn>
-                  ) : (
-                    <Typography type="body">{groupItem.title}</Typography>
-                  )}
-                  {groupItem.currentValue != null && (
-                    <Typography type="bodySemiBold" color="contentAction">
-                      {groupItem.currentValue}
-                    </Typography>
-                  )}
-                  {groupItem.toggleButton && (
-                    <Toggle
-                      toggled={isDarkMode}
-                      onClick={() =>
-                        dispatchToMainStore(darkModeSettingChanged())
-                      }
-                    />
-                  )}
-                </SpaceBetweenContainer>
-              </ListItemClickableContainer>
-            )}
+            renderRow={groupItem => {
+              if (groupItem.isModalWindow) {
+                return (
+                  <Modal
+                    renderContent={({ closeModal }) => (
+                      <ThemeSwitcher closeSwitcher={closeModal} />
+                    )}
+                    placement="fullBottom"
+                    children={() => listItem(groupItem, groupLabel)}
+                  />
+                );
+              }
+
+              return listItem(groupItem, groupLabel);
+            }}
           />
         )
       )}

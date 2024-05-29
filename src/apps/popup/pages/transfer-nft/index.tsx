@@ -1,54 +1,93 @@
+import { DeployUtil } from 'casper-js-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { Trans, useTranslation } from 'react-i18next';
 
 import {
-  FooterButtonsContainer,
-  HeaderSubmenuBarNavLink,
-  PopupHeader,
-  PopupLayout
-} from '@libs/layout';
+  MapNFTTokenStandardToName,
+  fetchAndDispatchExtendedDeployInfo
+} from '@src/utils';
+
 import { TransferNftContent } from '@popup/pages/transfer-nft/content';
+import {
+  getDefaultPaymentAmountBasedOnNftTokenStandard,
+  getRuntimeArgs
+} from '@popup/pages/transfer-nft/utils';
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { accountTrackingIdOfSentNftTokensChanged } from '@background/redux/account-info/actions';
 import {
   selectAccountBalance,
   selectAccountNftTokens
 } from '@background/redux/account-info/selectors';
-import { CSPRtoMotes } from '@libs/ui/utils/formatters';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { MapNFTTokenStandardToName } from '@src/utils';
-import { getRawPublicKey } from '@libs/entities/Account';
-import { useTransferNftForm } from '@libs/ui/forms/transfer-nft';
-import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
-import { HomePageTabsId, TransferSuccessScreen, Button } from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@popup/router';
+import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
 import {
-  getDefaultPaymentAmountBasedOnNftTokenStandard,
-  getRuntimeArgs,
-  signNftDeploy
-} from '@popup/pages/transfer-nft/utils';
-import { dispatchToMainStore } from '@background/redux/utils';
+  ledgerDeployChanged,
+  ledgerRecipientToSaveOnSuccessChanged
+} from '@background/redux/ledger/actions';
+import {
+  selectAskForReviewAfter,
+  selectRatedInStore
+} from '@background/redux/rate-app/selectors';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
-import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
 import {
-  accountPendingTransactionsChanged,
-  accountTrackingIdOfSentNftTokensChanged
-} from '@background/redux/account-info/actions';
+  selectIsActiveAccountFromLedger,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
+
+import { useLedger } from '@hooks/use-ledger';
+
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
-import { createErrorLocationState, ErrorPath } from '@layout/error';
+import { getRawPublicKey } from '@libs/entities/Account';
+import {
+  AlignedFlexRow,
+  ErrorPath,
+  FooterButtonsContainer,
+  HeaderPopup,
+  HeaderSubmenuBarNavLink,
+  PopupLayout,
+  SpacingSize,
+  createErrorLocationState
+} from '@libs/layout';
+import {
+  makeNFTDeploy,
+  sendSignDeploy,
+  signDeploy
+} from '@libs/services/deployer-service';
+import {
+  Button,
+  HomePageTabsId,
+  LedgerEventView,
+  SvgIcon,
+  TransferSuccessScreen,
+  renderLedgerFooter
+} from '@libs/ui/components';
+import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
+import { useTransferNftForm } from '@libs/ui/forms/transfer-nft';
+import { CSPRtoMotes } from '@libs/ui/utils';
 
 export const TransferNftPage = () => {
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
   const [haveReverseOwnerLookUp, setHaveReverseOwnerLookUp] = useState(false);
+  const [showLedgerConfirm, setShowLedgerConfirm] = useState(false);
+
   const { contractPackageHash, tokenId } = useParams();
 
   const nftTokens = useSelector(selectAccountNftTokens);
   const csprBalance = useSelector(selectAccountBalance);
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const isActiveAccountFromLedger = useSelector(
+    selectIsActiveAccountFromLedger
+  );
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
+  const contactPublicKeys = useSelector(selectAllPublicKeys);
+  const ratedInStore = useSelector(selectRatedInStore);
+  const askForReviewAfter = useSelector(selectAskForReviewAfter);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -85,7 +124,7 @@ export const TransferNftPage = () => {
   );
 
   const { recipientForm, amountForm } = useTransferNftForm(
-    csprBalance.amountMotes,
+    csprBalance.liquidMotes,
     paymentAmount
   );
 
@@ -99,6 +138,11 @@ export const TransferNftPage = () => {
       amountForm.formState.isValid &&
       !haveReverseOwnerLookUp
   });
+  const { recipientPublicKey } = recipientForm.getValues();
+  const isRecipientPublicKeyInContact = useMemo(
+    () => contactPublicKeys.includes(recipientPublicKey),
+    [contactPublicKeys, recipientPublicKey]
+  );
 
   const submitTransfer = async () => {
     if (haveReverseOwnerLookUp || !nftToken) return;
@@ -118,78 +162,219 @@ export const TransferNftPage = () => {
         target: getRawPublicKey(recipientPublicKey)
       };
 
-      const signDeploy = signNftDeploy(
+      const deploy = await makeNFTDeploy(
         getRuntimeArgs(tokenStandard, args),
         CSPRtoMotes(paymentAmount),
         KEYS.publicKey,
         networkName,
         nftToken?.contract_package_hash!,
-        [KEYS]
+        nodeUrl
       );
 
-      signDeploy.send(nodeUrl).then((deployHash: string) => {
-        dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
+      const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
 
-        if (deployHash) {
-          dispatchToMainStore(
-            accountTrackingIdOfSentNftTokensChanged({
-              trackingId: nftToken.tracking_id,
-              deployHash
-            })
-          );
+      sendSignDeploy(signedDeploy, nodeUrl)
+        .then(resp => {
+          dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
-          let triesLeft = 10;
-          const interval = setInterval(async () => {
-            const { payload: extendedDeployInfo } =
-              await dispatchFetchExtendedDeploysInfo(deployHash);
-            if (extendedDeployInfo) {
-              dispatchToMainStore(
-                accountPendingTransactionsChanged(extendedDeployInfo)
-              );
-              clearInterval(interval);
-            } else if (triesLeft === 0) {
-              clearInterval(interval);
-            }
+          if ('result' in resp) {
+            const deployHash = resp.result.deploy_hash;
 
-            triesLeft--;
-            //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-          }, 2000);
+            dispatchToMainStore(
+              accountTrackingIdOfSentNftTokensChanged({
+                trackingId: nftToken.tracking_id,
+                deployHash
+              })
+            );
 
-          setShowSuccessScreen(true);
-        } else {
+            fetchAndDispatchExtendedDeployInfo(deployHash);
+
+            setShowSuccessScreen(true);
+          } else {
+            navigate(
+              ErrorPath,
+              createErrorLocationState({
+                errorHeaderText:
+                  resp.error.message || t('Something went wrong'),
+                errorContentText:
+                  resp.error.data ||
+                  t(
+                    'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                  ),
+                errorPrimaryButtonLabel: t('Close'),
+                errorRedirectPath: RouterPath.Home
+              })
+            );
+          }
+        })
+        .catch(error => {
+          console.error(error, 'nft transfer request error');
+
           navigate(
             ErrorPath,
             createErrorLocationState({
-              errorHeaderText: t('Something went wrong'),
-              errorContentText: t(
-                'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-              ),
+              errorHeaderText: error.message || t('Something went wrong'),
+              errorContentText:
+                typeof error.data === 'string'
+                  ? error.data
+                  : t(
+                      'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                    ),
               errorPrimaryButtonLabel: t('Close'),
               errorRedirectPath: RouterPath.Home
             })
           );
-        }
+        });
+    }
+  };
+
+  const beforeLedgerActionCb = async () => {
+    setShowLedgerConfirm(true);
+
+    if (haveReverseOwnerLookUp || !nftToken || !activeAccount) return;
+
+    const KEYS = createAsymmetricKey(
+      activeAccount.publicKey,
+      activeAccount.secretKey
+    );
+
+    const args = {
+      tokenId: nftToken.token_id,
+      source: KEYS.publicKey,
+      target: getRawPublicKey(recipientPublicKey)
+    };
+
+    const deploy = await makeNFTDeploy(
+      getRuntimeArgs(tokenStandard, args),
+      CSPRtoMotes(paymentAmount),
+      KEYS.publicKey,
+      networkName,
+      nftToken?.contract_package_hash!,
+      nodeUrl
+    );
+
+    dispatchToMainStore(
+      ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+    );
+    dispatchToMainStore(
+      ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
+    );
+  };
+
+  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+    ledgerAction: submitTransfer,
+    beforeLedgerActionCb
+  });
+
+  const renderFooter = () => {
+    if (showLedgerConfirm && !showSuccessScreen) {
+      return renderLedgerFooter({
+        onConnect: makeSubmitLedgerAction,
+        event: ledgerEventStatusToRender,
+        onErrorCtaPressed: () => setShowLedgerConfirm(false)
       });
     }
+
+    return () => (
+      <FooterButtonsContainer>
+        {showSuccessScreen ? (
+          <>
+            <Button
+              color="primaryBlue"
+              type="button"
+              onClick={() => {
+                const currentDate = Date.now();
+
+                const shouldAskForReview =
+                  askForReviewAfter == null || currentDate > askForReviewAfter;
+
+                if (ratedInStore || !shouldAskForReview) {
+                  const homeRoutesState = {
+                    state: {
+                      // set the active tab to deploys
+                      activeTabId: HomePageTabsId.Deploys
+                    }
+                  };
+
+                  // Navigate to "Home" with the pre-defined state
+                  navigate(RouterPath.Home, homeRoutesState);
+                } else {
+                  // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
+                  navigate(RouterPath.RateApp);
+                }
+              }}
+            >
+              <Trans t={t}>Done</Trans>
+            </Button>
+
+            {!isRecipientPublicKeyInContact && (
+              <Button
+                color="secondaryBlue"
+                onClick={() => {
+                  const { recipientPublicKey } = recipientForm.getValues();
+
+                  navigate(RouterPath.AddContact, {
+                    state: {
+                      recipientPublicKey: recipientPublicKey
+                    }
+                  });
+                }}
+              >
+                <Trans t={t}>Add recipient to list of contacts</Trans>
+              </Button>
+            )}
+          </>
+        ) : (
+          <Button
+            color={isActiveAccountFromLedger ? 'primaryRed' : 'primaryBlue'}
+            type="button"
+            disabled={isButtonDisabled}
+            onClick={
+              isActiveAccountFromLedger
+                ? makeSubmitLedgerAction()
+                : submitTransfer
+            }
+          >
+            {isActiveAccountFromLedger ? (
+              <AlignedFlexRow gap={SpacingSize.Small}>
+                <SvgIcon src="assets/icons/ledger-white.svg" />
+                <Trans t={t}>Confirm send</Trans>
+              </AlignedFlexRow>
+            ) : (
+              <Trans t={t}>Confirm send</Trans>
+            )}
+          </Button>
+        )}
+      </FooterButtonsContainer>
+    );
   };
 
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={
             showSuccessScreen
               ? undefined
-              : () => <HeaderSubmenuBarNavLink linkType="back" />
+              : showLedgerConfirm
+                ? () => (
+                    <HeaderSubmenuBarNavLink
+                      linkType="back"
+                      onClick={() => setShowLedgerConfirm(false)}
+                    />
+                  )
+                : () => <HeaderSubmenuBarNavLink linkType="back" />
           }
         />
       )}
       renderContent={() =>
         showSuccessScreen ? (
-          <TransferSuccessScreen headerText="You’ve sent the NFT" />
+          <TransferSuccessScreen headerText="You submitted a transaction" />
+        ) : showLedgerConfirm ? (
+          <LedgerEventView event={ledgerEventStatusToRender} />
         ) : (
           <TransferNftContent
             nftToken={nftToken}
@@ -199,35 +384,7 @@ export const TransferNftPage = () => {
           />
         )
       }
-      renderFooter={() => (
-        <FooterButtonsContainer>
-          {showSuccessScreen ? (
-            <Button
-              color="primaryBlue"
-              type="button"
-              onClick={() => {
-                navigate(RouterPath.Home, {
-                  state: {
-                    // set the active tab to deploys
-                    activeTabId: HomePageTabsId.Deploys
-                  }
-                });
-              }}
-            >
-              <Trans t={t}>Done</Trans>
-            </Button>
-          ) : (
-            <Button
-              color="primaryBlue"
-              type="button"
-              disabled={isButtonDisabled}
-              onClick={submitTransfer}
-            >
-              <Trans t={t}>Confirm send</Trans>
-            </Button>
-          )}
-        </FooterButtonsContainer>
-      )}
+      renderFooter={renderFooter()}
     />
   );
 };

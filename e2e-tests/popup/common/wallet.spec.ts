@@ -1,5 +1,5 @@
-import { popup, popupExpect } from '../../fixtures';
 import { ACCOUNT_NAMES } from '../../constants';
+import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI: lock/unlock/reset wallet', () => {
   popup(
@@ -10,6 +10,8 @@ popup.describe('Popup UI: lock/unlock/reset wallet', () => {
       ).toBeVisible();
 
       await unlockVault();
+
+      await popupExpect(popupPage.getByText('Unlocking...')).toBeVisible();
 
       await popupExpect(
         popupPage.getByText(ACCOUNT_NAMES.defaultFirstAccountName)

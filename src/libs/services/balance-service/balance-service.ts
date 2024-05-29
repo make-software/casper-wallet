@@ -1,42 +1,54 @@
-import { serviceMessage } from '@src/background/service-message';
-import { dispatchToMainStore } from '@background/redux/utils';
-
-import { Payload } from '@libs/services/types';
-
 import { BALANCE_REFRESH_RATE, CURRENCY_REFRESH_RATE } from '@src/constants';
 
-import { handleError, toJson } from '../utils';
-import { queryClient } from '../query-client';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { serviceMessage } from '@background/service-message';
 
 import {
+  DataResponse,
+  ErrorResponse,
+  PaginatedResponse,
+  Payload
+} from '@libs/services/types';
+
+import { queryClient } from '../query-client';
+import { handleError, toJson } from '../utils';
+import {
+  getAccountBalanceUrl,
+  getAccountBalancesUrl,
+  getCurrencyRateUrl
+} from './constants';
+import {
+  AccountData,
   FetchBalanceResponse,
-  GetAccountBalanceRequestResponse,
   GetCurrencyRateRequestResponse
 } from './types';
-import { getCurrencyRateUrl, getAccountBalanceUrl } from './constants';
 
 export const currencyRateRequest = (
-  casperApiUrl: string,
+  casperClarityApiUrl: string,
   signal?: AbortSignal
 ): Promise<GetCurrencyRateRequestResponse> =>
-  fetch(getCurrencyRateUrl(casperApiUrl), { signal })
+  fetch(getCurrencyRateUrl(casperClarityApiUrl), { signal })
     .then(toJson)
     .catch(handleError);
 
 export const accountBalanceRequest = (
-  publicKey: string,
-  casperApiUrl: string,
+  accountHash: string,
+  casperWalletApiUrl: string,
   signal?: AbortSignal
-): Promise<GetAccountBalanceRequestResponse> => {
-  if (!publicKey) {
-    throw Error('Missing public key');
+): Promise<AccountData> => {
+  if (!accountHash) {
+    throw Error('Missing account hash');
   }
 
-  return fetch(getAccountBalanceUrl({ publicKey, casperApiUrl }), { signal })
+  return fetch(getAccountBalanceUrl({ accountHash, casperWalletApiUrl }), {
+    signal
+  })
     .then(res => {
       if (res.status === 404) {
         return {
-          data: '0'
+          data: {
+            balance: 0
+          } as AccountData
         };
       }
 
@@ -45,31 +57,76 @@ export const accountBalanceRequest = (
     .catch(handleError);
 };
 
+export const accountBalancesRequest = (
+  accountHashes: string,
+  casperWalletApiUrl: string,
+  signal?: AbortSignal
+): Promise<PaginatedResponse<AccountData> | ErrorResponse> =>
+  fetch(
+    getAccountBalancesUrl({
+      accountHashes,
+      casperWalletApiUrl
+    }),
+    {
+      signal
+    }
+  )
+    .then(toJson)
+    .catch(handleError);
+
 export const dispatchFetchActiveAccountBalance = (
-  publicKey = ''
+  accountHash = ''
 ): Promise<Payload<FetchBalanceResponse>> =>
-  dispatchToMainStore(serviceMessage.fetchBalanceRequest({ publicKey }));
+  dispatchToMainStore(serviceMessage.fetchBalanceRequest({ accountHash }));
+
+export const dispatchFetchAccountBalances = (
+  accountHashes = ''
+): Promise<Payload<PaginatedResponse<AccountData> | ErrorResponse>> =>
+  dispatchToMainStore(
+    serviceMessage.fetchAccountBalancesRequest({ accountHashes })
+  );
 
 export const fetchAccountBalance = ({
-  publicKey,
-  casperApiUrl
+  accountHash,
+  casperWalletApiUrl
 }: {
-  publicKey: string;
-  casperApiUrl: string;
-}) =>
+  accountHash: string;
+  casperWalletApiUrl: string;
+}): Promise<DataResponse<AccountData>> =>
   queryClient.fetchQuery(
-    ['getAccountBalanceRequest', publicKey, casperApiUrl],
-    ({ signal }) => accountBalanceRequest(publicKey, casperApiUrl, signal),
+    ['getAccountBalanceRequest', accountHash, casperWalletApiUrl],
+    ({ signal }) =>
+      accountBalanceRequest(accountHash, casperWalletApiUrl, signal),
     {
       staleTime: BALANCE_REFRESH_RATE
     }
   );
 
-export const fetchCurrencyRate = ({ casperApiUrl }: { casperApiUrl: string }) =>
+export const fetchCurrencyRate = ({
+  casperClarityApiUrl
+}: {
+  casperClarityApiUrl: string;
+}) =>
   queryClient.fetchQuery(
     'getCurrencyRateRequest',
-    ({ signal }) => currencyRateRequest(casperApiUrl, signal),
+    ({ signal }) => currencyRateRequest(casperClarityApiUrl, signal),
     {
       staleTime: CURRENCY_REFRESH_RATE
+    }
+  );
+
+export const fetchAccountBalances = ({
+  accountHashes,
+  casperWalletApiUrl
+}: {
+  accountHashes: string;
+  casperWalletApiUrl: string;
+}) =>
+  queryClient.fetchQuery(
+    ['getAccountBalancesRequest', accountHashes, casperWalletApiUrl],
+    ({ signal }) =>
+      accountBalancesRequest(accountHashes, casperWalletApiUrl, signal),
+    {
+      staleTime: BALANCE_REFRESH_RATE
     }
   );

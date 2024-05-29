@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import styled from 'styled-components';
-import { BaseProps, Link, SvgIcon } from '@src/libs/ui';
+
+import { Link, SvgIcon } from '@libs/ui/components';
+import { BaseProps } from '@libs/ui/types';
 
 const getSocialMediaColor = (type: SocialMediaType) => {
   return {
@@ -59,21 +61,20 @@ const Container = styled(Link)<Omit<SvgIconSocialProps, 'userId'>>(
   })
 );
 
-export const SvgIconSocial = React.forwardRef<
-  HTMLAnchorElement,
-  SvgIconSocialProps
->(({ socialMediaType: type, userId, ...props }: SvgIconSocialProps, ref) => {
-  return (
-    <Container
-      ref={ref}
-      color="inherit"
-      socialMediaType={type}
-      href={getSocialMediaUrl(type, userId)}
-      {...props}
-    >
-      <SvgIcon src={`assets/icons/ic-${type}.svg`} />
-    </Container>
-  );
-});
+export const SvgIconSocial = forwardRef<HTMLAnchorElement, SvgIconSocialProps>(
+  ({ socialMediaType: type, userId, ...props }: SvgIconSocialProps, ref) => {
+    return (
+      <Container
+        ref={ref}
+        color="inherit"
+        socialMediaType={type}
+        href={getSocialMediaUrl(type, userId)}
+        {...props}
+      >
+        <SvgIcon src={`assets/icons/ic-${type}.svg`} />
+      </Container>
+    );
+  }
+);
 
 export default SvgIconSocial;

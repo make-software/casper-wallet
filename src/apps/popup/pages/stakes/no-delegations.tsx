@@ -6,7 +6,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { SvgIcon, Typography } from '@libs/ui';
+import { SvgIcon, Typography } from '@libs/ui/components';
 
 export const NoDelegations = () => {
   const { t } = useTranslation();

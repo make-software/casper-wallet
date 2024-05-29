@@ -5,3 +5,6 @@ export const selectEncryptionKeyHash = (state: RootState): string | null =>
 
 export const selectVaultIsLocked = (state: RootState): boolean =>
   state.session.isLocked;
+
+export const selectIsContactEditingAllowed = (state: RootState) =>
+  state.session.isContactEditingAllowed;

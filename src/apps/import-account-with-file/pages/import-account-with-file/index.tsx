@@ -1,15 +1,15 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import {
   FooterButtonsContainer,
-  LayoutWindow,
-  PopupHeader
+  HeaderPopup,
+  LayoutWindow
 } from '@libs/layout';
-import { Button } from '@libs/ui';
-import { RouterPath } from '../../router';
+import { Button } from '@libs/ui/components';
 
+import { RouterPath } from '../../router';
 import { ImportAccountWithFileContentPage } from './content';
 
 export function ImportAccountWithFilePage() {
@@ -18,7 +18,7 @@ export function ImportAccountWithFilePage() {
 
   return (
     <LayoutWindow
-      renderHeader={() => <PopupHeader />}
+      renderHeader={() => <HeaderPopup />}
       renderContent={() => <ImportAccountWithFileContentPage />}
       renderFooter={() => (
         <FooterButtonsContainer>

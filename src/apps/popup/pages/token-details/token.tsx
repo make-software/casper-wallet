@@ -1,8 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
+
+import { NetworkSetting } from '@src/constants';
+
+import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
+
+import {
+  selectActiveNetworkSetting,
+  selectApiConfigBasedOnActiveNetwork
+} from '@background/redux/settings/selectors';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { TokenType, useCasperToken } from '@hooks/use-casper-token';
 
 import {
   CenteredFlexColumn,
@@ -10,17 +23,14 @@ import {
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
-import { Button, Link, List, SvgIcon, TokenPlate, Typography } from '@libs/ui';
-import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
-import { TokenType, useCasperToken } from '@src/hooks';
+import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 import {
-  selectActiveNetworkSetting,
-  selectApiConfigBasedOnActiveNetwork
-} from '@background/redux/settings/selectors';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { getBuyWithTopperUrl, NetworkSetting } from '@src/constants';
-import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
-import { ContractPackageWithBalance } from '@src/libs/services/erc20-service';
+  Button,
+  List,
+  SvgIcon,
+  TokenPlate,
+  Typography
+} from '@libs/ui/components';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 16px;
@@ -157,27 +167,19 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
               <Trans t={t}>Receive</Trans>
             </Typography>
           </ButtonContainer>
-          {tokenName === 'Casper' &&
-            network === NetworkSetting.Mainnet &&
-            activeAccount?.publicKey && (
-              <Link
-                color="inherit"
-                target="_blank"
-                href={getBuyWithTopperUrl(activeAccount.publicKey)}
-              >
-                <ButtonContainer gap={SpacingSize.Medium}>
-                  <Button circle>
-                    <SvgIcon
-                      src="assets/icons/card.svg"
-                      color="contentOnFill"
-                    />
-                  </Button>
-                  <Typography type="captionMedium" color="contentAction">
-                    <Trans t={t}>Buy</Trans>
-                  </Typography>
-                </ButtonContainer>
-              </Link>
-            )}
+          {tokenName === 'Casper' && network === NetworkSetting.Mainnet && (
+            <ButtonContainer
+              gap={SpacingSize.Medium}
+              onClick={() => navigate(RouterPath.BuyCSPR)}
+            >
+              <Button circle>
+                <SvgIcon src="assets/icons/card.svg" color="contentOnFill" />
+              </Button>
+              <Typography type="captionMedium" color="contentAction">
+                <Trans t={t}>Buy</Trans>
+              </Typography>
+            </ButtonContainer>
+          )}
         </FooterItemContainer>
       )}
       marginLeftForItemSeparatorLine={16}

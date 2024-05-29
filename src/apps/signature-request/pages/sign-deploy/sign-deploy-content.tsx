@@ -8,18 +8,18 @@ import {
   ParagraphContainer,
   SpaceBetweenFlexRow,
   SpacingSize
-} from '@layout/containers';
-import { Accordion, List, SvgIcon, Typography } from '@libs/ui';
+} from '@libs/layout';
+import { Accordion, List, SvgIcon, Typography } from '@libs/ui/components';
 
-import { DeployValue } from './deploy-value';
 import {
   CasperDeploy,
+  ParsedValueType,
   SignatureRequestFields,
-  SignatureRequestKeys,
-  ParsedValueType
+  SignatureRequestKeys
 } from './deploy-types';
-import { deriveDeployInfoFromDeployRaw } from './derive-deploy-info-from-deploy-raw';
 import { getDeployParsedValue } from './deploy-utils';
+import { DeployValue } from './deploy-value';
+import { deriveDeployInfoFromDeployRaw } from './derive-deploy-info-from-deploy-raw';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
   margin: 16px;
@@ -76,7 +76,9 @@ export function SignDeployContent({
     recipientKey: t('Recipient (Key)'),
     recipientHash: t('Recipient (Hash)'),
     entryPoint: t('Entry point'),
-    token_metas: t('Token metas')
+    token_metas: t('Token metas'),
+    contractHash: t('Contract hash'),
+    contractName: t('Contract name')
   };
 
   const deployInfo = deriveDeployInfoFromDeployRaw(deploy);
@@ -91,7 +93,14 @@ export function SignDeployContent({
     deployType: deployInfo.deployType
   };
   const deployDetailRecords = Object.entries(signatureRequest);
-  if (deployInfo.entryPoint != null) {
+
+  if (deployInfo.contractName) {
+    deployDetailRecords.push(['contractName', deployInfo.contractName]);
+  }
+  if (deployInfo.contractHash) {
+    deployDetailRecords.push(['contractHash', deployInfo.contractHash]);
+  }
+  if (deployInfo.entryPoint) {
     deployDetailRecords.push(['entryPoint', deployInfo.entryPoint]);
   }
 

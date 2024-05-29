@@ -6,7 +6,11 @@ import {
 } from '@playwright/test';
 import path from 'path';
 
-import { PLAYGROUND_URL, vaultPassword } from './constants';
+import {
+  DEFAULT_FIRST_ACCOUNT,
+  PLAYGROUND_URL,
+  vaultPassword
+} from './constants';
 
 export const test = base.extend<{
   context: BrowserContext;
@@ -207,6 +211,7 @@ export const popup = test.extend<{
   lockVault: () => Promise<void>;
   createAccount: (newAccountName: string) => Promise<void>;
   connectAccounts: () => Promise<void>;
+  addContact: () => Promise<void>;
 }>({
   popupPage: async ({ extensionId, page }, use) => {
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
@@ -265,6 +270,27 @@ export const popup = test.extend<{
     };
 
     await use(connectAccounts);
+  },
+  addContact: async ({ page }, use) => {
+    const addContact = async () => {
+      await page.getByTestId('menu-open-icon').click();
+      await page.getByText('Contacts').click();
+
+      await page.getByRole('button', { name: 'Add contact' }).click();
+
+      await page
+        .getByPlaceholder('Name', { exact: true })
+        .fill(DEFAULT_FIRST_ACCOUNT.accountName);
+      await page
+        .getByPlaceholder('Public key', { exact: true })
+        .fill(DEFAULT_FIRST_ACCOUNT.publicKey);
+
+      await page.getByRole('button', { name: 'Add contact' }).click();
+
+      await page.getByRole('button', { name: 'Done' }).click();
+    };
+
+    await use(addContact);
   }
 });
 

@@ -1,22 +1,50 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+
+import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize,
   VerticalSpaceContainer
-} from '@src/libs/layout';
-import { SvgIcon, Typography } from '@libs/ui';
+} from '@libs/layout';
+import { HomePageTabsId, SvgIcon, Typography } from '@libs/ui/components';
 
 interface TransferSuccessScreenProps {
   headerText: string;
+  children?: React.ReactNode;
 }
 
 export const TransferSuccessScreen = ({
-  headerText
+  headerText,
+  children
 }: TransferSuccessScreenProps) => {
   const { t } = useTranslation();
+  const navigate = useTypedNavigate();
+
+  useEffect(() => {
+    const keyDownHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        navigate(RouterPath.Home, {
+          state: {
+            // set the active tab to deploys
+            activeTabId: HomePageTabsId.Deploys
+          }
+        });
+      }
+    };
+
+    window.addEventListener('keydown', keyDownHandler);
+
+    return () => window.removeEventListener('keydown', keyDownHandler);
+  }, [navigate]);
+
+  useEffect(() => {
+    const container = document.querySelector('#ms-container');
+
+    container?.scrollTo(0, 0);
+  }, []);
 
   return (
     <ContentContainer>
@@ -39,6 +67,7 @@ export const TransferSuccessScreen = ({
             </Trans>
           </Typography>
         </VerticalSpaceContainer>
+        {children}
       </ParagraphContainer>
     </ContentContainer>
   );

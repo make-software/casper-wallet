@@ -1,11 +1,11 @@
 import throttle from 'lodash.throttle';
 import { useEffect } from 'react';
-
 import { useSelector } from 'react-redux';
-import { dispatchToMainStore } from '../background/redux/utils';
-import { selectVaultIsLocked } from '@src/background/redux/session/selectors';
-import { selectKeysDoesExist } from '@src/background/redux/keys/selectors';
-import { lastActivityTimeRefreshed } from '@src/background/redux/last-activity-time/actions';
+
+import { selectKeysDoesExist } from '@background/redux/keys/selectors';
+import { lastActivityTimeRefreshed } from '@background/redux/last-activity-time/actions';
+import { selectVaultIsLocked } from '@background/redux/session/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
 
 const throttleDelay = 5000;
 const throttledDispatchToMainStore = throttle(

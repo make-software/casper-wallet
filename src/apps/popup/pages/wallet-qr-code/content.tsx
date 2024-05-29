@@ -1,6 +1,6 @@
+import { QRCodeCanvas } from 'qrcode.react';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { QRCodeCanvas } from 'qrcode.react';
 import styled, { useTheme } from 'styled-components';
 
 import {
@@ -9,13 +9,13 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { Typography } from '@libs/ui';
+import { Typography } from '@libs/ui/components';
 
 const QRContainer = styled(CenteredFlexRow)`
   padding: 20px 16px;
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
   border-radius: ${({ theme }) => theme.borderRadius.base}px;
-  margin-top: 20px;
+  margin-top: 24px;
 `;
 
 interface WalletQrCodePageContentProps {

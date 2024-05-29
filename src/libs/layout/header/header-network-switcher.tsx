@@ -2,13 +2,15 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { AlignedFlexRow, SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
-import { SvgIcon, Typography, Modal, hexToRGBA } from '@libs/ui';
+import { NetworkSetting } from '@src/constants';
 
+import { activeNetworkSettingChanged } from '@background/redux/settings/actions';
 import { selectActiveNetworkSetting } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { activeNetworkSettingChanged } from '@background/redux/settings/actions';
-import { NetworkSetting } from '@src/constants';
+
+import { AlignedFlexRow, SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
+import { Modal, SvgIcon, Typography } from '@libs/ui/components';
+import { hexToRGBA } from '@libs/ui/utils';
 
 const NetworkSwitcherContainer = styled(AlignedFlexRow)`
   background-color: ${({ theme }) => hexToRGBA(theme.color.black, '0.16')};
@@ -105,6 +107,7 @@ export const HeaderNetworkSwitcher = () => {
             src="assets/icons/network.svg"
             size={16}
             color="contentOnFill"
+            dataTestId="network-switcher"
           />
           <Typography type="listSubtext" color="contentOnFill">
             {activeNetwork}

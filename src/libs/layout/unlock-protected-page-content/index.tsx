@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 import { FieldErrors, UseFormRegister } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+
+import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
+
+import { useLockWalletWhenNoMoreRetries } from '@hooks/use-lock-wallet-when-no-more-retries';
 
 import {
   ContentContainer,
@@ -15,9 +20,7 @@ import {
   PasswordVisibilityIcon,
   SvgIcon,
   Typography
-} from '@libs/ui';
-
-import { useLockWalletWhenNoMoreRetries } from './use-lock-wallet-when-no-more-retries';
+} from '@libs/ui/components';
 
 interface PasswordFormValues {
   password: string;
@@ -26,19 +29,23 @@ interface PasswordFormValues {
 interface PasswordPageContentType {
   register: UseFormRegister<PasswordFormValues>;
   errors: FieldErrors<PasswordFormValues>;
-  description: string;
+  title?: string;
 }
 export const UnlockProtectedPageContent = ({
   register,
   errors,
-  description
+  title
 }: PasswordPageContentType) => {
   const [passwordInputType, setPasswordInputType] =
     useState<PasswordInputType>('password');
 
   const { t } = useTranslation();
 
+  const loginRetryCount = useSelector(selectLoginRetryCount);
+
   useLockWalletWhenNoMoreRetries();
+
+  const retryLeft = 5 - loginRetryCount;
 
   return (
     <ContentContainer>
@@ -51,12 +58,18 @@ export const UnlockProtectedPageContent = ({
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          <Trans t={t}>Wallet password required</Trans>
+          <Trans t={t}>{title || 'Enter your password'}</Trans>
         </Typography>
       </ParagraphContainer>
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
-          {description}
+          <Trans
+            defaults="You have <bold>{{retryLeft}}</bold> tries left."
+            values={{
+              retryLeft
+            }}
+            components={{ bold: <strong /> }}
+          />
         </Typography>
       </ParagraphContainer>
       <InputsContainer>

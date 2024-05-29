@@ -1,32 +1,35 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import browser from 'webextension-polyfill';
+
+import { HomePageTabName, NetworkSetting } from '@src/constants';
+
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
+
+import {
+  selectActiveNetworkSetting,
+  selectIsActiveAccountConnectedWithActiveOrigin,
+  selectVaultActiveAccount
+} from '@background/redux/root-selector';
+
+import { useCasperToken } from '@hooks/use-casper-token';
 
 import {
   AlignedFlexRow,
-  CenteredFlexRow,
-  FlexColumn,
-  HeaderSubmenuBarNavLink,
-  LinkType,
-  SpacingSize
-} from '@libs/layout';
-import {
   CenteredFlexColumn,
+  CenteredFlexRow,
   ContentContainer,
-  FlexRow,
   LeftAlignedFlexColumn,
   SpaceBetweenFlexRow,
+  SpacingSize,
   TileContainer,
   VerticalSpaceContainer
-} from '@src/libs/layout/containers';
-
+} from '@libs/layout';
 import {
   AccountActionsMenuPopover,
   Avatar,
   Button,
-  getFontSizeBasedOnTextLength,
   Hash,
   HashVariant,
   SvgIcon,
@@ -34,28 +37,13 @@ import {
   Tabs,
   Tile,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 
-import { useCasperToken } from '@src/hooks';
-import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
-import {
-  selectActiveNetworkSetting,
-  selectCountOfAccounts,
-  selectIsActiveAccountConnectedWithActiveOrigin,
-  selectVaultActiveAccount
-} from '@src/background/redux/root-selector';
-import { formatNumber, motesToCSPR } from '@src/libs/ui/utils/formatters';
-import { selectAccountBalance } from '@background/redux/account-info/selectors';
-import {
-  getBuyWithTopperUrl,
-  HomePageTabName,
-  NetworkSetting
-} from '@src/constants';
-
-import { TokensList } from './components/tokens-list';
-import { NftList } from './components/nft-list';
+import { AccountBalance } from './components/account-balance';
 import { DeploysList } from './components/deploys-list';
 import { MoreButtonsModal } from './components/more-buttons-modal';
+import { NftList } from './components/nft-list';
+import { TokensList } from './components/tokens-list';
 
 const DividerLine = styled.hr`
   margin: 16px 0;
@@ -66,7 +54,7 @@ const DividerLine = styled.hr`
 `;
 
 const ButtonsContainer = styled(CenteredFlexRow)`
-  margin-top: 16px;
+  margin-top: 24px;
 `;
 
 const ButtonContainer = styled(CenteredFlexColumn)`
@@ -87,18 +75,8 @@ export function HomePageContent() {
   );
   const network = useSelector(selectActiveNetworkSetting);
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const balance = useSelector(selectAccountBalance);
 
   const casperToken = useCasperToken();
-
-  const handleBuyWithCSPR = useCallback(() => {
-    if (activeAccount?.publicKey && network === NetworkSetting.Mainnet) {
-      browser.tabs.create({
-        url: getBuyWithTopperUrl(activeAccount.publicKey),
-        active: true
-      });
-    }
-  }, [activeAccount?.publicKey, network]);
 
   useEffect(() => {
     if (!state?.activeTabId) {
@@ -136,43 +114,12 @@ export function HomePageContent() {
               <AccountActionsMenuPopover account={activeAccount} />
             </SpaceBetweenFlexRow>
             <DividerLine />
-            <FlexColumn gap={SpacingSize.Tiny}>
-              <FlexRow gap={SpacingSize.Small}>
-                <Typography
-                  type="CSPRBold"
-                  fontSize={getFontSizeBasedOnTextLength(
-                    balance.amountMotes?.length || 1
-                  )}
-                >
-                  {balance.amountMotes == null
-                    ? '-'
-                    : formatNumber(motesToCSPR(balance.amountMotes), {
-                        precision: { max: 5 }
-                      })}
-                </Typography>
-                <Typography
-                  type="CSPRLight"
-                  color="contentSecondary"
-                  fontSize={getFontSizeBasedOnTextLength(
-                    balance.amountMotes?.length || 1
-                  )}
-                >
-                  CSPR
-                </Typography>
-              </FlexRow>
-              <Typography
-                type="body"
-                color="contentSecondary"
-                loading={!balance.amountMotes}
-              >
-                {balance.amountFiat}
-              </Typography>
-            </FlexColumn>
+            <AccountBalance />
             <ButtonsContainer gap={SpacingSize.XXXL}>
               {network === NetworkSetting.Mainnet && (
                 <ButtonContainer
                   gap={SpacingSize.Small}
-                  onClick={handleBuyWithCSPR}
+                  onClick={() => navigate(RouterPath.BuyCSPR)}
                 >
                   <Button circle>
                     <SvgIcon
@@ -211,7 +158,7 @@ export function HomePageContent() {
                   <Trans t={t}>Send</Trans>
                 </Typography>
               </ButtonContainer>
-              <MoreButtonsModal handleBuyWithCSPR={handleBuyWithCSPR} />
+              <MoreButtonsModal />
             </ButtonsContainer>
           </TileContainer>
         </Tile>
@@ -230,32 +177,5 @@ export function HomePageContent() {
         </Tabs>
       </VerticalSpaceContainer>
     </ContentContainer>
-  );
-}
-
-interface HomePageHeaderSubmenuItemsProps {
-  linkType: LinkType;
-}
-
-export function HomePageHeaderSubmenuItems({
-  linkType
-}: HomePageHeaderSubmenuItemsProps) {
-  const { t } = useTranslation();
-  const countOfAccounts = useSelector(selectCountOfAccounts);
-
-  return (
-    <>
-      <LeftAlignedFlexColumn>
-        <Typography type="body">
-          <Trans t={t}>Accounts list</Trans>
-        </Typography>
-
-        <Typography type="listSubtext" color="contentSecondary">
-          {countOfAccounts} {countOfAccounts > 1 ? t('accounts') : t('account')}
-        </Typography>
-      </LeftAlignedFlexColumn>
-
-      <HeaderSubmenuBarNavLink linkType={linkType} />
-    </>
   );
 }

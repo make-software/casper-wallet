@@ -1,24 +1,46 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { UseFormReturn, useWatch } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 
+import { selectAllContacts } from '@background/redux/contacts/selectors';
 import { selectRecentRecipientPublicKeys } from '@background/redux/recent-recipient-public-keys/selectors';
-import { SpacingSize, VerticalSpaceContainer } from '@libs/layout';
-import { Input, List, RecipientPlate, SvgIcon } from '@libs/ui';
-import { TransferRecipientFormValues } from '@libs/ui/forms/transfer';
-import { useClickAway } from '@libs/ui/hooks/use-click-away';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { useClickAway } from '@hooks/use-click-away';
+
+import {
+  AlignedFlexRow,
+  SpacingSize,
+  VerticalSpaceContainer
+} from '@libs/layout';
+import {
+  Input,
+  List,
+  RecipientPlate,
+  SvgIcon,
+  Typography
+} from '@libs/ui/components';
+import { TransferRecipientFormValues } from '@libs/ui/forms/transfer';
 import { TransferNftRecipientFormValues } from '@libs/ui/forms/transfer-nft';
+
+const SeparatorContainer = styled(AlignedFlexRow)`
+  padding: 8px 16px;
+`;
 
 interface RecipientDropdownInputProps {
   recipientForm: UseFormReturn<
     TransferRecipientFormValues | TransferNftRecipientFormValues
   >;
+  setRecipientName: React.Dispatch<React.SetStateAction<string>>;
+  recipientName: string;
 }
 
 export const RecipientDropdownInput = ({
-  recipientForm
+  recipientForm,
+  setRecipientName,
+  recipientName
 }: RecipientDropdownInputProps) => {
   const [
     isOpenRecentRecipientPublicKeysList,
@@ -32,6 +54,7 @@ export const RecipientDropdownInput = ({
     selectRecentRecipientPublicKeys
   );
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const contacts = useSelector(selectAllContacts);
 
   const { register, formState, setValue, control, trigger } = recipientForm;
   const { errors } = formState;
@@ -57,17 +80,61 @@ export const RecipientDropdownInput = ({
     //   eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const optionsRow = useMemo(
+  const recentRecipient = useMemo(
     () =>
-      recentRecipientPublicKeys
-        .filter(item => item !== activeAccount?.publicKey)
-        .map((item, index) => ({
-          publicKey: item,
-          id: index
-        }))
-        .filter(item => item.publicKey.includes(inputValue || '')),
-    [activeAccount?.publicKey, inputValue, recentRecipientPublicKeys]
+      recentRecipientPublicKeys.map(key => {
+        const contact = contacts.find(contact => contact.publicKey === key);
+        if (contact) {
+          return {
+            name: contact.name,
+            publicKey: key
+          };
+        }
+        return {
+          name: '',
+          publicKey: key
+        };
+      }),
+    [contacts, recentRecipientPublicKeys]
   );
+
+  const getUniquePublicKeyItemsWithId = useMemo(() => {
+    const recentRecipientWithSeparator = recentRecipient.length
+      ? [
+          {
+            name: '',
+            publicKey: '',
+            isResentSeparator: true
+          },
+          ...recentRecipient
+        ]
+      : [...recentRecipient];
+    const contactsWithSeparator = contacts.length
+      ? [
+          {
+            name: '',
+            publicKey: '',
+            isContactsSeparator: true
+          },
+          ...contacts
+        ]
+      : [];
+
+    const items = [
+      ...recentRecipientWithSeparator,
+      ...contactsWithSeparator
+    ].filter(item => item.publicKey !== activeAccount?.publicKey);
+
+    return items.map((item, index) => ({ ...item, id: index }));
+  }, [activeAccount?.publicKey, contacts, recentRecipient]);
+
+  const optionsRow = useMemo(() => {
+    return getUniquePublicKeyItemsWithId.filter(
+      item =>
+        item.publicKey.includes(inputValue || '') ||
+        item.name.includes(inputValue || '')
+    );
+  }, [getUniquePublicKeyItemsWithId, inputValue]);
 
   const recipientLabel = t('To recipient');
 
@@ -75,11 +142,14 @@ export const RecipientDropdownInput = ({
     <VerticalSpaceContainer top={SpacingSize.XL}>
       <RecipientPlate
         publicKey={inputValue}
+        name={recipientName}
         recipientLabel={recipientLabel}
         showFullPublicKey
         handleClick={() => {
           setShowRecipientPlate(false);
           setIsOpenRecentRecipientPublicKeysList(true);
+
+          trigger('recipientPublicKey');
         }}
       />
     </VerticalSpaceContainer>
@@ -95,31 +165,56 @@ export const RecipientDropdownInput = ({
         monotype
         label={recipientLabel}
         prefixIcon={<SvgIcon src="assets/icons/search.svg" size={24} />}
-        placeholder={t('Recipient public address')}
+        placeholder={t('Public address or contact name')}
         {...register('recipientPublicKey')}
         error={!!errors?.recipientPublicKey}
         validationText={errors?.recipientPublicKey?.message}
         autoComplete="off"
       />
-      {isOpenRecentRecipientPublicKeysList && (
+      {isOpenRecentRecipientPublicKeysList && optionsRow.length ? (
         <List
           contentTop={SpacingSize.Tiny}
           rows={optionsRow}
-          renderRow={({ publicKey }) => (
-            <RecipientPlate
-              publicKey={publicKey}
-              handleClick={async () => {
-                setValue('recipientPublicKey', publicKey);
-                await trigger('recipientPublicKey');
+          maxHeight={161}
+          renderRow={row => {
+            if ('isResentSeparator' in row) {
+              return (
+                <SeparatorContainer>
+                  <Typography type="labelMedium" color="contentSecondary">
+                    <Trans t={t}>Recent</Trans>
+                  </Typography>
+                </SeparatorContainer>
+              );
+            }
+            if ('isContactsSeparator' in row) {
+              return (
+                <SeparatorContainer>
+                  <Typography type="labelMedium" color="contentSecondary">
+                    <Trans t={t}>Contacts</Trans>
+                  </Typography>
+                </SeparatorContainer>
+              );
+            }
 
-                setIsOpenRecentRecipientPublicKeysList(false);
-                setShowRecipientPlate(true);
-              }}
-            />
-          )}
+            return (
+              <RecipientPlate
+                publicKey={row.publicKey}
+                name={row.name}
+                handleClick={() => {
+                  setValue('recipientPublicKey', row.publicKey);
+
+                  setIsOpenRecentRecipientPublicKeysList(false);
+                  setShowRecipientPlate(true);
+                  setRecipientName(row.name);
+
+                  trigger('recipientPublicKey');
+                }}
+              />
+            );
+          }}
           marginLeftForItemSeparatorLine={56}
         />
-      )}
+      ) : null}
     </VerticalSpaceContainer>
   );
 };

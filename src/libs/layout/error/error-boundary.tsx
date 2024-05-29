@@ -1,8 +1,6 @@
 import React, { Component, ReactNode } from 'react';
-import {
-  createErrorLocationState,
-  WindowErrorPage
-} from '@src/libs/layout/error';
+
+import { WindowErrorPage, createErrorLocationState } from '@libs/layout';
 
 interface Props {
   children: ReactNode;
