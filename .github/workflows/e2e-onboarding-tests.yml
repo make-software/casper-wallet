@@ -14,8 +14,8 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.39.0-jammy
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
 
@@ -28,14 +28,14 @@ jobs:
       - name: Run Chrome tests
         run: npm run e2e:chrome:headless:onboarding
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: test-results
