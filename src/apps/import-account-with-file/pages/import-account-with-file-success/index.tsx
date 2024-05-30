@@ -32,7 +32,7 @@ export function ImportAccountWithFileSuccessContentPage() {
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            Imported accounts are distinguished by an ‘IMPORTED’ badge in the
+            Imported accounts are distinguished by an ‘IMPORTED’ icon in the
             account lists.
           </Trans>
         </Typography>

@@ -1,9 +1,9 @@
-import { popup, popupExpect } from '../../fixtures';
 import {
   DEFAULT_FIRST_ACCOUNT,
   DEFAULT_SECOND_ACCOUNT,
   vaultPassword
 } from '../../constants';
+import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI: contacts', () => {
   popup(

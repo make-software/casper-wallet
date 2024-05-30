@@ -80,6 +80,8 @@ interface ListProps<ListRow extends ListRowBase> {
   stickyHeader?: boolean;
   maxHeight?: number;
   borderRadius?: 'base';
+  height?: number;
+  maxItemsToRender?: number;
 }
 
 export function List<ListRow extends ListRowBase>({
@@ -95,7 +97,9 @@ export function List<ListRow extends ListRowBase>({
   contentTop = SpacingSize.XL,
   stickyHeader,
   maxHeight,
-  borderRadius
+  borderRadius,
+  height,
+  maxItemsToRender
 }: ListProps<ListRow>) {
   const separatorLine =
     marginLeftForHeaderSeparatorLine || marginLeftForHeaderSeparatorLine === 0
@@ -135,8 +139,8 @@ export function List<ListRow extends ListRowBase>({
               {renderHeader()}
             </ListHeaderContainer>
           )}
-          {maxHeight ? (
-            <MacScrollbar style={{ maxHeight }}>
+          {maxHeight || height ? (
+            <MacScrollbar style={{ maxHeight, height }}>
               <RowsContainer
                 marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
               >
@@ -151,11 +155,19 @@ export function List<ListRow extends ListRowBase>({
             <RowsContainer
               marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
             >
-              {rows.map((row, index, array) => (
-                <RowContainer key={row.id}>
-                  {renderRow(row, index, array)}
-                </RowContainer>
-              ))}
+              {maxItemsToRender
+                ? rows
+                    .slice(0, maxItemsToRender)
+                    .map((row, index, array) => (
+                      <RowContainer key={row.id}>
+                        {renderRow(row, index, array)}
+                      </RowContainer>
+                    ))
+                : rows.map((row, index, array) => (
+                    <RowContainer key={row.id}>
+                      {renderRow(row, index, array)}
+                    </RowContainer>
+                  ))}
             </RowsContainer>
           )}
 

@@ -6,5 +6,28 @@ export interface RPCResponse {
 export interface RPCErrorResponse {
   code: number;
   message: string;
-  data: string;
+  data: string | any;
+}
+
+export interface ICasperNodeStatusResponse {
+  last_progress: string;
+}
+
+export interface ICasperNetworkSendDeployResponse {
+  jsonrpc: '2.0';
+  id: number;
+  result: {
+    api_version: string;
+    deploy_hash: string;
+  };
+}
+
+export interface ICasperNetworkSendDeployErrorResponse {
+  error: {
+    code: number;
+    data: string;
+    message: string;
+  };
+  id: number;
+  jsonrpc: string;
 }

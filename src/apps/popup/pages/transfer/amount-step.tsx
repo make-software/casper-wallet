@@ -17,9 +17,13 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Checkbox, Input, Typography } from '@libs/ui/components';
+import { Checkbox, Error, Input, Typography } from '@libs/ui/components';
 import { TransferAmountFormValues } from '@libs/ui/forms/transfer';
-import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils';
+import {
+  formatFiatAmount,
+  handleNumericInput,
+  motesToCSPR
+} from '@libs/ui/utils';
 
 interface AmountStepProps {
   amountForm: UseFormReturn<TransferAmountFormValues>;
@@ -41,7 +45,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
     const maxAmountMotes: string =
       csprBalance.liquidMotes == null
         ? '0'
-        : Big(csprBalance.liquidMotes).sub(TRANSFER_COST_MOTES).toString();
+        : Big(csprBalance.liquidMotes).sub(TRANSFER_COST_MOTES).toFixed();
 
     const hasEnoughBalance = Big(maxAmountMotes).gte(TRANSFER_MIN_AMOUNT_MOTES);
     const isMaxAmountEqualMinAmount = Big(maxAmountMotes).eq(
@@ -93,14 +97,13 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
       </ParagraphContainer>
 
       {isCSPR && disabled && (
-        <ParagraphContainer top={SpacingSize.Small}>
-          <Typography type="body" color="contentActionCritical">
-            <Trans t={t}>
-              You don't have enough CSPR to cover the transfer minimum amount
-              and the transaction fee.
-            </Trans>
-          </Typography>
-        </ParagraphContainer>
+        <VerticalSpaceContainer top={SpacingSize.XL}>
+          <Error
+            header="Not enough CSPR"
+            description="You don't have enough CSPR to cover the transfer minimum amount
+              and the transaction fee."
+          />
+        </VerticalSpaceContainer>
       )}
 
       <VerticalSpaceContainer top={SpacingSize.XXL}>
@@ -108,21 +111,19 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
           label={amountLabel}
           rightLabel={fiatAmount}
           monotype
+          type="number"
           placeholder={t('0.00')}
           suffixText={symbol}
           {...register('amount')}
           disabled={isCSPR && disabled}
           onChange={e => {
-            // replace all non-numeric characters except decimal point
-            e.target.value = e.target.value.replace(/[^0-9.]/g, '');
-            // regex replace decimal point from beginning of string
-            e.target.value = e.target.value.replace(/^\./, '');
             onChangeCSPRAmount(e);
 
             if (isChecked) {
               setIsChecked(false);
             }
           }}
+          onKeyDown={handleNumericInput}
           error={!!errors?.amount}
           validationText={errors?.amount?.message}
         />
@@ -170,10 +171,12 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
             label={paymentAmoutLabel}
             rightLabel={paymentFiatAmount}
             monotype
+            type="number"
             placeholder={t('Enter transaction fee')}
             suffixText={'CSPR'}
             {...register('paymentAmount')}
             error={!!errors?.paymentAmount}
+            onKeyDown={handleNumericInput}
             validationText={
               errors?.paymentAmount?.message ||
               "You'll be charged this amount in CSPR as a transaction fee. You can change it at your discretion."

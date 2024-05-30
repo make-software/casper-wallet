@@ -14,16 +14,21 @@ export const secretKeyPathForCER = path.join(
   './account_secret_key.cer'
 );
 
+export const torusSecretKeyHex =
+  '1ac774d1b4e05a5546ddc8345e8ccf1d7ef3d19b0e5cd722f161260e6bf1d35d';
+
 export const ACCOUNT_NAMES = {
   defaultFirstAccountName: 'Account 1',
   defaultSecondAccountName: 'Account 2',
   createdAccountName: 'New account 1',
   importedPemAccountName: 'Imported pem account',
   renamedAccountName: 'Renamed account',
-  importedCerAccountName: 'Imported cer account'
+  importedCerAccountName: 'Imported cer account',
+  importedTorusAccountName: 'Torus account'
 };
 
-export const PLAYGROUND_URL = 'https://casper-wallet-playground.make.services/';
+export const PLAYGROUND_URL =
+  'https://cspr-wallet-playground.dev.make.services/';
 
 export const IMPORTED_PEM_ACCOUNT = {
   accountName: ACCOUNT_NAMES.importedPemAccountName,
@@ -39,6 +44,14 @@ export const IMPORTED_CER_ACCOUNT = {
     '01a8d1042fa244f39fe4caa1660fc6dce522b3afe649dbe61f7d16e240168e6ff2',
   truncatedPublicKey: '01a8d...e6ff2',
   mediumTruncatedPublicKey: '01a8d1042f...40168e6ff2'
+};
+
+export const IMPORTED_TORUS_ACCOUNT = {
+  accountName: ACCOUNT_NAMES.importedTorusAccountName,
+  publicKey:
+    '02029fcc5bb34a6b2768086ac3bad7ccab6870e980df2c53f26ec06a8865182ffd4f',
+  truncatedPublicKey: '02029...ffd4f',
+  mediumTruncatedPublicKey: '02029fcc5b...65182ffd4f'
 };
 
 export const DEFAULT_FIRST_ACCOUNT = {

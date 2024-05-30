@@ -1,6 +1,4 @@
-import { CEP18Client } from 'casper-cep18-js-client';
-import { CLPublicKey, DeployUtil } from 'casper-js-sdk';
-import { sub } from 'date-fns';
+import { DeployUtil } from 'casper-js-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -11,13 +9,17 @@ import {
   TRANSFER_COST_MOTES
 } from '@src/constants';
 import { useActiveAccountErc20Tokens } from '@src/hooks/use-active-account-erc20-tokens';
+import { fetchAndDispatchExtendedDeployInfo } from '@src/utils';
 
 import { TransferPageContent } from '@popup/pages/transfer/content';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
-import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
+import {
+  ledgerDeployChanged,
+  ledgerRecipientToSaveOnSuccessChanged
+} from '@background/redux/ledger/actions';
 import {
   selectAskForReviewAfter,
   selectRatedInStore
@@ -25,30 +27,46 @@ import {
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-
 import {
+  selectIsActiveAccountFromLedger,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
+
+import { useLedger } from '@hooks/use-ledger';
+
+import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
+import {
+  AlignedFlexRow,
   ErrorPath,
   FooterButtonsContainer,
   HeaderPopup,
   HeaderSubmenuBarNavLink,
   PopupLayout,
   SpaceBetweenFlexRow,
+  SpacingSize,
   createErrorLocationState
 } from '@libs/layout';
-import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import { signAndDeploy } from '@libs/services/deployer-service';
-import { makeNativeTransferDeploy } from '@libs/services/transfer-service/transfer-service';
-import { Account } from '@libs/types/account';
-import { Button, HomePageTabsId, Typography } from '@libs/ui/components';
+import {
+  makeCep18TransferDeploy,
+  makeNativeTransferDeploy,
+  sendSignDeploy,
+  signDeploy
+} from '@libs/services/deployer-service';
+import { HardwareWalletType } from '@libs/types/account';
+import {
+  Button,
+  HomePageTabsId,
+  SvgIcon,
+  Typography,
+  renderLedgerFooter
+} from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useTransferForm } from '@libs/ui/forms/transfer';
 import {
   CSPRtoMotes,
   divideErc20Balance,
   formatNumber,
-  motesToCSPR,
-  multiplyErc20Balance
+  motesToCSPR
 } from '@libs/ui/utils';
 
 import { TransactionSteps, getIsErc20Transfer } from './utils';
@@ -74,6 +92,9 @@ export const TransferPage = () => {
   const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(true);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const isActiveAccountFromLedger = useSelector(
+    selectIsActiveAccountFromLedger
+  );
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
@@ -176,114 +197,144 @@ export const TransferPage = () => {
     };
   }, [isSubmitButtonDisable, transferStep]);
 
-  const submitDeploy = (
-    deploy: DeployUtil.Deploy,
-    activeAccount: Account,
-    nodeUrl: string
-  ) => {
-    signAndDeploy(
-      deploy,
-      activeAccount.publicKey,
-      activeAccount.secretKey,
-      nodeUrl
-    ).then(resp => {
-      dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
+  const sendDeploy = (signDeploy: DeployUtil.Deploy) => {
+    sendSignDeploy(signDeploy, nodeUrl)
+      .then(resp => {
+        dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
-      if ('deploy_hash' in resp) {
-        let triesLeft = 10;
-        const interval = setInterval(async () => {
-          const { payload: extendedDeployInfo } =
-            await dispatchFetchExtendedDeploysInfo(resp.deploy_hash);
-          if (extendedDeployInfo) {
-            dispatchToMainStore(
-              accountPendingTransactionsChanged(extendedDeployInfo)
-            );
-            clearInterval(interval);
-          } else if (triesLeft === 0) {
-            clearInterval(interval);
-          }
+        if ('result' in resp) {
+          fetchAndDispatchExtendedDeployInfo(resp.result.deploy_hash);
 
-          triesLeft--;
-          //   Note: this timeout is needed because the deploy is not immediately visible in the explorer
-        }, 2000);
+          setTransferStep(TransactionSteps.Success);
+        } else {
+          navigate(
+            ErrorPath,
+            createErrorLocationState({
+              errorHeaderText: resp.error.message || t('Something went wrong'),
+              errorContentText:
+                resp.error.data ||
+                t(
+                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                ),
+              errorPrimaryButtonLabel: t('Close'),
+              errorRedirectPath: RouterPath.Home
+            })
+          );
+        }
+      })
+      .catch(error => {
+        console.error(error, 'transfer request error');
 
-        setTransferStep(TransactionSteps.Success);
-      } else {
         navigate(
           ErrorPath,
           createErrorLocationState({
-            errorHeaderText: resp.message || t('Something went wrong'),
+            errorHeaderText: error.message || t('Something went wrong'),
             errorContentText:
-              resp.data ||
-              t(
-                'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-              ),
+              typeof error.data === 'string'
+                ? error.data
+                : t(
+                    'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+                  ),
             errorPrimaryButtonLabel: t('Close'),
             errorRedirectPath: RouterPath.Home
           })
         );
-      }
-    });
+      });
   };
 
-  const onSubmitSending = () => {
+  const onSubmitSending = async () => {
     if (activeAccount) {
-      const publicKeyFromHex = (publicKeyHex: string) => {
-        return CLPublicKey.fromHex(publicKeyHex);
-      };
+      const KEYS = createAsymmetricKey(
+        activeAccount.publicKey,
+        activeAccount.secretKey
+      );
 
       if (isErc20Transfer) {
         // ERC20 transfer
-        const cep18 = new CEP18Client(nodeUrl, networkName);
-
-        cep18.setContractHash(
-          `hash-${tokenContractHash}`,
-          `hash-${tokenContractPackageHash}`
-        );
-
-        // create deploy
-        const tempDeploy = cep18.transfer(
-          {
-            recipient: publicKeyFromHex(recipientPublicKey),
-            amount: multiplyErc20Balance(amount, erc20Decimals) || '0'
-          },
-          CSPRtoMotes(paymentAmount),
-          publicKeyFromHex(activeAccount.publicKey),
-          networkName
-        );
-
-        const deployParams = new DeployUtil.DeployParams(
-          publicKeyFromHex(activeAccount.publicKey),
+        const deploy = await makeCep18TransferDeploy(
+          nodeUrl,
           networkName,
-          undefined,
-          undefined,
-          undefined,
-          sub(new Date(), { seconds: 2 }).getTime() // https://github.com/casper-network/casper-node/issues/4152
+          tokenContractHash,
+          tokenContractPackageHash,
+          recipientPublicKey,
+          amount,
+          erc20Decimals,
+          paymentAmount,
+          activeAccount
         );
 
-        const deploy = DeployUtil.makeDeploy(
-          deployParams,
-          tempDeploy.session,
-          tempDeploy.payment
-        );
+        const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
 
-        submitDeploy(deploy, activeAccount, nodeUrl);
+        sendDeploy(signedDeploy);
       } else {
         // CSPR transfer
         const motesAmount = CSPRtoMotes(amount);
 
-        const deploy = makeNativeTransferDeploy(
-          activeAccount.publicKey,
+        const deploy = await makeNativeTransferDeploy(
+          activeAccount,
           recipientPublicKey,
           motesAmount,
           networkName,
+          nodeUrl,
           transferIdMemo
         );
 
-        submitDeploy(deploy, activeAccount, nodeUrl);
+        const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
+
+        sendDeploy(signedDeploy);
       }
     }
   };
+
+  const beforeLedgerActionCb = async () => {
+    setTransferStep(TransactionSteps.ConfirmWithLedger);
+
+    if (activeAccount?.hardware === HardwareWalletType.Ledger) {
+      if (isErc20Transfer) {
+        const deploy = await makeCep18TransferDeploy(
+          nodeUrl,
+          networkName,
+          tokenContractHash,
+          tokenContractPackageHash,
+          recipientPublicKey,
+          amount,
+          erc20Decimals,
+          paymentAmount,
+          activeAccount
+        );
+
+        dispatchToMainStore(
+          ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+        );
+        dispatchToMainStore(
+          ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
+        );
+      } else {
+        const motesAmount = CSPRtoMotes(amount);
+
+        const deploy = await makeNativeTransferDeploy(
+          activeAccount,
+          recipientPublicKey,
+          motesAmount,
+          networkName,
+          nodeUrl,
+          transferIdMemo
+        );
+
+        dispatchToMainStore(
+          ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+        );
+        dispatchToMainStore(
+          ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
+        );
+      }
+    }
+  };
+
+  const { ledgerEventStatusToRender, makeSubmitLedgerAction } = useLedger({
+    ledgerAction: onSubmitSending,
+    beforeLedgerActionCb
+  });
 
   const getButtonProps = () => {
     const isRecipientFormButtonDisabled = calculateSubmitButtonDisabled({
@@ -328,7 +379,9 @@ export const TransferPage = () => {
             isSubmitButtonDisable ||
             isRecipientFormButtonDisabled ||
             isAmountFormButtonDisabled,
-          onClick: onSubmitSending
+          onClick: isActiveAccountFromLedger
+            ? makeSubmitLedgerAction()
+            : onSubmitSending
         };
       }
       case TransactionSteps.Success: {
@@ -337,7 +390,7 @@ export const TransferPage = () => {
             const currentDate = Date.now();
 
             const shouldAskForReview =
-              askForReviewAfter == null || currentDate < askForReviewAfter;
+              askForReviewAfter == null || currentDate > askForReviewAfter;
 
             if (ratedInStore || !shouldAskForReview) {
               const homeRoutesState = {
@@ -359,64 +412,48 @@ export const TransferPage = () => {
     }
   };
 
-  const handleBackButton = () => {
-    switch (transferStep) {
-      case TransactionSteps.Recipient: {
-        navigate(-1);
-        break;
-      }
-      case TransactionSteps.Amount: {
-        setTransferStep(TransactionSteps.Recipient);
-        break;
-      }
-      case TransactionSteps.Confirm: {
-        setTransferStep(TransactionSteps.Amount);
-        break;
-      }
-
-      default: {
-        navigate(-1);
-        break;
-      }
-    }
+  const getBackButton = {
+    [TransactionSteps.Recipient]: () => (
+      <HeaderSubmenuBarNavLink linkType="back" onClick={() => navigate(-1)} />
+    ),
+    [TransactionSteps.Amount]: () => (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        onClick={() => setTransferStep(TransactionSteps.Recipient)}
+      />
+    ),
+    [TransactionSteps.Confirm]: () => (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        onClick={() => setTransferStep(TransactionSteps.Amount)}
+      />
+    ),
+    [TransactionSteps.ConfirmWithLedger]: () => (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        onClick={() => setTransferStep(TransactionSteps.Confirm)}
+      />
+    ),
+    [TransactionSteps.Success]: undefined
   };
 
   const transactionFee = isErc20Transfer
     ? `${paymentAmount}`
     : `${motesToCSPR(TRANSFER_COST_MOTES)}`;
 
-  return (
-    <PopupLayout
-      renderHeader={() => (
-        <HeaderPopup
-          withNetworkSwitcher
-          withMenu
-          withConnectionStatus
-          renderSubmenuBarItems={
-            transferStep === TransactionSteps.Success
-              ? undefined
-              : () => (
-                  <HeaderSubmenuBarNavLink
-                    linkType="back"
-                    onClick={handleBackButton}
-                  />
-                )
-          }
-        />
-      )}
-      renderContent={() => (
-        <TransferPageContent
-          transferStep={transferStep}
-          recipientForm={recipientForm}
-          amountForm={amountForm}
-          recipientPublicKey={recipientPublicKey}
-          amount={amount}
-          paymentAmount={paymentAmount}
-          balance={formattedBalance}
-          symbol={symbol}
-        />
-      )}
-      renderFooter={() => (
+  const renderFooter = () => {
+    if (transferStep === TransactionSteps.ConfirmWithLedger) {
+      return renderLedgerFooter({
+        onConnect: makeSubmitLedgerAction,
+        event: ledgerEventStatusToRender,
+        onErrorCtaPressed: () => {
+          setTransferStep(TransactionSteps.Confirm);
+        }
+      });
+    }
+
+    return () => {
+      return (
         <FooterButtonsContainer>
           {transferStep === TransactionSteps.Confirm ||
           transferStep === TransactionSteps.Success ? null : (
@@ -433,13 +470,21 @@ export const TransferPage = () => {
             </SpaceBetweenFlexRow>
           )}
           <Button color="primaryBlue" type="button" {...getButtonProps()}>
-            <Trans t={t}>
-              {transferStep === TransactionSteps.Confirm
-                ? 'Send'
-                : transferStep === TransactionSteps.Success
-                  ? 'Done'
-                  : 'Next'}
-            </Trans>
+            {isActiveAccountFromLedger &&
+            transferStep === TransactionSteps.Confirm ? (
+              <AlignedFlexRow gap={SpacingSize.Small}>
+                <SvgIcon src="assets/icons/ledger-white.svg" />
+                <Trans t={t}>Send</Trans>
+              </AlignedFlexRow>
+            ) : (
+              <Trans t={t}>
+                {transferStep === TransactionSteps.Confirm
+                  ? 'Send'
+                  : transferStep === TransactionSteps.Success
+                    ? 'Done'
+                    : 'Next'}
+              </Trans>
+            )}
           </Button>
           {transferStep === TransactionSteps.Success &&
             !isRecipientPublicKeyInContact && (
@@ -457,7 +502,34 @@ export const TransferPage = () => {
               </Button>
             )}
         </FooterButtonsContainer>
+      );
+    };
+  };
+
+  return (
+    <PopupLayout
+      renderHeader={() => (
+        <HeaderPopup
+          withNetworkSwitcher
+          withMenu
+          withConnectionStatus
+          renderSubmenuBarItems={getBackButton[transferStep]}
+        />
       )}
+      renderContent={() => (
+        <TransferPageContent
+          transferStep={transferStep}
+          recipientForm={recipientForm}
+          amountForm={amountForm}
+          recipientPublicKey={recipientPublicKey}
+          amount={amount}
+          paymentAmount={paymentAmount}
+          balance={formattedBalance}
+          symbol={symbol}
+          LedgerEventStatus={ledgerEventStatusToRender}
+        />
+      )}
+      renderFooter={renderFooter()}
     />
   );
 };

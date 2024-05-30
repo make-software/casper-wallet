@@ -83,11 +83,15 @@ const AddressContainer = styled(FlexColumn)`
   padding: 16px 12px 16px 0;
 `;
 
-const AmountContainer = styled(AlignedSpaceBetweenFlexRow)<{
+const AmountRowContainer = styled(AlignedSpaceBetweenFlexRow)<{
   emptyAmount?: boolean;
 }>`
   padding: ${({ emptyAmount }) =>
     emptyAmount ? '16px 16px 16px 0' : '8px 16px 8px 0'};
+`;
+
+const AmountContainer = styled.div`
+  max-width: 160px;
 `;
 
 const RowsContainer = styled(FlexColumn)<BorderBottomPseudoElementProps>`
@@ -171,7 +175,7 @@ export const ActivityDetailsPageContent = ({
     precision: { min: 5 }
   });
   const costAmountInUSD = formatCurrency(
-    deployInfo.currencyCost || '0',
+    String(deployInfo.currencyCost) || '0',
     'USD',
     {
       precision: 5
@@ -308,28 +312,50 @@ export const ActivityDetailsPageContent = ({
               </Typography>
             )}
           </ItemContainer>
-          <AmountContainer emptyAmount={formattedTransferAmount === '-'}>
+          <AmountRowContainer emptyAmount={formattedTransferAmount === '-'}>
             <Typography type="captionRegular" color="contentSecondary">
               <Trans t={t}>Amount</Trans>
             </Typography>
-            <RightAlignedFlexColumn>
-              <Typography type="captionHash">
-                {isPendingStatus(deployInfo.status)
-                  ? `${amount} ${symbol || 'CSPR'}`
-                  : `${formattedTransferAmount} ${
+            <Tooltip
+              overflowWrap
+              placement="topLeft"
+              title={
+                formattedTransferAmount !== '-' &&
+                formattedTransferAmount.length > 18
+                  ? `${formattedTransferAmount} ${
                       formattedTransferAmount !== '-'
                         ? deployInfo.contractPackage?.metadata?.symbol || 'CSPR'
                         : ''
-                    }`}
-              </Typography>
-              {!deployInfo.contractPackage?.metadata?.symbol && (
-                <Typography type="listSubtext" color="contentSecondary">
-                  {transferAmountInUSD}
-                </Typography>
-              )}
-            </RightAlignedFlexColumn>
-          </AmountContainer>
-          <AmountContainer>
+                    }`
+                  : undefined
+              }
+            >
+              <RightAlignedFlexColumn>
+                <AmountContainer>
+                  <Typography type="captionHash" ellipsis>
+                    {isPendingStatus(deployInfo.status)
+                      ? `${amount} ${symbol || 'CSPR'}`
+                      : `${formattedTransferAmount} ${
+                          formattedTransferAmount !== '-'
+                            ? deployInfo.contractPackage?.metadata?.symbol ||
+                              'CSPR'
+                            : ''
+                        }`}
+                  </Typography>
+                </AmountContainer>
+                {!deployInfo.contractPackage?.metadata?.symbol && (
+                  <Typography
+                    type="listSubtext"
+                    color="contentSecondary"
+                    ellipsis
+                  >
+                    {transferAmountInUSD}
+                  </Typography>
+                )}
+              </RightAlignedFlexColumn>
+            </Tooltip>
+          </AmountRowContainer>
+          <AmountRowContainer>
             <Typography type="captionRegular" color="contentSecondary">
               <Trans t={t}>Payment Amount</Trans>
             </Typography>
@@ -349,8 +375,8 @@ export const ActivityDetailsPageContent = ({
                 </>
               )}
             </RightAlignedFlexColumn>
-          </AmountContainer>
-          <AmountContainer>
+          </AmountRowContainer>
+          <AmountRowContainer>
             <Typography type="captionRegular" color="contentSecondary">
               <Trans t={t}>Cost</Trans>
             </Typography>
@@ -368,7 +394,7 @@ export const ActivityDetailsPageContent = ({
                 </>
               )}
             </RightAlignedFlexColumn>
-          </AmountContainer>
+          </AmountRowContainer>
         </RowsContainer>
       </Tile>
     </ContentContainer>

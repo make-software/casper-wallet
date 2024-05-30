@@ -1,12 +1,4 @@
-import {
-  CLKeyParameters,
-  CLPublicKey,
-  CLValueBuilder,
-  DeployUtil,
-  Keys,
-  RuntimeArgs
-} from 'casper-js-sdk';
-import { sub } from 'date-fns';
+import { CLKeyParameters, CLValueBuilder, RuntimeArgs } from 'casper-js-sdk';
 
 import {
   NFT_CEP47_PAYMENT_AMOUNT_AVERAGE_MOTES,
@@ -92,35 +84,4 @@ export const getRuntimeArgs = (
     default:
       throw new Error('Unknown token standard.');
   }
-};
-
-export const signNftDeploy = (
-  runtimeArgs: RuntimeArgs,
-  paymentAmount: string,
-  deploySender: CLPublicKey,
-  networkName: string,
-  contractPackageHash: string,
-  keys: Keys.AsymmetricKey[]
-) => {
-  const hash = Uint8Array.from(Buffer.from(contractPackageHash, 'hex'));
-
-  const deployParams = new DeployUtil.DeployParams(
-    deploySender,
-    networkName,
-    undefined,
-    undefined,
-    undefined,
-    sub(new Date(), { seconds: 2 }).getTime()
-  ); // https://github.com/casper-network/casper-node/issues/4152
-  const session =
-    DeployUtil.ExecutableDeployItem.newStoredVersionContractByHash(
-      hash,
-      null,
-      'transfer',
-      runtimeArgs
-    );
-  const payment = DeployUtil.standardPayment(paymentAmount);
-  const deploy = DeployUtil.makeDeploy(deployParams, session, payment);
-
-  return deploy.sign(keys);
 };

@@ -18,14 +18,23 @@ import {
   Hash,
   HashVariant,
   Tile,
+  Tooltip,
   Typography
 } from '@libs/ui/components';
 
 export const AmountContainer = styled(SpaceBetweenFlexColumn)`
   align-items: flex-end;
+
+  max-width: 120px;
 `;
 
-export const Container = styled(TileContainer)`
+const NameContainer = styled(SpaceBetweenFlexColumn)`
+  align-items: flex-start;
+
+  max-width: 120px;
+`;
+
+const Container = styled(TileContainer)`
   margin-top: 8px;
 `;
 
@@ -60,10 +69,17 @@ export const ActiveAccountPlate = ({
           <SpaceBetweenFlexRow>
             <AlignedFlexRow gap={SpacingSize.Medium}>
               <Avatar publicKey={activeAccount.publicKey} size={24} />
-              <SpaceBetweenFlexColumn>
-                <Typography type="captionMedium">
-                  {activeAccount.name}
-                </Typography>
+              <NameContainer>
+                <Tooltip
+                  title={activeAccount.name}
+                  placement="topLeft"
+                  overflowWrap
+                  fullWidth
+                >
+                  <Typography type="captionMedium" ellipsis>
+                    {activeAccount.name}
+                  </Typography>
+                </Tooltip>
                 <Hash
                   value={activeAccount.publicKey}
                   variant={HashVariant.CaptionHash}
@@ -71,12 +87,21 @@ export const ActiveAccountPlate = ({
                   truncated
                   placement="bottomRight"
                 />
-              </SpaceBetweenFlexColumn>
+              </NameContainer>
             </AlignedFlexRow>
             <AmountContainer>
-              <Typography type="captionHash">
-                {balance == null ? '-' : balance}
-              </Typography>
+              <Tooltip
+                title={
+                  balance != null && balance.length > 9 ? balance : undefined
+                }
+                placement="topLeft"
+                overflowWrap
+                fullWidth
+              >
+                <Typography type="captionHash" ellipsis>
+                  {balance == null ? '-' : balance}
+                </Typography>
+              </Tooltip>
               <Typography type="captionHash" color="contentSecondary">
                 {symbol || '-'}
               </Typography>

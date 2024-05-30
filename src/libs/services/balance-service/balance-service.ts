@@ -3,11 +3,20 @@ import { BALANCE_REFRESH_RATE, CURRENCY_REFRESH_RATE } from '@src/constants';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { serviceMessage } from '@background/service-message';
 
-import { DataResponse, Payload } from '@libs/services/types';
+import {
+  DataResponse,
+  ErrorResponse,
+  PaginatedResponse,
+  Payload
+} from '@libs/services/types';
 
 import { queryClient } from '../query-client';
 import { handleError, toJson } from '../utils';
-import { getAccountBalanceUrl, getCurrencyRateUrl } from './constants';
+import {
+  getAccountBalanceUrl,
+  getAccountBalancesUrl,
+  getCurrencyRateUrl
+} from './constants';
 import {
   AccountData,
   FetchBalanceResponse,
@@ -48,10 +57,34 @@ export const accountBalanceRequest = (
     .catch(handleError);
 };
 
+export const accountBalancesRequest = (
+  accountHashes: string,
+  casperWalletApiUrl: string,
+  signal?: AbortSignal
+): Promise<PaginatedResponse<AccountData> | ErrorResponse> =>
+  fetch(
+    getAccountBalancesUrl({
+      accountHashes,
+      casperWalletApiUrl
+    }),
+    {
+      signal
+    }
+  )
+    .then(toJson)
+    .catch(handleError);
+
 export const dispatchFetchActiveAccountBalance = (
   accountHash = ''
 ): Promise<Payload<FetchBalanceResponse>> =>
   dispatchToMainStore(serviceMessage.fetchBalanceRequest({ accountHash }));
+
+export const dispatchFetchAccountBalances = (
+  accountHashes = ''
+): Promise<Payload<PaginatedResponse<AccountData> | ErrorResponse>> =>
+  dispatchToMainStore(
+    serviceMessage.fetchAccountBalancesRequest({ accountHashes })
+  );
 
 export const fetchAccountBalance = ({
   accountHash,
@@ -79,5 +112,21 @@ export const fetchCurrencyRate = ({
     ({ signal }) => currencyRateRequest(casperClarityApiUrl, signal),
     {
       staleTime: CURRENCY_REFRESH_RATE
+    }
+  );
+
+export const fetchAccountBalances = ({
+  accountHashes,
+  casperWalletApiUrl
+}: {
+  accountHashes: string;
+  casperWalletApiUrl: string;
+}) =>
+  queryClient.fetchQuery(
+    ['getAccountBalancesRequest', accountHashes, casperWalletApiUrl],
+    ({ signal }) =>
+      accountBalancesRequest(accountHashes, casperWalletApiUrl, signal),
+    {
+      staleTime: BALANCE_REFRESH_RATE
     }
   );

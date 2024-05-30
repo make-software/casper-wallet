@@ -59,7 +59,7 @@ export function ImportAccountWithFileUploadPage() {
       )
       .test(
         'fileType',
-        t('Please upload a PEM file containing private key.'),
+        t('Please upload a PEM or CER file containing a private key.'),
         filesArray => {
           if (filesArray != null && filesArray.length > 0) {
             return /\.pem$|\.cer$/.test(filesArray[0].name);

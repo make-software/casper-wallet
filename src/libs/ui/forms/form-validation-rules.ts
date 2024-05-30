@@ -12,7 +12,7 @@ import {
   TRANSFER_COST_MOTES,
   TRANSFER_MIN_AMOUNT_MOTES
 } from '@src/constants';
-import { isValidPublicKey, isValidU64 } from '@src/utils';
+import { isValidPublicKey, isValidSecretKeyHash, isValidU64 } from '@src/utils';
 
 import { loginRetryCountIncremented } from '@background/redux/login-retry-count/actions';
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
@@ -145,7 +145,7 @@ export const useCSPRTransferAmountRule = (amountMotes: string | null) => {
   const maxAmountMotes: string =
     amountMotes == null
       ? '0'
-      : Big(amountMotes).sub(TRANSFER_COST_MOTES).toString();
+      : Big(amountMotes).sub(TRANSFER_COST_MOTES).toFixed();
 
   return Yup.string()
     .required(t('Amount is required'))
@@ -195,7 +195,7 @@ export const useCSPRTransferAmountRule = (amountMotes: string | null) => {
 export const useErc20AmountRule = (amount: string | null) => {
   const { t } = useTranslation();
 
-  const maxAmount: string = amount == null ? '0' : Big(amount).toString();
+  const maxAmount: string = amount == null ? '0' : Big(amount).toFixed();
 
   return Yup.string()
     .required(t('Amount is required'))
@@ -240,7 +240,7 @@ export const usePaymentAmountRule = (csprBalance: string | null) => {
   const { t } = useTranslation();
 
   const maxAmountMotes: string =
-    csprBalance == null ? '0' : Big(csprBalance).toString();
+    csprBalance == null ? '0' : Big(csprBalance).toFixed();
 
   return Yup.string()
     .required(t('Payment amount is required'))
@@ -307,7 +307,7 @@ export const useCSPRStakeAmountRule = (
   const maxAmountMotes: string =
     amountMotes == null
       ? '0'
-      : Big(amountMotes).sub(STAKE_COST_MOTES).toString();
+      : Big(amountMotes).sub(STAKE_COST_MOTES).toFixed();
 
   return Yup.string()
     .required({
@@ -365,12 +365,12 @@ export const useCSPRStakeAmountRule = (
           switch (mode) {
             case AuctionManagerEntryPoint.undelegate: {
               return Big(CSPRtoMotes(csprAmountInputValue)).lte(
-                Big(stakeAmountMotes).sub(getStakeMinAmountMotes()).toString()
+                Big(stakeAmountMotes).sub(getStakeMinAmountMotes()).toFixed()
               );
             }
             case AuctionManagerEntryPoint.redelegate: {
               return Big(CSPRtoMotes(csprAmountInputValue)).lte(
-                Big(stakeAmountMotes).toString()
+                Big(stakeAmountMotes).toFixed()
               );
             }
             case AuctionManagerEntryPoint.delegate:
@@ -494,5 +494,35 @@ export const useContactPublicKeyRule = () => {
       name: 'contactPublicKey',
       test: value => (value ? isValidPublicKey(value) : false),
       message: t('Public address should be a valid public key')
+    });
+};
+
+export const useTorusSecretKeyRule = () => {
+  const { t } = useTranslation();
+
+  return Yup.string()
+    .required(t('Secret key is required'))
+    .test({
+      name: 'secret key',
+      test: value => (value ? isValidSecretKeyHash(value) : false),
+      message: t('This secret key doesn’t look right')
+    });
+};
+
+export const useBuyCSPRKeyRule = () => {
+  const { t } = useTranslation();
+
+  return Yup.string()
+    .required(t('Amount is required'))
+    .test({
+      name: 'validU64',
+      test: csprAmountInputValue => {
+        if (csprAmountInputValue) {
+          return isValidU64(csprAmountInputValue);
+        }
+
+        return false;
+      },
+      message: t(`Amount is invalid`)
     });
 };

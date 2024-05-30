@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { isSafariBuild } from '@src/utils';
+import { isLedgerAvailable, isSafariBuild } from '@src/utils';
 
 import { TimeoutDurationSetting } from '@popup/constants';
-import { RouterPath, useNavigationMenu } from '@popup/router';
+import { RouterPath, useNavigationMenu, useTypedNavigate } from '@popup/router';
 
 import { WindowApp } from '@background/create-open-window';
 import { selectCountOfContacts } from '@background/redux/contacts/selectors';
@@ -20,7 +19,7 @@ import { ThemeMode } from '@background/redux/settings/types';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
   selectCountOfConnectedSites,
-  selectVaultHasImportedAccount
+  selectVaultCountsOfAccounts
 } from '@background/redux/vault/selectors';
 
 import { useWindowManager } from '@hooks/use-window-manager';
@@ -82,14 +81,14 @@ interface MenuGroup {
 }
 
 export function NavigationMenuPageContent() {
-  const navigate = useNavigate();
+  const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
   const timeoutDurationSetting = useSelector(selectTimeoutDurationSetting);
   const countOfConnectedSites = useSelector(selectCountOfConnectedSites);
-  const vaultHasImportedAccount = useSelector(selectVaultHasImportedAccount);
   const countOfContacts = useSelector(selectCountOfContacts);
   const themeMode = useSelector(selectThemeModeSetting);
+  const countOfAccounts = useSelector(selectVaultCountsOfAccounts);
 
   const { openWindow } = useWindowManager();
   const { closeNavigationMenu } = useNavigationMenu();
@@ -121,6 +120,17 @@ export function NavigationMenuPageContent() {
         items: [
           {
             id: 1,
+            title: t('All accounts'),
+            iconPath: 'assets/icons/accounts.svg',
+            currentValue: countOfAccounts,
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.AllAccountsList);
+            }
+          },
+          {
+            id: 2,
             title: t('Create account'),
             iconPath: 'assets/icons/plus.svg',
             disabled: false,
@@ -130,9 +140,9 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 2,
+            id: 3,
             title: t('Import account'),
-            description: t('From Signer secret key file'),
+            description: t('From secret key file'),
             iconPath: 'assets/icons/upload.svg',
             disabled: false,
             handleOnClick: () => {
@@ -142,7 +152,31 @@ export function NavigationMenuPageContent() {
                 isNewWindow: true
               }).catch(e => console.error(e));
             }
-          }
+          },
+          {
+            id: 4,
+            title: t('Import Torus account'),
+            iconPath: 'assets/icons/torus.svg',
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.ImportAccountFromTorus);
+            }
+          },
+          ...(isLedgerAvailable
+            ? [
+                {
+                  id: 5,
+                  title: t('Connect Ledger'),
+                  iconPath: 'assets/icons/ledger-blue.svg',
+                  disabled: false,
+                  handleOnClick: () => {
+                    closeNavigationMenu();
+                    navigate(RouterPath.ImportAccountFromLedger);
+                  }
+                }
+              ]
+            : [])
         ]
       },
       {
@@ -224,14 +258,13 @@ export function NavigationMenuPageContent() {
           {
             id: 4,
             title: t('Download account keys'),
-            description: t('For all accounts imported via file'),
             iconPath: 'assets/icons/download.svg',
-            disabled: !vaultHasImportedAccount,
+            disabled: false,
             // https://github.com/make-software/casper-wallet/issues/611
             hide: isSafariBuild,
             handleOnClick: () => {
               closeNavigationMenu();
-              navigate(RouterPath.DownloadSecretKeys);
+              navigate(RouterPath.DownloadAccountKeys);
             }
           },
           {
@@ -268,11 +301,11 @@ export function NavigationMenuPageContent() {
     ],
     [
       t,
+      countOfAccounts,
       countOfContacts,
       countOfConnectedSites,
-      timeoutDurationSetting,
       themeMode,
-      vaultHasImportedAccount,
+      timeoutDurationSetting,
       closeNavigationMenu,
       navigate,
       openWindow

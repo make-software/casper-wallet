@@ -1,9 +1,13 @@
 import Big from 'big.js';
-import { CLPublicKey } from 'casper-js-sdk';
+import { CLPublicKey, Keys, decodeBase16 } from 'casper-js-sdk';
 import { runtime } from 'webextension-polyfill';
 
 import { Browser, NFT_TOKENS_REFRESH_RATE } from '@src/constants';
 
+import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
+import { dispatchToMainStore } from '@background/redux/utils';
+
+import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import {
   NFTTokenMetadata,
   NFTTokenMetadataEntry,
@@ -31,6 +35,10 @@ export const getUrlOrigin = (url: string | undefined) => {
 export const isSafariBuild = process.env.BROWSER === Browser.Safari;
 export const isFirefoxBuild = process.env.BROWSER === Browser.Firefox;
 export const isChromeBuild = process.env.BROWSER === Browser.Chrome;
+
+export const isLedgerAvailable =
+  process.env.BROWSER === Browser.Chrome ||
+  process.env.BROWSER === Browser.Edge;
 
 export const isValidU64 = (value?: string): boolean => {
   if (!value) {
@@ -100,6 +108,8 @@ export const hashPrefixRegEx = new RegExp(
   'i'
 );
 
+const validHashRegExp = new RegExp('^([0-9A-Fa-f]){64}$');
+
 export interface SplitDataType {
   prefix: string;
   hash: string;
@@ -130,8 +140,31 @@ export const isValidAccountHash = (
     return false;
   }
 
-  const validHashRegExp = new RegExp('^([0-9A-Fa-f]){64}$');
   return validHashRegExp.test(accountHash.trim());
+};
+
+/*
+ * This function checks if the provided secretKey is a valid hash key.
+ * Firstly, it checks if the secretKey is not an empty string.
+ * Then, it tests the secretKey against the defined regular expression using test() method.
+ * If the secretKey passes these checks, it attempts to parse and decode it as a 'raw' type private key.
+ * If no exceptions occur during parsing and decoding, the function returns true indicating the secretKey is valid.
+ * If the secretKey fails any of these checks or an exception is caught during parsing/decoding,
+ * false is returned indicating the secretKey is invalid.
+ */
+export const isValidSecretKeyHash = (secretKey: string) => {
+  if (!secretKey) {
+    return false;
+  }
+  if (!validHashRegExp.test(secretKey.trim())) {
+    return false;
+  }
+  try {
+    Keys.Secp256K1.parsePrivateKey(decodeBase16(secretKey), 'raw');
+    return true;
+  } catch (error) {
+    return false;
+  }
 };
 
 export const mapToDictionary = <T, V extends Record<string, any>>(
@@ -313,6 +346,10 @@ export const findMediaPreview = (metadata: NFTTokenMetadataEntry): boolean => {
 };
 
 export const isEqualCaseInsensitive = (key1: string, key2: string) => {
+  if (!(key1 && key2)) {
+    return false;
+  }
+
   return key1.toLowerCase() === key2.toLowerCase();
 };
 
@@ -334,10 +371,31 @@ export const setCSPForSafari = () => {
       meta.setAttribute('http-equiv', 'Content-Security-Policy');
       meta.setAttribute(
         'content',
-        `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://casper-testnet-node-proxy.make.services/rpc https://casper-node-proxy.make.services/rpc https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/`
+        `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://onramp-api.cspr.click/api/`
       );
 
       document.getElementsByTagName('head')[0].appendChild(meta);
     }
   }
+};
+
+export const fetchAndDispatchExtendedDeployInfo = (deployHash: string) => {
+  let triesLeft = 10;
+
+  const interval = setInterval(async () => {
+    const { payload: extendedDeployInfo } =
+      await dispatchFetchExtendedDeploysInfo(deployHash);
+
+    if (extendedDeployInfo) {
+      dispatchToMainStore(
+        accountPendingTransactionsChanged(extendedDeployInfo)
+      );
+      clearInterval(interval);
+    } else if (triesLeft === 0) {
+      clearInterval(interval);
+    }
+
+    triesLeft--;
+    // Note: this timeout is needed because the deploy is not immediately visible in the explorer
+  }, 2000);
 };

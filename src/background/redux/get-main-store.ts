@@ -54,7 +54,9 @@ export const selectPopupState = (state: RootState): PopupState => {
     recentRecipientPublicKeys: state.recentRecipientPublicKeys,
     accountInfo: state.accountInfo,
     contacts: state.contacts,
-    rateApp: state.rateApp
+    rateApp: state.rateApp,
+    accountBalances: state.accountBalances,
+    ledger: state.ledger
   };
 };
 

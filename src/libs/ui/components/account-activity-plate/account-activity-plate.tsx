@@ -56,6 +56,10 @@ const SymbolContainer = styled(RightAlignedCenteredFlexRow)`
   max-width: 80px;
 `;
 
+const AmountContainer = styled(RightAlignedCenteredFlexRow)`
+  max-width: 120px;
+`;
+
 interface AccountActivityPlateProps {
   transactionInfo: Erc20TransferWithId | ExtendedDeployWithId;
   onClick?: () => void;
@@ -102,22 +106,29 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
         : callerPublicKey;
 
     try {
-      const parsedAmount =
-        ((typeof args?.amount?.parsed === 'string' ||
-          typeof args?.amount?.parsed === 'number') &&
-          args?.amount?.parsed) ||
-        '-';
-
-      if (parsedAmount !== '-') {
-        const stringAmount =
-          typeof parsedAmount === 'number'
-            ? parsedAmount.toString()
-            : parsedAmount;
-
+      if (transactionInfo.amount) {
         amount =
           Number.isInteger(decimals) && decimals !== undefined
-            ? divideErc20Balance(stringAmount, decimals)
-            : motesToCSPR(stringAmount);
+            ? divideErc20Balance(transactionInfo.amount, decimals)
+            : motesToCSPR(transactionInfo.amount);
+      } else {
+        const parsedAmount =
+          ((typeof args?.amount?.parsed === 'string' ||
+            typeof args?.amount?.parsed === 'number') &&
+            args?.amount?.parsed) ||
+          '-';
+
+        if (parsedAmount !== '-') {
+          const stringAmount =
+            typeof parsedAmount === 'number'
+              ? parsedAmount.toString()
+              : parsedAmount;
+
+          amount =
+            Number.isInteger(decimals) && decimals !== undefined
+              ? divideErc20Balance(stringAmount, decimals)
+              : motesToCSPR(stringAmount);
+        }
       }
     } catch (error) {
       console.error(error);
@@ -239,16 +250,24 @@ export const AccountActivityPlate = forwardRef<Ref, AccountActivityPlateProps>(
               </Typography>
               <DeployStatus deployResult={transactionInfo} />
             </AlignedFlexRow>
-            <Typography type="captionHash">
-              {formattedAmount === '-' ? null : (
-                <>
-                  {type === ActivityType.Sent || type === ActivityType.Delegated
-                    ? '-'
-                    : ''}
-                  {formattedAmount}
-                </>
-              )}
-            </Typography>
+            <Tooltip
+              overflowWrap
+              title={formattedAmount.length > 11 ? formattedAmount : undefined}
+            >
+              <AmountContainer>
+                <Typography type="captionHash" ellipsis>
+                  {formattedAmount === '-' ? null : (
+                    <>
+                      {type === ActivityType.Sent ||
+                      type === ActivityType.Delegated
+                        ? '-'
+                        : ''}
+                      {formattedAmount}
+                    </>
+                  )}
+                </Typography>
+              </AmountContainer>
+            </Tooltip>
           </AlignedSpaceBetweenFlexRow>
           <AlignedSpaceBetweenFlexRow>
             <AlignedFlexRow>

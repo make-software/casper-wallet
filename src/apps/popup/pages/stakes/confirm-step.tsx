@@ -53,7 +53,7 @@ export const ConfirmStep = ({
   });
   const totalCSPR: string = Big(inputAmountCSPR)
     .add(transferCostInCSPR)
-    .toString();
+    .toFixed();
 
   const transactionDataRows = [
     {

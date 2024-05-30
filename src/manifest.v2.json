@@ -13,10 +13,11 @@
     "declarativeNetRequest",
     "https://image-proxy-cdn.make.services/*",
     "https://casper-assets.s3.amazonaws.com/*",
-    "https://casper-testnet-node-proxy.make.services/*",
-    "https://casper-node-proxy.make.services/*",
+    "https://node.cspr.cloud/*",
+    "https://node.testnet.cspr.cloud/*",
     "https://api.testnet.casperwallet.io/*",
-    "https://api.mainnet.casperwallet.io/*"
+    "https://api.mainnet.casperwallet.io/*",
+    "https://onramp-api.cspr.click/api/*"
   ],
   "declarative_net_request": {
     "rule_resources": [

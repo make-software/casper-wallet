@@ -28,6 +28,10 @@ import {
   openOnboardingUi
 } from '@background/open-onboarding-flow';
 import {
+  accountBalancesChanged,
+  accountBalancesReseted
+} from '@background/redux/account-balances/actions';
+import {
   accountBalanceChanged,
   accountCasperActivityChanged,
   accountCasperActivityCountChanged,
@@ -60,6 +64,12 @@ import {
   CheckSecretKeyExistAction
 } from '@background/redux/import-account-actions-should-be-removed';
 import {
+  ledgerDeployChanged,
+  ledgerNewWindowIdChanged,
+  ledgerRecipientToSaveOnSuccessChanged,
+  ledgerStateCleared
+} from '@background/redux/ledger/actions';
+import {
   askForReviewAfterChanged,
   ratedInStoreChanged
 } from '@background/redux/rate-app/actions';
@@ -69,10 +79,12 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
+  accountsImported,
   activeAccountChanged,
   anotherAccountConnected,
   deployPayloadReceived,
   deploysReseted,
+  hideAccountFromListChange,
   secretPhraseCreated,
   siteConnected,
   siteDisconnected,
@@ -112,8 +124,14 @@ import { fetchErc20TokenActivity } from '@libs/services/account-activity-service
 import { fetchAccountInfo } from '@libs/services/account-info';
 import {
   fetchAccountBalance,
+  fetchAccountBalances,
   fetchCurrencyRate
 } from '@libs/services/balance-service';
+import {
+  fetchOnRampOptionGet,
+  fetchOnRampOptionPost,
+  fetchOnRampSelectionPost
+} from '@libs/services/buy-cspr-service';
 import { fetchErc20Tokens } from '@libs/services/erc20-service';
 import { fetchNftTokens } from '@libs/services/nft-service';
 import {
@@ -564,10 +582,12 @@ runtime.onMessage.addListener(
           case getType(vaultReseted):
           case getType(secretPhraseCreated):
           case getType(accountImported):
+          case getType(accountsImported):
           case getType(accountAdded):
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeAccountChanged):
+          case getType(hideAccountFromListChange):
           case getType(activeTimeoutDurationSettingChanged):
           case getType(activeNetworkSettingChanged):
           case getType(vaultSettingsReseted):
@@ -620,6 +640,12 @@ runtime.onMessage.addListener(
           case getType(contactsReseted):
           case getType(ratedInStoreChanged):
           case getType(askForReviewAfterChanged):
+          case getType(accountBalancesChanged):
+          case getType(accountBalancesReseted):
+          case getType(ledgerNewWindowIdChanged):
+          case getType(ledgerStateCleared):
+          case getType(ledgerDeployChanged):
+          case getType(ledgerRecipientToSaveOnSuccessChanged):
             store.dispatch(action);
             return sendResponse(undefined);
 
@@ -646,6 +672,27 @@ runtime.onMessage.addListener(
                   accountData: accountData?.data || null,
                   currencyRate: rate?.data || null
                 })
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchAccountBalancesRequest): {
+            const { casperWalletApiUrl } = selectApiConfigBasedOnActiveNetwork(
+              store.getState()
+            );
+
+            try {
+              const data = await fetchAccountBalances({
+                accountHashes: action.payload.accountHashes,
+                casperWalletApiUrl
+              });
+
+              return sendResponse(
+                serviceMessage.fetchAccountBalancesResponse(data)
               );
             } catch (error) {
               console.error(error);
@@ -852,6 +899,48 @@ runtime.onMessage.addListener(
 
               return sendResponse(
                 serviceMessage.fetchValidatorsDetailsDataResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchOnRampGetOptionRequest): {
+            try {
+              const data = await fetchOnRampOptionGet();
+
+              return sendResponse(
+                serviceMessage.fetchOnRampGetOptionResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchOnRampPostOptionRequest): {
+            try {
+              const data = await fetchOnRampOptionPost(action.payload);
+
+              return sendResponse(
+                serviceMessage.fetchOnRampPostOptionResponse(data)
+              );
+            } catch (error) {
+              console.error(error);
+            }
+
+            return;
+          }
+
+          case getType(serviceMessage.fetchOnRampPostSelectionRequest): {
+            try {
+              const data = await fetchOnRampSelectionPost(action.payload);
+
+              return sendResponse(
+                serviceMessage.fetchOnRampPostSelectionResponse(data)
               );
             } catch (error) {
               console.error(error);

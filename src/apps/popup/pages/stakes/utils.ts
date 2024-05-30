@@ -22,6 +22,34 @@ type StakeActionTextMap = Record<
   Omit<StakeTexts, 'amountStepMaxAmountValue'>
 >;
 
+const stakeActionsTextMap: StakeActionTextMap = {
+  [AuctionManagerEntryPoint.delegate]: {
+    validatorStepHeaderText: 'Delegate',
+    amountStepHeaderText: 'Delegate amount',
+    confirmStepHeaderText: 'Confirm delegation',
+    successStepHeaderText: 'You’ve submitted a delegation',
+    amountStepText: 'Delegate max',
+    confirmStepText: 'You’ll delegate'
+  },
+  [AuctionManagerEntryPoint.undelegate]: {
+    validatorStepHeaderText: 'Undelegate',
+    amountStepHeaderText: 'Undelegate amount',
+    confirmStepHeaderText: 'Confirm undelegation',
+    successStepHeaderText: 'You’ve submitted an undelegation',
+    amountStepText: 'Undelegate max:',
+    confirmStepText: 'You’ll undelegate'
+  },
+  [AuctionManagerEntryPoint.redelegate]: {
+    validatorStepHeaderText: 'Redelegate',
+    amountStepHeaderText: 'Redelegate amount',
+    newValidatorStepHeaderText: 'Delegate',
+    confirmStepHeaderText: 'Confirm redelegation',
+    successStepHeaderText: 'You’ve submitted a redelegation',
+    amountStepText: 'Redelegate max:',
+    confirmStepText: 'You’ll redelegate'
+  }
+};
+
 export const useFilteredValidators = (
   inputValue: string | undefined,
   validatorList: ValidatorResultWithId[] | null
@@ -56,34 +84,6 @@ export const useStakeActionTexts = (
   stakesType: AuctionManagerEntryPoint,
   stakeAmountMotes?: string
 ) => {
-  const stakeActionsTextMap: StakeActionTextMap = {
-    [AuctionManagerEntryPoint.delegate]: {
-      validatorStepHeaderText: 'Delegate',
-      amountStepHeaderText: 'Delegate amount',
-      confirmStepHeaderText: 'Confirm delegation',
-      successStepHeaderText: 'You’ve submitted a delegation',
-      amountStepText: 'Delegate max',
-      confirmStepText: 'You’ll delegate'
-    },
-    [AuctionManagerEntryPoint.undelegate]: {
-      validatorStepHeaderText: 'Undelegate',
-      amountStepHeaderText: 'Undelegate amount',
-      confirmStepHeaderText: 'Confirm undelegation',
-      successStepHeaderText: 'You’ve submitted an undelegation',
-      amountStepText: 'Undelegate max:',
-      confirmStepText: 'You’ll undelegate'
-    },
-    [AuctionManagerEntryPoint.redelegate]: {
-      validatorStepHeaderText: 'Redelegate',
-      amountStepHeaderText: 'Redelegate amount',
-      newValidatorStepHeaderText: 'Delegate',
-      confirmStepHeaderText: 'Confirm redelegation',
-      successStepHeaderText: 'You’ve submitted a redelegation',
-      amountStepText: 'Redelegate max:',
-      confirmStepText: 'You’ll redelegate'
-    }
-  };
-
   const [state, setState] = useState<StakeTexts>({
     ...stakeActionsTextMap[stakesType],
     amountStepMaxAmountValue: null
@@ -94,13 +94,13 @@ export const useStakeActionTexts = (
       stakeAmountMotes &&
       formatNumber(motesToCSPR(stakeAmountMotes), { precision: { max: 4 } });
 
-    setState(prevState => ({
-      ...prevState,
+    setState({
+      ...stakeActionsTextMap[stakesType],
       amountStepMaxAmountValue:
         stakesType !== AuctionManagerEntryPoint.delegate
           ? `${formattedAmountCSPR} CSPR`
           : null
-    }));
+    });
   }, [stakeAmountMotes, stakesType]);
 
   return state;

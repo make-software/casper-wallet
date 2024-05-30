@@ -1,14 +1,9 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { tabs } from 'webextension-polyfill';
 
-import {
-  HomePageTabName,
-  NetworkSetting,
-  getBuyWithTopperUrl
-} from '@src/constants';
+import { HomePageTabName, NetworkSetting } from '@src/constants';
 
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
@@ -83,15 +78,6 @@ export function HomePageContent() {
 
   const casperToken = useCasperToken();
 
-  const handleBuyWithCSPR = useCallback(() => {
-    if (activeAccount?.publicKey && network === NetworkSetting.Mainnet) {
-      tabs.create({
-        url: getBuyWithTopperUrl(activeAccount.publicKey),
-        active: true
-      });
-    }
-  }, [activeAccount?.publicKey, network]);
-
   useEffect(() => {
     if (!state?.activeTabId) {
       const container = document.querySelector('#ms-container');
@@ -133,7 +119,7 @@ export function HomePageContent() {
               {network === NetworkSetting.Mainnet && (
                 <ButtonContainer
                   gap={SpacingSize.Small}
-                  onClick={handleBuyWithCSPR}
+                  onClick={() => navigate(RouterPath.BuyCSPR)}
                 >
                   <Button circle>
                     <SvgIcon
@@ -172,7 +158,7 @@ export function HomePageContent() {
                   <Trans t={t}>Send</Trans>
                 </Typography>
               </ButtonContainer>
-              <MoreButtonsModal handleBuyWithCSPR={handleBuyWithCSPR} />
+              <MoreButtonsModal />
             </ButtonsContainer>
           </TileContainer>
         </Tile>

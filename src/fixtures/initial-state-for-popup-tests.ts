@@ -54,13 +54,15 @@ export const initialStateForPopupTests: RootState = {
         publicKey:
           '0202b1943511b8c23b1b2b8ed7ddcedffcc7be70d9366a5005c7beab08a81b7ae633',
         secretKey: 'Go8sSp3u/hSaDFCjFK6wdM4VZuWjqxEaNB38RaZHLA0=',
-        name: 'Account 1'
+        name: 'Account 1',
+        hidden: false
       },
       {
         publicKey:
           '0203b2e05f074452f5e69ba512310deceaca152ebd3394eadcec26c6e68e91aa7724',
         secretKey: 'TCDeehVWtWeWP2PM/UKh2gQ6hgUpZ6v1D6lzmonYpm4=',
-        name: 'Account 2'
+        name: 'Account 2',
+        hidden: false
       }
     ],
     accountNamesByOriginDict: {},
@@ -70,6 +72,11 @@ export const initialStateForPopupTests: RootState = {
   },
   windowManagement: {
     windowId: null
+  },
+  ledger: {
+    windowId: null,
+    deploy: null,
+    recipientToSaveOnSuccess: null
   },
   vaultCipher:
     'G89IRk1Zc+l46uPzkhTwSy09IUM5Q4R1JoIfOCeyMZEn47OnFK7Rk1fSPJ9gsSVsiq+d00AqKuW/lTV+s1OTGOucftVqKBF6XSyR9tG7P2sgRyJ6o5vS/h+tVSyqHt6wHFuTcee1IResAfxPJEjiKbMMm7gN1eFosvqM8utdBOgIkR17+HiojfvdI0Q07kWZXy0SuUceSxnXGHZU2LdMikZI2JmkaEgk+Qgm/nNzqlN2hAKxQRhr+68opUiIN/lpOYPLS64nZou6vuqSKu+Uogd8znNZOcFA+4+1zXlbJEp8HksSqy+fblAxDALpauljIogoPfwLIaSPU1GSwTfG63yuCiMVlAE+FwOAt31J+m0N++obOTomfp6ZjN0uOG700Kfm5NSWMMXqCp/f/M8C466/ONqsl0og/R1KXOw0nPYybzmgXCyS35yZyOXmxzKrKtXRdYVTBz79pjMbR8p1CCDnVLHJyKKIGbsGrX3ADjwkJHmBEjGPL2Qb4Ez7ATzcQ/XEdcK+VfzbNkJivssPMBV+6ETNWrwPbIR4BxfN12TbmdAej7nbP+oaM1plKhcoW1hp0oD60Ngwh8D1ztD9i+3R9yDGVNwjh56ytvk5E1Fo7e02NYBJgjvHFoBz+fX4iHlliHczRRVC3OVceZcPPMCeVuigkz7wirqscxBfnrc+EBXrziOrEc4NobSKJI33UEZAMLjxLZSD8CR9J9RrJzFCrda44P65uSypiSyw49EPdsG4etW9Eop2iHNO5Ny7oCr7mITsFvFkGtXDh+tQ4r6D4b7ZGe2AD2Jm/4t9jcBsPO3wHxPfS7eIHq8RUJZUK7DL90s8gt0wXzIFgIeMIc+mcK0HigU+zYaBHO9O+PUfetEHZANmSwsRu3nmiHogEZaPJAT+ATY3+3GjNMQ=',
@@ -110,5 +117,6 @@ export const initialStateForPopupTests: RootState = {
   rateApp: {
     ratedInStore: false,
     askForReviewAfter: null
-  }
+  },
+  accountBalances: []
 };
