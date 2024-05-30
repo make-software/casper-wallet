@@ -1,43 +1,44 @@
 import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { WindowApp, useWindowManager } from '@src/hooks';
+import { isLedgerAvailable, isSafariBuild } from '@src/utils';
 
-import { RouterPath, useNavigationMenu } from '@src/apps/popup/router';
+import { TimeoutDurationSetting } from '@popup/constants';
+import { RouterPath, useNavigationMenu, useTypedNavigate } from '@popup/router';
 
-import {
-  ContentContainer,
-  ListItemClickableContainer as BaseListItemClickableContainer,
-  FlexColumn,
-  SpaceBetweenFlexRow,
-  SpacingSize
-} from '@src/libs/layout';
-import {
-  SvgIcon,
-  Typography,
-  List,
-  Link,
-  Modal,
-  ThemeSwitcher
-} from '@src/libs/ui';
-
-import {
-  selectCountOfConnectedSites,
-  selectVaultHasImportedAccount
-} from '@src/background/redux/vault/selectors';
+import { WindowApp } from '@background/create-open-window';
+import { selectCountOfContacts } from '@background/redux/contacts/selectors';
+import { lockVault } from '@background/redux/sagas/actions';
 import {
   selectThemeModeSetting,
   selectTimeoutDurationSetting
-} from '@src/background/redux/settings/selectors';
-import { dispatchToMainStore } from '@src/background/redux/utils';
-import { lockVault } from '@src/background/redux/sagas/actions';
-import { TimeoutDurationSetting } from '@popup/constants';
-import { isSafariBuild } from '@src/utils';
-import { selectCountOfContacts } from '@background/redux/contacts/selectors';
+} from '@background/redux/settings/selectors';
 import { ThemeMode } from '@background/redux/settings/types';
+import { dispatchToMainStore } from '@background/redux/utils';
+import {
+  selectCountOfConnectedSites,
+  selectVaultCountsOfAccounts
+} from '@background/redux/vault/selectors';
+
+import { useWindowManager } from '@hooks/use-window-manager';
+
+import {
+  ListItemClickableContainer as BaseListItemClickableContainer,
+  ContentContainer,
+  FlexColumn,
+  SpaceBetweenFlexRow,
+  SpacingSize
+} from '@libs/layout';
+import {
+  Link,
+  List,
+  Modal,
+  SvgIcon,
+  ThemeSwitcher,
+  Typography
+} from '@libs/ui/components';
 
 interface ListItemClickableContainerProps {
   disabled: boolean;
@@ -80,14 +81,14 @@ interface MenuGroup {
 }
 
 export function NavigationMenuPageContent() {
-  const navigate = useNavigate();
+  const navigate = useTypedNavigate();
   const { t } = useTranslation();
 
   const timeoutDurationSetting = useSelector(selectTimeoutDurationSetting);
   const countOfConnectedSites = useSelector(selectCountOfConnectedSites);
-  const vaultHasImportedAccount = useSelector(selectVaultHasImportedAccount);
   const countOfContacts = useSelector(selectCountOfContacts);
   const themeMode = useSelector(selectThemeModeSetting);
+  const countOfAccounts = useSelector(selectVaultCountsOfAccounts);
 
   const { openWindow } = useWindowManager();
   const { closeNavigationMenu } = useNavigationMenu();
@@ -119,6 +120,17 @@ export function NavigationMenuPageContent() {
         items: [
           {
             id: 1,
+            title: t('All accounts'),
+            iconPath: 'assets/icons/accounts.svg',
+            currentValue: countOfAccounts,
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.AllAccountsList);
+            }
+          },
+          {
+            id: 2,
             title: t('Create account'),
             iconPath: 'assets/icons/plus.svg',
             disabled: false,
@@ -128,9 +140,9 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 2,
+            id: 3,
             title: t('Import account'),
-            description: t('From Signer secret key file'),
+            description: t('From secret key file'),
             iconPath: 'assets/icons/upload.svg',
             disabled: false,
             handleOnClick: () => {
@@ -140,7 +152,31 @@ export function NavigationMenuPageContent() {
                 isNewWindow: true
               }).catch(e => console.error(e));
             }
-          }
+          },
+          {
+            id: 4,
+            title: t('Import Torus account'),
+            iconPath: 'assets/icons/torus.svg',
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.ImportAccountFromTorus);
+            }
+          },
+          ...(isLedgerAvailable
+            ? [
+                {
+                  id: 5,
+                  title: t('Connect Ledger'),
+                  iconPath: 'assets/icons/ledger-blue.svg',
+                  disabled: false,
+                  handleOnClick: () => {
+                    closeNavigationMenu();
+                    navigate(RouterPath.ImportAccountFromLedger);
+                  }
+                }
+              ]
+            : [])
         ]
       },
       {
@@ -170,17 +206,6 @@ export function NavigationMenuPageContent() {
           },
           {
             id: 3,
-            title: t('Timeout'),
-            iconPath: 'assets/icons/lock.svg',
-            currentValue: TimeoutDurationSetting[timeoutDurationSetting],
-            disabled: false,
-            handleOnClick: () => {
-              closeNavigationMenu();
-              navigate(RouterPath.Timeout);
-            }
-          },
-          {
-            id: 4,
             title: t('Theme'),
             iconPath:
               themeMode === ThemeMode.SYSTEM
@@ -199,6 +224,17 @@ export function NavigationMenuPageContent() {
         items: [
           {
             id: 1,
+            title: t('Timeout'),
+            iconPath: 'assets/icons/lock.svg',
+            currentValue: TimeoutDurationSetting[timeoutDurationSetting],
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.Timeout);
+            }
+          },
+          {
+            id: 2,
             title: t('Back up your secret recovery phrase'),
             iconPath: 'assets/icons/secure.svg',
             disabled: false,
@@ -208,7 +244,7 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 2,
+            id: 3,
             title: t('Generate wallet QR code'),
             description: t('Scan to import your wallet on mobile'),
             iconPath: 'assets/icons/qr.svg',
@@ -220,20 +256,19 @@ export function NavigationMenuPageContent() {
             }
           },
           {
-            id: 3,
+            id: 4,
             title: t('Download account keys'),
-            description: t('For all accounts imported via file'),
             iconPath: 'assets/icons/download.svg',
-            disabled: !vaultHasImportedAccount,
+            disabled: false,
             // https://github.com/make-software/casper-wallet/issues/611
             hide: isSafariBuild,
             handleOnClick: () => {
               closeNavigationMenu();
-              navigate(RouterPath.DownloadSecretKeys);
+              navigate(RouterPath.DownloadAccountKeys);
             }
           },
           {
-            id: 4,
+            id: 5,
             title: t('Change Password'),
             iconPath: 'assets/icons/secure.svg',
             disabled: false,
@@ -266,11 +301,11 @@ export function NavigationMenuPageContent() {
     ],
     [
       t,
+      countOfAccounts,
       countOfContacts,
       countOfConnectedSites,
-      timeoutDurationSetting,
       themeMode,
-      vaultHasImportedAccount,
+      timeoutDurationSetting,
       closeNavigationMenu,
       navigate,
       openWindow

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
-import { BaseProps } from '../../types';
-import { useClickAway } from '../../hooks/use-click-away';
+import { useClickAway } from '@hooks/use-click-away';
+
+import { BaseProps } from '@libs/ui/types';
 
 export interface AccordionProps extends BaseProps {
   children: (renderProps: RenderProps) => React.ReactNode | string;
@@ -16,7 +17,7 @@ interface RenderProps {
 
 const AccordionContainer = styled.div<{
   isOpen: boolean;
-}>(({ isOpen }) => ({
+}>(() => ({
   display: 'flex',
   flexDirection: 'column',
 

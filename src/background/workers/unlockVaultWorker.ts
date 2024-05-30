@@ -1,10 +1,11 @@
+import { VaultCipherState } from '@background/redux/vault-cipher/types';
+
 import {
   deriveEncryptionKey,
   generateRandomSaltHex
 } from '@libs/crypto/hashing';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import { decryptVault, encryptVault } from '@libs/crypto/vault';
-import { VaultCipherState } from '@background/redux/vault-cipher/types';
 
 /**
  * on unlock decrypt stored vault from cipher

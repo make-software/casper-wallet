@@ -1,20 +1,21 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+
+import { selectSecretPhrase } from '@background/redux/vault/selectors';
 
 import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize,
   VerticalSpaceContainer
-} from '@src/libs/layout';
+} from '@libs/layout';
 import {
-  Typography,
-  SecretPhraseWordsView,
   CopySecretPhraseBar,
-  TextList
-} from '@src/libs/ui';
-import { selectSecretPhrase } from '@src/background/redux/vault/selectors';
+  SecretPhraseWordsView,
+  TextList,
+  Typography
+} from '@libs/ui/components';
 
 export function BackupSecretPhrasePageContent() {
   const { t } = useTranslation();
@@ -30,11 +31,8 @@ export function BackupSecretPhrasePageContent() {
     { key: 2, value: t('Never share the phrase with anyone.') },
     {
       key: 3,
-      value: (
-        <Trans>
-          Be careful of phishing! Casper Wallet will never spontaneously ask you
-          for your secret recovery phrase.
-        </Trans>
+      value: t(
+        'Be careful of phishing! Casper Wallet will never spontaneously ask you for your secret recovery phrase.'
       )
     },
     {

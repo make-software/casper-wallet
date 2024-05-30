@@ -1,16 +1,16 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
+
+import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
   ContentContainer,
+  FooterButtonsAbsoluteContainer,
   IllustrationContainer,
   ParagraphContainer,
-  FooterButtonsAbsoluteContainer,
   SpacingSize
-} from '@src/libs/layout';
-import { Typography, Button, SvgIcon } from '@libs/ui';
-
-import { useTypedNavigate, RouterPath } from '@popup/router';
+} from '@libs/layout';
+import { Button, SvgIcon, Typography } from '@libs/ui/components';
 
 export function NoConnectedAccountPageContent() {
   const navigate = useTypedNavigate();

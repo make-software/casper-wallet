@@ -1,12 +1,11 @@
 import * as Yup from 'yup';
-import { useForm } from 'react-hook-form';
-import { UseFormProps } from 'react-hook-form/dist/types/form';
+import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
+import { UseFormProps, useForm } from 'react-hook-form';
 
 import {
   useContactNameRule,
   useContactPublicKeyRule
 } from '@libs/ui/forms/form-validation-rules';
-import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 
 export type ContactFromValues = {
   name: string;

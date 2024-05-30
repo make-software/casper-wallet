@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 import { FieldErrors, UseFormRegister } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { InputsContainer, ParagraphContainer, SpacingSize } from '@libs/layout';
 import {
   Input,
   InputValidationType,
   PasswordInputType,
   PasswordVisibilityIcon,
   Typography
-} from '@libs/ui';
-import { InputsContainer, ParagraphContainer, SpacingSize } from '@libs/layout';
+} from '@libs/ui/components';
 import { CreatePasswordFormValues } from '@libs/ui/forms/create-password';
 import { minPasswordLength } from '@libs/ui/forms/form-validation-rules';
 
@@ -37,20 +37,25 @@ export const PasswordInputs = ({
       <ParagraphContainer top={SpacingSize.Medium}>
         <Typography type="body" color="contentSecondary">
           {needToAddMoreCharacters <= 0 ? (
-            <Trans t={t}>
-              Your password length is -{' '}
-              <Typography type="bodySemiBold" color="contentPrimary">
-                {{ passwordLength }} characters.
-              </Typography>
-            </Trans>
+            <Trans
+              // spase at the end required to prevent error on browser auto-translate
+              defaults="Your password length is - <t><nt> {{passwordLength}} </nt> characters.</t> "
+              values={{ passwordLength }}
+              components={{
+                t: <Typography type="bodySemiBold" color="contentPrimary" />,
+                nt: <span translate="no" />
+              }}
+            />
           ) : (
-            <Trans t={t}>
-              You need to add at least{' '}
-              <Typography type="bodySemiBold" color="contentPrimary">
-                {{ needToAddMoreCharacters }} characters
-              </Typography>{' '}
-              more.
-            </Trans>
+            <Trans
+              t={t}
+              defaults="You need to add at least <t><nt> {{needToAddMoreCharacters}} </nt> characters</t> more"
+              values={{ needToAddMoreCharacters }}
+              components={{
+                t: <Typography type="bodySemiBold" color="contentPrimary" />,
+                nt: <span translate="no" />
+              }}
+            />
           )}
         </Typography>
       </ParagraphContainer>

@@ -1,5 +1,5 @@
-import { deriveKeyPair } from './bip32';
 import { FIXED_PUBLIC_KEY_0, FIXED_SECRET_PHRASE } from './__fixtures';
+import { deriveKeyPair } from './bip32';
 
 describe('bip32', () => {
   it('should derive the same key as ledger from the same mnomonic phrase', () => {

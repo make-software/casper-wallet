@@ -1,7 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Typography, BaseProps } from '@src/libs/ui';
+
 import { FlexColumn } from '@libs/layout';
+import { Typography } from '@libs/ui/components';
+import { BaseProps } from '@libs/ui/types';
 
 export enum FormFieldStatus {
   Error = 'error',
@@ -55,7 +57,11 @@ export function FormField({
     <FlexColumn {...restProps}>
       <LabelContainer>
         {label && <Typography type="bodySemiBold">{label}</Typography>}
-        {rightLabel && <Typography type="body">{rightLabel}</Typography>}
+        {rightLabel && (
+          <Typography type="captionRegular" color="contentSecondary">
+            {rightLabel}
+          </Typography>
+        )}
       </LabelContainer>
 
       {children}

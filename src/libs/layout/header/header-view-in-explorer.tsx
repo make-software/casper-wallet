@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { Link, SvgIcon, Typography } from '@libs/ui';
-import { AlignedFlexRow, CenteredFlexColumn, SpacingSize } from '@libs/layout';
 import {
   getBlockExplorerAccountUrl,
   getBlockExplorerContractUrl,
   getBlockExplorerDeployUrl,
   getContractNftUrl
 } from '@src/constants';
-import { useCasperToken } from '@src/hooks';
+
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { useCasperToken } from '@hooks/use-casper-token';
+
+import { AlignedFlexRow, CenteredFlexColumn, SpacingSize } from '@libs/layout';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
+import { Link, SvgIcon, Typography } from '@libs/ui/components';
 
 interface HeaderViewInExplorerProps {
   tokenName?: string;

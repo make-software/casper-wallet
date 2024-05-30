@@ -1,4 +1,5 @@
 import { useLocation } from 'react-router-dom';
+
 import { LocationState } from './types';
 
 export function useTypedLocation() {

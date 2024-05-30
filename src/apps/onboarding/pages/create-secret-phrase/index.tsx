@@ -1,20 +1,22 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Stepper } from '@onboarding/components/stepper';
+import { RouterPath } from '@onboarding/router';
+import { useTypedNavigate } from '@onboarding/router/use-typed-navigate';
+
+import { resetVault } from '@background/redux/sagas/actions';
+import { dispatchToMainStore } from '@background/redux/utils';
+
 import {
   HeaderSubmenuBarNavLink,
   LayoutTab,
   TabFooterContainer,
   TabHeaderContainer
 } from '@libs/layout';
-import { Button } from '@libs/ui';
-import { Stepper } from '@src/apps/onboarding/components/stepper';
-import { RouterPath } from '@src/apps/onboarding/router';
-import { useTypedNavigate } from '@src/apps/onboarding/router/use-typed-navigate';
-import { dispatchToMainStore } from '@src/background/redux/utils';
+import { Button } from '@libs/ui/components';
 
 import { CreateSecretPhraseContent } from './content';
-import { resetVault } from '@src/background/redux/sagas/actions';
 
 export function CreateSecretPhrasePage() {
   const navigate = useTypedNavigate();

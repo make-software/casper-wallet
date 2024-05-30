@@ -12,8 +12,7 @@ export enum RouterPath {
   ConnectAnotherAccountByParams = '/connect-another-account/:targetAccountName',
   ConnectedSites = '/connected-sites',
   BackupSecretPhrase = '/backup-secret-phrase',
-  DownloadSecretKeys = '/download-secret-keys',
-  DownloadedSecretKeys = '/downloaded-secret-keys',
+  DownloadAccountKeys = '/download-account-keys',
   Transfer = '/transfer/:tokenContractPackageHash/:tokenContractHash',
   TransferNoParams = '/transfer',
   ActivityDetails = '/activity-details',
@@ -25,7 +24,14 @@ export enum RouterPath {
   ChangePassword = '/change-password',
   Delegate = '/delegate',
   Undelegate = '/undelegate',
+  Redelegate = '/redelegate',
   ContactList = '/contact-list',
   AddContact = '/add-contact',
-  ContactDetails = '/contact-list/:contactName'
+  ContactDetails = '/contact-list/:contactName',
+  RateApp = '/rate-app',
+  AllAccountsList = '/accounts-list',
+  ImportAccountFromTorus = '/import-account-from-torus',
+  BuyCSPR = '/buy-cspr',
+  ImportAccountFromLedger = '/import-account-from-ledger',
+  SignWithLedgerInNewWindow = '/sign-with-ledger-in-new-window'
 }

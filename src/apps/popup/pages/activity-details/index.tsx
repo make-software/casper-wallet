@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
 
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
+
 import {
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
   HeaderViewInExplorer,
-  PopupHeader,
   PopupLayout
 } from '@libs/layout';
-import { HomePageTabsId } from '@libs/ui';
-import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import {
-  dispatchFetchExtendedDeploysInfo,
-  ExtendedDeploy
+  ExtendedDeploy,
+  dispatchFetchExtendedDeploysInfo
 } from '@libs/services/account-activity-service';
+import { HomePageTabsId } from '@libs/ui/components';
 
 import { ActivityDetailsPageContent } from './content';
 
@@ -42,7 +43,7 @@ export const ActivityDetailsPage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

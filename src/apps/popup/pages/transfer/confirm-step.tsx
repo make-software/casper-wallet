@@ -1,8 +1,12 @@
+import Big from 'big.js';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import Big from 'big.js';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+
+import { TRANSFER_COST_MOTES } from '@src/constants';
+
+import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 
 import {
   ContentContainer,
@@ -17,14 +21,8 @@ import {
   List,
   RecipientPlate,
   Typography
-} from '@libs/ui';
-import {
-  formatFiatAmount,
-  formatNumber,
-  motesToCSPR
-} from '@libs/ui/utils/formatters';
-import { TRANSFER_COST_MOTES } from '@src/constants';
-import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
+} from '@libs/ui/components';
+import { formatFiatAmount, formatNumber, motesToCSPR } from '@libs/ui/utils';
 
 export const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;
@@ -57,7 +55,7 @@ export const ConfirmStep = ({
     const transferCostInCSPR = formatNumber(motesToCSPR(TRANSFER_COST_MOTES), {
       precision: { max: 5 }
     });
-    const totalCSPR: string = Big(amount).add(transferCostInCSPR).toString();
+    const totalCSPR: string = Big(amount).add(transferCostInCSPR).toFixed();
 
     transactionDataRows = [
       {

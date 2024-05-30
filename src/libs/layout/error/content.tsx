@@ -1,14 +1,14 @@
 import React from 'react';
 
 import {
-  PageContainer,
   ContentContainer,
   IllustrationContainer,
   OnboardingIllustrationContainer,
+  PageContainer,
   ParagraphContainer,
   SpacingSize
-} from '@src/libs/layout';
-import { SvgIcon, Typography } from '@src/libs/ui';
+} from '@libs/layout';
+import { SvgIcon, Typography } from '@libs/ui/components';
 
 import { ErrorContent } from './types';
 

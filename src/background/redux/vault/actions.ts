@@ -1,6 +1,9 @@
 import { createAction } from 'typesafe-actions';
-import { Account, VaultState } from '@src/background/redux/vault/types';
-import { SecretPhrase } from '@src/libs/crypto';
+
+import { VaultState } from '@background/redux/vault/types';
+
+import { SecretPhrase } from '@libs/crypto';
+import { Account } from '@libs/types/account';
 
 export const vaultReseted = createAction('VAULT_RESETED')<void>();
 
@@ -11,10 +14,15 @@ export const secretPhraseCreated = createAction(
 )<SecretPhrase>();
 
 export const accountImported = createAction('ACCOUNT_IMPORTED')<Account>();
+
 export const accountAdded = createAction('ACCOUNT_ADDED')<Account>();
+
+export const accountsImported = createAction('ACCOUNTS_IMPORTED')<Account[]>();
+
 export const accountRemoved = createAction('ACCOUNT_REMOVED')<{
   accountName: string;
 }>();
+
 export const accountRenamed = createAction('ACCOUNT_RENAMED')<{
   oldName: string;
   newName: string;
@@ -51,4 +59,10 @@ export const deploysReseted = createAction('DEPLOYS_RESETED')<void>();
 export const deployPayloadReceived = createAction('DEPLOY_PAYLOAD_RECEIVED')<{
   id: string;
   json: string;
+}>();
+
+export const hideAccountFromListChange = createAction(
+  'HIDE_ACCOUNT_FROM_LIST_CHANGE'
+)<{
+  accountName: string;
 }>();

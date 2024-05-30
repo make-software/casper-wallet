@@ -1,15 +1,22 @@
 import React from 'react';
-import styled from 'styled-components';
 import { Trans, useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+
+import { Contact } from '@background/redux/contacts/types';
 
 import {
   ContentContainer,
   LeftAlignedFlexColumn,
   SpacingSize
 } from '@libs/layout';
-import { Avatar, Hash, HashVariant, Tile, Typography } from '@libs/ui';
-import { formatShortTimestamp } from '@libs/ui/utils/formatters';
-import { Contact } from '@background/redux/contacts/types';
+import {
+  Avatar,
+  Hash,
+  HashVariant,
+  Tile,
+  Typography
+} from '@libs/ui/components';
+import { formatShortTimestamp } from '@libs/ui/utils';
 
 const Container = styled(LeftAlignedFlexColumn)`
   margin-top: 24px;
@@ -29,7 +36,7 @@ export const ContactDetails = ({ contact }: ContactDetailsProps) => {
     <ContentContainer>
       <Tile>
         <Container>
-          <Avatar publicKey={contact.publicKey} size={89} />
+          <Avatar publicKey={contact.publicKey} size={88} borderRadius={12} />
           <LeftAlignedFlexColumn gap={SpacingSize.Large}>
             <Typography type="header">{contact.name}</Typography>
             <Hash

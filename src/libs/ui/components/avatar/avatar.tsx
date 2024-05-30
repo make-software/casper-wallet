@@ -1,45 +1,17 @@
-import Identicon from 'react-identicons';
 import React from 'react';
 import styled, { DefaultTheme, useTheme } from 'styled-components';
-import { useSelector } from 'react-redux';
+
+import { isValidAccountHash, isValidPublicKey } from '@src/utils';
+
+import { useIsDarkMode } from '@hooks/use-is-dark-mode';
 
 import {
-  SpacingSize,
-  AvatarContainer,
   AlignedFlexRow,
-  CenteredFlexRow
+  AvatarContainer,
+  CenteredFlexRow,
+  SpacingSize
 } from '@libs/layout';
-import { isValidAccountHash, isValidPublicKey } from '@src/utils';
-import { SvgIcon } from '@libs/ui';
-import { selectThemeModeSetting } from '@background/redux/settings/selectors';
-import { ThemeMode } from '@background/redux/settings/types';
-import { useSystemThemeDetector } from '@src/hooks';
-
-const RoundedIdenticon = styled(Identicon)(
-  ({
-    theme,
-    displayContext,
-    isActiveAccount,
-    isConnected
-  }: {
-    theme: DefaultTheme;
-    displayContext?: 'header' | 'accountList';
-    isActiveAccount?: boolean;
-    isConnected?: boolean;
-  }) => ({
-    borderRadius: theme.borderRadius.base,
-
-    ...(displayContext === 'accountList' && {
-      border: isActiveAccount
-        ? `3px solid ${
-            isConnected
-              ? theme.color.contentPositive
-              : theme.color.contentDisabled
-          }`
-        : `3px solid ${theme.color.backgroundPrimary}`
-    })
-  })
-);
+import { Identicon, SvgIcon } from '@libs/ui/components';
 
 const IconHashWrapper = styled(CenteredFlexRow)(({ theme }) => ({
   color: theme.color.contentOnFill,
@@ -68,6 +40,7 @@ interface AvatarTypes {
   isConnected?: boolean;
   displayContext?: 'header' | 'accountList';
   isActiveAccount?: boolean;
+  borderRadius?: number;
 }
 
 export const Avatar = ({
@@ -77,18 +50,12 @@ export const Avatar = ({
   withConnectedStatus,
   isConnected,
   displayContext,
-  isActiveAccount
+  isActiveAccount,
+  borderRadius
 }: AvatarTypes) => {
   const theme = useTheme();
 
-  const themeMode = useSelector(selectThemeModeSetting);
-
-  const isSystemDarkTheme = useSystemThemeDetector();
-
-  const isDarkMode =
-    themeMode === ThemeMode.SYSTEM
-      ? isSystemDarkTheme
-      : themeMode === ThemeMode.DARK;
+  const isDarkMode = useIsDarkMode();
 
   const connectIcon = isDarkMode
     ? displayContext === 'header'
@@ -101,13 +68,14 @@ export const Avatar = ({
   if (withConnectedStatus && isConnected !== undefined) {
     return (
       <ConnectionStatusBadgeContainer>
-        <RoundedIdenticon
-          string={publicKey}
+        <Identicon
+          value={publicKey}
           size={size}
-          bg={theme.color.contentOnFill}
+          background={theme.color.contentOnFill}
           displayContext={displayContext}
           isActiveAccount={isActiveAccount}
           isConnected={isConnected}
+          borderRadius={borderRadius}
         />
         <SvgIcon
           src={connectIcon}
@@ -140,11 +108,11 @@ export const Avatar = ({
   if (isValidPublicKey(publicKey)) {
     return (
       <AvatarContainer top={top}>
-        <RoundedIdenticon
-          string={publicKey}
+        <Identicon
+          value={publicKey}
           size={size}
-          bg={theme.color.contentOnFill}
-          isDarkMode={isDarkMode}
+          background={theme.color.contentOnFill}
+          borderRadius={borderRadius}
         />
       </AvatarContainer>
     );

@@ -1,8 +1,19 @@
+import { QRCodeSVG } from 'qrcode.react';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { QRCodeSVG } from 'qrcode.react';
+
+import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
+import { useTypedLocation } from '@popup/router';
+
+import {
+  selectAccountBalance,
+  selectErc20Tokens
+} from '@background/redux/account-info/selectors';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { useCopyToClipboard } from '@hooks/use-copy-to-clipboard';
 
 import {
   ContentContainer,
@@ -11,16 +22,8 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Tile, Typography, ActiveAccountPlate } from '@libs/ui';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import { useCopyToClipboard } from '@src/hooks';
-import { useTypedLocation } from '@popup/router';
-import {
-  selectAccountBalance,
-  selectErc20Tokens
-} from '@background/redux/account-info/selectors';
-import { motesToCSPR } from '@libs/ui/utils/formatters';
-import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
+import { ActiveAccountPlate, Tile, Typography } from '@libs/ui/components';
+import { motesToCSPR } from '@libs/ui/utils';
 
 const Container = styled.div`
   padding: 20px 16px;
@@ -60,7 +63,7 @@ export const ReceivePageContent = () => {
   useEffect(() => {
     if (tokenData?.symbol === 'CSPR') {
       const balance =
-        (csprBalance.amountMotes && motesToCSPR(csprBalance.amountMotes)) ||
+        (csprBalance.liquidMotes && motesToCSPR(csprBalance.liquidMotes)) ||
         '0';
       setTokenData(prev => ({ ...prev, balance }));
     } else {
@@ -69,7 +72,7 @@ export const ReceivePageContent = () => {
         erc20Tokens?.find(t => t?.symbol === tokenData?.symbol)?.amount ?? '0';
       setTokenData(prev => ({ ...prev, balance }));
     }
-  }, [csprBalance, tokenData?.symbol, tokens]);
+  }, [csprBalance.liquidMotes, tokenData?.symbol, tokens]);
 
   return (
     <ContentContainer>

@@ -1,5 +1,5 @@
-import { getBip44Path } from './bip44';
 import { Bip44Path } from './__fixtures';
+import { getBip44Path } from './bip44';
 
 describe('bip44', () => {
   it('should generate valid bip44 derivation path for casper coin', () => {

@@ -1,13 +1,13 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
   SpacingSize,
   TabPageContainer,
   TabTextContainer,
   VerticalSpaceContainer
-} from '@src/libs/layout';
-import { Typography, TextList } from '@src/libs/ui';
+} from '@libs/layout';
+import { TextList, Typography } from '@libs/ui/components';
 
 export function ConfirmSecretPhraseSuccessPageContent() {
   const { t } = useTranslation();
@@ -17,11 +17,8 @@ export function ConfirmSecretPhraseSuccessPageContent() {
     { key: 2, value: t('Never share the phrase with anyone.') },
     {
       key: 3,
-      value: (
-        <Trans>
-          Be careful of phishing! Casper Wallet will never spontaneously ask for
-          your secret phrase.
-        </Trans>
+      value: t(
+        'Be careful of phishing! Casper Wallet will never spontaneously ask for your secret phrase.'
       )
     },
     {

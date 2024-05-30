@@ -8,15 +8,11 @@ module.exports = {
   coveragePathIgnorePatterns: ['/node_modules/'],
   testRegex: '(/tests?/.*|(\\.|/)(test|spec))\\.tsx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  modulePathIgnorePatterns: ['<rootDir>/.*/__mocks__', '<rootDir>/e2e'],
+  modulePathIgnorePatterns: ['<rootDir>/e2e-tests'],
   moduleNameMapper: {
-    '\\.(jpg|jpeg|png|gif|webp|svg|ttf|woff|woff2)$':
-      '<rootDir>/__mocks__/file-mock.js',
-    '^@src/(.*)$': '<rootDir>/src/$1',
-    '^@mocks/(.*)$': '<rootDir>/__mocks__/$1',
-    '^@testHelpers/(.*)$': '<rootDir>/__testHelpers__/$1'
+    '^@src/(.*)$': '<rootDir>/src/$1'
   },
-  setupFilesAfterEnv: ['@testing-library/jest-dom/extend-expect'],
+  setupFilesAfterEnv: ['@testing-library/jest-dom'],
   coverageReporters: ['json', 'text'],
   coverageThreshold: {
     global: {

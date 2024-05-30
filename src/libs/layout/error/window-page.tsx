@@ -1,14 +1,14 @@
 import React from 'react';
 import { NavigateFunction } from 'react-router';
 
-import {
-  LayoutWindow,
-  PopupHeader,
-  FooterButtonsContainer
-} from '@libs/layout';
-import { Button } from '@libs/ui';
+import { closeCurrentWindow } from '@background/close-current-window';
 
-import { closeCurrentWindow } from '@src/background/close-current-window';
+import {
+  FooterButtonsContainer,
+  HeaderPopup,
+  LayoutWindow
+} from '@libs/layout';
+import { Button } from '@libs/ui/components';
 
 import { ErrorPageContent } from './content';
 import { ErrorLocationState } from './types';
@@ -38,7 +38,7 @@ export function WindowErrorPage({
 
   return (
     <LayoutWindow
-      renderHeader={() => <PopupHeader />}
+      renderHeader={() => <HeaderPopup />}
       renderContent={() => (
         <ErrorPageContent
           errorHeaderText={state.errorHeaderText}

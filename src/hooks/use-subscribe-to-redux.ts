@@ -1,12 +1,13 @@
-import { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { getType, isActionOf } from 'typesafe-actions';
-import browser from 'webextension-polyfill';
+import { runtime } from 'webextension-polyfill';
+
 import {
-  backgroundEvent,
-  BackgroundEvent
+  BackgroundEvent,
+  backgroundEvent
 } from '@background/background-events';
-import { PopupState } from '@src/background/redux/utils';
-import { rootAction } from '@src/background/redux';
+import { rootAction } from '@background/redux';
+import { PopupState } from '@background/redux/types';
 
 type Props = {
   windowInitAction: (typeof rootAction)['windowManagement'][keyof (typeof rootAction)['windowManagement']];
@@ -27,16 +28,16 @@ export const useSubscribeToRedux = ({
   );
 
   useEffect(() => {
-    if (!browser.runtime.onMessage.hasListener(handleStateUpdate)) {
-      browser.runtime.onMessage.addListener(handleStateUpdate);
+    if (!runtime.onMessage.hasListener(handleStateUpdate)) {
+      runtime.onMessage.addListener(handleStateUpdate);
     }
 
-    browser.runtime.sendMessage((windowInitAction as any)()).catch(() => {
+    runtime.sendMessage((windowInitAction as any)()).catch(() => {
       console.error('window init: ' + getType(windowInitAction));
     });
 
     return () => {
-      browser.runtime.onMessage.removeListener(handleStateUpdate);
+      runtime.onMessage.removeListener(handleStateUpdate);
     };
   }, [handleStateUpdate, windowInitAction]);
 };

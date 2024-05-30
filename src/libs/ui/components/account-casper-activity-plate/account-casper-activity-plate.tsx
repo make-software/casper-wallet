@@ -2,31 +2,6 @@ import React, { forwardRef, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import {
-  ContentColor,
-  Hash,
-  HashVariant,
-  SvgIcon,
-  Tooltip,
-  Typography
-} from '@libs/ui';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-import {
-  formatNumber,
-  formatTimestamp,
-  formatTimestampAge,
-  motesToCSPR
-} from '@libs/ui/utils/formatters';
-import {
-  AlignedFlexRow,
-  AlignedSpaceBetweenFlexRow,
-  AccountActivityPlateContainer,
-  ActivityPlateDivider,
-  ActivityPlateContentContainer,
-  ActivityPlateIconCircleContainer,
-  SpacingSize
-} from '@libs/layout';
 import {
   ActivityShortTypeName,
   ActivityType,
@@ -34,8 +9,36 @@ import {
   ActivityTypeIcons,
   ActivityTypeName
 } from '@src/constants';
-import { TransferResultWithId } from '@libs/services/account-activity-service';
+
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import {
+  AccountActivityPlateContainer,
+  ActivityPlateContentContainer,
+  ActivityPlateDivider,
+  ActivityPlateIconCircleContainer,
+  AlignedFlexRow,
+  AlignedSpaceBetweenFlexRow,
+  SpacingSize
+} from '@libs/layout';
+import { TransferResultWithId } from '@libs/services/account-activity-service';
+import {
+  Hash,
+  HashVariant,
+  SvgIcon,
+  Tooltip,
+  Typography
+} from '@libs/ui/components';
+import {
+  ContentColor,
+  formatNumber,
+  formatTimestamp,
+  formatTimestampAge,
+  motesToCSPR
+} from '@libs/ui/utils';
 
 type Ref = HTMLDivElement;
 

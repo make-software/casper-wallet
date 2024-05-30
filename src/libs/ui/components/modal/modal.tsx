@@ -1,12 +1,33 @@
 import React, { MouseEvent, useRef, useState } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
-import { useClickAway } from '@libs/ui/hooks/use-click-away';
-import { BaseProps } from '@libs/ui';
+import { useClickAway } from '@hooks/use-click-away';
+
 import { AlignedFlexRow, Overlay } from '@libs/layout';
+import { BaseProps } from '@libs/ui/types';
 
 const ChildrenContainer = styled(AlignedFlexRow)`
   cursor: pointer;
+`;
+
+const slideInFromBottom = keyframes`
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+`;
+
+const slideOutToBottom = keyframes`
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(100%);
+  }
 `;
 
 const ModalContainer = styled.div<{
@@ -44,6 +65,14 @@ const ModalContainer = styled.div<{
       : `${theme.borderRadius.twelve}px`
 }));
 
+const ModalEnterFromBottom = styled(ModalContainer)`
+  animation: ${slideInFromBottom} 0.5s linear forwards;
+`;
+
+const ModalExitToBottom = styled(ModalContainer)`
+  animation: ${slideOutToBottom} 0.5s linear forwards;
+`;
+
 interface RenderChildrenProps {
   isOpen: boolean;
 }
@@ -57,35 +86,72 @@ export interface ModalProps extends BaseProps {
   renderContent: (renderProps: RenderContentProps) => React.ReactNode | string;
   dataTestId?: string;
   placement: 'top' | 'bottom' | 'fullBottom';
+  loading?: boolean;
+  childrenFlexGrow?: number;
 }
 
 export const Modal = ({
   children,
   renderContent,
   placement,
-  dataTestId
+  dataTestId,
+  loading,
+  childrenFlexGrow
 }: ModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
   const childrenContainerRef = useRef<HTMLDivElement>(null);
 
   const { ref: clickAwayRef } = useClickAway({
     callback: event => {
       event.stopPropagation();
-      isOpen && setIsOpen(false);
+      setIsExiting(true);
+
+      if (placement === 'top') {
+        setIsOpen(false);
+        setIsExiting(false);
+      } else {
+        // After animation completes, set isOpen to false
+        setTimeout(() => {
+          setIsOpen(false);
+          setIsExiting(false);
+        }, 500);
+      }
     }
   });
 
   const closeModal = (e: MouseEvent) => {
     e.stopPropagation();
-    setIsOpen(false);
+    setIsExiting(true);
+
+    if (placement === 'top') {
+      setIsOpen(false);
+      setIsExiting(false);
+    } else {
+      // After animation completes, set isOpen to false
+      setTimeout(() => {
+        setIsOpen(false);
+        setIsExiting(false);
+      }, 500);
+    }
   };
+
+  let ModalComponent;
+
+  if (placement === 'top') {
+    ModalComponent = ModalContainer;
+  } else {
+    ModalComponent = isExiting ? ModalExitToBottom : ModalEnterFromBottom;
+  }
 
   return (
     <>
       <ChildrenContainer
         ref={childrenContainerRef}
         data-testid={dataTestId}
+        flexGrow={childrenFlexGrow}
         onClick={event => {
+          if (loading) return;
           event.stopPropagation();
           setIsOpen(true);
         }}
@@ -95,9 +161,9 @@ export const Modal = ({
 
       {isOpen && (
         <Overlay>
-          <ModalContainer ref={clickAwayRef} placement={placement}>
+          <ModalComponent ref={clickAwayRef} placement={placement}>
             {renderContent({ closeModal })}
-          </ModalContainer>
+          </ModalComponent>
         </Overlay>
       )}
     </>

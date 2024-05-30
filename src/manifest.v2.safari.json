@@ -12,7 +12,12 @@
     "storage",
     "tabs",
     "declarativeNetRequest",
-    "https://image-proxy-cdn.make.services/*"
+    "https://image-proxy-cdn.make.services/*",
+    "https://api.testnet.casperwallet.io/*",
+    "https://api.mainnet.casperwallet.io/*",
+    "https://onramp-api.cspr.click/api/*",
+    "https://node.testnet.cspr.cloud/*",
+    "https://node.cspr.cloud/*"
   ],
   "declarative_net_request": {
     "rule_resources": [

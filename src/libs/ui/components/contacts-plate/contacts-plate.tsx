@@ -1,9 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { AlignedFlexRow, FlexColumn, SpacingSize } from '@libs/layout';
-import { Avatar, Hash, HashVariant, Typography } from '@libs/ui';
 import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { AlignedFlexRow, FlexColumn, SpacingSize } from '@libs/layout';
+import { Avatar, Hash, HashVariant, Typography } from '@libs/ui/components';
 
 const Container = styled(AlignedFlexRow)`
   cursor: pointer;
@@ -26,7 +27,7 @@ export const ContactsPlate = ({ publicKey, name }: ContactsPlateProps) => {
         navigate(RouterPath.ContactDetails.replace(':contactName', name));
       }}
     >
-      <Avatar publicKey={publicKey} size={24} />
+      <Avatar publicKey={publicKey} size={24} borderRadius={2} />
       <FlexColumn>
         <Typography type="captionRegular">{name}</Typography>
         <Hash

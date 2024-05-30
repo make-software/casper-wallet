@@ -3,25 +3,25 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { dispatchToMainStore } from '@background/redux/utils';
+import { accountRenamed } from '@background/redux/vault/actions';
+import { selectVaultAccountsNames } from '@background/redux/vault/selectors';
+
 import {
-  FooterButtonsAbsoluteContainer,
   ContentContainer,
+  FooterButtonsAbsoluteContainer,
   IllustrationContainer,
-  ParagraphContainer,
   InputsContainer,
+  ParagraphContainer,
   SpacingSize
-} from '@src/libs/layout';
-import { Button, Input, SvgIcon, Typography } from '@src/libs/ui';
+} from '@libs/layout';
+import { Button, Input, SvgIcon, Typography } from '@libs/ui/components';
 import {
   RenameAccountFormValues,
   useRenameAccount
-} from '@src/libs/ui/forms/rename-account';
-
-import { RouterPath, useTypedNavigate } from '@popup/router';
-
-import { accountRenamed } from '@src/background/redux/vault/actions';
-import { selectVaultAccountsNames } from '@src/background/redux/vault/selectors';
-import { dispatchToMainStore } from '@src/background/redux/utils';
+} from '@libs/ui/forms/rename-account';
 
 export function RenameAccountPageContent() {
   const navigate = useTypedNavigate();

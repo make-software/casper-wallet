@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 
-import { Typography } from '@libs/ui';
+import { Typography } from '@libs/ui/components';
 
 interface TooltipProps {
   title?: string | null;
@@ -27,7 +27,7 @@ const TooltipTip = styled.div<{ placement: Placement }>(
   ({ theme, placement }) => ({
     position: 'absolute',
 
-    zIndex: 1,
+    zIndex: 2,
 
     ...(placement === 'topCenter' && {
       left: '50%',

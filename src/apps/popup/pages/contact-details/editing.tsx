@@ -1,6 +1,6 @@
 import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 import { FieldErrors, UseFormRegister } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
   ContentContainer,
@@ -14,7 +14,7 @@ import {
   Input,
   TextArea,
   Typography
-} from '@libs/ui';
+} from '@libs/ui/components';
 import { ContactFromValues } from '@libs/ui/forms/contact';
 
 interface EditingContactPageContentProps {
@@ -51,7 +51,7 @@ export const EditingContactPageContent = ({
         >
           <TextArea
             {...register('publicKey')}
-            placeholder={t('0x')}
+            placeholder={t('Public key')}
             type="captionHash"
           />
         </FormField>

@@ -1,37 +1,40 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { PasswordProtectionPage } from 'src/apps/popup/pages/password-protection-page';
 
-import {
-  AlignedFlexRow,
-  FooterButtonsContainer,
-  HeaderSubmenuBarNavLink,
-  PopupHeader,
-  PopupLayout,
-  SpacingSize
-} from '@libs/layout';
-import { Button, Link, SvgIcon } from '@libs/ui';
 import { getBlockExplorerAccountUrl } from '@src/constants';
-import {
-  selectAllContacts,
-  selectAllContactsNames
-} from '@background/redux/contacts/selectors';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+
+import { DeleteContactPageContent } from '@popup/pages/contact-details/deleting';
+import { ContactDetails } from '@popup/pages/contact-details/details';
+import { EditingContactPageContent } from '@popup/pages/contact-details/editing';
 import { RouterPath, useTypedNavigate } from '@popup/router';
-import { dispatchToMainStore } from '@background/redux/utils';
+
 import {
   contactRemoved,
   contactUpdated
 } from '@background/redux/contacts/actions';
-import { PasswordProtectionPage } from 'src/apps/popup/pages/password-protection-page';
+import {
+  selectAllContacts,
+  selectAllContactsNames
+} from '@background/redux/contacts/selectors';
 import { contactEditingPermissionChanged } from '@background/redux/session/actions';
 import { selectIsContactEditingAllowed } from '@background/redux/session/selectors';
-import { DeleteContactPageContent } from '@popup/pages/contact-details/deleting';
-import { ContactDetails } from '@popup/pages/contact-details/details';
-import { EditingContactPageContent } from '@popup/pages/contact-details/editing';
-import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+
+import {
+  AlignedFlexRow,
+  FooterButtonsContainer,
+  HeaderPopup,
+  HeaderSubmenuBarNavLink,
+  PopupLayout,
+  SpacingSize
+} from '@libs/layout';
+import { Button, SvgIcon } from '@libs/ui/components';
 import { useContactForm } from '@libs/ui/forms/contact';
+import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 
 export const ContactDetailsPage = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -109,7 +112,7 @@ export const ContactDetailsPage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus
@@ -124,11 +127,13 @@ export const ContactDetailsPage = () => {
                     onClick={openEditContact}
                     color="contentAction"
                     src="assets/icons/edit.svg"
+                    dataTestId="edit-contact-button"
                   />
                   <SvgIcon
                     onClick={openDeleteContact}
                     color="contentActionCritical"
                     src="assets/icons/delete.svg"
+                    dataTestId="delete-contact-button"
                   />
                 </AlignedFlexRow>
               )}
@@ -168,17 +173,12 @@ export const ContactDetailsPage = () => {
           )}
           {!isDeleting && !isEditing && (
             <Button
-              as={props => (
-                <Link
-                  color="contentAction"
-                  target="_blank"
-                  href={getBlockExplorerAccountUrl(
-                    casperLiveUrl,
-                    contact.publicKey
-                  )}
-                  {...props}
-                />
-              )}
+              onClick={() => {
+                window.open(
+                  getBlockExplorerAccountUrl(casperLiveUrl, contact.publicKey),
+                  '_blank'
+                );
+              }}
               color="secondaryBlue"
               title={t('View account in CSPR.live')}
             >

@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
-import { getLinearGradientColor } from '@libs/ui/utils/get-linear-gradient-color';
-import { hexToRGBA } from '@libs/ui/utils/hex-to-rgba';
+
+import { getLinearGradientColor, hexToRGBA } from '@libs/ui/utils';
 
 // Be careful when importing dependencies here
 // Import of getColorFromTheme or getLinearGradientColor from '@libs/ui'
@@ -95,16 +95,22 @@ const getGapSize = (gap?: SpacingSize) => {
 interface FlexRowProps {
   gap?: SpacingSize;
   wrap?: 'wrap' | 'nowrap';
+  flexGrow?: number;
 }
 
 export const FlexRow = styled.div<FlexRowProps>`
   display: flex;
   gap: ${({ gap }) => getGapSize(gap)};
   flex-wrap: ${({ wrap }) => wrap};
+  flex-grow: ${({ flexGrow }) => flexGrow || 'inherit'};
 `;
 
 export const AlignedFlexRow = styled(FlexRow)`
   align-items: center;
+`;
+
+export const BaseLineFlexRow = styled(FlexRow)`
+  align-items: baseline;
 `;
 
 export const CenteredFlexRow = styled(AlignedFlexRow)`
@@ -324,4 +330,13 @@ export const ActivityPlateDivider = styled.div`
 
   border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
   background-color: ${({ theme }) => theme.color.contentSecondary};
+`;
+
+export const DropdownHeader = styled(AlignedSpaceBetweenFlexRow)`
+  padding: 8px 16px;
+
+  border-top-left-radius: ${({ theme }) => theme.borderRadius.base}px;
+  border-top-right-radius: ${({ theme }) => theme.borderRadius.base}px;
+
+  background-color: ${({ theme }) => theme.color.backgroundPrimary};
 `;

@@ -1,7 +1,7 @@
-import { Account } from '@background/redux/vault/types';
+import { Account, AccountWithBalance } from '@libs/types/account';
 
 export function sortAccounts(
-  accounts: Account[],
+  accounts: AccountWithBalance[],
   activeAccountName: string | null,
   connectedAccountNames: string[]
 ) {

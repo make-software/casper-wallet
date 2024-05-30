@@ -1,4 +1,4 @@
-import browser from 'webextension-polyfill';
+import { runtime, tabs } from 'webextension-polyfill';
 
 import { isFirefoxBuild, isSafariBuild } from '@src/utils';
 
@@ -9,14 +9,14 @@ import { isFirefoxBuild, isSafariBuild } from '@src/utils';
 // WARNING: IT WILL RELOAD ENTIRE EXTENSION
 export function closeWindowByReloadExtension() {
   if (isSafariBuild) {
-    browser.tabs.create({ url: 'onboarding.html', active: true });
-    browser.runtime.reload();
+    tabs.create({ url: 'onboarding.html', active: true });
+    runtime.reload();
     return;
   }
   if (isFirefoxBuild) {
-    browser.runtime.reload();
+    runtime.reload();
     return;
   }
   window.close();
-  browser.tabs.create({ url: 'onboarding.html', active: true });
+  tabs.create({ url: 'onboarding.html', active: true });
 }

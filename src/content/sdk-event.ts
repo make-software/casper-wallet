@@ -1,4 +1,5 @@
 import { ActionType, createAction } from 'typesafe-actions';
+
 import { CasperWalletState } from './sdk-types';
 
 // Event emitted to connected sites

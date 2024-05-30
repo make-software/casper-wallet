@@ -1,27 +1,34 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
-import { PopoverLink, SvgIcon, Typography } from '@libs/ui';
-import { RouterPath, useTypedNavigate } from '@popup/router';
 import { getBlockExplorerAccountUrl } from '@src/constants';
-import { Popover } from '@libs/ui/components/popover/popover';
+
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+import { hideAccountFromListChange } from '@background/redux/vault/actions';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
   selectIsAnyAccountConnectedWithActiveOrigin
 } from '@background/redux/vault/selectors';
-import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
-import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { Account } from '@background/redux/vault/types';
+
+import { Account } from '@libs/types/account';
+import { PopoverLink, SvgIcon, Typography } from '@libs/ui/components';
+import { Popover } from '@libs/ui/components/popover/popover';
 
 interface AccountActionsMenuPopoverProps {
   account: Account;
   onClick?: (e: React.MouseEvent) => void;
+  showHideAccountItem?: boolean;
 }
 export const AccountActionsMenuPopover = ({
   account,
-  onClick
+  onClick,
+  showHideAccountItem
 }: AccountActionsMenuPopoverProps) => {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -121,6 +128,33 @@ export const AccountActionsMenuPopover = ({
               <Trans t={t}>View on CSPR.live</Trans>
             </Typography>
           </PopoverLink>
+          {showHideAccountItem && (
+            <PopoverLink
+              variant="contentAction"
+              onClick={() => {
+                dispatchToMainStore(
+                  hideAccountFromListChange({ accountName: account.name })
+                );
+              }}
+            >
+              <SvgIcon
+                src={
+                  account.hidden
+                    ? 'assets/icons/show.svg'
+                    : 'assets/icons/hide.svg'
+                }
+                marginRight="medium"
+                color="contentDisabled"
+              />
+              <Typography type="body">
+                {account.hidden ? (
+                  <Trans t={t}>Show in list</Trans>
+                ) : (
+                  <Trans t={t}>Hide from list</Trans>
+                )}
+              </Typography>
+            </PopoverLink>
+          )}
           <PopoverLink
             variant="contentAction"
             onClick={event => {

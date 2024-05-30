@@ -1,14 +1,19 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
 import { UseFormRegister } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
+  InputsContainer,
   TabPageContainer,
-  TabTextContainer,
-  InputsContainer
+  TabTextContainer
 } from '@libs/layout';
-import { FormField, FormFieldStatus, TextArea, Typography } from '@libs/ui';
-import { RecoverSecretPhraseFormValues } from '@src/libs/ui/forms/recover-from-secret-phrase';
+import {
+  FormField,
+  FormFieldStatus,
+  TextArea,
+  Typography
+} from '@libs/ui/components';
+import { RecoverSecretPhraseFormValues } from '@libs/ui/forms/recover-from-secret-phrase';
 
 interface RecoverFromSecretPhrasePageContentProps {
   register: UseFormRegister<RecoverSecretPhraseFormValues>;
@@ -29,8 +34,8 @@ export function RecoverFromSecretPhrasePageContent({
       <TabTextContainer>
         <Typography type="body" color="contentSecondary">
           <Trans t={t}>
-            Recover your wallet by entering each word of your 24-word secret
-            recovery phrase, separated by spaces.
+            Recover your wallet by entering each word of your 12-word or 24-word
+            secret recovery phrase, separated by spaces.
           </Trans>
         </Typography>
       </TabTextContainer>

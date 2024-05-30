@@ -1,5 +1,5 @@
-import { randomBytes } from '@noble/hashes/utils';
 import { scryptAsync } from '@noble/hashes/scrypt';
+import { randomBytes } from '@noble/hashes/utils';
 
 import { convertBytesToHex, convertHexToBytes } from './utils';
 
@@ -26,7 +26,7 @@ export async function encodePassword(
     createScryptOptions()
   )
     .then(convertBytesToHex)
-    .catch(err => {
+    .catch(() => {
       throw Error('encodePassword failed!');
     });
 }

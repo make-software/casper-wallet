@@ -1,29 +1,47 @@
 import { ActionType, createAction } from 'typesafe-actions';
 
-import { FetchBalanceResponse } from '@libs/services/balance-service';
-import { AccountInfo } from '@libs/services/account-info';
 import {
   Erc20TokenActionResult,
-  TransferResult,
-  ExtendedDeploy
-} from 'src/libs/services/account-activity-service';
+  ExtendedDeploy,
+  TransferResult
+} from '@libs/services/account-activity-service/types';
+import { AccountInfo } from '@libs/services/account-info/types';
+import {
+  AccountData,
+  FetchBalanceResponse
+} from '@libs/services/balance-service/types';
+import {
+  GetOnRampResponse,
+  OptionsPostRequestData,
+  ResponseOnRampProps,
+  ResponseSelectionProps,
+  SelectionPostRequestData
+} from '@libs/services/buy-cspr-service/types';
+import { ContractPackageWithBalance } from '@libs/services/erc20-service/types';
+import { NFTTokenResult } from '@libs/services/nft-service/types';
 import { ErrorResponse, PaginatedResponse } from '@libs/services/types';
-import { ContractPackageWithBalance } from '@libs/services/erc20-service';
-import { NFTTokenResult } from '@libs/services/nft-service';
 import {
   DelegatorResult,
   ValidatorResult
-} from '@libs/services/validators-service';
+} from '@libs/services/validators-service/types';
 
 type Meta = void;
 
 export const serviceMessage = {
   fetchBalanceRequest: createAction('FETCH_ACCOUNT_BALANCE')<
-    { publicKey: string },
+    { accountHash: string },
     Meta
   >(),
   fetchBalanceResponse: createAction('FETCH_ACCOUNT_BALANCE_RESPONSE')<
     FetchBalanceResponse,
+    Meta
+  >(),
+  fetchAccountBalancesRequest: createAction('FETCH_ACCOUNT_BALANCES')<
+    { accountHashes: string },
+    Meta
+  >(),
+  fetchAccountBalancesResponse: createAction('FETCH_ACCOUNT_BALANCES_RESPONSE')<
+    PaginatedResponse<AccountData> | ErrorResponse,
     Meta
   >(),
   fetchAccountInfoRequest: createAction('FETCH_ACCOUNT_INFO')<
@@ -96,7 +114,25 @@ export const serviceMessage = {
   )<{ publicKey: string }, Meta>(),
   fetchValidatorsDetailsDataResponse: createAction(
     'FETCH_VALIDATORS_DETAILS_DATA_RESPONSE'
-  )<PaginatedResponse<DelegatorResult> | ErrorResponse, Meta>()
+  )<PaginatedResponse<DelegatorResult> | ErrorResponse, Meta>(),
+  fetchOnRampGetOptionRequest: createAction(
+    'FETCH_ON_RAMP_GET_OPTION_REQUEST'
+  )<Meta>(),
+  fetchOnRampGetOptionResponse: createAction(
+    'FETCH_ON_RAMP_GET_OPTION_RESPONSE'
+  )<GetOnRampResponse, Meta>(),
+  fetchOnRampPostOptionRequest: createAction(
+    'FETCH_ON_RAMP_POST_OPTION_REQUEST'
+  )<OptionsPostRequestData, Meta>(),
+  fetchOnRampPostOptionResponse: createAction(
+    'FETCH_ON_RAMP_POST_OPTION_RESPONSE'
+  )<ResponseOnRampProps, Meta>(),
+  fetchOnRampPostSelectionRequest: createAction(
+    'FETCH_ON_RAMP_POST_SELECTION_REQUEST'
+  )<SelectionPostRequestData, Meta>(),
+  fetchOnRampPostSelectionResponse: createAction(
+    'FETCH_ON_RAMP_POST_SELECTION_RESPONSE'
+  )<ResponseSelectionProps, Meta>()
 };
 
 export type ServiceMessage = ActionType<typeof serviceMessage>;

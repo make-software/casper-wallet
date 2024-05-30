@@ -1,3 +1,3 @@
-import { ErrorLocationState } from '@src/libs/layout/error';
+import { ErrorLocationState } from '@libs/layout';
 
 export interface LocationState extends ErrorLocationState {}

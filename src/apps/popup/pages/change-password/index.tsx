@@ -1,23 +1,25 @@
 import React from 'react';
+import { useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
+
+import { ChangePasswordPageContent } from '@popup/pages/change-password/content';
+import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { changePassword } from '@background/redux/sagas/actions';
+import { dispatchToMainStore } from '@background/redux/utils';
 
 import {
   FooterButtonsContainer,
+  HeaderPopup,
   HeaderSubmenuBarNavLink,
-  PopupHeader,
   PopupLayout
 } from '@libs/layout';
-import { Button, PasswordInputs } from '@libs/ui';
+import { Button, PasswordInputs } from '@libs/ui/components';
 import {
   CreatePasswordFormValues,
   useCreatePasswordForm
 } from '@libs/ui/forms/create-password';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
-import { dispatchToMainStore } from '@background/redux/utils';
-import { changePassword } from '@background/redux/sagas/actions';
-import { RouterPath, useTypedNavigate } from '@popup/router';
-import { ChangePasswordPageContent } from '@popup/pages/change-password/content';
-import { useWatch } from 'react-hook-form';
 
 export const ChangePasswordPage = () => {
   const { t } = useTranslation();
@@ -49,7 +51,7 @@ export const ChangePasswordPage = () => {
       variant="form"
       onSubmit={handleSubmit(onSubmit)}
       renderHeader={() => (
-        <PopupHeader
+        <HeaderPopup
           withNetworkSwitcher
           withMenu
           withConnectionStatus

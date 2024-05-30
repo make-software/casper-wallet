@@ -1,8 +1,9 @@
-import React, { useState, useRef, PropsWithChildren, MouseEvent } from 'react';
+import React, { MouseEvent, PropsWithChildren, useRef, useState } from 'react';
 import styled from 'styled-components';
 
+import { useClickAway } from '@hooks/use-click-away';
+
 import { AlignedFlexRow, FlexColumn, Overlay, SpacingSize } from '@libs/layout';
-import { useClickAway } from '@libs/ui/hooks/use-click-away';
 
 const popoverOffsetFromChildren = 8;
 const contentHeight = 188;

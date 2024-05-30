@@ -1,11 +1,8 @@
-import Big from 'big.js';
+import { TokenType } from '@hooks/use-casper-token';
 
-import { divideErc20Balance, formatNumber } from '@libs/ui/utils/formatters';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
-import { TokenType } from '@src/hooks';
+import { divideErc20Balance, formatNumber } from '@libs/ui/utils';
 
-export const tokenDivider = (decimals: number | null) =>
-  Big(10).pow(decimals || 0);
 export const MINIMUM_SHOWING_BALANCE = 0.00001;
 
 export const formatErc20TokenBalance = (
@@ -35,7 +32,7 @@ export const formatErc20TokenBalance = (
         symbol: token?.metadata?.symbol || '',
         decimals: token?.metadata?.decimals,
         amountFiat: null,
-        icon: token.icon_url || 'assets/icons/erc20-avatar.svg'
+        icon: token.icon_url || 'assets/icons/cep18-contract-icon.svg'
       };
     })
     .sort((a, b) => {
