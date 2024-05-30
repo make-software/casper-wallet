@@ -6,6 +6,7 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
+  accountsImported,
   activeAccountChanged,
   anotherAccountConnected,
   deployPayloadReceived,
@@ -80,14 +81,21 @@ export const reducer = createReducer(initialState)
     (
       state,
       { payload: account }: ReturnType<typeof accountImported>
-    ): State => {
-      return {
-        ...state,
-        accounts: [...state.accounts, account],
-        activeAccountName:
-          state.accounts.length === 0 ? account.name : state.activeAccountName
-      };
-    }
+    ): State => ({
+      ...state,
+      accounts: [...state.accounts, account],
+      activeAccountName:
+        state.accounts.length === 0 ? account.name : state.activeAccountName
+    })
+  )
+  .handleAction(
+    accountsImported,
+    (state, { payload: accounts }: ReturnType<typeof accountsImported>) => ({
+      ...state,
+      accounts: [...state.accounts, ...accounts],
+      activeAccountName:
+        state.accounts.length === 0 ? accounts[0].name : state.activeAccountName
+    })
   )
   .handleAction(
     accountRemoved,

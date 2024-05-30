@@ -12,7 +12,8 @@ import { hideAccountFromListChange } from '@background/redux/vault/actions';
 import {
   selectVaultAccount,
   selectVaultHiddenAccountsNames,
-  selectVaultImportedAccountNames
+  selectVaultImportedAccountNames,
+  selectVaultLedgerAccountNames
 } from '@background/redux/vault/selectors';
 
 import { useFetchAccountInfo } from '@hooks/use-fetch-account-info';
@@ -143,6 +144,7 @@ export function AccountSettingsActionsGroup() {
   const { accountName } = useParams();
   const importedAccountNames = useSelector(selectVaultImportedAccountNames);
   const hiddenAccountsNames = useSelector(selectVaultHiddenAccountsNames);
+  const ledgerAccountNames = useSelector(selectVaultLedgerAccountNames);
 
   if (!accountName) {
     return null;
@@ -150,12 +152,15 @@ export function AccountSettingsActionsGroup() {
 
   const isImportedAccount = importedAccountNames.includes(accountName);
   const isAccountHidden = hiddenAccountsNames.includes(accountName);
+  const isLedgerAccount = ledgerAccountNames.includes(accountName);
 
   return (
     <AccountSettingsActionsGroupContainer>
       <AccountIconButton type="rename" />
       <AccountIconButton type={isAccountHidden ? 'show' : 'hide'} />
-      {isImportedAccount && <AccountIconButton type="remove" />}
+      {(isImportedAccount || isLedgerAccount) && (
+        <AccountIconButton type="remove" />
+      )}
     </AccountSettingsActionsGroupContainer>
   );
 }

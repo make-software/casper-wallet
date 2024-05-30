@@ -2,11 +2,13 @@ import React, { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { CenteredFlexRow } from '@libs/layout';
+import { useIsDarkMode } from '@hooks/use-is-dark-mode';
+
+import { CenteredFlexRow, SpacingSize } from '@libs/layout';
 import {
   CopyToClipboard,
   Placement,
-  Tag,
+  SvgIcon,
   Tooltip,
   Typography
 } from '@libs/ui/components';
@@ -36,7 +38,8 @@ interface HashProps {
   truncatedSize?: TruncateKeySize;
   color?: ContentColor;
   withCopyOnSelfClick?: boolean;
-  withTag?: boolean;
+  isImported?: boolean;
+  isLedger?: boolean;
   placement?: Placement;
   withoutTooltip?: boolean;
 }
@@ -47,12 +50,14 @@ export function Hash({
   withCopyOnSelfClick = true,
   truncated,
   color,
-  withTag,
+  isImported,
   truncatedSize,
   placement,
-  withoutTooltip = false
+  withoutTooltip = false,
+  isLedger
 }: HashProps) {
   const { t } = useTranslation();
+  const isDarkMode = useIsDarkMode();
 
   const HashComponent = useMemo(
     () => (
@@ -70,12 +75,27 @@ export function Hash({
             {truncated ? truncateKey(value, { size: truncatedSize }) : value}
           </Typography>
         </Tooltip>
-        {withTag && (
-          <Tag displayContext="accountList">{`${t('Imported')}`}</Tag>
+        {isImported && (
+          <SvgIcon
+            src="assets/icons/upload.svg"
+            dataTestId="import-account-icon"
+            size={20}
+          />
+        )}
+        {isLedger && (
+          <SvgIcon
+            src={
+              isDarkMode
+                ? 'assets/icons/ledger-white.svg'
+                : 'assets/icons/ledger-blue.svg'
+            }
+            size={20}
+          />
         )}
       </>
     ),
     [
+      isDarkMode,
       truncated,
       withoutTooltip,
       value,
@@ -83,8 +103,8 @@ export function Hash({
       variant,
       color,
       truncatedSize,
-      withTag,
-      t
+      isImported,
+      isLedger
     ]
   );
 
@@ -98,7 +118,9 @@ export function Hash({
                 <Trans t={t}>Copied!</Trans>
               </Typography>
             ) : (
-              <HashContainer withHover>{HashComponent}</HashContainer>
+              <HashContainer gap={SpacingSize.Tiny} withHover>
+                {HashComponent}
+              </HashContainer>
             )}
           </>
         )}
@@ -106,5 +128,6 @@ export function Hash({
       />
     );
   }
-  return <HashContainer>{HashComponent}</HashContainer>;
+
+  return <HashContainer gap={SpacingSize.Tiny}>{HashComponent}</HashContainer>;
 }

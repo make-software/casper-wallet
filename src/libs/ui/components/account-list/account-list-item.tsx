@@ -6,7 +6,7 @@ import {
   FlexColumn,
   SpacingSize
 } from '@libs/layout';
-import { AccountListRows } from '@libs/types/account';
+import { AccountListRows, HardwareWalletType } from '@libs/types/account';
 import {
   AccountActionsMenuPopover,
   Avatar,
@@ -105,7 +105,8 @@ export const AccountListItem = ({
               variant={HashVariant.CaptionHash}
               truncated
               withoutTooltip
-              withTag={account.imported}
+              isImported={account.imported}
+              isLedger={account.hardware === HardwareWalletType.Ledger}
             />
             <Typography type="captionHash" color="contentSecondary">
               CSPR

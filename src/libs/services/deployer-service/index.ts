@@ -13,16 +13,26 @@ import {
   AuctionManagerEntryPoint,
   CasperNodeUrl,
   NetworkName,
+  ReferrerUrl,
   STAKE_COST_MOTES,
   TRANSFER_COST_MOTES
 } from '@src/constants';
 
 import { getRawPublicKey } from '@libs/entities/Account';
 import { toJson } from '@libs/services/utils';
-import { Account } from '@libs/types/account';
+import {
+  Account,
+  AccountWithBalance,
+  HardwareWalletType
+} from '@libs/types/account';
 import { CSPRtoMotes, multiplyErc20Balance } from '@libs/ui/utils';
 
-import { ICasperNodeStatusResponse } from './types';
+import { ledger } from '../ledger';
+import {
+  ICasperNetworkSendDeployErrorResponse,
+  ICasperNetworkSendDeployResponse,
+  ICasperNodeStatusResponse
+} from './types';
 
 export const getAuctionManagerDeployCost = (
   entryPoint: AuctionManagerEntryPoint
@@ -43,7 +53,10 @@ export const getDateForDeploy = async (nodeUrl: CasperNodeUrl) => {
 
   try {
     const casperNodeTimestamp: ICasperNodeStatusResponse = await fetch(
-      `${nodeUrl}/info_get_status`
+      `${nodeUrl}/info_get_status`,
+      {
+        referrer: ReferrerUrl
+      }
     ).then(toJson);
 
     return casperNodeTimestamp?.last_progress
@@ -54,7 +67,7 @@ export const getDateForDeploy = async (nodeUrl: CasperNodeUrl) => {
   }
 };
 
-export const makeAuctionManagerDeployAndSing = async (
+export const makeAuctionManagerDeploy = async (
   contractEntryPoint: AuctionManagerEntryPoint,
   delegatorPublicKeyHex: string,
   validatorPublicKeyHex: string,
@@ -62,8 +75,7 @@ export const makeAuctionManagerDeployAndSing = async (
   amountMotes: string,
   networkName: NetworkName,
   auctionManagerContractHash: string,
-  nodeUrl: CasperNodeUrl,
-  keys: Keys.AsymmetricKey[]
+  nodeUrl: CasperNodeUrl
 ) => {
   const hash = decodeBase16(auctionManagerContractHash);
 
@@ -103,21 +115,18 @@ export const makeAuctionManagerDeployAndSing = async (
 
   const payment = DeployUtil.standardPayment(deployCost);
 
-  const deploy = DeployUtil.makeDeploy(deployParams, session, payment);
-
-  return deploy.sign(keys);
+  return DeployUtil.makeDeploy(deployParams, session, payment);
 };
 
-export const makeNativeTransferDeployAndSign = async (
-  senderPublicKeyHex: string,
+export const makeNativeTransferDeploy = async (
+  activeAccount: AccountWithBalance,
   recipientPublicKeyHex: string,
   amountMotes: string,
   networkName: NetworkName,
   nodeUrl: CasperNodeUrl,
-  keys: Keys.AsymmetricKey[],
   transferIdMemo?: string
 ) => {
-  const senderPublicKey = CLPublicKey.fromHex(senderPublicKeyHex);
+  const senderPublicKey = CLPublicKey.fromHex(activeAccount.publicKey);
   const recipientPublicKey = CLPublicKey.fromHex(recipientPublicKeyHex);
 
   const date = await getDateForDeploy(nodeUrl);
@@ -141,12 +150,10 @@ export const makeNativeTransferDeployAndSign = async (
 
   const payment = DeployUtil.standardPayment(TRANSFER_COST_MOTES);
 
-  const deploy = DeployUtil.makeDeploy(deployParams, session, payment);
-
-  return deploy.sign(keys);
+  return DeployUtil.makeDeploy(deployParams, session, payment);
 };
 
-export const makeCep18TransferDeployAndSign = async (
+export const makeCep18TransferDeploy = async (
   nodeUrl: CasperNodeUrl,
   networkName: NetworkName,
   tokenContractHash: string | undefined,
@@ -155,8 +162,7 @@ export const makeCep18TransferDeployAndSign = async (
   amount: string,
   erc20Decimals: number | null,
   paymentAmount: string,
-  activeAccount: Account,
-  keys: Keys.AsymmetricKey[]
+  activeAccount: Account
 ) => {
   const cep18 = new CEP18Client(nodeUrl, networkName);
 
@@ -187,23 +193,20 @@ export const makeCep18TransferDeployAndSign = async (
     date // https://github.com/casper-network/casper-node/issues/4152
   );
 
-  const deploy = DeployUtil.makeDeploy(
+  return DeployUtil.makeDeploy(
     deployParams,
     tempDeploy.session,
     tempDeploy.payment
   );
-
-  return deploy.sign(keys);
 };
 
-export const makeNFTDeployAndSign = async (
+export const makeNFTDeploy = async (
   runtimeArgs: RuntimeArgs,
   paymentAmount: string,
   deploySender: CLPublicKey,
   networkName: NetworkName,
   contractPackageHash: string,
-  nodeUrl: CasperNodeUrl,
-  keys: Keys.AsymmetricKey[]
+  nodeUrl: CasperNodeUrl
 ) => {
   const hash = Uint8Array.from(Buffer.from(contractPackageHash, 'hex'));
 
@@ -225,7 +228,62 @@ export const makeNFTDeployAndSign = async (
       runtimeArgs
     );
   const payment = DeployUtil.standardPayment(paymentAmount);
-  const deploy = DeployUtil.makeDeploy(deployParams, session, payment);
+
+  return DeployUtil.makeDeploy(deployParams, session, payment);
+};
+
+export const signLedgerDeploy = async (
+  deploy: DeployUtil.Deploy,
+  activeAccount: Account
+) => {
+  const resp = await ledger.singDeploy(deploy, {
+    index: activeAccount.derivationIndex,
+    publicKey: activeAccount.publicKey
+  });
+
+  const approval = new DeployUtil.Approval();
+  approval.signer = activeAccount.publicKey;
+  approval.signature = resp.signatureHex;
+  deploy.approvals.push(approval);
+
+  return deploy;
+};
+
+export const signDeploy = (
+  deploy: DeployUtil.Deploy,
+  keys: Keys.AsymmetricKey[],
+  activeAccount: Account
+) => {
+  if (activeAccount?.hardware === HardwareWalletType.Ledger) {
+    return signLedgerDeploy(deploy, activeAccount);
+  }
 
   return deploy.sign(keys);
+};
+
+export const sendSignDeploy = (
+  deploy: DeployUtil.Deploy,
+  nodeUrl: CasperNodeUrl
+): Promise<
+  ICasperNetworkSendDeployResponse | ICasperNetworkSendDeployErrorResponse
+> => {
+  const oneMegaByte = 1048576;
+  const size = DeployUtil.deploySizeInBytes(deploy);
+
+  if (size > oneMegaByte) {
+    throw new Error(
+      `Deploy can not be send, because it's too large: ${size} bytes. Max size is 1 megabyte.`
+    );
+  }
+
+  return fetch(nodeUrl, {
+    method: 'POST',
+    referrer: ReferrerUrl,
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      method: 'account_put_deploy',
+      params: [DeployUtil.deployToJson(deploy).deploy],
+      id: new Date().getTime()
+    })
+  }).then(toJson);
 };

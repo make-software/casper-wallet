@@ -30,6 +30,9 @@ export const GlobalStyle = createGlobalStyle<{ theme: any }>`
     border-radius: 16px;
     
     color: ${props => props.theme.color.contentPrimary};
+      
+    display: flex;
+    justify-content: center;
   }
   
   * {

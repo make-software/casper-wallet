@@ -13,7 +13,6 @@ import reduxAction from './redux-action';
 import rootReducer from './root-reducer';
 import rootSaga from './root-saga';
 
-// export const composeEnhancers = compose;
 export const composeEnhancers =
   process.env.NODE_ENV === 'development' && isChromeBuild
     ? composeWithDevTools({

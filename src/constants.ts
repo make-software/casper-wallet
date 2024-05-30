@@ -43,6 +43,9 @@ export const getContractNftUrl = (
   tokenId: string
 ) => `${casperLiveUrl}/contracts/${contractHash}/nfts/${tokenId}`;
 
+export const ledgerSupportLink =
+  'https://support.ledger.com/hc/en-us/articles/4416379141009-Casper-CSPR?docs=true';
+
 export enum CasperLiveUrl {
   MainnetUrl = 'https://cspr.live',
   TestnetUrl = 'https://testnet.cspr.live'
@@ -79,6 +82,8 @@ export enum CasperNodeUrl {
   MainnetUrl = 'https://node.cspr.cloud/rpc',
   TestnetUrl = 'https://node.testnet.cspr.cloud/rpc'
 }
+
+export const ReferrerUrl = 'https://casperwallet.io';
 
 export enum NetworkName {
   Mainnet = 'casper',
@@ -161,6 +166,7 @@ export enum StakeSteps {
   NewValidator = 'new validator',
   Amount = 'amount',
   Confirm = 'confirm',
+  ConfirmWithLedger = 'confirm with ledger',
   Success = 'success'
 }
 
