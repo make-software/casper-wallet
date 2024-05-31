@@ -117,6 +117,9 @@ popup.describe('Popup UI: buy cspr', () => {
 
       await popupPage.getByText('Ukraine').click();
 
+      // wait until a modal window closed
+      await new Promise(r => setTimeout(r, 2000));
+
       await popupPage.getByRole('button', { name: 'Next' }).click();
 
       await popupExpect(
@@ -127,6 +130,9 @@ popup.describe('Popup UI: buy cspr', () => {
       await popupPage.getByPlaceholder('Search', { exact: true }).fill('UAH');
 
       await popupPage.getByText('UAH').click();
+
+      // wait until a modal window closed
+      await new Promise(r => setTimeout(r, 2000));
 
       await popupPage.getByRole('button', { name: 'Next' }).click();
 

@@ -281,13 +281,15 @@ export const BorderContainer = styled.div`
 export const Overlay = styled.div`
   position: fixed;
   z-index: ${({ theme }) => theme.zIndex.modal};
-  top: 0;
-  left: 0;
+  top: 50%;
+  left: 50%;
   bottom: 0;
   right: 0;
 
+  transform: translate(-50%, -50%);
+
   height: 100vh;
-  max-width: 360px;
+  width: 360px;
 
   background: ${({ theme }) => hexToRGBA(theme.color.black, '0.32')};
 `;
