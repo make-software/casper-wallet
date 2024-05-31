@@ -46,7 +46,7 @@ popup.describe('Popup UI: import account with file', () => {
       popupPage.getByText(IMPORTED_TORUS_ACCOUNT.truncatedPublicKey)
     ).toBeVisible();
     await popupExpect(
-      popupPage.getByText('Imported', { exact: true })
+      popupPage.getByTestId('import-account-icon')
     ).toBeVisible();
   });
 });

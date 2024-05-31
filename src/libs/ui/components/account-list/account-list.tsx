@@ -3,8 +3,10 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { isLedgerAvailable } from '@src/utils';
+
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
-import { RouterPath, useTypedNavigate } from '@popup/router';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { WindowApp } from '@background/create-open-window';
 import {
@@ -16,14 +18,14 @@ import {
 import { useWindowManager } from '@hooks/use-window-manager';
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
-import { CenteredFlexRow, SpacingSize } from '@libs/layout';
+import { FlexColumn, SpacingSize } from '@libs/layout';
 import { AccountListRows } from '@libs/types/account';
 import { Button, List } from '@libs/ui/components';
 import { sortAccounts } from '@libs/ui/components/account-list/utils';
 
 import { AccountListItem } from './account-list-item';
 
-const ButtonContainer = styled(CenteredFlexRow)`
+const ButtonContainer = styled(FlexColumn)`
   padding: 16px;
 `;
 
@@ -32,8 +34,8 @@ interface AccountListProps {
 }
 
 export const AccountList = ({ closeModal }: AccountListProps) => {
+  const { pathname } = useTypedLocation();
   const [accountListRows, setAccountListRows] = useState<AccountListRows[]>([]);
-
   const { changeActiveAccountWithEvent: changeActiveAccount } =
     useAccountManager();
   const { t } = useTranslation();
@@ -66,7 +68,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
     <List
       rows={accountListRows}
       contentTop={SpacingSize.None}
-      maxHeight={402}
+      maxHeight={322}
       renderRow={account => {
         const isConnected = connectedAccountNames.includes(account.name);
         const isActiveAccount = activeAccountName === account.name;
@@ -89,7 +91,14 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
         <ButtonContainer gap={SpacingSize.Large}>
           <Button
             color="secondaryBlue"
-            flexWidth
+            onClick={() => {
+              navigate(RouterPath.CreateAccount);
+            }}
+          >
+            <Trans t={t}>Create account</Trans>
+          </Button>
+          <Button
+            color="secondaryBlue"
             onClick={() => {
               openWindow({
                 windowApp: WindowApp.ImportAccount,
@@ -97,17 +106,22 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
               }).catch(e => console.error(e));
             }}
           >
-            <Trans t={t}>Import</Trans>
+            <Trans t={t}>Import account</Trans>
           </Button>
-          <Button
-            color="secondaryBlue"
-            flexWidth
-            onClick={() => {
-              navigate(RouterPath.CreateAccount);
-            }}
-          >
-            <Trans t={t}>Create</Trans>
-          </Button>
+          {isLedgerAvailable && (
+            <Button
+              color="secondaryBlue"
+              onClick={evt => {
+                if (pathname === RouterPath.ImportAccountFromLedger) {
+                  closeModal(evt);
+                } else {
+                  navigate(RouterPath.ImportAccountFromLedger);
+                }
+              }}
+            >
+              <Trans t={t}>Connect Ledger</Trans>
+            </Button>
+          )}
         </ButtonContainer>
       )}
     />

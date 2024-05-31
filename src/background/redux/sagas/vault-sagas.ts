@@ -52,6 +52,7 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
+  accountsImported,
   activeAccountChanged,
   anotherAccountConnected,
   deployPayloadReceived,
@@ -96,6 +97,7 @@ export function* vaultSagas() {
     [
       getType(accountAdded),
       getType(accountImported),
+      getType(accountsImported),
       getType(accountRemoved),
       getType(accountRenamed),
       getType(siteConnected),

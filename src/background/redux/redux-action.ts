@@ -6,6 +6,7 @@ import * as activeOrigin from './active-origin/actions';
 import * as contacts from './contacts/actions';
 import * as keys from './keys/actions';
 import * as lastActivityTime from './last-activity-time/actions';
+import * as ledger from './ledger/actions';
 import * as loginRetryCount from './login-retry-count/actions';
 import * as loginRetryLockoutTime from './login-retry-lockout-time/actions';
 import * as rateApp from './rate-app/actions';
@@ -33,7 +34,8 @@ const reduxAction = {
   accountInfo,
   contacts,
   rateApp,
-  accountBalances
+  accountBalances,
+  ledger
 };
 
 export type ReduxAction = ActionType<typeof reduxAction>;
