@@ -46,6 +46,7 @@ export const TokenPlate = ({
 }: TokenPlateProps) => {
   const tokenIconFormat = token?.icon?.split('.').pop();
   const isTokenIconJPG = tokenIconFormat === 'jpg';
+  const isTokenIconPNG = tokenIconFormat === 'png';
 
   return (
     <ListItemContainer
@@ -55,7 +56,7 @@ export const TokenPlate = ({
       clickable={!!handleOnClick}
     >
       <AlignedFlexRow gap={SpacingSize.Medium}>
-        {isTokenIconJPG ? (
+        {isTokenIconJPG || isTokenIconPNG ? (
           <LogoImg
             src={token?.icon || ''}
             alt={token?.name}
