@@ -79,6 +79,7 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
+  accountsAdded,
   accountsImported,
   activeAccountChanged,
   anotherAccountConnected,
@@ -163,6 +164,7 @@ import {
   initKeys,
   initVault,
   lockVault,
+  recoverVault,
   resetVault,
   unlockVault
 } from './redux/sagas/actions';
@@ -573,6 +575,7 @@ runtime.onMessage.addListener(
           case getType(unlockVault):
           case getType(initKeys):
           case getType(initVault):
+          case getType(recoverVault):
           case getType(createAccount):
           case getType(deploysReseted):
           case getType(sessionReseted):
@@ -584,6 +587,7 @@ runtime.onMessage.addListener(
           case getType(accountImported):
           case getType(accountsImported):
           case getType(accountAdded):
+          case getType(accountsAdded):
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeAccountChanged):

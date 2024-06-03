@@ -32,9 +32,14 @@ export function ConfirmSecretPhraseSuccessPageContent() {
 
   return (
     <TabPageContainer>
-      <Typography type="header">
-        <Trans t={t}>Awesome, your secret phrase is confirmed!</Trans>
+      <Typography type="captionMedium" color="contentActionCritical" uppercase>
+        <Trans t={t}>Step 6</Trans>
       </Typography>
+      <VerticalSpaceContainer top={SpacingSize.Tiny}>
+        <Typography type="headerBig">
+          <Trans t={t}>Awesome, your secret phrase is confirmed!</Trans>
+        </Typography>
+      </VerticalSpaceContainer>
 
       <TabTextContainer>
         <Typography type="body" color="contentSecondary">

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { SvgIcon } from '@libs/ui/components';
 
-import { CenteredFlexColumn } from './containers';
+import { CenteredFlexColumn, FlexColumn } from './containers';
 
 const Container = styled.div`
   width: 100%;
@@ -14,7 +14,7 @@ const Container = styled.div`
 
 const AbsoluteCenteredContainer = styled(CenteredFlexColumn)`
   width: 512px;
-  gap: 40px;
+  gap: 60px;
 
   position: absolute;
   top: 50%;
@@ -24,9 +24,10 @@ const AbsoluteCenteredContainer = styled(CenteredFlexColumn)`
 
 interface ContentContainerProps {
   layoutContext: 'withIllustration' | 'withStepper';
+  minHeight?: number | 'auto';
 }
 
-const MainContainer = styled.div<ContentContainerProps>`
+const MainContainer = styled(FlexColumn)<ContentContainerProps>`
   background-color: ${({ theme, layoutContext }) =>
     layoutContext === 'withIllustration'
       ? theme.color.backgroundPrimary
@@ -36,7 +37,14 @@ const MainContainer = styled.div<ContentContainerProps>`
 
   height: 100%;
   width: 100%;
+  min-height: ${({ minHeight }) =>
+    minHeight === 'auto' ? minHeight : minHeight ? `${minHeight}px` : '560px'};
   overflow-y: auto;
+`;
+
+const ContentContainer = styled.div`
+  height: 100%;
+  flex-grow: 1;
 `;
 
 interface LayoutProps extends ContentContainerProps {
@@ -49,7 +57,8 @@ export function LayoutTab({
   layoutContext,
   renderHeader,
   renderContent,
-  renderFooter
+  renderFooter,
+  minHeight
 }: LayoutProps) {
   return (
     <Container>
@@ -59,9 +68,9 @@ export function LayoutTab({
           width={164}
           height={40}
         />
-        <MainContainer layoutContext={layoutContext}>
+        <MainContainer layoutContext={layoutContext} minHeight={minHeight}>
           {renderHeader && renderHeader()}
-          {renderContent()}
+          <ContentContainer>{renderContent()}</ContentContainer>
           {renderFooter && renderFooter()}
         </MainContainer>
       </AbsoluteCenteredContainer>

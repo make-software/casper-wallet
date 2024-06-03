@@ -36,11 +36,16 @@ export function CreateSecretPhraseConfirmationPageContent() {
 
   return (
     <TabPageContainer>
-      <Typography type="header">
-        <Trans t={t}>
-          Before we generate your secret recovery phrase, please remember
-        </Trans>
+      <Typography type="captionMedium" color="contentActionCritical" uppercase>
+        <Trans t={t}>Step 3</Trans>
       </Typography>
+      <VerticalSpaceContainer top={SpacingSize.Tiny}>
+        <Typography type="headerBig">
+          <Trans t={t}>
+            Before we generate your secret recovery phrase, please remember
+          </Trans>
+        </Typography>
+      </VerticalSpaceContainer>
 
       <VerticalSpaceContainer top={SpacingSize.XL}>
         <TextList items={items} />

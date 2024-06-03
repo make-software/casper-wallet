@@ -14,13 +14,13 @@ import { ErrorContent } from './types';
 
 interface ErrorPageContentProps extends ErrorContent {
   // TODO: I guess will be better pass it through location state. It require extending of location state type
-  illustrationType: 'onboarding' | 'general';
+  pageType: 'onboarding' | 'general';
 }
 
 export function ErrorPageContent({
   errorContentText,
   errorHeaderText,
-  illustrationType
+  pageType
 }: ErrorPageContentProps) {
   if (errorContentText == null || errorHeaderText == null) {
     throw new Error('Cannot render ErrorPage: not enough props');
@@ -29,7 +29,7 @@ export function ErrorPageContent({
   return (
     <PageContainer>
       <ContentContainer>
-        {illustrationType === 'onboarding' ? (
+        {pageType === 'onboarding' ? (
           <OnboardingIllustrationContainer>
             <SvgIcon
               src="assets/illustrations/wrong-secret-phrase.svg"
@@ -48,7 +48,9 @@ export function ErrorPageContent({
         )}
 
         <ParagraphContainer top={SpacingSize.XL}>
-          <Typography type="header">{errorHeaderText}</Typography>
+          <Typography type={pageType === 'onboarding' ? 'headerBig' : 'header'}>
+            {errorHeaderText}
+          </Typography>
         </ParagraphContainer>
 
         <ParagraphContainer top={SpacingSize.Medium}>

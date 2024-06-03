@@ -16,6 +16,7 @@ import { CreateVaultPasswordPage } from '@onboarding/pages/create-vault-password
 import { OnboardingSuccessPage } from '@onboarding/pages/onboarding-success';
 import { RecoverFromSecretPhrasePage } from '@onboarding/pages/recover-from-secret-phrase';
 import { ResetWalletPage } from '@onboarding/pages/reset-wallet';
+import { SelectAccountsToRecoverPage } from '@onboarding/pages/select-accounts-to-recover';
 import { UnlockWalletPage } from '@onboarding/pages/unlock-wallet';
 import { WelcomePage } from '@onboarding/pages/welcome';
 import { WriteDownSecretPhrasePage } from '@onboarding/pages/write-down-secret-phrase';
@@ -109,6 +110,10 @@ function AuthorizedUserRoutes({
         <Route
           path={RouterPath.RecoverFromSecretPhrase}
           element={<RecoverFromSecretPhrasePage />}
+        />
+        <Route
+          path={RouterPath.SelectAccountsToRecover}
+          element={<SelectAccountsToRecoverPage />}
         />
         <Route
           path={RouterPath.WriteDownSecretPhrase}

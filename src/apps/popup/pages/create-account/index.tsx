@@ -7,6 +7,7 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 import { createAccount } from '@background/redux/sagas/actions';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
+  selectSecretPhrase,
   selectVaultAccountsNames,
   selectVaultDerivedAccounts
 } from '@background/redux/vault/selectors';
@@ -33,6 +34,7 @@ export function CreateAccountPage() {
 
   const existingAccountNames = useSelector(selectVaultAccountsNames);
   const derivedAccounts = useSelector(selectVaultDerivedAccounts);
+  const secretPhrase = useSelector(selectSecretPhrase);
 
   const {
     register,
@@ -40,7 +42,7 @@ export function CreateAccountPage() {
     formState: { errors, isValid }
   } = useCreateAccountForm(
     existingAccountNames,
-    getDefaultName(derivedAccounts.length, existingAccountNames)
+    getDefaultName(existingAccountNames, derivedAccounts, secretPhrase)
   );
   const onSubmit = ({ name }: CreateAccountFormValues) => {
     const newName = name.trim();
