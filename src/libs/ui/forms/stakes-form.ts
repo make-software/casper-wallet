@@ -24,13 +24,13 @@ export type StakeAmountFormValues = {
 
 export const useStakesForm = (
   amountMotes: string | null,
-  stakesType: AuctionManagerEntryPoint,
+  stakeType: AuctionManagerEntryPoint,
   stakeAmountMotes: string,
   delegatorsNumber?: number,
   delegatorsNumberForNewValidator?: number
 ) => {
   const validatorFormSchema = Yup.object().shape({
-    validatorPublicKey: useValidatorPublicKeyRule(stakesType, delegatorsNumber)
+    validatorPublicKey: useValidatorPublicKeyRule(stakeType, delegatorsNumber)
   });
 
   const validatorFormOptions: UseFormProps<StakeValidatorFormValues> = {
@@ -52,7 +52,7 @@ export const useStakesForm = (
   };
 
   const amountFormSchema = Yup.object().shape({
-    amount: useCSPRStakeAmountRule(amountMotes, stakesType, stakeAmountMotes)
+    amount: useCSPRStakeAmountRule(amountMotes, stakeType, stakeAmountMotes)
   });
 
   const amountFormOptions: UseFormProps<StakeAmountFormValues> = {

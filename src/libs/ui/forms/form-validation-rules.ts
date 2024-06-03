@@ -21,7 +21,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { verifyPasswordAgainstHash } from '@libs/crypto/hashing';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 
-export const minPasswordLength = 16;
+export const minPasswordLength = 1;
 
 const ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED = 1;
 
@@ -403,7 +403,7 @@ export const useCSPRStakeAmountRule = (
 };
 
 export const useValidatorPublicKeyRule = (
-  stakesType: AuctionManagerEntryPoint,
+  stakeType: AuctionManagerEntryPoint,
   delegatorsNumber?: number
 ) => {
   const { t } = useTranslation();
@@ -419,8 +419,8 @@ export const useValidatorPublicKeyRule = (
       name: 'maxDelegators',
       test: () => {
         if (
-          stakesType === AuctionManagerEntryPoint.undelegate ||
-          stakesType === AuctionManagerEntryPoint.redelegate
+          stakeType === AuctionManagerEntryPoint.undelegate ||
+          stakeType === AuctionManagerEntryPoint.redelegate
         ) {
           return true;
         }

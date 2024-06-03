@@ -32,21 +32,21 @@ interface ConfirmStepProps {
   inputAmountCSPR: string;
   validator: ValidatorResult | null;
   newValidator: ValidatorResult | null;
-  stakesType: AuctionManagerEntryPoint;
+  stakeType: AuctionManagerEntryPoint;
   confirmStepText: string;
 }
 export const ConfirmStep = ({
   inputAmountCSPR,
   validator,
   newValidator,
-  stakesType,
+  stakeType,
   confirmStepText
 }: ConfirmStepProps) => {
   const { t } = useTranslation();
 
   const currencyRate = useSelector(selectAccountCurrencyRate);
 
-  const transferFeeMotes = getAuctionManagerDeployCost(stakesType);
+  const transferFeeMotes = getAuctionManagerDeployCost(stakeType);
 
   const transferCostInCSPR = formatNumber(motesToCSPR(transferFeeMotes), {
     precision: { max: 5 }
@@ -102,7 +102,7 @@ export const ConfirmStep = ({
           }
           delegatorsNumber={validator?.delegators_number}
           validatorLabel={
-            stakesType === AuctionManagerEntryPoint.redelegate
+            stakeType === AuctionManagerEntryPoint.redelegate
               ? t('From validator')
               : t('To validator')
           }

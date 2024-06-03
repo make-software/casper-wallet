@@ -33,7 +33,7 @@ interface ConfirmStepProps {
   amount: string;
   balance: string | null;
   symbol: string | null;
-  isCSPR: boolean;
+  isErc20Transfer: boolean;
   paymentAmount: string;
   recipientName?: string;
 }
@@ -42,7 +42,7 @@ export const ConfirmStep = ({
   amount,
   balance,
   symbol,
-  isCSPR,
+  isErc20Transfer,
   paymentAmount,
   recipientName
 }: ConfirmStepProps) => {
@@ -51,7 +51,7 @@ export const ConfirmStep = ({
   const currencyRate = useSelector(selectAccountCurrencyRate);
   let transactionDataRows;
 
-  if (isCSPR) {
+  if (!isErc20Transfer) {
     const transferCostInCSPR = formatNumber(motesToCSPR(TRANSFER_COST_MOTES), {
       precision: { max: 5 }
     });
