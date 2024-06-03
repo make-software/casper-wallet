@@ -10,20 +10,20 @@ import { accountRenamed } from '@background/redux/vault/actions';
 import { selectVaultAccountsNames } from '@background/redux/vault/selectors';
 
 import {
-  ContentContainer,
-  FooterButtonsAbsoluteContainer,
-  IllustrationContainer,
-  InputsContainer,
-  ParagraphContainer,
-  SpacingSize
+  FooterButtonsContainer,
+  HeaderPopup,
+  HeaderSubmenuBarNavLink,
+  PopupLayout
 } from '@libs/layout';
-import { Button, Input, SvgIcon, Typography } from '@libs/ui/components';
+import { Button } from '@libs/ui/components';
 import {
   RenameAccountFormValues,
   useRenameAccount
 } from '@libs/ui/forms/rename-account';
 
-export function RenameAccountPageContent() {
+import { RenameAccountPageContent } from './content';
+
+export const RenameAccountPage = () => {
   const navigate = useTypedNavigate();
   const { accountName } = useParams();
   const { t } = useTranslation();
@@ -48,30 +48,24 @@ export function RenameAccountPageContent() {
   }
 
   return (
-    <ContentContainer>
-      <IllustrationContainer>
-        <SvgIcon
-          src="assets/illustrations/rename-account.svg"
-          width={200}
-          height={120}
+    <PopupLayout
+      variant="form"
+      onSubmit={handleSubmit(onSubmit)}
+      renderHeader={() => (
+        <HeaderPopup
+          withNetworkSwitcher
+          withMenu
+          withConnectionStatus
+          renderSubmenuBarItems={() => (
+            <HeaderSubmenuBarNavLink linkType="back" />
+          )}
         />
-      </IllustrationContainer>
-      <ParagraphContainer top={SpacingSize.XL}>
-        <Typography type="header">
-          <Trans t={t}>Rename account</Trans>
-        </Typography>
-      </ParagraphContainer>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <InputsContainer>
-          <Input
-            type="text"
-            placeholder={t('New account name')}
-            {...register('name')}
-            error={!!errors.name}
-            validationText={errors.name?.message}
-          />
-        </InputsContainer>
-        <FooterButtonsAbsoluteContainer>
+      )}
+      renderContent={() => (
+        <RenameAccountPageContent register={register} errors={errors} />
+      )}
+      renderFooter={() => (
+        <FooterButtonsContainer>
           <Button disabled={!isDirty}>
             <Trans t={t}>Update</Trans>
           </Button>
@@ -82,8 +76,8 @@ export function RenameAccountPageContent() {
           >
             <Trans t={t}>Cancel</Trans>
           </Button>
-        </FooterButtonsAbsoluteContainer>
-      </form>
-    </ContentContainer>
+        </FooterButtonsContainer>
+      )}
+    />
   );
-}
+};

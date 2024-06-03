@@ -8,18 +8,19 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { accountRemoved } from '@background/redux/vault/actions';
 
 import {
-  ContentContainer,
-  FooterButtonsAbsoluteContainer,
-  IllustrationContainer,
-  ParagraphContainer,
-  SpacingSize
+  FooterButtonsContainer,
+  HeaderPopup,
+  HeaderSubmenuBarNavLink,
+  PopupLayout
 } from '@libs/layout';
-import { Button, SvgIcon, Typography } from '@libs/ui/components';
+import { Button } from '@libs/ui/components';
 
-export function RemoveAccountPageContent() {
+import { RemoveAccountPageContent } from './content';
+
+export const RemoveAccountPage = () => {
+  const { t } = useTranslation();
   const navigate = useTypedNavigate();
   const { accountName } = useParams();
-  const { t } = useTranslation();
 
   const handleRemoveAccount = useCallback(() => {
     if (!accountName) {
@@ -37,35 +38,28 @@ export function RemoveAccountPageContent() {
   }
 
   return (
-    <ContentContainer>
-      <IllustrationContainer>
-        <SvgIcon
-          src="assets/illustrations/remove-account.svg"
-          width={200}
-          height={120}
+    <PopupLayout
+      renderHeader={() => (
+        <HeaderPopup
+          withNetworkSwitcher
+          withMenu
+          withConnectionStatus
+          renderSubmenuBarItems={() => (
+            <HeaderSubmenuBarNavLink linkType="back" />
+          )}
         />
-      </IllustrationContainer>
-      <ParagraphContainer top={SpacingSize.XL}>
-        <Typography type="header">
-          <Trans t={t}>Remove account?</Trans>
-        </Typography>
-      </ParagraphContainer>
-      <ParagraphContainer top={SpacingSize.Medium}>
-        <Typography type="body" color="contentSecondary">
-          <Trans t={t}>
-            Are you sure you want to remove this account? The action can’t be
-            undone.
-          </Trans>
-        </Typography>
-      </ParagraphContainer>
-      <FooterButtonsAbsoluteContainer>
-        <Button color="primaryRed" onClick={handleRemoveAccount}>
-          <Trans t={t}>Remove</Trans>
-        </Button>
-        <Button onClick={() => navigate(-1)} color="secondaryBlue">
-          <Trans t={t}>Cancel</Trans>
-        </Button>
-      </FooterButtonsAbsoluteContainer>
-    </ContentContainer>
+      )}
+      renderContent={() => <RemoveAccountPageContent />}
+      renderFooter={() => (
+        <FooterButtonsContainer>
+          <Button color="primaryRed" onClick={handleRemoveAccount}>
+            <Trans t={t}>Remove</Trans>
+          </Button>
+          <Button onClick={() => navigate(-1)} color="secondaryBlue">
+            <Trans t={t}>Cancel</Trans>
+          </Button>
+        </FooterButtonsContainer>
+      )}
+    />
   );
-}
+};

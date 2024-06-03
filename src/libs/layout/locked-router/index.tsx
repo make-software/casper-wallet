@@ -1,13 +1,8 @@
 import React from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
-import {
-  LayoutWindow,
-  PopupLayout,
-  ResetVaultPageContent,
-  UnlockVaultPageContent
-} from '@libs/layout';
-import { HeaderPopup } from '@libs/layout/header/header-popup';
+import { ResetVaultPage } from '@libs/layout/reset-vault';
+import { UnlockVaultPage } from '@libs/layout/unlock-vault';
 
 export const LockedRouterPath = {
   Any: '*',
@@ -18,43 +13,17 @@ interface LockedRouterProps {
   popupLayout?: boolean;
 }
 
-export function LockedRouter({ popupLayout }: LockedRouterProps) {
-  return (
-    <HashRouter>
-      <Routes>
-        <Route
-          path={LockedRouterPath.Any}
-          element={
-            popupLayout ? (
-              <PopupLayout
-                renderHeader={() => <HeaderPopup />}
-                renderContent={() => <UnlockVaultPageContent />}
-              />
-            ) : (
-              <LayoutWindow
-                renderHeader={() => <HeaderPopup />}
-                renderContent={() => <UnlockVaultPageContent />}
-              />
-            )
-          }
-        />
-        <Route
-          path={LockedRouterPath.ResetVault}
-          element={
-            popupLayout ? (
-              <PopupLayout
-                renderHeader={() => <HeaderPopup />}
-                renderContent={() => <ResetVaultPageContent />}
-              />
-            ) : (
-              <LayoutWindow
-                renderHeader={() => <HeaderPopup />}
-                renderContent={() => <ResetVaultPageContent />}
-              />
-            )
-          }
-        />
-      </Routes>
-    </HashRouter>
-  );
-}
+export const LockedRouter = ({ popupLayout }: LockedRouterProps) => (
+  <HashRouter>
+    <Routes>
+      <Route
+        path={LockedRouterPath.Any}
+        element={<UnlockVaultPage popupLayout={popupLayout} />}
+      />
+      <Route
+        path={LockedRouterPath.ResetVault}
+        element={<ResetVaultPage popupLayout={popupLayout} />}
+      />
+    </Routes>
+  </HashRouter>
+);
