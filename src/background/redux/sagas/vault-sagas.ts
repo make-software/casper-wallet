@@ -53,6 +53,7 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
+  accountsAdded,
   accountsImported,
   activeAccountChanged,
   anotherAccountConnected,
@@ -97,6 +98,7 @@ export function* vaultSagas() {
   yield takeLatest(
     [
       getType(accountAdded),
+      getType(accountsAdded),
       getType(accountImported),
       getType(accountsImported),
       getType(accountRemoved),
