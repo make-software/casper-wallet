@@ -9,7 +9,6 @@ import {
   selectPasswordHash,
   selectPasswordSaltHash
 } from '@background/redux/keys/selectors';
-import { selectHasLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
 import { unlockVault } from '@background/redux/sagas/actions';
 import { UnlockVault } from '@background/redux/sagas/types';
 import { dispatchToMainStore } from '@background/redux/utils';
@@ -21,44 +20,39 @@ import { useLockWalletWhenNoMoreRetries } from '@hooks/use-lock-wallet-when-no-m
 import unlockAnimation from '@libs/animations/unlock_animation.json';
 import {
   AlignedFlexRow,
-  ContentContainer,
-  FooterButtonsAbsoluteContainer,
-  IllustrationContainer,
-  InputsContainer,
+  FooterButtonsContainer,
+  HeaderPopup,
+  LayoutWindow,
   LockedRouterPath,
-  ParagraphContainer,
+  PopupLayout,
   SpacingSize
 } from '@libs/layout';
-import {
-  Button,
-  Input,
-  PasswordInputType,
-  PasswordVisibilityIcon,
-  SvgIcon,
-  Typography
-} from '@libs/ui/components';
+import { Button, Typography } from '@libs/ui/components';
 import {
   UnlockWalletFormValues,
   useUnlockWalletForm
 } from '@libs/ui/forms/unlock-wallet';
 
+import { UnlockVaultPageContent } from './content';
+
 interface UnlockMessageEvent extends MessageEvent {
   data: UnlockVault;
 }
 
-export function UnlockVaultPageContent() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+interface UnlockVaultPageProps {
+  popupLayout?: boolean;
+}
+
+export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const [passwordInputType, setPasswordInputType] =
-    useState<PasswordInputType>('password');
+  const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const passwordHash = useSelector(selectPasswordHash);
   const passwordSaltHash = useSelector(selectPasswordSaltHash);
   const keyDerivationSaltHash = useSelector(selectKeyDerivationSaltHash);
   const vaultCipher = useSelector(selectVaultCipher);
-  const hasLoginRetryLockoutTime = useSelector(selectHasLoginRetryLockoutTime);
 
   if (passwordHash == null || passwordSaltHash == null) {
     throw Error("Password doesn't exist");
@@ -153,111 +147,58 @@ export function UnlockVaultPageContent() {
 
   useLockWalletWhenNoMoreRetries(resetField);
 
-  if (hasLoginRetryLockoutTime) {
-    return (
-      <>
-        <ContentContainer>
-          <IllustrationContainer>
-            <SvgIcon
-              src="assets/illustrations/password-lock.svg"
-              width={210}
-              height={120}
+  const footer = (
+    <FooterButtonsContainer>
+      <Button type="submit" disabled={isLoading}>
+        {isLoading ? (
+          <AlignedFlexRow gap={SpacingSize.Small}>
+            <Player
+              renderer={'svg'}
+              autoplay
+              loop
+              src={unlockAnimation}
+              style={{ width: '24px', height: '24px' }}
             />
-          </IllustrationContainer>
-          <ParagraphContainer top={SpacingSize.XL}>
-            <Typography type="header">
-              <Trans t={t}>
-                Please wait before the next attempt to unlock your wallet
-              </Trans>
-            </Typography>
-          </ParagraphContainer>
-          <ParagraphContainer top={SpacingSize.Medium}>
-            <Typography type="body" color="contentSecondary">
-              <Trans t={t}>
-                You’ve reached the maximum number of unlock attempts. For
-                security reasons, you will need to wait a brief while before you
-                can attempt again.
-              </Trans>
-            </Typography>
-          </ParagraphContainer>
-          <ParagraphContainer top={SpacingSize.Medium}>
-            <Typography type="body" color="contentSecondary">
-              <Trans t={t}>
-                You can try again in <b>5 mins.</b>
-              </Trans>
-            </Typography>
-          </ParagraphContainer>
-        </ContentContainer>
-      </>
-    );
-  }
-
-  return (
-    <form onSubmit={handleSubmit(handleUnlockVault)}>
-      <ContentContainer>
-        <IllustrationContainer>
-          <SvgIcon
-            src="assets/illustrations/locked-wallet.svg"
-            width={200}
-            height={120}
-          />
-        </IllustrationContainer>
-        <ParagraphContainer top={SpacingSize.XL}>
-          <Typography type="header">
-            <Trans t={t}>Your wallet is locked</Trans>
-          </Typography>
-        </ParagraphContainer>
-        <ParagraphContainer top={SpacingSize.Medium}>
-          <Typography type="body" color="contentSecondary">
-            <Trans t={t}>Please enter your password to unlock.</Trans>
-          </Typography>
-        </ParagraphContainer>
-        <InputsContainer>
-          <Input
-            type={passwordInputType}
-            placeholder={t('Password')}
-            error={!!errors.password}
-            validationText={errors.password?.message}
-            suffixIcon={
-              <PasswordVisibilityIcon
-                passwordInputType={passwordInputType}
-                setPasswordInputType={setPasswordInputType}
-              />
-            }
-            {...register('password')}
-          />
-        </InputsContainer>
-      </ContentContainer>
-      <FooterButtonsAbsoluteContainer>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? (
-            <AlignedFlexRow gap={SpacingSize.Small}>
-              <Player
-                renderer="svg"
-                autoplay
-                loop
-                src={unlockAnimation}
-                style={{ width: '24px', height: '24px' }}
-              />
-              <Typography type="bodySemiBold">
-                <Trans t={t}>Unlocking...</Trans>
-              </Typography>
-            </AlignedFlexRow>
-          ) : (
             <Typography type="bodySemiBold">
-              <Trans t={t}>Unlock wallet</Trans>
+              <Trans t={t}>Unlocking...</Trans>
             </Typography>
-          )}
-        </Button>
-        <Button
-          disabled={isLoading}
-          type="button"
-          color="secondaryRed"
-          onClick={() => navigate(LockedRouterPath.ResetVault)}
-        >
-          {t('Reset wallet')}
-        </Button>
-      </FooterButtonsAbsoluteContainer>
-    </form>
+          </AlignedFlexRow>
+        ) : (
+          <Typography type="bodySemiBold">
+            <Trans t={t}>Unlock wallet</Trans>
+          </Typography>
+        )}
+      </Button>
+      <Button
+        disabled={isLoading}
+        type="button"
+        color="secondaryRed"
+        onClick={() => navigate(LockedRouterPath.ResetVault)}
+      >
+        {t('Reset wallet')}
+      </Button>
+    </FooterButtonsContainer>
   );
-}
+
+  return popupLayout ? (
+    <PopupLayout
+      variant="form"
+      onSubmit={handleSubmit(handleUnlockVault)}
+      renderHeader={() => <HeaderPopup />}
+      renderContent={() => (
+        <UnlockVaultPageContent register={register} errors={errors} />
+      )}
+      renderFooter={() => footer}
+    />
+  ) : (
+    <LayoutWindow
+      variant="form"
+      onSubmit={handleSubmit(handleUnlockVault)}
+      renderHeader={() => <HeaderPopup />}
+      renderContent={() => (
+        <UnlockVaultPageContent register={register} errors={errors} />
+      )}
+      renderFooter={() => footer}
+    />
+  );
+};

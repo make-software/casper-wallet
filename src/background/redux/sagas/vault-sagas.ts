@@ -26,6 +26,7 @@ import {
 } from '@libs/crypto/hashing';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import { encryptVault } from '@libs/crypto/vault';
+import { Account } from '@libs/types/account';
 
 import { accountInfoReset } from '../account-info/actions';
 import { keysUpdated } from '../keys/actions';
@@ -316,17 +317,31 @@ function* createAccountSaga(action: ReturnType<typeof createAccount>) {
       throw Error('Account name exist');
     }
 
-    const accountCount = derivedAccounts.length;
+    let isAccountAlreadyAdded = true;
+    let i = 0;
+
     const secretPhrase = yield* sagaSelect(selectSecretPhrase);
 
-    const keyPair = deriveKeyPair(secretPhrase, accountCount);
-    const account = {
-      ...keyPair,
-      name,
-      hidden: false
-    };
+    while (isAccountAlreadyAdded) {
+      const keyPair = deriveKeyPair(secretPhrase, i);
+      if (
+        !derivedAccounts.some(
+          account => account.publicKey === keyPair.publicKey
+        )
+      ) {
+        isAccountAlreadyAdded = false;
 
-    yield put(accountAdded(account));
+        const account: Account = {
+          ...keyPair,
+          name,
+          hidden: false,
+          derivationIndex: i
+        };
+        yield put(accountAdded(account));
+        break;
+      }
+      i++;
+    }
   } catch (err) {
     console.error(err);
   }

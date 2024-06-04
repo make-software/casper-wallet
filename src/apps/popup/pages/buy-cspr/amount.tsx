@@ -8,19 +8,26 @@ import {
   AlignedFlexRow,
   BaseLineFlexRow,
   ContentContainer,
+  InputsContainer,
   LeftAlignedFlexColumn,
   ParagraphContainer,
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
 import { ResponseCurrencyProps } from '@libs/services/buy-cspr-service/types';
-import { Input, List, Modal, SvgIcon, Typography } from '@libs/ui/components';
+import {
+  Input,
+  List,
+  Modal,
+  ModalSwitcher,
+  SvgIcon,
+  Typography
+} from '@libs/ui/components';
 import { useBuyCSPR } from '@libs/ui/forms/buy-cspr';
 import { formatNumber, handleNumericInput } from '@libs/ui/utils';
 
 import { CurrencyRow } from './components/currency-row';
 import { ListRow } from './components/list-row';
-import { Switcher } from './components/switcher';
 
 interface AmountProps {
   currencies: ResponseCurrencyProps[];
@@ -120,12 +127,16 @@ export const Amount = ({
           />
           <Modal
             renderContent={({ closeModal }) => (
-              <Switcher
-                label="Currency"
-                closeSwitcher={closeModal}
-                register={currencySearchRegister}
-                searchName="currencySearch"
-              >
+              <ModalSwitcher label="Currency" closeSwitcher={closeModal}>
+                <InputsContainer>
+                  <Input
+                    prefixIcon={
+                      <SvgIcon src="assets/icons/search.svg" size={24} />
+                    }
+                    placeholder={t('Search')}
+                    {...currencySearchRegister('currencySearch')}
+                  />
+                </InputsContainer>
                 <List
                   contentTop={SpacingSize.Medium}
                   rows={sortedCurrency}
@@ -152,7 +163,7 @@ export const Amount = ({
                   }}
                   marginLeftForItemSeparatorLine={16}
                 />
-              </Switcher>
+              </ModalSwitcher>
             )}
             placement="fullBottom"
             children={() => (

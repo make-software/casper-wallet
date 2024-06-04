@@ -22,11 +22,11 @@ import { ImportAccountFromLedgerPage } from '@popup/pages/import-account-from-le
 import { ImportAccountFromTorusPage } from '@popup/pages/import-account-from-torus';
 import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
 import { NftDetailsPage } from '@popup/pages/nft-details';
-import { NoConnectedAccountPageContent } from '@popup/pages/no-connected-account';
+import { NoConnectedAccountPage } from '@popup/pages/no-connected-account';
 import { RateAppPage } from '@popup/pages/rate-app';
 import { ReceivePage } from '@popup/pages/receive';
-import { RemoveAccountPageContent } from '@popup/pages/remove-account';
-import { RenameAccountPageContent } from '@popup/pages/rename-account';
+import { RemoveAccountPage } from '@popup/pages/remove-account';
+import { RenameAccountPage } from '@popup/pages/rename-account';
 import { SignWithLedgerInNewWindowPage } from '@popup/pages/sign-with-ledger-in-new-window';
 import { StakesPage } from '@popup/pages/stakes';
 import { TimeoutPageContent } from '@popup/pages/timeout';
@@ -134,52 +134,11 @@ function AppRoutes() {
           />
         }
       />
-      <Route
-        path={RouterPath.RemoveAccount}
-        element={
-          <PopupLayout
-            renderHeader={() => (
-              <HeaderPopup
-                withNetworkSwitcher
-                withMenu
-                withConnectionStatus
-                renderSubmenuBarItems={() => (
-                  <HeaderSubmenuBarNavLink linkType="back" />
-                )}
-              />
-            )}
-            renderContent={() => <RemoveAccountPageContent />}
-          />
-        }
-      />
-      <Route
-        path={RouterPath.RenameAccount}
-        element={
-          <PopupLayout
-            renderHeader={() => (
-              <HeaderPopup
-                withNetworkSwitcher
-                withMenu
-                withConnectionStatus
-                renderSubmenuBarItems={() => (
-                  <HeaderSubmenuBarNavLink linkType="back" />
-                )}
-              />
-            )}
-            renderContent={() => <RenameAccountPageContent />}
-          />
-        }
-      />
+      <Route path={RouterPath.RemoveAccount} element={<RemoveAccountPage />} />
+      <Route path={RouterPath.RenameAccount} element={<RenameAccountPage />} />
       <Route
         path={RouterPath.NoConnectedAccount}
-        element={
-          <PopupLayout
-            renderHeader={() => (
-              <HeaderPopup withNetworkSwitcher withMenu withConnectionStatus />
-            )}
-            renderContent={() => <NoConnectedAccountPageContent />}
-          />
-        }
+        element={<NoConnectedAccountPage />}
       />
       <Route
         path={RouterPath.ConnectedSites}

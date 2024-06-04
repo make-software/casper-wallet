@@ -63,7 +63,7 @@ export function Tabs({ children, preferActiveTabId }: TabsProps) {
   return (
     <>
       <StickyTabsContainer>
-        <TabsContainer>
+        <TabsContainer flexGrow={1}>
           {children.map((tab, index) => {
             const { tabName } = tab.props;
 

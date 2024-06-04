@@ -70,11 +70,18 @@ export const DEFAULT_SECOND_ACCOUNT = {
   mediumTruncatedPublicKey: '0203b2e05f...8e91aa7724'
 };
 
-export const RECOVER_ACCOUNT_FROM_TWELVE_WORDS = {
+export const RECOVER_FIRST_ACCOUNT_FROM_TWELVE_WORDS = {
   accountName: 'Account 1',
   publicKey:
     '0202b869dbed03ef2cc6a76e54e1a5c588fbe6198f80937994f9a2c1fd3aff4adc1b',
   truncatedPublicKey: '0202b...adc1b'
+};
+
+export const RECOVER_SECOND_ACCOUNT_FROM_TWELVE_WORDS = {
+  accountName: 'Account 1',
+  publicKey:
+    '02022cafccfb61ffc4e4221e4d2c38eec6035d579d04c1396b1c2027dc0729c53589',
+  truncatedPublicKey: '02022...53589'
 };
 
 export const VALIDATOR = {

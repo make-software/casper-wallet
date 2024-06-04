@@ -1,5 +1,4 @@
 import React from 'react';
-import { FieldValues, UseFormRegister } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -7,20 +6,23 @@ import {
   AlignedFlexRow,
   FlexColumn,
   FooterButtonsContainer,
-  InputsContainer,
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { Button, Input, SvgIcon, Typography } from '@libs/ui/components';
+import { Button, Typography } from '@libs/ui/components';
 
 const Container = styled(FlexColumn)`
   background-color: ${({ theme }) => theme.color.backgroundSecondary};
   border-top-right-radius: ${({ theme }) => theme.borderRadius.sixteen}px;
   border-top-left-radius: ${({ theme }) => theme.borderRadius.sixteen}px;
+
+  height: 528px;
 `;
 
 const ContentContainer = styled.div`
   padding: 0 16px;
+
+  flex-grow: 1;
 `;
 
 const HeaderContainer = styled(AlignedFlexRow)`
@@ -36,19 +38,15 @@ const CancelButton = styled(Typography)`
 `;
 
 interface SwitcherProps {
-  label: 'Country' | 'Currency';
+  label: string;
   closeSwitcher: (e: React.MouseEvent<Element, MouseEvent>) => void;
   children: React.ReactNode;
-  register: UseFormRegister<FieldValues>;
-  searchName: 'countryNameSearch' | 'currencySearch';
 }
 
-export const Switcher = ({
+export const ModalSwitcher = ({
   label,
   closeSwitcher,
-  children,
-  register,
-  searchName
+  children
 }: SwitcherProps) => {
   const { t } = useTranslation();
 
@@ -70,14 +68,6 @@ export const Switcher = ({
             <Trans t={t}>{label}</Trans>
           </Typography>
         </ParagraphContainer>
-
-        <InputsContainer>
-          <Input
-            prefixIcon={<SvgIcon src="assets/icons/search.svg" size={24} />}
-            placeholder={t('Search')}
-            {...register(searchName)}
-          />
-        </InputsContainer>
 
         {children}
       </ContentContainer>

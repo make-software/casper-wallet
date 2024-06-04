@@ -9,6 +9,7 @@ type Ref = HTMLSpanElement | HTMLHeadingElement;
 
 export type TypographyType =
   | 'header'
+  | 'headerBig'
   | 'body'
   | 'bodySemiBold'
   | 'bodyHash'
@@ -220,21 +221,37 @@ const StyledTypography = styled('span').withConfig({
 const StyledHeader = styled('h1').withConfig({
   shouldForwardProp: (prop, defaultValidatorFn) =>
     !['loading'].includes(prop) && defaultValidatorFn(prop)
-})<TypographyProps>(({ theme, ...props }) => {
+})<TypographyProps>(({ theme, type, ...props }) => {
   const body = getBodyStyles(theme, props);
-  return {
-    ...body,
-    fontWeight: theme.typography.fontWeight.bold,
-    fontSize: '2.4rem',
-    lineHeight: '2.8rem'
-  };
+
+  switch (type) {
+    case 'header': {
+      return {
+        ...body,
+        fontWeight: theme.typography.fontWeight.bold,
+        fontSize: '2.4rem',
+        lineHeight: '2.8rem'
+      };
+    }
+    case 'headerBig': {
+      return {
+        ...body,
+        fontWeight: theme.typography.fontWeight.bold,
+        fontSize: '2.8rem',
+        lineHeight: '3.6rem'
+      };
+    }
+  }
 });
 
 export const Typography = forwardRef<Ref, TypographyProps>(function Typography(
   { dataTestId, ...props },
   ref
 ) {
-  const Component = props.type !== 'header' ? StyledTypography : StyledHeader;
+  const Component =
+    props.type !== 'header' && props.type !== 'headerBig'
+      ? StyledTypography
+      : StyledHeader;
 
   if (props.loading) {
     return (

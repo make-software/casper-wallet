@@ -31,7 +31,7 @@ export function TabErrorPage({
         <ErrorPageContent
           errorHeaderText={state.errorHeaderText}
           errorContentText={state.errorContentText}
-          illustrationType="onboarding"
+          pageType="onboarding"
         />
       )}
       renderFooter={() => (

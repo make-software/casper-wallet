@@ -110,7 +110,7 @@ export function CreateVaultPasswordPage({
           </CreateVaultPasswordPageContent>
         )}
         renderFooter={() => (
-          <TabFooterContainer>
+          <TabFooterContainer style={{ marginTop: '28px' }}>
             <Checkbox
               checked={isChecked}
               onChange={() => setIsChecked(currentValue => !currentValue)}

@@ -1,5 +1,4 @@
-import React from 'react';
-import { UseFormReturn } from 'react-hook-form';
+import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -7,29 +6,39 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import {
-  ActiveAccountPlate,
-  RecipientDropdownInput,
-  Typography
-} from '@libs/ui/components';
-import { TransferRecipientFormValues } from '@libs/ui/forms/transfer';
+import { Typography } from '@libs/ui/components';
+import { RecipientTabs } from '@libs/ui/components/recipient-tabs/recipient-tabs';
+import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
+import { useTransferRecipientForm } from '@libs/ui/forms/transfer';
 
 interface RecipientStepProps {
-  recipientForm: UseFormReturn<TransferRecipientFormValues>;
-  balance: string | null;
-  symbol: string | null;
   setRecipientName: React.Dispatch<React.SetStateAction<string>>;
   recipientName: string;
+  setRecipientPublicKey: (value: React.SetStateAction<string>) => void;
+  setIsRecipientFormButtonDisabled: React.Dispatch<
+    React.SetStateAction<boolean>
+  >;
 }
 
 export const RecipientStep = ({
-  recipientForm,
-  balance,
-  symbol,
   setRecipientName,
-  recipientName
+  recipientName,
+  setIsRecipientFormButtonDisabled,
+  setRecipientPublicKey
 }: RecipientStepProps) => {
   const { t } = useTranslation();
+
+  const recipientForm = useTransferRecipientForm();
+
+  const { formState } = recipientForm;
+
+  useEffect(() => {
+    const isRecipientFormButtonDisabled = calculateSubmitButtonDisabled({
+      isValid: formState.isValid
+    });
+
+    setIsRecipientFormButtonDisabled(!!isRecipientFormButtonDisabled);
+  }, [formState.isValid, setIsRecipientFormButtonDisabled]);
 
   return (
     <ContentContainer>
@@ -38,12 +47,12 @@ export const RecipientStep = ({
           <Trans t={t}>Specify recipient</Trans>
         </Typography>
       </ParagraphContainer>
-      <ActiveAccountPlate label="From" balance={balance} symbol={symbol} />
 
-      <RecipientDropdownInput
+      <RecipientTabs
         recipientForm={recipientForm}
-        setRecipientName={setRecipientName}
         recipientName={recipientName}
+        setRecipientName={setRecipientName}
+        setRecipientPublicKey={setRecipientPublicKey}
       />
     </ContentContainer>
   );

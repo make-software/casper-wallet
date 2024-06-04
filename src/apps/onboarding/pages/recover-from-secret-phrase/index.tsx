@@ -4,10 +4,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Stepper } from '@onboarding/components/stepper';
 import { RouterPath } from '@onboarding/router';
 import { useTypedNavigate } from '@onboarding/router/use-typed-navigate';
-import { closeActiveTab } from '@onboarding/utils/close-active-tab';
-
-import { initVault } from '@background/redux/sagas/actions';
-import { dispatchToMainStore } from '@background/redux/utils';
 
 import { validateSecretPhrase } from '@libs/crypto';
 import {
@@ -41,8 +37,11 @@ export function RecoverFromSecretPhrasePage() {
       if (!validateSecretPhrase(secretPhrase)) {
         throw Error('Invalid secret phrase.');
       }
-      dispatchToMainStore(initVault({ secretPhrase }));
-      closeActiveTab();
+      navigate(RouterPath.SelectAccountsToRecover, {
+        state: {
+          secretPhrase
+        }
+      });
     } catch (err) {
       console.error(err);
       navigate(
@@ -67,13 +66,14 @@ export function RecoverFromSecretPhrasePage() {
     <form onSubmit={handleSubmit(onSubmit)}>
       <LayoutTab
         layoutContext="withStepper"
+        minHeight={640}
         renderHeader={() => (
           <TabHeaderContainer>
             <HeaderSubmenuBarNavLink
               linkType="back"
               onClick={() => navigate(RouterPath.CreateSecretPhrase)}
             />
-            <Stepper length={3} activeIndex={2} />
+            <Stepper length={4} activeIndex={2} />
           </TabHeaderContainer>
         )}
         renderContent={() => (
@@ -85,7 +85,7 @@ export function RecoverFromSecretPhrasePage() {
         renderFooter={() => (
           <TabFooterContainer>
             <Button disabled={submitButtonDisabled}>
-              <Trans t={t}>Recover my wallet</Trans>
+              <Trans t={t}>Next</Trans>
             </Button>
           </TabFooterContainer>
         )}

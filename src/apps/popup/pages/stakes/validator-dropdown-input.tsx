@@ -33,7 +33,7 @@ interface ValidatorDropdownInputProps {
     React.SetStateAction<ValidatorResultWithId | null>
   >;
   setStakeAmount: React.Dispatch<React.SetStateAction<string>>;
-  stakesType: AuctionManagerEntryPoint;
+  stakeType: AuctionManagerEntryPoint;
   undelegateValidatorList: ValidatorResultWithId[] | null;
   loading: boolean;
 }
@@ -44,7 +44,7 @@ export const ValidatorDropdownInput = ({
   validator,
   setValidator,
   setStakeAmount,
-  stakesType,
+  stakeType,
   undelegateValidatorList,
   loading
 }: ValidatorDropdownInputProps) => {
@@ -107,7 +107,7 @@ export const ValidatorDropdownInput = ({
   );
 
   useEffect(() => {
-    switch (stakesType) {
+    switch (stakeType) {
       case AuctionManagerEntryPoint.delegate: {
         setLabel('To validator');
         break;
@@ -118,7 +118,7 @@ export const ValidatorDropdownInput = ({
         break;
       }
     }
-  }, [stakesType]);
+  }, [stakeType]);
 
   return showValidatorPlate && validator ? (
     <VerticalSpaceContainer top={SpacingSize.XL}>
@@ -133,7 +133,7 @@ export const ValidatorDropdownInput = ({
         }
         // TODO: remove user_stake after we merge recipient and amount steps for undelegation
         totalStake={
-          stakesType === AuctionManagerEntryPoint.delegate
+          stakeType === AuctionManagerEntryPoint.delegate
             ? validator.total_stake
             : validator.user_stake
         }
@@ -211,7 +211,7 @@ export const ValidatorDropdownInput = ({
                 logo={logo}
                 // TODO: remove user_stake after we merge recipient and amount steps for undelegation
                 totalStake={
-                  stakesType === AuctionManagerEntryPoint.delegate
+                  stakeType === AuctionManagerEntryPoint.delegate
                     ? validator.total_stake
                     : validator.user_stake
                 }
