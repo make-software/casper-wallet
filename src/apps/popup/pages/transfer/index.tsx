@@ -473,7 +473,7 @@ export const TransferPage = () => {
         >
           <Trans t={t}>Done</Trans>
         </Button>
-        {isRecipientPublicKeyInContact && (
+        {!isRecipientPublicKeyInContact && (
           <Button
             color="secondaryBlue"
             onClick={() =>
