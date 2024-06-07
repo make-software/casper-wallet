@@ -52,6 +52,7 @@ export const AmountStep = ({
   setIsAmountFormButtonDisabled
 }: AmountStepProps) => {
   const [disabled, setDisabled] = useState(false);
+  const [maxAmountMotes, setMaxAmountMotes] = useState('0');
 
   const { t } = useTranslation();
 
@@ -83,6 +84,7 @@ export const AmountStep = ({
 
     const hasEnoughBalance = Big(maxAmountMotes).gte(TRANSFER_MIN_AMOUNT_MOTES);
 
+    setMaxAmountMotes(maxAmountMotes);
     setDisabled(!hasEnoughBalance);
   }, [csprBalance.liquidMotes]);
 
@@ -92,7 +94,7 @@ export const AmountStep = ({
     }
   }, [isErc20Transfer, setAmount]);
 
-  const { register, formState, control, trigger } = amountForm;
+  const { register, formState, control, trigger, setValue } = amountForm;
 
   const { errors } = formState;
 
@@ -178,6 +180,24 @@ export const AmountStep = ({
           validationText={errors?.amount?.message}
         />
       </VerticalSpaceContainer>
+
+      {!isErc20Transfer && (
+        <ParagraphContainer top={SpacingSize.Small}>
+          <Typography
+            type="captionRegular"
+            color="contentAction"
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              setAmount(motesToCSPR(maxAmountMotes));
+              setValue('amount', motesToCSPR(maxAmountMotes));
+
+              trigger('amount');
+            }}
+          >
+            <Trans t={t}>Send max</Trans>
+          </Typography>
+        </ParagraphContainer>
+      )}
 
       {/** transferIdMemo is only relevant for CSPR */}
       <VerticalSpaceContainer top={SpacingSize.XL}>
