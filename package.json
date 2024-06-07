@@ -52,7 +52,7 @@
     "styled-components": "^5"
   },
   "dependencies": {
-    "@formatjs/intl": "2.6.2",
+    "@formatjs/intl": "2.10.4",
     "@hookform/resolvers": "2.9.10",
     "@lapo/asn1js": "1.2.4",
     "@ledgerhq/hw-transport": "^6.30.6",
