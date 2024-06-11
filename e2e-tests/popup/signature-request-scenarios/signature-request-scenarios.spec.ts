@@ -1,8 +1,8 @@
 import {
   DEFAULT_FIRST_ACCOUNT,
-  NEW_VALIDATOR,
+  NEW_VALIDATOR_FOR_SIGNATURE_REQUEST,
   PLAYGROUND_URL,
-  VALIDATOR
+  VALIDATOR_FOR_SIGNATURE_REQUEST
 } from '../../constants';
 import { popup, popupExpect } from '../../fixtures';
 
@@ -35,7 +35,9 @@ popup.describe('Popup UI: signature request scenarios', () => {
       signatureRequestPage.getByText('Recipient (Key)')
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText(VALIDATOR.truncatedPublicKey)
+      signatureRequestPage.getByText(
+        VALIDATOR_FOR_SIGNATURE_REQUEST.truncatedPublicKey
+      )
     ).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('Amount')).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('2.5 CSPR')).toBeVisible();
@@ -81,10 +83,12 @@ popup.describe('Popup UI: signature request scenarios', () => {
         .nth(2)
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText(VALIDATOR.name)
+      signatureRequestPage.getByText(VALIDATOR_FOR_SIGNATURE_REQUEST.name)
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText(VALIDATOR.truncatedPublicKey)
+      signatureRequestPage.getByText(
+        VALIDATOR_FOR_SIGNATURE_REQUEST.truncatedPublicKey
+      )
     ).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('Amount')).toBeVisible();
     await popupExpect(
@@ -130,10 +134,12 @@ popup.describe('Popup UI: signature request scenarios', () => {
         .nth(2)
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText(VALIDATOR.name)
+      signatureRequestPage.getByText(VALIDATOR_FOR_SIGNATURE_REQUEST.name)
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText(VALIDATOR.truncatedPublicKey)
+      signatureRequestPage.getByText(
+        VALIDATOR_FOR_SIGNATURE_REQUEST.truncatedPublicKey
+      )
     ).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('Amount')).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('2.5 CSPR')).toBeVisible();
@@ -177,18 +183,24 @@ popup.describe('Popup UI: signature request scenarios', () => {
         .nth(2)
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText(VALIDATOR.name, { exact: true })
+      signatureRequestPage.getByText(VALIDATOR_FOR_SIGNATURE_REQUEST.name, {
+        exact: true
+      })
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText(VALIDATOR.truncatedPublicKey)
+      signatureRequestPage.getByText(
+        VALIDATOR_FOR_SIGNATURE_REQUEST.truncatedPublicKey
+      )
     ).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('Amount')).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('2.5 CSPR')).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText(NEW_VALIDATOR.name)
+      signatureRequestPage.getByText(NEW_VALIDATOR_FOR_SIGNATURE_REQUEST.name)
     ).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText(NEW_VALIDATOR.truncatedPublicKey)
+      signatureRequestPage.getByText(
+        NEW_VALIDATOR_FOR_SIGNATURE_REQUEST.truncatedPublicKey
+      )
     ).toBeVisible();
 
     page.on('dialog', async dialog => {
