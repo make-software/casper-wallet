@@ -70,6 +70,17 @@ popup.describe('Popup UI: ERC-20 transfer', () => {
 
       await popupExpect(
         popupPage.getByRole('button', { name: 'Confirm send' })
+      ).toBeDisabled();
+
+      // Scroll to the bottom
+      await popupPage.evaluate(() => {
+        const container = document.querySelector('#ms-container');
+
+        container?.scrollTo(0, 1000);
+      });
+
+      await popupExpect(
+        popupPage.getByRole('button', { name: 'Confirm send' })
       ).not.toBeDisabled();
 
       await popupPage.getByRole('button', { name: 'Confirm send' }).click();
@@ -146,6 +157,17 @@ popup.describe('Popup UI: ERC-20 transfer', () => {
     await popupExpect(
       popupPage.getByText(DEFAULT_SECOND_ACCOUNT.publicKey)
     ).toBeVisible();
+
+    await popupExpect(
+      popupPage.getByRole('button', { name: 'Confirm send' })
+    ).toBeDisabled();
+
+    // Scroll to the bottom
+    await popupPage.evaluate(() => {
+      const container = document.querySelector('#ms-container');
+
+      container?.scrollTo(0, 1000);
+    });
 
     await popupExpect(
       popupPage.getByRole('button', { name: 'Confirm send' })
