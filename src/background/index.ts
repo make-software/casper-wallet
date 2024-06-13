@@ -159,7 +159,6 @@ import {
   recipientPublicKeyReseted
 } from './redux/recent-recipient-public-keys/actions';
 import {
-  changePassword,
   createAccount,
   initKeys,
   initVault,
@@ -636,7 +635,6 @@ runtime.onMessage.addListener(
           case getType(accountCasperActivityCountChanged):
           case getType(accountTrackingIdOfSentNftTokensChanged):
           case getType(accountTrackingIdOfSentNftTokensRemoved):
-          case getType(changePassword):
           case getType(newContactAdded):
           case getType(contactRemoved):
           case getType(contactEditingPermissionChanged):

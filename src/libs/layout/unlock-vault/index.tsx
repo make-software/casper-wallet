@@ -70,7 +70,7 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
 
     setIsLoading(true);
     const unlockVaultWorker = new Worker(
-      new URL('@background/workers/unlockVaultWorker.ts', import.meta.url)
+      new URL('@background/workers/unlock-vault-worker.ts', import.meta.url)
     );
 
     if (keyDerivationSaltHash == null) {
