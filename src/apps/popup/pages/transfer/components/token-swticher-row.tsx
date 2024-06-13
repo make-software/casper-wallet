@@ -42,7 +42,9 @@ export const TokenSwitcherRow = ({
         <Container gap={SpacingSize.Medium}>
           <AlignedFlexRow gap={SpacingSize.Large} flexGrow={1}>
             <SvgIcon src={iconUrl || ''} size={24} />
-            <Typography type="body">{tokenName}</Typography>
+            <Typography dataTestId="token-row" type="body">
+              {tokenName}
+            </Typography>
           </AlignedFlexRow>
           <Typography type="bodySemiBold" color="contentAction">
             <Trans t={t}>Change</Trans>

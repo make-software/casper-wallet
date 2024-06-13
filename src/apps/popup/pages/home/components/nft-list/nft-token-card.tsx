@@ -70,6 +70,7 @@ export const NftTokenCard = forwardRef<
     <NftTokenCardContainer
       gap={SpacingSize.Small}
       ref={ref}
+      data-testid="nft-token-card"
       onClick={() => {
         navigate(
           RouterPath.NftDetails.replace(

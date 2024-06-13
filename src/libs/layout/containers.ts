@@ -333,3 +333,10 @@ export const DropdownHeader = styled(AlignedSpaceBetweenFlexRow)`
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
 `;
+
+export const AmountContainer = styled(SpaceBetweenFlexColumn)`
+  align-items: flex-end;
+  text-align: end;
+
+  max-width: 120px;
+`;
