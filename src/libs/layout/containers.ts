@@ -287,6 +287,8 @@ export const Overlay = styled.div`
 
   transform: translate(-50%, -50%);
 
+  overflow: auto;
+
   height: 100vh;
   width: 360px;
 
