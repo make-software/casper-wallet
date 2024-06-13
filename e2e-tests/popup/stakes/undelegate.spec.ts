@@ -39,6 +39,13 @@ popup.describe('Popup UI: Undelegation', () => {
         popupPage.getByText(VALIDATOR_FOR_STAKE.publicKey)
       ).toBeVisible();
 
+      // Scroll to the bottom
+      await popupPage.evaluate(() => {
+        const container = document.querySelector('#ms-container');
+
+        container?.scrollTo(0, 1000);
+      });
+
       await popupExpect(
         popupPage.getByRole('button', { name: 'Confirm undelegation' })
       ).not.toBeDisabled();
