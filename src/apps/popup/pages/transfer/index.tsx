@@ -72,6 +72,7 @@ const ScrollContainer = styled(VerticalSpaceContainer)<{
 }>`
   opacity: ${({ isHidden }) => (isHidden ? '0' : '1')};
   height: ${({ isHidden }) => (isHidden ? '0' : '24px')};
+  visibility: ${({ isHidden }) => (isHidden ? 'hidden' : 'visible')};
   transition:
     opacity 0.2s ease-in-out,
     height 0.5s ease-in-out;
@@ -148,9 +149,11 @@ export const TransferPage = () => {
     [contactPublicKeys, recipientPublicKey]
   );
 
-  const { isSubmitButtonDisable, setIsSubmitButtonDisable } = useSubmitButton(
-    transferStep === TransactionSteps.Confirm
-  );
+  const {
+    isSubmitButtonDisable,
+    setIsSubmitButtonDisable,
+    isAdditionalTextVisible
+  } = useSubmitButton(transferStep === TransactionSteps.Confirm);
 
   const sendDeploy = (signDeploy: DeployUtil.Deploy) => {
     sendSignDeploy(signDeploy, nodeUrl)
@@ -427,8 +430,8 @@ export const TransferPage = () => {
       <></>
     ),
     [TransactionSteps.Confirm]: (
-      <ConfirmButtonContainer isHidden={!isSubmitButtonDisable}>
-        <ScrollContainer isHidden={!isSubmitButtonDisable}>
+      <ConfirmButtonContainer isHidden={!isAdditionalTextVisible}>
+        <ScrollContainer isHidden={!isAdditionalTextVisible}>
           <CenteredFlexRow>
             <Typography type="captionRegular">
               <Trans t={t}>Scroll down to check all details</Trans>

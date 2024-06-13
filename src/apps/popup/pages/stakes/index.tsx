@@ -2,6 +2,7 @@ import { DeployUtil } from 'casper-js-sdk';
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 
 import {
   AuctionManagerEntryPoint,
@@ -42,6 +43,7 @@ import { useSubmitButton } from '@hooks/use-submit-button';
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import {
   AlignedFlexRow,
+  CenteredFlexRow,
   ErrorPath,
   FooterButtonsContainer,
   HeaderPopup,
@@ -71,6 +73,24 @@ import {
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useStakesForm } from '@libs/ui/forms/stakes-form';
 import { CSPRtoMotes, formatNumber, motesToCSPR } from '@libs/ui/utils';
+
+const ScrollContainer = styled(VerticalSpaceContainer)<{
+  isHidden: boolean;
+}>`
+  opacity: ${({ isHidden }) => (isHidden ? '0' : '1')};
+  height: ${({ isHidden }) => (isHidden ? '0' : '24px')};
+  visibility: ${({ isHidden }) => (isHidden ? 'hidden' : 'visible')};
+  transition:
+    opacity 0.2s ease-in-out,
+    height 0.5s ease-in-out;
+`;
+
+const ConfirmButtonContainer = styled(FooterButtonsContainer)<{
+  isHidden: boolean;
+}>`
+  gap: ${({ isHidden }) => (isHidden ? '0' : '16px')};
+  transition: gap 0.5s ease-in-out;
+`;
 
 export const StakesPage = () => {
   const [stakeStep, setStakeStep] = useState(StakeSteps.Validator);
@@ -117,9 +137,11 @@ export const StakesPage = () => {
     getValues: getValuesNewValidatorForm
   } = newValidatorForm;
 
-  const { isSubmitButtonDisable, setIsSubmitButtonDisable } = useSubmitButton(
-    stakeStep === StakeSteps.Confirm
-  );
+  const {
+    isSubmitButtonDisable,
+    setIsSubmitButtonDisable,
+    isAdditionalTextVisible
+  } = useSubmitButton(stakeStep === StakeSteps.Confirm);
 
   const submitStake = async () => {
     setIsSubmitButtonDisable(true);
@@ -428,7 +450,14 @@ export const StakesPage = () => {
       </FooterButtonsContainer>
     ),
     [StakeSteps.Confirm]: (
-      <FooterButtonsContainer>
+      <ConfirmButtonContainer isHidden={!isAdditionalTextVisible}>
+        <ScrollContainer isHidden={!isAdditionalTextVisible}>
+          <CenteredFlexRow>
+            <Typography type="captionRegular">
+              <Trans t={t}>Scroll down to check all details</Trans>
+            </Typography>
+          </CenteredFlexRow>
+        </ScrollContainer>
         <Button
           color={isActiveAccountFromLedger ? 'primaryRed' : 'primaryBlue'}
           type="button"
@@ -450,7 +479,7 @@ export const StakesPage = () => {
             <Trans t={t}>{confirmButtonText}</Trans>
           )}
         </Button>
-      </FooterButtonsContainer>
+      </ConfirmButtonContainer>
     ),
     [StakeSteps.ConfirmWithLedger]: ledgerFooterButton ? (
       ledgerFooterButton()
