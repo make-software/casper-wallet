@@ -19,12 +19,6 @@ import { emitSdkEventToActiveTabs } from '@background/utils';
 import { sdkEvent } from '@content/sdk-event';
 
 import { deriveKeyPair } from '@libs/crypto';
-import {
-  deriveEncryptionKey,
-  encodePassword,
-  generateRandomSaltHex
-} from '@libs/crypto/hashing';
-import { convertBytesToHex } from '@libs/crypto/utils';
 import { encryptVault } from '@libs/crypto/vault';
 import { Account } from '@libs/types/account';
 
@@ -73,7 +67,6 @@ import {
 } from '../vault/selectors';
 import { popupWindowInit } from '../windowManagement/actions';
 import {
-  changePassword,
   createAccount,
   lockVault,
   startBackground,
@@ -114,7 +107,6 @@ export function* vaultSagas() {
     updateVaultCipher
   );
   yield takeLatest(getType(createAccount), createAccountSaga);
-  yield takeLatest(getType(changePassword), changePasswordSaga);
 }
 
 /**
@@ -344,48 +336,6 @@ function* createAccountSaga(action: ReturnType<typeof createAccount>) {
       }
       i++;
     }
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
-  try {
-    const { password } = action.payload;
-
-    const passwordSaltHash = generateRandomSaltHex();
-    const passwordHash = yield* sagaCall(() =>
-      encodePassword(password, passwordSaltHash)
-    );
-    const keyDerivationSaltHash = generateRandomSaltHex();
-    const newEncryptionKeyBytes = yield* sagaCall(() =>
-      deriveEncryptionKey(password, keyDerivationSaltHash)
-    );
-    const newEncryptionKeyHash = convertBytesToHex(newEncryptionKeyBytes);
-
-    yield put(
-      keysUpdated({
-        passwordHash,
-        passwordSaltHash,
-        keyDerivationSaltHash
-      })
-    );
-    yield put(
-      encryptionKeyHashCreated({ encryptionKeyHash: newEncryptionKeyHash })
-    );
-
-    const vault = yield* sagaSelect(selectVault);
-
-    // encrypt cipher with the new key
-    const newVaultCipher = yield* sagaCall(() =>
-      encryptVault(newEncryptionKeyHash, vault)
-    );
-
-    yield put(
-      vaultCipherCreated({
-        vaultCipher: newVaultCipher
-      })
-    );
   } catch (err) {
     console.error(err);
   }

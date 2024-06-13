@@ -1,13 +1,17 @@
 import React, { useCallback, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
 import { ChangePasswordPageContent } from '@popup/pages/change-password/content';
 import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { changePassword } from '@background/redux/sagas/actions';
+import { keysUpdated } from '@background/redux/keys/actions';
+import { encryptionKeyHashCreated } from '@background/redux/session/actions';
 import { dispatchToMainStore } from '@background/redux/utils';
+import { vaultCipherCreated } from '@background/redux/vault-cipher/actions';
+import { selectVault } from '@background/redux/vault/selectors';
 
 import {
   FooterButtonsContainer,
@@ -22,12 +26,24 @@ import {
 } from '@libs/ui/forms/create-password';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 
+interface CreatePasswordWorkerMessageEvent extends MessageEvent {
+  data: {
+    passwordHash: string;
+    passwordSaltHash: string;
+    newEncryptionKeyHash: string;
+    keyDerivationSaltHash: string;
+    newVaultCipher: string;
+  };
+}
+
 export const ChangePasswordPage = () => {
   const [isPasswordConfirmed, setIsPasswordConfirmed] =
     useState<boolean>(false);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
+
+  const vault = useSelector(selectVault);
 
   const {
     register,
@@ -50,7 +66,47 @@ export const ChangePasswordPage = () => {
   });
 
   const onSubmit = (data: CreatePasswordFormValues) => {
-    dispatchToMainStore(changePassword({ password: data.password }));
+    const worker = new Worker(
+      new URL('@background/workers/create-password-worker.ts', import.meta.url)
+    );
+
+    worker.postMessage({
+      password: data.password,
+      vault
+    });
+
+    worker.onmessage = (event: CreatePasswordWorkerMessageEvent) => {
+      const {
+        passwordHash,
+        passwordSaltHash,
+        newEncryptionKeyHash,
+        keyDerivationSaltHash,
+        newVaultCipher
+      } = event.data;
+
+      dispatchToMainStore(
+        keysUpdated({
+          passwordHash,
+          passwordSaltHash,
+          keyDerivationSaltHash
+        })
+      );
+
+      dispatchToMainStore(
+        encryptionKeyHashCreated({ encryptionKeyHash: newEncryptionKeyHash })
+      );
+
+      dispatchToMainStore(
+        vaultCipherCreated({
+          vaultCipher: newVaultCipher
+        })
+      );
+    };
+
+    worker.onerror = error => {
+      console.error(error);
+    };
+
     navigate(RouterPath.Home);
   };
 

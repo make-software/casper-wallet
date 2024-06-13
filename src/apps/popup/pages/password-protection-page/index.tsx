@@ -21,15 +21,15 @@ import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-
 import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
 
 interface BackupSecretPhrasePasswordPageType {
-  setPasswordConfirmed: () => void;
+  setPasswordConfirmed?: () => void;
   onClick?: (password: string) => Promise<void>;
-  loading?: boolean;
+  isLoading?: boolean;
 }
 
 export const PasswordProtectionPage = ({
   setPasswordConfirmed,
   onClick,
-  loading = false
+  isLoading = false
 }: BackupSecretPhrasePasswordPageType) => {
   const { t } = useTranslation();
 
@@ -56,11 +56,15 @@ export const PasswordProtectionPage = ({
       const { password } = getValues();
 
       onClick(password).then(() => {
-        setPasswordConfirmed();
+        if (setPasswordConfirmed) {
+          setPasswordConfirmed();
+        }
         dispatchToMainStore(loginRetryCountReseted());
       });
     } else {
-      setPasswordConfirmed();
+      if (setPasswordConfirmed) {
+        setPasswordConfirmed();
+      }
       dispatchToMainStore(loginRetryCountReseted());
     }
   };
@@ -84,8 +88,8 @@ export const PasswordProtectionPage = ({
       )}
       renderFooter={() => (
         <FooterButtonsContainer>
-          <Button disabled={isSubmitButtonDisabled || loading}>
-            {loading ? t('Loading') : t('Continue')}
+          <Button disabled={isSubmitButtonDisabled || isLoading}>
+            {isLoading ? t('Loading') : t('Continue')}
           </Button>
         </FooterButtonsContainer>
       )}
