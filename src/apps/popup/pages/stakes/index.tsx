@@ -121,12 +121,22 @@ export const StakesPage = () => {
   const { stakeType, validatorList, undelegateValidatorList, loading } =
     useStakeType();
 
+  const hasDelegationToSelectedValidator = undelegateValidatorList?.some(
+    accountDelegation => accountDelegation.public_key === validator?.public_key
+  );
+  const hasDelegationToSelectedNewValidator = undelegateValidatorList?.some(
+    accountDelegation =>
+      accountDelegation.public_key === newValidator?.public_key
+  );
+
   const { amountForm, validatorForm, newValidatorForm } = useStakesForm(
     csprBalance.liquidMotes,
     stakeType,
     stakeAmountMotes,
     validator?.delegators_number,
-    newValidator?.delegators_number
+    newValidator?.delegators_number,
+    hasDelegationToSelectedValidator,
+    hasDelegationToSelectedNewValidator
   );
   const { formState: amountFormState, getValues: getValuesAmountForm } =
     amountForm;
@@ -267,8 +277,11 @@ export const StakesPage = () => {
       <Step headerText={validatorStepHeaderText}>
         <ValidatorDropdownInput
           validatorForm={validatorForm}
-          validatorList={validatorList}
-          undelegateValidatorList={undelegateValidatorList}
+          validatorList={
+            stakeType === AuctionManagerEntryPoint.delegate
+              ? validatorList
+              : undelegateValidatorList
+          }
           validator={validator}
           setValidator={setValidator}
           setStakeAmount={setStakeAmountMotes}
