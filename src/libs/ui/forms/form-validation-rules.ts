@@ -6,13 +6,19 @@ import { useSelector } from 'react-redux';
 import {
   AuctionManagerEntryPoint,
   DELEGATION_MIN_AMOUNT_MOTES,
+  ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED,
   LOGIN_RETRY_ATTEMPTS_LIMIT,
   MAX_DELEGATORS,
   STAKE_COST_MOTES,
   TRANSFER_COST_MOTES,
   TRANSFER_MIN_AMOUNT_MOTES
 } from '@src/constants';
-import { isValidPublicKey, isValidSecretKeyHash, isValidU64 } from '@src/utils';
+import {
+  getErrorMessageForIncorrectPassword,
+  isValidPublicKey,
+  isValidSecretKeyHash,
+  isValidU64
+} from '@src/utils';
 
 import { loginRetryCountIncremented } from '@background/redux/login-retry-count/actions';
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
@@ -22,8 +28,6 @@ import { verifyPasswordAgainstHash } from '@libs/crypto/hashing';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 
 export const minPasswordLength = 16;
-
-const ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED = 1;
 
 export function useCreatePasswordRule() {
   const { t } = useTranslation();
@@ -38,7 +42,6 @@ export function useVerifyPasswordAgainstHashRule(
   passwordHash: string,
   passwordSaltHash: string
 ) {
-  const { t } = useTranslation();
   const loginRetryCount = useSelector(selectLoginRetryCount);
 
   const attemptsLeft =
@@ -46,14 +49,7 @@ export function useVerifyPasswordAgainstHashRule(
     loginRetryCount -
     ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED;
 
-  const errorMessage =
-    attemptsLeft === 1
-      ? t(
-          'Password is incorrect. You’ve got last attempt, after that you’ll have to wait for 5 mins'
-        )
-      : t(
-          `Password is incorrect. You’ve got ${attemptsLeft} attempts, after that you’ll have to wait for 5 mins`
-        );
+  const errorMessage = getErrorMessageForIncorrectPassword(attemptsLeft);
 
   return Yup.string().test('authenticate', errorMessage, async password => {
     const result = await verifyPasswordAgainstHash(
