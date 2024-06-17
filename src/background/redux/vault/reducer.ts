@@ -12,7 +12,7 @@ import {
   anotherAccountConnected,
   deployPayloadReceived,
   deploysReseted,
-  hideAccountFromListChange,
+  hideAccountFromListChanged,
   secretPhraseCreated,
   siteConnected,
   siteDisconnected,
@@ -287,10 +287,12 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    hideAccountFromListChange,
+    hideAccountFromListChanged,
     (
       state,
-      { payload: { accountName } }: ReturnType<typeof hideAccountFromListChange>
+      {
+        payload: { accountName }
+      }: ReturnType<typeof hideAccountFromListChanged>
     ) => {
       const visibleAccounts = state.accounts.filter(
         account => !account.hidden && account.name !== accountName

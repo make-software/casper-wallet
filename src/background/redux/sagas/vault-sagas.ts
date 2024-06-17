@@ -53,6 +53,7 @@ import {
   anotherAccountConnected,
   deployPayloadReceived,
   deploysReseted,
+  hideAccountFromListChanged,
   siteConnected,
   siteDisconnected,
   vaultLoaded,
@@ -102,7 +103,8 @@ export function* vaultSagas() {
       getType(siteDisconnected),
       getType(activeAccountChanged),
       getType(activeTimeoutDurationSettingChanged),
-      getType(deployPayloadReceived)
+      getType(deployPayloadReceived),
+      getType(hideAccountFromListChanged)
     ],
     updateVaultCipher
   );

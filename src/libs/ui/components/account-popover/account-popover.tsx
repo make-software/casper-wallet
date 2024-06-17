@@ -10,7 +10,7 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { hideAccountFromListChange } from '@background/redux/vault/actions';
+import { hideAccountFromListChanged } from '@background/redux/vault/actions';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
   selectIsAnyAccountConnectedWithActiveOrigin
@@ -133,7 +133,7 @@ export const AccountActionsMenuPopover = ({
               variant="contentAction"
               onClick={() => {
                 dispatchToMainStore(
-                  hideAccountFromListChange({ accountName: account.name })
+                  hideAccountFromListChanged({ accountName: account.name })
                 );
               }}
             >
