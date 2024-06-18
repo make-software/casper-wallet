@@ -8,7 +8,7 @@ import { RootState } from 'typesafe-actions';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { dispatchToMainStore } from '@background/redux/utils';
-import { hideAccountFromListChange } from '@background/redux/vault/actions';
+import { hideAccountFromListChanged } from '@background/redux/vault/actions';
 import {
   selectVaultAccount,
   selectVaultHiddenAccountsNames,
@@ -115,7 +115,7 @@ function AccountIconButton({ type }: AccountIconButtonProps) {
         break;
       case 'hide':
       case 'show':
-        dispatchToMainStore(hideAccountFromListChange({ accountName }));
+        dispatchToMainStore(hideAccountFromListChanged({ accountName }));
         break;
       default:
         throw new Error('Not found');

@@ -85,7 +85,7 @@ import {
   anotherAccountConnected,
   deployPayloadReceived,
   deploysReseted,
-  hideAccountFromListChange,
+  hideAccountFromListChanged,
   secretPhraseCreated,
   siteConnected,
   siteDisconnected,
@@ -590,7 +590,7 @@ runtime.onMessage.addListener(
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeAccountChanged):
-          case getType(hideAccountFromListChange):
+          case getType(hideAccountFromListChanged):
           case getType(activeTimeoutDurationSettingChanged):
           case getType(activeNetworkSettingChanged):
           case getType(vaultSettingsReseted):
