@@ -73,7 +73,8 @@ export const AmountStep = ({
     erc20Balance,
     isErc20Transfer,
     csprBalance.liquidMotes,
-    paymentAmount
+    paymentAmount,
+    selectedToken?.decimals
   );
 
   useEffect(() => {
