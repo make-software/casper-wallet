@@ -69,7 +69,8 @@ export const Avatar = ({
     return (
       <ConnectionStatusBadgeContainer>
         <Identicon
-          value={publicKey}
+          // in the case of public key is with uppercase characters
+          value={publicKey.toLowerCase()}
           size={size}
           background={theme.color.contentOnFill}
           displayContext={displayContext}
@@ -109,7 +110,8 @@ export const Avatar = ({
     return (
       <AvatarContainer top={top}>
         <Identicon
-          value={publicKey}
+          // in the case of public key is with uppercase characters
+          value={publicKey.toLowerCase()}
           size={size}
           background={theme.color.contentOnFill}
           borderRadius={borderRadius}
