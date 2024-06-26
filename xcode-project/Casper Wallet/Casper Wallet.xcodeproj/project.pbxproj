@@ -20,7 +20,6 @@
 		2439D7C029F0757C00F07C90 /* connectToApp.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7AA29F0757C00F07C90 /* connectToApp.bundle.js */; };
 		2439D7C129F0757C00F07C90 /* logo16.png in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7AB29F0757C00F07C90 /* logo16.png */; };
 		2439D7C229F0757C00F07C90 /* connect-to-app.html in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7AC29F0757C00F07C90 /* connect-to-app.html */; };
-		2439D7C329F0757C00F07C90 /* 909.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7AD29F0757C00F07C90 /* 909.bundle.js */; };
 		2439D7C429F0757C00F07C90 /* locales in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7AE29F0757C00F07C90 /* locales */; };
 		2439D7C529F0757C00F07C90 /* import-account-with-file.html in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7AF29F0757C00F07C90 /* import-account-with-file.html */; };
 		2439D7C629F0757C00F07C90 /* sdk.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B029F0757C00F07C90 /* sdk.bundle.js */; };
@@ -31,7 +30,6 @@
 		2439D7CB29F0757C00F07C90 /* logo64.png in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B529F0757C00F07C90 /* logo64.png */; };
 		2439D7CC29F0757C00F07C90 /* signatureRequest.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B629F0757C00F07C90 /* signatureRequest.bundle.js */; };
 		2439D7CD29F0757C00F07C90 /* importAccountWithFile.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B729F0757C00F07C90 /* importAccountWithFile.bundle.js */; };
-		2439D7CE29F0757C00F07C90 /* 125.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B829F0757C00F07C90 /* 125.bundle.js */; };
 		2439D7CF29F0757C00F07C90 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7B929F0757C00F07C90 /* manifest.json */; };
 		2439D7D029F0757C00F07C90 /* onboarding.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7BA29F0757C00F07C90 /* onboarding.bundle.js */; };
 		2439D7D129F0757C00F07C90 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7BB29F0757C00F07C90 /* assets */; };
@@ -40,6 +38,13 @@
 		2439D7D429F0757C00F07C90 /* onboarding.html in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7BE29F0757C00F07C90 /* onboarding.html */; };
 		2439D7D529F0757C00F07C90 /* signature-request.html in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7BF29F0757C00F07C90 /* signature-request.html */; };
 		B3867CAE2A7B038000BD01B7 /* declarative_net_request_rules.json in Resources */ = {isa = PBXBuildFile; fileRef = B3867CAC2A7B038000BD01B7 /* declarative_net_request_rules.json */; };
+		B3C8A9332C21AF6D006B8DA3 /* 314.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B3C8A92C2C21AF6C006B8DA3 /* 314.bundle.js */; };
+		B3C8A9342C21AF6D006B8DA3 /* 355.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B3C8A92D2C21AF6C006B8DA3 /* 355.bundle.js */; };
+		B3C8A9352C21AF6D006B8DA3 /* 83.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B3C8A92E2C21AF6C006B8DA3 /* 83.bundle.js */; };
+		B3C8A9362C21AF6D006B8DA3 /* 176.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B3C8A92F2C21AF6C006B8DA3 /* 176.bundle.js */; };
+		B3C8A9372C21AF6D006B8DA3 /* 878.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B3C8A9302C21AF6C006B8DA3 /* 878.bundle.js */; };
+		B3C8A9382C21AF6D006B8DA3 /* 564.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B3C8A9312C21AF6C006B8DA3 /* 564.bundle.js */; };
+		B3C8A9392C21AF6D006B8DA3 /* 467.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B3C8A9322C21AF6C006B8DA3 /* 467.bundle.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -86,7 +91,6 @@
 		2439D7AA29F0757C00F07C90 /* connectToApp.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = connectToApp.bundle.js; path = ../../../build/firefox/connectToApp.bundle.js; sourceTree = "<group>"; };
 		2439D7AB29F0757C00F07C90 /* logo16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo16.png; path = ../../../build/firefox/logo16.png; sourceTree = "<group>"; };
 		2439D7AC29F0757C00F07C90 /* connect-to-app.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = "connect-to-app.html"; path = "../../../build/firefox/connect-to-app.html"; sourceTree = "<group>"; };
-		2439D7AD29F0757C00F07C90 /* 909.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = 909.bundle.js; path = ../../../build/firefox/909.bundle.js; sourceTree = "<group>"; };
 		2439D7AE29F0757C00F07C90 /* locales */ = {isa = PBXFileReference; lastKnownFileType = folder; name = locales; path = ../../../build/firefox/locales; sourceTree = "<group>"; };
 		2439D7AF29F0757C00F07C90 /* import-account-with-file.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = "import-account-with-file.html"; path = "../../../build/firefox/import-account-with-file.html"; sourceTree = "<group>"; };
 		2439D7B029F0757C00F07C90 /* sdk.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = sdk.bundle.js; path = ../../../build/firefox/sdk.bundle.js; sourceTree = "<group>"; };
@@ -97,7 +101,6 @@
 		2439D7B529F0757C00F07C90 /* logo64.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo64.png; path = ../../../build/firefox/logo64.png; sourceTree = "<group>"; };
 		2439D7B629F0757C00F07C90 /* signatureRequest.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = signatureRequest.bundle.js; path = ../../../build/firefox/signatureRequest.bundle.js; sourceTree = "<group>"; };
 		2439D7B729F0757C00F07C90 /* importAccountWithFile.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = importAccountWithFile.bundle.js; path = ../../../build/firefox/importAccountWithFile.bundle.js; sourceTree = "<group>"; };
-		2439D7B829F0757C00F07C90 /* 125.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = 125.bundle.js; path = ../../../build/firefox/125.bundle.js; sourceTree = "<group>"; };
 		2439D7B929F0757C00F07C90 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = ../../../build/firefox/manifest.json; sourceTree = "<group>"; };
 		2439D7BA29F0757C00F07C90 /* onboarding.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = onboarding.bundle.js; path = ../../../build/firefox/onboarding.bundle.js; sourceTree = "<group>"; };
 		2439D7BB29F0757C00F07C90 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = ../../../build/firefox/assets; sourceTree = "<group>"; };
@@ -106,6 +109,13 @@
 		2439D7BE29F0757C00F07C90 /* onboarding.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = onboarding.html; path = ../../../build/firefox/onboarding.html; sourceTree = "<group>"; };
 		2439D7BF29F0757C00F07C90 /* signature-request.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = "signature-request.html"; path = "../../../build/firefox/signature-request.html"; sourceTree = "<group>"; };
 		B3867CAC2A7B038000BD01B7 /* declarative_net_request_rules.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = declarative_net_request_rules.json; path = ../../../src/declarative_net_request_rules.json; sourceTree = "<group>"; };
+		B3C8A92C2C21AF6C006B8DA3 /* 314.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 314.bundle.js; path = ../../../build/firefox/314.bundle.js; sourceTree = "<group>"; };
+		B3C8A92D2C21AF6C006B8DA3 /* 355.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 355.bundle.js; path = ../../../build/firefox/355.bundle.js; sourceTree = "<group>"; };
+		B3C8A92E2C21AF6C006B8DA3 /* 83.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 83.bundle.js; path = ../../../build/firefox/83.bundle.js; sourceTree = "<group>"; };
+		B3C8A92F2C21AF6C006B8DA3 /* 176.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 176.bundle.js; path = ../../../build/firefox/176.bundle.js; sourceTree = "<group>"; };
+		B3C8A9302C21AF6C006B8DA3 /* 878.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 878.bundle.js; path = ../../../build/firefox/878.bundle.js; sourceTree = "<group>"; };
+		B3C8A9312C21AF6C006B8DA3 /* 564.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 564.bundle.js; path = ../../../build/firefox/564.bundle.js; sourceTree = "<group>"; };
+		B3C8A9322C21AF6C006B8DA3 /* 467.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 467.bundle.js; path = ../../../build/firefox/467.bundle.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -184,11 +194,17 @@
 		2439D7A929F0757C00F07C90 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				B3C8A92E2C21AF6C006B8DA3 /* 83.bundle.js */,
+				B3C8A92F2C21AF6C006B8DA3 /* 176.bundle.js */,
+				B3C8A92C2C21AF6C006B8DA3 /* 314.bundle.js */,
+				B3C8A92D2C21AF6C006B8DA3 /* 355.bundle.js */,
+				B3C8A9322C21AF6C006B8DA3 /* 467.bundle.js */,
+				B3C8A9312C21AF6C006B8DA3 /* 564.bundle.js */,
+				B3C8A9302C21AF6C006B8DA3 /* 878.bundle.js */,
 				B3867CAC2A7B038000BD01B7 /* declarative_net_request_rules.json */,
 				2439D7AA29F0757C00F07C90 /* connectToApp.bundle.js */,
 				2439D7AB29F0757C00F07C90 /* logo16.png */,
 				2439D7AC29F0757C00F07C90 /* connect-to-app.html */,
-				2439D7AD29F0757C00F07C90 /* 909.bundle.js */,
 				2439D7AE29F0757C00F07C90 /* locales */,
 				2439D7AF29F0757C00F07C90 /* import-account-with-file.html */,
 				2439D7B029F0757C00F07C90 /* sdk.bundle.js */,
@@ -199,7 +215,6 @@
 				2439D7B529F0757C00F07C90 /* logo64.png */,
 				2439D7B629F0757C00F07C90 /* signatureRequest.bundle.js */,
 				2439D7B729F0757C00F07C90 /* importAccountWithFile.bundle.js */,
-				2439D7B829F0757C00F07C90 /* 125.bundle.js */,
 				2439D7B929F0757C00F07C90 /* manifest.json */,
 				2439D7BA29F0757C00F07C90 /* onboarding.bundle.js */,
 				2439D7BB29F0757C00F07C90 /* assets */,
@@ -310,25 +325,30 @@
 				2439D7CB29F0757C00F07C90 /* logo64.png in Resources */,
 				2439D7D229F0757C00F07C90 /* popup.bundle.js in Resources */,
 				2439D7C029F0757C00F07C90 /* connectToApp.bundle.js in Resources */,
-				2439D7CE29F0757C00F07C90 /* 125.bundle.js in Resources */,
 				2439D7D129F0757C00F07C90 /* assets in Resources */,
 				2439D7C129F0757C00F07C90 /* logo16.png in Resources */,
 				2439D7C729F0757C00F07C90 /* contentScript.bundle.js in Resources */,
 				2439D7D329F0757C00F07C90 /* logo192.png in Resources */,
 				2439D7C429F0757C00F07C90 /* locales in Resources */,
 				2439D7D029F0757C00F07C90 /* onboarding.bundle.js in Resources */,
+				B3C8A9352C21AF6D006B8DA3 /* 83.bundle.js in Resources */,
+				B3C8A9342C21AF6D006B8DA3 /* 355.bundle.js in Resources */,
 				2439D7C829F0757C00F07C90 /* popup.html in Resources */,
 				2439D7C929F0757C00F07C90 /* background.bundle.js in Resources */,
 				2439D7C529F0757C00F07C90 /* import-account-with-file.html in Resources */,
-				2439D7C329F0757C00F07C90 /* 909.bundle.js in Resources */,
 				2439D7C629F0757C00F07C90 /* sdk.bundle.js in Resources */,
 				2439D7CD29F0757C00F07C90 /* importAccountWithFile.bundle.js in Resources */,
+				B3C8A9392C21AF6D006B8DA3 /* 467.bundle.js in Resources */,
+				B3C8A9362C21AF6D006B8DA3 /* 176.bundle.js in Resources */,
 				2439D7CF29F0757C00F07C90 /* manifest.json in Resources */,
+				B3C8A9332C21AF6D006B8DA3 /* 314.bundle.js in Resources */,
 				2439D7CC29F0757C00F07C90 /* signatureRequest.bundle.js in Resources */,
 				B3867CAE2A7B038000BD01B7 /* declarative_net_request_rules.json in Resources */,
+				B3C8A9382C21AF6D006B8DA3 /* 564.bundle.js in Resources */,
 				2439D7CA29F0757C00F07C90 /* logo128.png in Resources */,
 				2439D7C229F0757C00F07C90 /* connect-to-app.html in Resources */,
 				2439D7D529F0757C00F07C90 /* signature-request.html in Resources */,
+				B3C8A9372C21AF6D006B8DA3 /* 878.bundle.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -564,7 +584,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Casper Wallet/Casper Wallet.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 69;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Casper Wallet/Info.plist";
@@ -578,7 +598,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 1.10.0;
+				MARKETING_VERSION = 1.11.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -601,7 +621,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Casper Wallet/Casper Wallet.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 69;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Casper Wallet/Info.plist";
@@ -615,7 +635,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 1.10.0;
+				MARKETING_VERSION = 1.11.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
