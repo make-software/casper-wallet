@@ -128,7 +128,11 @@ export const TransferPage = () => {
     }
 
     if (tokenData) {
-      setIsErc20Transfer(true);
+      if (tokenData.name === 'Casper') {
+        setIsErc20Transfer(false);
+      } else {
+        setIsErc20Transfer(true);
+      }
       setSelectedToken(tokenData);
     } else {
       setIsErc20Transfer(false);
