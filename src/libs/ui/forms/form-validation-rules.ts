@@ -185,10 +185,25 @@ export const useCSPRTransferAmountRule = (amountMotes: string | null) => {
       message: t(
         'Your account balance is not high enough. Enter a smaller amount.'
       )
+    })
+    .test({
+      name: 'decimalPartLength',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          const decimalPart = amountInputValue.split('.')[1];
+          return decimalPart == null || decimalPart.length <= 9;
+        }
+
+        return false;
+      },
+      message: t('No more than 9 decimals')
     });
 };
 
-export const useErc20AmountRule = (amount: string | null) => {
+export const useErc20AmountRule = (
+  amount: string | null,
+  decimals: number | undefined
+) => {
   const { t } = useTranslation();
 
   const maxAmount: string = amount == null ? '0' : Big(amount).toFixed();
@@ -229,6 +244,22 @@ export const useErc20AmountRule = (amount: string | null) => {
       message: t(
         'Your account balance is not high enough. Enter a smaller amount.'
       )
+    })
+    .test({
+      name: 'decimalPartLength',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          const decimalPart = amountInputValue.split('.')[1];
+          if (decimals || decimals === 0) {
+            return decimalPart == null || decimalPart.length <= decimals;
+          }
+
+          return true;
+        }
+
+        return false;
+      },
+      message: t(`No more than ${decimals} decimals`)
     });
 };
 
