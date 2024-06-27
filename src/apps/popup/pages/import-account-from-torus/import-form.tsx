@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FieldErrors, UseFormRegister } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -24,6 +24,12 @@ interface ImportTorusFormProps {
 
 export const ImportTorusForm = ({ register, errors }: ImportTorusFormProps) => {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const container = document.querySelector('#ms-container');
+
+    container?.scrollTo(0, 0);
+  }, []);
 
   return (
     <ContentContainer>
