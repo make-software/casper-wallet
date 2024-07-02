@@ -203,16 +203,6 @@ export const FooterButtonsContainer = styled(SpaceBetweenFlexRow)<Props>`
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
 `;
 
-/**
- * @deprecated to be replaced by FooterButtonsContainer when Popup layout is refactored
- * to be the same as window layout
- */
-export const FooterButtonsAbsoluteContainer = styled(FooterButtonsContainer)`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-`;
-
 export const ListItemClickableContainer = styled(SpaceBetweenFlexRow)`
   cursor: pointer;
 
@@ -239,7 +229,6 @@ export const TabHeaderContainer = styled(AlignedFlexRow)`
 
 export const TabFooterContainer = styled(FooterButtonsContainer)`
   padding: 24px 32px;
-  margin-top: 30px;
 `;
 
 export const TabTextContainer = styled.div`
@@ -247,7 +236,7 @@ export const TabTextContainer = styled.div`
 `;
 
 export const TabPageContainer = styled.div`
-  padding: 24px 32px;
+  padding: 40px 32px 0;
 `;
 
 export const BreakWordContainer = styled.div`
@@ -291,11 +280,17 @@ export const BorderContainer = styled.div`
 export const Overlay = styled.div`
   position: fixed;
   z-index: ${({ theme }) => theme.zIndex.modal};
-  top: 0;
-  left: 0;
+  top: 50%;
+  left: 50%;
+  bottom: 0;
+  right: 0;
+
+  transform: translate(-50%, -50%);
+
+  overflow: auto;
 
   height: 100vh;
-  width: 100vw;
+  width: 360px;
 
   background: ${({ theme }) => hexToRGBA(theme.color.black, '0.32')};
 `;
@@ -339,4 +334,11 @@ export const DropdownHeader = styled(AlignedSpaceBetweenFlexRow)`
   border-top-right-radius: ${({ theme }) => theme.borderRadius.base}px;
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
+`;
+
+export const AmountContainer = styled(SpaceBetweenFlexColumn)`
+  align-items: flex-end;
+  text-align: end;
+
+  max-width: 120px;
 `;

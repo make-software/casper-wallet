@@ -2,7 +2,7 @@ import { ActivityType } from '@src/constants';
 
 import { TokenType } from '@hooks/use-casper-token';
 
-import { ErrorLocationState } from '@libs/layout';
+import { ErrorLocationState } from '@libs/layout/error/types';
 
 export interface LocationState extends ErrorLocationState {
   showNavigationMenu?: boolean;

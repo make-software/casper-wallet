@@ -9,6 +9,7 @@ import { TRANSFER_COST_MOTES } from '@src/constants';
 import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 
 import {
+  AmountContainer,
   ContentContainer,
   ParagraphContainer,
   SpaceBetweenFlexRow,
@@ -17,14 +18,13 @@ import {
 } from '@libs/layout';
 import {
   ActiveAccountPlate,
-  AmountContainer,
   List,
   RecipientPlate,
   Typography
 } from '@libs/ui/components';
 import { formatFiatAmount, formatNumber, motesToCSPR } from '@libs/ui/utils';
 
-export const ListItemContainer = styled(SpaceBetweenFlexRow)`
+const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;
 `;
 
@@ -33,7 +33,7 @@ interface ConfirmStepProps {
   amount: string;
   balance: string | null;
   symbol: string | null;
-  isCSPR: boolean;
+  isErc20Transfer: boolean;
   paymentAmount: string;
   recipientName?: string;
 }
@@ -42,7 +42,7 @@ export const ConfirmStep = ({
   amount,
   balance,
   symbol,
-  isCSPR,
+  isErc20Transfer,
   paymentAmount,
   recipientName
 }: ConfirmStepProps) => {
@@ -51,7 +51,7 @@ export const ConfirmStep = ({
   const currencyRate = useSelector(selectAccountCurrencyRate);
   let transactionDataRows;
 
-  if (isCSPR) {
+  if (!isErc20Transfer) {
     const transferCostInCSPR = formatNumber(motesToCSPR(TRANSFER_COST_MOTES), {
       precision: { max: 5 }
     });

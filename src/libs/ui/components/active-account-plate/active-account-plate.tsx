@@ -22,7 +22,7 @@ import {
   Typography
 } from '@libs/ui/components';
 
-export const AmountContainer = styled(SpaceBetweenFlexColumn)`
+const AmountContainer = styled(SpaceBetweenFlexColumn)`
   align-items: flex-end;
 
   max-width: 120px;
@@ -42,12 +42,14 @@ interface ActiveAccountPlateProps {
   label: string;
   balance: string | null;
   symbol: string | null;
+  top?: SpacingSize;
 }
 
 export const ActiveAccountPlate = ({
   label,
   symbol,
-  balance
+  balance,
+  top
 }: ActiveAccountPlateProps) => {
   const { t } = useTranslation();
 
@@ -59,7 +61,7 @@ export const ActiveAccountPlate = ({
 
   return (
     <>
-      <ParagraphContainer top={SpacingSize.XXL}>
+      <ParagraphContainer top={top || SpacingSize.XXL}>
         <Typography type="bodySemiBold">
           <Trans t={t}>{label}</Trans>
         </Typography>

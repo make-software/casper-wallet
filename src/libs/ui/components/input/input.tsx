@@ -6,14 +6,6 @@ import { BaseProps } from '@libs/ui/types';
 
 type Ref = HTMLInputElement;
 
-const getThemeColorByError = (error?: boolean) => {
-  if (error == null || !error) {
-    return 'contentDisabled';
-  }
-
-  return 'fillCritical';
-};
-
 const InputContainer = styled('div')<InputProps>(
   ({
     theme,
@@ -45,7 +37,9 @@ const InputContainer = styled('div')<InputProps>(
     path: {
       fill: oneColoredIcons
         ? theme.color.contentDisabled
-        : theme.color[getThemeColorByError(error)]
+        : error
+          ? theme.color.fillCritical
+          : ''
     },
 
     ...((disabled || readOnly) && {

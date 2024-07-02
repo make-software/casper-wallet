@@ -35,9 +35,13 @@ import {
   ledger
 } from '@libs/services/ledger';
 import { Account, HardwareWalletType } from '@libs/types/account';
-import { Button, Tile, Typography } from '@libs/ui/components';
+import {
+  Button,
+  DynamicAccountsListWithSelect,
+  Tile,
+  Typography
+} from '@libs/ui/components';
 
-import { LedgerAccountsList } from './ledger-accounts-list';
 import { ILedgerAccountListItem } from './types';
 
 const AnimationContainer = styled(CenteredFlexColumn)`
@@ -219,14 +223,15 @@ export const ConnectedLedger: React.FC<IConnectedLedgerProps> = ({
               </Tile>
             </VerticalSpaceContainer>
           ) : (
-            <LedgerAccountsList
-              ledgerAccountsWithBalance={ledgerAccountsWithBalance}
+            <DynamicAccountsListWithSelect
+              accountsWithBalance={ledgerAccountsWithBalance}
               setIsButtonDisabled={setIsButtonDisabled}
               selectedAccounts={selectedAccounts}
               setSelectedAccounts={setSelectedAccounts}
               maxItemsToRender={maxItemsToRender}
               onLoadMore={onLoadMore}
               isLoadingMore={isLoadingMore}
+              namePrefix="Ledger account"
             />
           )}
         </ContentContainer>

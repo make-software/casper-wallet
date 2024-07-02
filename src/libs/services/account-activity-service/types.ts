@@ -242,6 +242,7 @@ export interface Metadata {
 
 export type Erc20TransferWithId = {
   id: string;
+  amount?: string;
   deployHash: string;
   callerPublicKey: string;
   timestamp: string;

@@ -19,13 +19,8 @@ import { emitSdkEventToActiveTabs } from '@background/utils';
 import { sdkEvent } from '@content/sdk-event';
 
 import { deriveKeyPair } from '@libs/crypto';
-import {
-  deriveEncryptionKey,
-  encodePassword,
-  generateRandomSaltHex
-} from '@libs/crypto/hashing';
-import { convertBytesToHex } from '@libs/crypto/utils';
 import { encryptVault } from '@libs/crypto/vault';
+import { Account } from '@libs/types/account';
 
 import { accountInfoReset } from '../account-info/actions';
 import { keysUpdated } from '../keys/actions';
@@ -52,11 +47,13 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
+  accountsAdded,
   accountsImported,
   activeAccountChanged,
   anotherAccountConnected,
   deployPayloadReceived,
   deploysReseted,
+  hideAccountFromListChanged,
   siteConnected,
   siteDisconnected,
   vaultLoaded,
@@ -71,7 +68,6 @@ import {
 } from '../vault/selectors';
 import { popupWindowInit } from '../windowManagement/actions';
 import {
-  changePassword,
   createAccount,
   lockVault,
   startBackground,
@@ -96,6 +92,7 @@ export function* vaultSagas() {
   yield takeLatest(
     [
       getType(accountAdded),
+      getType(accountsAdded),
       getType(accountImported),
       getType(accountsImported),
       getType(accountRemoved),
@@ -106,12 +103,12 @@ export function* vaultSagas() {
       getType(siteDisconnected),
       getType(activeAccountChanged),
       getType(activeTimeoutDurationSettingChanged),
-      getType(deployPayloadReceived)
+      getType(deployPayloadReceived),
+      getType(hideAccountFromListChanged)
     ],
     updateVaultCipher
   );
   yield takeLatest(getType(createAccount), createAccountSaga);
-  yield takeLatest(getType(changePassword), changePasswordSaga);
 }
 
 /**
@@ -316,59 +313,31 @@ function* createAccountSaga(action: ReturnType<typeof createAccount>) {
       throw Error('Account name exist');
     }
 
-    const accountCount = derivedAccounts.length;
+    let isAccountAlreadyAdded = true;
+    let i = 0;
+
     const secretPhrase = yield* sagaSelect(selectSecretPhrase);
 
-    const keyPair = deriveKeyPair(secretPhrase, accountCount);
-    const account = {
-      ...keyPair,
-      name,
-      hidden: false
-    };
+    while (isAccountAlreadyAdded) {
+      const keyPair = deriveKeyPair(secretPhrase, i);
+      if (
+        !derivedAccounts.some(
+          account => account.publicKey === keyPair.publicKey
+        )
+      ) {
+        isAccountAlreadyAdded = false;
 
-    yield put(accountAdded(account));
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-function* changePasswordSaga(action: ReturnType<typeof changePassword>) {
-  try {
-    const { password } = action.payload;
-
-    const passwordSaltHash = generateRandomSaltHex();
-    const passwordHash = yield* sagaCall(() =>
-      encodePassword(password, passwordSaltHash)
-    );
-    const keyDerivationSaltHash = generateRandomSaltHex();
-    const newEncryptionKeyBytes = yield* sagaCall(() =>
-      deriveEncryptionKey(password, keyDerivationSaltHash)
-    );
-    const newEncryptionKeyHash = convertBytesToHex(newEncryptionKeyBytes);
-
-    yield put(
-      keysUpdated({
-        passwordHash,
-        passwordSaltHash,
-        keyDerivationSaltHash
-      })
-    );
-    yield put(
-      encryptionKeyHashCreated({ encryptionKeyHash: newEncryptionKeyHash })
-    );
-
-    const vault = yield* sagaSelect(selectVault);
-
-    // encrypt cipher with the new key
-    const newVaultCipher = yield* sagaCall(() =>
-      encryptVault(newEncryptionKeyHash, vault)
-    );
-
-    yield put(
-      vaultCipherCreated({
-        vaultCipher: newVaultCipher
-      })
-    );
+        const account: Account = {
+          ...keyPair,
+          name,
+          hidden: false,
+          derivationIndex: i
+        };
+        yield put(accountAdded(account));
+        break;
+      }
+      i++;
+    }
   } catch (err) {
     console.error(err);
   }

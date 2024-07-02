@@ -9,6 +9,7 @@ import { AuctionManagerEntryPoint } from '@src/constants';
 import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 
 import {
+  AmountContainer,
   ParagraphContainer,
   SpaceBetweenFlexRow,
   SpacingSize,
@@ -16,15 +17,10 @@ import {
 } from '@libs/layout';
 import { getAuctionManagerDeployCost } from '@libs/services/deployer-service';
 import { ValidatorResult } from '@libs/services/validators-service/types';
-import {
-  AmountContainer,
-  List,
-  Typography,
-  ValidatorPlate
-} from '@libs/ui/components';
+import { List, Typography, ValidatorPlate } from '@libs/ui/components';
 import { formatFiatAmount, formatNumber, motesToCSPR } from '@libs/ui/utils';
 
-export const ListItemContainer = styled(SpaceBetweenFlexRow)`
+const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;
 `;
 
@@ -32,21 +28,21 @@ interface ConfirmStepProps {
   inputAmountCSPR: string;
   validator: ValidatorResult | null;
   newValidator: ValidatorResult | null;
-  stakesType: AuctionManagerEntryPoint;
+  stakeType: AuctionManagerEntryPoint;
   confirmStepText: string;
 }
 export const ConfirmStep = ({
   inputAmountCSPR,
   validator,
   newValidator,
-  stakesType,
+  stakeType,
   confirmStepText
 }: ConfirmStepProps) => {
   const { t } = useTranslation();
 
   const currencyRate = useSelector(selectAccountCurrencyRate);
 
-  const transferFeeMotes = getAuctionManagerDeployCost(stakesType);
+  const transferFeeMotes = getAuctionManagerDeployCost(stakeType);
 
   const transferCostInCSPR = formatNumber(motesToCSPR(transferFeeMotes), {
     precision: { max: 5 }
@@ -102,7 +98,7 @@ export const ConfirmStep = ({
           }
           delegatorsNumber={validator?.delegators_number}
           validatorLabel={
-            stakesType === AuctionManagerEntryPoint.redelegate
+            stakeType === AuctionManagerEntryPoint.redelegate
               ? t('From validator')
               : t('To validator')
           }

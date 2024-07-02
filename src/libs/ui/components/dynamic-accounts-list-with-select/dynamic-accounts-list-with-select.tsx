@@ -12,6 +12,8 @@ import styled from 'styled-components';
 
 import { isEqualCaseInsensitive } from '@src/utils';
 
+import { ILedgerAccountListItem } from '@popup/pages/import-account-from-ledger/types';
+
 import {
   selectVaultAccountsNames,
   selectVaultLedgerAccounts
@@ -28,6 +30,7 @@ import {
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
+import { AccountListRows } from '@libs/types/account';
 import {
   Avatar,
   Checkbox,
@@ -41,10 +44,8 @@ import {
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { formatNumber, motesToCSPR } from '@libs/ui/utils';
 
-import { ILedgerAccountListItem } from './types';
-
 const ListItemContainer = styled(FlexColumn)<{ disabled?: boolean }>`
-  padding: 20px 16px;
+  padding: 12px 16px;
 
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 `;
@@ -59,15 +60,14 @@ const AmountContainer = styled(FlexColumn)`
 `;
 
 interface ListProps {
-  ledgerAccountsWithBalance: ILedgerAccountListItem[];
+  accountsWithBalance: (ILedgerAccountListItem | AccountListRows)[];
   setIsButtonDisabled: React.Dispatch<React.SetStateAction<boolean>>;
-  selectedAccounts: ILedgerAccountListItem[];
-  setSelectedAccounts: React.Dispatch<
-    React.SetStateAction<ILedgerAccountListItem[]>
-  >;
+  selectedAccounts: (ILedgerAccountListItem | AccountListRows)[];
+  setSelectedAccounts: React.Dispatch<React.SetStateAction<any[]>>;
   maxItemsToRender: number;
   onLoadMore: () => void;
   isLoadingMore: boolean;
+  namePrefix: string;
 }
 
 type FormFields = FieldValues & {
@@ -75,14 +75,15 @@ type FormFields = FieldValues & {
   checkbox: boolean[];
 };
 
-export const LedgerAccountsList = ({
-  ledgerAccountsWithBalance,
+export const DynamicAccountsListWithSelect = ({
+  accountsWithBalance,
   setIsButtonDisabled,
   selectedAccounts,
   setSelectedAccounts,
   maxItemsToRender,
   onLoadMore,
-  isLoadingMore
+  isLoadingMore,
+  namePrefix
 }: ListProps) => {
   const [accountNames, setAccountNames] = useState<{ name: string }[]>([]);
   const [checkboxes, setCheckboxes] = useState<boolean[]>([]);
@@ -113,14 +114,10 @@ export const LedgerAccountsList = ({
   });
 
   useEffect(() => {
-    for (
-      let i = inputsFields.length;
-      i < ledgerAccountsWithBalance.length;
-      i++
-    ) {
-      append({ name: `Ledger account ${i + 1}` });
+    for (let i = inputsFields.length; i < accountsWithBalance.length; i++) {
+      append({ name: `${namePrefix} ${i + 1}` });
     }
-  }, [append, inputsFields.length, ledgerAccountsWithBalance]);
+  }, [append, inputsFields.length, accountsWithBalance, namePrefix]);
 
   useEffect(() => {
     setAccountNames(getValues('accountNames'));
@@ -148,9 +145,10 @@ export const LedgerAccountsList = ({
 
   return (
     <List<ILedgerAccountListItem>
-      rows={ledgerAccountsWithBalance}
+      rows={accountsWithBalance}
       contentTop={SpacingSize.XL}
       maxItemsToRender={maxItemsToRender}
+      maxHeight={290}
       renderRow={(account, index) => {
         const inputFieldName = `accountNames.${index}.name`;
         const checkBoxFieldName = `checkbox.${index}`;
@@ -185,6 +183,7 @@ export const LedgerAccountsList = ({
               control={control}
               render={({ field: checkboxControllerField }) => (
                 <SpaceBetweenFlexRow
+                  data-testid={`select-account-${index}`}
                   onClick={() => {
                     if (isAlreadyConnected) return;
 

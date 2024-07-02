@@ -9,5 +9,6 @@ export enum RouterPath {
   ConfirmSecretPhrase = '/confirm-secret-phrase',
   ConfirmSecretPhraseSuccess = '/confirm-secret-phrase-success',
   OnboardingSuccess = '/onboarding-success',
-  ResetWallet = '/reset-wallet'
+  ResetWallet = '/reset-wallet',
+  SelectAccountsToRecover = '/select-accounts-to-recover'
 }

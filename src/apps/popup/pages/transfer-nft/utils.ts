@@ -85,3 +85,16 @@ export const getRuntimeArgs = (
       throw new Error('Unknown token standard.');
   }
 };
+
+export enum TransferNFTSteps {
+  Review = 'review',
+  Recipient = 'recipient',
+  Confirm = 'confirm',
+  ConfirmWithLedger = 'confirm with ledger',
+  Success = 'success'
+}
+
+export interface NFTData {
+  contentType: string;
+  url?: string;
+}

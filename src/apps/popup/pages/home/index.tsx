@@ -13,8 +13,6 @@ import {
   selectVaultActiveAccount
 } from '@background/redux/root-selector';
 
-import { useCasperToken } from '@hooks/use-casper-token';
-
 import {
   AlignedFlexRow,
   CenteredFlexColumn,
@@ -76,8 +74,6 @@ export function HomePageContent() {
   const network = useSelector(selectActiveNetworkSetting);
   const activeAccount = useSelector(selectVaultActiveAccount);
 
-  const casperToken = useCasperToken();
-
   useEffect(() => {
     if (!state?.activeTabId) {
       const container = document.querySelector('#ms-container');
@@ -134,19 +130,7 @@ export function HomePageContent() {
               )}
               <ButtonContainer
                 gap={SpacingSize.Small}
-                onClick={() =>
-                  navigate(
-                    casperToken?.id
-                      ? RouterPath.Transfer.replace(
-                          ':tokenContractPackageHash',
-                          casperToken.id
-                        ).replace(
-                          ':tokenContractHash',
-                          casperToken.contractHash || 'null'
-                        )
-                      : RouterPath.TransferNoParams
-                  )
-                }
+                onClick={() => navigate(RouterPath.Transfer)}
               >
                 <Button circle>
                   <SvgIcon

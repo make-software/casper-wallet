@@ -1,6 +1,6 @@
 import Big from 'big.js';
 import React, { useEffect, useState } from 'react';
-import { UseFormReturn, useWatch } from 'react-hook-form';
+import { useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -10,6 +10,10 @@ import {
   selectAccountBalance,
   selectAccountCurrencyRate
 } from '@background/redux/account-info/selectors';
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+
+import { TokenType } from '@hooks/use-casper-token';
 
 import {
   ContentContainer,
@@ -17,22 +21,36 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { Checkbox, Error, Input, Typography } from '@libs/ui/components';
-import { TransferAmountFormValues } from '@libs/ui/forms/transfer';
+import { Error, Input, Typography } from '@libs/ui/components';
+import { TransactionFeePlate } from '@libs/ui/components/transaction-fee-plate/transaction-fee-plate';
+import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
+import { useTransferAmountForm } from '@libs/ui/forms/transfer';
 import {
+  divideErc20Balance,
   formatFiatAmount,
   handleNumericInput,
   motesToCSPR
 } from '@libs/ui/utils';
 
 interface AmountStepProps {
-  amountForm: UseFormReturn<TransferAmountFormValues>;
-  symbol: string | null;
-  isCSPR: boolean;
+  isErc20Transfer: boolean;
+  paymentAmount: string;
+  selectedToken: TokenType | null | undefined;
+  setAmount: (value: React.SetStateAction<string>) => void;
+  setPaymentAmount: (value: React.SetStateAction<string>) => void;
+  setTransferIdMemo: (value: React.SetStateAction<string>) => void;
+  setIsAmountFormButtonDisabled: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
-  const [isChecked, setIsChecked] = useState(false);
+export const AmountStep = ({
+  isErc20Transfer,
+  paymentAmount,
+  selectedToken,
+  setAmount,
+  setPaymentAmount,
+  setTransferIdMemo,
+  setIsAmountFormButtonDisabled
+}: AmountStepProps) => {
   const [disabled, setDisabled] = useState(false);
   const [maxAmountMotes, setMaxAmountMotes] = useState('0');
 
@@ -40,6 +58,24 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
 
   const currencyRate = useSelector(selectAccountCurrencyRate);
   const csprBalance = useSelector(selectAccountBalance);
+  const activeAccount = useSelector(selectVaultActiveAccount);
+  const { networkName } = useSelector(selectApiConfigBasedOnActiveNetwork);
+
+  const erc20Balance =
+    (selectedToken?.balance &&
+      divideErc20Balance(
+        selectedToken.balance,
+        selectedToken?.decimals || null
+      )) ||
+    null;
+
+  const amountForm = useTransferAmountForm(
+    erc20Balance,
+    isErc20Transfer,
+    csprBalance.liquidMotes,
+    paymentAmount,
+    selectedToken?.decimals
+  );
 
   useEffect(() => {
     const maxAmountMotes: string =
@@ -48,32 +84,45 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
         : Big(csprBalance.liquidMotes).sub(TRANSFER_COST_MOTES).toFixed();
 
     const hasEnoughBalance = Big(maxAmountMotes).gte(TRANSFER_MIN_AMOUNT_MOTES);
-    const isMaxAmountEqualMinAmount = Big(maxAmountMotes).eq(
-      TRANSFER_MIN_AMOUNT_MOTES
-    );
 
-    setIsChecked(isMaxAmountEqualMinAmount);
     setMaxAmountMotes(maxAmountMotes);
     setDisabled(!hasEnoughBalance);
   }, [csprBalance.liquidMotes]);
 
-  const {
-    register,
-    formState: { errors },
-    control,
-    setValue,
-    trigger
-  } = amountForm;
+  useEffect(() => {
+    if (!isErc20Transfer) {
+      setAmount(motesToCSPR(TRANSFER_MIN_AMOUNT_MOTES));
+    }
+  }, [isErc20Transfer, setAmount]);
+
+  const { register, formState, control, trigger, setValue } = amountForm;
+
+  const { errors } = formState;
+
+  useEffect(() => {
+    if (formState.touchedFields.amount) {
+      trigger();
+    }
+  }, [
+    networkName,
+    activeAccount?.publicKey,
+    trigger,
+    formState.touchedFields.amount,
+    selectedToken?.amount,
+    csprBalance.liquidMotes,
+    paymentAmount
+  ]);
 
   const { onChange: onChangeTransferIdMemo } = register('transferIdMemo');
   const { onChange: onChangeCSPRAmount } = register('amount');
+  const { onChange: onChangePaymentAmount } = register('paymentAmount');
 
   const amount = useWatch({
     control,
     name: 'amount'
   });
 
-  const paymentAmount = useWatch({
+  const paymentAmountFieldValue = useWatch({
     control,
     name: 'paymentAmount'
   });
@@ -81,12 +130,19 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
   const amountLabel = t('Amount');
   const transferIdLabel = t('Transfer ID (memo)');
   const paymentAmoutLabel = t('Set custom transaction fee');
-  const fiatAmount = isCSPR
+  const fiatAmount = !isErc20Transfer
     ? formatFiatAmount(amount || '0', currencyRate)
     : undefined;
-  const paymentFiatAmount = !isCSPR
-    ? formatFiatAmount(paymentAmount || '0', currencyRate)
+  const paymentFiatAmount = isErc20Transfer
+    ? formatFiatAmount(paymentAmountFieldValue || '0', currencyRate)
     : undefined;
+
+  useEffect(() => {
+    const isAmountFormButtonDisabled = calculateSubmitButtonDisabled({
+      isValid: formState.isValid
+    });
+    setIsAmountFormButtonDisabled(!!isAmountFormButtonDisabled);
+  }, [formState.isValid, setIsAmountFormButtonDisabled]);
 
   return (
     <ContentContainer>
@@ -96,7 +152,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
         </Typography>
       </ParagraphContainer>
 
-      {isCSPR && disabled && (
+      {!isErc20Transfer && disabled && (
         <VerticalSpaceContainer top={SpacingSize.XL}>
           <Error
             header="Not enough CSPR"
@@ -113,15 +169,12 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
           monotype
           type="number"
           placeholder={t('0.00')}
-          suffixText={symbol}
+          suffixText={selectedToken?.symbol}
           {...register('amount')}
-          disabled={isCSPR && disabled}
+          disabled={!isErc20Transfer && disabled}
           onChange={e => {
             onChangeCSPRAmount(e);
-
-            if (isChecked) {
-              setIsChecked(false);
-            }
+            setAmount(e.target.value);
           }}
           onKeyDown={handleNumericInput}
           error={!!errors?.amount}
@@ -129,29 +182,27 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
         />
       </VerticalSpaceContainer>
 
-      {isCSPR && (
-        <VerticalSpaceContainer top={SpacingSize.Small}>
-          <Checkbox
-            variant="square"
-            label={t('Send max amount')}
-            checked={isChecked}
-            disabled={disabled}
-            onChange={() => {
-              if (isChecked) {
-                setValue('amount', motesToCSPR(TRANSFER_MIN_AMOUNT_MOTES));
-              } else {
-                setValue('amount', motesToCSPR(maxAmountMotes));
-              }
+      {!isErc20Transfer && (
+        <ParagraphContainer top={SpacingSize.Small}>
+          <Typography
+            type="captionRegular"
+            color="contentAction"
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              setAmount(motesToCSPR(maxAmountMotes));
+              setValue('amount', motesToCSPR(maxAmountMotes));
+
               trigger('amount');
-              setIsChecked(!isChecked);
             }}
-          />
-        </VerticalSpaceContainer>
+          >
+            <Trans t={t}>Send max</Trans>
+          </Typography>
+        </ParagraphContainer>
       )}
 
       {/** transferIdMemo is only relevant for CSPR */}
       <VerticalSpaceContainer top={SpacingSize.XL}>
-        {isCSPR ? (
+        {!isErc20Transfer ? (
           <Input
             label={transferIdLabel}
             monotype
@@ -162,6 +213,7 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
               // replace all non-numeric characters
               e.target.value = e.target.value.replace(/[^0-9]/g, '');
               onChangeTransferIdMemo(e);
+              setTransferIdMemo(e.target.value);
             }}
             error={!!errors?.transferIdMemo}
             validationText={errors?.transferIdMemo?.message}
@@ -176,6 +228,10 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
             suffixText={'CSPR'}
             {...register('paymentAmount')}
             error={!!errors?.paymentAmount}
+            onChange={e => {
+              onChangePaymentAmount(e);
+              setPaymentAmount(e.target.value);
+            }}
             onKeyDown={handleNumericInput}
             validationText={
               errors?.paymentAmount?.message ||
@@ -184,6 +240,13 @@ export const AmountStep = ({ amountForm, symbol, isCSPR }: AmountStepProps) => {
           />
         )}
       </VerticalSpaceContainer>
+      {!isErc20Transfer && (
+        <VerticalSpaceContainer top={SpacingSize.XL}>
+          <TransactionFeePlate
+            paymentAmount={motesToCSPR(TRANSFER_COST_MOTES)}
+          />
+        </VerticalSpaceContainer>
+      )}
     </ContentContainer>
   );
 };

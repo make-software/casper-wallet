@@ -51,7 +51,6 @@ export async function openOnboardingUi() {
 
   // create a tab if it does not exist or if it's not an onboarding URL
   if (!tabExist || !isOnboardingUrl) {
-    console.log(123);
     tabs
       .create({ url: 'onboarding.html', active: true })
       .then(tab => {

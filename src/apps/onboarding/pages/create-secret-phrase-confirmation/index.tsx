@@ -35,6 +35,7 @@ export function CreateSecretPhraseConfirmationPage({
   return (
     <LayoutTab
       layoutContext="withStepper"
+      minHeight={680}
       renderHeader={() => (
         <TabHeaderContainer>
           <HeaderSubmenuBarNavLink linkType="back" onClick={handleBack} />
@@ -43,7 +44,7 @@ export function CreateSecretPhraseConfirmationPage({
       )}
       renderContent={() => <CreateSecretPhraseConfirmationPageContent />}
       renderFooter={() => (
-        <TabFooterContainer>
+        <TabFooterContainer style={{ marginTop: '28px' }}>
           <Checkbox
             checked={isChecked}
             onChange={() => setIsChecked(currentValue => !currentValue)}

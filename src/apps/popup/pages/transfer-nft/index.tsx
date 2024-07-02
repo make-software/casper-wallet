@@ -9,12 +9,12 @@ import {
   fetchAndDispatchExtendedDeployInfo
 } from '@src/utils';
 
-import { TransferNftContent } from '@popup/pages/transfer-nft/content';
 import {
+  TransferNFTSteps,
   getDefaultPaymentAmountBasedOnNftTokenStandard,
   getRuntimeArgs
 } from '@popup/pages/transfer-nft/utils';
-import { RouterPath, useTypedNavigate } from '@popup/router';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { accountTrackingIdOfSentNftTokensChanged } from '@background/redux/account-info/actions';
 import {
@@ -69,10 +69,18 @@ import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-
 import { useTransferNftForm } from '@libs/ui/forms/transfer-nft';
 import { CSPRtoMotes } from '@libs/ui/utils';
 
+import { ConfirmStep } from './confirm-step';
+import { RecipientStep } from './recipient-step';
+import { ReviewStep } from './review-step';
+
 export const TransferNftPage = () => {
-  const [showSuccessScreen, setShowSuccessScreen] = useState(false);
+  const [transferNFTStep, setTransferNFTStep] = useState(
+    TransferNFTSteps.Review
+  );
+  const [recipientName, setRecipientName] = useState('');
+  const [paymentAmount, setPaymentAmount] = useState('');
   const [haveReverseOwnerLookUp, setHaveReverseOwnerLookUp] = useState(false);
-  const [showLedgerConfirm, setShowLedgerConfirm] = useState(false);
+  const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(false);
 
   const { contractPackageHash, tokenId } = useParams();
 
@@ -91,6 +99,9 @@ export const TransferNftPage = () => {
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
+  const location = useTypedLocation();
+
+  const { nftData } = location.state;
 
   const nftToken = useMemo(
     () =>
@@ -118,26 +129,29 @@ export const TransferNftPage = () => {
     ? MapNFTTokenStandardToName[nftToken.token_standard_id]
     : '';
 
-  const paymentAmount = useMemo(
+  const defaultPaymentAmount = useMemo(
     () => getDefaultPaymentAmountBasedOnNftTokenStandard(tokenStandard),
     [tokenStandard]
   );
 
   const { recipientForm, amountForm } = useTransferNftForm(
     csprBalance.liquidMotes,
-    paymentAmount
+    defaultPaymentAmount
   );
 
-  useEffect(() => {
-    amountForm.trigger('paymentAmount');
-  }, [amountForm]);
+  const { getValues, trigger } = amountForm;
 
-  const isButtonDisabled = calculateSubmitButtonDisabled({
-    isValid:
-      recipientForm.formState.isValid &&
-      amountForm.formState.isValid &&
-      !haveReverseOwnerLookUp
+  useEffect(() => {
+    trigger('paymentAmount');
+  }, [trigger]);
+
+  const isRecipientFormButtonDisabled = calculateSubmitButtonDisabled({
+    isValid: recipientForm.formState.isValid && !haveReverseOwnerLookUp
   });
+  const isAmountFormButtonDisabled = calculateSubmitButtonDisabled({
+    isValid: amountForm.formState.isValid
+  });
+
   const { recipientPublicKey } = recipientForm.getValues();
   const isRecipientPublicKeyInContact = useMemo(
     () => contactPublicKeys.includes(recipientPublicKey),
@@ -146,6 +160,8 @@ export const TransferNftPage = () => {
 
   const submitTransfer = async () => {
     if (haveReverseOwnerLookUp || !nftToken) return;
+
+    setIsSubmitButtonDisable(true);
 
     if (activeAccount) {
       const { recipientPublicKey } = recipientForm.getValues();
@@ -189,7 +205,7 @@ export const TransferNftPage = () => {
 
             fetchAndDispatchExtendedDeployInfo(deployHash);
 
-            setShowSuccessScreen(true);
+            setTransferNFTStep(TransferNFTSteps.Success);
           } else {
             navigate(
               ErrorPath,
@@ -229,7 +245,7 @@ export const TransferNftPage = () => {
   };
 
   const beforeLedgerActionCb = async () => {
-    setShowLedgerConfirm(true);
+    setTransferNFTStep(TransferNFTSteps.ConfirmWithLedger);
 
     if (haveReverseOwnerLookUp || !nftToken || !activeAccount) return;
 
@@ -266,87 +282,169 @@ export const TransferNftPage = () => {
     beforeLedgerActionCb
   });
 
-  const renderFooter = () => {
-    if (showLedgerConfirm && !showSuccessScreen) {
-      return renderLedgerFooter({
-        onConnect: makeSubmitLedgerAction,
-        event: ledgerEventStatusToRender,
-        onErrorCtaPressed: () => setShowLedgerConfirm(false)
-      });
-    }
+  const content = {
+    [TransferNFTSteps.Review]: (
+      <ReviewStep
+        nftToken={nftToken}
+        haveReverseOwnerLookUp={haveReverseOwnerLookUp}
+        amountForm={amountForm}
+        nftData={nftData}
+      />
+    ),
+    [TransferNFTSteps.Recipient]: (
+      <RecipientStep
+        recipientForm={recipientForm}
+        setRecipientName={setRecipientName}
+        recipientName={recipientName}
+      />
+    ),
+    [TransferNFTSteps.Confirm]: (
+      <ConfirmStep
+        paymentAmount={paymentAmount}
+        recipientName={recipientName}
+        nftToken={nftToken}
+        nftData={nftData}
+        recipientPublicKey={recipientPublicKey}
+      />
+    ),
+    [TransferNFTSteps.ConfirmWithLedger]: (
+      <LedgerEventView event={ledgerEventStatusToRender} />
+    ),
+    [TransferNFTSteps.Success]: (
+      <TransferSuccessScreen headerText="You submitted a transaction" />
+    )
+  };
 
-    return () => (
+  const headerButtons = {
+    [TransferNFTSteps.Review]: <HeaderSubmenuBarNavLink linkType="back" />,
+    [TransferNFTSteps.Recipient]: (
+      <HeaderSubmenuBarNavLink
+        onClick={() => setTransferNFTStep(TransferNFTSteps.Review)}
+        linkType="back"
+      />
+    ),
+    [TransferNFTSteps.Confirm]: (
+      <HeaderSubmenuBarNavLink
+        onClick={() => setTransferNFTStep(TransferNFTSteps.Recipient)}
+        linkType="back"
+      />
+    ),
+    [TransferNFTSteps.ConfirmWithLedger]: (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        onClick={() => setTransferNFTStep(TransferNFTSteps.Confirm)}
+      />
+    )
+  };
+
+  const ledgerFooterButton = renderLedgerFooter({
+    onConnect: makeSubmitLedgerAction,
+    event: ledgerEventStatusToRender,
+    onErrorCtaPressed: () => setTransferNFTStep(TransferNFTSteps.Confirm)
+  });
+
+  const footerButtons = {
+    [TransferNFTSteps.Review]: (
       <FooterButtonsContainer>
-        {showSuccessScreen ? (
-          <>
-            <Button
-              color="primaryBlue"
-              type="button"
-              onClick={() => {
-                const currentDate = Date.now();
+        <Button
+          disabled={isAmountFormButtonDisabled}
+          onClick={() => {
+            const { paymentAmount } = getValues();
 
-                const shouldAskForReview =
-                  askForReviewAfter == null || currentDate > askForReviewAfter;
-
-                if (ratedInStore || !shouldAskForReview) {
-                  const homeRoutesState = {
-                    state: {
-                      // set the active tab to deploys
-                      activeTabId: HomePageTabsId.Deploys
-                    }
-                  };
-
-                  // Navigate to "Home" with the pre-defined state
-                  navigate(RouterPath.Home, homeRoutesState);
-                } else {
-                  // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
-                  navigate(RouterPath.RateApp);
-                }
-              }}
-            >
-              <Trans t={t}>Done</Trans>
-            </Button>
-
-            {!isRecipientPublicKeyInContact && (
-              <Button
-                color="secondaryBlue"
-                onClick={() => {
-                  const { recipientPublicKey } = recipientForm.getValues();
-
-                  navigate(RouterPath.AddContact, {
-                    state: {
-                      recipientPublicKey: recipientPublicKey
-                    }
-                  });
-                }}
-              >
-                <Trans t={t}>Add recipient to list of contacts</Trans>
-              </Button>
-            )}
-          </>
-        ) : (
-          <Button
-            color={isActiveAccountFromLedger ? 'primaryRed' : 'primaryBlue'}
-            type="button"
-            disabled={isButtonDisabled}
-            onClick={
-              isActiveAccountFromLedger
-                ? makeSubmitLedgerAction()
-                : submitTransfer
-            }
-          >
-            {isActiveAccountFromLedger ? (
-              <AlignedFlexRow gap={SpacingSize.Small}>
-                <SvgIcon src="assets/icons/ledger-white.svg" />
-                <Trans t={t}>Confirm send</Trans>
-              </AlignedFlexRow>
-            ) : (
+            setPaymentAmount(paymentAmount);
+            setTransferNFTStep(TransferNFTSteps.Recipient);
+          }}
+        >
+          <Trans t={t}>Next</Trans>
+        </Button>
+      </FooterButtonsContainer>
+    ),
+    [TransferNFTSteps.Recipient]: (
+      <FooterButtonsContainer>
+        <Button
+          disabled={isRecipientFormButtonDisabled}
+          onClick={() => setTransferNFTStep(TransferNFTSteps.Confirm)}
+        >
+          <Trans t={t}>Next</Trans>
+        </Button>
+      </FooterButtonsContainer>
+    ),
+    [TransferNFTSteps.Confirm]: (
+      <FooterButtonsContainer>
+        <Button
+          color={isActiveAccountFromLedger ? 'primaryRed' : 'primaryBlue'}
+          type="button"
+          onClick={
+            isActiveAccountFromLedger
+              ? makeSubmitLedgerAction()
+              : submitTransfer
+          }
+          disabled={isSubmitButtonDisable}
+        >
+          {isActiveAccountFromLedger ? (
+            <AlignedFlexRow gap={SpacingSize.Small}>
+              <SvgIcon src="assets/icons/ledger-white.svg" />
               <Trans t={t}>Confirm send</Trans>
-            )}
+            </AlignedFlexRow>
+          ) : (
+            <Trans t={t}>Confirm send</Trans>
+          )}
+        </Button>
+      </FooterButtonsContainer>
+    ),
+    [TransferNFTSteps.ConfirmWithLedger]: ledgerFooterButton ? (
+      ledgerFooterButton()
+    ) : (
+      <></>
+    ),
+    [TransferNFTSteps.Success]: (
+      <FooterButtonsContainer>
+        <Button
+          color="primaryBlue"
+          type="button"
+          onClick={() => {
+            const currentDate = Date.now();
+
+            const shouldAskForReview =
+              askForReviewAfter == null || currentDate > askForReviewAfter;
+
+            if (ratedInStore || !shouldAskForReview) {
+              const homeRoutesState = {
+                state: {
+                  // set the active tab to deploys
+                  activeTabId: HomePageTabsId.Deploys
+                }
+              };
+
+              // Navigate to "Home" with the pre-defined state
+              navigate(RouterPath.Home, homeRoutesState);
+            } else {
+              // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
+              navigate(RouterPath.RateApp);
+            }
+          }}
+        >
+          <Trans t={t}>Done</Trans>
+        </Button>
+
+        {!isRecipientPublicKeyInContact && (
+          <Button
+            color="secondaryBlue"
+            onClick={() => {
+              const { recipientPublicKey } = recipientForm.getValues();
+
+              navigate(RouterPath.AddContact, {
+                state: {
+                  recipientPublicKey: recipientPublicKey
+                }
+              });
+            }}
+          >
+            <Trans t={t}>Add recipient to list of contacts</Trans>
           </Button>
         )}
       </FooterButtonsContainer>
-    );
+    )
   };
 
   return (
@@ -357,34 +455,14 @@ export const TransferNftPage = () => {
           withMenu
           withConnectionStatus
           renderSubmenuBarItems={
-            showSuccessScreen
+            transferNFTStep === TransferNFTSteps.Success
               ? undefined
-              : showLedgerConfirm
-                ? () => (
-                    <HeaderSubmenuBarNavLink
-                      linkType="back"
-                      onClick={() => setShowLedgerConfirm(false)}
-                    />
-                  )
-                : () => <HeaderSubmenuBarNavLink linkType="back" />
+              : () => headerButtons[transferNFTStep]
           }
         />
       )}
-      renderContent={() =>
-        showSuccessScreen ? (
-          <TransferSuccessScreen headerText="You submitted a transaction" />
-        ) : showLedgerConfirm ? (
-          <LedgerEventView event={ledgerEventStatusToRender} />
-        ) : (
-          <TransferNftContent
-            nftToken={nftToken}
-            recipientForm={recipientForm}
-            amountForm={amountForm}
-            haveReverseOwnerLookUp={haveReverseOwnerLookUp}
-          />
-        )
-      }
-      renderFooter={renderFooter()}
+      renderContent={() => content[transferNFTStep]}
+      renderFooter={() => footerButtons[transferNFTStep]}
     />
   );
 };

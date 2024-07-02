@@ -23,12 +23,7 @@ export type TransferAmountFormValues = {
   transferIdMemo: string;
 };
 
-export function useTransferForm(
-  erc20Balance: string | null,
-  isErc20: boolean,
-  amountMotes: string | null,
-  paymentAmount: string
-) {
+export const useTransferRecipientForm = () => {
   const recipientFormSchema = Yup.object().shape({
     recipientPublicKey: useRecipientPublicKeyRule()
   });
@@ -40,8 +35,18 @@ export function useTransferForm(
     delayError: 500
   };
 
+  return useForm<TransferRecipientFormValues>(recipientFormOptions);
+};
+
+export const useTransferAmountForm = (
+  erc20Balance: string | null,
+  isErc20: boolean,
+  amountMotes: string | null,
+  paymentAmount: string,
+  decimals: number | undefined
+) => {
   const erc20AmountFormSchema = Yup.object().shape({
-    amount: useErc20AmountRule(erc20Balance),
+    amount: useErc20AmountRule(erc20Balance, decimals),
     paymentAmount: usePaymentAmountRule(amountMotes),
     transferIdMemo: useTransferIdMemoRule()
   });
@@ -68,8 +73,5 @@ export function useTransferForm(
         }
   };
 
-  return {
-    recipientForm: useForm<TransferRecipientFormValues>(recipientFormOptions),
-    amountForm: useForm<TransferAmountFormValues>(amountFormOptions)
-  };
-}
+  return useForm<TransferAmountFormValues>(amountFormOptions);
+};

@@ -1,12 +1,25 @@
-import React from 'react';
+import * as Yup from 'yup';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { AnyObject } from 'yup/es/types';
+
+import {
+  ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED,
+  LOGIN_RETRY_ATTEMPTS_LIMIT
+} from '@src/constants';
+import { getErrorMessageForIncorrectPassword } from '@src/utils';
 
 import {
   selectPasswordHash,
   selectPasswordSaltHash
 } from '@background/redux/keys/selectors';
-import { loginRetryCountReseted } from '@background/redux/login-retry-count/actions';
+import {
+  loginRetryCountIncremented,
+  loginRetryCountReseted
+} from '@background/redux/login-retry-count/actions';
+import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import {
@@ -17,24 +30,40 @@ import {
   UnlockProtectedPageContent
 } from '@libs/layout';
 import { Button } from '@libs/ui/components';
-import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
-import { useUnlockWalletForm } from '@libs/ui/forms/unlock-wallet';
 
 interface BackupSecretPhrasePasswordPageType {
-  setPasswordConfirmed: () => void;
+  setPasswordConfirmed?: () => void;
   onClick?: (password: string) => Promise<void>;
-  loading?: boolean;
+  isLoading?: boolean;
+}
+
+interface VerifyPasswordMessageEvent extends MessageEvent {
+  data: {
+    isPasswordCorrect: Yup.StringSchema<
+      string | undefined,
+      AnyObject,
+      string | undefined
+    >;
+  };
 }
 
 export const PasswordProtectionPage = ({
   setPasswordConfirmed,
   onClick,
-  loading = false
+  isLoading = false
 }: BackupSecretPhrasePasswordPageType) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { t } = useTranslation();
 
   const passwordHash = useSelector(selectPasswordHash);
   const passwordSaltHash = useSelector(selectPasswordSaltHash);
+  const loginRetryCount = useSelector(selectLoginRetryCount);
+
+  const attemptsLeft =
+    LOGIN_RETRY_ATTEMPTS_LIMIT -
+    loginRetryCount -
+    ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED;
 
   if (passwordHash == null || passwordSaltHash == null) {
     throw Error("Password doesn't exist");
@@ -43,26 +72,62 @@ export const PasswordProtectionPage = ({
   const {
     register,
     handleSubmit,
-    formState: { errors, isDirty },
-    getValues
-  } = useUnlockWalletForm(passwordHash, passwordSaltHash);
-
-  const isSubmitButtonDisabled = calculateSubmitButtonDisabled({
-    isDirty
+    formState: { errors },
+    getValues,
+    setError
+  } = useForm({
+    defaultValues: {
+      password: ''
+    }
   });
 
   const onSubmit = () => {
-    if (onClick) {
-      const { password } = getValues();
+    setIsSubmitting(true);
 
-      onClick(password).then(() => {
-        setPasswordConfirmed();
-        dispatchToMainStore(loginRetryCountReseted());
-      });
-    } else {
-      setPasswordConfirmed();
-      dispatchToMainStore(loginRetryCountReseted());
-    }
+    const { password } = getValues();
+
+    const worker = new Worker(
+      new URL('@background/workers/verify-password-worker.ts', import.meta.url)
+    );
+
+    worker.postMessage({
+      passwordHash,
+      passwordSaltHash,
+      password
+    });
+
+    worker.onmessage = (event: VerifyPasswordMessageEvent) => {
+      const { isPasswordCorrect } = event.data;
+
+      if (!isPasswordCorrect) {
+        dispatchToMainStore(loginRetryCountIncremented());
+        const errorMessage = getErrorMessageForIncorrectPassword(attemptsLeft);
+
+        setError('password', {
+          message: t(errorMessage)
+        });
+        setIsSubmitting(false);
+      } else {
+        if (onClick) {
+          onClick(password).then(() => {
+            if (setPasswordConfirmed) {
+              setPasswordConfirmed();
+            }
+            dispatchToMainStore(loginRetryCountReseted());
+          });
+        } else {
+          if (setPasswordConfirmed) {
+            setPasswordConfirmed();
+          }
+          dispatchToMainStore(loginRetryCountReseted());
+        }
+      }
+    };
+
+    worker.onerror = error => {
+      console.error(error);
+      setIsSubmitting(false);
+    };
   };
 
   return (
@@ -84,8 +149,8 @@ export const PasswordProtectionPage = ({
       )}
       renderFooter={() => (
         <FooterButtonsContainer>
-          <Button disabled={isSubmitButtonDisabled || loading}>
-            {loading ? t('Loading') : t('Continue')}
+          <Button disabled={isSubmitting || isLoading}>
+            {isSubmitting || isLoading ? t('Loading') : t('Continue')}
           </Button>
         </FooterButtonsContainer>
       )}

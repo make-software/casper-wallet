@@ -133,18 +133,7 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
           <ButtonContainer
             gap={SpacingSize.Medium}
             onClick={() =>
-              navigate(
-                tokenData?.id
-                  ? RouterPath.Transfer.replace(
-                      ':tokenContractPackageHash',
-                      tokenData.id
-                    ).replace(
-                      ':tokenContractHash',
-                      tokenData.contractHash || 'null'
-                    )
-                  : RouterPath.TransferNoParams,
-                { state: { tokenData } }
-              )
+              navigate(RouterPath.Transfer, { state: { tokenData } })
             }
           >
             <Button circle>
