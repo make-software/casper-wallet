@@ -52,6 +52,7 @@ export function CreateAccountPageContent({
           {...register('name')}
           error={!!errorMessage}
           validationText={errorMessage}
+          autoComplete="off"
         />
       </InputsContainer>
     </ContentContainer>
