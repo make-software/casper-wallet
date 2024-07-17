@@ -12,11 +12,12 @@ import {
   Modal,
   SvgIcon
 } from '@libs/ui/components';
+import { hexToRGBA } from '@libs/ui/utils';
 
 const ConnectionStatusContainer = styled(AlignedFlexRow)`
   width: fit-content;
 
-  background-color: rgb(0, 0, 0, 0.16);
+  background-color: ${({ theme }) => hexToRGBA(theme.color.black, '0.24')};
   padding: 6px 8px 6px 14px;
   border-top-right-radius: ${({ theme }) => theme.borderRadius.hundred}px;
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius.hundred}px;
