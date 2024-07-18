@@ -96,6 +96,16 @@ export enum AuctionManagerContractHash {
   Testnet = '93d923e336b20a4c4ca14d592b60e5bd3fe330775618290104f9beb326db7ae2'
 }
 
+export enum CSPRMarketContractHash {
+  Mainnet = '31cc023b17c903a963ec60eab96a60f1fa37cb74b4b3bafc91a441e0e9d70f97',
+  Testnet = '154ff59b5f9feec42d3a418058d66badcb2121dc3ffb2e3cf92596bf5aafbc88'
+}
+
+export enum AssociatedKeysContractHash {
+  Mainnet = 'b2ec4f982efa8643c979cb3ab42ad1a18851c2e6f91804cd3e65c079679bdc59',
+  Testnet = '676794cbbb35ff5642d0ae9c35302e244a7236a614d7e9ef58d0fb2cba6be3ed'
+}
+
 export enum ActivityType {
   Sent = 'Sent',
   Received = 'Received',
@@ -181,4 +191,103 @@ export enum TokenEntryPoint {
   mint = 'mint',
   burn = 'burn',
   transfer = 'transfer'
+}
+
+// rename to AuctionManagerEntryPoint after HRD will be ready
+export enum AuctionManagerEntryPoint_V2 {
+  delegate = 'delegate',
+  undelegate = 'undelegate',
+  redelegate = 'redelegate',
+  add = 'add_bid',
+  withdraw = 'withdraw_bid',
+  activate = 'activate_bid'
+}
+
+export const AuctionEntryPointNameMap = {
+  [AuctionManagerEntryPoint_V2.add]: 'Add bid',
+  [AuctionManagerEntryPoint_V2.withdraw]: 'Withdraw bid',
+  [AuctionManagerEntryPoint_V2.activate]: 'Activate bid',
+  [AuctionManagerEntryPoint_V2.delegate]: 'Delegate',
+  [AuctionManagerEntryPoint_V2.undelegate]: 'Undelegate',
+  [AuctionManagerEntryPoint_V2.redelegate]: 'Redelegate'
+};
+
+export enum NftTokenEntryPoint {
+  approve = 'approve',
+  burn = 'burn',
+  mint = 'mint',
+  transfer = 'transfer',
+  update_token_meta = 'update_token_meta',
+  set_approval_for_all = 'set_approval_for_all'
+}
+
+export const NftTokenEntryPointNameMap = {
+  [NftTokenEntryPoint.approve]: 'Approve',
+  [NftTokenEntryPoint.burn]: 'Burn',
+  [NftTokenEntryPoint.mint]: 'Mint',
+  [NftTokenEntryPoint.transfer]: 'Transfer',
+  [NftTokenEntryPoint.update_token_meta]: 'Update',
+  [NftTokenEntryPoint.set_approval_for_all]: 'Approve'
+};
+
+export enum Cep18EntryPoint {
+  mint = 'mint',
+  burn = 'burn',
+  transfer = 'transfer',
+  increase_allowance = 'increase_allowance'
+}
+
+export const Cep18EntryPointNameMap = {
+  [Cep18EntryPoint.mint]: 'Mint',
+  [Cep18EntryPoint.burn]: 'Burn',
+  [Cep18EntryPoint.transfer]: 'Transfer',
+  [Cep18EntryPoint.increase_allowance]: 'Increase allowance'
+};
+
+export enum CsprMarketEntryPoint {
+  delist_token = 'delist_token',
+  list_token = 'list_token',
+  accept_offer = 'accept_offer',
+  cancel_offer = 'cancel_offer',
+  make_offer = 'make_offer'
+}
+
+export const CsprMarketEntryPointNameMap = {
+  [CsprMarketEntryPoint.delist_token]: 'Delist',
+  [CsprMarketEntryPoint.list_token]: 'List',
+  [CsprMarketEntryPoint.accept_offer]: 'Accept offer',
+  [CsprMarketEntryPoint.cancel_offer]: 'Cancel offer',
+  [CsprMarketEntryPoint.make_offer]: 'Make offer'
+};
+
+export const ExecutionTypesMap = {
+  1: 'WASM deploy', //"ModuleBytes"
+  2: 'Contract call', //"StoredContractByHash"
+  3: 'Contract call', //"StoredContractByName",
+  4: 'Contract call', //"StoredVersionedContractByHash",
+  5: 'Contract call', //"StoredVersionedContractByName",
+  6: 'Transfer'
+};
+
+export const TRANSFER = 6;
+
+export enum ContractTypeId {
+  System = 1,
+  Cep18 = 2,
+  CustomCep18 = 3,
+  CEP47Nft = 4,
+  CustomCEP47Nft = 5,
+  DeFi = 6,
+  CEP78Nft = 7,
+  CustomCEP78Nft = 8,
+  CSPRMarket = 9
+}
+
+export enum DeployIcon {
+  Generic = 'assets/icons/generic.svg',
+  Auction = '/assets/icons/auction.svg',
+  NativeTransfer = '/assets/icons/casper.svg',
+  CSPRStudio = '/assets/icons/cspr-studio.svg',
+  CSPRMarket = '/assets/icons/cspr-market.svg',
+  AssociatedKeys = '/assets/icons/associated-keys.svg'
 }

@@ -7,6 +7,7 @@ import {
   ActivityType,
   ActivityTypeName,
   AuctionManagerEntryPoint,
+  ExecutionTypesMap,
   getBlockExplorerContractUrl
 } from '@src/constants';
 
@@ -57,15 +58,6 @@ interface ActivityDetailsPageContentProps {
   amount?: string | null;
   symbol?: string | null;
 }
-
-export const ExecutionTypesMap = {
-  1: 'WASM deploy', //"ModuleBytes"
-  2: 'Contract call', //"StoredContractByHash"
-  3: 'Contract call', //"StoredContractByName",
-  4: 'Contract call', //"StoredVersionedContractByHash",
-  5: 'Contract call', //"StoredVersionedContractByName",
-  6: 'Transfer'
-};
 
 const Erc20EventType = {
   erc20_approve: 'approve',

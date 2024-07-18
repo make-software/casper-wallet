@@ -8,15 +8,18 @@ import { ContentColor } from '@libs/ui/utils';
 
 export enum Status {
   Success = 'success',
+  Processed = 'processed',
   Error = 'error',
+  /** @deprecated Became 'Processed' */
   Executed = 'executed',
   Pending = 'pending',
   Expired = 'expired'
 }
 
 const StatusIcons = {
-  [Status.Success]: 'assets/icons/tick-in-circle.svg',
-  [Status.Executed]: 'assets/icons/tick-in-circle.svg',
+  [Status.Success]: 'assets/icons/clock.svg',
+  [Status.Executed]: 'assets/icons/clock.svg',
+  [Status.Processed]: 'assets/icons/clock.svg',
   [Status.Pending]: 'assets/icons/clock.svg',
   [Status.Error]: 'assets/icons/error.svg',
   [Status.Expired]: 'assets/icons/error.svg'
@@ -25,6 +28,7 @@ const StatusIcons = {
 const StatusColors = {
   [Status.Success]: 'contentPositive',
   [Status.Executed]: 'contentPositive',
+  [Status.Processed]: 'contentPositive',
   [Status.Pending]: 'contentLightBlue',
   [Status.Error]: 'contentActionCritical',
   [Status.Expired]: 'contentActionCritical'
@@ -34,6 +38,7 @@ const StatusColors = {
 const StatusBackgroundColors = {
   [Status.Success]: 'rgba(119, 255, 190, 0.12)',
   [Status.Executed]: 'rgba(119, 255, 190, 0.12)',
+  [Status.Processed]: 'rgba(119, 255, 190, 0.12)',
   [Status.Pending]: 'rgba(116, 144, 255, 0.12)',
   [Status.Error]: 'rgba(204, 0, 15, 0.08)',
   [Status.Expired]: 'rgba(204, 0, 15, 0.08)'
@@ -45,6 +50,7 @@ const getDeployStatus = (
   if (
     deployResult &&
     deployResult?.status &&
+    deployResult?.status !== Status.Processed &&
     deployResult?.status !== Status.Executed
   ) {
     return deployResult?.status as Status;
@@ -67,7 +73,7 @@ export interface DeployStatusProps {
 
 const StatusContainer = styled(AlignedFlexRow)<{ status: Status }>(
   ({ theme, status }) => ({
-    padding: '4px 8px',
+    padding: '2px 8px',
 
     backgroundColor: StatusBackgroundColors[status],
     borderRadius: theme.borderRadius.hundred
@@ -86,6 +92,7 @@ export const DeployStatus = ({
     [Status.Success]: t('Success'),
     [Status.Error]: t('Error'),
     [Status.Executed]: t('Executed'),
+    [Status.Processed]: t('Processed'),
     [Status.Pending]: t('Pending'),
     [Status.Expired]: t('Expired')
   };
@@ -102,9 +109,9 @@ export const DeployStatus = ({
             color={StatusColors[status] as ContentColor}
           />
           <Typography
-            type="labelMedium"
+            type="captionMedium"
             color={StatusColors[status] as ContentColor}
-            uppercase
+            capitalize
           >
             {StatusLabel[status]}
           </Typography>
@@ -113,18 +120,17 @@ export const DeployStatus = ({
     );
   }
 
-  if (status === Status.Success) {
-    return null;
+  if (status === Status.Error || status === Status.Pending) {
+    return (
+      <Tooltip title={message} placement="bottomCenter">
+        <SvgIcon
+          src={StatusIcons[status]}
+          color={StatusColors[status] as ContentColor}
+          size={16}
+        />
+      </Tooltip>
+    );
   }
 
-  return (
-    <Tooltip title={message} placement="bottomCenter">
-      <Typography
-        type="labelMedium"
-        color={StatusColors[status] as ContentColor}
-      >
-        {StatusLabel[status]}
-      </Typography>
-    </Tooltip>
-  );
+  return null;
 };

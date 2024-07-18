@@ -8,12 +8,8 @@ import { useFetchAccountDeploys } from '@hooks/use-fetch-account-deploys';
 import { useMapAccountDeploysListWithPendingTransactions } from '@hooks/use-map-account-deploys-list-with-pending-transactions';
 
 import { SpacingSize } from '@libs/layout';
-import {
-  AccountActivityPlate,
-  List,
-  LoadingActivityView,
-  NoActivityView
-} from '@libs/ui/components';
+import { List, LoadingActivityView, NoActivityView } from '@libs/ui/components';
+import { DeployPlate } from '@libs/ui/components/deploy-plate/deploy-plate';
 
 export const DeploysList = () => {
   const { loadMoreDeploys, loading, hasNextPage } = useFetchAccountDeploys();
@@ -42,14 +38,14 @@ export const DeploysList = () => {
     }
   }, []);
 
-  const setActivityPlateYPosition = () => {
-    const container = document.querySelector('#ms-container');
-
-    localStorage.setItem(
-      'activityPlateYPosition',
-      container?.scrollTop.toString() || ''
-    );
-  };
+  // const setActivityPlateYPosition = () => {
+  //   const container = document.querySelector('#ms-container');
+  //
+  //   localStorage.setItem(
+  //     'activityPlateYPosition',
+  //     container?.scrollTop.toString() || ''
+  //   );
+  // };
 
   return (
     <>
@@ -58,11 +54,21 @@ export const DeploysList = () => {
           <List
             contentTop={SpacingSize.None}
             rows={accountDeploysListWithPendingTransactions}
-            renderRow={transaction => (
-              <AccountActivityPlate
-                transactionInfo={transaction}
-                onClick={setActivityPlateYPosition}
-                isDeploysList={true}
+            renderRow={() => (
+              // <AccountActivityPlate
+              //   transactionInfo={transaction}
+              //   onClick={setActivityPlateYPosition}
+              //   isDeploysList={true}
+              // />
+              <DeployPlate
+                deploy={{
+                  executionTypeId: 1,
+                  transfers: [],
+                  contractPackage: {
+                    contract_type_id: 9
+                  },
+                  contractHash: 'CSPRMarketContractHash.Testnet'
+                }}
               />
             )}
             marginLeftForItemSeparatorLine={54}
