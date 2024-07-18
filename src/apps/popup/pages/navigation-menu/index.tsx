@@ -37,6 +37,7 @@ import {
   Modal,
   SvgIcon,
   ThemeSwitcher,
+  Tile,
   Typography
 } from '@libs/ui/components';
 
@@ -57,8 +58,13 @@ const ListItemClickableContainer = styled(
   }
 `;
 
-export const SpaceBetweenContainer = styled(SpaceBetweenFlexRow)`
+const SpaceBetweenContainer = styled(SpaceBetweenFlexRow)`
   align-items: center;
+`;
+
+const LogoContainer = styled.div`
+  padding: 24px 18px;
+  margin: 16px 0;
 `;
 
 interface MenuItem {
@@ -291,6 +297,13 @@ export function NavigationMenuPageContent() {
           },
           {
             id: 2,
+            title: t('User guides'),
+            iconPath: 'assets/icons/books.svg',
+            href: 'https://casperwallet.io/user-guide',
+            disabled: false
+          },
+          {
+            id: 3,
             title: t('About us'),
             iconPath: 'assets/icons/team.svg',
             href: 'https://make.services/',
@@ -380,6 +393,15 @@ export function NavigationMenuPageContent() {
           />
         )
       )}
+      <Tile>
+        <LogoContainer>
+          <SvgIcon
+            src="assets/icons/casper-wallet-text-logo.svg"
+            width={129}
+            height={32}
+          />
+        </LogoContainer>
+      </Tile>
     </ContentContainer>
   );
 }
