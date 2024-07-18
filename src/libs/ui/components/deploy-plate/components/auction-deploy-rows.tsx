@@ -3,24 +3,14 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import {
   AuctionEntryPointNameMap,
-  AuctionManagerEntryPoint,
   AuctionManagerEntryPoint_V2,
   DeployIcon
 } from '@src/constants';
 
-import { AlignedFlexRow, FlexColumn, FlexRow, SpacingSize } from '@libs/layout';
-import {
-  Avatar,
-  DeployStatus,
-  Hash,
-  HashVariant,
-  Link,
-  SvgIcon,
-  Typography
-} from '@libs/ui/components';
+import { AlignedFlexRow, SpacingSize } from '@libs/layout';
+import { Avatar, Hash, HashVariant, Typography } from '@libs/ui/components';
 import { DeployContainer } from '@libs/ui/components/deploy-plate/components/deploy-container';
 import { DeployDefault } from '@libs/ui/components/deploy-plate/components/deploy-default';
-import { formatTimestampAge } from '@libs/ui/utils';
 
 interface AuctionDeployRowsProps {
   validatorPublicKey: string;
