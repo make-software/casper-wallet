@@ -100,6 +100,7 @@ export function UnlockVaultPageContent({
           placeholder={t('Password')}
           error={!!errors.password}
           validationText={errors.password?.message}
+          autoFocus
           suffixIcon={
             <PasswordVisibilityIcon
               passwordInputType={passwordInputType}

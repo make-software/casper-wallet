@@ -144,6 +144,7 @@ export interface InputProps extends BaseProps {
   dataTestId?: string;
   autoComplete?: string;
   secondaryBackground?: boolean;
+  autoFocus?: boolean;
 }
 
 export const Input = forwardRef<Ref, InputProps>(function Input(
@@ -168,6 +169,7 @@ export const Input = forwardRef<Ref, InputProps>(function Input(
     readOnly,
     autoComplete,
     secondaryBackground,
+    autoFocus,
     ...restProps
   }: InputProps,
   ref
@@ -219,6 +221,7 @@ export const Input = forwardRef<Ref, InputProps>(function Input(
           readOnly={readOnly}
           disabled={disabled}
           autoComplete={autoComplete}
+          autoFocus={autoFocus}
         />
 
         {!suffixIcon && error && (
