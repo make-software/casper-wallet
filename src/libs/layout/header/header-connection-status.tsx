@@ -7,6 +7,7 @@ import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
 import {
   AccountList,
+  Avatar,
   Hash,
   HashVariant,
   Modal,
@@ -25,7 +26,15 @@ const ConnectionStatusContainer = styled(AlignedFlexRow)`
   left: -2px;
 `;
 
-export function HeaderConnectionStatus() {
+interface HeaderConnectionStatusProps {
+  publicKey: string;
+  isConnected: boolean;
+}
+
+export function HeaderConnectionStatus({
+  publicKey,
+  isConnected
+}: HeaderConnectionStatusProps) {
   const activeAccount = useSelector(selectVaultActiveAccount);
 
   return (
@@ -36,22 +45,31 @@ export function HeaderConnectionStatus() {
         <AccountList closeModal={closeModal} />
       )}
       children={({ isOpen }) => (
-        <ConnectionStatusContainer gap={SpacingSize.Tiny}>
-          <Hash
-            value={activeAccount?.publicKey!}
-            variant={HashVariant.ListSubtextHash}
-            truncated
-            withoutTooltip
-            color="contentOnFill"
-            withCopyOnSelfClick={false}
+        <>
+          <Avatar
+            size={32}
+            publicKey={publicKey}
+            withConnectedStatus
+            isConnected={isConnected}
+            displayContext="header"
           />
-          <SvgIcon
-            size={16}
-            src="assets/icons/chevron-up.svg"
-            flipByAxis={isOpen ? undefined : 'X'}
-            color="contentOnFill"
-          />
-        </ConnectionStatusContainer>
+          <ConnectionStatusContainer gap={SpacingSize.Tiny}>
+            <Hash
+              value={activeAccount?.publicKey!}
+              variant={HashVariant.ListSubtextHash}
+              truncated
+              withoutTooltip
+              color="contentOnFill"
+              withCopyOnSelfClick={false}
+            />
+            <SvgIcon
+              size={16}
+              src="assets/icons/chevron-up.svg"
+              flipByAxis={isOpen ? undefined : 'X'}
+              color="contentOnFill"
+            />
+          </ConnectionStatusContainer>
+        </>
       )}
     />
   );
