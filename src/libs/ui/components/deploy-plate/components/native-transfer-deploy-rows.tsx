@@ -36,7 +36,7 @@ export const NativeTransferDeployRows = ({
       </AlignedFlexRow>
       <AlignedFlexRow gap={SpacingSize.Small}>
         <Typography type="captionRegular" color="contentSecondary">
-          <Trans t={t}>{isTransactionIn ? 'to' : 'from'}</Trans>
+          <Trans t={t}>{isTransactionIn ? 'from' : 'to'}</Trans>
         </Typography>
         <AlignedFlexRow gap={SpacingSize.Tiny}>
           <Avatar publicKey={publicKey} size={16} />

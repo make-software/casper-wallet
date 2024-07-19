@@ -9,8 +9,8 @@ import {
 
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
 import { Link, Typography } from '@libs/ui/components';
+import { DefaultDeployRows } from '@libs/ui/components/deploy-plate/components/default-deploy-rows';
 import { DeployContainer } from '@libs/ui/components/deploy-plate/components/deploy-container';
-import { DeployDefault } from '@libs/ui/components/deploy-plate/components/deploy-default';
 
 interface CSPRMarketDeployRowsProps {
   entryPointName: CsprMarketEntryPoint;
@@ -81,7 +81,7 @@ export const CSPRMarketDeployRows = ({
   }
 
   return (
-    <DeployDefault
+    <DefaultDeployRows
       contractLink={contractLink}
       contractName={contractName}
       entryPointName={entryPointName}

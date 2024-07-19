@@ -107,6 +107,7 @@ export const DeployStatus = ({
           <SvgIcon
             src={StatusIcons[status]}
             color={StatusColors[status] as ContentColor}
+            size={16}
           />
           <Typography
             type="captionMedium"

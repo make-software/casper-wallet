@@ -9,8 +9,8 @@ import {
 
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
 import { Avatar, Hash, HashVariant, Typography } from '@libs/ui/components';
+import { DefaultDeployRows } from '@libs/ui/components/deploy-plate/components/default-deploy-rows';
 import { DeployContainer } from '@libs/ui/components/deploy-plate/components/deploy-container';
-import { DeployDefault } from '@libs/ui/components/deploy-plate/components/deploy-default';
 
 interface AuctionDeployRowsProps {
   validatorPublicKey: string;
@@ -172,7 +172,7 @@ export const AuctionDeployRows = ({
   }
 
   return (
-    <DeployDefault
+    <DefaultDeployRows
       contractLink={contractLink}
       contractName="name"
       entryPointName={entryPointName}

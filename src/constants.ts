@@ -212,6 +212,7 @@ export const AuctionEntryPointNameMap = {
   [AuctionManagerEntryPoint_V2.redelegate]: 'Redelegate'
 };
 
+// double-check this entry point
 export enum NftTokenEntryPoint {
   approve = 'approve',
   burn = 'burn',

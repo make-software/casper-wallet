@@ -20,7 +20,7 @@ import { AssociatedDeployRows } from '@libs/ui/components/deploy-plate/component
 import { AuctionDeployRows } from '@libs/ui/components/deploy-plate/components/auction-deploy-rows';
 import { Cep18DeployRows } from '@libs/ui/components/deploy-plate/components/cep18-deploy-rows';
 import { CSPRMarketDeployRows } from '@libs/ui/components/deploy-plate/components/cspr-market-deploy-rows';
-import { DeployDefault } from '@libs/ui/components/deploy-plate/components/deploy-default';
+import { DefaultDeployRows } from '@libs/ui/components/deploy-plate/components/default-deploy-rows';
 import { NativeTransferDeployRows } from '@libs/ui/components/deploy-plate/components/native-transfer-deploy-rows';
 import { NftDeployRows } from '@libs/ui/components/deploy-plate/components/nft-deploy-rows';
 
@@ -96,7 +96,7 @@ export const DeployPlate = ({ deploy }: DeployPlateProps) => {
           // navigate(RouterPath.DeployDetails);
         }}
       >
-        <DeployDefault
+        <DefaultDeployRows
           contractLink="link"
           contractName="name"
           timestamp="2024-07-03T08:31:23.577Z"
@@ -215,7 +215,7 @@ export const DeployPlate = ({ deploy }: DeployPlateProps) => {
         // navigate(RouterPath.DeployDetails);
       }}
     >
-      <DeployDefault
+      <DefaultDeployRows
         contractLink="link"
         contractName="name"
         timestamp="2024-07-03T08:31:23.577Z"

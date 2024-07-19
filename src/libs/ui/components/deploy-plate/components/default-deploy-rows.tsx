@@ -7,17 +7,19 @@ import { AlignedFlexRow, SpacingSize } from '@libs/layout';
 import { Link, Typography } from '@libs/ui/components';
 import { DeployContainer } from '@libs/ui/components/deploy-plate/components/deploy-container';
 
-export const DeployDefault = ({
-  contractLink,
-  contractName,
-  entryPointName,
-  timestamp
-}: {
+interface DefaultDeployRowsProps {
   contractLink: string;
   contractName: string;
   entryPointName: string;
   timestamp: string;
-}) => {
+}
+
+export const DefaultDeployRows = ({
+  contractLink,
+  contractName,
+  entryPointName,
+  timestamp
+}: DefaultDeployRowsProps) => {
   const { t } = useTranslation();
 
   return (
