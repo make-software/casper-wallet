@@ -129,7 +129,7 @@ export const DeployPlate = ({ deploy }: DeployPlateProps) => {
     );
   }
 
-  if (isNFT) {
+  if (isAssociated) {
     return (
       <Container
         onClick={() => {
@@ -137,10 +137,29 @@ export const DeployPlate = ({ deploy }: DeployPlateProps) => {
           // navigate(RouterPath.DeployDetails);
         }}
       >
-        <NftDeployRows
-          publicKey="02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5"
+        <AssociatedDeployRows
+          contractName="name"
+          contractLink="link"
+          timestamp="2024-07-03T08:31:23.577Z"
+        />
+        <SvgIcon src="assets/icons/chevron.svg" size={16} />
+      </Container>
+    );
+  }
+
+  if (isCSPRMarket) {
+    return (
+      <Container
+        onClick={() => {
+          // need to pass props to view transaction details
+          // navigate(RouterPath.DeployDetails);
+        }}
+      >
+        <CSPRMarketDeployRows
           amountOfNFTs={2}
-          entryPointName={NftTokenEntryPoint.update_token_meta}
+          entryPointName={CsprMarketEntryPoint.accept_offer}
+          contractName="name"
+          contractLink="link"
           timestamp="2024-07-03T08:31:23.577Z"
         />
         <SvgIcon src="assets/icons/chevron.svg" size={16} />
@@ -170,7 +189,7 @@ export const DeployPlate = ({ deploy }: DeployPlateProps) => {
     );
   }
 
-  if (isCSPRMarket) {
+  if (isNFT) {
     return (
       <Container
         onClick={() => {
@@ -178,29 +197,10 @@ export const DeployPlate = ({ deploy }: DeployPlateProps) => {
           // navigate(RouterPath.DeployDetails);
         }}
       >
-        <CSPRMarketDeployRows
+        <NftDeployRows
+          publicKey="02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5"
           amountOfNFTs={2}
-          entryPointName={CsprMarketEntryPoint.accept_offer}
-          contractName="name"
-          contractLink="link"
-          timestamp="2024-07-03T08:31:23.577Z"
-        />
-        <SvgIcon src="assets/icons/chevron.svg" size={16} />
-      </Container>
-    );
-  }
-
-  if (isAssociated) {
-    return (
-      <Container
-        onClick={() => {
-          // need to pass props to view transaction details
-          // navigate(RouterPath.DeployDetails);
-        }}
-      >
-        <AssociatedDeployRows
-          contractName="name"
-          contractLink="link"
+          entryPointName={NftTokenEntryPoint.update_token_meta}
           timestamp="2024-07-03T08:31:23.577Z"
         />
         <SvgIcon src="assets/icons/chevron.svg" size={16} />
