@@ -32,5 +32,6 @@ export enum RouterPath {
   ImportAccountFromTorus = '/import-account-from-torus',
   BuyCSPR = '/buy-cspr',
   ImportAccountFromLedger = '/import-account-from-ledger',
-  SignWithLedgerInNewWindow = '/sign-with-ledger-in-new-window'
+  SignWithLedgerInNewWindow = '/sign-with-ledger-in-new-window',
+  DeployDetails = '/deploys-details'
 }

@@ -342,3 +342,8 @@ export const AmountContainer = styled(SpaceBetweenFlexColumn)`
 
   max-width: 120px;
 `;
+
+export const NftIndexContainer = styled.div`
+  padding: 0 6px;
+  background: ${({ theme }) => theme.color.backgroundSecondary};
+`;

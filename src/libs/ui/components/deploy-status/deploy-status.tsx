@@ -44,7 +44,7 @@ const StatusBackgroundColors = {
   [Status.Expired]: 'rgba(204, 0, 15, 0.08)'
 };
 
-const getDeployStatus = (
+export const getDeployStatus = (
   deployResult?: { status: string; errorMessage: string | null } | null
 ): Status => {
   if (

@@ -16,6 +16,7 @@ import { ConnectedSitesPage } from '@popup/pages/connected-sites';
 import { ContactDetailsPage } from '@popup/pages/contact-details';
 import { ContactsBookPage } from '@popup/pages/contacts';
 import { CreateAccountPage } from '@popup/pages/create-account';
+import { DeployDetailsPage } from '@popup/pages/deploy-details';
 import { DownloadAccountKeysPage } from '@popup/pages/download-account-keys';
 import { HomePageContent } from '@popup/pages/home';
 import { ImportAccountFromLedgerPage } from '@popup/pages/import-account-from-ledger';
@@ -252,6 +253,7 @@ function AppRoutes() {
         path={RouterPath.SignWithLedgerInNewWindow}
         element={<SignWithLedgerInNewWindowPage />}
       />
+      <Route path={RouterPath.DeployDetails} element={<DeployDetailsPage />} />
     </Routes>
   );
 }

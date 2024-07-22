@@ -232,6 +232,7 @@ export const NftTokenEntryPointNameMap = {
 };
 
 export enum Cep18EntryPoint {
+  approve = 'approve',
   mint = 'mint',
   burn = 'burn',
   transfer = 'transfer',
@@ -242,7 +243,8 @@ export const Cep18EntryPointNameMap = {
   [Cep18EntryPoint.mint]: 'Mint',
   [Cep18EntryPoint.burn]: 'Burn',
   [Cep18EntryPoint.transfer]: 'Transfer',
-  [Cep18EntryPoint.increase_allowance]: 'Increase allowance'
+  [Cep18EntryPoint.increase_allowance]: 'Increase allowance',
+  [Cep18EntryPoint.approve]: 'Approve transfer rights'
 };
 
 export enum CsprMarketEntryPoint {
@@ -261,7 +263,7 @@ export const CsprMarketEntryPointNameMap = {
   [CsprMarketEntryPoint.make_offer]: 'Make offer'
 };
 
-export const ExecutionTypesMap = {
+export const ExecutionTypesMap: { [key in number]: string } = {
   1: 'WASM deploy', //"ModuleBytes"
   2: 'Contract call', //"StoredContractByHash"
   3: 'Contract call', //"StoredContractByName",
@@ -290,5 +292,25 @@ export enum DeployIcon {
   NativeTransfer = '/assets/icons/casper.svg',
   CSPRStudio = '/assets/icons/cspr-studio.svg',
   CSPRMarket = '/assets/icons/cspr-market.svg',
-  AssociatedKeys = '/assets/icons/associated-keys.svg'
+  AssociatedKeys = '/assets/icons/associated-keys.svg',
+  Cep18Default = '/assets/icons/cep-18-default.svg'
+}
+
+// TODO: move this somewhere else
+/**
+ * FungibleTokenActionTypeEnum
+ */
+export enum FTActionTypeEnum {
+  'Mint' = 1,
+  'Transfer' = 2,
+  'Approve' = 3,
+  'Burn' = 4
+}
+
+export enum NftActivityTypeEnum {
+  'Mint' = 1,
+  'Burn' = 2,
+  'Approve' = 3,
+  'Transfer' = 4,
+  'Metadata' = 5
 }
