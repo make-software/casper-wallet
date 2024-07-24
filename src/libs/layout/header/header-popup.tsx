@@ -7,12 +7,8 @@ import {
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
 
-import {
-  AlignedFlexRow,
-  AlignedSpaceBetweenFlexRow,
-  HeaderContainer
-} from '@libs/layout';
-import { Avatar, SvgIcon } from '@libs/ui/components';
+import { AlignedSpaceBetweenFlexRow, HeaderContainer } from '@libs/layout';
+import { SvgIcon } from '@libs/ui/components';
 
 import { HeaderActions } from './header-actions';
 import { HeaderConnectionStatus } from './header-connection-status';
@@ -51,16 +47,10 @@ export function HeaderPopup({
     <>
       <HeaderContainer>
         {withConnectionStatus && activeAccount?.publicKey ? (
-          <AlignedFlexRow>
-            <Avatar
-              size={32}
-              publicKey={activeAccount.publicKey}
-              withConnectedStatus
-              isConnected={isActiveAccountConnected}
-              displayContext="header"
-            />
-            <HeaderConnectionStatus />
-          </AlignedFlexRow>
+          <HeaderConnectionStatus
+            publicKey={activeAccount.publicKey}
+            isConnected={isActiveAccountConnected}
+          />
         ) : (
           <SvgIcon
             src="assets/icons/wallet-original-on-white.svg"

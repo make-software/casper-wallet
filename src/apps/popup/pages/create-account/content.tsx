@@ -53,6 +53,7 @@ export function CreateAccountPageContent({
           error={!!errorMessage}
           validationText={errorMessage}
           autoComplete="off"
+          autoFocus
         />
       </InputsContainer>
     </ContentContainer>

@@ -73,6 +73,7 @@ export function UnlockWalletPageContent({
             type={passwordInputType}
             placeholder={t('Password')}
             oneColoredIcons
+            autoFocus
             suffixIcon={
               <PasswordVisibilityIcon
                 passwordInputType={passwordInputType}
