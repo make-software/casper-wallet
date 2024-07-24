@@ -42,10 +42,11 @@ export const useTransferAmountForm = (
   erc20Balance: string | null,
   isErc20: boolean,
   amountMotes: string | null,
-  paymentAmount: string
+  paymentAmount: string,
+  decimals: number | undefined
 ) => {
   const erc20AmountFormSchema = Yup.object().shape({
-    amount: useErc20AmountRule(erc20Balance),
+    amount: useErc20AmountRule(erc20Balance, decimals),
     paymentAmount: usePaymentAmountRule(amountMotes),
     transferIdMemo: useTransferIdMemoRule()
   });

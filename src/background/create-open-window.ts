@@ -183,7 +183,7 @@ export async function openNewSeparateWindow({
           type: 'normal',
           height: popupHeight,
           width: popupWidth,
-          left: windowWidth + xOffset - popupWidth,
+          left: windowWidth + xOffset - popupWidth - 200,
           top: yOffset,
           focused: true
         });

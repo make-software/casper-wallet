@@ -63,8 +63,8 @@ export const deployPayloadReceived = createAction('DEPLOY_PAYLOAD_RECEIVED')<{
   json: string;
 }>();
 
-export const hideAccountFromListChange = createAction(
-  'HIDE_ACCOUNT_FROM_LIST_CHANGE'
+export const hideAccountFromListChanged = createAction(
+  'HIDE_ACCOUNT_FROM_LIST_CHANGED'
 )<{
   accountName: string;
 }>();

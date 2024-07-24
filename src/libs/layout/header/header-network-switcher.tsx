@@ -13,7 +13,7 @@ import { Modal, SvgIcon, Typography } from '@libs/ui/components';
 import { hexToRGBA } from '@libs/ui/utils';
 
 const NetworkSwitcherContainer = styled(AlignedFlexRow)`
-  background-color: ${({ theme }) => hexToRGBA(theme.color.black, '0.16')};
+  background-color: ${({ theme }) => hexToRGBA(theme.color.black, '0.24')};
   padding: 6px 8px;
   border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
@@ -106,8 +106,12 @@ export const HeaderNetworkSwitcher = () => {
           <SvgIcon
             src="assets/icons/network.svg"
             size={16}
-            color="contentOnFill"
             dataTestId="network-switcher"
+            color={
+              activeNetwork === NetworkSetting.Testnet
+                ? 'contentLightBlue'
+                : 'contentLightRed'
+            }
           />
           <Typography type="listSubtext" color="contentOnFill">
             {activeNetwork}

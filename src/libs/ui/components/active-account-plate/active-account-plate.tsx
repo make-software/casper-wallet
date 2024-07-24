@@ -22,7 +22,7 @@ import {
   Typography
 } from '@libs/ui/components';
 
-export const AmountContainer = styled(SpaceBetweenFlexColumn)`
+const AmountContainer = styled(SpaceBetweenFlexColumn)`
   align-items: flex-end;
 
   max-width: 120px;

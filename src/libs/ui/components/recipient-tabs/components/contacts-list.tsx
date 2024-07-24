@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { selectAllContacts } from '@background/redux/contacts/selectors';
 import { ContactWithId } from '@background/redux/contacts/types';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
 import { SpacingSize, TileContainer } from '@libs/layout';
 import { List, RecipientPlate, Tile, Typography } from '@libs/ui/components';
@@ -15,15 +16,18 @@ export const ContactsList = ({ handleSelectRecipient }: ContactsListProps) => {
   const [contactsWithId, setContactsWithId] = useState<ContactWithId[]>([]);
 
   const contacts = useSelector(selectAllContacts);
+  const activeAccount = useSelector(selectVaultActiveAccount);
 
   useEffect(() => {
-    const contactsWithId = contacts.map(contact => ({
-      ...contact,
-      id: contact.name
-    }));
+    const contactsWithId = contacts
+      .map(contact => ({
+        ...contact,
+        id: contact.name
+      }))
+      .filter(account => account.publicKey !== activeAccount?.publicKey);
 
     setContactsWithId(contactsWithId);
-  }, [contacts]);
+  }, [contacts, activeAccount]);
 
   if (contactsWithId.length === 0) {
     return (
