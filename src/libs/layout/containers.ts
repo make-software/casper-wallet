@@ -287,6 +287,8 @@ export const Overlay = styled.div`
 
   transform: translate(-50%, -50%);
 
+  overflow: auto;
+
   height: 100vh;
   width: 360px;
 
@@ -332,4 +334,11 @@ export const DropdownHeader = styled(AlignedSpaceBetweenFlexRow)`
   border-top-right-radius: ${({ theme }) => theme.borderRadius.base}px;
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
+`;
+
+export const AmountContainer = styled(SpaceBetweenFlexColumn)`
+  align-items: flex-end;
+  text-align: end;
+
+  max-width: 120px;
 `;

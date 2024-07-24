@@ -85,7 +85,7 @@ import {
   anotherAccountConnected,
   deployPayloadReceived,
   deploysReseted,
-  hideAccountFromListChange,
+  hideAccountFromListChanged,
   secretPhraseCreated,
   siteConnected,
   siteDisconnected,
@@ -159,7 +159,6 @@ import {
   recipientPublicKeyReseted
 } from './redux/recent-recipient-public-keys/actions';
 import {
-  changePassword,
   createAccount,
   initKeys,
   initVault,
@@ -591,7 +590,7 @@ runtime.onMessage.addListener(
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeAccountChanged):
-          case getType(hideAccountFromListChange):
+          case getType(hideAccountFromListChanged):
           case getType(activeTimeoutDurationSettingChanged):
           case getType(activeNetworkSettingChanged):
           case getType(vaultSettingsReseted):
@@ -636,7 +635,6 @@ runtime.onMessage.addListener(
           case getType(accountCasperActivityCountChanged):
           case getType(accountTrackingIdOfSentNftTokensChanged):
           case getType(accountTrackingIdOfSentNftTokensRemoved):
-          case getType(changePassword):
           case getType(newContactAdded):
           case getType(contactRemoved):
           case getType(contactEditingPermissionChanged):

@@ -69,6 +69,20 @@ export const ImportAccountFromTorusPage = () => {
     )
   };
 
+  const headerButton = {
+    [ImportAccountSteps.Instruction]: (
+      <HeaderSubmenuBarNavLink linkType="back" />
+    ),
+    [ImportAccountSteps.Form]: (
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        onClick={() => setImportStep(ImportAccountSteps.Instruction)}
+      />
+    ),
+    [ImportAccountSteps.Success]: <HeaderSubmenuBarNavLink linkType="close" />,
+    [ImportAccountSteps.Failure]: <HeaderSubmenuBarNavLink linkType="close" />
+  };
+
   const footerButton = {
     [ImportAccountSteps.Instruction]: (
       <Button onClick={() => setImportStep(ImportAccountSteps.Form)}>
@@ -109,13 +123,7 @@ export const ImportAccountFromTorusPage = () => {
           withNetworkSwitcher
           withMenu
           withConnectionStatus
-          renderSubmenuBarItems={() => (
-            <HeaderSubmenuBarNavLink
-              linkType={
-                importStep === ImportAccountSteps.Success ? 'close' : 'back'
-              }
-            />
-          )}
+          renderSubmenuBarItems={() => headerButton[importStep]}
         />
       )}
       renderContent={() => content[importStep]}

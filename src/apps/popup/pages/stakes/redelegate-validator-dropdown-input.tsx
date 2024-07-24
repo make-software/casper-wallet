@@ -107,7 +107,7 @@ export const RedelegateValidatorDropdownInput = ({
           validator?.account_info?.info?.owner?.branding?.logo?.png_256 ||
           validator?.account_info?.info?.owner?.branding?.logo?.png_1024
         }
-        totalStake={validator.user_stake}
+        totalStake={validator.total_stake}
         delegatorsNumber={validator?.delegators_number}
         validatorLabel={t('To validator')}
         error={errors?.newValidatorPublicKey}
@@ -179,7 +179,7 @@ export const RedelegateValidatorDropdownInput = ({
                 fee={validator.fee}
                 name={validator?.account_info?.info?.owner?.name}
                 logo={logo}
-                totalStake={validator.user_stake}
+                totalStake={validator.total_stake}
                 delegatorsNumber={validator?.delegators_number}
                 handleClick={() => {
                   setValue('newValidatorPublicKey', validator.public_key);

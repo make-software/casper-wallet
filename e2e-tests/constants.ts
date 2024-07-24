@@ -84,12 +84,54 @@ export const RECOVER_SECOND_ACCOUNT_FROM_TWELVE_WORDS = {
   truncatedPublicKey: '02022...53589'
 };
 
-export const VALIDATOR = {
+export const VALIDATOR_FOR_SIGNATURE_REQUEST = {
   name: 'Validator',
   truncatedPublicKey: '0106c...ca2ca'
 };
 
-export const NEW_VALIDATOR = {
+export const NEW_VALIDATOR_FOR_SIGNATURE_REQUEST = {
   name: 'New validator',
   truncatedPublicKey: '017d9...2009e'
+};
+
+export const VALIDATOR_FOR_STAKE = {
+  publicKey:
+    '010e5669b070545e2b32bc66363b9d3d4390fca56bf52a05f1411b7fa18ca311c7',
+  truncatedPublicKey: '010e...11c7'
+};
+
+export const NEW_VALIDATOR_FOR_STAKE = {
+  publicKey:
+    '01ad002e37667f90aa982396ebdfcc7d3eea99731241eaad8a0dc20f453f72975a',
+  truncatedPublicKey: '01ad...975a'
+};
+
+export const URLS = {
+  rpc: 'https://node.testnet.cspr.cloud/rpc'
+};
+
+export const RPC_RESPONSE = {
+  success: {
+    status: 200,
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1717761373590,
+      result: {
+        api_version: '1.5.6',
+        deploy_hash: 'deploy hash'
+      }
+    })
+  },
+  failure: {
+    status: 500,
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1717761373590,
+      error: {
+        code: '',
+        data: 'Error description',
+        message: 'Error message'
+      }
+    })
+  }
 };

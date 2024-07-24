@@ -38,8 +38,8 @@ const TabContainer = styled(CenteredFlexRow)<{ disable?: boolean }>`
 
 export const HomePageTabsId = {
   Tokens: 0,
-  Deploys: 1,
-  NFTs: 2
+  NFTs: 1,
+  Deploys: 2
 };
 
 export const Tab = styled.div<TabProps>``;

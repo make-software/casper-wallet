@@ -3,17 +3,23 @@ import { scryptAsync } from '@noble/hashes/scrypt';
 import { randomBytes } from '@noble/hashes/utils';
 import { CLPublicKey } from 'casper-js-sdk';
 
+import { createScryptOptions } from '@libs/crypto/hashing';
+import { convertBytesToBase64 } from '@libs/crypto/utils';
 import { Account } from '@libs/types/account';
 
-import { createScryptOptions } from './hashing';
-import { convertBytesToBase64 } from './utils';
+interface GenerateSyncWalletQrDataEvent extends MessageEvent {
+  data: {
+    password: string;
+    secretPhrase: string[];
+    derivedAccounts: Account[];
+    importedAccounts: Account[];
+  };
+}
 
-export const generateSyncWalletQrData = async (
-  password: string,
-  secretPhrase: string[],
-  derivedAccounts: Account[],
-  importedAccounts: Account[]
-) => {
+onmessage = async function (event: GenerateSyncWalletQrDataEvent) {
+  const { password, secretPhrase, derivedAccounts, importedAccounts } =
+    event.data;
+
   const salt = randomBytes(16);
   const iv = randomBytes(16);
 
@@ -46,7 +52,11 @@ export const generateSyncWalletQrData = async (
   const qrData = convertBytesToBase64(qrBytes);
   const qrDataArray = qrData.match(/.{1,200}/g);
 
-  return (qrDataArray ?? [qrData]).map(
+  const result = (qrDataArray ?? [qrData]).map(
     (qr, i, arr) => `${i + 1}$${arr.length}$${qr}`
   );
+
+  postMessage({
+    result
+  });
 };

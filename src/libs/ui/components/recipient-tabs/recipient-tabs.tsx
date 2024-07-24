@@ -58,26 +58,6 @@ export const RecipientTabs = ({
     //   eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleIconClick = () => {
-    navigator.clipboard
-      .readText()
-      .then(clipboardText => {
-        setValue('recipientPublicKey', clipboardText);
-        if (setRecipientPublicKey) {
-          setRecipientPublicKey(clipboardText);
-        }
-
-        trigger('recipientPublicKey').then(isValid => {
-          if (isValid) {
-            setShowRecipientPlate(true);
-          }
-        });
-      })
-      .catch(err => {
-        console.error('Could not read clipboard: ', err);
-      });
-  };
-
   const handleSelectRecipient = (publicKey: string, name: string) => {
     if (setRecipientPublicKey) {
       setRecipientPublicKey(publicKey);
@@ -115,17 +95,6 @@ export const RecipientTabs = ({
       <Input
         monotype
         prefixIcon={<SvgIcon src="assets/icons/search.svg" size={24} />}
-        suffixIcon={
-          !!errors?.recipientPublicKey ? null : (
-            <SvgIcon
-              src="assets/icons/paste.svg"
-              size={24}
-              color="contentAction"
-              onClick={handleIconClick}
-              style={{ cursor: 'pointer' }}
-            />
-          )
-        }
         placeholder={t('Public key')}
         {...register('recipientPublicKey')}
         onChange={e => {

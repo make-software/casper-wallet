@@ -27,10 +27,16 @@ export const useStakesForm = (
   stakeType: AuctionManagerEntryPoint,
   stakeAmountMotes: string,
   delegatorsNumber?: number,
-  delegatorsNumberForNewValidator?: number
+  delegatorsNumberForNewValidator?: number,
+  hasDelegationToSelectedValidator?: boolean,
+  hasDelegationToSelectedNewValidator?: boolean
 ) => {
   const validatorFormSchema = Yup.object().shape({
-    validatorPublicKey: useValidatorPublicKeyRule(stakeType, delegatorsNumber)
+    validatorPublicKey: useValidatorPublicKeyRule(
+      stakeType,
+      delegatorsNumber,
+      hasDelegationToSelectedValidator
+    )
   });
 
   const validatorFormOptions: UseFormProps<StakeValidatorFormValues> = {
@@ -41,7 +47,8 @@ export const useStakesForm = (
 
   const newValidatorFromSchema = Yup.object().shape({
     newValidatorPublicKey: useNewValidatorPublicKeyRule(
-      delegatorsNumberForNewValidator
+      delegatorsNumberForNewValidator,
+      hasDelegationToSelectedNewValidator
     )
   });
 

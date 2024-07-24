@@ -32,7 +32,3 @@ export const recoverVault = createAction('RECOVER_VAULT_SAGA')<{
 export const createAccount = createAction('CREATE_ACCOUNT_SAGA')<{
   name?: string;
 }>();
-
-export const changePassword = createAction('CHANGE_PASSWORD_SAGA')<{
-  password: string;
-}>();

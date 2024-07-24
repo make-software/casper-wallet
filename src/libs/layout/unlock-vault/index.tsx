@@ -1,14 +1,25 @@
+import * as Yup from 'yup';
 import { Player } from '@lottiefiles/react-lottie-player';
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { AnyObject } from 'yup/es/types';
+
+import {
+  ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED,
+  LOGIN_RETRY_ATTEMPTS_LIMIT
+} from '@src/constants';
+import { getErrorMessageForIncorrectPassword } from '@src/utils';
 
 import {
   selectKeyDerivationSaltHash,
   selectPasswordHash,
   selectPasswordSaltHash
 } from '@background/redux/keys/selectors';
+import { loginRetryCountIncremented } from '@background/redux/login-retry-count/actions';
+import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
 import { unlockVault } from '@background/redux/sagas/actions';
 import { UnlockVault } from '@background/redux/sagas/types';
 import { dispatchToMainStore } from '@background/redux/utils';
@@ -28,10 +39,7 @@ import {
   SpacingSize
 } from '@libs/layout';
 import { Button, Typography } from '@libs/ui/components';
-import {
-  UnlockWalletFormValues,
-  useUnlockWalletForm
-} from '@libs/ui/forms/unlock-wallet';
+import { UnlockWalletFormValues } from '@libs/ui/forms/unlock-wallet';
 
 import { UnlockVaultPageContent } from './content';
 
@@ -41,6 +49,16 @@ interface UnlockMessageEvent extends MessageEvent {
 
 interface UnlockVaultPageProps {
   popupLayout?: boolean;
+}
+
+interface VerifyPasswordMessageEvent extends MessageEvent {
+  data: {
+    isPasswordCorrect: Yup.StringSchema<
+      string | undefined,
+      AnyObject,
+      string | undefined
+    >;
+  };
 }
 
 export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
@@ -53,6 +71,12 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
   const passwordSaltHash = useSelector(selectPasswordSaltHash);
   const keyDerivationSaltHash = useSelector(selectKeyDerivationSaltHash);
   const vaultCipher = useSelector(selectVaultCipher);
+  const loginRetryCount = useSelector(selectLoginRetryCount);
+
+  const attemptsLeft =
+    LOGIN_RETRY_ATTEMPTS_LIMIT -
+    loginRetryCount -
+    ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED;
 
   if (passwordHash == null || passwordSaltHash == null) {
     throw Error("Password doesn't exist");
@@ -61,27 +85,55 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
   const {
     register,
     handleSubmit,
+    formState: { errors },
     resetField,
-    formState: { errors }
-  } = useUnlockWalletForm(passwordHash, passwordSaltHash);
+    setError
+  } = useForm({
+    defaultValues: {
+      password: ''
+    }
+  });
 
   async function handleUnlockVault({ password }: UnlockWalletFormValues) {
     if (isLoading) return;
 
     setIsLoading(true);
+
+    const verifyPasswordWorker = new Worker(
+      new URL('@background/workers/verify-password-worker.ts', import.meta.url)
+    );
     const unlockVaultWorker = new Worker(
-      new URL('@background/workers/unlockVaultWorker.ts', import.meta.url)
+      new URL('@background/workers/unlock-vault-worker.ts', import.meta.url)
     );
 
     if (keyDerivationSaltHash == null) {
       throw Error("Key derivation salt doesn't exist");
     }
 
-    unlockVaultWorker.postMessage({
-      password,
-      keyDerivationSaltHash,
-      vaultCipher
+    verifyPasswordWorker.postMessage({
+      passwordHash,
+      passwordSaltHash,
+      password
     });
+
+    verifyPasswordWorker.onmessage = (event: VerifyPasswordMessageEvent) => {
+      const { isPasswordCorrect } = event.data;
+      const errorMessage = getErrorMessageForIncorrectPassword(attemptsLeft);
+
+      if (!isPasswordCorrect) {
+        dispatchToMainStore(loginRetryCountIncremented());
+        setError('password', {
+          message: t(errorMessage)
+        });
+        setIsLoading(false);
+      } else {
+        unlockVaultWorker.postMessage({
+          password,
+          keyDerivationSaltHash,
+          vaultCipher
+        });
+      }
+    };
 
     unlockVaultWorker.onmessage = (event: UnlockMessageEvent) => {
       const {
@@ -137,6 +189,11 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
           })
         );
       }
+    };
+
+    verifyPasswordWorker.onerror = error => {
+      console.error(error);
+      setIsLoading(false);
     };
 
     unlockVaultWorker.onerror = error => {
