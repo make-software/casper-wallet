@@ -10,18 +10,23 @@ import {
   selectVaultImportedAccounts
 } from '@background/redux/vault/selectors';
 
-import { generateSyncWalletQrData } from '@libs/crypto';
 import {
   HeaderPopup,
   HeaderSubmenuBarNavLink,
   PopupLayout
 } from '@libs/layout';
 
+interface GenerateWalletQrDataMessageEvent extends MessageEvent {
+  data: {
+    result: string[];
+  };
+}
+
 export const WalletQrCodePage = () => {
   const [qrStrings, setQrStrings] = useState<string[]>([]);
   const [isPasswordConfirmed, setIsPasswordConfirmed] =
     useState<boolean>(false);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const secretPhrase = useSelector(selectSecretPhrase);
   const derivedAccounts = useSelector(selectVaultDerivedAccounts, shallowEqual);
@@ -36,26 +41,39 @@ export const WalletQrCodePage = () => {
 
   const generateQRCode = async (password: string) => {
     if (secretPhrase) {
-      setLoading(true);
-      const data = await generateSyncWalletQrData(
+      setIsLoading(true);
+
+      const worker = new Worker(
+        new URL(
+          '@background/workers/generate-sync-wallet-qr-data-worker.ts',
+          import.meta.url
+        )
+      );
+
+      worker.postMessage({
         password,
         secretPhrase,
         derivedAccounts,
         importedAccounts
-      );
+      });
 
-      setLoading(false);
-      setQrStrings(data);
+      worker.onmessage = (event: GenerateWalletQrDataMessageEvent) => {
+        const { result } = event.data;
+
+        setQrStrings(result);
+        setPasswordConfirmed();
+      };
+
+      worker.onerror = error => {
+        console.error(error);
+        setIsLoading(false);
+      };
     }
   };
 
   if (!isPasswordConfirmed) {
     return (
-      <PasswordProtectionPage
-        setPasswordConfirmed={setPasswordConfirmed}
-        onClick={generateQRCode}
-        loading={loading}
-      />
+      <PasswordProtectionPage onClick={generateQRCode} isLoading={isLoading} />
     );
   }
 

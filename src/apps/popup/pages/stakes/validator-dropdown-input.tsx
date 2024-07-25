@@ -34,7 +34,6 @@ interface ValidatorDropdownInputProps {
   >;
   setStakeAmount: React.Dispatch<React.SetStateAction<string>>;
   stakeType: AuctionManagerEntryPoint;
-  undelegateValidatorList: ValidatorResultWithId[] | null;
   loading: boolean;
 }
 
@@ -45,7 +44,6 @@ export const ValidatorDropdownInput = ({
   setValidator,
   setStakeAmount,
   stakeType,
-  undelegateValidatorList,
   loading
 }: ValidatorDropdownInputProps) => {
   const [isOpenValidatorPublicKeysList, setIsOpenValidatorPublicKeysList] =
@@ -103,7 +101,7 @@ export const ValidatorDropdownInput = ({
 
   const filteredValidatorsList = useFilteredValidators(
     inputValue,
-    undelegateValidatorList || validatorList
+    validatorList
   );
 
   useEffect(() => {

@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { selectVaultAccountsWithBalances } from '@background/redux/vault/selectors';
+import {
+  selectVaultAccountsWithBalances,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
 
 import { SpacingSize } from '@libs/layout';
 import { AccountListRows } from '@libs/types/account';
@@ -17,15 +20,18 @@ export const MyAccountsList = ({
   const [accountsWithIds, setAccountsWithIds] = useState<AccountListRows[]>([]);
 
   const accounts = useSelector(selectVaultAccountsWithBalances);
+  const activeAccount = useSelector(selectVaultActiveAccount);
 
   useEffect(() => {
-    const accountsWithIds = accounts.map(account => ({
-      ...account,
-      id: account.name
-    }));
+    const accountsWithIds = accounts
+      .map(account => ({
+        ...account,
+        id: account.name
+      }))
+      .filter(account => account.publicKey !== activeAccount?.publicKey);
 
     setAccountsWithIds(accountsWithIds);
-  }, [accounts, setAccountsWithIds]);
+  }, [accounts, setAccountsWithIds, activeAccount]);
 
   return (
     <List

@@ -48,9 +48,9 @@ export const lightTheme = {
     backgroundPrimary: '#FFFFFF',
     backgroundSecondary: '#F5F6F7',
     backgroundRed: {
-      deg: '148deg',
-      from: '#E93240 6.78%',
-      to: '#C2000E 71.85%'
+      deg: '180deg',
+      from: 'rgb(232.69, 50.42, 63.73) 0%',
+      to: 'rgb(194, 0, 14) 100%'
     },
 
     contentPrimary: '#1A1919',
@@ -63,6 +63,7 @@ export const lightTheme = {
     contentPositive: '#2DDC88',
     contentGreenStatus: '#77FFBE',
     contentLightBlue: '#7490FF',
+    contentLightRed: '#FF404E',
 
     fillPrimary: '#0A2EBF',
     fillPrimaryHover: '#001C8C',
@@ -104,9 +105,9 @@ export const darkTheme = {
     backgroundPrimary: '#262730',
     backgroundSecondary: '#18181F',
     backgroundRed: {
-      deg: '148deg',
-      from: '#B82832 6.78%',
-      to: '#99000B 71.85%'
+      deg: '180deg',
+      from: 'rgb(183.6, 39.78, 50.28) 0%',
+      to: 'rgb(153, 0, 11.04) 100%'
     },
 
     contentPrimary: '#FFFFFF',
@@ -119,6 +120,7 @@ export const darkTheme = {
     contentPositive: '#2DDC88',
     contentGreenStatus: '#77FFBE',
     contentLightBlue: '#7490FF',
+    contentLightRed: '#FF404E',
 
     fillPrimary: '#153CD6',
     fillPrimaryHover: '#0929AC',

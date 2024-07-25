@@ -399,3 +399,8 @@ export const fetchAndDispatchExtendedDeployInfo = (deployHash: string) => {
     // Note: this timeout is needed because the deploy is not immediately visible in the explorer
   }, 2000);
 };
+
+export const getErrorMessageForIncorrectPassword = (attemptsLeft: number) =>
+  attemptsLeft === 1
+    ? 'Password is incorrect. You’ve got last attempt, after that you’ll have to wait for 5 mins'
+    : `Password is incorrect. You’ve got ${attemptsLeft} attempts, after that you’ll have to wait for 5 mins`;
