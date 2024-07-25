@@ -52,11 +52,11 @@ export const DownloadAccountKeysPage = () => {
         account.secretKey
       );
       const file = asymmetricKey.exportPrivateKeyInPem();
-      zip.file(`${account.name}_public_key.pem`, file);
+      zip.file(`${account.name}_secret_key.pem`, file);
     });
 
     zip.generateAsync({ type: 'blob' }).then(function (content) {
-      downloadFile(new Blob([content]), 'casper-wallet-public-keys.zip');
+      downloadFile(new Blob([content]), 'casper-wallet-secret_keys.zip');
     });
 
     setDownloadAccountKeysStep(DownloadAccountKeysSteps.Success);
