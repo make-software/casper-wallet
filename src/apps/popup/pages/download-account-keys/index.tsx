@@ -1,3 +1,4 @@
+import JSZip from 'jszip';
 import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -43,16 +44,19 @@ export const DownloadAccountKeysPage = () => {
   }
 
   const downloadKeys = () => {
+    const zip = new JSZip();
+
     selectedAccounts.forEach(account => {
       const asymmetricKey = createAsymmetricKey(
         account.publicKey,
         account.secretKey
       );
       const file = asymmetricKey.exportPrivateKeyInPem();
-      downloadFile(
-        new Blob([file], { type: 'text/plain;charset=utf-8' }),
-        `${account.name}_secret_key.pem`
-      );
+      zip.file(`${account.name}_secret_key.pem`, file);
+    });
+
+    zip.generateAsync({ type: 'blob' }).then(function (content) {
+      downloadFile(new Blob([content]), 'casper-wallet-secret_keys.zip');
     });
 
     setDownloadAccountKeysStep(DownloadAccountKeysSteps.Success);
