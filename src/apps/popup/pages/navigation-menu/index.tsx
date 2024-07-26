@@ -22,6 +22,7 @@ import {
   selectVaultCountsOfAccounts
 } from '@background/redux/vault/selectors';
 
+import { useIsDarkMode } from '@hooks/use-is-dark-mode';
 import { useWindowManager } from '@hooks/use-window-manager';
 
 import {
@@ -89,6 +90,7 @@ interface MenuGroup {
 export function NavigationMenuPageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
+  const isDarkMode = useIsDarkMode();
 
   const timeoutDurationSetting = useSelector(selectTimeoutDurationSetting);
   const countOfConnectedSites = useSelector(selectCountOfConnectedSites);
@@ -396,7 +398,11 @@ export function NavigationMenuPageContent() {
       <Tile>
         <LogoContainer>
           <SvgIcon
-            src="assets/icons/casper-wallet-text-logo.svg"
+            src={
+              isDarkMode
+                ? 'assets/icons/wallet-original-on-white.svg'
+                : 'assets/icons/casper-wallet-text-logo.svg'
+            }
             width={129}
             height={32}
           />
