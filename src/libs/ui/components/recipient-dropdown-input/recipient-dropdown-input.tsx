@@ -169,7 +169,6 @@ export const RecipientDropdownInput = ({
         {...register('recipientPublicKey')}
         error={!!errors?.recipientPublicKey}
         validationText={errors?.recipientPublicKey?.message}
-        autoComplete="off"
       />
       {isOpenRecentRecipientPublicKeysList && optionsRow.length ? (
         <List

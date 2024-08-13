@@ -148,7 +148,6 @@ export const RedelegateValidatorDropdownInput = ({
         }
         placeholder={t('Validator public address')}
         {...register('newValidatorPublicKey')}
-        autoComplete="off"
       />
       {isOpenValidatorPublicKeysList && (
         <List

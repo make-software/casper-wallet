@@ -167,7 +167,7 @@ export const Input = forwardRef<Ref, InputProps>(function Input(
     onFocus,
     dataTestId,
     readOnly,
-    autoComplete,
+    autoComplete = 'off',
     secondaryBackground,
     autoFocus,
     ...restProps

@@ -175,7 +175,6 @@ export const ValidatorDropdownInput = ({
         }
         placeholder={t('Validator public address')}
         {...register('validatorPublicKey')}
-        autoComplete="off"
       />
       {loading && <Spinner />}
       {isOpenValidatorPublicKeysList && !loading && (
