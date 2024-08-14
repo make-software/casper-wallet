@@ -70,19 +70,68 @@ export const DEFAULT_SECOND_ACCOUNT = {
   mediumTruncatedPublicKey: '0203b2e05f...8e91aa7724'
 };
 
-export const RECOVER_ACCOUNT_FROM_TWELVE_WORDS = {
+export const RECOVER_FIRST_ACCOUNT_FROM_TWELVE_WORDS = {
   accountName: 'Account 1',
   publicKey:
     '0202b869dbed03ef2cc6a76e54e1a5c588fbe6198f80937994f9a2c1fd3aff4adc1b',
   truncatedPublicKey: '0202b...adc1b'
 };
 
-export const VALIDATOR = {
+export const RECOVER_SECOND_ACCOUNT_FROM_TWELVE_WORDS = {
+  accountName: 'Account 1',
+  publicKey:
+    '02022cafccfb61ffc4e4221e4d2c38eec6035d579d04c1396b1c2027dc0729c53589',
+  truncatedPublicKey: '02022...53589'
+};
+
+export const VALIDATOR_FOR_SIGNATURE_REQUEST = {
   name: 'Validator',
   truncatedPublicKey: '0106c...ca2ca'
 };
 
-export const NEW_VALIDATOR = {
+export const NEW_VALIDATOR_FOR_SIGNATURE_REQUEST = {
   name: 'New validator',
   truncatedPublicKey: '017d9...2009e'
+};
+
+export const VALIDATOR_FOR_STAKE = {
+  publicKey:
+    '010e5669b070545e2b32bc66363b9d3d4390fca56bf52a05f1411b7fa18ca311c7',
+  truncatedPublicKey: '010e...11c7'
+};
+
+export const NEW_VALIDATOR_FOR_STAKE = {
+  publicKey:
+    '01ad002e37667f90aa982396ebdfcc7d3eea99731241eaad8a0dc20f453f72975a',
+  truncatedPublicKey: '01ad...975a'
+};
+
+export const URLS = {
+  rpc: 'https://node.testnet.cspr.cloud/rpc'
+};
+
+export const RPC_RESPONSE = {
+  success: {
+    status: 200,
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1717761373590,
+      result: {
+        api_version: '1.5.6',
+        deploy_hash: 'deploy hash'
+      }
+    })
+  },
+  failure: {
+    status: 500,
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1717761373590,
+      error: {
+        code: '',
+        data: 'Error description',
+        message: 'Error message'
+      }
+    })
+  }
 };

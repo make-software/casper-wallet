@@ -151,50 +151,13 @@ export const useStakeType = () => {
   );
 
   useEffect(() => {
+    const name = pathname.split('/')[1];
     // checking pathname to know what type of stake it is
-    if (pathname.split('/')[1] === AuctionManagerEntryPoint.delegate) {
-      setStakeType(AuctionManagerEntryPoint.delegate);
-
-      dispatchFetchAuctionValidatorsRequest()
-        .then(({ payload }) => {
-          if ('data' in payload) {
-            const { data } = payload;
-
-            const validatorListWithId = data.map(validator => ({
-              ...validator,
-              id: validator.public_key
-            }));
-
-            setValidatorList(validatorListWithId);
-          }
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } else if (pathname.split('/')[1] === AuctionManagerEntryPoint.undelegate) {
-      setStakeType(AuctionManagerEntryPoint.undelegate);
-
-      if (activeAccount) {
-        dispatchFetchValidatorsDetailsDataRequest(activeAccount.publicKey)
-          .then(({ payload }) => {
-            if ('data' in payload) {
-              const { data } = payload;
-
-              const validatorListWithId = data.map(delegator => ({
-                ...delegator.validator,
-                id: delegator.validator_public_key,
-                user_stake: delegator.stake
-              }));
-
-              setUndelegateValidatorList(validatorListWithId);
-            }
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-      }
-    } else if (pathname.split('/')[1] === AuctionManagerEntryPoint.redelegate) {
-      setStakeType(AuctionManagerEntryPoint.redelegate);
+    if (
+      name === AuctionManagerEntryPoint.delegate ||
+      name === AuctionManagerEntryPoint.redelegate
+    ) {
+      setStakeType(name);
 
       if (activeAccount) {
         Promise.all([
@@ -214,6 +177,28 @@ export const useStakeType = () => {
             }
             if ('data' in undelegateValidatorResp.payload) {
               const { data } = undelegateValidatorResp.payload;
+
+              const validatorListWithId = data.map(delegator => ({
+                ...delegator.validator,
+                id: delegator.validator_public_key,
+                user_stake: delegator.stake
+              }));
+
+              setUndelegateValidatorList(validatorListWithId);
+            }
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }
+    } else if (name === AuctionManagerEntryPoint.undelegate) {
+      setStakeType(name);
+
+      if (activeAccount) {
+        dispatchFetchValidatorsDetailsDataRequest(activeAccount.publicKey)
+          .then(({ payload }) => {
+            if ('data' in payload) {
+              const { data } = payload;
 
               const validatorListWithId = data.map(delegator => ({
                 ...delegator.validator,

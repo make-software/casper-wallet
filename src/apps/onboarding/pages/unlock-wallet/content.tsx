@@ -19,15 +19,14 @@ import {
 import { UnlockWalletFormValues } from '@libs/ui/forms/unlock-wallet';
 
 // Design of this page is temporary. Should be changed after it will be done in Figma
-const TabPageContainer = styled.div`
-  padding-top: 24px;
-`;
+const TabPageContainer = styled.div``;
 
 const IllustrationContainer = styled(TabPageContainerBase)``;
 
 // It's need for good reading
 const GrayBackgroundContainer = styled(TabPageContainerBase)`
   background-color: ${({ theme }) => theme.color.backgroundSecondary};
+  padding-bottom: 28px;
 `;
 
 interface LoginPageContentProps {
@@ -74,6 +73,7 @@ export function UnlockWalletPageContent({
             type={passwordInputType}
             placeholder={t('Password')}
             oneColoredIcons
+            autoFocus
             suffixIcon={
               <PasswordVisibilityIcon
                 passwordInputType={passwordInputType}

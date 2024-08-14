@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 export const useSubmitButton = (isConfirmStep: boolean) => {
   const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(true);
+  const [isAdditionalTextVisible, setIsAdditionalTextVisible] = useState(true);
 
   useEffect(() => {
     if (!isConfirmStep) return;
@@ -15,6 +16,7 @@ export const useSubmitButton = (isConfirmStep: boolean) => {
         layoutContentContainer.scrollHeight
     ) {
       setIsSubmitButtonDisable(false);
+      setIsAdditionalTextVisible(false);
     }
 
     const handleScroll = () => {
@@ -27,6 +29,7 @@ export const useSubmitButton = (isConfirmStep: boolean) => {
 
         if (bottom) {
           setIsSubmitButtonDisable(false);
+          setIsAdditionalTextVisible(false);
         }
       }
     };
@@ -42,6 +45,7 @@ export const useSubmitButton = (isConfirmStep: boolean) => {
 
   return {
     isSubmitButtonDisable,
-    setIsSubmitButtonDisable
+    setIsSubmitButtonDisable,
+    isAdditionalTextVisible
   };
 };

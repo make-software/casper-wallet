@@ -1,3 +1,5 @@
 import { ErrorLocationState } from '@libs/layout';
 
-export interface LocationState extends ErrorLocationState {}
+export interface LocationState extends ErrorLocationState {
+  secretPhrase?: string[];
+}

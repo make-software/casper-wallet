@@ -11,7 +11,7 @@ export function ResetWalletPageContent() {
 
   return (
     <TabPageContainer>
-      <Typography type="header">
+      <Typography type="headerBig">
         <Trans t={t}>Are you sure you want to start again?</Trans>
       </Typography>
 

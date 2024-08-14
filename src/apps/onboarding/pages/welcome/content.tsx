@@ -1,7 +1,12 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { TabPageContainer, TabTextContainer } from '@libs/layout';
+import {
+  SpacingSize,
+  TabPageContainer,
+  TabTextContainer,
+  VerticalSpaceContainer
+} from '@libs/layout';
 import { SvgIcon, Typography } from '@libs/ui/components';
 
 export function WelcomePageContent() {
@@ -13,11 +18,11 @@ export function WelcomePageContent() {
         width={225}
         height={120}
       />
-      <TabTextContainer>
-        <Typography type="header">
+      <VerticalSpaceContainer top={SpacingSize.XXXL}>
+        <Typography type="headerBig">
           <Trans t={t}>Ready to create your new wallet?</Trans>
         </Typography>
-      </TabTextContainer>
+      </VerticalSpaceContainer>
 
       <TabTextContainer>
         <Typography type="body" color="contentSecondary">

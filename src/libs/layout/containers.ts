@@ -229,7 +229,6 @@ export const TabHeaderContainer = styled(AlignedFlexRow)`
 
 export const TabFooterContainer = styled(FooterButtonsContainer)`
   padding: 24px 32px;
-  margin-top: 30px;
 `;
 
 export const TabTextContainer = styled.div`
@@ -237,7 +236,7 @@ export const TabTextContainer = styled.div`
 `;
 
 export const TabPageContainer = styled.div`
-  padding: 24px 32px;
+  padding: 40px 32px 0;
 `;
 
 export const BreakWordContainer = styled.div`
@@ -288,6 +287,8 @@ export const Overlay = styled.div`
 
   transform: translate(-50%, -50%);
 
+  overflow: auto;
+
   height: 100vh;
   width: 360px;
 
@@ -333,4 +334,11 @@ export const DropdownHeader = styled(AlignedSpaceBetweenFlexRow)`
   border-top-right-radius: ${({ theme }) => theme.borderRadius.base}px;
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
+`;
+
+export const AmountContainer = styled(SpaceBetweenFlexColumn)`
+  align-items: flex-end;
+  text-align: end;
+
+  max-width: 120px;
 `;

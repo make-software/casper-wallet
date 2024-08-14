@@ -6,12 +6,13 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
+  accountsAdded,
   accountsImported,
   activeAccountChanged,
   anotherAccountConnected,
   deployPayloadReceived,
   deploysReseted,
-  hideAccountFromListChange,
+  hideAccountFromListChanged,
   secretPhraseCreated,
   siteConnected,
   siteDisconnected,
@@ -86,6 +87,15 @@ export const reducer = createReducer(initialState)
       accounts: [...state.accounts, account],
       activeAccountName:
         state.accounts.length === 0 ? account.name : state.activeAccountName
+    })
+  )
+  .handleAction(
+    accountsAdded,
+    (state, { payload: accounts }: ReturnType<typeof accountsAdded>) => ({
+      ...state,
+      accounts: [...state.accounts, ...accounts],
+      activeAccountName:
+        state.accounts.length === 0 ? accounts[0].name : state.activeAccountName
     })
   )
   .handleAction(
@@ -277,10 +287,12 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    hideAccountFromListChange,
+    hideAccountFromListChanged,
     (
       state,
-      { payload: { accountName } }: ReturnType<typeof hideAccountFromListChange>
+      {
+        payload: { accountName }
+      }: ReturnType<typeof hideAccountFromListChanged>
     ) => {
       const visibleAccounts = state.accounts.filter(
         account => !account.hidden && account.name !== accountName

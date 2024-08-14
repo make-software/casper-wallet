@@ -79,12 +79,13 @@ import {
   accountImported,
   accountRemoved,
   accountRenamed,
+  accountsAdded,
   accountsImported,
   activeAccountChanged,
   anotherAccountConnected,
   deployPayloadReceived,
   deploysReseted,
-  hideAccountFromListChange,
+  hideAccountFromListChanged,
   secretPhraseCreated,
   siteConnected,
   siteDisconnected,
@@ -158,11 +159,11 @@ import {
   recipientPublicKeyReseted
 } from './redux/recent-recipient-public-keys/actions';
 import {
-  changePassword,
   createAccount,
   initKeys,
   initVault,
   lockVault,
+  recoverVault,
   resetVault,
   unlockVault
 } from './redux/sagas/actions';
@@ -573,6 +574,7 @@ runtime.onMessage.addListener(
           case getType(unlockVault):
           case getType(initKeys):
           case getType(initVault):
+          case getType(recoverVault):
           case getType(createAccount):
           case getType(deploysReseted):
           case getType(sessionReseted):
@@ -584,10 +586,11 @@ runtime.onMessage.addListener(
           case getType(accountImported):
           case getType(accountsImported):
           case getType(accountAdded):
+          case getType(accountsAdded):
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeAccountChanged):
-          case getType(hideAccountFromListChange):
+          case getType(hideAccountFromListChanged):
           case getType(activeTimeoutDurationSettingChanged):
           case getType(activeNetworkSettingChanged):
           case getType(vaultSettingsReseted):
@@ -632,7 +635,6 @@ runtime.onMessage.addListener(
           case getType(accountCasperActivityCountChanged):
           case getType(accountTrackingIdOfSentNftTokensChanged):
           case getType(accountTrackingIdOfSentNftTokensRemoved):
-          case getType(changePassword):
           case getType(newContactAdded):
           case getType(contactRemoved):
           case getType(contactEditingPermissionChanged):

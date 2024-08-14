@@ -30,7 +30,7 @@ export function ConfirmSecretPhraseSuccessPage() {
       )}
       renderContent={() => <ConfirmSecretPhraseSuccessPageContent />}
       renderFooter={() => (
-        <TabFooterContainer>
+        <TabFooterContainer style={{ marginTop: '28px' }}>
           <Button onClick={() => navigate(RouterPath.OnboardingSuccess)}>
             <Trans t={t}>Done</Trans>
           </Button>

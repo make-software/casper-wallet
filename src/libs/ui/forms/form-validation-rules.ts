@@ -6,13 +6,19 @@ import { useSelector } from 'react-redux';
 import {
   AuctionManagerEntryPoint,
   DELEGATION_MIN_AMOUNT_MOTES,
+  ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED,
   LOGIN_RETRY_ATTEMPTS_LIMIT,
   MAX_DELEGATORS,
   STAKE_COST_MOTES,
   TRANSFER_COST_MOTES,
   TRANSFER_MIN_AMOUNT_MOTES
 } from '@src/constants';
-import { isValidPublicKey, isValidSecretKeyHash, isValidU64 } from '@src/utils';
+import {
+  getErrorMessageForIncorrectPassword,
+  isValidPublicKey,
+  isValidSecretKeyHash,
+  isValidU64
+} from '@src/utils';
 
 import { loginRetryCountIncremented } from '@background/redux/login-retry-count/actions';
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
@@ -21,9 +27,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { verifyPasswordAgainstHash } from '@libs/crypto/hashing';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 
-export const minPasswordLength = 1;
-
-const ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED = 1;
+export const minPasswordLength = 16;
 
 export function useCreatePasswordRule() {
   const { t } = useTranslation();
@@ -38,7 +42,6 @@ export function useVerifyPasswordAgainstHashRule(
   passwordHash: string,
   passwordSaltHash: string
 ) {
-  const { t } = useTranslation();
   const loginRetryCount = useSelector(selectLoginRetryCount);
 
   const attemptsLeft =
@@ -46,14 +49,7 @@ export function useVerifyPasswordAgainstHashRule(
     loginRetryCount -
     ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED;
 
-  const errorMessage =
-    attemptsLeft === 1
-      ? t(
-          'Password is incorrect. You’ve got last attempt, after that you’ll have to wait for 5 mins'
-        )
-      : t(
-          `Password is incorrect. You’ve got ${attemptsLeft} attempts, after that you’ll have to wait for 5 mins`
-        );
+  const errorMessage = getErrorMessageForIncorrectPassword(attemptsLeft);
 
   return Yup.string().test('authenticate', errorMessage, async password => {
     const result = await verifyPasswordAgainstHash(
@@ -189,10 +185,25 @@ export const useCSPRTransferAmountRule = (amountMotes: string | null) => {
       message: t(
         'Your account balance is not high enough. Enter a smaller amount.'
       )
+    })
+    .test({
+      name: 'decimalPartLength',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          const decimalPart = amountInputValue.split('.')[1];
+          return decimalPart == null || decimalPart.length <= 9;
+        }
+
+        return false;
+      },
+      message: t('No more than 9 decimals')
     });
 };
 
-export const useErc20AmountRule = (amount: string | null) => {
+export const useErc20AmountRule = (
+  amount: string | null,
+  decimals: number | undefined
+) => {
   const { t } = useTranslation();
 
   const maxAmount: string = amount == null ? '0' : Big(amount).toFixed();
@@ -233,6 +244,22 @@ export const useErc20AmountRule = (amount: string | null) => {
       message: t(
         'Your account balance is not high enough. Enter a smaller amount.'
       )
+    })
+    .test({
+      name: 'decimalPartLength',
+      test: amountInputValue => {
+        if (amountInputValue) {
+          const decimalPart = amountInputValue.split('.')[1];
+          if (decimals || decimals === 0) {
+            return decimalPart == null || decimalPart.length <= decimals;
+          }
+
+          return true;
+        }
+
+        return false;
+      },
+      message: t(`No more than ${decimals} decimals`)
     });
 };
 
@@ -404,7 +431,8 @@ export const useCSPRStakeAmountRule = (
 
 export const useValidatorPublicKeyRule = (
   stakeType: AuctionManagerEntryPoint,
-  delegatorsNumber?: number
+  delegatorsNumber?: number,
+  hasDelegationToSelectedValidator?: boolean
 ) => {
   const { t } = useTranslation();
 
@@ -424,11 +452,11 @@ export const useValidatorPublicKeyRule = (
         ) {
           return true;
         }
-        if (delegatorsNumber) {
+        if (delegatorsNumber && !hasDelegationToSelectedValidator) {
           return delegatorsNumber < MAX_DELEGATORS;
         }
 
-        return false;
+        return !!hasDelegationToSelectedValidator;
       },
       message: t(
         'This validator has reached the network limit for total delegators and therefore cannot be delegated to by new accounts. Please select another validator with fewer than 1200 total delegators'
@@ -436,7 +464,10 @@ export const useValidatorPublicKeyRule = (
     });
 };
 
-export const useNewValidatorPublicKeyRule = (delegatorsNumber?: number) => {
+export const useNewValidatorPublicKeyRule = (
+  delegatorsNumber?: number,
+  hasDelegationToSelectedNewValidator?: boolean
+) => {
   const { t } = useTranslation();
 
   return Yup.string()
@@ -449,11 +480,11 @@ export const useNewValidatorPublicKeyRule = (delegatorsNumber?: number) => {
     .test({
       name: 'maxDelegators',
       test: () => {
-        if (delegatorsNumber) {
+        if (delegatorsNumber && !hasDelegationToSelectedNewValidator) {
           return delegatorsNumber < MAX_DELEGATORS;
         }
 
-        return false;
+        return !!hasDelegationToSelectedNewValidator;
       },
       message: t(
         'This validator has reached the network limit for total delegators and therefore cannot be delegated to by new accounts. Please select another validator with fewer than 1200 total delegators'

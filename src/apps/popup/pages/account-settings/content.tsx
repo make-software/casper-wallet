@@ -1,14 +1,15 @@
+import { QRCodeCanvas } from 'qrcode.react';
 import React, { useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { RootState } from 'typesafe-actions';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { dispatchToMainStore } from '@background/redux/utils';
-import { hideAccountFromListChange } from '@background/redux/vault/actions';
+import { hideAccountFromListChanged } from '@background/redux/vault/actions';
 import {
   selectVaultAccount,
   selectVaultHiddenAccountsNames,
@@ -36,6 +37,7 @@ import {
 
 export function AccountSettingsPageContent() {
   const { t } = useTranslation();
+  const theme = useTheme();
 
   const { accountName } = useParams();
   const account = useSelector((state: RootState) =>
@@ -60,6 +62,16 @@ export function AccountSettingsPageContent() {
                 {accountInfoStandardName}
               </Typography>
             )}
+            <VerticalSpaceContainer top={SpacingSize.XL}>
+              <QRCodeCanvas
+                id="qrCode"
+                value={account.publicKey}
+                size={120}
+                fgColor={theme.color.contentPrimary}
+                bgColor={theme.color.backgroundPrimary}
+                level={'H'}
+              />
+            </VerticalSpaceContainer>
             <VerticalSpaceContainer top={SpacingSize.XL}>
               <FlexColumn gap={SpacingSize.Small}>
                 <Typography type="bodySemiBold">
@@ -115,7 +127,7 @@ function AccountIconButton({ type }: AccountIconButtonProps) {
         break;
       case 'hide':
       case 'show':
-        dispatchToMainStore(hideAccountFromListChange({ accountName }));
+        dispatchToMainStore(hideAccountFromListChanged({ accountName }));
         break;
       default:
         throw new Error('Not found');

@@ -2,6 +2,7 @@ import { DeployUtil } from 'casper-js-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 
 import { ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES } from '@src/constants';
 import { fetchAndDispatchExtendedDeployInfo } from '@src/utils';
@@ -32,15 +33,16 @@ import { useSubmitButton } from '@hooks/use-submit-button';
 import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
 import {
   AlignedFlexRow,
+  CenteredFlexRow,
   ErrorPath,
   FooterButtonsContainer,
   HeaderPopup,
   HeaderSubmenuBarNavLink,
   PopupLayout,
   SpacingSize,
+  VerticalSpaceContainer,
   createErrorLocationState
 } from '@libs/layout';
-import { HeaderSubmenuBarBuyCSPRLink } from '@libs/layout/header/header-submenu-bar-buy-cspr-link';
 import {
   makeCep18TransferDeploy,
   makeNativeTransferDeploy,
@@ -54,6 +56,7 @@ import {
   LedgerEventView,
   SvgIcon,
   TransferSuccessScreen,
+  Typography,
   renderLedgerFooter
 } from '@libs/ui/components';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils';
@@ -63,6 +66,24 @@ import { ConfirmStep } from './confirm-step';
 import { RecipientStep } from './recipient-step';
 import { TokenStep } from './token-step';
 import { TransactionSteps } from './utils';
+
+const ScrollContainer = styled(VerticalSpaceContainer)<{
+  isHidden: boolean;
+}>`
+  opacity: ${({ isHidden }) => (isHidden ? '0' : '1')};
+  height: ${({ isHidden }) => (isHidden ? '0' : '24px')};
+  visibility: ${({ isHidden }) => (isHidden ? 'hidden' : 'visible')};
+  transition:
+    opacity 0.2s ease-in-out,
+    height 0.5s ease-in-out;
+`;
+
+const ConfirmButtonContainer = styled(FooterButtonsContainer)<{
+  isHidden: boolean;
+}>`
+  gap: ${({ isHidden }) => (isHidden ? '0' : '16px')};
+  transition: gap 0.5s ease-in-out;
+`;
 
 export const TransferPage = () => {
   const { t } = useTranslation();
@@ -107,7 +128,11 @@ export const TransferPage = () => {
     }
 
     if (tokenData) {
-      setIsErc20Transfer(true);
+      if (tokenData.name === 'Casper') {
+        setIsErc20Transfer(false);
+      } else {
+        setIsErc20Transfer(true);
+      }
       setSelectedToken(tokenData);
     } else {
       setIsErc20Transfer(false);
@@ -128,9 +153,11 @@ export const TransferPage = () => {
     [contactPublicKeys, recipientPublicKey]
   );
 
-  const { isSubmitButtonDisable, setIsSubmitButtonDisable } = useSubmitButton(
-    transferStep === TransactionSteps.Confirm
-  );
+  const {
+    isSubmitButtonDisable,
+    setIsSubmitButtonDisable,
+    isAdditionalTextVisible
+  } = useSubmitButton(transferStep === TransactionSteps.Confirm);
 
   const sendDeploy = (signDeploy: DeployUtil.Deploy) => {
     sendSignDeploy(signDeploy, nodeUrl)
@@ -321,37 +348,27 @@ export const TransferPage = () => {
 
   const headerButtons = {
     [TransactionSteps.Token]: (
-      <>
-        <HeaderSubmenuBarNavLink linkType="back" />
-        <HeaderSubmenuBarBuyCSPRLink />
-      </>
+      <HeaderSubmenuBarNavLink linkType="back" backTypeWithBalance />
     ),
     [TransactionSteps.Recipient]: (
-      <>
-        <HeaderSubmenuBarNavLink
-          linkType="back"
-          onClick={() => setTransferStep(TransactionSteps.Token)}
-        />
-        <HeaderSubmenuBarBuyCSPRLink />
-      </>
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        backTypeWithBalance
+        onClick={() => setTransferStep(TransactionSteps.Token)}
+      />
     ),
     [TransactionSteps.Amount]: (
-      <>
-        <HeaderSubmenuBarNavLink
-          linkType="back"
-          onClick={() => setTransferStep(TransactionSteps.Recipient)}
-        />
-        <HeaderSubmenuBarBuyCSPRLink />
-      </>
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        backTypeWithBalance
+        onClick={() => setTransferStep(TransactionSteps.Recipient)}
+      />
     ),
     [TransactionSteps.Confirm]: (
-      <>
-        <HeaderSubmenuBarNavLink
-          linkType="back"
-          onClick={() => setTransferStep(TransactionSteps.Amount)}
-        />
-        <HeaderSubmenuBarBuyCSPRLink />
-      </>
+      <HeaderSubmenuBarNavLink
+        linkType="back"
+        onClick={() => setTransferStep(TransactionSteps.Amount)}
+      />
     ),
     [TransactionSteps.ConfirmWithLedger]: (
       <HeaderSubmenuBarNavLink
@@ -417,7 +434,14 @@ export const TransferPage = () => {
       <></>
     ),
     [TransactionSteps.Confirm]: (
-      <FooterButtonsContainer>
+      <ConfirmButtonContainer isHidden={!isAdditionalTextVisible}>
+        <ScrollContainer isHidden={!isAdditionalTextVisible}>
+          <CenteredFlexRow>
+            <Typography type="captionRegular">
+              <Trans t={t}>Scroll down to check all details</Trans>
+            </Typography>
+          </CenteredFlexRow>
+        </ScrollContainer>
         <Button
           color="primaryBlue"
           type="button"
@@ -441,7 +465,7 @@ export const TransferPage = () => {
             <Trans t={t}>Confirm send</Trans>
           )}
         </Button>
-      </FooterButtonsContainer>
+      </ConfirmButtonContainer>
     ),
     [TransactionSteps.Success]: (
       <FooterButtonsContainer>
@@ -473,7 +497,7 @@ export const TransferPage = () => {
         >
           <Trans t={t}>Done</Trans>
         </Button>
-        {isRecipientPublicKeyInContact && (
+        {!isRecipientPublicKeyInContact && (
           <Button
             color="secondaryBlue"
             onClick={() =>

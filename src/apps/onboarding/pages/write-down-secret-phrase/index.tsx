@@ -35,6 +35,7 @@ export function WriteDownSecretPhrasePage({
   return (
     <LayoutTab
       layoutContext="withStepper"
+      minHeight={704}
       renderHeader={() => (
         <TabHeaderContainer>
           <HeaderSubmenuBarNavLink linkType="back" />
@@ -43,7 +44,7 @@ export function WriteDownSecretPhrasePage({
       )}
       renderContent={() => <WriteDownSecretPhrasePageContent phrase={phrase} />}
       renderFooter={() => (
-        <TabFooterContainer>
+        <TabFooterContainer style={{ marginTop: '28px' }}>
           <Checkbox
             checked={isChecked}
             onChange={() => setIsChecked(currentValue => !currentValue)}
