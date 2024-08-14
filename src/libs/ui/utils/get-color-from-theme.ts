@@ -12,6 +12,7 @@ export type ContentColor =
   | 'contentPositive'
   | 'contentGreenStatus'
   | 'contentLightBlue'
+  | 'contentLightRed'
   | 'brandRed'
   | 'black';
 
@@ -48,6 +49,7 @@ export function getColorFromTheme(theme: DefaultTheme, color: Color) {
     contentGreenStatus: theme.color.contentGreenStatus,
     contentWarning: theme.color.contentWarning,
     contentLightBlue: theme.color.contentLightBlue,
+    contentLightRed: theme.color.contentLightRed,
     brandRed: theme.color.brandRed,
     fillPrimary: theme.color.fillPrimary,
     fillCritical: theme.color.fillCritical,

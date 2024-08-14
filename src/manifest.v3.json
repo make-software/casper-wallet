@@ -11,9 +11,7 @@
     "management",
     "storage",
     "tabs",
-    "declarativeNetRequest",
-    "clipboardRead",
-    "clipboardWrite"
+    "declarativeNetRequest"
   ],
   "declarative_net_request": {
     "rule_resources": [
