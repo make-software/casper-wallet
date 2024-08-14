@@ -23,16 +23,24 @@ import {
 } from '@libs/ui/components';
 import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
 
-const ValidatorPlateContainer = styled(AlignedSpaceBetweenFlexRow)<{
+const ValidatorPlateContainer = styled(AlignedFlexRow)<{
   onClick?: () => void;
   withBackground?: boolean;
+  withBorder?: boolean;
 }>`
   cursor: ${({ onClick }) => (onClick ? 'pointer' : 'initial')};
   background: ${({ withBackground, theme }) =>
     withBackground ? theme.color.backgroundPrimary : 'transparent'};
   border-radius: ${({ theme }) => theme.borderRadius.base}px;
+  padding: ${({ withBorder }) => (withBorder ? '11px 0 0 16px' : '11px 16px')};
+`;
 
-  padding: 8px 16px;
+const InfoContainer = styled(AlignedSpaceBetweenFlexRow)<{
+  withBorder?: boolean;
+}>`
+  border-bottom: ${({ withBorder, theme }) =>
+    withBorder ? `0.5px solid ${theme.color.borderPrimary}` : 'none'};
+  padding: ${({ withBorder }) => (withBorder ? '0 16px 11px 0' : '0')};
 `;
 
 const NameContainer = styled(FlexColumn)`
@@ -59,6 +67,7 @@ interface ValidatorPlateProps {
   validatorLabel?: string;
   error?: FieldError;
   totalStake?: string;
+  withBorder?: boolean;
 }
 
 export const ValidatorPlate = ({
@@ -71,7 +80,8 @@ export const ValidatorPlate = ({
   delegatorsNumber,
   validatorLabel,
   error,
-  totalStake
+  totalStake,
+  withBorder
 }: ValidatorPlateProps) => {
   const [formattedTotalStake, setFormattedTotalStake] = useState('');
 
@@ -107,7 +117,7 @@ export const ValidatorPlate = ({
             <Avatar publicKey={publicKey} size={24} />
           )}
         </IconContainer>
-        <FlexColumn>
+        <FlexColumn gap={SpacingSize.Tiny}>
           <Hash
             value={publicKey}
             variant={HashVariant.CaptionHash}
@@ -117,7 +127,7 @@ export const ValidatorPlate = ({
             color="contentPrimary"
             withoutTooltip
           />
-          <Typography type="captionRegular" color="contentSecondary" ellipsis>
+          <Typography type="listSubtext" color="contentSecondary" ellipsis>
             {name}
           </Typography>
         </FlexColumn>
@@ -129,14 +139,16 @@ export const ValidatorPlate = ({
     <ValidatorPlateContainer
       onClick={handleClick}
       withBackground={withBackground}
+      gap={SpacingSize.Medium}
+      withBorder={withBorder}
     >
-      <AlignedFlexRow gap={SpacingSize.Medium}>
-        {logoUrl ? (
-          <Image src={logoUrl} alt={name} />
-        ) : (
-          <Avatar publicKey={publicKey} size={24} />
-        )}
-        <NameContainer>
+      {logoUrl ? (
+        <Image src={logoUrl} alt={name} />
+      ) : (
+        <Avatar publicKey={publicKey} size={24} />
+      )}
+      <InfoContainer flexGrow={1} withBorder={withBorder}>
+        <NameContainer style={{ gap: '2px' }}>
           <Hash
             value={publicKey}
             variant={HashVariant.CaptionHash}
@@ -146,24 +158,24 @@ export const ValidatorPlate = ({
             color="contentPrimary"
             withoutTooltip
           />
-          <Typography type="captionRegular" color="contentSecondary" ellipsis>
+          <Typography type="listSubtext" color="contentSecondary" ellipsis>
             {name}
           </Typography>
         </NameContainer>
-      </AlignedFlexRow>
-      <RightAlignedFlexColumn>
-        <Typography type="captionHash">
-          {`${formattedTotalStake} CSPR`}
-        </Typography>
-        <AlignedFlexRow gap={SpacingSize.Small}>
-          <Typography type="listSubtext" color="contentSecondary">
-            {`${formattedFee}% fee`}
+        <RightAlignedFlexColumn style={{ gap: '2px' }}>
+          <Typography type="captionHash">
+            {`${formattedTotalStake} CSPR`}
           </Typography>
-          <Typography type="listSubtext">
-            {getFormattedDelegatorsNumber()} delegators
-          </Typography>
-        </AlignedFlexRow>
-      </RightAlignedFlexColumn>
+          <AlignedFlexRow gap={SpacingSize.Small}>
+            <Typography type="listSubtext" color="contentSecondary">
+              {`${formattedFee}% fee`}
+            </Typography>
+            <Typography type="listSubtext">
+              {getFormattedDelegatorsNumber()} delegators
+            </Typography>
+          </AlignedFlexRow>
+        </RightAlignedFlexColumn>
+      </InfoContainer>
     </ValidatorPlateContainer>
   );
 
