@@ -72,7 +72,6 @@ export function UnlockWalletPageContent({
             validationType={InputValidationType.Password}
             type={passwordInputType}
             placeholder={t('Password')}
-            oneColoredIcons
             autoFocus
             suffixIcon={
               <PasswordVisibilityIcon

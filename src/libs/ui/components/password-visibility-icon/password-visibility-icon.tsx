@@ -25,6 +25,7 @@ export function PasswordVisibilityIcon({
           ? 'assets/icons/hide.svg'
           : 'assets/icons/show.svg'
       }
+      color="contentDisabled"
       size={20}
     />
   );

@@ -29,8 +29,8 @@ export const useTransferRecipientForm = () => {
   });
 
   const recipientFormOptions: UseFormProps<TransferRecipientFormValues> = {
-    reValidateMode: 'onBlur',
-    mode: 'onBlur',
+    reValidateMode: 'onChange',
+    mode: 'onChange',
     resolver: yupResolver(recipientFormSchema),
     delayError: 500
   };
