@@ -6,7 +6,7 @@ import { selectAllContacts } from '@background/redux/contacts/selectors';
 import { ContactWithId } from '@background/redux/contacts/types';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
-import { SpacingSize, TileContainer } from '@libs/layout';
+import { SpacingSize } from '@libs/layout';
 import { List, RecipientPlate, Tile, Typography } from '@libs/ui/components';
 
 interface ContactsListProps {
