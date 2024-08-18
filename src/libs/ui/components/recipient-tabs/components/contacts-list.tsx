@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 
 import { selectAllContacts } from '@background/redux/contacts/selectors';
 import { ContactWithId } from '@background/redux/contacts/types';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
-import { SpacingSize, TileContainer } from '@libs/layout';
+import { SpacingSize } from '@libs/layout';
 import { List, RecipientPlate, Tile, Typography } from '@libs/ui/components';
 
 interface ContactsListProps {
   handleSelectRecipient: (publicKey: string, name: string) => void;
 }
+
+const Container = styled.div`
+  padding: 16px;
+`;
 
 export const ContactsList = ({ handleSelectRecipient }: ContactsListProps) => {
   const [contactsWithId, setContactsWithId] = useState<ContactWithId[]>([]);
@@ -32,11 +37,11 @@ export const ContactsList = ({ handleSelectRecipient }: ContactsListProps) => {
   if (contactsWithId.length === 0) {
     return (
       <Tile>
-        <TileContainer top={SpacingSize.None}>
+        <Container>
           <Typography type="body" color="contentPrimary" textAlign="center">
             No contacts found
           </Typography>
-        </TileContainer>
+        </Container>
       </Tile>
     );
   }

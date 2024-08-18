@@ -65,7 +65,6 @@ export const PasswordInputs = ({
           validationType={InputValidationType.Password}
           type={passwordInputType}
           placeholder={t('Password')}
-          oneColoredIcons
           suffixIcon={
             <PasswordVisibilityIcon
               passwordInputType={passwordInputType}
@@ -79,7 +78,6 @@ export const PasswordInputs = ({
         <Input
           type={confirmPasswordInputType}
           placeholder={t('Confirm password')}
-          oneColoredIcons
           suffixIcon={
             <PasswordVisibilityIcon
               passwordInputType={confirmPasswordInputType}
