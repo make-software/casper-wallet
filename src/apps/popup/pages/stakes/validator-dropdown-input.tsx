@@ -1,28 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { AuctionManagerEntryPoint } from '@src/constants';
 
+import { ValidatorList } from '@popup/pages/stakes/components/validator-list';
 import { useFilteredValidators } from '@popup/pages/stakes/utils';
 
 import { useClickAway } from '@hooks/use-click-away';
 
 import {
   AlignedFlexRow,
-  DropdownHeader,
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
 import { ValidatorResultWithId } from '@libs/services/validators-service/types';
-import {
-  Input,
-  List,
-  Spinner,
-  SvgIcon,
-  Typography,
-  ValidatorPlate
-} from '@libs/ui/components';
+import { Input, Spinner, SvgIcon, ValidatorPlate } from '@libs/ui/components';
 import { StakeValidatorFormValues } from '@libs/ui/forms/stakes-form';
 
 interface ValidatorDropdownInputProps {
@@ -118,6 +111,16 @@ export const ValidatorDropdownInput = ({
     }
   }, [stakeType]);
 
+  const handleValidatorClick = (validator: ValidatorResultWithId) => {
+    setValue('validatorPublicKey', validator.public_key);
+    setStakeAmount(validator.user_stake!);
+
+    setValidator(validator);
+
+    setIsOpenValidatorPublicKeysList(false);
+    setShowValidatorPlate(true);
+  };
+
   return showValidatorPlate && validator ? (
     <VerticalSpaceContainer top={SpacingSize.XL}>
       <ValidatorPlate
@@ -175,59 +178,17 @@ export const ValidatorDropdownInput = ({
         }
         placeholder={t('Validator public address')}
         {...register('validatorPublicKey')}
-        autoComplete="off"
       />
       {loading && <Spinner />}
       {isOpenValidatorPublicKeysList && !loading && (
-        <List
-          contentTop={SpacingSize.Tiny}
-          rows={filteredValidatorsList}
-          maxHeight={193}
-          stickyHeader
-          borderRadius="base"
-          renderHeader={() => (
-            <DropdownHeader>
-              <Typography type="labelMedium" color="contentSecondary">
-                <Trans t={t}>Validator</Trans>
-              </Typography>
-              <Typography type="labelMedium" color="contentSecondary">
-                <Trans t={t}>Total stake, fee, delegators</Trans>
-              </Typography>
-            </DropdownHeader>
-          )}
-          renderRow={validator => {
-            const logo =
-              validator?.account_info?.info?.owner?.branding?.logo?.svg ||
-              validator?.account_info?.info?.owner?.branding?.logo?.png_256 ||
-              validator?.account_info?.info?.owner?.branding?.logo?.png_1024;
-
-            return (
-              <ValidatorPlate
-                publicKey={validator?.public_key}
-                fee={validator.fee}
-                name={validator?.account_info?.info?.owner?.name}
-                logo={logo}
-                // TODO: remove user_stake after we merge recipient and amount steps for undelegation
-                totalStake={
-                  stakeType === AuctionManagerEntryPoint.delegate
-                    ? validator.total_stake
-                    : validator.user_stake
-                }
-                delegatorsNumber={validator?.delegators_number}
-                handleClick={() => {
-                  setValue('validatorPublicKey', validator.public_key);
-                  setStakeAmount(validator.user_stake!);
-
-                  setValidator(validator);
-
-                  setIsOpenValidatorPublicKeysList(false);
-                  setShowValidatorPlate(true);
-                }}
-              />
-            );
-          }}
-          marginLeftForItemSeparatorLine={56}
-          marginLeftForHeaderSeparatorLine={0}
+        <ValidatorList
+          filteredValidatorsList={filteredValidatorsList}
+          totalStake={
+            stakeType === AuctionManagerEntryPoint.delegate
+              ? 'total_stake'
+              : 'user_stake'
+          }
+          handleValidatorClick={handleValidatorClick}
         />
       )}
     </VerticalSpaceContainer>

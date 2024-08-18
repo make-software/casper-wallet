@@ -1,25 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
+import { ValidatorList } from '@popup/pages/stakes/components/validator-list';
 import { useFilteredValidators } from '@popup/pages/stakes/utils';
 
 import { useClickAway } from '@hooks/use-click-away';
 
 import {
   AlignedFlexRow,
-  DropdownHeader,
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
 import { ValidatorResultWithId } from '@libs/services/validators-service/types';
-import {
-  Input,
-  List,
-  SvgIcon,
-  Typography,
-  ValidatorPlate
-} from '@libs/ui/components';
+import { Input, SvgIcon, ValidatorPlate } from '@libs/ui/components';
 import { StakeNewValidatorFormValues } from '@libs/ui/forms/stakes-form';
 
 interface ValidatorDropdownInputProps {
@@ -96,6 +90,16 @@ export const RedelegateValidatorDropdownInput = ({
     validatorList
   );
 
+  const handleValidatorClick = (validator: ValidatorResultWithId) => {
+    setValue('newValidatorPublicKey', validator.public_key);
+    setStakeAmount(validator.user_stake!);
+
+    setValidator(validator);
+
+    setIsOpenValidatorPublicKeysList(false);
+    setShowValidatorPlate(true);
+  };
+
   return showValidatorPlate && validator ? (
     <VerticalSpaceContainer top={SpacingSize.XL}>
       <ValidatorPlate
@@ -148,53 +152,12 @@ export const RedelegateValidatorDropdownInput = ({
         }
         placeholder={t('Validator public address')}
         {...register('newValidatorPublicKey')}
-        autoComplete="off"
       />
       {isOpenValidatorPublicKeysList && (
-        <List
-          contentTop={SpacingSize.Tiny}
-          rows={filteredValidatorsList}
-          maxHeight={193}
-          stickyHeader
-          borderRadius="base"
-          renderHeader={() => (
-            <DropdownHeader>
-              <Typography type="labelMedium" color="contentSecondary">
-                <Trans t={t}>Validator</Trans>
-              </Typography>
-              <Typography type="labelMedium" color="contentSecondary">
-                <Trans t={t}>Total stake, fee, delegators</Trans>
-              </Typography>
-            </DropdownHeader>
-          )}
-          renderRow={validator => {
-            const logo =
-              validator?.account_info?.info?.owner?.branding?.logo?.svg ||
-              validator?.account_info?.info?.owner?.branding?.logo?.png_256 ||
-              validator?.account_info?.info?.owner?.branding?.logo?.png_1024;
-
-            return (
-              <ValidatorPlate
-                publicKey={validator?.public_key}
-                fee={validator.fee}
-                name={validator?.account_info?.info?.owner?.name}
-                logo={logo}
-                totalStake={validator.total_stake}
-                delegatorsNumber={validator?.delegators_number}
-                handleClick={() => {
-                  setValue('newValidatorPublicKey', validator.public_key);
-                  setStakeAmount(validator.user_stake!);
-
-                  setValidator(validator);
-
-                  setIsOpenValidatorPublicKeysList(false);
-                  setShowValidatorPlate(true);
-                }}
-              />
-            );
-          }}
-          marginLeftForItemSeparatorLine={56}
-          marginLeftForHeaderSeparatorLine={0}
+        <ValidatorList
+          filteredValidatorsList={filteredValidatorsList}
+          totalStake="total_stake"
+          handleValidatorClick={handleValidatorClick}
         />
       )}
     </VerticalSpaceContainer>

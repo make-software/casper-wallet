@@ -129,7 +129,6 @@ export const RecipientTabs = ({
         }}
         error={!!errors?.recipientPublicKey}
         validationText={errors?.recipientPublicKey?.message}
-        autoComplete="off"
       />
       <Tabs onClick={inputValue ? undefined : clearErrors}>
         <Tab tabName={RecipientTabName.Recent}>
