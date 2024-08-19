@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -64,30 +64,22 @@ export const useFilteredValidators = (
   inputValue: string | undefined,
   validatorList: ValidatorResultWithId[] | null
 ) => {
-  const filterValidators = useCallback(
-    (
-      inputValue: string | undefined,
-      validatorList: ValidatorResultWithId[] | null
-    ): ValidatorResultWithId[] | [] => {
-      if (!validatorList) return [];
-      if (!inputValue) return validatorList;
+  return useMemo(() => {
+    if (!validatorList) return [];
+    if (!inputValue) return validatorList;
 
-      const lowerCaseInput = inputValue.toLowerCase();
+    const lowerCaseInput = inputValue.toLowerCase();
 
-      const isIncluded = (stringToCheck: string | undefined) =>
-        stringToCheck?.toLowerCase().includes(lowerCaseInput);
+    const isIncluded = (stringToCheck: string | undefined) =>
+      stringToCheck?.toLowerCase().includes(lowerCaseInput);
 
-      return validatorList.filter(validator => {
-        const { public_key } = validator;
-        const ownerName = validator?.account_info?.info?.owner?.name;
+    return validatorList.filter(validator => {
+      const { public_key } = validator;
+      const ownerName = validator?.account_info?.info?.owner?.name;
 
-        return isIncluded(ownerName) || isIncluded(public_key);
-      });
-    },
-    []
-  );
-
-  return filterValidators(inputValue, validatorList);
+      return isIncluded(ownerName) || isIncluded(public_key);
+    });
+  }, [inputValue, validatorList]);
 };
 
 export const useStakeActionTexts = (

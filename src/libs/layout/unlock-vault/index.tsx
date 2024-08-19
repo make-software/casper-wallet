@@ -206,7 +206,10 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
 
   const footer = (
     <FooterButtonsContainer>
-      <Button type="submit" disabled={isLoading}>
+      <Button
+        type="submit"
+        style={{ pointerEvents: isLoading ? 'none' : 'auto' }}
+      >
         {isLoading ? (
           <AlignedFlexRow gap={SpacingSize.Small}>
             <Player

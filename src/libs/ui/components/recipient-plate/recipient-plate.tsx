@@ -55,7 +55,7 @@ export const RecipientPlate = ({
           gap={SpacingSize.Medium}
           onClick={handleClick}
         >
-          <Avatar publicKey={publicKey} size={24} />
+          <Avatar publicKey={publicKey} size={24} borderRadius={2} />
           <LeftAlignedFlexColumn>
             <Hash
               value={publicKey}
@@ -78,7 +78,7 @@ export const RecipientPlate = ({
 
   return (
     <Container gap={SpacingSize.Medium} onClick={handleClick}>
-      <Avatar publicKey={publicKey} size={24} />
+      <Avatar publicKey={publicKey} size={24} borderRadius={2} />
       <LeftAlignedFlexColumn>
         <Hash
           value={publicKey}

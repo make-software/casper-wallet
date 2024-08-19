@@ -33,7 +33,8 @@ export const RecipientTabs = ({
 
   const { t } = useTranslation();
 
-  const { register, trigger, control, formState, setValue } = recipientForm;
+  const { register, trigger, control, formState, setValue, clearErrors } =
+    recipientForm;
   const { errors } = formState;
   const { onChange } = register('recipientPublicKey');
 
@@ -94,7 +95,29 @@ export const RecipientTabs = ({
     >
       <Input
         monotype
-        prefixIcon={<SvgIcon src="assets/icons/search.svg" size={24} />}
+        prefixIcon={
+          <SvgIcon
+            src="assets/icons/search.svg"
+            size={24}
+            color="contentDisabled"
+          />
+        }
+        suffixIcon={
+          inputValue && (
+            <SvgIcon
+              src="assets/icons/cross.svg"
+              size={16}
+              onClick={() => {
+                setValue('recipientPublicKey', '');
+                if (setRecipientPublicKey) {
+                  setRecipientPublicKey('');
+                }
+                setRecipientName('');
+                trigger('recipientPublicKey');
+              }}
+            />
+          )
+        }
         placeholder={t('Public key')}
         {...register('recipientPublicKey')}
         onChange={e => {
@@ -106,21 +129,18 @@ export const RecipientTabs = ({
         }}
         error={!!errors?.recipientPublicKey}
         validationText={errors?.recipientPublicKey?.message}
-        autoComplete="off"
       />
-      <VerticalSpaceContainer top={SpacingSize.Tiny}>
-        <Tabs>
-          <Tab tabName={RecipientTabName.Recent}>
-            <RecentList handleSelectRecipient={handleSelectRecipient} />
-          </Tab>
-          <Tab tabName={RecipientTabName.MyAccounts}>
-            <MyAccountsList handleSelectRecipient={handleSelectRecipient} />
-          </Tab>
-          <Tab tabName={RecipientTabName.Contacts}>
-            <ContactsList handleSelectRecipient={handleSelectRecipient} />
-          </Tab>
-        </Tabs>
-      </VerticalSpaceContainer>
+      <Tabs onClick={inputValue ? undefined : clearErrors}>
+        <Tab tabName={RecipientTabName.Recent}>
+          <RecentList handleSelectRecipient={handleSelectRecipient} />
+        </Tab>
+        <Tab tabName={RecipientTabName.MyAccounts}>
+          <MyAccountsList handleSelectRecipient={handleSelectRecipient} />
+        </Tab>
+        <Tab tabName={RecipientTabName.Contacts}>
+          <ContactsList handleSelectRecipient={handleSelectRecipient} />
+        </Tab>
+      </Tabs>
     </VerticalSpaceContainer>
   );
 };
