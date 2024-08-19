@@ -34,7 +34,7 @@ const FlexColumn = styled.div`
   flex-direction: column;
 `;
 
-export const RowsContainer = styled.div<RowsContainerProps>`
+const RowsContainer = styled.div<RowsContainerProps>`
   & > * + *:before {
     ${borderBottomPseudoElementRules};
   }

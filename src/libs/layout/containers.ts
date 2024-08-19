@@ -332,6 +332,7 @@ export const DropdownHeader = styled(AlignedSpaceBetweenFlexRow)`
 
   border-top-left-radius: ${({ theme }) => theme.borderRadius.base}px;
   border-top-right-radius: ${({ theme }) => theme.borderRadius.base}px;
+  border-bottom: ${({ theme }) => `0.5px solid ${theme.color.borderPrimary}`};
 
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
 `;

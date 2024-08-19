@@ -38,6 +38,10 @@ popup.describe('Popup UI: Redelegation', () => {
 
       await popupPage.getByPlaceholder('0.00', { exact: true }).fill('500');
 
+      await popupExpect(
+        popupPage.getByRole('button', { name: 'Next' })
+      ).not.toBeDisabled();
+
       await popupPage.getByRole('button', { name: 'Next' }).click();
 
       await popupPage.getByText('Delegate', { exact: true }).click();
