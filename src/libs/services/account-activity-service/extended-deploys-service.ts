@@ -1,7 +1,10 @@
+import { CloudPaginatedResponse, IDeploy } from 'casper-wallet-core';
+
 import { ACCOUNT_DEPLOY_REFRESH_RATE } from '@src/constants';
 
 import { dispatchToMainStore } from '@background/redux/utils';
 import { serviceMessage } from '@background/service-message';
+import { deploysRepository } from '@background/wallet-repositories';
 
 import { queryClient } from '@libs/services/query-client';
 import {
@@ -11,10 +14,7 @@ import {
 } from '@libs/services/types';
 import { handleError, toJson } from '@libs/services/utils';
 
-import {
-  getAccountExtendedDeploysLink,
-  getExtendedDeploysHashLink
-} from './constants';
+import { getExtendedDeploysHashLink } from './constants';
 import { ExtendedDeploy, ExtendedDeployResult } from './types';
 
 export const extendedDeploysRequest = (
@@ -46,18 +46,7 @@ export const dispatchFetchExtendedDeploysInfo = (
     serviceMessage.fetchExtendedDeploysInfoRequest({ deployHash })
   );
 
-export const accountExtendedDeploysRequest = (
-  casperClarityApiUrl: string,
-  publicKey: string,
-  page: number,
-  signal?: AbortSignal
-): Promise<PaginatedResponse<ExtendedDeployResult>> =>
-  fetch(getAccountExtendedDeploysLink(casperClarityApiUrl, publicKey, page), {
-    signal
-  })
-    .then(toJson)
-    .catch(handleError);
-
+// TODO just a quick example. Errors handling required
 export const fetchAccountExtendedDeploys = ({
   casperClarityApiUrl,
   publicKey,
@@ -66,16 +55,15 @@ export const fetchAccountExtendedDeploys = ({
   casperClarityApiUrl: string;
   publicKey: string;
   page: number;
-}): Promise<PaginatedResponse<ExtendedDeployResult> | ErrorResponse> =>
+}): Promise<CloudPaginatedResponse<IDeploy>> =>
   queryClient.fetchQuery(
     ['accountDeploysRequest', casperClarityApiUrl, publicKey, page],
-    ({ signal }) =>
-      accountExtendedDeploysRequest(
-        casperClarityApiUrl,
-        publicKey,
+    () =>
+      deploysRepository.getDeploys({
         page,
-        signal
-      ),
+        activePublicKey: publicKey,
+        network: 'testnet'
+      }),
     { staleTime: ACCOUNT_DEPLOY_REFRESH_RATE }
   );
 

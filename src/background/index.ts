@@ -116,7 +116,6 @@ import { SdkMethod, isSDKMethod, sdkMethod } from '@content/sdk-method';
 
 import {
   MapExtendedDeploy,
-  MapPaginatedExtendedDeploys,
   fetchAccountCasperActivity,
   fetchAccountExtendedDeploys,
   fetchExtendedDeploysInfo
@@ -188,6 +187,8 @@ import {
 import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
 import { ServiceMessage, serviceMessage } from './service-message';
 import { emitSdkEventToActiveTabsWithOrigin } from './utils';
+// to resolve all repositories
+import './wallet-repositories';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -816,9 +817,7 @@ runtime.onMessage.addListener(
               });
 
               return sendResponse(
-                serviceMessage.fetchAccountExtendedDeploysResponse(
-                  MapPaginatedExtendedDeploys(data)
-                )
+                serviceMessage.fetchAccountExtendedDeploysResponse(data)
               );
             } catch (error) {
               console.error(error);

@@ -135,21 +135,6 @@ export const MapExtendedDeploy = ({
   rate: rate
 });
 
-export const MapPaginatedExtendedDeploys = (
-  response: PaginatedResponse<ExtendedDeployResult> | ErrorResponse
-): PaginatedResponse<ExtendedDeploy> | ErrorResponse => {
-  if ('data' in response) {
-    return {
-      ...response,
-      data: response.data ? response.data.map(MapExtendedDeploy) : []
-    };
-  }
-
-  return {
-    ...response
-  };
-};
-
 export type ExtendedDeployContractPackageMetadata = {
   symbol: string;
   decimals: number;

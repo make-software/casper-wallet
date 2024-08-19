@@ -1,3 +1,4 @@
+import { CloudPaginatedResponse, IDeploy } from 'casper-wallet-core';
 import { ActionType, createAction } from 'typesafe-actions';
 
 import {
@@ -88,7 +89,7 @@ export const serviceMessage = {
   >(),
   fetchAccountExtendedDeploysResponse: createAction(
     'FETCH_ACCOUNT_DEPLOYS_RESPONSE'
-  )<PaginatedResponse<ExtendedDeploy> | ErrorResponse, Meta>(),
+  )<CloudPaginatedResponse<IDeploy> | ErrorResponse, Meta>(),
   fetchAccountCasperActivityRequest: createAction(
     'FETCH_ACCOUNT_CASPER_ACTIVITY'
   )<{ accountHash: string; page: number }, Meta>(),
