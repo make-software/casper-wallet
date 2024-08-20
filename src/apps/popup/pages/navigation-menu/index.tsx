@@ -400,8 +400,8 @@ export function NavigationMenuPageContent() {
           <SvgIcon
             src={
               isDarkMode
-                ? 'assets/icons/wallet-original-on-white.svg'
-                : 'assets/icons/casper-wallet-text-logo.svg'
+                ? 'assets/icons/casper-wallet-text-logo-dark.svg'
+                : 'assets/icons/casper-wallet-text-logo-light.svg'
             }
             width={129}
             height={32}
