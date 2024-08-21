@@ -172,6 +172,7 @@ export const AmountStep = ({
           suffixText={selectedToken?.symbol}
           {...register('amount')}
           disabled={!isErc20Transfer && disabled}
+          autoFocus
           onChange={e => {
             onChangeCSPRAmount(e);
             setAmount(e.target.value);

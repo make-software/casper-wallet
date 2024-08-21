@@ -126,6 +126,7 @@ export const AmountStep = ({
           rightLabel={fiatAmount}
           type="number"
           monotype
+          autoFocus
           placeholder={t('0.00')}
           suffixText={'CSPR'}
           {...register('amount')}

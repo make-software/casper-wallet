@@ -38,8 +38,8 @@ const TabContainer = styled(CenteredFlexRow)<{ disable?: boolean }>`
 
 export const HomePageTabsId = {
   Tokens: 0,
-  Deploys: 1,
-  NFTs: 2
+  NFTs: 1,
+  Deploys: 2
 };
 
 export const Tab = styled.div<TabProps>``;
@@ -52,9 +52,10 @@ interface TabProps {
 interface TabsProps {
   children: React.ReactElement<TabProps>[];
   preferActiveTabId?: number;
+  onClick?: () => void;
 }
 
-export function Tabs({ children, preferActiveTabId }: TabsProps) {
+export function Tabs({ children, preferActiveTabId, onClick }: TabsProps) {
   // set preferActiveTabId as the default value if it is provided. We do not need to track props change, so we can set it directly in useState
   const [activeTabId, setActiveTabId] = useState(preferActiveTabId || 0);
 
@@ -77,6 +78,9 @@ export function Tabs({ children, preferActiveTabId }: TabsProps) {
               <TabContainer
                 onClick={() => {
                   setActiveTabId(index);
+                  if (onClick) {
+                    onClick();
+                  }
                 }}
                 key={tabName}
               >
