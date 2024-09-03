@@ -1,15 +1,16 @@
+import { IDeploy } from 'casper-wallet-core';
+import {
+  isAssociatedKeysDeploy,
+  isAuctionDeploy,
+  isCasperMarketDeploy,
+  isCep18Deploy,
+  isNativeCsprDeploy,
+  isNftDeploy,
+  isWasmDeployExecutionType
+} from 'casper-wallet-core/src/utils/deploy';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-
-import {
-  AssociatedKeysContractHash,
-  AuctionManagerContractHash,
-  CSPRMarketContractHash,
-  ContractTypeId,
-  ExecutionTypesMap,
-  TRANSFER
-} from '@src/constants';
 
 import { AssociatedActionRows } from '@popup/pages/deploy-details/components/action-rows/associated-action-rows';
 import { AuctionActionRows } from '@popup/pages/deploy-details/components/action-rows/auction-action-rows';
@@ -18,6 +19,7 @@ import { CsprMarketActionRows } from '@popup/pages/deploy-details/components/act
 import { DefaultActionRows } from '@popup/pages/deploy-details/components/action-rows/default-action-rows';
 import { NativeTransferActionRows } from '@popup/pages/deploy-details/components/action-rows/native-transfer-action-rows';
 import { NftActionsRows } from '@popup/pages/deploy-details/components/action-rows/nft-actions-rows';
+import { getEntryPointName } from '@popup/pages/deploy-details/utils';
 
 import {
   AlignedSpaceBetweenFlexRow,
@@ -25,7 +27,6 @@ import {
   FlexColumn,
   borderBottomPseudoElementRules
 } from '@libs/layout';
-import { ExtendedCloudDeploy } from '@libs/types/deploy';
 import { Tile, Typography } from '@libs/ui/components';
 
 const RowsContainer = styled(FlexColumn)<BorderBottomPseudoElementProps>`
@@ -45,7 +46,7 @@ const RowContainer = styled(AlignedSpaceBetweenFlexRow)`
 `;
 
 interface ActionProps {
-  deploy: ExtendedCloudDeploy;
+  deploy: IDeploy;
 }
 
 const Container = ({ children }: { children: React.ReactNode }) => {
@@ -64,129 +65,78 @@ const Container = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const DeployDetailsAction = ({ deploy }: ActionProps) => {
-  const { executionTypeId, contractPackage, contractHash, entryPoint } = deploy;
+  const title = getEntryPointName(deploy, true);
 
-  // remove this after we add types for deploy
-  const deployType = ExecutionTypesMap[executionTypeId];
-  const isTransfer = deploy.executionTypeId === TRANSFER;
-  const isWASMDeploy = deployType === 'WASM deploy';
-
-  const entryPointName = entryPoint?.name || '';
-
-  const contractTypeId =
-    contractPackage?.latest_version_contract_type_id ||
-    contractPackage?.contract_type_id;
-
-  const isNativeTransfer = isTransfer && deploy.transfers;
-  const isAuction =
-    contractHash === AuctionManagerContractHash.Mainnet ||
-    contractHash === AuctionManagerContractHash.Testnet;
-  const isNFT =
-    contractTypeId === ContractTypeId.CEP78Nft ||
-    contractTypeId === ContractTypeId.CEP47Nft ||
-    contractTypeId === ContractTypeId.CustomCEP78Nft ||
-    contractTypeId === ContractTypeId.CustomCEP47Nft;
-  const isCep18 =
-    contractTypeId === ContractTypeId.CustomCep18 ||
-    contractTypeId === ContractTypeId.Cep18;
-  const isCSPRMarket =
-    contractHash === CSPRMarketContractHash.Mainnet ||
-    contractHash === CSPRMarketContractHash.Testnet;
-  const isAssociated =
-    contractHash === AssociatedKeysContractHash.Mainnet ||
-    contractHash === AssociatedKeysContractHash.Testnet;
-
-  if (isNativeTransfer) {
+  if (isNativeCsprDeploy(deploy)) {
     return (
       <Container>
         <NativeTransferActionRows
-          amount="500.4213"
-          fiatAmount="$386.34"
-          publicKey="02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5"
+          amount={deploy.formattedDecimalAmount}
+          fiatAmount={deploy.fiatAmount}
+          isReceive={deploy.isReceive}
+          title={title}
+          publicKey={
+            deploy.isReceive ? deploy.callerPublicKey : deploy.recipientKey
+          }
+          accountName={
+            deploy.isReceive
+              ? deploy?.callerAccountInfo?.name
+              : deploy?.recipientAccountInfo?.name
+          }
         />
       </Container>
     );
   }
 
-  if (isWASMDeploy) {
+  if (isWasmDeployExecutionType(deploy)) {
     return (
       <Container>
-        <Typography type="bodySemiBold">{deployType}</Typography>
+        <Typography type="bodySemiBold">{title}</Typography>
       </Container>
     );
   }
 
-  if (isAuction) {
+  if (isAuctionDeploy(deploy)) {
     return (
       <Container>
-        <AuctionActionRows
-          fiatAmount="$386.34"
-          amount="500.4213"
-          entryPointName={entryPointName}
-          validatorPublicKey="02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5"
-          newValidatorPublicKey="02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5"
-          contractLink="link"
-          contractName="name"
-        />
+        <AuctionActionRows deploy={deploy} />
       </Container>
     );
   }
 
-  if (isAssociated) {
+  if (isAssociatedKeysDeploy(deploy)) {
     return (
       <Container>
         <AssociatedActionRows
-          contractLink={'link'}
-          publicKey={
-            '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5'
-          }
+          contractPackageHash={deploy.contractPackageHash}
+          publicKey={deploy.callerPublicKey}
+          contractName={deploy.contractName}
+          callerAccountInfo={deploy.callerAccountInfo}
         />
       </Container>
     );
   }
 
-  if (isCSPRMarket) {
+  if (isCasperMarketDeploy(deploy)) {
     return (
       <Container>
-        <CsprMarketActionRows
-          entryPointName={entryPointName}
-          nftName={'eggforce_nft'}
-          nftId={'1890'}
-          amount={'500.3933'}
-          fiatAmount={'$386.34'}
-          publicKey={
-            '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5'
-          }
-          csprMarketLink={'link'}
-        />
+        <CsprMarketActionRows deploy={deploy} />
       </Container>
     );
   }
 
-  if (isCep18) {
+  if (isCep18Deploy(deploy)) {
     return (
       <Container>
-        <Cep18ActionRows
-          entryPointName={entryPointName}
-          amount="500.4213"
-          symbol="BOIN"
-          contractLink="link"
-          contractName="name"
-          publicKey="02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5"
-        />
+        <Cep18ActionRows deploy={deploy} />
       </Container>
     );
   }
 
-  if (isNFT) {
+  if (isNftDeploy(deploy)) {
     return (
       <Container>
-        <NftActionsRows
-          entryPointName={entryPointName}
-          nftId="1234"
-          publicKey="02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5"
-          newOwnerPublicKey="02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5"
-        />
+        <NftActionsRows deploy={deploy} />
       </Container>
     );
   }
@@ -194,9 +144,9 @@ export const DeployDetailsAction = ({ deploy }: ActionProps) => {
   return (
     <Container>
       <DefaultActionRows
-        entryPointName={entryPointName}
-        contractLink="link"
-        contractName="name"
+        title={title}
+        contractName={deploy.contractName}
+        contractPackageHash={deploy.contractPackageHash}
       />
     </Container>
   );

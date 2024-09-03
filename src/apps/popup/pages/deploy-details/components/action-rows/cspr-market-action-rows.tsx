@@ -1,65 +1,53 @@
+import { ICasperMarketDeploy } from 'casper-wallet-core/src/domain/deploys/entities';
 import React from 'react';
 
-import {
-  CsprMarketEntryPoint,
-  CsprMarketEntryPointNameMap,
-  DeployIcon
-} from '@src/constants';
+import { CsprMarketDeployEntryPoint } from '@src/constants';
 
 import { DefaultActionRows } from '@popup/pages/deploy-details/components/action-rows/default-action-rows';
 import {
-  AccountInfoRow,
   AmountRow,
   ContractInfoRow,
   NftInfoRow,
   SimpleContainer
 } from '@popup/pages/deploy-details/components/common';
+import { getEntryPointName } from '@popup/pages/deploy-details/utils';
+
+import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 
 interface CsprMarketActionRowsProps {
-  entryPointName: string;
-  nftIcon?: string;
-  nftName: string;
-  nftId: string;
-  amount: string;
-  fiatAmount: string;
-  publicKey: string;
-  csprMarketLink: string;
+  deploy: ICasperMarketDeploy;
 }
 
-export const CsprMarketActionRows = ({
-  entryPointName,
-  nftIcon = DeployIcon.Generic,
-  nftName,
-  nftId,
-  amount,
-  csprMarketLink,
-  fiatAmount,
-  publicKey
-}: CsprMarketActionRowsProps) => {
-  const isDelist = entryPointName === CsprMarketEntryPoint.delist_token;
+export const CsprMarketActionRows = ({ deploy }: CsprMarketActionRowsProps) => {
+  const {
+    entryPoint,
+    contractName,
+    contractPackageHash,
+    nftTokenIds,
+    offererAccountInfo
+  } = deploy;
+  const isDelist = entryPoint === CsprMarketDeployEntryPoint.delist_token;
   const isListAction =
-    entryPointName === CsprMarketEntryPoint.delist_token ||
-    entryPointName === CsprMarketEntryPoint.list_token;
+    entryPoint === CsprMarketDeployEntryPoint.delist_token ||
+    entryPoint === CsprMarketDeployEntryPoint.list_token;
   const isOfferAction =
-    entryPointName === CsprMarketEntryPoint.accept_offer ||
-    entryPointName === CsprMarketEntryPoint.make_offer ||
-    entryPointName === CsprMarketEntryPoint.cancel_offer;
+    entryPoint === CsprMarketDeployEntryPoint.accept_offer ||
+    entryPoint === CsprMarketDeployEntryPoint.make_offer ||
+    entryPoint === CsprMarketDeployEntryPoint.cancel_offer;
+
+  const title = getEntryPointName(deploy, true);
 
   if (isListAction) {
     return (
-      <SimpleContainer
-        entryPointName={CsprMarketEntryPointNameMap[entryPointName]}
-      >
+      <SimpleContainer title={title}>
         <NftInfoRow
-          nftId={nftId}
-          contractIcon={nftIcon}
-          contractName={nftName}
+          nftTokenIds={nftTokenIds}
+          publicKey={deploy.collectionHash}
         />
         <ContractInfoRow
-          contractLink={csprMarketLink}
-          contractName="CSPR.market"
+          publicKey={contractPackageHash}
+          contractName={contractName}
           label={isDelist ? 'from' : 'on'}
-          iconUrl={DeployIcon.CSPRMarket}
         />
       </SimpleContainer>
     );
@@ -67,26 +55,29 @@ export const CsprMarketActionRows = ({
 
   if (isOfferAction) {
     return (
-      <SimpleContainer
-        entryPointName={CsprMarketEntryPointNameMap[entryPointName]}
-      >
+      <SimpleContainer title={title}>
         <AmountRow
           label="of"
-          amount={amount}
+          amount={deploy.formattedDecimalAmount}
           symbol="CSPR"
-          fiatAmount={fiatAmount}
+          fiatAmount={deploy.fiatAmount}
         />
         <NftInfoRow
-          nftId={nftId}
-          contractIcon={nftIcon}
-          contractName={nftName}
+          nftTokenIds={nftTokenIds}
+          imgLogo={offererAccountInfo?.brandingLogo}
+          contractName={offererAccountInfo?.name}
+          publicKey={deploy.contractPackageHash}
           label="for"
         />
-        <AccountInfoRow publicKey={publicKey} label="from" />
+        <AccountInfoRow
+          publicKey={deploy.offererHash}
+          label="from"
+          isAction
+          iconSize={20}
+        />
         <ContractInfoRow
-          contractLink={csprMarketLink}
-          contractName="CSPR.market"
-          iconUrl={DeployIcon.CSPRMarket}
+          publicKey={contractPackageHash}
+          contractName={contractName}
           label="on"
         />
       </SimpleContainer>
@@ -95,9 +86,9 @@ export const CsprMarketActionRows = ({
 
   return (
     <DefaultActionRows
-      entryPointName={entryPointName}
-      contractLink={csprMarketLink}
-      contractName="CSPR.market"
+      title={title}
+      contractPackageHash={contractPackageHash}
+      contractName={contractName}
     />
   );
 };

@@ -1,50 +1,65 @@
+import { ICep18ActionsResult } from 'casper-wallet-core/src/domain/deploys/entities';
 import React from 'react';
 
-import { DeployIcon, FTActionTypeEnum } from '@src/constants';
+import {
+  Cep18DeployEntryPoint,
+  DeployIcon,
+  DeployResultEntryPointNameMap
+} from '@src/constants';
 
 import {
-  AccountInfoRow,
   AmountRow,
   ContractInfoRow,
   SimpleContainer
 } from '@popup/pages/deploy-details/components/common';
 
-import { FTActionsResult } from '@libs/types/deploy';
-
-const ftResultActionNameMap: { [key in number]: string } = {
-  [FTActionTypeEnum.Approve]: 'Granted transfer rights',
-  [FTActionTypeEnum.Transfer]: 'Transferred',
-  [FTActionTypeEnum.Burn]: 'Burned',
-  [FTActionTypeEnum.Mint]: 'Minted'
-};
+import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 
 interface Cep18ResultRowsProps {
-  ftAction: FTActionsResult;
+  action: ICep18ActionsResult;
+  contractPackageHash: string;
 }
 
-export const Cep18ResultRows = ({ ftAction }: Cep18ResultRowsProps) => {
-  const isTransfer = ftAction.ft_action_type_id === FTActionTypeEnum.Transfer;
-  const isMint = ftAction.ft_action_type_id === FTActionTypeEnum.Mint;
-  const isBurn = ftAction.ft_action_type_id === FTActionTypeEnum.Burn;
-  const isApprove = ftAction.ft_action_type_id === FTActionTypeEnum.Approve;
+export const Cep18ResultRows = ({
+  action,
+  contractPackageHash
+}: Cep18ResultRowsProps) => {
+  const {
+    entryPoint,
+    formattedDecimalAmount,
+    symbol,
+    recipientKey,
+    callerPublicKey,
+    contractName,
+    iconUrl
+  } = action;
+  const isTransfer = entryPoint === Cep18DeployEntryPoint.transfer;
+  const isMint = entryPoint === Cep18DeployEntryPoint.mint;
+  const isBurn = entryPoint === Cep18DeployEntryPoint.burn;
+  const isApprove = entryPoint === Cep18DeployEntryPoint.approve;
+
+  const title = DeployResultEntryPointNameMap[action.entryPoint];
 
   if (isApprove) {
     return (
-      <SimpleContainer
-        entryPointName={ftResultActionNameMap[ftAction.ft_action_type_id]}
-      >
-        <AmountRow amount={'amount'} symbol={'symbol'} label="for" />
+      <SimpleContainer title={title}>
+        <AmountRow
+          amount={formattedDecimalAmount}
+          symbol={symbol}
+          label="for"
+        />
         <ContractInfoRow
-          contractLink={'contractLink'}
-          contractName={'contractName'}
-          iconUrl={'iconUrl' || DeployIcon.Cep18Default}
+          publicKey={contractPackageHash}
+          contractName={contractName}
+          iconUrl={iconUrl}
           additionalInfo="token(s)"
+          defaultSvg={DeployIcon.Cep18Default}
         />
         <AccountInfoRow
-          publicKey={
-            '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5'
-          }
+          publicKey={recipientKey}
           label="to"
+          isAction
+          iconSize={20}
         />
       </SimpleContainer>
     );
@@ -52,21 +67,20 @@ export const Cep18ResultRows = ({ ftAction }: Cep18ResultRowsProps) => {
 
   if (isBurn) {
     return (
-      <SimpleContainer
-        entryPointName={ftResultActionNameMap[ftAction.ft_action_type_id]}
-      >
-        <AmountRow amount={'amount'} symbol={'symbol'} />
+      <SimpleContainer title={title}>
+        <AmountRow amount={formattedDecimalAmount} symbol={symbol} />
         <ContractInfoRow
-          contractLink={'contractLink'}
-          contractName={'contractName'}
-          iconUrl={'iconUrl' || DeployIcon.Cep18Default}
+          publicKey={contractPackageHash}
+          contractName={contractName}
+          iconUrl={iconUrl}
           additionalInfo="token(s)"
+          defaultSvg={DeployIcon.Cep18Default}
         />
         <AccountInfoRow
-          publicKey={
-            '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5'
-          }
+          publicKey={recipientKey}
           label="owned by"
+          isAction
+          iconSize={20}
         />
       </SimpleContainer>
     );
@@ -74,21 +88,20 @@ export const Cep18ResultRows = ({ ftAction }: Cep18ResultRowsProps) => {
 
   if (isMint) {
     return (
-      <SimpleContainer
-        entryPointName={ftResultActionNameMap[ftAction.ft_action_type_id]}
-      >
-        <AmountRow amount={'amount'} symbol={'symbol'} />
+      <SimpleContainer title={title}>
+        <AmountRow amount={formattedDecimalAmount} symbol={symbol} />
         <ContractInfoRow
-          contractLink={'contractLink'}
-          contractName={'contractName'}
-          iconUrl={'iconUrl' || DeployIcon.Cep18Default}
+          publicKey={contractPackageHash}
+          contractName={contractName}
+          iconUrl={iconUrl}
           additionalInfo="token(s)"
+          defaultSvg={DeployIcon.Cep18Default}
         />
         <AccountInfoRow
-          publicKey={
-            '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5'
-          }
+          publicKey={recipientKey}
           label="to"
+          isAction
+          iconSize={20}
         />
       </SimpleContainer>
     );
@@ -96,27 +109,26 @@ export const Cep18ResultRows = ({ ftAction }: Cep18ResultRowsProps) => {
 
   if (isTransfer) {
     return (
-      <SimpleContainer
-        entryPointName={ftResultActionNameMap[ftAction.ft_action_type_id]}
-      >
-        <AmountRow amount={'amount'} symbol={'symbol'} />
+      <SimpleContainer title={title}>
+        <AmountRow amount={formattedDecimalAmount} symbol={symbol} />
         <ContractInfoRow
-          contractLink={'contractLink'}
-          contractName={'contractName'}
-          iconUrl={'iconUrl' || DeployIcon.Cep18Default}
+          publicKey={contractPackageHash}
+          contractName={contractName}
+          iconUrl={iconUrl}
           additionalInfo="token(s)"
+          defaultSvg={DeployIcon.Cep18Default}
         />
         <AccountInfoRow
-          publicKey={
-            '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5'
-          }
+          publicKey={callerPublicKey}
           label="from"
+          isAction
+          iconSize={20}
         />
         <AccountInfoRow
-          publicKey={
-            '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5'
-          }
+          publicKey={recipientKey}
           label="to"
+          isAction
+          iconSize={20}
         />
       </SimpleContainer>
     );

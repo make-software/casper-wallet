@@ -1,4 +1,4 @@
-import { ActivityType } from '@src/constants';
+import { IDeploy } from 'casper-wallet-core';
 
 import { TokenType } from '@hooks/use-casper-token';
 
@@ -6,15 +6,6 @@ import { ErrorLocationState } from '@libs/layout/error/types';
 
 export interface LocationState extends ErrorLocationState {
   showNavigationMenu?: boolean;
-  activityDetailsData?: {
-    fromAccount: string;
-    toAccount: string;
-    deployHash: string;
-    type: ActivityType | null;
-    amount?: string;
-    symbol?: string;
-    isDeploysList?: boolean;
-  };
   activeTabId?: number;
   tokenData?: TokenType | null;
   nftData?: {
@@ -22,4 +13,6 @@ export interface LocationState extends ErrorLocationState {
     url?: string;
   };
   recipientPublicKey?: string;
+  deploy?: IDeploy;
+  navigateHome?: boolean;
 }

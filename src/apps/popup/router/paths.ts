@@ -14,7 +14,6 @@ export enum RouterPath {
   BackupSecretPhrase = '/backup-secret-phrase',
   DownloadAccountKeys = '/download-account-keys',
   Transfer = '/transfer',
-  ActivityDetails = '/activity-details',
   Token = '/token/:tokenName',
   Receive = '/receive',
   NftDetails = '/nft-details/:contractPackageHash/nfts/:tokenId',

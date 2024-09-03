@@ -1,68 +1,62 @@
+import { IAccountInfo } from 'casper-wallet-core/src/domain/accountInfo';
+import {
+  AuctionEntryPointType,
+  IAuctionDeploy
+} from 'casper-wallet-core/src/domain/deploys/entities';
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import {
-  AuctionEntryPointNameMap,
-  AuctionManagerEntryPoint_V2,
-  DeployIcon
-} from '@src/constants';
+import { AuctionDeployEntryPoint, DeployIcon } from '@src/constants';
+
+import { getEntryPointName } from '@popup/pages/deploy-details/utils';
 
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import { Avatar, Hash, HashVariant, Typography } from '@libs/ui/components';
-import { DefaultDeployRows } from '@libs/ui/components/deploy-plate/components/default-deploy-rows';
+import { Typography } from '@libs/ui/components';
+import { AccountInfoIcon } from '@libs/ui/components/account-info-icon/account-info-icon';
+import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 import { DeployContainer } from '@libs/ui/components/deploy-plate/components/deploy-container';
 
 interface AuctionDeployRowsProps {
-  validatorPublicKey: string;
-  newValidatorPublicKey: string;
-  amount: string;
-  entryPointName: AuctionManagerEntryPoint_V2 | string;
-  contractLink: string;
-  contractName: string;
-  timestamp: string;
+  deploy: IAuctionDeploy;
 }
-
-const RenderLabel = ({ label }: { label: string }) => {
-  const { t } = useTranslation();
-
-  return (
-    <Typography type="captionRegular" color="contentSecondary">
-      <Trans t={t}>{label}</Trans>
-    </Typography>
-  );
-};
 
 const ValidatorAccountInfo = ({
   publicKey,
   label,
-  withHash
+  withHash,
+  imgLogo,
+  accountName
 }: {
-  publicKey: string;
+  publicKey: Maybe<string>;
   label: string;
   withHash?: boolean;
+  imgLogo?: Maybe<string>;
+  accountName?: string;
 }) => {
+  const { t } = useTranslation();
+
   if (withHash) {
     return (
-      <>
-        <RenderLabel label={label} />
-        <AlignedFlexRow gap={SpacingSize.Tiny}>
-          <Avatar publicKey={publicKey} size={16} />
-          <Hash
-            value={publicKey}
-            variant={HashVariant.CaptionHash}
-            truncated
-            truncatedSize="small"
-            color="contentPrimary"
-          />
-        </AlignedFlexRow>
-      </>
+      <AccountInfoRow
+        publicKey={publicKey}
+        accountName={accountName}
+        imgLogo={imgLogo}
+        label={label}
+      />
     );
   }
 
   return (
     <>
-      <RenderLabel label={label} />
-      <Avatar publicKey={publicKey} size={16} />
+      <Typography type="captionRegular" color="contentSecondary">
+        <Trans t={t}>{label}</Trans>
+      </Typography>
+      <AccountInfoIcon
+        publicKey={publicKey}
+        iconUrl={imgLogo}
+        accountName={accountName}
+      />
     </>
   );
 };
@@ -78,20 +72,22 @@ const ManageAuctionBidAction = ({ amount }: { amount: string }) => (
 
 const DelegationAuctionAction = ({
   amount,
-  entryPointName,
-  validatorPublicKey,
-  newValidatorPublicKey
+  entryPoint,
+  toValidator,
+  fromValidator,
+  toValidatorAccountInfo,
+  fromValidatorAccountInfo
 }: {
   amount: string;
-  entryPointName: AuctionManagerEntryPoint_V2;
-  validatorPublicKey: string;
-  newValidatorPublicKey: string;
+  entryPoint: AuctionEntryPointType;
+  toValidator: Maybe<string>;
+  fromValidator: Maybe<string>;
+  toValidatorAccountInfo: Maybe<IAccountInfo>;
+  fromValidatorAccountInfo: Maybe<IAccountInfo>;
 }) => {
-  const isDelegate = entryPointName === AuctionManagerEntryPoint_V2.delegate;
-  const isUndelegate =
-    entryPointName === AuctionManagerEntryPoint_V2.undelegate;
-  const isRedelegate =
-    entryPointName === AuctionManagerEntryPoint_V2.redelegate;
+  const isDelegate = entryPoint === AuctionDeployEntryPoint.delegate;
+  const isUndelegate = entryPoint === AuctionDeployEntryPoint.undelegate;
+  const isRedelegate = entryPoint === AuctionDeployEntryPoint.redelegate;
 
   return (
     <>
@@ -105,16 +101,33 @@ const DelegationAuctionAction = ({
         {(isDelegate || isUndelegate) && (
           <ValidatorAccountInfo
             label={isDelegate ? 'to' : 'from'}
-            publicKey={validatorPublicKey}
+            publicKey={isDelegate ? toValidator : fromValidator}
             withHash
+            imgLogo={
+              isDelegate
+                ? toValidatorAccountInfo?.brandingLogo
+                : fromValidatorAccountInfo?.brandingLogo
+            }
+            accountName={
+              isDelegate
+                ? toValidatorAccountInfo?.name
+                : fromValidatorAccountInfo?.name
+            }
           />
         )}
         {isRedelegate && (
           <>
-            <ValidatorAccountInfo label="from" publicKey={validatorPublicKey} />
+            <ValidatorAccountInfo
+              label="from"
+              publicKey={fromValidator}
+              imgLogo={fromValidatorAccountInfo?.brandingLogo}
+              accountName={fromValidatorAccountInfo?.name}
+            />
             <ValidatorAccountInfo
               label="to"
-              publicKey={newValidatorPublicKey}
+              publicKey={toValidator}
+              imgLogo={toValidatorAccountInfo?.brandingLogo}
+              accountName={toValidatorAccountInfo?.name}
             />
           </>
         )}
@@ -123,33 +136,32 @@ const DelegationAuctionAction = ({
   );
 };
 
-export const AuctionDeployRows = ({
-  validatorPublicKey,
-  newValidatorPublicKey,
-  amount,
-  entryPointName,
-  contractLink,
-  timestamp
-}: AuctionDeployRowsProps) => {
+export const AuctionDeployRows = ({ deploy }: AuctionDeployRowsProps) => {
+  const { entryPoint, formattedDecimalAmount } = deploy;
   const isManageAuctionBidDeploy =
-    entryPointName === AuctionManagerEntryPoint_V2.activate ||
-    entryPointName === AuctionManagerEntryPoint_V2.withdraw ||
-    entryPointName === AuctionManagerEntryPoint_V2.add;
+    entryPoint === AuctionDeployEntryPoint.activate ||
+    entryPoint === AuctionDeployEntryPoint.withdraw ||
+    entryPoint === AuctionDeployEntryPoint.add;
 
   const isDelegationDeploy =
-    entryPointName === AuctionManagerEntryPoint_V2.delegate ||
-    entryPointName === AuctionManagerEntryPoint_V2.undelegate ||
-    entryPointName === AuctionManagerEntryPoint_V2.redelegate;
+    entryPoint === AuctionDeployEntryPoint.delegate ||
+    entryPoint === AuctionDeployEntryPoint.undelegate ||
+    entryPoint === AuctionDeployEntryPoint.redelegate;
+
+  const title = getEntryPointName(deploy);
 
   if (isManageAuctionBidDeploy) {
     return (
       <DeployContainer
-        timestamp="2024-07-03T08:31:23.577Z"
-        // TODO: add logic for generic icon and title
+        timestamp={deploy.timestamp}
         iconUrl={DeployIcon.Auction}
-        title={AuctionEntryPointNameMap[entryPointName]}
+        title={title}
+        deployStatus={{
+          status: deploy.status,
+          errorMessage: deploy.errorMessage
+        }}
       >
-        <ManageAuctionBidAction amount={amount} />
+        <ManageAuctionBidAction amount={formattedDecimalAmount} />
       </DeployContainer>
     );
   }
@@ -157,26 +169,25 @@ export const AuctionDeployRows = ({
   if (isDelegationDeploy) {
     return (
       <DeployContainer
-        timestamp={timestamp}
+        timestamp={deploy.timestamp}
         iconUrl={DeployIcon.Auction}
-        title={AuctionEntryPointNameMap[entryPointName]}
+        title={title}
+        deployStatus={{
+          status: deploy.status,
+          errorMessage: deploy.errorMessage
+        }}
       >
         <DelegationAuctionAction
-          amount={amount}
-          entryPointName={entryPointName}
-          validatorPublicKey={validatorPublicKey}
-          newValidatorPublicKey={newValidatorPublicKey}
+          amount={formattedDecimalAmount}
+          entryPoint={entryPoint}
+          toValidator={deploy.toValidator}
+          fromValidator={deploy.fromValidator}
+          toValidatorAccountInfo={deploy.toValidatorAccountInfo}
+          fromValidatorAccountInfo={deploy.fromValidatorAccountInfo}
         />
       </DeployContainer>
     );
   }
 
-  return (
-    <DefaultDeployRows
-      contractLink={contractLink}
-      contractName="name"
-      entryPointName={entryPointName}
-      timestamp={timestamp}
-    />
-  );
+  return null;
 };

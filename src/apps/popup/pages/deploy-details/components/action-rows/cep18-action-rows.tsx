@@ -1,91 +1,105 @@
+import { ICep18Deploy } from 'casper-wallet-core/src/domain/deploys/entities';
 import React from 'react';
 
-import {
-  Cep18EntryPoint,
-  Cep18EntryPointNameMap,
-  DeployIcon
-} from '@src/constants';
+import { Cep18DeployEntryPoint, DeployIcon } from '@src/constants';
 
 import { DefaultActionRows } from '@popup/pages/deploy-details/components/action-rows/default-action-rows';
 import {
-  AccountInfoRow,
   AmountRow,
   ContractInfoRow,
   SimpleContainer
 } from '@popup/pages/deploy-details/components/common';
+import { getEntryPointName } from '@popup/pages/deploy-details/utils';
+
+import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 
 interface Cep18ActionRowsProps {
-  entryPointName: string;
-  amount: string;
-  symbol: string;
-  iconUrl?: string;
-  contractLink: string;
-  contractName: string;
-  publicKey: string;
+  deploy: ICep18Deploy;
 }
 
-export const Cep18ActionRows = ({
-  entryPointName,
-  amount,
-  symbol,
-  iconUrl = DeployIcon.Generic,
-  contractLink,
-  contractName,
-  publicKey
-}: Cep18ActionRowsProps) => {
-  const isTransfer = entryPointName === Cep18EntryPoint.transfer;
-  const isMint = entryPointName === Cep18EntryPoint.mint;
-  const isBurn = entryPointName === Cep18EntryPoint.burn;
-  const isApprove = entryPointName === Cep18EntryPoint.approve;
+export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
+  const {
+    entryPoint,
+    recipientKey,
+    contractPackageHash,
+    contractName,
+    formattedDecimalAmount,
+    symbol,
+    iconUrl
+  } = deploy;
+  const isTransfer = entryPoint === Cep18DeployEntryPoint.transfer;
+  const isMint = entryPoint === Cep18DeployEntryPoint.mint;
+  const isBurn = entryPoint === Cep18DeployEntryPoint.burn;
+  const isApprove = entryPoint === Cep18DeployEntryPoint.approve;
+
+  const title = getEntryPointName(deploy, true);
 
   if (isTransfer || isMint) {
     return (
-      <SimpleContainer entryPointName={Cep18EntryPointNameMap[entryPointName]}>
-        <AmountRow amount={amount} symbol={symbol} label="of" />
+      <SimpleContainer title={title}>
+        <AmountRow amount={formattedDecimalAmount} symbol={symbol} label="of" />
         <ContractInfoRow
-          contractLink={contractLink}
+          publicKey={contractPackageHash}
           contractName={contractName}
-          iconUrl={iconUrl || DeployIcon.Cep18Default}
+          iconUrl={iconUrl}
+          defaultSvg={DeployIcon.Cep18Default}
+          additionalInfo="token(s)"
         />
-        <AccountInfoRow publicKey={publicKey} label="to" />
+        <AccountInfoRow
+          publicKey={recipientKey}
+          label="to"
+          isAction
+          iconSize={20}
+        />
       </SimpleContainer>
     );
   }
 
   if (isApprove) {
     return (
-      <SimpleContainer entryPointName={Cep18EntryPointNameMap[entryPointName]}>
-        <AmountRow amount={amount} symbol={symbol} label="for" />
+      <SimpleContainer title={title}>
+        <AmountRow
+          amount={formattedDecimalAmount}
+          symbol={symbol}
+          label="for"
+        />
         <ContractInfoRow
-          contractLink={contractLink}
+          publicKey={contractPackageHash}
           contractName={contractName}
-          iconUrl={iconUrl || DeployIcon.Cep18Default}
+          iconUrl={iconUrl}
+          defaultSvg={DeployIcon.Cep18Default}
           additionalInfo="token(s)"
         />
-        <AccountInfoRow publicKey={publicKey} label="to" />
+        <AccountInfoRow publicKey={recipientKey} label="to" />
       </SimpleContainer>
     );
   }
 
   if (isBurn) {
     return (
-      <SimpleContainer entryPointName={Cep18EntryPointNameMap[entryPointName]}>
-        <AmountRow amount={amount} symbol={symbol} label="of" />
+      <SimpleContainer title={title}>
+        <AmountRow amount={formattedDecimalAmount} symbol={symbol} label="of" />
         <ContractInfoRow
-          contractLink={contractLink}
+          publicKey={contractPackageHash}
           contractName={contractName}
-          iconUrl={iconUrl || DeployIcon.Cep18Default}
+          iconUrl={iconUrl}
+          defaultSvg={DeployIcon.Cep18Default}
           additionalInfo="token(s)"
         />
-        <AccountInfoRow publicKey={publicKey} label="owned by" />
+        <AccountInfoRow
+          publicKey={recipientKey}
+          label="owned by"
+          isAction
+          iconSize={20}
+        />
       </SimpleContainer>
     );
   }
 
   return (
     <DefaultActionRows
-      entryPointName={entryPointName}
-      contractLink={contractLink}
+      title={title}
+      contractPackageHash={contractPackageHash}
       contractName={contractName}
       additionalInfo="CEP-18 Token"
     />

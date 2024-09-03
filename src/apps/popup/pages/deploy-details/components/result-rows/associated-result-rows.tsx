@@ -3,7 +3,7 @@ import React from 'react';
 import { SimpleContainer } from '@popup/pages/deploy-details/components/common';
 
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import { Avatar, Hash, HashVariant } from '@libs/ui/components';
+import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 
 interface AssociatedResultRowsProps {
   publicKey: string;
@@ -12,16 +12,9 @@ interface AssociatedResultRowsProps {
 export const AssociatedResultRows = ({
   publicKey
 }: AssociatedResultRowsProps) => (
-  <SimpleContainer entryPointName={'Updated account'}>
+  <SimpleContainer title={'Updated account'}>
     <AlignedFlexRow gap={SpacingSize.Small}>
-      <Avatar publicKey={publicKey} size={20} />
-      <Hash
-        value={publicKey}
-        variant={HashVariant.CaptionHash}
-        truncated
-        truncatedSize="small"
-        color="contentAction"
-      />
+      <AccountInfoRow publicKey={publicKey} isAction iconSize={20} />
     </AlignedFlexRow>
   </SimpleContainer>
 );

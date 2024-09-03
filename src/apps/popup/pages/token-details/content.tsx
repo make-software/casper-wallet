@@ -9,8 +9,8 @@ import {
 } from '@libs/layout';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 import {
-  CasperTokenActivityList,
-  Erc20TokenActivityList,
+  CasperTokenTransferDeploysList,
+  Cep18TokenDeploysList,
   Typography
 } from '@libs/ui/components';
 
@@ -41,9 +41,9 @@ export const TokenPageContent: React.FC<TokenPageContentProps> = ({
         </Typography>
       </ParagraphContainer>
       {tokenName === 'Casper' ? (
-        <CasperTokenActivityList />
+        <CasperTokenTransferDeploysList />
       ) : (
-        <Erc20TokenActivityList />
+        <Cep18TokenDeploysList />
       )}
     </ContentContainer>
   );

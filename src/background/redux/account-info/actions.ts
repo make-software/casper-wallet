@@ -1,11 +1,11 @@
 import { createAction } from 'typesafe-actions';
 
 import {
-  Erc20TokenActionResult,
-  ExtendedDeploy,
-  ExtendedDeployWithId,
-  TransferResultWithId
-} from '@libs/services/account-activity-service/types';
+  AccountDeploysDataType,
+  Cep18TransferDeploysDataType,
+  CsprTransferDeploysDataType
+} from '@background/redux/account-info/types';
+
 import { AccountBalance } from '@libs/services/balance-service/types';
 import { ContractPackageWithBalance } from '@libs/services/erc20-service/types';
 import { NFTTokenResult } from '@libs/services/nft-service/types';
@@ -22,47 +22,30 @@ export const accountCurrencyRateChanged = createAction(
   'ACCOUNT_CURRENCY_RATE_CHANGED'
 )<number | null>();
 
-export const accountCasperActivityChanged = createAction(
-  'ACCOUNT_CASPER_ACTIVITY_CHANGED'
-)<TransferResultWithId[]>();
+export const accountCsprTransferDeploysDataChanged = createAction(
+  'ACCOUNT_CSPR_TRANSFER_DEPLOYS_DATA_CHANGED'
+)<CsprTransferDeploysDataType>();
 
-export const accountCasperActivityUpdated = createAction(
-  'ACCOUNT_CASPER_ACTIVITY_UPDATED'
-)<TransferResultWithId[]>();
-
-export const accountErc20TokensActivityChanged = createAction(
-  'ACCOUNT_ERC20_TOKEN_ACTIVITY_CHANGED'
+export const accountCep18TransferDeploysDataChanged = createAction(
+  'ACCOUNT_CEP18_TRANSFER_DEPLOYS_DATA_CHANGED'
 )<{
-  activityList: Erc20TokenActionResult[];
+  cep18TransferDeploysData: Cep18TransferDeploysDataType;
   contractPackageHash: string;
-  tokenActivityCount: number;
-}>();
-
-export const accountErc20TokensActivityUpdated = createAction(
-  'ACCOUNT_ERC20_TOKEN_ACTIVITY_UPDATED'
-)<{
-  activityList: Erc20TokenActionResult[];
-  contractPackageHash: string;
-  tokenActivityCount: number;
 }>();
 
 export const accountInfoReset = createAction('ACCOUNT_INFO_RESET')();
 
-export const accountPendingTransactionsChanged = createAction(
-  'ACCOUNT_PENDING_TRANSACTIONS_CHANGED'
-)<ExtendedDeploy>();
+export const accountPendingDeployHashesChanged = createAction(
+  'ACCOUNT_PENDING_DEPLOY_HASHES_CHANGED'
+)<string>();
 
-export const accountPendingTransactionsRemove = createAction(
+export const accountPendingDeployHashesRemove = createAction(
   'ACCOUNT_PENDING_TRANSACTIONS_REMOVE'
 )<string>();
 
-export const accountDeploysAdded = createAction('ACCOUNT_DEPLOYS_ADDED')<
-  ExtendedDeployWithId[] | null
->();
-
-export const accountDeploysUpdated = createAction('ACCOUNT_DEPLOYS_UPDATED')<
-  ExtendedDeployWithId[]
->();
+export const accountDeploysDataChanged = createAction(
+  'ACCOUNT_DEPLOYS_DATA_CHANGED'
+)<AccountDeploysDataType>();
 
 export const accountNftTokensAdded = createAction('ACCOUNT_NFT_TOKENS_ADDED')<
   NFTTokenResult[] | null

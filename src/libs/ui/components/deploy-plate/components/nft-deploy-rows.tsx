@@ -1,110 +1,91 @@
+import { INftDeploy } from 'casper-wallet-core/src/domain/deploys/entities';
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 
-import {
-  DeployIcon,
-  NftTokenEntryPoint,
-  NftTokenEntryPointNameMap
-} from '@src/constants';
+import { DeployIcon, NftDeployEntryPoint } from '@src/constants';
+
+import { getEntryPointName } from '@popup/pages/deploy-details/utils';
 
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import {
-  Avatar,
-  Hash,
-  HashVariant,
-  Link,
-  Typography
-} from '@libs/ui/components';
+import { Typography } from '@libs/ui/components';
+import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
+import { ContractRow } from '@libs/ui/components/deploy-plate/components/common';
 import { DeployContainer } from '@libs/ui/components/deploy-plate/components/deploy-container';
 
 interface NftDeployRowsProps {
-  amountOfNFTs: number;
-  publicKey: string;
-  entryPointName: NftTokenEntryPoint;
-  timestamp: string;
+  deploy: INftDeploy;
 }
 
-const NftAmount = ({ amountOfNFTs }: { amountOfNFTs: number }) => (
+const NftAmount = ({ amountOfNFTs }: { amountOfNFTs: Maybe<number> }) => (
   <AlignedFlexRow gap={SpacingSize.Tiny}>
     <Typography type="captionHash">{amountOfNFTs}</Typography>
     <Typography type="captionRegular">NFT(s)</Typography>
   </AlignedFlexRow>
 );
 
-const LinkToNftContract = () => {
-  const { t } = useTranslation();
+export const NftDeployRows = ({ deploy }: NftDeployRowsProps) => {
+  const { entryPoint } = deploy;
+  const isBurn = entryPoint === NftDeployEntryPoint.burn;
+  const isMint = entryPoint === NftDeployEntryPoint.mint;
+  const isTransfer = entryPoint === NftDeployEntryPoint.transfer;
+  const isApprove =
+    entryPoint === NftDeployEntryPoint.approve ||
+    entryPoint === NftDeployEntryPoint.set_approval_for_all;
 
-  return (
-    <AlignedFlexRow gap={SpacingSize.Small}>
-      <Typography type="captionRegular" color="contentSecondary">
-        <Trans t={t}>with</Trans>
-      </Typography>
-      {/* TODO: add link for casper studio */}
-      <Link color="contentAction">
-        <Typography type="captionRegular">CSPR.studio</Typography>
-      </Link>
-    </AlignedFlexRow>
-  );
-};
-
-const RecipientInfo = ({
-  publicKey,
-  amountOfNFTs
-}: {
-  publicKey: string;
-  amountOfNFTs: number;
-}) => {
-  const { t } = useTranslation();
-
-  return (
-    <AlignedFlexRow gap={SpacingSize.Small}>
-      <NftAmount amountOfNFTs={amountOfNFTs} />
-      <Typography type="captionRegular" color="contentSecondary">
-        <Trans t={t}>to</Trans>
-      </Typography>
-      <AlignedFlexRow gap={SpacingSize.Tiny}>
-        <Avatar publicKey={publicKey} size={16} />
-        <Hash
-          value={publicKey}
-          variant={HashVariant.CaptionHash}
-          truncated
-          truncatedSize="small"
-          color="contentPrimary"
-        />
-      </AlignedFlexRow>
-    </AlignedFlexRow>
-  );
-};
-
-export const NftDeployRows = ({
-  publicKey,
-  amountOfNFTs,
-  entryPointName,
-  timestamp
-}: NftDeployRowsProps) => {
-  const isBurn = entryPointName === NftTokenEntryPoint.burn;
-  const isMint = entryPointName === NftTokenEntryPoint.mint;
-  const isTransfer = entryPointName === NftTokenEntryPoint.transfer;
+  const title = getEntryPointName(deploy);
 
   return (
     <DeployContainer
-      timestamp={timestamp}
-      iconUrl={DeployIcon.CSPRStudio}
-      title={NftTokenEntryPointNameMap[entryPointName]}
+      timestamp={deploy.timestamp}
+      iconUrl={deploy.iconUrl || DeployIcon.NFTDefault}
+      title={title}
+      deployStatus={{
+        status: deploy.status,
+        errorMessage: deploy.errorMessage
+      }}
     >
       {isBurn && (
         <>
-          <NftAmount amountOfNFTs={amountOfNFTs} />
-          <LinkToNftContract />
+          <NftAmount amountOfNFTs={deploy.amountOfNFTs} />
+          <ContractRow label="with" contractName={deploy.contractName} />
+        </>
+      )}
+      {isApprove && (
+        <>
+          <AccountInfoRow
+            label="to"
+            publicKey={deploy.recipientKey}
+            accountName={
+              deploy.isReceive
+                ? deploy.callerAccountInfo?.name
+                : deploy.recipientAccountInfo?.name
+            }
+            imgLogo={deploy.iconUrl}
+          >
+            <NftAmount amountOfNFTs={deploy.amountOfNFTs} />
+          </AccountInfoRow>
+          <ContractRow label="with" contractName={deploy.contractName} />
         </>
       )}
       {(isMint || isTransfer) && (
         <>
-          <RecipientInfo publicKey={publicKey} amountOfNFTs={amountOfNFTs} />
-          <LinkToNftContract />
+          <AccountInfoRow
+            label="to"
+            publicKey={deploy.recipientKey}
+            accountName={
+              deploy.isReceive
+                ? deploy.callerAccountInfo?.name
+                : deploy.recipientAccountInfo?.name
+            }
+          >
+            <NftAmount amountOfNFTs={deploy.amountOfNFTs} />
+          </AccountInfoRow>
+          <ContractRow label="with" contractName={deploy.contractName} />
         </>
       )}
-      {!(isBurn || isMint || isTransfer) && <LinkToNftContract />}
+      {!(isBurn || isMint || isTransfer || isApprove) && (
+        <ContractRow label="with" contractName={deploy.contractName} />
+      )}
     </DeployContainer>
   );
 };

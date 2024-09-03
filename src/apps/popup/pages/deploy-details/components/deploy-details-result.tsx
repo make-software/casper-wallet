@@ -1,8 +1,13 @@
+import { IDeploy } from 'casper-wallet-core';
+import {
+  isAssociatedKeysDeploy,
+  isCasperMarketDeploy,
+  isCep18Deploy,
+  isNftDeploy
+} from 'casper-wallet-core/src/utils/deploy';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-
-import { AssociatedKeysContractHash } from '@src/constants';
 
 import { AssociatedResultRows } from '@popup/pages/deploy-details/components/result-rows/associated-result-rows';
 import { Cep18ResultRows } from '@popup/pages/deploy-details/components/result-rows/cep18-result-rows';
@@ -14,7 +19,6 @@ import {
   FlexColumn,
   borderBottomPseudoElementRules
 } from '@libs/layout';
-import { ExtendedCloudDeploy } from '@libs/types/deploy';
 import { Status, Tile, Typography, getDeployStatus } from '@libs/ui/components';
 
 const RowsContainer = styled(FlexColumn)<BorderBottomPseudoElementProps>`
@@ -51,57 +55,72 @@ const Container = ({ children }: { children: React.ReactNode }) => {
 };
 
 interface DeployDetailsResultProps {
-  deploy: ExtendedCloudDeploy;
+  deploy: IDeploy;
 }
 
 export const DeployDetailsResult = ({ deploy }: DeployDetailsResultProps) => {
   const deployStatus = getDeployStatus(deploy);
-  const { contractHash } = deploy;
 
   if (deployStatus === Status.Error) {
     return null;
   }
 
-  const isAssociated =
-    contractHash === AssociatedKeysContractHash.Mainnet ||
-    contractHash === AssociatedKeysContractHash.Testnet;
-
-  const showResultRow =
-    deploy.transfers || deploy.nftActions || deploy.ftActions;
-
-  if (isAssociated) {
+  if (isAssociatedKeysDeploy(deploy)) {
     return (
       <Container>
-        <AssociatedResultRows
-          publicKey={
-            '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5'
-          }
-        />
+        <AssociatedResultRows publicKey={deploy.callerPublicKey} />
       </Container>
     );
   }
 
-  if (!showResultRow) {
-    return null;
+  if (deploy.transfersActionsResult.length) {
+    return (
+      <Container>
+        {deploy?.transfersActionsResult.map((action, id) => (
+          <NativeTransferResultRows
+            amount={action.formattedDecimalAmount}
+            key={id}
+            callerAccountInfo={action.callerAccountInfo}
+            recipientAccountInfo={action.recipientAccountInfo}
+            toPublicKey={action.recipientKey}
+            fromPublicKey={action.callerPublicKey}
+            fiatAmount={action.fiatAmount}
+          />
+        ))}
+      </Container>
+    );
   }
 
-  return (
-    <Container>
-      {deploy.transfers?.map((transfer, idx) => (
-        <NativeTransferResultRows
-          amount={transfer.amount}
-          key={idx}
-          toPublicKey={'transfer.toPublicKey'}
-          fromPublicKey={'transfer.fromPublicKey'}
-          fiatAmount={'transfer.fiatAmount'}
-        />
-      ))}
-      {deploy.ftActions?.map((ftAction, idx) => (
-        <Cep18ResultRows ftAction={ftAction} key={idx} />
-      ))}
-      {deploy.nftActions?.map((nftAction, idx) => (
-        <NftResultRows nftAction={nftAction} key={idx} />
-      ))}
-    </Container>
-  );
+  if (
+    (isNftDeploy(deploy) || isCasperMarketDeploy(deploy)) &&
+    deploy.nftActionsResult.length
+  ) {
+    return (
+      <Container>
+        {deploy.nftActionsResult.map((action, id) => (
+          <NftResultRows
+            action={action}
+            key={id}
+            contractPackageHash={deploy.contractPackageHash}
+          />
+        ))}
+      </Container>
+    );
+  }
+
+  if (isCep18Deploy(deploy) && deploy.cep18ActionsResult.length) {
+    return (
+      <Container>
+        {deploy.cep18ActionsResult.map((action, id) => (
+          <Cep18ResultRows
+            action={action}
+            key={id}
+            contractPackageHash={deploy.contractPackageHash}
+          />
+        ))}
+      </Container>
+    );
+  }
+
+  return null;
 };

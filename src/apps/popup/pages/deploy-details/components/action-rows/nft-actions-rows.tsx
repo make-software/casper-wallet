@@ -1,98 +1,123 @@
+import { INftDeploy } from 'casper-wallet-core/src/domain/deploys/entities';
 import React from 'react';
 
-import {
-  DeployIcon,
-  NftTokenEntryPoint,
-  NftTokenEntryPointNameMap
-} from '@src/constants';
+import { DeployIcon, NftDeployEntryPoint } from '@src/constants';
 
 import { DefaultActionRows } from '@popup/pages/deploy-details/components/action-rows/default-action-rows';
 import {
-  AccountInfoRow,
+  ContractInfoRow,
   NftInfoRow,
   SimpleContainer
 } from '@popup/pages/deploy-details/components/common';
+import { getEntryPointName } from '@popup/pages/deploy-details/utils';
+
+import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 
 interface NftActionsRowsProps {
-  entryPointName: string;
-  nftId: string;
-  publicKey: string;
-  newOwnerPublicKey?: string;
+  deploy: INftDeploy;
 }
 
-export const NftActionsRows = ({
-  entryPointName,
-  nftId,
-  publicKey,
-  newOwnerPublicKey
-}: NftActionsRowsProps) => {
-  const isBurn = entryPointName === NftTokenEntryPoint.burn;
-  const isMint = entryPointName === NftTokenEntryPoint.mint;
-  const isTransfer = entryPointName === NftTokenEntryPoint.transfer;
-  const isUpdate = entryPointName === NftTokenEntryPoint.update_token_meta;
+export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
+  const {
+    entryPoint,
+    nftTokenIds,
+    recipientKey,
+    contractPackageHash,
+    contractName,
+    callerPublicKey,
+    iconUrl,
+    callerAccountInfo,
+    recipientAccountInfo
+  } = deploy;
+  const isBurn = entryPoint === NftDeployEntryPoint.burn;
+  const isMint = entryPoint === NftDeployEntryPoint.mint;
+  const isTransfer = entryPoint === NftDeployEntryPoint.transfer;
+  const isUpdate = entryPoint === NftDeployEntryPoint.update_token_meta;
   const isApprove =
-    entryPointName === NftTokenEntryPoint.approve ||
-    entryPointName === NftTokenEntryPoint.set_approval_for_all;
+    entryPoint === NftDeployEntryPoint.approve ||
+    entryPoint === NftDeployEntryPoint.set_approval_for_all;
+
+  const title = getEntryPointName(deploy, true);
 
   if (isBurn) {
     return (
-      <SimpleContainer
-        entryPointName={NftTokenEntryPointNameMap[entryPointName]}
-      >
+      <SimpleContainer title={title}>
         <NftInfoRow
-          contractLink="https://example.com"
-          contractName={'CSPR.studio'}
-          nftId={nftId}
-          contractIcon={DeployIcon.CSPRStudio}
+          publicKey={contractPackageHash}
+          contractName={contractName}
+          imgLogo={iconUrl}
+          nftTokenIds={nftTokenIds}
+          defaultSvg={DeployIcon.NFTDefault}
         />
-        <AccountInfoRow publicKey={publicKey} label="owned by" />
+        <AccountInfoRow
+          publicKey={recipientKey}
+          accountName={recipientAccountInfo?.name}
+          label="owned by"
+          isAction
+          iconSize={20}
+        />
       </SimpleContainer>
     );
   }
 
   if (isMint) {
     return (
-      <SimpleContainer
-        entryPointName={NftTokenEntryPointNameMap[entryPointName]}
-      >
+      <SimpleContainer title={title}>
         <NftInfoRow
-          contractLink="https://example.com"
-          contractName={'CSPR.studio'}
-          nftId={nftId}
-          contractIcon={DeployIcon.CSPRStudio}
+          publicKey={contractPackageHash}
+          contractName={contractName}
+          imgLogo={iconUrl}
+          nftTokenIds={nftTokenIds}
+          defaultSvg={DeployIcon.NFTDefault}
         />
-        <AccountInfoRow publicKey={publicKey} label="to" />
+        <AccountInfoRow
+          publicKey={recipientKey}
+          accountName={recipientAccountInfo?.name}
+          label="to"
+          isAction
+          iconSize={20}
+        />
       </SimpleContainer>
     );
   }
 
   if (isTransfer) {
     return (
-      <SimpleContainer
-        entryPointName={NftTokenEntryPointNameMap[entryPointName]}
-      >
+      <SimpleContainer title={title}>
         <NftInfoRow
-          contractLink="https://example.com"
-          contractName={'CSPR.studio'}
-          nftId={nftId}
-          contractIcon={DeployIcon.CSPRStudio}
+          publicKey={contractPackageHash}
+          contractName={contractName}
+          imgLogo={iconUrl}
+          nftTokenIds={nftTokenIds}
+          defaultSvg={DeployIcon.NFTDefault}
         />
-        <AccountInfoRow publicKey={publicKey} label="from" />
-        <AccountInfoRow publicKey={newOwnerPublicKey || ''} label="to" />
+        <AccountInfoRow
+          publicKey={callerPublicKey}
+          accountName={callerAccountInfo?.name}
+          label="from"
+          isAction
+          iconSize={20}
+        />
+        <AccountInfoRow
+          publicKey={recipientKey}
+          accountName={recipientAccountInfo?.name}
+          label="to"
+          isAction
+          iconSize={20}
+        />
       </SimpleContainer>
     );
   }
 
   if (isUpdate) {
     return (
-      <SimpleContainer
-        entryPointName={NftTokenEntryPointNameMap[entryPointName]}
-      >
+      <SimpleContainer title={title}>
         <NftInfoRow
-          contractLink="https://example.com"
-          contractName={'CSPR.studio'}
-          nftId={nftId}
-          contractIcon={DeployIcon.CSPRStudio}
+          publicKey={contractPackageHash}
+          contractName={contractName}
+          imgLogo={iconUrl}
+          nftTokenIds={nftTokenIds}
+          defaultSvg={DeployIcon.NFTDefault}
         />
       </SimpleContainer>
     );
@@ -100,29 +125,32 @@ export const NftActionsRows = ({
 
   if (isApprove) {
     return (
-      <SimpleContainer
-        entryPointName={NftTokenEntryPointNameMap[entryPointName]}
-      >
+      <SimpleContainer title={title}>
         <NftInfoRow
-          contractLink="https://example.com"
-          contractName={'CSPR.studio'}
-          nftId={nftId}
-          contractIcon={DeployIcon.CSPRStudio}
-          label="of"
-          manyNfts
+          publicKey={contractPackageHash}
+          contractName={contractName}
+          imgLogo={iconUrl}
+          nftTokenIds={nftTokenIds}
+          defaultSvg={DeployIcon.NFTDefault}
+          label="for"
+          isApprove
         />
-        <AccountInfoRow publicKey={publicKey} label="to" />
+        <ContractInfoRow
+          contractName={contractName}
+          publicKey={recipientKey}
+          label="to"
+        />
       </SimpleContainer>
     );
   }
 
   return (
     <DefaultActionRows
-      entryPointName={entryPointName}
-      contractLink="https://example.com"
-      contractName="CSPR.studio"
+      title={title}
+      contractPackageHash={contractPackageHash}
+      contractName={contractName}
       additionalInfo="CEP-47 NFT"
-      iconUrl={DeployIcon.CSPRStudio}
+      iconUrl={DeployIcon.NFTDefault}
     />
   );
 };

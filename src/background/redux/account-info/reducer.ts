@@ -1,23 +1,22 @@
 import { createReducer } from 'typesafe-actions';
 
+import { isEqualCaseInsensitive } from '@src/utils';
+
 import {
   accountBalanceChanged,
-  accountCasperActivityChanged,
   accountCasperActivityCountChanged,
-  accountCasperActivityUpdated,
+  accountCep18TransferDeploysDataChanged,
+  accountCsprTransferDeploysDataChanged,
   accountCurrencyRateChanged,
-  accountDeploysAdded,
   accountDeploysCountChanged,
-  accountDeploysUpdated,
+  accountDeploysDataChanged,
   accountErc20Changed,
-  accountErc20TokensActivityChanged,
-  accountErc20TokensActivityUpdated,
   accountInfoReset,
   accountNftTokensAdded,
   accountNftTokensCountChanged,
   accountNftTokensUpdated,
-  accountPendingTransactionsChanged,
-  accountPendingTransactionsRemove,
+  accountPendingDeployHashesChanged,
+  accountPendingDeployHashesRemove,
   accountTrackingIdOfSentNftTokensChanged,
   accountTrackingIdOfSentNftTokensRemoved
 } from './actions';
@@ -32,11 +31,11 @@ const initialState: AccountInfoState = {
     totalBalanceFiat: null
   },
   currencyRate: null,
-  accountCasperActivity: [],
-  accountErc20TokensActivity: null,
-  pendingTransactions: [],
+  csprTransferDeploysData: null,
+  cep18TransferDeploysData: null,
+  pendingDeployHashes: [],
   erc20Tokens: [],
-  accountDeploys: [],
+  accountDeploysData: null,
   accountNftTokens: [],
   nftTokensCount: 0,
   accountDeploysCount: 0,
@@ -65,94 +64,162 @@ export const reducer = createReducer(initialState)
     })
   )
   .handleAction(
-    accountCasperActivityChanged,
-    (state, { payload }): AccountInfoState => ({
-      ...state,
-      accountCasperActivity: payload
-    })
-  )
-  .handleAction(accountCasperActivityUpdated, (state, { payload }) => ({
-    ...state,
-    accountCasperActivity:
-      state.accountCasperActivity != null
-        ? [...state.accountCasperActivity, ...payload]
-        : payload
-  }))
-  .handleAction(
-    accountErc20TokensActivityChanged,
-    (
-      state,
-      { payload: { contractPackageHash, activityList, tokenActivityCount } }
-    ) => ({
-      ...state,
-      accountErc20TokensActivity: {
-        ...state.accountErc20TokensActivity,
-        [contractPackageHash]: {
-          tokenActivityCount,
-          tokenActivityList: activityList
-        }
+    accountCsprTransferDeploysDataChanged,
+    (state, { payload }): AccountInfoState => {
+      const csprTransferDeploysData = state.csprTransferDeploysData;
+
+      if (
+        payload &&
+        csprTransferDeploysData &&
+        payload.pages[0].itemCount > csprTransferDeploysData.pages[0].itemCount
+      ) {
+        return {
+          ...state,
+          csprTransferDeploysData: payload
+        };
       }
-    })
-  )
-  .handleAction(
-    accountErc20TokensActivityUpdated,
-    (
-      state,
-      { payload: { activityList, contractPackageHash, tokenActivityCount } }
-    ) => {
-      const tokensActivity = state.accountErc20TokensActivity || {};
+
+      if (
+        payload &&
+        csprTransferDeploysData?.pageParams &&
+        payload.pageParams.length < csprTransferDeploysData.pageParams.length
+      ) {
+        const updatedDeploysData = { ...csprTransferDeploysData };
+
+        payload.pageParams.forEach((pageParam, index) => {
+          const element = csprTransferDeploysData?.pageParams.find(
+            el => el === pageParam
+          );
+          if (!element) {
+            updatedDeploysData.pageParams.push(pageParam);
+            updatedDeploysData.pages.push(payload.pages[index]);
+          }
+        });
+
+        return {
+          ...state,
+          csprTransferDeploysData: updatedDeploysData
+        };
+      }
 
       return {
         ...state,
-        accountErc20TokensActivity: {
-          ...state.accountErc20TokensActivity,
-          [contractPackageHash]: tokensActivity[contractPackageHash]
-            ? {
-                tokenActivityCount,
-                tokenActivityList: [
-                  ...tokensActivity[contractPackageHash].tokenActivityList,
-                  ...activityList
-                ]
-              }
-            : {
-                tokenActivityCount,
-                tokenActivityList: activityList
-              }
+        csprTransferDeploysData: payload
+      };
+    }
+  )
+  .handleAction(
+    accountCep18TransferDeploysDataChanged,
+    (
+      state,
+      {
+        payload: { cep18TransferDeploysData: payloadData, contractPackageHash }
+      }
+    ) => {
+      const cep18TransferDeploysData = state.cep18TransferDeploysData || {};
+      const deploy = cep18TransferDeploysData[contractPackageHash];
+
+      if (
+        payloadData &&
+        deploy &&
+        payloadData.pages[0].itemCount > deploy.pages[0].itemCount
+      ) {
+        return {
+          ...state,
+          cep18TransferDeploysData: {
+            ...state.cep18TransferDeploysData,
+            [contractPackageHash]: payloadData
+          }
+        };
+      }
+
+      if (
+        payloadData &&
+        deploy &&
+        payloadData.pageParams.length < deploy.pageParams.length
+      ) {
+        const updatedDeploy = { ...deploy };
+        payloadData.pageParams.forEach((pageParam, index) => {
+          const element = deploy?.pageParams.find(el => el === pageParam);
+
+          if (!element) {
+            updatedDeploy.pageParams.push(pageParam);
+            updatedDeploy.pages.push(payloadData.pages[index]);
+          }
+        });
+
+        return {
+          ...state,
+          cep18TransferDeploysData: {
+            [contractPackageHash]: updatedDeploy
+          }
+        };
+      }
+
+      return {
+        ...state,
+        cep18TransferDeploysData: {
+          ...state.cep18TransferDeploysData,
+          [contractPackageHash]: payloadData
         }
       };
     }
   )
-  .handleAction(accountPendingTransactionsChanged, (state, { payload }) => {
-    const pendingTransactions = {
-      ...payload,
-      id: payload.deployHash
+  .handleAction(accountPendingDeployHashesChanged, (state, { payload }) => {
+    return {
+      ...state,
+      pendingDeployHashes: [payload, ...state.pendingDeployHashes]
     };
+  })
+  .handleAction(accountPendingDeployHashesRemove, (state, { payload }) => ({
+    ...state,
+    pendingDeployHashes: state.pendingDeployHashes.filter(
+      deploy => !isEqualCaseInsensitive(deploy, payload)
+    )
+  }))
+  .handleAction(accountDeploysDataChanged, (state, { payload }) => {
+    const stateDeploysData = state.accountDeploysData;
+
+    if (
+      payload &&
+      stateDeploysData &&
+      payload.pages[0].item_count > stateDeploysData.pages[0].item_count
+    ) {
+      return {
+        ...state,
+        accountDeploysData: payload
+      };
+    }
+
+    if (
+      payload &&
+      stateDeploysData?.pageParams &&
+      payload.pageParams.length < stateDeploysData.pageParams.length
+    ) {
+      const updatedDeploysData = { ...stateDeploysData };
+
+      payload.pageParams.forEach((pageParam, index) => {
+        const element = stateDeploysData?.pageParams.find(
+          el => el === pageParam
+        );
+
+        if (!element) {
+          updatedDeploysData.pageParams.push(pageParam);
+          updatedDeploysData.pages.push(payload.pages[index]);
+        }
+      });
+
+      return {
+        ...state,
+        accountDeploysData: updatedDeploysData
+      };
+    }
 
     return {
       ...state,
-      pendingTransactions:
-        state.pendingTransactions?.length > 0
-          ? [pendingTransactions, ...state.pendingTransactions]
-          : [pendingTransactions]
+      accountDeploysData: payload
     };
   })
-  .handleAction(accountPendingTransactionsRemove, (state, { payload }) => ({
-    ...state,
-    pendingTransactions: state.pendingTransactions.filter(
-      transaction => transaction.deployHash !== payload
-    )
-  }))
-  .handleAction(accountDeploysAdded, (state, { payload }) => ({
-    ...state,
-    accountDeploys: payload
-  }))
-  .handleAction(accountDeploysUpdated, (state, { payload }) => ({
-    ...state,
-    accountDeploys:
-      state.accountDeploys != null
-        ? [...state.accountDeploys, ...payload]
-        : payload
-  }))
   .handleAction(accountNftTokensAdded, (state, { payload }) => ({
     ...state,
     accountNftTokens: payload

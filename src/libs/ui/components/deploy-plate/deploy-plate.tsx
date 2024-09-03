@@ -1,18 +1,17 @@
+import { IDeploy } from 'casper-wallet-core';
+import {
+  isAssociatedKeysDeploy,
+  isAuctionDeploy,
+  isCasperMarketDeploy,
+  isCep18Deploy,
+  isNativeCsprDeploy,
+  isNftDeploy,
+  isWasmDeployExecutionType
+} from 'casper-wallet-core/src/utils/deploy';
 import React from 'react';
 import styled from 'styled-components';
 
-import {
-  AssociatedKeysContractHash,
-  AuctionManagerContractHash,
-  AuctionManagerEntryPoint_V2,
-  CSPRMarketContractHash,
-  Cep18EntryPoint,
-  ContractTypeId,
-  CsprMarketEntryPoint,
-  ExecutionTypesMap,
-  NftTokenEntryPoint,
-  TRANSFER
-} from '@src/constants';
+import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { AlignedSpaceBetweenFlexRow } from '@libs/layout';
 import { SvgIcon } from '@libs/ui/components';
@@ -33,176 +32,143 @@ const Container = styled(AlignedSpaceBetweenFlexRow)`
 `;
 
 interface DeployPlateProps {
-  // update this type
-  deploy: any;
+  deploy: IDeploy;
+  onClick?: () => void;
+  navigateHome?: boolean;
 }
 
-export const DeployPlate = ({ deploy }: DeployPlateProps) => {
-  const { executionTypeId, contractPackage, contractHash } = deploy;
+export const DeployPlate = ({
+  deploy,
+  onClick,
+  navigateHome = false
+}: DeployPlateProps) => {
+  const navigate = useTypedNavigate();
 
-  // remove this after we add types for deploy
-  // @ts-ignore
-  const deployType = ExecutionTypesMap[executionTypeId];
-  const isTransfer = deploy.executionTypeId === TRANSFER;
-  const isWASMDeploy = deployType === 'WASM deploy';
-
-  const contractTypeId =
-    contractPackage.latest_version_contract_type_id ||
-    contractPackage.contract_type_id;
-
-  const isNativeTransfer = isTransfer && deploy.transfers;
-  const isAuction =
-    contractHash === AuctionManagerContractHash.Mainnet ||
-    contractHash === AuctionManagerContractHash.Testnet;
-  const isNFT =
-    contractTypeId === ContractTypeId.CEP78Nft ||
-    contractTypeId === ContractTypeId.CEP47Nft ||
-    contractTypeId === ContractTypeId.CustomCEP78Nft ||
-    contractTypeId === ContractTypeId.CustomCEP47Nft;
-  const isCep18 =
-    contractTypeId === ContractTypeId.CustomCep18 ||
-    contractTypeId === ContractTypeId.Cep18;
-  const isCSPRMarket =
-    contractHash === CSPRMarketContractHash.Mainnet ||
-    contractHash === CSPRMarketContractHash.Testnet;
-  const isAssociated =
-    contractHash === AssociatedKeysContractHash.Mainnet ||
-    contractHash === AssociatedKeysContractHash.Testnet;
-
-  if (isNativeTransfer) {
+  if (isNativeCsprDeploy(deploy)) {
     return (
       <Container
         onClick={() => {
-          // need to pass props to view transaction details
-          // navigate(RouterPath.DeployDetails);
+          navigate(RouterPath.DeployDetails, {
+            state: {
+              deploy,
+              navigateHome
+            }
+          });
+
+          if (onClick) {
+            onClick();
+          }
         }}
       >
-        <NativeTransferDeployRows
-          publicKey="02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5"
-          amount="1,000,000.00"
-          isTransactionIn={true}
-          timestamp="2024-07-03T08:31:23.577Z"
-        />
+        <NativeTransferDeployRows deploy={deploy} />
         <SvgIcon src="assets/icons/chevron.svg" size={16} />
       </Container>
     );
   }
 
-  if (isWASMDeploy) {
+  if (isWasmDeployExecutionType(deploy)) {
     return (
       <Container
         onClick={() => {
-          // need to pass props to view transaction details
-          // navigate(RouterPath.DeployDetails);
+          navigate(RouterPath.DeployDetails, {
+            state: {
+              deploy,
+              navigateHome
+            }
+          });
         }}
       >
-        <DefaultDeployRows
-          contractLink="link"
-          contractName="name"
-          timestamp="2024-07-03T08:31:23.577Z"
-          entryPointName={'entryPointName'}
-        />
+        <DefaultDeployRows deploy={deploy} />
         <SvgIcon src="assets/icons/chevron.svg" size={16} />
       </Container>
     );
   }
 
-  if (isAuction) {
+  if (isAuctionDeploy(deploy)) {
     return (
       <Container
         onClick={() => {
-          // need to pass props to view transaction details
-          // navigate(RouterPath.DeployDetails);
+          navigate(RouterPath.DeployDetails, {
+            state: {
+              deploy,
+              navigateHome
+            }
+          });
         }}
       >
-        <AuctionDeployRows
-          validatorPublicKey="02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5"
-          newValidatorPublicKey="02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5"
-          amount="1,000,000.00"
-          entryPointName={AuctionManagerEntryPoint_V2.activate}
-          contractLink=""
-          contractName=""
-          timestamp="2024-07-03T08:31:23.577Z"
-        />
+        <AuctionDeployRows deploy={deploy} />
         <SvgIcon src="assets/icons/chevron.svg" size={16} />
       </Container>
     );
   }
 
-  if (isAssociated) {
+  if (isAssociatedKeysDeploy(deploy)) {
     return (
       <Container
         onClick={() => {
-          // need to pass props to view transaction details
-          // navigate(RouterPath.DeployDetails);
+          navigate(RouterPath.DeployDetails, {
+            state: {
+              deploy,
+              navigateHome
+            }
+          });
         }}
       >
-        <AssociatedDeployRows
-          contractName="name"
-          contractLink="link"
-          timestamp="2024-07-03T08:31:23.577Z"
-        />
+        <AssociatedDeployRows deploy={deploy} />
         <SvgIcon src="assets/icons/chevron.svg" size={16} />
       </Container>
     );
   }
 
-  if (isCSPRMarket) {
+  if (isCasperMarketDeploy(deploy)) {
     return (
       <Container
         onClick={() => {
-          // need to pass props to view transaction details
-          // navigate(RouterPath.DeployDetails);
+          navigate(RouterPath.DeployDetails, {
+            state: {
+              deploy,
+              navigateHome
+            }
+          });
         }}
       >
-        <CSPRMarketDeployRows
-          amountOfNFTs={2}
-          entryPointName={CsprMarketEntryPoint.accept_offer}
-          contractName="name"
-          contractLink="link"
-          timestamp="2024-07-03T08:31:23.577Z"
-        />
+        <CSPRMarketDeployRows deploy={deploy} />
+        <SvgIcon src="assets/icons/chevron.svg" size={16} />
+      </Container>
+    );
+  }
+  //
+  if (isCep18Deploy(deploy)) {
+    return (
+      <Container
+        onClick={() => {
+          navigate(RouterPath.DeployDetails, {
+            state: {
+              deploy,
+              navigateHome
+            }
+          });
+        }}
+      >
+        <Cep18DeployRows deploy={deploy} />
         <SvgIcon src="assets/icons/chevron.svg" size={16} />
       </Container>
     );
   }
 
-  if (isCep18) {
+  if (isNftDeploy(deploy)) {
     return (
       <Container
         onClick={() => {
-          // need to pass props to view transaction details
-          // navigate(RouterPath.DeployDetails);
+          navigate(RouterPath.DeployDetails, {
+            state: {
+              deploy,
+              navigateHome
+            }
+          });
         }}
       >
-        <Cep18DeployRows
-          amount="1,000,000.00"
-          publicKey="02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5"
-          tokenName="Beast Coin"
-          symbol="BOIN"
-          contractLink=""
-          entryPointName={Cep18EntryPoint.burn}
-          timestamp="2024-07-03T08:31:23.577Z"
-        />
-        <SvgIcon src="assets/icons/chevron.svg" size={16} />
-      </Container>
-    );
-  }
-
-  if (isNFT) {
-    return (
-      <Container
-        onClick={() => {
-          // need to pass props to view transaction details
-          // navigate(RouterPath.DeployDetails);
-        }}
-      >
-        <NftDeployRows
-          publicKey="02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5"
-          amountOfNFTs={2}
-          entryPointName={NftTokenEntryPoint.update_token_meta}
-          timestamp="2024-07-03T08:31:23.577Z"
-        />
+        <NftDeployRows deploy={deploy} />
         <SvgIcon src="assets/icons/chevron.svg" size={16} />
       </Container>
     );
@@ -211,16 +177,15 @@ export const DeployPlate = ({ deploy }: DeployPlateProps) => {
   return (
     <Container
       onClick={() => {
-        // need to pass props to view transaction details
-        // navigate(RouterPath.DeployDetails);
+        navigate(RouterPath.DeployDetails, {
+          state: {
+            deploy,
+            navigateHome
+          }
+        });
       }}
     >
-      <DefaultDeployRows
-        contractLink="link"
-        contractName="name"
-        timestamp="2024-07-03T08:31:23.577Z"
-        entryPointName={'entryPointName'}
-      />
+      <DefaultDeployRows deploy={deploy} />
       <SvgIcon src="assets/icons/chevron.svg" size={16} />
     </Container>
   );

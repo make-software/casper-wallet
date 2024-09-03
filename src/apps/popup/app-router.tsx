@@ -5,7 +5,6 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 
 import { AccountSettingsPage } from '@popup/pages/account-settings';
-import { ActivityDetailsPage } from '@popup/pages/activity-details';
 import { AddContactPage } from '@popup/pages/add-contact';
 import { AllAccountsPage } from '@popup/pages/all-accounts';
 import { BackupSecretPhrasePage } from '@popup/pages/backup-secret-phrase';
@@ -204,10 +203,6 @@ function AppRoutes() {
         element={<DownloadAccountKeysPage />}
       />
       <Route path={RouterPath.Transfer} element={<TransferPage />} />
-      <Route
-        path={RouterPath.ActivityDetails}
-        element={<ActivityDetailsPage />}
-      />
       <Route path={RouterPath.Token} element={<TokenDetailPage />} />
       <Route path={RouterPath.Receive} element={<ReceivePage />} />
       <Route path={RouterPath.NftDetails} element={<NftDetailsPage />} />

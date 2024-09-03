@@ -1,35 +1,38 @@
+import { IAccountInfo } from 'casper-wallet-core/src/domain/accountInfo';
+import { IAuctionDeploy } from 'casper-wallet-core/src/domain/deploys/entities';
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 
-import {
-  AuctionEntryPointNameMap,
-  AuctionManagerEntryPoint_V2,
-  DeployIcon
-} from '@src/constants';
+import { AuctionDeployEntryPoint, DeployIcon } from '@src/constants';
 
 import { DefaultActionRows } from '@popup/pages/deploy-details/components/action-rows/default-action-rows';
 import {
-  AccountInfoRow,
   ActionContainerWithLink,
   AmountRow,
   ContainerWithAmount
 } from '@popup/pages/deploy-details/components/common';
+import { getEntryPointName } from '@popup/pages/deploy-details/utils';
+
+import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 
 const ManageAuctionBidAction = ({
   amount,
-  entryPointName,
-  contractLink,
-  fiatAmount
+  title,
+  fiatAmount,
+  contractPackageHash,
+  contractName
 }: {
   amount: string;
-  entryPointName: AuctionManagerEntryPoint_V2;
-  contractLink: string;
+  title: string;
   fiatAmount: string;
+  contractPackageHash: string;
+  contractName: string;
 }) => (
   <ActionContainerWithLink
-    entryPointName={AuctionEntryPointNameMap[entryPointName]}
-    contractLink={contractLink}
-    contractName={'Auction bid'}
+    title={title}
+    contractName={contractName}
     contractIcon={DeployIcon.Auction}
+    contractPackageHash={contractPackageHash}
   >
     <AmountRow
       amount={amount}
@@ -42,36 +45,57 @@ const ManageAuctionBidAction = ({
 
 const DelegationAuctionAction = ({
   amount,
-  entryPointName,
+  title,
   fiatAmount,
-  validatorPublicKey,
-  newValidatorPublicKey
+  toValidatorAccountInfo,
+  fromValidatorAccountInfo,
+  entryPoint,
+  toValidator,
+  fromValidator
 }: {
   amount: string;
-  entryPointName: AuctionManagerEntryPoint_V2;
+  title: string;
   fiatAmount: string;
-  validatorPublicKey: string;
-  newValidatorPublicKey: string;
+  toValidatorAccountInfo: Maybe<IAccountInfo>;
+  fromValidatorAccountInfo: Maybe<IAccountInfo>;
+  entryPoint: string;
+  toValidator: Maybe<string>;
+  fromValidator: Maybe<string>;
 }) => {
-  const isDelegate = entryPointName === AuctionManagerEntryPoint_V2.delegate;
-  const isUndelegate =
-    entryPointName === AuctionManagerEntryPoint_V2.undelegate;
-  const isRedelegate =
-    entryPointName === AuctionManagerEntryPoint_V2.redelegate;
+  const isDelegate = entryPoint === AuctionDeployEntryPoint.delegate;
+  const isUndelegate = entryPoint === AuctionDeployEntryPoint.undelegate;
+  const isRedelegate = entryPoint === AuctionDeployEntryPoint.redelegate;
 
   return (
-    <ContainerWithAmount
-      entryPointName={AuctionEntryPointNameMap[entryPointName]}
-      amount={amount}
-      fiatAmount={fiatAmount}
-    >
+    <ContainerWithAmount title={title} amount={amount} fiatAmount={fiatAmount}>
       {isDelegate && (
-        <AccountInfoRow publicKey={validatorPublicKey} label="to" />
+        <AccountInfoRow
+          publicKey={toValidator}
+          label="to"
+          accountName={toValidatorAccountInfo?.name}
+          imgLogo={toValidatorAccountInfo?.brandingLogo}
+          isAction
+          iconSize={20}
+        />
       )}
       {(isUndelegate || isRedelegate) && (
         <>
-          <AccountInfoRow publicKey={validatorPublicKey} label="from" />
-          <AccountInfoRow publicKey={newValidatorPublicKey} label="to" />
+          <AccountInfoRow
+            publicKey={fromValidator}
+            label="from"
+            accountName={fromValidatorAccountInfo?.name}
+            imgLogo={fromValidatorAccountInfo?.brandingLogo}
+            isAction
+            iconSize={20}
+          />
+          <AccountInfoRow
+            publicKey={toValidator}
+            label="to"
+            accountName={toValidatorAccountInfo?.name}
+            imgLogo={toValidatorAccountInfo?.brandingLogo}
+            isAction
+            iconSize={20}
+          />
         </>
       )}
     </ContainerWithAmount>
@@ -79,41 +103,39 @@ const DelegationAuctionAction = ({
 };
 
 interface AuctionActionRowsProps {
-  validatorPublicKey: string;
-  newValidatorPublicKey: string;
-  amount: string;
-  entryPointName: AuctionManagerEntryPoint_V2 | string;
-  contractLink: string;
-  contractName: string;
-  fiatAmount: string;
+  deploy: IAuctionDeploy;
 }
 
-export const AuctionActionRows = ({
-  entryPointName,
-  amount,
-  contractLink,
-  fiatAmount,
-  newValidatorPublicKey,
-  validatorPublicKey,
-  contractName
-}: AuctionActionRowsProps) => {
+export const AuctionActionRows = ({ deploy }: AuctionActionRowsProps) => {
+  const {
+    entryPoint,
+    formattedDecimalAmount,
+    fiatAmount,
+    fromValidator,
+    toValidator,
+    fromValidatorAccountInfo,
+    toValidatorAccountInfo
+  } = deploy;
   const isManageAuctionBidDeploy =
-    entryPointName === AuctionManagerEntryPoint_V2.activate ||
-    entryPointName === AuctionManagerEntryPoint_V2.withdraw ||
-    entryPointName === AuctionManagerEntryPoint_V2.add;
+    entryPoint === AuctionDeployEntryPoint.activate ||
+    entryPoint === AuctionDeployEntryPoint.withdraw ||
+    entryPoint === AuctionDeployEntryPoint.add;
 
   const isDelegationDeploy =
-    entryPointName === AuctionManagerEntryPoint_V2.delegate ||
-    entryPointName === AuctionManagerEntryPoint_V2.undelegate ||
-    entryPointName === AuctionManagerEntryPoint_V2.redelegate;
+    entryPoint === AuctionDeployEntryPoint.delegate ||
+    entryPoint === AuctionDeployEntryPoint.undelegate ||
+    entryPoint === AuctionDeployEntryPoint.redelegate;
+
+  const title = getEntryPointName(deploy, true);
 
   if (isManageAuctionBidDeploy) {
     return (
       <ManageAuctionBidAction
-        amount={amount}
-        entryPointName={entryPointName}
-        contractLink={contractLink}
+        amount={formattedDecimalAmount}
+        title={title}
         fiatAmount={fiatAmount}
+        contractName={deploy.contractName}
+        contractPackageHash={deploy.contractPackageHash}
       />
     );
   }
@@ -121,20 +143,23 @@ export const AuctionActionRows = ({
   if (isDelegationDeploy) {
     return (
       <DelegationAuctionAction
-        amount={amount}
-        entryPointName={entryPointName}
+        amount={formattedDecimalAmount}
+        title={title}
         fiatAmount={fiatAmount}
-        newValidatorPublicKey={newValidatorPublicKey}
-        validatorPublicKey={validatorPublicKey}
+        fromValidatorAccountInfo={fromValidatorAccountInfo}
+        toValidatorAccountInfo={toValidatorAccountInfo}
+        entryPoint={entryPoint}
+        fromValidator={fromValidator}
+        toValidator={toValidator}
       />
     );
   }
 
   return (
     <DefaultActionRows
-      entryPointName={entryPointName}
-      contractLink={contractLink}
-      contractName={contractName}
+      title={title}
+      contractPackageHash={deploy.contractPackageHash}
+      contractName={deploy.contractName}
       iconUrl={DeployIcon.Auction}
     />
   );

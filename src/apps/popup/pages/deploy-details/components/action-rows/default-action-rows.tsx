@@ -1,38 +1,56 @@
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
-import { DeployIcon } from '@src/constants';
+import { DeployIcon, getBlockExplorerContractUrl } from '@src/constants';
 
 import { SimpleContainer } from '@popup/pages/deploy-details/components/common';
 
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import { Link, SvgIcon, Typography } from '@libs/ui/components';
+import { Link, Typography } from '@libs/ui/components';
+import { AccountInfoIcon } from '@libs/ui/components/account-info-icon/account-info-icon';
 
 interface DefaultActionRowsProps {
-  entryPointName: string;
-  contractLink: string;
-  contractName: string;
+  title: string;
+  contractName: Maybe<string>;
   additionalInfo?: string;
   iconUrl?: string;
+  contractPackageHash: string;
 }
 
 export const DefaultActionRows = ({
-  entryPointName,
-  contractLink,
+  title,
   contractName,
   additionalInfo,
-  iconUrl = DeployIcon.Generic // default icon for actions with no custom icon provided
+  iconUrl,
+  contractPackageHash
 }: DefaultActionRowsProps) => {
   const { t } = useTranslation();
 
+  const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+
+  const link = getBlockExplorerContractUrl(
+    casperLiveUrl,
+    contractPackageHash || ''
+  );
+
   return (
-    <SimpleContainer entryPointName={entryPointName}>
+    <SimpleContainer title={title}>
       <AlignedFlexRow gap={SpacingSize.Small}>
         <Typography type="captionRegular" color="contentSecondary">
           <Trans t={t}>with</Trans>
         </Typography>
-        <SvgIcon src={iconUrl} size={20} />
-        <Link color="contentAction" href={contractLink}>
+        <AccountInfoIcon
+          publicKey={contractPackageHash}
+          size={20}
+          accountName={contractName}
+          iconUrl={iconUrl}
+          defaultSvg={DeployIcon.Generic}
+        />
+        <Link color="contentAction" href={link} target="_blank">
           <Typography type="captionRegular">{contractName}</Typography>
         </Link>
         {additionalInfo && (

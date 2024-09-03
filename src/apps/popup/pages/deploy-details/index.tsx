@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { DeployDetailsPageContent } from '@popup/pages/deploy-details/content';
+import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import {
   HeaderPopup,
@@ -8,8 +9,14 @@ import {
   HeaderViewInExplorer,
   PopupLayout
 } from '@libs/layout';
+import { HomePageTabsId } from '@libs/ui/components';
 
 export const DeployDetailsPage = () => {
+  const location = useTypedLocation();
+  const navigate = useTypedNavigate();
+
+  const { deploy, navigateHome } = location.state;
+
   return (
     <PopupLayout
       renderHeader={() => (
@@ -19,13 +26,27 @@ export const DeployDetailsPage = () => {
           withConnectionStatus
           renderSubmenuBarItems={() => (
             <>
-              <HeaderSubmenuBarNavLink linkType="back" />
-              <HeaderViewInExplorer deployHash={'deployHash'} />
+              <HeaderSubmenuBarNavLink
+                linkType="back"
+                onClick={
+                  navigateHome
+                    ? () => {
+                        navigate(RouterPath.Home, {
+                          state: {
+                            // set the active tab to deploys
+                            activeTabId: HomePageTabsId.Deploys
+                          }
+                        });
+                      }
+                    : undefined
+                }
+              />
+              <HeaderViewInExplorer deployHash={deploy?.deployHash} />
             </>
           )}
         />
       )}
-      renderContent={() => <DeployDetailsPageContent />}
+      renderContent={() => <DeployDetailsPageContent deploy={deploy} />}
     />
   );
 };

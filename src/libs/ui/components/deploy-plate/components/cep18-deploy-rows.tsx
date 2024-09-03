@@ -1,79 +1,63 @@
+import { ICep18Deploy } from 'casper-wallet-core/src/domain/deploys/entities';
 import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 
-import {
-  Cep18EntryPoint,
-  Cep18EntryPointNameMap,
-  DeployIcon
-} from '@src/constants';
+import { Cep18DeployEntryPoint, DeployIcon } from '@src/constants';
+
+import { getEntryPointName } from '@popup/pages/deploy-details/utils';
 
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import {
-  Avatar,
-  Hash,
-  HashVariant,
-  Link,
-  Typography
-} from '@libs/ui/components';
+import { Typography } from '@libs/ui/components';
+import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 import { DeployContainer } from '@libs/ui/components/deploy-plate/components/deploy-container';
 
 interface Erc20DeployRowsProps {
-  amount: string;
-  symbol: string;
-  publicKey: string;
-  tokenName: string;
-  contractLink: string;
-  entryPointName: Cep18EntryPoint;
-  timestamp: string;
+  deploy: ICep18Deploy;
 }
 
-export const Cep18DeployRows = ({
-  amount,
-  symbol,
-  publicKey,
-  tokenName,
-  contractLink,
-  entryPointName,
-  timestamp
-}: Erc20DeployRowsProps) => {
-  const { t } = useTranslation();
-
-  const isTransfer = entryPointName === Cep18EntryPoint.transfer;
+export const Cep18DeployRows = ({ deploy }: Erc20DeployRowsProps) => {
+  const { entryPoint } = deploy;
+  const isTransfer = entryPoint === Cep18DeployEntryPoint.transfer;
+  const title = getEntryPointName(deploy);
 
   return (
     <DeployContainer
-      timestamp={timestamp}
-      iconUrl={'icon from deploy' || DeployIcon.Generic}
-      title={Cep18EntryPointNameMap[entryPointName]}
+      timestamp={deploy.timestamp}
+      iconUrl={deploy.iconUrl || DeployIcon.Cep18Default}
+      title={title}
+      deployStatus={{
+        status: deploy.status,
+        errorMessage: deploy.errorMessage
+      }}
     >
       <AlignedFlexRow gap={SpacingSize.Tiny}>
-        <Typography type="captionHash">{amount}</Typography>
+        <Typography type="captionHash">
+          {deploy.formattedDecimalAmount}
+        </Typography>
         <Typography type="captionHash" color="contentSecondary">
-          {symbol}
+          {deploy.symbol}
         </Typography>
       </AlignedFlexRow>
-      <AlignedFlexRow gap={SpacingSize.Small}>
-        <Link color="contentAction" href={contractLink}>
-          <Typography type="captionRegular">{tokenName}</Typography>
-        </Link>
-        {isTransfer && (
-          <>
-            <Typography type="captionRegular" color="contentSecondary">
-              <Trans t={t}>to</Trans>
-            </Typography>
-            <AlignedFlexRow gap={SpacingSize.Tiny}>
-              <Avatar publicKey={publicKey} size={16} />
-              <Hash
-                value={publicKey}
-                variant={HashVariant.CaptionHash}
-                truncated
-                truncatedSize="small"
-                color="contentPrimary"
-              />
-            </AlignedFlexRow>
-          </>
-        )}
-      </AlignedFlexRow>
+      {isTransfer ? (
+        <AccountInfoRow
+          label="to"
+          publicKey={deploy.recipientKey}
+          accountName={
+            deploy.isReceive
+              ? deploy.callerAccountInfo?.name
+              : deploy.recipientAccountInfo?.name
+          }
+        >
+          <Typography type="captionRegular" color="contentPrimary">
+            {deploy.contractName}
+          </Typography>
+        </AccountInfoRow>
+      ) : (
+        <AlignedFlexRow gap={SpacingSize.Small}>
+          <Typography type="captionRegular" color="contentPrimary">
+            {deploy.contractName}
+          </Typography>
+        </AlignedFlexRow>
+      )}
     </DeployContainer>
   );
 };

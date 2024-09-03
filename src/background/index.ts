@@ -1,3 +1,4 @@
+import { CasperNetwork } from 'casper-wallet-core/src/domain/common/common';
 import { RootAction, getType } from 'typesafe-actions';
 import {
   Tabs,
@@ -33,22 +34,19 @@ import {
 } from '@background/redux/account-balances/actions';
 import {
   accountBalanceChanged,
-  accountCasperActivityChanged,
   accountCasperActivityCountChanged,
-  accountCasperActivityUpdated,
+  accountCep18TransferDeploysDataChanged,
+  accountCsprTransferDeploysDataChanged,
   accountCurrencyRateChanged,
-  accountDeploysAdded,
   accountDeploysCountChanged,
-  accountDeploysUpdated,
+  accountDeploysDataChanged,
   accountErc20Changed,
-  accountErc20TokensActivityChanged,
-  accountErc20TokensActivityUpdated,
   accountInfoReset,
   accountNftTokensAdded,
   accountNftTokensCountChanged,
   accountNftTokensUpdated,
-  accountPendingTransactionsChanged,
-  accountPendingTransactionsRemove,
+  accountPendingDeployHashesChanged,
+  accountPendingDeployHashesRemove,
   accountTrackingIdOfSentNftTokensChanged,
   accountTrackingIdOfSentNftTokensRemoved
 } from '@background/redux/account-info/actions';
@@ -115,8 +113,6 @@ import { sdkEvent } from '@content/sdk-event';
 import { SdkMethod, isSDKMethod, sdkMethod } from '@content/sdk-method';
 
 import {
-  MapExtendedDeploy,
-  fetchAccountCasperActivity,
   fetchAccountExtendedDeploys,
   fetchExtendedDeploysInfo
 } from '@libs/services/account-activity-service';
@@ -179,7 +175,10 @@ import {
   themeModeSettingChanged,
   vaultSettingsReseted
 } from './redux/settings/actions';
-import { selectApiConfigBasedOnActiveNetwork } from './redux/settings/selectors';
+import {
+  selectActiveNetworkSetting,
+  selectApiConfigBasedOnActiveNetwork
+} from './redux/settings/selectors';
 import {
   vaultCipherCreated,
   vaultCipherReseted
@@ -619,16 +618,13 @@ runtime.onMessage.addListener(
           case getType(recipientPublicKeyReseted):
           case getType(accountBalanceChanged):
           case getType(accountCurrencyRateChanged):
-          case getType(accountCasperActivityChanged):
-          case getType(accountCasperActivityUpdated):
+          case getType(accountCsprTransferDeploysDataChanged):
           case getType(accountInfoReset):
-          case getType(accountPendingTransactionsChanged):
-          case getType(accountPendingTransactionsRemove):
+          case getType(accountPendingDeployHashesChanged):
+          case getType(accountPendingDeployHashesRemove):
           case getType(accountErc20Changed):
-          case getType(accountErc20TokensActivityChanged):
-          case getType(accountErc20TokensActivityUpdated):
-          case getType(accountDeploysAdded):
-          case getType(accountDeploysUpdated):
+          case getType(accountCep18TransferDeploysDataChanged):
+          case getType(accountDeploysDataChanged):
           case getType(accountNftTokensAdded):
           case getType(accountNftTokensUpdated):
           case getType(accountNftTokensCountChanged):
@@ -730,16 +726,18 @@ runtime.onMessage.addListener(
               store.getState()
             );
 
+            const network = selectActiveNetworkSetting(store.getState());
+
             try {
               const data = await fetchExtendedDeploysInfo({
                 deployHash: action.payload.deployHash,
-                casperClarityApiUrl
+                casperClarityApiUrl,
+                publicKey: action.payload.publicKey,
+                network: network.toLowerCase() as CasperNetwork
               });
 
               return sendResponse(
-                serviceMessage.fetchExtendedDeploysInfoResponse(
-                  MapExtendedDeploy(data)
-                )
+                serviceMessage.fetchExtendedDeploysInfoResponse(data)
               );
             } catch (error) {
               console.error(error);
@@ -809,11 +807,14 @@ runtime.onMessage.addListener(
               store.getState()
             );
 
+            const network = selectActiveNetworkSetting(store.getState());
+
             try {
               const data = await fetchAccountExtendedDeploys({
                 casperClarityApiUrl,
                 publicKey: action.payload.publicKey,
-                page: action.payload.page
+                page: action.payload.page,
+                network: network.toLowerCase() as CasperNetwork
               });
 
               return sendResponse(
@@ -823,27 +824,6 @@ runtime.onMessage.addListener(
               console.error(error);
             }
 
-            return;
-          }
-
-          case getType(serviceMessage.fetchAccountCasperActivityRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchAccountCasperActivity({
-                casperClarityApiUrl,
-                accountHash: action.payload.accountHash,
-                page: action.payload.page
-              });
-
-              return sendResponse(
-                serviceMessage.fetchAccountCasperActivityResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
             return;
           }
 

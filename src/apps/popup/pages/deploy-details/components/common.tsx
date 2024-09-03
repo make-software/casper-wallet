@@ -1,77 +1,61 @@
-import React from 'react';
+import { Maybe } from 'casper-wallet-core/src/typings/common';
+import React, { useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+
+import { getBlockExplorerContractUrl } from '@src/constants';
+import { isEqualCaseInsensitive } from '@src/utils';
+
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
 import {
   AlignedFlexRow,
   LeftAlignedFlexColumn,
-  NftIndexContainer,
   SpacingSize
 } from '@libs/layout';
-import {
-  Avatar,
-  Hash,
-  HashVariant,
-  Link,
-  SvgIcon,
-  Typography
-} from '@libs/ui/components';
+import { Link, SvgIcon, Typography } from '@libs/ui/components';
+import { AccountInfoIcon } from '@libs/ui/components/account-info-icon/account-info-icon';
 
-interface RecipientInfoRowProps {
-  publicKey: string;
-  label: string;
-}
+const AlignedFlexRowContainer = styled(AlignedFlexRow)`
+  column-gap: 8px;
+  flex-wrap: wrap;
+`;
 
-export const AccountInfoRow = ({ publicKey, label }: RecipientInfoRowProps) => {
-  const { t } = useTranslation();
-
-  return (
-    <AlignedFlexRow gap={SpacingSize.Small}>
-      <Typography type="captionRegular" color="contentSecondary">
-        <Trans t={t}>{label}</Trans>
-      </Typography>
-      <Avatar publicKey={publicKey} size={20} />
-      <Hash
-        value={publicKey}
-        variant={HashVariant.CaptionHash}
-        truncated
-        truncatedSize="small"
-        color="contentAction"
-      />
-    </AlignedFlexRow>
-  );
-};
+export const NftIndexContainer = styled.div`
+  padding: 0 6px;
+  background: ${({ theme }) => theme.color.backgroundSecondary};
+  max-width: 296px;
+`;
 
 interface ContainerProps {
-  entryPointName: string;
+  title: string;
   children: React.ReactNode;
 }
 
-export const SimpleContainer = ({
-  entryPointName,
-  children
-}: ContainerProps) => (
+export const SimpleContainer = ({ title, children }: ContainerProps) => (
   <LeftAlignedFlexColumn gap={SpacingSize.Tiny}>
-    <Typography type="bodySemiBold">{entryPointName}</Typography>
+    <Typography type="bodySemiBold">{title}</Typography>
     {children}
   </LeftAlignedFlexColumn>
 );
 
 interface ActionContainerWithAmountProps {
-  entryPointName: string;
+  title: string;
   children: React.ReactNode;
   amount: string;
   fiatAmount: string;
 }
 
 export const ContainerWithAmount = ({
-  entryPointName,
+  title,
   children,
   amount,
   fiatAmount
 }: ActionContainerWithAmountProps) => (
   <LeftAlignedFlexColumn gap={SpacingSize.Tiny}>
     <AlignedFlexRow gap={SpacingSize.Small}>
-      <Typography type="bodySemiBold">{entryPointName}</Typography>
+      <Typography type="bodySemiBold">{title}</Typography>
       <Typography type="bodyHash">{amount}</Typography>
       <Typography type="bodyHash" color="contentSecondary">
         CSPR
@@ -85,82 +69,112 @@ export const ContainerWithAmount = ({
 );
 
 interface ActionContainerWithLinkProps {
-  entryPointName: string;
+  title: string;
   children: React.ReactNode;
-  contractLink: string;
   contractName: string;
   contractIcon: string;
+  contractPackageHash: string;
 }
 
 export const ActionContainerWithLink = ({
-  entryPointName,
+  title,
   children,
-  contractLink,
   contractName,
-  contractIcon
-}: ActionContainerWithLinkProps) => (
-  <LeftAlignedFlexColumn gap={SpacingSize.Tiny}>
-    <AlignedFlexRow gap={SpacingSize.Small}>
-      <Typography type="bodySemiBold">{entryPointName}</Typography>
-      <SvgIcon src={contractIcon} size={20} />
-      <Link color="contentAction" href={contractLink}>
-        <Typography type="captionRegular">{contractName}</Typography>
-      </Link>
-    </AlignedFlexRow>
-    {children}
-  </LeftAlignedFlexColumn>
-);
+  contractIcon,
+  contractPackageHash
+}: ActionContainerWithLinkProps) => {
+  const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+
+  const link = getBlockExplorerContractUrl(
+    casperLiveUrl,
+    contractPackageHash || ''
+  );
+
+  return (
+    <LeftAlignedFlexColumn gap={SpacingSize.Tiny}>
+      <AlignedFlexRow gap={SpacingSize.Small}>
+        <Typography type="bodySemiBold">{title}</Typography>
+        <SvgIcon src={contractIcon} size={20} />
+        <Link color="contentAction" href={link} target="_blank">
+          <Typography type="captionRegular">{contractName}</Typography>
+        </Link>
+      </AlignedFlexRow>
+      {children}
+    </LeftAlignedFlexColumn>
+  );
+};
 
 interface NftInfoRowProps {
-  nftId?: string;
+  nftTokenIds: string[];
   label?: string;
-  manyNfts?: boolean;
-  contractLink?: string;
-  contractName: string;
-  contractIcon: string;
+  contractName?: string;
+  imgLogo?: Maybe<string>;
+  publicKey?: string;
+  isApprove?: boolean;
+  defaultSvg?: string;
 }
 
 export const NftInfoRow = ({
-  nftId,
-  contractIcon,
+  nftTokenIds,
+  imgLogo,
   contractName,
-  contractLink,
   label,
-  manyNfts
+  publicKey,
+  isApprove,
+  defaultSvg
 }: NftInfoRowProps) => {
   const { t } = useTranslation();
 
+  const { csprStudioCep47ContractHash, casperLiveUrl } = useSelector(
+    selectApiConfigBasedOnActiveNetwork
+  );
+
+  const link = getBlockExplorerContractUrl(casperLiveUrl, publicKey || '');
+
+  const getCollectionName = useCallback(() => {
+    if (
+      publicKey &&
+      isEqualCaseInsensitive(publicKey, csprStudioCep47ContractHash)
+    ) {
+      return 'CSPR.studio';
+    }
+
+    return contractName;
+  }, [publicKey, contractName, csprStudioCep47ContractHash]);
+
   return (
-    <AlignedFlexRow gap={SpacingSize.Small}>
+    <AlignedFlexRowContainer>
       {label && (
         <Typography type="captionRegular" color="contentSecondary">
           <Trans t={t}>{label}</Trans>
         </Typography>
       )}
-      {manyNfts && (
+      {nftTokenIds.length > 1 && (
         <Typography type="captionRegular">
           <Trans t={t}>all</Trans>
         </Typography>
       )}
-      <SvgIcon src={contractIcon} size={20} />
-      {contractLink ? (
-        <Link color="contentAction" href={contractLink}>
-          <Typography type="captionRegular">{contractName}</Typography>
-        </Link>
-      ) : (
-        <Typography type="captionHash">{contractName}</Typography>
-      )}
+      <AccountInfoIcon
+        publicKey={publicKey || ''}
+        accountName={getCollectionName()}
+        iconUrl={imgLogo}
+        size={20}
+        defaultSvg={defaultSvg}
+      />
+      <Link color="contentAction" href={link} target="_blank">
+        <Typography type="captionRegular">{getCollectionName()}</Typography>
+      </Link>
       <Typography type="captionRegular" color="contentSecondary">
-        {manyNfts ? 'NFT(s)' : 'NFT'}
+        {isApprove || nftTokenIds.length > 1 ? 'NFT(s)' : 'NFT'}
       </Typography>
-      {nftId && (
+      {nftTokenIds.map(id => (
         <NftIndexContainer>
-          <Typography type="captionRegular" color="contentAction">
-            {nftId}
+          <Typography type="captionRegular" color="contentAction" ellipsis>
+            {id}
           </Typography>
         </NftIndexContainer>
-      )}
-    </AlignedFlexRow>
+      ))}
+    </AlignedFlexRowContainer>
   );
 };
 
@@ -200,21 +214,27 @@ export const AmountRow = ({
 };
 
 interface ContractInfoRowProps {
-  contractLink: string;
+  publicKey: string;
   contractName: string;
-  iconUrl: string;
+  iconUrl?: Maybe<string>;
   label?: string;
   additionalInfo?: string;
+  defaultSvg?: string;
 }
 
 export const ContractInfoRow = ({
-  contractLink,
+  publicKey,
   contractName,
-  iconUrl,
   label,
-  additionalInfo
+  additionalInfo,
+  iconUrl,
+  defaultSvg
 }: ContractInfoRowProps) => {
   const { t } = useTranslation();
+
+  const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork); // Fetch the live Casper network URL from Redux store.  // Assuming 'publicKey' is the public key of the contract.  // Replace 'casperLiveUrl' with the actual live Casper network URL.  // Fetch the contract details using the public key.  // Display the contract name, icon, and additional information.  // If the contract details are not found, display a
+
+  const link = getBlockExplorerContractUrl(casperLiveUrl, publicKey || '');
 
   return (
     <AlignedFlexRow gap={SpacingSize.Small}>
@@ -223,8 +243,14 @@ export const ContractInfoRow = ({
           <Trans t={t}>{label}</Trans>
         </Typography>
       )}
-      <SvgIcon src={iconUrl} size={20} />
-      <Link color="contentAction" href={contractLink}>
+      <AccountInfoIcon
+        publicKey={publicKey}
+        size={20}
+        accountName={contractName}
+        iconUrl={iconUrl}
+        defaultSvg={defaultSvg}
+      />
+      <Link color="contentAction" href={link} target="_blank">
         <Typography type="captionRegular">{contractName}</Typography>
       </Link>
       {additionalInfo && (

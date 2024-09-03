@@ -1,50 +1,66 @@
+import { INftActionsResult } from 'casper-wallet-core/src/domain/deploys/entities';
 import React from 'react';
 
-import { DeployIcon, NftActivityTypeEnum } from '@src/constants';
+import {
+  DeployIcon,
+  DeployResultEntryPointNameMap,
+  NftDeployEntryPoint
+} from '@src/constants';
 
 import {
-  AccountInfoRow,
+  ContractInfoRow,
   NftInfoRow,
   SimpleContainer
 } from '@popup/pages/deploy-details/components/common';
 
-import { NftCloudActionsResult } from '@libs/types/deploy';
-
-const nftResultActionNameMap: { [key in number]: string } = {
-  [NftActivityTypeEnum.Approve]: 'Granted transfer rights',
-  [NftActivityTypeEnum.Burn]: 'Burned',
-  [NftActivityTypeEnum.Mint]: 'Minted',
-  [NftActivityTypeEnum.Transfer]: 'Transferred',
-  [NftActivityTypeEnum.Metadata]: 'Updated metadata'
-};
+import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 
 interface NftResultRowsProps {
-  nftAction: NftCloudActionsResult;
+  action: INftActionsResult;
+  contractPackageHash: string;
 }
 
-export const NftResultRows = ({ nftAction }: NftResultRowsProps) => {
-  const isBurn = nftAction.nft_action_id === NftActivityTypeEnum.Burn;
-  const isMint = nftAction.nft_action_id === NftActivityTypeEnum.Mint;
-  const isTransfer = nftAction.nft_action_id === NftActivityTypeEnum.Transfer;
-  const isUpdate = nftAction.nft_action_id === NftActivityTypeEnum.Metadata;
-  const isApprove = nftAction.nft_action_id === NftActivityTypeEnum.Approve;
+export const NftResultRows = ({
+  action,
+  contractPackageHash
+}: NftResultRowsProps) => {
+  const {
+    entryPoint,
+    nftTokenIds,
+    recipientKey,
+    callerPublicKey,
+    contractName,
+    iconUrl,
+    recipientAccountInfo,
+    callerAccountInfo
+  } = action;
+
+  const isBurn = entryPoint === NftDeployEntryPoint.burn;
+  const isMint = entryPoint === NftDeployEntryPoint.mint;
+  const isTransfer = entryPoint === NftDeployEntryPoint.transfer;
+  const isUpdate = entryPoint === NftDeployEntryPoint.update_token_meta;
+  const isApprove =
+    entryPoint === NftDeployEntryPoint.approve ||
+    entryPoint === NftDeployEntryPoint.set_approval_for_all;
+
+  const title = DeployResultEntryPointNameMap[action.entryPoint];
 
   if (isBurn) {
     return (
-      <SimpleContainer
-        entryPointName={nftResultActionNameMap[nftAction.nft_action_id]}
-      >
+      <SimpleContainer title={title}>
         <NftInfoRow
-          contractLink="https://example.com"
-          contractName="CSPR.studio"
-          nftId={nftAction.token_id}
-          contractIcon={DeployIcon.CSPRStudio}
+          publicKey={contractPackageHash}
+          contractName={contractName}
+          nftTokenIds={nftTokenIds}
+          imgLogo={iconUrl}
+          defaultSvg={DeployIcon.NFTDefault}
         />
         <AccountInfoRow
-          publicKey={
-            '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5'
-          }
+          publicKey={recipientKey}
+          accountName={recipientAccountInfo?.name}
           label="owned by"
+          isAction
+          iconSize={20}
         />
       </SimpleContainer>
     );
@@ -52,20 +68,20 @@ export const NftResultRows = ({ nftAction }: NftResultRowsProps) => {
 
   if (isMint) {
     return (
-      <SimpleContainer
-        entryPointName={nftResultActionNameMap[nftAction.nft_action_id]}
-      >
+      <SimpleContainer title={title}>
         <NftInfoRow
-          contractLink="https://example.com"
-          contractName="CSPR.studio"
-          nftId={nftAction.token_id}
-          contractIcon={DeployIcon.CSPRStudio}
+          publicKey={contractPackageHash}
+          contractName={contractName}
+          nftTokenIds={nftTokenIds}
+          imgLogo={iconUrl}
+          defaultSvg={DeployIcon.NFTDefault}
         />
         <AccountInfoRow
-          publicKey={
-            '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5'
-          }
+          publicKey={recipientKey}
+          accountName={recipientAccountInfo?.name}
           label="to"
+          isAction
+          iconSize={20}
         />
       </SimpleContainer>
     );
@@ -73,26 +89,27 @@ export const NftResultRows = ({ nftAction }: NftResultRowsProps) => {
 
   if (isTransfer) {
     return (
-      <SimpleContainer
-        entryPointName={nftResultActionNameMap[nftAction.nft_action_id]}
-      >
+      <SimpleContainer title={title}>
         <NftInfoRow
-          contractLink="https://example.com"
-          contractName="CSPR.studio"
-          nftId={nftAction.token_id}
-          contractIcon={DeployIcon.CSPRStudio}
+          publicKey={contractPackageHash}
+          contractName={contractName}
+          nftTokenIds={nftTokenIds}
+          imgLogo={iconUrl}
+          defaultSvg={DeployIcon.NFTDefault}
         />
         <AccountInfoRow
-          publicKey={
-            '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5'
-          }
+          publicKey={callerPublicKey}
+          accountName={callerAccountInfo?.name}
           label="from"
+          isAction
+          iconSize={20}
         />
         <AccountInfoRow
-          publicKey={
-            '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5'
-          }
+          publicKey={recipientKey}
+          accountName={recipientAccountInfo?.name}
           label="to"
+          isAction
+          iconSize={20}
         />
       </SimpleContainer>
     );
@@ -100,14 +117,13 @@ export const NftResultRows = ({ nftAction }: NftResultRowsProps) => {
 
   if (isUpdate) {
     return (
-      <SimpleContainer
-        entryPointName={nftResultActionNameMap[nftAction.nft_action_id]}
-      >
+      <SimpleContainer title={title}>
         <NftInfoRow
-          contractLink="https://example.com"
-          contractName="CSPR.studio"
-          nftId={nftAction.token_id}
-          contractIcon={DeployIcon.CSPRStudio}
+          publicKey={contractPackageHash}
+          contractName={contractName}
+          nftTokenIds={nftTokenIds}
+          imgLogo={iconUrl}
+          defaultSvg={DeployIcon.NFTDefault}
           label={'for'}
         />
       </SimpleContainer>
@@ -116,21 +132,19 @@ export const NftResultRows = ({ nftAction }: NftResultRowsProps) => {
 
   if (isApprove) {
     return (
-      <SimpleContainer
-        entryPointName={nftResultActionNameMap[nftAction.nft_action_id]}
-      >
+      <SimpleContainer title={title}>
         <NftInfoRow
-          contractLink="https://example.com"
-          contractName="CSPR.studio"
-          nftId={nftAction.token_id}
-          contractIcon={DeployIcon.CSPRStudio}
+          publicKey={contractPackageHash}
+          contractName={contractName}
+          nftTokenIds={nftTokenIds}
+          imgLogo={iconUrl}
+          defaultSvg={DeployIcon.NFTDefault}
           label={'for'}
-          manyNfts
+          isApprove
         />
-        <AccountInfoRow
-          publicKey={
-            '02028a04ab5ff8435f19581484643cadfd755ee9f0985e402d646ae6f3bd040912f5'
-          }
+        <ContractInfoRow
+          publicKey={recipientKey}
+          contractName={contractName}
           label="to"
         />
       </SimpleContainer>

@@ -1,4 +1,5 @@
 import { CloudPaginatedResponse, IDeploy } from 'casper-wallet-core';
+import { CasperNetwork } from 'casper-wallet-core/src/domain/common/common';
 
 import { ACCOUNT_DEPLOY_REFRESH_RATE } from '@src/constants';
 
@@ -7,62 +8,56 @@ import { serviceMessage } from '@background/service-message';
 import { deploysRepository } from '@background/wallet-repositories';
 
 import { queryClient } from '@libs/services/query-client';
-import {
-  ErrorResponse,
-  PaginatedResponse,
-  Payload
-} from '@libs/services/types';
-import { handleError, toJson } from '@libs/services/utils';
-
-import { getExtendedDeploysHashLink } from './constants';
-import { ExtendedDeploy, ExtendedDeployResult } from './types';
-
-export const extendedDeploysRequest = (
-  casperClarityApiUrl: string,
-  deployHash: string,
-  signal?: AbortSignal
-): Promise<ExtendedDeployResult> =>
-  fetch(getExtendedDeploysHashLink(casperClarityApiUrl, deployHash), { signal })
-    .then(toJson)
-    .catch(handleError);
+import { ErrorResponse, Payload } from '@libs/services/types';
 
 export const fetchExtendedDeploysInfo = ({
   casperClarityApiUrl,
-  deployHash
+  deployHash,
+  publicKey,
+  network
 }: {
   casperClarityApiUrl: string;
   deployHash: string;
+  publicKey: string;
+  network: CasperNetwork;
 }) =>
   queryClient.fetchQuery(
-    ['accountTransactionsRequest', casperClarityApiUrl, deployHash],
-    ({ signal }) =>
-      extendedDeploysRequest(casperClarityApiUrl, deployHash, signal)
+    ['getSingleDeploy', casperClarityApiUrl, deployHash, network],
+    () =>
+      deploysRepository.getSingleDeploy({
+        deployHash,
+        network,
+        activePublicKey: publicKey
+      })
   );
 
 export const dispatchFetchExtendedDeploysInfo = (
-  deployHash: string
-): Promise<Payload<ExtendedDeploy>> =>
+  deployHash: string,
+  publicKey: string
+): Promise<Payload<IDeploy | null>> =>
   dispatchToMainStore(
-    serviceMessage.fetchExtendedDeploysInfoRequest({ deployHash })
+    serviceMessage.fetchExtendedDeploysInfoRequest({ deployHash, publicKey })
   );
 
 // TODO just a quick example. Errors handling required
 export const fetchAccountExtendedDeploys = ({
   casperClarityApiUrl,
   publicKey,
-  page
+  page,
+  network
 }: {
   casperClarityApiUrl: string;
   publicKey: string;
   page: number;
+  network: CasperNetwork;
 }): Promise<CloudPaginatedResponse<IDeploy>> =>
   queryClient.fetchQuery(
-    ['accountDeploysRequest', casperClarityApiUrl, publicKey, page],
+    ['getDeploys', casperClarityApiUrl, publicKey, page, network],
     () =>
       deploysRepository.getDeploys({
         page,
         activePublicKey: publicKey,
-        network: 'testnet'
+        network
       }),
     { staleTime: ACCOUNT_DEPLOY_REFRESH_RATE }
   );
@@ -70,7 +65,7 @@ export const fetchAccountExtendedDeploys = ({
 export const dispatchFetchAccountExtendedDeploys = (
   publicKey: string,
   page: number
-): Promise<Payload<PaginatedResponse<ExtendedDeploy> | ErrorResponse>> =>
+): Promise<Payload<CloudPaginatedResponse<IDeploy> | ErrorResponse>> =>
   dispatchToMainStore(
     serviceMessage.fetchAccountExtendedDeploysRequest({ publicKey, page })
   );

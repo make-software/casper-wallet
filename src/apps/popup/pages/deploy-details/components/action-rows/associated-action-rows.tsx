@@ -1,52 +1,64 @@
+import { IAccountInfo } from 'casper-wallet-core/src/domain/accountInfo';
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
-import { DeployIcon } from '@src/constants';
+import { DeployIcon, getBlockExplorerContractUrl } from '@src/constants';
 
 import { SimpleContainer } from '@popup/pages/deploy-details/components/common';
 
+import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import {
-  Avatar,
-  Hash,
-  HashVariant,
-  Link,
-  SvgIcon,
-  Typography
-} from '@libs/ui/components';
+import { Link, Typography } from '@libs/ui/components';
+import { AccountInfoIcon } from '@libs/ui/components/account-info-icon/account-info-icon';
+import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 
 interface AssociatedActionRowsProps {
   publicKey: string;
-  contractLink: string;
+  contractPackageHash: string;
+  contractName: string;
+  callerAccountInfo: Maybe<IAccountInfo>;
 }
 
 export const AssociatedActionRows = ({
   publicKey,
-  contractLink
+  contractPackageHash,
+  contractName,
+  callerAccountInfo
 }: AssociatedActionRowsProps) => {
   const { t } = useTranslation();
 
+  const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
+
+  const link = getBlockExplorerContractUrl(
+    casperLiveUrl,
+    contractPackageHash || ''
+  );
+
   return (
-    <SimpleContainer entryPointName={'Update account'}>
+    <SimpleContainer title={'Update account'}>
       <AlignedFlexRow gap={SpacingSize.Small}>
-        <Avatar publicKey={publicKey} size={20} />
-        <Hash
-          value={publicKey}
-          variant={HashVariant.CaptionHash}
-          truncated
-          truncatedSize="small"
-          color="contentAction"
+        <AccountInfoRow
+          publicKey={publicKey}
+          iconSize={20}
+          accountName={callerAccountInfo?.name}
+          isAction
         />
       </AlignedFlexRow>
       <AlignedFlexRow gap={SpacingSize.Small}>
         <Typography type="captionRegular" color="contentSecondary">
           <Trans t={t}>with</Trans>
         </Typography>
-        <SvgIcon src={DeployIcon.AssociatedKeys} size={20} />
-        <Link color="contentAction" href={contractLink}>
-          <Typography type="captionRegular">
-            Associated Key Management
-          </Typography>
+        <AccountInfoIcon
+          publicKey={contractPackageHash}
+          size={20}
+          accountName={contractName}
+          iconUrl={DeployIcon.AssociatedKeys}
+        />
+        <Link color="contentAction" href={link} target="_blank">
+          <Typography type="captionRegular">{contractName}</Typography>
         </Link>
       </AlignedFlexRow>
       <AlignedFlexRow>
