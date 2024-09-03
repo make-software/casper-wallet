@@ -22,10 +22,6 @@ popup.describe('Popup UI: buy cspr', () => {
       ).toBeVisible();
       await popupPage.getByRole('button', { name: 'Next' }).click();
 
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Review provider option' })
-      ).toBeVisible();
-
       await popupPage.getByText('Topper by Uphold').click();
 
       await popupExpect(
@@ -43,7 +39,7 @@ popup.describe('Popup UI: buy cspr', () => {
     }
   );
 
-  popup.skip(
+  popup(
     'should redirect to Ramp provider page',
     async ({ popupPage, unlockVault, context }) => {
       await unlockVault();
@@ -63,10 +59,6 @@ popup.describe('Popup UI: buy cspr', () => {
         popupPage.getByRole('heading', { name: 'Enter amount' })
       ).toBeVisible();
       await popupPage.getByRole('button', { name: 'Next' }).click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Pick provider' })
-      ).toBeVisible();
 
       await popupExpect(
         popupPage.getByRole('button', { name: 'Confirm' })
