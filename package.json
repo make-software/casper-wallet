@@ -77,7 +77,7 @@
     "i18next": "^23.11.0",
     "i18next-browser-languagedetector": "^7.2.1",
     "i18next-http-backend": "2.5.0",
-    "i18next-parser": "7.9.0",
+    "i18next-parser": "9.0.2",
     "jszip": "^3.10.1",
     "lodash.throttle": "4.1.1",
     "mac-scrollbar": "^0.13.6",
