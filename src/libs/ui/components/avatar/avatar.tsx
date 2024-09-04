@@ -1,3 +1,4 @@
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 import styled, { DefaultTheme, useTheme } from 'styled-components';
 
@@ -61,7 +62,7 @@ const ConnectIcon = styled(SvgIcon)<{
 `;
 
 interface AvatarTypes {
-  publicKey: string;
+  publicKey: Maybe<string>;
   size: number;
   top?: SpacingSize;
   withConnectedStatus?: boolean;
@@ -98,7 +99,7 @@ export const Avatar = ({
       <ConnectionStatusBadgeContainer>
         <Identicon
           // in the case of public key is with uppercase characters
-          value={publicKey.toLowerCase()}
+          value={publicKey?.toLowerCase() || ''}
           size={size}
           background={theme.color.contentOnFill}
           displayContext={displayContext}

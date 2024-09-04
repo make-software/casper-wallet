@@ -1,3 +1,4 @@
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React, { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -32,7 +33,7 @@ const HashContainer = styled(CenteredFlexRow)<HashContainerProps>`
 `;
 
 interface HashProps {
-  value: string;
+  value: Maybe<string>;
   variant: HashVariant;
   truncated?: boolean;
   truncatedSize?: TruncateKeySize;
@@ -42,6 +43,7 @@ interface HashProps {
   isLedger?: boolean;
   placement?: Placement;
   withoutTooltip?: boolean;
+  withCopyIcon?: boolean;
 }
 
 export function Hash({
@@ -54,7 +56,8 @@ export function Hash({
   truncatedSize,
   placement,
   withoutTooltip = false,
-  isLedger
+  isLedger,
+  withCopyIcon
 }: HashProps) {
   const { t } = useTranslation();
   const isDarkMode = useIsDarkMode();
@@ -72,7 +75,9 @@ export function Hash({
             wordBreak={!truncated}
             color={color || 'contentSecondary'}
           >
-            {truncated ? truncateKey(value, { size: truncatedSize }) : value}
+            {truncated
+              ? truncateKey(value || '', { size: truncatedSize })
+              : value}
           </Typography>
         </Tooltip>
         {isImported && (
@@ -92,10 +97,10 @@ export function Hash({
             size={20}
           />
         )}
+        {withCopyIcon && <SvgIcon src="assets/icons/copy.svg" size={16} />}
       </>
     ),
     [
-      isDarkMode,
       truncated,
       withoutTooltip,
       value,
@@ -104,11 +109,13 @@ export function Hash({
       color,
       truncatedSize,
       isImported,
-      isLedger
+      isLedger,
+      isDarkMode,
+      withCopyIcon
     ]
   );
 
-  if (withCopyOnSelfClick) {
+  if (withCopyOnSelfClick || withCopyIcon) {
     return (
       <CopyToClipboard
         renderContent={({ isClicked }) => (
@@ -124,7 +131,7 @@ export function Hash({
             )}
           </>
         )}
-        valueToCopy={value}
+        valueToCopy={value || ''}
       />
     );
   }
