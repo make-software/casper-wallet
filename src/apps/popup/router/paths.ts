@@ -32,5 +32,6 @@ export enum RouterPath {
   BuyCSPR = '/buy-cspr',
   ImportAccountFromLedger = '/import-account-from-ledger',
   SignWithLedgerInNewWindow = '/sign-with-ledger-in-new-window',
-  DeployDetails = '/deploys-details'
+  DeployDetails = '/deploys-details',
+  AddWatchAccount = '/add-watch-account'
 }

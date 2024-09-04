@@ -9,6 +9,7 @@ import {
   accountsAdded,
   accountsImported,
   activeAccountChanged,
+  addWatchingAccount,
   anotherAccountConnected,
   deployPayloadReceived,
   deploysReseted,
@@ -316,6 +317,18 @@ export const reducer = createReducer(initialState)
 
           return account;
         })
+      };
+    }
+  )
+  .handleAction(
+    addWatchingAccount,
+    (state, action: ReturnType<typeof addWatchingAccount>): State => {
+      const account = action.payload;
+
+      return {
+        ...state,
+        accounts: [...state.accounts, account],
+        activeAccountName: account.name
       };
     }
   );

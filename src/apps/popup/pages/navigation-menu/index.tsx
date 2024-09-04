@@ -184,7 +184,17 @@ export function NavigationMenuPageContent() {
                   }
                 }
               ]
-            : [])
+            : []),
+          {
+            id: 6,
+            title: t('Add watch account'),
+            iconPath: 'assets/icons/plus.svg',
+            disabled: false,
+            handleOnClick: () => {
+              closeNavigationMenu();
+              navigate(RouterPath.AddWatchAccount);
+            }
+          }
         ]
       },
       {
