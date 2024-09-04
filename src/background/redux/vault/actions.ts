@@ -68,3 +68,7 @@ export const hideAccountFromListChanged = createAction(
 )<{
   accountName: string;
 }>();
+
+export const addWatchingAccount = createAction(
+  'ADD_WATCHING_ACCOUNT'
+)<Account>();

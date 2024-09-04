@@ -80,6 +80,7 @@ import {
   accountsAdded,
   accountsImported,
   activeAccountChanged,
+  addWatchingAccount,
   anotherAccountConnected,
   deployPayloadReceived,
   deploysReseted,
@@ -645,6 +646,7 @@ runtime.onMessage.addListener(
           case getType(ledgerStateCleared):
           case getType(ledgerDeployChanged):
           case getType(ledgerRecipientToSaveOnSuccessChanged):
+          case getType(addWatchingAccount):
             store.dispatch(action);
             return sendResponse(undefined);
 

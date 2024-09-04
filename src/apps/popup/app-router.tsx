@@ -6,6 +6,7 @@ import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 
 import { AccountSettingsPage } from '@popup/pages/account-settings';
 import { AddContactPage } from '@popup/pages/add-contact';
+import { AddWatchAccount } from '@popup/pages/add-watch-account';
 import { AllAccountsPage } from '@popup/pages/all-accounts';
 import { BackupSecretPhrasePage } from '@popup/pages/backup-secret-phrase';
 import { BuyCSPRPage } from '@popup/pages/buy-cspr';
@@ -249,6 +250,7 @@ function AppRoutes() {
         element={<SignWithLedgerInNewWindowPage />}
       />
       <Route path={RouterPath.DeployDetails} element={<DeployDetailsPage />} />
+      <Route path={RouterPath.AddWatchAccount} element={<AddWatchAccount />} />
     </Routes>
   );
 }
