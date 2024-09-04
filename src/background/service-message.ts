@@ -1,8 +1,8 @@
+import { CloudPaginatedResponse, IDeploy } from 'casper-wallet-core';
 import { ActionType, createAction } from 'typesafe-actions';
 
 import {
   Erc20TokenActionResult,
-  ExtendedDeploy,
   TransferResult
 } from '@libs/services/account-activity-service/types';
 import { AccountInfo } from '@libs/services/account-info/types';
@@ -68,12 +68,12 @@ export const serviceMessage = {
     'FETCH_ERC20_TOKEN_ACTIVITY_RESPONSE'
   )<PaginatedResponse<Erc20TokenActionResult>, Meta>(),
   fetchExtendedDeploysInfoRequest: createAction('FETCH_EXTENDED_DEPLOYS_INFO')<
-    { deployHash: string },
+    { deployHash: string; publicKey: string },
     Meta
   >(),
   fetchExtendedDeploysInfoResponse: createAction(
     'FETCH_EXTENDED_DEPLOYS_INFO_RESPONSE'
-  )<ExtendedDeploy, Meta>(),
+  )<IDeploy | null, Meta>(),
   fetchErc20TokensRequest: createAction('FETCH_ERC20_TOKENS')<
     { accountHash: string },
     Meta
@@ -88,13 +88,7 @@ export const serviceMessage = {
   >(),
   fetchAccountExtendedDeploysResponse: createAction(
     'FETCH_ACCOUNT_DEPLOYS_RESPONSE'
-  )<PaginatedResponse<ExtendedDeploy> | ErrorResponse, Meta>(),
-  fetchAccountCasperActivityRequest: createAction(
-    'FETCH_ACCOUNT_CASPER_ACTIVITY'
-  )<{ accountHash: string; page: number }, Meta>(),
-  fetchAccountCasperActivityResponse: createAction(
-    'FETCH_ACCOUNT_CASPER_ACTIVITY_RESPONSE'
-  )<PaginatedResponse<TransferResult>, Meta>(),
+  )<CloudPaginatedResponse<IDeploy> | ErrorResponse, Meta>(),
   fetchNftTokensRequest: createAction('FETCH_NFT_TOKENS')<
     { accountHash: string; page: number },
     Meta

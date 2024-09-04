@@ -2,8 +2,7 @@ import { DeployUtil } from 'casper-js-sdk';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { fetchAndDispatchExtendedDeployInfo } from '@src/utils';
-
+import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
 import {
   selectLedgerDeploy,
   selectLedgerRecipientToSaveOnSuccess
@@ -55,7 +54,9 @@ export const SignWithLedgerInNewWindowPage = () => {
         }
 
         if ('result' in resp) {
-          fetchAndDispatchExtendedDeployInfo(resp.result.deploy_hash);
+          dispatchToMainStore(
+            accountPendingDeployHashesChanged(resp.result.deploy_hash)
+          );
         }
 
         setIsSuccess(true);

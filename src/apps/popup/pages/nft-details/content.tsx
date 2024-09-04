@@ -19,6 +19,7 @@ import { RouterPath, useTypedNavigate } from '@popup/router';
 import { accountTrackingIdOfSentNftTokensRemoved } from '@background/redux/account-info/actions';
 import { selectAccountTrackingIdOfSentNftTokens } from '@background/redux/account-info/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
+import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
 import { useAsyncEffect } from '@hooks/use-async-effect';
 
@@ -110,6 +111,7 @@ export const NftDetailsContent = ({
   const accountTrackingIdOfSentNftTokens = useSelector(
     selectAccountTrackingIdOfSentNftTokens
   );
+  const activeAccount = useSelector(selectVaultActiveAccount);
 
   const isButtonDisabled = Boolean(
     accountTrackingIdOfSentNftTokens[nftToken?.tracking_id!]
@@ -145,7 +147,10 @@ export const NftDetailsContent = ({
 
     const interval = setInterval(async () => {
       const { payload: extendedDeployInfo } =
-        await dispatchFetchExtendedDeploysInfo(deployHash);
+        await dispatchFetchExtendedDeploysInfo(
+          deployHash,
+          activeAccount?.publicKey!
+        );
 
       if (extendedDeployInfo) {
         if (extendedDeployInfo.status === Status.Executed) {
@@ -159,7 +164,11 @@ export const NftDetailsContent = ({
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [accountTrackingIdOfSentNftTokens, nftToken?.tracking_id]);
+  }, [
+    accountTrackingIdOfSentNftTokens,
+    activeAccount?.publicKey,
+    nftToken?.tracking_id
+  ]);
 
   const tokenStandard = nftToken
     ? MapNFTTokenStandardToName[nftToken.token_standard_id]

@@ -6,20 +6,20 @@ export const selectAccountBalance = (state: RootState) =>
 export const selectAccountCurrencyRate = (state: RootState) =>
   state.accountInfo.currencyRate;
 
-export const selectAccountCasperActivity = (state: RootState) =>
-  state.accountInfo.accountCasperActivity;
+export const selectAccountCsprTransferDeploysData = (state: RootState) =>
+  state.accountInfo.csprTransferDeploysData;
 
-export const selectAccountErc20TokensActivity = (state: RootState) =>
-  state.accountInfo.accountErc20TokensActivity;
+export const selectAccountCep18TransferDeploysData = (state: RootState) =>
+  state.accountInfo.cep18TransferDeploysData;
 
-export const selectPendingTransactions = (state: RootState) =>
-  state.accountInfo.pendingTransactions;
+export const selectPendingDeployHashes = (state: RootState) =>
+  state.accountInfo.pendingDeployHashes;
 
 export const selectErc20Tokens = (state: RootState) =>
   state.accountInfo.erc20Tokens;
 
-export const selectAccountDeploys = (state: RootState) =>
-  state.accountInfo.accountDeploys;
+export const selectAccountDeploysData = (state: RootState) =>
+  state.accountInfo.accountDeploysData;
 
 export const selectAccountNftTokens = (state: RootState) =>
   state.accountInfo.accountNftTokens;

@@ -14,7 +14,6 @@ export enum RouterPath {
   BackupSecretPhrase = '/backup-secret-phrase',
   DownloadAccountKeys = '/download-account-keys',
   Transfer = '/transfer',
-  ActivityDetails = '/activity-details',
   Token = '/token/:tokenName',
   Receive = '/receive',
   NftDetails = '/nft-details/:contractPackageHash/nfts/:tokenId',
@@ -32,5 +31,6 @@ export enum RouterPath {
   ImportAccountFromTorus = '/import-account-from-torus',
   BuyCSPR = '/buy-cspr',
   ImportAccountFromLedger = '/import-account-from-ledger',
-  SignWithLedgerInNewWindow = '/sign-with-ledger-in-new-window'
+  SignWithLedgerInNewWindow = '/sign-with-ledger-in-new-window',
+  DeployDetails = '/deploys-details'
 }

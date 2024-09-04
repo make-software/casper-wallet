@@ -1,13 +1,10 @@
 import Big from 'big.js';
 import { CLPublicKey, Keys, decodeBase16 } from 'casper-js-sdk';
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import { runtime } from 'webextension-polyfill';
 
 import { Browser, NFT_TOKENS_REFRESH_RATE } from '@src/constants';
 
-import { accountPendingTransactionsChanged } from '@background/redux/account-info/actions';
-import { dispatchToMainStore } from '@background/redux/utils';
-
-import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import {
   NFTTokenMetadata,
   NFTTokenMetadataEntry,
@@ -379,28 +376,11 @@ export const setCSPForSafari = () => {
   }
 };
 
-export const fetchAndDispatchExtendedDeployInfo = (deployHash: string) => {
-  let triesLeft = 10;
-
-  const interval = setInterval(async () => {
-    const { payload: extendedDeployInfo } =
-      await dispatchFetchExtendedDeploysInfo(deployHash);
-
-    if (extendedDeployInfo) {
-      dispatchToMainStore(
-        accountPendingTransactionsChanged(extendedDeployInfo)
-      );
-      clearInterval(interval);
-    } else if (triesLeft === 0) {
-      clearInterval(interval);
-    }
-
-    triesLeft--;
-    // Note: this timeout is needed because the deploy is not immediately visible in the explorer
-  }, 2000);
-};
-
 export const getErrorMessageForIncorrectPassword = (attemptsLeft: number) =>
   attemptsLeft === 1
     ? 'Password is incorrect. You’ve got last attempt, after that you’ll have to wait for 5 mins'
     : `Password is incorrect. You’ve got ${attemptsLeft} attempts, after that you’ll have to wait for 5 mins`;
+
+export const isPublicKeyHash = (hash?: Maybe<string>) => {
+  return hash?.startsWith('01') || hash?.startsWith('02');
+};

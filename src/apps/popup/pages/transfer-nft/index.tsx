@@ -4,10 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import {
-  MapNFTTokenStandardToName,
-  fetchAndDispatchExtendedDeployInfo
-} from '@src/utils';
+import { MapNFTTokenStandardToName } from '@src/utils';
 
 import {
   TransferNFTSteps,
@@ -16,7 +13,10 @@ import {
 } from '@popup/pages/transfer-nft/utils';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
-import { accountTrackingIdOfSentNftTokensChanged } from '@background/redux/account-info/actions';
+import {
+  accountPendingDeployHashesChanged,
+  accountTrackingIdOfSentNftTokensChanged
+} from '@background/redux/account-info/actions';
 import {
   selectAccountBalance,
   selectAccountNftTokens
@@ -203,7 +203,7 @@ export const TransferNftPage = () => {
               })
             );
 
-            fetchAndDispatchExtendedDeployInfo(deployHash);
+            dispatchToMainStore(accountPendingDeployHashesChanged(deployHash));
 
             setTransferNFTStep(TransferNFTSteps.Success);
           } else {

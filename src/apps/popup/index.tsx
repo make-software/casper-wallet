@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { Suspense, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 // skeleton styles
@@ -25,6 +26,20 @@ import { AppRouter } from './app-router';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 3 * 60 * 1000,
+        refetchInterval: 3 * 60 * 1000,
+        gcTime: 3 * 60 * 1000,
+        retry: false
+      },
+      mutations: {
+        retry: false
+      }
+    }
+  });
 
   setCSPForSafari();
 
@@ -60,9 +75,11 @@ const Tree = () => {
       <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
         <GlobalStyle />
         <ReduxProvider store={store}>
-          <ErrorBoundary>
-            <AppRouter />
-          </ErrorBoundary>
+          <QueryClientProvider client={queryClient}>
+            <ErrorBoundary>
+              <AppRouter />
+            </ErrorBoundary>
+          </QueryClientProvider>
         </ReduxProvider>
       </ThemeProvider>
     </Suspense>

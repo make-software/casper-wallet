@@ -1,3 +1,4 @@
+import { IDeploy } from 'casper-wallet-core';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -9,7 +10,6 @@ import {
 } from '@libs/layout';
 import {
   Erc20TokenActionResult,
-  ExtendedDeployWithId,
   TransferResultWithId
 } from '@libs/services/account-activity-service';
 import { Tile, Typography } from '@libs/ui/components';
@@ -23,7 +23,7 @@ export const NoActivityView = ({
   top
 }: {
   activityList:
-    | (TransferResultWithId | Erc20TokenActionResult | ExtendedDeployWithId)[]
+    | (TransferResultWithId | Erc20TokenActionResult | IDeploy)[]
     | null;
   top?: SpacingSize;
   loading?: boolean;
