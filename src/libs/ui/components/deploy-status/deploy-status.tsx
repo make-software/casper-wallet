@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import { SvgIcon, Tooltip, Typography } from '@libs/ui/components';
+import { Placement, SvgIcon, Tooltip, Typography } from '@libs/ui/components';
 import { ContentColor } from '@libs/ui/utils';
 
 export enum Status {
@@ -69,6 +69,7 @@ export interface DeployStatusProps {
     | null
     | undefined;
   textWithIcon?: boolean;
+  placement?: Placement;
 }
 
 const StatusContainer = styled(AlignedFlexRow)<{ status: Status }>(
@@ -80,11 +81,10 @@ const StatusContainer = styled(AlignedFlexRow)<{ status: Status }>(
   })
 );
 
-export const isPendingStatus = (status: string) => status === Status.Pending;
-
 export const DeployStatus = ({
   deployResult,
-  textWithIcon
+  textWithIcon,
+  placement = 'topRight'
 }: DeployStatusProps) => {
   const { t } = useTranslation();
 
@@ -102,7 +102,7 @@ export const DeployStatus = ({
 
   if (textWithIcon) {
     return (
-      <Tooltip title={message} placement="topRight">
+      <Tooltip title={message} placement={placement}>
         <StatusContainer status={status} gap={SpacingSize.Small}>
           <SvgIcon
             src={StatusIcons[status]}
