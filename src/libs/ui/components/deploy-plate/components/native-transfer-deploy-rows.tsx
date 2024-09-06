@@ -40,7 +40,13 @@ export const NativeTransferDeployRows = ({
       <AccountInfoRow
         label={deploy.isReceive ? 'from' : 'to'}
         publicKey={
-          deploy.isReceive ? deploy.callerPublicKey : deploy.recipientKey
+          deploy.isReceive
+            ? deploy.callerPublicKey ||
+              deploy.callerAccountInfo?.accountHash ||
+              ''
+            : deploy.recipientKey ||
+              deploy.recipientAccountInfo?.accountHash ||
+              ''
         }
         accountName={
           deploy.isReceive

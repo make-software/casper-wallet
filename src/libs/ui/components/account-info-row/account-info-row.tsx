@@ -1,10 +1,13 @@
 import { Maybe } from 'casper-wallet-core/src/typings/common';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { getBlockExplorerAccountUrl } from '@src/constants';
+import {
+  getBlockExplorerAccountUrl,
+  getBlockExplorerContractPackageUrl
+} from '@src/constants';
 import { isEqualCaseInsensitive } from '@src/utils';
 
 import { selectAllContacts } from '@background/redux/contacts/selectors';
@@ -44,6 +47,8 @@ export const AccountInfoRow = ({
   iconSize = 16,
   isAction = false
 }: AccountInfoRowProps) => {
+  const [linkUrl, setLinkUrl] = useState('');
+
   const { t } = useTranslation();
 
   const accounts = useSelector(selectVaultAccounts);
@@ -55,7 +60,25 @@ export const AccountInfoRow = ({
     csprMarketContractHash
   } = useSelector(selectApiConfigBasedOnActiveNetwork);
 
-  const link = getBlockExplorerAccountUrl(casperLiveUrl, publicKey || '');
+  useEffect(() => {
+    if (
+      publicKey &&
+      (isEqualCaseInsensitive(publicKey, csprStudioCep47ContractHash) ||
+        isEqualCaseInsensitive(publicKey, csprMarketContractHash))
+    ) {
+      setLinkUrl(
+        getBlockExplorerContractPackageUrl(casperLiveUrl, publicKey || '')
+      );
+    } else {
+      setLinkUrl(getBlockExplorerAccountUrl(casperLiveUrl, publicKey || ''));
+    }
+  }, [
+    auctionPoolContractHash,
+    casperLiveUrl,
+    csprMarketContractHash,
+    csprStudioCep47ContractHash,
+    publicKey
+  ]);
 
   const accountLabel = useMemo(
     () => accounts.find(acc => acc.publicKey === publicKey)?.name,
@@ -101,7 +124,7 @@ export const AccountInfoRow = ({
         <>
           <Link
             color="inherit"
-            href={isAction ? link : undefined}
+            href={isAction ? linkUrl : undefined}
             target="_blank"
           >
             <AccountInfoNameContainer>

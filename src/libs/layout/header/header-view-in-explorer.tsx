@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 
 import {
   getBlockExplorerAccountUrl,
-  getBlockExplorerContractUrl,
+  getBlockExplorerContractPackageUrl,
   getBlockExplorerDeployUrl,
   getContractNftUrl
 } from '@src/constants';
@@ -69,7 +69,7 @@ export function HeaderViewInExplorer({
 
         if (token) {
           setHrefToTokenOnCasperLive(
-            getBlockExplorerContractUrl(
+            getBlockExplorerContractPackageUrl(
               casperLiveUrl,
               token.contract_package_hash
             )

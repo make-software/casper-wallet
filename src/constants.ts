@@ -29,11 +29,19 @@ export const MAX_DELEGATORS = 1200;
 
 export const PENDING_DEPLOY_REFETCH_INTERVAL = 5 * 1000;
 
-export const getBlockExplorerAccountUrl = (baseUrl: string, hash: string) =>
-  `${baseUrl}/account/${hash}`;
+export const getBlockExplorerAccountUrl = (
+  casperLiveUrl: string,
+  publicKey: string
+) => {
+  const path = publicKey?.includes('uref') ? 'uref' : 'account';
 
-export const getBlockExplorerContractUrl = (baseUrl: string, hash: string) =>
-  `${baseUrl}/contract-package/${hash}`;
+  return `${casperLiveUrl}/${path}/${publicKey}`;
+};
+
+export const getBlockExplorerContractPackageUrl = (
+  casperLiveUrl: string,
+  contractPackageHash: string
+) => `${casperLiveUrl}/contract-package/${contractPackageHash}`;
 
 export const getBlockExplorerDeployUrl = (
   casperLiveUrl: string,

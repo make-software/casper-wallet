@@ -137,7 +137,7 @@ export const DeployPlate = ({
       </Container>
     );
   }
-  //
+
   if (isCep18Deploy(deploy)) {
     return (
       <Container

@@ -8,7 +8,6 @@ import {
 } from '@src/constants';
 
 import {
-  ContractInfoRow,
   NftInfoRow,
   SimpleContainer
 } from '@popup/pages/deploy-details/components/common';
@@ -56,8 +55,8 @@ export const NftResultRows = ({
           defaultSvg={DeployIcon.NFTDefault}
         />
         <AccountInfoRow
-          publicKey={recipientKey}
-          accountName={recipientAccountInfo?.name}
+          publicKey={recipientKey || callerPublicKey}
+          accountName={recipientAccountInfo?.name || callerAccountInfo?.name}
           label="owned by"
           isAction
           iconSize={20}
@@ -142,11 +141,7 @@ export const NftResultRows = ({
           label={'for'}
           isApprove
         />
-        <ContractInfoRow
-          publicKey={recipientKey}
-          contractName={contractName}
-          label="to"
-        />
+        <AccountInfoRow publicKey={recipientKey} label="to" isAction />
       </SimpleContainer>
     );
   }

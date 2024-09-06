@@ -4,7 +4,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import { DeployIcon, getBlockExplorerContractUrl } from '@src/constants';
+import { DeployIcon, getBlockExplorerContractPackageUrl } from '@src/constants';
 
 import { SimpleContainer } from '@popup/pages/deploy-details/components/common';
 
@@ -32,7 +32,7 @@ export const AssociatedActionRows = ({
 
   const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
 
-  const link = getBlockExplorerContractUrl(
+  const link = getBlockExplorerContractPackageUrl(
     casperLiveUrl,
     contractPackageHash || ''
   );

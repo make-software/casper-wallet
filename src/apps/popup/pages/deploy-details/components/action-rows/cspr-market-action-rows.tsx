@@ -42,7 +42,7 @@ export const CsprMarketActionRows = ({ deploy }: CsprMarketActionRowsProps) => {
       <SimpleContainer title={title}>
         <NftInfoRow
           nftTokenIds={nftTokenIds}
-          publicKey={deploy.collectionHash}
+          publicKey={deploy.collectionHash || deploy.contractPackageHash}
         />
         <ContractInfoRow
           publicKey={contractPackageHash}
@@ -56,17 +56,19 @@ export const CsprMarketActionRows = ({ deploy }: CsprMarketActionRowsProps) => {
   if (isOfferAction) {
     return (
       <SimpleContainer title={title}>
-        <AmountRow
-          label="of"
-          amount={deploy.formattedDecimalAmount}
-          symbol="CSPR"
-          fiatAmount={deploy.fiatAmount}
-        />
+        {Number(deploy.formattedDecimalAmount) ? (
+          <AmountRow
+            label="of"
+            amount={deploy.formattedDecimalAmount}
+            symbol="CSPR"
+            fiatAmount={deploy.fiatAmount}
+          />
+        ) : null}
         <NftInfoRow
           nftTokenIds={nftTokenIds}
           imgLogo={offererAccountInfo?.brandingLogo}
           contractName={offererAccountInfo?.name}
-          publicKey={deploy.contractPackageHash}
+          publicKey={deploy.collectionHash || deploy.contractPackageHash}
           label="for"
         />
         <AccountInfoRow

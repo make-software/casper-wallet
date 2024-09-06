@@ -5,7 +5,6 @@ import { DeployIcon, NftDeployEntryPoint } from '@src/constants';
 
 import { DefaultActionRows } from '@popup/pages/deploy-details/components/action-rows/default-action-rows';
 import {
-  ContractInfoRow,
   NftInfoRow,
   SimpleContainer
 } from '@popup/pages/deploy-details/components/common';
@@ -135,11 +134,7 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           label="for"
           isApprove
         />
-        <ContractInfoRow
-          contractName={contractName}
-          publicKey={recipientKey}
-          label="to"
-        />
+        <AccountInfoRow publicKey={recipientKey} label="to" isAction />
       </SimpleContainer>
     );
   }
