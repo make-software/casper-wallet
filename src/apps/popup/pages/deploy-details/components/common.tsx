@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { getBlockExplorerContractUrl } from '@src/constants';
+import { getBlockExplorerContractUrl, getContractNftUrl } from '@src/constants';
 import { isEqualCaseInsensitive } from '@src/utils';
 
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
@@ -169,9 +169,15 @@ export const NftInfoRow = ({
       </Typography>
       {nftTokenIds.map(id => (
         <NftIndexContainer>
-          <Typography type="captionRegular" color="contentAction" ellipsis>
-            {id}
-          </Typography>
+          <Link
+            color="contentAction"
+            target="_blank"
+            href={getContractNftUrl(casperLiveUrl, publicKey || '', id)}
+          >
+            <Typography type="captionRegular" color="contentAction" ellipsis>
+              {id}
+            </Typography>
+          </Link>
         </NftIndexContainer>
       ))}
     </AlignedFlexRowContainer>
