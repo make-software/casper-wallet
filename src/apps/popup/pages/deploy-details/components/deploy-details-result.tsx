@@ -65,6 +65,16 @@ export const DeployDetailsResult = ({ deploy }: DeployDetailsResultProps) => {
     return null;
   }
 
+  const showResultRow = Boolean(
+    deploy.status !== 'error' &&
+      (deploy.transfersActionsResult.length ||
+        (isNftDeploy(deploy) && deploy.nftActionsResult.length) ||
+        (isCep18Deploy(deploy) && deploy.cep18ActionsResult.length) ||
+        isAssociatedKeysDeploy(deploy))
+  );
+
+  if (!showResultRow) return null;
+
   if (isAssociatedKeysDeploy(deploy)) {
     return (
       <Container>
@@ -87,40 +97,23 @@ export const DeployDetailsResult = ({ deploy }: DeployDetailsResultProps) => {
             fiatAmount={action.fiatAmount}
           />
         ))}
+        {isCep18Deploy(deploy) &&
+          deploy.cep18ActionsResult.map((action, id) => (
+            <Cep18ResultRows
+              action={action}
+              key={id}
+              contractPackageHash={deploy.contractPackageHash}
+            />
+          ))}
+        {(isNftDeploy(deploy) || isCasperMarketDeploy(deploy)) &&
+          deploy.nftActionsResult.map((action, id) => (
+            <NftResultRows
+              action={action}
+              key={id}
+              contractPackageHash={deploy.contractPackageHash}
+            />
+          ))}
       </Container>
     );
   }
-
-  if (
-    (isNftDeploy(deploy) || isCasperMarketDeploy(deploy)) &&
-    deploy.nftActionsResult.length
-  ) {
-    return (
-      <Container>
-        {deploy.nftActionsResult.map((action, id) => (
-          <NftResultRows
-            action={action}
-            key={id}
-            contractPackageHash={deploy.contractPackageHash}
-          />
-        ))}
-      </Container>
-    );
-  }
-
-  if (isCep18Deploy(deploy) && deploy.cep18ActionsResult.length) {
-    return (
-      <Container>
-        {deploy.cep18ActionsResult.map((action, id) => (
-          <Cep18ResultRows
-            action={action}
-            key={id}
-            contractPackageHash={deploy.contractPackageHash}
-          />
-        ))}
-      </Container>
-    );
-  }
-
-  return null;
 };

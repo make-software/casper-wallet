@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { getBlockExplorerContractUrl, getContractNftUrl } from '@src/constants';
+import { getBlockExplorerContractPackageUrl } from '@src/constants';
 import { isEqualCaseInsensitive } from '@src/utils';
 
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
@@ -85,7 +85,7 @@ export const ActionContainerWithLink = ({
 }: ActionContainerWithLinkProps) => {
   const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
 
-  const link = getBlockExplorerContractUrl(
+  const link = getBlockExplorerContractPackageUrl(
     casperLiveUrl,
     contractPackageHash || ''
   );
@@ -129,7 +129,10 @@ export const NftInfoRow = ({
     selectApiConfigBasedOnActiveNetwork
   );
 
-  const link = getBlockExplorerContractUrl(casperLiveUrl, publicKey || '');
+  const link = getBlockExplorerContractPackageUrl(
+    casperLiveUrl,
+    publicKey || ''
+  );
 
   const getCollectionName = useCallback(() => {
     if (
@@ -240,7 +243,10 @@ export const ContractInfoRow = ({
 
   const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork); // Fetch the live Casper network URL from Redux store.  // Assuming 'publicKey' is the public key of the contract.  // Replace 'casperLiveUrl' with the actual live Casper network URL.  // Fetch the contract details using the public key.  // Display the contract name, icon, and additional information.  // If the contract details are not found, display a
 
-  const link = getBlockExplorerContractUrl(casperLiveUrl, publicKey || '');
+  const link = getBlockExplorerContractPackageUrl(
+    casperLiveUrl,
+    publicKey || ''
+  );
 
   return (
     <AlignedFlexRow gap={SpacingSize.Small}>
