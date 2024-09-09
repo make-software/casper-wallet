@@ -70,10 +70,6 @@ export const DeployDetailsPageContent = ({
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
-  // const activeAccount = {
-  //   publicKey:
-  //     '0203b9b4cd6085590b68bfccaf7ea1744766e5225928beba99155a1bd79870f7a984'
-  // };
 
   useEffect(() => {
     setSingleDeploy(deploy);
@@ -109,6 +105,7 @@ export const DeployDetailsPageContent = ({
               status: singleDeploy.status,
               errorMessage: singleDeploy.errorMessage
             }}
+            placement="bottomRight"
           />
         </TitleContainer>
       </ParagraphContainer>
