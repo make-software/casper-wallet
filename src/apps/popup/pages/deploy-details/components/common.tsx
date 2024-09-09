@@ -4,7 +4,10 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { getBlockExplorerContractPackageUrl } from '@src/constants';
+import {
+  getBlockExplorerContractPackageUrl,
+  getContractNftUrl
+} from '@src/constants';
 import { isEqualCaseInsensitive } from '@src/utils';
 
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
