@@ -172,9 +172,15 @@ export const NftInfoRow = ({
       </Typography>
       {nftTokenIds.map(id => (
         <NftIndexContainer>
-          <Typography type="captionRegular" color="contentAction" ellipsis>
-            {id}
-          </Typography>
+          <Link
+            color="contentAction"
+            target="_blank"
+            href={getContractNftUrl(casperLiveUrl, publicKey || '', id)}
+          >
+            <Typography type="captionRegular" color="contentAction" ellipsis>
+              {id}
+            </Typography>
+          </Link>
         </NftIndexContainer>
       ))}
     </AlignedFlexRowContainer>

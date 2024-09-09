@@ -77,5 +77,5 @@ export const AccountInfoIcon = ({
     return null;
   }
 
-  return <Avatar publicKey={publicKey} size={size} />;
+  return <Avatar publicKey={publicKey} size={size} borderRadius={2} />;
 };
