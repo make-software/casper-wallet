@@ -13,8 +13,7 @@ import styled from 'styled-components';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { AlignedSpaceBetweenFlexRow } from '@libs/layout';
-import { SvgIcon } from '@libs/ui/components';
+import { AlignedFlexRow } from '@libs/layout';
 import { AssociatedDeployRows } from '@libs/ui/components/deploy-plate/components/associated-deploy-rows';
 import { AuctionDeployRows } from '@libs/ui/components/deploy-plate/components/auction-deploy-rows';
 import { Cep18DeployRows } from '@libs/ui/components/deploy-plate/components/cep18-deploy-rows';
@@ -23,7 +22,7 @@ import { DefaultDeployRows } from '@libs/ui/components/deploy-plate/components/d
 import { NativeTransferDeployRows } from '@libs/ui/components/deploy-plate/components/native-transfer-deploy-rows';
 import { NftDeployRows } from '@libs/ui/components/deploy-plate/components/nft-deploy-rows';
 
-const Container = styled(AlignedSpaceBetweenFlexRow)`
+const Container = styled(AlignedFlexRow)`
   padding: 16px 12px 16px;
 
   background: ${props => props.theme.color.backgroundPrimary};
@@ -61,7 +60,6 @@ export const DeployPlate = ({
         }}
       >
         <NativeTransferDeployRows deploy={deploy} />
-        <SvgIcon src="assets/icons/chevron.svg" size={16} />
       </Container>
     );
   }
@@ -76,10 +74,13 @@ export const DeployPlate = ({
               navigateHome
             }
           });
+
+          if (onClick) {
+            onClick();
+          }
         }}
       >
         <DefaultDeployRows deploy={deploy} />
-        <SvgIcon src="assets/icons/chevron.svg" size={16} />
       </Container>
     );
   }
@@ -94,10 +95,13 @@ export const DeployPlate = ({
               navigateHome
             }
           });
+
+          if (onClick) {
+            onClick();
+          }
         }}
       >
         <AuctionDeployRows deploy={deploy} />
-        <SvgIcon src="assets/icons/chevron.svg" size={16} />
       </Container>
     );
   }
@@ -112,10 +116,13 @@ export const DeployPlate = ({
               navigateHome
             }
           });
+
+          if (onClick) {
+            onClick();
+          }
         }}
       >
         <AssociatedDeployRows deploy={deploy} />
-        <SvgIcon src="assets/icons/chevron.svg" size={16} />
       </Container>
     );
   }
@@ -130,10 +137,13 @@ export const DeployPlate = ({
               navigateHome
             }
           });
+
+          if (onClick) {
+            onClick();
+          }
         }}
       >
         <CSPRMarketDeployRows deploy={deploy} />
-        <SvgIcon src="assets/icons/chevron.svg" size={16} />
       </Container>
     );
   }
@@ -148,10 +158,13 @@ export const DeployPlate = ({
               navigateHome
             }
           });
+
+          if (onClick) {
+            onClick();
+          }
         }}
       >
         <Cep18DeployRows deploy={deploy} />
-        <SvgIcon src="assets/icons/chevron.svg" size={16} />
       </Container>
     );
   }
@@ -166,10 +179,13 @@ export const DeployPlate = ({
               navigateHome
             }
           });
+
+          if (onClick) {
+            onClick();
+          }
         }}
       >
         <NftDeployRows deploy={deploy} />
-        <SvgIcon src="assets/icons/chevron.svg" size={16} />
       </Container>
     );
   }
@@ -183,10 +199,13 @@ export const DeployPlate = ({
             navigateHome
           }
         });
+
+        if (onClick) {
+          onClick();
+        }
       }}
     >
       <DefaultDeployRows deploy={deploy} />
-      <SvgIcon src="assets/icons/chevron.svg" size={16} />
     </Container>
   );
 };

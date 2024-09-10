@@ -1,18 +1,13 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { CasperNetwork } from 'casper-wallet-core/src/domain/common/common';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import { accountCsprTransferDeploysDataChanged } from '@background/redux/account-info/actions';
-import { selectAccountCsprTransferDeploysData } from '@background/redux/account-info/selectors';
 import { selectActiveNetworkSetting } from '@background/redux/settings/selectors';
-import { dispatchToMainStore } from '@background/redux/utils';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { deploysRepository } from '@background/wallet-repositories';
 
 export const useFetchCsprTransferDeploys = () => {
-  const csprDeploysData = useSelector(selectAccountCsprTransferDeploysData);
-
   const activeAccount = useSelector(selectVaultActiveAccount);
   const network = useSelector(selectActiveNetworkSetting);
 
@@ -31,9 +26,8 @@ export const useFetchCsprTransferDeploys = () => {
         activePublicKey: activeAccount?.publicKey ?? '',
         network: network.toLowerCase() as CasperNetwork
       }),
-    getNextPageParam: (lastPage, _, lastPageParam) => {
-      const nextPage =
-        (csprDeploysData?.pageParams.length || lastPageParam) + 1;
+    getNextPageParam: (lastPage, pages) => {
+      const nextPage = pages.length + 1;
 
       return nextPage <= lastPage.pageCount ? nextPage : undefined;
     },
@@ -42,19 +36,12 @@ export const useFetchCsprTransferDeploys = () => {
 
   const csprTransferDeploys = useMemo(
     () =>
-      csprDeploysData?.pages
+      csprTransferDeploysData?.pages
         ?.flat()
         ?.map(t => t.data)
         ?.flat() ?? [],
-    [csprDeploysData?.pages]
+    [csprTransferDeploysData?.pages]
   );
-
-  useEffect(() => {
-    if (isCsprTransferDeploysLoading) return;
-    dispatchToMainStore(
-      accountCsprTransferDeploysDataChanged(csprTransferDeploysData)
-    );
-  }, [csprTransferDeploysData, isCsprTransferDeploysLoading]);
 
   return {
     csprTransferDeploys,

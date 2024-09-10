@@ -101,6 +101,7 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
       title={title}
       contractPackageHash={contractPackageHash}
       contractName={contractName}
+      iconUrl={iconUrl || DeployIcon.Cep18Default}
       additionalInfo="CEP-18 Token"
     />
   );

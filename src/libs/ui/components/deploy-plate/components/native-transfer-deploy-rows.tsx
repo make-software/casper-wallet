@@ -29,8 +29,8 @@ export const NativeTransferDeployRows = ({
         errorMessage: deploy.errorMessage
       }}
     >
-      <AlignedFlexRow gap={SpacingSize.Tiny}>
-        <Typography type="captionHash">
+      <AlignedFlexRow gap={SpacingSize.Tiny} style={{ maxWidth: '240px' }}>
+        <Typography type="captionHash" ellipsis>
           {deploy.formattedDecimalAmount}
         </Typography>
         <Typography type="captionHash" color="contentSecondary">

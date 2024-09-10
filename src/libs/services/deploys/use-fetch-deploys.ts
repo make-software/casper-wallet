@@ -6,21 +6,14 @@ import { useSelector } from 'react-redux';
 
 import { PENDING_DEPLOY_REFETCH_INTERVAL } from '@src/constants';
 
-import {
-  accountDeploysDataChanged,
-  accountPendingDeployHashesRemove
-} from '@background/redux/account-info/actions';
-import {
-  selectAccountDeploysData,
-  selectPendingDeployHashes
-} from '@background/redux/account-info/selectors';
+import { accountPendingDeployHashesRemove } from '@background/redux/account-info/actions';
+import { selectPendingDeployHashes } from '@background/redux/account-info/selectors';
 import { selectActiveNetworkSetting } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { deploysRepository } from '@background/wallet-repositories';
 
 export const useFetchDeploys = () => {
-  const deploysDataFromStore = useSelector(selectAccountDeploysData);
   const pendingDeployHashes = useSelector(selectPendingDeployHashes);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const network = useSelector(selectActiveNetworkSetting);
@@ -42,9 +35,8 @@ export const useFetchDeploys = () => {
         network: network.toLowerCase() as CasperNetwork,
         page: pageParam
       }),
-    getNextPageParam: (lastPage, _, lastPageParam) => {
-      const nextPage =
-        (deploysDataFromStore?.pageParams.length || lastPageParam) + 1;
+    getNextPageParam: (lastPage, pages) => {
+      const nextPage = pages.length + 1;
 
       return nextPage <= lastPage.page_count ? nextPage : undefined;
     },
@@ -81,11 +73,11 @@ export const useFetchDeploys = () => {
 
   const flattenedDeploys = useMemo(
     () =>
-      deploysDataFromStore?.pages
+      deploysData?.pages
         ?.flat()
         ?.map(t => t.data)
         ?.flat() ?? [],
-    [deploysDataFromStore?.pages]
+    [deploysData?.pages]
   );
 
   const deploys = useMemo(() => {
@@ -100,11 +92,6 @@ export const useFetchDeploys = () => {
       )
     ];
   }, [pendingDeploys, flattenedDeploys]);
-
-  useEffect(() => {
-    if (isDeploysLoading) return;
-    dispatchToMainStore(accountDeploysDataChanged(deploysData));
-  }, [deploysData, isDeploysLoading]);
 
   useEffect(() => {
     if (isPendingDeploysLoading) return;
