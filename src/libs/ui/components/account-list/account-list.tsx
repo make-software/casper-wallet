@@ -11,6 +11,7 @@ import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { WindowApp } from '@background/create-open-window';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
+  selectVaultAccountsPublicKeys,
   selectVaultActiveAccountName,
   selectVaultVisibleAccounts
 } from '@background/redux/vault/selectors';
@@ -19,7 +20,11 @@ import { useWindowManager } from '@hooks/use-window-manager';
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { FlexColumn, SpacingSize } from '@libs/layout';
-import { AccountListRows } from '@libs/types/account';
+import { useFetchAccountInfo } from '@libs/services/account-info';
+import {
+  AccountListRowWithAccountHash,
+  AccountListRows
+} from '@libs/types/account';
 import { Button, List } from '@libs/ui/components';
 import { sortAccounts } from '@libs/ui/components/account-list/utils';
 
@@ -35,7 +40,9 @@ interface AccountListProps {
 
 export const AccountList = ({ closeModal }: AccountListProps) => {
   const { pathname } = useTypedLocation();
-  const [accountListRows, setAccountListRows] = useState<AccountListRows[]>([]);
+  const [accountListRows, setAccountListRows] = useState<
+    AccountListRowWithAccountHash<AccountListRows>[]
+  >([]);
   const { changeActiveAccountWithEvent: changeActiveAccount } =
     useAccountManager();
   const { t } = useTranslation();
@@ -44,9 +51,11 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
 
   const visibleAccounts = useSelector(selectVaultVisibleAccounts);
   const activeAccountName = useSelector(selectVaultActiveAccountName);
-
   const connectedAccountNames =
     useSelector(selectConnectedAccountNamesWithActiveOrigin) || [];
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
+
+  const accountInfo = useFetchAccountInfo(accountsPublicKeys);
 
   useEffect(() => {
     const accountListRows = sortAccounts(
@@ -83,6 +92,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
               changeActiveAccount(account.name);
               closeModal(event);
             }}
+            accountInfo={accountInfo}
           />
         );
       }}

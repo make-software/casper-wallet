@@ -23,3 +23,7 @@ export interface AccountWithBalance extends Account {
 export interface AccountListRows extends AccountWithBalance {
   id: string;
 }
+
+export type AccountListRowWithAccountHash<T extends AccountListRows> = T & {
+  accountHash: string;
+};

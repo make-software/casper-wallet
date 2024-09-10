@@ -147,6 +147,7 @@ export const NftDetailsContent = ({
 
     const interval = setInterval(async () => {
       const { payload: extendedDeployInfo } =
+        // TODO: rewrite this to hook and move to deploys service
         await dispatchFetchExtendedDeploysInfo(
           deployHash,
           activeAccount?.publicKey!

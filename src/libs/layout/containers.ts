@@ -163,7 +163,7 @@ export const HeaderContainer = styled(AlignedSpaceBetweenFlexRow)`
     getLinearGradientColor(theme.color.backgroundRed)};
   height: 72px;
 
-  padding: 0 16px;
+  padding: 0 8px;
 `;
 
 export const PageContainer = styled(SpaceBetweenFlexColumn)`
@@ -291,6 +291,9 @@ export const Overlay = styled.div`
 
   height: 100vh;
   width: 360px;
+
+  // this remove overlay from header
+  margin-top: 72px;
 
   background: ${({ theme }) => hexToRGBA(theme.color.black, '0.32')};
 `;

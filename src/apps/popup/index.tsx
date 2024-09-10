@@ -24,22 +24,22 @@ import { GlobalStyle, darkTheme, lightTheme } from '@libs/ui';
 
 import { AppRouter } from './app-router';
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 3 * 60 * 1000,
+      refetchInterval: 3 * 60 * 1000,
+      gcTime: 3 * 60 * 1000,
+      retry: false
+    },
+    mutations: {
+      retry: false
+    }
+  }
+});
+
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
-
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 3 * 60 * 1000,
-        refetchInterval: 3 * 60 * 1000,
-        gcTime: 3 * 60 * 1000,
-        retry: false
-      },
-      mutations: {
-        retry: false
-      }
-    }
-  });
 
   setCSPForSafari();
 

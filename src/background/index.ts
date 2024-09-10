@@ -113,12 +113,7 @@ import { SiteNotConnectedError, WalletLockedError } from '@content/sdk-errors';
 import { sdkEvent } from '@content/sdk-event';
 import { SdkMethod, isSDKMethod, sdkMethod } from '@content/sdk-method';
 
-import {
-  fetchAccountExtendedDeploys,
-  fetchExtendedDeploysInfo
-} from '@libs/services/account-activity-service';
-import { fetchErc20TokenActivity } from '@libs/services/account-activity-service/erc20-token-activity-service';
-import { fetchAccountInfo } from '@libs/services/account-info';
+import { fetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import {
   fetchAccountBalance,
   fetchAccountBalances,
@@ -702,27 +697,6 @@ runtime.onMessage.addListener(
             return;
           }
 
-          case getType(serviceMessage.fetchAccountInfoRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const { data: accountInfo } = await fetchAccountInfo({
-                accountHash: action.payload.accountHash,
-                casperClarityApiUrl
-              });
-
-              return sendResponse(
-                serviceMessage.fetchAccountInfoResponse(accountInfo)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
           case getType(serviceMessage.fetchExtendedDeploysInfoRequest): {
             const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
@@ -774,54 +748,6 @@ runtime.onMessage.addListener(
                   serviceMessage.fetchErc20TokensResponse([])
                 );
               }
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchErc20TokenActivityRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchErc20TokenActivity({
-                casperClarityApiUrl,
-                publicKey: action.payload.publicKey,
-                page: action.payload.page,
-                contractPackageHash: action.payload.contractPackageHash
-              });
-
-              return sendResponse(
-                serviceMessage.fetchErc20TokenActivityResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchAccountExtendedDeploysRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            const network = selectActiveNetworkSetting(store.getState());
-
-            try {
-              const data = await fetchAccountExtendedDeploys({
-                casperClarityApiUrl,
-                publicKey: action.payload.publicKey,
-                page: action.payload.page,
-                network: network.toLowerCase() as CasperNetwork
-              });
-
-              return sendResponse(
-                serviceMessage.fetchAccountExtendedDeploysResponse(data)
-              );
             } catch (error) {
               console.error(error);
             }

@@ -9,14 +9,8 @@ import { selectActiveNetworkSetting } from '@background/redux/settings/selectors
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { AlignedFlexRow, SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
+import { HeaderBackgroundContainer } from '@libs/layout/header/components/header-background-container';
 import { Modal, SvgIcon, Typography } from '@libs/ui/components';
-import { hexToRGBA } from '@libs/ui/utils';
-
-const NetworkSwitcherContainer = styled(AlignedFlexRow)`
-  background-color: ${({ theme }) => hexToRGBA(theme.color.black, '0.24')};
-  padding: 6px 8px;
-  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
-`;
 
 const ModalContentContainer = styled.div`
   padding: 8px;
@@ -102,10 +96,10 @@ export const HeaderNetworkSwitcher = () => {
         </ModalContentContainer>
       )}
       children={({ isOpen }) => (
-        <NetworkSwitcherContainer gap={SpacingSize.Tiny}>
+        <HeaderBackgroundContainer isOpen={isOpen}>
           <SvgIcon
             src="assets/icons/network.svg"
-            size={16}
+            size={24}
             dataTestId="network-switcher"
             color={
               activeNetwork === NetworkSetting.Testnet
@@ -113,16 +107,7 @@ export const HeaderNetworkSwitcher = () => {
                 : 'contentLightRed'
             }
           />
-          <Typography type="listSubtext" color="contentOnFill">
-            {activeNetwork}
-          </Typography>
-          <SvgIcon
-            size={16}
-            src="assets/icons/chevron-up.svg"
-            flipByAxis={isOpen ? undefined : 'X'}
-            color="contentOnFill"
-          />
-        </NetworkSwitcherContainer>
+        </HeaderBackgroundContainer>
       )}
     />
   );

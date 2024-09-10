@@ -77,6 +77,7 @@ export const DeployDetailsPageContent = ({
 
   useEffect(() => {
     if (deploy?.deployHash && activeAccount?.publicKey) {
+      // TODO: rewrite this to hook and move to deploys service
       dispatchFetchExtendedDeploysInfo(
         deploy.deployHash,
         activeAccount?.publicKey
