@@ -83,37 +83,38 @@ export const DeployDetailsResult = ({ deploy }: DeployDetailsResultProps) => {
     );
   }
 
-  if (deploy.transfersActionsResult.length) {
-    return (
-      <Container>
-        {deploy?.transfersActionsResult.map((action, id) => (
-          <NativeTransferResultRows
-            amount={action.formattedDecimalAmount}
+  return (
+    <Container>
+      {deploy?.transfersActionsResult.map((action, id) => (
+        <NativeTransferResultRows
+          amount={action.formattedDecimalAmount}
+          key={id}
+          callerAccountInfo={action.callerAccountInfo}
+          recipientAccountInfo={action.recipientAccountInfo}
+          toPublicKey={action.recipientKey}
+          fromPublicKey={action.callerPublicKey}
+          fiatAmount={action.fiatAmount}
+        />
+      ))}
+      {isCep18Deploy(deploy) &&
+        deploy.cep18ActionsResult.map((action, id) => (
+          <Cep18ResultRows
+            action={action}
             key={id}
-            callerAccountInfo={action.callerAccountInfo}
-            recipientAccountInfo={action.recipientAccountInfo}
-            toPublicKey={action.recipientKey}
-            fromPublicKey={action.callerPublicKey}
-            fiatAmount={action.fiatAmount}
+            contractPackageHash={deploy.contractPackageHash}
           />
         ))}
-        {isCep18Deploy(deploy) &&
-          deploy.cep18ActionsResult.map((action, id) => (
-            <Cep18ResultRows
-              action={action}
-              key={id}
-              contractPackageHash={deploy.contractPackageHash}
-            />
-          ))}
-        {(isNftDeploy(deploy) || isCasperMarketDeploy(deploy)) &&
-          deploy.nftActionsResult.map((action, id) => (
-            <NftResultRows
-              action={action}
-              key={id}
-              contractPackageHash={deploy.contractPackageHash}
-            />
-          ))}
-      </Container>
-    );
-  }
+      {(isNftDeploy(deploy) || isCasperMarketDeploy(deploy)) &&
+        deploy.nftActionsResult.map((action, id) => (
+          <NftResultRows
+            action={action}
+            key={id}
+            contractHash={deploy.contractHash}
+            contractPackageHash={
+              deploy.collectionHash || deploy.contractPackageHash
+            }
+          />
+        ))}
+    </Container>
+  );
 };

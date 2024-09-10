@@ -49,7 +49,7 @@ export const Cep18ResultRows = ({
           label="for"
         />
         <ContractInfoRow
-          publicKey={contractPackageHash}
+          contractPackageHash={contractPackageHash}
           contractName={contractName}
           iconUrl={iconUrl}
           additionalInfo="token(s)"
@@ -70,7 +70,7 @@ export const Cep18ResultRows = ({
       <SimpleContainer title={title}>
         <AmountRow amount={formattedDecimalAmount} symbol={symbol} />
         <ContractInfoRow
-          publicKey={contractPackageHash}
+          contractPackageHash={contractPackageHash}
           contractName={contractName}
           iconUrl={iconUrl}
           additionalInfo="token(s)"
@@ -91,7 +91,7 @@ export const Cep18ResultRows = ({
       <SimpleContainer title={title}>
         <AmountRow amount={formattedDecimalAmount} symbol={symbol} />
         <ContractInfoRow
-          publicKey={contractPackageHash}
+          contractPackageHash={contractPackageHash}
           contractName={contractName}
           iconUrl={iconUrl}
           additionalInfo="token(s)"
@@ -112,7 +112,7 @@ export const Cep18ResultRows = ({
       <SimpleContainer title={title}>
         <AmountRow amount={formattedDecimalAmount} symbol={symbol} />
         <ContractInfoRow
-          publicKey={contractPackageHash}
+          contractPackageHash={contractPackageHash}
           contractName={contractName}
           iconUrl={iconUrl}
           additionalInfo="token(s)"
