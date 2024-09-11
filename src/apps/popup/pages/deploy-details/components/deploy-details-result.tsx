@@ -2,7 +2,6 @@ import { IDeploy } from 'casper-wallet-core';
 import {
   isAssociatedKeysDeploy,
   isCasperMarketDeploy,
-  isCep18Deploy,
   isNftDeploy
 } from 'casper-wallet-core/src/utils/deploy';
 import React from 'react';
@@ -68,8 +67,8 @@ export const DeployDetailsResult = ({ deploy }: DeployDetailsResultProps) => {
   const showResultRow = Boolean(
     deploy.status !== 'error' &&
       (deploy.transfersActionsResult.length ||
-        (isNftDeploy(deploy) && deploy.nftActionsResult.length) ||
-        (isCep18Deploy(deploy) && deploy.cep18ActionsResult.length) ||
+        deploy.nftActionsResult.length ||
+        deploy.cep18ActionsResult.length ||
         isAssociatedKeysDeploy(deploy))
   );
 
@@ -96,25 +95,28 @@ export const DeployDetailsResult = ({ deploy }: DeployDetailsResultProps) => {
           fiatAmount={action.fiatAmount}
         />
       ))}
-      {isCep18Deploy(deploy) &&
-        deploy.cep18ActionsResult.map((action, id) => (
-          <Cep18ResultRows
-            action={action}
-            key={id}
-            contractPackageHash={deploy.contractPackageHash}
-          />
-        ))}
-      {(isNftDeploy(deploy) || isCasperMarketDeploy(deploy)) &&
-        deploy.nftActionsResult.map((action, id) => (
+      {deploy.cep18ActionsResult.map((action, id) => (
+        <Cep18ResultRows
+          action={action}
+          key={id}
+          contractPackageHash={deploy.contractPackageHash}
+        />
+      ))}
+      {deploy.nftActionsResult.map((action, id) => {
+        const contractPackageHash =
+          isNftDeploy(deploy) || isCasperMarketDeploy(deploy)
+            ? deploy?.collectionHash || deploy?.contractPackageHash
+            : deploy?.contractPackageHash;
+
+        return (
           <NftResultRows
             action={action}
             key={id}
             contractHash={deploy.contractHash}
-            contractPackageHash={
-              deploy.collectionHash || deploy.contractPackageHash
-            }
+            contractPackageHash={contractPackageHash}
           />
-        ))}
+        );
+      })}
     </Container>
   );
 };
