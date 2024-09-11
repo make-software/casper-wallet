@@ -102,7 +102,11 @@ export const DeployStatus = ({
 
   if (textWithIcon) {
     return (
-      <Tooltip title={message} placement={placement}>
+      <Tooltip
+        title={message}
+        placement={placement}
+        noWrap={!(message?.length! >= 29)}
+      >
         <StatusContainer status={status} gap={SpacingSize.Small}>
           <SvgIcon
             src={StatusIcons[status]}

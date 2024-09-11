@@ -1,5 +1,5 @@
 import { Maybe } from 'casper-wallet-core/src/typings/common';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -114,9 +114,10 @@ interface NftInfoRowProps {
   label?: string;
   contractName?: string;
   imgLogo?: Maybe<string>;
-  publicKey?: string;
+  contractPackageHash?: string;
   isApprove?: boolean;
   defaultSvg?: string;
+  collectionHash: string;
 }
 
 export const NftInfoRow = ({
@@ -124,9 +125,10 @@ export const NftInfoRow = ({
   imgLogo,
   contractName,
   label,
-  publicKey,
+  contractPackageHash,
   isApprove,
-  defaultSvg
+  defaultSvg,
+  collectionHash
 }: NftInfoRowProps) => {
   const { t } = useTranslation();
 
@@ -134,21 +136,24 @@ export const NftInfoRow = ({
     selectApiConfigBasedOnActiveNetwork
   );
 
-  const link = getBlockExplorerContractPackageUrl(
-    casperLiveUrl,
-    publicKey || ''
+  const isCsprStudio = useMemo(
+    () => isEqualCaseInsensitive(collectionHash, csprStudioCep47ContractHash),
+    [collectionHash, csprStudioCep47ContractHash]
+  );
+  const hash = useMemo(
+    () => (isCsprStudio ? collectionHash : contractPackageHash),
+    [collectionHash, contractPackageHash, isCsprStudio]
   );
 
+  const link = getBlockExplorerContractPackageUrl(casperLiveUrl, hash || '');
+
   const getCollectionName = useCallback(() => {
-    if (
-      publicKey &&
-      isEqualCaseInsensitive(publicKey, csprStudioCep47ContractHash)
-    ) {
+    if (isCsprStudio) {
       return 'CSPR.studio';
     }
 
     return contractName;
-  }, [publicKey, contractName, csprStudioCep47ContractHash]);
+  }, [contractName, isCsprStudio]);
 
   return (
     <AlignedFlexRowContainer>
@@ -163,7 +168,7 @@ export const NftInfoRow = ({
         </Typography>
       )}
       <AccountInfoIcon
-        publicKey={publicKey || ''}
+        publicKey={hash || ''}
         accountName={getCollectionName()}
         iconUrl={imgLogo}
         size={20}
@@ -180,7 +185,7 @@ export const NftInfoRow = ({
           <Link
             color="contentAction"
             target="_blank"
-            href={getContractNftUrl(casperLiveUrl, publicKey || '', id)}
+            href={getContractNftUrl(casperLiveUrl, hash || '', id)}
           >
             <Typography type="captionRegular" color="contentAction" ellipsis>
               {id}
@@ -208,7 +213,10 @@ export const AmountRow = ({
   const { t } = useTranslation();
 
   return (
-    <AlignedFlexRow gap={SpacingSize.Small} style={{ maxWidth: '296px' }}>
+    <AlignedFlexRowContainer
+      gap={SpacingSize.Small}
+      style={{ maxWidth: '296px' }}
+    >
       {label && (
         <Typography type="captionRegular" color="contentSecondary">
           <Trans t={t}>{label}</Trans>
@@ -225,12 +233,12 @@ export const AmountRow = ({
           {`(${fiatAmount})`}
         </Typography>
       )}
-    </AlignedFlexRow>
+    </AlignedFlexRowContainer>
   );
 };
 
 interface ContractInfoRowProps {
-  publicKey: string;
+  contractPackageHash: string;
   contractName: string;
   iconUrl?: Maybe<string>;
   label?: string;
@@ -239,7 +247,7 @@ interface ContractInfoRowProps {
 }
 
 export const ContractInfoRow = ({
-  publicKey,
+  contractPackageHash,
   contractName,
   label,
   additionalInfo,
@@ -252,18 +260,18 @@ export const ContractInfoRow = ({
 
   const link = getBlockExplorerContractPackageUrl(
     casperLiveUrl,
-    publicKey || ''
+    contractPackageHash || ''
   );
 
   return (
-    <AlignedFlexRow gap={SpacingSize.Small}>
+    <AlignedFlexRowContainer gap={SpacingSize.Small}>
       {label && (
         <Typography type="captionRegular" color="contentSecondary">
           <Trans t={t}>{label}</Trans>
         </Typography>
       )}
       <AccountInfoIcon
-        publicKey={publicKey}
+        publicKey={contractPackageHash}
         size={20}
         accountName={contractName}
         iconUrl={iconUrl}
@@ -277,6 +285,6 @@ export const ContractInfoRow = ({
           <Trans t={t}>{additionalInfo}</Trans>
         </Typography>
       )}
-    </AlignedFlexRow>
+    </AlignedFlexRowContainer>
   );
 };

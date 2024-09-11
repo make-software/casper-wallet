@@ -97,7 +97,7 @@ export const DeployDetailsPageContent = ({
               status: singleDeploy.status,
               errorMessage: singleDeploy.errorMessage
             }}
-            placement="bottomRight"
+            placement="bottomLeft"
           />
         </TitleContainer>
       </ParagraphContainer>
