@@ -151,7 +151,7 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
       contractPackageHash={contractPackageHash}
       contractName={contractName}
       additionalInfo="CEP-47 NFT"
-      iconUrl={DeployIcon.NFTDefault}
+      iconUrl={iconUrl || DeployIcon.NFTDefault}
     />
   );
 };

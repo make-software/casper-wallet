@@ -57,9 +57,11 @@ export const ContainerWithAmount = ({
   fiatAmount
 }: ActionContainerWithAmountProps) => (
   <LeftAlignedFlexColumn gap={SpacingSize.Tiny}>
-    <AlignedFlexRow gap={SpacingSize.Small}>
+    <AlignedFlexRow gap={SpacingSize.Small} style={{ maxWidth: '296px' }}>
       <Typography type="bodySemiBold">{title}</Typography>
-      <Typography type="bodyHash">{amount}</Typography>
+      <Typography type="bodyHash" ellipsis>
+        {amount}
+      </Typography>
       <Typography type="bodyHash" color="contentSecondary">
         CSPR
       </Typography>
@@ -211,13 +213,18 @@ export const AmountRow = ({
   const { t } = useTranslation();
 
   return (
-    <AlignedFlexRowContainer gap={SpacingSize.Small}>
+    <AlignedFlexRowContainer
+      gap={SpacingSize.Small}
+      style={{ maxWidth: '296px' }}
+    >
       {label && (
         <Typography type="captionRegular" color="contentSecondary">
           <Trans t={t}>{label}</Trans>
         </Typography>
       )}
-      <Typography type="bodyHash">{amount}</Typography>
+      <Typography type="bodyHash" ellipsis>
+        {amount}
+      </Typography>
       <Typography type="bodyHash" color="contentSecondary">
         {symbol}
       </Typography>

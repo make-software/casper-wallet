@@ -35,14 +35,14 @@ export const DeployContainer = ({
   deployStatus
 }: DeployContainerProps) => {
   return (
-    <AlignedFlexRow gap={SpacingSize.Small}>
+    <AlignedFlexRow gap={SpacingSize.Medium} flexGrow={1}>
       {iconUrl.endsWith('.svg') ? (
         <SvgIcon src={iconUrl || ''} alt={title || ''} size={24} />
       ) : (
         <LogoImg src={iconUrl} alt={title || ''} title={title || ''} />
       )}
       <FlexColumn>
-        <AlignedFlexRow gap={SpacingSize.Small} style={{ maxWidth: '256px' }}>
+        <AlignedFlexRow gap={SpacingSize.Small} style={{ maxWidth: '240px' }}>
           <Typography type="bodySemiBold" ellipsis>
             {title}
           </Typography>
@@ -54,6 +54,7 @@ export const DeployContainer = ({
         </AlignedFlexRow>
         {children}
       </FlexColumn>
+      <SvgIcon src="assets/icons/chevron.svg" size={16} />
     </AlignedFlexRow>
   );
 };

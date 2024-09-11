@@ -34,12 +34,7 @@ import {
 } from '@background/redux/account-balances/actions';
 import {
   accountBalanceChanged,
-  accountCasperActivityCountChanged,
-  accountCep18TransferDeploysDataChanged,
-  accountCsprTransferDeploysDataChanged,
   accountCurrencyRateChanged,
-  accountDeploysCountChanged,
-  accountDeploysDataChanged,
   accountErc20Changed,
   accountInfoReset,
   accountNftTokensAdded,
@@ -619,18 +614,13 @@ runtime.onMessage.addListener(
           case getType(recipientPublicKeyReseted):
           case getType(accountBalanceChanged):
           case getType(accountCurrencyRateChanged):
-          case getType(accountCsprTransferDeploysDataChanged):
           case getType(accountInfoReset):
           case getType(accountPendingDeployHashesChanged):
           case getType(accountPendingDeployHashesRemove):
           case getType(accountErc20Changed):
-          case getType(accountCep18TransferDeploysDataChanged):
-          case getType(accountDeploysDataChanged):
           case getType(accountNftTokensAdded):
           case getType(accountNftTokensUpdated):
           case getType(accountNftTokensCountChanged):
-          case getType(accountDeploysCountChanged):
-          case getType(accountCasperActivityCountChanged):
           case getType(accountTrackingIdOfSentNftTokensChanged):
           case getType(accountTrackingIdOfSentNftTokensRemoved):
           case getType(newContactAdded):
