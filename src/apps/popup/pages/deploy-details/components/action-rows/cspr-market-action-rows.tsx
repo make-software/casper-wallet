@@ -23,6 +23,7 @@ export const CsprMarketActionRows = ({ deploy }: CsprMarketActionRowsProps) => {
     entryPoint,
     contractName,
     contractPackageHash,
+    collectionHash,
     nftTokenIds,
     offererAccountInfo
   } = deploy;
@@ -42,10 +43,11 @@ export const CsprMarketActionRows = ({ deploy }: CsprMarketActionRowsProps) => {
       <SimpleContainer title={title}>
         <NftInfoRow
           nftTokenIds={nftTokenIds}
-          publicKey={deploy.collectionHash || deploy.contractPackageHash}
+          contractPackageHash={contractPackageHash}
+          collectionHash={collectionHash}
         />
         <ContractInfoRow
-          publicKey={contractPackageHash}
+          contractPackageHash={contractPackageHash}
           contractName={contractName}
           label={isDelist ? 'from' : 'on'}
         />
@@ -68,7 +70,8 @@ export const CsprMarketActionRows = ({ deploy }: CsprMarketActionRowsProps) => {
           nftTokenIds={nftTokenIds}
           imgLogo={offererAccountInfo?.brandingLogo}
           contractName={offererAccountInfo?.name}
-          publicKey={deploy.collectionHash || deploy.contractPackageHash}
+          contractPackageHash={contractPackageHash}
+          collectionHash={collectionHash}
           label="for"
         />
         <AccountInfoRow
@@ -78,7 +81,7 @@ export const CsprMarketActionRows = ({ deploy }: CsprMarketActionRowsProps) => {
           iconSize={20}
         />
         <ContractInfoRow
-          publicKey={contractPackageHash}
+          contractPackageHash={contractPackageHash}
           contractName={contractName}
           label="on"
         />
