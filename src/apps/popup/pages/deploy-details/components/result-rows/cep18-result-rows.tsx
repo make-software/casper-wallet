@@ -27,6 +27,8 @@ export const Cep18ResultRows = ({
   const {
     entryPoint,
     formattedDecimalAmount,
+    recipientAccountInfo,
+    callerAccountInfo,
     symbol,
     recipientKey,
     callerPublicKey,
@@ -60,6 +62,8 @@ export const Cep18ResultRows = ({
           label="to"
           isAction
           iconSize={20}
+          csprName={recipientAccountInfo?.csprName}
+          imgLogo={recipientAccountInfo?.brandingLogo}
         />
       </SimpleContainer>
     );
@@ -81,6 +85,8 @@ export const Cep18ResultRows = ({
           label="owned by"
           isAction
           iconSize={20}
+          csprName={recipientAccountInfo?.csprName}
+          imgLogo={recipientAccountInfo?.brandingLogo}
         />
       </SimpleContainer>
     );
@@ -102,6 +108,8 @@ export const Cep18ResultRows = ({
           label="to"
           isAction
           iconSize={20}
+          csprName={recipientAccountInfo?.csprName}
+          imgLogo={recipientAccountInfo?.brandingLogo}
         />
       </SimpleContainer>
     );
@@ -123,12 +131,16 @@ export const Cep18ResultRows = ({
           label="from"
           isAction
           iconSize={20}
+          csprName={callerAccountInfo?.csprName}
+          imgLogo={callerAccountInfo?.brandingLogo}
         />
         <AccountInfoRow
           publicKey={recipientKey}
           label="to"
           isAction
           iconSize={20}
+          csprName={recipientAccountInfo?.csprName}
+          imgLogo={recipientAccountInfo?.brandingLogo}
         />
       </SimpleContainer>
     );

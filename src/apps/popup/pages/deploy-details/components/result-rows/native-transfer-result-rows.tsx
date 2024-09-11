@@ -34,6 +34,8 @@ export const NativeTransferResultRows = ({
       label={'from'}
       isAction
       iconSize={20}
+      csprName={callerAccountInfo?.csprName}
+      imgLogo={callerAccountInfo?.brandingLogo}
     />
     <AccountInfoRow
       publicKey={toPublicKey}
@@ -41,6 +43,8 @@ export const NativeTransferResultRows = ({
       label={'to'}
       isAction
       iconSize={20}
+      csprName={recipientAccountInfo?.csprName}
+      imgLogo={recipientAccountInfo?.brandingLogo}
     />
   </ContainerWithAmount>
 );

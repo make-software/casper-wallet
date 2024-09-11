@@ -56,6 +56,8 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           label="owned by"
           isAction
           iconSize={20}
+          csprName={recipientAccountInfo?.csprName}
+          imgLogo={recipientAccountInfo?.brandingLogo}
         />
       </SimpleContainer>
     );
@@ -78,6 +80,8 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           label="to"
           isAction
           iconSize={20}
+          csprName={recipientAccountInfo?.csprName}
+          imgLogo={recipientAccountInfo?.brandingLogo}
         />
       </SimpleContainer>
     );
@@ -100,6 +104,8 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           label="from"
           isAction
           iconSize={20}
+          csprName={callerAccountInfo?.csprName}
+          imgLogo={callerAccountInfo?.brandingLogo}
         />
         <AccountInfoRow
           publicKey={recipientKey}
@@ -107,6 +113,8 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           label="to"
           isAction
           iconSize={20}
+          csprName={recipientAccountInfo?.csprName}
+          imgLogo={recipientAccountInfo?.brandingLogo}
         />
       </SimpleContainer>
     );
@@ -140,7 +148,14 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           isApprove
           collectionHash={contractHash}
         />
-        <AccountInfoRow publicKey={recipientKey} label="to" isAction />
+        <AccountInfoRow
+          publicKey={recipientKey}
+          label="to"
+          isAction
+          iconSize={20}
+          csprName={recipientAccountInfo?.csprName}
+          imgLogo={recipientAccountInfo?.brandingLogo}
+        />
       </SimpleContainer>
     );
   }

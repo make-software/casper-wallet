@@ -76,6 +76,7 @@ const DelegationAuctionAction = ({
           imgLogo={toValidatorAccountInfo?.brandingLogo}
           isAction
           iconSize={20}
+          csprName={toValidatorAccountInfo?.csprName}
         />
       )}
       {(isUndelegate || isRedelegate) && (
@@ -87,6 +88,7 @@ const DelegationAuctionAction = ({
             imgLogo={fromValidatorAccountInfo?.brandingLogo}
             isAction
             iconSize={20}
+            csprName={fromValidatorAccountInfo?.csprName}
           />
           <AccountInfoRow
             publicKey={toValidator}
@@ -95,6 +97,7 @@ const DelegationAuctionAction = ({
             imgLogo={toValidatorAccountInfo?.brandingLogo}
             isAction
             iconSize={20}
+            csprName={toValidatorAccountInfo?.csprName}
           />
         </>
       )}

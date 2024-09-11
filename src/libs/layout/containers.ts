@@ -102,7 +102,7 @@ export const FlexRow = styled.div<FlexRowProps>`
   display: flex;
   gap: ${({ gap }) => getGapSize(gap)};
   flex-wrap: ${({ wrap }) => wrap};
-  flex-grow: ${({ flexGrow }) => flexGrow || 'inherit'};
+  flex-grow: ${({ flexGrow }) => flexGrow ?? 'inherit'};
 `;
 
 export const AlignedFlexRow = styled(FlexRow)`

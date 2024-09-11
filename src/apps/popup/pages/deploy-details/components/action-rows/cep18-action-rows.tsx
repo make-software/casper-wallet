@@ -24,6 +24,7 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
     contractPackageHash,
     contractName,
     formattedDecimalAmount,
+    recipientAccountInfo,
     symbol,
     iconUrl
   } = deploy;
@@ -50,6 +51,8 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
           label="to"
           isAction
           iconSize={20}
+          csprName={recipientAccountInfo?.csprName}
+          imgLogo={recipientAccountInfo?.brandingLogo}
         />
       </SimpleContainer>
     );
@@ -70,7 +73,13 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
           defaultSvg={DeployIcon.Cep18Default}
           additionalInfo="token(s)"
         />
-        <AccountInfoRow publicKey={recipientKey} label="to" />
+        <AccountInfoRow
+          publicKey={recipientKey}
+          label="to"
+          iconSize={20}
+          csprName={recipientAccountInfo?.csprName}
+          imgLogo={recipientAccountInfo?.brandingLogo}
+        />
       </SimpleContainer>
     );
   }
@@ -91,6 +100,8 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
           label="owned by"
           isAction
           iconSize={20}
+          csprName={recipientAccountInfo?.csprName}
+          imgLogo={recipientAccountInfo?.brandingLogo}
         />
       </SimpleContainer>
     );
