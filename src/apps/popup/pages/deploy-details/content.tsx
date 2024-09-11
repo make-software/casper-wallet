@@ -1,14 +1,11 @@
 import { IDeploy } from 'casper-wallet-core';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { DeployDetailsAction } from '@popup/pages/deploy-details/components/deploy-details-action';
 import { DeployDetailsResult } from '@popup/pages/deploy-details/components/deploy-details-result';
 import { getEntryPointName } from '@popup/pages/deploy-details/utils';
-
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
 import {
   AlignedSpaceBetweenFlexRow,
@@ -22,7 +19,7 @@ import {
   SpacingSize,
   borderBottomPseudoElementRules
 } from '@libs/layout';
-import { dispatchFetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
+import { useFetchDeploy } from '@libs/services/deploys/use-fetch-deploy';
 import {
   DeployStatus,
   Hash,
@@ -69,23 +66,17 @@ export const DeployDetailsPageContent = ({
 
   const { t } = useTranslation();
 
-  const activeAccount = useSelector(selectVaultActiveAccount);
-
   useEffect(() => {
     setSingleDeploy(deploy);
   }, [deploy]);
 
+  const { deployData } = useFetchDeploy(deploy?.deployHash);
+
   useEffect(() => {
-    if (deploy?.deployHash && activeAccount?.publicKey) {
-      // TODO: rewrite this to hook and move to deploys service
-      dispatchFetchExtendedDeploysInfo(
-        deploy.deployHash,
-        activeAccount?.publicKey
-      ).then(({ payload: resp }) => {
-        setSingleDeploy(resp);
-      });
+    if (deployData) {
+      setSingleDeploy(deployData);
     }
-  }, [activeAccount?.publicKey, deploy?.deployHash]);
+  }, [deployData]);
 
   if (!singleDeploy) {
     return null;
@@ -106,7 +97,7 @@ export const DeployDetailsPageContent = ({
               status: singleDeploy.status,
               errorMessage: singleDeploy.errorMessage
             }}
-            placement="bottomRight"
+            placement="bottomLeft"
           />
         </TitleContainer>
       </ParagraphContainer>

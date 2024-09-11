@@ -39,7 +39,7 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
       <SimpleContainer title={title}>
         <AmountRow amount={formattedDecimalAmount} symbol={symbol} label="of" />
         <ContractInfoRow
-          publicKey={contractPackageHash}
+          contractPackageHash={contractPackageHash}
           contractName={contractName}
           iconUrl={iconUrl}
           defaultSvg={DeployIcon.Cep18Default}
@@ -64,7 +64,7 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
           label="for"
         />
         <ContractInfoRow
-          publicKey={contractPackageHash}
+          contractPackageHash={contractPackageHash}
           contractName={contractName}
           iconUrl={iconUrl}
           defaultSvg={DeployIcon.Cep18Default}
@@ -80,7 +80,7 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
       <SimpleContainer title={title}>
         <AmountRow amount={formattedDecimalAmount} symbol={symbol} label="of" />
         <ContractInfoRow
-          publicKey={contractPackageHash}
+          contractPackageHash={contractPackageHash}
           contractName={contractName}
           iconUrl={iconUrl}
           defaultSvg={DeployIcon.Cep18Default}
@@ -101,6 +101,7 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
       title={title}
       contractPackageHash={contractPackageHash}
       contractName={contractName}
+      iconUrl={iconUrl || DeployIcon.Cep18Default}
       additionalInfo="CEP-18 Token"
     />
   );
