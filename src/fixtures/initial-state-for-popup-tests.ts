@@ -113,5 +113,8 @@ export const initialStateForPopupTests: RootState = {
     ratedInStore: false,
     askForReviewAfter: null
   },
-  accountBalances: []
+  accountBalances: [],
+  promotion: {
+    showCSPRNamePromotion: true
+  }
 };

@@ -62,6 +62,7 @@ import {
   ledgerRecipientToSaveOnSuccessChanged,
   ledgerStateCleared
 } from '@background/redux/ledger/actions';
+import { setShowCSPRNamePromotion } from '@background/redux/promotion/actions';
 import {
   askForReviewAfterChanged,
   ratedInStoreChanged
@@ -632,6 +633,7 @@ runtime.onMessage.addListener(
           case getType(ledgerDeployChanged):
           case getType(ledgerRecipientToSaveOnSuccessChanged):
           case getType(addWatchingAccount):
+          case getType(setShowCSPRNamePromotion):
             store.dispatch(action);
             return sendResponse(undefined);
 

@@ -68,6 +68,12 @@ const LogoContainer = styled.div`
   margin: 16px 0;
 `;
 
+const CsprNameContainer = styled.div`
+  padding: 1px 8px;
+  background-color: ${props => props.theme.color.contentPositive};
+  border-radius: ${props => props.theme.borderRadius.twoHundred}px;
+`;
+
 interface MenuItem {
   id: number;
   title: string;
@@ -80,6 +86,7 @@ interface MenuItem {
   hide?: boolean;
   toggleButton?: boolean;
   isModalWindow?: boolean;
+  isCsprName?: boolean;
 }
 
 interface MenuGroup {
@@ -194,6 +201,17 @@ export function NavigationMenuPageContent() {
               closeNavigationMenu();
               navigate(RouterPath.AddWatchAccount);
             }
+          },
+          {
+            id: 7,
+            title: t('CSPR.name'),
+            description: t('Get names for your accounts'),
+            iconPath: 'assets/icons/cspr-name.svg',
+            // TODO: add url to CSPR.name
+            href: '',
+            currentValue: t('New'),
+            disabled: false,
+            isCsprName: true
           }
         ]
       },
@@ -367,11 +385,17 @@ export function NavigationMenuPageContent() {
         ) : (
           <Typography type="body">{groupItem.title}</Typography>
         )}
-        {groupItem.currentValue != null && (
+        {groupItem.currentValue != null && !groupItem.isCsprName ? (
           <Typography type="bodySemiBold" color="contentAction">
             {groupItem.currentValue}
           </Typography>
-        )}
+        ) : groupItem.currentValue != null && groupItem.isCsprName ? (
+          <CsprNameContainer>
+            <Typography type="captionMedium" color="contentOnFill">
+              {groupItem.currentValue}
+            </Typography>
+          </CsprNameContainer>
+        ) : null}
       </SpaceBetweenContainer>
     </ListItemClickableContainer>
   );
