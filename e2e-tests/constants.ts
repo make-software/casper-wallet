@@ -78,7 +78,7 @@ export const RECOVER_FIRST_ACCOUNT_FROM_TWELVE_WORDS = {
 };
 
 export const RECOVER_SECOND_ACCOUNT_FROM_TWELVE_WORDS = {
-  accountName: 'Account 1',
+  accountName: 'Account 2',
   publicKey:
     '02022cafccfb61ffc4e4221e4d2c38eec6035d579d04c1396b1c2027dc0729c53589',
   truncatedPublicKey: '02022...53589'

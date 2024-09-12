@@ -68,7 +68,9 @@ popup.describe('Popup UI: contacts', () => {
       ).toBeVisible();
 
       await popupExpect(
-        popupPage.getByText(DEFAULT_FIRST_ACCOUNT.accountName)
+        popupPage
+          .getByText(DEFAULT_FIRST_ACCOUNT.accountName, { exact: true })
+          .nth(1)
       ).toBeVisible();
 
       await popupExpect(
@@ -135,7 +137,10 @@ popup.describe('Popup UI: contacts', () => {
       await unlockVault();
       await addContact();
 
-      await popupPage.getByText(DEFAULT_FIRST_ACCOUNT.accountName).click();
+      await popupPage
+        .getByText(DEFAULT_FIRST_ACCOUNT.accountName, { exact: true })
+        .nth(1)
+        .click();
 
       await popupExpect(
         popupPage.getByRole('heading', {
@@ -144,7 +149,9 @@ popup.describe('Popup UI: contacts', () => {
       ).toBeVisible();
 
       await popupExpect(
-        popupPage.getByText(DEFAULT_FIRST_ACCOUNT.publicKey)
+        popupPage
+          .getByText(DEFAULT_FIRST_ACCOUNT.publicKey, { exact: true })
+          .nth(1)
       ).toBeVisible();
     }
   );
@@ -155,7 +162,10 @@ popup.describe('Popup UI: contacts', () => {
       await unlockVault();
       await addContact();
 
-      await popupPage.getByText(DEFAULT_FIRST_ACCOUNT.accountName).click();
+      await popupPage
+        .getByText(DEFAULT_FIRST_ACCOUNT.accountName, { exact: true })
+        .nth(1)
+        .click();
 
       await popupPage.getByTestId('edit-contact-button').click();
 
@@ -190,7 +200,9 @@ popup.describe('Popup UI: contacts', () => {
       await popupPage.getByRole('button', { name: 'Save' }).click();
 
       await popupExpect(
-        popupPage.getByText(DEFAULT_FIRST_ACCOUNT.accountName)
+        popupPage
+          .getByText(DEFAULT_FIRST_ACCOUNT.accountName, { exact: true })
+          .nth(1)
       ).not.toBeVisible();
 
       await popupPage.getByText(DEFAULT_SECOND_ACCOUNT.accountName).click();
@@ -213,7 +225,10 @@ popup.describe('Popup UI: contacts', () => {
       await unlockVault();
       await addContact();
 
-      await popupPage.getByText(DEFAULT_FIRST_ACCOUNT.accountName).click();
+      await popupPage
+        .getByText(DEFAULT_FIRST_ACCOUNT.accountName, { exact: true })
+        .nth(1)
+        .click();
 
       await popupPage.getByTestId('delete-contact-button').click();
 
@@ -233,7 +248,9 @@ popup.describe('Popup UI: contacts', () => {
       await popupPage.getByRole('button', { name: 'Delete' }).click();
 
       await popupExpect(
-        popupPage.getByText(DEFAULT_FIRST_ACCOUNT.accountName)
+        popupPage
+          .getByText(DEFAULT_FIRST_ACCOUNT.accountName, { exact: true })
+          .nth(1)
       ).not.toBeVisible();
     }
   );

@@ -77,6 +77,7 @@ interface AvatarTypes {
   borderRadius?: number;
   brandingLogo?: Maybe<string> | undefined;
   isAccountSwitcherOpen?: boolean;
+  dataTestId?: string;
 }
 
 interface ConnectionStatusBadgeTypes {
@@ -86,6 +87,7 @@ interface ConnectionStatusBadgeTypes {
   displayContext?: 'header' | 'accountList';
   isDarkMode: boolean;
   isAccountSwitcherOpen?: boolean;
+  dataTestId?: string;
 }
 
 interface LogoTypes {
@@ -105,10 +107,11 @@ const ConnectionStatusBadge = ({
   displayContext,
   isConnected,
   isDarkMode,
-  isAccountSwitcherOpen
+  isAccountSwitcherOpen,
+  dataTestId
 }: ConnectionStatusBadgeTypes) => {
   return (
-    <ConnectionStatusBadgeContainer>
+    <ConnectionStatusBadgeContainer data-testid={dataTestId}>
       {children}
       <ConnectIcon
         src={connectIcon}
@@ -144,7 +147,8 @@ export const Avatar = ({
   isActiveAccount,
   borderRadius,
   brandingLogo,
-  isAccountSwitcherOpen
+  isAccountSwitcherOpen,
+  dataTestId
 }: AvatarTypes) => {
   const theme = useTheme();
 
@@ -163,6 +167,7 @@ export const Avatar = ({
         connectIcon={connectIcon}
         isDarkMode={isDarkMode}
         isAccountSwitcherOpen={isAccountSwitcherOpen}
+        dataTestId={dataTestId}
       >
         {brandingLogo ? (
           <Logo size={size} brandingLogo={brandingLogo} publicKey={publicKey} />

@@ -41,7 +41,6 @@ export function HeaderConnectionStatus({
   return (
     <Modal
       placement="top"
-      dataTestId="connection-status-modal"
       renderContent={({ closeModal }) => (
         <AccountList closeModal={closeModal} />
       )}
@@ -56,6 +55,7 @@ export function HeaderConnectionStatus({
               displayContext="header"
               brandingLogo={brandingLogo}
               isAccountSwitcherOpen={isOpen}
+              dataTestId="connection-status-modal"
             />
           </HeaderBackgroundContainer>
           <LeftAlignedFlexColumn
