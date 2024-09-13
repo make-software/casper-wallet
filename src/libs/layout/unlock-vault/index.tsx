@@ -11,6 +11,7 @@ import {
   ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED,
   LOGIN_RETRY_ATTEMPTS_LIMIT
 } from '@src/constants';
+import { PasswordDoesNotExistError } from '@src/errors';
 import { getErrorMessageForIncorrectPassword } from '@src/utils';
 
 import {
@@ -79,7 +80,7 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
     ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED;
 
   if (passwordHash == null || passwordSaltHash == null) {
-    throw Error("Password doesn't exist");
+    throw new PasswordDoesNotExistError();
   }
 
   const {
