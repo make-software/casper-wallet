@@ -1,5 +1,7 @@
 import React, { Component, ReactNode } from 'react';
 
+import { PasswordDoesNotExistError } from '@src/errors';
+
 import { WindowErrorPage, createErrorLocationState } from '@libs/layout';
 
 interface Props {
@@ -32,12 +34,16 @@ export class ErrorBoundary extends Component<Props, State> {
       // TODO: Add localizations below
       return (
         <WindowErrorPage
+          error={this.state.error}
           overrideState={createErrorLocationState({
             errorHeaderText: 'Something went wrong',
             errorContentText:
               this.state.error?.message ||
               'Please check browser console for error details, this will be a valuable for our team to fix the issue.',
-            errorPrimaryButtonLabel: 'Close',
+            errorPrimaryButtonLabel:
+              this.state.error instanceof PasswordDoesNotExistError
+                ? 'Reset Wallet'
+                : 'Close',
             errorRedirectPath: null
           })}
         />

@@ -1,7 +1,12 @@
 import React from 'react';
 import { NavigateFunction } from 'react-router';
 
+import { PasswordDoesNotExistError } from '@src/errors';
+
 import { closeCurrentWindow } from '@background/close-current-window';
+import { openOnboardingUi } from '@background/open-onboarding-flow';
+import { resetVault } from '@background/redux/sagas/actions';
+import { dispatchToMainStore } from '@background/redux/utils';
 
 import {
   FooterButtonsContainer,
@@ -17,12 +22,14 @@ interface ErrorPageProps {
   overrideState?: { state: Required<ErrorLocationState> };
   createTypedNavigate?: () => NavigateFunction;
   createTypedLocation?: () => Location & any;
+  error?: Error | null;
 }
 
 export function WindowErrorPage({
   overrideState,
   createTypedNavigate,
-  createTypedLocation
+  createTypedLocation,
+  error
 }: ErrorPageProps) {
   const navigate = createTypedNavigate
     ? createTypedNavigate()
@@ -50,11 +57,20 @@ export function WindowErrorPage({
         <FooterButtonsContainer>
           <Button
             color="primaryBlue"
-            onClick={() =>
-              location?.state?.errorRedirectPath != null
+            onClick={async () => {
+              if (error instanceof PasswordDoesNotExistError) {
+                try {
+                  dispatchToMainStore(resetVault());
+                  closeCurrentWindow();
+                  openOnboardingUi();
+                  return;
+                } catch (e) {}
+              }
+
+              return location?.state?.errorRedirectPath != null
                 ? navigate(location.state.errorRedirectPath)
-                : closeCurrentWindow()
-            }
+                : closeCurrentWindow();
+            }}
           >
             {state.errorPrimaryButtonLabel}
           </Button>
