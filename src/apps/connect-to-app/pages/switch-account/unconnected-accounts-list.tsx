@@ -1,3 +1,4 @@
+import { IAccountInfo } from 'casper-wallet-core/src/domain/accountInfo';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -12,7 +13,10 @@ import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-s
 import { sdkMethod } from '@content/sdk-method';
 
 import { LeftAlignedFlexColumn, SpacingSize } from '@libs/layout';
-import { AccountListRows } from '@libs/types/account';
+import {
+  AccountListRowWithAccountHash,
+  AccountListRows
+} from '@libs/types/account';
 import {
   Button,
   ConnectionStatusBadge,
@@ -39,13 +43,15 @@ export const SpaceBetweenContainer = styled(CentredFlexRow)`
 `;
 
 interface UnconnectedAccountsListProps {
-  unconnectedAccountsList: AccountListRows[];
+  unconnectedAccountsList: AccountListRowWithAccountHash<AccountListRows>[];
   requestId: string;
+  accountsInfo: Record<string, IAccountInfo> | undefined;
 }
 
 export const UnconnectedAccountsList = ({
   unconnectedAccountsList,
-  requestId
+  requestId,
+  accountsInfo
 }: UnconnectedAccountsListProps) => {
   const activeOrigin = useSelector(selectActiveOrigin);
 
@@ -60,46 +66,53 @@ export const UnconnectedAccountsList = ({
         rows={unconnectedAccountsList}
         headerLabelTop={SpacingSize.Large}
         contentTop={SpacingSize.Small}
-        renderRow={(unconnectedAccount, index) => (
-          <ListItemContainer key={unconnectedAccount.name}>
-            <SpaceBetweenContainer>
-              <LeftAlignedFlexColumn>
-                <ConnectionStatusBadge
-                  isConnected={false}
-                  displayContext="accountList"
-                />
-                <Typography type="body">{unconnectedAccount.name}</Typography>
-                <Hash
-                  value={unconnectedAccount.publicKey}
-                  variant={HashVariant.CaptionHash}
-                  truncated
-                  placement={
-                    index === unconnectedAccountsList.length - 1
-                      ? 'topRight'
-                      : 'bottomRight'
-                  }
-                />
-              </LeftAlignedFlexColumn>
-              <Button
-                color="primaryRed"
-                inline
-                minWidth="86"
-                onClick={async () => {
-                  await connectAnotherAccount(
-                    unconnectedAccount.name,
-                    activeOrigin
-                  );
-                  await sendSdkResponseToSpecificTab(
-                    sdkMethod.switchAccountResponse(false, { requestId })
-                  );
-                  closeCurrentWindow();
-                }}
-              >
-                <Trans t={t}>Connect</Trans>
-              </Button>
-            </SpaceBetweenContainer>
-          </ListItemContainer>
-        )}
+        renderRow={(unconnectedAccount, index) => {
+          const csprName =
+            accountsInfo &&
+            accountsInfo[unconnectedAccount.accountHash].csprName;
+
+          return (
+            <ListItemContainer key={unconnectedAccount.name}>
+              <SpaceBetweenContainer>
+                <LeftAlignedFlexColumn>
+                  <ConnectionStatusBadge
+                    isConnected={false}
+                    displayContext="accountList"
+                  />
+                  <Typography type="body">{unconnectedAccount.name}</Typography>
+                  <Hash
+                    value={unconnectedAccount.publicKey}
+                    variant={HashVariant.CaptionHash}
+                    csprName={csprName}
+                    truncated
+                    placement={
+                      index === unconnectedAccountsList.length - 1
+                        ? 'topRight'
+                        : 'bottomRight'
+                    }
+                  />
+                </LeftAlignedFlexColumn>
+                <Button
+                  color="primaryRed"
+                  inline
+                  minWidth="86"
+                  onClick={async () => {
+                    await connectAnotherAccount(
+                      unconnectedAccount.name,
+                      activeOrigin
+                    );
+                    await sendSdkResponseToSpecificTab(
+                      sdkMethod.switchAccountResponse(false, { requestId })
+                    );
+                    closeCurrentWindow();
+                  }}
+                >
+                  <Trans t={t}>Connect</Trans>
+                </Button>
+              </SpaceBetweenContainer>
+            </ListItemContainer>
+          );
+        }}
         marginLeftForItemSeparatorLine={60}
       />
     );

@@ -9,12 +9,14 @@ import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import {
   selectConnectedAccountsWithActiveOrigin,
   selectUnconnectedAccountsWithActiveOrigin,
+  selectVaultAccountsPublicKeys,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
 import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
 
 import { sdkMethod } from '@content/sdk-method';
 
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   ContentContainer,
   LeftAlignedFlexColumn,
@@ -23,6 +25,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import {
   Button,
   ConnectionStatusBadge,
@@ -44,6 +47,7 @@ type SwitchAccountContentProps = { requestId: string };
 export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
   const activeOrigin = useSelector(selectActiveOrigin);
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const publicKeys = useSelector(selectVaultAccountsPublicKeys);
   const connectedAccountsToActiveTab = useSelector(
     selectConnectedAccountsWithActiveOrigin
   );
@@ -59,17 +63,21 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
     .filter(account => account.name !== activeAccount?.name)
     .map(account => ({
       ...account,
-      id: account.name
+      id: account.name,
+      accountHash: getAccountHashFromPublicKey(account.publicKey)
     }));
 
   const unconnectedAccountsList = unconnectedAccounts.map(account => ({
     ...account,
-    id: account.name
+    id: account.name,
+    accountHash: getAccountHashFromPublicKey(account.publicKey)
   }));
 
   const isActiveAccountConnected: boolean = unconnectedAccountsList.every(
     account => account.name !== activeAccount?.name
   );
+
+  const accountsInfo = useFetchAccountsInfo(publicKeys);
 
   return (
     <PageContainer>
@@ -115,6 +123,7 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
               <UnconnectedAccountsList
                 requestId={requestId}
                 unconnectedAccountsList={unconnectedAccountsList}
+                accountsInfo={accountsInfo}
               />
             </>
           )}
@@ -123,48 +132,55 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
           <>
             <List
               rows={connectedAccountsListItems}
-              renderRow={(account, index) => (
-                <ListItemContainer key={account.name}>
-                  <SpaceBetweenContainer>
-                    <LeftAlignedFlexColumn>
-                      <ConnectionStatusBadge
-                        isConnected
-                        displayContext="accountList"
-                      />
-                      <Typography type="body">{account.name}</Typography>
-                      <Hash
-                        value={account.publicKey}
-                        variant={HashVariant.CaptionHash}
-                        truncated
-                        placement={
-                          index === connectedAccountsListItems.length - 1
-                            ? 'topRight'
-                            : 'bottomRight'
-                        }
-                      />
-                    </LeftAlignedFlexColumn>
-                    <Button
-                      color="secondaryBlue"
-                      inline
-                      minWidth="86"
-                      onClick={async () => {
-                        await changeActiveAccount(account.name);
-                        await sendSdkResponseToSpecificTab(
-                          sdkMethod.switchAccountResponse(true, { requestId })
-                        );
-                        closeCurrentWindow();
-                      }}
-                    >
-                      <Trans t={t}>Switch</Trans>
-                    </Button>
-                  </SpaceBetweenContainer>
-                </ListItemContainer>
-              )}
+              renderRow={(account, index) => {
+                const csprName =
+                  accountsInfo && accountsInfo[account.accountHash].csprName;
+
+                return (
+                  <ListItemContainer key={account.name}>
+                    <SpaceBetweenContainer>
+                      <LeftAlignedFlexColumn>
+                        <ConnectionStatusBadge
+                          isConnected
+                          displayContext="accountList"
+                        />
+                        <Typography type="body">{account.name}</Typography>
+                        <Hash
+                          value={account.publicKey}
+                          csprName={csprName}
+                          variant={HashVariant.CaptionHash}
+                          truncated
+                          placement={
+                            index === connectedAccountsListItems.length - 1
+                              ? 'topRight'
+                              : 'bottomRight'
+                          }
+                        />
+                      </LeftAlignedFlexColumn>
+                      <Button
+                        color="secondaryBlue"
+                        inline
+                        minWidth="86"
+                        onClick={async () => {
+                          await changeActiveAccount(account.name);
+                          await sendSdkResponseToSpecificTab(
+                            sdkMethod.switchAccountResponse(true, { requestId })
+                          );
+                          closeCurrentWindow();
+                        }}
+                      >
+                        <Trans t={t}>Switch</Trans>
+                      </Button>
+                    </SpaceBetweenContainer>
+                  </ListItemContainer>
+                );
+              }}
               marginLeftForItemSeparatorLine={60}
             />
             <UnconnectedAccountsList
               requestId={requestId}
               unconnectedAccountsList={unconnectedAccountsList}
+              accountsInfo={accountsInfo}
             />
           </>
         )}

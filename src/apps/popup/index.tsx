@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import React, { Suspense, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 // skeleton styles
@@ -20,23 +20,10 @@ import { useSubscribeToRedux } from '@hooks/use-subscribe-to-redux';
 import { useSystemThemeDetector } from '@hooks/use-system-theme-detector';
 
 import { ErrorBoundary } from '@libs/layout';
+import { newQueryClient } from '@libs/services/query-client';
 import { GlobalStyle, darkTheme, lightTheme } from '@libs/ui';
 
 import { AppRouter } from './app-router';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 3 * 60 * 1000,
-      refetchInterval: 3 * 60 * 1000,
-      gcTime: 3 * 60 * 1000,
-      retry: false
-    },
-    mutations: {
-      retry: false
-    }
-  }
-});
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
@@ -75,7 +62,7 @@ const Tree = () => {
       <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
         <GlobalStyle />
         <ReduxProvider store={store}>
-          <QueryClientProvider client={queryClient}>
+          <QueryClientProvider client={newQueryClient}>
             <ErrorBoundary>
               <AppRouter />
             </ErrorBoundary>
