@@ -1,3 +1,4 @@
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 import styled, { DefaultTheme, useTheme } from 'styled-components';
 
@@ -32,8 +33,36 @@ export const BackgroundWrapper = styled.div(
   })
 );
 
+const ConnectIcon = styled(SvgIcon)<{
+  displayContext?: 'header' | 'accountList';
+  isDarkMode: boolean;
+  color: string;
+}>`
+  position: absolute;
+  bottom: ${({ displayContext }) =>
+    displayContext === 'header'
+      ? '-4px'
+      : displayContext === 'accountList'
+        ? '-2px'
+        : '-5px'};
+  right: ${({ displayContext }) =>
+    displayContext === 'header'
+      ? '-4px'
+      : displayContext === 'accountList'
+        ? '-2px'
+        : '-5px'};
+  svg > circle {
+    stroke: ${({ isDarkMode, displayContext, theme }) =>
+      displayContext === 'header'
+        ? isDarkMode
+          ? '#A30D18'
+          : '#CF111F'
+        : theme.color.backgroundPrimary};
+  }
+`;
+
 interface AvatarTypes {
-  publicKey: string;
+  publicKey: Maybe<string>;
   size: number;
   top?: SpacingSize;
   withConnectedStatus?: boolean;
@@ -70,7 +99,7 @@ export const Avatar = ({
       <ConnectionStatusBadgeContainer>
         <Identicon
           // in the case of public key is with uppercase characters
-          value={publicKey.toLowerCase()}
+          value={publicKey?.toLowerCase() || ''}
           size={size}
           background={theme.color.contentOnFill}
           displayContext={displayContext}
@@ -78,28 +107,15 @@ export const Avatar = ({
           isConnected={isConnected}
           borderRadius={borderRadius}
         />
-        <SvgIcon
+        <ConnectIcon
           src={connectIcon}
           size={
             displayContext === 'header' || displayContext === 'accountList'
               ? 12
               : 16
           }
-          style={{
-            position: 'absolute',
-            bottom:
-              displayContext === 'header'
-                ? '-4px'
-                : displayContext === 'accountList'
-                  ? '-2px'
-                  : '-5px',
-            right:
-              displayContext === 'header'
-                ? '-4px'
-                : displayContext === 'accountList'
-                  ? '-2px'
-                  : '-5px'
-          }}
+          isDarkMode={isDarkMode}
+          displayContext={displayContext}
           color={isConnected ? 'contentPositive' : 'contentDisabled'}
         />
       </ConnectionStatusBadgeContainer>

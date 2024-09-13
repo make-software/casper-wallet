@@ -5,10 +5,10 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES } from '@src/constants';
-import { fetchAndDispatchExtendedDeployInfo } from '@src/utils';
 
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
+import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
 import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
 import {
   ledgerDeployChanged,
@@ -165,7 +165,9 @@ export const TransferPage = () => {
         dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
         if ('result' in resp) {
-          fetchAndDispatchExtendedDeployInfo(resp.result.deploy_hash);
+          dispatchToMainStore(
+            accountPendingDeployHashesChanged(resp.result.deploy_hash)
+          );
 
           setTransferStep(TransactionSteps.Success);
         } else {

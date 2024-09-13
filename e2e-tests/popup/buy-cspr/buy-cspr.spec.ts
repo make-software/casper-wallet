@@ -22,14 +22,6 @@ popup.describe('Popup UI: buy cspr', () => {
       ).toBeVisible();
       await popupPage.getByRole('button', { name: 'Next' }).click();
 
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Pick provider' })
-      ).toBeVisible();
-
-      await popupExpect(
-        popupPage.getByRole('button', { name: 'Confirm' })
-      ).toBeDisabled();
-
       await popupPage.getByText('Topper by Uphold').click();
 
       await popupExpect(
@@ -67,10 +59,6 @@ popup.describe('Popup UI: buy cspr', () => {
         popupPage.getByRole('heading', { name: 'Enter amount' })
       ).toBeVisible();
       await popupPage.getByRole('button', { name: 'Next' }).click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Pick provider' })
-      ).toBeVisible();
 
       await popupExpect(
         popupPage.getByRole('button', { name: 'Confirm' })

@@ -33,7 +33,8 @@ export const RecipientTabs = ({
 
   const { t } = useTranslation();
 
-  const { register, trigger, control, formState, setValue } = recipientForm;
+  const { register, trigger, control, formState, setValue, clearErrors } =
+    recipientForm;
   const { errors } = formState;
   const { onChange } = register('recipientPublicKey');
 
@@ -57,26 +58,6 @@ export const RecipientTabs = ({
     //   This should trigger only once
     //   eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const handleIconClick = () => {
-    navigator.clipboard
-      .readText()
-      .then(clipboardText => {
-        setValue('recipientPublicKey', clipboardText);
-        if (setRecipientPublicKey) {
-          setRecipientPublicKey(clipboardText);
-        }
-
-        trigger('recipientPublicKey').then(isValid => {
-          if (isValid) {
-            setShowRecipientPlate(true);
-          }
-        });
-      })
-      .catch(err => {
-        console.error('Could not read clipboard: ', err);
-      });
-  };
 
   const handleSelectRecipient = (publicKey: string, name: string) => {
     if (setRecipientPublicKey) {
@@ -114,15 +95,26 @@ export const RecipientTabs = ({
     >
       <Input
         monotype
-        prefixIcon={<SvgIcon src="assets/icons/search.svg" size={24} />}
+        prefixIcon={
+          <SvgIcon
+            src="assets/icons/search.svg"
+            size={24}
+            color="contentDisabled"
+          />
+        }
         suffixIcon={
-          !!errors?.recipientPublicKey ? null : (
+          inputValue && (
             <SvgIcon
-              src="assets/icons/paste.svg"
-              size={24}
-              color="contentAction"
-              onClick={handleIconClick}
-              style={{ cursor: 'pointer' }}
+              src="assets/icons/cross.svg"
+              size={16}
+              onClick={() => {
+                setValue('recipientPublicKey', '');
+                if (setRecipientPublicKey) {
+                  setRecipientPublicKey('');
+                }
+                setRecipientName('');
+                trigger('recipientPublicKey');
+              }}
             />
           )
         }
@@ -137,21 +129,18 @@ export const RecipientTabs = ({
         }}
         error={!!errors?.recipientPublicKey}
         validationText={errors?.recipientPublicKey?.message}
-        autoComplete="off"
       />
-      <VerticalSpaceContainer top={SpacingSize.Tiny}>
-        <Tabs>
-          <Tab tabName={RecipientTabName.Recent}>
-            <RecentList handleSelectRecipient={handleSelectRecipient} />
-          </Tab>
-          <Tab tabName={RecipientTabName.MyAccounts}>
-            <MyAccountsList handleSelectRecipient={handleSelectRecipient} />
-          </Tab>
-          <Tab tabName={RecipientTabName.Contacts}>
-            <ContactsList handleSelectRecipient={handleSelectRecipient} />
-          </Tab>
-        </Tabs>
-      </VerticalSpaceContainer>
+      <Tabs onClick={inputValue ? undefined : clearErrors}>
+        <Tab tabName={RecipientTabName.Recent}>
+          <RecentList handleSelectRecipient={handleSelectRecipient} />
+        </Tab>
+        <Tab tabName={RecipientTabName.MyAccounts}>
+          <MyAccountsList handleSelectRecipient={handleSelectRecipient} />
+        </Tab>
+        <Tab tabName={RecipientTabName.Contacts}>
+          <ContactsList handleSelectRecipient={handleSelectRecipient} />
+        </Tab>
+      </Tabs>
     </VerticalSpaceContainer>
   );
 };

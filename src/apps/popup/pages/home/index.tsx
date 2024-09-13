@@ -152,11 +152,11 @@ export function HomePageContent() {
           <Tab tabName={HomePageTabName.Tokens}>
             <TokensList />
           </Tab>
-          <Tab tabName={HomePageTabName.Deploys}>
-            <DeploysList />
-          </Tab>
           <Tab tabName={HomePageTabName.NFTs}>
             <NftList />
+          </Tab>
+          <Tab tabName={HomePageTabName.Deploys}>
+            <DeploysList />
           </Tab>
         </Tabs>
       </VerticalSpaceContainer>

@@ -1,3 +1,4 @@
+import { CasperNetwork } from 'casper-wallet-core/src/domain/common/common';
 import { RootAction, getType } from 'typesafe-actions';
 import {
   Tabs,
@@ -33,22 +34,14 @@ import {
 } from '@background/redux/account-balances/actions';
 import {
   accountBalanceChanged,
-  accountCasperActivityChanged,
-  accountCasperActivityCountChanged,
-  accountCasperActivityUpdated,
   accountCurrencyRateChanged,
-  accountDeploysAdded,
-  accountDeploysCountChanged,
-  accountDeploysUpdated,
   accountErc20Changed,
-  accountErc20TokensActivityChanged,
-  accountErc20TokensActivityUpdated,
   accountInfoReset,
   accountNftTokensAdded,
   accountNftTokensCountChanged,
   accountNftTokensUpdated,
-  accountPendingTransactionsChanged,
-  accountPendingTransactionsRemove,
+  accountPendingDeployHashesChanged,
+  accountPendingDeployHashesRemove,
   accountTrackingIdOfSentNftTokensChanged,
   accountTrackingIdOfSentNftTokensRemoved
 } from '@background/redux/account-info/actions';
@@ -82,6 +75,7 @@ import {
   accountsAdded,
   accountsImported,
   activeAccountChanged,
+  addWatchingAccount,
   anotherAccountConnected,
   deployPayloadReceived,
   deploysReseted,
@@ -115,9 +109,6 @@ import { sdkEvent } from '@content/sdk-event';
 import { SdkMethod, isSDKMethod, sdkMethod } from '@content/sdk-method';
 
 import {
-  MapExtendedDeploy,
-  MapPaginatedExtendedDeploys,
-  fetchAccountCasperActivity,
   fetchAccountExtendedDeploys,
   fetchExtendedDeploysInfo
 } from '@libs/services/account-activity-service';
@@ -180,7 +171,10 @@ import {
   themeModeSettingChanged,
   vaultSettingsReseted
 } from './redux/settings/actions';
-import { selectApiConfigBasedOnActiveNetwork } from './redux/settings/selectors';
+import {
+  selectActiveNetworkSetting,
+  selectApiConfigBasedOnActiveNetwork
+} from './redux/settings/selectors';
 import {
   vaultCipherCreated,
   vaultCipherReseted
@@ -188,6 +182,8 @@ import {
 import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
 import { ServiceMessage, serviceMessage } from './service-message';
 import { emitSdkEventToActiveTabsWithOrigin } from './utils';
+// to resolve all repositories
+import './wallet-repositories';
 
 // setup default onboarding action
 async function handleActionClick() {
@@ -618,21 +614,13 @@ runtime.onMessage.addListener(
           case getType(recipientPublicKeyReseted):
           case getType(accountBalanceChanged):
           case getType(accountCurrencyRateChanged):
-          case getType(accountCasperActivityChanged):
-          case getType(accountCasperActivityUpdated):
           case getType(accountInfoReset):
-          case getType(accountPendingTransactionsChanged):
-          case getType(accountPendingTransactionsRemove):
+          case getType(accountPendingDeployHashesChanged):
+          case getType(accountPendingDeployHashesRemove):
           case getType(accountErc20Changed):
-          case getType(accountErc20TokensActivityChanged):
-          case getType(accountErc20TokensActivityUpdated):
-          case getType(accountDeploysAdded):
-          case getType(accountDeploysUpdated):
           case getType(accountNftTokensAdded):
           case getType(accountNftTokensUpdated):
           case getType(accountNftTokensCountChanged):
-          case getType(accountDeploysCountChanged):
-          case getType(accountCasperActivityCountChanged):
           case getType(accountTrackingIdOfSentNftTokensChanged):
           case getType(accountTrackingIdOfSentNftTokensRemoved):
           case getType(newContactAdded):
@@ -648,6 +636,7 @@ runtime.onMessage.addListener(
           case getType(ledgerStateCleared):
           case getType(ledgerDeployChanged):
           case getType(ledgerRecipientToSaveOnSuccessChanged):
+          case getType(addWatchingAccount):
             store.dispatch(action);
             return sendResponse(undefined);
 
@@ -729,16 +718,18 @@ runtime.onMessage.addListener(
               store.getState()
             );
 
+            const network = selectActiveNetworkSetting(store.getState());
+
             try {
               const data = await fetchExtendedDeploysInfo({
                 deployHash: action.payload.deployHash,
-                casperClarityApiUrl
+                casperClarityApiUrl,
+                publicKey: action.payload.publicKey,
+                network: network.toLowerCase() as CasperNetwork
               });
 
               return sendResponse(
-                serviceMessage.fetchExtendedDeploysInfoResponse(
-                  MapExtendedDeploy(data)
-                )
+                serviceMessage.fetchExtendedDeploysInfoResponse(data)
               );
             } catch (error) {
               console.error(error);
@@ -808,43 +799,23 @@ runtime.onMessage.addListener(
               store.getState()
             );
 
+            const network = selectActiveNetworkSetting(store.getState());
+
             try {
               const data = await fetchAccountExtendedDeploys({
                 casperClarityApiUrl,
                 publicKey: action.payload.publicKey,
-                page: action.payload.page
+                page: action.payload.page,
+                network: network.toLowerCase() as CasperNetwork
               });
 
               return sendResponse(
-                serviceMessage.fetchAccountExtendedDeploysResponse(
-                  MapPaginatedExtendedDeploys(data)
-                )
+                serviceMessage.fetchAccountExtendedDeploysResponse(data)
               );
             } catch (error) {
               console.error(error);
             }
 
-            return;
-          }
-
-          case getType(serviceMessage.fetchAccountCasperActivityRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchAccountCasperActivity({
-                casperClarityApiUrl,
-                accountHash: action.payload.accountHash,
-                page: action.payload.page
-              });
-
-              return sendResponse(
-                serviceMessage.fetchAccountCasperActivityResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
             return;
           }
 

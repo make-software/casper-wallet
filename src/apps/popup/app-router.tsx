@@ -5,8 +5,8 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 
 import { AccountSettingsPage } from '@popup/pages/account-settings';
-import { ActivityDetailsPage } from '@popup/pages/activity-details';
 import { AddContactPage } from '@popup/pages/add-contact';
+import { AddWatchAccount } from '@popup/pages/add-watch-account';
 import { AllAccountsPage } from '@popup/pages/all-accounts';
 import { BackupSecretPhrasePage } from '@popup/pages/backup-secret-phrase';
 import { BuyCSPRPage } from '@popup/pages/buy-cspr';
@@ -16,6 +16,7 @@ import { ConnectedSitesPage } from '@popup/pages/connected-sites';
 import { ContactDetailsPage } from '@popup/pages/contact-details';
 import { ContactsBookPage } from '@popup/pages/contacts';
 import { CreateAccountPage } from '@popup/pages/create-account';
+import { DeployDetailsPage } from '@popup/pages/deploy-details';
 import { DownloadAccountKeysPage } from '@popup/pages/download-account-keys';
 import { HomePageContent } from '@popup/pages/home';
 import { ImportAccountFromLedgerPage } from '@popup/pages/import-account-from-ledger';
@@ -203,10 +204,6 @@ function AppRoutes() {
         element={<DownloadAccountKeysPage />}
       />
       <Route path={RouterPath.Transfer} element={<TransferPage />} />
-      <Route
-        path={RouterPath.ActivityDetails}
-        element={<ActivityDetailsPage />}
-      />
       <Route path={RouterPath.Token} element={<TokenDetailPage />} />
       <Route path={RouterPath.Receive} element={<ReceivePage />} />
       <Route path={RouterPath.NftDetails} element={<NftDetailsPage />} />
@@ -252,6 +249,8 @@ function AppRoutes() {
         path={RouterPath.SignWithLedgerInNewWindow}
         element={<SignWithLedgerInNewWindowPage />}
       />
+      <Route path={RouterPath.DeployDetails} element={<DeployDetailsPage />} />
+      <Route path={RouterPath.AddWatchAccount} element={<AddWatchAccount />} />
     </Routes>
   );
 }

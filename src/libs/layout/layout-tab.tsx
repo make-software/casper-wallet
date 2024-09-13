@@ -64,7 +64,7 @@ export function LayoutTab({
     <Container>
       <AbsoluteCenteredContainer>
         <SvgIcon
-          src="assets/icons/casper-wallet-text-logo.svg"
+          src="assets/icons/casper-wallet-text-logo-light.svg"
           width={164}
           height={40}
         />

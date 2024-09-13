@@ -99,15 +99,10 @@ export const initialStateForPopupTests: RootState = {
       totalBalanceFiat: null
     },
     currencyRate: null,
-    accountCasperActivity: [],
-    accountErc20TokensActivity: null,
-    pendingTransactions: [],
+    pendingDeployHashes: [],
     erc20Tokens: [],
-    accountDeploys: [],
     accountNftTokens: [],
     nftTokensCount: 0,
-    accountDeploysCount: 0,
-    accountCasperActivityCount: 0,
     accountTrackingIdOfSentNftTokens: {}
   },
   contacts: {

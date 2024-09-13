@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 
 import { selectAllContacts } from '@background/redux/contacts/selectors';
 import { selectRecentRecipientPublicKeys } from '@background/redux/recent-recipient-public-keys/selectors';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
-import { SpacingSize, TileContainer } from '@libs/layout';
+import { SpacingSize } from '@libs/layout';
 import { List, RecipientPlate, Tile, Typography } from '@libs/ui/components';
 
 interface MyAccountsListProps {
@@ -17,6 +18,10 @@ interface RecentListState {
   id: string;
   name: string;
 }
+
+const Container = styled.div`
+  padding: 16px;
+`;
 
 export const RecentList = ({ handleSelectRecipient }: MyAccountsListProps) => {
   const [accountsWithIds, setAccountsWithIds] = useState<RecentListState[]>([]);
@@ -54,11 +59,11 @@ export const RecentList = ({ handleSelectRecipient }: MyAccountsListProps) => {
   if (!accountsWithIds.length) {
     return (
       <Tile>
-        <TileContainer top={SpacingSize.None}>
+        <Container>
           <Typography type="body" color="contentPrimary" textAlign="center">
-            No recent recipients were found.
+            No recent recipients found
           </Typography>
-        </TileContainer>
+        </Container>
       </Tile>
     );
   }

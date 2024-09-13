@@ -452,7 +452,10 @@ export const useValidatorPublicKeyRule = (
         ) {
           return true;
         }
-        if (delegatorsNumber && !hasDelegationToSelectedValidator) {
+        if (
+          (delegatorsNumber === 0 || delegatorsNumber) &&
+          !hasDelegationToSelectedValidator
+        ) {
           return delegatorsNumber < MAX_DELEGATORS;
         }
 
@@ -480,7 +483,10 @@ export const useNewValidatorPublicKeyRule = (
     .test({
       name: 'maxDelegators',
       test: () => {
-        if (delegatorsNumber && !hasDelegationToSelectedNewValidator) {
+        if (
+          (delegatorsNumber === 0 || delegatorsNumber) &&
+          !hasDelegationToSelectedNewValidator
+        ) {
           return delegatorsNumber < MAX_DELEGATORS;
         }
 

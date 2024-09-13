@@ -9,7 +9,6 @@ import {
   STAKE_COST_MOTES,
   StakeSteps
 } from '@src/constants';
-import { fetchAndDispatchExtendedDeployInfo } from '@src/utils';
 
 import { AmountStep } from '@popup/pages/stakes/amount-step';
 import { ConfirmStep } from '@popup/pages/stakes/confirm-step';
@@ -24,6 +23,7 @@ import {
 import { ValidatorDropdownInput } from '@popup/pages/stakes/validator-dropdown-input';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
+import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
 import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import { ledgerDeployChanged } from '@background/redux/ledger/actions';
 import {
@@ -180,7 +180,9 @@ export const StakesPage = () => {
       sendSignDeploy(signedDeploy, nodeUrl)
         .then(resp => {
           if ('result' in resp) {
-            fetchAndDispatchExtendedDeployInfo(resp.result.deploy_hash);
+            dispatchToMainStore(
+              accountPendingDeployHashesChanged(resp.result.deploy_hash)
+            );
 
             setStakeStep(StakeSteps.Success);
           } else {

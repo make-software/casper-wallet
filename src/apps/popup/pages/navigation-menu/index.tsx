@@ -22,6 +22,7 @@ import {
   selectVaultCountsOfAccounts
 } from '@background/redux/vault/selectors';
 
+import { useIsDarkMode } from '@hooks/use-is-dark-mode';
 import { useWindowManager } from '@hooks/use-window-manager';
 
 import {
@@ -37,6 +38,7 @@ import {
   Modal,
   SvgIcon,
   ThemeSwitcher,
+  Tile,
   Typography
 } from '@libs/ui/components';
 
@@ -57,8 +59,13 @@ const ListItemClickableContainer = styled(
   }
 `;
 
-export const SpaceBetweenContainer = styled(SpaceBetweenFlexRow)`
+const SpaceBetweenContainer = styled(SpaceBetweenFlexRow)`
   align-items: center;
+`;
+
+const LogoContainer = styled.div`
+  padding: 24px 18px;
+  margin: 16px 0;
 `;
 
 interface MenuItem {
@@ -83,6 +90,7 @@ interface MenuGroup {
 export function NavigationMenuPageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
+  const isDarkMode = useIsDarkMode();
 
   const timeoutDurationSetting = useSelector(selectTimeoutDurationSetting);
   const countOfConnectedSites = useSelector(selectCountOfConnectedSites);
@@ -177,6 +185,16 @@ export function NavigationMenuPageContent() {
                 }
               ]
             : [])
+          // {
+          //   id: 6,
+          //   title: t('Add watch account'),
+          //   iconPath: 'assets/icons/plus.svg',
+          //   disabled: false,
+          //   handleOnClick: () => {
+          //     closeNavigationMenu();
+          //     navigate(RouterPath.AddWatchAccount);
+          //   }
+          // }
         ]
       },
       {
@@ -291,6 +309,13 @@ export function NavigationMenuPageContent() {
           },
           {
             id: 2,
+            title: t('User guides'),
+            iconPath: 'assets/icons/books.svg',
+            href: 'https://casperwallet.io/user-guide',
+            disabled: false
+          },
+          {
+            id: 3,
             title: t('About us'),
             iconPath: 'assets/icons/team.svg',
             href: 'https://make.services/',
@@ -380,6 +405,19 @@ export function NavigationMenuPageContent() {
           />
         )
       )}
+      <Tile>
+        <LogoContainer>
+          <SvgIcon
+            src={
+              isDarkMode
+                ? 'assets/icons/casper-wallet-text-logo-dark.svg'
+                : 'assets/icons/casper-wallet-text-logo-light.svg'
+            }
+            width={129}
+            height={32}
+          />
+        </LogoContainer>
+      </Tile>
     </ContentContainer>
   );
 }

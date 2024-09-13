@@ -7,15 +7,7 @@ import { BaseProps } from '@libs/ui/types';
 type Ref = HTMLInputElement;
 
 const InputContainer = styled('div')<InputProps>(
-  ({
-    theme,
-    oneColoredIcons,
-    disabled,
-    error,
-    monotype,
-    readOnly,
-    secondaryBackground
-  }) => ({
+  ({ theme, disabled, monotype, readOnly, secondaryBackground }) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -33,14 +25,6 @@ const InputContainer = styled('div')<InputProps>(
     fontSize: '1.4rem',
     lineHeight: '2.4rem',
     height: '4rem',
-
-    path: {
-      fill: oneColoredIcons
-        ? theme.color.contentDisabled
-        : error
-          ? theme.color.fillCritical
-          : ''
-    },
 
     ...((disabled || readOnly) && {
       color: theme.color.contentSecondary
@@ -132,8 +116,6 @@ export interface InputProps extends BaseProps {
   rightLabel?: string | null;
   prefixIcon?: ReactNode | null;
   suffixIcon?: ReactNode | null;
-  // TODO: make a better name 🙈
-  oneColoredIcons?: boolean;
   suffixText?: string | null | ReactNode;
 
   type?: HTMLInputTypeAttribute;
@@ -144,6 +126,7 @@ export interface InputProps extends BaseProps {
   dataTestId?: string;
   autoComplete?: string;
   secondaryBackground?: boolean;
+  autoFocus?: boolean;
 }
 
 export const Input = forwardRef<Ref, InputProps>(function Input(
@@ -162,12 +145,12 @@ export const Input = forwardRef<Ref, InputProps>(function Input(
     error,
     validationType,
     validationText,
-    oneColoredIcons,
     onFocus,
     dataTestId,
     readOnly,
-    autoComplete,
+    autoComplete = 'off',
     secondaryBackground,
+    autoFocus,
     ...restProps
   }: InputProps,
   ref
@@ -205,7 +188,6 @@ export const Input = forwardRef<Ref, InputProps>(function Input(
         monotype={monotype}
         error={error}
         height={height}
-        oneColoredIcons={oneColoredIcons}
         secondaryBackground={secondaryBackground}
       >
         {prefixIcon && <PrefixContainer>{prefixIcon}</PrefixContainer>}
@@ -219,6 +201,7 @@ export const Input = forwardRef<Ref, InputProps>(function Input(
           readOnly={readOnly}
           disabled={disabled}
           autoComplete={autoComplete}
+          autoFocus={autoFocus}
         />
 
         {!suffixIcon && error && (
