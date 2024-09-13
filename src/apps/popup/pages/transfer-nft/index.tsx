@@ -21,7 +21,7 @@ import {
   selectAccountBalance,
   selectAccountNftTokens
 } from '@background/redux/account-info/selectors';
-import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
+import { selectAllContactsPublicKeys } from '@background/redux/contacts/selectors';
 import {
   ledgerDeployChanged,
   ledgerRecipientToSaveOnSuccessChanged
@@ -81,6 +81,8 @@ export const TransferNftPage = () => {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [haveReverseOwnerLookUp, setHaveReverseOwnerLookUp] = useState(false);
   const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(false);
+  const [isRecipientFormButtonDisabled, setIsRecipientFormButtonDisabled] =
+    useState(true);
 
   const { contractPackageHash, tokenId } = useParams();
 
@@ -93,7 +95,7 @@ export const TransferNftPage = () => {
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
-  const contactPublicKeys = useSelector(selectAllPublicKeys);
+  const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
   const ratedInStore = useSelector(selectRatedInStore);
   const askForReviewAfter = useSelector(selectAskForReviewAfter);
 
@@ -145,9 +147,6 @@ export const TransferNftPage = () => {
     trigger('paymentAmount');
   }, [trigger]);
 
-  const isRecipientFormButtonDisabled = calculateSubmitButtonDisabled({
-    isValid: recipientForm.formState.isValid && !haveReverseOwnerLookUp
-  });
   const isAmountFormButtonDisabled = calculateSubmitButtonDisabled({
     isValid: amountForm.formState.isValid
   });
@@ -296,6 +295,8 @@ export const TransferNftPage = () => {
         recipientForm={recipientForm}
         setRecipientName={setRecipientName}
         recipientName={recipientName}
+        setIsRecipientFormButtonDisabled={setIsRecipientFormButtonDisabled}
+        haveReverseOwnerLookUp={haveReverseOwnerLookUp}
       />
     ),
     [TransferNFTSteps.Confirm]: (

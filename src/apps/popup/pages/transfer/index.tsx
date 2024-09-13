@@ -9,7 +9,7 @@ import { ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES } from '@src/constants';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
-import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
+import { selectAllContactsPublicKeys } from '@background/redux/contacts/selectors';
 import {
   ledgerDeployChanged,
   ledgerRecipientToSaveOnSuccessChanged
@@ -114,7 +114,7 @@ export const TransferPage = () => {
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
-  const contactPublicKeys = useSelector(selectAllPublicKeys);
+  const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
   const ratedInStore = useSelector(selectRatedInStore);
   const askForReviewAfter = useSelector(selectAskForReviewAfter);
 

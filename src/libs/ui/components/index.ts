@@ -38,7 +38,6 @@ export * from './account-list/account-list';
 export * from './connection-status-badge/connection-status-badge';
 export * from './casper-token-transfer-deploys-list/casper-token-transfer-deploys-list';
 export * from './loading-activity-view/loading-activity-view';
-export * from './recipient-dropdown-input/recipient-dropdown-input';
 export * from './transfer-success-screen/transfer-succeess-screen';
 export * from './contract-icon/contract-icon';
 export * from './password-inputs/password-inputs';

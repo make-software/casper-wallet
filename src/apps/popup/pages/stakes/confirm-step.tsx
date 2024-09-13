@@ -98,9 +98,9 @@ export const ConfirmStep = ({
           }
           delegatorsNumber={validator?.delegators_number}
           validatorLabel={
-            stakeType === AuctionManagerEntryPoint.redelegate
-              ? t('From validator')
-              : t('To validator')
+            stakeType === AuctionManagerEntryPoint.delegate
+              ? t('To validator')
+              : t('From validator')
           }
           showFullPublicKey
         />

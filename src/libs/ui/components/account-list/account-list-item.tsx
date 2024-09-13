@@ -55,7 +55,7 @@ interface AccountListItemProps {
   isActiveAccount: boolean;
   showHideAccountItem?: boolean;
   closeModal?: (e: React.MouseEvent) => void;
-  accountInfo: Record<string, IAccountInfo> | undefined;
+  accountsInfo: Record<string, IAccountInfo> | undefined;
 }
 
 export const AccountListItem = ({
@@ -65,7 +65,7 @@ export const AccountListItem = ({
   isConnected,
   showHideAccountItem,
   closeModal,
-  accountInfo
+  accountsInfo
 }: AccountListItemProps) => {
   const accountBalance =
     account.balance?.liquidMotes != null
@@ -74,9 +74,9 @@ export const AccountListItem = ({
         })
       : '-';
 
-  const csprName = accountInfo && accountInfo[account.accountHash]?.csprName;
+  const csprName = accountsInfo && accountsInfo[account.accountHash]?.csprName;
   const brandingLogo =
-    accountInfo && accountInfo[account.accountHash]?.brandingLogo;
+    accountsInfo && accountsInfo[account.accountHash]?.brandingLogo;
 
   return (
     <ListItemContainer key={account.name}>

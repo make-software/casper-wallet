@@ -149,7 +149,6 @@ export const NftResultRows = ({
   }
 
   if (isApprove) {
-    console.log(1);
     return (
       <SimpleContainer title={title}>
         <NftInfoRow

@@ -10,7 +10,7 @@ import {
   SpacingSize
 } from '@libs/layout';
 import { HeaderBackgroundContainer } from '@libs/layout/header/components/header-background-container';
-import { useFetchAccountInfo } from '@libs/services/account-info';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import {
   AccountList,
   Avatar,
@@ -31,12 +31,12 @@ export function HeaderConnectionStatus({
 }: HeaderConnectionStatusProps) {
   const activeAccount = useSelector(selectVaultActiveAccount);
 
-  const accountInfo = useFetchAccountInfo([activeAccount?.publicKey!]);
+  const accountsInfo = useFetchAccountsInfo([activeAccount?.publicKey!]);
 
   const accountHash = getAccountHashFromPublicKey(activeAccount?.publicKey);
 
-  const csprName = accountInfo && accountInfo[accountHash]?.csprName;
-  const brandingLogo = accountInfo && accountInfo[accountHash]?.brandingLogo;
+  const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
+  const brandingLogo = accountsInfo && accountsInfo[accountHash]?.brandingLogo;
 
   return (
     <Modal

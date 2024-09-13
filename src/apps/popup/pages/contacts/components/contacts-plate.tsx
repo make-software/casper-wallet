@@ -4,10 +4,10 @@ import styled from 'styled-components';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
+import { selectAllContactsPublicKeys } from '@background/redux/contacts/selectors';
 
 import { AlignedFlexRow, FlexColumn, SpacingSize } from '@libs/layout';
-import { useFetchAccountInfo } from '@libs/services/account-info';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import { Avatar, Hash, HashVariant, Typography } from '@libs/ui/components';
 
 const Container = styled(AlignedFlexRow)`
@@ -29,11 +29,11 @@ export const ContactsPlate = ({
 }: ContactsPlateProps) => {
   const navigate = useTypedNavigate();
 
-  const contactPublicKeys = useSelector(selectAllPublicKeys);
-  const accountInfo = useFetchAccountInfo(contactPublicKeys);
+  const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
+  const accountsInfo = useFetchAccountsInfo(contactPublicKeys);
 
-  const csprName = accountInfo && accountInfo[accountHash]?.csprName;
-  const brandingLogo = accountInfo && accountInfo[accountHash]?.brandingLogo;
+  const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
+  const brandingLogo = accountsInfo && accountsInfo[accountHash]?.brandingLogo;
 
   return (
     <Container

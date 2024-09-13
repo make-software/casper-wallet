@@ -20,7 +20,7 @@ import { useWindowManager } from '@hooks/use-window-manager';
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { FlexColumn, SpacingSize } from '@libs/layout';
-import { useFetchAccountInfo } from '@libs/services/account-info';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import {
   AccountListRowWithAccountHash,
   AccountListRows
@@ -55,7 +55,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
     useSelector(selectConnectedAccountNamesWithActiveOrigin) || [];
   const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
-  const accountInfo = useFetchAccountInfo(accountsPublicKeys);
+  const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
 
   useEffect(() => {
     const accountListRows = sortAccounts(
@@ -92,7 +92,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
               changeActiveAccount(account.name);
               closeModal(event);
             }}
-            accountInfo={accountInfo}
+            accountsInfo={accountsInfo}
           />
         );
       }}

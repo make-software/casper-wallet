@@ -6,7 +6,7 @@ import { selectActiveNetworkSetting } from '@background/redux/settings/selectors
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { deploysRepository } from '@background/wallet-repositories';
 
-export const useFetchDeploy = (deployHash?: string) => {
+export const useFetchSingleDeploy = (deployHash?: string) => {
   const activeAccount = useSelector(selectVaultActiveAccount);
   const network = useSelector(selectActiveNetworkSetting);
 

@@ -154,10 +154,6 @@ export const SpaceBetweenFlexColumn = styled(FlexColumn)`
   justify-content: space-between;
 `;
 
-export const SpaceAroundFlexColumn = styled(FlexColumn)`
-  justify-content: space-around;
-`;
-
 export const HeaderContainer = styled(AlignedSpaceBetweenFlexRow)`
   background: ${({ theme }) =>
     getLinearGradientColor(theme.color.backgroundRed)};
@@ -168,10 +164,6 @@ export const HeaderContainer = styled(AlignedSpaceBetweenFlexRow)`
 
 export const PageContainer = styled(SpaceBetweenFlexColumn)`
   height: 100%;
-`;
-
-export const LogoContainer = styled.div`
-  cursor: ${props => (props.onClick ? 'pointer' : 'default')};
 `;
 
 export const ContentContainer = styled.div`
@@ -306,28 +298,6 @@ export const AccountActivityPlateContainer = styled(AlignedSpaceBetweenFlexRow)`
 export const ActivityPlateContentContainer = styled(FlexColumn)`
   flex-grow: 1;
   gap: 2px;
-`;
-
-export const ActivityPlateIconCircleContainer = styled(CenteredFlexRow)`
-  min-width: 28px;
-
-  width: 28px;
-  height: 28px;
-
-  margin-right: 4px;
-
-  background: ${({ theme }) => theme.color.fillNeutral};
-  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
-`;
-
-export const ActivityPlateDivider = styled.div`
-  width: 2px;
-  height: 2px;
-
-  margin: 0 6px;
-
-  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
-  background-color: ${({ theme }) => theme.color.contentSecondary};
 `;
 
 export const DropdownHeader = styled(AlignedSpaceBetweenFlexRow)`

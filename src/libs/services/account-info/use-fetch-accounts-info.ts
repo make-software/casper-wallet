@@ -8,7 +8,7 @@ import { accountInfoRepository } from '@background/wallet-repositories';
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 
-export const useFetchAccountInfo = (accountPublicKeys: string[]) => {
+export const useFetchAccountsInfo = (accountPublicKeys: string[]) => {
   const network = useSelector(selectActiveNetworkSetting);
 
   const accountHashes = useMemo(
@@ -18,7 +18,7 @@ export const useFetchAccountInfo = (accountPublicKeys: string[]) => {
 
   const accountHashesString = accountHashes.toString();
 
-  const { data: accountInfo } = useQuery({
+  const { data: accountsInfo } = useQuery({
     queryKey: ['ACCOUNT_INFO', accountHashesString],
     queryFn: async () => {
       return await accountInfoRepository.getAccountsInfo({
@@ -28,5 +28,5 @@ export const useFetchAccountInfo = (accountPublicKeys: string[]) => {
     }
   });
 
-  return accountInfo;
+  return accountsInfo;
 };

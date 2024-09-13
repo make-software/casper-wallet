@@ -25,7 +25,7 @@ import {
   TileContainer,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { useFetchAccountInfo } from '@libs/services/account-info';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import {
   Hash,
   HashVariant,
@@ -48,9 +48,9 @@ export function AccountSettingsPageContent() {
   }
 
   const accountHash = getAccountHashFromPublicKey(account.publicKey);
-  const accountInfo = useFetchAccountInfo([account.publicKey]);
+  const accountsInfo = useFetchAccountsInfo([account.publicKey]);
 
-  const csprName = accountInfo && accountInfo[accountHash]?.csprName;
+  const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
 
   return (
     <>

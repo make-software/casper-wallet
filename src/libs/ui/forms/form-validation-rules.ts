@@ -130,8 +130,14 @@ export const useRecipientPublicKeyRule = () => {
     .required(t('Recipient is required'))
     .test({
       name: 'recipientPublicKey',
-      test: value => (value ? isValidPublicKey(value) : false),
-      message: t('Recipient should be a valid public key')
+      test: value => {
+        if (value) {
+          return value.endsWith('.cspr') ? true : isValidPublicKey(value);
+        }
+
+        return false;
+      },
+      message: t('Recipient should be a valid public key or cspr name')
     });
 };
 
