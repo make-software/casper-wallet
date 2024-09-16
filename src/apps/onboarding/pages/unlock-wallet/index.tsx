@@ -3,6 +3,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { PasswordDoesNotExistError } from '@src/errors';
+
 import { UnlockWalletPageContent } from '@onboarding/pages/unlock-wallet/content';
 import { RouterPath, useTypedNavigate } from '@onboarding/router';
 
@@ -39,7 +41,7 @@ export function UnlockWalletPage({ saveIsLoggedIn }: UnlockWalletPageProps) {
   const passwordSaltHash = useSelector(selectPasswordSaltHash);
 
   if (passwordHash == null || passwordSaltHash == null) {
-    throw Error("Password doesn't exist");
+    throw new PasswordDoesNotExistError();
   }
 
   const {
