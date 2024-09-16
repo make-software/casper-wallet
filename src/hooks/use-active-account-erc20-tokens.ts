@@ -22,6 +22,7 @@ export const useActiveAccountErc20Tokens = () => {
   const effectTimeoutRef = useRef<NodeJS.Timeout>();
   const forceUpdate = useForceUpdate();
   const [tokens, setTokens] = useState<TokenType[] | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(true);
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
@@ -30,6 +31,7 @@ export const useActiveAccountErc20Tokens = () => {
   );
 
   useEffect(() => {
+    setIsLoading(true);
     dispatchFetchErc20TokensRequest(
       getAccountHashFromPublicKey(activeAccount?.publicKey)
     )
@@ -40,7 +42,8 @@ export const useActiveAccountErc20Tokens = () => {
       })
       .catch(error => {
         console.error('Balance request failed:', error);
-      });
+      })
+      .finally(() => setIsLoading(false));
 
     // will cause effect to run again after timeout
     effectTimeoutRef.current = setTimeout(() => {
@@ -53,5 +56,5 @@ export const useActiveAccountErc20Tokens = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeAccount?.publicKey, casperClarityApiUrl, t, forceUpdate]);
 
-  return { tokens: tokens };
+  return { tokens, isLoading };
 };

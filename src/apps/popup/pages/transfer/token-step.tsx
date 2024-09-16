@@ -37,10 +37,12 @@ export const TokenStep = ({
   const { t } = useTranslation();
 
   const casperToken = useCasperToken();
-  const { tokens } = useActiveAccountErc20Tokens();
+  const { tokens, isLoading } = useActiveAccountErc20Tokens();
 
   useEffect(() => {
     const tokensList: TokenType[] = [];
+
+    if (isLoading) return;
 
     if (casperToken) {
       tokensList.push(casperToken);
@@ -51,13 +53,27 @@ export const TokenStep = ({
     }
 
     setTokenList(tokensList);
-  }, [casperToken, tokens]);
+
+    const token = tokensList.find(token => token.id === selectedToken?.id);
+
+    if (token) {
+      setSelectedToken(token);
+    } else {
+      setSelectedToken(casperToken);
+    }
+  }, [casperToken, tokens, isLoading]);
 
   return (
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
           <Trans t={t}>Select token and account</Trans>
+        </Typography>
+      </ParagraphContainer>
+
+      <ParagraphContainer top={SpacingSize.XXL}>
+        <Typography type="bodySemiBold">
+          <Trans t={t}>Token</Trans>
         </Typography>
       </ParagraphContainer>
 

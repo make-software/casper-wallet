@@ -3,8 +3,3 @@ export const getErc20TokensUrl = (
   accountHash: string
 ) =>
   `${casperClarityApiUrl}/accounts/${accountHash}/erc20-tokens?fields=latest_contract,contract_package`;
-
-export const getContractPackageUrl = (
-  casperClarityApiUrl: string,
-  contractPackageHash: string
-) => `${casperClarityApiUrl}/contract-packages/${contractPackageHash}`;
