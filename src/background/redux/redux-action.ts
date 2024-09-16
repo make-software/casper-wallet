@@ -9,6 +9,7 @@ import * as lastActivityTime from './last-activity-time/actions';
 import * as ledger from './ledger/actions';
 import * as loginRetryCount from './login-retry-count/actions';
 import * as loginRetryLockoutTime from './login-retry-lockout-time/actions';
+import * as promotion from './promotion/actions';
 import * as rateApp from './rate-app/actions';
 import * as recentRecipientPublicKeys from './recent-recipient-public-keys/actions';
 import * as sagas from './sagas/actions';
@@ -35,7 +36,8 @@ const reduxAction = {
   contacts,
   rateApp,
   accountBalances,
-  ledger
+  ledger,
+  promotion
 };
 
 export type ReduxAction = ActionType<typeof reduxAction>;

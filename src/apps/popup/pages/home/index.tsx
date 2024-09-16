@@ -9,6 +9,7 @@ import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import {
   selectActiveNetworkSetting,
+  selectShowCSPRNamePromotion,
   selectVaultActiveAccount
 } from '@background/redux/root-selector';
 
@@ -28,6 +29,7 @@ import {
   Tile,
   Typography
 } from '@libs/ui/components';
+import { CsprNameBanner } from '@libs/ui/components/cspr-name-banner/cspr-name-banner';
 
 import { AccountBalance } from './components/account-balance';
 import { DeploysList } from './components/deploys-list';
@@ -58,6 +60,7 @@ export function HomePageContent() {
 
   const network = useSelector(selectActiveNetworkSetting);
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const showCSPRNamePromotion = useSelector(selectShowCSPRNamePromotion);
 
   useEffect(() => {
     if (!state?.activeTabId) {
@@ -69,6 +72,7 @@ export function HomePageContent() {
 
   return (
     <ContentContainer>
+      {showCSPRNamePromotion && <CsprNameBanner />}
       {activeAccount && (
         <Tile>
           <Container>
