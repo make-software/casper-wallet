@@ -1,3 +1,4 @@
+import { INativeCsprDeploy } from 'casper-wallet-core/src/domain/deploys/entities';
 import React from 'react';
 
 import { ContainerWithAmount } from '@popup/pages/deploy-details/components/common';
@@ -5,29 +6,49 @@ import { ContainerWithAmount } from '@popup/pages/deploy-details/components/comm
 import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 
 interface NativeTransferActionRowsProps {
-  amount: string;
-  publicKey: string;
-  fiatAmount: string;
-  isReceive: boolean;
   title: string;
-  accountName?: string;
+  deploy: INativeCsprDeploy;
 }
 
 export const NativeTransferActionRows = ({
-  amount,
-  publicKey,
-  fiatAmount,
-  isReceive,
   title,
-  accountName
-}: NativeTransferActionRowsProps) => (
-  <ContainerWithAmount title={title} amount={amount} fiatAmount={fiatAmount}>
-    <AccountInfoRow
-      publicKey={publicKey}
-      label={isReceive ? 'from' : 'to'}
-      accountName={accountName}
-      isAction
-      iconSize={20}
-    />
-  </ContainerWithAmount>
-);
+  deploy
+}: NativeTransferActionRowsProps) => {
+  const {
+    formattedDecimalAmount,
+    fiatAmount,
+    isReceive,
+    callerPublicKey,
+    recipientKey,
+    callerAccountInfo,
+    recipientAccountInfo
+  } = deploy;
+
+  return (
+    <ContainerWithAmount
+      title={title}
+      amount={formattedDecimalAmount}
+      fiatAmount={fiatAmount}
+    >
+      <AccountInfoRow
+        publicKey={isReceive ? callerPublicKey : recipientKey}
+        label={isReceive ? 'from' : 'to'}
+        accountName={
+          isReceive ? callerAccountInfo?.name : recipientAccountInfo?.name
+        }
+        isAction
+        iconSize={20}
+        imgLogo={
+          isReceive
+            ? callerAccountInfo?.brandingLogo
+            : recipientAccountInfo?.brandingLogo
+        }
+        csprName={
+          isReceive
+            ? callerAccountInfo?.csprName
+            : recipientAccountInfo?.csprName
+        }
+      />
+    </ContainerWithAmount>
+  );
+};

@@ -17,8 +17,6 @@ import {
   selectVaultLedgerAccountNames
 } from '@background/redux/vault/selectors';
 
-import { useFetchAccountInfo } from '@hooks/use-fetch-account-info';
-
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   ContentContainer,
@@ -27,6 +25,7 @@ import {
   TileContainer,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { useFetchAccountInfo } from '@libs/services/account-info';
 import {
   Hash,
   HashVariant,
@@ -49,7 +48,9 @@ export function AccountSettingsPageContent() {
   }
 
   const accountHash = getAccountHashFromPublicKey(account.publicKey);
-  const { accountInfoStandardName } = useFetchAccountInfo(account);
+  const accountInfo = useFetchAccountInfo([account.publicKey]);
+
+  const csprName = accountInfo && accountInfo[accountHash]?.csprName;
 
   return (
     <>
@@ -57,11 +58,6 @@ export function AccountSettingsPageContent() {
         <Tile>
           <TileContainer paddingVertical={SpacingSize.XL}>
             <Typography type="header">{account.name}</Typography>
-            {accountInfoStandardName && (
-              <Typography type="body" ellipsis>
-                {accountInfoStandardName}
-              </Typography>
-            )}
             <VerticalSpaceContainer top={SpacingSize.XL}>
               <QRCodeCanvas
                 id="qrCode"
@@ -83,6 +79,18 @@ export function AccountSettingsPageContent() {
                 />
               </FlexColumn>
             </VerticalSpaceContainer>
+            {csprName ? (
+              <VerticalSpaceContainer top={SpacingSize.XL}>
+                <FlexColumn gap={SpacingSize.Small}>
+                  <Typography type="bodySemiBold">
+                    <Trans t={t}>CSPR.name</Trans>
+                  </Typography>
+                  <Typography type="captionRegular" color="contentSecondary">
+                    {csprName}
+                  </Typography>
+                </FlexColumn>
+              </VerticalSpaceContainer>
+            ) : null}
             <VerticalSpaceContainer top={SpacingSize.XL}>
               <FlexColumn gap={SpacingSize.Small}>
                 <Typography type="bodySemiBold">

@@ -1,3 +1,4 @@
+import { IAccountInfo } from 'casper-wallet-core/src/domain/accountInfo';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -6,7 +7,11 @@ import {
   FlexColumn,
   SpacingSize
 } from '@libs/layout';
-import { AccountListRows, HardwareWalletType } from '@libs/types/account';
+import {
+  AccountListRowWithAccountHash,
+  AccountListRows,
+  HardwareWalletType
+} from '@libs/types/account';
 import {
   AccountActionsMenuPopover,
   Avatar,
@@ -41,7 +46,7 @@ const AccountName = styled(Typography)`
 `;
 
 interface AccountListItemProps {
-  account: AccountListRows;
+  account: AccountListRowWithAccountHash<AccountListRows>;
   onClick?: (
     event: React.MouseEvent<HTMLDivElement>,
     accountName: string
@@ -50,6 +55,7 @@ interface AccountListItemProps {
   isActiveAccount: boolean;
   showHideAccountItem?: boolean;
   closeModal?: (e: React.MouseEvent) => void;
+  accountInfo: Record<string, IAccountInfo> | undefined;
 }
 
 export const AccountListItem = ({
@@ -58,7 +64,8 @@ export const AccountListItem = ({
   isActiveAccount,
   isConnected,
   showHideAccountItem,
-  closeModal
+  closeModal,
+  accountInfo
 }: AccountListItemProps) => {
   const accountBalance =
     account.balance?.liquidMotes != null
@@ -66,6 +73,10 @@ export const AccountListItem = ({
           precision: { max: 0 }
         })
       : '-';
+
+  const csprName = accountInfo && accountInfo[account.accountHash]?.csprName;
+  const brandingLogo =
+    accountInfo && accountInfo[account.accountHash]?.brandingLogo;
 
   return (
     <ListItemContainer key={account.name}>
@@ -77,6 +88,7 @@ export const AccountListItem = ({
           isConnected={isConnected}
           displayContext="accountList"
           isActiveAccount={isActiveAccount}
+          brandingLogo={brandingLogo}
         />
         <ClickableContainer
           onClick={
@@ -102,6 +114,7 @@ export const AccountListItem = ({
           <AlignedSpaceBetweenFlexRow>
             <Hash
               value={account.publicKey}
+              csprName={csprName}
               variant={HashVariant.CaptionHash}
               truncated
               withoutTooltip

@@ -1,3 +1,4 @@
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -24,3 +25,14 @@ export const ContractRow = ({
     </AlignedFlexRow>
   );
 };
+
+export const NftAmount = ({
+  amountOfNFTs
+}: {
+  amountOfNFTs: Maybe<number>;
+}) => (
+  <AlignedFlexRow gap={SpacingSize.Tiny} flexGrow={0}>
+    <Typography type="captionHash">{amountOfNFTs}</Typography>
+    <Typography type="captionRegular">NFT(s)</Typography>
+  </AlignedFlexRow>
+);

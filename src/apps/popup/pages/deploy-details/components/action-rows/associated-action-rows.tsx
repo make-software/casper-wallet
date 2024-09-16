@@ -45,6 +45,8 @@ export const AssociatedActionRows = ({
           iconSize={20}
           accountName={callerAccountInfo?.name}
           isAction
+          csprName={callerAccountInfo?.csprName}
+          imgLogo={callerAccountInfo?.brandingLogo}
         />
       </AlignedFlexRow>
       <AlignedFlexRow gap={SpacingSize.Small}>
