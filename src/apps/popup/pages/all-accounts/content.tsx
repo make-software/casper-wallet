@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 
 import {
   selectConnectedAccountNamesWithActiveOrigin,
+  selectVaultAccountsPublicKeys,
   selectVaultActiveAccountName,
   selectVaultHiddenAccounts,
   selectVaultVisibleAccounts
@@ -11,17 +12,21 @@ import {
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { ContentContainer, SpacingSize } from '@libs/layout';
-import { AccountListRows } from '@libs/types/account';
+import { useFetchAccountInfo } from '@libs/services/account-info';
+import {
+  AccountListRowWithAccountHash,
+  AccountListRows
+} from '@libs/types/account';
 import { List } from '@libs/ui/components';
 import { AccountListItem } from '@libs/ui/components/account-list/account-list-item';
 import { sortAccounts } from '@libs/ui/components/account-list/utils';
 
 export const AllAccountsContent = () => {
   const [visibleAccountsWithId, setVisibleAccountsWithId] = useState<
-    AccountListRows[]
+    AccountListRowWithAccountHash<AccountListRows>[]
   >([]);
   const [hiddenAccountsWithId, setHiddeAccountsWithId] = useState<
-    AccountListRows[]
+    AccountListRowWithAccountHash<AccountListRows>[]
   >([]);
 
   const { t } = useTranslation();
@@ -31,6 +36,9 @@ export const AllAccountsContent = () => {
   const connectedAccountNames =
     useSelector(selectConnectedAccountNamesWithActiveOrigin) || [];
   const activeAccountName = useSelector(selectVaultActiveAccountName);
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
+
+  const accountInfo = useFetchAccountInfo(accountsPublicKeys);
 
   useEffect(() => {
     const visibleAccountListRows = sortAccounts(
@@ -77,6 +85,7 @@ export const AllAccountsContent = () => {
               isActiveAccount={isActiveAccount}
               isConnected={isConnected}
               showHideAccountItem
+              accountInfo={accountInfo}
             />
           );
         }}
@@ -97,6 +106,7 @@ export const AllAccountsContent = () => {
                 isActiveAccount={false}
                 isConnected={isConnected}
                 showHideAccountItem
+                accountInfo={accountInfo}
               />
             );
           }}

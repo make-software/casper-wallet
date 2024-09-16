@@ -26,6 +26,7 @@ interface AccountInfoRowProps {
   children?: React.ReactNode;
   iconSize?: number;
   isAction?: boolean;
+  csprName: Maybe<string> | undefined;
 }
 
 const AccountInfoContainer = styled(AlignedFlexRow)`
@@ -45,7 +46,8 @@ export const AccountInfoRow = ({
   imgLogo,
   children,
   iconSize = 16,
-  isAction = false
+  isAction = false,
+  csprName
 }: AccountInfoRowProps) => {
   const [linkUrl, setLinkUrl] = useState('');
 
@@ -151,6 +153,7 @@ export const AccountInfoRow = ({
                   <Hash
                     value={publicKey}
                     variant={HashVariant.CaptionHash}
+                    csprName={csprName}
                     truncated
                     truncatedSize="base"
                     color={isAction ? 'contentAction' : 'contentPrimary'}

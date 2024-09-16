@@ -56,7 +56,9 @@ popup.describe('Popup UI: connect account', () => {
         page.getByRole('button', { name: 'Disconnect' })
       ).toBeVisible();
       await popupExpect(
-        page.getByText(ACCOUNT_NAMES.defaultFirstAccountName)
+        page
+          .getByText(ACCOUNT_NAMES.defaultFirstAccountName, { exact: true })
+          .nth(1)
       ).toBeVisible();
     }
   );
@@ -98,7 +100,9 @@ popup.describe('Popup UI: connect account', () => {
         page.getByRole('button', { name: 'Disconnect' })
       ).toBeVisible();
       await popupExpect(
-        page.getByText(ACCOUNT_NAMES.defaultFirstAccountName)
+        page
+          .getByText(ACCOUNT_NAMES.defaultFirstAccountName, { exact: true })
+          .nth(1)
       ).toBeVisible();
       await popupExpect(
         page.getByText(ACCOUNT_NAMES.defaultSecondAccountName)

@@ -37,6 +37,7 @@ const ConnectIcon = styled(SvgIcon)<{
   displayContext?: 'header' | 'accountList';
   isDarkMode: boolean;
   color: string;
+  isAccountSwitcherOpen?: boolean;
 }>`
   position: absolute;
   bottom: ${({ displayContext }) =>
@@ -52,11 +53,15 @@ const ConnectIcon = styled(SvgIcon)<{
         ? '-2px'
         : '-5px'};
   svg > circle {
-    stroke: ${({ isDarkMode, displayContext, theme }) =>
+    stroke: ${({ isDarkMode, displayContext, theme, isAccountSwitcherOpen }) =>
       displayContext === 'header'
-        ? isDarkMode
-          ? '#A30D18'
-          : '#CF111F'
+        ? isAccountSwitcherOpen
+          ? isDarkMode
+            ? '#930C16'
+            : '#BA0F1C'
+          : isDarkMode
+            ? '#A30D18'
+            : '#CF111F'
         : theme.color.backgroundPrimary};
   }
 `;
@@ -70,7 +75,67 @@ interface AvatarTypes {
   displayContext?: 'header' | 'accountList';
   isActiveAccount?: boolean;
   borderRadius?: number;
+  brandingLogo?: Maybe<string> | undefined;
+  isAccountSwitcherOpen?: boolean;
+  dataTestId?: string;
 }
+
+interface ConnectionStatusBadgeTypes {
+  children: React.ReactNode;
+  connectIcon: string;
+  isConnected: boolean;
+  displayContext?: 'header' | 'accountList';
+  isDarkMode: boolean;
+  isAccountSwitcherOpen?: boolean;
+  dataTestId?: string;
+}
+
+interface LogoTypes {
+  size: number;
+  brandingLogo: string;
+  publicKey: Maybe<string>;
+}
+
+const LogoImg = styled.img<{ size: number }>`
+  width: ${({ size }) => size}px;
+  height: ${({ size }) => size}px;
+`;
+
+const ConnectionStatusBadge = ({
+  children,
+  connectIcon,
+  displayContext,
+  isConnected,
+  isDarkMode,
+  isAccountSwitcherOpen,
+  dataTestId
+}: ConnectionStatusBadgeTypes) => {
+  return (
+    <ConnectionStatusBadgeContainer data-testid={dataTestId}>
+      {children}
+      <ConnectIcon
+        src={connectIcon}
+        size={displayContext === 'header' ? 14 : 12}
+        isDarkMode={isDarkMode}
+        displayContext={displayContext}
+        color={isConnected ? 'contentPositive' : 'contentDisabled'}
+        isAccountSwitcherOpen={isAccountSwitcherOpen}
+      />
+    </ConnectionStatusBadgeContainer>
+  );
+};
+
+const Logo = ({ size, brandingLogo, publicKey }: LogoTypes) =>
+  brandingLogo.endsWith('.svg') ? (
+    <SvgIcon src={brandingLogo || ''} alt={publicKey || ''} size={size} />
+  ) : (
+    <LogoImg
+      src={brandingLogo}
+      size={size}
+      alt={publicKey || ''}
+      title={publicKey || ''}
+    />
+  );
 
 export const Avatar = ({
   publicKey,
@@ -80,45 +145,51 @@ export const Avatar = ({
   isConnected,
   displayContext,
   isActiveAccount,
-  borderRadius
+  borderRadius,
+  brandingLogo,
+  isAccountSwitcherOpen,
+  dataTestId
 }: AvatarTypes) => {
   const theme = useTheme();
 
   const isDarkMode = useIsDarkMode();
 
-  const connectIcon = isDarkMode
-    ? displayContext === 'header'
-      ? 'assets/icons/connected-dark.svg'
-      : 'assets/icons/connected-dark-big.svg'
-    : displayContext === 'header'
-      ? 'assets/icons/connected-light.svg'
-      : 'assets/icons/connected-light-big.svg';
+  const connectIcon =
+    displayContext === 'header'
+      ? 'assets/icons/connected-big.svg'
+      : 'assets/icons/connected.svg';
 
   if (withConnectedStatus && isConnected !== undefined) {
     return (
-      <ConnectionStatusBadgeContainer>
-        <Identicon
-          // in the case of public key is with uppercase characters
-          value={publicKey?.toLowerCase() || ''}
-          size={size}
-          background={theme.color.contentOnFill}
-          displayContext={displayContext}
-          isActiveAccount={isActiveAccount}
-          isConnected={isConnected}
-          borderRadius={borderRadius}
-        />
-        <ConnectIcon
-          src={connectIcon}
-          size={
-            displayContext === 'header' || displayContext === 'accountList'
-              ? 12
-              : 16
-          }
-          isDarkMode={isDarkMode}
-          displayContext={displayContext}
-          color={isConnected ? 'contentPositive' : 'contentDisabled'}
-        />
-      </ConnectionStatusBadgeContainer>
+      <ConnectionStatusBadge
+        isConnected={isConnected}
+        displayContext={displayContext}
+        connectIcon={connectIcon}
+        isDarkMode={isDarkMode}
+        isAccountSwitcherOpen={isAccountSwitcherOpen}
+        dataTestId={dataTestId}
+      >
+        {brandingLogo ? (
+          <Logo size={size} brandingLogo={brandingLogo} publicKey={publicKey} />
+        ) : (
+          <Identicon
+            // in the case of public key is with uppercase characters
+            value={publicKey?.toLowerCase() || ''}
+            size={size}
+            background={theme.color.contentOnFill}
+            displayContext={displayContext}
+            isActiveAccount={isActiveAccount}
+            isConnected={isConnected}
+            borderRadius={borderRadius}
+          />
+        )}
+      </ConnectionStatusBadge>
+    );
+  }
+
+  if (brandingLogo) {
+    return (
+      <Logo size={size} brandingLogo={brandingLogo} publicKey={publicKey} />
     );
   }
 

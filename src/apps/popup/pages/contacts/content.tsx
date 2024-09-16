@@ -2,19 +2,21 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import { EmptyContacts } from '@popup/pages/contacts/empty-contacts';
+import { ContactsPlate } from '@popup/pages/contacts/components/contacts-plate';
+import { EmptyContacts } from '@popup/pages/contacts/components/empty-contacts';
 
 import {
   selectAllContacts,
   selectLastModified
 } from '@background/redux/contacts/selectors';
 
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { ContactsPlate, List, Typography } from '@libs/ui/components';
+import { List, Typography } from '@libs/ui/components';
 import { formatShortTimestamp } from '@libs/ui/utils';
 
 export const ContactsBookPageContent = () => {
@@ -25,7 +27,8 @@ export const ContactsBookPageContent = () => {
 
   const contactsWithId = contacts.map((contact, index) => ({
     ...contact,
-    id: index
+    id: index,
+    accountHash: getAccountHashFromPublicKey(contact.publicKey)
   }));
 
   if (contactsWithId.length === 0) {
@@ -50,8 +53,12 @@ export const ContactsBookPageContent = () => {
       )}
       <List
         rows={contactsWithId}
-        renderRow={({ publicKey, name }) => (
-          <ContactsPlate publicKey={publicKey} name={name} />
+        renderRow={({ publicKey, name, accountHash }) => (
+          <ContactsPlate
+            publicKey={publicKey}
+            name={name}
+            accountHash={accountHash}
+          />
         )}
         marginLeftForItemSeparatorLine={54}
       />

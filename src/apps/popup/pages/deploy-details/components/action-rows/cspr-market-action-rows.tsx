@@ -79,6 +79,8 @@ export const CsprMarketActionRows = ({ deploy }: CsprMarketActionRowsProps) => {
           label="from"
           isAction
           iconSize={20}
+          csprName={offererAccountInfo?.csprName}
+          imgLogo={offererAccountInfo?.brandingLogo}
         />
         <ContractInfoRow
           contractPackageHash={contractPackageHash}

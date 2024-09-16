@@ -8,10 +8,6 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import {
-  Erc20TokenActionResult,
-  TransferResultWithId
-} from '@libs/services/account-activity-service';
 import { Tile, Typography } from '@libs/ui/components';
 
 const Container = styled(CenteredFlexRow)`
@@ -22,9 +18,7 @@ export const NoActivityView = ({
   activityList,
   top
 }: {
-  activityList:
-    | (TransferResultWithId | Erc20TokenActionResult | IDeploy)[]
-    | null;
+  activityList: IDeploy[] | null;
   top?: SpacingSize;
   loading?: boolean;
 }) => {

@@ -50,7 +50,9 @@ onboarding.describe('Onboarding UI: recover secret phrase flow', () => {
       await page.getByText('All accounts').click();
 
       await onboardingExpect(
-        page.getByText(DEFAULT_FIRST_ACCOUNT.accountName)
+        page
+          .getByText(DEFAULT_FIRST_ACCOUNT.accountName, { exact: true })
+          .nth(1)
       ).toBeVisible();
       await onboardingExpect(
         page.getByText(DEFAULT_FIRST_ACCOUNT.truncatedPublicKey).nth(0)
@@ -100,10 +102,12 @@ onboarding.describe('Onboarding UI: recover secret phrase flow', () => {
       await page.getByText('All accounts').click();
 
       await onboardingExpect(
-        page.getByText(DEFAULT_FIRST_ACCOUNT.accountName)
+        page
+          .getByText(DEFAULT_FIRST_ACCOUNT.accountName, { exact: true })
+          .nth(1)
       ).toBeVisible();
       await onboardingExpect(
-        page.getByText(DEFAULT_FIRST_ACCOUNT.truncatedPublicKey).nth(0)
+        page.getByText(DEFAULT_FIRST_ACCOUNT.truncatedPublicKey).nth(1)
       ).toBeVisible();
       await onboardingExpect(
         page.getByText(DEFAULT_SECOND_ACCOUNT.accountName)
@@ -158,7 +162,11 @@ onboarding.describe('Onboarding UI: recover secret phrase flow', () => {
       await page.getByText('All accounts').click();
 
       await onboardingExpect(
-        page.getByText(RECOVER_FIRST_ACCOUNT_FROM_TWELVE_WORDS.accountName)
+        page
+          .getByText(RECOVER_FIRST_ACCOUNT_FROM_TWELVE_WORDS.accountName, {
+            exact: true
+          })
+          .nth(1)
       ).toBeVisible();
       await onboardingExpect(
         page
@@ -213,12 +221,16 @@ onboarding.describe('Onboarding UI: recover secret phrase flow', () => {
       await page.getByText('All accounts').click();
 
       await onboardingExpect(
-        page.getByText(RECOVER_FIRST_ACCOUNT_FROM_TWELVE_WORDS.accountName)
+        page
+          .getByText(RECOVER_FIRST_ACCOUNT_FROM_TWELVE_WORDS.accountName, {
+            exact: true
+          })
+          .nth(1)
       ).toBeVisible();
       await onboardingExpect(
         page
           .getByText(RECOVER_FIRST_ACCOUNT_FROM_TWELVE_WORDS.truncatedPublicKey)
-          .nth(0)
+          .nth(1)
       ).toBeVisible();
       await onboardingExpect(
         page.getByText(RECOVER_SECOND_ACCOUNT_FROM_TWELVE_WORDS.accountName)

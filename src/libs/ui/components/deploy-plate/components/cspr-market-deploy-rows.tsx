@@ -5,9 +5,10 @@ import { CsprMarketDeployEntryPoint, DeployIcon } from '@src/constants';
 
 import { getEntryPointName } from '@popup/pages/deploy-details/utils';
 
-import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import { Typography } from '@libs/ui/components';
-import { ContractRow } from '@libs/ui/components/deploy-plate/components/common';
+import {
+  ContractRow,
+  NftAmount
+} from '@libs/ui/components/deploy-plate/components/common';
 import { DefaultDeployRows } from '@libs/ui/components/deploy-plate/components/default-deploy-rows';
 import { DeployContainer } from '@libs/ui/components/deploy-plate/components/deploy-container';
 
@@ -40,10 +41,7 @@ export const CSPRMarketDeployRows = ({ deploy }: CSPRMarketDeployRowsProps) => {
           errorMessage: deploy.errorMessage
         }}
       >
-        <AlignedFlexRow gap={SpacingSize.Tiny}>
-          <Typography type="captionHash">{deploy.amountOfNFTs}</Typography>
-          <Typography type="captionRegular">NFT(s)</Typography>
-        </AlignedFlexRow>
+        <NftAmount amountOfNFTs={deploy.amountOfNFTs} />
         <ContractRow
           label={isDelist ? 'from' : 'on'}
           contractName={deploy.contractName}

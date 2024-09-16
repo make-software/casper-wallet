@@ -77,7 +77,7 @@ export const DeployDetailsResult = ({ deploy }: DeployDetailsResultProps) => {
   if (isAssociatedKeysDeploy(deploy)) {
     return (
       <Container>
-        <AssociatedResultRows publicKey={deploy.callerPublicKey} />
+        <AssociatedResultRows deploy={deploy} />
       </Container>
     );
   }

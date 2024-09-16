@@ -48,10 +48,20 @@ export const NativeTransferDeployRows = ({
               deploy.recipientAccountInfo?.accountHash ||
               ''
         }
+        imgLogo={
+          deploy.isReceive
+            ? deploy.callerAccountInfo?.brandingLogo
+            : deploy.recipientAccountInfo?.brandingLogo
+        }
         accountName={
           deploy.isReceive
             ? deploy.callerAccountInfo?.name
             : deploy.recipientAccountInfo?.name
+        }
+        csprName={
+          deploy.isReceive
+            ? deploy.callerAccountInfo?.csprName
+            : deploy.recipientAccountInfo?.csprName
         }
       />
     </DeployContainer>

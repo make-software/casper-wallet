@@ -1,11 +1,6 @@
-import { CloudPaginatedResponse, IDeploy } from 'casper-wallet-core';
+import { IDeploy } from 'casper-wallet-core';
 import { ActionType, createAction } from 'typesafe-actions';
 
-import {
-  Erc20TokenActionResult,
-  TransferResult
-} from '@libs/services/account-activity-service/types';
-import { AccountInfo } from '@libs/services/account-info/types';
 import {
   AccountData,
   FetchBalanceResponse
@@ -44,29 +39,6 @@ export const serviceMessage = {
     PaginatedResponse<AccountData> | ErrorResponse,
     Meta
   >(),
-  fetchAccountInfoRequest: createAction('FETCH_ACCOUNT_INFO')<
-    { accountHash: string },
-    Meta
-  >(),
-  fetchAccountInfoResponse: createAction('FETCH_ACCOUNT_INFO_RESPONSE')<
-    AccountInfo,
-    Meta
-  >(),
-  fetchAccountActivityRequest: createAction('FETCH_ACCOUNT_ACTIVITY')<
-    { publicKey: string; page: number },
-    Meta
-  >(),
-  fetchAccountActivityResponse: createAction('FETCH_ACCOUNT_ACTIVITY_RESPONSE')<
-    PaginatedResponse<TransferResult>,
-    Meta
-  >(),
-  fetchErc20TokenActivityRequest: createAction('FETCH_ERC20_TOKEN_ACTIVITY')<
-    { publicKey: string; page: number; contractPackageHash: string },
-    Meta
-  >(),
-  fetchErc20TokenActivityResponse: createAction(
-    'FETCH_ERC20_TOKEN_ACTIVITY_RESPONSE'
-  )<PaginatedResponse<Erc20TokenActionResult>, Meta>(),
   fetchExtendedDeploysInfoRequest: createAction('FETCH_EXTENDED_DEPLOYS_INFO')<
     { deployHash: string; publicKey: string },
     Meta
@@ -82,13 +54,6 @@ export const serviceMessage = {
     ContractPackageWithBalance[],
     Meta
   >(),
-  fetchAccountExtendedDeploysRequest: createAction('FETCH_ACCOUNT_DEPLOYS')<
-    { publicKey: string; page: number },
-    Meta
-  >(),
-  fetchAccountExtendedDeploysResponse: createAction(
-    'FETCH_ACCOUNT_DEPLOYS_RESPONSE'
-  )<CloudPaginatedResponse<IDeploy> | ErrorResponse, Meta>(),
   fetchNftTokensRequest: createAction('FETCH_NFT_TOKENS')<
     { accountHash: string; page: number },
     Meta

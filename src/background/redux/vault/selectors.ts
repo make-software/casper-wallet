@@ -24,6 +24,9 @@ export const selectSecretPhrase = (state: RootState): null | SecretPhrase =>
 export const selectVaultAccounts = (state: RootState): Account[] =>
   state.vault.accounts;
 
+export const selectVaultAccountsPublicKeys = (state: RootState): string[] =>
+  state.vault.accounts.map(key => key.publicKey);
+
 export const selectVaultAccountsWithBalances = createSelector(
   selectVaultAccounts,
   selectAccountBalances,
