@@ -19,7 +19,7 @@ import {
   SpacingSize,
   borderBottomPseudoElementRules
 } from '@libs/layout';
-import { useFetchDeploy } from '@libs/services/deploys/use-fetch-deploy';
+import { useFetchSingleDeploy } from '@libs/services/deploys/use-fetch-single-deploy';
 import {
   DeployStatus,
   Hash,
@@ -70,7 +70,7 @@ export const DeployDetailsPageContent = ({
     setSingleDeploy(deploy);
   }, [deploy]);
 
-  const { deployData } = useFetchDeploy(deploy?.deployHash);
+  const { deployData } = useFetchSingleDeploy(deploy?.deployHash);
 
   useEffect(() => {
     if (deployData) {

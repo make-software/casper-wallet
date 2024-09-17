@@ -79,6 +79,7 @@
     "i18next-http-backend": "2.5.0",
     "i18next-parser": "7.9.0",
     "jszip": "^3.10.1",
+    "lodash.debounce": "^4.0.8",
     "lodash.throttle": "4.1.1",
     "mac-scrollbar": "^0.13.6",
     "md5": "^2.3.0",

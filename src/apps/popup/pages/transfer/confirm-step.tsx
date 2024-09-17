@@ -8,6 +8,7 @@ import { TRANSFER_COST_MOTES } from '@src/constants';
 
 import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   AmountContainer,
   ContentContainer,
@@ -16,6 +17,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import {
   ActiveAccountPlate,
   List,
@@ -49,6 +51,14 @@ export const ConfirmStep = ({
   const { t } = useTranslation();
 
   const currencyRate = useSelector(selectAccountCurrencyRate);
+
+  const accountsInfo = useFetchAccountsInfo([recipientPublicKey]);
+
+  const accountHash = getAccountHashFromPublicKey(recipientPublicKey);
+
+  const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
+  const brandingLogo = accountsInfo && accountsInfo[accountHash]?.brandingLogo;
+
   let transactionDataRows;
 
   if (!isErc20Transfer) {
@@ -124,6 +134,8 @@ export const ConfirmStep = ({
           publicKey={recipientPublicKey}
           showFullPublicKey
           name={recipientName}
+          csprName={csprName}
+          brandingLogo={brandingLogo}
         />
       </VerticalSpaceContainer>
       <List

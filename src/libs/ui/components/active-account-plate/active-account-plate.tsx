@@ -5,6 +5,7 @@ import styled from 'styled-components';
 
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   AlignedFlexRow,
   ParagraphContainer,
@@ -13,6 +14,7 @@ import {
   SpacingSize,
   TileContainer
 } from '@libs/layout';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import {
   Avatar,
   Hash,
@@ -55,6 +57,13 @@ export const ActiveAccountPlate = ({
 
   const activeAccount = useSelector(selectVaultActiveAccount);
 
+  const accountsInfo = useFetchAccountsInfo([activeAccount?.publicKey!]);
+
+  const accountHash = getAccountHashFromPublicKey(activeAccount?.publicKey);
+
+  const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
+  const brandingLogo = accountsInfo && accountsInfo[accountHash]?.brandingLogo;
+
   if (!activeAccount) {
     return null;
   }
@@ -70,7 +79,11 @@ export const ActiveAccountPlate = ({
         <Container paddingVertical={SpacingSize.Small}>
           <SpaceBetweenFlexRow>
             <AlignedFlexRow gap={SpacingSize.Medium}>
-              <Avatar publicKey={activeAccount.publicKey} size={24} />
+              <Avatar
+                publicKey={activeAccount.publicKey}
+                brandingLogo={brandingLogo}
+                size={24}
+              />
               <NameContainer>
                 <Tooltip
                   title={activeAccount.name}
@@ -84,6 +97,7 @@ export const ActiveAccountPlate = ({
                 </Tooltip>
                 <Hash
                   value={activeAccount.publicKey}
+                  csprName={csprName}
                   variant={HashVariant.CaptionHash}
                   color="contentSecondary"
                   truncated

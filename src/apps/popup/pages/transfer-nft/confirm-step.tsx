@@ -1,12 +1,14 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import { NFTTokenResult } from '@libs/services/nft-service';
 import { RecipientPlate, Typography } from '@libs/ui/components';
 import { TransactionFeePlate } from '@libs/ui/components/transaction-fee-plate/transaction-fee-plate';
@@ -31,6 +33,13 @@ export const ConfirmStep = ({
 }: ConfirmStepProps) => {
   const { t } = useTranslation();
 
+  const accountsInfo = useFetchAccountsInfo([recipientPublicKey]);
+
+  const accountHash = getAccountHashFromPublicKey(recipientPublicKey);
+
+  const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
+  const brandingLogo = accountsInfo && accountsInfo[accountHash]?.brandingLogo;
+
   return (
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
@@ -49,6 +58,8 @@ export const ConfirmStep = ({
           publicKey={recipientPublicKey}
           showFullPublicKey
           name={recipientName}
+          csprName={csprName}
+          brandingLogo={brandingLogo}
         />
       </VerticalSpaceContainer>
 

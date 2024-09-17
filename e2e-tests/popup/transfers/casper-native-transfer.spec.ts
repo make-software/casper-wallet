@@ -30,8 +30,20 @@ popup.describe('Popup UI: Casper Native Transfer', () => {
       ).toBeDisabled();
 
       await popupPage
-        .getByPlaceholder('Public key', { exact: true })
+        .getByPlaceholder('Public key or name', { exact: true })
         .fill(DEFAULT_SECOND_ACCOUNT.publicKey);
+
+      await popupExpect(
+        popupPage.getByText(DEFAULT_SECOND_ACCOUNT.mediumTruncatedPublicKey, {
+          exact: true
+        })
+      ).toBeVisible();
+
+      await popupPage
+        .getByText(DEFAULT_SECOND_ACCOUNT.mediumTruncatedPublicKey, {
+          exact: true
+        })
+        .click();
 
       await popupPage.getByRole('button', { name: 'Next' }).click();
 
@@ -100,8 +112,20 @@ popup.describe('Popup UI: Casper Native Transfer', () => {
     ).toBeDisabled();
 
     await popupPage
-      .getByPlaceholder('Public key', { exact: true })
+      .getByPlaceholder('Public key or name', { exact: true })
       .fill(DEFAULT_SECOND_ACCOUNT.publicKey);
+
+    await popupExpect(
+      popupPage.getByText(DEFAULT_SECOND_ACCOUNT.mediumTruncatedPublicKey, {
+        exact: true
+      })
+    ).toBeVisible();
+
+    await popupPage
+      .getByText(DEFAULT_SECOND_ACCOUNT.mediumTruncatedPublicKey, {
+        exact: true
+      })
+      .click();
 
     await popupPage.getByRole('button', { name: 'Next' }).click();
 

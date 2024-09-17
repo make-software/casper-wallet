@@ -27,7 +27,8 @@
     "https://api.testnet.casperwallet.io/*",
     "https://api.mainnet.casperwallet.io/*",
     "https://node.cspr.cloud/*",
-    "https://node.testnet.cspr.cloud/*"
+    "https://node.testnet.cspr.cloud/*",
+    "https://cspr-wallet-api.dev.make.services/*"
   ],
   "background": {
     "service_worker": "./background.bundle.js"

@@ -12,7 +12,7 @@ import {
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { ContentContainer, SpacingSize } from '@libs/layout';
-import { useFetchAccountInfo } from '@libs/services/account-info';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import {
   AccountListRowWithAccountHash,
   AccountListRows
@@ -38,7 +38,7 @@ export const AllAccountsContent = () => {
   const activeAccountName = useSelector(selectVaultActiveAccountName);
   const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
-  const accountInfo = useFetchAccountInfo(accountsPublicKeys);
+  const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
 
   useEffect(() => {
     const visibleAccountListRows = sortAccounts(
@@ -85,7 +85,7 @@ export const AllAccountsContent = () => {
               isActiveAccount={isActiveAccount}
               isConnected={isConnected}
               showHideAccountItem
-              accountInfo={accountInfo}
+              accountsInfo={accountsInfo}
             />
           );
         }}
@@ -106,7 +106,7 @@ export const AllAccountsContent = () => {
                 isActiveAccount={false}
                 isConnected={isConnected}
                 showHideAccountItem
-                accountInfo={accountInfo}
+                accountsInfo={accountsInfo}
               />
             );
           }}
