@@ -90,8 +90,12 @@ export const DeployDetailsResult = ({ deploy }: DeployDetailsResultProps) => {
           key={id}
           callerAccountInfo={action.callerAccountInfo}
           recipientAccountInfo={action.recipientAccountInfo}
-          toPublicKey={action.recipientKey}
-          fromPublicKey={action.callerPublicKey}
+          toPublicKey={
+            action.recipientKey || action.recipientAccountInfo?.accountHash!
+          }
+          fromPublicKey={
+            action.callerPublicKey || action.callerAccountInfo?.accountHash!
+          }
           fiatAmount={action.fiatAmount}
         />
       ))}
