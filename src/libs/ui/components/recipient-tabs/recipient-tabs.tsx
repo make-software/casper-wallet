@@ -1,5 +1,5 @@
 import debounce from 'lodash.debounce';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -43,8 +43,6 @@ export const RecipientTabs = ({
   setShowSelectedRecipient,
   showSelectedRecipient
 }: RecipientTabsProps) => {
-  const [showSearchItem, setShowSearchItem] = useState<boolean>(false);
-
   const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
   const recentRecipientPublicKeys = useSelector(
     selectRecentRecipientPublicKeys
@@ -71,12 +69,6 @@ export const RecipientTabs = ({
     ]);
     return Array.from(mergedKeys);
   }, [accountsPublicKeys, contactPublicKeys, recentRecipientPublicKeys]);
-
-  useEffect(() => {
-    if (formState.isValid) {
-      setShowSearchItem(true);
-    }
-  }, [formState.isValid]);
 
   useEffect(() => {
     if (formState.isValid) {
@@ -135,7 +127,6 @@ export const RecipientTabs = ({
               size={16}
               onClick={() => {
                 setShowSelectedRecipient(false);
-                setShowSearchItem(false);
                 setValue('recipientPublicKey', '');
                 if (setRecipientPublicKey) {
                   setRecipientPublicKey('');
@@ -158,36 +149,37 @@ export const RecipientTabs = ({
         error={!!errors?.recipientPublicKey}
         validationText={errors?.recipientPublicKey?.message}
       />
-      {showSearchItem && inputValue ? (
-        inputValue.endsWith('.cspr') ? (
-          <SearchItemByCsprName
-            inputValue={inputValue}
-            handleSelectRecipient={handleSelectRecipient}
-          />
-        ) : isValidPublicKey(inputValue) ? (
-          <SearchItemByPublicKey
-            inputValue={inputValue}
-            handleSelectRecipient={handleSelectRecipient}
-          />
-        ) : null
+      {inputValue?.endsWith('.cspr') ? (
+        <SearchItemByCsprName
+          inputValue={inputValue}
+          handleSelectRecipient={handleSelectRecipient}
+        />
+      ) : isValidPublicKey(inputValue) ? (
+        <SearchItemByPublicKey
+          inputValue={inputValue}
+          handleSelectRecipient={handleSelectRecipient}
+        />
       ) : (
         <Tabs onClick={inputValue ? undefined : clearErrors}>
           <Tab tabName={RecipientTabName.Recent}>
             <RecentList
               handleSelectRecipient={handleSelectRecipient}
               accountsInfo={accountsInfo}
+              inputValue={inputValue}
             />
           </Tab>
           <Tab tabName={RecipientTabName.MyAccounts}>
             <MyAccountsList
               handleSelectRecipient={handleSelectRecipient}
               accountsInfo={accountsInfo}
+              inputValue={inputValue}
             />
           </Tab>
           <Tab tabName={RecipientTabName.Contacts}>
             <ContactsList
               handleSelectRecipient={handleSelectRecipient}
               accountsInfo={accountsInfo}
+              inputValue={inputValue}
             />
           </Tab>
         </Tabs>
