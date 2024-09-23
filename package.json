@@ -72,7 +72,7 @@
     "big.js": "^6.2.1",
     "casper-cep18-js-client": "1.0.2",
     "casper-js-sdk": "2.15.4",
-    "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#v0.9.5",
+    "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#6313de4ad1cb479c6c049c66a63521ab95d296ca",
     "date-fns": "^2.30.0",
     "i18next": "^23.11.0",
     "i18next-browser-languagedetector": "^7.2.1",

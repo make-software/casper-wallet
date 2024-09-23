@@ -1,10 +1,16 @@
 import { DeployUtil } from 'casper-js-sdk';
+import {
+  getDeployFromJson,
+  getTransactionV1FromJson
+} from 'casper-wallet-core';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { getSigningAccount } from '@src/utils';
 
+import { SignDeployContent } from '@signature-request/pages/sign-deploy/sign-deploy-content';
+import { SignTxContent } from '@signature-request/pages/sign-deploy/sign-tx-content';
 import { RouterPath } from '@signature-request/router';
 
 import { closeCurrentWindow } from '@background/close-current-window';
@@ -39,12 +45,13 @@ import {
 } from '@libs/ui/components';
 
 import { CasperDeploy } from './deploy-types';
-import { SignDeployContent } from './sign-deploy-content';
 
 export function SignDeployPage() {
   const { t } = useTranslation();
 
   const [deploy, setDeploy] = useState<undefined | CasperDeploy>(undefined);
+  const [tx, setTx] = useState<undefined | any>(undefined);
+
   const [isSigningAccountFromLedger, setIsSigningAccountFromLedger] =
     useState(false);
 
@@ -92,15 +99,22 @@ export function SignDeployPage() {
     if (deployJson == null) {
       return;
     }
+    console.log('-------- deployJson', deployJson);
+    const deploy = getDeployFromJson(JSON.stringify(deployJson));
+    const tx = getTransactionV1FromJson(JSON.stringify(deployJson));
+    console.log('-------- deploy', deploy);
+    console.log('-------- tx', tx);
 
-    const res = DeployUtil.deployFromJson(deployJson);
-    if (!res.ok) {
-      const error = Error('Parsing deploy from json error');
+    if (deploy) {
+      // @ts-ignore
+      setDeploy(deploy);
+    } else if (tx) {
+      setTx(tx);
+    } else {
+      const error = Error('Invalid transaction json');
       sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
       throw error;
     }
-
-    setDeploy(res.val);
 
     return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,25 +143,36 @@ export function SignDeployPage() {
   }
 
   const handleSign = useCallback(async () => {
-    if (deploy?.hash == null) {
-      return;
-    }
+    let signature: Uint8Array | null = null;
 
-    let signature: Uint8Array;
+    if (deploy?.hash) {
+      if (signingAccount.hardware === HardwareWalletType.Ledger) {
+        const resp = await ledger.singDeploy(deploy, {
+          index: signingAccount.derivationIndex,
+          publicKey: signingAccount.publicKey
+        });
 
-    if (signingAccount.hardware === HardwareWalletType.Ledger) {
-      const resp = await ledger.singDeploy(deploy, {
-        index: signingAccount.derivationIndex,
-        publicKey: signingAccount.publicKey
-      });
+        signature = resp.signature;
+      } else {
+        signature = signDeploy(
+          deploy.hash,
+          signingAccount.publicKey,
+          signingAccount.secretKey
+        );
+      }
+      console.log('-------- signature', signature);
+    } else if (tx?.hash) {
+      if (signingAccount.hardware === HardwareWalletType.Ledger) {
+        signature = null;
+      } else {
+        signature = signDeploy(
+          tx.hash,
+          signingAccount.publicKey,
+          signingAccount.secretKey
+        );
+      }
 
-      signature = resp.signature;
-    } else {
-      signature = signDeploy(
-        deploy.hash,
-        signingAccount.publicKey,
-        signingAccount.secretKey
-      );
+      console.log('-------- tx signature', signature);
     }
 
     if (!signature) {
@@ -163,6 +188,7 @@ export function SignDeployPage() {
     closeCurrentWindow();
   }, [
     deploy,
+    tx,
     signingAccount.hardware,
     signingAccount.derivationIndex,
     signingAccount.publicKey,
@@ -220,7 +246,7 @@ export function SignDeployPage() {
       <FooterButtonsContainer>
         <Button
           color="primaryRed"
-          disabled={deploy == null}
+          disabled={!(deploy || tx)}
           onClick={
             isSigningAccountFromLedger ? makeSubmitLedgerAction() : handleSign
           }
@@ -261,10 +287,21 @@ export function SignDeployPage() {
         showLedgerConfirm ? (
           <LedgerEventView event={ledgerEventStatusToRender} />
         ) : (
-          <SignDeployContent
-            deploy={deploy}
-            signingPublicKeyHex={signingAccount.publicKey}
-          />
+          <>
+            {deploy && (
+              <SignDeployContent
+                deploy={deploy}
+                signingPublicKeyHex={signingAccount.publicKey}
+              />
+            )}
+            {tx && (
+              <SignTxContent
+                tx={tx}
+                txJson={deployJsonById[requestId]}
+                signingPublicKeyHex={signingAccount.publicKey}
+              />
+            )}
+          </>
         )
       }
       renderFooter={renderFooter()}
