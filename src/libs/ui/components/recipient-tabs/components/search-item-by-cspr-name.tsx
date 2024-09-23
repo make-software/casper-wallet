@@ -44,7 +44,7 @@ export const SearchItemByCsprName = ({
         <Tile>
           <EmptyResultContainer>
             <Typography type="body" color="contentPrimary" textAlign="center">
-              No cspr name found
+              There is no account using this CSPR.name
             </Typography>
           </EmptyResultContainer>
         </Tile>
