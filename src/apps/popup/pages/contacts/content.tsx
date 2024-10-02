@@ -7,6 +7,7 @@ import { EmptyContacts } from '@popup/pages/contacts/components/empty-contacts';
 
 import {
   selectAllContacts,
+  selectAllContactsPublicKeys,
   selectLastModified
 } from '@background/redux/contacts/selectors';
 
@@ -16,6 +17,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import { List, Typography } from '@libs/ui/components';
 import { formatShortTimestamp } from '@libs/ui/utils';
 
@@ -24,12 +26,15 @@ export const ContactsBookPageContent = () => {
 
   const contacts = useSelector(selectAllContacts);
   const lastModified = useSelector(selectLastModified);
+  const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
 
   const contactsWithId = contacts.map((contact, index) => ({
     ...contact,
     id: index,
     accountHash: getAccountHashFromPublicKey(contact.publicKey)
   }));
+
+  const accountsInfo = useFetchAccountsInfo(contactPublicKeys);
 
   if (contactsWithId.length === 0) {
     return <EmptyContacts />;
@@ -53,13 +58,20 @@ export const ContactsBookPageContent = () => {
       )}
       <List
         rows={contactsWithId}
-        renderRow={({ publicKey, name, accountHash }) => (
-          <ContactsPlate
-            publicKey={publicKey}
-            name={name}
-            accountHash={accountHash}
-          />
-        )}
+        renderRow={({ publicKey, name, accountHash }) => {
+          const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
+          const brandingLogo =
+            accountsInfo && accountsInfo[accountHash]?.brandingLogo;
+
+          return (
+            <ContactsPlate
+              publicKey={publicKey}
+              name={name}
+              csprName={csprName}
+              brandingLogo={brandingLogo}
+            />
+          );
+        }}
         marginLeftForItemSeparatorLine={54}
       />
     </ContentContainer>
