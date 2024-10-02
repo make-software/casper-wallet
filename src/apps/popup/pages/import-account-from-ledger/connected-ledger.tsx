@@ -96,23 +96,12 @@ export const ConnectedLedger: React.FC<IConnectedLedgerProps> = ({
     if (!accountsFromLedger.length || isLoadingBalances) return;
 
     const accountsWithBalance = accountsFromLedger.map<ILedgerAccountListItem>(
-      account => {
-        const accountHash = getAccountHashFromPublicKey(account.publicKey);
-
-        const accountLiquidBalance =
-          accountsBalances && accountsBalances[accountHash]?.liquidBalance;
-
-        return {
-          publicKey: account.publicKey,
-          derivationIndex: account.index,
-          accountHash,
-          name: '',
-          id: account.publicKey,
-          balance: {
-            liquidMotes: `${accountLiquidBalance ?? '0'}`
-          }
-        };
-      }
+      account => ({
+        publicKey: account.publicKey,
+        derivationIndex: account.index,
+        name: '',
+        id: account.publicKey
+      })
     );
 
     setLedgerAccountsWithBalance(accountsWithBalance);

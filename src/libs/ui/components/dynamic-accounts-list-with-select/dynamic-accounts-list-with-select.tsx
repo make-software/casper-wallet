@@ -159,13 +159,13 @@ export const DynamicAccountsListWithSelect = ({
         const accountHash = getAccountHashFromPublicKey(account.publicKey);
 
         const accountLiquidBalance =
-          accountsBalances && accountsBalances[accountHash].liquidBalance;
+          accountsBalances && accountsBalances[accountHash]?.liquidBalance;
 
         const accountBalance = accountLiquidBalance
           ? formatNumber(motesToCSPR(accountLiquidBalance), {
               precision: { max: 0 }
             })
-          : '-';
+          : '0';
 
         const isAlreadyConnected = alreadyConnectedLedgerAccounts.some(
           alreadyConnectedAccount =>

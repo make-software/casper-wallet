@@ -64,7 +64,7 @@ export const AccountListItem = ({
     ? formatNumber(motesToCSPR(accountLiquidBalance), {
         precision: { max: 0 }
       })
-    : '-';
+    : '0';
 
   const csprName = accountsInfo && accountsInfo[account.accountHash]?.csprName;
   const brandingLogo =

@@ -114,7 +114,7 @@ export const Download = ({
 
           const accountLiquidBalance =
             accountsBalances &&
-            accountsBalances[account.accountHash].liquidBalance;
+            accountsBalances[account.accountHash]?.liquidBalance;
 
           return (
             <AccountListItem

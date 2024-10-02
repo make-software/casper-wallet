@@ -66,23 +66,13 @@ export const SelectAccountsToRecoverPage = () => {
     if (!derivedAccounts.length || isLoadingBalances) return;
 
     const derivedAccountsWithBalance: AccountListRows[] = derivedAccounts.map(
-      (account, index) => {
-        const accountHash = getAccountHashFromPublicKey(account.publicKey);
-
-        const accountLiquidBalance =
-          accountsBalances && accountsBalances[accountHash]?.liquidBalance;
-
-        return {
-          ...account,
-          id: account.publicKey,
-          hidden: false,
-          derivationIndex: index,
-          name: '',
-          balance: {
-            liquidMotes: `${accountLiquidBalance ?? '0'}`
-          }
-        };
-      }
+      (account, index) => ({
+        ...account,
+        id: account.publicKey,
+        hidden: false,
+        derivationIndex: index,
+        name: ''
+      })
     );
 
     setDerivedAccountsWithBalance(derivedAccountsWithBalance);

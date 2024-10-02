@@ -40,7 +40,7 @@ export const AllAccountsContent = () => {
   const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
   const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
-  const { accountsBalances } = useFetchWalletBalance();
+  const { accountsBalances, isLoadingBalance } = useFetchWalletBalance();
 
   useEffect(() => {
     const visibleAccountListRows = sortAccounts(
@@ -83,7 +83,7 @@ export const AllAccountsContent = () => {
 
           const accountLiquidBalance =
             accountsBalances &&
-            accountsBalances[account.accountHash].liquidBalance;
+            accountsBalances[account.accountHash]?.liquidBalance;
 
           return (
             <AccountListItem
@@ -93,6 +93,7 @@ export const AllAccountsContent = () => {
               showHideAccountItem
               accountsInfo={accountsInfo}
               accountLiquidBalance={accountLiquidBalance}
+              isLoadingBalance={isLoadingBalance}
             />
           );
         }}
@@ -109,7 +110,7 @@ export const AllAccountsContent = () => {
 
             const accountLiquidBalance =
               accountsBalances &&
-              accountsBalances[account.accountHash].liquidBalance;
+              accountsBalances[account.accountHash]?.liquidBalance;
 
             return (
               <AccountListItem
@@ -119,6 +120,7 @@ export const AllAccountsContent = () => {
                 showHideAccountItem
                 accountsInfo={accountsInfo}
                 accountLiquidBalance={accountLiquidBalance}
+                isLoadingBalance={isLoadingBalance}
               />
             );
           }}

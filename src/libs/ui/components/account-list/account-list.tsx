@@ -57,7 +57,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
   const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
   const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
-  const { accountsBalances } = useFetchWalletBalance();
+  const { accountsBalances, isLoadingBalance } = useFetchWalletBalance();
 
   useEffect(() => {
     const accountListRows = sortAccounts(
@@ -86,7 +86,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
 
         const accountLiquidBalance =
           accountsBalances &&
-          accountsBalances[account.accountHash].liquidBalance;
+          accountsBalances[account.accountHash]?.liquidBalance;
 
         return (
           <AccountListItem
@@ -100,6 +100,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
             }}
             accountLiquidBalance={accountLiquidBalance}
             accountsInfo={accountsInfo}
+            isLoadingBalance={isLoadingBalance}
           />
         );
       }}
