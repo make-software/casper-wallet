@@ -7,10 +7,7 @@ import styled from 'styled-components';
 import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
 import { useTypedLocation } from '@popup/router';
 
-import {
-  selectAccountBalance,
-  selectErc20Tokens
-} from '@background/redux/account-info/selectors';
+import { selectErc20Tokens } from '@background/redux/account-info/selectors';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
 import { useCopyToClipboard } from '@hooks/use-copy-to-clipboard';
@@ -22,6 +19,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import { ActiveAccountPlate, Tile, Typography } from '@libs/ui/components';
 import { motesToCSPR } from '@libs/ui/utils';
 
@@ -57,13 +55,15 @@ export const ReceivePageContent = () => {
     symbol: location?.state?.tokenData?.symbol ?? ''
   });
 
-  const csprBalance = useSelector(selectAccountBalance, shallowEqual);
   const tokens = useSelector(selectErc20Tokens, shallowEqual);
+
+  const { accountBalance } = useFetchWalletBalance();
 
   useEffect(() => {
     if (tokenData?.symbol === 'CSPR') {
       const balance =
-        (csprBalance.liquidMotes && motesToCSPR(csprBalance.liquidMotes)) ||
+        (accountBalance.liquidBalance &&
+          motesToCSPR(accountBalance.liquidBalance)) ||
         '0';
       setTokenData(prev => ({ ...prev, balance }));
     } else {
@@ -72,7 +72,7 @@ export const ReceivePageContent = () => {
         erc20Tokens?.find(t => t?.symbol === tokenData?.symbol)?.amount ?? '0';
       setTokenData(prev => ({ ...prev, balance }));
     }
-  }, [csprBalance.liquidMotes, tokenData?.symbol, tokens]);
+  }, [accountBalance.liquidBalance, tokenData?.symbol, tokens]);
 
   return (
     <ContentContainer>

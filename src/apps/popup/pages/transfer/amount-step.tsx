@@ -6,10 +6,6 @@ import { useSelector } from 'react-redux';
 
 import { TRANSFER_COST_MOTES, TRANSFER_MIN_AMOUNT_MOTES } from '@src/constants';
 
-import {
-  selectAccountBalance,
-  selectAccountCurrencyRate
-} from '@background/redux/account-info/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
@@ -21,6 +17,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import { Error, Input, Typography } from '@libs/ui/components';
 import { TransactionFeePlate } from '@libs/ui/components/transaction-fee-plate/transaction-fee-plate';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
@@ -56,10 +53,10 @@ export const AmountStep = ({
 
   const { t } = useTranslation();
 
-  const currencyRate = useSelector(selectAccountCurrencyRate);
-  const csprBalance = useSelector(selectAccountBalance);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { networkName } = useSelector(selectApiConfigBasedOnActiveNetwork);
+
+  const { accountBalance, currencyRate } = useFetchWalletBalance();
 
   const erc20Balance =
     (selectedToken?.balance &&
@@ -72,22 +69,21 @@ export const AmountStep = ({
   const amountForm = useTransferAmountForm(
     erc20Balance,
     isErc20Transfer,
-    csprBalance.liquidMotes,
+    accountBalance.liquidBalance,
     paymentAmount,
     selectedToken?.decimals
   );
 
   useEffect(() => {
-    const maxAmountMotes: string =
-      csprBalance.liquidMotes == null
-        ? '0'
-        : Big(csprBalance.liquidMotes).sub(TRANSFER_COST_MOTES).toFixed();
+    const maxAmountMotes: string = !accountBalance.liquidBalance
+      ? '0'
+      : Big(accountBalance.liquidBalance).sub(TRANSFER_COST_MOTES).toFixed();
 
     const hasEnoughBalance = Big(maxAmountMotes).gte(TRANSFER_MIN_AMOUNT_MOTES);
 
     setMaxAmountMotes(maxAmountMotes);
     setDisabled(!hasEnoughBalance);
-  }, [csprBalance.liquidMotes]);
+  }, [accountBalance.liquidBalance]);
 
   useEffect(() => {
     if (!isErc20Transfer) {
@@ -109,7 +105,7 @@ export const AmountStep = ({
     trigger,
     formState.touchedFields.amount,
     selectedToken?.amount,
-    csprBalance.liquidMotes,
+    accountBalance.liquidBalance,
     paymentAmount
   ]);
 
@@ -131,10 +127,13 @@ export const AmountStep = ({
   const transferIdLabel = t('Transfer ID (memo)');
   const paymentAmoutLabel = t('Set custom transaction fee');
   const fiatAmount = !isErc20Transfer
-    ? formatFiatAmount(amount || '0', currencyRate)
+    ? formatFiatAmount(amount || '0', currencyRate?.rate || null)
     : undefined;
   const paymentFiatAmount = isErc20Transfer
-    ? formatFiatAmount(paymentAmountFieldValue || '0', currencyRate)
+    ? formatFiatAmount(
+        paymentAmountFieldValue || '0',
+        currencyRate?.rate || null
+      )
     : undefined;
 
   useEffect(() => {

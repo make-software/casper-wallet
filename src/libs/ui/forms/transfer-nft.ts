@@ -16,7 +16,7 @@ export type TransferNftRecipientFormValues = {
 };
 
 export const useTransferNftForm = (
-  amountMotes: string | null,
+  amountMotes: string | undefined,
   paymentAmount: string
 ) => {
   const recipientFormSchema = Yup.object().shape({

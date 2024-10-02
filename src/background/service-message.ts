@@ -2,10 +2,6 @@ import { IDeploy } from 'casper-wallet-core';
 import { ActionType, createAction } from 'typesafe-actions';
 
 import {
-  AccountData,
-  FetchBalanceResponse
-} from '@libs/services/balance-service/types';
-import {
   GetOnRampResponse,
   OptionsPostRequestData,
   ResponseOnRampProps,
@@ -23,22 +19,6 @@ import {
 type Meta = void;
 
 export const serviceMessage = {
-  fetchBalanceRequest: createAction('FETCH_ACCOUNT_BALANCE')<
-    { accountHash: string },
-    Meta
-  >(),
-  fetchBalanceResponse: createAction('FETCH_ACCOUNT_BALANCE_RESPONSE')<
-    FetchBalanceResponse,
-    Meta
-  >(),
-  fetchAccountBalancesRequest: createAction('FETCH_ACCOUNT_BALANCES')<
-    { accountHashes: string },
-    Meta
-  >(),
-  fetchAccountBalancesResponse: createAction('FETCH_ACCOUNT_BALANCES_RESPONSE')<
-    PaginatedResponse<AccountData> | ErrorResponse,
-    Meta
-  >(),
   fetchExtendedDeploysInfoRequest: createAction('FETCH_EXTENDED_DEPLOYS_INFO')<
     { deployHash: string; publicKey: string },
     Meta

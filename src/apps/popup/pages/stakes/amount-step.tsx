@@ -2,7 +2,6 @@ import Big from 'big.js';
 import React, { useEffect, useState } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import {
@@ -12,16 +11,12 @@ import {
 } from '@src/constants';
 
 import {
-  selectAccountBalance,
-  selectAccountCurrencyRate
-} from '@background/redux/account-info/selectors';
-
-import {
   AlignedFlexRow,
   ParagraphContainer,
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import { Error, Input, Typography } from '@libs/ui/components';
 import { StakeAmountFormValues } from '@libs/ui/forms/stakes-form';
 import {
@@ -54,22 +49,20 @@ export const AmountStep = ({
 
   const { t } = useTranslation();
 
-  const currencyRate = useSelector(selectAccountCurrencyRate);
-  const csprBalance = useSelector(selectAccountBalance);
+  const { accountBalance, currencyRate } = useFetchWalletBalance();
 
   useEffect(() => {
     switch (stakeType) {
       case AuctionManagerEntryPoint.delegate: {
-        const maxAmountMotes: string =
-          csprBalance.liquidMotes == null
-            ? '0'
-            : Big(csprBalance.liquidMotes).sub(STAKE_COST_MOTES).toFixed();
+        const maxAmountMotes: string = !accountBalance.liquidBalance
+          ? '0'
+          : Big(accountBalance.liquidBalance).sub(STAKE_COST_MOTES).toFixed();
         const minAmount = Big(STAKE_COST_MOTES)
           .add(DELEGATION_MIN_AMOUNT_MOTES)
           .toFixed();
         const hasEnoughBalance =
-          csprBalance.liquidMotes != null &&
-          Big(csprBalance.liquidMotes).gte(minAmount);
+          accountBalance.liquidBalance &&
+          Big(accountBalance.liquidBalance).gte(minAmount);
 
         setDisabled(!hasEnoughBalance);
 
@@ -79,14 +72,14 @@ export const AmountStep = ({
       case AuctionManagerEntryPoint.undelegate:
       case AuctionManagerEntryPoint.redelegate: {
         const hasEnoughBalance =
-          csprBalance.liquidMotes != null &&
-          Big(csprBalance.liquidMotes).gte(STAKE_COST_MOTES);
+          accountBalance.liquidBalance &&
+          Big(accountBalance.liquidBalance).gte(STAKE_COST_MOTES);
 
         setDisabled(!hasEnoughBalance);
         setMaxAmountMotes(stakeAmountMotes);
       }
     }
-  }, [csprBalance.liquidMotes, stakeAmountMotes, stakeType]);
+  }, [accountBalance.liquidBalance, stakeAmountMotes, stakeType]);
 
   const {
     register,
@@ -103,7 +96,10 @@ export const AmountStep = ({
 
   const amountLabel = t('Amount');
 
-  const fiatAmount = formatFiatAmount(amount || '0', currencyRate);
+  const fiatAmount = formatFiatAmount(
+    amount || '0',
+    currencyRate?.rate || null
+  );
 
   return (
     <>

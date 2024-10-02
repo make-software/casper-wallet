@@ -1,12 +1,9 @@
 import Big from 'big.js';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { AuctionManagerEntryPoint } from '@src/constants';
-
-import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 
 import {
   AmountContainer,
@@ -15,6 +12,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import { getAuctionManagerDeployCost } from '@libs/services/deployer-service';
 import { ValidatorResult } from '@libs/services/validators-service/types';
 import { List, Typography, ValidatorPlate } from '@libs/ui/components';
@@ -40,7 +38,7 @@ export const ConfirmStep = ({
 }: ConfirmStepProps) => {
   const { t } = useTranslation();
 
-  const currencyRate = useSelector(selectAccountCurrencyRate);
+  const { currencyRate } = useFetchWalletBalance();
 
   const transferFeeMotes = getAuctionManagerDeployCost(stakeType);
 
@@ -58,14 +56,18 @@ export const ConfirmStep = ({
       amount: formatNumber(inputAmountCSPR, {
         precision: { max: 5 }
       }),
-      fiatPrice: formatFiatAmount(inputAmountCSPR, currencyRate),
+      fiatPrice: formatFiatAmount(inputAmountCSPR, currencyRate?.rate || null),
       symbol: 'CSPR'
     },
     {
       id: 2,
       text: t('Transaction fee'),
       amount: transferCostInCSPR,
-      fiatPrice: formatFiatAmount(transferCostInCSPR, currencyRate, 3),
+      fiatPrice: formatFiatAmount(
+        transferCostInCSPR,
+        currencyRate?.rate || null,
+        3
+      ),
       symbol: 'CSPR'
     },
     {
@@ -74,7 +76,7 @@ export const ConfirmStep = ({
       amount: formatNumber(totalCSPR, {
         precision: { max: 5 }
       }),
-      fiatPrice: formatFiatAmount(totalCSPR, currencyRate),
+      fiatPrice: formatFiatAmount(totalCSPR, currencyRate?.rate || null),
       symbol: 'CSPR',
       bold: true
     }

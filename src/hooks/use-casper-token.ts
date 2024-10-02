@@ -1,17 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 
-import {
-  selectAccountBalance,
-  selectAccountCurrencyRate
-} from '@background/redux/account-info/selectors';
-
-import {
-  formatCurrency,
-  formatNumber,
-  motesToCSPR,
-  motesToCurrency
-} from '@libs/ui/utils';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 
 export type TokenType = {
   id: string;
@@ -28,37 +17,22 @@ export type TokenType = {
 export const useCasperToken = () => {
   const [casperToken, setCasperToken] = useState<TokenType | null>(null);
 
-  const balance = useSelector(selectAccountBalance);
-  const currencyRate = useSelector(selectAccountCurrencyRate);
-
-  const amount =
-    balance?.liquidMotes == null
-      ? '-'
-      : formatNumber(motesToCSPR(balance.liquidMotes), {
-          precision: { max: 5 }
-        });
-  const amountFiat =
-    currencyRate != null && balance?.liquidMotes != null
-      ? formatCurrency(
-          motesToCurrency(String(balance.liquidMotes), currencyRate),
-          'USD',
-          {
-            precision: 2
-          }
-        )
-      : '';
+  const { accountBalance } = useFetchWalletBalance();
 
   useEffect(() => {
     setCasperToken({
       id: 'Casper',
       contractHash: undefined,
       name: 'Casper',
-      amount,
-      amountFiat: amountFiat,
+      amount: accountBalance.liquidFormattedDecimalBalance || '-',
+      amountFiat: accountBalance.liquidFormattedFiatBalance,
       symbol: 'CSPR',
       icon: '/assets/icons/casper.svg'
     });
-  }, [amount, amountFiat]);
+  }, [
+    accountBalance.liquidFormattedDecimalBalance,
+    accountBalance.liquidFormattedFiatBalance
+  ]);
 
   return casperToken;
 };

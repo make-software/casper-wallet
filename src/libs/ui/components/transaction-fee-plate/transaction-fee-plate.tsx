@@ -1,16 +1,14 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { TRANSFER_COST_MOTES } from '@src/constants';
-
-import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 
 import {
   AlignedSpaceBetweenFlexRow,
   RightAlignedFlexColumn
 } from '@libs/layout';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import { Tile, Typography } from '@libs/ui/components';
 import { formatFiatAmount, formatNumber, motesToCSPR } from '@libs/ui/utils';
 
@@ -27,7 +25,7 @@ export const TransactionFeePlate = ({
 }: TransactionFeePlateProps) => {
   const { t } = useTranslation();
 
-  const currencyRate = useSelector(selectAccountCurrencyRate);
+  const { currencyRate } = useFetchWalletBalance();
 
   return (
     <Tile>
@@ -45,7 +43,7 @@ export const TransactionFeePlate = ({
           <Typography type="listSubtext">
             {formatFiatAmount(
               motesToCSPR(TRANSFER_COST_MOTES) || '0',
-              currencyRate,
+              currencyRate?.rate || null,
               3
             )}
           </Typography>

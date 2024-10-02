@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import {
-  selectVaultAccountsWithBalances,
+  selectVaultAccounts,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
 
@@ -38,7 +38,7 @@ export const MyAccountsList = ({
     []
   );
 
-  const accounts = useSelector(selectVaultAccountsWithBalances);
+  const accounts = useSelector(selectVaultAccounts);
   const activeAccount = useSelector(selectVaultActiveAccount);
 
   useEffect(() => {

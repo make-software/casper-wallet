@@ -42,7 +42,7 @@ const Container = styled(TileContainer)`
 
 interface ActiveAccountPlateProps {
   label: string;
-  balance: string | null;
+  balance: string | undefined;
   symbol: string | null;
   top?: SpacingSize;
 }
@@ -107,15 +107,13 @@ export const ActiveAccountPlate = ({
             </AlignedFlexRow>
             <AmountContainer>
               <Tooltip
-                title={
-                  balance != null && balance.length > 9 ? balance : undefined
-                }
+                title={balance && balance?.length > 9 ? balance : undefined}
                 placement="topLeft"
                 overflowWrap
                 fullWidth
               >
                 <Typography type="captionHash" ellipsis>
-                  {balance == null ? '-' : balance}
+                  {balance || '-'}
                 </Typography>
               </Tooltip>
               <Typography type="captionHash" color="contentSecondary">

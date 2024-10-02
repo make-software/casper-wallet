@@ -17,10 +17,7 @@ import {
   accountPendingDeployHashesChanged,
   accountTrackingIdOfSentNftTokensChanged
 } from '@background/redux/account-info/actions';
-import {
-  selectAccountBalance,
-  selectAccountNftTokens
-} from '@background/redux/account-info/selectors';
+import { selectAccountNftTokens } from '@background/redux/account-info/selectors';
 import { selectAllContactsPublicKeys } from '@background/redux/contacts/selectors';
 import {
   ledgerDeployChanged,
@@ -52,6 +49,7 @@ import {
   SpacingSize,
   createErrorLocationState
 } from '@libs/layout';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import {
   makeNFTDeploy,
   sendSignDeploy,
@@ -87,7 +85,6 @@ export const TransferNftPage = () => {
   const { contractPackageHash, tokenId } = useParams();
 
   const nftTokens = useSelector(selectAccountNftTokens);
-  const csprBalance = useSelector(selectAccountBalance);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isActiveAccountFromLedger = useSelector(
     selectIsActiveAccountFromLedger
@@ -98,6 +95,8 @@ export const TransferNftPage = () => {
   const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
   const ratedInStore = useSelector(selectRatedInStore);
   const askForReviewAfter = useSelector(selectAskForReviewAfter);
+
+  const { accountBalance } = useFetchWalletBalance();
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -137,7 +136,7 @@ export const TransferNftPage = () => {
   );
 
   const { recipientForm, amountForm } = useTransferNftForm(
-    csprBalance.liquidMotes,
+    accountBalance.liquidBalance,
     defaultPaymentAmount
   );
 

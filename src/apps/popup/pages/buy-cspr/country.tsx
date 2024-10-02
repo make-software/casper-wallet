@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-
-import { selectAccountBalance } from '@background/redux/account-info/selectors';
 
 import {
   ContentContainer,
@@ -11,6 +8,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import { ResponseCountryPropsWithId } from '@libs/services/buy-cspr-service/types';
 import {
   ActiveAccountPlate,
@@ -21,7 +19,6 @@ import {
   SvgIcon,
   Typography
 } from '@libs/ui/components';
-import { motesToCSPR } from '@libs/ui/utils';
 
 import { CountryRow } from './components/country-row';
 import { ListRow } from './components/list-row';
@@ -45,10 +42,7 @@ export const Country = ({
   >([]);
   const { t } = useTranslation();
 
-  const csprBalance = useSelector(selectAccountBalance);
-
-  const balance =
-    csprBalance.liquidMotes && motesToCSPR(csprBalance.liquidMotes);
+  const { accountBalance } = useFetchWalletBalance();
 
   const { register, control, setValue } = useForm();
 
@@ -79,7 +73,7 @@ export const Country = ({
 
       <ActiveAccountPlate
         label="Recipient account"
-        balance={balance}
+        balance={accountBalance.liquidDecimalBalance}
         symbol="CSPR"
       />
 

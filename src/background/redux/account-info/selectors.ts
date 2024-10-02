@@ -1,11 +1,5 @@
 import { RootState } from 'typesafe-actions';
 
-export const selectAccountBalance = (state: RootState) =>
-  state.accountInfo.balance;
-
-export const selectAccountCurrencyRate = (state: RootState) =>
-  state.accountInfo.currencyRate;
-
 export const selectPendingDeployHashes = (state: RootState) =>
   state.accountInfo.pendingDeployHashes;
 
