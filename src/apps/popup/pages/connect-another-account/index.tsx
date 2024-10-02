@@ -58,7 +58,7 @@ export function ConnectAnotherAccountPageContent() {
   const { targetAccountName } = useParams();
 
   const activeOrigin = useSelector(selectActiveOrigin);
-  const publicKeys = useSelector(selectVaultAccountsPublicKeys);
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
   const {
     connectAnotherAccountWithEvent: connectAccount,
@@ -87,7 +87,7 @@ export function ConnectAnotherAccountPageContent() {
     targetAccount?.publicKey
   );
 
-  const accountsInfo = useFetchAccountsInfo(publicKeys);
+  const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
 
   const targetAccountCsprName =
     accountsInfo && accountsInfo[targetAccountHash]?.csprName;

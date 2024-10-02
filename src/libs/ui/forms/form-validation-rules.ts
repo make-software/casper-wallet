@@ -137,7 +137,9 @@ export const useRecipientPublicKeyRule = () => {
 
         return false;
       },
-      message: t('Recipient should be a valid public key or cspr name')
+      message: t(
+        'The recipient should be a valid public key, CSPR.name or contact name'
+      )
     });
 };
 

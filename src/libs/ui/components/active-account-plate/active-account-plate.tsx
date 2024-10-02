@@ -3,7 +3,10 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+import {
+  selectVaultAccountsPublicKeys,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
@@ -56,11 +59,11 @@ export const ActiveAccountPlate = ({
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
-  const accountsInfo = useFetchAccountsInfo([activeAccount?.publicKey!]);
+  const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
 
   const accountHash = getAccountHashFromPublicKey(activeAccount?.publicKey);
-
   const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
   const brandingLogo = accountsInfo && accountsInfo[accountHash]?.brandingLogo;
 

@@ -1,14 +1,19 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { selectAllContactsPublicKeys } from '@background/redux/contacts/selectors';
 import { Contact } from '@background/redux/contacts/types';
 
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   ContentContainer,
+  FlexColumn,
   LeftAlignedFlexColumn,
   SpacingSize
 } from '@libs/layout';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import {
   Avatar,
   Hash,
@@ -32,6 +37,13 @@ interface ContactDetailsProps {
 export const ContactDetails = ({ contact }: ContactDetailsProps) => {
   const { t } = useTranslation();
 
+  const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
+
+  const accountsInfo = useFetchAccountsInfo(contactPublicKeys);
+
+  const accountHash = getAccountHashFromPublicKey(contact.publicKey);
+  const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
+
   return (
     <ContentContainer>
       <Tile>
@@ -44,6 +56,16 @@ export const ContactDetails = ({ contact }: ContactDetailsProps) => {
               variant={HashVariant.CaptionHash}
               color="contentPrimary"
             />
+            {csprName ? (
+              <FlexColumn gap={SpacingSize.Small}>
+                <Typography type="bodySemiBold">
+                  <Trans t={t}>CSPR.name</Trans>
+                </Typography>
+                <Typography type="captionRegular" color="contentSecondary">
+                  {csprName}
+                </Typography>
+              </FlexColumn>
+            ) : null}
             <Typography type="captionRegular" color="contentSecondary">
               <Trans t={t}>
                 Last edited: {formatShortTimestamp(contact.lastModified)}

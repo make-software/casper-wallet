@@ -19,7 +19,7 @@ export const useFetchAccountsInfo = (accountPublicKeys: string[]) => {
   const accountHashesString = accountHashes.toString();
 
   const { data: accountsInfo } = useQuery({
-    queryKey: ['ACCOUNT_INFO', accountHashesString],
+    queryKey: ['ACCOUNT_INFO', accountHashesString, network],
     queryFn: async () => {
       return await accountInfoRepository.getAccountsInfo({
         accountHashes,

@@ -12,6 +12,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { hideAccountFromListChanged } from '@background/redux/vault/actions';
 import {
   selectVaultAccount,
+  selectVaultAccountsPublicKeys,
   selectVaultHiddenAccountsNames,
   selectVaultImportedAccountNames,
   selectVaultLedgerAccountNames
@@ -42,13 +43,14 @@ export function AccountSettingsPageContent() {
   const account = useSelector((state: RootState) =>
     selectVaultAccount(state, accountName || '')
   );
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
   if (!account) {
     throw new Error("Account doesn't exist");
   }
 
+  const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
   const accountHash = getAccountHashFromPublicKey(account.publicKey);
-  const accountsInfo = useFetchAccountsInfo([account.publicKey]);
 
   const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
 
