@@ -3,8 +3,6 @@ import { createReducer } from 'typesafe-actions';
 import { isEqualCaseInsensitive } from '@src/utils';
 
 import {
-  accountBalanceChanged,
-  accountCurrencyRateChanged,
   accountErc20Changed,
   accountInfoReset,
   accountNftTokensAdded,
@@ -18,14 +16,6 @@ import {
 import { AccountInfoState } from './types';
 
 const initialState: AccountInfoState = {
-  balance: {
-    liquidMotes: null,
-    delegatedMotes: null,
-    undelegatingMotes: null,
-    totalBalanceMotes: null,
-    totalBalanceFiat: null
-  },
-  currencyRate: null,
   pendingDeployHashes: [],
   erc20Tokens: [],
   accountNftTokens: [],
@@ -35,17 +25,6 @@ const initialState: AccountInfoState = {
 
 export const reducer = createReducer(initialState)
   .handleAction(accountInfoReset, () => initialState)
-  .handleAction(accountBalanceChanged, (state, { payload }) => ({
-    ...state,
-    balance: payload
-  }))
-  .handleAction(
-    accountCurrencyRateChanged,
-    (state, { payload }): AccountInfoState => ({
-      ...state,
-      currencyRate: payload
-    })
-  )
   .handleAction(
     accountErc20Changed,
     (state, { payload }): AccountInfoState => ({

@@ -1,14 +1,10 @@
 import { Player } from '@lottiefiles/react-lottie-player';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-
-import { isEqualCaseInsensitive } from '@src/utils';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { accountsImported } from '@background/redux/vault/actions';
 
@@ -28,7 +24,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { dispatchFetchAccountBalances } from '@libs/services/balance-service';
+import { useFetchAccountsBalances } from '@libs/services/balance-service';
 import {
   LedgerAccount,
   LedgerEventStatus,
@@ -73,10 +69,6 @@ export const ConnectedLedger: React.FC<IConnectedLedgerProps> = ({
   const navigate = useTypedNavigate();
   const isDarkMode = useIsDarkMode();
 
-  const { casperWalletApiUrl } = useSelector(
-    selectApiConfigBasedOnActiveNetwork
-  );
-
   useEffect(() => {
     ledger.getAccountList({ size: 5, offset: 0 });
   }, []);
@@ -93,48 +85,41 @@ export const ConnectedLedger: React.FC<IConnectedLedgerProps> = ({
     return () => sub.unsubscribe();
   }, []);
 
+  const accountHashes = accountsFromLedger.map(account =>
+    getAccountHashFromPublicKey(account.publicKey)
+  );
+
+  const { accountsBalances, isLoadingBalances } =
+    useFetchAccountsBalances(accountHashes);
+
   useEffect(() => {
-    if (!accountsFromLedger.length) return;
+    if (!accountsFromLedger.length || isLoadingBalances) return;
 
-    const hashes = accountsFromLedger.reduce(
-      (previousValue, currentValue, currentIndex) => {
-        const hash = getAccountHashFromPublicKey(currentValue.publicKey);
+    const accountsWithBalance = accountsFromLedger.map<ILedgerAccountListItem>(
+      account => {
+        const accountHash = getAccountHashFromPublicKey(account.publicKey);
 
-        return accountsFromLedger.length === currentIndex + 1
-          ? previousValue + `${hash}`
-          : previousValue + `${hash},`;
-      },
-      ''
+        const accountLiquidBalance =
+          accountsBalances && accountsBalances[accountHash]?.liquidBalance;
+
+        return {
+          publicKey: account.publicKey,
+          derivationIndex: account.index,
+          accountHash,
+          name: '',
+          id: account.publicKey,
+          balance: {
+            liquidMotes: `${accountLiquidBalance ?? '0'}`
+          }
+        };
+      }
     );
 
-    dispatchFetchAccountBalances(hashes)
-      .then(({ payload }) => {
-        if ('data' in payload) {
-          const accountsWithBalance =
-            accountsFromLedger.map<ILedgerAccountListItem>(account => {
-              const accountWithBalance = payload.data.find(ac =>
-                isEqualCaseInsensitive(ac.public_key, account.publicKey)
-              );
+    setLedgerAccountsWithBalance(accountsWithBalance);
 
-              return {
-                publicKey: account.publicKey,
-                derivationIndex: account.index,
-                name: '',
-                id: account.publicKey,
-                balance: {
-                  liquidMotes: `${accountWithBalance?.balance ?? '0'}`
-                }
-              };
-            });
-
-          setLedgerAccountsWithBalance(accountsWithBalance);
-        }
-      })
-      .finally(() => {
-        setIsLoading(false);
-        setIsLoadingMore(false);
-      });
-  }, [casperWalletApiUrl, accountsFromLedger]);
+    setIsLoading(false);
+    setIsLoadingMore(false);
+  }, [accountsBalances, accountsFromLedger, isLoadingBalances]);
 
   const onSubmit = () => {
     const accounts: Account[] = selectedAccounts.map(account => ({
@@ -232,6 +217,7 @@ export const ConnectedLedger: React.FC<IConnectedLedgerProps> = ({
               onLoadMore={onLoadMore}
               isLoadingMore={isLoadingMore}
               namePrefix="Ledger account"
+              accountsBalances={accountsBalances}
             />
           )}
         </ContentContainer>

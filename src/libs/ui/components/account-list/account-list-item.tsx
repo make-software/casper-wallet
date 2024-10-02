@@ -56,6 +56,7 @@ interface AccountListItemProps {
   showHideAccountItem?: boolean;
   closeModal?: (e: React.MouseEvent) => void;
   accountsInfo: Record<string, IAccountInfo> | undefined;
+  accountLiquidBalance: string | undefined;
 }
 
 export const AccountListItem = ({
@@ -65,14 +66,14 @@ export const AccountListItem = ({
   isConnected,
   showHideAccountItem,
   closeModal,
-  accountsInfo
+  accountsInfo,
+  accountLiquidBalance
 }: AccountListItemProps) => {
-  const accountBalance =
-    account.balance?.liquidMotes != null
-      ? formatNumber(motesToCSPR(account.balance.liquidMotes), {
-          precision: { max: 0 }
-        })
-      : '-';
+  const accountBalance = accountLiquidBalance
+    ? formatNumber(motesToCSPR(accountLiquidBalance), {
+        precision: { max: 0 }
+      })
+    : '-';
 
   const csprName = accountsInfo && accountsInfo[account.accountHash]?.csprName;
   const brandingLogo =
@@ -103,11 +104,7 @@ export const AccountListItem = ({
             <AccountName type={isActiveAccount ? 'bodySemiBold' : 'body'}>
               {account.name}
             </AccountName>
-            <Balance
-              type="bodyHash"
-              ellipsis
-              loading={!account.balance && account.balance !== 0}
-            >
+            <Balance type="bodyHash" ellipsis loading={!accountLiquidBalance}>
               {accountBalance}
             </Balance>
           </AlignedSpaceBetweenFlexRow>

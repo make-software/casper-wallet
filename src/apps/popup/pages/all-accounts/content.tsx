@@ -13,6 +13,7 @@ import {
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { ContentContainer, SpacingSize } from '@libs/layout';
 import { useFetchAccountsInfo } from '@libs/services/account-info';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import {
   AccountListRowWithAccountHash,
   AccountListRows
@@ -39,6 +40,7 @@ export const AllAccountsContent = () => {
   const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
   const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
+  const { accountsBalances } = useFetchWalletBalance();
 
   useEffect(() => {
     const visibleAccountListRows = sortAccounts(
@@ -79,6 +81,10 @@ export const AllAccountsContent = () => {
           const isConnected = connectedAccountNames.includes(account.name);
           const isActiveAccount = activeAccountName === account.name;
 
+          const accountLiquidBalance =
+            accountsBalances &&
+            accountsBalances[account.accountHash].liquidBalance;
+
           return (
             <AccountListItem
               account={account}
@@ -86,6 +92,7 @@ export const AllAccountsContent = () => {
               isConnected={isConnected}
               showHideAccountItem
               accountsInfo={accountsInfo}
+              accountLiquidBalance={accountLiquidBalance}
             />
           );
         }}
@@ -100,6 +107,10 @@ export const AllAccountsContent = () => {
           renderRow={account => {
             const isConnected = connectedAccountNames.includes(account.name);
 
+            const accountLiquidBalance =
+              accountsBalances &&
+              accountsBalances[account.accountHash].liquidBalance;
+
             return (
               <AccountListItem
                 account={account}
@@ -107,6 +118,7 @@ export const AllAccountsContent = () => {
                 isConnected={isConnected}
                 showHideAccountItem
                 accountsInfo={accountsInfo}
+                accountLiquidBalance={accountLiquidBalance}
               />
             );
           }}

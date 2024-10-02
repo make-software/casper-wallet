@@ -20,11 +20,7 @@ import {
 
 import { getRawPublicKey } from '@libs/entities/Account';
 import { toJson } from '@libs/services/utils';
-import {
-  Account,
-  AccountWithBalance,
-  HardwareWalletType
-} from '@libs/types/account';
+import { Account, HardwareWalletType } from '@libs/types/account';
 import { CSPRtoMotes, multiplyErc20Balance } from '@libs/ui/utils';
 
 import { ledger } from '../ledger';
@@ -119,7 +115,7 @@ export const makeAuctionManagerDeploy = async (
 };
 
 export const makeNativeTransferDeploy = async (
-  activeAccount: AccountWithBalance,
+  activeAccount: Account,
   recipientPublicKeyHex: string,
   amountMotes: string,
   networkName: NetworkName,

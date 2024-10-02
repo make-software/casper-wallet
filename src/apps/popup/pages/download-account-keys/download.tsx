@@ -4,16 +4,23 @@ import { useSelector } from 'react-redux';
 
 import {
   selectConnectedAccountNamesWithActiveOrigin,
-  selectVaultAccountsWithBalances,
+  selectVaultAccountsExceptLedgersAccounts,
+  selectVaultAccountsPublicKeys,
   selectVaultActiveAccountName
 } from '@background/redux/vault/selectors';
 
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { AccountListRows } from '@libs/types/account';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
+import {
+  AccountListRowWithAccountHash,
+  AccountListRows
+} from '@libs/types/account';
 import { List, Typography } from '@libs/ui/components';
 
 import { AccountListItem } from './components/account-list-item';
@@ -27,20 +34,26 @@ export const Download = ({
   setSelectedAccounts,
   selectedAccounts
 }: DownloadProps) => {
-  const [accountsWithId, setAccountsWithId] = useState<AccountListRows[]>([]);
+  const [accountsWithId, setAccountsWithId] = useState<
+    AccountListRowWithAccountHash<AccountListRows>[]
+  >([]);
 
   const { t } = useTranslation();
 
-  // TODO: update this when the ledger feature is ready, to not allow the download of the ledger accounts
-  const accounts = useSelector(selectVaultAccountsWithBalances);
+  const accounts = useSelector(selectVaultAccountsExceptLedgersAccounts);
   const connectedAccountNames =
     useSelector(selectConnectedAccountNamesWithActiveOrigin) || [];
   const activeAccountName = useSelector(selectVaultActiveAccountName);
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
+
+  const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
+  const { accountsBalances } = useFetchWalletBalance();
 
   useEffect(() => {
     const accountsWithId = accounts.map(account => ({
       ...account,
-      id: account.name
+      id: account.name,
+      accountHash: getAccountHashFromPublicKey(account.publicKey)
     }));
 
     setAccountsWithId(accountsWithId);
@@ -99,6 +112,10 @@ export const Download = ({
           const isSelected =
             selectedAccounts.findIndex(acc => acc.id === account.id) !== -1;
 
+          const accountLiquidBalance =
+            accountsBalances &&
+            accountsBalances[account.accountHash].liquidBalance;
+
           return (
             <AccountListItem
               account={account}
@@ -106,6 +123,8 @@ export const Download = ({
               isActiveAccount={isActiveAccount}
               onClick={() => toggleAccount(account)}
               isSelected={isSelected}
+              accountLiquidBalance={accountLiquidBalance}
+              accountsInfo={accountsInfo}
             />
           );
         }}
