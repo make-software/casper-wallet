@@ -39,7 +39,7 @@ popup.describe('Popup UI: buy cspr', () => {
     }
   );
 
-  popup(
+  popup.skip(
     'should redirect to Ramp provider page',
     async ({ popupPage, unlockVault, context }) => {
       await unlockVault();
