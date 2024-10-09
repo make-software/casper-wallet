@@ -3,7 +3,7 @@ import { useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import { TermsLink } from '@src/constants';
+import { TERMS_URLS } from '@src/constants';
 
 import { Stepper } from '@onboarding/components/stepper';
 import { RouterPath } from '@onboarding/router';
@@ -69,7 +69,7 @@ export function CreateVaultPasswordPage({
         onClick={event => {
           event.stopPropagation();
           event.preventDefault();
-          window.open(TermsLink.Tos, '_blank');
+          window.open(TERMS_URLS.tos, '_blank');
         }}
         color="contentAction"
       >
@@ -80,7 +80,7 @@ export function CreateVaultPasswordPage({
         onClick={event => {
           event.stopPropagation();
           event.preventDefault();
-          window.open(TermsLink.Privacy, '_blank');
+          window.open(TERMS_URLS.privacy, '_blank');
         }}
         color="contentAction"
       >
