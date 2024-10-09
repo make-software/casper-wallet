@@ -7,3 +7,5 @@ export const ratedInStoreChanged = createAction(
 export const askForReviewAfterChanged = createAction(
   'ASK_FOR_REVIEW_AFTER_CHANGED'
 )<number>();
+
+export const resetRateApp = createAction('RESET_RATE_APP')();

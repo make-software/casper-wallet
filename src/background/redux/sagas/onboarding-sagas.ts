@@ -4,6 +4,8 @@ import { storage } from 'webextension-polyfill';
 
 import { disableOnboardingFlow } from '@background/open-onboarding-flow';
 import { contactsReseted } from '@background/redux/contacts/actions';
+import { resetPromotion } from '@background/redux/promotion/actions';
+import { resetRateApp } from '@background/redux/rate-app/actions';
 import { recipientPublicKeyReseted } from '@background/redux/recent-recipient-public-keys/actions';
 import { vaultSettingsReseted } from '@background/redux/settings/actions';
 
@@ -54,6 +56,8 @@ function* resetVaultSaga() {
     yield put(recipientPublicKeyReseted());
     yield put(contactsReseted());
     yield put(vaultSettingsReseted());
+    yield put(resetRateApp());
+    yield put(resetPromotion());
 
     storage.local.clear();
   } catch (err) {
