@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { TermsLink } from '@src/constants';
 import { isLedgerAvailable, isSafariBuild } from '@src/utils';
 
 import { TimeoutDurationSetting } from '@popup/constants';
@@ -320,20 +321,34 @@ export function NavigationMenuPageContent() {
         items: [
           {
             id: 1,
+            title: t('Terms & Conditions'),
+            iconPath: 'assets/icons/books.svg',
+            href: TermsLink.Tos,
+            disabled: false
+          },
+          {
+            id: 2,
+            title: t('Privacy Policy'),
+            iconPath: 'assets/icons/books.svg',
+            href: TermsLink.Privacy,
+            disabled: false
+          },
+          {
+            id: 3,
             title: t('Share feedback'),
             iconPath: 'assets/icons/chat.svg',
             href: 'https://casper-wallet.canny.io/feature-requests',
             disabled: false
           },
           {
-            id: 2,
+            id: 4,
             title: t('User guides'),
             iconPath: 'assets/icons/books.svg',
             href: 'https://casperwallet.io/user-guide',
             disabled: false
           },
           {
-            id: 3,
+            id: 5,
             title: t('About us'),
             iconPath: 'assets/icons/team.svg',
             href: 'https://make.services/',
