@@ -8,7 +8,6 @@ import {
   ResponseSelectionProps,
   SelectionPostRequestData
 } from '@libs/services/buy-cspr-service/types';
-import { ContractPackageWithBalance } from '@libs/services/erc20-service/types';
 import { NFTTokenResult } from '@libs/services/nft-service/types';
 import { ErrorResponse, PaginatedResponse } from '@libs/services/types';
 import {
@@ -26,14 +25,6 @@ export const serviceMessage = {
   fetchExtendedDeploysInfoResponse: createAction(
     'FETCH_EXTENDED_DEPLOYS_INFO_RESPONSE'
   )<IDeploy | null, Meta>(),
-  fetchErc20TokensRequest: createAction('FETCH_ERC20_TOKENS')<
-    { accountHash: string },
-    Meta
-  >(),
-  fetchErc20TokensResponse: createAction('FETCH_ERC20_TOKENS_RESPONSE')<
-    ContractPackageWithBalance[],
-    Meta
-  >(),
   fetchNftTokensRequest: createAction('FETCH_NFT_TOKENS')<
     { accountHash: string; page: number },
     Meta

@@ -29,7 +29,6 @@ import {
   openOnboardingUi
 } from '@background/open-onboarding-flow';
 import {
-  accountErc20Changed,
   accountInfoReset,
   accountNftTokensAdded,
   accountNftTokensCountChanged,
@@ -109,7 +108,6 @@ import {
   fetchOnRampOptionPost,
   fetchOnRampSelectionPost
 } from '@libs/services/buy-cspr-service';
-import { fetchErc20Tokens } from '@libs/services/erc20-service';
 import { fetchNftTokens } from '@libs/services/nft-service';
 import {
   fetchAuctionValidators,
@@ -600,7 +598,6 @@ runtime.onMessage.addListener(
           case getType(accountInfoReset):
           case getType(accountPendingDeployHashesChanged):
           case getType(accountPendingDeployHashesRemove):
-          case getType(accountErc20Changed):
           case getType(accountNftTokensAdded):
           case getType(accountNftTokensUpdated):
           case getType(accountNftTokensCountChanged):
@@ -645,39 +642,6 @@ runtime.onMessage.addListener(
               return sendResponse(
                 serviceMessage.fetchExtendedDeploysInfoResponse(data)
               );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchErc20TokensRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const { data: tokensList } = await fetchErc20Tokens({
-                casperClarityApiUrl,
-                accountHash: action.payload.accountHash
-              });
-
-              if (tokensList) {
-                const erc20Tokens = tokensList.map(token => ({
-                  balance: token.balance,
-                  contractHash: token.latest_contract?.contract_hash,
-                  ...(token?.contract_package ?? {})
-                }));
-
-                return sendResponse(
-                  serviceMessage.fetchErc20TokensResponse(erc20Tokens)
-                );
-              } else {
-                return sendResponse(
-                  serviceMessage.fetchErc20TokensResponse([])
-                );
-              }
             } catch (error) {
               console.error(error);
             }

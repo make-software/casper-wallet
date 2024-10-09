@@ -1,40 +1,22 @@
+import { TokenDto } from 'casper-wallet-core/src/data/dto';
+
 import { TokenType } from '@hooks/use-casper-token';
 
-import { ContractPackageWithBalance } from '@libs/services/erc20-service';
-import { divideErc20Balance, formatNumber } from '@libs/ui/utils';
-
-export const MINIMUM_SHOWING_BALANCE = 0.00001;
-
-export const formatErc20TokenBalance = (
-  erc20Tokens: ContractPackageWithBalance[] | null
+export const formatCep18Tokens = (
+  cep18Tokens: TokenDto[] | undefined
 ): TokenType[] | undefined => {
-  return erc20Tokens
-    ?.map(token => {
-      const calculatedErc20Balance = token?.balance
-        ? divideErc20Balance(token?.balance, token.metadata?.decimals)
-        : '0';
-
-      const formattedErc20Amount = calculatedErc20Balance
-        ? formatNumber(calculatedErc20Balance, { precision: { max: 5 } })
-        : '-';
-
-      const erc20Amount =
-        parseFloat(formattedErc20Amount) >= MINIMUM_SHOWING_BALANCE
-          ? formattedErc20Amount
-          : '0';
-
-      return {
-        id: token.contract_package_hash,
-        contractHash: token.contractHash,
-        name: token.contract_name,
-        balance: token.balance,
-        amount: erc20Amount,
-        symbol: token?.metadata?.symbol || '',
-        decimals: token?.metadata?.decimals,
-        amountFiat: null,
-        icon: token.icon_url || 'assets/icons/cep18-contract-icon.svg'
-      };
-    })
+  return cep18Tokens
+    ?.map(token => ({
+      id: token.contractPackageHash,
+      contractHash: token.contractHash,
+      name: token.name,
+      balance: token.balance,
+      amount: token.formattedDecimalBalance,
+      symbol: token.symbol,
+      decimals: token.decimals,
+      amountFiat: null,
+      icon: token.iconUrl || 'assets/icons/cep18-contract-icon.svg'
+    }))
     .sort((a, b) => {
       const first = a.amount.split(',').join('');
       const second = b.amount.split(',').join('');

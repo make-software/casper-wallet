@@ -7,7 +7,6 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 import {
   CasperTokenTransferDeploysList,
   Cep18TokenDeploysList,
@@ -16,13 +15,7 @@ import {
 
 import { Token } from './token';
 
-interface TokenPageContentProps {
-  erc20Tokens: ContractPackageWithBalance[] | null;
-}
-
-export const TokenPageContent: React.FC<TokenPageContentProps> = ({
-  erc20Tokens
-}) => {
+export const TokenPageContent: React.FC = () => {
   const { t } = useTranslation();
 
   const { tokenName } = useParams();
@@ -34,7 +27,7 @@ export const TokenPageContent: React.FC<TokenPageContentProps> = ({
           <Trans t={t}>Token</Trans>
         </Typography>
       </ParagraphContainer>
-      <Token erc20Tokens={erc20Tokens} />
+      <Token />
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
           <Trans t={t}>Activity</Trans>

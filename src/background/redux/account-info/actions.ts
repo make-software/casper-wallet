@@ -1,11 +1,6 @@
 import { createAction } from 'typesafe-actions';
 
-import { ContractPackageWithBalance } from '@libs/services/erc20-service/types';
 import { NFTTokenResult } from '@libs/services/nft-service/types';
-
-export const accountErc20Changed = createAction('ACCOUNT_ERC20_CHANGED')<
-  ContractPackageWithBalance[]
->();
 
 export const accountInfoReset = createAction('ACCOUNT_INFO_RESET')();
 

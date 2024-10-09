@@ -3,7 +3,6 @@ import { createReducer } from 'typesafe-actions';
 import { isEqualCaseInsensitive } from '@src/utils';
 
 import {
-  accountErc20Changed,
   accountInfoReset,
   accountNftTokensAdded,
   accountNftTokensCountChanged,
@@ -17,7 +16,6 @@ import { AccountInfoState } from './types';
 
 const initialState: AccountInfoState = {
   pendingDeployHashes: [],
-  erc20Tokens: [],
   accountNftTokens: [],
   nftTokensCount: 0,
   accountTrackingIdOfSentNftTokens: {}
@@ -25,13 +23,6 @@ const initialState: AccountInfoState = {
 
 export const reducer = createReducer(initialState)
   .handleAction(accountInfoReset, () => initialState)
-  .handleAction(
-    accountErc20Changed,
-    (state, { payload }): AccountInfoState => ({
-      ...state,
-      erc20Tokens: payload
-    })
-  )
   .handleAction(accountPendingDeployHashesChanged, (state, { payload }) => {
     return {
       ...state,
