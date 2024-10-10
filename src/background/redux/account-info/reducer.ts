@@ -4,9 +4,6 @@ import { isEqualCaseInsensitive } from '@src/utils';
 
 import {
   accountInfoReset,
-  accountNftTokensAdded,
-  accountNftTokensCountChanged,
-  accountNftTokensUpdated,
   accountPendingDeployHashesChanged,
   accountPendingDeployHashesRemove,
   accountTrackingIdOfSentNftTokensChanged,
@@ -16,8 +13,6 @@ import { AccountInfoState } from './types';
 
 const initialState: AccountInfoState = {
   pendingDeployHashes: [],
-  accountNftTokens: [],
-  nftTokensCount: 0,
   accountTrackingIdOfSentNftTokens: {}
 };
 
@@ -34,21 +29,6 @@ export const reducer = createReducer(initialState)
     pendingDeployHashes: state.pendingDeployHashes.filter(
       deploy => !isEqualCaseInsensitive(deploy, payload)
     )
-  }))
-  .handleAction(accountNftTokensAdded, (state, { payload }) => ({
-    ...state,
-    accountNftTokens: payload
-  }))
-  .handleAction(accountNftTokensUpdated, (state, { payload }) => ({
-    ...state,
-    accountNftTokens:
-      state.accountNftTokens != null
-        ? [...state.accountNftTokens, ...payload]
-        : payload
-  }))
-  .handleAction(accountNftTokensCountChanged, (state, { payload }) => ({
-    ...state,
-    nftTokensCount: payload
   }))
   .handleAction(
     accountTrackingIdOfSentNftTokensChanged,
