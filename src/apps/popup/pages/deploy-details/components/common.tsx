@@ -181,7 +181,7 @@ export const NftInfoRow = ({
         {isApprove || nftTokenIds.length > 1 ? 'NFT(s)' : 'NFT'}
       </Typography>
       {nftTokenIds.map(id => (
-        <NftIndexContainer>
+        <NftIndexContainer key={id}>
           <Link
             color="contentAction"
             target="_blank"

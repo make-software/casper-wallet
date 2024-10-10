@@ -1,21 +1,11 @@
-import React, { forwardRef, useMemo, useState } from 'react';
+import { INft } from 'casper-wallet-core/src/domain';
+import React, { forwardRef } from 'react';
 import styled from 'styled-components';
-
-import {
-  ContentType,
-  deriveMediaType,
-  findMediaPreview,
-  getImageProxyUrl,
-  getMetadataKeyValue,
-  getNftTokenMetadataWithLinks
-} from '@src/utils';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { useAsyncEffect } from '@hooks/use-async-effect';
-
 import { FlexColumn, SpacingSize } from '@libs/layout';
-import { NFTTokenResult } from '@libs/services/nft-service';
+import { useFetchDeriveMediaType } from '@libs/services/nft-service';
 import {
   EmptyMediaPlaceholder,
   LoadingMediaPlaceholder,
@@ -35,36 +25,18 @@ const NftTokenCardContainer = styled(FlexColumn)`
 export const NftTokenCard = forwardRef<
   Ref,
   {
-    nftToken: NFTTokenResult | null;
+    nftToken: INft | null;
     onClick?: () => void;
   }
 >(({ nftToken, onClick }, ref) => {
   const navigate = useTypedNavigate();
-  const [contentType, setContentType] = useState<ContentType>('');
-  const [typeLoading, setTypeLoading] = useState<boolean>(true);
 
-  const nftTokenMetadataWithLinks = useMemo(
-    () => getNftTokenMetadataWithLinks(nftToken),
-    [nftToken]
-  );
+  const preview = nftToken?.previewUrl;
 
-  const preview = nftTokenMetadataWithLinks?.find(findMediaPreview);
+  const cachedUrl = nftToken?.proxyPreviewUrl;
 
-  const metadataKeyValue = useMemo(
-    () => getMetadataKeyValue(nftTokenMetadataWithLinks),
-    [nftTokenMetadataWithLinks]
-  );
-
-  const cachedUrl = getImageProxyUrl(preview?.value);
-
-  useAsyncEffect<string>(
-    () => deriveMediaType(cachedUrl),
-    mediaType => {
-      setContentType(mediaType);
-      setTypeLoading(false);
-    },
-    [cachedUrl]
-  );
+  const { contentType, isLoadingMediaType } =
+    useFetchDeriveMediaType(cachedUrl);
 
   return (
     <NftTokenCardContainer
@@ -75,11 +47,8 @@ export const NftTokenCard = forwardRef<
         navigate(
           RouterPath.NftDetails.replace(
             ':tokenId',
-            nftToken?.token_id || ''
-          ).replace(
-            ':contractPackageHash',
-            nftToken?.contract_package_hash || ''
-          )
+            nftToken?.tokenId || ''
+          ).replace(':contractPackageHash', nftToken?.contractPackageHash || '')
         );
 
         if (onClick) {
@@ -89,9 +58,9 @@ export const NftTokenCard = forwardRef<
     >
       {preview ? (
         <>
-          {typeLoading && <LoadingMediaPlaceholder />}
+          {isLoadingMediaType && <LoadingMediaPlaceholder />}
           <NftPreviewImage
-            url={preview.value}
+            url={preview}
             cachedUrl={cachedUrl}
             contentType={contentType}
           />
@@ -100,7 +69,7 @@ export const NftTokenCard = forwardRef<
         <EmptyMediaPlaceholder />
       )}
       <Typography type="captionRegular" ellipsis>
-        {metadataKeyValue?.name}
+        {nftToken?.metadata?.name}
       </Typography>
     </NftTokenCardContainer>
   );

@@ -20,6 +20,7 @@ export const useFetchSingleDeploy = (deployHash?: string) => {
         activePublicKey: activeAccount?.publicKey ?? '',
         network: network.toLowerCase() as CasperNetwork
       }),
+    enabled: Boolean(deployHash && activeAccount?.publicKey),
     refetchInterval: DEPLOY_DETAILS_REFRESH_RATE,
     staleTime: DEPLOY_DETAILS_REFRESH_RATE
   });

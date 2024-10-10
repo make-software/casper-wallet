@@ -1,7 +1,7 @@
+import { NftContentType } from 'casper-wallet-core/src/domain/nfts/entities';
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-
-import { ContentType } from '@src/utils';
 
 import {
   AudioNftPlaceholder,
@@ -27,8 +27,8 @@ export const NftPreviewImage = ({
   contentType
 }: {
   url: string;
-  contentType: ContentType;
-  cachedUrl?: string;
+  contentType?: NftContentType;
+  cachedUrl?: Maybe<string>;
 }) => {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -48,7 +48,7 @@ export const NftPreviewImage = ({
 
   return (
     <>
-      {contentType.startsWith('image') && (
+      {contentType?.startsWith('image') && (
         <ImageContainer>
           <NftImage
             style={{ display: loading ? 'none' : 'inline-block' }}
@@ -59,8 +59,8 @@ export const NftPreviewImage = ({
           {loading && <LoadingMediaPlaceholder />}
         </ImageContainer>
       )}
-      {contentType.startsWith('audio') && <AudioNftPlaceholder />}
-      {contentType.startsWith('video') && <VideoNftPlaceholder />}
+      {contentType?.startsWith('audio') && <AudioNftPlaceholder />}
+      {contentType?.startsWith('video') && <VideoNftPlaceholder />}
       {contentType === 'unknown' && <EmptyMediaPlaceholder />}
     </>
   );

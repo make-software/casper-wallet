@@ -1,4 +1,3 @@
-import { IDeploy } from 'casper-wallet-core';
 import { ActionType, createAction } from 'typesafe-actions';
 
 import {
@@ -8,7 +7,6 @@ import {
   ResponseSelectionProps,
   SelectionPostRequestData
 } from '@libs/services/buy-cspr-service/types';
-import { NFTTokenResult } from '@libs/services/nft-service/types';
 import { ErrorResponse, PaginatedResponse } from '@libs/services/types';
 import {
   DelegatorResult,
@@ -18,21 +16,6 @@ import {
 type Meta = void;
 
 export const serviceMessage = {
-  fetchExtendedDeploysInfoRequest: createAction('FETCH_EXTENDED_DEPLOYS_INFO')<
-    { deployHash: string; publicKey: string },
-    Meta
-  >(),
-  fetchExtendedDeploysInfoResponse: createAction(
-    'FETCH_EXTENDED_DEPLOYS_INFO_RESPONSE'
-  )<IDeploy | null, Meta>(),
-  fetchNftTokensRequest: createAction('FETCH_NFT_TOKENS')<
-    { accountHash: string; page: number },
-    Meta
-  >(),
-  fetchNftTokensResponse: createAction('FETCH_NFT_TOKENS_RESPONSE')<
-    PaginatedResponse<NFTTokenResult> | ErrorResponse,
-    Meta
-  >(),
   fetchAuctionValidatorsRequest: createAction(
     'FETCH_AUCTION_VALIDATORS'
   )<Meta>(),
