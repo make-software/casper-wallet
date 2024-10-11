@@ -112,7 +112,7 @@ export const URLS = {
 };
 export function createLocators(page: Page) {
   return {
-    accountSwitcher: page.locator("div.sc-hLBbgP.sc-eDvSVe.sc-gKPRtg.sc-kImNAt > span[type='listSubtextHash'].sc-iOeugr"),
+    accountSwitcher: page.getByTestId('connection-status-modal'),
     firstAccount: page.locator("span[type='bodySemiBold'].sc-iOeugr.hnMrar.sc-iJbNxu.bAimRi"),
     CSPRtotalBalance: page.locator('span[type="CSPRBold"]'),
     liquidBalance: page.locator('#layout-content-container > div > div.sc-gGvHcT.LEYqH > div > div.sc-hLBbgP.sc-kDvujY.bxIaNA.czrHSx > div.sc-hLBbgP.sc-kDvujY.nnmro.czrHSx > div.sc-hLBbgP.sc-kDvujY.sc-fmixVB.eJhjZ.czrHSx.jIbqvc > div:nth-child(1) > div > span.sc-iOeugr.fFyyCL'),
