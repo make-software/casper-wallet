@@ -1,5 +1,6 @@
 import { onboardingExpect, onboarding } from '../fixtures';
 import { DEFAULT_FIRST_ACCOUNT } from '../constants';
+import { createLocators } from '../constants';
 
 onboarding.describe('Onboarding UI: confirm secret phrase flow', () => {
   onboarding(
@@ -30,6 +31,26 @@ onboarding.describe('Onboarding UI: confirm secret phrase flow', () => {
       await onboardingExpect(
         page.getByText(DEFAULT_FIRST_ACCOUNT.accountName)
       ).toBeVisible();
+      //Fresh account should have empty balances, no nft or deploy history
+      await onboardingExpect(
+        page.getByText("NFTs")).toBeVisible();
+
+      await page.getByText("NFTs").click();
+
+      await onboardingExpect(
+      await page.getByText("No NFT tokens")).toBeVisible();
+
+      await page.getByText("Deploys").click();
+
+      await onboardingExpect(
+      await page.getByText("No activity")).toBeVisible();
+
+      const locators = createLocators(page);
+      const accountSwitcher = locators.accountSwitcher;
+      const firstAccount = locators.firstAccount;
+    
+      // Perform actions and assertions
+      await accountSwitcher.click();
     }
   );
 
