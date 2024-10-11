@@ -212,6 +212,8 @@ export const popup = test.extend<{
   createAccount: (newAccountName: string) => Promise<void>;
   connectAccounts: () => Promise<void>;
   addContact: () => Promise<void>;
+  providePassword: (popupPage?: Page) => Promise<void>;
+  passwordTimeout: (popupPage?: Page) => Promise<void>;
 }>({
   popupPage: async ({ extensionId, page }, use) => {
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
@@ -291,7 +293,37 @@ export const popup = test.extend<{
     };
 
     await use(addContact);
-  }
-});
+  },
 
+
+providePassword: async ({ page }, use) => {
+  const providePassword = async (popupPage?: Page) => {
+    const currentPage = popupPage || page;
+
+    await currentPage
+      .getByPlaceholder('Password', { exact: true })
+      .fill(vaultPassword);
+    await currentPage.getByRole('button', { name: 'Continue' }).click();
+  };
+
+  await use(providePassword);
+},
+
+passwordTimeout: async ({ page }, use) => {
+  const passwordTimeout = async (popupPage?: Page) => {
+    const currentPage = popupPage || page;
+
+    await currentPage
+      .getByPlaceholder('Password', { exact: true })
+      .fill('wrong password');
+    
+      for (let i = 0; i < 5; i++) {
+        await currentPage.getByRole('button', { name: 'Continue' }).click();
+      }
+      
+  };
+
+  await use(passwordTimeout);
+}
+});
 export const popupExpect = popup.expect;

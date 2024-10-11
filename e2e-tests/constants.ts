@@ -1,4 +1,5 @@
 import path from 'path';
+import {Page, Locator} from '@playwright/test'
 
 export const vaultPassword = '3hQqzYn4C7Y8rEZTVEZb';
 export const twentyFourWordsSecretPhrase =
@@ -109,6 +110,18 @@ export const NEW_VALIDATOR_FOR_STAKE = {
 export const URLS = {
   rpc: 'https://node.testnet.cspr.cloud/rpc'
 };
+export function createLocators(page: Page) {
+  return {
+    accountSwitcher: page.locator("div.sc-hLBbgP.sc-eDvSVe.sc-gKPRtg.sc-kImNAt > span[type='listSubtextHash'].sc-iOeugr"),
+    firstAccount: page.locator("span[type='bodySemiBold'].sc-iOeugr.hnMrar.sc-iJbNxu.bAimRi"),
+    CSPRtotalBalance: page.locator('span[type="CSPRBold"]'),
+    liquidBalance: page.locator('#layout-content-container > div > div.sc-gGvHcT.LEYqH > div > div.sc-hLBbgP.sc-kDvujY.bxIaNA.czrHSx > div.sc-hLBbgP.sc-kDvujY.nnmro.czrHSx > div.sc-hLBbgP.sc-kDvujY.sc-fmixVB.eJhjZ.czrHSx.jIbqvc > div:nth-child(1) > div > span.sc-iOeugr.fFyyCL'),
+    delegatedBalance: page.locator('//*[@id="layout-content-container"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div/span[1]'),
+    undelegatingBalance: page.locator('//*[@id="layout-content-container"]/div/div[1]/div/div[2]/div[2]/div[2]/div[3]/div/span[1]'),
+    totalBalanceUSD: page.locator('//span[@type="captionRegular" and @color="contentSecondary"]'),
+    threeDotsMenu: page.locator("//*[contains(@class, 'sc-eJDSGI') and contains(@class, 'bMCuLR')]")
+  };
+}
 
 export const RPC_RESPONSE = {
   success: {
