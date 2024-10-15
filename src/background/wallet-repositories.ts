@@ -4,12 +4,14 @@ const {
   deploysRepository,
   accountInfoRepository,
   tokensRepository,
-  nftsRepository
+  nftsRepository,
+  validatorsRepository
 } = setupRepositories();
 
 export {
   deploysRepository,
   accountInfoRepository,
   tokensRepository,
-  nftsRepository
+  nftsRepository,
+  validatorsRepository
 };

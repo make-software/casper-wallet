@@ -1,4 +1,6 @@
 import Big from 'big.js';
+import { formatNumber } from 'casper-wallet-core';
+import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -14,9 +16,8 @@ import {
 } from '@libs/layout';
 import { useFetchWalletBalance } from '@libs/services/balance-service';
 import { getAuctionManagerDeployCost } from '@libs/services/deployer-service';
-import { ValidatorResult } from '@libs/services/validators-service/types';
 import { List, Typography, ValidatorPlate } from '@libs/ui/components';
-import { formatFiatAmount, formatNumber, motesToCSPR } from '@libs/ui/utils';
+import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;
@@ -24,8 +25,8 @@ const ListItemContainer = styled(SpaceBetweenFlexRow)`
 
 interface ConfirmStepProps {
   inputAmountCSPR: string;
-  validator: ValidatorResult | null;
-  newValidator: ValidatorResult | null;
+  validator: ValidatorDto | null;
+  newValidator: ValidatorDto | null;
   stakeType: AuctionManagerEntryPoint;
   confirmStepText: string;
 }
@@ -90,15 +91,11 @@ export const ConfirmStep = ({
     <>
       <VerticalSpaceContainer top={SpacingSize.XL}>
         <ValidatorPlate
-          publicKey={validator?.public_key}
+          publicKey={validator?.publicKey}
           fee={validator.fee}
-          name={validator?.account_info?.info?.owner?.name}
-          logo={
-            validator?.account_info?.info?.owner?.branding?.logo?.svg ||
-            validator?.account_info?.info?.owner?.branding?.logo?.png_256 ||
-            validator?.account_info?.info?.owner?.branding?.logo?.png_1024
-          }
-          delegatorsNumber={validator?.delegators_number}
+          name={validator?.name}
+          logo={validator?.svgLogo || validator?.imgLogo}
+          delegatorsNumber={validator?.delegatorsNumber}
           validatorLabel={
             stakeType === AuctionManagerEntryPoint.delegate
               ? t('To validator')
@@ -110,17 +107,11 @@ export const ConfirmStep = ({
         {newValidator && (
           <VerticalSpaceContainer top={SpacingSize.XL}>
             <ValidatorPlate
-              publicKey={newValidator?.public_key}
+              publicKey={newValidator?.publicKey}
               fee={newValidator.fee}
-              name={newValidator?.account_info?.info?.owner?.name}
-              logo={
-                newValidator?.account_info?.info?.owner?.branding?.logo?.svg ||
-                newValidator?.account_info?.info?.owner?.branding?.logo
-                  ?.png_256 ||
-                newValidator?.account_info?.info?.owner?.branding?.logo
-                  ?.png_1024
-              }
-              delegatorsNumber={newValidator?.delegators_number}
+              name={newValidator?.name}
+              logo={newValidator?.svgLogo || newValidator?.imgLogo}
+              delegatorsNumber={newValidator?.delegatorsNumber}
               validatorLabel={t('To validator')}
               showFullPublicKey
             />

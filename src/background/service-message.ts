@@ -7,27 +7,10 @@ import {
   ResponseSelectionProps,
   SelectionPostRequestData
 } from '@libs/services/buy-cspr-service/types';
-import { ErrorResponse, PaginatedResponse } from '@libs/services/types';
-import {
-  DelegatorResult,
-  ValidatorResult
-} from '@libs/services/validators-service/types';
 
 type Meta = void;
 
 export const serviceMessage = {
-  fetchAuctionValidatorsRequest: createAction(
-    'FETCH_AUCTION_VALIDATORS'
-  )<Meta>(),
-  fetchAuctionValidatorsResponse: createAction(
-    'FETCH_AUCTION_VALIDATORS_RESPONSE'
-  )<PaginatedResponse<ValidatorResult> | ErrorResponse, Meta>(),
-  fetchValidatorsDetailsDataRequest: createAction(
-    'FETCH_VALIDATORS_DETAILS_DATA'
-  )<{ publicKey: string }, Meta>(),
-  fetchValidatorsDetailsDataResponse: createAction(
-    'FETCH_VALIDATORS_DETAILS_DATA_RESPONSE'
-  )<PaginatedResponse<DelegatorResult> | ErrorResponse, Meta>(),
   fetchOnRampGetOptionRequest: createAction(
     'FETCH_ON_RAMP_GET_OPTION_REQUEST'
   )<Meta>(),

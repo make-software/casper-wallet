@@ -1,3 +1,4 @@
+import { formatNumber } from 'casper-wallet-core';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -10,7 +11,7 @@ import {
 } from '@libs/layout';
 import { useFetchWalletBalance } from '@libs/services/balance-service';
 import { Tile, Typography } from '@libs/ui/components';
-import { formatFiatAmount, formatNumber, motesToCSPR } from '@libs/ui/utils';
+import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils';
 
 const TransactionFeeContainer = styled(AlignedSpaceBetweenFlexRow)`
   padding: 10px 16px;

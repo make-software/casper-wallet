@@ -1,4 +1,5 @@
 import { Player } from '@lottiefiles/react-lottie-player';
+import { formatNumber } from 'casper-wallet-core';
 import { ICsprBalance } from 'casper-wallet-core/src/domain/tokens';
 import React, { useEffect, useState } from 'react';
 import {
@@ -44,7 +45,7 @@ import {
   Typography
 } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
-import { formatNumber, motesToCSPR } from '@libs/ui/utils';
+import { motesToCSPR } from '@libs/ui/utils';
 
 const ListItemContainer = styled(FlexColumn)<{ disabled?: boolean }>`
   padding: 12px 16px;

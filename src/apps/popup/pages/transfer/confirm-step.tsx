@@ -1,4 +1,5 @@
 import Big from 'big.js';
+import { formatNumber } from 'casper-wallet-core';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -22,7 +23,7 @@ import {
   RecipientPlate,
   Typography
 } from '@libs/ui/components';
-import { formatFiatAmount, formatNumber, motesToCSPR } from '@libs/ui/utils';
+import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;

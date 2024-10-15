@@ -1,3 +1,4 @@
+import { formatNumber } from 'casper-wallet-core';
 import React, { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
@@ -24,7 +25,7 @@ import {
   Typography
 } from '@libs/ui/components';
 import { useBuyCSPR } from '@libs/ui/forms/buy-cspr';
-import { formatNumber, handleNumericInput } from '@libs/ui/utils';
+import { handleNumericInput } from '@libs/ui/utils';
 
 import { CurrencyRow } from './components/currency-row';
 import { ListRow } from './components/list-row';

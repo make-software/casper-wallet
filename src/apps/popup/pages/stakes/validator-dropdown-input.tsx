@@ -1,3 +1,4 @@
+import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import React, { useEffect, useState } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -14,17 +15,14 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { ValidatorResultWithId } from '@libs/services/validators-service/types';
 import { Input, Spinner, SvgIcon, ValidatorPlate } from '@libs/ui/components';
 import { StakeValidatorFormValues } from '@libs/ui/forms/stakes-form';
 
 interface ValidatorDropdownInputProps {
   validatorForm: UseFormReturn<StakeValidatorFormValues>;
-  validatorList: ValidatorResultWithId[] | null;
-  validator: ValidatorResultWithId | null;
-  setValidator: React.Dispatch<
-    React.SetStateAction<ValidatorResultWithId | null>
-  >;
+  validatorList: ValidatorDto[] | null;
+  validator: ValidatorDto | null;
+  setValidator: React.Dispatch<React.SetStateAction<ValidatorDto | null>>;
   setStakeAmount: React.Dispatch<React.SetStateAction<string>>;
   stakeType: AuctionManagerEntryPoint;
   loading: boolean;
@@ -66,9 +64,9 @@ export const ValidatorDropdownInput = ({
       if (validator) {
         if (inputValue !== '') {
           setShowValidatorPlate(true);
-          setValue('validatorPublicKey', validator.public_key);
-          setStakeAmount(validator.user_stake!);
-          await resetAndTriggerPublicKey(validator.public_key);
+          setValue('validatorPublicKey', validator.publicKey);
+          setStakeAmount(validator.stake!);
+          await resetAndTriggerPublicKey(validator.publicKey);
         } else {
           setShowValidatorPlate(false);
           setValidator(null);
@@ -111,9 +109,9 @@ export const ValidatorDropdownInput = ({
     }
   }, [stakeType]);
 
-  const handleValidatorClick = (validator: ValidatorResultWithId) => {
-    setValue('validatorPublicKey', validator.public_key);
-    setStakeAmount(validator.user_stake!);
+  const handleValidatorClick = (validator: ValidatorDto) => {
+    setValue('validatorPublicKey', validator.publicKey);
+    setStakeAmount(validator.stake!);
 
     setValidator(validator);
 
@@ -124,21 +122,17 @@ export const ValidatorDropdownInput = ({
   return showValidatorPlate && validator ? (
     <VerticalSpaceContainer top={SpacingSize.XL}>
       <ValidatorPlate
-        publicKey={validator.public_key}
+        publicKey={validator.publicKey}
         fee={validator.fee}
-        name={validator?.account_info?.info?.owner?.name}
-        logo={
-          validator?.account_info?.info?.owner?.branding?.logo?.svg ||
-          validator?.account_info?.info?.owner?.branding?.logo?.png_256 ||
-          validator?.account_info?.info?.owner?.branding?.logo?.png_1024
-        }
+        name={validator?.name}
+        logo={validator?.svgLogo || validator?.imgLogo}
         // TODO: remove user_stake after we merge recipient and amount steps for undelegation
-        totalStake={
+        formattedTotalStake={
           stakeType === AuctionManagerEntryPoint.delegate
-            ? validator.total_stake
-            : validator.user_stake
+            ? validator.formattedTotalStake
+            : validator.formattedDecimalStake
         }
-        delegatorsNumber={validator?.delegators_number}
+        delegatorsNumber={validator?.delegatorsNumber}
         validatorLabel={label}
         error={errors?.validatorPublicKey}
         handleClick={() => {
@@ -185,8 +179,8 @@ export const ValidatorDropdownInput = ({
           filteredValidatorsList={filteredValidatorsList}
           totalStake={
             stakeType === AuctionManagerEntryPoint.delegate
-              ? 'total_stake'
-              : 'user_stake'
+              ? 'formattedTotalStake'
+              : 'formattedDecimalStake'
           }
           handleValidatorClick={handleValidatorClick}
         />

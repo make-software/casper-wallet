@@ -143,6 +143,7 @@ export const RETINA_SCALE = 2;
 export const IMAGE_WIDTH = 376;
 export const CACHE_TTL = '2592000';
 
+// TODO: use isKeysEqual form casper wallet core
 export const isEqualCaseInsensitive = (key1: string, key2: string) => {
   if (!(key1 && key2)) {
     return false;
