@@ -106,35 +106,6 @@ export const formatTimestampAge = (value: string): string => {
   })}`;
 };
 
-export const formatNumber = (
-  value: number | string,
-  {
-    precision,
-    notation,
-    compactDisplay
-  }: {
-    precision?: { min?: number; max?: number };
-    notation?: 'compact' | 'standard';
-    compactDisplay?: 'short' | 'long';
-  } = {}
-): string =>
-  intl.formatNumber(value as number, {
-    minimumFractionDigits: precision?.min || 0,
-    maximumFractionDigits: precision?.max || precision?.min || 0,
-    notation,
-    compactDisplay
-  });
-
-export function formatMotes(motes: string) {
-  const int = Number.parseInt(motes);
-
-  if (Number.isNaN(int)) {
-    throw new Error('Parsing motes failed');
-  }
-
-  return int.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-}
-
 export const motesToCSPR = (motes: string): string => {
   return Big(motes).div(MOTES_PER_CSPR_RATE).toFixed();
 };

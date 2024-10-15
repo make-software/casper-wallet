@@ -1,3 +1,4 @@
+import { formatNumber } from 'casper-wallet-core';
 import { IAccountInfo } from 'casper-wallet-core/src/domain/accountInfo';
 import React from 'react';
 import styled from 'styled-components';
@@ -19,7 +20,7 @@ import {
   HashVariant,
   Typography
 } from '@libs/ui/components';
-import { formatNumber, motesToCSPR } from '@libs/ui/utils';
+import { motesToCSPR } from '@libs/ui/utils';
 
 const ListItemContainer = styled(FlexColumn)`
   min-height: 68px;

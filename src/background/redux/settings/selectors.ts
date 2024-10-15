@@ -7,10 +7,8 @@ import {
   AuctionPoolContractHash,
   CSPRMarketContractHash,
   CSPRStudioCep47ContractHash,
-  CasperClarityApiUrl,
   CasperLiveUrl,
   CasperNodeUrl,
-  CasperWalletApiUrl,
   NetworkName,
   NetworkSetting
 } from '@src/constants';
@@ -28,8 +26,6 @@ export const selectApiConfigBasedOnActiveNetwork = createSelector(
       case NetworkSetting.Mainnet:
         return {
           casperLiveUrl: CasperLiveUrl.MainnetUrl,
-          casperClarityApiUrl: CasperClarityApiUrl.MainnetUrl,
-          casperWalletApiUrl: CasperWalletApiUrl.MainnetUrl,
           networkName: NetworkName.Mainnet,
           nodeUrl: CasperNodeUrl.MainnetUrl,
           auctionManagerContractHash: AuctionManagerContractHash.Mainnet,
@@ -41,8 +37,6 @@ export const selectApiConfigBasedOnActiveNetwork = createSelector(
       case NetworkSetting.Testnet:
         return {
           casperLiveUrl: CasperLiveUrl.TestnetUrl,
-          casperClarityApiUrl: CasperClarityApiUrl.TestnetUrl,
-          casperWalletApiUrl: CasperWalletApiUrl.TestnetUrl,
           networkName: NetworkName.Testnet,
           nodeUrl: CasperNodeUrl.TestnetUrl,
           auctionManagerContractHash: AuctionManagerContractHash.Testnet,

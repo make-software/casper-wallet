@@ -1,3 +1,4 @@
+import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
@@ -9,13 +10,12 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { ValidatorResultWithId } from '@libs/services/validators-service';
 import { Tile, Typography, ValidatorPlate } from '@libs/ui/components';
 
 interface ValidatorListProps {
-  filteredValidatorsList: ValidatorResultWithId[];
-  handleValidatorClick: (validator: ValidatorResultWithId) => void;
-  totalStake: 'total_stake' | 'user_stake';
+  filteredValidatorsList: ValidatorDto[];
+  handleValidatorClick: (validator: ValidatorDto) => void;
+  totalStake: 'formattedTotalStake' | 'formattedDecimalStake';
 }
 
 const Container = styled.div``;
@@ -48,24 +48,19 @@ export const ValidatorList = ({
               rowCount={filteredValidatorsList.length}
               rowRenderer={({ index, key, style }) => {
                 const validator = filteredValidatorsList[index];
-                const logo =
-                  validator?.account_info?.info?.owner?.branding?.logo?.svg ||
-                  validator?.account_info?.info?.owner?.branding?.logo
-                    ?.png_256 ||
-                  validator?.account_info?.info?.owner?.branding?.logo
-                    ?.png_1024;
+                const logo = validator?.svgLogo || validator?.imgLogo;
 
                 return (
                   <Container style={style}>
                     <ValidatorPlate
                       key={key}
-                      publicKey={validator?.public_key}
+                      publicKey={validator?.publicKey}
                       fee={validator.fee}
-                      name={validator?.account_info?.info?.owner?.name}
+                      name={validator?.name}
                       logo={logo}
                       // TODO: remove user_stake after we merge recipient and amount steps for undelegation
-                      totalStake={validator[totalStake]}
-                      delegatorsNumber={validator?.delegators_number}
+                      formattedTotalStake={validator[totalStake]}
+                      delegatorsNumber={validator?.delegatorsNumber}
                       handleClick={() => {
                         handleValidatorClick(validator);
                       }}

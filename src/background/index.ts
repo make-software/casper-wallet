@@ -103,10 +103,6 @@ import {
   fetchOnRampOptionPost,
   fetchOnRampSelectionPost
 } from '@libs/services/buy-cspr-service';
-import {
-  fetchAuctionValidators,
-  fetchValidatorsDetailsData
-} from '@libs/services/validators-service';
 
 import {
   CannotGetActiveAccountError,
@@ -148,7 +144,6 @@ import {
   themeModeSettingChanged,
   vaultSettingsReseted
 } from './redux/settings/actions';
-import { selectApiConfigBasedOnActiveNetwork } from './redux/settings/selectors';
 import {
   vaultCipherCreated,
   vaultCipherReseted
@@ -612,47 +607,6 @@ runtime.onMessage.addListener(
             return;
 
           // SERVICE MESSAGE HANDLERS
-          case getType(serviceMessage.fetchAuctionValidatorsRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchAuctionValidators({
-                casperClarityApiUrl
-              });
-
-              return sendResponse(
-                serviceMessage.fetchAuctionValidatorsResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchValidatorsDetailsDataRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchValidatorsDetailsData({
-                casperClarityApiUrl,
-                publicKey: action.payload.publicKey
-              });
-
-              return sendResponse(
-                serviceMessage.fetchValidatorsDetailsDataResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
           case getType(serviceMessage.fetchOnRampGetOptionRequest): {
             try {
               const data = await fetchOnRampOptionGet();

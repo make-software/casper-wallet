@@ -1,3 +1,4 @@
+import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import React, { useEffect, useState } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -12,17 +13,14 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { ValidatorResultWithId } from '@libs/services/validators-service/types';
 import { Input, SvgIcon, ValidatorPlate } from '@libs/ui/components';
 import { StakeNewValidatorFormValues } from '@libs/ui/forms/stakes-form';
 
 interface ValidatorDropdownInputProps {
   newValidatorForm: UseFormReturn<StakeNewValidatorFormValues>;
-  validatorList: ValidatorResultWithId[] | null;
-  validator: ValidatorResultWithId | null;
-  setValidator: React.Dispatch<
-    React.SetStateAction<ValidatorResultWithId | null>
-  >;
+  validatorList: ValidatorDto[] | null;
+  validator: ValidatorDto | null;
+  setValidator: React.Dispatch<React.SetStateAction<ValidatorDto | null>>;
   setStakeAmount: React.Dispatch<React.SetStateAction<string>>;
 }
 
@@ -59,9 +57,9 @@ export const RedelegateValidatorDropdownInput = ({
       if (validator) {
         if (inputValue !== '') {
           setShowValidatorPlate(true);
-          setValue('newValidatorPublicKey', validator.public_key);
-          setStakeAmount(validator.user_stake!);
-          await resetAndTriggerPublicKey(validator.public_key);
+          setValue('newValidatorPublicKey', validator.publicKey);
+          setStakeAmount(validator.stake!);
+          await resetAndTriggerPublicKey(validator.publicKey);
         } else {
           setShowValidatorPlate(false);
           setValidator(null);
@@ -90,9 +88,9 @@ export const RedelegateValidatorDropdownInput = ({
     validatorList
   );
 
-  const handleValidatorClick = (validator: ValidatorResultWithId) => {
-    setValue('newValidatorPublicKey', validator.public_key);
-    setStakeAmount(validator.user_stake!);
+  const handleValidatorClick = (validator: ValidatorDto) => {
+    setValue('newValidatorPublicKey', validator.publicKey);
+    setStakeAmount(validator.stake!);
 
     setValidator(validator);
 
@@ -103,16 +101,12 @@ export const RedelegateValidatorDropdownInput = ({
   return showValidatorPlate && validator ? (
     <VerticalSpaceContainer top={SpacingSize.XL}>
       <ValidatorPlate
-        publicKey={validator.public_key}
+        publicKey={validator.publicKey}
         fee={validator.fee}
-        name={validator?.account_info?.info?.owner?.name}
-        logo={
-          validator?.account_info?.info?.owner?.branding?.logo?.svg ||
-          validator?.account_info?.info?.owner?.branding?.logo?.png_256 ||
-          validator?.account_info?.info?.owner?.branding?.logo?.png_1024
-        }
-        totalStake={validator.total_stake}
-        delegatorsNumber={validator?.delegators_number}
+        name={validator?.name}
+        logo={validator?.svgLogo || validator?.imgLogo}
+        formattedTotalStake={validator.formattedTotalStake}
+        delegatorsNumber={validator?.delegatorsNumber}
         validatorLabel={t('To validator')}
         error={errors?.newValidatorPublicKey}
         handleClick={() => {
@@ -156,7 +150,7 @@ export const RedelegateValidatorDropdownInput = ({
       {isOpenValidatorPublicKeysList && (
         <ValidatorList
           filteredValidatorsList={filteredValidatorsList}
-          totalStake="total_stake"
+          totalStake="formattedTotalStake"
           handleValidatorClick={handleValidatorClick}
         />
       )}
