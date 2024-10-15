@@ -1,3 +1,4 @@
+import { IOnRampProvider } from 'casper-wallet-core/src/domain';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -11,7 +12,6 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { ProviderProps } from '@libs/services/buy-cspr-service/types';
 import { Checkbox, Tile, Typography } from '@libs/ui/components';
 
 const ProviderContainer = styled(Tile)`
@@ -48,11 +48,11 @@ const DividerLine = styled.hr`
 `;
 
 interface ProviderPageProps {
-  availableProviders: ProviderProps[];
+  availableProviders: IOnRampProvider[];
   setSelectedProviders: React.Dispatch<
-    React.SetStateAction<ProviderProps | null>
+    React.SetStateAction<IOnRampProvider | null>
   >;
-  selectedProviders: ProviderProps | null;
+  selectedProviders: IOnRampProvider | null;
 }
 
 export const Provider = ({
