@@ -1,9 +1,9 @@
+import { IOnRampCurrencyItem } from 'casper-wallet-core/src/domain';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { CenteredFlexColumn, SpacingSize } from '@libs/layout';
-import { ResponseCurrencyProps } from '@libs/services/buy-cspr-service/types';
 import { Tile, Typography } from '@libs/ui/components';
 
 const Container = styled.div`
@@ -11,7 +11,7 @@ const Container = styled.div`
 `;
 
 interface CurrencyRowProps {
-  selectedCurrency: ResponseCurrencyProps;
+  selectedCurrency: IOnRampCurrencyItem;
   onClick: () => void;
 }
 
@@ -33,7 +33,7 @@ export const CurrencyRow = ({
             color="contentAction"
             dataTestId="currency-row"
           >
-            {selectedCurrency.code}
+            {selectedCurrency?.code}
           </Typography>
         </Container>
       </Tile>

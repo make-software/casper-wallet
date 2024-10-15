@@ -5,7 +5,8 @@ const {
   accountInfoRepository,
   tokensRepository,
   nftsRepository,
-  validatorsRepository
+  validatorsRepository,
+  onRampRepository
 } = setupRepositories();
 
 export {
@@ -13,5 +14,6 @@ export {
   accountInfoRepository,
   tokensRepository,
   nftsRepository,
-  validatorsRepository
+  validatorsRepository,
+  onRampRepository
 };

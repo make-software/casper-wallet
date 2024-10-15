@@ -208,8 +208,12 @@ const SpinnerCircle = styled.div`
   transform: translateZ(0);
 `;
 
-export const Spinner = () => (
-  <SpinnerWrapper>
+interface SpinnerProps {
+  style?: React.CSSProperties | undefined;
+}
+
+export const Spinner = ({ style }: SpinnerProps) => (
+  <SpinnerWrapper style={style}>
     <SpinnerCircle />
   </SpinnerWrapper>
 );

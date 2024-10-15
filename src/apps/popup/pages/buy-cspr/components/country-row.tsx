@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { IOnRampCountry } from 'casper-wallet-core/src/domain';
+import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -9,8 +10,7 @@ import {
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
-import { ResponseCountryPropsWithId } from '@libs/services/buy-cspr-service/types';
-import { Tile, Typography } from '@libs/ui/components';
+import { Spinner, Tile, Typography } from '@libs/ui/components';
 
 const Container = styled(SpaceBetweenFlexRow)`
   padding: 16px;
@@ -21,29 +21,23 @@ const RowContainer = styled(FlexColumn)`
 `;
 
 interface CountryRowProps {
-  country: ResponseCountryPropsWithId;
+  country: IOnRampCountry;
   onClick: () => void;
+  isLoadingOnRampCountriesAndCurrencies: boolean;
 }
 
-export const CountryRow = ({ country, onClick }: CountryRowProps) => {
-  const [iconSrc, setIconSrc] = useState('');
-
+export const CountryRow = ({
+  country,
+  onClick,
+  isLoadingOnRampCountriesAndCurrencies
+}: CountryRowProps) => {
   const { t } = useTranslation();
 
-  useEffect(() => {
-    if (country.code) {
-      setIconSrc(
-        `https://purecatamphetamine.github.io/country-flag-icons/3x2/${country.code}.svg`
-      );
-    }
-  }, [country.code]);
-
-  const handleError = () => {
-    setIconSrc('/assets/icons/placeholder-image-gray.svg');
-  };
-
   return (
-    <RowContainer gap={SpacingSize.Small} onClick={onClick}>
+    <RowContainer
+      gap={SpacingSize.Small}
+      onClick={isLoadingOnRampCountriesAndCurrencies ? undefined : onClick}
+    >
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="bodySemiBold">
           <Trans t={t}>Country</Trans>
@@ -53,24 +47,31 @@ export const CountryRow = ({ country, onClick }: CountryRowProps) => {
       <Tile>
         <Container gap={SpacingSize.Medium}>
           <AlignedFlexRow gap={SpacingSize.Large} flexGrow={1}>
-            <img
-              alt={`${country.name}`}
-              src={iconSrc}
-              width="24"
-              height="18"
-              onError={handleError}
-            />
-            <Typography
-              type="body"
-              loading={!country.name}
-              dataTestId="country-row"
-            >
-              {country.name}
-            </Typography>
+            {isLoadingOnRampCountriesAndCurrencies ? (
+              <Spinner style={{ margin: '10px 0' }} />
+            ) : (
+              <>
+                <img
+                  alt={`${country?.name}`}
+                  src={country?.flagUri}
+                  width="24"
+                  height="18"
+                />
+                <Typography
+                  type="body"
+                  loading={!country?.name}
+                  dataTestId="country-row"
+                >
+                  {country?.name}
+                </Typography>
+              </>
+            )}
           </AlignedFlexRow>
-          <Typography type="bodySemiBold" color="contentAction">
-            <Trans t={t}>Change</Trans>
-          </Typography>
+          {isLoadingOnRampCountriesAndCurrencies ? null : (
+            <Typography type="bodySemiBold" color="contentAction">
+              <Trans t={t}>Change</Trans>
+            </Typography>
+          )}
         </Container>
       </Tile>
     </RowContainer>

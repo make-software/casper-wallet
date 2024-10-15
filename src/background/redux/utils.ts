@@ -2,8 +2,6 @@ import { call, select } from 'redux-saga/effects';
 import { RootState } from 'typesafe-actions';
 import { runtime } from 'webextension-polyfill';
 
-import { ServiceMessage } from '@background/service-message';
-
 import { ReduxAction } from './redux-action';
 
 declare global {
@@ -12,7 +10,7 @@ declare global {
   }
 }
 
-export function dispatchToMainStore(action: ReduxAction | ServiceMessage) {
+export function dispatchToMainStore(action: ReduxAction) {
   return runtime.sendMessage(action).catch(() => {
     console.error('Dispatch to Main Store: ' + action.type);
   });
