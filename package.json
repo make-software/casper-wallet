@@ -52,6 +52,7 @@
     "styled-components": "^5"
   },
   "dependencies": {
+    "@bringweb3/chrome-extension-kit": "^1.1.11",
     "@formatjs/intl": "2.10.4",
     "@hookform/resolvers": "2.9.10",
     "@lapo/asn1js": "1.2.4",
@@ -74,6 +75,7 @@
     "casper-js-sdk": "2.15.4",
     "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#v0.9.5",
     "date-fns": "^2.30.0",
+    "dotenv-webpack": "^8.1.0",
     "i18next": "^23.11.0",
     "i18next-browser-languagedetector": "^7.2.1",
     "i18next-http-backend": "2.5.0",

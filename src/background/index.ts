@@ -1,3 +1,4 @@
+import { bringInitBackground } from '@bringweb3/chrome-extension-kit';
 import { CasperNetwork } from 'casper-wallet-core/src/domain/common/common';
 import { RootAction, getType } from 'typesafe-actions';
 import {
@@ -22,6 +23,10 @@ import {
   backgroundEvent,
   popupStateUpdated
 } from '@background/background-events';
+import {
+  BringWeb3Events,
+  bringWeb3Events
+} from '@background/bring-web3-events';
 import { WindowApp } from '@background/create-open-window';
 import {
   disableOnboardingFlow,
@@ -67,6 +72,7 @@ import {
   askForReviewAfterChanged,
   ratedInStoreChanged
 } from '@background/redux/rate-app/actions';
+import { ThemeMode } from '@background/redux/settings/types';
 import {
   accountAdded,
   accountDisconnected,
@@ -169,7 +175,8 @@ import {
 } from './redux/settings/actions';
 import {
   selectActiveNetworkSetting,
-  selectApiConfigBasedOnActiveNetwork
+  selectApiConfigBasedOnActiveNetwork,
+  selectThemeModeSetting
 } from './redux/settings/selectors';
 import {
   vaultCipherCreated,
@@ -177,7 +184,10 @@ import {
 } from './redux/vault-cipher/actions';
 import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
 import { ServiceMessage, serviceMessage } from './service-message';
-import { emitSdkEventToActiveTabsWithOrigin } from './utils';
+import {
+  emitSdkEventToActiveTabs,
+  emitSdkEventToActiveTabsWithOrigin
+} from './utils';
 // to resolve all repositories
 import './wallet-repositories';
 
@@ -297,7 +307,12 @@ tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 runtime.onMessage.addListener(
   async (
-    action: RootAction | SdkMethod | ServiceMessage | popupStateUpdated,
+    action:
+      | RootAction
+      | SdkMethod
+      | ServiceMessage
+      | popupStateUpdated
+      | BringWeb3Events,
     sender
   ) => {
     const store = await getExistingMainStoreSingletonOrInit();
@@ -641,6 +656,74 @@ runtime.onMessage.addListener(
             // do nothing
             return;
 
+          case getType(bringWeb3Events.getActivePublicKey): {
+            const activeAccount = selectVaultActiveAccount(store.getState());
+
+            return sendResponse(
+              bringWeb3Events.getActivePublicKeyResponse({
+                publicKey: activeAccount?.publicKey!
+              })
+            );
+          }
+
+          case getType(bringWeb3Events.promptLoginRequest): {
+            const isLocked = selectVaultIsLocked(store.getState());
+
+            if (isLocked) {
+              windows.getCurrent().then(currentWindow => {
+                const windowWidth = currentWindow.width ?? 0;
+                const xOffset = currentWindow.left ?? 0;
+                const yOffset = currentWindow.top ?? 0;
+                const popupWidth = 360;
+                const popupHeight = 700;
+
+                windows.create({
+                  url: 'popup.html#/bring-web3-unlock',
+                  type: 'popup',
+                  height: popupHeight,
+                  width: popupWidth,
+                  left: windowWidth + xOffset - popupWidth,
+                  top: yOffset,
+                  focused: true
+                });
+              });
+            } else {
+              emitSdkEventToActiveTabs(tab => {
+                if (!tab.url) {
+                  return;
+                }
+
+                const activeAccount = selectVaultActiveAccount(
+                  store.getState()
+                );
+
+                return sdkEvent.changedConnectedAccountEvent({
+                  isLocked: isLocked,
+                  isConnected: undefined,
+                  activeKey: activeAccount?.publicKey
+                });
+              });
+            }
+
+            return sendResponse(undefined);
+          }
+
+          case getType(bringWeb3Events.getTheme): {
+            const themeMode = selectThemeModeSetting(store.getState());
+
+            const isDarkMode =
+              // we can't get theme from system, so will use dark
+              themeMode === ThemeMode.SYSTEM
+                ? true
+                : themeMode === ThemeMode.DARK;
+
+            return sendResponse(
+              bringWeb3Events.getThemeResponse({
+                theme: isDarkMode ? 'dark' : 'light'
+              })
+            );
+          }
+
           // SERVICE MESSAGE HANDLERS
           case getType(serviceMessage.fetchBalanceRequest): {
             const { casperWalletApiUrl, casperClarityApiUrl } =
@@ -890,6 +973,13 @@ runtime.onMessage.addListener(
         if (action === 'ping') {
           return;
         }
+        // this is added for not spamming with errors from bringweb3
+        if ('from' in action) {
+          // @ts-ignore
+          if (action.from === 'bringweb3') {
+            return;
+          }
+        }
         throw Error('Background: Unknown message: ' + JSON.stringify(action));
       }
     });
@@ -903,3 +993,8 @@ function ping() {
   });
 }
 setInterval(ping, 15000);
+
+bringInitBackground({
+  identifier: process.env.PLATFORM_IDENTIFIER || '', // The identifier key you obtained from Bringweb3
+  apiEndpoint: process.env.NODE_ENV === 'production' ? 'prod' : 'sandbox'
+});
