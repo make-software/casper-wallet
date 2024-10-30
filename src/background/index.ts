@@ -3,6 +3,7 @@ import { RootAction, getType } from 'typesafe-actions';
 import {
   Tabs,
   action,
+  alarms,
   browserAction,
   management,
   runtime,
@@ -291,6 +292,16 @@ tabs.onActivated.addListener(
 tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo && changeInfo.url && tab.windowId) {
     updateOrigin(tab.windowId);
+  }
+});
+
+// Dispatch the lockVault action when the 'vaultLock' alarm is triggered
+alarms.onAlarm.addListener(async function (alarm) {
+  const store = await getExistingMainStoreSingletonOrInit();
+
+  if (alarm.name === 'vaultLock') {
+    // Dispatch the lockVault action to the main store
+    store.dispatch(lockVault());
   }
 });
 
@@ -887,19 +898,8 @@ runtime.onMessage.addListener(
             );
         }
       } else {
-        if (action === 'ping') {
-          return;
-        }
         throw Error('Background: Unknown message: ' + JSON.stringify(action));
       }
     });
   }
 );
-
-// ping mechanism to keep background script from destroing wallet session when it's unlocked
-function ping() {
-  runtime.sendMessage('ping').catch(() => {
-    // ping
-  });
-}
-setInterval(ping, 15000);

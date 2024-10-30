@@ -11,7 +11,8 @@
     "management",
     "storage",
     "tabs",
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "alarms"
   ],
   "declarative_net_request": {
     "rule_resources": [
