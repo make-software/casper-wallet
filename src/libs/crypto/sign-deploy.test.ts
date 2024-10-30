@@ -37,17 +37,17 @@ describe('sign-deploy', () => {
     const transferAmount = 10;
     const transferId = 34;
 
-    let deployParams = new DeployUtil.DeployParams(
+    const deployParams = new DeployUtil.DeployParams(
       signingKeyPair.publicKey,
       networkName
     );
-    let session = DeployUtil.ExecutableDeployItem.newTransfer(
+    const session = DeployUtil.ExecutableDeployItem.newTransfer(
       transferAmount,
       recipientKeyPair.publicKey,
       undefined,
       transferId
     );
-    let payment = DeployUtil.standardPayment(paymentAmount);
+    const payment = DeployUtil.standardPayment(paymentAmount);
     let deploy = DeployUtil.makeDeploy(deployParams, session, payment);
 
     const signature = getSignature(deploy.hash, signingKeyPair);

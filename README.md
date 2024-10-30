@@ -160,7 +160,7 @@ You should install Redux DevTools browser extension and connect it to Redux DevT
 
 Write tests into `e2e-tests` folder.
 
-To run e2e tests, you must use npm script `npm run e2e:chrome:ui:popup` or `e2e:chrome:ui:onboarding`.
+To run e2e tests, you must use npm script `` or `e2e:chrome:ui:onboarding`.npm run e2e:chrome:ui:popup
 Tests are run in UI mode.
 
 All information

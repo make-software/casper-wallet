@@ -41,7 +41,7 @@ export const ImportTorusForm = ({ register, errors }: ImportTorusFormProps) => {
       <InputsContainer>
         <FormField
           statusText={errors.secretKey?.message}
-          status={!!errors.secretKey ? FormFieldStatus.Error : undefined}
+          status={errors.secretKey ? FormFieldStatus.Error : undefined}
         >
           <TextArea
             {...register('secretKey')}

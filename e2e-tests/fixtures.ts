@@ -1,14 +1,15 @@
 import {
-  test as base,
-  chromium,
   type BrowserContext,
-  Page
+  Page,
+  test as base,
+  chromium
 } from '@playwright/test';
 import path from 'path';
 
 import {
   DEFAULT_FIRST_ACCOUNT,
   PLAYGROUND_URL,
+  newPassword,
   vaultPassword
 } from './constants';
 
@@ -214,6 +215,10 @@ export const popup = test.extend<{
   addContact: () => Promise<void>;
   providePassword: (popupPage?: Page) => Promise<void>;
   passwordTimeout: (popupPage?: Page) => Promise<void>;
+  changePassword: (popupPage?: Page) => Promise<void>;
+  provideNewPassword: (popupPage?: Page) => Promise<void>;
+  unlockVaultNewPassword: (popupPage?: Page) => Promise<void>;
+  passwordDontMatch: (popupPage?: Page) => Promise<void>;
 }>({
   popupPage: async ({ extensionId, page }, use) => {
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
@@ -227,9 +232,25 @@ export const popup = test.extend<{
         .getByPlaceholder('Password', { exact: true })
         .fill(vaultPassword);
       await currentPage.getByRole('button', { name: 'Unlock wallet' }).click();
+      await page.waitForSelector('text=Total balance', {
+        state: 'visible',
+        timeout: 20000
+      });
     };
 
     await use(unlockVault);
+  },
+  unlockVaultNewPassword: async ({ page }, use) => {
+    const unlockVaultNewPassword = async (popupPage?: Page) => {
+      const currentPage = popupPage || page;
+
+      await currentPage
+        .getByPlaceholder('Password', { exact: true })
+        .fill(newPassword);
+      await currentPage.getByRole('button', { name: 'Unlock wallet' }).click();
+    };
+
+    await use(unlockVaultNewPassword);
   },
   lockVault: async ({ page }, use) => {
     const lockVault = async () => {
@@ -295,35 +316,79 @@ export const popup = test.extend<{
     await use(addContact);
   },
 
+  providePassword: async ({ page }, use) => {
+    const providePassword = async (popupPage?: Page) => {
+      const currentPage = popupPage || page;
 
-providePassword: async ({ page }, use) => {
-  const providePassword = async (popupPage?: Page) => {
-    const currentPage = popupPage || page;
+      await currentPage
+        .getByPlaceholder('Password', { exact: true })
+        .fill(vaultPassword);
+      await currentPage.getByRole('button', { name: 'Continue' }).click();
+    };
 
-    await currentPage
-      .getByPlaceholder('Password', { exact: true })
-      .fill(vaultPassword);
-    await currentPage.getByRole('button', { name: 'Continue' }).click();
-  };
+    await use(providePassword);
+  },
+  provideNewPassword: async ({ page }, use) => {
+    const provideNewPassword = async (popupPage?: Page) => {
+      const currentPage = popupPage || page;
 
-  await use(providePassword);
-},
+      await currentPage
+        .getByPlaceholder('Password', { exact: true })
+        .fill(newPassword);
+      await currentPage.getByRole('button', { name: 'Continue' }).click();
+    };
 
-passwordTimeout: async ({ page }, use) => {
-  const passwordTimeout = async (popupPage?: Page) => {
-    const currentPage = popupPage || page;
+    await use(provideNewPassword);
+  },
+  changePassword: async ({ page }, use) => {
+    const changePassword = async (popupPage?: Page) => {
+      const currentPage = popupPage || page;
 
-    await currentPage
-      .getByPlaceholder('Password', { exact: true })
-      .fill('wrong password');
-    
+      await currentPage
+        .getByPlaceholder('Password', { exact: true })
+        .fill(newPassword);
+      await currentPage.getByPlaceholder('Confirm password').fill(newPassword);
+
+      await currentPage.getByRole('button', { name: 'Continue' }).click();
+
+      await page.waitForTimeout(2000);
+    };
+
+    await use(changePassword);
+  },
+  passwordDontMatch: async ({ page }, use) => {
+    const changePassword = async (popupPage?: Page) => {
+      const currentPage = popupPage || page;
+
+      await currentPage
+        .getByPlaceholder('Password', { exact: true })
+        .fill(newPassword);
+      await currentPage
+        .getByPlaceholder('Confirm password')
+        .fill(vaultPassword);
+
+      await currentPage.getByRole('button', { name: 'Continue' }).click();
+
+      await page.waitForTimeout(2000);
+    };
+
+    await use(changePassword);
+  },
+
+  passwordTimeout: async ({ page }, use) => {
+    const passwordTimeout = async (popupPage?: Page) => {
+      const currentPage = popupPage || page;
+
+      await currentPage
+        .getByPlaceholder('Password', { exact: true })
+        .fill('wrong password');
+
       for (let i = 0; i < 5; i++) {
         await currentPage.getByRole('button', { name: 'Continue' }).click();
       }
-      
-  };
+    };
 
-  await use(passwordTimeout);
-}
+    await use(passwordTimeout);
+  }
 });
 export const popupExpect = popup.expect;

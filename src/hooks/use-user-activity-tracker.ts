@@ -31,14 +31,14 @@ export function useUserActivityTracker(): void {
     const events = ['mousemove', 'click', 'keydown'];
 
     if (keysDoesExist && !vaultIsLocked) {
-      for (let i in events) {
+      for (const i in events) {
         window.addEventListener(events[i], refreshUserActivity);
       }
     }
 
     return () => {
       throttledDispatchToMainStore.cancel();
-      for (let i in events) {
+      for (const i in events) {
         window.removeEventListener(events[i], refreshUserActivity);
       }
     };

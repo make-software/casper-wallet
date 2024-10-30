@@ -1,7 +1,8 @@
+import { Page } from '@playwright/test';
 import path from 'path';
-import {Page, Locator} from '@playwright/test'
 
 export const vaultPassword = '3hQqzYn4C7Y8rEZTVEZb';
+export const newPassword = 'this is new password';
 export const twentyFourWordsSecretPhrase =
   'hold matrix spider subway bottom jazz charge fire lawn valley stay coil moral hospital dream cycle multiply december agree huge major tower devote old';
 export const twelveWordsSecretPhrase =
@@ -21,7 +22,8 @@ export const torusSecretKeyHex =
 export const ACCOUNT_NAMES = {
   defaultFirstAccountName: 'Account 1',
   defaultSecondAccountName: 'Account 2',
-  createdAccountName: 'New account 1',
+  createdAccountName: 'First New Account',
+  createdAccountName2: 'Second New account ',
   importedPemAccountName: 'Imported pem account',
   renamedAccountName: 'Renamed account',
   importedCerAccountName: 'Imported cer account',
@@ -113,16 +115,30 @@ export const URLS = {
 export function createLocators(page: Page) {
   return {
     accountSwitcher: page.getByTestId('connection-status-modal'),
-    firstAccount: page.locator("span[type='bodySemiBold'].sc-iOeugr.hnMrar.sc-iJbNxu.bAimRi"),
+    firstAccount: page.locator(
+      "span[type='bodySemiBold'].sc-iOeugr.hnMrar.sc-iJbNxu.bAimRi"
+    ),
     CSPRtotalBalance: page.locator('span[type="CSPRBold"]'),
-    liquidBalance: page.locator('#layout-content-container > div > div.sc-gGvHcT.LEYqH > div > div.sc-hLBbgP.sc-kDvujY.bxIaNA.czrHSx > div.sc-hLBbgP.sc-kDvujY.nnmro.czrHSx > div.sc-hLBbgP.sc-kDvujY.sc-fmixVB.eJhjZ.czrHSx.jIbqvc > div:nth-child(1) > div > span.sc-iOeugr.fFyyCL'),
-    delegatedBalance: page.locator('//*[@id="layout-content-container"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div/span[1]'),
-    undelegatingBalance: page.locator('//*[@id="layout-content-container"]/div/div[1]/div/div[2]/div[2]/div[2]/div[3]/div/span[1]'),
-    totalBalanceUSD: page.locator('//span[@type="captionRegular" and @color="contentSecondary"]'),
-    threeDotsMenu: page.locator("//*[contains(@class, 'sc-eJDSGI') and contains(@class, 'bMCuLR')]")
+    liquidBalance: page.locator(
+      '#layout-content-container > div > div.sc-gGvHcT.LEYqH > div > div.sc-hLBbgP.sc-kDvujY.bxIaNA.czrHSx > div.sc-hLBbgP.sc-kDvujY.nnmro.czrHSx > div.sc-hLBbgP.sc-kDvujY.sc-fmixVB.eJhjZ.czrHSx.jIbqvc > div:nth-child(1) > div > span.sc-iOeugr.fFyyCL'
+    ),
+    delegatedBalance: page.locator(
+      '//*[@id="layout-content-container"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div/span[1]'
+    ),
+    undelegatingBalance: page.locator(
+      '//*[@id="layout-content-container"]/div/div[1]/div/div[2]/div[2]/div[2]/div[3]/div/span[1]'
+    ),
+    totalBalanceUSD: page.locator(
+      '//span[@type="captionRegular" and @color="contentSecondary"]'
+    ),
+    threeDotsMenu: page.locator(
+      "//*[contains(@class, 'sc-eJDSGI') and contains(@class, 'bMCuLR')]"
+    )
   };
 }
-
+export function accountSettingLocator(accountName: string) {
+  return `xpath=//div[contains(@class, 'sc-hLBbgP') and contains(@class, 'fYMUrO')]//span[text()='${accountName}']/ancestor::div[contains(@class, 'sc-hLBbgP')]/following-sibling::div[@data-testid='popover-children-container']`;
+}
 export const RPC_RESPONSE = {
   success: {
     status: 200,

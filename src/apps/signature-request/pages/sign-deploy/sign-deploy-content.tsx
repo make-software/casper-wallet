@@ -83,7 +83,7 @@ export function SignDeployContent({
 
   const deployInfo = deriveDeployInfoFromDeployRaw(deploy);
 
-  let signatureRequest: SignatureRequestFields = {
+  const signatureRequest: SignatureRequestFields = {
     signingKey: signingPublicKeyHex,
     account: deployInfo.account,
     deployHash: deployInfo.deployHash,
