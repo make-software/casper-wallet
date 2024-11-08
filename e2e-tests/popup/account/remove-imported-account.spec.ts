@@ -7,7 +7,7 @@ import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI: remove imported account', () => {
   popup(
-    'should import account via .pem file',
+    'should remove imported account',
     async ({ unlockVault, context, popupPage }) => {
       await unlockVault();
 
@@ -65,7 +65,6 @@ popup.describe('Popup UI: remove imported account', () => {
         )
         .click();
       await popupPage.getByText('Manage').click();
-      //await popupPage.getByTestId('connection-status-modal').click();
 
       await popupExpect(popupPage.getByText('Public key')).toBeVisible();
       await popupExpect(popupPage.getByText('Account hash')).toBeVisible();

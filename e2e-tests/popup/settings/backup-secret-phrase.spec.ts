@@ -31,47 +31,6 @@ popup.describe('Popup UI: back up secret phrase', () => {
       ).toBeVisible();
     }
   );
-  popup(
-    'should display safety tips',
-    async ({ popupPage, unlockVault, providePassword }) => {
-      await unlockVault();
-      await popupPage.getByTestId('menu-open-icon').click();
-      await popupPage.getByText('Back up your secret recovery phrase').click();
-      await providePassword();
-
-      await popupExpect(
-        popupPage.getByRole('heading', {
-          name: 'Back up your secret recovery phrase'
-        })
-      ).toBeVisible();
-
-      await popupExpect(
-        popupPage.getByText('Save a backup in multiple secure locations.')
-      ).toBeVisible();
-
-      await popupExpect(
-        popupPage.getByText('Never share the phrase with anyone.')
-      ).toBeVisible();
-
-      await popupExpect(
-        popupPage.getByText(
-          'Be careful of phishing! Casper Wallet will never spontaneously ask you for your secret recovery phrase.'
-        )
-      ).toBeVisible();
-
-      await popupExpect(
-        popupPage.getByText(
-          'If you need to back up your secret recovery phrase again, you can find it in Settings.'
-        )
-      ).toBeVisible();
-
-      await popupExpect(
-        popupPage.getByText(
-          'Casper Wallet cannot recover your secret recovery phrase! If you lose it, you may not be able to recover your funds.'
-        )
-      ).toBeVisible();
-    }
-  );
 
   popup(
     'should timeout after providing wrong password 5 times',

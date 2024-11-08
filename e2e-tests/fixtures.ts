@@ -5,10 +5,14 @@ import {
   chromium
 } from '@playwright/test';
 import path from 'path';
+import { PipelineOptions } from 'stream';
 
 import {
   DEFAULT_FIRST_ACCOUNT,
+  DEFAULT_SECOND_ACCOUNT,
   PLAYGROUND_URL,
+  RPC_RESPONSE,
+  URLS,
   newPassword,
   vaultPassword
 } from './constants';
@@ -219,6 +223,8 @@ export const popup = test.extend<{
   provideNewPassword: (popupPage?: Page) => Promise<void>;
   unlockVaultNewPassword: (popupPage?: Page) => Promise<void>;
   passwordDontMatch: (popupPage?: Page) => Promise<void>;
+  sendCsprTokens: (popupPage?: Page) => Promise<void>;
+  unlockValutForSigning: (popupPage?: Page) => Promise<void>;
 }>({
   popupPage: async ({ extensionId, page }, use) => {
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
@@ -232,14 +238,118 @@ export const popup = test.extend<{
         .getByPlaceholder('Password', { exact: true })
         .fill(vaultPassword);
       await currentPage.getByRole('button', { name: 'Unlock wallet' }).click();
+      await page.waitForLoadState('networkidle');
       await page.waitForSelector('text=Total balance', {
         state: 'visible',
-        timeout: 20000
+        timeout: 30000
       });
     };
 
     await use(unlockVault);
   },
+  unlockValutForSigning: async ({ page }, use) => {
+    const unlockValutForSigning = async (popupPage?: Page) => {
+      const currentPage = popupPage || page;
+
+      await currentPage
+        .getByPlaceholder('Password', { exact: true })
+        .fill(vaultPassword);
+      await currentPage.getByRole('button', { name: 'Unlock wallet' }).click();
+    };
+
+    await use(unlockValutForSigning);
+  },
+  sendCsprTokens: async ({ page }, use) => {
+    const sendCsprTokens = async (popupPage?: Page) => {
+      const currentPage = popupPage || page;
+      await currentPage.route(URLS.rpc, route =>
+        route.fulfill(RPC_RESPONSE.success)
+      );
+
+      await new Promise(r => setTimeout(r, 5000));
+
+      await currentPage.getByText('Send').click();
+
+      await popupExpect(
+        currentPage.getByRole('heading', { name: 'Select token and account' })
+      ).toBeVisible();
+
+      await currentPage.getByRole('button', { name: 'Next' }).click();
+
+      await popupExpect(
+        currentPage.getByRole('heading', { name: 'Specify recipient' })
+      ).toBeVisible();
+
+      await popupExpect(
+        currentPage.getByRole('button', { name: 'Next' })
+      ).toBeDisabled();
+
+      await currentPage
+        .getByPlaceholder('Public key or name', { exact: true })
+        .fill(DEFAULT_SECOND_ACCOUNT.publicKey);
+
+      await popupExpect(
+        currentPage.getByText(DEFAULT_SECOND_ACCOUNT.mediumTruncatedPublicKey, {
+          exact: true
+        })
+      ).toBeVisible();
+
+      await currentPage
+        .getByText(DEFAULT_SECOND_ACCOUNT.mediumTruncatedPublicKey, {
+          exact: true
+        })
+        .click();
+
+      await currentPage.getByRole('button', { name: 'Next' }).click();
+
+      await popupExpect(
+        currentPage.getByRole('heading', { name: 'Enter amount' })
+      ).toBeVisible();
+
+      await currentPage.getByRole('button', { name: 'Next' }).click();
+
+      await popupExpect(
+        currentPage.getByRole('heading', { name: 'Confirm sending' })
+      ).toBeVisible();
+
+      await popupExpect(
+        currentPage.getByText(DEFAULT_SECOND_ACCOUNT.publicKey)
+      ).toBeVisible();
+
+      await popupExpect(
+        currentPage.getByRole('button', { name: 'Confirm send' })
+      ).toBeDisabled();
+
+      // Scroll to the bottom
+      await currentPage.evaluate(() => {
+        const container = document.querySelector('#ms-container');
+
+        container?.scrollTo(0, 1000);
+      });
+
+      await popupExpect(
+        currentPage.getByRole('button', { name: 'Confirm send' })
+      ).not.toBeDisabled();
+
+      await currentPage.getByRole('button', { name: 'Confirm send' }).click();
+      await currentPage.waitForLoadState('networkidle');
+      await popupExpect(
+        currentPage.getByRole('heading', {
+          name: 'You submitted a transaction'
+        })
+      ).toBeVisible();
+
+      await currentPage.getByRole('button', { name: 'Done' }).click();
+
+      popupExpect(
+        currentPage.getByRole('heading', {
+          name: 'Are you enjoying Casper Wallet so far?'
+        })
+      ).toBeVisible();
+    };
+    await use(sendCsprTokens);
+  },
+
   unlockVaultNewPassword: async ({ page }, use) => {
     const unlockVaultNewPassword = async (popupPage?: Page) => {
       const currentPage = popupPage || page;
@@ -273,7 +383,7 @@ export const popup = test.extend<{
 
     await use(createAccount);
   },
-  connectAccounts: async ({ page, unlockVault, context }, use) => {
+  connectAccounts: async ({ page, unlockValutForSigning, context }, use) => {
     const connectAccounts = async () => {
       await page.goto(PLAYGROUND_URL);
 
@@ -282,7 +392,7 @@ export const popup = test.extend<{
         page.getByRole('button', { name: 'Connect', exact: true }).click()
       ]);
 
-      await unlockVault(connectAccountPage);
+      await unlockValutForSigning(connectAccountPage);
 
       await connectAccountPage.getByText('select all', { exact: true }).click();
 

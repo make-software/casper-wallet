@@ -1,97 +1,13 @@
 import { expect } from '@playwright/test';
-
-import { DEFAULT_SECOND_ACCOUNT, RPC_RESPONSE, URLS } from '../../constants';
 import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI:  review flow', () => {
   popup(
-    'Positive review flow - go to web store',
-    async ({ popupPage, unlockVault, context, page }) => {
+    'should redirect to web store',
+    async ({ popupPage, unlockVault, context, page, sendCsprTokens }) => {
       await unlockVault();
 
-      await popupPage.route(URLS.rpc, route =>
-        route.fulfill(RPC_RESPONSE.success)
-      );
-      await popupPage.waitForLoadState('networkidle');
-      await new Promise(r => setTimeout(r, 5000));
-
-      await popupPage.getByText('Send').click();
-      await popupPage.waitForLoadState('networkidle');
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Select token and account' })
-      ).toBeVisible();
-
-      await popupPage.getByRole('button', { name: 'Next' }).click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Specify recipient' })
-      ).toBeVisible();
-
-      await popupExpect(
-        popupPage.getByRole('button', { name: 'Next' })
-      ).toBeDisabled();
-
-      await popupPage
-        .getByPlaceholder('Public key or name', { exact: true })
-        .fill(DEFAULT_SECOND_ACCOUNT.publicKey);
-
-      await popupExpect(
-        popupPage.getByText(DEFAULT_SECOND_ACCOUNT.mediumTruncatedPublicKey, {
-          exact: true
-        })
-      ).toBeVisible();
-
-      await popupPage
-        .getByText(DEFAULT_SECOND_ACCOUNT.mediumTruncatedPublicKey, {
-          exact: true
-        })
-        .click();
-
-      await popupPage.getByRole('button', { name: 'Next' }).click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Enter amount' })
-      ).toBeVisible();
-
-      await popupPage.getByRole('button', { name: 'Next' }).click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Confirm sending' })
-      ).toBeVisible();
-
-      await popupExpect(
-        popupPage.getByText(DEFAULT_SECOND_ACCOUNT.publicKey)
-      ).toBeVisible();
-
-      await popupExpect(
-        popupPage.getByRole('button', { name: 'Confirm send' })
-      ).toBeDisabled();
-
-      // Scroll to the bottom
-      await popupPage.evaluate(() => {
-        const container = document.querySelector('#ms-container');
-
-        container?.scrollTo(0, 1000);
-      });
-
-      await popupExpect(
-        popupPage.getByRole('button', { name: 'Confirm send' })
-      ).not.toBeDisabled();
-
-      await popupPage.getByRole('button', { name: 'Confirm send' }).click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'You submitted a transaction' })
-      ).toBeVisible();
-
-      await popupPage.getByRole('button', { name: 'Done' }).click();
-
-      popupExpect(
-        popupPage.getByRole('heading', {
-          name: 'Are you enjoying Casper Wallet so far?'
-        })
-      ).toBeVisible();
-
+      await sendCsprTokens();
       await popupPage
         .getByRole('button', { name: "Yes, I'm enjoying it" })
         .click();
@@ -115,91 +31,11 @@ popup.describe('Popup UI:  review flow', () => {
     }
   );
   popup(
-    'negative review flow - go to telegram',
-    async ({ popupPage, unlockVault, context, page }) => {
+    'should redirect to telegram',
+    async ({ popupPage, unlockVault, context, page, sendCsprTokens }) => {
       await unlockVault();
 
-      await popupPage.route(URLS.rpc, route =>
-        route.fulfill(RPC_RESPONSE.success)
-      );
-
-      await new Promise(r => setTimeout(r, 5000));
-
-      await popupPage.getByText('Send').click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Select token and account' })
-      ).toBeVisible();
-
-      await popupPage.getByRole('button', { name: 'Next' }).click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Specify recipient' })
-      ).toBeVisible();
-
-      await popupExpect(
-        popupPage.getByRole('button', { name: 'Next' })
-      ).toBeDisabled();
-
-      await popupPage
-        .getByPlaceholder('Public key or name', { exact: true })
-        .fill(DEFAULT_SECOND_ACCOUNT.publicKey);
-
-      await popupExpect(
-        popupPage.getByText(DEFAULT_SECOND_ACCOUNT.mediumTruncatedPublicKey, {
-          exact: true
-        })
-      ).toBeVisible();
-
-      await popupPage
-        .getByText(DEFAULT_SECOND_ACCOUNT.mediumTruncatedPublicKey, {
-          exact: true
-        })
-        .click();
-
-      await popupPage.getByRole('button', { name: 'Next' }).click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Enter amount' })
-      ).toBeVisible();
-
-      await popupPage.getByRole('button', { name: 'Next' }).click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Confirm sending' })
-      ).toBeVisible();
-
-      await popupExpect(
-        popupPage.getByText(DEFAULT_SECOND_ACCOUNT.publicKey)
-      ).toBeVisible();
-
-      await popupExpect(
-        popupPage.getByRole('button', { name: 'Confirm send' })
-      ).toBeDisabled();
-
-      await popupPage.evaluate(() => {
-        const container = document.querySelector('#ms-container');
-
-        container?.scrollTo(0, 1000);
-      });
-
-      await popupExpect(
-        popupPage.getByRole('button', { name: 'Confirm send' })
-      ).not.toBeDisabled();
-
-      await popupPage.getByRole('button', { name: 'Confirm send' }).click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'You submitted a transaction' })
-      ).toBeVisible();
-
-      await popupPage.getByRole('button', { name: 'Done' }).click();
-
-      popupExpect(
-        popupPage.getByRole('heading', {
-          name: 'Are you enjoying Casper Wallet so far?'
-        })
-      ).toBeVisible();
+      await sendCsprTokens();
 
       await popupPage.getByRole('button', { name: 'Not so much' }).click();
 
@@ -223,92 +59,11 @@ popup.describe('Popup UI:  review flow', () => {
   );
 
   popup(
-    'negative review flow - go to home page',
-    async ({ popupPage, unlockVault }) => {
+    'should redirect to home page',
+    async ({ popupPage, unlockVault, sendCsprTokens }) => {
       await unlockVault();
 
-      await popupPage.route(URLS.rpc, route =>
-        route.fulfill(RPC_RESPONSE.success)
-      );
-
-      await new Promise(r => setTimeout(r, 5000));
-
-      await popupPage.getByText('Send').click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Select token and account' })
-      ).toBeVisible();
-
-      await popupPage.getByRole('button', { name: 'Next' }).click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Specify recipient' })
-      ).toBeVisible();
-
-      await popupExpect(
-        popupPage.getByRole('button', { name: 'Next' })
-      ).toBeDisabled();
-
-      await popupPage
-        .getByPlaceholder('Public key or name', { exact: true })
-        .fill(DEFAULT_SECOND_ACCOUNT.publicKey);
-
-      await popupExpect(
-        popupPage.getByText(DEFAULT_SECOND_ACCOUNT.mediumTruncatedPublicKey, {
-          exact: true
-        })
-      ).toBeVisible();
-
-      await popupPage
-        .getByText(DEFAULT_SECOND_ACCOUNT.mediumTruncatedPublicKey, {
-          exact: true
-        })
-        .click();
-
-      await popupPage.getByRole('button', { name: 'Next' }).click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Enter amount' })
-      ).toBeVisible();
-
-      await popupPage.getByRole('button', { name: 'Next' }).click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'Confirm sending' })
-      ).toBeVisible();
-
-      await popupExpect(
-        popupPage.getByText(DEFAULT_SECOND_ACCOUNT.publicKey)
-      ).toBeVisible();
-
-      await popupExpect(
-        popupPage.getByRole('button', { name: 'Confirm send' })
-      ).toBeDisabled();
-
-      // Scroll to the bottom
-      await popupPage.evaluate(() => {
-        const container = document.querySelector('#ms-container');
-
-        container?.scrollTo(0, 1000);
-      });
-
-      await popupExpect(
-        popupPage.getByRole('button', { name: 'Confirm send' })
-      ).not.toBeDisabled();
-
-      await popupPage.getByRole('button', { name: 'Confirm send' }).click();
-
-      await popupExpect(
-        popupPage.getByRole('heading', { name: 'You submitted a transaction' })
-      ).toBeVisible();
-
-      await popupPage.getByRole('button', { name: 'Done' }).click();
-
-      popupExpect(
-        popupPage.getByRole('heading', {
-          name: 'Are you enjoying Casper Wallet so far?'
-        })
-      ).toBeVisible();
+      await sendCsprTokens();
 
       await popupPage.getByRole('button', { name: 'Not so much' }).click();
 

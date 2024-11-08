@@ -1,5 +1,4 @@
 import { DEFAULT_FIRST_ACCOUNT } from '../constants';
-import { createLocators } from '../constants';
 import { onboarding, onboardingExpect } from '../fixtures';
 
 onboarding.describe('Onboarding UI: confirm secret phrase flow', () => {
@@ -43,12 +42,6 @@ onboarding.describe('Onboarding UI: confirm secret phrase flow', () => {
       await page.getByText('Deploys').click();
 
       await onboardingExpect(await page.getByText('No activity')).toBeVisible();
-
-      const locators = createLocators(page);
-      const accountSwitcher = locators.accountSwitcher;
-
-      // Perform actions and assertions
-      await accountSwitcher.click();
     }
   );
 
