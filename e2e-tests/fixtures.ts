@@ -239,6 +239,7 @@ export const popup = test.extend<{
         .fill(vaultPassword);
       await currentPage.getByRole('button', { name: 'Unlock wallet' }).click();
       await page.waitForLoadState('networkidle');
+      await new Promise(r => setTimeout(r, 5000));
       await page.waitForSelector('text=Total balance', {
         state: 'visible',
         timeout: 30000
