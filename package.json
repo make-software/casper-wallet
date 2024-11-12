@@ -52,7 +52,7 @@
     "styled-components": "^5"
   },
   "dependencies": {
-    "@bringweb3/chrome-extension-kit": "^1.1.11",
+    "@bringweb3/chrome-extension-kit": "^1.1.12",
     "@formatjs/intl": "2.10.4",
     "@hookform/resolvers": "2.9.10",
     "@lapo/asn1js": "1.2.4",
