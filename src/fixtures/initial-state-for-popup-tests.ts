@@ -92,7 +92,6 @@ export const initialStateForPopupTests: RootState = {
   recentRecipientPublicKeys: [],
   accountInfo: {
     pendingDeployHashes: [],
-    erc20Tokens: [],
     accountNftTokens: [],
     nftTokensCount: 0,
     accountTrackingIdOfSentNftTokens: {}

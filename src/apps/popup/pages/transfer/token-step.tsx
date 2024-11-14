@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { useActiveAccountErc20Tokens } from '@hooks/use-active-account-erc20-tokens';
+import { formatCep18Tokens } from '@popup/pages/home/components/tokens-list/utils';
+
 import { TokenType, useCasperToken } from '@hooks/use-casper-token';
 
 import {
@@ -9,6 +10,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
+import { useFetchCep18Tokens } from '@libs/services/cep18-service';
 import {
   ActiveAccountPlate,
   List,
@@ -37,19 +39,20 @@ export const TokenStep = ({
   const { t } = useTranslation();
 
   const casperToken = useCasperToken();
-  const { tokens, isLoading } = useActiveAccountErc20Tokens();
+  const { cep18Tokens, isLoadingTokens } = useFetchCep18Tokens();
 
   useEffect(() => {
     const tokensList: TokenType[] = [];
 
-    if (isLoading) return;
+    if (isLoadingTokens) return;
+    const formatedCep18Tokens = formatCep18Tokens(cep18Tokens);
 
     if (casperToken) {
       tokensList.push(casperToken);
     }
 
-    if (tokens) {
-      tokensList.push(...tokens);
+    if (formatedCep18Tokens) {
+      tokensList.push(...formatedCep18Tokens);
     }
 
     setTokenList(tokensList);
@@ -61,7 +64,13 @@ export const TokenStep = ({
     } else {
       setSelectedToken(casperToken);
     }
-  }, [casperToken, tokens, isLoading, selectedToken?.id, setSelectedToken]);
+  }, [
+    casperToken,
+    cep18Tokens,
+    isLoadingTokens,
+    selectedToken?.id,
+    setSelectedToken
+  ]);
 
   return (
     <ContentContainer>

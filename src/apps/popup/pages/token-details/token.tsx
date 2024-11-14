@@ -6,7 +6,7 @@ import styled from 'styled-components';
 
 import { NetworkSetting } from '@src/constants';
 
-import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
+import { formatCep18Tokens } from '@popup/pages/home/components/tokens-list/utils';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import {
@@ -23,7 +23,7 @@ import {
   SpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
-import { ContractPackageWithBalance } from '@libs/services/erc20-service';
+import { useFetchCep18Tokens } from '@libs/services/cep18-service';
 import {
   Button,
   List,
@@ -52,11 +52,7 @@ type TokenInfoList = {
   value: string;
 };
 
-type TokenProps = {
-  erc20Tokens: ContractPackageWithBalance[] | null;
-};
-
-export const Token = ({ erc20Tokens }: TokenProps) => {
+export const Token = () => {
   const location = useTypedLocation();
   const [tokenData, setTokenData] = useState<TokenType | null>(
     location.state.tokenData ?? null
@@ -71,6 +67,7 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
   const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const network = useSelector(selectActiveNetworkSetting);
+  const { cep18Tokens } = useFetchCep18Tokens();
 
   useEffect(() => {
     if (tokenName === 'Casper') {
@@ -82,10 +79,10 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
         ]);
       }
     } else {
-      // ERC-20 token case
-      const erc20TokensList = formatErc20TokenBalance(erc20Tokens);
+      // CEP-18 token case
+      const formatedCep18Tokens = formatCep18Tokens(cep18Tokens);
 
-      const token = erc20TokensList?.find(token => token.id === tokenName);
+      const token = formatedCep18Tokens?.find(token => token.id === tokenName);
 
       if (token) {
         setTokenData(token);
@@ -110,7 +107,7 @@ export const Token = ({ erc20Tokens }: TokenProps) => {
     casperToken,
     activeAccount,
     casperLiveUrl,
-    erc20Tokens,
+    cep18Tokens,
     tokenData?.symbol,
     tokenData?.decimals
   ]);
