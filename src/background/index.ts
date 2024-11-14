@@ -55,10 +55,14 @@ import {
   ledgerRecipientToSaveOnSuccessChanged,
   ledgerStateCleared
 } from '@background/redux/ledger/actions';
-import { setShowCSPRNamePromotion } from '@background/redux/promotion/actions';
+import {
+  resetPromotion,
+  setShowCSPRNamePromotion
+} from '@background/redux/promotion/actions';
 import {
   askForReviewAfterChanged,
-  ratedInStoreChanged
+  ratedInStoreChanged,
+  resetRateApp
 } from '@background/redux/rate-app/actions';
 import {
   accountAdded,
@@ -610,12 +614,14 @@ runtime.onMessage.addListener(
           case getType(contactsReseted):
           case getType(ratedInStoreChanged):
           case getType(askForReviewAfterChanged):
+          case getType(resetRateApp):
           case getType(ledgerNewWindowIdChanged):
           case getType(ledgerStateCleared):
           case getType(ledgerDeployChanged):
           case getType(ledgerRecipientToSaveOnSuccessChanged):
           case getType(addWatchingAccount):
           case getType(setShowCSPRNamePromotion):
+          case getType(resetPromotion):
             store.dispatch(action);
             return sendResponse(undefined);
 
