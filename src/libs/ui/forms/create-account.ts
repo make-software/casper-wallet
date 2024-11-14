@@ -3,7 +3,7 @@ import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import { UseFormProps, useForm } from 'react-hook-form';
 
 import { SecretPhrase, deriveKeyPair } from '@libs/crypto';
-import { AccountWithBalance } from '@libs/types/account';
+import { Account } from '@libs/types/account';
 
 import { useAccountNameRule } from './form-validation-rules';
 
@@ -34,7 +34,7 @@ export function useCreateAccountForm(
 
 export function getDefaultName(
   existingAccountNames: string[],
-  derivedAccounts: AccountWithBalance[],
+  derivedAccounts: Account[],
   secretPhrase: SecretPhrase | null
 ) {
   const accountString = 'Account';

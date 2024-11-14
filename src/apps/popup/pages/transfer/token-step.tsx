@@ -61,7 +61,7 @@ export const TokenStep = ({
     } else {
       setSelectedToken(casperToken);
     }
-  }, [casperToken, tokens, isLoading]);
+  }, [casperToken, tokens, isLoading, selectedToken?.id, setSelectedToken]);
 
   return (
     <ContentContainer>
@@ -117,7 +117,7 @@ export const TokenStep = ({
 
       <ActiveAccountPlate
         label="From"
-        balance={selectedToken?.amount || null}
+        balance={selectedToken?.amount}
         symbol={selectedToken?.symbol || null}
         top={SpacingSize.XL}
       />

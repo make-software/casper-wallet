@@ -29,12 +29,6 @@ import {
   openOnboardingUi
 } from '@background/open-onboarding-flow';
 import {
-  accountBalancesChanged,
-  accountBalancesReseted
-} from '@background/redux/account-balances/actions';
-import {
-  accountBalanceChanged,
-  accountCurrencyRateChanged,
   accountErc20Changed,
   accountInfoReset,
   accountNftTokensAdded,
@@ -110,11 +104,6 @@ import { sdkEvent } from '@content/sdk-event';
 import { SdkMethod, isSDKMethod, sdkMethod } from '@content/sdk-method';
 
 import { fetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import {
-  fetchAccountBalance,
-  fetchAccountBalances,
-  fetchCurrencyRate
-} from '@libs/services/balance-service';
 import {
   fetchOnRampOptionGet,
   fetchOnRampOptionPost,
@@ -608,8 +597,6 @@ runtime.onMessage.addListener(
           case getType(loginRetryLockoutTimeSet):
           case getType(recipientPublicKeyAdded):
           case getType(recipientPublicKeyReseted):
-          case getType(accountBalanceChanged):
-          case getType(accountCurrencyRateChanged):
           case getType(accountInfoReset):
           case getType(accountPendingDeployHashesChanged):
           case getType(accountPendingDeployHashesRemove):
@@ -626,8 +613,6 @@ runtime.onMessage.addListener(
           case getType(contactsReseted):
           case getType(ratedInStoreChanged):
           case getType(askForReviewAfterChanged):
-          case getType(accountBalancesChanged):
-          case getType(accountBalancesReseted):
           case getType(ledgerNewWindowIdChanged):
           case getType(ledgerStateCleared):
           case getType(ledgerDeployChanged):
@@ -642,53 +627,6 @@ runtime.onMessage.addListener(
             return;
 
           // SERVICE MESSAGE HANDLERS
-          case getType(serviceMessage.fetchBalanceRequest): {
-            const { casperWalletApiUrl, casperClarityApiUrl } =
-              selectApiConfigBasedOnActiveNetwork(store.getState());
-
-            try {
-              const [accountData, rate] = await Promise.all([
-                fetchAccountBalance({
-                  accountHash: action.payload.accountHash,
-                  casperWalletApiUrl
-                }),
-                fetchCurrencyRate({ casperClarityApiUrl })
-              ]);
-
-              return sendResponse(
-                serviceMessage.fetchBalanceResponse({
-                  accountData: accountData?.data || null,
-                  currencyRate: rate?.data || null
-                })
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchAccountBalancesRequest): {
-            const { casperWalletApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchAccountBalances({
-                accountHashes: action.payload.accountHashes,
-                casperWalletApiUrl
-              });
-
-              return sendResponse(
-                serviceMessage.fetchAccountBalancesResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
           case getType(serviceMessage.fetchExtendedDeploysInfoRequest): {
             const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
