@@ -336,7 +336,7 @@ export const TransferPage = () => {
       <ConfirmStep
         recipientPublicKey={recipientPublicKey}
         amount={amount}
-        balance={selectedToken?.amount || null}
+        balance={selectedToken?.amount}
         symbol={selectedToken?.symbol || null}
         isErc20Transfer={isErc20Transfer}
         paymentAmount={paymentAmount}

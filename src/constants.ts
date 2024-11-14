@@ -1,17 +1,10 @@
 const SECOND = 1000;
 
-export const FETCH_QUERY_OPTIONS = {
-  // cached for 30 sec
-  apiCacheTime: 30 * SECOND
-};
-
 export const BALANCE_REFRESH_RATE = 15 * SECOND;
 export const CURRENCY_REFRESH_RATE = 30 * SECOND;
 export const TOKENS_REFRESH_RATE = 15 * SECOND;
 export const NFT_TOKENS_REFRESH_RATE = 60 * SECOND;
-export const ACCOUNT_DEPLOY_REFRESH_RATE = 30 * SECOND;
 export const ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE = 30 * SECOND;
-export const ERC20_TOKEN_ACTIVITY_REFRESH_RATE = 30 * SECOND;
 export const VALIDATORS_REFRESH_RATE = 30 * SECOND;
 export const PENDING_DEPLOY_REFETCH_INTERVAL = 5 * SECOND;
 export const DEPLOY_DETAILS_REFRESH_RATE = 30 * SECOND;
@@ -28,6 +21,16 @@ export const NFT_CEP78_PAYMENT_AMOUNT_AVERAGE_MOTES = '3000000000'; // 3 CSPR
 export const STAKE_COST_MOTES = '2500000000'; // 2.5 CSPR
 export const DELEGATION_MIN_AMOUNT_MOTES = '500000000000'; // 500 CSPR
 export const MAX_DELEGATORS = 1200;
+
+export const USER_GUIDES_URL = 'https://casperwallet.io/user-guide';
+export const SHARE_FEEDBACK_URL =
+  'https://casper-wallet.canny.io/feature-requests';
+export const ABOUT_US_URL = 'https://make.services';
+export const TERMS_URLS = {
+  tos: 'https://www.casperwallet.io/tos',
+  privacy: 'https://www.casperwallet.io/privacy'
+};
+export const REFERRER_URL = 'https://casperwallet.io';
 
 export const getBlockExplorerAccountUrl = (
   casperLiveUrl: string,
@@ -84,17 +87,10 @@ export enum Browser {
   Edge = 'edge'
 }
 
-export enum TermsLink {
-  Tos = 'https://www.casperwallet.io/tos',
-  Privacy = 'https://www.casperwallet.io/privacy'
-}
-
 export enum CasperNodeUrl {
   MainnetUrl = 'https://node.cspr.cloud/rpc',
   TestnetUrl = 'https://node.testnet.cspr.cloud/rpc'
 }
-
-export const ReferrerUrl = 'https://casperwallet.io';
 
 export enum NetworkName {
   Mainnet = 'casper',

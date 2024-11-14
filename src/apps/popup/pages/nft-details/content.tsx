@@ -154,7 +154,7 @@ export const NftDetailsContent = ({
         );
 
       if (extendedDeployInfo) {
-        if (extendedDeployInfo.status === Status.Executed) {
+        if (extendedDeployInfo.status !== Status.Pending) {
           dispatchToMainStore(
             accountTrackingIdOfSentNftTokensRemoved(nftToken?.tracking_id!)
           );

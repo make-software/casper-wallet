@@ -1,7 +1,10 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+import {
+  selectVaultAccountsPublicKeys,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
@@ -30,8 +33,9 @@ export function HeaderConnectionStatus({
   isConnected
 }: HeaderConnectionStatusProps) {
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
-  const accountsInfo = useFetchAccountsInfo([activeAccount?.publicKey!]);
+  const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
 
   const accountHash = getAccountHashFromPublicKey(activeAccount?.publicKey);
 

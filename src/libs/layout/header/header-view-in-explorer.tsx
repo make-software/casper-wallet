@@ -1,3 +1,4 @@
+import { TokenDto } from 'casper-wallet-core/src/data/dto';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -14,7 +15,6 @@ import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { useCasperToken } from '@hooks/use-casper-token';
 
 import { AlignedFlexRow, CenteredFlexColumn, SpacingSize } from '@libs/layout';
-import { ContractPackageWithBalance } from '@libs/services/erc20-service';
 import { Link, SvgIcon, Typography } from '@libs/ui/components';
 
 interface HeaderViewInExplorerProps {
@@ -22,7 +22,7 @@ interface HeaderViewInExplorerProps {
   deployHash?: string;
   nftTokenId?: string;
   contractHash?: string;
-  erc20Tokens?: ContractPackageWithBalance[];
+  cep18Tokens?: TokenDto[];
 }
 
 export function HeaderViewInExplorer({
@@ -30,7 +30,7 @@ export function HeaderViewInExplorer({
   deployHash,
   nftTokenId,
   contractHash,
-  erc20Tokens
+  cep18Tokens
 }: HeaderViewInExplorerProps) {
   const [hrefToTokenOnCasperLive, setHrefToTokenOnCasperLive] = useState<
     string | undefined
@@ -63,15 +63,15 @@ export function HeaderViewInExplorer({
         }
       } else {
         // ERC-20 token case
-        const token = erc20Tokens?.find(
-          token => token.contract_package_hash === tokenName
+        const token = cep18Tokens?.find(
+          token => token.contractPackageHash === tokenName
         );
 
         if (token) {
           setHrefToTokenOnCasperLive(
             getBlockExplorerContractPackageUrl(
               casperLiveUrl,
-              token.contract_package_hash
+              token.contractPackageHash
             )
           );
         }
@@ -88,7 +88,7 @@ export function HeaderViewInExplorer({
     casperToken,
     activeAccount,
     casperLiveUrl,
-    erc20Tokens,
+    cep18Tokens,
     deployHash,
     nftTokenId,
     contractHash

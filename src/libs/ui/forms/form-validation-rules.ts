@@ -137,17 +137,18 @@ export const useRecipientPublicKeyRule = () => {
 
         return false;
       },
-      message: t('Recipient should be a valid public key or cspr name')
+      message: t(
+        'The recipient should be a valid public key, CSPR.name or contact name'
+      )
     });
 };
 
-export const useCSPRTransferAmountRule = (amountMotes: string | null) => {
+export const useCSPRTransferAmountRule = (amountMotes: string | undefined) => {
   const { t } = useTranslation();
 
-  const maxAmountMotes: string =
-    amountMotes == null
-      ? '0'
-      : Big(amountMotes).sub(TRANSFER_COST_MOTES).toFixed();
+  const maxAmountMotes: string = !amountMotes
+    ? '0'
+    : Big(amountMotes).sub(TRANSFER_COST_MOTES).toFixed();
 
   return Yup.string()
     .required(t('Amount is required'))
@@ -269,11 +270,12 @@ export const useErc20AmountRule = (
     });
 };
 
-export const usePaymentAmountRule = (csprBalance: string | null) => {
+export const usePaymentAmountRule = (csprBalance: string | undefined) => {
   const { t } = useTranslation();
 
-  const maxAmountMotes: string =
-    csprBalance == null ? '0' : Big(csprBalance).toFixed();
+  const maxAmountMotes: string = !csprBalance
+    ? '0'
+    : Big(csprBalance).toFixed();
 
   return Yup.string()
     .required(t('Payment amount is required'))
@@ -315,7 +317,7 @@ export const usePaymentAmountRule = (csprBalance: string | null) => {
 };
 
 export const useCSPRStakeAmountRule = (
-  amountMotes: string | null,
+  amountMotes: string | undefined,
   mode: AuctionManagerEntryPoint,
   stakeAmountMotes: string
 ) => {
@@ -337,10 +339,9 @@ export const useCSPRStakeAmountRule = (
     }
   };
 
-  const maxAmountMotes: string =
-    amountMotes == null
-      ? '0'
-      : Big(amountMotes).sub(STAKE_COST_MOTES).toFixed();
+  const maxAmountMotes: string = !amountMotes
+    ? '0'
+    : Big(amountMotes).sub(STAKE_COST_MOTES).toFixed();
 
   return Yup.string()
     .required({

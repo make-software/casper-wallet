@@ -1,9 +1,6 @@
 import React from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-
-import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 
 import {
   ContentContainer,
@@ -11,6 +8,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import { NFTTokenResult } from '@libs/services/nft-service';
 import { Input, Typography } from '@libs/ui/components';
 import { TransferNftAmountFormValues } from '@libs/ui/forms/transfer-nft';
@@ -34,7 +32,7 @@ export const ReviewStep = ({
 }: ReviewStepProps) => {
   const { t } = useTranslation();
 
-  const currencyRate = useSelector(selectAccountCurrencyRate);
+  const { currencyRate } = useFetchWalletBalance();
 
   const {
     register,
@@ -49,7 +47,7 @@ export const ReviewStep = ({
 
   const paymentFiatAmount = formatFiatAmount(
     paymentAmount || '0',
-    currencyRate
+    currencyRate?.rate || null
   );
 
   return (

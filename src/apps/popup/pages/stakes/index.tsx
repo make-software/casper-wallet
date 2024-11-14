@@ -24,7 +24,6 @@ import { ValidatorDropdownInput } from '@popup/pages/stakes/validator-dropdown-i
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
-import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import { ledgerDeployChanged } from '@background/redux/ledger/actions';
 import {
   selectAskForReviewAfter,
@@ -55,6 +54,7 @@ import {
   VerticalSpaceContainer,
   createErrorLocationState
 } from '@libs/layout';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import {
   makeAuctionManagerDeploy,
   sendSignDeploy,
@@ -111,12 +111,13 @@ export const StakesPage = () => {
   const { networkName, nodeUrl, auctionManagerContractHash } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
-  const csprBalance = useSelector(selectAccountBalance);
   const ratedInStore = useSelector(selectRatedInStore);
   const askForReviewAfter = useSelector(selectAskForReviewAfter);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
+
+  const { accountBalance } = useFetchWalletBalance();
 
   const { stakeType, validatorList, undelegateValidatorList, loading } =
     useStakeType();
@@ -130,7 +131,7 @@ export const StakesPage = () => {
   );
 
   const { amountForm, validatorForm, newValidatorForm } = useStakesForm(
-    csprBalance.liquidMotes,
+    accountBalance.liquidBalance,
     stakeType,
     stakeAmountMotes,
     validator?.delegators_number,
@@ -538,7 +539,8 @@ export const StakesPage = () => {
   if (
     (stakeType === AuctionManagerEntryPoint.undelegate ||
       stakeType === AuctionManagerEntryPoint.redelegate) &&
-    (csprBalance.delegatedMotes == null || csprBalance.delegatedMotes === '0')
+    (!accountBalance.delegatedBalance ||
+      accountBalance.delegatedBalance === '0')
   ) {
     return (
       <PopupLayout

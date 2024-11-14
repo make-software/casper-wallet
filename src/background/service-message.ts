@@ -2,17 +2,12 @@ import { IDeploy } from 'casper-wallet-core';
 import { ActionType, createAction } from 'typesafe-actions';
 
 import {
-  AccountData,
-  FetchBalanceResponse
-} from '@libs/services/balance-service/types';
-import {
   GetOnRampResponse,
   OptionsPostRequestData,
   ResponseOnRampProps,
   ResponseSelectionProps,
   SelectionPostRequestData
 } from '@libs/services/buy-cspr-service/types';
-import { ContractPackageWithBalance } from '@libs/services/erc20-service/types';
 import { NFTTokenResult } from '@libs/services/nft-service/types';
 import { ErrorResponse, PaginatedResponse } from '@libs/services/types';
 import {
@@ -23,22 +18,6 @@ import {
 type Meta = void;
 
 export const serviceMessage = {
-  fetchBalanceRequest: createAction('FETCH_ACCOUNT_BALANCE')<
-    { accountHash: string },
-    Meta
-  >(),
-  fetchBalanceResponse: createAction('FETCH_ACCOUNT_BALANCE_RESPONSE')<
-    FetchBalanceResponse,
-    Meta
-  >(),
-  fetchAccountBalancesRequest: createAction('FETCH_ACCOUNT_BALANCES')<
-    { accountHashes: string },
-    Meta
-  >(),
-  fetchAccountBalancesResponse: createAction('FETCH_ACCOUNT_BALANCES_RESPONSE')<
-    PaginatedResponse<AccountData> | ErrorResponse,
-    Meta
-  >(),
   fetchExtendedDeploysInfoRequest: createAction('FETCH_EXTENDED_DEPLOYS_INFO')<
     { deployHash: string; publicKey: string },
     Meta
@@ -46,14 +25,6 @@ export const serviceMessage = {
   fetchExtendedDeploysInfoResponse: createAction(
     'FETCH_EXTENDED_DEPLOYS_INFO_RESPONSE'
   )<IDeploy | null, Meta>(),
-  fetchErc20TokensRequest: createAction('FETCH_ERC20_TOKENS')<
-    { accountHash: string },
-    Meta
-  >(),
-  fetchErc20TokensResponse: createAction('FETCH_ERC20_TOKENS_RESPONSE')<
-    ContractPackageWithBalance[],
-    Meta
-  >(),
   fetchNftTokensRequest: createAction('FETCH_NFT_TOKENS')<
     { accountHash: string; page: number },
     Meta

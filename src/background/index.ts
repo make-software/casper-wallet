@@ -29,13 +29,6 @@ import {
   openOnboardingUi
 } from '@background/open-onboarding-flow';
 import {
-  accountBalancesChanged,
-  accountBalancesReseted
-} from '@background/redux/account-balances/actions';
-import {
-  accountBalanceChanged,
-  accountCurrencyRateChanged,
-  accountErc20Changed,
   accountInfoReset,
   accountNftTokensAdded,
   accountNftTokensCountChanged,
@@ -115,16 +108,10 @@ import { SdkMethod, isSDKMethod, sdkMethod } from '@content/sdk-method';
 
 import { fetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
 import {
-  fetchAccountBalance,
-  fetchAccountBalances,
-  fetchCurrencyRate
-} from '@libs/services/balance-service';
-import {
   fetchOnRampOptionGet,
   fetchOnRampOptionPost,
   fetchOnRampSelectionPost
 } from '@libs/services/buy-cspr-service';
-import { fetchErc20Tokens } from '@libs/services/erc20-service';
 import { fetchNftTokens } from '@libs/services/nft-service';
 import {
   fetchAuctionValidators,
@@ -612,12 +599,9 @@ runtime.onMessage.addListener(
           case getType(loginRetryLockoutTimeSet):
           case getType(recipientPublicKeyAdded):
           case getType(recipientPublicKeyReseted):
-          case getType(accountBalanceChanged):
-          case getType(accountCurrencyRateChanged):
           case getType(accountInfoReset):
           case getType(accountPendingDeployHashesChanged):
           case getType(accountPendingDeployHashesRemove):
-          case getType(accountErc20Changed):
           case getType(accountNftTokensAdded):
           case getType(accountNftTokensUpdated):
           case getType(accountNftTokensCountChanged):
@@ -631,8 +615,6 @@ runtime.onMessage.addListener(
           case getType(ratedInStoreChanged):
           case getType(askForReviewAfterChanged):
           case getType(resetRateApp):
-          case getType(accountBalancesChanged):
-          case getType(accountBalancesReseted):
           case getType(ledgerNewWindowIdChanged):
           case getType(ledgerStateCleared):
           case getType(ledgerDeployChanged):
@@ -648,53 +630,6 @@ runtime.onMessage.addListener(
             return;
 
           // SERVICE MESSAGE HANDLERS
-          case getType(serviceMessage.fetchBalanceRequest): {
-            const { casperWalletApiUrl, casperClarityApiUrl } =
-              selectApiConfigBasedOnActiveNetwork(store.getState());
-
-            try {
-              const [accountData, rate] = await Promise.all([
-                fetchAccountBalance({
-                  accountHash: action.payload.accountHash,
-                  casperWalletApiUrl
-                }),
-                fetchCurrencyRate({ casperClarityApiUrl })
-              ]);
-
-              return sendResponse(
-                serviceMessage.fetchBalanceResponse({
-                  accountData: accountData?.data || null,
-                  currencyRate: rate?.data || null
-                })
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchAccountBalancesRequest): {
-            const { casperWalletApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchAccountBalances({
-                accountHashes: action.payload.accountHashes,
-                casperWalletApiUrl
-              });
-
-              return sendResponse(
-                serviceMessage.fetchAccountBalancesResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
           case getType(serviceMessage.fetchExtendedDeploysInfoRequest): {
             const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
               store.getState()
@@ -713,39 +648,6 @@ runtime.onMessage.addListener(
               return sendResponse(
                 serviceMessage.fetchExtendedDeploysInfoResponse(data)
               );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchErc20TokensRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const { data: tokensList } = await fetchErc20Tokens({
-                casperClarityApiUrl,
-                accountHash: action.payload.accountHash
-              });
-
-              if (tokensList) {
-                const erc20Tokens = tokensList.map(token => ({
-                  balance: token.balance,
-                  contractHash: token.latest_contract?.contract_hash,
-                  ...(token?.contract_package ?? {})
-                }));
-
-                return sendResponse(
-                  serviceMessage.fetchErc20TokensResponse(erc20Tokens)
-                );
-              } else {
-                return sendResponse(
-                  serviceMessage.fetchErc20TokensResponse([])
-                );
-              }
             } catch (error) {
               console.error(error);
             }

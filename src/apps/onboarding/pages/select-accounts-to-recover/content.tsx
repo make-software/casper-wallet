@@ -1,5 +1,5 @@
 import { Player } from '@lottiefiles/react-lottie-player';
-import React, { SetStateAction } from 'react';
+import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -13,12 +13,7 @@ import {
   TabPageContainer,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { AccountListRows } from '@libs/types/account';
-import {
-  DynamicAccountsListWithSelect,
-  Tile,
-  Typography
-} from '@libs/ui/components';
+import { Tile, Typography } from '@libs/ui/components';
 
 const AnimationContainer = styled(CenteredFlexColumn)`
   padding: 106px 16px;
@@ -26,24 +21,12 @@ const AnimationContainer = styled(CenteredFlexColumn)`
 
 interface SelectAccountsToRecoverContentProps {
   isLoading: boolean;
-  derivedAccountsWithBalance: AccountListRows[];
-  isLoadingMore: boolean;
-  onLoadMore: () => void;
-  maxItemsToRender: number;
-  setSelectedAccounts: React.Dispatch<SetStateAction<AccountListRows[]>>;
-  selectedAccounts: AccountListRows[];
-  setIsButtonDisabled: React.Dispatch<SetStateAction<boolean>>;
+  children: React.ReactNode;
 }
 
 export const SelectAccountsToRecoverContent = ({
   isLoading,
-  isLoadingMore,
-  onLoadMore,
-  derivedAccountsWithBalance,
-  maxItemsToRender,
-  setSelectedAccounts,
-  selectedAccounts,
-  setIsButtonDisabled
+  children
 }: SelectAccountsToRecoverContentProps) => {
   const { t } = useTranslation();
   const isDarkMode = useIsDarkMode();
@@ -90,16 +73,7 @@ export const SelectAccountsToRecoverContent = ({
           </Tile>
         </VerticalSpaceContainer>
       ) : (
-        <DynamicAccountsListWithSelect
-          accountsWithBalance={derivedAccountsWithBalance}
-          isLoadingMore={isLoadingMore}
-          onLoadMore={onLoadMore}
-          maxItemsToRender={maxItemsToRender}
-          setSelectedAccounts={setSelectedAccounts}
-          selectedAccounts={selectedAccounts}
-          setIsButtonDisabled={setIsButtonDisabled}
-          namePrefix="Account"
-        />
+        children
       )}
     </TabPageContainer>
   );
