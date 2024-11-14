@@ -138,8 +138,7 @@ export const NftDetailsContent = ({
         title: t('Collection'),
         value: nftToken?.contactName,
         image:
-          // nftToken?.contract_package?.icon_url ||
-          'assets/icons/nft-contract-icon.svg'
+          nftToken?.contractPackageIcon || 'assets/icons/nft-contract-icon.svg'
       },
       {
         id: 3,
@@ -162,7 +161,7 @@ export const NftDetailsContent = ({
       nftToken?.metadata?.description,
       nftToken?.contactName,
       nftToken?.contractPackageHash,
-      // nftToken?.contract_package?.icon_url,
+      nftToken?.contractPackageIcon,
       nftToken?.tokenId,
       t,
       tokenStandard
