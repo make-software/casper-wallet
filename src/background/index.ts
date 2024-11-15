@@ -99,16 +99,6 @@ import { sdkEvent } from '@content/sdk-event';
 import { SdkMethod, isSDKMethod, sdkMethod } from '@content/sdk-method';
 
 import {
-  fetchOnRampOptionGet,
-  fetchOnRampOptionPost,
-  fetchOnRampSelectionPost
-} from '@libs/services/buy-cspr-service';
-import {
-  fetchAuctionValidators,
-  fetchValidatorsDetailsData
-} from '@libs/services/validators-service';
-
-import {
   CannotGetActiveAccountError,
   CannotGetSenderOriginError
 } from './internal-errors';
@@ -148,13 +138,11 @@ import {
   themeModeSettingChanged,
   vaultSettingsReseted
 } from './redux/settings/actions';
-import { selectApiConfigBasedOnActiveNetwork } from './redux/settings/selectors';
 import {
   vaultCipherCreated,
   vaultCipherReseted
 } from './redux/vault-cipher/actions';
 import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
-import { ServiceMessage, serviceMessage } from './service-message';
 import { emitSdkEventToActiveTabsWithOrigin } from './utils';
 // to resolve all repositories
 import './wallet-repositories';
@@ -274,10 +262,7 @@ tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 runtime.onMessage.addListener(
-  async (
-    action: RootAction | SdkMethod | ServiceMessage | popupStateUpdated,
-    sender
-  ) => {
+  async (action: RootAction | SdkMethod | popupStateUpdated, sender) => {
     const store = await getExistingMainStoreSingletonOrInit();
 
     return new Promise(async (sendResponse, sendError) => {
@@ -610,90 +595,6 @@ runtime.onMessage.addListener(
           case getType(backgroundEvent.popupStateUpdated):
             // do nothing
             return;
-
-          // SERVICE MESSAGE HANDLERS
-          case getType(serviceMessage.fetchAuctionValidatorsRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchAuctionValidators({
-                casperClarityApiUrl
-              });
-
-              return sendResponse(
-                serviceMessage.fetchAuctionValidatorsResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchValidatorsDetailsDataRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchValidatorsDetailsData({
-                casperClarityApiUrl,
-                publicKey: action.payload.publicKey
-              });
-
-              return sendResponse(
-                serviceMessage.fetchValidatorsDetailsDataResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchOnRampGetOptionRequest): {
-            try {
-              const data = await fetchOnRampOptionGet();
-
-              return sendResponse(
-                serviceMessage.fetchOnRampGetOptionResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchOnRampPostOptionRequest): {
-            try {
-              const data = await fetchOnRampOptionPost(action.payload);
-
-              return sendResponse(
-                serviceMessage.fetchOnRampPostOptionResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchOnRampPostSelectionRequest): {
-            try {
-              const data = await fetchOnRampSelectionPost(action.payload);
-
-              return sendResponse(
-                serviceMessage.fetchOnRampPostSelectionResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
 
           // TODO: All below should be removed when Import Account is integrated with window
           case 'check-secret-key-exist' as any: {
