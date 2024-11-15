@@ -1,13 +1,10 @@
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { selectAllContactsPublicKeys } from '@background/redux/contacts/selectors';
-
 import { AlignedFlexRow, FlexColumn, SpacingSize } from '@libs/layout';
-import { useFetchAccountsInfo } from '@libs/services/account-info';
 import { Avatar, Hash, HashVariant, Typography } from '@libs/ui/components';
 
 const Container = styled(AlignedFlexRow)`
@@ -19,21 +16,17 @@ const Container = styled(AlignedFlexRow)`
 interface ContactsPlateProps {
   publicKey: string;
   name: string;
-  accountHash: string;
+  csprName: Maybe<string> | undefined;
+  brandingLogo: Maybe<string> | undefined;
 }
 
 export const ContactsPlate = ({
   publicKey,
   name,
-  accountHash
+  csprName,
+  brandingLogo
 }: ContactsPlateProps) => {
   const navigate = useTypedNavigate();
-
-  const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
-  const accountsInfo = useFetchAccountsInfo(contactPublicKeys);
-
-  const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
-  const brandingLogo = accountsInfo && accountsInfo[accountHash]?.brandingLogo;
 
   return (
     <Container

@@ -1,9 +1,7 @@
+import { IOnRampCountry } from 'casper-wallet-core/src/domain';
 import React, { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-
-import { selectAccountBalance } from '@background/redux/account-info/selectors';
 
 import {
   ContentContainer,
@@ -11,7 +9,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { ResponseCountryPropsWithId } from '@libs/services/buy-cspr-service/types';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import {
   ActiveAccountPlate,
   Input,
@@ -21,34 +19,32 @@ import {
   SvgIcon,
   Typography
 } from '@libs/ui/components';
-import { motesToCSPR } from '@libs/ui/utils';
 
 import { CountryRow } from './components/country-row';
 import { ListRow } from './components/list-row';
 import { sortCountries } from './utils';
 
 interface CountryProps {
-  availableCountries: ResponseCountryPropsWithId[];
-  setSelectedCountry: React.Dispatch<
-    React.SetStateAction<ResponseCountryPropsWithId>
-  >;
-  selectedCountry: ResponseCountryPropsWithId;
+  availableCountries: IOnRampCountry[];
+  setSelectedCountry: React.Dispatch<React.SetStateAction<IOnRampCountry>>;
+  selectedCountry: IOnRampCountry;
+  isLoadingOnRampCountriesAndCurrencies: boolean;
 }
+
+type ExtendedOnRampCountry = IOnRampCountry & { id: number };
 
 export const Country = ({
   availableCountries,
   setSelectedCountry,
-  selectedCountry
+  selectedCountry,
+  isLoadingOnRampCountriesAndCurrencies
 }: CountryProps) => {
   const [sortedCountries, setSortedCountries] = useState<
-    ResponseCountryPropsWithId[]
+    ExtendedOnRampCountry[]
   >([]);
   const { t } = useTranslation();
 
-  const csprBalance = useSelector(selectAccountBalance);
-
-  const balance =
-    csprBalance.liquidMotes && motesToCSPR(csprBalance.liquidMotes);
+  const { accountBalance } = useFetchWalletBalance();
 
   const { register, control, setValue } = useForm();
 
@@ -60,11 +56,16 @@ export const Country = ({
   useEffect(() => {
     const sortedCountries = sortCountries(
       availableCountries,
-      selectedCountry.code
-    ).filter(
-      country =>
-        country?.name.toLowerCase().includes(inputValue?.toLowerCase() || '')
-    );
+      selectedCountry?.code
+    )
+      .filter(
+        country =>
+          country?.name.toLowerCase().includes(inputValue?.toLowerCase() || '')
+      )
+      .map((country, index) => ({
+        ...country,
+        id: index
+      }));
 
     setSortedCountries(sortedCountries);
   }, [availableCountries, inputValue, selectedCountry]);
@@ -79,7 +80,7 @@ export const Country = ({
 
       <ActiveAccountPlate
         label="Recipient account"
-        balance={balance}
+        balance={accountBalance.liquidDecimalBalance}
         symbol="CSPR"
       />
 
@@ -98,7 +99,7 @@ export const Country = ({
               rows={sortedCountries}
               height={280}
               renderRow={country => {
-                const isSelected = selectedCountry.code === country.code;
+                const isSelected = selectedCountry?.code === country?.code;
 
                 return (
                   <ListRow
@@ -125,6 +126,9 @@ export const Country = ({
           <CountryRow
             country={selectedCountry}
             onClick={() => setValue('countryNameSearch', '')}
+            isLoadingOnRampCountriesAndCurrencies={
+              isLoadingOnRampCountriesAndCurrencies
+            }
           />
         )}
         loading={!sortedCountries.length}

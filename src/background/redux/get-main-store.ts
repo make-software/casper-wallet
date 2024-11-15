@@ -58,7 +58,6 @@ export const selectPopupState = (state: RootState): PopupState => {
     accountInfo: state.accountInfo,
     contacts: state.contacts,
     rateApp: state.rateApp,
-    accountBalances: state.accountBalances,
     ledger: state.ledger,
     promotion: state.promotion
   };

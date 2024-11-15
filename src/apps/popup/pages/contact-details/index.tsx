@@ -2,13 +2,13 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { PasswordProtectionPage } from 'src/apps/popup/pages/password-protection-page';
 
 import { getBlockExplorerAccountUrl } from '@src/constants';
 
 import { DeleteContactPageContent } from '@popup/pages/contact-details/deleting';
 import { ContactDetails } from '@popup/pages/contact-details/details';
 import { EditingContactPageContent } from '@popup/pages/contact-details/editing';
+import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {

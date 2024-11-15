@@ -1,4 +1,6 @@
 import { Player } from '@lottiefiles/react-lottie-player';
+import { formatNumber } from 'casper-wallet-core';
+import { ICsprBalance } from 'casper-wallet-core/src/domain/tokens';
 import React, { useEffect, useState } from 'react';
 import {
   Controller,
@@ -23,6 +25,7 @@ import { useIsDarkMode } from '@hooks/use-is-dark-mode';
 
 import dotsDarkModeAnimation from '@libs/animations/dots_dark_mode.json';
 import dotsLightModeAnimation from '@libs/animations/dots_light_mode.json';
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   CenteredFlexRow,
   FlexColumn,
@@ -42,7 +45,7 @@ import {
   Typography
 } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
-import { formatNumber, motesToCSPR } from '@libs/ui/utils';
+import { motesToCSPR } from '@libs/ui/utils';
 
 const ListItemContainer = styled(FlexColumn)<{ disabled?: boolean }>`
   padding: 12px 16px;
@@ -68,6 +71,7 @@ interface ListProps {
   onLoadMore: () => void;
   isLoadingMore: boolean;
   namePrefix: string;
+  accountsBalances: Record<string, ICsprBalance> | undefined;
 }
 
 type FormFields = FieldValues & {
@@ -83,7 +87,8 @@ export const DynamicAccountsListWithSelect = ({
   maxItemsToRender,
   onLoadMore,
   isLoadingMore,
-  namePrefix
+  namePrefix,
+  accountsBalances
 }: ListProps) => {
   const [accountNames, setAccountNames] = useState<{ name: string }[]>([]);
   const [checkboxes, setCheckboxes] = useState<boolean[]>([]);
@@ -152,12 +157,16 @@ export const DynamicAccountsListWithSelect = ({
       renderRow={(account, index) => {
         const inputFieldName = `accountNames.${index}.name`;
         const checkBoxFieldName = `checkbox.${index}`;
-        const balance = formatNumber(
-          motesToCSPR(String(account.balance.liquidMotes)),
-          {
-            precision: { max: 0 }
-          }
-        );
+        const accountHash = getAccountHashFromPublicKey(account.publicKey);
+
+        const accountLiquidBalance =
+          accountsBalances && accountsBalances[accountHash]?.liquidBalance;
+
+        const accountBalance = accountLiquidBalance
+          ? formatNumber(motesToCSPR(accountLiquidBalance), {
+              precision: { max: 0 }
+            })
+          : '0';
 
         const isAlreadyConnected = alreadyConnectedLedgerAccounts.some(
           alreadyConnectedAccount =>
@@ -232,7 +241,9 @@ export const DynamicAccountsListWithSelect = ({
                   <CenteredFlexRow gap={SpacingSize.Medium}>
                     <AmountContainer>
                       <Tooltip
-                        title={balance.length > 9 ? balance : undefined}
+                        title={
+                          accountBalance.length > 9 ? accountBalance : undefined
+                        }
                         placement="topLeft"
                         overflowWrap
                         fullWidth
@@ -242,7 +253,7 @@ export const DynamicAccountsListWithSelect = ({
                           style={{ textAlign: 'right' }}
                           ellipsis
                         >
-                          {balance}
+                          {accountBalance}
                         </Typography>
                       </Tooltip>
                       <Typography

@@ -1,20 +1,14 @@
+import { formatNumber } from 'casper-wallet-core';
+import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
 import { AuctionManagerEntryPoint } from '@src/constants';
 
 import { useTypedLocation } from '@popup/router';
 
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
-
-import {
-  ValidatorResultWithId,
-  dispatchFetchAuctionValidatorsRequest,
-  dispatchFetchValidatorsDetailsDataRequest
-} from '@libs/services/validators-service';
-import { formatNumber, motesToCSPR } from '@libs/ui/utils';
+import { useFetchValidators } from '@libs/services/validators-service';
+import { motesToCSPR } from '@libs/ui/utils';
 
 type StakeTexts = {
   validatorStepHeaderText: string;
@@ -62,7 +56,7 @@ const stakeActionsTextMap: StakeActionTextMap = {
 
 export const useFilteredValidators = (
   inputValue: string | undefined,
-  validatorList: ValidatorResultWithId[] | null
+  validatorList: ValidatorDto[] | null
 ) => {
   return useMemo(() => {
     if (!validatorList) return [];
@@ -74,10 +68,10 @@ export const useFilteredValidators = (
       stringToCheck?.toLowerCase().includes(lowerCaseInput);
 
     return validatorList.filter(validator => {
-      const { public_key } = validator;
-      const ownerName = validator?.account_info?.info?.owner?.name;
+      const { publicKey } = validator;
+      const ownerName = validator?.name;
 
-      return isIncluded(ownerName) || isIncluded(public_key);
+      return isIncluded(ownerName) || isIncluded(publicKey);
     });
   }, [inputValue, validatorList]);
 };
@@ -127,20 +121,21 @@ export const useStakeType = () => {
   const [stakeType, setStakeType] = useState<AuctionManagerEntryPoint>(
     AuctionManagerEntryPoint.delegate
   );
-  const [validatorList, setValidatorList] = useState<
-    ValidatorResultWithId[] | null
-  >(null);
+  const [validatorList, setValidatorList] = useState<ValidatorDto[] | null>(
+    null
+  );
   const [undelegateValidatorList, setUndelegateValidatorList] = useState<
-    ValidatorResultWithId[] | null
+    ValidatorDto[] | null
   >(null);
-  const [loading, setLoading] = useState(true);
 
   const { pathname } = useTypedLocation();
 
-  const activeAccount = useSelector(selectVaultActiveAccount);
-  const { casperClarityApiUrl } = useSelector(
-    selectApiConfigBasedOnActiveNetwork
-  );
+  const {
+    validators,
+    validatorsWithStakes,
+    isLoadingValidatorsWithStakes,
+    isLoadingValidators
+  } = useFetchValidators();
 
   useEffect(() => {
     const name = pathname.split('/')[1];
@@ -150,68 +145,18 @@ export const useStakeType = () => {
       name === AuctionManagerEntryPoint.redelegate
     ) {
       setStakeType(name);
-
-      if (activeAccount) {
-        Promise.all([
-          dispatchFetchAuctionValidatorsRequest(),
-          dispatchFetchValidatorsDetailsDataRequest(activeAccount.publicKey)
-        ])
-          .then(([allValidatorsResp, undelegateValidatorResp]) => {
-            if ('data' in allValidatorsResp.payload) {
-              const { data } = allValidatorsResp.payload;
-
-              const validatorListWithId = data.map(validator => ({
-                ...validator,
-                id: validator.public_key
-              }));
-
-              setValidatorList(validatorListWithId);
-            }
-            if ('data' in undelegateValidatorResp.payload) {
-              const { data } = undelegateValidatorResp.payload;
-
-              const validatorListWithId = data.map(delegator => ({
-                ...delegator.validator,
-                id: delegator.validator_public_key,
-                user_stake: delegator.stake
-              }));
-
-              setUndelegateValidatorList(validatorListWithId);
-            }
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-      }
+      setValidatorList(validators);
+      setUndelegateValidatorList(validatorsWithStakes);
     } else if (name === AuctionManagerEntryPoint.undelegate) {
       setStakeType(name);
-
-      if (activeAccount) {
-        dispatchFetchValidatorsDetailsDataRequest(activeAccount.publicKey)
-          .then(({ payload }) => {
-            if ('data' in payload) {
-              const { data } = payload;
-
-              const validatorListWithId = data.map(delegator => ({
-                ...delegator.validator,
-                id: delegator.validator_public_key,
-                user_stake: delegator.stake
-              }));
-
-              setUndelegateValidatorList(validatorListWithId);
-            }
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-      }
+      setUndelegateValidatorList(validatorsWithStakes);
     }
-  }, [activeAccount, pathname, casperClarityApiUrl]);
+  }, [pathname, validators, validatorsWithStakes]);
 
   return {
     stakeType,
     validatorList,
     undelegateValidatorList,
-    loading
+    loading: !(!isLoadingValidators && !isLoadingValidatorsWithStakes)
   };
 };

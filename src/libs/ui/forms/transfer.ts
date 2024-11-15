@@ -41,7 +41,7 @@ export const useTransferRecipientForm = () => {
 export const useTransferAmountForm = (
   erc20Balance: string | null,
   isErc20: boolean,
-  amountMotes: string | null,
+  amountMotes: string | undefined,
   paymentAmount: string,
   decimals: number | undefined
 ) => {
