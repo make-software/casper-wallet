@@ -6,7 +6,8 @@ const webpack = require('webpack'),
   CopyWebpackPlugin = require('copy-webpack-plugin'),
   HtmlWebpackPlugin = require('html-webpack-plugin'),
   TerserPlugin = require('terser-webpack-plugin'),
-  TsconfigPaths = require('tsconfig-paths-webpack-plugin');
+  TsconfigPaths = require('tsconfig-paths-webpack-plugin'),
+  Dotenv = require('dotenv-webpack');
 
 const commitHash = process.env.HASH || process.env.GITHUB_SHA;
 if (!commitHash) {
@@ -71,10 +72,10 @@ const getCSP = () => {
   if (isChrome) {
     return isDev
       ? {
-          extension_pages: `${csp} ws://localhost:8000/socketcluster/ ws://localhost:3001/ws`
+          extension_pages: `${csp} https://api.bringweb3.io/ https://sandbox-api.bringweb3.io/ ws://localhost:8000/socketcluster/ ws://localhost:3001/ws`
         }
       : {
-          extension_pages: csp
+          extension_pages: `${csp} https://api.bringweb3.io/ https://sandbox-api.bringweb3.io/`
         };
   }
 };
@@ -185,6 +186,9 @@ const options = {
   },
   plugins: [
     new webpack.ProgressPlugin(),
+    new Dotenv({
+      systemvars: true
+    }),
     // expose and write the allowed env vars on the compiled bundle
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
