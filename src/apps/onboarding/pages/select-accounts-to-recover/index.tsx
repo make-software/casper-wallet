@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-
-import { isEqualCaseInsensitive } from '@src/utils';
 
 import { Stepper } from '@onboarding/components/stepper';
 import { SelectAccountsToRecoverContent } from '@onboarding/pages/select-accounts-to-recover/content';
@@ -15,7 +12,6 @@ import {
 import { closeActiveTab } from '@onboarding/utils/close-active-tab';
 
 import { recoverVault } from '@background/redux/sagas/actions';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
@@ -25,9 +21,9 @@ import {
   TabFooterContainer,
   TabHeaderContainer
 } from '@libs/layout';
-import { dispatchFetchAccountBalances } from '@libs/services/balance-service';
+import { useFetchAccountsBalances } from '@libs/services/balance-service';
 import { Account, AccountListRows, KeyPair } from '@libs/types/account';
-import { Button } from '@libs/ui/components';
+import { Button, DynamicAccountsListWithSelect } from '@libs/ui/components';
 
 export const SelectAccountsToRecoverPage = () => {
   const [derivedAccounts, setDerivedAccounts] = useState<KeyPair[]>([]);
@@ -47,10 +43,6 @@ export const SelectAccountsToRecoverPage = () => {
   const { t } = useTranslation();
   const location = useTypedLocation();
 
-  const { casperWalletApiUrl } = useSelector(
-    selectApiConfigBasedOnActiveNetwork
-  );
-
   useEffect(() => {
     if (location.state?.secretPhrase) {
       const keyPairs = getKeyPairList({
@@ -63,49 +55,31 @@ export const SelectAccountsToRecoverPage = () => {
     }
   }, [location.state?.secretPhrase, setDerivedAccounts]);
 
+  const accountHashes = derivedAccounts.map(account =>
+    getAccountHashFromPublicKey(account.publicKey)
+  );
+
+  const { accountsBalances, isLoadingBalances } =
+    useFetchAccountsBalances(accountHashes);
+
   useEffect(() => {
-    if (!derivedAccounts.length) return;
+    if (!derivedAccounts.length || isLoadingBalances) return;
 
-    const hashes = derivedAccounts.reduce(
-      (previousValue, currentValue, currentIndex) => {
-        const hash = getAccountHashFromPublicKey(currentValue.publicKey);
-
-        return derivedAccounts.length === currentIndex + 1
-          ? previousValue + `${hash}`
-          : previousValue + `${hash},`;
-      },
-      ''
+    const derivedAccountsWithBalance: AccountListRows[] = derivedAccounts.map(
+      (account, index) => ({
+        ...account,
+        id: account.publicKey,
+        hidden: false,
+        derivationIndex: index,
+        name: ''
+      })
     );
 
-    dispatchFetchAccountBalances(hashes)
-      .then(({ payload }) => {
-        if ('data' in payload) {
-          const derivedAccountsWithBalance: AccountListRows[] =
-            derivedAccounts.map((account, index) => {
-              const accountWithBalance = payload.data.find(ac =>
-                isEqualCaseInsensitive(ac.public_key, account.publicKey)
-              );
+    setDerivedAccountsWithBalance(derivedAccountsWithBalance);
 
-              return {
-                ...account,
-                id: account.publicKey,
-                hidden: false,
-                derivationIndex: index,
-                name: '',
-                balance: {
-                  liquidMotes: `${accountWithBalance?.balance ?? '0'}`
-                }
-              };
-            });
-
-          setDerivedAccountsWithBalance(derivedAccountsWithBalance);
-        }
-      })
-      .finally(() => {
-        setIsLoading(false);
-        setIsLoadingMore(false);
-      });
-  }, [derivedAccounts, casperWalletApiUrl]);
+    setIsLoading(false);
+    setIsLoadingMore(false);
+  }, [accountsBalances, derivedAccounts, isLoadingBalances]);
 
   const onLoadMore = () => {
     try {
@@ -156,16 +130,19 @@ export const SelectAccountsToRecoverPage = () => {
         </TabHeaderContainer>
       )}
       renderContent={() => (
-        <SelectAccountsToRecoverContent
-          isLoading={isLoading}
-          derivedAccountsWithBalance={derivedAccountsWithBalance}
-          isLoadingMore={isLoadingMore}
-          onLoadMore={onLoadMore}
-          maxItemsToRender={maxItemsToRender}
-          setSelectedAccounts={setSelectedAccounts}
-          setIsButtonDisabled={setIsButtonDisabled}
-          selectedAccounts={selectedAccounts}
-        />
+        <SelectAccountsToRecoverContent isLoading={isLoading}>
+          <DynamicAccountsListWithSelect
+            accountsWithBalance={derivedAccountsWithBalance}
+            isLoadingMore={isLoadingMore}
+            onLoadMore={onLoadMore}
+            maxItemsToRender={maxItemsToRender}
+            setSelectedAccounts={setSelectedAccounts}
+            selectedAccounts={selectedAccounts}
+            setIsButtonDisabled={setIsButtonDisabled}
+            namePrefix="Account"
+            accountsBalances={accountsBalances}
+          />
+        </SelectAccountsToRecoverContent>
       )}
       renderFooter={() => (
         <TabFooterContainer>

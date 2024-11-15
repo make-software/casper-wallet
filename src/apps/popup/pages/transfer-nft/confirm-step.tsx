@@ -1,3 +1,4 @@
+import { INft } from 'casper-wallet-core/src/domain';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -9,7 +10,6 @@ import {
   VerticalSpaceContainer
 } from '@libs/layout';
 import { useFetchAccountsInfo } from '@libs/services/account-info';
-import { NFTTokenResult } from '@libs/services/nft-service';
 import { RecipientPlate, Typography } from '@libs/ui/components';
 import { TransactionFeePlate } from '@libs/ui/components/transaction-fee-plate/transaction-fee-plate';
 
@@ -18,7 +18,7 @@ import { NFTData } from './utils';
 
 interface ConfirmStepProps {
   nftData?: NFTData;
-  nftToken: NFTTokenResult | undefined;
+  nftToken: INft | undefined;
   recipientPublicKey: string;
   recipientName: string;
   paymentAmount: string;

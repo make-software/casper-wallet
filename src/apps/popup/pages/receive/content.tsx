@@ -1,16 +1,12 @@
 import { QRCodeSVG } from 'qrcode.react';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { shallowEqual, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { formatErc20TokenBalance } from '@popup/pages/home/components/tokens-list/utils';
+import { formatCep18Tokens } from '@popup/pages/home/components/tokens-list/utils';
 import { useTypedLocation } from '@popup/router';
 
-import {
-  selectAccountBalance,
-  selectErc20Tokens
-} from '@background/redux/account-info/selectors';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
 import { useCopyToClipboard } from '@hooks/use-copy-to-clipboard';
@@ -22,6 +18,8 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
+import { useFetchCep18Tokens } from '@libs/services/cep18-service';
 import { ActiveAccountPlate, Tile, Typography } from '@libs/ui/components';
 import { motesToCSPR } from '@libs/ui/utils';
 
@@ -57,22 +55,24 @@ export const ReceivePageContent = () => {
     symbol: location?.state?.tokenData?.symbol ?? ''
   });
 
-  const csprBalance = useSelector(selectAccountBalance, shallowEqual);
-  const tokens = useSelector(selectErc20Tokens, shallowEqual);
+  const { accountBalance } = useFetchWalletBalance();
+  const { cep18Tokens } = useFetchCep18Tokens();
 
   useEffect(() => {
     if (tokenData?.symbol === 'CSPR') {
       const balance =
-        (csprBalance.liquidMotes && motesToCSPR(csprBalance.liquidMotes)) ||
+        (accountBalance.liquidBalance &&
+          motesToCSPR(accountBalance.liquidBalance)) ||
         '0';
       setTokenData(prev => ({ ...prev, balance }));
     } else {
-      const erc20Tokens = formatErc20TokenBalance(tokens);
+      const formatedCep18Tokens = formatCep18Tokens(cep18Tokens);
       const balance =
-        erc20Tokens?.find(t => t?.symbol === tokenData?.symbol)?.amount ?? '0';
+        formatedCep18Tokens?.find(t => t?.symbol === tokenData?.symbol)
+          ?.amount ?? '0';
       setTokenData(prev => ({ ...prev, balance }));
     }
-  }, [csprBalance.liquidMotes, tokenData?.symbol, tokens]);
+  }, [accountBalance.liquidBalance, tokenData?.symbol, cep18Tokens]);
 
   return (
     <ContentContainer>

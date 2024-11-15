@@ -1,3 +1,4 @@
+import { QueryClientProvider } from '@tanstack/react-query';
 import React, { Suspense, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
@@ -14,6 +15,7 @@ import { onboardingAppInit } from '@background/redux/windowManagement/actions';
 
 import '@libs/i18n/i18n';
 import { ErrorBoundary } from '@libs/layout';
+import { newQueryClient } from '@libs/services/query-client';
 import { GlobalStyle, lightTheme } from '@libs/ui';
 
 const Tree = () => {
@@ -37,9 +39,11 @@ const Tree = () => {
       <ThemeProvider theme={lightTheme}>
         <GlobalStyle />
         <ReduxProvider store={store}>
-          <ErrorBoundary>
-            <AppRouter />
-          </ErrorBoundary>
+          <QueryClientProvider client={newQueryClient}>
+            <ErrorBoundary>
+              <AppRouter />
+            </ErrorBoundary>
+          </QueryClientProvider>
         </ReduxProvider>
       </ThemeProvider>
     </Suspense>

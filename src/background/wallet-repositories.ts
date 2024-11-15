@@ -1,5 +1,19 @@
 import { setupRepositories } from 'casper-wallet-core';
 
-const { deploysRepository, accountInfoRepository } = setupRepositories();
+const {
+  deploysRepository,
+  accountInfoRepository,
+  tokensRepository,
+  nftsRepository,
+  validatorsRepository,
+  onRampRepository
+} = setupRepositories();
 
-export { deploysRepository, accountInfoRepository };
+export {
+  deploysRepository,
+  accountInfoRepository,
+  tokensRepository,
+  nftsRepository,
+  validatorsRepository,
+  onRampRepository
+};

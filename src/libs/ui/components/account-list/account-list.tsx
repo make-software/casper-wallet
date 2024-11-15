@@ -21,6 +21,7 @@ import { useWindowManager } from '@hooks/use-window-manager';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { FlexColumn, SpacingSize } from '@libs/layout';
 import { useFetchAccountsInfo } from '@libs/services/account-info';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import {
   AccountListRowWithAccountHash,
   AccountListRows
@@ -56,6 +57,7 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
   const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
   const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
+  const { accountsBalances, isLoadingBalance } = useFetchWalletBalance();
 
   useEffect(() => {
     const accountListRows = sortAccounts(
@@ -82,6 +84,10 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
         const isConnected = connectedAccountNames.includes(account.name);
         const isActiveAccount = activeAccountName === account.name;
 
+        const accountLiquidBalance =
+          accountsBalances &&
+          accountsBalances[account.accountHash]?.liquidBalance;
+
         return (
           <AccountListItem
             account={account}
@@ -92,7 +98,9 @@ export const AccountList = ({ closeModal }: AccountListProps) => {
               changeActiveAccount(account.name);
               closeModal(event);
             }}
+            accountLiquidBalance={accountLiquidBalance}
             accountsInfo={accountsInfo}
+            isLoadingBalance={isLoadingBalance}
           />
         );
       }}
