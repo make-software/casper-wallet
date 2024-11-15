@@ -13,7 +13,7 @@ import {
   AuctionManagerEntryPoint,
   CasperNodeUrl,
   NetworkName,
-  ReferrerUrl,
+  REFERRER_URL,
   STAKE_COST_MOTES,
   TRANSFER_COST_MOTES
 } from '@src/constants';
@@ -51,7 +51,7 @@ export const getDateForDeploy = async (nodeUrl: CasperNodeUrl) => {
     const casperNodeTimestamp: ICasperNodeStatusResponse = await fetch(
       `${nodeUrl}/info_get_status`,
       {
-        referrer: ReferrerUrl
+        referrer: REFERRER_URL
       }
     ).then(toJson);
 
@@ -274,7 +274,7 @@ export const sendSignDeploy = (
 
   return fetch(nodeUrl, {
     method: 'POST',
-    referrer: ReferrerUrl,
+    referrer: REFERRER_URL,
     body: JSON.stringify({
       jsonrpc: '2.0',
       method: 'account_put_deploy',

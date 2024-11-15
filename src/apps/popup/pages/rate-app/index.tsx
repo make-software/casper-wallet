@@ -95,6 +95,7 @@ export const RateAppPage = () => {
           dispatchToMainStore(ratedInStoreChanged(true));
 
           window.open(RateAppLinks[browser], '_blank');
+          navigate(RouterPath.Home);
         }}
       >
         <Trans t={t}>Leave a review</Trans>
@@ -111,6 +112,7 @@ export const RateAppPage = () => {
             dispatchToMainStore(askForReviewAfterChanged(datePlusFourMonth));
 
             window.open('https://t.me/CSPRhub/4689', '_blank');
+            navigate(RouterPath.Home);
           }}
         >
           <Trans t={t}>Get in touch</Trans>

@@ -21,6 +21,16 @@ export const STAKE_COST_MOTES = '2500000000'; // 2.5 CSPR
 export const DELEGATION_MIN_AMOUNT_MOTES = '500000000000'; // 500 CSPR
 export const MAX_DELEGATORS = 1200;
 
+export const USER_GUIDES_URL = 'https://casperwallet.io/user-guide';
+export const SHARE_FEEDBACK_URL =
+  'https://casper-wallet.canny.io/feature-requests';
+export const ABOUT_US_URL = 'https://make.services';
+export const TERMS_URLS = {
+  tos: 'https://www.casperwallet.io/tos',
+  privacy: 'https://www.casperwallet.io/privacy'
+};
+export const REFERRER_URL = 'https://casperwallet.io';
+
 export const getBlockExplorerAccountUrl = (
   casperLiveUrl: string,
   publicKey: string
@@ -66,17 +76,10 @@ export enum Browser {
   Edge = 'edge'
 }
 
-export enum TermsLink {
-  Tos = 'https://www.casperwallet.io/tos',
-  Privacy = 'https://www.casperwallet.io/privacy'
-}
-
 export enum CasperNodeUrl {
   MainnetUrl = 'https://node.cspr.cloud/rpc',
   TestnetUrl = 'https://node.testnet.cspr.cloud/rpc'
 }
-
-export const ReferrerUrl = 'https://casperwallet.io';
 
 export enum NetworkName {
   Mainnet = 'casper',
