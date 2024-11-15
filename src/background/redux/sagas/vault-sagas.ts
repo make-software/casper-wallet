@@ -1,5 +1,6 @@
 import { put, select, takeLatest } from 'redux-saga/effects';
 import { getType } from 'typesafe-actions';
+import { alarms } from 'webextension-polyfill';
 
 import { getUrlOrigin } from '@src/utils';
 
@@ -24,7 +25,6 @@ import { Account } from '@libs/types/account';
 import { accountInfoReset } from '../account-info/actions';
 import { keysUpdated } from '../keys/actions';
 import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
-import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
 import { loginRetryCountReseted } from '../login-retry-count/actions';
 import {
   encryptionKeyHashCreated,
@@ -234,39 +234,35 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
 }
 
 /**
- *
+ * This saga function is responsible for managing the vault timeout and locking mechanism.
+ * It checks if the vault exists and is not locked, retrieves the vault timeout duration setting,
+ * calculates the timeout duration value based on the setting, and creates an alarm to lock the vault.
+ * If an error occurs during the execution, it logs the error.
  */
 function* timeoutCounterSaga() {
-  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
   try {
+    // Check if the vault exists and is not locked
     const vaultDoesExist = yield* sagaSelect(selectVaultCipherDoesExist);
     const vaultIsLocked = yield* sagaSelect(selectVaultIsLocked);
-    const vaultLastActivityTime = yield* sagaSelect(
-      selectVaultLastActivityTime
-    );
+
+    // Get the vault timeout duration setting
     const vaultTimeoutDurationSetting = yield* sagaSelect(
       selectTimeoutDurationSetting
     );
+
+    // Calculate the timeout duration value based on the setting
     const timeoutDurationValue =
       MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
 
-    if (vaultDoesExist && !vaultIsLocked && vaultLastActivityTime) {
-      const currentTime = Date.now();
-      const timeoutExpired =
-        currentTime - vaultLastActivityTime >= timeoutDurationValue;
-
-      if (timeoutExpired) {
-        yield put(lockVault());
-      } else {
-        yield* sagaCall(delay, timeoutDurationValue);
-        yield put(lockVault());
-      }
+    // If the vault exists and is not locked, create an alarm to lock the vault
+    if (vaultDoesExist && !vaultIsLocked) {
+      alarms.create('vaultLock', {
+        delayInMinutes: timeoutDurationValue
+      });
     }
   } catch (err) {
-    console.error(err);
-  } finally {
-    //
+    // Log any errors that occur during the execution of the saga
+    console.error(err, 'err');
   }
 }
 
