@@ -1,3 +1,4 @@
+import { IOnRampCountry } from 'casper-wallet-core/src/domain';
 import React, { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
@@ -9,7 +10,6 @@ import {
   SpacingSize
 } from '@libs/layout';
 import { useFetchWalletBalance } from '@libs/services/balance-service';
-import { ResponseCountryPropsWithId } from '@libs/services/buy-cspr-service/types';
 import {
   ActiveAccountPlate,
   Input,
@@ -25,20 +25,22 @@ import { ListRow } from './components/list-row';
 import { sortCountries } from './utils';
 
 interface CountryProps {
-  availableCountries: ResponseCountryPropsWithId[];
-  setSelectedCountry: React.Dispatch<
-    React.SetStateAction<ResponseCountryPropsWithId>
-  >;
-  selectedCountry: ResponseCountryPropsWithId;
+  availableCountries: IOnRampCountry[];
+  setSelectedCountry: React.Dispatch<React.SetStateAction<IOnRampCountry>>;
+  selectedCountry: IOnRampCountry;
+  isLoadingOnRampCountriesAndCurrencies: boolean;
 }
+
+type ExtendedOnRampCountry = IOnRampCountry & { id: number };
 
 export const Country = ({
   availableCountries,
   setSelectedCountry,
-  selectedCountry
+  selectedCountry,
+  isLoadingOnRampCountriesAndCurrencies
 }: CountryProps) => {
   const [sortedCountries, setSortedCountries] = useState<
-    ResponseCountryPropsWithId[]
+    ExtendedOnRampCountry[]
   >([]);
   const { t } = useTranslation();
 
@@ -54,11 +56,16 @@ export const Country = ({
   useEffect(() => {
     const sortedCountries = sortCountries(
       availableCountries,
-      selectedCountry.code
-    ).filter(
-      country =>
-        country?.name.toLowerCase().includes(inputValue?.toLowerCase() || '')
-    );
+      selectedCountry?.code
+    )
+      .filter(
+        country =>
+          country?.name.toLowerCase().includes(inputValue?.toLowerCase() || '')
+      )
+      .map((country, index) => ({
+        ...country,
+        id: index
+      }));
 
     setSortedCountries(sortedCountries);
   }, [availableCountries, inputValue, selectedCountry]);
@@ -92,7 +99,7 @@ export const Country = ({
               rows={sortedCountries}
               height={280}
               renderRow={country => {
-                const isSelected = selectedCountry.code === country.code;
+                const isSelected = selectedCountry?.code === country?.code;
 
                 return (
                   <ListRow
@@ -119,6 +126,9 @@ export const Country = ({
           <CountryRow
             country={selectedCountry}
             onClick={() => setValue('countryNameSearch', '')}
+            isLoadingOnRampCountriesAndCurrencies={
+              isLoadingOnRampCountriesAndCurrencies
+            }
           />
         )}
         loading={!sortedCountries.length}
