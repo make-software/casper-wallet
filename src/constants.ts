@@ -4,7 +4,6 @@ export const BALANCE_REFRESH_RATE = 15 * SECOND;
 export const CURRENCY_REFRESH_RATE = 30 * SECOND;
 export const TOKENS_REFRESH_RATE = 15 * SECOND;
 export const NFT_TOKENS_REFRESH_RATE = 60 * SECOND;
-export const ACCOUNT_CASPER_ACTIVITY_REFRESH_RATE = 30 * SECOND;
 export const VALIDATORS_REFRESH_RATE = 30 * SECOND;
 export const PENDING_DEPLOY_REFETCH_INTERVAL = 5 * SECOND;
 export const DEPLOY_DETAILS_REFRESH_RATE = 30 * SECOND;
@@ -63,16 +62,6 @@ export const ledgerSupportLink =
 export enum CasperLiveUrl {
   MainnetUrl = 'https://cspr.live',
   TestnetUrl = 'https://testnet.cspr.live'
-}
-
-export enum CasperClarityApiUrl {
-  MainnetUrl = 'https://event-store-api-clarity-mainnet.make.services',
-  TestnetUrl = 'https://event-store-api-clarity-testnet.make.services'
-}
-
-export enum CasperWalletApiUrl {
-  MainnetUrl = 'https://api.mainnet.casperwallet.io',
-  TestnetUrl = 'https://api.testnet.casperwallet.io'
 }
 
 export enum NetworkSetting {

@@ -1,4 +1,6 @@
 import { DeployUtil } from 'casper-js-sdk';
+import { formatNumber } from 'casper-wallet-core';
+import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -60,7 +62,6 @@ import {
   sendSignDeploy,
   signDeploy
 } from '@libs/services/deployer-service';
-import { ValidatorResultWithId } from '@libs/services/validators-service/types';
 import {
   Button,
   HomePageTabsId,
@@ -72,7 +73,7 @@ import {
 } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useStakesForm } from '@libs/ui/forms/stakes-form';
-import { CSPRtoMotes, formatNumber, motesToCSPR } from '@libs/ui/utils';
+import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils';
 
 const ScrollContainer = styled(VerticalSpaceContainer)<{
   isHidden: boolean;
@@ -97,11 +98,8 @@ export const StakesPage = () => {
   const [validatorPublicKey, setValidatorPublicKey] = useState('');
   const [newValidatorPublicKey, setNewValidatorPublicKey] = useState('');
   const [inputAmountCSPR, setInputAmountCSPR] = useState('');
-  const [validator, setValidator] = useState<ValidatorResultWithId | null>(
-    null
-  );
-  const [newValidator, setNewValidator] =
-    useState<ValidatorResultWithId | null>(null);
+  const [validator, setValidator] = useState<ValidatorDto | null>(null);
+  const [newValidator, setNewValidator] = useState<ValidatorDto | null>(null);
   const [stakeAmountMotes, setStakeAmountMotes] = useState('');
 
   const activeAccount = useSelector(selectVaultActiveAccount);
@@ -123,19 +121,18 @@ export const StakesPage = () => {
     useStakeType();
 
   const hasDelegationToSelectedValidator = undelegateValidatorList?.some(
-    accountDelegation => accountDelegation.public_key === validator?.public_key
+    accountDelegation => accountDelegation.publicKey === validator?.publicKey
   );
   const hasDelegationToSelectedNewValidator = undelegateValidatorList?.some(
-    accountDelegation =>
-      accountDelegation.public_key === newValidator?.public_key
+    accountDelegation => accountDelegation.publicKey === newValidator?.publicKey
   );
 
   const { amountForm, validatorForm, newValidatorForm } = useStakesForm(
     accountBalance.liquidBalance,
     stakeType,
     stakeAmountMotes,
-    validator?.delegators_number,
-    newValidator?.delegators_number,
+    validator?.delegatorsNumber,
+    newValidator?.delegatorsNumber,
     hasDelegationToSelectedValidator,
     hasDelegationToSelectedNewValidator
   );

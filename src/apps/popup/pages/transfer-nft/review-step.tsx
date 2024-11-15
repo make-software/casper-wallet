@@ -1,3 +1,4 @@
+import { INft } from 'casper-wallet-core/src/domain';
 import React from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
@@ -9,7 +10,6 @@ import {
   VerticalSpaceContainer
 } from '@libs/layout';
 import { useFetchWalletBalance } from '@libs/services/balance-service';
-import { NFTTokenResult } from '@libs/services/nft-service';
 import { Input, Typography } from '@libs/ui/components';
 import { TransferNftAmountFormValues } from '@libs/ui/forms/transfer-nft';
 import { formatFiatAmount, handleNumericInput } from '@libs/ui/utils';
@@ -18,7 +18,7 @@ import { NFTPlate } from './components/nft-plate';
 import { NFTData } from './utils';
 
 interface ReviewStepProps {
-  nftToken: NFTTokenResult | undefined;
+  nftToken: INft | undefined;
   haveReverseOwnerLookUp: boolean;
   amountForm: UseFormReturn<TransferNftAmountFormValues>;
   nftData?: NFTData;

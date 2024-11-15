@@ -1,4 +1,3 @@
-import { CasperNetwork } from 'casper-wallet-core/src/domain/common/common';
 import { RootAction, getType } from 'typesafe-actions';
 import {
   Tabs,
@@ -30,9 +29,6 @@ import {
 } from '@background/open-onboarding-flow';
 import {
   accountInfoReset,
-  accountNftTokensAdded,
-  accountNftTokensCountChanged,
-  accountNftTokensUpdated,
   accountPendingDeployHashesChanged,
   accountPendingDeployHashesRemove,
   accountTrackingIdOfSentNftTokensChanged,
@@ -106,18 +102,6 @@ import { SiteNotConnectedError, WalletLockedError } from '@content/sdk-errors';
 import { sdkEvent } from '@content/sdk-event';
 import { SdkMethod, isSDKMethod, sdkMethod } from '@content/sdk-method';
 
-import { fetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import {
-  fetchOnRampOptionGet,
-  fetchOnRampOptionPost,
-  fetchOnRampSelectionPost
-} from '@libs/services/buy-cspr-service';
-import { fetchNftTokens } from '@libs/services/nft-service';
-import {
-  fetchAuctionValidators,
-  fetchValidatorsDetailsData
-} from '@libs/services/validators-service';
-
 import {
   CannotGetActiveAccountError,
   CannotGetSenderOriginError
@@ -159,15 +143,10 @@ import {
   vaultSettingsReseted
 } from './redux/settings/actions';
 import {
-  selectActiveNetworkSetting,
-  selectApiConfigBasedOnActiveNetwork
-} from './redux/settings/selectors';
-import {
   vaultCipherCreated,
   vaultCipherReseted
 } from './redux/vault-cipher/actions';
 import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
-import { ServiceMessage, serviceMessage } from './service-message';
 import { emitSdkEventToActiveTabsWithOrigin } from './utils';
 // to resolve all repositories
 import './wallet-repositories';
@@ -287,10 +266,7 @@ tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 runtime.onMessage.addListener(
-  async (
-    action: RootAction | SdkMethod | ServiceMessage | popupStateUpdated,
-    sender
-  ) => {
+  async (action: RootAction | SdkMethod | popupStateUpdated, sender) => {
     const store = await getExistingMainStoreSingletonOrInit();
 
     return new Promise(async (sendResponse, sendError) => {
@@ -602,9 +578,6 @@ runtime.onMessage.addListener(
           case getType(accountInfoReset):
           case getType(accountPendingDeployHashesChanged):
           case getType(accountPendingDeployHashesRemove):
-          case getType(accountNftTokensAdded):
-          case getType(accountNftTokensUpdated):
-          case getType(accountNftTokensCountChanged):
           case getType(accountTrackingIdOfSentNftTokensChanged):
           case getType(accountTrackingIdOfSentNftTokensRemoved):
           case getType(newContactAdded):
@@ -628,135 +601,6 @@ runtime.onMessage.addListener(
           case getType(backgroundEvent.popupStateUpdated):
             // do nothing
             return;
-
-          // SERVICE MESSAGE HANDLERS
-          case getType(serviceMessage.fetchExtendedDeploysInfoRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            const network = selectActiveNetworkSetting(store.getState());
-
-            try {
-              const data = await fetchExtendedDeploysInfo({
-                deployHash: action.payload.deployHash,
-                casperClarityApiUrl,
-                publicKey: action.payload.publicKey,
-                network: network.toLowerCase() as CasperNetwork
-              });
-
-              return sendResponse(
-                serviceMessage.fetchExtendedDeploysInfoResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchNftTokensRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchNftTokens({
-                casperClarityApiUrl,
-                accountHash: action.payload.accountHash,
-                page: action.payload.page
-              });
-
-              return sendResponse(serviceMessage.fetchNftTokensResponse(data));
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchAuctionValidatorsRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchAuctionValidators({
-                casperClarityApiUrl
-              });
-
-              return sendResponse(
-                serviceMessage.fetchAuctionValidatorsResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchValidatorsDetailsDataRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchValidatorsDetailsData({
-                casperClarityApiUrl,
-                publicKey: action.payload.publicKey
-              });
-
-              return sendResponse(
-                serviceMessage.fetchValidatorsDetailsDataResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchOnRampGetOptionRequest): {
-            try {
-              const data = await fetchOnRampOptionGet();
-
-              return sendResponse(
-                serviceMessage.fetchOnRampGetOptionResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchOnRampPostOptionRequest): {
-            try {
-              const data = await fetchOnRampOptionPost(action.payload);
-
-              return sendResponse(
-                serviceMessage.fetchOnRampPostOptionResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchOnRampPostSelectionRequest): {
-            try {
-              const data = await fetchOnRampSelectionPost(action.payload);
-
-              return sendResponse(
-                serviceMessage.fetchOnRampPostSelectionResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
 
           // TODO: All below should be removed when Import Account is integrated with window
           case 'check-secret-key-exist' as any: {
