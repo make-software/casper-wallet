@@ -1,15 +1,7 @@
 import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-
-import {
-  selectAccountNftTokens,
-  selectAccountNftTokensCount
-} from '@background/redux/account-info/selectors';
-
-import { useFetchNftTokens } from '@hooks/use-fetch-nft-tokens';
 
 import {
   BorderContainer,
@@ -18,6 +10,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { useFetchNftTokens } from '@libs/services/nft-service';
 import { Skeleton, Tile, Typography } from '@libs/ui/components';
 
 import { NftTokenCard } from './nft-token-card';
@@ -38,15 +31,18 @@ const Container = styled(CenteredFlexRow)`
 export const NftList = () => {
   const { t } = useTranslation();
 
-  const nftTokens = useSelector(selectAccountNftTokens);
-  const nftTokensCount = useSelector(selectAccountNftTokensCount);
-
-  const { loadMoreNftTokens, loading, hasNextPage } = useFetchNftTokens();
+  const {
+    nftTokens,
+    isNftsLoading,
+    hasNftsNextPage,
+    fetchNftsNextPage,
+    nftTokensCount
+  } = useFetchNftTokens();
 
   const [sentryRef] = useInfiniteScroll({
-    loading,
-    hasNextPage,
-    onLoadMore: loadMoreNftTokens,
+    loading: isNftsLoading,
+    hasNextPage: hasNftsNextPage,
+    onLoadMore: fetchNftsNextPage,
     delayInMs: 0
   });
 
@@ -83,31 +79,30 @@ export const NftList = () => {
         </TotalNftValueContainer>
       </BorderContainer>
 
-      {nftTokens != null && nftTokens.length > 0 && (
+      {nftTokens.length > 0 && (
         <NftListContainer wrap="wrap">
           {nftTokens.map(nftToken => (
             <NftTokenCard
               nftToken={nftToken}
-              key={nftToken.tracking_id}
+              key={nftToken.trackingId}
               onClick={setNftTokenYPosition}
             />
           ))}
         </NftListContainer>
       )}
 
-      {(loading || hasNextPage) && (
+      {(isNftsLoading || hasNftsNextPage) && (
         <NftListContainer ref={sentryRef}>
           <Skeleton height={145} width={145} />
           <Skeleton height={145} width={145} />
         </NftListContainer>
       )}
 
-      {(nftTokens == null || nftTokens.length === 0) && !loading && (
+      {nftTokens.length === 0 && !isNftsLoading && (
         <VerticalSpaceContainer top={SpacingSize.None}>
           <Container>
             <Typography type="body" color="contentSecondary">
               {nftTokens?.length === 0 && <Trans t={t}>No NFT tokens</Trans>}
-              {nftTokens == null && <Trans t={t}>Something went wrong</Trans>}
             </Typography>
           </Container>
         </VerticalSpaceContainer>

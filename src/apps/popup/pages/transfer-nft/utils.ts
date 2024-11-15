@@ -1,4 +1,5 @@
 import { CLKeyParameters, CLValueBuilder, RuntimeArgs } from 'casper-js-sdk';
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 
 import {
   NFT_CEP47_PAYMENT_AMOUNT_AVERAGE_MOTES,
@@ -24,7 +25,7 @@ export type TransferArgs = {
 } & TokenArgs;
 
 export const getDefaultPaymentAmountBasedOnNftTokenStandard = (
-  tokenStandard: NFTTokenStandard | ''
+  tokenStandard: string | ''
 ) => {
   switch (tokenStandard) {
     case NFTTokenStandard.CEP47:
@@ -65,7 +66,7 @@ export const getRuntimeArgsForCep47Transfer = ({
   });
 
 export const getRuntimeArgs = (
-  tokenStandard: NFTTokenStandard | '',
+  tokenStandard: string | '',
   args: TransferArgs
 ) => {
   switch (tokenStandard) {
@@ -95,6 +96,6 @@ export enum TransferNFTSteps {
 }
 
 export interface NFTData {
-  contentType: string;
-  url?: string;
+  contentType?: string;
+  url?: Maybe<string>;
 }

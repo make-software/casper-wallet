@@ -1,7 +1,7 @@
 import {
-  ResponseCountryPropsWithId,
-  ResponseCurrencyProps
-} from '@libs/services/buy-cspr-service/types';
+  IOnRampCountry,
+  IOnRampCurrencyItem
+} from 'casper-wallet-core/src/domain';
 
 export enum BuyCSPRSteps {
   Country = 'country',
@@ -11,9 +11,9 @@ export enum BuyCSPRSteps {
 }
 
 export function sortCountries(
-  availableCountries: ResponseCountryPropsWithId[],
+  availableCountries: IOnRampCountry[],
   selectedCountryCode: string
-): ResponseCountryPropsWithId[] {
+): IOnRampCountry[] {
   const copiedCountries = [...availableCountries];
 
   return copiedCountries.sort((a, b) => {
@@ -28,7 +28,7 @@ export function sortCountries(
 }
 
 export const sortCurrencies = (
-  currencies: ResponseCurrencyProps[],
+  currencies: IOnRampCurrencyItem[],
   selectedCurrencyCode: string
 ) => {
   const copiedCurrencies = [...currencies];

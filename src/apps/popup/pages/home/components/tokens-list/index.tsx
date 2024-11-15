@@ -5,12 +5,12 @@ import styled from 'styled-components';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { TokenType, useCasperToken } from '@hooks/use-casper-token';
-import { useFetchErc20Tokens } from '@hooks/use-fetch-erc20-tokens';
 
 import { SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
+import { useFetchCep18Tokens } from '@libs/services/cep18-service';
 import { List, TokenPlate, Typography } from '@libs/ui/components';
 
-import { formatErc20TokenBalance } from './utils';
+import { formatCep18Tokens } from './utils';
 
 const TotalValueContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;
@@ -25,12 +25,12 @@ export const TokensList = () => {
   const [totalAmountFiat, setTotalAmountFiat] = useState<string | null>(null);
 
   const casperToken = useCasperToken();
-  const erc20Tokens = useFetchErc20Tokens();
+  const { cep18Tokens } = useFetchCep18Tokens();
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
   useEffect(() => {
-    const erc20TokensList = formatErc20TokenBalance(erc20Tokens);
+    const formatedCep18Tokens = formatCep18Tokens(cep18Tokens);
 
     const tokensList: TokenType[] = [];
 
@@ -39,12 +39,12 @@ export const TokensList = () => {
       setTotalAmountFiat(casperToken.amountFiat);
     }
 
-    if (erc20TokensList) {
-      tokensList.push(...erc20TokensList);
+    if (formatedCep18Tokens) {
+      tokensList.push(...formatedCep18Tokens);
     }
 
     setTokensList(tokensList);
-  }, [casperToken, erc20Tokens]);
+  }, [casperToken, cep18Tokens]);
 
   useEffect(() => {
     const container = document.querySelector('#ms-container');

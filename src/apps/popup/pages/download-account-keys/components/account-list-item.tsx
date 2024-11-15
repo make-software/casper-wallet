@@ -1,3 +1,5 @@
+import { formatNumber } from 'casper-wallet-core';
+import { IAccountInfo } from 'casper-wallet-core/src/domain/accountInfo';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -6,7 +8,11 @@ import {
   FlexColumn,
   SpacingSize
 } from '@libs/layout';
-import { AccountListRows, HardwareWalletType } from '@libs/types/account';
+import {
+  AccountListRowWithAccountHash,
+  AccountListRows,
+  HardwareWalletType
+} from '@libs/types/account';
 import {
   Avatar,
   Checkbox,
@@ -14,7 +20,7 @@ import {
   HashVariant,
   Typography
 } from '@libs/ui/components';
-import { formatNumber, motesToCSPR } from '@libs/ui/utils';
+import { motesToCSPR } from '@libs/ui/utils';
 
 const ListItemContainer = styled(FlexColumn)`
   min-height: 68px;
@@ -37,11 +43,13 @@ const AccountName = styled(Typography)`
 `;
 
 interface AccountListItemProps {
-  account: AccountListRows;
+  account: AccountListRowWithAccountHash<AccountListRows>;
   onClick: (event: React.MouseEvent<HTMLDivElement>) => void;
   isConnected: boolean;
   isActiveAccount: boolean;
   isSelected?: boolean;
+  accountsInfo: Record<string, IAccountInfo> | undefined;
+  accountLiquidBalance: string | undefined;
 }
 
 export const AccountListItem = ({
@@ -49,14 +57,19 @@ export const AccountListItem = ({
   onClick,
   isActiveAccount,
   isConnected,
-  isSelected
+  isSelected,
+  accountsInfo,
+  accountLiquidBalance
 }: AccountListItemProps) => {
-  const accountBalance =
-    account.balance?.liquidMotes != null
-      ? formatNumber(motesToCSPR(account.balance.liquidMotes), {
-          precision: { max: 0 }
-        })
-      : '-';
+  const accountBalance = accountLiquidBalance
+    ? formatNumber(motesToCSPR(accountLiquidBalance), {
+        precision: { max: 0 }
+      })
+    : '0';
+
+  const csprName = accountsInfo && accountsInfo[account.accountHash]?.csprName;
+  const brandingLogo =
+    accountsInfo && accountsInfo[account.accountHash]?.brandingLogo;
 
   return (
     <ListItemContainer key={account.name} onClick={onClick}>
@@ -68,23 +81,21 @@ export const AccountListItem = ({
           isConnected={isConnected}
           displayContext="accountList"
           isActiveAccount={isActiveAccount}
+          brandingLogo={brandingLogo}
         />
         <FlexColumn flexGrow={1}>
           <AlignedSpaceBetweenFlexRow gap={SpacingSize.Small}>
             <AccountName type={isActiveAccount ? 'bodySemiBold' : 'body'}>
               {account.name}
             </AccountName>
-            <Balance
-              type="bodyHash"
-              ellipsis
-              loading={!account.balance && account.balance !== 0}
-            >
+            <Balance type="bodyHash" ellipsis loading={!accountLiquidBalance}>
               {accountBalance}
             </Balance>
           </AlignedSpaceBetweenFlexRow>
           <AlignedSpaceBetweenFlexRow>
             <Hash
               value={account.publicKey}
+              csprName={csprName}
               variant={HashVariant.CaptionHash}
               truncated
               withoutTooltip

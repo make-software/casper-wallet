@@ -13,18 +13,14 @@ import {
   AuctionManagerEntryPoint,
   CasperNodeUrl,
   NetworkName,
-  ReferrerUrl,
+  REFERRER_URL,
   STAKE_COST_MOTES,
   TRANSFER_COST_MOTES
 } from '@src/constants';
 
 import { getRawPublicKey } from '@libs/entities/Account';
 import { toJson } from '@libs/services/utils';
-import {
-  Account,
-  AccountWithBalance,
-  HardwareWalletType
-} from '@libs/types/account';
+import { Account, HardwareWalletType } from '@libs/types/account';
 import { CSPRtoMotes, multiplyErc20Balance } from '@libs/ui/utils';
 
 import { ledger } from '../ledger';
@@ -55,7 +51,7 @@ export const getDateForDeploy = async (nodeUrl: CasperNodeUrl) => {
     const casperNodeTimestamp: ICasperNodeStatusResponse = await fetch(
       `${nodeUrl}/info_get_status`,
       {
-        referrer: ReferrerUrl
+        referrer: REFERRER_URL
       }
     ).then(toJson);
 
@@ -119,7 +115,7 @@ export const makeAuctionManagerDeploy = async (
 };
 
 export const makeNativeTransferDeploy = async (
-  activeAccount: AccountWithBalance,
+  activeAccount: Account,
   recipientPublicKeyHex: string,
   amountMotes: string,
   networkName: NetworkName,
@@ -278,7 +274,7 @@ export const sendSignDeploy = (
 
   return fetch(nodeUrl, {
     method: 'POST',
-    referrer: ReferrerUrl,
+    referrer: REFERRER_URL,
     body: JSON.stringify({
       jsonrpc: '2.0',
       method: 'account_put_deploy',

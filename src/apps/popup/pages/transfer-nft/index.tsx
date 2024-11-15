@@ -4,8 +4,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import { MapNFTTokenStandardToName } from '@src/utils';
-
 import {
   TransferNFTSteps,
   getDefaultPaymentAmountBasedOnNftTokenStandard,
@@ -17,10 +15,6 @@ import {
   accountPendingDeployHashesChanged,
   accountTrackingIdOfSentNftTokensChanged
 } from '@background/redux/account-info/actions';
-import {
-  selectAccountBalance,
-  selectAccountNftTokens
-} from '@background/redux/account-info/selectors';
 import { selectAllContactsPublicKeys } from '@background/redux/contacts/selectors';
 import {
   ledgerDeployChanged,
@@ -52,11 +46,13 @@ import {
   SpacingSize,
   createErrorLocationState
 } from '@libs/layout';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import {
   makeNFTDeploy,
   sendSignDeploy,
   signDeploy
 } from '@libs/services/deployer-service';
+import { useFetchNftTokens } from '@libs/services/nft-service';
 import {
   Button,
   HomePageTabsId,
@@ -86,8 +82,6 @@ export const TransferNftPage = () => {
 
   const { contractPackageHash, tokenId } = useParams();
 
-  const nftTokens = useSelector(selectAccountNftTokens);
-  const csprBalance = useSelector(selectAccountBalance);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isActiveAccountFromLedger = useSelector(
     selectIsActiveAccountFromLedger
@@ -99,6 +93,9 @@ export const TransferNftPage = () => {
   const ratedInStore = useSelector(selectRatedInStore);
   const askForReviewAfter = useSelector(selectAskForReviewAfter);
 
+  const { accountBalance } = useFetchWalletBalance();
+  const { nftTokens } = useFetchNftTokens();
+
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
   const location = useTypedLocation();
@@ -109,8 +106,8 @@ export const TransferNftPage = () => {
     () =>
       nftTokens?.find(
         token =>
-          token.token_id === tokenId &&
-          token.contract_package_hash === contractPackageHash
+          token.tokenId === tokenId &&
+          token.contractPackageHash === contractPackageHash
       ),
     [contractPackageHash, nftTokens, tokenId]
   );
@@ -122,14 +119,12 @@ export const TransferNftPage = () => {
   }, [navigate, nftToken]);
 
   useEffect(() => {
-    if (nftToken?.contract_package?.metadata?.owner_reverse_lookup_mode) {
+    if (nftToken?.owner_reverse_lookup_mode) {
       setHaveReverseOwnerLookUp(true);
     }
   }, [nftToken]);
 
-  const tokenStandard = nftToken
-    ? MapNFTTokenStandardToName[nftToken.token_standard_id]
-    : '';
+  const tokenStandard = nftToken?.standard || '';
 
   const defaultPaymentAmount = useMemo(
     () => getDefaultPaymentAmountBasedOnNftTokenStandard(tokenStandard),
@@ -137,7 +132,7 @@ export const TransferNftPage = () => {
   );
 
   const { recipientForm, amountForm } = useTransferNftForm(
-    csprBalance.liquidMotes,
+    accountBalance.liquidBalance,
     defaultPaymentAmount
   );
 
@@ -172,7 +167,7 @@ export const TransferNftPage = () => {
       );
 
       const args = {
-        tokenId: nftToken.token_id,
+        tokenId: nftToken.tokenId,
         source: KEYS.publicKey,
         target: getRawPublicKey(recipientPublicKey)
       };
@@ -182,7 +177,7 @@ export const TransferNftPage = () => {
         CSPRtoMotes(paymentAmount),
         KEYS.publicKey,
         networkName,
-        nftToken?.contract_package_hash!,
+        nftToken?.contractPackageHash!,
         nodeUrl
       );
 
@@ -197,7 +192,7 @@ export const TransferNftPage = () => {
 
             dispatchToMainStore(
               accountTrackingIdOfSentNftTokensChanged({
-                trackingId: nftToken.tracking_id,
+                trackingId: nftToken.trackingId,
                 deployHash
               })
             );
@@ -254,7 +249,7 @@ export const TransferNftPage = () => {
     );
 
     const args = {
-      tokenId: nftToken.token_id,
+      tokenId: nftToken.tokenId,
       source: KEYS.publicKey,
       target: getRawPublicKey(recipientPublicKey)
     };
@@ -264,7 +259,7 @@ export const TransferNftPage = () => {
       CSPRtoMotes(paymentAmount),
       KEYS.publicKey,
       networkName,
-      nftToken?.contract_package_hash!,
+      nftToken?.contractPackageHash!,
       nodeUrl
     );
 

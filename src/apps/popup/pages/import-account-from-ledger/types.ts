@@ -1,6 +1,6 @@
-import { AccountWithBalance } from '@libs/types/account';
+import { Account } from '@libs/types/account';
 
 export type ILedgerAccountListItem = Omit<
-  AccountWithBalance,
+  Account,
   'hidden' | 'secretKey' | 'imported' | 'hardware'
 > & { id: string };

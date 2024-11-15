@@ -1,3 +1,4 @@
+import { formatNumber } from 'casper-wallet-core';
 import { IAccountInfo } from 'casper-wallet-core/src/domain/accountInfo';
 import React from 'react';
 import styled from 'styled-components';
@@ -19,7 +20,7 @@ import {
   HashVariant,
   Typography
 } from '@libs/ui/components';
-import { formatNumber, motesToCSPR } from '@libs/ui/utils';
+import { motesToCSPR } from '@libs/ui/utils';
 
 const ListItemContainer = styled(FlexColumn)`
   min-height: 68px;
@@ -56,6 +57,8 @@ interface AccountListItemProps {
   showHideAccountItem?: boolean;
   closeModal?: (e: React.MouseEvent) => void;
   accountsInfo: Record<string, IAccountInfo> | undefined;
+  accountLiquidBalance: string | undefined;
+  isLoadingBalance: boolean;
 }
 
 export const AccountListItem = ({
@@ -65,14 +68,15 @@ export const AccountListItem = ({
   isConnected,
   showHideAccountItem,
   closeModal,
-  accountsInfo
+  accountsInfo,
+  accountLiquidBalance,
+  isLoadingBalance
 }: AccountListItemProps) => {
-  const accountBalance =
-    account.balance?.liquidMotes != null
-      ? formatNumber(motesToCSPR(account.balance.liquidMotes), {
-          precision: { max: 0 }
-        })
-      : '-';
+  const accountBalance = accountLiquidBalance
+    ? formatNumber(motesToCSPR(accountLiquidBalance), {
+        precision: { max: 0 }
+      })
+    : '0';
 
   const csprName = accountsInfo && accountsInfo[account.accountHash]?.csprName;
   const brandingLogo =
@@ -106,7 +110,7 @@ export const AccountListItem = ({
             <Balance
               type="bodyHash"
               ellipsis
-              loading={!account.balance && account.balance !== 0}
+              loading={isLoadingBalance && !accountLiquidBalance}
             >
               {accountBalance}
             </Balance>
