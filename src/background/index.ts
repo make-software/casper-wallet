@@ -28,6 +28,7 @@ import {
   bringWeb3Events
 } from '@background/bring-web3-events';
 import { WindowApp } from '@background/create-open-window';
+import { initKeepAlive } from '@background/keep-alive';
 import {
   disableOnboardingFlow,
   enableOnboardingFlow,
@@ -731,6 +732,13 @@ runtime.onMessage.addListener(
             );
         }
       } else {
+        if (action === 'keepAlive') {
+          // Send an asynchronous response
+          sendResponse({ status: 'alive' });
+
+          // returning true to indicate an asynchronous response
+          return true;
+        }
         // this is added for not spamming with errors from bringweb3
         if ('from' in action) {
           // @ts-ignore
@@ -743,6 +751,10 @@ runtime.onMessage.addListener(
     });
   }
 );
+
+initKeepAlive().catch(error => {
+  console.error('Initialization of keep alive error:', error);
+});
 
 bringInitBackground({
   identifier: process.env.PLATFORM_IDENTIFIER || '', // The identifier key you obtained from Bringweb3
