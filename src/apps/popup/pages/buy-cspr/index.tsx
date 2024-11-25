@@ -5,7 +5,7 @@ import {
   IOnRampProvider,
   IProviderSelectionData
 } from 'casper-wallet-core/src/domain';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -59,6 +59,7 @@ export const BuyCSPRPage = () => {
   >([]);
   const [selectedProvider, setSelectedProvider] =
     useState<IOnRampProvider | null>(null);
+  const [providerUrl, setProviderUrl] = useState<string | null>(null);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -81,14 +82,14 @@ export const BuyCSPRPage = () => {
     getOnRampProviderLocation
   } = useGetOnRampProviders();
 
-  useEffect(() => {
-    if (onRampCountriesAndCurrenciesError) {
+  const handleError = useCallback(
+    (error: Error) => {
       navigate(
         ErrorPath,
         createErrorLocationState({
           errorHeaderText: t('Something went wrong'),
           errorContentText:
-            onRampCountriesAndCurrenciesError.message ||
+            error.message ||
             t(
               'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
             ),
@@ -96,6 +97,13 @@ export const BuyCSPRPage = () => {
           errorRedirectPath: RouterPath.Home
         })
       );
+    },
+    [navigate, t]
+  );
+
+  useEffect(() => {
+    if (onRampCountriesAndCurrenciesError) {
+      handleError(onRampCountriesAndCurrenciesError);
     }
     if (isLoadingOnRampCountriesAndCurrencies) return;
 
@@ -111,6 +119,7 @@ export const BuyCSPRPage = () => {
     defaultCountry,
     defaultCurrency,
     defaultDepositAmount,
+    handleError,
     isLoadingOnRampCountriesAndCurrencies,
     navigate,
     onRampCountriesAndCurrenciesError,
@@ -138,26 +147,12 @@ export const BuyCSPRPage = () => {
           setBuyCSPRStep(BuyCSPRSteps.Provider);
         }
       },
-      onError: error => {
-        navigate(
-          ErrorPath,
-          createErrorLocationState({
-            errorHeaderText: t('Something went wrong'),
-            errorContentText:
-              error.message ||
-              t(
-                'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-              ),
-            errorPrimaryButtonLabel: t('Close'),
-            errorRedirectPath: RouterPath.Home
-          })
-        );
-      }
+      onError: handleError
     });
   };
 
-  const handleSubmit = () => {
-    if (activeAccount && selectedProvider) {
+  useEffect(() => {
+    if (activeAccount?.publicKey && selectedProvider?.providerKey) {
       const data: IProviderSelectionData = {
         account: activeAccount.publicKey,
         fiatCurrency: selectedCurrency.code,
@@ -169,26 +164,23 @@ export const BuyCSPRPage = () => {
 
       getOnRampProviderLocation(data, {
         onSuccess: providerLocation => {
-          window.open(providerLocation.location, '_blank');
+          setProviderUrl(providerLocation.location);
         },
-        onError: error => {
-          console.error(error.message, 'provider selection request failed');
-
-          navigate(
-            ErrorPath,
-            createErrorLocationState({
-              errorHeaderText: t('Something went wrong'),
-              errorContentText:
-                error.message ||
-                t(
-                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                ),
-              errorPrimaryButtonLabel: t('Close'),
-              errorRedirectPath: RouterPath.Home
-            })
-          );
-        }
+        onError: handleError
       });
+    }
+  }, [
+    activeAccount?.publicKey,
+    selectedProvider?.providerKey,
+    selectedCurrency.code,
+    fiatAmount,
+    getOnRampProviderLocation,
+    handleError
+  ]);
+
+  const handleSubmit = () => {
+    if (providerUrl) {
+      window.open(providerUrl, '_blank');
     }
   };
 
