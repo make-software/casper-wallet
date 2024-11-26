@@ -12,7 +12,6 @@
     "storage",
     "tabs",
     "declarativeNetRequest",
-    "alarms",
     "https://image-proxy-cdn.make.services/*",
     "https://api.testnet.casperwallet.io/*",
     "https://api.mainnet.casperwallet.io/*",

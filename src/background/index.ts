@@ -3,7 +3,6 @@ import { RootAction, getType } from 'typesafe-actions';
 import {
   Tabs,
   action,
-  alarms,
   browserAction,
   management,
   runtime,
@@ -14,6 +13,7 @@ import {
 import {
   getUrlOrigin,
   hasHttpPrefix,
+  isChromeBuild,
   isEqualCaseInsensitive
 } from '@src/utils';
 
@@ -273,16 +273,6 @@ tabs.onActivated.addListener(
 tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo && changeInfo.url && tab.windowId) {
     updateOrigin(tab.windowId);
-  }
-});
-
-// Dispatch the lockVault action when the 'vaultLock' alarm is triggered
-alarms.onAlarm.addListener(async function (alarm) {
-  const store = await getExistingMainStoreSingletonOrInit();
-
-  if (alarm.name === 'vaultLock') {
-    // Dispatch the lockVault action to the main store
-    store.dispatch(lockVault());
   }
 });
 
@@ -756,7 +746,9 @@ initKeepAlive().catch(error => {
   console.error('Initialization of keep alive error:', error);
 });
 
-bringInitBackground({
-  identifier: process.env.PLATFORM_IDENTIFIER || '', // The identifier key you obtained from Bringweb3
-  apiEndpoint: process.env.NODE_ENV === 'production' ? 'prod' : 'sandbox'
-});
+if (isChromeBuild) {
+  bringInitBackground({
+    identifier: process.env.PLATFORM_IDENTIFIER || '', // The identifier key you obtained from Bringweb3
+    apiEndpoint: process.env.NODE_ENV === 'production' ? 'prod' : 'sandbox'
+  });
+}

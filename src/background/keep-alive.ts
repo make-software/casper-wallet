@@ -1,5 +1,7 @@
 import { runtime } from 'webextension-polyfill';
 
+import { isChromeBuild } from '@src/utils';
+
 import { getExistingMainStoreSingletonOrInit } from '@background/redux/get-main-store';
 import { selectKeysDoesExist } from '@background/redux/keys/selectors';
 import { selectVaultIsLocked } from '@background/redux/session/selectors';
@@ -48,13 +50,15 @@ function keepAlive() {
 }
 
 export async function initKeepAlive() {
-  const store = await getExistingMainStoreSingletonOrInit();
+  if (isChromeBuild) {
+    const store = await getExistingMainStoreSingletonOrInit();
 
-  // Initial call to manageKeepAlive to set the initial state
-  await manageKeepAlive();
-
-  // Subscribe to store updates
-  store.subscribe(async () => {
+    // Initial call to manageKeepAlive to set the initial state
     await manageKeepAlive();
-  });
+
+    // Subscribe to store updates
+    store.subscribe(async () => {
+      await manageKeepAlive();
+    });
+  }
 }
