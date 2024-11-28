@@ -59,7 +59,12 @@ export function DeployValue({
       return <Typography type="body">{formatDate(value)}</Typography>;
     }
 
-    return <Typography type="body">{value}</Typography>;
+    return (
+      // Temporary solution. We will change it when we have the new design
+      <Typography type="body" style={{ overflowWrap: 'anywhere' }}>
+        {value}
+      </Typography>
+    );
   } else {
     // cl value args
     const { parsedValue } = getDeployParsedValue(value);
@@ -96,6 +101,11 @@ export function DeployValue({
       );
     }
 
-    return <Typography type="body">{parsedValue}</Typography>;
+    return (
+      // Temporary solution. We will change it when we have the new design
+      <Typography type="body" style={{ overflowWrap: 'anywhere' }}>
+        {parsedValue}
+      </Typography>
+    );
   }
 }
