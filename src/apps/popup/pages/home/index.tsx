@@ -66,7 +66,7 @@ export function HomePageContent() {
     if (!state?.activeTabId) {
       const container = document.querySelector('#ms-container');
 
-      container?.scrollTo(0, 0);
+      container?.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }
   }, [state?.activeTabId]);
 

@@ -29,7 +29,7 @@ export const DeploysList = () => {
       container?.scrollTo(0, Number(position));
       localStorage.removeItem('activityPlateYPosition');
     } else {
-      container?.scrollTo(0, 0);
+      container?.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }
   }, []);
 
