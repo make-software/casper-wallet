@@ -134,7 +134,7 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
               rows={connectedAccountsListItems}
               renderRow={(account, index) => {
                 const csprName =
-                  accountsInfo && accountsInfo[account.accountHash].csprName;
+                  accountsInfo && accountsInfo[account.accountHash]?.csprName;
 
                 return (
                   <ListItemContainer key={account.name}>

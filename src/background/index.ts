@@ -3,7 +3,6 @@ import { RootAction, getType } from 'typesafe-actions';
 import {
   Tabs,
   action,
-  alarms,
   browserAction,
   management,
   runtime,
@@ -14,6 +13,7 @@ import {
 import {
   getUrlOrigin,
   hasHttpPrefix,
+  isChromeBuild,
   isEqualCaseInsensitive
 } from '@src/utils';
 
@@ -28,6 +28,7 @@ import {
   bringWeb3Events
 } from '@background/bring-web3-events';
 import { WindowApp } from '@background/create-open-window';
+import { initKeepAlive } from '@background/keep-alive';
 import {
   disableOnboardingFlow,
   enableOnboardingFlow,
@@ -272,16 +273,6 @@ tabs.onActivated.addListener(
 tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo && changeInfo.url && tab.windowId) {
     updateOrigin(tab.windowId);
-  }
-});
-
-// Dispatch the lockVault action when the 'vaultLock' alarm is triggered
-alarms.onAlarm.addListener(async function (alarm) {
-  const store = await getExistingMainStoreSingletonOrInit();
-
-  if (alarm.name === 'vaultLock') {
-    // Dispatch the lockVault action to the main store
-    store.dispatch(lockVault());
   }
 });
 
@@ -731,6 +722,13 @@ runtime.onMessage.addListener(
             );
         }
       } else {
+        if (action === 'keepAlive') {
+          // Send an asynchronous response
+          sendResponse({ status: 'alive' });
+
+          // returning true to indicate an asynchronous response
+          return true;
+        }
         // this is added for not spamming with errors from bringweb3
         if ('from' in action) {
           // @ts-ignore
@@ -744,7 +742,13 @@ runtime.onMessage.addListener(
   }
 );
 
-bringInitBackground({
-  identifier: process.env.PLATFORM_IDENTIFIER || '', // The identifier key you obtained from Bringweb3
-  apiEndpoint: process.env.NODE_ENV === 'production' ? 'prod' : 'sandbox'
+initKeepAlive().catch(error => {
+  console.error('Initialization of keep alive error:', error);
 });
+
+if (isChromeBuild) {
+  bringInitBackground({
+    identifier: process.env.PLATFORM_IDENTIFIER || '', // The identifier key you obtained from Bringweb3
+    apiEndpoint: process.env.NODE_ENV === 'production' ? 'prod' : 'sandbox'
+  });
+}
