@@ -97,7 +97,7 @@ export function ConnectedSitesPage() {
               const accountHash = getAccountHashFromPublicKey(publicKey);
 
               const csprName =
-                accountsInfo && accountsInfo[accountHash].csprName;
+                accountsInfo && accountsInfo[accountHash]?.csprName;
 
               return (
                 <SiteGroupItem
