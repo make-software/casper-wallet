@@ -183,7 +183,7 @@ export function SignDeployContent({
                   }
 
                   return (
-                    <AccordionItem key={key}>
+                    <AccordionItem key={key} gap={SpacingSize.Small}>
                       <Typography type="body" color="contentSecondary">
                         {label}
                       </Typography>
