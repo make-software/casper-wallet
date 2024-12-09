@@ -48,6 +48,7 @@ export const initBringScript = () => {
       ], // A list of custom events that dispatched when the user's wallet address had changed
       theme: theme,
       text: 'lower',
+      switchWallet: false,
       darkTheme: {
         fontFamily: '"Inter", sans-serif',
         popupBg: '#18181F',
