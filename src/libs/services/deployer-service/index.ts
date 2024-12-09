@@ -239,7 +239,7 @@ export const signLedgerDeploy = async (
 
   const approval = new DeployUtil.Approval();
   approval.signer = activeAccount.publicKey;
-  approval.signature = resp.signatureHex;
+  approval.signature = resp.prefixedSignatureHex;
   deploy.approvals.push(approval);
 
   return deploy;
