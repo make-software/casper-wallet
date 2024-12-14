@@ -1,4 +1,4 @@
-import { CasperNetwork } from 'casper-wallet-core/src/domain/common/common';
+import { bringInitBackground } from '@bringweb3/chrome-extension-kit';
 import { RootAction, getType } from 'typesafe-actions';
 import {
   Tabs,
@@ -13,6 +13,7 @@ import {
 import {
   getUrlOrigin,
   hasHttpPrefix,
+  isChromeBuild,
   isEqualCaseInsensitive
 } from '@src/utils';
 
@@ -22,24 +23,19 @@ import {
   backgroundEvent,
   popupStateUpdated
 } from '@background/background-events';
+import {
+  BringWeb3Events,
+  bringWeb3Events
+} from '@background/bring-web3-events';
 import { WindowApp } from '@background/create-open-window';
+import { initKeepAlive } from '@background/keep-alive';
 import {
   disableOnboardingFlow,
   enableOnboardingFlow,
   openOnboardingUi
 } from '@background/open-onboarding-flow';
 import {
-  accountBalancesChanged,
-  accountBalancesReseted
-} from '@background/redux/account-balances/actions';
-import {
-  accountBalanceChanged,
-  accountCurrencyRateChanged,
-  accountErc20Changed,
   accountInfoReset,
-  accountNftTokensAdded,
-  accountNftTokensCountChanged,
-  accountNftTokensUpdated,
   accountPendingDeployHashesChanged,
   accountPendingDeployHashesRemove,
   accountTrackingIdOfSentNftTokensChanged,
@@ -62,11 +58,16 @@ import {
   ledgerRecipientToSaveOnSuccessChanged,
   ledgerStateCleared
 } from '@background/redux/ledger/actions';
-import { setShowCSPRNamePromotion } from '@background/redux/promotion/actions';
+import {
+  resetPromotion,
+  setShowCSPRNamePromotion
+} from '@background/redux/promotion/actions';
 import {
   askForReviewAfterChanged,
-  ratedInStoreChanged
+  ratedInStoreChanged,
+  resetRateApp
 } from '@background/redux/rate-app/actions';
+import { ThemeMode } from '@background/redux/settings/types';
 import {
   accountAdded,
   accountDisconnected,
@@ -109,24 +110,6 @@ import { SiteNotConnectedError, WalletLockedError } from '@content/sdk-errors';
 import { sdkEvent } from '@content/sdk-event';
 import { SdkMethod, isSDKMethod, sdkMethod } from '@content/sdk-method';
 
-import { fetchExtendedDeploysInfo } from '@libs/services/account-activity-service';
-import {
-  fetchAccountBalance,
-  fetchAccountBalances,
-  fetchCurrencyRate
-} from '@libs/services/balance-service';
-import {
-  fetchOnRampOptionGet,
-  fetchOnRampOptionPost,
-  fetchOnRampSelectionPost
-} from '@libs/services/buy-cspr-service';
-import { fetchErc20Tokens } from '@libs/services/erc20-service';
-import { fetchNftTokens } from '@libs/services/nft-service';
-import {
-  fetchAuctionValidators,
-  fetchValidatorsDetailsData
-} from '@libs/services/validators-service';
-
 import {
   CannotGetActiveAccountError,
   CannotGetSenderOriginError
@@ -167,17 +150,16 @@ import {
   themeModeSettingChanged,
   vaultSettingsReseted
 } from './redux/settings/actions';
-import {
-  selectActiveNetworkSetting,
-  selectApiConfigBasedOnActiveNetwork
-} from './redux/settings/selectors';
+import { selectThemeModeSetting } from './redux/settings/selectors';
 import {
   vaultCipherCreated,
   vaultCipherReseted
 } from './redux/vault-cipher/actions';
 import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
-import { ServiceMessage, serviceMessage } from './service-message';
-import { emitSdkEventToActiveTabsWithOrigin } from './utils';
+import {
+  emitSdkEventToActiveTabs,
+  emitSdkEventToActiveTabsWithOrigin
+} from './utils';
 // to resolve all repositories
 import './wallet-repositories';
 
@@ -297,7 +279,7 @@ tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 runtime.onMessage.addListener(
   async (
-    action: RootAction | SdkMethod | ServiceMessage | popupStateUpdated,
+    action: RootAction | SdkMethod | popupStateUpdated | BringWeb3Events,
     sender
   ) => {
     const store = await getExistingMainStoreSingletonOrInit();
@@ -608,15 +590,9 @@ runtime.onMessage.addListener(
           case getType(loginRetryLockoutTimeSet):
           case getType(recipientPublicKeyAdded):
           case getType(recipientPublicKeyReseted):
-          case getType(accountBalanceChanged):
-          case getType(accountCurrencyRateChanged):
           case getType(accountInfoReset):
           case getType(accountPendingDeployHashesChanged):
           case getType(accountPendingDeployHashesRemove):
-          case getType(accountErc20Changed):
-          case getType(accountNftTokensAdded):
-          case getType(accountNftTokensUpdated):
-          case getType(accountNftTokensCountChanged):
           case getType(accountTrackingIdOfSentNftTokensChanged):
           case getType(accountTrackingIdOfSentNftTokensRemoved):
           case getType(newContactAdded):
@@ -626,14 +602,14 @@ runtime.onMessage.addListener(
           case getType(contactsReseted):
           case getType(ratedInStoreChanged):
           case getType(askForReviewAfterChanged):
-          case getType(accountBalancesChanged):
-          case getType(accountBalancesReseted):
+          case getType(resetRateApp):
           case getType(ledgerNewWindowIdChanged):
           case getType(ledgerStateCleared):
           case getType(ledgerDeployChanged):
           case getType(ledgerRecipientToSaveOnSuccessChanged):
           case getType(addWatchingAccount):
           case getType(setShowCSPRNamePromotion):
+          case getType(resetPromotion):
             store.dispatch(action);
             return sendResponse(undefined);
 
@@ -641,213 +617,72 @@ runtime.onMessage.addListener(
             // do nothing
             return;
 
-          // SERVICE MESSAGE HANDLERS
-          case getType(serviceMessage.fetchBalanceRequest): {
-            const { casperWalletApiUrl, casperClarityApiUrl } =
-              selectApiConfigBasedOnActiveNetwork(store.getState());
+          case getType(bringWeb3Events.getActivePublicKey): {
+            const activeAccount = selectVaultActiveAccount(store.getState());
 
-            try {
-              const [accountData, rate] = await Promise.all([
-                fetchAccountBalance({
-                  accountHash: action.payload.accountHash,
-                  casperWalletApiUrl
-                }),
-                fetchCurrencyRate({ casperClarityApiUrl })
-              ]);
-
-              return sendResponse(
-                serviceMessage.fetchBalanceResponse({
-                  accountData: accountData?.data || null,
-                  currencyRate: rate?.data || null
-                })
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
+            return sendResponse(
+              bringWeb3Events.getActivePublicKeyResponse({
+                publicKey: activeAccount?.publicKey!
+              })
+            );
           }
 
-          case getType(serviceMessage.fetchAccountBalancesRequest): {
-            const { casperWalletApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
+          case getType(bringWeb3Events.promptLoginRequest): {
+            const isLocked = selectVaultIsLocked(store.getState());
 
-            try {
-              const data = await fetchAccountBalances({
-                accountHashes: action.payload.accountHashes,
-                casperWalletApiUrl
+            if (isLocked) {
+              windows.getCurrent().then(currentWindow => {
+                const windowWidth = currentWindow.width ?? 0;
+                const xOffset = currentWindow.left ?? 0;
+                const yOffset = currentWindow.top ?? 0;
+                const popupWidth = 360;
+                const popupHeight = 700;
+
+                windows.create({
+                  url: 'popup.html#/bring-web3-unlock',
+                  type: 'popup',
+                  height: popupHeight,
+                  width: popupWidth,
+                  left: windowWidth + xOffset - popupWidth,
+                  top: yOffset,
+                  focused: true
+                });
               });
+            } else {
+              emitSdkEventToActiveTabs(tab => {
+                if (!tab.url) {
+                  return;
+                }
 
-              return sendResponse(
-                serviceMessage.fetchAccountBalancesResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchExtendedDeploysInfoRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            const network = selectActiveNetworkSetting(store.getState());
-
-            try {
-              const data = await fetchExtendedDeploysInfo({
-                deployHash: action.payload.deployHash,
-                casperClarityApiUrl,
-                publicKey: action.payload.publicKey,
-                network: network.toLowerCase() as CasperNetwork
-              });
-
-              return sendResponse(
-                serviceMessage.fetchExtendedDeploysInfoResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchErc20TokensRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const { data: tokensList } = await fetchErc20Tokens({
-                casperClarityApiUrl,
-                accountHash: action.payload.accountHash
-              });
-
-              if (tokensList) {
-                const erc20Tokens = tokensList.map(token => ({
-                  balance: token.balance,
-                  contractHash: token.latest_contract?.contract_hash,
-                  ...(token?.contract_package ?? {})
-                }));
-
-                return sendResponse(
-                  serviceMessage.fetchErc20TokensResponse(erc20Tokens)
+                const activeAccount = selectVaultActiveAccount(
+                  store.getState()
                 );
-              } else {
-                return sendResponse(
-                  serviceMessage.fetchErc20TokensResponse([])
-                );
-              }
-            } catch (error) {
-              console.error(error);
-            }
 
-            return;
-          }
-
-          case getType(serviceMessage.fetchNftTokensRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchNftTokens({
-                casperClarityApiUrl,
-                accountHash: action.payload.accountHash,
-                page: action.payload.page
+                return sdkEvent.changedConnectedAccountEvent({
+                  isLocked: isLocked,
+                  isConnected: undefined,
+                  activeKey: activeAccount?.publicKey
+                });
               });
-
-              return sendResponse(serviceMessage.fetchNftTokensResponse(data));
-            } catch (error) {
-              console.error(error);
             }
 
-            return;
+            return sendResponse(undefined);
           }
 
-          case getType(serviceMessage.fetchAuctionValidatorsRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
+          case getType(bringWeb3Events.getTheme): {
+            const themeMode = selectThemeModeSetting(store.getState());
+
+            const isDarkMode =
+              // we can't get theme from system, so will use dark
+              themeMode === ThemeMode.SYSTEM
+                ? true
+                : themeMode === ThemeMode.DARK;
+
+            return sendResponse(
+              bringWeb3Events.getThemeResponse({
+                theme: isDarkMode ? 'dark' : 'light'
+              })
             );
-
-            try {
-              const data = await fetchAuctionValidators({
-                casperClarityApiUrl
-              });
-
-              return sendResponse(
-                serviceMessage.fetchAuctionValidatorsResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchValidatorsDetailsDataRequest): {
-            const { casperClarityApiUrl } = selectApiConfigBasedOnActiveNetwork(
-              store.getState()
-            );
-
-            try {
-              const data = await fetchValidatorsDetailsData({
-                casperClarityApiUrl,
-                publicKey: action.payload.publicKey
-              });
-
-              return sendResponse(
-                serviceMessage.fetchValidatorsDetailsDataResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchOnRampGetOptionRequest): {
-            try {
-              const data = await fetchOnRampOptionGet();
-
-              return sendResponse(
-                serviceMessage.fetchOnRampGetOptionResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchOnRampPostOptionRequest): {
-            try {
-              const data = await fetchOnRampOptionPost(action.payload);
-
-              return sendResponse(
-                serviceMessage.fetchOnRampPostOptionResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
-          }
-
-          case getType(serviceMessage.fetchOnRampPostSelectionRequest): {
-            try {
-              const data = await fetchOnRampSelectionPost(action.payload);
-
-              return sendResponse(
-                serviceMessage.fetchOnRampPostSelectionResponse(data)
-              );
-            } catch (error) {
-              console.error(error);
-            }
-
-            return;
           }
 
           // TODO: All below should be removed when Import Account is integrated with window
@@ -887,8 +722,19 @@ runtime.onMessage.addListener(
             );
         }
       } else {
-        if (action === 'ping') {
-          return;
+        if (action === 'keepAlive') {
+          // Send an asynchronous response
+          sendResponse({ status: 'alive' });
+
+          // returning true to indicate an asynchronous response
+          return true;
+        }
+        // this is added for not spamming with errors from bringweb3
+        if ('from' in action) {
+          // @ts-ignore
+          if (action.from === 'bringweb3') {
+            return;
+          }
         }
         throw Error('Background: Unknown message: ' + JSON.stringify(action));
       }
@@ -896,10 +742,13 @@ runtime.onMessage.addListener(
   }
 );
 
-// ping mechanism to keep background script from destroing wallet session when it's unlocked
-function ping() {
-  runtime.sendMessage('ping').catch(() => {
-    // ping
+initKeepAlive().catch(error => {
+  console.error('Initialization of keep alive error:', error);
+});
+
+if (isChromeBuild) {
+  bringInitBackground({
+    identifier: process.env.PLATFORM_IDENTIFIER || '', // The identifier key you obtained from Bringweb3
+    apiEndpoint: process.env.NODE_ENV === 'production' ? 'prod' : 'sandbox'
   });
 }
-setInterval(ping, 15000);

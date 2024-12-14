@@ -1,6 +1,5 @@
 import { ActionType } from 'typesafe-actions';
 
-import * as accountBalances from './account-balances/actions';
 import * as accountInfo from './account-info/actions';
 import * as activeOrigin from './active-origin/actions';
 import * as contacts from './contacts/actions';
@@ -35,7 +34,6 @@ const reduxAction = {
   accountInfo,
   contacts,
   rateApp,
-  accountBalances,
   ledger,
   promotion
 };

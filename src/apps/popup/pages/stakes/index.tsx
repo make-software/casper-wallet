@@ -1,4 +1,6 @@
 import { DeployUtil } from 'casper-js-sdk';
+import { formatNumber } from 'casper-wallet-core';
+import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -24,7 +26,6 @@ import { ValidatorDropdownInput } from '@popup/pages/stakes/validator-dropdown-i
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
-import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import { ledgerDeployChanged } from '@background/redux/ledger/actions';
 import {
   selectAskForReviewAfter,
@@ -55,12 +56,12 @@ import {
   VerticalSpaceContainer,
   createErrorLocationState
 } from '@libs/layout';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import {
   makeAuctionManagerDeploy,
   sendSignDeploy,
   signDeploy
 } from '@libs/services/deployer-service';
-import { ValidatorResultWithId } from '@libs/services/validators-service/types';
 import {
   Button,
   HomePageTabsId,
@@ -72,7 +73,7 @@ import {
 } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useStakesForm } from '@libs/ui/forms/stakes-form';
-import { CSPRtoMotes, formatNumber, motesToCSPR } from '@libs/ui/utils';
+import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils';
 
 const ScrollContainer = styled(VerticalSpaceContainer)<{
   isHidden: boolean;
@@ -97,11 +98,8 @@ export const StakesPage = () => {
   const [validatorPublicKey, setValidatorPublicKey] = useState('');
   const [newValidatorPublicKey, setNewValidatorPublicKey] = useState('');
   const [inputAmountCSPR, setInputAmountCSPR] = useState('');
-  const [validator, setValidator] = useState<ValidatorResultWithId | null>(
-    null
-  );
-  const [newValidator, setNewValidator] =
-    useState<ValidatorResultWithId | null>(null);
+  const [validator, setValidator] = useState<ValidatorDto | null>(null);
+  const [newValidator, setNewValidator] = useState<ValidatorDto | null>(null);
   const [stakeAmountMotes, setStakeAmountMotes] = useState('');
 
   const activeAccount = useSelector(selectVaultActiveAccount);
@@ -111,30 +109,30 @@ export const StakesPage = () => {
   const { networkName, nodeUrl, auctionManagerContractHash } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
-  const csprBalance = useSelector(selectAccountBalance);
   const ratedInStore = useSelector(selectRatedInStore);
   const askForReviewAfter = useSelector(selectAskForReviewAfter);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
+  const { accountBalance } = useFetchWalletBalance();
+
   const { stakeType, validatorList, undelegateValidatorList, loading } =
     useStakeType();
 
   const hasDelegationToSelectedValidator = undelegateValidatorList?.some(
-    accountDelegation => accountDelegation.public_key === validator?.public_key
+    accountDelegation => accountDelegation.publicKey === validator?.publicKey
   );
   const hasDelegationToSelectedNewValidator = undelegateValidatorList?.some(
-    accountDelegation =>
-      accountDelegation.public_key === newValidator?.public_key
+    accountDelegation => accountDelegation.publicKey === newValidator?.publicKey
   );
 
   const { amountForm, validatorForm, newValidatorForm } = useStakesForm(
-    csprBalance.liquidMotes,
+    accountBalance.liquidBalance,
     stakeType,
     stakeAmountMotes,
-    validator?.delegators_number,
-    newValidator?.delegators_number,
+    validator?.delegatorsNumber,
+    newValidator?.delegatorsNumber,
     hasDelegationToSelectedValidator,
     hasDelegationToSelectedNewValidator
   );
@@ -538,7 +536,8 @@ export const StakesPage = () => {
   if (
     (stakeType === AuctionManagerEntryPoint.undelegate ||
       stakeType === AuctionManagerEntryPoint.redelegate) &&
-    (csprBalance.delegatedMotes == null || csprBalance.delegatedMotes === '0')
+    (!accountBalance.delegatedBalance ||
+      accountBalance.delegatedBalance === '0')
   ) {
     return (
       <PopupLayout

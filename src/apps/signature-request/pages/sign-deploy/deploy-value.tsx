@@ -1,8 +1,9 @@
 import { CLValue } from 'casper-js-sdk';
+import { formatNumber } from 'casper-wallet-core';
 import React from 'react';
 
 import { Hash, HashVariant, Typography } from '@libs/ui/components';
-import { formatDate, formatNumber, motesToCSPR } from '@libs/ui/utils';
+import { formatDate, motesToCSPR } from '@libs/ui/utils';
 
 import {
   getDeployParsedValue,
@@ -58,7 +59,12 @@ export function DeployValue({
       return <Typography type="body">{formatDate(value)}</Typography>;
     }
 
-    return <Typography type="body">{value}</Typography>;
+    return (
+      // Temporary solution. We will change it when we have the new design
+      <Typography type="body" style={{ overflowWrap: 'anywhere' }}>
+        {value}
+      </Typography>
+    );
   } else {
     // cl value args
     const { parsedValue } = getDeployParsedValue(value);
@@ -95,6 +101,11 @@ export function DeployValue({
       );
     }
 
-    return <Typography type="body">{parsedValue}</Typography>;
+    return (
+      // Temporary solution. We will change it when we have the new design
+      <Typography type="body" style={{ overflowWrap: 'anywhere' }}>
+        {parsedValue}
+      </Typography>
+    );
   }
 }

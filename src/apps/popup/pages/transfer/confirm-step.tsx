@@ -1,12 +1,10 @@
 import Big from 'big.js';
+import { formatNumber } from 'casper-wallet-core';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { TRANSFER_COST_MOTES } from '@src/constants';
-
-import { selectAccountCurrencyRate } from '@background/redux/account-info/selectors';
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
@@ -18,13 +16,14 @@ import {
   VerticalSpaceContainer
 } from '@libs/layout';
 import { useFetchAccountsInfo } from '@libs/services/account-info';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import {
   ActiveAccountPlate,
   List,
   RecipientPlate,
   Typography
 } from '@libs/ui/components';
-import { formatFiatAmount, formatNumber, motesToCSPR } from '@libs/ui/utils';
+import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;
@@ -33,7 +32,7 @@ const ListItemContainer = styled(SpaceBetweenFlexRow)`
 interface ConfirmStepProps {
   recipientPublicKey: string;
   amount: string;
-  balance: string | null;
+  balance: string | undefined;
   symbol: string | null;
   isErc20Transfer: boolean;
   paymentAmount: string;
@@ -50,8 +49,7 @@ export const ConfirmStep = ({
 }: ConfirmStepProps) => {
   const { t } = useTranslation();
 
-  const currencyRate = useSelector(selectAccountCurrencyRate);
-
+  const { currencyRate } = useFetchWalletBalance();
   const accountsInfo = useFetchAccountsInfo([recipientPublicKey]);
 
   const accountHash = getAccountHashFromPublicKey(recipientPublicKey);
@@ -74,14 +72,18 @@ export const ConfirmStep = ({
         amount: formatNumber(amount, {
           precision: { max: 5 }
         }),
-        fiatPrice: formatFiatAmount(amount, currencyRate),
+        fiatPrice: formatFiatAmount(amount, currencyRate?.rate || null),
         symbol
       },
       {
         id: 2,
         text: t('Transaction fee'),
         amount: transferCostInCSPR,
-        fiatPrice: formatFiatAmount(transferCostInCSPR, currencyRate, 3),
+        fiatPrice: formatFiatAmount(
+          transferCostInCSPR,
+          currencyRate?.rate || null,
+          3
+        ),
         symbol
       },
       {
@@ -90,7 +92,7 @@ export const ConfirmStep = ({
         amount: formatNumber(totalCSPR, {
           precision: { max: 5 }
         }),
-        fiatPrice: formatFiatAmount(totalCSPR, currencyRate),
+        fiatPrice: formatFiatAmount(totalCSPR, currencyRate?.rate || null),
         symbol,
         bold: true
       }
@@ -112,7 +114,11 @@ export const ConfirmStep = ({
         amount: formatNumber(paymentAmount, {
           precision: { max: 5 }
         }),
-        fiatPrice: formatFiatAmount(paymentAmount, currencyRate, 3),
+        fiatPrice: formatFiatAmount(
+          paymentAmount,
+          currencyRate?.rate || null,
+          3
+        ),
         symbol: 'CSPR'
       }
     ];

@@ -1,4 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import {
+  IGetOnRampProvidersData,
+  IOnRampCountry,
+  IOnRampCurrencyItem,
+  IOnRampProvider,
+  IProviderSelectionData
+} from 'casper-wallet-core/src/domain';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -14,17 +21,8 @@ import {
   PopupLayout,
   createErrorLocationState
 } from '@libs/layout';
-import {
-  dispatchFetchOnRampOptionGet,
-  dispatchFetchOnRampOptionPost,
-  dispatchFetchOnRampSelectionPost
-} from '@libs/services/buy-cspr-service';
-import {
-  ProviderProps,
-  ResponseCountryPropsWithId,
-  ResponseCurrencyProps,
-  SelectionPostRequestData
-} from '@libs/services/buy-cspr-service/types';
+import { useFetchOnRampCountriesAndCurrencies } from '@libs/services/buy-cspr-service/use-fetch-on-ramp-countries-and-currencies';
+import { useGetOnRampProviders } from '@libs/services/buy-cspr-service/use-get-on-ramp-providers';
 import { Button, Typography } from '@libs/ui/components';
 
 import { Amount } from './amount';
@@ -36,160 +34,126 @@ import { BuyCSPRSteps } from './utils';
 export const BuyCSPRPage = () => {
   const [buyCSPRStep, setBuyCSPRStep] = useState(BuyCSPRSteps.Country);
   const [availableCountries, setAvailableCountries] = useState<
-    ResponseCountryPropsWithId[]
+    IOnRampCountry[]
   >([]);
-  const [selectedCountry, setSelectedCountry] =
-    useState<ResponseCountryPropsWithId>({
-      id: 0,
-      name: '',
-      code: ''
-    });
-  const [currencies, setCurrencies] = useState<ResponseCurrencyProps[]>([]);
-  const [selectedCurrency, setSelectedCurrency] =
-    useState<ResponseCurrencyProps>({
+  const [selectedCountry, setSelectedCountry] = useState<IOnRampCountry>({
+    name: '',
+    code: '',
+    flagUri: ''
+  });
+  const [availableCurrencies, setAvailableCurrencies] = useState<
+    IOnRampCurrencyItem[]
+  >([]);
+  const [selectedCurrency, setSelectedCurrency] = useState<IOnRampCurrencyItem>(
+    {
       id: 0,
       code: '',
       type_id: '',
       rate: 0
-    });
+    }
+  );
   const [defaultAmount, setDefaultAmount] = useState('0');
   const [fiatAmount, setFiatAmount] = useState<number>(0);
-  const [availableProviders, setAvailableProviders] = useState<ProviderProps[]>(
-    []
-  );
+  const [availableProviders, setAvailableProviders] = useState<
+    IOnRampProvider[]
+  >([]);
   const [selectedProvider, setSelectedProvider] =
-    useState<ProviderProps | null>(null);
-  const [loadingAvailableProviders, setLoadingAvailableProviders] =
-    useState(false);
-  const [loadingRedirectUrl, setLoadingRedirectUrl] = useState(false);
+    useState<IOnRampProvider | null>(null);
+  const [providerUrl, setProviderUrl] = useState<string | null>(null);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
 
+  const {
+    currencies,
+    countries,
+    defaultCountry,
+    defaultCurrency,
+    defaultDepositAmount,
+    isLoadingOnRampCountriesAndCurrencies,
+    onRampCountriesAndCurrenciesError
+  } = useFetchOnRampCountriesAndCurrencies();
+  const {
+    getOnRampProviders,
+    isProvidersLoading,
+    isProviderLocationLoading,
+    getOnRampProviderLocation
+  } = useGetOnRampProviders();
+
+  const handleError = useCallback(
+    (error: Error) => {
+      navigate(
+        ErrorPath,
+        createErrorLocationState({
+          errorHeaderText: t('Something went wrong'),
+          errorContentText:
+            error.message ||
+            t(
+              'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+            ),
+          errorPrimaryButtonLabel: t('Close'),
+          errorRedirectPath: RouterPath.Home
+        })
+      );
+    },
+    [navigate, t]
+  );
+
   useEffect(() => {
-    dispatchFetchOnRampOptionGet()
-      .then(({ payload }) => {
-        if ('countries' in payload) {
-          const countriesWithId = payload.countries.map((country, id) => ({
-            id,
-            ...country
-          }));
+    if (onRampCountriesAndCurrenciesError) {
+      handleError(onRampCountriesAndCurrenciesError);
+    }
+    if (isLoadingOnRampCountriesAndCurrencies) return;
 
-          const defaultSelectedCountry = countriesWithId.find(
-            country => country.code === payload.defaultCountry
-          );
-
-          const defaultSelectedCurrency = payload.currencies.find(
-            currency => currency.code === payload.defaultCurrency
-          );
-
-          setAvailableCountries(countriesWithId);
-          setCurrencies(payload.currencies);
-          setSelectedCountry(defaultSelectedCountry!);
-          setSelectedCurrency(defaultSelectedCurrency!);
-          setDefaultAmount(payload.defaultAmount);
-          setFiatAmount(Number(payload.defaultAmount));
-        } else {
-          navigate(
-            ErrorPath,
-            createErrorLocationState({
-              errorHeaderText: t('Something went wrong'),
-              errorContentText:
-                payload.error.message ||
-                t(
-                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                ),
-              errorPrimaryButtonLabel: t('Close'),
-              errorRedirectPath: RouterPath.Home
-            })
-          );
-        }
-      })
-      .catch(error => {
-        console.error(error.message, 'countries request failed');
-
-        navigate(
-          ErrorPath,
-          createErrorLocationState({
-            errorHeaderText: error.message || t('Something went wrong'),
-            errorContentText:
-              typeof error.data === 'string'
-                ? error.data
-                : t(
-                    'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                  ),
-            errorPrimaryButtonLabel: t('Close'),
-            errorRedirectPath: RouterPath.Home
-          })
-        );
-      });
-  }, [navigate, t]);
+    setAvailableCountries(countries);
+    setAvailableCurrencies(currencies);
+    setSelectedCountry(defaultCountry!);
+    setSelectedCurrency(defaultCurrency!);
+    setDefaultAmount(defaultDepositAmount!);
+    setFiatAmount(Number(defaultDepositAmount));
+  }, [
+    countries,
+    currencies,
+    defaultCountry,
+    defaultCurrency,
+    defaultDepositAmount,
+    handleError,
+    isLoadingOnRampCountriesAndCurrencies,
+    navigate,
+    onRampCountriesAndCurrenciesError,
+    t
+  ]);
 
   const handleAmountSubmit = () => {
-    setLoadingAvailableProviders(true);
-
-    dispatchFetchOnRampOptionPost({
+    const data: IGetOnRampProvidersData = {
       amount: fiatAmount,
-      country: selectedCountry.code,
-      fiatCurrency: selectedCurrency.code,
-      paymentCurrency: selectedCurrency.code
-    })
-      .then(({ payload }) => {
-        if ('availableProviders' in payload) {
-          if (payload.availableProviders.length === 0) {
-            setBuyCSPRStep(BuyCSPRSteps.NoProvider);
-          } else {
-            setAvailableProviders(payload.availableProviders);
-
-            if (payload.availableProviders.length === 1) {
-              setSelectedProvider(payload.availableProviders[0]);
-            }
-
-            setBuyCSPRStep(BuyCSPRSteps.Provider);
-          }
+      country: selectedCountry?.code,
+      fiatCurrency: selectedCurrency?.code,
+      paymentCurrency: selectedCurrency?.code
+    };
+    getOnRampProviders(data, {
+      onSuccess: onRampProviders => {
+        if (onRampProviders.availableProviders.length === 0) {
+          setBuyCSPRStep(BuyCSPRSteps.NoProvider);
         } else {
-          navigate(
-            ErrorPath,
-            createErrorLocationState({
-              errorHeaderText: t('Something went wrong'),
-              errorContentText:
-                payload.error.message ||
-                t(
-                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                ),
-              errorPrimaryButtonLabel: t('Close'),
-              errorRedirectPath: RouterPath.Home
-            })
-          );
-        }
-      })
-      .catch(error => {
-        console.error(error.message, 'available provider request failed');
+          setAvailableProviders(onRampProviders.availableProviders);
 
-        navigate(
-          ErrorPath,
-          createErrorLocationState({
-            errorHeaderText: error.message || t('Something went wrong'),
-            errorContentText:
-              typeof error.data === 'string'
-                ? error.data
-                : t(
-                    'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                  ),
-            errorPrimaryButtonLabel: t('Close'),
-            errorRedirectPath: RouterPath.Home
-          })
-        );
-      })
-      .finally(() => setLoadingAvailableProviders(false));
+          if (onRampProviders.availableProviders.length === 1) {
+            setSelectedProvider(onRampProviders.availableProviders[0]);
+          }
+
+          setBuyCSPRStep(BuyCSPRSteps.Provider);
+        }
+      },
+      onError: handleError
+    });
   };
 
-  const handleSubmit = () => {
-    setLoadingRedirectUrl(true);
-    if (activeAccount && selectedProvider) {
-      const data: SelectionPostRequestData = {
+  useEffect(() => {
+    if (activeAccount?.publicKey && selectedProvider?.providerKey) {
+      const data: IProviderSelectionData = {
         account: activeAccount.publicKey,
         fiatCurrency: selectedCurrency.code,
         cryptoAmount: null,
@@ -198,45 +162,25 @@ export const BuyCSPRPage = () => {
         fiatAmount
       };
 
-      dispatchFetchOnRampSelectionPost(data)
-        .then(({ payload }) => {
-          if ('location' in payload) {
-            window.open(payload.location, '_blank');
-          } else {
-            navigate(
-              ErrorPath,
-              createErrorLocationState({
-                errorHeaderText: t('Something went wrong'),
-                errorContentText:
-                  payload.error.message ||
-                  t(
-                    'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                  ),
-                errorPrimaryButtonLabel: t('Close'),
-                errorRedirectPath: RouterPath.Home
-              })
-            );
-          }
-        })
-        .catch(error => {
-          console.error(error.message, 'provider selection request failed');
+      getOnRampProviderLocation(data, {
+        onSuccess: providerLocation => {
+          setProviderUrl(providerLocation.location);
+        },
+        onError: handleError
+      });
+    }
+  }, [
+    activeAccount?.publicKey,
+    selectedProvider?.providerKey,
+    selectedCurrency.code,
+    fiatAmount,
+    getOnRampProviderLocation,
+    handleError
+  ]);
 
-          navigate(
-            ErrorPath,
-            createErrorLocationState({
-              errorHeaderText: error.message || t('Something went wrong'),
-              errorContentText:
-                typeof error.data === 'string'
-                  ? error.data
-                  : t(
-                      'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                    ),
-              errorPrimaryButtonLabel: t('Close'),
-              errorRedirectPath: RouterPath.Home
-            })
-          );
-        })
-        .finally(() => setLoadingRedirectUrl(false));
+  const handleSubmit = () => {
+    if (providerUrl) {
+      window.open(providerUrl, '_blank');
     }
   };
 
@@ -246,11 +190,14 @@ export const BuyCSPRPage = () => {
         availableCountries={availableCountries}
         selectedCountry={selectedCountry}
         setSelectedCountry={setSelectedCountry}
+        isLoadingOnRampCountriesAndCurrencies={
+          isLoadingOnRampCountriesAndCurrencies
+        }
       />
     ),
     [BuyCSPRSteps.Amount]: (
       <Amount
-        currencies={currencies}
+        availableCurrencies={availableCurrencies}
         selectedCurrency={selectedCurrency}
         setPaymentAmount={setFiatAmount}
         setSelectedCurrency={setSelectedCurrency}
@@ -266,8 +213,8 @@ export const BuyCSPRPage = () => {
     ),
     [BuyCSPRSteps.NoProvider]: (
       <NoProvider
-        countryName={selectedCountry.name}
-        currencyCode={selectedCurrency.code}
+        countryName={selectedCountry?.name}
+        currencyCode={selectedCurrency?.code}
       />
     )
   };
@@ -302,7 +249,7 @@ export const BuyCSPRPage = () => {
       <>
         <Button
           onClick={handleAmountSubmit}
-          disabled={fiatAmount === 0 || loadingAvailableProviders}
+          disabled={fiatAmount === 0 || isProvidersLoading}
         >
           <Trans t={t}>Next</Trans>
         </Button>
@@ -317,7 +264,7 @@ export const BuyCSPRPage = () => {
         ) : null}
         <Button
           color="primaryRed"
-          disabled={!selectedProvider || loadingRedirectUrl}
+          disabled={!selectedProvider || isProviderLocationLoading}
           onClick={handleSubmit}
         >
           <Trans t={t}>Confirm</Trans>

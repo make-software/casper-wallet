@@ -1,10 +1,8 @@
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { selectAccountBalance } from '@background/redux/account-info/selectors';
-
 import { FlexRow, SpacingSize } from '@libs/layout';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
 import { ContentColor, getColorFromTheme, motesToCSPR } from '@libs/ui/utils';
 
 const Container = styled(FlexRow)`
@@ -20,8 +18,8 @@ const Filled = styled.div<{ filledWidth: number; color: ContentColor }>`
 `;
 
 function calculateLiquidPercentage(
-  amountMotes: string | null,
-  fullBalanceMotes: string | null
+  amountMotes: string | undefined,
+  fullBalanceMotes: string | undefined
 ) {
   if (amountMotes != null && fullBalanceMotes != null) {
     const current = Number(motesToCSPR(amountMotes));
@@ -34,28 +32,31 @@ function calculateLiquidPercentage(
 }
 
 export const AmountBar = () => {
-  const balance = useSelector(selectAccountBalance);
+  const { accountBalance } = useFetchWalletBalance();
 
   const liquidPercentage = useMemo(
     () =>
-      calculateLiquidPercentage(balance.liquidMotes, balance.totalBalanceMotes),
-    [balance.liquidMotes, balance.totalBalanceMotes]
+      calculateLiquidPercentage(
+        accountBalance.liquidBalance,
+        accountBalance.totalBalance
+      ),
+    [accountBalance.liquidBalance, accountBalance.totalBalance]
   );
   const delegatedPercentage = useMemo(
     () =>
       calculateLiquidPercentage(
-        balance.delegatedMotes,
-        balance.totalBalanceMotes
+        accountBalance.delegatedBalance,
+        accountBalance.totalBalance
       ),
-    [balance.delegatedMotes, balance.totalBalanceMotes]
+    [accountBalance.delegatedBalance, accountBalance.totalBalance]
   );
   const undelegatingPercentage = useMemo(
     () =>
       calculateLiquidPercentage(
-        balance.undelegatingMotes,
-        balance.totalBalanceMotes
+        accountBalance.undelegatingBalance,
+        accountBalance.totalBalance
       ),
-    [balance.undelegatingMotes, balance.totalBalanceMotes]
+    [accountBalance.undelegatingBalance, accountBalance.totalBalance]
   );
 
   return (

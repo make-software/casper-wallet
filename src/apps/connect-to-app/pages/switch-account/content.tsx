@@ -47,7 +47,7 @@ type SwitchAccountContentProps = { requestId: string };
 export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
   const activeOrigin = useSelector(selectActiveOrigin);
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const publicKeys = useSelector(selectVaultAccountsPublicKeys);
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
   const connectedAccountsToActiveTab = useSelector(
     selectConnectedAccountsWithActiveOrigin
   );
@@ -77,7 +77,7 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
     account => account.name !== activeAccount?.name
   );
 
-  const accountsInfo = useFetchAccountsInfo(publicKeys);
+  const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
 
   return (
     <PageContainer>
@@ -134,14 +134,14 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
               rows={connectedAccountsListItems}
               renderRow={(account, index) => {
                 const csprName =
-                  accountsInfo && accountsInfo[account.accountHash].csprName;
+                  accountsInfo && accountsInfo[account.accountHash]?.csprName;
 
                 return (
                   <ListItemContainer key={account.name}>
                     <SpaceBetweenContainer>
                       <LeftAlignedFlexColumn>
                         <ConnectionStatusBadge
-                          isConnected
+                          isConnected={true}
                           displayContext="accountList"
                         />
                         <Typography type="body">{account.name}</Typography>

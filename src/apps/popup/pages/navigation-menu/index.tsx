@@ -3,6 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import {
+  ABOUT_US_URL,
+  SHARE_FEEDBACK_URL,
+  TERMS_URLS,
+  USER_GUIDES_URL
+} from '@src/constants';
 import { isLedgerAvailable, isSafariBuild } from '@src/utils';
 
 import { TimeoutDurationSetting } from '@popup/constants';
@@ -191,18 +197,18 @@ export function NavigationMenuPageContent() {
                   }
                 }
               ]
-            : []),
-          {
-            id: 6,
-            title: t('CSPR.name'),
-            description: t('Get names for your accounts'),
-            iconPath: 'assets/icons/cspr-name.svg',
-            // TODO: add url to CSPR.name
-            href: '',
-            currentValue: t('New'),
-            disabled: false,
-            isCsprName: true
-          }
+            : [])
+          // {
+          //   id: 6,
+          //   title: t('CSPR.name'),
+          //   description: t('Get names for your accounts'),
+          //   iconPath: 'assets/icons/cspr-name.svg',
+          //   // TODO: add url to CSPR.name
+          //   href: '',
+          //   currentValue: t('New'),
+          //   disabled: false,
+          //   isCsprName: true
+          // }
           // {
           //   id: 7,
           //   title: t('Add watch account'),
@@ -320,23 +326,37 @@ export function NavigationMenuPageContent() {
         items: [
           {
             id: 1,
-            title: t('Share feedback'),
-            iconPath: 'assets/icons/chat.svg',
-            href: 'https://casper-wallet.canny.io/feature-requests',
+            title: t('Terms & Conditions'),
+            iconPath: 'assets/icons/books.svg',
+            href: TERMS_URLS.tos,
             disabled: false
           },
           {
             id: 2,
-            title: t('User guides'),
+            title: t('Privacy Policy'),
             iconPath: 'assets/icons/books.svg',
-            href: 'https://casperwallet.io/user-guide',
+            href: TERMS_URLS.privacy,
             disabled: false
           },
           {
             id: 3,
+            title: t('Share feedback'),
+            iconPath: 'assets/icons/chat.svg',
+            href: SHARE_FEEDBACK_URL,
+            disabled: false
+          },
+          {
+            id: 4,
+            title: t('User guides'),
+            iconPath: 'assets/icons/books.svg',
+            href: USER_GUIDES_URL,
+            disabled: false
+          },
+          {
+            id: 5,
             title: t('About us'),
             iconPath: 'assets/icons/team.svg',
-            href: 'https://make.services/',
+            href: ABOUT_US_URL,
             disabled: false
           }
         ]

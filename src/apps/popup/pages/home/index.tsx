@@ -8,8 +8,7 @@ import { HomePageTabName, NetworkSetting } from '@src/constants';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import {
-  selectActiveNetworkSetting,
-  selectShowCSPRNamePromotion,
+  selectActiveNetworkSetting, // selectShowCSPRNamePromotion,
   selectVaultActiveAccount
 } from '@background/redux/root-selector';
 
@@ -29,8 +28,8 @@ import {
   Tile,
   Typography
 } from '@libs/ui/components';
-import { CsprNameBanner } from '@libs/ui/components/cspr-name-banner/cspr-name-banner';
 
+// import { CsprNameBanner } from '@libs/ui/components/cspr-name-banner/cspr-name-banner';
 import { AccountBalance } from './components/account-balance';
 import { DeploysList } from './components/deploys-list';
 import { MoreButtonsModal } from './components/more-buttons-modal';
@@ -60,19 +59,20 @@ export function HomePageContent() {
 
   const network = useSelector(selectActiveNetworkSetting);
   const activeAccount = useSelector(selectVaultActiveAccount);
-  const showCSPRNamePromotion = useSelector(selectShowCSPRNamePromotion);
+  // const showCSPRNamePromotion = useSelector(selectShowCSPRNamePromotion);
 
   useEffect(() => {
     if (!state?.activeTabId) {
       const container = document.querySelector('#ms-container');
 
-      container?.scrollTo(0, 0);
+      container?.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }
   }, [state?.activeTabId]);
 
+  // TODO CSPR.name
   return (
     <ContentContainer>
-      {showCSPRNamePromotion && <CsprNameBanner />}
+      {/*{showCSPRNamePromotion && <CsprNameBanner />}*/}
       {activeAccount && (
         <Tile>
           <Container>

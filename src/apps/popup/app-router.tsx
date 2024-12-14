@@ -9,6 +9,7 @@ import { AddContactPage } from '@popup/pages/add-contact';
 import { AddWatchAccount } from '@popup/pages/add-watch-account';
 import { AllAccountsPage } from '@popup/pages/all-accounts';
 import { BackupSecretPhrasePage } from '@popup/pages/backup-secret-phrase';
+import { BringWeb3Unlock } from '@popup/pages/bring-web3-unlock';
 import { BuyCSPRPage } from '@popup/pages/buy-cspr';
 import { ChangePasswordPage } from '@popup/pages/change-password';
 import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
@@ -251,6 +252,7 @@ function AppRoutes() {
       />
       <Route path={RouterPath.DeployDetails} element={<DeployDetailsPage />} />
       <Route path={RouterPath.AddWatchAccount} element={<AddWatchAccount />} />
+      <Route path={RouterPath.BringWeb3Unlock} element={<BringWeb3Unlock />} />
     </Routes>
   );
 }

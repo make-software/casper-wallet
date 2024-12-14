@@ -69,7 +69,7 @@ export const UnconnectedAccountsList = ({
         renderRow={(unconnectedAccount, index) => {
           const csprName =
             accountsInfo &&
-            accountsInfo[unconnectedAccount.accountHash].csprName;
+            accountsInfo[unconnectedAccount.accountHash]?.csprName;
 
           return (
             <ListItemContainer key={unconnectedAccount.name}>

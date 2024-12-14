@@ -8,7 +8,6 @@ import {
   MapTimeoutDurationSettingToValue
 } from '@popup/constants';
 
-import { accountBalancesReseted } from '@background/redux/account-balances/actions';
 import {
   loginRetryLockoutTimeReseted,
   loginRetryLockoutTimeSet
@@ -120,7 +119,6 @@ function* lockVaultSaga() {
     yield put(vaultReseted());
     yield put(deploysReseted());
     yield put(accountInfoReset());
-    yield put(accountBalancesReseted());
 
     emitSdkEventToActiveTabs(() => {
       return sdkEvent.lockedEvent({
@@ -236,6 +234,14 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
 }
 
 /**
+ * Saga to handle the timeout and locking mechanism of a vault based on its last activity time and a specified timeout duration setting.
+ *
+ * The generator function calculates the time elapsed since the last activity of the vault.
+ * If the vault exists, it is not locked, and the last
+ * activity time is available, it checks if the elapsed time surpasses the timeout duration.
+ * If true, it triggers a vault lock action
+ * immediately.
+ * If false, it sets up a delay for the remaining time until the timeout duration is met before locking the vault.
  *
  */
 function* timeoutCounterSaga() {

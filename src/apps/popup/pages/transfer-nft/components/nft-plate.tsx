@@ -1,14 +1,12 @@
-import React, { useMemo } from 'react';
+import { INft } from 'casper-wallet-core/src/domain';
+import React from 'react';
 import styled from 'styled-components';
-
-import { getMetadataKeyValue, getNftTokenMetadataWithLinks } from '@src/utils';
 
 import {
   AlignedFlexRow,
   LeftAlignedFlexColumn,
   SpacingSize
 } from '@libs/layout';
-import { NFTTokenResult } from '@libs/services/nft-service';
 import { SvgIcon, Tile, Typography } from '@libs/ui/components';
 
 import { NFTData } from '../utils';
@@ -25,20 +23,12 @@ const NftImage = styled.img`
 `;
 
 interface NftPlateProps {
-  nftToken: NFTTokenResult | undefined;
+  nftToken: INft | undefined;
   nftData?: NFTData;
 }
 
 export const NFTPlate = ({ nftData, nftToken }: NftPlateProps) => {
-  const nftTokenMetadataWithLinks = useMemo(
-    () => getNftTokenMetadataWithLinks(nftToken),
-    [nftToken]
-  );
-
-  const metadataKeyValue = useMemo(
-    () => getMetadataKeyValue(nftTokenMetadataWithLinks),
-    [nftTokenMetadataWithLinks]
-  );
+  const name = nftToken?.metadata?.name;
 
   const isImage = nftData?.contentType?.startsWith('image');
   const isVideo = nftData?.contentType?.startsWith('video');
@@ -48,7 +38,7 @@ export const NFTPlate = ({ nftData, nftToken }: NftPlateProps) => {
     <Tile>
       <Container>
         <AlignedFlexRow gap={SpacingSize.Medium}>
-          {isImage && <NftImage src={nftData?.url} />}
+          {isImage && <NftImage src={nftData?.url as string} />}
           {isAudio && (
             <SvgIcon
               src="assets/icons/audio-nft-placeholder.svg"
@@ -64,9 +54,9 @@ export const NFTPlate = ({ nftData, nftToken }: NftPlateProps) => {
             />
           )}
           <LeftAlignedFlexColumn gap={SpacingSize.Tiny}>
-            <Typography type="subtitle">{metadataKeyValue?.name}</Typography>
+            <Typography type="subtitle">{name}</Typography>
             <Typography type="captionRegular" color="contentSecondary">
-              {nftToken?.contract_package?.contract_name}
+              {nftToken?.contactName}
             </Typography>
           </LeftAlignedFlexColumn>
         </AlignedFlexRow>

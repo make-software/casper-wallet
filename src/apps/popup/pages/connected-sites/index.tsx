@@ -32,11 +32,11 @@ export function ConnectedSitesPage() {
 
   const accountsByOrigin = useSelector(selectAccountsByOriginDict);
   const siteNameByOriginDict = useSelector(selectSiteNameByOriginDict);
-  const publicKeys = useSelector(selectVaultAccountsPublicKeys);
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
   const isNoSitesConnected = !Object.entries(accountsByOrigin).length;
 
-  const accountsInfo = useFetchAccountsInfo(publicKeys);
+  const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
 
   if (isNoSitesConnected) {
     return (
@@ -97,7 +97,7 @@ export function ConnectedSitesPage() {
               const accountHash = getAccountHashFromPublicKey(publicKey);
 
               const csprName =
-                accountsInfo && accountsInfo[accountHash].csprName;
+                accountsInfo && accountsInfo[accountHash]?.csprName;
 
               return (
                 <SiteGroupItem

@@ -2,7 +2,8 @@ import { createReducer } from 'typesafe-actions';
 
 import {
   askForReviewAfterChanged,
-  ratedInStoreChanged
+  ratedInStoreChanged,
+  resetRateApp
 } from '@background/redux/rate-app/actions';
 import { RateAppState } from '@background/redux/rate-app/types';
 
@@ -35,4 +36,5 @@ export const reducer = createReducer(initialState)
       ...state,
       askForReviewAfter: action.payload
     })
-  );
+  )
+  .handleAction(resetRateApp, () => initialState);

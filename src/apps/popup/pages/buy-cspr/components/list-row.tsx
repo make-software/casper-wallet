@@ -1,3 +1,7 @@
+import {
+  IOnRampCountry,
+  IOnRampCurrencyItem
+} from 'casper-wallet-core/src/domain';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
@@ -6,10 +10,6 @@ import {
   AlignedSpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
-import {
-  ResponseCountryPropsWithId,
-  ResponseCurrencyProps
-} from '@libs/services/buy-cspr-service/types';
 import { Checkbox, Typography } from '@libs/ui/components';
 
 const Container = styled(AlignedSpaceBetweenFlexRow)`
@@ -19,10 +19,10 @@ const Container = styled(AlignedSpaceBetweenFlexRow)`
 `;
 
 interface ListRowProps {
-  country?: ResponseCountryPropsWithId;
+  country?: IOnRampCountry;
   handleSelect: (e: React.MouseEvent<Element, MouseEvent>) => void;
   isSelected: boolean;
-  currency?: ResponseCurrencyProps;
+  currency?: IOnRampCurrencyItem;
 }
 
 export const ListRow = ({
@@ -53,18 +53,18 @@ export const ListRow = ({
         {country && (
           <>
             <img
-              alt={`${country.name}`}
+              alt={`${country?.name}`}
               src={iconSrc}
               width="24"
               height="18"
               onError={handleError}
             />
-            <Typography type="body">{country.name}</Typography>
+            <Typography type="body">{country?.name}</Typography>
           </>
         )}
         {currency && (
           <Typography type="body" color="contentSecondary">
-            {currency.code}
+            {currency?.code}
           </Typography>
         )}
       </AlignedFlexRow>

@@ -1,7 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import { blake2b } from '@noble/hashes/blake2b';
-import LedgerCasperApp from '@zondax/ledger-casper';
-import { ResponseSign } from '@zondax/ledger-casper/src/types';
+import LedgerCasperApp, { ResponseSign } from '@zondax/ledger-casper';
 import { Buffer } from 'buffer';
 import { DeployUtil } from 'casper-js-sdk';
 import {
@@ -302,18 +301,18 @@ export class Ledger {
           ? result.signatureRSV.subarray(0, 64)
           : result.signatureRSV;
 
-      const signatureHex = `02${patchedSignature.toString('hex')}`;
+      const prefixedSignatureHex = `02${patchedSignature.toString('hex')}`;
 
       this.#LedgerEventStatussSubject.next({
         status: LedgerEventStatus.SignatureCompleted,
         publicKey: account.publicKey,
         deployHash,
-        signatureHex
+        signatureHex: prefixedSignatureHex
       });
 
       const prefix = new Uint8Array([0x02]);
 
-      if (!signatureHex) {
+      if (!prefixedSignatureHex) {
         this.#processError({
           status: LedgerEventStatus.SignatureFailed,
           publicKey: account.publicKey,
@@ -323,8 +322,10 @@ export class Ledger {
       }
 
       return {
-        signatureHex,
-        signature: new Uint8Array([...prefix, ...patchedSignature])
+        signatureHex: patchedSignature.toString('hex'),
+        signature: patchedSignature,
+        prefixedSignatureHex,
+        prefixedSignature: new Uint8Array([...prefix, ...patchedSignature])
       };
     } catch (e) {
       if (e instanceof LedgerError) {
@@ -342,7 +343,7 @@ export class Ledger {
   async signMessage(
     message: string,
     account: Partial<LedgerAccount>
-  ): Promise<SignResult> {
+  ): Promise<Pick<SignResult, 'signature' | 'signatureHex'>> {
     try {
       if (account.index === undefined) {
         this.#processError({ status: LedgerEventStatus.InvalidIndex });
