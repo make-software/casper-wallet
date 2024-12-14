@@ -1,7 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import { blake2b } from '@noble/hashes/blake2b';
-import LedgerCasperApp from '@zondax/ledger-casper';
-import { ResponseSign } from '@zondax/ledger-casper/src/types';
+import LedgerCasperApp, { ResponseSign } from '@zondax/ledger-casper';
 import { Buffer } from 'buffer';
 import { DeployUtil } from 'casper-js-sdk';
 import {

@@ -197,18 +197,18 @@ export function NavigationMenuPageContent() {
                   }
                 }
               ]
-            : []),
-          {
-            id: 6,
-            title: t('CSPR.name'),
-            description: t('Get names for your accounts'),
-            iconPath: 'assets/icons/cspr-name.svg',
-            // TODO: add url to CSPR.name
-            href: '',
-            currentValue: t('New'),
-            disabled: false,
-            isCsprName: true
-          }
+            : [])
+          // {
+          //   id: 6,
+          //   title: t('CSPR.name'),
+          //   description: t('Get names for your accounts'),
+          //   iconPath: 'assets/icons/cspr-name.svg',
+          //   // TODO: add url to CSPR.name
+          //   href: '',
+          //   currentValue: t('New'),
+          //   disabled: false,
+          //   isCsprName: true
+          // }
           // {
           //   id: 7,
           //   title: t('Add watch account'),
