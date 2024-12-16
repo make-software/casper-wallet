@@ -360,7 +360,10 @@ runtime.onMessage.addListener(
 
             const isDeployAlreadySigningWithThisAccount =
               deploy?.approvals?.some(approvals =>
-                isEqualCaseInsensitive(approvals.signer, signingPublicKeyHex)
+                isEqualCaseInsensitive(
+                  approvals.signer.toString(),
+                  signingPublicKeyHex
+                )
               ) ?? false;
 
             if (isDeployAlreadySigningWithThisAccount) {

@@ -1,4 +1,4 @@
-import { DeployUtil } from 'casper-js-sdk';
+import { Deploy, makeAuctionManagerDeploy } from 'casper-js-sdk';
 import { formatNumber } from 'casper-wallet-core';
 import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import React, { useState } from 'react';
@@ -9,7 +9,8 @@ import styled from 'styled-components';
 import {
   AuctionManagerEntryPoint,
   STAKE_COST_MOTES,
-  StakeSteps
+  StakeSteps,
+  networkNameToSdkNetworkNameMap
 } from '@src/constants';
 
 import { AmountStep } from '@popup/pages/stakes/amount-step';
@@ -41,7 +42,7 @@ import {
 import { useLedger } from '@hooks/use-ledger';
 import { useSubmitButton } from '@hooks/use-submit-button';
 
-import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
+import { createAsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 import {
   AlignedFlexRow,
   CenteredFlexRow,
@@ -57,11 +58,7 @@ import {
   createErrorLocationState
 } from '@libs/layout';
 import { useFetchWalletBalance } from '@libs/services/balance-service';
-import {
-  makeAuctionManagerDeploy,
-  sendSignDeploy,
-  signDeploy
-} from '@libs/services/deployer-service';
+import { sendSignDeploy, signDeploy } from '@libs/services/deployer-service';
 import {
   Button,
   HomePageTabsId,
@@ -106,7 +103,7 @@ export const StakesPage = () => {
   const isActiveAccountFromLedger = useSelector(
     selectIsActiveAccountFromLedger
   );
-  const { networkName, nodeUrl, auctionManagerContractHash } = useSelector(
+  const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
   const ratedInStore = useSelector(selectRatedInStore);
@@ -157,23 +154,21 @@ export const StakesPage = () => {
     if (activeAccount) {
       const motesAmount = CSPRtoMotes(inputAmountCSPR);
 
-      const KEYS = createAsymmetricKey(
+      const KEYS = await createAsymmetricKeys(
         activeAccount.publicKey,
         activeAccount.secretKey
       );
 
-      const deploy = await makeAuctionManagerDeploy(
-        stakeType,
-        activeAccount.publicKey,
-        validatorPublicKey,
-        newValidatorPublicKey || null,
-        motesAmount,
-        networkName,
-        auctionManagerContractHash,
-        nodeUrl
-      );
+      const deploy = makeAuctionManagerDeploy({
+        amount: motesAmount,
+        chainName: networkNameToSdkNetworkNameMap[networkName],
+        contractEntryPoint: stakeType,
+        delegatorPublicKeyHex: activeAccount.publicKey,
+        newValidatorPublicKeyHex: newValidatorPublicKey,
+        validatorPublicKeyHex: validatorPublicKey
+      });
 
-      const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
+      const signedDeploy = await signDeploy(deploy, KEYS, activeAccount);
 
       sendSignDeploy(signedDeploy, nodeUrl)
         .then(resp => {
@@ -227,19 +222,17 @@ export const StakesPage = () => {
     if (activeAccount) {
       const motesAmount = CSPRtoMotes(inputAmountCSPR);
 
-      const deploy = await makeAuctionManagerDeploy(
-        stakeType,
-        activeAccount.publicKey,
-        validatorPublicKey,
-        newValidatorPublicKey || null,
-        motesAmount,
-        networkName,
-        auctionManagerContractHash,
-        nodeUrl
-      );
+      const deploy = makeAuctionManagerDeploy({
+        amount: motesAmount,
+        chainName: networkNameToSdkNetworkNameMap[networkName],
+        contractEntryPoint: stakeType,
+        delegatorPublicKeyHex: activeAccount.publicKey,
+        newValidatorPublicKeyHex: newValidatorPublicKey,
+        validatorPublicKeyHex: validatorPublicKey
+      });
 
       dispatchToMainStore(
-        ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+        ledgerDeployChanged(JSON.stringify(Deploy.toJson(deploy)))
       );
     }
   };

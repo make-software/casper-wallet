@@ -1,23 +1,28 @@
-import { Keys, decodeBase16 } from 'casper-js-sdk';
+import { Conversions, KeyAlgorithm, PrivateKey } from 'casper-js-sdk';
 
-import { privateKeyBytesToBase64 } from '@libs/crypto/utils';
+import { AsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 
-export const parseSecretKeyStringSecp = (secretKeyHex: string) => {
-  let keyPair: Keys.AsymmetricKey;
+export const parseSecretKeyStringSecp = async (secretKeyHex: string) => {
+  let keyPair: AsymmetricKeys;
 
   try {
-    const secretKey = decodeBase16(secretKeyHex);
-    const privateKeyBuffer = Keys.Secp256K1.parsePrivateKey(secretKey, 'raw');
-    const publicKey = Keys.Secp256K1.privateToPublicKey(privateKeyBuffer);
+    const privateKey = await PrivateKey.fromHex(
+      secretKeyHex,
+      KeyAlgorithm.SECP256K1
+    );
+    const publicKey = privateKey.publicKey;
 
-    keyPair = Keys.Secp256K1.parseKeyPair(publicKey, secretKey, 'raw');
+    keyPair = {
+      publicKey,
+      secretKey: privateKey
+    };
   } catch (error) {
     console.error(error);
     throw Error('Invalid secret key');
   }
 
   return {
-    secretKeyBase64: privateKeyBytesToBase64(keyPair.privateKey),
+    secretKeyBase64: Conversions.encodeBase64(keyPair.secretKey.toBytes()),
     publicKeyHex: keyPair.publicKey.toHex(false)
   };
 };

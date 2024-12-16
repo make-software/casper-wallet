@@ -1,3 +1,5 @@
+import { CasperNetworkName } from 'casper-js-sdk';
+
 const SECOND = 1000;
 
 export const BALANCE_REFRESH_RATE = 15 * SECOND;
@@ -277,4 +279,12 @@ export const DeployResultEntryPointNameMap: { [key: string]: string } = {
   ...Cep18DeployResultName,
   ...NftDeployResultName,
   ...CsprMarketDeployEntryPointNameMap
+};
+
+export const networkNameToSdkNetworkNameMap: Record<
+  NetworkName,
+  CasperNetworkName
+> = {
+  [NetworkName.Mainnet]: CasperNetworkName.Mainnet,
+  [NetworkName.Testnet]: CasperNetworkName.Testnet
 };

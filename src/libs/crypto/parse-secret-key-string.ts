@@ -1,43 +1,44 @@
 import ASN1 from '@lapo/asn1js';
 import Base64 from '@lapo/asn1js/base64';
-import { Keys, decodeBase16 } from 'casper-js-sdk';
+import { Conversions, KeyAlgorithm, PrivateKey } from 'casper-js-sdk';
 // These libraries are required for backward compatibility with Legacy Signer
 import { t } from 'i18next';
 
-import { privateKeyBytesToBase64 } from './utils';
+import { AsymmetricKeys } from './create-asymmetric-key';
 
-export function parseSecretKeyString(fileContents: string): {
+export async function parseSecretKeyString(fileContents: string): Promise<{
   publicKeyHex: string;
   secretKeyBase64: string;
-} {
+}> {
   const der = Base64.unarmor(fileContents);
-  const decodedString = ASN1.decode(der).toPrettyString();
+  const decodedString: string = ASN1.decode(der).toPrettyString();
   const algorithm = getAlgorithm(decodedString);
 
-  let keyPair: Keys.AsymmetricKey;
+  let keyPair: AsymmetricKeys;
   switch (algorithm) {
     case 'Ed25519':
       {
-        const secretKeyHex = decodedString.split('\n')[4].split('|')[1];
-        const secretKey = decodeBase16(secretKeyHex);
-        const privateKeyBuffer = Keys.Ed25519.parsePrivateKey(secretKey);
-        const publicKey = Keys.Ed25519.privateToPublicKey(privateKeyBuffer);
+        const secretKeyHex = decodedString.split('\n')[5].split('|')[1];
+        const privateKey = await PrivateKey.fromHex(
+          secretKeyHex,
+          KeyAlgorithm.ED25519
+        );
+        const publicKey = privateKey.publicKey;
 
-        keyPair = Keys.Ed25519.parseKeyPair(publicKey, secretKey);
+        keyPair = { secretKey: privateKey, publicKey };
       }
       break;
 
     case 'Secp256K1':
       {
         const secretKeyHex = decodedString.split('\n')[2].split('|')[1];
-        const secretKey = decodeBase16(secretKeyHex);
-        const privateKeyBuffer = Keys.Secp256K1.parsePrivateKey(
-          secretKey,
-          'raw'
+        const privateKey = await PrivateKey.fromHex(
+          secretKeyHex,
+          KeyAlgorithm.SECP256K1
         );
-        const publicKey = Keys.Secp256K1.privateToPublicKey(privateKeyBuffer);
+        const publicKey = privateKey.publicKey;
 
-        keyPair = Keys.Secp256K1.parseKeyPair(publicKey, secretKey, 'raw');
+        keyPair = { secretKey: privateKey, publicKey };
       }
       break;
 
@@ -48,7 +49,7 @@ export function parseSecretKeyString(fileContents: string): {
   }
 
   return {
-    secretKeyBase64: privateKeyBytesToBase64(keyPair.privateKey),
+    secretKeyBase64: Conversions.encodeBase64(keyPair.secretKey.toBytes()),
     publicKeyHex: keyPair.publicKey.toHex(false)
   };
 }

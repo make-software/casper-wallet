@@ -1,64 +1,98 @@
-import { Keys, decodeBase64 } from 'casper-js-sdk';
+import { Conversions, KeyAlgorithm, PrivateKey } from 'casper-js-sdk';
 import fs from 'fs';
+
+import { AsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 
 import { parseSecretKeyString } from './parse-secret-key-string';
 
 /** manual testing should confirm that imported keys have the same public key and private key than legacy signer */
 
-it('should import key pair from the pem file, validate keys and generate the same file from this key pair', () => {
-  (
-    [
-      {
-        type: 'ed',
-        pemFilePath: __dirname + '/ed_secret_key.pem',
-        pemFilePublicKeyHex:
-          '01c8988c6ceac0013824432d5ee68e4292975361b8acc55fc0ddcdae19f062f3db'
-      },
-      {
-        type: 'secp',
-        pemFilePath: __dirname + '/secp_secret_key.pem',
-        pemFilePublicKeyHex:
-          '0202963c77ed0dcf1cc098ce9355aa71c2b74edc96645a8e1ce2882980e9881c73e5'
-      }
-    ] as const
-  ).forEach(({ type, pemFilePath, pemFilePublicKeyHex }) => {
-    const pemFileContents = fs.readFileSync(pemFilePath).toString();
-    const { publicKeyHex, secretKeyBase64 } =
-      parseSecretKeyString(pemFileContents);
+it('should import ed key pair from the pem file, validate keys and generate the same file from this key pair', async () => {
+  const ed = {
+    type: 'ed',
+    pemFilePath: __dirname + '/ed_secret_key.pem',
+    pemFilePublicKeyHex:
+      '01c8988c6ceac0013824432d5ee68e4292975361b8acc55fc0ddcdae19f062f3db'
+  } as const;
 
-    const keyPair = getKeyPairFromSecretKeyBase64(type, secretKeyBase64);
-
-    expect(keyPair.publicKey.toHex(false)).toBe(pemFilePublicKeyHex);
-    expect(keyPair.publicKey.toHex(false)).toBe(publicKeyHex);
-    expect(keyPair.exportPrivateKeyInPem()).toBe(pemFileContents);
+  await expect(getData(ed.type, ed.pemFilePath)).resolves.toStrictEqual({
+    publicKeyHex: ed.pemFilePublicKeyHex,
+    publicKey: ed.pemFilePublicKeyHex,
+    pemFileContents: `-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEIKu6biwimq52O4qzdyAp78RrIblNs6GXZdkcqr0+iLLj
+-----END PRIVATE KEY-----
+`
   });
 });
 
-function getKeyPairFromSecretKeyBase64(
+it('should import secp key pair from the pem file, validate keys and generate the same file from this key pair', async () => {
+  const secp = {
+    type: 'secp',
+    pemFilePath: __dirname + '/secp_secret_key.pem',
+    pemFilePublicKeyHex:
+      '0202963c77ed0dcf1cc098ce9355aa71c2b74edc96645a8e1ce2882980e9881c73e5'
+  } as const;
+
+  await expect(getData(secp.type, secp.pemFilePath)).resolves.toStrictEqual({
+    publicKeyHex: secp.pemFilePublicKeyHex,
+    publicKey: secp.pemFilePublicKeyHex,
+    pemFileContents: `-----BEGIN EC PRIVATE KEY-----
+MHQCAQEEIF9N7aGLID1DPkpayubhr4t0YuRbX+ppcwSXIIIKP33joAcGBSuBBAAK
+oUQDQgAEljx37Q3PHMCYzpNVqnHCt07clmRajhziiCmA6Ygcc+W+rKMDv4vXDJ21
+u7aZawhRbZl0Ilnrz9MVHbhiSeva0g==
+-----END EC PRIVATE KEY-----`
+  });
+});
+
+const getData = async (type: 'ed' | 'secp', pemFilePath: string) => {
+  const pemFileContents = fs.readFileSync(pemFilePath).toString();
+
+  const { publicKeyHex, secretKeyBase64 } =
+    await parseSecretKeyString(pemFileContents);
+
+  const keyPair = await getKeyPairFromSecretKeyBase64(type, secretKeyBase64);
+
+  return {
+    publicKeyHex,
+    publicKey: keyPair.publicKey.toHex(),
+    pemFileContents
+  };
+};
+
+async function getKeyPairFromSecretKeyBase64(
   asymmetricKey: 'ed' | 'secp',
   secretKeyBase64: string
 ) {
-  let keyPair: Keys.AsymmetricKey;
+  let keyPair: AsymmetricKeys;
 
   switch (asymmetricKey) {
     case 'ed':
       {
-        const secretKey = decodeBase64(secretKeyBase64);
-        const parsedSecretKey = Keys.Ed25519.parsePrivateKey(secretKey);
-        const publicKey = Keys.Ed25519.privateToPublicKey(parsedSecretKey);
-        keyPair = Keys.Ed25519.parseKeyPair(publicKey, secretKey);
+        const secretKey = Conversions.base64to16(secretKeyBase64);
+        const privateKey = await PrivateKey.fromHex(
+          secretKey,
+          KeyAlgorithm.ED25519
+        );
+        const publicKey = privateKey.publicKey;
+        keyPair = {
+          secretKey: privateKey,
+          publicKey
+        };
       }
       break;
 
     case 'secp':
       {
-        const secretKey = decodeBase64(secretKeyBase64);
-        const parsedSecretKey = Keys.Secp256K1.parsePrivateKey(
+        const secretKey = Conversions.base64to16(secretKeyBase64);
+        const privateKey = await PrivateKey.fromHex(
           secretKey,
-          'raw'
+          KeyAlgorithm.SECP256K1
         );
-        const publicKey = Keys.Secp256K1.privateToPublicKey(parsedSecretKey);
-        keyPair = Keys.Secp256K1.parseKeyPair(publicKey, secretKey, 'raw');
+        const publicKey = privateKey.publicKey;
+        keyPair = {
+          secretKey: privateKey,
+          publicKey
+        };
       }
       break;
 

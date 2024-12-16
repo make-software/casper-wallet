@@ -1,5 +1,5 @@
 import Big from 'big.js';
-import { CLPublicKey, Keys, decodeBase16 } from 'casper-js-sdk';
+import { KeyAlgorithm, PrivateKey, PublicKey } from 'casper-js-sdk';
 import { Maybe } from 'casper-wallet-core/src/typings/common';
 import { runtime } from 'webextension-polyfill';
 
@@ -67,7 +67,7 @@ export const isValidPublicKey = (
   }
 
   try {
-    CLPublicKey.fromHex(publicKey).toHex(false);
+    PublicKey.fromHex(publicKey).toHex(false);
     return true;
   } catch (error) {
     return false;
@@ -101,15 +101,18 @@ export const isValidAccountHash = (
  * If the secretKey fails any of these checks or an exception is caught during parsing/decoding,
  * false is returned indicating the secretKey is invalid.
  */
-export const isValidSecretKeyHash = (secretKey: string) => {
+export const isValidSecretKeyHash = async (secretKey: string) => {
   if (!secretKey) {
     return false;
   }
+
   if (!validHashRegExp.test(secretKey.trim())) {
     return false;
   }
+
   try {
-    Keys.Secp256K1.parsePrivateKey(decodeBase16(secretKey), 'raw');
+    await PrivateKey.fromHex(secretKey, KeyAlgorithm.SECP256K1);
+
     return true;
   } catch (error) {
     return false;

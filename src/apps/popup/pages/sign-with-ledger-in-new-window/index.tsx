@@ -1,4 +1,4 @@
-import { DeployUtil } from 'casper-js-sdk';
+import { Deploy } from 'casper-js-sdk';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -14,7 +14,7 @@ import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
 import { useLedger } from '@hooks/use-ledger';
 
-import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
+import { createAsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 import { sendSignDeploy, signDeploy } from '@libs/services/deployer-service';
 import { LedgerEventStatus } from '@libs/services/ledger';
 import { LedgerConnectionView } from '@libs/ui/components';
@@ -33,19 +33,14 @@ export const SignWithLedgerInNewWindowPage = () => {
       return;
     }
 
-    const KEYS = createAsymmetricKey(
+    const KEYS = await createAsymmetricKeys(
       activeAccount.publicKey,
       activeAccount.secretKey
     );
 
-    const resp = DeployUtil.deployFromJson(JSON.parse(deploy));
+    const resp = Deploy.fromJSON(deploy);
 
-    if (!resp.ok) {
-      console.log('-------- json parse error', resp.val);
-      return;
-    }
-
-    const signedDeploy = await signDeploy(resp.val, [KEYS], activeAccount);
+    const signedDeploy = await signDeploy(resp, KEYS, activeAccount);
 
     sendSignDeploy(signedDeploy, nodeUrl)
       .then(resp => {

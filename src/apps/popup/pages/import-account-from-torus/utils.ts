@@ -37,7 +37,7 @@ export const useImportTorusAccount = ({
   const importTorusAccount = useCallback(
     async (name: string, secretKey: string) => {
       const { secretKeyBase64, publicKeyHex } =
-        parseSecretKeyStringSecp(secretKey);
+        await parseSecretKeyStringSecp(secretKey);
       const secretKeyError = await doesSecretKeyExist(secretKeyBase64);
 
       if (secretKeyError) {
