@@ -5,7 +5,7 @@ import { useFetchWalletBalance } from '@libs/services/balance-service';
 // TODO: review this in future and maybe remove and use type from casper wallet core
 export type TokenType = {
   id: string;
-  contractHash?: string;
+  contractPackageHash?: string;
   name: string;
   amount: string;
   amountFiat: string | null;
@@ -23,7 +23,7 @@ export const useCasperToken = () => {
   useEffect(() => {
     setCasperToken({
       id: 'Casper',
-      contractHash: undefined,
+      contractPackageHash: undefined,
       name: 'Casper',
       amount: accountBalance.liquidFormattedDecimalBalance || '-',
       amountFiat: accountBalance.liquidFormattedFiatBalance,

@@ -21,7 +21,7 @@ interface HeaderViewInExplorerProps {
   tokenName?: string;
   deployHash?: string;
   nftTokenId?: string;
-  contractHash?: string;
+  contractPackageHash?: string;
   cep18Tokens?: TokenDto[];
 }
 
@@ -29,7 +29,7 @@ export function HeaderViewInExplorer({
   tokenName,
   deployHash,
   nftTokenId,
-  contractHash,
+  contractPackageHash,
   cep18Tokens
 }: HeaderViewInExplorerProps) {
   const [hrefToTokenOnCasperLive, setHrefToTokenOnCasperLive] = useState<
@@ -78,9 +78,9 @@ export function HeaderViewInExplorer({
       }
     }
 
-    if (nftTokenId && contractHash) {
+    if (nftTokenId && contractPackageHash) {
       setHrefToNftOnCasperLive(
-        getContractNftUrl(casperLiveUrl, contractHash, nftTokenId)
+        getContractNftUrl(casperLiveUrl, contractPackageHash, nftTokenId)
       );
     }
   }, [
@@ -91,7 +91,7 @@ export function HeaderViewInExplorer({
     cep18Tokens,
     deployHash,
     nftTokenId,
-    contractHash
+    contractPackageHash
   ]);
 
   if (

@@ -220,11 +220,11 @@ export const TransferPage = () => {
       activeAccount.secretKey
     );
 
-    if (isErc20Transfer && selectedToken?.contractHash) {
+    if (isErc20Transfer && selectedToken?.contractPackageHash) {
       // CEP18 transfer
       const deploy = makeCep18TransferDeploy({
         chainName: networkNameToSdkNetworkNameMap[networkName],
-        contractHash: selectedToken.contractHash,
+        contractPackageHash: selectedToken.contractPackageHash,
         paymentAmount: CSPRtoMotes(paymentAmount),
         recipientPublicKeyHex: recipientPublicKey,
         senderPublicKeyHex: activeAccount.publicKey,
@@ -257,10 +257,10 @@ export const TransferPage = () => {
     setTransferStep(TransactionSteps.ConfirmWithLedger);
 
     if (activeAccount?.hardware === HardwareWalletType.Ledger) {
-      if (isErc20Transfer && selectedToken?.contractHash) {
+      if (isErc20Transfer && selectedToken?.contractPackageHash) {
         const deploy = makeCep18TransferDeploy({
           chainName: networkNameToSdkNetworkNameMap[networkName],
-          contractHash: selectedToken.contractHash,
+          contractPackageHash: selectedToken.contractPackageHash,
           paymentAmount: CSPRtoMotes(paymentAmount),
           recipientPublicKeyHex: recipientPublicKey,
           senderPublicKeyHex: activeAccount.publicKey,
@@ -269,7 +269,7 @@ export const TransferPage = () => {
         });
 
         dispatchToMainStore(
-          ledgerDeployChanged(JSON.stringify(Deploy.toJson(deploy)))
+          ledgerDeployChanged(JSON.stringify(Deploy.toJSON(deploy)))
         );
         dispatchToMainStore(
           ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
@@ -286,7 +286,7 @@ export const TransferPage = () => {
         });
 
         dispatchToMainStore(
-          ledgerDeployChanged(JSON.stringify(Deploy.toJson(deploy)))
+          ledgerDeployChanged(JSON.stringify(Deploy.toJSON(deploy)))
         );
         dispatchToMainStore(
           ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
