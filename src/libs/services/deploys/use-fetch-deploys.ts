@@ -33,12 +33,13 @@ export const useFetchDeploys = () => {
       deploysRepository.getDeploys({
         activePublicKey: activeAccount?.publicKey ?? '',
         network: network.toLowerCase() as CasperNetwork,
-        page: pageParam
+        page: pageParam,
+        withProxyHeader: false
       }),
     getNextPageParam: (lastPage, pages) => {
       const nextPage = pages.length + 1;
 
-      return nextPage <= lastPage.page_count ? nextPage : undefined;
+      return nextPage <= lastPage.pageCount ? nextPage : undefined;
     },
     initialPageParam: 1
   });
@@ -57,7 +58,8 @@ export const useFetchDeploys = () => {
           deploysRepository.getSingleDeploy({
             deployHash: hash,
             activePublicKey: activeAccount?.publicKey ?? '',
-            network: network.toLowerCase() as CasperNetwork
+            network: network.toLowerCase() as CasperNetwork,
+            withProxyHeader: false
           })
         );
 
