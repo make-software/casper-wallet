@@ -51,9 +51,8 @@ export const ValidatorList = ({
                 const logo = validator?.svgLogo || validator?.imgLogo;
 
                 return (
-                  <Container style={style}>
+                  <Container style={style} key={key}>
                     <ValidatorPlate
-                      key={key}
                       publicKey={validator?.publicKey}
                       fee={validator.fee}
                       name={validator?.name}
