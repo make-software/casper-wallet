@@ -548,7 +548,7 @@ export const useTorusSecretKeyRule = () => {
     .required(t('Secret key is required'))
     .test({
       name: 'secret key',
-      test: async value => (value ? await isValidSecretKeyHash(value) : false),
+      test: value => (value ? isValidSecretKeyHash(value) : false),
       message: t('This secret key doesn’t look right')
     });
 };

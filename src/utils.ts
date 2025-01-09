@@ -101,7 +101,7 @@ export const isValidAccountHash = (
  * If the secretKey fails any of these checks or an exception is caught during parsing/decoding,
  * false is returned indicating the secretKey is invalid.
  */
-export const isValidSecretKeyHash = async (secretKey: string) => {
+export const isValidSecretKeyHash = (secretKey: string) => {
   if (!secretKey) {
     return false;
   }
@@ -111,7 +111,7 @@ export const isValidSecretKeyHash = async (secretKey: string) => {
   }
 
   try {
-    await PrivateKey.fromHex(secretKey, KeyAlgorithm.SECP256K1);
+    PrivateKey.fromHex(secretKey, KeyAlgorithm.SECP256K1);
 
     return true;
   } catch (error) {
@@ -173,7 +173,7 @@ export const setCSPForSafari = () => {
       meta.setAttribute('http-equiv', 'Content-Security-Policy');
       meta.setAttribute(
         'content',
-        `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://onramp-api.cspr.click/api/ https://cspr-wallet-api.dev.make.services/`
+        `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://cspr-wallet-api-condor.dev.make.services/ https://onramp-api.cspr.click/api/ https://cspr-wallet-api.dev.make.services/ https://cspr-wallet-api-condor.dev.make.services/`
       );
 
       document.getElementsByTagName('head')[0].appendChild(meta);
