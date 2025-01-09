@@ -97,7 +97,7 @@ export function SignDeployPage() {
         return;
       }
 
-      const tx = Transaction.fromJson(deployJson);
+      const tx = Transaction.fromJSON(deployJson);
       setTransaction(tx);
     } catch (e) {
       const error = Error('Invalid transaction json');

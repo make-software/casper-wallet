@@ -232,7 +232,7 @@ export const StakesPage = () => {
       });
 
       dispatchToMainStore(
-        ledgerDeployChanged(JSON.stringify(Deploy.toJson(deploy)))
+        ledgerDeployChanged(JSON.stringify(Deploy.toJSON(deploy)))
       );
     }
   };

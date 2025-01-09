@@ -88,7 +88,7 @@ export const signDeploy = async (
   return deploy;
 };
 
-export const sendSignDeploy = (
+export const sendSignDeploy = async (
   deploy: Deploy,
   nodeUrl: CasperNodeUrl
 ): Promise<
@@ -110,7 +110,7 @@ export const sendSignDeploy = (
     body: JSON.stringify({
       jsonrpc: '2.0',
       method: 'account_put_deploy',
-      params: [Deploy.toJson(deploy)],
+      params: [Deploy.toJSON(deploy)],
       id: new Date().getTime()
     })
   }).then(toJson);
