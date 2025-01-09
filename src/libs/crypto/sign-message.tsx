@@ -13,24 +13,24 @@ export const createMessageBytesWithHeaders = (message: string): Uint8Array => {
   return Uint8Array.from(Buffer.from(messageWithHeader));
 };
 
-export const signMessage = async (
+export const signMessage = (
   message: string,
   publicKeyHex: string,
   privateKeyBase64: string
 ) => {
   const publicKey = PublicKey.fromHex(publicKeyHex);
 
-  const privateKey = await PrivateKey.fromHex(
+  const privateKey = PrivateKey.fromHex(
     Conversions.base64to16(privateKeyBase64),
     publicKey.cryptoAlg
   );
-  `§`;
+
   const messageHash = Uint8Array.from(
     Buffer.from(createMessageBytesWithHeaders(message))
   );
 
   // signature is a signed deploy hash
-  const signature = await privateKey.sign(messageHash);
+  const signature = privateKey.sign(messageHash);
 
   // ERROR HANDLING
   if (signature == null) {

@@ -157,7 +157,7 @@ export function SignDeployPage() {
 
       signature = resp.signature;
     } else {
-      signature = await signDeploy(
+      signature = signDeploy(
         transaction.hash.toBytes(),
         signingAccount.publicKey,
         signingAccount.secretKey

@@ -124,7 +124,7 @@ export function SignMessagePage() {
 
       signature = resp.signature;
     } else {
-      signature = await signMessage(
+      signature = signMessage(
         message,
         signingAccount.publicKey,
         signingAccount.secretKey
