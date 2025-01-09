@@ -157,7 +157,7 @@ export const TransferNftPage = () => {
       const { recipientPublicKey } = recipientForm.getValues();
       const { paymentAmount } = amountForm.getValues();
 
-      const KEYS = await createAsymmetricKeys(
+      const KEYS = createAsymmetricKeys(
         activeAccount.publicKey,
         activeAccount.secretKey
       );
@@ -235,7 +235,7 @@ export const TransferNftPage = () => {
     if (haveReverseOwnerLookUp || !nftToken || !activeAccount || !tokenStandard)
       return;
 
-    const KEYS = await createAsymmetricKeys(
+    const KEYS = createAsymmetricKeys(
       activeAccount.publicKey,
       activeAccount.secretKey
     );
@@ -251,7 +251,7 @@ export const TransferNftPage = () => {
     });
 
     dispatchToMainStore(
-      ledgerDeployChanged(JSON.stringify(Deploy.toJson(deploy)))
+      ledgerDeployChanged(JSON.stringify(Deploy.toJSON(deploy)))
     );
     dispatchToMainStore(
       ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)

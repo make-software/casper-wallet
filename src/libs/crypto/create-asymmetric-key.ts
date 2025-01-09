@@ -2,18 +2,20 @@ import { Conversions, PrivateKey, PublicKey } from 'casper-js-sdk';
 
 export interface AsymmetricKeys {
   publicKey: PublicKey;
-  secretKey: PrivateKey;
+  secretKey: PrivateKey | null;
 }
 
-export async function createAsymmetricKeys(
+export function createAsymmetricKeys(
   publicKeyHex: string,
   secretKeyBase64: string
-): Promise<AsymmetricKeys> {
+): AsymmetricKeys {
   const publicKey = PublicKey.fromHex(publicKeyHex);
-  const privateKey = await PrivateKey.fromHex(
-    Conversions.base64to16(secretKeyBase64),
-    publicKey.cryptoAlg
-  );
+  const privateKey = secretKeyBase64.length
+    ? PrivateKey.fromHex(
+        Conversions.base64to16(secretKeyBase64),
+        publicKey.cryptoAlg
+      )
+    : null;
 
   return {
     publicKey: publicKey,

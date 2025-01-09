@@ -79,7 +79,11 @@ export const signDeploy = async (
     return signLedgerDeploy(deploy, activeAccount);
   }
 
-  await deploy.sign(keys.secretKey);
+  if (!keys.secretKey) {
+    throw new Error('Missing secret key');
+  }
+
+  deploy.sign(keys.secretKey);
 
   return deploy;
 };

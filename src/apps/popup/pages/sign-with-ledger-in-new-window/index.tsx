@@ -33,7 +33,7 @@ export const SignWithLedgerInNewWindowPage = () => {
       return;
     }
 
-    const KEYS = await createAsymmetricKeys(
+    const KEYS = createAsymmetricKeys(
       activeAccount.publicKey,
       activeAccount.secretKey
     );

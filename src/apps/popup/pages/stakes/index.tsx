@@ -154,7 +154,7 @@ export const StakesPage = () => {
     if (activeAccount) {
       const motesAmount = CSPRtoMotes(inputAmountCSPR);
 
-      const KEYS = await createAsymmetricKeys(
+      const KEYS = createAsymmetricKeys(
         activeAccount.publicKey,
         activeAccount.secretKey
       );
