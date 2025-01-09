@@ -6,10 +6,10 @@ import { t } from 'i18next';
 
 import { AsymmetricKeys } from './create-asymmetric-key';
 
-export async function parseSecretKeyString(fileContents: string): Promise<{
+export function parseSecretKeyString(fileContents: string): {
   publicKeyHex: string;
   secretKeyBase64: string;
-}> {
+} {
   const der = Base64.unarmor(fileContents);
   const decodedString: string = ASN1.decode(der).toPrettyString();
   const algorithm = getAlgorithm(decodedString);
@@ -18,9 +18,8 @@ export async function parseSecretKeyString(fileContents: string): Promise<{
   switch (algorithm) {
     case 'Ed25519':
       {
-        const secretKeyHex = decodedString.split('\n')[5].split('|')[1];
-        const privateKey = await PrivateKey.fromHex(
-          secretKeyHex,
+        const privateKey = PrivateKey.fromPem(
+          fileContents,
           KeyAlgorithm.ED25519
         );
         const publicKey = privateKey.publicKey;
@@ -31,9 +30,8 @@ export async function parseSecretKeyString(fileContents: string): Promise<{
 
     case 'Secp256K1':
       {
-        const secretKeyHex = decodedString.split('\n')[2].split('|')[1];
-        const privateKey = await PrivateKey.fromHex(
-          secretKeyHex,
+        const privateKey = PrivateKey.fromPem(
+          fileContents,
           KeyAlgorithm.SECP256K1
         );
         const publicKey = privateKey.publicKey;
@@ -46,6 +44,12 @@ export async function parseSecretKeyString(fileContents: string): Promise<{
       throw Error(
         t('A private key was not detected. Try importing a different file.')
       );
+  }
+
+  if (!keyPair.secretKey) {
+    throw new Error(
+      t('A private key was not detected. Try importing a different file.')
+    );
   }
 
   return {

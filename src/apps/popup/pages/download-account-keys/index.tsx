@@ -47,12 +47,15 @@ export const DownloadAccountKeysPage = () => {
     const zip = new JSZip();
 
     for (const account of selectedAccounts) {
-      const asymmetricKey = await createAsymmetricKeys(
+      const asymmetricKey = createAsymmetricKeys(
         account.publicKey,
         account.secretKey
       );
-      const file = asymmetricKey.secretKey.toPem();
-      zip.file(`${account.name}_secret_key.pem`, file);
+
+      if (asymmetricKey.secretKey) {
+        const file = asymmetricKey.secretKey.toPem();
+        zip.file(`${account.name}_secret_key.pem`, file);
+      }
     }
 
     await zip.generateAsync({ type: 'blob' }).then(function (content) {

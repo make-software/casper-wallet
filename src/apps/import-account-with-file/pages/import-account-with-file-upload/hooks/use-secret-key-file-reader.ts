@@ -55,7 +55,7 @@ export function useSecretKeyFileReader({
         }
 
         const { publicKeyHex, secretKeyBase64 } =
-          await parseSecretKeyString(fileContents);
+          parseSecretKeyString(fileContents);
 
         const secretKeyError = await doesSecretKeyExist(secretKeyBase64);
         if (secretKeyError) {

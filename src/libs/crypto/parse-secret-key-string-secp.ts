@@ -2,14 +2,11 @@ import { Conversions, KeyAlgorithm, PrivateKey } from 'casper-js-sdk';
 
 import { AsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 
-export const parseSecretKeyStringSecp = async (secretKeyHex: string) => {
+export const parseSecretKeyStringSecp = (secretKeyHex: string) => {
   let keyPair: AsymmetricKeys;
 
   try {
-    const privateKey = await PrivateKey.fromHex(
-      secretKeyHex,
-      KeyAlgorithm.SECP256K1
-    );
+    const privateKey = PrivateKey.fromHex(secretKeyHex, KeyAlgorithm.SECP256K1);
     const publicKey = privateKey.publicKey;
 
     keyPair = {
@@ -17,7 +14,10 @@ export const parseSecretKeyStringSecp = async (secretKeyHex: string) => {
       secretKey: privateKey
     };
   } catch (error) {
-    console.error(error);
+    throw Error('Invalid secret key');
+  }
+
+  if (!keyPair.secretKey) {
     throw Error('Invalid secret key');
   }
 
