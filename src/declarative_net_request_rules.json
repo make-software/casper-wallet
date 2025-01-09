@@ -51,6 +51,23 @@
     }
   },
   {
+    "id": 7,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://casperwallet.io"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "https://cspr-wallet-api-condor.dev.make.services"
+    }
+  },
+  {
     "id": 4,
     "priority": 1,
     "action": {

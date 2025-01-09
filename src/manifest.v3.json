@@ -27,6 +27,7 @@
     "https://image-proxy-cdn.make.services/*",
     "https://api.testnet.casperwallet.io/*",
     "https://api.mainnet.casperwallet.io/*",
+    "https://cspr-wallet-api-condor.dev.make.services/*",
     "https://node.cspr.cloud/*",
     "https://node.testnet.cspr.cloud/*",
     "https://cspr-wallet-api.dev.make.services/*",
