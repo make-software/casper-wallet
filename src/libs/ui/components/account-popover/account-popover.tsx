@@ -196,7 +196,11 @@ export const AccountActionsMenuPopover = ({
         </PopoverItemsContainer>
       )}
     >
-      <SvgIcon src="assets/icons/more.svg" onClick={() => setIsOpen(!isOpen)} />
+      <SvgIcon
+        src="assets/icons/more.svg"
+        data-testid="popover-children-container"
+        onClick={() => setIsOpen(!isOpen)}
+      />
     </Popover>
   );
 };
