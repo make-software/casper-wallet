@@ -1,3 +1,4 @@
+import { isError } from 'casper-wallet-core';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -50,25 +51,37 @@ export function useSecretKeyFileReader({
         const fileContents = reader.result as string;
 
         const fileValidationError = isFileValid(fileContents);
+
         if (fileValidationError) {
           return onFailure(fileValidationError.message);
         }
 
-        const { publicKeyHex, secretKeyBase64 } =
-          parseSecretKeyString(fileContents);
+        try {
+          const { publicKeyHex, secretKeyBase64 } =
+            parseSecretKeyString(fileContents);
 
-        const secretKeyError = await doesSecretKeyExist(secretKeyBase64);
-        if (secretKeyError) {
-          return onFailure(secretKeyError.message);
+          const secretKeyError = await doesSecretKeyExist(secretKeyBase64);
+
+          if (secretKeyError) {
+            return onFailure(secretKeyError.message);
+          }
+
+          return onSuccess({
+            imported: true,
+            name: name.trim(),
+            publicKey: publicKeyHex,
+            secretKey: secretKeyBase64,
+            hidden: false
+          });
+        } catch (e) {
+          return onFailure(
+            isError(e)
+              ? e.message
+              : t(
+                  'A private key was not detected. Try importing a different file.'
+                )
+          );
         }
-
-        return onSuccess({
-          imported: true,
-          name: name.trim(),
-          publicKey: publicKeyHex,
-          secretKey: secretKeyBase64,
-          hidden: false
-        });
       };
     },
     [t, onSuccess, onFailure]
