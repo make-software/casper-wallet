@@ -52,7 +52,7 @@
     "styled-components": "^5"
   },
   "dependencies": {
-    "@bringweb3/chrome-extension-kit": "^1.2.4",
+    "@bringweb3/chrome-extension-kit": "^1.2.11",
     "@formatjs/intl": "2.10.4",
     "@hookform/resolvers": "2.9.10",
     "@lapo/asn1js": "1.2.4",
@@ -71,7 +71,7 @@
     "@zondax/ledger-casper": "^2.6.3",
     "base64-loader": "1.0.0",
     "big.js": "^6.2.1",
-    "casper-js-sdk": "5.0.3-beta2",
+    "casper-js-sdk": "5.0.4-beta2",
     "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#d29880a97ddc05d5fe8f78cfca1ad61ea53a2848",
     "date-fns": "^2.30.0",
     "dotenv-webpack": "^8.1.0",
