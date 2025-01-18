@@ -24,6 +24,8 @@ export const useFetchValidators = () => {
         queryFn: () =>
           validatorsRepository.getValidators({
             network: network.toLowerCase() as CasperNetwork,
+            page: 1,
+            limit: 250, // TODO pagination
             withProxyHeader: false
           }),
         staleTime: VALIDATORS_REFRESH_RATE
