@@ -38,6 +38,20 @@
 		2439D7D429F0757C00F07C90 /* onboarding.html in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7BE29F0757C00F07C90 /* onboarding.html */; };
 		2439D7D529F0757C00F07C90 /* signature-request.html in Resources */ = {isa = PBXBuildFile; fileRef = 2439D7BF29F0757C00F07C90 /* signature-request.html */; };
 		B3867CAE2A7B038000BD01B7 /* declarative_net_request_rules.json in Resources */ = {isa = PBXBuildFile; fileRef = B3867CAC2A7B038000BD01B7 /* declarative_net_request_rules.json */; };
+		B39B904A2D3EFCE1007C438D /* reactPlayerSoundCloud.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39B90432D3EFCE1007C438D /* reactPlayerSoundCloud.bundle.js */; };
+		B39B904B2D3EFCE1007C438D /* reactPlayerMixcloud.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39B90402D3EFCE1007C438D /* reactPlayerMixcloud.bundle.js */; };
+		B39B904C2D3EFCE1007C438D /* reactPlayerDailyMotion.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39B903C2D3EFCE1007C438D /* reactPlayerDailyMotion.bundle.js */; };
+		B39B904D2D3EFCE1007C438D /* reactPlayerPreview.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39B90422D3EFCE1007C438D /* reactPlayerPreview.bundle.js */; };
+		B39B904E2D3EFCE1007C438D /* reactPlayerFilePlayer.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39B903E2D3EFCE1007C438D /* reactPlayerFilePlayer.bundle.js */; };
+		B39B904F2D3EFCE1007C438D /* reactPlayerYouTube.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39B90492D3EFCE1007C438D /* reactPlayerYouTube.bundle.js */; };
+		B39B90502D3EFCE1007C438D /* reactPlayerTwitch.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39B90452D3EFCE1007C438D /* reactPlayerTwitch.bundle.js */; };
+		B39B90512D3EFCE1007C438D /* reactPlayerKaltura.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39B903F2D3EFCE1007C438D /* reactPlayerKaltura.bundle.js */; };
+		B39B90522D3EFCE1007C438D /* reactPlayerWistia.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39B90482D3EFCE1007C438D /* reactPlayerWistia.bundle.js */; };
+		B39B90532D3EFCE1007C438D /* reactPlayerStreamable.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39B90442D3EFCE1007C438D /* reactPlayerStreamable.bundle.js */; };
+		B39B90542D3EFCE1007C438D /* reactPlayerFacebook.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39B903D2D3EFCE1007C438D /* reactPlayerFacebook.bundle.js */; };
+		B39B90552D3EFCE1007C438D /* reactPlayerVidyard.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39B90462D3EFCE1007C438D /* reactPlayerVidyard.bundle.js */; };
+		B39B90562D3EFCE1007C438D /* reactPlayerMux.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39B90412D3EFCE1007C438D /* reactPlayerMux.bundle.js */; };
+		B39B90572D3EFCE1007C438D /* reactPlayerVimeo.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39B90472D3EFCE1007C438D /* reactPlayerVimeo.bundle.js */; };
 		B39F2C712C885940002CF2B9 /* 646.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39F2C6A2C885940002CF2B9 /* 646.bundle.js */; };
 		B39F2C722C885940002CF2B9 /* 652.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39F2C6B2C885940002CF2B9 /* 652.bundle.js */; };
 		B39F2C732C885940002CF2B9 /* 271.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39F2C6C2C885940002CF2B9 /* 271.bundle.js */; };
@@ -109,6 +123,20 @@
 		2439D7BE29F0757C00F07C90 /* onboarding.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = onboarding.html; path = ../../../build/firefox/onboarding.html; sourceTree = "<group>"; };
 		2439D7BF29F0757C00F07C90 /* signature-request.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = "signature-request.html"; path = "../../../build/firefox/signature-request.html"; sourceTree = "<group>"; };
 		B3867CAC2A7B038000BD01B7 /* declarative_net_request_rules.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = declarative_net_request_rules.json; path = ../../../src/declarative_net_request_rules.json; sourceTree = "<group>"; };
+		B39B903C2D3EFCE1007C438D /* reactPlayerDailyMotion.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = reactPlayerDailyMotion.bundle.js; path = "/Users/compote/Projects/casper-wallet/build/firefox/reactPlayerDailyMotion.bundle.js"; sourceTree = "<absolute>"; };
+		B39B903D2D3EFCE1007C438D /* reactPlayerFacebook.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = reactPlayerFacebook.bundle.js; path = "/Users/compote/Projects/casper-wallet/build/firefox/reactPlayerFacebook.bundle.js"; sourceTree = "<absolute>"; };
+		B39B903E2D3EFCE1007C438D /* reactPlayerFilePlayer.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = reactPlayerFilePlayer.bundle.js; path = "/Users/compote/Projects/casper-wallet/build/firefox/reactPlayerFilePlayer.bundle.js"; sourceTree = "<absolute>"; };
+		B39B903F2D3EFCE1007C438D /* reactPlayerKaltura.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = reactPlayerKaltura.bundle.js; path = "/Users/compote/Projects/casper-wallet/build/firefox/reactPlayerKaltura.bundle.js"; sourceTree = "<absolute>"; };
+		B39B90402D3EFCE1007C438D /* reactPlayerMixcloud.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = reactPlayerMixcloud.bundle.js; path = "/Users/compote/Projects/casper-wallet/build/firefox/reactPlayerMixcloud.bundle.js"; sourceTree = "<absolute>"; };
+		B39B90412D3EFCE1007C438D /* reactPlayerMux.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = reactPlayerMux.bundle.js; path = "/Users/compote/Projects/casper-wallet/build/firefox/reactPlayerMux.bundle.js"; sourceTree = "<absolute>"; };
+		B39B90422D3EFCE1007C438D /* reactPlayerPreview.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = reactPlayerPreview.bundle.js; path = "/Users/compote/Projects/casper-wallet/build/firefox/reactPlayerPreview.bundle.js"; sourceTree = "<absolute>"; };
+		B39B90432D3EFCE1007C438D /* reactPlayerSoundCloud.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = reactPlayerSoundCloud.bundle.js; path = "/Users/compote/Projects/casper-wallet/build/firefox/reactPlayerSoundCloud.bundle.js"; sourceTree = "<absolute>"; };
+		B39B90442D3EFCE1007C438D /* reactPlayerStreamable.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = reactPlayerStreamable.bundle.js; path = "/Users/compote/Projects/casper-wallet/build/firefox/reactPlayerStreamable.bundle.js"; sourceTree = "<absolute>"; };
+		B39B90452D3EFCE1007C438D /* reactPlayerTwitch.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = reactPlayerTwitch.bundle.js; path = "/Users/compote/Projects/casper-wallet/build/firefox/reactPlayerTwitch.bundle.js"; sourceTree = "<absolute>"; };
+		B39B90462D3EFCE1007C438D /* reactPlayerVidyard.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = reactPlayerVidyard.bundle.js; path = "/Users/compote/Projects/casper-wallet/build/firefox/reactPlayerVidyard.bundle.js"; sourceTree = "<absolute>"; };
+		B39B90472D3EFCE1007C438D /* reactPlayerVimeo.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = reactPlayerVimeo.bundle.js; path = "/Users/compote/Projects/casper-wallet/build/firefox/reactPlayerVimeo.bundle.js"; sourceTree = "<absolute>"; };
+		B39B90482D3EFCE1007C438D /* reactPlayerWistia.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = reactPlayerWistia.bundle.js; path = "/Users/compote/Projects/casper-wallet/build/firefox/reactPlayerWistia.bundle.js"; sourceTree = "<absolute>"; };
+		B39B90492D3EFCE1007C438D /* reactPlayerYouTube.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = reactPlayerYouTube.bundle.js; path = "/Users/compote/Projects/casper-wallet/build/firefox/reactPlayerYouTube.bundle.js"; sourceTree = "<absolute>"; };
 		B39F2C6A2C885940002CF2B9 /* 646.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 646.bundle.js; path = ../../../build/firefox/646.bundle.js; sourceTree = "<group>"; };
 		B39F2C6B2C885940002CF2B9 /* 652.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 652.bundle.js; path = ../../../build/firefox/652.bundle.js; sourceTree = "<group>"; };
 		B39F2C6C2C885940002CF2B9 /* 271.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 271.bundle.js; path = ../../../build/firefox/271.bundle.js; sourceTree = "<group>"; };
@@ -222,6 +250,20 @@
 				2439D7BD29F0757C00F07C90 /* logo192.png */,
 				2439D7BE29F0757C00F07C90 /* onboarding.html */,
 				2439D7BF29F0757C00F07C90 /* signature-request.html */,
+				B39B903C2D3EFCE1007C438D /* reactPlayerDailyMotion.bundle.js */,
+				B39B903D2D3EFCE1007C438D /* reactPlayerFacebook.bundle.js */,
+				B39B903E2D3EFCE1007C438D /* reactPlayerFilePlayer.bundle.js */,
+				B39B903F2D3EFCE1007C438D /* reactPlayerKaltura.bundle.js */,
+				B39B90402D3EFCE1007C438D /* reactPlayerMixcloud.bundle.js */,
+				B39B90412D3EFCE1007C438D /* reactPlayerMux.bundle.js */,
+				B39B90422D3EFCE1007C438D /* reactPlayerPreview.bundle.js */,
+				B39B90432D3EFCE1007C438D /* reactPlayerSoundCloud.bundle.js */,
+				B39B90442D3EFCE1007C438D /* reactPlayerStreamable.bundle.js */,
+				B39B90452D3EFCE1007C438D /* reactPlayerTwitch.bundle.js */,
+				B39B90462D3EFCE1007C438D /* reactPlayerVidyard.bundle.js */,
+				B39B90472D3EFCE1007C438D /* reactPlayerVimeo.bundle.js */,
+				B39B90482D3EFCE1007C438D /* reactPlayerWistia.bundle.js */,
+				B39B90492D3EFCE1007C438D /* reactPlayerYouTube.bundle.js */,
 			);
 			name = Resources;
 			path = "Casper Wallet Extension";
@@ -347,6 +389,20 @@
 				2439D7CC29F0757C00F07C90 /* signatureRequest.bundle.js in Resources */,
 				B3867CAE2A7B038000BD01B7 /* declarative_net_request_rules.json in Resources */,
 				2439D7CA29F0757C00F07C90 /* logo128.png in Resources */,
+				B39B904A2D3EFCE1007C438D /* reactPlayerSoundCloud.bundle.js in Resources */,
+				B39B904B2D3EFCE1007C438D /* reactPlayerMixcloud.bundle.js in Resources */,
+				B39B904C2D3EFCE1007C438D /* reactPlayerDailyMotion.bundle.js in Resources */,
+				B39B904D2D3EFCE1007C438D /* reactPlayerPreview.bundle.js in Resources */,
+				B39B904E2D3EFCE1007C438D /* reactPlayerFilePlayer.bundle.js in Resources */,
+				B39B904F2D3EFCE1007C438D /* reactPlayerYouTube.bundle.js in Resources */,
+				B39B90502D3EFCE1007C438D /* reactPlayerTwitch.bundle.js in Resources */,
+				B39B90512D3EFCE1007C438D /* reactPlayerKaltura.bundle.js in Resources */,
+				B39B90522D3EFCE1007C438D /* reactPlayerWistia.bundle.js in Resources */,
+				B39B90532D3EFCE1007C438D /* reactPlayerStreamable.bundle.js in Resources */,
+				B39B90542D3EFCE1007C438D /* reactPlayerFacebook.bundle.js in Resources */,
+				B39B90552D3EFCE1007C438D /* reactPlayerVidyard.bundle.js in Resources */,
+				B39B90562D3EFCE1007C438D /* reactPlayerMux.bundle.js in Resources */,
+				B39B90572D3EFCE1007C438D /* reactPlayerVimeo.bundle.js in Resources */,
 				2439D7C229F0757C00F07C90 /* connect-to-app.html in Resources */,
 				2439D7D529F0757C00F07C90 /* signature-request.html in Resources */,
 			);
