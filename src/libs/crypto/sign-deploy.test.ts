@@ -14,7 +14,7 @@ import { signDeploy } from './sign-deploy';
 const getSignature = (hash: Uint8Array, keyPair: AsymmetricKeys) => {
   const publicKeyHex = keyPair.publicKey.toHex(false);
   const privateKeyBase64 = Conversions.encodeBase64(
-    keyPair.secretKey.toBytes()
+    keyPair.secretKey!.toBytes()
   );
   return signDeploy(hash, publicKeyHex, privateKeyBase64);
 };
@@ -25,35 +25,31 @@ describe('sign-deploy', () => {
     'hex'
   );
 
-  it('should get correct signature for Ed25519 keyPair', async () => {
-    const privateKey = await PrivateKey.generate(KeyAlgorithm.ED25519);
+  it('should get correct signature for Ed25519 keyPair', () => {
+    const privateKey = PrivateKey.generate(KeyAlgorithm.ED25519);
     const keyPair: AsymmetricKeys = {
       secretKey: privateKey,
       publicKey: privateKey.publicKey
     };
-    const signature = await getSignature(hash, keyPair);
-    await expect(
-      keyPair.publicKey.verifySignature(hash, signature)
-    ).resolves.toBeTruthy();
+    const signature = getSignature(hash, keyPair);
+    expect(keyPair.publicKey.verifySignature(hash, signature)).toBeTruthy();
   });
 
-  it('should get correct signature for Secp256K1 keyPair', async () => {
-    const privateKey = await PrivateKey.generate(KeyAlgorithm.SECP256K1);
+  it('should get correct signature for Secp256K1 keyPair', () => {
+    const privateKey = PrivateKey.generate(KeyAlgorithm.SECP256K1);
     const keyPair: AsymmetricKeys = {
       secretKey: privateKey,
       publicKey: privateKey.publicKey
     };
-    const signature = await getSignature(hash, keyPair);
-    await expect(
-      keyPair.publicKey.verifySignature(hash, signature)
-    ).resolves.toBeTruthy();
+    const signature = getSignature(hash, keyPair);
+    expect(keyPair.publicKey.verifySignature(hash, signature)).toBeTruthy();
   });
 
-  it('should set correct signature on the deploy with setSignature', async () => {
-    const signingPrivateKey = await PrivateKey.generate(KeyAlgorithm.ED25519);
-    const recipientPrivateKey = await PrivateKey.generate(KeyAlgorithm.ED25519);
+  it('should set correct signature on the deploy with setSignature', () => {
+    const signingPrivateKey = PrivateKey.generate(KeyAlgorithm.ED25519);
+    const recipientPrivateKey = PrivateKey.generate(KeyAlgorithm.ED25519);
 
-    const getSignedDeployApproval = async () => {
+    const getSignedDeployApproval = () => {
       let deploy = makeCsprTransferDeploy({
         transferAmount: '1000000000',
         memo: '34',
@@ -62,7 +58,7 @@ describe('sign-deploy', () => {
         recipientPublicKeyHex: recipientPrivateKey.publicKey.toHex()
       });
 
-      const signature = await getSignature(deploy.hash.toBytes(), {
+      const signature = getSignature(deploy.hash.toBytes(), {
         publicKey: signingPrivateKey.publicKey,
         secretKey: signingPrivateKey
       });
@@ -76,8 +72,6 @@ describe('sign-deploy', () => {
       return deploy.approvals[0].signer;
     };
 
-    await expect(getSignedDeployApproval()).resolves.toEqual(
-      signingPrivateKey.publicKey
-    );
+    expect(getSignedDeployApproval()).toEqual(signingPrivateKey.publicKey);
   });
 });
