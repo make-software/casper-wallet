@@ -7,6 +7,7 @@ interface PopoverProps {
   children: JSX.Element;
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isAllAccountsPage?: boolean;
 }
 
 export function Popover({
@@ -14,7 +15,8 @@ export function Popover({
   children,
   popoverParentRef,
   isOpen,
-  setIsOpen
+  setIsOpen,
+  isAllAccountsPage = false
 }: PropsWithChildren<PopoverProps>) {
   useEffect(() => {
     // Get the container with class "ms-container"
@@ -48,11 +50,17 @@ export function Popover({
       isOpen={isOpen}
       onClickOutside={() => setIsOpen(false)}
       positions={['bottom', 'top']}
-      containerStyle={{
-        zIndex: '15'
-      }}
-      transform={{ top: 55, left: 135 }}
-      parentElement={popoverParentRef.current || undefined}
+      containerStyle={
+        isAllAccountsPage
+          ? undefined
+          : {
+              zIndex: '15'
+            }
+      }
+      transform={isAllAccountsPage ? undefined : { top: 55, left: 135 }}
+      parentElement={
+        isAllAccountsPage ? undefined : popoverParentRef.current || undefined
+      }
       content={content}
     >
       {children}
