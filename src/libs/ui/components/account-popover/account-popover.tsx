@@ -35,12 +35,14 @@ interface AccountActionsMenuPopoverProps {
   onClick?: (e: React.MouseEvent) => void;
   showHideAccountItem?: boolean;
   popoverParentRef: React.MutableRefObject<HTMLDivElement | null>;
+  isAllAccountsPage?: boolean;
 }
 export const AccountActionsMenuPopover = ({
   account,
   onClick,
   showHideAccountItem,
-  popoverParentRef
+  popoverParentRef,
+  isAllAccountsPage = false
 }: AccountActionsMenuPopoverProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -59,6 +61,7 @@ export const AccountActionsMenuPopover = ({
   return (
     <Popover
       popoverParentRef={popoverParentRef}
+      isAllAccountsPage={isAllAccountsPage}
       isOpen={isOpen}
       setIsOpen={setIsOpen}
       content={() => (
@@ -80,7 +83,7 @@ export const AccountActionsMenuPopover = ({
                 marginRight="medium"
                 color="contentDisabled"
               />
-              <Typography type="body">
+              <Typography type="body" color="contentPrimary">
                 <Trans t={t}>Disconnect</Trans>
               </Typography>
             </PopoverLink>
@@ -104,7 +107,7 @@ export const AccountActionsMenuPopover = ({
                 marginRight="medium"
                 color="contentDisabled"
               />
-              <Typography type="body">
+              <Typography type="body" color="contentPrimary">
                 <Trans t={t}>Connect</Trans>
               </Typography>
             </PopoverLink>
@@ -126,7 +129,7 @@ export const AccountActionsMenuPopover = ({
               marginRight="medium"
               color="contentDisabled"
             />
-            <Typography type="body">
+            <Typography type="body" color="contentPrimary">
               <Trans t={t}>Rename</Trans>
             </Typography>
           </PopoverLink>
@@ -141,7 +144,7 @@ export const AccountActionsMenuPopover = ({
               marginRight="medium"
               color="contentDisabled"
             />
-            <Typography type="body">
+            <Typography type="body" color="contentPrimary">
               <Trans t={t}>View on CSPR.live</Trans>
             </Typography>
           </PopoverLink>
@@ -163,7 +166,7 @@ export const AccountActionsMenuPopover = ({
                 marginRight="medium"
                 color="contentDisabled"
               />
-              <Typography type="body">
+              <Typography type="body" color="contentPrimary">
                 {account.hidden ? (
                   <Trans t={t}>Show in list</Trans>
                 ) : (
@@ -189,7 +192,7 @@ export const AccountActionsMenuPopover = ({
               marginRight="medium"
               color="contentDisabled"
             />
-            <Typography type="body">
+            <Typography type="body" color="contentPrimary">
               <Trans t={t}>Manage</Trans>
             </Typography>
           </PopoverLink>
