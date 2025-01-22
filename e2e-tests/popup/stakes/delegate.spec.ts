@@ -59,6 +59,11 @@ popup.describe('Popup UI: Delegation', () => {
           name: 'You’ve submitted a delegation'
         })
       ).toBeVisible();
+
+      await popupPage.waitForTimeout(1000);
+      await popupPage.getByRole('button', { name: 'Done' }).click();
+
+      await popupPage.getByText('Close').click();
     }
   );
 });

@@ -27,6 +27,11 @@ popup.describe('Popup UI: Redelegation', () => {
       await new Promise(r => setTimeout(r, 2000));
 
       await popupPage
+        .getByPlaceholder('Validator public address', { exact: true })
+        .fill(VALIDATOR_FOR_STAKE.publicKey);
+
+      await new Promise(r => setTimeout(r, 2000));
+      await popupPage
         .getByText(VALIDATOR_FOR_STAKE.truncatedPublicKey, { exact: true })
         .click();
 
