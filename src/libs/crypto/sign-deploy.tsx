@@ -1,6 +1,6 @@
 import { Conversions, PrivateKey, PublicKey } from 'casper-js-sdk';
 
-export const signDeploy = (
+export const signDeployForProviderResponse = (
   deployHash: Uint8Array,
   publicKeyHex: string,
   privateKeyBase64: string

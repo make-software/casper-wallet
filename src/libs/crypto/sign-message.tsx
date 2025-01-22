@@ -13,7 +13,7 @@ export const createMessageBytesWithHeaders = (message: string): Uint8Array => {
   return Uint8Array.from(Buffer.from(messageWithHeader));
 };
 
-export const signMessage = (
+export const signMessageForProviderResponse = (
   message: string,
   publicKeyHex: string,
   privateKeyBase64: string

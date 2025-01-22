@@ -21,7 +21,7 @@ import { useLedger } from '@hooks/use-ledger';
 
 import { sdkMethod } from '@content/sdk-method';
 
-import { signDeploy } from '@libs/crypto';
+import { signDeployForProviderResponse } from '@libs/crypto';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import {
   AlignedFlexRow,
@@ -157,7 +157,7 @@ export function SignDeployPage() {
 
       signature = resp.signature;
     } else {
-      signature = signDeploy(
+      signature = signDeployForProviderResponse(
         transaction.hash.toBytes(),
         signingAccount.publicKey,
         signingAccount.secretKey
