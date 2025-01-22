@@ -122,6 +122,7 @@ export const AllAccountsContent = () => {
                 accountsInfo={accountsInfo}
                 accountLiquidBalance={accountLiquidBalance}
                 isLoadingBalance={isLoadingBalance}
+                isAllAccountsPage={true}
               />
             );
           }}
