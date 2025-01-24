@@ -1,5 +1,7 @@
-import { Keys, decodeBase64 } from 'casper-js-sdk';
+import { Conversions, KeyAlgorithm, PrivateKey } from 'casper-js-sdk';
 import fs from 'fs';
+
+import { AsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 
 import { parseSecretKeyString } from './parse-secret-key-string';
 
@@ -30,7 +32,7 @@ it('should import key pair from the pem file, validate keys and generate the sam
 
     expect(keyPair.publicKey.toHex(false)).toBe(pemFilePublicKeyHex);
     expect(keyPair.publicKey.toHex(false)).toBe(publicKeyHex);
-    expect(keyPair.exportPrivateKeyInPem()).toBe(pemFileContents);
+    expect(keyPair.secretKey!.toPem()).toBe(pemFileContents);
   });
 });
 
@@ -38,27 +40,33 @@ function getKeyPairFromSecretKeyBase64(
   asymmetricKey: 'ed' | 'secp',
   secretKeyBase64: string
 ) {
-  let keyPair: Keys.AsymmetricKey;
+  let keyPair: AsymmetricKeys;
 
   switch (asymmetricKey) {
     case 'ed':
       {
-        const secretKey = decodeBase64(secretKeyBase64);
-        const parsedSecretKey = Keys.Ed25519.parsePrivateKey(secretKey);
-        const publicKey = Keys.Ed25519.privateToPublicKey(parsedSecretKey);
-        keyPair = Keys.Ed25519.parseKeyPair(publicKey, secretKey);
+        const secretKey = Conversions.base64to16(secretKeyBase64);
+        const privateKey = PrivateKey.fromHex(secretKey, KeyAlgorithm.ED25519);
+        const publicKey = privateKey.publicKey;
+        keyPair = {
+          secretKey: privateKey,
+          publicKey
+        };
       }
       break;
 
     case 'secp':
       {
-        const secretKey = decodeBase64(secretKeyBase64);
-        const parsedSecretKey = Keys.Secp256K1.parsePrivateKey(
+        const secretKey = Conversions.base64to16(secretKeyBase64);
+        const privateKey = PrivateKey.fromHex(
           secretKey,
-          'raw'
+          KeyAlgorithm.SECP256K1
         );
-        const publicKey = Keys.Secp256K1.privateToPublicKey(parsedSecretKey);
-        keyPair = Keys.Secp256K1.parseKeyPair(publicKey, secretKey, 'raw');
+        const publicKey = privateKey.publicKey;
+        keyPair = {
+          secretKey: privateKey,
+          publicKey
+        };
       }
       break;
 

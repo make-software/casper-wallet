@@ -17,7 +17,7 @@ import { useLedger } from '@hooks/use-ledger';
 
 import { sdkMethod } from '@content/sdk-method';
 
-import { signMessage } from '@libs/crypto/sign-message';
+import { signMessageForProviderResponse } from '@libs/crypto/sign-message';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import {
   AlignedFlexRow,
@@ -124,7 +124,7 @@ export function SignMessagePage() {
 
       signature = resp.signature;
     } else {
-      signature = signMessage(
+      signature = signMessageForProviderResponse(
         message,
         signingAccount.publicKey,
         signingAccount.secretKey

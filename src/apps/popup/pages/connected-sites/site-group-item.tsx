@@ -1,3 +1,4 @@
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -23,6 +24,7 @@ interface SiteGroupItemProps {
   handleOnClick: () => void;
   imported?: boolean;
   hardware?: HardwareWalletType;
+  csprName: Maybe<string> | undefined;
 }
 
 export function SiteGroupItem({
@@ -30,7 +32,8 @@ export function SiteGroupItem({
   publicKey,
   handleOnClick,
   imported,
-  hardware
+  hardware,
+  csprName
 }: SiteGroupItemProps) {
   return (
     <SiteGroupItemContainer>
@@ -40,6 +43,7 @@ export function SiteGroupItem({
         </Typography>
         <Hash
           variant={HashVariant.CaptionHash}
+          csprName={csprName}
           value={publicKey}
           truncated
           isImported={imported}

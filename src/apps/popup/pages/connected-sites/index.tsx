@@ -8,15 +8,18 @@ import { SiteGroupItem } from '@popup/pages/connected-sites/site-group-item';
 
 import {
   selectAccountsByOriginDict,
-  selectSiteNameByOriginDict
+  selectSiteNameByOriginDict,
+  selectVaultAccountsPublicKeys
 } from '@background/redux/vault/selectors';
 
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   ContentContainer,
   IllustrationContainer,
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import { List, SvgIcon, Typography } from '@libs/ui/components';
 
 export function ConnectedSitesPage() {
@@ -29,8 +32,11 @@ export function ConnectedSitesPage() {
 
   const accountsByOrigin = useSelector(selectAccountsByOriginDict);
   const siteNameByOriginDict = useSelector(selectSiteNameByOriginDict);
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
   const isNoSitesConnected = !Object.entries(accountsByOrigin).length;
+
+  const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
 
   if (isNoSitesConnected) {
     return (
@@ -88,11 +94,17 @@ export function ConnectedSitesPage() {
             renderRow={(account, index, array) => {
               const { name, publicKey, imported, hardware } = account;
 
+              const accountHash = getAccountHashFromPublicKey(publicKey);
+
+              const csprName =
+                accountsInfo && accountsInfo[accountHash]?.csprName;
+
               return (
                 <SiteGroupItem
                   key={name}
                   name={name}
                   publicKey={publicKey}
+                  csprName={csprName}
                   imported={imported}
                   hardware={hardware}
                   handleOnClick={async () => {

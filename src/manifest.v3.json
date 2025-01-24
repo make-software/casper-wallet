@@ -11,7 +11,8 @@
     "management",
     "storage",
     "tabs",
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "alarms"
   ],
   "declarative_net_request": {
     "rule_resources": [
@@ -26,8 +27,11 @@
     "https://image-proxy-cdn.make.services/*",
     "https://api.testnet.casperwallet.io/*",
     "https://api.mainnet.casperwallet.io/*",
+    "https://cspr-wallet-api-condor.dev.make.services/*",
     "https://node.cspr.cloud/*",
-    "https://node.testnet.cspr.cloud/*"
+    "https://node.testnet.cspr.cloud/*",
+    "https://cspr-wallet-api.dev.make.services/*",
+    "https://*.bringweb3.io/*"
   ],
   "background": {
     "service_worker": "./background.bundle.js"

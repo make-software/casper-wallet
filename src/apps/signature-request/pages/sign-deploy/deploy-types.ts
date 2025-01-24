@@ -1,5 +1,4 @@
-import { CLValue } from 'casper-js-sdk';
-import { Deploy } from 'casper-js-sdk/dist/lib/DeployUtil';
+import { CLValue, Deploy } from 'casper-js-sdk';
 
 export type ArgDict = { [key: string]: string | CLValue };
 

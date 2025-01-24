@@ -1,14 +1,23 @@
-import { DeployUtil, Keys } from 'casper-js-sdk';
+import { concatBytes } from '@noble/ciphers/utils';
+import {
+  CasperNetworkName,
+  Conversions,
+  Deploy,
+  KeyAlgorithm,
+  PrivateKey,
+  makeCsprTransferDeploy
+} from 'casper-js-sdk';
 
-import { signDeploy } from './sign-deploy';
+import { AsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 
-const getSignature = (
-  hash: Uint8Array,
-  keyPair: Keys.Ed25519 | Keys.Secp256K1
-) => {
+import { signDeployForProviderResponse } from './sign-deploy';
+
+const getSignature = (hash: Uint8Array, keyPair: AsymmetricKeys) => {
   const publicKeyHex = keyPair.publicKey.toHex(false);
-  const privateKeyBase64 = Buffer.from(keyPair.privateKey).toString('base64');
-  return signDeploy(hash, publicKeyHex, privateKeyBase64);
+  const privateKeyBase64 = Conversions.encodeBase64(
+    keyPair.secretKey!.toBytes()
+  );
+  return signDeployForProviderResponse(hash, publicKeyHex, privateKeyBase64);
 };
 
 describe('sign-deploy', () => {
@@ -18,50 +27,58 @@ describe('sign-deploy', () => {
   );
 
   it('should get correct signature for Ed25519 keyPair', () => {
-    const keyPair = Keys.Ed25519.new();
+    const privateKey = PrivateKey.generate(KeyAlgorithm.ED25519);
+    const keyPair: AsymmetricKeys = {
+      secretKey: privateKey,
+      publicKey: privateKey.publicKey
+    };
     const signature = getSignature(hash, keyPair);
-    expect(keyPair.verify(signature, hash)).toBeTruthy();
+    const algBytes = Uint8Array.of(privateKey.publicKey.cryptoAlg);
+    expect(
+      keyPair.publicKey.verifySignature(hash, concatBytes(algBytes, signature))
+    ).toBeTruthy();
   });
 
   it('should get correct signature for Secp256K1 keyPair', () => {
-    const keyPair = Keys.Secp256K1.new();
+    const privateKey = PrivateKey.generate(KeyAlgorithm.SECP256K1);
+    const keyPair: AsymmetricKeys = {
+      secretKey: privateKey,
+      publicKey: privateKey.publicKey
+    };
+    const algBytes = Uint8Array.of(privateKey.publicKey.cryptoAlg);
     const signature = getSignature(hash, keyPair);
-    expect(keyPair.verify(signature, hash)).toBeTruthy();
+    expect(
+      keyPair.publicKey.verifySignature(hash, concatBytes(algBytes, signature))
+    ).toBeTruthy();
   });
 
   it('should set correct signature on the deploy with setSignature', () => {
-    const signingKeyPair = Keys.Ed25519.new();
-    const recipientKeyPair = Keys.Ed25519.new();
-    const networkName = 'test-network';
-    const paymentAmount = 10000000000000;
-    const transferAmount = 10;
-    const transferId = 34;
+    const signingPrivateKey = PrivateKey.generate(KeyAlgorithm.ED25519);
+    const recipientPrivateKey = PrivateKey.generate(KeyAlgorithm.ED25519);
 
-    let deployParams = new DeployUtil.DeployParams(
-      signingKeyPair.publicKey,
-      networkName
-    );
-    let session = DeployUtil.ExecutableDeployItem.newTransfer(
-      transferAmount,
-      recipientKeyPair.publicKey,
-      undefined,
-      transferId
-    );
-    let payment = DeployUtil.standardPayment(paymentAmount);
-    let deploy = DeployUtil.makeDeploy(deployParams, session, payment);
+    const getSignedDeployApproval = () => {
+      let deploy = makeCsprTransferDeploy({
+        transferAmount: '1000000000',
+        memo: '34',
+        chainName: CasperNetworkName.Testnet,
+        senderPublicKeyHex: signingPrivateKey.publicKey.toHex(),
+        recipientPublicKeyHex: recipientPrivateKey.publicKey.toHex()
+      });
 
-    const signature = getSignature(deploy.hash, signingKeyPair);
-    deploy = DeployUtil.setSignature(
-      deploy,
-      signature,
-      signingKeyPair.publicKey
-    );
+      const signature = getSignature(deploy.hash.toBytes(), {
+        publicKey: signingPrivateKey.publicKey,
+        secretKey: signingPrivateKey
+      });
 
-    const approval = {
-      signer: signingKeyPair.accountHex(),
-      signature: Keys.Ed25519.accountHex(signature)
+      deploy = Deploy.setSignature(
+        deploy,
+        signature,
+        signingPrivateKey.publicKey
+      );
+
+      return deploy.approvals[0].signer;
     };
 
-    expect(deploy.approvals[0]).toEqual(approval);
+    expect(getSignedDeployApproval()).toEqual(signingPrivateKey.publicKey);
   });
 });

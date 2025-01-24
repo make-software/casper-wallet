@@ -44,10 +44,13 @@ interface HashProps {
   placement?: Placement;
   withoutTooltip?: boolean;
   withCopyIcon?: boolean;
+  csprName?: Maybe<string>;
+  withOpacity?: boolean;
 }
 
 export function Hash({
   value,
+  csprName,
   variant,
   withCopyOnSelfClick = true,
   truncated,
@@ -57,7 +60,8 @@ export function Hash({
   placement,
   withoutTooltip = false,
   isLedger,
-  withCopyIcon
+  withCopyIcon,
+  withOpacity
 }: HashProps) {
   const { t } = useTranslation();
   const isDarkMode = useIsDarkMode();
@@ -71,13 +75,16 @@ export function Hash({
           placement={placement}
         >
           <Typography
-            type={variant}
+            type={csprName ? 'captionRegular' : variant}
             wordBreak={!truncated}
             color={color || 'contentSecondary'}
+            style={{ opacity: withOpacity ? '0.8' : '1' }}
           >
-            {truncated
-              ? truncateKey(value || '', { size: truncatedSize })
-              : value}
+            {csprName
+              ? csprName
+              : truncated
+                ? truncateKey(value || '', { size: truncatedSize })
+                : value}
           </Typography>
         </Tooltip>
         {isImported && (
@@ -97,7 +104,14 @@ export function Hash({
             size={20}
           />
         )}
-        {withCopyIcon && <SvgIcon src="assets/icons/copy.svg" size={16} />}
+        {withCopyIcon && (
+          <SvgIcon
+            src="assets/icons/copy.svg"
+            style={{ opacity: withOpacity ? '0.4' : '1' }}
+            {...(withOpacity && { color: 'contentOnFill' })}
+            size={16}
+          />
+        )}
       </>
     ),
     [
@@ -107,6 +121,7 @@ export function Hash({
       placement,
       variant,
       color,
+      csprName,
       truncatedSize,
       isImported,
       isLedger,
@@ -125,7 +140,10 @@ export function Hash({
                 <Trans t={t}>Copied!</Trans>
               </Typography>
             ) : (
-              <HashContainer gap={SpacingSize.Tiny} withHover>
+              <HashContainer
+                gap={withCopyIcon ? SpacingSize.Small : SpacingSize.Tiny}
+                withHover
+              >
                 {HashComponent}
               </HashContainer>
             )}

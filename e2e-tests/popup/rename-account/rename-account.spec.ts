@@ -7,7 +7,8 @@ popup.describe('Popup UI: rename account', () => {
     async ({ popupPage, unlockVault }) => {
       await unlockVault();
 
-      await popupPage.getByTestId('popover-children-container').click();
+      await popupPage.getByTestId('connection-status-modal').click();
+      await popupPage.getByTestId('popover-children-container').nth(0).click();
 
       await popupPage.getByText('Rename').click();
 

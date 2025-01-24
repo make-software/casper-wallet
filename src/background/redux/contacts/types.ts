@@ -12,7 +12,3 @@ export type ContactsState = {
 export interface EditContactActionType extends Contact {
   oldName: string;
 }
-
-export interface ContactWithId extends Contact {
-  id: string;
-}

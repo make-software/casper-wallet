@@ -63,6 +63,13 @@ export const NftResultRows = ({
           label="owned by"
           isAction
           iconSize={20}
+          csprName={
+            recipientAccountInfo?.csprName || callerAccountInfo?.csprName
+          }
+          imgLogo={
+            recipientAccountInfo?.brandingLogo ||
+            callerAccountInfo?.brandingLogo
+          }
         />
       </SimpleContainer>
     );
@@ -85,6 +92,8 @@ export const NftResultRows = ({
           label="to"
           isAction
           iconSize={20}
+          csprName={recipientAccountInfo?.csprName}
+          imgLogo={recipientAccountInfo?.brandingLogo}
         />
       </SimpleContainer>
     );
@@ -107,6 +116,8 @@ export const NftResultRows = ({
           label="from"
           isAction
           iconSize={20}
+          csprName={callerAccountInfo?.csprName}
+          imgLogo={callerAccountInfo?.brandingLogo}
         />
         <AccountInfoRow
           publicKey={recipientKey}
@@ -114,6 +125,8 @@ export const NftResultRows = ({
           label="to"
           isAction
           iconSize={20}
+          csprName={recipientAccountInfo?.csprName}
+          imgLogo={recipientAccountInfo?.brandingLogo}
         />
       </SimpleContainer>
     );
@@ -148,7 +161,14 @@ export const NftResultRows = ({
           isApprove
           collectionHash={contractHash}
         />
-        <AccountInfoRow publicKey={recipientKey} label="to" isAction />
+        <AccountInfoRow
+          publicKey={recipientKey}
+          label="to"
+          isAction
+          iconSize={20}
+          csprName={recipientAccountInfo?.csprName}
+          imgLogo={recipientAccountInfo?.brandingLogo}
+        />
       </SimpleContainer>
     );
   }

@@ -49,6 +49,8 @@ export interface LedgerAccountsOptions {
 export interface SignResult {
   signatureHex: string;
   signature: Uint8Array;
+  prefixedSignatureHex: string;
+  prefixedSignature: Uint8Array;
 }
 
 export type LedgerTransport = 'USB' | 'Bluetooth';

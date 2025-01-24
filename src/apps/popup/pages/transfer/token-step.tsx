@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { useActiveAccountErc20Tokens } from '@hooks/use-active-account-erc20-tokens';
+import { formatCep18Tokens } from '@popup/pages/home/components/tokens-list/utils';
+
 import { TokenType, useCasperToken } from '@hooks/use-casper-token';
 
 import {
@@ -9,6 +10,7 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
+import { useFetchCep18Tokens } from '@libs/services/cep18-service';
 import {
   ActiveAccountPlate,
   List,
@@ -37,27 +39,50 @@ export const TokenStep = ({
   const { t } = useTranslation();
 
   const casperToken = useCasperToken();
-  const { tokens } = useActiveAccountErc20Tokens();
+  const { cep18Tokens, isLoadingTokens } = useFetchCep18Tokens();
 
   useEffect(() => {
     const tokensList: TokenType[] = [];
+
+    if (isLoadingTokens) return;
+    const formatedCep18Tokens = formatCep18Tokens(cep18Tokens);
 
     if (casperToken) {
       tokensList.push(casperToken);
     }
 
-    if (tokens) {
-      tokensList.push(...tokens);
+    if (formatedCep18Tokens) {
+      tokensList.push(...formatedCep18Tokens);
     }
 
     setTokenList(tokensList);
-  }, [casperToken, tokens]);
+
+    const token = tokensList.find(token => token.id === selectedToken?.id);
+
+    if (token) {
+      setSelectedToken(token);
+    } else {
+      setSelectedToken(casperToken);
+    }
+  }, [
+    casperToken,
+    cep18Tokens,
+    isLoadingTokens,
+    selectedToken?.id,
+    setSelectedToken
+  ]);
 
   return (
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
           <Trans t={t}>Select token and account</Trans>
+        </Typography>
+      </ParagraphContainer>
+
+      <ParagraphContainer top={SpacingSize.XXL}>
+        <Typography type="bodySemiBold">
+          <Trans t={t}>Token</Trans>
         </Typography>
       </ParagraphContainer>
 
@@ -101,7 +126,7 @@ export const TokenStep = ({
 
       <ActiveAccountPlate
         label="From"
-        balance={selectedToken?.amount || null}
+        balance={selectedToken?.amount}
         symbol={selectedToken?.symbol || null}
         top={SpacingSize.XL}
       />

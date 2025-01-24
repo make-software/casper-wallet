@@ -91,18 +91,7 @@ export const initialStateForPopupTests: RootState = {
   },
   recentRecipientPublicKeys: [],
   accountInfo: {
-    balance: {
-      liquidMotes: null,
-      delegatedMotes: null,
-      undelegatingMotes: null,
-      totalBalanceMotes: null,
-      totalBalanceFiat: null
-    },
-    currencyRate: null,
     pendingDeployHashes: [],
-    erc20Tokens: [],
-    accountNftTokens: [],
-    nftTokensCount: 0,
     accountTrackingIdOfSentNftTokens: {}
   },
   contacts: {
@@ -113,5 +102,7 @@ export const initialStateForPopupTests: RootState = {
     ratedInStore: false,
     askForReviewAfter: null
   },
-  accountBalances: []
+  promotion: {
+    showCSPRNamePromotion: true
+  }
 };

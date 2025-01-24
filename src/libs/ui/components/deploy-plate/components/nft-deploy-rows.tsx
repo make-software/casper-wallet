@@ -1,27 +1,20 @@
 import { INftDeploy } from 'casper-wallet-core/src/domain/deploys/entities';
-import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 
 import { DeployIcon, NftDeployEntryPoint } from '@src/constants';
 
 import { getEntryPointName } from '@popup/pages/deploy-details/utils';
 
-import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import { Typography } from '@libs/ui/components';
 import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
-import { ContractRow } from '@libs/ui/components/deploy-plate/components/common';
+import {
+  ContractRow,
+  NftAmount
+} from '@libs/ui/components/deploy-plate/components/common';
 import { DeployContainer } from '@libs/ui/components/deploy-plate/components/deploy-container';
 
 interface NftDeployRowsProps {
   deploy: INftDeploy;
 }
-
-const NftAmount = ({ amountOfNFTs }: { amountOfNFTs: Maybe<number> }) => (
-  <AlignedFlexRow gap={SpacingSize.Tiny}>
-    <Typography type="captionHash">{amountOfNFTs}</Typography>
-    <Typography type="captionRegular">NFT(s)</Typography>
-  </AlignedFlexRow>
-);
 
 export const NftDeployRows = ({ deploy }: NftDeployRowsProps) => {
   const { entryPoint } = deploy;
@@ -60,7 +53,16 @@ export const NftDeployRows = ({ deploy }: NftDeployRowsProps) => {
                 ? deploy.callerAccountInfo?.name
                 : deploy.recipientAccountInfo?.name
             }
-            imgLogo={deploy.iconUrl}
+            imgLogo={
+              deploy.isReceive
+                ? deploy.callerAccountInfo?.brandingLogo
+                : deploy.recipientAccountInfo?.brandingLogo
+            }
+            csprName={
+              deploy.isReceive
+                ? deploy.callerAccountInfo?.csprName
+                : deploy.recipientAccountInfo?.csprName
+            }
           >
             <NftAmount amountOfNFTs={deploy.amountOfNFTs} />
           </AccountInfoRow>
@@ -76,6 +78,16 @@ export const NftDeployRows = ({ deploy }: NftDeployRowsProps) => {
               deploy.isReceive
                 ? deploy.callerAccountInfo?.name
                 : deploy.recipientAccountInfo?.name
+            }
+            imgLogo={
+              deploy.isReceive
+                ? deploy.callerAccountInfo?.brandingLogo
+                : deploy.recipientAccountInfo?.brandingLogo
+            }
+            csprName={
+              deploy.isReceive
+                ? deploy.callerAccountInfo?.csprName
+                : deploy.recipientAccountInfo?.csprName
             }
           >
             <NftAmount amountOfNFTs={deploy.amountOfNFTs} />

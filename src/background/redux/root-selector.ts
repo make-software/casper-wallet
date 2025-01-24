@@ -11,3 +11,4 @@ export * from './settings/selectors';
 export * from './recent-recipient-public-keys/selectors';
 export * from './rate-app/selectors';
 export * from './ledger/selectors';
+export * from './promotion/selectors';

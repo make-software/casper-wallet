@@ -33,5 +33,6 @@ export enum RouterPath {
   ImportAccountFromLedger = '/import-account-from-ledger',
   SignWithLedgerInNewWindow = '/sign-with-ledger-in-new-window',
   DeployDetails = '/deploys-details',
-  AddWatchAccount = '/add-watch-account'
+  AddWatchAccount = '/add-watch-account',
+  BringWeb3Unlock = '/bring-web3-unlock'
 }

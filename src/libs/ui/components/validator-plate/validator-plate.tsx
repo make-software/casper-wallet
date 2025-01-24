@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { formatNumber } from 'casper-wallet-core';
+import { Maybe } from 'casper-wallet-core/src/typings/common';
+import React from 'react';
 import { FieldError } from 'react-hook-form';
 import styled from 'styled-components';
 
@@ -21,7 +23,6 @@ import {
   HashVariant,
   Typography
 } from '@libs/ui/components';
-import { formatNumber, motesToCSPR } from '@libs/ui/utils/formatters';
 
 const ValidatorPlateContainer = styled(AlignedFlexRow)<{
   onClick?: () => void;
@@ -62,11 +63,11 @@ interface ValidatorPlateProps {
   name?: string;
   logo?: string;
   showFullPublicKey?: boolean;
-  fee: number;
+  fee: string;
   delegatorsNumber?: number;
   validatorLabel?: string;
   error?: FieldError;
-  totalStake?: string;
+  formattedTotalStake?: Maybe<string>;
   withBorder?: boolean;
 }
 
@@ -80,26 +81,16 @@ export const ValidatorPlate = ({
   delegatorsNumber,
   validatorLabel,
   error,
-  totalStake,
+  formattedTotalStake,
   withBorder
 }: ValidatorPlateProps) => {
-  const [formattedTotalStake, setFormattedTotalStake] = useState('');
-
-  useEffect(() => {
-    if (totalStake) {
-      setFormattedTotalStake(formatNumber(motesToCSPR(totalStake)));
-    }
-  }, [totalStake]);
-
   const logoUrl = getImageProxyUrl(logo);
-  const formattedFee = formatNumber(fee, {
-    precision: { min: 2 }
-  });
+
   const getFormattedDelegatorsNumber = () => {
     if (delegatorsNumber && delegatorsNumber >= 1000) {
       return (
         formatNumber(delegatorsNumber / 1000, {
-          precision: { max: 2 }
+          precision: { max: 3 }
         }) + 'k'
       );
     }
@@ -168,7 +159,7 @@ export const ValidatorPlate = ({
           </Typography>
           <AlignedFlexRow gap={SpacingSize.Small}>
             <Typography type="listSubtext" color="contentSecondary">
-              {`${formattedFee}% fee`}
+              {`${fee}% fee`}
             </Typography>
             <Typography type="listSubtext">
               {getFormattedDelegatorsNumber()} delegators

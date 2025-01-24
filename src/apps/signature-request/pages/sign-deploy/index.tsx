@@ -1,10 +1,12 @@
-import { DeployUtil } from 'casper-js-sdk';
+import { Transaction } from 'casper-js-sdk';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { getSigningAccount } from '@src/utils';
 
+import { SignDeployContent } from '@signature-request/pages/sign-deploy/sign-deploy-content';
+import { SignTxContent } from '@signature-request/pages/sign-deploy/sign-tx-content';
 import { RouterPath } from '@signature-request/router';
 
 import { closeCurrentWindow } from '@background/close-current-window';
@@ -19,7 +21,7 @@ import { useLedger } from '@hooks/use-ledger';
 
 import { sdkMethod } from '@content/sdk-method';
 
-import { signDeploy } from '@libs/crypto';
+import { signDeployForProviderResponse } from '@libs/crypto';
 import { convertBytesToHex } from '@libs/crypto/utils';
 import {
   AlignedFlexRow,
@@ -38,13 +40,13 @@ import {
   renderLedgerFooter
 } from '@libs/ui/components';
 
-import { CasperDeploy } from './deploy-types';
-import { SignDeployContent } from './sign-deploy-content';
-
 export function SignDeployPage() {
   const { t } = useTranslation();
 
-  const [deploy, setDeploy] = useState<undefined | CasperDeploy>(undefined);
+  const [transaction, setTransaction] = useState<undefined | Transaction>(
+    undefined
+  );
+
   const [isSigningAccountFromLedger, setIsSigningAccountFromLedger] =
     useState(false);
 
@@ -88,19 +90,20 @@ export function SignDeployPage() {
   const deployJsonById = useSelector(selectDeploysJsonById);
 
   useEffect(() => {
-    const deployJson = deployJsonById[requestId];
-    if (deployJson == null) {
-      return;
-    }
+    try {
+      const deployJson = deployJsonById[requestId];
 
-    const res = DeployUtil.deployFromJson(deployJson);
-    if (!res.ok) {
-      const error = Error('Parsing deploy from json error');
+      if (deployJson == null) {
+        return;
+      }
+
+      const tx = Transaction.fromJSON(deployJson);
+      setTransaction(tx);
+    } catch (e) {
+      const error = Error('Invalid transaction json');
       sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
       throw error;
     }
-
-    setDeploy(res.val);
 
     return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,13 +132,24 @@ export function SignDeployPage() {
   }
 
   const handleSign = useCallback(async () => {
-    if (deploy?.hash == null) {
+    let signature: Uint8Array | null = null;
+
+    if (!transaction) {
       return;
     }
 
-    let signature: Uint8Array;
-
     if (signingAccount.hardware === HardwareWalletType.Ledger) {
+      if (transaction.getTransactionV1()) {
+        // TODO not supported by Ledger yet
+        return;
+      }
+
+      const deploy = transaction.getDeploy();
+
+      if (!deploy) {
+        return;
+      }
+
       const resp = await ledger.singDeploy(deploy, {
         index: signingAccount.derivationIndex,
         publicKey: signingAccount.publicKey
@@ -143,8 +157,8 @@ export function SignDeployPage() {
 
       signature = resp.signature;
     } else {
-      signature = signDeploy(
-        deploy.hash,
+      signature = signDeployForProviderResponse(
+        transaction.hash.toBytes(),
         signingAccount.publicKey,
         signingAccount.secretKey
       );
@@ -162,7 +176,7 @@ export function SignDeployPage() {
     );
     closeCurrentWindow();
   }, [
-    deploy,
+    transaction,
     signingAccount.hardware,
     signingAccount.derivationIndex,
     signingAccount.publicKey,
@@ -220,7 +234,7 @@ export function SignDeployPage() {
       <FooterButtonsContainer>
         <Button
           color="primaryRed"
-          disabled={deploy == null}
+          disabled={!transaction}
           onClick={
             isSigningAccountFromLedger ? makeSubmitLedgerAction() : handleSign
           }
@@ -261,10 +275,21 @@ export function SignDeployPage() {
         showLedgerConfirm ? (
           <LedgerEventView event={ledgerEventStatusToRender} />
         ) : (
-          <SignDeployContent
-            deploy={deploy}
-            signingPublicKeyHex={signingAccount.publicKey}
-          />
+          <>
+            {transaction?.getDeploy() && (
+              <SignDeployContent
+                deploy={transaction?.getDeploy()}
+                signingPublicKeyHex={signingAccount.publicKey}
+              />
+            )}
+            {transaction?.getTransactionV1() && (
+              <SignTxContent
+                tx={transaction?.getTransactionV1()}
+                txJson={deployJsonById[requestId]}
+                signingPublicKeyHex={signingAccount.publicKey}
+              />
+            )}
+          </>
         )
       }
       renderFooter={renderFooter()}

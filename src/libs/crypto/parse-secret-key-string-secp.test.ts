@@ -1,4 +1,6 @@
-import { Keys, decodeBase16 } from 'casper-js-sdk';
+import { KeyAlgorithm, PrivateKey } from 'casper-js-sdk';
+
+import { AsymmetricKeys } from './create-asymmetric-key';
 
 describe('parseSecretKeyStringSecp', () => {
   it('should throws an error for an invalid secret key', () => {
@@ -19,16 +21,18 @@ describe('parseSecretKeyStringSecp', () => {
 });
 
 function parseSecretKeyStringSecp(secretKeyHex: string) {
-  let keyPair: Keys.AsymmetricKey;
+  let keyPair: AsymmetricKeys;
 
   try {
-    const secretKey = decodeBase16(secretKeyHex);
-    const privateKeyBuffer = Keys.Secp256K1.parsePrivateKey(secretKey, 'raw');
-    const publicKey = Keys.Secp256K1.privateToPublicKey(privateKeyBuffer);
+    const privateKey = PrivateKey.fromHex(secretKeyHex, KeyAlgorithm.SECP256K1);
 
-    keyPair = Keys.Secp256K1.parseKeyPair(publicKey, secretKey, 'raw');
+    const publicKey = privateKey.publicKey;
+
+    keyPair = {
+      secretKey: privateKey,
+      publicKey
+    };
   } catch (error) {
-    console.error(error);
     throw Error('Invalid secret key');
   }
 

@@ -1,6 +1,5 @@
 import { combineReducers } from 'redux';
 
-import { reducer as accountBalances } from './account-balances/reducer';
 import { reducer as accountInfo } from './account-info/reducer';
 import { reducer as activeOrigin } from './active-origin/reducer';
 import { reducer as contacts } from './contacts/reducer';
@@ -9,6 +8,7 @@ import { reducer as lastActivityTime } from './last-activity-time/reducer';
 import { reducer as ledger } from './ledger/reducer';
 import { reducer as loginRetryCount } from './login-retry-count/reducer';
 import { reducer as loginRetryLockoutTime } from './login-retry-lockout-time/reducer';
+import { reducer as promotion } from './promotion/reducer';
 import { reducer as rateApp } from './rate-app/reducer';
 import { reducer as recentRecipientPublicKeys } from './recent-recipient-public-keys/reducer';
 import { reducer as session } from './session/reducer';
@@ -32,8 +32,8 @@ const rootReducer = combineReducers({
   accountInfo,
   contacts,
   rateApp,
-  accountBalances,
-  ledger
+  ledger,
+  promotion
 });
 
 export default rootReducer;

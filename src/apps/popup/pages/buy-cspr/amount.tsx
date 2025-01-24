@@ -1,3 +1,5 @@
+import { formatNumber } from 'casper-wallet-core';
+import { IOnRampCurrencyItem } from 'casper-wallet-core/src/domain';
 import React, { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
@@ -14,7 +16,6 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { ResponseCurrencyProps } from '@libs/services/buy-cspr-service/types';
 import {
   Input,
   List,
@@ -24,29 +25,29 @@ import {
   Typography
 } from '@libs/ui/components';
 import { useBuyCSPR } from '@libs/ui/forms/buy-cspr';
-import { formatNumber, handleNumericInput } from '@libs/ui/utils';
+import { handleNumericInput } from '@libs/ui/utils';
 
 import { CurrencyRow } from './components/currency-row';
 import { ListRow } from './components/list-row';
 
 interface AmountProps {
-  currencies: ResponseCurrencyProps[];
-  selectedCurrency: ResponseCurrencyProps;
+  availableCurrencies: IOnRampCurrencyItem[];
+  selectedCurrency: IOnRampCurrencyItem;
   setPaymentAmount: React.Dispatch<React.SetStateAction<number>>;
   setSelectedCurrency: React.Dispatch<
-    React.SetStateAction<ResponseCurrencyProps>
+    React.SetStateAction<IOnRampCurrencyItem>
   >;
   defaultAmount: string;
 }
 
 export const Amount = ({
-  currencies,
+  availableCurrencies,
   selectedCurrency,
   setPaymentAmount,
   setSelectedCurrency,
   defaultAmount
 }: AmountProps) => {
-  const [sortedCurrency, setSortedCurrency] = useState<ResponseCurrencyProps[]>(
+  const [sortedCurrency, setSortedCurrency] = useState<IOnRampCurrencyItem[]>(
     []
   );
   const { t } = useTranslation();
@@ -90,16 +91,17 @@ export const Amount = ({
 
   useEffect(() => {
     const sortedCurrencies = sortCurrencies(
-      currencies,
-      selectedCurrency.code
-    ).filter(currency =>
-      currency.code
-        .toLowerCase()
-        .includes(searchInputValue?.toLowerCase() || '')
+      availableCurrencies,
+      selectedCurrency?.code
+    ).filter(
+      currency =>
+        currency?.code
+          .toLowerCase()
+          .includes(searchInputValue?.toLowerCase() || '')
     );
 
     setSortedCurrency(sortedCurrencies);
-  }, [currencies, searchInputValue, selectedCurrency.code]);
+  }, [availableCurrencies, searchInputValue, selectedCurrency?.code]);
 
   return (
     <ContentContainer>
@@ -142,7 +144,8 @@ export const Amount = ({
                   rows={sortedCurrency}
                   height={280}
                   renderRow={currency => {
-                    const isSelected = selectedCurrency.code === currency.code;
+                    const isSelected =
+                      selectedCurrency?.code === currency?.code;
 
                     return (
                       <ListRow

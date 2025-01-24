@@ -8,7 +8,7 @@ export const selectCountOfContacts = (state: RootState) =>
 export const selectAllContactsNames = (state: RootState) =>
   state.contacts.contacts.map(contact => contact.name);
 
-export const selectAllPublicKeys = (state: RootState) =>
+export const selectAllContactsPublicKeys = (state: RootState) =>
   state.contacts.contacts.map(contact => contact.publicKey);
 
 export const selectLastModified = (state: RootState) =>

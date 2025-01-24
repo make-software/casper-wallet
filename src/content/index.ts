@@ -1,6 +1,8 @@
 import { getType } from 'typesafe-actions';
 import { runtime } from 'webextension-polyfill';
 
+import { initBringScript } from '@content/bring';
+
 import { SdkEvent, sdkEvent } from './sdk-event';
 import { CasperWalletEventType } from './sdk-event-type';
 import {
@@ -145,3 +147,5 @@ function cleanup() {
 window.addEventListener(cleanupEventType, cleanup);
 
 init();
+
+initBringScript();

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -26,19 +26,19 @@ export const RecipientStep = ({
   setIsRecipientFormButtonDisabled,
   setRecipientPublicKey
 }: RecipientStepProps) => {
+  const [showSelectedRecipient, setShowSelectedRecipient] = useState(false);
+
   const { t } = useTranslation();
 
   const recipientForm = useTransferRecipientForm();
 
-  const { formState } = recipientForm;
-
   useEffect(() => {
     const isRecipientFormButtonDisabled = calculateSubmitButtonDisabled({
-      isValid: formState.isValid
+      isValid: showSelectedRecipient
     });
 
     setIsRecipientFormButtonDisabled(!!isRecipientFormButtonDisabled);
-  }, [formState.isValid, setIsRecipientFormButtonDisabled]);
+  }, [showSelectedRecipient, setIsRecipientFormButtonDisabled]);
 
   return (
     <ContentContainer>
@@ -53,6 +53,8 @@ export const RecipientStep = ({
         recipientName={recipientName}
         setRecipientName={setRecipientName}
         setRecipientPublicKey={setRecipientPublicKey}
+        setShowSelectedRecipient={setShowSelectedRecipient}
+        showSelectedRecipient={showSelectedRecipient}
       />
     </ContentContainer>
   );

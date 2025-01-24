@@ -1,15 +1,22 @@
-import { DeployUtil } from 'casper-js-sdk';
+import {
+  Deploy,
+  makeCep18TransferDeploy,
+  makeCsprTransferDeploy
+} from 'casper-js-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES } from '@src/constants';
+import {
+  ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES,
+  networkNameToSdkNetworkNameMap
+} from '@src/constants';
 
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
-import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
+import { selectAllContactsPublicKeys } from '@background/redux/contacts/selectors';
 import {
   ledgerDeployChanged,
   ledgerRecipientToSaveOnSuccessChanged
@@ -30,7 +37,7 @@ import { TokenType, useCasperToken } from '@hooks/use-casper-token';
 import { useLedger } from '@hooks/use-ledger';
 import { useSubmitButton } from '@hooks/use-submit-button';
 
-import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
+import { createAsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 import {
   AlignedFlexRow,
   CenteredFlexRow,
@@ -43,12 +50,7 @@ import {
   VerticalSpaceContainer,
   createErrorLocationState
 } from '@libs/layout';
-import {
-  makeCep18TransferDeploy,
-  makeNativeTransferDeploy,
-  sendSignDeploy,
-  signDeploy
-} from '@libs/services/deployer-service';
+import { sendSignDeploy, signDeploy } from '@libs/services/deployer-service';
 import { HardwareWalletType } from '@libs/types/account';
 import {
   Button,
@@ -59,7 +61,7 @@ import {
   Typography,
   renderLedgerFooter
 } from '@libs/ui/components';
-import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils';
+import { CSPRtoMotes, motesToCSPR, multiplyErc20Balance } from '@libs/ui/utils';
 
 import { AmountStep } from './amount-step';
 import { ConfirmStep } from './confirm-step';
@@ -114,7 +116,7 @@ export const TransferPage = () => {
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
-  const contactPublicKeys = useSelector(selectAllPublicKeys);
+  const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
   const ratedInStore = useSelector(selectRatedInStore);
   const askForReviewAfter = useSelector(selectAskForReviewAfter);
 
@@ -159,7 +161,7 @@ export const TransferPage = () => {
     isAdditionalTextVisible
   } = useSubmitButton(transferStep === TransactionSteps.Confirm);
 
-  const sendDeploy = (signDeploy: DeployUtil.Deploy) => {
+  const sendDeploy = (signDeploy: Deploy) => {
     sendSignDeploy(signDeploy, nodeUrl)
       .then(resp => {
         dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
@@ -209,46 +211,45 @@ export const TransferPage = () => {
   const onSubmitSending = async () => {
     setIsSubmitButtonDisable(true);
 
-    if (activeAccount) {
-      const KEYS = createAsymmetricKey(
-        activeAccount.publicKey,
-        activeAccount.secretKey
-      );
+    if (!activeAccount) {
+      return;
+    }
 
-      if (isErc20Transfer) {
-        // ERC20 transfer
-        const deploy = await makeCep18TransferDeploy(
-          nodeUrl,
-          networkName,
-          selectedToken?.contractHash,
-          selectedToken?.id,
-          recipientPublicKey,
-          amount,
-          selectedToken?.decimals || null,
-          paymentAmount,
-          activeAccount
-        );
+    const KEYS = createAsymmetricKeys(
+      activeAccount.publicKey,
+      activeAccount.secretKey
+    );
 
-        const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
+    if (isErc20Transfer && selectedToken?.contractPackageHash) {
+      // CEP18 transfer
+      const deploy = makeCep18TransferDeploy({
+        chainName: networkNameToSdkNetworkNameMap[networkName],
+        contractPackageHash: selectedToken.contractPackageHash,
+        paymentAmount: CSPRtoMotes(paymentAmount),
+        recipientPublicKeyHex: recipientPublicKey,
+        senderPublicKeyHex: activeAccount.publicKey,
+        transferAmount:
+          multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0'
+      });
 
-        sendDeploy(signedDeploy);
-      } else {
-        // CSPR transfer
-        const motesAmount = CSPRtoMotes(amount);
+      const signedDeploy = await signDeploy(deploy, KEYS, activeAccount);
 
-        const deploy = await makeNativeTransferDeploy(
-          activeAccount,
-          recipientPublicKey,
-          motesAmount,
-          networkName,
-          nodeUrl,
-          transferIdMemo
-        );
+      sendDeploy(signedDeploy);
+    } else {
+      // CSPR transfer
+      const motesAmount = CSPRtoMotes(amount);
 
-        const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
+      const deploy = makeCsprTransferDeploy({
+        chainName: networkNameToSdkNetworkNameMap[networkName],
+        memo: transferIdMemo,
+        recipientPublicKeyHex: recipientPublicKey,
+        senderPublicKeyHex: activeAccount.publicKey,
+        transferAmount: motesAmount
+      });
 
-        sendDeploy(signedDeploy);
-      }
+      const signedDeploy = await signDeploy(deploy, KEYS, activeAccount);
+
+      sendDeploy(signedDeploy);
     }
   };
 
@@ -256,21 +257,19 @@ export const TransferPage = () => {
     setTransferStep(TransactionSteps.ConfirmWithLedger);
 
     if (activeAccount?.hardware === HardwareWalletType.Ledger) {
-      if (isErc20Transfer) {
-        const deploy = await makeCep18TransferDeploy(
-          nodeUrl,
-          networkName,
-          selectedToken?.contractHash,
-          selectedToken?.id,
-          recipientPublicKey,
-          amount,
-          selectedToken?.decimals || null,
-          paymentAmount,
-          activeAccount
-        );
+      if (isErc20Transfer && selectedToken?.contractPackageHash) {
+        const deploy = makeCep18TransferDeploy({
+          chainName: networkNameToSdkNetworkNameMap[networkName],
+          contractPackageHash: selectedToken.contractPackageHash,
+          paymentAmount: CSPRtoMotes(paymentAmount),
+          recipientPublicKeyHex: recipientPublicKey,
+          senderPublicKeyHex: activeAccount.publicKey,
+          transferAmount:
+            multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0'
+        });
 
         dispatchToMainStore(
-          ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+          ledgerDeployChanged(JSON.stringify(Deploy.toJSON(deploy)))
         );
         dispatchToMainStore(
           ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
@@ -278,17 +277,16 @@ export const TransferPage = () => {
       } else {
         const motesAmount = CSPRtoMotes(amount);
 
-        const deploy = await makeNativeTransferDeploy(
-          activeAccount,
-          recipientPublicKey,
-          motesAmount,
-          networkName,
-          nodeUrl,
-          transferIdMemo
-        );
+        const deploy = makeCsprTransferDeploy({
+          chainName: networkNameToSdkNetworkNameMap[networkName],
+          memo: transferIdMemo,
+          recipientPublicKeyHex: recipientPublicKey,
+          senderPublicKeyHex: activeAccount.publicKey,
+          transferAmount: motesAmount
+        });
 
         dispatchToMainStore(
-          ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+          ledgerDeployChanged(JSON.stringify(Deploy.toJSON(deploy)))
         );
         dispatchToMainStore(
           ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
@@ -336,7 +334,7 @@ export const TransferPage = () => {
       <ConfirmStep
         recipientPublicKey={recipientPublicKey}
         amount={amount}
-        balance={selectedToken?.amount || null}
+        balance={selectedToken?.amount}
         symbol={selectedToken?.symbol || null}
         isErc20Transfer={isErc20Transfer}
         paymentAmount={paymentAmount}

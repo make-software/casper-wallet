@@ -32,7 +32,8 @@ export const themeConfig = {
     sixteen: 16,
     twenty: 20,
     eighty: 80,
-    hundred: 100
+    hundred: 100,
+    twoHundred: 200
   },
   padding: {
     1.2: '1.2rem',

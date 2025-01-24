@@ -30,7 +30,7 @@ export const useTransferRecipientForm = () => {
 
   const recipientFormOptions: UseFormProps<TransferRecipientFormValues> = {
     reValidateMode: 'onChange',
-    mode: 'onChange',
+    mode: 'onTouched',
     resolver: yupResolver(recipientFormSchema),
     delayError: 500
   };
@@ -41,7 +41,7 @@ export const useTransferRecipientForm = () => {
 export const useTransferAmountForm = (
   erc20Balance: string | null,
   isErc20: boolean,
-  amountMotes: string | null,
+  amountMotes: string | undefined,
   paymentAmount: string,
   decimals: number | undefined
 ) => {
@@ -62,7 +62,7 @@ export const useTransferAmountForm = (
 
   const amountFormOptions: UseFormProps<TransferAmountFormValues> = {
     reValidateMode: 'onChange',
-    mode: 'onChange',
+    mode: 'onTouched',
     resolver: yupResolver(amountFormSchema),
     defaultValues: isErc20
       ? {

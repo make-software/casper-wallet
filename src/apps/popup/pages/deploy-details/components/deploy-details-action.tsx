@@ -70,20 +70,7 @@ export const DeployDetailsAction = ({ deploy }: ActionProps) => {
   if (isNativeCsprDeploy(deploy)) {
     return (
       <Container>
-        <NativeTransferActionRows
-          amount={deploy.formattedDecimalAmount}
-          fiatAmount={deploy.fiatAmount}
-          isReceive={deploy.isReceive}
-          title={title}
-          publicKey={
-            deploy.isReceive ? deploy.callerPublicKey : deploy.recipientKey
-          }
-          accountName={
-            deploy.isReceive
-              ? deploy?.callerAccountInfo?.name
-              : deploy?.recipientAccountInfo?.name
-          }
-        />
+        <NativeTransferActionRows title={title} deploy={deploy} />
       </Container>
     );
   }

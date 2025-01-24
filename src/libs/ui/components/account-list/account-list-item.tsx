@@ -1,4 +1,6 @@
-import React from 'react';
+import { formatNumber } from 'casper-wallet-core';
+import { IAccountInfo } from 'casper-wallet-core/src/domain/accountInfo';
+import React, { useRef } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -6,7 +8,11 @@ import {
   FlexColumn,
   SpacingSize
 } from '@libs/layout';
-import { AccountListRows, HardwareWalletType } from '@libs/types/account';
+import {
+  AccountListRowWithAccountHash,
+  AccountListRows,
+  HardwareWalletType
+} from '@libs/types/account';
 import {
   AccountActionsMenuPopover,
   Avatar,
@@ -14,7 +20,7 @@ import {
   HashVariant,
   Typography
 } from '@libs/ui/components';
-import { formatNumber, motesToCSPR } from '@libs/ui/utils';
+import { motesToCSPR } from '@libs/ui/utils';
 
 const ListItemContainer = styled(FlexColumn)`
   min-height: 68px;
@@ -41,7 +47,7 @@ const AccountName = styled(Typography)`
 `;
 
 interface AccountListItemProps {
-  account: AccountListRows;
+  account: AccountListRowWithAccountHash<AccountListRows>;
   onClick?: (
     event: React.MouseEvent<HTMLDivElement>,
     accountName: string
@@ -50,6 +56,10 @@ interface AccountListItemProps {
   isActiveAccount: boolean;
   showHideAccountItem?: boolean;
   closeModal?: (e: React.MouseEvent) => void;
+  accountsInfo: Record<string, IAccountInfo> | undefined;
+  accountLiquidBalance: string | undefined;
+  isLoadingBalance: boolean;
+  isAllAccountsPage?: boolean;
 }
 
 export const AccountListItem = ({
@@ -58,17 +68,26 @@ export const AccountListItem = ({
   isActiveAccount,
   isConnected,
   showHideAccountItem,
-  closeModal
+  closeModal,
+  accountsInfo,
+  accountLiquidBalance,
+  isLoadingBalance,
+  isAllAccountsPage = false
 }: AccountListItemProps) => {
-  const accountBalance =
-    account.balance?.liquidMotes != null
-      ? formatNumber(motesToCSPR(account.balance.liquidMotes), {
-          precision: { max: 0 }
-        })
-      : '-';
+  const popoverParentRef = useRef<HTMLDivElement | null>(null);
+
+  const accountBalance = accountLiquidBalance
+    ? formatNumber(motesToCSPR(accountLiquidBalance), {
+        precision: { max: 0 }
+      })
+    : '0';
+
+  const csprName = accountsInfo && accountsInfo[account.accountHash]?.csprName;
+  const brandingLogo =
+    accountsInfo && accountsInfo[account.accountHash]?.brandingLogo;
 
   return (
-    <ListItemContainer key={account.name}>
+    <ListItemContainer key={account.name} ref={popoverParentRef}>
       <AlignedSpaceBetweenFlexRow gap={SpacingSize.Small}>
         <Avatar
           size={38}
@@ -77,6 +96,7 @@ export const AccountListItem = ({
           isConnected={isConnected}
           displayContext="accountList"
           isActiveAccount={isActiveAccount}
+          brandingLogo={brandingLogo}
         />
         <ClickableContainer
           onClick={
@@ -94,7 +114,7 @@ export const AccountListItem = ({
             <Balance
               type="bodyHash"
               ellipsis
-              loading={!account.balance && account.balance !== 0}
+              loading={isLoadingBalance && !accountLiquidBalance}
             >
               {accountBalance}
             </Balance>
@@ -102,6 +122,7 @@ export const AccountListItem = ({
           <AlignedSpaceBetweenFlexRow>
             <Hash
               value={account.publicKey}
+              csprName={csprName}
               variant={HashVariant.CaptionHash}
               truncated
               withoutTooltip
@@ -117,6 +138,8 @@ export const AccountListItem = ({
           account={account}
           showHideAccountItem={showHideAccountItem}
           onClick={closeModal}
+          popoverParentRef={popoverParentRef}
+          isAllAccountsPage={isAllAccountsPage}
         />
       </AlignedSpaceBetweenFlexRow>
     </ListItemContainer>

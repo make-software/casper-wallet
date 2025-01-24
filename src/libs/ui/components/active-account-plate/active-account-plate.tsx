@@ -3,8 +3,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+import {
+  selectVaultAccountsPublicKeys,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
 
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   AlignedFlexRow,
   ParagraphContainer,
@@ -13,6 +17,7 @@ import {
   SpacingSize,
   TileContainer
 } from '@libs/layout';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import {
   Avatar,
   Hash,
@@ -40,7 +45,7 @@ const Container = styled(TileContainer)`
 
 interface ActiveAccountPlateProps {
   label: string;
-  balance: string | null;
+  balance: string | undefined;
   symbol: string | null;
   top?: SpacingSize;
 }
@@ -54,6 +59,13 @@ export const ActiveAccountPlate = ({
   const { t } = useTranslation();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
+
+  const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
+
+  const accountHash = getAccountHashFromPublicKey(activeAccount?.publicKey);
+  const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
+  const brandingLogo = accountsInfo && accountsInfo[accountHash]?.brandingLogo;
 
   if (!activeAccount) {
     return null;
@@ -70,7 +82,11 @@ export const ActiveAccountPlate = ({
         <Container paddingVertical={SpacingSize.Small}>
           <SpaceBetweenFlexRow>
             <AlignedFlexRow gap={SpacingSize.Medium}>
-              <Avatar publicKey={activeAccount.publicKey} size={24} />
+              <Avatar
+                publicKey={activeAccount.publicKey}
+                brandingLogo={brandingLogo}
+                size={24}
+              />
               <NameContainer>
                 <Tooltip
                   title={activeAccount.name}
@@ -84,6 +100,7 @@ export const ActiveAccountPlate = ({
                 </Tooltip>
                 <Hash
                   value={activeAccount.publicKey}
+                  csprName={csprName}
                   variant={HashVariant.CaptionHash}
                   color="contentSecondary"
                   truncated
@@ -93,15 +110,13 @@ export const ActiveAccountPlate = ({
             </AlignedFlexRow>
             <AmountContainer>
               <Tooltip
-                title={
-                  balance != null && balance.length > 9 ? balance : undefined
-                }
+                title={balance && balance?.length > 9 ? balance : undefined}
                 placement="topLeft"
                 overflowWrap
                 fullWidth
               >
                 <Typography type="captionHash" ellipsis>
-                  {balance == null ? '-' : balance}
+                  {balance || '-'}
                 </Typography>
               </Tooltip>
               <Typography type="captionHash" color="contentSecondary">

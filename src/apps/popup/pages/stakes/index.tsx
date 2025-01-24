@@ -1,4 +1,6 @@
-import { DeployUtil } from 'casper-js-sdk';
+import { Deploy, makeAuctionManagerDeploy } from 'casper-js-sdk';
+import { formatNumber } from 'casper-wallet-core';
+import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -7,7 +9,8 @@ import styled from 'styled-components';
 import {
   AuctionManagerEntryPoint,
   STAKE_COST_MOTES,
-  StakeSteps
+  StakeSteps,
+  networkNameToSdkNetworkNameMap
 } from '@src/constants';
 
 import { AmountStep } from '@popup/pages/stakes/amount-step';
@@ -24,7 +27,6 @@ import { ValidatorDropdownInput } from '@popup/pages/stakes/validator-dropdown-i
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
-import { selectAccountBalance } from '@background/redux/account-info/selectors';
 import { ledgerDeployChanged } from '@background/redux/ledger/actions';
 import {
   selectAskForReviewAfter,
@@ -40,7 +42,7 @@ import {
 import { useLedger } from '@hooks/use-ledger';
 import { useSubmitButton } from '@hooks/use-submit-button';
 
-import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
+import { createAsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 import {
   AlignedFlexRow,
   CenteredFlexRow,
@@ -55,12 +57,8 @@ import {
   VerticalSpaceContainer,
   createErrorLocationState
 } from '@libs/layout';
-import {
-  makeAuctionManagerDeploy,
-  sendSignDeploy,
-  signDeploy
-} from '@libs/services/deployer-service';
-import { ValidatorResultWithId } from '@libs/services/validators-service/types';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
+import { sendSignDeploy, signDeploy } from '@libs/services/deployer-service';
 import {
   Button,
   HomePageTabsId,
@@ -72,7 +70,7 @@ import {
 } from '@libs/ui/components';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { useStakesForm } from '@libs/ui/forms/stakes-form';
-import { CSPRtoMotes, formatNumber, motesToCSPR } from '@libs/ui/utils';
+import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils';
 
 const ScrollContainer = styled(VerticalSpaceContainer)<{
   isHidden: boolean;
@@ -97,44 +95,41 @@ export const StakesPage = () => {
   const [validatorPublicKey, setValidatorPublicKey] = useState('');
   const [newValidatorPublicKey, setNewValidatorPublicKey] = useState('');
   const [inputAmountCSPR, setInputAmountCSPR] = useState('');
-  const [validator, setValidator] = useState<ValidatorResultWithId | null>(
-    null
-  );
-  const [newValidator, setNewValidator] =
-    useState<ValidatorResultWithId | null>(null);
+  const [validator, setValidator] = useState<ValidatorDto | null>(null);
+  const [newValidator, setNewValidator] = useState<ValidatorDto | null>(null);
   const [stakeAmountMotes, setStakeAmountMotes] = useState('');
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isActiveAccountFromLedger = useSelector(
     selectIsActiveAccountFromLedger
   );
-  const { networkName, nodeUrl, auctionManagerContractHash } = useSelector(
+  const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
-  const csprBalance = useSelector(selectAccountBalance);
   const ratedInStore = useSelector(selectRatedInStore);
   const askForReviewAfter = useSelector(selectAskForReviewAfter);
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
+  const { accountBalance } = useFetchWalletBalance();
+
   const { stakeType, validatorList, undelegateValidatorList, loading } =
     useStakeType();
 
   const hasDelegationToSelectedValidator = undelegateValidatorList?.some(
-    accountDelegation => accountDelegation.public_key === validator?.public_key
+    accountDelegation => accountDelegation.publicKey === validator?.publicKey
   );
   const hasDelegationToSelectedNewValidator = undelegateValidatorList?.some(
-    accountDelegation =>
-      accountDelegation.public_key === newValidator?.public_key
+    accountDelegation => accountDelegation.publicKey === newValidator?.publicKey
   );
 
   const { amountForm, validatorForm, newValidatorForm } = useStakesForm(
-    csprBalance.liquidMotes,
+    accountBalance.liquidBalance,
     stakeType,
     stakeAmountMotes,
-    validator?.delegators_number,
-    newValidator?.delegators_number,
+    validator?.delegatorsNumber,
+    newValidator?.delegatorsNumber,
     hasDelegationToSelectedValidator,
     hasDelegationToSelectedNewValidator
   );
@@ -159,23 +154,21 @@ export const StakesPage = () => {
     if (activeAccount) {
       const motesAmount = CSPRtoMotes(inputAmountCSPR);
 
-      const KEYS = createAsymmetricKey(
+      const KEYS = createAsymmetricKeys(
         activeAccount.publicKey,
         activeAccount.secretKey
       );
 
-      const deploy = await makeAuctionManagerDeploy(
-        stakeType,
-        activeAccount.publicKey,
-        validatorPublicKey,
-        newValidatorPublicKey || null,
-        motesAmount,
-        networkName,
-        auctionManagerContractHash,
-        nodeUrl
-      );
+      const deploy = makeAuctionManagerDeploy({
+        amount: motesAmount,
+        chainName: networkNameToSdkNetworkNameMap[networkName],
+        contractEntryPoint: stakeType,
+        delegatorPublicKeyHex: activeAccount.publicKey,
+        newValidatorPublicKeyHex: newValidatorPublicKey,
+        validatorPublicKeyHex: validatorPublicKey
+      });
 
-      const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
+      const signedDeploy = await signDeploy(deploy, KEYS, activeAccount);
 
       sendSignDeploy(signedDeploy, nodeUrl)
         .then(resp => {
@@ -229,19 +222,17 @@ export const StakesPage = () => {
     if (activeAccount) {
       const motesAmount = CSPRtoMotes(inputAmountCSPR);
 
-      const deploy = await makeAuctionManagerDeploy(
-        stakeType,
-        activeAccount.publicKey,
-        validatorPublicKey,
-        newValidatorPublicKey || null,
-        motesAmount,
-        networkName,
-        auctionManagerContractHash,
-        nodeUrl
-      );
+      const deploy = makeAuctionManagerDeploy({
+        amount: motesAmount,
+        chainName: networkNameToSdkNetworkNameMap[networkName],
+        contractEntryPoint: stakeType,
+        delegatorPublicKeyHex: activeAccount.publicKey,
+        newValidatorPublicKeyHex: newValidatorPublicKey,
+        validatorPublicKeyHex: validatorPublicKey
+      });
 
       dispatchToMainStore(
-        ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+        ledgerDeployChanged(JSON.stringify(Deploy.toJSON(deploy)))
       );
     }
   };
@@ -538,7 +529,8 @@ export const StakesPage = () => {
   if (
     (stakeType === AuctionManagerEntryPoint.undelegate ||
       stakeType === AuctionManagerEntryPoint.redelegate) &&
-    (csprBalance.delegatedMotes == null || csprBalance.delegatedMotes === '0')
+    (!accountBalance.delegatedBalance ||
+      accountBalance.delegatedBalance === '0')
   ) {
     return (
       <PopupLayout

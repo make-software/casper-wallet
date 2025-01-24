@@ -23,7 +23,7 @@ export type StakeAmountFormValues = {
 };
 
 export const useStakesForm = (
-  amountMotes: string | null,
+  amountMotes: string | undefined,
   stakeType: AuctionManagerEntryPoint,
   stakeAmountMotes: string,
   delegatorsNumber?: number,

@@ -26,13 +26,15 @@ const ValidatorAccountInfo = ({
   label,
   withHash,
   imgLogo,
-  accountName
+  accountName,
+  csprName
 }: {
   publicKey: Maybe<string>;
   label: string;
   withHash?: boolean;
   imgLogo?: Maybe<string>;
   accountName?: string;
+  csprName: Maybe<string> | undefined;
 }) => {
   const { t } = useTranslation();
 
@@ -43,6 +45,7 @@ const ValidatorAccountInfo = ({
         accountName={accountName}
         imgLogo={imgLogo}
         label={label}
+        csprName={csprName}
       />
     );
   }
@@ -113,6 +116,11 @@ const DelegationAuctionAction = ({
                 ? toValidatorAccountInfo?.name
                 : fromValidatorAccountInfo?.name
             }
+            csprName={
+              isDelegate
+                ? toValidatorAccountInfo?.csprName
+                : fromValidatorAccountInfo?.csprName
+            }
           />
         )}
         {isRedelegate && (
@@ -122,12 +130,14 @@ const DelegationAuctionAction = ({
               publicKey={fromValidator}
               imgLogo={fromValidatorAccountInfo?.brandingLogo}
               accountName={fromValidatorAccountInfo?.name}
+              csprName={fromValidatorAccountInfo?.csprName}
             />
             <ValidatorAccountInfo
               label="to"
               publicKey={toValidator}
               imgLogo={toValidatorAccountInfo?.brandingLogo}
               accountName={toValidatorAccountInfo?.name}
+              csprName={toValidatorAccountInfo?.csprName}
             />
           </>
         )}

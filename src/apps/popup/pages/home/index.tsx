@@ -8,28 +8,20 @@ import { HomePageTabName, NetworkSetting } from '@src/constants';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import {
-  selectActiveNetworkSetting,
-  selectIsActiveAccountConnectedWithActiveOrigin,
+  selectActiveNetworkSetting, // selectShowCSPRNamePromotion,
   selectVaultActiveAccount
 } from '@background/redux/root-selector';
 
 import {
-  AlignedFlexRow,
   CenteredFlexColumn,
   CenteredFlexRow,
   ContentContainer,
-  LeftAlignedFlexColumn,
-  SpaceBetweenFlexRow,
   SpacingSize,
   TileContainer,
   VerticalSpaceContainer
 } from '@libs/layout';
 import {
-  AccountActionsMenuPopover,
-  Avatar,
   Button,
-  Hash,
-  HashVariant,
   SvgIcon,
   Tab,
   Tabs,
@@ -37,19 +29,12 @@ import {
   Typography
 } from '@libs/ui/components';
 
+// import { CsprNameBanner } from '@libs/ui/components/cspr-name-banner/cspr-name-banner';
 import { AccountBalance } from './components/account-balance';
 import { DeploysList } from './components/deploys-list';
 import { MoreButtonsModal } from './components/more-buttons-modal';
 import { NftList } from './components/nft-list';
 import { TokensList } from './components/tokens-list';
-
-const DividerLine = styled.hr`
-  margin: 16px 0;
-
-  border-width: 0;
-  height: 0.5px;
-  background-color: ${({ theme }) => theme.color.borderPrimary};
-`;
 
 const ButtonsContainer = styled(CenteredFlexRow)`
   margin-top: 24px;
@@ -61,6 +46,10 @@ const ButtonContainer = styled(CenteredFlexColumn)`
   padding: 0 16px;
 `;
 
+const Container = styled(TileContainer)`
+  margin-top: 24px;
+`;
+
 export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
@@ -68,48 +57,25 @@ export function HomePageContent() {
 
   const state = location.state;
 
-  const isActiveAccountConnected = useSelector(
-    selectIsActiveAccountConnectedWithActiveOrigin
-  );
   const network = useSelector(selectActiveNetworkSetting);
   const activeAccount = useSelector(selectVaultActiveAccount);
+  // const showCSPRNamePromotion = useSelector(selectShowCSPRNamePromotion);
 
   useEffect(() => {
     if (!state?.activeTabId) {
       const container = document.querySelector('#ms-container');
 
-      container?.scrollTo(0, 0);
+      container?.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }
   }, [state?.activeTabId]);
 
+  // TODO CSPR.name
   return (
     <ContentContainer>
+      {/*{showCSPRNamePromotion && <CsprNameBanner />}*/}
       {activeAccount && (
         <Tile>
-          <TileContainer>
-            <SpaceBetweenFlexRow>
-              <AlignedFlexRow gap={SpacingSize.Large}>
-                <Avatar
-                  size={44}
-                  publicKey={activeAccount.publicKey}
-                  withConnectedStatus
-                  isConnected={isActiveAccountConnected}
-                />
-                <LeftAlignedFlexColumn>
-                  <Typography type="bodySemiBold">
-                    {activeAccount.name}
-                  </Typography>
-                  <Hash
-                    value={activeAccount.publicKey}
-                    variant={HashVariant.CaptionHash}
-                    truncated
-                    placement="bottomCenter"
-                  />
-                </LeftAlignedFlexColumn>
-              </AlignedFlexRow>
-              <AccountActionsMenuPopover account={activeAccount} />
-            </SpaceBetweenFlexRow>
-            <DividerLine />
+          <Container>
             <AccountBalance />
             <ButtonsContainer gap={SpacingSize.XXXL}>
               {network === NetworkSetting.Mainnet && (
@@ -144,7 +110,7 @@ export function HomePageContent() {
               </ButtonContainer>
               <MoreButtonsModal />
             </ButtonsContainer>
-          </TileContainer>
+          </Container>
         </Tile>
       )}
       <VerticalSpaceContainer top={SpacingSize.Tiny}>

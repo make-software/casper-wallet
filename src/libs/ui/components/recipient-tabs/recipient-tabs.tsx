@@ -1,11 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import debounce from 'lodash.debounce';
+import React, { useEffect, useMemo } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
-import { useClickAway } from '@hooks/use-click-away';
+import { isValidPublicKey } from '@src/utils';
+
+import { selectAllContactsPublicKeys } from '@background/redux/contacts/selectors';
+import { selectRecentRecipientPublicKeys } from '@background/redux/recent-recipient-public-keys/selectors';
+import { selectVaultAccountsPublicKeys } from '@background/redux/vault/selectors';
 
 import { SpacingSize, VerticalSpaceContainer } from '@libs/layout';
-import { Input, RecipientPlate, SvgIcon, Tab, Tabs } from '@libs/ui/components';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
+import { Input, SvgIcon, Tab, Tabs } from '@libs/ui/components';
+import { SearchItemByCsprName } from '@libs/ui/components/recipient-tabs/components/search-item-by-cspr-name';
+import { SearchItemByPublicKey } from '@libs/ui/components/recipient-tabs/components/search-item-by-public-key';
+import { SelectedRecipient } from '@libs/ui/components/recipient-tabs/components/selected-recipient';
 import { TransferRecipientFormValues } from '@libs/ui/forms/transfer';
 import { TransferNftRecipientFormValues } from '@libs/ui/forms/transfer-nft';
 
@@ -21,15 +31,23 @@ interface RecipientTabsProps {
   setRecipientPublicKey?: (value: React.SetStateAction<string>) => void;
   setRecipientName: React.Dispatch<React.SetStateAction<string>>;
   recipientName: string;
+  setShowSelectedRecipient: React.Dispatch<React.SetStateAction<boolean>>;
+  showSelectedRecipient: boolean;
 }
 
 export const RecipientTabs = ({
   recipientForm,
   setRecipientPublicKey,
   setRecipientName,
-  recipientName
+  recipientName,
+  setShowSelectedRecipient,
+  showSelectedRecipient
 }: RecipientTabsProps) => {
-  const [showRecipientPlate, setShowRecipientPlate] = useState(false);
+  const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
+  const recentRecipientPublicKeys = useSelector(
+    selectRecentRecipientPublicKeys
+  );
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
   const { t } = useTranslation();
 
@@ -43,17 +61,18 @@ export const RecipientTabs = ({
     name: 'recipientPublicKey'
   });
 
-  const { ref: clickAwayRef } = useClickAway({
-    callback: () => {
-      if (formState.isValid) {
-        setShowRecipientPlate(true);
-      }
-    }
-  });
+  const publicKeys = useMemo(() => {
+    const mergedKeys = new Set([
+      ...contactPublicKeys,
+      ...recentRecipientPublicKeys,
+      ...accountsPublicKeys
+    ]);
+    return Array.from(mergedKeys);
+  }, [accountsPublicKeys, contactPublicKeys, recentRecipientPublicKeys]);
 
   useEffect(() => {
     if (formState.isValid) {
-      setShowRecipientPlate(true);
+      setShowSelectedRecipient(true);
     }
     //   This should trigger only once
     //   eslint-disable-next-line react-hooks/exhaustive-deps
@@ -65,32 +84,31 @@ export const RecipientTabs = ({
     }
     setValue('recipientPublicKey', publicKey);
 
-    setShowRecipientPlate(true);
+    setShowSelectedRecipient(true);
     setRecipientName(name);
 
     trigger('recipientPublicKey');
+    setShowSelectedRecipient(true);
   };
 
-  return showRecipientPlate ? (
-    <VerticalSpaceContainer top={SpacingSize.XXL}>
-      <RecipientPlate
-        publicKey={inputValue}
-        name={recipientName}
-        recipientLabel={t('To recipient')}
-        showFullPublicKey
-        handleClick={() => {
-          setShowRecipientPlate(false);
+  const accountsInfo = useFetchAccountsInfo(publicKeys);
 
-          trigger('recipientPublicKey');
-        }}
+  if (showSelectedRecipient) {
+    return (
+      <SelectedRecipient
+        recipientName={recipientName}
+        setShowSelectedRecipient={setShowSelectedRecipient}
+        inputValue={inputValue}
+        trigger={trigger}
       />
-    </VerticalSpaceContainer>
-  ) : (
+    );
+  }
+
+  return (
     <VerticalSpaceContainer
       top={SpacingSize.XXXL}
-      ref={clickAwayRef}
       onFocus={() => {
-        setShowRecipientPlate(false);
+        setShowSelectedRecipient(false);
       }}
     >
       <Input
@@ -108,6 +126,7 @@ export const RecipientTabs = ({
               src="assets/icons/cross.svg"
               size={16}
               onClick={() => {
+                setShowSelectedRecipient(false);
                 setValue('recipientPublicKey', '');
                 if (setRecipientPublicKey) {
                   setRecipientPublicKey('');
@@ -118,29 +137,53 @@ export const RecipientTabs = ({
             />
           )
         }
-        placeholder={t('Public key')}
+        placeholder={t('Public key or name')}
         {...register('recipientPublicKey')}
-        onChange={e => {
+        onChange={debounce(e => {
           onChange(e);
 
           if (setRecipientPublicKey) {
             setRecipientPublicKey(e.target.value);
           }
-        }}
+        }, 500)}
         error={!!errors?.recipientPublicKey}
         validationText={errors?.recipientPublicKey?.message}
       />
-      <Tabs onClick={inputValue ? undefined : clearErrors}>
-        <Tab tabName={RecipientTabName.Recent}>
-          <RecentList handleSelectRecipient={handleSelectRecipient} />
-        </Tab>
-        <Tab tabName={RecipientTabName.MyAccounts}>
-          <MyAccountsList handleSelectRecipient={handleSelectRecipient} />
-        </Tab>
-        <Tab tabName={RecipientTabName.Contacts}>
-          <ContactsList handleSelectRecipient={handleSelectRecipient} />
-        </Tab>
-      </Tabs>
+      {inputValue?.endsWith('.cspr') ? (
+        <SearchItemByCsprName
+          inputValue={inputValue}
+          handleSelectRecipient={handleSelectRecipient}
+        />
+      ) : isValidPublicKey(inputValue) ? (
+        <SearchItemByPublicKey
+          inputValue={inputValue}
+          handleSelectRecipient={handleSelectRecipient}
+        />
+      ) : (
+        <Tabs onClick={inputValue ? undefined : clearErrors}>
+          <Tab tabName={RecipientTabName.Recent}>
+            <RecentList
+              handleSelectRecipient={handleSelectRecipient}
+              accountsInfo={accountsInfo}
+              inputValue={inputValue}
+            />
+          </Tab>
+          <Tab tabName={RecipientTabName.MyAccounts}>
+            <MyAccountsList
+              handleSelectRecipient={handleSelectRecipient}
+              accountsInfo={accountsInfo}
+              inputValue={inputValue}
+            />
+          </Tab>
+          <Tab tabName={RecipientTabName.Contacts}>
+            <ContactsList
+              handleSelectRecipient={handleSelectRecipient}
+              accountsInfo={accountsInfo}
+              inputValue={inputValue}
+            />
+          </Tab>
+        </Tabs>
+      )}
     </VerticalSpaceContainer>
   );
 };

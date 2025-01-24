@@ -32,38 +32,40 @@ const slideOutToBottom = keyframes`
 
 const ModalContainer = styled.div<{
   placement: 'top' | 'bottom' | 'fullBottom';
-}>(({ theme, placement }) => ({
-  position: 'absolute',
+}>(({ theme, placement }) => {
+  return {
+    position: 'absolute',
 
-  margin: '0 16px',
+    margin: '0 16px',
 
-  maxWidth: '328px',
+    maxWidth: '328px',
 
-  ...(placement === 'fullBottom' && {
-    bottom: 0,
+    ...(placement === 'fullBottom' && {
+      bottom: 0,
 
-    margin: 0,
-    maxWidth: '360px'
-  }),
+      margin: 0,
+      maxWidth: '360px'
+    }),
 
-  ...(placement === 'top' && {
-    top: '88px'
-  }),
+    ...(placement === 'top' && {
+      top: '16px'
+    }),
 
-  ...(placement === 'bottom' && {
-    bottom: '16px'
-  }),
+    ...(placement === 'bottom' && {
+      bottom: '88px'
+    }),
 
-  left: 0,
-  right: 0,
+    left: 0,
+    right: 0,
 
-  backgroundColor: theme.color.backgroundPrimary,
-  boxShadow: theme.shadow.contextMenu,
-  borderRadius:
-    placement === 'fullBottom'
-      ? `${theme.borderRadius.sixteen}px`
-      : `${theme.borderRadius.twelve}px`
-}));
+    backgroundColor: theme.color.backgroundPrimary,
+    boxShadow: theme.shadow.contextMenu,
+    borderRadius:
+      placement === 'fullBottom'
+        ? `${theme.borderRadius.sixteen}px`
+        : `${theme.borderRadius.twelve}px`
+  };
+});
 
 const ModalEnterFromBottom = styled(ModalContainer)`
   animation: ${slideInFromBottom} 0.5s linear forwards;

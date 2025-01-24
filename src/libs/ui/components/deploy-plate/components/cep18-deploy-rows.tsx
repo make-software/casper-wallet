@@ -46,6 +46,16 @@ export const Cep18DeployRows = ({ deploy }: Erc20DeployRowsProps) => {
               ? deploy.callerAccountInfo?.name
               : deploy.recipientAccountInfo?.name
           }
+          imgLogo={
+            deploy.isReceive
+              ? deploy.callerAccountInfo?.brandingLogo
+              : deploy.recipientAccountInfo?.brandingLogo
+          }
+          csprName={
+            deploy.isReceive
+              ? deploy.callerAccountInfo?.csprName
+              : deploy.recipientAccountInfo?.csprName
+          }
         >
           <Typography type="captionRegular" color="contentPrimary">
             {deploy.contractName}

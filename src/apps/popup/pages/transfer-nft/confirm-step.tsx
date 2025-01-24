@@ -1,13 +1,15 @@
+import { INft } from 'casper-wallet-core/src/domain';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { NFTTokenResult } from '@libs/services/nft-service';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import { RecipientPlate, Typography } from '@libs/ui/components';
 import { TransactionFeePlate } from '@libs/ui/components/transaction-fee-plate/transaction-fee-plate';
 
@@ -16,7 +18,7 @@ import { NFTData } from './utils';
 
 interface ConfirmStepProps {
   nftData?: NFTData;
-  nftToken: NFTTokenResult | undefined;
+  nftToken: INft | undefined;
   recipientPublicKey: string;
   recipientName: string;
   paymentAmount: string;
@@ -30,6 +32,13 @@ export const ConfirmStep = ({
   paymentAmount
 }: ConfirmStepProps) => {
   const { t } = useTranslation();
+
+  const accountsInfo = useFetchAccountsInfo([recipientPublicKey]);
+
+  const accountHash = getAccountHashFromPublicKey(recipientPublicKey);
+
+  const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
+  const brandingLogo = accountsInfo && accountsInfo[accountHash]?.brandingLogo;
 
   return (
     <ContentContainer>
@@ -49,6 +58,8 @@ export const ConfirmStep = ({
           publicKey={recipientPublicKey}
           showFullPublicKey
           name={recipientName}
+          csprName={csprName}
+          brandingLogo={brandingLogo}
         />
       </VerticalSpaceContainer>
 

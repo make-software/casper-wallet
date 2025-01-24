@@ -29,7 +29,8 @@ export const useFetchCep18TransferDeploys = (contractPackageHash: string) => {
         network: network.toLowerCase() as CasperNetwork,
         activePublicKey: activeAccount?.publicKey ?? '',
         contractPackageHash,
-        page: pageParam
+        page: pageParam,
+        withProxyHeader: false
       }),
     getNextPageParam: (lastPage, pages) => {
       const nextPage = pages.length + 1;

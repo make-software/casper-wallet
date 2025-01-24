@@ -12,12 +12,11 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { hideAccountFromListChanged } from '@background/redux/vault/actions';
 import {
   selectVaultAccount,
+  selectVaultAccountsPublicKeys,
   selectVaultHiddenAccountsNames,
   selectVaultImportedAccountNames,
   selectVaultLedgerAccountNames
 } from '@background/redux/vault/selectors';
-
-import { useFetchAccountInfo } from '@hooks/use-fetch-account-info';
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
@@ -27,6 +26,7 @@ import {
   TileContainer,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import {
   Hash,
   HashVariant,
@@ -43,13 +43,16 @@ export function AccountSettingsPageContent() {
   const account = useSelector((state: RootState) =>
     selectVaultAccount(state, accountName || '')
   );
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
   if (!account) {
     throw new Error("Account doesn't exist");
   }
 
+  const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
   const accountHash = getAccountHashFromPublicKey(account.publicKey);
-  const { accountInfoStandardName } = useFetchAccountInfo(account);
+
+  const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
 
   return (
     <>
@@ -57,11 +60,6 @@ export function AccountSettingsPageContent() {
         <Tile>
           <TileContainer paddingVertical={SpacingSize.XL}>
             <Typography type="header">{account.name}</Typography>
-            {accountInfoStandardName && (
-              <Typography type="body" ellipsis>
-                {accountInfoStandardName}
-              </Typography>
-            )}
             <VerticalSpaceContainer top={SpacingSize.XL}>
               <QRCodeCanvas
                 id="qrCode"
@@ -83,6 +81,18 @@ export function AccountSettingsPageContent() {
                 />
               </FlexColumn>
             </VerticalSpaceContainer>
+            {csprName ? (
+              <VerticalSpaceContainer top={SpacingSize.XL}>
+                <FlexColumn gap={SpacingSize.Small}>
+                  <Typography type="bodySemiBold">
+                    <Trans t={t}>CSPR.name</Trans>
+                  </Typography>
+                  <Typography type="captionRegular" color="contentSecondary">
+                    {csprName}
+                  </Typography>
+                </FlexColumn>
+              </VerticalSpaceContainer>
+            ) : null}
             <VerticalSpaceContainer top={SpacingSize.XL}>
               <FlexColumn gap={SpacingSize.Small}>
                 <Typography type="bodySemiBold">

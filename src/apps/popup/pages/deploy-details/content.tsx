@@ -8,6 +8,7 @@ import { DeployDetailsResult } from '@popup/pages/deploy-details/components/depl
 import { getEntryPointName } from '@popup/pages/deploy-details/utils';
 
 import {
+  AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
   BorderBottomPseudoElementProps,
   ContentContainer,
@@ -19,11 +20,13 @@ import {
   SpacingSize,
   borderBottomPseudoElementRules
 } from '@libs/layout';
-import { useFetchDeploy } from '@libs/services/deploys/use-fetch-deploy';
+import { useFetchSingleDeploy } from '@libs/services/deploys/use-fetch-single-deploy';
 import {
   DeployStatus,
   Hash,
   HashVariant,
+  Status,
+  SvgIcon,
   Tile,
   Typography
 } from '@libs/ui/components';
@@ -70,7 +73,7 @@ export const DeployDetailsPageContent = ({
     setSingleDeploy(deploy);
   }, [deploy]);
 
-  const { deployData } = useFetchDeploy(deploy?.deployHash);
+  const { deployData } = useFetchSingleDeploy(deploy?.deployHash);
 
   useEffect(() => {
     if (deployData) {
@@ -97,7 +100,6 @@ export const DeployDetailsPageContent = ({
               status: singleDeploy.status,
               errorMessage: singleDeploy.errorMessage
             }}
-            placement="bottomLeft"
           />
         </TitleContainer>
       </ParagraphContainer>
@@ -105,6 +107,24 @@ export const DeployDetailsPageContent = ({
       <DeployDetailsResult deploy={singleDeploy} />
       <Tile style={{ marginTop: '16px' }}>
         <RowsContainer marginLeftForSeparatorLine={16}>
+          {singleDeploy.errorMessage &&
+            singleDeploy.status === Status.Error && (
+              <RowContainer gap={SpacingSize.Medium}>
+                <Typography type="captionRegular" color="contentSecondary">
+                  <Trans t={t}>Status</Trans>
+                </Typography>
+                <AlignedFlexRow gap={SpacingSize.Small}>
+                  <SvgIcon
+                    src="assets/icons/error.svg"
+                    color="contentActionCritical"
+                    size={20}
+                  />
+                  <Typography type="captionRegular" wordBreak>
+                    {singleDeploy.errorMessage}
+                  </Typography>
+                </AlignedFlexRow>
+              </RowContainer>
+            )}
           <RowContainer>
             <Typography type="captionRegular" color="contentSecondary">
               <Trans t={t}>Deploy hash</Trans>

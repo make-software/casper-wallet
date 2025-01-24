@@ -28,7 +28,9 @@ popup.describe('Popup UI: disconnect account', () => {
       await popupPage.getByText('Connected sites').click();
 
       await popupExpect(
-        popupPage.getByText(ACCOUNT_NAMES.defaultFirstAccountName)
+        popupPage
+          .getByText(ACCOUNT_NAMES.defaultFirstAccountName, { exact: true })
+          .nth(1)
       ).toBeVisible();
       await popupExpect(
         popupPage.getByText(ACCOUNT_NAMES.defaultSecondAccountName)
@@ -40,7 +42,9 @@ popup.describe('Popup UI: disconnect account', () => {
       await disconnectIcons[0].click();
 
       await popupExpect(
-        popupPage.getByText(ACCOUNT_NAMES.defaultFirstAccountName)
+        popupPage
+          .getByText(ACCOUNT_NAMES.defaultFirstAccountName, { exact: true })
+          .nth(1)
       ).not.toBeVisible();
       await popupExpect(
         popupPage.getByText(ACCOUNT_NAMES.defaultSecondAccountName)
@@ -55,7 +59,9 @@ popup.describe('Popup UI: disconnect account', () => {
       await popupPage.getByText('Connected sites').click();
 
       await popupExpect(
-        popupPage.getByText(ACCOUNT_NAMES.defaultFirstAccountName)
+        popupPage
+          .getByText(ACCOUNT_NAMES.defaultFirstAccountName, { exact: true })
+          .nth(1)
       ).toBeVisible();
       await popupExpect(
         popupPage.getByText(ACCOUNT_NAMES.defaultSecondAccountName)

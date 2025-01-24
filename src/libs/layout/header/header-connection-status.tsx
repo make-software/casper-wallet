@@ -1,31 +1,27 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
 
-import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
+import {
+  selectVaultAccountsPublicKeys,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
 
-import { AlignedFlexRow, SpacingSize } from '@libs/layout';
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+import {
+  AlignedFlexRow,
+  LeftAlignedFlexColumn,
+  SpacingSize
+} from '@libs/layout';
+import { HeaderBackgroundContainer } from '@libs/layout/header/components/header-background-container';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import {
   AccountList,
   Avatar,
   Hash,
   HashVariant,
   Modal,
-  SvgIcon
+  Typography
 } from '@libs/ui/components';
-import { hexToRGBA } from '@libs/ui/utils';
-
-const ConnectionStatusContainer = styled(AlignedFlexRow)`
-  width: fit-content;
-
-  background-color: ${({ theme }) => hexToRGBA(theme.color.black, '0.24')};
-  padding: 6px 8px 6px 14px;
-  border-top-right-radius: ${({ theme }) => theme.borderRadius.hundred}px;
-  border-bottom-right-radius: ${({ theme }) => theme.borderRadius.hundred}px;
-
-  position: relative;
-  left: -2px;
-`;
 
 interface HeaderConnectionStatusProps {
   publicKey: string;
@@ -37,40 +33,56 @@ export function HeaderConnectionStatus({
   isConnected
 }: HeaderConnectionStatusProps) {
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
+
+  const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
+
+  const accountHash = getAccountHashFromPublicKey(activeAccount?.publicKey);
+
+  const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
+  const brandingLogo = accountsInfo && accountsInfo[accountHash]?.brandingLogo;
 
   return (
     <Modal
       placement="top"
-      dataTestId="connection-status-modal"
       renderContent={({ closeModal }) => (
         <AccountList closeModal={closeModal} />
       )}
       children={({ isOpen }) => (
-        <>
-          <Avatar
-            size={32}
-            publicKey={publicKey}
-            withConnectedStatus
-            isConnected={isConnected}
-            displayContext="header"
-          />
-          <ConnectionStatusContainer gap={SpacingSize.Tiny}>
+        <AlignedFlexRow gap={SpacingSize.Tiny}>
+          <HeaderBackgroundContainer isOpen={isOpen}>
+            <Avatar
+              size={36}
+              publicKey={publicKey}
+              withConnectedStatus
+              isConnected={isConnected}
+              displayContext="header"
+              brandingLogo={brandingLogo}
+              isAccountSwitcherOpen={isOpen}
+              dataTestId="connection-status-modal"
+            />
+          </HeaderBackgroundContainer>
+          <LeftAlignedFlexColumn
+            style={{ cursor: 'auto' }}
+            onClick={event => {
+              event.stopPropagation();
+            }}
+          >
+            <Typography type="bodySemiBold" color="contentOnFill">
+              {activeAccount?.name}
+            </Typography>
             <Hash
               value={activeAccount?.publicKey!}
-              variant={HashVariant.ListSubtextHash}
+              csprName={csprName}
+              variant={HashVariant.CaptionHash}
+              color="contentOnFill"
               truncated
-              withoutTooltip
-              color="contentOnFill"
-              withCopyOnSelfClick={false}
+              withCopyIcon
+              placement="bottomRight"
+              withOpacity
             />
-            <SvgIcon
-              size={16}
-              src="assets/icons/chevron-up.svg"
-              flipByAxis={isOpen ? undefined : 'X'}
-              color="contentOnFill"
-            />
-          </ConnectionStatusContainer>
-        </>
+          </LeftAlignedFlexColumn>
+        </AlignedFlexRow>
       )}
     />
   );

@@ -1,102 +1,69 @@
-import React, { MouseEvent, PropsWithChildren, useRef, useState } from 'react';
-import styled from 'styled-components';
-
-import { useClickAway } from '@hooks/use-click-away';
-
-import { AlignedFlexRow, FlexColumn, Overlay, SpacingSize } from '@libs/layout';
-
-const popoverOffsetFromChildren = 8;
-const contentHeight = 188;
-
-const ChildrenContainer = styled(AlignedFlexRow)`
-  cursor: pointer;
-`;
-
-interface PopoverContainerProps {
-  domRect?: DOMRect;
-}
-
-const PopoverOverlay = styled(Overlay)`
-  background: inherit;
-`;
-
-const PopoverContainer = styled.div<PopoverContainerProps>`
-  position: absolute;
-  right: 16px;
-  top: ${({ domRect }) => {
-    if (domRect == null) {
-      return '0px';
-    }
-
-    const { top, bottom, height } = domRect;
-
-    if (top && bottom) {
-      return bottom >= window.innerHeight - contentHeight
-        ? `${top - contentHeight}px`
-        : `${top + height + popoverOffsetFromChildren}px`;
-    }
-  }};
-
-  z-index: ${({ theme }) => theme.zIndex.dropdown};
-`;
-
-const PopoverItemsContainer = styled(FlexColumn)`
-  padding: 8px;
-
-  background: ${({ theme }) => theme.color.backgroundPrimary};
-  box-shadow: ${({ theme }) => theme.shadow.contextMenu};
-  border-radius: ${({ theme }) => theme.borderRadius.eight}px;
-`;
-
-type RenderProps = {
-  closePopover: (e: MouseEvent<HTMLAnchorElement>) => void;
-};
+import React, { PropsWithChildren, useEffect } from 'react';
+import { ContentRenderer, Popover as TinyPopover } from 'react-tiny-popover';
 
 interface PopoverProps {
-  renderMenuItems: (renderProps: RenderProps) => JSX.Element;
+  content: ContentRenderer;
+  popoverParentRef: React.MutableRefObject<HTMLDivElement | null>;
+  children: JSX.Element;
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isAllAccountsPage?: boolean;
 }
 
 export function Popover({
-  renderMenuItems,
-  children
+  content,
+  children,
+  popoverParentRef,
+  isOpen,
+  setIsOpen,
+  isAllAccountsPage = false
 }: PropsWithChildren<PopoverProps>) {
-  const [isOpen, setIsOpen] = useState(false);
-  const childrenContainerRef = useRef<HTMLDivElement>(null);
-
-  const { ref: clickAwayRef } = useClickAway({
-    callback: (event: MouseEvent<HTMLAnchorElement>) => {
-      event.stopPropagation();
-      isOpen && setIsOpen(false);
+  useEffect(() => {
+    // Get the container with class "ms-container"
+    // (to manage scroll behavior while the popover is open)
+    const scrollableContainer = document.querySelector('.ms-container');
+    if (scrollableContainer) {
+      const style = scrollableContainer.getAttribute('style');
+      if (isOpen) {
+        scrollableContainer.setAttribute('style', `${style} overflow: hidden;`);
+      } else {
+        scrollableContainer.setAttribute(
+          'style',
+          style?.replace('overflow: hidden;', '')!
+        );
+      }
     }
-  });
 
-  const closePopover = (e: MouseEvent<HTMLAnchorElement>) => {
-    e.stopPropagation();
-    setIsOpen(false);
-  };
+    return () => {
+      if (scrollableContainer) {
+        const style = scrollableContainer.getAttribute('style');
+        scrollableContainer.setAttribute(
+          'style',
+          style?.replace('overflow: hidden;', '')!
+        );
+      }
+    };
+  }, [isOpen]);
 
   return (
-    <>
-      <ChildrenContainer
-        ref={childrenContainerRef}
-        data-testid="popover-children-container"
-        onClick={() => setIsOpen(true)}
-      >
-        {children}
-      </ChildrenContainer>
-
-      {isOpen && (
-        <PopoverOverlay>
-          <PopoverContainer
-            ref={clickAwayRef}
-            domRect={childrenContainerRef.current?.getBoundingClientRect()}
-          >
-            <PopoverItemsContainer gap={SpacingSize.Tiny}>
-              {renderMenuItems({ closePopover })}
-            </PopoverItemsContainer>
-          </PopoverContainer>
-        </PopoverOverlay>
-      )}
-    </>
+    <TinyPopover
+      isOpen={isOpen}
+      onClickOutside={() => setIsOpen(false)}
+      positions={['bottom', 'top']}
+      containerStyle={
+        isAllAccountsPage
+          ? undefined
+          : {
+              zIndex: '15'
+            }
+      }
+      transform={isAllAccountsPage ? undefined : { top: 55, left: 135 }}
+      parentElement={
+        isAllAccountsPage ? undefined : popoverParentRef.current || undefined
+      }
+      content={content}
+    >
+      {children}
+    </TinyPopover>
   );
 }

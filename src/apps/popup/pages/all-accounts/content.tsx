@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 
 import {
   selectConnectedAccountNamesWithActiveOrigin,
+  selectVaultAccountsPublicKeys,
   selectVaultActiveAccountName,
   selectVaultHiddenAccounts,
   selectVaultVisibleAccounts
@@ -11,17 +12,22 @@ import {
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import { ContentContainer, SpacingSize } from '@libs/layout';
-import { AccountListRows } from '@libs/types/account';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
+import {
+  AccountListRowWithAccountHash,
+  AccountListRows
+} from '@libs/types/account';
 import { List } from '@libs/ui/components';
 import { AccountListItem } from '@libs/ui/components/account-list/account-list-item';
 import { sortAccounts } from '@libs/ui/components/account-list/utils';
 
 export const AllAccountsContent = () => {
   const [visibleAccountsWithId, setVisibleAccountsWithId] = useState<
-    AccountListRows[]
+    AccountListRowWithAccountHash<AccountListRows>[]
   >([]);
   const [hiddenAccountsWithId, setHiddeAccountsWithId] = useState<
-    AccountListRows[]
+    AccountListRowWithAccountHash<AccountListRows>[]
   >([]);
 
   const { t } = useTranslation();
@@ -31,6 +37,10 @@ export const AllAccountsContent = () => {
   const connectedAccountNames =
     useSelector(selectConnectedAccountNamesWithActiveOrigin) || [];
   const activeAccountName = useSelector(selectVaultActiveAccountName);
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
+
+  const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
+  const { accountsBalances, isLoadingBalance } = useFetchWalletBalance();
 
   useEffect(() => {
     const visibleAccountListRows = sortAccounts(
@@ -71,12 +81,20 @@ export const AllAccountsContent = () => {
           const isConnected = connectedAccountNames.includes(account.name);
           const isActiveAccount = activeAccountName === account.name;
 
+          const accountLiquidBalance =
+            accountsBalances &&
+            accountsBalances[account.accountHash]?.liquidBalance;
+
           return (
             <AccountListItem
               account={account}
               isActiveAccount={isActiveAccount}
               isConnected={isConnected}
               showHideAccountItem
+              accountsInfo={accountsInfo}
+              accountLiquidBalance={accountLiquidBalance}
+              isLoadingBalance={isLoadingBalance}
+              isAllAccountsPage={true}
             />
           );
         }}
@@ -91,12 +109,20 @@ export const AllAccountsContent = () => {
           renderRow={account => {
             const isConnected = connectedAccountNames.includes(account.name);
 
+            const accountLiquidBalance =
+              accountsBalances &&
+              accountsBalances[account.accountHash]?.liquidBalance;
+
             return (
               <AccountListItem
                 account={account}
                 isActiveAccount={false}
                 isConnected={isConnected}
                 showHideAccountItem
+                accountsInfo={accountsInfo}
+                accountLiquidBalance={accountLiquidBalance}
+                isLoadingBalance={isLoadingBalance}
+                isAllAccountsPage={true}
               />
             );
           }}

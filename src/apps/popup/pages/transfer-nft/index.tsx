@@ -1,15 +1,14 @@
-import { DeployUtil } from 'casper-js-sdk';
+import { Deploy, NFTTokenStandard, makeNftTransferDeploy } from 'casper-js-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import { MapNFTTokenStandardToName } from '@src/utils';
+import { networkNameToSdkNetworkNameMap } from '@src/constants';
 
 import {
   TransferNFTSteps,
-  getDefaultPaymentAmountBasedOnNftTokenStandard,
-  getRuntimeArgs
+  getDefaultPaymentAmountBasedOnNftTokenStandard
 } from '@popup/pages/transfer-nft/utils';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
@@ -17,11 +16,7 @@ import {
   accountPendingDeployHashesChanged,
   accountTrackingIdOfSentNftTokensChanged
 } from '@background/redux/account-info/actions';
-import {
-  selectAccountBalance,
-  selectAccountNftTokens
-} from '@background/redux/account-info/selectors';
-import { selectAllPublicKeys } from '@background/redux/contacts/selectors';
+import { selectAllContactsPublicKeys } from '@background/redux/contacts/selectors';
 import {
   ledgerDeployChanged,
   ledgerRecipientToSaveOnSuccessChanged
@@ -40,8 +35,7 @@ import {
 
 import { useLedger } from '@hooks/use-ledger';
 
-import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
-import { getRawPublicKey } from '@libs/entities/Account';
+import { createAsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 import {
   AlignedFlexRow,
   ErrorPath,
@@ -52,11 +46,9 @@ import {
   SpacingSize,
   createErrorLocationState
 } from '@libs/layout';
-import {
-  makeNFTDeploy,
-  sendSignDeploy,
-  signDeploy
-} from '@libs/services/deployer-service';
+import { useFetchWalletBalance } from '@libs/services/balance-service';
+import { sendSignDeploy, signDeploy } from '@libs/services/deployer-service';
+import { useFetchNftTokens } from '@libs/services/nft-service';
 import {
   Button,
   HomePageTabsId,
@@ -81,11 +73,11 @@ export const TransferNftPage = () => {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [haveReverseOwnerLookUp, setHaveReverseOwnerLookUp] = useState(false);
   const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(false);
+  const [isRecipientFormButtonDisabled, setIsRecipientFormButtonDisabled] =
+    useState(true);
 
   const { contractPackageHash, tokenId } = useParams();
 
-  const nftTokens = useSelector(selectAccountNftTokens);
-  const csprBalance = useSelector(selectAccountBalance);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isActiveAccountFromLedger = useSelector(
     selectIsActiveAccountFromLedger
@@ -93,9 +85,12 @@ export const TransferNftPage = () => {
   const { networkName, nodeUrl } = useSelector(
     selectApiConfigBasedOnActiveNetwork
   );
-  const contactPublicKeys = useSelector(selectAllPublicKeys);
+  const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
   const ratedInStore = useSelector(selectRatedInStore);
   const askForReviewAfter = useSelector(selectAskForReviewAfter);
+
+  const { accountBalance } = useFetchWalletBalance();
+  const { nftTokens } = useFetchNftTokens();
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -107,8 +102,8 @@ export const TransferNftPage = () => {
     () =>
       nftTokens?.find(
         token =>
-          token.token_id === tokenId &&
-          token.contract_package_hash === contractPackageHash
+          token.tokenId === tokenId &&
+          token.contractPackageHash === contractPackageHash
       ),
     [contractPackageHash, nftTokens, tokenId]
   );
@@ -120,14 +115,12 @@ export const TransferNftPage = () => {
   }, [navigate, nftToken]);
 
   useEffect(() => {
-    if (nftToken?.contract_package?.metadata?.owner_reverse_lookup_mode) {
+    if (nftToken?.owner_reverse_lookup_mode) {
       setHaveReverseOwnerLookUp(true);
     }
   }, [nftToken]);
 
-  const tokenStandard = nftToken
-    ? MapNFTTokenStandardToName[nftToken.token_standard_id]
-    : '';
+  const tokenStandard = nftToken?.standard;
 
   const defaultPaymentAmount = useMemo(
     () => getDefaultPaymentAmountBasedOnNftTokenStandard(tokenStandard),
@@ -135,7 +128,7 @@ export const TransferNftPage = () => {
   );
 
   const { recipientForm, amountForm } = useTransferNftForm(
-    csprBalance.liquidMotes,
+    accountBalance.liquidBalance,
     defaultPaymentAmount
   );
 
@@ -145,9 +138,6 @@ export const TransferNftPage = () => {
     trigger('paymentAmount');
   }, [trigger]);
 
-  const isRecipientFormButtonDisabled = calculateSubmitButtonDisabled({
-    isValid: recipientForm.formState.isValid && !haveReverseOwnerLookUp
-  });
   const isAmountFormButtonDisabled = calculateSubmitButtonDisabled({
     isValid: amountForm.formState.isValid
   });
@@ -163,31 +153,26 @@ export const TransferNftPage = () => {
 
     setIsSubmitButtonDisable(true);
 
-    if (activeAccount) {
+    if (activeAccount && tokenStandard) {
       const { recipientPublicKey } = recipientForm.getValues();
       const { paymentAmount } = amountForm.getValues();
 
-      const KEYS = createAsymmetricKey(
+      const KEYS = createAsymmetricKeys(
         activeAccount.publicKey,
         activeAccount.secretKey
       );
 
-      const args = {
-        tokenId: nftToken.token_id,
-        source: KEYS.publicKey,
-        target: getRawPublicKey(recipientPublicKey)
-      };
+      const deploy = makeNftTransferDeploy({
+        chainName: networkNameToSdkNetworkNameMap[networkName],
+        contractPackageHash: nftToken.contractPackageHash,
+        nftStandard: NFTTokenStandard[tokenStandard],
+        paymentAmount: CSPRtoMotes(paymentAmount),
+        recipientPublicKeyHex: recipientPublicKey,
+        senderPublicKeyHex: KEYS.publicKey.toHex(),
+        tokenId: nftToken.tokenId
+      });
 
-      const deploy = await makeNFTDeploy(
-        getRuntimeArgs(tokenStandard, args),
-        CSPRtoMotes(paymentAmount),
-        KEYS.publicKey,
-        networkName,
-        nftToken?.contract_package_hash!,
-        nodeUrl
-      );
-
-      const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
+      const signedDeploy = await signDeploy(deploy, KEYS, activeAccount);
 
       sendSignDeploy(signedDeploy, nodeUrl)
         .then(resp => {
@@ -198,7 +183,7 @@ export const TransferNftPage = () => {
 
             dispatchToMainStore(
               accountTrackingIdOfSentNftTokensChanged({
-                trackingId: nftToken.tracking_id,
+                trackingId: nftToken.trackingId,
                 deployHash
               })
             );
@@ -247,30 +232,26 @@ export const TransferNftPage = () => {
   const beforeLedgerActionCb = async () => {
     setTransferNFTStep(TransferNFTSteps.ConfirmWithLedger);
 
-    if (haveReverseOwnerLookUp || !nftToken || !activeAccount) return;
+    if (haveReverseOwnerLookUp || !nftToken || !activeAccount || !tokenStandard)
+      return;
 
-    const KEYS = createAsymmetricKey(
+    const KEYS = createAsymmetricKeys(
       activeAccount.publicKey,
       activeAccount.secretKey
     );
 
-    const args = {
-      tokenId: nftToken.token_id,
-      source: KEYS.publicKey,
-      target: getRawPublicKey(recipientPublicKey)
-    };
-
-    const deploy = await makeNFTDeploy(
-      getRuntimeArgs(tokenStandard, args),
-      CSPRtoMotes(paymentAmount),
-      KEYS.publicKey,
-      networkName,
-      nftToken?.contract_package_hash!,
-      nodeUrl
-    );
+    const deploy = makeNftTransferDeploy({
+      chainName: networkNameToSdkNetworkNameMap[networkName],
+      contractPackageHash: nftToken.contractPackageHash,
+      nftStandard: NFTTokenStandard[tokenStandard],
+      paymentAmount: CSPRtoMotes(paymentAmount),
+      recipientPublicKeyHex: recipientPublicKey,
+      senderPublicKeyHex: KEYS.publicKey.toHex(),
+      tokenId: nftToken.tokenId
+    });
 
     dispatchToMainStore(
-      ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+      ledgerDeployChanged(JSON.stringify(Deploy.toJSON(deploy)))
     );
     dispatchToMainStore(
       ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
@@ -296,6 +277,8 @@ export const TransferNftPage = () => {
         recipientForm={recipientForm}
         setRecipientName={setRecipientName}
         recipientName={recipientName}
+        setIsRecipientFormButtonDisabled={setIsRecipientFormButtonDisabled}
+        haveReverseOwnerLookUp={haveReverseOwnerLookUp}
       />
     ),
     [TransferNFTSteps.Confirm]: (

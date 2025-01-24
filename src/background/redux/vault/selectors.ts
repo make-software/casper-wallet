@@ -1,15 +1,10 @@
 import { createSelector } from 'reselect';
 import { RootState } from 'typesafe-actions';
 
-import { selectAccountBalances } from '@background/redux/account-balances/selectors';
 import { VaultState } from '@background/redux/vault/types';
 
 import { SecretPhrase } from '@libs/crypto';
-import {
-  Account,
-  AccountWithBalance,
-  HardwareWalletType
-} from '@libs/types/account';
+import { Account, HardwareWalletType } from '@libs/types/account';
 
 import { selectActiveOrigin } from '../active-origin/selectors';
 
@@ -24,35 +19,15 @@ export const selectSecretPhrase = (state: RootState): null | SecretPhrase =>
 export const selectVaultAccounts = (state: RootState): Account[] =>
   state.vault.accounts;
 
-export const selectVaultAccountsWithBalances = createSelector(
-  selectVaultAccounts,
-  selectAccountBalances,
-  (accounts, accountBalances): AccountWithBalance[] =>
-    accounts.map(account => {
-      if (!accountBalances.length) {
-        return {
-          ...account,
-          balance: {
-            liquidMotes: null
-          }
-        };
-      }
+export const selectVaultAccountsPublicKeys = (state: RootState): string[] =>
+  state.vault.accounts.map(key => key.publicKey);
 
-      const accountBalance = accountBalances.find(
-        ac => ac.public_key === account.publicKey
-      );
-
-      return {
-        ...account,
-        balance: {
-          liquidMotes: String(accountBalance?.balance || '0')
-        }
-      };
-    })
-);
+export const selectVaultAccountsExceptLedgersAccounts = (
+  state: RootState
+): Account[] => state.vault.accounts.filter(account => !account.hardware);
 
 export const selectVaultCountsOfAccounts = createSelector(
-  selectVaultAccountsWithBalances,
+  selectVaultAccounts,
   accounts => accounts.length
 );
 
@@ -60,12 +35,12 @@ export const selectVaultHasAccounts = (state: RootState): boolean =>
   state.vault.accounts.length > 0;
 
 export const selectVaultAccountsNames = createSelector(
-  selectVaultAccountsWithBalances,
+  selectVaultAccounts,
   accounts => accounts.map(account => account.name)
 );
 
 export const selectVaultImportedAccounts = createSelector(
-  selectVaultAccountsWithBalances,
+  selectVaultAccounts,
   accounts => accounts.filter(account => account.imported)
 );
 
@@ -75,12 +50,12 @@ export const selectVaultImportedAccountNames = createSelector(
 );
 
 export const selectVaultVisibleAccounts = createSelector(
-  selectVaultAccountsWithBalances,
+  selectVaultAccounts,
   accounts => accounts.filter(account => !account.hidden)
 );
 
 export const selectVaultHiddenAccounts = createSelector(
-  selectVaultAccountsWithBalances,
+  selectVaultAccounts,
   accounts => accounts.filter(account => account.hidden)
 );
 
@@ -95,12 +70,12 @@ export const selectVaultHasImportedAccount = createSelector(
 );
 
 export const selectVaultDerivedAccounts = createSelector(
-  selectVaultAccountsWithBalances,
+  selectVaultAccounts,
   accounts => accounts.filter(account => !account.imported && !account.hardware)
 );
 
 export const selectVaultLedgerAccounts = createSelector(
-  selectVaultAccountsWithBalances,
+  selectVaultAccounts,
   accounts =>
     accounts.filter(account => account.hardware === HardwareWalletType.Ledger)
 );
@@ -111,12 +86,12 @@ export const selectVaultLedgerAccountNames = createSelector(
 );
 
 export const selectVaultAccountsSecretKeysBase64 = createSelector(
-  selectVaultAccountsWithBalances,
+  selectVaultAccounts,
   accounts => accounts.map(account => account.secretKey)
 );
 
 export const selectVaultAccount = createSelector(
-  selectVaultAccountsWithBalances,
+  selectVaultAccounts,
   (_: RootState, accountName: string) => accountName,
   (accounts, accountName) =>
     accounts.find(account => account.name === accountName)
@@ -126,7 +101,7 @@ export const selectVaultActiveAccountName = (state: RootState) =>
   state.vault.activeAccountName;
 
 export const selectVaultActiveAccount = createSelector(
-  selectVaultAccountsWithBalances,
+  selectVaultAccounts,
   selectVaultActiveAccountName,
   (accounts, activeAccountName) => {
     return accounts.find(account => account.name === activeAccountName);
@@ -219,19 +194,19 @@ export const selectConnectedAccountNamesWithActiveOrigin = createSelector(
 
 export const selectConnectedAccountsWithActiveOrigin = createSelector(
   selectActiveOrigin,
-  selectVaultAccountsWithBalances,
+  selectVaultAccounts,
   selectConnectedAccountNamesWithActiveOrigin,
-  (origin, accounts, connectedAccountNamesWithOrigin): AccountWithBalance[] => {
+  (origin, accounts, connectedAccountNamesWithOrigin): Account[] => {
     return (connectedAccountNamesWithOrigin || [])
       .map(accountName =>
         accounts.find(account => account.name === accountName)
       )
-      .filter((account): account is AccountWithBalance => !!account);
+      .filter((account): account is Account => !!account);
   }
 );
 
 export const selectUnconnectedAccountsWithActiveOrigin = createSelector(
-  selectVaultAccountsWithBalances,
+  selectVaultAccounts,
   selectConnectedAccountsWithActiveOrigin,
   (accounts, connectedAccountsToActiveTab) =>
     accounts.filter(

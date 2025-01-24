@@ -1,10 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
-
-import { selectAccountNftTokens } from '@background/redux/account-info/selectors';
 
 import {
   HeaderPopup,
@@ -12,6 +9,7 @@ import {
   HeaderViewInExplorer,
   PopupLayout
 } from '@libs/layout';
+import { useFetchNftTokens } from '@libs/services/nft-service';
 import { HomePageTabsId } from '@libs/ui/components';
 
 import { NftDetailsContent } from './content';
@@ -20,16 +18,16 @@ export const NftDetailsPage = () => {
   const { contractPackageHash, tokenId } = useParams();
   const navigate = useTypedNavigate();
 
-  const nftTokes = useSelector(selectAccountNftTokens);
+  const { nftTokens } = useFetchNftTokens();
 
   const nftToken = useMemo(
     () =>
-      nftTokes?.find(
+      nftTokens?.find(
         token =>
-          token.token_id === tokenId &&
-          token.contract_package_hash === contractPackageHash
+          token.tokenId === tokenId &&
+          token.contractPackageHash === contractPackageHash
       ),
-    [contractPackageHash, nftTokes, tokenId]
+    [contractPackageHash, nftTokens, tokenId]
   );
 
   useEffect(() => {
@@ -57,7 +55,7 @@ export const NftDetailsPage = () => {
               />
               <HeaderViewInExplorer
                 nftTokenId={tokenId}
-                contractHash={contractPackageHash}
+                contractPackageHash={contractPackageHash}
               />
             </>
           )}

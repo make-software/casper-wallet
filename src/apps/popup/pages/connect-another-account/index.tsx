@@ -11,9 +11,11 @@ import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import {
   selectConnectedAccountsWithActiveOrigin,
   selectVaultAccounts,
+  selectVaultAccountsPublicKeys,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
 
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   ContentContainer,
   LeftAlignedFlexColumn,
@@ -22,6 +24,7 @@ import {
   TileContainer,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
 import {
   Button,
   Hash,
@@ -55,6 +58,8 @@ export function ConnectAnotherAccountPageContent() {
   const { targetAccountName } = useParams();
 
   const activeOrigin = useSelector(selectActiveOrigin);
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
+
   const {
     connectAnotherAccountWithEvent: connectAccount,
     changeActiveAccountWithEvent: changeActiveAccount
@@ -73,9 +78,19 @@ export function ConnectAnotherAccountPageContent() {
   const connectedAccountsListItems = connectedAccountsToActiveTab.map(
     account => ({
       ...account,
-      id: account.name
+      id: account.name,
+      accountHash: getAccountHashFromPublicKey(account.publicKey)
     })
   );
+
+  const targetAccountHash = getAccountHashFromPublicKey(
+    targetAccount?.publicKey
+  );
+
+  const accountsInfo = useFetchAccountsInfo(accountsPublicKeys);
+
+  const targetAccountCsprName =
+    accountsInfo && accountsInfo[targetAccountHash]?.csprName;
 
   return (
     <ContentContainer>
@@ -97,6 +112,7 @@ export function ConnectAnotherAccountPageContent() {
                   <Typography type="body">{targetAccount.name}</Typography>
                   <Hash
                     value={targetAccount.publicKey}
+                    csprName={targetAccountCsprName}
                     variant={HashVariant.CaptionHash}
                     truncated
                     placement="bottomRight"
@@ -122,41 +138,47 @@ export function ConnectAnotherAccountPageContent() {
         rows={connectedAccountsListItems}
         headerLabelTop={SpacingSize.Large}
         contentTop={SpacingSize.Small}
-        renderRow={(account, index) => (
-          <ListItemContainer key={account.name}>
-            <SvgIcon
-              src="assets/icons/radio-button-on.svg"
-              color="contentPositive"
-            />
+        renderRow={(account, index) => {
+          const csprName =
+            accountsInfo && accountsInfo[account.accountHash]?.csprName;
 
-            <SpaceBetweenContainer>
-              <LeftAlignedFlexColumn>
-                <Typography type="body">{account.name}</Typography>
-                <Hash
-                  value={account.publicKey}
-                  variant={HashVariant.CaptionHash}
-                  truncated
-                  placement={
-                    index === connectedAccountsListItems.length - 1
-                      ? 'topRight'
-                      : 'bottomRight'
-                  }
-                />
-              </LeftAlignedFlexColumn>
-              <Button
-                color="secondaryBlue"
-                inline
-                minWidth="86"
-                onClick={async () => {
-                  await changeActiveAccount(account.name);
-                  navigate(RouterPath.Home);
-                }}
-              >
-                <Trans t={t}>Switch</Trans>
-              </Button>
-            </SpaceBetweenContainer>
-          </ListItemContainer>
-        )}
+          return (
+            <ListItemContainer key={account.name}>
+              <SvgIcon
+                src="assets/icons/radio-button-on.svg"
+                color="contentPositive"
+              />
+
+              <SpaceBetweenContainer>
+                <LeftAlignedFlexColumn>
+                  <Typography type="body">{account.name}</Typography>
+                  <Hash
+                    value={account.publicKey}
+                    variant={HashVariant.CaptionHash}
+                    csprName={csprName}
+                    truncated
+                    placement={
+                      index === connectedAccountsListItems.length - 1
+                        ? 'topRight'
+                        : 'bottomRight'
+                    }
+                  />
+                </LeftAlignedFlexColumn>
+                <Button
+                  color="secondaryBlue"
+                  inline
+                  minWidth="86"
+                  onClick={async () => {
+                    await changeActiveAccount(account.name);
+                    navigate(RouterPath.Home);
+                  }}
+                >
+                  <Trans t={t}>Switch</Trans>
+                </Button>
+              </SpaceBetweenContainer>
+            </ListItemContainer>
+          );
+        }}
         marginLeftForItemSeparatorLine={60}
       />
     </ContentContainer>

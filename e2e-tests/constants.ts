@@ -78,7 +78,7 @@ export const RECOVER_FIRST_ACCOUNT_FROM_TWELVE_WORDS = {
 };
 
 export const RECOVER_SECOND_ACCOUNT_FROM_TWELVE_WORDS = {
-  accountName: 'Account 1',
+  accountName: 'Account 2',
   publicKey:
     '02022cafccfb61ffc4e4221e4d2c38eec6035d579d04c1396b1c2027dc0729c53589',
   truncatedPublicKey: '02022...53589'
@@ -96,8 +96,8 @@ export const NEW_VALIDATOR_FOR_SIGNATURE_REQUEST = {
 
 export const VALIDATOR_FOR_STAKE = {
   publicKey:
-    '010e5669b070545e2b32bc66363b9d3d4390fca56bf52a05f1411b7fa18ca311c7',
-  truncatedPublicKey: '010e...11c7'
+    '01f340df2c32f25391e8f7924a99e93cab3a6f230ff7af1cacbfc070772cbebd94',
+  truncatedPublicKey: '01f3...bd94'
 };
 
 export const NEW_VALIDATOR_FOR_STAKE = {

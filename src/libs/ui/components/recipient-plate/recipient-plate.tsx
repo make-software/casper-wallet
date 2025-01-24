@@ -1,3 +1,4 @@
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -12,7 +13,6 @@ import {
   FormField,
   Hash,
   HashVariant,
-  SvgIcon,
   Typography
 } from '@libs/ui/components';
 
@@ -22,6 +22,8 @@ interface RecipientPlateProps {
   recipientLabel?: string;
   showFullPublicKey?: boolean;
   name?: string;
+  brandingLogo: Maybe<string> | undefined;
+  csprName: Maybe<string> | undefined;
 }
 
 const PublicKeyOptionContainer = styled(FlexRow)<{ onClick?: () => void }>`
@@ -46,7 +48,9 @@ export const RecipientPlate = ({
   publicKey,
   recipientLabel,
   showFullPublicKey,
-  name
+  name,
+  csprName,
+  brandingLogo
 }: RecipientPlateProps) => {
   if (recipientLabel) {
     return (
@@ -55,8 +59,16 @@ export const RecipientPlate = ({
           gap={SpacingSize.Medium}
           onClick={handleClick}
         >
-          <Avatar publicKey={publicKey} size={24} borderRadius={2} />
+          <Avatar
+            publicKey={publicKey}
+            size={24}
+            borderRadius={2}
+            brandingLogo={brandingLogo}
+          />
           <LeftAlignedFlexColumn>
+            {csprName && (
+              <Typography type="captionMedium">{csprName}</Typography>
+            )}
             <Hash
               value={publicKey}
               variant={HashVariant.CaptionHash}
@@ -78,10 +90,16 @@ export const RecipientPlate = ({
 
   return (
     <Container gap={SpacingSize.Medium} onClick={handleClick}>
-      <Avatar publicKey={publicKey} size={24} borderRadius={2} />
+      <Avatar
+        publicKey={publicKey}
+        size={24}
+        borderRadius={2}
+        brandingLogo={brandingLogo}
+      />
       <LeftAlignedFlexColumn>
         <Hash
           value={publicKey}
+          csprName={csprName}
           variant={HashVariant.CaptionHash}
           truncated={!showFullPublicKey}
           truncatedSize="medium"
@@ -91,7 +109,6 @@ export const RecipientPlate = ({
         />
         {name && (
           <AlignedFlexRow gap={SpacingSize.Tiny}>
-            <SvgIcon src="assets/icons/contact.svg" size={16} />
             <Typography type="captionRegular" color="contentSecondary">
               {name}
             </Typography>

@@ -2,19 +2,23 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import { EmptyContacts } from '@popup/pages/contacts/empty-contacts';
+import { ContactsPlate } from '@popup/pages/contacts/components/contacts-plate';
+import { EmptyContacts } from '@popup/pages/contacts/components/empty-contacts';
 
 import {
   selectAllContacts,
+  selectAllContactsPublicKeys,
   selectLastModified
 } from '@background/redux/contacts/selectors';
 
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   ContentContainer,
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { ContactsPlate, List, Typography } from '@libs/ui/components';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
+import { List, Typography } from '@libs/ui/components';
 import { formatShortTimestamp } from '@libs/ui/utils';
 
 export const ContactsBookPageContent = () => {
@@ -22,11 +26,15 @@ export const ContactsBookPageContent = () => {
 
   const contacts = useSelector(selectAllContacts);
   const lastModified = useSelector(selectLastModified);
+  const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
 
   const contactsWithId = contacts.map((contact, index) => ({
     ...contact,
-    id: index
+    id: index,
+    accountHash: getAccountHashFromPublicKey(contact.publicKey)
   }));
+
+  const accountsInfo = useFetchAccountsInfo(contactPublicKeys);
 
   if (contactsWithId.length === 0) {
     return <EmptyContacts />;
@@ -50,9 +58,20 @@ export const ContactsBookPageContent = () => {
       )}
       <List
         rows={contactsWithId}
-        renderRow={({ publicKey, name }) => (
-          <ContactsPlate publicKey={publicKey} name={name} />
-        )}
+        renderRow={({ publicKey, name, accountHash }) => {
+          const csprName = accountsInfo && accountsInfo[accountHash]?.csprName;
+          const brandingLogo =
+            accountsInfo && accountsInfo[accountHash]?.brandingLogo;
+
+          return (
+            <ContactsPlate
+              publicKey={publicKey}
+              name={name}
+              csprName={csprName}
+              brandingLogo={brandingLogo}
+            />
+          );
+        }}
         marginLeftForItemSeparatorLine={54}
       />
     </ContentContainer>

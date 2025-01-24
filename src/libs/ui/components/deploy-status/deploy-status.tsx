@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import { Placement, SvgIcon, Tooltip, Typography } from '@libs/ui/components';
+import { SvgIcon, Typography } from '@libs/ui/components';
 import { ContentColor } from '@libs/ui/utils';
 
 export enum Status {
@@ -69,7 +69,6 @@ export interface DeployStatusProps {
     | null
     | undefined;
   textWithIcon?: boolean;
-  placement?: Placement;
 }
 
 const StatusContainer = styled(AlignedFlexRow)<{ status: Status }>(
@@ -83,8 +82,7 @@ const StatusContainer = styled(AlignedFlexRow)<{ status: Status }>(
 
 export const DeployStatus = ({
   deployResult,
-  textWithIcon,
-  placement = 'topRight'
+  textWithIcon
 }: DeployStatusProps) => {
   const { t } = useTranslation();
 
@@ -98,42 +96,33 @@ export const DeployStatus = ({
   };
 
   const status = getDeployStatus(deployResult);
-  const message = deployResult?.errorMessage;
 
   if (textWithIcon) {
     return (
-      <Tooltip
-        title={message}
-        placement={placement}
-        noWrap={!(message?.length! >= 29)}
-      >
-        <StatusContainer status={status} gap={SpacingSize.Small}>
-          <SvgIcon
-            src={StatusIcons[status]}
-            color={StatusColors[status] as ContentColor}
-            size={16}
-          />
-          <Typography
-            type="captionMedium"
-            color={StatusColors[status] as ContentColor}
-            capitalize
-          >
-            {StatusLabel[status]}
-          </Typography>
-        </StatusContainer>
-      </Tooltip>
-    );
-  }
-
-  if (status === Status.Error || status === Status.Pending) {
-    return (
-      <Tooltip title={message} placement="bottomCenter">
+      <StatusContainer status={status} gap={SpacingSize.Small}>
         <SvgIcon
           src={StatusIcons[status]}
           color={StatusColors[status] as ContentColor}
           size={16}
         />
-      </Tooltip>
+        <Typography
+          type="captionMedium"
+          color={StatusColors[status] as ContentColor}
+          capitalize
+        >
+          {StatusLabel[status]}
+        </Typography>
+      </StatusContainer>
+    );
+  }
+
+  if (status === Status.Error || status === Status.Pending) {
+    return (
+      <SvgIcon
+        src={StatusIcons[status]}
+        color={StatusColors[status] as ContentColor}
+        size={16}
+      />
     );
   }
 

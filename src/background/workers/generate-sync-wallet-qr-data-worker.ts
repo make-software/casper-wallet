@@ -1,7 +1,7 @@
 import { aes_256_cbc } from '@noble/ciphers/webcrypto/aes';
 import { scryptAsync } from '@noble/hashes/scrypt';
 import { randomBytes } from '@noble/hashes/utils';
-import { CLPublicKey } from 'casper-js-sdk';
+import { PublicKey } from 'casper-js-sdk';
 
 import { createScryptOptions } from '@libs/crypto/hashing';
 import { convertBytesToBase64 } from '@libs/crypto/utils';
@@ -32,7 +32,7 @@ onmessage = async function (event: GenerateSyncWalletQrDataEvent) {
       ...importedAccounts.map(acc => ({
         secretKey: acc.secretKey,
         label: acc.name,
-        publicKeyTag: CLPublicKey.fromHex(acc.publicKey).getTag()
+        publicKeyTag: PublicKey.fromHex(acc.publicKey).cryptoAlg
       }))
     ]
   ]);
