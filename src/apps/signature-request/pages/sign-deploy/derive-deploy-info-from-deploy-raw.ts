@@ -22,15 +22,15 @@ export function deriveDeployInfoFromDeployRaw(deploy: CasperDeploy) {
   const contractHashBytes = getContractHash(deploy);
   const contractName = getContractName(deploy);
   const contractHash = contractHashBytes
-    ? convertBytesToHex(contractHashBytes)
+    ? convertBytesToHex(contractHashBytes.hash.toBytes())
     : undefined;
 
   return {
-    account: account.toHex(false),
-    deployHash: convertBytesToHex(deploy.hash),
-    bodyHash: convertBytesToHex(bodyHash),
+    account: account?.toHex(false) ?? '',
+    deployHash: deploy.hash.toHex(),
+    bodyHash: bodyHash?.toHex(),
     gasPrice: gasPrice.toString(),
-    timestamp: timestamp.toString(),
+    timestamp: timestamp.toMilliseconds().toString(),
     contractHash,
     contractName,
     chainName,

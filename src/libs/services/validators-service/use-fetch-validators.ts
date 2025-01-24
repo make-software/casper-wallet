@@ -23,7 +23,10 @@ export const useFetchValidators = () => {
         queryKey: ['VALIDATORS', network],
         queryFn: () =>
           validatorsRepository.getValidators({
-            network: network.toLowerCase() as CasperNetwork
+            network: network.toLowerCase() as CasperNetwork,
+            page: 1,
+            limit: 250, // TODO pagination
+            withProxyHeader: false
           }),
         staleTime: VALIDATORS_REFRESH_RATE
       },
@@ -32,7 +35,8 @@ export const useFetchValidators = () => {
         queryFn: () =>
           validatorsRepository.getValidatorsWithStakes({
             network: network.toLowerCase() as CasperNetwork,
-            publicKey: activeAccount?.publicKey || ''
+            publicKey: activeAccount?.publicKey || '',
+            withProxyHeader: false
           }),
         staleTime: VALIDATORS_REFRESH_RATE
       }

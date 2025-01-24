@@ -55,7 +55,7 @@ export const NftDetailsPage = () => {
               />
               <HeaderViewInExplorer
                 nftTokenId={tokenId}
-                contractHash={contractPackageHash}
+                contractPackageHash={contractPackageHash}
               />
             </>
           )}

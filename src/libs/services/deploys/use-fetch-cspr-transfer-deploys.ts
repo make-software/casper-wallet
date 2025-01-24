@@ -24,7 +24,8 @@ export const useFetchCsprTransferDeploys = () => {
       deploysRepository.getCsprTransferDeploys({
         page: pageParam,
         activePublicKey: activeAccount?.publicKey ?? '',
-        network: network.toLowerCase() as CasperNetwork
+        network: network.toLowerCase() as CasperNetwork,
+        withProxyHeader: false
       }),
     getNextPageParam: (lastPage, pages) => {
       const nextPage = pages.length + 1;

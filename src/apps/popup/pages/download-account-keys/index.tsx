@@ -5,7 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
+import { createAsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 import {
   FooterButtonsContainer,
   HeaderPopup,
@@ -43,19 +43,22 @@ export const DownloadAccountKeysPage = () => {
     );
   }
 
-  const downloadKeys = () => {
+  const downloadKeys = async () => {
     const zip = new JSZip();
 
-    selectedAccounts.forEach(account => {
-      const asymmetricKey = createAsymmetricKey(
+    for (const account of selectedAccounts) {
+      const asymmetricKey = createAsymmetricKeys(
         account.publicKey,
         account.secretKey
       );
-      const file = asymmetricKey.exportPrivateKeyInPem();
-      zip.file(`${account.name}_secret_key.pem`, file);
-    });
 
-    zip.generateAsync({ type: 'blob' }).then(function (content) {
+      if (asymmetricKey.secretKey) {
+        const file = asymmetricKey.secretKey.toPem();
+        zip.file(`${account.name}_secret_key.pem`, file);
+      }
+    }
+
+    await zip.generateAsync({ type: 'blob' }).then(function (content) {
       downloadFile(new Blob([content]), 'casper-wallet-secret_keys.zip');
     });
 

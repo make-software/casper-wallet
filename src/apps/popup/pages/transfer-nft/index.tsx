@@ -1,13 +1,14 @@
-import { DeployUtil } from 'casper-js-sdk';
+import { Deploy, NFTTokenStandard, makeNftTransferDeploy } from 'casper-js-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
+import { networkNameToSdkNetworkNameMap } from '@src/constants';
+
 import {
   TransferNFTSteps,
-  getDefaultPaymentAmountBasedOnNftTokenStandard,
-  getRuntimeArgs
+  getDefaultPaymentAmountBasedOnNftTokenStandard
 } from '@popup/pages/transfer-nft/utils';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
@@ -34,8 +35,7 @@ import {
 
 import { useLedger } from '@hooks/use-ledger';
 
-import { createAsymmetricKey } from '@libs/crypto/create-asymmetric-key';
-import { getRawPublicKey } from '@libs/entities/Account';
+import { createAsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 import {
   AlignedFlexRow,
   ErrorPath,
@@ -47,11 +47,7 @@ import {
   createErrorLocationState
 } from '@libs/layout';
 import { useFetchWalletBalance } from '@libs/services/balance-service';
-import {
-  makeNFTDeploy,
-  sendSignDeploy,
-  signDeploy
-} from '@libs/services/deployer-service';
+import { sendSignDeploy, signDeploy } from '@libs/services/deployer-service';
 import { useFetchNftTokens } from '@libs/services/nft-service';
 import {
   Button,
@@ -124,7 +120,7 @@ export const TransferNftPage = () => {
     }
   }, [nftToken]);
 
-  const tokenStandard = nftToken?.standard || '';
+  const tokenStandard = nftToken?.standard;
 
   const defaultPaymentAmount = useMemo(
     () => getDefaultPaymentAmountBasedOnNftTokenStandard(tokenStandard),
@@ -157,31 +153,26 @@ export const TransferNftPage = () => {
 
     setIsSubmitButtonDisable(true);
 
-    if (activeAccount) {
+    if (activeAccount && tokenStandard) {
       const { recipientPublicKey } = recipientForm.getValues();
       const { paymentAmount } = amountForm.getValues();
 
-      const KEYS = createAsymmetricKey(
+      const KEYS = createAsymmetricKeys(
         activeAccount.publicKey,
         activeAccount.secretKey
       );
 
-      const args = {
-        tokenId: nftToken.tokenId,
-        source: KEYS.publicKey,
-        target: getRawPublicKey(recipientPublicKey)
-      };
+      const deploy = makeNftTransferDeploy({
+        chainName: networkNameToSdkNetworkNameMap[networkName],
+        contractPackageHash: nftToken.contractPackageHash,
+        nftStandard: NFTTokenStandard[tokenStandard],
+        paymentAmount: CSPRtoMotes(paymentAmount),
+        recipientPublicKeyHex: recipientPublicKey,
+        senderPublicKeyHex: KEYS.publicKey.toHex(),
+        tokenId: nftToken.tokenId
+      });
 
-      const deploy = await makeNFTDeploy(
-        getRuntimeArgs(tokenStandard, args),
-        CSPRtoMotes(paymentAmount),
-        KEYS.publicKey,
-        networkName,
-        nftToken?.contractPackageHash!,
-        nodeUrl
-      );
-
-      const signedDeploy = await signDeploy(deploy, [KEYS], activeAccount);
+      const signedDeploy = await signDeploy(deploy, KEYS, activeAccount);
 
       sendSignDeploy(signedDeploy, nodeUrl)
         .then(resp => {
@@ -241,30 +232,26 @@ export const TransferNftPage = () => {
   const beforeLedgerActionCb = async () => {
     setTransferNFTStep(TransferNFTSteps.ConfirmWithLedger);
 
-    if (haveReverseOwnerLookUp || !nftToken || !activeAccount) return;
+    if (haveReverseOwnerLookUp || !nftToken || !activeAccount || !tokenStandard)
+      return;
 
-    const KEYS = createAsymmetricKey(
+    const KEYS = createAsymmetricKeys(
       activeAccount.publicKey,
       activeAccount.secretKey
     );
 
-    const args = {
-      tokenId: nftToken.tokenId,
-      source: KEYS.publicKey,
-      target: getRawPublicKey(recipientPublicKey)
-    };
-
-    const deploy = await makeNFTDeploy(
-      getRuntimeArgs(tokenStandard, args),
-      CSPRtoMotes(paymentAmount),
-      KEYS.publicKey,
-      networkName,
-      nftToken?.contractPackageHash!,
-      nodeUrl
-    );
+    const deploy = makeNftTransferDeploy({
+      chainName: networkNameToSdkNetworkNameMap[networkName],
+      contractPackageHash: nftToken.contractPackageHash,
+      nftStandard: NFTTokenStandard[tokenStandard],
+      paymentAmount: CSPRtoMotes(paymentAmount),
+      recipientPublicKeyHex: recipientPublicKey,
+      senderPublicKeyHex: KEYS.publicKey.toHex(),
+      tokenId: nftToken.tokenId
+    });
 
     dispatchToMainStore(
-      ledgerDeployChanged(JSON.stringify(DeployUtil.deployToJson(deploy)))
+      ledgerDeployChanged(JSON.stringify(Deploy.toJSON(deploy)))
     );
     dispatchToMainStore(
       ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)

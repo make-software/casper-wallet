@@ -1,4 +1,4 @@
-import { CLPublicKey, encodeBase16 } from 'casper-js-sdk';
+import { PublicKey } from 'casper-js-sdk';
 
 // PublicKey casper nomenclature:
 // - public key = base16 hex => algo prefix + public key hex
@@ -10,8 +10,8 @@ import { CLPublicKey, encodeBase16 } from 'casper-js-sdk';
 // ED = 01 public keys should be 66 chars long (with the prefix)
 // SEC = 02 public keys should be 68 chars long (with the prefix)
 
-export const getRawPublicKey = (publicKeyHex: string): CLPublicKey =>
-  CLPublicKey.fromHex(publicKeyHex);
+export const getRawPublicKey = (publicKeyHex: string): PublicKey =>
+  PublicKey.fromHex(publicKeyHex);
 
 export const getAccountHashFromPublicKey = (
   publicKey: string | undefined
@@ -20,5 +20,5 @@ export const getAccountHashFromPublicKey = (
     throw Error('Missing public key');
   }
 
-  return encodeBase16(getRawPublicKey(publicKey).toAccountHash());
+  return getRawPublicKey(publicKey).accountHash().toHex();
 };

@@ -1,5 +1,5 @@
 import Big from 'big.js';
-import { CLPublicKey, Keys, decodeBase16 } from 'casper-js-sdk';
+import { KeyAlgorithm, PrivateKey, PublicKey } from 'casper-js-sdk';
 import { Maybe } from 'casper-wallet-core/src/typings/common';
 import { runtime } from 'webextension-polyfill';
 
@@ -67,7 +67,7 @@ export const isValidPublicKey = (
   }
 
   try {
-    CLPublicKey.fromHex(publicKey).toHex(false);
+    PublicKey.fromHex(publicKey).toHex(false);
     return true;
   } catch (error) {
     return false;
@@ -105,11 +105,14 @@ export const isValidSecretKeyHash = (secretKey: string) => {
   if (!secretKey) {
     return false;
   }
+
   if (!validHashRegExp.test(secretKey.trim())) {
     return false;
   }
+
   try {
-    Keys.Secp256K1.parsePrivateKey(decodeBase16(secretKey), 'raw');
+    PrivateKey.fromHex(secretKey, KeyAlgorithm.SECP256K1);
+
     return true;
   } catch (error) {
     return false;
@@ -170,7 +173,7 @@ export const setCSPForSafari = () => {
       meta.setAttribute('http-equiv', 'Content-Security-Policy');
       meta.setAttribute(
         'content',
-        `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://onramp-api.cspr.click/api/ https://cspr-wallet-api.dev.make.services/`
+        `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://cspr-wallet-api-condor.dev.make.services/ https://onramp-api.cspr.click/api/ https://cspr-wallet-api.dev.make.services/ https://cspr-wallet-api-condor.dev.make.services/`
       );
 
       document.getElementsByTagName('head')[0].appendChild(meta);

@@ -358,10 +358,13 @@ runtime.onMessage.addListener(
 
             const deploy: CasperDeploy = deployJson.deploy;
 
-            const isDeployAlreadySigningWithThisAccount = deploy.approvals.some(
-              approvals =>
-                isEqualCaseInsensitive(approvals.signer, signingPublicKeyHex)
-            );
+            const isDeployAlreadySigningWithThisAccount =
+              deploy?.approvals?.some(approvals =>
+                isEqualCaseInsensitive(
+                  approvals.signer.toString(),
+                  signingPublicKeyHex
+                )
+              ) ?? false;
 
             if (isDeployAlreadySigningWithThisAccount) {
               return sendResponse(
