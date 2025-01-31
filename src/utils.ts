@@ -92,6 +92,11 @@ export const isValidAccountHash = (
   return validHashRegExp.test(accountHash.trim());
 };
 
+/** It's for old accounts that possible can have mixed private and public keys in secretKey */
+export const getPrivateKeyHexFromSecretKey = (secretKeyHex: string) => {
+  return secretKeyHex.substring(0, 64);
+};
+
 /*
  * This function checks if the provided secretKey is a valid hash key.
  * Firstly, it checks if the secretKey is not an empty string.
@@ -111,7 +116,10 @@ export const isValidSecretKeyHash = (secretKey: string) => {
   }
 
   try {
-    PrivateKey.fromHex(secretKey, KeyAlgorithm.SECP256K1);
+    PrivateKey.fromHex(
+      getPrivateKeyHexFromSecretKey(secretKey),
+      KeyAlgorithm.SECP256K1
+    );
 
     return true;
   } catch (error) {
