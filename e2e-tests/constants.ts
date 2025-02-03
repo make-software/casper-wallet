@@ -102,8 +102,8 @@ export const VALIDATOR_FOR_STAKE = {
 
 export const NEW_VALIDATOR_FOR_STAKE = {
   publicKey:
-    '01ad002e37667f90aa982396ebdfcc7d3eea99731241eaad8a0dc20f453f72975a',
-  truncatedPublicKey: '01ad...975a'
+    '012d58e05b2057a84115709e0a6ccf000c6a83b4e8dfa389a680c1ab001864f1f2',
+  truncatedPublicKey: '012d...f1f2'
 };
 
 export const URLS = {

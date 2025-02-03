@@ -67,6 +67,7 @@ popup.describe('Popup UI: NFT Transfer', () => {
 
       await popupPage.getByRole('button', { name: 'Confirm send' }).click();
 
+      await popupPage.waitForTimeout(1000);
       await popupExpect(
         popupPage.getByRole('heading', { name: 'You submitted a transaction' })
       ).toBeVisible();
