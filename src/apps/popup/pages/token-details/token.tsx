@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { NetworkSetting } from '@src/constants';
+import { isSafariBuild } from '@src/utils';
 
 import { formatCep18Tokens } from '@popup/pages/home/components/tokens-list/utils';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
@@ -153,19 +154,21 @@ export const Token = () => {
               <Trans t={t}>Receive</Trans>
             </Typography>
           </ButtonContainer>
-          {tokenName === 'Casper' && network === NetworkSetting.Mainnet && (
-            <ButtonContainer
-              gap={SpacingSize.Medium}
-              onClick={() => navigate(RouterPath.BuyCSPR)}
-            >
-              <Button circle>
-                <SvgIcon src="assets/icons/card.svg" color="contentOnFill" />
-              </Button>
-              <Typography type="captionMedium" color="contentAction">
-                <Trans t={t}>Buy</Trans>
-              </Typography>
-            </ButtonContainer>
-          )}
+          {tokenName === 'Casper' &&
+            network === NetworkSetting.Mainnet &&
+            !isSafariBuild && (
+              <ButtonContainer
+                gap={SpacingSize.Medium}
+                onClick={() => navigate(RouterPath.BuyCSPR)}
+              >
+                <Button circle>
+                  <SvgIcon src="assets/icons/card.svg" color="contentOnFill" />
+                </Button>
+                <Typography type="captionMedium" color="contentAction">
+                  <Trans t={t}>Buy</Trans>
+                </Typography>
+              </ButtonContainer>
+            )}
         </FooterItemContainer>
       )}
       marginLeftForItemSeparatorLine={16}
