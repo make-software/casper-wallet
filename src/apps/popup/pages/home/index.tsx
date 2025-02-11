@@ -8,7 +8,8 @@ import { HomePageTabName, NetworkSetting } from '@src/constants';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import {
-  selectActiveNetworkSetting, // selectShowCSPRNamePromotion,
+  selectActiveNetworkSetting,
+  selectIsCasper2Network,
   selectVaultActiveAccount
 } from '@background/redux/root-selector';
 
@@ -54,6 +55,7 @@ export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
   const location = useTypedLocation();
+  const isCasper2Network = useSelector(selectIsCasper2Network);
 
   const state = location.state;
 
@@ -121,7 +123,13 @@ export function HomePageContent() {
           <Tab tabName={HomePageTabName.NFTs}>
             <NftList />
           </Tab>
-          <Tab tabName={HomePageTabName.Deploys}>
+          <Tab
+            tabName={
+              isCasper2Network
+                ? HomePageTabName.Transactions
+                : HomePageTabName.Deploys
+            }
+          >
             <DeploysList />
           </Tab>
         </Tabs>

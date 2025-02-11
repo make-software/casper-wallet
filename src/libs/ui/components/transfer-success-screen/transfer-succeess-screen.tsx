@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { selectIsCasper2Network } from '@background/redux/settings/selectors';
 
 import {
   ContentContainer,
@@ -22,6 +25,7 @@ export const TransferSuccessScreen = ({
 }: TransferSuccessScreenProps) => {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
+  const isCasper2Network = useSelector(selectIsCasper2Network);
 
   useEffect(() => {
     const keyDownHandler = (e: KeyboardEvent) => {
@@ -62,8 +66,9 @@ export const TransferSuccessScreen = ({
         <VerticalSpaceContainer top={SpacingSize.Medium}>
           <Typography type="body" color="contentSecondary">
             <Trans t={t}>
-              You can check its status in the Deploys tab on your Wallet home
-              page.
+              {`You can check its status in the ${
+                isCasper2Network ? 'Transactions' : 'Deploys'
+              } tab on your Wallet home page.`}
             </Trans>
           </Typography>
         </VerticalSpaceContainer>
