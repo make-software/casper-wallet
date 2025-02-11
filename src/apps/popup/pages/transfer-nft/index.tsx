@@ -1,4 +1,9 @@
-import { Deploy, NFTTokenStandard, makeNftTransferDeploy } from 'casper-js-sdk';
+import {
+  Deploy,
+  NFTTokenStandard,
+  makeNftTransferDeploy,
+  makeNftTransferTransaction
+} from 'casper-js-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -26,7 +31,11 @@ import {
   selectRatedInStore
 } from '@background/redux/rate-app/selectors';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import {
+  selectApiConfigBasedOnActiveNetwork,
+  selectCasperNetworkApiVersion,
+  selectIsCasper2Network
+} from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
   selectIsActiveAccountFromLedger,
@@ -49,8 +58,8 @@ import {
 import { useFetchWalletBalance } from '@libs/services/balance-service';
 import {
   getDateForDeploy,
-  sendSignDeploy,
-  signDeploy
+  sendSignedTx,
+  signTx
 } from '@libs/services/deployer-service';
 import { useFetchNftTokens } from '@libs/services/nft-service';
 import {
@@ -79,6 +88,8 @@ export const TransferNftPage = () => {
   const [isSubmitButtonDisable, setIsSubmitButtonDisable] = useState(false);
   const [isRecipientFormButtonDisabled, setIsRecipientFormButtonDisabled] =
     useState(true);
+  const isCasper2Network = useSelector(selectIsCasper2Network);
+  const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
 
   const { contractPackageHash, tokenId } = useParams();
 
@@ -168,7 +179,7 @@ export const TransferNftPage = () => {
 
       const timestamp = await getDateForDeploy(nodeUrl);
 
-      const deploy = makeNftTransferDeploy({
+      const tx = makeNftTransferTransaction({
         chainName: networkNameToSdkNetworkNameMap[networkName],
         contractPackageHash: nftToken.contractPackageHash,
         nftStandard: NFTTokenStandard[tokenStandard],
@@ -176,44 +187,26 @@ export const TransferNftPage = () => {
         recipientPublicKeyHex: recipientPublicKey,
         senderPublicKeyHex: KEYS.publicKey.toHex(),
         tokenId: nftToken.tokenId,
-        timestamp
+        timestamp,
+        casperNetworkApiVersion
       });
 
-      const signedDeploy = await signDeploy(deploy, KEYS, activeAccount);
+      const signedTx = await signTx(tx, KEYS, activeAccount);
 
-      sendSignDeploy(signedDeploy, nodeUrl)
-        .then(resp => {
+      sendSignedTx(signedTx, nodeUrl, isCasper2Network)
+        .then(hash => {
           dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
 
-          if ('result' in resp) {
-            const deployHash = resp.result.deploy_hash;
+          dispatchToMainStore(
+            accountTrackingIdOfSentNftTokensChanged({
+              trackingId: nftToken.trackingId,
+              deployHash: hash
+            })
+          );
 
-            dispatchToMainStore(
-              accountTrackingIdOfSentNftTokensChanged({
-                trackingId: nftToken.trackingId,
-                deployHash
-              })
-            );
+          dispatchToMainStore(accountPendingDeployHashesChanged(hash));
 
-            dispatchToMainStore(accountPendingDeployHashesChanged(deployHash));
-
-            setTransferNFTStep(TransferNFTSteps.Success);
-          } else {
-            navigate(
-              ErrorPath,
-              createErrorLocationState({
-                errorHeaderText:
-                  resp.error.message || t('Something went wrong'),
-                errorContentText:
-                  resp.error.data ||
-                  t(
-                    'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                  ),
-                errorPrimaryButtonLabel: t('Close'),
-                errorRedirectPath: RouterPath.Home
-              })
-            );
-          }
+          setTransferNFTStep(TransferNFTSteps.Success);
         })
         .catch(error => {
           console.error(error, 'nft transfer request error');
