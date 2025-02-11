@@ -18,7 +18,9 @@
     "https://api.testnet.casperwallet.io/*",
     "https://api.mainnet.casperwallet.io/*",
     "https://onramp-api.cspr.click/api/*",
-    "https://cspr-wallet-api.dev.make.services/*"
+    "https://cspr-wallet-api.dev.make.services/*",
+    "https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/*",
+    "https://cspr-wallet-api-condor.dev.make.services/*"
   ],
   "declarative_net_request": {
     "rule_resources": [

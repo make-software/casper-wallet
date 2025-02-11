@@ -49,8 +49,12 @@ export const getBlockExplorerContractPackageUrl = (
 
 export const getBlockExplorerDeployUrl = (
   casperLiveUrl: string,
-  deployHash: string
-) => `${casperLiveUrl}/deploy/${deployHash}`;
+  deployHash: string,
+  isCasper2Network: boolean
+) =>
+  `${casperLiveUrl}/${
+    isCasper2Network ? 'transaction' : 'deploy'
+  }/${deployHash}`;
 
 export const getContractNftUrl = (
   casperLiveUrl: string,
@@ -63,12 +67,14 @@ export const ledgerSupportLink =
 
 export enum CasperLiveUrl {
   MainnetUrl = 'https://cspr.live',
-  TestnetUrl = 'https://testnet.cspr.live'
+  TestnetUrl = 'https://testnet.cspr.live',
+  Devnet = 'https://devnet.cspr.live'
 }
 
 export enum NetworkSetting {
   Mainnet = 'Mainnet',
-  Testnet = 'Testnet'
+  Testnet = 'Testnet',
+  Devnet = 'Devnet'
 }
 
 export enum Browser {
@@ -80,17 +86,14 @@ export enum Browser {
 
 export enum CasperNodeUrl {
   MainnetUrl = 'https://node.cspr.cloud/rpc',
-  TestnetUrl = 'https://node.testnet.cspr.cloud/rpc'
+  TestnetUrl = 'https://node.testnet.cspr.cloud/rpc',
+  DevnetUrl = 'https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/rpc'
 }
 
 export enum NetworkName {
   Mainnet = 'casper',
-  Testnet = 'casper-test'
-}
-
-export enum AuctionManagerContractHash {
-  Mainnet = 'ccb576d6ce6dec84a551e48f0d0b7af89ddba44c7390b690036257a04a3ae9ea',
-  Testnet = '93d923e336b20a4c4ca14d592b60e5bd3fe330775618290104f9beb326db7ae2'
+  Testnet = 'casper-test',
+  Devnet = 'dev-net'
 }
 
 export enum CSPRMarketContractHash {
@@ -116,6 +119,7 @@ export enum AuctionPoolContractHash {
 export enum HomePageTabName {
   Tokens = 'Tokens',
   Deploys = 'Deploys',
+  Transactions = 'Transactions',
   NFTs = 'NFTs'
 }
 
@@ -286,5 +290,6 @@ export const networkNameToSdkNetworkNameMap: Record<
   CasperNetworkName
 > = {
   [NetworkName.Mainnet]: CasperNetworkName.Mainnet,
-  [NetworkName.Testnet]: CasperNetworkName.Testnet
+  [NetworkName.Testnet]: CasperNetworkName.Testnet,
+  [NetworkName.Devnet]: CasperNetworkName.DevNet
 };
