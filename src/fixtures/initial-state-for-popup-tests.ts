@@ -85,6 +85,7 @@ export const initialStateForPopupTests: RootState = {
   activeOrigin: null,
   settings: {
     activeNetwork: NetworkSetting.Testnet,
+    casperNetworkApiVersion: '1.5.8',
     activeTimeoutDuration: TimeoutDurationSetting['5 min'],
     isDarkMode: false,
     themeMode: ThemeMode.SYSTEM
