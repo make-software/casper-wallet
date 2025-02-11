@@ -1,43 +1,51 @@
 import {
+  Args,
   CLValue,
   Conversions,
-  ExecutableDeployItem,
-  ModuleBytes,
-  StoredContractByHash,
-  StoredContractByName,
-  StoredVersionedContractByHash,
-  StoredVersionedContractByName,
-  TransferDeployItem,
+  Transaction,
+  TransactionEntryPointEnum,
   TypeID
 } from 'casper-js-sdk';
 
 import {
   ArgDict,
-  CasperDeploy,
   DeployType,
   ParsedDeployArgValue,
   ParsedValueType,
   SignatureRequestKeys
 } from './deploy-types';
 
-export function getDeployType(deploy: CasperDeploy): DeployType {
-  if (deploy?.session?.isModuleBytes()) {
+const AUCTION_NATIVE_ENTRY_POINTS = [
+  TransactionEntryPointEnum.Delegate,
+  TransactionEntryPointEnum.Undelegate,
+  TransactionEntryPointEnum.Redelegate,
+  TransactionEntryPointEnum.ActivateBid,
+  TransactionEntryPointEnum.AddBid,
+  TransactionEntryPointEnum.AddReservations,
+  TransactionEntryPointEnum.CancelReservations,
+  TransactionEntryPointEnum.WithdrawBid,
+  TransactionEntryPointEnum.ChangeBidPublicKey
+];
+
+export function getTxType(tx: Transaction): DeployType {
+  if (tx?.entryPoint?.type === TransactionEntryPointEnum.Call) {
     return DeployType.ModuleBytes;
-  }
-
-  if (deploy.isTransfer()) {
+  } else if (tx?.entryPoint?.type === TransactionEntryPointEnum.Transfer) {
     return DeployType.TransferCall;
+  } else if (AUCTION_NATIVE_ENTRY_POINTS.includes(tx.entryPoint.type)) {
+    return DeployType.AuctionNative;
   }
 
-  if (deploy.isStandardPayment()) {
+  if (tx.target?.stored) {
     return DeployType.ContractCall;
   }
 
   return DeployType.Unknown;
 }
 
-export function getDeployPayment(deploy: CasperDeploy): string {
-  const arg = deploy.payment.moduleBytes?.args.getByName('amount');
+export function getTxPayment(tx: Transaction): string {
+  const arg = tx.pricingMode.paymentLimited?.paymentAmount;
+
   if (arg) {
     return arg.toString();
   } else {
@@ -45,45 +53,38 @@ export function getDeployPayment(deploy: CasperDeploy): string {
   }
 }
 
-export function getEntryPoint(deploy: CasperDeploy): string | undefined {
-  const storedContractObj = getStoredContractObjFromSession(deploy.session);
-
-  return storedContractObj instanceof ModuleBytes
-    ? undefined
-    : storedContractObj?.entryPoint;
+export function getTxEntryPoint(tx: Transaction): string | undefined {
+  return tx.entryPoint.customEntryPoint;
 }
 
-export const getContractHash = (deploy: CasperDeploy) => {
-  const storedContractObj = getStoredContractObjFromSession(deploy.session);
-
-  return storedContractObj instanceof StoredContractByHash ||
-    storedContractObj instanceof StoredVersionedContractByHash
-    ? storedContractObj.hash
-    : undefined;
+export const getTxContractHash = (tx: Transaction) => {
+  return (
+    tx.target.stored?.id.byHash?.toHex() ||
+    tx.target.stored?.id.byPackageHash?.addr?.toHex()
+  );
 };
 
-export const getContractName = (deploy: CasperDeploy) => {
-  const storedContractObj = getStoredContractObjFromSession(deploy.session);
-
-  return storedContractObj instanceof StoredContractByName ||
-    storedContractObj instanceof StoredVersionedContractByName
-    ? storedContractObj.name
-    : undefined;
+export const getTxContractName = (tx: Transaction) => {
+  return (
+    tx.target.stored?.id.byName?.toString() ||
+    tx.target.stored?.id.byPackageName?.name
+  );
 };
 
-export function getDeployArgs(deploy: CasperDeploy): ArgDict {
-  if (deploy.session.transfer) {
-    return getDeployArgsForTransfer(deploy.session.transfer);
+export function getTxArgs(tx: Transaction): ArgDict {
+  if (tx.target.native) {
+    if (tx.entryPoint.type === TransactionEntryPointEnum.Transfer) {
+      return getDeployArgsForTransfer(tx.args);
+    } else if (AUCTION_NATIVE_ENTRY_POINTS.includes(tx.entryPoint.type)) {
+      return getTxArgsForNativeAuction(tx);
+    }
   }
 
-  const storedContractObj = getStoredContractObjFromSession(deploy.session);
+  const txArgs: ArgDict = tx.target.stored
+    ? getDeployArgsFromArgsDict(tx.args.args)
+    : {};
 
-  const deployArgs: ArgDict =
-    storedContractObj != null
-      ? getDeployArgsFromArgsDict(storedContractObj.args.args)
-      : {};
-
-  return deployArgs;
+  return txArgs;
 }
 
 function unwrapNestedLists(value: CLValue): ParsedDeployArgValue {
@@ -98,9 +99,9 @@ function unwrapNestedLists(value: CLValue): ParsedDeployArgValue {
   return parsedValue;
 }
 
-function getDeployArgsForTransfer(transferDeploy: TransferDeployItem): ArgDict {
+function getDeployArgsForTransfer(txArgs: Args): ArgDict {
   const args: ArgDict = {};
-  const targetFromDeploy = transferDeploy.args.getByName('target');
+  const targetFromDeploy = txArgs.getByName('target');
 
   if (!targetFromDeploy) {
     throw new Error("Couldn't find 'target' in transfer data");
@@ -110,7 +111,7 @@ function getDeployArgsForTransfer(transferDeploy: TransferDeployItem): ArgDict {
     case TypeID.ByteArray:
       args.recipientHash = Conversions.encodeBase16(targetFromDeploy.bytes());
       break;
-    // If deploy is created using version of SDK gte than 2.7.0
+    // If tx is created using version of SDK gte than 2.7.0
     // In fact this logic can be removed in future as well as pkHex param
     case TypeID.PublicKey:
       if (targetFromDeploy.publicKey) {
@@ -118,101 +119,45 @@ function getDeployArgsForTransfer(transferDeploy: TransferDeployItem): ArgDict {
       }
       break;
     default: {
-      throw new Error(
-        'Target from deploy was neither AccountHash or PublicKey'
-      );
+      throw new Error('Target from tx was neither AccountHash or PublicKey');
     }
   }
 
-  const amountString = transferDeploy.args.getByName('amount');
+  const amountString = txArgs.getByName('amount');
 
   if (!amountString) {
     throw new Error("Couldn't find 'amount' in transfer data");
   }
 
-  const idString = transferDeploy.args.getByName('id');
-
-  if (!idString) {
-    throw new Error("Couldn't find 'id' in transfer data");
-  }
+  const idString = txArgs.getByName('id');
 
   args.amount = amountString.toString();
-  args.transferId = idString.toString();
+
+  if (idString) {
+    args.transferId = idString.toString();
+  }
 
   return args;
 }
 
-function getStoredContractObjFromSession(
-  session: ExecutableDeployItem
-):
-  | StoredContractByHash
-  | StoredContractByName
-  | StoredVersionedContractByHash
-  | StoredVersionedContractByName
-  | ModuleBytes
-  | undefined {
-  if (session.storedContractByHash) {
-    return session.storedContractByHash;
-  }
-
-  if (session.storedContractByName) {
-    return session.storedContractByName;
-  }
-
-  if (session.storedVersionedContractByHash) {
-    return session.storedVersionedContractByHash;
-  }
-
-  if (session.storedVersionedContractByName) {
-    return session.storedVersionedContractByName;
-  }
-
-  if (session.moduleBytes) {
-    return session.moduleBytes;
-  }
-
-  return undefined;
-}
-
 function getDeployArgsFromArgsDict(args: Map<string, CLValue>) {
-  const deployArgs: ArgDict = {};
+  const txArgs: ArgDict = {};
 
   args.forEach((value, key) => {
-    deployArgs[key] = value;
+    txArgs[key] = value;
   });
 
-  return deployArgs;
+  return txArgs;
 }
 
-export function isDeployArgValueHash(value: CLValue): boolean {
-  const tag = value.type.getTypeID();
+function getTxArgsForNativeAuction(tx: Transaction) {
+  const txArgs: ArgDict = { entryPoint: tx.entryPoint.type };
 
-  switch (tag) {
-    case TypeID.Key:
-    case TypeID.URef:
-    case TypeID.PublicKey:
-      return true;
+  tx.args.args.forEach((value, key) => {
+    txArgs[key] = value;
+  });
 
-    default:
-      return false;
-  }
-}
-
-export function isDeployArgValueNumber(value: CLValue): boolean {
-  const tag = value.type.getTypeID();
-
-  switch (tag) {
-    case TypeID.U8:
-    case TypeID.U32:
-    case TypeID.U64:
-    case TypeID.U128:
-    case TypeID.U256:
-    case TypeID.U512:
-      return true;
-
-    default:
-      return false;
-  }
+  return txArgs;
 }
 
 export function parseDeployArgValue(
@@ -234,10 +179,6 @@ export function parseDeployArgValue(
       if (key?.uRef) {
         return parseDeployArgValue(CLValue.newCLUref(key.uRef));
       }
-
-      // if (key?.bytes()) {
-      //   return parseDeployArgValue(key.value() as CLByteArray);
-      // }
 
       throw new Error('Failed to parse key argument');
 
@@ -307,12 +248,64 @@ export function parseDeployArgValue(
       return { parsedValue: value.publicKey?.toHex() ?? '' };
 
     default:
-      // Special handling as there is no CLTypeTag for CLAccountHash
-      // if (value instanceof CLAccountHash) {
-      //   return { parsedValue: encodeBase16(value.value()) };
-      // }
-
       return { parsedValue: value.toString() };
+  }
+}
+
+export const getParsedArgValue = (value: CLValue): ParsedDeployArgValue => {
+  const parsedValue = parseDeployArgValue(value);
+  let type: ParsedValueType.Json | undefined;
+  let stringValue: string;
+
+  if (Array.isArray(parsedValue)) {
+    stringValue = parsedValue
+      .reduce((acc: string[], cur) => {
+        if (cur.type === ParsedValueType.Json) {
+          type = cur.type;
+        }
+        acc.push(cur.parsedValue);
+
+        return acc;
+      }, [])
+      .join(', ');
+  } else if (parsedValue?.type === ParsedValueType.Json) {
+    type = ParsedValueType.Json;
+    stringValue = parsedValue.parsedValue;
+  } else {
+    stringValue = parsedValue.parsedValue;
+  }
+
+  return { parsedValue: stringValue, type };
+};
+
+export function isArgValueHash(value: CLValue): boolean {
+  const tag = value.type.getTypeID();
+
+  switch (tag) {
+    case TypeID.Key:
+    case TypeID.URef:
+    case TypeID.PublicKey:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+export function isArgValueNumber(value: CLValue): boolean {
+  const tag = value.type.getTypeID();
+
+  switch (tag) {
+    case TypeID.U8:
+    case TypeID.U32:
+    case TypeID.U64:
+    case TypeID.U128:
+    case TypeID.U256:
+    case TypeID.U512:
+      return true;
+
+    default:
+      return false;
   }
 }
 
@@ -344,30 +337,4 @@ export const isKeyOfCurrencyValue = (key: string) => {
 export const isKeyOfTimestampValue = (key: string) => {
   const keysOfTimestampValues: SignatureRequestKeys[] = ['timestamp'];
   return keysOfTimestampValues.includes(key as SignatureRequestKeys);
-};
-
-export const getDeployParsedValue = (value: CLValue): ParsedDeployArgValue => {
-  const parsedValue = parseDeployArgValue(value);
-  let type: ParsedValueType.Json | undefined;
-  let stringValue: string;
-
-  if (Array.isArray(parsedValue)) {
-    stringValue = parsedValue
-      .reduce((acc: string[], cur) => {
-        if (cur.type === ParsedValueType.Json) {
-          type = cur.type;
-        }
-        acc.push(cur.parsedValue);
-
-        return acc;
-      }, [])
-      .join(', ');
-  } else if (parsedValue?.type === ParsedValueType.Json) {
-    type = ParsedValueType.Json;
-    stringValue = parsedValue.parsedValue;
-  } else {
-    stringValue = parsedValue.parsedValue;
-  }
-
-  return { parsedValue: stringValue, type };
 };
