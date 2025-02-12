@@ -1,4 +1,6 @@
 import {
+  DEFAULT_MAXIMUM_DELEGATION_AMOUNT,
+  DEFAULT_MINIMUM_DELEGATION_AMOUNT,
   Deploy,
   makeAuctionManagerDeploy,
   makeAuctionManagerTransaction
@@ -142,10 +144,13 @@ export const StakesPage = () => {
     accountBalance.liquidBalance,
     stakeType,
     stakeAmountMotes,
+    validator?.minAmount ?? DEFAULT_MINIMUM_DELEGATION_AMOUNT.toString(),
+    validator?.maxAmount ?? DEFAULT_MAXIMUM_DELEGATION_AMOUNT.toString(),
     validator?.delegatorsNumber,
     newValidator?.delegatorsNumber,
     hasDelegationToSelectedValidator,
-    hasDelegationToSelectedNewValidator
+    hasDelegationToSelectedNewValidator,
+    validator?.reservedSlots
   );
   const { formState: amountFormState, getValues: getValuesAmountForm } =
     amountForm;

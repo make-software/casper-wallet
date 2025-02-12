@@ -319,7 +319,9 @@ export const usePaymentAmountRule = (csprBalance: string | undefined) => {
 export const useCSPRStakeAmountRule = (
   amountMotes: string | undefined,
   mode: AuctionManagerEntryPoint,
-  stakeAmountMotes: string
+  stakeAmountMotes: string,
+  validatorMinAmount: string,
+  validatorMaxAmount: string
 ) => {
   const { t } = useTranslation();
 
@@ -327,7 +329,7 @@ export const useCSPRStakeAmountRule = (
     switch (mode) {
       case AuctionManagerEntryPoint.delegate:
       case AuctionManagerEntryPoint.redelegate: {
-        return DELEGATION_MIN_AMOUNT_MOTES;
+        return validatorMinAmount;
       }
       case AuctionManagerEntryPoint.undelegate: {
         return '0';
@@ -433,13 +435,39 @@ export const useCSPRStakeAmountRule = (
                   'Your account balance is not high enough. Enter a smaller amount.'
                 )
               }
+    })
+    .test({
+      name: 'amountAboveValidatorMaxAmount',
+      test: csprAmountInputValue => {
+        if (csprAmountInputValue) {
+          switch (mode) {
+            case AuctionManagerEntryPoint.delegate:
+            case AuctionManagerEntryPoint.redelegate:
+              return Big(CSPRtoMotes(csprAmountInputValue)).lte(
+                validatorMaxAmount
+              );
+            default: {
+              return true;
+            }
+          }
+        }
+
+        return false;
+      },
+      message: {
+        header: t('You cannot delegate this amount'),
+        description: t(
+          `Delegation amount for this validator cannot be more than ${validatorMaxAmount} CSPR.`
+        )
+      }
     });
 };
 
 export const useValidatorPublicKeyRule = (
   stakeType: AuctionManagerEntryPoint,
   delegatorsNumber?: number,
-  hasDelegationToSelectedValidator?: boolean
+  hasDelegationToSelectedValidator?: boolean,
+  reservedSlots = 0
 ) => {
   const { t } = useTranslation();
 
@@ -463,7 +491,7 @@ export const useValidatorPublicKeyRule = (
           (delegatorsNumber === 0 || delegatorsNumber) &&
           !hasDelegationToSelectedValidator
         ) {
-          return delegatorsNumber < MAX_DELEGATORS;
+          return delegatorsNumber + reservedSlots < MAX_DELEGATORS;
         }
 
         return !!hasDelegationToSelectedValidator;
@@ -476,7 +504,8 @@ export const useValidatorPublicKeyRule = (
 
 export const useNewValidatorPublicKeyRule = (
   delegatorsNumber?: number,
-  hasDelegationToSelectedNewValidator?: boolean
+  hasDelegationToSelectedNewValidator?: boolean,
+  reservedSlots = 0
 ) => {
   const { t } = useTranslation();
 
@@ -494,7 +523,7 @@ export const useNewValidatorPublicKeyRule = (
           (delegatorsNumber === 0 || delegatorsNumber) &&
           !hasDelegationToSelectedNewValidator
         ) {
-          return delegatorsNumber < MAX_DELEGATORS;
+          return delegatorsNumber + reservedSlots < MAX_DELEGATORS;
         }
 
         return !!hasDelegationToSelectedNewValidator;

@@ -1,5 +1,7 @@
 import { formatNumber } from 'casper-wallet-core';
+import { CSPR_COIN } from 'casper-wallet-core/src/domain/constants/casperNetwork';
 import { Maybe } from 'casper-wallet-core/src/typings/common';
+import { formatTokenBalance } from 'casper-wallet-core/src/utils/common';
 import React from 'react';
 import { FieldError } from 'react-hook-form';
 import styled from 'styled-components';
@@ -60,6 +62,8 @@ const Image = styled.img`
 interface ValidatorPlateProps {
   handleClick?: () => void;
   publicKey: string;
+  minAmount: string;
+  reservedSlots: number;
   name?: string;
   logo?: string;
   showFullPublicKey?: boolean;
@@ -82,20 +86,24 @@ export const ValidatorPlate = ({
   validatorLabel,
   error,
   formattedTotalStake,
-  withBorder
+  withBorder,
+  minAmount,
+  reservedSlots
 }: ValidatorPlateProps) => {
   const logoUrl = getImageProxyUrl(logo);
 
+  const totalDelegatorsNumber = (delegatorsNumber ?? 0) + reservedSlots;
+
   const getFormattedDelegatorsNumber = () => {
-    if (delegatorsNumber && delegatorsNumber >= 1000) {
+    if (totalDelegatorsNumber >= 1000) {
       return (
-        formatNumber(delegatorsNumber / 1000, {
+        formatNumber(totalDelegatorsNumber / 1000, {
           precision: { max: 3 }
         }) + 'k'
       );
     }
 
-    return delegatorsNumber;
+    return totalDelegatorsNumber;
   };
 
   const plateWithFullPublicKey = (
@@ -163,6 +171,11 @@ export const ValidatorPlate = ({
             </Typography>
             <Typography type="listSubtext">
               {getFormattedDelegatorsNumber()} delegators
+            </Typography>
+          </AlignedFlexRow>
+          <AlignedFlexRow gap={SpacingSize.Small}>
+            <Typography type="listSubtext">
+              {`min ${formatTokenBalance(minAmount, CSPR_COIN.decimals)} CSPR`}
             </Typography>
           </AlignedFlexRow>
         </RightAlignedFlexColumn>

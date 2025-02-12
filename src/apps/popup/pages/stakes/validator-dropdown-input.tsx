@@ -133,6 +133,8 @@ export const ValidatorDropdownInput = ({
             : validator.formattedDecimalStake
         }
         delegatorsNumber={validator?.delegatorsNumber}
+        minAmount={validator.minAmount}
+        reservedSlots={validator.reservedSlots}
         validatorLabel={label}
         error={errors?.validatorPublicKey}
         handleClick={() => {
