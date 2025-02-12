@@ -20,6 +20,8 @@
     "https://node.cspr.cloud/*",
     "https://cspr-wallet-api.dev.make.services/*",
     "https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/*",
+    "https://api.integration.casperwallet.io/*",
+    "https://node.integration.cspr.cloud/*",
     "https://cspr-wallet-api-condor.dev.make.services/*"
   ],
   "declarative_net_request": {

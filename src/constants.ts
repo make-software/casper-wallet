@@ -68,13 +68,15 @@ export const ledgerSupportLink =
 export enum CasperLiveUrl {
   MainnetUrl = 'https://cspr.live',
   TestnetUrl = 'https://testnet.cspr.live',
-  Devnet = 'https://devnet.cspr.live'
+  Devnet = 'https://devnet.cspr.live',
+  Integration = 'https://integration.cspr.live'
 }
 
 export enum NetworkSetting {
   Mainnet = 'Mainnet',
   Testnet = 'Testnet',
-  Devnet = 'Devnet'
+  Devnet = 'Devnet',
+  Integration = 'Integration'
 }
 
 export enum Browser {
@@ -87,13 +89,15 @@ export enum Browser {
 export enum CasperNodeUrl {
   MainnetUrl = 'https://node.cspr.cloud/rpc',
   TestnetUrl = 'https://node.testnet.cspr.cloud/rpc',
-  DevnetUrl = 'https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/rpc'
+  DevnetUrl = 'https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/rpc',
+  Integration = 'https://node.integration.cspr.cloud/rpc'
 }
 
 export enum NetworkName {
   Mainnet = 'casper',
   Testnet = 'casper-test',
-  Devnet = 'dev-net'
+  Devnet = 'dev-net',
+  Integration = 'integration-test'
 }
 
 export enum CSPRMarketContractHash {
@@ -291,5 +295,6 @@ export const networkNameToSdkNetworkNameMap: Record<
 > = {
   [NetworkName.Mainnet]: CasperNetworkName.Mainnet,
   [NetworkName.Testnet]: CasperNetworkName.Testnet,
-  [NetworkName.Devnet]: CasperNetworkName.DevNet
+  [NetworkName.Devnet]: CasperNetworkName.DevNet,
+  [NetworkName.Integration]: CasperNetworkName.Integration
 };

@@ -30,7 +30,8 @@ const ModalContentRow = styled(SpaceBetweenFlexRow)`
 const NetworkIconColor: Record<NetworkSetting, Color> = {
   Mainnet: 'contentLightRed',
   Testnet: 'contentLightBlue',
-  Devnet: 'contentWarning'
+  Devnet: 'contentWarning',
+  Integration: 'contentPositive'
 };
 
 export const HeaderNetworkSwitcher = () => {
@@ -57,6 +58,16 @@ export const HeaderNetworkSwitcher = () => {
     }
 
     dispatchToMainStore(activeNetworkSettingChanged(NetworkSetting.Devnet));
+  };
+
+  const changeActiveNetworkToIntegration = () => {
+    if (activeNetwork === NetworkSetting.Integration) {
+      return;
+    }
+
+    dispatchToMainStore(
+      activeNetworkSettingChanged(NetworkSetting.Integration)
+    );
   };
 
   return (
@@ -123,6 +134,28 @@ export const HeaderNetworkSwitcher = () => {
               <Typography type="body">{NetworkSetting.Devnet}</Typography>
             </AlignedFlexRow>
             {activeNetwork === NetworkSetting.Devnet && (
+              <SvgIcon
+                src="assets/icons/tick.svg"
+                size={24}
+                color="contentAction"
+              />
+            )}
+          </ModalContentRow>
+          <ModalContentRow
+            onClick={event => {
+              changeActiveNetworkToIntegration();
+              closeModal(event);
+            }}
+          >
+            <AlignedFlexRow gap={SpacingSize.Large}>
+              <SvgIcon
+                src="assets/icons/network.svg"
+                size={24}
+                color="contentPositive"
+              />
+              <Typography type="body">{NetworkSetting.Integration}</Typography>
+            </AlignedFlexRow>
+            {activeNetwork === NetworkSetting.Integration && (
               <SvgIcon
                 src="assets/icons/tick.svg"
                 size={24}

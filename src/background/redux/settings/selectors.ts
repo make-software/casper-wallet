@@ -52,6 +52,16 @@ export const selectApiConfigBasedOnActiveNetwork = createSelector(
           csprStudioCep47ContractHash: CSPRStudioCep47ContractHash.Testnet,
           auctionPoolContractHash: AuctionPoolContractHash.Testnet
         };
+      case NetworkSetting.Integration:
+        return {
+          casperLiveUrl: CasperLiveUrl.Integration,
+          networkName: NetworkName.Integration,
+          nodeUrl: CasperNodeUrl.Integration,
+          csprMarketContractHash: CSPRMarketContractHash.Testnet,
+          associatedKeysContractHash: AssociatedKeysContractHash.Testnet,
+          csprStudioCep47ContractHash: CSPRStudioCep47ContractHash.Testnet,
+          auctionPoolContractHash: AuctionPoolContractHash.Testnet
+        };
       default:
         throw new Error(`Unknown network: ${activeNetwork}`);
     }

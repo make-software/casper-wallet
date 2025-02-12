@@ -71,7 +71,7 @@
     "base64-loader": "1.0.0",
     "big.js": "^6.2.1",
     "casper-js-sdk": "5.0.8-beta2",
-    "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#8d01659e2a67fdb1a63c6f3691ecf774f96d7f44",
+    "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#59f42fc55c0e685b95378cc4d46b20a5a9c7fe71",
     "date-fns": "^2.30.0",
     "dotenv-webpack": "^8.1.0",
     "i18next": "^23.11.0",
