@@ -1,4 +1,4 @@
-import { HttpFetchHandler, RpcClient } from 'casper-js-sdk';
+import { HttpHandler, RpcClient } from 'casper-js-sdk';
 import { InfoGetStatusResult } from 'casper-js-sdk/dist/rpc/response';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
 import { getType } from 'typesafe-actions';
@@ -26,7 +26,7 @@ function* checkCasper2NetworkSaga() {
       selectApiConfigBasedOnActiveNetwork
     );
 
-    const handler = new HttpFetchHandler(nodeUrl);
+    const handler = new HttpHandler(nodeUrl, 'fetch');
     handler.setReferrer(REFERRER_URL);
     const rpcClient = new RpcClient(handler);
 

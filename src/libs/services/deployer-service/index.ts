@@ -2,7 +2,7 @@ import {
   Approval,
   Deploy,
   HexBytes,
-  HttpFetchHandler,
+  HttpHandler,
   PublicKey,
   RpcClient,
   Transaction
@@ -37,7 +37,7 @@ export const getAuctionManagerDeployCost = (
 
 export const getDateForDeploy = async (nodeUrl: CasperNodeUrl) => {
   const defaultDate = sub(new Date(), { seconds: 2 });
-  const handler = new HttpFetchHandler(nodeUrl);
+  const handler = new HttpHandler(nodeUrl, 'fetch');
   handler.setReferrer(REFERRER_URL);
   const rpcClient = new RpcClient(handler);
 
@@ -116,7 +116,7 @@ export const sendSignedTx = async (
   nodeUrl: CasperNodeUrl,
   isCasper2Network: boolean
 ): Promise<string> => {
-  const handler = new HttpFetchHandler(nodeUrl);
+  const handler = new HttpHandler(nodeUrl, 'fetch');
   handler.setReferrer(REFERRER_URL);
   const rpcClient = new RpcClient(handler);
 
