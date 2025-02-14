@@ -1,7 +1,10 @@
 import { Transaction } from 'casper-js-sdk';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+
+import { selectIsCasper2Network } from '@background/redux/settings/selectors';
 
 import {
   ContentContainer,
@@ -54,6 +57,7 @@ export function SignDeployContent({
   signingPublicKeyHex
 }: SignDeployContentProps) {
   const { t } = useTranslation();
+  const isCasper2 = useSelector(selectIsCasper2Network);
 
   if (!tx) {
     return null;
@@ -62,7 +66,7 @@ export function SignDeployContent({
   const LABEL_DICT: Record<SignatureRequestKeys, string> = {
     signingKey: t('Signing key'),
     account: t('Account'),
-    deployHash: t('Deploy hash'),
+    deployHash: t(isCasper2 ? 'Transaction hash' : 'Deploy hash'),
     txHash: t('Transaction hash'),
     delegator: t('Delegator'),
     validator: t('Validator'),
@@ -72,7 +76,7 @@ export function SignDeployContent({
     transferId: t('Transfer ID'),
     transactionFee: t('Transaction fee'),
     timestamp: t('Timestamp'),
-    deployType: t('Deploy type'),
+    deployType: t(isCasper2 ? 'Transaction type' : 'Deploy type'),
     chainName: t('Chain name'),
     recipientKey: t('Recipient (Key)'),
     recipientHash: t('Recipient (Hash)'),
