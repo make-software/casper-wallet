@@ -80,9 +80,10 @@ export function getTxArgs(tx: Transaction): ArgDict {
     }
   }
 
-  const txArgs: ArgDict = tx.target.stored
-    ? getDeployArgsFromArgsDict(tx.args.args)
-    : {};
+  const txArgs: ArgDict =
+    tx.target.stored || tx.target.session?.moduleBytes
+      ? getDeployArgsFromArgsDict(tx.args.args)
+      : {};
 
   return txArgs;
 }
@@ -174,6 +175,10 @@ export function parseDeployArgValue(
 
       if (key?.account) {
         return { parsedValue: key.account?.toHex() ?? '' };
+      }
+
+      if (key?.hash) {
+        return { parsedValue: key.hash?.toHex() ?? '' };
       }
 
       if (key?.uRef) {
