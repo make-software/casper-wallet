@@ -70,8 +70,8 @@
     "@zondax/ledger-casper": "^2.6.3",
     "base64-loader": "1.0.0",
     "big.js": "^6.2.1",
-    "casper-js-sdk": "5.0.9-beta2",
-    "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#28e4dca9c2d44bb2b268f14d120fd665bab351eb",
+    "casper-js-sdk": "5.0.10-beta2",
+    "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#78b356443d7e217a7cb890c040053ca66b9c4049",
     "date-fns": "^2.30.0",
     "dotenv-webpack": "^8.1.0",
     "i18next": "^23.11.0",
@@ -103,6 +103,9 @@
     "styled-components": "5.3.6",
     "typesafe-actions": "5.1.0",
     "yup": "^0.32.11"
+  },
+  "overrides": {
+    "elliptic": "6.6.1"
   },
   "devDependencies": {
     "@babel/core": "7.23.3",
