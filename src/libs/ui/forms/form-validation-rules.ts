@@ -459,7 +459,10 @@ export const useCSPRStakeAmountRule = (
       message: {
         header: t('You cannot delegate this amount'),
         description: t(
-          `Delegation amount for this validator cannot be more than ${validatorMaxAmount} CSPR.`
+          `Delegation amount for this validator cannot be more than ${formatTokenBalance(
+            validatorMaxAmount,
+            CSPR_COIN.decimals
+          )} CSPR.`
         )
       }
     });
