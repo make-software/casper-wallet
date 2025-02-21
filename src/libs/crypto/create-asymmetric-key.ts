@@ -1,23 +1,24 @@
-import { CLPublicKey, CLPublicKeyTag, Keys, decodeBase64 } from 'casper-js-sdk';
+import { Conversions, PrivateKey, PublicKey } from 'casper-js-sdk';
 
-export function createAsymmetricKey(
-  publicKey: string,
-  secretKey: string
-): Keys.AsymmetricKey {
-  const clPublicKey = CLPublicKey.fromHex(publicKey);
-  const decodedSecretKey = decodeBase64(secretKey);
+export interface AsymmetricKeys {
+  publicKey: PublicKey;
+  secretKey: PrivateKey | null;
+}
 
-  switch (clPublicKey.tag) {
-    case CLPublicKeyTag.ED25519:
-      return new Keys.Ed25519({
-        publicKey: clPublicKey.value(),
-        secretKey: decodedSecretKey
-      });
+export function createAsymmetricKeys(
+  publicKeyHex: string,
+  secretKeyBase64: string
+): AsymmetricKeys {
+  const publicKey = PublicKey.fromHex(publicKeyHex);
+  const privateKey = secretKeyBase64.length
+    ? PrivateKey.fromHex(
+        Conversions.base64to16(secretKeyBase64),
+        publicKey.cryptoAlg
+      )
+    : null;
 
-    case CLPublicKeyTag.SECP256K1:
-      return new Keys.Secp256K1(clPublicKey.value(), decodedSecretKey);
-
-    default:
-      throw Error('Unknown Signature type.');
-  }
+  return {
+    publicKey: publicKey,
+    secretKey: privateKey
+  };
 }

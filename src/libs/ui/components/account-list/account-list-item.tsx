@@ -1,6 +1,6 @@
 import { formatNumber } from 'casper-wallet-core';
 import { IAccountInfo } from 'casper-wallet-core/src/domain/accountInfo';
-import React from 'react';
+import React, { useRef } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -59,6 +59,7 @@ interface AccountListItemProps {
   accountsInfo: Record<string, IAccountInfo> | undefined;
   accountLiquidBalance: string | undefined;
   isLoadingBalance: boolean;
+  isAllAccountsPage?: boolean;
 }
 
 export const AccountListItem = ({
@@ -70,8 +71,11 @@ export const AccountListItem = ({
   closeModal,
   accountsInfo,
   accountLiquidBalance,
-  isLoadingBalance
+  isLoadingBalance,
+  isAllAccountsPage = false
 }: AccountListItemProps) => {
+  const popoverParentRef = useRef<HTMLDivElement | null>(null);
+
   const accountBalance = accountLiquidBalance
     ? formatNumber(motesToCSPR(accountLiquidBalance), {
         precision: { max: 0 }
@@ -83,7 +87,7 @@ export const AccountListItem = ({
     accountsInfo && accountsInfo[account.accountHash]?.brandingLogo;
 
   return (
-    <ListItemContainer key={account.name}>
+    <ListItemContainer key={account.name} ref={popoverParentRef}>
       <AlignedSpaceBetweenFlexRow gap={SpacingSize.Small}>
         <Avatar
           size={38}
@@ -134,6 +138,8 @@ export const AccountListItem = ({
           account={account}
           showHideAccountItem={showHideAccountItem}
           onClick={closeModal}
+          popoverParentRef={popoverParentRef}
+          isAllAccountsPage={isAllAccountsPage}
         />
       </AlignedSpaceBetweenFlexRow>
     </ListItemContainer>

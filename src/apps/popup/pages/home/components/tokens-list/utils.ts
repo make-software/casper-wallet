@@ -6,9 +6,9 @@ export const formatCep18Tokens = (
   cep18Tokens: TokenDto[] | undefined
 ): TokenType[] | undefined => {
   return cep18Tokens
-    ?.map(token => ({
+    ?.map<TokenType>(token => ({
       id: token.contractPackageHash,
-      contractHash: token.contractHash,
+      contractPackageHash: token.contractPackageHash,
       name: token.name,
       balance: token.balance,
       amount: token.formattedDecimalBalance,

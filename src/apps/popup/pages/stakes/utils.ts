@@ -145,7 +145,7 @@ export const useStakeType = () => {
       name === AuctionManagerEntryPoint.redelegate
     ) {
       setStakeType(name);
-      setValidatorList(validators);
+      setValidatorList(validators?.data ?? []);
       setUndelegateValidatorList(validatorsWithStakes);
     } else if (name === AuctionManagerEntryPoint.undelegate) {
       setStakeType(name);

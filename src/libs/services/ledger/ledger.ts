@@ -1,9 +1,8 @@
 import Transport from '@ledgerhq/hw-transport';
 import { blake2b } from '@noble/hashes/blake2b';
-import LedgerCasperApp from '@zondax/ledger-casper';
-import { ResponseSign } from '@zondax/ledger-casper/src/types';
+import LedgerCasperApp, { ResponseSign } from '@zondax/ledger-casper';
 import { Buffer } from 'buffer';
-import { DeployUtil } from 'casper-js-sdk';
+import { Deploy } from 'casper-js-sdk';
 import {
   BehaviorSubject,
   Observable,
@@ -213,7 +212,7 @@ export class Ledger {
 
   /** @throws {LedgerError} message - ILedgerEvent JSON */
   async singDeploy(
-    deploy: DeployUtil.Deploy,
+    deploy: Deploy,
     account: Partial<LedgerAccount>
   ): Promise<SignResult> {
     try {
@@ -223,7 +222,7 @@ export class Ledger {
 
       await this.#checkConnection(account.index);
 
-      const deployHash = Buffer.from(deploy.hash).toString('hex');
+      const deployHash = deploy.hash.toHex();
 
       const devicePk =
         account.index !== undefined
@@ -254,7 +253,7 @@ export class Ledger {
         });
       }
 
-      const deployBytes = DeployUtil.deployToBytes(deploy);
+      const deployBytes = deploy.toBytes();
 
       this.#LedgerEventStatussSubject.next({
         status: LedgerEventStatus.SignatureRequestedToUser,

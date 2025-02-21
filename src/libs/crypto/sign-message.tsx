@@ -1,4 +1,4 @@
-import { CLPublicKey, CLPublicKeyTag, Keys, decodeBase64 } from 'casper-js-sdk';
+import { Conversions, PrivateKey, PublicKey } from 'casper-js-sdk';
 
 export const CASPER_MESSAGE_HEADER = `Casper Message:\n`;
 
@@ -13,34 +13,24 @@ export const createMessageBytesWithHeaders = (message: string): Uint8Array => {
   return Uint8Array.from(Buffer.from(messageWithHeader));
 };
 
-export const signMessage = (
+export const signMessageForProviderResponse = (
   message: string,
   publicKeyHex: string,
   privateKeyBase64: string
 ) => {
-  const clPublicKey = CLPublicKey.fromHex(publicKeyHex);
-  const publicKey = clPublicKey.value();
-  const secretKey = decodeBase64(privateKeyBase64);
+  const publicKey = PublicKey.fromHex(publicKeyHex);
+
+  const privateKey = PrivateKey.fromHex(
+    Conversions.base64to16(privateKeyBase64),
+    publicKey.cryptoAlg
+  );
+
   const messageHash = Uint8Array.from(
     Buffer.from(createMessageBytesWithHeaders(message))
   );
 
-  let keyPair: Keys.AsymmetricKey;
-  switch (clPublicKey.tag) {
-    case CLPublicKeyTag.ED25519:
-      keyPair = new Keys.Ed25519({ publicKey, secretKey });
-      break;
-
-    case CLPublicKeyTag.SECP256K1:
-      keyPair = new Keys.Secp256K1(publicKey, secretKey);
-      break;
-
-    default:
-      throw Error('Unknown Signature type.');
-  }
-
   // signature is a signed deploy hash
-  const signature = keyPair.sign(messageHash);
+  const signature = privateKey.sign(messageHash);
 
   // ERROR HANDLING
   if (signature == null) {

@@ -31,7 +31,8 @@ export const useFetchNftTokens = () => {
       nftsRepository.getNfts({
         network: network.toLowerCase() as CasperNetwork,
         publicKey: activeAccount?.publicKey ?? '',
-        page: pageParam
+        page: pageParam,
+        withProxyHeader: false
       }),
     getNextPageParam: (lastPage, pages) => {
       const nextPage = pages.length + 1;

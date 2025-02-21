@@ -6,7 +6,7 @@ import { nftsRepository } from '@background/wallet-repositories';
 export const useFetchDeriveMediaType = (url?: Maybe<string>) => {
   const { data: contentType, isFetching: isLoadingMediaType } = useQuery({
     queryKey: ['deriveNftMediaType', url],
-    queryFn: () => nftsRepository.deriveNftMediaType(url || ''),
+    queryFn: () => nftsRepository.deriveNftMediaType(url || '', false),
     enabled: Boolean(url),
     refetchInterval: false
   });

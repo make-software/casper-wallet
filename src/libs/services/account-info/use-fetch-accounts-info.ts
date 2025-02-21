@@ -23,7 +23,8 @@ export const useFetchAccountsInfo = (accountPublicKeys: string[]) => {
     queryFn: async () => {
       return await accountInfoRepository.getAccountsInfo({
         accountHashes,
-        network: network.toLowerCase() as CasperNetwork
+        network: network.toLowerCase() as CasperNetwork,
+        withProxyHeader: false
       });
     }
   });

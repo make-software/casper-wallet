@@ -17,7 +17,8 @@ export const useFetchCep18Tokens = () => {
     queryFn: () =>
       tokensRepository.getTokens({
         network: network.toLowerCase() as CasperNetwork,
-        publicKey: activeAccount?.publicKey || ''
+        publicKey: activeAccount?.publicKey || '',
+        withProxyHeader: false
       }),
     refetchInterval: TOKENS_REFRESH_RATE,
     staleTime: TOKENS_REFRESH_RATE

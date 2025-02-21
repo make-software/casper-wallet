@@ -18,7 +18,8 @@ export const useFetchSingleDeploy = (deployHash?: string) => {
       deploysRepository.getSingleDeploy({
         deployHash: deployHash ?? '',
         activePublicKey: activeAccount?.publicKey ?? '',
-        network: network.toLowerCase() as CasperNetwork
+        network: network.toLowerCase() as CasperNetwork,
+        withProxyHeader: false
       }),
     enabled: Boolean(deployHash && activeAccount?.publicKey),
     refetchInterval: DEPLOY_DETAILS_REFRESH_RATE,

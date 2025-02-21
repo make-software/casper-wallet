@@ -36,7 +36,8 @@ export const accountBalanceQuery = ({
   queryFn: () =>
     tokensRepository.getCsprBalance({
       publicKey: activeAccount?.publicKey || '',
-      network: network.toLowerCase() as CasperNetwork
+      network: network.toLowerCase() as CasperNetwork,
+      withProxyHeader: false
     }),
   refetchInterval: BALANCE_REFRESH_RATE,
   staleTime: BALANCE_REFRESH_RATE
@@ -46,7 +47,8 @@ export const currencyRateQuery = ({ network }: CurrencyRateQueryProps) => ({
   queryKey: ['CURRENCY_RATE', network],
   queryFn: () =>
     tokensRepository.getCsprFiatCurrencyRate({
-      network: network.toLowerCase() as CasperNetwork
+      network: network.toLowerCase() as CasperNetwork,
+      withProxyHeader: false
     }),
   refetchInterval: CURRENCY_REFRESH_RATE,
   staleTime: CURRENCY_REFRESH_RATE
@@ -61,7 +63,8 @@ export const accountsBalancesQuery = ({
   queryFn: async () =>
     accountInfoRepository.getAccountsBalances({
       accountHashes: accountHashes,
-      network: network.toLowerCase() as CasperNetwork
+      network: network.toLowerCase() as CasperNetwork,
+      withProxyHeader: false
     }),
   refetchInterval: BALANCE_REFRESH_RATE,
   staleTime: BALANCE_REFRESH_RATE
