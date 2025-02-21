@@ -1,7 +1,6 @@
 import Big from 'big.js';
 import { KeyAlgorithm, PrivateKey, PublicKey } from 'casper-js-sdk';
 import { Maybe } from 'casper-wallet-core/src/typings/common';
-import { runtime } from 'webextension-polyfill';
 
 import { Browser } from '@src/constants';
 
@@ -131,10 +130,6 @@ export enum NFTTokenStandard {
   CEP47 = 'CEP47',
   CEP78 = 'CEP78'
 }
-
-export const isSafariExtension = runtime.id.startsWith(
-  'software.make.Casper-Wallet.Extension'
-);
 
 export const getImageProxyUrl = (
   url: string | undefined,
