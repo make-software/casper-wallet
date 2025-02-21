@@ -1,5 +1,7 @@
 import * as Yup from 'yup';
 import Big from 'big.js';
+import { CSPR_COIN } from 'casper-wallet-core/src/domain/constants/casperNetwork';
+import { formatTokenBalance } from 'casper-wallet-core/src/utils/common';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -503,9 +505,12 @@ export const useValidatorPublicKeyRule = (
 };
 
 export const useNewValidatorPublicKeyRule = (
+  inputAmountCspr: string,
+  minAmountForNewValidator: string,
+  maxAmountForNewValidator: string,
+  reservedSlotsForNewValidator: number,
   delegatorsNumber?: number,
-  hasDelegationToSelectedNewValidator?: boolean,
-  reservedSlots = 0
+  hasDelegationToSelectedNewValidator?: boolean
 ) => {
   const { t } = useTranslation();
 
@@ -523,7 +528,9 @@ export const useNewValidatorPublicKeyRule = (
           (delegatorsNumber === 0 || delegatorsNumber) &&
           !hasDelegationToSelectedNewValidator
         ) {
-          return delegatorsNumber + reservedSlots < MAX_DELEGATORS;
+          return (
+            delegatorsNumber + reservedSlotsForNewValidator < MAX_DELEGATORS
+          );
         }
 
         return !!hasDelegationToSelectedNewValidator;
@@ -531,6 +538,34 @@ export const useNewValidatorPublicKeyRule = (
       message: t(
         'This validator has reached the network limit for total delegators and therefore cannot be delegated to by new accounts. Please select another validator with fewer than 1200 total delegators'
       )
+    })
+    .test({
+      name: 'amountBelowMinTransfer',
+      test: () =>
+        Big(CSPRtoMotes(inputAmountCspr || '0')).gte(minAmountForNewValidator),
+      message: {
+        header: t('You can’t redelegate this amount'),
+        description: t(
+          `The minimum required redelegation amount is ${formatTokenBalance(
+            minAmountForNewValidator,
+            CSPR_COIN.decimals
+          )} CSPR.`
+        )
+      }
+    })
+    .test({
+      name: 'amountAboveValidatorMaxAmount',
+      test: () =>
+        Big(CSPRtoMotes(inputAmountCspr) || '0').lte(maxAmountForNewValidator),
+      message: {
+        header: t('You cannot delegate this amount'),
+        description: t(
+          `Delegation amount for this validator cannot be more than ${formatTokenBalance(
+            maxAmountForNewValidator,
+            CSPR_COIN.decimals
+          )} CSPR.`
+        )
+      }
     });
 };
 

@@ -192,8 +192,10 @@ export const ValidatorPlate = ({
         {error && error.message && (
           <VerticalSpaceContainer top={SpacingSize.XL}>
             <Error
-              header="This validator has max delegators"
-              description={error.message}
+              // @ts-ignore
+              header={error.message.header}
+              // @ts-ignore
+              description={error.message.description}
             />
           </VerticalSpaceContainer>
         )}

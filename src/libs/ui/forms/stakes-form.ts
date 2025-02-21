@@ -1,5 +1,10 @@
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
+import {
+  DEFAULT_MAXIMUM_DELEGATION_AMOUNT,
+  DEFAULT_MINIMUM_DELEGATION_AMOUNT
+} from 'casper-js-sdk';
+import { IValidator } from 'casper-wallet-core';
 import { UseFormProps, useForm } from 'react-hook-form';
 
 import { AuctionManagerEntryPoint } from '@src/constants';
@@ -26,14 +31,26 @@ export const useStakesForm = (
   amountMotes: string | undefined,
   stakeType: AuctionManagerEntryPoint,
   stakeAmountMotes: string,
-  minAmount: string,
-  maxAmount: string,
-  delegatorsNumber?: number,
-  delegatorsNumberForNewValidator?: number,
+  validator: IValidator | null,
+  newValidator: IValidator | null,
+  inputAmountCspr: string,
   hasDelegationToSelectedValidator?: boolean,
-  hasDelegationToSelectedNewValidator?: boolean,
-  reservedSlots = 0
+  hasDelegationToSelectedNewValidator?: boolean
 ) => {
+  const minAmount =
+    validator?.minAmount ?? DEFAULT_MINIMUM_DELEGATION_AMOUNT.toString();
+  const maxAmount =
+    validator?.maxAmount ?? DEFAULT_MAXIMUM_DELEGATION_AMOUNT.toString();
+  const delegatorsNumber = validator?.delegatorsNumber;
+  const reservedSlots = validator?.reservedSlots ?? 0;
+
+  const delegatorsNumberForNewValidator = newValidator?.delegatorsNumber;
+  const minAmountForNewValidator =
+    newValidator?.minAmount ?? DEFAULT_MINIMUM_DELEGATION_AMOUNT.toString();
+  const maxAmountForNewValidator =
+    newValidator?.maxAmount ?? DEFAULT_MAXIMUM_DELEGATION_AMOUNT.toString();
+  const reservedSlotsForNewValidator = newValidator?.reservedSlots ?? 0;
+
   const validatorFormSchema = Yup.object().shape({
     validatorPublicKey: useValidatorPublicKeyRule(
       stakeType,
@@ -51,9 +68,12 @@ export const useStakesForm = (
 
   const newValidatorFromSchema = Yup.object().shape({
     newValidatorPublicKey: useNewValidatorPublicKeyRule(
+      inputAmountCspr,
+      minAmountForNewValidator,
+      maxAmountForNewValidator,
+      reservedSlotsForNewValidator,
       delegatorsNumberForNewValidator,
-      hasDelegationToSelectedNewValidator,
-      reservedSlots
+      hasDelegationToSelectedNewValidator
     )
   });
 
