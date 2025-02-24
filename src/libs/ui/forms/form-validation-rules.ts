@@ -593,6 +593,10 @@ export const useContactNameRule = (
       t("Name can't be empty"),
       value => value != null && value.trim() !== ''
     )
+    .matches(
+      /^[\daA-zZ\s]+$/,
+      t('Contact name can’t contain special characters')
+    )
     .test(
       'unique',
       t(
