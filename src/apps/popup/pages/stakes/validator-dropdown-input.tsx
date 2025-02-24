@@ -23,7 +23,7 @@ interface ValidatorDropdownInputProps {
   validatorList: ValidatorDto[] | null;
   validator: ValidatorDto | null;
   setValidator: React.Dispatch<React.SetStateAction<ValidatorDto | null>>;
-  setStakeAmount: React.Dispatch<React.SetStateAction<string>>;
+  setMaxAmountMotesForStaking: React.Dispatch<React.SetStateAction<string>>;
   stakeType: AuctionManagerEntryPoint;
   loading: boolean;
 }
@@ -33,7 +33,7 @@ export const ValidatorDropdownInput = ({
   validatorList,
   validator,
   setValidator,
-  setStakeAmount,
+  setMaxAmountMotesForStaking,
   stakeType,
   loading
 }: ValidatorDropdownInputProps) => {
@@ -65,7 +65,7 @@ export const ValidatorDropdownInput = ({
         if (inputValue !== '') {
           setShowValidatorPlate(true);
           setValue('validatorPublicKey', validator.publicKey);
-          setStakeAmount(validator.stake!);
+          setMaxAmountMotesForStaking(validator.stake!);
           await resetAndTriggerPublicKey(validator.publicKey);
         } else {
           setShowValidatorPlate(false);
@@ -111,7 +111,7 @@ export const ValidatorDropdownInput = ({
 
   const handleValidatorClick = (validator: ValidatorDto) => {
     setValue('validatorPublicKey', validator.publicKey);
-    setStakeAmount(validator.stake!);
+    setMaxAmountMotesForStaking(validator.stake!);
 
     setValidator(validator);
 

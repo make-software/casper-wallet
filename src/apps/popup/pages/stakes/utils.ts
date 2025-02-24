@@ -78,7 +78,7 @@ export const useFilteredValidators = (
 
 export const useStakeActionTexts = (
   stakeType: AuctionManagerEntryPoint,
-  stakeAmountMotes?: string
+  maxAmountMotesForStaking?: string
 ) => {
   const [state, setState] = useState<StakeTexts>({
     ...stakeActionsTextMap[stakeType],
@@ -87,8 +87,10 @@ export const useStakeActionTexts = (
 
   useEffect(() => {
     const formattedAmountCSPR =
-      stakeAmountMotes &&
-      formatNumber(motesToCSPR(stakeAmountMotes), { precision: { max: 4 } });
+      maxAmountMotesForStaking &&
+      formatNumber(motesToCSPR(maxAmountMotesForStaking), {
+        precision: { max: 4 }
+      });
 
     setState({
       ...stakeActionsTextMap[stakeType],
@@ -97,7 +99,7 @@ export const useStakeActionTexts = (
           ? `${formattedAmountCSPR} CSPR`
           : null
     });
-  }, [stakeAmountMotes, stakeType]);
+  }, [maxAmountMotesForStaking, stakeType]);
 
   return state;
 };

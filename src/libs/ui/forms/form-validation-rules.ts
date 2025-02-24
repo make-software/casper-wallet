@@ -321,7 +321,7 @@ export const usePaymentAmountRule = (csprBalance: string | undefined) => {
 export const useCSPRStakeAmountRule = (
   amountMotes: string | undefined,
   mode: AuctionManagerEntryPoint,
-  stakeAmountMotes: string,
+  maxAmountMotesForStaking: string,
   validatorMinAmount: string,
   validatorMaxAmount: string
 ) => {
@@ -403,12 +403,14 @@ export const useCSPRStakeAmountRule = (
           switch (mode) {
             case AuctionManagerEntryPoint.undelegate: {
               return Big(CSPRtoMotes(csprAmountInputValue)).lte(
-                Big(stakeAmountMotes).sub(getStakeMinAmountMotes()).toFixed()
+                Big(maxAmountMotesForStaking)
+                  .sub(getStakeMinAmountMotes())
+                  .toFixed()
               );
             }
             case AuctionManagerEntryPoint.redelegate: {
               return Big(CSPRtoMotes(csprAmountInputValue)).lte(
-                Big(stakeAmountMotes).toFixed()
+                Big(maxAmountMotesForStaking).toFixed()
               );
             }
             case AuctionManagerEntryPoint.delegate:

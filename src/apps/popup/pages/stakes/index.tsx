@@ -109,7 +109,7 @@ export const StakesPage = () => {
   const [inputAmountCSPR, setInputAmountCSPR] = useState('');
   const [validator, setValidator] = useState<ValidatorDto | null>(null);
   const [newValidator, setNewValidator] = useState<ValidatorDto | null>(null);
-  const [stakeAmountMotes, setStakeAmountMotes] = useState('');
+  const [maxAmountMotesForStaking, setMaxAmountMotesForStaking] = useState('');
   const isCasper2Network = useSelector(selectIsCasper2Network);
   const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
 
@@ -141,7 +141,7 @@ export const StakesPage = () => {
   const { amountForm, validatorForm, newValidatorForm } = useStakesForm(
     accountBalance.liquidBalance,
     stakeType,
-    stakeAmountMotes,
+    maxAmountMotesForStaking,
     validator,
     newValidator,
     inputAmountCSPR,
@@ -263,7 +263,7 @@ export const StakesPage = () => {
     confirmStepText,
     amountStepText,
     amountStepMaxAmountValue
-  } = useStakeActionTexts(stakeType, stakeAmountMotes);
+  } = useStakeActionTexts(stakeType, maxAmountMotesForStaking);
 
   const confirmButtonText = useConfirmationButtonText(stakeType);
 
@@ -279,7 +279,7 @@ export const StakesPage = () => {
           }
           validator={validator}
           setValidator={setValidator}
-          setStakeAmount={setStakeAmountMotes}
+          setMaxAmountMotesForStaking={setMaxAmountMotesForStaking}
           stakeType={stakeType}
           loading={loading}
         />
@@ -290,7 +290,7 @@ export const StakesPage = () => {
         <AmountStep
           amountForm={amountForm}
           stakeType={stakeType}
-          stakeAmountMotes={stakeAmountMotes}
+          maxAmountMotesForStaking={maxAmountMotesForStaking}
           amountStepText={amountStepText}
           amountStepMaxAmountValue={amountStepMaxAmountValue}
         />
