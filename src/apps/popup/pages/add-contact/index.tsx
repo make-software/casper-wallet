@@ -9,6 +9,10 @@ import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import { newContactAdded } from '@background/redux/contacts/actions';
 import { selectAllContactsNames } from '@background/redux/contacts/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
+import {
+  selectVaultAccountsNames,
+  selectVaultAccountsPublicKeys
+} from '@background/redux/vault/selectors';
 
 import {
   FooterButtonsContainer,
@@ -28,12 +32,18 @@ export const AddContactPage = () => {
   const { state } = useTypedLocation();
 
   const contactsNames = useSelector(selectAllContactsNames);
+  const accountNames = useSelector(selectVaultAccountsNames);
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isValid }
-  } = useContactForm(contactsNames, state?.recipientPublicKey);
+  } = useContactForm(
+    [...contactsNames, ...accountNames],
+    accountsPublicKeys,
+    state?.recipientPublicKey
+  );
 
   const onSubmit = ({ name, publicKey }: ContactFromValues) => {
     const lastModified = new Date().toISOString();
