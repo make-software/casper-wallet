@@ -21,15 +21,13 @@ interface ValidatorDropdownInputProps {
   validatorList: ValidatorDto[] | null;
   validator: ValidatorDto | null;
   setValidator: React.Dispatch<React.SetStateAction<ValidatorDto | null>>;
-  setStakeAmount: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const RedelegateValidatorDropdownInput = ({
   newValidatorForm,
   validatorList,
   validator,
-  setValidator,
-  setStakeAmount
+  setValidator
 }: ValidatorDropdownInputProps) => {
   const [isOpenValidatorPublicKeysList, setIsOpenValidatorPublicKeysList] =
     useState(true);
@@ -58,7 +56,6 @@ export const RedelegateValidatorDropdownInput = ({
         if (inputValue !== '') {
           setShowValidatorPlate(true);
           setValue('newValidatorPublicKey', validator.publicKey);
-          setStakeAmount(validator.stake!);
           await resetAndTriggerPublicKey(validator.publicKey);
         } else {
           setShowValidatorPlate(false);
@@ -90,7 +87,6 @@ export const RedelegateValidatorDropdownInput = ({
 
   const handleValidatorClick = (validator: ValidatorDto) => {
     setValue('newValidatorPublicKey', validator.publicKey);
-    setStakeAmount(validator.stake!);
 
     setValidator(validator);
 
