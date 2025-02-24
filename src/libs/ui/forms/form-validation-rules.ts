@@ -590,13 +590,17 @@ export const useContactNameRule = (
     .test(
       'unique',
       t(
-        'You’ve already got a contact with this name. Please find a new name for this one'
+        'You’ve already got an account / contact with this name. Please find a new name for this one'
       ),
       value => isContactNameIsTakenCallback(value)
     );
 };
 
-export const useContactPublicKeyRule = () => {
+export const useContactPublicKeyRule = (
+  isPublicKeyAlreadyExistCallback: (
+    value: string | undefined
+  ) => Promise<boolean> | boolean
+) => {
   const { t } = useTranslation();
 
   return Yup.string()
@@ -605,6 +609,13 @@ export const useContactPublicKeyRule = () => {
       name: 'contactPublicKey',
       test: value => (value ? isValidPublicKey(value) : false),
       message: t('Public address should be a valid public key')
+    })
+    .test({
+      name: 'unique',
+      test: value => isPublicKeyAlreadyExistCallback(value),
+      message: t(
+        'You already have an account / contact with the same public key'
+      )
     });
 };
 
