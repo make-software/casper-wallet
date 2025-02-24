@@ -324,7 +324,6 @@ export const StakesPage = () => {
           validatorList={validatorList}
           validator={newValidator}
           setValidator={setNewValidator}
-          setStakeAmount={setStakeAmountMotes}
         />
       </Step>
     ),
