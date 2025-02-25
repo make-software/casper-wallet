@@ -501,9 +501,12 @@ export const useValidatorPublicKeyRule = (
 
         return !!hasDelegationToSelectedValidator;
       },
-      message: t(
-        'This validator has reached the network limit for total delegators and therefore cannot be delegated to by new accounts. Please select another validator with fewer than 1200 total delegators'
-      )
+      message: {
+        header: t('This validator has max delegators'),
+        description: t(
+          'This validator has reached the network limit for total delegators and therefore cannot be delegated to by new accounts. Please select another validator with fewer than 1200 total delegators'
+        )
+      }
     });
 };
 
@@ -538,9 +541,12 @@ export const useNewValidatorPublicKeyRule = (
 
         return !!hasDelegationToSelectedNewValidator;
       },
-      message: t(
-        'This validator has reached the network limit for total delegators and therefore cannot be delegated to by new accounts. Please select another validator with fewer than 1200 total delegators'
-      )
+      message: {
+        header: t('This validator has max delegators'),
+        description: t(
+          'This validator has reached the network limit for total delegators and therefore cannot be delegated to by new accounts. Please select another validator with fewer than 1200 total delegators'
+        )
+      }
     })
     .test({
       name: 'amountBelowMinTransfer',
