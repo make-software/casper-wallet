@@ -95,11 +95,24 @@ export const signTx = async (
   keys: AsymmetricKeys,
   activeAccount: Account
 ) => {
-  if (
-    activeAccount?.hardware === HardwareWalletType.Ledger &&
-    tx.getTransactionV1()
-  ) {
-    throw new Error('Signing TX with Ledger is not supported yet');
+  if (activeAccount?.hardware === HardwareWalletType.Ledger) {
+    const txV1 = tx.getTransactionV1();
+    const deploy = tx.getDeploy();
+
+    if (txV1) {
+      throw new Error('Signing TransactionV1 with Ledger is not supported yet');
+    } else if (deploy) {
+      const signedDeploy = await signLedgerDeploy(deploy, activeAccount);
+      const approval = signedDeploy.approvals[0];
+
+      if (!approval) {
+        throw new Error('Invalid signature. Try to sign Deploy again');
+      }
+
+      tx.setSignature(approval.signature.bytes, approval.signer);
+
+      return tx;
+    }
   }
 
   if (!keys.secretKey) {
