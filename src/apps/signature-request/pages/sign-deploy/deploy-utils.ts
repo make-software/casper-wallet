@@ -231,6 +231,10 @@ export function parseDeployArgValue(
         return { parsedValue: key.account?.toHex() ?? '' };
       }
 
+      if (key?.hash) {
+        return { parsedValue: key.hash?.toHex() ?? '' };
+      }
+
       if (key?.uRef) {
         return parseDeployArgValue(CLValue.newCLUref(key.uRef));
       }
