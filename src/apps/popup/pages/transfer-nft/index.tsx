@@ -47,7 +47,11 @@ import {
   createErrorLocationState
 } from '@libs/layout';
 import { useFetchWalletBalance } from '@libs/services/balance-service';
-import { sendSignDeploy, signDeploy } from '@libs/services/deployer-service';
+import {
+  getDateForDeploy,
+  sendSignDeploy,
+  signDeploy
+} from '@libs/services/deployer-service';
 import { useFetchNftTokens } from '@libs/services/nft-service';
 import {
   Button,
@@ -162,6 +166,8 @@ export const TransferNftPage = () => {
         activeAccount.secretKey
       );
 
+      const timestamp = await getDateForDeploy(nodeUrl);
+
       const deploy = makeNftTransferDeploy({
         chainName: networkNameToSdkNetworkNameMap[networkName],
         contractPackageHash: nftToken.contractPackageHash,
@@ -169,7 +175,8 @@ export const TransferNftPage = () => {
         paymentAmount: CSPRtoMotes(paymentAmount),
         recipientPublicKeyHex: recipientPublicKey,
         senderPublicKeyHex: KEYS.publicKey.toHex(),
-        tokenId: nftToken.tokenId
+        tokenId: nftToken.tokenId,
+        timestamp
       });
 
       const signedDeploy = await signDeploy(deploy, KEYS, activeAccount);
@@ -240,6 +247,8 @@ export const TransferNftPage = () => {
       activeAccount.secretKey
     );
 
+    const timestamp = await getDateForDeploy(nodeUrl);
+
     const deploy = makeNftTransferDeploy({
       chainName: networkNameToSdkNetworkNameMap[networkName],
       contractPackageHash: nftToken.contractPackageHash,
@@ -247,7 +256,8 @@ export const TransferNftPage = () => {
       paymentAmount: CSPRtoMotes(paymentAmount),
       recipientPublicKeyHex: recipientPublicKey,
       senderPublicKeyHex: KEYS.publicKey.toHex(),
-      tokenId: nftToken.tokenId
+      tokenId: nftToken.tokenId,
+      timestamp
     });
 
     dispatchToMainStore(

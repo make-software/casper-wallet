@@ -34,7 +34,7 @@ export const getAuctionManagerDeployCost = (
 };
 
 export const getDateForDeploy = async (nodeUrl: CasperNodeUrl) => {
-  const defaultDate = sub(new Date(), { seconds: 2 }).getTime();
+  const defaultDate = sub(new Date(), { seconds: 2 }).toISOString();
 
   try {
     const casperNodeTimestamp: ICasperNodeStatusResponse = await fetch(
@@ -45,7 +45,7 @@ export const getDateForDeploy = async (nodeUrl: CasperNodeUrl) => {
     ).then(toJson);
 
     return casperNodeTimestamp?.last_progress
-      ? new Date(casperNodeTimestamp?.last_progress).getTime()
+      ? new Date(casperNodeTimestamp?.last_progress).toISOString()
       : defaultDate;
   } catch {
     return defaultDate;

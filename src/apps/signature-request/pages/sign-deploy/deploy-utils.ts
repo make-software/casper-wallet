@@ -1,6 +1,5 @@
 import {
   CLValue,
-  CLValueOption,
   Conversions,
   ExecutableDeployItem,
   ModuleBytes,
@@ -232,6 +231,10 @@ export function parseDeployArgValue(
         return { parsedValue: key.account?.toHex() ?? '' };
       }
 
+      if (key?.hash) {
+        return { parsedValue: key.hash?.toHex() ?? '' };
+      }
+
       if (key?.uRef) {
         return parseDeployArgValue(CLValue.newCLUref(key.uRef));
       }
@@ -249,7 +252,7 @@ export function parseDeployArgValue(
       const option = value.option;
 
       if (option && !option?.isEmpty()) {
-        return parseDeployArgValue(CLValueOption.newCLOption(option.value()));
+        return parseDeployArgValue(CLValue.newCLOption(option.value()));
       }
       // This will be None due to the above logic
       const optionValue = option?.toString();

@@ -50,7 +50,11 @@ import {
   VerticalSpaceContainer,
   createErrorLocationState
 } from '@libs/layout';
-import { sendSignDeploy, signDeploy } from '@libs/services/deployer-service';
+import {
+  getDateForDeploy,
+  sendSignDeploy,
+  signDeploy
+} from '@libs/services/deployer-service';
 import { HardwareWalletType } from '@libs/types/account';
 import {
   Button,
@@ -220,6 +224,8 @@ export const TransferPage = () => {
       activeAccount.secretKey
     );
 
+    const timestamp = await getDateForDeploy(nodeUrl);
+
     if (isErc20Transfer && selectedToken?.contractPackageHash) {
       // CEP18 transfer
       const deploy = makeCep18TransferDeploy({
@@ -229,7 +235,8 @@ export const TransferPage = () => {
         recipientPublicKeyHex: recipientPublicKey,
         senderPublicKeyHex: activeAccount.publicKey,
         transferAmount:
-          multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0'
+          multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0',
+        timestamp
       });
 
       const signedDeploy = await signDeploy(deploy, KEYS, activeAccount);
@@ -244,7 +251,8 @@ export const TransferPage = () => {
         memo: transferIdMemo,
         recipientPublicKeyHex: recipientPublicKey,
         senderPublicKeyHex: activeAccount.publicKey,
-        transferAmount: motesAmount
+        transferAmount: motesAmount,
+        timestamp
       });
 
       const signedDeploy = await signDeploy(deploy, KEYS, activeAccount);
@@ -256,6 +264,8 @@ export const TransferPage = () => {
   const beforeLedgerActionCb = async () => {
     setTransferStep(TransactionSteps.ConfirmWithLedger);
 
+    const timestamp = await getDateForDeploy(nodeUrl);
+
     if (activeAccount?.hardware === HardwareWalletType.Ledger) {
       if (isErc20Transfer && selectedToken?.contractPackageHash) {
         const deploy = makeCep18TransferDeploy({
@@ -265,7 +275,8 @@ export const TransferPage = () => {
           recipientPublicKeyHex: recipientPublicKey,
           senderPublicKeyHex: activeAccount.publicKey,
           transferAmount:
-            multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0'
+            multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0',
+          timestamp
         });
 
         dispatchToMainStore(
@@ -282,7 +293,8 @@ export const TransferPage = () => {
           memo: transferIdMemo,
           recipientPublicKeyHex: recipientPublicKey,
           senderPublicKeyHex: activeAccount.publicKey,
-          transferAmount: motesAmount
+          transferAmount: motesAmount,
+          timestamp
         });
 
         dispatchToMainStore(

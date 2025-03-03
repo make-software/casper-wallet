@@ -1,5 +1,7 @@
 import { Conversions, PrivateKey, PublicKey } from 'casper-js-sdk';
 
+import { getPrivateKeyHexFromSecretKey } from '@src/utils';
+
 export const signDeployForProviderResponse = (
   deployHash: Uint8Array,
   publicKeyHex: string,
@@ -7,7 +9,7 @@ export const signDeployForProviderResponse = (
 ) => {
   const publicKey = PublicKey.fromHex(publicKeyHex);
   const privateKey = PrivateKey.fromHex(
-    Conversions.base64to16(privateKeyBase64),
+    getPrivateKeyHexFromSecretKey(Conversions.base64to16(privateKeyBase64)),
     publicKey.cryptoAlg
   );
 

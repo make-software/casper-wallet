@@ -58,7 +58,11 @@ import {
   createErrorLocationState
 } from '@libs/layout';
 import { useFetchWalletBalance } from '@libs/services/balance-service';
-import { sendSignDeploy, signDeploy } from '@libs/services/deployer-service';
+import {
+  getDateForDeploy,
+  sendSignDeploy,
+  signDeploy
+} from '@libs/services/deployer-service';
 import {
   Button,
   HomePageTabsId,
@@ -159,13 +163,16 @@ export const StakesPage = () => {
         activeAccount.secretKey
       );
 
+      const timestamp = await getDateForDeploy(nodeUrl);
+
       const deploy = makeAuctionManagerDeploy({
         amount: motesAmount,
         chainName: networkNameToSdkNetworkNameMap[networkName],
         contractEntryPoint: stakeType,
         delegatorPublicKeyHex: activeAccount.publicKey,
         newValidatorPublicKeyHex: newValidatorPublicKey,
-        validatorPublicKeyHex: validatorPublicKey
+        validatorPublicKeyHex: validatorPublicKey,
+        timestamp
       });
 
       const signedDeploy = await signDeploy(deploy, KEYS, activeAccount);
@@ -222,13 +229,16 @@ export const StakesPage = () => {
     if (activeAccount) {
       const motesAmount = CSPRtoMotes(inputAmountCSPR);
 
+      const timestamp = await getDateForDeploy(nodeUrl);
+
       const deploy = makeAuctionManagerDeploy({
         amount: motesAmount,
         chainName: networkNameToSdkNetworkNameMap[networkName],
         contractEntryPoint: stakeType,
         delegatorPublicKeyHex: activeAccount.publicKey,
         newValidatorPublicKeyHex: newValidatorPublicKey,
-        validatorPublicKeyHex: validatorPublicKey
+        validatorPublicKeyHex: validatorPublicKey,
+        timestamp
       });
 
       dispatchToMainStore(
