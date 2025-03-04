@@ -21,5 +21,6 @@ module.exports = {
       lines: 100,
       statements: 100
     }
-  }
+  },
+  testPathIgnorePatterns: ['<rootDir>/e2e-tests/']
 };
