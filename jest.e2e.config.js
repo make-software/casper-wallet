@@ -12,5 +12,6 @@ module.exports = {
   modulePathIgnorePatterns: ['<rootDir>/.*/__mocks__', '<rootDir>/src'],
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['@testing-library/jest-dom'],
-  testTimeout: 1000 * 60
+  testTimeout: 1000 * 60,
+  testPathIgnorePatterns: ['<rootDir>/e2e-tests/']
 };
