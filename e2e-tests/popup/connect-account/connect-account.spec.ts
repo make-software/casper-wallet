@@ -6,7 +6,7 @@ import { popup, popupExpect } from '../../fixtures';
 popup.describe('Popup UI: connect account', () => {
   let connectAccountPage: Page;
 
-  popup.beforeEach(async ({ page, context, unlockVault }) => {
+  popup.beforeEach(async ({ page, context, unlockValutForSigning }) => {
     await page.goto(PLAYGROUND_URL);
 
     [connectAccountPage] = await Promise.all([
@@ -14,7 +14,7 @@ popup.describe('Popup UI: connect account', () => {
       page.getByRole('button', { name: 'Connect', exact: true }).click()
     ]);
 
-    await unlockVault(connectAccountPage);
+    await unlockValutForSigning(connectAccountPage);
   });
 
   popup(
@@ -42,6 +42,7 @@ popup.describe('Popup UI: connect account', () => {
         .click();
 
       await page.goto(`chrome-extension://${extensionId}/popup.html`);
+      await page.waitForLoadState('networkidle');
 
       await page.getByTestId('menu-open-icon').click();
       await page.getByText('Connected sites').click();

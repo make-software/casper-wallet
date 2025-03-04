@@ -15,7 +15,8 @@ popup.describe('Popup UI: ERC-20 transfer', () => {
             id: 1717761373590,
             result: {
               api_version: '1.5.6',
-              deploy_hash: 'deploy hash'
+              deploy_hash:
+                '23a86de2a614b81aed066dca9efd53086082f71fd18bbc51ec78d506f0845746'
             }
           })
         })

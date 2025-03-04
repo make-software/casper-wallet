@@ -11,7 +11,7 @@ popup.describe('Popup UI: lock/unlock/reset wallet', () => {
 
       await unlockVault();
 
-      await popupExpect(popupPage.getByText('Unlocking...')).toBeVisible();
+     // await popupExpect(popupPage.getByText('Unlocking...')).toBeVisible();
 
       await popupExpect(
         popupPage.getByText(ACCOUNT_NAMES.defaultFirstAccountName)

@@ -10,6 +10,7 @@ popup.describe('Popup UI: disconnect account', () => {
     'should click the disconnect button on dapp and disconnect all accounts from the site',
     async ({ page, extensionId }) => {
       await page.goto(PLAYGROUND_URL);
+      await page.waitForLoadState('networkidle');
 
       await page.getByRole('button', { name: 'Disconnect' }).click();
 
