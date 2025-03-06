@@ -52,23 +52,24 @@ export const HeaderNetworkSwitcher = () => {
     dispatchToMainStore(activeNetworkSettingChanged(NetworkSetting.Testnet));
   };
 
-  const changeActiveNetworkToDevnet = () => {
-    if (activeNetwork === NetworkSetting.Devnet) {
-      return;
-    }
+  // const changeActiveNetworkToDevnet = () => {
+  //   if (activeNetwork === NetworkSetting.Devnet) {
+  //     return;
+  //   }
+  //
+  //   dispatchToMainStore(activeNetworkSettingChanged(NetworkSetting.Devnet));
+  // };
 
-    dispatchToMainStore(activeNetworkSettingChanged(NetworkSetting.Devnet));
-  };
-
-  const changeActiveNetworkToIntegration = () => {
-    if (activeNetwork === NetworkSetting.Integration) {
-      return;
-    }
-
-    dispatchToMainStore(
-      activeNetworkSettingChanged(NetworkSetting.Integration)
-    );
-  };
+  // TODO add envs support
+  // const changeActiveNetworkToIntegration = () => {
+  //   if (activeNetwork === NetworkSetting.Integration) {
+  //     return;
+  //   }
+  //
+  //   dispatchToMainStore(
+  //     activeNetworkSettingChanged(NetworkSetting.Integration)
+  //   );
+  // };
 
   return (
     <Modal
@@ -119,50 +120,50 @@ export const HeaderNetworkSwitcher = () => {
               />
             )}
           </ModalContentRow>
-          <ModalContentRow
-            onClick={event => {
-              changeActiveNetworkToDevnet();
-              closeModal(event);
-            }}
-          >
-            <AlignedFlexRow gap={SpacingSize.Large}>
-              <SvgIcon
-                src="assets/icons/network.svg"
-                size={24}
-                color="contentWarning"
-              />
-              <Typography type="body">{NetworkSetting.Devnet}</Typography>
-            </AlignedFlexRow>
-            {activeNetwork === NetworkSetting.Devnet && (
-              <SvgIcon
-                src="assets/icons/tick.svg"
-                size={24}
-                color="contentAction"
-              />
-            )}
-          </ModalContentRow>
-          <ModalContentRow
-            onClick={event => {
-              changeActiveNetworkToIntegration();
-              closeModal(event);
-            }}
-          >
-            <AlignedFlexRow gap={SpacingSize.Large}>
-              <SvgIcon
-                src="assets/icons/network.svg"
-                size={24}
-                color="contentPositive"
-              />
-              <Typography type="body">{NetworkSetting.Integration}</Typography>
-            </AlignedFlexRow>
-            {activeNetwork === NetworkSetting.Integration && (
-              <SvgIcon
-                src="assets/icons/tick.svg"
-                size={24}
-                color="contentAction"
-              />
-            )}
-          </ModalContentRow>
+          {/*<ModalContentRow*/}
+          {/*  onClick={event => {*/}
+          {/*    changeActiveNetworkToDevnet();*/}
+          {/*    closeModal(event);*/}
+          {/*  }}*/}
+          {/*>*/}
+          {/*  <AlignedFlexRow gap={SpacingSize.Large}>*/}
+          {/*    <SvgIcon*/}
+          {/*      src="assets/icons/network.svg"*/}
+          {/*      size={24}*/}
+          {/*      color="contentWarning"*/}
+          {/*    />*/}
+          {/*    <Typography type="body">{NetworkSetting.Devnet}</Typography>*/}
+          {/*  </AlignedFlexRow>*/}
+          {/*  {activeNetwork === NetworkSetting.Devnet && (*/}
+          {/*    <SvgIcon*/}
+          {/*      src="assets/icons/tick.svg"*/}
+          {/*      size={24}*/}
+          {/*      color="contentAction"*/}
+          {/*    />*/}
+          {/*  )}*/}
+          {/*</ModalContentRow>*/}
+          {/*<ModalContentRow*/}
+          {/*  onClick={event => {*/}
+          {/*    changeActiveNetworkToIntegration();*/}
+          {/*    closeModal(event);*/}
+          {/*  }}*/}
+          {/*>*/}
+          {/*  <AlignedFlexRow gap={SpacingSize.Large}>*/}
+          {/*    <SvgIcon*/}
+          {/*      src="assets/icons/network.svg"*/}
+          {/*      size={24}*/}
+          {/*      color="contentPositive"*/}
+          {/*    />*/}
+          {/*    <Typography type="body">{NetworkSetting.Integration}</Typography>*/}
+          {/*  </AlignedFlexRow>*/}
+          {/*  {activeNetwork === NetworkSetting.Integration && (*/}
+          {/*    <SvgIcon*/}
+          {/*      src="assets/icons/tick.svg"*/}
+          {/*      size={24}*/}
+          {/*      color="contentAction"*/}
+          {/*    />*/}
+          {/*  )}*/}
+          {/*</ModalContentRow>*/}
         </ModalContentContainer>
       )}
       children={({ isOpen }) => (
