@@ -1,5 +1,7 @@
 import * as Yup from 'yup';
 import Big from 'big.js';
+import { CSPR_COIN } from 'casper-wallet-core/src/domain/constants/casperNetwork';
+import { formatTokenBalance } from 'casper-wallet-core/src/utils/common';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -319,7 +321,9 @@ export const usePaymentAmountRule = (csprBalance: string | undefined) => {
 export const useCSPRStakeAmountRule = (
   amountMotes: string | undefined,
   mode: AuctionManagerEntryPoint,
-  stakeAmountMotes: string
+  stakeAmountMotes: string,
+  validatorMinAmount: string,
+  validatorMaxAmount: string
 ) => {
   const { t } = useTranslation();
 
@@ -327,7 +331,7 @@ export const useCSPRStakeAmountRule = (
     switch (mode) {
       case AuctionManagerEntryPoint.delegate:
       case AuctionManagerEntryPoint.redelegate: {
-        return DELEGATION_MIN_AMOUNT_MOTES;
+        return validatorMinAmount;
       }
       case AuctionManagerEntryPoint.undelegate: {
         return '0';
@@ -433,13 +437,42 @@ export const useCSPRStakeAmountRule = (
                   'Your account balance is not high enough. Enter a smaller amount.'
                 )
               }
+    })
+    .test({
+      name: 'amountAboveValidatorMaxAmount',
+      test: csprAmountInputValue => {
+        if (csprAmountInputValue) {
+          switch (mode) {
+            case AuctionManagerEntryPoint.delegate:
+            case AuctionManagerEntryPoint.redelegate:
+              return Big(CSPRtoMotes(csprAmountInputValue)).lte(
+                validatorMaxAmount
+              );
+            default: {
+              return true;
+            }
+          }
+        }
+
+        return false;
+      },
+      message: {
+        header: t('You cannot delegate this amount'),
+        description: t(
+          `Delegation amount for this validator cannot be more than ${formatTokenBalance(
+            validatorMaxAmount,
+            CSPR_COIN.decimals
+          )} CSPR.`
+        )
+      }
     });
 };
 
 export const useValidatorPublicKeyRule = (
   stakeType: AuctionManagerEntryPoint,
   delegatorsNumber?: number,
-  hasDelegationToSelectedValidator?: boolean
+  hasDelegationToSelectedValidator?: boolean,
+  reservedSlots = 0
 ) => {
   const { t } = useTranslation();
 
@@ -463,18 +496,25 @@ export const useValidatorPublicKeyRule = (
           (delegatorsNumber === 0 || delegatorsNumber) &&
           !hasDelegationToSelectedValidator
         ) {
-          return delegatorsNumber < MAX_DELEGATORS;
+          return delegatorsNumber + reservedSlots < MAX_DELEGATORS;
         }
 
         return !!hasDelegationToSelectedValidator;
       },
-      message: t(
-        'This validator has reached the network limit for total delegators and therefore cannot be delegated to by new accounts. Please select another validator with fewer than 1200 total delegators'
-      )
+      message: {
+        header: t('This validator has max delegators'),
+        description: t(
+          'This validator has reached the network limit for total delegators and therefore cannot be delegated to by new accounts. Please select another validator with fewer than 1200 total delegators'
+        )
+      }
     });
 };
 
 export const useNewValidatorPublicKeyRule = (
+  inputAmountCspr: string,
+  minAmountForNewValidator: string,
+  maxAmountForNewValidator: string,
+  reservedSlotsForNewValidator: number,
   delegatorsNumber?: number,
   hasDelegationToSelectedNewValidator?: boolean
 ) => {
@@ -494,14 +534,47 @@ export const useNewValidatorPublicKeyRule = (
           (delegatorsNumber === 0 || delegatorsNumber) &&
           !hasDelegationToSelectedNewValidator
         ) {
-          return delegatorsNumber < MAX_DELEGATORS;
+          return (
+            delegatorsNumber + reservedSlotsForNewValidator < MAX_DELEGATORS
+          );
         }
 
         return !!hasDelegationToSelectedNewValidator;
       },
-      message: t(
-        'This validator has reached the network limit for total delegators and therefore cannot be delegated to by new accounts. Please select another validator with fewer than 1200 total delegators'
-      )
+      message: {
+        header: t('This validator has max delegators'),
+        description: t(
+          'This validator has reached the network limit for total delegators and therefore cannot be delegated to by new accounts. Please select another validator with fewer than 1200 total delegators'
+        )
+      }
+    })
+    .test({
+      name: 'amountBelowMinTransfer',
+      test: () =>
+        Big(CSPRtoMotes(inputAmountCspr || '0')).gte(minAmountForNewValidator),
+      message: {
+        header: t('You can’t redelegate this amount'),
+        description: t(
+          `The minimum required redelegation amount is ${formatTokenBalance(
+            minAmountForNewValidator,
+            CSPR_COIN.decimals
+          )} CSPR.`
+        )
+      }
+    })
+    .test({
+      name: 'amountAboveValidatorMaxAmount',
+      test: () =>
+        Big(CSPRtoMotes(inputAmountCspr) || '0').lte(maxAmountForNewValidator),
+      message: {
+        header: t('You cannot delegate this amount'),
+        description: t(
+          `Delegation amount for this validator cannot be more than ${formatTokenBalance(
+            maxAmountForNewValidator,
+            CSPR_COIN.decimals
+          )} CSPR.`
+        )
+      }
     });
 };
 

@@ -51,7 +51,7 @@
     }
   },
   {
-    "id": 7,
+    "id": 4,
     "priority": 1,
     "action": {
       "type": "modifyHeaders",
@@ -68,7 +68,7 @@
     }
   },
   {
-    "id": 4,
+    "id": 5,
     "priority": 1,
     "action": {
       "type": "modifyHeaders",
@@ -85,7 +85,7 @@
     }
   },
   {
-    "id": 5,
+    "id": 6,
     "priority": 1,
     "action": {
       "type": "modifyHeaders",
@@ -102,7 +102,7 @@
     }
   },
   {
-    "id": 6,
+    "id": 7,
     "priority": 1,
     "action": {
       "type": "modifyHeaders",
@@ -116,6 +116,57 @@
     },
     "condition": {
       "urlFilter": "https://cspr-wallet-api.dev.make.services"
+    }
+  },
+  {
+    "id": 8,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://casperwallet.io"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor"
+    }
+  },
+  {
+    "id": 9,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://casperwallet.io"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "https://api.integration.casperwallet.io"
+    }
+  },
+  {
+    "id": 10,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://casperwallet.io"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "https://node.integration.cspr.cloud/"
     }
   }
 ]

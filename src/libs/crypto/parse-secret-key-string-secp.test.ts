@@ -1,5 +1,7 @@
 import { KeyAlgorithm, PrivateKey } from 'casper-js-sdk';
 
+import { getPrivateKeyHexFromSecretKey } from '@src/utils';
+
 import { AsymmetricKeys } from './create-asymmetric-key';
 
 describe('parseSecretKeyStringSecp', () => {
@@ -24,7 +26,10 @@ function parseSecretKeyStringSecp(secretKeyHex: string) {
   let keyPair: AsymmetricKeys;
 
   try {
-    const privateKey = PrivateKey.fromHex(secretKeyHex, KeyAlgorithm.SECP256K1);
+    const privateKey = PrivateKey.fromHex(
+      getPrivateKeyHexFromSecretKey(secretKeyHex),
+      KeyAlgorithm.SECP256K1
+    );
 
     const publicKey = privateKey.publicKey;
 

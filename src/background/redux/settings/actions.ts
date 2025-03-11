@@ -19,3 +19,7 @@ export const themeModeSettingChanged = createAction(
 )<ThemeMode>();
 
 export const vaultSettingsReseted = createAction('VAULT_SETTINGS_RESETED')();
+
+export const casperNetworkApiVersionChanged = createAction(
+  'CASPER2_NETWORK_CHANGED'
+)<string>();

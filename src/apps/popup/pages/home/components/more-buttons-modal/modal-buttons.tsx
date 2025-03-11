@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { NetworkSetting } from '@src/constants';
+import { isSafariBuild } from '@src/utils';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
@@ -29,7 +30,7 @@ export const ModalButtons = () => {
 
   return (
     <FlexColumn>
-      {network === NetworkSetting.Mainnet && (
+      {network === NetworkSetting.Mainnet && !isSafariBuild && (
         <ButtonContainer
           gap={SpacingSize.Large}
           onClick={() => navigate(RouterPath.BuyCSPR)}

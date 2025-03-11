@@ -11,6 +11,7 @@ export enum ThemeMode {
 export interface SettingsState {
   activeTimeoutDuration: TimeoutDurationSetting;
   activeNetwork: NetworkSetting;
+  casperNetworkApiVersion: string;
   isDarkMode: boolean;
   themeMode: ThemeMode;
 }

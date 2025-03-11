@@ -1,5 +1,8 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+
+import { selectIsCasper2Network } from '@background/redux/settings/selectors';
 
 import {
   ContentContainer,
@@ -18,6 +21,7 @@ interface ISuccessViewProps {
 
 export const SuccessView: React.FC<ISuccessViewProps> = ({ onClose }) => {
   const { t } = useTranslation();
+  const isCasper2Network = useSelector(selectIsCasper2Network);
 
   return (
     <PopupLayout
@@ -34,7 +38,9 @@ export const SuccessView: React.FC<ISuccessViewProps> = ({ onClose }) => {
             />
             <VerticalSpaceContainer top={SpacingSize.XL}>
               <Typography type="header">
-                <Trans t={t}>Deploy successfully sent</Trans>
+                <Trans t={t}>{`${
+                  isCasper2Network ? 'Transaction' : 'Deploy'
+                } successfully sent`}</Trans>
               </Typography>
             </VerticalSpaceContainer>
             <VerticalSpaceContainer top={SpacingSize.Medium}>

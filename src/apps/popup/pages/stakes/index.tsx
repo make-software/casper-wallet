@@ -1,4 +1,8 @@
-import { Deploy, makeAuctionManagerDeploy } from 'casper-js-sdk';
+import {
+  Deploy,
+  makeAuctionManagerDeploy,
+  makeAuctionManagerTransaction
+} from 'casper-js-sdk';
 import { formatNumber } from 'casper-wallet-core';
 import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import React, { useState } from 'react';
@@ -32,7 +36,11 @@ import {
   selectAskForReviewAfter,
   selectRatedInStore
 } from '@background/redux/rate-app/selectors';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import {
+  selectApiConfigBasedOnActiveNetwork,
+  selectCasperNetworkApiVersion,
+  selectIsCasper2Network
+} from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
   selectIsActiveAccountFromLedger,
@@ -58,7 +66,11 @@ import {
   createErrorLocationState
 } from '@libs/layout';
 import { useFetchWalletBalance } from '@libs/services/balance-service';
-import { sendSignDeploy, signDeploy } from '@libs/services/deployer-service';
+import {
+  getDateForDeploy,
+  sendSignedTx,
+  signTx
+} from '@libs/services/deployer-service';
 import {
   Button,
   HomePageTabsId,
@@ -98,6 +110,8 @@ export const StakesPage = () => {
   const [validator, setValidator] = useState<ValidatorDto | null>(null);
   const [newValidator, setNewValidator] = useState<ValidatorDto | null>(null);
   const [stakeAmountMotes, setStakeAmountMotes] = useState('');
+  const isCasper2Network = useSelector(selectIsCasper2Network);
+  const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isActiveAccountFromLedger = useSelector(
@@ -128,8 +142,9 @@ export const StakesPage = () => {
     accountBalance.liquidBalance,
     stakeType,
     stakeAmountMotes,
-    validator?.delegatorsNumber,
-    newValidator?.delegatorsNumber,
+    validator,
+    newValidator,
+    inputAmountCSPR,
     hasDelegationToSelectedValidator,
     hasDelegationToSelectedNewValidator
   );
@@ -159,41 +174,25 @@ export const StakesPage = () => {
         activeAccount.secretKey
       );
 
-      const deploy = makeAuctionManagerDeploy({
+      const timestamp = await getDateForDeploy(nodeUrl);
+
+      const tx = makeAuctionManagerTransaction({
         amount: motesAmount,
         chainName: networkNameToSdkNetworkNameMap[networkName],
         contractEntryPoint: stakeType,
         delegatorPublicKeyHex: activeAccount.publicKey,
         newValidatorPublicKeyHex: newValidatorPublicKey,
-        validatorPublicKeyHex: validatorPublicKey
+        validatorPublicKeyHex: validatorPublicKey,
+        timestamp,
+        casperNetworkApiVersion
       });
 
-      const signedDeploy = await signDeploy(deploy, KEYS, activeAccount);
+      const signedTx = await signTx(tx, KEYS, activeAccount);
 
-      sendSignDeploy(signedDeploy, nodeUrl)
-        .then(resp => {
-          if ('result' in resp) {
-            dispatchToMainStore(
-              accountPendingDeployHashesChanged(resp.result.deploy_hash)
-            );
-
-            setStakeStep(StakeSteps.Success);
-          } else {
-            navigate(
-              ErrorPath,
-              createErrorLocationState({
-                errorHeaderText:
-                  resp.error.message || t('Something went wrong'),
-                errorContentText:
-                  resp.error.data ||
-                  t(
-                    'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                  ),
-                errorPrimaryButtonLabel: t('Close'),
-                errorRedirectPath: RouterPath.Home
-              })
-            );
-          }
+      sendSignedTx(signedTx, nodeUrl, isCasper2Network)
+        .then(hash => {
+          dispatchToMainStore(accountPendingDeployHashesChanged(hash));
+          setStakeStep(StakeSteps.Success);
         })
         .catch(error => {
           console.error(error, 'staking request error');
@@ -222,13 +221,16 @@ export const StakesPage = () => {
     if (activeAccount) {
       const motesAmount = CSPRtoMotes(inputAmountCSPR);
 
+      const timestamp = await getDateForDeploy(nodeUrl);
+
       const deploy = makeAuctionManagerDeploy({
         amount: motesAmount,
         chainName: networkNameToSdkNetworkNameMap[networkName],
         contractEntryPoint: stakeType,
         delegatorPublicKeyHex: activeAccount.publicKey,
         newValidatorPublicKeyHex: newValidatorPublicKey,
-        validatorPublicKeyHex: validatorPublicKey
+        validatorPublicKeyHex: validatorPublicKey,
+        timestamp
       });
 
       dispatchToMainStore(

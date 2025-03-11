@@ -91,6 +91,8 @@ export const ConfirmStep = ({
     <>
       <VerticalSpaceContainer top={SpacingSize.XL}>
         <ValidatorPlate
+          minAmount={validator.minAmount}
+          reservedSlots={validator.reservedSlots}
           publicKey={validator?.publicKey}
           fee={validator.fee}
           name={validator?.name}
@@ -107,6 +109,8 @@ export const ConfirmStep = ({
         {newValidator && (
           <VerticalSpaceContainer top={SpacingSize.XL}>
             <ValidatorPlate
+              minAmount={newValidator.minAmount}
+              reservedSlots={newValidator.reservedSlots}
               publicKey={newValidator?.publicKey}
               fee={newValidator.fee}
               name={newValidator?.name}

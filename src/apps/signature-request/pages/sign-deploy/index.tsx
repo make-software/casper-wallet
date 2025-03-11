@@ -3,13 +3,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import { getSigningAccount } from '@src/utils';
+import { getSigningAccount, isEqualCaseInsensitive } from '@src/utils';
 
 import { SignDeployContent } from '@signature-request/pages/sign-deploy/sign-deploy-content';
-import { SignTxContent } from '@signature-request/pages/sign-deploy/sign-tx-content';
 import { RouterPath } from '@signature-request/router';
 
 import { closeCurrentWindow } from '@background/close-current-window';
+import { selectIsCasper2Network } from '@background/redux/settings/selectors';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
   selectDeploysJsonById,
@@ -42,6 +42,7 @@ import {
 
 export function SignDeployPage() {
   const { t } = useTranslation();
+  const isCasper2Network = useSelector(selectIsCasper2Network);
 
   const [transaction, setTransaction] = useState<undefined | Transaction>(
     undefined
@@ -130,6 +131,27 @@ export function SignDeployPage() {
     sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
     throw error;
   }
+
+  useEffect(() => {
+    const isAlreadySigned = transaction?.approvals.some(apr =>
+      isEqualCaseInsensitive(apr.signer.toHex(), signingAccount.publicKey)
+    );
+
+    if (isAlreadySigned) {
+      const error = Error(
+        `The ${
+          isCasper2Network ? 'Transaction' : 'Deploy'
+        } has already been signed with this account`
+      );
+      sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
+      throw error;
+    }
+  }, [
+    isCasper2Network,
+    requestId,
+    signingAccount.publicKey,
+    transaction?.approvals
+  ]);
 
   const handleSign = useCallback(async () => {
     let signature: Uint8Array | null = null;
@@ -276,16 +298,9 @@ export function SignDeployPage() {
           <LedgerEventView event={ledgerEventStatusToRender} />
         ) : (
           <>
-            {transaction?.getDeploy() && (
+            {transaction && (
               <SignDeployContent
-                deploy={transaction?.getDeploy()}
-                signingPublicKeyHex={signingAccount.publicKey}
-              />
-            )}
-            {transaction?.getTransactionV1() && (
-              <SignTxContent
-                tx={transaction?.getTransactionV1()}
-                txJson={deployJsonById[requestId]}
+                tx={transaction}
                 signingPublicKeyHex={signingAccount.publicKey}
               />
             )}

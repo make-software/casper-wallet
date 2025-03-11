@@ -1,7 +1,10 @@
 import {
   Deploy,
+  Transaction,
   makeCep18TransferDeploy,
-  makeCsprTransferDeploy
+  makeCep18TransferTransaction,
+  makeCsprTransferDeploy,
+  makeCsprTransferTransaction
 } from 'casper-js-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -26,7 +29,11 @@ import {
   selectRatedInStore
 } from '@background/redux/rate-app/selectors';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import {
+  selectApiConfigBasedOnActiveNetwork,
+  selectCasperNetworkApiVersion,
+  selectIsCasper2Network
+} from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
   selectIsActiveAccountFromLedger,
@@ -50,7 +57,11 @@ import {
   VerticalSpaceContainer,
   createErrorLocationState
 } from '@libs/layout';
-import { sendSignDeploy, signDeploy } from '@libs/services/deployer-service';
+import {
+  getDateForDeploy,
+  sendSignedTx,
+  signTx
+} from '@libs/services/deployer-service';
 import { HardwareWalletType } from '@libs/types/account';
 import {
   Button,
@@ -91,6 +102,8 @@ export const TransferPage = () => {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
   const location = useTypedLocation();
+  const isCasper2Network = useSelector(selectIsCasper2Network);
+  const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
 
   const [isErc20Transfer, setIsErc20Transfer] = useState<boolean>(false);
   const [selectedToken, setSelectedToken] = useState<TokenType | null>();
@@ -161,32 +174,12 @@ export const TransferPage = () => {
     isAdditionalTextVisible
   } = useSubmitButton(transferStep === TransactionSteps.Confirm);
 
-  const sendDeploy = (signDeploy: Deploy) => {
-    sendSignDeploy(signDeploy, nodeUrl)
-      .then(resp => {
+  const sendTx = (tx: Transaction) => {
+    sendSignedTx(tx, nodeUrl, isCasper2Network)
+      .then(hash => {
         dispatchToMainStore(recipientPublicKeyAdded(recipientPublicKey));
-
-        if ('result' in resp) {
-          dispatchToMainStore(
-            accountPendingDeployHashesChanged(resp.result.deploy_hash)
-          );
-
-          setTransferStep(TransactionSteps.Success);
-        } else {
-          navigate(
-            ErrorPath,
-            createErrorLocationState({
-              errorHeaderText: resp.error.message || t('Something went wrong'),
-              errorContentText:
-                resp.error.data ||
-                t(
-                  'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                ),
-              errorPrimaryButtonLabel: t('Close'),
-              errorRedirectPath: RouterPath.Home
-            })
-          );
-        }
+        dispatchToMainStore(accountPendingDeployHashesChanged(hash));
+        setTransferStep(TransactionSteps.Success);
       })
       .catch(error => {
         console.error(error, 'transfer request error');
@@ -220,41 +213,47 @@ export const TransferPage = () => {
       activeAccount.secretKey
     );
 
+    const timestamp = await getDateForDeploy(nodeUrl);
+
     if (isErc20Transfer && selectedToken?.contractPackageHash) {
       // CEP18 transfer
-      const deploy = makeCep18TransferDeploy({
+      const tx = makeCep18TransferTransaction({
         chainName: networkNameToSdkNetworkNameMap[networkName],
         contractPackageHash: selectedToken.contractPackageHash,
         paymentAmount: CSPRtoMotes(paymentAmount),
         recipientPublicKeyHex: recipientPublicKey,
         senderPublicKeyHex: activeAccount.publicKey,
         transferAmount:
-          multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0'
+          multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0',
+        timestamp,
+        casperNetworkApiVersion
       });
 
-      const signedDeploy = await signDeploy(deploy, KEYS, activeAccount);
+      const signedTx = await signTx(tx, KEYS, activeAccount);
 
-      sendDeploy(signedDeploy);
+      sendTx(signedTx);
     } else {
       // CSPR transfer
-      const motesAmount = CSPRtoMotes(amount);
-
-      const deploy = makeCsprTransferDeploy({
+      const tx = makeCsprTransferTransaction({
         chainName: networkNameToSdkNetworkNameMap[networkName],
         memo: transferIdMemo,
         recipientPublicKeyHex: recipientPublicKey,
         senderPublicKeyHex: activeAccount.publicKey,
-        transferAmount: motesAmount
+        transferAmount: CSPRtoMotes(amount),
+        timestamp,
+        casperNetworkApiVersion
       });
 
-      const signedDeploy = await signDeploy(deploy, KEYS, activeAccount);
+      const signedTx = await signTx(tx, KEYS, activeAccount);
 
-      sendDeploy(signedDeploy);
+      sendTx(signedTx);
     }
   };
 
   const beforeLedgerActionCb = async () => {
     setTransferStep(TransactionSteps.ConfirmWithLedger);
+
+    const timestamp = await getDateForDeploy(nodeUrl);
 
     if (activeAccount?.hardware === HardwareWalletType.Ledger) {
       if (isErc20Transfer && selectedToken?.contractPackageHash) {
@@ -265,7 +264,8 @@ export const TransferPage = () => {
           recipientPublicKeyHex: recipientPublicKey,
           senderPublicKeyHex: activeAccount.publicKey,
           transferAmount:
-            multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0'
+            multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0',
+          timestamp
         });
 
         dispatchToMainStore(
@@ -282,7 +282,8 @@ export const TransferPage = () => {
           memo: transferIdMemo,
           recipientPublicKeyHex: recipientPublicKey,
           senderPublicKeyHex: activeAccount.publicKey,
-          transferAmount: motesAmount
+          transferAmount: motesAmount,
+          timestamp
         });
 
         dispatchToMainStore(

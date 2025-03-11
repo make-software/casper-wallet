@@ -101,6 +101,8 @@ export const RedelegateValidatorDropdownInput = ({
   return showValidatorPlate && validator ? (
     <VerticalSpaceContainer top={SpacingSize.XL}>
       <ValidatorPlate
+        minAmount={validator.minAmount}
+        reservedSlots={validator.reservedSlots}
         publicKey={validator.publicKey}
         fee={validator.fee}
         name={validator?.name}

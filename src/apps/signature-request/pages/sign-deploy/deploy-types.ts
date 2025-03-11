@@ -6,7 +6,8 @@ export enum DeployType {
   TransferCall = 'Transfer Call',
   ContractCall = 'Contract Call',
   ModuleBytes = 'Module Bytes',
-  Unknown = 'Unknown'
+  Unknown = 'Unknown',
+  AuctionNative = 'Auction Native'
 }
 
 export type SignatureRequestFields = {
@@ -20,6 +21,7 @@ export type SignatureRequestFields = {
   entryPoint?: string;
   contractHash?: string;
   contractName?: string;
+  txHash?: string;
 };
 
 export type SignatureRequestArguments = {

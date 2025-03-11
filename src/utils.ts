@@ -1,7 +1,6 @@
 import Big from 'big.js';
 import { KeyAlgorithm, PrivateKey, PublicKey } from 'casper-js-sdk';
 import { Maybe } from 'casper-wallet-core/src/typings/common';
-import { runtime } from 'webextension-polyfill';
 
 import { Browser } from '@src/constants';
 
@@ -92,6 +91,11 @@ export const isValidAccountHash = (
   return validHashRegExp.test(accountHash.trim());
 };
 
+/** It's for old accounts that possible can have mixed private and public keys in secretKey */
+export const getPrivateKeyHexFromSecretKey = (secretKeyHex: string) => {
+  return secretKeyHex.substring(0, 64);
+};
+
 /*
  * This function checks if the provided secretKey is a valid hash key.
  * Firstly, it checks if the secretKey is not an empty string.
@@ -111,7 +115,10 @@ export const isValidSecretKeyHash = (secretKey: string) => {
   }
 
   try {
-    PrivateKey.fromHex(secretKey, KeyAlgorithm.SECP256K1);
+    PrivateKey.fromHex(
+      getPrivateKeyHexFromSecretKey(secretKey),
+      KeyAlgorithm.SECP256K1
+    );
 
     return true;
   } catch (error) {
@@ -123,10 +130,6 @@ export enum NFTTokenStandard {
   CEP47 = 'CEP47',
   CEP78 = 'CEP78'
 }
-
-export const isSafariExtension = runtime.id.startsWith(
-  'software.make.Casper-Wallet.Extension'
-);
 
 export const getImageProxyUrl = (
   url: string | undefined,
@@ -173,7 +176,7 @@ export const setCSPForSafari = () => {
       meta.setAttribute('http-equiv', 'Content-Security-Policy');
       meta.setAttribute(
         'content',
-        `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://cspr-wallet-api-condor.dev.make.services/ https://onramp-api.cspr.click/api/ https://cspr-wallet-api.dev.make.services/ https://cspr-wallet-api-condor.dev.make.services/`
+        `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://cspr-wallet-api-condor.dev.make.services/ https://api.integration.casperwallet.io/ https://node.integration.cspr.cloud/ https://onramp-api.cspr.click/api/ https://cspr-wallet-api.dev.make.services/ https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/ https://cspr-wallet-api-condor.dev.make.services/`
       );
 
       document.getElementsByTagName('head')[0].appendChild(meta);

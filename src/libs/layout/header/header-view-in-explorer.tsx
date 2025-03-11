@@ -9,7 +9,10 @@ import {
   getContractNftUrl
 } from '@src/constants';
 
-import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
+import {
+  selectApiConfigBasedOnActiveNetwork,
+  selectIsCasper2Network
+} from '@background/redux/settings/selectors';
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 
 import { useCasperToken } from '@hooks/use-casper-token';
@@ -44,13 +47,14 @@ export function HeaderViewInExplorer({
 
   const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const activeAccount = useSelector(selectVaultActiveAccount);
+  const isCasper2Network = useSelector(selectIsCasper2Network);
 
   const casperToken = useCasperToken();
 
   useEffect(() => {
     if (!tokenName && deployHash) {
       setHrefToDeployOnCasperLive(
-        getBlockExplorerDeployUrl(casperLiveUrl, deployHash)
+        getBlockExplorerDeployUrl(casperLiveUrl, deployHash, isCasper2Network)
       );
     }
 

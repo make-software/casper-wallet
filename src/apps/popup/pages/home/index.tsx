@@ -4,11 +4,13 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { HomePageTabName, NetworkSetting } from '@src/constants';
+import { isSafariBuild } from '@src/utils';
 
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import {
-  selectActiveNetworkSetting, // selectShowCSPRNamePromotion,
+  selectActiveNetworkSetting,
+  selectIsCasper2Network,
   selectVaultActiveAccount
 } from '@background/redux/root-selector';
 
@@ -54,6 +56,7 @@ export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
   const location = useTypedLocation();
+  const isCasper2Network = useSelector(selectIsCasper2Network);
 
   const state = location.state;
 
@@ -78,7 +81,7 @@ export function HomePageContent() {
           <Container>
             <AccountBalance />
             <ButtonsContainer gap={SpacingSize.XXXL}>
-              {network === NetworkSetting.Mainnet && (
+              {network === NetworkSetting.Mainnet && !isSafariBuild && (
                 <ButtonContainer
                   gap={SpacingSize.Small}
                   onClick={() => navigate(RouterPath.BuyCSPR)}
@@ -121,7 +124,13 @@ export function HomePageContent() {
           <Tab tabName={HomePageTabName.NFTs}>
             <NftList />
           </Tab>
-          <Tab tabName={HomePageTabName.Deploys}>
+          <Tab
+            tabName={
+              isCasper2Network
+                ? HomePageTabName.Transactions
+                : HomePageTabName.Deploys
+            }
+          >
             <DeploysList />
           </Tab>
         </Tabs>

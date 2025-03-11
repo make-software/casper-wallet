@@ -1,42 +1,28 @@
-import { convertBytesToHex } from '@libs/crypto/utils';
+import { Transaction } from 'casper-js-sdk';
 
-import { CasperDeploy } from './deploy-types';
 import {
-  getContractHash,
-  getContractName,
-  getDeployArgs,
-  getDeployPayment,
-  getDeployType,
-  getEntryPoint
-} from './deploy-utils';
+  getTxArgs,
+  getTxContractHash,
+  getTxContractName,
+  getTxEntryPoint,
+  getTxPayment,
+  getTxType
+} from './utils';
 
-export function deriveDeployInfoFromDeployRaw(deploy: CasperDeploy) {
-  const {
-    header: { account, chainName, bodyHash, timestamp, gasPrice }
-  } = deploy;
-
-  const payment = getDeployPayment(deploy);
-  const deployType = getDeployType(deploy);
-  const deployArgs = getDeployArgs(deploy);
-  const entryPoint = getEntryPoint(deploy);
-  const contractHashBytes = getContractHash(deploy);
-  const contractName = getContractName(deploy);
-  const contractHash = contractHashBytes
-    ? convertBytesToHex(contractHashBytes.hash.toBytes())
-    : undefined;
-
+export function deriveDeployInfoFromDeployRaw(tx: Transaction) {
   return {
-    account: account?.toHex(false) ?? '',
-    deployHash: deploy.hash.toHex(),
-    bodyHash: bodyHash?.toHex(),
-    gasPrice: gasPrice.toString(),
-    timestamp: timestamp.toMilliseconds().toString(),
-    contractHash,
-    contractName,
-    chainName,
-    deployType,
-    payment,
-    entryPoint,
-    deployArgs
+    account:
+      tx.initiatorAddr.publicKey?.toHex() ??
+      tx.initiatorAddr.accountHash?.toHex() ??
+      '',
+    deployHash: tx.hash.toHex(),
+    timestamp: tx.timestamp.toMilliseconds().toString(),
+    chainName: tx.chainName,
+    payment: getTxPayment(tx),
+    deployType: getTxType(tx),
+    deployArgs: getTxArgs(tx),
+    contractHash: getTxContractHash(tx),
+    contractName: getTxContractName(tx),
+    entryPoint: getTxEntryPoint(tx)
   };
 }

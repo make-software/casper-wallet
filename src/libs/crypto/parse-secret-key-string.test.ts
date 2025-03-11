@@ -1,6 +1,8 @@
 import { Conversions, KeyAlgorithm, PrivateKey } from 'casper-js-sdk';
 import fs from 'fs';
 
+import { getPrivateKeyHexFromSecretKey } from '@src/utils';
+
 import { AsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 
 import { parseSecretKeyString } from './parse-secret-key-string';
@@ -59,7 +61,7 @@ function getKeyPairFromSecretKeyBase64(
       {
         const secretKey = Conversions.base64to16(secretKeyBase64);
         const privateKey = PrivateKey.fromHex(
-          secretKey,
+          getPrivateKeyHexFromSecretKey(secretKey),
           KeyAlgorithm.SECP256K1
         );
         const publicKey = privateKey.publicKey;

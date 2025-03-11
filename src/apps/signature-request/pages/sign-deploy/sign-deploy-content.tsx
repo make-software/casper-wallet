@@ -1,6 +1,10 @@
+import { Transaction } from 'casper-js-sdk';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+
+import { selectIsCasper2Network } from '@background/redux/settings/selectors';
 
 import {
   ContentContainer,
@@ -12,14 +16,13 @@ import {
 import { Accordion, List, SvgIcon, Typography } from '@libs/ui/components';
 
 import {
-  CasperDeploy,
   ParsedValueType,
   SignatureRequestFields,
   SignatureRequestKeys
 } from './deploy-types';
-import { getDeployParsedValue } from './deploy-utils';
 import { DeployValue } from './deploy-value';
 import { deriveDeployInfoFromDeployRaw } from './derive-deploy-info-from-deploy-raw';
+import { getParsedArgValue } from './utils';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
   margin: 16px;
@@ -45,24 +48,26 @@ const JsonBlock = styled.textarea`
 `;
 
 export interface SignDeployContentProps {
-  deploy?: CasperDeploy;
+  tx?: Transaction;
   signingPublicKeyHex: string;
 }
 
 export function SignDeployContent({
-  deploy,
+  tx,
   signingPublicKeyHex
 }: SignDeployContentProps) {
   const { t } = useTranslation();
+  const isCasper2 = useSelector(selectIsCasper2Network);
 
-  if (deploy == null) {
+  if (!tx) {
     return null;
   }
 
   const LABEL_DICT: Record<SignatureRequestKeys, string> = {
     signingKey: t('Signing key'),
     account: t('Account'),
-    deployHash: t('Deploy hash'),
+    deployHash: t(isCasper2 ? 'Transaction hash' : 'Deploy hash'),
+    txHash: t('Transaction hash'),
     delegator: t('Delegator'),
     validator: t('Validator'),
     new_validator: t('New validator'),
@@ -71,7 +76,7 @@ export function SignDeployContent({
     transferId: t('Transfer ID'),
     transactionFee: t('Transaction fee'),
     timestamp: t('Timestamp'),
-    deployType: t('Deploy type'),
+    deployType: t(isCasper2 ? 'Transaction type' : 'Deploy type'),
     chainName: t('Chain name'),
     recipientKey: t('Recipient (Key)'),
     recipientHash: t('Recipient (Hash)'),
@@ -81,7 +86,7 @@ export function SignDeployContent({
     contractName: t('Contract name')
   };
 
-  const deployInfo = deriveDeployInfoFromDeployRaw(deploy);
+  const deployInfo = deriveDeployInfoFromDeployRaw(tx);
 
   let signatureRequest: SignatureRequestFields = {
     signingKey: signingPublicKeyHex,
@@ -125,6 +130,8 @@ export function SignDeployContent({
         return 'Contract arguments';
       case 'Module Bytes':
         return 'Session arguments';
+      case 'Auction Native':
+        return 'Auction Native arguments';
       default:
         return 'Transfer Data';
     }
@@ -162,7 +169,7 @@ export function SignDeployContent({
                     LABEL_DICT[key as keyof typeof signatureRequest] || key;
 
                   if (typeof value !== 'string') {
-                    const { parsedValue, type } = getDeployParsedValue(value);
+                    const { parsedValue, type } = getParsedArgValue(value);
 
                     if (type === ParsedValueType.Json) {
                       return (
