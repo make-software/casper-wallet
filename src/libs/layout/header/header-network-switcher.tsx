@@ -11,6 +11,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { AlignedFlexRow, SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
 import { HeaderBackgroundContainer } from '@libs/layout/header/components/header-background-container';
 import { Modal, SvgIcon, Typography } from '@libs/ui/components';
+import { Color } from '@libs/ui/utils';
 
 const ModalContentContainer = styled.div`
   padding: 8px;
@@ -25,6 +26,13 @@ const ModalContentRow = styled(SpaceBetweenFlexRow)`
     border-radius: ${({ theme }) => theme.borderRadius.base}px;
   }
 `;
+
+const NetworkIconColor: Record<NetworkSetting, Color> = {
+  Mainnet: 'contentLightRed',
+  Testnet: 'contentLightBlue',
+  Devnet: 'contentWarning',
+  Integration: 'contentPositive'
+};
 
 export const HeaderNetworkSwitcher = () => {
   const activeNetwork = useSelector(selectActiveNetworkSetting);
@@ -43,6 +51,25 @@ export const HeaderNetworkSwitcher = () => {
 
     dispatchToMainStore(activeNetworkSettingChanged(NetworkSetting.Testnet));
   };
+
+  // const changeActiveNetworkToDevnet = () => {
+  //   if (activeNetwork === NetworkSetting.Devnet) {
+  //     return;
+  //   }
+  //
+  //   dispatchToMainStore(activeNetworkSettingChanged(NetworkSetting.Devnet));
+  // };
+
+  // TODO add envs support
+  // const changeActiveNetworkToIntegration = () => {
+  //   if (activeNetwork === NetworkSetting.Integration) {
+  //     return;
+  //   }
+  //
+  //   dispatchToMainStore(
+  //     activeNetworkSettingChanged(NetworkSetting.Integration)
+  //   );
+  // };
 
   return (
     <Modal
@@ -93,6 +120,50 @@ export const HeaderNetworkSwitcher = () => {
               />
             )}
           </ModalContentRow>
+          {/*<ModalContentRow*/}
+          {/*  onClick={event => {*/}
+          {/*    changeActiveNetworkToDevnet();*/}
+          {/*    closeModal(event);*/}
+          {/*  }}*/}
+          {/*>*/}
+          {/*  <AlignedFlexRow gap={SpacingSize.Large}>*/}
+          {/*    <SvgIcon*/}
+          {/*      src="assets/icons/network.svg"*/}
+          {/*      size={24}*/}
+          {/*      color="contentWarning"*/}
+          {/*    />*/}
+          {/*    <Typography type="body">{NetworkSetting.Devnet}</Typography>*/}
+          {/*  </AlignedFlexRow>*/}
+          {/*  {activeNetwork === NetworkSetting.Devnet && (*/}
+          {/*    <SvgIcon*/}
+          {/*      src="assets/icons/tick.svg"*/}
+          {/*      size={24}*/}
+          {/*      color="contentAction"*/}
+          {/*    />*/}
+          {/*  )}*/}
+          {/*</ModalContentRow>*/}
+          {/*<ModalContentRow*/}
+          {/*  onClick={event => {*/}
+          {/*    changeActiveNetworkToIntegration();*/}
+          {/*    closeModal(event);*/}
+          {/*  }}*/}
+          {/*>*/}
+          {/*  <AlignedFlexRow gap={SpacingSize.Large}>*/}
+          {/*    <SvgIcon*/}
+          {/*      src="assets/icons/network.svg"*/}
+          {/*      size={24}*/}
+          {/*      color="contentPositive"*/}
+          {/*    />*/}
+          {/*    <Typography type="body">{NetworkSetting.Integration}</Typography>*/}
+          {/*  </AlignedFlexRow>*/}
+          {/*  {activeNetwork === NetworkSetting.Integration && (*/}
+          {/*    <SvgIcon*/}
+          {/*      src="assets/icons/tick.svg"*/}
+          {/*      size={24}*/}
+          {/*      color="contentAction"*/}
+          {/*    />*/}
+          {/*  )}*/}
+          {/*</ModalContentRow>*/}
         </ModalContentContainer>
       )}
       children={({ isOpen }) => (
@@ -101,11 +172,7 @@ export const HeaderNetworkSwitcher = () => {
             src="assets/icons/network.svg"
             size={24}
             dataTestId="network-switcher"
-            color={
-              activeNetwork === NetworkSetting.Testnet
-                ? 'contentLightBlue'
-                : 'contentLightRed'
-            }
+            color={NetworkIconColor[activeNetwork]}
           />
         </HeaderBackgroundContainer>
       )}

@@ -1,5 +1,13 @@
-import { Approval, Deploy, HexBytes, PublicKey } from 'casper-js-sdk';
-import { sub } from 'date-fns';
+import {
+  Approval,
+  Deploy,
+  HexBytes,
+  HttpHandler,
+  PublicKey,
+  RpcClient,
+  Transaction
+} from 'casper-js-sdk';
+import { isBefore, sub } from 'date-fns';
 
 import {
   AuctionManagerEntryPoint,
@@ -9,15 +17,9 @@ import {
 } from '@src/constants';
 import { AsymmetricKeys } from '@src/libs/crypto/create-asymmetric-key';
 
-import { toJson } from '@libs/services/utils';
 import { Account, HardwareWalletType } from '@libs/types/account';
 
 import { ledger } from '../ledger';
-import {
-  ICasperNetworkSendDeployErrorResponse,
-  ICasperNetworkSendDeployResponse,
-  ICasperNodeStatusResponse
-} from './types';
 
 export const getAuctionManagerDeployCost = (
   entryPoint: AuctionManagerEntryPoint
@@ -34,21 +36,21 @@ export const getAuctionManagerDeployCost = (
 };
 
 export const getDateForDeploy = async (nodeUrl: CasperNodeUrl) => {
-  const defaultDate = sub(new Date(), { seconds: 2 }).toISOString();
+  const defaultDate = sub(new Date(), { seconds: 2 });
+  const handler = new HttpHandler(nodeUrl, 'fetch');
+  handler.setReferrer(REFERRER_URL);
+  const rpcClient = new RpcClient(handler);
 
   try {
-    const casperNodeTimestamp: ICasperNodeStatusResponse = await fetch(
-      `${nodeUrl}/info_get_status`,
-      {
-        referrer: REFERRER_URL
-      }
-    ).then(toJson);
+    const resp = await rpcClient.getStatus();
 
-    return casperNodeTimestamp?.last_progress
-      ? new Date(casperNodeTimestamp?.last_progress).toISOString()
-      : defaultDate;
+    const nodeDate = resp.lastProgress.toDate();
+
+    return isBefore(nodeDate, defaultDate)
+      ? defaultDate.toISOString()
+      : nodeDate.toISOString();
   } catch {
-    return defaultDate;
+    return defaultDate.toISOString();
   }
 };
 
@@ -88,30 +90,62 @@ export const signDeploy = async (
   return deploy;
 };
 
-export const sendSignDeploy = async (
-  deploy: Deploy,
-  nodeUrl: CasperNodeUrl
-): Promise<
-  ICasperNetworkSendDeployResponse | ICasperNetworkSendDeployErrorResponse
-> => {
-  const oneMegaByte = 1048576;
-  const size = deploy.toBytes().length;
+export const signTx = async (
+  tx: Transaction,
+  keys: AsymmetricKeys,
+  activeAccount: Account
+) => {
+  if (activeAccount?.hardware === HardwareWalletType.Ledger) {
+    const txV1 = tx.getTransactionV1();
+    const deploy = tx.getDeploy();
 
-  if (size > oneMegaByte) {
-    throw new Error(
-      `Deploy can not be send, because it's too large: ${size} bytes. Max size is 1 megabyte.`
-    );
+    if (txV1) {
+      throw new Error('Signing TransactionV1 with Ledger is not supported yet');
+    } else if (deploy) {
+      const signedDeploy = await signLedgerDeploy(deploy, activeAccount);
+      const approval = signedDeploy.approvals[0];
+
+      if (!approval) {
+        throw new Error('Invalid signature. Try to sign Deploy again');
+      }
+
+      tx.setSignature(approval.signature.bytes, approval.signer);
+
+      return tx;
+    }
   }
 
-  return fetch(nodeUrl, {
-    // TODO change to rpc usage
-    method: 'POST',
-    referrer: REFERRER_URL,
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      method: 'account_put_deploy',
-      params: [Deploy.toJSON(deploy)],
-      id: new Date().getTime()
-    })
-  }).then(toJson);
+  if (!keys.secretKey) {
+    throw new Error('Missing secret key');
+  }
+
+  tx.sign(keys.secretKey);
+
+  return tx;
+};
+
+export const sendSignedTx = async (
+  tx: Transaction,
+  nodeUrl: CasperNodeUrl,
+  isCasper2Network: boolean
+): Promise<string> => {
+  const handler = new HttpHandler(nodeUrl, 'fetch');
+  handler.setReferrer(REFERRER_URL);
+  const rpcClient = new RpcClient(handler);
+
+  if (isCasper2Network) {
+    const txResp = await rpcClient.putTransaction(tx);
+
+    return txResp.transactionHash.toString();
+  }
+
+  const deploy = tx.getDeploy();
+
+  if (deploy) {
+    const deployResp = await rpcClient.putDeploy(deploy);
+
+    return deployResp.deployHash.toHex();
+  }
+
+  throw new Error('Invalid Transaction object');
 };

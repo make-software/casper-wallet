@@ -8,6 +8,7 @@ import { TimeoutDurationSetting } from '@popup/constants';
 import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged,
+  casperNetworkApiVersionChanged,
   themeModeSettingChanged,
   vaultSettingsReseted
 } from './actions';
@@ -15,6 +16,7 @@ import { SettingsState, ThemeMode } from './types';
 
 const initialState: SettingsState = {
   activeNetwork: NetworkSetting.Mainnet,
+  casperNetworkApiVersion: '1.5.8',
   activeTimeoutDuration: TimeoutDurationSetting['5 min'],
   isDarkMode: false, // Deprecated
   themeMode: isSafariBuild ? ThemeMode.LIGHT : ThemeMode.SYSTEM
@@ -41,5 +43,12 @@ export const reducer = createReducer(initialState)
     (state, { payload }): SettingsState => ({
       ...state,
       themeMode: payload
+    })
+  )
+  .handleAction(
+    casperNetworkApiVersionChanged,
+    (state, action): SettingsState => ({
+      ...state,
+      casperNetworkApiVersion: action.payload
     })
   );

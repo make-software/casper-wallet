@@ -6,13 +6,13 @@ import { Hash, HashVariant, Typography } from '@libs/ui/components';
 import { formatDate, motesToCSPR } from '@libs/ui/utils';
 
 import {
-  getDeployParsedValue,
-  isDeployArgValueHash,
-  isDeployArgValueNumber,
+  getParsedArgValue,
+  isArgValueHash,
+  isArgValueNumber,
   isKeyOfCurrencyValue,
   isKeyOfHashValue,
   isKeyOfTimestampValue
-} from './deploy-utils';
+} from './utils';
 
 export function DeployValue({
   id,
@@ -67,9 +67,9 @@ export function DeployValue({
     );
   } else {
     // cl value args
-    const { parsedValue } = getDeployParsedValue(value);
+    const { parsedValue } = getParsedArgValue(value);
 
-    if (isDeployArgValueHash(value)) {
+    if (isArgValueHash(value)) {
       return (
         <Hash
           value={parsedValue}
@@ -81,7 +81,7 @@ export function DeployValue({
       );
     }
 
-    if (isDeployArgValueNumber(value)) {
+    if (isArgValueNumber(value)) {
       if (isContractCall && id === 'amount' && showSimpleAmount) {
         return (
           <Typography type="bodyHash">{formatNumber(parsedValue)}</Typography>

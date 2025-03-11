@@ -42,8 +42,8 @@ export const ValidatorList = ({
           {({ width }) => (
             <List
               overscanRowCount={5}
-              rowHeight={64}
-              height={Math.min(3 * 64, filteredValidatorsList.length * 64)}
+              rowHeight={80}
+              height={Math.min(3 * 80, filteredValidatorsList.length * 80)}
               width={width}
               rowCount={filteredValidatorsList.length}
               rowRenderer={({ index, key, style }) => {
@@ -53,6 +53,8 @@ export const ValidatorList = ({
                 return (
                   <Container style={style} key={key}>
                     <ValidatorPlate
+                      minAmount={validator.minAmount}
+                      reservedSlots={validator.reservedSlots}
                       publicKey={validator?.publicKey}
                       fee={validator.fee}
                       name={validator?.name}

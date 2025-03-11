@@ -3,7 +3,6 @@ import { RootState } from 'typesafe-actions';
 
 import {
   AssociatedKeysContractHash,
-  AuctionManagerContractHash,
   AuctionPoolContractHash,
   CSPRMarketContractHash,
   CSPRStudioCep47ContractHash,
@@ -28,18 +27,36 @@ export const selectApiConfigBasedOnActiveNetwork = createSelector(
           casperLiveUrl: CasperLiveUrl.MainnetUrl,
           networkName: NetworkName.Mainnet,
           nodeUrl: CasperNodeUrl.MainnetUrl,
-          auctionManagerContractHash: AuctionManagerContractHash.Mainnet,
           csprMarketContractHash: CSPRMarketContractHash.Mainnet,
           associatedKeysContractHash: AssociatedKeysContractHash.Mainnet,
           csprStudioCep47ContractHash: CSPRStudioCep47ContractHash.Mainnet,
           auctionPoolContractHash: AuctionPoolContractHash.Mainnet
+        };
+      case NetworkSetting.Devnet:
+        return {
+          casperLiveUrl: CasperLiveUrl.Devnet,
+          networkName: NetworkName.Devnet,
+          nodeUrl: CasperNodeUrl.DevnetUrl,
+          csprMarketContractHash: CSPRMarketContractHash.Testnet,
+          associatedKeysContractHash: AssociatedKeysContractHash.Testnet,
+          csprStudioCep47ContractHash: CSPRStudioCep47ContractHash.Testnet,
+          auctionPoolContractHash: AuctionPoolContractHash.Testnet
         };
       case NetworkSetting.Testnet:
         return {
           casperLiveUrl: CasperLiveUrl.TestnetUrl,
           networkName: NetworkName.Testnet,
           nodeUrl: CasperNodeUrl.TestnetUrl,
-          auctionManagerContractHash: AuctionManagerContractHash.Testnet,
+          csprMarketContractHash: CSPRMarketContractHash.Testnet,
+          associatedKeysContractHash: AssociatedKeysContractHash.Testnet,
+          csprStudioCep47ContractHash: CSPRStudioCep47ContractHash.Testnet,
+          auctionPoolContractHash: AuctionPoolContractHash.Testnet
+        };
+      case NetworkSetting.Integration:
+        return {
+          casperLiveUrl: CasperLiveUrl.Integration,
+          networkName: NetworkName.Integration,
+          nodeUrl: CasperNodeUrl.Integration,
           csprMarketContractHash: CSPRMarketContractHash.Testnet,
           associatedKeysContractHash: AssociatedKeysContractHash.Testnet,
           csprStudioCep47ContractHash: CSPRStudioCep47ContractHash.Testnet,
@@ -53,3 +70,9 @@ export const selectApiConfigBasedOnActiveNetwork = createSelector(
 
 export const selectThemeModeSetting = (state: RootState) =>
   state.settings.themeMode;
+
+export const selectCasperNetworkApiVersion = (state: RootState) =>
+  state.settings.casperNetworkApiVersion;
+
+export const selectIsCasper2Network = (state: RootState) =>
+  state.settings.casperNetworkApiVersion?.startsWith('2.') ?? false;

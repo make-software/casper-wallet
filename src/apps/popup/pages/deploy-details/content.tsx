@@ -1,11 +1,14 @@
 import { IDeploy } from 'casper-wallet-core';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { DeployDetailsAction } from '@popup/pages/deploy-details/components/deploy-details-action';
 import { DeployDetailsResult } from '@popup/pages/deploy-details/components/deploy-details-result';
 import { getEntryPointName } from '@popup/pages/deploy-details/utils';
+
+import { selectIsCasper2Network } from '@background/redux/settings/selectors';
 
 import {
   AlignedFlexRow,
@@ -63,6 +66,7 @@ interface DeployDetailsPageContentProps {
 export const DeployDetailsPageContent = ({
   deploy
 }: DeployDetailsPageContentProps) => {
+  const isCasper2Network = useSelector(selectIsCasper2Network);
   const [singleDeploy, setSingleDeploy] = useState<IDeploy | null | undefined>(
     null
   );
@@ -127,7 +131,9 @@ export const DeployDetailsPageContent = ({
             )}
           <RowContainer>
             <Typography type="captionRegular" color="contentSecondary">
-              <Trans t={t}>Deploy hash</Trans>
+              <Trans t={t}>{`${
+                isCasper2Network ? 'Transaction' : 'Deploy'
+              } hash`}</Trans>
             </Typography>
             <Hash
               value={singleDeploy.deployHash}
