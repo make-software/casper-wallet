@@ -184,7 +184,8 @@ export const StakesPage = () => {
         newValidatorPublicKeyHex: newValidatorPublicKey,
         validatorPublicKeyHex: validatorPublicKey,
         timestamp,
-        casperNetworkApiVersion
+        casperNetworkApiVersion,
+        gasPrice: 3
       });
 
       const signedTx = await signTx(tx, KEYS, activeAccount);

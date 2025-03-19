@@ -188,7 +188,8 @@ export const TransferNftPage = () => {
         senderPublicKeyHex: KEYS.publicKey.toHex(),
         tokenId: nftToken.tokenId,
         timestamp,
-        casperNetworkApiVersion
+        casperNetworkApiVersion,
+        gasPrice: 3
       });
 
       const signedTx = await signTx(tx, KEYS, activeAccount);
