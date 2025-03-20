@@ -226,7 +226,8 @@ export const TransferPage = () => {
         transferAmount:
           multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0',
         timestamp,
-        casperNetworkApiVersion
+        casperNetworkApiVersion,
+        gasPrice: 3
       });
 
       const signedTx = await signTx(tx, KEYS, activeAccount);
@@ -241,7 +242,8 @@ export const TransferPage = () => {
         senderPublicKeyHex: activeAccount.publicKey,
         transferAmount: CSPRtoMotes(amount),
         timestamp,
-        casperNetworkApiVersion
+        casperNetworkApiVersion,
+        gasPrice: 3
       });
 
       const signedTx = await signTx(tx, KEYS, activeAccount);
