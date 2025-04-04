@@ -198,7 +198,9 @@ popup.describe('Popup UI: signature request scenarios', () => {
       )
     ).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('Amount')).toBeVisible();
-    await popupExpect(signatureRequestPage.getByText('2.5 CSPR').first()).toBeVisible();
+    await popupExpect(
+      signatureRequestPage.getByText('2.5 CSPR').first()
+    ).toBeVisible();
     await popupExpect(
       signatureRequestPage.getByText(NEW_VALIDATOR_FOR_SIGNATURE_REQUEST.name)
     ).toBeVisible();

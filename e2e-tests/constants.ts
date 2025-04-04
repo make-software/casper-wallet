@@ -154,13 +154,12 @@ export const RPC_RESPONSE = {
   failure: {
     status: 500,
     body: JSON.stringify({
-      jsonrpc: '2.0',
-      id: 1717761373590,
-      error: {
-        code: '',
+      sourceErr: {
+        code: -32008,
         data: 'Error description',
         message: 'Error message'
-      }
+      },
+      statusCode: -32008
     })
   }
 };

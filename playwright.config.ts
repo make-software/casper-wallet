@@ -31,7 +31,7 @@ export default defineConfig({
     trace: 'on-first-retry',
 
     contextOptions: {
-      permissions: ['clipboard-read', 'clipboard-write', 'accessibility-events']
+      permissions: ['clipboard-read', 'clipboard-write']
     }
   },
 
