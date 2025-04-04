@@ -13,5 +13,5 @@ module.exports = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['@testing-library/jest-dom'],
   testTimeout: 1000 * 60,
-  testPathIgnorePatterns: ['<rootDir>/e2e-tests/']
+  testPathIgnorePatterns: ['e2e-tests/']
 };

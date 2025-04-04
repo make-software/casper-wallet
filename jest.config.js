@@ -8,7 +8,7 @@ module.exports = {
   coveragePathIgnorePatterns: ['/node_modules/'],
   testRegex: '(/tests?/.*|(\\.|/)(test|spec))\\.tsx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
- // modulePathIgnorePatterns: ['<rootDir>/e2e-tests'],
+  modulePathIgnorePatterns: ['<rootDir>/e2e-tests'],
   moduleNameMapper: {
     '^@src/(.*)$': '<rootDir>/src/$1'
   },
@@ -22,5 +22,5 @@ module.exports = {
       statements: 100
     }
   },
-  testPathIgnorePatterns: ['<rootDir>/e2e-tests/']
+  testPathIgnorePatterns: ['e2e-tests/']
 };
