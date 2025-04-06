@@ -161,18 +161,7 @@ export function SignDeployPage() {
     }
 
     if (signingAccount.hardware === HardwareWalletType.Ledger) {
-      if (transaction.getTransactionV1()) {
-        // TODO not supported by Ledger yet
-        return;
-      }
-
-      const deploy = transaction.getDeploy();
-
-      if (!deploy) {
-        return;
-      }
-
-      const resp = await ledger.singDeploy(deploy, {
+      const resp = await ledger.singTransaction(transaction, {
         index: signingAccount.derivationIndex,
         publicKey: signingAccount.publicKey
       });

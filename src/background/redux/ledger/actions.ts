@@ -6,6 +6,9 @@ export const ledgerNewWindowIdChanged = createAction(
 export const ledgerDeployChanged = createAction(
   'LEDGER_DEPLOY_CHANGED'
 )<string>();
+export const ledgerTransactionChanged = createAction(
+  'LEDGER_TRANSACTION_CHANGED'
+)<string>();
 export const ledgerRecipientToSaveOnSuccessChanged = createAction(
   'LEDGER_RECIPIENT_TO_SAVE_ON_SUCCESS_CHANGED'
 )<string>();

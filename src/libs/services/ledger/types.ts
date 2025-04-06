@@ -21,7 +21,8 @@ export enum LedgerEventStatus {
   LedgerAskPermission = 'ledger-ask-permission',
   ErrorOpeningDevice = 'ledger-error-opening-device',
   Timeout = 'ledger-timeout',
-  InvalidIndex = 'ledger-invalid-index'
+  InvalidIndex = 'ledger-invalid-index',
+  TransactionForOldAppVersion = 'ledger-transaction-for-old-app-version'
 }
 
 export interface LedgerAccount {
@@ -34,7 +35,7 @@ export interface ILedgerEvent {
   publicKey?: string;
   firstAcctIndex?: number;
   accounts?: LedgerAccount[];
-  deployHash?: string;
+  txHash?: string;
   error?: string;
   message?: string;
   msgHash?: string;

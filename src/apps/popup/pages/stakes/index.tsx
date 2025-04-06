@@ -1,8 +1,4 @@
-import {
-  Deploy,
-  makeAuctionManagerDeploy,
-  makeAuctionManagerTransaction
-} from 'casper-js-sdk';
+import { Deploy } from 'casper-js-sdk';
 import { formatNumber } from 'casper-wallet-core';
 import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import React, { useState } from 'react';
@@ -31,7 +27,10 @@ import { ValidatorDropdownInput } from '@popup/pages/stakes/validator-dropdown-i
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
-import { ledgerDeployChanged } from '@background/redux/ledger/actions';
+import {
+  ledgerDeployChanged,
+  ledgerTransactionChanged
+} from '@background/redux/ledger/actions';
 import {
   selectAskForReviewAfter,
   selectRatedInStore
@@ -71,6 +70,7 @@ import {
   sendSignedTx,
   signTx
 } from '@libs/services/deployer-service';
+import { buildAuctionTransactions } from '@libs/services/tx-builders';
 import {
   Button,
   HomePageTabsId,
@@ -176,19 +176,25 @@ export const StakesPage = () => {
 
       const timestamp = await getDateForDeploy(nodeUrl);
 
-      const tx = makeAuctionManagerTransaction({
-        amount: motesAmount,
-        chainName: networkNameToSdkNetworkNameMap[networkName],
-        contractEntryPoint: stakeType,
-        delegatorPublicKeyHex: activeAccount.publicKey,
-        newValidatorPublicKeyHex: newValidatorPublicKey,
-        validatorPublicKeyHex: validatorPublicKey,
-        timestamp,
-        casperNetworkApiVersion,
-        gasPrice: 3
-      });
+      const { transaction, fallbackDeploy } = buildAuctionTransactions(
+        {
+          amount: motesAmount,
+          chainName: networkNameToSdkNetworkNameMap[networkName],
+          contractEntryPoint: stakeType,
+          delegatorPublicKeyHex: activeAccount.publicKey,
+          newValidatorPublicKeyHex: newValidatorPublicKey,
+          validatorPublicKeyHex: validatorPublicKey,
+          timestamp
+        },
+        casperNetworkApiVersion
+      );
 
-      const signedTx = await signTx(tx, KEYS, activeAccount);
+      const signedTx = await signTx(
+        transaction,
+        KEYS,
+        activeAccount,
+        fallbackDeploy
+      );
 
       sendSignedTx(signedTx, nodeUrl, isCasper2Network)
         .then(hash => {
@@ -224,18 +230,24 @@ export const StakesPage = () => {
 
       const timestamp = await getDateForDeploy(nodeUrl);
 
-      const deploy = makeAuctionManagerDeploy({
-        amount: motesAmount,
-        chainName: networkNameToSdkNetworkNameMap[networkName],
-        contractEntryPoint: stakeType,
-        delegatorPublicKeyHex: activeAccount.publicKey,
-        newValidatorPublicKeyHex: newValidatorPublicKey,
-        validatorPublicKeyHex: validatorPublicKey,
-        timestamp
-      });
+      const { transaction, fallbackDeploy } = buildAuctionTransactions(
+        {
+          amount: motesAmount,
+          chainName: networkNameToSdkNetworkNameMap[networkName],
+          contractEntryPoint: stakeType,
+          delegatorPublicKeyHex: activeAccount.publicKey,
+          newValidatorPublicKeyHex: newValidatorPublicKey,
+          validatorPublicKeyHex: validatorPublicKey,
+          timestamp
+        },
+        casperNetworkApiVersion
+      );
 
       dispatchToMainStore(
-        ledgerDeployChanged(JSON.stringify(Deploy.toJSON(deploy)))
+        ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
+      );
+      dispatchToMainStore(
+        ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
       );
     }
   };

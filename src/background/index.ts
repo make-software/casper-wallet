@@ -56,7 +56,8 @@ import {
   ledgerDeployChanged,
   ledgerNewWindowIdChanged,
   ledgerRecipientToSaveOnSuccessChanged,
-  ledgerStateCleared
+  ledgerStateCleared,
+  ledgerTransactionChanged
 } from '@background/redux/ledger/actions';
 import {
   resetPromotion,
@@ -609,6 +610,7 @@ runtime.onMessage.addListener(
           case getType(ledgerNewWindowIdChanged):
           case getType(ledgerStateCleared):
           case getType(ledgerDeployChanged):
+          case getType(ledgerTransactionChanged):
           case getType(ledgerRecipientToSaveOnSuccessChanged):
           case getType(addWatchingAccount):
           case getType(setShowCSPRNamePromotion):

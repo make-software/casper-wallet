@@ -1,12 +1,4 @@
-import {
-  Approval,
-  Deploy,
-  HexBytes,
-  HttpHandler,
-  PublicKey,
-  RpcClient,
-  Transaction
-} from 'casper-js-sdk';
+import { Deploy, HttpHandler, RpcClient, Transaction } from 'casper-js-sdk';
 import { isBefore, sub } from 'date-fns';
 
 import {
@@ -54,65 +46,28 @@ export const getDateForDeploy = async (nodeUrl: CasperNodeUrl) => {
   }
 };
 
-export const signLedgerDeploy = async (
-  deploy: Deploy,
-  activeAccount: Account
-) => {
-  const resp = await ledger.singDeploy(deploy, {
-    index: activeAccount.derivationIndex,
-    publicKey: activeAccount.publicKey
-  });
-
-  const approval = new Approval(
-    PublicKey.fromHex(activeAccount.publicKey),
-    HexBytes.fromHex(resp.prefixedSignatureHex)
-  );
-  deploy.approvals.push(approval);
-
-  return deploy;
-};
-
-export const signDeploy = async (
-  deploy: Deploy,
-  keys: AsymmetricKeys,
-  activeAccount: Account
-) => {
-  if (activeAccount?.hardware === HardwareWalletType.Ledger) {
-    return signLedgerDeploy(deploy, activeAccount);
-  }
-
-  if (!keys.secretKey) {
-    throw new Error('Missing secret key');
-  }
-
-  deploy.sign(keys.secretKey);
-
-  return deploy;
-};
-
 export const signTx = async (
   tx: Transaction,
   keys: AsymmetricKeys,
-  activeAccount: Account
+  activeAccount: Account,
+  deployFallback?: Deploy
 ) => {
   if (activeAccount?.hardware === HardwareWalletType.Ledger) {
-    const txV1 = tx.getTransactionV1();
-    const deploy = tx.getDeploy();
+    const signedTx = await ledger.getSignedTransaction(
+      tx,
+      {
+        publicKey: activeAccount.publicKey,
+        index: activeAccount.derivationIndex
+      },
+      deployFallback ? Transaction.fromDeploy(deployFallback) : undefined
+    );
+    const approval = signedTx.approvals[0];
 
-    if (txV1) {
-      throw new Error('Signing TransactionV1 with Ledger is not supported yet');
-    } else if (deploy) {
-      const signedDeploy = await signLedgerDeploy(deploy, activeAccount);
-      const approval = signedDeploy.approvals[0];
-
-      if (!approval) {
-        throw new Error('Invalid signature. Try to sign Deploy again');
-      }
-
-      tx.setSignature(approval.signature.bytes, approval.signer);
-
-      return tx;
+    if (!approval) {
+      throw new Error('Invalid signature. Try to sign Transaction again');
     }
+
+    return signedTx;
   }
 
   if (!keys.secretKey) {
@@ -136,7 +91,7 @@ export const sendSignedTx = async (
   if (isCasper2Network) {
     const txResp = await rpcClient.putTransaction(tx);
 
-    return txResp.transactionHash.toString();
+    return txResp.transactionHash.toHex();
   }
 
   const deploy = tx.getDeploy();

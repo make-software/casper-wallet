@@ -2,7 +2,7 @@ import Transport from '@ledgerhq/hw-transport';
 import { blake2b } from '@noble/hashes/blake2b';
 import LedgerCasperApp, { ResponseSign } from '@zondax/ledger-casper';
 import { Buffer } from 'buffer';
-import { Deploy } from 'casper-js-sdk';
+import { HexBytes, PublicKey, Transaction } from 'casper-js-sdk';
 import {
   BehaviorSubject,
   Observable,
@@ -211,8 +211,8 @@ export class Ledger {
   };
 
   /** @throws {LedgerError} message - ILedgerEvent JSON */
-  async singDeploy(
-    deploy: Deploy,
+  async singTransaction(
+    tx: Transaction,
     account: Partial<LedgerAccount>
   ): Promise<SignResult> {
     try {
@@ -222,7 +222,17 @@ export class Ledger {
 
       await this.#checkConnection(account.index);
 
-      const deployHash = deploy.hash.toHex();
+      const appInfo = await this.#ledgerApp?.getAppInfo();
+      const appSupportsTransactionV1 =
+        appInfo?.appVersion?.startsWith('3.') ?? false;
+
+      if (!appSupportsTransactionV1 && !tx.getDeploy()) {
+        this.#processError({
+          status: LedgerEventStatus.TransactionForOldAppVersion
+        });
+      }
+
+      const txHash = tx.hash.toHex();
 
       const devicePk =
         account.index !== undefined
@@ -237,7 +247,7 @@ export class Ledger {
           status: LedgerEventStatus.SignatureFailed,
           error: 'Could not retrieve key by index from device',
           publicKey: account.publicKey,
-          deployHash
+          txHash
         });
       }
 
@@ -249,30 +259,45 @@ export class Ledger {
           error:
             'Signing key not found on Ledger device. Signature process failed',
           publicKey: account.publicKey,
-          deployHash
+          txHash
         });
       }
-
-      const deployBytes = deploy.toBytes();
 
       this.#LedgerEventStatussSubject.next({
         status: LedgerEventStatus.SignatureRequestedToUser,
         publicKey: account.publicKey,
-        deployHash: deployHash
+        txHash
       });
 
       let result: ResponseSign;
 
-      if (deploy.session.isModuleBytes()) {
-        result = await this.#ledgerApp?.signWasmDeploy(
-          this.#getAccountPath(account.index),
-          Buffer.from(deployBytes)
-        );
-      } else {
+      if (appSupportsTransactionV1) {
+        let txBytes = tx.toBytes();
+
         result = await this.#ledgerApp?.sign(
           this.#getAccountPath(account.index),
-          Buffer.from(deployBytes)
+          Buffer.from(txBytes)
         );
+      } else {
+        const deploy = tx.getDeploy();
+
+        if (!deploy) {
+          this.#processError({
+            status: LedgerEventStatus.TransactionForOldAppVersion
+          });
+        }
+
+        if (deploy.session.isModuleBytes()) {
+          result = await this.#ledgerApp?.signWasmDeploy(
+            this.#getAccountPath(account.index),
+            Buffer.from(deploy.toBytes())
+          );
+        } else {
+          result = await this.#ledgerApp?.sign(
+            this.#getAccountPath(account.index),
+            Buffer.from(deploy.toBytes())
+          );
+        }
       }
 
       await this.#processDelayAfterAction();
@@ -282,7 +307,7 @@ export class Ledger {
         this.#processError({
           status: LedgerEventStatus.SignatureCanceled,
           publicKey: account.publicKey,
-          deployHash
+          txHash
         });
       }
 
@@ -291,7 +316,7 @@ export class Ledger {
           status: LedgerEventStatus.SignatureFailed,
           error: result.errorMessage,
           publicKey: account.publicKey,
-          deployHash
+          txHash
         });
       }
 
@@ -306,7 +331,7 @@ export class Ledger {
       this.#LedgerEventStatussSubject.next({
         status: LedgerEventStatus.SignatureCompleted,
         publicKey: account.publicKey,
-        deployHash,
+        txHash,
         signatureHex: prefixedSignatureHex
       });
 
@@ -316,7 +341,7 @@ export class Ledger {
         this.#processError({
           status: LedgerEventStatus.SignatureFailed,
           publicKey: account.publicKey,
-          deployHash,
+          txHash,
           error: `Empty signature`
         });
       }
@@ -336,6 +361,49 @@ export class Ledger {
           error: 'Unknown signature error'
         });
       }
+    }
+  }
+
+  async getSignedTransaction(
+    tx: Transaction,
+    account: Partial<Pick<LedgerAccount, 'index'>> &
+      Pick<LedgerAccount, 'publicKey'>,
+    fallbackTxFromDeploy?: Transaction
+  ): Promise<Transaction> {
+    if (account.index === undefined) {
+      this.#processError({ status: LedgerEventStatus.InvalidIndex });
+    }
+
+    await this.#checkConnection(account.index);
+
+    const appInfo = await this.#ledgerApp?.getAppInfo();
+    const appSupportsTransactionV1 =
+      appInfo?.appVersion?.startsWith('3.') ?? false;
+
+    if (appSupportsTransactionV1) {
+      const resp = await this.singTransaction(tx, account);
+
+      tx.setSignature(
+        HexBytes.fromHex(resp.prefixedSignatureHex).bytes,
+        PublicKey.fromHex(account.publicKey)
+      );
+
+      return tx;
+    } else {
+      if (!fallbackTxFromDeploy) {
+        this.#processError({
+          status: LedgerEventStatus.TransactionForOldAppVersion
+        });
+      }
+
+      const resp = await this.singTransaction(fallbackTxFromDeploy, account);
+
+      fallbackTxFromDeploy.setSignature(
+        HexBytes.fromHex(resp.prefixedSignatureHex).bytes,
+        PublicKey.fromHex(account.publicKey)
+      );
+
+      return fallbackTxFromDeploy;
     }
   }
 

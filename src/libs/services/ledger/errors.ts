@@ -62,6 +62,11 @@ export const ledgerErrorsData: Record<LedgerEventStatus, ILedgerErrorData> = {
     title: 'Your have pending signing action on your Ledger device',
     description: 'Handle the previous signing action and then make a new one'
   },
+  [LedgerEventStatus.TransactionForOldAppVersion]: {
+    title:
+      'Only Deploy signature is supported for Ledger devices before v3.0.0.',
+    description: 'Please, use Ledger v3.0.0 or send a Deploy for signing.'
+  },
   'ledger-ask-permission': { title: null, description: null },
   'ledger-account-list-updated': { title: null, description: null },
   'ledger-connected': { title: null, description: null },

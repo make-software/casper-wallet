@@ -5,7 +5,8 @@ import { useSelector } from 'react-redux';
 import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
 import {
   selectLedgerDeploy,
-  selectLedgerRecipientToSaveOnSuccess
+  selectLedgerRecipientToSaveOnSuccess,
+  selectLedgerTransaction
 } from '@background/redux/ledger/selectors';
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import {
@@ -18,14 +19,15 @@ import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { useLedger } from '@hooks/use-ledger';
 
 import { createAsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
-import { sendSignedTx, signDeploy } from '@libs/services/deployer-service';
+import { sendSignedTx, signTx } from '@libs/services/deployer-service';
 import { LedgerEventStatus } from '@libs/services/ledger';
 import { LedgerConnectionView } from '@libs/ui/components';
 
 import { SuccessView } from './success-view';
 
 export const SignWithLedgerInNewWindowPage = () => {
-  const deploy = useSelector(selectLedgerDeploy);
+  const deployJson = useSelector(selectLedgerDeploy);
+  const txJson = useSelector(selectLedgerTransaction);
   const recipient = useSelector(selectLedgerRecipientToSaveOnSuccess);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const { nodeUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
@@ -33,7 +35,7 @@ export const SignWithLedgerInNewWindowPage = () => {
   const isCasper2Network = useSelector(selectIsCasper2Network);
 
   const ledgerAction = async () => {
-    if (!(activeAccount && deploy)) {
+    if (!(activeAccount && txJson && deployJson)) {
       return;
     }
 
@@ -42,15 +44,12 @@ export const SignWithLedgerInNewWindowPage = () => {
       activeAccount.secretKey
     );
 
-    const resp = Deploy.fromJSON(deploy);
+    const tx = Transaction.fromJSON(txJson);
+    const deployFallback = Deploy.fromJSON(deployJson);
 
-    const signedDeploy = await signDeploy(resp, KEYS, activeAccount);
+    const signedTx = await signTx(tx, KEYS, activeAccount, deployFallback);
 
-    sendSignedTx(
-      Transaction.fromDeploy(signedDeploy),
-      nodeUrl,
-      isCasper2Network
-    )
+    sendSignedTx(signedTx, nodeUrl, isCasper2Network)
       .then(hash => {
         if (recipient) {
           dispatchToMainStore(recipientPublicKeyAdded(recipient));
