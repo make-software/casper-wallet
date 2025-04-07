@@ -124,7 +124,7 @@
     "@types/big.js": "^6.1.6",
     "@types/chrome": "0.0.246",
     "@types/expect": "^24.3.0",
-    "@types/jest": "29.5.12",
+    "@types/jest": "29.5.14",
     "@types/lodash.throttle": "4.1.7",
     "@types/md5": "^2.3.5",
     "@types/node": "^20.9.0",
