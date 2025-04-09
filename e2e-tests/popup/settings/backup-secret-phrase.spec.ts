@@ -34,13 +34,13 @@ popup.describe('Popup UI: back up secret phrase', () => {
 
   popup(
     'should timeout after providing wrong password 5 times',
-    async ({ popupPage, unlockVault, passwordTimeout }) => {
+    async ({ popupPage, unlockVault, setWrongPasswordFiveTimes }) => {
       await unlockVault();
 
       await popupPage.getByTestId('menu-open-icon').click();
       await popupPage.getByText('Back up your secret recovery phrase').click();
 
-      await passwordTimeout();
+      await setWrongPasswordFiveTimes();
 
       await popupExpect(
         popupPage.getByRole('heading', {

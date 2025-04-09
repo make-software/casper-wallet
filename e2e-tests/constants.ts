@@ -56,30 +56,6 @@ export const IMPORTED_TORUS_ACCOUNT = {
   truncatedPublicKey: '02029...ffd4f',
   mediumTruncatedPublicKey: '02029fcc5b...65182ffd4f'
 };
-export function createLocators(page: Page) {
-  return {
-    accountSwitcher: page.getByTestId('connection-status-modal'),
-    firstAccount: page.locator(
-      "span[type='bodySemiBold'].sc-iOeugr.hnMrar.sc-iJbNxu.bAimRi"
-    ),
-    CSPRtotalBalance: page.locator('span[type="CSPRBold"]'),
-    liquidBalance: page.locator(
-      '#layout-content-container > div > div.sc-gGvHcT.LEYqH > div > div.sc-hLBbgP.sc-kDvujY.bxIaNA.czrHSx > div.sc-hLBbgP.sc-kDvujY.nnmro.czrHSx > div.sc-hLBbgP.sc-kDvujY.sc-fmixVB.eJhjZ.czrHSx.jIbqvc > div:nth-child(1) > div > span.sc-iOeugr.fFyyCL'
-    ),
-    delegatedBalance: page.locator(
-      '//*[@id="layout-content-container"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div/span[1]'
-    ),
-    undelegatingBalance: page.locator(
-      '//*[@id="layout-content-container"]/div/div[1]/div/div[2]/div[2]/div[2]/div[3]/div/span[1]'
-    ),
-    totalBalanceUSD: page.locator(
-      '//span[@type="captionRegular" and @color="contentSecondary"]'
-    ),
-    threeDotsMenu: page.locator(
-      "//*[contains(@class, 'sc-eJDSGI') and contains(@class, 'bMCuLR')]"
-    )
-  };
-}
 export function accountSettingLocator(accountName: string) {
   return `xpath=//div[contains(@class, 'sc-hLBbgP') and contains(@class, 'fYMUrO')]//span[text()='${accountName}']/ancestor::div[contains(@class, 'sc-hLBbgP')]/following-sibling::div[@data-testid='popover-children-container']`;
 }
@@ -146,8 +122,11 @@ export const RPC_RESPONSE = {
       jsonrpc: '2.0',
       id: 1717761373590,
       result: {
-        api_version: '1.5.6',
-        deploy_hash: '23a86de2a614b81aed066dca9efd53086082f71fd18bbc51ec78d506f0845746'
+        api_version: '2.0.0',
+        transaction_hash: {
+          Version1:
+            '9de32b7f6d79e559cb3f7b94250a605739de803d98ec681cc4a4b7dc8604fdae'
+        }
       }
     })
   },
@@ -155,11 +134,11 @@ export const RPC_RESPONSE = {
     status: 500,
     body: JSON.stringify({
       sourceErr: {
-        code: -32008,
-        data: 'Error description',
-        message: 'Error message'
+        code: -32016,
+        data: 'the transaction was invalid: The transaction sent to the network had insufficient transfer amount',
+        message: 'Invalid transaction'
       },
-      statusCode: -32008
+      statusCode: -32016
     })
   }
 };

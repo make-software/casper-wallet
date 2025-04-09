@@ -3,8 +3,6 @@ import { expect } from '@playwright/test';
 import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI:  review flow', () => {
-  popup.skip();
-    //skipped as there is issue with undefied value for all tests which use RPC
   popup(
     'should redirect to web store',
     async ({ popupPage, unlockVault, context, page, sendCsprTokens }) => {

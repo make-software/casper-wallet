@@ -47,7 +47,7 @@ popup.describe('Popup UI: change password', () => {
       providePassword,
       provideNewPassword,
       lockVault,
-      passwordDontMatch,
+      setWrongPassword,
       unlockValutForSigning
     }) => {
       await unlockVault();
@@ -57,7 +57,7 @@ popup.describe('Popup UI: change password', () => {
 
       await popupExpect(popupPage.getByText('Change Password')).toBeVisible();
 
-      await passwordDontMatch();
+      await setWrongPassword();
       await popupExpect(
         popupPage.getByText("Passwords don't match")
       ).toBeVisible();

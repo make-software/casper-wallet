@@ -228,11 +228,11 @@ export const popup = test.extend<{
   connectAccounts: () => Promise<void>;
   addContact: () => Promise<void>;
   providePassword: (popupPage?: Page) => Promise<void>;
-  passwordTimeout: (popupPage?: Page) => Promise<void>;
+  setWrongPasswordFiveTimes: (popupPage?: Page) => Promise<void>;
   changePassword: (popupPage?: Page) => Promise<void>;
   provideNewPassword: (popupPage?: Page) => Promise<void>;
   unlockVaultNewPassword: (popupPage?: Page) => Promise<void>;
-  passwordDontMatch: (popupPage?: Page) => Promise<void>;
+  setWrongPassword: (popupPage?: Page) => Promise<void>;
   sendCsprTokens: (popupPage?: Page) => Promise<void>;
   unlockValutForSigning: (popupPage?: Page) => Promise<void>;
 }>({
@@ -473,7 +473,7 @@ export const popup = test.extend<{
 
     await use(changePassword);
   },
-  passwordDontMatch: async ({ page }, use) => {
+  setWrongPassword: async ({ page }, use) => {
     const changePassword = async (popupPage?: Page) => {
       const currentPage = popupPage || page;
 
@@ -492,8 +492,8 @@ export const popup = test.extend<{
     await use(changePassword);
   },
 
-  passwordTimeout: async ({ page }, use) => {
-    const passwordTimeout = async (popupPage?: Page) => {
+  setWrongPasswordFiveTimes: async ({ page }, use) => {
+    const setWrongPasswordFiveTimes = async (popupPage?: Page) => {
       const currentPage = popupPage || page;
 
       await currentPage
@@ -505,7 +505,7 @@ export const popup = test.extend<{
       }
     };
 
-    await use(passwordTimeout);
+    await use(setWrongPasswordFiveTimes);
   }
 });
 export const popupExpect = popup.expect;

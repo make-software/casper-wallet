@@ -2,8 +2,6 @@ import { DEFAULT_SECOND_ACCOUNT } from '../../constants';
 import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI: ERC-20 transfer', () => {
-  popup.skip();
-    //skipped as there is issue with undefied value for all tests which use RPC
   popup(
     'should made a successful transfer',
     async ({ unlockVault, popupPage }) => {
@@ -16,9 +14,11 @@ popup.describe('Popup UI: ERC-20 transfer', () => {
             jsonrpc: '2.0',
             id: 1717761373590,
             result: {
-              api_version: '1.5.6',
-              deploy_hash:
-                '23a86de2a614b81aed066dca9efd53086082f71fd18bbc51ec78d506f0845746'
+              api_version: '2.0.0',
+              transaction_hash: {
+                Version1:
+                  '9de32b7f6d79e559cb3f7b94250a605739de803d98ec681cc4a4b7dc8604fdae'
+              }
             }
           })
         })

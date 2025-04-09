@@ -2,8 +2,6 @@ import { RPC_RESPONSE, URLS, VALIDATOR_FOR_STAKE } from '../../constants';
 import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI: Delegation', () => {
-  popup.skip();
-    //skipped as there is issue with undefied value for all tests which use RPC
   popup(
     'should made a successful delegation',
     async ({ popupPage, unlockVault }) => {
