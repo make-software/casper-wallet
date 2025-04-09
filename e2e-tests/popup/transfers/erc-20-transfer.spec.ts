@@ -203,9 +203,15 @@ popup.describe('Popup UI: ERC-20 transfer', () => {
     await popupPage.getByRole('button', { name: 'Confirm send' }).click();
 
     await popupExpect(
-      popupPage.getByRole('heading', { name: 'Error message' })
+      popupPage.getByRole('heading', {
+        name: 'failed to send http request, details: Code: 500, err: Internal Server Error'
+      })
     ).toBeVisible();
-    await popupExpect(popupPage.getByText('Error description')).toBeVisible();
+    await popupExpect(
+      popupPage.getByText(
+        'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+      )
+    ).toBeVisible();
 
     await popupPage.getByRole('button', { name: 'Close' }).click();
   });

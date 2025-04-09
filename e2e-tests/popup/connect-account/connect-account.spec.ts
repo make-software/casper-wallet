@@ -6,7 +6,7 @@ import { popup, popupExpect } from '../../fixtures';
 popup.describe('Popup UI: connect account', () => {
   let connectAccountPage: Page;
 
-  popup.beforeEach(async ({ page, context, unlockValutForSigning }) => {
+  popup.beforeEach(async ({ page, context, unlockVault }) => {
     await page.goto(PLAYGROUND_URL);
 
     [connectAccountPage] = await Promise.all([
@@ -14,7 +14,7 @@ popup.describe('Popup UI: connect account', () => {
       page.getByRole('button', { name: 'Connect', exact: true }).click()
     ]);
 
-    await unlockValutForSigning(connectAccountPage);
+    await unlockVault(connectAccountPage);
   });
 
   popup(

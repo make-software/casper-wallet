@@ -135,10 +135,11 @@ export const RPC_RESPONSE = {
     body: JSON.stringify({
       sourceErr: {
         code: -32016,
-        data: 'the transaction was invalid: The transaction sent to the network had insufficient transfer amount',
-        message: 'Invalid transaction'
+        data: 'error description',
+        message: 'error message'
       },
-      statusCode: -32016
+      id: 1,
+      jsonrpc: '2.0'
     })
   }
 };

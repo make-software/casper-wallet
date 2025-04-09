@@ -47,8 +47,7 @@ popup.describe('Popup UI: change password', () => {
       providePassword,
       provideNewPassword,
       lockVault,
-      setWrongPassword,
-      unlockValutForSigning
+      setWrongPassword
     }) => {
       await unlockVault();
       await popupPage.getByTestId('menu-open-icon').click();
@@ -77,7 +76,7 @@ popup.describe('Popup UI: change password', () => {
         })
       ).toBeVisible();
       await lockVault();
-      await unlockValutForSigning();
+      await unlockVault();
 
       await popupExpect(
         popupPage.getByTestId('network-switcher').getByRole('img')

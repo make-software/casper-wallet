@@ -45,14 +45,7 @@ popup.describe('Popup UI: rename account', () => {
       await popupPage.getByText('Manage').click();
 
       await popupExpect(popupPage.getByText('Public key')).toBeVisible();
-
-      await popupPage
-        .locator('div')
-        .filter({ hasText: /^Close$/ })
-        .getByRole('img')
-        .first()
-        .click();
-
+      await popupPage.getByTestId('rename-account-icon').click();
       await popupExpect(
         popupPage.getByRole('heading', { name: 'Rename account' })
       ).toBeVisible();

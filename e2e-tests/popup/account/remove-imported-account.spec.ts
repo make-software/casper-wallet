@@ -59,19 +59,11 @@ popup.describe('Popup UI: remove imported account', () => {
         popupPage.getByTestId('import-account-icon')
       ).toBeVisible();
 
-      await popupPage
-        .locator('div:nth-child(3) > div > div > div:nth-child(3) > .sc-lbVpMG')
-        .click();
+      await popupPage.getByTestId('popover-children-container').nth(2).click();
       await popupPage.getByText('Manage').click();
-
       await popupExpect(popupPage.getByText('Public key')).toBeVisible();
       await popupExpect(popupPage.getByText('Account hash')).toBeVisible();
-      await popupPage
-        .locator('div')
-        .filter({ hasText: /^Close$/ })
-        .getByRole('img')
-        .nth(2)
-        .click();
+      await popupPage.getByTestId('remove-account-icon').click();
 
       await popupExpect(
         popupPage.getByRole('heading', { name: 'Remove account?' })
