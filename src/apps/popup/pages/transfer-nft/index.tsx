@@ -33,6 +33,7 @@ import {
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import {
   selectApiConfigBasedOnActiveNetwork,
+  selectCasperNetworkApiVersion,
   selectIsCasper2Network
 } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
@@ -88,6 +89,7 @@ export const TransferNftPage = () => {
   const [isRecipientFormButtonDisabled, setIsRecipientFormButtonDisabled] =
     useState(true);
   const isCasper2Network = useSelector(selectIsCasper2Network);
+  const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
 
   const { contractPackageHash, tokenId } = useParams();
 
@@ -175,6 +177,8 @@ export const TransferNftPage = () => {
         activeAccount.secretKey
       );
 
+      const timestamp = await getDateForDeploy(nodeUrl);
+
       const tx = makeNftTransferTransaction({
         chainName: networkNameToSdkNetworkNameMap[networkName],
         contractPackageHash: nftToken.contractPackageHash,
@@ -182,7 +186,10 @@ export const TransferNftPage = () => {
         paymentAmount: CSPRtoMotes(paymentAmount),
         recipientPublicKeyHex: recipientPublicKey,
         senderPublicKeyHex: KEYS.publicKey.toHex(),
-        tokenId: nftToken.tokenId
+        tokenId: nftToken.tokenId,
+        timestamp,
+        casperNetworkApiVersion,
+        gasPrice: 3
       });
 
       const signedTx = await signTx(tx, KEYS, activeAccount);

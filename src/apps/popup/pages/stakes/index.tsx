@@ -38,6 +38,7 @@ import {
 } from '@background/redux/rate-app/selectors';
 import {
   selectApiConfigBasedOnActiveNetwork,
+  selectCasperNetworkApiVersion,
   selectIsCasper2Network
 } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
@@ -110,6 +111,7 @@ export const StakesPage = () => {
   const [newValidator, setNewValidator] = useState<ValidatorDto | null>(null);
   const [stakeAmountMotes, setStakeAmountMotes] = useState('');
   const isCasper2Network = useSelector(selectIsCasper2Network);
+  const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isActiveAccountFromLedger = useSelector(
@@ -172,13 +174,18 @@ export const StakesPage = () => {
         activeAccount.secretKey
       );
 
+      const timestamp = await getDateForDeploy(nodeUrl);
+
       const tx = makeAuctionManagerTransaction({
         amount: motesAmount,
         chainName: networkNameToSdkNetworkNameMap[networkName],
         contractEntryPoint: stakeType,
         delegatorPublicKeyHex: activeAccount.publicKey,
         newValidatorPublicKeyHex: newValidatorPublicKey,
-        validatorPublicKeyHex: validatorPublicKey
+        validatorPublicKeyHex: validatorPublicKey,
+        timestamp,
+        casperNetworkApiVersion,
+        gasPrice: 3
       });
 
       const signedTx = await signTx(tx, KEYS, activeAccount);

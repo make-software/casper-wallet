@@ -4,7 +4,8 @@ import {
   HexBytes,
   HttpHandler,
   PublicKey,
-  RpcClient
+  RpcClient,
+  Transaction
 } from 'casper-js-sdk';
 import { isBefore, sub } from 'date-fns';
 
@@ -89,30 +90,62 @@ export const signDeploy = async (
   return deploy;
 };
 
-export const sendSignDeploy = async (
-  deploy: Deploy,
-  nodeUrl: CasperNodeUrl
-): Promise<
-  ICasperNetworkSendDeployResponse | ICasperNetworkSendDeployErrorResponse
-> => {
-  const oneMegaByte = 1048576;
-  const size = deploy.toBytes().length;
+export const signTx = async (
+  tx: Transaction,
+  keys: AsymmetricKeys,
+  activeAccount: Account
+) => {
+  if (activeAccount?.hardware === HardwareWalletType.Ledger) {
+    const txV1 = tx.getTransactionV1();
+    const deploy = tx.getDeploy();
 
-  if (size > oneMegaByte) {
-    throw new Error(
-      `Deploy can not be send, because it's too large: ${size} bytes. Max size is 1 megabyte.`
-    );
+    if (txV1) {
+      throw new Error('Signing TransactionV1 with Ledger is not supported yet');
+    } else if (deploy) {
+      const signedDeploy = await signLedgerDeploy(deploy, activeAccount);
+      const approval = signedDeploy.approvals[0];
+
+      if (!approval) {
+        throw new Error('Invalid signature. Try to sign Deploy again');
+      }
+
+      tx.setSignature(approval.signature.bytes, approval.signer);
+
+      return tx;
+    }
   }
 
-  return fetch(nodeUrl, {
-    // TODO change to rpc usage
-    method: 'POST',
-    referrer: REFERRER_URL,
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      method: 'account_put_deploy',
-      params: [Deploy.toJSON(deploy)],
-      id: new Date().getTime()
-    })
-  }).then(toJson);
+  if (!keys.secretKey) {
+    throw new Error('Missing secret key');
+  }
+
+  tx.sign(keys.secretKey);
+
+  return tx;
+};
+
+export const sendSignedTx = async (
+  tx: Transaction,
+  nodeUrl: CasperNodeUrl,
+  isCasper2Network: boolean
+): Promise<string> => {
+  const handler = new HttpHandler(nodeUrl, 'fetch');
+  handler.setReferrer(REFERRER_URL);
+  const rpcClient = new RpcClient(handler);
+
+  if (isCasper2Network) {
+    const txResp = await rpcClient.putTransaction(tx);
+
+    return txResp.transactionHash.toString();
+  }
+
+  const deploy = tx.getDeploy();
+
+  if (deploy) {
+    const deployResp = await rpcClient.putDeploy(deploy);
+
+    return deployResp.deployHash.toHex();
+  }
+
+  throw new Error('Invalid Transaction object');
 };
