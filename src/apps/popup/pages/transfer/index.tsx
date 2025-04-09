@@ -31,7 +31,6 @@ import {
 import { recipientPublicKeyAdded } from '@background/redux/recent-recipient-public-keys/actions';
 import {
   selectApiConfigBasedOnActiveNetwork,
-  selectCasperNetworkApiVersion,
   selectIsCasper2Network
 } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
@@ -103,7 +102,6 @@ export const TransferPage = () => {
   const navigate = useTypedNavigate();
   const location = useTypedLocation();
   const isCasper2Network = useSelector(selectIsCasper2Network);
-  const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
 
   const [isErc20Transfer, setIsErc20Transfer] = useState<boolean>(false);
   const [selectedToken, setSelectedToken] = useState<TokenType | null>();
@@ -213,8 +211,6 @@ export const TransferPage = () => {
       activeAccount.secretKey
     );
 
-    const timestamp = await getDateForDeploy(nodeUrl);
-
     if (isErc20Transfer && selectedToken?.contractPackageHash) {
       // CEP18 transfer
       const tx = makeCep18TransferTransaction({
@@ -224,9 +220,7 @@ export const TransferPage = () => {
         recipientPublicKeyHex: recipientPublicKey,
         senderPublicKeyHex: activeAccount.publicKey,
         transferAmount:
-          multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0',
-        timestamp,
-        casperNetworkApiVersion
+          multiplyErc20Balance(amount, selectedToken?.decimals ?? 0) ?? '0'
       });
 
       const signedTx = await signTx(tx, KEYS, activeAccount);
@@ -239,9 +233,7 @@ export const TransferPage = () => {
         memo: transferIdMemo,
         recipientPublicKeyHex: recipientPublicKey,
         senderPublicKeyHex: activeAccount.publicKey,
-        transferAmount: CSPRtoMotes(amount),
-        timestamp,
-        casperNetworkApiVersion
+        transferAmount: motesAmount
       });
 
       const signedTx = await signTx(tx, KEYS, activeAccount);
