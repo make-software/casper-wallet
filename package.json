@@ -58,7 +58,7 @@
     "@lapo/asn1js": "1.2.4",
     "@ledgerhq/hw-transport": "^6.30.6",
     "@ledgerhq/hw-transport-web-ble": "^6.28.6",
-    "@ledgerhq/hw-transport-webhid": "^6.28.6",
+    "@ledgerhq/hw-transport-webhid": "^6.30.0",
     "@ledgerhq/hw-transport-webusb": "^6.28.6",
     "@lottiefiles/react-lottie-player": "3.6.0",
     "@noble/ciphers": "^0.3.0",
