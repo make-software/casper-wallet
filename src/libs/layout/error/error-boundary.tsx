@@ -1,5 +1,6 @@
 import React, { Component, ReactNode } from 'react';
 
+import { ErrorMessages } from '@src/constants';
 import { PasswordDoesNotExistError } from '@src/errors';
 
 import { WindowErrorPage, createErrorLocationState } from '@libs/layout';
@@ -36,10 +37,10 @@ export class ErrorBoundary extends Component<Props, State> {
         <WindowErrorPage
           error={this.state.error}
           overrideState={createErrorLocationState({
-            errorHeaderText: 'Something went wrong',
+            errorHeaderText: ErrorMessages.common.UNKNOWN_ERROR.message,
             errorContentText:
               this.state.error?.message ||
-              'Please check browser console for error details, this will be a valuable for our team to fix the issue.',
+              ErrorMessages.common.UNKNOWN_ERROR.description,
             errorPrimaryButtonLabel:
               this.state.error instanceof PasswordDoesNotExistError
                 ? 'Reset Wallet'
