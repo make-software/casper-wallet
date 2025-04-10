@@ -1,4 +1,4 @@
-import { DEFAULT_SECOND_ACCOUNT } from '../../constants';
+import { DEFAULT_SECOND_ACCOUNT, RPC_RESPONSE, URLS } from '../../constants';
 import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI: ERC-20 transfer', () => {
@@ -7,21 +7,8 @@ popup.describe('Popup UI: ERC-20 transfer', () => {
     async ({ unlockVault, popupPage }) => {
       await unlockVault();
 
-      await popupPage.route('https://node.testnet.cspr.cloud/rpc', route =>
-        route.fulfill({
-          status: 200,
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: 1717761373590,
-            result: {
-              api_version: '2.0.0',
-              transaction_hash: {
-                Version1:
-                  '9de32b7f6d79e559cb3f7b94250a605739de803d98ec681cc4a4b7dc8604fdae'
-              }
-            }
-          })
-        })
+      await popupPage.route(URLS.rpc, route =>
+        route.fulfill(RPC_RESPONSE.success)
       );
 
       await new Promise(r => setTimeout(r, 5000));
