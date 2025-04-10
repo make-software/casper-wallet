@@ -1,5 +1,7 @@
+import { Page } from '@playwright/test';
 import path from 'path';
 
+export const newPassword = 'this is new password';
 export const vaultPassword = '3hQqzYn4C7Y8rEZTVEZb';
 export const twentyFourWordsSecretPhrase =
   'hold matrix spider subway bottom jazz charge fire lawn valley stay coil moral hospital dream cycle multiply december agree huge major tower devote old';
@@ -20,7 +22,8 @@ export const torusSecretKeyHex =
 export const ACCOUNT_NAMES = {
   defaultFirstAccountName: 'Account 1',
   defaultSecondAccountName: 'Account 2',
-  createdAccountName: 'New account 1',
+  createdAccountName: 'First New Account',
+  createdAccountName2: 'Second New account ',
   importedPemAccountName: 'Imported pem account',
   renamedAccountName: 'Renamed account',
   importedCerAccountName: 'Imported cer account',
@@ -53,7 +56,9 @@ export const IMPORTED_TORUS_ACCOUNT = {
   truncatedPublicKey: '02029...ffd4f',
   mediumTruncatedPublicKey: '02029fcc5b...65182ffd4f'
 };
-
+export function accountSettingLocator(accountName: string) {
+  return `xpath=//div[contains(@class, 'sc-hLBbgP') and contains(@class, 'fYMUrO')]//span[text()='${accountName}']/ancestor::div[contains(@class, 'sc-hLBbgP')]/following-sibling::div[@data-testid='popover-children-container']`;
+}
 export const DEFAULT_FIRST_ACCOUNT = {
   accountName: ACCOUNT_NAMES.defaultFirstAccountName,
   publicKey:
@@ -102,8 +107,8 @@ export const VALIDATOR_FOR_STAKE = {
 
 export const NEW_VALIDATOR_FOR_STAKE = {
   publicKey:
-    '01ad002e37667f90aa982396ebdfcc7d3eea99731241eaad8a0dc20f453f72975a',
-  truncatedPublicKey: '01ad...975a'
+    '01c8be540a643e6c9df283dd2d2d6be67748f69a3c7bb6cf34471c899b8e858c9a',
+  truncatedPublicKey: '01c8...8c9a'
 };
 
 export const URLS = {
@@ -117,21 +122,24 @@ export const RPC_RESPONSE = {
       jsonrpc: '2.0',
       id: 1717761373590,
       result: {
-        api_version: '1.5.6',
-        deploy_hash: 'deploy hash'
+        api_version: '2.0.0',
+        transaction_hash: {
+          Version1:
+            '9de32b7f6d79e559cb3f7b94250a605739de803d98ec681cc4a4b7dc8604fdae'
+        }
       }
     })
   },
   failure: {
     status: 500,
     body: JSON.stringify({
-      jsonrpc: '2.0',
-      id: 1717761373590,
-      error: {
-        code: '',
-        data: 'Error description',
-        message: 'Error message'
-      }
+      sourceErr: {
+        code: -32016,
+        data: 'error description',
+        message: 'error message'
+      },
+      id: 1,
+      jsonrpc: '2.0'
     })
   }
 };

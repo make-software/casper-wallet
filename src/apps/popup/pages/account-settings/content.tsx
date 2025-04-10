@@ -153,6 +153,7 @@ function AccountIconButton({ type }: AccountIconButtonProps) {
       onClick={handleNavigateToNextPage}
       color={type === 'remove' ? 'contentActionCritical' : 'contentAction'}
       src={icons[type]}
+      dataTestId={`${type}-account-icon`}
     />
   );
 }

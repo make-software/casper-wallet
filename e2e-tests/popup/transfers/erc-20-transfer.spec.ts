@@ -1,4 +1,4 @@
-import { DEFAULT_SECOND_ACCOUNT } from '../../constants';
+import { DEFAULT_SECOND_ACCOUNT, RPC_RESPONSE, URLS } from '../../constants';
 import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI: ERC-20 transfer', () => {
@@ -7,18 +7,8 @@ popup.describe('Popup UI: ERC-20 transfer', () => {
     async ({ unlockVault, popupPage }) => {
       await unlockVault();
 
-      await popupPage.route('https://node.testnet.cspr.cloud/rpc', route =>
-        route.fulfill({
-          status: 200,
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: 1717761373590,
-            result: {
-              api_version: '1.5.6',
-              deploy_hash: 'deploy hash'
-            }
-          })
-        })
+      await popupPage.route(URLS.rpc, route =>
+        route.fulfill(RPC_RESPONSE.success)
       );
 
       await new Promise(r => setTimeout(r, 5000));
@@ -200,9 +190,15 @@ popup.describe('Popup UI: ERC-20 transfer', () => {
     await popupPage.getByRole('button', { name: 'Confirm send' }).click();
 
     await popupExpect(
-      popupPage.getByRole('heading', { name: 'Error message' })
+      popupPage.getByRole('heading', {
+        name: 'failed to send http request, details: Code: 500, err: Internal Server Error'
+      })
     ).toBeVisible();
-    await popupExpect(popupPage.getByText('Error description')).toBeVisible();
+    await popupExpect(
+      popupPage.getByText(
+        'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
+      )
+    ).toBeVisible();
 
     await popupPage.getByRole('button', { name: 'Close' }).click();
   });

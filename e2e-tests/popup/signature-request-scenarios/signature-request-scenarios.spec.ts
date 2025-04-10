@@ -10,7 +10,7 @@ popup.describe('Popup UI: signature request scenarios', () => {
   popup.beforeEach(async ({ connectAccounts, page }) => {
     await connectAccounts();
     // need to wait for the connection status modal to disappear
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(4000);
   });
 
   popup('should signing the transfer deploy', async ({ page, context }) => {
@@ -18,7 +18,7 @@ popup.describe('Popup UI: signature request scenarios', () => {
 
     const [signatureRequestPage] = await Promise.all([
       context.waitForEvent('page'),
-      page.getByRole('button', { name: 'Transfer' }).click()
+      page.getByRole('button', { name: 'Transfer' }).first().click()
     ]);
 
     await popupExpect(
@@ -56,6 +56,7 @@ popup.describe('Popup UI: signature request scenarios', () => {
 
   popup('should signing the delegate deploy', async ({ page, context }) => {
     await page.goto(PLAYGROUND_URL);
+    await page.waitForLoadState('networkidle');
 
     const [signatureRequestPage] = await Promise.all([
       context.waitForEvent('page'),
@@ -105,6 +106,7 @@ popup.describe('Popup UI: signature request scenarios', () => {
 
   popup('should signing the undelegate deploy', async ({ page, context }) => {
     await page.goto(PLAYGROUND_URL);
+    await page.waitForLoadState('networkidle');
 
     const [signatureRequestPage] = await Promise.all([
       context.waitForEvent('page'),
@@ -142,7 +144,9 @@ popup.describe('Popup UI: signature request scenarios', () => {
       )
     ).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('Amount')).toBeVisible();
-    await popupExpect(signatureRequestPage.getByText('2.5 CSPR')).toBeVisible();
+    await popupExpect(
+      signatureRequestPage.getByText('2.5 CSPR').first()
+    ).toBeVisible();
 
     page.on('dialog', async dialog => {
       popupExpect(dialog.message()).toContain('Sign successful');
@@ -154,6 +158,7 @@ popup.describe('Popup UI: signature request scenarios', () => {
 
   popup('should signing the redelegate deploy', async ({ page, context }) => {
     await page.goto(PLAYGROUND_URL);
+    await page.waitForLoadState('networkidle');
 
     const [signatureRequestPage] = await Promise.all([
       context.waitForEvent('page'),
@@ -193,7 +198,9 @@ popup.describe('Popup UI: signature request scenarios', () => {
       )
     ).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('Amount')).toBeVisible();
-    await popupExpect(signatureRequestPage.getByText('2.5 CSPR')).toBeVisible();
+    await popupExpect(
+      signatureRequestPage.getByText('2.5 CSPR').first()
+    ).toBeVisible();
     await popupExpect(
       signatureRequestPage.getByText(NEW_VALIDATOR_FOR_SIGNATURE_REQUEST.name)
     ).toBeVisible();
@@ -213,12 +220,14 @@ popup.describe('Popup UI: signature request scenarios', () => {
 
   popup('should cancel the signing process', async ({ page, context }) => {
     await page.goto(PLAYGROUND_URL);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
 
     const [signatureRequestPage] = await Promise.all([
       context.waitForEvent('page'),
-      page.getByRole('button', { name: 'Transfer' }).click()
+      page.getByRole('button', { name: 'Transfer' }).first().click()
     ]);
-
+    await signatureRequestPage.waitForLoadState('domcontentloaded');
     page.on('dialog', async dialog => {
       popupExpect(dialog.message()).toContain('Sign cancelled');
       await dialog.accept();
