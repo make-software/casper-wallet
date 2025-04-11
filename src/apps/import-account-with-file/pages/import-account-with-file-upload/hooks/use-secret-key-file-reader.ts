@@ -2,6 +2,8 @@ import { isError } from 'casper-wallet-core';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { ErrorMessages } from '@src/constants';
+
 import { checkSecretKeyExist } from '@background/redux/import-account-actions-should-be-removed';
 
 import { parseSecretKeyString } from '@libs/crypto';
@@ -26,7 +28,7 @@ export function useSecretKeyFileReader({
       const isFileValid = (fileContents: string): Error | undefined => {
         if (!fileContents || fileContents.includes('PUBLIC KEY')) {
           return new Error(
-            t('A private key was not detected. Try importing a different file.')
+            t(ErrorMessages.secretKeyFile.INVALID_FILE_CONTENTS.description)
           );
         }
       };
@@ -38,7 +40,7 @@ export function useSecretKeyFileReader({
           secretKeyBase64 && (await checkSecretKeyExist(secretKeyBase64));
         if (existence) {
           return new Error(
-            t('This account already exists. Try importing a different file.')
+            t(ErrorMessages.secretKeyFile.ACCOUNT_EXISTS.description)
           );
         }
       };
@@ -77,9 +79,7 @@ export function useSecretKeyFileReader({
           return onFailure(
             isError(e)
               ? e.message
-              : t(
-                  'A private key was not detected. Try importing a different file.'
-                )
+              : t(ErrorMessages.secretKeyFile.PARSING_ERROR.description)
           );
         }
       };

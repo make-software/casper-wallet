@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 
+import { ErrorMessages } from '@src/constants';
+
 import { ApproveConnectionPage } from '@connect-to-app/pages/approve-connection';
 import { ConnectingPage } from '@connect-to-app/pages/connecting';
 import { SelectAccountPage } from '@connect-to-app/pages/select-account';
@@ -87,7 +89,9 @@ function useSiteRelatedData() {
   const siteTitle = searchParams.get('title');
 
   if (origin == null) {
-    throw new Error('Missing origin search param');
+    throw new Error(
+      `${ErrorMessages.common.MISSING_SEARCH_PARAM.description} origin`
+    );
   }
 
   const connectWith = t('Connect with');

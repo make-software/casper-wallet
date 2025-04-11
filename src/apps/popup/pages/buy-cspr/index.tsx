@@ -9,6 +9,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
+import { ErrorMessages } from '@src/constants';
+
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
@@ -87,12 +89,9 @@ export const BuyCSPRPage = () => {
       navigate(
         ErrorPath,
         createErrorLocationState({
-          errorHeaderText: t('Something went wrong'),
+          errorHeaderText: t(ErrorMessages.common.UNKNOWN_ERROR.message),
           errorContentText:
-            error.message ||
-            t(
-              'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-            ),
+            error.message || t(ErrorMessages.common.UNKNOWN_ERROR.description),
           errorPrimaryButtonLabel: t('Close'),
           errorRedirectPath: RouterPath.Home
         })

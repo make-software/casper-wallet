@@ -1,4 +1,3 @@
-import { Page } from '@playwright/test';
 import path from 'path';
 
 export const newPassword = 'this is new password';
@@ -131,12 +130,12 @@ export const RPC_RESPONSE = {
     })
   },
   failure: {
-    status: 500,
+    status: 200,
     body: JSON.stringify({
-      sourceErr: {
+      error: {
         code: -32016,
-        data: 'error description',
-        message: 'error message'
+        data: 'Error description',
+        message: 'Error message'
       },
       id: 1,
       jsonrpc: '2.0'

@@ -98,19 +98,8 @@ popup.describe('Popup UI: ERC-20 transfer', () => {
   popup('should made a failed transfer', async ({ unlockVault, popupPage }) => {
     await unlockVault();
 
-    await popupPage.route('https://node.testnet.cspr.cloud/rpc', route =>
-      route.fulfill({
-        status: 500,
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1717761373590,
-          error: {
-            code: '',
-            data: 'Error description',
-            message: 'Error message'
-          }
-        })
-      })
+    await popupPage.route(URLS.rpc, route =>
+      route.fulfill(RPC_RESPONSE.failure)
     );
 
     await new Promise(r => setTimeout(r, 5000));
@@ -191,14 +180,10 @@ popup.describe('Popup UI: ERC-20 transfer', () => {
 
     await popupExpect(
       popupPage.getByRole('heading', {
-        name: 'failed to send http request, details: Code: 500, err: Internal Server Error'
+        name: 'Error message'
       })
     ).toBeVisible();
-    await popupExpect(
-      popupPage.getByText(
-        'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-      )
-    ).toBeVisible();
+    await popupExpect(popupPage.getByText('Error description')).toBeVisible();
 
     await popupPage.getByRole('button', { name: 'Close' }).click();
   });
