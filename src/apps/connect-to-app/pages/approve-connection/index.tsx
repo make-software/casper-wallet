@@ -3,6 +3,8 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import styled from 'styled-components';
 
+import { ErrorMessages } from '@src/constants';
+
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
 import { closeCurrentWindow } from '@background/close-current-window';
@@ -42,8 +44,9 @@ export function ApproveConnectionPage({
   const requestId = searchParams.get('requestId');
 
   if (!requestId) {
-    const error = Error(`Missing search param: ${requestId}`);
-    throw error;
+    throw Error(
+      `${ErrorMessages.common.MISSING_SEARCH_PARAM.description} ${requestId}`
+    );
   }
 
   const selectedAccountNamesLength = selectedAccountNames.length;

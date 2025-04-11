@@ -298,3 +298,89 @@ export const networkNameToSdkNetworkNameMap: Record<
   [NetworkName.Devnet]: CasperNetworkName.DevNet,
   [NetworkName.Integration]: CasperNetworkName.Integration
 };
+
+export const ErrorMessages = {
+  common: {
+    UNKNOWN_ERROR: {
+      message: 'Something went wrong',
+      description:
+        'Please check the browser console for error details, this will be valuable for our team to fix the issue.'
+    },
+    MISSING_SEARCH_PARAM: {
+      message: 'Missing Search Parameter',
+      description:
+        'The required search parameter is missing. Ensure all necessary parameters are provided.'
+    }
+  },
+  secretPhrase: {
+    INVALID_SECRET_PHRASE: {
+      message: 'Invalid secret phrase'
+    },
+    WRONG_SECRET_PHRASE_ORDER: {
+      message: "That's not the correct word order",
+      description:
+        'Please start over. Make sure you save your secret phrase as a text file or write it down somewhere.'
+    },
+    IMPORT_SECRET_PHRASE_FAILED: {
+      message: 'Import of Secret Recovery Phrase failed',
+      description:
+        'Confirm that you are using a Casper Wallet secret recovery phrase, and that you typed each word correctly and in the correct order.'
+    }
+  },
+  importAccountWithFile: {
+    IMPORT_ACCOUNT_WITH_FILE_FAILED: {
+      message: 'Import of Account with File failed',
+      description:
+        'We couldn’t import your account. Please confirm that you’re importing a file containing your secret key (not to be confused with your public key).'
+    }
+  },
+  secretKeyFile: {
+    INVALID_FILE_CONTENTS: {
+      message: 'Invalid Key File Detected',
+      description:
+        'The uploaded file does not contain a private key. Please try importing a valid private key file.'
+    },
+    ACCOUNT_EXISTS: {
+      message: 'Account Already Exists',
+      description:
+        'The account associated with the provided private key already exists. Try importing a different file.'
+    },
+    PARSING_ERROR: {
+      message: 'Error Parsing Key File',
+      description:
+        'The private key file could not be parsed. Ensure the file format is valid and try again.'
+    }
+  },
+  signTransaction: {
+    MISSING_SEARCH_PARAM: {
+      message: 'Required Parameters Missing',
+      description:
+        'The request to sign the deploy is missing one or more required parameters. Please ensure all required data is provided.'
+    },
+    INVALID_TRANSACTION_JSON: {
+      message: 'Invalid Transaction Data',
+      description:
+        'The transaction data provided is invalid and cannot be processed. Please check the input and try again.'
+    },
+    SIGNING_ACCOUNT_MISSING: {
+      message: 'Signing Account Not Found',
+      description:
+        'The requested signing account does not exist in the wallet. Ensure the account is imported and try again.'
+    },
+    ACCOUNT_NOT_CONNECTED: {
+      message: 'Account Not Connected',
+      description:
+        'The signing account is not connected to the current site. Please connect the account and retry.'
+    },
+    MISSING_TRANSFER_ARGUMENT: {
+      message: 'Missing Transfer Argument',
+      description:
+        "The transaction data is missing a required argument, such as 'target' or 'amount'. Please ensure all transfer data is provided."
+    },
+    UNSUPPORTED_TARGET_TYPE: {
+      message: 'Unsupported Target Type',
+      description:
+        'The target provided in the transfer data is neither an AccountHash nor a PublicKey. Ensure the target type is valid.'
+    }
+  }
+};
