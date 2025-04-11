@@ -100,6 +100,12 @@ export const NEW_VALIDATOR_FOR_SIGNATURE_REQUEST = {
 
 export const VALIDATOR_FOR_STAKE = {
   publicKey:
+    '0106ca7c39cd272dbf21a86eeb3b36b7c26e2e9b94af64292419f7862936bca2ca',
+  truncatedPublicKey: '0106...a2ca'
+};
+
+export const VALIDATOR_FOR_UNDELEGATE = {
+  publicKey:
     '01f340df2c32f25391e8f7924a99e93cab3a6f230ff7af1cacbfc070772cbebd94',
   truncatedPublicKey: '01f3...bd94'
 };
