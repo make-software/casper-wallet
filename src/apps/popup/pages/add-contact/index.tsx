@@ -7,7 +7,10 @@ import { SuccessScreen } from '@popup/pages/add-contact/success-screen';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { newContactAdded } from '@background/redux/contacts/actions';
-import { selectAllContactsNames } from '@background/redux/contacts/selectors';
+import {
+  selectAllContactsNames,
+  selectAllContactsPublicKeys
+} from '@background/redux/contacts/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import {
@@ -28,12 +31,17 @@ export const AddContactPage = () => {
   const { state } = useTypedLocation();
 
   const contactsNames = useSelector(selectAllContactsNames);
+  const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isValid }
-  } = useContactForm(contactsNames, state?.recipientPublicKey);
+  } = useContactForm(
+    contactsNames,
+    contactPublicKeys,
+    state?.recipientPublicKey
+  );
 
   const onSubmit = ({ name, publicKey }: ContactFromValues) => {
     const lastModified = new Date().toISOString();
