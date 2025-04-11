@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
+import { ErrorMessages } from '@src/constants';
 import { getSigningAccount, isEqualCaseInsensitive } from '@src/utils';
 
 import { SignDeployContent } from '@signature-request/pages/sign-deploy/sign-deploy-content';
@@ -62,7 +63,7 @@ export function SignDeployPage() {
     useState<boolean>(isLedgerNewWindow);
 
   if (!requestId || !signingPublicKeyHex) {
-    throw Error('Missing search param');
+    throw Error(ErrorMessages.signTransaction.MISSING_SEARCH_PARAM.description);
   }
 
   const renderDeps = [requestId, signingPublicKeyHex];
@@ -101,7 +102,9 @@ export function SignDeployPage() {
       const tx = Transaction.fromJSON(deployJson);
       setTransaction(tx);
     } catch (e) {
-      const error = Error('Invalid transaction json');
+      const error = Error(
+        ErrorMessages.signTransaction.INVALID_TRANSACTION_JSON.description
+      );
       sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
       throw error;
     }
@@ -114,7 +117,9 @@ export function SignDeployPage() {
 
   // signing account should exist in wallet
   if (signingAccount == null) {
-    const error = Error('No signing account');
+    const error = Error(
+      ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
+    );
     sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
     throw error;
   }
@@ -126,7 +131,7 @@ export function SignDeployPage() {
     !isLedgerNewWindow
   ) {
     const error = Error(
-      'Account with signingPublicKeyHex is not connected to site'
+      ErrorMessages.signTransaction.ACCOUNT_NOT_CONNECTED.description
     );
     sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
     throw error;
