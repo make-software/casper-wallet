@@ -14,6 +14,7 @@ export type ContactFromValues = {
 
 export const useContactForm = (
   existingContactNames: string[],
+  existingContactPublicKeys: string[],
   defaultPublicKey?: string,
   defaultName?: string
 ) => {
@@ -22,7 +23,11 @@ export const useContactForm = (
       value =>
         value?.trim() != null && !existingContactNames.includes(value?.trim())
     ),
-    publicKey: useContactPublicKeyRule()
+    publicKey: useContactPublicKeyRule(
+      value =>
+        value?.trim() != null &&
+        !existingContactPublicKeys.includes(value?.trim())
+    )
   });
 
   const newContactFormOptions: UseFormProps<ContactFromValues> = {
