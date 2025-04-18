@@ -341,7 +341,10 @@ export const TransferNftPage = () => {
   const ledgerFooterButton = renderLedgerFooter({
     onConnect: makeSubmitLedgerAction,
     event: ledgerEventStatusToRender,
-    onErrorCtaPressed: () => setTransferNFTStep(TransferNFTSteps.Confirm)
+    onErrorCtaPressed: () => {
+      setTransferNFTStep(TransferNFTSteps.Confirm);
+      setIsSubmitButtonDisable(false);
+    }
   });
 
   const footerButtons = {
