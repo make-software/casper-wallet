@@ -7,6 +7,8 @@ import {
   TypeID
 } from 'casper-js-sdk';
 
+import { ErrorMessages } from '@src/constants';
+
 import {
   ArgDict,
   DeployType,
@@ -105,7 +107,9 @@ function getDeployArgsForTransfer(txArgs: Args): ArgDict {
   const targetFromDeploy = txArgs.getByName('target');
 
   if (!targetFromDeploy) {
-    throw new Error("Couldn't find 'target' in transfer data");
+    throw new Error(
+      `${ErrorMessages.signTransaction.MISSING_TRANSFER_ARGUMENT.description} - target`
+    );
   }
 
   switch (targetFromDeploy.type.getTypeID()) {
@@ -120,14 +124,18 @@ function getDeployArgsForTransfer(txArgs: Args): ArgDict {
       }
       break;
     default: {
-      throw new Error('Target from tx was neither AccountHash or PublicKey');
+      throw new Error(
+        ErrorMessages.signTransaction.UNSUPPORTED_TARGET_TYPE.description
+      );
     }
   }
 
   const amountString = txArgs.getByName('amount');
 
   if (!amountString) {
-    throw new Error("Couldn't find 'amount' in transfer data");
+    throw new Error(
+      `${ErrorMessages.signTransaction.MISSING_TRANSFER_ARGUMENT.description} - amount`
+    );
   }
 
   const idString = txArgs.getByName('id');

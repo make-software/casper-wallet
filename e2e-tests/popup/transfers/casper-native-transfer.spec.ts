@@ -161,7 +161,9 @@ popup.describe('Popup UI: Casper Native Transfer', () => {
     await popupPage.getByRole('button', { name: 'Confirm send' }).click();
 
     await popupExpect(
-      popupPage.getByRole('heading', { name: 'Error message' })
+      popupPage.getByRole('heading', {
+        name: 'Error message'
+      })
     ).toBeVisible();
     await popupExpect(popupPage.getByText('Error description')).toBeVisible();
 

@@ -7,7 +7,10 @@ import { SuccessScreen } from '@popup/pages/add-contact/success-screen';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { newContactAdded } from '@background/redux/contacts/actions';
-import { selectAllContactsNames } from '@background/redux/contacts/selectors';
+import {
+  selectAllContactsNames,
+  selectAllContactsPublicKeys
+} from '@background/redux/contacts/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
   selectVaultAccountsNames,
@@ -34,6 +37,7 @@ export const AddContactPage = () => {
   const contactsNames = useSelector(selectAllContactsNames);
   const accountNames = useSelector(selectVaultAccountsNames);
   const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
+  const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
 
   const {
     register,
@@ -41,7 +45,7 @@ export const AddContactPage = () => {
     formState: { errors, isValid }
   } = useContactForm(
     [...contactsNames, ...accountNames],
-    accountsPublicKeys,
+    [...accountsPublicKeys, ...contactPublicKeys],
     state?.recipientPublicKey
   );
 

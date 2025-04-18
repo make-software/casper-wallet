@@ -609,7 +609,7 @@ export const useContactNameRule = (
 };
 
 export const useContactPublicKeyRule = (
-  isPublicKeyAlreadyExistCallback: (
+  isPublicKeyAlreadyInContactsCallback: (
     value: string | undefined
   ) => Promise<boolean> | boolean
 ) => {
@@ -622,13 +622,11 @@ export const useContactPublicKeyRule = (
       test: value => (value ? isValidPublicKey(value) : false),
       message: t('Public address should be a valid public key')
     })
-    .test({
-      name: 'unique',
-      test: value => isPublicKeyAlreadyExistCallback(value),
-      message: t(
-        'You already have an account / contact with the same public key'
-      )
-    });
+    .test(
+      'unique',
+      t('You’ve already got a contact with this public key'),
+      value => isPublicKeyAlreadyInContactsCallback(value)
+    );
 };
 
 export const useTorusSecretKeyRule = () => {

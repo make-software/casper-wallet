@@ -1,6 +1,8 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { ErrorMessages } from '@src/constants';
+
 import { Stepper } from '@onboarding/components/stepper';
 import { RouterPath } from '@onboarding/router';
 import { useTypedNavigate } from '@onboarding/router/use-typed-navigate';
@@ -35,7 +37,7 @@ export function RecoverFromSecretPhrasePage() {
     try {
       const secretPhrase = phrase.trim().split(' ');
       if (!validateSecretPhrase(secretPhrase)) {
-        throw Error('Invalid secret phrase.');
+        throw Error(ErrorMessages.secretPhrase.INVALID_SECRET_PHRASE.message);
       }
       navigate(RouterPath.SelectAccountsToRecover, {
         state: {
@@ -47,9 +49,11 @@ export function RecoverFromSecretPhrasePage() {
       navigate(
         ErrorPath,
         createErrorLocationState({
-          errorHeaderText: t('Import of Secret Recovery Phrase failed'),
+          errorHeaderText: t(
+            ErrorMessages.secretPhrase.IMPORT_SECRET_PHRASE_FAILED.message
+          ),
           errorContentText: t(
-            'Confirm that you are using a Casper Wallet secret recovery phrase, and that you typed each word correctly and in the correct order.'
+            ErrorMessages.secretPhrase.IMPORT_SECRET_PHRASE_FAILED.description
           ),
           errorPrimaryButtonLabel: t('Try again'),
           errorRedirectPath: RouterPath.RecoverFromSecretPhrase

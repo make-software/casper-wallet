@@ -1,14 +1,18 @@
 import {
-  test as base,
-  chromium,
   type BrowserContext,
-  Page
+  Page,
+  test as base,
+  chromium
 } from '@playwright/test';
 import path from 'path';
 
 import {
   DEFAULT_FIRST_ACCOUNT,
+  DEFAULT_SECOND_ACCOUNT,
   PLAYGROUND_URL,
+  RPC_RESPONSE,
+  URLS,
+  newPassword,
   vaultPassword
 } from './constants';
 
@@ -34,13 +38,24 @@ export const test = base.extend<{
     await context.close();
   },
   extensionId: async ({ context }, use) => {
-    let [background] = context.serviceWorkers();
+    let background = context.serviceWorkers()[0];
 
     if (!background) {
-      background = await context.waitForEvent('serviceworker');
+      try {
+        background = await context.waitForEvent('serviceworker', {
+          timeout: 5000
+        });
+      } catch (error) {
+        throw new Error('Service worker did not register in time.');
+      }
     }
 
-    const extensionId = background.url().split('/')[2];
+    if (!background) {
+      throw new Error('Failed to retrieve the service worker.');
+    }
+
+    // Extract extension ID from the worker URL (if it's a Chrome extension)
+    const extensionId = new URL(background.url()).host;
 
     await use(extensionId);
   }
@@ -212,6 +227,13 @@ export const popup = test.extend<{
   createAccount: (newAccountName: string) => Promise<void>;
   connectAccounts: () => Promise<void>;
   addContact: () => Promise<void>;
+  providePassword: (popupPage?: Page) => Promise<void>;
+  setWrongPasswordFiveTimes: (popupPage?: Page) => Promise<void>;
+  changePassword: (popupPage?: Page) => Promise<void>;
+  provideNewPassword: (popupPage?: Page) => Promise<void>;
+  unlockVaultNewPassword: (popupPage?: Page) => Promise<void>;
+  setWrongPassword: (popupPage?: Page) => Promise<void>;
+  sendCsprTokens: (popupPage?: Page) => Promise<void>;
 }>({
   popupPage: async ({ extensionId, page }, use) => {
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
@@ -225,6 +247,7 @@ export const popup = test.extend<{
         .getByPlaceholder('Password', { exact: true })
         .fill(vaultPassword);
       await currentPage.getByRole('button', { name: 'Unlock wallet' }).click();
+      await page.waitForLoadState('networkidle');
     };
 
     await use(unlockVault);
@@ -271,6 +294,59 @@ export const popup = test.extend<{
 
     await use(connectAccounts);
   },
+  sendCsprTokens: async ({ page }, use) => {
+    const sendCsprTokens = async (popupPage?: Page) => {
+      const currentPage = popupPage || page;
+      await currentPage.route(URLS.rpc, route =>
+        route.fulfill(RPC_RESPONSE.success)
+      );
+
+      await new Promise(r => setTimeout(r, 5000));
+
+      await currentPage.getByText('Send').click();
+
+      await currentPage.getByRole('button', { name: 'Next' }).click();
+
+      await currentPage
+        .getByPlaceholder('Public key or name', { exact: true })
+        .fill(DEFAULT_SECOND_ACCOUNT.publicKey);
+
+      await currentPage
+        .getByText(DEFAULT_SECOND_ACCOUNT.mediumTruncatedPublicKey, {
+          exact: true
+        })
+        .click();
+
+      await currentPage.getByRole('button', { name: 'Next' }).click();
+
+      await currentPage.getByRole('button', { name: 'Next' }).click();
+
+      // Scroll to the bottom
+      await currentPage.evaluate(() => {
+        const container = document.querySelector('#ms-container');
+
+        container?.scrollTo(0, 1000);
+      });
+
+      await currentPage.getByRole('button', { name: 'Confirm send' }).click();
+      await currentPage.waitForLoadState('networkidle');
+      await currentPage.getByRole('button', { name: 'Done' }).click();
+    };
+    await use(sendCsprTokens);
+  },
+
+  unlockVaultNewPassword: async ({ page }, use) => {
+    const unlockVaultNewPassword = async (popupPage?: Page) => {
+      const currentPage = popupPage || page;
+
+      await currentPage
+        .getByPlaceholder('Password', { exact: true })
+        .fill(newPassword);
+      await currentPage.getByRole('button', { name: 'Unlock wallet' }).click();
+    };
+
+    await use(unlockVaultNewPassword);
+  },
   addContact: async ({ page }, use) => {
     const addContact = async () => {
       await page.getByTestId('menu-open-icon').click();
@@ -291,7 +367,81 @@ export const popup = test.extend<{
     };
 
     await use(addContact);
+  },
+
+  providePassword: async ({ page }, use) => {
+    const providePassword = async (popupPage?: Page) => {
+      const currentPage = popupPage || page;
+
+      await currentPage
+        .getByPlaceholder('Password', { exact: true })
+        .fill(vaultPassword);
+      await currentPage.getByRole('button', { name: 'Continue' }).click();
+    };
+
+    await use(providePassword);
+  },
+  provideNewPassword: async ({ page }, use) => {
+    const provideNewPassword = async (popupPage?: Page) => {
+      const currentPage = popupPage || page;
+
+      await currentPage
+        .getByPlaceholder('Password', { exact: true })
+        .fill(newPassword);
+      await currentPage.getByRole('button', { name: 'Continue' }).click();
+    };
+
+    await use(provideNewPassword);
+  },
+  changePassword: async ({ page }, use) => {
+    const changePassword = async (popupPage?: Page) => {
+      const currentPage = popupPage || page;
+
+      await currentPage
+        .getByPlaceholder('Password', { exact: true })
+        .fill(newPassword);
+      await currentPage.getByPlaceholder('Confirm password').fill(newPassword);
+
+      await currentPage.getByRole('button', { name: 'Continue' }).click();
+
+      await page.waitForTimeout(2000);
+    };
+
+    await use(changePassword);
+  },
+  setWrongPassword: async ({ page }, use) => {
+    const changePassword = async (popupPage?: Page) => {
+      const currentPage = popupPage || page;
+
+      await currentPage
+        .getByPlaceholder('Password', { exact: true })
+        .fill(newPassword);
+      await currentPage
+        .getByPlaceholder('Confirm password')
+        .fill(vaultPassword);
+
+      await currentPage.getByRole('button', { name: 'Continue' }).click();
+
+      await page.waitForTimeout(2000);
+    };
+
+    await use(changePassword);
+  },
+
+  setWrongPasswordFiveTimes: async ({ page }, use) => {
+    const setWrongPasswordFiveTimes = async (popupPage?: Page) => {
+      const currentPage = popupPage || page;
+
+      await currentPage
+        .getByPlaceholder('Password', { exact: true })
+        .fill('wrong password');
+
+      for (let i = 0; i < 5; i++) {
+        await currentPage.getByRole('button', { name: 'Continue' }).click();
+      }
+    };
+
+    await use(setWrongPasswordFiveTimes);
   }
 });
-
 export const popupExpect = popup.expect;

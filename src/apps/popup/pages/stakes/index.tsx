@@ -8,6 +8,7 @@ import styled from 'styled-components';
 
 import {
   AuctionManagerEntryPoint,
+  ErrorMessages,
   STAKE_COST_MOTES,
   StakeSteps,
   networkNameToSdkNetworkNameMap
@@ -207,13 +208,14 @@ export const StakesPage = () => {
           navigate(
             ErrorPath,
             createErrorLocationState({
-              errorHeaderText: error.message || t('Something went wrong'),
+              errorHeaderText:
+                error.sourceErr?.message ||
+                error.message ||
+                t(ErrorMessages.common.UNKNOWN_ERROR.message),
               errorContentText:
-                typeof error.data === 'string'
-                  ? error.data
-                  : t(
-                      'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                    ),
+                typeof error?.sourceErr?.data === 'string'
+                  ? error.sourceErr.data
+                  : t(ErrorMessages.common.UNKNOWN_ERROR.description),
               errorPrimaryButtonLabel: t('Close'),
               errorRedirectPath: RouterPath.Home
             })

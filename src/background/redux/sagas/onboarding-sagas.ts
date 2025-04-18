@@ -2,6 +2,8 @@ import { put, takeLatest } from 'redux-saga/effects';
 import { getType } from 'typesafe-actions';
 import { storage } from 'webextension-polyfill';
 
+import { ErrorMessages } from '@src/constants';
+
 import { disableOnboardingFlow } from '@background/open-onboarding-flow';
 import { contactsReseted } from '@background/redux/contacts/actions';
 import { resetPromotion } from '@background/redux/promotion/actions';
@@ -104,7 +106,7 @@ function* initVaultSaga(action: ReturnType<typeof initVault>) {
   try {
     const { secretPhrase } = action.payload;
     if (!validateSecretPhrase(secretPhrase)) {
-      throw Error('Invalid secret phrase.');
+      throw Error(ErrorMessages.secretPhrase.INVALID_SECRET_PHRASE.message);
     }
 
     const keyPair = deriveKeyPair(secretPhrase, 0);
@@ -128,7 +130,7 @@ function* recoverVaultSaga(action: ReturnType<typeof recoverVault>) {
   try {
     const { secretPhrase, accounts } = action.payload;
     if (!validateSecretPhrase(secretPhrase)) {
-      throw Error('Invalid secret phrase.');
+      throw Error(ErrorMessages.secretPhrase.INVALID_SECRET_PHRASE.message);
     }
 
     yield put(secretPhraseCreated(secretPhrase));

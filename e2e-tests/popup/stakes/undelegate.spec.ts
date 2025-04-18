@@ -1,4 +1,4 @@
-import { RPC_RESPONSE, URLS, VALIDATOR_FOR_STAKE } from '../../constants';
+import { RPC_RESPONSE, URLS, VALIDATOR_FOR_UNDELEGATE } from '../../constants';
 import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI: Undelegation', () => {
@@ -22,7 +22,7 @@ popup.describe('Popup UI: Undelegation', () => {
       await new Promise(r => setTimeout(r, 2000));
 
       await popupPage
-        .getByText(VALIDATOR_FOR_STAKE.truncatedPublicKey, { exact: true })
+        .getByText(VALIDATOR_FOR_UNDELEGATE.truncatedPublicKey, { exact: true })
         .click();
 
       await popupPage.getByRole('button', { name: 'Next' }).click();
@@ -36,7 +36,7 @@ popup.describe('Popup UI: Undelegation', () => {
       await popupPage.getByRole('button', { name: 'Next' }).click();
 
       await popupExpect(
-        popupPage.getByText(VALIDATOR_FOR_STAKE.publicKey)
+        popupPage.getByText(VALIDATOR_FOR_UNDELEGATE.publicKey)
       ).toBeVisible();
 
       // Scroll to the bottom

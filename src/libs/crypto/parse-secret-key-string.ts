@@ -4,6 +4,8 @@ import { Conversions, KeyAlgorithm, PrivateKey } from 'casper-js-sdk';
 // These libraries are required for backward compatibility with Legacy Signer
 import { t } from 'i18next';
 
+import { ErrorMessages } from '@src/constants';
+
 import { AsymmetricKeys } from './create-asymmetric-key';
 
 export function parseSecretKeyString(fileContents: string): {
@@ -42,13 +44,13 @@ export function parseSecretKeyString(fileContents: string): {
 
     default:
       throw Error(
-        t('A private key was not detected. Try importing a different file.')
+        t(ErrorMessages.secretKeyFile.INVALID_FILE_CONTENTS.description)
       );
   }
 
   if (!keyPair.secretKey) {
     throw new Error(
-      t('A private key was not detected. Try importing a different file.')
+      t(ErrorMessages.secretKeyFile.INVALID_FILE_CONTENTS.description)
     );
   }
 

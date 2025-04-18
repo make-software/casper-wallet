@@ -17,7 +17,8 @@ import {
 } from '@background/redux/contacts/actions';
 import {
   selectAllContacts,
-  selectAllContactsNames
+  selectAllContactsNames,
+  selectAllContactsPublicKeys
 } from '@background/redux/contacts/selectors';
 import { contactEditingPermissionChanged } from '@background/redux/session/actions';
 import { selectIsContactEditingAllowed } from '@background/redux/session/selectors';
@@ -54,6 +55,7 @@ export const ContactDetailsPage = () => {
   const contactsNames = useSelector(selectAllContactsNames);
   const accountNames = useSelector(selectVaultAccountsNames);
   const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
+  const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
 
   const handlePasswordConfirmed = useCallback(() => {
     dispatchToMainStore(contactEditingPermissionChanged());
@@ -74,7 +76,7 @@ export const ContactDetailsPage = () => {
     formState: { errors, isValid }
   } = useContactForm(
     [...existingContactNames, ...accountNames],
-    accountsPublicKeys,
+    [...accountsPublicKeys, ...contactPublicKeys],
     contact?.publicKey!,
     contact?.name!
   );
