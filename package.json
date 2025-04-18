@@ -105,7 +105,10 @@
     "yup": "^0.32.11"
   },
   "overrides": {
-    "elliptic": "6.6.1"
+    "elliptic": "6.6.1",
+    "cookie": "^0.7.0",
+    "image-size": "2.0.2",
+    "path-to-regexp": "^1.8.0"
   },
   "devDependencies": {
     "@babel/core": "7.23.3",
