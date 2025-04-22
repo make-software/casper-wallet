@@ -10,6 +10,7 @@ import {
   networkNameToSdkNetworkNameMap
 } from '@src/constants';
 
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
@@ -103,6 +104,7 @@ export const TransferPage = () => {
   const location = useTypedLocation();
   const isCasper2Network = useSelector(selectIsCasper2Network);
   const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
+  const { changeActiveAccountSupportsWithEvent } = useAccountManager();
 
   const [isErc20Transfer, setIsErc20Transfer] = useState<boolean>(false);
   const [selectedToken, setSelectedToken] = useState<TokenType | null>();
@@ -235,7 +237,8 @@ export const TransferPage = () => {
         transaction,
         KEYS,
         activeAccount,
-        fallbackDeploy
+        fallbackDeploy,
+        changeActiveAccountSupportsWithEvent
       );
 
       sendTx(signedTx);
@@ -256,7 +259,8 @@ export const TransferPage = () => {
         transaction,
         KEYS,
         activeAccount,
-        fallbackDeploy
+        fallbackDeploy,
+        changeActiveAccountSupportsWithEvent
       );
 
       sendTx(signedTx);

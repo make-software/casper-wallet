@@ -9,6 +9,7 @@ import {
   accountsAdded,
   accountsImported,
   activeAccountChanged,
+  activeAccountSupportsChanged,
   addWatchingAccount,
   anotherAccountConnected,
   deployPayloadReceived,
@@ -277,6 +278,22 @@ export const reducer = createReducer(initialState)
     (state, { payload }: ReturnType<typeof activeAccountChanged>) => ({
       ...state,
       activeAccountName: payload
+    })
+  )
+  .handleAction(
+    activeAccountSupportsChanged,
+    (state, { payload }: ReturnType<typeof activeAccountSupportsChanged>) => ({
+      ...state,
+      accounts: state.accounts.map(account => {
+        if (account.name === state.activeAccountName) {
+          return {
+            ...account,
+            supports: payload
+          };
+        } else {
+          return account;
+        }
+      })
     })
   )
   .handleAction(deploysReseted, (): State => initialState)

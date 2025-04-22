@@ -96,7 +96,17 @@ export const sdkMethod = {
   getVersionResponse: createAction('CasperWalletProvider:GetVersion:Response')<
     string,
     Meta
-  >()
+  >(),
+  getActivePublicKeySupportsRequest: createAction(
+    'CasperWalletProvider:GetActivePublicKeySupports'
+  )<void, Meta>(),
+  getActivePublicKeySupportsResponse: createAction(
+    'CasperWalletProvider:GetActivePublicKeySupports:Response'
+  )<string[], Meta>(),
+  getActivePublicKeySupportsError: createCustomAction(
+    'CasperWalletProvider:GetActivePublicKeySupports:Error',
+    (payload: SdkError, meta: Meta) => ({ payload, meta, error: true })
+  )
 };
 
 export type SdkMethod = ActionType<typeof sdkMethod>;

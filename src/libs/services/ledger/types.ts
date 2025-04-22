@@ -40,6 +40,7 @@ export interface ILedgerEvent {
   message?: string;
   msgHash?: string;
   signatureHex?: string;
+  appVersion?: string;
 }
 
 export interface LedgerAccountsOptions {

@@ -1,7 +1,11 @@
 import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 
-import { getUrlOrigin } from '@src/utils';
+import {
+  getActiveAccountSupports,
+  getUrlOrigin,
+  isEqualCaseInsensitive
+} from '@src/utils';
 
 import { accountInfoReset } from '@background/redux/account-info/actions';
 import { selectVaultIsLocked } from '@background/redux/session/selectors';
@@ -9,6 +13,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import {
   accountDisconnected,
   activeAccountChanged,
+  activeAccountSupportsChanged,
   anotherAccountConnected,
   siteConnected,
   siteDisconnected
@@ -24,6 +29,7 @@ import {
 } from '@background/utils';
 
 import { sdkEvent } from '@content/sdk-event';
+import { CasperWalletSupports } from '@content/sdk-types';
 
 import { Account } from '@libs/types/account';
 
@@ -100,7 +106,10 @@ export function useAccountManager() {
           sdkEvent.connectedAccountEvent({
             isLocked: isLocked,
             isConnected: isLocked ? undefined : true,
-            activeKey: isLocked ? undefined : account.publicKey
+            activeKey: isLocked ? undefined : account.publicKey,
+            activeKeySupports: isLocked
+              ? undefined
+              : getActiveAccountSupports(activeAccount)
           })
         );
         if (!selectedAccountsIncludeActive) {
@@ -140,7 +149,10 @@ export function useAccountManager() {
           sdkEvent.connectedAccountEvent({
             isLocked: isLocked,
             isConnected: isLocked ? undefined : true,
-            activeKey: isLocked ? undefined : account.publicKey
+            activeKey: isLocked ? undefined : account.publicKey,
+            activeKeySupports: isLocked
+              ? undefined
+              : getActiveAccountSupports(activeAccount)
           })
         );
         if (!selectedAccountIsActive) {
@@ -188,7 +200,11 @@ export function useAccountManager() {
           activeKey:
             isLocked || !isAccountConnectedWithTab
               ? undefined
-              : account.publicKey
+              : account.publicKey,
+          activeKeySupports:
+            isLocked || !isAccountConnectedWithTab
+              ? undefined
+              : getActiveAccountSupports(activeAccount)
         });
       });
 
@@ -215,7 +231,10 @@ export function useAccountManager() {
           sdkEvent.disconnectedAccountEvent({
             isLocked: isLocked,
             isConnected: isLocked ? undefined : false,
-            activeKey: isLocked ? undefined : activeAccount?.publicKey
+            activeKey: isLocked ? undefined : activeAccount?.publicKey,
+            activeKeySupports: isLocked
+              ? undefined
+              : getActiveAccountSupports(activeAccount)
           })
         );
       }
@@ -255,7 +274,10 @@ export function useAccountManager() {
           sdkEvent.disconnectedAccountEvent({
             isLocked: isLocked,
             isConnected: isLocked ? undefined : false,
-            activeKey: isLocked ? undefined : activeAccount?.publicKey
+            activeKey: isLocked ? undefined : activeAccount?.publicKey,
+            activeKeySupports: isLocked
+              ? undefined
+              : getActiveAccountSupports(activeAccount)
           })
         );
       }
@@ -270,11 +292,64 @@ export function useAccountManager() {
     [accountNamesByOriginDict, activeAccount, isLocked]
   );
 
+  /**
+   * change active account supports
+   */
+  const changeActiveAccountSupportsWithEvent = useCallback(
+    async (publicKey: string, supportsTransactionV1: boolean) => {
+      if (
+        !activeAccount ||
+        !isEqualCaseInsensitive(activeAccount.publicKey, publicKey)
+      ) {
+        return;
+      }
+
+      emitSdkEventToActiveTabs(tab => {
+        if (!tab.url) {
+          return;
+        }
+
+        const isAccountConnectedWithTab = isAccountConnectedWithOrigin(
+          getUrlOrigin(tab.url),
+          activeAccount.name
+        );
+
+        return sdkEvent.changedActiveAccountSupportsEvent({
+          isLocked: isLocked,
+          isConnected: isLocked ? undefined : isAccountConnectedWithTab,
+          activeKey:
+            isLocked || !isAccountConnectedWithTab
+              ? undefined
+              : activeAccount.publicKey,
+          activeKeySupports:
+            isLocked || !isAccountConnectedWithTab
+              ? undefined
+              : [
+                  CasperWalletSupports.signDeploy,
+                  CasperWalletSupports.signMessage,
+                  ...(supportsTransactionV1
+                    ? [CasperWalletSupports.signTransactionV1]
+                    : [])
+                ]
+        });
+      });
+
+      dispatchToMainStore(
+        activeAccountSupportsChanged(
+          supportsTransactionV1 ? [CasperWalletSupports.signTransactionV1] : []
+        )
+      );
+      dispatchToMainStore(accountInfoReset());
+    },
+    [activeAccount?.name, accounts, isLocked, isAccountConnectedWithOrigin]
+  );
+
   return {
     connectSiteWithEvent,
     connectAnotherAccountWithEvent,
     changeActiveAccountWithEvent,
     disconnectSiteWithEvent,
-    disconnectAccountWithEvent
+    disconnectAccountWithEvent,
+    changeActiveAccountSupportsWithEvent
   };
 }

@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 
 import { ErrorMessages, networkNameToSdkNetworkNameMap } from '@src/constants';
 
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 import {
   TransferNFTSteps,
   getDefaultPaymentAmountBasedOnNftTokenStandard
@@ -87,6 +88,7 @@ export const TransferNftPage = () => {
     useState(true);
   const isCasper2Network = useSelector(selectIsCasper2Network);
   const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
+  const { changeActiveAccountSupportsWithEvent } = useAccountManager();
 
   const { contractPackageHash, tokenId } = useParams();
 
@@ -197,7 +199,8 @@ export const TransferNftPage = () => {
         transaction,
         KEYS,
         activeAccount,
-        fallbackDeploy
+        fallbackDeploy,
+        changeActiveAccountSupportsWithEvent
       );
 
       sendSignedTx(signedTx, nodeUrl, isCasper2Network)

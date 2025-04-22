@@ -24,6 +24,7 @@ async function handleSdkMessage(message: SdkEvent | SdkMethod) {
       case getType(sdkMethod.signResponse):
       case getType(sdkMethod.signMessageError):
       case getType(sdkMethod.signMessageResponse):
+      case getType(sdkMethod.getActivePublicKeySupportsResponse):
         window.dispatchEvent(
           new CustomEvent(SdkMethodEventType.Response, {
             detail: JSON.stringify(message)
@@ -68,6 +69,10 @@ function emitSdkEvent(message: SdkEvent) {
 
     case getType(sdkEvent.unlockedEvent):
       eventType = CasperWalletEventType.Unlocked;
+      break;
+
+    case getType(sdkEvent.changedActiveAccountSupportsEvent):
+      eventType = CasperWalletEventType.ActiveKeySupportsChanged;
       break;
 
     default:

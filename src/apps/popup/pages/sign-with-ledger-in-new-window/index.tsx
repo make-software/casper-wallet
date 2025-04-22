@@ -2,6 +2,8 @@ import { Deploy, Transaction } from 'casper-js-sdk';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+
 import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
 import {
   selectLedgerDeploy,
@@ -33,6 +35,7 @@ export const SignWithLedgerInNewWindowPage = () => {
   const { nodeUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const [isSuccess, setIsSuccess] = useState(false);
   const isCasper2Network = useSelector(selectIsCasper2Network);
+  const { changeActiveAccountSupportsWithEvent } = useAccountManager();
 
   const ledgerAction = async () => {
     if (!(activeAccount && txJson && deployJson)) {
@@ -47,7 +50,13 @@ export const SignWithLedgerInNewWindowPage = () => {
     const tx = Transaction.fromJSON(txJson);
     const deployFallback = Deploy.fromJSON(deployJson);
 
-    const signedTx = await signTx(tx, KEYS, activeAccount, deployFallback);
+    const signedTx = await signTx(
+      tx,
+      KEYS,
+      activeAccount,
+      deployFallback,
+      changeActiveAccountSupportsWithEvent
+    );
 
     sendSignedTx(signedTx, nodeUrl, isCasper2Network)
       .then(hash => {

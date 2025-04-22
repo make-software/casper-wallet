@@ -10,6 +10,8 @@ import { accountsImported } from '@background/redux/vault/actions';
 
 import { useIsDarkMode } from '@hooks/use-is-dark-mode';
 
+import { CasperWalletSupports } from '@content/sdk-types';
+
 import spinnerDarkModeAnimation from '@libs/animations/spinner_dark_mode.json';
 import spinnerLightModeAnimation from '@libs/animations/spinner_light_mode.json';
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
@@ -64,6 +66,8 @@ export const ConnectedLedger: React.FC<IConnectedLedgerProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [maxItemsToRender, setMaxItemsToRender] = useState(5);
+  const [ledgerAppVersion, setLedgerAppVersion] = useState<string | null>(null);
+  const supportsSignTransactionV1 = Number(ledgerAppVersion?.[0] ?? 2) > 2;
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
@@ -79,6 +83,7 @@ export const ConnectedLedger: React.FC<IConnectedLedgerProps> = ({
         setAccountsFromLedger(prev => {
           return [...prev, ...(event.accounts ?? [])];
         });
+        setLedgerAppVersion(event.appVersion ?? null);
       }
     });
 
@@ -117,7 +122,10 @@ export const ConnectedLedger: React.FC<IConnectedLedgerProps> = ({
       secretKey: '',
       hardware: HardwareWalletType.Ledger,
       hidden: false,
-      derivationIndex: account.derivationIndex
+      derivationIndex: account.derivationIndex,
+      supports: supportsSignTransactionV1
+        ? [CasperWalletSupports.signTransactionV1]
+        : undefined
     }));
 
     dispatchToMainStore(accountsImported(accounts)).then(() => {

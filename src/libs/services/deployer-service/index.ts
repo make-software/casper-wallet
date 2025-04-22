@@ -50,7 +50,11 @@ export const signTx = async (
   tx: Transaction,
   keys: AsymmetricKeys,
   activeAccount: Account,
-  deployFallback?: Deploy
+  deployFallback?: Deploy,
+  supportsTransactionV1Cb?: (
+    publicKey: string,
+    supports: boolean
+  ) => Promise<void>
 ) => {
   if (activeAccount?.hardware === HardwareWalletType.Ledger) {
     const signedTx = await ledger.getSignedTransaction(
@@ -59,7 +63,8 @@ export const signTx = async (
         publicKey: activeAccount.publicKey,
         index: activeAccount.derivationIndex
       },
-      deployFallback ? Transaction.fromDeploy(deployFallback) : undefined
+      deployFallback ? Transaction.fromDeploy(deployFallback) : undefined,
+      supportsTransactionV1Cb
     );
     const approval = signedTx.approvals[0];
 

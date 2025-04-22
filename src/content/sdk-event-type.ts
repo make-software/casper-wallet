@@ -15,5 +15,7 @@ export const CasperWalletEventType = {
   /** Wallet was locked: */
   Locked: `${EVENT_TYPE_PREFIX}:locked`,
   /** Wallet was unlocked: */
-  Unlocked: `${EVENT_TYPE_PREFIX}:unlocked`
+  Unlocked: `${EVENT_TYPE_PREFIX}:unlocked`,
+  /** Active key was changed using the Wallet interface: */
+  ActiveKeySupportsChanged: `${EVENT_TYPE_PREFIX}:activeKeySupportsChanged`
 } as const;

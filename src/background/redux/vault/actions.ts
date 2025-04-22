@@ -2,6 +2,8 @@ import { createAction } from 'typesafe-actions';
 
 import { VaultState } from '@background/redux/vault/types';
 
+import { CasperWalletSupports } from '@content/sdk-types';
+
 import { SecretPhrase } from '@libs/crypto';
 import { Account } from '@libs/types/account';
 
@@ -55,6 +57,10 @@ export const siteDisconnected = createAction('SITE_DISCONNECTED')<{
 export const activeAccountChanged = createAction(
   'ACTIVE_ACCOUNT_CHANGED'
 )<string>();
+
+export const activeAccountSupportsChanged = createAction(
+  'ACTIVE_ACCOUNT_SUPPORTS_CHANGED'
+)<CasperWalletSupports[]>();
 
 export const deploysReseted = createAction('DEPLOYS_RESETED')<void>();
 

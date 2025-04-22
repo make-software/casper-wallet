@@ -1,7 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import { blake2b } from '@noble/hashes/blake2b';
 import LedgerCasperApp, { ResponseSign } from '@zondax/ledger-casper';
-import { Buffer } from 'buffer';
 import { HexBytes, PublicKey, Transaction } from 'casper-js-sdk';
 import {
   BehaviorSubject,
@@ -192,10 +191,13 @@ export class Ledger {
         index: offset + i
       }));
 
+      const appInfo = await this.#ledgerApp?.getAppInfo();
+
       this.#LedgerEventStatussSubject.next({
         status: LedgerEventStatus.AccountListUpdated,
         firstAcctIndex: offset,
-        accounts: updatedAccountList
+        accounts: updatedAccountList,
+        appVersion: appInfo.appVersion
       });
 
       if (offset === this.cachedAccounts.length) {
@@ -211,9 +213,13 @@ export class Ledger {
   };
 
   /** @throws {LedgerError} message - ILedgerEvent JSON */
-  async singTransaction(
+  async signTransaction(
     tx: Transaction,
-    account: Partial<LedgerAccount>
+    account: Partial<LedgerAccount>,
+    supportsTransactionV1Cb?: (
+      publicKey: string,
+      supports: boolean
+    ) => Promise<void>
   ): Promise<SignResult> {
     try {
       if (account.index === undefined) {
@@ -307,6 +313,8 @@ export class Ledger {
             Buffer.from(deploy.toBytes())
           );
         }
+
+        supportsTransactionV1Cb?.(account.publicKey, false);
       }
 
       await this.#processDelayAfterAction();
@@ -377,7 +385,11 @@ export class Ledger {
     tx: Transaction,
     account: Partial<Pick<LedgerAccount, 'index'>> &
       Pick<LedgerAccount, 'publicKey'>,
-    fallbackTxFromDeploy?: Transaction
+    fallbackTxFromDeploy?: Transaction,
+    supportsTransactionV1Cb?: (
+      publicKey: string,
+      supports: boolean
+    ) => Promise<void>
   ): Promise<Transaction> {
     if (account.index === undefined) {
       this.#processError({ status: LedgerEventStatus.InvalidIndex });
@@ -389,7 +401,11 @@ export class Ledger {
     const appSupportsTransactionV1 = Number(appInfo?.appVersion?.[0] ?? 2) > 2;
 
     if (appSupportsTransactionV1) {
-      const resp = await this.singTransaction(tx, account);
+      const resp = await this.signTransaction(
+        tx,
+        account,
+        supportsTransactionV1Cb
+      );
 
       tx.setSignature(
         HexBytes.fromHex(resp.prefixedSignatureHex).bytes,
@@ -404,7 +420,11 @@ export class Ledger {
         });
       }
 
-      const resp = await this.singTransaction(fallbackTxFromDeploy, account);
+      const resp = await this.signTransaction(
+        fallbackTxFromDeploy,
+        account,
+        supportsTransactionV1Cb
+      );
 
       fallbackTxFromDeploy.setSignature(
         HexBytes.fromHex(resp.prefixedSignatureHex).bytes,

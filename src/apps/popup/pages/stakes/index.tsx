@@ -14,6 +14,7 @@ import {
   networkNameToSdkNetworkNameMap
 } from '@src/constants';
 
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 import { AmountStep } from '@popup/pages/stakes/amount-step';
 import { ConfirmStep } from '@popup/pages/stakes/confirm-step';
 import { NoDelegations } from '@popup/pages/stakes/no-delegations';
@@ -113,6 +114,7 @@ export const StakesPage = () => {
   const [maxAmountMotesForStaking, setMaxAmountMotesForStaking] = useState('');
   const isCasper2Network = useSelector(selectIsCasper2Network);
   const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
+  const { changeActiveAccountSupportsWithEvent } = useAccountManager();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isActiveAccountFromLedger = useSelector(
@@ -194,7 +196,8 @@ export const StakesPage = () => {
         transaction,
         KEYS,
         activeAccount,
-        fallbackDeploy
+        fallbackDeploy,
+        changeActiveAccountSupportsWithEvent
       );
 
       sendSignedTx(signedTx, nodeUrl, isCasper2Network)

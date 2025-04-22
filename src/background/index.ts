@@ -11,6 +11,7 @@ import {
 } from 'webextension-polyfill';
 
 import {
+  getActiveAccountSupports,
   getUrlOrigin,
   hasHttpPrefix,
   isChromeBuild,
@@ -254,6 +255,10 @@ const updateOrigin = async (windowId: number) => {
           activeKey:
             !isLocked && isActiveAccountConnected
               ? activeAccount.publicKey
+              : undefined,
+          activeKeySupports:
+            !isLocked && isActiveAccountConnected
+              ? getActiveAccountSupports(activeAccount)
               : undefined
         })
       );
@@ -445,6 +450,10 @@ runtime.onMessage.addListener(
                 activeKey:
                   !isLocked && isActiveAccountConnected
                     ? activeAccount.publicKey
+                    : undefined,
+                activeKeySupports:
+                  !isLocked && isActiveAccountConnected
+                    ? getActiveAccountSupports(activeAccount)
                     : undefined
               })
             );
@@ -521,6 +530,55 @@ runtime.onMessage.addListener(
             return sendResponse(
               sdkMethod.getActivePublicKeyResponse(
                 activeAccount.publicKey,
+                action.meta
+              )
+            );
+          }
+
+          case getType(sdkMethod.getActivePublicKeySupportsRequest): {
+            const origin = getUrlOrigin(sender.url);
+
+            if (!origin) {
+              return sendError(CannotGetSenderOriginError());
+            }
+
+            const isLocked = selectVaultIsLocked(store.getState());
+
+            if (isLocked) {
+              return sendResponse(
+                sdkMethod.getActivePublicKeySupportsError(
+                  WalletLockedError(),
+                  action.meta
+                )
+              );
+            }
+
+            const activeAccount = selectVaultActiveAccount(store.getState());
+
+            if (!activeAccount) {
+              return sendError(CannotGetActiveAccountError());
+            }
+
+            const isConnected = selectIsAccountConnected(
+              store.getState(),
+              origin,
+              activeAccount?.name
+            );
+
+            if (!isConnected) {
+              return sendResponse(
+                sdkMethod.getActivePublicKeySupportsError(
+                  SiteNotConnectedError(),
+                  action.meta
+                )
+              );
+            }
+
+            const supports = getActiveAccountSupports(activeAccount);
+
+            return sendResponse(
+              sdkMethod.getActivePublicKeySupportsResponse(
+                supports,
                 action.meta
               )
             );
@@ -666,7 +724,10 @@ runtime.onMessage.addListener(
                 return sdkEvent.changedConnectedAccountEvent({
                   isLocked: isLocked,
                   isConnected: undefined,
-                  activeKey: activeAccount?.publicKey
+                  activeKey: activeAccount?.publicKey,
+                  activeKeySupports: activeAccount
+                    ? getActiveAccountSupports(activeAccount)
+                    : undefined
                 });
               });
             }
