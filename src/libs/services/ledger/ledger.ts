@@ -224,7 +224,7 @@ export class Ledger {
 
       const appInfo = await this.#ledgerApp?.getAppInfo();
       const appSupportsTransactionV1 =
-        appInfo?.appVersion?.startsWith('3.') ?? false;
+        Number(appInfo?.appVersion?.[0] ?? 2) > 2;
 
       if (!appSupportsTransactionV1 && !tx.getDeploy()) {
         this.#processError({
@@ -272,12 +272,21 @@ export class Ledger {
       let result: ResponseSign;
 
       if (appSupportsTransactionV1) {
-        let txBytes = tx.toBytes();
+        if (tx.getDeploy()?.session?.isModuleBytes()) {
+          // in version 3. we still need to use signWasmDeploy for legacy WASM Deploys
+          result = await this.#ledgerApp?.signWasmDeploy(
+            this.#getAccountPath(account.index),
+            Buffer.from(tx.getDeploy()!.toBytes())
+          );
+        } else {
+          let txBytes = tx.toBytes();
+          result = await this.#ledgerApp?.sign(
+            this.#getAccountPath(account.index),
+            Buffer.from(txBytes)
+          );
+        }
 
-        result = await this.#ledgerApp?.sign(
-          this.#getAccountPath(account.index),
-          Buffer.from(txBytes)
-        );
+        supportsTransactionV1Cb?.(account.publicKey, true);
       } else {
         const deploy = tx.getDeploy();
 
@@ -377,8 +386,7 @@ export class Ledger {
     await this.#checkConnection(account.index);
 
     const appInfo = await this.#ledgerApp?.getAppInfo();
-    const appSupportsTransactionV1 =
-      appInfo?.appVersion?.startsWith('3.') ?? false;
+    const appSupportsTransactionV1 = Number(appInfo?.appVersion?.[0] ?? 2) > 2;
 
     if (appSupportsTransactionV1) {
       const resp = await this.singTransaction(tx, account);
