@@ -64,7 +64,7 @@ export const buildCsprTransferTransactions = (
 ) => {
   const transaction = makeCsprTransferTransaction({
     chainName,
-    memo,
+    memo: memo ?? Date.now().toString(),
     recipientPublicKeyHex,
     senderPublicKeyHex,
     transferAmount,
@@ -76,7 +76,7 @@ export const buildCsprTransferTransactions = (
   // required for old Ledger apps
   const fallbackDeploy = makeCsprTransferDeploy({
     chainName,
-    memo,
+    memo: memo ?? Date.now().toString(),
     recipientPublicKeyHex,
     senderPublicKeyHex,
     transferAmount,
