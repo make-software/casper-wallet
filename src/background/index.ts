@@ -79,6 +79,7 @@ import {
   accountsAdded,
   accountsImported,
   activeAccountChanged,
+  activeAccountSupportsChanged,
   addWatchingAccount,
   anotherAccountConnected,
   deployPayloadReceived,
@@ -626,6 +627,7 @@ runtime.onMessage.addListener(
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeAccountChanged):
+          case getType(activeAccountSupportsChanged):
           case getType(hideAccountFromListChanged):
           case getType(activeTimeoutDurationSettingChanged):
           case getType(activeNetworkSettingChanged):
