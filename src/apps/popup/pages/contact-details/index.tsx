@@ -78,7 +78,8 @@ export const ContactDetailsPage = () => {
     [...existingContactNames, ...accountNames],
     [...accountsPublicKeys, ...contactPublicKeys],
     contact?.publicKey!,
-    contact?.name!
+    contact?.name!,
+    isEditing
   );
 
   const isButtonDisabled = useMemo(
