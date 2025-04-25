@@ -1,3 +1,4 @@
+import { Page } from '@playwright/test';
 import path from 'path';
 
 export const newPassword = 'this is new password';
@@ -64,6 +65,20 @@ export const DEFAULT_FIRST_ACCOUNT = {
     '0202b1943511b8c23b1b2b8ed7ddcedffcc7be70d9366a5005c7beab08a81b7ae633',
   truncatedPublicKey: '0202b...ae633',
   mediumTruncatedPublicKey: '0202b19435...a81b7ae633'
+};
+export const FIRST_CONTACT = {
+  accountName: 'First contact',
+  publicKey:
+    '0202b1943511b8c23b1b2b8ed7ddcedffcc7be70d9366a5005c7beab08a81b7ae631',
+  truncatedPublicKey: '0202b...ae631',
+  mediumTruncatedPublicKey: '0202b19435...a81b7ae631'
+};
+export const SECOND_CONTACT = {
+  accountName: 'Second contact',
+  publicKey:
+    '0202b1943511b8c23b1b2b8ed7ddcedffcc7be70d9366a5005c7beab08a81b7ae666',
+  truncatedPublicKey: '0202b...ae666',
+  mediumTruncatedPublicKey: '0202b19435...a81b7ae666'
 };
 
 export const DEFAULT_SECOND_ACCOUNT = {
@@ -136,12 +151,12 @@ export const RPC_RESPONSE = {
     })
   },
   failure: {
-    status: 200,
+    status: 500,
     body: JSON.stringify({
-      error: {
+      sourceErr: {
         code: -32016,
-        data: 'Error description',
-        message: 'Error message'
+        data: 'error description',
+        message: 'error message'
       },
       id: 1,
       jsonrpc: '2.0'

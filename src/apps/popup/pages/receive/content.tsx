@@ -1,8 +1,8 @@
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 import { formatCep18Tokens } from '@popup/pages/home/components/tokens-list/utils';
 import { useTypedLocation } from '@popup/router';
@@ -42,6 +42,7 @@ interface ITokenData {
 
 export const ReceivePageContent = () => {
   const { t } = useTranslation();
+  const theme = useTheme();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
 
@@ -90,14 +91,13 @@ export const ReceivePageContent = () => {
         <Tile>
           <Container>
             <FlexColumn gap={SpacingSize.Medium}>
-              <QRCodeSVG
+              <QRCodeCanvas
+                id="qrCode"
                 value={activeAccount?.publicKey || ''}
-                style={{
-                  maxWidth: '296px',
-                  maxHeight: '296px',
-                  height: 'auto',
-                  width: 'auto'
-                }}
+                size={296}
+                fgColor={theme.color.contentPrimary}
+                bgColor={theme.color.backgroundPrimary}
+                level={'H'}
               />
               {isClicked ? (
                 <Typography type="captionHash" color="contentPositive">

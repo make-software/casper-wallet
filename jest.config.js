@@ -10,7 +10,9 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   modulePathIgnorePatterns: ['<rootDir>/e2e-tests'],
   moduleNameMapper: {
-    '^@src/(.*)$': '<rootDir>/src/$1'
+    '^@src/(.*)$': '<rootDir>/src/$1',
+    '^@content/sdk-types$': '<rootDir>/src/content/sdk-types',
+    '^@libs/types/(.*)$': '<rootDir>/src/libs/types/$1'
   },
   setupFilesAfterEnv: ['@testing-library/jest-dom'],
   coverageReporters: ['json', 'text'],

@@ -1,9 +1,4 @@
-import {
-  Deploy,
-  NFTTokenStandard,
-  makeNftTransferDeploy,
-  makeNftTransferTransaction
-} from 'casper-js-sdk';
+import { Deploy, NFTTokenStandard } from 'casper-js-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -11,6 +6,7 @@ import { useParams } from 'react-router-dom';
 
 import { ErrorMessages, networkNameToSdkNetworkNameMap } from '@src/constants';
 
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 import {
   TransferNFTSteps,
   getDefaultPaymentAmountBasedOnNftTokenStandard
@@ -24,7 +20,8 @@ import {
 import { selectAllContactsPublicKeys } from '@background/redux/contacts/selectors';
 import {
   ledgerDeployChanged,
-  ledgerRecipientToSaveOnSuccessChanged
+  ledgerRecipientToSaveOnSuccessChanged,
+  ledgerTransactionChanged
 } from '@background/redux/ledger/actions';
 import {
   selectAskForReviewAfter,
@@ -62,6 +59,7 @@ import {
   signTx
 } from '@libs/services/deployer-service';
 import { useFetchNftTokens } from '@libs/services/nft-service';
+import { buildNftTransferTransactions } from '@libs/services/tx-builders';
 import {
   Button,
   HomePageTabsId,
@@ -90,6 +88,7 @@ export const TransferNftPage = () => {
     useState(true);
   const isCasper2Network = useSelector(selectIsCasper2Network);
   const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
+  const { changeActiveAccountSupportsWithEvent } = useAccountManager();
 
   const { contractPackageHash, tokenId } = useParams();
 
@@ -179,20 +178,30 @@ export const TransferNftPage = () => {
 
       const timestamp = await getDateForDeploy(nodeUrl);
 
-      const tx = makeNftTransferTransaction({
-        chainName: networkNameToSdkNetworkNameMap[networkName],
-        contractPackageHash: nftToken.contractPackageHash,
-        nftStandard: NFTTokenStandard[tokenStandard],
-        paymentAmount: CSPRtoMotes(paymentAmount),
-        recipientPublicKeyHex: recipientPublicKey,
-        senderPublicKeyHex: KEYS.publicKey.toHex(),
-        tokenId: nftToken.tokenId,
-        timestamp,
-        casperNetworkApiVersion,
-        gasPrice: 3
-      });
+      const { transaction, fallbackDeploy } = buildNftTransferTransactions(
+        {
+          chainName: networkNameToSdkNetworkNameMap[networkName],
+          contractPackageHash: nftToken.contractPackageHash,
+          nftStandard: NFTTokenStandard[tokenStandard],
+          paymentAmount: CSPRtoMotes(paymentAmount),
+          recipientPublicKeyHex: recipientPublicKey,
+          senderPublicKeyHex: KEYS.publicKey.toHex(),
+          tokenId:
+            nftToken.tokenIdType === 'uint' ? nftToken.tokenId : undefined,
+          tokenHash:
+            nftToken.tokenIdType === 'hash' ? nftToken.tokenId : undefined,
+          timestamp
+        },
+        casperNetworkApiVersion
+      );
 
-      const signedTx = await signTx(tx, KEYS, activeAccount);
+      const signedTx = await signTx(
+        transaction,
+        KEYS,
+        activeAccount,
+        fallbackDeploy,
+        changeActiveAccountSupportsWithEvent
+      );
 
       sendSignedTx(signedTx, nodeUrl, isCasper2Network)
         .then(hash => {
@@ -244,19 +253,27 @@ export const TransferNftPage = () => {
 
     const timestamp = await getDateForDeploy(nodeUrl);
 
-    const deploy = makeNftTransferDeploy({
-      chainName: networkNameToSdkNetworkNameMap[networkName],
-      contractPackageHash: nftToken.contractPackageHash,
-      nftStandard: NFTTokenStandard[tokenStandard],
-      paymentAmount: CSPRtoMotes(paymentAmount),
-      recipientPublicKeyHex: recipientPublicKey,
-      senderPublicKeyHex: KEYS.publicKey.toHex(),
-      tokenId: nftToken.tokenId,
-      timestamp
-    });
+    const { transaction, fallbackDeploy } = buildNftTransferTransactions(
+      {
+        chainName: networkNameToSdkNetworkNameMap[networkName],
+        contractPackageHash: nftToken.contractPackageHash,
+        nftStandard: NFTTokenStandard[tokenStandard],
+        paymentAmount: CSPRtoMotes(paymentAmount),
+        recipientPublicKeyHex: recipientPublicKey,
+        senderPublicKeyHex: KEYS.publicKey.toHex(),
+        tokenId: nftToken.tokenIdType === 'uint' ? nftToken.tokenId : undefined,
+        tokenHash:
+          nftToken.tokenIdType === 'hash' ? nftToken.tokenId : undefined,
+        timestamp
+      },
+      casperNetworkApiVersion
+    );
 
     dispatchToMainStore(
-      ledgerDeployChanged(JSON.stringify(Deploy.toJSON(deploy)))
+      ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
+    );
+    dispatchToMainStore(
+      ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
     );
     dispatchToMainStore(
       ledgerRecipientToSaveOnSuccessChanged(recipientPublicKey)
@@ -328,7 +345,10 @@ export const TransferNftPage = () => {
   const ledgerFooterButton = renderLedgerFooter({
     onConnect: makeSubmitLedgerAction,
     event: ledgerEventStatusToRender,
-    onErrorCtaPressed: () => setTransferNFTStep(TransferNFTSteps.Confirm)
+    onErrorCtaPressed: () => {
+      setTransferNFTStep(TransferNFTSteps.Confirm);
+      setIsSubmitButtonDisable(false);
+    }
   });
 
   const footerButtons = {

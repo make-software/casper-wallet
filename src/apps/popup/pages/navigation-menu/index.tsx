@@ -5,6 +5,7 @@ import styled from 'styled-components';
 
 import {
   ABOUT_US_URL,
+  CASHBACK_URL,
   SHARE_FEEDBACK_URL,
   TERMS_URLS,
   USER_GUIDES_URL
@@ -258,6 +259,13 @@ export function NavigationMenuPageContent() {
             currentValue: themeMode,
             disabled: false,
             isModalWindow: true
+          },
+          {
+            id: 4,
+            title: t('Cashback'),
+            iconPath: 'assets/icons/cspr-shopping.svg',
+            disabled: false,
+            href: CASHBACK_URL
           }
         ]
       },

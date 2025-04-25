@@ -294,6 +294,14 @@ export const NftDetailsContent = ({
                 color="contentPrimary"
                 placement="bottomLeft"
               />
+            ) : token.id === 3 && (token?.value?.length ?? 0) > 10 ? (
+              <Hash
+                value={token.value || ''}
+                variant={HashVariant.CaptionHash}
+                truncated
+                color="contentPrimary"
+                placement="bottomLeft"
+              />
             ) : token.image ? (
               <AlignedFlexRow gap={SpacingSize.Small}>
                 <Typography

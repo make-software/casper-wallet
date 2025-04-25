@@ -321,7 +321,7 @@ export const usePaymentAmountRule = (csprBalance: string | undefined) => {
 export const useCSPRStakeAmountRule = (
   amountMotes: string | undefined,
   mode: AuctionManagerEntryPoint,
-  stakeAmountMotes: string,
+  maxAmountMotesForStaking: string,
   validatorMinAmount: string,
   validatorMaxAmount: string
 ) => {
@@ -403,12 +403,14 @@ export const useCSPRStakeAmountRule = (
           switch (mode) {
             case AuctionManagerEntryPoint.undelegate: {
               return Big(CSPRtoMotes(csprAmountInputValue)).lte(
-                Big(stakeAmountMotes).sub(getStakeMinAmountMotes()).toFixed()
+                Big(maxAmountMotesForStaking)
+                  .sub(getStakeMinAmountMotes())
+                  .toFixed()
               );
             }
             case AuctionManagerEntryPoint.redelegate: {
               return Big(CSPRtoMotes(csprAmountInputValue)).lte(
-                Big(stakeAmountMotes).toFixed()
+                Big(maxAmountMotesForStaking).toFixed()
               );
             }
             case AuctionManagerEntryPoint.delegate:
@@ -593,10 +595,14 @@ export const useContactNameRule = (
       t("Name can't be empty"),
       value => value != null && value.trim() !== ''
     )
+    .matches(
+      /^[\daA-zZ\s]+$/,
+      t('Contact name can’t contain special characters')
+    )
     .test(
       'unique',
       t(
-        'You’ve already got a contact with this name. Please find a new name for this one'
+        'You’ve already got an account / contact with this name. Please find a new name for this one'
       ),
       value => isContactNameIsTakenCallback(value)
     );

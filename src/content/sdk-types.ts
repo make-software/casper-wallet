@@ -8,4 +8,12 @@ export type CasperWalletState = {
   isConnected: boolean | undefined;
   /** if unlocked and connected contain active key otherwise undefined */
   activeKey: string | undefined;
+  /** if unlocked and connected, contain a list of supported features for the current active key otherwise `undefined` */
+  activeKeySupports: CasperWalletSupports[] | undefined;
 };
+
+export enum CasperWalletSupports {
+  signDeploy = 'sign-deploy',
+  signTransactionV1 = 'sign-transactionv1',
+  signMessage = 'sign-message'
+}

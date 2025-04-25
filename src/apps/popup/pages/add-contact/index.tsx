@@ -12,6 +12,10 @@ import {
   selectAllContactsPublicKeys
 } from '@background/redux/contacts/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
+import {
+  selectVaultAccountsNames,
+  selectVaultAccountsPublicKeys
+} from '@background/redux/vault/selectors';
 
 import {
   FooterButtonsContainer,
@@ -31,6 +35,8 @@ export const AddContactPage = () => {
   const { state } = useTypedLocation();
 
   const contactsNames = useSelector(selectAllContactsNames);
+  const accountNames = useSelector(selectVaultAccountsNames);
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
   const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
 
   const {
@@ -38,8 +44,8 @@ export const AddContactPage = () => {
     handleSubmit,
     formState: { errors, isValid }
   } = useContactForm(
-    contactsNames,
-    contactPublicKeys,
+    [...contactsNames, ...accountNames],
+    [...accountsPublicKeys, ...contactPublicKeys],
     state?.recipientPublicKey
   );
 

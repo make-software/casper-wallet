@@ -31,6 +31,7 @@ export const TERMS_URLS = {
   tos: 'https://www.casperwallet.io/tos',
   privacy: 'https://www.casperwallet.io/privacy'
 };
+export const CASHBACK_URL = 'https://www.cspr.shopping';
 export const REFERRER_URL = 'https://casperwallet.io';
 
 export const getBlockExplorerAccountUrl = (

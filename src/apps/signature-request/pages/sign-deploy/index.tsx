@@ -6,6 +6,8 @@ import { useSelector } from 'react-redux';
 import { ErrorMessages } from '@src/constants';
 import { getSigningAccount, isEqualCaseInsensitive } from '@src/utils';
 
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+
 import { SignDeployContent } from '@signature-request/pages/sign-deploy/sign-deploy-content';
 import { RouterPath } from '@signature-request/router';
 
@@ -44,6 +46,7 @@ import {
 export function SignDeployPage() {
   const { t } = useTranslation();
   const isCasper2Network = useSelector(selectIsCasper2Network);
+  const { changeActiveAccountSupportsWithEvent } = useAccountManager();
 
   const [transaction, setTransaction] = useState<undefined | Transaction>(
     undefined
@@ -166,21 +169,14 @@ export function SignDeployPage() {
     }
 
     if (signingAccount.hardware === HardwareWalletType.Ledger) {
-      if (transaction.getTransactionV1()) {
-        // TODO not supported by Ledger yet
-        return;
-      }
-
-      const deploy = transaction.getDeploy();
-
-      if (!deploy) {
-        return;
-      }
-
-      const resp = await ledger.singDeploy(deploy, {
-        index: signingAccount.derivationIndex,
-        publicKey: signingAccount.publicKey
-      });
+      const resp = await ledger.signTransaction(
+        transaction,
+        {
+          index: signingAccount.derivationIndex,
+          publicKey: signingAccount.publicKey
+        },
+        changeActiveAccountSupportsWithEvent
+      );
 
       signature = resp.signature;
     } else {
@@ -208,7 +204,8 @@ export function SignDeployPage() {
     signingAccount.derivationIndex,
     signingAccount.publicKey,
     signingAccount.secretKey,
-    requestId
+    requestId,
+    changeActiveAccountSupportsWithEvent
   ]);
 
   const handleCancel = useCallback(() => {
