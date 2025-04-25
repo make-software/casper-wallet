@@ -2,7 +2,6 @@ import { Page } from '@playwright/test';
 import path from 'path';
 
 export const newPassword = 'this is new password';
-export const newPassword = 'this is new password';
 export const vaultPassword = '3hQqzYn4C7Y8rEZTVEZb';
 export const twentyFourWordsSecretPhrase =
   'hold matrix spider subway bottom jazz charge fire lawn valley stay coil moral hospital dream cycle multiply december agree huge major tower devote old';
@@ -23,8 +22,6 @@ export const torusSecretKeyHex =
 export const ACCOUNT_NAMES = {
   defaultFirstAccountName: 'Account 1',
   defaultSecondAccountName: 'Account 2',
-  createdAccountName: 'First New Account',
-  createdAccountName2: 'Second New account ',
   createdAccountName: 'First New Account',
   createdAccountName2: 'Second New account ',
   importedPemAccountName: 'Imported pem account',
@@ -68,6 +65,20 @@ export const DEFAULT_FIRST_ACCOUNT = {
     '0202b1943511b8c23b1b2b8ed7ddcedffcc7be70d9366a5005c7beab08a81b7ae633',
   truncatedPublicKey: '0202b...ae633',
   mediumTruncatedPublicKey: '0202b19435...a81b7ae633'
+};
+export const FIRST_CONTACT = {
+  accountName: 'First contact',
+  publicKey:
+    '0202b1943511b8c23b1b2b8ed7ddcedffcc7be70d9366a5005c7beab08a81b7ae631',
+  truncatedPublicKey: '0202b...ae631',
+  mediumTruncatedPublicKey: '0202b19435...a81b7ae631'
+};
+export const SECOND_CONTACT = {
+  accountName: 'Second contact',
+  publicKey:
+    '0202b1943511b8c23b1b2b8ed7ddcedffcc7be70d9366a5005c7beab08a81b7ae666',
+  truncatedPublicKey: '0202b...ae666',
+  mediumTruncatedPublicKey: '0202b19435...a81b7ae666'
 };
 
 export const DEFAULT_SECOND_ACCOUNT = {
@@ -118,8 +129,6 @@ export const NEW_VALIDATOR_FOR_STAKE = {
   publicKey:
     '01c8be540a643e6c9df283dd2d2d6be67748f69a3c7bb6cf34471c899b8e858c9a',
   truncatedPublicKey: '01c8...8c9a'
-    '01c8be540a643e6c9df283dd2d2d6be67748f69a3c7bb6cf34471c899b8e858c9a',
-  truncatedPublicKey: '01c8...8c9a'
 };
 
 export const URLS = {
@@ -138,16 +147,11 @@ export const RPC_RESPONSE = {
           Version1:
             '9de32b7f6d79e559cb3f7b94250a605739de803d98ec681cc4a4b7dc8604fdae'
         }
-        api_version: '2.0.0',
-        transaction_hash: {
-          Version1:
-            '9de32b7f6d79e559cb3f7b94250a605739de803d98ec681cc4a4b7dc8604fdae'
-        }
       }
     })
   },
   failure: {
-    status: 200,
+    status: 500,
     body: JSON.stringify({
       sourceErr: {
         code: -32016,

@@ -166,9 +166,7 @@ popup.describe('Popup UI: Casper Native Transfer', () => {
       })
     ).toBeVisible();
     await popupExpect(
-      popupPage.getByText(
-        'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-      )
+      popupPage.getByText('Please check the browser')
     ).toBeVisible();
 
     await popupPage.getByRole('button', { name: 'Close' }).click();
