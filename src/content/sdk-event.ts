@@ -16,7 +16,10 @@ export const sdkEvent = {
     'changedConnectedAccountEvent'
   )<CasperWalletState>(),
   lockedEvent: createAction('lockedEvent')<CasperWalletState>(),
-  unlockedEvent: createAction('unlockedEvent')<CasperWalletState>()
+  unlockedEvent: createAction('unlockedEvent')<CasperWalletState>(),
+  changedActiveAccountSupportsEvent: createAction(
+    'changedActiveAccountSupportsEvent'
+  )<CasperWalletState>()
 };
 
 export type SdkEvent = ActionType<typeof sdkEvent>;

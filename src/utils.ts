@@ -4,7 +4,9 @@ import { Maybe } from 'casper-wallet-core/src/typings/common';
 
 import { Browser } from '@src/constants';
 
-import { Account } from '@libs/types/account';
+import { CasperWalletSupports } from '@content/sdk-types';
+
+import { Account, HardwareWalletType } from '@libs/types/account';
 
 interface ImageProxyUrlProps {
   ttl: string;
@@ -191,4 +193,22 @@ export const getErrorMessageForIncorrectPassword = (attemptsLeft: number) =>
 
 export const isPublicKeyHash = (hash?: Maybe<string>) => {
   return hash?.startsWith('01') || hash?.startsWith('02');
+};
+
+export const getActiveAccountSupports = (activeAccount: Account) => {
+  return activeAccount.hardware === HardwareWalletType.Ledger
+    ? [
+        CasperWalletSupports.signDeploy,
+        CasperWalletSupports.signMessage,
+        ...(activeAccount.supports?.includes(
+          CasperWalletSupports.signTransactionV1
+        )
+          ? [CasperWalletSupports.signTransactionV1]
+          : [])
+      ]
+    : [
+        CasperWalletSupports.signDeploy,
+        CasperWalletSupports.signMessage,
+        CasperWalletSupports.signTransactionV1
+      ];
 };

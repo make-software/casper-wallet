@@ -1,7 +1,7 @@
 import { put, select, takeLatest } from 'redux-saga/effects';
 import { getType } from 'typesafe-actions';
 
-import { getUrlOrigin } from '@src/utils';
+import { getActiveAccountSupports, getUrlOrigin } from '@src/utils';
 
 import {
   LOCK_VAULT_TIMEOUT,
@@ -124,7 +124,8 @@ function* lockVaultSaga() {
       return sdkEvent.lockedEvent({
         isLocked: true,
         isConnected: undefined,
-        activeKey: undefined
+        activeKey: undefined,
+        activeKeySupports: undefined
       });
     });
   } catch (err) {
@@ -224,6 +225,9 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
           isConnected: isActiveAccountConnectedWithTab,
           activeKey: isActiveAccountConnectedWithTab
             ? activeAccount.publicKey
+            : undefined,
+          activeKeySupports: isActiveAccountConnectedWithTab
+            ? getActiveAccountSupports(activeAccount)
             : undefined
         });
       });

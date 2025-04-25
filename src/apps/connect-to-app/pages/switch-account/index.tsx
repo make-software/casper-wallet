@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { ErrorMessages } from '@src/constants';
+
 import { closeCurrentWindow } from '@background/close-current-window';
 import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
 
@@ -18,8 +20,9 @@ export function SwitchAccountPage() {
   const requestId = searchParams.get('requestId');
 
   if (!requestId) {
-    const error = Error(`Missing search param: ${requestId}`);
-    throw error;
+    throw Error(
+      `${ErrorMessages.common.MISSING_SEARCH_PARAM.description} ${requestId}`
+    );
   }
 
   const handleCancel = async () => {

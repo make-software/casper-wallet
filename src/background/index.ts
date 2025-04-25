@@ -11,6 +11,7 @@ import {
 } from 'webextension-polyfill';
 
 import {
+  getActiveAccountSupports,
   getUrlOrigin,
   hasHttpPrefix,
   isChromeBuild,
@@ -56,7 +57,8 @@ import {
   ledgerDeployChanged,
   ledgerNewWindowIdChanged,
   ledgerRecipientToSaveOnSuccessChanged,
-  ledgerStateCleared
+  ledgerStateCleared,
+  ledgerTransactionChanged
 } from '@background/redux/ledger/actions';
 import {
   resetPromotion,
@@ -77,6 +79,7 @@ import {
   accountsAdded,
   accountsImported,
   activeAccountChanged,
+  activeAccountSupportsChanged,
   addWatchingAccount,
   anotherAccountConnected,
   deployPayloadReceived,
@@ -253,6 +256,10 @@ const updateOrigin = async (windowId: number) => {
           activeKey:
             !isLocked && isActiveAccountConnected
               ? activeAccount.publicKey
+              : undefined,
+          activeKeySupports:
+            !isLocked && isActiveAccountConnected
+              ? getActiveAccountSupports(activeAccount)
               : undefined
         })
       );
@@ -444,6 +451,10 @@ runtime.onMessage.addListener(
                 activeKey:
                   !isLocked && isActiveAccountConnected
                     ? activeAccount.publicKey
+                    : undefined,
+                activeKeySupports:
+                  !isLocked && isActiveAccountConnected
+                    ? getActiveAccountSupports(activeAccount)
                     : undefined
               })
             );
@@ -525,6 +536,55 @@ runtime.onMessage.addListener(
             );
           }
 
+          case getType(sdkMethod.getActivePublicKeySupportsRequest): {
+            const origin = getUrlOrigin(sender.url);
+
+            if (!origin) {
+              return sendError(CannotGetSenderOriginError());
+            }
+
+            const isLocked = selectVaultIsLocked(store.getState());
+
+            if (isLocked) {
+              return sendResponse(
+                sdkMethod.getActivePublicKeySupportsError(
+                  WalletLockedError(),
+                  action.meta
+                )
+              );
+            }
+
+            const activeAccount = selectVaultActiveAccount(store.getState());
+
+            if (!activeAccount) {
+              return sendError(CannotGetActiveAccountError());
+            }
+
+            const isConnected = selectIsAccountConnected(
+              store.getState(),
+              origin,
+              activeAccount?.name
+            );
+
+            if (!isConnected) {
+              return sendResponse(
+                sdkMethod.getActivePublicKeySupportsError(
+                  SiteNotConnectedError(),
+                  action.meta
+                )
+              );
+            }
+
+            const supports = getActiveAccountSupports(activeAccount);
+
+            return sendResponse(
+              sdkMethod.getActivePublicKeySupportsResponse(
+                supports,
+                action.meta
+              )
+            );
+          }
+
           case getType(sdkMethod.getVersionRequest): {
             const manifestData = await chrome.runtime.getManifest();
             const version = manifestData.version;
@@ -567,6 +627,7 @@ runtime.onMessage.addListener(
           case getType(accountRemoved):
           case getType(accountRenamed):
           case getType(activeAccountChanged):
+          case getType(activeAccountSupportsChanged):
           case getType(hideAccountFromListChanged):
           case getType(activeTimeoutDurationSettingChanged):
           case getType(activeNetworkSettingChanged):
@@ -609,6 +670,7 @@ runtime.onMessage.addListener(
           case getType(ledgerNewWindowIdChanged):
           case getType(ledgerStateCleared):
           case getType(ledgerDeployChanged):
+          case getType(ledgerTransactionChanged):
           case getType(ledgerRecipientToSaveOnSuccessChanged):
           case getType(addWatchingAccount):
           case getType(setShowCSPRNamePromotion):
@@ -664,7 +726,10 @@ runtime.onMessage.addListener(
                 return sdkEvent.changedConnectedAccountEvent({
                   isLocked: isLocked,
                   isConnected: undefined,
-                  activeKey: activeAccount?.publicKey
+                  activeKey: activeAccount?.publicKey,
+                  activeKeySupports: activeAccount
+                    ? getActiveAccountSupports(activeAccount)
+                    : undefined
                 });
               });
             }

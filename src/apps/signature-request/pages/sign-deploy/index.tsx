@@ -3,7 +3,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
+import { ErrorMessages } from '@src/constants';
 import { getSigningAccount, isEqualCaseInsensitive } from '@src/utils';
+
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
 import { SignDeployContent } from '@signature-request/pages/sign-deploy/sign-deploy-content';
 import { RouterPath } from '@signature-request/router';
@@ -43,6 +46,7 @@ import {
 export function SignDeployPage() {
   const { t } = useTranslation();
   const isCasper2Network = useSelector(selectIsCasper2Network);
+  const { changeActiveAccountSupportsWithEvent } = useAccountManager();
 
   const [transaction, setTransaction] = useState<undefined | Transaction>(
     undefined
@@ -62,7 +66,7 @@ export function SignDeployPage() {
     useState<boolean>(isLedgerNewWindow);
 
   if (!requestId || !signingPublicKeyHex) {
-    throw Error('Missing search param');
+    throw Error(ErrorMessages.signTransaction.MISSING_SEARCH_PARAM.description);
   }
 
   const renderDeps = [requestId, signingPublicKeyHex];
@@ -101,7 +105,9 @@ export function SignDeployPage() {
       const tx = Transaction.fromJSON(deployJson);
       setTransaction(tx);
     } catch (e) {
-      const error = Error('Invalid transaction json');
+      const error = Error(
+        ErrorMessages.signTransaction.INVALID_TRANSACTION_JSON.description
+      );
       sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
       throw error;
     }
@@ -114,7 +120,9 @@ export function SignDeployPage() {
 
   // signing account should exist in wallet
   if (signingAccount == null) {
-    const error = Error('No signing account');
+    const error = Error(
+      ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
+    );
     sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
     throw error;
   }
@@ -126,7 +134,7 @@ export function SignDeployPage() {
     !isLedgerNewWindow
   ) {
     const error = Error(
-      'Account with signingPublicKeyHex is not connected to site'
+      ErrorMessages.signTransaction.ACCOUNT_NOT_CONNECTED.description
     );
     sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
     throw error;
@@ -161,21 +169,14 @@ export function SignDeployPage() {
     }
 
     if (signingAccount.hardware === HardwareWalletType.Ledger) {
-      if (transaction.getTransactionV1()) {
-        // TODO not supported by Ledger yet
-        return;
-      }
-
-      const deploy = transaction.getDeploy();
-
-      if (!deploy) {
-        return;
-      }
-
-      const resp = await ledger.singDeploy(deploy, {
-        index: signingAccount.derivationIndex,
-        publicKey: signingAccount.publicKey
-      });
+      const resp = await ledger.signTransaction(
+        transaction,
+        {
+          index: signingAccount.derivationIndex,
+          publicKey: signingAccount.publicKey
+        },
+        changeActiveAccountSupportsWithEvent
+      );
 
       signature = resp.signature;
     } else {
@@ -203,7 +204,8 @@ export function SignDeployPage() {
     signingAccount.derivationIndex,
     signingAccount.publicKey,
     signingAccount.secretKey,
-    requestId
+    requestId,
+    changeActiveAccountSupportsWithEvent
   ]);
 
   const handleCancel = useCallback(() => {

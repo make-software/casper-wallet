@@ -35,9 +35,9 @@ export const LedgerEventView: React.FC<ILedgerEventViewProps> = ({
 
   if (
     event.status === LedgerEventStatus.SignatureRequestedToUser &&
-    event.deployHash
+    event.txHash
   ) {
-    return <ReviewWithLedger hash={event.deployHash} hashLabel={'Txn hash'} />;
+    return <ReviewWithLedger hash={event.txHash} hashLabel={'Txn hash'} />;
   }
 
   if (

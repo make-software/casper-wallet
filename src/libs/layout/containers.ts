@@ -195,8 +195,10 @@ export const FooterButtonsContainer = styled(SpaceBetweenFlexRow)<Props>`
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
 `;
 
-export const ListItemClickableContainer = styled(SpaceBetweenFlexRow)`
-  cursor: pointer;
+export const ListItemClickableContainer = styled(SpaceBetweenFlexRow)<{
+  isDisabled?: boolean;
+}>`
+  cursor: ${({ isDisabled }) => (isDisabled ? 'default' : 'pointer')};
 
   width: 100%;
   padding: 14px 18px;

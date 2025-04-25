@@ -14,15 +14,24 @@ export type ContactFromValues = {
 
 export const useContactForm = (
   existingContactNames: string[],
+  existingContactPublicKeys: string[],
   defaultPublicKey?: string,
-  defaultName?: string
+  defaultName?: string,
+  isEditMode = false
 ) => {
   const newContactFormSchema = Yup.object().shape({
     name: useContactNameRule(
       value =>
         value?.trim() != null && !existingContactNames.includes(value?.trim())
     ),
-    publicKey: useContactPublicKeyRule()
+    publicKey: useContactPublicKeyRule(value => {
+      if (isEditMode) return true;
+
+      return (
+        value?.trim() != null &&
+        !existingContactPublicKeys.includes(value?.trim())
+      );
+    })
   });
 
   const newContactFormOptions: UseFormProps<ContactFromValues> = {

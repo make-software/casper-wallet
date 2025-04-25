@@ -1,8 +1,4 @@
-import {
-  Deploy,
-  makeAuctionManagerDeploy,
-  makeAuctionManagerTransaction
-} from 'casper-js-sdk';
+import { Deploy } from 'casper-js-sdk';
 import { formatNumber } from 'casper-wallet-core';
 import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import React, { useState } from 'react';
@@ -12,11 +8,13 @@ import styled from 'styled-components';
 
 import {
   AuctionManagerEntryPoint,
+  ErrorMessages,
   STAKE_COST_MOTES,
   StakeSteps,
   networkNameToSdkNetworkNameMap
 } from '@src/constants';
 
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 import { AmountStep } from '@popup/pages/stakes/amount-step';
 import { ConfirmStep } from '@popup/pages/stakes/confirm-step';
 import { NoDelegations } from '@popup/pages/stakes/no-delegations';
@@ -31,7 +29,10 @@ import { ValidatorDropdownInput } from '@popup/pages/stakes/validator-dropdown-i
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
-import { ledgerDeployChanged } from '@background/redux/ledger/actions';
+import {
+  ledgerDeployChanged,
+  ledgerTransactionChanged
+} from '@background/redux/ledger/actions';
 import {
   selectAskForReviewAfter,
   selectRatedInStore
@@ -71,6 +72,7 @@ import {
   sendSignedTx,
   signTx
 } from '@libs/services/deployer-service';
+import { buildAuctionTransactions } from '@libs/services/tx-builders';
 import {
   Button,
   HomePageTabsId,
@@ -109,9 +111,10 @@ export const StakesPage = () => {
   const [inputAmountCSPR, setInputAmountCSPR] = useState('');
   const [validator, setValidator] = useState<ValidatorDto | null>(null);
   const [newValidator, setNewValidator] = useState<ValidatorDto | null>(null);
-  const [stakeAmountMotes, setStakeAmountMotes] = useState('');
+  const [maxAmountMotesForStaking, setMaxAmountMotesForStaking] = useState('');
   const isCasper2Network = useSelector(selectIsCasper2Network);
   const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
+  const { changeActiveAccountSupportsWithEvent } = useAccountManager();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isActiveAccountFromLedger = useSelector(
@@ -141,7 +144,7 @@ export const StakesPage = () => {
   const { amountForm, validatorForm, newValidatorForm } = useStakesForm(
     accountBalance.liquidBalance,
     stakeType,
-    stakeAmountMotes,
+    maxAmountMotesForStaking,
     validator,
     newValidator,
     inputAmountCSPR,
@@ -176,18 +179,26 @@ export const StakesPage = () => {
 
       const timestamp = await getDateForDeploy(nodeUrl);
 
-      const tx = makeAuctionManagerTransaction({
-        amount: motesAmount,
-        chainName: networkNameToSdkNetworkNameMap[networkName],
-        contractEntryPoint: stakeType,
-        delegatorPublicKeyHex: activeAccount.publicKey,
-        newValidatorPublicKeyHex: newValidatorPublicKey,
-        validatorPublicKeyHex: validatorPublicKey,
-        timestamp,
+      const { transaction, fallbackDeploy } = buildAuctionTransactions(
+        {
+          amount: motesAmount,
+          chainName: networkNameToSdkNetworkNameMap[networkName],
+          contractEntryPoint: stakeType,
+          delegatorPublicKeyHex: activeAccount.publicKey,
+          newValidatorPublicKeyHex: newValidatorPublicKey,
+          validatorPublicKeyHex: validatorPublicKey,
+          timestamp
+        },
         casperNetworkApiVersion
-      });
+      );
 
-      const signedTx = await signTx(tx, KEYS, activeAccount);
+      const signedTx = await signTx(
+        transaction,
+        KEYS,
+        activeAccount,
+        fallbackDeploy,
+        changeActiveAccountSupportsWithEvent
+      );
 
       sendSignedTx(signedTx, nodeUrl, isCasper2Network)
         .then(hash => {
@@ -200,13 +211,14 @@ export const StakesPage = () => {
           navigate(
             ErrorPath,
             createErrorLocationState({
-              errorHeaderText: error.message || t('Something went wrong'),
+              errorHeaderText:
+                error.sourceErr?.message ||
+                error.message ||
+                t(ErrorMessages.common.UNKNOWN_ERROR.message),
               errorContentText:
-                typeof error.data === 'string'
-                  ? error.data
-                  : t(
-                      'Please check browser console for error details, this will be a valuable for our team to fix the issue.'
-                    ),
+                typeof error?.sourceErr?.data === 'string'
+                  ? error.sourceErr.data
+                  : t(ErrorMessages.common.UNKNOWN_ERROR.description),
               errorPrimaryButtonLabel: t('Close'),
               errorRedirectPath: RouterPath.Home
             })
@@ -223,18 +235,24 @@ export const StakesPage = () => {
 
       const timestamp = await getDateForDeploy(nodeUrl);
 
-      const deploy = makeAuctionManagerDeploy({
-        amount: motesAmount,
-        chainName: networkNameToSdkNetworkNameMap[networkName],
-        contractEntryPoint: stakeType,
-        delegatorPublicKeyHex: activeAccount.publicKey,
-        newValidatorPublicKeyHex: newValidatorPublicKey,
-        validatorPublicKeyHex: validatorPublicKey,
-        timestamp
-      });
+      const { transaction, fallbackDeploy } = buildAuctionTransactions(
+        {
+          amount: motesAmount,
+          chainName: networkNameToSdkNetworkNameMap[networkName],
+          contractEntryPoint: stakeType,
+          delegatorPublicKeyHex: activeAccount.publicKey,
+          newValidatorPublicKeyHex: newValidatorPublicKey,
+          validatorPublicKeyHex: validatorPublicKey,
+          timestamp
+        },
+        casperNetworkApiVersion
+      );
 
       dispatchToMainStore(
-        ledgerDeployChanged(JSON.stringify(Deploy.toJSON(deploy)))
+        ledgerTransactionChanged(JSON.stringify(transaction.toJSON()))
+      );
+      dispatchToMainStore(
+        ledgerDeployChanged(JSON.stringify(Deploy.toJSON(fallbackDeploy)))
       );
     }
   };
@@ -263,7 +281,7 @@ export const StakesPage = () => {
     confirmStepText,
     amountStepText,
     amountStepMaxAmountValue
-  } = useStakeActionTexts(stakeType, stakeAmountMotes);
+  } = useStakeActionTexts(stakeType, maxAmountMotesForStaking);
 
   const confirmButtonText = useConfirmationButtonText(stakeType);
 
@@ -279,7 +297,7 @@ export const StakesPage = () => {
           }
           validator={validator}
           setValidator={setValidator}
-          setStakeAmount={setStakeAmountMotes}
+          setMaxAmountMotesForStaking={setMaxAmountMotesForStaking}
           stakeType={stakeType}
           loading={loading}
         />
@@ -290,7 +308,7 @@ export const StakesPage = () => {
         <AmountStep
           amountForm={amountForm}
           stakeType={stakeType}
-          stakeAmountMotes={stakeAmountMotes}
+          maxAmountMotesForStaking={maxAmountMotesForStaking}
           amountStepText={amountStepText}
           amountStepMaxAmountValue={amountStepMaxAmountValue}
         />
@@ -311,7 +329,6 @@ export const StakesPage = () => {
           validatorList={validatorList}
           validator={newValidator}
           setValidator={setNewValidator}
-          setStakeAmount={setStakeAmountMotes}
         />
       </Step>
     ),

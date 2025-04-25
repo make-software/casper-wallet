@@ -1,6 +1,8 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { ErrorMessages } from '@src/constants';
+
 import { useTypedLocation } from '@import-account-with-file/router';
 
 import {
@@ -27,7 +29,12 @@ export function ImportAccountWithFileFailureContentPage() {
       </IllustrationContainer>
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          <Trans t={t}>Something went wrong</Trans>
+          <Trans t={t}>
+            {
+              ErrorMessages.importAccountWithFile
+                .IMPORT_ACCOUNT_WITH_FILE_FAILED.message
+            }
+          </Trans>
         </Typography>
       </ParagraphContainer>
       <ParagraphContainer top={SpacingSize.Medium}>
@@ -35,7 +42,8 @@ export function ImportAccountWithFileFailureContentPage() {
           {state?.importAccountStatusMessage
             ? state.importAccountStatusMessage
             : t(
-                ': We couldn’t import your account. Please confirm that you’re importing a file containing your secret key (not to be confused with your public key).'
+                ErrorMessages.importAccountWithFile
+                  .IMPORT_ACCOUNT_WITH_FILE_FAILED.description
               )}
         </Typography>
       </ParagraphContainer>

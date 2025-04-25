@@ -17,12 +17,17 @@ import {
 } from '@background/redux/contacts/actions';
 import {
   selectAllContacts,
-  selectAllContactsNames
+  selectAllContactsNames,
+  selectAllContactsPublicKeys
 } from '@background/redux/contacts/selectors';
 import { contactEditingPermissionChanged } from '@background/redux/session/actions';
 import { selectIsContactEditingAllowed } from '@background/redux/session/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
+import {
+  selectVaultAccountsNames,
+  selectVaultAccountsPublicKeys
+} from '@background/redux/vault/selectors';
 
 import {
   AlignedFlexRow,
@@ -48,6 +53,9 @@ export const ContactDetailsPage = () => {
   const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
   const isContactEditingAllowed = useSelector(selectIsContactEditingAllowed);
   const contactsNames = useSelector(selectAllContactsNames);
+  const accountNames = useSelector(selectVaultAccountsNames);
+  const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
+  const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
 
   const handlePasswordConfirmed = useCallback(() => {
     dispatchToMainStore(contactEditingPermissionChanged());
@@ -66,7 +74,13 @@ export const ContactDetailsPage = () => {
     handleSubmit,
     getValues,
     formState: { errors, isValid }
-  } = useContactForm(existingContactNames, contact?.publicKey!, contact?.name!);
+  } = useContactForm(
+    [...existingContactNames, ...accountNames],
+    [...accountsPublicKeys, ...contactPublicKeys],
+    contact?.publicKey!,
+    contact?.name!,
+    isEditing
+  );
 
   const isButtonDisabled = useMemo(
     () => calculateSubmitButtonDisabled({ isValid }),

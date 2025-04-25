@@ -80,7 +80,7 @@ export function SelectAccountContent({
       : { caption: captionSelectAll, onClick: handleSelectAll };
   }, [t, areAllAccountsSelected, handleSelectAll, handleUnselectAll]);
 
-  const accountsListItems = notConnectedAccounts.map(account => ({
+  const accountsListItems = accounts.map(account => ({
     ...account,
     id: account.name
   }));
@@ -102,45 +102,59 @@ export function SelectAccountContent({
           rows={accountsListItems}
           headerLabelTop={SpacingSize.Large}
           contentTop={SpacingSize.Small}
-          renderRow={(account, index) => (
-            <ListItemClickableContainer
-              onClick={() =>
-                setSelectedAccountNames(selectedAccountNames =>
-                  selectedAccountNames.includes(account.name)
-                    ? selectedAccountNames.filter(
-                        accountName => accountName !== account.name
-                      )
-                    : [...selectedAccountNames, account.name]
-                )
-              }
-            >
-              <Checkbox
-                variant="square"
-                checked={selectedAccountNames.includes(account.name)}
-              />
-              <AccountNameWithHashListItemContainer>
-                <Typography
-                  type={
-                    activeAccount && activeAccount.name === account.name
-                      ? 'bodySemiBold'
-                      : 'body'
-                  }
-                >
-                  {account.name}
-                </Typography>
-                <Hash
-                  value={account.publicKey}
-                  variant={HashVariant.CaptionHash}
-                  truncated
-                  placement={
-                    index === accountsListItems.length - 1
-                      ? 'topRight'
-                      : 'bottomRight'
-                  }
+          renderRow={(account, index) => {
+            const isAccountAlreadyConnected = !!connectedAccountNames?.includes(
+              account.name
+            );
+            const isAccountSelected = selectedAccountNames.includes(
+              account.name
+            );
+
+            return (
+              <ListItemClickableContainer
+                onClick={
+                  isAccountAlreadyConnected
+                    ? undefined
+                    : () =>
+                        setSelectedAccountNames(selectedAccountNames =>
+                          isAccountSelected
+                            ? selectedAccountNames.filter(
+                                accountName => accountName !== account.name
+                              )
+                            : [...selectedAccountNames, account.name]
+                        )
+                }
+                isDisabled={isAccountAlreadyConnected}
+              >
+                <Checkbox
+                  variant="square"
+                  checked={isAccountSelected || isAccountAlreadyConnected}
+                  disabled={isAccountAlreadyConnected}
                 />
-              </AccountNameWithHashListItemContainer>
-            </ListItemClickableContainer>
-          )}
+                <AccountNameWithHashListItemContainer>
+                  <Typography
+                    type={
+                      activeAccount && activeAccount.name === account.name
+                        ? 'bodySemiBold'
+                        : 'body'
+                    }
+                  >
+                    {account.name}
+                  </Typography>
+                  <Hash
+                    value={account.publicKey}
+                    variant={HashVariant.CaptionHash}
+                    truncated
+                    placement={
+                      index === accountsListItems.length - 1
+                        ? 'topRight'
+                        : 'bottomRight'
+                    }
+                  />
+                </AccountNameWithHashListItemContainer>
+              </ListItemClickableContainer>
+            );
+          }}
           marginLeftForItemSeparatorLine={60}
         />
       </ContentContainer>

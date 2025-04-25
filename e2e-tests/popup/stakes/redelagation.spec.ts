@@ -2,7 +2,7 @@ import {
   NEW_VALIDATOR_FOR_STAKE,
   RPC_RESPONSE,
   URLS,
-  VALIDATOR_FOR_STAKE
+  VALIDATOR_FOR_UNDELEGATE
 } from '../../constants';
 import { popup, popupExpect } from '../../fixtures';
 
@@ -28,11 +28,11 @@ popup.describe('Popup UI: Redelegation', () => {
 
       await popupPage
         .getByPlaceholder('Validator public address', { exact: true })
-        .fill(VALIDATOR_FOR_STAKE.publicKey);
+        .fill(VALIDATOR_FOR_UNDELEGATE.publicKey);
 
       await new Promise(r => setTimeout(r, 2000));
       await popupPage
-        .getByText(VALIDATOR_FOR_STAKE.truncatedPublicKey, { exact: true })
+        .getByText(VALIDATOR_FOR_UNDELEGATE.truncatedPublicKey, { exact: true })
         .click();
 
       await popupPage.getByRole('button', { name: 'Next' }).click();
@@ -72,7 +72,7 @@ popup.describe('Popup UI: Redelegation', () => {
       ).toBeDisabled();
 
       await popupExpect(
-        popupPage.getByText(VALIDATOR_FOR_STAKE.publicKey)
+        popupPage.getByText(VALIDATOR_FOR_UNDELEGATE.publicKey)
       ).toBeVisible();
 
       await popupExpect(

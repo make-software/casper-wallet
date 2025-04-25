@@ -1,3 +1,5 @@
+import { CasperWalletSupports } from '@content/sdk-types';
+
 export interface KeyPair {
   secretKey: string; // can be empty string
   publicKey: string;
@@ -8,6 +10,7 @@ export interface Account extends KeyPair {
   hardware?: HardwareWalletType;
   hidden: boolean;
   derivationIndex?: number;
+  supports?: CasperWalletSupports[];
 }
 
 export enum HardwareWalletType {

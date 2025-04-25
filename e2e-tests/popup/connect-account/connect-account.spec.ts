@@ -42,6 +42,7 @@ popup.describe('Popup UI: connect account', () => {
         .click();
 
       await page.goto(`chrome-extension://${extensionId}/popup.html`);
+      await page.waitForLoadState('networkidle');
 
       await page.getByTestId('menu-open-icon').click();
       await page.getByText('Connected sites').click();

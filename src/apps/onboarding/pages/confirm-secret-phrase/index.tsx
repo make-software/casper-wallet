@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router-dom';
 
+import { ErrorMessages } from '@src/constants';
+
 import { Stepper } from '@onboarding/components/stepper';
 import { RouterPath } from '@onboarding/router';
 import { useTypedNavigate } from '@onboarding/router/use-typed-navigate';
@@ -45,16 +47,18 @@ export function ConfirmSecretPhrasePage({
         dispatchToMainStore(initVault({ secretPhrase: phrase }));
         navigate(RouterPath.ConfirmSecretPhraseSuccess);
       } else {
-        throw Error('Invalid secret phrase.');
+        throw Error(ErrorMessages.secretPhrase.INVALID_SECRET_PHRASE.message);
       }
     } catch (err) {
       console.error(err);
       navigate(
         ErrorPath,
         createErrorLocationState({
-          errorHeaderText: t("That's not the correct word order"),
+          errorHeaderText: t(
+            ErrorMessages.secretPhrase.WRONG_SECRET_PHRASE_ORDER.message
+          ),
           errorContentText: t(
-            'Please start over. Make sure you save your secret phrase as a text file or write it down somewhere.'
+            ErrorMessages.secretPhrase.WRONG_SECRET_PHRASE_ORDER.description
           ),
           errorPrimaryButtonLabel: t('Generate a new secret recovery phrase'),
           errorRedirectPath: RouterPath.CreateSecretPhraseConfirmation

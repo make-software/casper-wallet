@@ -30,7 +30,7 @@ export type StakeAmountFormValues = {
 export const useStakesForm = (
   amountMotes: string | undefined,
   stakeType: AuctionManagerEntryPoint,
-  stakeAmountMotes: string,
+  maxAmountMotesForStaking: string,
   validator: IValidator | null,
   newValidator: IValidator | null,
   inputAmountCspr: string,
@@ -87,7 +87,7 @@ export const useStakesForm = (
     amount: useCSPRStakeAmountRule(
       amountMotes,
       stakeType,
-      stakeAmountMotes,
+      maxAmountMotesForStaking,
       minAmount,
       maxAmount
     )

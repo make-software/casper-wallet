@@ -32,7 +32,7 @@ const StakeMaxButton = styled(AlignedFlexRow)<{ disabled?: boolean }>`
 interface AmountStepProps {
   amountForm: UseFormReturn<StakeAmountFormValues>;
   stakeType: AuctionManagerEntryPoint;
-  stakeAmountMotes: string;
+  maxAmountMotesForStaking: string;
   amountStepText: string;
   amountStepMaxAmountValue: string | null;
 }
@@ -40,7 +40,7 @@ interface AmountStepProps {
 export const AmountStep = ({
   amountForm,
   stakeType,
-  stakeAmountMotes,
+  maxAmountMotesForStaking,
   amountStepText,
   amountStepMaxAmountValue
 }: AmountStepProps) => {
@@ -76,10 +76,10 @@ export const AmountStep = ({
           Big(accountBalance.liquidBalance).gte(STAKE_COST_MOTES);
 
         setDisabled(!hasEnoughBalance);
-        setMaxAmountMotes(stakeAmountMotes);
+        setMaxAmountMotes(maxAmountMotesForStaking);
       }
     }
-  }, [accountBalance.liquidBalance, stakeAmountMotes, stakeType]);
+  }, [accountBalance.liquidBalance, maxAmountMotesForStaking, stakeType]);
 
   const {
     register,

@@ -251,6 +251,25 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         }),
         options
       );
+    },
+    /**
+     * Get a list of features that the active public key supports.
+     * It can be `sign-deploy`, `sign-transactionv1` and `signMessage`
+     * @returns returns array of features that supports the active public key.
+     * @throws when wallet is locked (err.code: 1)
+     * @throws when active account not approved to connect with the site (err.code: 2)
+     */
+    getActivePublicKeySupports(): Promise<string[]> {
+      return fetchFromBackground<
+        ReturnType<
+          (typeof sdkMethod)['getActivePublicKeySupportsResponse']
+        >['payload']
+      >(
+        sdkMethod.getActivePublicKeySupportsRequest(undefined, {
+          requestId: generateRequestId()
+        }),
+        options
+      );
     }
   };
 };

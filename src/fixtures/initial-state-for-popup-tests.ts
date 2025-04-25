@@ -76,6 +76,7 @@ export const initialStateForPopupTests: RootState = {
   ledger: {
     windowId: null,
     deploy: null,
+    transaction: null,
     recipientToSaveOnSuccess: null
   },
   vaultCipher:
