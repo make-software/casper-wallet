@@ -2,6 +2,7 @@ import { Page } from '@playwright/test';
 import path from 'path';
 
 export const newPassword = 'this is new password';
+export const newPassword = 'this is new password';
 export const vaultPassword = '3hQqzYn4C7Y8rEZTVEZb';
 export const twentyFourWordsSecretPhrase =
   'hold matrix spider subway bottom jazz charge fire lawn valley stay coil moral hospital dream cycle multiply december agree huge major tower devote old';
@@ -22,6 +23,8 @@ export const torusSecretKeyHex =
 export const ACCOUNT_NAMES = {
   defaultFirstAccountName: 'Account 1',
   defaultSecondAccountName: 'Account 2',
+  createdAccountName: 'First New Account',
+  createdAccountName2: 'Second New account ',
   createdAccountName: 'First New Account',
   createdAccountName2: 'Second New account ',
   importedPemAccountName: 'Imported pem account',
@@ -101,12 +104,20 @@ export const NEW_VALIDATOR_FOR_SIGNATURE_REQUEST = {
 
 export const VALIDATOR_FOR_STAKE = {
   publicKey:
+    '0106ca7c39cd272dbf21a86eeb3b36b7c26e2e9b94af64292419f7862936bca2ca',
+  truncatedPublicKey: '0106...a2ca'
+};
+
+export const VALIDATOR_FOR_UNDELEGATE = {
+  publicKey:
     '01f340df2c32f25391e8f7924a99e93cab3a6f230ff7af1cacbfc070772cbebd94',
   truncatedPublicKey: '01f3...bd94'
 };
 
 export const NEW_VALIDATOR_FOR_STAKE = {
   publicKey:
+    '01c8be540a643e6c9df283dd2d2d6be67748f69a3c7bb6cf34471c899b8e858c9a',
+  truncatedPublicKey: '01c8...8c9a'
     '01c8be540a643e6c9df283dd2d2d6be67748f69a3c7bb6cf34471c899b8e858c9a',
   truncatedPublicKey: '01c8...8c9a'
 };
@@ -127,11 +138,16 @@ export const RPC_RESPONSE = {
           Version1:
             '9de32b7f6d79e559cb3f7b94250a605739de803d98ec681cc4a4b7dc8604fdae'
         }
+        api_version: '2.0.0',
+        transaction_hash: {
+          Version1:
+            '9de32b7f6d79e559cb3f7b94250a605739de803d98ec681cc4a4b7dc8604fdae'
+        }
       }
     })
   },
   failure: {
-    status: 500,
+    status: 200,
     body: JSON.stringify({
       sourceErr: {
         code: -32016,

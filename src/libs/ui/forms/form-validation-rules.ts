@@ -602,7 +602,11 @@ export const useContactNameRule = (
     );
 };
 
-export const useContactPublicKeyRule = () => {
+export const useContactPublicKeyRule = (
+  isPublicKeyAlreadyInContactsCallback: (
+    value: string | undefined
+  ) => Promise<boolean> | boolean
+) => {
   const { t } = useTranslation();
 
   return Yup.string()
@@ -611,7 +615,12 @@ export const useContactPublicKeyRule = () => {
       name: 'contactPublicKey',
       test: value => (value ? isValidPublicKey(value) : false),
       message: t('Public address should be a valid public key')
-    });
+    })
+    .test(
+      'unique',
+      t('You’ve already got a contact with this public key'),
+      value => isPublicKeyAlreadyInContactsCallback(value)
+    );
 };
 
 export const useTorusSecretKeyRule = () => {

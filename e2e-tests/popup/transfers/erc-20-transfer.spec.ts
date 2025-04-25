@@ -1,3 +1,4 @@
+
 import { DEFAULT_SECOND_ACCOUNT, RPC_RESPONSE, URLS } from '../../constants';
 import { popup, popupExpect } from '../../fixtures';
 
@@ -98,19 +99,8 @@ popup.describe('Popup UI: ERC-20 transfer', () => {
   popup('should made a failed transfer', async ({ unlockVault, popupPage }) => {
     await unlockVault();
 
-    await popupPage.route('https://node.testnet.cspr.cloud/rpc', route =>
-      route.fulfill({
-        status: 500,
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1717761373590,
-          error: {
-            code: '',
-            data: 'Error description',
-            message: 'Error message'
-          }
-        })
-      })
+    await popupPage.route(URLS.rpc, route =>
+      route.fulfill(RPC_RESPONSE.failure)
     );
 
     await new Promise(r => setTimeout(r, 5000));

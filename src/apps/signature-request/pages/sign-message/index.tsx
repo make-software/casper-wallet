@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
+import { ErrorMessages } from '@src/constants';
 import { getSigningAccount } from '@src/utils';
 
 import { RouterPath } from '@signature-request/router';
@@ -56,7 +57,7 @@ export function SignMessagePage() {
 
   if (!requestId || !message || !signingPublicKeyHex) {
     throw Error(
-      `Missing search param: ${requestId} ${message} ${signingPublicKeyHex}`
+      `${ErrorMessages.signTransaction.MISSING_SEARCH_PARAM.description} ${requestId} ${message} ${signingPublicKeyHex}`
     );
   }
 
@@ -87,7 +88,9 @@ export function SignMessagePage() {
 
   // signing account should exist in wallet
   if (signingAccount == null) {
-    const error = Error('No signing account');
+    const error = Error(
+      ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
+    );
     sendSdkResponseToSpecificTab(
       sdkMethod.signMessageError(error, { requestId })
     );
@@ -101,7 +104,7 @@ export function SignMessagePage() {
     !isLedgerNewWindow
   ) {
     const error = Error(
-      'Account with signingPublicKeyHex is not connected to site'
+      ErrorMessages.signTransaction.ACCOUNT_NOT_CONNECTED.description
     );
     sendSdkResponseToSpecificTab(
       sdkMethod.signMessageError(error, { requestId })
