@@ -1,8 +1,4 @@
-import {
-  DEFAULT_FIRST_ACCOUNT,
-  DEFAULT_SECOND_ACCOUNT,
-  vaultPassword
-} from '../../constants';
+import { FIRST_CONTACT, SECOND_CONTACT, vaultPassword } from '../../constants';
 import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI: contacts', () => {
@@ -42,10 +38,10 @@ popup.describe('Popup UI: contacts', () => {
 
       await popupPage
         .getByPlaceholder('Name', { exact: true })
-        .fill(DEFAULT_FIRST_ACCOUNT.accountName);
+        .fill(FIRST_CONTACT.accountName);
       await popupPage
         .getByPlaceholder('Public key', { exact: true })
-        .fill(DEFAULT_FIRST_ACCOUNT.publicKey);
+        .fill(FIRST_CONTACT.publicKey);
 
       await popupPage.getByRole('button', { name: 'Add contact' }).click();
 
@@ -68,13 +64,11 @@ popup.describe('Popup UI: contacts', () => {
       ).toBeVisible();
 
       await popupExpect(
-        popupPage
-          .getByText(DEFAULT_FIRST_ACCOUNT.accountName, { exact: true })
-          .nth(1)
+        popupPage.getByText(FIRST_CONTACT.accountName, { exact: true })
       ).toBeVisible();
 
       await popupExpect(
-        popupPage.getByText(DEFAULT_FIRST_ACCOUNT.mediumTruncatedPublicKey)
+        popupPage.getByText(FIRST_CONTACT.mediumTruncatedPublicKey)
       ).toBeVisible();
     }
   );
@@ -91,10 +85,10 @@ popup.describe('Popup UI: contacts', () => {
 
       await popupPage
         .getByPlaceholder('Name', { exact: true })
-        .fill(DEFAULT_FIRST_ACCOUNT.accountName);
+        .fill(FIRST_CONTACT.accountName);
       await popupPage
         .getByPlaceholder('Public key', { exact: true })
-        .fill(DEFAULT_FIRST_ACCOUNT.truncatedPublicKey);
+        .fill(FIRST_CONTACT.truncatedPublicKey);
 
       await popupExpect(
         popupPage.getByText('Public address should be a valid public key')
@@ -115,10 +109,10 @@ popup.describe('Popup UI: contacts', () => {
 
       await popupPage
         .getByPlaceholder('Name', { exact: true })
-        .fill(DEFAULT_FIRST_ACCOUNT.accountName);
+        .fill(FIRST_CONTACT.accountName);
       await popupPage
         .getByPlaceholder('Public key', { exact: true })
-        .fill(DEFAULT_FIRST_ACCOUNT.publicKey);
+        .fill(FIRST_CONTACT.publicKey);
 
       await popupExpect(
         popupPage.getByText(
@@ -138,20 +132,17 @@ popup.describe('Popup UI: contacts', () => {
       await addContact();
 
       await popupPage
-        .getByText(DEFAULT_FIRST_ACCOUNT.accountName, { exact: true })
-        .nth(1)
+        .getByText(FIRST_CONTACT.accountName, { exact: true })
         .click();
 
       await popupExpect(
         popupPage.getByRole('heading', {
-          name: DEFAULT_FIRST_ACCOUNT.accountName
+          name: FIRST_CONTACT.accountName
         })
       ).toBeVisible();
 
       await popupExpect(
-        popupPage
-          .getByText(DEFAULT_FIRST_ACCOUNT.publicKey, { exact: true })
-          .nth(1)
+        popupPage.getByText(FIRST_CONTACT.publicKey, { exact: true })
       ).toBeVisible();
     }
   );
@@ -163,8 +154,7 @@ popup.describe('Popup UI: contacts', () => {
       await addContact();
 
       await popupPage
-        .getByText(DEFAULT_FIRST_ACCOUNT.accountName, { exact: true })
-        .nth(1)
+        .getByText(FIRST_CONTACT.accountName, { exact: true })
         .click();
 
       await popupPage.getByTestId('edit-contact-button').click();
@@ -183,38 +173,36 @@ popup.describe('Popup UI: contacts', () => {
       ).toBeVisible();
       popupExpect(
         await popupPage.getByPlaceholder('Name', { exact: true }).inputValue()
-      ).toBe(DEFAULT_FIRST_ACCOUNT.accountName);
+      ).toBe(FIRST_CONTACT.accountName);
       popupExpect(
         await popupPage
           .getByPlaceholder('Public key', { exact: true })
           .inputValue()
-      ).toBe(DEFAULT_FIRST_ACCOUNT.publicKey);
+      ).toBe(FIRST_CONTACT.publicKey);
 
       await popupPage
         .getByPlaceholder('Name', { exact: true })
-        .fill(DEFAULT_SECOND_ACCOUNT.accountName);
+        .fill(SECOND_CONTACT.accountName);
       await popupPage
         .getByPlaceholder('Public key', { exact: true })
-        .fill(DEFAULT_SECOND_ACCOUNT.publicKey);
+        .fill(SECOND_CONTACT.publicKey);
 
       await popupPage.getByRole('button', { name: 'Save' }).click();
 
       await popupExpect(
-        popupPage
-          .getByText(DEFAULT_FIRST_ACCOUNT.accountName, { exact: true })
-          .nth(1)
+        popupPage.getByText(FIRST_CONTACT.accountName, { exact: true })
       ).not.toBeVisible();
 
-      await popupPage.getByText(DEFAULT_SECOND_ACCOUNT.accountName).click();
+      await popupPage.getByText(SECOND_CONTACT.accountName).click();
 
       await popupExpect(
         popupPage.getByRole('heading', {
-          name: DEFAULT_SECOND_ACCOUNT.accountName
+          name: SECOND_CONTACT.accountName
         })
       ).toBeVisible();
 
       await popupExpect(
-        popupPage.getByText(DEFAULT_SECOND_ACCOUNT.publicKey)
+        popupPage.getByText(SECOND_CONTACT.publicKey)
       ).toBeVisible();
     }
   );
@@ -226,8 +214,7 @@ popup.describe('Popup UI: contacts', () => {
       await addContact();
 
       await popupPage
-        .getByText(DEFAULT_FIRST_ACCOUNT.accountName, { exact: true })
-        .nth(1)
+        .getByText(FIRST_CONTACT.accountName, { exact: true })
         .click();
 
       await popupPage.getByTestId('delete-contact-button').click();
@@ -248,9 +235,7 @@ popup.describe('Popup UI: contacts', () => {
       await popupPage.getByRole('button', { name: 'Delete' }).click();
 
       await popupExpect(
-        popupPage
-          .getByText(DEFAULT_FIRST_ACCOUNT.accountName, { exact: true })
-          .nth(1)
+        popupPage.getByText(FIRST_CONTACT.accountName, { exact: true })
       ).not.toBeVisible();
     }
   );

@@ -9,6 +9,7 @@ import path from 'path';
 import {
   DEFAULT_FIRST_ACCOUNT,
   DEFAULT_SECOND_ACCOUNT,
+  FIRST_CONTACT,
   PLAYGROUND_URL,
   RPC_RESPONSE,
   URLS,
@@ -356,10 +357,10 @@ export const popup = test.extend<{
 
       await page
         .getByPlaceholder('Name', { exact: true })
-        .fill(DEFAULT_FIRST_ACCOUNT.accountName);
+        .fill(FIRST_CONTACT.accountName);
       await page
         .getByPlaceholder('Public key', { exact: true })
-        .fill(DEFAULT_FIRST_ACCOUNT.publicKey);
+        .fill(FIRST_CONTACT.publicKey);
 
       await page.getByRole('button', { name: 'Add contact' }).click();
 

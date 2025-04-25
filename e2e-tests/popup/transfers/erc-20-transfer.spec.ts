@@ -1,3 +1,4 @@
+
 import { DEFAULT_SECOND_ACCOUNT, RPC_RESPONSE, URLS } from '../../constants';
 import { popup, popupExpect } from '../../fixtures';
 
@@ -180,10 +181,12 @@ popup.describe('Popup UI: ERC-20 transfer', () => {
 
     await popupExpect(
       popupPage.getByRole('heading', {
-        name: 'Error message'
+        name: 'failed to send http request, details: Code: 500, err: Internal Server Error'
       })
     ).toBeVisible();
-    await popupExpect(popupPage.getByText('Error description')).toBeVisible();
+    await popupExpect(
+      popupPage.getByText('Please check the browser')
+    ).toBeVisible();
 
     await popupPage.getByRole('button', { name: 'Close' }).click();
   });
