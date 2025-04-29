@@ -168,5 +168,22 @@
     "condition": {
       "urlFilter": "https://node.integration.cspr.cloud/"
     }
+  },
+  {
+    "id": 11,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://casperwallet.io"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "https://cspr-wallet-api.stg.make.services/"
+    }
   }
 ]

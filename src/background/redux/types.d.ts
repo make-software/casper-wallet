@@ -2,13 +2,13 @@ import { ActionType, StateType } from 'typesafe-actions';
 
 import { AccountInfoState } from '@background/redux/account-info/types';
 import { ActiveOriginState } from '@background/redux/active-origin/types';
+import { AppEventsState } from '@background/redux/app-events/types';
 import { ContactsState } from '@background/redux/contacts/types';
 import { KeysState } from '@background/redux/keys/types';
 import { LastActivityTimeState } from '@background/redux/last-activity-time/reducer';
 import { LedgerState } from '@background/redux/ledger/types';
 import { LoginRetryCountState } from '@background/redux/login-retry-count/reducer';
 import { LoginRetryLockoutTimeState } from '@background/redux/login-retry-lockout-time/types';
-import { PromotionState } from '@background/redux/promotion/types';
 import { RateAppState } from '@background/redux/rate-app/types';
 import { RecentRecipientPublicKeysState } from '@background/redux/recent-recipient-public-keys/types';
 import { SessionState } from '@background/redux/session/types';
@@ -50,5 +50,5 @@ export type PopupState = {
   contacts: ContactsState;
   rateApp: RateAppState;
   ledger: LedgerState;
-  promotion: PromotionState;
+  appEvents: AppEventsState;
 };

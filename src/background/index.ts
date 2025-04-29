@@ -43,6 +43,10 @@ import {
   accountTrackingIdOfSentNftTokensRemoved
 } from '@background/redux/account-info/actions';
 import {
+  dismissAppEvent,
+  resetAppEventsDismission
+} from '@background/redux/app-events/actions';
+import {
   contactRemoved,
   contactUpdated,
   contactsReseted,
@@ -60,10 +64,6 @@ import {
   ledgerStateCleared,
   ledgerTransactionChanged
 } from '@background/redux/ledger/actions';
-import {
-  resetPromotion,
-  setShowCSPRNamePromotion
-} from '@background/redux/promotion/actions';
 import {
   askForReviewAfterChanged,
   ratedInStoreChanged,
@@ -673,8 +673,8 @@ runtime.onMessage.addListener(
           case getType(ledgerTransactionChanged):
           case getType(ledgerRecipientToSaveOnSuccessChanged):
           case getType(addWatchingAccount):
-          case getType(setShowCSPRNamePromotion):
-          case getType(resetPromotion):
+          case getType(dismissAppEvent):
+          case getType(resetAppEventsDismission):
             store.dispatch(action);
             return sendResponse(undefined);
 
