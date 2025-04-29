@@ -34,5 +34,6 @@ export enum RouterPath {
   SignWithLedgerInNewWindow = '/sign-with-ledger-in-new-window',
   DeployDetails = '/deploys-details',
   AddWatchAccount = '/add-watch-account',
-  BringWeb3Unlock = '/bring-web3-unlock'
+  BringWeb3Unlock = '/bring-web3-unlock',
+  Casper2Event = '/casper2-event'
 }
