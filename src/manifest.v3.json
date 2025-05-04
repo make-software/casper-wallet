@@ -29,6 +29,7 @@
     "https://api.mainnet.casperwallet.io/*",
     "https://cspr-wallet-api-condor.dev.make.services/*",
     "https://cspr-wallet-api.stg.make.services/*",
+    "https://api.casperwallet.io/*",
     "https://node.cspr.cloud/*",
     "https://node.testnet.cspr.cloud/*",
     "https://cspr-wallet-api.dev.make.services/*",

@@ -92,7 +92,7 @@ export function HomePageContent() {
         navigate(RouterPath.Casper2Event, {
           state: { appEvent: activeMarketingEvent }
         });
-      }, 300);
+      }, 1500);
 
       return () => clearTimeout(t);
     }

@@ -23,7 +23,8 @@
     "https://api.integration.casperwallet.io/*",
     "https://node.integration.cspr.cloud/*",
     "https://cspr-wallet-api-condor.dev.make.services/*",
-    "https://cspr-wallet-api.stg.make.services/*"
+    "https://cspr-wallet-api.stg.make.services/*",
+    "https://api.casperwallet.io/*"
   ],
   "declarative_net_request": {
     "rule_resources": [

@@ -15,7 +15,7 @@ export const useGetActiveAppMarketingEvent = (ignoreEventIds: number[]) => {
     queryFn: () =>
       appEventsRepository.getActiveMarketingEvent({
         withProxyHeader: false,
-        env: 'STAGING',
+        env: 'PRODUCTION',
         ignoreEventIds
       }),
     refetchInterval: APP_MARKETING_EVENTS_REFRESH_RATE,
