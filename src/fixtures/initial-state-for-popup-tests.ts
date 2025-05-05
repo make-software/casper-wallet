@@ -104,7 +104,7 @@ export const initialStateForPopupTests: RootState = {
     ratedInStore: false,
     askForReviewAfter: null
   },
-  promotion: {
-    showCSPRNamePromotion: true
+  appEvents: {
+    dismissedEventIds: []
   }
 };

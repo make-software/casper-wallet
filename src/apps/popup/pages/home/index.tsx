@@ -1,15 +1,20 @@
 import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { shallowEqual, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { HomePageTabName, NetworkSetting } from '@src/constants';
+import {
+  Casper2EventIdForSeparateScreen,
+  HomePageTabName,
+  NetworkSetting
+} from '@src/constants';
 import { isSafariBuild } from '@src/utils';
 
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import {
   selectActiveNetworkSetting,
+  selectDismissedAppEvents,
   selectIsCasper2Network,
   selectVaultActiveAccount
 } from '@background/redux/root-selector';
@@ -22,6 +27,7 @@ import {
   TileContainer,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { useGetActiveAppMarketingEvent } from '@libs/services/app-events';
 import {
   Button,
   SvgIcon,
@@ -30,8 +36,8 @@ import {
   Tile,
   Typography
 } from '@libs/ui/components';
+import { AppEventBanner } from '@libs/ui/components/app-event-banner/app-event-banner';
 
-// import { CsprNameBanner } from '@libs/ui/components/cspr-name-banner/cspr-name-banner';
 import { AccountBalance } from './components/account-balance';
 import { DeploysList } from './components/deploys-list';
 import { MoreButtonsModal } from './components/more-buttons-modal';
@@ -57,12 +63,14 @@ export function HomePageContent() {
   const { t } = useTranslation();
   const location = useTypedLocation();
   const isCasper2Network = useSelector(selectIsCasper2Network);
-
+  const dismissedAppEventIds = useSelector(
+    selectDismissedAppEvents,
+    shallowEqual
+  );
   const state = location.state;
 
   const network = useSelector(selectActiveNetworkSetting);
   const activeAccount = useSelector(selectVaultActiveAccount);
-  // const showCSPRNamePromotion = useSelector(selectShowCSPRNamePromotion);
 
   useEffect(() => {
     if (!state?.activeTabId) {
@@ -72,10 +80,29 @@ export function HomePageContent() {
     }
   }, [state?.activeTabId]);
 
-  // TODO CSPR.name
+  const { activeMarketingEvent } =
+    useGetActiveAppMarketingEvent(dismissedAppEventIds);
+  const isCasper2EventScreen =
+    activeMarketingEvent?.id === 1 &&
+    !dismissedAppEventIds.includes(Casper2EventIdForSeparateScreen);
+
+  useEffect(() => {
+    if (isCasper2EventScreen) {
+      const t = setTimeout(() => {
+        navigate(RouterPath.Casper2Event, {
+          state: { appEvent: activeMarketingEvent }
+        });
+      }, 1500);
+
+      return () => clearTimeout(t);
+    }
+  }, [isCasper2EventScreen, navigate, activeMarketingEvent]);
+
   return (
     <ContentContainer>
-      {/*{showCSPRNamePromotion && <CsprNameBanner />}*/}
+      {activeMarketingEvent && (
+        <AppEventBanner activeMarketingEvent={activeMarketingEvent} />
+      )}
       {activeAccount && (
         <Tile>
           <Container>
