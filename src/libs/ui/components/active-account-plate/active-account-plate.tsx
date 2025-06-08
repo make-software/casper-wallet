@@ -99,6 +99,7 @@ export const ActiveAccountPlate = ({
                   </Typography>
                 </Tooltip>
                 <Hash
+                  label={t('Public key')}
                   value={activeAccount.publicKey}
                   csprName={csprName}
                   variant={HashVariant.CaptionHash}

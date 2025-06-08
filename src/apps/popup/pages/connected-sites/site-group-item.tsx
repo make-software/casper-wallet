@@ -1,5 +1,6 @@
 import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import {
@@ -35,6 +36,8 @@ export function SiteGroupItem({
   hardware,
   csprName
 }: SiteGroupItemProps) {
+  const { t } = useTranslation();
+
   return (
     <SiteGroupItemContainer>
       <AccountNameAndPublicKeyContainer>
@@ -42,6 +45,7 @@ export function SiteGroupItem({
           {name}
         </Typography>
         <Hash
+          label={t('Public key')}
           variant={HashVariant.CaptionHash}
           csprName={csprName}
           value={publicKey}

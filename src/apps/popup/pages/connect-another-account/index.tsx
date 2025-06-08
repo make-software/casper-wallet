@@ -111,6 +111,7 @@ export function ConnectAnotherAccountPageContent() {
                 <LeftAlignedFlexColumn>
                   <Typography type="body">{targetAccount.name}</Typography>
                   <Hash
+                    label={t('Public key')}
                     value={targetAccount.publicKey}
                     csprName={targetAccountCsprName}
                     variant={HashVariant.CaptionHash}
@@ -153,6 +154,7 @@ export function ConnectAnotherAccountPageContent() {
                 <LeftAlignedFlexColumn>
                   <Typography type="body">{account.name}</Typography>
                   <Hash
+                    label={t('Public key')}
                     value={account.publicKey}
                     variant={HashVariant.CaptionHash}
                     csprName={csprName}

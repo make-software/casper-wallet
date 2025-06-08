@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import {
@@ -32,6 +33,7 @@ export function HeaderConnectionStatus({
   publicKey,
   isConnected
 }: HeaderConnectionStatusProps) {
+  const { t } = useTranslation();
   const activeAccount = useSelector(selectVaultActiveAccount);
   const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
@@ -72,6 +74,7 @@ export function HeaderConnectionStatus({
               {activeAccount?.name}
             </Typography>
             <Hash
+              label={t('Public key')}
               value={activeAccount?.publicKey!}
               csprName={csprName}
               variant={HashVariant.CaptionHash}

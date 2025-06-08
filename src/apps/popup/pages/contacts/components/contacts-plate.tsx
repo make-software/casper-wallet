@@ -1,5 +1,6 @@
 import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
@@ -27,6 +28,7 @@ export const ContactsPlate = ({
   brandingLogo
 }: ContactsPlateProps) => {
   const navigate = useTypedNavigate();
+  const { t } = useTranslation();
 
   return (
     <Container
@@ -44,6 +46,7 @@ export const ContactsPlate = ({
       <FlexColumn>
         <Typography type="captionRegular">{name}</Typography>
         <Hash
+          label={t('Public key')}
           value={publicKey}
           csprName={csprName}
           variant={HashVariant.CaptionHash}

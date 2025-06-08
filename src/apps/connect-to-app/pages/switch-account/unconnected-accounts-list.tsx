@@ -81,6 +81,7 @@ export const UnconnectedAccountsList = ({
                   />
                   <Typography type="body">{unconnectedAccount.name}</Typography>
                   <Hash
+                    label={t('Public key')}
                     value={unconnectedAccount.publicKey}
                     variant={HashVariant.CaptionHash}
                     csprName={csprName}
