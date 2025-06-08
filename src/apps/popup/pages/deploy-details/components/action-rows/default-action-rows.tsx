@@ -14,6 +14,7 @@ interface DefaultActionRowsProps {
   additionalInfo?: string;
   iconUrl?: string;
   contractPackageHash: string;
+  contractLink?: Maybe<string>;
 }
 
 export const DefaultActionRows = ({
@@ -21,7 +22,8 @@ export const DefaultActionRows = ({
   contractName,
   additionalInfo,
   iconUrl,
-  contractPackageHash
+  contractPackageHash,
+  contractLink
 }: DefaultActionRowsProps) => {
   return (
     <SimpleContainer title={title}>
@@ -32,6 +34,7 @@ export const DefaultActionRows = ({
         iconUrl={iconUrl}
         additionalInfo={additionalInfo}
         defaultSvg={DeployIcon.Generic}
+        contractLink={contractLink}
       />
     </SimpleContainer>
   );

@@ -70,7 +70,7 @@ export const DeployDetailsAction = ({ deploy }: ActionProps) => {
   if (isNativeCsprDeploy(deploy)) {
     return (
       <Container>
-        <NativeTransferActionRows title={title} deploy={deploy} />
+        <NativeTransferActionRows title={title} {...deploy} />
       </Container>
     );
   }
@@ -86,7 +86,7 @@ export const DeployDetailsAction = ({ deploy }: ActionProps) => {
   if (isAuctionDeploy(deploy)) {
     return (
       <Container>
-        <AuctionActionRows deploy={deploy} />
+        <AuctionActionRows title={title} {...deploy} />
       </Container>
     );
   }
@@ -107,7 +107,7 @@ export const DeployDetailsAction = ({ deploy }: ActionProps) => {
   if (isCasperMarketDeploy(deploy)) {
     return (
       <Container>
-        <CsprMarketActionRows deploy={deploy} />
+        <CsprMarketActionRows title={title} {...deploy} />
       </Container>
     );
   }
@@ -115,7 +115,7 @@ export const DeployDetailsAction = ({ deploy }: ActionProps) => {
   if (isCep18Deploy(deploy)) {
     return (
       <Container>
-        <Cep18ActionRows deploy={deploy} />
+        <Cep18ActionRows title={title} {...deploy} />
       </Container>
     );
   }
@@ -123,7 +123,7 @@ export const DeployDetailsAction = ({ deploy }: ActionProps) => {
   if (isNftDeploy(deploy)) {
     return (
       <Container>
-        <NftActionsRows deploy={deploy} />
+        <NftActionsRows title={title} {...deploy} />
       </Container>
     );
   }

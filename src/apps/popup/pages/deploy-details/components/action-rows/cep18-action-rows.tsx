@@ -1,4 +1,5 @@
 import { ICep18Deploy } from 'casper-wallet-core/src/domain/deploys/entities';
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 
 import { Cep18DeployEntryPoint, DeployIcon } from '@src/constants';
@@ -9,31 +10,38 @@ import {
   ContractInfoRow,
   SimpleContainer
 } from '@popup/pages/deploy-details/components/common';
-import { getEntryPointName } from '@popup/pages/deploy-details/utils';
 
 import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 
 interface Cep18ActionRowsProps {
-  deploy: ICep18Deploy;
+  title: string;
+  entryPoint: ICep18Deploy['entryPoint'];
+  recipientKey: ICep18Deploy['recipientKey'];
+  contractPackageHash: ICep18Deploy['contractPackageHash'];
+  contractName: ICep18Deploy['contractName'];
+  formattedDecimalAmount: ICep18Deploy['formattedDecimalAmount'];
+  recipientAccountInfo: ICep18Deploy['recipientAccountInfo'];
+  symbol: ICep18Deploy['symbol'];
+  iconUrl: ICep18Deploy['iconUrl'];
+  contractLink?: Maybe<string>;
 }
 
-export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
-  const {
-    entryPoint,
-    recipientKey,
-    contractPackageHash,
-    contractName,
-    formattedDecimalAmount,
-    recipientAccountInfo,
-    symbol,
-    iconUrl
-  } = deploy;
+export const Cep18ActionRows = ({
+  title,
+  entryPoint,
+  recipientKey,
+  contractPackageHash,
+  contractName,
+  formattedDecimalAmount,
+  recipientAccountInfo,
+  symbol,
+  iconUrl,
+  contractLink
+}: Cep18ActionRowsProps) => {
   const isTransfer = entryPoint === Cep18DeployEntryPoint.transfer;
   const isMint = entryPoint === Cep18DeployEntryPoint.mint;
   const isBurn = entryPoint === Cep18DeployEntryPoint.burn;
   const isApprove = entryPoint === Cep18DeployEntryPoint.approve;
-
-  const title = getEntryPointName(deploy, true);
 
   if (isTransfer || isMint) {
     return (
@@ -45,6 +53,7 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
           iconUrl={iconUrl}
           defaultSvg={DeployIcon.Cep18Default}
           additionalInfo="token(s)"
+          contractLink={contractLink}
         />
         <AccountInfoRow
           publicKey={recipientKey}
@@ -53,6 +62,7 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
           iconSize={20}
           csprName={recipientAccountInfo?.csprName}
           imgLogo={recipientAccountInfo?.brandingLogo}
+          accountLink={recipientAccountInfo?.explorerLink}
         />
       </SimpleContainer>
     );
@@ -72,6 +82,7 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
           iconUrl={iconUrl}
           defaultSvg={DeployIcon.Cep18Default}
           additionalInfo="token(s)"
+          contractLink={contractLink}
         />
         <AccountInfoRow
           publicKey={recipientKey}
@@ -79,6 +90,7 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
           iconSize={20}
           csprName={recipientAccountInfo?.csprName}
           imgLogo={recipientAccountInfo?.brandingLogo}
+          accountLink={recipientAccountInfo?.explorerLink}
         />
       </SimpleContainer>
     );
@@ -94,6 +106,7 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
           iconUrl={iconUrl}
           defaultSvg={DeployIcon.Cep18Default}
           additionalInfo="token(s)"
+          contractLink={contractLink}
         />
         <AccountInfoRow
           publicKey={recipientKey}
@@ -102,6 +115,7 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
           iconSize={20}
           csprName={recipientAccountInfo?.csprName}
           imgLogo={recipientAccountInfo?.brandingLogo}
+          accountLink={recipientAccountInfo?.explorerLink}
         />
       </SimpleContainer>
     );
@@ -114,6 +128,7 @@ export const Cep18ActionRows = ({ deploy }: Cep18ActionRowsProps) => {
       contractName={contractName}
       iconUrl={iconUrl || DeployIcon.Cep18Default}
       additionalInfo="CEP-18 Token"
+      contractLink={contractLink}
     />
   );
 };

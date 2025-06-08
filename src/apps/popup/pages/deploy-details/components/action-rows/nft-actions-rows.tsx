@@ -1,4 +1,5 @@
 import { INftDeploy } from 'casper-wallet-core/src/domain/deploys/entities';
+import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 
 import { DeployIcon, NftDeployEntryPoint } from '@src/constants';
@@ -8,27 +9,38 @@ import {
   NftInfoRow,
   SimpleContainer
 } from '@popup/pages/deploy-details/components/common';
-import { getEntryPointName } from '@popup/pages/deploy-details/utils';
 
 import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 
 interface NftActionsRowsProps {
-  deploy: INftDeploy;
+  title: string;
+  entryPoint: INftDeploy['entryPoint'];
+  nftTokenIds: INftDeploy['nftTokenIds'];
+  recipientKey: INftDeploy['recipientKey'];
+  contractPackageHash: INftDeploy['contractPackageHash'];
+  contractName: INftDeploy['contractName'];
+  callerPublicKey: INftDeploy['callerPublicKey'];
+  iconUrl: INftDeploy['iconUrl'];
+  callerAccountInfo: INftDeploy['callerAccountInfo'];
+  recipientAccountInfo: INftDeploy['recipientAccountInfo'];
+  contractHash: INftDeploy['contractHash'];
+  contractLink?: Maybe<string>;
 }
 
-export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
-  const {
-    entryPoint,
-    nftTokenIds,
-    recipientKey,
-    contractPackageHash,
-    contractName,
-    callerPublicKey,
-    iconUrl,
-    callerAccountInfo,
-    recipientAccountInfo,
-    contractHash
-  } = deploy;
+export const NftActionsRows = ({
+  title,
+  entryPoint,
+  nftTokenIds,
+  recipientKey,
+  contractPackageHash,
+  contractName,
+  callerPublicKey,
+  iconUrl,
+  callerAccountInfo,
+  recipientAccountInfo,
+  contractHash,
+  contractLink
+}: NftActionsRowsProps) => {
   const isBurn = entryPoint === NftDeployEntryPoint.burn;
   const isMint = entryPoint === NftDeployEntryPoint.mint;
   const isTransfer = entryPoint === NftDeployEntryPoint.transfer;
@@ -36,8 +48,6 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
   const isApprove =
     entryPoint === NftDeployEntryPoint.approve ||
     entryPoint === NftDeployEntryPoint.set_approval_for_all;
-
-  const title = getEntryPointName(deploy, true);
 
   if (isBurn) {
     return (
@@ -49,6 +59,7 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           nftTokenIds={nftTokenIds}
           defaultSvg={DeployIcon.NFTDefault}
           collectionHash={contractHash}
+          contractLink={contractLink}
         />
         <AccountInfoRow
           publicKey={recipientKey}
@@ -58,6 +69,7 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           iconSize={20}
           csprName={recipientAccountInfo?.csprName}
           imgLogo={recipientAccountInfo?.brandingLogo}
+          accountLink={recipientAccountInfo?.explorerLink}
         />
       </SimpleContainer>
     );
@@ -73,6 +85,7 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           nftTokenIds={nftTokenIds}
           defaultSvg={DeployIcon.NFTDefault}
           collectionHash={contractHash}
+          contractLink={contractLink}
         />
         <AccountInfoRow
           publicKey={recipientKey}
@@ -82,6 +95,7 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           iconSize={20}
           csprName={recipientAccountInfo?.csprName}
           imgLogo={recipientAccountInfo?.brandingLogo}
+          accountLink={recipientAccountInfo?.explorerLink}
         />
       </SimpleContainer>
     );
@@ -97,6 +111,7 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           nftTokenIds={nftTokenIds}
           defaultSvg={DeployIcon.NFTDefault}
           collectionHash={contractHash}
+          contractLink={contractLink}
         />
         <AccountInfoRow
           publicKey={callerPublicKey}
@@ -106,6 +121,7 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           iconSize={20}
           csprName={callerAccountInfo?.csprName}
           imgLogo={callerAccountInfo?.brandingLogo}
+          accountLink={callerAccountInfo?.explorerLink}
         />
         <AccountInfoRow
           publicKey={recipientKey}
@@ -115,6 +131,7 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           iconSize={20}
           csprName={recipientAccountInfo?.csprName}
           imgLogo={recipientAccountInfo?.brandingLogo}
+          accountLink={recipientAccountInfo?.explorerLink}
         />
       </SimpleContainer>
     );
@@ -130,6 +147,7 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           nftTokenIds={nftTokenIds}
           defaultSvg={DeployIcon.NFTDefault}
           collectionHash={contractHash}
+          contractLink={contractLink}
         />
       </SimpleContainer>
     );
@@ -147,6 +165,7 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           label="for"
           isApprove
           collectionHash={contractHash}
+          contractLink={contractLink}
         />
         <AccountInfoRow
           publicKey={recipientKey}
@@ -155,6 +174,7 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
           iconSize={20}
           csprName={recipientAccountInfo?.csprName}
           imgLogo={recipientAccountInfo?.brandingLogo}
+          accountLink={recipientAccountInfo?.explorerLink}
         />
       </SimpleContainer>
     );
@@ -167,6 +187,7 @@ export const NftActionsRows = ({ deploy }: NftActionsRowsProps) => {
       contractName={contractName}
       additionalInfo="CEP-47 NFT"
       iconUrl={iconUrl || DeployIcon.NFTDefault}
+      contractLink={contractLink}
     />
   );
 };
