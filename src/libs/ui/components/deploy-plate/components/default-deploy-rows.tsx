@@ -1,4 +1,4 @@
-import { IDeploy } from 'casper-wallet-core/src/domain/deploys/entities';
+import { IDeploy, isWasmDeployExecutionType } from 'casper-wallet-core';
 import React from 'react';
 
 import { DeployIcon } from '@src/constants';
@@ -25,7 +25,7 @@ export const DefaultDeployRows = ({ deploy }: DefaultDeployRowsProps) => {
         errorMessage: deploy.errorMessage
       }}
     >
-      {deploy.contractName && (
+      {deploy.contractName && !isWasmDeployExecutionType(deploy) && (
         <ContractRow label="with" contractName={deploy.contractName} />
       )}
     </DeployContainer>

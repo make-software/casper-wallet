@@ -150,7 +150,8 @@ export const ExecutionTypesMap: { [key in number]: string } = {
   3: 'Contract call', //"StoredContractByName",
   4: 'Contract call', //"StoredVersionedContractByHash",
   5: 'Contract call', //"StoredVersionedContractByName",
-  6: 'Transfer'
+  6: 'Transfer',
+  7: 'WASM deploy' // new type
 };
 
 export enum DeployIcon {
