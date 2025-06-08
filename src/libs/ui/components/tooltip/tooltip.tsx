@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { Typography } from '@libs/ui/components';
 
 interface TooltipProps {
-  title?: string | null;
+  title?: JSX.Element | string | null;
   children: React.ReactNode;
   placement?: Placement;
   noWrap?: boolean;
@@ -67,26 +67,28 @@ const TooltipTip = styled.div<{ placement: Placement }>(
     borderRadius: `${theme.borderRadius.twelve}px`,
     boxShadow: `${theme.shadow.tooltip}`,
 
-    maxWidth: '270px',
+    maxWidth: '320px',
 
     transition: 'opacity 250ms ease-in-out',
     opacity: '0',
     visibility: 'hidden',
-    display: 'none'
+    cursor: 'default'
   })
 );
 
-const Container = styled.div<{ fullWidth?: boolean }>`
-  position: relative;
-
-  width: ${({ fullWidth }) => (fullWidth ? '100%' : 'auto')};
+const ChildrenContainer = styled.div`
+  cursor: pointer;
 `;
 
-const ChildrenContainer = styled.div`
-  &:hover + ${TooltipTip} {
+const TooltipWrapper = styled.div<{ fullWidth?: boolean }>`
+  position: relative;
+  display: block;
+
+  width: ${({ fullWidth }) => (fullWidth ? '100%' : 'auto')};
+
+  &:hover ${TooltipTip} {
     opacity: 1;
     visibility: visible;
-    display: block;
   }
 `;
 
@@ -107,18 +109,22 @@ export const Tooltip = forwardRef<Ref, TooltipProps>(
     }
 
     return (
-      <Container ref={ref} fullWidth={fullWidth}>
+      <TooltipWrapper ref={ref} fullWidth={fullWidth}>
         <ChildrenContainer>{children}</ChildrenContainer>
         <TooltipTip placement={placement}>
-          <Typography
-            type="captionRegular"
-            noWrap={noWrap}
-            overflowWrap={overflowWrap}
-          >
-            {title}
-          </Typography>
+          {typeof title === 'string' ? (
+            <Typography
+              type="captionRegular"
+              noWrap={noWrap}
+              overflowWrap={overflowWrap}
+            >
+              {title}
+            </Typography>
+          ) : (
+            title
+          )}
         </TooltipTip>
-      </Container>
+      </TooltipWrapper>
     );
   }
 );
