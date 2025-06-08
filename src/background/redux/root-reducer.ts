@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux';
 
 import { reducer as accountInfo } from './account-info/reducer';
+import { reducer as activeOriginFavicon } from './active-origin-favicon/reducer';
 import { reducer as activeOrigin } from './active-origin/reducer';
 import { reducer as appEvents } from './app-events/reducer';
 import { reducer as contacts } from './contacts/reducer';
@@ -27,6 +28,7 @@ const rootReducer = combineReducers({
   loginRetryLockoutTime,
   lastActivityTime,
   activeOrigin,
+  activeOriginFavicon,
   settings,
   recentRecipientPublicKeys,
   accountInfo,
