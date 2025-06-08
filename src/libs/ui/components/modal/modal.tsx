@@ -6,8 +6,8 @@ import { useClickAway } from '@hooks/use-click-away';
 import { AlignedFlexRow, Overlay } from '@libs/layout';
 import { BaseProps } from '@libs/ui/types';
 
-const ChildrenContainer = styled(AlignedFlexRow)`
-  cursor: pointer;
+const ChildrenContainer = styled(AlignedFlexRow)<{ disabled: boolean }>`
+  cursor: ${({ disabled }) => (disabled ? 'auto' : 'pointer')};
 `;
 
 const slideInFromBottom = keyframes`
@@ -90,6 +90,7 @@ export interface ModalProps extends BaseProps {
   placement: 'top' | 'bottom' | 'fullBottom';
   loading?: boolean;
   childrenFlexGrow?: number;
+  disabled?: boolean;
 }
 
 export const Modal = ({
@@ -98,7 +99,8 @@ export const Modal = ({
   placement,
   dataTestId,
   loading,
-  childrenFlexGrow
+  childrenFlexGrow,
+  disabled = false
 }: ModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
@@ -149,11 +151,12 @@ export const Modal = ({
   return (
     <>
       <ChildrenContainer
+        disabled={disabled}
         ref={childrenContainerRef}
         data-testid={dataTestId}
         flexGrow={childrenFlexGrow}
         onClick={event => {
-          if (loading) return;
+          if (loading || disabled) return;
           event.stopPropagation();
           setIsOpen(true);
         }}
