@@ -58,14 +58,8 @@ export const formatShortTimestamp = (value: string): string => {
   return `${nativeIntl.format(date)}`;
 };
 
-export const formatDate = (value: string): string => {
-  const timestamp = Number.parseInt(value);
-
-  if (Number.isNaN(timestamp) || !Number.isInteger(timestamp)) {
-    throw new Error("Couldn't get timestamp from string");
-  }
-
-  const date = new Date(timestamp);
+export const formatDate = (isoString: string): string => {
+  const date = new Date(isoString);
 
   return `${intl.formatDate(date, {
     month: 'short',
