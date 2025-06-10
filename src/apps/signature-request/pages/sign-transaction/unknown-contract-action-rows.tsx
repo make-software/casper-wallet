@@ -28,7 +28,7 @@ import { formatDate } from '@libs/ui/utils';
 
 const AlignedFlexRowContainer = styled(AlignedFlexRow)`
   column-gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 `;
 
 interface UnknownContractActionRowsProps {
@@ -366,7 +366,7 @@ export const UnknownContractActionRows = ({
                   type="captionRegular"
                   color={'contentSecondary'}
                   ellipsis
-                  style={{ maxWidth: 125 }}
+                  style={{ maxWidth: 123 }}
                 >
                   {action.contractName ?? ''}
                 </Typography>
