@@ -116,7 +116,7 @@ export const UnknownContractActionRows = ({
                         variant={HashVariant.CaptionHash}
                         label={'Uref'}
                         truncated
-                        truncatedSize={'base'}
+                        truncatedSize={'medium'}
                         color={'contentAction'}
                         withCopyOnSelfClick={!value.link}
                       />
