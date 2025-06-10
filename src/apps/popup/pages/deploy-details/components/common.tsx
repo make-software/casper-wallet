@@ -113,6 +113,7 @@ export const ActionContainerWithLink = ({
 
 interface NftInfoRowProps {
   nftTokenIds: string[];
+  nftTokenUrlsMap: Record<string, string | null>;
   label?: string;
   contractName?: string;
   imgLogo?: Maybe<string>;
@@ -125,6 +126,7 @@ interface NftInfoRowProps {
 
 export const NftInfoRow = ({
   nftTokenIds,
+  nftTokenUrlsMap,
   imgLogo,
   contractName,
   label,
@@ -189,7 +191,10 @@ export const NftInfoRow = ({
           <Link
             color="contentAction"
             target="_blank"
-            href={getContractNftUrl(casperLiveUrl, hash || '', id)} // TODO
+            href={
+              nftTokenUrlsMap[id] ??
+              getContractNftUrl(casperLiveUrl, hash || '', id)
+            }
           >
             <Typography type="captionRegular" color="contentAction" ellipsis>
               {id}

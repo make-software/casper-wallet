@@ -16,6 +16,7 @@ interface NftActionsRowsProps {
   title: string;
   entryPoint: INftDeploy['entryPoint'];
   nftTokenIds: INftDeploy['nftTokenIds'];
+  nftTokenUrlsMap: INftDeploy['nftTokenUrlsMap'];
   recipientKey: INftDeploy['recipientKey'];
   contractPackageHash: INftDeploy['contractPackageHash'];
   contractName: INftDeploy['contractName'];
@@ -31,6 +32,7 @@ export const NftActionsRows = ({
   title,
   entryPoint,
   nftTokenIds,
+  nftTokenUrlsMap,
   recipientKey,
   contractPackageHash,
   contractName,
@@ -57,6 +59,7 @@ export const NftActionsRows = ({
           contractName={contractName}
           imgLogo={iconUrl}
           nftTokenIds={nftTokenIds}
+          nftTokenUrlsMap={nftTokenUrlsMap}
           defaultSvg={DeployIcon.NFTDefault}
           collectionHash={contractHash}
           contractLink={contractLink}
@@ -83,6 +86,7 @@ export const NftActionsRows = ({
           contractName={contractName}
           imgLogo={iconUrl}
           nftTokenIds={nftTokenIds}
+          nftTokenUrlsMap={nftTokenUrlsMap}
           defaultSvg={DeployIcon.NFTDefault}
           collectionHash={contractHash}
           contractLink={contractLink}
@@ -109,6 +113,7 @@ export const NftActionsRows = ({
           contractName={contractName}
           imgLogo={iconUrl}
           nftTokenIds={nftTokenIds}
+          nftTokenUrlsMap={nftTokenUrlsMap}
           defaultSvg={DeployIcon.NFTDefault}
           collectionHash={contractHash}
           contractLink={contractLink}
@@ -145,6 +150,7 @@ export const NftActionsRows = ({
           contractName={contractName}
           imgLogo={iconUrl}
           nftTokenIds={nftTokenIds}
+          nftTokenUrlsMap={nftTokenUrlsMap}
           defaultSvg={DeployIcon.NFTDefault}
           collectionHash={contractHash}
           contractLink={contractLink}
@@ -161,6 +167,7 @@ export const NftActionsRows = ({
           contractName={contractName}
           imgLogo={iconUrl}
           nftTokenIds={nftTokenIds}
+          nftTokenUrlsMap={nftTokenUrlsMap}
           defaultSvg={DeployIcon.NFTDefault}
           label="for"
           isApprove

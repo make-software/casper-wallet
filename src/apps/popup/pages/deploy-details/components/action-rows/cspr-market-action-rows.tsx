@@ -21,6 +21,7 @@ interface CsprMarketActionRowsProps {
   contractPackageHash: ICasperMarketDeploy['contractPackageHash'];
   collectionHash: ICasperMarketDeploy['collectionHash'];
   nftTokenIds: ICasperMarketDeploy['nftTokenIds'];
+  nftTokenUrlsMap: ICasperMarketDeploy['nftTokenUrlsMap'];
   offererAccountInfo: ICasperMarketDeploy['offererAccountInfo'];
   formattedDecimalAmount: ICasperMarketDeploy['formattedDecimalAmount'];
   fiatAmount: ICasperMarketDeploy['fiatAmount'];
@@ -35,6 +36,7 @@ export const CsprMarketActionRows = ({
   contractPackageHash,
   collectionHash,
   nftTokenIds,
+  nftTokenUrlsMap,
   offererAccountInfo,
   formattedDecimalAmount,
   fiatAmount,
@@ -55,6 +57,7 @@ export const CsprMarketActionRows = ({
       <SimpleContainer title={title}>
         <NftInfoRow
           nftTokenIds={nftTokenIds}
+          nftTokenUrlsMap={nftTokenUrlsMap}
           contractPackageHash={contractPackageHash}
           collectionHash={collectionHash}
           contractLink={contractLink}
@@ -82,6 +85,7 @@ export const CsprMarketActionRows = ({
         ) : null}
         <NftInfoRow
           nftTokenIds={nftTokenIds}
+          nftTokenUrlsMap={nftTokenUrlsMap}
           imgLogo={offererAccountInfo?.brandingLogo}
           contractName={offererAccountInfo?.name}
           contractPackageHash={contractPackageHash}
