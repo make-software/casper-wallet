@@ -71,7 +71,7 @@
     "base64-loader": "1.0.0",
     "big.js": "^6.2.1",
     "casper-js-sdk": "^5.0.6",
-    "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#a78b45fc030960f7c3e6af49f426081ead7dd3d7",
+    "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#d608b3c897e737eb52cd93d50578783020e2e7ed",
     "confetti-js": "^0.0.18",
     "date-fns": "^2.30.0",
     "dotenv-webpack": "^8.1.0",
