@@ -1,5 +1,6 @@
 import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import {
@@ -52,6 +53,8 @@ export const RecipientPlate = ({
   csprName,
   brandingLogo
 }: RecipientPlateProps) => {
+  const { t } = useTranslation();
+
   if (recipientLabel) {
     return (
       <FormField label={recipientLabel}>
@@ -70,6 +73,7 @@ export const RecipientPlate = ({
               <Typography type="captionMedium">{csprName}</Typography>
             )}
             <Hash
+              label={t('Public key')}
               value={publicKey}
               variant={HashVariant.CaptionHash}
               truncated={!showFullPublicKey}

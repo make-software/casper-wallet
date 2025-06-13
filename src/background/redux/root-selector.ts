@@ -1,4 +1,5 @@
 export * from './active-origin/selectors';
+export * from './active-origin-favicon/selectors';
 export * from './keys/selectors';
 export * from './last-activity-time/selectors';
 export * from './login-retry-count/selectors';

@@ -1,6 +1,7 @@
 import { ActionType, StateType } from 'typesafe-actions';
 
 import { AccountInfoState } from '@background/redux/account-info/types';
+import { ActiveOriginFaviconState } from '@background/redux/active-origin-favicon/types';
 import { ActiveOriginState } from '@background/redux/active-origin/types';
 import { AppEventsState } from '@background/redux/app-events/types';
 import { ContactsState } from '@background/redux/contacts/types';
@@ -45,6 +46,7 @@ export type PopupState = {
   lastActivityTime: LastActivityTimeState;
   settings: SettingsState;
   activeOrigin: ActiveOriginState;
+  activeOriginFavicon: ActiveOriginFaviconState;
   recentRecipientPublicKeys: RecentRecipientPublicKeysState;
   accountInfo: AccountInfoState;
   contacts: ContactsState;

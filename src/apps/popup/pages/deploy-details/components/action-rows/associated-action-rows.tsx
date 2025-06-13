@@ -20,13 +20,15 @@ interface AssociatedActionRowsProps {
   contractPackageHash: string;
   contractName: string;
   callerAccountInfo: Maybe<IAccountInfo>;
+  contractLink?: Maybe<string>;
 }
 
 export const AssociatedActionRows = ({
   publicKey,
   contractPackageHash,
   contractName,
-  callerAccountInfo
+  callerAccountInfo,
+  contractLink
 }: AssociatedActionRowsProps) => {
   const { t } = useTranslation();
 
@@ -47,6 +49,7 @@ export const AssociatedActionRows = ({
           isAction
           csprName={callerAccountInfo?.csprName}
           imgLogo={callerAccountInfo?.brandingLogo}
+          accountLink={callerAccountInfo?.explorerLink}
         />
       </AlignedFlexRow>
       <AlignedFlexRow gap={SpacingSize.Small}>
@@ -59,7 +62,7 @@ export const AssociatedActionRows = ({
           accountName={contractName}
           iconUrl={DeployIcon.AssociatedKeys}
         />
-        <Link color="contentAction" href={link} target="_blank">
+        <Link color="contentAction" href={contractLink ?? link} target="_blank">
           <Typography type="captionRegular">{contractName}</Typography>
         </Link>
       </AlignedFlexRow>

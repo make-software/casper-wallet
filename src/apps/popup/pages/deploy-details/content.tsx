@@ -94,7 +94,7 @@ export const DeployDetailsPageContent = ({
   return (
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
-        <TitleContainer>
+        <TitleContainer wrap={'wrap'}>
           <Typography type="header" wordBreak>
             <Trans t={t}>{deployName}</Trans>
           </Typography>

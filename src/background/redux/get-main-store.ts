@@ -53,6 +53,7 @@ export const selectPopupState = (state: RootState): PopupState => {
     loginRetryLockoutTime: state.loginRetryLockoutTime,
     lastActivityTime: state.lastActivityTime,
     activeOrigin: state.activeOrigin,
+    activeOriginFavicon: state.activeOriginFavicon,
     settings: state.settings,
     recentRecipientPublicKeys: state.recentRecipientPublicKeys,
     accountInfo: state.accountInfo,

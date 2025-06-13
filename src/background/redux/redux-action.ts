@@ -1,6 +1,7 @@
 import { ActionType } from 'typesafe-actions';
 
 import * as accountInfo from './account-info/actions';
+import * as activeOriginFavicon from './active-origin-favicon/actions';
 import * as activeOrigin from './active-origin/actions';
 import * as appEvents from './app-events/actions';
 import * as contacts from './contacts/actions';
@@ -29,6 +30,7 @@ const reduxAction = {
   loginRetryLockoutTime,
   lastActivityTime,
   activeOrigin,
+  activeOriginFavicon,
   settings,
   recentRecipientPublicKeys,
   accountInfo,

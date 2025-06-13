@@ -7,23 +7,25 @@ import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-inf
 
 interface NativeTransferActionRowsProps {
   title: string;
-  deploy: INativeCsprDeploy;
+  formattedDecimalAmount: INativeCsprDeploy['formattedDecimalAmount'];
+  fiatAmount: INativeCsprDeploy['fiatAmount'];
+  isReceive: INativeCsprDeploy['isReceive'];
+  callerPublicKey: INativeCsprDeploy['callerPublicKey'];
+  recipientKey: INativeCsprDeploy['recipientKey'];
+  callerAccountInfo: INativeCsprDeploy['callerAccountInfo'];
+  recipientAccountInfo: INativeCsprDeploy['recipientAccountInfo'];
 }
 
 export const NativeTransferActionRows = ({
   title,
-  deploy
+  formattedDecimalAmount,
+  fiatAmount,
+  isReceive,
+  callerPublicKey,
+  recipientKey,
+  callerAccountInfo,
+  recipientAccountInfo
 }: NativeTransferActionRowsProps) => {
-  const {
-    formattedDecimalAmount,
-    fiatAmount,
-    isReceive,
-    callerPublicKey,
-    recipientKey,
-    callerAccountInfo,
-    recipientAccountInfo
-  } = deploy;
-
   return (
     <ContainerWithAmount
       title={title}
@@ -47,6 +49,11 @@ export const NativeTransferActionRows = ({
           isReceive
             ? callerAccountInfo?.csprName
             : recipientAccountInfo?.csprName
+        }
+        accountLink={
+          isReceive
+            ? callerAccountInfo?.explorerLink
+            : recipientAccountInfo?.explorerLink
         }
       />
     </ContainerWithAmount>

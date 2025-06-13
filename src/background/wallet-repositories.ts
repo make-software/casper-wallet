@@ -7,7 +7,8 @@ const {
   nftsRepository,
   validatorsRepository,
   onRampRepository,
-  appEventsRepository
+  appEventsRepository,
+  txSignatureRequestRepository
 } = setupRepositories();
 
 export {
@@ -17,5 +18,6 @@ export {
   nftsRepository,
   validatorsRepository,
   onRampRepository,
-  appEventsRepository
+  appEventsRepository,
+  txSignatureRequestRepository
 };

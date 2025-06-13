@@ -52,7 +52,12 @@ export function LayoutWindow({
   return (
     <Container {...formProps}>
       {renderHeader && <PageHeader>{renderHeader()}</PageHeader>}
-      <MacScrollbar>
+      <MacScrollbar
+        id="ms-container"
+        style={{
+          flexGrow: 1
+        }}
+      >
         <PageContent>{renderContent()}</PageContent>
       </MacScrollbar>
       {renderFooter && <PageFooter>{renderFooter()}</PageFooter>}
