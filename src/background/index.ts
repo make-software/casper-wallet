@@ -1,4 +1,5 @@
 import { bringInitBackground } from '@bringweb3/chrome-extension-kit';
+import { Deploy } from 'casper-js-sdk';
 import { RootAction, getType } from 'typesafe-actions';
 import {
   Tabs,
@@ -17,8 +18,6 @@ import {
   isChromeBuild,
   isEqualCaseInsensitive
 } from '@src/utils';
-
-import { CasperDeploy } from '@signature-request/pages/sign-deploy/deploy-types';
 
 import {
   backgroundEvent,
@@ -42,6 +41,11 @@ import {
   accountTrackingIdOfSentNftTokensChanged,
   accountTrackingIdOfSentNftTokensRemoved
 } from '@background/redux/account-info/actions';
+import { activeOriginFaviconChanged } from '@background/redux/active-origin-favicon/actions';
+import {
+  dismissAppEvent,
+  resetAppEventsDismission
+} from '@background/redux/app-events/actions';
 import {
   contactRemoved,
   contactUpdated,
@@ -60,10 +64,6 @@ import {
   ledgerStateCleared,
   ledgerTransactionChanged
 } from '@background/redux/ledger/actions';
-import {
-  resetPromotion,
-  setShowCSPRNamePromotion
-} from '@background/redux/promotion/actions';
 import {
   askForReviewAfterChanged,
   ratedInStoreChanged,
@@ -237,6 +237,7 @@ const updateOrigin = async (windowId: number) => {
 
   if (activeOrigin !== newActiveOrigin) {
     store.dispatch(activeOriginChanged(newActiveOrigin));
+    store.dispatch(activeOriginFaviconChanged(tab0.favIconUrl ?? null));
 
     const activeAccount = selectVaultActiveAccount(state);
 
@@ -363,7 +364,7 @@ runtime.onMessage.addListener(
               return sendError(Error('Desploy json string parse error'));
             }
 
-            const deploy: CasperDeploy = deployJson.deploy;
+            const deploy: Deploy = deployJson.deploy;
 
             const isDeployAlreadySigningWithThisAccount =
               deploy?.approvals?.some(approvals =>
@@ -673,8 +674,8 @@ runtime.onMessage.addListener(
           case getType(ledgerTransactionChanged):
           case getType(ledgerRecipientToSaveOnSuccessChanged):
           case getType(addWatchingAccount):
-          case getType(setShowCSPRNamePromotion):
-          case getType(resetPromotion):
+          case getType(dismissAppEvent):
+          case getType(resetAppEventsDismission):
             store.dispatch(action);
             return sendResponse(undefined);
 

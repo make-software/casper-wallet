@@ -8,15 +8,23 @@ import {
   getBlockExplorerAccountUrl,
   getBlockExplorerContractPackageUrl
 } from '@src/constants';
-import { isEqualCaseInsensitive } from '@src/utils';
+import { isEqualCaseInsensitive, isPublicKeyHash } from '@src/utils';
 
 import { selectAllContacts } from '@background/redux/contacts/selectors';
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 import { selectVaultAccounts } from '@background/redux/vault/selectors';
 
 import { AlignedFlexRow } from '@libs/layout';
-import { Hash, HashVariant, Link, Typography } from '@libs/ui/components';
+import {
+  Hash,
+  HashVariant,
+  Link,
+  SvgIcon,
+  Typography
+} from '@libs/ui/components';
 import { AccountInfoIcon } from '@libs/ui/components/account-info-icon/account-info-icon';
+
+import { CopyToClipboardComponent } from '../copy-to-clipboard-component/copy-to-clipboard-component';
 
 interface AccountInfoRowProps {
   publicKey: Maybe<string>;
@@ -27,6 +35,8 @@ interface AccountInfoRowProps {
   iconSize?: number;
   isAction?: boolean;
   csprName: Maybe<string> | undefined;
+  accountLink?: Maybe<string>;
+  withCopyIcon?: boolean;
 }
 
 const AccountInfoContainer = styled(AlignedFlexRow)`
@@ -47,7 +57,9 @@ export const AccountInfoRow = ({
   children,
   iconSize = 16,
   isAction = false,
-  csprName
+  csprName,
+  accountLink,
+  withCopyIcon = false
 }: AccountInfoRowProps) => {
   const [linkUrl, setLinkUrl] = useState('');
 
@@ -91,7 +103,7 @@ export const AccountInfoRow = ({
     [publicKey, contacts]
   );
 
-  const name = accountLabel || accountName || contactName || '';
+  const name = accountLabel || contactName || '';
 
   const getContractName = useCallback(() => {
     if (
@@ -118,17 +130,14 @@ export const AccountInfoRow = ({
   ]);
 
   const contractName = getContractName();
+  const linkHref = isAction ? accountLink ?? linkUrl : undefined;
 
   return (
     <AccountInfoContainer>
       {children}
       {publicKey && (
         <>
-          <Link
-            color="inherit"
-            href={isAction ? linkUrl : undefined}
-            target="_blank"
-          >
+          <Link color="inherit" href={linkHref} target="_blank">
             <AccountInfoNameContainer>
               {label && (
                 <Typography type="captionRegular" color="contentSecondary">
@@ -154,7 +163,13 @@ export const AccountInfoRow = ({
                     value={publicKey}
                     variant={HashVariant.CaptionHash}
                     csprName={csprName}
+                    ownerName={accountName}
                     truncated
+                    label={
+                      isPublicKeyHash(publicKey)
+                        ? t('Public key')
+                        : t('Account hash')
+                    }
                     truncatedSize="base"
                     color={isAction ? 'contentAction' : 'contentPrimary'}
                     withCopyOnSelfClick={false}
@@ -170,6 +185,26 @@ export const AccountInfoRow = ({
               )}
             </AccountInfoNameContainer>
           </Link>
+          {withCopyIcon && (
+            <CopyToClipboardComponent
+              enabled={withCopyIcon}
+              withCopyIcon={withCopyIcon}
+              valueToCopy={publicKey || ''}
+              copiedElement={
+                <SvgIcon
+                  src="assets/icons/tick.svg"
+                  color={'contentPositive'}
+                  size={16}
+                />
+              }
+            >
+              <SvgIcon
+                src="assets/icons/copy.svg"
+                color={'contentDisabled'}
+                size={16}
+              />
+            </CopyToClipboardComponent>
+          )}
         </>
       )}
     </AccountInfoContainer>

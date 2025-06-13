@@ -79,6 +79,7 @@ interface ActionContainerWithLinkProps {
   contractName: string;
   contractIcon: string;
   contractPackageHash: string;
+  contractLink?: Maybe<string>;
 }
 
 export const ActionContainerWithLink = ({
@@ -86,7 +87,8 @@ export const ActionContainerWithLink = ({
   children,
   contractName,
   contractIcon,
-  contractPackageHash
+  contractPackageHash,
+  contractLink
 }: ActionContainerWithLinkProps) => {
   const { casperLiveUrl } = useSelector(selectApiConfigBasedOnActiveNetwork);
 
@@ -100,7 +102,7 @@ export const ActionContainerWithLink = ({
       <AlignedFlexRow gap={SpacingSize.Small}>
         <Typography type="bodySemiBold">{title}</Typography>
         <SvgIcon src={contractIcon} size={20} />
-        <Link color="contentAction" href={link} target="_blank">
+        <Link color="contentAction" href={contractLink ?? link} target="_blank">
           <Typography type="captionRegular">{contractName}</Typography>
         </Link>
       </AlignedFlexRow>
@@ -111,6 +113,7 @@ export const ActionContainerWithLink = ({
 
 interface NftInfoRowProps {
   nftTokenIds: string[];
+  nftTokenUrlsMap: Record<string, string | null>;
   label?: string;
   contractName?: string;
   imgLogo?: Maybe<string>;
@@ -118,17 +121,20 @@ interface NftInfoRowProps {
   isApprove?: boolean;
   defaultSvg?: string;
   collectionHash: string;
+  contractLink?: Maybe<string>;
 }
 
 export const NftInfoRow = ({
   nftTokenIds,
+  nftTokenUrlsMap,
   imgLogo,
   contractName,
   label,
   contractPackageHash,
   isApprove,
   defaultSvg,
-  collectionHash
+  collectionHash,
+  contractLink
 }: NftInfoRowProps) => {
   const { t } = useTranslation();
 
@@ -174,7 +180,7 @@ export const NftInfoRow = ({
         size={20}
         defaultSvg={defaultSvg}
       />
-      <Link color="contentAction" href={link} target="_blank">
+      <Link color="contentAction" href={contractLink ?? link} target="_blank">
         <Typography type="captionRegular">{getCollectionName()}</Typography>
       </Link>
       <Typography type="captionRegular" color="contentSecondary">
@@ -185,7 +191,10 @@ export const NftInfoRow = ({
           <Link
             color="contentAction"
             target="_blank"
-            href={getContractNftUrl(casperLiveUrl, hash || '', id)}
+            href={
+              nftTokenUrlsMap[id] ??
+              getContractNftUrl(casperLiveUrl, hash || '', id)
+            }
           >
             <Typography type="captionRegular" color="contentAction" ellipsis>
               {id}
@@ -244,6 +253,7 @@ interface ContractInfoRowProps {
   label?: string;
   additionalInfo?: string;
   defaultSvg?: string;
+  contractLink?: Maybe<string>;
 }
 
 export const ContractInfoRow = ({
@@ -252,7 +262,8 @@ export const ContractInfoRow = ({
   label,
   additionalInfo,
   iconUrl,
-  defaultSvg
+  defaultSvg,
+  contractLink
 }: ContractInfoRowProps) => {
   const { t } = useTranslation();
 
@@ -277,8 +288,10 @@ export const ContractInfoRow = ({
         iconUrl={iconUrl}
         defaultSvg={defaultSvg}
       />
-      <Link color="contentAction" href={link} target="_blank">
-        <Typography type="captionRegular">{contractName}</Typography>
+      <Link color="contentAction" href={contractLink ?? link} target="_blank">
+        <Typography type="captionRegular" ellipsis style={{ maxWidth: 220 }}>
+          {contractName}
+        </Typography>
       </Link>
       {additionalInfo && (
         <Typography type="captionRegular" color="contentSecondary">

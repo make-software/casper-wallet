@@ -1,4 +1,5 @@
 import { IDeploy } from 'casper-wallet-core';
+import { isWasmDeployExecutionType } from 'casper-wallet-core/src/utils/deploy';
 
 import {
   DeployActionEntryPointNameMap,
@@ -11,6 +12,8 @@ export const getEntryPointName = (deploy: IDeploy, isAction?: boolean) => {
     return 'Transfer';
   } else if (deploy?.type === 'ASSOCIATED_KEYS') {
     return 'Update account';
+  } else if (isWasmDeployExecutionType(deploy)) {
+    return 'WASM transaction';
   }
 
   const entryPointName = deploy?.entryPoint

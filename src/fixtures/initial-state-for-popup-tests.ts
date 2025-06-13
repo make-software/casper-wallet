@@ -84,6 +84,7 @@ export const initialStateForPopupTests: RootState = {
   loginRetryLockoutTime: null,
   lastActivityTime: null,
   activeOrigin: null,
+  activeOriginFavicon: null,
   settings: {
     activeNetwork: NetworkSetting.Testnet,
     casperNetworkApiVersion: '1.5.8',
@@ -104,7 +105,7 @@ export const initialStateForPopupTests: RootState = {
     ratedInStore: false,
     askForReviewAfter: null
   },
-  promotion: {
-    showCSPRNamePromotion: true
+  appEvents: {
+    dismissedEventIds: []
   }
 };

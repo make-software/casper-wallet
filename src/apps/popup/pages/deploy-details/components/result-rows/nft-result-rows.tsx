@@ -28,6 +28,7 @@ export const NftResultRows = ({
   const {
     entryPoint,
     nftTokenIds,
+    nftTokenUrlsMap,
     recipientKey,
     callerPublicKey,
     contractName,
@@ -53,6 +54,7 @@ export const NftResultRows = ({
           contractPackageHash={contractPackageHash}
           contractName={contractName}
           nftTokenIds={nftTokenIds}
+          nftTokenUrlsMap={nftTokenUrlsMap}
           imgLogo={iconUrl}
           defaultSvg={DeployIcon.NFTDefault}
           collectionHash={contractHash}
@@ -82,6 +84,7 @@ export const NftResultRows = ({
           contractPackageHash={contractPackageHash}
           contractName={contractName}
           nftTokenIds={nftTokenIds}
+          nftTokenUrlsMap={nftTokenUrlsMap}
           imgLogo={iconUrl}
           defaultSvg={DeployIcon.NFTDefault}
           collectionHash={contractHash}
@@ -106,6 +109,7 @@ export const NftResultRows = ({
           contractPackageHash={contractPackageHash}
           contractName={contractName}
           nftTokenIds={nftTokenIds}
+          nftTokenUrlsMap={nftTokenUrlsMap}
           imgLogo={iconUrl}
           defaultSvg={DeployIcon.NFTDefault}
           collectionHash={contractHash}
@@ -139,6 +143,7 @@ export const NftResultRows = ({
           contractPackageHash={contractPackageHash}
           contractName={contractName}
           nftTokenIds={nftTokenIds}
+          nftTokenUrlsMap={nftTokenUrlsMap}
           imgLogo={iconUrl}
           defaultSvg={DeployIcon.NFTDefault}
           label={'for'}
@@ -155,6 +160,7 @@ export const NftResultRows = ({
           contractPackageHash={contractPackageHash}
           contractName={contractName}
           nftTokenIds={nftTokenIds}
+          nftTokenUrlsMap={nftTokenUrlsMap}
           imgLogo={iconUrl}
           defaultSvg={DeployIcon.NFTDefault}
           label={'for'}

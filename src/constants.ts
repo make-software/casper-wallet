@@ -5,6 +5,7 @@ const SECOND = 1000;
 export const BALANCE_REFRESH_RATE = 15 * SECOND;
 export const CURRENCY_REFRESH_RATE = 30 * SECOND;
 export const TOKENS_REFRESH_RATE = 15 * SECOND;
+export const APP_MARKETING_EVENTS_REFRESH_RATE = 60 * 60 * SECOND;
 export const NFT_TOKENS_REFRESH_RATE = 60 * SECOND;
 export const VALIDATORS_REFRESH_RATE = 30 * SECOND;
 export const PENDING_DEPLOY_REFETCH_INTERVAL = 5 * SECOND;
@@ -149,7 +150,8 @@ export const ExecutionTypesMap: { [key in number]: string } = {
   3: 'Contract call', //"StoredContractByName",
   4: 'Contract call', //"StoredVersionedContractByHash",
   5: 'Contract call', //"StoredVersionedContractByName",
-  6: 'Transfer'
+  6: 'Transfer',
+  7: 'WASM deploy' // new type
 };
 
 export enum DeployIcon {
@@ -385,3 +387,6 @@ export const ErrorMessages = {
     }
   }
 };
+
+// TODO temp
+export const Casper2EventIdForSeparateScreen = -20;

@@ -6,7 +6,9 @@ const {
   tokensRepository,
   nftsRepository,
   validatorsRepository,
-  onRampRepository
+  onRampRepository,
+  appEventsRepository,
+  txSignatureRequestRepository
 } = setupRepositories();
 
 export {
@@ -15,5 +17,7 @@ export {
   tokensRepository,
   nftsRepository,
   validatorsRepository,
-  onRampRepository
+  onRampRepository,
+  appEventsRepository,
+  txSignatureRequestRepository
 };

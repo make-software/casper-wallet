@@ -1,20 +1,16 @@
 import { Maybe } from 'casper-wallet-core/src/typings/common';
-import React, { useMemo } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { useIsDarkMode } from '@hooks/use-is-dark-mode';
 
-import { CenteredFlexRow, SpacingSize } from '@libs/layout';
-import {
-  CopyToClipboard,
-  Placement,
-  SvgIcon,
-  Tooltip,
-  Typography
-} from '@libs/ui/components';
+import { AlignedFlexRow, SpacingSize } from '@libs/layout';
+import { Placement, SvgIcon, Typography } from '@libs/ui/components';
+import { PortalTooltip } from '@libs/ui/components/portal-tooltip/portal-tooltip';
 import { ContentColor } from '@libs/ui/utils';
 
+import { CopyToClipboardComponent } from '../copy-to-clipboard-component/copy-to-clipboard-component';
+import { HashTooltip } from './hash-tooltip';
 import { TruncateKeySize, truncateKey } from './utils';
 
 export enum HashVariant {
@@ -27,7 +23,7 @@ interface HashContainerProps {
   withHover?: boolean;
 }
 
-const HashContainer = styled(CenteredFlexRow)<HashContainerProps>`
+const HashContainer = styled(AlignedFlexRow)<HashContainerProps>`
   ${({ withHover, theme }) =>
     withHover && ` &:hover > span { color: ${theme.color.contentAction}; }`};
 `;
@@ -46,6 +42,10 @@ interface HashProps {
   withCopyIcon?: boolean;
   csprName?: Maybe<string>;
   withOpacity?: boolean;
+  label?: string;
+  ownerName?: string;
+  contractName?: string;
+  withCopiedIcon?: boolean;
 }
 
 export function Hash({
@@ -57,36 +57,100 @@ export function Hash({
   color,
   isImported,
   truncatedSize,
-  placement,
   withoutTooltip = false,
   isLedger,
   withCopyIcon,
-  withOpacity
+  withOpacity,
+  label,
+  ownerName,
+  contractName,
+  withCopiedIcon = false
 }: HashProps) {
-  const { t } = useTranslation();
   const isDarkMode = useIsDarkMode();
+
+  const renderTitle = useCallback(() => {
+    if (!(truncated && !withoutTooltip)) {
+      return null;
+    }
+
+    if (label && value) {
+      return (
+        <HashTooltip
+          hash={value}
+          hashLabel={label}
+          csprName={csprName}
+          ownerName={ownerName}
+          contractName={contractName}
+        />
+      );
+    }
+
+    return (
+      <Typography type="captionRegular" overflowWrap color="contentPrimary">
+        {value}
+      </Typography>
+    );
+  }, [
+    csprName,
+    label,
+    ownerName,
+    truncated,
+    value,
+    withOpacity,
+    withoutTooltip
+  ]);
 
   const HashComponent = useMemo(
     () => (
       <>
-        <Tooltip
-          title={truncated && !withoutTooltip ? value : null}
-          overflowWrap
-          placement={placement}
-        >
-          <Typography
-            type={csprName ? 'captionRegular' : variant}
-            wordBreak={!truncated}
-            color={color || 'contentSecondary'}
-            style={{ opacity: withOpacity ? '0.8' : '1' }}
+        <PortalTooltip title={renderTitle()}>
+          <CopyToClipboardComponent
+            enabled={Boolean(withCopyOnSelfClick || withCopyIcon)}
+            withCopyIcon={Boolean(withCopyIcon)}
+            valueToCopy={value || ''}
+            copiedElement={
+              withCopiedIcon ? (
+                <SvgIcon
+                  src="assets/icons/tick.svg"
+                  color={'contentPositive'}
+                  size={16}
+                />
+              ) : undefined
+            }
+            copyElement={
+              withCopiedIcon ? (
+                <SvgIcon
+                  src="assets/icons/copy.svg"
+                  style={{ opacity: withOpacity ? '0.4' : '1' }}
+                  {...(withOpacity && { color: 'contentOnFill' })}
+                  size={16}
+                />
+              ) : undefined
+            }
+            copiedElementWithChildren={withCopiedIcon}
           >
-            {csprName
-              ? csprName
-              : truncated
-                ? truncateKey(value || '', { size: truncatedSize })
-                : value}
-          </Typography>
-        </Tooltip>
+            <Typography
+              type={csprName ? 'captionRegular' : variant}
+              wordBreak={!truncated}
+              color={color || 'contentSecondary'}
+              style={{ opacity: withOpacity ? '0.8' : '1' }}
+            >
+              {csprName
+                ? csprName
+                : truncated
+                  ? truncateKey(value || '', { size: truncatedSize })
+                  : value}
+            </Typography>
+            {withCopyIcon && !withCopiedIcon && (
+              <SvgIcon
+                src="assets/icons/copy.svg"
+                style={{ opacity: withOpacity ? '0.4' : '1' }}
+                {...(withOpacity && { color: 'contentOnFill' })}
+                size={16}
+              />
+            )}
+          </CopyToClipboardComponent>
+        </PortalTooltip>
         {isImported && (
           <SvgIcon
             src="assets/icons/upload.svg"
@@ -104,55 +168,25 @@ export function Hash({
             size={20}
           />
         )}
-        {withCopyIcon && (
-          <SvgIcon
-            src="assets/icons/copy.svg"
-            style={{ opacity: withOpacity ? '0.4' : '1' }}
-            {...(withOpacity && { color: 'contentOnFill' })}
-            size={16}
-          />
-        )}
       </>
     ),
     [
-      truncated,
-      withoutTooltip,
+      renderTitle,
+      withCopyOnSelfClick,
+      withCopyIcon,
       value,
-      placement,
-      variant,
-      color,
+      withCopiedIcon,
+      withOpacity,
       csprName,
+      variant,
+      truncated,
+      color,
       truncatedSize,
       isImported,
       isLedger,
-      isDarkMode,
-      withCopyIcon
+      isDarkMode
     ]
   );
-
-  if (withCopyOnSelfClick || withCopyIcon) {
-    return (
-      <CopyToClipboard
-        renderContent={({ isClicked }) => (
-          <>
-            {isClicked ? (
-              <Typography type="captionHash" color="contentPositive">
-                <Trans t={t}>Copied!</Trans>
-              </Typography>
-            ) : (
-              <HashContainer
-                gap={withCopyIcon ? SpacingSize.Small : SpacingSize.Tiny}
-                withHover
-              >
-                {HashComponent}
-              </HashContainer>
-            )}
-          </>
-        )}
-        valueToCopy={value || ''}
-      />
-    );
-  }
 
   return <HashContainer gap={SpacingSize.Tiny}>{HashComponent}</HashContainer>;
 }

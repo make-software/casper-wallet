@@ -24,7 +24,7 @@ export type TypographyType =
   | 'subtitle'
   | 'listSubtextHash';
 
-export type CSPRSize = '2.8rem' | '2.4rem' | '2rem' | '1.8rem';
+export type CSPRSize = '2.8rem' | '2.4rem' | '2rem' | '1.8rem' | '1.6rem';
 
 export interface BodyStylesProps extends BaseProps {
   color?: ContentColor;
@@ -34,6 +34,7 @@ export interface BodyStylesProps extends BaseProps {
   loading?: boolean;
   wordBreak?: boolean;
   fontSize?: CSPRSize;
+  lineHeight?: string;
   ellipsis?: boolean;
   overflowWrap?: boolean;
   translate?: 'yes' | 'no';
@@ -106,117 +107,119 @@ function getBodyStyles(
 const StyledTypography = styled('span').withConfig({
   shouldForwardProp: (prop, defaultValidatorFn) =>
     !['loading'].includes(prop) && defaultValidatorFn(prop)
-})<TypographyProps>(({ theme, type, fontSize, ...restProps }): CSSObject => {
-  const base = getBodyStyles(theme, restProps);
+})<TypographyProps>(
+  ({ theme, type, fontSize, lineHeight, ...restProps }): CSSObject => {
+    const base = getBodyStyles(theme, restProps);
 
-  const bodyBase = {
-    ...base,
-    fontSize: '1.5rem',
-    lineHeight: '2.4rem',
-    fontFamily: theme.typography.fontFamily.primary,
-    fontWeight: theme.typography.fontWeight.regular
-  };
+    const bodyBase = {
+      ...base,
+      fontSize: '1.5rem',
+      lineHeight: '2.4rem',
+      fontFamily: theme.typography.fontFamily.primary,
+      fontWeight: theme.typography.fontWeight.regular
+    };
 
-  const captionBase = {
-    ...base,
-    fontSize: '1.4rem',
-    lineHeight: '2.4rem',
-    fontFamily: theme.typography.fontFamily.primary,
-    fontWeight: theme.typography.fontWeight.regular
-  };
+    const captionBase = {
+      ...base,
+      fontSize: '1.4rem',
+      lineHeight: '2.4rem',
+      fontFamily: theme.typography.fontFamily.primary,
+      fontWeight: theme.typography.fontWeight.regular
+    };
 
-  const CSPRBase = {
-    ...base,
-    fontFamily: theme.typography.fontFamily.mono,
-    fontSize: fontSize || '2.8rem',
-    lineHeight: '4rem'
-  };
+    const CSPRBase = {
+      ...base,
+      fontFamily: theme.typography.fontFamily.mono,
+      fontSize: fontSize || '2.8rem',
+      lineHeight: '4rem'
+    };
 
-  switch (type) {
-    case 'captionRegular':
-      return captionBase;
+    switch (type) {
+      case 'captionRegular':
+        return captionBase;
 
-    case 'captionMedium':
-      return {
-        ...captionBase,
-        fontWeight: theme.typography.fontWeight.medium
-      };
+      case 'captionMedium':
+        return {
+          ...captionBase,
+          fontWeight: theme.typography.fontWeight.medium
+        };
 
-    case 'captionHash':
-      return {
-        ...captionBase,
-        lineHeight: '2.4rem',
-        fontFamily: theme.typography.fontFamily.mono
-      };
+      case 'captionHash':
+        return {
+          ...captionBase,
+          lineHeight: '2.4rem',
+          fontFamily: theme.typography.fontFamily.mono
+        };
 
-    case 'labelMedium':
-      return {
-        ...base,
-        fontSize: '1.2rem',
-        lineHeight: '1.6rem',
-        fontWeight: theme.typography.fontWeight.medium
-      };
-    case 'body':
-      return bodyBase;
+      case 'labelMedium':
+        return {
+          ...base,
+          fontSize: '1.2rem',
+          lineHeight: '1.6rem',
+          fontWeight: theme.typography.fontWeight.medium
+        };
+      case 'body':
+        return bodyBase;
 
-    case 'bodySemiBold':
-      return {
-        ...bodyBase,
-        fontWeight: theme.typography.fontWeight.semiBold
-      };
+      case 'bodySemiBold':
+        return {
+          ...bodyBase,
+          fontWeight: theme.typography.fontWeight.semiBold
+        };
 
-    case 'bodyHash':
-      return {
-        ...bodyBase,
-        fontFamily: theme.typography.fontFamily.mono
-      };
+      case 'bodyHash':
+        return {
+          ...bodyBase,
+          fontFamily: theme.typography.fontFamily.mono
+        };
 
-    case 'CSPRLight':
-      return {
-        ...CSPRBase,
-        fontWeight: theme.typography.fontWeight.light
-      };
+      case 'CSPRLight':
+        return {
+          ...CSPRBase,
+          fontWeight: theme.typography.fontWeight.light
+        };
 
-    case 'CSPRBold':
-      return {
-        ...CSPRBase,
-        fontWeight: theme.typography.fontWeight.bold
-      };
+      case 'CSPRBold':
+        return {
+          ...CSPRBase,
+          fontWeight: theme.typography.fontWeight.bold
+        };
 
-    case 'listSubtext':
-      return {
-        ...base,
-        fontSize: '1.2rem',
-        lineHeight: '1.6rem'
-      };
+      case 'listSubtext':
+        return {
+          ...base,
+          fontSize: '1.2rem',
+          lineHeight: '1.6rem'
+        };
 
-    case 'formFieldStatus':
-      return {
-        ...base,
-        fontSize: '1rem',
-        lineHeight: '1.2rem'
-      };
+      case 'formFieldStatus':
+        return {
+          ...base,
+          fontSize: '1rem',
+          lineHeight: '1.2rem'
+        };
 
-    case 'subtitle':
-      return {
-        ...captionBase,
-        fontSize: '1.8rem',
-        lineHeight: '2.4rem',
-        fontWeight: theme.typography.fontWeight.bold
-      };
+      case 'subtitle':
+        return {
+          ...captionBase,
+          fontSize: fontSize ?? '1.8rem',
+          lineHeight: lineHeight ?? '2.4rem',
+          fontWeight: theme.typography.fontWeight.bold
+        };
 
-    case 'listSubtextHash':
-      return {
-        ...CSPRBase,
-        fontSize: '1.2rem',
-        lineHeight: '1.6rem',
-        fontWeight: theme.typography.fontWeight.medium
-      };
+      case 'listSubtextHash':
+        return {
+          ...CSPRBase,
+          fontSize: '1.2rem',
+          lineHeight: '1.6rem',
+          fontWeight: theme.typography.fontWeight.medium
+        };
 
-    default:
-      throw new Error('Unknown type of Typography');
+      default:
+        throw new Error('Unknown type of Typography');
+    }
   }
-});
+);
 
 const StyledHeader = styled('h1').withConfig({
   shouldForwardProp: (prop, defaultValidatorFn) =>

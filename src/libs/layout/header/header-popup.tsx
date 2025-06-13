@@ -8,6 +8,8 @@ import {
 } from '@background/redux/vault/selectors';
 
 import { AlignedSpaceBetweenFlexRow, HeaderContainer } from '@libs/layout';
+import { HeaderSigningAccount } from '@libs/layout/header/header-signing-account';
+import { Account } from '@libs/types/account';
 import { SvgIcon } from '@libs/ui/components';
 
 import { HeaderActions } from './header-actions';
@@ -25,6 +27,7 @@ interface HeaderProps {
   withNetworkSwitcher?: boolean;
   withMenu?: boolean;
   withConnectionStatus?: boolean;
+  signingAccount?: Account;
   renderSubmenuBarItems?: () => JSX.Element;
 }
 
@@ -32,6 +35,7 @@ export function HeaderPopup({
   withNetworkSwitcher,
   withMenu,
   withConnectionStatus,
+  signingAccount,
   renderSubmenuBarItems
 }: HeaderProps) {
   const isActiveAccountConnected = useSelector(
@@ -51,6 +55,8 @@ export function HeaderPopup({
             publicKey={activeAccount.publicKey}
             isConnected={isActiveAccountConnected}
           />
+        ) : signingAccount ? (
+          <HeaderSigningAccount account={signingAccount} isConnected={true} />
         ) : (
           <SvgIcon
             src="assets/icons/wallet-original-on-white.svg"

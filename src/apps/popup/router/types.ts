@@ -1,4 +1,4 @@
-import { IDeploy } from 'casper-wallet-core';
+import { IAppMarketingEvent, IDeploy } from 'casper-wallet-core';
 
 import { NFTData } from '@popup/pages/transfer-nft/utils';
 
@@ -14,4 +14,5 @@ export interface LocationState extends ErrorLocationState {
   recipientPublicKey?: string;
   deploy?: IDeploy;
   navigateHome?: boolean;
+  appEvent?: IAppMarketingEvent;
 }

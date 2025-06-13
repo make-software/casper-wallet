@@ -14,8 +14,8 @@ import { selectVaultIsLocked } from '@background/redux/session/selectors';
 
 import { ErrorPath, LockedRouter, WindowErrorPage } from '@libs/layout';
 
-import { SignDeployPage } from './pages/sign-deploy';
 import { SignMessagePage } from './pages/sign-message';
+import { SignTransactionPage } from './pages/sign-transaction';
 
 export function AppRouter() {
   useUserActivityTracker();
@@ -28,7 +28,7 @@ export function AppRouter() {
   return (
     <HashRouter>
       <Routes>
-        <Route path={RouterPath.SignDeploy} element={<SignDeployPage />} />
+        <Route path={RouterPath.SignDeploy} element={<SignTransactionPage />} />
         <Route path={RouterPath.SignMessage} element={<SignMessagePage />} />
         <Route
           path={ErrorPath}

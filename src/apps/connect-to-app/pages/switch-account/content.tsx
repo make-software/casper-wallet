@@ -146,6 +146,7 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
                         />
                         <Typography type="body">{account.name}</Typography>
                         <Hash
+                          label={t('Public key')}
                           value={account.publicKey}
                           csprName={csprName}
                           variant={HashVariant.CaptionHash}

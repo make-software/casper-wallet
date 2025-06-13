@@ -1,4 +1,5 @@
 export * from './active-origin/selectors';
+export * from './active-origin-favicon/selectors';
 export * from './keys/selectors';
 export * from './last-activity-time/selectors';
 export * from './login-retry-count/selectors';
@@ -11,4 +12,4 @@ export * from './settings/selectors';
 export * from './recent-recipient-public-keys/selectors';
 export * from './rate-app/selectors';
 export * from './ledger/selectors';
-export * from './promotion/selectors';
+export * from './app-events/selectors';

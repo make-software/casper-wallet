@@ -11,7 +11,6 @@ import {
   AmountRow,
   ContainerWithAmount
 } from '@popup/pages/deploy-details/components/common';
-import { getEntryPointName } from '@popup/pages/deploy-details/utils';
 
 import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 
@@ -20,19 +19,22 @@ const ManageAuctionBidAction = ({
   title,
   fiatAmount,
   contractPackageHash,
-  contractName
+  contractName,
+  contractLink
 }: {
   amount: string;
   title: string;
   fiatAmount: string;
   contractPackageHash: string;
   contractName: string;
+  contractLink?: Maybe<string>;
 }) => (
   <ActionContainerWithLink
     title={title}
     contractName={contractName}
     contractIcon={DeployIcon.Auction}
     contractPackageHash={contractPackageHash}
+    contractLink={contractLink}
   >
     <AmountRow
       amount={amount}
@@ -77,6 +79,7 @@ const DelegationAuctionAction = ({
           isAction
           iconSize={20}
           csprName={toValidatorAccountInfo?.csprName}
+          accountLink={toValidatorAccountInfo?.explorerLink}
         />
       )}
       {(isUndelegate || isRedelegate) && (
@@ -89,6 +92,7 @@ const DelegationAuctionAction = ({
             isAction
             iconSize={20}
             csprName={fromValidatorAccountInfo?.csprName}
+            accountLink={fromValidatorAccountInfo?.explorerLink}
           />
           <AccountInfoRow
             publicKey={toValidator}
@@ -98,6 +102,7 @@ const DelegationAuctionAction = ({
             isAction
             iconSize={20}
             csprName={toValidatorAccountInfo?.csprName}
+            accountLink={toValidatorAccountInfo?.explorerLink}
           />
         </>
       )}
@@ -106,19 +111,32 @@ const DelegationAuctionAction = ({
 };
 
 interface AuctionActionRowsProps {
-  deploy: IAuctionDeploy;
+  entryPoint: IAuctionDeploy['entryPoint'];
+  formattedDecimalAmount: IAuctionDeploy['formattedDecimalAmount'];
+  fiatAmount: IAuctionDeploy['fiatAmount'];
+  fromValidator: IAuctionDeploy['fromValidator'];
+  toValidator: IAuctionDeploy['toValidator'];
+  fromValidatorAccountInfo: IAuctionDeploy['fromValidatorAccountInfo'];
+  toValidatorAccountInfo: IAuctionDeploy['toValidatorAccountInfo'];
+  contractName: IAuctionDeploy['contractName'];
+  contractPackageHash: IAuctionDeploy['contractPackageHash'];
+  title: string;
+  contractLink?: Maybe<string>;
 }
 
-export const AuctionActionRows = ({ deploy }: AuctionActionRowsProps) => {
-  const {
-    entryPoint,
-    formattedDecimalAmount,
-    fiatAmount,
-    fromValidator,
-    toValidator,
-    fromValidatorAccountInfo,
-    toValidatorAccountInfo
-  } = deploy;
+export const AuctionActionRows = ({
+  entryPoint,
+  formattedDecimalAmount,
+  fiatAmount,
+  fromValidator,
+  toValidator,
+  fromValidatorAccountInfo,
+  toValidatorAccountInfo,
+  contractPackageHash,
+  contractName,
+  title,
+  contractLink
+}: AuctionActionRowsProps) => {
   const isManageAuctionBidDeploy =
     entryPoint === AuctionDeployEntryPoint.activate ||
     entryPoint === AuctionDeployEntryPoint.withdraw ||
@@ -129,16 +147,15 @@ export const AuctionActionRows = ({ deploy }: AuctionActionRowsProps) => {
     entryPoint === AuctionDeployEntryPoint.undelegate ||
     entryPoint === AuctionDeployEntryPoint.redelegate;
 
-  const title = getEntryPointName(deploy, true);
-
   if (isManageAuctionBidDeploy) {
     return (
       <ManageAuctionBidAction
         amount={formattedDecimalAmount}
         title={title}
         fiatAmount={fiatAmount}
-        contractName={deploy.contractName}
-        contractPackageHash={deploy.contractPackageHash}
+        contractName={contractName}
+        contractPackageHash={contractPackageHash}
+        contractLink={contractLink}
       />
     );
   }
@@ -161,8 +178,9 @@ export const AuctionActionRows = ({ deploy }: AuctionActionRowsProps) => {
   return (
     <DefaultActionRows
       title={title}
-      contractPackageHash={deploy.contractPackageHash}
-      contractName={deploy.contractName}
+      contractPackageHash={contractPackageHash}
+      contractName={contractName}
+      contractLink={contractLink}
       iconUrl={DeployIcon.Auction}
     />
   );

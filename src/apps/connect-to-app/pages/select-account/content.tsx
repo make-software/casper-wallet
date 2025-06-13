@@ -142,6 +142,7 @@ export function SelectAccountContent({
                     {account.name}
                   </Typography>
                   <Hash
+                    label={t('Public key')}
                     value={account.publicKey}
                     variant={HashVariant.CaptionHash}
                     truncated
