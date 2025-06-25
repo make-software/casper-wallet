@@ -110,8 +110,8 @@ export const AmountStep = ({
             description={
               stakeType === AuctionManagerEntryPoint.delegate
                 ? "You don't have enough CSPR to cover the delegation minimum amount\n" +
-                  '              and the transaction fee.'
-                : "You don't have enough CSPR to cover the transaction fee."
+                  '              and the transaction payment.'
+                : "You don't have enough CSPR to cover the transaction payment."
             }
           />
         </VerticalSpaceContainer>

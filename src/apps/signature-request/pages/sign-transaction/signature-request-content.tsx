@@ -184,7 +184,7 @@ export function SignatureRequestContent({
                           {signatureRequest.action.type === 'CSPR_NATIVE' ||
                           signatureRequest.action.type === 'AUCTION'
                             ? 'Fee required to process the transaction'
-                            : 'Payment amount that limits the transaction processing cost'}
+                            : 'Transaction payment that limits the transaction processing cost'}
                         </Trans>
                       </Typography>
                     }

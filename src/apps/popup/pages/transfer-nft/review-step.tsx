@@ -74,18 +74,18 @@ export const ReviewStep = ({
 
       <VerticalSpaceContainer top={SpacingSize.XL}>
         <Input
-          label={t('Transaction fee')}
+          label={t('Transaction payment')}
           rightLabel={paymentFiatAmount}
           monotype
           type="number"
-          placeholder={t('Enter transaction fee')}
+          placeholder={t('Enter transaction payment')}
           suffixText={'CSPR'}
           {...register('paymentAmount')}
           error={!!errors?.paymentAmount}
           onKeyDown={handleNumericInput}
           validationText={
             errors?.paymentAmount?.message ||
-            "You'll be charged this amount in CSPR as a transaction fee. You can change it at your discretion."
+            "You'll be charged this amount in CSPR as a transaction payment. You can change it at your discretion."
           }
         />
       </VerticalSpaceContainer>

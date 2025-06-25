@@ -428,7 +428,7 @@ export const StakesPage = () => {
       <FooterButtonsContainer>
         <SpaceBetweenFlexRow>
           <Typography type="captionRegular" color="contentSecondary">
-            <Trans t={t}>Transaction fee</Trans>
+            <Trans t={t}>Transaction payment</Trans>
           </Typography>
           <Typography type="captionHash">
             {formatNumber(motesToCSPR(STAKE_COST_MOTES), {

@@ -280,7 +280,7 @@ export const usePaymentAmountRule = (csprBalance: string | undefined) => {
     : Big(csprBalance).toFixed();
 
   return Yup.string()
-    .required(t('Payment amount is required'))
+    .required(t('Transaction payment is required'))
     .test({
       name: 'validU64',
       test: amountInputValue => {
