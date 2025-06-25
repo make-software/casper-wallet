@@ -216,24 +216,40 @@ export function SignatureRequestContent({
             }))}
             renderRow={({ id, value }) => (
               <ListItemContainer key={id}>
-                <WeightContainer gap={SpacingSize.Small} wrap="nowrap">
-                  <Typography type="body" color="contentSecondary">
-                    {t('Weight:')}
-                  </Typography>
-                  <Typography type="bodyHash" color="contentPrimary">
-                    {value.weight ?? 1}
-                  </Typography>
-                </WeightContainer>
-                <AccountInfoRow
-                  isAction
-                  iconSize={20}
-                  publicKey={value.publicKey}
-                  csprName={value.accountInfo?.csprName}
-                  imgLogo={value.accountInfo?.brandingLogo}
-                  accountName={value.accountInfo?.name}
-                  accountLink={value.accountInfo?.explorerLink}
-                  withCopyIcon
-                />
+                <SpaceBetweenFlexRow
+                  gap={SpacingSize.Small}
+                  flexGrow={1}
+                  wrap="nowrap"
+                >
+                  <WeightContainer gap={SpacingSize.Small} wrap="nowrap">
+                    <Typography type="body" color="contentSecondary">
+                      {t('Weight:')}
+                    </Typography>
+                    <Typography type="bodyHash" color="contentPrimary">
+                      {value.weight ?? 1}
+                    </Typography>
+                  </WeightContainer>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end'
+                    }}
+                  >
+                    <AccountInfoRow
+                      isAction
+                      iconSize={20}
+                      publicKey={value.publicKey}
+                      csprName={value.accountInfo?.csprName}
+                      imgLogo={value.accountInfo?.brandingLogo}
+                      accountName={value.accountInfo?.name}
+                      accountLink={value.accountInfo?.explorerLink}
+                      withCopyIcon
+                      containerStyle={{ flexWrap: 'nowrap' }}
+                      nameContainerStyle={{ justifyContent: 'flex-end' }}
+                    />
+                  </div>
+                </SpaceBetweenFlexRow>
               </ListItemContainer>
             )}
             marginLeftForItemSeparatorLine={16}
