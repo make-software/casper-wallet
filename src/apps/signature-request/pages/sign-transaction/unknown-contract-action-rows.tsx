@@ -3,6 +3,7 @@ import {
   ITxSignatureRequestUnknownContractAction,
   ITxSignatureRequestWasmAction,
   ITxSignatureRequestWasmProxyAction,
+  formatTokenBalance,
   isTxSignatureRequestUnknownContractAction,
   isTxSignatureRequestWasmProxyAction
 } from 'casper-wallet-core';
@@ -80,7 +81,9 @@ export const UnknownContractActionRows = ({
                         wordBreak: 'break-all'
                       }}
                     >
-                      <Trans t={t}>{value.value.toString()}</Trans>
+                      <Trans t={t}>
+                        {formatTokenBalance(value.value.toString(), 0, 0)}
+                      </Trans>
                     </Typography>
                   </>
                 )}

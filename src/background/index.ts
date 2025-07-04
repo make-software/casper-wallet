@@ -818,6 +818,7 @@ initKeepAlive().catch(error => {
 if (isChromeBuild) {
   bringInitBackground({
     identifier: process.env.PLATFORM_IDENTIFIER || '', // The identifier key you obtained from Bringweb3
-    apiEndpoint: process.env.NODE_ENV === 'production' ? 'prod' : 'sandbox'
+    apiEndpoint: process.env.NODE_ENV === 'production' ? 'prod' : 'sandbox',
+    isEnabledByDefault: true
   });
 }
