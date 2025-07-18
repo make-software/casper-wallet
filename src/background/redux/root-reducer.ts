@@ -14,6 +14,7 @@ import { reducer as rateApp } from './rate-app/reducer';
 import { reducer as recentRecipientPublicKeys } from './recent-recipient-public-keys/reducer';
 import { reducer as session } from './session/reducer';
 import { reducer as settings } from './settings/reducer';
+import { reducer as trustedWasm } from './trusted-wasm/reducer';
 import { reducer as vaultCipher } from './vault-cipher/reducer';
 import { reducer as vault } from './vault/reducer';
 import { reducer as windowManagement } from './windowManagement/reducer';
@@ -35,7 +36,8 @@ const rootReducer = combineReducers({
   contacts,
   rateApp,
   ledger,
-  appEvents
+  appEvents,
+  trustedWasm
 });
 
 export default rootReducer;
