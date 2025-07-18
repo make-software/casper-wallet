@@ -45,7 +45,10 @@ export const NftActionsRows = ({
 }: NftActionsRowsProps) => {
   const isBurn = entryPoint === NftDeployEntryPoint.burn;
   const isMint = entryPoint === NftDeployEntryPoint.mint;
-  const isTransfer = entryPoint === NftDeployEntryPoint.transfer;
+  const isTransfer =
+    entryPoint === NftDeployEntryPoint.transfer ||
+    entryPoint === NftDeployEntryPoint.transfer_from ||
+    entryPoint === NftDeployEntryPoint.safe_transfer_from;
   const isUpdate = entryPoint === NftDeployEntryPoint.update_token_meta;
   const isApprove =
     entryPoint === NftDeployEntryPoint.approve ||
