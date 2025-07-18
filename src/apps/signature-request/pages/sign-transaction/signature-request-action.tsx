@@ -134,7 +134,9 @@ export const SignatureRequestAction: React.FC<SignatureRequestActionProps> = ({
           contractPackageHash={
             action.contractPackageHash ?? action.contractHash ?? ''
           }
+          contractHash={action.contractHash ?? ''}
           contractLink={action.contractLink}
+          collectionName={action.collectionName}
         />
       </Container>
     );
@@ -168,6 +170,7 @@ export const SignatureRequestAction: React.FC<SignatureRequestActionProps> = ({
           contractPackageHash={action.contractPackageHash ?? ''}
           contractHash={action.contractHash ?? ''}
           contractLink={action.contractLink}
+          collectionName={action.collectionName}
         />
       </Container>
     );

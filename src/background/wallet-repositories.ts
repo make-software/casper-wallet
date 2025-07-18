@@ -8,7 +8,8 @@ const {
   validatorsRepository,
   onRampRepository,
   appEventsRepository,
-  txSignatureRequestRepository
+  txSignatureRequestRepository,
+  contractPackageRepository
 } = setupRepositories();
 
 export {
@@ -19,5 +20,6 @@ export {
   validatorsRepository,
   onRampRepository,
   appEventsRepository,
-  txSignatureRequestRepository
+  txSignatureRequestRepository,
+  contractPackageRepository
 };

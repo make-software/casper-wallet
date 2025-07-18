@@ -18,12 +18,16 @@ interface NftResultRowsProps {
   action: INftActionsResult;
   contractPackageHash: string;
   contractHash: string;
+  collectionHash: string;
+  collectionName?: string;
 }
 
 export const NftResultRows = ({
   action,
   contractPackageHash,
-  contractHash
+  contractHash,
+  collectionHash,
+  collectionName
 }: NftResultRowsProps) => {
   const {
     entryPoint,
@@ -31,7 +35,6 @@ export const NftResultRows = ({
     nftTokenUrlsMap,
     recipientKey,
     callerPublicKey,
-    contractName,
     iconUrl,
     recipientAccountInfo,
     callerAccountInfo
@@ -55,12 +58,13 @@ export const NftResultRows = ({
       <SimpleContainer title={title}>
         <NftInfoRow
           contractPackageHash={contractPackageHash}
-          contractName={contractName}
+          contractHash={contractHash}
+          collectionName={collectionName}
           nftTokenIds={nftTokenIds}
           nftTokenUrlsMap={nftTokenUrlsMap}
           imgLogo={iconUrl}
           defaultSvg={DeployIcon.NFTDefault}
-          collectionHash={contractHash}
+          collectionHash={collectionHash}
         />
         <AccountInfoRow
           publicKey={recipientKey || callerPublicKey}
@@ -85,12 +89,13 @@ export const NftResultRows = ({
       <SimpleContainer title={title}>
         <NftInfoRow
           contractPackageHash={contractPackageHash}
-          contractName={contractName}
+          contractHash={contractHash}
+          collectionName={collectionName}
           nftTokenIds={nftTokenIds}
           nftTokenUrlsMap={nftTokenUrlsMap}
           imgLogo={iconUrl}
           defaultSvg={DeployIcon.NFTDefault}
-          collectionHash={contractHash}
+          collectionHash={collectionHash}
         />
         <AccountInfoRow
           publicKey={recipientKey}
@@ -110,12 +115,13 @@ export const NftResultRows = ({
       <SimpleContainer title={title}>
         <NftInfoRow
           contractPackageHash={contractPackageHash}
-          contractName={contractName}
+          contractHash={contractHash}
+          collectionName={collectionName}
           nftTokenIds={nftTokenIds}
           nftTokenUrlsMap={nftTokenUrlsMap}
           imgLogo={iconUrl}
           defaultSvg={DeployIcon.NFTDefault}
-          collectionHash={contractHash}
+          collectionHash={collectionHash}
         />
         <AccountInfoRow
           publicKey={callerPublicKey}
@@ -144,13 +150,14 @@ export const NftResultRows = ({
       <SimpleContainer title={title}>
         <NftInfoRow
           contractPackageHash={contractPackageHash}
-          contractName={contractName}
+          contractHash={contractHash}
+          collectionName={collectionName}
           nftTokenIds={nftTokenIds}
           nftTokenUrlsMap={nftTokenUrlsMap}
           imgLogo={iconUrl}
           defaultSvg={DeployIcon.NFTDefault}
           label={'for'}
-          collectionHash={contractHash}
+          collectionHash={collectionHash}
         />
       </SimpleContainer>
     );
@@ -161,14 +168,15 @@ export const NftResultRows = ({
       <SimpleContainer title={title}>
         <NftInfoRow
           contractPackageHash={contractPackageHash}
-          contractName={contractName}
+          contractHash={contractHash}
+          collectionName={collectionName}
           nftTokenIds={nftTokenIds}
           nftTokenUrlsMap={nftTokenUrlsMap}
           imgLogo={iconUrl}
           defaultSvg={DeployIcon.NFTDefault}
           label={'for'}
           isApprove
-          collectionHash={contractHash}
+          collectionHash={collectionHash}
         />
         <AccountInfoRow
           publicKey={recipientKey}
