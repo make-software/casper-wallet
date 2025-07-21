@@ -11,7 +11,6 @@ import { AllAccountsPage } from '@popup/pages/all-accounts';
 import { BackupSecretPhrasePage } from '@popup/pages/backup-secret-phrase';
 import { BringWeb3Unlock } from '@popup/pages/bring-web3-unlock';
 import { BuyCSPRPage } from '@popup/pages/buy-cspr';
-import { Casper2EventPage } from '@popup/pages/casper2-event';
 import { ChangePasswordPage } from '@popup/pages/change-password';
 import { ConnectAnotherAccountPageContent } from '@popup/pages/connect-another-account';
 import { ConnectedSitesPage } from '@popup/pages/connected-sites';
@@ -254,7 +253,6 @@ function AppRoutes() {
       <Route path={RouterPath.DeployDetails} element={<DeployDetailsPage />} />
       <Route path={RouterPath.AddWatchAccount} element={<AddWatchAccount />} />
       <Route path={RouterPath.BringWeb3Unlock} element={<BringWeb3Unlock />} />
-      <Route path={RouterPath.Casper2Event} element={<Casper2EventPage />} />
     </Routes>
   );
 }

@@ -130,7 +130,8 @@ export const isValidSecretKeyHash = (secretKey: string) => {
 
 export enum NFTTokenStandard {
   CEP47 = 'CEP47',
-  CEP78 = 'CEP78'
+  CEP78 = 'CEP78',
+  CEP95 = 'CEP95'
 }
 
 export const getImageProxyUrl = (

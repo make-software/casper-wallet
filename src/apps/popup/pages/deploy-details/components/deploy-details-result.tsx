@@ -118,6 +118,7 @@ export const DeployDetailsResult = ({ deploy }: DeployDetailsResultProps) => {
             key={id}
             contractHash={deploy.contractHash}
             contractPackageHash={contractPackageHash}
+            collectionHash={deploy.contractHash}
           />
         );
       })}

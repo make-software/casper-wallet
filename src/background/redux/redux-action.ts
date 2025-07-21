@@ -15,6 +15,7 @@ import * as recentRecipientPublicKeys from './recent-recipient-public-keys/actio
 import * as sagas from './sagas/actions';
 import * as session from './session/actions';
 import * as settings from './settings/actions';
+import * as trustedWasm from './trusted-wasm/actions';
 import * as vaultCipher from './vault-cipher/actions';
 import * as vault from './vault/actions';
 import * as windowManagement from './windowManagement/actions';
@@ -37,7 +38,8 @@ const reduxAction = {
   contacts,
   rateApp,
   ledger,
-  appEvents
+  appEvents,
+  trustedWasm
 };
 
 export type ReduxAction = ActionType<typeof reduxAction>;

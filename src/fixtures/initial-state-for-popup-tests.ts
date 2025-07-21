@@ -22,6 +22,7 @@ export const initialStateForPopupTests: RootState = {
     isLocked: true,
     isContactEditingAllowed: false
   },
+  trustedWasm: { hashesByOriginDict: {} },
   vault: {
     secretPhrase: [
       'hold',

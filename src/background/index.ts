@@ -71,6 +71,12 @@ import {
 } from '@background/redux/rate-app/actions';
 import { ThemeMode } from '@background/redux/settings/types';
 import {
+  addWasmToTrusted,
+  removeAllWasmFromTrustedOrigin,
+  removeWasmFromTrusted,
+  resetTrustedWasmState
+} from '@background/redux/trusted-wasm/actions';
+import {
   accountAdded,
   accountDisconnected,
   accountImported,
@@ -676,6 +682,10 @@ runtime.onMessage.addListener(
           case getType(addWatchingAccount):
           case getType(dismissAppEvent):
           case getType(resetAppEventsDismission):
+          case getType(addWasmToTrusted):
+          case getType(removeWasmFromTrusted):
+          case getType(removeAllWasmFromTrustedOrigin):
+          case getType(resetTrustedWasmState):
             store.dispatch(action);
             return sendResponse(undefined);
 

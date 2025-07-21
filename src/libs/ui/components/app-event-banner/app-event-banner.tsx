@@ -9,16 +9,18 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
 import { Typography } from '@libs/ui/components';
 
-const AppEventContainer = styled.div<{ isCasper2event?: boolean }>`
+const AppEventContainer = styled.div<{ eventId: number }>`
   display: flex;
   flex-direction: column;
   margin-top: 24px;
   padding: 14px 105px 14px 16px;
   height: 108px;
-  background-image: ${({ isCasper2event = false }) =>
-    isCasper2event
+  background-image: ${({ eventId }) =>
+    eventId === 1
       ? "url('../../../../assets/illustrations/cspr-2-banner.svg')"
-      : "url('../../../../assets/illustrations/cspr-event-banner.svg')"};
+      : eventId === 2
+        ? "url('../../../../assets/illustrations/cspr-name-banner.svg')"
+        : "url('../../../../assets/illustrations/cspr-event-banner.svg')"};
 `;
 
 const OpacityText = styled(Typography)`
@@ -71,7 +73,7 @@ export const AppEventBanner: React.FC<IAppEventBannerProps> = ({
   const isCasper2event = activeMarketingEvent.id === 1;
 
   return (
-    <AppEventContainer isCasper2event={isCasper2event}>
+    <AppEventContainer eventId={activeMarketingEvent.id}>
       <Typography
         type="subtitle"
         color="contentOnFill"
