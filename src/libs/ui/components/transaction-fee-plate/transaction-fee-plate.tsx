@@ -32,7 +32,7 @@ export const TransactionFeePlate = ({
     <Tile>
       <TransactionFeeContainer>
         <Typography type="captionRegular">
-          <Trans t={t}>Transaction fee</Trans>
+          <Trans t={t}>Transaction payment</Trans>
         </Typography>
         <RightAlignedFlexColumn>
           <Typography type="bodyHash">

@@ -1,3 +1,4 @@
+import { formatAddress } from 'casper-wallet-core';
 import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React, { useCallback, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -5,6 +6,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import {
+  DeployIcon,
   getBlockExplorerContractPackageUrl,
   getContractNftUrl
 } from '@src/constants';
@@ -17,6 +19,7 @@ import {
   LeftAlignedFlexColumn,
   SpacingSize
 } from '@libs/layout';
+import { useFetchContractPackage } from '@libs/services/contract-package';
 import { Link, SvgIcon, Typography } from '@libs/ui/components';
 import { AccountInfoIcon } from '@libs/ui/components/account-info-icon/account-info-icon';
 
@@ -115,9 +118,10 @@ interface NftInfoRowProps {
   nftTokenIds: string[];
   nftTokenUrlsMap: Record<string, string | null>;
   label?: string;
-  contractName?: string;
   imgLogo?: Maybe<string>;
   contractPackageHash?: string;
+  contractHash: string;
+  collectionName?: Maybe<string>;
   isApprove?: boolean;
   defaultSvg?: string;
   collectionHash: string;
@@ -128,12 +132,13 @@ export const NftInfoRow = ({
   nftTokenIds,
   nftTokenUrlsMap,
   imgLogo,
-  contractName,
   label,
   contractPackageHash,
+  contractHash,
   isApprove,
   defaultSvg,
   collectionHash,
+  collectionName,
   contractLink
 }: NftInfoRowProps) => {
   const { t } = useTranslation();
@@ -142,13 +147,16 @@ export const NftInfoRow = ({
     selectApiConfigBasedOnActiveNetwork
   );
 
+  const { contractPackage: collectionContractPackage } =
+    useFetchContractPackage(collectionHash);
+
   const isCsprStudio = useMemo(
-    () => isEqualCaseInsensitive(collectionHash, csprStudioCep47ContractHash),
-    [collectionHash, csprStudioCep47ContractHash]
+    () => isEqualCaseInsensitive(contractHash, csprStudioCep47ContractHash),
+    [contractHash, csprStudioCep47ContractHash]
   );
   const hash = useMemo(
-    () => (isCsprStudio ? collectionHash : contractPackageHash),
-    [collectionHash, contractPackageHash, isCsprStudio]
+    () => (isCsprStudio ? contractHash : contractPackageHash),
+    [contractHash, contractPackageHash, isCsprStudio]
   );
 
   const link = getBlockExplorerContractPackageUrl(casperLiveUrl, hash || '');
@@ -158,8 +166,17 @@ export const NftInfoRow = ({
       return 'CSPR.studio';
     }
 
-    return contractName;
-  }, [contractName, isCsprStudio]);
+    return (
+      collectionName ??
+      collectionContractPackage?.name ??
+      formatAddress(collectionHash)
+    );
+  }, [
+    collectionContractPackage?.name,
+    collectionHash,
+    collectionName,
+    isCsprStudio
+  ]);
 
   return (
     <AlignedFlexRowContainer>
@@ -174,11 +191,11 @@ export const NftInfoRow = ({
         </Typography>
       )}
       <AccountInfoIcon
-        publicKey={hash || ''}
+        publicKey={isCsprStudio ? contractHash : collectionHash || ''}
         accountName={getCollectionName()}
         iconUrl={imgLogo}
         size={20}
-        defaultSvg={defaultSvg}
+        defaultSvg={defaultSvg ?? DeployIcon.NFTDefault}
       />
       <Link color="contentAction" href={contractLink ?? link} target="_blank">
         <Typography type="captionRegular">{getCollectionName()}</Typography>

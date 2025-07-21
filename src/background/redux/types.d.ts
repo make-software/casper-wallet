@@ -14,6 +14,7 @@ import { RateAppState } from '@background/redux/rate-app/types';
 import { RecentRecipientPublicKeysState } from '@background/redux/recent-recipient-public-keys/types';
 import { SessionState } from '@background/redux/session/types';
 import { SettingsState } from '@background/redux/settings/types';
+import { TrustedWasmState } from '@background/redux/trusted-wasm/types';
 import { VaultCipherState } from '@background/redux/vault-cipher/types';
 import { VaultState } from '@background/redux/vault/types';
 import { WindowManagementState } from '@background/redux/windowManagement/types';
@@ -53,4 +54,5 @@ export type PopupState = {
   rateApp: RateAppState;
   ledger: LedgerState;
   appEvents: AppEventsState;
+  trustedWasm: TrustedWasmState;
 };

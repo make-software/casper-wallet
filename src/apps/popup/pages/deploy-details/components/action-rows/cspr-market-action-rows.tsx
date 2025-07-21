@@ -19,6 +19,7 @@ interface CsprMarketActionRowsProps {
   entryPoint: ICasperMarketDeploy['entryPoint'];
   contractName: ICasperMarketDeploy['contractName'];
   contractPackageHash: ICasperMarketDeploy['contractPackageHash'];
+  contractHash: ICasperMarketDeploy['contractHash'];
   collectionHash: ICasperMarketDeploy['collectionHash'];
   nftTokenIds: ICasperMarketDeploy['nftTokenIds'];
   nftTokenUrlsMap: ICasperMarketDeploy['nftTokenUrlsMap'];
@@ -27,6 +28,7 @@ interface CsprMarketActionRowsProps {
   fiatAmount: ICasperMarketDeploy['fiatAmount'];
   offererHash: ICasperMarketDeploy['offererHash'];
   contractLink?: Maybe<string>;
+  collectionName?: Maybe<string>;
 }
 
 export const CsprMarketActionRows = ({
@@ -34,6 +36,7 @@ export const CsprMarketActionRows = ({
   entryPoint,
   contractName,
   contractPackageHash,
+  contractHash,
   collectionHash,
   nftTokenIds,
   nftTokenUrlsMap,
@@ -41,7 +44,8 @@ export const CsprMarketActionRows = ({
   formattedDecimalAmount,
   fiatAmount,
   offererHash,
-  contractLink
+  contractLink,
+  collectionName
 }: CsprMarketActionRowsProps) => {
   const isDelist = entryPoint === CsprMarketDeployEntryPoint.delist_token;
   const isListAction =
@@ -59,6 +63,8 @@ export const CsprMarketActionRows = ({
           nftTokenIds={nftTokenIds}
           nftTokenUrlsMap={nftTokenUrlsMap}
           contractPackageHash={contractPackageHash}
+          contractHash={contractHash}
+          collectionName={collectionName}
           collectionHash={collectionHash}
           contractLink={contractLink}
         />
@@ -87,9 +93,10 @@ export const CsprMarketActionRows = ({
           nftTokenIds={nftTokenIds}
           nftTokenUrlsMap={nftTokenUrlsMap}
           imgLogo={offererAccountInfo?.brandingLogo}
-          contractName={offererAccountInfo?.name}
           contractPackageHash={contractPackageHash}
+          contractHash={contractHash}
           collectionHash={collectionHash}
+          collectionName={collectionName}
           label="for"
           contractLink={contractLink}
         />

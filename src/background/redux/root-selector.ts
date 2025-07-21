@@ -13,3 +13,4 @@ export * from './recent-recipient-public-keys/selectors';
 export * from './rate-app/selectors';
 export * from './ledger/selectors';
 export * from './app-events/selectors';
+export * from './trusted-wasm/selectors';

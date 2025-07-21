@@ -3,11 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import {
-  Casper2EventIdForSeparateScreen,
-  HomePageTabName,
-  NetworkSetting
-} from '@src/constants';
+import { HomePageTabName, NetworkSetting } from '@src/constants';
 import { isSafariBuild } from '@src/utils';
 
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
@@ -82,21 +78,6 @@ export function HomePageContent() {
 
   const { activeMarketingEvent } =
     useGetActiveAppMarketingEvent(dismissedAppEventIds);
-  const isCasper2EventScreen =
-    activeMarketingEvent?.id === 1 &&
-    !dismissedAppEventIds.includes(Casper2EventIdForSeparateScreen);
-
-  useEffect(() => {
-    if (isCasper2EventScreen) {
-      const t = setTimeout(() => {
-        navigate(RouterPath.Casper2Event, {
-          state: { appEvent: activeMarketingEvent }
-        });
-      }, 1500);
-
-      return () => clearTimeout(t);
-    }
-  }, [isCasper2EventScreen, navigate, activeMarketingEvent]);
 
   return (
     <ContentContainer>

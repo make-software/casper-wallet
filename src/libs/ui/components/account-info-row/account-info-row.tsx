@@ -37,6 +37,8 @@ interface AccountInfoRowProps {
   csprName: Maybe<string> | undefined;
   accountLink?: Maybe<string>;
   withCopyIcon?: boolean;
+  containerStyle?: React.CSSProperties;
+  nameContainerStyle?: React.CSSProperties;
 }
 
 const AccountInfoContainer = styled(AlignedFlexRow)`
@@ -59,7 +61,9 @@ export const AccountInfoRow = ({
   isAction = false,
   csprName,
   accountLink,
-  withCopyIcon = false
+  withCopyIcon = false,
+  containerStyle,
+  nameContainerStyle
 }: AccountInfoRowProps) => {
   const [linkUrl, setLinkUrl] = useState('');
 
@@ -133,12 +137,12 @@ export const AccountInfoRow = ({
   const linkHref = isAction ? accountLink ?? linkUrl : undefined;
 
   return (
-    <AccountInfoContainer>
+    <AccountInfoContainer style={containerStyle}>
       {children}
       {publicKey && (
         <>
           <Link color="inherit" href={linkHref} target="_blank">
-            <AccountInfoNameContainer>
+            <AccountInfoNameContainer style={nameContainerStyle}>
               {label && (
                 <Typography type="captionRegular" color="contentSecondary">
                   <Trans t={t}>{label}</Trans>

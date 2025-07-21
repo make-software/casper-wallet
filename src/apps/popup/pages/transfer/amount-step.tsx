@@ -125,7 +125,7 @@ export const AmountStep = ({
 
   const amountLabel = t('Amount');
   const transferIdLabel = t('Transfer ID (memo)');
-  const paymentAmoutLabel = t('Set custom transaction fee');
+  const paymentAmoutLabel = t('Set custom transaction payment');
   const fiatAmount = !isErc20Transfer
     ? formatFiatAmount(amount || '0', currencyRate?.rate || null)
     : undefined;
@@ -156,7 +156,7 @@ export const AmountStep = ({
           <Error
             header="Not enough CSPR"
             description="You don't have enough CSPR to cover the transfer minimum amount
-              and the transaction fee."
+              and the transaction payment."
           />
         </VerticalSpaceContainer>
       )}
@@ -224,7 +224,7 @@ export const AmountStep = ({
             rightLabel={paymentFiatAmount}
             monotype
             type="number"
-            placeholder={t('Enter transaction fee')}
+            placeholder={t('Enter transaction payment')}
             suffixText={'CSPR'}
             {...register('paymentAmount')}
             error={!!errors?.paymentAmount}
@@ -235,7 +235,7 @@ export const AmountStep = ({
             onKeyDown={handleNumericInput}
             validationText={
               errors?.paymentAmount?.message ||
-              "You'll be charged this amount in CSPR as a transaction fee. You can change it at your discretion."
+              "You'll be charged this amount in CSPR as a transaction payment. You can change it at your discretion."
             }
           />
         )}

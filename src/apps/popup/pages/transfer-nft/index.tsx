@@ -1,10 +1,11 @@
-import { Deploy, NFTTokenStandard } from 'casper-js-sdk';
+import { Deploy } from 'casper-js-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { ErrorMessages, networkNameToSdkNetworkNameMap } from '@src/constants';
+import { NFTTokenStandard } from '@src/utils';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 import {

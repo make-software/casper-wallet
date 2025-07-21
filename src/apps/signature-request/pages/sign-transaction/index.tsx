@@ -30,6 +30,12 @@ import { selectActiveOriginFavicon } from '@background/redux/active-origin-favic
 import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import { selectIsCasper2Network } from '@background/redux/settings/selectors';
 import {
+  addWasmToTrusted,
+  removeWasmFromTrusted
+} from '@background/redux/trusted-wasm/actions';
+import { selectTrustedWasmForActiveOrigin } from '@background/redux/trusted-wasm/selectors';
+import { dispatchToMainStore } from '@background/redux/utils';
+import {
   selectConnectedAccountNamesWithActiveOrigin,
   selectDeploysJsonById,
   selectVaultAccounts
@@ -79,6 +85,10 @@ export function SignTransactionPage() {
     selectConnectedAccountNamesWithActiveOrigin,
     shallowEqual
   );
+  const activeOriginTrustedWasm = useSelector(
+    selectTrustedWasmForActiveOrigin,
+    shallowEqual
+  );
   const { changeActiveAccountSupportsWithEvent } = useAccountManager();
 
   const searchParams = new URLSearchParams(document.location.search);
@@ -99,6 +109,10 @@ export function SignTransactionPage() {
     undefined
   );
   const [wasmApproved, setWasmApproved] = useState<boolean>(false);
+  const [additionalApproveRequired, setAdditionalApproveRequired] =
+    useState(false);
+
+  const wasmApprovalInitialisedRef = useRef(false);
 
   const [isSigningAccountFromLedger, setIsSigningAccountFromLedger] =
     useState(false);
@@ -269,11 +283,50 @@ export function SignTransactionPage() {
     closeNewLedgerWindowsAndClearState();
   };
 
-  const additionalApproveRequired = Boolean(
+  const maybeRequireApproval = Boolean(
     signatureRequest &&
       (isTxSignatureRequestWasmAction(signatureRequest.action) ||
-        isTxSignatureRequestWasmProxyAction(signatureRequest.action))
+        isTxSignatureRequestWasmProxyAction(signatureRequest.action)) &&
+      !activeOriginTrustedWasm.includes(signatureRequest.action.washHash)
   );
+
+  useEffect(() => {
+    if (maybeRequireApproval && !wasmApprovalInitialisedRef.current) {
+      setAdditionalApproveRequired(true);
+      wasmApprovalInitialisedRef.current = true;
+    }
+  }, [maybeRequireApproval]);
+
+  const toggleWasmApproval = useCallback(() => {
+    if (
+      !(
+        activeOrigin &&
+        signatureRequest &&
+        (isTxSignatureRequestWasmAction(signatureRequest.action) ||
+          isTxSignatureRequestWasmProxyAction(signatureRequest.action))
+      )
+    ) {
+      return;
+    }
+
+    if (wasmApproved) {
+      setWasmApproved(false);
+      dispatchToMainStore(
+        removeWasmFromTrusted({
+          origin: activeOrigin,
+          wasmHash: signatureRequest.action.washHash
+        })
+      );
+    } else {
+      setWasmApproved(true);
+      dispatchToMainStore(
+        addWasmToTrusted({
+          origin: activeOrigin,
+          wasmHash: signatureRequest.action.washHash
+        })
+      );
+    }
+  }, [activeOrigin, signatureRequest, wasmApproved]);
 
   const renderFooter = () => {
     if (signingPageState === SigningPageState.LedgerConfirmation) {
@@ -288,10 +341,7 @@ export function SignTransactionPage() {
       <FooterButtonsContainer direction={'column'}>
         {additionalApproveRequired && (
           <AlignedFlexRow gap={SpacingSize.Small}>
-            <Checkbox
-              checked={wasmApproved}
-              onChange={() => setWasmApproved(prev => !prev)}
-            />
+            <Checkbox checked={wasmApproved} onChange={toggleWasmApproval} />
             <Typography type={'captionRegular'} color={'contentPrimary'}>
               <Trans>
                 I initiated this transaction from a trusted application and

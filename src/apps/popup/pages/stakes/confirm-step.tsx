@@ -62,7 +62,7 @@ export const ConfirmStep = ({
     },
     {
       id: 2,
-      text: t('Transaction fee'),
+      text: t('Transaction payment'),
       amount: transferCostInCSPR,
       fiatPrice: formatFiatAmount(
         transferCostInCSPR,

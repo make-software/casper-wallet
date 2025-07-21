@@ -20,7 +20,10 @@ export const NftDeployRows = ({ deploy }: NftDeployRowsProps) => {
   const { entryPoint } = deploy;
   const isBurn = entryPoint === NftDeployEntryPoint.burn;
   const isMint = entryPoint === NftDeployEntryPoint.mint;
-  const isTransfer = entryPoint === NftDeployEntryPoint.transfer;
+  const isTransfer =
+    entryPoint === NftDeployEntryPoint.transfer ||
+    entryPoint === NftDeployEntryPoint.transfer_from ||
+    entryPoint === NftDeployEntryPoint.safe_transfer_from;
   const isApprove =
     entryPoint === NftDeployEntryPoint.approve ||
     entryPoint === NftDeployEntryPoint.set_approval_for_all;

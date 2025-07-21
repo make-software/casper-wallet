@@ -18,8 +18,9 @@ export const MOTES_PER_CSPR_RATE = '1000000000'; // 1 000 000 000 MOTES === 1 CS
 export const TRANSFER_COST_MOTES = '100000000'; // 0.1 CSPR
 export const TRANSFER_MIN_AMOUNT_MOTES = '2500000000'; // 2.5 CSPR
 export const ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES = '3000000000'; // 3 CSPR
-export const NFT_CEP47_PAYMENT_AMOUNT_AVERAGE_MOTES = '4000000000'; // 2 CSPR
-export const NFT_CEP78_PAYMENT_AMOUNT_AVERAGE_MOTES = '15000000000'; // 9 CSPR
+export const NFT_CEP47_PAYMENT_AMOUNT_AVERAGE_MOTES = '4000000000'; // 4 CSPR
+export const NFT_CEP78_PAYMENT_AMOUNT_AVERAGE_MOTES = '15000000000'; // 15 CSPR
+export const NFT_CEP95_PAYMENT_AMOUNT_AVERAGE_MOTES = '4000000000'; // 4 CSPR
 export const STAKE_COST_MOTES = '2500000000'; // 2.5 CSPR
 export const DELEGATION_MIN_AMOUNT_MOTES = '500000000000'; // 500 CSPR
 export const MAX_DELEGATORS = 1200;
@@ -198,7 +199,9 @@ export enum NftDeployEntryPoint {
   mint = 'mint',
   transfer = 'transfer',
   update_token_meta = 'update_token_meta',
-  set_approval_for_all = 'set_approval_for_all'
+  set_approval_for_all = 'set_approval_for_all',
+  transfer_from = 'transfer_from',
+  safe_transfer_from = 'safe_transfer_from'
 }
 
 export const NftDeployEntryPointNameMap = {
@@ -206,6 +209,8 @@ export const NftDeployEntryPointNameMap = {
   [NftDeployEntryPoint.burn]: 'Burn',
   [NftDeployEntryPoint.mint]: 'Mint',
   [NftDeployEntryPoint.transfer]: 'Transfer',
+  [NftDeployEntryPoint.transfer_from]: 'Transfer',
+  [NftDeployEntryPoint.safe_transfer_from]: 'Transfer',
   [NftDeployEntryPoint.update_token_meta]: 'Update metadata',
   [NftDeployEntryPoint.set_approval_for_all]: 'Approve transfer'
 };
@@ -215,6 +220,8 @@ export const NftDeployActionName = {
   [NftDeployEntryPoint.burn]: 'Burn',
   [NftDeployEntryPoint.mint]: 'Mint',
   [NftDeployEntryPoint.transfer]: 'Transfer',
+  [NftDeployEntryPoint.transfer_from]: 'Transfer',
+  [NftDeployEntryPoint.safe_transfer_from]: 'Transfer',
   [NftDeployEntryPoint.update_token_meta]: 'Update metadata',
   [NftDeployEntryPoint.set_approval_for_all]: 'Approve transfer rights'
 };
@@ -224,6 +231,8 @@ export const NftDeployResultName = {
   [NftDeployEntryPoint.burn]: 'Burned',
   [NftDeployEntryPoint.mint]: 'Minted',
   [NftDeployEntryPoint.transfer]: 'Transferred',
+  [NftDeployEntryPoint.transfer_from]: 'Transferred',
+  [NftDeployEntryPoint.safe_transfer_from]: 'Transferred',
   [NftDeployEntryPoint.update_token_meta]: 'Updated metadata',
   [NftDeployEntryPoint.set_approval_for_all]: 'Granted transfer rights'
 };

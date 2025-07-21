@@ -1,17 +1,20 @@
 import {
+  Deploy,
   makeAuctionManagerDeploy,
   makeAuctionManagerTransaction,
   makeCep18TransferDeploy,
   makeCep18TransferTransaction,
   makeCsprTransferDeploy,
-  makeCsprTransferTransaction,
-  makeNftTransferDeploy,
-  makeNftTransferTransaction
+  makeCsprTransferTransaction
 } from 'casper-js-sdk';
 import { IMakeAuctionManagerDeployParams } from 'casper-js-sdk/dist/utils/auction-manager';
 import { IMakeCep18TransferDeployParams } from 'casper-js-sdk/dist/utils/cep-18-transfer';
 import { IMakeNftTransferDeployParams } from 'casper-js-sdk/dist/utils/cep-nft-transfer';
 import { IMakeCsprTransferDeployParams } from 'casper-js-sdk/dist/utils/cspr-transfer';
+import {
+  NFTTokenStandard,
+  makeNftTransferTransaction
+} from 'casper-wallet-core';
 
 export const buildCep18Transactions = (
   {
@@ -124,6 +127,11 @@ export const buildAuctionTransactions = (
   return { transaction, fallbackDeploy };
 };
 
+interface IBuildNftTransferTransactionsParams
+  extends Omit<IMakeNftTransferDeployParams, 'nftStandard'> {
+  nftStandard: NFTTokenStandard;
+}
+
 export const buildNftTransferTransactions = (
   {
     chainName,
@@ -135,7 +143,7 @@ export const buildNftTransferTransactions = (
     tokenId,
     tokenHash,
     timestamp
-  }: IMakeNftTransferDeployParams,
+  }: IBuildNftTransferTransactionsParams,
   casperNetworkApiVersion: string
 ) => {
   const transaction = makeNftTransferTransaction({
@@ -153,7 +161,7 @@ export const buildNftTransferTransactions = (
   });
 
   // required for old Ledger apps
-  const fallbackDeploy = makeNftTransferDeploy({
+  const fallbackDeploy = makeNftTransferTransaction({
     chainName,
     contractPackageHash,
     nftStandard,
@@ -162,8 +170,10 @@ export const buildNftTransferTransactions = (
     senderPublicKeyHex,
     tokenId,
     tokenHash,
-    timestamp
+    timestamp,
+    casperNetworkApiVersion: '1.5.8',
+    gasPrice: 3
   });
 
-  return { transaction, fallbackDeploy };
+  return { transaction, fallbackDeploy: fallbackDeploy.getDeploy() as Deploy };
 };

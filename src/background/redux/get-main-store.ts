@@ -12,6 +12,7 @@ import { RateAppState } from '@background/redux/rate-app/types';
 import { RecentRecipientPublicKeysState } from '@background/redux/recent-recipient-public-keys/types';
 import { startBackground } from '@background/redux/sagas/actions';
 import { SettingsState } from '@background/redux/settings/types';
+import { TrustedWasmState } from '@background/redux/trusted-wasm/types';
 import { PopupState } from '@background/redux/types';
 
 export const VAULT_CIPHER_KEY = 'zazXu8w9GyCtxZ';
@@ -24,6 +25,7 @@ export const RECENT_RECIPIENT_PUBLIC_KEYS = '7c2WyRuGhEtaDX';
 export const CONTACTS_KEY = 'teuwe6zH3A72gc';
 export const RATE_APP = 'p4cGYubbwnd9ke';
 export const APP_EVENTS = 'k4uL4wqkvCMoxB';
+export const TRUSTED_WASM = 'k1uC4wqkwCMwxL';
 
 type StorageState = {
   [VAULT_CIPHER_KEY]: string;
@@ -36,6 +38,7 @@ type StorageState = {
   [CONTACTS_KEY]: ContactsState;
   [RATE_APP]: RateAppState;
   [APP_EVENTS]: AppEventsState;
+  [TRUSTED_WASM]: TrustedWasmState;
 };
 // this needs to be private
 let storeSingleton: ReturnType<typeof createStore>;
@@ -60,7 +63,8 @@ export const selectPopupState = (state: RootState): PopupState => {
     contacts: state.contacts,
     rateApp: state.rateApp,
     ledger: state.ledger,
-    appEvents: state.appEvents
+    appEvents: state.appEvents,
+    trustedWasm: state.trustedWasm
   };
 };
 
@@ -80,7 +84,8 @@ export async function getExistingMainStoreSingletonOrInit() {
       [RECENT_RECIPIENT_PUBLIC_KEYS]: recentRecipientPublicKeys,
       [CONTACTS_KEY]: contacts,
       [RATE_APP]: rateApp,
-      [APP_EVENTS]: appEvents
+      [APP_EVENTS]: appEvents,
+      [TRUSTED_WASM]: trustedWasm
     } = (await storage.local.get([
       VAULT_CIPHER_KEY,
       KEYS_KEY,
@@ -91,7 +96,8 @@ export async function getExistingMainStoreSingletonOrInit() {
       RECENT_RECIPIENT_PUBLIC_KEYS,
       CONTACTS_KEY,
       RATE_APP,
-      APP_EVENTS
+      APP_EVENTS,
+      TRUSTED_WASM
     ])) as StorageState;
 
     if (storeSingleton == null) {
@@ -111,7 +117,8 @@ export async function getExistingMainStoreSingletonOrInit() {
           recentRecipientPublicKeys,
           contacts,
           rateApp,
-          appEvents
+          appEvents,
+          trustedWasm
         });
       }
       // send start action
@@ -135,7 +142,8 @@ export async function getExistingMainStoreSingletonOrInit() {
           recentRecipientPublicKeys,
           contacts,
           rateApp,
-          appEvents
+          appEvents,
+          trustedWasm
         } = state;
         storage.local
           .set({
@@ -148,7 +156,8 @@ export async function getExistingMainStoreSingletonOrInit() {
             [RECENT_RECIPIENT_PUBLIC_KEYS]: recentRecipientPublicKeys,
             [CONTACTS_KEY]: contacts,
             [RATE_APP]: rateApp,
-            [APP_EVENTS]: appEvents
+            [APP_EVENTS]: appEvents,
+            [TRUSTED_WASM]: trustedWasm
           })
           .catch(e => {
             console.error('Persist encrypted vault failed: ', e);
