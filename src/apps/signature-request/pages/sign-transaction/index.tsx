@@ -370,7 +370,10 @@ export function SignTransactionPage() {
             }
           >
             {isSigningAccountFromLedger ? (
-              <AlignedFlexRow gap={SpacingSize.Small}>
+              <AlignedFlexRow
+                gap={SpacingSize.Small}
+                style={{ justifyContent: 'center' }}
+              >
                 <SvgIcon src="assets/icons/ledger-white.svg" />
                 <Trans t={t}>Sign with Ledger</Trans>
               </AlignedFlexRow>
