@@ -282,7 +282,7 @@ export class Ledger {
           // in version 3. we still need to use signWasmDeploy for legacy WASM Deploys
           result = await this.#ledgerApp?.signWasmDeploy(
             this.#getAccountPath(account.index),
-            Buffer.from(tx.getDeploy()!.toBytes())
+            Buffer.from(tx.toBytes())
           );
         } else {
           let txBytes = tx.toBytes();
