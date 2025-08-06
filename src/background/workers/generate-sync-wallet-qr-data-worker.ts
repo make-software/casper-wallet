@@ -1,4 +1,4 @@
-import { aes_256_cbc } from '@noble/ciphers/webcrypto/aes';
+import { cbc } from '@noble/ciphers/aes';
 import { scryptAsync } from '@noble/hashes/scrypt';
 import { randomBytes } from '@noble/hashes/utils';
 import { PublicKey } from 'casper-js-sdk';
@@ -39,8 +39,8 @@ onmessage = async function (event: GenerateSyncWalletQrDataEvent) {
 
   const data = Uint8Array.from(Buffer.from(qrDataString));
 
-  const stream = aes_256_cbc(key, iv);
-  const cipher = await stream.encrypt(data);
+  const stream = cbc(key, iv);
+  const cipher = stream.encrypt(data);
 
   const qrString = JSON.stringify([
     convertBytesToBase64(cipher),
