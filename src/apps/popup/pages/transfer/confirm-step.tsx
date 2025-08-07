@@ -1,5 +1,5 @@
 import Big from 'big.js';
-import { formatNumber } from 'casper-wallet-core';
+import { formatFiatAmount, formatNumber } from 'casper-wallet-core';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -23,7 +23,7 @@ import {
   RecipientPlate,
   Typography
 } from '@libs/ui/components';
-import { formatFiatAmount, motesToCSPR } from '@libs/ui/utils';
+import { motesToCSPR } from '@libs/ui/utils';
 
 const ListItemContainer = styled(SpaceBetweenFlexRow)`
   padding: 12px 16px;
@@ -37,6 +37,7 @@ interface ConfirmStepProps {
   isErc20Transfer: boolean;
   paymentAmount: string;
   recipientName?: string;
+  tokenPrice?: string | null;
 }
 export const ConfirmStep = ({
   recipientPublicKey,
@@ -45,7 +46,8 @@ export const ConfirmStep = ({
   symbol,
   isErc20Transfer,
   paymentAmount,
-  recipientName
+  recipientName,
+  tokenPrice
 }: ConfirmStepProps) => {
   const { t } = useTranslation();
 
@@ -72,18 +74,18 @@ export const ConfirmStep = ({
         amount: formatNumber(amount, {
           precision: { max: 5 }
         }),
-        fiatPrice: formatFiatAmount(amount, currencyRate?.rate || null),
+        fiatPrice: currencyRate?.rate
+          ? formatFiatAmount(currencyRate.rate, amount)
+          : null,
         symbol
       },
       {
         id: 2,
         text: t('Transaction payment'),
         amount: transferCostInCSPR,
-        fiatPrice: formatFiatAmount(
-          transferCostInCSPR,
-          currencyRate?.rate || null,
-          3
-        ),
+        fiatPrice: currencyRate?.rate
+          ? formatFiatAmount(currencyRate.rate, transferCostInCSPR, 3)
+          : null,
         symbol
       },
       {
@@ -92,7 +94,9 @@ export const ConfirmStep = ({
         amount: formatNumber(totalCSPR, {
           precision: { max: 5 }
         }),
-        fiatPrice: formatFiatAmount(totalCSPR, currencyRate?.rate || null),
+        fiatPrice: currencyRate?.rate
+          ? formatFiatAmount(currencyRate.rate, totalCSPR)
+          : null,
         symbol,
         bold: true
       }
@@ -105,7 +109,9 @@ export const ConfirmStep = ({
         amount: formatNumber(amount, {
           precision: { max: 5 }
         }),
-        fiatPrice: null,
+        fiatPrice: tokenPrice
+          ? formatFiatAmount(Number(tokenPrice), amount)
+          : null,
         symbol
       },
       {
@@ -114,11 +120,9 @@ export const ConfirmStep = ({
         amount: formatNumber(paymentAmount, {
           precision: { max: 5 }
         }),
-        fiatPrice: formatFiatAmount(
-          paymentAmount,
-          currencyRate?.rate || null,
-          3
-        ),
+        fiatPrice: currencyRate?.rate
+          ? formatFiatAmount(currencyRate.rate, paymentAmount, 3)
+          : null,
         symbol: 'CSPR'
       }
     ];

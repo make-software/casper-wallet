@@ -1,4 +1,5 @@
 import Big from 'big.js';
+import { formatFiatAmount } from 'casper-wallet-core';
 import React, { useEffect, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
@@ -24,7 +25,6 @@ import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-
 import { useTransferAmountForm } from '@libs/ui/forms/transfer';
 import {
   divideErc20Balance,
-  formatFiatAmount,
   handleNumericInput,
   motesToCSPR
 } from '@libs/ui/utils';
@@ -127,13 +127,16 @@ export const AmountStep = ({
   const transferIdLabel = t('Transfer ID (memo)');
   const paymentAmoutLabel = t('Set custom transaction payment');
   const fiatAmount = !isErc20Transfer
-    ? formatFiatAmount(amount || '0', currencyRate?.rate || null)
-    : undefined;
+    ? currencyRate?.rate && amount
+      ? formatFiatAmount(currencyRate.rate, amount || '0')
+      : null
+    : selectedToken?.tokenPrice && amount
+      ? formatFiatAmount(Number(selectedToken.tokenPrice), amount || '0')
+      : null;
   const paymentFiatAmount = isErc20Transfer
-    ? formatFiatAmount(
-        paymentAmountFieldValue || '0',
-        currencyRate?.rate || null
-      )
+    ? currencyRate?.rate
+      ? formatFiatAmount(currencyRate.rate, paymentAmountFieldValue || '0')
+      : null
     : undefined;
 
   useEffect(() => {

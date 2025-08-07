@@ -8,6 +8,7 @@ import { NetworkSetting } from '@src/constants';
 import { isSafariBuild } from '@src/utils';
 
 import { formatCep18Tokens } from '@popup/pages/home/components/tokens-list/utils';
+import { MarketDataValue } from '@popup/pages/token-details/MarketDataValue';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import {
@@ -50,7 +51,7 @@ const ButtonContainer = styled(CenteredFlexColumn)`
 type TokenInfoList = {
   id: number;
   name: string;
-  value: string;
+  value: string | JSX.Element;
 };
 
 export const Token = () => {
@@ -76,7 +77,16 @@ export const Token = () => {
       if (casperToken && activeAccount) {
         setTokenData(casperToken);
         setTokenInfoList([
-          { id: 1, name: 'Symbol', value: casperToken?.symbol }
+          { id: 1, name: 'Symbol', value: casperToken?.symbol },
+          ...(casperToken.tokenPrice
+            ? [
+                {
+                  id: 2,
+                  name: 'Market Price',
+                  value: <MarketDataValue token={casperToken} />
+                }
+              ]
+            : [])
         ]);
       }
     } else {
@@ -89,7 +99,16 @@ export const Token = () => {
         setTokenData(token);
         setTokenInfoList([
           { id: 1, name: 'Symbol', value: token?.symbol },
-          { id: 2, name: 'Decimals', value: (token?.decimals || 0).toString() }
+          { id: 2, name: 'Decimals', value: (token?.decimals || 0).toString() },
+          ...(token.tokenPrice
+            ? [
+                {
+                  id: 3,
+                  name: 'Market Price',
+                  value: <MarketDataValue token={token} />
+                }
+              ]
+            : [])
         ]);
       } else {
         setTokenData(prev => (prev ? { ...prev, amount: '0' } : null));
@@ -99,7 +118,16 @@ export const Token = () => {
             id: 2,
             name: 'Decimals',
             value: (tokenData?.decimals || 0).toString()
-          }
+          },
+          ...(tokenData?.tokenPrice
+            ? [
+                {
+                  id: 3,
+                  name: 'Market Price',
+                  value: <MarketDataValue token={tokenData} />
+                }
+              ]
+            : [])
         ]);
       }
     }
@@ -110,7 +138,8 @@ export const Token = () => {
     casperLiveUrl,
     cep18Tokens,
     tokenData?.symbol,
-    tokenData?.decimals
+    tokenData?.decimals,
+    tokenData?.tokenPrice
   ]);
 
   return (
@@ -123,7 +152,13 @@ export const Token = () => {
           <Typography type="captionRegular" color="contentSecondary">
             {name}
           </Typography>
-          <Typography type="captionRegular">{value}</Typography>
+          {typeof value === 'string' ? (
+            <Typography wordBreak={true} type="captionRegular">
+              {value}
+            </Typography>
+          ) : (
+            value
+          )}
         </ListItemContainer>
       )}
       renderFooter={() => (

@@ -1,3 +1,4 @@
+import Big from 'big.js';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -9,6 +10,7 @@ import { TokenType, useCasperToken } from '@hooks/use-casper-token';
 import { SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
 import { useFetchCep18Tokens } from '@libs/services/cep18-service';
 import { List, TokenPlate, Typography } from '@libs/ui/components';
+import { formatCurrency } from '@libs/ui/utils';
 
 import { formatCep18Tokens } from './utils';
 
@@ -36,12 +38,23 @@ export const TokensList = () => {
 
     if (casperToken) {
       tokensList.push(casperToken);
-      setTotalAmountFiat(casperToken.amountFiat);
     }
 
     if (formatedCep18Tokens) {
       tokensList.push(...formatedCep18Tokens);
     }
+
+    setTotalAmountFiat(
+      formatCurrency(
+        tokensList
+          .reduce((acc, cur) => acc.add(cur.amountFiatDecimal || 0), Big(0))
+          .toFixed(),
+        'USD',
+        {
+          precision: 2
+        }
+      )
+    );
 
     setTokensList(tokensList);
   }, [casperToken, cep18Tokens]);

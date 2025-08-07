@@ -1,4 +1,5 @@
 import { useQueries } from '@tanstack/react-query';
+import Big from 'big.js';
 import { useSelector } from 'react-redux';
 
 import { selectActiveNetworkSetting } from '@background/redux/settings/selectors';
@@ -13,6 +14,7 @@ import {
   accountsBalancesQuery,
   currencyRateQuery
 } from '@libs/services/balance-service/queries';
+import { fetchCep18TokensQuery } from '@libs/services/cep18-service/queries';
 import { formatCurrency, motesToCurrency } from '@libs/ui/utils';
 
 export const useFetchWalletBalance = () => {
@@ -45,7 +47,8 @@ export const useFetchWalletBalance = () => {
         accountHashesString,
         network,
         accountHashes
-      })
+      }),
+      fetchCep18TokensQuery({ network, activeAccount })
     ],
     combine: results => {
       const accountBalance = results[0].data;
@@ -55,16 +58,29 @@ export const useFetchWalletBalance = () => {
       const undelegatingBalance = results[0].data?.undelegatingBalance;
       const currencyRate = results[1].data?.rate;
       const accountsBalances = results[2].data;
+      const cep18tokens = results[3].data;
+
+      const csprTotalFiatBalance = Big(
+        results[0].data?.totalDecimalBalance || 0
+      ).mul(currencyRate || 0);
+      const totalFiatBalance = Big(csprTotalFiatBalance)
+        .add(
+          (cep18tokens ?? []).reduce(
+            (acc, cur) => acc.add(cur.fiatBalance || 0),
+            Big(0)
+          )
+        )
+        .toFixed();
 
       const totalFormattedFiatBalance =
         currencyRate && totalBalance
-          ? formatCurrency(
-              motesToCurrency(String(totalBalance), currencyRate),
-              'USD',
-              {
-                precision: 2
-              }
-            )
+          ? formatCurrency(totalFiatBalance, 'USD', {
+              precision: 2
+            })
+          : '';
+      const liquidFiatBalance =
+        currencyRate && liquidBalance
+          ? motesToCurrency(String(liquidBalance), currencyRate)
           : '';
       const liquidFormattedFiatBalance =
         currencyRate && liquidBalance
@@ -102,6 +118,7 @@ export const useFetchWalletBalance = () => {
           ...accountBalance,
           totalFormattedFiatBalance,
           liquidFormattedFiatBalance,
+          liquidFiatBalance,
           delegatedFormattedFiatBalance,
           undelegatedFormattedFiatBalance
         },
