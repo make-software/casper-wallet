@@ -20,9 +20,9 @@ import { selectVaultActiveAccount } from '@background/redux/vault/selectors';
 import { TokenType, useCasperToken } from '@hooks/use-casper-token';
 
 import {
+  AlignedSpaceBetweenFlexRow,
   CenteredFlexColumn,
   CenteredFlexRow,
-  SpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
 import { useFetchCep18Tokens } from '@libs/services/cep18-service';
@@ -34,7 +34,7 @@ import {
   Typography
 } from '@libs/ui/components';
 
-const ListItemContainer = styled(SpaceBetweenFlexRow)`
+const ListItemContainer = styled(AlignedSpaceBetweenFlexRow)`
   padding: 16px;
 `;
 

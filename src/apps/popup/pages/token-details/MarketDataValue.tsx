@@ -3,7 +3,7 @@ import React from 'react';
 
 import { TokenType } from '@hooks/use-casper-token';
 
-import { CenteredFlexRow } from '@libs/layout';
+import { CenteredFlexRow, SpacingSize } from '@libs/layout';
 import { Button, Typography } from '@libs/ui/components';
 
 interface IMarketDataValueProps {
@@ -16,32 +16,36 @@ const priceProviderAssetsMap: Record<SupportedMarketDataProviders, string> = {
 };
 
 export const MarketDataValue: React.FC<IMarketDataValueProps> = ({ token }) => (
-  <CenteredFlexRow>
-    {token.tokenPrice && (
-      <Typography wordBreak={true} type="captionRegular">
-        {`$${Number(token.tokenPrice).toLocaleString('en-US', {
-          maximumFractionDigits: 10
-        })}`}
-      </Typography>
-    )}
-    {token.tokenPriceProvider && (
-      <Button
-        inline
-        disabled={!token.tokenPriceProviderUrl}
-        style={{ background: 'transparent', padding: 8 }}
-        onClick={() => {
-          if (token.tokenPriceProviderUrl) {
-            window.open(token.tokenPriceProviderUrl, '_blank');
-          }
-        }}
-      >
+  <Button
+    inline
+    disabled={!token.tokenPriceProviderUrl}
+    style={{ background: 'transparent', padding: 0 }}
+    onClick={() => {
+      if (token.tokenPriceProviderUrl) {
+        window.open(token.tokenPriceProviderUrl, '_blank');
+      }
+    }}
+  >
+    <CenteredFlexRow gap={SpacingSize.Small}>
+      {token.tokenPrice && (
+        <Typography
+          wordBreak={true}
+          type="captionRegular"
+          color="contentAction"
+        >
+          {`$${Number(token.tokenPrice).toLocaleString('en-US', {
+            maximumFractionDigits: 10
+          })}`}
+        </Typography>
+      )}
+      {token.tokenPriceProvider && (
         <img
           alt={`${token.tokenPriceProvider} icon`}
           src={priceProviderAssetsMap[token.tokenPriceProvider]}
           width="20"
           height="20"
         />
-      </Button>
-    )}
-  </CenteredFlexRow>
+      )}
+    </CenteredFlexRow>
+  </Button>
 );
