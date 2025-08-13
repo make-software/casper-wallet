@@ -1,5 +1,5 @@
 import Big from 'big.js';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -23,41 +23,25 @@ const TotalValueContainer = styled(SpaceBetweenFlexRow)`
 `;
 
 export const TokensList = () => {
-  const [tokensList, setTokensList] = useState<TokenType[]>([]);
-  const [totalAmountFiat, setTotalAmountFiat] = useState<string | null>(null);
-
   const casperToken = useCasperToken();
   const { cep18Tokens } = useFetchCep18Tokens();
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
 
-  useEffect(() => {
-    const formatedCep18Tokens = formatCep18Tokens(cep18Tokens);
+  const tokensList: TokenType[] = [
+    ...(casperToken ? [casperToken] : []),
+    ...(formatCep18Tokens(cep18Tokens) ?? [])
+  ];
 
-    const tokensList: TokenType[] = [];
-
-    if (casperToken) {
-      tokensList.push(casperToken);
+  const totalAmountFiat = formatCurrency(
+    tokensList
+      .reduce((acc, cur) => acc.add(cur.amountFiatDecimal || 0), Big(0))
+      .toFixed(),
+    'USD',
+    {
+      precision: 2
     }
-
-    if (formatedCep18Tokens) {
-      tokensList.push(...formatedCep18Tokens);
-    }
-
-    setTotalAmountFiat(
-      formatCurrency(
-        tokensList
-          .reduce((acc, cur) => acc.add(cur.amountFiatDecimal || 0), Big(0))
-          .toFixed(),
-        'USD',
-        {
-          precision: 2
-        }
-      )
-    );
-
-    setTokensList(tokensList);
-  }, [casperToken, cep18Tokens]);
+  );
 
   useEffect(() => {
     const container = document.querySelector('#ms-container');
