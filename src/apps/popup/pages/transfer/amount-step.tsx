@@ -130,9 +130,10 @@ export const AmountStep = ({
     ? currencyRate?.rate && amount
       ? formatFiatAmount(currencyRate.rate, amount || '0')
       : null
-    : selectedToken?.tokenPrice && amount
-      ? formatFiatAmount(Number(selectedToken.tokenPrice), amount || '0')
+    : Boolean(Number(selectedToken?.tokenPrice)) && amount
+      ? formatFiatAmount(Number(selectedToken?.tokenPrice), amount || '0')
       : null;
+
   const paymentFiatAmount = isErc20Transfer
     ? currencyRate?.rate
       ? formatFiatAmount(currencyRate.rate, paymentAmountFieldValue || '0')
