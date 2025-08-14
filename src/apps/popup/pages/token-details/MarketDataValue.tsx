@@ -44,6 +44,9 @@ export const MarketDataValue: React.FC<IMarketDataValueProps> = ({ token }) => (
           src={priceProviderAssetsMap[token.tokenPriceProvider]}
           width="20"
           height="20"
+          style={{
+            borderRadius: '50%'
+          }}
         />
       )}
     </CenteredFlexRow>
