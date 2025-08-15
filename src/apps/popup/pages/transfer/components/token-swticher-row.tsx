@@ -9,6 +9,11 @@ const Container = styled(SpaceBetweenFlexRow)`
   padding: 16px;
 `;
 
+const LogoImg = styled.img`
+  width: 24px;
+  height: 24px;
+`;
+
 interface TokenSwitcherRowProps {
   tokenName: string | undefined;
   iconUrl: string | null | undefined;
@@ -24,7 +29,11 @@ export const TokenSwitcherRow = ({
     <Tile style={{ marginTop: '8px' }}>
       <Container gap={SpacingSize.Medium}>
         <AlignedFlexRow gap={SpacingSize.Large} flexGrow={1}>
-          <SvgIcon src={iconUrl || ''} size={24} />
+          {iconUrl?.endsWith('.svg') ? (
+            <SvgIcon src={iconUrl || ''} size={24} />
+          ) : (
+            <LogoImg src={iconUrl || ''} alt={tokenName} title={tokenName} />
+          )}
           <Typography dataTestId="token-row" type="body">
             {tokenName}
           </Typography>

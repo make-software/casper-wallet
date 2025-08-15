@@ -106,7 +106,7 @@ export const TokenPlate = ({
               </Typography>
             </RightAlignedCenteredFlexRow>
           </Tooltip>
-          {token?.name === 'Casper' && (
+          {(token?.name === 'Casper' || token?.amountFiat) && (
             <Typography
               type="listSubtext"
               color="contentSecondary"

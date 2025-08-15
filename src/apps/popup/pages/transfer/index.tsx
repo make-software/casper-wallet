@@ -366,6 +366,7 @@ export const TransferPage = () => {
         amount={amount}
         balance={selectedToken?.amount}
         symbol={selectedToken?.symbol || null}
+        tokenPrice={selectedToken?.tokenPrice}
         isErc20Transfer={isErc20Transfer}
         paymentAmount={paymentAmount}
         recipientName={recipientName}
