@@ -1,7 +1,7 @@
 import { IAppMarketingEvent } from 'casper-wallet-core';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { dismissAppEvent } from '@background/redux/app-events/actions';
 import { dispatchToMainStore } from '@background/redux/utils';
@@ -9,18 +9,40 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
 import { Typography } from '@libs/ui/components';
 
-const AppEventContainer = styled.div<{ eventId: number }>`
+const bannerMap: Record<number, string> = {
+  1: "url('../../../../assets/illustrations/cspr-2-banner.svg')",
+  2: "url('../../../../assets/illustrations/cspr-name-banner.svg')"
+};
+
+type AppEventContainerProps = {
+  eventId: number;
+  bgImage?: string;
+};
+
+const sharedBannerStyles = css<AppEventContainerProps>`
   display: flex;
   flex-direction: column;
   margin-top: 24px;
   padding: 14px 105px 14px 16px;
   height: 108px;
-  background-image: ${({ eventId }) =>
-    eventId === 1
-      ? "url('../../../../assets/illustrations/cspr-2-banner.svg')"
-      : eventId === 2
-        ? "url('../../../../assets/illustrations/cspr-name-banner.svg')"
-        : "url('../../../../assets/illustrations/cspr-event-banner.svg')"};
+
+  background-image: ${({ bgImage, eventId }) =>
+    bgImage ??
+    bannerMap[eventId] ??
+    "url('../../../../assets/illustrations/cspr-event-banner.svg')"};
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+`;
+
+const AppEventContainer = styled.div<AppEventContainerProps>`
+  ${sharedBannerStyles}
+`;
+
+const AppEventLinkContainer = styled.a<AppEventContainerProps>`
+  ${sharedBannerStyles}
+  text-decoration: none;
+  color: inherit; /* ensure text inside (if any) is readable on the banner */
 `;
 
 const OpacityText = styled(Typography)`
@@ -71,9 +93,27 @@ export const AppEventBanner: React.FC<IAppEventBannerProps> = ({
   };
 
   const isCasper2event = activeMarketingEvent.id === 1;
+  const isCaspyEvent = activeMarketingEvent.id === 3;
+
+  const bgImage = activeMarketingEvent?.image_url
+    ? `url('${activeMarketingEvent.image_url}')`
+    : undefined;
+
+  if (isCaspyEvent) {
+    return (
+      <AppEventLinkContainer
+        href={activeMarketingEvent?.url || '#'}
+        target="_blank"
+        rel="noreferrer noopener"
+        eventId={activeMarketingEvent.id}
+        bgImage={bgImage}
+        aria-label={activeMarketingEvent?.name || 'Open promotion'}
+      />
+    );
+  }
 
   return (
-    <AppEventContainer eventId={activeMarketingEvent.id}>
+    <AppEventContainer eventId={activeMarketingEvent.id} bgImage={bgImage}>
       <Typography
         type="subtitle"
         color="contentOnFill"
@@ -87,6 +127,7 @@ export const AppEventBanner: React.FC<IAppEventBannerProps> = ({
             : activeMarketingEvent.name}
         </Trans>
       </Typography>
+
       <OpacityText type="listSubtext" color="contentOnFill" ellipsis>
         <Trans t={t}>
           {isCasper2event
@@ -94,10 +135,16 @@ export const AppEventBanner: React.FC<IAppEventBannerProps> = ({
             : activeMarketingEvent.description}
         </Trans>
       </OpacityText>
+
       <ButtonsContainer gap={SpacingSize.Medium}>
-        <ActionButton href={activeMarketingEvent.url} target="_blank">
+        <ActionButton
+          href={activeMarketingEvent.url}
+          target="_blank"
+          rel="noreferrer noopener"
+        >
           <Trans t={t}>Learn more</Trans>
         </ActionButton>
+
         <DismissButton onClick={dismissPromotion}>
           <Trans t={t}>Dismiss</Trans>
         </DismissButton>
