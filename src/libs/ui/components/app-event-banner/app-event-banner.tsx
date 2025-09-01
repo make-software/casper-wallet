@@ -7,7 +7,7 @@ import { dismissAppEvent } from '@background/redux/app-events/actions';
 import { dispatchToMainStore } from '@background/redux/utils';
 
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
-import { Typography } from '@libs/ui/components';
+import { SvgIcon, Typography } from '@libs/ui/components';
 
 const bannerMap: Record<number, string> = {
   1: "url('../../../../assets/illustrations/cspr-2-banner.svg')",
@@ -79,6 +79,34 @@ const DismissButton = styled.div`
   cursor: pointer;
 `;
 
+const CaspyWrapper = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const CloseIconButton = styled.button`
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: ${({ theme }) => theme.color.backgroundSecondary ?? '#E0E0E0'};
+  color: ${({ theme }) => theme.color.contentDisabled};
+
+  outline: none;
+  &:focus-visible {
+    box-shadow: 0 0 0 2px ${({ theme }) => theme.color.contentOnFill}33;
+  }
+`;
+
 interface IAppEventBannerProps {
   activeMarketingEvent: IAppMarketingEvent;
 }
@@ -101,15 +129,29 @@ export const AppEventBanner: React.FC<IAppEventBannerProps> = ({
 
   if (isCaspyEvent) {
     return (
-      <AppEventLinkContainer
-        href={activeMarketingEvent?.url || '#'}
-        target="_blank"
-        rel="noreferrer noopener"
-        eventId={activeMarketingEvent.id}
-        bgImage={bgImage}
-        aria-label={activeMarketingEvent?.name || 'Open promotion'}
-        onClick={dismissPromotion}
-      />
+      <CaspyWrapper>
+        <AppEventLinkContainer
+          href={activeMarketingEvent?.url || '#'}
+          target="_blank"
+          rel="noreferrer noopener"
+          eventId={activeMarketingEvent.id}
+          bgImage={bgImage}
+          aria-label={activeMarketingEvent?.name || 'Open promotion'}
+          onClick={dismissPromotion}
+        />
+        <CloseIconButton
+          type="button"
+          aria-label={'dismiss'}
+          title={'dismiss'}
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            dismissPromotion();
+          }}
+        >
+          <SvgIcon src="assets/icons/close.svg" size={15} />
+        </CloseIconButton>
+      </CaspyWrapper>
     );
   }
 
