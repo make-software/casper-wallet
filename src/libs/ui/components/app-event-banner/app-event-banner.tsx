@@ -40,9 +40,9 @@ const AppEventContainer = styled.div<AppEventContainerProps>`
 `;
 
 const AppEventLinkContainer = styled.a<AppEventContainerProps>`
-  ${sharedBannerStyles}
+  ${sharedBannerStyles};
   text-decoration: none;
-  color: inherit; /* ensure text inside (if any) is readable on the banner */
+  color: inherit;
 `;
 
 const OpacityText = styled(Typography)`
@@ -108,6 +108,7 @@ export const AppEventBanner: React.FC<IAppEventBannerProps> = ({
         eventId={activeMarketingEvent.id}
         bgImage={bgImage}
         aria-label={activeMarketingEvent?.name || 'Open promotion'}
+        onClick={dismissPromotion}
       />
     );
   }
