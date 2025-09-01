@@ -137,7 +137,6 @@ export const AppEventBanner: React.FC<IAppEventBannerProps> = ({
           eventId={activeMarketingEvent.id}
           bgImage={bgImage}
           aria-label={activeMarketingEvent?.name || 'Open promotion'}
-          onClick={dismissPromotion}
         />
         <CloseIconButton
           type="button"
