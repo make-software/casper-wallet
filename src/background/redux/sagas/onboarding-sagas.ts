@@ -10,6 +10,7 @@ import { contactsReseted } from '@background/redux/contacts/actions';
 import { resetRateApp } from '@background/redux/rate-app/actions';
 import { recipientPublicKeyReseted } from '@background/redux/recent-recipient-public-keys/actions';
 import { vaultSettingsReseted } from '@background/redux/settings/actions';
+import { resetTrustedWasmState } from '@background/redux/trusted-wasm/actions';
 
 import { deriveKeyPair, validateSecretPhrase } from '@libs/crypto';
 import {
@@ -57,6 +58,7 @@ function* resetVaultSaga() {
     yield put(loginRetryCountReseted());
     yield put(recipientPublicKeyReseted());
     yield put(contactsReseted());
+    yield put(resetTrustedWasmState());
     yield put(vaultSettingsReseted());
     yield put(resetRateApp());
     yield put(resetAppEventsDismission());
