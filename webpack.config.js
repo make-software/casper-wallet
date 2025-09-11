@@ -9,7 +9,9 @@ const webpack = require('webpack'),
   TsconfigPaths = require('tsconfig-paths-webpack-plugin'),
   Dotenv = require('dotenv-webpack');
 
-const commitHash = process.env.HASH || process.env.GITHUB_SHA;
+const commitHash =
+  process.env.HASH || process.env.GITHUB_SHA || Date.now().toFixed();
+
 if (!commitHash) {
   throw Error('No commit hash env!');
 }
