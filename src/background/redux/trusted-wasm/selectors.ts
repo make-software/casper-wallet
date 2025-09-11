@@ -10,7 +10,7 @@ export const selectTrustedWasmForActiveOrigin = createSelector(
   selectActiveOrigin,
   selectTrustedWasmByOriginDict,
   (origin, hashesByOriginDict) =>
-    origin != null && (hashesByOriginDict[origin] || []).length > 0
+    origin != null && (hashesByOriginDict?.[origin] || []).length > 0
       ? hashesByOriginDict[origin]
       : []
 );
