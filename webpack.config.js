@@ -1,13 +1,15 @@
-const webpack = require('webpack'),
-  path = require('path'),
-  fileSystem = require('fs-extra'),
-  env = require('./utils/env'),
-  pkg = require('./package.json'),
-  CopyWebpackPlugin = require('copy-webpack-plugin'),
-  HtmlWebpackPlugin = require('html-webpack-plugin'),
-  TerserPlugin = require('terser-webpack-plugin'),
-  TsconfigPaths = require('tsconfig-paths-webpack-plugin'),
-  Dotenv = require('dotenv-webpack');
+const webpack = require('webpack');
+const path = require('path');
+const fileSystem = require('fs-extra');
+const env = require('./utils/env');
+const pkg = require('./package.json');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const TsconfigPaths = require('tsconfig-paths-webpack-plugin');
+const Dotenv = require('dotenv-webpack');
+
+const LavaMoat = require('@lavamoat/webpack');
 
 const commitHash =
   process.env.HASH || process.env.GITHUB_SHA || Date.now().toFixed();
@@ -115,9 +117,6 @@ const options = {
     contentScript: path.join(__dirname, 'src', 'content', 'index.ts'),
     sdk: path.join(__dirname, 'src', 'content', 'sdk.ts')
   },
-  chromeExtensionBoilerplate: {
-    notHotReload: ['contentScript', 'devtools']
-  },
   output: {
     path: path.resolve(__dirname, buildDir),
     filename: '[name].bundle.js',
@@ -152,7 +151,12 @@ const options = {
         options: htmlLoaderOptions,
         exclude: /node_modules/
       },
-      { test: /\.css$/i, use: ['style-loader', 'css-loader'] },
+      {
+        test: /\.css$/i,
+        // Exclude CSS from LavaMoat compartment wrapping
+        use: ['style-loader', 'css-loader', LavaMoat.exclude],
+        sideEffects: true
+      },
       {
         test: /\.tsx?$/,
         loader: 'ts-loader',
@@ -188,6 +192,12 @@ const options = {
   },
   plugins: [
     new webpack.ProgressPlugin(),
+    new LavaMoat({
+      generatePolicy: false, // if it's already exist, keep it to false. Re-enable only if were changes in package.json
+      readableResourceIds: true,
+      diagnosticsVerbosity: 1,
+      HtmlWebpackPluginInterop: true
+    }),
     new Dotenv({
       systemvars: true
     }),
@@ -377,6 +387,8 @@ const options = {
 if (isDev) {
   options.devtool = 'cheap-module-source-map';
 } else {
+  // Disable source maps in production when using LavaMoat
+  options.devtool = false;
   options.optimization = {
     minimize: true,
     minimizer: [
