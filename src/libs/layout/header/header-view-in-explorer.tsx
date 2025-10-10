@@ -1,4 +1,4 @@
-import { TokenDto } from 'casper-wallet-core/src/data/dto';
+import { ITokenWithFiatBalance } from 'casper-wallet-core';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -25,7 +25,7 @@ interface HeaderViewInExplorerProps {
   deployHash?: string;
   nftTokenId?: string;
   contractPackageHash?: string;
-  cep18Tokens?: TokenDto[];
+  cep18Tokens?: ITokenWithFiatBalance[];
 }
 
 export function HeaderViewInExplorer({

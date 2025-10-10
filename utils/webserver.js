@@ -59,9 +59,10 @@ const publicPath = `http://localhost:${env.PORT}/`;
 
 const server = new WebpackDevServer(
   {
-    https: false,
     hot: true,
-    client: false,
+    client: {
+      overlay: false
+    },
     host: 'localhost',
     port: env.PORT,
     static: {
@@ -84,24 +85,24 @@ if (process.env.NODE_ENV === 'development' && 'hot' in module) {
 }
 
 (async () => {
-  await server.startCallback(async () => {
-    if (isChrome) {
-      const delay = ms => new Promise(res => setTimeout(res, ms));
+  await server.start();
 
-      const openExtensionPageCommand = `open -na "Google Chrome" chrome-extension://${chromeExtensionID}/popup.html --args --remote-debugging-port=9222`;
-      const installExtensionCommand = `open -na "Google Chrome" chrome://extensions/ --args --load-extension=${extensionAbsPath} --remote-debugging-port=9222`;
+  if (isChrome) {
+    const delay = ms => new Promise(res => setTimeout(res, ms));
 
-      execSync(installExtensionCommand);
-      await delay(2000); // Waiting for install
-      execSync(openExtensionPageCommand);
-    } else if (isFirefox) {
-      execSync(
-        `web-ext run --source-dir ${ExtensionBuildPath.Firefox} -u about:debugging#/runtime/this-firefox`
-      );
-    } else if (isSafari) {
-      execSync(`open -na Safari ${publicPath}popup.html`);
-    } else {
-      throw new Error("Unknown browser passed. Couldn't start browser");
-    }
-  });
+    const openExtensionPageCommand = `open -na "Google Chrome" chrome-extension://${chromeExtensionID}/popup.html --args --remote-debugging-port=9222`;
+    const installExtensionCommand = `open -na "Google Chrome" chrome://extensions/ --args --load-extension=${extensionAbsPath} --remote-debugging-port=9222`;
+
+    execSync(installExtensionCommand);
+    await delay(2000); // Waiting for install
+    execSync(openExtensionPageCommand);
+  } else if (isFirefox) {
+    execSync(
+      `web-ext run --source-dir ${ExtensionBuildPath.Firefox} -u about:debugging#/runtime/this-firefox`
+    );
+  } else if (isSafari) {
+    execSync(`open -na Safari ${publicPath}popup.html`);
+  } else {
+    throw new Error("Unknown browser passed. Couldn't start browser");
+  }
 })();

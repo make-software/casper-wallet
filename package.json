@@ -1,7 +1,7 @@
 {
   "name": "Casper Wallet",
   "description": "Securely manage your CSPR tokens and interact with dapps with the self-custody wallet for the Casper blockchain.",
-  "version": "2.1.2",
+  "version": "2.2.2",
   "author": "MAKE LLC",
   "scripts": {
     "devtools:redux": "redux-devtools --hostname=localhost",
@@ -61,7 +61,7 @@
     "@ledgerhq/hw-transport-webhid": "^6.30.0",
     "@ledgerhq/hw-transport-webusb": "^6.28.6",
     "@lottiefiles/react-lottie-player": "3.6.0",
-    "@noble/ciphers": "^0.3.0",
+    "@noble/ciphers": "^1.3.0",
     "@scure/bip32": "1.6.2",
     "@scure/bip39": "1.2.1",
     "@tanstack/react-query": "^5.52.3",
@@ -71,7 +71,7 @@
     "base64-loader": "1.0.0",
     "big.js": "^6.2.1",
     "casper-js-sdk": "^5.0.6",
-    "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#v1.1.3",
+    "casper-wallet-core": "git+ssh://git@github.com:make-software/casper-wallet-core.git#v1.1.5",
     "date-fns": "^2.30.0",
     "dotenv-webpack": "^8.1.0",
     "i18next": "^23.11.0",
@@ -130,7 +130,7 @@
     "@types/jest": "29.5.14",
     "@types/lodash.throttle": "4.1.7",
     "@types/md5": "^2.3.5",
-    "@types/node": "^20.9.0",
+    "@types/node": "^24.2.0",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.3.0",
     "@types/react-virtualized": "^9.21.30",
@@ -166,7 +166,7 @@
     "markdownlint-cli": "0.42.0",
     "playwright": "^1.50.1",
     "prettier": "3.1.0",
-    "source-map-loader": "4.0.1",
+    "source-map-loader": "5.0.0",
     "style-loader": "^3.3.4",
     "terser-webpack-plugin": "5.3.6",
     "ts-jest": "29.3.2",
@@ -179,7 +179,7 @@
     "webextension-polyfill": "0.10.0",
     "webpack": "5.94.0",
     "webpack-cli": "5.1.4",
-    "webpack-dev-server": "^4.15.1",
+    "webpack-dev-server": "^5.2.1",
     "xcode-build-webpack-plugin": "^1.0.2"
   }
 }

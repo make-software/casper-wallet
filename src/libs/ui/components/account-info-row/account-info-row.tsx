@@ -107,7 +107,7 @@ export const AccountInfoRow = ({
     [publicKey, contacts]
   );
 
-  const name = accountLabel || contactName || '';
+  const name = accountLabel || contactName || accountName || '';
 
   const getContractName = useCallback(() => {
     if (

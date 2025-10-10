@@ -298,9 +298,11 @@ export function SignTransactionPage() {
   }, [maybeRequireApproval]);
 
   const toggleWasmApproval = useCallback(() => {
+    const origin = originRef.current[requestId].activeOrigin ?? null;
+
     if (
       !(
-        activeOrigin &&
+        origin &&
         signatureRequest &&
         (isTxSignatureRequestWasmAction(signatureRequest.action) ||
           isTxSignatureRequestWasmProxyAction(signatureRequest.action))
@@ -313,7 +315,7 @@ export function SignTransactionPage() {
       setWasmApproved(false);
       dispatchToMainStore(
         removeWasmFromTrusted({
-          origin: activeOrigin,
+          origin,
           wasmHash: signatureRequest.action.washHash
         })
       );
@@ -321,12 +323,12 @@ export function SignTransactionPage() {
       setWasmApproved(true);
       dispatchToMainStore(
         addWasmToTrusted({
-          origin: activeOrigin,
+          origin,
           wasmHash: signatureRequest.action.washHash
         })
       );
     }
-  }, [activeOrigin, signatureRequest, wasmApproved]);
+  }, [requestId, signatureRequest, wasmApproved]);
 
   const renderFooter = () => {
     if (signingPageState === SigningPageState.LedgerConfirmation) {
@@ -370,7 +372,10 @@ export function SignTransactionPage() {
             }
           >
             {isSigningAccountFromLedger ? (
-              <AlignedFlexRow gap={SpacingSize.Small}>
+              <AlignedFlexRow
+                gap={SpacingSize.Small}
+                style={{ justifyContent: 'center' }}
+              >
                 <SvgIcon src="assets/icons/ledger-white.svg" />
                 <Trans t={t}>Sign with Ledger</Trans>
               </AlignedFlexRow>
