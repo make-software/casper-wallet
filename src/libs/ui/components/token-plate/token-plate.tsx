@@ -6,18 +6,18 @@ import { TokenType } from '@hooks/use-casper-token';
 import {
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
-  RightAlignedCenteredFlexRow,
-  RightAlignedFlexColumn,
-  SpacingSize
+  FlexColumn,
+  SpacingSize,
+  getSpacingSize
 } from '@libs/layout';
 import { SvgIcon, Tooltip, Typography } from '@libs/ui/components';
 
-const TokenAmountContainer = styled(RightAlignedFlexColumn)`
-  max-width: 120px;
+const TokenAmountContainer = styled(FlexColumn)`
+  max-width: 300px;
 `;
 
 const TokenNameContainer = styled.div`
-  max-width: 100px;
+  max-width: 200px;
 `;
 
 const ListItemContainer = styled(AlignedSpaceBetweenFlexRow)<{
@@ -26,6 +26,11 @@ const ListItemContainer = styled(AlignedSpaceBetweenFlexRow)<{
 }>`
   cursor: ${({ clickable }) => (clickable ? 'pointer' : 'default')};
   padding: ${({ chevron }) => (chevron ? '10px 12px 10px 16px' : '10px 16px')};
+`;
+
+const TokenDetailsContainer = styled(AlignedFlexRow)`
+  column-gap: ${getSpacingSize(SpacingSize.Tiny)};
+  row-gap: ${getSpacingSize(SpacingSize.None)};
 `;
 
 const LogoImg = styled.img`
@@ -65,57 +70,66 @@ export const TokenPlate = ({
         ) : (
           <SvgIcon src={token?.icon || ''} alt={token?.name} size={32} />
         )}
-        <TokenNameContainer>
-          <Tooltip
-            title={
-              token?.name && token.name.length > 10 ? token.name : undefined
-            }
-            fullWidth
-            overflowWrap
-          >
-            <Typography type="body" ellipsis loading={!token?.name}>
-              {token?.name}
-            </Typography>
-          </Tooltip>
-        </TokenNameContainer>
-      </AlignedFlexRow>
-      <AlignedFlexRow gap={SpacingSize.Small}>
-        <TokenAmountContainer>
-          <Tooltip
-            title={
-              (token?.amount && token.amount.length > 7) ||
-              (token?.symbol && token.symbol.length > 6)
-                ? `${token?.amount} ${token?.symbol}`
-                : undefined
-            }
-            placement="bottomLeft"
-            overflowWrap
-            fullWidth
-          >
-            <RightAlignedCenteredFlexRow gap={SpacingSize.Small}>
-              <Typography type="bodyHash" ellipsis loading={!token?.amount}>
-                {token?.amount}
-              </Typography>
-              <Typography
-                type="bodyHash"
-                color="contentSecondary"
-                ellipsis={!!(token?.symbol && token.symbol.length > 6)}
-                loading={!token?.symbol && token?.symbol !== ''}
-              >
-                {token?.symbol}
-              </Typography>
-            </RightAlignedCenteredFlexRow>
-          </Tooltip>
-          {(token?.name === 'Casper' || token?.amountFiat) && (
-            <Typography
-              type="listSubtext"
-              color="contentSecondary"
-              loading={!token?.amountFiat}
+        <FlexColumn>
+          <TokenNameContainer>
+            <Tooltip
+              title={
+                token?.name && token.name.length > 10 ? token.name : undefined
+              }
+              fullWidth
+              overflowWrap
             >
-              {token?.amountFiat}
-            </Typography>
-          )}
-        </TokenAmountContainer>
+              <Typography type="bodySemiBold" ellipsis loading={!token?.name}>
+                {token?.name}
+              </Typography>
+            </Tooltip>
+          </TokenNameContainer>
+
+          <TokenAmountContainer>
+            <Tooltip
+              title={
+                (token?.amount && token.amount.length > 7) ||
+                (token?.symbol && token.symbol.length > 6)
+                  ? `${token?.amount} ${token?.symbol}`
+                  : undefined
+              }
+              placement="bottomLeft"
+              overflowWrap
+              fullWidth
+            >
+              <TokenDetailsContainer wrap="wrap">
+                <Typography
+                  type="captionHash"
+                  ellipsis
+                  loading={!token?.amount}
+                >
+                  {token?.amount}
+                </Typography>
+
+                <Typography
+                  type="captionHash"
+                  color="contentSecondary"
+                  ellipsis={!!(token?.symbol && token.symbol.length > 6)}
+                  loading={!token?.symbol && token?.symbol !== ''}
+                >
+                  {token?.symbol}
+                </Typography>
+
+                {(token?.name === 'Casper' || token?.amountFiat) && (
+                  <Typography
+                    type="captionRegular"
+                    color="contentSecondary"
+                    loading={!token?.amountFiat}
+                  >
+                    ({token?.amountFiat})
+                  </Typography>
+                )}
+              </TokenDetailsContainer>
+            </Tooltip>
+          </TokenAmountContainer>
+        </FlexColumn>
+      </AlignedFlexRow>
+      <AlignedFlexRow>
         {chevron && <SvgIcon src="assets/icons/chevron.svg" size={16} />}
       </AlignedFlexRow>
     </ListItemContainer>
