@@ -163,7 +163,8 @@ export enum DeployIcon {
   CSPRMarket = '/assets/icons/cspr-market.svg',
   AssociatedKeys = '/assets/icons/associated-keys.svg',
   Cep18Default = '/assets/icons/cep-18-default.svg',
-  NFTDefault = 'assets/icons/nft-contract-icon.svg'
+  NFTDefault = 'assets/icons/nft-contract-icon.svg',
+  Wasm = 'assets/icons/wasm.svg'
 }
 
 export enum AuctionDeployEntryPoint {

@@ -6,7 +6,7 @@ import {
   isCep18Deploy,
   isNativeCsprDeploy,
   isNftDeploy,
-  isWasmDeployExecutionType
+  isWasmDeploy
 } from 'casper-wallet-core/src/utils/deploy';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -75,7 +75,7 @@ export const DeployDetailsAction = ({ deploy }: ActionProps) => {
     );
   }
 
-  if (isWasmDeployExecutionType(deploy)) {
+  if (isWasmDeploy(deploy)) {
     return (
       <Container>
         <Typography type="bodySemiBold">{title}</Typography>
@@ -134,6 +134,7 @@ export const DeployDetailsAction = ({ deploy }: ActionProps) => {
         title={title}
         contractName={deploy.contractName}
         contractPackageHash={deploy.contractPackageHash}
+        iconUrl={deploy.iconUrl ?? undefined}
       />
     </Container>
   );
