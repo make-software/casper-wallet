@@ -142,7 +142,9 @@ export const initBringScript = () => {
         activateTitleFC: '#A9AAAD',
         activateTitleBoldFS: '14px',
         activateTitleBoldFW: '600',
-        activateTitleBoldFC: '#FFFFFF'
+        activateTitleBoldFC: '#FFFFFF',
+        activateWalletNameFC: '#407FF7',
+        logoRadius: 32
       },
       lightTheme: {
         fontFamily: '"Inter", sans-serif',
@@ -237,7 +239,9 @@ export const initBringScript = () => {
         activateTitleFC: '#84868C',
         activateTitleBoldFS: '14px',
         activateTitleBoldFW: '600',
-        activateTitleBoldFC: '#1A1919'
+        activateTitleBoldFC: '#1A1919',
+        activateWalletNameFC: '#407FF7',
+        logoRadius: 32
       }
     });
   }
