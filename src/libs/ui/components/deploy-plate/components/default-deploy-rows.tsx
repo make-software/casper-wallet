@@ -26,9 +26,11 @@ export const DefaultDeployRows = ({ deploy }: DefaultDeployRowsProps) => {
   return (
     <DeployContainer
       iconUrl={
-        isWasmDeploy(deploy) || isWasmProxyDeploy(deploy)
-          ? DeployIcon.Wasm
-          : DeployIcon.Generic
+        deploy.iconUrl
+          ? deploy.iconUrl
+          : isWasmDeploy(deploy) || isWasmProxyDeploy(deploy)
+            ? DeployIcon.Wasm
+            : DeployIcon.Generic
       }
       title={title}
       timestamp={deploy.timestamp}
