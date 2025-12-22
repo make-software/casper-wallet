@@ -1,4 +1,9 @@
-import { IDeploy, isWasmDeployExecutionType } from 'casper-wallet-core';
+import {
+  IDeploy,
+  formatAddress,
+  isWasmDeploy,
+  isWasmProxyDeploy
+} from 'casper-wallet-core';
 import React from 'react';
 
 import { DeployIcon } from '@src/constants';
@@ -15,9 +20,18 @@ interface DefaultDeployRowsProps {
 export const DefaultDeployRows = ({ deploy }: DefaultDeployRowsProps) => {
   const title = getEntryPointName(deploy);
 
+  const contractIdentification =
+    deploy.contractName || formatAddress(deploy.contractPackageHash) || '';
+
   return (
     <DeployContainer
-      iconUrl={DeployIcon.Generic}
+      iconUrl={
+        deploy.iconUrl
+          ? deploy.iconUrl
+          : isWasmDeploy(deploy) || isWasmProxyDeploy(deploy)
+            ? DeployIcon.Wasm
+            : DeployIcon.Generic
+      }
       title={title}
       timestamp={deploy.timestamp}
       deployStatus={{
@@ -25,8 +39,8 @@ export const DefaultDeployRows = ({ deploy }: DefaultDeployRowsProps) => {
         errorMessage: deploy.errorMessage
       }}
     >
-      {deploy.contractName && !isWasmDeployExecutionType(deploy) && (
-        <ContractRow label="with" contractName={deploy.contractName} />
+      {contractIdentification && !isWasmDeploy(deploy) && (
+        <ContractRow label="with" contractName={contractIdentification} />
       )}
     </DeployContainer>
   );

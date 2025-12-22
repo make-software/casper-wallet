@@ -65,7 +65,7 @@ export const initBringScript = () => {
         secondaryBtnFS: '14px',
         secondaryBtnFW: '500',
         secondaryBtnFC: '#7490FF',
-        secondaryBtnBorderC: 'transparent',
+        // secondaryBtnBorderC: 'transparent',
         secondaryBtnBorderW: '0',
         secondaryBtnRadius: '4px',
         // Markdown
@@ -142,7 +142,9 @@ export const initBringScript = () => {
         activateTitleFC: '#A9AAAD',
         activateTitleBoldFS: '14px',
         activateTitleBoldFW: '600',
-        activateTitleBoldFC: '#FFFFFF'
+        activateTitleBoldFC: '#FFFFFF',
+        activateWalletNameFC: '#407FF7',
+        logoBg: '#18181F'
       },
       lightTheme: {
         fontFamily: '"Inter", sans-serif',
@@ -160,7 +162,7 @@ export const initBringScript = () => {
         secondaryBtnFS: '14px',
         secondaryBtnFW: '500',
         secondaryBtnFC: '#0A2EBF',
-        secondaryBtnBorderC: 'transparent',
+        // secondaryBtnBorderC: 'transparent',
         secondaryBtnBorderW: '0',
         secondaryBtnRadius: '4px',
         // Markdown
@@ -237,7 +239,12 @@ export const initBringScript = () => {
         activateTitleFC: '#84868C',
         activateTitleBoldFS: '14px',
         activateTitleBoldFW: '600',
-        activateTitleBoldFC: '#1A1919'
+        activateTitleBoldFC: '#1A1919',
+        activateWalletNameFC: '#407FF7',
+        logoBg: '#F5F6F7',
+        optoutDescFC: '#1A1919',
+        labelFC: '#1A1919',
+        labelDescFC: '#1A1919'
       }
     });
   }

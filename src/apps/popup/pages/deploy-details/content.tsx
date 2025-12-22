@@ -37,6 +37,7 @@ import { formatShortTimestamp } from '@libs/ui/utils';
 
 const TitleContainer = styled(SpaceBetweenFlexRow)`
   align-items: end;
+  gap: 8px;
 `;
 
 const RowsContainer = styled(FlexColumn)<BorderBottomPseudoElementProps>`
@@ -89,13 +90,13 @@ export const DeployDetailsPageContent = ({
     return null;
   }
 
-  const deployName = getEntryPointName(singleDeploy, true);
+  const deployName = getEntryPointName(singleDeploy, true, true);
 
   return (
     <ContentContainer>
       <ParagraphContainer top={SpacingSize.XL}>
-        <TitleContainer wrap={'wrap'}>
-          <Typography type="header" wordBreak>
+        <TitleContainer>
+          <Typography type="header">
             <Trans t={t}>{deployName}</Trans>
           </Typography>
           <DeployStatus
