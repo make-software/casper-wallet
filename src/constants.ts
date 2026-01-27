@@ -395,8 +395,12 @@ export const ErrorMessages = {
       description:
         'The target provided in the transfer data is neither an AccountHash nor a PublicKey. Ensure the target type is valid.'
     }
+  },
+  decryptMessage: {
+    LEDGER_NOT_SUPPORTED: {
+      message: 'Decryption with Ledger is not supported',
+      description:
+        'Ledger hardware wallets do not support message decryption. Use a software wallet instead.'
+    }
   }
 };
-
-// TODO temp
-export const Casper2EventIdForSeparateScreen = -20;
