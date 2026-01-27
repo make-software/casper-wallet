@@ -79,6 +79,7 @@
     "i18next-http-backend": "2.5.0",
     "i18next-parser": "^9.3.0",
     "jszip": "^3.10.1",
+    "libsodium-wrappers-sumo": "^0.8.2",
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "4.1.1",
     "mac-scrollbar": "^0.13.6",
