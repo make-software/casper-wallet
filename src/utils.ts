@@ -210,6 +210,7 @@ export const getActiveAccountSupports = (activeAccount: Account) => {
     : [
         CasperWalletSupports.signDeploy,
         CasperWalletSupports.signMessage,
-        CasperWalletSupports.signTransactionV1
+        CasperWalletSupports.signTransactionV1,
+        CasperWalletSupports.messagesEncryption
       ];
 };
