@@ -24,7 +24,11 @@ async function handleSdkMessage(message: SdkEvent | SdkMethod) {
       case getType(sdkMethod.signResponse):
       case getType(sdkMethod.signMessageError):
       case getType(sdkMethod.signMessageResponse):
+      case getType(sdkMethod.decryptMessageResponse):
+      case getType(sdkMethod.decryptMessageError):
       case getType(sdkMethod.getActivePublicKeySupportsResponse):
+      case getType(sdkMethod.getEncryptedMessageResponse):
+      case getType(sdkMethod.getEncryptedMessageError):
         window.dispatchEvent(
           new CustomEvent(SdkMethodEventType.Response, {
             detail: JSON.stringify(message)
