@@ -15,5 +15,7 @@ export type CasperWalletState = {
 export enum CasperWalletSupports {
   signDeploy = 'sign-deploy',
   signTransactionV1 = 'sign-transactionv1',
-  signMessage = 'sign-message'
+  signMessage = 'sign-message',
+  messageEncryption = 'message-encryption',
+  messageDecryption = 'message-decryption'
 }

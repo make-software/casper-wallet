@@ -1,5 +1,5 @@
 import { bringInitBackground } from '@bringweb3/chrome-extension-kit';
-import { Deploy } from 'casper-js-sdk';
+import { Deploy, PublicKey } from 'casper-js-sdk';
 import { RootAction, getType } from 'typesafe-actions';
 import {
   Tabs,
@@ -119,9 +119,12 @@ import { SiteNotConnectedError, WalletLockedError } from '@content/sdk-errors';
 import { sdkEvent } from '@content/sdk-event';
 import { SdkMethod, isSDKMethod, sdkMethod } from '@content/sdk-method';
 
+import { encryptAsHexWithCasperPublicKey } from '@libs/crypto';
+
 import {
   CannotGetActiveAccountError,
-  CannotGetSenderOriginError
+  CannotGetSenderOriginError,
+  ENCRYPT_MESSAGE_MAX_LENGTH
 } from './internal-errors';
 import { openWindow } from './open-window';
 import { activeOriginChanged } from './redux/active-origin/actions';
@@ -430,6 +433,27 @@ runtime.onMessage.addListener(
             return sendResponse(undefined);
           }
 
+          case getType(sdkMethod.decryptMessageRequest): {
+            const origin = getUrlOrigin(sender.url);
+
+            if (!origin) {
+              return sendError(CannotGetSenderOriginError());
+            }
+
+            const { signingPublicKeyHex, message } = action.payload;
+
+            openWindow({
+              windowApp: WindowApp.DecryptMessageRequest,
+              searchParams: {
+                requestId: action.meta.requestId,
+                signingPublicKeyHex,
+                message
+              }
+            });
+
+            return sendResponse(undefined);
+          }
+
           case getType(sdkMethod.disconnectRequest): {
             const origin = getUrlOrigin(sender.url);
             if (!origin) {
@@ -541,6 +565,48 @@ runtime.onMessage.addListener(
                 action.meta
               )
             );
+          }
+
+          case getType(sdkMethod.getEncryptedMessageRequest): {
+            const origin = getUrlOrigin(sender.url);
+
+            const { signingPublicKeyHex, message = '' } = action.payload;
+
+            if (!origin) {
+              return sendError(CannotGetSenderOriginError());
+            }
+
+            try {
+              PublicKey.fromHex(signingPublicKeyHex);
+            } catch (e) {
+              return sendError(Error('Public key hex is not valid'));
+            }
+
+            if (message.length > ENCRYPT_MESSAGE_MAX_LENGTH) {
+              return sendError(
+                Error(
+                  `Message should be less than ${ENCRYPT_MESSAGE_MAX_LENGTH} symbols`
+                )
+              );
+            }
+
+            try {
+              const encryptedMessage = await encryptAsHexWithCasperPublicKey(
+                signingPublicKeyHex,
+                message
+              );
+
+              return sendResponse(
+                sdkMethod.getEncryptedMessageResponse(
+                  {
+                    encryptedMessage
+                  },
+                  action.meta
+                )
+              );
+            } catch (e) {
+              return sendError(Error('Error during message encryption'));
+            }
           }
 
           case getType(sdkMethod.getActivePublicKeySupportsRequest): {

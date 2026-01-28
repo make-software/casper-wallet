@@ -1,3 +1,4 @@
+import { formatAddress } from 'casper-wallet-core';
 import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 
@@ -29,7 +30,7 @@ export const DefaultActionRows = ({
     <SimpleContainer title={title}>
       <ContractInfoRow
         contractPackageHash={contractPackageHash}
-        contractName={contractName || 'Unknown Contract'}
+        contractName={contractName || formatAddress(contractPackageHash)}
         label="with"
         iconUrl={iconUrl}
         additionalInfo={additionalInfo}

@@ -152,7 +152,7 @@ export const UnknownContractActionRows = ({
                       <Typography
                         type="captionRegular"
                         color="contentPrimary"
-                        style={{ marginRight: 8, whiteSpace: 'nowrap' }}
+                        style={{ marginRight: 8 }}
                       >
                         <Trans t={t}>{key.toString()}</Trans>
                       </Typography>
@@ -168,7 +168,7 @@ export const UnknownContractActionRows = ({
                       <Typography
                         type="captionRegular"
                         color="contentPrimary"
-                        style={{ marginRight: 8, whiteSpace: 'nowrap' }}
+                        style={{ marginRight: 8 }}
                       >
                         <Trans t={t}>{key.toString()}</Trans>
                       </Typography>
@@ -192,7 +192,7 @@ export const UnknownContractActionRows = ({
                   <Typography
                     type="captionRegular"
                     color="contentPrimary"
-                    style={{ marginRight: 8, whiteSpace: 'nowrap' }}
+                    style={{ marginRight: 8 }}
                   >
                     <Trans t={t}>{key.toString()}</Trans>
                   </Typography>
@@ -214,7 +214,7 @@ export const UnknownContractActionRows = ({
                   <Typography
                     type="captionRegular"
                     color="contentPrimary"
-                    style={{ marginRight: 8, whiteSpace: 'nowrap' }}
+                    style={{ marginRight: 8 }}
                   >
                     <Trans t={t}>{key.toString()}</Trans>
                   </Typography>
@@ -253,7 +253,7 @@ export const UnknownContractActionRows = ({
                   <Typography
                     type="captionRegular"
                     color="contentPrimary"
-                    style={{ marginRight: 8, whiteSpace: 'nowrap' }}
+                    style={{ marginRight: 8 }}
                   >
                     <Trans t={t}>{key.toString()}</Trans>
                   </Typography>

@@ -1,13 +1,12 @@
-import { IDeploy } from 'casper-wallet-core';
 import {
+  IDeploy,
   isAssociatedKeysDeploy,
   isAuctionDeploy,
   isCasperMarketDeploy,
   isCep18Deploy,
   isNativeCsprDeploy,
-  isNftDeploy,
-  isWasmDeployExecutionType
-} from 'casper-wallet-core/src/utils/deploy';
+  isNftDeploy
+} from 'casper-wallet-core';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -60,27 +59,6 @@ export const DeployPlate = ({
         }}
       >
         <NativeTransferDeployRows deploy={deploy} />
-      </Container>
-    );
-  }
-
-  if (isWasmDeployExecutionType(deploy)) {
-    return (
-      <Container
-        onClick={() => {
-          navigate(RouterPath.DeployDetails, {
-            state: {
-              deploy,
-              navigateHome
-            }
-          });
-
-          if (onClick) {
-            onClick();
-          }
-        }}
-      >
-        <DefaultDeployRows deploy={deploy} />
       </Container>
     );
   }
