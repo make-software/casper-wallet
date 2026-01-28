@@ -69,7 +69,10 @@ export const sdkMethod = {
   >(),
   decryptMessageResponse: createAction(
     'CasperWalletProvider:DecryptMessage:Response'
-  )<{ cancelled: true } | { cancelled: false; message: string }, Meta>(),
+  )<
+    { cancelled: true } | { cancelled: false; decryptedMessage: string },
+    Meta
+  >(),
   decryptMessageError: createAction(
     'CasperWalletProvider:DecryptMessage:Error'
   )<Error, Meta>(),

@@ -25,7 +25,7 @@ export type DecryptedResponse =
     }
   | {
       cancelled: false; // if sign was successfull
-      message: string; // decrypted message
+      decryptedMessage: string; // decrypted message
     };
 
 const DefaultOptions: CasperWalletProviderOptions = {
@@ -232,7 +232,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
 
         return {
           cancelled: res.cancelled,
-          message: res.message
+          decryptedMessage: res.decryptedMessage
         };
       });
     },

@@ -127,7 +127,7 @@ export function DecryptMessagePage() {
 
     sendSdkResponseToSpecificTab(
       sdkMethod.decryptMessageResponse(
-        { message: decryptedMessage, cancelled: false },
+        { decryptedMessage, cancelled: false },
         { requestId }
       )
     );
