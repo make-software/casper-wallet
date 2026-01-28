@@ -59,7 +59,7 @@ export function DecryptMessageContent({
               <TextArea
                 value={decryptedMessage || message}
                 readOnly
-                style={{ minHeight: 250 }}
+                style={{ minHeight: 220 }}
               />
             </Typography>
           </FormField>
