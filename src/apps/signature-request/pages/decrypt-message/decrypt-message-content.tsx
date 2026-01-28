@@ -35,19 +35,6 @@ export function DecryptMessageContent({
             <Trans t={t}>Decrypt Message Request</Trans>
           </Typography>
         </ParagraphContainer>
-        {Boolean(decryptedMessage) && (
-          <ParagraphContainer top={SpacingSize.XL}>
-            <FormField label={t('Decrypted message:')}>
-              <Typography type="body">
-                <TextArea
-                  value={decryptedMessage}
-                  readOnly
-                  style={{ maxHeight: 125 }}
-                />
-              </Typography>
-            </FormField>
-          </ParagraphContainer>
-        )}
         {hasDecryptionError && (
           <ParagraphContainer top={SpacingSize.XL}>
             <FormField label={t('Decryption error:')}>
@@ -64,15 +51,15 @@ export function DecryptMessageContent({
             </FormField>
           </ParagraphContainer>
         )}
-        <ParagraphContainer
-          top={decryptedMessage ? SpacingSize.Small : SpacingSize.XL}
-        >
-          <FormField label={t('Message:')}>
+        <ParagraphContainer top={SpacingSize.XL}>
+          <FormField
+            label={t(decryptedMessage ? 'Decrypted message:' : 'Message:')}
+          >
             <Typography type="body">
               <TextArea
-                value={message}
+                value={decryptedMessage || message}
                 readOnly
-                style={{ minHeight: decryptedMessage ? 125 : 250 }}
+                style={{ minHeight: 250 }}
               />
             </Typography>
           </FormField>
