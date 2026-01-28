@@ -7,7 +7,8 @@ export enum WindowApp {
   ConnectToApp = 'ConnectToApp',
   SwitchAccount = 'SwitchAccount',
   SignatureRequestDeploy = 'SignatureRequestDeploy',
-  SignatureRequestMessage = 'SignatureRequestMessage'
+  SignatureRequestMessage = 'SignatureRequestMessage',
+  DecryptMessageRequest = 'DecryptMessageRequest'
 }
 
 export type WindowSearchParams = Record<string, string>;
@@ -33,6 +34,8 @@ function getUrlByWindowApp(
       return `signature-request.html${searchParamsWithPrefix}#${RouterPath.SignDeploy}`;
     case WindowApp.SignatureRequestMessage:
       return `signature-request.html${searchParamsWithPrefix}#${RouterPath.SignMessage}`;
+    case WindowApp.DecryptMessageRequest:
+      return `signature-request.html${searchParamsWithPrefix}#${RouterPath.DecryptMessage}`;
     default:
       return 'popup.html';
   }

@@ -60,6 +60,22 @@ export const sdkMethod = {
     Error,
     Meta
   >(),
+  decryptMessageRequest: createAction('CasperWalletProvider:DecryptMessage')<
+    {
+      message: string;
+      signingPublicKeyHex: string;
+    },
+    Meta
+  >(),
+  decryptMessageResponse: createAction(
+    'CasperWalletProvider:DecryptMessage:Response'
+  )<
+    { cancelled: true } | { cancelled: false; decryptedMessage: string },
+    Meta
+  >(),
+  decryptMessageError: createAction(
+    'CasperWalletProvider:DecryptMessage:Error'
+  )<Error, Meta>(),
   disconnectRequest: createAction('CasperWalletProvider:Disconnect')<
     void,
     Meta
@@ -87,6 +103,27 @@ export const sdkMethod = {
   )<string, Meta>(),
   getActivePublicKeyError: createCustomAction(
     'CasperWalletProvider:GetActivePublicKey:Error',
+    (payload: SdkError, meta: Meta) => ({ payload, meta, error: true })
+  ),
+  getEncryptedMessageRequest: createAction(
+    'CasperWalletProvider:GetEncryptedMessage'
+  )<
+    {
+      message: string;
+      signingPublicKeyHex: string;
+    },
+    Meta
+  >(),
+  getEncryptedMessageResponse: createAction(
+    'CasperWalletProvider:GetEncryptedMessage:Response'
+  )<
+    {
+      encryptedMessage: string;
+    },
+    Meta
+  >(),
+  getEncryptedMessageError: createCustomAction(
+    'CasperWalletProvider:GetEncryptedMessage:Error',
     (payload: SdkError, meta: Meta) => ({ payload, meta, error: true })
   ),
   getVersionRequest: createAction('CasperWalletProvider:GetVersion')<

@@ -19,6 +19,15 @@ export type SignatureResponse =
       signature: Uint8Array; // signature as byte array
     };
 
+export type DecryptedResponse =
+  | {
+      cancelled: true; // if sign was cancelled
+    }
+  | {
+      cancelled: false; // if sign was successfull
+      decryptedMessage: string; // decrypted message
+    };
+
 const DefaultOptions: CasperWalletProviderOptions = {
   timeout: 30 * 60 * 1000 /** 30min */
 };
@@ -194,6 +203,40 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       });
     },
     /**
+     * Request the decrypt message with the Casper Wallet extension
+     * @param message - message to decrypt as string
+     * @param signingPublicKeyHex - public key hash (in hex format)
+     * @returns a payload response when user responded to request, it will contain `message` if approved, or `cancelled === true` flag when rejected.
+     */
+    decryptMessage: (
+      message: string,
+      signingPublicKeyHex: string
+    ): Promise<DecryptedResponse> => {
+      return fetchFromBackground<
+        ReturnType<(typeof sdkMethod)['decryptMessageResponse']>['payload']
+      >(
+        sdkMethod.decryptMessageRequest(
+          {
+            message,
+            signingPublicKeyHex
+          },
+          {
+            requestId: generateRequestId()
+          }
+        )
+      ).then(res => {
+        // response empty because it was canceled
+        if (res.cancelled) {
+          return res;
+        }
+
+        return {
+          cancelled: res.cancelled,
+          decryptedMessage: res.decryptedMessage
+        };
+      });
+    },
+    /**
      * Disconnect the Casper Wallet extension
      * @returns `true` value when successfully disconnected, `false` otherwise.
      */
@@ -239,6 +282,27 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       );
     },
     /**
+     * Get the encrypted message from the Casper Wallet extension
+     * @returns returns an encrypted message.
+     * Message max length is 4096 symbols.
+     */
+    getEncryptedMessage(message: string, signingPublicKeyHex: string) {
+      return fetchFromBackground<
+        ReturnType<(typeof sdkMethod)['getEncryptedMessageResponse']>['payload']
+      >(
+        sdkMethod.getEncryptedMessageRequest(
+          {
+            message,
+            signingPublicKeyHex
+          },
+          {
+            requestId: generateRequestId()
+          }
+        ),
+        options
+      );
+    },
+    /**
      * Get version of the installed Casper Wallet extension
      * @returns version of the installed wallet extension.
      */
@@ -254,7 +318,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
     },
     /**
      * Get a list of features that the active public key supports.
-     * It can be `sign-deploy`, `sign-transactionv1` and `signMessage`
+     * It can be `sign-deploy`, `sign-transactionv1`, `sign-message` and `messages-encryption`
      * @returns returns array of features that supports the active public key.
      * @throws when wallet is locked (err.code: 1)
      * @throws when active account not approved to connect with the site (err.code: 2)
