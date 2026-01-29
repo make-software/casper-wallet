@@ -203,6 +203,27 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       });
     },
     /**
+     * Get the encrypted message from the Casper Wallet extension
+     * @returns returns an encrypted message.
+     * Message max length is 4096 symbols.
+     */
+    encryptMessage(message: string, signingPublicKeyHex: string) {
+      return fetchFromBackground<
+        ReturnType<(typeof sdkMethod)['encryptMessageResponse']>['payload']
+      >(
+        sdkMethod.encryptMessageRequest(
+          {
+            message,
+            signingPublicKeyHex
+          },
+          {
+            requestId: generateRequestId()
+          }
+        ),
+        options
+      );
+    },
+    /**
      * Request the decrypt message with the Casper Wallet extension
      * @param message - message to decrypt as string
      * @param signingPublicKeyHex - public key hash (in hex format)
@@ -282,15 +303,19 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       );
     },
     /**
+     * @deprecated // TODO remove in future releases
      * Get the encrypted message from the Casper Wallet extension
      * @returns returns an encrypted message.
      * Message max length is 4096 symbols.
      */
     getEncryptedMessage(message: string, signingPublicKeyHex: string) {
+      console.warn(
+        '`CasperWalletProvider().getEncryptedMessage` is deprecated and will be removed in future releases, use `CasperWalletProvider().encryptMessage` instead'
+      );
       return fetchFromBackground<
-        ReturnType<(typeof sdkMethod)['getEncryptedMessageResponse']>['payload']
+        ReturnType<(typeof sdkMethod)['encryptMessageResponse']>['payload']
       >(
-        sdkMethod.getEncryptedMessageRequest(
+        sdkMethod.encryptMessageRequest(
           {
             message,
             signingPublicKeyHex
