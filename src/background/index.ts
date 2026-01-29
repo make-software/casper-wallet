@@ -567,7 +567,7 @@ runtime.onMessage.addListener(
             );
           }
 
-          case getType(sdkMethod.getEncryptedMessageRequest): {
+          case getType(sdkMethod.encryptMessageRequest): {
             const origin = getUrlOrigin(sender.url);
 
             const { signingPublicKeyHex, message = '' } = action.payload;
@@ -597,7 +597,7 @@ runtime.onMessage.addListener(
               );
 
               return sendResponse(
-                sdkMethod.getEncryptedMessageResponse(
+                sdkMethod.encryptMessageResponse(
                   {
                     encryptedMessage
                   },
