@@ -89,15 +89,6 @@ export const AccountListItem = ({
   return (
     <ListItemContainer key={account.name} ref={popoverParentRef}>
       <AlignedSpaceBetweenFlexRow gap={SpacingSize.Small}>
-        <Avatar
-          size={38}
-          publicKey={account.publicKey}
-          withConnectedStatus
-          isConnected={isConnected}
-          displayContext="accountList"
-          isActiveAccount={isActiveAccount}
-          brandingLogo={brandingLogo}
-        />
         <ClickableContainer
           onClick={
             onClick
@@ -108,30 +99,45 @@ export const AccountListItem = ({
           }
         >
           <AlignedSpaceBetweenFlexRow gap={SpacingSize.Small}>
-            <AccountName type={isActiveAccount ? 'bodySemiBold' : 'body'}>
-              {account.name}
-            </AccountName>
-            <Balance
-              type="bodyHash"
-              ellipsis
-              loading={isLoadingBalance && !accountLiquidBalance}
-            >
-              {accountBalance}
-            </Balance>
-          </AlignedSpaceBetweenFlexRow>
-          <AlignedSpaceBetweenFlexRow>
-            <Hash
-              value={account.publicKey}
-              csprName={csprName}
-              variant={HashVariant.CaptionHash}
-              truncated
-              withoutTooltip
-              isImported={account.imported}
-              isLedger={account.hardware === HardwareWalletType.Ledger}
-            />
-            <Typography type="captionHash" color="contentSecondary">
-              CSPR
-            </Typography>
+            <div>
+              <Avatar
+                size={38}
+                publicKey={account.publicKey}
+                withConnectedStatus
+                isConnected={isConnected}
+                displayContext="accountList"
+                isActiveAccount={isActiveAccount}
+                brandingLogo={brandingLogo}
+              />
+            </div>
+            <FlexColumn>
+              <AlignedSpaceBetweenFlexRow gap={SpacingSize.Small}>
+                <AccountName type={isActiveAccount ? 'bodySemiBold' : 'body'}>
+                  {account.name}
+                </AccountName>
+                <Balance
+                  type="bodyHash"
+                  ellipsis
+                  loading={isLoadingBalance && !accountLiquidBalance}
+                >
+                  {accountBalance}
+                </Balance>
+              </AlignedSpaceBetweenFlexRow>
+              <AlignedSpaceBetweenFlexRow>
+                <Hash
+                  value={account.publicKey}
+                  csprName={csprName}
+                  variant={HashVariant.CaptionHash}
+                  truncated
+                  withoutTooltip
+                  isImported={account.imported}
+                  isLedger={account.hardware === HardwareWalletType.Ledger}
+                />
+                <Typography type="captionHash" color="contentSecondary">
+                  CSPR
+                </Typography>
+              </AlignedSpaceBetweenFlexRow>
+            </FlexColumn>
           </AlignedSpaceBetweenFlexRow>
         </ClickableContainer>
         <AccountActionsMenuPopover

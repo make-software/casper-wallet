@@ -10,6 +10,7 @@ import {
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   AlignedFlexRow,
+  FlexRow,
   LeftAlignedFlexColumn,
   SpacingSize
 } from '@libs/layout';
@@ -64,26 +65,28 @@ export function HeaderConnectionStatus({
               dataTestId="connection-status-modal"
             />
           </HeaderBackgroundContainer>
-          <LeftAlignedFlexColumn
-            style={{ cursor: 'auto' }}
-            onClick={event => {
-              event.stopPropagation();
-            }}
-          >
+          <LeftAlignedFlexColumn>
             <Typography type="bodySemiBold" color="contentOnFill">
               {activeAccount?.name}
             </Typography>
-            <Hash
-              label={t('Public key')}
-              value={activeAccount?.publicKey!}
-              csprName={csprName}
-              variant={HashVariant.CaptionHash}
-              color="contentOnFill"
-              truncated
-              withCopyIcon
-              placement="bottomRight"
-              withOpacity
-            />
+            <FlexRow
+              style={{ cursor: 'auto' }}
+              onClick={event => {
+                event.stopPropagation();
+              }}
+            >
+              <Hash
+                label={t('Public key')}
+                value={activeAccount?.publicKey!}
+                csprName={csprName}
+                variant={HashVariant.CaptionHash}
+                color="contentOnFill"
+                truncated
+                withCopyIcon
+                placement="bottomRight"
+                withOpacity
+              />
+            </FlexRow>
           </LeftAlignedFlexColumn>
         </AlignedFlexRow>
       )}
