@@ -69,6 +69,10 @@ export function ApproveConnectionPage({
     closeCurrentWindow();
   };
 
+  const connectToAccountLabel = ` to ${selectedAccountNamesLength} ${
+    selectedAccountNames.length > 1 ? t('accounts') : t('account')
+  }`;
+
   return (
     <LayoutWindow
       renderHeader={() => (
@@ -94,8 +98,9 @@ export function ApproveConnectionPage({
           >
             {/* TODO: optimize text in Trans component below */}
             <Trans t={t}>
-              Connect to {{ selectedAccountNamesLength }}{' '}
-              {selectedAccountNames.length > 1 ? t('accounts') : t('account')}
+              {`Connect${
+                selectedAccountNamesLength > 0 ? connectToAccountLabel : ''
+              }`}
             </Trans>
           </Button>
           <Button color="secondaryBlue" onClick={handleCancel}>
