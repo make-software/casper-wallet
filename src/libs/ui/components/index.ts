@@ -58,3 +58,4 @@ export * from './ledger-error-view/ledger-error-view';
 export * from './ledger-event-view/ledger-event-view';
 export * from './ledger-connection-view/ledger-connection-view';
 export * from './dynamic-accounts-list-with-select/dynamic-accounts-list-with-select';
+export * from './approve-connection-content/approve-connection-content';

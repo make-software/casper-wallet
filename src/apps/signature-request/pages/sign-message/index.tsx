@@ -1,13 +1,17 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { shallowEqual, useSelector } from 'react-redux';
 
 import { ErrorMessages } from '@src/constants';
 import { getSigningAccount } from '@src/utils';
 
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+
 import { RouterPath } from '@signature-request/router';
 
 import { closeCurrentWindow } from '@background/close-current-window';
+import { selectActiveOriginFavicon } from '@background/redux/active-origin-favicon/selectors';
+import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
   selectVaultAccounts
@@ -20,6 +24,7 @@ import { sdkMethod } from '@content/sdk-method';
 
 import { signMessageForProviderResponse } from '@libs/crypto/sign-message';
 import { convertBytesToHex } from '@libs/crypto/utils';
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   AlignedFlexRow,
   FooterButtonsContainer,
@@ -28,12 +33,16 @@ import {
   LayoutWindow,
   SpacingSize
 } from '@libs/layout';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
+import { useFetchAccountsBalances } from '@libs/services/balance-service';
 import { LedgerEventStatus, ledger } from '@libs/services/ledger';
 import { HardwareWalletType } from '@libs/types/account';
 import {
+  ApproveConnectionContent,
   Button,
   LedgerEventView,
   SvgIcon,
+  Typography,
   renderLedgerFooter
 } from '@libs/ui/components';
 
@@ -48,6 +57,9 @@ export function SignMessagePage() {
   const [showLedgerConfirm, setShowLedgerConfirm] =
     useState<boolean>(isLedgerNewWindow);
 
+  const activeOriginFavicon = useSelector(selectActiveOriginFavicon);
+  const activeOrigin = useSelector(selectActiveOrigin);
+
   const requestId = searchParams.get('requestId');
   const message = searchParams.get('message');
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
@@ -61,19 +73,16 @@ export function SignMessagePage() {
     );
   }
 
-  const renderDeps = [requestId, signingPublicKeyHex];
+  // it's required to prevent throwing error when active origin changed because of clicked link (e.g. public key)
+  const originRef = useRef({
+    [requestId]: { activeOrigin, activeOriginFavicon }
+  });
 
-  const vaultAccounts = useSelector(selectVaultAccounts);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const accounts = useMemo(() => vaultAccounts, renderDeps);
+  const accounts = useSelector(selectVaultAccounts, shallowEqual);
 
-  const connectedAccountNamesWithOrigin = useSelector(
-    selectConnectedAccountNamesWithActiveOrigin
-  );
-  const connectedAccountNames = useMemo(
-    () => connectedAccountNamesWithOrigin,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    renderDeps
+  const connectedAccountNames = useSelector(
+    selectConnectedAccountNamesWithActiveOrigin,
+    shallowEqual
   );
 
   useEffect(() => {
@@ -97,20 +106,27 @@ export function SignMessagePage() {
     throw error;
   }
 
-  // signing account should be connected to site
-  if (
-    connectedAccountNames != null &&
+  const shouldTryToConnectAccount =
+    connectedAccountNames &&
     !connectedAccountNames.includes(signingAccount.name) &&
-    !isLedgerNewWindow
-  ) {
-    const error = Error(
-      ErrorMessages.signTransaction.ACCOUNT_NOT_CONNECTED.description
-    );
-    sendSdkResponseToSpecificTab(
-      sdkMethod.signMessageError(error, { requestId })
-    );
-    throw error;
-  }
+    !isLedgerNewWindow;
+
+  const signingAccountHash = getAccountHashFromPublicKey(
+    signingAccount.publicKey
+  );
+
+  const { accountsBalances, isLoadingBalances } = useFetchAccountsBalances([
+    signingAccountHash
+  ]);
+
+  const accountsInfo = useFetchAccountsInfo([signingAccount.publicKey]);
+
+  const { connectAnotherAccountWithEvent: connectAnotherAccount } =
+    useAccountManager();
+
+  const handleConnect = useCallback(async () => {
+    await connectAnotherAccount(signingAccount.name, activeOrigin);
+  }, [activeOrigin, connectAnotherAccount, signingAccount.name]);
 
   const handleSign = useCallback(async () => {
     if (message == null) {
@@ -180,6 +196,22 @@ export function SignMessagePage() {
   };
 
   const renderFooter = () => {
+    if (shouldTryToConnectAccount) {
+      return () => (
+        <FooterButtonsContainer>
+          <Typography type="captionRegular" textAlign={'center'}>
+            <Trans t={t}>Only connect with sites you trust</Trans>
+          </Typography>
+          <Button color="primaryRed" onClick={handleConnect}>
+            <Trans t={t}>Connect</Trans>
+          </Button>
+          <Button color="secondaryBlue" onClick={handleCancel}>
+            <Trans t={t}>Cancel</Trans>
+          </Button>
+        </FooterButtonsContainer>
+      );
+    }
+
     if (showLedgerConfirm) {
       return renderLedgerFooter({
         onConnect: makeSubmitLedgerAction,
@@ -241,16 +273,33 @@ export function SignMessagePage() {
           }
         />
       )}
-      renderContent={() =>
-        showLedgerConfirm ? (
+      renderContent={() => {
+        if (shouldTryToConnectAccount) {
+          return (
+            <ApproveConnectionContent
+              account={signingAccount}
+              accountLiquidBalance={
+                accountsBalances?.[signingAccountHash].liquidBalance ?? '0'
+              }
+              accountsInfo={accountsInfo}
+              isLoadingBalance={isLoadingBalances}
+              origin={originRef.current[requestId].activeOrigin ?? null}
+              activeOriginFavicon={
+                originRef.current[requestId].activeOriginFavicon ?? null
+              }
+            />
+          );
+        }
+
+        return showLedgerConfirm ? (
           <LedgerEventView event={ledgerEventStatusToRender} />
         ) : (
           <SignMessageContent
             message={message}
             publicKeyHex={signingPublicKeyHex}
           />
-        )
-      }
+        );
+      }}
       renderFooter={renderFooter()}
     />
   );

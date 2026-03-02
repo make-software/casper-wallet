@@ -1,11 +1,15 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 
 import { ErrorMessages } from '@src/constants';
 import { getSigningAccount } from '@src/utils';
 
+import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+
 import { closeCurrentWindow } from '@background/close-current-window';
+import { selectActiveOriginFavicon } from '@background/redux/active-origin-favicon/selectors';
+import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
   selectVaultAccounts
@@ -15,13 +19,20 @@ import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-s
 import { sdkMethod } from '@content/sdk-method';
 
 import { decryptEncryptedBase64PrivateKey } from '@libs/crypto';
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   FooterButtonsContainer,
   HeaderPopup,
   LayoutWindow
 } from '@libs/layout';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
+import { useFetchAccountsBalances } from '@libs/services/balance-service';
 import { HardwareWalletType } from '@libs/types/account';
-import { Button } from '@libs/ui/components';
+import {
+  ApproveConnectionContent,
+  Button,
+  Typography
+} from '@libs/ui/components';
 
 import { DecryptMessageContent } from './decrypt-message-content';
 
@@ -30,6 +41,9 @@ export function DecryptMessagePage() {
   const searchParams = new URLSearchParams(document.location.search);
   const [decryptedMessage, setDecryptedMessage] = useState('');
   const [hasDecryptionError, setHasDecryptionError] = useState(false);
+
+  const activeOriginFavicon = useSelector(selectActiveOriginFavicon);
+  const activeOrigin = useSelector(selectActiveOrigin);
 
   const requestId = searchParams.get('requestId');
   const message = searchParams.get('message');
@@ -41,18 +55,19 @@ export function DecryptMessagePage() {
     );
   }
 
-  const vaultAccounts = useSelector(selectVaultAccounts, shallowEqual);
+  // it's required to prevent throwing error when active origin changed because of clicked link (e.g. public key)
+  const originRef = useRef({
+    [requestId]: { activeOrigin, activeOriginFavicon }
+  });
 
-  const connectedAccountNamesWithOrigin = useSelector(
-    selectConnectedAccountNamesWithActiveOrigin
+  const accounts = useSelector(selectVaultAccounts, shallowEqual);
+
+  const connectedAccountNames = useSelector(
+    selectConnectedAccountNamesWithActiveOrigin,
+    shallowEqual
   );
 
-  const connectedAccountNames = useMemo(
-    () => connectedAccountNamesWithOrigin,
-    [connectedAccountNamesWithOrigin]
-  );
-
-  const signingAccount = getSigningAccount(vaultAccounts, signingPublicKeyHex);
+  const signingAccount = getSigningAccount(accounts, signingPublicKeyHex);
 
   if (!signingAccount) {
     const error = Error(
@@ -74,18 +89,26 @@ export function DecryptMessagePage() {
     throw error;
   }
 
-  if (
+  const shouldTryToConnectAccount =
     connectedAccountNames &&
-    !connectedAccountNames.includes(signingAccount.name)
-  ) {
-    const error = Error(
-      ErrorMessages.signTransaction.ACCOUNT_NOT_CONNECTED.description
-    );
-    sendSdkResponseToSpecificTab(
-      sdkMethod.signMessageError(error, { requestId })
-    );
-    throw error;
-  }
+    !connectedAccountNames.includes(signingAccount.name);
+
+  const signingAccountHash = getAccountHashFromPublicKey(
+    signingAccount.publicKey
+  );
+
+  const { accountsBalances, isLoadingBalances } = useFetchAccountsBalances([
+    signingAccountHash
+  ]);
+
+  const accountsInfo = useFetchAccountsInfo([signingAccount.publicKey]);
+
+  const { connectAnotherAccountWithEvent: connectAnotherAccount } =
+    useAccountManager();
+
+  const handleConnect = useCallback(async () => {
+    await connectAnotherAccount(signingAccount.name, activeOrigin);
+  }, [activeOrigin, connectAnotherAccount, signingAccount.name]);
 
   const handleCancel = useCallback(() => {
     sendSdkResponseToSpecificTab(
@@ -135,7 +158,23 @@ export function DecryptMessagePage() {
   }, [decryptedMessage, requestId]);
 
   const renderFooter = useCallback(() => {
-    return (
+    if (shouldTryToConnectAccount) {
+      return () => (
+        <FooterButtonsContainer>
+          <Typography type="captionRegular" textAlign={'center'}>
+            <Trans t={t}>Only connect with sites you trust</Trans>
+          </Typography>
+          <Button color="primaryRed" onClick={handleConnect}>
+            <Trans t={t}>Connect</Trans>
+          </Button>
+          <Button color="secondaryBlue" onClick={handleCancel}>
+            <Trans t={t}>Cancel</Trans>
+          </Button>
+        </FooterButtonsContainer>
+      );
+    }
+
+    return () => (
       <FooterButtonsContainer>
         <Button
           color="primaryRed"
@@ -150,20 +189,47 @@ export function DecryptMessagePage() {
         </Button>
       </FooterButtonsContainer>
     );
-  }, [decryptedMessage, handleCancel, handleDecrypt, handleSendResponse, t]);
+  }, [
+    decryptedMessage,
+    handleCancel,
+    handleConnect,
+    handleDecrypt,
+    handleSendResponse,
+    shouldTryToConnectAccount,
+    t
+  ]);
 
   return (
     <LayoutWindow
       renderHeader={() => <HeaderPopup />}
-      renderContent={() => (
-        <DecryptMessageContent
-          message={message}
-          hasDecryptionError={hasDecryptionError}
-          decryptedMessage={decryptedMessage}
-          publicKeyHex={signingPublicKeyHex}
-        />
-      )}
-      renderFooter={renderFooter}
+      renderContent={() => {
+        if (shouldTryToConnectAccount) {
+          return (
+            <ApproveConnectionContent
+              account={signingAccount}
+              accountLiquidBalance={
+                accountsBalances?.[signingAccountHash].liquidBalance ?? '0'
+              }
+              accountsInfo={accountsInfo}
+              isLoadingBalance={isLoadingBalances}
+              origin={originRef.current[requestId].activeOrigin ?? null}
+              activeOriginFavicon={
+                originRef.current[requestId].activeOriginFavicon ?? null
+              }
+            />
+          );
+        }
+
+        return (
+          <DecryptMessageContent
+            message={message}
+            hasDecryptionError={hasDecryptionError}
+            decryptedMessage={decryptedMessage}
+            publicKeyHex={signingPublicKeyHex}
+          />
+        );
+      }}
+      renderFooter={renderFooter()}
     />
   );
 }

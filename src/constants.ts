@@ -312,6 +312,16 @@ export const networkNameToSdkNetworkNameMap: Record<
   [NetworkName.Integration]: CasperNetworkName.Integration
 };
 
+export const chainNameToNetworkSettingsMap: Record<
+  CasperNetworkName,
+  NetworkSetting
+> = {
+  [CasperNetworkName.Mainnet]: NetworkSetting.Mainnet,
+  [CasperNetworkName.Testnet]: NetworkSetting.Testnet,
+  [CasperNetworkName.DevNet]: NetworkSetting.Devnet,
+  [CasperNetworkName.Integration]: NetworkSetting.Integration
+};
+
 export const ErrorMessages = {
   common: {
     UNKNOWN_ERROR: {
@@ -379,11 +389,6 @@ export const ErrorMessages = {
       message: 'Signing Account Not Found',
       description:
         'The requested signing account does not exist in the wallet. Ensure the account is imported and try again.'
-    },
-    ACCOUNT_NOT_CONNECTED: {
-      message: 'Account Not Connected',
-      description:
-        'The signing account is not connected to the current site. Please connect the account and retry.'
     },
     MISSING_TRANSFER_ARGUMENT: {
       message: 'Missing Transfer Argument',

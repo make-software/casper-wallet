@@ -60,6 +60,7 @@ interface AccountListItemProps {
   accountLiquidBalance: string | undefined;
   isLoadingBalance: boolean;
   isAllAccountsPage?: boolean;
+  withMenu?: boolean;
 }
 
 export const AccountListItem = ({
@@ -72,7 +73,8 @@ export const AccountListItem = ({
   accountsInfo,
   accountLiquidBalance,
   isLoadingBalance,
-  isAllAccountsPage = false
+  isAllAccountsPage = false,
+  withMenu = true
 }: AccountListItemProps) => {
   const popoverParentRef = useRef<HTMLDivElement | null>(null);
 
@@ -140,13 +142,15 @@ export const AccountListItem = ({
             </FlexColumn>
           </AlignedSpaceBetweenFlexRow>
         </ClickableContainer>
-        <AccountActionsMenuPopover
-          account={account}
-          showHideAccountItem={showHideAccountItem}
-          onClick={closeModal}
-          popoverParentRef={popoverParentRef}
-          isAllAccountsPage={isAllAccountsPage}
-        />
+        {withMenu && (
+          <AccountActionsMenuPopover
+            account={account}
+            showHideAccountItem={showHideAccountItem}
+            onClick={closeModal}
+            popoverParentRef={popoverParentRef}
+            isAllAccountsPage={isAllAccountsPage}
+          />
+        )}
       </AlignedSpaceBetweenFlexRow>
     </ListItemContainer>
   );
