@@ -76,3 +76,6 @@ export const selectCasperNetworkApiVersion = (state: RootState) =>
 
 export const selectIsCasper2Network = (state: RootState) =>
   state.settings.casperNetworkApiVersion?.startsWith('2.') ?? false;
+
+export const selectSystemColorScheme = (state: RootState) =>
+  state.settings.systemColorScheme;

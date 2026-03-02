@@ -14,4 +14,5 @@ export interface SettingsState {
   casperNetworkApiVersion: string;
   isDarkMode: boolean;
   themeMode: ThemeMode;
+  systemColorScheme: 'dark' | 'light' | null;
 }

@@ -162,7 +162,10 @@ import {
   themeModeSettingChanged,
   vaultSettingsReseted
 } from './redux/settings/actions';
-import { selectThemeModeSetting } from './redux/settings/selectors';
+import {
+  selectSystemColorScheme,
+  selectThemeModeSetting
+} from './redux/settings/selectors';
 import {
   vaultCipherCreated,
   vaultCipherReseted
@@ -816,11 +819,11 @@ runtime.onMessage.addListener(
 
           case getType(bringWeb3Events.getTheme): {
             const themeMode = selectThemeModeSetting(store.getState());
+            const systemColorScheme = selectSystemColorScheme(store.getState());
 
             const isDarkMode =
-              // we can't get theme from system, so will use dark
               themeMode === ThemeMode.SYSTEM
-                ? true
+                ? systemColorScheme === null || systemColorScheme === 'dark'
                 : themeMode === ThemeMode.DARK;
 
             return sendResponse(
