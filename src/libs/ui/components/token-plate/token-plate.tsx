@@ -49,9 +49,8 @@ export const TokenPlate = ({
   chevron,
   handleOnClick
 }: TokenPlateProps) => {
-  const tokenIconFormat = token?.icon?.split('.').pop();
-  const isTokenIconJPG = tokenIconFormat === 'jpg';
-  const isTokenIconPNG = tokenIconFormat === 'png';
+  const tokenIconFormat = token?.icon?.split('.').pop()?.toLowerCase();
+  const isTokenIconSvg = tokenIconFormat === 'svg';
 
   return (
     <ListItemContainer
@@ -61,14 +60,14 @@ export const TokenPlate = ({
       clickable={!!handleOnClick}
     >
       <AlignedFlexRow gap={SpacingSize.Medium}>
-        {isTokenIconJPG || isTokenIconPNG ? (
+        {isTokenIconSvg ? (
+          <SvgIcon src={token?.icon || ''} alt={token?.name} size={32} />
+        ) : (
           <LogoImg
             src={token?.icon || ''}
             alt={token?.name}
             title={token?.name}
           />
-        ) : (
-          <SvgIcon src={token?.icon || ''} alt={token?.name} size={32} />
         )}
         <FlexColumn>
           <TokenNameContainer>
