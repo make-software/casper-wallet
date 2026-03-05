@@ -162,15 +162,7 @@ export const AuctionDeployRows = ({ deploy }: AuctionDeployRowsProps) => {
 
   if (isManageAuctionBidDeploy) {
     return (
-      <DeployContainer
-        timestamp={deploy.timestamp}
-        iconUrl={DeployIcon.Auction}
-        title={title}
-        deployStatus={{
-          status: deploy.status,
-          errorMessage: deploy.errorMessage
-        }}
-      >
+      <DeployContainer iconUrl={DeployIcon.Auction} title={title}>
         <ManageAuctionBidAction amount={formattedDecimalAmount} />
       </DeployContainer>
     );
@@ -178,15 +170,7 @@ export const AuctionDeployRows = ({ deploy }: AuctionDeployRowsProps) => {
 
   if (isDelegationDeploy) {
     return (
-      <DeployContainer
-        timestamp={deploy.timestamp}
-        iconUrl={DeployIcon.Auction}
-        title={title}
-        deployStatus={{
-          status: deploy.status,
-          errorMessage: deploy.errorMessage
-        }}
-      >
+      <DeployContainer iconUrl={DeployIcon.Auction} title={title}>
         <DelegationAuctionAction
           amount={formattedDecimalAmount}
           entryPoint={entryPoint}

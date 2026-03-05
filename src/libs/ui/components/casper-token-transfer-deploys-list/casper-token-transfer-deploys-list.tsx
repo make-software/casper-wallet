@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
+import { useTheme } from 'styled-components';
 
-import { SpacingSize } from '@libs/layout';
+import { SpacingSize, activityBottomPseudoElementRules } from '@libs/layout';
 import { useFetchCsprTransferDeploys } from '@libs/services/deploys';
 import { List, LoadingActivityView, NoActivityView } from '@libs/ui/components';
 import { DeployPlate } from '@libs/ui/components/deploy-plate/deploy-plate';
 
 export const CasperTokenTransferDeploysList = () => {
+  const theme = useTheme();
   const {
     csprTransferDeploys,
     isCsprTransferDeploysLoading,
@@ -49,7 +51,9 @@ export const CasperTokenTransferDeploysList = () => {
           renderRow={deploy => (
             <DeployPlate deploy={deploy} onClick={setCasperTokenYPosition} />
           )}
-          marginLeftForItemSeparatorLine={54}
+          marginLeftForItemSeparatorLine={0}
+          borderBottomPseudoElementRules={activityBottomPseudoElementRules}
+          rowContainerColor={theme.color.backgroundSecondary}
         />
       )}
 

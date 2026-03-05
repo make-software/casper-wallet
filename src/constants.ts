@@ -125,8 +125,7 @@ export enum AuctionPoolContractHash {
 
 export enum HomePageTabName {
   Tokens = 'Tokens',
-  Deploys = 'Deploys',
-  Transactions = 'Transactions',
+  Activity = 'Activity',
   NFTs = 'NFTs'
 }
 

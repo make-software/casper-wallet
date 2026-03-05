@@ -33,11 +33,6 @@ export const DefaultDeployRows = ({ deploy }: DefaultDeployRowsProps) => {
             : DeployIcon.Generic
       }
       title={title}
-      timestamp={deploy.timestamp}
-      deployStatus={{
-        status: deploy.status,
-        errorMessage: deploy.errorMessage
-      }}
     >
       {contractIdentification && !isWasmDeploy(deploy) && (
         <ContractRow label="with" contractName={contractIdentification} />

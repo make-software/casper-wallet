@@ -32,15 +32,7 @@ export const CSPRMarketDeployRows = ({ deploy }: CSPRMarketDeployRowsProps) => {
 
   if (isListAction) {
     return (
-      <DeployContainer
-        timestamp={deploy.timestamp}
-        iconUrl={DeployIcon.CSPRMarket}
-        title={title}
-        deployStatus={{
-          status: deploy.status,
-          errorMessage: deploy.errorMessage
-        }}
-      >
+      <DeployContainer iconUrl={DeployIcon.CSPRMarket} title={title}>
         <NftAmount amountOfNFTs={deploy.amountOfNFTs} />
         <ContractRow
           label={isDelist ? 'from' : 'on'}
@@ -52,15 +44,7 @@ export const CSPRMarketDeployRows = ({ deploy }: CSPRMarketDeployRowsProps) => {
 
   if (isOfferAction) {
     return (
-      <DeployContainer
-        timestamp={deploy.timestamp}
-        iconUrl={DeployIcon.CSPRMarket}
-        title={title}
-        deployStatus={{
-          status: deploy.status,
-          errorMessage: deploy.errorMessage
-        }}
-      >
+      <DeployContainer iconUrl={DeployIcon.CSPRMarket} title={title}>
         <ContractRow label="on" contractName={deploy.contractName} />
       </DeployContainer>
     );

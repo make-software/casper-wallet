@@ -17,9 +17,9 @@ export enum Status {
 }
 
 const StatusIcons = {
-  [Status.Success]: 'assets/icons/clock.svg',
-  [Status.Executed]: 'assets/icons/clock.svg',
-  [Status.Processed]: 'assets/icons/clock.svg',
+  [Status.Success]: 'assets/icons/tick-in-circle.svg',
+  [Status.Executed]: 'assets/icons/tick-in-circle.svg',
+  [Status.Processed]: 'assets/icons/tick-in-circle.svg',
   [Status.Pending]: 'assets/icons/clock.svg',
   [Status.Error]: 'assets/icons/error.svg',
   [Status.Expired]: 'assets/icons/error.svg'
@@ -116,15 +116,11 @@ export const DeployStatus = ({
     );
   }
 
-  if (status === Status.Error || status === Status.Pending) {
-    return (
-      <SvgIcon
-        src={StatusIcons[status]}
-        color={StatusColors[status] as ContentColor}
-        size={16}
-      />
-    );
-  }
-
-  return null;
+  return (
+    <SvgIcon
+      src={StatusIcons[status]}
+      color={StatusColors[status] as ContentColor}
+      size={16}
+    />
+  );
 };

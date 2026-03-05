@@ -60,8 +60,8 @@ export const ContainerWithAmount = ({
   fiatAmount
 }: ActionContainerWithAmountProps) => (
   <LeftAlignedFlexColumn gap={SpacingSize.Tiny}>
+    <Typography type="bodySemiBold">{title}</Typography>
     <AlignedFlexRow gap={SpacingSize.Small} style={{ maxWidth: '296px' }}>
-      <Typography type="bodySemiBold">{title}</Typography>
       <Typography type="bodyHash" ellipsis>
         {amount}
       </Typography>

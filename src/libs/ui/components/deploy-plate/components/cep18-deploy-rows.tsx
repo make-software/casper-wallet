@@ -21,13 +21,8 @@ export const Cep18DeployRows = ({ deploy }: Erc20DeployRowsProps) => {
 
   return (
     <DeployContainer
-      timestamp={deploy.timestamp}
       iconUrl={deploy.iconUrl || DeployIcon.Cep18Default}
       title={title}
-      deployStatus={{
-        status: deploy.status,
-        errorMessage: deploy.errorMessage
-      }}
     >
       <AlignedFlexRow gap={SpacingSize.Tiny} style={{ maxWidth: '240px' }}>
         <Typography type="captionHash" ellipsis>

@@ -8,11 +8,9 @@ import {
   isNftDeploy
 } from 'casper-wallet-core';
 import React from 'react';
-import styled from 'styled-components';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
-import { AlignedFlexRow } from '@libs/layout';
 import { AssociatedDeployRows } from '@libs/ui/components/deploy-plate/components/associated-deploy-rows';
 import { AuctionDeployRows } from '@libs/ui/components/deploy-plate/components/auction-deploy-rows';
 import { Cep18DeployRows } from '@libs/ui/components/deploy-plate/components/cep18-deploy-rows';
@@ -21,13 +19,7 @@ import { DefaultDeployRows } from '@libs/ui/components/deploy-plate/components/d
 import { NativeTransferDeployRows } from '@libs/ui/components/deploy-plate/components/native-transfer-deploy-rows';
 import { NftDeployRows } from '@libs/ui/components/deploy-plate/components/nft-deploy-rows';
 
-const Container = styled(AlignedFlexRow)`
-  padding: 16px 12px 16px;
-
-  background: ${props => props.theme.color.backgroundPrimary};
-
-  cursor: pointer;
-`;
+import { TransactionContainer } from './components/TransactionContainer';
 
 interface DeployPlateProps {
   deploy: IDeploy;
@@ -44,7 +36,8 @@ export const DeployPlate = ({
 
   if (isNativeCsprDeploy(deploy)) {
     return (
-      <Container
+      <TransactionContainer
+        deploy={deploy}
         onClick={() => {
           navigate(RouterPath.DeployDetails, {
             state: {
@@ -59,13 +52,14 @@ export const DeployPlate = ({
         }}
       >
         <NativeTransferDeployRows deploy={deploy} />
-      </Container>
+      </TransactionContainer>
     );
   }
 
   if (isAuctionDeploy(deploy)) {
     return (
-      <Container
+      <TransactionContainer
+        deploy={deploy}
         onClick={() => {
           navigate(RouterPath.DeployDetails, {
             state: {
@@ -80,13 +74,14 @@ export const DeployPlate = ({
         }}
       >
         <AuctionDeployRows deploy={deploy} />
-      </Container>
+      </TransactionContainer>
     );
   }
 
   if (isAssociatedKeysDeploy(deploy)) {
     return (
-      <Container
+      <TransactionContainer
+        deploy={deploy}
         onClick={() => {
           navigate(RouterPath.DeployDetails, {
             state: {
@@ -101,13 +96,14 @@ export const DeployPlate = ({
         }}
       >
         <AssociatedDeployRows deploy={deploy} />
-      </Container>
+      </TransactionContainer>
     );
   }
 
   if (isCasperMarketDeploy(deploy)) {
     return (
-      <Container
+      <TransactionContainer
+        deploy={deploy}
         onClick={() => {
           navigate(RouterPath.DeployDetails, {
             state: {
@@ -122,13 +118,14 @@ export const DeployPlate = ({
         }}
       >
         <CSPRMarketDeployRows deploy={deploy} />
-      </Container>
+      </TransactionContainer>
     );
   }
 
   if (isCep18Deploy(deploy)) {
     return (
-      <Container
+      <TransactionContainer
+        deploy={deploy}
         onClick={() => {
           navigate(RouterPath.DeployDetails, {
             state: {
@@ -143,13 +140,14 @@ export const DeployPlate = ({
         }}
       >
         <Cep18DeployRows deploy={deploy} />
-      </Container>
+      </TransactionContainer>
     );
   }
 
   if (isNftDeploy(deploy)) {
     return (
-      <Container
+      <TransactionContainer
+        deploy={deploy}
         onClick={() => {
           navigate(RouterPath.DeployDetails, {
             state: {
@@ -164,12 +162,13 @@ export const DeployPlate = ({
         }}
       >
         <NftDeployRows deploy={deploy} />
-      </Container>
+      </TransactionContainer>
     );
   }
 
   return (
-    <Container
+    <TransactionContainer
+      deploy={deploy}
       onClick={() => {
         navigate(RouterPath.DeployDetails, {
           state: {
@@ -184,6 +183,6 @@ export const DeployPlate = ({
       }}
     >
       <DefaultDeployRows deploy={deploy} />
-    </Container>
+    </TransactionContainer>
   );
 };

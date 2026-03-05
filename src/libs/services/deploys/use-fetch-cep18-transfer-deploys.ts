@@ -25,7 +25,7 @@ export const useFetchCep18TransferDeploys = (contractPackageHash: string) => {
     ],
     enabled: Boolean(activeAccount?.publicKey),
     queryFn: ({ pageParam }) =>
-      deploysRepository.getCep18TransferDeploys({
+      deploysRepository.getTransactionsFeed({
         network: network.toLowerCase() as CasperNetwork,
         activePublicKey: activeAccount?.publicKey ?? '',
         contractPackageHash,

@@ -159,6 +159,7 @@ import { selectVaultIsLocked } from './redux/session/selectors';
 import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged,
+  systemColorSchemeChanged,
   themeModeSettingChanged,
   vaultSettingsReseted
 } from './redux/settings/actions';
@@ -755,6 +756,7 @@ runtime.onMessage.addListener(
           case getType(removeWasmFromTrusted):
           case getType(removeAllWasmFromTrustedOrigin):
           case getType(resetTrustedWasmState):
+          case getType(systemColorSchemeChanged):
             store.dispatch(action);
             return sendResponse(undefined);
 

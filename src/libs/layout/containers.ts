@@ -261,6 +261,16 @@ export const borderBottomPseudoElementRules = css<BorderBottomPseudoElementProps
   border-bottom: ${({ theme }) => `0.5px solid ${theme.color.borderPrimary}`};
 `;
 
+export const activityBottomPseudoElementRules = css<BorderBottomPseudoElementProps>`
+  content: '';
+  width: ${({ marginLeftForSeparatorLine }) =>
+    `calc(100% - ${marginLeftForSeparatorLine}px)`};
+  margin-left: ${({ marginLeftForSeparatorLine }) =>
+    marginLeftForSeparatorLine}px;
+  height: 16px;
+  background: ${({ theme }) => theme.color.backgroundSecondary};
+`;
+
 export const BorderContainer = styled.div`
   & > *:last-child {
     ${borderBottomPseudoElementRules};

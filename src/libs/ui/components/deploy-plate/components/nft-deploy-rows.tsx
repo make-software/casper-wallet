@@ -32,13 +32,8 @@ export const NftDeployRows = ({ deploy }: NftDeployRowsProps) => {
 
   return (
     <DeployContainer
-      timestamp={deploy.timestamp}
       iconUrl={deploy.iconUrl || DeployIcon.NFTDefault}
       title={title}
-      deployStatus={{
-        status: deploy.status,
-        errorMessage: deploy.errorMessage
-      }}
     >
       {isBurn && (
         <>

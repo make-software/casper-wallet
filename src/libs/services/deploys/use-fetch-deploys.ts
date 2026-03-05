@@ -30,7 +30,7 @@ export const useFetchDeploys = () => {
     queryKey: ['DEPLOYS', network, activeAccount?.publicKey],
     enabled: Boolean(activeAccount?.publicKey),
     queryFn: ({ pageParam }) =>
-      deploysRepository.getDeploys({
+      deploysRepository.getTransactionsFeed({
         activePublicKey: activeAccount?.publicKey ?? '',
         network: network.toLowerCase() as CasperNetwork,
         page: pageParam,
