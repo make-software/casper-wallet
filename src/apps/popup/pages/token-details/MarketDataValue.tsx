@@ -11,6 +11,7 @@ interface IMarketDataValueProps {
 }
 
 const priceProviderAssetsMap: Record<SupportedMarketDataProviders, string> = {
+  CsprTrade: 'assets/icons/cspr-trade.svg',
   CoinGecko: 'assets/icons/coingecko.png',
   FriendlyMarket: 'assets/icons/friendly-market.png'
 };
