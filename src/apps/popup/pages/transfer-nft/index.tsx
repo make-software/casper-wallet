@@ -162,8 +162,8 @@ export const TransferNftPage = () => {
   const { recipientPublicKey } = recipientForm.getValues();
   const shouldSuggestAddContact = useMemo(
     () =>
-      !contactPublicKeys.includes(recipientPublicKey.toLowerCase()) &&
-      !walletPublicKeys.includes(recipientPublicKey.toLowerCase()),
+      !contactPublicKeys.includes(recipientPublicKey?.toLowerCase()) &&
+      !walletPublicKeys.includes(recipientPublicKey?.toLowerCase()),
     [contactPublicKeys, recipientPublicKey, walletPublicKeys]
   );
 
