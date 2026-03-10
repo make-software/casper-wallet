@@ -173,7 +173,7 @@ export const DeployDetailsPageContent = ({
           </RowContainer>
           <RowContainer withTwoRows>
             <Typography type="captionRegular" color="contentSecondary">
-              <Trans t={t}>Cost</Trans>
+              <Trans t={t}>Charged amount</Trans>
             </Typography>
             <RightAlignedFlexColumn>
               <FlexRow gap={SpacingSize.Tiny}>
