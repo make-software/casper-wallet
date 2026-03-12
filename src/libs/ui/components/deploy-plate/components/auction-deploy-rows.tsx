@@ -55,11 +55,13 @@ const ValidatorAccountInfo = ({
       <Typography type="captionRegular" color="contentSecondary">
         <Trans t={t}>{label}</Trans>
       </Typography>
-      <AccountInfoIcon
-        publicKey={publicKey}
-        iconUrl={imgLogo}
-        accountName={accountName}
-      />
+      <div /*to fix layout issue*/>
+        <AccountInfoIcon
+          publicKey={publicKey}
+          iconUrl={imgLogo}
+          accountName={accountName}
+        />
+      </div>
     </>
   );
 };
