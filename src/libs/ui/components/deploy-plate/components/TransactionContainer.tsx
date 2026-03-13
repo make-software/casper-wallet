@@ -1,6 +1,6 @@
 import { IDeploy } from 'casper-wallet-core';
 import React, { FC, PropsWithChildren } from 'react';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import {
   AlignedFlexRow,
@@ -8,7 +8,8 @@ import {
   FlexColumn,
   SpacingSize
 } from '@libs/layout';
-import { DeployStatus, Identicon, Typography } from '@libs/ui/components';
+import { DeployStatus, Typography } from '@libs/ui/components';
+import { AccountInfoIcon } from '@libs/ui/components/account-info-icon/account-info-icon';
 import { formatTimestampAge } from '@libs/ui/utils';
 
 const Container = styled(FlexColumn)`
@@ -41,8 +42,6 @@ interface ITransactionContainerProps {
 export const TransactionContainer: FC<
   ITransactionContainerProps & PropsWithChildren
 > = ({ deploy, children, onClick }) => {
-  const theme = useTheme();
-
   const resultsCount =
     (deploy.transfersActionsResult?.length ?? 0) +
     (deploy.nftActionsResult?.length ?? 0) +
@@ -52,10 +51,11 @@ export const TransactionContainer: FC<
     <Container onClick={onClick}>
       <Header>
         <AlignedFlexRow gap={SpacingSize.Medium}>
-          <Identicon
-            value={deploy.callerPublicKey}
+          <AccountInfoIcon
+            publicKey={deploy.callerPublicKey}
+            accountName={deploy.callerAccountInfo?.name}
+            iconUrl={deploy.callerAccountInfo?.brandingLogo}
             size={20}
-            background={theme.color.contentOnFill}
           />
           <Typography type="captionRegular" color="contentSecondary" noWrap>
             {formatTimestampAge(deploy.timestamp)}
