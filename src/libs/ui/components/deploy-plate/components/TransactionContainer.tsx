@@ -132,7 +132,7 @@ export const TransactionContainer: FC<
           action={action}
           contractHash={deploy.contractHash}
           contractPackageHash={contractPackageHash}
-          collectionHash={deploy.contractHash}
+          collectionHash={action.collectionHash}
         />
       </ContentResultItem>
     );
