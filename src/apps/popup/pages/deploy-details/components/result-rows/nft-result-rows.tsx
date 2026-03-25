@@ -8,10 +8,12 @@ import {
 } from '@src/constants';
 
 import {
+  ContractInfoRow,
   NftInfoRow,
   SimpleContainer
 } from '@popup/pages/deploy-details/components/common';
 
+import { useFetchContractPackage } from '@libs/services/contract-package';
 import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 
 interface NftResultRowsProps {
@@ -34,7 +36,9 @@ export const NftResultRows = ({
     nftTokenIds,
     nftTokenUrlsMap,
     recipientKey,
+    recipientKeyType,
     callerPublicKey,
+    callerKeyType,
     iconUrl,
     recipientAccountInfo,
     callerAccountInfo
@@ -53,6 +57,14 @@ export const NftResultRows = ({
 
   const title = DeployResultEntryPointNameMap[action.entryPoint];
 
+  const { contractPackage: callerContractPackage } = useFetchContractPackage(
+    callerKeyType === 'contractHash' ? callerPublicKey : null
+  );
+
+  const { contractPackage: recipientContractPackage } = useFetchContractPackage(
+    recipientKeyType === 'contractHash' ? recipientKey : null
+  );
+
   if (isBurn) {
     return (
       <SimpleContainer title={title}>
@@ -66,20 +78,30 @@ export const NftResultRows = ({
           defaultSvg={DeployIcon.NFTDefault}
           collectionHash={collectionHash}
         />
-        <AccountInfoRow
-          publicKey={recipientKey || callerPublicKey}
-          accountName={recipientAccountInfo?.name || callerAccountInfo?.name}
-          label="owned by"
-          isAction
-          iconSize={20}
-          csprName={
-            recipientAccountInfo?.csprName || callerAccountInfo?.csprName
-          }
-          imgLogo={
-            recipientAccountInfo?.brandingLogo ||
-            callerAccountInfo?.brandingLogo
-          }
-        />
+        {recipientKeyType === 'contractHash' ? (
+          <ContractInfoRow
+            label="owned by"
+            contractName={recipientContractPackage?.name || ''}
+            contractPackageHash={recipientKey}
+            iconUrl={recipientContractPackage?.iconUrl}
+            defaultSvg={DeployIcon.Cep18Default}
+          />
+        ) : (
+          <AccountInfoRow
+            publicKey={recipientKey || callerPublicKey}
+            accountName={recipientAccountInfo?.name || callerAccountInfo?.name}
+            label="owned by"
+            isAction
+            iconSize={20}
+            csprName={
+              recipientAccountInfo?.csprName || callerAccountInfo?.csprName
+            }
+            imgLogo={
+              recipientAccountInfo?.brandingLogo ||
+              callerAccountInfo?.brandingLogo
+            }
+          />
+        )}
       </SimpleContainer>
     );
   }
@@ -97,15 +119,25 @@ export const NftResultRows = ({
           defaultSvg={DeployIcon.NFTDefault}
           collectionHash={collectionHash}
         />
-        <AccountInfoRow
-          publicKey={recipientKey}
-          accountName={recipientAccountInfo?.name}
-          label="to"
-          isAction
-          iconSize={20}
-          csprName={recipientAccountInfo?.csprName}
-          imgLogo={recipientAccountInfo?.brandingLogo}
-        />
+        {recipientKeyType === 'contractHash' ? (
+          <ContractInfoRow
+            label="to"
+            contractName={recipientContractPackage?.name || ''}
+            contractPackageHash={recipientKey}
+            iconUrl={recipientContractPackage?.iconUrl}
+            defaultSvg={DeployIcon.Cep18Default}
+          />
+        ) : (
+          <AccountInfoRow
+            publicKey={recipientKey}
+            accountName={recipientAccountInfo?.name}
+            label="to"
+            isAction
+            iconSize={20}
+            csprName={recipientAccountInfo?.csprName}
+            imgLogo={recipientAccountInfo?.brandingLogo}
+          />
+        )}
       </SimpleContainer>
     );
   }
@@ -123,24 +155,44 @@ export const NftResultRows = ({
           defaultSvg={DeployIcon.NFTDefault}
           collectionHash={collectionHash}
         />
-        <AccountInfoRow
-          publicKey={callerPublicKey}
-          accountName={callerAccountInfo?.name}
-          label="from"
-          isAction
-          iconSize={20}
-          csprName={callerAccountInfo?.csprName}
-          imgLogo={callerAccountInfo?.brandingLogo}
-        />
-        <AccountInfoRow
-          publicKey={recipientKey}
-          accountName={recipientAccountInfo?.name}
-          label="to"
-          isAction
-          iconSize={20}
-          csprName={recipientAccountInfo?.csprName}
-          imgLogo={recipientAccountInfo?.brandingLogo}
-        />
+        {callerKeyType === 'contractHash' ? (
+          <ContractInfoRow
+            label="from"
+            contractPackageHash={callerPublicKey}
+            contractName={callerContractPackage?.name || ''}
+            iconUrl={callerContractPackage?.iconUrl}
+            defaultSvg={DeployIcon.Cep18Default}
+          />
+        ) : (
+          <AccountInfoRow
+            publicKey={callerPublicKey}
+            accountName={callerAccountInfo?.name}
+            label="from"
+            isAction
+            iconSize={20}
+            csprName={callerAccountInfo?.csprName}
+            imgLogo={callerAccountInfo?.brandingLogo}
+          />
+        )}
+        {recipientKeyType === 'contractHash' ? (
+          <ContractInfoRow
+            label="to"
+            contractName={recipientContractPackage?.name || ''}
+            contractPackageHash={recipientKey}
+            iconUrl={recipientContractPackage?.iconUrl}
+            defaultSvg={DeployIcon.Cep18Default}
+          />
+        ) : (
+          <AccountInfoRow
+            publicKey={recipientKey}
+            accountName={recipientAccountInfo?.name}
+            label="to"
+            isAction
+            iconSize={20}
+            csprName={recipientAccountInfo?.csprName}
+            imgLogo={recipientAccountInfo?.brandingLogo}
+          />
+        )}
       </SimpleContainer>
     );
   }
@@ -178,14 +230,24 @@ export const NftResultRows = ({
           isApprove
           collectionHash={collectionHash}
         />
-        <AccountInfoRow
-          publicKey={recipientKey}
-          label="to"
-          isAction
-          iconSize={20}
-          csprName={recipientAccountInfo?.csprName}
-          imgLogo={recipientAccountInfo?.brandingLogo}
-        />
+        {recipientKeyType === 'contractHash' ? (
+          <ContractInfoRow
+            label="to"
+            contractName={recipientContractPackage?.name || ''}
+            contractPackageHash={recipientKey}
+            iconUrl={recipientContractPackage?.iconUrl}
+            defaultSvg={DeployIcon.Cep18Default}
+          />
+        ) : (
+          <AccountInfoRow
+            publicKey={recipientKey}
+            label="to"
+            isAction
+            iconSize={20}
+            csprName={recipientAccountInfo?.csprName}
+            imgLogo={recipientAccountInfo?.brandingLogo}
+          />
+        )}
       </SimpleContainer>
     );
   }

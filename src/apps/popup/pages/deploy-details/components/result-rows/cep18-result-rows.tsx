@@ -13,6 +13,7 @@ import {
   SimpleContainer
 } from '@popup/pages/deploy-details/components/common';
 
+import { useFetchContractPackage } from '@libs/services/contract-package';
 import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 
 interface Cep18ResultRowsProps {
@@ -29,8 +30,10 @@ export const Cep18ResultRows = ({
     formattedDecimalAmount,
     recipientAccountInfo,
     callerAccountInfo,
+    callerKeyType,
     symbol,
     recipientKey,
+    recipientKeyType,
     callerPublicKey,
     contractName,
     iconUrl
@@ -41,6 +44,14 @@ export const Cep18ResultRows = ({
   const isApprove = entryPoint === Cep18DeployEntryPoint.approve;
 
   const title = DeployResultEntryPointNameMap[action.entryPoint];
+
+  const { contractPackage: callerContractPackage } = useFetchContractPackage(
+    callerKeyType === 'contractHash' ? callerPublicKey : null
+  );
+
+  const { contractPackage: recipientContractPackage } = useFetchContractPackage(
+    recipientKeyType === 'contractHash' ? recipientKey : null
+  );
 
   if (isApprove) {
     return (
@@ -57,14 +68,24 @@ export const Cep18ResultRows = ({
           additionalInfo="token(s)"
           defaultSvg={DeployIcon.Cep18Default}
         />
-        <AccountInfoRow
-          publicKey={recipientKey}
-          label="to"
-          isAction
-          iconSize={20}
-          csprName={recipientAccountInfo?.csprName}
-          imgLogo={recipientAccountInfo?.brandingLogo}
-        />
+        {recipientKeyType === 'contractHash' ? (
+          <ContractInfoRow
+            label="to"
+            contractName={recipientContractPackage?.name || ''}
+            contractPackageHash={recipientKey}
+            iconUrl={recipientContractPackage?.iconUrl}
+            defaultSvg={DeployIcon.Cep18Default}
+          />
+        ) : (
+          <AccountInfoRow
+            publicKey={recipientKey}
+            label="to"
+            isAction
+            iconSize={20}
+            csprName={recipientAccountInfo?.csprName}
+            imgLogo={recipientAccountInfo?.brandingLogo}
+          />
+        )}
       </SimpleContainer>
     );
   }
@@ -80,14 +101,24 @@ export const Cep18ResultRows = ({
           additionalInfo="token(s)"
           defaultSvg={DeployIcon.Cep18Default}
         />
-        <AccountInfoRow
-          publicKey={recipientKey}
-          label="owned by"
-          isAction
-          iconSize={20}
-          csprName={recipientAccountInfo?.csprName}
-          imgLogo={recipientAccountInfo?.brandingLogo}
-        />
+        {recipientKeyType === 'contractHash' ? (
+          <ContractInfoRow
+            label="owned by"
+            contractName={recipientContractPackage?.name || ''}
+            contractPackageHash={recipientKey}
+            iconUrl={recipientContractPackage?.iconUrl}
+            defaultSvg={DeployIcon.Cep18Default}
+          />
+        ) : (
+          <AccountInfoRow
+            publicKey={recipientKey}
+            label="owned by"
+            isAction
+            iconSize={20}
+            csprName={recipientAccountInfo?.csprName}
+            imgLogo={recipientAccountInfo?.brandingLogo}
+          />
+        )}
       </SimpleContainer>
     );
   }
@@ -103,14 +134,24 @@ export const Cep18ResultRows = ({
           additionalInfo="token(s)"
           defaultSvg={DeployIcon.Cep18Default}
         />
-        <AccountInfoRow
-          publicKey={recipientKey}
-          label="to"
-          isAction
-          iconSize={20}
-          csprName={recipientAccountInfo?.csprName}
-          imgLogo={recipientAccountInfo?.brandingLogo}
-        />
+        {recipientKeyType === 'contractHash' ? (
+          <ContractInfoRow
+            label="to"
+            contractName={recipientContractPackage?.name || ''}
+            contractPackageHash={recipientKey}
+            iconUrl={recipientContractPackage?.iconUrl}
+            defaultSvg={DeployIcon.Cep18Default}
+          />
+        ) : (
+          <AccountInfoRow
+            publicKey={recipientKey}
+            label="to"
+            isAction
+            iconSize={20}
+            csprName={recipientAccountInfo?.csprName}
+            imgLogo={recipientAccountInfo?.brandingLogo}
+          />
+        )}
       </SimpleContainer>
     );
   }
@@ -126,22 +167,42 @@ export const Cep18ResultRows = ({
           additionalInfo="token(s)"
           defaultSvg={DeployIcon.Cep18Default}
         />
-        <AccountInfoRow
-          publicKey={callerPublicKey}
-          label="from"
-          isAction
-          iconSize={20}
-          csprName={callerAccountInfo?.csprName}
-          imgLogo={callerAccountInfo?.brandingLogo}
-        />
-        <AccountInfoRow
-          publicKey={recipientKey}
-          label="to"
-          isAction
-          iconSize={20}
-          csprName={recipientAccountInfo?.csprName}
-          imgLogo={recipientAccountInfo?.brandingLogo}
-        />
+        {callerKeyType === 'contractHash' ? (
+          <ContractInfoRow
+            label="from"
+            contractPackageHash={callerPublicKey}
+            contractName={callerContractPackage?.name || ''}
+            iconUrl={callerContractPackage?.iconUrl}
+            defaultSvg={DeployIcon.Cep18Default}
+          />
+        ) : (
+          <AccountInfoRow
+            publicKey={callerPublicKey}
+            label="from"
+            isAction
+            iconSize={20}
+            csprName={callerAccountInfo?.csprName}
+            imgLogo={callerAccountInfo?.brandingLogo}
+          />
+        )}
+        {recipientKeyType === 'contractHash' ? (
+          <ContractInfoRow
+            label="to"
+            contractName={recipientContractPackage?.name || ''}
+            contractPackageHash={recipientKey}
+            iconUrl={recipientContractPackage?.iconUrl}
+            defaultSvg={DeployIcon.Cep18Default}
+          />
+        ) : (
+          <AccountInfoRow
+            publicKey={recipientKey}
+            label="to"
+            isAction
+            iconSize={20}
+            csprName={recipientAccountInfo?.csprName}
+            imgLogo={recipientAccountInfo?.brandingLogo}
+          />
+        )}
       </SimpleContainer>
     );
   }
