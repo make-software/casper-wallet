@@ -48,6 +48,7 @@ import { sdkMethod } from '@content/sdk-method';
 
 import { signDeployForProviderResponse } from '@libs/crypto';
 import { convertBytesToHex } from '@libs/crypto/utils';
+import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 import {
   AlignedFlexRow,
   FooterButtonsContainer,
@@ -56,10 +57,13 @@ import {
   LayoutWindow,
   SpacingSize
 } from '@libs/layout';
+import { useFetchAccountsInfo } from '@libs/services/account-info';
+import { useFetchAccountsBalances } from '@libs/services/balance-service';
 import { LedgerEventStatus, ledger } from '@libs/services/ledger';
 import { useFetchDataForSignatureRequest } from '@libs/services/signature-request-service';
 import { HardwareWalletType } from '@libs/types/account';
 import {
+  ApproveConnectionContent,
   Button,
   Checkbox,
   LedgerEventView,
@@ -145,19 +149,28 @@ export function SignTransactionPage() {
     throw error;
   }
 
-  // signing account should be connected to site
-  if (
-    !originRef.current[requestId].connectedAccountNames?.includes(
-      signingAccount.name
-    ) &&
-    !isLedgerNewWindow
-  ) {
-    const error = Error(
-      ErrorMessages.signTransaction.ACCOUNT_NOT_CONNECTED.description
-    );
-    sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
-    throw error;
-  }
+  const shouldTryToConnectAccount =
+    connectedAccountNames &&
+    !connectedAccountNames.includes(signingAccount.name) &&
+    !isLedgerNewWindow;
+
+  const signingAccountHash = getAccountHashFromPublicKey(
+    signingAccount.publicKey
+  );
+
+  const { accountsBalances, isLoadingBalances } = useFetchAccountsBalances(
+    [signingAccountHash],
+    transaction?.chainName
+  );
+
+  const accountsInfo = useFetchAccountsInfo([signingAccount.publicKey]);
+
+  const { connectAnotherAccountWithEvent: connectAnotherAccount } =
+    useAccountManager();
+
+  const handleConnect = useCallback(async () => {
+    await connectAnotherAccount(signingAccount.name, activeOrigin);
+  }, [activeOrigin, connectAnotherAccount, signingAccount.name]);
 
   const handlePressShowRawJson = useCallback(() => {
     setSigningPageState(SigningPageState.RowDataContent);
@@ -331,6 +344,22 @@ export function SignTransactionPage() {
   }, [requestId, signatureRequest, wasmApproved]);
 
   const renderFooter = () => {
+    if (shouldTryToConnectAccount) {
+      return () => (
+        <FooterButtonsContainer>
+          <Typography type="captionRegular" textAlign={'center'}>
+            <Trans t={t}>Only connect with sites you trust</Trans>
+          </Typography>
+          <Button color="primaryRed" onClick={handleConnect}>
+            <Trans t={t}>Connect</Trans>
+          </Button>
+          <Button color="secondaryBlue" onClick={handleCancel}>
+            <Trans t={t}>Cancel</Trans>
+          </Button>
+        </FooterButtonsContainer>
+      );
+    }
+
     if (signingPageState === SigningPageState.LedgerConfirmation) {
       return renderLedgerFooter({
         onConnect: makeSubmitLedgerAction,
@@ -406,8 +435,25 @@ export function SignTransactionPage() {
           }
         />
       )}
-      renderContent={() =>
-        isLoadingSignatureRequest ? (
+      renderContent={() => {
+        if (shouldTryToConnectAccount) {
+          return (
+            <ApproveConnectionContent
+              account={signingAccount}
+              accountLiquidBalance={
+                accountsBalances?.[signingAccountHash].liquidBalance ?? '0'
+              }
+              accountsInfo={accountsInfo}
+              isLoadingBalance={isLoadingBalances}
+              origin={originRef.current[requestId].activeOrigin ?? null}
+              activeOriginFavicon={
+                originRef.current[requestId].activeOriginFavicon ?? null
+              }
+            />
+          );
+        }
+
+        return isLoadingSignatureRequest ? (
           <SignatureRequestLoading />
         ) : (
           <>
@@ -435,8 +481,8 @@ export function SignTransactionPage() {
                 <SignatureRequestRawJson json={signatureRequest.rawJson} />
               )}
           </>
-        )
-      }
+        );
+      }}
       renderFooter={renderFooter()}
     />
   );

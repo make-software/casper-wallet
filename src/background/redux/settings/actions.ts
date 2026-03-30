@@ -23,3 +23,7 @@ export const vaultSettingsReseted = createAction('VAULT_SETTINGS_RESETED')();
 export const casperNetworkApiVersionChanged = createAction(
   'CASPER2_NETWORK_CHANGED'
 )<string>();
+
+export const systemColorSchemeChanged = createAction(
+  'SYSTEM_COLOR_SCHEME_CHANGED'
+)<'dark' | 'light'>();

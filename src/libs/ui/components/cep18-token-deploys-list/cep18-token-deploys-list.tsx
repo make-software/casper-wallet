@@ -1,13 +1,15 @@
 import React, { useEffect } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { useParams } from 'react-router-dom';
+import { useTheme } from 'styled-components';
 
-import { SpacingSize } from '@libs/layout';
+import { SpacingSize, activityBottomPseudoElementRules } from '@libs/layout';
 import { useFetchCep18TransferDeploys } from '@libs/services/deploys';
 import { List, LoadingActivityView, NoActivityView } from '@libs/ui/components';
 import { DeployPlate } from '@libs/ui/components/deploy-plate/deploy-plate';
 
 export const Cep18TokenDeploysList = () => {
+  const theme = useTheme();
   const { tokenName } = useParams();
 
   const {
@@ -56,7 +58,9 @@ export const Cep18TokenDeploysList = () => {
           renderRow={deploy => (
             <DeployPlate deploy={deploy} onClick={setCep18TokenYPosition} />
           )}
-          marginLeftForItemSeparatorLine={54}
+          marginLeftForItemSeparatorLine={0}
+          borderBottomPseudoElementRules={activityBottomPseudoElementRules}
+          rowContainerColor={theme.color.backgroundSecondary}
         />
       )}
 

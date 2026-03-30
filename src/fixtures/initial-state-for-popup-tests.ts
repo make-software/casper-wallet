@@ -91,7 +91,8 @@ export const initialStateForPopupTests: RootState = {
     casperNetworkApiVersion: '1.5.8',
     activeTimeoutDuration: TimeoutDurationSetting['5 min'],
     isDarkMode: false,
-    themeMode: ThemeMode.SYSTEM
+    themeMode: ThemeMode.SYSTEM,
+    systemColorScheme: null
   },
   recentRecipientPublicKeys: [],
   accountInfo: {

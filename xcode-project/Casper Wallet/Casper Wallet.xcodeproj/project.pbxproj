@@ -54,7 +54,6 @@
 		B39B90572D3EFCE1007C438D /* reactPlayerVimeo.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39B90472D3EFCE1007C438D /* reactPlayerVimeo.bundle.js */; };
 		B39F2C712C885940002CF2B9 /* 646.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39F2C6A2C885940002CF2B9 /* 646.bundle.js */; };
 		B39F2C722C885940002CF2B9 /* 652.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39F2C6B2C885940002CF2B9 /* 652.bundle.js */; };
-		B39F2C732C885940002CF2B9 /* 271.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39F2C6C2C885940002CF2B9 /* 271.bundle.js */; };
 		B39F2C742C885940002CF2B9 /* 812.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39F2C6D2C885940002CF2B9 /* 812.bundle.js */; };
 		B39F2C752C885940002CF2B9 /* 209.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39F2C6E2C885940002CF2B9 /* 209.bundle.js */; };
 		B39F2C772C885940002CF2B9 /* 36.bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = B39F2C702C885940002CF2B9 /* 36.bundle.js */; };
@@ -139,7 +138,6 @@
 		B39B90492D3EFCE1007C438D /* reactPlayerYouTube.bundle.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = reactPlayerYouTube.bundle.js; path = "/Users/compote/Projects/casper-wallet/build/firefox/reactPlayerYouTube.bundle.js"; sourceTree = "<absolute>"; };
 		B39F2C6A2C885940002CF2B9 /* 646.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 646.bundle.js; path = ../../../build/firefox/646.bundle.js; sourceTree = "<group>"; };
 		B39F2C6B2C885940002CF2B9 /* 652.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 652.bundle.js; path = ../../../build/firefox/652.bundle.js; sourceTree = "<group>"; };
-		B39F2C6C2C885940002CF2B9 /* 271.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 271.bundle.js; path = ../../../build/firefox/271.bundle.js; sourceTree = "<group>"; };
 		B39F2C6D2C885940002CF2B9 /* 812.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 812.bundle.js; path = ../../../build/firefox/812.bundle.js; sourceTree = "<group>"; };
 		B39F2C6E2C885940002CF2B9 /* 209.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 209.bundle.js; path = ../../../build/firefox/209.bundle.js; sourceTree = "<group>"; };
 		B39F2C702C885940002CF2B9 /* 36.bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = 36.bundle.js; path = ../../../build/firefox/36.bundle.js; sourceTree = "<group>"; };
@@ -225,7 +223,6 @@
 				B3E7FBDB2E4526E800B1579C /* 476.bundle.js */,
 				B39F2C702C885940002CF2B9 /* 36.bundle.js */,
 				B39F2C6E2C885940002CF2B9 /* 209.bundle.js */,
-				B39F2C6C2C885940002CF2B9 /* 271.bundle.js */,
 				B39F2C6A2C885940002CF2B9 /* 646.bundle.js */,
 				B39F2C6B2C885940002CF2B9 /* 652.bundle.js */,
 				B39F2C6D2C885940002CF2B9 /* 812.bundle.js */,
@@ -367,7 +364,6 @@
 				2439D7D429F0757C00F07C90 /* onboarding.html in Resources */,
 				B39F2C752C885940002CF2B9 /* 209.bundle.js in Resources */,
 				2439D7CB29F0757C00F07C90 /* logo64.png in Resources */,
-				B39F2C732C885940002CF2B9 /* 271.bundle.js in Resources */,
 				2439D7D229F0757C00F07C90 /* popup.bundle.js in Resources */,
 				B39F2C742C885940002CF2B9 /* 812.bundle.js in Resources */,
 				2439D7C029F0757C00F07C90 /* connectToApp.bundle.js in Resources */,
@@ -640,7 +636,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Casper Wallet/Casper Wallet.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 144;
+				CURRENT_PROJECT_VERSION = 150;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Casper Wallet/Info.plist";
@@ -654,7 +650,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 2.3.1;
+				MARKETING_VERSION = 2.4.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -677,7 +673,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Casper Wallet/Casper Wallet.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 144;
+				CURRENT_PROJECT_VERSION = 150;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Casper Wallet/Info.plist";
@@ -691,7 +687,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 2.3.1;
+				MARKETING_VERSION = 2.4.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,

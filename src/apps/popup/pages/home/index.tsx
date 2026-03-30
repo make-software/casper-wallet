@@ -11,7 +11,6 @@ import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 import {
   selectActiveNetworkSetting,
   selectDismissedAppEvents,
-  selectIsCasper2Network,
   selectVaultActiveAccount
 } from '@background/redux/root-selector';
 
@@ -58,7 +57,6 @@ export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
   const location = useTypedLocation();
-  const isCasper2Network = useSelector(selectIsCasper2Network);
   const dismissedAppEventIds = useSelector(
     selectDismissedAppEvents,
     shallowEqual
@@ -132,13 +130,7 @@ export function HomePageContent() {
           <Tab tabName={HomePageTabName.NFTs}>
             <NftList />
           </Tab>
-          <Tab
-            tabName={
-              isCasper2Network
-                ? HomePageTabName.Transactions
-                : HomePageTabName.Deploys
-            }
-          >
+          <Tab tabName={HomePageTabName.Activity}>
             <DeploysList />
           </Tab>
         </Tabs>

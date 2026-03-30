@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
+import { useTheme } from 'styled-components';
 
-import { SpacingSize } from '@libs/layout';
+import { SpacingSize, activityBottomPseudoElementRules } from '@libs/layout';
 import { useFetchDeploys } from '@libs/services/deploys';
 import { List, LoadingActivityView, NoActivityView } from '@libs/ui/components';
 import { DeployPlate } from '@libs/ui/components/deploy-plate/deploy-plate';
 
 export const DeploysList = () => {
+  const theme = useTheme();
   const {
     deploys,
     isDeploysLoading,
@@ -55,7 +57,9 @@ export const DeploysList = () => {
               onClick={setActivityPlateYPosition}
             />
           )}
-          marginLeftForItemSeparatorLine={54}
+          marginLeftForItemSeparatorLine={0}
+          borderBottomPseudoElementRules={activityBottomPseudoElementRules}
+          rowContainerColor={theme.color.backgroundSecondary}
         />
       )}
 

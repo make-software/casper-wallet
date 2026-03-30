@@ -116,7 +116,7 @@ popup.describe('Popup UI: contacts', () => {
 
       await popupExpect(
         popupPage.getByText(
-          'You’ve already got a contact with this name. Please find a new name for this one'
+          'You’ve already got an account / contact with this name. Please find a new name for this one'
         )
       ).toBeVisible();
       await popupExpect(

@@ -17,7 +17,10 @@ popup.describe('Popup UI: NFT Transfer', () => {
 
       await new Promise(r => setTimeout(r, 2000));
 
-      await popupPage.getByTestId('nft-token-card').click();
+      await popupPage
+        .getByTestId('nft-token-card')
+        .filter({ hasText: 'west' })
+        .click();
 
       await popupExpect(
         popupPage.getByRole('heading', { name: 'west' })

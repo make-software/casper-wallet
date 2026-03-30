@@ -22,6 +22,8 @@ import {
 import { useFetchContractPackage } from '@libs/services/contract-package';
 import { Link, SvgIcon, Typography } from '@libs/ui/components';
 import { AccountInfoIcon } from '@libs/ui/components/account-info-icon/account-info-icon';
+import { HashTooltip } from '@libs/ui/components/hash/hash-tooltip';
+import { PortalTooltip } from '@libs/ui/components/portal-tooltip/portal-tooltip';
 
 const AlignedFlexRowContainer = styled(AlignedFlexRow)`
   column-gap: 8px;
@@ -60,8 +62,8 @@ export const ContainerWithAmount = ({
   fiatAmount
 }: ActionContainerWithAmountProps) => (
   <LeftAlignedFlexColumn gap={SpacingSize.Tiny}>
+    <Typography type="bodySemiBold">{title}</Typography>
     <AlignedFlexRow gap={SpacingSize.Small} style={{ maxWidth: '296px' }}>
-      <Typography type="bodySemiBold">{title}</Typography>
       <Typography type="bodyHash" ellipsis>
         {amount}
       </Typography>
@@ -213,7 +215,12 @@ export const NftInfoRow = ({
               getContractNftUrl(casperLiveUrl, hash || '', id)
             }
           >
-            <Typography type="captionRegular" color="contentAction" ellipsis>
+            <Typography
+              type="captionRegular"
+              color="contentAction"
+              ellipsis
+              style={{ maxWidth: 264 }}
+            >
               {id}
             </Typography>
           </Link>
@@ -292,29 +299,62 @@ export const ContractInfoRow = ({
   );
 
   return (
-    <AlignedFlexRowContainer gap={SpacingSize.Small}>
+    <AlignedFlexRow
+      gap={SpacingSize.Small}
+      style={{ flexWrap: 'nowrap', overflow: 'hidden', maxWidth: '100%' }}
+    >
       {label && (
-        <Typography type="captionRegular" color="contentSecondary">
+        <Typography
+          type="captionRegular"
+          color="contentSecondary"
+          style={{ flexShrink: 0 }}
+        >
           <Trans t={t}>{label}</Trans>
         </Typography>
       )}
-      <AccountInfoIcon
-        publicKey={contractPackageHash}
-        size={20}
-        accountName={contractName}
-        iconUrl={iconUrl}
-        defaultSvg={defaultSvg}
-      />
-      <Link color="contentAction" href={contractLink ?? link} target="_blank">
-        <Typography type="captionRegular" ellipsis style={{ maxWidth: 220 }}>
-          {contractName}
-        </Typography>
-      </Link>
+      <div style={{ overflow: 'hidden', minWidth: 0 }}>
+        <PortalTooltip
+          title={
+            <HashTooltip
+              hash={contractPackageHash}
+              hashLabel={t('Contract package hash')}
+              contractName={contractName}
+            />
+          }
+        >
+          <AlignedFlexRow
+            gap={SpacingSize.Small}
+            style={{ flexWrap: 'nowrap' }}
+          >
+            <AccountInfoIcon
+              publicKey={contractPackageHash}
+              size={20}
+              accountName={contractName}
+              iconUrl={iconUrl}
+              defaultSvg={defaultSvg}
+            />
+            <Link
+              color="contentAction"
+              href={contractLink ?? link}
+              target="_blank"
+              style={{ display: 'block', overflow: 'hidden', minWidth: 0 }}
+            >
+              <Typography type="captionRegular" ellipsis>
+                {contractName}
+              </Typography>
+            </Link>
+          </AlignedFlexRow>
+        </PortalTooltip>
+      </div>
       {additionalInfo && (
-        <Typography type="captionRegular" color="contentSecondary">
+        <Typography
+          type="captionRegular"
+          color="contentSecondary"
+          style={{ flexShrink: 0 }}
+        >
           <Trans t={t}>{additionalInfo}</Trans>
         </Typography>
       )}
-    </AlignedFlexRowContainer>
+    </AlignedFlexRow>
   );
 };

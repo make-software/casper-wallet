@@ -44,7 +44,10 @@ export function PopupLayout({
   const asFormProps: any =
     (restProps.variant === 'form' && {
       as: 'form',
-      onSubmit: restProps.onSubmit
+      onSubmit: (e: React.FormEvent) => {
+        e.preventDefault();
+        restProps.onSubmit();
+      }
     }) ||
     undefined;
 

@@ -20,15 +20,7 @@ export const NativeTransferDeployRows = ({
   const title = getEntryPointName(deploy);
 
   return (
-    <DeployContainer
-      timestamp={deploy.timestamp}
-      iconUrl={DeployIcon.NativeTransfer}
-      title={title}
-      deployStatus={{
-        status: deploy.status,
-        errorMessage: deploy.errorMessage
-      }}
-    >
+    <DeployContainer iconUrl={DeployIcon.NativeTransfer} title={title}>
       <AlignedFlexRow gap={SpacingSize.Tiny} style={{ maxWidth: '240px' }}>
         <Typography type="captionHash" ellipsis>
           {deploy.formattedDecimalAmount}

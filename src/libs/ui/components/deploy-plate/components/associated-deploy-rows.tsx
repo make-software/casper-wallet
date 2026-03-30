@@ -16,15 +16,7 @@ export const AssociatedDeployRows = ({ deploy }: AssociatedDeployRowsProps) => {
   const title = getEntryPointName(deploy);
 
   return (
-    <DeployContainer
-      timestamp={deploy.timestamp}
-      iconUrl={DeployIcon.AssociatedKeys}
-      title={title}
-      deployStatus={{
-        status: deploy.status,
-        errorMessage: deploy.errorMessage
-      }}
-    >
+    <DeployContainer iconUrl={DeployIcon.AssociatedKeys} title={title}>
       <ContractRow label="with" contractName={deploy.contractName} />
     </DeployContainer>
   );

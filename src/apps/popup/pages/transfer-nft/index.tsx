@@ -37,6 +37,7 @@ import {
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
   selectIsActiveAccountFromLedger,
+  selectVaultAccountsPublicKeys,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
 
@@ -101,6 +102,7 @@ export const TransferNftPage = () => {
     selectApiConfigBasedOnActiveNetwork
   );
   const contactPublicKeys = useSelector(selectAllContactsPublicKeys);
+  const walletPublicKeys = useSelector(selectVaultAccountsPublicKeys);
   const ratedInStore = useSelector(selectRatedInStore);
   const askForReviewAfter = useSelector(selectAskForReviewAfter);
 
@@ -158,9 +160,11 @@ export const TransferNftPage = () => {
   });
 
   const { recipientPublicKey } = recipientForm.getValues();
-  const isRecipientPublicKeyInContact = useMemo(
-    () => contactPublicKeys.includes(recipientPublicKey),
-    [contactPublicKeys, recipientPublicKey]
+  const shouldSuggestAddContact = useMemo(
+    () =>
+      !contactPublicKeys.includes(recipientPublicKey?.toLowerCase()) &&
+      !walletPublicKeys.includes(recipientPublicKey?.toLowerCase()),
+    [contactPublicKeys, recipientPublicKey, walletPublicKeys]
   );
 
   const submitTransfer = async () => {
@@ -436,7 +440,7 @@ export const TransferNftPage = () => {
           <Trans t={t}>Done</Trans>
         </Button>
 
-        {!isRecipientPublicKeyInContact && (
+        {shouldSuggestAddContact && (
           <Button
             color="secondaryBlue"
             onClick={() => {

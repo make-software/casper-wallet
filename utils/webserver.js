@@ -59,7 +59,8 @@ const publicPath = `http://localhost:${env.PORT}/`;
 
 const server = new WebpackDevServer(
   {
-    hot: true,
+    hot: false, // Probably can be improved. Was added to prevent infinite reloading after changes
+    liveReload: false, // Probably can be improved. Was added to prevent infinite reloading after changes
     client: {
       overlay: false
     },

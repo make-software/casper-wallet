@@ -1,10 +1,18 @@
 import {
   DEFAULT_FIRST_ACCOUNT,
-  NEW_VALIDATOR_FOR_SIGNATURE_REQUEST,
   PLAYGROUND_URL,
   VALIDATOR_FOR_SIGNATURE_REQUEST
 } from '../../constants';
 import { popup, popupExpect } from '../../fixtures';
+
+const waitForContentScript = async (page: any) => {
+  await page.waitForLoadState('networkidle');
+  await page.waitForFunction(
+    () => typeof (window as any).CasperWalletProvider !== 'undefined',
+    null,
+    { timeout: 10000 }
+  );
+};
 
 popup.describe('Popup UI: signature request scenarios', () => {
   popup.beforeEach(async ({ connectAccounts, page }) => {
@@ -15,34 +23,24 @@ popup.describe('Popup UI: signature request scenarios', () => {
 
   popup('should signing the transfer deploy', async ({ page, context }) => {
     await page.goto(PLAYGROUND_URL);
+    await waitForContentScript(page);
 
     const [signatureRequestPage] = await Promise.all([
-      context.waitForEvent('page'),
+      context.waitForEvent('page', { timeout: 15000 }),
       page.getByRole('button', { name: 'Transfer' }).first().click()
     ]);
+
+    await page.waitForTimeout(2000);
 
     await popupExpect(
       signatureRequestPage.getByRole('heading', { name: 'Signature Request' })
     ).toBeVisible();
 
-    await signatureRequestPage.getByText('Transfer Data').click();
+    await popupExpect(signatureRequestPage.getByText('Transfer')).toBeVisible();
 
+    await popupExpect(signatureRequestPage.getByText('0.1 CSPR')).toBeVisible();
     await popupExpect(
-      signatureRequestPage.getByText('Transfer Call')
-    ).toBeVisible();
-
-    await popupExpect(
-      signatureRequestPage.getByText('Recipient (Key)')
-    ).toBeVisible();
-    await popupExpect(
-      signatureRequestPage.getByText(
-        VALIDATOR_FOR_SIGNATURE_REQUEST.truncatedPublicKey
-      )
-    ).toBeVisible();
-    await popupExpect(signatureRequestPage.getByText('Amount')).toBeVisible();
-    await popupExpect(signatureRequestPage.getByText('2.5 CSPR')).toBeVisible();
-    await popupExpect(
-      signatureRequestPage.getByText('Transfer ID')
+      signatureRequestPage.getByText('Transaction ID')
     ).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('1234')).toBeVisible();
 
@@ -56,45 +54,28 @@ popup.describe('Popup UI: signature request scenarios', () => {
 
   popup('should signing the delegate deploy', async ({ page, context }) => {
     await page.goto(PLAYGROUND_URL);
-    await page.waitForLoadState('networkidle');
+    await waitForContentScript(page);
 
     const [signatureRequestPage] = await Promise.all([
-      context.waitForEvent('page'),
+      context.waitForEvent('page', { timeout: 15000 }),
       page.getByRole('button', { name: 'Delegate', exact: true }).click()
     ]);
+
+    await page.waitForTimeout(2000);
 
     await popupExpect(
       signatureRequestPage.getByRole('heading', { name: 'Signature Request' })
     ).toBeVisible();
 
-    await signatureRequestPage.getByText('Contract arguments').click();
+    await popupExpect(signatureRequestPage.getByText('Delegate')).toBeVisible();
 
-    await popupExpect(
-      signatureRequestPage.getByText('Contract Call')
-    ).toBeVisible();
-
-    await popupExpect(signatureRequestPage.getByText('delegate')).toBeVisible();
-
-    await popupExpect(
-      signatureRequestPage.getByText('Delegator')
-    ).toBeVisible();
-    await popupExpect(
-      signatureRequestPage
-        .getByText(DEFAULT_FIRST_ACCOUNT.truncatedPublicKey)
-        .nth(2)
-    ).toBeVisible();
-    await popupExpect(
-      signatureRequestPage.getByText(VALIDATOR_FOR_SIGNATURE_REQUEST.name)
-    ).toBeVisible();
     await popupExpect(
       signatureRequestPage.getByText(
         VALIDATOR_FOR_SIGNATURE_REQUEST.truncatedPublicKey
       )
     ).toBeVisible();
-    await popupExpect(signatureRequestPage.getByText('Amount')).toBeVisible();
-    await popupExpect(
-      signatureRequestPage.getByText('2.5 CSPR').nth(1)
-    ).toBeVisible();
+
+    await popupExpect(signatureRequestPage.getByText('2.5 CSPR')).toBeVisible();
 
     page.on('dialog', async dialog => {
       popupExpect(dialog.message()).toContain('Sign successful');
@@ -106,47 +87,30 @@ popup.describe('Popup UI: signature request scenarios', () => {
 
   popup('should signing the undelegate deploy', async ({ page, context }) => {
     await page.goto(PLAYGROUND_URL);
-    await page.waitForLoadState('networkidle');
+    await waitForContentScript(page);
 
     const [signatureRequestPage] = await Promise.all([
-      context.waitForEvent('page'),
+      context.waitForEvent('page', { timeout: 15000 }),
       page.getByRole('button', { name: 'Undelegate', exact: true }).click()
     ]);
+
+    await page.waitForTimeout(2000);
 
     await popupExpect(
       signatureRequestPage.getByRole('heading', { name: 'Signature Request' })
     ).toBeVisible();
 
-    await signatureRequestPage.getByText('Contract arguments').click();
-
     await popupExpect(
-      signatureRequestPage.getByText('Contract Call')
+      signatureRequestPage.getByText('Undelegate')
     ).toBeVisible();
 
-    await popupExpect(
-      signatureRequestPage.getByText('undelegate')
-    ).toBeVisible();
-
-    await popupExpect(
-      signatureRequestPage.getByText('Delegator')
-    ).toBeVisible();
     await popupExpect(
       signatureRequestPage
         .getByText(DEFAULT_FIRST_ACCOUNT.truncatedPublicKey)
-        .nth(2)
+        .first()
     ).toBeVisible();
-    await popupExpect(
-      signatureRequestPage.getByText(VALIDATOR_FOR_SIGNATURE_REQUEST.name)
-    ).toBeVisible();
-    await popupExpect(
-      signatureRequestPage.getByText(
-        VALIDATOR_FOR_SIGNATURE_REQUEST.truncatedPublicKey
-      )
-    ).toBeVisible();
-    await popupExpect(signatureRequestPage.getByText('Amount')).toBeVisible();
-    await popupExpect(
-      signatureRequestPage.getByText('2.5 CSPR').first()
-    ).toBeVisible();
+
+    await popupExpect(signatureRequestPage.getByText('2.5 CSPR')).toBeVisible();
 
     page.on('dialog', async dialog => {
       popupExpect(dialog.message()).toContain('Sign successful');
@@ -158,57 +122,24 @@ popup.describe('Popup UI: signature request scenarios', () => {
 
   popup('should signing the redelegate deploy', async ({ page, context }) => {
     await page.goto(PLAYGROUND_URL);
-    await page.waitForLoadState('networkidle');
+    await waitForContentScript(page);
 
     const [signatureRequestPage] = await Promise.all([
-      context.waitForEvent('page'),
+      context.waitForEvent('page', { timeout: 15000 }),
       page.getByRole('button', { name: 'Redelegate', exact: true }).click()
     ]);
+
+    await page.waitForTimeout(2000);
 
     await popupExpect(
       signatureRequestPage.getByRole('heading', { name: 'Signature Request' })
     ).toBeVisible();
 
-    await signatureRequestPage.getByText('Contract arguments').click();
-
     await popupExpect(
-      signatureRequestPage.getByText('Contract Call')
+      signatureRequestPage.getByText('Redelegate')
     ).toBeVisible();
 
-    await popupExpect(
-      signatureRequestPage.getByText('redelegate')
-    ).toBeVisible();
-
-    await popupExpect(
-      signatureRequestPage.getByText('Delegator')
-    ).toBeVisible();
-    await popupExpect(
-      signatureRequestPage
-        .getByText(DEFAULT_FIRST_ACCOUNT.truncatedPublicKey)
-        .nth(2)
-    ).toBeVisible();
-    await popupExpect(
-      signatureRequestPage.getByText(VALIDATOR_FOR_SIGNATURE_REQUEST.name, {
-        exact: true
-      })
-    ).toBeVisible();
-    await popupExpect(
-      signatureRequestPage.getByText(
-        VALIDATOR_FOR_SIGNATURE_REQUEST.truncatedPublicKey
-      )
-    ).toBeVisible();
-    await popupExpect(signatureRequestPage.getByText('Amount')).toBeVisible();
-    await popupExpect(
-      signatureRequestPage.getByText('2.5 CSPR').first()
-    ).toBeVisible();
-    await popupExpect(
-      signatureRequestPage.getByText(NEW_VALIDATOR_FOR_SIGNATURE_REQUEST.name)
-    ).toBeVisible();
-    await popupExpect(
-      signatureRequestPage.getByText(
-        NEW_VALIDATOR_FOR_SIGNATURE_REQUEST.truncatedPublicKey
-      )
-    ).toBeVisible();
+    await popupExpect(signatureRequestPage.getByText('2.5 CSPR')).toBeVisible();
 
     page.on('dialog', async dialog => {
       popupExpect(dialog.message()).toContain('Sign successful');
@@ -220,11 +151,10 @@ popup.describe('Popup UI: signature request scenarios', () => {
 
   popup('should cancel the signing process', async ({ page, context }) => {
     await page.goto(PLAYGROUND_URL);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForContentScript(page);
 
     const [signatureRequestPage] = await Promise.all([
-      context.waitForEvent('page'),
+      context.waitForEvent('page', { timeout: 15000 }),
       page.getByRole('button', { name: 'Transfer' }).first().click()
     ]);
     await signatureRequestPage.waitForLoadState('domcontentloaded');

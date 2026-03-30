@@ -1,4 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { SystemMintContractInfo } from 'casper-wallet-core';
 import { CasperNetwork } from 'casper-wallet-core/src/domain/common/common';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -21,11 +22,14 @@ export const useFetchCsprTransferDeploys = () => {
     enabled: Boolean(activeAccount?.publicKey),
     queryKey: ['CSPR_TRANSFER_DEPLOYS', network, activeAccount?.publicKey],
     queryFn: ({ pageParam }) =>
-      deploysRepository.getCsprTransferDeploys({
+      deploysRepository.getTransactionsFeed({
         page: pageParam,
         activePublicKey: activeAccount?.publicKey ?? '',
         network: network.toLowerCase() as CasperNetwork,
-        withProxyHeader: false
+        withProxyHeader: false,
+        contractPackageHash:
+          SystemMintContractInfo[network.toLowerCase() as CasperNetwork]
+            ?.contractPackageHash
       }),
     getNextPageParam: (lastPage, pages) => {
       const nextPage = pages.length + 1;

@@ -6,7 +6,10 @@ import styled from 'styled-components';
 import { ErrorMessages } from '@src/constants';
 
 import { closeCurrentWindow } from '@background/close-current-window';
-import { selectIsActiveAccountConnectedWithActiveOrigin } from '@background/redux/vault/selectors';
+import {
+  selectConnectedAccountNamesWithActiveOrigin,
+  selectIsActiveAccountConnectedWithActiveOrigin
+} from '@background/redux/vault/selectors';
 import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
 
 import { sdkMethod } from '@content/sdk-method';
@@ -41,6 +44,9 @@ export function SelectAccountPage({
 }: SelectAccountPageProps) {
   const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
+
+  const connectedAccountNames =
+    useSelector(selectConnectedAccountNamesWithActiveOrigin) ?? [];
 
   if (!requestId) {
     throw Error(
@@ -99,7 +105,10 @@ export function SelectAccountPage({
             </Typography>
           </TextCentredContainer>
           <Button
-            disabled={selectedAccountNames.length === 0}
+            disabled={
+              selectedAccountNames.length === 0 &&
+              connectedAccountNames.length === 0
+            }
             onClick={handleAccountSelection}
           >
             <Trans t={t}>Next</Trans>

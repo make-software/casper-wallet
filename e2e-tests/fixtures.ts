@@ -277,9 +277,16 @@ export const popup = test.extend<{
   connectAccounts: async ({ page, unlockVault, context }, use) => {
     const connectAccounts = async () => {
       await page.goto(PLAYGROUND_URL);
+      await page.waitForLoadState('networkidle');
+      // Wait for the extension content script to inject
+      await page.waitForFunction(
+        () => typeof (window as any).CasperWalletProvider !== 'undefined',
+        null,
+        { timeout: 10000 }
+      );
 
       const [connectAccountPage] = await Promise.all([
-        context.waitForEvent('page'),
+        context.waitForEvent('page', { timeout: 15000 }),
         page.getByRole('button', { name: 'Connect', exact: true }).click()
       ]);
 

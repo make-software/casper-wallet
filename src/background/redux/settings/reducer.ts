@@ -9,6 +9,7 @@ import {
   activeNetworkSettingChanged,
   activeTimeoutDurationSettingChanged,
   casperNetworkApiVersionChanged,
+  systemColorSchemeChanged,
   themeModeSettingChanged,
   vaultSettingsReseted
 } from './actions';
@@ -19,7 +20,8 @@ const initialState: SettingsState = {
   casperNetworkApiVersion: '1.5.8',
   activeTimeoutDuration: TimeoutDurationSetting['5 min'],
   isDarkMode: false, // Deprecated
-  themeMode: isSafariBuild ? ThemeMode.LIGHT : ThemeMode.SYSTEM
+  themeMode: isSafariBuild ? ThemeMode.LIGHT : ThemeMode.SYSTEM,
+  systemColorScheme: null
 };
 
 export const reducer = createReducer(initialState)
@@ -50,5 +52,12 @@ export const reducer = createReducer(initialState)
     (state, action): SettingsState => ({
       ...state,
       casperNetworkApiVersion: action.payload
+    })
+  )
+  .handleAction(
+    systemColorSchemeChanged,
+    (state, { payload }): SettingsState => ({
+      ...state,
+      systemColorScheme: payload
     })
   );

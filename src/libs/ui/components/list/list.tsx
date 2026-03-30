@@ -1,20 +1,30 @@
 import { MacScrollbar } from 'mac-scrollbar';
 import React from 'react';
-import styled from 'styled-components';
+import styled, {
+  DefaultTheme,
+  FlattenInterpolation,
+  ThemeProps
+} from 'styled-components';
 
 import {
   BorderBottomPseudoElementProps,
   SpacingSize,
   VerticalSpaceContainer,
-  borderBottomPseudoElementRules
+  borderBottomPseudoElementRules as defaultBorderBottomPseudoElementRules
 } from '@libs/layout';
 import { Tile, Typography } from '@libs/ui/components';
 
+type BorderBottomPseudoElementRulesType = FlattenInterpolation<
+  ThemeProps<DefaultTheme> & BorderBottomPseudoElementProps
+>;
+
 interface ListHeaderContainerProps extends BorderBottomPseudoElementProps {
+  borderBottomPseudoElementRules: BorderBottomPseudoElementRulesType;
   stickyHeader?: boolean;
 }
 
 interface RowsContainerProps extends BorderBottomPseudoElementProps {
+  borderBottomPseudoElementRules: BorderBottomPseudoElementRulesType;
   maxHeight?: number;
 }
 
@@ -36,11 +46,14 @@ const FlexColumn = styled.div`
 
 const RowsContainer = styled.div<RowsContainerProps>`
   & > * + *:before {
-    ${borderBottomPseudoElementRules};
+    ${({ borderBottomPseudoElementRules }) => borderBottomPseudoElementRules};
   }
 `;
 
-const RowContainer = styled(FlexColumn)``;
+const RowContainer = styled(FlexColumn)<{ rowContainerColor?: string }>`
+  background: ${({ rowContainerColor }) =>
+    rowContainerColor ? rowContainerColor : 'unset'};
+`;
 const ListHeaderContainer = styled(FlexColumn)<ListHeaderContainerProps>`
   ${({ stickyHeader, theme }) =>
     stickyHeader
@@ -48,12 +61,12 @@ const ListHeaderContainer = styled(FlexColumn)<ListHeaderContainerProps>`
       : ''};
 
   &::after {
-    ${borderBottomPseudoElementRules};
+    ${({ borderBottomPseudoElementRules }) => borderBottomPseudoElementRules};
   }
 `;
-const ListFooterContainer = styled(FlexColumn)`
+const ListFooterContainer = styled(FlexColumn)<ListHeaderContainerProps>`
   &::before {
-    ${borderBottomPseudoElementRules};
+    ${({ borderBottomPseudoElementRules }) => borderBottomPseudoElementRules};
   }
 `;
 
@@ -82,6 +95,8 @@ interface ListProps<ListRow extends ListRowBase> {
   borderRadius?: 'base';
   height?: number;
   maxItemsToRender?: number;
+  borderBottomPseudoElementRules?: BorderBottomPseudoElementRulesType;
+  rowContainerColor?: string;
 }
 
 export function List<ListRow extends ListRowBase>({
@@ -99,7 +114,9 @@ export function List<ListRow extends ListRowBase>({
   maxHeight,
   borderRadius,
   height,
-  maxItemsToRender
+  maxItemsToRender,
+  borderBottomPseudoElementRules = defaultBorderBottomPseudoElementRules,
+  rowContainerColor
 }: ListProps<ListRow>) {
   const separatorLine =
     marginLeftForHeaderSeparatorLine || marginLeftForHeaderSeparatorLine === 0
@@ -133,6 +150,7 @@ export function List<ListRow extends ListRowBase>({
         <Tile borderRadius={borderRadius}>
           {renderHeader && (
             <ListHeaderContainer
+              borderBottomPseudoElementRules={borderBottomPseudoElementRules}
               marginLeftForSeparatorLine={separatorLine}
               stickyHeader={stickyHeader}
             >
@@ -142,10 +160,14 @@ export function List<ListRow extends ListRowBase>({
           {maxHeight || height ? (
             <MacScrollbar style={{ maxHeight, height }}>
               <RowsContainer
+                borderBottomPseudoElementRules={borderBottomPseudoElementRules}
                 marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
               >
                 {rows.map((row, index, array) => (
-                  <RowContainer key={row.id}>
+                  <RowContainer
+                    key={row.id}
+                    rowContainerColor={rowContainerColor}
+                  >
                     {renderRow(row, index, array)}
                   </RowContainer>
                 ))}
@@ -153,18 +175,23 @@ export function List<ListRow extends ListRowBase>({
             </MacScrollbar>
           ) : (
             <RowsContainer
+              borderBottomPseudoElementRules={borderBottomPseudoElementRules}
               marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
             >
               {maxItemsToRender
-                ? rows
-                    .slice(0, maxItemsToRender)
-                    .map((row, index, array) => (
-                      <RowContainer key={row.id}>
-                        {renderRow(row, index, array)}
-                      </RowContainer>
-                    ))
+                ? rows.slice(0, maxItemsToRender).map((row, index, array) => (
+                    <RowContainer
+                      key={row.id}
+                      rowContainerColor={rowContainerColor}
+                    >
+                      {renderRow(row, index, array)}
+                    </RowContainer>
+                  ))
                 : rows.map((row, index, array) => (
-                    <RowContainer key={row.id}>
+                    <RowContainer
+                      key={row.id}
+                      rowContainerColor={rowContainerColor}
+                    >
                       {renderRow(row, index, array)}
                     </RowContainer>
                   ))}
@@ -173,6 +200,7 @@ export function List<ListRow extends ListRowBase>({
 
           {renderFooter && (
             <ListFooterContainer
+              borderBottomPseudoElementRules={borderBottomPseudoElementRules}
               marginLeftForSeparatorLine={marginLeftForItemSeparatorLine}
             >
               {renderFooter()}
