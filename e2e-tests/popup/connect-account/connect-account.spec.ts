@@ -8,9 +8,15 @@ popup.describe('Popup UI: connect account', () => {
 
   popup.beforeEach(async ({ page, context, unlockVault }) => {
     await page.goto(PLAYGROUND_URL);
+    await page.waitForLoadState('networkidle');
+    await page.waitForFunction(
+      () => typeof (window as any).CasperWalletProvider !== 'undefined',
+      null,
+      { timeout: 10000 }
+    );
 
     [connectAccountPage] = await Promise.all([
-      context.waitForEvent('page'),
+      context.waitForEvent('page', { timeout: 15000 }),
       page.getByRole('button', { name: 'Connect', exact: true }).click()
     ]);
 

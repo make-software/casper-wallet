@@ -40,7 +40,7 @@ onboarding.describe('Onboarding UI: confirm secret phrase flow', () => {
         await page.getByText('No NFT tokens')
       ).toBeVisible();
 
-      await page.getByText('Deploys').click();
+      await page.getByText('Activity').click();
 
       await onboardingExpect(await page.getByText('No activity')).toBeVisible();
     }

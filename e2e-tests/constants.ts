@@ -1,6 +1,7 @@
 import { Page } from '@playwright/test';
 import path from 'path';
 
+
 export const newPassword = 'this is new password';
 export const vaultPassword = '3hQqzYn4C7Y8rEZTVEZb';
 export const twentyFourWordsSecretPhrase =
@@ -127,8 +128,8 @@ export const VALIDATOR_FOR_UNDELEGATE = {
 
 export const NEW_VALIDATOR_FOR_STAKE = {
   publicKey:
-    '01c8be540a643e6c9df283dd2d2d6be67748f69a3c7bb6cf34471c899b8e858c9a',
-  truncatedPublicKey: '01c8...8c9a'
+    '0106ca7c39cd272dbf21a86eeb3b36b7c26e2e9b94af64292419f7862936bca2ca',
+  truncatedPublicKey: '0106...a2ca'
 };
 
 export const URLS = {

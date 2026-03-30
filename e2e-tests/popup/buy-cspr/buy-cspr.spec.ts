@@ -99,9 +99,9 @@ popup.describe('Popup UI: buy cspr', () => {
 
       await popupPage
         .getByPlaceholder('Search', { exact: true })
-        .fill('Ukraine');
+        .fill('Poland');
 
-      await popupPage.getByText('Ukraine').click();
+      await popupPage.getByText('Poland').click();
 
       // wait until a modal window closed
       await new Promise(r => setTimeout(r, 2000));
