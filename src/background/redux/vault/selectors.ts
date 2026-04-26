@@ -192,6 +192,15 @@ export const selectConnectedAccountNamesWithActiveOrigin = createSelector(
       : []
 );
 
+export const selectConnectedAccountNamesByOrigin =
+  (origin: string | null | undefined) =>
+  (state: RootState): string[] => {
+    const dict = state.vault.accountNamesByOriginDict;
+    return origin != null && (dict[origin] || []).length > 0
+      ? (dict[origin] as string[])
+      : [];
+  };
+
 export const selectConnectedAccountsWithActiveOrigin = createSelector(
   selectActiveOrigin,
   selectVaultAccounts,

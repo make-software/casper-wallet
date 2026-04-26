@@ -31,10 +31,10 @@ import {
   addWasmToTrusted,
   removeWasmFromTrusted
 } from '@background/redux/trusted-wasm/actions';
-import { selectTrustedWasmForActiveOrigin } from '@background/redux/trusted-wasm/selectors';
+import { selectTrustedWasmByOrigin } from '@background/redux/trusted-wasm/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
-  selectConnectedAccountNamesWithActiveOrigin,
+  selectConnectedAccountNamesByOrigin,
   selectDeploysJsonById,
   selectVaultAccounts
 } from '@background/redux/vault/selectors';
@@ -85,14 +85,6 @@ export function SignTransactionPage() {
   const isCasper2Network = useSelector(selectIsCasper2Network);
   const accounts = useSelector(selectVaultAccounts, shallowEqual);
   const deployJsonById = useSelector(selectDeploysJsonById, shallowEqual);
-  const connectedAccountNames = useSelector(
-    selectConnectedAccountNamesWithActiveOrigin,
-    shallowEqual
-  );
-  const activeOriginTrustedWasm = useSelector(
-    selectTrustedWasmForActiveOrigin,
-    shallowEqual
-  );
   const { changeActiveAccountSupportsWithEvent } = useAccountManager();
 
   const searchParams = new URLSearchParams(document.location.search);
@@ -104,6 +96,15 @@ export function SignTransactionPage() {
   const initialEventToRender =
     (searchParams.get('initialEventToRender') as LedgerEventStatus) ??
     LedgerEventStatus.Disconnected;
+
+  const connectedAccountNames = useSelector(
+    selectConnectedAccountNamesByOrigin(requestOrigin),
+    shallowEqual
+  );
+  const requestOriginTrustedWasm = useSelector(
+    selectTrustedWasmByOrigin(requestOrigin),
+    shallowEqual
+  );
 
   const [signingPageState, setSigningPageState] = useState<SigningPageState>(
     isLedgerNewWindow
@@ -131,10 +132,6 @@ export function SignTransactionPage() {
   ) {
     throw Error(ErrorMessages.signTransaction.MISSING_SEARCH_PARAM.description);
   }
-
-  // const originRef = useRef({
-  //   [requestId]: { origin: requestOrigin, connectedAccountNames }
-  // });
 
   const signingAccount = useMemo(
     () => getSigningAccount(accounts, signingPublicKeyHex),
@@ -319,7 +316,7 @@ export function SignTransactionPage() {
     signatureRequest &&
       (isTxSignatureRequestWasmAction(signatureRequest.action) ||
         isTxSignatureRequestWasmProxyAction(signatureRequest.action)) &&
-      !activeOriginTrustedWasm.includes(signatureRequest.action.washHash)
+      !requestOriginTrustedWasm.includes(signatureRequest.action.washHash)
   );
 
   useEffect(() => {

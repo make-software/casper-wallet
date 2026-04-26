@@ -11,7 +11,7 @@ import { RouterPath } from '@signature-request/router';
 
 import { closeCurrentWindow } from '@background/close-current-window';
 import {
-  selectConnectedAccountNamesWithActiveOrigin,
+  selectConnectedAccountNamesByOrigin,
   selectVaultAccounts
 } from '@background/redux/vault/selectors';
 import {
@@ -83,7 +83,7 @@ export function SignMessagePage() {
   const accounts = useSelector(selectVaultAccounts, shallowEqual);
 
   const connectedAccountNames = useSelector(
-    selectConnectedAccountNamesWithActiveOrigin,
+    selectConnectedAccountNamesByOrigin(requestOrigin),
     shallowEqual
   );
 
