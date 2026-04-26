@@ -26,8 +26,6 @@ import { SigningPageState } from '@signature-request/pages/sign-transaction/type
 import { RouterPath } from '@signature-request/router';
 
 import { closeCurrentWindow } from '@background/close-current-window';
-import { selectActiveOriginFavicon } from '@background/redux/active-origin-favicon/selectors';
-import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import { selectIsCasper2Network } from '@background/redux/settings/selectors';
 import {
   addWasmToTrusted,
@@ -71,6 +69,7 @@ import {
   Typography,
   renderLedgerFooter
 } from '@libs/ui/components';
+import { getFaviconUrlFromOrigin } from '@libs/ui/components/site-favicon-badge/site-favicon-badge';
 
 const CancelButtonContainer = styled.div`
   display: flex;
@@ -81,8 +80,6 @@ const CancelButtonContainer = styled.div`
 export function SignTransactionPage() {
   const { t } = useTranslation();
   const isCasper2Network = useSelector(selectIsCasper2Network);
-  const activeOriginFavicon = useSelector(selectActiveOriginFavicon);
-  const activeOrigin = useSelector(selectActiveOrigin);
   const accounts = useSelector(selectVaultAccounts, shallowEqual);
   const deployJsonById = useSelector(selectDeploysJsonById, shallowEqual);
   const connectedAccountNames = useSelector(
@@ -99,6 +96,7 @@ export function SignTransactionPage() {
   const isLedgerNewWindow = Boolean(searchParams.get('initialEventToRender'));
   const requestId = searchParams.get('requestId');
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
+  const requestOrigin = searchParams.get('origin');
   const initialEventToRender =
     (searchParams.get('initialEventToRender') as LedgerEventStatus) ??
     LedgerEventStatus.Disconnected;
@@ -121,14 +119,13 @@ export function SignTransactionPage() {
   const [isSigningAccountFromLedger, setIsSigningAccountFromLedger] =
     useState(false);
 
-  if (!requestId || !signingPublicKeyHex) {
+  if (!requestId || !signingPublicKeyHex || !requestOrigin) {
     throw Error(ErrorMessages.signTransaction.MISSING_SEARCH_PARAM.description);
   }
 
-  // it's required to prevent throwing error when active origin changed because of clicked link (e.g. public key)
-  const originRef = useRef({
-    [requestId]: { activeOrigin, activeOriginFavicon, connectedAccountNames }
-  });
+  // const originRef = useRef({
+  //   [requestId]: { origin: requestOrigin, connectedAccountNames }
+  // });
 
   const signingAccount = useMemo(
     () => getSigningAccount(accounts, signingPublicKeyHex),
@@ -169,8 +166,8 @@ export function SignTransactionPage() {
     useAccountManager();
 
   const handleConnect = useCallback(async () => {
-    await connectAnotherAccount(signingAccount.name, activeOrigin);
-  }, [activeOrigin, connectAnotherAccount, signingAccount.name]);
+    await connectAnotherAccount(signingAccount.name, requestOrigin);
+  }, [requestOrigin, connectAnotherAccount, signingAccount.name]);
 
   const handlePressShowRawJson = useCallback(() => {
     setSigningPageState(SigningPageState.RowDataContent);
@@ -285,7 +282,8 @@ export function SignTransactionPage() {
       domain: 'signature-request.html',
       params: {
         requestId,
-        signingPublicKeyHex
+        signingPublicKeyHex,
+        origin: requestOrigin
       },
       hash: RouterPath.SignDeploy
     }
@@ -311,7 +309,7 @@ export function SignTransactionPage() {
   }, [maybeRequireApproval]);
 
   const toggleWasmApproval = useCallback(() => {
-    const origin = originRef.current[requestId].activeOrigin ?? null;
+    const origin = requestOrigin;
 
     if (
       !(
@@ -341,7 +339,7 @@ export function SignTransactionPage() {
         })
       );
     }
-  }, [requestId, signatureRequest, wasmApproved]);
+  }, [requestOrigin, signatureRequest, wasmApproved]);
 
   const renderFooter = () => {
     if (shouldTryToConnectAccount) {
@@ -445,10 +443,8 @@ export function SignTransactionPage() {
               }
               accountsInfo={accountsInfo}
               isLoadingBalance={isLoadingBalances}
-              origin={originRef.current[requestId].activeOrigin ?? null}
-              activeOriginFavicon={
-                originRef.current[requestId].activeOriginFavicon ?? null
-              }
+              origin={requestOrigin}
+              activeOriginFavicon={getFaviconUrlFromOrigin(requestOrigin)}
             />
           );
         }
@@ -466,12 +462,7 @@ export function SignTransactionPage() {
                 <SignatureRequestContent
                   signatureRequest={signatureRequest}
                   signingPublicKeyHex={signingAccount.publicKey}
-                  activeOrigin={
-                    originRef.current[requestId].activeOrigin ?? null
-                  }
-                  activeOriginFavicon={
-                    originRef.current[requestId].activeOriginFavicon ?? null
-                  }
+                  origin={requestOrigin}
                   handlePressShowRawJson={handlePressShowRawJson}
                 />
               )}

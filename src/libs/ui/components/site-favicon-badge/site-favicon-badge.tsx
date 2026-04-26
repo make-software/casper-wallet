@@ -16,8 +16,8 @@ const FaviconImg = styled.img`
   height: 24px;
 `;
 
-export function getFaviconUrlFromOrigin(origin: string) {
-  if (!/https?:\/\//.test(origin)) {
+export function getFaviconUrlFromOrigin(origin: string | null) {
+  if (!origin || !/https?:\/\//.test(origin)) {
     return null;
   }
 

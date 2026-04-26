@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 
@@ -10,8 +10,6 @@ import { useAccountManager } from '@popup/hooks/use-account-actions-with-events'
 import { RouterPath } from '@signature-request/router';
 
 import { closeCurrentWindow } from '@background/close-current-window';
-import { selectActiveOriginFavicon } from '@background/redux/active-origin-favicon/selectors';
-import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import {
   selectConnectedAccountNamesWithActiveOrigin,
   selectVaultAccounts
@@ -45,6 +43,7 @@ import {
   Typography,
   renderLedgerFooter
 } from '@libs/ui/components';
+import { getFaviconUrlFromOrigin } from '@libs/ui/components/site-favicon-badge/site-favicon-badge';
 
 import { SignMessageContent } from './sign-message-content';
 
@@ -57,26 +56,19 @@ export function SignMessagePage() {
   const [showLedgerConfirm, setShowLedgerConfirm] =
     useState<boolean>(isLedgerNewWindow);
 
-  const activeOriginFavicon = useSelector(selectActiveOriginFavicon);
-  const activeOrigin = useSelector(selectActiveOrigin);
-
   const requestId = searchParams.get('requestId');
   const message = searchParams.get('message');
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
+  const requestOrigin = searchParams.get('origin');
   const initialEventToRender =
     (searchParams.get('initialEventToRender') as LedgerEventStatus) ??
     LedgerEventStatus.Disconnected;
 
-  if (!requestId || !message || !signingPublicKeyHex) {
+  if (!requestId || !message || !signingPublicKeyHex || !requestOrigin) {
     throw Error(
-      `${ErrorMessages.signTransaction.MISSING_SEARCH_PARAM.description} ${requestId} ${message} ${signingPublicKeyHex}`
+      `${ErrorMessages.signTransaction.MISSING_SEARCH_PARAM.description} ${requestId} ${message} ${signingPublicKeyHex} ${requestOrigin}`
     );
   }
-
-  // it's required to prevent throwing error when active origin changed because of clicked link (e.g. public key)
-  const originRef = useRef({
-    [requestId]: { activeOrigin, activeOriginFavicon }
-  });
 
   const accounts = useSelector(selectVaultAccounts, shallowEqual);
 
@@ -125,8 +117,8 @@ export function SignMessagePage() {
     useAccountManager();
 
   const handleConnect = useCallback(async () => {
-    await connectAnotherAccount(signingAccount.name, activeOrigin);
-  }, [activeOrigin, connectAnotherAccount, signingAccount.name]);
+    await connectAnotherAccount(signingAccount.name, requestOrigin);
+  }, [requestOrigin, connectAnotherAccount, signingAccount.name]);
 
   const handleSign = useCallback(async () => {
     if (message == null) {
@@ -184,7 +176,8 @@ export function SignMessagePage() {
       params: {
         requestId,
         signingPublicKeyHex,
-        message
+        message,
+        origin: requestOrigin
       },
       hash: RouterPath.SignMessage
     }
@@ -283,10 +276,8 @@ export function SignMessagePage() {
               }
               accountsInfo={accountsInfo}
               isLoadingBalance={isLoadingBalances}
-              origin={originRef.current[requestId].activeOrigin ?? null}
-              activeOriginFavicon={
-                originRef.current[requestId].activeOriginFavicon ?? null
-              }
+              origin={requestOrigin}
+              activeOriginFavicon={getFaviconUrlFromOrigin(requestOrigin)}
             />
           );
         }
@@ -297,6 +288,7 @@ export function SignMessagePage() {
           <SignMessageContent
             message={message}
             publicKeyHex={signingPublicKeyHex}
+            origin={requestOrigin}
           />
         );
       }}

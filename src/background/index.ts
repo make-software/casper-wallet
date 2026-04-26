@@ -410,7 +410,8 @@ runtime.onMessage.addListener(
               windowApp: WindowApp.SignatureRequestDeploy,
               searchParams: {
                 requestId: action.meta.requestId,
-                signingPublicKeyHex
+                signingPublicKeyHex,
+                origin
               }
             });
 
@@ -430,7 +431,8 @@ runtime.onMessage.addListener(
               searchParams: {
                 requestId: action.meta.requestId,
                 signingPublicKeyHex,
-                message
+                message,
+                origin
               }
             });
 
@@ -451,7 +453,8 @@ runtime.onMessage.addListener(
               searchParams: {
                 requestId: action.meta.requestId,
                 signingPublicKeyHex,
-                message
+                message,
+                origin
               }
             });
 
