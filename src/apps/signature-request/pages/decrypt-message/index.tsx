@@ -59,6 +59,7 @@ export function DecryptMessagePage() {
   const originRef = useRef({
     [requestId]: { activeOrigin, activeOriginFavicon }
   });
+  const responseSentRef = useRef(false);
 
   const accounts = useSelector(selectVaultAccounts, shallowEqual);
 
@@ -111,6 +112,8 @@ export function DecryptMessagePage() {
   }, [activeOrigin, connectAnotherAccount, signingAccount.name]);
 
   const handleCancel = useCallback(() => {
+    if (responseSentRef.current) return;
+    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
       sdkMethod.decryptMessageResponse({ cancelled: true }, { requestId })
     );
@@ -148,6 +151,7 @@ export function DecryptMessagePage() {
       return;
     }
 
+    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
       sdkMethod.decryptMessageResponse(
         { decryptedMessage, cancelled: false },

@@ -77,6 +77,7 @@ export function SignMessagePage() {
   const originRef = useRef({
     [requestId]: { activeOrigin, activeOriginFavicon }
   });
+  const responseSentRef = useRef(false);
 
   const accounts = useSelector(selectVaultAccounts, shallowEqual);
 
@@ -154,6 +155,7 @@ export function SignMessagePage() {
       return;
     }
 
+    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
       sdkMethod.signMessageResponse(
         { signatureHex: convertBytesToHex(signature), cancelled: false },
@@ -245,6 +247,8 @@ export function SignMessagePage() {
   };
 
   const handleCancel = useCallback(() => {
+    if (responseSentRef.current) return;
+    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
       sdkMethod.signResponse({ cancelled: true }, { requestId })
     );

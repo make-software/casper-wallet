@@ -117,6 +117,7 @@ export function SignTransactionPage() {
     useState(false);
 
   const wasmApprovalInitialisedRef = useRef(false);
+  const responseSentRef = useRef(false);
 
   const [isSigningAccountFromLedger, setIsSigningAccountFromLedger] =
     useState(false);
@@ -241,6 +242,7 @@ export function SignTransactionPage() {
       return;
     }
 
+    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
       sdkMethod.signResponse(
         { signatureHex: convertBytesToHex(signature), cancelled: false },
@@ -259,6 +261,8 @@ export function SignTransactionPage() {
   ]);
 
   const handleCancel = useCallback(() => {
+    if (responseSentRef.current) return;
+    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
       sdkMethod.signResponse({ cancelled: true }, { requestId })
     );
