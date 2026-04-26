@@ -2,17 +2,30 @@ import { tabs } from 'webextension-polyfill';
 
 import { SdkMethod } from '@content/sdk-method';
 
-// TODO: should use tab id to send back to specific tab
-export async function sendSdkResponseToSpecificTab(action: SdkMethod) {
-  const tabsList = await tabs.query({
-    active: true
-  });
+export async function sendSdkResponseToSpecificTab(
+  action: SdkMethod,
+  tabId: number
+) {
+  if (!Number.isInteger(tabId) || tabId < 0) {
+    console.error('sendSdkResponseToSpecificTab: invalid tabId', tabId);
+    return;
+  }
 
-  tabsList.forEach(async tab => {
-    if (tab.id) {
-      tabs.sendMessage(tab.id, action);
-    } else {
-      throw Error('Tab without id: ' + tab);
-    }
-  });
+  try {
+    await tabs.sendMessage(tabId, action);
+  } catch (err) {
+    console.warn('sendSdkResponseToSpecificTab: delivery failed', err);
+  }
+}
+
+export function parseRequestTabId(
+  searchParams: URLSearchParams
+): number | null {
+  const raw = searchParams.get('tabId');
+
+  if (!raw) return null;
+
+  const parsed = Number(raw);
+
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
 }

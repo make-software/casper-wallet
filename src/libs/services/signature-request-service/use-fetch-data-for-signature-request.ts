@@ -11,12 +11,14 @@ import { sdkMethod } from '@content/sdk-method';
 interface IUseFetchDataForSignatureRequestParams {
   signingPublicKeyHex: string;
   requestId: string;
+  requestTabId: number;
   transactionJson?: string;
   onTransactionParsed?: (tx: Transaction) => void;
 }
 
 export const useFetchDataForSignatureRequest = ({
   requestId,
+  requestTabId,
   transactionJson,
   signingPublicKeyHex,
   onTransactionParsed
@@ -46,7 +48,8 @@ export const useFetchDataForSignatureRequest = ({
             ErrorMessages.signTransaction.INVALID_TRANSACTION_JSON.description
           );
           sendSdkResponseToSpecificTab(
-            sdkMethod.signError(error, { requestId })
+            sdkMethod.signError(error, { requestId }),
+            requestTabId
           );
           throw error;
         }

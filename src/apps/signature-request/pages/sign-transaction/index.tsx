@@ -38,7 +38,10 @@ import {
   selectDeploysJsonById,
   selectVaultAccounts
 } from '@background/redux/vault/selectors';
-import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+import {
+  parseRequestTabId,
+  sendSdkResponseToSpecificTab
+} from '@background/send-sdk-response-to-specific-tab';
 
 import { useLedger } from '@hooks/use-ledger';
 
@@ -95,6 +98,7 @@ export function SignTransactionPage() {
   const searchParams = new URLSearchParams(document.location.search);
   const isLedgerNewWindow = Boolean(searchParams.get('initialEventToRender'));
   const requestId = searchParams.get('requestId');
+  const requestTabId = parseRequestTabId(searchParams);
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
   const requestOrigin = searchParams.get('origin');
   const initialEventToRender =
@@ -119,7 +123,12 @@ export function SignTransactionPage() {
   const [isSigningAccountFromLedger, setIsSigningAccountFromLedger] =
     useState(false);
 
-  if (!requestId || !signingPublicKeyHex || !requestOrigin) {
+  if (
+    !requestId ||
+    !signingPublicKeyHex ||
+    !requestOrigin ||
+    requestTabId == null
+  ) {
     throw Error(ErrorMessages.signTransaction.MISSING_SEARCH_PARAM.description);
   }
 
@@ -142,7 +151,10 @@ export function SignTransactionPage() {
     const error = Error(
       ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
     );
-    sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
+    sendSdkResponseToSpecificTab(
+      sdkMethod.signError(error, { requestId }),
+      requestTabId
+    );
     throw error;
   }
 
@@ -184,6 +196,7 @@ export function SignTransactionPage() {
       transactionJson,
       signingPublicKeyHex,
       requestId,
+      requestTabId,
       onTransactionParsed: tx => setTransaction(tx)
     });
 
@@ -198,12 +211,16 @@ export function SignTransactionPage() {
           isCasper2Network ? 'Transaction' : 'Deploy'
         } has already been signed with this account`
       );
-      sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
+      sendSdkResponseToSpecificTab(
+        sdkMethod.signError(error, { requestId }),
+        requestTabId
+      );
       throw error;
     }
   }, [
     isCasper2Network,
     requestId,
+    requestTabId,
     signingAccount?.publicKey,
     transaction?.approvals
   ]);
@@ -242,7 +259,8 @@ export function SignTransactionPage() {
       sdkMethod.signResponse(
         { signatureHex: convertBytesToHex(signature), cancelled: false },
         { requestId }
-      )
+      ),
+      requestTabId
     );
     closeCurrentWindow();
   }, [
@@ -252,15 +270,17 @@ export function SignTransactionPage() {
     signingAccount.publicKey,
     signingAccount.secretKey,
     requestId,
+    requestTabId,
     changeActiveAccountSupportsWithEvent
   ]);
 
   const handleCancel = useCallback(() => {
     sendSdkResponseToSpecificTab(
-      sdkMethod.signResponse({ cancelled: true }, { requestId })
+      sdkMethod.signResponse({ cancelled: true }, { requestId }),
+      requestTabId
     );
     closeCurrentWindow();
-  }, [requestId]);
+  }, [requestId, requestTabId]);
 
   useEffect(() => {
     window.addEventListener('beforeunload', handleCancel);
@@ -283,7 +303,8 @@ export function SignTransactionPage() {
       params: {
         requestId,
         signingPublicKeyHex,
-        origin: requestOrigin
+        origin: requestOrigin,
+        tabId: String(requestTabId)
       },
       hash: RouterPath.SignDeploy
     }

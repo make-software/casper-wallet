@@ -8,7 +8,10 @@ import { ErrorMessages } from '@src/constants';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
 import { closeCurrentWindow } from '@background/close-current-window';
-import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+import {
+  parseRequestTabId,
+  sendSdkResponseToSpecificTab
+} from '@background/send-sdk-response-to-specific-tab';
 
 import { sdkMethod } from '@content/sdk-method';
 
@@ -42,8 +45,9 @@ export function ApproveConnectionPage({
 }: Props) {
   const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
+  const requestTabId = parseRequestTabId(searchParams);
 
-  if (!requestId) {
+  if (!requestId || requestTabId == null) {
     throw Error(
       `${ErrorMessages.common.MISSING_SEARCH_PARAM.description} ${requestId}`
     );
@@ -57,14 +61,16 @@ export function ApproveConnectionPage({
   const handleApproveConnection = async () => {
     await connectAccounts(selectedAccountNames, origin, siteTitle);
     await sendSdkResponseToSpecificTab(
-      sdkMethod.connectResponse(true, { requestId })
+      sdkMethod.connectResponse(true, { requestId }),
+      requestTabId
     );
     navigate(RouterPath.Connecting);
   };
 
   const handleCancel = async () => {
     await sendSdkResponseToSpecificTab(
-      sdkMethod.connectResponse(false, { requestId })
+      sdkMethod.connectResponse(false, { requestId }),
+      requestTabId
     );
     closeCurrentWindow();
   };

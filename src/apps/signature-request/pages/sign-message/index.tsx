@@ -14,7 +14,10 @@ import {
   selectConnectedAccountNamesWithActiveOrigin,
   selectVaultAccounts
 } from '@background/redux/vault/selectors';
-import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+import {
+  parseRequestTabId,
+  sendSdkResponseToSpecificTab
+} from '@background/send-sdk-response-to-specific-tab';
 
 import { useLedger } from '@hooks/use-ledger';
 
@@ -57,6 +60,7 @@ export function SignMessagePage() {
     useState<boolean>(isLedgerNewWindow);
 
   const requestId = searchParams.get('requestId');
+  const requestTabId = parseRequestTabId(searchParams);
   const message = searchParams.get('message');
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
   const requestOrigin = searchParams.get('origin');
@@ -64,7 +68,13 @@ export function SignMessagePage() {
     (searchParams.get('initialEventToRender') as LedgerEventStatus) ??
     LedgerEventStatus.Disconnected;
 
-  if (!requestId || !message || !signingPublicKeyHex || !requestOrigin) {
+  if (
+    !requestId ||
+    !message ||
+    !signingPublicKeyHex ||
+    !requestOrigin ||
+    requestTabId == null
+  ) {
     throw Error(
       `${ErrorMessages.signTransaction.MISSING_SEARCH_PARAM.description} ${requestId} ${message} ${signingPublicKeyHex} ${requestOrigin}`
     );
@@ -93,7 +103,8 @@ export function SignMessagePage() {
       ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
     );
     sendSdkResponseToSpecificTab(
-      sdkMethod.signMessageError(error, { requestId })
+      sdkMethod.signMessageError(error, { requestId }),
+      requestTabId
     );
     throw error;
   }
@@ -150,7 +161,8 @@ export function SignMessagePage() {
       sdkMethod.signMessageResponse(
         { signatureHex: convertBytesToHex(signature), cancelled: false },
         { requestId }
-      )
+      ),
+      requestTabId
     );
     closeCurrentWindow();
   }, [
@@ -159,7 +171,8 @@ export function SignMessagePage() {
     signingAccount.derivationIndex,
     signingAccount.publicKey,
     signingAccount.secretKey,
-    requestId
+    requestId,
+    requestTabId
   ]);
 
   const {
@@ -177,7 +190,8 @@ export function SignMessagePage() {
         requestId,
         signingPublicKeyHex,
         message,
-        origin: requestOrigin
+        origin: requestOrigin,
+        tabId: String(requestTabId)
       },
       hash: RouterPath.SignMessage
     }
@@ -239,10 +253,11 @@ export function SignMessagePage() {
 
   const handleCancel = useCallback(() => {
     sendSdkResponseToSpecificTab(
-      sdkMethod.signResponse({ cancelled: true }, { requestId })
+      sdkMethod.signResponse({ cancelled: true }, { requestId }),
+      requestTabId
     );
     closeCurrentWindow();
-  }, [requestId]);
+  }, [requestId, requestTabId]);
 
   useEffect(() => {
     window.addEventListener('beforeunload', handleCancel);

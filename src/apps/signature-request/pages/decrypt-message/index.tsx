@@ -12,7 +12,10 @@ import {
   selectConnectedAccountNamesWithActiveOrigin,
   selectVaultAccounts
 } from '@background/redux/vault/selectors';
-import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+import {
+  parseRequestTabId,
+  sendSdkResponseToSpecificTab
+} from '@background/send-sdk-response-to-specific-tab';
 
 import { sdkMethod } from '@content/sdk-method';
 
@@ -42,11 +45,18 @@ export function DecryptMessagePage() {
   const [hasDecryptionError, setHasDecryptionError] = useState(false);
 
   const requestId = searchParams.get('requestId');
+  const requestTabId = parseRequestTabId(searchParams);
   const message = searchParams.get('message');
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
   const requestOrigin = searchParams.get('origin');
 
-  if (!requestId || !message || !signingPublicKeyHex || !requestOrigin) {
+  if (
+    !requestId ||
+    !message ||
+    !signingPublicKeyHex ||
+    !requestOrigin ||
+    requestTabId == null
+  ) {
     throw Error(
       `${ErrorMessages.signTransaction.MISSING_SEARCH_PARAM.description} ${requestId} ${message} ${signingPublicKeyHex} ${requestOrigin}`
     );
@@ -66,7 +76,8 @@ export function DecryptMessagePage() {
       ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
     );
     sendSdkResponseToSpecificTab(
-      sdkMethod.signMessageError(error, { requestId })
+      sdkMethod.signMessageError(error, { requestId }),
+      requestTabId
     );
     throw error;
   }
@@ -76,7 +87,8 @@ export function DecryptMessagePage() {
       ErrorMessages.decryptMessage.LEDGER_NOT_SUPPORTED.description
     );
     sendSdkResponseToSpecificTab(
-      sdkMethod.signMessageError(error, { requestId })
+      sdkMethod.signMessageError(error, { requestId }),
+      requestTabId
     );
     throw error;
   }
@@ -104,10 +116,11 @@ export function DecryptMessagePage() {
 
   const handleCancel = useCallback(() => {
     sendSdkResponseToSpecificTab(
-      sdkMethod.decryptMessageResponse({ cancelled: true }, { requestId })
+      sdkMethod.decryptMessageResponse({ cancelled: true }, { requestId }),
+      requestTabId
     );
     closeCurrentWindow();
-  }, [requestId]);
+  }, [requestId, requestTabId]);
 
   useEffect(() => {
     window.addEventListener('beforeunload', handleCancel);
@@ -144,10 +157,11 @@ export function DecryptMessagePage() {
       sdkMethod.decryptMessageResponse(
         { decryptedMessage, cancelled: false },
         { requestId }
-      )
+      ),
+      requestTabId
     );
     closeCurrentWindow();
-  }, [decryptedMessage, requestId]);
+  }, [decryptedMessage, requestId, requestTabId]);
 
   const renderFooter = useCallback(() => {
     if (shouldTryToConnectAccount) {

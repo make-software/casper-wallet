@@ -314,11 +314,18 @@ runtime.onMessage.addListener(
             if (!origin) {
               return sendError(CannotGetSenderOriginError());
             }
+            const senderTabId = sender.tab?.id;
+
+            if (senderTabId == null) {
+              return sendError(Error('Missing sender tab id'));
+            }
+
             const activeAccount = selectVaultActiveAccount(store.getState());
 
             const query: Record<string, string> = {
               requestId: action.meta.requestId,
-              origin: origin
+              origin: origin,
+              tabId: String(senderTabId)
             };
             if (action.payload.title != null) {
               query.title = action.payload.title;
@@ -347,9 +354,16 @@ runtime.onMessage.addListener(
               return sendError(CannotGetSenderOriginError());
             }
 
+            const senderTabId = sender.tab?.id;
+
+            if (senderTabId == null) {
+              return sendError(Error('Missing sender tab id'));
+            }
+
             const query: Record<string, string> = {
               requestId: action.meta.requestId,
-              origin: origin
+              origin: origin,
+              tabId: String(senderTabId)
             };
             if (action.payload.title != null) {
               query.title = action.payload.title;
@@ -367,6 +381,12 @@ runtime.onMessage.addListener(
             const origin = getUrlOrigin(sender.url);
             if (!origin) {
               return sendError(CannotGetSenderOriginError());
+            }
+
+            const senderTabId = sender.tab?.id;
+
+            if (senderTabId == null) {
+              return sendError(Error('Missing sender tab id'));
             }
 
             const { signingPublicKeyHex } = action.payload;
@@ -411,7 +431,8 @@ runtime.onMessage.addListener(
               searchParams: {
                 requestId: action.meta.requestId,
                 signingPublicKeyHex,
-                origin
+                origin,
+                tabId: String(senderTabId)
               }
             });
 
@@ -424,6 +445,12 @@ runtime.onMessage.addListener(
               return sendError(CannotGetSenderOriginError());
             }
 
+            const senderTabId = sender.tab?.id;
+
+            if (senderTabId == null) {
+              return sendError(Error('Missing sender tab id'));
+            }
+
             const { signingPublicKeyHex, message } = action.payload;
 
             openWindow({
@@ -432,7 +459,8 @@ runtime.onMessage.addListener(
                 requestId: action.meta.requestId,
                 signingPublicKeyHex,
                 message,
-                origin
+                origin,
+                tabId: String(senderTabId)
               }
             });
 
@@ -446,6 +474,12 @@ runtime.onMessage.addListener(
               return sendError(CannotGetSenderOriginError());
             }
 
+            const senderTabId = sender.tab?.id;
+
+            if (senderTabId == null) {
+              return sendError(Error('Missing sender tab id'));
+            }
+
             const { signingPublicKeyHex, message } = action.payload;
 
             openWindow({
@@ -454,7 +488,8 @@ runtime.onMessage.addListener(
                 requestId: action.meta.requestId,
                 signingPublicKeyHex,
                 message,
-                origin
+                origin,
+                tabId: String(senderTabId)
               }
             });
 
