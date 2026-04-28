@@ -76,7 +76,7 @@
     "dotenv-webpack": "^8.1.0",
     "i18next": "^23.11.0",
     "i18next-browser-languagedetector": "^7.2.1",
-    "i18next-http-backend": "2.5.0",
+    "i18next-http-backend": "3.0.5",
     "i18next-parser": "^9.3.0",
     "jszip": "^3.10.1",
     "libsodium-wrappers-sumo": "^0.8.2",
