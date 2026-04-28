@@ -10,7 +10,10 @@ import {
   selectConnectedAccountNamesWithActiveOrigin,
   selectIsActiveAccountConnectedWithActiveOrigin
 } from '@background/redux/vault/selectors';
-import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+import {
+  parseRequestTabId,
+  sendSdkResponseToSpecificTab
+} from '@background/send-sdk-response-to-specific-tab';
 
 import { sdkMethod } from '@content/sdk-method';
 
@@ -44,11 +47,12 @@ export function SelectAccountPage({
 }: SelectAccountPageProps) {
   const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
+  const requestTabId = parseRequestTabId(searchParams);
 
   const connectedAccountNames =
     useSelector(selectConnectedAccountNamesWithActiveOrigin) ?? [];
 
-  if (!requestId) {
+  if (!requestId || requestTabId == null) {
     throw Error(
       `${ErrorMessages.common.MISSING_SEARCH_PARAM.description} ${requestId}`
     );
@@ -59,7 +63,8 @@ export function SelectAccountPage({
   );
   if (isActiveAccountConnected) {
     sendSdkResponseToSpecificTab(
-      sdkMethod.connectResponse(true, { requestId })
+      sdkMethod.connectResponse(true, { requestId }),
+      requestTabId
     ).then(() => {
       closeCurrentWindow();
     });
@@ -70,7 +75,8 @@ export function SelectAccountPage({
 
   const handleCancel = async () => {
     await sendSdkResponseToSpecificTab(
-      sdkMethod.connectResponse(false, { requestId })
+      sdkMethod.connectResponse(false, { requestId }),
+      requestTabId
     );
     closeCurrentWindow();
   };

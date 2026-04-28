@@ -42,9 +42,12 @@ import {
   UnconnectedAccountsList
 } from './unconnected-accounts-list';
 
-type SwitchAccountContentProps = { requestId: string };
+type SwitchAccountContentProps = { requestId: string; requestTabId: number };
 
-export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
+export function SwitchAccountContent({
+  requestId,
+  requestTabId
+}: SwitchAccountContentProps) {
   const activeOrigin = useSelector(selectActiveOrigin);
   const activeAccount = useSelector(selectVaultActiveAccount);
   const accountsPublicKeys = useSelector(selectVaultAccountsPublicKeys);
@@ -122,6 +125,7 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
               </ParagraphContainer>
               <UnconnectedAccountsList
                 requestId={requestId}
+                requestTabId={requestTabId}
                 unconnectedAccountsList={unconnectedAccountsList}
                 accountsInfo={accountsInfo}
               />
@@ -165,7 +169,10 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
                         onClick={async () => {
                           await changeActiveAccount(account.name);
                           await sendSdkResponseToSpecificTab(
-                            sdkMethod.switchAccountResponse(true, { requestId })
+                            sdkMethod.switchAccountResponse(true, {
+                              requestId
+                            }),
+                            requestTabId
                           );
                           closeCurrentWindow();
                         }}
@@ -180,6 +187,7 @@ export function SwitchAccountContent({ requestId }: SwitchAccountContentProps) {
             />
             <UnconnectedAccountsList
               requestId={requestId}
+              requestTabId={requestTabId}
               unconnectedAccountsList={unconnectedAccountsList}
               accountsInfo={accountsInfo}
             />

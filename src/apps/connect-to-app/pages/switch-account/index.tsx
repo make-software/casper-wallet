@@ -3,7 +3,10 @@ import React from 'react';
 import { ErrorMessages } from '@src/constants';
 
 import { closeCurrentWindow } from '@background/close-current-window';
-import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+import {
+  parseRequestTabId,
+  sendSdkResponseToSpecificTab
+} from '@background/send-sdk-response-to-specific-tab';
 
 import { sdkMethod } from '@content/sdk-method';
 
@@ -18,8 +21,9 @@ import { SwitchAccountContent } from './content';
 export function SwitchAccountPage() {
   const searchParams = new URLSearchParams(document.location.search);
   const requestId = searchParams.get('requestId');
+  const requestTabId = parseRequestTabId(searchParams);
 
-  if (!requestId) {
+  if (!requestId || requestTabId == null) {
     throw Error(
       `${ErrorMessages.common.MISSING_SEARCH_PARAM.description} ${requestId}`
     );
@@ -27,7 +31,8 @@ export function SwitchAccountPage() {
 
   const handleCancel = async () => {
     await sendSdkResponseToSpecificTab(
-      sdkMethod.connectResponse(false, { requestId })
+      sdkMethod.connectResponse(false, { requestId }),
+      requestTabId
     );
     closeCurrentWindow();
   };
@@ -44,7 +49,12 @@ export function SwitchAccountPage() {
           )}
         />
       )}
-      renderContent={() => <SwitchAccountContent requestId={requestId} />}
+      renderContent={() => (
+        <SwitchAccountContent
+          requestId={requestId}
+          requestTabId={requestTabId}
+        />
+      )}
     />
   );
 }

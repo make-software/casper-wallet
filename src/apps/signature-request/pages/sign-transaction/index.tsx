@@ -26,21 +26,22 @@ import { SigningPageState } from '@signature-request/pages/sign-transaction/type
 import { RouterPath } from '@signature-request/router';
 
 import { closeCurrentWindow } from '@background/close-current-window';
-import { selectActiveOriginFavicon } from '@background/redux/active-origin-favicon/selectors';
-import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import { selectIsCasper2Network } from '@background/redux/settings/selectors';
 import {
   addWasmToTrusted,
   removeWasmFromTrusted
 } from '@background/redux/trusted-wasm/actions';
-import { selectTrustedWasmForActiveOrigin } from '@background/redux/trusted-wasm/selectors';
+import { selectTrustedWasmByOrigin } from '@background/redux/trusted-wasm/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import {
-  selectConnectedAccountNamesWithActiveOrigin,
+  selectConnectedAccountNamesByOrigin,
   selectDeploysJsonById,
   selectVaultAccounts
 } from '@background/redux/vault/selectors';
-import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+import {
+  parseRequestTabId,
+  sendSdkResponseToSpecificTab
+} from '@background/send-sdk-response-to-specific-tab';
 
 import { useLedger } from '@hooks/use-ledger';
 
@@ -71,6 +72,7 @@ import {
   Typography,
   renderLedgerFooter
 } from '@libs/ui/components';
+import { getFaviconUrlFromOrigin } from '@libs/ui/components/site-favicon-badge/site-favicon-badge';
 
 const CancelButtonContainer = styled.div`
   display: flex;
@@ -81,27 +83,28 @@ const CancelButtonContainer = styled.div`
 export function SignTransactionPage() {
   const { t } = useTranslation();
   const isCasper2Network = useSelector(selectIsCasper2Network);
-  const activeOriginFavicon = useSelector(selectActiveOriginFavicon);
-  const activeOrigin = useSelector(selectActiveOrigin);
   const accounts = useSelector(selectVaultAccounts, shallowEqual);
   const deployJsonById = useSelector(selectDeploysJsonById, shallowEqual);
-  const connectedAccountNames = useSelector(
-    selectConnectedAccountNamesWithActiveOrigin,
-    shallowEqual
-  );
-  const activeOriginTrustedWasm = useSelector(
-    selectTrustedWasmForActiveOrigin,
-    shallowEqual
-  );
   const { changeActiveAccountSupportsWithEvent } = useAccountManager();
 
   const searchParams = new URLSearchParams(document.location.search);
   const isLedgerNewWindow = Boolean(searchParams.get('initialEventToRender'));
   const requestId = searchParams.get('requestId');
+  const requestTabId = parseRequestTabId(searchParams);
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
+  const requestOrigin = searchParams.get('origin');
   const initialEventToRender =
     (searchParams.get('initialEventToRender') as LedgerEventStatus) ??
     LedgerEventStatus.Disconnected;
+
+  const connectedAccountNames = useSelector(
+    selectConnectedAccountNamesByOrigin(requestOrigin),
+    shallowEqual
+  );
+  const requestOriginTrustedWasm = useSelector(
+    selectTrustedWasmByOrigin(requestOrigin),
+    shallowEqual
+  );
 
   const [signingPageState, setSigningPageState] = useState<SigningPageState>(
     isLedgerNewWindow
@@ -117,18 +120,19 @@ export function SignTransactionPage() {
     useState(false);
 
   const wasmApprovalInitialisedRef = useRef(false);
+  const responseSentRef = useRef(false);
 
   const [isSigningAccountFromLedger, setIsSigningAccountFromLedger] =
     useState(false);
 
-  if (!requestId || !signingPublicKeyHex) {
+  if (
+    !requestId ||
+    !signingPublicKeyHex ||
+    !requestOrigin ||
+    requestTabId == null
+  ) {
     throw Error(ErrorMessages.signTransaction.MISSING_SEARCH_PARAM.description);
   }
-
-  // it's required to prevent throwing error when active origin changed because of clicked link (e.g. public key)
-  const originRef = useRef({
-    [requestId]: { activeOrigin, activeOriginFavicon, connectedAccountNames }
-  });
 
   const signingAccount = useMemo(
     () => getSigningAccount(accounts, signingPublicKeyHex),
@@ -145,7 +149,10 @@ export function SignTransactionPage() {
     const error = Error(
       ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
     );
-    sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
+    sendSdkResponseToSpecificTab(
+      sdkMethod.signError(error, { requestId }),
+      requestTabId
+    );
     throw error;
   }
 
@@ -169,8 +176,8 @@ export function SignTransactionPage() {
     useAccountManager();
 
   const handleConnect = useCallback(async () => {
-    await connectAnotherAccount(signingAccount.name, activeOrigin);
-  }, [activeOrigin, connectAnotherAccount, signingAccount.name]);
+    await connectAnotherAccount(signingAccount.name, requestOrigin);
+  }, [requestOrigin, connectAnotherAccount, signingAccount.name]);
 
   const handlePressShowRawJson = useCallback(() => {
     setSigningPageState(SigningPageState.RowDataContent);
@@ -187,6 +194,7 @@ export function SignTransactionPage() {
       transactionJson,
       signingPublicKeyHex,
       requestId,
+      requestTabId,
       onTransactionParsed: tx => setTransaction(tx)
     });
 
@@ -201,12 +209,16 @@ export function SignTransactionPage() {
           isCasper2Network ? 'Transaction' : 'Deploy'
         } has already been signed with this account`
       );
-      sendSdkResponseToSpecificTab(sdkMethod.signError(error, { requestId }));
+      sendSdkResponseToSpecificTab(
+        sdkMethod.signError(error, { requestId }),
+        requestTabId
+      );
       throw error;
     }
   }, [
     isCasper2Network,
     requestId,
+    requestTabId,
     signingAccount?.publicKey,
     transaction?.approvals
   ]);
@@ -241,11 +253,13 @@ export function SignTransactionPage() {
       return;
     }
 
+    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
       sdkMethod.signResponse(
         { signatureHex: convertBytesToHex(signature), cancelled: false },
         { requestId }
-      )
+      ),
+      requestTabId
     );
     closeCurrentWindow();
   }, [
@@ -255,15 +269,19 @@ export function SignTransactionPage() {
     signingAccount.publicKey,
     signingAccount.secretKey,
     requestId,
+    requestTabId,
     changeActiveAccountSupportsWithEvent
   ]);
 
   const handleCancel = useCallback(() => {
+    if (responseSentRef.current) return;
+    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
-      sdkMethod.signResponse({ cancelled: true }, { requestId })
+      sdkMethod.signResponse({ cancelled: true }, { requestId }),
+      requestTabId
     );
     closeCurrentWindow();
-  }, [requestId]);
+  }, [requestId, requestTabId]);
 
   useEffect(() => {
     window.addEventListener('beforeunload', handleCancel);
@@ -285,7 +303,9 @@ export function SignTransactionPage() {
       domain: 'signature-request.html',
       params: {
         requestId,
-        signingPublicKeyHex
+        signingPublicKeyHex,
+        origin: requestOrigin,
+        tabId: String(requestTabId)
       },
       hash: RouterPath.SignDeploy
     }
@@ -300,7 +320,7 @@ export function SignTransactionPage() {
     signatureRequest &&
       (isTxSignatureRequestWasmAction(signatureRequest.action) ||
         isTxSignatureRequestWasmProxyAction(signatureRequest.action)) &&
-      !activeOriginTrustedWasm.includes(signatureRequest.action.washHash)
+      !requestOriginTrustedWasm.includes(signatureRequest.action.washHash)
   );
 
   useEffect(() => {
@@ -311,7 +331,7 @@ export function SignTransactionPage() {
   }, [maybeRequireApproval]);
 
   const toggleWasmApproval = useCallback(() => {
-    const origin = originRef.current[requestId].activeOrigin ?? null;
+    const origin = requestOrigin;
 
     if (
       !(
@@ -341,7 +361,7 @@ export function SignTransactionPage() {
         })
       );
     }
-  }, [requestId, signatureRequest, wasmApproved]);
+  }, [requestOrigin, signatureRequest, wasmApproved]);
 
   const renderFooter = () => {
     if (shouldTryToConnectAccount) {
@@ -445,10 +465,8 @@ export function SignTransactionPage() {
               }
               accountsInfo={accountsInfo}
               isLoadingBalance={isLoadingBalances}
-              origin={originRef.current[requestId].activeOrigin ?? null}
-              activeOriginFavicon={
-                originRef.current[requestId].activeOriginFavicon ?? null
-              }
+              origin={requestOrigin}
+              activeOriginFavicon={getFaviconUrlFromOrigin(requestOrigin)}
             />
           );
         }
@@ -466,12 +484,7 @@ export function SignTransactionPage() {
                 <SignatureRequestContent
                   signatureRequest={signatureRequest}
                   signingPublicKeyHex={signingAccount.publicKey}
-                  activeOrigin={
-                    originRef.current[requestId].activeOrigin ?? null
-                  }
-                  activeOriginFavicon={
-                    originRef.current[requestId].activeOriginFavicon ?? null
-                  }
+                  origin={requestOrigin}
                   handlePressShowRawJson={handlePressShowRawJson}
                 />
               )}

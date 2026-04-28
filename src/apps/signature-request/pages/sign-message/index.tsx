@@ -10,13 +10,14 @@ import { useAccountManager } from '@popup/hooks/use-account-actions-with-events'
 import { RouterPath } from '@signature-request/router';
 
 import { closeCurrentWindow } from '@background/close-current-window';
-import { selectActiveOriginFavicon } from '@background/redux/active-origin-favicon/selectors';
-import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import {
-  selectConnectedAccountNamesWithActiveOrigin,
+  selectConnectedAccountNamesByOrigin,
   selectVaultAccounts
 } from '@background/redux/vault/selectors';
-import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+import {
+  parseRequestTabId,
+  sendSdkResponseToSpecificTab
+} from '@background/send-sdk-response-to-specific-tab';
 
 import { useLedger } from '@hooks/use-ledger';
 
@@ -45,6 +46,7 @@ import {
   Typography,
   renderLedgerFooter
 } from '@libs/ui/components';
+import { getFaviconUrlFromOrigin } from '@libs/ui/components/site-favicon-badge/site-favicon-badge';
 
 import { SignMessageContent } from './sign-message-content';
 
@@ -57,31 +59,33 @@ export function SignMessagePage() {
   const [showLedgerConfirm, setShowLedgerConfirm] =
     useState<boolean>(isLedgerNewWindow);
 
-  const activeOriginFavicon = useSelector(selectActiveOriginFavicon);
-  const activeOrigin = useSelector(selectActiveOrigin);
-
   const requestId = searchParams.get('requestId');
+  const requestTabId = parseRequestTabId(searchParams);
   const message = searchParams.get('message');
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
+  const requestOrigin = searchParams.get('origin');
   const initialEventToRender =
     (searchParams.get('initialEventToRender') as LedgerEventStatus) ??
     LedgerEventStatus.Disconnected;
 
-  if (!requestId || !message || !signingPublicKeyHex) {
+  if (
+    !requestId ||
+    !message ||
+    !signingPublicKeyHex ||
+    !requestOrigin ||
+    requestTabId == null
+  ) {
     throw Error(
-      `${ErrorMessages.signTransaction.MISSING_SEARCH_PARAM.description} ${requestId} ${message} ${signingPublicKeyHex}`
+      `${ErrorMessages.signTransaction.MISSING_SEARCH_PARAM.description} ${requestId} ${message} ${signingPublicKeyHex} ${requestOrigin}`
     );
   }
 
-  // it's required to prevent throwing error when active origin changed because of clicked link (e.g. public key)
-  const originRef = useRef({
-    [requestId]: { activeOrigin, activeOriginFavicon }
-  });
+  const responseSentRef = useRef(false);
 
   const accounts = useSelector(selectVaultAccounts, shallowEqual);
 
   const connectedAccountNames = useSelector(
-    selectConnectedAccountNamesWithActiveOrigin,
+    selectConnectedAccountNamesByOrigin(requestOrigin),
     shallowEqual
   );
 
@@ -101,7 +105,8 @@ export function SignMessagePage() {
       ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
     );
     sendSdkResponseToSpecificTab(
-      sdkMethod.signMessageError(error, { requestId })
+      sdkMethod.signMessageError(error, { requestId }),
+      requestTabId
     );
     throw error;
   }
@@ -125,8 +130,8 @@ export function SignMessagePage() {
     useAccountManager();
 
   const handleConnect = useCallback(async () => {
-    await connectAnotherAccount(signingAccount.name, activeOrigin);
-  }, [activeOrigin, connectAnotherAccount, signingAccount.name]);
+    await connectAnotherAccount(signingAccount.name, requestOrigin);
+  }, [requestOrigin, connectAnotherAccount, signingAccount.name]);
 
   const handleSign = useCallback(async () => {
     if (message == null) {
@@ -154,11 +159,13 @@ export function SignMessagePage() {
       return;
     }
 
+    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
       sdkMethod.signMessageResponse(
         { signatureHex: convertBytesToHex(signature), cancelled: false },
         { requestId }
-      )
+      ),
+      requestTabId
     );
     closeCurrentWindow();
   }, [
@@ -167,7 +174,8 @@ export function SignMessagePage() {
     signingAccount.derivationIndex,
     signingAccount.publicKey,
     signingAccount.secretKey,
-    requestId
+    requestId,
+    requestTabId
   ]);
 
   const {
@@ -184,7 +192,9 @@ export function SignMessagePage() {
       params: {
         requestId,
         signingPublicKeyHex,
-        message
+        message,
+        origin: requestOrigin,
+        tabId: String(requestTabId)
       },
       hash: RouterPath.SignMessage
     }
@@ -245,11 +255,14 @@ export function SignMessagePage() {
   };
 
   const handleCancel = useCallback(() => {
+    if (responseSentRef.current) return;
+    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
-      sdkMethod.signResponse({ cancelled: true }, { requestId })
+      sdkMethod.signResponse({ cancelled: true }, { requestId }),
+      requestTabId
     );
     closeCurrentWindow();
-  }, [requestId]);
+  }, [requestId, requestTabId]);
 
   useEffect(() => {
     window.addEventListener('beforeunload', handleCancel);
@@ -283,10 +296,8 @@ export function SignMessagePage() {
               }
               accountsInfo={accountsInfo}
               isLoadingBalance={isLoadingBalances}
-              origin={originRef.current[requestId].activeOrigin ?? null}
-              activeOriginFavicon={
-                originRef.current[requestId].activeOriginFavicon ?? null
-              }
+              origin={requestOrigin}
+              activeOriginFavicon={getFaviconUrlFromOrigin(requestOrigin)}
             />
           );
         }
@@ -297,6 +308,7 @@ export function SignMessagePage() {
           <SignMessageContent
             message={message}
             publicKeyHex={signingPublicKeyHex}
+            origin={requestOrigin}
           />
         );
       }}

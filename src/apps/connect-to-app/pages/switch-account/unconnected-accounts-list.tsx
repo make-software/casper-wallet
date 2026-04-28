@@ -45,12 +45,14 @@ export const SpaceBetweenContainer = styled(CentredFlexRow)`
 interface UnconnectedAccountsListProps {
   unconnectedAccountsList: AccountListRowWithAccountHash<AccountListRows>[];
   requestId: string;
+  requestTabId: number;
   accountsInfo: Record<string, IAccountInfo> | undefined;
 }
 
 export const UnconnectedAccountsList = ({
   unconnectedAccountsList,
   requestId,
+  requestTabId,
   accountsInfo
 }: UnconnectedAccountsListProps) => {
   const activeOrigin = useSelector(selectActiveOrigin);
@@ -103,7 +105,8 @@ export const UnconnectedAccountsList = ({
                       activeOrigin
                     );
                     await sendSdkResponseToSpecificTab(
-                      sdkMethod.switchAccountResponse(false, { requestId })
+                      sdkMethod.switchAccountResponse(false, { requestId }),
+                      requestTabId
                     );
                     closeCurrentWindow();
                   }}

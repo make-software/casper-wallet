@@ -21,6 +21,7 @@ import { List, SvgIcon, Tile, Typography } from '@libs/ui/components';
 import { AccountInfoRow } from '@libs/ui/components/account-info-row/account-info-row';
 import { MaybeLink } from '@libs/ui/components/maybe-link/maybe-link';
 import { PortalTooltip } from '@libs/ui/components/portal-tooltip/portal-tooltip';
+import { getFaviconUrlFromOrigin } from '@libs/ui/components/site-favicon-badge/site-favicon-badge';
 
 import { SignatureRequestAction } from './signature-request-action';
 import { SignatureRequestValue } from './signature-request-value';
@@ -57,8 +58,7 @@ const Favicon = styled.img`
 export interface SignatureRequestContentProps {
   signatureRequest: ITxSignatureRequest;
   signingPublicKeyHex: string;
-  activeOriginFavicon: string | null;
-  activeOrigin: string | null;
+  origin: string | null;
   handlePressShowRawJson: () => void;
 }
 
@@ -91,11 +91,11 @@ export interface ISignatureRequestRecordSenderValue {
 
 export function SignatureRequestContent({
   signatureRequest,
-  activeOriginFavicon,
-  activeOrigin,
+  origin,
   handlePressShowRawJson
 }: SignatureRequestContentProps) {
   const { t } = useTranslation();
+  const faviconUrl = getFaviconUrlFromOrigin(origin);
 
   const deployDetailRecords: ISignatureRequestRecords = {
     network: signatureRequest.chainName,
@@ -125,23 +125,23 @@ export function SignatureRequestContent({
       <ContentContainer>
         <VerticalSpaceContainer top={SpacingSize.Medium}>
           <AlignedFlexRow gap={SpacingSize.Small}>
-            {activeOriginFavicon && (
+            {faviconUrl && (
               <div>
-                <Favicon src={activeOriginFavicon} />
+                <Favicon src={faviconUrl} />
               </div>
             )}
             <FlexColumn flexGrow={1}>
               <Typography type="header">
                 <Trans t={t}>Signature Request</Trans>
               </Typography>
-              <MaybeLink link={activeOrigin}>
+              <MaybeLink link={origin}>
                 <Typography
                   type="captionRegular"
                   color={'contentAction'}
                   ellipsis
                   style={{ maxWidth: '296px' }}
                 >
-                  <Trans t={t}>{activeOrigin}</Trans>
+                  <Trans t={t}>{origin}</Trans>
                 </Typography>
               </MaybeLink>
             </FlexColumn>

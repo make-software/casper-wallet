@@ -8,13 +8,14 @@ import { getSigningAccount } from '@src/utils';
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
 import { closeCurrentWindow } from '@background/close-current-window';
-import { selectActiveOriginFavicon } from '@background/redux/active-origin-favicon/selectors';
-import { selectActiveOrigin } from '@background/redux/active-origin/selectors';
 import {
-  selectConnectedAccountNamesWithActiveOrigin,
+  selectConnectedAccountNamesByOrigin,
   selectVaultAccounts
 } from '@background/redux/vault/selectors';
-import { sendSdkResponseToSpecificTab } from '@background/send-sdk-response-to-specific-tab';
+import {
+  parseRequestTabId,
+  sendSdkResponseToSpecificTab
+} from '@background/send-sdk-response-to-specific-tab';
 
 import { sdkMethod } from '@content/sdk-method';
 
@@ -33,6 +34,7 @@ import {
   Button,
   Typography
 } from '@libs/ui/components';
+import { getFaviconUrlFromOrigin } from '@libs/ui/components/site-favicon-badge/site-favicon-badge';
 
 import { DecryptMessageContent } from './decrypt-message-content';
 
@@ -42,28 +44,30 @@ export function DecryptMessagePage() {
   const [decryptedMessage, setDecryptedMessage] = useState('');
   const [hasDecryptionError, setHasDecryptionError] = useState(false);
 
-  const activeOriginFavicon = useSelector(selectActiveOriginFavicon);
-  const activeOrigin = useSelector(selectActiveOrigin);
-
   const requestId = searchParams.get('requestId');
+  const requestTabId = parseRequestTabId(searchParams);
   const message = searchParams.get('message');
   const signingPublicKeyHex = searchParams.get('signingPublicKeyHex');
+  const requestOrigin = searchParams.get('origin');
 
-  if (!requestId || !message || !signingPublicKeyHex) {
+  if (
+    !requestId ||
+    !message ||
+    !signingPublicKeyHex ||
+    !requestOrigin ||
+    requestTabId == null
+  ) {
     throw Error(
-      `${ErrorMessages.signTransaction.MISSING_SEARCH_PARAM.description} ${requestId} ${message} ${signingPublicKeyHex}`
+      `${ErrorMessages.signTransaction.MISSING_SEARCH_PARAM.description} ${requestId} ${message} ${signingPublicKeyHex} ${requestOrigin}`
     );
   }
 
-  // it's required to prevent throwing error when active origin changed because of clicked link (e.g. public key)
-  const originRef = useRef({
-    [requestId]: { activeOrigin, activeOriginFavicon }
-  });
+  const responseSentRef = useRef(false);
 
   const accounts = useSelector(selectVaultAccounts, shallowEqual);
 
   const connectedAccountNames = useSelector(
-    selectConnectedAccountNamesWithActiveOrigin,
+    selectConnectedAccountNamesByOrigin(requestOrigin),
     shallowEqual
   );
 
@@ -74,7 +78,8 @@ export function DecryptMessagePage() {
       ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
     );
     sendSdkResponseToSpecificTab(
-      sdkMethod.signMessageError(error, { requestId })
+      sdkMethod.signMessageError(error, { requestId }),
+      requestTabId
     );
     throw error;
   }
@@ -84,7 +89,8 @@ export function DecryptMessagePage() {
       ErrorMessages.decryptMessage.LEDGER_NOT_SUPPORTED.description
     );
     sendSdkResponseToSpecificTab(
-      sdkMethod.signMessageError(error, { requestId })
+      sdkMethod.signMessageError(error, { requestId }),
+      requestTabId
     );
     throw error;
   }
@@ -107,15 +113,18 @@ export function DecryptMessagePage() {
     useAccountManager();
 
   const handleConnect = useCallback(async () => {
-    await connectAnotherAccount(signingAccount.name, activeOrigin);
-  }, [activeOrigin, connectAnotherAccount, signingAccount.name]);
+    await connectAnotherAccount(signingAccount.name, requestOrigin);
+  }, [requestOrigin, connectAnotherAccount, signingAccount.name]);
 
   const handleCancel = useCallback(() => {
+    if (responseSentRef.current) return;
+    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
-      sdkMethod.decryptMessageResponse({ cancelled: true }, { requestId })
+      sdkMethod.decryptMessageResponse({ cancelled: true }, { requestId }),
+      requestTabId
     );
     closeCurrentWindow();
-  }, [requestId]);
+  }, [requestId, requestTabId]);
 
   useEffect(() => {
     window.addEventListener('beforeunload', handleCancel);
@@ -148,14 +157,16 @@ export function DecryptMessagePage() {
       return;
     }
 
+    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
       sdkMethod.decryptMessageResponse(
         { decryptedMessage, cancelled: false },
         { requestId }
-      )
+      ),
+      requestTabId
     );
     closeCurrentWindow();
-  }, [decryptedMessage, requestId]);
+  }, [decryptedMessage, requestId, requestTabId]);
 
   const renderFooter = useCallback(() => {
     if (shouldTryToConnectAccount) {
@@ -212,10 +223,8 @@ export function DecryptMessagePage() {
               }
               accountsInfo={accountsInfo}
               isLoadingBalance={isLoadingBalances}
-              origin={originRef.current[requestId].activeOrigin ?? null}
-              activeOriginFavicon={
-                originRef.current[requestId].activeOriginFavicon ?? null
-              }
+              origin={requestOrigin}
+              activeOriginFavicon={getFaviconUrlFromOrigin(requestOrigin)}
             />
           );
         }
@@ -226,6 +235,7 @@ export function DecryptMessagePage() {
             hasDecryptionError={hasDecryptionError}
             decryptedMessage={decryptedMessage}
             publicKeyHex={signingPublicKeyHex}
+            origin={requestOrigin}
           />
         );
       }}
