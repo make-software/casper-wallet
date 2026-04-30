@@ -11,7 +11,7 @@ popup.describe('Popup UI: Undelegation', () => {
         route.fulfill(RPC_RESPONSE.success)
       );
 
-      await popupPage.getByText('More').click();
+      await popupPage.getByText('More', { exact: true }).click();
 
       await popupPage.getByText('Undelegate', { exact: true }).click();
 
