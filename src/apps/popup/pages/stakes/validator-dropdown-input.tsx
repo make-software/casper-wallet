@@ -5,8 +5,13 @@ import { useTranslation } from 'react-i18next';
 
 import { AuctionManagerEntryPoint } from '@src/constants';
 
+import { HighStakeWarning } from '@popup/pages/stakes/components/high-stake-warning';
 import { ValidatorList } from '@popup/pages/stakes/components/validator-list';
-import { useFilteredValidators } from '@popup/pages/stakes/utils';
+import {
+  getValidatorNetworkShare,
+  isHighStakeValidator,
+  useFilteredValidators
+} from '@popup/pages/stakes/utils';
 
 import { useClickAway } from '@hooks/use-click-away';
 
@@ -142,6 +147,14 @@ export const ValidatorDropdownInput = ({
           setIsOpenValidatorPublicKeysList(true);
         }}
       />
+      {stakeType === AuctionManagerEntryPoint.delegate &&
+        isHighStakeValidator(validator) && (
+          <VerticalSpaceContainer top={SpacingSize.Medium}>
+            <HighStakeWarning
+              networkShare={getValidatorNetworkShare(validator)!}
+            />
+          </VerticalSpaceContainer>
+        )}
     </VerticalSpaceContainer>
   ) : (
     <VerticalSpaceContainer

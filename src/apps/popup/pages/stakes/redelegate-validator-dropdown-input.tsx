@@ -3,8 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { HighStakeWarning } from '@popup/pages/stakes/components/high-stake-warning';
 import { ValidatorList } from '@popup/pages/stakes/components/validator-list';
-import { useFilteredValidators } from '@popup/pages/stakes/utils';
+import {
+  getValidatorNetworkShare,
+  isHighStakeValidator,
+  useFilteredValidators
+} from '@popup/pages/stakes/utils';
 
 import { useClickAway } from '@hooks/use-click-away';
 
@@ -112,6 +117,13 @@ export const RedelegateValidatorDropdownInput = ({
           setIsOpenValidatorPublicKeysList(true);
         }}
       />
+      {isHighStakeValidator(validator) && (
+        <VerticalSpaceContainer top={SpacingSize.Medium}>
+          <HighStakeWarning
+            networkShare={getValidatorNetworkShare(validator)!}
+          />
+        </VerticalSpaceContainer>
+      )}
     </VerticalSpaceContainer>
   ) : (
     <VerticalSpaceContainer

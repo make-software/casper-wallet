@@ -29,7 +29,7 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { verifyPasswordAgainstHash } from '@libs/crypto/hashing';
 import { CSPRtoMotes, motesToCSPR } from '@libs/ui/utils/formatters';
 
-export const minPasswordLength = 16;
+export const minPasswordLength = 1;
 
 export function useCreatePasswordRule() {
   const { t } = useTranslation();
