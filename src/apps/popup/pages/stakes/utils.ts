@@ -10,24 +10,6 @@ import { useTypedLocation } from '@popup/router';
 import { useFetchValidators } from '@libs/services/validators-service';
 import { motesToCSPR } from '@libs/ui/utils';
 
-export const HIGH_STAKE_NETWORK_SHARE_THRESHOLD = 5; // percent
-
-export const getValidatorNetworkShare = (
-  validator: ValidatorDto | null
-): string | null => {
-  if (!validator) return null;
-  return validator.networkShare ?? null;
-};
-
-export const isHighStakeValidator = (
-  validator: ValidatorDto | null
-): boolean => {
-  const share = getValidatorNetworkShare(validator);
-  if (share == null) return false;
-  const num = Number(share);
-  return Number.isFinite(num) && num >= HIGH_STAKE_NETWORK_SHARE_THRESHOLD;
-};
-
 type StakeTexts = {
   validatorStepHeaderText: string;
   newValidatorStepHeaderText?: string;

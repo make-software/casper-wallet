@@ -5,7 +5,7 @@ import { AlignedFlexRow, FlexColumn, SpacingSize } from '@libs/layout';
 import { SvgIcon, Tile, Typography } from '@libs/ui/components';
 
 interface HighStakeWarningProps {
-  networkShare: string;
+  formattedNetworkShare: string;
 }
 
 const Content = styled(FlexColumn)`
@@ -13,9 +13,9 @@ const Content = styled(FlexColumn)`
   gap: 8px;
 `;
 
-export const HighStakeWarning = ({ networkShare }: HighStakeWarningProps) => {
-  const formatted = Number(networkShare).toFixed(2);
-
+export const HighStakeWarning = ({
+  formattedNetworkShare
+}: HighStakeWarningProps) => {
   return (
     <Tile borderRadius="base">
       <Content>
@@ -28,9 +28,9 @@ export const HighStakeWarning = ({ networkShare }: HighStakeWarningProps) => {
           <Typography type="bodySemiBold">Important</Typography>
         </AlignedFlexRow>
         <Typography type="captionRegular" color="contentSecondary">
-          This validator controls {formatted}% of the voting power and belongs
-          to a high&#8209;stake group. Elevated stake concentration may affect
-          decentralization and reduce overall network resilience.
+          This validator controls {formattedNetworkShare}% of the voting power
+          and belongs to a high&#8209;stake group. Elevated stake concentration
+          may affect decentralization and reduce overall network resilience.
         </Typography>
       </Content>
     </Tile>
