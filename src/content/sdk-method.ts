@@ -1,6 +1,7 @@
 import { ActionType, createAction, createCustomAction } from 'typesafe-actions';
 
 import { SdkError } from './sdk-errors';
+import type { SignTypedDataParams, SignTypedDataResult } from './sdk-types';
 
 export const SdkMethodEventType = {
   Request: 'CasperWalletMethod:Request',
@@ -57,6 +58,21 @@ export const sdkMethod = {
     'CasperWalletProvider:SignMessage:Response'
   )<{ cancelled: true } | { cancelled: false; signatureHex: string }, Meta>(),
   signMessageError: createAction('CasperWalletProvider:SignMessage:Error')<
+    Error,
+    Meta
+  >(),
+  signTypedDataRequest: createAction('CasperWalletProvider:SignTypedData')<
+    {
+      typedData: SignTypedDataParams['typedData'];
+      options?: SignTypedDataParams['options'];
+      signingPublicKeyHex: string;
+    },
+    Meta
+  >(),
+  signTypedDataResponse: createAction(
+    'CasperWalletProvider:SignTypedData:Response'
+  )<SignTypedDataResult, Meta>(),
+  signTypedDataError: createAction('CasperWalletProvider:SignTypedData:Error')<
     Error,
     Meta
   >(),
