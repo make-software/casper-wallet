@@ -11,7 +11,7 @@ popup.describe('Popup UI: Delegation', () => {
         route.fulfill(RPC_RESPONSE.success)
       );
 
-      await popupPage.getByText('More').click();
+      await popupPage.getByText('More', { exact: true }).click();
 
       await popupPage.getByText('Delegate', { exact: true }).click();
 
