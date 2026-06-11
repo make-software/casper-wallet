@@ -14,6 +14,7 @@ import {
   anotherAccountConnected,
   deployPayloadReceived,
   deploysReseted,
+  eip712PayloadReceived,
   hideAccountFromListChanged,
   secretPhraseCreated,
   siteConnected,
@@ -31,7 +32,8 @@ const initialState: State = {
   accountNamesByOriginDict: {},
   siteNameByOriginDict: {},
   activeAccountName: null,
-  jsonById: {}
+  jsonById: {},
+  eip712ById: {}
 };
 
 export const reducer = createReducer(initialState)
@@ -47,7 +49,8 @@ export const reducer = createReducer(initialState)
           accounts,
           activeAccountName,
           secretPhrase,
-          jsonById
+          jsonById,
+          eip712ById
         }
       }: ReturnType<typeof vaultLoaded>
     ) => ({
@@ -57,7 +60,11 @@ export const reducer = createReducer(initialState)
       activeAccountName,
       secretPhrase,
       jsonById:
-        Object.keys(state.jsonById).length === 0 ? jsonById : state.jsonById
+        Object.keys(state.jsonById).length === 0 ? jsonById : state.jsonById,
+      eip712ById:
+        Object.keys(state.eip712ById).length === 0
+          ? eip712ById
+          : state.eip712ById
     })
   )
   .handleAction(
@@ -302,6 +309,13 @@ export const reducer = createReducer(initialState)
     (state, { payload }: ReturnType<typeof deployPayloadReceived>): State => ({
       ...state,
       jsonById: { [payload.id]: payload.json }
+    })
+  )
+  .handleAction(
+    eip712PayloadReceived,
+    (state, { payload }: ReturnType<typeof eip712PayloadReceived>): State => ({
+      ...state,
+      eip712ById: { [payload.id]: payload.json }
     })
   )
   .handleAction(
