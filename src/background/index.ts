@@ -90,6 +90,7 @@ import {
   anotherAccountConnected,
   deployPayloadReceived,
   deploysReseted,
+  eip712PayloadReceived,
   hideAccountFromListChanged,
   secretPhraseCreated,
   siteConnected,
@@ -459,6 +460,40 @@ runtime.onMessage.addListener(
                 requestId: action.meta.requestId,
                 signingPublicKeyHex,
                 message,
+                origin,
+                tabId: String(senderTabId)
+              }
+            });
+
+            return sendResponse(undefined);
+          }
+
+          case getType(sdkMethod.signTypedDataRequest): {
+            const origin = getUrlOrigin(sender.url);
+            if (!origin) {
+              return sendError(CannotGetSenderOriginError());
+            }
+
+            const senderTabId = sender.tab?.id;
+
+            if (senderTabId == null) {
+              return sendError(Error('Missing sender tab id'));
+            }
+
+            const { signingPublicKeyHex, typedData, options } = action.payload;
+
+            store.dispatch(
+              eip712PayloadReceived({
+                id: action.meta.requestId,
+                json: JSON.stringify({ typedData, options })
+              })
+            );
+
+            openWindow({
+              windowApp: WindowApp.SignatureRequestEip712,
+              searchParams: {
+                requestId: action.meta.requestId,
+                signingPublicKeyHex,
                 origin,
                 tabId: String(senderTabId)
               }
