@@ -1,4 +1,4 @@
-import { IEIP712SignatureRequest } from 'casper-wallet-core';
+import { IEIP712DisplayRow, IEIP712SignatureRequest } from 'casper-wallet-core';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -15,7 +15,7 @@ import { List, SvgIcon, Tile, Typography } from '@libs/ui/components';
 import { MaybeLink } from '@libs/ui/components/maybe-link/maybe-link';
 import { getFaviconUrlFromOrigin } from '@libs/ui/components/site-favicon-badge/site-favicon-badge';
 
-import { Eip712DisplayRow } from './eip712-display-row';
+import { Eip712DisplayRow, Eip712NetworkRow } from './eip712-display-row';
 
 const RowDataContainer = styled(AlignedFlexRow)`
   margin: 16px;
@@ -48,15 +48,26 @@ export function SignEip712Content({
   const { t } = useTranslation();
   const faviconUrl = getFaviconUrlFromOrigin(origin);
 
+  const networkRow: IEIP712DisplayRow = {
+    label: t('Network'),
+    value: signatureRequest.chainName,
+    displayValue: signatureRequest.chainName,
+    presentation: 'string',
+    type: '',
+    copyValue: null,
+    accountInfo: null,
+    contractPackage: null
+  };
+
   return (
     <PageContainer>
       <ContentContainer>
         <VerticalSpaceContainer top={SpacingSize.Medium}>
           <AlignedFlexRow gap={SpacingSize.Small}>
             {faviconUrl && (
-              <div>
+              <>
                 <Favicon src={faviconUrl} />
-              </div>
+              </>
             )}
             <FlexColumn flexGrow={1}>
               <Typography type="header">
@@ -78,12 +89,25 @@ export function SignEip712Content({
 
         <List
           headerLabel={t('Domain')}
-          rows={signatureRequest.domainRows.map((row, index) => ({
-            id: `domain-${index}-${row.label}`,
-            label: row.label,
-            value: row
-          }))}
-          renderRow={({ value }) => <Eip712DisplayRow row={value} />}
+          rows={[
+            {
+              id: 'domain-network',
+              label: networkRow.label,
+              value: networkRow
+            },
+            ...signatureRequest.domainRows.map((row, index) => ({
+              id: `domain-${index}-${row.label}`,
+              label: row.label,
+              value: row
+            }))
+          ]}
+          renderRow={({ id, value }) =>
+            id === 'domain-network' ? (
+              <Eip712NetworkRow chainName={value.value} />
+            ) : (
+              <Eip712DisplayRow row={value} />
+            )
+          }
           marginLeftForItemSeparatorLine={16}
         />
 
