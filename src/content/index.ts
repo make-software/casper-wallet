@@ -24,6 +24,8 @@ async function handleSdkMessage(message: SdkEvent | SdkMethod) {
       case getType(sdkMethod.signResponse):
       case getType(sdkMethod.signMessageError):
       case getType(sdkMethod.signMessageResponse):
+      case getType(sdkMethod.signTypedDataResponse):
+      case getType(sdkMethod.signTypedDataError):
       case getType(sdkMethod.decryptMessageResponse):
       case getType(sdkMethod.decryptMessageError):
       case getType(sdkMethod.encryptMessageResponse):
