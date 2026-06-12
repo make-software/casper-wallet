@@ -46,6 +46,7 @@ import {
 import { useFetchAccountsInfo } from '@libs/services/account-info';
 import { useFetchAccountsBalances } from '@libs/services/balance-service';
 import { useFetchDataForEip712Request } from '@libs/services/signature-request-service';
+import { HardwareWalletType } from '@libs/types/account';
 import {
   ApproveConnectionContent,
   Button,
@@ -108,6 +109,18 @@ export function SignEip712Page() {
     throw error;
   }
 
+  // Ledger hardware wallets do not support EIP-712 typed data signing.
+  if (signingAccount.hardware === HardwareWalletType.Ledger) {
+    const error = Error(
+      ErrorMessages.signTypedData.LEDGER_NOT_SUPPORTED.description
+    );
+    sendSdkResponseToSpecificTab(
+      sdkMethod.signTypedDataError(error, { requestId }),
+      requestTabId
+    );
+    throw error;
+  }
+
   const shouldTryToConnectAccount =
     connectedAccountNames &&
     !connectedAccountNames.includes(signingAccount.name);
@@ -162,10 +175,7 @@ export function SignEip712Page() {
       return;
     }
 
-    // TODO(WALLET-1251): only software-key signing is supported for EIP-712.
-    // Add Ledger hardware-wallet support (for accounts with
-    // `hardware === HardwareWalletType.Ledger`), mirroring the sign-message /
-    // sign-transaction Ledger flow (`useLedger`, Ledger confirmation footer).
+    // EIP-712 supports software-key signing only; Ledger accounts are rejected earlier.
     const publicKey = PublicKey.fromHex(signingAccount.publicKey);
     const privateKey = PrivateKey.fromHex(
       getPrivateKeyHexFromSecretKey(
