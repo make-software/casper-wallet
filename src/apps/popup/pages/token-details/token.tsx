@@ -25,6 +25,8 @@ import {
 import { useFetchCep18Tokens } from '@libs/services/cep18-service';
 import {
   Button,
+  Hash,
+  HashVariant,
   List,
   SvgIcon,
   TokenPlate,
@@ -94,10 +96,26 @@ export const Token = () => {
       return [
         { id: 1, name: 'Symbol', value: token?.symbol ?? '' },
         { id: 2, name: 'Decimals', value: (token?.decimals || 0).toString() },
-        ...(Boolean(Number(token?.tokenPrice)) && token
+        ...(token?.contractPackageHash
           ? [
               {
                 id: 3,
+                name: 'Contract package hash',
+                value: (
+                  <Hash
+                    value={token.contractPackageHash}
+                    variant={HashVariant.CaptionHash}
+                    truncated
+                    color="contentPrimary"
+                  />
+                )
+              }
+            ]
+          : []),
+        ...(Boolean(Number(token?.tokenPrice)) && token
+          ? [
+              {
+                id: 4,
                 name: 'Market Price',
                 value: <MarketDataValue token={token} />
               }
