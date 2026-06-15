@@ -100,7 +100,7 @@
     "react-virtualized": "^9.22.5",
     "redux": "4.2.1",
     "redux-saga": "1.2.3",
-    "reselect": "4.1.7",
+    "reselect": "5.2.0",
     "styled-components": "5.3.11",
     "typesafe-actions": "5.1.0",
     "yup": "^0.32.11"
