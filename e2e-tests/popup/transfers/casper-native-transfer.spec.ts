@@ -162,7 +162,7 @@ popup.describe('Popup UI: Casper Native Transfer', () => {
 
     await popupExpect(
       popupPage.getByRole('heading', {
-        name: 'failed to send http request, details: Code: 500, err: Internal Server Error'
+        name: 'Internal Server Error'
       })
     ).toBeVisible();
     await popupExpect(

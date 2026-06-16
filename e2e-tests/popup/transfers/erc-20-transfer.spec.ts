@@ -181,7 +181,7 @@ popup.describe('Popup UI: ERC-20 transfer', () => {
 
     await popupExpect(
       popupPage.getByRole('heading', {
-        name: 'failed to send http request, details: Code: 500, err: Internal Server Error'
+        name: 'Internal Server Error'
       })
     ).toBeVisible();
     await popupExpect(
