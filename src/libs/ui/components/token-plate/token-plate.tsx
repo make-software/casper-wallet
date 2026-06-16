@@ -11,6 +11,7 @@ import {
   getSpacingSize
 } from '@libs/layout';
 import { SvgIcon, Tooltip, Typography } from '@libs/ui/components';
+import { truncateKey } from '@libs/ui/components/hash/utils';
 
 const TokenAmountContainer = styled(FlexColumn)`
   max-width: 300px;
@@ -52,6 +53,19 @@ export const TokenPlate = ({
   const tokenIconFormat = token?.icon?.split('.').pop()?.toLowerCase();
   const isTokenIconSvg = tokenIconFormat === 'svg';
 
+  const nameTooltipTitle = token?.contractPackageHash ? (
+    <FlexColumn gap={SpacingSize.Tiny}>
+      <Typography type="captionRegular" overflowWrap>
+        {token.name}
+      </Typography>
+      <Typography type="captionHash" color="contentSecondary">
+        {truncateKey(token.contractPackageHash, { size: 'base' })}
+      </Typography>
+    </FlexColumn>
+  ) : token?.name && token.name.length > 10 ? (
+    token.name
+  ) : undefined;
+
   return (
     <ListItemContainer
       chevron={chevron}
@@ -71,13 +85,7 @@ export const TokenPlate = ({
         )}
         <FlexColumn>
           <TokenNameContainer>
-            <Tooltip
-              title={
-                token?.name && token.name.length > 10 ? token.name : undefined
-              }
-              fullWidth
-              overflowWrap
-            >
+            <Tooltip title={nameTooltipTitle} fullWidth overflowWrap>
               <Typography type="bodySemiBold" ellipsis loading={!token?.name}>
                 {token?.name}
               </Typography>

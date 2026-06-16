@@ -16,7 +16,7 @@ popup.describe('Popup UI: Redelegation', () => {
         route.fulfill(RPC_RESPONSE.success)
       );
 
-      await popupPage.getByText('More').click();
+      await popupPage.getByText('More', { exact: true }).click();
 
       await popupPage.getByText('Redelegate', { exact: true }).click();
 
