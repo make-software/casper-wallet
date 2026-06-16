@@ -83,14 +83,35 @@ export function SignEip712Page() {
     shallowEqual
   );
 
-  const { typedData, options } = useMemo<{
+  const { typedData, options, isInvalidPayload } = useMemo<{
     typedData?: IEIP712TypedData;
     options?: IEIP712SignTypedDataOptions;
+    isInvalidPayload?: boolean;
   }>(() => {
     const raw = eip712JsonById[requestId];
 
-    return raw ? JSON.parse(raw) : {};
+    if (!raw) {
+      return {};
+    }
+
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return { isInvalidPayload: true };
+    }
   }, [eip712JsonById, requestId]);
+
+  // Stored payload is present but not valid JSON — cannot proceed.
+  if (isInvalidPayload) {
+    const error = Error(
+      ErrorMessages.signTypedData.INVALID_TYPED_DATA.description
+    );
+    sendSdkResponseToSpecificTab(
+      sdkMethod.signTypedDataError(error, { requestId }),
+      requestTabId
+    );
+    throw error;
+  }
 
   const signingAccount = useMemo(
     () => getSigningAccount(accounts, signingPublicKeyHex),
@@ -113,6 +134,18 @@ export function SignEip712Page() {
   if (signingAccount.hardware === HardwareWalletType.Ledger) {
     const error = Error(
       ErrorMessages.signTypedData.LEDGER_NOT_SUPPORTED.description
+    );
+    sendSdkResponseToSpecificTab(
+      sdkMethod.signTypedDataError(error, { requestId }),
+      requestTabId
+    );
+    throw error;
+  }
+
+  // Watch-only accounts have no secret key and cannot sign.
+  if (!signingAccount.secretKey) {
+    const error = Error(
+      ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
     );
     sendSdkResponseToSpecificTab(
       sdkMethod.signTypedDataError(error, { requestId }),
@@ -171,41 +204,53 @@ export function SignEip712Page() {
   }, [requestId, requestTabId]);
 
   const handleSign = useCallback(() => {
-    if (!typedData) {
+    if (!typedData || responseSentRef.current) {
       return;
     }
 
-    // EIP-712 supports software-key signing only; Ledger accounts are rejected earlier.
-    const publicKey = PublicKey.fromHex(signingAccount.publicKey);
-    const privateKey = PrivateKey.fromHex(
-      getPrivateKeyHexFromSecretKey(
-        Conversions.base64to16(signingAccount.secretKey)
-      ),
-      publicKey.cryptoAlg
-    );
+    try {
+      // EIP-712 supports software-key signing only; Ledger accounts are rejected earlier.
+      const publicKey = PublicKey.fromHex(signingAccount.publicKey);
+      const privateKey = PrivateKey.fromHex(
+        getPrivateKeyHexFromSecretKey(
+          Conversions.base64to16(signingAccount.secretKey)
+        ),
+        publicKey.cryptoAlg
+      );
 
-    const result = eip712Repository.signTypedData({
-      typedData,
-      privateKey,
-      options
-    });
+      const result = eip712Repository.signTypedData({
+        typedData,
+        privateKey,
+        options
+      });
 
-    responseSentRef.current = true;
-    sendSdkResponseToSpecificTab(
-      sdkMethod.signTypedDataResponse(
-        {
-          cancelled: false,
-          signature: result.signature,
-          digest: result.digest,
-          publicKey: result.publicKey,
-          hashArtifacts: result.hashArtifacts,
-          error: null
-        },
-        { requestId }
-      ),
-      requestTabId
-    );
-    closeCurrentWindow();
+      responseSentRef.current = true;
+      sendSdkResponseToSpecificTab(
+        sdkMethod.signTypedDataResponse(
+          {
+            cancelled: false,
+            signature: result.signature,
+            digest: result.digest,
+            publicKey: result.publicKey,
+            hashArtifacts: result.hashArtifacts,
+            error: null
+          },
+          { requestId }
+        ),
+        requestTabId
+      );
+      closeCurrentWindow();
+    } catch {
+      responseSentRef.current = true;
+      sendSdkResponseToSpecificTab(
+        sdkMethod.signTypedDataError(
+          Error(ErrorMessages.signTypedData.SIGNING_FAILED.description),
+          { requestId }
+        ),
+        requestTabId
+      );
+      closeCurrentWindow();
+    }
   }, [
     typedData,
     options,
@@ -277,7 +322,7 @@ export function SignEip712Page() {
             <ApproveConnectionContent
               account={signingAccount}
               accountLiquidBalance={
-                accountsBalances?.[signingAccountHash].liquidBalance ?? '0'
+                accountsBalances?.[signingAccountHash]?.liquidBalance ?? '0'
               }
               accountsInfo={accountsInfo}
               isLoadingBalance={isLoadingBalances}

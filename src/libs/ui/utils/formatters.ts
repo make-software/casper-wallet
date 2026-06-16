@@ -1,10 +1,7 @@
 import { createIntl, createIntlCache } from '@formatjs/intl';
 import Big from 'big.js';
-// eslint-disable-next-line import/no-duplicates
-import { formatDistanceToNowStrict } from 'date-fns';
-// eslint-disable-next-line import/no-duplicates
+import { type FormatDistanceToken, formatDistanceToNowStrict } from 'date-fns';
 import { enUS as en } from 'date-fns/locale/en-US';
-import type { FormatDistanceToken } from 'date-fns/locale/types';
 
 import { MOTES_PER_CSPR_RATE } from '@src/constants';
 
