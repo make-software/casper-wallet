@@ -10,4 +10,5 @@ export type VaultState = {
   siteNameByOriginDict: SiteNameByOriginDict;
   activeAccountName: string | null;
   jsonById: Record<string, string>;
+  eip712ById: Record<string, string>;
 };

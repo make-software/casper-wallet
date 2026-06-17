@@ -9,7 +9,8 @@ const {
   onRampRepository,
   appEventsRepository,
   txSignatureRequestRepository,
-  contractPackageRepository
+  contractPackageRepository,
+  eip712Repository
 } = setupRepositories();
 
 export {
@@ -21,5 +22,6 @@ export {
   onRampRepository,
   appEventsRepository,
   txSignatureRequestRepository,
-  contractPackageRepository
+  contractPackageRepository,
+  eip712Repository
 };

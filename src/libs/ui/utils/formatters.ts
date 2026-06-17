@@ -1,9 +1,7 @@
 import { createIntl, createIntlCache } from '@formatjs/intl';
 import Big from 'big.js';
-// eslint-disable-next-line import/no-duplicates
-import { formatDistanceToNowStrict } from 'date-fns';
-// eslint-disable-next-line import/no-duplicates
-import en from 'date-fns/locale/en-US';
+import { type FormatDistanceToken, formatDistanceToNowStrict } from 'date-fns';
+import { enUS as en } from 'date-fns/locale/en-US';
 
 import { MOTES_PER_CSPR_RATE } from '@src/constants';
 
@@ -17,15 +15,23 @@ const intl = createIntl(
   cache
 );
 
-const formatDistanceTokens = {
+const formatDistanceTokens: Record<FormatDistanceToken, string> = {
   lessThanXSeconds: 'second',
   xSeconds: 'second',
+  halfAMinute: 'minute',
   lessThanXMinutes: 'minute',
   xMinutes: 'minute',
+  aboutXHours: 'hour',
   xHours: 'hour',
   xDays: 'day',
+  aboutXWeeks: 'week',
+  xWeeks: 'week',
+  aboutXMonths: 'month',
   xMonths: 'month',
-  xYears: 'year'
+  aboutXYears: 'year',
+  xYears: 'year',
+  overXYears: 'year',
+  almostXYears: 'year'
 };
 
 export const formatTimestamp = (value: string): string => {
@@ -73,7 +79,7 @@ export const formatDate = (isoString: string): string => {
 };
 
 const formatDistance = (
-  token: keyof typeof formatDistanceTokens,
+  token: FormatDistanceToken,
   count: number,
   options: any
 ) => {

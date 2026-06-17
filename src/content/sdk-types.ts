@@ -16,6 +16,40 @@ export enum CasperWalletSupports {
   signDeploy = 'sign-deploy',
   signTransactionV1 = 'sign-transactionv1',
   signMessage = 'sign-message',
+  signTypedData = 'sign-typed-data',
   messageEncryption = 'message-encryption',
   messageDecryption = 'message-decryption'
+}
+
+export interface SignTypedDataParams {
+  typedData: {
+    domain: Record<string, unknown>;
+    types: Record<string, Array<{ name: string; type: string }>>;
+    primaryType: string;
+    message: Record<string, unknown>;
+  };
+  options?: {
+    domainTypes?: Array<{ name: string; type: string }>;
+    returnHashArtifacts?: boolean;
+    rejectUnknownFields?: boolean;
+  };
+}
+
+export interface EIP712HashArtifacts {
+  domainTypeString?: string;
+  domain?: Record<string, unknown>;
+  domainSeparator?: string;
+  canonicalTypeString?: string;
+  typeHash?: string;
+  structHash?: string;
+}
+
+export interface SignTypedDataResult {
+  cancelled: boolean;
+  signature: string | null;
+  digest: string | null;
+  publicKey: string | null;
+  error: string | null;
+  errorCode?: string;
+  hashArtifacts?: EIP712HashArtifacts;
 }

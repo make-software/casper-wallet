@@ -242,3 +242,6 @@ export const selectCountOfConnectedSites = createSelector(
 );
 
 export const selectDeploysJsonById = (state: RootState) => state.vault.jsonById;
+
+export const selectEip712JsonById = (state: RootState) =>
+  state.vault.eip712ById;

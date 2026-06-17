@@ -69,6 +69,11 @@ export const deployPayloadReceived = createAction('DEPLOY_PAYLOAD_RECEIVED')<{
   json: string;
 }>();
 
+export const eip712PayloadReceived = createAction('EIP712_PAYLOAD_RECEIVED')<{
+  id: string;
+  json: string;
+}>();
+
 export const hideAccountFromListChanged = createAction(
   'HIDE_ACCOUNT_FROM_LIST_CHANGED'
 )<{

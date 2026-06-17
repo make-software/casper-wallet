@@ -1,5 +1,4 @@
-import { HttpHandler, RpcClient } from 'casper-js-sdk';
-import { InfoGetStatusResult } from 'casper-js-sdk/dist/rpc/response';
+import { HttpHandler, InfoGetStatusResult, RpcClient } from 'casper-js-sdk';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
 import { getType } from 'typesafe-actions';
 

@@ -1,5 +1,9 @@
 import {
   Deploy,
+  IMakeAuctionManagerDeployParams,
+  IMakeCep18TransferDeployParams,
+  IMakeCsprTransferDeployParams,
+  IMakeNftTransferDeployParams,
   makeAuctionManagerDeploy,
   makeAuctionManagerTransaction,
   makeCep18TransferDeploy,
@@ -7,10 +11,6 @@ import {
   makeCsprTransferDeploy,
   makeCsprTransferTransaction
 } from 'casper-js-sdk';
-import { IMakeAuctionManagerDeployParams } from 'casper-js-sdk/dist/utils/auction-manager';
-import { IMakeCep18TransferDeployParams } from 'casper-js-sdk/dist/utils/cep-18-transfer';
-import { IMakeNftTransferDeployParams } from 'casper-js-sdk/dist/utils/cep-nft-transfer';
-import { IMakeCsprTransferDeployParams } from 'casper-js-sdk/dist/utils/cspr-transfer';
 import {
   NFTTokenStandard,
   makeNftTransferTransaction

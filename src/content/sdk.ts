@@ -7,6 +7,7 @@ import {
   isSDKMethod,
   sdkMethod
 } from './sdk-method';
+import { SignTypedDataParams, SignTypedDataResult } from './sdk-types';
 
 export type SignatureResponse =
   | {
@@ -201,6 +202,25 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
           signature
         };
       });
+    },
+    signTypedData: (
+      params: SignTypedDataParams,
+      signingPublicKeyHex: string
+    ): Promise<SignTypedDataResult> => {
+      return fetchFromBackground<
+        ReturnType<(typeof sdkMethod)['signTypedDataResponse']>['payload']
+      >(
+        sdkMethod.signTypedDataRequest(
+          {
+            typedData: params.typedData,
+            options: params.options,
+            signingPublicKeyHex
+          },
+          {
+            requestId: generateRequestId()
+          }
+        )
+      );
     },
     /**
      * Get the encrypted message from the Casper Wallet extension

@@ -406,5 +406,22 @@ export const ErrorMessages = {
       description:
         'Ledger hardware wallets do not support message decryption. Use a software wallet instead.'
     }
+  },
+  signTypedData: {
+    LEDGER_NOT_SUPPORTED: {
+      message: 'Typed data signing with Ledger is not supported',
+      description:
+        'Ledger hardware wallets do not support EIP-712 typed data signing. Use a software wallet instead.'
+    },
+    SIGNING_FAILED: {
+      message: 'Failed to sign the typed data',
+      description:
+        'An unexpected error occurred while signing the EIP-712 typed data. Please try again.'
+    },
+    INVALID_TYPED_DATA: {
+      message: 'Invalid Typed Data',
+      description:
+        'The EIP-712 typed data provided is invalid and cannot be processed. Please check the input and try again.'
+    }
   }
 };
