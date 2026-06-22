@@ -107,7 +107,7 @@ export function SignEip712Page() {
       ErrorMessages.signTypedDataEIP712.INVALID_TYPED_DATA.description
     );
     sendSdkResponseToSpecificTab(
-      sdkMethod.signTypedDataError(error, { requestId }),
+      sdkMethod.signTypedDataEIP712Error(error, { requestId }),
       requestTabId
     );
     throw error;
@@ -124,7 +124,7 @@ export function SignEip712Page() {
       ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
     );
     sendSdkResponseToSpecificTab(
-      sdkMethod.signTypedDataError(error, { requestId }),
+      sdkMethod.signTypedDataEIP712Error(error, { requestId }),
       requestTabId
     );
     throw error;
@@ -136,7 +136,7 @@ export function SignEip712Page() {
       ErrorMessages.signTypedDataEIP712.LEDGER_NOT_SUPPORTED.description
     );
     sendSdkResponseToSpecificTab(
-      sdkMethod.signTypedDataError(error, { requestId }),
+      sdkMethod.signTypedDataEIP712Error(error, { requestId }),
       requestTabId
     );
     throw error;
@@ -148,7 +148,7 @@ export function SignEip712Page() {
       ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
     );
     sendSdkResponseToSpecificTab(
-      sdkMethod.signTypedDataError(error, { requestId }),
+      sdkMethod.signTypedDataEIP712Error(error, { requestId }),
       requestTabId
     );
     throw error;
@@ -188,7 +188,7 @@ export function SignEip712Page() {
     if (responseSentRef.current) return;
     responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
-      sdkMethod.signTypedDataResponse(
+      sdkMethod.signTypedDataEIP712Response(
         {
           cancelled: true,
           signature: null,
@@ -226,7 +226,7 @@ export function SignEip712Page() {
 
       responseSentRef.current = true;
       sendSdkResponseToSpecificTab(
-        sdkMethod.signTypedDataResponse(
+        sdkMethod.signTypedDataEIP712Response(
           {
             cancelled: false,
             signature: result.signature,
@@ -243,7 +243,7 @@ export function SignEip712Page() {
     } catch {
       responseSentRef.current = true;
       sendSdkResponseToSpecificTab(
-        sdkMethod.signTypedDataError(
+        sdkMethod.signTypedDataEIP712Error(
           Error(ErrorMessages.signTypedDataEIP712.SIGNING_FAILED.description),
           { requestId }
         ),

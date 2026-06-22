@@ -468,7 +468,7 @@ runtime.onMessage.addListener(
             return sendResponse(undefined);
           }
 
-          case getType(sdkMethod.signTypedDataRequest): {
+          case getType(sdkMethod.signTypedDataEIP712Request): {
             const origin = getUrlOrigin(sender.url);
             if (!origin) {
               return sendError(CannotGetSenderOriginError());

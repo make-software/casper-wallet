@@ -208,9 +208,9 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
       signingPublicKeyHex: string
     ): Promise<SignTypedDataResult> => {
       return fetchFromBackground<
-        ReturnType<(typeof sdkMethod)['signTypedDataResponse']>['payload']
+        ReturnType<(typeof sdkMethod)['signTypedDataEIP712Response']>['payload']
       >(
-        sdkMethod.signTypedDataRequest(
+        sdkMethod.signTypedDataEIP712Request(
           {
             typedData: params.typedData,
             options: params.options,
