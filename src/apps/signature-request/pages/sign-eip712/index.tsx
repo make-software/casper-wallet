@@ -104,7 +104,7 @@ export function SignEip712Page() {
   // Stored payload is present but not valid JSON — cannot proceed.
   if (isInvalidPayload) {
     const error = Error(
-      ErrorMessages.signTypedData.INVALID_TYPED_DATA.description
+      ErrorMessages.signTypedDataEIP712.INVALID_TYPED_DATA.description
     );
     sendSdkResponseToSpecificTab(
       sdkMethod.signTypedDataError(error, { requestId }),
@@ -133,7 +133,7 @@ export function SignEip712Page() {
   // Ledger hardware wallets do not support EIP-712 typed data signing.
   if (signingAccount.hardware === HardwareWalletType.Ledger) {
     const error = Error(
-      ErrorMessages.signTypedData.LEDGER_NOT_SUPPORTED.description
+      ErrorMessages.signTypedDataEIP712.LEDGER_NOT_SUPPORTED.description
     );
     sendSdkResponseToSpecificTab(
       sdkMethod.signTypedDataError(error, { requestId }),
@@ -218,7 +218,7 @@ export function SignEip712Page() {
         publicKey.cryptoAlg
       );
 
-      const result = eip712Repository.signTypedData({
+      const result = eip712Repository.signTypedDataEIP712({
         typedData,
         privateKey,
         options
@@ -244,7 +244,7 @@ export function SignEip712Page() {
       responseSentRef.current = true;
       sendSdkResponseToSpecificTab(
         sdkMethod.signTypedDataError(
-          Error(ErrorMessages.signTypedData.SIGNING_FAILED.description),
+          Error(ErrorMessages.signTypedDataEIP712.SIGNING_FAILED.description),
           { requestId }
         ),
         requestTabId

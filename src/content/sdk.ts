@@ -203,7 +203,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         };
       });
     },
-    signTypedData: (
+    signTypedDataEIP712: (
       params: SignTypedDataParams,
       signingPublicKeyHex: string
     ): Promise<SignTypedDataResult> => {
