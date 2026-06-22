@@ -123,7 +123,7 @@
     "@redux-devtools/remote": "^0.9.3",
     "@testing-library/dom": "9.3.4",
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^15.0.7",
+    "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.5.2",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/big.js": "^6.1.6",
