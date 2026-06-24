@@ -20,4 +20,10 @@ describe('formatPrimaryTypeLabel', () => {
   it('returns empty string unchanged', () => {
     expect(formatPrimaryTypeLabel('')).toBe('');
   });
+  it('returns empty string for separator-only input', () => {
+    expect(formatPrimaryTypeLabel('_')).toBe('');
+    expect(formatPrimaryTypeLabel('__')).toBe('');
+    expect(formatPrimaryTypeLabel('-')).toBe('');
+    expect(formatPrimaryTypeLabel('   ')).toBe('');
+  });
 });

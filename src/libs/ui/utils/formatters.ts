@@ -179,6 +179,7 @@ export function formatPrimaryTypeLabel(value: string): string {
     .replace(/\s+/g, ' ')
     .trim()
     .split(' ')
+    .filter(Boolean)
     .map(word => capitalizeString(word))
     .join(' ');
 }
