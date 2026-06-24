@@ -14,6 +14,7 @@ import {
 import { List, SvgIcon, Tile, Typography } from '@libs/ui/components';
 import { MaybeLink } from '@libs/ui/components/maybe-link/maybe-link';
 import { getFaviconUrlFromOrigin } from '@libs/ui/components/site-favicon-badge/site-favicon-badge';
+import { formatPrimaryTypeLabel } from '@libs/ui/utils';
 
 import { Eip712DisplayRow, Eip712NetworkRow } from './eip712-display-row';
 
@@ -112,7 +113,7 @@ export function SignEip712Content({
         />
 
         <List
-          headerLabel={signatureRequest.primaryType}
+          headerLabel={formatPrimaryTypeLabel(signatureRequest.primaryType)}
           rows={signatureRequest.messageRows.map((row, index) => ({
             id: `message-${index}-${row.label}`,
             label: row.label,

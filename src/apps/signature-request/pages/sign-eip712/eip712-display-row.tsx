@@ -75,9 +75,10 @@ export function Eip712DisplayRow({ row }: Eip712DisplayRowProps) {
         <Hash
           value={row.copyValue ?? row.value}
           variant={HashVariant.BodyHash}
-          color="contentPrimary"
+          color="contentAction"
           truncated
           withCopyOnSelfClick
+          withCopyIcon
         />
       ) : (
         <Typography type="bodyHash" color="contentPrimary" overflowWrap>

@@ -169,6 +169,21 @@ export function capitalizeString(str: string): string {
   return `${str[0].toUpperCase()}${str.slice(1)}`;
 }
 
+export function formatPrimaryTypeLabel(value: string): string {
+  if (!value) {
+    return value;
+  }
+  return value
+    .replace(/[_-]+/g, ' ')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ')
+    .filter(Boolean)
+    .map(word => capitalizeString(word))
+    .join(' ');
+}
+
 export const formatCurrency = (
   value: string,
   code: string,
