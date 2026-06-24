@@ -61,7 +61,9 @@ export const sdkMethod = {
     Error,
     Meta
   >(),
-  signTypedDataRequest: createAction('CasperWalletProvider:SignTypedData')<
+  signTypedDataEIP712Request: createAction(
+    'CasperWalletProvider:SignTypedDataEIP712'
+  )<
     {
       typedData: SignTypedDataParams['typedData'];
       options?: SignTypedDataParams['options'];
@@ -69,13 +71,12 @@ export const sdkMethod = {
     },
     Meta
   >(),
-  signTypedDataResponse: createAction(
-    'CasperWalletProvider:SignTypedData:Response'
+  signTypedDataEIP712Response: createAction(
+    'CasperWalletProvider:SignTypedDataEIP712:Response'
   )<SignTypedDataResult, Meta>(),
-  signTypedDataError: createAction('CasperWalletProvider:SignTypedData:Error')<
-    Error,
-    Meta
-  >(),
+  signTypedDataEIP712Error: createAction(
+    'CasperWalletProvider:SignTypedDataEIP712:Error'
+  )<Error, Meta>(),
   encryptMessageRequest: createAction('CasperWalletProvider:EncryptMessage')<
     {
       message: string;

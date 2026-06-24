@@ -203,14 +203,14 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         };
       });
     },
-    signTypedData: (
+    signTypedDataEIP712: (
       params: SignTypedDataParams,
       signingPublicKeyHex: string
     ): Promise<SignTypedDataResult> => {
       return fetchFromBackground<
-        ReturnType<(typeof sdkMethod)['signTypedDataResponse']>['payload']
+        ReturnType<(typeof sdkMethod)['signTypedDataEIP712Response']>['payload']
       >(
-        sdkMethod.signTypedDataRequest(
+        sdkMethod.signTypedDataEIP712Request(
           {
             typedData: params.typedData,
             options: params.options,
@@ -363,7 +363,7 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
     },
     /**
      * Get a list of features that the active public key supports.
-     * It can be `sign-deploy`, `sign-transactionv1`, `sign-message` and `messages-encryption`
+     * It can be `sign-deploy`, `sign-transactionv1`, `sign-message`, `sign-typed-data-eip712`, `message-encryption` and `message-decryption`
      * @returns returns array of features that supports the active public key.
      * @throws when wallet is locked (err.code: 1)
      * @throws when active account not approved to connect with the site (err.code: 2)

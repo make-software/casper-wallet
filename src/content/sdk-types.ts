@@ -16,7 +16,7 @@ export enum CasperWalletSupports {
   signDeploy = 'sign-deploy',
   signTransactionV1 = 'sign-transactionv1',
   signMessage = 'sign-message',
-  signTypedData = 'sign-typed-data',
+  signTypedDataEIP712 = 'sign-typed-data-eip712',
   messageEncryption = 'message-encryption',
   messageDecryption = 'message-decryption'
 }
