@@ -49,7 +49,7 @@ export const useFetchDataForEip712Request = ({
             ErrorMessages.signTransaction.INVALID_TRANSACTION_JSON.description
           );
           sendSdkResponseToSpecificTab(
-            sdkMethod.signTypedDataEIP712Error(error, { requestId }),
+            sdkMethod.signTypedDataError(error, { requestId }),
             requestTabId
           );
           throw error;
