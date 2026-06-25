@@ -21,6 +21,7 @@ const RowDataContainer = styled(SpaceBetweenFlexRow)`
   margin: 16px;
   width: unset;
   gap: 8px;
+  flex-wrap: wrap;
 `;
 
 interface Eip712DisplayRowProps {
@@ -45,13 +46,16 @@ export function Eip712DisplayRow({ row }: Eip712DisplayRowProps) {
   }
 
   if (row.presentation === 'account') {
+    const publicKey = row.accountInfo?.publicKey;
+
     return (
       <RowDataContainer>
         <Typography type="body" color="contentSecondary">
           {row.label}
         </Typography>
         <AccountInfoRow
-          publicKey={row.value}
+          publicKey={publicKey ?? row.value}
+          isAccountHash={!publicKey}
           csprName={row.accountInfo?.csprName}
           imgLogo={row.accountInfo?.brandingLogo}
           accountName={row.accountInfo?.name}
