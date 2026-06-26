@@ -104,10 +104,10 @@ export function SignEip712Page() {
   // Stored payload is present but not valid JSON — cannot proceed.
   if (isInvalidPayload) {
     const error = Error(
-      ErrorMessages.signTypedDataEIP712.INVALID_TYPED_DATA.description
+      ErrorMessages.signTypedData.INVALID_TYPED_DATA.description
     );
     sendSdkResponseToSpecificTab(
-      sdkMethod.signTypedDataEIP712Error(error, { requestId }),
+      sdkMethod.signTypedDataError(error, { requestId }),
       requestTabId
     );
     throw error;
@@ -124,7 +124,7 @@ export function SignEip712Page() {
       ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
     );
     sendSdkResponseToSpecificTab(
-      sdkMethod.signTypedDataEIP712Error(error, { requestId }),
+      sdkMethod.signTypedDataError(error, { requestId }),
       requestTabId
     );
     throw error;
@@ -133,10 +133,10 @@ export function SignEip712Page() {
   // Ledger hardware wallets do not support EIP-712 typed data signing.
   if (signingAccount.hardware === HardwareWalletType.Ledger) {
     const error = Error(
-      ErrorMessages.signTypedDataEIP712.LEDGER_NOT_SUPPORTED.description
+      ErrorMessages.signTypedData.LEDGER_NOT_SUPPORTED.description
     );
     sendSdkResponseToSpecificTab(
-      sdkMethod.signTypedDataEIP712Error(error, { requestId }),
+      sdkMethod.signTypedDataError(error, { requestId }),
       requestTabId
     );
     throw error;
@@ -148,7 +148,7 @@ export function SignEip712Page() {
       ErrorMessages.signTransaction.SIGNING_ACCOUNT_MISSING.description
     );
     sendSdkResponseToSpecificTab(
-      sdkMethod.signTypedDataEIP712Error(error, { requestId }),
+      sdkMethod.signTypedDataError(error, { requestId }),
       requestTabId
     );
     throw error;
@@ -188,7 +188,7 @@ export function SignEip712Page() {
     if (responseSentRef.current) return;
     responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
-      sdkMethod.signTypedDataEIP712Response(
+      sdkMethod.signTypedDataResponse(
         {
           cancelled: true,
           signature: null,
@@ -218,7 +218,7 @@ export function SignEip712Page() {
         publicKey.cryptoAlg
       );
 
-      const result = eip712Repository.signTypedDataEIP712({
+      const result = eip712Repository.signTypedData({
         typedData,
         privateKey,
         options
@@ -226,7 +226,7 @@ export function SignEip712Page() {
 
       responseSentRef.current = true;
       sendSdkResponseToSpecificTab(
-        sdkMethod.signTypedDataEIP712Response(
+        sdkMethod.signTypedDataResponse(
           {
             cancelled: false,
             signature: result.signature,
@@ -243,8 +243,8 @@ export function SignEip712Page() {
     } catch {
       responseSentRef.current = true;
       sendSdkResponseToSpecificTab(
-        sdkMethod.signTypedDataEIP712Error(
-          Error(ErrorMessages.signTypedDataEIP712.SIGNING_FAILED.description),
+        sdkMethod.signTypedDataError(
+          Error(ErrorMessages.signTypedData.SIGNING_FAILED.description),
           { requestId }
         ),
         requestTabId

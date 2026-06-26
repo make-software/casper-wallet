@@ -203,14 +203,14 @@ export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
         };
       });
     },
-    signTypedDataEIP712: (
+    signTypedData: (
       params: SignTypedDataParams,
       signingPublicKeyHex: string
     ): Promise<SignTypedDataResult> => {
       return fetchFromBackground<
-        ReturnType<(typeof sdkMethod)['signTypedDataEIP712Response']>['payload']
+        ReturnType<(typeof sdkMethod)['signTypedDataResponse']>['payload']
       >(
-        sdkMethod.signTypedDataEIP712Request(
+        sdkMethod.signTypedDataRequest(
           {
             typedData: params.typedData,
             options: params.options,

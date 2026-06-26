@@ -39,6 +39,7 @@ interface AccountInfoRowProps {
   withCopyIcon?: boolean;
   containerStyle?: React.CSSProperties;
   nameContainerStyle?: React.CSSProperties;
+  isAccountHash?: boolean;
 }
 
 const AccountInfoContainer = styled(AlignedFlexRow)`
@@ -63,7 +64,8 @@ export const AccountInfoRow = ({
   accountLink,
   withCopyIcon = false,
   containerStyle,
-  nameContainerStyle
+  nameContainerStyle,
+  isAccountHash
 }: AccountInfoRowProps) => {
   const [linkUrl, setLinkUrl] = useState('');
 
@@ -170,9 +172,11 @@ export const AccountInfoRow = ({
                     ownerName={accountName}
                     truncated
                     label={
-                      isPublicKeyHash(publicKey)
-                        ? t('Public key')
-                        : t('Account hash')
+                      isAccountHash
+                        ? t('Account hash')
+                        : isPublicKeyHash(publicKey)
+                          ? t('Public key')
+                          : t('Account hash')
                     }
                     truncatedSize="base"
                     color={isAction ? 'contentAction' : 'contentPrimary'}
