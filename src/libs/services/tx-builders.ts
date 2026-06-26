@@ -37,7 +37,7 @@ export const buildCep18Transactions = (
     transferAmount,
     timestamp,
     casperNetworkApiVersion,
-    gasPrice: 3
+    gasPrice: 1
   });
 
   // required for old Ledger apps
@@ -73,7 +73,7 @@ export const buildCsprTransferTransactions = (
     transferAmount,
     timestamp,
     casperNetworkApiVersion,
-    gasPrice: 3
+    gasPrice: 1
   });
 
   // required for old Ledger apps
@@ -110,7 +110,7 @@ export const buildAuctionTransactions = (
     validatorPublicKeyHex,
     timestamp,
     casperNetworkApiVersion,
-    gasPrice: 3
+    gasPrice: 1
   });
 
   // required for old Ledger apps
@@ -157,7 +157,7 @@ export const buildNftTransferTransactions = (
     tokenHash,
     timestamp,
     casperNetworkApiVersion,
-    gasPrice: 3
+    gasPrice: 1
   });
 
   // required for old Ledger apps
@@ -172,7 +172,7 @@ export const buildNftTransferTransactions = (
     tokenHash,
     timestamp,
     casperNetworkApiVersion: '1.5.8',
-    gasPrice: 3
+    gasPrice: 1
   });
 
   return { transaction, fallbackDeploy: fallbackDeploy.getDeploy() as Deploy };
