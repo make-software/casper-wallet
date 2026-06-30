@@ -1,6 +1,10 @@
-import { gcm } from '@noble/ciphers/aes';
-import { bytesToUtf8, concatBytes, utf8ToBytes } from '@noble/ciphers/utils';
-import { randomBytes } from '@noble/ciphers/webcrypto';
+import { gcm } from '@noble/ciphers/aes.js';
+import {
+  bytesToUtf8,
+  concatBytes,
+  randomBytes,
+  utf8ToBytes
+} from '@noble/ciphers/utils.js';
 
 import {
   convertBase64ToBytes,

@@ -56,6 +56,7 @@
   "resolutions": {
     "styled-components": "^5"
   },
+  "//dependencyNotes": "@scure/bip32 and @scure/bip39 are intentionally held at v1 (1.6.2 / 1.2.1): casper-js-sdk@5.0.12 pins @scure/* ^1 and shares the top-level copy. Bumping to v2 would fork BIP32/39 into two impls and pull @noble/curves@2/@noble/hashes@2 (wrong-address risk, no upside). Bump in lockstep only when the SDK/core move off @scure ^1. See WALLET-1330.",
   "dependencies": {
     "@bringweb3/chrome-extension-kit": "1.6.4",
     "@formatjs/intl": "2.10.4",
@@ -66,7 +67,7 @@
     "@ledgerhq/hw-transport-webhid": "^6.30.8",
     "@ledgerhq/hw-transport-webusb": "^6.29.12",
     "@lottiefiles/react-lottie-player": "3.6.0",
-    "@noble/ciphers": "^1.3.0",
+    "@noble/ciphers": "^2.2.0",
     "@scure/bip32": "1.6.2",
     "@scure/bip39": "1.2.1",
     "@tanstack/react-query": "^5.100.5",
@@ -84,7 +85,7 @@
     "i18next-http-backend": "^3.0.5",
     "i18next-parser": "^9.4.0",
     "jszip": "^3.10.1",
-    "libsodium-wrappers-sumo": "^0.8.2",
+    "libsodium-wrappers-sumo": "^0.8.4",
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "4.1.1",
     "mac-scrollbar": "^0.13.6",
