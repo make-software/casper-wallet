@@ -1,7 +1,7 @@
 {
   "name": "Casper Wallet",
   "description": "Securely manage your CSPR tokens and interact with dapps with the self-custody wallet for the Casper blockchain.",
-  "version": "2.4.3",
+  "version": "2.5.0",
   "author": "MAKE LLC",
   "engines": {
     "node": ">=22",
@@ -115,6 +115,9 @@
     "cookie": "^0.7.0",
     "image-size": "2.0.2",
     "path-to-regexp": "^1.8.0",
+    "router": {
+      "path-to-regexp": "^8.0.0"
+    },
     "qs": "^6.15.2",
     "serialize-javascript": "^7.0.5",
     "tmp": "^0.2.7"
