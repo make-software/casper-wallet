@@ -8,7 +8,7 @@ describe('parseSecretKeyStringSecp', () => {
   it('should throws an error for an invalid secret key', () => {
     expect(() => {
       parseSecretKeyStringSecp('invalidKey');
-    }).toThrowError('Invalid secret key');
+    }).toThrow('Invalid secret key');
   });
 
   it('should returns the correct key pair for a valid secret key', () => {
