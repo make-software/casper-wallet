@@ -1,6 +1,4 @@
-import { Page } from '@playwright/test';
 import path from 'path';
-
 
 export const newPassword = 'this is new password';
 export const vaultPassword = '3hQqzYn4C7Y8rEZTVEZb';
