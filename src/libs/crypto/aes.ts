@@ -1,4 +1,10 @@
-import * as aes from 'micro-aes-gcm/index';
+import { gcm } from '@noble/ciphers/aes.js';
+import {
+  bytesToUtf8,
+  concatBytes,
+  randomBytes,
+  utf8ToBytes
+} from '@noble/ciphers/utils.js';
 
 import {
   convertBase64ToBytes,
@@ -10,16 +16,22 @@ export async function aesEncryptString(
   keyHash: string,
   str: string
 ): Promise<string> {
-  const key = convertHexToBytes(keyHash);
-  const bytes = await aes.encrypt(key, str);
-  return convertBytesToBase64(bytes);
+  const iv = randomBytes(12);
+  const ciphertext = gcm(convertHexToBytes(keyHash), iv).encrypt(
+    utf8ToBytes(str)
+  );
+
+  return convertBytesToBase64(concatBytes(iv, ciphertext));
 }
 
 export async function aesDecryptString(
   keyHash: string,
   cipherBase64: string
 ): Promise<string> {
-  const key = convertHexToBytes(keyHash);
-  const jsonBytes = await aes.decrypt(key, convertBase64ToBytes(cipherBase64));
-  return aes.utils.bytesToUtf8(jsonBytes);
+  const data = convertBase64ToBytes(cipherBase64);
+  const plaintext = gcm(convertHexToBytes(keyHash), data.slice(0, 12)).decrypt(
+    data.slice(12)
+  );
+
+  return bytesToUtf8(plaintext);
 }

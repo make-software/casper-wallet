@@ -4,7 +4,9 @@ module.exports = {
   transform: {
     '^.+\\.(j|t)sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }]
   },
-  transformIgnorePatterns: ['<rootDir>/node_modules/(?!micro-aes-gcm/.*)'],
+  transformIgnorePatterns: [
+    '<rootDir>/node_modules/(?!(@lapo/asn1js|@noble/ciphers)/)'
+  ],
   coveragePathIgnorePatterns: ['/node_modules/'],
   testRegex: '(/tests?/.*|(\\.|/)(test|spec))\\.tsx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
