@@ -40,3 +40,13 @@ jobs:
       run: |
         npm ci
         npm run ci-check
+
+    # Blocking: fail the build on a high+ vulnerability that reaches the
+    # shipped bundle (runtime deps only).
+    - name: Audit runtime dependencies (blocking)
+      run: npm run audit:ci
+
+    # Non-blocking: surface dev/build-toolchain advisories for visibility
+    # without failing CI (these never reach the extension bundle).
+    - name: Audit full dependency tree (non-blocking)
+      run: npm audit || true
