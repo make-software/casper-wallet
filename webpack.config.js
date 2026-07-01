@@ -116,7 +116,7 @@ const options = {
     sdk: path.join(__dirname, 'src', 'content', 'sdk.ts')
   },
   chromeExtensionBoilerplate: {
-    notHotReload: ['background', 'contentScript', 'devtools', 'sdk']// Probably can be improved. Background and sdk were added to prevent infinite reloading after changes
+    notHotReload: ['background', 'contentScript', 'devtools', 'sdk'] // Probably can be improved. Background and sdk were added to prevent infinite reloading after changes
   },
   output: {
     path: path.resolve(__dirname, buildDir),
@@ -140,10 +140,8 @@ const options = {
       },
       {
         test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
-        loader: 'file-loader',
-        options: {
-          name: '[name].[ext]'
-        },
+        type: 'asset/resource',
+        generator: { filename: '[name][ext]' },
         exclude: /node_modules/
       },
       {
