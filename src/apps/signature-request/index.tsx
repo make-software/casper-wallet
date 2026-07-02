@@ -3,7 +3,7 @@ import React, { Suspense, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 // skeleton styles
 import 'react-loading-skeleton/dist/skeleton.css';
-import { Provider as ReduxProvider } from 'react-redux/es/exports';
+import { Provider as ReduxProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
 import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';

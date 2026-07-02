@@ -19,12 +19,15 @@ export const selectSecretPhrase = (state: RootState): null | SecretPhrase =>
 export const selectVaultAccounts = (state: RootState): Account[] =>
   state.vault.accounts;
 
-export const selectVaultAccountsPublicKeys = (state: RootState): string[] =>
-  state.vault.accounts.map(key => key.publicKey);
+export const selectVaultAccountsPublicKeys = createSelector(
+  selectVaultAccounts,
+  accounts => accounts.map(account => account.publicKey)
+);
 
-export const selectVaultAccountsExceptLedgersAccounts = (
-  state: RootState
-): Account[] => state.vault.accounts.filter(account => !account.hardware);
+export const selectVaultAccountsExceptLedgersAccounts = createSelector(
+  selectVaultAccounts,
+  accounts => accounts.filter(account => !account.hardware)
+);
 
 export const selectVaultCountsOfAccounts = createSelector(
   selectVaultAccounts,
@@ -146,12 +149,13 @@ export const selectAccountsByOriginDict = createSelector(
 
 export const selectIsAccountConnected = createSelector(
   selectAccountNamesByOriginDict,
+  (_: RootState, origin: string | undefined) => origin,
   (
     _: RootState,
-    origin: string | undefined,
+    _origin: string | undefined,
     accountName: string | undefined
-  ) => [origin, accountName],
-  (accountNamesByOriginDict, [origin, accountName]) => {
+  ) => accountName,
+  (accountNamesByOriginDict, origin, accountName) => {
     const accountNames: '' | string[] | undefined =
       origin && accountNamesByOriginDict[origin];
     if (accountNames == null || !accountName) {
