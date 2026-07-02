@@ -1,5 +1,4 @@
-import { Location } from '@remix-run/router';
-import { useLocation } from 'react-router-dom';
+import { Location, useLocation } from 'react-router-dom';
 
 import { LocationState } from './types';
 

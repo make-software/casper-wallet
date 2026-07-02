@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
+import { yupResolver } from '@hookform/resolvers/yup';
 import React, { useCallback } from 'react';
-import { FieldValues, UseFormProps, useForm } from 'react-hook-form';
+import { FieldValues, Resolver, UseFormProps, useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { checkAccountNameIsTaken } from '@background/redux/import-account-actions-should-be-removed';
@@ -51,7 +51,7 @@ export function ImportAccountWithFileUploadPage() {
   });
 
   const formSchema = Yup.object().shape({
-    secretKeyFile: Yup.mixed()
+    secretKeyFile: Yup.mixed<FileList>()
       .test(
         'required',
         t('File is required.'),
@@ -77,7 +77,11 @@ export function ImportAccountWithFileUploadPage() {
   const formOptions: UseFormProps<ImportAccountFormValues> = {
     mode: 'onChange',
     reValidateMode: 'onChange',
-    resolver: yupResolver(formSchema),
+    // secretKeyFile has no .required() (validity is enforced via .test() instead), so yup
+    // infers it as an optional output key while keeping it a required-but-undefinable input
+    // key; that Input/Output asymmetry can't be expressed by a single FormValues type, hence
+    // the cast (same pattern as buy-cspr.ts).
+    resolver: yupResolver(formSchema) as Resolver<ImportAccountFormValues>,
     defaultValues: {
       secretKeyFile: undefined,
       name: ''

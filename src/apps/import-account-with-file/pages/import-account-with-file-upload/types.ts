@@ -1,4 +1,4 @@
 export type ImportAccountFormValues = {
-  secretKeyFile: string | undefined;
+  secretKeyFile: FileList | undefined;
   name: string;
 };

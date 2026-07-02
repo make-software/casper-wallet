@@ -1,11 +1,9 @@
-import * as Yup from 'yup';
 import { Player } from '@lottiefiles/react-lottie-player';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { AnyObject } from 'yup/es/types';
 
 import {
   ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED,
@@ -54,11 +52,7 @@ interface UnlockVaultPageProps {
 
 interface VerifyPasswordMessageEvent extends MessageEvent {
   data: {
-    isPasswordCorrect: Yup.StringSchema<
-      string | undefined,
-      AnyObject,
-      string | undefined
-    >;
+    isPasswordCorrect: boolean;
   };
 }
 

@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { UseFormProps, useForm } from 'react-hook-form';
 
 import { SecretPhrase, deriveKeyPair } from '@libs/crypto';

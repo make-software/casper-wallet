@@ -1,9 +1,7 @@
-import * as Yup from 'yup';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { AnyObject } from 'yup/es/types';
 
 import {
   ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED,
@@ -40,11 +38,7 @@ interface BackupSecretPhrasePasswordPageType {
 
 interface VerifyPasswordMessageEvent extends MessageEvent {
   data: {
-    isPasswordCorrect: Yup.StringSchema<
-      string | undefined,
-      AnyObject,
-      string | undefined
-    >;
+    isPasswordCorrect: boolean;
   };
 }
 

@@ -13,11 +13,11 @@ popup.describe('Popup UI:  review flow', () => {
         .getByRole('button', { name: "Yes, I'm enjoying it" })
         .click();
 
-      popupExpect(
+      await popupExpect(
         popupPage.getByRole('heading', { name: 'Thanks! You made our day' })
       ).toBeVisible();
 
-      popupExpect(
+      await popupExpect(
         popupPage.getByRole('button', { name: 'Leave a review' })
       ).toBeVisible();
 
@@ -40,13 +40,13 @@ popup.describe('Popup UI:  review flow', () => {
 
       await popupPage.getByRole('button', { name: 'Not so much' }).click();
 
-      popupExpect(
+      await popupExpect(
         popupPage.getByRole('heading', {
           name: "We'd love to hear more from you"
         })
       ).toBeVisible();
 
-      popupExpect(
+      await popupExpect(
         popupPage.getByRole('button', { name: 'Get in touch' })
       ).toBeVisible();
 
@@ -68,20 +68,20 @@ popup.describe('Popup UI:  review flow', () => {
 
       await popupPage.getByRole('button', { name: 'Not so much' }).click();
 
-      popupExpect(
+      await popupExpect(
         popupPage.getByRole('heading', {
           name: "We'd love to hear more from you"
         })
       ).toBeVisible();
 
-      popupExpect(
+      await popupExpect(
         popupPage.getByRole('button', { name: 'Maybe later' })
       ).toBeVisible();
 
       await popupPage.getByRole('button', { name: 'Maybe later' }).click();
 
-      popupExpect(popupPage.getByText('Total balance')).toBeVisible();
-      popupExpect(popupPage.getByText('Delegated')).toBeVisible();
+      await popupExpect(popupPage.getByText('Total balance')).toBeVisible();
+      await popupExpect(popupPage.getByText('Delegated')).toBeVisible();
     }
   );
 });
