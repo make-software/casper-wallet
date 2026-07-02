@@ -36,8 +36,7 @@ const getMargin = (size?: 'small' | 'medium') => {
 };
 
 const Container = styled('div').withConfig({
-  shouldForwardProp: (prop, defaultValidatorFn) =>
-    !['flipByAxis'].includes(prop) && defaultValidatorFn(prop)
+  shouldForwardProp: prop => !['flipByAxis'].includes(prop)
 })<{
   size: number;
   width?: string | number;

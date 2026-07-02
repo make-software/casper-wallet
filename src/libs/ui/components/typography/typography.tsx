@@ -105,8 +105,7 @@ function getBodyStyles(
 }
 
 const StyledTypography = styled('span').withConfig({
-  shouldForwardProp: (prop, defaultValidatorFn) =>
-    !['loading'].includes(prop) && defaultValidatorFn(prop)
+  shouldForwardProp: prop => !['loading'].includes(prop)
 })<TypographyProps>(
   ({ theme, type, fontSize, lineHeight, ...restProps }): CSSObject => {
     const base = getBodyStyles(theme, restProps);
@@ -222,8 +221,7 @@ const StyledTypography = styled('span').withConfig({
 );
 
 const StyledHeader = styled('h1').withConfig({
-  shouldForwardProp: (prop, defaultValidatorFn) =>
-    !['loading'].includes(prop) && defaultValidatorFn(prop)
+  shouldForwardProp: prop => !['loading'].includes(prop)
 })<TypographyProps>(({ theme, type, ...props }) => {
   const body = getBodyStyles(theme, props);
 
