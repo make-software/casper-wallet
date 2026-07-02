@@ -8,6 +8,8 @@ const shouldForwardProp = (propName: string, target: unknown) =>
 export const CspStyleSheetManager = ({ children }: PropsWithChildren) => (
   <StyleSheetManager
     shouldForwardProp={shouldForwardProp}
+    // no-op until CSP-nonce hardening (WALLET-1337 follow-up) wires
+    // process.env.CSP_NONCE via DefinePlugin; style-src is 'unsafe-inline' for now
     nonce={process.env.CSP_NONCE}
   >
     {children}
