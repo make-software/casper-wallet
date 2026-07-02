@@ -1,6 +1,10 @@
-const path = require('path');
-const { readFileSync, writeFileSync } = require('fs');
-const { gettextToI18next } = require('i18next-conv');
+import { readFileSync, writeFileSync } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+import { gettextToI18next } from 'i18next-conv';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const options = {
   project: 'casper-signer-v2',
