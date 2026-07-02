@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { AnyObject } from 'yup/es/types';
+import { AnyObject } from 'yup';
 
 import {
   ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED,

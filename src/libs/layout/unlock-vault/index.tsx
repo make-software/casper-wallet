@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { AnyObject } from 'yup/es/types';
+import { AnyObject } from 'yup';
 
 import {
   ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED,

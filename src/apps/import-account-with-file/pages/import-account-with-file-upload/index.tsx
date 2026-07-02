@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
+import { yupResolver } from '@hookform/resolvers/yup';
 import React, { useCallback } from 'react';
 import { FieldValues, UseFormProps, useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
