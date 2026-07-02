@@ -9,6 +9,14 @@ const webpack = require('webpack'),
   TsconfigPaths = require('tsconfig-paths-webpack-plugin'),
   Dotenv = require('dotenv-webpack');
 
+const crypto = require('crypto');
+
+// One nonce per webpack build invocation — shared by the manifest CSP
+// (getCSP below), the Safari runtime meta-tag CSP (src/utils.ts), and every
+// StyleSheetManager (src/libs/ui/style-sheet-manager.tsx) so styled-components'
+// runtime-injected <style> tags satisfy style-src without 'unsafe-inline'.
+const cspNonce = crypto.randomBytes(16).toString('base64');
+
 const commitHash =
   process.env.HASH || process.env.GITHUB_SHA || Date.now().toFixed();
 
@@ -64,8 +72,7 @@ if (fileSystem.existsSync(secretsPath)) {
 }
 
 const getCSP = () => {
-  const csp =
-    "default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://onramp-api.cspr.click/api/ https://cspr-wallet-api.dev.make.services/ https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/ https://cspr-wallet-api-condor.dev.make.services/ https://cspr-wallet-api.stg.make.services/ https://api.casperwallet.io/ https://api.integration.casperwallet.io/ https://node.integration.cspr.cloud/";
+  const csp = `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'nonce-${cspNonce}'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://onramp-api.cspr.click/api/ https://cspr-wallet-api.dev.make.services/ https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/ https://cspr-wallet-api-condor.dev.make.services/ https://cspr-wallet-api.stg.make.services/ https://api.casperwallet.io/ https://api.integration.casperwallet.io/ https://node.integration.cspr.cloud/`;
 
   if (isFirefox) {
     return csp;
@@ -194,7 +201,8 @@ const options = {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
       'process.env.MOCK_STATE': JSON.stringify(process.env.MOCK_STATE),
       'process.env.BROWSER': JSON.stringify(process.env.BROWSER),
-      'process.env.TEST_ENV': JSON.stringify(process.env.TEST_ENV)
+      'process.env.TEST_ENV': JSON.stringify(process.env.TEST_ENV),
+      'process.env.CSP_NONCE': JSON.stringify(cspNonce)
     }),
     // manifest file generation
     new CopyWebpackPlugin({
