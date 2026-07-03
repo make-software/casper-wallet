@@ -271,7 +271,7 @@ export const activityBottomPseudoElementRules = css<BorderBottomPseudoElementPro
   background: ${({ theme }) => theme.color.backgroundSecondary};
 `;
 
-export const BorderContainer = styled.div`
+export const BorderContainer = styled.div<BorderBottomPseudoElementProps>`
   & > *:last-child {
     ${borderBottomPseudoElementRules};
   }

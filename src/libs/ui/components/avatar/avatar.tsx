@@ -1,6 +1,6 @@
 import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
-import styled, { DefaultTheme, useTheme } from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 import { isValidAccountHash, isValidPublicKey } from '@src/utils';
 
@@ -24,8 +24,8 @@ const ConnectionStatusBadgeContainer = styled(AlignedFlexRow)`
   z-index: 1;
 `;
 
-export const BackgroundWrapper = styled.div(
-  ({ size, theme }: { size: number; theme: DefaultTheme }) => ({
+export const BackgroundWrapper = styled.div<{ size: number }>(
+  ({ size, theme }) => ({
     borderRadius: theme.borderRadius.eight,
     height: `${size}px`,
     width: `${size}px`,

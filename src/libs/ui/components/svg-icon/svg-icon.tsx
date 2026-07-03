@@ -1,3 +1,4 @@
+import isPropValid from '@emotion/is-prop-valid';
 import React, { HTMLAttributes, forwardRef } from 'react';
 import ReactSVG from 'react-inlinesvg';
 import styled from 'styled-components';
@@ -36,8 +37,7 @@ const getMargin = (size?: 'small' | 'medium') => {
 };
 
 const Container = styled('div').withConfig({
-  shouldForwardProp: (prop, defaultValidatorFn) =>
-    !['flipByAxis'].includes(prop) && defaultValidatorFn(prop)
+  shouldForwardProp: prop => !['flipByAxis'].includes(prop) && isPropValid(prop)
 })<{
   size: number;
   width?: string | number;

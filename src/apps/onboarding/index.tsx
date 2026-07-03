@@ -16,7 +16,7 @@ import { onboardingAppInit } from '@background/redux/windowManagement/actions';
 import '@libs/i18n/i18n';
 import { ErrorBoundary } from '@libs/layout';
 import { newQueryClient } from '@libs/services/query-client';
-import { GlobalStyle, lightTheme } from '@libs/ui';
+import { CspStyleSheetManager, GlobalStyle, lightTheme } from '@libs/ui';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
@@ -36,16 +36,18 @@ const Tree = () => {
 
   return (
     <Suspense fallback={null}>
-      <ThemeProvider theme={lightTheme}>
-        <GlobalStyle />
-        <ReduxProvider store={store}>
-          <QueryClientProvider client={newQueryClient}>
-            <ErrorBoundary>
-              <AppRouter />
-            </ErrorBoundary>
-          </QueryClientProvider>
-        </ReduxProvider>
-      </ThemeProvider>
+      <CspStyleSheetManager>
+        <ThemeProvider theme={lightTheme}>
+          <GlobalStyle />
+          <ReduxProvider store={store}>
+            <QueryClientProvider client={newQueryClient}>
+              <ErrorBoundary>
+                <AppRouter />
+              </ErrorBoundary>
+            </QueryClientProvider>
+          </ReduxProvider>
+        </ThemeProvider>
+      </CspStyleSheetManager>
     </Suspense>
   );
 };
