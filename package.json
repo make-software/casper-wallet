@@ -93,7 +93,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.80.0",
     "react-i18next": "^17.0.8",
-    "react-infinite-scroll-hook": "^4.1.1",
+    "react-infinite-scroll-hook": "^5.0.2",
     "react-inlinesvg": "^4.5.0",
     "react-loading-skeleton": "^3.3.1",
     "react-player": "^2.16.0",
