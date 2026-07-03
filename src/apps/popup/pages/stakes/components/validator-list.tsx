@@ -1,8 +1,6 @@
 import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
-import List from 'react-virtualized/dist/commonjs/List';
 import styled from 'styled-components';
 
 import {
@@ -12,6 +10,11 @@ import {
 } from '@libs/layout';
 import { Tile, Typography, ValidatorPlate } from '@libs/ui/components';
 
+import {
+  ROW_HEIGHT_PX,
+  getValidatorListHeight
+} from './get-validator-list-height';
+
 interface ValidatorListProps {
   filteredValidatorsList: ValidatorDto[];
   handleValidatorClick: (validator: ValidatorDto) => void;
@@ -19,6 +22,11 @@ interface ValidatorListProps {
 }
 
 const Container = styled.div``;
+
+const ScrollContainer = styled.div<{ maxHeight: number }>`
+  max-height: ${({ maxHeight }) => maxHeight}px;
+  overflow-y: auto;
+`;
 
 export const ValidatorList = ({
   filteredValidatorsList,
@@ -38,41 +46,36 @@ export const ValidatorList = ({
             <Trans t={t}>Total stake, fee, delegators</Trans>
           </Typography>
         </DropdownHeader>
-        <AutoSizer disableHeight>
-          {({ width }) => (
-            <List
-              overscanRowCount={5}
-              rowHeight={80}
-              height={Math.min(3 * 80, filteredValidatorsList.length * 80)}
-              width={width}
-              rowCount={filteredValidatorsList.length}
-              rowRenderer={({ index, key, style }) => {
-                const validator = filteredValidatorsList[index];
-                const logo = validator?.svgLogo || validator?.imgLogo;
+        <ScrollContainer
+          maxHeight={getValidatorListHeight(filteredValidatorsList.length)}
+        >
+          {filteredValidatorsList.map(validator => {
+            const logo = validator?.svgLogo || validator?.imgLogo;
 
-                return (
-                  <Container style={style} key={key}>
-                    <ValidatorPlate
-                      minAmount={validator.minAmount}
-                      reservedSlots={validator.reservedSlots}
-                      publicKey={validator?.publicKey}
-                      fee={validator.fee}
-                      name={validator?.name}
-                      logo={logo}
-                      // TODO: remove user_stake after we merge recipient and amount steps for undelegation
-                      formattedTotalStake={validator[totalStake]}
-                      delegatorsNumber={validator?.delegatorsNumber}
-                      handleClick={() => {
-                        handleValidatorClick(validator);
-                      }}
-                      withBorder
-                    />
-                  </Container>
-                );
-              }}
-            />
-          )}
-        </AutoSizer>
+            return (
+              <Container
+                key={validator.publicKey}
+                style={{ height: ROW_HEIGHT_PX }}
+              >
+                <ValidatorPlate
+                  minAmount={validator.minAmount}
+                  reservedSlots={validator.reservedSlots}
+                  publicKey={validator?.publicKey}
+                  fee={validator.fee}
+                  name={validator?.name}
+                  logo={logo}
+                  // TODO: remove user_stake after we merge recipient and amount steps for undelegation
+                  formattedTotalStake={validator[totalStake]}
+                  delegatorsNumber={validator?.delegatorsNumber}
+                  handleClick={() => {
+                    handleValidatorClick(validator);
+                  }}
+                  withBorder
+                />
+              </Container>
+            );
+          })}
+        </ScrollContainer>
       </Tile>
     </VerticalSpaceContainer>
   );
