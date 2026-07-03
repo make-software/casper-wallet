@@ -65,9 +65,7 @@ export const getDeployStatus = (
 
 export interface DeployStatusProps {
   deployResult:
-    | { status: string; errorMessage: string | null }
-    | null
-    | undefined;
+    { status: string; errorMessage: string | null } | null | undefined;
   textWithIcon?: boolean;
 }
 

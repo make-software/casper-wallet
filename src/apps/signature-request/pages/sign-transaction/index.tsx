@@ -318,9 +318,9 @@ export function SignTransactionPage() {
 
   const maybeRequireApproval = Boolean(
     signatureRequest &&
-      (isTxSignatureRequestWasmAction(signatureRequest.action) ||
-        isTxSignatureRequestWasmProxyAction(signatureRequest.action)) &&
-      !requestOriginTrustedWasm.includes(signatureRequest.action.washHash)
+    (isTxSignatureRequestWasmAction(signatureRequest.action) ||
+      isTxSignatureRequestWasmProxyAction(signatureRequest.action)) &&
+    !requestOriginTrustedWasm.includes(signatureRequest.action.washHash)
   );
 
   useEffect(() => {
@@ -333,14 +333,12 @@ export function SignTransactionPage() {
   const toggleWasmApproval = useCallback(() => {
     const origin = requestOrigin;
 
-    if (
-      !(
-        origin &&
-        signatureRequest &&
-        (isTxSignatureRequestWasmAction(signatureRequest.action) ||
-          isTxSignatureRequestWasmProxyAction(signatureRequest.action))
-      )
-    ) {
+    if (!(
+      origin &&
+      signatureRequest &&
+      (isTxSignatureRequestWasmAction(signatureRequest.action) ||
+        isTxSignatureRequestWasmProxyAction(signatureRequest.action))
+    )) {
       return;
     }
 

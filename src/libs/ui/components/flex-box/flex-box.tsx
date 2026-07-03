@@ -3,7 +3,6 @@ import styled from 'styled-components';
 
 import { BaseProps } from '@libs/ui/types';
 
-/* eslint-disable-next-line */
 export interface FlexBoxProps extends BaseProps {
   /* @description will add spacing between children, work depending on row/column layout */
   itemsSpacing?: number;

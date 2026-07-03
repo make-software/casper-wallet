@@ -4,9 +4,7 @@ import { runtime } from 'webextension-polyfill';
 // WARNING: legacy to be refactored, don't reuse!
 
 export type RemoteAction =
-  | CheckAccountNameIsTakenAction
-  | CheckSecretKeyExistAction
-  | GetWindowIdAction;
+  CheckAccountNameIsTakenAction | CheckSecretKeyExistAction | GetWindowIdAction;
 
 export type CheckAccountNameIsTakenAction = PayloadAction<
   'check-account-name-is-taken',

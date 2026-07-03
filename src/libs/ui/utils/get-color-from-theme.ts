@@ -17,9 +17,7 @@ export type ContentColor =
   | 'black';
 
 export type BackgroundColor =
-  | 'inherit'
-  | 'backgroundPrimary'
-  | 'backgroundSecondary';
+  'inherit' | 'backgroundPrimary' | 'backgroundSecondary';
 
 export type FillColor =
   | 'inherit'

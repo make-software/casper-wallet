@@ -66,10 +66,10 @@ export const DeployDetailsResult = ({ deploy }: DeployDetailsResultProps) => {
 
   const showResultRow = Boolean(
     deploy.status !== 'error' &&
-      (deploy.transfersActionsResult.length ||
-        deploy.nftActionsResult.length ||
-        deploy.cep18ActionsResult.length ||
-        isAssociatedKeysDeploy(deploy))
+    (deploy.transfersActionsResult.length ||
+      deploy.nftActionsResult.length ||
+      deploy.cep18ActionsResult.length ||
+      isAssociatedKeysDeploy(deploy))
   );
 
   if (!showResultRow) return null;

@@ -19,13 +19,10 @@ const initialState: State = {
 };
 
 export const reducer = createReducer(initialState)
-  .handleAction(
-    ledgerNewWindowIdChanged,
-    (state, { payload }): State => ({
-      ...state,
-      windowId: payload
-    })
-  )
+  .handleAction(ledgerNewWindowIdChanged, (state, { payload }): State => ({
+    ...state,
+    windowId: payload
+  }))
   .handleAction(ledgerStateCleared, (): State => initialState)
   .handleAction(ledgerDeployChanged, (state, { payload }): State => {
     return {

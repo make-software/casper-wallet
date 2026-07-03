@@ -93,11 +93,10 @@ export const Amount = ({
     const sortedCurrencies = sortCurrencies(
       availableCurrencies,
       selectedCurrency?.code
-    ).filter(
-      currency =>
-        currency?.code
-          .toLowerCase()
-          .includes(searchInputValue?.toLowerCase() || '')
+    ).filter(currency =>
+      currency?.code
+        .toLowerCase()
+        .includes(searchInputValue?.toLowerCase() || '')
     );
 
     setSortedCurrency(sortedCurrencies);

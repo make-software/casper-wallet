@@ -136,7 +136,7 @@ export const AccountInfoRow = ({
   ]);
 
   const contractName = getContractName();
-  const linkHref = isAction ? accountLink ?? linkUrl : undefined;
+  const linkHref = isAction ? (accountLink ?? linkUrl) : undefined;
 
   return (
     <AccountInfoContainer style={containerStyle}>

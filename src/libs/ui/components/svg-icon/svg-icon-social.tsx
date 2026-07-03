@@ -43,7 +43,6 @@ export type SocialMediaType =
   | 'reddit'
   | 'wechat';
 
-/* eslint-disable-next-line */
 export interface SvgIconSocialProps extends BaseProps {
   socialMediaType: SocialMediaType;
   userId: string;

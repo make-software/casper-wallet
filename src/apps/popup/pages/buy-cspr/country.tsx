@@ -58,9 +58,8 @@ export const Country = ({
       availableCountries,
       selectedCountry?.code
     )
-      .filter(
-        country =>
-          country?.name.toLowerCase().includes(inputValue?.toLowerCase() || '')
+      .filter(country =>
+        country?.name.toLowerCase().includes(inputValue?.toLowerCase() || '')
       )
       .map((country, index) => ({
         ...country,
