@@ -10,6 +10,15 @@ function getCrypto(): Crypto {
   return c;
 }
 
+// TS 5.7+ types `Uint8Array` as `Uint8Array<ArrayBufferLike>`, where
+// `ArrayBufferLike` includes `SharedArrayBuffer`; WebCrypto's `BufferSource`
+// only accepts `ArrayBuffer`-backed views. Every buffer here is a plain
+// `ArrayBuffer`-backed `Uint8Array` at runtime (from `new Uint8Array`, noble,
+// `TextEncoder`, or `.slice()`), so this reinterpretation is byte-identical.
+function asBufferSource(bytes: Uint8Array): BufferSource {
+  return bytes as BufferSource;
+}
+
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
@@ -81,12 +90,21 @@ async function hkdfAesKey(
   salt: Uint8Array
 ): Promise<CryptoKey> {
   const crypto = getCrypto();
-  const ikm = await crypto.subtle.importKey('raw', shared, 'HKDF', false, [
-    'deriveBits'
-  ]);
+  const ikm = await crypto.subtle.importKey(
+    'raw',
+    asBufferSource(shared),
+    'HKDF',
+    false,
+    ['deriveBits']
+  );
 
   const bits = await crypto.subtle.deriveBits(
-    { name: 'HKDF', hash: 'SHA-256', salt, info: HKDF_INFO },
+    {
+      name: 'HKDF',
+      hash: 'SHA-256',
+      salt: asBufferSource(salt),
+      info: asBufferSource(HKDF_INFO)
+    },
     ikm,
     256
   );
@@ -125,7 +143,7 @@ export async function encrypt(
 
   const out = new Uint8Array(
     await getCrypto().subtle.encrypt(
-      { name: 'AES-GCM', iv },
+      { name: 'AES-GCM', iv: asBufferSource(iv) },
       key,
       enc.encode(message)
     )
@@ -152,7 +170,7 @@ export async function decryptWithScalar(
   const pt = await crypto.subtle.decrypt(
     { name: 'AES-GCM', iv },
     key,
-    concat(ct, tag)
+    asBufferSource(concat(ct, tag))
   );
 
   return dec.decode(new Uint8Array(pt));

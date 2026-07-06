@@ -2,6 +2,7 @@ import { bringInitBackground } from '@bringweb3/chrome-extension-kit';
 import { Deploy, PublicKey } from 'casper-js-sdk';
 import { RootAction, getType } from 'typesafe-actions';
 import {
+  Runtime,
   Tabs,
   action,
   browserAction,
@@ -300,10 +301,9 @@ tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 runtime.onMessage.addListener(
-  async (
-    action: RootAction | SdkMethod | popupStateUpdated | BringWeb3Events,
-    sender
-  ) => {
+  async (message: unknown, sender: Runtime.MessageSender) => {
+    const action = message as
+      RootAction | SdkMethod | popupStateUpdated | BringWeb3Events;
     const store = await getExistingMainStoreSingletonOrInit();
 
     return new Promise(async (sendResponse, sendError) => {
@@ -736,7 +736,7 @@ runtime.onMessage.addListener(
           }
 
           case getType(sdkMethod.getVersionRequest): {
-            const manifestData = await chrome.runtime.getManifest();
+            const manifestData = runtime.getManifest();
             const version = manifestData.version;
 
             return sendResponse(

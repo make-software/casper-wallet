@@ -5,14 +5,9 @@ import { initBringScript } from '@content/bring';
 
 import { SdkEvent, sdkEvent } from './sdk-event';
 import { CasperWalletEventType } from './sdk-event-type';
-import {
-  SdkMethod,
-  SdkMethodEventType,
-  isSDKMethod,
-  sdkMethod
-} from './sdk-method';
+import { SdkMethodEventType, isSDKMethod, sdkMethod } from './sdk-method';
 
-async function handleSdkMessage(message: SdkEvent | SdkMethod) {
+async function handleSdkMessage(message: unknown) {
   // delayed sdk request response
   if (isSDKMethod(message)) {
     switch (message.type) {
@@ -45,7 +40,7 @@ async function handleSdkMessage(message: SdkEvent | SdkMethod) {
         );
     }
   } else {
-    emitSdkEvent(message);
+    emitSdkEvent(message as SdkEvent);
   }
 }
 
