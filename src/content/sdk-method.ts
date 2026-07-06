@@ -162,12 +162,11 @@ export const sdkMethod = {
 
 export type SdkMethod = ActionType<typeof sdkMethod>;
 
-export function isSDKMethod(action?: {
-  type?: unknown;
-  meta?: unknown;
-}): action is SdkMethod {
+export function isSDKMethod(action?: unknown): action is SdkMethod {
+  const candidate = action as { type?: unknown; meta?: Meta } | undefined;
+
   return (
-    typeof action?.type === 'string' &&
-    typeof (action.meta as Meta | undefined)?.requestId === 'string'
+    typeof candidate?.type === 'string' &&
+    typeof candidate.meta?.requestId === 'string'
   );
 }

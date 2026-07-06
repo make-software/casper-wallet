@@ -19,9 +19,10 @@ export const useSubscribeToRedux = ({
   setPopupState
 }: Props) => {
   const handleStateUpdate = useCallback(
-    (message: BackgroundEvent) => {
-      if (isActionOf(backgroundEvent.popupStateUpdated)(message)) {
-        setPopupState(message.payload);
+    (message: unknown) => {
+      const event = message as BackgroundEvent;
+      if (isActionOf(backgroundEvent.popupStateUpdated)(event)) {
+        setPopupState(event.payload);
       }
     },
     [setPopupState]

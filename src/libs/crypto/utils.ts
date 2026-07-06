@@ -9,13 +9,13 @@ export function publicKeyBytesToHex(publicKeyBytes: Uint8Array): string {
   return `${prefix}${publicKeyHex}`;
 }
 
-export function validateString(val: unknown): val is string {
-  if (typeof val === 'string' || val instanceof String) return true;
+export function validateString(val: unknown): asserts val is string {
+  if (typeof val === 'string' || val instanceof String) return;
   throw Error('arg not valid, got:' + val);
 }
 
-export function validateBytes(val: unknown): val is Uint8Array {
-  if (val != null && val && val instanceof Uint8Array) return true;
+export function validateBytes(val: unknown): asserts val is Uint8Array {
+  if (val != null && val && val instanceof Uint8Array) return;
   throw Error('arg not valid, got:' + val);
 }
 
