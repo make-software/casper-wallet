@@ -78,7 +78,7 @@ export const TokenPlate = ({
           <SvgIcon src={token?.icon || ''} alt={token?.name} size={32} />
         ) : (
           <LogoImg
-            src={token?.icon || ''}
+            src={token?.icon || undefined}
             alt={token?.name}
             title={token?.name}
           />

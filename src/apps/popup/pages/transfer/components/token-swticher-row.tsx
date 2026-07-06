@@ -32,7 +32,11 @@ export const TokenSwitcherRow = ({
           {iconUrl?.endsWith('.svg') ? (
             <SvgIcon src={iconUrl || ''} size={24} />
           ) : (
-            <LogoImg src={iconUrl || ''} alt={tokenName} title={tokenName} />
+            <LogoImg
+              src={iconUrl || undefined}
+              alt={tokenName}
+              title={tokenName}
+            />
           )}
           <Typography dataTestId="token-row" type="body">
             {tokenName}
