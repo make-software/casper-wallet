@@ -804,16 +804,16 @@ runtime.onMessage.addListener(
           case loginRetryLockoutTimeSet.type:
           case recipientPublicKeyAdded.type:
           case recipientPublicKeyReseted.type:
-          case getType(accountInfoReset):
-          case getType(accountPendingDeployHashesChanged):
-          case getType(accountPendingDeployHashesRemove):
-          case getType(accountTrackingIdOfSentNftTokensChanged):
-          case getType(accountTrackingIdOfSentNftTokensRemoved):
-          case getType(newContactAdded):
-          case getType(contactRemoved):
+          case accountInfoReset.type:
+          case accountPendingDeployHashesChanged.type:
+          case accountPendingDeployHashesRemove.type:
+          case accountTrackingIdOfSentNftTokensChanged.type:
+          case accountTrackingIdOfSentNftTokensRemoved.type:
+          case newContactAdded.type:
+          case contactRemoved.type:
           case getType(contactEditingPermissionChanged):
-          case getType(contactUpdated):
-          case getType(contactsReseted):
+          case contactUpdated.type:
+          case contactsReseted.type:
           case ratedInStoreChanged.type:
           case askForReviewAfterChanged.type:
           case resetRateApp.type:
