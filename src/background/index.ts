@@ -29,6 +29,11 @@ import {
   bringWeb3Events
 } from '@background/bring-web3-events';
 import { WindowApp } from '@background/create-open-window';
+import {
+  PRIVATE_STATE_REQUEST_TYPE,
+  isTrustedUiSender,
+  selectPrivateState
+} from '@background/handlers/private-state';
 import { initKeepAlive } from '@background/keep-alive';
 import {
   disableOnboardingFlow,
@@ -906,6 +911,14 @@ runtime.onMessage.addListener(
                 theme: isDarkMode ? 'dark' : 'light'
               })
             );
+          }
+
+          case PRIVATE_STATE_REQUEST_TYPE as any: {
+            if (!isTrustedUiSender(sender)) {
+              // No data (and no error detail) for untrusted senders
+              return;
+            }
+            return sendResponse(selectPrivateState(store.getState()));
           }
 
           // TODO: All below should be removed when Import Account is integrated with window

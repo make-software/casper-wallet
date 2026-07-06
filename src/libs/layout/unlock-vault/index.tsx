@@ -12,20 +12,16 @@ import {
 import { PasswordDoesNotExistError } from '@src/errors';
 import { getErrorMessageForIncorrectPassword } from '@src/utils';
 
-import {
-  selectKeyDerivationSaltHash,
-  selectPasswordHash,
-  selectPasswordSaltHash
-} from '@background/redux/keys/selectors';
+import { selectKeysDoesExist } from '@background/redux/keys/selectors';
 import { loginRetryCountIncremented } from '@background/redux/login-retry-count/actions';
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
 import { unlockVault } from '@background/redux/sagas/actions';
 import { UnlockVault } from '@background/redux/sagas/types';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { selectVaultCipher } from '@background/redux/vault-cipher/selectors';
 import { VaultState } from '@background/redux/vault/types';
 
 import { useLockWalletWhenNoMoreRetries } from '@hooks/use-lock-wallet-when-no-more-retries';
+import { usePrivateState } from '@hooks/use-private-state';
 
 import unlockAnimation from '@libs/animations/unlock_animation.json';
 import {
@@ -62,10 +58,8 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const passwordHash = useSelector(selectPasswordHash);
-  const passwordSaltHash = useSelector(selectPasswordSaltHash);
-  const keyDerivationSaltHash = useSelector(selectKeyDerivationSaltHash);
-  const vaultCipher = useSelector(selectVaultCipher);
+  const privateState = usePrivateState();
+  const keysDoesExist = useSelector(selectKeysDoesExist);
   const loginRetryCount = useSelector(selectLoginRetryCount);
 
   const attemptsLeft =
@@ -73,7 +67,7 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
     loginRetryCount -
     ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED;
 
-  if (passwordHash == null || passwordSaltHash == null) {
+  if (!keysDoesExist) {
     throw new PasswordDoesNotExistError();
   }
 
@@ -90,7 +84,14 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
   });
 
   async function handleUnlockVault({ password }: UnlockWalletFormValues) {
-    if (isLoading) return;
+    if (isLoading || privateState == null) return;
+
+    const {
+      passwordHash,
+      passwordSaltHash,
+      keyDerivationSaltHash,
+      vaultCipher
+    } = privateState;
 
     setIsLoading(true);
 
@@ -198,6 +199,11 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
   }
 
   useLockWalletWhenNoMoreRetries(resetField);
+
+  // private state (hashes + cipher) arrives in ms; matches existing async-boot behavior
+  if (privateState == null) {
+    return null;
+  }
 
   const footer = (
     <FooterButtonsContainer>

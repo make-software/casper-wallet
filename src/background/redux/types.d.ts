@@ -15,7 +15,6 @@ import { RecentRecipientPublicKeysState } from '@background/redux/recent-recipie
 import { SessionState } from '@background/redux/session/types';
 import { SettingsState } from '@background/redux/settings/types';
 import { TrustedWasmState } from '@background/redux/trusted-wasm/types';
-import { VaultCipherState } from '@background/redux/vault-cipher/types';
 import { VaultState } from '@background/redux/vault/types';
 import { WindowManagementState } from '@background/redux/windowManagement/types';
 
@@ -42,7 +41,6 @@ export type PopupState = {
   loginRetryCount: LoginRetryCountState;
   vault: VaultState;
   windowManagement: WindowManagementState;
-  vaultCipher: VaultCipherState;
   loginRetryLockoutTime: LoginRetryLockoutTimeState;
   lastActivityTime: LastActivityTimeState;
   settings: SettingsState;

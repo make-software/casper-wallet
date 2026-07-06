@@ -43,16 +43,20 @@ type StorageState = {
 // this needs to be private
 let storeSingleton: ReturnType<typeof createStore>;
 
-// These state keys will be passed to popups
+// These state keys will be passed to popups. P0.1: cipher/hash material is
+// NOT broadcast — UI flows that need it use fetchPrivateState() explicitly.
 export const selectPopupState = (state: RootState): PopupState => {
-  // TODO: must sanitize state to not send private data back to front
   return {
-    keys: state.keys,
+    keys: {
+      passwordHash: null,
+      passwordSaltHash: null,
+      keyDerivationSaltHash: null,
+      keysDoesExist: state.keys.keysDoesExist
+    },
+    session: { ...state.session, encryptionKeyHash: null },
     loginRetryCount: state.loginRetryCount,
-    session: state.session,
     vault: state.vault,
     windowManagement: state.windowManagement,
-    vaultCipher: state.vaultCipher,
     loginRetryLockoutTime: state.loginRetryLockoutTime,
     lastActivityTime: state.lastActivityTime,
     activeOrigin: state.activeOrigin,
@@ -105,7 +109,9 @@ export async function getExistingMainStoreSingletonOrInit() {
         const { initialStateForPopupTests } = await import(
           /* webpackMode: "eager" */ '@src/fixtures'
         );
-        storeSingleton = createStore(initialStateForPopupTests as PopupState);
+        // The MOCK store IS the background store: it keeps the full RootState
+        // (incl. vaultCipher + real hashes); only the broadcast is sanitized.
+        storeSingleton = createStore(initialStateForPopupTests);
       } else {
         storeSingleton = createStore({
           vaultCipher,
