@@ -783,7 +783,7 @@ runtime.onMessage.addListener(
           case getType(activeNetworkSettingChanged):
           case getType(vaultSettingsReseted):
           case getType(themeModeSettingChanged):
-          case getType(lastActivityTimeRefreshed):
+          case lastActivityTimeRefreshed.type:
           case getType(siteConnected):
           case getType(anotherAccountConnected):
           case getType(accountDisconnected):

@@ -84,7 +84,7 @@ export function* vaultSagas() {
   yield takeLatest(
     [
       getType(startBackground),
-      getType(lastActivityTimeRefreshed),
+      lastActivityTimeRefreshed.type,
       getType(activeTimeoutDurationSettingChanged)
     ],
     timeoutCounterSaga
