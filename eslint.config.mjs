@@ -90,5 +90,27 @@ export default tseslint.config(
       'no-useless-catch': 'off', // 2
       'no-case-declarations': 'off' // 1
     }
+  },
+  {
+    // Playwright e2e suite: not part of the `npm run lint` gate (it targets
+    // ./src only) but linted by IDEs. Scope out React-specific rules — the
+    // Playwright fixture callback is named `use` and trips rules-of-hooks —
+    // and mirror the src-block deferrals that apply here too.
+    files: ['e2e-tests/**/*.ts', 'playwright.config.ts'],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.node }
+    },
+    settings: {
+      react: { version: 'detect' }
+    },
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { args: 'after-used', caughtErrors: 'none' }
+      ]
+    }
   }
 );
