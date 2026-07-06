@@ -156,18 +156,6 @@ const options = {
         loader: 'ts-loader',
         exclude: /node_modules\/(?!(casper-wallet-core)\/).*/,
         options: { allowTsInNodeModules: true }
-      },
-      {
-        test: /\.(js|jsx)$/,
-        use: [
-          {
-            loader: 'source-map-loader'
-          },
-          {
-            loader: 'babel-loader'
-          }
-        ],
-        exclude: /node_modules/
       }
     ]
   },
