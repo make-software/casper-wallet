@@ -1,25 +1,21 @@
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { isKeysEqual } from 'casper-wallet-core';
-import { createReducer } from 'typesafe-actions';
 
-import {
-  addWasmToTrusted,
-  removeAllWasmFromTrustedOrigin,
-  removeWasmFromTrusted,
-  resetTrustedWasmState
-} from './actions';
 import { TrustedWasmState } from './types';
 
-type State = TrustedWasmState;
-
-const initialState: State = {
+const initialState: TrustedWasmState = {
   hashesByOriginDict: {}
 };
 
-export const reducer = createReducer(initialState)
-  .handleAction(resetTrustedWasmState, () => initialState)
-  .handleAction(
-    addWasmToTrusted,
-    (state, action: ReturnType<typeof addWasmToTrusted>): State => {
+const slice = createSlice({
+  name: 'trustedWasm',
+  initialState,
+  reducers: {
+    resetTrustedWasmState: () => initialState,
+    addWasmToTrusted: (
+      state,
+      action: PayloadAction<{ origin: string; wasmHash: string }>
+    ) => {
       const { wasmHash, origin } = action.payload;
       const currentTrustedWasm =
         state.hashesByOriginDict ?? initialState.hashesByOriginDict;
@@ -33,11 +29,11 @@ export const reducer = createReducer(initialState)
           ]
         }
       };
-    }
-  )
-  .handleAction(
-    removeWasmFromTrusted,
-    (state, action: ReturnType<typeof removeWasmFromTrusted>): State => {
+    },
+    removeWasmFromTrusted: (
+      state,
+      action: PayloadAction<{ origin: string; wasmHash: string }>
+    ) => {
       const { wasmHash, origin } = action.payload;
       const currentTrustedWasm =
         state.hashesByOriginDict ?? initialState.hashesByOriginDict;
@@ -55,22 +51,25 @@ export const reducer = createReducer(initialState)
       } else {
         return { ...state };
       }
-    }
-  )
-  .handleAction(
-    removeAllWasmFromTrustedOrigin,
-    (
+    },
+    removeAllWasmFromTrustedOrigin: (
       state,
-      action: ReturnType<typeof removeAllWasmFromTrustedOrigin>
-    ): State => {
+      action: PayloadAction<{ origin: string }>
+    ) => {
       const { origin } = action.payload;
-      const currentTrustedWasm =
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructuring omit: drops `origin`'s key while collecting the rest
+      const { [origin]: _removed, ...rest } =
         state.hashesByOriginDict ?? initialState.hashesByOriginDict;
 
-      if (currentTrustedWasm?.[origin]) {
-        delete currentTrustedWasm[origin];
-      }
-
-      return { ...state, hashesByOriginDict: { ...currentTrustedWasm } };
+      return { ...state, hashesByOriginDict: rest };
     }
-  );
+  }
+});
+
+export const {
+  addWasmToTrusted,
+  removeAllWasmFromTrustedOrigin,
+  removeWasmFromTrusted,
+  resetTrustedWasmState
+} = slice.actions;
+export const reducer = slice.reducer;

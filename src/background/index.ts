@@ -788,13 +788,13 @@ runtime.onMessage.addListener(
           case getType(anotherAccountConnected):
           case getType(accountDisconnected):
           case getType(siteDisconnected):
-          case getType(windowIdChanged):
-          case getType(windowIdCleared):
-          case getType(onboardingAppInit):
-          case getType(popupWindowInit):
-          case getType(connectWindowInit):
-          case getType(importWindowInit):
-          case getType(signWindowInit):
+          case windowIdChanged.type:
+          case windowIdCleared.type:
+          case onboardingAppInit.type:
+          case popupWindowInit.type:
+          case connectWindowInit.type:
+          case importWindowInit.type:
+          case signWindowInit.type:
           case vaultCipherReseted.type:
           case vaultCipherCreated.type:
           case getType(keysReseted):
@@ -817,18 +817,18 @@ runtime.onMessage.addListener(
           case ratedInStoreChanged.type:
           case askForReviewAfterChanged.type:
           case resetRateApp.type:
-          case getType(ledgerNewWindowIdChanged):
-          case getType(ledgerStateCleared):
-          case getType(ledgerDeployChanged):
-          case getType(ledgerTransactionChanged):
-          case getType(ledgerRecipientToSaveOnSuccessChanged):
+          case ledgerNewWindowIdChanged.type:
+          case ledgerStateCleared.type:
+          case ledgerDeployChanged.type:
+          case ledgerTransactionChanged.type:
+          case ledgerRecipientToSaveOnSuccessChanged.type:
           case getType(addWatchingAccount):
           case dismissAppEvent.type:
           case resetAppEventsDismission.type:
-          case getType(addWasmToTrusted):
-          case getType(removeWasmFromTrusted):
-          case getType(removeAllWasmFromTrustedOrigin):
-          case getType(resetTrustedWasmState):
+          case addWasmToTrusted.type:
+          case removeWasmFromTrusted.type:
+          case removeAllWasmFromTrustedOrigin.type:
+          case resetTrustedWasmState.type:
           case getType(systemColorSchemeChanged):
             store.dispatch(action);
             return sendResponse(undefined);

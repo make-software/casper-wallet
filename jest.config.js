@@ -5,7 +5,7 @@ module.exports = {
     '^.+\\.(j|t)sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }]
   },
   transformIgnorePatterns: [
-    '<rootDir>/node_modules/(?!(@lapo/asn1js|@noble/ciphers|@formatjs|intl-messageformat)/)'
+    '<rootDir>/node_modules/(?!(@lapo/asn1js|@noble/ciphers|@formatjs|intl-messageformat|casper-wallet-core|uuid)/)'
   ],
   coveragePathIgnorePatterns: ['/node_modules/'],
   testRegex: '(/tests?/.*|(\\.|/)(test|spec))\\.tsx?$',

@@ -1,20 +1,33 @@
-import { createReducer } from 'typesafe-actions';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import { windowIdChanged, windowIdCleared } from './actions';
 import { WindowManagementState } from './types';
 
-type State = WindowManagementState;
+const initialState: WindowManagementState = { windowId: null };
 
-const initialState: State = {
-  windowId: null
-};
+const slice = createSlice({
+  name: 'windowManagement',
+  initialState,
+  reducers: {
+    windowIdChanged: (state, action: PayloadAction<number>) => ({
+      ...state,
+      windowId: action.payload
+    }),
+    windowIdCleared: state => ({ ...state, windowId: null }),
+    onboardingAppInit: state => state,
+    popupWindowInit: state => state,
+    connectWindowInit: state => state,
+    importWindowInit: state => state,
+    signWindowInit: state => state
+  }
+});
 
-export const reducer = createReducer(initialState)
-  .handleAction(windowIdChanged, (state, { payload }): State => ({
-    ...state,
-    windowId: payload
-  }))
-  .handleAction(windowIdCleared, (state): State => ({
-    ...state,
-    windowId: null
-  }));
+export const {
+  connectWindowInit,
+  importWindowInit,
+  onboardingAppInit,
+  popupWindowInit,
+  signWindowInit,
+  windowIdChanged,
+  windowIdCleared
+} = slice.actions;
+export const reducer = slice.reducer;
