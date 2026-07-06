@@ -77,7 +77,7 @@ import {
 export function* vaultSagas() {
   yield takeLatest(getType(lockVault), lockVaultSaga);
   yield takeLatest(
-    [getType(loginRetryLockoutTimeSet), getType(popupWindowInit)],
+    [loginRetryLockoutTimeSet.type, getType(popupWindowInit)],
     setDelayForLockoutVaultSaga
   );
   yield takeLatest(getType(unlockVault), unlockVaultSaga);

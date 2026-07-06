@@ -795,13 +795,13 @@ runtime.onMessage.addListener(
           case getType(connectWindowInit):
           case getType(importWindowInit):
           case getType(signWindowInit):
-          case getType(vaultCipherReseted):
-          case getType(vaultCipherCreated):
+          case vaultCipherReseted.type:
+          case vaultCipherCreated.type:
           case getType(keysReseted):
           case getType(keysUpdated):
-          case getType(loginRetryCountReseted):
-          case getType(loginRetryCountIncremented):
-          case getType(loginRetryLockoutTimeSet):
+          case loginRetryCountReseted.type:
+          case loginRetryCountIncremented.type:
+          case loginRetryLockoutTimeSet.type:
           case getType(recipientPublicKeyAdded):
           case getType(recipientPublicKeyReseted):
           case getType(accountInfoReset):
