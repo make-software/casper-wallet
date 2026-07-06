@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type JSX } from 'react';
 import styled from 'styled-components';
 
 import { useCopyToClipboard } from '@hooks/use-copy-to-clipboard';

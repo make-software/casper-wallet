@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useEffect } from 'react';
+import React, { type JSX, PropsWithChildren, useEffect } from 'react';
 import { ContentRenderer, Popover as TinyPopover } from 'react-tiny-popover';
 
 interface PopoverProps {

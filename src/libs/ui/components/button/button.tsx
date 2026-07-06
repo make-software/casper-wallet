@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { type JSX, forwardRef } from 'react';
 import styled from 'styled-components';
 
 import { BaseProps } from '@libs/ui/types';
