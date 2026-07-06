@@ -1,5 +1,6 @@
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
-import React from 'react';
+import React, { useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -34,6 +35,14 @@ export const ValidatorList = ({
   totalStake
 }: ValidatorListProps) => {
   const { t } = useTranslation();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: filteredValidatorsList.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => ROW_HEIGHT_PX,
+    overscan: 5
+  });
 
   return (
     <VerticalSpaceContainer top={SpacingSize.Tiny}>
@@ -47,34 +56,51 @@ export const ValidatorList = ({
           </Typography>
         </DropdownHeader>
         <ScrollContainer
+          ref={scrollContainerRef}
           maxHeight={getValidatorListHeight(filteredValidatorsList.length)}
         >
-          {filteredValidatorsList.map(validator => {
-            const logo = validator?.svgLogo || validator?.imgLogo;
+          <div
+            style={{
+              height: virtualizer.getTotalSize(),
+              width: '100%',
+              position: 'relative'
+            }}
+          >
+            {virtualizer.getVirtualItems().map(virtualRow => {
+              const validator = filteredValidatorsList[virtualRow.index];
+              const logo = validator?.svgLogo || validator?.imgLogo;
 
-            return (
-              <Container
-                key={validator.publicKey}
-                style={{ height: ROW_HEIGHT_PX }}
-              >
-                <ValidatorPlate
-                  minAmount={validator.minAmount}
-                  reservedSlots={validator.reservedSlots}
-                  publicKey={validator?.publicKey}
-                  fee={validator.fee}
-                  name={validator?.name}
-                  logo={logo}
-                  // TODO: remove user_stake after we merge recipient and amount steps for undelegation
-                  formattedTotalStake={validator[totalStake]}
-                  delegatorsNumber={validator?.delegatorsNumber}
-                  handleClick={() => {
-                    handleValidatorClick(validator);
+              return (
+                <Container
+                  key={validator.publicKey}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: virtualRow.size,
+                    transform: `translateY(${virtualRow.start}px)`
                   }}
-                  withBorder
-                />
-              </Container>
-            );
-          })}
+                >
+                  <ValidatorPlate
+                    minAmount={validator.minAmount}
+                    reservedSlots={validator.reservedSlots}
+                    publicKey={validator?.publicKey}
+                    fee={validator.fee}
+                    name={validator?.name}
+                    logo={logo}
+                    // TODO: remove user_stake after we merge recipient and amount steps for undelegation
+                    formattedTotalStake={validator[totalStake]}
+                    delegatorsNumber={validator?.delegatorsNumber}
+                    handleClick={() => {
+                      handleValidatorClick(validator);
+                    }}
+                    withBorder
+                  />
+                </Container>
+              );
+            })}
+          </div>
         </ScrollContainer>
       </Tile>
     </VerticalSpaceContainer>
