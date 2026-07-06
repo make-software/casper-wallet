@@ -152,11 +152,11 @@ export const darkTheme = {
 export type LightTheme = typeof lightTheme;
 export type DarkTheme = typeof darkTheme;
 interface ThemeColors
-  extends Omit<LightTheme['color'], 'fillSecondary' | 'fillSecondaryHover'>,
+  extends
+    Omit<LightTheme['color'], 'fillSecondary' | 'fillSecondaryHover'>,
     Omit<DarkTheme['color'], 'fillSecondary' | 'fillSecondaryHover'> {
   fillSecondary:
-    | LightTheme['color']['fillSecondary']
-    | DarkTheme['color']['fillSecondary'];
+    LightTheme['color']['fillSecondary'] | DarkTheme['color']['fillSecondary'];
   fillSecondaryHover:
     | LightTheme['color']['fillSecondaryHover']
     | DarkTheme['color']['fillSecondaryHover'];

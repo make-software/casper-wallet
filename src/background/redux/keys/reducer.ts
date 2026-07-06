@@ -12,11 +12,8 @@ const initialState: State = {
 };
 
 export const reducer = createReducer(initialState)
-  .handleAction(
-    keysUpdated,
-    (state, action): State => ({
-      ...state,
-      ...action.payload
-    })
-  )
+  .handleAction(keysUpdated, (state, action): State => ({
+    ...state,
+    ...action.payload
+  }))
   .handleAction(keysReseted, () => initialState);

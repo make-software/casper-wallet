@@ -44,7 +44,7 @@ export function HeaderPopup({
   const activeAccount = useSelector(selectVaultActiveAccount);
   const headerDataUpdaterEnabled = Boolean(
     activeAccount?.publicKey &&
-      (withMenu || withConnectionStatus || withNetworkSwitcher)
+    (withMenu || withConnectionStatus || withNetworkSwitcher)
   );
 
   return (

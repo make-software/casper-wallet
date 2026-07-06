@@ -10,17 +10,11 @@ const initialState: State = {
 };
 
 export const reducer = createReducer(initialState)
-  .handleAction(
-    windowIdChanged,
-    (state, { payload }): State => ({
-      ...state,
-      windowId: payload
-    })
-  )
-  .handleAction(
-    windowIdCleared,
-    (state): State => ({
-      ...state,
-      windowId: null
-    })
-  );
+  .handleAction(windowIdChanged, (state, { payload }): State => ({
+    ...state,
+    windowId: payload
+  }))
+  .handleAction(windowIdCleared, (state): State => ({
+    ...state,
+    windowId: null
+  }));

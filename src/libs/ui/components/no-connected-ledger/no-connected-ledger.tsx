@@ -62,13 +62,11 @@ export const NoConnectedLedger: React.FC<INoConnectedLedgerProps> = ({
     container?.scrollTo(0, 0);
   }, []);
 
-  if (
-    !(
-      event?.status === LedgerEventStatus.Disconnected ||
-      event?.status === LedgerEventStatus.WaitingResponseFromDevice ||
-      event?.status === LedgerEventStatus.LedgerAskPermission
-    )
-  ) {
+  if (!(
+    event?.status === LedgerEventStatus.Disconnected ||
+    event?.status === LedgerEventStatus.WaitingResponseFromDevice ||
+    event?.status === LedgerEventStatus.LedgerAskPermission
+  )) {
     return null;
   }
 

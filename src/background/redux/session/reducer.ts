@@ -18,24 +18,15 @@ const initialState: State = {
 
 export const reducer = createReducer(initialState)
   .handleAction(sessionReseted, (): State => initialState)
-  .handleAction(
-    vaultUnlocked,
-    (state): State => ({
-      ...state,
-      isLocked: false
-    })
-  )
-  .handleAction(
-    encryptionKeyHashCreated,
-    (state, action): State => ({
-      ...state,
-      encryptionKeyHash: action.payload.encryptionKeyHash
-    })
-  )
-  .handleAction(
-    contactEditingPermissionChanged,
-    (state): State => ({
-      ...state,
-      isContactEditingAllowed: true
-    })
-  );
+  .handleAction(vaultUnlocked, (state): State => ({
+    ...state,
+    isLocked: false
+  }))
+  .handleAction(encryptionKeyHashCreated, (state, action): State => ({
+    ...state,
+    encryptionKeyHash: action.payload.encryptionKeyHash
+  }))
+  .handleAction(contactEditingPermissionChanged, (state): State => ({
+    ...state,
+    isContactEditingAllowed: true
+  }));

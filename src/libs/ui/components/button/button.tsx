@@ -165,11 +165,7 @@ const BUTTON_COMPONENT_BY_COLOR_DICT = {
 export interface ButtonProps extends BaseButtonProps {
   // TODO: change color to variant, and remove variant prop, using width is enough
   color?:
-    | 'primaryBlue'
-    | 'primaryRed'
-    | 'secondaryBlue'
-    | 'secondaryRed'
-    | 'utility';
+    'primaryBlue' | 'primaryRed' | 'secondaryBlue' | 'secondaryRed' | 'utility';
   as?: (props: any) => JSX.Element;
   onClick?: (ev: any) => void;
   circle?: boolean;

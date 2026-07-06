@@ -127,8 +127,10 @@ export const buildAuctionTransactions = (
   return { transaction, fallbackDeploy };
 };
 
-interface IBuildNftTransferTransactionsParams
-  extends Omit<IMakeNftTransferDeployParams, 'nftStandard'> {
+interface IBuildNftTransferTransactionsParams extends Omit<
+  IMakeNftTransferDeployParams,
+  'nftStandard'
+> {
   nftStandard: NFTTokenStandard;
 }
 

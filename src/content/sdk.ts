@@ -39,16 +39,13 @@ function fetchFromBackground<T extends SdkMethod['payload']>(
 ): Promise<T> {
   return new Promise((resolve, reject) => {
     // timeout & cleanup to prevent memory leaks
-    const timeoutId = setTimeout(
-      () => {
-        reject(
-          Error(
-            `SDK RESPONSE TIMEOUT: ${requestAction.type}:${requestAction.meta.requestId}`
-          )
-        );
-      },
-      options?.timeout || DefaultOptions.timeout
-    );
+    const timeoutId = setTimeout(() => {
+      reject(
+        Error(
+          `SDK RESPONSE TIMEOUT: ${requestAction.type}:${requestAction.meta.requestId}`
+        )
+      );
+    }, options?.timeout || DefaultOptions.timeout);
 
     window.dispatchEvent(
       new CustomEvent(SdkMethodEventType.Request, {
