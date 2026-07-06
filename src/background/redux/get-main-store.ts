@@ -109,7 +109,13 @@ export async function getExistingMainStoreSingletonOrInit() {
       } else {
         storeSingleton = createStore({
           vaultCipher,
-          keys,
+          keys: keys && {
+            ...keys,
+            keysDoesExist:
+              keys.passwordHash != null &&
+              keys.passwordSaltHash != null &&
+              keys.keyDerivationSaltHash != null
+          },
           loginRetryCount,
           loginRetryLockoutTime,
           lastActivityTime,

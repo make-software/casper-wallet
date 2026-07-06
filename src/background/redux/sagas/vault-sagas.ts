@@ -85,7 +85,7 @@ export function* vaultSagas() {
     [
       getType(startBackground),
       lastActivityTimeRefreshed.type,
-      getType(activeTimeoutDurationSettingChanged)
+      activeTimeoutDurationSettingChanged.type
     ],
     timeoutCounterSaga
   );
@@ -102,7 +102,7 @@ export function* vaultSagas() {
       getType(accountDisconnected),
       getType(siteDisconnected),
       getType(activeAccountChanged),
-      getType(activeTimeoutDurationSettingChanged),
+      activeTimeoutDurationSettingChanged.type,
       getType(deployPayloadReceived),
       getType(eip712PayloadReceived),
       getType(hideAccountFromListChanged)

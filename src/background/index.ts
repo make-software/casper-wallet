@@ -764,9 +764,9 @@ runtime.onMessage.addListener(
           case getType(recoverVault):
           case getType(createAccount):
           case getType(deploysReseted):
-          case getType(sessionReseted):
-          case getType(encryptionKeyHashCreated):
-          case getType(vaultUnlocked):
+          case sessionReseted.type:
+          case encryptionKeyHashCreated.type:
+          case vaultUnlocked.type:
           case getType(vaultLoaded):
           case getType(vaultReseted):
           case getType(secretPhraseCreated):
@@ -779,10 +779,10 @@ runtime.onMessage.addListener(
           case getType(activeAccountChanged):
           case getType(activeAccountSupportsChanged):
           case getType(hideAccountFromListChanged):
-          case getType(activeTimeoutDurationSettingChanged):
-          case getType(activeNetworkSettingChanged):
-          case getType(vaultSettingsReseted):
-          case getType(themeModeSettingChanged):
+          case activeTimeoutDurationSettingChanged.type:
+          case activeNetworkSettingChanged.type:
+          case vaultSettingsReseted.type:
+          case themeModeSettingChanged.type:
           case lastActivityTimeRefreshed.type:
           case getType(siteConnected):
           case getType(anotherAccountConnected):
@@ -797,8 +797,8 @@ runtime.onMessage.addListener(
           case signWindowInit.type:
           case vaultCipherReseted.type:
           case vaultCipherCreated.type:
-          case getType(keysReseted):
-          case getType(keysUpdated):
+          case keysReseted.type:
+          case keysUpdated.type:
           case loginRetryCountReseted.type:
           case loginRetryCountIncremented.type:
           case loginRetryLockoutTimeSet.type:
@@ -811,7 +811,7 @@ runtime.onMessage.addListener(
           case accountTrackingIdOfSentNftTokensRemoved.type:
           case newContactAdded.type:
           case contactRemoved.type:
-          case getType(contactEditingPermissionChanged):
+          case contactEditingPermissionChanged.type:
           case contactUpdated.type:
           case contactsReseted.type:
           case ratedInStoreChanged.type:
@@ -829,7 +829,7 @@ runtime.onMessage.addListener(
           case removeWasmFromTrusted.type:
           case removeAllWasmFromTrustedOrigin.type:
           case resetTrustedWasmState.type:
-          case getType(systemColorSchemeChanged):
+          case systemColorSchemeChanged.type:
             store.dispatch(action);
             return sendResponse(undefined);
 

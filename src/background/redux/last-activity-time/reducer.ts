@@ -1,5 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+import { vaultUnlocked } from '../session/reducer';
+
 export type LastActivityTimeState = number | null;
 
 const initialState = null as LastActivityTimeState;
@@ -16,11 +18,9 @@ const slice = createSlice({
   },
   extraReducers: builder => {
     // session's vaultUnlocked also refreshes activity time.
-    // Interim: session is still typesafe-actions — match by its bare string.
-    // Task 9 (session conversion) MUST replace this with addCase(vaultUnlocked, …).
     builder.addCase(
-      'VAULT_UNLOCKED',
-      (_state, action: any) => action.payload.lastActivityTime
+      vaultUnlocked,
+      (_state, action) => action.payload.lastActivityTime
     );
   }
 });

@@ -14,7 +14,7 @@ import { unlockVault } from './actions';
 
 export function* watchCasper2NetworkSaga() {
   yield takeLatest(
-    [getType(unlockVault), getType(activeNetworkSettingChanged)],
+    [getType(unlockVault), activeNetworkSettingChanged.type],
     checkCasper2NetworkSaga
   );
 }
