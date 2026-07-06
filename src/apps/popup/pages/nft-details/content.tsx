@@ -73,7 +73,7 @@ const ButtonContainer = styled(CenteredFlexColumn)<{ disabled: boolean }>`
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 `;
 
-const Player = styled(ReactPlayer)`
+const Player = styled(ReactPlayer).attrs({ wrapper: 'div' })`
   max-height: 312px;
   max-width: 312px;
 
@@ -200,31 +200,36 @@ export const NftDetailsContent = ({
                 onError={onError}
               />
             )}
-            {(isAudio || isVideo) && (
+            {isVideo && (
               <CenteredFlexColumn>
-                {isAudio && (
-                  <AudioNftContainer>
-                    <SvgIcon
-                      src="assets/icons/audio-nft-placeholder.svg"
-                      height={120}
-                      width={120}
-                    />
-                  </AudioNftContainer>
-                )}
                 <Player
-                  style={
-                    isVideo
-                      ? { display: loading ? 'none' : 'block' }
-                      : undefined
-                  }
-                  url={cachedUrl || preview}
+                  style={{ display: loading ? 'none' : 'block' }}
+                  src={(cachedUrl || preview) as string}
                   controls={true}
                   volume={0.5}
-                  width={isVideo ? 'auto' : undefined}
-                  height={isVideo ? 'auto' : 70}
+                  width="auto"
+                  height="auto"
                   onError={onError}
-                  onReady={onLoad}
-                  config={{ file: { forceAudio: isAudio } }}
+                  onCanPlay={onLoad}
+                />
+              </CenteredFlexColumn>
+            )}
+            {isAudio && (
+              <CenteredFlexColumn>
+                <AudioNftContainer>
+                  <SvgIcon
+                    src="assets/icons/audio-nft-placeholder.svg"
+                    height={120}
+                    width={120}
+                  />
+                </AudioNftContainer>
+                {/* eslint-disable-next-line jsx-a11y/media-has-caption -- NFT audio previews are arbitrary third-party media with no caption track available */}
+                <audio
+                  src={(cachedUrl || preview) as string}
+                  controls
+                  onCanPlay={onLoad}
+                  onError={onError}
+                  style={{ width: '100%' }}
                 />
               </CenteredFlexColumn>
             )}
