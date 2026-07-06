@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import confusingBrowserGlobals from 'confusing-browser-globals';
 import importPlugin from 'eslint-plugin-import';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import prettierRecommended from 'eslint-plugin-prettier/recommended';
@@ -45,6 +46,21 @@ export default tseslint.config(
       'import/no-cycle': [1, { maxDepth: 10, ignoreExternal: true }],
       'import/no-named-as-default': 0,
       'import/export': 1,
+
+      // --- Restored from the legacy eslint-config-react-app baseline ---
+      // react-app enforced these error/warn rules outside of any recommended
+      // preset, so dropping the config silently un-enforced them (they moved
+      // from `on` to `absent`, not `off`, so they never showed up as "net-new
+      // disabled"). All six pass with zero violations against current src, so
+      // re-adding them restores parity with no code churn. They are genuine
+      // bug/security catchers, not style (which prettier owns) — kept at
+      // `error` so a future regression fails CI rather than only warns.
+      'array-callback-return': 'error',
+      'no-restricted-globals': ['error', ...confusingBrowserGlobals],
+      'no-script-url': 'error',
+      'no-eval': 'error',
+      'no-new-func': 'error',
+      'no-throw-literal': 'error',
 
       // --- Deferred (DEP-12): rules newly introduced by the ESLint 9 /
       // typescript-eslint 8 / react-hooks 7 / eslint-plugin-react recommended
