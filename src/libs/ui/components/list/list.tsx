@@ -1,5 +1,5 @@
 import { MacScrollbar } from 'mac-scrollbar';
-import React from 'react';
+import React, { type JSX } from 'react';
 import styled, { Interpolation } from 'styled-components';
 
 import {

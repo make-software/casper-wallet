@@ -1,6 +1,6 @@
 import { MacScrollbar } from 'mac-scrollbar';
 import 'mac-scrollbar/dist/mac-scrollbar.css';
-import React, { PropsWithChildren } from 'react';
+import React, { type JSX, PropsWithChildren } from 'react';
 import styled from 'styled-components';
 
 import { FlexColumn } from './containers';

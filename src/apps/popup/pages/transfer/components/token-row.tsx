@@ -42,7 +42,7 @@ export const TokenRow = ({
       <AlignedFlexRow gap={SpacingSize.Medium}>
         {isTokenIconJPG ? (
           <LogoImg
-            src={token?.icon || ''}
+            src={token?.icon || undefined}
             alt={token?.name}
             title={token?.name}
           />

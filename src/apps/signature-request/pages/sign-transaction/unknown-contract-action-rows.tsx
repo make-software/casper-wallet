@@ -7,7 +7,13 @@ import {
   isTxSignatureRequestUnknownContractAction,
   isTxSignatureRequestWasmProxyAction
 } from 'casper-wallet-core';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  type JSX,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
 

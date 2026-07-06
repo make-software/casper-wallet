@@ -129,7 +129,11 @@ export async function getExistingMainStoreSingletonOrInit() {
 
         // propagate state to replicas
         const popupState = selectPopupState(state);
-        runtime.sendMessage(backgroundEvent.popupStateUpdated(popupState));
+        runtime
+          .sendMessage(backgroundEvent.popupStateUpdated(popupState))
+          .catch(() => {
+            // no UI replica is open to receive the update — expected, ignore
+          });
 
         // persist selected state
         const {

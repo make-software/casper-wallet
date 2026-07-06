@@ -1,5 +1,6 @@
 import React, {
   Dispatch,
+  type JSX,
   SetStateAction,
   useEffect,
   useMemo,

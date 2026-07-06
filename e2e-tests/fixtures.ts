@@ -7,7 +7,6 @@ import {
 import path from 'path';
 
 import {
-  DEFAULT_FIRST_ACCOUNT,
   DEFAULT_SECOND_ACCOUNT,
   FIRST_CONTACT,
   PLAYGROUND_URL,
