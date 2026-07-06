@@ -56,4 +56,22 @@ describe('settings reducer', () => {
     const s = reducer(changed, vaultSettingsReseted());
     expect(s).toEqual(initial);
   });
+
+  it('defaults themeMode to SYSTEM on non-Safari builds', () => {
+    expect(initial.themeMode).toBe(ThemeMode.SYSTEM);
+  });
+
+  it('defaults themeMode to LIGHT on Safari builds', () => {
+    jest.isolateModules(() => {
+      jest.doMock('@src/utils', () => ({
+        ...jest.requireActual('@src/utils'),
+        isSafariBuild: true
+      }));
+      // eslint-disable-next-line @typescript-eslint/no-require-imports -- require is required to re-import the module under the mocked build flag
+      const { reducer: safariReducer } = require('./reducer');
+      const safariInitial = safariReducer(undefined, { type: '@@INIT' } as any);
+      expect(safariInitial.themeMode).toBe(ThemeMode.LIGHT);
+    });
+    jest.dontMock('@src/utils');
+  });
 });

@@ -25,7 +25,7 @@ const slice = createSlice({
         hashesByOriginDict: {
           ...currentTrustedWasm,
           [origin]: [
-            ...new Set([...(currentTrustedWasm?.[origin] ?? []), wasmHash])
+            ...new Set([...(currentTrustedWasm[origin] ?? []), wasmHash])
           ]
         }
       };
@@ -38,7 +38,7 @@ const slice = createSlice({
       const currentTrustedWasm =
         state.hashesByOriginDict ?? initialState.hashesByOriginDict;
 
-      if (currentTrustedWasm?.[origin]) {
+      if (currentTrustedWasm[origin]) {
         return {
           ...state,
           hashesByOriginDict: {
@@ -57,9 +57,15 @@ const slice = createSlice({
       action: PayloadAction<{ origin: string }>
     ) => {
       const { origin } = action.payload;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructuring omit: drops `origin`'s key while collecting the rest
-      const { [origin]: _removed, ...rest } =
-        state.hashesByOriginDict ?? initialState.hashesByOriginDict;
+      // Copy-then-delete instead of computed-key rest destructuring: the latter
+      // compiles to TS's `__rest` helper, which contains a `typeof key ===
+      // 'symbol'` branch that is unreachable for a string origin (dead branch,
+      // and ts-jest strips inline istanbul-ignore comments). Behaviour is
+      // identical: drop `origin`'s key while keeping the rest.
+      const rest = {
+        ...(state.hashesByOriginDict ?? initialState.hashesByOriginDict)
+      };
+      delete rest[origin];
 
       return { ...state, hashesByOriginDict: rest };
     }

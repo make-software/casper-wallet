@@ -1,4 +1,12 @@
-import { popupWindowInit, windowIdChanged, windowIdCleared } from './actions';
+import {
+  connectWindowInit,
+  importWindowInit,
+  onboardingAppInit,
+  popupWindowInit,
+  signWindowInit,
+  windowIdChanged,
+  windowIdCleared
+} from './actions';
 import { reducer } from './reducer';
 
 describe('windowManagement reducer', () => {
@@ -13,8 +21,11 @@ describe('windowManagement reducer', () => {
     expect(reducer(s, windowIdCleared())).toEqual({ windowId: null });
   });
   it('window-init actions do not change state', () => {
-    expect(reducer({ windowId: 7 }, popupWindowInit())).toEqual({
-      windowId: 7
-    });
+    const state = { windowId: 7 };
+    expect(reducer(state, onboardingAppInit())).toEqual({ windowId: 7 });
+    expect(reducer(state, popupWindowInit())).toEqual({ windowId: 7 });
+    expect(reducer(state, connectWindowInit())).toEqual({ windowId: 7 });
+    expect(reducer(state, importWindowInit())).toEqual({ windowId: 7 });
+    expect(reducer(state, signWindowInit())).toEqual({ windowId: 7 });
   });
 });

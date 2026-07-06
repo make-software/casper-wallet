@@ -91,21 +91,21 @@ export function* vaultSagas() {
   );
   yield takeLatest(
     [
-      getType(accountAdded),
-      getType(accountsAdded),
-      getType(accountImported),
-      getType(accountsImported),
-      getType(accountRemoved),
-      getType(accountRenamed),
-      getType(siteConnected),
-      getType(anotherAccountConnected),
-      getType(accountDisconnected),
-      getType(siteDisconnected),
-      getType(activeAccountChanged),
+      accountAdded.type,
+      accountsAdded.type,
+      accountImported.type,
+      accountsImported.type,
+      accountRemoved.type,
+      accountRenamed.type,
+      siteConnected.type,
+      anotherAccountConnected.type,
+      accountDisconnected.type,
+      siteDisconnected.type,
+      activeAccountChanged.type,
       activeTimeoutDurationSettingChanged.type,
-      getType(deployPayloadReceived),
-      getType(eip712PayloadReceived),
-      getType(hideAccountFromListChanged)
+      deployPayloadReceived.type,
+      eip712PayloadReceived.type,
+      hideAccountFromListChanged.type
     ],
     updateVaultCipher
   );

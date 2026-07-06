@@ -104,6 +104,33 @@ describe('trustedWasm reducer', () => {
     ).toBe(false);
   });
 
+  it('falls back to an empty dict when state has no hashesByOriginDict (addWasmToTrusted)', () => {
+    const state = reducer(
+      {} as any,
+      addWasmToTrusted({ origin: 'https://app.example', wasmHash: 'hash1' })
+    );
+    expect(state).toEqual({
+      hashesByOriginDict: { 'https://app.example': ['hash1'] }
+    });
+  });
+
+  it('falls back to an empty dict when state has no hashesByOriginDict (removeWasmFromTrusted else-branch)', () => {
+    const state = reducer(
+      {} as any,
+      removeWasmFromTrusted({ origin: 'https://app.example', wasmHash: 'h' })
+    );
+    // else-branch returns `{ ...state }`; the ?? fallback still fires for the guard read
+    expect(state).toEqual({});
+  });
+
+  it('falls back to an empty dict when state has no hashesByOriginDict (removeAllWasmFromTrustedOrigin)', () => {
+    const state = reducer(
+      {} as any,
+      removeAllWasmFromTrustedOrigin({ origin: 'https://app.example' })
+    );
+    expect(state).toEqual({ hashesByOriginDict: {} });
+  });
+
   it('resets to initial state on resetTrustedWasmState', () => {
     const seeded = {
       hashesByOriginDict: { 'https://app.example': ['hash1'] }

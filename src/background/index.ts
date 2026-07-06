@@ -763,31 +763,31 @@ runtime.onMessage.addListener(
           case getType(initVault):
           case getType(recoverVault):
           case getType(createAccount):
-          case getType(deploysReseted):
+          case deploysReseted.type:
           case sessionReseted.type:
           case encryptionKeyHashCreated.type:
           case vaultUnlocked.type:
-          case getType(vaultLoaded):
-          case getType(vaultReseted):
-          case getType(secretPhraseCreated):
-          case getType(accountImported):
-          case getType(accountsImported):
-          case getType(accountAdded):
-          case getType(accountsAdded):
-          case getType(accountRemoved):
-          case getType(accountRenamed):
-          case getType(activeAccountChanged):
-          case getType(activeAccountSupportsChanged):
-          case getType(hideAccountFromListChanged):
+          case vaultLoaded.type:
+          case vaultReseted.type:
+          case secretPhraseCreated.type:
+          case accountImported.type:
+          case accountsImported.type:
+          case accountAdded.type:
+          case accountsAdded.type:
+          case accountRemoved.type:
+          case accountRenamed.type:
+          case activeAccountChanged.type:
+          case activeAccountSupportsChanged.type:
+          case hideAccountFromListChanged.type:
           case activeTimeoutDurationSettingChanged.type:
           case activeNetworkSettingChanged.type:
           case vaultSettingsReseted.type:
           case themeModeSettingChanged.type:
           case lastActivityTimeRefreshed.type:
-          case getType(siteConnected):
-          case getType(anotherAccountConnected):
-          case getType(accountDisconnected):
-          case getType(siteDisconnected):
+          case siteConnected.type:
+          case anotherAccountConnected.type:
+          case accountDisconnected.type:
+          case siteDisconnected.type:
           case windowIdChanged.type:
           case windowIdCleared.type:
           case onboardingAppInit.type:
@@ -822,7 +822,7 @@ runtime.onMessage.addListener(
           case ledgerDeployChanged.type:
           case ledgerTransactionChanged.type:
           case ledgerRecipientToSaveOnSuccessChanged.type:
-          case getType(addWatchingAccount):
+          case addWatchingAccount.type:
           case dismissAppEvent.type:
           case resetAppEventsDismission.type:
           case addWasmToTrusted.type:
