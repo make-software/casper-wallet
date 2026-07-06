@@ -802,8 +802,8 @@ runtime.onMessage.addListener(
           case loginRetryCountReseted.type:
           case loginRetryCountIncremented.type:
           case loginRetryLockoutTimeSet.type:
-          case getType(recipientPublicKeyAdded):
-          case getType(recipientPublicKeyReseted):
+          case recipientPublicKeyAdded.type:
+          case recipientPublicKeyReseted.type:
           case getType(accountInfoReset):
           case getType(accountPendingDeployHashesChanged):
           case getType(accountPendingDeployHashesRemove):
@@ -814,17 +814,17 @@ runtime.onMessage.addListener(
           case getType(contactEditingPermissionChanged):
           case getType(contactUpdated):
           case getType(contactsReseted):
-          case getType(ratedInStoreChanged):
-          case getType(askForReviewAfterChanged):
-          case getType(resetRateApp):
+          case ratedInStoreChanged.type:
+          case askForReviewAfterChanged.type:
+          case resetRateApp.type:
           case getType(ledgerNewWindowIdChanged):
           case getType(ledgerStateCleared):
           case getType(ledgerDeployChanged):
           case getType(ledgerTransactionChanged):
           case getType(ledgerRecipientToSaveOnSuccessChanged):
           case getType(addWatchingAccount):
-          case getType(dismissAppEvent):
-          case getType(resetAppEventsDismission):
+          case dismissAppEvent.type:
+          case resetAppEventsDismission.type:
           case getType(addWasmToTrusted):
           case getType(removeWasmFromTrusted):
           case getType(removeAllWasmFromTrustedOrigin):
