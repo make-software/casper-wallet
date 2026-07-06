@@ -751,18 +751,18 @@ runtime.onMessage.addListener(
         }
       } else if (action.type != null) {
         switch (action.type) {
-          case getType(resetVault): {
+          case resetVault.type: {
             store.dispatch(action);
             await enableOnboardingFlow();
             return sendResponse(undefined);
           }
 
-          case getType(lockVault):
-          case getType(unlockVault):
-          case getType(initKeys):
-          case getType(initVault):
-          case getType(recoverVault):
-          case getType(createAccount):
+          case lockVault.type:
+          case unlockVault.type:
+          case initKeys.type:
+          case initVault.type:
+          case recoverVault.type:
+          case createAccount.type:
           case deploysReseted.type:
           case sessionReseted.type:
           case encryptionKeyHashCreated.type:

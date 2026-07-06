@@ -1,5 +1,4 @@
 import { put, select, takeLatest } from 'redux-saga/effects';
-import { getType } from 'typesafe-actions';
 
 import { getActiveAccountSupports, getUrlOrigin } from '@src/utils';
 
@@ -75,15 +74,15 @@ import {
 } from './actions';
 
 export function* vaultSagas() {
-  yield takeLatest(getType(lockVault), lockVaultSaga);
+  yield takeLatest(lockVault.type, lockVaultSaga);
   yield takeLatest(
     [loginRetryLockoutTimeSet.type, popupWindowInit.type],
     setDelayForLockoutVaultSaga
   );
-  yield takeLatest(getType(unlockVault), unlockVaultSaga);
+  yield takeLatest(unlockVault.type, unlockVaultSaga);
   yield takeLatest(
     [
-      getType(startBackground),
+      startBackground.type,
       lastActivityTimeRefreshed.type,
       activeTimeoutDurationSettingChanged.type
     ],
@@ -109,7 +108,7 @@ export function* vaultSagas() {
     ],
     updateVaultCipher
   );
-  yield takeLatest(getType(createAccount), createAccountSaga);
+  yield takeLatest(createAccount.type, createAccountSaga);
 }
 
 /**

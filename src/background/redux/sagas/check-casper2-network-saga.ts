@@ -1,6 +1,5 @@
 import { HttpHandler, InfoGetStatusResult, RpcClient } from 'casper-js-sdk';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
-import { getType } from 'typesafe-actions';
 
 import { REFERRER_URL } from '@src/constants';
 
@@ -14,7 +13,7 @@ import { unlockVault } from './actions';
 
 export function* watchCasper2NetworkSaga() {
   yield takeLatest(
-    [getType(unlockVault), activeNetworkSettingChanged.type],
+    [unlockVault.type, activeNetworkSettingChanged.type],
     checkCasper2NetworkSaga
   );
 }
