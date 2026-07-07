@@ -1,9 +1,7 @@
-import { RootState } from 'typesafe-actions';
+import { RootState } from '@background/redux/store-types';
 
 export const selectKeysDoesExist = (state: RootState): boolean =>
-  state.keys.passwordHash != null &&
-  state.keys.passwordSaltHash != null &&
-  state.keys.keyDerivationSaltHash != null;
+  state.keys.keysDoesExist;
 
 export const selectPasswordHash = (state: RootState): string | null =>
   state.keys.passwordHash;

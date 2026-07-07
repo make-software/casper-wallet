@@ -1,9 +1,4 @@
-import { createReducer } from 'typesafe-actions';
-
-import {
-  dismissAppEvent,
-  resetAppEventsDismission
-} from '@background/redux/app-events/actions';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 import { AppEventsState } from './types';
 
@@ -11,14 +6,19 @@ const initialState: AppEventsState = {
   dismissedEventIds: []
 };
 
-export const reducer = createReducer(initialState)
-  .handleAction(
-    dismissAppEvent,
-    (state: AppEventsState, action: ReturnType<typeof dismissAppEvent>) => ({
+const slice = createSlice({
+  name: 'appEvents',
+  initialState,
+  reducers: {
+    dismissAppEvent: (state, action: PayloadAction<number>) => ({
       ...state,
       dismissedEventIds: [
         ...new Set([...state.dismissedEventIds, action.payload])
       ]
-    })
-  )
-  .handleAction(resetAppEventsDismission, () => initialState);
+    }),
+    resetAppEventsDismission: () => initialState
+  }
+});
+
+export const { dismissAppEvent, resetAppEventsDismission } = slice.actions;
+export const reducer = slice.reducer;

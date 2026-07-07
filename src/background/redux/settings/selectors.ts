@@ -1,5 +1,4 @@
 import { createSelector } from 'reselect';
-import { RootState } from 'typesafe-actions';
 
 import {
   AssociatedKeysContractHash,
@@ -11,6 +10,8 @@ import {
   NetworkName,
   NetworkSetting
 } from '@src/constants';
+
+import { RootState } from '@background/redux/store-types';
 
 export const selectTimeoutDurationSetting = (state: RootState) =>
   state.settings.activeTimeoutDuration;

@@ -1,4 +1,3 @@
-import { RootState } from 'typesafe-actions';
 import { runtime, storage } from 'webextension-polyfill';
 
 import { backgroundEvent } from '@background/background-events';
@@ -12,6 +11,7 @@ import { RateAppState } from '@background/redux/rate-app/types';
 import { RecentRecipientPublicKeysState } from '@background/redux/recent-recipient-public-keys/types';
 import { startBackground } from '@background/redux/sagas/actions';
 import { SettingsState } from '@background/redux/settings/types';
+import { RootState } from '@background/redux/store-types';
 import { TrustedWasmState } from '@background/redux/trusted-wasm/types';
 import { PopupState } from '@background/redux/types';
 
@@ -43,16 +43,20 @@ type StorageState = {
 // this needs to be private
 let storeSingleton: ReturnType<typeof createStore>;
 
-// These state keys will be passed to popups
+// These state keys will be passed to popups. P0.1: cipher/hash material is
+// NOT broadcast — UI flows that need it use fetchPrivateState() explicitly.
 export const selectPopupState = (state: RootState): PopupState => {
-  // TODO: must sanitize state to not send private data back to front
   return {
-    keys: state.keys,
+    keys: {
+      passwordHash: null,
+      passwordSaltHash: null,
+      keyDerivationSaltHash: null,
+      keysDoesExist: state.keys.keysDoesExist
+    },
+    session: { ...state.session, encryptionKeyHash: null },
     loginRetryCount: state.loginRetryCount,
-    session: state.session,
     vault: state.vault,
     windowManagement: state.windowManagement,
-    vaultCipher: state.vaultCipher,
     loginRetryLockoutTime: state.loginRetryLockoutTime,
     lastActivityTime: state.lastActivityTime,
     activeOrigin: state.activeOrigin,
@@ -105,11 +109,19 @@ export async function getExistingMainStoreSingletonOrInit() {
         const { initialStateForPopupTests } = await import(
           /* webpackMode: "eager" */ '@src/fixtures'
         );
-        storeSingleton = createStore(initialStateForPopupTests as PopupState);
+        // The MOCK store IS the background store: it keeps the full RootState
+        // (incl. vaultCipher + real hashes); only the broadcast is sanitized.
+        storeSingleton = createStore(initialStateForPopupTests);
       } else {
         storeSingleton = createStore({
           vaultCipher,
-          keys,
+          keys: keys && {
+            ...keys,
+            keysDoesExist:
+              keys.passwordHash != null &&
+              keys.passwordSaltHash != null &&
+              keys.keyDerivationSaltHash != null
+          },
           loginRetryCount,
           loginRetryLockoutTime,
           lastActivityTime,
@@ -174,6 +186,10 @@ export async function getExistingMainStoreSingletonOrInit() {
 
   return storeSingleton;
 }
+
+export type MainStore = Awaited<
+  ReturnType<typeof getExistingMainStoreSingletonOrInit>
+>;
 
 export function createMainStoreReplica<T extends PopupState>(state: T) {
   return createStore(state);

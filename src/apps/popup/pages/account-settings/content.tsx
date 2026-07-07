@@ -4,10 +4,10 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
-import { RootState } from 'typesafe-actions';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
+import { RootState } from '@background/redux/store-types';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { hideAccountFromListChanged } from '@background/redux/vault/actions';
 import {

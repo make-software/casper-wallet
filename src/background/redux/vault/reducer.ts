@@ -1,27 +1,10 @@
-import { createReducer } from 'typesafe-actions';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import {
-  accountAdded,
-  accountDisconnected,
-  accountImported,
-  accountRemoved,
-  accountRenamed,
-  accountsAdded,
-  accountsImported,
-  activeAccountChanged,
-  activeAccountSupportsChanged,
-  addWatchingAccount,
-  anotherAccountConnected,
-  deployPayloadReceived,
-  deploysReseted,
-  eip712PayloadReceived,
-  hideAccountFromListChanged,
-  secretPhraseCreated,
-  siteConnected,
-  siteDisconnected,
-  vaultLoaded,
-  vaultReseted
-} from './actions';
+import { CasperWalletSupports } from '@content/sdk-types';
+
+import { SecretPhrase } from '@libs/crypto';
+import { Account } from '@libs/types/account';
+
 import { VaultState } from './types';
 
 type State = VaultState;
@@ -36,11 +19,12 @@ const initialState: State = {
   eip712ById: {}
 };
 
-export const reducer = createReducer(initialState)
-  .handleAction(vaultReseted, () => initialState)
-  .handleAction(
-    vaultLoaded,
-    (
+const slice = createSlice({
+  name: 'vault',
+  initialState,
+  reducers: {
+    vaultReseted: () => initialState,
+    vaultLoaded: (
       state,
       {
         payload: {
@@ -52,7 +36,7 @@ export const reducer = createReducer(initialState)
           jsonById,
           eip712ById
         }
-      }: ReturnType<typeof vaultLoaded>
+      }: PayloadAction<VaultState>
     ) => ({
       accountNamesByOriginDict,
       siteNameByOriginDict,
@@ -65,18 +49,15 @@ export const reducer = createReducer(initialState)
         Object.keys(state.eip712ById).length === 0
           ? eip712ById
           : state.eip712ById
-    })
-  )
-  .handleAction(
-    secretPhraseCreated,
-    (state, action: ReturnType<typeof secretPhraseCreated>): State => ({
+    }),
+    secretPhraseCreated: (
+      state,
+      action: PayloadAction<SecretPhrase>
+    ): State => ({
       ...state,
       secretPhrase: action.payload
-    })
-  )
-  .handleAction(
-    accountAdded,
-    (state, action: ReturnType<typeof accountAdded>): State => {
+    }),
+    accountAdded: (state, action: PayloadAction<Account>): State => {
       const account = action.payload;
 
       return {
@@ -84,43 +65,37 @@ export const reducer = createReducer(initialState)
         accounts: [...state.accounts, account],
         activeAccountName: account.name
       };
-    }
-  )
-  .handleAction(
-    accountImported,
-    (
+    },
+    accountImported: (
       state,
-      { payload: account }: ReturnType<typeof accountImported>
+      { payload: account }: PayloadAction<Account>
     ): State => ({
       ...state,
       accounts: [...state.accounts, account],
       activeAccountName:
         state.accounts.length === 0 ? account.name : state.activeAccountName
-    })
-  )
-  .handleAction(
-    accountsAdded,
-    (state, { payload: accounts }: ReturnType<typeof accountsAdded>) => ({
-      ...state,
-      accounts: [...state.accounts, ...accounts],
-      activeAccountName:
-        state.accounts.length === 0 ? accounts[0].name : state.activeAccountName
-    })
-  )
-  .handleAction(
-    accountsImported,
-    (state, { payload: accounts }: ReturnType<typeof accountsImported>) => ({
-      ...state,
-      accounts: [...state.accounts, ...accounts],
-      activeAccountName:
-        state.accounts.length === 0 ? accounts[0].name : state.activeAccountName
-    })
-  )
-  .handleAction(
-    accountRemoved,
-    (
+    }),
+    accountsAdded: (
       state,
-      { payload: { accountName } }: ReturnType<typeof accountRemoved>
+      { payload: accounts }: PayloadAction<Account[]>
+    ) => ({
+      ...state,
+      accounts: [...state.accounts, ...accounts],
+      activeAccountName:
+        state.accounts.length === 0 ? accounts[0].name : state.activeAccountName
+    }),
+    accountsImported: (
+      state,
+      { payload: accounts }: PayloadAction<Account[]>
+    ) => ({
+      ...state,
+      accounts: [...state.accounts, ...accounts],
+      activeAccountName:
+        state.accounts.length === 0 ? accounts[0].name : state.activeAccountName
+    }),
+    accountRemoved: (
+      state,
+      { payload: { accountName } }: PayloadAction<{ accountName: string }>
     ): State => {
       const newAccounts = state.accounts.filter(
         account => account.name !== accountName
@@ -151,13 +126,12 @@ export const reducer = createReducer(initialState)
         activeAccountName: newActiveAccount,
         accountNamesByOriginDict: newAccountNamesByOriginDict
       };
-    }
-  )
-  .handleAction(
-    accountRenamed,
-    (
+    },
+    accountRenamed: (
       state,
-      { payload: { oldName, newName } }: ReturnType<typeof accountRenamed>
+      {
+        payload: { oldName, newName }
+      }: PayloadAction<{ oldName: string; newName: string }>
     ): State => {
       const newAccountNamesByOriginDict = Object.fromEntries(
         Object.keys(state.accountNamesByOriginDict).map(origin => [
@@ -185,61 +159,67 @@ export const reducer = createReducer(initialState)
             : state.activeAccountName,
         accountNamesByOriginDict: newAccountNamesByOriginDict
       };
-    }
-  )
-  .handleAction(
-    siteConnected,
-    (
+    },
+    siteConnected: (
       state,
       {
         payload: { siteOrigin, accountNames, siteTitle }
-      }: ReturnType<typeof siteConnected>
-    ) => ({
-      ...state,
-      siteNameByOriginDict: {
-        ...state?.siteNameByOriginDict,
-        [siteOrigin]: siteTitle
-      },
-      accountNamesByOriginDict: {
-        ...state.accountNamesByOriginDict,
-        [siteOrigin]:
-          (state.accountNamesByOriginDict[siteOrigin] || []).length > 0
-            ? [
-                ...(state.accountNamesByOriginDict[siteOrigin] || []),
-                ...accountNames
-              ]
-            : [...accountNames]
-      }
-    })
-  )
-  .handleAction(
-    anotherAccountConnected,
-    (
+      }: PayloadAction<{
+        siteOrigin: string;
+        accountNames: string[];
+        siteTitle: string;
+      }>
+    ) => {
+      // Behaviour-identical to the verbatim body: the original spread the same
+      // `... || []` expression twice, leaving a dead `|| []` branch inside the
+      // truthy path (and a defensive `state?.` that never short-circuits since
+      // `state` is always defined). Hoisting to a single const preserves
+      // semantics and lets the one remaining `|| []` branch be exercised.
+      // (ts-jest strips inline `istanbul ignore` comments, so annotation was
+      // not viable here.)
+      const existingNames = state.accountNamesByOriginDict[siteOrigin] || [];
+
+      return {
+        ...state,
+        siteNameByOriginDict: {
+          ...state.siteNameByOriginDict,
+          [siteOrigin]: siteTitle
+        },
+        accountNamesByOriginDict: {
+          ...state.accountNamesByOriginDict,
+          [siteOrigin]:
+            existingNames.length > 0
+              ? [...existingNames, ...accountNames]
+              : [...accountNames]
+        }
+      };
+    },
+    anotherAccountConnected: (
       state,
       {
         payload: { siteOrigin, accountName }
-      }: ReturnType<typeof anotherAccountConnected>
-    ) => ({
-      ...state,
-      accountNamesByOriginDict: {
-        ...state.accountNamesByOriginDict,
-        [siteOrigin]:
-          (state.accountNamesByOriginDict[siteOrigin] || []).length > 0
-            ? [
-                ...(state.accountNamesByOriginDict[siteOrigin] || []),
-                accountName
-              ]
-            : [accountName]
-      }
-    })
-  )
-  .handleAction(
-    accountDisconnected,
-    (
+      }: PayloadAction<{ siteOrigin: string; accountName: string }>
+    ) => {
+      // See siteConnected: hoist the duplicated `... || []` to eliminate the
+      // dead second `|| []` branch while preserving behaviour.
+      const existingNames = state.accountNamesByOriginDict[siteOrigin] || [];
+
+      return {
+        ...state,
+        accountNamesByOriginDict: {
+          ...state.accountNamesByOriginDict,
+          [siteOrigin]:
+            existingNames.length > 0
+              ? [...existingNames, accountName]
+              : [accountName]
+        }
+      };
+    },
+    accountDisconnected: (
       state,
       {
         payload: { siteOrigin, accountName }
-      }: ReturnType<typeof accountDisconnected>
+      }: PayloadAction<{ accountName: string; siteOrigin: string }>
     ) => {
       const newAccountNamesByOriginDict = Object.fromEntries(
         Object.entries(state.accountNamesByOriginDict)
@@ -264,13 +244,10 @@ export const reducer = createReducer(initialState)
         ...state,
         accountNamesByOriginDict: newAccountNamesByOriginDict
       };
-    }
-  )
-  .handleAction(
-    siteDisconnected,
-    (
+    },
+    siteDisconnected: (
       state,
-      { payload: { siteOrigin } }: ReturnType<typeof siteDisconnected>
+      { payload: { siteOrigin } }: PayloadAction<{ siteOrigin: string }>
     ) => ({
       ...state,
       accountNamesByOriginDict: Object.fromEntries(
@@ -278,18 +255,15 @@ export const reducer = createReducer(initialState)
           ([origin]) => origin !== siteOrigin
         )
       )
-    })
-  )
-  .handleAction(
-    activeAccountChanged,
-    (state, { payload }: ReturnType<typeof activeAccountChanged>) => ({
+    }),
+    activeAccountChanged: (state, { payload }: PayloadAction<string>) => ({
       ...state,
       activeAccountName: payload
-    })
-  )
-  .handleAction(
-    activeAccountSupportsChanged,
-    (state, { payload }: ReturnType<typeof activeAccountSupportsChanged>) => ({
+    }),
+    activeAccountSupportsChanged: (
+      state,
+      { payload }: PayloadAction<CasperWalletSupports[]>
+    ) => ({
       ...state,
       accounts: state.accounts.map(account => {
         if (account.name === state.activeAccountName) {
@@ -301,30 +275,25 @@ export const reducer = createReducer(initialState)
           return account;
         }
       })
-    })
-  )
-  .handleAction(deploysReseted, (): State => initialState)
-  .handleAction(
-    deployPayloadReceived,
-    (state, { payload }: ReturnType<typeof deployPayloadReceived>): State => ({
+    }),
+    deploysReseted: (): State => initialState,
+    deployPayloadReceived: (
+      state,
+      { payload }: PayloadAction<{ id: string; json: string }>
+    ): State => ({
       ...state,
       jsonById: { [payload.id]: payload.json }
-    })
-  )
-  .handleAction(
-    eip712PayloadReceived,
-    (state, { payload }: ReturnType<typeof eip712PayloadReceived>): State => ({
+    }),
+    eip712PayloadReceived: (
+      state,
+      { payload }: PayloadAction<{ id: string; json: string }>
+    ): State => ({
       ...state,
       eip712ById: { [payload.id]: payload.json }
-    })
-  )
-  .handleAction(
-    hideAccountFromListChanged,
-    (
+    }),
+    hideAccountFromListChanged: (
       state,
-      {
-        payload: { accountName }
-      }: ReturnType<typeof hideAccountFromListChanged>
+      { payload: { accountName } }: PayloadAction<{ accountName: string }>
     ) => {
       const visibleAccounts = state.accounts.filter(
         account => !account.hidden && account.name !== accountName
@@ -349,11 +318,8 @@ export const reducer = createReducer(initialState)
           return account;
         })
       };
-    }
-  )
-  .handleAction(
-    addWatchingAccount,
-    (state, action: ReturnType<typeof addWatchingAccount>): State => {
+    },
+    addWatchingAccount: (state, action: PayloadAction<Account>): State => {
       const account = action.payload;
 
       return {
@@ -362,4 +328,29 @@ export const reducer = createReducer(initialState)
         activeAccountName: account.name
       };
     }
-  );
+  }
+});
+
+export const {
+  accountAdded,
+  accountDisconnected,
+  accountImported,
+  accountRemoved,
+  accountRenamed,
+  accountsAdded,
+  accountsImported,
+  activeAccountChanged,
+  activeAccountSupportsChanged,
+  addWatchingAccount,
+  anotherAccountConnected,
+  deployPayloadReceived,
+  deploysReseted,
+  eip712PayloadReceived,
+  hideAccountFromListChanged,
+  secretPhraseCreated,
+  siteConnected,
+  siteDisconnected,
+  vaultLoaded,
+  vaultReseted
+} = slice.actions;
+export const reducer = slice.reducer;

@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect';
-import { RootState } from 'typesafe-actions';
+
+import { RootState } from '@background/redux/store-types';
 
 import { LoginRetryLockoutTimeState } from './types';
 

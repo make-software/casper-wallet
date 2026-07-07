@@ -10,10 +10,7 @@ import {
 import { PasswordDoesNotExistError } from '@src/errors';
 import { getErrorMessageForIncorrectPassword } from '@src/utils';
 
-import {
-  selectPasswordHash,
-  selectPasswordSaltHash
-} from '@background/redux/keys/selectors';
+import { selectKeysDoesExist } from '@background/redux/keys/selectors';
 import {
   loginRetryCountIncremented,
   loginRetryCountReseted
@@ -21,11 +18,14 @@ import {
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 
+import { usePrivateState } from '@hooks/use-private-state';
+
 import {
   FooterButtonsContainer,
   HeaderPopup,
   HeaderSubmenuBarNavLink,
   PopupLayout,
+  PrivateStateErrorPage,
   UnlockProtectedPageContent
 } from '@libs/layout';
 import { Button } from '@libs/ui/components';
@@ -51,8 +51,12 @@ export const PasswordProtectionPage = ({
 
   const { t } = useTranslation();
 
-  const passwordHash = useSelector(selectPasswordHash);
-  const passwordSaltHash = useSelector(selectPasswordSaltHash);
+  const {
+    privateState,
+    error: privateStateError,
+    retry: retryPrivateState
+  } = usePrivateState();
+  const keysDoesExist = useSelector(selectKeysDoesExist);
   const loginRetryCount = useSelector(selectLoginRetryCount);
 
   const attemptsLeft =
@@ -60,7 +64,7 @@ export const PasswordProtectionPage = ({
     loginRetryCount -
     ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED;
 
-  if (passwordHash == null || passwordSaltHash == null) {
+  if (!keysDoesExist) {
     throw new PasswordDoesNotExistError();
   }
 
@@ -77,6 +81,10 @@ export const PasswordProtectionPage = ({
   });
 
   const onSubmit = () => {
+    if (privateState == null) return;
+
+    const { passwordHash, passwordSaltHash } = privateState;
+
     setIsSubmitting(true);
 
     const { password } = getValues();
@@ -124,6 +132,15 @@ export const PasswordProtectionPage = ({
       setIsSubmitting(false);
     };
   };
+
+  if (privateStateError) {
+    return <PrivateStateErrorPage layout="popup" onRetry={retryPrivateState} />;
+  }
+
+  // private state (hashes) arrives in ms; matches existing async-boot behavior
+  if (privateState == null) {
+    return null;
+  }
 
   return (
     <PopupLayout

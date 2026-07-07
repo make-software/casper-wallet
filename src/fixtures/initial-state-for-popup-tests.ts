@@ -1,10 +1,9 @@
-import { RootState } from 'typesafe-actions';
-
 import { NetworkSetting } from '@src/constants';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 
 import { ThemeMode } from '@background/redux/settings/types';
+import { RootState } from '@background/redux/store-types';
 
 export const initialStateForPopupTests: RootState = {
   keys: {
@@ -13,12 +12,14 @@ export const initialStateForPopupTests: RootState = {
     passwordSaltHash:
       '088da9fc6cc474e408acfc9a2d4a2f83776332d53008b1c3ee0b9f52f10c8201',
     keyDerivationSaltHash:
-      '5a92932f02799e90c2e6b994b6b8b23220dd3022570c43837f318e1d0379f1e2'
+      '5a92932f02799e90c2e6b994b6b8b23220dd3022570c43837f318e1d0379f1e2',
+    keysDoesExist: true
   },
   loginRetryCount: 0,
   session: {
     encryptionKeyHash:
       '7b55663cb7cd7d96765373ce0ee8d6901244de1ed241d20f9afe18a81149ea71',
+    encryptionKeyDoesExist: true,
     isLocked: true,
     isContactEditingAllowed: false
   },

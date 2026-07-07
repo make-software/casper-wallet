@@ -1,4 +1,4 @@
-import { ActionType, createAction, createCustomAction } from 'typesafe-actions';
+import { createAction } from '@reduxjs/toolkit';
 
 import { SdkError } from './sdk-errors';
 import type { SignTypedDataParams, SignTypedDataResult } from './sdk-types';
@@ -10,157 +10,121 @@ export const SdkMethodEventType = {
 
 type Meta = { requestId: string };
 
+/** FSA-compatible (payload, meta) creator with exact type string */
+const createSdkAction = <P, T extends string = string>(type: T) =>
+  createAction(type, (payload: P, meta: Meta) => ({ payload, meta }));
+
+/** FSA error envelope: {payload, meta, error: true} — wire shape must not change */
+const createSdkErrorAction = <T extends string>(type: T) =>
+  createAction(type, (payload: SdkError | Error, meta: Meta) => ({
+    payload,
+    meta,
+    error: true as const
+  }));
+
 export const sdkMethod = {
-  connectRequest: createAction('CasperWalletProvider:Connect')<
-    { title: string },
-    Meta
-  >(),
-  connectResponse: createAction('CasperWalletProvider:Connect:Response')<
-    boolean,
-    Meta
-  >(),
-  connectError: createAction('CasperWalletProvider:Connect:Error')<
-    Error,
-    Meta
-  >(),
-  switchAccountRequest: createAction('CasperWalletProvider:SwitchAccount')<
-    { title: string },
-    Meta
-  >(),
-  switchAccountResponse: createAction(
+  connectRequest: createSdkAction<{ title: string }>(
+    'CasperWalletProvider:Connect'
+  ),
+  connectResponse: createSdkAction<boolean>(
+    'CasperWalletProvider:Connect:Response'
+  ),
+  connectError: createSdkAction<Error>('CasperWalletProvider:Connect:Error'),
+  switchAccountRequest: createSdkAction<{ title: string }>(
+    'CasperWalletProvider:SwitchAccount'
+  ),
+  switchAccountResponse: createSdkAction<boolean>(
     'CasperWalletProvider:SwitchAccount:Response'
-  )<boolean, Meta>(),
-  switchAccountError: createAction('CasperWalletProvider:SwitchAccount:Error')<
-    Error,
-    Meta
-  >(),
-  signRequest: createAction('CasperWalletProvider:Sign')<
-    {
-      deployJson: string;
-      signingPublicKeyHex: string;
-    },
-    Meta
-  >(),
-  signResponse: createAction('CasperWalletProvider:Sign:Response')<
+  ),
+  switchAccountError: createSdkAction<Error>(
+    'CasperWalletProvider:SwitchAccount:Error'
+  ),
+  signRequest: createSdkAction<{
+    deployJson: string;
+    signingPublicKeyHex: string;
+  }>('CasperWalletProvider:Sign'),
+  signResponse: createSdkAction<
     | { cancelled: true; message?: string }
-    | { cancelled: false; signatureHex: string },
-    Meta
-  >(),
-  signError: createAction('CasperWalletProvider:Sign:Error')<Error, Meta>(),
-  signMessageRequest: createAction('CasperWalletProvider:SignMessage')<
-    {
-      message: string;
-      signingPublicKeyHex: string;
-    },
-    Meta
-  >(),
-  signMessageResponse: createAction(
-    'CasperWalletProvider:SignMessage:Response'
-  )<{ cancelled: true } | { cancelled: false; signatureHex: string }, Meta>(),
-  signMessageError: createAction('CasperWalletProvider:SignMessage:Error')<
-    Error,
-    Meta
-  >(),
-  signTypedDataRequest: createAction('CasperWalletProvider:SignTypedData')<
-    {
-      typedData: SignTypedDataParams['typedData'];
-      options?: SignTypedDataParams['options'];
-      signingPublicKeyHex: string;
-    },
-    Meta
-  >(),
-  signTypedDataResponse: createAction(
+    | { cancelled: false; signatureHex: string }
+  >('CasperWalletProvider:Sign:Response'),
+  signError: createSdkAction<Error>('CasperWalletProvider:Sign:Error'),
+  signMessageRequest: createSdkAction<{
+    message: string;
+    signingPublicKeyHex: string;
+  }>('CasperWalletProvider:SignMessage'),
+  signMessageResponse: createSdkAction<
+    { cancelled: true } | { cancelled: false; signatureHex: string }
+  >('CasperWalletProvider:SignMessage:Response'),
+  signMessageError: createSdkAction<Error>(
+    'CasperWalletProvider:SignMessage:Error'
+  ),
+  signTypedDataRequest: createSdkAction<{
+    typedData: SignTypedDataParams['typedData'];
+    options?: SignTypedDataParams['options'];
+    signingPublicKeyHex: string;
+  }>('CasperWalletProvider:SignTypedData'),
+  signTypedDataResponse: createSdkAction<SignTypedDataResult>(
     'CasperWalletProvider:SignTypedData:Response'
-  )<SignTypedDataResult, Meta>(),
-  signTypedDataError: createAction('CasperWalletProvider:SignTypedData:Error')<
-    Error,
-    Meta
-  >(),
-  encryptMessageRequest: createAction('CasperWalletProvider:EncryptMessage')<
-    {
-      message: string;
-      signingPublicKeyHex: string;
-    },
-    Meta
-  >(),
-  encryptMessageResponse: createAction(
+  ),
+  signTypedDataError: createSdkAction<Error>(
+    'CasperWalletProvider:SignTypedData:Error'
+  ),
+  encryptMessageRequest: createSdkAction<{
+    message: string;
+    signingPublicKeyHex: string;
+  }>('CasperWalletProvider:EncryptMessage'),
+  encryptMessageResponse: createSdkAction<{ encryptedMessage: string }>(
     'CasperWalletProvider:EncryptMessage:Response'
-  )<
-    {
-      encryptedMessage: string;
-    },
-    Meta
-  >(),
-  encryptMessageError: createCustomAction(
-    'CasperWalletProvider:EncryptMessage:Error',
-    (payload: SdkError, meta: Meta) => ({ payload, meta, error: true })
   ),
-  decryptMessageRequest: createAction('CasperWalletProvider:DecryptMessage')<
-    {
-      message: string;
-      signingPublicKeyHex: string;
-    },
-    Meta
-  >(),
-  decryptMessageResponse: createAction(
-    'CasperWalletProvider:DecryptMessage:Response'
-  )<
-    { cancelled: true } | { cancelled: false; decryptedMessage: string },
-    Meta
-  >(),
-  decryptMessageError: createAction(
+  encryptMessageError: createSdkErrorAction(
+    'CasperWalletProvider:EncryptMessage:Error'
+  ),
+  decryptMessageRequest: createSdkAction<{
+    message: string;
+    signingPublicKeyHex: string;
+  }>('CasperWalletProvider:DecryptMessage'),
+  decryptMessageResponse: createSdkAction<
+    { cancelled: true } | { cancelled: false; decryptedMessage: string }
+  >('CasperWalletProvider:DecryptMessage:Response'),
+  decryptMessageError: createSdkAction<Error>(
     'CasperWalletProvider:DecryptMessage:Error'
-  )<Error, Meta>(),
-  disconnectRequest: createAction('CasperWalletProvider:Disconnect')<
-    void,
-    Meta
-  >(),
-  disconnectResponse: createAction('CasperWalletProvider:Disconnect:Response')<
-    boolean,
-    Meta
-  >(),
-  isConnectedRequest: createAction('CasperWalletProvider:IsConnected')<
-    void,
-    Meta
-  >(),
-  isConnectedResponse: createAction(
+  ),
+  disconnectRequest: createSdkAction<void>('CasperWalletProvider:Disconnect'),
+  disconnectResponse: createSdkAction<boolean>(
+    'CasperWalletProvider:Disconnect:Response'
+  ),
+  isConnectedRequest: createSdkAction<void>('CasperWalletProvider:IsConnected'),
+  isConnectedResponse: createSdkAction<boolean>(
     'CasperWalletProvider:IsConnected:Response'
-  )<boolean, Meta>(),
-  isConnectedError: createCustomAction(
-    'CasperWalletProvider:IsConnected:Error',
-    (payload: SdkError, meta: Meta) => ({ payload, meta, error: true })
   ),
-  getActivePublicKeyRequest: createAction(
+  isConnectedError: createSdkErrorAction(
+    'CasperWalletProvider:IsConnected:Error'
+  ),
+  getActivePublicKeyRequest: createSdkAction<void>(
     'CasperWalletProvider:GetActivePublicKey'
-  )<void, Meta>(),
-  getActivePublicKeyResponse: createAction(
-    'CasperWalletProvider:GetActivePublicKey:Response'
-  )<string, Meta>(),
-  getActivePublicKeyError: createCustomAction(
-    'CasperWalletProvider:GetActivePublicKey:Error',
-    (payload: SdkError, meta: Meta) => ({ payload, meta, error: true })
   ),
-  getVersionRequest: createAction('CasperWalletProvider:GetVersion')<
-    void,
-    Meta
-  >(),
-  getVersionResponse: createAction('CasperWalletProvider:GetVersion:Response')<
-    string,
-    Meta
-  >(),
-  getActivePublicKeySupportsRequest: createAction(
+  getActivePublicKeyResponse: createSdkAction<string>(
+    'CasperWalletProvider:GetActivePublicKey:Response'
+  ),
+  getActivePublicKeyError: createSdkErrorAction(
+    'CasperWalletProvider:GetActivePublicKey:Error'
+  ),
+  getVersionRequest: createSdkAction<void>('CasperWalletProvider:GetVersion'),
+  getVersionResponse: createSdkAction<string>(
+    'CasperWalletProvider:GetVersion:Response'
+  ),
+  getActivePublicKeySupportsRequest: createSdkAction<void>(
     'CasperWalletProvider:GetActivePublicKeySupports'
-  )<void, Meta>(),
-  getActivePublicKeySupportsResponse: createAction(
+  ),
+  getActivePublicKeySupportsResponse: createSdkAction<string[]>(
     'CasperWalletProvider:GetActivePublicKeySupports:Response'
-  )<string[], Meta>(),
-  getActivePublicKeySupportsError: createCustomAction(
-    'CasperWalletProvider:GetActivePublicKeySupports:Error',
-    (payload: SdkError, meta: Meta) => ({ payload, meta, error: true })
+  ),
+  getActivePublicKeySupportsError: createSdkErrorAction(
+    'CasperWalletProvider:GetActivePublicKeySupports:Error'
   )
 };
 
-export type SdkMethod = ActionType<typeof sdkMethod>;
+export type SdkMethod = ReturnType<(typeof sdkMethod)[keyof typeof sdkMethod]>;
 
 export function isSDKMethod(action?: unknown): action is SdkMethod {
   const candidate = action as { type?: unknown; meta?: Meta } | undefined;

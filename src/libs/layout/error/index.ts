@@ -19,6 +19,7 @@ export function createErrorLocationState({
 }
 
 export * from './error-boundary';
+export * from './private-state-error-page';
 export * from './tab-page';
 export * from './types';
 export * from './window-page';

@@ -1,6 +1,7 @@
 import { call, select } from 'redux-saga/effects';
-import { RootState } from 'typesafe-actions';
 import { runtime } from 'webextension-polyfill';
+
+import { RootState } from '@background/redux/store-types';
 
 import { ReduxAction } from './redux-action';
 

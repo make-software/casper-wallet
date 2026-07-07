@@ -1,47 +1,46 @@
-import { createReducer } from 'typesafe-actions';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import {
-  ledgerDeployChanged,
-  ledgerNewWindowIdChanged,
-  ledgerRecipientToSaveOnSuccessChanged,
-  ledgerStateCleared,
-  ledgerTransactionChanged
-} from './actions';
 import { LedgerState } from './types';
 
-type State = LedgerState;
-
-const initialState: State = {
+const initialState: LedgerState = {
   windowId: null,
   deploy: null,
   transaction: null,
   recipientToSaveOnSuccess: null
 };
 
-export const reducer = createReducer(initialState)
-  .handleAction(ledgerNewWindowIdChanged, (state, { payload }): State => ({
-    ...state,
-    windowId: payload
-  }))
-  .handleAction(ledgerStateCleared, (): State => initialState)
-  .handleAction(ledgerDeployChanged, (state, { payload }): State => {
-    return {
+const slice = createSlice({
+  name: 'ledger',
+  initialState,
+  reducers: {
+    ledgerNewWindowIdChanged: (state, { payload }: PayloadAction<number>) => ({
+      ...state,
+      windowId: payload
+    }),
+    ledgerStateCleared: () => initialState,
+    ledgerDeployChanged: (state, { payload }: PayloadAction<string>) => ({
       ...state,
       deploy: payload
-    };
-  })
-  .handleAction(ledgerTransactionChanged, (state, { payload }): State => {
-    return {
+    }),
+    ledgerTransactionChanged: (state, { payload }: PayloadAction<string>) => ({
       ...state,
       transaction: payload
-    };
-  })
-  .handleAction(
-    ledgerRecipientToSaveOnSuccessChanged,
-    (state, { payload }): State => {
-      return {
-        ...state,
-        recipientToSaveOnSuccess: payload
-      };
-    }
-  );
+    }),
+    ledgerRecipientToSaveOnSuccessChanged: (
+      state,
+      { payload }: PayloadAction<string>
+    ) => ({
+      ...state,
+      recipientToSaveOnSuccess: payload
+    })
+  }
+});
+
+export const {
+  ledgerDeployChanged,
+  ledgerNewWindowIdChanged,
+  ledgerRecipientToSaveOnSuccessChanged,
+  ledgerStateCleared,
+  ledgerTransactionChanged
+} = slice.actions;
+export const reducer = slice.reducer;

@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect';
-import { RootState } from 'typesafe-actions';
+
+import { RootState } from '@background/redux/store-types';
 
 export const selectAllContacts = (state: RootState) => state.contacts.contacts;
 

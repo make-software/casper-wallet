@@ -1,14 +1,20 @@
-import { createReducer } from 'typesafe-actions';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import { recipientPublicKeyAdded, recipientPublicKeyReseted } from './actions';
 import { RecentRecipientPublicKeysState } from './types';
 
 const initialState = [] as RecentRecipientPublicKeysState;
 
-export const reducer = createReducer(initialState)
-  .handleAction(recipientPublicKeyReseted, () => initialState)
-  .handleAction(
-    recipientPublicKeyAdded,
-    // This is a hack to make sure the most recent recipient is always at the top of the list.
-    (state, action) => [...new Set([action.payload, ...state])]
-  );
+const slice = createSlice({
+  name: 'recentRecipientPublicKeys',
+  initialState,
+  reducers: {
+    recipientPublicKeyReseted: () => initialState,
+    recipientPublicKeyAdded: (state, action: PayloadAction<string>) => [
+      ...new Set([action.payload, ...state])
+    ]
+  }
+});
+
+export const { recipientPublicKeyAdded, recipientPublicKeyReseted } =
+  slice.actions;
+export const reducer = slice.reducer;

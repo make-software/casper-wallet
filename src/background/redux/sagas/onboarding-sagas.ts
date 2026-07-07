@@ -1,5 +1,4 @@
 import { put, takeLatest } from 'redux-saga/effects';
-import { getType } from 'typesafe-actions';
 import { storage } from 'webextension-polyfill';
 
 import { ErrorMessages } from '@src/constants';
@@ -39,10 +38,10 @@ import {
 import { initKeys, initVault, recoverVault, resetVault } from './actions';
 
 export function* onboardingSagas() {
-  yield takeLatest(getType(resetVault), resetVaultSaga);
-  yield takeLatest(getType(initKeys), initKeysSage);
-  yield takeLatest(getType(initVault), initVaultSaga);
-  yield takeLatest(getType(recoverVault), recoverVaultSaga);
+  yield takeLatest(resetVault.type, resetVaultSaga);
+  yield takeLatest(initKeys.type, initKeysSage);
+  yield takeLatest(initVault.type, initVaultSaga);
+  yield takeLatest(recoverVault.type, recoverVaultSaga);
 }
 
 /**
