@@ -142,12 +142,6 @@ export function createOpenWindow({
         return newWindow.then(newWindow => {
           if (newWindow.id) {
             setWindowId(newWindow.id);
-
-            const handleCloseWindow = () => {
-              windows.onRemoved.removeListener(handleCloseWindow);
-              clearWindowId();
-            };
-            windows.onRemoved.addListener(handleCloseWindow);
           }
           return newWindow;
         });

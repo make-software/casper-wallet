@@ -37,6 +37,8 @@ import {
   selectIsAccountConnected,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
+import { windowClosed } from '@background/redux/windowManagement/actions';
+import { selectWindowId } from '@background/redux/windowManagement/selectors';
 
 import { sdkEvent } from '@content/sdk-event';
 import { isSDKMethod } from '@content/sdk-method';
@@ -164,6 +166,19 @@ tabs.onActivated.addListener(
 tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo && changeInfo.url && tab.windowId) {
     updateOrigin(tab.windowId);
+  }
+});
+
+// Single init-time listener for the approval-window lifecycle. Replaces the
+// per-creation `windows.onRemoved` listeners that used to be added inside
+// `createOpenWindow` (one leaked per opened window). `windows.onRemoved` fires
+// for ANY window, so the id-match guard ensures we only react when the removed
+// window is the tracked approval window. `windowClosed()` nulls the slice
+// `windowId` AND marks any still-open requests as 'closed'.
+windows.onRemoved.addListener(async (removedWindowId: number) => {
+  const store = await getExistingMainStoreSingletonOrInit();
+  if (removedWindowId === selectWindowId(store.getState())) {
+    store.dispatch(windowClosed());
   }
 });
 

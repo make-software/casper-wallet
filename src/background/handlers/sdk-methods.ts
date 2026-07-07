@@ -74,7 +74,7 @@ export async function handleSdkMethod(
         response: sdkMethod.connectResponse(true, action.meta)
       };
     } else {
-      openWindow({
+      openWindow(store, {
         windowApp: WindowApp.ConnectToApp,
         searchParams: query
       });
@@ -102,7 +102,7 @@ export async function handleSdkMethod(
       query.title = action.payload.title;
     }
 
-    openWindow({
+    openWindow(store, {
       windowApp: WindowApp.SwitchAccount,
       searchParams: query
     });
@@ -155,7 +155,7 @@ export async function handleSdkMethod(
       })
     );
 
-    openWindow({
+    openWindow(store, {
       windowApp: WindowApp.SignatureRequestDeploy,
       searchParams: {
         requestId: action.meta.requestId,
@@ -180,7 +180,7 @@ export async function handleSdkMethod(
 
     const { signingPublicKeyHex, message } = action.payload;
 
-    openWindow({
+    openWindow(store, {
       windowApp: WindowApp.SignatureRequestMessage,
       searchParams: {
         requestId: action.meta.requestId,
@@ -213,7 +213,7 @@ export async function handleSdkMethod(
       })
     );
 
-    openWindow({
+    openWindow(store, {
       windowApp: WindowApp.SignatureRequestEip712,
       searchParams: {
         requestId: action.meta.requestId,
@@ -239,7 +239,7 @@ export async function handleSdkMethod(
 
     const { signingPublicKeyHex, message } = action.payload;
 
-    openWindow({
+    openWindow(store, {
       windowApp: WindowApp.DecryptMessageRequest,
       searchParams: {
         requestId: action.meta.requestId,

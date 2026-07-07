@@ -1,15 +1,18 @@
-// TODO: Remake it after background store will be complete
 import {
   OpenWindowProps,
   createOpenWindow
 } from '@background/create-open-window';
+import { MainStore } from '@background/redux/get-main-store';
+import {
+  windowIdChanged,
+  windowIdCleared
+} from '@background/redux/windowManagement/actions';
+import { selectWindowId } from '@background/redux/windowManagement/selectors';
 
-let windowId: number | null = null;
-
-export function openWindow(openWindowProps: OpenWindowProps) {
+export function openWindow(store: MainStore, openWindowProps: OpenWindowProps) {
   createOpenWindow({
-    windowId,
-    setWindowId: (id: number) => (windowId = id),
-    clearWindowId: () => (windowId = null)
+    windowId: selectWindowId(store.getState()),
+    setWindowId: (id: number) => store.dispatch(windowIdChanged(id)),
+    clearWindowId: () => store.dispatch(windowIdCleared())
   })(openWindowProps);
 }
