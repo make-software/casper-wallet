@@ -87,11 +87,7 @@ export type CasperWalletProviderOptions = {
 };
 
 export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
-  let requestId = 0;
-  const generateRequestId = (): string => {
-    requestId = requestId + 1;
-    return requestId.toString();
-  };
+  const generateRequestId = (): string => crypto.randomUUID();
 
   return {
     /**
