@@ -2,9 +2,15 @@ import { runtime } from 'webextension-polyfill';
 
 import { initBringScript } from '@content/bring';
 
+import { SDK_HANDSHAKE_TYPE } from './sdk-channel';
 import { SdkEvent, sdkEvent } from './sdk-event';
 import { CasperWalletEventType } from './sdk-event-type';
-import { SdkMethodEventType, isSDKMethod, sdkMethod } from './sdk-method';
+import { isSDKMethod, sdkMethod } from './sdk-method';
+
+// The private port handed to the page-world SDK during the handshake. Both the
+// direct `runtime.sendMessage` response and the delayed `runtime.onMessage`
+// response ride this port back to the SDK — never the public window bus.
+let activePort: MessagePort | null = null;
 
 async function handleSdkMessage(message: unknown) {
   // delayed sdk request response
@@ -25,11 +31,8 @@ async function handleSdkMessage(message: unknown) {
       case sdkMethod.encryptMessageResponse.type:
       case sdkMethod.encryptMessageError.type:
       case sdkMethod.getActivePublicKeySupportsResponse.type:
-        window.dispatchEvent(
-          new CustomEvent(SdkMethodEventType.Response, {
-            detail: JSON.stringify(message)
-          })
-        );
+        // route the delayed response over the private port (not a window event)
+        activePort?.postMessage(message);
         return;
 
       default:
@@ -87,31 +90,44 @@ function emitSdkEvent(message: SdkEvent) {
   window.dispatchEvent(event);
 }
 
-// SDK Message proxy to the backend
-function handleSdkRequestEvent(e: Event) {
-  const requestAction = (e as CustomEvent).detail;
-  // validation
-  if (!isSDKMethod(requestAction)) {
-    throw Error(
-      'Content: invalid sdk requestAction: ' + JSON.stringify(requestAction)
-    );
-  }
+// SDK Message proxy to the backend, over the private MessageChannel.
+//
+// The content script keeps `port1`; requests that arrive on it are shaped-checked
+// with `isSDKMethod` and forwarded to the background. Direct responses ride back
+// on the same port. `port2` is transferred to the page-world SDK during the
+// handshake, so only the holder of that port (the injected SDK) can drive this
+// path — a script that forges the old `Request` window CustomEvent gets nothing,
+// because that window listener no longer exists.
+function establishSdkPort() {
+  const channel = new MessageChannel();
 
-  runtime
-    .sendMessage(requestAction)
-    .then(message => {
-      // if valid message send back response
-      if (isSDKMethod(message)) {
-        window.dispatchEvent(
-          new CustomEvent(SdkMethodEventType.Response, {
-            detail: JSON.stringify(message)
-          })
-        );
-      }
-    })
-    .catch(err => {
-      throw Error('Content: sdk request received error: ' + err);
-    });
+  channel.port1.onmessage = event => {
+    const requestAction = event.data;
+    // reject anything not shaped like an SDK method
+    if (!isSDKMethod(requestAction)) {
+      return;
+    }
+
+    runtime
+      .sendMessage(requestAction)
+      .then(message => {
+        // if valid message send back response over the private port
+        if (isSDKMethod(message)) {
+          channel.port1.postMessage(message);
+        }
+      })
+      .catch(err => {
+        console.error('Content: sdk request received error: ', err);
+      });
+  };
+
+  activePort = channel.port1;
+
+  // hand port2 to the page-world SDK; origin-scoped so it is never delivered
+  // cross-origin.
+  window.postMessage({ type: SDK_HANDSHAKE_TYPE }, window.location.origin, [
+    channel.port2
+  ]);
 }
 
 // inject sdk script - idempotent, doesn't need cleanup
@@ -125,6 +141,10 @@ function injectSdkScript() {
     scriptTag.src = runtime.getURL(inpageScriptPath);
     scriptTag.onload = function () {
       documentHeadOrRoot.removeChild(scriptTag);
+      // The SDK bundle has now evaluated and registered its handshake `message`
+      // listener, so handing over the port here closes the race that posting
+      // synchronously from `init()` (before the SDK loads) would open.
+      establishSdkPort();
     };
     documentHeadOrRoot.insertBefore(scriptTag, documentHeadOrRoot.children[0]);
   } catch (e) {
@@ -137,7 +157,6 @@ function init() {
   injectSdkScript();
 
   runtime.onMessage.addListener(handleSdkMessage);
-  window.addEventListener(SdkMethodEventType.Request, handleSdkRequestEvent);
 }
 
 // cleanup logic
@@ -147,7 +166,9 @@ function cleanup() {
   document.removeEventListener(cleanupEventType, cleanup);
 
   runtime.onMessage.removeListener(handleSdkMessage);
-  window.removeEventListener(SdkMethodEventType.Request, handleSdkRequestEvent);
+  // tear down the private port so a superseded instance can't keep proxying
+  activePort?.close();
+  activePort = null;
 }
 window.addEventListener(cleanupEventType, cleanup);
 

@@ -1,13 +1,25 @@
 import { convertHexToBytes } from '@libs/crypto/utils';
 
+import { SDK_HANDSHAKE_TYPE, isTrustedWindowMessage } from './sdk-channel';
 import { CasperWalletEventType } from './sdk-event-type';
-import {
-  SdkMethod,
-  SdkMethodEventType,
-  isSDKMethod,
-  sdkMethod
-} from './sdk-method';
+import { SdkMethod, isSDKMethod, sdkMethod } from './sdk-method';
 import { SignTypedDataParams, SignTypedDataResult } from './sdk-types';
+
+// The private port to the content script, received once during the handshake.
+// Requests and responses ride this port instead of the forgeable window bus.
+let sdkPort: MessagePort | null = null;
+
+window.addEventListener('message', (e: MessageEvent) => {
+  if (
+    isTrustedWindowMessage(e) &&
+    e.data?.type === SDK_HANDSHAKE_TYPE &&
+    e.ports[0]
+  ) {
+    sdkPort = e.ports[0];
+    // begin dispatching queued/incoming messages on the port
+    sdkPort.start();
+  }
+});
 
 export type SignatureResponse =
   | {
@@ -38,8 +50,18 @@ function fetchFromBackground<T extends SdkMethod['payload']>(
   options?: CasperWalletProviderOptions
 ): Promise<T> {
   return new Promise((resolve, reject) => {
+    const port = sdkPort;
+    if (!port) {
+      // handshake hasn't completed yet — the content script hands the port over
+      // on SDK load, so this should only happen if a request is fired before the
+      // page fully initialised.
+      reject(Error(`SDK PORT NOT ESTABLISHED: ${requestAction.type}`));
+      return;
+    }
+
     // timeout & cleanup to prevent memory leaks
     const timeoutId = setTimeout(() => {
+      port.removeEventListener('message', waitForResponse);
       reject(
         Error(
           `SDK RESPONSE TIMEOUT: ${requestAction.type}:${requestAction.meta.requestId}`
@@ -47,16 +69,10 @@ function fetchFromBackground<T extends SdkMethod['payload']>(
       );
     }, options?.timeout || DefaultOptions.timeout);
 
-    window.dispatchEvent(
-      new CustomEvent(SdkMethodEventType.Request, {
-        detail: requestAction
-      })
-    );
+    const waitForResponse = (e: MessageEvent) => {
+      const message = e.data;
 
-    const waitForResponseEvent = (e: Event) => {
-      const message = JSON.parse((e as CustomEvent).detail);
-
-      // filter out response events not for this request
+      // filter out responses not for this request
       if (
         !isSDKMethod(message) ||
         message.meta.requestId !== requestAction.meta.requestId
@@ -64,21 +80,19 @@ function fetchFromBackground<T extends SdkMethod['payload']>(
         return;
       }
 
-      window.removeEventListener(
-        SdkMethodEventType.Response,
-        waitForResponseEvent
-      );
+      port.removeEventListener('message', waitForResponse);
+      clearTimeout(timeoutId);
       // check for errors
       if ('error' in message && message.error) {
         reject(message.payload);
       } else {
         resolve(message.payload as T);
       }
-
-      clearTimeout(timeoutId);
     };
 
-    window.addEventListener(SdkMethodEventType.Response, waitForResponseEvent);
+    port.addEventListener('message', waitForResponse);
+    port.start();
+    port.postMessage(requestAction);
   });
 }
 
