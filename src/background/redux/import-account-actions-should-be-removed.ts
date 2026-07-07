@@ -1,4 +1,3 @@
-import { EmptyAction, PayloadAction } from 'typesafe-actions';
 import { runtime } from 'webextension-polyfill';
 
 // WARNING: legacy to be refactored, don't reuse!
@@ -6,10 +5,10 @@ import { runtime } from 'webextension-polyfill';
 export type RemoteAction =
   CheckAccountNameIsTakenAction | CheckSecretKeyExistAction | GetWindowIdAction;
 
-export type CheckAccountNameIsTakenAction = PayloadAction<
-  'check-account-name-is-taken',
-  { accountName: string }
->;
+export type CheckAccountNameIsTakenAction = {
+  type: 'check-account-name-is-taken';
+  payload: { accountName: string };
+};
 
 export const checkAccountNameIsTaken = (value: string): Promise<boolean> => {
   const action: CheckAccountNameIsTakenAction = {
@@ -21,10 +20,10 @@ export const checkAccountNameIsTaken = (value: string): Promise<boolean> => {
   return runtime.sendMessage(action);
 };
 
-export type CheckSecretKeyExistAction = PayloadAction<
-  'check-secret-key-exist',
-  { secretKeyBase64: string }
->;
+export type CheckSecretKeyExistAction = {
+  type: 'check-secret-key-exist';
+  payload: { secretKeyBase64: string };
+};
 export const checkSecretKeyExist = (
   secretKeyBase64: string
 ): Promise<boolean> => {
@@ -37,7 +36,7 @@ export const checkSecretKeyExist = (
   return runtime.sendMessage(action);
 };
 
-export type GetWindowIdAction = EmptyAction<'get-window-id'>;
+export type GetWindowIdAction = { type: 'get-window-id' };
 
 export const getWindowId = (): Promise<number | null> => {
   const action: GetWindowIdAction = { type: 'get-window-id' };

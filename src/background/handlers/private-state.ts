@@ -1,5 +1,6 @@
-import { RootState } from 'typesafe-actions';
 import { Runtime, runtime } from 'webextension-polyfill';
+
+import { RootState } from '@background/redux/store-types';
 
 export const PRIVATE_STATE_REQUEST_TYPE = 'PRIVATE_STATE_REQUEST' as const;
 

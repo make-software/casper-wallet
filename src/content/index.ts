@@ -1,4 +1,3 @@
-import { getType } from 'typesafe-actions';
 import { runtime } from 'webextension-polyfill';
 
 import { initBringScript } from '@content/bring';
@@ -11,21 +10,21 @@ async function handleSdkMessage(message: unknown) {
   // delayed sdk request response
   if (isSDKMethod(message)) {
     switch (message.type) {
-      case getType(sdkMethod.connectResponse):
-      case getType(sdkMethod.connectError):
-      case getType(sdkMethod.switchAccountResponse):
-      case getType(sdkMethod.switchAccountError):
-      case getType(sdkMethod.signError):
-      case getType(sdkMethod.signResponse):
-      case getType(sdkMethod.signMessageError):
-      case getType(sdkMethod.signMessageResponse):
-      case getType(sdkMethod.signTypedDataResponse):
-      case getType(sdkMethod.signTypedDataError):
-      case getType(sdkMethod.decryptMessageResponse):
-      case getType(sdkMethod.decryptMessageError):
-      case getType(sdkMethod.encryptMessageResponse):
-      case getType(sdkMethod.encryptMessageError):
-      case getType(sdkMethod.getActivePublicKeySupportsResponse):
+      case sdkMethod.connectResponse.type:
+      case sdkMethod.connectError.type:
+      case sdkMethod.switchAccountResponse.type:
+      case sdkMethod.switchAccountError.type:
+      case sdkMethod.signError.type:
+      case sdkMethod.signResponse.type:
+      case sdkMethod.signMessageError.type:
+      case sdkMethod.signMessageResponse.type:
+      case sdkMethod.signTypedDataResponse.type:
+      case sdkMethod.signTypedDataError.type:
+      case sdkMethod.decryptMessageResponse.type:
+      case sdkMethod.decryptMessageError.type:
+      case sdkMethod.encryptMessageResponse.type:
+      case sdkMethod.encryptMessageError.type:
+      case sdkMethod.getActivePublicKeySupportsResponse.type:
         window.dispatchEvent(
           new CustomEvent(SdkMethodEventType.Response, {
             detail: JSON.stringify(message)
@@ -48,31 +47,31 @@ async function handleSdkMessage(message: unknown) {
 function emitSdkEvent(message: SdkEvent) {
   let eventType: string;
   switch (message.type) {
-    case getType(sdkEvent.connectedAccountEvent):
+    case sdkEvent.connectedAccountEvent.type:
       eventType = CasperWalletEventType.Connected;
       break;
 
-    case getType(sdkEvent.disconnectedAccountEvent):
+    case sdkEvent.disconnectedAccountEvent.type:
       eventType = CasperWalletEventType.Disconnected;
       break;
 
-    case getType(sdkEvent.changedConnectedAccountEvent):
+    case sdkEvent.changedConnectedAccountEvent.type:
       eventType = CasperWalletEventType.ActiveKeyChanged;
       break;
 
-    case getType(sdkEvent.changedTab):
+    case sdkEvent.changedTab.type:
       eventType = CasperWalletEventType.TabChanged;
       break;
 
-    case getType(sdkEvent.lockedEvent):
+    case sdkEvent.lockedEvent.type:
       eventType = CasperWalletEventType.Locked;
       break;
 
-    case getType(sdkEvent.unlockedEvent):
+    case sdkEvent.unlockedEvent.type:
       eventType = CasperWalletEventType.Unlocked;
       break;
 
-    case getType(sdkEvent.changedActiveAccountSupportsEvent):
+    case sdkEvent.changedActiveAccountSupportsEvent.type:
       eventType = CasperWalletEventType.ActiveKeySupportsChanged;
       break;
 

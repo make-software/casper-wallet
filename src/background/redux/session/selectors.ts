@@ -1,4 +1,4 @@
-import { RootState } from 'typesafe-actions';
+import { RootState } from '@background/redux/store-types';
 
 export const selectEncryptionKeyHash = (state: RootState): string | null =>
   state.session.encryptionKeyHash;

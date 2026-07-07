@@ -1,4 +1,3 @@
-import { RootState } from 'typesafe-actions';
 import { runtime, storage } from 'webextension-polyfill';
 
 import { backgroundEvent } from '@background/background-events';
@@ -12,6 +11,7 @@ import { RateAppState } from '@background/redux/rate-app/types';
 import { RecentRecipientPublicKeysState } from '@background/redux/recent-recipient-public-keys/types';
 import { startBackground } from '@background/redux/sagas/actions';
 import { SettingsState } from '@background/redux/settings/types';
+import { RootState } from '@background/redux/store-types';
 import { TrustedWasmState } from '@background/redux/trusted-wasm/types';
 import { PopupState } from '@background/redux/types';
 
@@ -186,6 +186,10 @@ export async function getExistingMainStoreSingletonOrInit() {
 
   return storeSingleton;
 }
+
+export type MainStore = Awaited<
+  ReturnType<typeof getExistingMainStoreSingletonOrInit>
+>;
 
 export function createMainStoreReplica<T extends PopupState>(state: T) {
   return createStore(state);

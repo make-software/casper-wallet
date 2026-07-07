@@ -1,0 +1,467 @@
+import { Deploy, PublicKey } from 'casper-js-sdk';
+import { Runtime, runtime } from 'webextension-polyfill';
+
+import {
+  getActiveAccountSupports,
+  getUrlOrigin,
+  isEqualCaseInsensitive
+} from '@src/utils';
+
+import { WindowApp } from '@background/create-open-window';
+import {
+  CannotGetActiveAccountError,
+  CannotGetSenderOriginError,
+  ENCRYPT_MESSAGE_MAX_LENGTH
+} from '@background/internal-errors';
+import { openWindow } from '@background/open-window';
+import { MainStore } from '@background/redux/get-main-store';
+import {
+  deployPayloadReceived,
+  eip712PayloadReceived,
+  siteDisconnected
+} from '@background/redux/vault/actions';
+import {
+  selectAccountNamesByOriginDict,
+  selectIsAccountConnected,
+  selectVaultActiveAccount
+} from '@background/redux/vault/selectors';
+import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
+
+import { SiteNotConnectedError, WalletLockedError } from '@content/sdk-errors';
+import { sdkEvent } from '@content/sdk-event';
+import { SdkMethod, sdkMethod } from '@content/sdk-method';
+
+import { encryptAsHexWithCasperPublicKey } from '@libs/crypto';
+
+import { selectVaultIsLocked } from '../redux/session/selectors';
+import { HandlerResult } from './types';
+
+export async function handleSdkMethod(
+  action: SdkMethod,
+  sender: Runtime.MessageSender,
+  store: MainStore
+): Promise<HandlerResult> {
+  if (sdkMethod.connectRequest.match(action)) {
+    const origin = getUrlOrigin(sender.url);
+    if (!origin) {
+      throw CannotGetSenderOriginError();
+    }
+    const senderTabId = sender.tab?.id;
+
+    if (senderTabId == null) {
+      throw Error('Missing sender tab id');
+    }
+
+    const activeAccount = selectVaultActiveAccount(store.getState());
+
+    const query: Record<string, string> = {
+      requestId: action.meta.requestId,
+      origin: origin,
+      tabId: String(senderTabId)
+    };
+    if (action.payload.title != null) {
+      query.title = action.payload.title;
+    }
+    const isAccountAlreadyConnected = selectIsAccountConnected(
+      store.getState(),
+      origin,
+      activeAccount?.name
+    );
+
+    if (isAccountAlreadyConnected) {
+      return {
+        handled: true,
+        response: sdkMethod.connectResponse(true, action.meta)
+      };
+    } else {
+      openWindow({
+        windowApp: WindowApp.ConnectToApp,
+        searchParams: query
+      });
+    }
+
+    return { handled: true, response: undefined };
+  } else if (sdkMethod.switchAccountRequest.match(action)) {
+    const origin = getUrlOrigin(sender.url);
+    if (!origin) {
+      throw CannotGetSenderOriginError();
+    }
+
+    const senderTabId = sender.tab?.id;
+
+    if (senderTabId == null) {
+      throw Error('Missing sender tab id');
+    }
+
+    const query: Record<string, string> = {
+      requestId: action.meta.requestId,
+      origin: origin,
+      tabId: String(senderTabId)
+    };
+    if (action.payload.title != null) {
+      query.title = action.payload.title;
+    }
+
+    openWindow({
+      windowApp: WindowApp.SwitchAccount,
+      searchParams: query
+    });
+
+    return { handled: true, response: undefined };
+  } else if (sdkMethod.signRequest.match(action)) {
+    const origin = getUrlOrigin(sender.url);
+    if (!origin) {
+      throw CannotGetSenderOriginError();
+    }
+
+    const senderTabId = sender.tab?.id;
+
+    if (senderTabId == null) {
+      throw Error('Missing sender tab id');
+    }
+
+    const { signingPublicKeyHex } = action.payload;
+    let deployJson;
+    try {
+      deployJson = JSON.parse(action.payload.deployJson);
+    } catch (err) {
+      throw Error('Desploy json string parse error');
+    }
+
+    const deploy: Deploy = deployJson.deploy;
+
+    const isDeployAlreadySigningWithThisAccount =
+      deploy?.approvals?.some(approvals =>
+        isEqualCaseInsensitive(approvals.signer.toString(), signingPublicKeyHex)
+      ) ?? false;
+
+    if (isDeployAlreadySigningWithThisAccount) {
+      return {
+        handled: true,
+        response: sdkMethod.signResponse(
+          {
+            cancelled: true,
+            message: 'This deploy already sign by this account'
+          },
+          { requestId: action.meta.requestId }
+        )
+      };
+    }
+
+    store.dispatch(
+      deployPayloadReceived({
+        id: action.meta.requestId,
+        json: deployJson
+      })
+    );
+
+    openWindow({
+      windowApp: WindowApp.SignatureRequestDeploy,
+      searchParams: {
+        requestId: action.meta.requestId,
+        signingPublicKeyHex,
+        origin,
+        tabId: String(senderTabId)
+      }
+    });
+
+    return { handled: true, response: undefined };
+  } else if (sdkMethod.signMessageRequest.match(action)) {
+    const origin = getUrlOrigin(sender.url);
+    if (!origin) {
+      throw CannotGetSenderOriginError();
+    }
+
+    const senderTabId = sender.tab?.id;
+
+    if (senderTabId == null) {
+      throw Error('Missing sender tab id');
+    }
+
+    const { signingPublicKeyHex, message } = action.payload;
+
+    openWindow({
+      windowApp: WindowApp.SignatureRequestMessage,
+      searchParams: {
+        requestId: action.meta.requestId,
+        signingPublicKeyHex,
+        message,
+        origin,
+        tabId: String(senderTabId)
+      }
+    });
+
+    return { handled: true, response: undefined };
+  } else if (sdkMethod.signTypedDataRequest.match(action)) {
+    const origin = getUrlOrigin(sender.url);
+    if (!origin) {
+      throw CannotGetSenderOriginError();
+    }
+
+    const senderTabId = sender.tab?.id;
+
+    if (senderTabId == null) {
+      throw Error('Missing sender tab id');
+    }
+
+    const { signingPublicKeyHex, typedData, options } = action.payload;
+
+    store.dispatch(
+      eip712PayloadReceived({
+        id: action.meta.requestId,
+        json: JSON.stringify({ typedData, options })
+      })
+    );
+
+    openWindow({
+      windowApp: WindowApp.SignatureRequestEip712,
+      searchParams: {
+        requestId: action.meta.requestId,
+        signingPublicKeyHex,
+        origin,
+        tabId: String(senderTabId)
+      }
+    });
+
+    return { handled: true, response: undefined };
+  } else if (sdkMethod.decryptMessageRequest.match(action)) {
+    const origin = getUrlOrigin(sender.url);
+
+    if (!origin) {
+      throw CannotGetSenderOriginError();
+    }
+
+    const senderTabId = sender.tab?.id;
+
+    if (senderTabId == null) {
+      throw Error('Missing sender tab id');
+    }
+
+    const { signingPublicKeyHex, message } = action.payload;
+
+    openWindow({
+      windowApp: WindowApp.DecryptMessageRequest,
+      searchParams: {
+        requestId: action.meta.requestId,
+        signingPublicKeyHex,
+        message,
+        origin,
+        tabId: String(senderTabId)
+      }
+    });
+
+    return { handled: true, response: undefined };
+  } else if (sdkMethod.disconnectRequest.match(action)) {
+    const origin = getUrlOrigin(sender.url);
+    if (!origin) {
+      throw CannotGetSenderOriginError();
+    }
+
+    let success = false;
+
+    const isLocked = selectVaultIsLocked(store.getState());
+
+    const activeAccount = selectVaultActiveAccount(store.getState());
+    if (activeAccount == null) {
+      throw CannotGetActiveAccountError();
+    }
+    const isActiveAccountConnected = selectIsAccountConnected(
+      store.getState(),
+      origin,
+      activeAccount.name
+    );
+
+    emitSdkEventToActiveTabsWithOrigin(
+      origin,
+      sdkEvent.disconnectedAccountEvent({
+        isLocked: isLocked,
+        isConnected: isLocked ? undefined : false,
+        activeKey:
+          !isLocked && isActiveAccountConnected
+            ? activeAccount.publicKey
+            : undefined,
+        activeKeySupports:
+          !isLocked && isActiveAccountConnected
+            ? getActiveAccountSupports(activeAccount)
+            : undefined
+      })
+    );
+    store.dispatch(
+      siteDisconnected({
+        siteOrigin: origin
+      })
+    );
+    success = true;
+
+    return {
+      handled: true,
+      response: sdkMethod.disconnectResponse(success, action.meta)
+    };
+  } else if (sdkMethod.isConnectedRequest.match(action)) {
+    const origin = getUrlOrigin(sender.url);
+    if (!origin) {
+      throw CannotGetSenderOriginError();
+    }
+
+    const isLocked = selectVaultIsLocked(store.getState());
+    if (isLocked) {
+      return {
+        handled: true,
+        response: sdkMethod.isConnectedError(WalletLockedError(), action.meta)
+      };
+    }
+    const accountNamesByOriginDict = selectAccountNamesByOriginDict(
+      store.getState()
+    );
+    const isConnected = Boolean(origin in accountNamesByOriginDict);
+
+    return {
+      handled: true,
+      response: sdkMethod.isConnectedResponse(isConnected, action.meta)
+    };
+  } else if (sdkMethod.getActivePublicKeyRequest.match(action)) {
+    const origin = getUrlOrigin(sender.url);
+    if (!origin) {
+      throw CannotGetSenderOriginError();
+    }
+
+    const isLocked = selectVaultIsLocked(store.getState());
+    if (isLocked) {
+      return {
+        handled: true,
+        response: sdkMethod.getActivePublicKeyError(
+          WalletLockedError(),
+          action.meta
+        )
+      };
+    }
+
+    const activeAccount = selectVaultActiveAccount(store.getState());
+    if (activeAccount == null) {
+      throw CannotGetActiveAccountError();
+    }
+
+    const isConnected = selectIsAccountConnected(
+      store.getState(),
+      origin,
+      activeAccount?.name
+    );
+
+    if (!isConnected) {
+      return {
+        handled: true,
+        response: sdkMethod.getActivePublicKeyError(
+          SiteNotConnectedError(),
+          action.meta
+        )
+      };
+    }
+
+    return {
+      handled: true,
+      response: sdkMethod.getActivePublicKeyResponse(
+        activeAccount.publicKey,
+        action.meta
+      )
+    };
+  } else if (sdkMethod.encryptMessageRequest.match(action)) {
+    const origin = getUrlOrigin(sender.url);
+
+    const { signingPublicKeyHex, message = '' } = action.payload;
+
+    if (!origin) {
+      throw CannotGetSenderOriginError();
+    }
+
+    try {
+      PublicKey.fromHex(signingPublicKeyHex);
+    } catch (e) {
+      throw Error('Public key hex is not valid');
+    }
+
+    if (message.length > ENCRYPT_MESSAGE_MAX_LENGTH) {
+      throw Error(
+        `Message should be less than ${ENCRYPT_MESSAGE_MAX_LENGTH} symbols`
+      );
+    }
+
+    try {
+      const encryptedMessage = await encryptAsHexWithCasperPublicKey(
+        signingPublicKeyHex,
+        message
+      );
+
+      return {
+        handled: true,
+        response: sdkMethod.encryptMessageResponse(
+          {
+            encryptedMessage
+          },
+          action.meta
+        )
+      };
+    } catch (e) {
+      throw Error('Error during message encryption');
+    }
+  } else if (sdkMethod.getActivePublicKeySupportsRequest.match(action)) {
+    const origin = getUrlOrigin(sender.url);
+
+    if (!origin) {
+      throw CannotGetSenderOriginError();
+    }
+
+    const isLocked = selectVaultIsLocked(store.getState());
+
+    if (isLocked) {
+      return {
+        handled: true,
+        response: sdkMethod.getActivePublicKeySupportsError(
+          WalletLockedError(),
+          action.meta
+        )
+      };
+    }
+
+    const activeAccount = selectVaultActiveAccount(store.getState());
+
+    if (!activeAccount) {
+      throw CannotGetActiveAccountError();
+    }
+
+    const isConnected = selectIsAccountConnected(
+      store.getState(),
+      origin,
+      activeAccount?.name
+    );
+
+    if (!isConnected) {
+      return {
+        handled: true,
+        response: sdkMethod.getActivePublicKeySupportsError(
+          SiteNotConnectedError(),
+          action.meta
+        )
+      };
+    }
+
+    const supports = getActiveAccountSupports(activeAccount);
+
+    return {
+      handled: true,
+      response: sdkMethod.getActivePublicKeySupportsResponse(
+        supports,
+        action.meta
+      )
+    };
+  } else if (sdkMethod.getVersionRequest.match(action)) {
+    const manifestData = runtime.getManifest();
+    const version = manifestData.version;
+
+    return {
+      handled: true,
+      response: sdkMethod.getVersionResponse(version, action.meta)
+    };
+  }
+
+  return { handled: false };
+}

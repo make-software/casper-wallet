@@ -1,10 +1,9 @@
-import { RootState } from 'typesafe-actions';
-
 import { NetworkSetting } from '@src/constants';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 
 import { ThemeMode } from '@background/redux/settings/types';
+import { RootState } from '@background/redux/store-types';
 
 export const initialStateForPopupTests: RootState = {
   keys: {

@@ -1,15 +1,17 @@
-import { ActionType, createAction } from 'typesafe-actions';
+import { createAction } from '@reduxjs/toolkit';
 
 import { PopupState } from './redux/types';
 
 // General purpose events emitted by background to all extension windows
 
 export const backgroundEvent = {
-  popupStateUpdated: createAction('popupStateUpdated')<PopupState>()
+  popupStateUpdated: createAction<PopupState>('popupStateUpdated')
 };
 
-export type BackgroundEvent = ActionType<typeof backgroundEvent>;
-export type popupStateUpdated = ActionType<
+export type BackgroundEvent = ReturnType<
+  (typeof backgroundEvent)[keyof typeof backgroundEvent]
+>;
+export type popupStateUpdated = ReturnType<
   typeof backgroundEvent.popupStateUpdated
 >;
 

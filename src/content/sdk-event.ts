@@ -1,25 +1,25 @@
-import { ActionType, createAction } from 'typesafe-actions';
+import { createAction } from '@reduxjs/toolkit';
 
 import { CasperWalletState } from './sdk-types';
 
 // Event emitted to connected sites
 
 export const sdkEvent = {
-  connectedAccountEvent: createAction(
+  connectedAccountEvent: createAction<CasperWalletState>(
     'connectedAccountEvent'
-  )<CasperWalletState>(),
-  disconnectedAccountEvent: createAction(
+  ),
+  disconnectedAccountEvent: createAction<CasperWalletState>(
     'disconnectedAccountEvent'
-  )<CasperWalletState>(),
-  changedTab: createAction('changedTabEvent')<CasperWalletState>(),
-  changedConnectedAccountEvent: createAction(
+  ),
+  changedTab: createAction<CasperWalletState>('changedTabEvent'),
+  changedConnectedAccountEvent: createAction<CasperWalletState>(
     'changedConnectedAccountEvent'
-  )<CasperWalletState>(),
-  lockedEvent: createAction('lockedEvent')<CasperWalletState>(),
-  unlockedEvent: createAction('unlockedEvent')<CasperWalletState>(),
-  changedActiveAccountSupportsEvent: createAction(
+  ),
+  lockedEvent: createAction<CasperWalletState>('lockedEvent'),
+  unlockedEvent: createAction<CasperWalletState>('unlockedEvent'),
+  changedActiveAccountSupportsEvent: createAction<CasperWalletState>(
     'changedActiveAccountSupportsEvent'
-  )<CasperWalletState>()
+  )
 };
 
-export type SdkEvent = ActionType<typeof sdkEvent>;
+export type SdkEvent = ReturnType<(typeof sdkEvent)[keyof typeof sdkEvent]>;
