@@ -203,8 +203,24 @@ runtime.onMessage.addListener(
           );
         }
 
+        // Must stay AFTER the isSDKMethod branch: a page-crafted message with
+        // this type and meta.requestId passes the content-script relay filter
+        // and has to be captured (and rejected) by the SDK branch first
         if (isPrivateStateRequest(action)) {
           if (!isTrustedUiSender(sender)) {
+            if (sender.id === runtime.id) {
+              // Same-extension sender rejected by the URL-prefix check —
+              // distinguishes a legitimate-but-unrecognized UI origin
+              // (packaging variant, sandboxed frame) from a probing sender.
+              // Origin only: a content-script sender's full page URL could
+              // carry tokens in query strings
+              const senderOrigin =
+                sender.url != null ? new URL(sender.url).origin : undefined;
+              console.warn(
+                'Background: private-state request from same-extension sender rejected by URL check:',
+                senderOrigin
+              );
+            }
             // No data (and no error detail) for untrusted senders
             return;
           }

@@ -31,6 +31,7 @@ import {
   LayoutWindow,
   LockedRouterPath,
   PopupLayout,
+  PrivateStateErrorPage,
   SpacingSize
 } from '@libs/layout';
 import { Button, Typography } from '@libs/ui/components';
@@ -58,7 +59,11 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const privateState = usePrivateState();
+  const {
+    privateState,
+    error: privateStateError,
+    retry: retryPrivateState
+  } = usePrivateState();
   const keysDoesExist = useSelector(selectKeysDoesExist);
   const loginRetryCount = useSelector(selectLoginRetryCount);
 
@@ -199,6 +204,15 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
   }
 
   useLockWalletWhenNoMoreRetries(resetField);
+
+  if (privateStateError) {
+    return (
+      <PrivateStateErrorPage
+        layout={popupLayout ? 'popup' : 'window'}
+        onRetry={retryPrivateState}
+      />
+    );
+  }
 
   // private state (hashes + cipher) arrives in ms; matches existing async-boot behavior
   if (privateState == null) {

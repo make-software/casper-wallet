@@ -25,6 +25,7 @@ import {
   HeaderPopup,
   HeaderSubmenuBarNavLink,
   PopupLayout,
+  PrivateStateErrorPage,
   UnlockProtectedPageContent
 } from '@libs/layout';
 import { Button } from '@libs/ui/components';
@@ -50,7 +51,11 @@ export const PasswordProtectionPage = ({
 
   const { t } = useTranslation();
 
-  const privateState = usePrivateState();
+  const {
+    privateState,
+    error: privateStateError,
+    retry: retryPrivateState
+  } = usePrivateState();
   const keysDoesExist = useSelector(selectKeysDoesExist);
   const loginRetryCount = useSelector(selectLoginRetryCount);
 
@@ -127,6 +132,10 @@ export const PasswordProtectionPage = ({
       setIsSubmitting(false);
     };
   };
+
+  if (privateStateError) {
+    return <PrivateStateErrorPage layout="popup" onRetry={retryPrivateState} />;
+  }
 
   // private state (hashes) arrives in ms; matches existing async-boot behavior
   if (privateState == null) {

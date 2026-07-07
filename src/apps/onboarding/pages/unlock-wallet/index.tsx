@@ -17,6 +17,7 @@ import { usePrivateState } from '@hooks/use-private-state';
 
 import {
   LayoutTab,
+  PrivateStateErrorPage,
   TabFooterContainer as TabFooterContainerBase
 } from '@libs/layout';
 import { Button } from '@libs/ui/components';
@@ -32,11 +33,19 @@ interface UnlockWalletPageProps {
 }
 
 export function UnlockWalletPage({ saveIsLoggedIn }: UnlockWalletPageProps) {
-  const privateState = usePrivateState();
+  const {
+    privateState,
+    error: privateStateError,
+    retry: retryPrivateState
+  } = usePrivateState();
   const keysDoesExist = useSelector(selectKeysDoesExist);
 
   if (!keysDoesExist) {
     throw new PasswordDoesNotExistError();
+  }
+
+  if (privateStateError) {
+    return <PrivateStateErrorPage layout="tab" onRetry={retryPrivateState} />;
   }
 
   // private state (hashes) arrives in ms; matches existing async-boot behavior
