@@ -11,20 +11,26 @@ export async function emitSdkEventToActiveTabs(
     active: true
   });
 
-  tabsList.forEach(async tab => {
-    if (tab.id) {
-      // skip non http windows
-      if (tab.url && hasHttpPrefix(tab.url)) {
-        const action = callback(tab);
-        if (action == null) {
-          return;
+  await Promise.all(
+    tabsList.map(async tab => {
+      if (tab.id) {
+        // skip non http windows
+        if (tab.url && hasHttpPrefix(tab.url)) {
+          const action = callback(tab);
+          if (action == null) {
+            return;
+          }
+          try {
+            await tabs.sendMessage(tab.id, action);
+          } catch (error) {
+            console.warn('Failed to send SDK event to tab: ' + tab.id, error);
+          }
         }
-        tabs.sendMessage(tab.id, action);
+      } else {
+        console.error('Tab without id: ' + tab);
       }
-    } else {
-      throw Error('Tab without id: ' + tab);
-    }
-  });
+    })
+  );
 }
 
 export async function emitSdkEventToActiveTabsWithOrigin(
@@ -39,18 +45,24 @@ export async function emitSdkEventToActiveTabsWithOrigin(
     active: true
   });
 
-  tabsList.forEach(async tab => {
-    if (tab.id) {
-      // skip non http windows
-      if (
-        tab.url &&
-        hasHttpPrefix(tab.url) &&
-        getUrlOrigin(tab.url) === origin
-      ) {
-        tabs.sendMessage(tab.id, action);
+  await Promise.all(
+    tabsList.map(async tab => {
+      if (tab.id) {
+        // skip non http windows
+        if (
+          tab.url &&
+          hasHttpPrefix(tab.url) &&
+          getUrlOrigin(tab.url) === origin
+        ) {
+          try {
+            await tabs.sendMessage(tab.id, action);
+          } catch (error) {
+            console.warn('Failed to send SDK event to tab: ' + tab.id, error);
+          }
+        }
+      } else {
+        console.error('Tab without id: ' + tab);
       }
-    } else {
-      throw Error('Tab without id: ' + tab);
-    }
-  });
+    })
+  );
 }

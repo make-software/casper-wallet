@@ -3,13 +3,7 @@ import {
   IEIP712SignTypedDataOptions,
   IEIP712TypedData
 } from 'casper-wallet-core';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 
@@ -73,7 +67,6 @@ export function SignEip712Page() {
   }
 
   const [showRawJson, setShowRawJson] = useState(false);
-  const responseSentRef = useRef(false);
 
   const accounts = useSelector(selectVaultAccounts, shallowEqual);
   const eip712JsonById = useSelector(selectEip712JsonById, shallowEqual);
@@ -185,8 +178,6 @@ export function SignEip712Page() {
   }, [requestOrigin, connectAnotherAccount, signingAccount.name]);
 
   const handleCancel = useCallback(() => {
-    if (responseSentRef.current) return;
-    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
       sdkMethod.signTypedDataResponse(
         {
@@ -204,7 +195,7 @@ export function SignEip712Page() {
   }, [requestId, requestTabId]);
 
   const handleSign = useCallback(() => {
-    if (!typedData || responseSentRef.current) {
+    if (!typedData) {
       return;
     }
 
@@ -224,7 +215,6 @@ export function SignEip712Page() {
         options
       });
 
-      responseSentRef.current = true;
       sendSdkResponseToSpecificTab(
         sdkMethod.signTypedDataResponse(
           {
@@ -241,7 +231,6 @@ export function SignEip712Page() {
       );
       closeCurrentWindow();
     } catch {
-      responseSentRef.current = true;
       sendSdkResponseToSpecificTab(
         sdkMethod.signTypedDataError(
           Error(ErrorMessages.signTypedData.SIGNING_FAILED.description),

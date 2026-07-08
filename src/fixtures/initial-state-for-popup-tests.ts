@@ -74,7 +74,8 @@ export const initialStateForPopupTests: RootState = {
     eip712ById: {}
   },
   windowManagement: {
-    windowId: null
+    windowId: null,
+    requests: {}
   },
   ledger: {
     windowId: null,
