@@ -18,11 +18,21 @@ export function sendSdkResponseToSpecificTab(action: SdkMethod, tabId: number) {
   // Route through the background so it can dedupe by requestId atomically
   // (the background store is the single writer). Returns the sendMessage
   // promise so callers that `await` before closing the window still resolve.
-  return runtime.sendMessage({
-    type: SDK_RESPONSE_TO_TAB,
-    action,
-    tabId
-  } as SdkResponseToTabMessage);
+  //
+  // The `.catch` restores the always-resolves contract of the pre-reroute
+  // implementation: callers (approve-connection / switch-account /
+  // select-account) `await` this then `closeCurrentWindow()` with no try/catch,
+  // so a rejection (e.g. the service worker torn down mid-flight) must NOT
+  // propagate — otherwise the approval window would never close.
+  return runtime
+    .sendMessage({
+      type: SDK_RESPONSE_TO_TAB,
+      action,
+      tabId
+    } as SdkResponseToTabMessage)
+    .catch(err =>
+      console.warn('sendSdkResponseToSpecificTab: forward failed', err)
+    );
 }
 
 export function parseRequestTabId(
