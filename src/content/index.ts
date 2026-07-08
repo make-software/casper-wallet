@@ -12,6 +12,26 @@ import { isSDKMethod, sdkMethod } from './sdk-method';
 // response ride this port back to the SDK — never the public window bus.
 let activePort: MessagePort | null = null;
 
+// Only genuine page → background SDK *requests* may cross the relay. Pinning the
+// exact request-direction type strings (instead of trusting `isSDKMethod`'s
+// shape check alone) means a forged `*:Response`/`*:Error` envelope or a redux
+// action `type` can never be relayed to the background — independent of the
+// background router's branch ordering (defense-in-depth for P0.2).
+const SDK_REQUEST_TYPES: ReadonlySet<string> = new Set([
+  sdkMethod.connectRequest.type,
+  sdkMethod.switchAccountRequest.type,
+  sdkMethod.signRequest.type,
+  sdkMethod.signMessageRequest.type,
+  sdkMethod.signTypedDataRequest.type,
+  sdkMethod.encryptMessageRequest.type,
+  sdkMethod.decryptMessageRequest.type,
+  sdkMethod.disconnectRequest.type,
+  sdkMethod.isConnectedRequest.type,
+  sdkMethod.getActivePublicKeyRequest.type,
+  sdkMethod.getVersionRequest.type,
+  sdkMethod.getActivePublicKeySupportsRequest.type
+]);
+
 async function handleSdkMessage(message: unknown) {
   // delayed sdk request response
   if (isSDKMethod(message)) {
@@ -103,8 +123,11 @@ function establishSdkPort() {
 
   channel.port1.onmessage = event => {
     const requestAction = event.data;
-    // reject anything not shaped like an SDK method
-    if (!isSDKMethod(requestAction)) {
+    // only genuine SDK requests may cross into the background
+    if (
+      !isSDKMethod(requestAction) ||
+      !SDK_REQUEST_TYPES.has(requestAction.type)
+    ) {
       return;
     }
 
@@ -118,6 +141,17 @@ function establishSdkPort() {
       })
       .catch(err => {
         console.error('Content: sdk request received error: ', err);
+        // The send failed (e.g. the MV3 service-worker restart race). Tell the
+        // SDK now over the private port so its promise rejects immediately,
+        // instead of letting the dapp wait out the per-request timeout (up to
+        // 30 min). `error: true` + the request's `meta` route it back to the
+        // right pending promise on the SDK side.
+        channel.port1.postMessage({
+          type: `${requestAction.type}:Error`,
+          payload: err instanceof Error ? err : Error(String(err)),
+          meta: requestAction.meta,
+          error: true
+        });
       });
   };
 
@@ -125,9 +159,18 @@ function establishSdkPort() {
 
   // hand port2 to the page-world SDK; origin-scoped so it is never delivered
   // cross-origin.
-  window.postMessage({ type: SDK_HANDSHAKE_TYPE }, window.location.origin, [
-    channel.port2
-  ]);
+  try {
+    window.postMessage({ type: SDK_HANDSHAKE_TYPE }, window.location.origin, [
+      channel.port2
+    ]);
+  } catch (e) {
+    // An opaque-origin document (e.g. a page served with a CSP `sandbox`
+    // header) reports `window.location.origin` as the string "null", which is
+    // not a valid `targetOrigin` — `postMessage` throws. Match the injection
+    // error handling in `injectSdkScript` rather than letting the exception
+    // escape this `onload` handler uncaught.
+    console.error('CasperWalletSdk handshake failed. ', e);
+  }
 }
 
 // inject sdk script - idempotent, doesn't need cleanup
@@ -163,7 +206,7 @@ function init() {
 export const cleanupEventType = 'CasperWalletProvider:Cleanup';
 window.dispatchEvent(new CustomEvent(cleanupEventType));
 function cleanup() {
-  document.removeEventListener(cleanupEventType, cleanup);
+  window.removeEventListener(cleanupEventType, cleanup);
 
   runtime.onMessage.removeListener(handleSdkMessage);
   // tear down the private port so a superseded instance can't keep proxying

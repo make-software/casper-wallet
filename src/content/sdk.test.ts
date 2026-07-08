@@ -137,3 +137,80 @@ describe('CasperWalletProvider requestId', () => {
     }
   });
 });
+
+describe('CasperWalletProvider pre-handshake queueing', () => {
+  // `window.CasperWalletProvider` is live before the content-script handshake
+  // delivers the port. A request fired in that gap must be parked and flushed
+  // once the port arrives — never hard-rejected (the pre-DEP-99 window listener
+  // always existed, so this preserves that behaviour). Fake timers keep the
+  // per-request timeout from firing (or leaking as an open handle) unless a test
+  // explicitly advances it.
+  beforeEach(() => {
+    jest.resetModules();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('parks a request fired before the handshake and flushes it once the port arrives', () => {
+    const { CasperWalletProvider, window } = loadSdk();
+    const provider = CasperWalletProvider();
+
+    const onReject = jest.fn();
+    // fired while `sdkPort` is still null
+    provider.getVersion().catch(onReject);
+
+    const port = makeFakePort();
+    // parked: nothing posted yet and — crucially — not hard-rejected
+    expect(port.postMessage).not.toHaveBeenCalled();
+    expect(onReject).not.toHaveBeenCalled();
+
+    const win = (global as { window: unknown }).window;
+    window.messageListeners.forEach(cb =>
+      cb({
+        source: win,
+        origin: ORIGIN,
+        data: { type: SDK_HANDSHAKE_TYPE },
+        ports: [port]
+      })
+    );
+
+    // the parked request is now flushed onto the private port
+    expect(port.postMessage).toHaveBeenCalledTimes(1);
+    expect((port.postMessage.mock.calls[0][0] as { type: string }).type).toBe(
+      'CasperWalletProvider:GetVersion'
+    );
+  });
+
+  it('times out a parked request when the handshake never completes, and never sends it late', async () => {
+    const { CasperWalletProvider, window } = loadSdk();
+    const provider = CasperWalletProvider({ timeout: 1000 });
+
+    const onReject = jest.fn();
+    provider.getVersion().catch(onReject);
+
+    // no handshake — advance past the per-request timeout
+    jest.advanceTimersByTime(1000);
+    await Promise.resolve();
+
+    expect(onReject).toHaveBeenCalledTimes(1);
+    expect((onReject.mock.calls[0][0] as Error).message).toMatch(
+      /SDK RESPONSE TIMEOUT/
+    );
+
+    // a late handshake must NOT resurrect the already-timed-out request
+    const port = makeFakePort();
+    const win = (global as { window: unknown }).window;
+    window.messageListeners.forEach(cb =>
+      cb({
+        source: win,
+        origin: ORIGIN,
+        data: { type: SDK_HANDSHAKE_TYPE },
+        ports: [port]
+      })
+    );
+    expect(port.postMessage).not.toHaveBeenCalled();
+  });
+});
