@@ -35,6 +35,11 @@
       }
     ]
   },
+  "browser_specific_settings": {
+    "gecko": {
+      "strict_min_version": "113.0"
+    }
+  },
   "background": {
     "scripts": ["./background.bundle.js"],
     "persistent": true

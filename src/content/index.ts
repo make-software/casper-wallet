@@ -2,9 +2,35 @@ import { runtime } from 'webextension-polyfill';
 
 import { initBringScript } from '@content/bring';
 
+import { SDK_HANDSHAKE_TYPE } from './sdk-channel';
 import { SdkEvent, sdkEvent } from './sdk-event';
 import { CasperWalletEventType } from './sdk-event-type';
-import { SdkMethodEventType, isSDKMethod, sdkMethod } from './sdk-method';
+import { isSDKMethod, sdkMethod } from './sdk-method';
+
+// The private port handed to the page-world SDK during the handshake. Both the
+// direct `runtime.sendMessage` response and the delayed `runtime.onMessage`
+// response ride this port back to the SDK — never the public window bus.
+let activePort: MessagePort | null = null;
+
+// Only genuine page → background SDK *requests* may cross the relay. Pinning the
+// exact request-direction type strings (instead of trusting `isSDKMethod`'s
+// shape check alone) means a forged `*:Response`/`*:Error` envelope or a redux
+// action `type` can never be relayed to the background — independent of the
+// background router's branch ordering (defense-in-depth for P0.2).
+const SDK_REQUEST_TYPES: ReadonlySet<string> = new Set([
+  sdkMethod.connectRequest.type,
+  sdkMethod.switchAccountRequest.type,
+  sdkMethod.signRequest.type,
+  sdkMethod.signMessageRequest.type,
+  sdkMethod.signTypedDataRequest.type,
+  sdkMethod.encryptMessageRequest.type,
+  sdkMethod.decryptMessageRequest.type,
+  sdkMethod.disconnectRequest.type,
+  sdkMethod.isConnectedRequest.type,
+  sdkMethod.getActivePublicKeyRequest.type,
+  sdkMethod.getVersionRequest.type,
+  sdkMethod.getActivePublicKeySupportsRequest.type
+]);
 
 async function handleSdkMessage(message: unknown) {
   // delayed sdk request response
@@ -25,11 +51,8 @@ async function handleSdkMessage(message: unknown) {
       case sdkMethod.encryptMessageResponse.type:
       case sdkMethod.encryptMessageError.type:
       case sdkMethod.getActivePublicKeySupportsResponse.type:
-        window.dispatchEvent(
-          new CustomEvent(SdkMethodEventType.Response, {
-            detail: JSON.stringify(message)
-          })
-        );
+        // route the delayed response over the private port (not a window event)
+        activePort?.postMessage(message);
         return;
 
       default:
@@ -87,31 +110,67 @@ function emitSdkEvent(message: SdkEvent) {
   window.dispatchEvent(event);
 }
 
-// SDK Message proxy to the backend
-function handleSdkRequestEvent(e: Event) {
-  const requestAction = (e as CustomEvent).detail;
-  // validation
-  if (!isSDKMethod(requestAction)) {
-    throw Error(
-      'Content: invalid sdk requestAction: ' + JSON.stringify(requestAction)
-    );
-  }
+// SDK Message proxy to the backend, over the private MessageChannel.
+//
+// The content script keeps `port1`; requests that arrive on it are shaped-checked
+// with `isSDKMethod` and forwarded to the background. Direct responses ride back
+// on the same port. `port2` is transferred to the page-world SDK during the
+// handshake, so only the holder of that port (the injected SDK) can drive this
+// path — a script that forges the old `Request` window CustomEvent gets nothing,
+// because that window listener no longer exists.
+function establishSdkPort() {
+  const channel = new MessageChannel();
 
-  runtime
-    .sendMessage(requestAction)
-    .then(message => {
-      // if valid message send back response
-      if (isSDKMethod(message)) {
-        window.dispatchEvent(
-          new CustomEvent(SdkMethodEventType.Response, {
-            detail: JSON.stringify(message)
-          })
-        );
-      }
-    })
-    .catch(err => {
-      throw Error('Content: sdk request received error: ' + err);
-    });
+  channel.port1.onmessage = event => {
+    const requestAction = event.data;
+    // only genuine SDK requests may cross into the background
+    if (
+      !isSDKMethod(requestAction) ||
+      !SDK_REQUEST_TYPES.has(requestAction.type)
+    ) {
+      return;
+    }
+
+    runtime
+      .sendMessage(requestAction)
+      .then(message => {
+        // if valid message send back response over the private port
+        if (isSDKMethod(message)) {
+          channel.port1.postMessage(message);
+        }
+      })
+      .catch(err => {
+        console.error('Content: sdk request received error: ', err);
+        // The send failed (e.g. the MV3 service-worker restart race). Tell the
+        // SDK now over the private port so its promise rejects immediately,
+        // instead of letting the dapp wait out the per-request timeout (up to
+        // 30 min). `error: true` + the request's `meta` route it back to the
+        // right pending promise on the SDK side.
+        channel.port1.postMessage({
+          type: `${requestAction.type}:Error`,
+          payload: err instanceof Error ? err : Error(String(err)),
+          meta: requestAction.meta,
+          error: true
+        });
+      });
+  };
+
+  activePort = channel.port1;
+
+  // hand port2 to the page-world SDK; origin-scoped so it is never delivered
+  // cross-origin.
+  try {
+    window.postMessage({ type: SDK_HANDSHAKE_TYPE }, window.location.origin, [
+      channel.port2
+    ]);
+  } catch (e) {
+    // An opaque-origin document (e.g. a page served with a CSP `sandbox`
+    // header) reports `window.location.origin` as the string "null", which is
+    // not a valid `targetOrigin` — `postMessage` throws. Match the injection
+    // error handling in `injectSdkScript` rather than letting the exception
+    // escape this `onload` handler uncaught.
+    console.error('CasperWalletSdk handshake failed. ', e);
+  }
 }
 
 // inject sdk script - idempotent, doesn't need cleanup
@@ -125,6 +184,10 @@ function injectSdkScript() {
     scriptTag.src = runtime.getURL(inpageScriptPath);
     scriptTag.onload = function () {
       documentHeadOrRoot.removeChild(scriptTag);
+      // The SDK bundle has now evaluated and registered its handshake `message`
+      // listener, so handing over the port here closes the race that posting
+      // synchronously from `init()` (before the SDK loads) would open.
+      establishSdkPort();
     };
     documentHeadOrRoot.insertBefore(scriptTag, documentHeadOrRoot.children[0]);
   } catch (e) {
@@ -137,17 +200,18 @@ function init() {
   injectSdkScript();
 
   runtime.onMessage.addListener(handleSdkMessage);
-  window.addEventListener(SdkMethodEventType.Request, handleSdkRequestEvent);
 }
 
 // cleanup logic
 export const cleanupEventType = 'CasperWalletProvider:Cleanup';
 window.dispatchEvent(new CustomEvent(cleanupEventType));
 function cleanup() {
-  document.removeEventListener(cleanupEventType, cleanup);
+  window.removeEventListener(cleanupEventType, cleanup);
 
   runtime.onMessage.removeListener(handleSdkMessage);
-  window.removeEventListener(SdkMethodEventType.Request, handleSdkRequestEvent);
+  // tear down the private port so a superseded instance can't keep proxying
+  activePort?.close();
+  activePort = null;
 }
 window.addEventListener(cleanupEventType, cleanup);
 

@@ -1,13 +1,36 @@
 import { convertHexToBytes } from '@libs/crypto/utils';
 
+import { SDK_HANDSHAKE_TYPE, isTrustedWindowMessage } from './sdk-channel';
 import { CasperWalletEventType } from './sdk-event-type';
-import {
-  SdkMethod,
-  SdkMethodEventType,
-  isSDKMethod,
-  sdkMethod
-} from './sdk-method';
+import { SdkMethod, isSDKMethod, sdkMethod } from './sdk-method';
 import { SignTypedDataParams, SignTypedDataResult } from './sdk-types';
+
+// The private port to the content script, received once during the handshake.
+// Requests and responses ride this port instead of the forgeable window bus.
+let sdkPort: MessagePort | null = null;
+
+// `window.CasperWalletProvider` exists as soon as this bundle evaluates, but the
+// content script only delivers the port a couple of tasks later (in
+// `scriptTag.onload` → handshake `postMessage`). A dapp that polls for the
+// provider and calls a method immediately can land in that gap. Rather than
+// hard-rejecting such requests (a regression versus the old always-present
+// window listener), we park each one here and flush it in order once the port
+// arrives. Every parked request keeps its own per-request timeout as the bound.
+const portWaiters: Array<(port: MessagePort) => void> = [];
+
+window.addEventListener('message', (e: MessageEvent) => {
+  if (
+    isTrustedWindowMessage(e) &&
+    e.data?.type === SDK_HANDSHAKE_TYPE &&
+    e.ports[0]
+  ) {
+    sdkPort = e.ports[0];
+    // begin dispatching queued/incoming messages on the port
+    sdkPort.start();
+    // flush any requests that were fired before the handshake completed
+    portWaiters.splice(0).forEach(send => send(sdkPort!));
+  }
+});
 
 export type SignatureResponse =
   | {
@@ -38,8 +61,25 @@ function fetchFromBackground<T extends SdkMethod['payload']>(
   options?: CasperWalletProviderOptions
 ): Promise<T> {
   return new Promise((resolve, reject) => {
-    // timeout & cleanup to prevent memory leaks
+    let settled = false;
+    let removeListener: (() => void) | null = null;
+
+    // timeout & cleanup to prevent memory leaks. Armed up front so it bounds the
+    // whole request — including any time spent parked waiting for the handshake.
     const timeoutId = setTimeout(() => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      removeListener?.();
+      // A parked request must not linger in the queue after timing out — the
+      // closure retains the full requestAction (for `sign`, the deploy JSON),
+      // and on a page whose handshake never completes the flush that would
+      // empty the queue never happens.
+      const parkedIndex = portWaiters.indexOf(sendOnPort);
+      if (parkedIndex !== -1) {
+        portWaiters.splice(parkedIndex, 1);
+      }
       reject(
         Error(
           `SDK RESPONSE TIMEOUT: ${requestAction.type}:${requestAction.meta.requestId}`
@@ -47,38 +87,49 @@ function fetchFromBackground<T extends SdkMethod['payload']>(
       );
     }, options?.timeout || DefaultOptions.timeout);
 
-    window.dispatchEvent(
-      new CustomEvent(SdkMethodEventType.Request, {
-        detail: requestAction
-      })
-    );
-
-    const waitForResponseEvent = (e: Event) => {
-      const message = JSON.parse((e as CustomEvent).detail);
-
-      // filter out response events not for this request
-      if (
-        !isSDKMethod(message) ||
-        message.meta.requestId !== requestAction.meta.requestId
-      ) {
+    const sendOnPort = (port: MessagePort) => {
+      // A parked request whose timeout already fired must not be sent.
+      if (settled) {
         return;
       }
 
-      window.removeEventListener(
-        SdkMethodEventType.Response,
-        waitForResponseEvent
-      );
-      // check for errors
-      if ('error' in message && message.error) {
-        reject(message.payload);
-      } else {
-        resolve(message.payload as T);
-      }
+      const waitForResponse = (e: MessageEvent) => {
+        const message = e.data;
 
-      clearTimeout(timeoutId);
+        // filter out responses not for this request
+        if (
+          !isSDKMethod(message) ||
+          message.meta.requestId !== requestAction.meta.requestId
+        ) {
+          return;
+        }
+
+        settled = true;
+        port.removeEventListener('message', waitForResponse);
+        clearTimeout(timeoutId);
+        // check for errors
+        if ('error' in message && message.error) {
+          reject(message.payload);
+        } else {
+          resolve(message.payload as T);
+        }
+      };
+
+      removeListener = () =>
+        port.removeEventListener('message', waitForResponse);
+      port.addEventListener('message', waitForResponse);
+      port.start();
+      port.postMessage(requestAction);
     };
 
-    window.addEventListener(SdkMethodEventType.Response, waitForResponseEvent);
+    if (sdkPort) {
+      // handshake already completed — send immediately
+      sendOnPort(sdkPort);
+    } else {
+      // handshake hasn't completed yet — park until the port arrives; the
+      // timeout above still bounds the wait.
+      portWaiters.push(sendOnPort);
+    }
   });
 }
 
@@ -86,13 +137,34 @@ export type CasperWalletProviderOptions = {
   timeout: number; // timeout of request to extension (in ms)
 };
 
-export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
-  let requestId = 0;
-  const generateRequestId = (): string => {
-    requestId = requestId + 1;
-    return requestId.toString();
-  };
+// `crypto.randomUUID` is only defined in a secure context. The content script
+// also matches plain `http://*/*` dapps, where `randomUUID` is `undefined`
+// but `getRandomValues` remains available. Fall back to building an RFC4122
+// v4 UUID from 16 CSPRNG bytes so both paths stay unpredictable and unique —
+// never fall back to `Math.random`.
+const generateRequestId = (): string => {
+  if (typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
 
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+  bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant 10xx
+  const hex = Array.from(bytes, b => b.toString(16).padStart(2, '0'));
+  return (
+    hex.slice(0, 4).join('') +
+    '-' +
+    hex.slice(4, 6).join('') +
+    '-' +
+    hex.slice(6, 8).join('') +
+    '-' +
+    hex.slice(8, 10).join('') +
+    '-' +
+    hex.slice(10, 16).join('')
+  );
+};
+
+export const CasperWalletProvider = (options?: CasperWalletProviderOptions) => {
   return {
     /**
      * Request the connect interface with the Casper Wallet extension. Will not show UI for already connected accounts and return true immediately.
