@@ -213,4 +213,32 @@ describe('CasperWalletProvider pre-handshake queueing', () => {
     );
     expect(port.postMessage).not.toHaveBeenCalled();
   });
+
+  it('drops a timed-out parked request from the queue (no retention)', async () => {
+    const { CasperWalletProvider, window } = loadSdk();
+    const provider = CasperWalletProvider({ timeout: 1000 });
+
+    // parked, then timed out — must be removed from the queue, not just
+    // neutralized by the `settled` guard (the closure retains the full
+    // requestAction, e.g. a deploy JSON for `sign`).
+    provider.getVersion().catch(() => undefined);
+    jest.advanceTimersByTime(1000);
+    await Promise.resolve();
+
+    // a later request + handshake must flush exactly ONE message — the live
+    // request, not the expired one still sitting in the queue.
+    provider.getVersion().catch(() => undefined);
+    const port = makeFakePort();
+    const win = (global as { window: unknown }).window;
+    window.messageListeners.forEach(cb =>
+      cb({
+        source: win,
+        origin: ORIGIN,
+        data: { type: SDK_HANDSHAKE_TYPE },
+        ports: [port]
+      })
+    );
+
+    expect(port.postMessage).toHaveBeenCalledTimes(1);
+  });
 });

@@ -72,6 +72,14 @@ function fetchFromBackground<T extends SdkMethod['payload']>(
       }
       settled = true;
       removeListener?.();
+      // A parked request must not linger in the queue after timing out — the
+      // closure retains the full requestAction (for `sign`, the deploy JSON),
+      // and on a page whose handshake never completes the flush that would
+      // empty the queue never happens.
+      const parkedIndex = portWaiters.indexOf(sendOnPort);
+      if (parkedIndex !== -1) {
+        portWaiters.splice(parkedIndex, 1);
+      }
       reject(
         Error(
           `SDK RESPONSE TIMEOUT: ${requestAction.type}:${requestAction.meta.requestId}`
