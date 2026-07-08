@@ -23,15 +23,31 @@ if (isChromeBuild) {
   });
 }
 
+// Edge-triggered guard: manageKeepAlive runs on every store update, and an
+// unguarded alarms.create would reset the alarm's schedule on each dispatch,
+// pushing the next fire to ~30s after the last update — exactly Chrome's idle
+// deadline. `null` means "unknown" (fresh SW start): alarms persist across SW
+// restarts, so the first start/stop call must always reach the alarms API —
+// create refreshes the surviving alarm, clear kills a stale one.
+let alarmActive: boolean | null = null;
+
 // Function to start the keep-alive alarm
 export function startKeepAlive() {
+  if (alarmActive === true) {
+    return;
+  }
   alarms.create(KEEP_ALIVE_ALARM_NAME, { periodInMinutes: 0.5 });
+  alarmActive = true;
   console.log('KeepAlive alarm started.');
 }
 
 // Function to stop the keep-alive alarm
 export function stopKeepAlive() {
+  if (alarmActive === false) {
+    return;
+  }
   alarms.clear(KEEP_ALIVE_ALARM_NAME);
+  alarmActive = false;
   console.log('KeepAlive alarm stopped.');
 }
 

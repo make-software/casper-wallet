@@ -86,6 +86,61 @@ describe('keep-alive', () => {
   });
 });
 
+// This block resets the module registry, so it must come after the
+// shared-instance describe above — the idempotency guard is module state, and
+// each test needs a freshly evaluated module (mirroring an SW cold start).
+describe('keep-alive idempotency guard', () => {
+  const loadFreshKeepAlive = () => {
+    jest.resetModules();
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { alarms: freshAlarms } = require('webextension-polyfill');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const keepAliveModule = require('@background/keep-alive');
+    return { freshAlarms, keepAliveModule };
+  };
+
+  it('repeated startKeepAlive creates the alarm only once — store updates must not reset its schedule', () => {
+    const { freshAlarms, keepAliveModule } = loadFreshKeepAlive();
+
+    keepAliveModule.startKeepAlive();
+    keepAliveModule.startKeepAlive();
+    keepAliveModule.startKeepAlive();
+
+    expect(freshAlarms.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('repeated stopKeepAlive clears the alarm only once', () => {
+    const { freshAlarms, keepAliveModule } = loadFreshKeepAlive();
+
+    keepAliveModule.stopKeepAlive();
+    keepAliveModule.stopKeepAlive();
+
+    expect(freshAlarms.clear).toHaveBeenCalledTimes(1);
+  });
+
+  it('stopKeepAlive as the first call after SW start still clears a persisted stale alarm', () => {
+    // Alarms survive SW restarts: if the SW cold-starts locked while the
+    // previous life's alarm is still scheduled, the first stop must reach
+    // the alarms API even though this module instance never started it.
+    const { freshAlarms, keepAliveModule } = loadFreshKeepAlive();
+
+    keepAliveModule.stopKeepAlive();
+
+    expect(freshAlarms.clear).toHaveBeenCalledWith('casper-keep-alive');
+  });
+
+  it('start → stop → start transitions each reach the alarms API', () => {
+    const { freshAlarms, keepAliveModule } = loadFreshKeepAlive();
+
+    keepAliveModule.startKeepAlive();
+    keepAliveModule.stopKeepAlive();
+    keepAliveModule.startKeepAlive();
+
+    expect(freshAlarms.create).toHaveBeenCalledTimes(2);
+    expect(freshAlarms.clear).toHaveBeenCalledTimes(1);
+  });
+});
+
 // This block resets the module registry, so it must stay the last describe in
 // the file — earlier tests rely on the module instance imported at the top.
 describe('keep-alive on non-Chrome builds', () => {
