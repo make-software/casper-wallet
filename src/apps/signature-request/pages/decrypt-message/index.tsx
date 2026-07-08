@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 
@@ -62,8 +62,6 @@ export function DecryptMessagePage() {
     );
   }
 
-  const responseSentRef = useRef(false);
-
   const accounts = useSelector(selectVaultAccounts, shallowEqual);
 
   const connectedAccountNames = useSelector(
@@ -117,8 +115,6 @@ export function DecryptMessagePage() {
   }, [requestOrigin, connectAnotherAccount, signingAccount.name]);
 
   const handleCancel = useCallback(() => {
-    if (responseSentRef.current) return;
-    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
       sdkMethod.decryptMessageResponse({ cancelled: true }, { requestId }),
       requestTabId
@@ -157,7 +153,6 @@ export function DecryptMessagePage() {
       return;
     }
 
-    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
       sdkMethod.decryptMessageResponse(
         { decryptedMessage, cancelled: false },

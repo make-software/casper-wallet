@@ -26,6 +26,7 @@ import {
 } from '@background/handlers/private-state';
 import { handleReduxAction } from '@background/handlers/redux-actions';
 import { handleSdkMethod } from '@background/handlers/sdk-methods';
+import { handleSdkResponseToTab } from '@background/handlers/sdk-response-to-tab';
 import { initKeepAlive } from '@background/keep-alive';
 import {
   disableOnboardingFlow,
@@ -245,7 +246,11 @@ runtime.onMessage.addListener(
         if (typeof action.type === 'string') {
           const typedAction = action as { type: string };
 
-          for (const handle of [handleReduxAction, handleBringWeb3] as const) {
+          for (const handle of [
+            handleReduxAction,
+            handleBringWeb3,
+            handleSdkResponseToTab
+          ] as const) {
             const result = await handle(typedAction, store);
             if (result.handled) {
               return respond(result);

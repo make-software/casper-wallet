@@ -25,6 +25,7 @@ import {
   selectIsAccountConnected,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
+import { windowRequestOpened } from '@background/redux/windowManagement/actions';
 import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 
 import { SiteNotConnectedError, WalletLockedError } from '@content/sdk-errors';
@@ -74,6 +75,7 @@ export async function handleSdkMethod(
         response: sdkMethod.connectResponse(true, action.meta)
       };
     } else {
+      store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
       openWindow(store, {
         windowApp: WindowApp.ConnectToApp,
         searchParams: query
@@ -102,6 +104,7 @@ export async function handleSdkMethod(
       query.title = action.payload.title;
     }
 
+    store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
     openWindow(store, {
       windowApp: WindowApp.SwitchAccount,
       searchParams: query
@@ -155,6 +158,7 @@ export async function handleSdkMethod(
       })
     );
 
+    store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
     openWindow(store, {
       windowApp: WindowApp.SignatureRequestDeploy,
       searchParams: {
@@ -180,6 +184,7 @@ export async function handleSdkMethod(
 
     const { signingPublicKeyHex, message } = action.payload;
 
+    store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
     openWindow(store, {
       windowApp: WindowApp.SignatureRequestMessage,
       searchParams: {
@@ -213,6 +218,7 @@ export async function handleSdkMethod(
       })
     );
 
+    store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
     openWindow(store, {
       windowApp: WindowApp.SignatureRequestEip712,
       searchParams: {
@@ -239,6 +245,7 @@ export async function handleSdkMethod(
 
     const { signingPublicKeyHex, message } = action.payload;
 
+    store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
     openWindow(store, {
       windowApp: WindowApp.DecryptMessageRequest,
       searchParams: {

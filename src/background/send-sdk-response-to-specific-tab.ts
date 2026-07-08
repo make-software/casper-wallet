@@ -1,21 +1,28 @@
-import { tabs } from 'webextension-polyfill';
+import { runtime } from 'webextension-polyfill';
 
 import { SdkMethod } from '@content/sdk-method';
 
-export async function sendSdkResponseToSpecificTab(
-  action: SdkMethod,
-  tabId: number
-) {
-  if (!Number.isInteger(tabId) || tabId < 0) {
-    console.error('sendSdkResponseToSpecificTab: invalid tabId', tabId);
-    return;
-  }
+// Message type for the UI→background forwarder. The UI no longer talks to the
+// dapp tab directly; it hands the response to the background, which dedupes by
+// `requestId` (first response for a request wins) and performs the actual
+// `tabs.sendMessage`. See `handlers/sdk-response-to-tab.ts`.
+export const SDK_RESPONSE_TO_TAB = 'CasperWallet:SdkResponseToTab';
 
-  try {
-    await tabs.sendMessage(tabId, action);
-  } catch (err) {
-    console.warn('sendSdkResponseToSpecificTab: delivery failed', err);
-  }
+export interface SdkResponseToTabMessage {
+  type: typeof SDK_RESPONSE_TO_TAB;
+  action: SdkMethod;
+  tabId: number;
+}
+
+export function sendSdkResponseToSpecificTab(action: SdkMethod, tabId: number) {
+  // Route through the background so it can dedupe by requestId atomically
+  // (the background store is the single writer). Returns the sendMessage
+  // promise so callers that `await` before closing the window still resolve.
+  return runtime.sendMessage({
+    type: SDK_RESPONSE_TO_TAB,
+    action,
+    tabId
+  } as SdkResponseToTabMessage);
 }
 
 export function parseRequestTabId(
