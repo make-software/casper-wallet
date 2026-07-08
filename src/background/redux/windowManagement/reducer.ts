@@ -1,8 +1,8 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import { WindowManagementState } from './types';
+import { RequestStatus, WindowManagementState } from './types';
 
-const initialState: WindowManagementState = { windowId: null };
+const initialState: WindowManagementState = { windowId: null, requests: {} };
 
 const slice = createSlice({
   name: 'windowManagement',
@@ -17,7 +17,37 @@ const slice = createSlice({
     popupWindowInit: state => state,
     connectWindowInit: state => state,
     importWindowInit: state => state,
-    signWindowInit: state => state
+    signWindowInit: state => state,
+    windowRequestOpened: (
+      state,
+      action: PayloadAction<{ requestId: string }>
+    ) => ({
+      ...state,
+      requests: {
+        ...state.requests,
+        [action.payload.requestId]: 'open'
+      }
+    }),
+    windowRequestResponded: (
+      state,
+      action: PayloadAction<{ requestId: string }>
+    ) => ({
+      ...state,
+      requests: {
+        ...state.requests,
+        [action.payload.requestId]: 'responded'
+      }
+    }),
+    windowClosed: state => ({
+      ...state,
+      windowId: null,
+      requests: Object.entries(state.requests).reduce<
+        Record<string, RequestStatus>
+      >((acc, [requestId, status]) => {
+        acc[requestId] = status === 'open' ? 'closed' : status;
+        return acc;
+      }, {})
+    })
   }
 });
 
@@ -27,7 +57,10 @@ export const {
   onboardingAppInit,
   popupWindowInit,
   signWindowInit,
+  windowClosed,
   windowIdChanged,
-  windowIdCleared
+  windowIdCleared,
+  windowRequestOpened,
+  windowRequestResponded
 } = slice.actions;
 export const reducer = slice.reducer;
