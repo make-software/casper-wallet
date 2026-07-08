@@ -17,6 +17,7 @@ import {
   loginRetryLockoutTimeSet
 } from '@background/redux/login-retry-lockout-time/actions';
 import { selectLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
+import { anchorServiceWorker } from '@background/sw-keep-alive-anchor';
 import { emitSdkEventToActiveTabs } from '@background/utils';
 
 import { sdkEvent } from '@content/sdk-event';
@@ -222,6 +223,10 @@ export function* setDelayForLockoutVaultSaga(
  * put new encryption key in session
  */
 function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
+  // Keep the MV3 service worker alive for the whole unlock flow — Chrome may
+  // otherwise kill it mid-saga during the heavy crypto work.
+  const releaseAnchor = anchorServiceWorker('unlock');
+
   try {
     const {
       vault,
@@ -285,6 +290,8 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
     }
   } catch (err) {
     console.error(err);
+  } finally {
+    releaseAnchor();
   }
 }
 
@@ -359,6 +366,10 @@ export function* timeoutCounterSaga(
  * update vault cipher on each vault update
  */
 function* updateVaultCipher() {
+  // Keep the MV3 service worker alive while the vault is re-encrypted —
+  // Chrome may otherwise kill it mid-saga during the heavy crypto work.
+  const releaseAnchor = anchorServiceWorker('encrypt');
+
   try {
     // get current encryption key
     const encryptionKeyHash = yield* sagaSelect(selectEncryptionKeyHash);
@@ -376,6 +387,8 @@ function* updateVaultCipher() {
     );
   } catch (err) {
     console.error(err);
+  } finally {
+    releaseAnchor();
   }
 }
 
@@ -383,6 +396,10 @@ function* updateVaultCipher() {
  *
  */
 function* createAccountSaga(action: ReturnType<typeof createAccount>) {
+  // Keep the MV3 service worker alive during key derivation — Chrome may
+  // otherwise kill it mid-saga during the heavy crypto work.
+  const releaseAnchor = anchorServiceWorker('create-account');
+
   try {
     const { name } = action.payload;
 
@@ -423,5 +440,7 @@ function* createAccountSaga(action: ReturnType<typeof createAccount>) {
     }
   } catch (err) {
     console.error(err);
+  } finally {
+    releaseAnchor();
   }
 }
