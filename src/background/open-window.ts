@@ -14,5 +14,9 @@ export function openWindow(store: MainStore, openWindowProps: OpenWindowProps) {
     windowId: selectWindowId(store.getState()),
     setWindowId: (id: number) => store.dispatch(windowIdChanged(id)),
     clearWindowId: () => store.dispatch(windowIdCleared())
-  })(openWindowProps);
+  })(openWindowProps).catch(error => {
+    // Fire-and-forget: if `windows.create` rejects, surface it instead of an
+    // unhandled rejection. The slice's window id is left cleared (no id was set).
+    console.error('openWindow: failed to open approval window', error);
+  });
 }

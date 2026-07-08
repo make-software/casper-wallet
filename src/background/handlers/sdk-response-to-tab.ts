@@ -1,4 +1,4 @@
-import { tabs } from 'webextension-polyfill';
+import { Runtime, tabs } from 'webextension-polyfill';
 
 import { MainStore } from '@background/redux/get-main-store';
 import { windowRequestResponded } from '@background/redux/windowManagement/actions';
@@ -8,6 +8,7 @@ import {
   SdkResponseToTabMessage
 } from '@background/send-sdk-response-to-specific-tab';
 
+import { isTrustedUiSender } from './private-state';
 import { HandlerResult } from './types';
 
 // Server-side dedupe of SDK responses (P0.5 root cause). The signature UI pages
@@ -27,12 +28,23 @@ import { HandlerResult } from './types';
 // the sign already set 'responded') without ever suppressing a first response.
 export async function handleSdkResponseToTab(
   message: unknown,
+  sender: Runtime.MessageSender,
   store: MainStore
 ): Promise<HandlerResult> {
   const candidate = message as Partial<SdkResponseToTabMessage> | undefined;
 
   if (candidate?.type !== SDK_RESPONSE_TO_TAB) {
     return { handled: false };
+  }
+
+  // Defense-in-depth: this handler reroutes a response to an arbitrary dapp
+  // tab, so only the extension's own UI pages may originate it. With the
+  // private MessageChannel transport + SDK_REQUEST_TYPES allowlist (P0.2) this
+  // is already unreachable from a page, but gating on the sender guards against
+  // a future allowlist regression or a content-script-world compromise.
+  // Silently drop (no response), matching the private-state / legacy-import gate.
+  if (!isTrustedUiSender(sender)) {
+    return { handled: true };
   }
 
   const { action, tabId } = candidate as SdkResponseToTabMessage;

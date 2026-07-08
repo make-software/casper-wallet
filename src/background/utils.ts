@@ -28,7 +28,6 @@ export async function emitSdkEventToActiveTabs(
         }
       } else {
         console.error('Tab without id: ' + tab);
-        return;
       }
     })
   );
@@ -63,7 +62,6 @@ export async function emitSdkEventToActiveTabsWithOrigin(
         }
       } else {
         console.error('Tab without id: ' + tab);
-        return;
       }
     })
   );

@@ -246,15 +246,22 @@ runtime.onMessage.addListener(
         if (typeof action.type === 'string') {
           const typedAction = action as { type: string };
 
-          for (const handle of [
-            handleReduxAction,
-            handleBringWeb3,
-            handleSdkResponseToTab
-          ] as const) {
+          for (const handle of [handleReduxAction, handleBringWeb3] as const) {
             const result = await handle(typedAction, store);
             if (result.handled) {
               return respond(result);
             }
+          }
+
+          // SDK-response reroute is gated on `sender` (only extension UI may
+          // originate it), so it is called outside the uniform loop above.
+          const sdkResponseResult = await handleSdkResponseToTab(
+            typedAction,
+            sender,
+            store
+          );
+          if (sdkResponseResult.handled) {
+            return respond(sdkResponseResult);
           }
 
           // Legacy import handler is gated on `sender` (P0.1), so it is called

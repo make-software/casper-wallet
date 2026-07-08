@@ -1,4 +1,4 @@
-import { tabs } from 'webextension-polyfill';
+import { Runtime, tabs } from 'webextension-polyfill';
 
 import { MainStore } from '@background/redux/get-main-store';
 import { RequestStatus } from '@background/redux/windowManagement/types';
@@ -14,7 +14,11 @@ import { handleSdkResponseToTab } from './sdk-response-to-tab';
 // `webextension-polyfill` throws outside a browser extension. Stub the only API
 // the handler touches so the module can load and we can spy delivery.
 jest.mock('webextension-polyfill', () => ({
-  tabs: { sendMessage: jest.fn() }
+  tabs: { sendMessage: jest.fn() },
+  runtime: {
+    id: 'ext-id',
+    getURL: (path: string) => `chrome-extension://ext-id/${path}`
+  }
 }));
 
 const sendMessageMock = tabs.sendMessage as jest.MockedFunction<
@@ -23,6 +27,13 @@ const sendMessageMock = tabs.sendMessage as jest.MockedFunction<
 
 const REQUEST_ID = 'req-1';
 const TAB_ID = 7;
+
+// Trusted extension-UI sender (id matches runtime.id, url under the extension
+// origin) — passes `isTrustedUiSender`.
+const UI_SENDER = {
+  id: 'ext-id',
+  url: 'chrome-extension://ext-id/popup.html'
+} as Runtime.MessageSender;
 
 // Build a fake store whose `requests` map carries the desired status for the
 // request under test, plus a spied dispatch.
@@ -79,7 +90,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     const { store, dispatch } = makeStore(undefined);
     const message = makeMessage();
 
-    const result = await handleSdkResponseToTab(message, store);
+    const result = await handleSdkResponseToTab(message, UI_SENDER, store);
 
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
     expect(sendMessageMock).toHaveBeenCalledWith(TAB_ID, message.action);
@@ -94,7 +105,11 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   it("already 'responded' → drops the duplicate (no send, no dispatch)", async () => {
     const { store, dispatch } = makeStore('responded');
 
-    const result = await handleSdkResponseToTab(makeMessage(), store);
+    const result = await handleSdkResponseToTab(
+      makeMessage(),
+      UI_SENDER,
+      store
+    );
 
     expect(sendMessageMock).not.toHaveBeenCalled();
     expect(dispatch).not.toHaveBeenCalled();
@@ -104,7 +119,11 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   it("'closed' (never responded) → still delivers (must NOT drop — beforeunload-cancel race)", async () => {
     const { store } = makeStore('closed');
 
-    const result = await handleSdkResponseToTab(makeMessage(), store);
+    const result = await handleSdkResponseToTab(
+      makeMessage(),
+      UI_SENDER,
+      store
+    );
 
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
     expect(sendMessageMock).toHaveBeenCalledWith(TAB_ID, makeMessage().action);
@@ -114,7 +133,11 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   it('invalid tabId → no delivery, no throw', async () => {
     const { store, dispatch } = makeStore(undefined);
 
-    const result = await handleSdkResponseToTab(makeMessage(-1), store);
+    const result = await handleSdkResponseToTab(
+      makeMessage(-1),
+      UI_SENDER,
+      store
+    );
 
     expect(sendMessageMock).not.toHaveBeenCalled();
     expect(dispatch).not.toHaveBeenCalled();
@@ -129,11 +152,15 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
     // Do NOT await — the first handler yields at `await tabs.sendMessage`, but
     // it has already dispatched `windowRequestResponded` synchronously.
-    const first = handleSdkResponseToTab(makeMessage(), store);
+    const first = handleSdkResponseToTab(makeMessage(), UI_SENDER, store);
 
     // Second message for the SAME requestId, processed during the first's
     // in-flight send. It must read status 'responded' and drop.
-    const secondResult = await handleSdkResponseToTab(makeMessage(), store);
+    const secondResult = await handleSdkResponseToTab(
+      makeMessage(),
+      UI_SENDER,
+      store
+    );
 
     expect(secondResult).toEqual({ handled: true, response: undefined });
     // Exactly ONE delivery reached the tab — the duplicate was deduped.
@@ -147,10 +174,29 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
     const result = await handleSdkResponseToTab(
       { type: 'SomethingElse' } as unknown as SdkResponseToTabMessage,
+      UI_SENDER,
       store
     );
 
     expect(result.handled).toBe(false);
     expect(sendMessageMock).not.toHaveBeenCalled();
+  });
+
+  it('untrusted sender → dropped (handled, no delivery, no dispatch)', async () => {
+    const { store, dispatch } = makeStore(undefined);
+    const untrustedSender = {
+      id: 'other-ext',
+      url: 'https://evil.example/page'
+    } as Runtime.MessageSender;
+
+    const result = await handleSdkResponseToTab(
+      makeMessage(),
+      untrustedSender,
+      store
+    );
+
+    expect(result).toEqual({ handled: true });
+    expect(sendMessageMock).not.toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalled();
   });
 });
