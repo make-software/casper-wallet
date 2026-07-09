@@ -1,6 +1,8 @@
 import { runtime, storage } from 'webextension-polyfill';
 
 import { backgroundEvent } from '@background/background-events';
+import { selectPrivateState } from '@background/handlers/private-state';
+import { privateStateChanged } from '@background/private-state-broadcast';
 import { AppEventsState } from '@background/redux/app-events/types';
 import { ContactsState } from '@background/redux/contacts/types';
 import { createStore } from '@background/redux/index';
@@ -140,6 +142,7 @@ export async function getExistingMainStoreSingletonOrInit() {
       }
       // send start action
       storeSingleton.dispatch(startBackground());
+      let previousPrivateState = selectPrivateState(storeSingleton.getState());
       // on updates propagate new state to replicas and also persist encrypted vault
       storeSingleton.subscribe(() => {
         const state = storeSingleton.getState();
@@ -151,6 +154,18 @@ export async function getExistingMainStoreSingletonOrInit() {
           .catch(() => {
             // no UI replica is open to receive the update — expected, ignore
           });
+
+        // P0.1: tell replicas to re-fetch private state on change, without
+        // ever including the private material itself in the broadcast.
+        const nextPrivateState = selectPrivateState(state);
+        if (privateStateChanged(previousPrivateState, nextPrivateState)) {
+          previousPrivateState = nextPrivateState;
+          runtime
+            .sendMessage(backgroundEvent.privateStateUpdated())
+            .catch(() => {
+              // no UI replica open to receive it — expected, ignore
+            });
+        }
 
         // persist selected state
         const {
