@@ -129,7 +129,12 @@ export async function getExistingMainStoreSingletonOrInit() {
           recentRecipientPublicKeys,
           contacts,
           rateApp,
-          appEvents,
+          appEvents: appEvents
+            ? {
+                dismissedEventIds: appEvents.dismissedEventIds ?? [],
+                errors: []
+              }
+            : undefined,
           trustedWasm
         });
       }
@@ -172,7 +177,7 @@ export async function getExistingMainStoreSingletonOrInit() {
             [RECENT_RECIPIENT_PUBLIC_KEYS]: recentRecipientPublicKeys,
             [CONTACTS_KEY]: contacts,
             [RATE_APP]: rateApp,
-            [APP_EVENTS]: appEvents,
+            [APP_EVENTS]: { dismissedEventIds: appEvents.dismissedEventIds },
             [TRUSTED_WASM]: trustedWasm
           })
           .catch(e => {

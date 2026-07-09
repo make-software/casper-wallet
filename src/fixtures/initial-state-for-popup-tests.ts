@@ -111,6 +111,7 @@ export const initialStateForPopupTests: RootState = {
     askForReviewAfter: null
   },
   appEvents: {
-    dismissedEventIds: []
+    dismissedEventIds: [],
+    errors: []
   }
 };
