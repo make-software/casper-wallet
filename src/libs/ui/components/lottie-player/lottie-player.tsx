@@ -28,7 +28,12 @@ export function LottiePlayer({
       renderer: 'svg',
       loop: !!loop,
       autoplay: !!autoplay,
-      ...(typeof src === 'string' ? { path: src } : { animationData: src })
+      // lottie-web mutates the animationData it is given, so a shared imported
+      // JSON (the dots/spinner animations are reused across several components)
+      // would be corrupted after the first instance — pass a fresh clone.
+      ...(typeof src === 'string'
+        ? { path: src }
+        : { animationData: structuredClone(src) })
     });
 
     return () => anim.destroy();
