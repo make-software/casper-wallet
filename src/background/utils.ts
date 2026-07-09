@@ -3,6 +3,7 @@ import { Tabs, tabs } from 'webextension-polyfill';
 import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
 
 import { SdkEvent } from '@content/sdk-event';
+import { SdkMethod } from '@content/sdk-method';
 
 export async function emitSdkEventToActiveTabs(
   callback: (tab: Tabs.Tab) => SdkEvent | undefined
@@ -35,7 +36,9 @@ export async function emitSdkEventToActiveTabs(
 
 export async function emitSdkEventToActiveTabsWithOrigin(
   origin: string,
-  action: SdkEvent
+  // A method **response** may also be broadcast through here as a same-origin
+  // delivery fallback (see `handleSdkResponseToTab`), hence `SdkEvent | SdkMethod`.
+  action: SdkEvent | SdkMethod
 ) {
   if (!origin) {
     return;

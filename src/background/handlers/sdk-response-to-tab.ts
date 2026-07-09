@@ -1,5 +1,6 @@
 import { Runtime, tabs } from 'webextension-polyfill';
 
+import { sagaError } from '@background/redux/app-events/actions';
 import { MainStore } from '@background/redux/get-main-store';
 import { windowRequestResponded } from '@background/redux/windowManagement/actions';
 import { selectRequestStatus } from '@background/redux/windowManagement/selectors';
@@ -7,9 +8,38 @@ import {
   SDK_RESPONSE_TO_TAB,
   SdkResponseToTabMessage
 } from '@background/send-sdk-response-to-specific-tab';
+import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 
 import { isTrustedUiSender } from './private-state';
 import { HandlerResult } from './types';
+
+// Recover the originating dapp origin from the sender page URL. The response
+// windows are opened with `?origin=<dappOrigin>` in their query string (e.g.
+// `signature-request.html?requestId=..&origin=<dappOrigin>&tabId=..#/..`), and
+// `sender.url` IS that page URL. `isTrustedUiSender` has already guaranteed
+// `sender.url` is a defined extension URL by the time we parse it. Returns null
+// if the param is absent or the URL is unparseable.
+function recoverDappOrigin(url: string | undefined): string | null {
+  if (!url) {
+    return null;
+  }
+  try {
+    return new URL(url).searchParams.get('origin');
+  } catch {
+    return null;
+  }
+}
+
+// SECURITY: the dapp `action` is the SDK response and may carry secret material
+// (a `signatureHex` / `encryptedMessage` / signed payload). This surfaced error
+// must reference ONLY the tabId + a static reason — never the action or any
+// part of its payload.
+function deliveryFailedError(tabId: unknown) {
+  return sagaError({
+    source: 'sdk-response-to-tab',
+    message: `SDK response delivery to tab ${tabId} failed; used same-origin fallback`
+  });
+}
 
 // Server-side dedupe of SDK responses (P0.5 root cause). The signature UI pages
 // used to `tabs.sendMessage` the response to the dapp tab directly and guard
@@ -62,9 +92,22 @@ export async function handleSdkResponseToTab(
     return { handled: true, response: undefined };
   }
 
-  if (!Number.isInteger(tabId) || tabId < 0) {
-    // Nothing was sent — do NOT mark responded (a valid retry must still deliver).
-    console.error('handleSdkResponseToTab: invalid tabId', tabId);
+  const origin = recoverDappOrigin(sender.url);
+  const validTab = Number.isInteger(tabId) && tabId >= 0;
+
+  if (!validTab) {
+    // No usable tab. If we can recover the dapp origin, deliver via the
+    // same-origin fallback (broadcast to any active tab of that origin) and
+    // mark responded — we ARE delivering, so a later duplicate must dedupe.
+    // With no origin, nothing is delivered: do NOT mark responded (a valid
+    // retry must still deliver). Either way surface the non-fatal error.
+    if (origin) {
+      if (requestId != null) {
+        store.dispatch(windowRequestResponded({ requestId }));
+      }
+      await emitSdkEventToActiveTabsWithOrigin(origin, action);
+    }
+    store.dispatch(deliveryFailedError(tabId));
     return { handled: true, response: undefined };
   }
 
@@ -84,8 +127,14 @@ export async function handleSdkResponseToTab(
 
   try {
     await tabs.sendMessage(tabId, action);
-  } catch (err) {
-    console.warn('handleSdkResponseToTab: delivery failed', err);
+  } catch {
+    // Tab gone / no listener → try the same-origin fallback (if we can recover
+    // the origin) and surface the non-fatal error. The optimistic mark above
+    // already deduped any retry.
+    if (origin) {
+      await emitSdkEventToActiveTabsWithOrigin(origin, action);
+    }
+    store.dispatch(deliveryFailedError(tabId));
   }
 
   return { handled: true, response: undefined };
