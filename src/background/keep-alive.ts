@@ -36,6 +36,10 @@ export function startKeepAlive() {
   if (alarmActive === true) {
     return;
   }
+  // 0.5 min is the alarms-API minimum only on Chrome >= 120; older Chromes
+  // silently clamp sub-minute periods to 1 minute, and a 60s pulse loses the
+  // service worker at its ~30s idle deadline (silent session loss). The
+  // manifest pins `minimum_chrome_version: 120` for exactly this reason.
   alarms.create(KEEP_ALIVE_ALARM_NAME, { periodInMinutes: 0.5 });
   alarmActive = true;
   console.log('KeepAlive alarm started.');

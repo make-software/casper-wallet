@@ -13,7 +13,7 @@
     "declarativeNetRequest",
     "alarms"
   ],
-  "minimum_chrome_version": "92",
+  "minimum_chrome_version": "120",
   "declarative_net_request": {
     "rule_resources": [
       {

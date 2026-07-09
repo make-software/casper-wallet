@@ -127,12 +127,6 @@ export function* lockVaultSaga() {
     yield put(deploysReseted());
     yield put(accountInfoReset());
 
-    // The vault is locked, so the persisted auto-lock deadline is spent —
-    // remove it so a stale value can never fire against a future session.
-    // `timeoutCounterSaga` locks by dispatching this same `lockVault` action,
-    // so this single site covers both the timeout and manual-lock paths.
-    yield* sagaCall(clearAutoLockDeadline);
-
     emitSdkEventToActiveTabs(() => {
       return sdkEvent.lockedEvent({
         isLocked: true,
@@ -141,6 +135,14 @@ export function* lockVaultSaga() {
         activeKeySupports: undefined
       });
     });
+
+    // The vault is locked, so the persisted auto-lock deadline is spent —
+    // remove it so a stale value can never fire against a future session.
+    // `timeoutCounterSaga` locks by dispatching this same `lockVault` action,
+    // so this single site covers both the timeout and manual-lock paths.
+    // Sequenced AFTER the emit: this is the only fallible step in the saga,
+    // and a storage rejection must not prevent dapps from seeing the lock.
+    yield* sagaCall(clearAutoLockDeadline);
   } catch (err) {
     console.error(err);
   }
@@ -197,11 +199,15 @@ export function* setDelayForLockoutVaultSaga(
     deadline = loginRetryLockoutTime + LOCK_VAULT_TIMEOUT;
     yield* sagaCall(writeLockoutDeadline, deadline);
   } else {
-    // Resume: read the persisted deadline, falling back to a computed one.
+    // Resume: read the persisted deadline. Anything but a finite number
+    // (missing key, corrupted storage) falls back to recomputing from the
+    // lockout start time — never fail open into an immediate lockout reset.
     const stored = yield* sagaCall(readLockoutDeadline);
+    const raw = stored[LOGIN_RETRY_LOCKOUT_DEADLINE_KEY];
     deadline =
-      (stored[LOGIN_RETRY_LOCKOUT_DEADLINE_KEY] as number | undefined) ??
-      loginRetryLockoutTime + LOCK_VAULT_TIMEOUT;
+      typeof raw === 'number' && Number.isFinite(raw)
+        ? raw
+        : loginRetryLockoutTime + LOCK_VAULT_TIMEOUT;
   }
 
   const timeLeft = deadline - Date.now();
@@ -338,11 +344,15 @@ export function* timeoutCounterSaga(
       let deadline: number;
 
       if (action.type === startBackground.type) {
-        // Resume: read the persisted deadline, falling back to a computed one.
+        // Resume: read the persisted deadline. Anything but a finite number
+        // (missing key, corrupted storage) falls back to recomputing from the
+        // last activity time — same validation as the lockout saga.
         const stored = yield* sagaCall(readAutoLockDeadline);
+        const raw = stored[AUTO_LOCK_DEADLINE_KEY];
         deadline =
-          (stored[AUTO_LOCK_DEADLINE_KEY] as number | undefined) ??
-          vaultLastActivityTime + timeoutDurationValue;
+          typeof raw === 'number' && Number.isFinite(raw)
+            ? raw
+            : vaultLastActivityTime + timeoutDurationValue;
       } else {
         // Arming: compute and persist the absolute deadline.
         deadline = vaultLastActivityTime + timeoutDurationValue;
@@ -356,6 +366,12 @@ export function* timeoutCounterSaga(
       }
 
       yield put(lockVault());
+    } else {
+      // Locked (or no session) — e.g. a cold start where the session slice was
+      // lost. The `lockVault` path that normally clears the persisted deadline
+      // never ran in this worker, so drop any stale value here to keep it from
+      // ever firing against a future session.
+      yield* sagaCall(clearAutoLockDeadline);
     }
   } catch (err) {
     console.error(err);

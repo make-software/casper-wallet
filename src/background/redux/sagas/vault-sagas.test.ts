@@ -1,6 +1,6 @@
 import * as matchers from 'redux-saga-test-plan/matchers';
 import { expectSaga } from 'redux-saga-test-plan';
-import { storage } from 'webextension-polyfill';
+import { storage, tabs } from 'webextension-polyfill';
 
 import {
   LOCK_VAULT_TIMEOUT,
@@ -54,6 +54,7 @@ jest.mock('webextension-polyfill', () => ({
 const mockStorageGet = storage.local.get as jest.Mock;
 const mockStorageSet = storage.local.set as jest.Mock;
 const mockStorageRemove = storage.local.remove as jest.Mock;
+const mockTabsQuery = tabs.query as jest.Mock;
 
 const NOW = 1_700_000_000_000;
 const FIVE_SECONDS = 5000;
@@ -70,6 +71,7 @@ beforeEach(() => {
   mockStorageGet.mockReset().mockResolvedValue({});
   mockStorageSet.mockReset().mockResolvedValue(undefined);
   mockStorageRemove.mockReset().mockResolvedValue(undefined);
+  mockTabsQuery.mockClear();
   jest.spyOn(console, 'error').mockImplementation(() => undefined);
 });
 
@@ -130,6 +132,30 @@ describe('setDelayForLockoutVaultSaga', () => {
       [LOGIN_RETRY_LOCKOUT_DEADLINE_KEY]: NOW + LOCK_VAULT_TIMEOUT
     });
   });
+
+  it.each([
+    ['a string', 'garbage'],
+    ['NaN', NaN]
+  ])(
+    'falls back to recomputing the deadline when the persisted value is corrupt (%s) instead of resetting immediately',
+    async (_label, corruptValue) => {
+      mockStorageGet.mockResolvedValue({
+        [LOGIN_RETRY_LOCKOUT_DEADLINE_KEY]: corruptValue
+      });
+
+      await expectSaga(setDelayForLockoutVaultSaga, startBackground())
+        .provide([
+          [matchers.select.selector(selectLoginRetryLockoutTime), NOW],
+          instantDelay
+        ])
+        // Recomputed from loginRetryLockoutTime — waits the full duration
+        // rather than failing open into an immediate lockout reset.
+        .call(delay, LOCK_VAULT_TIMEOUT)
+        .put(loginRetryCountReseted())
+        .put(loginRetryLockoutTimeReseted())
+        .run();
+    }
+  );
 
   it('does nothing and clears any stale deadline when there is no active lockout', async () => {
     await expectSaga(setDelayForLockoutVaultSaga, startBackground())
@@ -200,12 +226,28 @@ describe('timeoutCounterSaga', () => {
     });
   });
 
-  it('does nothing while the vault is locked', async () => {
+  it('falls back to recomputing the deadline when the persisted value is corrupt', async () => {
+    mockStorageGet.mockResolvedValue({
+      [AUTO_LOCK_DEADLINE_KEY]: 'garbage'
+    });
+
+    await expectSaga(timeoutCounterSaga, startBackground())
+      .provide([...unlockedVaultProvides(NOW), instantDelay])
+      // Recomputed from lastActivityTime — waits the full residual rather
+      // than locking immediately off a garbage value.
+      .call(delay, fiveMin)
+      .put(lockVault())
+      .run();
+  });
+
+  it('neither delays nor locks while the vault is locked, but clears the stale persisted deadline', async () => {
     await expectSaga(timeoutCounterSaga, startBackground())
       .provide([...unlockedVaultProvides(NOW, true), instantDelay])
       .not.call.fn(delay)
       .not.put(lockVault())
       .run();
+
+    expect(mockStorageRemove).toHaveBeenCalledWith(AUTO_LOCK_DEADLINE_KEY);
   });
 });
 
@@ -214,5 +256,18 @@ describe('lockVaultSaga', () => {
     await expectSaga(lockVaultSaga).run();
 
     expect(mockStorageRemove).toHaveBeenCalledWith(AUTO_LOCK_DEADLINE_KEY);
+  });
+
+  it('emits the locked event to tabs before touching storage, so a storage failure cannot skip the emit', async () => {
+    await expectSaga(lockVaultSaga).run();
+
+    // tabs.query is the first thing emitSdkEventToActiveTabs does; asserting
+    // its global invocation order against storage.local.remove proves the
+    // emit is no longer sequenced behind the fallible storage call.
+    expect(mockTabsQuery).toHaveBeenCalled();
+    expect(mockStorageRemove).toHaveBeenCalledWith(AUTO_LOCK_DEADLINE_KEY);
+    expect(mockTabsQuery.mock.invocationCallOrder[0]).toBeLessThan(
+      mockStorageRemove.mock.invocationCallOrder[0]
+    );
   });
 });
