@@ -1,4 +1,3 @@
-import { Player } from '@lottiefiles/react-lottie-player';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -16,6 +15,7 @@ import {
   subscribeToBluetoothAvailability
 } from '@libs/services/ledger';
 import { Button } from '@libs/ui/components';
+import { LottiePlayer } from '@libs/ui/components/lottie-player';
 
 interface ILedgerDisconnectedFooterProps {
   onConnect: (tr?: LedgerTransport) => () => Promise<void>;
@@ -47,8 +47,7 @@ export const LedgerDisconnectedFooter: React.FC<
     <FooterButtonsContainer>
       {isPlayingLoading ? (
         <CenteredFlexColumn>
-          <Player
-            renderer="svg"
+          <LottiePlayer
             autoplay
             loop
             src={isDarkMode ? dotsDarkModeAnimation : dotsLightModeAnimation}
