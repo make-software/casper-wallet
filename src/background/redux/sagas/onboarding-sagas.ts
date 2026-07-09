@@ -4,7 +4,10 @@ import { storage } from 'webextension-polyfill';
 import { ErrorMessages } from '@src/constants';
 
 import { disableOnboardingFlow } from '@background/open-onboarding-flow';
-import { resetAppEventsDismission } from '@background/redux/app-events/actions';
+import {
+  resetAppEventsDismission,
+  sagaError
+} from '@background/redux/app-events/actions';
 import { contactsReseted } from '@background/redux/contacts/actions';
 import { resetRateApp } from '@background/redux/rate-app/actions';
 import { recipientPublicKeyReseted } from '@background/redux/recent-recipient-public-keys/actions';
@@ -65,6 +68,7 @@ function* resetVaultSaga() {
     storage.local.clear();
   } catch (err) {
     console.error(err);
+    yield put(sagaError({ source: 'resetVaultSaga', message: String(err) }));
   }
 }
 
@@ -97,6 +101,7 @@ function* initKeysSage(action: ReturnType<typeof initKeys>) {
     );
   } catch (err) {
     console.error(err);
+    yield put(sagaError({ source: 'initKeysSage', message: String(err) }));
   }
 }
 
@@ -124,6 +129,7 @@ function* initVaultSaga(action: ReturnType<typeof initVault>) {
     disableOnboardingFlow();
   } catch (err) {
     console.error(err);
+    yield put(sagaError({ source: 'initVaultSaga', message: String(err) }));
   }
 }
 
@@ -141,5 +147,6 @@ function* recoverVaultSaga(action: ReturnType<typeof recoverVault>) {
     disableOnboardingFlow();
   } catch (err) {
     console.error(err);
+    yield put(sagaError({ source: 'recoverVaultSaga', message: String(err) }));
   }
 }

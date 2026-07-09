@@ -7,6 +7,7 @@ import {
   MapTimeoutDurationSettingToValue
 } from '@popup/constants';
 
+import { sagaError } from '@background/redux/app-events/actions';
 import {
   loginRetryLockoutTimeReseted,
   loginRetryLockoutTimeSet
@@ -131,6 +132,7 @@ function* lockVaultSaga() {
     });
   } catch (err) {
     console.error(err);
+    yield put(sagaError({ source: 'lockVaultSaga', message: String(err) }));
   }
 }
 
@@ -235,6 +237,7 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
     }
   } catch (err) {
     console.error(err);
+    yield put(sagaError({ source: 'unlockVaultSaga', message: String(err) }));
   }
 }
 
@@ -278,6 +281,9 @@ function* timeoutCounterSaga() {
     }
   } catch (err) {
     console.error(err);
+    yield put(
+      sagaError({ source: 'timeoutCounterSaga', message: String(err) })
+    );
   } finally {
     //
   }
@@ -304,6 +310,7 @@ function* updateVaultCipher() {
     );
   } catch (err) {
     console.error(err);
+    yield put(sagaError({ source: 'updateVaultCipher', message: String(err) }));
   }
 }
 
@@ -351,5 +358,6 @@ function* createAccountSaga(action: ReturnType<typeof createAccount>) {
     }
   } catch (err) {
     console.error(err);
+    yield put(sagaError({ source: 'createAccountSaga', message: String(err) }));
   }
 }
