@@ -1,4 +1,5 @@
 import { put, select, takeLatest } from 'redux-saga/effects';
+import { storage } from 'webextension-polyfill';
 
 import { getActiveAccountSupports, getUrlOrigin } from '@src/utils';
 
@@ -8,10 +9,15 @@ import {
 } from '@popup/constants';
 
 import {
+  AUTO_LOCK_DEADLINE_KEY,
+  LOGIN_RETRY_LOCKOUT_DEADLINE_KEY
+} from '@background/redux/get-main-store';
+import {
   loginRetryLockoutTimeReseted,
   loginRetryLockoutTimeSet
 } from '@background/redux/login-retry-lockout-time/actions';
 import { selectLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
+import { anchorServiceWorker } from '@background/sw-keep-alive-anchor';
 import { emitSdkEventToActiveTabs } from '@background/utils';
 
 import { sdkEvent } from '@content/sdk-event';
@@ -76,7 +82,7 @@ import {
 export function* vaultSagas() {
   yield takeLatest(lockVault.type, lockVaultSaga);
   yield takeLatest(
-    [loginRetryLockoutTimeSet.type, popupWindowInit.type],
+    [loginRetryLockoutTimeSet.type, popupWindowInit.type, startBackground.type],
     setDelayForLockoutVaultSaga
   );
   yield takeLatest(unlockVault.type, unlockVaultSaga);
@@ -114,7 +120,7 @@ export function* vaultSagas() {
 /**
  * on lock destroy session, vault and deploys
  */
-function* lockVaultSaga() {
+export function* lockVaultSaga() {
   try {
     yield put(sessionReseted());
     yield put(vaultReseted());
@@ -129,41 +135,92 @@ function* lockVaultSaga() {
         activeKeySupports: undefined
       });
     });
+
+    // The vault is locked, so the persisted auto-lock deadline is spent —
+    // remove it so a stale value can never fire against a future session.
+    // `timeoutCounterSaga` locks by dispatching this same `lockVault` action,
+    // so this single site covers both the timeout and manual-lock paths.
+    // Sequenced AFTER the emit: this is the only fallible step in the saga,
+    // and a storage rejection must not prevent dapps from seeing the lock.
+    yield* sagaCall(clearAutoLockDeadline);
   } catch (err) {
     console.error(err);
   }
 }
 
-function* setDelayForLockoutVaultSaga() {
+/**
+ * Promise-based delay used as a saga `call` effect. Exported so tests can match
+ * `call(delay, ms)` and assert the exact residual without a real timer.
+ */
+export const delay = (ms: number) =>
+  new Promise(resolve => setTimeout(resolve, ms));
+
+// Absolute login-retry lockout deadline persisted to `storage.local` so the
+// reset timer can be re-armed with the residual after a service-worker restart.
+const readLockoutDeadline = () =>
+  storage.local.get(LOGIN_RETRY_LOCKOUT_DEADLINE_KEY);
+const writeLockoutDeadline = (deadline: number) =>
+  storage.local.set({ [LOGIN_RETRY_LOCKOUT_DEADLINE_KEY]: deadline });
+const clearLockoutDeadline = () =>
+  storage.local.remove(LOGIN_RETRY_LOCKOUT_DEADLINE_KEY);
+
+/**
+ * Re-arms the login-retry lockout reset timer.
+ *
+ * Triggered when a lockout is set (`loginRetryLockoutTimeSet`) and on resume
+ * points (`startBackground` after an MV3 service-worker restart, `popupWindowInit`).
+ *
+ * On arming we persist an absolute `start + LOCK_VAULT_TIMEOUT` deadline to
+ * `storage.local`; on resume we read that deadline back and wait only the
+ * residual (`deadline - now`), or reset immediately if it already elapsed. This
+ * survives the service worker being killed mid-lockout.
+ */
+export function* setDelayForLockoutVaultSaga(
+  action: ReturnType<
+    | typeof loginRetryLockoutTimeSet
+    | typeof startBackground
+    | typeof popupWindowInit
+  >
+) {
   const loginRetryLockoutTime: number | null = yield select(
     selectLoginRetryLockoutTime
   );
 
   if (loginRetryLockoutTime == null) {
+    // No active lockout — drop any stale persisted deadline and stop.
+    yield* sagaCall(clearLockoutDeadline);
     return;
   }
 
-  const currentTime = Date.now();
-  const isTimeoutExpired =
-    currentTime - loginRetryLockoutTime >= LOCK_VAULT_TIMEOUT;
+  let deadline: number;
 
-  //  if the timeout expired we reset the count and lockout time
-  if (isTimeoutExpired) {
-    yield put(loginRetryCountReseted());
-    yield put(loginRetryLockoutTimeReseted());
+  if (action.type === loginRetryLockoutTimeSet.type) {
+    // Arming: compute and persist the absolute deadline.
+    deadline = loginRetryLockoutTime + LOCK_VAULT_TIMEOUT;
+    yield* sagaCall(writeLockoutDeadline, deadline);
+  } else {
+    // Resume: read the persisted deadline. Anything but a finite number
+    // (missing key, corrupted storage) falls back to recomputing from the
+    // lockout start time — never fail open into an immediate lockout reset.
+    const stored = yield* sagaCall(readLockoutDeadline);
+    const raw = stored[LOGIN_RETRY_LOCKOUT_DEADLINE_KEY];
+    deadline =
+      typeof raw === 'number' && Number.isFinite(raw)
+        ? raw
+        : loginRetryLockoutTime + LOCK_VAULT_TIMEOUT;
   }
 
-  //  if the timeout has not expired we set the timer with the time that is left
-  if (!isTimeoutExpired) {
-    const timeLeft = LOCK_VAULT_TIMEOUT - (currentTime - loginRetryLockoutTime);
-    const delay = (ms: number) =>
-      new Promise(resolve => setTimeout(resolve, ms));
+  const timeLeft = deadline - Date.now();
 
+  // Wait out only the residual; if it already elapsed we fall straight through
+  // to the reset below.
+  if (timeLeft > 0) {
     yield* sagaCall(delay, timeLeft);
-
-    yield put(loginRetryCountReseted());
-    yield put(loginRetryLockoutTimeReseted());
   }
+
+  yield put(loginRetryCountReseted());
+  yield put(loginRetryLockoutTimeReseted());
+  yield* sagaCall(clearLockoutDeadline);
 }
 
 /**
@@ -172,6 +229,10 @@ function* setDelayForLockoutVaultSaga() {
  * put new encryption key in session
  */
 function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
+  // Keep the MV3 service worker alive for the whole unlock flow — Chrome may
+  // otherwise kill it mid-saga during the heavy crypto work.
+  const releaseAnchor = anchorServiceWorker('unlock');
+
   try {
     const {
       vault,
@@ -235,23 +296,38 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
     }
   } catch (err) {
     console.error(err);
+  } finally {
+    releaseAnchor();
   }
 }
 
-/**
- * Saga to handle the timeout and locking mechanism of a vault based on its last activity time and a specified timeout duration setting.
- *
- * The generator function calculates the time elapsed since the last activity of the vault.
- * If the vault exists, it is not locked, and the last
- * activity time is available, it checks if the elapsed time surpasses the timeout duration.
- * If true, it triggers a vault lock action
- * immediately.
- * If false, it sets up a delay for the remaining time until the timeout duration is met before locking the vault.
- *
- */
-function* timeoutCounterSaga() {
-  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+// Absolute auto-lock deadline persisted to `storage.local` so the inactivity
+// timer can be re-armed with the residual after a service-worker restart.
+const readAutoLockDeadline = () => storage.local.get(AUTO_LOCK_DEADLINE_KEY);
+const writeAutoLockDeadline = (deadline: number) =>
+  storage.local.set({ [AUTO_LOCK_DEADLINE_KEY]: deadline });
+const clearAutoLockDeadline = () =>
+  storage.local.remove(AUTO_LOCK_DEADLINE_KEY);
 
+/**
+ * Saga to handle the timeout and locking mechanism of a vault based on its last
+ * activity time and a specified timeout duration setting.
+ *
+ * On arming (`lastActivityTimeRefreshed` / `activeTimeoutDurationSettingChanged`)
+ * it computes an absolute `lastActivity + timeout` deadline and persists it to
+ * `storage.local`. On resume (`startBackground` after an MV3 service-worker
+ * restart) it reads that deadline back instead of recomputing. Either way it
+ * locks immediately if the deadline already elapsed, otherwise it waits only the
+ * residual (`deadline - now`) before locking. Persisting the absolute deadline is
+ * what lets the timer survive the service worker being killed.
+ */
+export function* timeoutCounterSaga(
+  action: ReturnType<
+    | typeof startBackground
+    | typeof lastActivityTimeRefreshed
+    | typeof activeTimeoutDurationSettingChanged
+  >
+) {
   try {
     const vaultDoesExist = yield* sagaSelect(selectVaultCipherDoesExist);
     const vaultIsLocked = yield* sagaSelect(selectVaultIsLocked);
@@ -265,21 +341,40 @@ function* timeoutCounterSaga() {
       MapTimeoutDurationSettingToValue[vaultTimeoutDurationSetting];
 
     if (vaultDoesExist && !vaultIsLocked && vaultLastActivityTime) {
-      const currentTime = Date.now();
-      const timeoutExpired =
-        currentTime - vaultLastActivityTime >= timeoutDurationValue;
+      let deadline: number;
 
-      if (timeoutExpired) {
-        yield put(lockVault());
+      if (action.type === startBackground.type) {
+        // Resume: read the persisted deadline. Anything but a finite number
+        // (missing key, corrupted storage) falls back to recomputing from the
+        // last activity time — same validation as the lockout saga.
+        const stored = yield* sagaCall(readAutoLockDeadline);
+        const raw = stored[AUTO_LOCK_DEADLINE_KEY];
+        deadline =
+          typeof raw === 'number' && Number.isFinite(raw)
+            ? raw
+            : vaultLastActivityTime + timeoutDurationValue;
       } else {
-        yield* sagaCall(delay, timeoutDurationValue);
-        yield put(lockVault());
+        // Arming: compute and persist the absolute deadline.
+        deadline = vaultLastActivityTime + timeoutDurationValue;
+        yield* sagaCall(writeAutoLockDeadline, deadline);
       }
+
+      const timeLeft = deadline - Date.now();
+
+      if (timeLeft > 0) {
+        yield* sagaCall(delay, timeLeft);
+      }
+
+      yield put(lockVault());
+    } else {
+      // Locked (or no session) — e.g. a cold start where the session slice was
+      // lost. The `lockVault` path that normally clears the persisted deadline
+      // never ran in this worker, so drop any stale value here to keep it from
+      // ever firing against a future session.
+      yield* sagaCall(clearAutoLockDeadline);
     }
   } catch (err) {
     console.error(err);
-  } finally {
-    //
   }
 }
 
@@ -287,6 +382,10 @@ function* timeoutCounterSaga() {
  * update vault cipher on each vault update
  */
 function* updateVaultCipher() {
+  // Keep the MV3 service worker alive while the vault is re-encrypted —
+  // Chrome may otherwise kill it mid-saga during the heavy crypto work.
+  const releaseAnchor = anchorServiceWorker('encrypt');
+
   try {
     // get current encryption key
     const encryptionKeyHash = yield* sagaSelect(selectEncryptionKeyHash);
@@ -304,6 +403,8 @@ function* updateVaultCipher() {
     );
   } catch (err) {
     console.error(err);
+  } finally {
+    releaseAnchor();
   }
 }
 
@@ -311,6 +412,10 @@ function* updateVaultCipher() {
  *
  */
 function* createAccountSaga(action: ReturnType<typeof createAccount>) {
+  // Keep the MV3 service worker alive during key derivation — Chrome may
+  // otherwise kill it mid-saga during the heavy crypto work.
+  const releaseAnchor = anchorServiceWorker('create-account');
+
   try {
     const { name } = action.payload;
 
@@ -351,5 +456,7 @@ function* createAccountSaga(action: ReturnType<typeof createAccount>) {
     }
   } catch (err) {
     console.error(err);
+  } finally {
+    releaseAnchor();
   }
 }
