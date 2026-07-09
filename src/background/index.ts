@@ -26,6 +26,7 @@ import {
 } from '@background/handlers/private-state';
 import { handleReduxAction } from '@background/handlers/redux-actions';
 import { handleSdkMethod } from '@background/handlers/sdk-methods';
+import { handleSdkResponseToTab } from '@background/handlers/sdk-response-to-tab';
 import { initKeepAlive } from '@background/keep-alive';
 import {
   disableOnboardingFlow,
@@ -37,6 +38,8 @@ import {
   selectIsAccountConnected,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
+import { windowClosed } from '@background/redux/windowManagement/actions';
+import { selectWindowId } from '@background/redux/windowManagement/selectors';
 
 import { sdkEvent } from '@content/sdk-event';
 import { isSDKMethod } from '@content/sdk-method';
@@ -167,6 +170,19 @@ tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 });
 
+// Single init-time listener for the approval-window lifecycle. Replaces the
+// per-creation `windows.onRemoved` listeners that used to be added inside
+// `createOpenWindow` (one leaked per opened window). `windows.onRemoved` fires
+// for ANY window, so the id-match guard ensures we only react when the removed
+// window is the tracked approval window. `windowClosed()` nulls the slice
+// `windowId` AND marks any still-open requests as 'closed'.
+windows.onRemoved.addListener(async (removedWindowId: number) => {
+  const store = await getExistingMainStoreSingletonOrInit();
+  if (removedWindowId === selectWindowId(store.getState())) {
+    store.dispatch(windowClosed());
+  }
+});
+
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
 // Thin router: parse → route → delegate. All business logic lives in
 // `@background/handlers/*`; each handler returns a `HandlerResult`:
@@ -235,6 +251,17 @@ runtime.onMessage.addListener(
             if (result.handled) {
               return respond(result);
             }
+          }
+
+          // SDK-response reroute is gated on `sender` (only extension UI may
+          // originate it), so it is called outside the uniform loop above.
+          const sdkResponseResult = await handleSdkResponseToTab(
+            typedAction,
+            sender,
+            store
+          );
+          if (sdkResponseResult.handled) {
+            return respond(sdkResponseResult);
           }
 
           // Legacy import handler is gated on `sender` (P0.1), so it is called

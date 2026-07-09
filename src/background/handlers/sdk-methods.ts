@@ -25,6 +25,7 @@ import {
   selectIsAccountConnected,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
+import { windowRequestOpened } from '@background/redux/windowManagement/actions';
 import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 
 import { SiteNotConnectedError, WalletLockedError } from '@content/sdk-errors';
@@ -74,7 +75,8 @@ export async function handleSdkMethod(
         response: sdkMethod.connectResponse(true, action.meta)
       };
     } else {
-      openWindow({
+      store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
+      openWindow(store, {
         windowApp: WindowApp.ConnectToApp,
         searchParams: query
       });
@@ -102,7 +104,8 @@ export async function handleSdkMethod(
       query.title = action.payload.title;
     }
 
-    openWindow({
+    store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
+    openWindow(store, {
       windowApp: WindowApp.SwitchAccount,
       searchParams: query
     });
@@ -155,7 +158,8 @@ export async function handleSdkMethod(
       })
     );
 
-    openWindow({
+    store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
+    openWindow(store, {
       windowApp: WindowApp.SignatureRequestDeploy,
       searchParams: {
         requestId: action.meta.requestId,
@@ -180,7 +184,8 @@ export async function handleSdkMethod(
 
     const { signingPublicKeyHex, message } = action.payload;
 
-    openWindow({
+    store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
+    openWindow(store, {
       windowApp: WindowApp.SignatureRequestMessage,
       searchParams: {
         requestId: action.meta.requestId,
@@ -213,7 +218,8 @@ export async function handleSdkMethod(
       })
     );
 
-    openWindow({
+    store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
+    openWindow(store, {
       windowApp: WindowApp.SignatureRequestEip712,
       searchParams: {
         requestId: action.meta.requestId,
@@ -239,7 +245,8 @@ export async function handleSdkMethod(
 
     const { signingPublicKeyHex, message } = action.payload;
 
-    openWindow({
+    store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
+    openWindow(store, {
       windowApp: WindowApp.DecryptMessageRequest,
       searchParams: {
         requestId: action.meta.requestId,

@@ -4,6 +4,9 @@ export {
   onboardingAppInit,
   popupWindowInit,
   signWindowInit,
+  windowClosed,
   windowIdChanged,
-  windowIdCleared
+  windowIdCleared,
+  windowRequestOpened,
+  windowRequestResponded
 } from './reducer';
