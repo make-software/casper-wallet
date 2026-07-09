@@ -15,19 +15,31 @@ import {
 import { loginRetryLockoutTimeReseted } from '@background/redux/login-retry-lockout-time/actions';
 import { selectLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
 
+import * as vaultCryptoModule from '@libs/crypto/vault';
+import { encryptVault } from '@libs/crypto/vault';
+
 import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
 import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
 import { loginRetryCountReseted } from '../login-retry-count/actions';
 import { loginRetryLockoutTimeSet } from '../login-retry-lockout-time/reducer';
-import { selectVaultIsLocked } from '../session/selectors';
+import { sessionReseted } from '../session/actions';
+import {
+  selectEncryptionKeyHash,
+  selectVaultIsLocked
+} from '../session/selectors';
 import { selectTimeoutDurationSetting } from '../settings/selectors';
+import { vaultCipherCreated } from '../vault-cipher/actions';
 import { selectVaultCipherDoesExist } from '../vault-cipher/selectors';
+import { accountRenamed } from '../vault/actions';
+import { selectVault } from '../vault/selectors';
 import { lockVault, startBackground } from './actions';
 import {
+  VAULT_REENCRYPT_DEBOUNCE_MS,
   delay,
   lockVaultSaga,
   setDelayForLockoutVaultSaga,
-  timeoutCounterSaga
+  timeoutCounterSaga,
+  vaultSagas
 } from './vault-sagas';
 
 // Stub the storage-key module so importing it does not drag in the Redux store
@@ -252,14 +264,25 @@ describe('timeoutCounterSaga', () => {
 });
 
 describe('lockVaultSaga', () => {
+  // The flush re-encryption added at the top of lockVaultSaga now reaches these
+  // selectors and the encrypt call; provide a live key + stub cipher so the
+  // flush runs for real rather than throwing on a missing session.
+  const flushProvides: Array<
+    [ReturnType<typeof matchers.select.selector>, unknown]
+  > = [
+    [matchers.select.selector(selectEncryptionKeyHash), 'key-hash'],
+    [matchers.select.selector(selectVault), {} as never],
+    [matchers.call.fn(encryptVault), 'flushed-cipher']
+  ];
+
   it('clears the persisted auto-lock deadline on lock (covers both timeout-fired and manual lock)', async () => {
-    await expectSaga(lockVaultSaga).run();
+    await expectSaga(lockVaultSaga).provide(flushProvides).run();
 
     expect(mockStorageRemove).toHaveBeenCalledWith(AUTO_LOCK_DEADLINE_KEY);
   });
 
   it('emits the locked event to tabs before touching storage, so a storage failure cannot skip the emit', async () => {
-    await expectSaga(lockVaultSaga).run();
+    await expectSaga(lockVaultSaga).provide(flushProvides).run();
 
     // tabs.query is the first thing emitSdkEventToActiveTabs does; asserting
     // its global invocation order against storage.local.remove proves the
@@ -269,5 +292,48 @@ describe('lockVaultSaga', () => {
     expect(mockTabsQuery.mock.invocationCallOrder[0]).toBeLessThan(
       mockStorageRemove.mock.invocationCallOrder[0]
     );
+  });
+
+  it('flushes a synchronous re-encryption before tearing the session down', async () => {
+    // NB: no `.put(vaultCipherCreated(...))` expectation here — a matched
+    // `.put()` expectation removes that effect from the returned `effects.put`
+    // array, which would defeat the ordering assertion below. The
+    // `toBeGreaterThanOrEqual(0)` check still proves the flush was put.
+    const { effects } = await expectSaga(lockVaultSaga)
+      .provide([
+        [matchers.select.selector(selectEncryptionKeyHash), 'key-hash'],
+        [matchers.select.selector(selectVault), {} as never],
+        [matchers.call.fn(encryptVault), 'flushed-cipher']
+      ])
+      .run();
+
+    // redux-saga-test-plan collects PUT effects in the order they were yielded.
+    const putTypes = effects.put.map(
+      (e: { payload: { action: { type: string } } }) => e.payload.action.type
+    );
+    expect(putTypes.indexOf(vaultCipherCreated.type)).toBeGreaterThanOrEqual(0);
+    expect(putTypes.indexOf(vaultCipherCreated.type)).toBeLessThan(
+      putTypes.indexOf(sessionReseted.type)
+    );
+  });
+});
+
+describe('updateVaultCipher debounce', () => {
+  it('coalesces a burst of vault edits into a single re-encryption', async () => {
+    const encryptSpy = jest
+      .spyOn(vaultCryptoModule, 'encryptVault')
+      .mockResolvedValue('cipher-blob');
+
+    await expectSaga(vaultSagas)
+      .provide([
+        [matchers.select.selector(selectEncryptionKeyHash), 'key-hash'],
+        [matchers.select.selector(selectVault), {} as never]
+      ])
+      .dispatch(accountRenamed({ oldName: 'a', newName: 'b' }))
+      .dispatch(accountRenamed({ oldName: 'b', newName: 'c' }))
+      .dispatch(accountRenamed({ oldName: 'c', newName: 'd' }))
+      .silentRun(VAULT_REENCRYPT_DEBOUNCE_MS + 200);
+
+    expect(encryptSpy).toHaveBeenCalledTimes(1);
   });
 });

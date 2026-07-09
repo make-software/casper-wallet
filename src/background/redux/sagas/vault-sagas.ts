@@ -1,4 +1,4 @@
-import { put, select, takeLatest } from 'redux-saga/effects';
+import { debounce, put, select, takeLatest } from 'redux-saga/effects';
 import { storage } from 'webextension-polyfill';
 
 import { getActiveAccountSupports, getUrlOrigin } from '@src/utils';
@@ -79,6 +79,10 @@ import {
   unlockVault
 } from './actions';
 
+// Coalesce bursts of vault edits into a single re-encryption. 500ms is short
+// enough to feel instant on the next lock/read yet absorbs rapid multi-field edits.
+export const VAULT_REENCRYPT_DEBOUNCE_MS = 500;
+
 export function* vaultSagas() {
   yield takeLatest(lockVault.type, lockVaultSaga);
   yield takeLatest(
@@ -94,7 +98,8 @@ export function* vaultSagas() {
     ],
     timeoutCounterSaga
   );
-  yield takeLatest(
+  yield debounce(
+    VAULT_REENCRYPT_DEBOUNCE_MS,
     [
       accountAdded.type,
       accountsAdded.type,
@@ -122,6 +127,16 @@ export function* vaultSagas() {
  */
 export function* lockVaultSaga() {
   try {
+    // Flush any debounced-but-not-yet-persisted vault change before teardown.
+    // updateVaultCipher now runs on debounce(500ms); a vault edit in the last
+    // 500ms before lock would otherwise never be encrypted. Reusing
+    // updateVaultCipher keeps the ciphertext path (and blob format) identical.
+    // It reads the still-live encryptionKeyHash + vault; the resets below wipe
+    // both. A stale debounced straggler that fires ~500ms later runs against the
+    // reset session (encryptionKeyHash === null) — encryptVault throws, is caught
+    // inside updateVaultCipher, and can never overwrite this flushed cipher.
+    yield* updateVaultCipher();
+
     yield put(sessionReseted());
     yield put(vaultReseted());
     yield put(deploysReseted());
@@ -392,9 +407,7 @@ function* updateVaultCipher() {
     // encrypt cipher with the new key
     const vault = yield* sagaSelect(selectVault);
 
-    const vaultCipher = yield* sagaCall(() =>
-      encryptVault(encryptionKeyHash, vault)
-    );
+    const vaultCipher = yield* sagaCall(encryptVault, encryptionKeyHash, vault);
 
     yield put(
       vaultCipherCreated({
