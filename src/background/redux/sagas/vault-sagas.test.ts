@@ -358,6 +358,29 @@ describe('updateVaultCipher debounce', () => {
     expect(encryptSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('re-encrypts once per edit when edits are spaced beyond the debounce window', async () => {
+    // The other half of the debounce contract: coalescing must not become
+    // over-coalescing. Edits further apart than the window must each persist —
+    // the burst test above cannot distinguish a correct trailing-edge debounce
+    // from a configuration that swallows every edit after the first (e.g. a
+    // future swap to throttle/takeLeading, or a fattened window).
+    const encryptSpy = jest
+      .spyOn(vaultCryptoModule, 'encryptVault')
+      .mockResolvedValue('cipher-blob');
+
+    await expectSaga(vaultSagas)
+      .provide([
+        [matchers.select.selector(selectEncryptionKeyHash), 'key-hash'],
+        [matchers.select.selector(selectVault), EMPTY_VAULT]
+      ])
+      .dispatch(accountRenamed({ oldName: 'a', newName: 'b' }))
+      .delay(VAULT_REENCRYPT_DEBOUNCE_MS + 100)
+      .dispatch(accountRenamed({ oldName: 'b', newName: 'c' }))
+      .silentRun(2 * VAULT_REENCRYPT_DEBOUNCE_MS + 400);
+
+    expect(encryptSpy).toHaveBeenCalledTimes(2);
+  });
+
   it('is a silent no-op when a debounced run lands after the session is locked', async () => {
     // Straggler-after-lock: a trigger fired < 500ms before a lock re-arms the
     // debounce, then lockVaultSaga wipes the session key, and the trailing run
