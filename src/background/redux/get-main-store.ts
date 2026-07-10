@@ -213,6 +213,7 @@ export async function getExistingMainStoreSingletonOrInit() {
             [TRUSTED_WASM]: trustedWasm
           })
           .catch(e => {
+            // nosemgrep: cw-logging-secrets — static message + error object, no key material
             console.error('Persist encrypted vault failed: ', e);
           });
       });

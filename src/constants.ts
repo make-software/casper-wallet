@@ -25,6 +25,7 @@ export const STAKE_COST_MOTES = '2500000000'; // 2.5 CSPR
 export const DELEGATION_MIN_AMOUNT_MOTES = '500000000000'; // 500 CSPR
 export const MAX_DELEGATORS = 1200;
 
+// nosemgrep: ajinabraham.njsscan.generic.hardcoded_secrets.node_username — public docs URL, "USER" in the name is not a credential
 export const USER_GUIDES_URL = 'https://casperwallet.io/user-guide';
 export const SHARE_FEEDBACK_URL =
   'https://casper-wallet.canny.io/feature-requests';

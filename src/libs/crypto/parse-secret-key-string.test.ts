@@ -26,6 +26,7 @@ it('should import key pair from the pem file, validate keys and generate the sam
       }
     ] as const
   ).forEach(({ type, pemFilePath, pemFilePublicKeyHex }) => {
+    // nosemgrep: gitlab.eslint.detect-non-literal-fs-filename — test reading its own fixture, path built from __dirname
     const pemFileContents = fs.readFileSync(pemFilePath).toString();
     const { publicKeyHex, secretKeyBase64 } =
       parseSecretKeyString(pemFileContents);

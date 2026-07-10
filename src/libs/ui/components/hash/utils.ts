@@ -37,6 +37,7 @@ export function truncateKey(
 }
 
 export const isValidHash = (hash?: string | null): hash is string => {
+  // nosemgrep: ajinabraham.njsscan.crypto.timing_attack_node.node_timing_attack, gitlab.eslint.detect-possible-timing-attacks — format validation of a public hash for display, not a secret comparison
   if (hash == null) {
     return false;
   }

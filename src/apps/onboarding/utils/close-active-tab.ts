@@ -1,6 +1,7 @@
 import { tabs } from 'webextension-polyfill';
 
 export async function closeActiveTab() {
+  // nosemgrep: ajinabraham.njsscan.generic.error_disclosure.generic_error_disclosure — extension console, not a server response
   try {
     const tabsList = await tabs.query({
       active: true,
