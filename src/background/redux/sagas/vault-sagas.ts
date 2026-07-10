@@ -1,4 +1,4 @@
-import { put, select, takeLatest } from 'redux-saga/effects';
+import { debounce, put, select, takeLatest } from 'redux-saga/effects';
 import { storage } from 'webextension-polyfill';
 
 import { getActiveAccountSupports, getUrlOrigin } from '@src/utils';
@@ -81,6 +81,10 @@ import {
 } from './actions';
 import { errorToMessage } from './utils';
 
+// Coalesce bursts of vault edits into a single re-encryption. 500ms is short
+// enough to feel instant on the next lock/read yet absorbs rapid multi-field edits.
+export const VAULT_REENCRYPT_DEBOUNCE_MS = 500;
+
 export function* vaultSagas() {
   yield takeLatest(lockVault.type, lockVaultSaga);
   yield takeLatest(
@@ -96,7 +100,13 @@ export function* vaultSagas() {
     ],
     timeoutCounterSaga
   );
-  yield takeLatest(
+  // Unlike takeLatest, debounce does not cancel an in-flight run when the next
+  // trigger arrives, so two updateVaultCipher runs could overlap and the staler
+  // cipher win. This relies on the invariant that a single encryption
+  // (~2ms measured, even on a 50-account vault) stays far below the 500ms
+  // debounce window — keep that true if the vault or crypto grows.
+  yield debounce(
+    VAULT_REENCRYPT_DEBOUNCE_MS,
     [
       accountAdded.type,
       accountsAdded.type,
@@ -124,6 +134,16 @@ export function* vaultSagas() {
  */
 export function* lockVaultSaga() {
   try {
+    // Flush any debounced-but-not-yet-persisted vault change before teardown.
+    // updateVaultCipher now runs on debounce(500ms); a vault edit in the last
+    // 500ms before lock would otherwise never be encrypted. Reusing
+    // updateVaultCipher keeps the ciphertext path (and blob format) identical.
+    // It reads the still-live encryptionKeyHash + vault; the resets below wipe
+    // both. A stale debounced straggler that fires ~500ms later runs against the
+    // reset session (encryptionKeyHash === null), where updateVaultCipher
+    // early-returns — so it can never overwrite this flushed cipher.
+    yield* updateVaultCipher();
+
     yield put(sessionReseted());
     yield put(vaultReseted());
     yield put(deploysReseted());
@@ -400,12 +420,23 @@ function* updateVaultCipher() {
   try {
     // get current encryption key
     const encryptionKeyHash = yield* sagaSelect(selectEncryptionKeyHash);
+
+    // A locked / session-less state is not an error — there is simply nothing to
+    // persist. This is the debounced-straggler case: a trigger fired within
+    // 500ms before a lock re-arms the debounce, then `lockVaultSaga` wipes the
+    // session key, and the trailing run lands here with a null key. Returning
+    // early keeps it out of the `sagaError` → UI-banner channel, so a routine
+    // "edit then lock" never surfaces a spurious "Encryption key doesn't exist"
+    // toast. It also means the straggler can never overwrite the cipher the
+    // lock flush already persisted.
+    if (encryptionKeyHash == null) {
+      return;
+    }
+
     // encrypt cipher with the new key
     const vault = yield* sagaSelect(selectVault);
 
-    const vaultCipher = yield* sagaCall(() =>
-      encryptVault(encryptionKeyHash, vault)
-    );
+    const vaultCipher = yield* sagaCall(encryptVault, encryptionKeyHash, vault);
 
     yield put(
       vaultCipherCreated({
