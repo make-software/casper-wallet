@@ -9,6 +9,18 @@ jest.mock('@background/handlers/private-state', () => ({
   fetchPrivateState: jest.fn()
 }));
 
+// `use-private-state` imports `webextension-polyfill` directly (to listen for
+// the payload-free `privateStateUpdated` push signal), which throws outside a
+// browser extension. Stub it so the module can load under this node-env suite.
+jest.mock('webextension-polyfill', () => ({
+  runtime: {
+    onMessage: {
+      addListener: jest.fn(),
+      removeListener: jest.fn()
+    }
+  }
+}));
+
 const fetchMock = fetchPrivateState as jest.MockedFunction<
   typeof fetchPrivateState
 >;

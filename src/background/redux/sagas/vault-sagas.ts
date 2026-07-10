@@ -8,6 +8,7 @@ import {
   MapTimeoutDurationSettingToValue
 } from '@popup/constants';
 
+import { sagaError } from '@background/redux/app-events/actions';
 import {
   AUTO_LOCK_DEADLINE_KEY,
   LOGIN_RETRY_LOCKOUT_DEADLINE_KEY
@@ -78,6 +79,7 @@ import {
   startBackground,
   unlockVault
 } from './actions';
+import { errorToMessage } from './utils';
 
 // Coalesce bursts of vault edits into a single re-encryption. 500ms is short
 // enough to feel instant on the next lock/read yet absorbs rapid multi-field edits.
@@ -160,6 +162,9 @@ export function* lockVaultSaga() {
     yield* sagaCall(clearAutoLockDeadline);
   } catch (err) {
     console.error(err);
+    yield put(
+      sagaError({ source: 'lockVaultSaga', message: errorToMessage(err) })
+    );
   }
 }
 
@@ -311,6 +316,9 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
     }
   } catch (err) {
     console.error(err);
+    yield put(
+      sagaError({ source: 'unlockVaultSaga', message: errorToMessage(err) })
+    );
   } finally {
     releaseAnchor();
   }
@@ -390,6 +398,9 @@ export function* timeoutCounterSaga(
     }
   } catch (err) {
     console.error(err);
+    yield put(
+      sagaError({ source: 'timeoutCounterSaga', message: errorToMessage(err) })
+    );
   }
 }
 
@@ -416,6 +427,9 @@ function* updateVaultCipher() {
     );
   } catch (err) {
     console.error(err);
+    yield put(
+      sagaError({ source: 'updateVaultCipher', message: errorToMessage(err) })
+    );
   } finally {
     releaseAnchor();
   }
@@ -469,6 +483,9 @@ function* createAccountSaga(action: ReturnType<typeof createAccount>) {
     }
   } catch (err) {
     console.error(err);
+    yield put(
+      sagaError({ source: 'createAccountSaga', message: errorToMessage(err) })
+    );
   } finally {
     releaseAnchor();
   }

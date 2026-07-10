@@ -1,4 +1,3 @@
-import { Player } from '@lottiefiles/react-lottie-player';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
@@ -35,6 +34,7 @@ import {
   SpacingSize
 } from '@libs/layout';
 import { Button, Typography } from '@libs/ui/components';
+import { LottiePlayer } from '@libs/ui/components/lottie-player';
 import { UnlockWalletFormValues } from '@libs/ui/forms/unlock-wallet';
 
 import { UnlockVaultPageContent } from './content';
@@ -227,8 +227,7 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
       >
         {isLoading ? (
           <AlignedFlexRow gap={SpacingSize.Small}>
-            <Player
-              renderer={'svg'}
+            <LottiePlayer
               autoplay
               loop
               src={unlockAnimation}
