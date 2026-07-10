@@ -29,7 +29,8 @@ for (const entryName in config.entry) {
   if (excludeEntriesToHotReload.indexOf(entryName) === -1) {
     config.entry[entryName] = [
       'webpack/hot/dev-server',
-      `webpack-dev-server/client?hot=true&hostname=localhost&port=${env.PORT}`
+      // webpack-dev-server 6 only exports "./client/*", so the entry must point at index.js explicitly
+      `webpack-dev-server/client/index.js?hot=true&hostname=localhost&port=${env.PORT}`
     ].concat(config.entry[entryName]);
   }
 }
