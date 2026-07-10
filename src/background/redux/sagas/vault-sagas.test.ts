@@ -18,11 +18,16 @@ import { selectLoginRetryLockoutTime } from '@background/redux/login-retry-locko
 import * as vaultCryptoModule from '@libs/crypto/vault';
 import { encryptVault } from '@libs/crypto/vault';
 
+import { keysUpdated } from '../keys/actions';
 import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
 import { selectVaultLastActivityTime } from '../last-activity-time/selectors';
 import { loginRetryCountReseted } from '../login-retry-count/actions';
 import { loginRetryLockoutTimeSet } from '../login-retry-lockout-time/reducer';
-import { sessionReseted } from '../session/actions';
+import {
+  encryptionKeyHashCreated,
+  sessionReseted,
+  vaultUnlocked
+} from '../session/actions';
 import {
   selectEncryptionKeyHash,
   selectVaultIsLocked
@@ -30,15 +35,20 @@ import {
 import { selectTimeoutDurationSetting } from '../settings/selectors';
 import { vaultCipherCreated } from '../vault-cipher/actions';
 import { selectVaultCipherDoesExist } from '../vault-cipher/selectors';
-import { accountRenamed } from '../vault/actions';
-import { selectVault } from '../vault/selectors';
-import { lockVault, startBackground } from './actions';
+import { accountRenamed, vaultLoaded } from '../vault/actions';
+import {
+  selectAccountNamesByOriginDict,
+  selectVault,
+  selectVaultActiveAccount
+} from '../vault/selectors';
+import { lockVault, startBackground, unlockVault } from './actions';
 import {
   VAULT_REENCRYPT_DEBOUNCE_MS,
   delay,
   lockVaultSaga,
   setDelayForLockoutVaultSaga,
   timeoutCounterSaga,
+  unlockVaultSaga,
   vaultSagas
 } from './vault-sagas';
 
@@ -315,6 +325,88 @@ describe('lockVaultSaga', () => {
     expect(putTypes.indexOf(vaultCipherCreated.type)).toBeLessThan(
       putTypes.indexOf(sessionReseted.type)
     );
+  });
+});
+
+describe('unlockVaultSaga', () => {
+  const vault = {} as never;
+  const newKeyDerivationSaltHash = 'salt-hash';
+  const newVaultCipher = 'new-cipher-blob';
+  const newEncryptionKeyHash = 'new-key-hash';
+
+  const unlockAction = unlockVault({
+    vault,
+    newKeyDerivationSaltHash,
+    newVaultCipher,
+    newEncryptionKeyHash
+  });
+
+  // Both selectors read after the puts. Provide them so the saga's happy path
+  // runs to completion (no catch, no leaked console.error). `activeAccount`
+  // toggles the SDK-event emit branch. `emitSdkEventToActiveTabs` /
+  // `anchorServiceWorker` are not jest.mocked — same as `lockVaultSaga` above,
+  // they run for real against the mocked `webextension-polyfill` (and the
+  // anchor is a no-op off Chrome), so `mockTabsQuery` is the emit witness.
+  const provides = (
+    activeAccount: unknown
+  ): Array<[ReturnType<typeof matchers.select.selector>, unknown]> => [
+    [matchers.select.selector(selectAccountNamesByOriginDict), {}],
+    [matchers.select.selector(selectVaultActiveAccount), activeAccount]
+  ];
+
+  it('puts the exact unlock action sequence, each payload driven from action.payload', async () => {
+    await expectSaga(unlockVaultSaga, unlockAction)
+      .provide(provides({ name: 'Account 1', publicKey: '0201abc' }))
+      .put(loginRetryCountReseted())
+      .put(vaultLoaded(vault))
+      .put(keysUpdated({ keyDerivationSaltHash: newKeyDerivationSaltHash }))
+      .put(vaultCipherCreated({ vaultCipher: newVaultCipher }))
+      .put(
+        encryptionKeyHashCreated({ encryptionKeyHash: newEncryptionKeyHash })
+      )
+      .put(vaultUnlocked())
+      .run();
+  });
+
+  it('yields those puts in a deterministic order', async () => {
+    // No `.put()` expectations here: a matched `.put()` removes that effect from
+    // the returned `effects.put` array, which would defeat the ordering check.
+    const { effects } = await expectSaga(unlockVaultSaga, unlockAction)
+      .provide(provides({ name: 'Account 1', publicKey: '0201abc' }))
+      .run();
+
+    const putTypes = effects.put.map(
+      (e: { payload: { action: { type: string } } }) => e.payload.action.type
+    );
+
+    expect(putTypes).toEqual([
+      loginRetryCountReseted.type,
+      vaultLoaded.type,
+      keysUpdated.type,
+      vaultCipherCreated.type,
+      encryptionKeyHashCreated.type,
+      vaultUnlocked.type
+    ]);
+  });
+
+  it('emits the SDK unlocked event when there is an active account', async () => {
+    await expectSaga(unlockVaultSaga, unlockAction)
+      .provide(provides({ name: 'Account 1', publicKey: '0201abc' }))
+      .put(vaultUnlocked())
+      .run();
+
+    // tabs.query is the first thing emitSdkEventToActiveTabs does — its call is
+    // the witness that the emit branch ran.
+    expect(mockTabsQuery).toHaveBeenCalled();
+  });
+
+  it('unlocks but skips the SDK emit when there is no active account', async () => {
+    await expectSaga(unlockVaultSaga, unlockAction)
+      .provide(provides(undefined))
+      .put(vaultUnlocked())
+      .run();
+
+    expect(mockTabsQuery).not.toHaveBeenCalled();
   });
 });
 

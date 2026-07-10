@@ -243,7 +243,7 @@ export function* setDelayForLockoutVaultSaga(
  * generate a new encryption key each login and update existing cipher (collisions0
  * put new encryption key in session
  */
-function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
+export function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
   // Keep the MV3 service worker alive for the whole unlock flow — Chrome may
   // otherwise kill it mid-saga during the heavy crypto work.
   const releaseAnchor = anchorServiceWorker('unlock');
