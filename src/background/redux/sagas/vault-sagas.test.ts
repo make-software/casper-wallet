@@ -8,6 +8,7 @@ import {
   TimeoutDurationSetting
 } from '@popup/constants';
 
+import { sagaError } from '@background/redux/app-events/actions';
 import {
   AUTO_LOCK_DEADLINE_KEY,
   LOGIN_RETRY_LOCKOUT_DEADLINE_KEY
@@ -32,6 +33,7 @@ import { vaultCipherCreated } from '../vault-cipher/actions';
 import { selectVaultCipherDoesExist } from '../vault-cipher/selectors';
 import { accountRenamed } from '../vault/actions';
 import { selectVault } from '../vault/selectors';
+import { VaultState } from '../vault/types';
 import { lockVault, startBackground } from './actions';
 import {
   VAULT_REENCRYPT_DEBOUNCE_MS,
@@ -70,6 +72,19 @@ const mockTabsQuery = tabs.query as jest.Mock;
 
 const NOW = 1_700_000_000_000;
 const FIVE_SECONDS = 5000;
+
+// A shape-complete empty vault. The re-encrypt path never reads its contents in
+// these tests (encryptVault is always stubbed/spied), so empty fields suffice —
+// this just gives the `selectVault` provides an honest VaultState type.
+const EMPTY_VAULT: VaultState = {
+  secretPhrase: null,
+  accounts: [],
+  accountNamesByOriginDict: {},
+  siteNameByOriginDict: {},
+  activeAccountName: null,
+  jsonById: {},
+  eip712ById: {}
+};
 
 // Instantly resolve the module's own delay helper so tests never wait on a real
 // timer, and so the `.call(delay, ms)` assertion can verify the exact residual.
@@ -268,10 +283,16 @@ describe('lockVaultSaga', () => {
   // selectors and the encrypt call; provide a live key + stub cipher so the
   // flush runs for real rather than throwing on a missing session.
   const flushProvides: Array<
-    [ReturnType<typeof matchers.select.selector>, unknown]
+    [
+      (
+        | ReturnType<typeof matchers.select.selector>
+        | ReturnType<typeof matchers.call.fn>
+      ),
+      unknown
+    ]
   > = [
     [matchers.select.selector(selectEncryptionKeyHash), 'key-hash'],
-    [matchers.select.selector(selectVault), {} as never],
+    [matchers.select.selector(selectVault), EMPTY_VAULT],
     [matchers.call.fn(encryptVault), 'flushed-cipher']
   ];
 
@@ -302,7 +323,7 @@ describe('lockVaultSaga', () => {
     const { effects } = await expectSaga(lockVaultSaga)
       .provide([
         [matchers.select.selector(selectEncryptionKeyHash), 'key-hash'],
-        [matchers.select.selector(selectVault), {} as never],
+        [matchers.select.selector(selectVault), EMPTY_VAULT],
         [matchers.call.fn(encryptVault), 'flushed-cipher']
       ])
       .run();
@@ -327,7 +348,7 @@ describe('updateVaultCipher debounce', () => {
     await expectSaga(vaultSagas)
       .provide([
         [matchers.select.selector(selectEncryptionKeyHash), 'key-hash'],
-        [matchers.select.selector(selectVault), {} as never]
+        [matchers.select.selector(selectVault), EMPTY_VAULT]
       ])
       .dispatch(accountRenamed({ oldName: 'a', newName: 'b' }))
       .dispatch(accountRenamed({ oldName: 'b', newName: 'c' }))
@@ -335,5 +356,29 @@ describe('updateVaultCipher debounce', () => {
       .silentRun(VAULT_REENCRYPT_DEBOUNCE_MS + 200);
 
     expect(encryptSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('is a silent no-op when a debounced run lands after the session is locked', async () => {
+    // Straggler-after-lock: a trigger fired < 500ms before a lock re-arms the
+    // debounce, then lockVaultSaga wipes the session key, and the trailing run
+    // lands with encryptionKeyHash === null. It must NOT re-encrypt (no stale
+    // cipher can overwrite the lock flush) and must NOT surface a sagaError to
+    // the UI banner — a locked session is not an error.
+    const encryptSpy = jest.spyOn(vaultCryptoModule, 'encryptVault');
+
+    const { effects } = await expectSaga(vaultSagas)
+      .provide([
+        [matchers.select.selector(selectEncryptionKeyHash), null],
+        [matchers.select.selector(selectVault), EMPTY_VAULT]
+      ])
+      .dispatch(accountRenamed({ oldName: 'a', newName: 'b' }))
+      .silentRun(VAULT_REENCRYPT_DEBOUNCE_MS + 200);
+
+    expect(encryptSpy).not.toHaveBeenCalled();
+    const putTypes = (effects.put ?? []).map(
+      (e: { payload: { action: { type: string } } }) => e.payload.action.type
+    );
+    expect(putTypes).not.toContain(vaultCipherCreated.type);
+    expect(putTypes).not.toContain(sagaError.type);
   });
 });
