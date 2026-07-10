@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["src/apps/*/index.tsx", "scripts/*.mjs"],
+  "project": ["src/**/*.{js,ts,tsx}", "utils/**/*.js", "scripts/**/*.mjs"],
+  "ignoreDependencies": ["@types/chrome", "@noble/curves", "@noble/hashes"],
+  "ignoreBinaries": ["semgrep"],
+  "exclude": ["enumMembers"],
+  "webpack": {
+    "config": ["webpack.config.js"]
+  },
+  "jest": {
+    "config": ["jest.config.js"],
+    "entry": ["src/**/*.test.{ts,tsx}"]
+  },
+  "playwright": {
+    "config": ["playwright.config.ts", "playwright.firefox.config.ts"],
+    "entry": ["e2e-tests/**/*.ts"]
+  },
+  "eslint": {
+    "config": ["eslint.config.mjs"]
+  }
+}

@@ -176,7 +176,7 @@ export enum AuctionDeployEntryPoint {
   activate = 'activate_bid'
 }
 
-export const AuctionDeployEntryPointNameMap = {
+const AuctionDeployEntryPointNameMap = {
   [AuctionDeployEntryPoint.add]: 'Add bid',
   [AuctionDeployEntryPoint.withdraw]: 'Withdraw bid',
   [AuctionDeployEntryPoint.activate]: 'Activate bid',
@@ -185,7 +185,7 @@ export const AuctionDeployEntryPointNameMap = {
   [AuctionDeployEntryPoint.redelegate]: 'Redelegate'
 };
 
-export const AuctionDeployActionName = {
+const AuctionDeployActionName = {
   [AuctionDeployEntryPoint.add]: 'Add bid',
   [AuctionDeployEntryPoint.withdraw]: 'Withdraw bid',
   [AuctionDeployEntryPoint.activate]: 'Activate bid',
@@ -205,7 +205,7 @@ export enum NftDeployEntryPoint {
   safe_transfer_from = 'safe_transfer_from'
 }
 
-export const NftDeployEntryPointNameMap = {
+const NftDeployEntryPointNameMap = {
   [NftDeployEntryPoint.approve]: 'Approve transfer',
   [NftDeployEntryPoint.burn]: 'Burn',
   [NftDeployEntryPoint.mint]: 'Mint',
@@ -216,7 +216,7 @@ export const NftDeployEntryPointNameMap = {
   [NftDeployEntryPoint.set_approval_for_all]: 'Approve transfer'
 };
 
-export const NftDeployActionName = {
+const NftDeployActionName = {
   [NftDeployEntryPoint.approve]: 'Approve transfer rights',
   [NftDeployEntryPoint.burn]: 'Burn',
   [NftDeployEntryPoint.mint]: 'Mint',
@@ -227,7 +227,7 @@ export const NftDeployActionName = {
   [NftDeployEntryPoint.set_approval_for_all]: 'Approve transfer rights'
 };
 
-export const NftDeployResultName = {
+const NftDeployResultName = {
   [NftDeployEntryPoint.approve]: 'Granted transfer rights',
   [NftDeployEntryPoint.burn]: 'Burned',
   [NftDeployEntryPoint.mint]: 'Minted',
@@ -245,21 +245,21 @@ export enum Cep18DeployEntryPoint {
   transfer = 'transfer'
 }
 
-export const Cep18DeployEntryPointNameMap = {
+const Cep18DeployEntryPointNameMap = {
   [Cep18DeployEntryPoint.approve]: 'Approve',
   [Cep18DeployEntryPoint.burn]: 'Burn',
   [Cep18DeployEntryPoint.mint]: 'Mint',
   [Cep18DeployEntryPoint.transfer]: 'Transfer'
 };
 
-export const Cep18DeployActionName = {
+const Cep18DeployActionName = {
   [Cep18DeployEntryPoint.approve]: 'Approve transfer rights',
   [Cep18DeployEntryPoint.burn]: 'Burn',
   [Cep18DeployEntryPoint.mint]: 'Mint',
   [Cep18DeployEntryPoint.transfer]: 'Transfer'
 };
 
-export const Cep18DeployResultName = {
+const Cep18DeployResultName = {
   [Cep18DeployEntryPoint.approve]: 'Granted transfer rights',
   [Cep18DeployEntryPoint.burn]: 'Burned',
   [Cep18DeployEntryPoint.mint]: 'Minted',
@@ -274,7 +274,7 @@ export enum CsprMarketDeployEntryPoint {
   make_offer = 'make_offer'
 }
 
-export const CsprMarketDeployEntryPointNameMap = {
+const CsprMarketDeployEntryPointNameMap = {
   [CsprMarketDeployEntryPoint.accept_offer]: 'Accept offer',
   [CsprMarketDeployEntryPoint.cancel_offer]: 'Cancel offer',
   [CsprMarketDeployEntryPoint.delist_token]: 'Delist',

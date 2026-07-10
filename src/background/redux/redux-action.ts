@@ -50,11 +50,4 @@ export type ReduxAction = {
   [NS in keyof Creators]: ActionsOf<Creators[NS]>;
 }[keyof Creators];
 
-export function isReduxAction(action?: {
-  type?: unknown;
-  meta?: unknown;
-}): action is ReduxAction {
-  return typeof action?.type === 'string';
-}
-
 export default reduxAction;

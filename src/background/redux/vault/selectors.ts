@@ -67,11 +67,6 @@ export const selectVaultHiddenAccountsNames = createSelector(
   accounts => accounts.map(account => account.name)
 );
 
-export const selectVaultHasImportedAccount = createSelector(
-  selectVaultImportedAccounts,
-  importedAccounts => importedAccounts.length > 0
-);
-
 export const selectVaultDerivedAccounts = createSelector(
   selectVaultAccounts,
   accounts => accounts.filter(account => !account.imported && !account.hardware)
@@ -228,11 +223,6 @@ export const selectUnconnectedAccountsWithActiveOrigin = createSelector(
           connectedAccount => connectedAccount.name === account.name
         )
     )
-);
-
-export const selectCountOfAccounts = createSelector(
-  selectVaultAccounts,
-  accounts => accounts.length
 );
 
 export const selectCountOfConnectedAccountsWithActiveOrigin = createSelector(

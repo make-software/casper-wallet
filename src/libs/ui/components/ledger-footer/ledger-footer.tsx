@@ -35,7 +35,7 @@ export const renderLedgerFooter = ({
   return undefined;
 };
 
-export const LedgerErrorFooter: React.FC<
+const LedgerErrorFooter: React.FC<
   Pick<IRenderLedgerFooterParams, 'onErrorCtaPressed'>
 > = ({ onErrorCtaPressed }) => {
   const { t } = useTranslation();

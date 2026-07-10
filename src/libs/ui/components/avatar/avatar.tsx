@@ -24,14 +24,12 @@ const ConnectionStatusBadgeContainer = styled(AlignedFlexRow)`
   z-index: 1;
 `;
 
-export const BackgroundWrapper = styled.div<{ size: number }>(
-  ({ size, theme }) => ({
-    borderRadius: theme.borderRadius.eight,
-    height: `${size}px`,
-    width: `${size}px`,
-    backgroundColor: theme.color.contentDisabled
-  })
-);
+const BackgroundWrapper = styled.div<{ size: number }>(({ size, theme }) => ({
+  borderRadius: theme.borderRadius.eight,
+  height: `${size}px`,
+  width: `${size}px`,
+  backgroundColor: theme.color.contentDisabled
+}));
 
 const ConnectIcon = styled(SvgIcon)<{
   displayContext?: 'header' | 'accountList';

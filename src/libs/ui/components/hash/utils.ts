@@ -35,12 +35,3 @@ export function truncateKey(
 
   return `${beginOfKey}...${endOfKey}`;
 }
-
-export const isValidHash = (hash?: string | null): hash is string => {
-  // nosemgrep: ajinabraham.njsscan.crypto.timing_attack_node.node_timing_attack, gitlab.eslint.detect-possible-timing-attacks — format validation of a public hash for display, not a secret comparison
-  if (hash == null) {
-    return false;
-  }
-  const validHashRegExp = new RegExp('^([0-9A-Fa-f]){64}$');
-  return validHashRegExp.test(hash.trim());
-};

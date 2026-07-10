@@ -10,7 +10,7 @@ import { PublicKey } from 'casper-js-sdk';
 // ED = 01 public keys should be 66 chars long (with the prefix)
 // SEC = 02 public keys should be 68 chars long (with the prefix)
 
-export const getRawPublicKey = (publicKeyHex: string): PublicKey =>
+const getRawPublicKey = (publicKeyHex: string): PublicKey =>
   PublicKey.fromHex(publicKeyHex);
 
 export const getAccountHashFromPublicKey = (

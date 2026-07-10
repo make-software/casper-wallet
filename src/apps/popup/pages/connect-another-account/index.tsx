@@ -48,7 +48,7 @@ const ListItemContainer = styled(CentredFlexRow)`
   padding: 14px 18px;
 `;
 
-export const SpaceBetweenContainer = styled(CentredFlexRow)`
+const SpaceBetweenContainer = styled(CentredFlexRow)`
   justify-content: space-between;
 `;
 

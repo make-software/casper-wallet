@@ -4,7 +4,7 @@ import { convertBase64ToBytes } from '@libs/crypto/utils';
 
 const dec = new TextDecoder();
 
-export async function encrypt(
+async function encrypt(
   publicKeyHex: string,
   message: string
 ): Promise<Uint8Array> {
@@ -19,7 +19,7 @@ export async function encrypt(
   return sodium.crypto_box_seal(message, xPub) as Uint8Array;
 }
 
-export async function decryptWithSeed(
+async function decryptWithSeed(
   seed32: Uint8Array,
   encryptedBytes: Uint8Array
 ): Promise<string> {
@@ -45,7 +45,7 @@ export async function decryptWithSeed(
   return dec.decode(pt);
 }
 
-export async function decryptWithBase64PrivateKey(
+async function decryptWithBase64PrivateKey(
   privateKeyBase64: string,
   encryptedBytes: Uint8Array
 ): Promise<string> {

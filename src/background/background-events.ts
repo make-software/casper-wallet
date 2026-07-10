@@ -14,10 +14,3 @@ export const backgroundEvent = {
 export type BackgroundEvent = ReturnType<
   (typeof backgroundEvent)[keyof typeof backgroundEvent]
 >;
-
-export function isBackgroundEvent(action?: {
-  type?: unknown;
-  meta?: unknown;
-}): action is BackgroundEvent {
-  return typeof action?.type === 'string' && action.meta === undefined;
-}

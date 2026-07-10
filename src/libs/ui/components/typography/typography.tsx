@@ -8,7 +8,7 @@ import { ContentColor, getColorFromTheme } from '@libs/ui/utils';
 
 type Ref = HTMLSpanElement | HTMLHeadingElement;
 
-export type TypographyType =
+type TypographyType =
   | 'header'
   | 'headerBig'
   | 'body'
@@ -25,9 +25,9 @@ export type TypographyType =
   | 'subtitle'
   | 'listSubtextHash';
 
-export type CSPRSize = '2.8rem' | '2.4rem' | '2rem' | '1.8rem' | '1.6rem';
+type CSPRSize = '2.8rem' | '2.4rem' | '2rem' | '1.8rem' | '1.6rem';
 
-export interface BodyStylesProps extends BaseProps {
+interface BodyStylesProps extends BaseProps {
   color?: ContentColor;
   uppercase?: boolean;
   capitalize?: boolean;

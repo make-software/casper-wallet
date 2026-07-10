@@ -3,7 +3,7 @@ import { randomBytes } from '@noble/hashes/utils';
 
 import { convertBytesToHex, convertHexToBytes } from './utils';
 
-export function generateRandomSaltBytes() {
+function generateRandomSaltBytes() {
   return randomBytes(32);
 }
 

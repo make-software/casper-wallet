@@ -13,7 +13,7 @@ const RowContainer = styled(AlignedSpaceBetweenFlexRow)`
   padding: 16px;
 `;
 
-export const Tile = styled.div`
+const Tile = styled.div`
   margin-top: 16px;
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
   border-radius: ${({ theme }) => theme.borderRadius.twelve}px;

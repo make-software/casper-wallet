@@ -23,17 +23,17 @@ import { PopupState } from '@background/redux/types';
 // upgrade (VAULT_CIPHER_KEY is the worst case — it bricks existing vaults).
 // Add a new key for new data; never rename or reuse an existing one. Full
 // inventory, secrecy, and rationale: docs/architecture/storage-keys.md
-export const VAULT_CIPHER_KEY = 'zazXu8w9GyCtxZ';
+const VAULT_CIPHER_KEY = 'zazXu8w9GyCtxZ';
 export const KEYS_KEY = '2yNVAEQJB5rxMg';
-export const LOGIN_RETRY_KEY = '7ZVdMbk9yD8WGZ';
-export const LOGIN_RETRY_LOCKOUT_KEY = 'p6nnYiaxcsaNG3';
-export const LAST_ACTIVITY_TIME = 'j8d1dusn76EdD';
-export const VAULT_SETTINGS = 'Nmxd8BZh93MHua';
-export const RECENT_RECIPIENT_PUBLIC_KEYS = '7c2WyRuGhEtaDX';
-export const CONTACTS_KEY = 'teuwe6zH3A72gc';
-export const RATE_APP = 'p4cGYubbwnd9ke';
-export const APP_EVENTS = 'k4uL4wqkvCMoxB';
-export const TRUSTED_WASM = 'k1uC4wqkwCMwxL';
+const LOGIN_RETRY_KEY = '7ZVdMbk9yD8WGZ';
+const LOGIN_RETRY_LOCKOUT_KEY = 'p6nnYiaxcsaNG3';
+const LAST_ACTIVITY_TIME = 'j8d1dusn76EdD';
+const VAULT_SETTINGS = 'Nmxd8BZh93MHua';
+const RECENT_RECIPIENT_PUBLIC_KEYS = '7c2WyRuGhEtaDX';
+const CONTACTS_KEY = 'teuwe6zH3A72gc';
+const RATE_APP = 'p4cGYubbwnd9ke';
+const APP_EVENTS = 'k4uL4wqkvCMoxB';
+const TRUSTED_WASM = 'k1uC4wqkwCMwxL';
 
 // Absolute-timestamp deadlines (`Date.now() + remaining`, in ms) written
 // directly to `storage.local` by the vault sagas so the login-retry lockout and
@@ -66,7 +66,7 @@ let storeSingleton: ReturnType<typeof createStore>;
 
 // These state keys will be passed to popups. P0.1: cipher/hash material is
 // NOT broadcast — UI flows that need it use fetchPrivateState() explicitly.
-export const selectPopupState = (state: RootState): PopupState => {
+const selectPopupState = (state: RootState): PopupState => {
   return {
     keys: {
       passwordHash: null,

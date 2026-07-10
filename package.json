@@ -52,7 +52,8 @@
     "e2e:chrome:ui:onboarding": "TEST_ENV=true npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/onboarding-flow --ui --project chromium",
     "e2e:chrome:headless:popup": "TEST_ENV=true MOCK_STATE=true npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/popup --project chromium",
     "e2e:chrome:ui:popup": "TEST_ENV=true MOCK_STATE=true npm run build:chrome && PLAYWRIGHT_BROWSER=chromium npx playwright test e2e-tests/popup --ui --project chromium",
-    "e2e:firefox:headless:smoke": "TEST_ENV=true npm run build:firefox && npx playwright test --config playwright.firefox.config.ts"
+    "e2e:firefox:headless:smoke": "TEST_ENV=true npm run build:firefox && npx playwright test --config playwright.firefox.config.ts",
+    "knip": "knip"
   },
   "lint-staged": {
     "*.md": "markdownlint",
@@ -111,6 +112,7 @@
     "redux": "^5.0.1",
     "redux-saga": "^1.5.0",
     "reselect": "^5.2.0",
+    "rxjs": "^7.8.2",
     "styled-components": "6.4.3",
     "yup": "^1.7.1"
   },
@@ -159,8 +161,8 @@
     "i18next-conv": "^17.0.0",
     "i18next-parser": "^9.4.0",
     "jest": "^30.4.2",
+    "knip": "^6.26.0",
     "lint-staged": "^17.0.8",
-    "markdownlint": "0.41.0",
     "markdownlint-cli": "0.49.0",
     "playwright": "^1.61.0",
     "prettier": "^3.9.3",
@@ -170,7 +172,6 @@
     "terser-webpack-plugin": "^5.6.1",
     "ts-jest": "^29.4.11",
     "ts-loader": "^9.6.2",
-    "ts-node": "10.9.2",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.62.1",
