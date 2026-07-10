@@ -24,13 +24,6 @@ jest.mock('webextension-polyfill', () => ({
   tabs: { query: jest.fn().mockResolvedValue([]) }
 }));
 
-// createStore -> redux/index imports @redux-devtools/remote, which ships ESM
-// (nanoid) that jest cannot parse. The enhancer is never invoked under
-// NODE_ENV=test, so a passthrough stub is enough to let the import resolve.
-jest.mock('@redux-devtools/remote', () => ({
-  devToolsEnhancer: () => (create: unknown) => create
-}));
-
 // Drive the REAL preload of getExistingMainStoreSingletonOrInit with a fresh
 // module registry so the module-level `storeSingleton` let is undefined each
 // time. Returns the initialised store.
