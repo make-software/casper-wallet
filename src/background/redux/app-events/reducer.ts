@@ -4,7 +4,8 @@ import { AppEventsState, SagaError } from './types';
 
 const initialState: AppEventsState = {
   dismissedEventIds: [],
-  errors: []
+  errors: [],
+  nextErrorId: 0
 };
 
 const slice = createSlice({
@@ -26,11 +27,8 @@ const slice = createSlice({
         code?: string;
       }>
     ) => {
-      const nextId = state.errors.length
-        ? Math.max(...state.errors.map(error => error.id)) + 1
-        : 0;
       const entry: SagaError = {
-        id: nextId,
+        id: state.nextErrorId,
         source: action.payload.source,
         message: action.payload.message,
         ...(action.payload.code !== undefined
@@ -39,7 +37,8 @@ const slice = createSlice({
       };
       return {
         ...state,
-        errors: [...state.errors, entry].slice(-10)
+        errors: [...state.errors, entry].slice(-10),
+        nextErrorId: state.nextErrorId + 1
       };
     },
     dismissSagaError: (state, action: PayloadAction<number>) => ({

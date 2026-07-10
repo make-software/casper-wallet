@@ -112,6 +112,7 @@ export const initialStateForPopupTests: RootState = {
   },
   appEvents: {
     dismissedEventIds: [],
-    errors: []
+    errors: [],
+    nextErrorId: 0
   }
 };

@@ -146,7 +146,8 @@ export async function getExistingMainStoreSingletonOrInit() {
           appEvents: appEvents
             ? {
                 dismissedEventIds: appEvents.dismissedEventIds ?? [],
-                errors: []
+                errors: [],
+                nextErrorId: 0
               }
             : undefined,
           trustedWasm

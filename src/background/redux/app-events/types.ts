@@ -8,4 +8,5 @@ export interface SagaError {
 export interface AppEventsState {
   dismissedEventIds: number[];
   errors: SagaError[];
+  nextErrorId: number;
 }
