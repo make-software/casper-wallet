@@ -9,7 +9,7 @@ const initialState: KeysState = {
   keysDoesExist: false
 };
 
-const withDerivedFlag = (state: KeysState): KeysState => ({
+export const withDerivedFlag = (state: KeysState): KeysState => ({
   ...state,
   keysDoesExist:
     state.passwordHash != null &&

@@ -4,6 +4,7 @@ import { backgroundEvent } from '@background/background-events';
 import { AppEventsState } from '@background/redux/app-events/types';
 import { ContactsState } from '@background/redux/contacts/types';
 import { createStore } from '@background/redux/index';
+import { withDerivedFlag } from '@background/redux/keys/reducer';
 import { KeysState } from '@background/redux/keys/types';
 import { LoginRetryCountState } from '@background/redux/login-retry-count/reducer';
 import { LoginRetryLockoutTimeState } from '@background/redux/login-retry-lockout-time/types';
@@ -133,13 +134,10 @@ export async function getExistingMainStoreSingletonOrInit() {
       } else {
         storeSingleton = createStore({
           vaultCipher,
-          keys: keys && {
-            ...keys,
-            keysDoesExist:
-              keys.passwordHash != null &&
-              keys.passwordSaltHash != null &&
-              keys.keyDerivationSaltHash != null
-          },
+          // Recompute keysDoesExist from the hashes via the SAME derivation the
+          // reducer uses, so a stale/poisoned persisted flag can't survive a
+          // restart. Single source of truth — see keys/reducer withDerivedFlag.
+          keys: keys && withDerivedFlag(keys),
           loginRetryCount,
           loginRetryLockoutTime,
           lastActivityTime,
