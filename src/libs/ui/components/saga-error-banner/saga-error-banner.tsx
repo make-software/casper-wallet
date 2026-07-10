@@ -16,7 +16,6 @@ const BannerContainer = styled(FlexColumn)`
   top: 0;
   left: 0;
   right: 0;
-  width: 360px;
   z-index: ${({ theme }) => theme.zIndex.tooltip};
 
   max-height: 100vh;
@@ -90,8 +89,8 @@ export const SagaErrorBanner = () => {
           </ErrorTextContainer>
           <DismissButton
             type="button"
-            aria-label={'dismiss'}
-            title={'dismiss'}
+            aria-label={t('Dismiss')}
+            title={t('Dismiss')}
             onClick={() => handleDismiss(error.id)}
           >
             <SvgIcon src="assets/icons/close.svg" size={16} />
