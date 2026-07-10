@@ -39,6 +39,7 @@ import {
   vaultReseted
 } from '../vault/actions';
 import { initKeys, initVault, recoverVault, resetVault } from './actions';
+import { errorToMessage } from './utils';
 
 export function* onboardingSagas() {
   yield takeLatest(resetVault.type, resetVaultSaga);
@@ -68,7 +69,9 @@ function* resetVaultSaga() {
     storage.local.clear();
   } catch (err) {
     console.error(err);
-    yield put(sagaError({ source: 'resetVaultSaga', message: String(err) }));
+    yield put(
+      sagaError({ source: 'resetVaultSaga', message: errorToMessage(err) })
+    );
   }
 }
 
@@ -101,7 +104,9 @@ function* initKeysSage(action: ReturnType<typeof initKeys>) {
     );
   } catch (err) {
     console.error(err);
-    yield put(sagaError({ source: 'initKeysSage', message: String(err) }));
+    yield put(
+      sagaError({ source: 'initKeysSage', message: errorToMessage(err) })
+    );
   }
 }
 
@@ -129,7 +134,9 @@ function* initVaultSaga(action: ReturnType<typeof initVault>) {
     disableOnboardingFlow();
   } catch (err) {
     console.error(err);
-    yield put(sagaError({ source: 'initVaultSaga', message: String(err) }));
+    yield put(
+      sagaError({ source: 'initVaultSaga', message: errorToMessage(err) })
+    );
   }
 }
 
@@ -147,6 +154,8 @@ function* recoverVaultSaga(action: ReturnType<typeof recoverVault>) {
     disableOnboardingFlow();
   } catch (err) {
     console.error(err);
-    yield put(sagaError({ source: 'recoverVaultSaga', message: String(err) }));
+    yield put(
+      sagaError({ source: 'recoverVaultSaga', message: errorToMessage(err) })
+    );
   }
 }

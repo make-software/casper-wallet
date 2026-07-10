@@ -79,6 +79,7 @@ import {
   startBackground,
   unlockVault
 } from './actions';
+import { errorToMessage } from './utils';
 
 export function* vaultSagas() {
   yield takeLatest(lockVault.type, lockVaultSaga);
@@ -146,7 +147,9 @@ export function* lockVaultSaga() {
     yield* sagaCall(clearAutoLockDeadline);
   } catch (err) {
     console.error(err);
-    yield put(sagaError({ source: 'lockVaultSaga', message: String(err) }));
+    yield put(
+      sagaError({ source: 'lockVaultSaga', message: errorToMessage(err) })
+    );
   }
 }
 
@@ -298,7 +301,9 @@ function* unlockVaultSaga(action: ReturnType<typeof unlockVault>) {
     }
   } catch (err) {
     console.error(err);
-    yield put(sagaError({ source: 'unlockVaultSaga', message: String(err) }));
+    yield put(
+      sagaError({ source: 'unlockVaultSaga', message: errorToMessage(err) })
+    );
   } finally {
     releaseAnchor();
   }
@@ -379,7 +384,7 @@ export function* timeoutCounterSaga(
   } catch (err) {
     console.error(err);
     yield put(
-      sagaError({ source: 'timeoutCounterSaga', message: String(err) })
+      sagaError({ source: 'timeoutCounterSaga', message: errorToMessage(err) })
     );
   }
 }
@@ -409,7 +414,9 @@ function* updateVaultCipher() {
     );
   } catch (err) {
     console.error(err);
-    yield put(sagaError({ source: 'updateVaultCipher', message: String(err) }));
+    yield put(
+      sagaError({ source: 'updateVaultCipher', message: errorToMessage(err) })
+    );
   } finally {
     releaseAnchor();
   }
@@ -463,7 +470,9 @@ function* createAccountSaga(action: ReturnType<typeof createAccount>) {
     }
   } catch (err) {
     console.error(err);
-    yield put(sagaError({ source: 'createAccountSaga', message: String(err) }));
+    yield put(
+      sagaError({ source: 'createAccountSaga', message: errorToMessage(err) })
+    );
   } finally {
     releaseAnchor();
   }

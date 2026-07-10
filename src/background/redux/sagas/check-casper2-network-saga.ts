@@ -11,6 +11,7 @@ import {
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
 import { unlockVault } from './actions';
+import { errorToMessage } from './utils';
 
 export function* watchCasper2NetworkSaga() {
   yield takeLatest(
@@ -38,7 +39,10 @@ function* checkCasper2NetworkSaga() {
   } catch (err) {
     console.error(err);
     yield put(
-      sagaError({ source: 'checkCasper2NetworkSaga', message: String(err) })
+      sagaError({
+        source: 'checkCasper2NetworkSaga',
+        message: errorToMessage(err)
+      })
     );
   }
 }
