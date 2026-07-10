@@ -140,17 +140,23 @@ describe('emitSdkEventToActiveTabsWithOrigin', () => {
     queryMock.mockResolvedValue([matchingTab, otherOriginTab]);
     sendMessageMock.mockResolvedValue(undefined);
 
-    await emitSdkEventToActiveTabsWithOrigin('https://foo.com', testAction);
+    const delivered = await emitSdkEventToActiveTabsWithOrigin(
+      'https://foo.com',
+      testAction
+    );
 
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
     expect(sendMessageMock).toHaveBeenCalledWith(1, testAction);
+    // Delivered to exactly the one matching tab.
+    expect(delivered).toBe(1);
   });
 
   it('does not query or send when origin is empty', async () => {
-    await emitSdkEventToActiveTabsWithOrigin('', testAction);
+    const delivered = await emitSdkEventToActiveTabsWithOrigin('', testAction);
 
     expect(queryMock).not.toHaveBeenCalled();
     expect(sendMessageMock).not.toHaveBeenCalled();
+    expect(delivered).toBe(0);
   });
 
   it('isolates a failing tab: second matching tab still receives its send and the function resolves', async () => {
@@ -164,9 +170,10 @@ describe('emitSdkEventToActiveTabsWithOrigin', () => {
       return undefined;
     });
 
+    // Only the second tab's send succeeded → count is 1, not 2.
     await expect(
       emitSdkEventToActiveTabsWithOrigin('https://foo.com', testAction)
-    ).resolves.toBeUndefined();
+    ).resolves.toBe(1);
 
     expect(sendMessageMock).toHaveBeenCalledWith(1, testAction);
     expect(sendMessageMock).toHaveBeenCalledWith(2, testAction);
@@ -181,7 +188,7 @@ describe('emitSdkEventToActiveTabsWithOrigin', () => {
 
     await expect(
       emitSdkEventToActiveTabsWithOrigin('https://foo.com', testAction)
-    ).resolves.toBeUndefined();
+    ).resolves.toBe(1);
 
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
     expect(sendMessageMock).toHaveBeenCalledWith(2, testAction);

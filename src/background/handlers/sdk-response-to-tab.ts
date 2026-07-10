@@ -30,14 +30,38 @@ function recoverDappOrigin(url: string | undefined): string | null {
   }
 }
 
+// Same-origin delivery fallback. Returns the number of tabs the response was
+// SUCCESSFULLY delivered to (0 when there is no recoverable origin, or when the
+// broadcast matched no active same-origin tab). Wrapping the emit isolates a
+// `tabs.query`-level rejection so the caller's error-surface dispatch still runs
+// and the handler never rejects back to the signature page.
+async function deliverViaOrigin(
+  origin: string | null,
+  action: SdkResponseToTabMessage['action']
+): Promise<number> {
+  if (!origin) {
+    return 0;
+  }
+  try {
+    return await emitSdkEventToActiveTabsWithOrigin(origin, action);
+  } catch {
+    // tabs.query / query-level failure → nothing delivered.
+    return 0;
+  }
+}
+
 // SECURITY: the dapp `action` is the SDK response and may carry secret material
 // (a `signatureHex` / `encryptedMessage` / signed payload). This surfaced error
 // must reference ONLY the tabId + a static reason — never the action or any
-// part of its payload.
-function deliveryFailedError(tabId: unknown) {
+// part of its payload. The message is parameterized on whether the same-origin
+// fallback actually delivered, so a support reader is not told the response was
+// recovered when it was in fact lost.
+function deliveryFailedError(tabId: unknown, fallbackDelivered: boolean) {
   return sagaError({
     source: 'sdk-response-to-tab',
-    message: `SDK response delivery to tab ${tabId} failed; used same-origin fallback`
+    message: fallbackDelivered
+      ? `SDK response delivery to tab ${tabId} failed; delivered via same-origin fallback`
+      : `SDK response delivery to tab ${tabId} failed; no same-origin fallback available — response not delivered`
   });
 }
 
@@ -96,18 +120,17 @@ export async function handleSdkResponseToTab(
   const validTab = Number.isInteger(tabId) && tabId >= 0;
 
   if (!validTab) {
-    // No usable tab. If we can recover the dapp origin, deliver via the
-    // same-origin fallback (broadcast to any active tab of that origin) and
-    // mark responded — we ARE delivering, so a later duplicate must dedupe.
-    // With no origin, nothing is delivered: do NOT mark responded (a valid
-    // retry must still deliver). Either way surface the non-fatal error.
-    if (origin) {
-      if (requestId != null) {
-        store.dispatch(windowRequestResponded({ requestId }));
-      }
-      await emitSdkEventToActiveTabsWithOrigin(origin, action);
+    // No usable tab. Attempt the same-origin fallback (broadcast to any active
+    // tab of the recovered dapp origin). Only mark responded when the fallback
+    // ACTUALLY delivered to at least one tab — we ARE delivering, so a later
+    // duplicate must dedupe. When nothing was delivered (no origin, or the
+    // broadcast matched zero tabs), do NOT mark responded: a valid retry must
+    // still be able to deliver. Either way surface the non-fatal error.
+    const delivered = await deliverViaOrigin(origin, action);
+    if (delivered > 0 && requestId != null) {
+      store.dispatch(windowRequestResponded({ requestId }));
     }
-    store.dispatch(deliveryFailedError(tabId));
+    store.dispatch(deliveryFailedError(tabId, delivered > 0));
     return { handled: true, response: undefined };
   }
 
@@ -129,12 +152,11 @@ export async function handleSdkResponseToTab(
     await tabs.sendMessage(tabId, action);
   } catch {
     // Tab gone / no listener → try the same-origin fallback (if we can recover
-    // the origin) and surface the non-fatal error. The optimistic mark above
-    // already deduped any retry.
-    if (origin) {
-      await emitSdkEventToActiveTabsWithOrigin(origin, action);
-    }
-    store.dispatch(deliveryFailedError(tabId));
+    // the origin) and surface the non-fatal error, choosing the message based
+    // on whether the fallback actually delivered. The optimistic mark above
+    // already deduped any retry (delivery failure is terminal by design).
+    const delivered = await deliverViaOrigin(origin, action);
+    store.dispatch(deliveryFailedError(tabId, delivered > 0));
   }
 
   return { handled: true, response: undefined };
