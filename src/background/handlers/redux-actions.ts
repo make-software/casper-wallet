@@ -106,7 +106,7 @@ import {
 } from '../redux/vault-cipher/actions';
 import { HandlerResult } from './types';
 
-const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
+export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
   [
     lockVault,
     unlockVault,
