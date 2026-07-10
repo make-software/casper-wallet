@@ -16,6 +16,9 @@ output
 build
 web-ext-artifacts
 
+# bundle-analyzer report (ANALYZE=true builds)
+analyzer-report
+
 # misc
 .DS_Store
 .env.local

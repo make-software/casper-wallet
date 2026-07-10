@@ -16,6 +16,7 @@
     "dev:build:manifest:v2:safari": "NODE_ENV=development BROWSER=safari HASH=$(git rev-parse HEAD) node utils/build.js",
     "dev:build:manifest:v3:chrome": "NODE_ENV=development BROWSER=chrome HASH=$(git rev-parse HEAD) node utils/build.js",
     "build:chrome": "rm -rf ./build/chrome && npm run build:manifest:v3:chrome",
+    "build:analyze": "ANALYZE=true npm run build:chrome",
     "package:chrome": "web-ext --no-config-discovery build -s ./build/chrome --overwrite-dest",
     "build:firefox": "rm -rf ./build/firefox && npm run build:manifest:v2:firefox",
     "package:firefox": "web-ext --no-config-discovery build -s ./build/firefox --overwrite-dest",
@@ -180,6 +181,7 @@
     "web-ext": "^10.4.0",
     "webextension-polyfill": "0.12.0",
     "webpack": "^5.108.1",
+    "webpack-bundle-analyzer": "^5.3.0",
     "webpack-dev-server": "^5.2.5",
     "xcode-build-webpack-plugin": "^1.0.2"
   }
