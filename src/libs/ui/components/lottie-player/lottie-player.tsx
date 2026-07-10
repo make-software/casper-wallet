@@ -1,4 +1,7 @@
-import lottie from 'lottie-web';
+// SVG-only light build: drops the canvas/html renderers and the eval/Function-based
+// expressions engine (dead under our `script-src 'self'` CSP), shrinking the bundle.
+// Our animations only ever use `renderer: 'svg'` and no expressions.
+import lottie from 'lottie-web/build/player/lottie_light';
 import React, { useEffect, useRef } from 'react';
 
 interface LottiePlayerProps {
