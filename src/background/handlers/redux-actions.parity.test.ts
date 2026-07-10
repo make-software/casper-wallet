@@ -124,7 +124,12 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     loginRetryLockoutTimeActions.loginRetryLockoutTimeReseted,
     // Background-only: `yield put` inside check-casper2-network-saga after
     // probing the node API version. Never dispatched from the UI.
-    settingsActions.casperNetworkApiVersionChanged
+    settingsActions.casperNetworkApiVersionChanged,
+    // Background-only: `yield put` from the saga catch sites (P1.2 saga-error
+    // channel) in vault/onboarding/network sagas. The UI reads it via
+    // selectSagaErrors and dispatches only dismissSagaError (which IS
+    // forwarded); sagaError itself is never dispatched from the UI.
+    appEventsActions.sagaError
   ].map(creator => creator.type)
 );
 

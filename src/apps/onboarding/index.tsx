@@ -17,6 +17,7 @@ import '@libs/i18n/i18n';
 import { ErrorBoundary } from '@libs/layout';
 import { newQueryClient } from '@libs/services/query-client';
 import { CspStyleSheetManager, GlobalStyle, lightTheme } from '@libs/ui';
+import { SagaErrorBanner } from '@libs/ui/components/saga-error-banner/saga-error-banner';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
@@ -40,6 +41,7 @@ const Tree = () => {
         <ThemeProvider theme={lightTheme}>
           <GlobalStyle />
           <ReduxProvider store={store}>
+            <SagaErrorBanner />
             <QueryClientProvider client={newQueryClient}>
               <ErrorBoundary>
                 <AppRouter />

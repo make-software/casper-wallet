@@ -1,4 +1,3 @@
-import { Player } from '@lottiefiles/react-lottie-player';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -15,6 +14,7 @@ import {
   VerticalSpaceContainer
 } from '@libs/layout';
 import { FormField, TextArea, Typography } from '@libs/ui/components';
+import { LottiePlayer } from '@libs/ui/components/lottie-player';
 
 interface ReviewWithLedgerProps {
   hash: string;
@@ -54,8 +54,7 @@ export const ReviewWithLedger = ({
         </FormField>
       </VerticalSpaceContainer>
       <CenteredFlexColumn>
-        <Player
-          renderer="svg"
+        <LottiePlayer
           autoplay
           loop
           src={isDarkMode ? dotsDarkModeAnimation : dotsLightModeAnimation}

@@ -1,5 +1,6 @@
 const webpack = require('webpack'),
   path = require('path'),
+  crypto = require('crypto'),
   fileSystem = require('fs-extra'),
   env = require('./utils/env'),
   pkg = require('./package.json'),
@@ -63,9 +64,25 @@ if (fileSystem.existsSync(secretsPath)) {
   alias['secrets'] = secretsPath;
 }
 
+// One nonce per build. Chrome-production style-src pins to it instead of
+// 'unsafe-inline'; the same value is wired to __webpack_nonce__ (style-loader)
+// and process.env.CSP_NONCE (styled-components' CspStyleSheetManager) below,
+// so the manifest CSP and the injected <style> tags always match.
+const CSP_NONCE = crypto.randomBytes(16).toString('base64');
+
 const getCSP = () => {
-  const csp =
-    "default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://onramp-api.cspr.click/api/ https://cspr-wallet-api.dev.make.services/ https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/ https://cspr-wallet-api-condor.dev.make.services/ https://cspr-wallet-api.stg.make.services/ https://api.casperwallet.io/ https://api.integration.casperwallet.io/ https://node.integration.cspr.cloud/";
+  // Chrome-production locks <style>/<link> ELEMENTS to the build nonce (style-src,
+  // via which style-src-elem falls back) so an injected stylesheet is blocked, while
+  // keeping inline style ATTRIBUTES / element.style writes allowed via style-src-attr.
+  // The latter is unavoidable: React applies every `style={{…}}` prop and lottie-web /
+  // react-loading-skeleton / react-tiny-popover mutate element.style at runtime, all of
+  // which the CSP treats as "applying inline style" — a nonce cannot cover them. Dev,
+  // Firefox and Safari keep the previous 'unsafe-inline' behaviour.
+  const styleDirectives =
+    isChrome && !isDev
+      ? `style-src 'self' 'nonce-${CSP_NONCE}'; style-src-attr 'unsafe-inline'`
+      : "style-src 'unsafe-inline'";
+  const csp = `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'self' 'wasm-unsafe-eval'; ${styleDirectives}; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://onramp-api.cspr.click/api/ https://cspr-wallet-api.dev.make.services/ https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/ https://cspr-wallet-api-condor.dev.make.services/ https://cspr-wallet-api.stg.make.services/ https://api.casperwallet.io/ https://api.integration.casperwallet.io/ https://node.integration.cspr.cloud/`;
 
   if (isFirefox) {
     return csp;
@@ -88,29 +105,38 @@ const options = {
   },
   mode: process.env.NODE_ENV || 'development',
   entry: {
-    popup: path.join(__dirname, 'src', 'apps', 'popup', 'index.tsx'),
-    importAccountWithFile: path.join(
-      __dirname,
-      'src',
-      'apps',
-      'import-account-with-file',
-      'index.tsx'
-    ),
-    connectToApp: path.join(
-      __dirname,
-      'src',
-      'apps',
-      'connect-to-app',
-      'index.tsx'
-    ),
-    signatureRequest: path.join(
-      __dirname,
-      'src',
-      'apps',
-      'signature-request',
-      'index.tsx'
-    ),
-    onboarding: path.join(__dirname, 'src', 'apps', 'onboarding', 'index.tsx'),
+    // The nonce-setter is prepended as an array entry, not imported from inside
+    // each entry file: webpack executes array-entry modules strictly in order
+    // before the rest of the entry's module graph, so __webpack_nonce__ is set
+    // before any CSS (style-loader/styled-components) is evaluated. A source-level
+    // import can't guarantee this — prettier's import-sort would order it after
+    // the css imports in some entries.
+    popup: [
+      path.join(__dirname, 'src', 'set-webpack-nonce.ts'),
+      path.join(__dirname, 'src', 'apps', 'popup', 'index.tsx')
+    ],
+    importAccountWithFile: [
+      path.join(__dirname, 'src', 'set-webpack-nonce.ts'),
+      path.join(
+        __dirname,
+        'src',
+        'apps',
+        'import-account-with-file',
+        'index.tsx'
+      )
+    ],
+    connectToApp: [
+      path.join(__dirname, 'src', 'set-webpack-nonce.ts'),
+      path.join(__dirname, 'src', 'apps', 'connect-to-app', 'index.tsx')
+    ],
+    signatureRequest: [
+      path.join(__dirname, 'src', 'set-webpack-nonce.ts'),
+      path.join(__dirname, 'src', 'apps', 'signature-request', 'index.tsx')
+    ],
+    onboarding: [
+      path.join(__dirname, 'src', 'set-webpack-nonce.ts'),
+      path.join(__dirname, 'src', 'apps', 'onboarding', 'index.tsx')
+    ],
     background: path.join(__dirname, 'src', 'background', 'index.ts'),
     contentScript: path.join(__dirname, 'src', 'content', 'index.ts'),
     sdk: path.join(__dirname, 'src', 'content', 'sdk.ts')
@@ -182,7 +208,8 @@ const options = {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
       'process.env.MOCK_STATE': JSON.stringify(process.env.MOCK_STATE),
       'process.env.BROWSER': JSON.stringify(process.env.BROWSER),
-      'process.env.TEST_ENV': JSON.stringify(process.env.TEST_ENV)
+      'process.env.TEST_ENV': JSON.stringify(process.env.TEST_ENV),
+      'process.env.CSP_NONCE': JSON.stringify(CSP_NONCE)
     }),
     // manifest file generation
     new CopyWebpackPlugin({

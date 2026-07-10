@@ -1,9 +1,11 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import { AppEventsState } from './types';
+import { AppEventsState, SagaError } from './types';
 
 const initialState: AppEventsState = {
-  dismissedEventIds: []
+  dismissedEventIds: [],
+  errors: [],
+  nextErrorId: 0
 };
 
 const slice = createSlice({
@@ -16,9 +18,40 @@ const slice = createSlice({
         ...new Set([...state.dismissedEventIds, action.payload])
       ]
     }),
-    resetAppEventsDismission: () => initialState
+    resetAppEventsDismission: () => initialState,
+    sagaError: (
+      state,
+      action: PayloadAction<{
+        source: string;
+        message: string;
+        code?: string;
+      }>
+    ) => {
+      const entry: SagaError = {
+        id: state.nextErrorId,
+        source: action.payload.source,
+        message: action.payload.message,
+        ...(action.payload.code !== undefined
+          ? { code: action.payload.code }
+          : {})
+      };
+      return {
+        ...state,
+        errors: [...state.errors, entry].slice(-10),
+        nextErrorId: state.nextErrorId + 1
+      };
+    },
+    dismissSagaError: (state, action: PayloadAction<number>) => ({
+      ...state,
+      errors: state.errors.filter(error => error.id !== action.payload)
+    })
   }
 });
 
-export const { dismissAppEvent, resetAppEventsDismission } = slice.actions;
+export const {
+  dismissAppEvent,
+  resetAppEventsDismission,
+  sagaError,
+  dismissSagaError
+} = slice.actions;
 export const reducer = slice.reducer;

@@ -8,6 +8,7 @@ import {
 } from '@background/redux/account-info/actions';
 import {
   dismissAppEvent,
+  dismissSagaError,
   resetAppEventsDismission
 } from '@background/redux/app-events/actions';
 import {
@@ -176,6 +177,7 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
     addWatchingAccount,
     dismissAppEvent,
     resetAppEventsDismission,
+    dismissSagaError,
     addWasmToTrusted,
     removeWasmFromTrusted,
     removeAllWasmFromTrustedOrigin,

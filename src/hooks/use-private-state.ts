@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+import { runtime } from 'webextension-polyfill';
 
+import { backgroundEvent } from '@background/background-events';
 import {
   PrivateState,
   fetchPrivateState
@@ -85,6 +87,21 @@ export function usePrivateState(): UsePrivateStateResult {
       mounted = false;
     };
   }, [fetchAttemptId]);
+
+  useEffect(() => {
+    function listener(message: unknown) {
+      if (backgroundEvent.privateStateUpdated.match(message)) {
+        setFetchAttemptId(id => id + 1);
+      }
+      return undefined;
+    }
+
+    runtime.onMessage.addListener(listener);
+
+    return () => {
+      runtime.onMessage.removeListener(listener);
+    };
+  }, []);
 
   const retry = useCallback(() => setFetchAttemptId(id => id + 1), []);
 

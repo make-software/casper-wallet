@@ -1,5 +1,6 @@
 import { backgroundEvent } from '@background/background-events';
 import { enableOnboardingFlow } from '@background/open-onboarding-flow';
+import { dismissSagaError } from '@background/redux/app-events/actions';
 import { MainStore } from '@background/redux/get-main-store';
 import { lockVault, resetVault } from '@background/redux/sagas/actions';
 import { accountRenamed } from '@background/redux/vault/actions';
@@ -51,6 +52,16 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
   it('another FORWARDED type (payload-carrying) → dispatched verbatim', async () => {
     const { store, dispatch } = makeStore();
     const action = accountRenamed({ name: 'a', newName: 'b' } as any);
+
+    const result = await handleReduxAction(action, store);
+
+    expect(dispatch).toHaveBeenCalledWith(action);
+    expect(result).toEqual({ handled: true, response: undefined });
+  });
+
+  it('dismissSagaError → forwarded to the store (dismiss button must work)', async () => {
+    const { store, dispatch } = makeStore();
+    const action = dismissSagaError(1);
 
     const result = await handleReduxAction(action, store);
 
