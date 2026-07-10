@@ -1,1 +1,6 @@
-export { dismissAppEvent, resetAppEventsDismission } from './reducer';
+export {
+  dismissAppEvent,
+  dismissSagaError,
+  resetAppEventsDismission,
+  sagaError
+} from './reducer';

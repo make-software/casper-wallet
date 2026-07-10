@@ -28,6 +28,7 @@ import {
   darkTheme,
   lightTheme
 } from '@libs/ui';
+import { SagaErrorBanner } from '@libs/ui/components/saga-error-banner/saga-error-banner';
 
 import { AppRouter } from './app-router';
 
@@ -69,6 +70,7 @@ const Tree = () => {
         <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
           <GlobalStyle />
           <ReduxProvider store={store}>
+            <SagaErrorBanner />
             <QueryClientProvider client={newQueryClient}>
               <ErrorBoundary>
                 <AppRouter />

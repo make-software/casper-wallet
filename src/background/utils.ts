@@ -3,6 +3,7 @@ import { Tabs, tabs } from 'webextension-polyfill';
 import { getUrlOrigin, hasHttpPrefix } from '@src/utils';
 
 import { SdkEvent } from '@content/sdk-event';
+import { SdkMethod } from '@content/sdk-method';
 
 export async function emitSdkEventToActiveTabs(
   callback: (tab: Tabs.Tab) => SdkEvent | undefined
@@ -33,17 +34,25 @@ export async function emitSdkEventToActiveTabs(
   );
 }
 
+// Returns the number of tabs the action was SUCCESSFULLY delivered to. The
+// same-origin delivery fallback (`handleSdkResponseToTab`) uses this count to
+// decide whether the response actually reached the dapp; the SDK-event callers
+// ignore the return value (backward-compatible).
 export async function emitSdkEventToActiveTabsWithOrigin(
   origin: string,
-  action: SdkEvent
-) {
+  // A method **response** may also be broadcast through here as a same-origin
+  // delivery fallback (see `handleSdkResponseToTab`), hence `SdkEvent | SdkMethod`.
+  action: SdkEvent | SdkMethod
+): Promise<number> {
   if (!origin) {
-    return;
+    return 0;
   }
 
   const tabsList = await tabs.query({
     active: true
   });
+
+  let delivered = 0;
 
   await Promise.all(
     tabsList.map(async tab => {
@@ -56,6 +65,7 @@ export async function emitSdkEventToActiveTabsWithOrigin(
         ) {
           try {
             await tabs.sendMessage(tab.id, action);
+            delivered += 1;
           } catch (error) {
             console.warn('Failed to send SDK event to tab: ' + tab.id, error);
           }
@@ -65,4 +75,6 @@ export async function emitSdkEventToActiveTabsWithOrigin(
       }
     })
   );
+
+  return delivered;
 }

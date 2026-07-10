@@ -3,6 +3,7 @@ import { call, put, select, takeLatest } from 'redux-saga/effects';
 
 import { REFERRER_URL } from '@src/constants';
 
+import { sagaError } from '@background/redux/app-events/actions';
 import {
   activeNetworkSettingChanged,
   casperNetworkApiVersionChanged
@@ -10,6 +11,7 @@ import {
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
 import { unlockVault } from './actions';
+import { errorToMessage } from './utils';
 
 export function* watchCasper2NetworkSaga() {
   yield takeLatest(
@@ -36,5 +38,11 @@ function* checkCasper2NetworkSaga() {
     yield put(casperNetworkApiVersionChanged(status.apiVersion));
   } catch (err) {
     console.error(err);
+    yield put(
+      sagaError({
+        source: 'checkCasper2NetworkSaga',
+        message: errorToMessage(err)
+      })
+    );
   }
 }

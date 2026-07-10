@@ -6,6 +6,7 @@ import {
   SDK_RESPONSE_TO_TAB,
   SdkResponseToTabMessage
 } from '@background/send-sdk-response-to-specific-tab';
+import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 
 import { sdkMethod } from '@content/sdk-method';
 
@@ -21,18 +22,46 @@ jest.mock('webextension-polyfill', () => ({
   }
 }));
 
+// The same-origin fallback delegates to this util; stub it so we can assert it
+// is (or isn't) invoked without touching real `tabs.query`. It now resolves to
+// the COUNT of tabs it successfully delivered to.
+jest.mock('@background/utils', () => ({
+  emitSdkEventToActiveTabsWithOrigin: jest.fn()
+}));
+
 const sendMessageMock = tabs.sendMessage as jest.MockedFunction<
   typeof tabs.sendMessage
 >;
 
+const emitToOriginMock =
+  emitSdkEventToActiveTabsWithOrigin as jest.MockedFunction<
+    typeof emitSdkEventToActiveTabsWithOrigin
+  >;
+
+const DAPP_ORIGIN = 'https://dapp.example';
+
 const REQUEST_ID = 'req-1';
 const TAB_ID = 7;
+
+// Message-text fragments the handler surfaces via `sagaError`, keyed on whether
+// the same-origin fallback actually delivered.
+const DELIVERED_MSG = 'delivered via same-origin fallback';
+const NOT_DELIVERED_MSG =
+  'no same-origin fallback available — response not delivered';
 
 // Trusted extension-UI sender (id matches runtime.id, url under the extension
 // origin) — passes `isTrustedUiSender`.
 const UI_SENDER = {
   id: 'ext-id',
   url: 'chrome-extension://ext-id/popup.html'
+} as Runtime.MessageSender;
+
+// Trusted UI sender whose page URL carries the dapp origin in its `?origin=`
+// query param — the mechanism the handler uses to recover the origin for the
+// same-origin fallback (no new state / message field is threaded).
+const UI_SENDER_WITH_ORIGIN = {
+  id: 'ext-id',
+  url: `chrome-extension://ext-id/signature-request.html?requestId=${REQUEST_ID}&origin=${DAPP_ORIGIN}&tabId=${TAB_ID}#/SignMessage`
 } as Runtime.MessageSender;
 
 // Build a fake store whose `requests` map carries the desired status for the
@@ -80,10 +109,20 @@ function makeMessage(tabId: number = TAB_ID): SdkResponseToTabMessage {
   };
 }
 
+// Find the single `sagaError` dispatch (source === 'sdk-response-to-tab').
+function findSagaError(dispatch: jest.Mock) {
+  return dispatch.mock.calls.find(
+    ([a]) => a?.payload?.source === 'sdk-response-to-tab'
+  )?.[0];
+}
+
 describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   beforeEach(() => {
     sendMessageMock.mockReset();
     sendMessageMock.mockResolvedValue(undefined);
+    emitToOriginMock.mockReset();
+    // Default: fallback delivers to one tab. Individual tests override with 0.
+    emitToOriginMock.mockResolvedValue(1);
   });
 
   it('fresh request (no prior status) → delivers to the tab AND marks responded', async () => {
@@ -130,7 +169,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     expect(result.handled).toBe(true);
   });
 
-  it('invalid tabId → no delivery, no throw', async () => {
+  it('invalid tabId, no origin → surfaces "not delivered" sagaError, no delivery, does not mark responded', async () => {
     const { store, dispatch } = makeStore(undefined);
 
     const result = await handleSdkResponseToTab(
@@ -139,9 +178,211 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
       store
     );
 
+    // No usable tab and no origin to fall back to: nothing is delivered and the
+    // request is NOT marked responded (a valid retry must still deliver).
     expect(sendMessageMock).not.toHaveBeenCalled();
-    expect(dispatch).not.toHaveBeenCalled();
+    expect(emitToOriginMock).not.toHaveBeenCalled();
+
+    // Exactly one dispatch: the non-fatal sagaError making the loss visible.
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    const dispatched = findSagaError(dispatch);
+    expect(dispatched).toBeDefined();
+    expect(dispatched.payload.source).toBe('sdk-response-to-tab');
+    // The message must state the response was NOT delivered.
+    expect(dispatched.payload.message).toContain(NOT_DELIVERED_MSG);
+    // No windowRequestResponded was dispatched.
+    expect(dispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ payload: { requestId: REQUEST_ID } })
+    );
+
+    // SECURITY: the surfaced error must not leak signature material.
+    expect(JSON.stringify(dispatched)).not.toContain('deadbeef');
+    expect(dispatched.payload.message).not.toContain('deadbeef');
+
     expect(result.handled).toBe(true);
+  });
+
+  it('invalid tabId, origin present, fallback delivers (1) → marks responded, "delivered" sagaError', async () => {
+    const { store, dispatch } = makeStore(undefined);
+    emitToOriginMock.mockResolvedValue(1);
+
+    const result = await handleSdkResponseToTab(
+      makeMessage(-1),
+      UI_SENDER_WITH_ORIGIN,
+      store
+    );
+
+    // No usable tab → no direct delivery, but the same-origin fallback fires.
+    expect(sendMessageMock).not.toHaveBeenCalled();
+    expect(emitToOriginMock).toHaveBeenCalledTimes(1);
+    expect(emitToOriginMock).toHaveBeenCalledWith(
+      DAPP_ORIGIN,
+      makeMessage(-1).action
+    );
+
+    // We DID deliver via the fallback → mark responded so a later duplicate is
+    // deduped, plus surface the "delivered" sagaError.
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ payload: { requestId: REQUEST_ID } })
+    );
+    const sagaError = findSagaError(dispatch);
+    expect(sagaError).toBeDefined();
+    expect(sagaError.payload.message).toContain(DELIVERED_MSG);
+    expect(JSON.stringify(sagaError)).not.toContain('deadbeef');
+
+    expect(result.handled).toBe(true);
+  });
+
+  it('invalid tabId, origin present, fallback delivers ZERO → does NOT mark responded, "not delivered" sagaError', async () => {
+    const { store, dispatch } = makeStore(undefined);
+    emitToOriginMock.mockResolvedValue(0);
+
+    const result = await handleSdkResponseToTab(
+      makeMessage(-1),
+      UI_SENDER_WITH_ORIGIN,
+      store
+    );
+
+    // Fallback was attempted but matched zero tabs → nothing delivered.
+    expect(emitToOriginMock).toHaveBeenCalledTimes(1);
+
+    // A legitimate retry must still deliver → do NOT mark responded.
+    expect(dispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ payload: { requestId: REQUEST_ID } })
+    );
+    const sagaError = findSagaError(dispatch);
+    expect(sagaError).toBeDefined();
+    expect(sagaError.payload.message).toContain(NOT_DELIVERED_MSG);
+    expect(JSON.stringify(sagaError)).not.toContain('deadbeef');
+
+    expect(result.handled).toBe(true);
+  });
+
+  it('valid tabId, delivery rejects, origin present, fallback delivers (1) → optimistic responded + "delivered" sagaError', async () => {
+    const { store, dispatch } = makeStore(undefined);
+    sendMessageMock.mockRejectedValue(new Error('no listener / tab gone'));
+    emitToOriginMock.mockResolvedValue(1);
+
+    const result = await handleSdkResponseToTab(
+      makeMessage(),
+      UI_SENDER_WITH_ORIGIN,
+      store
+    );
+
+    // Direct delivery was attempted (and rejected).
+    expect(sendMessageMock).toHaveBeenCalledTimes(1);
+    expect(sendMessageMock).toHaveBeenCalledWith(TAB_ID, makeMessage().action);
+
+    // Fallback broadcast to the same-origin active tab.
+    expect(emitToOriginMock).toHaveBeenCalledTimes(1);
+    expect(emitToOriginMock).toHaveBeenCalledWith(
+      DAPP_ORIGIN,
+      makeMessage().action
+    );
+
+    // Optimistic mark happened BEFORE the await (atomic dedupe contract).
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ payload: { requestId: REQUEST_ID } })
+    );
+    const sagaError = findSagaError(dispatch);
+    expect(sagaError).toBeDefined();
+    expect(sagaError.payload.message).toContain(DELIVERED_MSG);
+
+    // SECURITY: no signature material in the surfaced error.
+    expect(JSON.stringify(sagaError)).not.toContain('deadbeef');
+    expect(sagaError.payload.message).not.toContain('deadbeef');
+
+    expect(result.handled).toBe(true);
+  });
+
+  it('valid tabId, delivery rejects, origin present, fallback delivers ZERO → optimistic responded + "not delivered" sagaError', async () => {
+    const { store, dispatch } = makeStore(undefined);
+    sendMessageMock.mockRejectedValue(new Error('no listener / tab gone'));
+    emitToOriginMock.mockResolvedValue(0);
+
+    const result = await handleSdkResponseToTab(
+      makeMessage(),
+      UI_SENDER_WITH_ORIGIN,
+      store
+    );
+
+    expect(sendMessageMock).toHaveBeenCalledTimes(1);
+    expect(emitToOriginMock).toHaveBeenCalledTimes(1);
+
+    // The optimistic mark is load-bearing: still dispatched before the await.
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ payload: { requestId: REQUEST_ID } })
+    );
+    const sagaError = findSagaError(dispatch);
+    expect(sagaError).toBeDefined();
+    expect(sagaError.payload.message).toContain(NOT_DELIVERED_MSG);
+    expect(JSON.stringify(sagaError)).not.toContain('deadbeef');
+
+    expect(result.handled).toBe(true);
+  });
+
+  it('valid tabId, delivery rejects, sender has NO origin → "not delivered" sagaError but no fallback', async () => {
+    const { store, dispatch } = makeStore(undefined);
+    sendMessageMock.mockRejectedValue(new Error('no listener / tab gone'));
+
+    const result = await handleSdkResponseToTab(
+      makeMessage(),
+      UI_SENDER,
+      store
+    );
+
+    expect(sendMessageMock).toHaveBeenCalledTimes(1);
+    // No origin recoverable → no fallback broadcast.
+    expect(emitToOriginMock).not.toHaveBeenCalled();
+
+    const sagaError = findSagaError(dispatch);
+    expect(sagaError).toBeDefined();
+    expect(sagaError.payload.message).toContain(NOT_DELIVERED_MSG);
+
+    expect(result.handled).toBe(true);
+  });
+
+  it('fallback emit THROWS (valid tab path) → handler still resolves, "not delivered" sagaError, does not reject', async () => {
+    const { store, dispatch } = makeStore(undefined);
+    sendMessageMock.mockRejectedValue(new Error('no listener / tab gone'));
+    emitToOriginMock.mockRejectedValue(new Error('tabs.query blew up'));
+
+    const result = await handleSdkResponseToTab(
+      makeMessage(),
+      UI_SENDER_WITH_ORIGIN,
+      store
+    );
+
+    // The emit rejection is swallowed → the error-surface dispatch still runs.
+    expect(emitToOriginMock).toHaveBeenCalledTimes(1);
+    const sagaError = findSagaError(dispatch);
+    expect(sagaError).toBeDefined();
+    expect(sagaError.payload.message).toContain(NOT_DELIVERED_MSG);
+    expect(JSON.stringify(sagaError)).not.toContain('deadbeef');
+
+    expect(result).toEqual({ handled: true, response: undefined });
+  });
+
+  it('fallback emit THROWS (invalid tab path) → handler still resolves, no responded, "not delivered" sagaError', async () => {
+    const { store, dispatch } = makeStore(undefined);
+    emitToOriginMock.mockRejectedValue(new Error('tabs.query blew up'));
+
+    const result = await handleSdkResponseToTab(
+      makeMessage(-1),
+      UI_SENDER_WITH_ORIGIN,
+      store
+    );
+
+    expect(emitToOriginMock).toHaveBeenCalledTimes(1);
+    // Nothing delivered → NOT marked responded.
+    expect(dispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ payload: { requestId: REQUEST_ID } })
+    );
+    const sagaError = findSagaError(dispatch);
+    expect(sagaError).toBeDefined();
+    expect(sagaError.payload.message).toContain(NOT_DELIVERED_MSG);
+
+    expect(result).toEqual({ handled: true, response: undefined });
   });
 
   it('atomic dedupe: a second response arriving while the first send is still in-flight is dropped', async () => {

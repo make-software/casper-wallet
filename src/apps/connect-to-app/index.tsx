@@ -28,6 +28,7 @@ import {
   darkTheme,
   lightTheme
 } from '@libs/ui';
+import { SagaErrorBanner } from '@libs/ui/components/saga-error-banner/saga-error-banner';
 
 const Tree = () => {
   const [state, setState] = useState<PopupState | null>(null);
@@ -67,6 +68,7 @@ const Tree = () => {
         <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
           <GlobalStyle />
           <ReduxProvider store={store}>
+            <SagaErrorBanner />
             <QueryClientProvider client={newQueryClient}>
               <ErrorBoundary>
                 <AppRouter />
