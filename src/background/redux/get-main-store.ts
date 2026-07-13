@@ -6,6 +6,7 @@ import { privateStateChanged } from '@background/private-state-broadcast';
 import { AppEventsState } from '@background/redux/app-events/types';
 import { ContactsState } from '@background/redux/contacts/types';
 import { createStore } from '@background/redux/index';
+import { withDerivedFlag } from '@background/redux/keys/reducer';
 import { KeysState } from '@background/redux/keys/types';
 import { LoginRetryCountState } from '@background/redux/login-retry-count/reducer';
 import { LoginRetryLockoutTimeState } from '@background/redux/login-retry-lockout-time/types';
@@ -17,6 +18,11 @@ import { RootState } from '@background/redux/store-types';
 import { TrustedWasmState } from '@background/redux/trusted-wasm/types';
 import { PopupState } from '@background/redux/types';
 
+// `storage.local` key names below are immutable and append-only: renaming or
+// repurposing one strands/drops the persisted data under the old name on
+// upgrade (VAULT_CIPHER_KEY is the worst case — it bricks existing vaults).
+// Add a new key for new data; never rename or reuse an existing one. Full
+// inventory, secrecy, and rationale: docs/architecture/storage-keys.md
 export const VAULT_CIPHER_KEY = 'zazXu8w9GyCtxZ';
 export const KEYS_KEY = '2yNVAEQJB5rxMg';
 export const LOGIN_RETRY_KEY = '7ZVdMbk9yD8WGZ';
@@ -38,6 +44,7 @@ export const TRUSTED_WASM = 'k1uC4wqkwCMwxL';
 // IMPORTANT: once shipped, these key strings are immutable. Existing installs
 // persist deadlines under exactly these strings; renaming them would strand the
 // old entries and break resume-after-restart for already-locked-out users.
+// See docs/architecture/storage-keys.md for the full key inventory.
 export const LOGIN_RETRY_LOCKOUT_DEADLINE_KEY = 'q9Tf3Lm4pRxVne';
 export const AUTO_LOCK_DEADLINE_KEY = 'r3Wj7Nc8vBhQyD';
 
@@ -129,13 +136,10 @@ export async function getExistingMainStoreSingletonOrInit() {
       } else {
         storeSingleton = createStore({
           vaultCipher,
-          keys: keys && {
-            ...keys,
-            keysDoesExist:
-              keys.passwordHash != null &&
-              keys.passwordSaltHash != null &&
-              keys.keyDerivationSaltHash != null
-          },
+          // Recompute keysDoesExist from the hashes via the SAME derivation the
+          // reducer uses, so a stale/poisoned persisted flag can't survive a
+          // restart. Single source of truth — see keys/reducer withDerivedFlag.
+          keys: keys && withDerivedFlag(keys),
           loginRetryCount,
           loginRetryLockoutTime,
           lastActivityTime,

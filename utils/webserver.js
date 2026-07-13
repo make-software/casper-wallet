@@ -60,6 +60,13 @@ const server = new WebpackDevServer(
   {
     hot: false, // Probably can be improved. Was added to prevent infinite reloading after changes
     liveReload: false, // Probably can be improved. Was added to prevent infinite reloading after changes
+    // DEP-99/WALLET-1343: evaluated extension auto-reload-on-rebuild (webpack-ext-reloader /
+    // a custom chrome.runtime.reload() signal) and cut it — it either re-enables the exact
+    // infinite-reload failure mode the two flags above guard against, or (webpack-ext-reloader)
+    // pulls in 5+ extra deps (lodash, ws, json5, webpack-sources, useragent) and forces
+    // background/contentScript into a hot-reload entry list they're deliberately excluded from.
+    // Not cheap/clean per plan Step 2 — deferred, not implemented. Reload the extension manually
+    // from chrome://extensions (or about:debugging) after a rebuild.
     client: {
       overlay: false
     },

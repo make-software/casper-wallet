@@ -34,22 +34,24 @@ export async function handleBringWeb3(
     const isLocked = selectVaultIsLocked(store.getState());
 
     if (isLocked) {
-      windows.getCurrent().then(currentWindow => {
-        const windowWidth = currentWindow.width ?? 0;
-        const xOffset = currentWindow.left ?? 0;
-        const yOffset = currentWindow.top ?? 0;
-        const popupWidth = 360;
-        const popupHeight = 700;
+      // Awaited (not fire-and-forget): a rejection from getCurrent/create then
+      // propagates to the message router instead of becoming an unhandled
+      // rejection, and the handler resolves only once the popup is opened.
+      const currentWindow = await windows.getCurrent();
+      const windowWidth = currentWindow.width ?? 0;
+      const xOffset = currentWindow.left ?? 0;
+      const yOffset = currentWindow.top ?? 0;
+      const popupWidth = 360;
+      const popupHeight = 700;
 
-        windows.create({
-          url: 'popup.html#/bring-web3-unlock',
-          type: 'popup',
-          height: popupHeight,
-          width: popupWidth,
-          left: windowWidth + xOffset - popupWidth,
-          top: yOffset,
-          focused: true
-        });
+      await windows.create({
+        url: 'popup.html#/bring-web3-unlock',
+        type: 'popup',
+        height: popupHeight,
+        width: popupWidth,
+        left: windowWidth + xOffset - popupWidth,
+        top: yOffset,
+        focused: true
       });
     } else {
       emitSdkEventToActiveTabs(tab => {

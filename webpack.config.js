@@ -403,4 +403,21 @@ if (isDev) {
   };
 }
 
+// Bundle size report — strictly opt-in, zero footprint unless ANALYZE=true.
+// `npm run build:analyze` sets it; never enabled by normal build/dev/start scripts.
+if (process.env.ANALYZE === 'true') {
+  const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+  options.plugins.push(
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'static',
+      openAnalyzer: false,
+      reportFilename: path.resolve(
+        __dirname,
+        'analyzer-report',
+        `${process.env.BROWSER || 'chrome'}.html`
+      )
+    })
+  );
+}
+
 module.exports = options;

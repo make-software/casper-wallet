@@ -30,7 +30,7 @@ import {
   ratedInStoreChanged,
   resetRateApp
 } from '@background/redux/rate-app/actions';
-import { RootAction } from '@background/redux/store-types';
+import { ReduxAction } from '@background/redux/redux-action';
 import {
   addWasmToTrusted,
   removeAllWasmFromTrustedOrigin,
@@ -107,7 +107,7 @@ import {
 } from '../redux/vault-cipher/actions';
 import { HandlerResult } from './types';
 
-const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
+export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
   [
     lockVault,
     unlockVault,
@@ -191,13 +191,13 @@ export async function handleReduxAction(
   store: MainStore
 ): Promise<HandlerResult> {
   if (action.type === resetVault.type) {
-    store.dispatch(action as unknown as RootAction);
+    store.dispatch(action as unknown as ReduxAction);
     await enableOnboardingFlow();
     return { handled: true, response: undefined };
   }
 
   if (FORWARDED_ACTION_TYPES.has(action.type)) {
-    store.dispatch(action as unknown as RootAction);
+    store.dispatch(action as unknown as ReduxAction);
     return { handled: true, response: undefined };
   }
 

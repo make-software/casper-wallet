@@ -14,9 +14,6 @@ export const backgroundEvent = {
 export type BackgroundEvent = ReturnType<
   (typeof backgroundEvent)[keyof typeof backgroundEvent]
 >;
-export type popupStateUpdated = ReturnType<
-  typeof backgroundEvent.popupStateUpdated
->;
 
 export function isBackgroundEvent(action?: {
   type?: unknown;
