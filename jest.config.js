@@ -27,9 +27,11 @@ module.exports = {
   // Coverage universe (DEP-16 → DEP-99/P8.2): reducers keep the global 100%
   // gate; the background message handlers (the runtime security boundary) and
   // the redux sagas are now enforced too, at realistic per-directory floors set
-  // to the coverage actually achieved (see coverageThreshold below). Jest
-  // matches each file to its LONGEST path key, so reducers stay on `global` 100
-  // while handlers/sagas use their own overrides.
+  // to the coverage actually achieved (see coverageThreshold below). A file
+  // matched by a path-specific threshold group is checked against it and
+  // dropped from `global`; since reducers live under neither `handlers/` nor
+  // `sagas/`, they stay on the `global` 100 gate while handlers/sagas are held
+  // to their own overrides.
   collectCoverageFrom: [
     'src/background/redux/**/reducer.ts',
     'src/background/handlers/**/*.ts',

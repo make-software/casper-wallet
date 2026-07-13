@@ -61,6 +61,10 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
+// NOTE: characterization of the CURRENT (known-vulnerable) behavior, not an
+// endorsement. `getActivePublicKey` discloses the active account's public key
+// with no vault-lock check and no dapp-connection check — the open P0.6 finding.
+// When P0.6 is fixed this assertion must FLIP (gated/withheld), not be restored.
 describe('handleBringWeb3 — getActivePublicKey', () => {
   it("returns the active account's public key", async () => {
     selectActiveAccountMock.mockReturnValue({ publicKey: 'PK-abc' } as any);
@@ -79,6 +83,9 @@ describe('handleBringWeb3 — getActivePublicKey', () => {
   });
 });
 
+// NOTE: the locked branch pins the P0.6 forced-popup primitive — any dapp can
+// trigger an unsolicited extension popup with no connection check. Characterized
+// here as current behavior; when P0.6 is closed these expectations must change.
 describe('handleBringWeb3 — promptLoginRequest', () => {
   it('when locked → opens the bring-web3 unlock popup positioned off the current window', async () => {
     selectIsLockedMock.mockReturnValue(true);
@@ -92,10 +99,6 @@ describe('handleBringWeb3 — promptLoginRequest', () => {
       bringWeb3Events.promptLoginRequest(),
       store
     );
-
-    // let the getCurrent().then(...) microtask settle
-    await Promise.resolve();
-    await Promise.resolve();
 
     expect(createWindowMock).toHaveBeenCalledTimes(1);
     expect(createWindowMock).toHaveBeenCalledWith(
