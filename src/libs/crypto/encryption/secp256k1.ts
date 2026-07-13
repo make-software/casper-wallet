@@ -123,7 +123,7 @@ function randomBytes(len: number): Uint8Array {
   return out;
 }
 
-export async function encrypt(
+async function encrypt(
   publicKeyHex: string,
   message: string
 ): Promise<Uint8Array> {
@@ -158,7 +158,7 @@ export async function encrypt(
   );
 }
 
-export async function decryptWithScalar(
+async function decryptWithScalar(
   scalar32: Uint8Array,
   encryptedBytes: Uint8Array
 ): Promise<string> {
@@ -176,7 +176,7 @@ export async function decryptWithScalar(
   return dec.decode(new Uint8Array(pt));
 }
 
-export async function decryptWithBase64PrivateKey(
+async function decryptWithBase64PrivateKey(
   privateKeyBase64: string,
   encryptedBytes: Uint8Array
 ): Promise<string> {

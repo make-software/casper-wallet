@@ -50,8 +50,8 @@ const StyledFlexBox = styled('div')<FlexBoxProps>(
   })
 );
 
-export const FlexBox = forwardRef<HTMLDivElement, FlexBoxProps>(
-  (props, ref) => <StyledFlexBox ref={ref} {...props} />
-);
+const FlexBox = forwardRef<HTMLDivElement, FlexBoxProps>((props, ref) => (
+  <StyledFlexBox ref={ref} {...props} />
+));
 
 export default FlexBox;

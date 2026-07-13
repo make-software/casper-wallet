@@ -32,5 +32,3 @@ i18n
     keySeparator: false as any,
     nsSeparator: false as any
   });
-
-export default i18n;

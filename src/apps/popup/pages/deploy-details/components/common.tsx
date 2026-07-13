@@ -30,7 +30,7 @@ const AlignedFlexRowContainer = styled(AlignedFlexRow)`
   flex-wrap: wrap;
 `;
 
-export const NftIndexContainer = styled.div`
+const NftIndexContainer = styled.div`
   padding: 0 6px;
   background: ${({ theme }) => theme.color.backgroundSecondary};
   max-width: 296px;

@@ -16,10 +16,9 @@ export type ContentColor =
   | 'brandRed'
   | 'black';
 
-export type BackgroundColor =
-  'inherit' | 'backgroundPrimary' | 'backgroundSecondary';
+type BackgroundColor = 'inherit' | 'backgroundPrimary' | 'backgroundSecondary';
 
-export type FillColor =
+type FillColor =
   | 'inherit'
   | 'fillPrimary'
   | 'fillPrimaryHover'

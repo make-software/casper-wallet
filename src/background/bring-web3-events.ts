@@ -11,7 +11,3 @@ export const bringWeb3Events = {
     'GET_THEME_RESPONSE'
   )
 };
-
-export type BringWeb3Events = ReturnType<
-  (typeof bringWeb3Events)[keyof typeof bringWeb3Events]
->;

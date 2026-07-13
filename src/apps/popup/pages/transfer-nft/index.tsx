@@ -364,6 +364,7 @@ export const TransferNftPage = () => {
           onClick={() => {
             const { paymentAmount } = getValues();
 
+            // nosemgrep: javascript.react.correctness.hooks.set-state-no-op.calling-set-state-on-current-state — local var holds the form value, not the state value; names just coincide
             setPaymentAmount(paymentAmount);
             setTransferNFTStep(TransferNFTSteps.Recipient);
           }}

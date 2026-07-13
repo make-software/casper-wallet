@@ -47,7 +47,7 @@ const Container: React.FC<PropsWithChildren> = ({ children }) => {
   );
 };
 
-export const getActionTitle = (signatureRequest: ITxSignatureRequest) => {
+const getActionTitle = (signatureRequest: ITxSignatureRequest) => {
   const action = signatureRequest.action;
 
   if (isTxSignatureRequestNativeCsprAction(action)) {

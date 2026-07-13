@@ -29,7 +29,7 @@ export class LedgerError extends Error {
   }
 }
 
-export class Ledger {
+class Ledger {
   cachedAccounts: LedgerAccount[] = [];
 
   #transport: Transport | null = null;

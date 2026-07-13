@@ -75,12 +75,6 @@ export const isValidPublicKey = (
   }
 };
 
-export const notEmpty = <TValue>(
-  value: TValue | null | undefined
-): value is TValue => {
-  return !(value === null || value === undefined);
-};
-
 const validHashRegExp = new RegExp('^([0-9A-Fa-f]){64}$');
 
 export const isValidAccountHash = (
@@ -148,9 +142,9 @@ export const getImageProxyUrl = (
   return `https://image-proxy-cdn.make.services/${width},fit,ttl${ttl}/${url}`;
 };
 
-export const RETINA_SCALE = 2;
-export const IMAGE_WIDTH = 376;
-export const CACHE_TTL = '2592000';
+const RETINA_SCALE = 2;
+const IMAGE_WIDTH = 376;
+const CACHE_TTL = '2592000';
 
 // TODO: use isKeysEqual form casper wallet core
 export const isEqualCaseInsensitive = (key1: string, key2: string) => {

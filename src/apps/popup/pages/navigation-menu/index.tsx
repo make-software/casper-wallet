@@ -388,6 +388,7 @@ export function NavigationMenuPageContent() {
       disabled={groupItem.disabled}
       key={groupLabel + groupItem.id}
       as={groupItem.href ? Link : 'div'}
+      // nosemgrep: typescript.react.security.audit.react-href-var.react-href-var — href comes from the static menu config above (constants), never from user input
       href={groupItem.href ? groupItem.href : undefined}
       target={groupItem.href ? '_blank' : undefined}
       onClick={groupItem.disabled ? undefined : groupItem.handleOnClick}

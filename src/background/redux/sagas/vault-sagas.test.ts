@@ -54,10 +54,9 @@ import {
   vaultSagas
 } from './vault-sagas';
 
-// Stub the storage-key module so importing it does not drag in the Redux store
-// (get-main-store -> redux/index -> @redux-devtools/remote -> nanoid ESM, which
-// jest cannot parse). The literals below MUST stay in lockstep with the real
-// keys in get-main-store.ts — they are immutable once shipped.
+// Stub the storage-key module so importing it does not drag in the Redux
+// store. The literals below MUST stay in lockstep with the real keys in
+// get-main-store.ts — they are immutable once shipped.
 jest.mock('@background/redux/get-main-store', () => ({
   LOGIN_RETRY_LOCKOUT_DEADLINE_KEY: 'q9Tf3Lm4pRxVne',
   AUTO_LOCK_DEADLINE_KEY: 'r3Wj7Nc8vBhQyD'

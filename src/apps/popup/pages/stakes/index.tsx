@@ -417,6 +417,7 @@ export const StakesPage = () => {
             const { validatorPublicKey } = getValuesValidatorForm();
 
             setStakeStep(StakeSteps.Amount);
+            // nosemgrep: javascript.react.correctness.hooks.set-state-no-op.calling-set-state-on-current-state — local var holds the form value, not the state value; names just coincide
             setValidatorPublicKey(validatorPublicKey);
           }}
         >

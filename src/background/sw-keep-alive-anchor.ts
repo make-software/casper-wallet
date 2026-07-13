@@ -5,6 +5,8 @@ import { isChromeBuild } from '@src/utils';
 /**
  * Heartbeat period for the service-worker anchor. Must stay comfortably under
  * Chrome's 30s service-worker idle deadline.
+ *
+ * @public consumed by the test via jest.requireActual, which knip can't trace
  */
 export const ANCHOR_HEARTBEAT_INTERVAL = 20_000;
 

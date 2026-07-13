@@ -1,0 +1,298 @@
+# Casper Wallet (browser extension) — custom Semgrep rules
+#
+# Encodes project-specific conventions from CLAUDE.md and .claude/docs into
+# automated checks. Run alongside registry rule packs (see .semgrep/README.md
+# for the full command).
+#
+# Rule ID naming: cw-<category>-<short-description>
+# Severity: ERROR for correctness/security violations, WARNING for style drift.
+
+rules:
+  # ============================================================================
+  # CLAUDE.md — Critical Invariant: only the background script mutates the
+  # Redux store. Frontend apps receive read-only replicas and send actions via
+  # runtime.sendMessage() (dispatchToMainStore). Importing the store singleton
+  # outside src/background/ breaks that boundary.
+  # ============================================================================
+  - id: cw-store-singleton-outside-background
+    message: >
+      getExistingMainStoreSingletonOrInit must only be used inside
+      src/background/. Frontend apps receive read-only state replicas via
+      backgroundEvent.popupStateUpdated() and dispatch actions with
+      dispatchToMainStore() (runtime.sendMessage). See CLAUDE.md →
+      Critical Invariant and .claude/docs/architecture.md.
+    severity: ERROR
+    languages: [typescript, javascript]
+    pattern-either:
+      - pattern: |
+          import { ..., getExistingMainStoreSingletonOrInit, ... } from '$MODULE'
+      - pattern: getExistingMainStoreSingletonOrInit(...)
+    paths:
+      exclude:
+        - 'src/background/**'
+
+  # ============================================================================
+  # Same invariant, storage layer: state persistence via browser.storage.local
+  # is owned by the background script (get-main-store.ts). Frontend apps must
+  # not read or write extension storage directly.
+  # ============================================================================
+  - id: cw-storage-local-outside-background
+    message: >
+      Direct browser storage access outside src/background/. State persistence
+      (encrypted vault, keys, settings) is owned by the background script;
+      frontend apps must consume state replicas instead. If this usage is
+      intentional and does not touch persisted state, add a
+      // nosemgrep: cw-storage-local-outside-background comment with justification.
+    severity: WARNING
+    languages: [typescript, javascript]
+    pattern-either:
+      - pattern: storage.local.get(...)
+      - pattern: storage.local.set(...)
+      - pattern: storage.local.remove(...)
+      - pattern: browser.storage.local.get(...)
+      - pattern: browser.storage.local.set(...)
+      - pattern: browser.storage.local.remove(...)
+      - pattern: chrome.storage.local.get(...)
+      - pattern: chrome.storage.local.set(...)
+      - pattern: chrome.storage.local.remove(...)
+    paths:
+      exclude:
+        - 'src/background/**'
+        - '**/*.test.ts'
+        - '**/*.test.tsx'
+
+  # ============================================================================
+  # Async side effects use Redux-Saga (src/background/redux/sagas/), not
+  # Redux Thunk. Detect accidental imports of redux-thunk.
+  # ============================================================================
+  - id: cw-redux-forbid-thunk
+    message: >
+      redux-thunk / createAsyncThunk are not used in this project.
+      Async side effects must use Redux-Saga (src/background/redux/sagas/).
+    severity: ERROR
+    languages: [typescript, javascript]
+    pattern-either:
+      - pattern: |
+          import $X from 'redux-thunk'
+      - pattern: |
+          import { ... } from 'redux-thunk'
+      - pattern: |
+          import { ..., createAsyncThunk, ... } from '@reduxjs/toolkit'
+      - pattern: createAsyncThunk(...)
+
+  # ============================================================================
+  # Logging — private keys / secrets / vault content must never be logged.
+  # Regex-based heuristic: flags console.* calls whose argument list mentions
+  # a sensitive identifier. Catches member access (obj.privateKey), bare
+  # references (privateKey), shorthand objects ({ privateKey }), and template
+  # literals (`key: ${privateKey}`).
+  # ============================================================================
+  - id: cw-logging-secrets
+    message: >
+      Potentially logging sensitive data (private key / secret / vault /
+      secret phrase / mnemonic / password / passphrase). Remove the log or
+      redact the value. Crypto wallets must never write key material to
+      console, crash reports, or analytics.
+    severity: ERROR
+    languages: [typescript, javascript]
+    pattern-regex: '\b(console\.(log|warn|error|info|debug))\s*\([^)]*\b(privateKey|secretKey|secretPhrase|mnemonic|seed|vault|password|passphrase|recoveryPhrase)\b'
+    paths:
+      exclude:
+        - '**/*.test.ts'
+        - '**/*.test.tsx'
+        - 'src/fixtures/**'
+
+  # ============================================================================
+  # Dangerous eval family — categorically forbidden in a crypto wallet, and
+  # blocked by the extension CSP in production anyway (see webpack.config.js).
+  # ============================================================================
+  - id: cw-no-eval
+    message: >
+      eval() and Function() constructor are forbidden. They enable arbitrary
+      code execution and violate the extension Content Security Policy.
+    severity: ERROR
+    languages: [typescript, javascript]
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+
+  # ============================================================================
+  # Insecure randomness for crypto — Math.random must never be used for keys,
+  # nonces, IDs used in security contexts. Scoped to the crypto library.
+  # ============================================================================
+  - id: cw-no-math-random-for-crypto
+    message: >
+      Math.random() is not cryptographically secure. Use crypto.getRandomValues
+      (or the CSPRNG helpers already used in @libs/crypto) for any
+      security-sensitive randomness (keys, nonces, challenges, session IDs).
+    severity: WARNING
+    languages: [typescript, javascript]
+    pattern: Math.random()
+    paths:
+      include:
+        - 'src/libs/crypto/**'
+        - 'src/background/redux/sagas/**'
+      exclude:
+        - '**/*.test.ts'
+        - '**/*.test.tsx'
+
+  # ============================================================================
+  # Hardcoded secrets heuristic — common token/key prefixes in source.
+  # ============================================================================
+  - id: cw-no-hardcoded-secrets
+    message: >
+      Possible hardcoded secret or API key. Move to environment variables or
+      a secure config loader. Never commit credentials to the repository.
+    severity: ERROR
+    languages: [typescript, javascript]
+    # (?!/) excludes route-path constants like ChangePassword = '/change-password'
+    pattern-regex: '(?i)(api[_-]?key|secret|token|password|private[_-]?key)\s*[:=]\s*["''](?!/)[A-Za-z0-9+/=_-]{16,}["'']'
+    paths:
+      exclude:
+        - '**/*.test.ts'
+        - '**/*.test.tsx'
+        - 'src/fixtures/**'
+        - '**/*.md'
+        - '**/*.json'
+
+  # ============================================================================
+  # HTTPS-only API communications. Detect plain http:// in URL literals.
+  # Allowlist: localhost and loopback (Redux DevTools ports 8000/8001, dev
+  # servers), plus the W3C/xmlns namespace URLs that appear in SVG handling.
+  # ============================================================================
+  - id: cw-no-plain-http
+    message: >
+      Plain HTTP URL detected. Use HTTPS for all production API endpoints.
+    severity: WARNING
+    languages: [typescript, javascript]
+    pattern-regex: '["''](http://(?!localhost|127\.0\.0\.1|www\.w3\.org)[^"'' ]+)["'']'
+    paths:
+      exclude:
+        - '**/*.test.ts'
+        - '**/*.test.tsx'
+        - 'src/fixtures/**'
+
+  # ============================================================================
+  # XSS — raw HTML injection is forbidden in a wallet UI. This covers both the
+  # React prop and direct DOM sinks (relevant for the content script, which
+  # runs in webpage context).
+  # ============================================================================
+  - id: cw-no-dangerously-set-inner-html
+    message: >
+      The React prop that injects raw HTML is forbidden — it is a direct XSS
+      vector. Render plain text or use a sanitiser if HTML is unavoidable.
+    severity: ERROR
+    languages: [typescript, javascript]
+    pattern-regex: '\bdangerouslySetInnerHTML\s*='
+
+  - id: cw-no-dom-html-injection
+    message: >
+      Direct HTML injection into the DOM (innerHTML / outerHTML /
+      insertAdjacentHTML / document.write). In an extension — especially the
+      content script running in webpage context — this is an XSS vector.
+      Use textContent or DOM element creation instead.
+    severity: ERROR
+    languages: [typescript, javascript]
+    pattern-either:
+      - pattern: $EL.innerHTML = $HTML
+      - pattern: $EL.outerHTML = $HTML
+      - pattern: $EL.insertAdjacentHTML(...)
+      - pattern: document.write(...)
+    paths:
+      exclude:
+        - '**/*.test.ts'
+        - '**/*.test.tsx'
+
+  # ============================================================================
+  # Redux selectors — array/object deriving selectors must be memoized via
+  # createSelector from reselect. Returning a new reference on every store
+  # change causes useSelector to trigger unnecessary rerenders.
+  # Scoped to src/background/redux/**/selectors.ts.
+  # ============================================================================
+  - id: cw-selector-unmemoized-array-method
+    message: >
+      Selector returns a new array reference on every call (map/filter/reduce/
+      flatMap/concat/slice/flat/sort/reverse). Wrap with createSelector from
+      reselect so the result is memoized and useSelector does not trigger
+      rerenders on unrelated store changes.
+    severity: WARNING
+    languages: [typescript]
+    patterns:
+      - pattern: |
+          export const $NAME = (state: RootState) => $X.$METHOD(...)
+      - metavariable-regex:
+          metavariable: $METHOD
+          regex: '^(map|filter|reduce|flatMap|concat|slice|flat|sort|reverse)$'
+    paths:
+      include:
+        - '**/src/background/redux/**/selectors.ts'
+
+  - id: cw-selector-unmemoized-nullish-default
+    message: >
+      Selector uses `?? []` / `?? {}` inline — the literal is a new reference
+      on every call whenever the left-hand value is nullish. Either extract
+      the fallback to a module-level constant (e.g. const EMPTY_ARRAY = [])
+      or wrap with createSelector.
+    severity: WARNING
+    languages: [typescript]
+    patterns:
+      - pattern-either:
+          - pattern: |
+              export const $NAME = (state: RootState) => $X ?? []
+          - pattern: |
+              export const $NAME = (state: RootState) => $X ?? {}
+    paths:
+      include:
+        - '**/src/background/redux/**/selectors.ts'
+
+  - id: cw-selector-unmemoized-util-call
+    message: >
+      Selector calls a utility that returns a fresh array/object
+      (orderBy / sortBy / groupBy / Object.values / Object.keys /
+      Object.entries / Array.from). Wrap with createSelector from reselect.
+    severity: WARNING
+    languages: [typescript]
+    patterns:
+      - pattern-either:
+          - pattern: |
+              export const $NAME = (state: RootState) => orderBy(...)
+          - pattern: |
+              export const $NAME = (state: RootState) => sortBy(...)
+          - pattern: |
+              export const $NAME = (state: RootState) => groupBy(...)
+          - pattern: |
+              export const $NAME = (state: RootState) => Object.values(...)
+          - pattern: |
+              export const $NAME = (state: RootState) => Object.keys(...)
+          - pattern: |
+              export const $NAME = (state: RootState) => Object.entries(...)
+          - pattern: |
+              export const $NAME = (state: RootState) => Array.from(...)
+    paths:
+      include:
+        - '**/src/background/redux/**/selectors.ts'
+
+  - id: cw-selector-factory-unmemoized-array-method
+    message: >
+      Parameterized selector factory `(arg) => (state: RootState) => ...`
+      returns a derived array — each call re-computes and returns a new
+      reference. Prefer a memoized selector (reselect's parametric pattern
+      via `createSelector` with a second argument).
+    severity: WARNING
+    languages: [typescript]
+    patterns:
+      - pattern: |
+          export const $NAME = (...) => (state: RootState) => $X.$METHOD(...)
+      - metavariable-regex:
+          metavariable: $METHOD
+          regex: '^(map|filter|reduce|flatMap|concat|slice|flat|sort|reverse)$'
+    paths:
+      include:
+        - '**/src/background/redux/**/selectors.ts'
+
+# NOTE: the casper-js-sdk version parity check (root package.json vs
+# casper-wallet-core's pin) lives in the `check:casper-sdk-version` npm script,
+# not here. Semgrep's experimental `mode: join` (used for this in
+# CasperWalletMobile) is broken in current semgrep versions: pattern-regex
+# named groups no longer emit metavariables, so join-mode rules crash with
+# AttributeError when they match. See .semgrep/README.md → Cross-file checks.

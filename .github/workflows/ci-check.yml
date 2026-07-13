@@ -41,6 +41,14 @@ jobs:
         npm ci
         npm run ci-check
 
+    # Blocking: custom wallet rules (.semgrep.yml) + security-focused registry
+    # packs, plus the casper-js-sdk version parity check. Pinned to the semgrep
+    # version the config was validated against (see .semgrep/README.md).
+    - name: Semgrep (blocking)
+      run: |
+        pipx install semgrep==1.157.0
+        npm run semgrep:ci
+
     # Blocking: fail the build on a high+ vulnerability that reaches the
     # shipped bundle (runtime deps only).
     - name: Audit runtime dependencies (blocking)

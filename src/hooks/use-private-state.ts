@@ -7,7 +7,7 @@ import {
   fetchPrivateState
 } from '@background/handlers/private-state';
 
-export const PRIVATE_STATE_FETCH_TIMEOUT_MS = 5000;
+const PRIVATE_STATE_FETCH_TIMEOUT_MS = 5000;
 /** Targets the MV3 SW-restart race: a rejected sendMessage usually succeeds on re-send */
 export const PRIVATE_STATE_RETRY_DELAYS_MS = [250, 500];
 
