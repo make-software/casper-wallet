@@ -1,4 +1,4 @@
-import { formatPrimaryTypeLabel } from './formatters';
+import { formatDateWithoutTime, formatPrimaryTypeLabel } from './formatters';
 
 describe('formatPrimaryTypeLabel', () => {
   it('splits PascalCase into Title Case words', () => {
@@ -25,5 +25,13 @@ describe('formatPrimaryTypeLabel', () => {
     expect(formatPrimaryTypeLabel('__')).toBe('');
     expect(formatPrimaryTypeLabel('-')).toBe('');
     expect(formatPrimaryTypeLabel('   ')).toBe('');
+  });
+});
+
+describe('formatDateWithoutTime', () => {
+  it('formats a date without time', () => {
+    expect(formatDateWithoutTime('2026-06-16T12:00:00.000Z')).toBe(
+      'Jun 16, 2026'
+    );
   });
 });
