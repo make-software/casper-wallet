@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 
@@ -121,12 +121,6 @@ export function DecryptMessagePage() {
     );
     closeCurrentWindow();
   }, [requestId, requestTabId]);
-
-  useEffect(() => {
-    window.addEventListener('beforeunload', handleCancel);
-
-    return () => window.removeEventListener('beforeunload', handleCancel);
-  }, [handleCancel]);
 
   const handleDecrypt = useCallback(async () => {
     try {

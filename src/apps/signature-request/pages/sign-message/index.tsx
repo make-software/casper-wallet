@@ -259,12 +259,6 @@ export function SignMessagePage() {
     closeCurrentWindow();
   }, [requestId, requestTabId]);
 
-  useEffect(() => {
-    window.addEventListener('beforeunload', handleCancel);
-
-    return () => window.removeEventListener('beforeunload', handleCancel);
-  }, [handleCancel]);
-
   return (
     <LayoutWindow
       renderHeader={() => (
