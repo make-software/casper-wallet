@@ -8,7 +8,7 @@ export type CancellableMethod =
   | 'signTypedData'
   | 'decryptMessage';
 
-export interface PendingRequestDescriptor {
+interface PendingRequestDescriptor {
   tabId: number;
   origin: string;
   method: CancellableMethod;

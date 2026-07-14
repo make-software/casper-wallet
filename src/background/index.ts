@@ -18,6 +18,7 @@ import {
 } from '@src/utils';
 
 import { handleBringWeb3 } from '@background/handlers/bringweb3';
+import { cancelOpenRequestsForClosedWindow } from '@background/handlers/cancel-open-requests-on-close';
 import { handleLegacyImport } from '@background/handlers/legacy-import';
 import {
   isPrivateStateRequest,
@@ -38,7 +39,6 @@ import {
   selectIsAccountConnected,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
-import { windowClosed } from '@background/redux/windowManagement/actions';
 import { selectWindowId } from '@background/redux/windowManagement/selectors';
 
 import { sdkEvent } from '@content/sdk-event';
@@ -174,12 +174,13 @@ tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 // per-creation `windows.onRemoved` listeners that used to be added inside
 // `createOpenWindow` (one leaked per opened window). `windows.onRemoved` fires
 // for ANY window, so the id-match guard ensures we only react when the removed
-// window is the tracked approval window. `windowClosed()` nulls the slice
-// `windowId` AND marks any still-open requests as 'closed'.
+// window is the tracked approval window. `cancelOpenRequestsForClosedWindow`
+// waits a grace period, then cancels any requests still open for that window
+// and dispatches `windowIdCleared` to null the slice `windowId`.
 windows.onRemoved.addListener(async (removedWindowId: number) => {
   const store = await getExistingMainStoreSingletonOrInit();
   if (removedWindowId === selectWindowId(store.getState())) {
-    store.dispatch(windowClosed());
+    await cancelOpenRequestsForClosedWindow(store, removedWindowId);
   }
 });
 
