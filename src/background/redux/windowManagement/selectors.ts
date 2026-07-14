@@ -9,3 +9,11 @@ export const selectRequestStatus = (
   state: RootState,
   requestId: string
 ): RequestStatus | undefined => state.windowManagement.requests[requestId];
+
+export const selectOpenRequests = (state: RootState) =>
+  Object.entries(state.windowManagement.requests)
+    .filter(([, status]) => status === 'open')
+    .map(([requestId]) => ({
+      requestId,
+      ...state.windowManagement.pendingRequests[requestId]
+    }));
