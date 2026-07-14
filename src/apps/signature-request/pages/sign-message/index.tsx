@@ -253,7 +253,7 @@ export function SignMessagePage() {
 
   const handleCancel = useCallback(() => {
     sendSdkResponseToSpecificTab(
-      sdkMethod.signResponse({ cancelled: true }, { requestId }),
+      sdkMethod.signMessageResponse({ cancelled: true }, { requestId }),
       requestTabId
     );
     closeCurrentWindow();
