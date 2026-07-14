@@ -17,6 +17,7 @@ import { ConnectedSitesPage } from '@popup/pages/connected-sites';
 import { ContactDetailsPage } from '@popup/pages/contact-details';
 import { ContactsBookPage } from '@popup/pages/contacts';
 import { CreateAccountPage } from '@popup/pages/create-account';
+import { CsprNameExpirationsPage } from '@popup/pages/cspr-name-expirations';
 import { DeployDetailsPage } from '@popup/pages/deploy-details';
 import { DownloadAccountKeysPage } from '@popup/pages/download-account-keys';
 import { HomePageContent } from '@popup/pages/home';
@@ -253,6 +254,10 @@ function AppRoutes() {
       <Route path={RouterPath.DeployDetails} element={<DeployDetailsPage />} />
       <Route path={RouterPath.AddWatchAccount} element={<AddWatchAccount />} />
       <Route path={RouterPath.BringWeb3Unlock} element={<BringWeb3Unlock />} />
+      <Route
+        path={RouterPath.CsprNameExpirations}
+        element={<CsprNameExpirationsPage />}
+      />
     </Routes>
   );
 }
