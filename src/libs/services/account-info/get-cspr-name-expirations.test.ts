@@ -33,7 +33,7 @@ describe('getCsprNameExpirations', () => {
       )
     };
 
-    const payload = await getCsprNameExpirations(
+    const { expirations, failedPublicKeys } = await getCsprNameExpirations(
       ['pk-a', 'pk-b'],
       network,
       repository
@@ -50,12 +50,13 @@ describe('getCsprNameExpirations', () => {
       network,
       false
     );
-    expect(payload).toEqual({
+    expect(expirations).toEqual({
       'pk-a': { csprName: 'alice.cspr', expiresAt: '2026-07-20T00:00:00Z' }
     });
+    expect(failedPublicKeys).toEqual([]);
   });
 
-  it('skips names that fail to resolve or have no expiration date', async () => {
+  it('reports failed resolutions separately and skips names without an expiration date', async () => {
     const repository = {
       getAccountsInfo: jest.fn().mockResolvedValue({
         'hash-pk-a': makeInfo({ csprName: 'alice.cspr' }),
@@ -75,15 +76,16 @@ describe('getCsprNameExpirations', () => {
         })
     };
 
-    const payload = await getCsprNameExpirations(
+    const { expirations, failedPublicKeys } = await getCsprNameExpirations(
       ['pk-a', 'pk-b', 'pk-c'],
       network,
       repository
     );
 
-    expect(payload).toEqual({
+    expect(expirations).toEqual({
       'pk-c': { csprName: 'carol.cspr', expiresAt: '2026-07-25T00:00:00Z' }
     });
+    expect(failedPublicKeys).toEqual(['pk-a']);
   });
 
   it('resolves in batches of at most 5 concurrent requests', async () => {
@@ -111,7 +113,7 @@ describe('getCsprNameExpirations', () => {
       })
     };
 
-    const payload = await getCsprNameExpirations(
+    const { expirations } = await getCsprNameExpirations(
       publicKeys,
       network,
       repository
@@ -119,6 +121,6 @@ describe('getCsprNameExpirations', () => {
 
     expect(repository.resolveAccountFromCsprName).toHaveBeenCalledTimes(12);
     expect(maxInFlight).toBeLessThanOrEqual(5);
-    expect(Object.keys(payload)).toHaveLength(12);
+    expect(Object.keys(expirations)).toHaveLength(12);
   });
 });

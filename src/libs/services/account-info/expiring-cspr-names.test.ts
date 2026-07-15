@@ -27,6 +27,18 @@ describe('getExpiringCsprNames', () => {
     ]);
   });
 
+  it('excludes records with an invalid expiration date', () => {
+    const result = getExpiringCsprNames(
+      {
+        'pk-bad': record('not-a-date'),
+        'pk-ok': record(new Date(NOW + 2 * DAY_MS).toISOString())
+      },
+      NOW
+    );
+
+    expect(result.map(({ publicKey }) => publicKey)).toEqual(['pk-ok']);
+  });
+
   it('sorts by expiration date ascending', () => {
     const result = getExpiringCsprNames(
       {

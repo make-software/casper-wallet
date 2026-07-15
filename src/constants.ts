@@ -1,4 +1,5 @@
 import { CasperNetworkName } from 'casper-js-sdk';
+import { CasperNetwork } from 'casper-wallet-core';
 
 const SECOND = 1000;
 
@@ -86,6 +87,18 @@ export enum NetworkSetting {
   Devnet = 'Devnet',
   Integration = 'Integration'
 }
+
+// Compiler-checked alternative to `networkSetting.toLowerCase() as CasperNetwork`:
+// if either enum gains a member, tsc fails here instead of the cast silently lying.
+const casperNetworkByNetworkSetting: Record<NetworkSetting, CasperNetwork> = {
+  [NetworkSetting.Mainnet]: 'mainnet',
+  [NetworkSetting.Testnet]: 'testnet',
+  [NetworkSetting.Devnet]: 'devnet',
+  [NetworkSetting.Integration]: 'integration'
+};
+
+export const getCasperNetwork = (network: NetworkSetting): CasperNetwork =>
+  casperNetworkByNetworkSetting[network];
 
 export enum Browser {
   Safari = 'safari',

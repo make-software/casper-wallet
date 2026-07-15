@@ -1,6 +1,7 @@
-import { CasperNetwork } from 'casper-wallet-core';
 import { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
+
+import { getCasperNetwork } from '@src/constants';
 
 import { expiringCsprNamesDismissed } from '@background/redux/cspr-name-expirations/actions';
 import { selectCsprNameExpirations } from '@background/redux/cspr-name-expirations/selectors';
@@ -13,7 +14,7 @@ export const useExpiringCsprNames = () => {
   const expirations = useSelector(selectCsprNameExpirations);
   const networkSetting = useSelector(selectActiveNetworkSetting);
 
-  const network = networkSetting.toLowerCase() as CasperNetwork;
+  const network = getCasperNetwork(networkSetting);
 
   const expiringNames = useMemo(
     () => getExpiringCsprNames(expirations[network] ?? {}, Date.now()),

@@ -159,6 +159,57 @@ describe('cspr-name-expirations reducer', () => {
     });
   });
 
+  it('keeps the previous record and dismissed flag for public keys whose resolution failed', () => {
+    const seeded: CsprNameExpirationsState = {
+      mainnet: {
+        'pk-a': {
+          csprName: 'alice.cspr',
+          expiresAt: '2026-07-20T00:00:00Z',
+          dismissed: true
+        },
+        'pk-b': {
+          csprName: 'bob.cspr',
+          expiresAt: '2026-08-01T00:00:00Z',
+          dismissed: false
+        }
+      }
+    };
+    const state = reducer(
+      seeded,
+      csprNameExpirationsUpdated({
+        network: 'mainnet',
+        expirations: {
+          'pk-b': { csprName: 'bob.cspr', expiresAt: '2026-08-01T00:00:00Z' }
+        },
+        failedPublicKeys: ['pk-a']
+      })
+    );
+    expect(state.mainnet).toEqual({
+      'pk-a': {
+        csprName: 'alice.cspr',
+        expiresAt: '2026-07-20T00:00:00Z',
+        dismissed: true
+      },
+      'pk-b': {
+        csprName: 'bob.cspr',
+        expiresAt: '2026-08-01T00:00:00Z',
+        dismissed: false
+      }
+    });
+  });
+
+  it('ignores failed public keys that have no previous record', () => {
+    const state = reducer(
+      undefined,
+      csprNameExpirationsUpdated({
+        network: 'mainnet',
+        expirations: {},
+        failedPublicKeys: ['pk-unknown']
+      })
+    );
+    expect(state).toEqual({ mainnet: {} });
+  });
+
   it('marks the given public keys as dismissed on the given network only', () => {
     const seeded: CsprNameExpirationsState = {
       mainnet: {

@@ -6,6 +6,8 @@ export const csprNameExpirationsUpdated = createAction(
 )<{
   network: CasperNetwork;
   expirations: Record<string, { csprName: string; expiresAt: string }>;
+  /** Accounts whose resolution failed this fetch — their stored records must be kept, not dropped */
+  failedPublicKeys?: string[];
 }>();
 
 export const expiringCsprNamesDismissed = createAction(
