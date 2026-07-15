@@ -28,6 +28,9 @@ export const useFetchCsprNameExpirations = (): void => {
     enabled: publicKeys.length > 0,
     staleTime: Infinity,
     gcTime: Infinity,
+    // Fetch once per popup session — override the query client's 3-min
+    // refetchInterval default so this does not poll while Home is mounted.
+    refetchInterval: false,
     queryFn: async () => {
       const accountHashes = publicKeys.map(getAccountHashFromPublicKey);
 
@@ -44,12 +47,20 @@ export const useFetchCsprNameExpirations = (): void => {
       const resolved = await runWithConcurrency(
         csprNames,
         MAX_CONCURRENT_RESOLUTIONS,
-        csprName =>
-          accountInfoRepository.resolveAccountFromCsprName(
-            csprName,
-            network,
-            false
-          )
+        // Isolate failures: a single rejected resolution must not sink the
+        // whole batch (which would leave the banner hidden for every name
+        // this session). Treat a failed lookup as "unresolved" (null).
+        async csprName => {
+          try {
+            return await accountInfoRepository.resolveAccountFromCsprName(
+              csprName,
+              network,
+              false
+            );
+          } catch {
+            return null;
+          }
+        }
       );
 
       const records: Record<string, CsprNameExpirationInput> = {};
