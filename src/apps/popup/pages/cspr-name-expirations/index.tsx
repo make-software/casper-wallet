@@ -1,6 +1,8 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { CSPR_NAME_URL } from '@src/constants';
+
 import {
   FooterButtonsContainer,
   HeaderPopup,
@@ -31,7 +33,7 @@ export const CsprNameExpirationsPage: React.FC = () => {
         <FooterButtonsContainer>
           <Button
             onClick={() =>
-              window.open('https://cspr.name', '_blank', 'noopener,noreferrer')
+              window.open(CSPR_NAME_URL, '_blank', 'noopener,noreferrer')
             }
           >
             <Trans t={t}>Renew on CSPR.name</Trans>

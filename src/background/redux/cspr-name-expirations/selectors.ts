@@ -1,4 +1,4 @@
-import { CasperNetwork } from 'casper-wallet-core/src/domain/common/common';
+import { CasperNetwork } from 'casper-wallet-core';
 import { RootState } from 'typesafe-actions';
 
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;

@@ -36,6 +36,8 @@ export const TERMS_URLS = {
 export const CASHBACK_URL = 'https://www.cspr.shopping';
 export const REFERRER_URL = 'https://casperwallet.io';
 
+export const CSPR_NAME_URL = 'https://cspr.name';
+
 export const getBlockExplorerAccountUrl = (
   casperLiveUrl: string,
   publicKey: string

@@ -1,4 +1,4 @@
-import { CasperNetwork } from 'casper-wallet-core/src/domain/common/common';
+import { CasperNetwork } from 'casper-wallet-core';
 import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';

@@ -1,4 +1,4 @@
-import { CasperNetwork } from 'casper-wallet-core/src/domain/common/common';
+import { CasperNetwork } from 'casper-wallet-core';
 import { createAction } from 'typesafe-actions';
 
 export interface CsprNameExpirationInput {
