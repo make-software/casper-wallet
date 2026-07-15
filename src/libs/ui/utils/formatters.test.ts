@@ -1,4 +1,4 @@
-import { formatDateWithoutTime, formatPrimaryTypeLabel } from './formatters';
+import { formatPrimaryTypeLabel, formatShortDate } from './formatters';
 
 describe('formatPrimaryTypeLabel', () => {
   it('splits PascalCase into Title Case words', () => {
@@ -28,10 +28,8 @@ describe('formatPrimaryTypeLabel', () => {
   });
 });
 
-describe('formatDateWithoutTime', () => {
-  it('formats a date without time', () => {
-    expect(formatDateWithoutTime('2026-06-16T12:00:00.000Z')).toBe(
-      'Jun 16, 2026'
-    );
+describe('formatShortDate', () => {
+  it('formats an ISO timestamp as a date without time', () => {
+    expect(formatShortDate('2026-06-16T12:00:00.000Z')).toBe('Jun 16, 2026');
   });
 });

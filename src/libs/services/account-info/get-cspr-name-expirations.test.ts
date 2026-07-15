@@ -1,0 +1,124 @@
+import { getCsprNameExpirations } from './get-cspr-name-expirations';
+
+jest.mock('@libs/entities/Account', () => ({
+  getAccountHashFromPublicKey: (publicKey: string) => `hash-${publicKey}`
+}));
+
+const network = 'mainnet' as const;
+
+const makeInfo = (overrides: Record<string, unknown>) => ({
+  id: '',
+  publicKey: '',
+  accountHash: '',
+  name: '',
+  brandingLogo: null,
+  csprName: null,
+  csprNameExpiresAt: null,
+  explorerLink: null,
+  ...overrides
+});
+
+describe('getCsprNameExpirations', () => {
+  it('resolves expirations only for accounts that have a cspr.name', async () => {
+    const repository = {
+      getAccountsInfo: jest.fn().mockResolvedValue({
+        'hash-pk-a': makeInfo({ csprName: 'alice.cspr' }),
+        'hash-pk-b': makeInfo({ csprName: null })
+      }),
+      resolveAccountFromCsprName: jest.fn().mockResolvedValue(
+        makeInfo({
+          csprName: 'alice.cspr',
+          csprNameExpiresAt: '2026-07-20T00:00:00Z'
+        })
+      )
+    };
+
+    const payload = await getCsprNameExpirations(
+      ['pk-a', 'pk-b'],
+      network,
+      repository
+    );
+
+    expect(repository.getAccountsInfo).toHaveBeenCalledWith({
+      accountHashes: ['hash-pk-a', 'hash-pk-b'],
+      network,
+      withProxyHeader: false
+    });
+    expect(repository.resolveAccountFromCsprName).toHaveBeenCalledTimes(1);
+    expect(repository.resolveAccountFromCsprName).toHaveBeenCalledWith(
+      'alice.cspr',
+      network,
+      false
+    );
+    expect(payload).toEqual({
+      'pk-a': { csprName: 'alice.cspr', expiresAt: '2026-07-20T00:00:00Z' }
+    });
+  });
+
+  it('skips names that fail to resolve or have no expiration date', async () => {
+    const repository = {
+      getAccountsInfo: jest.fn().mockResolvedValue({
+        'hash-pk-a': makeInfo({ csprName: 'alice.cspr' }),
+        'hash-pk-b': makeInfo({ csprName: 'bob.cspr' }),
+        'hash-pk-c': makeInfo({ csprName: 'carol.cspr' })
+      }),
+      resolveAccountFromCsprName: jest
+        .fn()
+        .mockImplementation(async (csprName: string) => {
+          if (csprName === 'alice.cspr') {
+            throw new Error('network error');
+          }
+          if (csprName === 'bob.cspr') {
+            return makeInfo({ csprNameExpiresAt: null });
+          }
+          return makeInfo({ csprNameExpiresAt: '2026-07-25T00:00:00Z' });
+        })
+    };
+
+    const payload = await getCsprNameExpirations(
+      ['pk-a', 'pk-b', 'pk-c'],
+      network,
+      repository
+    );
+
+    expect(payload).toEqual({
+      'pk-c': { csprName: 'carol.cspr', expiresAt: '2026-07-25T00:00:00Z' }
+    });
+  });
+
+  it('resolves in batches of at most 5 concurrent requests', async () => {
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const publicKeys = Array.from({ length: 12 }, (_, i) => `pk-${i}`);
+
+    const repository = {
+      getAccountsInfo: jest
+        .fn()
+        .mockResolvedValue(
+          Object.fromEntries(
+            publicKeys.map(pk => [
+              `hash-${pk}`,
+              makeInfo({ csprName: `${pk}.cspr` })
+            ])
+          )
+        ),
+      resolveAccountFromCsprName: jest.fn().mockImplementation(async () => {
+        inFlight += 1;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        inFlight -= 1;
+        return makeInfo({ csprNameExpiresAt: '2026-07-20T00:00:00Z' });
+      })
+    };
+
+    const payload = await getCsprNameExpirations(
+      publicKeys,
+      network,
+      repository
+    );
+
+    expect(repository.resolveAccountFromCsprName).toHaveBeenCalledTimes(12);
+    expect(maxInFlight).toBeLessThanOrEqual(5);
+    expect(Object.keys(payload)).toHaveLength(12);
+  });
+});

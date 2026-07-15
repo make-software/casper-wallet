@@ -1,16 +1,13 @@
-import { CasperNetwork } from 'casper-wallet-core';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { RootState } from 'typesafe-actions';
 
 import { HomePageTabName, NetworkSetting } from '@src/constants';
 import { isSafariBuild } from '@src/utils';
 
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
-import { selectShowCsprNameExpirationBanner } from '@background/redux/cspr-name-expirations/selectors';
 import {
   selectActiveNetworkSetting,
   selectDismissedAppEvents,
@@ -25,7 +22,10 @@ import {
   TileContainer,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { useFetchCsprNameExpirations } from '@libs/services/account-info/use-fetch-cspr-name-expirations';
+import {
+  useExpiringCsprNames,
+  useFetchCsprNameExpirations
+} from '@libs/services/account-info';
 import { useGetActiveAppMarketingEvent } from '@libs/services/app-events';
 import {
   Button,
@@ -36,9 +36,9 @@ import {
   Typography
 } from '@libs/ui/components';
 import { AppEventBanner } from '@libs/ui/components/app-event-banner/app-event-banner';
-import { CsprNameExpirationBanner } from '@libs/ui/components/cspr-name-expiration-banner/cspr-name-expiration-banner';
 
 import { AccountBalance } from './components/account-balance';
+import { CsprNameExpirationBanner } from './components/cspr-name-expiration-banner';
 import { DeploysList } from './components/deploys-list';
 import { MoreButtonsModal } from './components/more-buttons-modal';
 import { NftList } from './components/nft-list';
@@ -73,12 +73,16 @@ export function HomePageContent() {
 
   useFetchCsprNameExpirations();
 
-  const showCsprNameExpirationBanner = useSelector((state: RootState) =>
-    selectShowCsprNameExpirationBanner(
-      state,
-      network.toLowerCase() as CasperNetwork
-    )
-  );
+  const { showExpirationBanner, dismissExpiringNames } = useExpiringCsprNames();
+
+  // Latch for the whole popup session: dismissing the expiration banner must
+  // not reveal the marketing banner until the popup is reopened (refs reset
+  // on the next mount).
+  const wasExpirationBannerShown = useRef(false);
+
+  if (showExpirationBanner) {
+    wasExpirationBannerShown.current = true;
+  }
 
   useEffect(() => {
     if (!state?.activeTabId) {
@@ -91,12 +95,20 @@ export function HomePageContent() {
   const { activeMarketingEvent } =
     useGetActiveAppMarketingEvent(dismissedAppEventIds);
 
+  // At most one banner; the expiration banner wins over the marketing banner.
+  const showMarketingBanner =
+    Boolean(activeMarketingEvent) &&
+    !showExpirationBanner &&
+    !wasExpirationBannerShown.current;
+
   return (
     <ContentContainer>
-      {activeMarketingEvent && (
+      {showExpirationBanner && (
+        <CsprNameExpirationBanner onDismiss={dismissExpiringNames} />
+      )}
+      {showMarketingBanner && activeMarketingEvent && (
         <AppEventBanner activeMarketingEvent={activeMarketingEvent} />
       )}
-      {showCsprNameExpirationBanner && <CsprNameExpirationBanner />}
       {activeAccount && (
         <Tile>
           <Container>

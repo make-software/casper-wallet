@@ -2,51 +2,68 @@ import { createReducer } from 'typesafe-actions';
 
 import {
   csprNameExpirationsUpdated,
-  dismissCsprNameExpirations
+  expiringCsprNamesDismissed
 } from './actions';
-import { CsprNameExpirationRecord, CsprNameExpirationsState } from './types';
+import { CsprNameExpirationsState } from './types';
 
 const initialState: CsprNameExpirationsState = {};
 
 export const reducer = createReducer(initialState)
-  .handleAction(csprNameExpirationsUpdated, (state, action) => {
-    const { network, records } = action.payload;
-    const prevMap = state[network] ?? {};
-    const nextMap: Record<string, CsprNameExpirationRecord> = {};
+  .handleAction(
+    csprNameExpirationsUpdated,
+    (
+      state: CsprNameExpirationsState,
+      action: ReturnType<typeof csprNameExpirationsUpdated>
+    ): CsprNameExpirationsState => {
+      const { network, expirations } = action.payload;
+      const prevForNetwork = state[network] ?? {};
 
-    Object.entries(records).forEach(([publicKey, rec]) => {
-      const prev = prevMap[publicKey];
-      const dismissed =
-        prev != null &&
-        prev.csprName === rec.csprName &&
-        prev.expiresAt === rec.expiresAt
-          ? prev.dismissed
-          : false;
+      return {
+        ...state,
+        [network]: Object.fromEntries(
+          Object.entries(expirations).map(
+            ([publicKey, { csprName, expiresAt }]) => {
+              const prev = prevForNetwork[publicKey];
+              const sameNameAndDate =
+                prev?.csprName === csprName && prev?.expiresAt === expiresAt;
 
-      nextMap[publicKey] = {
-        csprName: rec.csprName,
-        expiresAt: rec.expiresAt,
-        dismissed
+              return [
+                publicKey,
+                {
+                  csprName,
+                  expiresAt,
+                  dismissed: sameNameAndDate ? prev.dismissed : false
+                }
+              ];
+            }
+          )
+        )
       };
-    });
-
-    return { ...state, [network]: nextMap };
-  })
-  .handleAction(dismissCsprNameExpirations, (state, action) => {
-    const { network, publicKeys } = action.payload;
-    const prevMap = state[network];
-
-    if (prevMap == null) {
-      return state;
     }
+  )
+  .handleAction(
+    expiringCsprNamesDismissed,
+    (
+      state: CsprNameExpirationsState,
+      action: ReturnType<typeof expiringCsprNamesDismissed>
+    ): CsprNameExpirationsState => {
+      const { network, publicKeys } = action.payload;
+      const forNetwork = state[network];
 
-    const nextMap = { ...prevMap };
-    publicKeys.forEach(publicKey => {
-      const rec = nextMap[publicKey];
-      if (rec != null) {
-        nextMap[publicKey] = { ...rec, dismissed: true };
+      if (!forNetwork) {
+        return state;
       }
-    });
 
-    return { ...state, [network]: nextMap };
-  });
+      return {
+        ...state,
+        [network]: Object.fromEntries(
+          Object.entries(forNetwork).map(([publicKey, record]) => [
+            publicKey,
+            publicKeys.includes(publicKey)
+              ? { ...record, dismissed: true }
+              : record
+          ])
+        )
+      };
+    }
+  );

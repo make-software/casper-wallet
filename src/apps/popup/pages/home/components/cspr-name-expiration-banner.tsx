@@ -1,21 +1,13 @@
-import { CasperNetwork } from 'casper-wallet-core';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { RootState } from 'typesafe-actions';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
-
-import { dismissCsprNameExpirations } from '@background/redux/cspr-name-expirations/actions';
-import { selectExpiringCsprNames } from '@background/redux/cspr-name-expirations/selectors';
-import { selectActiveNetworkSetting } from '@background/redux/settings/selectors';
-import { dispatchToMainStore } from '@background/redux/utils';
 
 import { AlignedFlexRow, SpacingSize } from '@libs/layout';
 import { Typography } from '@libs/ui/components';
 
-const Container = styled.div`
+const BannerContainer = styled.div`
   display: flex;
   flex-direction: column;
   margin-top: 24px;
@@ -38,8 +30,9 @@ const ButtonsContainer = styled(AlignedFlexRow)`
   margin-top: auto;
 `;
 
-const ActionButton = styled.div`
+const ActionButton = styled.button`
   padding: 0 10px;
+  border: none;
 
   background-color: ${props => props.theme.color.contentOnFill};
   border-radius: ${props => props.theme.borderRadius.hundred}px;
@@ -62,26 +55,18 @@ const DismissButton = styled.div`
   cursor: pointer;
 `;
 
-export const CsprNameExpirationBanner: React.FC = () => {
+interface CsprNameExpirationBannerProps {
+  onDismiss: () => void;
+}
+
+export const CsprNameExpirationBanner: React.FC<
+  CsprNameExpirationBannerProps
+> = ({ onDismiss }) => {
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
-  const networkSetting = useSelector(selectActiveNetworkSetting);
-  const network = networkSetting.toLowerCase() as CasperNetwork;
-  const expiringNames = useSelector((state: RootState) =>
-    selectExpiringCsprNames(state, network)
-  );
-
-  const handleDismiss = () => {
-    dispatchToMainStore(
-      dismissCsprNameExpirations({
-        network,
-        publicKeys: expiringNames.map(n => n.publicKey)
-      })
-    );
-  };
 
   return (
-    <Container>
+    <BannerContainer>
       <Typography
         type="subtitle"
         color="contentOnFill"
@@ -97,14 +82,14 @@ export const CsprNameExpirationBanner: React.FC = () => {
       </OpacityText>
 
       <ButtonsContainer gap={SpacingSize.Medium}>
-        <ActionButton onClick={() => navigate(RouterPath.CsprNameExpirations)}>
+        <ActionButton onClick={() => navigate(RouterPath.ExpiringCsprNames)}>
           <Trans t={t}>View names</Trans>
         </ActionButton>
 
-        <DismissButton onClick={handleDismiss}>
+        <DismissButton onClick={onDismiss}>
           <Trans t={t}>Dismiss</Trans>
         </DismissButton>
       </ButtonsContainer>
-    </Container>
+    </BannerContainer>
   );
 };

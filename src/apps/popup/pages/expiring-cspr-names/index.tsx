@@ -11,9 +11,9 @@ import {
 } from '@libs/layout';
 import { Button } from '@libs/ui/components';
 
-import { CsprNameExpirationsContent } from './content';
+import { ExpiringCsprNamesContent } from './content';
 
-export const CsprNameExpirationsPage: React.FC = () => {
+export const ExpiringCsprNamesPage = () => {
   const { t } = useTranslation();
 
   return (
@@ -28,7 +28,7 @@ export const CsprNameExpirationsPage: React.FC = () => {
           )}
         />
       )}
-      renderContent={() => <CsprNameExpirationsContent />}
+      renderContent={() => <ExpiringCsprNamesContent />}
       renderFooter={() => (
         <FooterButtonsContainer>
           <Button

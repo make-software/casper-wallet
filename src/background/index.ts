@@ -54,7 +54,7 @@ import {
 } from '@background/redux/contacts/actions';
 import {
   csprNameExpirationsUpdated,
-  dismissCsprNameExpirations
+  expiringCsprNamesDismissed
 } from '@background/redux/cspr-name-expirations/actions';
 import { getExistingMainStoreSingletonOrInit } from '@background/redux/get-main-store';
 import {
@@ -830,7 +830,7 @@ runtime.onMessage.addListener(
           case getType(dismissAppEvent):
           case getType(resetAppEventsDismission):
           case getType(csprNameExpirationsUpdated):
-          case getType(dismissCsprNameExpirations):
+          case getType(expiringCsprNamesDismissed):
           case getType(addWasmToTrusted):
           case getType(removeWasmFromTrusted):
           case getType(removeAllWasmFromTrustedOrigin):

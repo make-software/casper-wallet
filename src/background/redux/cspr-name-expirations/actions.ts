@@ -1,20 +1,15 @@
 import { CasperNetwork } from 'casper-wallet-core';
 import { createAction } from 'typesafe-actions';
 
-export interface CsprNameExpirationInput {
-  csprName: string;
-  expiresAt: string;
-}
-
 export const csprNameExpirationsUpdated = createAction(
   'CSPR_NAME_EXPIRATIONS_UPDATED'
 )<{
   network: CasperNetwork;
-  records: Record<string, CsprNameExpirationInput>;
+  expirations: Record<string, { csprName: string; expiresAt: string }>;
 }>();
 
-export const dismissCsprNameExpirations = createAction(
-  'DISMISS_CSPR_NAME_EXPIRATIONS'
+export const expiringCsprNamesDismissed = createAction(
+  'EXPIRING_CSPR_NAMES_DISMISSED'
 )<{
   network: CasperNetwork;
   publicKeys: string[];

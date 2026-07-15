@@ -78,14 +78,14 @@ export const formatDate = (isoString: string): string => {
   })}`;
 };
 
-export const formatDateWithoutTime = (isoString: string): string => {
-  const date = new Date(isoString);
+export const formatShortDate = (value: string): string => {
+  const date = new Date(value);
 
-  return intl.formatDate(date, {
+  return new Intl.DateTimeFormat('en', {
     month: 'short',
     day: 'numeric',
     year: 'numeric'
-  });
+  }).format(date);
 };
 
 const formatDistance = (
