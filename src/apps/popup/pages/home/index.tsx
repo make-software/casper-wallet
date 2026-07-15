@@ -1,13 +1,16 @@
+import { CasperNetwork } from 'casper-wallet-core/src/domain/common/common';
 import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { RootState } from 'typesafe-actions';
 
 import { HomePageTabName, NetworkSetting } from '@src/constants';
 import { isSafariBuild } from '@src/utils';
 
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
+import { selectShowCsprNameExpirationBanner } from '@background/redux/cspr-name-expirations/selectors';
 import {
   selectActiveNetworkSetting,
   selectDismissedAppEvents,
@@ -22,6 +25,7 @@ import {
   TileContainer,
   VerticalSpaceContainer
 } from '@libs/layout';
+import { useFetchCsprNameExpirations } from '@libs/services/account-info/use-fetch-cspr-name-expirations';
 import { useGetActiveAppMarketingEvent } from '@libs/services/app-events';
 import {
   Button,
@@ -32,6 +36,7 @@ import {
   Typography
 } from '@libs/ui/components';
 import { AppEventBanner } from '@libs/ui/components/app-event-banner/app-event-banner';
+import { CsprNameExpirationBanner } from '@libs/ui/components/cspr-name-expiration-banner/cspr-name-expiration-banner';
 
 import { AccountBalance } from './components/account-balance';
 import { DeploysList } from './components/deploys-list';
@@ -66,6 +71,15 @@ export function HomePageContent() {
   const network = useSelector(selectActiveNetworkSetting);
   const activeAccount = useSelector(selectVaultActiveAccount);
 
+  useFetchCsprNameExpirations();
+
+  const showCsprNameExpirationBanner = useSelector((state: RootState) =>
+    selectShowCsprNameExpirationBanner(
+      state,
+      network.toLowerCase() as CasperNetwork
+    )
+  );
+
   useEffect(() => {
     if (!state?.activeTabId) {
       const container = document.querySelector('#ms-container');
@@ -82,6 +96,7 @@ export function HomePageContent() {
       {activeMarketingEvent && (
         <AppEventBanner activeMarketingEvent={activeMarketingEvent} />
       )}
+      {showCsprNameExpirationBanner && <CsprNameExpirationBanner />}
       {activeAccount && (
         <Tile>
           <Container>
