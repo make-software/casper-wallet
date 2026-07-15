@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { CasperNetwork } from 'casper-wallet-core/src/domain/common/common';
+import { CasperNetwork } from 'casper-wallet-core';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
