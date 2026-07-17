@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { getCasperNetwork } from '@src/constants';
 
 import { csprNameExpirationsUpdated } from '@background/redux/cspr-name-expirations/actions';
+import { selectCsprNameExpirations } from '@background/redux/cspr-name-expirations/selectors';
 import { selectActiveNetworkSetting } from '@background/redux/settings/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { selectVaultAccountsPublicKeys } from '@background/redux/vault/selectors';
@@ -17,6 +18,7 @@ export const useFetchCsprNameExpirations = (): void => {
   const queryClient = useQueryClient();
   const networkSetting = useSelector(selectActiveNetworkSetting);
   const accountPublicKeys = useSelector(selectVaultAccountsPublicKeys);
+  const csprNameExpirations = useSelector(selectCsprNameExpirations);
 
   const network = getCasperNetwork(networkSetting);
 
@@ -41,7 +43,9 @@ export const useFetchCsprNameExpirations = (): void => {
           accountPublicKeys,
           accountsInfo,
           network,
-          accountInfoRepository
+          accountInfoRepository,
+          csprNameExpirations[network] ?? {},
+          Date.now()
         );
 
         dispatchToMainStore(
