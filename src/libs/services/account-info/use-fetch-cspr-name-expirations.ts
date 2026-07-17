@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 
 import { getCasperNetwork } from '@src/constants';
@@ -10,9 +10,11 @@ import { selectVaultAccountsPublicKeys } from '@background/redux/vault/selectors
 import { accountInfoRepository } from '@background/wallet-repositories';
 
 import { handleError } from '../utils';
+import { getAccountsInfoQueryOptions } from './accounts-info-query';
 import { getCsprNameExpirations } from './get-cspr-name-expirations';
 
 export const useFetchCsprNameExpirations = (): void => {
+  const queryClient = useQueryClient();
   const networkSetting = useSelector(selectActiveNetworkSetting);
   const accountPublicKeys = useSelector(selectVaultAccountsPublicKeys);
 
@@ -28,8 +30,16 @@ export const useFetchCsprNameExpirations = (): void => {
     refetchInterval: false,
     queryFn: async () => {
       try {
+        // Reuses the ACCOUNT_INFO cache entry populated by
+        // `useFetchAccountsInfo` on the same screen; fetches only on a miss,
+        // and a concurrent in-flight request with the same key is deduped.
+        const accountsInfo = await queryClient.ensureQueryData(
+          getAccountsInfoQueryOptions(accountPublicKeys, networkSetting)
+        );
+
         const { expirations, failedPublicKeys } = await getCsprNameExpirations(
           accountPublicKeys,
+          accountsInfo,
           network,
           accountInfoRepository
         );

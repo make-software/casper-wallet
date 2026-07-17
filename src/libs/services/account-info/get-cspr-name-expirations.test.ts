@@ -20,11 +20,11 @@ const makeInfo = (overrides: Record<string, unknown>) => ({
 
 describe('getCsprNameExpirations', () => {
   it('resolves expirations only for accounts that have a cspr.name', async () => {
+    const accountsInfo = {
+      'hash-pk-a': makeInfo({ csprName: 'alice.cspr' }),
+      'hash-pk-b': makeInfo({ csprName: null })
+    };
     const repository = {
-      getAccountsInfo: jest.fn().mockResolvedValue({
-        'hash-pk-a': makeInfo({ csprName: 'alice.cspr' }),
-        'hash-pk-b': makeInfo({ csprName: null })
-      }),
       resolveAccountFromCsprName: jest.fn().mockResolvedValue(
         makeInfo({
           csprName: 'alice.cspr',
@@ -35,15 +35,11 @@ describe('getCsprNameExpirations', () => {
 
     const { expirations, failedPublicKeys } = await getCsprNameExpirations(
       ['pk-a', 'pk-b'],
+      accountsInfo,
       network,
       repository
     );
 
-    expect(repository.getAccountsInfo).toHaveBeenCalledWith({
-      accountHashes: ['hash-pk-a', 'hash-pk-b'],
-      network,
-      withProxyHeader: false
-    });
     expect(repository.resolveAccountFromCsprName).toHaveBeenCalledTimes(1);
     expect(repository.resolveAccountFromCsprName).toHaveBeenCalledWith(
       'alice.cspr',
@@ -57,12 +53,12 @@ describe('getCsprNameExpirations', () => {
   });
 
   it('reports failed resolutions separately and skips names without an expiration date', async () => {
+    const accountsInfo = {
+      'hash-pk-a': makeInfo({ csprName: 'alice.cspr' }),
+      'hash-pk-b': makeInfo({ csprName: 'bob.cspr' }),
+      'hash-pk-c': makeInfo({ csprName: 'carol.cspr' })
+    };
     const repository = {
-      getAccountsInfo: jest.fn().mockResolvedValue({
-        'hash-pk-a': makeInfo({ csprName: 'alice.cspr' }),
-        'hash-pk-b': makeInfo({ csprName: 'bob.cspr' }),
-        'hash-pk-c': makeInfo({ csprName: 'carol.cspr' })
-      }),
       resolveAccountFromCsprName: jest
         .fn()
         .mockImplementation(async (csprName: string) => {
@@ -78,6 +74,7 @@ describe('getCsprNameExpirations', () => {
 
     const { expirations, failedPublicKeys } = await getCsprNameExpirations(
       ['pk-a', 'pk-b', 'pk-c'],
+      accountsInfo,
       network,
       repository
     );
@@ -93,17 +90,10 @@ describe('getCsprNameExpirations', () => {
     let maxInFlight = 0;
     const publicKeys = Array.from({ length: 12 }, (_, i) => `pk-${i}`);
 
+    const accountsInfo = Object.fromEntries(
+      publicKeys.map(pk => [`hash-${pk}`, makeInfo({ csprName: `${pk}.cspr` })])
+    );
     const repository = {
-      getAccountsInfo: jest
-        .fn()
-        .mockResolvedValue(
-          Object.fromEntries(
-            publicKeys.map(pk => [
-              `hash-${pk}`,
-              makeInfo({ csprName: `${pk}.cspr` })
-            ])
-          )
-        ),
       resolveAccountFromCsprName: jest.fn().mockImplementation(async () => {
         inFlight += 1;
         maxInFlight = Math.max(maxInFlight, inFlight);
@@ -115,6 +105,7 @@ describe('getCsprNameExpirations', () => {
 
     const { expirations } = await getCsprNameExpirations(
       publicKeys,
+      accountsInfo,
       network,
       repository
     );

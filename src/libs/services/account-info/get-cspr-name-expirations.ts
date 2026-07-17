@@ -20,11 +20,6 @@ export interface CsprNameExpirationsResult {
 }
 
 interface CsprNameResolver {
-  getAccountsInfo(params: {
-    accountHashes: string[];
-    network: CasperNetwork;
-    withProxyHeader?: boolean;
-  }): Promise<Record<string, IAccountInfo>>;
   resolveAccountFromCsprName(
     csprName: string,
     network: CasperNetwork,
@@ -34,6 +29,9 @@ interface CsprNameResolver {
 
 export const getCsprNameExpirations = async (
   accountPublicKeys: string[],
+  // Keyed by account hash; comes from the shared ACCOUNT_INFO query cache so
+  // this pipeline doesn't repeat the request `useFetchAccountsInfo` already made
+  accountsInfo: Record<string, IAccountInfo>,
   network: CasperNetwork,
   repository: CsprNameResolver
 ): Promise<CsprNameExpirationsResult> => {
@@ -43,12 +41,6 @@ export const getCsprNameExpirations = async (
       publicKey
     ])
   );
-
-  const accountsInfo = await repository.getAccountsInfo({
-    accountHashes: Object.keys(publicKeyByHash),
-    network,
-    withProxyHeader: false
-  });
 
   const accountsWithCsprName = Object.entries(accountsInfo).filter(([, info]) =>
     Boolean(info?.csprName)
