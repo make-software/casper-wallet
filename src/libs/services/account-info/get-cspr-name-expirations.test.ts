@@ -164,6 +164,95 @@ describe('getCsprNameExpirations', () => {
       expect(failedPublicKeys).toEqual([]);
     });
 
+    it('re-resolves a record expiring exactly at the notice-window boundary', async () => {
+      const boundaryDate = new Date(
+        now + CSPR_NAME_EXPIRATION_NOTICE_DAYS * DAY_MS
+      ).toISOString();
+      const repository = {
+        resolveAccountFromCsprName: jest.fn().mockResolvedValue(
+          makeInfo({
+            csprName: 'alice.cspr',
+            csprNameExpiresAt: boundaryDate
+          })
+        )
+      };
+
+      await getCsprNameExpirations(
+        ['pk-a'],
+        accountsInfo,
+        network,
+        repository,
+        {
+          'pk-a': {
+            csprName: 'alice.cspr',
+            expiresAt: boundaryDate,
+            dismissed: false
+          }
+        },
+        now
+      );
+
+      expect(repository.resolveAccountFromCsprName).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips resolution for a record expiring just past the notice-window boundary', async () => {
+      const justPastBoundaryDate = new Date(
+        now + CSPR_NAME_EXPIRATION_NOTICE_DAYS * DAY_MS + 1
+      ).toISOString();
+      const repository = { resolveAccountFromCsprName: jest.fn() };
+
+      const { expirations } = await getCsprNameExpirations(
+        ['pk-a'],
+        accountsInfo,
+        network,
+        repository,
+        {
+          'pk-a': {
+            csprName: 'alice.cspr',
+            expiresAt: justPastBoundaryDate,
+            dismissed: false
+          }
+        },
+        now
+      );
+
+      expect(repository.resolveAccountFromCsprName).not.toHaveBeenCalled();
+      expect(expirations).toEqual({
+        'pk-a': { csprName: 'alice.cspr', expiresAt: justPastBoundaryDate }
+      });
+    });
+
+    it('re-resolves a record whose stored date is unparseable, even when dismissed', async () => {
+      const repository = {
+        resolveAccountFromCsprName: jest.fn().mockResolvedValue(
+          makeInfo({
+            csprName: 'alice.cspr',
+            csprNameExpiresAt: farFutureDate
+          })
+        )
+      };
+
+      const { expirations } = await getCsprNameExpirations(
+        ['pk-a'],
+        accountsInfo,
+        network,
+        repository,
+        {
+          'pk-a': {
+            csprName: 'alice.cspr',
+            expiresAt: 'not-a-date',
+            dismissed: true
+          }
+        },
+        now
+      );
+
+      expect(repository.resolveAccountFromCsprName).toHaveBeenCalledTimes(1);
+      expect(expirations).toEqual({
+        'pk-a': { csprName: 'alice.cspr', expiresAt: farFutureDate }
+      });
+    });
+
     it('re-resolves a record within the notice window when it is not dismissed', async () => {
       const renewedDate = farFutureDate;
       const repository = {
