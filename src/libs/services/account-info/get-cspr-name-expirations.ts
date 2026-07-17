@@ -1,11 +1,20 @@
 import { CasperNetwork } from 'casper-wallet-core';
 import { IAccountInfo } from 'casper-wallet-core/src/domain/accountInfo';
 
-import { CSPR_NAME_RESOLUTION_BATCH_SIZE } from '@src/constants';
+import {
+  CSPR_NAME_EXPIRATION_NOTICE_DAYS,
+  CSPR_NAME_RESOLUTION_BATCH_SIZE
+} from '@src/constants';
+
+import {
+  CsprNameExpirationRecord,
+  CsprNameExpirationsByAccount
+} from '@background/redux/cspr-name-expirations/types';
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 
 import { handleError } from '../utils';
+import { DAY_MS } from './expiring-cspr-names';
 import { chunkArray } from './utils';
 
 export type CsprNameExpirationsPayload = Record<
@@ -27,13 +36,40 @@ interface CsprNameResolver {
   ): Promise<IAccountInfo | null>;
 }
 
+// An expired stored record counts as missing: a renewed name resolves to its
+// new date in the same cycle, a truly expired one resolves to null and gets
+// dropped by the reducer — which is also how stale records are cleaned up.
+const shouldResolve = (
+  csprName: string,
+  stored: CsprNameExpirationRecord,
+  now: number
+): boolean => {
+  if (stored.csprName !== csprName) {
+    return true;
+  }
+
+  const expiresAtMs = new Date(stored.expiresAt).getTime();
+
+  if (expiresAtMs <= now) {
+    return true;
+  }
+
+  if (expiresAtMs - now > CSPR_NAME_EXPIRATION_NOTICE_DAYS * DAY_MS) {
+    return false;
+  }
+
+  return !stored.dismissed;
+};
+
 export const getCsprNameExpirations = async (
   accountPublicKeys: string[],
   // Keyed by account hash; comes from the shared ACCOUNT_INFO query cache so
   // this pipeline doesn't repeat the request `useFetchAccountsInfo` already made
   accountsInfo: Record<string, IAccountInfo>,
   network: CasperNetwork,
-  repository: CsprNameResolver
+  repository: CsprNameResolver,
+  storedExpirations: CsprNameExpirationsByAccount,
+  now: number
 ): Promise<CsprNameExpirationsResult> => {
   const publicKeyByHash: Record<string, string> = Object.fromEntries(
     accountPublicKeys.map(publicKey => [
@@ -48,9 +84,33 @@ export const getCsprNameExpirations = async (
 
   const expirations: CsprNameExpirationsPayload = {};
   const failedPublicKeys: string[] = [];
+  const accountsToResolve: Array<[string, IAccountInfo]> = [];
+
+  for (const [accountHash, info] of accountsWithCsprName) {
+    const publicKey = publicKeyByHash[accountHash];
+
+    if (!publicKey || !info.csprName) {
+      continue;
+    }
+
+    const stored = storedExpirations[publicKey];
+
+    if (stored != null && !shouldResolve(info.csprName, stored, now)) {
+      // Re-emit the stored record verbatim so the reducer's sameNameAndDate
+      // check preserves the dismissed flag without a network call.
+      expirations[publicKey] = {
+        csprName: stored.csprName,
+        expiresAt: stored.expiresAt
+      };
+
+      continue;
+    }
+
+    accountsToResolve.push([accountHash, info]);
+  }
 
   for (const batch of chunkArray(
-    accountsWithCsprName,
+    accountsToResolve,
     CSPR_NAME_RESOLUTION_BATCH_SIZE
   )) {
     const resolved = await Promise.all(

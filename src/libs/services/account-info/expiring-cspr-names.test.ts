@@ -1,3 +1,5 @@
+import { CSPR_NAME_EXPIRATION_NOTICE_DAYS } from '@src/constants';
+
 import { getExpiringCsprNames } from './expiring-cspr-names';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -10,13 +12,21 @@ const record = (expiresAt: string, dismissed = false) => ({
 });
 
 describe('getExpiringCsprNames', () => {
-  it('returns only names expiring within the next 14 days', () => {
+  it('returns only names expiring within the notice window', () => {
     const result = getExpiringCsprNames(
       {
         'pk-past': record(new Date(NOW - DAY_MS).toISOString()),
         'pk-soon': record(new Date(NOW + 3 * DAY_MS).toISOString()),
-        'pk-edge': record(new Date(NOW + 14 * DAY_MS).toISOString()),
-        'pk-far': record(new Date(NOW + 15 * DAY_MS).toISOString())
+        'pk-edge': record(
+          new Date(
+            NOW + CSPR_NAME_EXPIRATION_NOTICE_DAYS * DAY_MS
+          ).toISOString()
+        ),
+        'pk-far': record(
+          new Date(
+            NOW + (CSPR_NAME_EXPIRATION_NOTICE_DAYS + 1) * DAY_MS
+          ).toISOString()
+        )
       },
       NOW
     );
