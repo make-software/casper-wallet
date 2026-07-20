@@ -14,29 +14,24 @@ const EXPORT_KEYS_URL = `popup.html#${RouterPath.DownloadAccountKeys}`;
 const SURFACE_WIDTH = 376;
 const SURFACE_HEIGHT = 700;
 
-// Both helpers are called fire-and-forget from onClick handlers, so they settle
-// their own failures rather than leaving an unhandled rejection. Same reasoning
-// as open-window.ts: a silent no-op with no trace is the worst outcome.
-
+// Rejects on failure — the caller is expected to tell the user. If this window
+// never opens there is no other surface on which the export could report back,
+// so swallowing here would leave the menu item looking simply dead.
 export async function openExportKeysSurface(): Promise<void> {
-  try {
-    const currentWindow = await windows.getCurrent();
+  const currentWindow = await windows.getCurrent();
 
-    // Firefox ignores width/height when the parent window is fullscreen and
-    // would open a tiny popup instead; omitting them lets it size the window
-    // itself. Chrome and Safari do this by default. Mirrors
-    // create-open-window.ts.
-    const isFullscreen = currentWindow.state === 'fullscreen';
+  // Firefox ignores width/height when the parent window is fullscreen and
+  // would open a tiny popup instead; omitting them lets it size the window
+  // itself. Chrome and Safari do this by default. Mirrors
+  // create-open-window.ts.
+  const isFullscreen = currentWindow.state === 'fullscreen';
 
-    await windows.create({
-      url: EXPORT_KEYS_URL,
-      type: 'popup',
-      focused: true,
-      ...(isFullscreen ? {} : { width: SURFACE_WIDTH, height: SURFACE_HEIGHT })
-    });
-  } catch (error) {
-    console.error('openExportKeysSurface: failed to open export window', error);
-  }
+  await windows.create({
+    url: EXPORT_KEYS_URL,
+    type: 'popup',
+    focused: true,
+    ...(isFullscreen ? {} : { width: SURFACE_WIDTH, height: SURFACE_HEIGHT })
+  });
 }
 
 export async function closeExportKeysSurface(): Promise<void> {

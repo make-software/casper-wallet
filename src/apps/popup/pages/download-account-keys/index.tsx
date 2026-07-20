@@ -17,6 +17,7 @@ import { AccountListRows } from '@libs/types/account';
 import { Button } from '@libs/ui/components';
 
 import { Download } from './download';
+import { Failure } from './failure';
 import { Instruction } from './instruction';
 import { Success } from './success';
 import { DownloadAccountKeysSteps, downloadFile } from './utils';
@@ -67,14 +68,15 @@ export const DownloadAccountKeysPage = () => {
 
       setDownloadAccountKeysStep(DownloadAccountKeysSteps.Success);
     } catch (error) {
-      // Stay on this step: advancing to Success here is exactly the false
-      // "your keys were saved" this ticket exists to remove. Only the error
-      // name is logged — the thrown value is built from key material and must
-      // not reach the console.
+      // Only the error name is logged — the thrown value is built from key
+      // material and must not reach the console. Nothing collects these logs
+      // (the project has no Sentry or equivalent), so the Failure step below is
+      // the only way this reaches anyone.
       console.error(
         'downloadKeys: failed to build or download the keys archive',
         error instanceof Error ? error.name : 'unknown error'
       );
+      setDownloadAccountKeysStep(DownloadAccountKeysSteps.Failure);
     }
   };
 
@@ -86,7 +88,8 @@ export const DownloadAccountKeysPage = () => {
         setSelectedAccounts={setSelectedAccounts}
       />
     ),
-    [DownloadAccountKeysSteps.Success]: <Success />
+    [DownloadAccountKeysSteps.Success]: <Success />,
+    [DownloadAccountKeysSteps.Failure]: <Failure />
   };
 
   const headerButton = {
@@ -108,6 +111,12 @@ export const DownloadAccountKeysPage = () => {
       />
     ),
     [DownloadAccountKeysSteps.Success]: (
+      <HeaderSubmenuBarNavLink
+        linkType="close"
+        onClick={() => closeExportKeysSurface()}
+      />
+    ),
+    [DownloadAccountKeysSteps.Failure]: (
       <HeaderSubmenuBarNavLink
         linkType="close"
         onClick={() => closeExportKeysSurface()}
@@ -139,6 +148,17 @@ export const DownloadAccountKeysPage = () => {
           <Trans t={t}>Download again</Trans>
         </Button>
       </>
+    ),
+    // Back to account selection rather than retrying blind: the selection is
+    // still in state, so the user can confirm or change it before trying again.
+    [DownloadAccountKeysSteps.Failure]: (
+      <Button
+        onClick={() =>
+          setDownloadAccountKeysStep(DownloadAccountKeysSteps.Download)
+        }
+      >
+        <Trans t={t}>Try again</Trans>
+      </Button>
     )
   };
 

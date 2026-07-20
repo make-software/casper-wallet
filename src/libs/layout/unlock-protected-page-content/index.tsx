@@ -30,11 +30,16 @@ interface PasswordPageContentType {
   register: UseFormRegister<PasswordFormValues>;
   errors: FieldErrors<PasswordFormValues>;
   title?: string;
+  // Mirrors the submit button's disabled state. Without it the field stays
+  // editable while the password is being verified, so a user who hits Enter can
+  // keep typing into a form that is already on its way out.
+  disabled?: boolean;
 }
 export const UnlockProtectedPageContent = ({
   register,
   errors,
-  title
+  title,
+  disabled
 }: PasswordPageContentType) => {
   const [passwordInputType, setPasswordInputType] =
     useState<PasswordInputType>('password');
@@ -79,6 +84,7 @@ export const UnlockProtectedPageContent = ({
           error={!!errors.password}
           validationText={errors.password?.message}
           autoFocus
+          disabled={disabled}
           suffixIcon={
             <PasswordVisibilityIcon
               passwordInputType={passwordInputType}

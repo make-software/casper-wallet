@@ -175,7 +175,11 @@ export const PasswordProtectionPage = ({
         )
       }
       renderContent={() => (
-        <UnlockProtectedPageContent errors={errors} register={register} />
+        <UnlockProtectedPageContent
+          errors={errors}
+          register={register}
+          disabled={isSubmitting || isLoading}
+        />
       )}
       renderFooter={() => (
         <FooterButtonsContainer>

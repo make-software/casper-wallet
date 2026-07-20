@@ -1,7 +1,11 @@
 export enum DownloadAccountKeysSteps {
   Instruction = 'instruction',
   Download = 'download',
-  Success = 'success'
+  Success = 'success',
+  // Reached only when the export throws. Deliberately a step of its own rather
+  // than a banner on Success: the user must never see "your keys were saved"
+  // alongside a failure (WALLET-1345).
+  Failure = 'failure'
 }
 
 export const downloadFile = (content: Blob, filename: string): void => {
