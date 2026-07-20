@@ -14,26 +14,44 @@ const EXPORT_KEYS_URL = `popup.html#${RouterPath.DownloadAccountKeys}`;
 const SURFACE_WIDTH = 376;
 const SURFACE_HEIGHT = 700;
 
+// Both helpers are called fire-and-forget from onClick handlers, so they settle
+// their own failures rather than leaving an unhandled rejection. Same reasoning
+// as open-window.ts: a silent no-op with no trace is the worst outcome.
+
 export async function openExportKeysSurface(): Promise<void> {
-  const currentWindow = await windows.getCurrent();
+  try {
+    const currentWindow = await windows.getCurrent();
 
-  // Firefox ignores width/height when the parent window is fullscreen and would
-  // open a tiny popup instead; omitting them lets it size the window itself.
-  // Chrome and Safari do this by default. Mirrors create-open-window.ts.
-  const isFullscreen = currentWindow.state === 'fullscreen';
+    // Firefox ignores width/height when the parent window is fullscreen and
+    // would open a tiny popup instead; omitting them lets it size the window
+    // itself. Chrome and Safari do this by default. Mirrors
+    // create-open-window.ts.
+    const isFullscreen = currentWindow.state === 'fullscreen';
 
-  await windows.create({
-    url: EXPORT_KEYS_URL,
-    type: 'popup',
-    focused: true,
-    ...(isFullscreen ? {} : { width: SURFACE_WIDTH, height: SURFACE_HEIGHT })
-  });
+    await windows.create({
+      url: EXPORT_KEYS_URL,
+      type: 'popup',
+      focused: true,
+      ...(isFullscreen ? {} : { width: SURFACE_WIDTH, height: SURFACE_HEIGHT })
+    });
+  } catch (error) {
+    console.error('openExportKeysSurface: failed to open export window', error);
+  }
 }
 
 export async function closeExportKeysSurface(): Promise<void> {
-  const currentWindow = await windows.getCurrent();
+  try {
+    const currentWindow = await windows.getCurrent();
 
-  if (currentWindow.id != null) {
-    await windows.remove(currentWindow.id);
+    if (currentWindow.id != null) {
+      await windows.remove(currentWindow.id);
+    }
+  } catch (error) {
+    // The window stays open and the user can still close it from the title bar,
+    // so this is recoverable — but it must not vanish without a trace.
+    console.error(
+      'closeExportKeysSurface: failed to close export window',
+      error
+    );
   }
 }

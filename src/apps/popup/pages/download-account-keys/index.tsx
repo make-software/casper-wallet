@@ -47,25 +47,35 @@ export const DownloadAccountKeysPage = () => {
   }
 
   const downloadKeys = async () => {
-    const zip = new JSZip();
+    try {
+      const zip = new JSZip();
 
-    for (const account of selectedAccounts) {
-      const asymmetricKey = createAsymmetricKeys(
-        account.publicKey,
-        account.secretKey
-      );
+      for (const account of selectedAccounts) {
+        const asymmetricKey = createAsymmetricKeys(
+          account.publicKey,
+          account.secretKey
+        );
 
-      if (asymmetricKey.secretKey) {
-        const file = asymmetricKey.secretKey.toPem();
-        zip.file(`${account.name}_secret_key.pem`, file);
+        if (asymmetricKey.secretKey) {
+          const file = asymmetricKey.secretKey.toPem();
+          zip.file(`${account.name}_secret_key.pem`, file);
+        }
       }
-    }
 
-    await zip.generateAsync({ type: 'blob' }).then(function (content) {
+      const content = await zip.generateAsync({ type: 'blob' });
       downloadFile(new Blob([content]), 'casper-wallet-secret_keys.zip');
-    });
 
-    setDownloadAccountKeysStep(DownloadAccountKeysSteps.Success);
+      setDownloadAccountKeysStep(DownloadAccountKeysSteps.Success);
+    } catch (error) {
+      // Stay on this step: advancing to Success here is exactly the false
+      // "your keys were saved" this ticket exists to remove. Only the error
+      // name is logged — the thrown value is built from key material and must
+      // not reach the console.
+      console.error(
+        'downloadKeys: failed to build or download the keys archive',
+        error instanceof Error ? error.name : 'unknown error'
+      );
+    }
   };
 
   const content = {
