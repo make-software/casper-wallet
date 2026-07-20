@@ -77,7 +77,16 @@ const selectPopupState = (state: RootState): PopupState => {
     session: { ...state.session, encryptionKeyHash: null },
     loginRetryCount: state.loginRetryCount,
     vault: state.vault,
-    windowManagement: state.windowManagement,
+    // Narrowed on purpose: `pendingRequests` maps each in-flight requestId to
+    // its dapp origin + tabId. The approval window is a single reused slot, so
+    // requests from two different origins can be open at once — broadcasting
+    // the whole slice would put dapp A's origin into dapp B's UI replica. No
+    // UI reads it (only `selectWindowId` is consumed, in use-window-manager);
+    // the cancel-on-close path reads it in the background, off the real store.
+    windowManagement: {
+      windowId: state.windowManagement.windowId,
+      requests: state.windowManagement.requests
+    },
     loginRetryLockoutTime: state.loginRetryLockoutTime,
     lastActivityTime: state.lastActivityTime,
     activeOrigin: state.activeOrigin,
@@ -230,5 +239,11 @@ export type MainStore = Awaited<
 >;
 
 export function createMainStoreReplica<T extends PopupState>(state: T) {
-  return createStore(state);
+  // `selectPopupState` strips `pendingRequests` (dapp origins + tabIds stay in
+  // the background). Restore the shape the slice reducer expects with an empty
+  // map — truthful, since a replica genuinely holds no request descriptors.
+  return createStore({
+    ...state,
+    windowManagement: { ...state.windowManagement, pendingRequests: {} }
+  });
 }
