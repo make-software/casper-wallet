@@ -3,7 +3,8 @@ import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
-import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { closeExportKeysSurface } from '@background/open-export-keys-surface';
 
 import { createAsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 import {
@@ -31,7 +32,6 @@ export const DownloadAccountKeysPage = () => {
   );
 
   const { t } = useTranslation();
-  const navigate = useTypedNavigate();
 
   const setPasswordConfirmed = useCallback(() => {
     setIsPasswordConfirmed(true);
@@ -39,7 +39,10 @@ export const DownloadAccountKeysPage = () => {
 
   if (!isPasswordConfirmed) {
     return (
-      <PasswordProtectionPage setPasswordConfirmed={setPasswordConfirmed} />
+      <PasswordProtectionPage
+        setPasswordConfirmed={setPasswordConfirmed}
+        onCloseWindow={() => closeExportKeysSurface()}
+      />
     );
   }
 
@@ -77,8 +80,14 @@ export const DownloadAccountKeysPage = () => {
   };
 
   const headerButton = {
+    // "Back" is only used where it genuinely steps back inside the flow. The
+    // entry step has nowhere to go back to in a dedicated window, so it closes
+    // instead — labelling that "Back" would be a lie (WALLET-1345).
     [DownloadAccountKeysSteps.Instruction]: (
-      <HeaderSubmenuBarNavLink linkType="back" />
+      <HeaderSubmenuBarNavLink
+        linkType="close"
+        onClick={() => closeExportKeysSurface()}
+      />
     ),
     [DownloadAccountKeysSteps.Download]: (
       <HeaderSubmenuBarNavLink
@@ -89,7 +98,10 @@ export const DownloadAccountKeysPage = () => {
       />
     ),
     [DownloadAccountKeysSteps.Success]: (
-      <HeaderSubmenuBarNavLink linkType="close" />
+      <HeaderSubmenuBarNavLink
+        linkType="close"
+        onClick={() => closeExportKeysSurface()}
+      />
     )
   };
 
@@ -109,19 +121,25 @@ export const DownloadAccountKeysPage = () => {
       </Button>
     ),
     [DownloadAccountKeysSteps.Success]: (
-      <Button onClick={() => navigate(RouterPath.Home)}>
-        <Trans t={t}>Done</Trans>
-      </Button>
+      <>
+        <Button onClick={() => closeExportKeysSurface()}>
+          <Trans t={t}>Done</Trans>
+        </Button>
+        <Button color="secondaryBlue" onClick={downloadKeys}>
+          <Trans t={t}>Download again</Trans>
+        </Button>
+      </>
     )
   };
 
   return (
     <PopupLayout
       renderHeader={() => (
+        // Deliberately bare: this window exists to export secret keys and
+        // nothing else. The wallet menu / network switcher / connection status
+        // would let the user navigate the full wallet inside a 376px export
+        // window and strand themselves there (WALLET-1345).
         <HeaderPopup
-          withNetworkSwitcher
-          withMenu
-          withConnectionStatus
           renderSubmenuBarItems={() => headerButton[downloadAccountKeysStep]}
         />
       )}

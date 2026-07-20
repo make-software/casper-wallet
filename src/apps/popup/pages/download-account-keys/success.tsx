@@ -24,7 +24,16 @@ export const Success = () => {
 
       <ParagraphContainer top={SpacingSize.XL}>
         <Typography type="header">
-          <Trans t={t}>You downloaded account private key(s)</Trans>
+          <Trans t={t}>Check your Downloads folder</Trans>
+        </Typography>
+      </ParagraphContainer>
+
+      <ParagraphContainer top={SpacingSize.Medium}>
+        <Typography type="body" color="contentSecondary">
+          <Trans t={t}>
+            Look for casper-wallet-secret_keys.zip in your Downloads folder. If
+            it isn’t there, the download didn’t complete — try again.
+          </Trans>
         </Typography>
       </ParagraphContainer>
 

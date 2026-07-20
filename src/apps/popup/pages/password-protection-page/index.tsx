@@ -34,6 +34,12 @@ interface BackupSecretPhrasePasswordPageType {
   setPasswordConfirmed?: () => void;
   onClick?: (password: string) => Promise<void>;
   isLoading?: boolean;
+  // Set when this page is rendered inside a dedicated window rather than the
+  // extension popup (WALLET-1345). Such a window has a single history entry, so
+  // the default "back" link is a no-op and would trap the user; it also has no
+  // business showing the wallet menu / network switcher. Passing this swaps the
+  // header for a bare one whose only action closes the window.
+  onCloseWindow?: () => void;
 }
 
 interface VerifyPasswordMessageEvent extends MessageEvent {
@@ -45,7 +51,8 @@ interface VerifyPasswordMessageEvent extends MessageEvent {
 export const PasswordProtectionPage = ({
   setPasswordConfirmed,
   onClick,
-  isLoading = false
+  isLoading = false,
+  onCloseWindow
 }: BackupSecretPhrasePasswordPageType) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -146,16 +153,27 @@ export const PasswordProtectionPage = ({
     <PopupLayout
       variant="form"
       onSubmit={handleSubmit(onSubmit)}
-      renderHeader={() => (
-        <HeaderPopup
-          withNetworkSwitcher
-          withMenu
-          withConnectionStatus
-          renderSubmenuBarItems={() => (
-            <HeaderSubmenuBarNavLink linkType="back" />
-          )}
-        />
-      )}
+      renderHeader={() =>
+        onCloseWindow ? (
+          <HeaderPopup
+            renderSubmenuBarItems={() => (
+              <HeaderSubmenuBarNavLink
+                linkType="close"
+                onClick={onCloseWindow}
+              />
+            )}
+          />
+        ) : (
+          <HeaderPopup
+            withNetworkSwitcher
+            withMenu
+            withConnectionStatus
+            renderSubmenuBarItems={() => (
+              <HeaderSubmenuBarNavLink linkType="back" />
+            )}
+          />
+        )
+      }
       renderContent={() => (
         <UnlockProtectedPageContent errors={errors} register={register} />
       )}
