@@ -37,7 +37,7 @@ export const TERMS_URLS = {
 export const CASHBACK_URL = 'https://www.cspr.shopping';
 export const REFERRER_URL = 'https://casperwallet.io';
 
-export const CSPR_NAME_URL = 'https://cspr.name';
+export const MY_CSPR_NAME_URL = 'https://cspr.name/my-names';
 
 export const CSPR_NAME_EXPIRATION_NOTICE_DAYS = 14 + 365;
 export const CSPR_NAME_RESOLUTION_BATCH_SIZE = 5;
