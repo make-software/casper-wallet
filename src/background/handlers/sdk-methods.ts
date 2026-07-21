@@ -75,7 +75,14 @@ export async function handleSdkMethod(
         response: sdkMethod.connectResponse(true, action.meta)
       };
     } else {
-      store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
+      store.dispatch(
+        windowRequestOpened({
+          requestId: action.meta.requestId,
+          tabId: senderTabId,
+          origin,
+          method: 'connect'
+        })
+      );
       openWindow(store, {
         windowApp: WindowApp.ConnectToApp,
         searchParams: query
@@ -104,7 +111,14 @@ export async function handleSdkMethod(
       query.title = action.payload.title;
     }
 
-    store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
+    store.dispatch(
+      windowRequestOpened({
+        requestId: action.meta.requestId,
+        tabId: senderTabId,
+        origin,
+        method: 'switchAccount'
+      })
+    );
     openWindow(store, {
       windowApp: WindowApp.SwitchAccount,
       searchParams: query
@@ -158,7 +172,14 @@ export async function handleSdkMethod(
       })
     );
 
-    store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
+    store.dispatch(
+      windowRequestOpened({
+        requestId: action.meta.requestId,
+        tabId: senderTabId,
+        origin,
+        method: 'sign'
+      })
+    );
     openWindow(store, {
       windowApp: WindowApp.SignatureRequestDeploy,
       searchParams: {
@@ -184,7 +205,14 @@ export async function handleSdkMethod(
 
     const { signingPublicKeyHex, message } = action.payload;
 
-    store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
+    store.dispatch(
+      windowRequestOpened({
+        requestId: action.meta.requestId,
+        tabId: senderTabId,
+        origin,
+        method: 'signMessage'
+      })
+    );
     openWindow(store, {
       windowApp: WindowApp.SignatureRequestMessage,
       searchParams: {
@@ -218,7 +246,14 @@ export async function handleSdkMethod(
       })
     );
 
-    store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
+    store.dispatch(
+      windowRequestOpened({
+        requestId: action.meta.requestId,
+        tabId: senderTabId,
+        origin,
+        method: 'signTypedData'
+      })
+    );
     openWindow(store, {
       windowApp: WindowApp.SignatureRequestEip712,
       searchParams: {
@@ -245,7 +280,14 @@ export async function handleSdkMethod(
 
     const { signingPublicKeyHex, message } = action.payload;
 
-    store.dispatch(windowRequestOpened({ requestId: action.meta.requestId }));
+    store.dispatch(
+      windowRequestOpened({
+        requestId: action.meta.requestId,
+        tabId: senderTabId,
+        origin,
+        method: 'decryptMessage'
+      })
+    );
     openWindow(store, {
       windowApp: WindowApp.DecryptMessageRequest,
       searchParams: {
