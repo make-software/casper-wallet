@@ -5,6 +5,7 @@ import * as activeOriginFavicon from './active-origin-favicon/actions';
 import * as activeOrigin from './active-origin/actions';
 import * as appEvents from './app-events/actions';
 import * as contacts from './contacts/actions';
+import * as csprNameExpirations from './cspr-name-expirations/actions';
 import * as keys from './keys/actions';
 import * as lastActivityTime from './last-activity-time/actions';
 import * as ledger from './ledger/actions';
@@ -39,7 +40,8 @@ const reduxAction = {
   rateApp,
   ledger,
   appEvents,
-  trustedWasm
+  trustedWasm,
+  csprNameExpirations
 };
 
 export type ReduxAction = ActionType<typeof reduxAction>;

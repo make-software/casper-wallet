@@ -78,6 +78,16 @@ export const formatDate = (isoString: string): string => {
   })}`;
 };
 
+export const formatShortDate = (value: string): string => {
+  const date = new Date(value);
+
+  return new Intl.DateTimeFormat('en', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(date);
+};
+
 const formatDistance = (
   token: FormatDistanceToken,
   count: number,

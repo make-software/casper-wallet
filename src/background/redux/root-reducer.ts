@@ -5,6 +5,7 @@ import { reducer as activeOriginFavicon } from './active-origin-favicon/reducer'
 import { reducer as activeOrigin } from './active-origin/reducer';
 import { reducer as appEvents } from './app-events/reducer';
 import { reducer as contacts } from './contacts/reducer';
+import { reducer as csprNameExpirations } from './cspr-name-expirations/reducer';
 import { reducer as keys } from './keys/reducer';
 import { reducer as lastActivityTime } from './last-activity-time/reducer';
 import { reducer as ledger } from './ledger/reducer';
@@ -37,7 +38,8 @@ const rootReducer = combineReducers({
   rateApp,
   ledger,
   appEvents,
-  trustedWasm
+  trustedWasm,
+  csprNameExpirations
 });
 
 export default rootReducer;

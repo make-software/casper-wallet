@@ -1,4 +1,5 @@
 import { CasperNetworkName } from 'casper-js-sdk';
+import { CasperNetwork } from 'casper-wallet-core';
 
 const SECOND = 1000;
 
@@ -35,6 +36,11 @@ export const TERMS_URLS = {
 };
 export const CASHBACK_URL = 'https://www.cspr.shopping';
 export const REFERRER_URL = 'https://casperwallet.io';
+
+export const MY_CSPR_NAME_URL = 'https://cspr.name/my-names';
+
+export const CSPR_NAME_EXPIRATION_NOTICE_DAYS = 14;
+export const CSPR_NAME_RESOLUTION_BATCH_SIZE = 5;
 
 export const getBlockExplorerAccountUrl = (
   casperLiveUrl: string,
@@ -81,6 +87,18 @@ export enum NetworkSetting {
   Devnet = 'Devnet',
   Integration = 'Integration'
 }
+
+// Compiler-checked alternative to `networkSetting.toLowerCase() as CasperNetwork`:
+// if either enum gains a member, tsc fails here instead of the cast silently lying.
+const casperNetworkByNetworkSetting: Record<NetworkSetting, CasperNetwork> = {
+  [NetworkSetting.Mainnet]: 'mainnet',
+  [NetworkSetting.Testnet]: 'testnet',
+  [NetworkSetting.Devnet]: 'devnet',
+  [NetworkSetting.Integration]: 'integration'
+};
+
+export const getCasperNetwork = (network: NetworkSetting): CasperNetwork =>
+  casperNetworkByNetworkSetting[network];
 
 export enum Browser {
   Safari = 'safari',

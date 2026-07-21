@@ -19,6 +19,7 @@ import { ContactsBookPage } from '@popup/pages/contacts';
 import { CreateAccountPage } from '@popup/pages/create-account';
 import { DeployDetailsPage } from '@popup/pages/deploy-details';
 import { DownloadAccountKeysPage } from '@popup/pages/download-account-keys';
+import { ExpiringCsprNamesPage } from '@popup/pages/expiring-cspr-names';
 import { HomePageContent } from '@popup/pages/home';
 import { ImportAccountFromLedgerPage } from '@popup/pages/import-account-from-ledger';
 import { ImportAccountFromTorusPage } from '@popup/pages/import-account-from-torus';
@@ -253,6 +254,10 @@ function AppRoutes() {
       <Route path={RouterPath.DeployDetails} element={<DeployDetailsPage />} />
       <Route path={RouterPath.AddWatchAccount} element={<AddWatchAccount />} />
       <Route path={RouterPath.BringWeb3Unlock} element={<BringWeb3Unlock />} />
+      <Route
+        path={RouterPath.ExpiringCsprNames}
+        element={<ExpiringCsprNamesPage />}
+      />
     </Routes>
   );
 }

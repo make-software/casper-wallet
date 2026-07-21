@@ -12,7 +12,9 @@ module.exports = {
   moduleNameMapper: {
     '^@src/(.*)$': '<rootDir>/src/$1',
     '^@content/sdk-types$': '<rootDir>/src/content/sdk-types',
-    '^@libs/types/(.*)$': '<rootDir>/src/libs/types/$1'
+    '^@libs/types/(.*)$': '<rootDir>/src/libs/types/$1',
+    '^@libs/(.*)$': '<rootDir>/src/libs/$1',
+    '^@background/(.*)$': '<rootDir>/src/background/$1'
   },
   setupFilesAfterEnv: ['@testing-library/jest-dom'],
   coverageReporters: ['json', 'text'],

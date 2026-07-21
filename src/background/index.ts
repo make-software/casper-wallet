@@ -52,6 +52,10 @@ import {
   contactsReseted,
   newContactAdded
 } from '@background/redux/contacts/actions';
+import {
+  csprNameExpirationsUpdated,
+  expiringCsprNamesDismissed
+} from '@background/redux/cspr-name-expirations/actions';
 import { getExistingMainStoreSingletonOrInit } from '@background/redux/get-main-store';
 import {
   CheckAccountNameIsTakenAction,
@@ -825,6 +829,8 @@ runtime.onMessage.addListener(
           case getType(addWatchingAccount):
           case getType(dismissAppEvent):
           case getType(resetAppEventsDismission):
+          case getType(csprNameExpirationsUpdated):
+          case getType(expiringCsprNamesDismissed):
           case getType(addWasmToTrusted):
           case getType(removeWasmFromTrusted):
           case getType(removeAllWasmFromTrustedOrigin):
