@@ -1,7 +1,6 @@
-import { QRCodeCanvas } from 'qrcode.react';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import {
   CenteredFlexRow,
@@ -9,11 +8,15 @@ import {
   ParagraphContainer,
   SpacingSize
 } from '@libs/layout';
-import { Typography } from '@libs/ui/components';
+import { QrCode, Typography } from '@libs/ui/components';
 
+// The symbol carries its own white quiet zone (see QrCode), so the card adds no
+// padding of its own — the full content width goes to the symbol instead, which
+// is what keeps the modules big enough to scan. The canvas covers the card
+// edge to edge, so the card needs no background of its own either; `overflow`
+// keeps the square canvas inside the rounded corners.
 const QRContainer = styled(CenteredFlexRow)`
-  padding: 20px 16px;
-  background-color: ${({ theme }) => theme.color.backgroundPrimary};
+  overflow: hidden;
   border-radius: ${({ theme }) => theme.borderRadius.base}px;
   margin-top: 24px;
 `;
@@ -25,7 +28,6 @@ interface WalletQrCodePageContentProps {
 export const WalletQrCodePageContent = ({
   qrStrings
 }: WalletQrCodePageContentProps) => {
-  const theme = useTheme();
   const [currentQrIndex, setCurrentQrIndex] = useState<number>(0);
 
   useEffect(() => {
@@ -59,14 +61,7 @@ export const WalletQrCodePageContent = ({
         </Typography>
       </ParagraphContainer>
       <QRContainer>
-        <QRCodeCanvas
-          id="qrCode"
-          value={qrStrings[currentQrIndex]}
-          size={296}
-          fgColor={theme.color.contentPrimary}
-          bgColor={theme.color.backgroundPrimary}
-          level={'H'}
-        />
+        <QrCode value={qrStrings[currentQrIndex]} size={328} />
       </QRContainer>
     </ContentContainer>
   );

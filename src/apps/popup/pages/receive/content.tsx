@@ -1,8 +1,7 @@
-import { QRCodeCanvas } from 'qrcode.react';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import { formatCep18Tokens } from '@popup/pages/home/components/tokens-list/utils';
 import { useTypedLocation } from '@popup/router';
@@ -20,7 +19,12 @@ import {
 } from '@libs/layout';
 import { useFetchWalletBalance } from '@libs/services/balance-service';
 import { useFetchCep18Tokens } from '@libs/services/cep18-service';
-import { ActiveAccountPlate, Tile, Typography } from '@libs/ui/components';
+import {
+  ActiveAccountPlate,
+  QrCode,
+  Tile,
+  Typography
+} from '@libs/ui/components';
 import { motesToCSPR } from '@libs/ui/utils';
 
 const Container = styled.div`
@@ -42,7 +46,6 @@ interface ITokenData {
 
 export const ReceivePageContent = () => {
   const { t } = useTranslation();
-  const theme = useTheme();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
 
@@ -91,14 +94,7 @@ export const ReceivePageContent = () => {
         <Tile>
           <Container>
             <FlexColumn gap={SpacingSize.Medium}>
-              <QRCodeCanvas
-                id="qrCode"
-                value={activeAccount?.publicKey || ''}
-                size={296}
-                fgColor={theme.color.contentPrimary}
-                bgColor={theme.color.backgroundPrimary}
-                level={'H'}
-              />
+              <QrCode value={activeAccount?.publicKey || ''} size={296} />
               {isClicked ? (
                 <Typography type="captionHash" color="contentPositive">
                   <Trans t={t}>Address copied!</Trans>
