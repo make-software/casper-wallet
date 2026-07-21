@@ -31,7 +31,7 @@ export function SwitchAccountPage() {
 
   const handleCancel = async () => {
     await sendSdkResponseToSpecificTab(
-      sdkMethod.connectResponse(false, { requestId }),
+      sdkMethod.switchAccountResponse(false, { requestId }),
       requestTabId
     );
     closeCurrentWindow();

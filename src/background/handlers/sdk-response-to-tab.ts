@@ -8,8 +8,8 @@ import {
   SDK_RESPONSE_TO_TAB,
   SdkResponseToTabMessage
 } from '@background/send-sdk-response-to-specific-tab';
-import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 
+import { deliverViaOrigin } from './deliver-via-origin';
 import { isTrustedUiSender } from './private-state';
 import { HandlerResult } from './types';
 
@@ -27,26 +27,6 @@ function recoverDappOrigin(url: string | undefined): string | null {
     return new URL(url).searchParams.get('origin');
   } catch {
     return null;
-  }
-}
-
-// Same-origin delivery fallback. Returns the number of tabs the response was
-// SUCCESSFULLY delivered to (0 when there is no recoverable origin, or when the
-// broadcast matched no active same-origin tab). Wrapping the emit isolates a
-// `tabs.query`-level rejection so the caller's error-surface dispatch still runs
-// and the handler never rejects back to the signature page.
-async function deliverViaOrigin(
-  origin: string | null,
-  action: SdkResponseToTabMessage['action']
-): Promise<number> {
-  if (!origin) {
-    return 0;
-  }
-  try {
-    return await emitSdkEventToActiveTabsWithOrigin(origin, action);
-  } catch {
-    // tabs.query / query-level failure → nothing delivered.
-    return 0;
   }
 }
 
@@ -72,14 +52,14 @@ function deliveryFailedError(tabId: unknown, fallbackDelivered: boolean) {
 // FIRST response for a request wins, later ones are dropped — atomically,
 // because the background store is the single writer.
 //
-// CRITICAL: drop ONLY when the request is already 'responded', NEVER on 'closed'.
-// `handleCancel` fires on `beforeunload` and sends its response just before the
-// window unloads; the `windows.onRemoved` listener then dispatches
-// `windowClosed()` (marking still-open requests 'closed'). These race. Dropping
-// on 'closed' would suppress a legitimate beforeunload-cancel for a window that
-// closed WITHOUT a prior response (dapp left hanging). Dropping only on
-// 'responded' kills the real duplicate (a cancel after a successful sign, where
+// CRITICAL: drop ONLY when the request is already 'responded'. When the tracked
+// approval window closes, the `windows.onRemoved` listener runs
+// `cancelOpenRequestsForClosedWindow`, which — after a short grace — marks each
+// request it cancels 'responded' (via `windowRequestResponded`). Dropping only on
+// 'responded' kills the real duplicate (a cancel racing a successful sign, where
 // the sign already set 'responded') without ever suppressing a first response.
+// ('closed' is now dispatch-dead: the close path uses `windowIdCleared`, not
+// `windowClosed`; the never-drop-on-'closed' stance is kept defensively.)
 export async function handleSdkResponseToTab(
   message: unknown,
   sender: Runtime.MessageSender,
@@ -136,10 +116,10 @@ export async function handleSdkResponseToTab(
 
   // Mark responded OPTIMISTICALLY, BEFORE the await. `runtime.onMessage`
   // handlers interleave at every `await`, so two near-simultaneous responses
-  // for the same requestId (the P0.5 repro: handleSign sends, then
-  // closeCurrentWindow → beforeunload → handleCancel sends) would BOTH read
-  // status `undefined` if we marked after the send — and both would reach the
-  // dapp. Dispatching synchronously here (before yielding the event loop) means
+  // for the same requestId (e.g. a genuine sign response racing the close-cancel
+  // emitted by `cancelOpenRequestsForClosedWindow`) would BOTH read status
+  // `undefined` if we marked after the send — and both would reach the dapp.
+  // Dispatching synchronously here (before yielding the event loop) means
   // a second message processed during the first's in-flight send reads
   // 'responded' and drops. Trade-off: on a genuine delivery failure the request
   // stays 'responded' and any retry is dropped — acceptable, since delivery

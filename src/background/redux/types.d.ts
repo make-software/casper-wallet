@@ -21,7 +21,10 @@ export type PopupState = {
   session: SessionState;
   loginRetryCount: LoginRetryCountState;
   vault: VaultState;
-  windowManagement: WindowManagementState;
+  // `pendingRequests` is deliberately NOT broadcast: it holds each in-flight
+  // request's dapp origin and tabId, and only background code needs it. See
+  // the narrowing in `selectPopupState`.
+  windowManagement: Omit<WindowManagementState, 'pendingRequests'>;
   loginRetryLockoutTime: LoginRetryLockoutTimeState;
   lastActivityTime: LastActivityTimeState;
   settings: SettingsState;

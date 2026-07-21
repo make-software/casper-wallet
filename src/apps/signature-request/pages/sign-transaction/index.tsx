@@ -279,12 +279,6 @@ export function SignTransactionPage() {
     closeCurrentWindow();
   }, [requestId, requestTabId]);
 
-  useEffect(() => {
-    window.addEventListener('beforeunload', handleCancel);
-
-    return () => window.removeEventListener('beforeunload', handleCancel);
-  }, [handleCancel]);
-
   const {
     ledgerEventStatusToRender,
     makeSubmitLedgerAction,
