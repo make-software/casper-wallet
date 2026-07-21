@@ -172,7 +172,14 @@ describe('connectRequest', () => {
     );
 
     expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({ payload: { requestId: 'req-1' } })
+      expect.objectContaining({
+        payload: {
+          requestId: 'req-1',
+          tabId: 9,
+          origin: ORIGIN,
+          method: 'connect'
+        }
+      })
     );
     expect(openWindowMock).toHaveBeenCalledWith(
       store,
@@ -211,6 +218,16 @@ describe('switchAccountRequest', () => {
       store
     );
     expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: {
+          requestId: 'req-1',
+          tabId: 9,
+          origin: ORIGIN,
+          method: 'switchAccount'
+        }
+      })
+    );
     expect(openWindowMock).toHaveBeenCalledWith(
       store,
       expect.objectContaining({ windowApp: WindowApp.SwitchAccount })
@@ -276,6 +293,16 @@ describe('signRequest', () => {
     );
 
     expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: {
+          requestId: 'req-1',
+          tabId: 9,
+          origin: ORIGIN,
+          method: 'sign'
+        }
+      })
+    );
     expect(openWindowMock).toHaveBeenCalledWith(
       store,
       expect.objectContaining({
@@ -299,6 +326,16 @@ describe('signMessageRequest', () => {
       store
     );
     expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: {
+          requestId: 'req-1',
+          tabId: 9,
+          origin: ORIGIN,
+          method: 'signMessage'
+        }
+      })
+    );
     expect(openWindowMock).toHaveBeenCalledWith(
       store,
       expect.objectContaining({ windowApp: WindowApp.SignatureRequestMessage })
@@ -323,6 +360,16 @@ describe('signTypedDataRequest', () => {
       store
     );
     expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: {
+          requestId: 'req-1',
+          tabId: 9,
+          origin: ORIGIN,
+          method: 'signTypedData'
+        }
+      })
+    );
     expect(openWindowMock).toHaveBeenCalledWith(
       store,
       expect.objectContaining({ windowApp: WindowApp.SignatureRequestEip712 })
@@ -343,6 +390,16 @@ describe('decryptMessageRequest', () => {
       store
     );
     expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: {
+          requestId: 'req-1',
+          tabId: 9,
+          origin: ORIGIN,
+          method: 'decryptMessage'
+        }
+      })
+    );
     expect(openWindowMock).toHaveBeenCalledWith(
       store,
       expect.objectContaining({ windowApp: WindowApp.DecryptMessageRequest })

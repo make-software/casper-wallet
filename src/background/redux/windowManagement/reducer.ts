@@ -1,8 +1,16 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import { RequestStatus, WindowManagementState } from './types';
+import {
+  CancellableMethod,
+  RequestStatus,
+  WindowManagementState
+} from './types';
 
-const initialState: WindowManagementState = { windowId: null, requests: {} };
+const initialState: WindowManagementState = {
+  windowId: null,
+  requests: {},
+  pendingRequests: {}
+};
 
 const slice = createSlice({
   name: 'windowManagement',
@@ -20,12 +28,25 @@ const slice = createSlice({
     signWindowInit: state => state,
     windowRequestOpened: (
       state,
-      action: PayloadAction<{ requestId: string }>
+      action: PayloadAction<{
+        requestId: string;
+        tabId: number;
+        origin: string;
+        method: CancellableMethod;
+      }>
     ) => ({
       ...state,
       requests: {
         ...state.requests,
         [action.payload.requestId]: 'open'
+      },
+      pendingRequests: {
+        ...state.pendingRequests,
+        [action.payload.requestId]: {
+          tabId: action.payload.tabId,
+          origin: action.payload.origin,
+          method: action.payload.method
+        }
       }
     }),
     windowRequestResponded: (

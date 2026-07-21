@@ -3,7 +3,7 @@ import {
   IEIP712SignTypedDataOptions,
   IEIP712TypedData
 } from 'casper-wallet-core';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 
@@ -248,12 +248,6 @@ export function SignEip712Page() {
     requestId,
     requestTabId
   ]);
-
-  useEffect(() => {
-    window.addEventListener('beforeunload', handleCancel);
-
-    return () => window.removeEventListener('beforeunload', handleCancel);
-  }, [handleCancel]);
 
   const renderFooter = () => {
     if (shouldTryToConnectAccount) {

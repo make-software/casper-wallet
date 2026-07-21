@@ -75,7 +75,8 @@ export const initialStateForPopupTests: RootState = {
   },
   windowManagement: {
     windowId: null,
-    requests: {}
+    requests: {},
+    pendingRequests: {}
   },
   ledger: {
     windowId: null,
