@@ -39,7 +39,7 @@ export const REFERRER_URL = 'https://casperwallet.io';
 
 export const MY_CSPR_NAME_URL = 'https://cspr.name/my-names';
 
-export const CSPR_NAME_EXPIRATION_NOTICE_DAYS = 14 + 365;
+export const CSPR_NAME_EXPIRATION_NOTICE_DAYS = 14;
 export const CSPR_NAME_RESOLUTION_BATCH_SIZE = 5;
 
 export const getBlockExplorerAccountUrl = (
