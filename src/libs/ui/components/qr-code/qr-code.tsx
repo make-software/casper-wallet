@@ -39,7 +39,6 @@ interface QrCodeProps {
 
 export const QrCode = ({ value, size }: QrCodeProps) => (
   <QRCodeCanvas
-    id="qrCode"
     value={value}
     size={size}
     fgColor={QR_FOREGROUND_COLOR}
