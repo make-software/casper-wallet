@@ -1,7 +1,7 @@
 {
   "name": "Casper Wallet",
   "description": "Securely manage your CSPR tokens and interact with dapps with the self-custody wallet for the Casper blockchain.",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "author": "MAKE LLC",
   "engines": {
     "node": ">=22",
@@ -40,6 +40,8 @@
     "test": "jest --no-cache --passWithNoTests",
     "test:coverage": "jest --no-cache --coverage",
     "prepare": "husky",
+    "setup": "npm ci && npm run allow-scripts && husky",
+    "allow-scripts": "allow-scripts",
     "locale:extract_pot": "i18next 'src/**/*.{ts,tsx}' && node scripts/locale_extract_pot.mjs",
     "locale:update_translations": "node scripts/locale_update_translations.mjs",
     "ci-check": "npm run format:check && npm run lint && npm run tsc && npm run knip && npm run test:coverage",
@@ -126,6 +128,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@lavamoat/allow-scripts": "^5.1.0",
+    "@lavamoat/preinstall-always-fail": "^3.0.0",
     "@playwright/test": "^1.61.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
@@ -179,5 +183,13 @@
     "webpack-bundle-analyzer": "^5.3.0",
     "webpack-dev-server": "^6.0.0",
     "xcode-build-webpack-plugin": "^1.0.2"
+  },
+  "lavamoat": {
+    "allowScripts": {
+      "@lavamoat/preinstall-always-fail#3.0.0": false,
+      "eslint-import-resolver-typescript>unrs-resolver#1.12.2": true,
+      "geckodriver#6.1.0": false,
+      "i18next-parser>esbuild#0.25.12": true
+    }
   }
 }

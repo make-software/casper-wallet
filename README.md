@@ -68,8 +68,20 @@ Clone this repository and run following commands from the repo root folder.
 _NOTE: Node.js LTS is required._
 
 ```shell
-npm install
+npm run setup
 ```
+
+npm lifecycle scripts are disabled by default (`.npmrc` sets `ignore-scripts=true`)
+as a supply-chain safeguard, so a plain `npm install` runs **no** dependency
+install scripts and does **not** set up the git hooks. `npm run setup` performs a
+full install: `npm ci`, then runs the approved install scripts via
+`@lavamoat/allow-scripts`, then installs the git hooks.
+
+Approved dependency install scripts live in the `lavamoat.allowScripts` allowlist
+in `package.json`. To add a dependency that ships an install script, run
+`npx allow-scripts auto`, then review the diff and set the new entry to `true`
+only if the script is trusted and required — otherwise leave it `false`. CI fails
+on any install script that is not explicitly configured.
 
 ### Grant script execution permissions for `scripts` folder
 

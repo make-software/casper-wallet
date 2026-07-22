@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         node-version: [22.x]
-    
+
     steps:
     - uses: actions/checkout@v4
 
@@ -39,6 +39,11 @@ jobs:
     - name: Install & Check
       run: |
         npm ci
+        # Run approved dependency install scripts (.npmrc sets ignore-scripts=true).
+        # Builds the unrs-resolver native binding needed by eslint/jest, and fails
+        # the build if a dependency ships an install script not in the
+        # `lavamoat.allowScripts` allowlist.
+        npm run allow-scripts
         npm run ci-check
 
     # Blocking: custom wallet rules (.semgrep.yml) + security-focused registry
