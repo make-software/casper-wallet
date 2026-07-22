@@ -11,6 +11,10 @@ on:
 #   This script deletes the cache which was connected to this branch after PR was closed.
 #   More information can be found here - https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#force-deleting-cache-entries
 
+permissions:
+  contents: read
+  actions: write
+
 jobs:
   cleanup:
     runs-on: ubuntu-latest
