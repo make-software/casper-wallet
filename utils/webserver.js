@@ -1,4 +1,4 @@
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 const XcodeBuildPlugin = require('xcode-build-webpack-plugin');
 const WebpackDevServer = require('webpack-dev-server');
 const webpack = require('webpack');
@@ -98,12 +98,24 @@ if (process.env.NODE_ENV === 'development' && 'hot' in module) {
   if (isChrome) {
     const delay = ms => new Promise(res => setTimeout(res, ms));
 
-    const openExtensionPageCommand = `open -na "Google Chrome" chrome-extension://${chromeExtensionID}/popup.html --args --remote-debugging-port=9222`;
-    const installExtensionCommand = `open -na "Google Chrome" chrome://extensions/ --args --load-extension=${extensionAbsPath} --remote-debugging-port=9222`;
-
-    execSync(installExtensionCommand);
+    // Pass args as an array (no shell) so the filesystem-derived
+    // extension path can't be interpreted as a shell command.
+    execFileSync('open', [
+      '-na',
+      'Google Chrome',
+      'chrome://extensions/',
+      '--args',
+      `--load-extension=${extensionAbsPath}`,
+      '--remote-debugging-port=9222'
+    ]);
     await delay(2000); // Waiting for install
-    execSync(openExtensionPageCommand);
+    execFileSync('open', [
+      '-na',
+      'Google Chrome',
+      `chrome-extension://${chromeExtensionID}/popup.html`,
+      '--args',
+      '--remote-debugging-port=9222'
+    ]);
   } else if (isFirefox) {
     execSync(
       `web-ext run --source-dir ${ExtensionBuildPath.Firefox} -u about:debugging#/runtime/this-firefox`

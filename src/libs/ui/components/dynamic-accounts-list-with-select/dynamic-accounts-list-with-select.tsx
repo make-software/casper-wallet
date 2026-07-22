@@ -326,7 +326,7 @@ export const DynamicAccountsListWithSelect = ({
                     name={`accountNames.${inputFieldIndex}.name`}
                     rules={{
                       pattern: {
-                        value: /^[\daA-zZ\s]+$/,
+                        value: /^[\da-zA-Z\s]+$/,
                         message: t(
                           'Account name can’t contain special characters'
                         )

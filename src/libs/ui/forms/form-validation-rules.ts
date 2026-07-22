@@ -114,7 +114,7 @@ export function useAccountNameRule(
     .required(t('Name is required'))
     .max(20, t("Account name can't be longer than 20 characters"))
     .matches(
-      /^[\daA-zZ\s]+$/,
+      /^[\da-zA-Z\s]+$/,
       t('Account name can’t contain special characters')
     )
     .test(
@@ -609,7 +609,7 @@ export const useContactNameRule = (
       value => value != null && value.trim() !== ''
     )
     .matches(
-      /^[\daA-zZ\s]+$/,
+      /^[\da-zA-Z\s]+$/,
       t('Contact name can’t contain special characters')
     )
     .test(

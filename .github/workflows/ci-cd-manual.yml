@@ -15,6 +15,9 @@ on:
          - "upload"
          - "publish"
 
+permissions:
+  contents: read
+
 jobs:
   check_version:
     runs-on: ubuntu-latest
