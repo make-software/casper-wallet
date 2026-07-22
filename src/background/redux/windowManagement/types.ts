@@ -16,6 +16,7 @@ interface PendingRequestDescriptor {
 
 export interface WindowManagementState {
   windowId: number | null;
+  exportKeysWindowId: number | null;
   requests: Record<string, RequestStatus>;
   pendingRequests: Record<string, PendingRequestDescriptor>;
 }

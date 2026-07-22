@@ -83,6 +83,9 @@ const selectPopupState = (state: RootState): PopupState => {
     // the whole slice would put dapp A's origin into dapp B's UI replica. No
     // UI reads it (only `selectWindowId` is consumed, in use-window-manager);
     // the cancel-on-close path reads it in the background, off the real store.
+    // `exportKeysWindowId` is also dropped: the export-window open path is now
+    // a background saga that reads it straight off the real store, so no
+    // replica needs it.
     windowManagement: {
       windowId: state.windowManagement.windowId,
       requests: state.windowManagement.requests
@@ -239,11 +242,17 @@ export type MainStore = Awaited<
 >;
 
 export function createMainStoreReplica<T extends PopupState>(state: T) {
-  // `selectPopupState` strips `pendingRequests` (dapp origins + tabIds stay in
-  // the background). Restore the shape the slice reducer expects with an empty
-  // map — truthful, since a replica genuinely holds no request descriptors.
+  // `selectPopupState` strips `pendingRequests` and `exportKeysWindowId` (the
+  // background keeps both; no UI reads either). Restore the shape the slice
+  // reducer expects — an empty map is truthful for a replica's request
+  // descriptors, and `null` is truthful since no replica tracks the export
+  // window.
   return createStore({
     ...state,
-    windowManagement: { ...state.windowManagement, pendingRequests: {} }
+    windowManagement: {
+      ...state.windowManagement,
+      pendingRequests: {},
+      exportKeysWindowId: null
+    }
   });
 }

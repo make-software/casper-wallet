@@ -1,5 +1,7 @@
 import {
   connectWindowInit,
+  exportKeysWindowIdChanged,
+  exportKeysWindowIdCleared,
   importWindowInit,
   onboardingAppInit,
   popupWindowInit,
@@ -12,30 +14,52 @@ import {
 } from './actions';
 import { reducer } from './reducer';
 
-const empty = { windowId: null, requests: {}, pendingRequests: {} } as const;
+const empty = {
+  windowId: null,
+  exportKeysWindowId: null,
+  requests: {},
+  pendingRequests: {}
+} as const;
 
 describe('windowManagement reducer', () => {
   it('has null windowId and no requests initially', () => {
     expect(reducer(undefined, { type: '@@INIT' } as any)).toEqual({
       windowId: null,
+      exportKeysWindowId: null,
       requests: {},
       pendingRequests: {}
     });
   });
   it('sets and clears windowId', () => {
     const s = reducer(
-      { windowId: null, requests: {}, pendingRequests: {} },
+      {
+        windowId: null,
+        exportKeysWindowId: null,
+        requests: {},
+        pendingRequests: {}
+      },
       windowIdChanged(7)
     );
-    expect(s).toEqual({ windowId: 7, requests: {}, pendingRequests: {} });
+    expect(s).toEqual({
+      windowId: 7,
+      exportKeysWindowId: null,
+      requests: {},
+      pendingRequests: {}
+    });
     expect(reducer(s, windowIdCleared())).toEqual({
       windowId: null,
+      exportKeysWindowId: null,
       requests: {},
       pendingRequests: {}
     });
   });
   it('window-init actions do not change state', () => {
-    const state = { windowId: 7, requests: {}, pendingRequests: {} };
+    const state = {
+      windowId: 7,
+      exportKeysWindowId: null,
+      requests: {},
+      pendingRequests: {}
+    };
     expect(reducer(state, onboardingAppInit())).toEqual(state);
     expect(reducer(state, popupWindowInit())).toEqual(state);
     expect(reducer(state, connectWindowInit())).toEqual(state);
@@ -45,7 +69,12 @@ describe('windowManagement reducer', () => {
 
   it('opens a request', () => {
     const s = reducer(
-      { windowId: null, requests: {}, pendingRequests: {} },
+      {
+        windowId: null,
+        exportKeysWindowId: null,
+        requests: {},
+        pendingRequests: {}
+      },
       windowRequestOpened({
         requestId: 'r1',
         tabId: 9,
@@ -58,7 +87,12 @@ describe('windowManagement reducer', () => {
 
   it('marks a request as responded, and is idempotent on a second respond', () => {
     let s = reducer(
-      { windowId: null, requests: {}, pendingRequests: {} },
+      {
+        windowId: null,
+        exportKeysWindowId: null,
+        requests: {},
+        pendingRequests: {}
+      },
       windowRequestOpened({
         requestId: 'r1',
         tabId: 9,
@@ -75,7 +109,12 @@ describe('windowManagement reducer', () => {
 
   it('closes open requests and clears windowId on windowClosed', () => {
     let s = reducer(
-      { windowId: 7, requests: {}, pendingRequests: {} },
+      {
+        windowId: 7,
+        exportKeysWindowId: null,
+        requests: {},
+        pendingRequests: {}
+      },
       windowRequestOpened({
         requestId: 'r2',
         tabId: 9,
@@ -90,7 +129,12 @@ describe('windowManagement reducer', () => {
 
   it('leaves a responded request as responded on windowClosed', () => {
     let s = reducer(
-      { windowId: 7, requests: {}, pendingRequests: {} },
+      {
+        windowId: 7,
+        exportKeysWindowId: null,
+        requests: {},
+        pendingRequests: {}
+      },
       windowRequestOpened({
         requestId: 'r3',
         tabId: 9,
@@ -144,5 +188,14 @@ describe('windowManagement reducer', () => {
   it('windowIdCleared nulls only windowId', () => {
     const next = reducer({ ...empty, windowId: 5 }, windowIdCleared());
     expect(next.windowId).toBeNull();
+  });
+
+  it('sets and clears exportKeysWindowId, independently of windowId', () => {
+    const set = reducer(empty, exportKeysWindowIdChanged(12));
+    expect(set.exportKeysWindowId).toBe(12);
+    expect(set.windowId).toBeNull();
+
+    const cleared = reducer(set, exportKeysWindowIdCleared());
+    expect(cleared.exportKeysWindowId).toBeNull();
   });
 });

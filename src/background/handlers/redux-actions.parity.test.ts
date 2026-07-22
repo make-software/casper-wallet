@@ -129,7 +129,15 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     // channel) in vault/onboarding/network sagas. The UI reads it via
     // selectSagaErrors and dispatches only dismissSagaError (which IS
     // forwarded); sagaError itself is never dispatched from the UI.
-    appEventsActions.sagaError
+    appEventsActions.sagaError,
+    // Background-only: put by the export-keys-window saga (create / stale-heal)
+    // and store.dispatch'd by the onRemoved listener on close. The UI
+    // dispatches only openExportKeysWindow.
+    windowManagementActions.exportKeysWindowIdChanged,
+    // Background-only: put by the export-keys-window saga (create / stale-heal)
+    // and store.dispatch'd by the onRemoved listener on close. The UI
+    // dispatches only openExportKeysWindow.
+    windowManagementActions.exportKeysWindowIdCleared
   ].map(creator => creator.type)
 );
 

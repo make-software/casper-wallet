@@ -34,6 +34,12 @@ interface BackupSecretPhrasePasswordPageType {
   setPasswordConfirmed?: () => void;
   onClick?: (password: string) => Promise<void>;
   isLoading?: boolean;
+  // Set when this page is rendered inside a dedicated window rather than the
+  // extension popup (WALLET-1345). Such a window has a single history entry, so
+  // the default "back" link is a no-op and would trap the user; it also has no
+  // business showing the wallet menu / network switcher. Passing this swaps the
+  // header for a bare one whose only action closes the window.
+  onCloseWindow?: () => void;
 }
 
 interface VerifyPasswordMessageEvent extends MessageEvent {
@@ -45,7 +51,8 @@ interface VerifyPasswordMessageEvent extends MessageEvent {
 export const PasswordProtectionPage = ({
   setPasswordConfirmed,
   onClick,
-  isLoading = false
+  isLoading = false,
+  onCloseWindow
 }: BackupSecretPhrasePasswordPageType) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -82,6 +89,9 @@ export const PasswordProtectionPage = ({
 
   const onSubmit = () => {
     if (privateState == null) return;
+    // The field is now read-only rather than disabled while verifying (so it
+    // keeps focus), which leaves Enter able to re-submit. Guard against that.
+    if (isSubmitting) return;
 
     const { passwordHash, passwordSaltHash } = privateState;
 
@@ -112,12 +122,16 @@ export const PasswordProtectionPage = ({
         setIsSubmitting(false);
       } else {
         if (onClick) {
-          onClick(password).then(() => {
-            if (setPasswordConfirmed) {
-              setPasswordConfirmed();
-            }
-            dispatchToMainStore(loginRetryCountReseted());
-          });
+          onClick(password)
+            .then(() => {
+              if (setPasswordConfirmed) {
+                setPasswordConfirmed();
+              }
+              dispatchToMainStore(loginRetryCountReseted());
+            })
+            // Without this a rejected onClick leaves the page stuck submitting —
+            // and now that the field is read-only-while-submitting, frozen too.
+            .catch(() => setIsSubmitting(false));
         } else {
           if (setPasswordConfirmed) {
             setPasswordConfirmed();
@@ -146,18 +160,33 @@ export const PasswordProtectionPage = ({
     <PopupLayout
       variant="form"
       onSubmit={handleSubmit(onSubmit)}
-      renderHeader={() => (
-        <HeaderPopup
-          withNetworkSwitcher
-          withMenu
-          withConnectionStatus
-          renderSubmenuBarItems={() => (
-            <HeaderSubmenuBarNavLink linkType="back" />
-          )}
-        />
-      )}
+      renderHeader={() =>
+        onCloseWindow ? (
+          <HeaderPopup
+            renderSubmenuBarItems={() => (
+              <HeaderSubmenuBarNavLink
+                linkType="close"
+                onClick={onCloseWindow}
+              />
+            )}
+          />
+        ) : (
+          <HeaderPopup
+            withNetworkSwitcher
+            withMenu
+            withConnectionStatus
+            renderSubmenuBarItems={() => (
+              <HeaderSubmenuBarNavLink linkType="back" />
+            )}
+          />
+        )
+      }
       renderContent={() => (
-        <UnlockProtectedPageContent errors={errors} register={register} />
+        <UnlockProtectedPageContent
+          errors={errors}
+          register={register}
+          readOnly={isSubmitting || isLoading}
+        />
       )}
       renderFooter={() => (
         <FooterButtonsContainer>
