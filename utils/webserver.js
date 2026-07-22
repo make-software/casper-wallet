@@ -121,7 +121,9 @@ if (process.env.NODE_ENV === 'development' && 'hot' in module) {
       `web-ext run --source-dir ${ExtensionBuildPath.Firefox} -u about:debugging#/runtime/this-firefox`
     );
   } else if (isSafari) {
-    execSync(`open -na Safari ${publicPath}popup.html`);
+    // Pass args as an array (no shell) so the PORT-derived public path
+    // can't be interpreted as a shell command.
+    execFileSync('open', ['-na', 'Safari', `${publicPath}popup.html`]);
   } else {
     throw new Error("Unknown browser passed. Couldn't start browser");
   }
