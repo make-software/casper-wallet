@@ -42,17 +42,23 @@ const mockRuntimeSendMessage = runtime.sendMessage as jest.Mock;
 
 beforeAll(() => {
   jest.spyOn(console, 'log').mockImplementation(() => undefined);
+  jest.spyOn(console, 'error').mockImplementation(() => undefined);
 });
 
 afterAll(() => {
   (console.log as jest.Mock).mockRestore();
+  (console.error as jest.Mock).mockRestore();
 });
+
+const flushPromises = () => new Promise(resolve => setImmediate(resolve));
 
 describe('keep-alive', () => {
   beforeEach(() => {
     mockAlarmsCreate.mockClear();
     mockAlarmsClear.mockClear();
     mockRuntimeSendMessage.mockClear();
+    mockRuntimeSendMessage.mockResolvedValue(undefined);
+    (console.error as jest.Mock).mockClear();
   });
 
   it('startKeepAlive creates the casper-keep-alive alarm with a 0.5 minute period', () => {
@@ -83,6 +89,31 @@ describe('keep-alive', () => {
 
     listener({ name: 'casper-keep-alive' });
     expect(mockRuntimeSendMessage).toHaveBeenCalledWith('keepAlive');
+  });
+
+  it('swallows the expected "Receiving end does not exist" ping rejection without logging', async () => {
+    mockRuntimeSendMessage.mockRejectedValue(
+      new Error('Could not establish connection. Receiving end does not exist.')
+    );
+    const listener = mockAlarmsOnAlarmAddListener.mock.calls[0][0];
+
+    listener({ name: 'casper-keep-alive' });
+    await flushPromises();
+
+    expect(console.error).not.toHaveBeenCalled();
+  });
+
+  it('logs unexpected ping rejections', async () => {
+    mockRuntimeSendMessage.mockRejectedValue(new Error('boom'));
+    const listener = mockAlarmsOnAlarmAddListener.mock.calls[0][0];
+
+    listener({ name: 'casper-keep-alive' });
+    await flushPromises();
+
+    expect(console.error).toHaveBeenCalledWith(
+      'KeepAlive error:',
+      expect.any(Error)
+    );
   });
 });
 

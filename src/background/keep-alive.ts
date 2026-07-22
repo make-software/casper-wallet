@@ -73,7 +73,18 @@ async function manageKeepAlive() {
 
 // ping mechanism to keep background script from destroing wallet session when it's unlocked
 function keepAlive() {
-  runtime.sendMessage('keepAlive').catch(error => {
+  runtime.sendMessage('keepAlive').catch((error: unknown) => {
+    // `runtime.sendMessage` delivers to every extension context except the
+    // sender, so when no popup/tab is open the ping has no receiver and Chrome
+    // rejects with "Receiving end does not exist." That is expected and
+    // harmless — the act of sending is what resets the SW idle timer; the
+    // reply is unused. Swallow only this case so real errors still surface.
+    if (
+      error instanceof Error &&
+      error.message.includes('Receiving end does not exist')
+    ) {
+      return;
+    }
     console.error('KeepAlive error:', error);
   });
 }
