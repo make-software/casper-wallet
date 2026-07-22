@@ -30,11 +30,17 @@ interface PasswordPageContentType {
   register: UseFormRegister<PasswordFormValues>;
   errors: FieldErrors<PasswordFormValues>;
   title?: string;
+  // Locks the field while the password is being verified. Read-only rather than
+  // disabled on purpose: disabling a focused input drops its focus, so after a
+  // wrong password the user would have to click back in. Read-only keeps focus
+  // while still blocking further typing.
+  readOnly?: boolean;
 }
 export const UnlockProtectedPageContent = ({
   register,
   errors,
-  title
+  title,
+  readOnly
 }: PasswordPageContentType) => {
   const [passwordInputType, setPasswordInputType] =
     useState<PasswordInputType>('password');
@@ -79,6 +85,7 @@ export const UnlockProtectedPageContent = ({
           error={!!errors.password}
           validationText={errors.password?.message}
           autoFocus
+          readOnly={readOnly}
           suffixIcon={
             <PasswordVisibilityIcon
               passwordInputType={passwordInputType}

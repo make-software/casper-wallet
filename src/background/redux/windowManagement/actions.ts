@@ -1,5 +1,7 @@
 export {
   connectWindowInit,
+  exportKeysWindowIdChanged,
+  exportKeysWindowIdCleared,
   importWindowInit,
   onboardingAppInit,
   popupWindowInit,

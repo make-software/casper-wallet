@@ -3,7 +3,8 @@ import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { PasswordProtectionPage } from '@popup/pages/password-protection-page';
-import { RouterPath, useTypedNavigate } from '@popup/router';
+
+import { closeExportKeysSurface } from '@background/open-export-keys-surface';
 
 import { createAsymmetricKeys } from '@libs/crypto/create-asymmetric-key';
 import {
@@ -16,6 +17,7 @@ import { AccountListRows } from '@libs/types/account';
 import { Button } from '@libs/ui/components';
 
 import { Download } from './download';
+import { Failure } from './failure';
 import { Instruction } from './instruction';
 import { Success } from './success';
 import { DownloadAccountKeysSteps, downloadFile } from './utils';
@@ -31,7 +33,6 @@ export const DownloadAccountKeysPage = () => {
   );
 
   const { t } = useTranslation();
-  const navigate = useTypedNavigate();
 
   const setPasswordConfirmed = useCallback(() => {
     setIsPasswordConfirmed(true);
@@ -39,30 +40,44 @@ export const DownloadAccountKeysPage = () => {
 
   if (!isPasswordConfirmed) {
     return (
-      <PasswordProtectionPage setPasswordConfirmed={setPasswordConfirmed} />
+      <PasswordProtectionPage
+        setPasswordConfirmed={setPasswordConfirmed}
+        onCloseWindow={() => closeExportKeysSurface()}
+      />
     );
   }
 
   const downloadKeys = async () => {
-    const zip = new JSZip();
+    try {
+      const zip = new JSZip();
 
-    for (const account of selectedAccounts) {
-      const asymmetricKey = createAsymmetricKeys(
-        account.publicKey,
-        account.secretKey
-      );
+      for (const account of selectedAccounts) {
+        const asymmetricKey = createAsymmetricKeys(
+          account.publicKey,
+          account.secretKey
+        );
 
-      if (asymmetricKey.secretKey) {
-        const file = asymmetricKey.secretKey.toPem();
-        zip.file(`${account.name}_secret_key.pem`, file);
+        if (asymmetricKey.secretKey) {
+          const file = asymmetricKey.secretKey.toPem();
+          zip.file(`${account.name}_secret_key.pem`, file);
+        }
       }
-    }
 
-    await zip.generateAsync({ type: 'blob' }).then(function (content) {
+      const content = await zip.generateAsync({ type: 'blob' });
       downloadFile(new Blob([content]), 'casper-wallet-secret_keys.zip');
-    });
 
-    setDownloadAccountKeysStep(DownloadAccountKeysSteps.Success);
+      setDownloadAccountKeysStep(DownloadAccountKeysSteps.Success);
+    } catch (error) {
+      // Only the error name is logged — the thrown value is built from key
+      // material and must not reach the console. Nothing collects these logs
+      // (the project has no Sentry or equivalent), so the Failure step below is
+      // the only way this reaches anyone.
+      console.error(
+        'downloadKeys: failed to build or download the keys archive',
+        error instanceof Error ? error.name : 'unknown error'
+      );
+      setDownloadAccountKeysStep(DownloadAccountKeysSteps.Failure);
+    }
   };
 
   const content = {
@@ -73,12 +88,19 @@ export const DownloadAccountKeysPage = () => {
         setSelectedAccounts={setSelectedAccounts}
       />
     ),
-    [DownloadAccountKeysSteps.Success]: <Success />
+    [DownloadAccountKeysSteps.Success]: <Success />,
+    [DownloadAccountKeysSteps.Failure]: <Failure />
   };
 
   const headerButton = {
+    // "Back" is only used where it genuinely steps back inside the flow. The
+    // entry step has nowhere to go back to in a dedicated window, so it closes
+    // instead — labelling that "Back" would be a lie (WALLET-1345).
     [DownloadAccountKeysSteps.Instruction]: (
-      <HeaderSubmenuBarNavLink linkType="back" />
+      <HeaderSubmenuBarNavLink
+        linkType="close"
+        onClick={() => closeExportKeysSurface()}
+      />
     ),
     [DownloadAccountKeysSteps.Download]: (
       <HeaderSubmenuBarNavLink
@@ -89,7 +111,16 @@ export const DownloadAccountKeysPage = () => {
       />
     ),
     [DownloadAccountKeysSteps.Success]: (
-      <HeaderSubmenuBarNavLink linkType="close" />
+      <HeaderSubmenuBarNavLink
+        linkType="close"
+        onClick={() => closeExportKeysSurface()}
+      />
+    ),
+    [DownloadAccountKeysSteps.Failure]: (
+      <HeaderSubmenuBarNavLink
+        linkType="close"
+        onClick={() => closeExportKeysSurface()}
+      />
     )
   };
 
@@ -109,8 +140,24 @@ export const DownloadAccountKeysPage = () => {
       </Button>
     ),
     [DownloadAccountKeysSteps.Success]: (
-      <Button onClick={() => navigate(RouterPath.Home)}>
-        <Trans t={t}>Done</Trans>
+      <>
+        <Button onClick={() => closeExportKeysSurface()}>
+          <Trans t={t}>Done</Trans>
+        </Button>
+        <Button color="secondaryBlue" onClick={downloadKeys}>
+          <Trans t={t}>Download again</Trans>
+        </Button>
+      </>
+    ),
+    // Back to account selection rather than retrying blind: the selection is
+    // still in state, so the user can confirm or change it before trying again.
+    [DownloadAccountKeysSteps.Failure]: (
+      <Button
+        onClick={() =>
+          setDownloadAccountKeysStep(DownloadAccountKeysSteps.Download)
+        }
+      >
+        <Trans t={t}>Try again</Trans>
       </Button>
     )
   };
@@ -118,10 +165,11 @@ export const DownloadAccountKeysPage = () => {
   return (
     <PopupLayout
       renderHeader={() => (
+        // Deliberately bare: this window exists to export secret keys and
+        // nothing else. The wallet menu / network switcher / connection status
+        // would let the user navigate the full wallet inside a 376px export
+        // window and strand themselves there (WALLET-1345).
         <HeaderPopup
-          withNetworkSwitcher
-          withMenu
-          withConnectionStatus
           renderSubmenuBarItems={() => headerButton[downloadAccountKeysStep]}
         />
       )}

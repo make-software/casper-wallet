@@ -8,6 +8,7 @@ import {
 
 const initialState: WindowManagementState = {
   windowId: null,
+  exportKeysWindowId: null,
   requests: {},
   pendingRequests: {}
 };
@@ -21,6 +22,14 @@ const slice = createSlice({
       windowId: action.payload
     }),
     windowIdCleared: state => ({ ...state, windowId: null }),
+    exportKeysWindowIdChanged: (state, action: PayloadAction<number>) => ({
+      ...state,
+      exportKeysWindowId: action.payload
+    }),
+    exportKeysWindowIdCleared: state => ({
+      ...state,
+      exportKeysWindowId: null
+    }),
     onboardingAppInit: state => state,
     popupWindowInit: state => state,
     connectWindowInit: state => state,
@@ -74,6 +83,8 @@ const slice = createSlice({
 
 export const {
   connectWindowInit,
+  exportKeysWindowIdChanged,
+  exportKeysWindowIdCleared,
   importWindowInit,
   onboardingAppInit,
   popupWindowInit,

@@ -10,14 +10,17 @@ import {
   TERMS_URLS,
   USER_GUIDES_URL
 } from '@src/constants';
-import { isLedgerAvailable, isSafariBuild } from '@src/utils';
+import { isLedgerAvailable } from '@src/utils';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 import { RouterPath, useNavigationMenu, useTypedNavigate } from '@popup/router';
 
 import { WindowApp } from '@background/create-open-window';
 import { selectCountOfContacts } from '@background/redux/contacts/selectors';
-import { lockVault } from '@background/redux/sagas/actions';
+import {
+  lockVault,
+  openExportKeysWindow
+} from '@background/redux/sagas/actions';
 import {
   selectThemeModeSetting,
   selectTimeoutDurationSetting
@@ -310,11 +313,9 @@ export function NavigationMenuPageContent() {
             title: t('Download account keys'),
             iconPath: 'assets/icons/download.svg',
             disabled: false,
-            // https://github.com/make-software/casper-wallet/issues/611
-            hide: isSafariBuild,
             handleOnClick: () => {
               closeNavigationMenu();
-              navigate(RouterPath.DownloadAccountKeys);
+              dispatchToMainStore(openExportKeysWindow());
             }
           },
           {
