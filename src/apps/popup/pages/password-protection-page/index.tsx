@@ -89,6 +89,9 @@ export const PasswordProtectionPage = ({
 
   const onSubmit = () => {
     if (privateState == null) return;
+    // The field is now read-only rather than disabled while verifying (so it
+    // keeps focus), which leaves Enter able to re-submit. Guard against that.
+    if (isSubmitting) return;
 
     const { passwordHash, passwordSaltHash } = privateState;
 
@@ -119,12 +122,16 @@ export const PasswordProtectionPage = ({
         setIsSubmitting(false);
       } else {
         if (onClick) {
-          onClick(password).then(() => {
-            if (setPasswordConfirmed) {
-              setPasswordConfirmed();
-            }
-            dispatchToMainStore(loginRetryCountReseted());
-          });
+          onClick(password)
+            .then(() => {
+              if (setPasswordConfirmed) {
+                setPasswordConfirmed();
+              }
+              dispatchToMainStore(loginRetryCountReseted());
+            })
+            // Without this a rejected onClick leaves the page stuck submitting —
+            // and now that the field is read-only-while-submitting, frozen too.
+            .catch(() => setIsSubmitting(false));
         } else {
           if (setPasswordConfirmed) {
             setPasswordConfirmed();
@@ -178,7 +185,7 @@ export const PasswordProtectionPage = ({
         <UnlockProtectedPageContent
           errors={errors}
           register={register}
-          disabled={isSubmitting || isLoading}
+          readOnly={isSubmitting || isLoading}
         />
       )}
       renderFooter={() => (
