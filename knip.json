@@ -2,7 +2,12 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["src/apps/*/index.tsx", "scripts/*.mjs"],
   "project": ["src/**/*.{js,ts,tsx}", "utils/**/*.js", "scripts/**/*.mjs"],
-  "ignoreDependencies": ["@types/chrome", "@noble/curves", "@noble/hashes"],
+  "ignoreDependencies": [
+    "@types/chrome",
+    "@noble/curves",
+    "@noble/hashes",
+    "@lavamoat/preinstall-always-fail"
+  ],
   "ignoreBinaries": ["semgrep"],
   "exclude": ["enumMembers"],
   "webpack": {
