@@ -84,6 +84,7 @@ import {
   initKeys,
   initVault,
   lockVault,
+  openExportKeysWindow,
   recoverVault,
   resetVault,
   unlockVault
@@ -111,6 +112,7 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
   [
     lockVault,
     unlockVault,
+    openExportKeysWindow,
     initKeys,
     initVault,
     recoverVault,

@@ -7,6 +7,9 @@ import { RequestStatus } from './types';
 export const selectWindowId = (state: RootState): number | null =>
   state.windowManagement.windowId;
 
+export const selectExportKeysWindowId = (state: RootState): number | null =>
+  state.windowManagement.exportKeysWindowId;
+
 export const selectRequestStatus = (
   state: RootState,
   requestId: string

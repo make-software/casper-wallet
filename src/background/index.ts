@@ -39,7 +39,11 @@ import {
   selectIsAccountConnected,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
-import { selectWindowId } from '@background/redux/windowManagement/selectors';
+import { exportKeysWindowIdCleared } from '@background/redux/windowManagement/actions';
+import {
+  selectExportKeysWindowId,
+  selectWindowId
+} from '@background/redux/windowManagement/selectors';
 
 import { sdkEvent } from '@content/sdk-event';
 import { isSDKMethod } from '@content/sdk-method';
@@ -181,6 +185,9 @@ windows.onRemoved.addListener(async (removedWindowId: number) => {
   const store = await getExistingMainStoreSingletonOrInit();
   if (removedWindowId === selectWindowId(store.getState())) {
     await cancelOpenRequestsForClosedWindow(store, removedWindowId);
+  }
+  if (removedWindowId === selectExportKeysWindowId(store.getState())) {
+    store.dispatch(exportKeysWindowIdCleared());
   }
 });
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -16,9 +16,11 @@ import { TimeoutDurationSetting } from '@popup/constants';
 import { RouterPath, useNavigationMenu, useTypedNavigate } from '@popup/router';
 
 import { WindowApp } from '@background/create-open-window';
-import { openExportKeysSurface } from '@background/open-export-keys-surface';
 import { selectCountOfContacts } from '@background/redux/contacts/selectors';
-import { lockVault } from '@background/redux/sagas/actions';
+import {
+  lockVault,
+  openExportKeysWindow
+} from '@background/redux/sagas/actions';
 import {
   selectThemeModeSetting,
   selectTimeoutDurationSetting
@@ -38,11 +40,9 @@ import {
   ContentContainer,
   FlexColumn,
   SpaceBetweenFlexRow,
-  SpacingSize,
-  VerticalSpaceContainer
+  SpacingSize
 } from '@libs/layout';
 import {
-  Error as ErrorMessage,
   Link,
   List,
   Modal,
@@ -108,8 +108,6 @@ export function NavigationMenuPageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
   const isDarkMode = useIsDarkMode();
-
-  const [exportKeysWindowFailed, setExportKeysWindowFailed] = useState(false);
 
   const timeoutDurationSetting = useSelector(selectTimeoutDurationSetting);
   const countOfConnectedSites = useSelector(selectCountOfConnectedSites);
@@ -315,21 +313,9 @@ export function NavigationMenuPageContent() {
             title: t('Download account keys'),
             iconPath: 'assets/icons/download.svg',
             disabled: false,
-            handleOnClick: async () => {
-              setExportKeysWindowFailed(false);
-
-              try {
-                await openExportKeysSurface();
-                // Only dismiss the menu once the window actually exists —
-                // otherwise the error below would have nowhere to render.
-                closeNavigationMenu();
-              } catch (error) {
-                console.error(
-                  'navigation-menu: failed to open the key export window',
-                  error
-                );
-                setExportKeysWindowFailed(true);
-              }
+            handleOnClick: () => {
+              closeNavigationMenu();
+              dispatchToMainStore(openExportKeysWindow());
             }
           },
           {
@@ -446,16 +432,6 @@ export function NavigationMenuPageContent() {
 
   return (
     <ContentContainer>
-      {exportKeysWindowFailed && (
-        <VerticalSpaceContainer top={SpacingSize.Medium}>
-          <ErrorMessage
-            header={t('Couldn’t open the export window')}
-            description={t(
-              'Your keys were not exported. Close any other wallet windows and try again.'
-            )}
-          />
-        </VerticalSpaceContainer>
-      )}
       {menuGroups.map(
         ({ headerLabel: groupLabel, items: groupItems }, index) => (
           <List
