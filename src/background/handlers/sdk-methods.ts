@@ -35,6 +35,7 @@ import { SdkMethod, sdkMethod } from '@content/sdk-method';
 import { encryptAsHexWithCasperPublicKey } from '@libs/crypto';
 
 import { selectVaultIsLocked } from '../redux/session/selectors';
+import { cancelSupersededRequests } from './cancel-superseded-requests';
 import { HandlerResult } from './types';
 
 export async function handleSdkMethod(
@@ -75,6 +76,8 @@ export async function handleSdkMethod(
         response: sdkMethod.connectResponse(true, action.meta)
       };
     } else {
+      cancelSupersededRequests(store);
+
       store.dispatch(
         windowRequestOpened({
           requestId: action.meta.requestId,
@@ -110,6 +113,8 @@ export async function handleSdkMethod(
     if (action.payload.title != null) {
       query.title = action.payload.title;
     }
+
+    cancelSupersededRequests(store);
 
     store.dispatch(
       windowRequestOpened({
@@ -172,6 +177,8 @@ export async function handleSdkMethod(
       })
     );
 
+    cancelSupersededRequests(store);
+
     store.dispatch(
       windowRequestOpened({
         requestId: action.meta.requestId,
@@ -204,6 +211,8 @@ export async function handleSdkMethod(
     }
 
     const { signingPublicKeyHex, message } = action.payload;
+
+    cancelSupersededRequests(store);
 
     store.dispatch(
       windowRequestOpened({
@@ -246,6 +255,8 @@ export async function handleSdkMethod(
       })
     );
 
+    cancelSupersededRequests(store);
+
     store.dispatch(
       windowRequestOpened({
         requestId: action.meta.requestId,
@@ -279,6 +290,8 @@ export async function handleSdkMethod(
     }
 
     const { signingPublicKeyHex, message } = action.payload;
+
+    cancelSupersededRequests(store);
 
     store.dispatch(
       windowRequestOpened({
