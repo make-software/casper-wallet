@@ -26,7 +26,7 @@ export type PopupState = {
   // the narrowing in `selectPopupState`.
   windowManagement: Omit<
     WindowManagementState,
-    'pendingRequests' | 'exportKeysWindowId'
+    'pendingRequests' | 'exportKeysWindowId' | 'requests'
   >;
   loginRetryLockoutTime: LoginRetryLockoutTimeState;
   lastActivityTime: LastActivityTimeState;

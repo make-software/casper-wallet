@@ -77,18 +77,14 @@ const selectPopupState = (state: RootState): PopupState => {
     session: { ...state.session, encryptionKeyHash: null },
     loginRetryCount: state.loginRetryCount,
     vault: state.vault,
-    // Narrowed on purpose: `pendingRequests` maps each in-flight requestId to
-    // its dapp origin + tabId. The approval window is a single reused slot, so
-    // requests from two different origins can be open at once — broadcasting
-    // the whole slice would put dapp A's origin into dapp B's UI replica. No
-    // UI reads it (only `selectWindowId` is consumed, in use-window-manager);
-    // the cancel-on-close path reads it in the background, off the real store.
-    // `exportKeysWindowId` is also dropped: the export-window open path is now
-    // a background saga that reads it straight off the real store, so no
-    // replica needs it.
+    // Narrowed on purpose. `pendingRequests` maps each in-flight requestId to
+    // its dapp origin + tabId. `requests` is the status/tombstone map read only
+    // by background dedup (sdk-response-to-tab) and selectOpenRequests. Neither
+    // is read by any UI replica, so broadcasting them would only leak dapp
+    // origins and serialize a lifetime-growing map into every popup update.
+    // `exportKeysWindowId` is background-only for the same reason.
     windowManagement: {
-      windowId: state.windowManagement.windowId,
-      requests: state.windowManagement.requests
+      windowId: state.windowManagement.windowId
     },
     loginRetryLockoutTime: state.loginRetryLockoutTime,
     lastActivityTime: state.lastActivityTime,
@@ -242,15 +238,16 @@ export type MainStore = Awaited<
 >;
 
 export function createMainStoreReplica<T extends PopupState>(state: T) {
-  // `selectPopupState` strips `pendingRequests` and `exportKeysWindowId` (the
-  // background keeps both; no UI reads either). Restore the shape the slice
-  // reducer expects — an empty map is truthful for a replica's request
-  // descriptors, and `null` is truthful since no replica tracks the export
-  // window.
+  // `selectPopupState` strips `pendingRequests`, `requests`, and
+  // `exportKeysWindowId` (the background keeps all three; no UI reads any of
+  // them). Restore the shape the slice reducer expects — empty maps are
+  // truthful for a replica's request descriptors/statuses, and `null` is
+  // truthful since no replica tracks the export window.
   return createStore({
     ...state,
     windowManagement: {
       ...state.windowManagement,
+      requests: {},
       pendingRequests: {},
       exportKeysWindowId: null
     }

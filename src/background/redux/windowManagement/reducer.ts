@@ -58,16 +58,29 @@ const slice = createSlice({
         }
       }
     }),
+    // The status entry is kept forever on purpose: `selectRequestStatus` reading
+    // back 'responded' is what makes the server-side dedup drop a duplicate
+    // response. Deleting it would turn the status into `undefined` and let the
+    // duplicate through. The DESCRIPTOR, on the other hand, is only ever read
+    // for requests still 'open' (selectOpenRequests filters on that), so it is
+    // dead weight once answered — drop it and keep the map proportional to the
+    // number of genuinely in-flight requests rather than to the lifetime total.
     windowRequestResponded: (
       state,
       action: PayloadAction<{ requestId: string }>
-    ) => ({
-      ...state,
-      requests: {
-        ...state.requests,
-        [action.payload.requestId]: 'responded'
-      }
-    }),
+    ) => {
+      const pendingRequests = { ...state.pendingRequests };
+      delete pendingRequests[action.payload.requestId];
+
+      return {
+        ...state,
+        requests: {
+          ...state.requests,
+          [action.payload.requestId]: 'responded'
+        },
+        pendingRequests
+      };
+    },
     windowClosed: state => ({
       ...state,
       windowId: null,

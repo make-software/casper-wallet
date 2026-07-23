@@ -166,7 +166,7 @@ describe('windowManagement reducer', () => {
     });
   });
 
-  it('windowRequestResponded flips only the status map', () => {
+  it('windowRequestResponded keeps the status but drops the descriptor', () => {
     const opened = reducer(
       empty,
       windowRequestOpened({
@@ -177,12 +177,43 @@ describe('windowManagement reducer', () => {
       })
     );
     const next = reducer(opened, windowRequestResponded({ requestId: 'r1' }));
+    // The status MUST survive — selectRequestStatus reading back 'responded'
+    // is what makes the server-side dedup drop a duplicate response.
     expect(next.requests.r1).toBe('responded');
-    expect(next.pendingRequests.r1).toEqual({
+    // The descriptor is only read for still-'open' requests, so it is dead
+    // weight once answered.
+    expect(next.pendingRequests.r1).toBeUndefined();
+  });
+
+  it('leaves a still-open sibling untouched when one request is answered', () => {
+    let s = reducer(
+      empty,
+      windowRequestOpened({
+        requestId: 'r1',
+        tabId: 9,
+        origin: 'https://dapp.example',
+        method: 'sign'
+      })
+    );
+    s = reducer(
+      s,
+      windowRequestOpened({
+        requestId: 'r2',
+        tabId: 9,
+        origin: 'https://other.example',
+        method: 'signMessage'
+      })
+    );
+    s = reducer(s, windowRequestResponded({ requestId: 'r1' }));
+    expect(s.pendingRequests.r2).toEqual({
       tabId: 9,
-      origin: 'o',
-      method: 'connect'
+      origin: 'https://other.example',
+      method: 'signMessage'
     });
+    // Responding twice must not throw or resurrect the dropped descriptor.
+    s = reducer(s, windowRequestResponded({ requestId: 'r1' }));
+    expect(s.pendingRequests.r1).toBeUndefined();
+    expect(s.requests.r1).toBe('responded');
   });
 
   it('windowIdCleared nulls only windowId', () => {
