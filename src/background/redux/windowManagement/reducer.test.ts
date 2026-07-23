@@ -6,7 +6,6 @@ import {
   onboardingAppInit,
   popupWindowInit,
   signWindowInit,
-  windowClosed,
   windowIdChanged,
   windowIdCleared,
   windowRequestOpened,
@@ -105,47 +104,6 @@ describe('windowManagement reducer', () => {
 
     s = reducer(s, windowRequestResponded({ requestId: 'r1' }));
     expect(s.requests.r1).toBe('responded');
-  });
-
-  it('closes open requests and clears windowId on windowClosed', () => {
-    let s = reducer(
-      {
-        windowId: 7,
-        exportKeysWindowId: null,
-        requests: {},
-        pendingRequests: {}
-      },
-      windowRequestOpened({
-        requestId: 'r2',
-        tabId: 9,
-        origin: 'https://dapp.example',
-        method: 'sign'
-      })
-    );
-    s = reducer(s, windowClosed());
-    expect(s.requests.r2).toBe('closed');
-    expect(s.windowId).toBeNull();
-  });
-
-  it('leaves a responded request as responded on windowClosed', () => {
-    let s = reducer(
-      {
-        windowId: 7,
-        exportKeysWindowId: null,
-        requests: {},
-        pendingRequests: {}
-      },
-      windowRequestOpened({
-        requestId: 'r3',
-        tabId: 9,
-        origin: 'https://dapp.example',
-        method: 'sign'
-      })
-    );
-    s = reducer(s, windowRequestResponded({ requestId: 'r3' }));
-    s = reducer(s, windowClosed());
-    expect(s.requests.r3).toBe('responded');
-    expect(s.windowId).toBeNull();
   });
 
   it('windowRequestOpened sets status open AND stores the descriptor', () => {

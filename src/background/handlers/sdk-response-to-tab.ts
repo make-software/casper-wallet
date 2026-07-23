@@ -58,8 +58,6 @@ function deliveryFailedError(tabId: unknown, fallbackDelivered: boolean) {
 // request it cancels 'responded' (via `windowRequestResponded`). Dropping only on
 // 'responded' kills the real duplicate (a cancel racing a successful sign, where
 // the sign already set 'responded') without ever suppressing a first response.
-// ('closed' is now dispatch-dead: the close path uses `windowIdCleared`, not
-// `windowClosed`; the never-drop-on-'closed' stance is kept defensively.)
 export async function handleSdkResponseToTab(
   message: unknown,
   sender: Runtime.MessageSender,
@@ -84,8 +82,8 @@ export async function handleSdkResponseToTab(
   const { action, tabId } = candidate as SdkResponseToTabMessage;
   const requestId = action?.meta?.requestId;
 
-  // Dedupe: first response for this requestId wins. Drop ONLY on 'responded'
-  // (see the race rationale above) — never on 'closed'.
+  // Dedupe: first response for this requestId wins. Drop iff 'responded'
+  // (see the race rationale above).
   if (
     requestId != null &&
     selectRequestStatus(store.getState(), requestId) === 'responded'

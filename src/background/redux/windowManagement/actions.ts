@@ -6,7 +6,6 @@ export {
   onboardingAppInit,
   popupWindowInit,
   signWindowInit,
-  windowClosed,
   windowIdChanged,
   windowIdCleared,
   windowRequestOpened,

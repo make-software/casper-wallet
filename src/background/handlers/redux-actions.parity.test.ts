@@ -110,9 +110,6 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     // Background-only: dispatched by the sdk-methods handler for an EIP-712
     // signature request. Never dispatched from the UI.
     vaultActions.eip712PayloadReceived,
-    // Background-only: retained for the reducer/parity guard but no longer
-    // dispatched (the close path now uses windowIdCleared). Never from the UI.
-    windowManagementActions.windowClosed,
     // Background-only: dispatched by sdk-methods when opening an approval
     // window (tracks the in-flight request). Never dispatched from the UI.
     windowManagementActions.windowRequestOpened,

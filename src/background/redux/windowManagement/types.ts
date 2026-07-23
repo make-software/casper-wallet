@@ -1,4 +1,4 @@
-export type RequestStatus = 'open' | 'responded' | 'closed';
+export type RequestStatus = 'open' | 'responded';
 
 export type CancellableMethod =
   | 'connect'

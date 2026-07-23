@@ -155,20 +155,6 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     expect(result.handled).toBe(true);
   });
 
-  it("'closed' (never responded) → still delivers (must NOT drop — beforeunload-cancel race)", async () => {
-    const { store } = makeStore('closed');
-
-    const result = await handleSdkResponseToTab(
-      makeMessage(),
-      UI_SENDER,
-      store
-    );
-
-    expect(sendMessageMock).toHaveBeenCalledTimes(1);
-    expect(sendMessageMock).toHaveBeenCalledWith(TAB_ID, makeMessage().action);
-    expect(result.handled).toBe(true);
-  });
-
   it('invalid tabId, no origin → surfaces "not delivered" sagaError, no delivery, does not mark responded', async () => {
     const { store, dispatch } = makeStore(undefined);
 

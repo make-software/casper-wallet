@@ -1,10 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import {
-  CancellableMethod,
-  RequestStatus,
-  WindowManagementState
-} from './types';
+import { CancellableMethod, WindowManagementState } from './types';
 
 const initialState: WindowManagementState = {
   windowId: null,
@@ -80,17 +76,7 @@ const slice = createSlice({
         },
         pendingRequests
       };
-    },
-    windowClosed: state => ({
-      ...state,
-      windowId: null,
-      requests: Object.entries(state.requests).reduce<
-        Record<string, RequestStatus>
-      >((acc, [requestId, status]) => {
-        acc[requestId] = status === 'open' ? 'closed' : status;
-        return acc;
-      }, {})
-    })
+    }
   }
 });
 
@@ -102,7 +88,6 @@ export const {
   onboardingAppInit,
   popupWindowInit,
   signWindowInit,
-  windowClosed,
   windowIdChanged,
   windowIdCleared,
   windowRequestOpened,
