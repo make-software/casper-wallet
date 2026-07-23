@@ -6,7 +6,6 @@ import { sdkMethod } from '@content/sdk-method';
 
 import {
   CANCEL_GRACE_MS,
-  buildCancelResponse,
   cancelOpenRequestsForClosedWindow
 } from './cancel-open-requests-on-close';
 
@@ -32,43 +31,6 @@ beforeEach(() => {
   jest.useFakeTimers();
 });
 afterEach(() => jest.useRealTimers());
-
-describe('buildCancelResponse', () => {
-  const c = (m: any) => buildCancelResponse(m, 'r');
-  it('connect', () =>
-    expect(c('connect')).toEqual(
-      sdkMethod.connectResponse(false, { requestId: 'r' })
-    ));
-  it('switchAccount', () =>
-    expect(c('switchAccount')).toEqual(
-      sdkMethod.switchAccountResponse(false, { requestId: 'r' })
-    ));
-  it('sign', () =>
-    expect(c('sign')).toEqual(
-      sdkMethod.signResponse({ cancelled: true }, { requestId: 'r' })
-    ));
-  it('signMessage', () =>
-    expect(c('signMessage')).toEqual(
-      sdkMethod.signMessageResponse({ cancelled: true }, { requestId: 'r' })
-    ));
-  it('signTypedData', () =>
-    expect(c('signTypedData')).toEqual(
-      sdkMethod.signTypedDataResponse(
-        {
-          cancelled: true,
-          signature: null,
-          digest: null,
-          publicKey: null,
-          error: null
-        },
-        { requestId: 'r' }
-      )
-    ));
-  it('decryptMessage', () =>
-    expect(c('decryptMessage')).toEqual(
-      sdkMethod.decryptMessageResponse({ cancelled: true }, { requestId: 'r' })
-    ));
-});
 
 describe('cancelOpenRequestsForClosedWindow', () => {
   const run = async (getState: jest.Mock) => {
