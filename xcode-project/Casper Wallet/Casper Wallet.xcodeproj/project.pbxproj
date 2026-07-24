@@ -479,7 +479,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "Casper Wallet Extension/Casper_Wallet_Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 23;
+				CURRENT_PROJECT_VERSION = 159;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Casper Wallet Extension/Info.plist";
@@ -491,7 +491,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 1.6.0;
+				MARKETING_VERSION = 2.7.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -509,7 +509,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "Casper Wallet Extension/Casper_Wallet_Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 23;
+				CURRENT_PROJECT_VERSION = 159;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Casper Wallet Extension/Info.plist";
@@ -521,7 +521,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 1.6.0;
+				MARKETING_VERSION = 2.7.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -543,7 +543,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Casper Wallet/Casper Wallet.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 158;
+				CURRENT_PROJECT_VERSION = 159;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Casper Wallet/Info.plist";
@@ -580,7 +580,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Casper Wallet/Casper Wallet.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 158;
+				CURRENT_PROJECT_VERSION = 159;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Casper Wallet/Info.plist";
