@@ -60,12 +60,11 @@ For more information please [follow the link](https://developer.apple.com/docume
 
 ## Development setup
 
-Working on any macOS or Linux machine with NodeJS LTS installed.
+Working on any macOS or Linux machine with Node.js 22 and npm 10+ installed (see `.nvmrc` for the exact version). If you use [nvm](https://github.com/nvm-sh/nvm), run `nvm use` from the repo root to pick up the right version.
 
 ### Install dependencies
 
-Clone this repository and run following commands from the repo root folder.
-_NOTE: Node.js LTS is required._
+Clone this repository and run the following command from the repo root folder.
 
 ```shell
 npm run setup
@@ -137,12 +136,60 @@ All at once:
 npm run build:all
 ```
 
+## Unit tests
+
+Unit tests are written with [Jest](https://jestjs.io/) and colocated with the source code.
+
+```shell
+npm test
+```
+
+To collect coverage (CI enforces a coverage gate):
+
+```shell
+npm run test:coverage
+```
+
+## Code quality checks
+
+Run the same checks as CI (Prettier, ESLint, TypeScript, knip and unit tests with coverage) with a single command:
+
+```shell
+npm run ci-check
+```
+
+The individual checks are also available as separate scripts: `npm run format:check`, `npm run lint`, `npm run tsc`, `npm run knip`.
+
+To run the project's [Semgrep](https://semgrep.dev/) static-analysis rules locally (requires the `semgrep` CLI):
+
+```shell
+npm run semgrep
+```
+
 ## E2E tests
 
-Write tests into `e2e-tests` folder.
+Write tests into the `e2e-tests` folder. Each script below builds the extension first and then runs the [Playwright](https://playwright.dev/docs/running-tests) suite.
 
-To run e2e tests, you must use npm script `npm run e2e:chrome:ui:popup` or `e2e:chrome:ui:onboarding`.
-Tests are run in UI mode.
+In UI mode:
 
-All information
-about how to run and debug tests can be found in [playwright docs](https://playwright.dev/docs/running-tests).
+```shell
+npm run e2e:chrome:ui:popup
+npm run e2e:chrome:ui:onboarding
+```
+
+Headless:
+
+```shell
+npm run e2e:chrome:headless:popup
+npm run e2e:chrome:headless:onboarding
+npm run e2e:firefox:headless:smoke
+```
+
+## Contributing & security
+
+- Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+- To report a security vulnerability, please follow [SECURITY.md](SECURITY.md) — do not open a public issue.
+
+## License
+
+Casper Wallet is licensed under the [Apache License 2.0](LICENSE).
