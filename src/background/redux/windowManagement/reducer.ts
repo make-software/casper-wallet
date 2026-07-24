@@ -1,10 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import {
-  CancellableMethod,
-  RequestStatus,
-  WindowManagementState
-} from './types';
+import { CancellableMethod, WindowManagementState } from './types';
 
 const initialState: WindowManagementState = {
   windowId: null,
@@ -58,26 +54,29 @@ const slice = createSlice({
         }
       }
     }),
+    // The status entry is kept forever on purpose: `selectRequestStatus` reading
+    // back 'responded' is what makes the server-side dedup drop a duplicate
+    // response. Deleting it would turn the status into `undefined` and let the
+    // duplicate through. The DESCRIPTOR, on the other hand, is only ever read
+    // for requests still 'open' (selectOpenRequests filters on that), so it is
+    // dead weight once answered — drop it and keep the map proportional to the
+    // number of genuinely in-flight requests rather than to the lifetime total.
     windowRequestResponded: (
       state,
       action: PayloadAction<{ requestId: string }>
-    ) => ({
-      ...state,
-      requests: {
-        ...state.requests,
-        [action.payload.requestId]: 'responded'
-      }
-    }),
-    windowClosed: state => ({
-      ...state,
-      windowId: null,
-      requests: Object.entries(state.requests).reduce<
-        Record<string, RequestStatus>
-      >((acc, [requestId, status]) => {
-        acc[requestId] = status === 'open' ? 'closed' : status;
-        return acc;
-      }, {})
-    })
+    ) => {
+      const pendingRequests = { ...state.pendingRequests };
+      delete pendingRequests[action.payload.requestId];
+
+      return {
+        ...state,
+        requests: {
+          ...state.requests,
+          [action.payload.requestId]: 'responded'
+        },
+        pendingRequests
+      };
+    }
   }
 });
 
@@ -89,7 +88,6 @@ export const {
   onboardingAppInit,
   popupWindowInit,
   signWindowInit,
-  windowClosed,
   windowIdChanged,
   windowIdCleared,
   windowRequestOpened,

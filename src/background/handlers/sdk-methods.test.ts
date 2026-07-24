@@ -22,6 +22,7 @@ import { sdkMethod } from '@content/sdk-method';
 
 import { encryptAsHexWithCasperPublicKey } from '@libs/crypto';
 
+import { cancelSupersededRequests } from './cancel-superseded-requests';
 import { handleSdkMethod } from './sdk-methods';
 
 // Heavy / side-effecting dependencies are stubbed so we test PURE routing:
@@ -34,6 +35,9 @@ jest.mock('casper-js-sdk', () => ({
   PublicKey: { fromHex: jest.fn() }
 }));
 jest.mock('@background/open-window', () => ({ openWindow: jest.fn() }));
+jest.mock('./cancel-superseded-requests', () => ({
+  cancelSupersededRequests: jest.fn()
+}));
 jest.mock('@background/utils', () => ({
   emitSdkEventToActiveTabsWithOrigin: jest.fn()
 }));
@@ -161,6 +165,19 @@ describe('connectRequest', () => {
     expect(dispatch).not.toHaveBeenCalled();
   });
 
+  it('does NOT cancel superseded requests on the already-connected fast path', async () => {
+    selectIsConnectedMock.mockReturnValue(true);
+    const { store } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.connectRequest({ title: 't' }, META),
+      SENDER,
+      store
+    );
+
+    expect(cancelSupersededRequests).not.toHaveBeenCalled();
+  });
+
   it('not connected → dispatches windowRequestOpened + opens ConnectToApp window (with title)', async () => {
     selectIsConnectedMock.mockReturnValue(false);
     const { store, dispatch } = makeStore();
@@ -282,6 +299,22 @@ describe('signRequest', () => {
     expect(dispatch).not.toHaveBeenCalled();
   });
 
+  it('does NOT cancel superseded requests on the already-signed fast path', async () => {
+    isEqualCIMock.mockReturnValue(true);
+    const { store } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.signRequest(
+        { deployJson, signingPublicKeyHex: 'PK-OTHER' },
+        META
+      ),
+      SENDER,
+      store
+    );
+
+    expect(cancelSupersededRequests).not.toHaveBeenCalled();
+  });
+
   it('fresh deploy → dispatches deployPayloadReceived + windowRequestOpened, opens deploy window', async () => {
     isEqualCIMock.mockReturnValue(false);
     const { store, dispatch } = makeStore();
@@ -311,6 +344,26 @@ describe('signRequest', () => {
       })
     );
     expect(result).toEqual({ handled: true, response: undefined });
+  });
+
+  it('cancels superseded requests before registering an opening request', async () => {
+    isEqualCIMock.mockReturnValue(false);
+    const { store, dispatch } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.signRequest({ deployJson, signingPublicKeyHex: 'PK-1' }, META),
+      SENDER,
+      store
+    );
+
+    const cancelOrder = (cancelSupersededRequests as jest.Mock).mock
+      .invocationCallOrder[0];
+    const openedDispatchIndex = dispatch.mock.calls.findIndex(([a]) =>
+      String(a?.type).includes('windowRequestOpened')
+    );
+    const openedOrder = dispatch.mock.invocationCallOrder[openedDispatchIndex];
+
+    expect(cancelOrder).toBeLessThan(openedOrder);
   });
 });
 

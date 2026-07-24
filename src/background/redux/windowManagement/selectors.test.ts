@@ -3,7 +3,7 @@ import { selectOpenRequests, selectRequestStatus } from './selectors';
 const state = {
   windowManagement: {
     windowId: null,
-    requests: { a: 'open', b: 'responded', c: 'closed' },
+    requests: { a: 'open', b: 'responded', c: 'responded' },
     pendingRequests: {
       a: { tabId: 1, origin: 'o', method: 'sign' },
       b: { tabId: 2, origin: 'o', method: 'connect' },
