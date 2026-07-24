@@ -1,6 +1,7 @@
 import * as accountInfoActions from '@background/redux/account-info/actions';
 import * as appEventsActions from '@background/redux/app-events/actions';
 import * as contactsActions from '@background/redux/contacts/actions';
+import * as csprNameExpirationsActions from '@background/redux/cspr-name-expirations/actions';
 import * as keysActions from '@background/redux/keys/actions';
 import * as lastActivityTimeActions from '@background/redux/last-activity-time/actions';
 import * as ledgerActions from '@background/redux/ledger/actions';
@@ -56,7 +57,7 @@ function isActionCreator(value: unknown): value is ActionCreatorLike {
 }
 
 /**
- * The 17 action modules `redux-actions.ts` pulls creators from. `background-
+ * The 18 action modules `redux-actions.ts` pulls creators from. `background-
  * events` is intentionally NOT here: its `popupStateUpdated` is a
  * `backgroundEvent`, handled by the dedicated `.match` branch, not the set.
  */
@@ -64,6 +65,7 @@ const ACTION_MODULES: Record<string, unknown>[] = [
   accountInfoActions,
   appEventsActions,
   contactsActions,
+  csprNameExpirationsActions,
   keysActions,
   lastActivityTimeActions,
   ledgerActions,
@@ -80,7 +82,7 @@ const ACTION_MODULES: Record<string, unknown>[] = [
   windowManagementActions
 ];
 
-/** Every `.type` reachable as an RTK action creator across the 17 modules. */
+/** Every `.type` reachable as an RTK action creator across the 18 modules. */
 const UNIVERSE_TYPES: ReadonlySet<string> = new Set(
   ACTION_MODULES.flatMap(mod =>
     Object.values(mod)

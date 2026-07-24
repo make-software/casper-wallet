@@ -116,5 +116,6 @@ export const initialStateForPopupTests: RootState = {
     dismissedEventIds: [],
     errors: [],
     nextErrorId: 0
-  }
+  },
+  csprNameExpirations: {}
 };

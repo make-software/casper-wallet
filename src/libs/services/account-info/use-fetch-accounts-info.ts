@@ -1,38 +1,27 @@
 import { useQuery } from '@tanstack/react-query';
 import { IAccountInfo } from 'casper-wallet-core/src/domain/accountInfo';
-import { CasperNetwork } from 'casper-wallet-core/src/domain/common/common';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { selectAllContacts } from '@background/redux/contacts/selectors';
 import { selectActiveNetworkSetting } from '@background/redux/settings/selectors';
 import { selectVaultAccounts } from '@background/redux/vault/selectors';
-import { accountInfoRepository } from '@background/wallet-repositories';
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
+
+import { getAccountsInfoQueryOptions } from './accounts-info-query';
 
 export const useFetchAccountsInfo = (accountPublicKeys: string[]) => {
   const network = useSelector(selectActiveNetworkSetting);
   const contacts = useSelector(selectAllContacts);
   const accounts = useSelector(selectVaultAccounts);
 
-  const accountHashes = useMemo(
-    () => accountPublicKeys.map(key => getAccountHashFromPublicKey(key)),
-    [accountPublicKeys]
+  const queryOptions = useMemo(
+    () => getAccountsInfoQueryOptions(accountPublicKeys, network),
+    [accountPublicKeys, network]
   );
 
-  const accountHashesString = accountHashes.toString();
-
-  const { data: accountsInfo } = useQuery({
-    queryKey: ['ACCOUNT_INFO', accountHashesString, network],
-    queryFn: async () => {
-      return await accountInfoRepository.getAccountsInfo({
-        accountHashes,
-        network: network.toLowerCase() as CasperNetwork,
-        withProxyHeader: false
-      });
-    }
-  });
+  const { data: accountsInfo } = useQuery(queryOptions);
 
   const namesMap: Record<string, string> = {
     ...contacts.reduce(

@@ -13,3 +13,4 @@ export * from './rate-app/selectors';
 export * from './ledger/selectors';
 export * from './app-events/selectors';
 export * from './trusted-wasm/selectors';
+export * from './cspr-name-expirations/selectors';

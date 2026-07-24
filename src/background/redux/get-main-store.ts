@@ -5,6 +5,7 @@ import { selectPrivateState } from '@background/handlers/private-state';
 import { privateStateChanged } from '@background/private-state-broadcast';
 import { AppEventsState } from '@background/redux/app-events/types';
 import { ContactsState } from '@background/redux/contacts/types';
+import { CsprNameExpirationsState } from '@background/redux/cspr-name-expirations/types';
 import { createStore } from '@background/redux/index';
 import { withDerivedFlag } from '@background/redux/keys/reducer';
 import { KeysState } from '@background/redux/keys/types';
@@ -34,6 +35,7 @@ const CONTACTS_KEY = 'teuwe6zH3A72gc';
 const RATE_APP = 'p4cGYubbwnd9ke';
 const APP_EVENTS = 'k4uL4wqkvCMoxB';
 const TRUSTED_WASM = 'k1uC4wqkwCMwxL';
+const CSPR_NAME_EXPIRATIONS = 'TVn5HXvXCfYRpJ';
 
 // Absolute-timestamp deadlines (`Date.now() + remaining`, in ms) written
 // directly to `storage.local` by the vault sagas so the login-retry lockout and
@@ -60,6 +62,7 @@ type StorageState = {
   [RATE_APP]: RateAppState;
   [APP_EVENTS]: AppEventsState;
   [TRUSTED_WASM]: TrustedWasmState;
+  [CSPR_NAME_EXPIRATIONS]: CsprNameExpirationsState;
 };
 // this needs to be private
 let storeSingleton: ReturnType<typeof createStore>;
@@ -97,7 +100,8 @@ const selectPopupState = (state: RootState): PopupState => {
     rateApp: state.rateApp,
     ledger: state.ledger,
     appEvents: state.appEvents,
-    trustedWasm: state.trustedWasm
+    trustedWasm: state.trustedWasm,
+    csprNameExpirations: state.csprNameExpirations
   };
 };
 
@@ -118,7 +122,8 @@ export async function getExistingMainStoreSingletonOrInit() {
       [CONTACTS_KEY]: contacts,
       [RATE_APP]: rateApp,
       [APP_EVENTS]: appEvents,
-      [TRUSTED_WASM]: trustedWasm
+      [TRUSTED_WASM]: trustedWasm,
+      [CSPR_NAME_EXPIRATIONS]: csprNameExpirations
     } = (await storage.local.get([
       VAULT_CIPHER_KEY,
       KEYS_KEY,
@@ -130,7 +135,8 @@ export async function getExistingMainStoreSingletonOrInit() {
       CONTACTS_KEY,
       RATE_APP,
       APP_EVENTS,
-      TRUSTED_WASM
+      TRUSTED_WASM,
+      CSPR_NAME_EXPIRATIONS
     ])) as StorageState;
 
     if (storeSingleton == null) {
@@ -162,7 +168,8 @@ export async function getExistingMainStoreSingletonOrInit() {
                 nextErrorId: 0
               }
             : undefined,
-          trustedWasm
+          trustedWasm,
+          csprNameExpirations
         });
       }
       // send start action
@@ -204,7 +211,8 @@ export async function getExistingMainStoreSingletonOrInit() {
           contacts,
           rateApp,
           appEvents,
-          trustedWasm
+          trustedWasm,
+          csprNameExpirations
         } = state;
         storage.local
           .set({
@@ -218,7 +226,8 @@ export async function getExistingMainStoreSingletonOrInit() {
             [CONTACTS_KEY]: contacts,
             [RATE_APP]: rateApp,
             [APP_EVENTS]: { dismissedEventIds: appEvents.dismissedEventIds },
-            [TRUSTED_WASM]: trustedWasm
+            [TRUSTED_WASM]: trustedWasm,
+            [CSPR_NAME_EXPIRATIONS]: csprNameExpirations
           })
           .catch(e => {
             // nosemgrep: cw-logging-secrets — static message + error object, no key material

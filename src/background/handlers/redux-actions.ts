@@ -17,6 +17,10 @@ import {
   contactsReseted,
   newContactAdded
 } from '@background/redux/contacts/actions';
+import {
+  csprNameExpirationsUpdated,
+  expiringCsprNamesDismissed
+} from '@background/redux/cspr-name-expirations/actions';
 import { MainStore } from '@background/redux/get-main-store';
 import {
   ledgerDeployChanged,
@@ -180,6 +184,8 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
     dismissAppEvent,
     resetAppEventsDismission,
     dismissSagaError,
+    csprNameExpirationsUpdated,
+    expiringCsprNamesDismissed,
     addWasmToTrusted,
     removeWasmFromTrusted,
     removeAllWasmFromTrustedOrigin,

@@ -3,6 +3,7 @@ import { ActiveOriginFaviconState } from '@background/redux/active-origin-favico
 import { ActiveOriginState } from '@background/redux/active-origin/types';
 import { AppEventsState } from '@background/redux/app-events/types';
 import { ContactsState } from '@background/redux/contacts/types';
+import { CsprNameExpirationsState } from '@background/redux/cspr-name-expirations/types';
 import { KeysState } from '@background/redux/keys/types';
 import { LastActivityTimeState } from '@background/redux/last-activity-time/reducer';
 import { LedgerState } from '@background/redux/ledger/types';
@@ -40,4 +41,5 @@ export type PopupState = {
   ledger: LedgerState;
   appEvents: AppEventsState;
   trustedWasm: TrustedWasmState;
+  csprNameExpirations: CsprNameExpirationsState;
 };

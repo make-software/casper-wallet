@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -22,6 +22,10 @@ import {
   TileContainer,
   VerticalSpaceContainer
 } from '@libs/layout';
+import {
+  useExpiringCsprNames,
+  useFetchCsprNameExpirations
+} from '@libs/services/account-info';
 import { useGetActiveAppMarketingEvent } from '@libs/services/app-events';
 import {
   Button,
@@ -34,6 +38,7 @@ import {
 import { AppEventBanner } from '@libs/ui/components/app-event-banner/app-event-banner';
 
 import { AccountBalance } from './components/account-balance';
+import { CsprNameExpirationBanner } from './components/cspr-name-expiration-banner';
 import { DeploysList } from './components/deploys-list';
 import { MoreButtonsModal } from './components/more-buttons-modal';
 import { NftList } from './components/nft-list';
@@ -66,6 +71,19 @@ export function HomePageContent() {
   const network = useSelector(selectActiveNetworkSetting);
   const activeAccount = useSelector(selectVaultActiveAccount);
 
+  useFetchCsprNameExpirations();
+
+  const { showExpirationBanner, dismissExpiringNames } = useExpiringCsprNames();
+
+  // Latch for the whole popup session: dismissing the expiration banner must
+  // not reveal the marketing banner until the popup is reopened (refs reset
+  // on the next mount).
+  const wasExpirationBannerShown = useRef(false);
+
+  if (showExpirationBanner) {
+    wasExpirationBannerShown.current = true;
+  }
+
   useEffect(() => {
     if (!state?.activeTabId) {
       const container = document.querySelector('#ms-container');
@@ -77,9 +95,18 @@ export function HomePageContent() {
   const { activeMarketingEvent } =
     useGetActiveAppMarketingEvent(dismissedAppEventIds);
 
+  // At most one banner; the expiration banner wins over the marketing banner.
+  const showMarketingBanner =
+    Boolean(activeMarketingEvent) &&
+    !showExpirationBanner &&
+    !wasExpirationBannerShown.current;
+
   return (
     <ContentContainer>
-      {activeMarketingEvent && (
+      {showExpirationBanner && (
+        <CsprNameExpirationBanner onDismiss={dismissExpiringNames} />
+      )}
+      {showMarketingBanner && activeMarketingEvent && (
         <AppEventBanner activeMarketingEvent={activeMarketingEvent} />
       )}
       {activeAccount && (
