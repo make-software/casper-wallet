@@ -58,8 +58,11 @@ jobs:
         npm run semgrep:test
         npm run semgrep:ci
 
-    # Blocking: fail the build on a high+ vulnerability that reaches the
-    # shipped bundle (runtime deps only).
+    # Blocking: fail the build on a high+ vulnerability in runtime deps. Plain
+    # `npm audit` cannot tell whether a vulnerable package is actually bundled,
+    # so the gate runs through scripts/audit-ci.mjs, which allows only advisories
+    # reviewed and shown not to reach the shipped bundle. Each exception carries
+    # its evidence and an expiry date; anything else still fails the build.
     - name: Audit runtime dependencies (blocking)
       run: npm run audit:ci
 
