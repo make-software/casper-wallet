@@ -11,6 +11,8 @@ architecture (background script store singleton, content script, reselect).
   secret logging, no eval, XSS sinks, selector memoization, etc.).
 - **`../.semgrepignore`** — paths excluded from all scans (build artifacts,
   node_modules, e2e reports, binary assets).
+- **`rule-tests/`** — one annotated fixture per custom rule, run by
+  `npm run semgrep:test`. See [Testing custom rules](#testing-custom-rules).
 
 ## Installation
 
@@ -200,10 +202,61 @@ Example skeleton for a new rule:
       - '**/*.test.ts'
 ```
 
-Test the rule before committing:
+Every new rule needs a fixture in `rule-tests/` — `npm run semgrep:test` fails
+if a rule in `../.semgrep.yml` has no test. See below.
+
+## Testing custom rules
 
 ```bash
-semgrep --config=./.semgrep.yml --test
+npm run semgrep:test
+```
+
+Each rule has one fixture at `rule-tests/<rule-id>.ts` (or `.tsx`) annotated
+with Semgrep's test comments:
+
+```ts
+// ruleid: cw-no-eval
+eval(src);
+
+// ok: cw-no-eval
+JSON.parse(src);
+```
+
+The annotation must be on the line **immediately before** the code, and must
+contain nothing but the marker and the rule id. Cover the vulnerable case, the
+safe alternative, and at least one near-miss that must not match.
+
+`rule-tests/` is listed in `../.prettierignore`: the `@trivago` import-sort
+plugin reorders imports away from their annotations, which silently breaks the
+import-based fixtures.
+
+### Two things the runner works around
+
+`scripts/semgrep-test.mjs` exists rather than a plain `semgrep --test` call
+because of two limitations:
+
+1. **`semgrep --test --config=<file> <directory>` crashes** in semgrep 1.157
+   (`test.py` → `relatively_eq` → `IndexError: tuple index out of range`). With
+   a single-file config, semgrep tries to name-match the config against each
+   test file and indexes an empty relative path. Only a **file** target takes
+   the branch that runs every rule in the config against it, so each fixture
+   needs its own invocation. (Same family as the `mode: join` breakage below —
+   this config layout is off semgrep's tested path.)
+2. **A rule with no fixture would pass silently.** The runner cross-checks the
+   rule ids in `../.semgrep.yml` against the ids actually exercised and fails on
+   any rule that has no test.
+
+### What these tests do not cover
+
+`semgrep --test` **ignores each rule's `paths:` include/exclude globs** —
+verified against 1.157: a fixture placed outside `paths.include` still matches,
+while a normal scan of the same file correctly reports nothing. So the fixtures
+validate **patterns only**. A broken `paths:` block — a wrong `include` glob, a
+missing `src/background/**` exclusion — will not be caught here. Check path
+scoping with a real scan instead:
+
+```bash
+npm run semgrep
 ```
 
 ## Further reading

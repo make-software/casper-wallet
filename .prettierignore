@@ -1,0 +1,5 @@
+# Semgrep rule fixtures. Annotations (`// ruleid:` / `// ok:`) must stay on the
+# line immediately before the code they describe, and the import-sort plugin
+# reorders imports away from their annotations. Formatting these files silently
+# breaks the rule tests, so leave them alone.
+.semgrep/rule-tests/

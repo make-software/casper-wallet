@@ -55,6 +55,7 @@ jobs:
     - name: Semgrep (blocking)
       run: |
         pipx install semgrep==1.157.0
+        npm run semgrep:test
         npm run semgrep:ci
 
     # Blocking: fail the build on a high+ vulnerability that reaches the
