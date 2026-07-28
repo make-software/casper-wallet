@@ -2,9 +2,15 @@ import { tabs } from 'webextension-polyfill';
 
 import { sagaError } from '@background/redux/app-events/actions';
 import { MainStore } from '@background/redux/get-main-store';
-import { windowRequestResponded } from '@background/redux/windowManagement/actions';
+import {
+  windowDetachedFromRequests,
+  windowRequestResponded
+} from '@background/redux/windowManagement/actions';
 import { selectOpenRequests } from '@background/redux/windowManagement/selectors';
-import { CancellableMethod } from '@background/redux/windowManagement/types';
+import {
+  CancellableMethod,
+  OpenRequest
+} from '@background/redux/windowManagement/types';
 
 import { SdkMethod, sdkMethod } from '@content/sdk-method';
 
@@ -18,7 +24,8 @@ export const CANCEL_GRACE_MS = 250;
 const delay = (ms: number) =>
   new Promise<void>(resolve => setTimeout(resolve, ms));
 
-export type OpenRequest = ReturnType<typeof selectOpenRequests>[number];
+export type CancelSource =
+  'cancel-on-close' | 'cancel-on-supersede' | 'open-window-failed';
 
 export function buildCancelResponse(
   method: CancellableMethod,
@@ -58,10 +65,10 @@ export function buildCancelResponse(
 // 'responded' and before the async sends — the close path uses it to null the
 // tracked windowId; the supersede path passes nothing (a new window is being
 // tracked, so windowId must NOT be cleared).
-export async function cancelRequests(
+async function cancelRequests(
   store: MainStore,
   initiallyOpen: OpenRequest[],
-  source: string,
+  source: CancelSource,
   afterMark?: () => void
 ): Promise<void> {
   if (initiallyOpen.length === 0) {
@@ -84,24 +91,93 @@ export async function cancelRequests(
   }
   afterMark?.();
 
-  await Promise.all(
+  await Promise.allSettled(
     toCancel.map(async ({ requestId, tabId, origin, method }) => {
       const action = buildCancelResponse(method, requestId);
       try {
         await tabs.sendMessage(tabId, action);
-      } catch {
-        const delivered = await deliverViaOrigin(origin, action);
-        store.dispatch(
-          sagaError({
-            source,
-            message:
-              `Cancel delivery to tab ${tabId} failed` +
-              (delivered > 0
-                ? '; delivered via same-origin fallback'
-                : '; not delivered')
-          })
+      } catch (error) {
+        // NEVER log `action` — it is an SDK response payload.
+        console.error(
+          `${source}: cancel delivery failed`,
+          { requestId, method, tabId },
+          error
         );
+        const delivered = await deliverViaOrigin(origin, action);
+        // Only surface a banner when the response is genuinely lost. On the
+        // supersede path this fires while the user is already looking at the
+        // NEXT approval screen, so a "recovered anyway" banner is pure noise on
+        // top of a signing prompt. Do NOT put `origin` in the message: appEvents
+        // is broadcast to every replica.
+        if (delivered === 0) {
+          store.dispatch(
+            sagaError({
+              source,
+              message: `Cancel delivery to tab ${tabId} failed; not delivered`
+            })
+          );
+        }
       }
     })
   );
+}
+
+// The single cancellation trigger: window `windowId` stopped displaying
+// requests (it closed, or it was reused for a different request). A request is
+// a candidate only if this was its LAST window — a request the Ledger
+// permission window still displays survives, and a request that never had this
+// window (e.g. one registered moments ago, still waiting for its window) can
+// never cancel itself.
+export async function cancelRequestsDisplacedBy(
+  store: MainStore,
+  windowId: number,
+  source: CancelSource,
+  afterMark?: () => void
+): Promise<void> {
+  const candidates = selectOpenRequests(store.getState()).filter(
+    request =>
+      request.windowIds.length === 1 && request.windowIds[0] === windowId
+  );
+
+  // Dispatched synchronously, before the grace: the slice must stop claiming
+  // this window displays anything the moment it stopped doing so.
+  store.dispatch(windowDetachedFromRequests({ windowId }));
+
+  await cancelRequests(store, candidates, source, afterMark);
+}
+
+// `windows.create` rejected, so no window will ever display this request and no
+// `windows.onRemoved` will ever fire for it. Without this the dapp promise hangs
+// until its own timeout (30 min by default).
+export async function failRequestOnWindowError(
+  store: MainStore,
+  requestId: string
+): Promise<void> {
+  const request = selectOpenRequests(store.getState()).find(
+    openRequest => openRequest.requestId === requestId
+  );
+
+  if (request == null) {
+    return;
+  }
+
+  store.dispatch(windowRequestResponded({ requestId }));
+  store.dispatch(
+    sagaError({
+      source: 'open-window-failed',
+      message: 'Approval window could not be opened; the request was cancelled'
+    })
+  );
+
+  const action = buildCancelResponse(request.method, requestId);
+  try {
+    await tabs.sendMessage(request.tabId, action);
+  } catch (error) {
+    console.error(
+      'open-window-failed: cancel delivery failed',
+      { requestId, method: request.method, tabId: request.tabId },
+      error
+    );
+    await deliverViaOrigin(request.origin, action);
+  }
 }
