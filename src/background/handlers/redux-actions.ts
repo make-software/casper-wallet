@@ -68,7 +68,8 @@ import {
   popupWindowInit,
   signWindowInit,
   windowIdChanged,
-  windowIdCleared
+  windowIdCleared,
+  windowRequestWindowAttached
 } from '@background/redux/windowManagement/actions';
 
 import { enableOnboardingFlow } from '../open-onboarding-flow';
@@ -148,6 +149,7 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
     siteDisconnected,
     windowIdChanged,
     windowIdCleared,
+    windowRequestWindowAttached,
     onboardingAppInit,
     popupWindowInit,
     connectWindowInit,

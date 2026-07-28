@@ -11,6 +11,7 @@ import {
 } from '@background/redux/ledger/actions';
 import { selectLedgerNewWindowId } from '@background/redux/ledger/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
+import { windowRequestWindowAttached } from '@background/redux/windowManagement/actions';
 
 import {
   ILedgerEvent,
@@ -156,7 +157,6 @@ export const useLedger = ({
       }
 
       isFirstEventRef.current = false;
-      console.log('-------- event', JSON.stringify(event.status, null, ' '));
     });
 
     return () => sub.unsubscribe();
@@ -182,6 +182,18 @@ export const useLedger = ({
 
         if (w.id) {
           dispatchToMainStore(ledgerNewWindowIdChanged(w.id));
+
+          // This window displays the SAME requestId as the approval window that
+          // opened it. Registering it is what keeps the request alive when the
+          // shared approval window is reused or closed while the user is still
+          // confirming on the device.
+          const requestId = askPermissionUrlData.params?.requestId;
+          if (requestId) {
+            dispatchToMainStore(
+              windowRequestWindowAttached({ requestId, windowId: w.id })
+            );
+          }
+
           triggeredRef.current = true;
 
           const handleCloseWindow = () => {
@@ -193,7 +205,12 @@ export const useLedger = ({
         }
       }
     })();
-  }, [ledgerEventStatusToRender.status, url, windowId]);
+  }, [
+    askPermissionUrlData.params?.requestId,
+    ledgerEventStatusToRender.status,
+    url,
+    windowId
+  ]);
 
   const closeNewLedgerWindowsAndClearState = useCallback(async () => {
     if (windowId) {

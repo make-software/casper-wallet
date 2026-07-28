@@ -118,6 +118,9 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     // Background-only: dispatched by sdk-response-to-tab when a request is
     // answered back to the tab. Never dispatched from the UI.
     windowManagementActions.windowRequestResponded,
+    // Background-only: dispatched by the cancel path when a window closes or
+    // is reused for a new request. Never dispatched from the UI.
+    windowManagementActions.windowDetachedFromRequests,
     // Background-only: `yield put` inside vault-sagas on successful unlock.
     // Never dispatched from the UI.
     loginRetryLockoutTimeActions.loginRetryLockoutTimeReseted,
@@ -181,5 +184,13 @@ describe('FORWARDED_ACTION_TYPES parity', () => {
   it('exact set equality: universe \\ EXCLUSIONS === FORWARDED_ACTION_TYPES', () => {
     const forwardable = new Set(difference(UNIVERSE_TYPES, EXCLUSIONS));
     expect(sorted(FORWARDED_ACTION_TYPES)).toEqual(sorted(forwardable));
+  });
+
+  it('windowRequestWindowAttached is forwarded (the Ledger window registers from the UI)', () => {
+    expect(
+      FORWARDED_ACTION_TYPES.has(
+        windowManagementActions.windowRequestWindowAttached.type
+      )
+    ).toBe(true);
   });
 });
