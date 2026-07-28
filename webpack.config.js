@@ -64,11 +64,15 @@ if (fileSystem.existsSync(secretsPath)) {
   alias['secrets'] = secretsPath;
 }
 
-// One nonce per build. Chrome-production style-src pins to it instead of
-// 'unsafe-inline'; the same value is wired to __webpack_nonce__ (style-loader)
-// and process.env.CSP_NONCE (styled-components' CspStyleSheetManager) below,
-// so the manifest CSP and the injected <style> tags always match.
-const CSP_NONCE = crypto.randomBytes(16).toString('base64');
+// One nonce per build, and ONLY for Chrome production — that is the sole CSP arm
+// that pins style-src to it (see getCSP below). Emitting a random literal into
+// Firefox/Safari bundles that never read it makes those builds irreproducible,
+// which AMO source review requires (it rebuilds and compares byte-for-byte).
+// Where it does apply, the same value is wired to __webpack_nonce__ (style-loader)
+// and process.env.CSP_NONCE (styled-components' CspStyleSheetManager) below, so
+// the manifest CSP and the injected <style> tags always match.
+const CSP_NONCE =
+  isChrome && !isDev ? crypto.randomBytes(16).toString('base64') : null;
 
 const getCSP = () => {
   // Chrome-production locks <style>/<link> ELEMENTS to the build nonce (style-src,

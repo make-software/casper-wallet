@@ -11,7 +11,7 @@ export const CspStyleSheetManager = ({ children }: PropsWithChildren) => (
     // styled-components stamps this nonce on its injected <style> tags so they pass the
     // Chrome-prod `style-src 'self' 'nonce-<value>'` CSP; value comes from webpack DefinePlugin
     // (inert on dev + Firefox/Safari, whose CSP keeps 'unsafe-inline'). See webpack.config.js.
-    nonce={process.env.CSP_NONCE}
+    nonce={process.env.CSP_NONCE ?? undefined}
   >
     {children}
   </StyleSheetManager>
