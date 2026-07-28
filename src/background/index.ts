@@ -40,10 +40,7 @@ import {
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
 import { exportKeysWindowIdCleared } from '@background/redux/windowManagement/actions';
-import {
-  selectExportKeysWindowId,
-  selectWindowId
-} from '@background/redux/windowManagement/selectors';
+import { selectExportKeysWindowId } from '@background/redux/windowManagement/selectors';
 
 import { sdkEvent } from '@content/sdk-event';
 import { isSDKMethod } from '@content/sdk-method';
@@ -177,18 +174,27 @@ tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 // Single init-time listener for the approval-window lifecycle. Replaces the
 // per-creation `windows.onRemoved` listeners that used to be added inside
 // `createOpenWindow` (one leaked per opened window). `windows.onRemoved` fires
-// for ANY window, so the id-match guard ensures we only react when the removed
-// window is the tracked approval window. `cancelOpenRequestsForClosedWindow`
-// waits a grace period, then cancels any requests still open for that window
-// and dispatches `windowIdCleared` to null the slice `windowId`.
-windows.onRemoved.addListener(async (removedWindowId: number) => {
-  const store = await getExistingMainStoreSingletonOrInit();
-  if (removedWindowId === selectWindowId(store.getState())) {
-    await cancelOpenRequestsForClosedWindow(store, removedWindowId);
-  }
-  if (removedWindowId === selectExportKeysWindowId(store.getState())) {
-    store.dispatch(exportKeysWindowIdCleared());
-  }
+// for ANY window; `cancelOpenRequestsForClosedWindow` itself decides whether
+// the removed window was the last display for any open request (a request
+// the Ledger permission window still shows survives), waits a grace period,
+// then cancels the survivors and dispatches `windowIdCleared` to null the
+// slice `windowId` if it is still tracking the removed window. The `async`
+// IIFE is awaited only internally so a rejection here can never skip the
+// export-keys cleanup below it.
+windows.onRemoved.addListener((removedWindowId: number) => {
+  void (async () => {
+    const store = await getExistingMainStoreSingletonOrInit();
+
+    try {
+      await cancelOpenRequestsForClosedWindow(store, removedWindowId);
+    } catch (error) {
+      console.error('cancel-on-close: failed to cancel open requests', error);
+    }
+
+    if (removedWindowId === selectExportKeysWindowId(store.getState())) {
+      store.dispatch(exportKeysWindowIdCleared());
+    }
+  })();
 });
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
