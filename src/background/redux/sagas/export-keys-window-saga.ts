@@ -3,6 +3,7 @@ import { Windows, windows } from 'webextension-polyfill';
 
 import { RouterPath } from '@popup/router/paths';
 
+import { sagaError } from '@background/redux/app-events/actions';
 import {
   exportKeysWindowIdChanged,
   exportKeysWindowIdCleared
@@ -67,12 +68,15 @@ export function* openExportKeysWindowSaga() {
       yield put(exportKeysWindowIdChanged(created.id));
     }
   } catch (error) {
-    // No UI surface here (the menu banner was removed): a failed open is rare
-    // (windows.create almost never rejects) and there is no popup left to show
-    // it in. The download-failure screen covers the important in-window case.
     console.error(
       'openExportKeysWindowSaga: failed to open export window',
       error
+    );
+    yield put(
+      sagaError({
+        source: 'openExportKeysWindowSaga',
+        message: 'Could not open the export window'
+      })
     );
   }
 }

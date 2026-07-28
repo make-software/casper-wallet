@@ -2,6 +2,7 @@ import * as matchers from 'redux-saga-test-plan/matchers';
 import { expectSaga } from 'redux-saga-test-plan';
 import { windows } from 'webextension-polyfill';
 
+import { sagaError } from '@background/redux/app-events/actions';
 import {
   exportKeysWindowIdChanged,
   exportKeysWindowIdCleared
@@ -84,6 +85,29 @@ describe('openExportKeysWindowSaga', () => {
       ])
       .not.put(exportKeysWindowIdChanged(expect.any(Number)))
       .run();
+  });
+
+  it('surfaces a saga error when the export window cannot be opened', () => {
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    return expectSaga(openExportKeysWindowSaga)
+      .withState({ windowManagement: { exportKeysWindowId: null } })
+      .provide([
+        [matchers.call.fn(windows.getAll), []],
+        [matchers.call.fn(windows.getCurrent), currentWindow],
+        [matchers.call.fn(windows.create), Promise.reject(new Error('denied'))]
+      ])
+      .put(
+        sagaError({
+          source: 'openExportKeysWindowSaga',
+          message: 'Could not open the export window'
+        })
+      )
+      .not.put(exportKeysWindowIdChanged(expect.any(Number)))
+      .run()
+      .finally(() => consoleError.mockRestore());
   });
 
   describe('exportKeysWindowSaga (watcher)', () => {
