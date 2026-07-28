@@ -2,7 +2,7 @@ import { createSelector } from 'reselect';
 
 import { RootState } from '@background/redux/store-types';
 
-import { RequestStatus } from './types';
+import { OpenRequest, OpenRequestDescriptor, RequestStatus } from './types';
 
 export const selectWindowId = (state: RootState): number | null =>
   state.windowManagement.windowId;
@@ -13,22 +13,19 @@ export const selectExportKeysWindowId = (state: RootState): number | null =>
 export const selectRequestStatus = (
   state: RootState,
   requestId: string
-): RequestStatus | undefined => state.windowManagement.requests[requestId];
+): RequestStatus | undefined =>
+  state.windowManagement.requests[requestId]?.status;
 
 const selectRequests = (state: RootState) => state.windowManagement.requests;
 
-const selectPendingRequests = (state: RootState) =>
-  state.windowManagement.pendingRequests;
-
-// Joins the status map with the descriptor map, yielding the descriptor of
-// every request still awaiting a response. Memoized (reselect) so repeated
-// reads — `cancelOpenRequestsForClosedWindow` reads it once before the grace
-// and once after — do not rebuild the array while the slice is unchanged.
-export const selectOpenRequests = createSelector(
-  selectRequests,
-  selectPendingRequests,
-  (requests, pendingRequests) =>
-    Object.entries(requests)
-      .filter(([, status]) => status === 'open')
-      .map(([requestId]) => ({ requestId, ...pendingRequests[requestId] }))
+// Every request still awaiting a response, with its descriptor. Memoized
+// (reselect) so the repeated reads on the cancel path — once to pick candidates,
+// once after the grace — do not rebuild the array while the slice is unchanged.
+export const selectOpenRequests = createSelector(selectRequests, requests =>
+  Object.entries(requests)
+    .filter(
+      (entry): entry is [string, OpenRequestDescriptor] =>
+        entry[1].status === 'open'
+    )
+    .map(([requestId, request]): OpenRequest => ({ requestId, ...request }))
 );

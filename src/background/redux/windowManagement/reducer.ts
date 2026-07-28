@@ -5,8 +5,7 @@ import { CancellableMethod, WindowManagementState } from './types';
 const initialState: WindowManagementState = {
   windowId: null,
   exportKeysWindowId: null,
-  requests: {},
-  pendingRequests: {}
+  requests: {}
 };
 
 const slice = createSlice({
@@ -31,6 +30,9 @@ const slice = createSlice({
     connectWindowInit: state => state,
     importWindowInit: state => state,
     signWindowInit: state => state,
+    // The descriptor is written ONCE. `requestId` is page-generated
+    // (`generateRequestId`, src/content/sdk.ts) i.e. dapp-controlled, so a
+    // repeated id must not overwrite a live request nor resurrect a tombstone.
     windowRequestOpened: (
       state,
       action: PayloadAction<{
@@ -39,44 +41,94 @@ const slice = createSlice({
         origin: string;
         method: CancellableMethod;
       }>
-    ) => ({
-      ...state,
-      requests: {
-        ...state.requests,
-        [action.payload.requestId]: 'open'
-      },
-      pendingRequests: {
-        ...state.pendingRequests,
-        [action.payload.requestId]: {
-          tabId: action.payload.tabId,
-          origin: action.payload.origin,
-          method: action.payload.method
-        }
-      }
-    }),
-    // The status entry is kept forever on purpose: `selectRequestStatus` reading
-    // back 'responded' is what makes the server-side dedup drop a duplicate
-    // response. Deleting it would turn the status into `undefined` and let the
-    // duplicate through. The DESCRIPTOR, on the other hand, is only ever read
-    // for requests still 'open' (selectOpenRequests filters on that), so it is
-    // dead weight once answered — drop it and keep the map proportional to the
-    // number of genuinely in-flight requests rather than to the lifetime total.
-    windowRequestResponded: (
-      state,
-      action: PayloadAction<{ requestId: string }>
     ) => {
-      const pendingRequests = { ...state.pendingRequests };
-      delete pendingRequests[action.payload.requestId];
+      if (state.requests[action.payload.requestId] != null) {
+        return state;
+      }
 
       return {
         ...state,
         requests: {
           ...state.requests,
-          [action.payload.requestId]: 'responded'
-        },
-        pendingRequests
+          [action.payload.requestId]: {
+            status: 'open',
+            tabId: action.payload.tabId,
+            origin: action.payload.origin,
+            method: action.payload.method,
+            windowIds: []
+          }
+        }
       };
-    }
+    },
+    // A window began displaying this request. Dispatched by `openWindow` once
+    // `windows.create`/reuse resolves, and by `use-ledger` for the separate
+    // permission window.
+    windowRequestWindowAttached: (
+      state,
+      action: PayloadAction<{ requestId: string; windowId: number }>
+    ) => {
+      const request = state.requests[action.payload.requestId];
+
+      if (
+        request == null ||
+        request.status !== 'open' ||
+        request.windowIds.includes(action.payload.windowId)
+      ) {
+        return state;
+      }
+
+      return {
+        ...state,
+        requests: {
+          ...state.requests,
+          [action.payload.requestId]: {
+            ...request,
+            windowIds: [...request.windowIds, action.payload.windowId]
+          }
+        }
+      };
+    },
+    // A window stopped displaying requests (closed, or reused for a new one).
+    windowDetachedFromRequests: (
+      state,
+      action: PayloadAction<{ windowId: number }>
+    ) => {
+      const requests = { ...state.requests };
+      let changed = false;
+
+      for (const [requestId, request] of Object.entries(state.requests)) {
+        if (
+          request.status === 'open' &&
+          request.windowIds.includes(action.payload.windowId)
+        ) {
+          requests[requestId] = {
+            ...request,
+            windowIds: request.windowIds.filter(
+              id => id !== action.payload.windowId
+            )
+          };
+          changed = true;
+        }
+      }
+
+      return changed ? { ...state, requests } : state;
+    },
+    // The tombstone is deliberately kept: `selectRequestStatus` reading back
+    // 'responded' is what makes the background dedup drop a duplicate response.
+    // It is in-memory only — an MV3 service-worker restart wipes it, after which
+    // a late duplicate is no longer deduped. The descriptor is dropped with it,
+    // so the map stays proportional to in-flight requests, not to the lifetime
+    // total.
+    windowRequestResponded: (
+      state,
+      action: PayloadAction<{ requestId: string }>
+    ) => ({
+      ...state,
+      requests: {
+        ...state.requests,
+        [action.payload.requestId]: { status: 'responded' }
+      }
+    })
   }
 });
 
@@ -88,9 +140,11 @@ export const {
   onboardingAppInit,
   popupWindowInit,
   signWindowInit,
+  windowDetachedFromRequests,
   windowIdChanged,
   windowIdCleared,
   windowRequestOpened,
-  windowRequestResponded
+  windowRequestResponded,
+  windowRequestWindowAttached
 } = slice.actions;
 export const reducer = slice.reducer;

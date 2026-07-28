@@ -6,172 +6,64 @@ import {
   onboardingAppInit,
   popupWindowInit,
   signWindowInit,
+  windowDetachedFromRequests,
   windowIdChanged,
   windowIdCleared,
   windowRequestOpened,
-  windowRequestResponded
+  windowRequestResponded,
+  windowRequestWindowAttached
 } from './actions';
 import { reducer } from './reducer';
+import { WindowManagementState } from './types';
 
-const empty = {
+const empty: WindowManagementState = {
   windowId: null,
   exportKeysWindowId: null,
-  requests: {},
-  pendingRequests: {}
-} as const;
+  requests: {}
+};
+
+const opened = (requestId: string) =>
+  windowRequestOpened({
+    requestId,
+    tabId: 3,
+    origin: 'https://dapp',
+    method: 'sign'
+  });
 
 describe('windowManagement reducer', () => {
   it('has null windowId and no requests initially', () => {
     expect(reducer(undefined, { type: '@@INIT' } as any)).toEqual({
       windowId: null,
       exportKeysWindowId: null,
-      requests: {},
-      pendingRequests: {}
+      requests: {}
     });
   });
+
   it('sets and clears windowId', () => {
-    const s = reducer(
-      {
-        windowId: null,
-        exportKeysWindowId: null,
-        requests: {},
-        pendingRequests: {}
-      },
-      windowIdChanged(7)
-    );
+    const s = reducer(empty, windowIdChanged(7));
     expect(s).toEqual({
       windowId: 7,
       exportKeysWindowId: null,
-      requests: {},
-      pendingRequests: {}
+      requests: {}
     });
     expect(reducer(s, windowIdCleared())).toEqual({
       windowId: null,
       exportKeysWindowId: null,
-      requests: {},
-      pendingRequests: {}
+      requests: {}
     });
   });
+
   it('window-init actions do not change state', () => {
-    const state = {
+    const state: WindowManagementState = {
       windowId: 7,
       exportKeysWindowId: null,
-      requests: {},
-      pendingRequests: {}
+      requests: {}
     };
     expect(reducer(state, onboardingAppInit())).toEqual(state);
     expect(reducer(state, popupWindowInit())).toEqual(state);
     expect(reducer(state, connectWindowInit())).toEqual(state);
     expect(reducer(state, importWindowInit())).toEqual(state);
     expect(reducer(state, signWindowInit())).toEqual(state);
-  });
-
-  it('opens a request', () => {
-    const s = reducer(
-      {
-        windowId: null,
-        exportKeysWindowId: null,
-        requests: {},
-        pendingRequests: {}
-      },
-      windowRequestOpened({
-        requestId: 'r1',
-        tabId: 9,
-        origin: 'https://dapp.example',
-        method: 'sign'
-      })
-    );
-    expect(s.requests.r1).toBe('open');
-  });
-
-  it('marks a request as responded, and is idempotent on a second respond', () => {
-    let s = reducer(
-      {
-        windowId: null,
-        exportKeysWindowId: null,
-        requests: {},
-        pendingRequests: {}
-      },
-      windowRequestOpened({
-        requestId: 'r1',
-        tabId: 9,
-        origin: 'https://dapp.example',
-        method: 'sign'
-      })
-    );
-    s = reducer(s, windowRequestResponded({ requestId: 'r1' }));
-    expect(s.requests.r1).toBe('responded');
-
-    s = reducer(s, windowRequestResponded({ requestId: 'r1' }));
-    expect(s.requests.r1).toBe('responded');
-  });
-
-  it('windowRequestOpened sets status open AND stores the descriptor', () => {
-    const next = reducer(
-      empty,
-      windowRequestOpened({
-        requestId: 'r1',
-        tabId: 9,
-        origin: 'https://dapp.example',
-        method: 'sign'
-      })
-    );
-    expect(next.requests.r1).toBe('open');
-    expect(next.pendingRequests.r1).toEqual({
-      tabId: 9,
-      origin: 'https://dapp.example',
-      method: 'sign'
-    });
-  });
-
-  it('windowRequestResponded keeps the status but drops the descriptor', () => {
-    const opened = reducer(
-      empty,
-      windowRequestOpened({
-        requestId: 'r1',
-        tabId: 9,
-        origin: 'o',
-        method: 'connect'
-      })
-    );
-    const next = reducer(opened, windowRequestResponded({ requestId: 'r1' }));
-    // The status MUST survive — selectRequestStatus reading back 'responded'
-    // is what makes the server-side dedup drop a duplicate response.
-    expect(next.requests.r1).toBe('responded');
-    // The descriptor is only read for still-'open' requests, so it is dead
-    // weight once answered.
-    expect(next.pendingRequests.r1).toBeUndefined();
-  });
-
-  it('leaves a still-open sibling untouched when one request is answered', () => {
-    let s = reducer(
-      empty,
-      windowRequestOpened({
-        requestId: 'r1',
-        tabId: 9,
-        origin: 'https://dapp.example',
-        method: 'sign'
-      })
-    );
-    s = reducer(
-      s,
-      windowRequestOpened({
-        requestId: 'r2',
-        tabId: 9,
-        origin: 'https://other.example',
-        method: 'signMessage'
-      })
-    );
-    s = reducer(s, windowRequestResponded({ requestId: 'r1' }));
-    expect(s.pendingRequests.r2).toEqual({
-      tabId: 9,
-      origin: 'https://other.example',
-      method: 'signMessage'
-    });
-    // Responding twice must not throw or resurrect the dropped descriptor.
-    s = reducer(s, windowRequestResponded({ requestId: 'r1' }));
-    expect(s.pendingRequests.r1).toBeUndefined();
-    expect(s.requests.r1).toBe('responded');
   });
 
   it('windowIdCleared nulls only windowId', () => {
@@ -186,5 +78,165 @@ describe('windowManagement reducer', () => {
 
     const cleared = reducer(set, exportKeysWindowIdCleared());
     expect(cleared.exportKeysWindowId).toBeNull();
+  });
+
+  it('marks a request as responded, and is idempotent on a second respond', () => {
+    let state = reducer(empty, opened('r1'));
+    state = reducer(state, windowRequestResponded({ requestId: 'r1' }));
+    expect(state.requests.r1).toEqual({ status: 'responded' });
+
+    state = reducer(state, windowRequestResponded({ requestId: 'r1' }));
+    expect(state.requests.r1).toEqual({ status: 'responded' });
+  });
+
+  it('leaves a still-open sibling untouched when one request is answered', () => {
+    let state = reducer(empty, opened('r1'));
+    state = reducer(
+      state,
+      windowRequestOpened({
+        requestId: 'r2',
+        tabId: 9,
+        origin: 'https://other.example',
+        method: 'signMessage'
+      })
+    );
+    state = reducer(state, windowRequestResponded({ requestId: 'r1' }));
+    expect(state.requests.r2).toEqual({
+      status: 'open',
+      tabId: 9,
+      origin: 'https://other.example',
+      method: 'signMessage',
+      windowIds: []
+    });
+
+    // Responding twice must not throw or resurrect the dropped descriptor.
+    state = reducer(state, windowRequestResponded({ requestId: 'r1' }));
+    expect(state.requests.r1).toEqual({ status: 'responded' });
+  });
+});
+
+describe('windowManagement requests', () => {
+  it('opens a request with no windows attached yet', () => {
+    const state = reducer(empty, opened('r1'));
+
+    expect(state.requests.r1).toEqual({
+      status: 'open',
+      tabId: 3,
+      origin: 'https://dapp',
+      method: 'sign',
+      windowIds: []
+    });
+  });
+
+  it('attaches a window id to an open request', () => {
+    let state = reducer(empty, opened('r1'));
+    state = reducer(
+      state,
+      windowRequestWindowAttached({ requestId: 'r1', windowId: 7 })
+    );
+
+    expect(state.requests.r1).toMatchObject({ windowIds: [7] });
+  });
+
+  it('attaches a second window (Ledger permission window) to the same request', () => {
+    let state = reducer(empty, opened('r1'));
+    state = reducer(
+      state,
+      windowRequestWindowAttached({ requestId: 'r1', windowId: 7 })
+    );
+    state = reducer(
+      state,
+      windowRequestWindowAttached({ requestId: 'r1', windowId: 9 })
+    );
+
+    expect(state.requests.r1).toMatchObject({ windowIds: [7, 9] });
+  });
+
+  it('ignores a duplicate attach of the same window', () => {
+    let state = reducer(empty, opened('r1'));
+    state = reducer(
+      state,
+      windowRequestWindowAttached({ requestId: 'r1', windowId: 7 })
+    );
+    const next = reducer(
+      state,
+      windowRequestWindowAttached({ requestId: 'r1', windowId: 7 })
+    );
+
+    expect(next).toBe(state);
+  });
+
+  it('ignores an attach to an unknown or responded request', () => {
+    const unknown = reducer(
+      empty,
+      windowRequestWindowAttached({ requestId: 'nope', windowId: 7 })
+    );
+    expect(unknown).toBe(empty);
+
+    let state = reducer(empty, opened('r1'));
+    state = reducer(state, windowRequestResponded({ requestId: 'r1' }));
+    const next = reducer(
+      state,
+      windowRequestWindowAttached({ requestId: 'r1', windowId: 7 })
+    );
+    expect(next).toBe(state);
+  });
+
+  it('detaches one window and leaves the other attached', () => {
+    let state = reducer(empty, opened('r1'));
+    state = reducer(
+      state,
+      windowRequestWindowAttached({ requestId: 'r1', windowId: 7 })
+    );
+    state = reducer(
+      state,
+      windowRequestWindowAttached({ requestId: 'r1', windowId: 9 })
+    );
+    state = reducer(state, windowDetachedFromRequests({ windowId: 7 }));
+
+    expect(state.requests.r1).toMatchObject({ windowIds: [9] });
+  });
+
+  it('detach is a no-op when no request holds that window', () => {
+    const state = reducer(empty, opened('r1'));
+    expect(reducer(state, windowDetachedFromRequests({ windowId: 7 }))).toBe(
+      state
+    );
+  });
+
+  it('responding replaces the descriptor with a tombstone', () => {
+    let state = reducer(empty, opened('r1'));
+    state = reducer(state, windowRequestResponded({ requestId: 'r1' }));
+
+    expect(state.requests.r1).toEqual({ status: 'responded' });
+  });
+
+  it('a reused requestId does not resurrect a tombstone', () => {
+    let state = reducer(empty, opened('r1'));
+    state = reducer(state, windowRequestResponded({ requestId: 'r1' }));
+    const next = reducer(state, opened('r1'));
+
+    expect(next).toBe(state);
+    expect(next.requests.r1).toEqual({ status: 'responded' });
+  });
+
+  it('a reused requestId does not clobber a still-open descriptor', () => {
+    let state = reducer(empty, opened('r1'));
+    state = reducer(
+      state,
+      windowRequestWindowAttached({ requestId: 'r1', windowId: 7 })
+    );
+    const next = reducer(
+      state,
+      windowRequestOpened({
+        requestId: 'r1',
+        tabId: 99,
+        origin: 'https://other',
+        method: 'connect'
+      })
+    );
+
+    expect(next).toBe(state);
+    expect(next.requests.r1).toMatchObject({ tabId: 3, windowIds: [7] });
   });
 });
