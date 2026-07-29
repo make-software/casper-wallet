@@ -9,12 +9,12 @@ import {
 } from '@popup/constants';
 
 import { sagaError } from '@background/redux/app-events/actions';
+import { loginRetryLockoutTimeReseted } from '@background/redux/login-retry-lockout-time/actions';
+import { selectLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
 import {
   AUTO_LOCK_DEADLINE_KEY,
   LOGIN_RETRY_LOCKOUT_DEADLINE_KEY
-} from '@background/redux/get-main-store';
-import { loginRetryLockoutTimeReseted } from '@background/redux/login-retry-lockout-time/actions';
-import { selectLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
+} from '@background/redux/storage-keys';
 
 import * as vaultCryptoModule from '@libs/crypto/vault';
 import { encryptVault } from '@libs/crypto/vault';
@@ -53,14 +53,6 @@ import {
   unlockVaultSaga,
   vaultSagas
 } from './vault-sagas';
-
-// Stub the storage-key module so importing it does not drag in the Redux
-// store. The literals below MUST stay in lockstep with the real keys in
-// get-main-store.ts — they are immutable once shipped.
-jest.mock('@background/redux/get-main-store', () => ({
-  LOGIN_RETRY_LOCKOUT_DEADLINE_KEY: 'q9Tf3Lm4pRxVne',
-  AUTO_LOCK_DEADLINE_KEY: 'r3Wj7Nc8vBhQyD'
-}));
 
 jest.mock('webextension-polyfill', () => ({
   storage: {
