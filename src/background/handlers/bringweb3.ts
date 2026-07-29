@@ -22,12 +22,18 @@ export async function handleBringWeb3(
   store: MainStore
 ): Promise<HandlerResult> {
   if (bringWeb3Events.getActivePublicKey.match(action)) {
-    const activeAccount = selectVaultActiveAccount(store.getState());
+    // Absence must not be shaped like success. A locked vault or a missing
+    // active account reports an explicit null; `bring.ts` already treats a
+    // missing key as "no wallet address" (the kit's getWalletAddress contract).
+    const isLocked = selectVaultIsLocked(store.getState());
+    const activeAccount = isLocked
+      ? undefined
+      : selectVaultActiveAccount(store.getState());
 
     return {
       handled: true,
       response: bringWeb3Events.getActivePublicKeyResponse({
-        publicKey: activeAccount?.publicKey!
+        publicKey: activeAccount?.publicKey ?? null
       })
     };
   } else if (bringWeb3Events.promptLoginRequest.match(action)) {

@@ -7,9 +7,9 @@ const getActivePublicKye = async (): Promise<string | undefined> => {
   try {
     const response = (await runtime.sendMessage({
       type: 'GET_ACTIVE_PUBLIC_KEY'
-    })) as { payload?: { publicKey?: string } } | undefined;
+    })) as { payload?: { publicKey?: string | null } } | undefined;
 
-    return response?.payload?.publicKey;
+    return response?.payload?.publicKey ?? undefined;
   } catch (e) {
     console.log(e, 'getActivePublicKye error');
 
