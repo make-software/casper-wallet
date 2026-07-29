@@ -107,6 +107,8 @@ const SENDER = {
   tab: { id: 9 }
 } as Runtime.MessageSender;
 
+let consoleErrorSpy: jest.SpyInstance;
+
 beforeEach(() => {
   jest.clearAllMocks();
   getUrlOriginMock.mockReturnValue(ORIGIN);
@@ -115,6 +117,11 @@ beforeEach(() => {
     publicKey: 'PK-1'
   } as any);
   selectIsConnectedMock.mockReturnValue(false);
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  consoleErrorSpy.mockRestore();
 });
 
 describe('connectRequest', () => {
@@ -272,7 +279,7 @@ describe('signRequest', () => {
     deploy: { approvals: [{ signer: 'PK-OTHER' }] }
   });
 
-  it('unparseable deployJson → throws parse error', async () => {
+  it('unparseable deployJson → throws parse error and logs the cause', async () => {
     const { store } = makeStore();
     await expect(
       handleSdkMethod(
@@ -283,7 +290,12 @@ describe('signRequest', () => {
         SENDER,
         store
       )
-    ).rejects.toThrow('Desploy json string parse error');
+    ).rejects.toThrow('Deploy json string parse error');
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('deploy json string parse failed'),
+      expect.anything()
+    );
   });
 
   it('deploy already signed by this account → returns cancelled response, no window', async () => {
@@ -693,6 +705,11 @@ describe('encryptMessageRequest', () => {
         store
       )
     ).rejects.toThrow('Public key hex is not valid');
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('public key hex invalid'),
+      expect.anything()
+    );
   });
 
   it('message over max length → throws', async () => {
@@ -725,6 +742,11 @@ describe('encryptMessageRequest', () => {
         store
       )
     ).rejects.toThrow('Error during message encryption');
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('message encryption failed'),
+      expect.anything()
+    );
   });
 
   it('success → returns encryptMessageResponse with the ciphertext', async () => {
