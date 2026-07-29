@@ -134,8 +134,9 @@ export const PasswordProtectionPage = ({
             // too. The error itself is logged rather than discarded: silently
             // resetting the button is indistinguishable from a wrong password.
             .catch((error: unknown) => {
-              // nosemgrep: cw-logging-secrets — static message + error object only; the
-              // password is in scope but is deliberately not referenced here.
+              // The password is in scope but is deliberately not referenced
+              // here — only a static message and the error object are logged.
+              // nosemgrep: cw-logging-secrets
               console.error('Password confirmation failed:', error);
               setIsSubmitting(false);
             });

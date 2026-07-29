@@ -53,13 +53,15 @@ function deliveryFailedError(tabId: unknown, fallbackDelivered: boolean) {
 // here and deduped by `requestId`: the FIRST response for a request wins,
 // later ones are dropped.
 //
-// CRITICAL: drop ONLY when the request is already 'responded'. Two cancel paths
-// mark requests responded — a window closing (`windows.onRemoved`) and a window
-// being reused for a new request (`openWindow` resolving with `reused: true`) —
-// and both run the same detach-and-cancel routine after a short grace. Dropping
-// only on 'responded' kills the real duplicate (a cancel racing a successful
-// sign, where the sign already set 'responded') without ever suppressing a
-// first response.
+// CRITICAL: drop ONLY when the request is already 'responded'. Three causes
+// mark requests responded — a window closing (`windows.onRemoved`), a window
+// being reused for a new request (`openWindow` resolving with `reused: true`),
+// and a window failing to open at all (`windows.create` rejecting). The first
+// two run the shared detach-and-cancel routine (`cancelRequestsDisplacedBy` →
+// `cancelRequests`) after a short grace; the third (`failRequestOnWindowError`)
+// dispatches directly, with no grace. Dropping only on 'responded' kills the
+// real duplicate (a cancel racing a successful sign, where the sign already
+// set 'responded') without ever suppressing a first response.
 export async function handleSdkResponseToTab(
   message: unknown,
   sender: Runtime.MessageSender,

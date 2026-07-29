@@ -15,6 +15,7 @@ describe('crypto validators — error messages never carry the value', () => {
     } catch (error) {
       const message = (error as Error).message;
       expect(message).not.toContain(SECRET);
+      expect(message).toContain('expected a string');
       expect(message.toLowerCase()).toContain('object');
     }
   });

@@ -1,11 +1,14 @@
 # `storage.local` key inventory
 
 This document describes every key Casper Wallet writes to the extension's
-`storage.local`, defined in
-[`src/background/redux/get-main-store.ts`](../../src/background/redux/get-main-store.ts).
-It exists so that anyone touching persistence understands two things before
-they change a key string: **the names are immutable**, and **the names are
-not a security control**.
+`storage.local`. Most are defined in
+[`src/background/redux/get-main-store.ts`](../../src/background/redux/get-main-store.ts);
+two — the standalone absolute-deadline keys — are defined in
+[`src/background/redux/storage-keys.ts`](../../src/background/redux/storage-keys.ts)
+(see the "Standalone absolute-deadline keys" section below). It exists so
+that anyone touching persistence understands two things before they change a
+key string: **the names are immutable**, and **the names are not a security
+control**.
 
 ## Key inventory
 

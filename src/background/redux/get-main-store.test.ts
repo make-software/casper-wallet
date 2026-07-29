@@ -220,4 +220,20 @@ describe('replica broadcast — rejection handling', () => {
       })
     );
   });
+
+  it('stays silent when the rejection is a bare string, not an Error', async () => {
+    const store = await initWithKeysSnapshot(undefined);
+    consoleErrorSpy.mockClear();
+    // Some polyfills reject with a plain string rather than an Error. The
+    // guard must match on the message text regardless of the rejection's
+    // type, or every store change with no popup open would log.
+    runtimeSendMessage.mockRejectedValue(
+      'Could not establish connection. Receiving end does not exist.'
+    );
+
+    store.dispatch(windowIdChanged(11));
+    await flushMicrotasks();
+
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
 });

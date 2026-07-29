@@ -102,14 +102,13 @@ const selectPopupState = (state: RootState): PopupState => {
 // Same idiom as keep-alive.ts.
 function broadcastToReplicas(message: BackgroundEvent, source: string): void {
   runtime.sendMessage(message).catch((error: unknown) => {
-    if (
-      error instanceof Error &&
-      error.message.includes('Receiving end does not exist')
-    ) {
+    const text = error instanceof Error ? error.message : String(error);
+    if (text.includes('Receiving end does not exist')) {
       return;
     }
-    // nosemgrep: cw-logging-secrets — static source label + error object; the
-    // broadcast payload (which carries the decrypted vault) is never logged.
+    // The broadcast payload (which carries the decrypted vault) is never
+    // logged — only a static source label and the error object.
+    // nosemgrep: cw-logging-secrets
     console.error(`${source} broadcast failed:`, error);
   });
 }
