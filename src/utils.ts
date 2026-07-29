@@ -8,6 +8,8 @@ import { CasperWalletSupports } from '@content/sdk-types';
 
 import { Account, HardwareWalletType } from '@libs/types/account';
 
+import cspConfig from './csp.json';
+
 interface ImageProxyUrlProps {
   ttl: string;
   width?: string | number;
@@ -171,9 +173,15 @@ export const setCSPForSafari = () => {
       const meta = document.createElement('meta');
 
       meta.setAttribute('http-equiv', 'Content-Security-Policy');
+      // Safari ships no manifest CSP — getCSP() in webpack.config.js has no
+      // Safari branch, so this <meta> IS the whole policy. Shared directives
+      // come from src/csp.json so it cannot drift from the other targets again;
+      // only the style arm is Safari-specific.
+      // Note: frame-ancestors inside a <meta http-equiv> is ignored by browsers;
+      // it is present for parity with the built manifests, not as protection.
       meta.setAttribute(
         'content',
-        `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://cspr-wallet-api-condor.dev.make.services/ https://cspr-wallet-api.stg.make.services/ https://api.casperwallet.io/ https://api.integration.casperwallet.io/ https://node.integration.cspr.cloud/ https://onramp-api.cspr.click/api/ https://cspr-wallet-api.dev.make.services/ https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/ https://cspr-wallet-api-condor.dev.make.services/`
+        `${cspConfig.baseDirectives}; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src ${cspConfig.connectSrc.join(' ')}`
       );
 
       document.getElementsByTagName('head')[0].appendChild(meta);
