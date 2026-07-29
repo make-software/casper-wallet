@@ -1,9 +1,8 @@
-import { windows } from 'webextension-polyfill';
-
 import {
   OpenWindowProps,
   createOpenWindow
 } from '@background/create-open-window';
+import { attachWindowToRequest } from '@background/handlers/attach-window-to-request';
 import {
   cancelRequestsDisplacedBy,
   failRequestOnWindowError
@@ -11,8 +10,7 @@ import {
 import { MainStore } from '@background/redux/get-main-store';
 import {
   windowIdChanged,
-  windowIdCleared,
-  windowRequestWindowAttached
+  windowIdCleared
 } from '@background/redux/windowManagement/actions';
 import { selectWindowId } from '@background/redux/windowManagement/selectors';
 
@@ -80,25 +78,14 @@ export function openWindow(
       }
 
       if (requestId != null) {
-        store.dispatch(windowRequestWindowAttached({ requestId, windowId }));
-
         // The reuse chain makes several browser round-trips (getAll → get →
         // update → tabs.update, see create-open-window.ts) before this `.then`
-        // runs, and window creation is itself an awaited round-trip. The
-        // window can close in that gap (the user approves in it and its page
-        // calls `closeCurrentWindow()`, or a Ledger cleanup closes it). If so,
-        // `onRemoved` already ran for `windowId` and found no candidates (this
-        // request had no window yet), so no future event will ever cancel it —
-        // it would stay 'open' forever and hang its dapp's promise. Confirm
-        // the window is still alive right after attaching and, if it is not,
-        // run the same cancellation `onRemoved` would have run.
-        void windows
-          .get(windowId)
-          .catch(() =>
-            cancelRequestsDisplacedBy(store, windowId, 'cancel-on-close').catch(
-              error => console.error('cancel-on-close: failed', error)
-            )
-          );
+        // runs, and window creation is itself an awaited round-trip, so the
+        // window can close in that gap. `attachWindowToRequest` owns both the
+        // dispatch and the liveness repair for that case — see the rationale
+        // there, and note the Ledger hook reaches the same helper across a
+        // wider gap still.
+        attachWindowToRequest(store, requestId, windowId);
       }
     },
     error => {
