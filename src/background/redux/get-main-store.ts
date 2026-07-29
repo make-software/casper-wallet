@@ -1,6 +1,9 @@
 import { runtime, storage } from 'webextension-polyfill';
 
-import { backgroundEvent } from '@background/background-events';
+import {
+  BackgroundEvent,
+  backgroundEvent
+} from '@background/background-events';
 import { selectPrivateState } from '@background/handlers/private-state';
 import { privateStateChanged } from '@background/private-state-broadcast';
 import { AppEventsState } from '@background/redux/app-events/types';
@@ -104,6 +107,26 @@ const selectPopupState = (state: RootState): PopupState => {
   };
 };
 
+// Only "no receiver" is expected: `runtime.sendMessage` delivers to every
+// extension context except the sender, so with no popup open Chrome rejects
+// with "Receiving end does not exist." Everything else — a structured-clone
+// failure, a throwing listener, a message-size limit — means an OPEN replica
+// just missed an update and is now silently stale, so it must be visible.
+// Same idiom as keep-alive.ts.
+function broadcastToReplicas(message: BackgroundEvent, source: string): void {
+  runtime.sendMessage(message).catch((error: unknown) => {
+    if (
+      error instanceof Error &&
+      error.message.includes('Receiving end does not exist')
+    ) {
+      return;
+    }
+    // nosemgrep: cw-logging-secrets — static source label + error object; the
+    // broadcast payload (which carries the decrypted vault) is never logged.
+    console.error(`${source} broadcast failed:`, error);
+  });
+}
+
 // If this flag is true, we initialize the initial state for the tests
 const isMockStateEnable = Boolean(process.env.MOCK_STATE);
 
@@ -180,22 +203,20 @@ export async function getExistingMainStoreSingletonOrInit() {
 
         // propagate state to replicas
         const popupState = selectPopupState(state);
-        runtime
-          .sendMessage(backgroundEvent.popupStateUpdated(popupState))
-          .catch(() => {
-            // no UI replica is open to receive the update — expected, ignore
-          });
+        broadcastToReplicas(
+          backgroundEvent.popupStateUpdated(popupState),
+          'popupStateUpdated'
+        );
 
         // P0.1: tell replicas to re-fetch private state on change, without
         // ever including the private material itself in the broadcast.
         const nextPrivateState = selectPrivateState(state);
         if (privateStateChanged(previousPrivateState, nextPrivateState)) {
           previousPrivateState = nextPrivateState;
-          runtime
-            .sendMessage(backgroundEvent.privateStateUpdated())
-            .catch(() => {
-              // no UI replica open to receive it — expected, ignore
-            });
+          broadcastToReplicas(
+            backgroundEvent.privateStateUpdated(),
+            'privateStateUpdated'
+          );
         }
 
         // persist selected state

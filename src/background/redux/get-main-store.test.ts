@@ -1,5 +1,8 @@
 import type { KeysState } from '@background/redux/keys/types';
-import { windowRequestOpened } from '@background/redux/windowManagement/actions';
+import {
+  windowIdChanged,
+  windowRequestOpened
+} from '@background/redux/windowManagement/actions';
 
 // --- storage / runtime mock -------------------------------------------------
 // storage.local.get returns the per-test snapshot; set/remove/sendMessage are
@@ -165,6 +168,56 @@ describe('selectPopupState broadcast — replica privacy narrowing', () => {
     // …and must NOT be anywhere in what replicas receive.
     expect(JSON.stringify(lastPopupStateBroadcast())).not.toContain(
       'dapp.example'
+    );
+  });
+});
+
+describe('replica broadcast — rejection handling', () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    storageSet.mockResolvedValue(undefined);
+    storageRemove.mockResolvedValue(undefined);
+    runtimeSendMessage.mockResolvedValue(undefined);
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
+  });
+
+  const flushMicrotasks = () =>
+    new Promise(resolve => setImmediate(resolve as () => void));
+
+  it('stays silent when no replica is listening', async () => {
+    const store = await initWithKeysSnapshot(undefined);
+    consoleErrorSpy.mockClear();
+    runtimeSendMessage.mockRejectedValue(
+      new Error('Could not establish connection. Receiving end does not exist.')
+    );
+
+    store.dispatch(windowIdChanged(11));
+    await flushMicrotasks();
+
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
+  it('reports any other rejection instead of hiding a stale replica', async () => {
+    const store = await initWithKeysSnapshot(undefined);
+    consoleErrorSpy.mockClear();
+    runtimeSendMessage.mockRejectedValue(
+      new Error('DataCloneError: value could not be cloned')
+    );
+
+    store.dispatch(windowIdChanged(11));
+    await flushMicrotasks();
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('popupStateUpdated'),
+      expect.objectContaining({
+        message: expect.stringContaining('DataCloneError')
+      })
     );
   });
 });
