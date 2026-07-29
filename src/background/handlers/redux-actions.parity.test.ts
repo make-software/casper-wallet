@@ -116,7 +116,8 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     // window (tracks the in-flight request). Never dispatched from the UI.
     windowManagementActions.windowRequestOpened,
     // Background-only: dispatched by sdk-response-to-tab when a request is
-    // answered back to the tab. Never dispatched from the UI.
+    // answered back to the tab, and by both cancel paths (window closed /
+    // window reused) when a request is cancelled. Never dispatched from the UI.
     windowManagementActions.windowRequestResponded,
     // Background-only: dispatched by the cancel path when a window closes or
     // is reused for a new request. Never dispatched from the UI.

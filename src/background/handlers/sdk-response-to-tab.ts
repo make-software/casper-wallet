@@ -45,19 +45,21 @@ function deliveryFailedError(tabId: unknown, fallbackDelivered: boolean) {
   });
 }
 
-// Server-side dedupe of SDK responses (P0.5 root cause). The signature UI pages
-// used to `tabs.sendMessage` the response to the dapp tab directly and guard
-// double-sends with a per-page `responseSentRef` (fragile: per instance, lost on
-// reload). Now every response is forwarded here and deduped by `requestId`: the
-// FIRST response for a request wins, later ones are dropped — atomically,
-// because the background store is the single writer.
+// Background dedupe of SDK responses (P0.5 root cause). There is no server; the
+// background store is the single writer, which is what makes this atomic.
+// The signature UI pages used to `tabs.sendMessage` the response to the dapp
+// tab directly and guard double-sends with a per-page `responseSentRef`
+// (fragile: per instance, lost on reload). Now every response is forwarded
+// here and deduped by `requestId`: the FIRST response for a request wins,
+// later ones are dropped.
 //
-// CRITICAL: drop ONLY when the request is already 'responded'. When the tracked
-// approval window closes, the `windows.onRemoved` listener runs
-// `cancelOpenRequestsForClosedWindow`, which — after a short grace — marks each
-// request it cancels 'responded' (via `windowRequestResponded`). Dropping only on
-// 'responded' kills the real duplicate (a cancel racing a successful sign, where
-// the sign already set 'responded') without ever suppressing a first response.
+// CRITICAL: drop ONLY when the request is already 'responded'. Two cancel paths
+// mark requests responded — a window closing (`windows.onRemoved`) and a window
+// being reused for a new request (`openWindow` resolving with `reused: true`) —
+// and both run the same detach-and-cancel routine after a short grace. Dropping
+// only on 'responded' kills the real duplicate (a cancel racing a successful
+// sign, where the sign already set 'responded') without ever suppressing a
+// first response.
 export async function handleSdkResponseToTab(
   message: unknown,
   sender: Runtime.MessageSender,
@@ -122,8 +124,8 @@ export async function handleSdkResponseToTab(
 
   // Mark responded OPTIMISTICALLY, BEFORE the await. `runtime.onMessage`
   // handlers interleave at every `await`, so two near-simultaneous responses
-  // for the same requestId (e.g. a genuine sign response racing the close-cancel
-  // emitted by `cancelOpenRequestsForClosedWindow`) would BOTH read status
+  // for the same requestId (e.g. a genuine sign response racing a cancel from
+  // either cancel path — window close or window reuse) would BOTH read status
   // `undefined` if we marked after the send — and both would reach the dapp.
   // Dispatching synchronously here (before yielding the event loop) means
   // a second message processed during the first's in-flight send reads
