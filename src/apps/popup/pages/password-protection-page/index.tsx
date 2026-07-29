@@ -129,9 +129,16 @@ export const PasswordProtectionPage = ({
               }
               dispatchToMainStore(loginRetryCountReseted());
             })
-            // Without this a rejected onClick leaves the page stuck submitting —
-            // and now that the field is read-only-while-submitting, frozen too.
-            .catch(() => setIsSubmitting(false));
+            // Without this a rejected onClick leaves the page stuck submitting
+            // — and now that the field is read-only-while-submitting, frozen
+            // too. The error itself is logged rather than discarded: silently
+            // resetting the button is indistinguishable from a wrong password.
+            .catch((error: unknown) => {
+              // nosemgrep: cw-logging-secrets — static message + error object only; the
+              // password is in scope but is deliberately not referenced here.
+              console.error('Password confirmation failed:', error);
+              setIsSubmitting(false);
+            });
         } else {
           if (setPasswordConfirmed) {
             setPasswordConfirmed();
