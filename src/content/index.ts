@@ -52,7 +52,22 @@ async function handleSdkMessage(message: unknown) {
       case sdkMethod.encryptMessageError.type:
       case sdkMethod.getActivePublicKeySupportsResponse.type:
         // route the delayed response over the private port (not a window event)
-        activePort?.postMessage(message);
+        if (activePort == null) {
+          // No port: cleanup() ran on an extension reload, or this response
+          // raced the handshake. Dropping it silently can discard a deploy the
+          // user just signed and leave the dapp hanging until its own timeout.
+          // SECURITY: type + requestId only — the payload of these envelopes
+          // carries signatureHex / encryptedMessage.
+          // nosemgrep: cw-logging-secrets — type + requestId only, never payload
+          console.error(
+            'Content: dropped a delayed SDK response, no active port:',
+            message.type,
+            message.meta.requestId
+          );
+          return;
+        }
+
+        activePort.postMessage(message);
         return;
 
       default:
