@@ -111,6 +111,7 @@ import {
   vaultCipherCreated,
   vaultCipherReseted
 } from '../redux/vault-cipher/actions';
+import { attachWindowToRequest } from './attach-window-to-request';
 import { HandlerResult } from './types';
 
 export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
@@ -149,7 +150,6 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
     siteDisconnected,
     windowIdChanged,
     windowIdCleared,
-    windowRequestWindowAttached,
     onboardingAppInit,
     popupWindowInit,
     connectWindowInit,
@@ -200,6 +200,20 @@ export async function handleReduxAction(
   action: { type: string },
   store: MainStore
 ): Promise<HandlerResult> {
+  // Intercepted rather than forwarded blindly: attaching a window is what makes
+  // a request cancellable, so a dead or bogus `windowId` would leave it open
+  // forever. `attachWindowToRequest` dispatches AND verifies the window is
+  // alive, which the generic forwarding path cannot do. The UI dispatcher here
+  // is `use-ledger` registering the Ledger permission window.
+  if (windowRequestWindowAttached.match(action)) {
+    attachWindowToRequest(
+      store,
+      action.payload.requestId,
+      action.payload.windowId
+    );
+    return { handled: true, response: undefined };
+  }
+
   if (action.type === resetVault.type) {
     store.dispatch(action as unknown as ReduxAction);
     await enableOnboardingFlow();
