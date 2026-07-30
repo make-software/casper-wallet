@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { HomePageTabName, NetworkSetting } from '@src/constants';
 import { isSafariBuild } from '@src/utils';
 
+import { useHomeTab } from '@popup/hooks/use-home-tab';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import {
@@ -67,6 +68,14 @@ export function HomePageContent() {
     shallowEqual
   );
   const state = location.state;
+
+  const { activeHomeTab, setActiveHomeTab } = useHomeTab();
+
+  const handleTabChange = (tabName: string) => {
+    // `Tabs` is name-addressed and generic over plain strings; on this page
+    // the names are exactly the HomePageTabName members rendered below.
+    setActiveHomeTab(tabName as HomePageTabName);
+  };
 
   const network = useSelector(selectActiveNetworkSetting);
   const activeAccount = useSelector(selectVaultActiveAccount);
@@ -150,7 +159,7 @@ export function HomePageContent() {
         </Tile>
       )}
       <VerticalSpaceContainer top={SpacingSize.Tiny}>
-        <Tabs preferActiveTabId={state?.activeTabId}>
+        <Tabs activeTabName={activeHomeTab} onTabChange={handleTabChange}>
           <Tab tabName={HomePageTabName.Tokens}>
             <TokensList />
           </Tab>
