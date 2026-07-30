@@ -7,7 +7,7 @@ popup.describe('Popup UI: Home tabs', () => {
       await unlockVault();
       await new Promise(r => setTimeout(r, 2000));
 
-      // Reach Home the way that used to stamp `activeTabId: NFTs` onto the
+      // Reach Home the way that used to stamp the stale tab index onto the
       // history entry: open an NFT and come back.
       await popupPage.getByText('NFTs').click();
       await new Promise(r => setTimeout(r, 2000));

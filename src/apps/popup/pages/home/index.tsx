@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -7,7 +7,7 @@ import { HomePageTabName, NetworkSetting } from '@src/constants';
 import { isSafariBuild } from '@src/utils';
 
 import { useHomeTab } from '@popup/hooks/use-home-tab';
-import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
+import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
   selectActiveNetworkSetting,
@@ -62,12 +62,10 @@ const Container = styled(TileContainer)`
 export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
-  const location = useTypedLocation();
   const dismissedAppEventIds = useSelector(
     selectDismissedAppEvents,
     shallowEqual
   );
-  const state = location.state;
 
   const { activeHomeTab, setActiveHomeTab } = useHomeTab();
 
@@ -92,14 +90,6 @@ export function HomePageContent() {
   if (showExpirationBanner) {
     wasExpirationBannerShown.current = true;
   }
-
-  useEffect(() => {
-    if (!state?.activeTabId) {
-      const container = document.querySelector('#ms-container');
-
-      container?.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    }
-  }, [state?.activeTabId]);
 
   const { activeMarketingEvent } =
     useGetActiveAppMarketingEvent(dismissedAppEventIds);

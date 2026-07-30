@@ -24,14 +24,9 @@ import { TransactionContainer } from './components/TransactionContainer';
 interface DeployPlateProps {
   deploy: IDeploy;
   onClick?: () => void;
-  navigateHome?: boolean;
 }
 
-export const DeployPlate = ({
-  deploy,
-  onClick,
-  navigateHome = false
-}: DeployPlateProps) => {
+export const DeployPlate = ({ deploy, onClick }: DeployPlateProps) => {
   const navigate = useTypedNavigate();
 
   if (isNativeCsprDeploy(deploy)) {
@@ -41,8 +36,7 @@ export const DeployPlate = ({
         onClick={() => {
           navigate(RouterPath.DeployDetails, {
             state: {
-              deploy,
-              navigateHome
+              deploy
             }
           });
 
@@ -63,8 +57,7 @@ export const DeployPlate = ({
         onClick={() => {
           navigate(RouterPath.DeployDetails, {
             state: {
-              deploy,
-              navigateHome
+              deploy
             }
           });
 
@@ -85,8 +78,7 @@ export const DeployPlate = ({
         onClick={() => {
           navigate(RouterPath.DeployDetails, {
             state: {
-              deploy,
-              navigateHome
+              deploy
             }
           });
 
@@ -107,8 +99,7 @@ export const DeployPlate = ({
         onClick={() => {
           navigate(RouterPath.DeployDetails, {
             state: {
-              deploy,
-              navigateHome
+              deploy
             }
           });
 
@@ -129,8 +120,7 @@ export const DeployPlate = ({
         onClick={() => {
           navigate(RouterPath.DeployDetails, {
             state: {
-              deploy,
-              navigateHome
+              deploy
             }
           });
 
@@ -151,8 +141,7 @@ export const DeployPlate = ({
         onClick={() => {
           navigate(RouterPath.DeployDetails, {
             state: {
-              deploy,
-              navigateHome
+              deploy
             }
           });
 
@@ -172,8 +161,7 @@ export const DeployPlate = ({
       onClick={() => {
         navigate(RouterPath.DeployDetails, {
           state: {
-            deploy,
-            navigateHome
+            deploy
           }
         });
 

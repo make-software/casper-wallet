@@ -10,7 +10,6 @@ import {
   PopupLayout
 } from '@libs/layout';
 import { useFetchNftTokens } from '@libs/services/nft-service';
-import { HomePageTabsId } from '@libs/ui/components';
 
 import { NftDetailsContent } from './content';
 
@@ -45,14 +44,7 @@ export const NftDetailsPage = () => {
           withConnectionStatus
           renderSubmenuBarItems={() => (
             <>
-              <HeaderSubmenuBarNavLink
-                linkType="back"
-                onClick={() =>
-                  navigate(RouterPath.Home, {
-                    state: { activeTabId: HomePageTabsId.NFTs }
-                  })
-                }
-              />
+              <HeaderSubmenuBarNavLink linkType="back" />
               <HeaderViewInExplorer
                 nftTokenId={tokenId}
                 contractPackageHash={contractPackageHash}

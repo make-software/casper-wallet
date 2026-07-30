@@ -2,6 +2,9 @@ import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
+import { HomePageTabName } from '@src/constants';
+
+import { useHomeTab } from '@popup/hooks/use-home-tab';
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { selectIsCasper2Network } from '@background/redux/settings/selectors';
@@ -12,7 +15,7 @@ import {
   SpacingSize,
   VerticalSpaceContainer
 } from '@libs/layout';
-import { HomePageTabsId, SvgIcon, Typography } from '@libs/ui/components';
+import { SvgIcon, Typography } from '@libs/ui/components';
 
 interface TransferSuccessScreenProps {
   headerText: string;
@@ -26,23 +29,20 @@ export const TransferSuccessScreen = ({
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
   const isCasper2Network = useSelector(selectIsCasper2Network);
+  const { setActiveHomeTab } = useHomeTab();
 
   useEffect(() => {
     const keyDownHandler = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
-        navigate(RouterPath.Home, {
-          state: {
-            // set the active tab to deploys
-            activeTabId: HomePageTabsId.Deploys
-          }
-        });
+        setActiveHomeTab(HomePageTabName.Activity);
+        navigate(RouterPath.Home);
       }
     };
 
     window.addEventListener('keydown', keyDownHandler);
 
     return () => window.removeEventListener('keydown', keyDownHandler);
-  }, [navigate]);
+  }, [navigate, setActiveHomeTab]);
 
   useEffect(() => {
     const container = document.querySelector('#ms-container');

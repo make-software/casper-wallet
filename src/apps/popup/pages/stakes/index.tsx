@@ -9,12 +9,14 @@ import styled from 'styled-components';
 import {
   AuctionManagerEntryPoint,
   ErrorMessages,
+  HomePageTabName,
   STAKE_COST_MOTES,
   StakeSteps,
   networkNameToSdkNetworkNameMap
 } from '@src/constants';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+import { useHomeTab } from '@popup/hooks/use-home-tab';
 import { AmountStep } from '@popup/pages/stakes/amount-step';
 import { ConfirmStep } from '@popup/pages/stakes/confirm-step';
 import { NoDelegations } from '@popup/pages/stakes/no-delegations';
@@ -75,7 +77,6 @@ import {
 import { buildAuctionTransactions } from '@libs/services/tx-builders';
 import {
   Button,
-  HomePageTabsId,
   LedgerEventView,
   SvgIcon,
   TransferSuccessScreen,
@@ -115,6 +116,7 @@ export const StakesPage = () => {
   const isCasper2Network = useSelector(selectIsCasper2Network);
   const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
   const { changeActiveAccountSupportsWithEvent } = useAccountManager();
+  const { setActiveHomeTab } = useHomeTab();
 
   const activeAccount = useSelector(selectVaultActiveAccount);
   const isActiveAccountFromLedger = useSelector(
@@ -524,15 +526,8 @@ export const StakesPage = () => {
               askForReviewAfter == null || currentDate > askForReviewAfter;
 
             if (ratedInStore || !shouldAskForReview) {
-              const homeRoutesState = {
-                state: {
-                  // set the active tab to deploys
-                  activeTabId: HomePageTabsId.Deploys
-                }
-              };
-
-              // Navigate "Home" with the pre-defined state
-              navigate(RouterPath.Home, homeRoutesState);
+              setActiveHomeTab(HomePageTabName.Activity);
+              navigate(RouterPath.Home);
             } else {
               // Navigate to "RateApp" when the application has not been rated in the store,
               // and it's time to ask for a review.

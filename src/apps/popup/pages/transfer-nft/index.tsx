@@ -4,10 +4,15 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import { ErrorMessages, networkNameToSdkNetworkNameMap } from '@src/constants';
+import {
+  ErrorMessages,
+  HomePageTabName,
+  networkNameToSdkNetworkNameMap
+} from '@src/constants';
 import { NFTTokenStandard } from '@src/utils';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+import { useHomeTab } from '@popup/hooks/use-home-tab';
 import {
   TransferNFTSteps,
   getDefaultPaymentAmountBasedOnNftTokenStandard
@@ -64,7 +69,6 @@ import { useFetchNftTokens } from '@libs/services/nft-service';
 import { buildNftTransferTransactions } from '@libs/services/tx-builders';
 import {
   Button,
-  HomePageTabsId,
   LedgerEventView,
   SvgIcon,
   TransferSuccessScreen,
@@ -91,6 +95,7 @@ export const TransferNftPage = () => {
   const isCasper2Network = useSelector(selectIsCasper2Network);
   const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
   const { changeActiveAccountSupportsWithEvent } = useAccountManager();
+  const { setActiveHomeTab } = useHomeTab();
 
   const { contractPackageHash, tokenId } = useParams();
 
@@ -423,15 +428,8 @@ export const TransferNftPage = () => {
               askForReviewAfter == null || currentDate > askForReviewAfter;
 
             if (ratedInStore || !shouldAskForReview) {
-              const homeRoutesState = {
-                state: {
-                  // set the active tab to deploys
-                  activeTabId: HomePageTabsId.Deploys
-                }
-              };
-
-              // Navigate to "Home" with the pre-defined state
-              navigate(RouterPath.Home, homeRoutesState);
+              setActiveHomeTab(HomePageTabName.Activity);
+              navigate(RouterPath.Home);
             } else {
               // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
               navigate(RouterPath.RateApp);
