@@ -60,7 +60,7 @@ export function Tabs({
   onTabChange,
   onClick
 }: TabsProps) {
-  const firstTabName = children[0].props.tabName;
+  const firstTabName = children[0]?.props.tabName ?? '';
 
   const [uncontrolledTabName, setUncontrolledTabName] = useState(firstTabName);
 
@@ -76,7 +76,9 @@ export function Tabs({
   const { t } = useTranslation();
 
   const handleTabClick = (tabName: string) => {
-    setUncontrolledTabName(tabName);
+    if (activeTabName === undefined) {
+      setUncontrolledTabName(tabName);
+    }
 
     if (onTabChange) {
       onTabChange(tabName);
