@@ -26,6 +26,7 @@ import {
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
 import { windowRequestOpened } from '@background/redux/windowManagement/actions';
+import { selectRequestStatus } from '@background/redux/windowManagement/selectors';
 import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 
 import { SiteNotConnectedError, WalletLockedError } from '@content/sdk-errors';
@@ -37,11 +38,40 @@ import { encryptAsHexWithCasperPublicKey } from '@libs/crypto';
 import { selectVaultIsLocked } from '../redux/session/selectors';
 import { HandlerResult } from './types';
 
+// The six methods that register a request and open an approval window. Kept as
+// one set, checked once below, so the duplicate guard cannot be forgotten by a
+// seventh flow the way it would be if it were copied into each branch.
+const APPROVAL_REQUEST_TYPES: ReadonlySet<string> = new Set([
+  sdkMethod.connectRequest.type,
+  sdkMethod.switchAccountRequest.type,
+  sdkMethod.signRequest.type,
+  sdkMethod.signMessageRequest.type,
+  sdkMethod.signTypedDataRequest.type,
+  sdkMethod.decryptMessageRequest.type
+]);
+
 export async function handleSdkMethod(
   action: SdkMethod,
   sender: Runtime.MessageSender,
   store: MainStore
 ): Promise<HandlerResult> {
+  // `requestId` is page-generated (`generateRequestId`, src/content/sdk.ts),
+  // i.e. dapp-controlled. The slice reducer already refuses to overwrite a live
+  // request or resurrect a tombstone, but that no-op was invisible to the
+  // caller: every branch below went on to open a window anyway. The result was
+  // a fully functional approval screen for a request the wallet could never
+  // answer — a replayed id renders normally, the user approves, and the
+  // response is dropped by the dedup with the dapp none the wiser. Reusing a
+  // LIVE id under another method is worse still: the first descriptor is kept,
+  // so a later cancel is built in the wrong shape. Refuse both here, before
+  // anything is dispatched.
+  if (
+    APPROVAL_REQUEST_TYPES.has(action.type) &&
+    selectRequestStatus(store.getState(), action.meta.requestId) != null
+  ) {
+    throw Error('Duplicate requestId');
+  }
+
   if (sdkMethod.connectRequest.match(action)) {
     const origin = getUrlOrigin(sender.url);
     if (!origin) {

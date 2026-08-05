@@ -15,8 +15,17 @@ import {
 import { selectWindowId } from '@background/redux/windowManagement/selectors';
 
 export interface OpenApprovalWindowProps extends OpenWindowProps {
-  /** Set for dapp approval flows; absent for internal (non-approval) windows. */
-  requestId?: string;
+  /**
+   * Required. `openWindow` has exactly one non-test importer (`sdk-methods`)
+   * and every one of its six call sites is a dapp approval flow — the UI's
+   * internal-window path is a different function entirely (`useWindowManager`
+   * → `createOpenWindow`). The optional it used to be was not free: every
+   * branch that saves a request from being stranded is gated on this field, so
+   * a seventh approval flow that forgot it would compile green, open a window
+   * that is never attached, and leave `{status: 'open', windowIds: []}` — the
+   * one state no window event can ever cancel.
+   */
+  requestId: string;
 }
 
 // Fire-and-forget by design (the message handler must not block on a browser
@@ -31,17 +40,15 @@ export function openWindow(
   { requestId, ...openWindowProps }: OpenApprovalWindowProps
 ) {
   // Fire-and-forget recovery shared by every "no window will ever display this
-  // request" outcome: log identifiers only (never the action/payload) and, for
-  // dapp approval flows, fail the request so its dapp promise doesn't hang
-  // until its own 30-minute timeout.
+  // request" outcome: log identifiers only (never the action/payload) and fail
+  // the request so its dapp promise doesn't hang until its own 30-minute
+  // timeout.
   const failIncomingRequest = (context: string, details: unknown) => {
     console.error(context, details);
 
-    if (requestId != null) {
-      void failRequestOnWindowError(store, requestId).catch(err =>
-        console.error('open-window-failed: recovery failed', err)
-      );
-    }
+    void failRequestOnWindowError(store, requestId).catch(err =>
+      console.error('open-window-failed: recovery failed', err)
+    );
   };
 
   const chain = createOpenWindow({
@@ -77,16 +84,14 @@ export function openWindow(
         ).catch(error => console.error('cancel-on-supersede: failed', error));
       }
 
-      if (requestId != null) {
-        // The reuse chain makes several browser round-trips (getAll → get →
-        // update → tabs.update, see create-open-window.ts) before this `.then`
-        // runs, and window creation is itself an awaited round-trip, so the
-        // window can close in that gap. `attachWindowToRequest` owns both the
-        // dispatch and the liveness repair for that case — see the rationale
-        // there, and note the Ledger hook reaches the same helper across a
-        // wider gap still.
-        attachWindowToRequest(store, requestId, windowId);
-      }
+      // The reuse chain makes several browser round-trips (getAll → get →
+      // update → tabs.update, see create-open-window.ts) before this `.then`
+      // runs, and window creation is itself an awaited round-trip, so the
+      // window can close in that gap. `attachWindowToRequest` owns both the
+      // dispatch and the liveness repair for that case — see the rationale
+      // there, and note the Ledger hook reaches the same helper across a wider
+      // gap still.
+      attachWindowToRequest(store, requestId, windowId);
     },
     error => {
       // Fire-and-forget: if `windows.create` rejects, surface it instead of an

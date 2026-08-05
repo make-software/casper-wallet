@@ -76,7 +76,7 @@ describe('openWindow (background store routing)', () => {
   it('passes the slice windowId from store.getState() into createOpenWindow', () => {
     const { store } = makeStore(42);
 
-    openWindow(store, { windowApp: WindowApp.ConnectToApp });
+    openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
 
     expect(createOpenWindowMock).toHaveBeenCalledTimes(1);
     const config = createOpenWindowMock.mock.calls[0][0];
@@ -86,7 +86,7 @@ describe('openWindow (background store routing)', () => {
   it('passes null windowId when the slice has no tracked window', () => {
     const { store } = makeStore(null);
 
-    openWindow(store, { windowApp: WindowApp.ConnectToApp });
+    openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
 
     const config = createOpenWindowMock.mock.calls[0][0];
     expect(config.windowId).toBeNull();
@@ -115,7 +115,7 @@ describe('openWindow (background store routing)', () => {
   it('setWindowId dispatches windowIdChanged with the new id', () => {
     const { store, dispatch } = makeStore(null);
 
-    openWindow(store, { windowApp: WindowApp.ConnectToApp });
+    openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
 
     const config = createOpenWindowMock.mock.calls[0][0];
     config.setWindowId(7);
@@ -125,7 +125,7 @@ describe('openWindow (background store routing)', () => {
   it('clearWindowId dispatches windowIdCleared', () => {
     const { store, dispatch } = makeStore(5);
 
-    openWindow(store, { windowApp: WindowApp.ConnectToApp });
+    openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
 
     const config = createOpenWindowMock.mock.calls[0][0];
     config.clearWindowId();
