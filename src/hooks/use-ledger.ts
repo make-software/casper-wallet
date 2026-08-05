@@ -11,7 +11,8 @@ import {
 } from '@background/redux/ledger/actions';
 import { selectLedgerNewWindowId } from '@background/redux/ledger/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { windowRequestWindowAttached } from '@background/redux/windowManagement/actions';
+
+import { registerLedgerPermissionWindow } from '@hooks/register-ledger-permission-window';
 
 import {
   ILedgerEvent,
@@ -27,6 +28,21 @@ import {
   usbTransportCreator
 } from '@libs/services/ledger';
 
+/**
+ * Search params carried into the permission window's URL. Spelled out rather
+ * than `Record<string, string>` so renaming `requestId` at a call site is a
+ * compile error: the lookup below is what registers the window against its
+ * request, and against a string record a renamed key silently yields
+ * `undefined` and takes the whole approval back to the P0 this model fixes.
+ */
+interface LedgerPermissionParams {
+  requestId?: string;
+  signingPublicKeyHex?: string;
+  message?: string;
+  origin?: string;
+  tabId?: string;
+}
+
 interface IUseLedgerParams {
   ledgerAction: () => Promise<void>;
   beforeLedgerActionCb: () => Promise<void>;
@@ -36,7 +52,7 @@ interface IUseLedgerParams {
   /** We have to open new browser window to handle device permission */
   askPermissionUrlData?: {
     domain: string;
-    params?: Record<string, string>;
+    params?: LedgerPermissionParams;
     hash: string;
   };
 }
@@ -66,13 +82,24 @@ export const useLedger = ({
   const isFirstEventRef = useRef<boolean>(true);
   const triggeredRef = useRef(false);
 
-  const params = new URLSearchParams({
-    ...(askPermissionUrlData.params ?? {}),
-    initialEventToRender: LedgerEventStatus.LedgerAskPermission,
-    ...(selectedTransportRef.current
-      ? { ledgerTransport: selectedTransportRef.current }
-      : {})
-  }).toString();
+  // Built key by key (rather than spread into the constructor) because
+  // `LedgerPermissionParams` has optional members: an absent one must be left
+  // out, not stringified as "undefined". Insertion order matches the previous
+  // spread, so the URL is unchanged for every existing flow.
+  const searchParams = new URLSearchParams();
+  Object.entries(askPermissionUrlData.params ?? {}).forEach(([key, value]) => {
+    if (value != null) {
+      searchParams.set(key, value);
+    }
+  });
+  searchParams.set(
+    'initialEventToRender',
+    LedgerEventStatus.LedgerAskPermission
+  );
+  if (selectedTransportRef.current) {
+    searchParams.set('ledgerTransport', selectedTransportRef.current);
+  }
+  const params = searchParams.toString();
 
   const url = useMemo(
     () =>
@@ -180,32 +207,45 @@ export const useLedger = ({
       ) {
         const w = await openNewSeparateWindow({ url });
 
-        if (w.id) {
-          dispatchToMainStore(ledgerNewWindowIdChanged(w.id));
-
-          // This window displays the SAME requestId as the approval window that
-          // opened it. Registering it is what keeps the request alive when the
-          // shared approval window is reused or closed while the user is still
-          // confirming on the device.
-          const requestId = askPermissionUrlData.params?.requestId;
-          if (requestId) {
-            dispatchToMainStore(
-              windowRequestWindowAttached({ requestId, windowId: w.id })
-            );
-          }
-
-          triggeredRef.current = true;
-
-          const handleCloseWindow = () => {
-            dispatchToMainStore(ledgerStateCleared());
-            windows.onRemoved.removeListener(handleCloseWindow);
-          };
-
-          windows.onRemoved.addListener(handleCloseWindow);
+        if (w.id == null) {
+          // Nothing below can run, and no `windows.onRemoved` will ever fire
+          // for a window without an id — so the request keeps claiming a
+          // display it does not have.
+          console.error(
+            'useLedger: the permission window resolved without an id'
+          );
+          return;
         }
+
+        dispatchToMainStore(ledgerNewWindowIdChanged(w.id));
+
+        registerLedgerPermissionWindow({
+          domain: askPermissionUrlData.domain,
+          requestId: askPermissionUrlData.params?.requestId,
+          windowId: w.id
+        });
+
+        triggeredRef.current = true;
+
+        const handleCloseWindow = () => {
+          dispatchToMainStore(ledgerStateCleared());
+          windows.onRemoved.removeListener(handleCloseWindow);
+        };
+
+        windows.onRemoved.addListener(handleCloseWindow);
       }
-    })();
+    })().catch(error => {
+      // `openNewSeparateWindow` is an awaited call that can reject, and without
+      // this the whole body — including the attach that keeps the request alive
+      // — is skipped with nothing anywhere. Log the error's NAME only: `url`
+      // embeds the plaintext `signMessage` message as a query param, and a
+      // rejection's text can echo the URL it failed on.
+      console.error('useLedger: opening the permission window failed', {
+        errorName: (error as Error)?.name
+      });
+    });
   }, [
+    askPermissionUrlData.domain,
     askPermissionUrlData.params?.requestId,
     ledgerEventStatusToRender.status,
     url,
