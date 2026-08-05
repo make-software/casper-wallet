@@ -2,7 +2,8 @@ import {
   type BrowserContext,
   Page,
   test as base,
-  chromium
+  chromium,
+  expect
 } from '@playwright/test';
 import path from 'path';
 
@@ -35,8 +36,39 @@ export const test = base.extend<{
       ]
     });
 
+    // e2e is the only job that exercises a production Chrome artifact, and therefore
+    // the only one where the manifest CSP is the nonce-pinned one. A broken nonce
+    // blocks every stylesheet while leaving the DOM intact, so the existing
+    // getByRole/toBeVisible assertions all still pass against an unstyled page —
+    // the page has to report the violation itself for the suite to notice.
+    //
+    // Deliberately scoped to CSP violations only: page errors are not asserted here
+    // because the suite has never been held to that bar, and a flood of unrelated
+    // failures would bury this signal.
+    const cspViolations: string[] = [];
+
+    await context.addInitScript(() => {
+      document.addEventListener('securitypolicyviolation', event => {
+        console.error(
+          `[CSP] ${event.effectiveDirective} blocked ${
+            event.blockedURI || 'inline'
+          } in ${event.documentURI}`
+        );
+      });
+    });
+
+    context.on('page', page => {
+      page.on('console', message => {
+        if (message.text().startsWith('[CSP]')) {
+          cspViolations.push(message.text());
+        }
+      });
+    });
+
     await use(context);
     await context.close();
+
+    expect(cspViolations, 'Content Security Policy violations').toEqual([]);
   },
   extensionId: async ({ context }, use) => {
     let background = context.serviceWorkers()[0];
