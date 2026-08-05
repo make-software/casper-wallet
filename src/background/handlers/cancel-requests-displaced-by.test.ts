@@ -219,7 +219,14 @@ it('still surfaces a banner on the CLOSE path even when the fallback delivered',
   expect(dispatch).toHaveBeenCalledWith(
     expect.objectContaining({
       type: 'appEvents/sagaError',
-      payload: expect.objectContaining({ source: 'cancel-on-close' })
+      payload: expect.objectContaining({
+        source: 'cancel-on-close',
+        // The TEXT, not just the source: `saga-error-banner.tsx` renders the
+        // message verbatim, and the two arms of this ternary say opposite
+        // things about whether the dapp was told. Collapsing it to the
+        // pessimistic constant must fail here.
+        message: expect.stringContaining('recovered via the page')
+      })
     })
   );
 });
