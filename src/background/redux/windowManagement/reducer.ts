@@ -141,6 +141,19 @@ const slice = createSlice({
       state,
       action: PayloadAction<{ requestId: string }>
     ) => {
+      // A transition, not an upsert — guarded the way its two siblings are.
+      // Only a request that is currently 'open' can become 'responded'; the
+      // union models ∅ → open → responded and this is what stops the reducer
+      // permitting ∅ → responded. Without it, a response the UI forwards for an
+      // id the store no longer holds (an MV3 restart between registration and
+      // the response) wrote an orphan tombstone that consumed a slot in the cap
+      // below and made the SDK entry guard reject that id as a duplicate.
+      if (
+        getRequest(state.requests, action.payload.requestId)?.status !== 'open'
+      ) {
+        return state;
+      }
+
       const requests: WindowManagementState['requests'] = {
         ...state.requests,
         [action.payload.requestId]: { status: 'responded' }

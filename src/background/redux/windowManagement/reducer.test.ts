@@ -308,12 +308,39 @@ describe('windowManagement requests', () => {
 
     it('the tombstone sweep does not count it as responded', () => {
       const next = reducer(
-        withHole,
+        reducer(withHole, opened('r1')),
         windowRequestResponded({ requestId: 'r1' })
       );
 
       expect(next.requests.r1).toEqual({ status: 'responded' });
       expect(Object.keys(next.requests)).toContain('ghost');
+    });
+  });
+
+  describe('the tombstone is a transition, not an upsert', () => {
+    // Its two siblings refuse to act on a missing or wrong-status entry; this
+    // one wrote unconditionally, so the union modelled ∅ → open → responded
+    // while the reducer permitted ∅ → responded. Reachable whenever the UI
+    // forwards a response for an id the store no longer has — an MV3
+    // service-worker restart between registration and the response — and the
+    // orphan then consumes a slot in the tombstone cap and makes the SDK entry
+    // guard reject that id as a duplicate.
+    it('refuses to tombstone a requestId that was never registered', () => {
+      const next = reducer(
+        empty,
+        windowRequestResponded({ requestId: 'ghost' })
+      );
+
+      expect(next).toBe(empty);
+    });
+
+    it('refuses to tombstone an already responded request again', () => {
+      let state = reducer(empty, opened('r1'));
+      state = reducer(state, windowRequestResponded({ requestId: 'r1' }));
+
+      const next = reducer(state, windowRequestResponded({ requestId: 'r1' }));
+
+      expect(next).toBe(state);
     });
   });
 
@@ -327,6 +354,7 @@ describe('windowManagement requests', () => {
       // browser session.
       let state = empty;
       for (let i = 0; i < MAX_RESPONDED_TOMBSTONES + 10; i++) {
+        state = reducer(state, opened(`r${i}`));
         state = reducer(state, windowRequestResponded({ requestId: `r${i}` }));
       }
 
@@ -344,6 +372,7 @@ describe('windowManagement requests', () => {
     it('never evicts an open request to make room', () => {
       let state = reducer(empty, opened('still-open'));
       for (let i = 0; i < MAX_RESPONDED_TOMBSTONES + 10; i++) {
+        state = reducer(state, opened(`r${i}`));
         state = reducer(state, windowRequestResponded({ requestId: `r${i}` }));
       }
 
