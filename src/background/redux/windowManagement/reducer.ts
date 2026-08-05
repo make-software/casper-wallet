@@ -1,5 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
+import { getRequest, isStorableRequestId } from './request-map';
 import { CancellableMethod, WindowManagementState } from './types';
 
 // How many answered requests keep a tombstone. Large enough that a late
@@ -48,7 +49,10 @@ const slice = createSlice({
         method: CancellableMethod;
       }>
     ) => {
-      if (state.requests[action.payload.requestId] != null) {
+      if (
+        !isStorableRequestId(action.payload.requestId) ||
+        getRequest(state.requests, action.payload.requestId) != null
+      ) {
         return state;
       }
 
@@ -73,7 +77,7 @@ const slice = createSlice({
       state,
       action: PayloadAction<{ requestId: string; windowId: number }>
     ) => {
-      const request = state.requests[action.payload.requestId];
+      const request = getRequest(state.requests, action.payload.requestId);
 
       if (
         request == null ||
@@ -145,7 +149,7 @@ const slice = createSlice({
       // Insertion order = the order requests were first registered, since
       // re-writing an existing key keeps its original position.
       const respondedIds = Object.keys(requests).filter(
-        requestId => requests[requestId]?.status === 'responded'
+        requestId => getRequest(requests, requestId)?.status === 'responded'
       );
 
       const overflow = respondedIds.length - MAX_RESPONDED_TOMBSTONES;

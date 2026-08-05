@@ -240,6 +240,58 @@ describe('windowManagement requests', () => {
     expect(next.requests.r1).toMatchObject({ tabId: 3, windowIds: [7] });
   });
 
+  describe('a requestId that collides with an Object.prototype member', () => {
+    // `requestId` is dapp-controlled and the map is a plain object, so
+    // `requests[id]` can read an INHERITED member. Reading it with `!= null`
+    // and with `?.status` then disagree — and the SDK entry guard used the
+    // second while this reducer used the first, so one of five string literals
+    // was refused registration here while the caller was told it was fresh: an
+    // approval window for a request the model never knew about.
+    it.each(['toString', 'constructor', 'valueOf', 'hasOwnProperty'])(
+      'registers %s like any other id',
+      key => {
+        const state = reducer(empty, opened(key));
+
+        expect(Object.prototype.hasOwnProperty.call(state.requests, key)).toBe(
+          true
+        );
+        expect(state.requests[key]).toMatchObject({
+          status: 'open',
+          tabId: 3,
+          windowIds: []
+        });
+      }
+    );
+
+    it('still refuses a SECOND registration of such an id', () => {
+      const state = reducer(empty, opened('toString'));
+      const next = reducer(state, opened('toString'));
+
+      expect(next).toBe(state);
+    });
+
+    it('attaches a window to such an id', () => {
+      let state = reducer(empty, opened('toString'));
+      state = reducer(
+        state,
+        windowRequestWindowAttached({ requestId: 'toString', windowId: 7 })
+      );
+
+      expect(state.requests.toString).toMatchObject({ windowIds: [7] });
+    });
+
+    it('refuses `__proto__` outright, leaving the map untouched', () => {
+      // Unlike the other four this one cannot be stored at all: the copy immer
+      // makes assigns the key, and assigning `__proto__` sets the object's
+      // PROTOTYPE instead of adding an entry — so the descriptor would become
+      // the prototype of every later lookup in the map.
+      const next = reducer(empty, opened('__proto__'));
+
+      expect(next).toBe(empty);
+      expect(Object.getPrototypeOf(next.requests)).toBe(Object.prototype);
+    });
+  });
+
   describe('a hole in the requests map is skipped, not crashed on', () => {
     // `requests` is `Partial<Record<…>>` so that the existence guards are real
     // code to the compiler rather than provably-dead branches. That makes an
