@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import { AppEventsState, SagaError } from './types';
+import { AppEventsState, SagaError, SagaErrorSource } from './types';
 
 const initialState: AppEventsState = {
   dismissedEventIds: [],
@@ -22,7 +22,7 @@ const slice = createSlice({
     sagaError: (
       state,
       action: PayloadAction<{
-        source: string;
+        source: SagaErrorSource;
         message: string;
         code?: string;
       }>

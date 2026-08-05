@@ -1,6 +1,7 @@
 import { tabs } from 'webextension-polyfill';
 
 import { sagaError } from '@background/redux/app-events/actions';
+import { SagaErrorSource } from '@background/redux/app-events/types';
 import { MainStore } from '@background/redux/get-main-store';
 import {
   windowDetachedFromRequests,
@@ -24,8 +25,16 @@ export const CANCEL_GRACE_MS = 250;
 const delay = (ms: number) =>
   new Promise<void>(resolve => setTimeout(resolve, ms));
 
-export type CancelSource =
-  'cancel-on-close' | 'cancel-on-supersede' | 'open-window-failed';
+// The window-driven cancel paths only. Derived from `SagaErrorSource` rather
+// than spelled out again, so the two can never drift — a `source` this module
+// dispatches is by construction one the banner reader knows.
+// `'open-window-failed'` is deliberately NOT here: it is produced by
+// `failRequestOnWindowError`, which is a separate trigger with no grace and no
+// window event behind it.
+export type CancelSource = Extract<
+  SagaErrorSource,
+  'cancel-on-close' | 'cancel-on-supersede'
+>;
 
 export function buildCancelResponse(
   method: CancellableMethod,
