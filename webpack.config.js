@@ -71,6 +71,11 @@ if (fileSystem.existsSync(secretsPath)) {
 // Where it does apply, the same value is wired to __webpack_nonce__ (style-loader)
 // and process.env.CSP_NONCE (styled-components' CspStyleSheetManager) below, so
 // the manifest CSP and the injected <style> tags always match.
+//
+// This is the ONLY place the Chrome-production predicate is spelled out: getCSP()
+// and the DefinePlugin literal both derive from the value, never re-derive the
+// condition. A second copy could drift and emit `'nonce-null'` — syntactically
+// valid, matched by nothing, blocking every stylesheet in all five apps.
 const CSP_NONCE =
   isChrome && !isDev ? crypto.randomBytes(16).toString('base64') : null;
 
@@ -82,10 +87,9 @@ const getCSP = () => {
   // react-loading-skeleton / react-tiny-popover mutate element.style at runtime, all of
   // which the CSP treats as "applying inline style" — a nonce cannot cover them. Dev,
   // Firefox and Safari keep the previous 'unsafe-inline' behaviour.
-  const styleDirectives =
-    isChrome && !isDev
-      ? `style-src 'self' 'nonce-${CSP_NONCE}'; style-src-attr 'unsafe-inline'`
-      : "style-src 'unsafe-inline'";
+  const styleDirectives = CSP_NONCE
+    ? `style-src 'self' 'nonce-${CSP_NONCE}'; style-src-attr 'unsafe-inline'`
+    : "style-src 'unsafe-inline'";
   const csp = `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'self' 'wasm-unsafe-eval'; ${styleDirectives}; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://onramp-api.cspr.click/api/ https://cspr-wallet-api.dev.make.services/ https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/ https://cspr-wallet-api-condor.dev.make.services/ https://cspr-wallet-api.stg.make.services/ https://api.casperwallet.io/ https://api.integration.casperwallet.io/ https://node.integration.cspr.cloud/`;
 
   if (isFirefox) {
