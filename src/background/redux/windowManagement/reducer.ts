@@ -2,6 +2,12 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 import { CancellableMethod, WindowManagementState } from './types';
 
+// How many answered requests keep a tombstone. Large enough that a late
+// duplicate — which arrives within a request's own lifetime, not hours later —
+// is still deduped; small enough to bound the map on the two targets whose
+// background page never restarts.
+export const MAX_RESPONDED_TOMBSTONES = 50;
+
 const initialState: WindowManagementState = {
   windowId: null,
   exportKeysWindowId: null,
@@ -117,20 +123,40 @@ const slice = createSlice({
     },
     // The tombstone is deliberately kept: `selectRequestStatus` reading back
     // 'responded' is what makes the background dedup drop a duplicate response.
-    // It is in-memory only — an MV3 service-worker restart wipes it, after which
-    // a late duplicate is no longer deduped. The descriptor is dropped with it,
-    // so the map stays proportional to in-flight requests, not to the lifetime
-    // total.
+    // It is in-memory only, but "in-memory" bounds nothing by itself: on MV3 a
+    // service-worker restart wipes it (after which a late duplicate is no
+    // longer deduped), while `manifest.v2.json` and `manifest.v2.safari.json`
+    // both declare `"persistent": true`, so on Firefox and Safari the
+    // background page is never torn down. Nothing here deleted a key, so on
+    // those two targets the map grew by one permanent entry per request —
+    // keyed by a dapp-supplied string — for the whole browser session. Hence
+    // the FIFO cap below: the descriptor is dropped as before, and the oldest
+    // tombstones are evicted once there are more than a dedup could plausibly
+    // need. Open requests are never evicted.
     windowRequestResponded: (
       state,
       action: PayloadAction<{ requestId: string }>
-    ) => ({
-      ...state,
-      requests: {
+    ) => {
+      const requests: WindowManagementState['requests'] = {
         ...state.requests,
         [action.payload.requestId]: { status: 'responded' }
+      };
+
+      // Insertion order = the order requests were first registered, since
+      // re-writing an existing key keeps its original position.
+      const respondedIds = Object.keys(requests).filter(
+        requestId => requests[requestId]?.status === 'responded'
+      );
+
+      const overflow = respondedIds.length - MAX_RESPONDED_TOMBSTONES;
+      if (overflow > 0) {
+        for (const requestId of respondedIds.slice(0, overflow)) {
+          delete requests[requestId];
+        }
       }
-    })
+
+      return { ...state, requests };
+    }
   }
 });
 
