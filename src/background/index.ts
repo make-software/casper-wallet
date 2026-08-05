@@ -18,7 +18,6 @@ import {
 } from '@src/utils';
 
 import { handleBringWeb3 } from '@background/handlers/bringweb3';
-import { cancelOpenRequestsForClosedWindow } from '@background/handlers/cancel-open-requests-on-close';
 import { handleLegacyImport } from '@background/handlers/legacy-import';
 import {
   isPrivateStateRequest,
@@ -28,6 +27,7 @@ import {
 import { handleReduxAction } from '@background/handlers/redux-actions';
 import { handleSdkMethod } from '@background/handlers/sdk-methods';
 import { handleSdkResponseToTab } from '@background/handlers/sdk-response-to-tab';
+import { handleWindowRemoved } from '@background/handlers/window-removed';
 import { initKeepAlive } from '@background/keep-alive';
 import {
   disableOnboardingFlow,
@@ -39,8 +39,6 @@ import {
   selectIsAccountConnected,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
-import { exportKeysWindowIdCleared } from '@background/redux/windowManagement/actions';
-import { selectExportKeysWindowId } from '@background/redux/windowManagement/selectors';
 
 import { sdkEvent } from '@content/sdk-event';
 import { isSDKMethod } from '@content/sdk-method';
@@ -174,27 +172,21 @@ tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 // Single init-time listener for the approval-window lifecycle. Replaces the
 // per-creation `windows.onRemoved` listeners that used to be added inside
 // `createOpenWindow` (one leaked per opened window). `windows.onRemoved` fires
-// for ANY window; `cancelOpenRequestsForClosedWindow` itself decides whether
-// the removed window was the last display for any open request (a request
-// the Ledger permission window still shows survives), waits a grace period,
-// then cancels the survivors and dispatches `windowIdCleared` to null the
-// slice `windowId` if it is still tracking the removed window. The `async`
-// IIFE is awaited only internally so a rejection here can never skip the
-// export-keys cleanup below it.
+// for ANY window; `handleWindowRemoved` itself decides whether the removed
+// window was the last display for any open request (a request the Ledger
+// permission window still shows survives), waits a grace period, then cancels
+// the survivors, nulls the slice `windowId` if it is still tracking the removed
+// window, and clears the tracked export-keys id.
+//
+// The body lives in a handler so it can be tested — this entry point is
+// imported by no test. Only the store init is left here, and its rejection is
+// caught: `getExistingMainStoreSingletonOrInit` can reject, and `void` on a
+// bare IIFE would discard that with no `unhandledrejection` handler anywhere.
 windows.onRemoved.addListener((removedWindowId: number) => {
   void (async () => {
     const store = await getExistingMainStoreSingletonOrInit();
-
-    try {
-      await cancelOpenRequestsForClosedWindow(store, removedWindowId);
-    } catch (error) {
-      console.error('cancel-on-close: failed to cancel open requests', error);
-    }
-
-    if (removedWindowId === selectExportKeysWindowId(store.getState())) {
-      store.dispatch(exportKeysWindowIdCleared());
-    }
-  })();
+    await handleWindowRemoved(store, removedWindowId);
+  })().catch(error => console.error('windows.onRemoved handler failed', error));
 });
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
