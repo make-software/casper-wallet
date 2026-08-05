@@ -71,7 +71,7 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
     const result = await handleReduxAction(action, trustedSender, store);
 
     expect(dispatch).toHaveBeenCalledWith(action);
-    expect(windows.get).toHaveBeenCalledWith(7);
+    expect(windows.get).toHaveBeenCalledWith(7, { populate: true });
     expect(result).toEqual({ handled: true, response: undefined });
   });
 

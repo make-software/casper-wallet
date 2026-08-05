@@ -6,8 +6,13 @@ import { attachWindowToRequest } from './attach-window-to-request';
 import { cancelRequestsDisplacedBy } from './cancel-requests';
 
 jest.mock('webextension-polyfill', () => ({
-  windows: { get: jest.fn(), getAll: jest.fn() }
+  windows: { get: jest.fn(), getAll: jest.fn() },
+  runtime: { getURL: (path: string) => `chrome-extension://ext-id/${path}` }
 }));
+
+const extensionTab = (search = '?requestId=r1') => ({
+  url: `chrome-extension://ext-id/signature-request.html${search}`
+});
 jest.mock('./cancel-requests', () => ({
   cancelRequestsDisplacedBy: jest.fn().mockResolvedValue(undefined)
 }));
@@ -32,6 +37,7 @@ beforeEach(() => {
 });
 
 it('attaches the window and leaves a live one alone', async () => {
+  getMock.mockResolvedValue({ id: 7, tabs: [extensionTab()] });
   const { store, dispatch } = makeStore();
 
   attachWindowToRequest(store, 'r1', 7);
@@ -40,8 +46,77 @@ it('attaches the window and leaves a live one alone', async () => {
   expect(dispatch).toHaveBeenCalledWith(
     windowRequestWindowAttached({ requestId: 'r1', windowId: 7 })
   );
-  expect(getMock).toHaveBeenCalledWith(7);
+  expect(getMock).toHaveBeenCalledWith(7, { populate: true });
   expect(cancelMock).not.toHaveBeenCalled();
+});
+
+describe('a window that is not ours must not own a request', () => {
+  it('undoes the attach when the window shows a web page', async () => {
+    // "A window with this id exists" is not the question — any live browser
+    // window passes that. A foreign id sits in `windowIds` keeping the set
+    // oversized, so closing the REAL approval window no longer cancels
+    // anything and the request's fate hangs on an unrelated window.
+    getMock.mockResolvedValue({
+      id: 7,
+      tabs: [{ url: 'https://dapp.example/page' }]
+    });
+    const { store } = makeStore();
+
+    attachWindowToRequest(store, 'r1', 7);
+    await flush();
+
+    expect(cancelMock).toHaveBeenCalledWith(store, 7, 'cancel-on-close');
+  });
+
+  it('accepts a window whose tab is still loading, via pendingUrl', async () => {
+    getMock.mockResolvedValue({
+      id: 7,
+      tabs: [{ pendingUrl: 'chrome-extension://ext-id/signature-request.html' }]
+    });
+    const { store } = makeStore();
+
+    attachWindowToRequest(store, 'r1', 7);
+    await flush();
+
+    expect(cancelMock).not.toHaveBeenCalled();
+  });
+
+  it('does not undo the attach when no URL is known yet', async () => {
+    // On the reuse path `tabs.update` resolves when the navigation STARTS, so
+    // the tab can legitimately have no url yet. Repairing on that would cancel
+    // a live approval — the exact failure this whole model prevents — so an
+    // inconclusive probe leaves the attach standing.
+    getMock.mockResolvedValue({ id: 7, tabs: [{}] });
+    const { store } = makeStore();
+
+    attachWindowToRequest(store, 'r1', 7);
+    await flush();
+
+    expect(cancelMock).not.toHaveBeenCalled();
+  });
+
+  it('warns but does not undo the attach when our window shows a different request', async () => {
+    // Same reasoning: the URL may still be the previous request's during the
+    // reuse round trip, so this is a diagnostic, not a verdict.
+    const consoleWarn = jest
+      .spyOn(console, 'warn')
+      .mockImplementation(() => {});
+    getMock.mockResolvedValue({
+      id: 7,
+      tabs: [extensionTab('?requestId=someone-else')]
+    });
+    const { store } = makeStore();
+
+    attachWindowToRequest(store, 'r1', 7);
+    await flush();
+
+    expect(cancelMock).not.toHaveBeenCalled();
+    expect(consoleWarn).toHaveBeenCalledWith(
+      'attachWindowToRequest: window shows a different requestId',
+      { requestId: 'r1', windowId: 7 }
+    );
+    consoleWarn.mockRestore();
+  });
 });
 
 it('repairs the request when the window is already gone', async () => {
