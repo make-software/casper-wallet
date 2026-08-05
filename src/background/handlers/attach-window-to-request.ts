@@ -57,7 +57,7 @@ export function attachWindowToRequest(
   // when the navigation STARTS, so a legitimate window can be probed before its
   // URL settles — repairing on that would cancel a live approval, the exact
   // failure this model exists to prevent.
-  void windows.get(windowId, { populate: true }).then(
+  const probe = windows.get(windowId, { populate: true }).then(
     browserWindow => {
       // (1) The window is live, but is it OURS? "A window with this id exists"
       // is what every live browser window satisfies. A foreign id sits in
@@ -82,8 +82,19 @@ export function attachWindowToRequest(
 
       // Diagnostic only, for the same reason: during the reuse round trip the
       // URL may still be the previous request's.
+      // Diagnostics only, both of them. Without them this check establishes
+      // "one of our windows" and says nothing about "the window showing THIS
+      // request"; with them a maintainer can tell the two apart. They do not
+      // repair, for the same reason as above: during the reuse round trip the
+      // URL may still be the previous request's.
       const shownRequestId = new URL(tabUrl).searchParams.get('requestId');
-      if (shownRequestId != null && shownRequestId !== requestId) {
+
+      if (shownRequestId == null) {
+        console.warn('attachWindowToRequest: window carries no requestId', {
+          requestId,
+          windowId
+        });
+      } else if (shownRequestId !== requestId) {
         console.warn(
           'attachWindowToRequest: window shows a different requestId',
           { requestId, windowId }
@@ -122,5 +133,15 @@ export function attachWindowToRequest(
           )
         );
     }
+  );
+  // Trailing `.catch` on top of the two-arm form above: the arms cannot catch
+  // each other (deliberately — the recovery must not trust itself), which
+  // leaves a throw in the FULFILLED arm covered by nothing. `runtime.getURL`
+  // is the live candidate, since an invalidated extension context is exactly
+  // what the rejected arm exists for. Without this the attach would stand with
+  // a windowId whose liveness was never established — this file's own
+  // permanently-uncancellable state — and leave no trace in a service worker.
+  void probe.catch(error =>
+    console.error('attachWindowToRequest: liveness check failed', error)
   );
 }
