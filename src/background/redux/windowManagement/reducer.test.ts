@@ -239,4 +239,29 @@ describe('windowManagement requests', () => {
     expect(next).toBe(state);
     expect(next.requests.r1).toMatchObject({ tabId: 3, windowIds: [7] });
   });
+
+  describe('a hole in the requests map is skipped, not crashed on', () => {
+    // `requests` is `Partial<Record<…>>` so that the existence guards are real
+    // code to the compiler rather than provably-dead branches. That makes an
+    // explicitly `undefined` entry representable — persistence rehydration and
+    // `delete`-based eviction both produce shapes near this — so the two places
+    // that walk the whole map must tolerate it.
+    const withHole = { ...empty, requests: { ghost: undefined } };
+
+    it('windowDetachedFromRequests leaves it alone', () => {
+      expect(
+        reducer(withHole, windowDetachedFromRequests({ windowId: 7 }))
+      ).toBe(withHole);
+    });
+
+    it('the tombstone sweep does not count it as responded', () => {
+      const next = reducer(
+        withHole,
+        windowRequestResponded({ requestId: 'r1' })
+      );
+
+      expect(next.requests.r1).toEqual({ status: 'responded' });
+      expect(Object.keys(next.requests)).toContain('ghost');
+    });
+  });
 });

@@ -93,18 +93,20 @@ const slice = createSlice({
       state,
       action: PayloadAction<{ windowId: number }>
     ) => {
-      const requests = { ...state.requests };
+      const requests: WindowManagementState['requests'] = {
+        ...state.requests
+      };
       let changed = false;
 
       for (const [requestId, request] of Object.entries(state.requests)) {
         if (
-          request.status === 'open' &&
+          request?.status === 'open' &&
           request.windowIds.includes(action.payload.windowId)
         ) {
           requests[requestId] = {
             ...request,
             windowIds: request.windowIds.filter(
-              id => id !== action.payload.windowId
+              (id: number) => id !== action.payload.windowId
             )
           };
           changed = true;
