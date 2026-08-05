@@ -44,7 +44,7 @@ export function openWindow(
     }
   };
 
-  createOpenWindow({
+  const chain = createOpenWindow({
     windowId: selectWindowId(store.getState()),
     setWindowId: (id: number) => store.dispatch(windowIdChanged(id)),
     clearWindowId: () => store.dispatch(windowIdCleared())
@@ -99,5 +99,14 @@ export function openWindow(
         errorName: (error as Error)?.name
       });
     }
+  );
+  // The two-arm form above is deliberate — `onRejected` must not catch the
+  // recovery it triggers — but that leaves the success arm covered by nothing.
+  // A throw there (from `attachWindowToRequest`) would open a window that is
+  // never attached, i.e. a request with an empty `windowIds` that no window
+  // event can ever cancel. That is unrecoverable, so at minimum it must be
+  // visible.
+  void chain.catch(error =>
+    console.error('openWindow: post-open handling failed', error)
   );
 }

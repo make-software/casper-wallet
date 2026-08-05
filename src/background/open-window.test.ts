@@ -228,6 +228,34 @@ describe('openWindow (background store routing)', () => {
     );
   });
 
+  it('logs a throw from the post-open handling instead of leaving it unhandled', async () => {
+    // The two-arm `.then(onFulfilled, onRejected)` form is deliberate — the
+    // recovery must not catch itself — but it leaves the success arm covered by
+    // nothing. If `attachWindowToRequest` throws, the window is open and never
+    // attached: `windowIds` stays `[]`, which the `length === 1` candidate
+    // filter can never select, so no window event will ever cancel the request
+    // and the dapp hangs for its full timeout with nothing logged.
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    const { store, dispatch } = makeStore(null);
+    (dispatch as jest.Mock).mockImplementation((action: { type: string }) => {
+      if (action.type === windowRequestWindowAttached.type) {
+        throw new Error('attach blew up');
+      }
+    });
+
+    openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r7' });
+    await flush();
+    await flush();
+
+    expect(consoleError).toHaveBeenCalledWith(
+      'openWindow: post-open handling failed',
+      expect.any(Error)
+    );
+    consoleError.mockRestore();
+  });
+
   it('does NOT run cancel-on-close when the attached window is still alive', async () => {
     createOpenWindowMock.mockReturnValue(
       jest.fn().mockResolvedValue({ window: { id: 21 }, reused: false })
