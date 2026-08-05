@@ -69,8 +69,8 @@ if (fileSystem.existsSync(secretsPath)) {
 // Firefox/Safari bundles that never read it makes those builds irreproducible,
 // which AMO source review requires (it rebuilds and compares byte-for-byte).
 // Where it does apply, the same value is wired to __webpack_nonce__ (style-loader)
-// and process.env.CSP_NONCE (styled-components' CspStyleSheetManager) below, so
-// the manifest CSP and the injected <style> tags always match.
+// and __CSP_NONCE__ (styled-components' CspStyleSheetManager) below, so the
+// manifest CSP and the injected <style> tags always match.
 //
 // This is the ONLY place the Chrome-production predicate is spelled out: getCSP()
 // and the DefinePlugin literal both derive from the value, never re-derive the
@@ -217,7 +217,14 @@ const options = {
       'process.env.MOCK_STATE': JSON.stringify(process.env.MOCK_STATE),
       'process.env.BROWSER': JSON.stringify(process.env.BROWSER),
       'process.env.TEST_ENV': JSON.stringify(process.env.TEST_ENV),
-      'process.env.CSP_NONCE': JSON.stringify(CSP_NONCE)
+      // Not routed through process.env: @types/node types every ProcessEnv member
+      // as `string | undefined`, which cannot express the `null` substituted on
+      // non-Chrome targets. A dedicated global is declared as `string | null`
+      // (src/@types/custom.d.ts), so the null-handling at each reader is enforced
+      // by tsc instead of being a convention nothing can check.
+      // The key stays defined for EVERY target on purpose — dropping it would
+      // leave the free variable unreplaced and throw ReferenceError at runtime.
+      __CSP_NONCE__: JSON.stringify(CSP_NONCE)
     }),
     // manifest file generation
     new CopyWebpackPlugin({
