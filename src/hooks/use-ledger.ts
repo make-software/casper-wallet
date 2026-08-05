@@ -214,6 +214,9 @@ export const useLedger = ({
           console.error(
             'useLedger: the permission window resolved without an id'
           );
+          setLedgerEventStatusToRender({
+            status: LedgerEventStatus.PermissionWindowFailed
+          });
           return;
         }
 
@@ -242,6 +245,14 @@ export const useLedger = ({
       // rejection's text can echo the URL it failed on.
       console.error('useLedger: opening the permission window failed', {
         errorName: (error as Error)?.name
+      });
+      // Without this the screen keeps rendering LedgerPermissionRequired: it
+      // tells the user to grant permission in a window that was never opened
+      // and never will be, with no retry path — nothing in this effect's
+      // dependency array has changed, so it will not run again. The only exit
+      // was the CTA that abandons the approval.
+      setLedgerEventStatusToRender({
+        status: LedgerEventStatus.PermissionWindowFailed
       });
     });
   }, [

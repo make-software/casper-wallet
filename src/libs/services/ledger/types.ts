@@ -18,6 +18,10 @@ export enum LedgerEventStatus {
   MsgSignatureCanceled = 'ledger-msg-signature-cancelled',
   MsgSignatureFailed = 'ledger-msg-signature-failed',
   LedgerPermissionRequired = 'ledger-permission-required',
+  // The separate window that asks for the device permission could not be
+  // opened. Distinct from LedgerPermissionRequired: there is no window for the
+  // user to grant anything in, so telling them to grant it is the wrong error.
+  PermissionWindowFailed = 'ledger-permission-window-failed',
   LedgerAskPermission = 'ledger-ask-permission',
   ErrorOpeningDevice = 'ledger-error-opening-device',
   Timeout = 'ledger-timeout',
