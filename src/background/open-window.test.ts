@@ -228,6 +228,47 @@ describe('openWindow (background store routing)', () => {
     );
   });
 
+  it('keeps the cause of an open failure while redacting the URL query', async () => {
+    // This is the sole cause-bearing diagnostic on the "no approval window
+    // could be opened" path. Logging only `error.name` kept the secret out but
+    // threw the diagnosis out with it: `.name` is the string "Error" in every
+    // realistic case here. Redacting from the first `?` keeps both properties —
+    // a `signMessage` window URL carries the user's plaintext message as a
+    // query param, and a rejection's text can echo the URL it failed on.
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    createOpenWindowMock.mockReturnValue(
+      jest
+        .fn()
+        .mockRejectedValue(
+          new Error(
+            'Cannot create window: signature-request.html?message=SECRET-PLAINTEXT&requestId=r8'
+          )
+        )
+    );
+    const { store } = makeStore(null);
+
+    openWindow(store, {
+      windowApp: WindowApp.SignatureRequestDeploy,
+      requestId: 'r8'
+    });
+    await flush();
+
+    expect(consoleError).toHaveBeenCalledWith(
+      'openWindow: failed to open approval window',
+      expect.objectContaining({
+        requestId: 'r8',
+        windowApp: WindowApp.SignatureRequestDeploy,
+        error: 'Cannot create window: signature-request.html'
+      })
+    );
+    expect(JSON.stringify(consoleError.mock.calls)).not.toContain(
+      'SECRET-PLAINTEXT'
+    );
+    consoleError.mockRestore();
+  });
+
   it('logs a throw from the post-open handling instead of leaving it unhandled', async () => {
     // The two-arm `.then(onFulfilled, onRejected)` form is deliberate — the
     // recovery must not catch itself — but it leaves the success arm covered by

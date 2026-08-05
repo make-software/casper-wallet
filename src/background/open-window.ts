@@ -28,6 +28,17 @@ export interface OpenApprovalWindowProps extends OpenWindowProps {
   requestId: string;
 }
 
+const MAX_LOGGED_ERROR_LENGTH = 200;
+
+// Everything from the first `?` onward is dropped: that is where a window URL
+// carries its search params, and for `signMessage` one of them is the user's
+// plaintext message.
+function redactUrlQuery(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+
+  return message.split('?')[0].slice(0, MAX_LOGGED_ERROR_LENGTH);
+}
+
 // Fire-and-forget by design (the message handler must not block on a browser
 // window), but every terminal state is now handled:
 //   reused   → the displaced request loses its last window and is cancelled
@@ -96,12 +107,19 @@ export function openWindow(
     error => {
       // Fire-and-forget: if `windows.create` rejects, surface it instead of an
       // unhandled rejection. The slice's window id is left cleared (no id was
-      // set). Never log the raw error: a `signMessage` window URL embeds the
-      // user's plaintext message as a query param, and a rejection's error
-      // text can echo the URL it failed on — log only the error's name.
+      // set).
+      //
+      // Never log the raw error: a `signMessage` window URL embeds the user's
+      // plaintext message as a query param, and a rejection's text can echo the
+      // URL it failed on. But dropping everything but `.name` dropped the
+      // diagnosis too — `.name` is the string "Error" for a `windows.create` /
+      // `windows.update` / `tabs.update` rejection, i.e. it says nothing. Cut
+      // from the first `?` (where any secret would be) and cap the length: the
+      // secret stays out, the reason stays in.
       failIncomingRequest('openWindow: failed to open approval window', {
         requestId,
-        errorName: (error as Error)?.name
+        windowApp: openWindowProps.windowApp,
+        error: redactUrlQuery(error)
       });
     }
   );
