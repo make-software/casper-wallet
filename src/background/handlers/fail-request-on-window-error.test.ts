@@ -77,6 +77,28 @@ it('tabs.sendMessage rejects → falls back to deliverViaOrigin', async () => {
   );
 });
 
+it('both delivery routes fail → the banner says the site was not told', async () => {
+  // The tombstone is already written by then, and `sdk-response-to-tab` drops
+  // anything that arrives later, so this is terminal: the dapp got nothing and
+  // will hang. Telling the user "the request was cancelled" is then wrong.
+  (tabs.sendMessage as jest.Mock).mockRejectedValue(new Error('tab gone'));
+  (deliverViaOrigin as jest.Mock).mockResolvedValue(0);
+  const dispatch = jest.fn();
+  const getState = jest.fn().mockReturnValue(state({ r1: open(3, 'sign') }));
+
+  await failRequestOnWindowError({ dispatch, getState } as any, 'r1');
+
+  expect(dispatch).toHaveBeenCalledWith(
+    expect.objectContaining({
+      type: 'appEvents/sagaError',
+      payload: expect.objectContaining({
+        source: 'open-window-failed',
+        message: expect.stringContaining('could not be told')
+      })
+    })
+  );
+});
+
 it('unknown requestId → clean no-op, nothing dispatched, nothing sent', async () => {
   const dispatch = jest.fn();
   const getState = jest.fn().mockReturnValue(state({}));

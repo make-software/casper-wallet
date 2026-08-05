@@ -93,11 +93,13 @@ const selectIsLockedMock = selectVaultIsLocked as jest.MockedFunction<
 const ORIGIN = 'https://dapp.example';
 const META = { requestId: 'req-1' };
 
-function makeStore() {
+function makeStore(requests: Record<string, unknown> = {}) {
   const dispatch = jest.fn();
   const store = {
     dispatch,
-    getState: () => ({})
+    getState: () => ({
+      windowManagement: { windowId: null, exportKeysWindowId: null, requests }
+    })
   } as unknown as MainStore;
   return { store, dispatch };
 }
@@ -122,6 +124,59 @@ beforeEach(() => {
 
 afterEach(() => {
   consoleErrorSpy.mockRestore();
+});
+
+describe('a requestId the wallet already registered', () => {
+  // `requestId` is page-generated, i.e. dapp-controlled. The reducer already
+  // refuses to overwrite a live request or resurrect a tombstone — but the six
+  // method branches called `openWindow` regardless, so the wallet still opened
+  // a fully functional approval screen for a request it could never answer:
+  // the user's approval was then dropped by the dedup, silently. Answer the
+  // dapp now instead.
+  it('a replayed finished requestId is refused before anything is dispatched', async () => {
+    const { store, dispatch } = makeStore({ 'req-1': { status: 'responded' } });
+
+    await expect(
+      handleSdkMethod(
+        sdkMethod.connectRequest({ title: 't' }, META),
+        SENDER,
+        store
+      )
+    ).rejects.toThrow('Duplicate requestId');
+
+    expect(openWindowMock).not.toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('a live requestId reused under a different method is refused too', async () => {
+    // Otherwise the first descriptor is kept and a later cancel is built in the
+    // wrong shape — e.g. connectResponse(false) delivered against a pending sign.
+    const { store, dispatch } = makeStore({
+      'req-1': {
+        status: 'open',
+        tabId: 3,
+        origin: ORIGIN,
+        method: 'connect',
+        windowIds: [7]
+      }
+    });
+
+    await expect(
+      handleSdkMethod(
+        sdkMethod.signRequest(
+          { deployJson: '{"deploy":{}}', signingPublicKeyHex: 'PK-1' },
+          META
+        ),
+        SENDER,
+        store
+      )
+    ).rejects.toThrow('Duplicate requestId');
+
+    // Nothing was dispatched — in particular not `deployPayloadReceived`, which
+    // is what made the replayed screen render normally.
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(openWindowMock).not.toHaveBeenCalled();
+  });
 });
 
 describe('connectRequest', () => {

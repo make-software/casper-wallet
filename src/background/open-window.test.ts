@@ -66,26 +66,29 @@ describe('openWindow (background store routing)', () => {
       jest.fn().mockResolvedValue({ window: { id: 1 }, reused: false })
     );
     // The post-attach liveness check calls `windows.get`; default it to
-    // "still alive" so tests unrelated to that check don't trip it.
+    // "still alive" so tests unrelated to that check don't trip it. When it
+    // rejects, the probe confirms against the window list rather than trusting
+    // the rejection's wording — default that list to empty, i.e. "really gone".
     (windows.get as jest.Mock).mockResolvedValue({ id: 1 });
+    (windows.getAll as jest.Mock).mockResolvedValue([]);
   });
 
   it('passes the slice windowId from store.getState() into createOpenWindow', () => {
     const { store } = makeStore(42);
 
-    openWindow(store, { windowApp: WindowApp.ConnectToApp });
+    openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
 
     expect(createOpenWindowMock).toHaveBeenCalledTimes(1);
-    const config = createOpenWindowMock.mock.calls[0][0];
+    const config = createOpenWindowMock.mock.calls[0][0]!;
     expect(config.windowId).toBe(42);
   });
 
   it('passes null windowId when the slice has no tracked window', () => {
     const { store } = makeStore(null);
 
-    openWindow(store, { windowApp: WindowApp.ConnectToApp });
+    openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
 
-    const config = createOpenWindowMock.mock.calls[0][0];
+    const config = createOpenWindowMock.mock.calls[0][0]!;
     expect(config.windowId).toBeNull();
   });
 
@@ -112,20 +115,20 @@ describe('openWindow (background store routing)', () => {
   it('setWindowId dispatches windowIdChanged with the new id', () => {
     const { store, dispatch } = makeStore(null);
 
-    openWindow(store, { windowApp: WindowApp.ConnectToApp });
+    openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
 
-    const config = createOpenWindowMock.mock.calls[0][0];
-    config.setWindowId(7);
+    const config = createOpenWindowMock.mock.calls[0][0]!;
+    config.setWindowId!(7);
     expect(dispatch).toHaveBeenCalledWith(windowIdChanged(7));
   });
 
   it('clearWindowId dispatches windowIdCleared', () => {
     const { store, dispatch } = makeStore(5);
 
-    openWindow(store, { windowApp: WindowApp.ConnectToApp });
+    openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
 
-    const config = createOpenWindowMock.mock.calls[0][0];
-    config.clearWindowId();
+    const config = createOpenWindowMock.mock.calls[0][0]!;
+    config.clearWindowId!();
     expect(dispatch).toHaveBeenCalledWith(windowIdCleared());
   });
 
@@ -223,6 +226,75 @@ describe('openWindow (background store routing)', () => {
       55,
       'cancel-on-close'
     );
+  });
+
+  it('keeps the cause of an open failure while redacting the URL query', async () => {
+    // This is the sole cause-bearing diagnostic on the "no approval window
+    // could be opened" path. Logging only `error.name` kept the secret out but
+    // threw the diagnosis out with it: `.name` is the string "Error" in every
+    // realistic case here. Redacting from the first `?` keeps both properties —
+    // a `signMessage` window URL carries the user's plaintext message as a
+    // query param, and a rejection's text can echo the URL it failed on.
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    createOpenWindowMock.mockReturnValue(
+      jest
+        .fn()
+        .mockRejectedValue(
+          new Error(
+            'Cannot create window: signature-request.html?message=SECRET-PLAINTEXT&requestId=r8'
+          )
+        )
+    );
+    const { store } = makeStore(null);
+
+    openWindow(store, {
+      windowApp: WindowApp.SignatureRequestDeploy,
+      requestId: 'r8'
+    });
+    await flush();
+
+    expect(consoleError).toHaveBeenCalledWith(
+      'openWindow: failed to open approval window',
+      expect.objectContaining({
+        requestId: 'r8',
+        windowApp: WindowApp.SignatureRequestDeploy,
+        error: 'Cannot create window: signature-request.html'
+      })
+    );
+    expect(JSON.stringify(consoleError.mock.calls)).not.toContain(
+      'SECRET-PLAINTEXT'
+    );
+    consoleError.mockRestore();
+  });
+
+  it('logs a throw from the post-open handling instead of leaving it unhandled', async () => {
+    // The two-arm `.then(onFulfilled, onRejected)` form is deliberate — the
+    // recovery must not catch itself — but it leaves the success arm covered by
+    // nothing. If `attachWindowToRequest` throws, the window is open and never
+    // attached: `windowIds` stays `[]`, which the `length === 1` candidate
+    // filter can never select, so no window event will ever cancel the request
+    // and the dapp hangs for its full timeout with nothing logged.
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    const { store, dispatch } = makeStore(null);
+    (dispatch as jest.Mock).mockImplementation((action: { type: string }) => {
+      if (action.type === windowRequestWindowAttached.type) {
+        throw new Error('attach blew up');
+      }
+    });
+
+    openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r7' });
+    await flush();
+    await flush();
+
+    expect(consoleError).toHaveBeenCalledWith(
+      'openWindow: post-open handling failed',
+      expect.any(Error)
+    );
+    consoleError.mockRestore();
   });
 
   it('does NOT run cancel-on-close when the attached window is still alive', async () => {

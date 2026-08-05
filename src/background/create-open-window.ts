@@ -44,10 +44,17 @@ function getUrlByWindowApp(
   }
 }
 
+// Approval-window tracking, and therefore all three of these, is background-only.
+// The UI's only consumers (`useWindowManager` → account-list, navigation-menu)
+// both pass `isNewWindow: true`, which forces `id = null` below — so the reuse
+// branch and `clearWindowId` are unreachable from the UI, and the `!isNewWindow`
+// guard makes `setWindowId` unreachable too. Optional here rather than
+// no-op'd at the call site, so a UI caller cannot accidentally retarget the
+// shared approval slot.
 interface CreateOpenWindowProps {
-  windowId: number | null;
-  clearWindowId: () => void;
-  setWindowId: (id: number) => void;
+  windowId?: number | null;
+  clearWindowId?: () => void;
+  setWindowId?: (id: number) => void;
 }
 
 export interface OpenWindowProps {
@@ -58,10 +65,10 @@ export interface OpenWindowProps {
 
 // This function returns a window instance that was created or reused
 export function createOpenWindow({
-  windowId,
+  windowId = null,
   setWindowId,
   clearWindowId
-}: CreateOpenWindowProps) {
+}: CreateOpenWindowProps = {}) {
   return async function openWindow({
     windowApp,
     isNewWindow,
@@ -104,7 +111,7 @@ export function createOpenWindow({
           return window;
         }
       } else {
-        clearWindowId();
+        clearWindowId?.();
       }
     }
 
@@ -145,7 +152,7 @@ export function createOpenWindow({
           // later close of that separate window would clear the tracked id
           // and a dapp approval could be cancelled by the wrong event.
           if (newWindow.id && !isNewWindow) {
-            setWindowId(newWindow.id);
+            setWindowId?.(newWindow.id);
           }
           return newWindow;
         });

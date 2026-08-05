@@ -111,8 +111,8 @@ it('cancels the displaced request, not the incoming one, when a window is reused
   await jest.advanceTimersByTimeAsync(0);
 
   const state = store.getState().windowManagement;
-  expect(state.requests.A.status).toBe('responded'); // displaced one cancelled
-  expect(state.requests.B.status).toBe('open'); // incoming one survives
+  expect(state.requests.A?.status).toBe('responded'); // displaced one cancelled
+  expect(state.requests.B?.status).toBe('open'); // incoming one survives
   expect((state.requests.B as any).windowIds).toEqual([7]); // and is attached
 
   // The cancel was actually delivered to A's tab, not B's.

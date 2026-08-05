@@ -1,3 +1,5 @@
+import { Runtime } from 'webextension-polyfill';
+
 import { backgroundEvent } from '@background/background-events';
 import {
   accountInfoReset,
@@ -67,8 +69,6 @@ import {
   onboardingAppInit,
   popupWindowInit,
   signWindowInit,
-  windowIdChanged,
-  windowIdCleared,
   windowRequestWindowAttached
 } from '@background/redux/windowManagement/actions';
 
@@ -112,6 +112,7 @@ import {
   vaultCipherReseted
 } from '../redux/vault-cipher/actions';
 import { attachWindowToRequest } from './attach-window-to-request';
+import { isTrustedUiSender } from './private-state';
 import { HandlerResult } from './types';
 
 export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
@@ -148,8 +149,6 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
     anotherAccountConnected,
     accountDisconnected,
     siteDisconnected,
-    windowIdChanged,
-    windowIdCleared,
     onboardingAppInit,
     popupWindowInit,
     connectWindowInit,
@@ -198,6 +197,7 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
 
 export async function handleReduxAction(
   action: { type: string },
+  sender: Runtime.MessageSender,
   store: MainStore
 ): Promise<HandlerResult> {
   // Intercepted rather than forwarded blindly: attaching a window is what makes
@@ -206,10 +206,30 @@ export async function handleReduxAction(
   // alive, which the generic forwarding path cannot do. The UI dispatcher here
   // is `use-ledger` registering the Ledger permission window.
   if (windowRequestWindowAttached.match(action)) {
+    // Defense-in-depth, same gate and same reasoning as `handleSdkResponseToTab`
+    // and `handleLegacyImport`: this branch decides a request's lifecycle, so
+    // only the extension's own UI pages may originate it. A live-but-unrelated
+    // windowId makes the request permanently uncancellable; a dead one attached
+    // in the gap before the real window makes `windowIds` exactly `[dead]`,
+    // which the cancel path then selects. Already unreachable from a page via
+    // the content script's SDK_REQUEST_TYPES allowlist — this is the layer that
+    // does not depend on that allowlist staying right.
+    // Silently drop (no response), matching the sibling gates.
+    if (!isTrustedUiSender(sender)) {
+      return { handled: true };
+    }
+
+    // `.match` is `isAction(action) && action.type === type` — it says nothing
+    // about the payload. Read it defensively so a payload-less message reaches
+    // `attachWindowToRequest`'s shape guard (which logs and drops it) instead
+    // of throwing a TypeError the router reports as a generic sendError.
+    const payload: Partial<{ requestId: string; windowId: number }> =
+      action.payload ?? {};
+
     attachWindowToRequest(
       store,
-      action.payload.requestId,
-      action.payload.windowId
+      payload.requestId as string,
+      payload.windowId as number
     );
     return { handled: true, response: undefined };
   }

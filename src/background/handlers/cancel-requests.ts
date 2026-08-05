@@ -1,6 +1,7 @@
 import { tabs } from 'webextension-polyfill';
 
 import { sagaError } from '@background/redux/app-events/actions';
+import { SagaErrorSource } from '@background/redux/app-events/types';
 import { MainStore } from '@background/redux/get-main-store';
 import {
   windowDetachedFromRequests,
@@ -24,8 +25,16 @@ export const CANCEL_GRACE_MS = 250;
 const delay = (ms: number) =>
   new Promise<void>(resolve => setTimeout(resolve, ms));
 
-export type CancelSource =
-  'cancel-on-close' | 'cancel-on-supersede' | 'open-window-failed';
+// The window-driven cancel paths only. Derived from `SagaErrorSource` rather
+// than spelled out again, so the two can never drift — a `source` this module
+// dispatches is by construction one the banner reader knows.
+// `'open-window-failed'` is deliberately NOT here: it is produced by
+// `failRequestOnWindowError`, which is a separate trigger with no grace and no
+// window event behind it.
+export type CancelSource = Extract<
+  SagaErrorSource,
+  'cancel-on-close' | 'cancel-on-supersede'
+>;
 
 export function buildCancelResponse(
   method: CancellableMethod,
@@ -69,6 +78,7 @@ async function cancelRequests(
   store: MainStore,
   initiallyOpen: OpenRequest[],
   source: CancelSource,
+  displacedWindowId: number,
   afterMark?: () => void
 ): Promise<void> {
   if (initiallyOpen.length === 0) {
@@ -78,12 +88,29 @@ async function cancelRequests(
 
   await delay(CANCEL_GRACE_MS);
 
-  const stillOpenIds = new Set(
-    selectOpenRequests(store.getState()).map(r => r.requestId)
+  const currentlyOpen = new Map(
+    selectOpenRequests(store.getState()).map(r => [r.requestId, r])
   );
-  // Open at snapshot AND still open now — excludes answered-during-grace and
-  // any new request opened during the grace.
-  const toCancel = initiallyOpen.filter(r => stillOpenIds.has(r.requestId));
+  // Re-checked against the CURRENT descriptor, not the snapshot. Two things
+  // must still hold after the grace:
+  //   - the request is still 'open'   — excludes answered-during-grace, and any
+  //                                     request opened during the grace;
+  //   - nothing but the displaced window displays it — a window attached DURING
+  //     the grace means the request is genuinely back on screen. That is not
+  //     hypothetical: the Ledger permission window attaches across a
+  //     `runtime.sendMessage` round trip (see attach-window-to-request.ts), so
+  //     it routinely lands after this routine snapshotted its candidates and
+  //     dispatched the detach. Cancelling here would destroy the signature the
+  //     user is confirming on the device — the exact P0 this model exists to
+  //     prevent. `every` over an already-detached (empty) set is vacuously true.
+  const toCancel = initiallyOpen.filter(request => {
+    const current = currentlyOpen.get(request.requestId);
+
+    return (
+      current != null &&
+      current.windowIds.every(windowId => windowId === displacedWindowId)
+    );
+  });
 
   // Mark synchronously from this snapshot, before the async sends.
   for (const { requestId } of toCancel) {
@@ -104,19 +131,27 @@ async function cancelRequests(
           error
         );
         const delivered = await deliverViaOrigin(origin, action);
-        // Only surface a banner when the response is genuinely lost. On the
-        // supersede path this fires while the user is already looking at the
-        // NEXT approval screen, so a "recovered anyway" banner is pure noise on
-        // top of a signing prompt. Do NOT put `origin` in the message: appEvents
-        // is broadcast to every replica.
-        if (delivered === 0) {
-          store.dispatch(
-            sagaError({
-              source,
-              message: `Cancel delivery to tab ${tabId} failed; not delivered`
-            })
-          );
+        // Suppression is gated on the SOURCE, not on the delivery count. On the
+        // supersede path a recovered cancel fires while the user is already
+        // looking at the NEXT approval screen, so the banner is pure noise on
+        // top of a signing prompt. On the close path there is no replacement
+        // screen — and `deliverViaOrigin` only counts same-origin sends to
+        // active tabs that did not throw, which is not proof that the tab
+        // holding the dapp's pending promise received anything. Do NOT put
+        // `origin` in the message: appEvents is broadcast to every replica.
+        if (source === 'cancel-on-supersede' && delivered > 0) {
+          return;
         }
+
+        store.dispatch(
+          sagaError({
+            source,
+            message:
+              delivered > 0
+                ? `Cancel delivery to tab ${tabId} failed; recovered via the page`
+                : `Cancel delivery to tab ${tabId} failed; not delivered`
+          })
+        );
       }
     })
   );
@@ -134,16 +169,26 @@ export async function cancelRequestsDisplacedBy(
   source: CancelSource,
   afterMark?: () => void
 ): Promise<void> {
-  const candidates = selectOpenRequests(store.getState()).filter(
-    request =>
-      request.windowIds.length === 1 && request.windowIds[0] === windowId
+  const displaced = selectOpenRequests(store.getState()).filter(request =>
+    request.windowIds.includes(windowId)
+  );
+  const candidates = displaced.filter(
+    request => request.windowIds.length === 1
   );
 
   // Dispatched synchronously, before the grace: the slice must stop claiming
   // this window displays anything the moment it stopped doing so.
-  store.dispatch(windowDetachedFromRequests({ windowId }));
+  //
+  // Gated on there being something to detach. `windows.onRemoved` fires for
+  // ANY window in the browser, and the store subscriber does no state-change
+  // comparison — every dispatch is a popupState broadcast to every replica plus
+  // a full storage.local rewrite, even when the reducer returns the identical
+  // state object.
+  if (displaced.length > 0) {
+    store.dispatch(windowDetachedFromRequests({ windowId }));
+  }
 
-  await cancelRequests(store, candidates, source, afterMark);
+  await cancelRequests(store, candidates, source, windowId, afterMark);
 }
 
 // `windows.create` rejected, so no window will ever display this request and no
@@ -162,14 +207,9 @@ export async function failRequestOnWindowError(
   }
 
   store.dispatch(windowRequestResponded({ requestId }));
-  store.dispatch(
-    sagaError({
-      source: 'open-window-failed',
-      message: 'Approval window could not be opened; the request was cancelled'
-    })
-  );
 
   const action = buildCancelResponse(request.method, requestId);
+  let delivered = 1;
   try {
     await tabs.sendMessage(request.tabId, action);
   } catch (error) {
@@ -178,6 +218,21 @@ export async function failRequestOnWindowError(
       { requestId, method: request.method, tabId: request.tabId },
       error
     );
-    await deliverViaOrigin(request.origin, action);
+    delivered = await deliverViaOrigin(request.origin, action);
   }
+
+  // Dispatched AFTER the delivery attempt so the message can tell the truth.
+  // The tombstone above is already written and `sdk-response-to-tab` drops
+  // anything that arrives later, so a failure on both routes is terminal: the
+  // dapp received nothing and will hang until its own timeout. Saying "the
+  // request was cancelled" there would be a lie the user cannot act on.
+  store.dispatch(
+    sagaError({
+      source: 'open-window-failed',
+      message:
+        delivered > 0
+          ? 'Approval window could not be opened; the request was cancelled'
+          : 'Approval window could not be opened and the site could not be told; the request may still be pending there'
+    })
+  );
 }

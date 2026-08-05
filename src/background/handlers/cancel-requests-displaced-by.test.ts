@@ -24,12 +24,16 @@ const state = (requests: any) => ({
   windowManagement: { windowId: 7, exportKeysWindowId: null, requests }
 });
 
-const run = async (getState: jest.Mock, windowId = 7) => {
+const run = async (
+  getState: jest.Mock,
+  windowId = 7,
+  source: 'cancel-on-close' | 'cancel-on-supersede' = 'cancel-on-close'
+) => {
   const dispatch = jest.fn();
   const promise = cancelRequestsDisplacedBy(
     { dispatch, getState } as any,
     windowId,
-    'cancel-on-close'
+    source
   );
   await jest.advanceTimersByTimeAsync(CANCEL_GRACE_MS);
   await promise;
@@ -79,12 +83,45 @@ it('keeps a request alive when a second window still displays it (Ledger)', asyn
   );
 });
 
+it('spares a request that regained a window during the grace', async () => {
+  // The Ledger attach crosses a runtime.sendMessage round trip, so it can land
+  // AFTER this routine snapshotted its candidates and detached the shared
+  // window. By the time the grace elapses the request is genuinely displayed
+  // again — cancelling it here is the P0 this whole model exists to prevent.
+  const getState = jest
+    .fn()
+    .mockReturnValueOnce(state({ r1: open(3, [7]) }))
+    .mockReturnValue(state({ r1: open(3, [9]) }));
+
+  const dispatch = await run(getState);
+
+  expect(tabs.sendMessage).not.toHaveBeenCalled();
+  expect(dispatch).not.toHaveBeenCalledWith(
+    expect.objectContaining({
+      type: windowRequestResponded({ requestId: 'r1' }).type
+    })
+  );
+});
+
 it('never cancels a request that never had this window', async () => {
   await run(
     jest.fn().mockReturnValue(state({ r1: open(3, []), r2: open(4, [9]) }))
   );
 
   expect(tabs.sendMessage).not.toHaveBeenCalled();
+});
+
+it('dispatches nothing at all when no open request held the window', async () => {
+  // `windows.onRemoved` now fires for ANY window the user closes, not just the
+  // tracked approval one. Every dispatch reaches the store subscriber, which
+  // does no state-change comparison: a full popupState broadcast to every
+  // replica plus a full storage.local rewrite. An unrelated window close must
+  // cost nothing.
+  const dispatch = await run(
+    jest.fn().mockReturnValue(state({ r1: open(3, [9]) }))
+  );
+
+  expect(dispatch).not.toHaveBeenCalled();
 });
 
 it('sends each cancel to its OWN tab when two requests are displaced', async () => {
@@ -144,12 +181,16 @@ it('one failing delivery does not abort the other', async () => {
   );
 });
 
-it('stays silent in the UI when the same-origin fallback delivered', async () => {
+it('stays silent in the UI when a SUPERSEDE recovered via the page origin', async () => {
+  // Only on this path is the user already looking at the next approval screen,
+  // so a "recovered anyway" banner would be noise on top of a signing prompt.
   (tabs.sendMessage as jest.Mock).mockRejectedValue(new Error('tab gone'));
   (deliverViaOrigin as jest.Mock).mockResolvedValue(1);
 
   const dispatch = await run(
-    jest.fn().mockReturnValue(state({ r1: open(3, [7]) }))
+    jest.fn().mockReturnValue(state({ r1: open(3, [7]) })),
+    7,
+    'cancel-on-supersede'
   );
 
   expect(deliverViaOrigin).toHaveBeenCalledWith(
@@ -158,5 +199,27 @@ it('stays silent in the UI when the same-origin fallback delivered', async () =>
   );
   expect(dispatch).not.toHaveBeenCalledWith(
     expect.objectContaining({ type: 'appEvents/sagaError' })
+  );
+});
+
+it('still surfaces a banner on the CLOSE path even when the fallback delivered', async () => {
+  // `cancelRequests` is shared, but the supersede rationale is not: after a
+  // window close there is no replacement screen, and `deliverViaOrigin` only
+  // counts same-origin sends to active tabs that did not throw — that is not
+  // proof the tab holding the dapp's pending promise received anything.
+  (tabs.sendMessage as jest.Mock).mockRejectedValue(new Error('tab gone'));
+  (deliverViaOrigin as jest.Mock).mockResolvedValue(1);
+
+  const dispatch = await run(
+    jest.fn().mockReturnValue(state({ r1: open(3, [7]) })),
+    7,
+    'cancel-on-close'
+  );
+
+  expect(dispatch).toHaveBeenCalledWith(
+    expect.objectContaining({
+      type: 'appEvents/sagaError',
+      payload: expect.objectContaining({ source: 'cancel-on-close' })
+    })
   );
 });
