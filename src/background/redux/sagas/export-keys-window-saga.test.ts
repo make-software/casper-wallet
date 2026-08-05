@@ -1,8 +1,12 @@
 import * as matchers from 'redux-saga-test-plan/matchers';
 import { expectSaga } from 'redux-saga-test-plan';
+import { throwError } from 'redux-saga-test-plan/providers';
 import { windows } from 'webextension-polyfill';
 
-import { sagaError } from '@background/redux/app-events/actions';
+import {
+  dismissSagaErrorsBySource,
+  sagaError
+} from '@background/redux/app-events/actions';
 import {
   exportKeysWindowIdChanged,
   exportKeysWindowIdCleared
@@ -23,6 +27,20 @@ jest.mock('webextension-polyfill', () => ({
   }
 }));
 
+interface RecordedEffect {
+  type: string;
+  payload?: { action?: { type?: string } };
+}
+
+// `.put(...)` is a containment check — it removes one matching effect from the
+// recorded set and passes, so a second, identical dispatch goes unnoticed.
+// Counting is what pins "exactly one", and it reads `allEffects` rather than
+// `effects` precisely because the former is not consumed by the assertions.
+const countPutsOfType = (allEffects: unknown, type: string) =>
+  (allEffects as RecordedEffect[]).filter(
+    effect => effect.type === 'PUT' && effect.payload?.action?.type === type
+  ).length;
+
 describe('openExportKeysWindowSaga', () => {
   const currentWindow = {
     id: 1,
@@ -31,6 +49,17 @@ describe('openExportKeysWindowSaga', () => {
     left: 0,
     top: 0
   };
+
+  it('retracts what a previous attempt reported before re-attempting', () => {
+    return expectSaga(openExportKeysWindowSaga)
+      .withState({ windowManagement: { exportKeysWindowId: null } })
+      .provide([
+        [matchers.call.fn(windows.getCurrent), currentWindow],
+        [matchers.call.fn(windows.create), { id: 77 }]
+      ])
+      .put(dismissSagaErrorsBySource('openExportKeysWindowSaga'))
+      .run();
+  });
 
   it('refocuses an existing export popup window and does not create', () => {
     return (
@@ -47,9 +76,49 @@ describe('openExportKeysWindowSaga', () => {
         // pass on the assertions above alone.
         .not.call.fn(windows.getCurrent)
         .not.call.fn(windows.create)
-        .not.put(exportKeysWindowIdChanged(expect.any(Number)))
+        // Asserted on the action type, not on a built action: expectSaga
+        // compares effects with lodash.isEqual, which never matches jest's
+        // asymmetric matchers — `.not.put(action(expect.any(Number)))` would be
+        // satisfied unconditionally and guarantee nothing.
+        .not.put.actionType(exportKeysWindowIdChanged.type)
+        .not.put.actionType(sagaError.type)
         .run()
     );
+  });
+
+  it('reports a failed refocus as a focus failure and still does not create', async () => {
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    try {
+      const { allEffects } = await expectSaga(openExportKeysWindowSaga)
+        .withState({ windowManagement: { exportKeysWindowId: 42 } })
+        .provide([
+          [matchers.call.fn(windows.getAll), [{ id: 42, type: 'popup' }]],
+          [matchers.call.fn(windows.update), throwError(new Error('denied'))]
+        ])
+        .put(
+          sagaError({
+            source: 'openExportKeysWindowSaga',
+            // The window was found by getAll, so it is on screen: the generic
+            // "could not open" message of the outer catch would contradict it.
+            message: 'Could not focus the export window'
+          })
+        )
+        // Opening a second export window alongside the existing one would be
+        // worse than the failure being reported.
+        .not.call.fn(windows.getCurrent)
+        .not.call.fn(windows.create)
+        // The window still exists; background/index.ts clears the tracked id on
+        // windows.onRemoved, so the saga must not clear it here.
+        .not.put.actionType(exportKeysWindowIdCleared.type)
+        .run();
+
+      expect(countPutsOfType(allEffects, sagaError.type)).toBe(1);
+    } finally {
+      consoleError.mockRestore();
+    }
   });
 
   it('clears a stale id and creates a new window', () => {
@@ -83,31 +152,40 @@ describe('openExportKeysWindowSaga', () => {
         [matchers.call.fn(windows.getCurrent), currentWindow],
         [matchers.call.fn(windows.create), {}]
       ])
-      .not.put(exportKeysWindowIdChanged(expect.any(Number)))
+      .not.put.actionType(exportKeysWindowIdChanged.type)
       .run();
   });
 
-  it('surfaces a saga error when the export window cannot be opened', () => {
+  it('surfaces a saga error when the export window cannot be opened', async () => {
     const consoleError = jest
       .spyOn(console, 'error')
       .mockImplementation(() => {});
 
-    return expectSaga(openExportKeysWindowSaga)
-      .withState({ windowManagement: { exportKeysWindowId: null } })
-      .provide([
-        [matchers.call.fn(windows.getAll), []],
-        [matchers.call.fn(windows.getCurrent), currentWindow],
-        [matchers.call.fn(windows.create), Promise.reject(new Error('denied'))]
-      ])
-      .put(
-        sagaError({
-          source: 'openExportKeysWindowSaga',
-          message: 'Could not open the export window'
-        })
-      )
-      .not.put(exportKeysWindowIdChanged(expect.any(Number)))
-      .run()
-      .finally(() => consoleError.mockRestore());
+    try {
+      const { allEffects } = await expectSaga(openExportKeysWindowSaga)
+        .withState({ windowManagement: { exportKeysWindowId: null } })
+        .provide([
+          [matchers.call.fn(windows.getCurrent), currentWindow],
+          // throwError throws at the effect site. A literal
+          // Promise.reject(...) here is built when the provider array is
+          // evaluated, before .run(), and nothing attaches a handler until the
+          // windows.create yield is reached — safe only while no macrotask
+          // boundary precedes it, and an unhandledRejection the moment one does.
+          [matchers.call.fn(windows.create), throwError(new Error('denied'))]
+        ])
+        .put(
+          sagaError({
+            source: 'openExportKeysWindowSaga',
+            message: 'Could not open the export window'
+          })
+        )
+        .not.put.actionType(exportKeysWindowIdChanged.type)
+        .run();
+
+      expect(countPutsOfType(allEffects, sagaError.type)).toBe(1);
+    } finally {
+      consoleError.mockRestore();
+    }
   });
 
   describe('exportKeysWindowSaga (watcher)', () => {

@@ -1,6 +1,7 @@
 import {
   dismissAppEvent,
   dismissSagaError,
+  dismissSagaErrorsBySource,
   resetAppEventsDismission,
   sagaError
 } from './actions';
@@ -137,6 +138,45 @@ describe('app-events reducer', () => {
         { id: 0, source: 'sagaA', message: 'a' },
         { id: 2, source: 'sagaC', message: 'c' }
       ]);
+    });
+  });
+
+  describe('dismissSagaErrorsBySource', () => {
+    const seeded: AppEventsState = {
+      dismissedEventIds: [],
+      errors: [
+        { id: 0, source: 'sagaA', message: 'first' },
+        { id: 1, source: 'sagaB', message: 'other' },
+        { id: 2, source: 'sagaA', message: 'second' }
+      ],
+      nextErrorId: 3
+    };
+
+    it('removes every entry from the given source and leaves the others', () => {
+      const result = reducer(seeded, dismissSagaErrorsBySource('sagaA'));
+      expect(result.errors).toEqual([
+        { id: 1, source: 'sagaB', message: 'other' }
+      ]);
+    });
+
+    it('does not rewind the id counter, so a later error cannot reuse a retracted id', () => {
+      const cleared = reducer(seeded, dismissSagaErrorsBySource('sagaA'));
+      expect(cleared.nextErrorId).toBe(3);
+
+      const next = reducer(
+        cleared,
+        sagaError({ source: 'sagaA', message: 'retry' })
+      );
+      expect(next.errors).toEqual([
+        { id: 1, source: 'sagaB', message: 'other' },
+        { id: 3, source: 'sagaA', message: 'retry' }
+      ]);
+    });
+
+    it('is a no-op for an unknown source', () => {
+      expect(
+        reducer(seeded, dismissSagaErrorsBySource('sagaZ')).errors
+      ).toEqual(seeded.errors);
     });
   });
 });
