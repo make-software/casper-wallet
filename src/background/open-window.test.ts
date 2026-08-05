@@ -79,7 +79,7 @@ describe('openWindow (background store routing)', () => {
     openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
 
     expect(createOpenWindowMock).toHaveBeenCalledTimes(1);
-    const config = createOpenWindowMock.mock.calls[0][0];
+    const config = createOpenWindowMock.mock.calls[0][0]!;
     expect(config.windowId).toBe(42);
   });
 
@@ -88,7 +88,7 @@ describe('openWindow (background store routing)', () => {
 
     openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
 
-    const config = createOpenWindowMock.mock.calls[0][0];
+    const config = createOpenWindowMock.mock.calls[0][0]!;
     expect(config.windowId).toBeNull();
   });
 
@@ -117,8 +117,8 @@ describe('openWindow (background store routing)', () => {
 
     openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
 
-    const config = createOpenWindowMock.mock.calls[0][0];
-    config.setWindowId(7);
+    const config = createOpenWindowMock.mock.calls[0][0]!;
+    config.setWindowId!(7);
     expect(dispatch).toHaveBeenCalledWith(windowIdChanged(7));
   });
 
@@ -127,8 +127,8 @@ describe('openWindow (background store routing)', () => {
 
     openWindow(store, { windowApp: WindowApp.ConnectToApp, requestId: 'r0' });
 
-    const config = createOpenWindowMock.mock.calls[0][0];
-    config.clearWindowId();
+    const config = createOpenWindowMock.mock.calls[0][0]!;
+    config.clearWindowId!();
     expect(dispatch).toHaveBeenCalledWith(windowIdCleared());
   });
 

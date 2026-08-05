@@ -69,8 +69,6 @@ import {
   onboardingAppInit,
   popupWindowInit,
   signWindowInit,
-  windowIdChanged,
-  windowIdCleared,
   windowRequestWindowAttached
 } from '@background/redux/windowManagement/actions';
 
@@ -151,8 +149,6 @@ export const FORWARDED_ACTION_TYPES: ReadonlySet<string> = new Set(
     anotherAccountConnected,
     accountDisconnected,
     siteDisconnected,
-    windowIdChanged,
-    windowIdCleared,
     onboardingAppInit,
     popupWindowInit,
     connectWindowInit,

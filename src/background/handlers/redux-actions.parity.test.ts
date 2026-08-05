@@ -124,6 +124,15 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     // Background-only: dispatched by the cancel path when a window closes or
     // is reused for a new request. Never dispatched from the UI.
     windowManagementActions.windowDetachedFromRequests,
+    // Background-only: the tracked approval-window slot is written by
+    // `openWindow` and by `createOpenWindow`'s background caller. Its only UI
+    // dispatcher was `use-window-manager`, whose inputs were dead — both
+    // consumers pass `isNewWindow: true`, so the reuse branch never ran. While
+    // these stayed forwardable, any extension UI page could `runtime.sendMessage`
+    // a `windowIdChanged(<arbitrary id>)` and retarget the slot that decides
+    // which window a dapp approval belongs to.
+    windowManagementActions.windowIdChanged,
+    windowManagementActions.windowIdCleared,
     // UI-dispatched (use-ledger registers the Ledger permission window), but
     // intercepted by the dedicated `windowRequestWindowAttached` branch in
     // handleReduxAction — deliberately not in the forwarding set. Forwarding it
