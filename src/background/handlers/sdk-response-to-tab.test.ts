@@ -122,6 +122,17 @@ function makeMessage(tabId: number = TAB_ID): SdkResponseToTabMessage {
   };
 }
 
+function makeCancelMessage(tabId: number = TAB_ID): SdkResponseToTabMessage {
+  return {
+    type: SDK_RESPONSE_TO_TAB,
+    action: sdkMethod.signResponse(
+      { cancelled: true },
+      { requestId: REQUEST_ID }
+    ),
+    tabId
+  };
+}
+
 // Find the single `sagaError` dispatch (source === 'sdk-response-to-tab').
 function findSagaError(dispatch: jest.Mock) {
   return dispatch.mock.calls.find(
@@ -154,11 +165,11 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     expect(result.handled).toBe(true);
   });
 
-  it("already 'responded' → drops the duplicate (no send, no dispatch)", async () => {
+  it("already 'responded' → drops a duplicate CANCEL with no send and no dispatch", async () => {
     const { store, dispatch } = makeStore({ status: 'responded' });
 
     const result = await handleSdkResponseToTab(
-      makeMessage(),
+      makeCancelMessage(),
       UI_SENDER,
       store
     );
@@ -179,22 +190,77 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
   });
 
-  it('logs when it drops a duplicate, without the payload', async () => {
-    const consoleError = jest
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
-    const { store } = makeStore({ status: 'responded' });
+  describe('a dropped duplicate is not one thing', () => {
+    // The comment here claimed a dropped `cancelled: true` is benign while a
+    // dropped signature never is, "and the two are distinguishable here" — then
+    // both took the identical console.error and neither reached the user. The
+    // benign case is the overwhelming majority of these lines, which trains a
+    // reader to ignore the one that means a signed transaction was destroyed.
+    let consoleError: jest.SpyInstance;
+    let consoleWarn: jest.SpyInstance;
 
-    await handleSdkResponseToTab(makeMessage(), UI_SENDER, store);
+    beforeEach(() => {
+      consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+      consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    });
 
-    expect(sendMessageMock).not.toHaveBeenCalled();
-    expect(consoleError).toHaveBeenCalledWith(
-      'sdk-response-to-tab: dropped duplicate response',
-      { requestId: REQUEST_ID, tabId: TAB_ID, type: expect.any(String) }
-    );
-    // The whole point: identifiers only, never the signed payload.
-    expect(JSON.stringify(consoleError.mock.calls)).not.toContain('deadbeef');
-    consoleError.mockRestore();
+    afterEach(() => {
+      consoleError.mockRestore();
+      consoleWarn.mockRestore();
+    });
+
+    it('escalates a dropped completed response and surfaces it to the user', async () => {
+      const { store, dispatch } = makeStore({ status: 'responded' });
+
+      await handleSdkResponseToTab(makeMessage(), UI_SENDER, store);
+
+      expect(sendMessageMock).not.toHaveBeenCalled();
+      expect(consoleError).toHaveBeenCalledWith(
+        'sdk-response-to-tab: dropped a completed response — the result was lost',
+        { requestId: REQUEST_ID, tabId: TAB_ID, type: expect.any(String) }
+      );
+      expect(findSagaError(dispatch)).toBeDefined();
+      // Identifiers only, never the signed payload — in either channel.
+      const logged = JSON.stringify([
+        ...consoleError.mock.calls,
+        ...dispatch.mock.calls
+      ]);
+      expect(logged).not.toContain('deadbeef');
+    });
+
+    it('only warns about a duplicate cancel, and does not bother the user', async () => {
+      const { store, dispatch } = makeStore({ status: 'responded' });
+
+      await handleSdkResponseToTab(makeCancelMessage(), UI_SENDER, store);
+
+      expect(consoleWarn).toHaveBeenCalledWith(
+        'sdk-response-to-tab: dropped a duplicate cancel',
+        { requestId: REQUEST_ID, tabId: TAB_ID, type: expect.any(String) }
+      );
+      expect(consoleError).not.toHaveBeenCalled();
+      expect(findSagaError(dispatch)).toBeUndefined();
+    });
+
+    it('treats a bare boolean answer as benign too', async () => {
+      // `connectResponse` / `switchAccountResponse` type their payload as a
+      // plain boolean, so a branch on `payload.cancelled` does not generalise
+      // across the union — and neither of them can lose anything.
+      const { store, dispatch } = makeStore({ status: 'responded' });
+
+      await handleSdkResponseToTab(
+        {
+          type: SDK_RESPONSE_TO_TAB,
+          action: sdkMethod.connectResponse(true, { requestId: REQUEST_ID }),
+          tabId: TAB_ID
+        },
+        UI_SENDER,
+        store
+      );
+
+      expect(consoleWarn).toHaveBeenCalled();
+      expect(consoleError).not.toHaveBeenCalled();
+      expect(findSagaError(dispatch)).toBeUndefined();
+    });
   });
 
   it('invalid tabId, no origin → surfaces "not delivered" sagaError, no delivery, does not mark responded', async () => {

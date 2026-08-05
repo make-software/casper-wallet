@@ -45,6 +45,26 @@ function deliveryFailedError(tabId: unknown, fallbackDelivered: boolean) {
   });
 }
 
+// Is a dropped duplicate one that costs nothing?
+//
+// It cannot be decided by `payload.cancelled` alone: `connectResponse` and
+// `switchAccountResponse` type their payload as a bare boolean, so that branch
+// does not generalise across the union. And it fails LOUD — anything not
+// recognised as benign is treated as a lost result, because the cost of a
+// missed warning is a line in a log while the cost of a missed error is a
+// signature the user produced and nobody ever received.
+function isBenignDuplicate(payload: unknown): boolean {
+  if (typeof payload === 'boolean') {
+    return true;
+  }
+
+  return (
+    typeof payload === 'object' &&
+    payload !== null &&
+    (payload as { cancelled?: unknown }).cancelled === true
+  );
+}
+
 // Background dedupe of SDK responses (P0.5 root cause). There is no server; the
 // background store is the single writer, which is what makes this atomic.
 // The signature UI pages used to `tabs.sendMessage` the response to the dapp
@@ -92,14 +112,34 @@ export async function handleSdkResponseToTab(
     requestId != null &&
     selectRequestStatus(store.getState(), requestId) === 'responded'
   ) {
-    // A dropped `cancelled: true` is benign; a dropped signature never is, and
-    // the two are distinguishable here. Log the identifiers ONLY — `action`
-    // carries `signatureHex` / `encryptedMessage` (see the SECURITY note above).
-    console.error('sdk-response-to-tab: dropped duplicate response', {
-      requestId,
-      tabId,
-      type: action?.type
-    });
+    // A dropped `cancelled: true` is benign; a dropped signature never is, so
+    // say which one happened. The benign case is the overwhelming majority of
+    // these lines, and at `error` severity it trains a reader to skip past the
+    // one that means a signed transaction was destroyed. Log the identifiers
+    // ONLY — `action` carries `signatureHex` / `encryptedMessage` (see the
+    // SECURITY note above).
+    const identifiers = { requestId, tabId, type: action?.type };
+
+    if (isBenignDuplicate(action?.payload)) {
+      console.warn(
+        'sdk-response-to-tab: dropped a duplicate cancel',
+        identifiers
+      );
+    } else {
+      console.error(
+        'sdk-response-to-tab: dropped a completed response — the result was lost',
+        identifiers
+      );
+      // The log alone is not enough here: the user approved something, the
+      // dapp will never hear about it, and nothing else on this path says so.
+      // No payload, no origin — appEvents is broadcast to every replica.
+      store.dispatch(
+        sagaError({
+          source: 'sdk-response-to-tab',
+          message: `A completed response for tab ${tabId} was dropped as a duplicate; the site was not told`
+        })
+      );
+    }
     // Drop the duplicate — it never reaches the tab. Respond so the forwarding
     // UI's `runtime.sendMessage` promise still resolves (some callers await it
     // before closing the window).
