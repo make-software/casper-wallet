@@ -1,4 +1,4 @@
-import { windows } from 'webextension-polyfill';
+import { runtime, windows } from 'webextension-polyfill';
 
 import { windowRequestWindowAttached } from '@background/redux/windowManagement/actions';
 
@@ -7,7 +7,7 @@ import { cancelRequestsDisplacedBy } from './cancel-requests';
 
 jest.mock('webextension-polyfill', () => ({
   windows: { get: jest.fn(), getAll: jest.fn() },
-  runtime: { getURL: (path: string) => `chrome-extension://ext-id/${path}` }
+  runtime: { getURL: jest.fn() }
 }));
 
 const extensionTab = (search = '?requestId=r1') => ({
@@ -19,6 +19,7 @@ jest.mock('./cancel-requests', () => ({
 
 const getMock = windows.get as jest.Mock;
 const getAllMock = windows.getAll as jest.Mock;
+const getUrlMock = runtime.getURL as jest.Mock;
 const cancelMock = cancelRequestsDisplacedBy as jest.Mock;
 
 // The liveness probe is fire-and-forget, so let the microtask queue drain.
@@ -33,6 +34,9 @@ beforeEach(() => {
   jest.clearAllMocks();
   getMock.mockResolvedValue({ id: 7 });
   getAllMock.mockResolvedValue([]);
+  getUrlMock.mockImplementation(
+    (path: string) => `chrome-extension://ext-id/${path}`
+  );
   cancelMock.mockResolvedValue(undefined);
 });
 
@@ -93,6 +97,30 @@ describe('a window that is not ours must not own a request', () => {
     await flush();
 
     expect(cancelMock).not.toHaveBeenCalled();
+  });
+
+  it('warns when our window carries no requestId at all', async () => {
+    // Without this the ownership check establishes "one of our windows" and
+    // says nothing about "the window showing THIS request" — and the two are
+    // only distinguishable through this branch and the mismatch one below.
+    const consoleWarn = jest
+      .spyOn(console, 'warn')
+      .mockImplementation(() => {});
+    getMock.mockResolvedValue({
+      id: 7,
+      tabs: [{ url: 'chrome-extension://ext-id/signature-request.html' }]
+    });
+    const { store } = makeStore();
+
+    attachWindowToRequest(store, 'r1', 7);
+    await flush();
+
+    expect(cancelMock).not.toHaveBeenCalled();
+    expect(consoleWarn).toHaveBeenCalledWith(
+      'attachWindowToRequest: window carries no requestId',
+      { requestId: 'r1', windowId: 7 }
+    );
+    consoleWarn.mockRestore();
   });
 
   it('warns but does not undo the attach when our window shows a different request', async () => {
@@ -219,6 +247,32 @@ describe('an unexplained probe rejection must not cancel a live approval', () =>
     expect(cancelMock).not.toHaveBeenCalled();
     consoleError.mockRestore();
   });
+});
+
+it('logs a throw from the ownership check instead of leaving it unhandled', async () => {
+  // The probe is a two-arm `.then(onFulfilled, onRejected)` with no trailing
+  // `.catch`, so a throw in the FULFILLED arm has nothing to catch it.
+  // `runtime.getURL` is a live candidate: it is precisely what fails on an
+  // invalidated extension context — the condition the rejected arm's own
+  // comment says it must not trust. With no `unhandledrejection` handler
+  // anywhere in `src/`, an MV3 service worker would leave no trace at all.
+  const consoleError = jest
+    .spyOn(console, 'error')
+    .mockImplementation(() => {});
+  getMock.mockResolvedValue({ id: 7, tabs: [extensionTab()] });
+  getUrlMock.mockImplementation(() => {
+    throw new Error('Extension context invalidated');
+  });
+  const { store } = makeStore();
+
+  attachWindowToRequest(store, 'r1', 7);
+  await flush();
+
+  expect(consoleError).toHaveBeenCalledWith(
+    'attachWindowToRequest: liveness check failed',
+    expect.any(Error)
+  );
+  consoleError.mockRestore();
 });
 
 describe('malformed payloads never reach the store', () => {

@@ -1,5 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
+import { getRequest, isStorableRequestId } from './request-map';
 import { CancellableMethod, WindowManagementState } from './types';
 
 // How many answered requests keep a tombstone. Large enough that a late
@@ -48,7 +49,10 @@ const slice = createSlice({
         method: CancellableMethod;
       }>
     ) => {
-      if (state.requests[action.payload.requestId] != null) {
+      if (
+        !isStorableRequestId(action.payload.requestId) ||
+        getRequest(state.requests, action.payload.requestId) != null
+      ) {
         return state;
       }
 
@@ -73,7 +77,7 @@ const slice = createSlice({
       state,
       action: PayloadAction<{ requestId: string; windowId: number }>
     ) => {
-      const request = state.requests[action.payload.requestId];
+      const request = getRequest(state.requests, action.payload.requestId);
 
       if (
         request == null ||
@@ -137,6 +141,19 @@ const slice = createSlice({
       state,
       action: PayloadAction<{ requestId: string }>
     ) => {
+      // A transition, not an upsert — guarded the way its two siblings are.
+      // Only a request that is currently 'open' can become 'responded'; the
+      // union models ∅ → open → responded and this is what stops the reducer
+      // permitting ∅ → responded. Without it, a response the UI forwards for an
+      // id the store no longer holds (an MV3 restart between registration and
+      // the response) wrote an orphan tombstone that consumed a slot in the cap
+      // below and made the SDK entry guard reject that id as a duplicate.
+      if (
+        getRequest(state.requests, action.payload.requestId)?.status !== 'open'
+      ) {
+        return state;
+      }
+
       const requests: WindowManagementState['requests'] = {
         ...state.requests,
         [action.payload.requestId]: { status: 'responded' }
@@ -145,7 +162,7 @@ const slice = createSlice({
       // Insertion order = the order requests were first registered, since
       // re-writing an existing key keeps its original position.
       const respondedIds = Object.keys(requests).filter(
-        requestId => requests[requestId]?.status === 'responded'
+        requestId => getRequest(requests, requestId)?.status === 'responded'
       );
 
       const overflow = respondedIds.length - MAX_RESPONDED_TOMBSTONES;

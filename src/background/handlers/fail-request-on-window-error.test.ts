@@ -43,7 +43,13 @@ it('found request → marks responded, surfaces sagaError, delivers the method-c
   expect(dispatch).toHaveBeenCalledWith(
     expect.objectContaining({
       type: 'appEvents/sagaError',
-      payload: expect.objectContaining({ source: 'open-window-failed' })
+      payload: expect.objectContaining({
+        source: 'open-window-failed',
+        // Pins the delivered arm's TEXT. The banner renders it verbatim, and
+        // the other arm tells the user the site may still be waiting — so
+        // collapsing this ternary either way must fail a test.
+        message: expect.stringContaining('the request was cancelled')
+      })
     })
   );
   expect(tabs.sendMessage).toHaveBeenCalledWith(

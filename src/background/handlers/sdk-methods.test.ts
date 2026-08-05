@@ -179,6 +179,40 @@ describe('a requestId the wallet already registered', () => {
   });
 });
 
+describe('a requestId that is not storable', () => {
+  it('is refused before a window opens, instead of stranding one', async () => {
+    // `__proto__` cannot be a key in the requests map, so the reducer refuses
+    // it. Without this the caller was told the id was fresh, the window opened,
+    // and the approval sat outside the lifecycle model entirely — not
+    // cancellable on close or supersede, not deduped, not recoverable.
+    const { store, dispatch } = makeStore();
+
+    await expect(
+      handleSdkMethod(
+        sdkMethod.connectRequest({ title: 't' }, { requestId: '__proto__' }),
+        SENDER,
+        store
+      )
+    ).rejects.toThrow('Invalid requestId');
+
+    expect(openWindowMock).not.toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('lets the other Object.prototype names through', async () => {
+    // They store as ordinary own properties; only `__proto__` does not.
+    const { store } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.connectRequest({ title: 't' }, { requestId: 'toString' }),
+      SENDER,
+      store
+    );
+
+    expect(openWindowMock).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('connectRequest', () => {
   it('missing origin → throws CannotGetSenderOriginError', async () => {
     getUrlOriginMock.mockReturnValue(undefined);

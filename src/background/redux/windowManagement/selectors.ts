@@ -2,6 +2,7 @@ import { createSelector } from 'reselect';
 
 import { RootState } from '@background/redux/store-types';
 
+import { getRequest } from './request-map';
 import { OpenRequest, RequestStatus } from './types';
 
 export const selectWindowId = (state: RootState): number | null =>
@@ -14,7 +15,7 @@ export const selectRequestStatus = (
   state: RootState,
   requestId: string
 ): RequestStatus | undefined =>
-  state.windowManagement.requests[requestId]?.status;
+  getRequest(state.windowManagement.requests, requestId)?.status;
 
 const selectRequests = (state: RootState) => state.windowManagement.requests;
 

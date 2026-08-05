@@ -26,6 +26,7 @@ import {
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
 import { windowRequestOpened } from '@background/redux/windowManagement/actions';
+import { isStorableRequestId } from '@background/redux/windowManagement/request-map';
 import { selectRequestStatus } from '@background/redux/windowManagement/selectors';
 import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 
@@ -65,11 +66,18 @@ export async function handleSdkMethod(
   // LIVE id under another method is worse still: the first descriptor is kept,
   // so a later cancel is built in the wrong shape. Refuse both here, before
   // anything is dispatched.
-  if (
-    APPROVAL_REQUEST_TYPES.has(action.type) &&
-    selectRequestStatus(store.getState(), action.meta.requestId) != null
-  ) {
-    throw Error('Duplicate requestId');
+  if (APPROVAL_REQUEST_TYPES.has(action.type)) {
+    // `__proto__` cannot be a key in the requests map, so the reducer refuses
+    // it — and without answering here, the caller would go on to open a window
+    // for a request the store never registered: outside cancellation on close,
+    // on supersede, the response dedup and the window-open recovery alike.
+    if (!isStorableRequestId(action.meta.requestId)) {
+      throw Error('Invalid requestId');
+    }
+
+    if (selectRequestStatus(store.getState(), action.meta.requestId) != null) {
+      throw Error('Duplicate requestId');
+    }
   }
 
   if (sdkMethod.connectRequest.match(action)) {
