@@ -206,10 +206,17 @@ export async function handleReduxAction(
   // alive, which the generic forwarding path cannot do. The UI dispatcher here
   // is `use-ledger` registering the Ledger permission window.
   if (windowRequestWindowAttached.match(action)) {
+    // `.match` is `isAction(action) && action.type === type` — it says nothing
+    // about the payload. Read it defensively so a payload-less message reaches
+    // `attachWindowToRequest`'s shape guard (which logs and drops it) instead
+    // of throwing a TypeError the router reports as a generic sendError.
+    const payload: Partial<{ requestId: string; windowId: number }> =
+      action.payload ?? {};
+
     attachWindowToRequest(
       store,
-      action.payload.requestId,
-      action.payload.windowId
+      payload.requestId as string,
+      payload.windowId as number
     );
     return { handled: true, response: undefined };
   }

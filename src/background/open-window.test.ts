@@ -66,8 +66,11 @@ describe('openWindow (background store routing)', () => {
       jest.fn().mockResolvedValue({ window: { id: 1 }, reused: false })
     );
     // The post-attach liveness check calls `windows.get`; default it to
-    // "still alive" so tests unrelated to that check don't trip it.
+    // "still alive" so tests unrelated to that check don't trip it. When it
+    // rejects, the probe confirms against the window list rather than trusting
+    // the rejection's wording — default that list to empty, i.e. "really gone".
     (windows.get as jest.Mock).mockResolvedValue({ id: 1 });
+    (windows.getAll as jest.Mock).mockResolvedValue([]);
   });
 
   it('passes the slice windowId from store.getState() into createOpenWindow', () => {

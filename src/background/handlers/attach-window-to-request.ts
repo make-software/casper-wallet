@@ -48,9 +48,37 @@ export function attachWindowToRequest(
   // repaired identically: run exactly what `onRemoved` would have run. When the
   // request still has another live window (the Ledger pair), the detach inside
   // simply shrinks the set and cancels nothing.
-  void windows.get(windowId).catch(() => {
-    void cancelRequestsDisplacedBy(store, windowId, 'cancel-on-close').catch(
-      error => console.error('cancel-on-close: failed', error)
+  // But a rejection is NOT proof of either. It can also mean a transient
+  // extension-context error or a Safari window-type quirk, and repairing on one
+  // of those cancels an approval that is on screen. Rather than narrowing on the
+  // error's text — which differs per browser and is exactly the kind of guard
+  // that silently stops matching — confirm against the window list, and do
+  // nothing if even that is unavailable.
+  void windows.get(windowId).catch((error: unknown) => {
+    console.error(
+      'attachWindowToRequest: window liveness probe rejected',
+      { requestId, windowId },
+      error
     );
+
+    void windows
+      .getAll()
+      .then(allWindows => {
+        if (!allWindows.some(({ id }) => id === windowId)) {
+          void cancelRequestsDisplacedBy(
+            store,
+            windowId,
+            'cancel-on-close'
+          ).catch(repairError =>
+            console.error('cancel-on-close: failed', repairError)
+          );
+        }
+      })
+      .catch(listError =>
+        console.error(
+          'attachWindowToRequest: window list unavailable, leaving the attach standing',
+          listError
+        )
+      );
   });
 }

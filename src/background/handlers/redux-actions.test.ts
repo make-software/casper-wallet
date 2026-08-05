@@ -63,6 +63,31 @@ describe('handleReduxAction forwarding gate (fail-closed)', () => {
     expect(result).toEqual({ handled: true, response: undefined });
   });
 
+  it('a payload-less attach message is refused by the guard, not thrown out of the handler', async () => {
+    // `.match` is `isAction(action) && action.type === type` — it does not
+    // validate the payload. Reading `action.payload.requestId` before
+    // `attachWindowToRequest`'s own shape guard runs turns the most obvious
+    // malformed shape into a TypeError that the router reports as a generic
+    // sendError, instead of the intended "ignoring malformed attach".
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    const { store, dispatch } = makeStore();
+
+    const result = await handleReduxAction(
+      { type: windowRequestWindowAttached.type },
+      store
+    );
+
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(consoleError).toHaveBeenCalledWith(
+      'attachWindowToRequest: ignoring malformed attach',
+      expect.any(Object)
+    );
+    expect(result).toEqual({ handled: true, response: undefined });
+    consoleError.mockRestore();
+  });
+
   it('a FORWARDED action type → dispatched to the real store', async () => {
     const { store, dispatch } = makeStore();
     const action = lockVault(); // type is in FORWARDED_ACTION_TYPES
