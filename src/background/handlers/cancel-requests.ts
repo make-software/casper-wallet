@@ -152,14 +152,24 @@ export async function cancelRequestsDisplacedBy(
   source: CancelSource,
   afterMark?: () => void
 ): Promise<void> {
-  const candidates = selectOpenRequests(store.getState()).filter(
-    request =>
-      request.windowIds.length === 1 && request.windowIds[0] === windowId
+  const displaced = selectOpenRequests(store.getState()).filter(request =>
+    request.windowIds.includes(windowId)
+  );
+  const candidates = displaced.filter(
+    request => request.windowIds.length === 1
   );
 
   // Dispatched synchronously, before the grace: the slice must stop claiming
   // this window displays anything the moment it stopped doing so.
-  store.dispatch(windowDetachedFromRequests({ windowId }));
+  //
+  // Gated on there being something to detach. `windows.onRemoved` fires for
+  // ANY window in the browser, and the store subscriber does no state-change
+  // comparison — every dispatch is a popupState broadcast to every replica plus
+  // a full storage.local rewrite, even when the reducer returns the identical
+  // state object.
+  if (displaced.length > 0) {
+    store.dispatch(windowDetachedFromRequests({ windowId }));
+  }
 
   await cancelRequests(store, candidates, source, windowId, afterMark);
 }

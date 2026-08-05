@@ -107,6 +107,19 @@ it('never cancels a request that never had this window', async () => {
   expect(tabs.sendMessage).not.toHaveBeenCalled();
 });
 
+it('dispatches nothing at all when no open request held the window', async () => {
+  // `windows.onRemoved` now fires for ANY window the user closes, not just the
+  // tracked approval one. Every dispatch reaches the store subscriber, which
+  // does no state-change comparison: a full popupState broadcast to every
+  // replica plus a full storage.local rewrite. An unrelated window close must
+  // cost nothing.
+  const dispatch = await run(
+    jest.fn().mockReturnValue(state({ r1: open(3, [9]) }))
+  );
+
+  expect(dispatch).not.toHaveBeenCalled();
+});
+
 it('sends each cancel to its OWN tab when two requests are displaced', async () => {
   await run(
     jest
