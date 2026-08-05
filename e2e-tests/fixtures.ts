@@ -48,6 +48,14 @@ export const test = base.extend<{
     const cspViolations: string[] = [];
 
     await context.addInitScript(() => {
+      // Extension documents only. The suite also drives pages this repo does not
+      // control — the Topper on-ramp the buy-CSPR flow redirects to, and the
+      // playground dapp — and those enforce a CSP of their own. Topper's blocks
+      // its own analytics on every load, which says nothing about this extension.
+      if (window.location.protocol !== 'chrome-extension:') {
+        return;
+      }
+
       document.addEventListener('securitypolicyviolation', event => {
         console.error(
           `[CSP] ${event.effectiveDirective} blocked ${
