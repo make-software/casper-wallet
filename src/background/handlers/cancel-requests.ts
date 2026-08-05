@@ -69,6 +69,7 @@ async function cancelRequests(
   store: MainStore,
   initiallyOpen: OpenRequest[],
   source: CancelSource,
+  displacedWindowId: number,
   afterMark?: () => void
 ): Promise<void> {
   if (initiallyOpen.length === 0) {
@@ -78,12 +79,29 @@ async function cancelRequests(
 
   await delay(CANCEL_GRACE_MS);
 
-  const stillOpenIds = new Set(
-    selectOpenRequests(store.getState()).map(r => r.requestId)
+  const currentlyOpen = new Map(
+    selectOpenRequests(store.getState()).map(r => [r.requestId, r])
   );
-  // Open at snapshot AND still open now — excludes answered-during-grace and
-  // any new request opened during the grace.
-  const toCancel = initiallyOpen.filter(r => stillOpenIds.has(r.requestId));
+  // Re-checked against the CURRENT descriptor, not the snapshot. Two things
+  // must still hold after the grace:
+  //   - the request is still 'open'   — excludes answered-during-grace, and any
+  //                                     request opened during the grace;
+  //   - nothing but the displaced window displays it — a window attached DURING
+  //     the grace means the request is genuinely back on screen. That is not
+  //     hypothetical: the Ledger permission window attaches across a
+  //     `runtime.sendMessage` round trip (see attach-window-to-request.ts), so
+  //     it routinely lands after this routine snapshotted its candidates and
+  //     dispatched the detach. Cancelling here would destroy the signature the
+  //     user is confirming on the device — the exact P0 this model exists to
+  //     prevent. `every` over an already-detached (empty) set is vacuously true.
+  const toCancel = initiallyOpen.filter(request => {
+    const current = currentlyOpen.get(request.requestId);
+
+    return (
+      current != null &&
+      current.windowIds.every(windowId => windowId === displacedWindowId)
+    );
+  });
 
   // Mark synchronously from this snapshot, before the async sends.
   for (const { requestId } of toCancel) {
@@ -143,7 +161,7 @@ export async function cancelRequestsDisplacedBy(
   // this window displays anything the moment it stopped doing so.
   store.dispatch(windowDetachedFromRequests({ windowId }));
 
-  await cancelRequests(store, candidates, source, afterMark);
+  await cancelRequests(store, candidates, source, windowId, afterMark);
 }
 
 // `windows.create` rejected, so no window will ever display this request and no

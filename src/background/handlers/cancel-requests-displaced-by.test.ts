@@ -79,6 +79,26 @@ it('keeps a request alive when a second window still displays it (Ledger)', asyn
   );
 });
 
+it('spares a request that regained a window during the grace', async () => {
+  // The Ledger attach crosses a runtime.sendMessage round trip, so it can land
+  // AFTER this routine snapshotted its candidates and detached the shared
+  // window. By the time the grace elapses the request is genuinely displayed
+  // again — cancelling it here is the P0 this whole model exists to prevent.
+  const getState = jest
+    .fn()
+    .mockReturnValueOnce(state({ r1: open(3, [7]) }))
+    .mockReturnValue(state({ r1: open(3, [9]) }));
+
+  const dispatch = await run(getState);
+
+  expect(tabs.sendMessage).not.toHaveBeenCalled();
+  expect(dispatch).not.toHaveBeenCalledWith(
+    expect.objectContaining({
+      type: windowRequestResponded({ requestId: 'r1' }).type
+    })
+  );
+});
+
 it('never cancels a request that never had this window', async () => {
   await run(
     jest.fn().mockReturnValue(state({ r1: open(3, []), r2: open(4, [9]) }))
