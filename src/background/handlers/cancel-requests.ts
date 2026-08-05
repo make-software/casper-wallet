@@ -122,19 +122,27 @@ async function cancelRequests(
           error
         );
         const delivered = await deliverViaOrigin(origin, action);
-        // Only surface a banner when the response is genuinely lost. On the
-        // supersede path this fires while the user is already looking at the
-        // NEXT approval screen, so a "recovered anyway" banner is pure noise on
-        // top of a signing prompt. Do NOT put `origin` in the message: appEvents
-        // is broadcast to every replica.
-        if (delivered === 0) {
-          store.dispatch(
-            sagaError({
-              source,
-              message: `Cancel delivery to tab ${tabId} failed; not delivered`
-            })
-          );
+        // Suppression is gated on the SOURCE, not on the delivery count. On the
+        // supersede path a recovered cancel fires while the user is already
+        // looking at the NEXT approval screen, so the banner is pure noise on
+        // top of a signing prompt. On the close path there is no replacement
+        // screen — and `deliverViaOrigin` only counts same-origin sends to
+        // active tabs that did not throw, which is not proof that the tab
+        // holding the dapp's pending promise received anything. Do NOT put
+        // `origin` in the message: appEvents is broadcast to every replica.
+        if (source === 'cancel-on-supersede' && delivered > 0) {
+          return;
         }
+
+        store.dispatch(
+          sagaError({
+            source,
+            message:
+              delivered > 0
+                ? `Cancel delivery to tab ${tabId} failed; recovered via the page`
+                : `Cancel delivery to tab ${tabId} failed; not delivered`
+          })
+        );
       }
     })
   );
@@ -190,14 +198,9 @@ export async function failRequestOnWindowError(
   }
 
   store.dispatch(windowRequestResponded({ requestId }));
-  store.dispatch(
-    sagaError({
-      source: 'open-window-failed',
-      message: 'Approval window could not be opened; the request was cancelled'
-    })
-  );
 
   const action = buildCancelResponse(request.method, requestId);
+  let delivered = 1;
   try {
     await tabs.sendMessage(request.tabId, action);
   } catch (error) {
@@ -206,6 +209,21 @@ export async function failRequestOnWindowError(
       { requestId, method: request.method, tabId: request.tabId },
       error
     );
-    await deliverViaOrigin(request.origin, action);
+    delivered = await deliverViaOrigin(request.origin, action);
   }
+
+  // Dispatched AFTER the delivery attempt so the message can tell the truth.
+  // The tombstone above is already written and `sdk-response-to-tab` drops
+  // anything that arrives later, so a failure on both routes is terminal: the
+  // dapp received nothing and will hang until its own timeout. Saying "the
+  // request was cancelled" there would be a lie the user cannot act on.
+  store.dispatch(
+    sagaError({
+      source: 'open-window-failed',
+      message:
+        delivered > 0
+          ? 'Approval window could not be opened; the request was cancelled'
+          : 'Approval window could not be opened and the site could not be told; the request may still be pending there'
+    })
+  );
 }

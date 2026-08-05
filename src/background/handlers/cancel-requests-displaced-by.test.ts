@@ -24,12 +24,16 @@ const state = (requests: any) => ({
   windowManagement: { windowId: 7, exportKeysWindowId: null, requests }
 });
 
-const run = async (getState: jest.Mock, windowId = 7) => {
+const run = async (
+  getState: jest.Mock,
+  windowId = 7,
+  source: 'cancel-on-close' | 'cancel-on-supersede' = 'cancel-on-close'
+) => {
   const dispatch = jest.fn();
   const promise = cancelRequestsDisplacedBy(
     { dispatch, getState } as any,
     windowId,
-    'cancel-on-close'
+    source
   );
   await jest.advanceTimersByTimeAsync(CANCEL_GRACE_MS);
   await promise;
@@ -177,12 +181,16 @@ it('one failing delivery does not abort the other', async () => {
   );
 });
 
-it('stays silent in the UI when the same-origin fallback delivered', async () => {
+it('stays silent in the UI when a SUPERSEDE recovered via the page origin', async () => {
+  // Only on this path is the user already looking at the next approval screen,
+  // so a "recovered anyway" banner would be noise on top of a signing prompt.
   (tabs.sendMessage as jest.Mock).mockRejectedValue(new Error('tab gone'));
   (deliverViaOrigin as jest.Mock).mockResolvedValue(1);
 
   const dispatch = await run(
-    jest.fn().mockReturnValue(state({ r1: open(3, [7]) }))
+    jest.fn().mockReturnValue(state({ r1: open(3, [7]) })),
+    7,
+    'cancel-on-supersede'
   );
 
   expect(deliverViaOrigin).toHaveBeenCalledWith(
@@ -191,5 +199,27 @@ it('stays silent in the UI when the same-origin fallback delivered', async () =>
   );
   expect(dispatch).not.toHaveBeenCalledWith(
     expect.objectContaining({ type: 'appEvents/sagaError' })
+  );
+});
+
+it('still surfaces a banner on the CLOSE path even when the fallback delivered', async () => {
+  // `cancelRequests` is shared, but the supersede rationale is not: after a
+  // window close there is no replacement screen, and `deliverViaOrigin` only
+  // counts same-origin sends to active tabs that did not throw — that is not
+  // proof the tab holding the dapp's pending promise received anything.
+  (tabs.sendMessage as jest.Mock).mockRejectedValue(new Error('tab gone'));
+  (deliverViaOrigin as jest.Mock).mockResolvedValue(1);
+
+  const dispatch = await run(
+    jest.fn().mockReturnValue(state({ r1: open(3, [7]) })),
+    7,
+    'cancel-on-close'
+  );
+
+  expect(dispatch).toHaveBeenCalledWith(
+    expect.objectContaining({
+      type: 'appEvents/sagaError',
+      payload: expect.objectContaining({ source: 'cancel-on-close' })
+    })
   );
 });
