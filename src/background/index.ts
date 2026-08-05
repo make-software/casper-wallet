@@ -252,11 +252,22 @@ runtime.onMessage.addListener(
         if (typeof action.type === 'string') {
           const typedAction = action as { type: string };
 
-          for (const handle of [handleReduxAction, handleBringWeb3] as const) {
-            const result = await handle(typedAction, store);
-            if (result.handled) {
-              return respond(result);
-            }
+          // Redux forwarding takes `sender`: its window-attach branch decides a
+          // request's lifecycle, so that one is gated the same way the two
+          // handlers below are. It is therefore called directly rather than
+          // through a uniform (action, store) loop.
+          const reduxResult = await handleReduxAction(
+            typedAction,
+            sender,
+            store
+          );
+          if (reduxResult.handled) {
+            return respond(reduxResult);
+          }
+
+          const bringWeb3Result = await handleBringWeb3(typedAction, store);
+          if (bringWeb3Result.handled) {
+            return respond(bringWeb3Result);
           }
 
           // SDK-response reroute is gated on `sender` (only extension UI may
