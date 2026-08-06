@@ -1,34 +1,29 @@
 import { MainStore } from '@background/redux/get-main-store';
 import { windowIdCleared } from '@background/redux/windowManagement/actions';
-import {
-  selectOpenRequests,
-  selectWindowId
-} from '@background/redux/windowManagement/selectors';
+import { selectWindowId } from '@background/redux/windowManagement/selectors';
 
-import { cancelRequests } from './cancel-requests';
+import { cancelRequestsDisplacedBy } from './cancel-requests';
 
-// Re-exported for cancel-open-requests-on-close.test.ts, which asserts this.
-export { CANCEL_GRACE_MS } from './cancel-requests';
-
+// A window closed. Any request it was the last display for is cancelled; a
+// request another window (the Ledger permission window) still shows survives.
+// Called for EVERY removed window, so an untracked one simply finds no
+// candidates and clears nothing.
 export async function cancelOpenRequestsForClosedWindow(
   store: MainStore,
   removedWindowId: number
 ): Promise<void> {
-  const initiallyOpen = selectOpenRequests(store.getState());
-
   // Null windowId only if the removed window is still the tracked one (no new
   // window took over during the grace). windowIdCleared touches ONLY windowId,
-  // never the requests map, so it cannot clobber a concurrently-registered
-  // request.
+  // never the requests map.
   const clearIfStillTracked = () => {
     if (selectWindowId(store.getState()) === removedWindowId) {
       store.dispatch(windowIdCleared());
     }
   };
 
-  await cancelRequests(
+  await cancelRequestsDisplacedBy(
     store,
-    initiallyOpen,
+    removedWindowId,
     'cancel-on-close',
     clearIfStillTracked
   );

@@ -1,10 +1,13 @@
 name: E2E popup tests
 
+# release/** is included to match ci-check: these are the only jobs that build a
+# production Chrome artifact, so the manifest CSP and the nonce wiring that goes
+# with it are exercised nowhere else.
 on:
   push:
-    branches: [ master, develop ]
+    branches: [ master, develop, release/** ]
   pull_request:
-    branches: [ master, develop ]
+    branches: [ master, develop, release/** ]
 
 permissions:
   contents: read

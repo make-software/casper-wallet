@@ -76,8 +76,7 @@ export const initialStateForPopupTests: RootState = {
   windowManagement: {
     windowId: null,
     exportKeysWindowId: null,
-    requests: {},
-    pendingRequests: {}
+    requests: {}
   },
   ledger: {
     windowId: null,

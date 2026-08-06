@@ -22,7 +22,6 @@ import { sdkMethod } from '@content/sdk-method';
 
 import { encryptAsHexWithCasperPublicKey } from '@libs/crypto';
 
-import { cancelSupersededRequests } from './cancel-superseded-requests';
 import { handleSdkMethod } from './sdk-methods';
 
 // Heavy / side-effecting dependencies are stubbed so we test PURE routing:
@@ -35,9 +34,6 @@ jest.mock('casper-js-sdk', () => ({
   PublicKey: { fromHex: jest.fn() }
 }));
 jest.mock('@background/open-window', () => ({ openWindow: jest.fn() }));
-jest.mock('./cancel-superseded-requests', () => ({
-  cancelSupersededRequests: jest.fn()
-}));
 jest.mock('@background/utils', () => ({
   emitSdkEventToActiveTabsWithOrigin: jest.fn()
 }));
@@ -97,11 +93,13 @@ const selectIsLockedMock = selectVaultIsLocked as jest.MockedFunction<
 const ORIGIN = 'https://dapp.example';
 const META = { requestId: 'req-1' };
 
-function makeStore() {
+function makeStore(requests: Record<string, unknown> = {}) {
   const dispatch = jest.fn();
   const store = {
     dispatch,
-    getState: () => ({})
+    getState: () => ({
+      windowManagement: { windowId: null, exportKeysWindowId: null, requests }
+    })
   } as unknown as MainStore;
   return { store, dispatch };
 }
@@ -119,6 +117,93 @@ beforeEach(() => {
     publicKey: 'PK-1'
   } as any);
   selectIsConnectedMock.mockReturnValue(false);
+});
+
+describe('a requestId the wallet already registered', () => {
+  // `requestId` is page-generated, i.e. dapp-controlled. The reducer already
+  // refuses to overwrite a live request or resurrect a tombstone — but the six
+  // method branches called `openWindow` regardless, so the wallet still opened
+  // a fully functional approval screen for a request it could never answer:
+  // the user's approval was then dropped by the dedup, silently. Answer the
+  // dapp now instead.
+  it('a replayed finished requestId is refused before anything is dispatched', async () => {
+    const { store, dispatch } = makeStore({ 'req-1': { status: 'responded' } });
+
+    await expect(
+      handleSdkMethod(
+        sdkMethod.connectRequest({ title: 't' }, META),
+        SENDER,
+        store
+      )
+    ).rejects.toThrow('Duplicate requestId');
+
+    expect(openWindowMock).not.toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('a live requestId reused under a different method is refused too', async () => {
+    // Otherwise the first descriptor is kept and a later cancel is built in the
+    // wrong shape — e.g. connectResponse(false) delivered against a pending sign.
+    const { store, dispatch } = makeStore({
+      'req-1': {
+        status: 'open',
+        tabId: 3,
+        origin: ORIGIN,
+        method: 'connect',
+        windowIds: [7]
+      }
+    });
+
+    await expect(
+      handleSdkMethod(
+        sdkMethod.signRequest(
+          { deployJson: '{"deploy":{}}', signingPublicKeyHex: 'PK-1' },
+          META
+        ),
+        SENDER,
+        store
+      )
+    ).rejects.toThrow('Duplicate requestId');
+
+    // Nothing was dispatched — in particular not `deployPayloadReceived`, which
+    // is what made the replayed screen render normally.
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(openWindowMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('a requestId that is not storable', () => {
+  it('is refused before a window opens, instead of stranding one', async () => {
+    // `__proto__` cannot be a key in the requests map, so the reducer refuses
+    // it. Without this the caller was told the id was fresh, the window opened,
+    // and the approval sat outside the lifecycle model entirely — not
+    // cancellable on close or supersede, not deduped, not recoverable.
+    const { store, dispatch } = makeStore();
+
+    await expect(
+      handleSdkMethod(
+        sdkMethod.connectRequest({ title: 't' }, { requestId: '__proto__' }),
+        SENDER,
+        store
+      )
+    ).rejects.toThrow('Invalid requestId');
+
+    expect(openWindowMock).not.toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('lets the other Object.prototype names through', async () => {
+    // They store as ordinary own properties; only `__proto__` does not.
+    const { store } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.connectRequest({ title: 't' }, { requestId: 'toString' }),
+      SENDER,
+      store
+    );
+
+    expect(openWindowMock).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('connectRequest', () => {
@@ -165,19 +250,6 @@ describe('connectRequest', () => {
     expect(dispatch).not.toHaveBeenCalled();
   });
 
-  it('does NOT cancel superseded requests on the already-connected fast path', async () => {
-    selectIsConnectedMock.mockReturnValue(true);
-    const { store } = makeStore();
-
-    await handleSdkMethod(
-      sdkMethod.connectRequest({ title: 't' }, META),
-      SENDER,
-      store
-    );
-
-    expect(cancelSupersededRequests).not.toHaveBeenCalled();
-  });
-
   it('not connected → dispatches windowRequestOpened + opens ConnectToApp window (with title)', async () => {
     selectIsConnectedMock.mockReturnValue(false);
     const { store, dispatch } = makeStore();
@@ -211,6 +283,22 @@ describe('connectRequest', () => {
       })
     );
     expect(result).toEqual({ handled: true, response: undefined });
+  });
+
+  it('passes the requestId to openWindow so the window can be attached', async () => {
+    selectIsConnectedMock.mockReturnValue(false);
+    const { store } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.connectRequest({ title: 't' }, META),
+      SENDER,
+      store
+    );
+
+    expect(openWindowMock).toHaveBeenCalledWith(
+      store,
+      expect.objectContaining({ requestId: 'req-1' })
+    );
   });
 });
 
@@ -250,6 +338,21 @@ describe('switchAccountRequest', () => {
       expect.objectContaining({ windowApp: WindowApp.SwitchAccount })
     );
     expect(result).toEqual({ handled: true, response: undefined });
+  });
+
+  it('passes the requestId to openWindow so the window can be attached', async () => {
+    const { store } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.switchAccountRequest({ title: 't' }, META),
+      SENDER,
+      store
+    );
+
+    expect(openWindowMock).toHaveBeenCalledWith(
+      store,
+      expect.objectContaining({ requestId: 'req-1' })
+    );
   });
 });
 
@@ -299,22 +402,6 @@ describe('signRequest', () => {
     expect(dispatch).not.toHaveBeenCalled();
   });
 
-  it('does NOT cancel superseded requests on the already-signed fast path', async () => {
-    isEqualCIMock.mockReturnValue(true);
-    const { store } = makeStore();
-
-    await handleSdkMethod(
-      sdkMethod.signRequest(
-        { deployJson, signingPublicKeyHex: 'PK-OTHER' },
-        META
-      ),
-      SENDER,
-      store
-    );
-
-    expect(cancelSupersededRequests).not.toHaveBeenCalled();
-  });
-
   it('fresh deploy → dispatches deployPayloadReceived + windowRequestOpened, opens deploy window', async () => {
     isEqualCIMock.mockReturnValue(false);
     const { store, dispatch } = makeStore();
@@ -346,9 +433,9 @@ describe('signRequest', () => {
     expect(result).toEqual({ handled: true, response: undefined });
   });
 
-  it('cancels superseded requests before registering an opening request', async () => {
+  it('passes the requestId to openWindow so the window can be attached', async () => {
     isEqualCIMock.mockReturnValue(false);
-    const { store, dispatch } = makeStore();
+    const { store } = makeStore();
 
     await handleSdkMethod(
       sdkMethod.signRequest({ deployJson, signingPublicKeyHex: 'PK-1' }, META),
@@ -356,14 +443,10 @@ describe('signRequest', () => {
       store
     );
 
-    const cancelOrder = (cancelSupersededRequests as jest.Mock).mock
-      .invocationCallOrder[0];
-    const openedDispatchIndex = dispatch.mock.calls.findIndex(([a]) =>
-      String(a?.type).includes('windowRequestOpened')
+    expect(openWindowMock).toHaveBeenCalledWith(
+      store,
+      expect.objectContaining({ requestId: 'req-1' })
     );
-    const openedOrder = dispatch.mock.invocationCallOrder[openedDispatchIndex];
-
-    expect(cancelOrder).toBeLessThan(openedOrder);
   });
 });
 
@@ -394,6 +477,24 @@ describe('signMessageRequest', () => {
       expect.objectContaining({ windowApp: WindowApp.SignatureRequestMessage })
     );
     expect(result).toEqual({ handled: true, response: undefined });
+  });
+
+  it('passes the requestId to openWindow so the window can be attached', async () => {
+    const { store } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.signMessageRequest(
+        { message: 'hi', signingPublicKeyHex: 'PK-1' },
+        META
+      ),
+      SENDER,
+      store
+    );
+
+    expect(openWindowMock).toHaveBeenCalledWith(
+      store,
+      expect.objectContaining({ requestId: 'req-1' })
+    );
   });
 });
 
@@ -429,6 +530,28 @@ describe('signTypedDataRequest', () => {
     );
     expect(result).toEqual({ handled: true, response: undefined });
   });
+
+  it('passes the requestId to openWindow so the window can be attached', async () => {
+    const { store } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.signTypedDataRequest(
+        {
+          typedData: { foo: 'bar' } as any,
+          options: undefined,
+          signingPublicKeyHex: 'PK-1'
+        },
+        META
+      ),
+      SENDER,
+      store
+    );
+
+    expect(openWindowMock).toHaveBeenCalledWith(
+      store,
+      expect.objectContaining({ requestId: 'req-1' })
+    );
+  });
 });
 
 describe('decryptMessageRequest', () => {
@@ -458,6 +581,24 @@ describe('decryptMessageRequest', () => {
       expect.objectContaining({ windowApp: WindowApp.DecryptMessageRequest })
     );
     expect(result).toEqual({ handled: true, response: undefined });
+  });
+
+  it('passes the requestId to openWindow so the window can be attached', async () => {
+    const { store } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.decryptMessageRequest(
+        { message: 'enc', signingPublicKeyHex: 'PK-1' },
+        META
+      ),
+      SENDER,
+      store
+    );
+
+    expect(openWindowMock).toHaveBeenCalledWith(
+      store,
+      expect.objectContaining({ requestId: 'req-1' })
+    );
   });
 });
 

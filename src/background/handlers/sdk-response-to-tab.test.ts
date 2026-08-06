@@ -1,7 +1,7 @@
 import { Runtime, tabs } from 'webextension-polyfill';
 
 import { MainStore } from '@background/redux/get-main-store';
-import { RequestStatus } from '@background/redux/windowManagement/types';
+import { Request } from '@background/redux/windowManagement/types';
 import {
   SDK_RESPONSE_TO_TAB,
   SdkResponseToTabMessage
@@ -64,15 +64,26 @@ const UI_SENDER_WITH_ORIGIN = {
   url: `chrome-extension://ext-id/signature-request.html?requestId=${REQUEST_ID}&origin=${DAPP_ORIGIN}&tabId=${TAB_ID}#/SignMessage`
 } as Runtime.MessageSender;
 
-// Build a fake store whose `requests` map carries the desired status for the
-// request under test, plus a spied dispatch.
-function makeStore(status?: RequestStatus) {
+// A live, still-open approval request — the status every real request has
+// while the user is looking at the approval window and hasn't answered yet.
+const OPEN_REQUEST: Request = {
+  status: 'open',
+  tabId: TAB_ID,
+  origin: DAPP_ORIGIN,
+  method: 'sign',
+  windowIds: [7]
+};
+
+// Build a fake store whose `requests` map carries the desired request entry
+// for the request under test, plus a spied dispatch.
+function makeStore(request?: Request) {
   const dispatch = jest.fn();
   const store = {
     getState: () => ({
       windowManagement: {
         windowId: null,
-        requests: status ? { [REQUEST_ID]: status } : {}
+        exportKeysWindowId: null,
+        requests: request ? { [REQUEST_ID]: request } : {}
       }
     }),
     dispatch
@@ -84,15 +95,17 @@ function makeStore(status?: RequestStatus) {
 // `requests` map, so a subsequent `selectRequestStatus` reflects the optimistic
 // mark. Used to prove the dedupe is atomic across an in-flight (un-awaited) send.
 function makeStatefulStore() {
-  const requests: Record<string, RequestStatus> = {};
+  const requests: Record<string, Request> = {};
   const dispatch = jest.fn((action: { payload?: { requestId?: string } }) => {
     const id = action?.payload?.requestId;
     if (id != null) {
-      requests[id] = 'responded';
+      requests[id] = { status: 'responded' };
     }
   });
   const store = {
-    getState: () => ({ windowManagement: { windowId: null, requests } }),
+    getState: () => ({
+      windowManagement: { windowId: null, exportKeysWindowId: null, requests }
+    }),
     dispatch
   } as unknown as MainStore;
   return { store, dispatch };
@@ -142,7 +155,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   });
 
   it("already 'responded' → drops the duplicate (no send, no dispatch)", async () => {
-    const { store, dispatch } = makeStore('responded');
+    const { store, dispatch } = makeStore({ status: 'responded' });
 
     const result = await handleSdkResponseToTab(
       makeMessage(),
@@ -153,6 +166,35 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     expect(sendMessageMock).not.toHaveBeenCalled();
     expect(dispatch).not.toHaveBeenCalled();
     expect(result.handled).toBe(true);
+  });
+
+  it('delivers a response for a request that is still open', async () => {
+    // No test in this file used status 'open' before — the status every live
+    // request has when the user approves. `=== 'responded'` widened to
+    // `!= null` would silently drop real signatures and no test would notice.
+    const { store } = makeStore(OPEN_REQUEST);
+
+    await handleSdkResponseToTab(makeMessage(), UI_SENDER, store);
+
+    expect(sendMessageMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('logs when it drops a duplicate, without the payload', async () => {
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    const { store } = makeStore({ status: 'responded' });
+
+    await handleSdkResponseToTab(makeMessage(), UI_SENDER, store);
+
+    expect(sendMessageMock).not.toHaveBeenCalled();
+    expect(consoleError).toHaveBeenCalledWith(
+      'sdk-response-to-tab: dropped duplicate response',
+      { requestId: REQUEST_ID, tabId: TAB_ID, type: expect.any(String) }
+    );
+    // The whole point: identifiers only, never the signed payload.
+    expect(JSON.stringify(consoleError.mock.calls)).not.toContain('deadbeef');
+    consoleError.mockRestore();
   });
 
   it('invalid tabId, no origin → surfaces "not delivered" sagaError, no delivery, does not mark responded', async () => {
