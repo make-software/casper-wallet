@@ -92,7 +92,7 @@ export const initialStateForPopupTests: RootState = {
   activeOriginFavicon: null,
   settings: {
     activeNetwork: NetworkSetting.Testnet,
-    casperNetworkApiVersion: '1.5.8',
+    casperNetworkApiVersion: '2.0.0',
     activeTimeoutDuration: TimeoutDurationSetting['5 min'],
     isDarkMode: false,
     themeMode: ThemeMode.SYSTEM,
