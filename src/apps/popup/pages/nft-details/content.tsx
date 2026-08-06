@@ -5,6 +5,8 @@ import ReactPlayer from 'react-player';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { hasHttpPrefix } from '@src/utils';
+
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { accountTrackingIdOfSentNftTokensRemoved } from '@background/redux/account-info/actions';
@@ -32,6 +34,7 @@ import {
   HashVariant,
   List,
   LoadingMediaPlaceholder,
+  RemoteIcon,
   Status,
   SvgIcon,
   Tile,
@@ -341,7 +344,11 @@ export const NftDetailsContent = ({
                 >
                   {token.value}
                 </Typography>
-                <SvgIcon src={token.image} size={32} />
+                {hasHttpPrefix(token.image) ? (
+                  <RemoteIcon src={token.image} size={32} alt={token.value} />
+                ) : (
+                  <SvgIcon src={token.image} size={32} />
+                )}
               </AlignedFlexRow>
             ) : (
               <Typography

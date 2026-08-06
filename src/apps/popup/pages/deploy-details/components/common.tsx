@@ -10,7 +10,7 @@ import {
   getBlockExplorerContractPackageUrl,
   getContractNftUrl
 } from '@src/constants';
-import { isEqualCaseInsensitive } from '@src/utils';
+import { hasHttpPrefix, isEqualCaseInsensitive } from '@src/utils';
 
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
@@ -20,7 +20,7 @@ import {
   SpacingSize
 } from '@libs/layout';
 import { useFetchContractPackage } from '@libs/services/contract-package';
-import { Link, SvgIcon, Typography } from '@libs/ui/components';
+import { Link, RemoteIcon, SvgIcon, Typography } from '@libs/ui/components';
 import { AccountInfoIcon } from '@libs/ui/components/account-info-icon/account-info-icon';
 import { HashTooltip } from '@libs/ui/components/hash/hash-tooltip';
 import { PortalTooltip } from '@libs/ui/components/portal-tooltip/portal-tooltip';
@@ -106,7 +106,11 @@ export const ActionContainerWithLink = ({
     <LeftAlignedFlexColumn gap={SpacingSize.Tiny}>
       <AlignedFlexRow gap={SpacingSize.Small}>
         <Typography type="bodySemiBold">{title}</Typography>
-        <SvgIcon src={contractIcon} size={20} />
+        {hasHttpPrefix(contractIcon) ? (
+          <RemoteIcon src={contractIcon} size={20} alt={contractName} />
+        ) : (
+          <SvgIcon src={contractIcon} size={20} />
+        )}
         <Link color="contentAction" href={contractLink ?? link} target="_blank">
           <Typography type="captionRegular">{contractName}</Typography>
         </Link>
