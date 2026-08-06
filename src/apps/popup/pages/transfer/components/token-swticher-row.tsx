@@ -2,16 +2,13 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { hasHttpPrefix } from '@src/utils';
+
 import { AlignedFlexRow, SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
-import { SvgIcon, Tile, Typography } from '@libs/ui/components';
+import { RemoteIcon, SvgIcon, Tile, Typography } from '@libs/ui/components';
 
 const Container = styled(SpaceBetweenFlexRow)`
   padding: 16px;
-`;
-
-const LogoImg = styled.img`
-  width: 24px;
-  height: 24px;
 `;
 
 interface TokenSwitcherRowProps {
@@ -29,11 +26,12 @@ export const TokenSwitcherRow = ({
     <Tile style={{ marginTop: '8px' }}>
       <Container gap={SpacingSize.Medium}>
         <AlignedFlexRow gap={SpacingSize.Large} flexGrow={1}>
-          {iconUrl?.endsWith('.svg') ? (
-            <SvgIcon src={iconUrl || ''} size={24} />
+          {iconUrl && !hasHttpPrefix(iconUrl) ? (
+            <SvgIcon src={iconUrl} size={24} />
           ) : (
-            <LogoImg
-              src={iconUrl || undefined}
+            <RemoteIcon
+              src={iconUrl}
+              size={24}
               alt={tokenName}
               title={tokenName}
             />

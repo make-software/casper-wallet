@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { hasHttpPrefix } from '@src/utils';
+
 import { TokenType } from '@hooks/use-casper-token';
 
 import {
@@ -8,19 +10,12 @@ import {
   AlignedSpaceBetweenFlexRow,
   SpacingSize
 } from '@libs/layout';
-import { Checkbox, SvgIcon, Typography } from '@libs/ui/components';
+import { Checkbox, RemoteIcon, SvgIcon, Typography } from '@libs/ui/components';
 
 const Container = styled(AlignedSpaceBetweenFlexRow)`
   padding: 16px;
 
   cursor: pointer;
-`;
-
-const LogoImg = styled.img`
-  width: 24px;
-  height: 24px;
-
-  border-radius: ${({ theme }) => theme.borderRadius.hundred}px;
 `;
 
 interface TokenRowProps {
@@ -34,20 +29,18 @@ export const TokenRow = ({
   isSelected,
   token
 }: TokenRowProps) => {
-  const tokenIconFormat = token?.icon?.split('.').pop();
-  const isTokenIconJPG = tokenIconFormat === 'jpg';
-
   return (
     <Container onClick={handleSelect}>
       <AlignedFlexRow gap={SpacingSize.Medium}>
-        {isTokenIconJPG ? (
-          <LogoImg
-            src={token?.icon || undefined}
+        {token?.icon && !hasHttpPrefix(token.icon) ? (
+          <SvgIcon src={token.icon} alt={token?.name} size={24} />
+        ) : (
+          <RemoteIcon
+            src={token?.icon}
+            size={24}
             alt={token?.name}
             title={token?.name}
           />
-        ) : (
-          <SvgIcon src={token?.icon || ''} alt={token?.name} size={24} />
         )}
         <Typography type="body">{token.name}</Typography>
       </AlignedFlexRow>
