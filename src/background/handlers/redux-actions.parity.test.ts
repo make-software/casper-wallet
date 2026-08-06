@@ -151,6 +151,11 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     // selectSagaErrors and dispatches only dismissSagaError (which IS
     // forwarded); sagaError itself is never dispatched from the UI.
     appEventsActions.sagaError,
+    // Background-only: put by the export-keys-window saga before each attempt,
+    // to retract what the previous attempt reported. The UI's only retraction
+    // path is the banner's dismiss button, which dispatches dismissSagaError by
+    // id (which IS forwarded) — never this one.
+    appEventsActions.dismissSagaErrorsBySource,
     // Background-only: put by the export-keys-window saga (create / stale-heal)
     // and store.dispatch'd by the onRemoved listener on close. The UI
     // dispatches only openExportKeysWindow.
