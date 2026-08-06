@@ -73,6 +73,27 @@ export const test = base.extend<{
       });
     });
 
+    // `checkCasper2NetworkSaga` asks the node for its api_version on every unlock
+    // and on every network switch. It runs in the background service worker, and
+    // `page.route` does not cover service-worker requests — only `context.route`
+    // does. Until this route existed the suite therefore reached the live
+    // cspr.cloud node on every test. Once that node began answering 429 (daily
+    // organization quota), the probe failed, `casperNetworkApiVersion` stayed on
+    // the pre-2.0 default, `sendSignedTx` fell back to `putDeploy`, and every
+    // submitting test died on a transaction-shaped mock with
+    // "Cannot read properties of undefined (reading 'toHex')".
+    //
+    // Only the status probe is answered here: the per-test `popupPage.route` that
+    // fulfils the submit is a page route, and page routes are matched first.
+    await context.route(URLS.anyRpcNode, async route => {
+      if (route.request().postDataJSON()?.method === 'info_get_status') {
+        await route.fulfill(RPC_RESPONSE.getStatus);
+        return;
+      }
+
+      await route.fallback();
+    });
+
     await use(context);
     await context.close();
 
