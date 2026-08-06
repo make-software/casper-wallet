@@ -163,31 +163,37 @@ describe('app-events reducer', () => {
     const seeded: AppEventsState = {
       dismissedEventIds: [],
       errors: [
-        { id: 0, source: 'sagaA', message: 'first' },
-        { id: 1, source: 'sagaB', message: 'other' },
-        { id: 2, source: 'sagaA', message: 'second' }
+        { id: 0, source: 'lockVaultSaga', message: 'first' },
+        { id: 1, source: 'unlockVaultSaga', message: 'other' },
+        { id: 2, source: 'lockVaultSaga', message: 'second' }
       ],
       nextErrorId: 3
     };
 
     it('removes every entry from the given source and leaves the others', () => {
-      const result = reducer(seeded, dismissSagaErrorsBySource('sagaA'));
+      const result = reducer(
+        seeded,
+        dismissSagaErrorsBySource('lockVaultSaga')
+      );
       expect(result.errors).toEqual([
-        { id: 1, source: 'sagaB', message: 'other' }
+        { id: 1, source: 'unlockVaultSaga', message: 'other' }
       ]);
     });
 
     it('does not rewind the id counter, so a later error cannot reuse a retracted id', () => {
-      const cleared = reducer(seeded, dismissSagaErrorsBySource('sagaA'));
+      const cleared = reducer(
+        seeded,
+        dismissSagaErrorsBySource('lockVaultSaga')
+      );
       expect(cleared.nextErrorId).toBe(3);
 
       const next = reducer(
         cleared,
-        sagaError({ source: 'sagaA', message: 'retry' })
+        sagaError({ source: 'lockVaultSaga', message: 'retry' })
       );
       expect(next.errors).toEqual([
-        { id: 1, source: 'sagaB', message: 'other' },
-        { id: 3, source: 'sagaA', message: 'retry' }
+        { id: 1, source: 'unlockVaultSaga', message: 'other' },
+        { id: 3, source: 'lockVaultSaga', message: 'retry' }
       ]);
     });
 
