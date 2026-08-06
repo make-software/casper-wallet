@@ -7,6 +7,13 @@ module.exports = {
   transformIgnorePatterns: [
     '<rootDir>/node_modules/(?!(@lapo/asn1js|@noble/ciphers|@formatjs|intl-messageformat|casper-wallet-core|uuid)/)'
   ],
+  // __CSP_NONCE__ is substituted by webpack's DefinePlugin, which never runs under
+  // jest. Without this the free variable would throw ReferenceError in any test that
+  // pulls in a module reading it; null matches both its declared type
+  // (src/@types/custom.d.ts) and what every non-Chrome-production build gets.
+  globals: {
+    __CSP_NONCE__: null
+  },
   coveragePathIgnorePatterns: ['/node_modules/'],
   testRegex: '(/tests?/.*|(\\.|/)(test|spec))\\.tsx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],

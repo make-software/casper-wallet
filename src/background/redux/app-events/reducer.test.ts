@@ -1,6 +1,7 @@
 import {
   dismissAppEvent,
   dismissSagaError,
+  dismissSagaErrorsBySource,
   resetAppEventsDismission,
   sagaError
 } from './actions';
@@ -155,6 +156,54 @@ describe('app-events reducer', () => {
         { id: 0, source: 'lockVaultSaga', message: 'a' },
         { id: 2, source: 'createAccountSaga', message: 'c' }
       ]);
+    });
+  });
+
+  describe('dismissSagaErrorsBySource', () => {
+    const seeded: AppEventsState = {
+      dismissedEventIds: [],
+      errors: [
+        { id: 0, source: 'lockVaultSaga', message: 'first' },
+        { id: 1, source: 'unlockVaultSaga', message: 'other' },
+        { id: 2, source: 'lockVaultSaga', message: 'second' }
+      ],
+      nextErrorId: 3
+    };
+
+    it('removes every entry from the given source and leaves the others', () => {
+      const result = reducer(
+        seeded,
+        dismissSagaErrorsBySource('lockVaultSaga')
+      );
+      expect(result.errors).toEqual([
+        { id: 1, source: 'unlockVaultSaga', message: 'other' }
+      ]);
+    });
+
+    it('does not rewind the id counter, so a later error cannot reuse a retracted id', () => {
+      const cleared = reducer(
+        seeded,
+        dismissSagaErrorsBySource('lockVaultSaga')
+      );
+      expect(cleared.nextErrorId).toBe(3);
+
+      const next = reducer(
+        cleared,
+        sagaError({ source: 'lockVaultSaga', message: 'retry' })
+      );
+      expect(next.errors).toEqual([
+        { id: 1, source: 'unlockVaultSaga', message: 'other' },
+        { id: 3, source: 'lockVaultSaga', message: 'retry' }
+      ]);
+    });
+
+    // "Unknown source" is no longer expressible — the payload is the same closed
+    // union as SagaError.source — so what is left to assert is the reachable case:
+    // a real producer that happens to have nothing on screen.
+    it('is a no-op for a source with no errors of its own', () => {
+      expect(
+        reducer(seeded, dismissSagaErrorsBySource('initVaultSaga')).errors
+      ).toEqual(seeded.errors);
     });
   });
 });

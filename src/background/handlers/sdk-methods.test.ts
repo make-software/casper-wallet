@@ -213,6 +213,93 @@ describe('a requestId that is not storable', () => {
   });
 });
 
+describe('a requestId the wallet already registered', () => {
+  // `requestId` is page-generated, i.e. dapp-controlled. The reducer already
+  // refuses to overwrite a live request or resurrect a tombstone — but the six
+  // method branches called `openWindow` regardless, so the wallet still opened
+  // a fully functional approval screen for a request it could never answer:
+  // the user's approval was then dropped by the dedup, silently. Answer the
+  // dapp now instead.
+  it('a replayed finished requestId is refused before anything is dispatched', async () => {
+    const { store, dispatch } = makeStore({ 'req-1': { status: 'responded' } });
+
+    await expect(
+      handleSdkMethod(
+        sdkMethod.connectRequest({ title: 't' }, META),
+        SENDER,
+        store
+      )
+    ).rejects.toThrow('Duplicate requestId');
+
+    expect(openWindowMock).not.toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('a live requestId reused under a different method is refused too', async () => {
+    // Otherwise the first descriptor is kept and a later cancel is built in the
+    // wrong shape — e.g. connectResponse(false) delivered against a pending sign.
+    const { store, dispatch } = makeStore({
+      'req-1': {
+        status: 'open',
+        tabId: 3,
+        origin: ORIGIN,
+        method: 'connect',
+        windowIds: [7]
+      }
+    });
+
+    await expect(
+      handleSdkMethod(
+        sdkMethod.signRequest(
+          { deployJson: '{"deploy":{}}', signingPublicKeyHex: 'PK-1' },
+          META
+        ),
+        SENDER,
+        store
+      )
+    ).rejects.toThrow('Duplicate requestId');
+
+    // Nothing was dispatched — in particular not `deployPayloadReceived`, which
+    // is what made the replayed screen render normally.
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(openWindowMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('a requestId that is not storable', () => {
+  it('is refused before a window opens, instead of stranding one', async () => {
+    // `__proto__` cannot be a key in the requests map, so the reducer refuses
+    // it. Without this the caller was told the id was fresh, the window opened,
+    // and the approval sat outside the lifecycle model entirely — not
+    // cancellable on close or supersede, not deduped, not recoverable.
+    const { store, dispatch } = makeStore();
+
+    await expect(
+      handleSdkMethod(
+        sdkMethod.connectRequest({ title: 't' }, { requestId: '__proto__' }),
+        SENDER,
+        store
+      )
+    ).rejects.toThrow('Invalid requestId');
+
+    expect(openWindowMock).not.toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('lets the other Object.prototype names through', async () => {
+    // They store as ordinary own properties; only `__proto__` does not.
+    const { store } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.connectRequest({ title: 't' }, { requestId: 'toString' }),
+      SENDER,
+      store
+    );
+
+    expect(openWindowMock).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('connectRequest', () => {
   it('missing origin → throws CannotGetSenderOriginError', async () => {
     getUrlOriginMock.mockReturnValue(undefined);
