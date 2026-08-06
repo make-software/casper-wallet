@@ -197,9 +197,12 @@ describe('app-events reducer', () => {
       ]);
     });
 
-    it('is a no-op for an unknown source', () => {
+    // "Unknown source" is no longer expressible — the payload is the same closed
+    // union as SagaError.source — so what is left to assert is the reachable case:
+    // a real producer that happens to have nothing on screen.
+    it('is a no-op for a source with no errors of its own', () => {
       expect(
-        reducer(seeded, dismissSagaErrorsBySource('sagaZ')).errors
+        reducer(seeded, dismissSagaErrorsBySource('initVaultSaga')).errors
       ).toEqual(seeded.errors);
     });
   });
