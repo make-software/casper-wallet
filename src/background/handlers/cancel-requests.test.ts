@@ -1,3 +1,5 @@
+import { CancellableMethod } from '@background/redux/windowManagement/types';
+
 import { sdkMethod } from '@content/sdk-method';
 
 import { buildCancelResponse } from './cancel-requests';
@@ -7,7 +9,7 @@ jest.mock('webextension-polyfill', () => ({
 }));
 
 describe('buildCancelResponse', () => {
-  const c = (m: any) => buildCancelResponse(m, 'r');
+  const c = (m: CancellableMethod) => buildCancelResponse(m, 'r');
   it('connect', () =>
     expect(c('connect')).toEqual(
       sdkMethod.connectResponse(false, { requestId: 'r' })

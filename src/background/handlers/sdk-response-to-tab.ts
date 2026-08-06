@@ -88,6 +88,14 @@ export async function handleSdkResponseToTab(
     requestId != null &&
     selectRequestStatus(store.getState(), requestId) === 'responded'
   ) {
+    // A dropped `cancelled: true` is benign; a dropped signature never is, and
+    // the two are distinguishable here. Log the identifiers ONLY — `action`
+    // carries `signatureHex` / `encryptedMessage` (see the SECURITY note above).
+    console.error('sdk-response-to-tab: dropped duplicate response', {
+      requestId,
+      tabId,
+      type: action?.type
+    });
     // Drop the duplicate — it never reaches the tab. Respond so the forwarding
     // UI's `runtime.sendMessage` promise still resolves (some callers await it
     // before closing the window).

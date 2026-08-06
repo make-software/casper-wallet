@@ -25,6 +25,9 @@ import { FORWARDED_ACTION_TYPES } from './redux-actions';
 jest.mock('@background/open-onboarding-flow', () => ({
   enableOnboardingFlow: jest.fn().mockResolvedValue(undefined)
 }));
+// Same reason, second route: redux-actions.ts imports attach-window-to-request,
+// which reaches for `windows` directly.
+jest.mock('webextension-polyfill', () => ({ windows: { get: jest.fn() } }));
 
 /**
  * Parity guard for `FORWARDED_ACTION_TYPES`.
@@ -118,6 +121,25 @@ const EXCLUSIONS: ReadonlySet<string> = new Set(
     // Background-only: dispatched by sdk-response-to-tab when a request is
     // answered back to the tab. Never dispatched from the UI.
     windowManagementActions.windowRequestResponded,
+    // Background-only: dispatched by the cancel path when a window closes or
+    // is reused for a new request. Never dispatched from the UI.
+    windowManagementActions.windowDetachedFromRequests,
+    // Background-only: the tracked approval-window slot is written by
+    // `openWindow` and by `createOpenWindow`'s background caller. Its only UI
+    // dispatcher was `use-window-manager`, whose inputs were dead — both
+    // consumers pass `isNewWindow: true`, so the reuse branch never ran. While
+    // these stayed forwardable, any extension UI page could `runtime.sendMessage`
+    // a `windowIdChanged(<arbitrary id>)` and retarget the slot that decides
+    // which window a dapp approval belongs to.
+    windowManagementActions.windowIdChanged,
+    windowManagementActions.windowIdCleared,
+    // UI-dispatched (use-ledger registers the Ledger permission window), but
+    // intercepted by the dedicated `windowRequestWindowAttached` branch in
+    // handleReduxAction — deliberately not in the forwarding set. Forwarding it
+    // blindly would let a dead or bogus windowId into `windowIds`, and a
+    // request whose set can never shrink to the window that went away is a
+    // request nothing can ever cancel.
+    windowManagementActions.windowRequestWindowAttached,
     // Background-only: `yield put` inside vault-sagas on successful unlock.
     // Never dispatched from the UI.
     loginRetryLockoutTimeActions.loginRetryLockoutTimeReseted,
@@ -181,5 +203,18 @@ describe('FORWARDED_ACTION_TYPES parity', () => {
   it('exact set equality: universe \\ EXCLUSIONS === FORWARDED_ACTION_TYPES', () => {
     const forwardable = new Set(difference(UNIVERSE_TYPES, EXCLUSIONS));
     expect(sorted(FORWARDED_ACTION_TYPES)).toEqual(sorted(forwardable));
+  });
+
+  it('windowRequestWindowAttached is NOT blindly forwarded — it has a dedicated branch', () => {
+    // The Ledger hook dispatches it from a UI page, so it must reach the
+    // background; but it must arrive through `handleReduxAction`'s dedicated
+    // branch, which verifies the window is alive, not through the generic
+    // forwarding set. Putting it back in the set would silently restore the
+    // "attach a dead windowId and the request can never be cancelled" hole.
+    expect(
+      FORWARDED_ACTION_TYPES.has(
+        windowManagementActions.windowRequestWindowAttached.type
+      )
+    ).toBe(false);
   });
 });

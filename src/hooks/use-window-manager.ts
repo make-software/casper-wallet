@@ -1,26 +1,18 @@
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
 
 import { createOpenWindow } from '@background/create-open-window';
-import { dispatchToMainStore } from '@background/redux/utils';
-import {
-  windowIdChanged,
-  windowIdCleared
-} from '@background/redux/windowManagement/actions';
-import { selectWindowId } from '@background/redux/windowManagement/selectors';
 
+/**
+ * Opens a deliberately separate window from a UI page (the import-account
+ * flows). It passes NO tracking inputs: both consumers pass `isNewWindow: true`,
+ * which makes the reuse branch, `setWindowId` and `clearWindowId` unreachable
+ * anyway — and wiring them meant a UI page dispatching `windowIdChanged` into
+ * the background store, i.e. retargeting the shared approval-window slot the
+ * request lifecycle depends on. That slot is background-only, and the two
+ * actions are excluded from the forwarding set accordingly.
+ */
 export function useWindowManager() {
-  const windowId = useSelector(selectWindowId);
-
-  const openWindow = useMemo(
-    () =>
-      createOpenWindow({
-        windowId,
-        setWindowId: (id: number) => dispatchToMainStore(windowIdChanged(id)),
-        clearWindowId: () => dispatchToMainStore(windowIdCleared())
-      }),
-    [windowId]
-  );
+  const openWindow = useMemo(() => createOpenWindow(), []);
 
   return { openWindow };
 }

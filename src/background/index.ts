@@ -18,7 +18,6 @@ import {
 } from '@src/utils';
 
 import { handleBringWeb3 } from '@background/handlers/bringweb3';
-import { cancelOpenRequestsForClosedWindow } from '@background/handlers/cancel-open-requests-on-close';
 import { handleLegacyImport } from '@background/handlers/legacy-import';
 import {
   isPrivateStateRequest,
@@ -28,6 +27,7 @@ import {
 import { handleReduxAction } from '@background/handlers/redux-actions';
 import { handleSdkMethod } from '@background/handlers/sdk-methods';
 import { handleSdkResponseToTab } from '@background/handlers/sdk-response-to-tab';
+import { handleWindowRemoved } from '@background/handlers/window-removed';
 import { initKeepAlive } from '@background/keep-alive';
 import {
   disableOnboardingFlow,
@@ -39,11 +39,6 @@ import {
   selectIsAccountConnected,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
-import { exportKeysWindowIdCleared } from '@background/redux/windowManagement/actions';
-import {
-  selectExportKeysWindowId,
-  selectWindowId
-} from '@background/redux/windowManagement/selectors';
 
 import { sdkEvent } from '@content/sdk-event';
 import { isSDKMethod } from '@content/sdk-method';
@@ -177,18 +172,21 @@ tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 // Single init-time listener for the approval-window lifecycle. Replaces the
 // per-creation `windows.onRemoved` listeners that used to be added inside
 // `createOpenWindow` (one leaked per opened window). `windows.onRemoved` fires
-// for ANY window, so the id-match guard ensures we only react when the removed
-// window is the tracked approval window. `cancelOpenRequestsForClosedWindow`
-// waits a grace period, then cancels any requests still open for that window
-// and dispatches `windowIdCleared` to null the slice `windowId`.
-windows.onRemoved.addListener(async (removedWindowId: number) => {
-  const store = await getExistingMainStoreSingletonOrInit();
-  if (removedWindowId === selectWindowId(store.getState())) {
-    await cancelOpenRequestsForClosedWindow(store, removedWindowId);
-  }
-  if (removedWindowId === selectExportKeysWindowId(store.getState())) {
-    store.dispatch(exportKeysWindowIdCleared());
-  }
+// for ANY window; `handleWindowRemoved` itself decides whether the removed
+// window was the last display for any open request (a request the Ledger
+// permission window still shows survives), waits a grace period, then cancels
+// the survivors, nulls the slice `windowId` if it is still tracking the removed
+// window, and clears the tracked export-keys id.
+//
+// The body lives in a handler so it can be tested — this entry point is
+// imported by no test. Only the store init is left here, and its rejection is
+// caught: `getExistingMainStoreSingletonOrInit` can reject, and `void` on a
+// bare IIFE would discard that with no `unhandledrejection` handler anywhere.
+windows.onRemoved.addListener((removedWindowId: number) => {
+  void (async () => {
+    const store = await getExistingMainStoreSingletonOrInit();
+    await handleWindowRemoved(store, removedWindowId);
+  })().catch(error => console.error('windows.onRemoved handler failed', error));
 });
 
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
@@ -254,11 +252,22 @@ runtime.onMessage.addListener(
         if (typeof action.type === 'string') {
           const typedAction = action as { type: string };
 
-          for (const handle of [handleReduxAction, handleBringWeb3] as const) {
-            const result = await handle(typedAction, store);
-            if (result.handled) {
-              return respond(result);
-            }
+          // Redux forwarding takes `sender`: its window-attach branch decides a
+          // request's lifecycle, so that one is gated the same way the two
+          // handlers below are. It is therefore called directly rather than
+          // through a uniform (action, store) loop.
+          const reduxResult = await handleReduxAction(
+            typedAction,
+            sender,
+            store
+          );
+          if (reduxResult.handled) {
+            return respond(reduxResult);
+          }
+
+          const bringWeb3Result = await handleBringWeb3(typedAction, store);
+          if (bringWeb3Result.handled) {
+            return respond(bringWeb3Result);
           }
 
           // SDK-response reroute is gated on `sender` (only extension UI may

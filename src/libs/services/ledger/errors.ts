@@ -24,6 +24,11 @@ export const ledgerErrorsData: Record<LedgerEventStatus, ILedgerErrorData> = {
     description:
       'This permission is needed for each new device when connecting to the browser.'
   },
+  [LedgerEventStatus.PermissionWindowFailed]: {
+    title: 'Could not open the Ledger permission window',
+    description:
+      'Close this screen and start the request again. If it keeps happening, check that the browser is not blocking extension windows.'
+  },
   [LedgerEventStatus.MsgSignatureFailed]: {
     title: 'Error when signing a message',
     description: null
