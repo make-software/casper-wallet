@@ -52,7 +52,10 @@ const slice = createSlice({
      * a successful retry opens. A producer dispatches this before re-attempting
      * so what the banner shows is always the current attempt.
      */
-    dismissSagaErrorsBySource: (state, action: PayloadAction<string>) => ({
+    dismissSagaErrorsBySource: (
+      state,
+      action: PayloadAction<SagaErrorSource>
+    ) => ({
       ...state,
       errors: state.errors.filter(error => error.source !== action.payload)
     })

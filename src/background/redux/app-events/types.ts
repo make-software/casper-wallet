@@ -18,6 +18,7 @@ export type SagaErrorSource =
   | 'timeoutCounterSaga'
   | 'updateVaultCipher'
   | 'createAccountSaga'
+  | 'openExportKeysWindowSaga'
   // approval-request lifecycle failures
   | 'cancel-on-close'
   | 'cancel-on-supersede'
