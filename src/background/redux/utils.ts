@@ -12,8 +12,15 @@ declare global {
 }
 
 export function dispatchToMainStore(action: ReduxAction) {
-  return runtime.sendMessage(action).catch(() => {
-    console.error('Dispatch to Main Store: ' + action.type);
+  return runtime.sendMessage(action).catch((error: unknown) => {
+    // A send to a sleeping or restarting MV3 service worker is a routine
+    // failure, and some of these actions are load-bearing — the Ledger
+    // permission window's attach is what keeps a request alive while the user
+    // confirms on the device. Discarding the cause left every one of those
+    // indistinguishable from the next. Log the type and the error, NEVER the
+    // action: payloads carry vault and signature material.
+    // nosemgrep: cw-logging-secrets
+    console.error('Dispatch to Main Store failed: ' + action.type, error);
   });
 }
 
