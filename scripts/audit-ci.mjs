@@ -41,20 +41,6 @@ const BLOCKING = new Set(['high', 'critical']);
  */
 const ACCEPTED = [
   {
-    id: 'GHSA-mh99-v99m-4gvg',
-    package: 'brace-expansion',
-    reviewBy: '2026-10-27',
-    reason:
-      'DoS via unbounded brace expansion. Reached only through casper-js-sdk, which ' +
-      'declares `glob: ^7.1.6` in dependencies but never imports it — 0 module imports ' +
-      'in its dist/. Verified absent from all 56 shipped bundles in build/: ' +
-      'brace-expansion requires both balanced-match and concat-map, and neither appears, ' +
-      "nor does glob's GLOBSTAR marker. No patched 1.x/2.x/3.x exists (maintenance tags " +
-      'are 1.1.16 / 2.1.2 / 3.0.2, all in the vulnerable <=5.0.7 range); the only fix is ' +
-      "5.0.8, which minimatch@3's `brace-expansion@^1.1.7` cannot take. Real fix is " +
-      'upstream: drop the unused glob dependency from casper-js-sdk.',
-  },
-  {
     id: 'GHSA-qwww-vcr4-c8h2',
     package: 'react-router',
     reviewBy: '2026-10-27',
