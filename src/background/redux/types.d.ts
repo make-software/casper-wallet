@@ -22,13 +22,12 @@ export type PopupState = {
   session: SessionState;
   loginRetryCount: LoginRetryCountState;
   vault: VaultState;
-  // `pendingRequests` is deliberately NOT broadcast: it holds each in-flight
-  // request's dapp origin and tabId, and only background code needs it. See
-  // the narrowing in `selectPopupState`.
-  windowManagement: Omit<
-    WindowManagementState,
-    'pendingRequests' | 'exportKeysWindowId' | 'requests'
-  >;
+  // Only `windowId` is broadcast. The `requests` map holds each in-flight
+  // request's dapp origin, tabId and window ids; no UI replica reads it, and
+  // broadcasting it would leak dapp origins into every popup update. `Pick`
+  // (not `Omit`) so a newly added slice field is excluded until someone opts
+  // it in.
+  windowManagement: Pick<WindowManagementState, 'windowId'>;
   loginRetryLockoutTime: LoginRetryLockoutTimeState;
   lastActivityTime: LastActivityTimeState;
   settings: SettingsState;

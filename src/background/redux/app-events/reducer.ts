@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import { AppEventsState, SagaError } from './types';
+import { AppEventsState, SagaError, SagaErrorSource } from './types';
 
 const initialState: AppEventsState = {
   dismissedEventIds: [],
@@ -22,7 +22,7 @@ const slice = createSlice({
     sagaError: (
       state,
       action: PayloadAction<{
-        source: string;
+        source: SagaErrorSource;
         message: string;
         code?: string;
       }>
@@ -44,6 +44,20 @@ const slice = createSlice({
     dismissSagaError: (state, action: PayloadAction<number>) => ({
       ...state,
       errors: state.errors.filter(error => error.id !== action.payload)
+    }),
+    /**
+     * Retracts every error a single producer has on screen. `errors` is
+     * otherwise append-only, so a producer that can be retriggered by the user
+     * leaves its previous failures pinned — including on top of the very screen
+     * a successful retry opens. A producer dispatches this before re-attempting
+     * so what the banner shows is always the current attempt.
+     */
+    dismissSagaErrorsBySource: (
+      state,
+      action: PayloadAction<SagaErrorSource>
+    ) => ({
+      ...state,
+      errors: state.errors.filter(error => error.source !== action.payload)
     })
   }
 });
@@ -52,6 +66,7 @@ export const {
   dismissAppEvent,
   resetAppEventsDismission,
   sagaError,
-  dismissSagaError
+  dismissSagaError,
+  dismissSagaErrorsBySource
 } = slice.actions;
 export const reducer = slice.reducer;

@@ -1,6 +1,33 @@
+/**
+ * Every producer of a `sagaError`, enumerated. Previously `source` was a bare
+ * `string`, so nothing tied the value a producer writes to the value a reader
+ * expects: a typo, a renamed module or a new producer that invents its own
+ * spelling all compiled clean. It is also what the request-lifecycle code
+ * needs, since one of these values decides whether a cancel banner is
+ * suppressed (see `CancelSource`).
+ */
+export type SagaErrorSource =
+  // redux-saga failures
+  | 'resetVaultSaga'
+  | 'initKeysSage'
+  | 'initVaultSaga'
+  | 'recoverVaultSaga'
+  | 'checkCasper2NetworkSaga'
+  | 'lockVaultSaga'
+  | 'unlockVaultSaga'
+  | 'timeoutCounterSaga'
+  | 'updateVaultCipher'
+  | 'createAccountSaga'
+  | 'openExportKeysWindowSaga'
+  // approval-request lifecycle failures
+  | 'cancel-on-close'
+  | 'cancel-on-supersede'
+  | 'open-window-failed'
+  | 'sdk-response-to-tab';
+
 export interface SagaError {
   id: number;
-  source: string;
+  source: SagaErrorSource;
   message: string;
   code?: string;
 }

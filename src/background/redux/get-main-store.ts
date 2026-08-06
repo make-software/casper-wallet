@@ -80,12 +80,11 @@ const selectPopupState = (state: RootState): PopupState => {
     session: { ...state.session, encryptionKeyHash: null },
     loginRetryCount: state.loginRetryCount,
     vault: state.vault,
-    // Narrowed on purpose. `pendingRequests` maps each in-flight requestId to
-    // its dapp origin + tabId. `requests` is the status/tombstone map read only
-    // by background dedup (sdk-response-to-tab) and selectOpenRequests. Neither
-    // is read by any UI replica, so broadcasting them would only leak dapp
-    // origins and serialize a lifetime-growing map into every popup update.
-    // `exportKeysWindowId` is background-only for the same reason.
+    // Narrowed on purpose. `requests` maps each in-flight requestId to its dapp
+    // origin, tabId and displaying window ids, and is read only by background
+    // dedup (sdk-response-to-tab) and selectOpenRequests. No UI replica reads
+    // it, so broadcasting it would leak dapp origins into every popup update.
+    // `exportKeysWindowId` is background-only because no replica reads it either.
     windowManagement: {
       windowId: state.windowManagement.windowId
     },
@@ -247,17 +246,16 @@ export type MainStore = Awaited<
 >;
 
 export function createMainStoreReplica<T extends PopupState>(state: T) {
-  // `selectPopupState` strips `pendingRequests`, `requests`, and
-  // `exportKeysWindowId` (the background keeps all three; no UI reads any of
-  // them). Restore the shape the slice reducer expects — empty maps are
-  // truthful for a replica's request descriptors/statuses, and `null` is
-  // truthful since no replica tracks the export window.
+  // `selectPopupState` strips `requests` and `exportKeysWindowId` (the
+  // background keeps both; no UI reads either). Restore the shape the slice
+  // reducer expects — an empty map is truthful for a replica's request
+  // descriptors, and `null` is truthful since no replica tracks the export
+  // window.
   return createStore({
     ...state,
     windowManagement: {
       ...state.windowManagement,
       requests: {},
-      pendingRequests: {},
       exportKeysWindowId: null
     }
   });

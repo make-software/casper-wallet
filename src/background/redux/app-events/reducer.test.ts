@@ -1,6 +1,7 @@
 import {
   dismissAppEvent,
   dismissSagaError,
+  dismissSagaErrorsBySource,
   resetAppEventsDismission,
   sagaError
 } from './actions';
@@ -44,15 +45,20 @@ describe('app-events reducer', () => {
     it('assigns ids from the monotonic counter and increments it', () => {
       const s1 = reducer(
         { dismissedEventIds: [], errors: [], nextErrorId: 0 },
-        sagaError({ source: 'sagaA', message: 'boom' })
+        sagaError({ source: 'lockVaultSaga', message: 'boom' })
       );
-      expect(s1.errors).toEqual([{ id: 0, source: 'sagaA', message: 'boom' }]);
+      expect(s1.errors).toEqual([
+        { id: 0, source: 'lockVaultSaga', message: 'boom' }
+      ]);
       expect(s1.nextErrorId).toBe(1);
 
-      const s2 = reducer(s1, sagaError({ source: 'sagaB', message: 'bang' }));
+      const s2 = reducer(
+        s1,
+        sagaError({ source: 'unlockVaultSaga', message: 'bang' })
+      );
       expect(s2.errors).toEqual([
-        { id: 0, source: 'sagaA', message: 'boom' },
-        { id: 1, source: 'sagaB', message: 'bang' }
+        { id: 0, source: 'lockVaultSaga', message: 'boom' },
+        { id: 1, source: 'unlockVaultSaga', message: 'bang' }
       ]);
       expect(s2.nextErrorId).toBe(2);
     });
@@ -60,13 +66,17 @@ describe('app-events reducer', () => {
     it('keeps the code field when provided, and omits it when absent', () => {
       const s1 = reducer(
         { dismissedEventIds: [], errors: [], nextErrorId: 0 },
-        sagaError({ source: 'sagaA', message: 'boom', code: 'ERR_CODE' })
+        sagaError({
+          source: 'lockVaultSaga',
+          message: 'boom',
+          code: 'ERR_CODE'
+        })
       );
       expect(s1.errors[0].code).toBe('ERR_CODE');
 
       const s2 = reducer(
         { dismissedEventIds: [], errors: [], nextErrorId: 0 },
-        sagaError({ source: 'sagaA', message: 'boom' })
+        sagaError({ source: 'lockVaultSaga', message: 'boom' })
       );
       expect(s2.errors[0].code).toBeUndefined();
     });
@@ -80,18 +90,18 @@ describe('app-events reducer', () => {
       for (let i = 0; i < 11; i++) {
         state = reducer(
           state,
-          sagaError({ source: 'saga', message: `error-${i}` })
+          sagaError({ source: 'initVaultSaga', message: `error-${i}` })
         );
       }
       expect(state.errors).toHaveLength(10);
       expect(state.errors[0]).toEqual({
         id: 1,
-        source: 'saga',
+        source: 'initVaultSaga',
         message: 'error-1'
       });
       expect(state.errors[9]).toEqual({
         id: 10,
-        source: 'saga',
+        source: 'initVaultSaga',
         message: 'error-10'
       });
       expect(state.errors.find(e => e.id === 0)).toBeUndefined();
@@ -105,8 +115,14 @@ describe('app-events reducer', () => {
         nextErrorId: 0
       };
       // add 2 errors -> ids 0, 1
-      state = reducer(state, sagaError({ source: 'sagaA', message: 'a' }));
-      state = reducer(state, sagaError({ source: 'sagaB', message: 'b' }));
+      state = reducer(
+        state,
+        sagaError({ source: 'lockVaultSaga', message: 'a' })
+      );
+      state = reducer(
+        state,
+        sagaError({ source: 'unlockVaultSaga', message: 'b' })
+      );
       expect(state.errors.map(e => e.id)).toEqual([0, 1]);
 
       // dismiss the highest id (1) — an in-flight dismiss for a
@@ -115,7 +131,10 @@ describe('app-events reducer', () => {
       expect(state.errors.map(e => e.id)).toEqual([0]);
 
       // a new error must get id 2, NOT the freed-up id 1
-      state = reducer(state, sagaError({ source: 'sagaC', message: 'c' }));
+      state = reducer(
+        state,
+        sagaError({ source: 'createAccountSaga', message: 'c' })
+      );
       expect(state.errors.map(e => e.id)).toEqual([0, 2]);
       expect(state.nextErrorId).toBe(3);
     });
@@ -123,20 +142,68 @@ describe('app-events reducer', () => {
 
   describe('dismissSagaError', () => {
     it('removes the entry with the given id and leaves the rest', () => {
-      const seeded = {
+      const seeded: AppEventsState = {
         dismissedEventIds: [],
         errors: [
-          { id: 0, source: 'sagaA', message: 'a' },
-          { id: 1, source: 'sagaB', message: 'b' },
-          { id: 2, source: 'sagaC', message: 'c' }
+          { id: 0, source: 'lockVaultSaga', message: 'a' },
+          { id: 1, source: 'unlockVaultSaga', message: 'b' },
+          { id: 2, source: 'createAccountSaga', message: 'c' }
         ],
         nextErrorId: 3
       };
       const result = reducer(seeded, dismissSagaError(1));
       expect(result.errors).toEqual([
-        { id: 0, source: 'sagaA', message: 'a' },
-        { id: 2, source: 'sagaC', message: 'c' }
+        { id: 0, source: 'lockVaultSaga', message: 'a' },
+        { id: 2, source: 'createAccountSaga', message: 'c' }
       ]);
+    });
+  });
+
+  describe('dismissSagaErrorsBySource', () => {
+    const seeded: AppEventsState = {
+      dismissedEventIds: [],
+      errors: [
+        { id: 0, source: 'lockVaultSaga', message: 'first' },
+        { id: 1, source: 'unlockVaultSaga', message: 'other' },
+        { id: 2, source: 'lockVaultSaga', message: 'second' }
+      ],
+      nextErrorId: 3
+    };
+
+    it('removes every entry from the given source and leaves the others', () => {
+      const result = reducer(
+        seeded,
+        dismissSagaErrorsBySource('lockVaultSaga')
+      );
+      expect(result.errors).toEqual([
+        { id: 1, source: 'unlockVaultSaga', message: 'other' }
+      ]);
+    });
+
+    it('does not rewind the id counter, so a later error cannot reuse a retracted id', () => {
+      const cleared = reducer(
+        seeded,
+        dismissSagaErrorsBySource('lockVaultSaga')
+      );
+      expect(cleared.nextErrorId).toBe(3);
+
+      const next = reducer(
+        cleared,
+        sagaError({ source: 'lockVaultSaga', message: 'retry' })
+      );
+      expect(next.errors).toEqual([
+        { id: 1, source: 'unlockVaultSaga', message: 'other' },
+        { id: 3, source: 'lockVaultSaga', message: 'retry' }
+      ]);
+    });
+
+    // "Unknown source" is no longer expressible — the payload is the same closed
+    // union as SagaError.source — so what is left to assert is the reachable case:
+    // a real producer that happens to have nothing on screen.
+    it('is a no-op for a source with no errors of its own', () => {
+      expect(
+        reducer(seeded, dismissSagaErrorsBySource('initVaultSaga')).errors
+      ).toEqual(seeded.errors);
     });
   });
 });

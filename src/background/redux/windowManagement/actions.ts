@@ -6,8 +6,10 @@ export {
   onboardingAppInit,
   popupWindowInit,
   signWindowInit,
+  windowDetachedFromRequests,
   windowIdChanged,
   windowIdCleared,
   windowRequestOpened,
-  windowRequestResponded
+  windowRequestResponded,
+  windowRequestWindowAttached
 } from './reducer';

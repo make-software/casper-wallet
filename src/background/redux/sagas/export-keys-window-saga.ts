@@ -4,6 +4,10 @@ import { Windows, windows } from 'webextension-polyfill';
 import { RouterPath } from '@popup/router/paths';
 
 import {
+  dismissSagaErrorsBySource,
+  sagaError
+} from '@background/redux/app-events/actions';
+import {
   exportKeysWindowIdChanged,
   exportKeysWindowIdCleared
 } from '@background/redux/windowManagement/actions';
@@ -14,8 +18,16 @@ import { openExportKeysWindow } from './actions';
 const EXPORT_KEYS_URL = `popup.html#${RouterPath.DownloadAccountKeys}`;
 const SURFACE_WIDTH = 376;
 const SURFACE_HEIGHT = 700;
+const ERROR_SOURCE = 'openExportKeysWindowSaga';
 
 export function* openExportKeysWindowSaga() {
+  // Retract what a previous attempt reported before making a new one. Errors
+  // are append-only and SagaErrorBanner is mounted route-independently in every
+  // UI — including popup.html, which is what EXPORT_KEYS_URL opens. Without
+  // this, a retry that succeeds renders the earlier failure's banner on top of
+  // the key-download screen, and repeated failures stack identical rows.
+  yield put(dismissSagaErrorsBySource(ERROR_SOURCE));
+
   try {
     const windowId: number | null = yield select(selectExportKeysWindowId);
 
@@ -29,10 +41,30 @@ export function* openExportKeysWindowSaga() {
       // worst case is a misfocus (never key disclosure).
       const existing = all.find(w => w.id === windowId && w.type === 'popup');
       if (existing?.id != null) {
-        yield call([windows, windows.update], existing.id, {
-          focused: true,
-          drawAttention: true
-        });
+        try {
+          yield call([windows, windows.update], existing.id, {
+            focused: true,
+            drawAttention: true
+          });
+        } catch (error) {
+          // Reported separately from the outer catch: getAll above found the
+          // window, so "could not open" would contradict what is on screen.
+          // The tracked id is deliberately kept — the window exists, and
+          // background/index.ts clears the id on windows.onRemoved. Falling
+          // through to windows.create is equally deliberate to avoid: it would
+          // open a second export window alongside the one already there.
+          console.error(
+            'openExportKeysWindowSaga: failed to focus the export window',
+            error
+          );
+          yield put(
+            sagaError({
+              source: ERROR_SOURCE,
+              message: 'Could not focus the export window'
+            })
+          );
+        }
+
         return;
       }
       yield put(exportKeysWindowIdCleared());
@@ -67,12 +99,15 @@ export function* openExportKeysWindowSaga() {
       yield put(exportKeysWindowIdChanged(created.id));
     }
   } catch (error) {
-    // No UI surface here (the menu banner was removed): a failed open is rare
-    // (windows.create almost never rejects) and there is no popup left to show
-    // it in. The download-failure screen covers the important in-window case.
     console.error(
       'openExportKeysWindowSaga: failed to open export window',
       error
+    );
+    yield put(
+      sagaError({
+        source: ERROR_SOURCE,
+        message: 'Could not open the export window'
+      })
     );
   }
 }
