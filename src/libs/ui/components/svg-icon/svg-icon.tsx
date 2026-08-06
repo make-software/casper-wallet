@@ -5,6 +5,8 @@ import styled from 'styled-components';
 
 import { Color, getColorFromTheme } from '@libs/ui/utils';
 
+import { assertLocalIconSrc } from './assert-local-icon-src';
+
 type Ref = HTMLDivElement;
 
 export interface SvgIconProps extends HTMLAttributes<Ref> {
@@ -97,6 +99,8 @@ export const SvgIcon = forwardRef<Ref, SvgIconProps>(
     }: SvgIconProps,
     ref
   ) => {
+    assertLocalIconSrc(src);
+
     const handleClick =
       onClick &&
       ((ev: any) => {
