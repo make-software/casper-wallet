@@ -165,6 +165,16 @@ export const getSigningAccount = (
     isEqualCaseInsensitive(account.publicKey, signingPublicKeyHex)
   );
 
+/**
+ * Safari ships no manifest CSP — getCSP() in webpack.config.js has no Safari
+ * branch, so the <meta> this builds IS the whole policy. Exported so a test can
+ * pin it: sharing `baseDirectives` with the other targets is what keeps the
+ * policies from drifting, but it also means an edit to src/csp.json silently
+ * changes what Safari enforces.
+ */
+export const getSafariCspContent = () =>
+  `${cspConfig.baseDirectives}; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src ${cspConfig.connectSrc.join(' ')}`;
+
 export const setCSPForSafari = () => {
   if (isSafariBuild) {
     const metaTag = document.querySelector('[http-equiv]');
@@ -173,16 +183,11 @@ export const setCSPForSafari = () => {
       const meta = document.createElement('meta');
 
       meta.setAttribute('http-equiv', 'Content-Security-Policy');
-      // Safari ships no manifest CSP — getCSP() in webpack.config.js has no
-      // Safari branch, so this <meta> IS the whole policy. Shared directives
-      // come from src/csp.json so it cannot drift from the other targets again;
-      // only the style arm is Safari-specific.
+      // Shared directives come from src/csp.json so it cannot drift from the
+      // other targets again; only the style arm is Safari-specific.
       // Note: frame-ancestors inside a <meta http-equiv> is ignored by browsers;
       // it is present for parity with the built manifests, not as protection.
-      meta.setAttribute(
-        'content',
-        `${cspConfig.baseDirectives}; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src ${cspConfig.connectSrc.join(' ')}`
-      );
+      meta.setAttribute('content', getSafariCspContent());
 
       document.getElementsByTagName('head')[0].appendChild(meta);
     }
