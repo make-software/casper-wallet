@@ -12,7 +12,11 @@ describe('assertLocalIconSrc', () => {
   afterEach(() => {
     consoleError.mockRestore();
     process.env.NODE_ENV = originalNodeEnv;
-    process.env.TEST_ENV = originalTestEnv;
+    if (originalTestEnv === undefined) {
+      delete process.env.TEST_ENV;
+    } else {
+      process.env.TEST_ENV = originalTestEnv;
+    }
   });
 
   it('reports a remote src with the [SvgIcon] marker the e2e fixture greps for', () => {
@@ -53,7 +57,5 @@ describe('assertLocalIconSrc', () => {
     assertLocalIconSrc('https://example.com/a.svg');
 
     expect(consoleError).toHaveBeenCalledTimes(1);
-
-    delete process.env.TEST_ENV;
   });
 });
