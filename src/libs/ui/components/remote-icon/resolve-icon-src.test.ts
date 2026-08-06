@@ -41,4 +41,24 @@ describe('resolveIconSrc', () => {
       resolveIconSrc({ src: 'https://example.com/a.svg', hasError: true })
     ).toBeNull();
   });
+
+  it('falls back when both guard conditions overlap: hasError with a missing src', () => {
+    expect(
+      resolveIconSrc({
+        src: null,
+        fallbackSrc: 'assets/icons/generic.svg',
+        hasError: true
+      })
+    ).toEqual({ src: 'assets/icons/generic.svg', isFallback: true });
+  });
+
+  it('treats an empty-string fallback as no fallback', () => {
+    expect(
+      resolveIconSrc({
+        src: 'https://example.com/a.svg',
+        fallbackSrc: '',
+        hasError: true
+      })
+    ).toBeNull();
+  });
 });
