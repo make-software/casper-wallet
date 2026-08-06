@@ -107,6 +107,103 @@ const getCSP = () => {
   }
 };
 
+// Single source for the nonce-setter entry: the emit-time assertion below finds the
+// bundles it has to check by looking for this exact path in webpack's normalized
+// entry, so the list of guarded bundles cannot drift from the list that actually gets
+// the setter prepended.
+const NONCE_SETTER = path.join(__dirname, 'src', 'set-webpack-nonce.ts');
+
+// The manifest CSP and the bundles receive the nonce through two different plugins
+// (CopyWebpackPlugin's manifest transform and DefinePlugin), so "the two agree" holds
+// only for as long as both keep deriving from CSP_NONCE. WALLET-1388 is what it looks
+// like when they stop: an ambient CSP_NONCE reached the bundles through
+// dotenv-webpack's `systemvars` while the manifest kept the generated value. The build
+// succeeded, the manifest looked right, and the extension rendered completely unstyled.
+//
+// Routing the value through __CSP_NONCE__ instead of process.env closed that particular
+// hole — dotenv-webpack only ever defines `process.env.*` keys — but the failure mode is
+// silent by nature, and the next source of drift will not announce itself either. So
+// this checks the artifacts rather than the intent: whatever the built manifest pins
+// must be exactly what this build generated, and exactly what every bundle carrying the
+// nonce setter contains.
+//
+// It runs on the last processAssets stage — after CopyWebpackPlugin has added the
+// manifest (it emits at PROCESS_ASSETS_STAGE_ADDITIONAL) and while asset sources are
+// still readable. afterEmit is too late: webpack swaps every emitted source for a
+// SizeOnlySource, and reading one throws. Working from the compilation rather than from
+// disk also keeps this working under webpack-dev-server, which never writes files.
+//
+// Throwing rejects the build rather than logging: tapable forwards the exception to the
+// seal callback, webpack hands it to the compiler callback as a fatal error, and
+// utils/build.js rethrows it — a non-zero exit. Pushing to compilation.errors would not
+// do that, since utils/build.js never inspects stats.
+class AssertCspNonceIntegrity {
+  apply(compiler) {
+    compiler.hooks.thisCompilation.tap(
+      'AssertCspNonceIntegrity',
+      compilation => {
+        compilation.hooks.processAssets.tap(
+          {
+            name: 'AssertCspNonceIntegrity',
+            stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT
+          },
+          () => assertNonceIntegrity(compiler, compilation)
+        );
+      }
+    );
+  }
+}
+
+const assertNonceIntegrity = (compiler, compilation) => {
+  const manifestAsset = compilation.getAsset('manifest.json');
+
+  if (!manifestAsset) {
+    throw new Error('CSP nonce check: the build emitted no manifest.json.');
+  }
+
+  const manifest = JSON.parse(manifestAsset.source.source().toString());
+  const csp =
+    typeof manifest.content_security_policy === 'string'
+      ? manifest.content_security_policy
+      : (manifest.content_security_policy?.extension_pages ?? '');
+  const pinned = csp.match(/'nonce-([^']*)'/)?.[1] ?? null;
+
+  if (pinned !== CSP_NONCE) {
+    throw new Error(
+      `CSP nonce check: the manifest pins ${JSON.stringify(pinned)}, but this build generated ${JSON.stringify(CSP_NONCE)}. Every injected stylesheet would be blocked.`
+    );
+  }
+
+  if (pinned === null) {
+    return;
+  }
+
+  // Not a hard-coded list of app entries: the guarded set is whichever entries webpack
+  // was actually given the nonce setter for, read back from the normalized entry.
+  for (const [name, entry] of Object.entries(compiler.options.entry)) {
+    if (!(entry.import ?? []).includes(NONCE_SETTER)) {
+      continue;
+    }
+
+    // "at least one file", not "every file": an entrypoint can emit a runtime chunk
+    // alongside its main bundle, and only the chunk holding set-webpack-nonce carries
+    // the substituted literal.
+    const carriesNonce = compilation.entrypoints
+      .get(name)
+      .getFiles()
+      .filter(file => file.endsWith('.js'))
+      .some(file =>
+        compilation.getAsset(file)?.source.source().toString().includes(pinned)
+      );
+
+    if (!carriesNonce) {
+      throw new Error(
+        `CSP nonce check: the manifest pins ${JSON.stringify(pinned)}, but no bundle of entry "${name}" contains it. That entry's stylesheets would be blocked.`
+      );
+    }
+  }
+};
+
 const options = {
   experiments: {
     topLevelAwait: true
@@ -120,11 +217,11 @@ const options = {
     // import can't guarantee this — prettier's import-sort would order it after
     // the css imports in some entries.
     popup: [
-      path.join(__dirname, 'src', 'set-webpack-nonce.ts'),
+      NONCE_SETTER,
       path.join(__dirname, 'src', 'apps', 'popup', 'index.tsx')
     ],
     importAccountWithFile: [
-      path.join(__dirname, 'src', 'set-webpack-nonce.ts'),
+      NONCE_SETTER,
       path.join(
         __dirname,
         'src',
@@ -134,15 +231,15 @@ const options = {
       )
     ],
     connectToApp: [
-      path.join(__dirname, 'src', 'set-webpack-nonce.ts'),
+      NONCE_SETTER,
       path.join(__dirname, 'src', 'apps', 'connect-to-app', 'index.tsx')
     ],
     signatureRequest: [
-      path.join(__dirname, 'src', 'set-webpack-nonce.ts'),
+      NONCE_SETTER,
       path.join(__dirname, 'src', 'apps', 'signature-request', 'index.tsx')
     ],
     onboarding: [
-      path.join(__dirname, 'src', 'set-webpack-nonce.ts'),
+      NONCE_SETTER,
       path.join(__dirname, 'src', 'apps', 'onboarding', 'index.tsx')
     ],
     background: path.join(__dirname, 'src', 'background', 'index.ts'),
@@ -226,6 +323,9 @@ const options = {
       // leave the free variable unreplaced and throw ReferenceError at runtime.
       __CSP_NONCE__: JSON.stringify(CSP_NONCE)
     }),
+    // Guards the two consumers above and below against drifting apart. Runs on
+    // afterEmit, so registration order here does not matter.
+    new AssertCspNonceIntegrity(),
     // manifest file generation
     new CopyWebpackPlugin({
       patterns: [

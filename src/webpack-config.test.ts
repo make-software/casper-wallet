@@ -31,20 +31,47 @@ interface PluginLike {
   definitions?: Record<string, string>;
   patterns?: CopyPattern[];
   options?: { patterns?: CopyPattern[] };
+  apply?: (compiler: FakeCompiler) => void;
 }
+
+type EntryLike = Record<string, string | string[]>;
 
 interface ConfigLike {
   plugins: PluginLike[];
+  entry: EntryLike;
 }
 
 interface Manifest {
   content_security_policy?: string | { extension_pages: string };
 }
 
+/** The slice of webpack's compilation/compiler API the emit-time assertion touches. */
+interface FakeAsset {
+  source: { source: () => string };
+}
+
+interface FakeCompilation {
+  hooks: { processAssets: { tap: (options: unknown, fn: () => void) => void } };
+  getAsset: (name: string) => FakeAsset | undefined;
+  entrypoints: Map<string, { getFiles: () => string[] }>;
+}
+
+interface FakeCompiler {
+  options: { entry: Record<string, { import: string[] }> };
+  hooks: {
+    thisCompilation: {
+      tap: (name: string, fn: (compilation: FakeCompilation) => void) => void;
+    };
+  };
+}
+
 interface LoadedConfig {
   /** Raw DefinePlugin substitution — a JSON literal: `"<base64>"` or `null`. */
   nonceLiteral: string;
   manifest: Manifest;
+  /** The AssertCspNonceIntegrity instance registered by this config. */
+  assertPlugin: PluginLike;
+  entry: EntryLike;
 }
 
 const loadConfig = (browser: string, nodeEnv: string): LoadedConfig => {
@@ -75,13 +102,23 @@ const loadConfig = (browser: string, nodeEnv: string): LoadedConfig => {
     throw new Error('No CopyWebpackPlugin pattern generates the manifest');
   }
 
+  const assertPlugin = config.plugins.find(
+    plugin => plugin.constructor?.name === 'AssertCspNonceIntegrity'
+  );
+
+  if (!assertPlugin) {
+    throw new Error('AssertCspNonceIntegrity is not registered');
+  }
+
   return {
     nonceLiteral: definitions.__CSP_NONCE__,
     manifest: JSON.parse(
       manifestPattern
         .transform(fs.readFileSync(path.join(ROOT, manifestPattern.from)))
         .toString()
-    )
+    ),
+    assertPlugin,
+    entry: config.entry
   };
 };
 
@@ -160,4 +197,216 @@ describe('webpack.config.js CSP nonce', () => {
       expect(manifest.content_security_policy).toBeUndefined();
     }
   );
+});
+
+/**
+ * The assertions above compare the two nonce channels as the config *describes* them.
+ * AssertCspNonceIntegrity (webpack.config.js) compares them as the build *emits* them,
+ * which is where WALLET-1388 went wrong: an ambient CSP_NONCE was substituted into the
+ * bundles through dotenv-webpack's `systemvars` while the manifest kept the generated
+ * value, and the build reported success.
+ *
+ * Driving it needs only four things off the compiler/compilation, faked here: the two
+ * hooks it taps, the normalized entry, the entrypoint file lists, and getAsset.
+ */
+const asset = (content: string): FakeAsset => ({
+  source: { source: () => content }
+});
+
+const runAssertion = ({
+  assertPlugin,
+  entry,
+  manifestJson,
+  bundles
+}: {
+  assertPlugin: PluginLike;
+  entry: EntryLike;
+  /** `null` stands for "the build emitted no manifest at all". */
+  manifestJson: string | null;
+  bundles: Record<string, string>;
+}) => {
+  let tapped: (() => void) | undefined;
+
+  const compilation: FakeCompilation = {
+    hooks: {
+      processAssets: {
+        tap: (_options, fn) => {
+          tapped = fn;
+        }
+      }
+    },
+    getAsset: name => {
+      if (name === 'manifest.json') {
+        return manifestJson === null ? undefined : asset(manifestJson);
+      }
+
+      return name in bundles ? asset(bundles[name]) : undefined;
+    },
+    entrypoints: new Map(
+      Object.keys(entry).map(name => [
+        name,
+        { getFiles: () => [`${name}.bundle.js`] }
+      ])
+    )
+  };
+
+  // The real entry is reused rather than invented, so a change to which entries get
+  // the nonce setter prepended reaches these cases automatically.
+  const compiler: FakeCompiler = {
+    options: {
+      entry: Object.fromEntries(
+        Object.entries(entry).map(([name, files]) => [
+          name,
+          { import: Array.isArray(files) ? files : [files] }
+        ])
+      )
+    },
+    hooks: {
+      thisCompilation: {
+        tap: (_name, fn) => fn(compilation)
+      }
+    }
+  };
+
+  assertPlugin.apply?.(compiler);
+
+  if (!tapped) {
+    throw new Error('AssertCspNonceIntegrity tapped no processAssets hook');
+  }
+
+  return tapped;
+};
+
+const manifestWith = (csp: string | undefined) =>
+  JSON.stringify(
+    csp === undefined
+      ? {}
+      : { content_security_policy: { extension_pages: csp } }
+  );
+
+describe('AssertCspNonceIntegrity', () => {
+  const originalEnv = { ...process.env };
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
+  });
+
+  describe('Chrome production', () => {
+    const load = () => {
+      const { nonceLiteral, assertPlugin, entry } = loadConfig(
+        'chrome',
+        'production'
+      );
+      const nonce: string = JSON.parse(nonceLiteral);
+      // Every entry that gets the setter carries the substituted literal; the rest
+      // (background, contentScript, sdk) never read it.
+      const bundles = Object.fromEntries(
+        Object.entries(entry).map(([name, files]) => [
+          `${name}.bundle.js`,
+          Array.isArray(files)
+            ? `__webpack_nonce__ = "${nonce}";`
+            : 'no nonce here'
+        ])
+      );
+
+      return { nonce, assertPlugin, entry, bundles };
+    };
+
+    it('passes when the manifest and every nonce-carrying bundle agree', () => {
+      const { nonce, assertPlugin, entry, bundles } = load();
+
+      expect(
+        runAssertion({
+          assertPlugin,
+          entry,
+          manifestJson: manifestWith(`style-src 'self' 'nonce-${nonce}'`),
+          bundles
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a build whose bundles carry a different nonce', () => {
+      const { nonce, assertPlugin, entry, bundles } = load();
+
+      expect(
+        runAssertion({
+          assertPlugin,
+          entry,
+          manifestJson: manifestWith(`style-src 'self' 'nonce-${nonce}'`),
+          // What an ambient CSP_NONCE used to produce.
+          bundles: { ...bundles, 'popup.bundle.js': '"SHADOWVALUE123";' }
+        })
+      ).toThrow(/no bundle of entry "popup" contains it/);
+    });
+
+    it('rejects a build whose manifest pins a nonce this build did not generate', () => {
+      const { assertPlugin, entry, bundles } = load();
+
+      expect(
+        runAssertion({
+          assertPlugin,
+          entry,
+          manifestJson: manifestWith("style-src 'self' 'nonce-SOMETHINGELSE'"),
+          bundles
+        })
+        // Anchored on the second clause: the per-entry check below reports the same
+        // "the manifest pins …" prefix, and this case has to fail on the manifest
+        // comparison specifically.
+      ).toThrow(/pins "SOMETHINGELSE", but this build generated/);
+    });
+
+    it('rejects a build whose manifest pins no nonce at all', () => {
+      const { assertPlugin, entry, bundles } = load();
+
+      expect(
+        runAssertion({
+          assertPlugin,
+          entry,
+          manifestJson: manifestWith("style-src 'unsafe-inline'"),
+          bundles
+        })
+      ).toThrow(/pins null, but this build generated/);
+    });
+
+    it('rejects a build that emitted no manifest', () => {
+      const { assertPlugin, entry, bundles } = load();
+
+      expect(
+        runAssertion({ assertPlugin, entry, manifestJson: null, bundles })
+      ).toThrow(/emitted no manifest\.json/);
+    });
+  });
+
+  describe('targets without a nonce', () => {
+    it.each(['firefox', 'safari'])(
+      'passes a %s build whose manifest pins nothing',
+      browser => {
+        const { assertPlugin, entry } = loadConfig(browser, 'production');
+
+        expect(
+          runAssertion({
+            assertPlugin,
+            entry,
+            manifestJson: manifestWith(
+              browser === 'safari' ? undefined : "style-src 'unsafe-inline'"
+            ),
+            bundles: {}
+          })
+        ).not.toThrow();
+      }
+    );
+
+    it('rejects a Firefox build whose manifest pins one anyway', () => {
+      const { assertPlugin, entry } = loadConfig('firefox', 'production');
+
+      expect(
+        runAssertion({
+          assertPlugin,
+          entry,
+          manifestJson: manifestWith("style-src 'self' 'nonce-LEAKED'"),
+          bundles: {}
+        })
+      ).toThrow(/but this build generated null/);
+    });
+  });
 });
