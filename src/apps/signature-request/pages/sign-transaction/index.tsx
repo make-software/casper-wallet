@@ -403,8 +403,14 @@ export function SignTransactionPage() {
           <Button
             color="primaryRed"
             flexWidth
+            // `!signatureRequest` mirrors the eip712 page. `transaction` is
+            // local state that outlives the payload it was parsed from, so
+            // once the answered request's payload is dropped from the vault
+            // this button would stay enabled over the empty pane the content
+            // branch below renders without a `signatureRequest`.
             disabled={
               !transaction ||
+              !signatureRequest ||
               isLoadingSignatureRequest ||
               (additionalApproveRequired && !wasmApproved)
             }

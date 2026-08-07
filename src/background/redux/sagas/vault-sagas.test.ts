@@ -43,6 +43,7 @@ import {
   selectVaultActiveAccount
 } from '../vault/selectors';
 import { VaultState } from '../vault/types';
+import { windowRequestResponded } from '../windowManagement/actions';
 import { lockVault, startBackground, unlockVault } from './actions';
 import {
   VAULT_REENCRYPT_DEBOUNCE_MS,
@@ -444,6 +445,27 @@ describe('updateVaultCipher debounce', () => {
       .dispatch(accountRenamed({ oldName: 'a', newName: 'b' }))
       .dispatch(accountRenamed({ oldName: 'b', newName: 'c' }))
       .dispatch(accountRenamed({ oldName: 'c', newName: 'd' }))
+      .silentRun(VAULT_REENCRYPT_DEBOUNCE_MS + 200);
+
+    expect(encryptSpy).toHaveBeenCalledTimes(1);
+  });
+
+  // WALLET-1384: the vault reducer deletes an answered request's signing
+  // payload, and that deletion must reach the cipher. Otherwise an MV3
+  // service-worker restart re-loads the entry from a stale blob through
+  // `vaultLoaded`, for a requestId whose `windowRequestResponded` has already
+  // fired — so nothing but the FIFO cap would ever remove it.
+  it('re-encrypts when an answered request drops its payload', async () => {
+    const encryptSpy = jest
+      .spyOn(vaultCryptoModule, 'encryptVault')
+      .mockResolvedValue('cipher-blob');
+
+    await expectSaga(vaultSagas)
+      .provide([
+        [matchers.select.selector(selectEncryptionKeyHash), 'key-hash'],
+        [matchers.select.selector(selectVault), EMPTY_VAULT]
+      ])
+      .dispatch(windowRequestResponded({ requestId: 'answered' }))
       .silentRun(VAULT_REENCRYPT_DEBOUNCE_MS + 200);
 
     expect(encryptSpy).toHaveBeenCalledTimes(1);

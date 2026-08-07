@@ -72,7 +72,10 @@ import {
   selectVaultActiveAccount,
   selectVaultDerivedAccounts
 } from '../vault/selectors';
-import { popupWindowInit } from '../windowManagement/actions';
+import {
+  popupWindowInit,
+  windowRequestResponded
+} from '../windowManagement/actions';
 import {
   createAccount,
   lockVault,
@@ -122,6 +125,17 @@ export function* vaultSagas() {
       activeTimeoutDurationSettingChanged.type,
       deployPayloadReceived.type,
       eip712PayloadReceived.type,
+      // The deletion belongs here for the same reason the two writes above do.
+      // The vault reducer drops an answered request's payload from
+      // `jsonById`/`eip712ById`, but that is an in-memory edit: without a
+      // re-encryption the cipher still holds the entry, and an MV3
+      // service-worker restart before the next vault write would resurrect it
+      // through `vaultLoaded` — for a requestId `windowRequestResponded` has
+      // already fired for, so nothing but the FIFO cap would ever remove it.
+      // Most responses have no payload entry, so this usually re-encrypts an
+      // unchanged vault; at ~2ms behind a 500ms debounce that is cheaper than
+      // the alternative of persisting writes but not deletes.
+      windowRequestResponded.type,
       hideAccountFromListChanged.type
     ],
     updateVaultCipher
