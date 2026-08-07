@@ -7,6 +7,7 @@ import { DeployIcon } from '@src/constants';
 // is itself exported from — the barrel import would close an import cycle.
 import { SvgIcon } from '@libs/ui/components/svg-icon/svg-icon';
 
+import { IconState, nextIconState } from './next-icon-state';
 import { resolveIconSrc } from './resolve-icon-src';
 
 export interface RemoteIconProps {
@@ -47,15 +48,25 @@ export const RemoteIcon = ({
   className,
   borderRadius
 }: RemoteIconProps) => {
-  const [hasError, setHasError] = useState(false);
+  const [state, setState] = useState<IconState>(() => ({
+    src,
+    hasError: false
+  }));
 
   // Rows are recycled across different tokens and contracts. Without this the
   // error latched from the previous url would hide a perfectly good new icon.
+  // The transition is hoisted into nextIconState so both rules — a changed
+  // src clears the error, an unchanged src preserves it — are assertable
+  // without a DOM.
   useEffect(() => {
-    setHasError(false);
+    setState(prev => nextIconState(prev, { src }));
   }, [src]);
 
-  const resolved = resolveIconSrc({ src, fallbackSrc, hasError });
+  const resolved = resolveIconSrc({
+    src,
+    fallbackSrc,
+    hasError: state.hasError
+  });
 
   if (resolved == null) {
     return null;
@@ -72,7 +83,7 @@ export const RemoteIcon = ({
       $borderRadius={borderRadius}
       alt={alt || ''}
       title={title || undefined}
-      onError={() => setHasError(true)}
+      onError={() => setState(prev => ({ ...prev, hasError: true }))}
       className={className}
       // Partial mitigation only: strips the Referer header so the icon host
       // can't correlate a request with the page it came from (which contract
