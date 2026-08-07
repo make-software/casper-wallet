@@ -39,6 +39,7 @@ describe('resolveIconSrc', () => {
 
   it('renders nothing when there is neither a url nor a fallback', () => {
     expect(resolveIconSrc({ src: undefined, hasError: false })).toBeNull();
+    expect(resolveIconSrc({ src: null, hasError: false })).toBeNull();
     expect(
       resolveIconSrc({ src: 'https://example.com/a.svg', hasError: true })
     ).toBeNull();
@@ -52,18 +53,5 @@ describe('resolveIconSrc', () => {
         hasError: true
       })
     ).toEqual({ src: DeployIcon.Generic, isFallback: true });
-  });
-
-  it('treats an empty-string fallback as no fallback', () => {
-    expect(
-      resolveIconSrc({
-        src: 'https://example.com/a.svg',
-        // Not a real DeployIcon value — this exercises the falsy-fallback
-        // guard in resolveIconSrc itself, not a case that can occur through
-        // the (now DeployIcon-typed) fallbackSrc prop in production.
-        fallbackSrc: '' as DeployIcon,
-        hasError: true
-      })
-    ).toBeNull();
   });
 });

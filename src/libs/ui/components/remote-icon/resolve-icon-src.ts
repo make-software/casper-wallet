@@ -24,7 +24,7 @@ export const resolveIconSrc = ({
   hasError
 }: ResolveIconSrcProps): ResolvedIconSrc | null => {
   if (!src || hasError) {
-    return fallbackSrc ? { src: fallbackSrc, isFallback: true } : null;
+    return fallbackSrc == null ? null : { src: fallbackSrc, isFallback: true };
   }
 
   return { src, isFallback: false };
