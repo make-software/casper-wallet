@@ -1,9 +1,24 @@
-import cspConfig from './csp.json';
 import {
   getSafariCspContent,
   hasHttpPrefix,
   isBundledAssetPath
 } from './utils';
+
+// Splits a `directive value; directive value` policy string into a
+// { directiveName: value } map. Tolerant of a trailing semicolon, repeated
+// whitespace inside a directive, and a directive with no value.
+const parseCspDirectives = (policy: string): Record<string, string> =>
+  Object.fromEntries(
+    policy
+      .split(';')
+      .map(directive => directive.trim())
+      .filter(directive => directive.length > 0)
+      .map(directive => {
+        const [name, ...valueParts] = directive.split(/\s+/);
+
+        return [name, valueParts.join(' ')];
+      })
+  );
 
 describe('hasHttpPrefix', () => {
   it('accepts absolute http and https urls', () => {
@@ -94,19 +109,57 @@ describe('getSafariCspContent', () => {
     expect(getSafariCspContent()).not.toMatch(/script-src[^;]*'unsafe-inline'/);
   });
 
-  it('locks every fetch-directive default down', () => {
-    const content = getSafariCspContent();
+  it('pins every directive by exact value, including the full connect-src host list', () => {
+    // Parsed into a { directive: value } map and compared whole against
+    // literals below. That closes two gaps `toContain` and a self-import
+    // left open: `toContain("default-src 'none'")` still matches
+    // "default-src 'none' https:", so widening a directive stayed green; and
+    // a directive with no assertion at all (or a newly appended one) was
+    // matched by nothing. A map diff catches a widened, narrowed, removed,
+    // or newly appended directive alike.
+    //
+    // The connect-src host list is intentionally hand-written here rather
+    // than read from `cspConfig.connectSrc` (src/csp.json) — comparing
+    // csp.json against itself proves nothing about its contents, only that
+    // getSafariCspContent() assembles the string getSafariCspContent()
+    // assembles. src/csp.json now single-sources this list into the Chrome
+    // manifest, the Firefox manifest, and this Safari <meta> tag, which is
+    // exactly why pinning its actual contents (not its own echo) matters.
+    //
+    // Trade-off: every legitimate host addition or removal in src/csp.json
+    // now also requires editing the literal below. That is the intended
+    // effect, not an accident — it forces a host-list change through review
+    // instead of silently widening (or breaking) all three CSP targets.
+    const directives = parseCspDirectives(getSafariCspContent());
 
-    expect(content).toContain("default-src 'none'");
-    expect(content).toContain("object-src 'none'");
-    expect(content).toContain("base-uri 'none'");
-    expect(content).toContain("form-action 'none'");
-  });
-
-  it('carries every connect-src host from csp.json and nothing else', () => {
-    const connectSrc = getSafariCspContent().split('connect-src ')[1];
-
-    expect(connectSrc.split(' ')).toEqual(cspConfig.connectSrc);
+    expect(directives).toEqual({
+      'default-src': "'none'",
+      'object-src': "'none'",
+      'base-uri': "'none'",
+      'form-action': "'none'",
+      'frame-ancestors': "'none'",
+      'script-src': "'self' 'wasm-unsafe-eval'",
+      'img-src': 'https: data:',
+      'media-src': 'https: data:',
+      'style-src': "'unsafe-inline'",
+      'connect-src': [
+        'https://event-store-api-clarity-testnet.make.services',
+        'https://event-store-api-clarity-mainnet.make.services',
+        'https://image-proxy-cdn.make.services/',
+        'https://node.cspr.cloud/',
+        'https://node.testnet.cspr.cloud/',
+        'https://api.testnet.casperwallet.io/',
+        'https://api.mainnet.casperwallet.io/',
+        'https://onramp-api.cspr.click/api/',
+        'https://cspr-wallet-api.dev.make.services/',
+        'https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/',
+        'https://cspr-wallet-api-condor.dev.make.services/',
+        'https://cspr-wallet-api.stg.make.services/',
+        'https://api.casperwallet.io/',
+        'https://api.integration.casperwallet.io/',
+        'https://node.integration.cspr.cloud/'
+      ].join(' ')
+    });
   });
 
   it('no longer reaches the casper-assets bucket', () => {
