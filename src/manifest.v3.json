@@ -36,7 +36,6 @@
     "https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/*",
     "https://api.integration.casperwallet.io/*",
     "https://node.integration.cspr.cloud/*",
-    "https://casper-assets.s3.amazonaws.com/*",
     "https://onramp-api.cspr.click/api/*",
     "https://*.bringweb3.io/*"
   ],

@@ -157,12 +157,14 @@ async function cancelRequests(
   );
 }
 
-// The single cancellation trigger: window `windowId` stopped displaying
-// requests (it closed, or it was reused for a different request). A request is
-// a candidate only if this was its LAST window — a request the Ledger
-// permission window still displays survives, and a request that never had this
-// window (e.g. one registered moments ago, still waiting for its window) can
-// never cancel itself.
+// The window-driven cancellation trigger: window `windowId` stopped displaying
+// requests (it closed, or it was reused for a different request). NOT the only
+// one — `failRequestOnWindowError` below is a second, independent trigger, for
+// the case where no window ever opened at all, and it runs with no grace and no
+// window event behind it. A request is a candidate here only if this was its
+// LAST window — a request the Ledger permission window still displays survives,
+// and a request that never had this window (e.g. one registered moments ago,
+// still waiting for its window) can never cancel itself.
 export async function cancelRequestsDisplacedBy(
   store: MainStore,
   windowId: number,

@@ -6,6 +6,7 @@ export * from './link/link';
 export * from './popover-link/popover-link';
 export * from './typography/typography';
 export * from './svg-icon/svg-icon';
+export * from './remote-icon/remote-icon';
 export * from './tile/tile';
 export * from './list/list';
 export * from './checkbox/checkbox';

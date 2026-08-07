@@ -103,6 +103,20 @@ describe('keep-alive', () => {
     expect(console.error).not.toHaveBeenCalled();
   });
 
+  it('swallows the same rejection when it arrives as a bare string, not an Error', async () => {
+    // A polyfill that rejects with a plain string must not take the error
+    // branch: this is the idle steady state, and it repeats every 30s.
+    mockRuntimeSendMessage.mockRejectedValue(
+      'Could not establish connection. Receiving end does not exist.'
+    );
+    const listener = mockAlarmsOnAlarmAddListener.mock.calls[0][0];
+
+    listener({ name: 'casper-keep-alive' });
+    await flushPromises();
+
+    expect(console.error).not.toHaveBeenCalled();
+  });
+
   it('logs unexpected ping rejections', async () => {
     mockRuntimeSendMessage.mockRejectedValue(new Error('boom'));
     const listener = mockAlarmsOnAlarmAddListener.mock.calls[0][0];

@@ -10,14 +10,14 @@ import {
 
 import { sagaError } from '@background/redux/app-events/actions';
 import {
-  AUTO_LOCK_DEADLINE_KEY,
-  LOGIN_RETRY_LOCKOUT_DEADLINE_KEY
-} from '@background/redux/get-main-store';
-import {
   loginRetryLockoutTimeReseted,
   loginRetryLockoutTimeSet
 } from '@background/redux/login-retry-lockout-time/actions';
 import { selectLoginRetryLockoutTime } from '@background/redux/login-retry-lockout-time/selectors';
+import {
+  AUTO_LOCK_DEADLINE_KEY,
+  LOGIN_RETRY_LOCKOUT_DEADLINE_KEY
+} from '@background/redux/storage-keys';
 import { anchorServiceWorker } from '@background/sw-keep-alive-anchor';
 import { emitSdkEventToActiveTabs } from '@background/utils';
 

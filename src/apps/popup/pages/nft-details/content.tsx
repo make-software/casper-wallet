@@ -38,6 +38,8 @@ import {
   Typography
 } from '@libs/ui/components';
 
+import { NftTokenDetailIcon } from './nft-token-detail-icon';
+
 const NftImageContainer = styled(CenteredFlexRow)`
   width: 100%;
   height: 100%;
@@ -341,7 +343,7 @@ export const NftDetailsContent = ({
                 >
                   {token.value}
                 </Typography>
-                <SvgIcon src={token.image} size={32} />
+                <NftTokenDetailIcon image={token.image} alt={token.value} />
               </AlignedFlexRow>
             ) : (
               <Typography

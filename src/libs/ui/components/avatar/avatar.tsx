@@ -2,7 +2,11 @@ import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 import styled, { useTheme } from 'styled-components';
 
-import { isValidAccountHash, isValidPublicKey } from '@src/utils';
+import {
+  isBundledAssetPath,
+  isValidAccountHash,
+  isValidPublicKey
+} from '@src/utils';
 
 import { useIsDarkMode } from '@hooks/use-is-dark-mode';
 
@@ -12,7 +16,7 @@ import {
   CenteredFlexRow,
   SpacingSize
 } from '@libs/layout';
-import { Identicon, SvgIcon } from '@libs/ui/components';
+import { Identicon, RemoteIcon, SvgIcon } from '@libs/ui/components';
 
 const IconHashWrapper = styled(CenteredFlexRow)(({ theme }) => ({
   color: theme.color.contentOnFill,
@@ -94,11 +98,6 @@ interface LogoTypes {
   publicKey: Maybe<string>;
 }
 
-const LogoImg = styled.img<{ size: number }>`
-  width: ${({ size }) => size}px;
-  height: ${({ size }) => size}px;
-`;
-
 const ConnectionStatusBadge = ({
   children,
   connectIcon,
@@ -124,14 +123,14 @@ const ConnectionStatusBadge = ({
 };
 
 const Logo = ({ size, brandingLogo, publicKey }: LogoTypes) =>
-  brandingLogo.endsWith('.svg') ? (
-    <SvgIcon src={brandingLogo || ''} alt={publicKey || ''} size={size} />
+  isBundledAssetPath(brandingLogo) ? (
+    <SvgIcon src={brandingLogo} alt={publicKey || ''} size={size} />
   ) : (
-    <LogoImg
+    <RemoteIcon
       src={brandingLogo}
       size={size}
-      alt={publicKey || ''}
-      title={publicKey || ''}
+      alt={publicKey}
+      title={publicKey}
     />
   );
 

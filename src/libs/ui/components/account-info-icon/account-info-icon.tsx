@@ -1,27 +1,25 @@
 import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
 
 import { DeployIcon } from '@src/constants';
-import { isEqualCaseInsensitive, isPublicKeyHash } from '@src/utils';
+import {
+  isBundledAssetPath,
+  isEqualCaseInsensitive,
+  isPublicKeyHash
+} from '@src/utils';
 
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
-import { Avatar, SvgIcon } from '@libs/ui/components';
+import { Avatar, RemoteIcon, SvgIcon } from '@libs/ui/components';
 
 interface AccountInfoIconProps {
   iconUrl?: Maybe<string>;
   accountName?: Maybe<string>;
   publicKey: Maybe<string>;
   size?: number;
-  defaultSvg?: string;
+  defaultSvg?: DeployIcon;
 }
-
-const LogoImg = styled.img<{ size: number }>`
-  width: ${({ size }) => size}px;
-  height: ${({ size }) => size}px;
-`;
 
 export const AccountInfoIcon = ({
   iconUrl,
@@ -57,14 +55,15 @@ export const AccountInfoIcon = ({
   }
 
   if (iconUrl) {
-    return iconUrl.endsWith('.svg') ? (
-      <SvgIcon src={iconUrl || ''} alt={accountName || ''} size={size} />
+    return isBundledAssetPath(iconUrl) ? (
+      <SvgIcon src={iconUrl} alt={accountName || ''} size={size} />
     ) : (
-      <LogoImg
+      <RemoteIcon
         src={iconUrl}
         size={size}
-        alt={accountName || ''}
-        title={publicKey || ''}
+        alt={accountName}
+        title={publicKey}
+        fallbackSrc={defaultSvg}
       />
     );
   }
