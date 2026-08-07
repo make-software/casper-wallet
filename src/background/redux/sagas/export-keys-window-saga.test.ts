@@ -208,6 +208,33 @@ describe('openExportKeysWindowSaga', () => {
     }
   });
 
+  it('reports a timeout instead of leaving the menu item inert', async () => {
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    try {
+      // A static `race` provider settles the race deterministically. Letting
+      // the real delay run would mean a 5s test, and driving it with fake
+      // timers would fight redux-saga's own scheduler.
+      const { allEffects } = await expectSaga(openExportKeysWindowSaga)
+        .withState({ windowManagement: { exportKeysWindowId: null } })
+        .provide({ race: () => ({ timedOut: true }) })
+        .put(
+          sagaError({
+            source: 'openExportKeysWindowSaga',
+            message: 'The export window did not open in time; try again'
+          })
+        )
+        .not.put.actionType(exportKeysWindowIdChanged.type)
+        .run();
+
+      expect(countPutsOfType(allEffects, sagaError.type)).toBe(1);
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
   describe('exportKeysWindowSaga (watcher)', () => {
     afterEach(() => {
       jest.clearAllMocks();
