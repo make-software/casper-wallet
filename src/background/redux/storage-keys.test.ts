@@ -10,11 +10,18 @@ import {
 // live only in the module and in `docs/architecture/storage-keys.md`, with no
 // doc/code parity check anywhere in `src`, `scripts` or CI.
 //
-// Renaming one strands the persisted entry: `vault-sagas.ts` falls back to a
-// recomputed deadline rather than failing open, so an already-locked-out user
-// silently gets a fresh full lockout instead of the residual one. These
-// assertions are the only thing that can catch that, so DO NOT "fix" a failure
-// here by updating the expected string — revert the rename instead.
+// Renaming one strands the persisted entry. It does NOT reset the countdown:
+// both resume paths fall back to the same formula they armed with
+// (`vault-sagas.ts:234` recomputes `loginRetryLockoutTime + LOCK_VAULT_TIMEOUT`,
+// which is `:224` verbatim; `:383` mirrors `:386`), and both operands are
+// themselves persisted slices — so the residual delay usually survives. What
+// does not survive is the case where the operand changed since arming:
+// `LOCK_VAULT_TIMEOUT` bumped by an update, or the user editing the auto-lock
+// timeout mid-countdown. The stored deadline is the only record of what was
+// actually promised, plus an orphan key left in `storage.local` forever.
+//
+// These assertions are the only thing that can catch a rename, so DO NOT "fix"
+// a failure here by updating the expected string — revert the rename instead.
 describe('storage-keys — shipped values are immutable', () => {
   it('pins LOGIN_RETRY_LOCKOUT_DEADLINE_KEY', () => {
     expect(LOGIN_RETRY_LOCKOUT_DEADLINE_KEY).toBe('q9Tf3Lm4pRxVne');

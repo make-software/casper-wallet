@@ -51,10 +51,18 @@ function deliveryFailedError(tabId: unknown, fallbackDelivered: boolean) {
 // `switchAccountResponse` type their payload as a bare boolean, so that branch
 // does not generalise across the union. For those two only `false` is the
 // throwaway shape — it is what `buildCancelResponse` synthesises and what the
-// reject buttons send. `true` is a genuine approval, and both approval paths
-// mutate wallet state BEFORE they send (`connectAccounts` / `changeActiveAccount`
-// are awaited), so a lost `true` leaves the wallet listing the site as connected
-// while the dapp was told the user rejected. That escalates like any other loss.
+// reject buttons send. `true` is a genuine approval, and the two interactive
+// approval paths mutate wallet state BEFORE they send (`approve-connection`
+// awaits `connectAccounts`, `switch-account` awaits `changeActiveAccount`), so a
+// lost `true` leaves the wallet listing the site as connected while the dapp was
+// told the user rejected. That escalates like any other loss.
+//
+// KNOWN NOISE: `select-account/index.tsx:64-71` sends `connectResponse(true)`
+// from the render body with no guard, so a re-render (the `windowRequestResponded`
+// broadcast triggers one) re-sends an already-DELIVERED approval, and that
+// duplicate lands here as an error. Nothing is lost in that case, but the status
+// alone cannot distinguish it from a `true` racing a cancel. Fixing it belongs in
+// that page, not in this classifier.
 //
 // And it fails LOUD — anything not recognised as benign is treated as a lost
 // result, because the cost of a missed warning is a line in a log while the
