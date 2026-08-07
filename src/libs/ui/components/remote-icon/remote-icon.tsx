@@ -15,13 +15,17 @@ export interface RemoteIconProps {
   /** Bundled `assets/icons/*.svg` path only — it is inlined by SvgIcon. */
   fallbackSrc?: string;
   className?: string;
+  /** Rounds the icon, e.g. `100` for a fully circular token logo. */
+  borderRadius?: number;
 }
 
-const Img = styled.img<{ size: number }>`
+const Img = styled.img<{ size: number; $borderRadius?: number }>`
   width: ${({ size }) => size}px;
   height: ${({ size }) => size}px;
   /* Contract and token logos are not guaranteed to be square. */
   object-fit: contain;
+  ${({ $borderRadius }) =>
+    $borderRadius != null && `border-radius: ${$borderRadius}px;`}
 `;
 
 /**
@@ -38,7 +42,8 @@ export const RemoteIcon = ({
   alt,
   title,
   fallbackSrc,
-  className
+  className,
+  borderRadius
 }: RemoteIconProps) => {
   const [hasError, setHasError] = useState(false);
 
@@ -62,10 +67,19 @@ export const RemoteIcon = ({
     <Img
       src={resolved.src}
       size={size}
+      $borderRadius={borderRadius}
       alt={alt || ''}
       title={title || undefined}
       onError={() => setHasError(true)}
       className={className}
+      // Partial mitigation only: strips the Referer header so the icon host
+      // can't correlate a request with the page it came from (which contract
+      // or token the wallet is showing, on signing screens included). The
+      // full fix is routing these through image-proxy-cdn.make.services and
+      // tightening img-src to that host, but the proxy 403s casper-assets
+      // URLs today ("requested URL is not allowed") and re-allowing them
+      // needs a backend-side decision — tracked as follow-up, not done here.
+      referrerPolicy="no-referrer"
     />
   );
 };

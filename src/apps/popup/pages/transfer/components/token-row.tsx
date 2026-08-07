@@ -40,6 +40,7 @@ export const TokenRow = ({
             size={24}
             alt={token?.name}
             title={token?.name}
+            borderRadius={100}
           />
         )}
         <Typography type="body">{token.name}</Typography>

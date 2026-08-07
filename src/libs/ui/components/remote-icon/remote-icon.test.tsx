@@ -1,5 +1,6 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { ServerStyleSheet } from 'styled-components';
 
 import { RemoteIcon } from './remote-icon';
 
@@ -32,5 +33,32 @@ describe('RemoteIcon', () => {
     );
 
     expect(html).toContain('alt=""');
+  });
+
+  it('withholds the referrer from the icon request', () => {
+    const html = renderToStaticMarkup(
+      <RemoteIcon src="https://example.com/a.png" />
+    );
+
+    expect(html).toContain('referrerPolicy="no-referrer"');
+  });
+
+  it('is square by default and round when a borderRadius is given', () => {
+    const squareSheet = new ServerStyleSheet();
+    renderToStaticMarkup(
+      squareSheet.collectStyles(<RemoteIcon src="https://example.com/a.png" />)
+    );
+    const squareCss = squareSheet.getStyleTags();
+
+    const roundSheet = new ServerStyleSheet();
+    renderToStaticMarkup(
+      roundSheet.collectStyles(
+        <RemoteIcon src="https://example.com/a.png" borderRadius={100} />
+      )
+    );
+    const roundCss = roundSheet.getStyleTags();
+
+    expect(squareCss).not.toContain('border-radius');
+    expect(roundCss).toContain('border-radius:100px');
   });
 });
