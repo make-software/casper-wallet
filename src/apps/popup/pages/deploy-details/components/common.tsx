@@ -10,7 +10,7 @@ import {
   getBlockExplorerContractPackageUrl,
   getContractNftUrl
 } from '@src/constants';
-import { isBundledAssetPath, isEqualCaseInsensitive } from '@src/utils';
+import { isEqualCaseInsensitive } from '@src/utils';
 
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
@@ -20,10 +20,12 @@ import {
   SpacingSize
 } from '@libs/layout';
 import { useFetchContractPackage } from '@libs/services/contract-package';
-import { Link, RemoteIcon, SvgIcon, Typography } from '@libs/ui/components';
+import { Link, Typography } from '@libs/ui/components';
 import { AccountInfoIcon } from '@libs/ui/components/account-info-icon/account-info-icon';
 import { HashTooltip } from '@libs/ui/components/hash/hash-tooltip';
 import { PortalTooltip } from '@libs/ui/components/portal-tooltip/portal-tooltip';
+
+import { ContractIcon } from './contract-icon';
 
 const AlignedFlexRowContainer = styled(AlignedFlexRow)`
   column-gap: 8px;
@@ -106,11 +108,7 @@ export const ActionContainerWithLink = ({
     <LeftAlignedFlexColumn gap={SpacingSize.Tiny}>
       <AlignedFlexRow gap={SpacingSize.Small}>
         <Typography type="bodySemiBold">{title}</Typography>
-        {isBundledAssetPath(contractIcon) ? (
-          <SvgIcon src={contractIcon} size={20} />
-        ) : (
-          <RemoteIcon src={contractIcon} size={20} alt={contractName} />
-        )}
+        <ContractIcon contractIcon={contractIcon} contractName={contractName} />
         <Link color="contentAction" href={contractLink ?? link} target="_blank">
           <Typography type="captionRegular">{contractName}</Typography>
         </Link>

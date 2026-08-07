@@ -5,8 +5,6 @@ import ReactPlayer from 'react-player';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { isBundledAssetPath } from '@src/utils';
-
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import { accountTrackingIdOfSentNftTokensRemoved } from '@background/redux/account-info/actions';
@@ -34,12 +32,13 @@ import {
   HashVariant,
   List,
   LoadingMediaPlaceholder,
-  RemoteIcon,
   Status,
   SvgIcon,
   Tile,
   Typography
 } from '@libs/ui/components';
+
+import { NftTokenDetailIcon } from './nft-token-detail-icon';
 
 const NftImageContainer = styled(CenteredFlexRow)`
   width: 100%;
@@ -344,11 +343,7 @@ export const NftDetailsContent = ({
                 >
                   {token.value}
                 </Typography>
-                {isBundledAssetPath(token.image) ? (
-                  <SvgIcon src={token.image} size={32} />
-                ) : (
-                  <RemoteIcon src={token.image} size={32} alt={token.value} />
-                )}
+                <NftTokenDetailIcon image={token.image} alt={token.value} />
               </AlignedFlexRow>
             ) : (
               <Typography
