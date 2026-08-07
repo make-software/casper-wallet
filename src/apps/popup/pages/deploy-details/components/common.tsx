@@ -10,7 +10,7 @@ import {
   getBlockExplorerContractPackageUrl,
   getContractNftUrl
 } from '@src/constants';
-import { hasHttpPrefix, isEqualCaseInsensitive } from '@src/utils';
+import { isBundledAssetPath, isEqualCaseInsensitive } from '@src/utils';
 
 import { selectApiConfigBasedOnActiveNetwork } from '@background/redux/settings/selectors';
 
@@ -106,10 +106,10 @@ export const ActionContainerWithLink = ({
     <LeftAlignedFlexColumn gap={SpacingSize.Tiny}>
       <AlignedFlexRow gap={SpacingSize.Small}>
         <Typography type="bodySemiBold">{title}</Typography>
-        {hasHttpPrefix(contractIcon) ? (
-          <RemoteIcon src={contractIcon} size={20} alt={contractName} />
-        ) : (
+        {isBundledAssetPath(contractIcon) ? (
           <SvgIcon src={contractIcon} size={20} />
+        ) : (
+          <RemoteIcon src={contractIcon} size={20} alt={contractName} />
         )}
         <Link color="contentAction" href={contractLink ?? link} target="_blank">
           <Typography type="captionRegular">{contractName}</Typography>

@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 
 import { DeployIcon } from '@src/constants';
 import {
-  hasHttpPrefix,
+  isBundledAssetPath,
   isEqualCaseInsensitive,
   isPublicKeyHash
 } from '@src/utils';
@@ -55,7 +55,9 @@ export const AccountInfoIcon = ({
   }
 
   if (iconUrl) {
-    return hasHttpPrefix(iconUrl) ? (
+    return isBundledAssetPath(iconUrl) ? (
+      <SvgIcon src={iconUrl} alt={accountName || ''} size={size} />
+    ) : (
       <RemoteIcon
         src={iconUrl}
         size={size}
@@ -63,8 +65,6 @@ export const AccountInfoIcon = ({
         title={publicKey}
         fallbackSrc={defaultSvg}
       />
-    ) : (
-      <SvgIcon src={iconUrl} alt={accountName || ''} size={size} />
     );
   }
 

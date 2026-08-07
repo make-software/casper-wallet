@@ -31,14 +31,49 @@ describe('assertLocalIconSrc', () => {
     );
   });
 
+  it('reports a shouted https prefix that hasHttpPrefix would have missed', () => {
+    process.env.NODE_ENV = 'development';
+
+    assertLocalIconSrc('HTTPS://example.com/a.svg');
+
+    expect(consoleError).toHaveBeenCalledTimes(1);
+    expect(consoleError.mock.calls[0][0]).toContain('[SvgIcon]');
+  });
+
+  it('reports a data: URI, which react-inlinesvg injects without any fetch', () => {
+    process.env.NODE_ENV = 'development';
+
+    assertLocalIconSrc('data:image/svg+xml,%3Csvg%3E%3C/svg%3E');
+
+    expect(consoleError).toHaveBeenCalledTimes(1);
+    expect(consoleError.mock.calls[0][0]).toContain('[SvgIcon]');
+  });
+
+  it('reports raw <svg> markup, which react-inlinesvg injects without any fetch', () => {
+    process.env.NODE_ENV = 'development';
+
+    assertLocalIconSrc('<svg onload="x"></svg>');
+
+    expect(consoleError).toHaveBeenCalledTimes(1);
+    expect(consoleError.mock.calls[0][0]).toContain('[SvgIcon]');
+  });
+
   it('stays silent for bundled asset paths', () => {
     process.env.NODE_ENV = 'development';
 
     assertLocalIconSrc('assets/icons/generic.svg');
     assertLocalIconSrc('/assets/icons/casper.svg');
-    assertLocalIconSrc('');
 
     expect(consoleError).not.toHaveBeenCalled();
+  });
+
+  it('reports an empty src, which is not a bundled asset path either', () => {
+    process.env.NODE_ENV = 'development';
+
+    assertLocalIconSrc('');
+
+    expect(consoleError).toHaveBeenCalledTimes(1);
+    expect(consoleError.mock.calls[0][0]).toContain('[SvgIcon]');
   });
 
   it('stays silent in a production build with no TEST_ENV', () => {

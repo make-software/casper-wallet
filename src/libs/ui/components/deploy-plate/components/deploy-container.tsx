@@ -2,7 +2,7 @@ import { Maybe } from 'casper-wallet-core/src/typings/common';
 import React from 'react';
 
 import { DeployIcon } from '@src/constants';
-import { hasHttpPrefix } from '@src/utils';
+import { isBundledAssetPath } from '@src/utils';
 
 import { AlignedFlexRow, FlexColumn, SpacingSize } from '@libs/layout';
 import { RemoteIcon, SvgIcon, Typography } from '@libs/ui/components';
@@ -20,7 +20,9 @@ export const DeployContainer = ({
 }: DeployContainerProps) => {
   return (
     <AlignedFlexRow gap={SpacingSize.Medium} flexGrow={1}>
-      {hasHttpPrefix(iconUrl) ? (
+      {isBundledAssetPath(iconUrl) ? (
+        <SvgIcon src={iconUrl} alt={title || ''} size={24} />
+      ) : (
         <RemoteIcon
           src={iconUrl}
           size={24}
@@ -28,8 +30,6 @@ export const DeployContainer = ({
           title={title}
           fallbackSrc={DeployIcon.Generic}
         />
-      ) : (
-        <SvgIcon src={iconUrl} alt={title || ''} size={24} />
       )}
       <FlexColumn>
         <AlignedFlexRow gap={SpacingSize.Small} style={{ maxWidth: '240px' }}>

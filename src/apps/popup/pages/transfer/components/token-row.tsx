@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { hasHttpPrefix } from '@src/utils';
+import { isBundledAssetPath } from '@src/utils';
 
 import { TokenType } from '@hooks/use-casper-token';
 
@@ -32,7 +32,7 @@ export const TokenRow = ({
   return (
     <Container onClick={handleSelect}>
       <AlignedFlexRow gap={SpacingSize.Medium}>
-        {token?.icon && !hasHttpPrefix(token.icon) ? (
+        {token?.icon != null && isBundledAssetPath(token.icon) ? (
           <SvgIcon src={token.icon} alt={token?.name} size={24} />
         ) : (
           <RemoteIcon

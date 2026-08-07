@@ -5,7 +5,7 @@ import ReactPlayer from 'react-player';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { hasHttpPrefix } from '@src/utils';
+import { isBundledAssetPath } from '@src/utils';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
@@ -344,10 +344,10 @@ export const NftDetailsContent = ({
                 >
                   {token.value}
                 </Typography>
-                {hasHttpPrefix(token.image) ? (
-                  <RemoteIcon src={token.image} size={32} alt={token.value} />
-                ) : (
+                {isBundledAssetPath(token.image) ? (
                   <SvgIcon src={token.image} size={32} />
+                ) : (
+                  <RemoteIcon src={token.image} size={32} alt={token.value} />
                 )}
               </AlignedFlexRow>
             ) : (

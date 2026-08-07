@@ -3,7 +3,7 @@ import React from 'react';
 import styled, { useTheme } from 'styled-components';
 
 import {
-  hasHttpPrefix,
+  isBundledAssetPath,
   isValidAccountHash,
   isValidPublicKey
 } from '@src/utils';
@@ -123,15 +123,15 @@ const ConnectionStatusBadge = ({
 };
 
 const Logo = ({ size, brandingLogo, publicKey }: LogoTypes) =>
-  hasHttpPrefix(brandingLogo) ? (
+  isBundledAssetPath(brandingLogo) ? (
+    <SvgIcon src={brandingLogo} alt={publicKey || ''} size={size} />
+  ) : (
     <RemoteIcon
       src={brandingLogo}
       size={size}
       alt={publicKey}
       title={publicKey}
     />
-  ) : (
-    <SvgIcon src={brandingLogo} alt={publicKey || ''} size={size} />
   );
 
 export const Avatar = ({

@@ -2,7 +2,7 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { hasHttpPrefix } from '@src/utils';
+import { isBundledAssetPath } from '@src/utils';
 
 import { AlignedFlexRow, SpaceBetweenFlexRow, SpacingSize } from '@libs/layout';
 import { RemoteIcon, SvgIcon, Tile, Typography } from '@libs/ui/components';
@@ -26,7 +26,7 @@ export const TokenSwitcherRow = ({
     <Tile style={{ marginTop: '8px' }}>
       <Container gap={SpacingSize.Medium}>
         <AlignedFlexRow gap={SpacingSize.Large} flexGrow={1}>
-          {iconUrl && !hasHttpPrefix(iconUrl) ? (
+          {iconUrl != null && isBundledAssetPath(iconUrl) ? (
             <SvgIcon src={iconUrl} size={24} />
           ) : (
             <RemoteIcon
