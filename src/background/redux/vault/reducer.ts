@@ -1,13 +1,56 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
+import { windowRequestResponded } from '@background/redux/windowManagement/actions';
+
 import { CasperWalletSupports } from '@content/sdk-types';
 
 import { SecretPhrase } from '@libs/crypto';
 import { Account } from '@libs/types/account';
 
+import { getPayload } from './payload-map';
 import { VaultState } from './types';
 
 type State = VaultState;
+
+/**
+ * Ceiling on `jsonById` / `eip712ById`.
+ *
+ * Both maps are cleared per request by the `windowRequestResponded` case in
+ * `extraReducers` below — but a deletion can be MISSED. An MV3 service-worker
+ * restart wipes `windowManagement.requests` (in-memory only) while these maps
+ * come back from the encrypted cipher through `vaultLoaded`, so the response
+ * for a pre-restart id can never arrive. Nothing else deletes a key:
+ * `deploysReseted` is a full-slice reset dispatched on lock, and `lockVaultSaga`
+ * flushes `updateVaultCipher` BEFORE it, so a leaked payload is re-loaded on the
+ * next unlock and lives in `storage.local` for good — while riding along in
+ * every popup-state broadcast, since `selectPopupState` sends `vault` whole.
+ *
+ * Ten is far above real concurrency (one approval window means 1-2 in-flight
+ * requests) and far below anything that costs memory.
+ */
+export const MAX_STORED_PAYLOADS = 10;
+
+type PayloadMap = State['jsonById'];
+
+// Insertion order = the order requests first stored a payload, since re-writing
+// an existing key keeps its original position — so the FIFO eviction below drops
+// the request that has been waiting longest, not one that merely refreshed.
+function storePayload(
+  payloads: PayloadMap,
+  requestId: string,
+  json: string
+): PayloadMap {
+  const next: PayloadMap = { ...payloads, [requestId]: json };
+
+  const overflow = Object.keys(next).length - MAX_STORED_PAYLOADS;
+  if (overflow > 0) {
+    for (const staleId of Object.keys(next).slice(0, overflow)) {
+      delete next[staleId];
+    }
+  }
+
+  return next;
+}
 
 const initialState: State = {
   secretPhrase: null,
@@ -277,19 +320,25 @@ const slice = createSlice({
       })
     }),
     deploysReseted: (): State => initialState,
+    // Merged, not replaced. Building a new single-entry dict here erased the
+    // payload of every other in-flight request — and since #1427 a request can
+    // legitimately outlive the window that displaced it: `cancelRequestsDisplacedBy`
+    // spares one that another window still shows (the Ledger permission window
+    // carries the same requestId). That survivor stayed 'open' on screen with
+    // nothing to sign, because its transaction JSON had just been dropped here.
     deployPayloadReceived: (
       state,
       { payload }: PayloadAction<{ id: string; json: string }>
     ): State => ({
       ...state,
-      jsonById: { [payload.id]: payload.json }
+      jsonById: storePayload(state.jsonById, payload.id, payload.json)
     }),
     eip712PayloadReceived: (
       state,
       { payload }: PayloadAction<{ id: string; json: string }>
     ): State => ({
       ...state,
-      eip712ById: { [payload.id]: payload.json }
+      eip712ById: storePayload(state.eip712ById, payload.id, payload.json)
     }),
     hideAccountFromListChanged: (
       state,
@@ -328,6 +377,40 @@ const slice = createSlice({
         activeAccountName: account.name
       };
     }
+  },
+  // The payload maps are bounded by the request lifecycle, not by a timer: a
+  // request that has been answered — signed, cancelled, superseded, or failed
+  // before its window opened — will never be read again, and every one of those
+  // paths funnels through `windowRequestResponded`.
+  //
+  // Keyed off the ACTION, not off `windowManagement`'s resulting state: that
+  // reducer no-ops the transition unless the request is currently 'open', which
+  // is exactly the orphan case (an MV3 restart between registration and the
+  // response) where a stale payload most needs dropping.
+  extraReducers: builder => {
+    builder.addCase(
+      windowRequestResponded,
+      (state, { payload: { requestId } }): State => {
+        if (
+          getPayload(state.jsonById, requestId) == null &&
+          getPayload(state.eip712ById, requestId) == null
+        ) {
+          // Same reasoning as the `displaced.length > 0` gate in
+          // cancel-requests.ts: the store subscriber compares nothing, so a new
+          // state object costs a popupState broadcast to every replica plus a
+          // full storage.local rewrite.
+          return state;
+        }
+
+        const jsonById = { ...state.jsonById };
+        const eip712ById = { ...state.eip712ById };
+
+        delete jsonById[requestId];
+        delete eip712ById[requestId];
+
+        return { ...state, jsonById, eip712ById };
+      }
+    );
   }
 });
 

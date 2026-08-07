@@ -33,6 +33,7 @@ import {
 } from '@background/redux/trusted-wasm/actions';
 import { selectTrustedWasmByOrigin } from '@background/redux/trusted-wasm/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
+import { getPayload } from '@background/redux/vault/payload-map';
 import {
   selectConnectedAccountNamesByOrigin,
   selectDeploysJsonById,
@@ -138,8 +139,11 @@ export function SignTransactionPage() {
     [accounts, signingPublicKeyHex]
   );
 
+  // `getPayload`, never a bare index: `requestId` is dapp-controlled, so
+  // `deployJsonById['constructor']` would hand this page an inherited
+  // Object.prototype member instead of transaction JSON.
   const transactionJson = useMemo<string | undefined>(
-    () => deployJsonById[requestId],
+    () => getPayload(deployJsonById, requestId),
     [deployJsonById, requestId]
   );
 
