@@ -58,7 +58,6 @@ async function handleSdkMessage(message: unknown) {
           // user just signed and leave the dapp hanging until its own timeout.
           // SECURITY: type + requestId only — the payload of these envelopes
           // carries signatureHex / encryptedMessage.
-          // nosemgrep: cw-logging-secrets — type + requestId only, never payload
           console.error(
             'Content: dropped a delayed SDK response, no active port:',
             message.type,

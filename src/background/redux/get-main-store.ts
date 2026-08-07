@@ -108,7 +108,6 @@ function broadcastToReplicas(message: BackgroundEvent, source: string): void {
     }
     // The broadcast payload (which carries the decrypted vault) is never
     // logged — only a static source label and the error object.
-    // nosemgrep: cw-logging-secrets
     console.error(`${source} broadcast failed:`, error);
   });
 }

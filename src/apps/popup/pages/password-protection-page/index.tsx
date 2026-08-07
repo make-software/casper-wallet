@@ -136,7 +136,6 @@ export const PasswordProtectionPage = ({
             .catch((error: unknown) => {
               // The password is in scope but is deliberately not referenced
               // here — only a static message and the error object are logged.
-              // nosemgrep: cw-logging-secrets
               console.error('Password confirmation failed:', error);
               setIsSubmitting(false);
             });

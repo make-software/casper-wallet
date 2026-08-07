@@ -185,7 +185,7 @@ export async function handleSdkMethod(
       // The dapp-facing message stays generic (it crosses a trust boundary);
       // the cause is kept here, otherwise a parse failure is unrecoverable
       // from a bug report.
-      // nosemgrep: cw-logging-secrets — static message + error object, no payload
+      // Static message + error object, never the payload.
       console.error('sdk-methods: deploy json string parse failed:', err);
       throw Error('Deploy json string parse error');
     }
@@ -474,7 +474,7 @@ export async function handleSdkMethod(
     try {
       PublicKey.fromHex(signingPublicKeyHex);
     } catch (e) {
-      // nosemgrep: cw-logging-secrets — static message + error object, no key material
+      // Static message + error object, never key material.
       console.error('sdk-methods: public key hex invalid:', e);
       throw Error('Public key hex is not valid');
     }
@@ -501,7 +501,7 @@ export async function handleSdkMethod(
         )
       };
     } catch (e) {
-      // nosemgrep: cw-logging-secrets — static message + error object, no message content
+      // Static message + error object, never the message content.
       console.error('sdk-methods: message encryption failed:', e);
       throw Error('Error during message encryption');
     }
