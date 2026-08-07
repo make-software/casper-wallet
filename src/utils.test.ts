@@ -89,6 +89,32 @@ describe('isBundledAssetPath', () => {
     expect(isBundledAssetPath('myassets/icons/a.svg')).toBe(false);
     expect(isBundledAssetPath('  assets/icons/a.svg')).toBe(false);
   });
+
+  // The prefix is the easy half. These all START with a legitimate `assets/`,
+  // so a `^/?assets/` test accepts every one of them — and react-inlinesvg
+  // inlines any string containing `<svg` verbatim, with no fetch and therefore
+  // no connect-src gate, on the signing screens AccountInfoIcon renders in.
+  it('rejects markup smuggled into the remainder of a valid prefix', () => {
+    expect(isBundledAssetPath('assets/<svg onload=1></svg>')).toBe(false);
+    expect(
+      isBundledAssetPath('assets/x<svg><style>*{display:none}</style></svg>')
+    ).toBe(false);
+    expect(isBundledAssetPath('/assets/<svg/>')).toBe(false);
+    expect(isBundledAssetPath('assets/data:image/svg+xml,<svg/>')).toBe(false);
+    expect(isBundledAssetPath('assets/icons/a.svg?x=<svg>')).toBe(false);
+    expect(isBundledAssetPath('assets/icons/a.svg#<svg>')).toBe(false);
+    expect(isBundledAssetPath('assets/../../etc/passwd')).toBe(false);
+  });
+
+  // Guards the other direction: a rejected bundled path falls through to
+  // RemoteIcon, which renders it as <img> and so loses SvgIcon's
+  // fill="currentColor" pass — the icon still appears but stops following the
+  // theme, which no other test would catch.
+  it('stays permissive enough for asset shapes webpack may emit later', () => {
+    expect(isBundledAssetPath('assets/icons/icon.min.svg')).toBe(true);
+    expect(isBundledAssetPath('assets/images/logo.png')).toBe(true);
+    expect(isBundledAssetPath('assets/icons/nested/deep/a.svg')).toBe(true);
+  });
 });
 
 describe('getSafariCspContent', () => {

@@ -19,7 +19,12 @@ const httpPrefixRegex = /^https?:\/\//;
 
 export const hasHttpPrefix = (url: string) => httpPrefixRegex.test(url);
 
-const bundledAssetPathRegex = /^\/?assets\//;
+// Anchored at BOTH ends, over a charset that cannot express markup. A bare
+// `^/?assets/` prefix test puts no constraint on the remainder, so an
+// API-supplied `assets/<svg onload=…></svg>` satisfies it and reaches the
+// inliner — `<`, `>`, spaces, quotes, `?`, `#`, `:` and `,` are all excluded,
+// and requiring a final `.ext` also rejects `..` traversal segments.
+const bundledAssetPathRegex = /^\/?assets\/(?:[\w-]+\/)*[\w.-]+\.[a-z0-9]+$/i;
 
 /**
  * Whether a src points at a file webpack bundled into the extension.
@@ -29,6 +34,10 @@ const bundledAssetPathRegex = /^\/?assets\//;
  * payloads and raw `<svg …>` strings straight into the DOM without any fetch —
  * so connect-src never sees them. Deciding "is this ours" rather than "is this
  * remote" keeps every unrecognised shape out of the inliner by default.
+ *
+ * The allow-list has to constrain the WHOLE string, not just its prefix: the
+ * shape it is guarding against is markup, and `assets/<svg …>` is both a valid
+ * prefix match and a payload react-inlinesvg inlines verbatim.
  */
 export const isBundledAssetPath = (src: string) =>
   bundledAssetPathRegex.test(src);

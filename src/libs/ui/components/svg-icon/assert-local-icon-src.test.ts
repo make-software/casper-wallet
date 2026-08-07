@@ -58,6 +58,20 @@ describe('assertLocalIconSrc', () => {
     expect(consoleError.mock.calls[0][0]).toContain('[SvgIcon]');
   });
 
+  // The guard fires on whatever isBundledAssetPath rejects, so a predicate that
+  // only checked the prefix left it silent on exactly this shape — a valid
+  // `assets/` prefix with `<svg …>` smuggled into the remainder, which routes
+  // to SvgIcon and gets inlined. The e2e [SvgIcon] marker could not catch it
+  // either, for the same reason.
+  it('reports markup smuggled into the remainder of a valid assets/ prefix', () => {
+    process.env.NODE_ENV = 'development';
+
+    assertLocalIconSrc('assets/<svg onload=1></svg>');
+
+    expect(consoleError).toHaveBeenCalledTimes(1);
+    expect(consoleError.mock.calls[0][0]).toContain('[SvgIcon]');
+  });
+
   it('stays silent for bundled asset paths', () => {
     process.env.NODE_ENV = 'development';
 
