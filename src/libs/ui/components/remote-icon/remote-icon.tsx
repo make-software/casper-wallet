@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import { DeployIcon } from '@src/constants';
+
 // Imported by path, not through the '@libs/ui/components' barrel this component
 // is itself exported from — the barrel import would close an import cycle.
 import { SvgIcon } from '@libs/ui/components/svg-icon/svg-icon';
@@ -12,8 +14,8 @@ export interface RemoteIconProps {
   size?: number;
   alt?: string | null;
   title?: string | null;
-  /** Bundled `assets/icons/*.svg` path only — it is inlined by SvgIcon. */
-  fallbackSrc?: string;
+  /** A bundled `assets/icons/*.svg` path — it is inlined by SvgIcon. */
+  fallbackSrc?: DeployIcon;
   className?: string;
   /** Rounds the icon, e.g. `100` for a fully circular token logo. */
   borderRadius?: number;

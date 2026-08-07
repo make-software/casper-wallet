@@ -1,3 +1,5 @@
+import { DeployIcon } from '@src/constants';
+
 import { resolveIconSrc } from './resolve-icon-src';
 
 describe('resolveIconSrc', () => {
@@ -11,28 +13,28 @@ describe('resolveIconSrc', () => {
     expect(
       resolveIconSrc({
         src: 'https://example.com/a.svg',
-        fallbackSrc: 'assets/icons/generic.svg',
+        fallbackSrc: DeployIcon.Generic,
         hasError: true
       })
-    ).toEqual({ src: 'assets/icons/generic.svg', isFallback: true });
+    ).toEqual({ src: DeployIcon.Generic, isFallback: true });
   });
 
   it('falls back when there is no url at all', () => {
     expect(
       resolveIconSrc({
         src: null,
-        fallbackSrc: 'assets/icons/generic.svg',
+        fallbackSrc: DeployIcon.Generic,
         hasError: false
       })
-    ).toEqual({ src: 'assets/icons/generic.svg', isFallback: true });
+    ).toEqual({ src: DeployIcon.Generic, isFallback: true });
 
     expect(
       resolveIconSrc({
         src: '',
-        fallbackSrc: 'assets/icons/generic.svg',
+        fallbackSrc: DeployIcon.Generic,
         hasError: false
       })
-    ).toEqual({ src: 'assets/icons/generic.svg', isFallback: true });
+    ).toEqual({ src: DeployIcon.Generic, isFallback: true });
   });
 
   it('renders nothing when there is neither a url nor a fallback', () => {
@@ -46,17 +48,20 @@ describe('resolveIconSrc', () => {
     expect(
       resolveIconSrc({
         src: null,
-        fallbackSrc: 'assets/icons/generic.svg',
+        fallbackSrc: DeployIcon.Generic,
         hasError: true
       })
-    ).toEqual({ src: 'assets/icons/generic.svg', isFallback: true });
+    ).toEqual({ src: DeployIcon.Generic, isFallback: true });
   });
 
   it('treats an empty-string fallback as no fallback', () => {
     expect(
       resolveIconSrc({
         src: 'https://example.com/a.svg',
-        fallbackSrc: '',
+        // Not a real DeployIcon value — this exercises the falsy-fallback
+        // guard in resolveIconSrc itself, not a case that can occur through
+        // the (now DeployIcon-typed) fallbackSrc prop in production.
+        fallbackSrc: '' as DeployIcon,
         hasError: true
       })
     ).toBeNull();

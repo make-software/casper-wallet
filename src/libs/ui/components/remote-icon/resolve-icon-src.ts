@@ -1,6 +1,8 @@
+import { DeployIcon } from '@src/constants';
+
 interface ResolveIconSrcProps {
   src?: string | null;
-  fallbackSrc?: string;
+  fallbackSrc?: DeployIcon;
   hasError: boolean;
 }
 

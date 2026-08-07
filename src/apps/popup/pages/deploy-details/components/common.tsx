@@ -129,7 +129,7 @@ interface NftInfoRowProps {
   contractHash: string;
   collectionName?: Maybe<string>;
   isApprove?: boolean;
-  defaultSvg?: string;
+  defaultSvg?: DeployIcon;
   collectionHash: string;
   contractLink?: Maybe<string>;
 }
@@ -280,7 +280,7 @@ interface ContractInfoRowProps {
   iconUrl?: Maybe<string>;
   label?: string;
   additionalInfo?: string;
-  defaultSvg?: string;
+  defaultSvg?: DeployIcon;
   contractLink?: Maybe<string>;
 }
 

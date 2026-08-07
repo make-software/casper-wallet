@@ -18,7 +18,7 @@ interface AccountInfoIconProps {
   accountName?: Maybe<string>;
   publicKey: Maybe<string>;
   size?: number;
-  defaultSvg?: string;
+  defaultSvg?: DeployIcon;
 }
 
 export const AccountInfoIcon = ({
