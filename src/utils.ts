@@ -19,6 +19,20 @@ const httpPrefixRegex = /^https?:\/\//;
 
 export const hasHttpPrefix = (url: string) => httpPrefixRegex.test(url);
 
+const bundledAssetPathRegex = /^\/?assets\//;
+
+/**
+ * Whether a src points at a file webpack bundled into the extension.
+ *
+ * This is an allow-list on purpose, and it is the inverse of how the routing
+ * used to work. SvgIcon is react-inlinesvg, which injects `data:image/svg+xml`
+ * payloads and raw `<svg …>` strings straight into the DOM without any fetch —
+ * so connect-src never sees them. Deciding "is this ours" rather than "is this
+ * remote" keeps every unrecognised shape out of the inliner by default.
+ */
+export const isBundledAssetPath = (src: string) =>
+  bundledAssetPathRegex.test(src);
+
 export const getUrlOrigin = (url: string | undefined) => {
   if (!url) {
     return undefined;

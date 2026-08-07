@@ -1,5 +1,9 @@
 import cspConfig from './csp.json';
-import { getSafariCspContent, hasHttpPrefix } from './utils';
+import {
+  getSafariCspContent,
+  hasHttpPrefix,
+  isBundledAssetPath
+} from './utils';
 
 describe('hasHttpPrefix', () => {
   it('accepts absolute http and https urls', () => {
@@ -32,6 +36,43 @@ describe('hasHttpPrefix', () => {
   it('is anchored at the start of the string', () => {
     expect(hasHttpPrefix('  https://example.com/a.svg')).toBe(false);
     expect(hasHttpPrefix('/redirect?to=https://example.com/a.svg')).toBe(false);
+  });
+});
+
+describe('isBundledAssetPath', () => {
+  it('accepts the two shapes bundled icons actually use', () => {
+    expect(isBundledAssetPath('assets/icons/generic.svg')).toBe(true);
+    expect(isBundledAssetPath('/assets/icons/casper.svg')).toBe(true);
+    expect(isBundledAssetPath('assets/illustrations/rate-app.svg')).toBe(true);
+  });
+
+  it('rejects every remote scheme, including a shouted one', () => {
+    expect(
+      isBundledAssetPath('https://casper-assets.s3.amazonaws.com/a.svg')
+    ).toBe(false);
+    expect(isBundledAssetPath('http://example.com/a.svg')).toBe(false);
+    // hasHttpPrefix is case-sensitive; this predicate must not inherit that gap,
+    // because whatever it rejects is what stays out of react-inlinesvg.
+    expect(isBundledAssetPath('HTTPS://example.com/a.svg')).toBe(false);
+    expect(isBundledAssetPath('//example.com/a.svg')).toBe(false);
+  });
+
+  it('rejects the two shapes react-inlinesvg injects without any fetch', () => {
+    expect(isBundledAssetPath('data:image/svg+xml,%3Csvg%3E%3C/svg%3E')).toBe(
+      false
+    );
+    expect(
+      isBundledAssetPath('data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=')
+    ).toBe(false);
+    expect(isBundledAssetPath('<svg onload="x"></svg>')).toBe(false);
+  });
+
+  it('rejects traversal and near-misses', () => {
+    expect(isBundledAssetPath('')).toBe(false);
+    expect(isBundledAssetPath('../assets/icons/a.svg')).toBe(false);
+    expect(isBundledAssetPath('assets')).toBe(false);
+    expect(isBundledAssetPath('myassets/icons/a.svg')).toBe(false);
+    expect(isBundledAssetPath('  assets/icons/a.svg')).toBe(false);
   });
 });
 
