@@ -12,6 +12,7 @@ import {
 import { selectLedgerNewWindowId } from '@background/redux/ledger/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 
+import { makeLedgerWindowCloseListener } from '@hooks/ledger-window-close-listener';
 import { registerLedgerPermissionWindow } from '@hooks/register-ledger-permission-window';
 
 import {
@@ -230,12 +231,7 @@ export const useLedger = ({
 
         triggeredRef.current = true;
 
-        const handleCloseWindow = () => {
-          dispatchToMainStore(ledgerStateCleared());
-          windows.onRemoved.removeListener(handleCloseWindow);
-        };
-
-        windows.onRemoved.addListener(handleCloseWindow);
+        windows.onRemoved.addListener(makeLedgerWindowCloseListener(w.id));
       }
     })().catch(error => {
       // `openNewSeparateWindow` is an awaited call that can reject, and without
