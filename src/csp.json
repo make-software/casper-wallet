@@ -1,5 +1,5 @@
 {
-  "baseDirectives": "default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'self' 'wasm-unsafe-eval'",
+  "baseDirectives": "default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'self' 'wasm-unsafe-eval'; img-src https: data:; media-src https: data:",
   "connectSrc": [
     "https://event-store-api-clarity-testnet.make.services",
     "https://event-store-api-clarity-mainnet.make.services",

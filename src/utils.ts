@@ -187,7 +187,7 @@ export const getSigningAccount = (
  * changes what Safari enforces.
  */
 export const getSafariCspContent = () =>
-  `${cspConfig.baseDirectives}; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src ${cspConfig.connectSrc.join(' ')}`;
+  `${cspConfig.baseDirectives}; style-src 'unsafe-inline'; connect-src ${cspConfig.connectSrc.join(' ')}`;
 
 export const setCSPForSafari = () => {
   if (isSafariBuild) {
@@ -197,8 +197,9 @@ export const setCSPForSafari = () => {
       const meta = document.createElement('meta');
 
       meta.setAttribute('http-equiv', 'Content-Security-Policy');
-      // Shared directives come from src/csp.json so it cannot drift from the
-      // other targets again; only the style arm is Safari-specific.
+      // Shared directives (img-src/media-src included) come from src/csp.json
+      // so they cannot drift from the other targets again; only the style
+      // arm is Safari-specific.
       // Note: frame-ancestors inside a <meta http-equiv> is ignored by browsers;
       // it is present for parity with the built manifests, not as protection.
       meta.setAttribute('content', getSafariCspContent());

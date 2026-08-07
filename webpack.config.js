@@ -92,10 +92,10 @@ const getCSP = () => {
   const styleDirectives = CSP_NONCE
     ? `style-src 'self' 'nonce-${CSP_NONCE}'; style-src-attr 'unsafe-inline'`
     : "style-src 'unsafe-inline'";
-  // `baseDirectives` and `connectSrc` are shared with the Safari runtime <meta>
-  // policy in src/utils.ts — see src/csp.json. Only the style arm differs per
-  // target, so it stays here.
-  const csp = `${cspConfig.baseDirectives}; ${styleDirectives}; img-src https: data:; media-src https: data:; connect-src ${cspConfig.connectSrc.join(' ')}`;
+  // `baseDirectives` (which now also carries img-src/media-src) and `connectSrc`
+  // are shared with the Safari runtime <meta> policy in src/utils.ts — see
+  // src/csp.json. Only the style arm differs per target, so it stays here.
+  const csp = `${cspConfig.baseDirectives}; ${styleDirectives}; connect-src ${cspConfig.connectSrc.join(' ')}`;
 
   if (isFirefox) {
     return csp;
