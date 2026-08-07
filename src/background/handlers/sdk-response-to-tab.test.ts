@@ -209,7 +209,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
       consoleWarn.mockRestore();
     });
 
-    it('escalates a dropped completed response and surfaces it to the user', async () => {
+    it('escalates a dropped completed response to error severity', async () => {
       const { store, dispatch } = makeStore({ status: 'responded' });
 
       await handleSdkResponseToTab(makeMessage(), UI_SENDER, store);
@@ -219,7 +219,10 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
         'sdk-response-to-tab: dropped a completed response — the result was lost',
         { requestId: REQUEST_ID, tabId: TAB_ID, type: expect.any(String) }
       );
-      expect(findSagaError(dispatch)).toBeDefined();
+      // Log-only by decision: `SagaErrorBanner` renders `message` verbatim and
+      // untranslated over the approval screens, so the user-facing half needs
+      // copy and an i18n key it does not have yet.
+      expect(findSagaError(dispatch)).toBeUndefined();
       // Identifiers only, never the signed payload — in either channel.
       const logged = JSON.stringify([
         ...consoleError.mock.calls,
@@ -241,16 +244,17 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
       expect(findSagaError(dispatch)).toBeUndefined();
     });
 
-    it('treats a bare boolean answer as benign too', async () => {
+    it('treats a bare `false` boolean answer as benign too', async () => {
       // `connectResponse` / `switchAccountResponse` type their payload as a
       // plain boolean, so a branch on `payload.cancelled` does not generalise
-      // across the union — and neither of them can lose anything.
-      const { store, dispatch } = makeStore({ status: 'responded' });
+      // across the union. `false` is what `buildCancelResponse` and the reject
+      // buttons send — nothing is lost by dropping it.
+      const { store } = makeStore({ status: 'responded' });
 
       await handleSdkResponseToTab(
         {
           type: SDK_RESPONSE_TO_TAB,
-          action: sdkMethod.connectResponse(true, { requestId: REQUEST_ID }),
+          action: sdkMethod.connectResponse(false, { requestId: REQUEST_ID }),
           tabId: TAB_ID
         },
         UI_SENDER,
@@ -259,7 +263,34 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
       expect(consoleWarn).toHaveBeenCalled();
       expect(consoleError).not.toHaveBeenCalled();
-      expect(findSagaError(dispatch)).toBeUndefined();
+    });
+
+    it('escalates a dropped bare `true` boolean answer — it is an approval', async () => {
+      // The asymmetry this closes: `approve-connection` awaits
+      // `connectAccounts(...)` and `switch-account` awaits
+      // `changeActiveAccount(...)` BEFORE sending, so a dropped `true` leaves
+      // the wallet listing the site as connected while the dapp was told the
+      // user rejected. Classifying it as a cancel logs the exact opposite of
+      // what happened.
+      const { store } = makeStore({ status: 'responded' });
+
+      await handleSdkResponseToTab(
+        {
+          type: SDK_RESPONSE_TO_TAB,
+          action: sdkMethod.switchAccountResponse(true, {
+            requestId: REQUEST_ID
+          }),
+          tabId: TAB_ID
+        },
+        UI_SENDER,
+        store
+      );
+
+      expect(consoleError).toHaveBeenCalledWith(
+        'sdk-response-to-tab: dropped a completed response — the result was lost',
+        { requestId: REQUEST_ID, tabId: TAB_ID, type: expect.any(String) }
+      );
+      expect(consoleWarn).not.toHaveBeenCalled();
     });
   });
 

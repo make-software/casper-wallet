@@ -49,13 +49,20 @@ function deliveryFailedError(tabId: unknown, fallbackDelivered: boolean) {
 //
 // It cannot be decided by `payload.cancelled` alone: `connectResponse` and
 // `switchAccountResponse` type their payload as a bare boolean, so that branch
-// does not generalise across the union. And it fails LOUD — anything not
-// recognised as benign is treated as a lost result, because the cost of a
-// missed warning is a line in a log while the cost of a missed error is a
-// signature the user produced and nobody ever received.
+// does not generalise across the union. For those two only `false` is the
+// throwaway shape — it is what `buildCancelResponse` synthesises and what the
+// reject buttons send. `true` is a genuine approval, and both approval paths
+// mutate wallet state BEFORE they send (`connectAccounts` / `changeActiveAccount`
+// are awaited), so a lost `true` leaves the wallet listing the site as connected
+// while the dapp was told the user rejected. That escalates like any other loss.
+//
+// And it fails LOUD — anything not recognised as benign is treated as a lost
+// result, because the cost of a missed warning is a line in a log while the
+// cost of a missed error is a signature the user produced and nobody ever
+// received.
 function isBenignDuplicate(payload: unknown): boolean {
   if (typeof payload === 'boolean') {
-    return true;
+    return payload === false;
   }
 
   return (
@@ -126,18 +133,15 @@ export async function handleSdkResponseToTab(
         identifiers
       );
     } else {
+      // Log-only, deliberately. The user-facing half would need copy that does
+      // not name an internal tabId (which identifies no dapp and suggests no
+      // next step) and an i18n key — `SagaErrorBanner` renders `message`
+      // verbatim and untranslated, and is mounted over the approval screens.
+      // Same call as item #19 in this PR: surface it in the log now, decide the
+      // banner separately.
       console.error(
         'sdk-response-to-tab: dropped a completed response — the result was lost',
         identifiers
-      );
-      // The log alone is not enough here: the user approved something, the
-      // dapp will never hear about it, and nothing else on this path says so.
-      // No payload, no origin — appEvents is broadcast to every replica.
-      store.dispatch(
-        sagaError({
-          source: 'sdk-response-to-tab',
-          message: `A completed response for tab ${tabId} was dropped as a duplicate; the site was not told`
-        })
       );
     }
     // Drop the duplicate — it never reaches the tab. Respond so the forwarding
