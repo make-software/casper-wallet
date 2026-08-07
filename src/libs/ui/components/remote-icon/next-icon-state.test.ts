@@ -1,42 +1,25 @@
-import { nextIconState } from './next-icon-state';
+import { nextHasError } from './next-icon-state';
 
-describe('nextIconState', () => {
-  it('clears hasError when src changes', () => {
-    expect(nextIconState({ src: 'a', hasError: true }, { src: 'b' })).toEqual({
-      src: 'b',
-      hasError: false
-    });
+describe('nextHasError', () => {
+  it('clears hasError on a srcChanged event, regardless of the prior value', () => {
+    expect(nextHasError(true, { type: 'srcChanged' })).toBe(false);
+    expect(nextHasError(false, { type: 'srcChanged' })).toBe(false);
   });
 
-  it('preserves hasError when src is unchanged', () => {
-    expect(nextIconState({ src: 'a', hasError: true }, { src: 'a' })).toEqual({
-      src: 'a',
-      hasError: true
-    });
-
-    expect(nextIconState({ src: 'a', hasError: false }, { src: 'a' })).toEqual({
-      src: 'a',
-      hasError: false
-    });
+  it('sets hasError on a loadError event, regardless of the prior value', () => {
+    expect(nextHasError(false, { type: 'loadError' })).toBe(true);
+    expect(nextHasError(true, { type: 'loadError' })).toBe(true);
   });
 
-  it('does not let an error latch onto a recycled row: error, then row reuse with a new src', () => {
-    // A row shows token-a and its image fails to load.
-    const afterError = { src: 'token-a', hasError: true };
+  it('does not let an error latch onto a recycled row: loadError, then a genuine srcChanged clears it', () => {
+    const afterError = nextHasError(false, { type: 'loadError' });
+    expect(afterError).toBe(true);
 
-    // The same component instance is recycled to show token-b.
-    const recycled = nextIconState(afterError, { src: 'token-b' });
-
-    expect(recycled).toEqual({ src: 'token-b', hasError: false });
-  });
-
-  it('treats null and undefined src as distinct values, not both "no src"', () => {
-    expect(
-      nextIconState({ src: undefined, hasError: true }, { src: null })
-    ).toEqual({ src: null, hasError: false });
-
-    expect(nextIconState({ src: null, hasError: true }, { src: null })).toEqual(
-      { src: null, hasError: true }
-    );
+    // The same component instance is recycled to show a different token —
+    // the effect behind this event only ever fires when src genuinely
+    // changed (React's own dependency-array guarantee), so a srcChanged
+    // event here always means a new, unrelated icon.
+    const afterRecycle = nextHasError(afterError, { type: 'srcChanged' });
+    expect(afterRecycle).toBe(false);
   });
 });
