@@ -145,15 +145,35 @@ describe('openExportKeysWindowSaga', () => {
       .run();
   });
 
-  it('does not track when the created window has no id', () => {
-    return expectSaga(openExportKeysWindowSaga)
-      .withState({ windowManagement: { exportKeysWindowId: null } })
-      .provide([
-        [matchers.call.fn(windows.getCurrent), currentWindow],
-        [matchers.call.fn(windows.create), {}]
-      ])
-      .not.put.actionType(exportKeysWindowIdChanged.type)
-      .run();
+  it('reports a created window that cannot be tracked', async () => {
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    try {
+      const { allEffects } = await expectSaga(openExportKeysWindowSaga)
+        .withState({ windowManagement: { exportKeysWindowId: null } })
+        .provide([
+          [matchers.call.fn(windows.getCurrent), currentWindow],
+          [matchers.call.fn(windows.create), {}]
+        ])
+        .put(
+          sagaError({
+            source: 'openExportKeysWindowSaga',
+            message:
+              'Could not track the export window; close it before opening another'
+          })
+        )
+        .not.put.actionType(exportKeysWindowIdChanged.type)
+        // Nothing was tracked, so there is nothing to clear: the new branch
+        // must not invent state.
+        .not.put.actionType(exportKeysWindowIdCleared.type)
+        .run();
+
+      expect(countPutsOfType(allEffects, sagaError.type)).toBe(1);
+    } finally {
+      consoleError.mockRestore();
+    }
   });
 
   it('surfaces a saga error when the export window cannot be opened', async () => {

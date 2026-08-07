@@ -97,6 +97,23 @@ export function* openExportKeysWindowSaga() {
 
     if (created.id != null) {
       yield put(exportKeysWindowIdChanged(created.id));
+    } else {
+      // windows.create RESOLVED, so the window is on screen — but with no id
+      // the store cannot track it: selectExportKeysWindowId stays null, the
+      // reuse guard above short-circuits, and the next click opens a SECOND
+      // window rendering key material. There is also no id to pass to
+      // windows.remove, so this is reported, not repaired. `created` is
+      // deliberately not logged: a Windows.Window can carry tabs[].url.
+      console.error(
+        'openExportKeysWindowSaga: the export window resolved without an id'
+      );
+      yield put(
+        sagaError({
+          source: ERROR_SOURCE,
+          message:
+            'Could not track the export window; close it before opening another'
+        })
+      );
     }
   } catch (error) {
     console.error(
