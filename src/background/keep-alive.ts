@@ -79,10 +79,15 @@ function keepAlive() {
     // rejects with "Receiving end does not exist." That is expected and
     // harmless — the act of sending is what resets the SW idle timer; the
     // reply is unused. Swallow only this case so real errors still surface.
-    if (
-      error instanceof Error &&
-      error.message.includes('Receiving end does not exist')
-    ) {
+    //
+    // Matched on the text regardless of the rejection's type: a polyfill that
+    // rejects with a bare string instead of an Error would otherwise take the
+    // `console.error` below on the normal idle steady state — an unlocked
+    // wallet with no UI open pings every 30s (`periodInMinutes: 0.5`), so that
+    // is a recurring false error that buries the real ones. Same guard shape as
+    // `broadcastToReplicas` in get-main-store.ts.
+    const text = error instanceof Error ? error.message : String(error);
+    if (text.includes('Receiving end does not exist')) {
       return;
     }
     console.error('KeepAlive error:', error);
