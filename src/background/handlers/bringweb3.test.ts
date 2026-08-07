@@ -61,12 +61,14 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-// NOTE: characterization of the CURRENT (known-vulnerable) behavior, not an
-// endorsement. `getActivePublicKey` discloses the active account's public key
-// with no vault-lock check and no dapp-connection check — the open P0.6 finding.
-// When P0.6 is fixed this assertion must FLIP (gated/withheld), not be restored.
+// `getActivePublicKey` discloses the active account's public key to the
+// bringweb3 integration. The vault-lock half of P0.6 is closed below: locked or
+// no-active-account now yields an explicit `null` rather than a success-shaped
+// `undefined`. The per-origin CONNECTION check is still missing — a separate P3
+// item; when it lands, the unlocked case here must become gated too.
 describe('handleBringWeb3 — getActivePublicKey', () => {
-  it("returns the active account's public key", async () => {
+  it("returns the active account's public key when unlocked", async () => {
+    selectIsLockedMock.mockReturnValue(false);
     selectActiveAccountMock.mockReturnValue({ publicKey: 'PK-abc' } as any);
 
     const result = await handleBringWeb3(
@@ -79,6 +81,37 @@ describe('handleBringWeb3 — getActivePublicKey', () => {
       response: bringWeb3Events.getActivePublicKeyResponse({
         publicKey: 'PK-abc'
       })
+    });
+  });
+
+  it('withholds the key while the vault is locked, without reading the vault', async () => {
+    selectIsLockedMock.mockReturnValue(true);
+    selectActiveAccountMock.mockReturnValue({ publicKey: 'PK-abc' } as any);
+
+    const result = await handleBringWeb3(
+      bringWeb3Events.getActivePublicKey(),
+      store
+    );
+
+    expect(result).toEqual({
+      handled: true,
+      response: bringWeb3Events.getActivePublicKeyResponse({ publicKey: null })
+    });
+    expect(selectActiveAccountMock).not.toHaveBeenCalled();
+  });
+
+  it('reports null when unlocked with no active account', async () => {
+    selectIsLockedMock.mockReturnValue(false);
+    selectActiveAccountMock.mockReturnValue(undefined as any);
+
+    const result = await handleBringWeb3(
+      bringWeb3Events.getActivePublicKey(),
+      store
+    );
+
+    expect(result).toEqual({
+      handled: true,
+      response: bringWeb3Events.getActivePublicKeyResponse({ publicKey: null })
     });
   });
 });

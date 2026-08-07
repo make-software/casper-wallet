@@ -45,19 +45,58 @@ function deliveryFailedError(tabId: unknown, fallbackDelivered: boolean) {
   });
 }
 
-// Server-side dedupe of SDK responses (P0.5 root cause). The signature UI pages
-// used to `tabs.sendMessage` the response to the dapp tab directly and guard
-// double-sends with a per-page `responseSentRef` (fragile: per instance, lost on
-// reload). Now every response is forwarded here and deduped by `requestId`: the
-// FIRST response for a request wins, later ones are dropped — atomically,
-// because the background store is the single writer.
+// Is a dropped duplicate one that costs nothing?
 //
-// CRITICAL: drop ONLY when the request is already 'responded'. When the tracked
-// approval window closes, the `windows.onRemoved` listener runs
-// `cancelOpenRequestsForClosedWindow`, which — after a short grace — marks each
-// request it cancels 'responded' (via `windowRequestResponded`). Dropping only on
-// 'responded' kills the real duplicate (a cancel racing a successful sign, where
-// the sign already set 'responded') without ever suppressing a first response.
+// It cannot be decided by `payload.cancelled` alone: `connectResponse` and
+// `switchAccountResponse` type their payload as a bare boolean, so that branch
+// does not generalise across the union. For those two only `false` is the
+// throwaway shape — it is what `buildCancelResponse` synthesises and what the
+// reject buttons send. `true` is a genuine approval, and the two interactive
+// approval paths mutate wallet state BEFORE they send (`approve-connection`
+// awaits `connectAccounts`, `switch-account` awaits `changeActiveAccount`), so a
+// lost `true` leaves the wallet listing the site as connected while the dapp was
+// told the user rejected. That escalates like any other loss.
+//
+// KNOWN NOISE: `select-account/index.tsx:64-71` sends `connectResponse(true)`
+// from the render body with no guard, so a re-render (the `windowRequestResponded`
+// broadcast triggers one) re-sends an already-DELIVERED approval, and that
+// duplicate lands here as an error. Nothing is lost in that case, but the status
+// alone cannot distinguish it from a `true` racing a cancel. Fixing it belongs in
+// that page, not in this classifier.
+//
+// And it fails LOUD — anything not recognised as benign is treated as a lost
+// result, because the cost of a missed warning is a line in a log while the
+// cost of a missed error is a signature the user produced and nobody ever
+// received.
+function isBenignDuplicate(payload: unknown): boolean {
+  if (typeof payload === 'boolean') {
+    return payload === false;
+  }
+
+  return (
+    typeof payload === 'object' &&
+    payload !== null &&
+    (payload as { cancelled?: unknown }).cancelled === true
+  );
+}
+
+// Background dedupe of SDK responses (P0.5 root cause). There is no server; the
+// background store is the single writer, which is what makes this atomic.
+// The signature UI pages used to `tabs.sendMessage` the response to the dapp
+// tab directly and guard double-sends with a per-page `responseSentRef`
+// (fragile: per instance, lost on reload). Now every response is forwarded
+// here and deduped by `requestId`: the FIRST response for a request wins,
+// later ones are dropped.
+//
+// CRITICAL: drop ONLY when the request is already 'responded'. Three causes
+// mark requests responded — a window closing (`windows.onRemoved`), a window
+// being reused for a new request (`openWindow` resolving with `reused: true`),
+// and a window failing to open at all (`windows.create` rejecting). The first
+// two run the shared detach-and-cancel routine (`cancelRequestsDisplacedBy` →
+// `cancelRequests`) after a short grace; the third (`failRequestOnWindowError`)
+// dispatches directly, with no grace. Dropping only on 'responded' kills the
+// real duplicate (a cancel racing a successful sign, where the sign already
+// set 'responded') without ever suppressing a first response.
 export async function handleSdkResponseToTab(
   message: unknown,
   sender: Runtime.MessageSender,
@@ -88,14 +127,31 @@ export async function handleSdkResponseToTab(
     requestId != null &&
     selectRequestStatus(store.getState(), requestId) === 'responded'
   ) {
-    // A dropped `cancelled: true` is benign; a dropped signature never is, and
-    // the two are distinguishable here. Log the identifiers ONLY — `action`
-    // carries `signatureHex` / `encryptedMessage` (see the SECURITY note above).
-    console.error('sdk-response-to-tab: dropped duplicate response', {
-      requestId,
-      tabId,
-      type: action?.type
-    });
+    // A dropped `cancelled: true` is benign; a dropped signature never is, so
+    // say which one happened. The benign case is the overwhelming majority of
+    // these lines, and at `error` severity it trains a reader to skip past the
+    // one that means a signed transaction was destroyed. Log the identifiers
+    // ONLY — `action` carries `signatureHex` / `encryptedMessage` (see the
+    // SECURITY note above).
+    const identifiers = { requestId, tabId, type: action?.type };
+
+    if (isBenignDuplicate(action?.payload)) {
+      console.warn(
+        'sdk-response-to-tab: dropped a duplicate cancel',
+        identifiers
+      );
+    } else {
+      // Log-only, deliberately. The user-facing half would need copy that does
+      // not name an internal tabId (which identifies no dapp and suggests no
+      // next step) and an i18n key — `SagaErrorBanner` renders `message`
+      // verbatim and untranslated, and is mounted over the approval screens.
+      // Same call as item #19 in this PR: surface it in the log now, decide the
+      // banner separately.
+      console.error(
+        'sdk-response-to-tab: dropped a completed response — the result was lost',
+        identifiers
+      );
+    }
     // Drop the duplicate — it never reaches the tab. Respond so the forwarding
     // UI's `runtime.sendMessage` promise still resolves (some callers await it
     // before closing the window).
@@ -122,8 +178,8 @@ export async function handleSdkResponseToTab(
 
   // Mark responded OPTIMISTICALLY, BEFORE the await. `runtime.onMessage`
   // handlers interleave at every `await`, so two near-simultaneous responses
-  // for the same requestId (e.g. a genuine sign response racing the close-cancel
-  // emitted by `cancelOpenRequestsForClosedWindow`) would BOTH read status
+  // for the same requestId (e.g. a genuine sign response racing a cancel from
+  // either cancel path — window close or window reuse) would BOTH read status
   // `undefined` if we marked after the send — and both would reach the dapp.
   // Dispatching synchronously here (before yielding the event loop) means
   // a second message processed during the first's in-flight send reads

@@ -16,9 +16,46 @@ import { bringWeb3Events } from '@background/bring-web3-events';
 import { sdkEvent } from '@content/sdk-event';
 import { SdkMethodEventType, sdkMethod } from '@content/sdk-method';
 
-describe('sdkMethod (34 entries)', () => {
-  it('has exactly 34 entries', () => {
-    expect(Object.keys(sdkMethod)).toHaveLength(34);
+describe('sdkMethod', () => {
+  it('exposes exactly the expected entries', () => {
+    // A count would pass on any add-plus-remove and would not say WHICH entry
+    // appeared; the exact set fails loudly on either, and documents the surface.
+    expect(Object.keys(sdkMethod).sort()).toEqual([
+      'connectError',
+      'connectRequest',
+      'connectResponse',
+      'decryptMessageError',
+      'decryptMessageRequest',
+      'decryptMessageResponse',
+      'disconnectRequest',
+      'disconnectResponse',
+      'encryptMessageError',
+      'encryptMessageRequest',
+      'encryptMessageResponse',
+      'getActivePublicKeyError',
+      'getActivePublicKeyRequest',
+      'getActivePublicKeyResponse',
+      'getActivePublicKeySupportsError',
+      'getActivePublicKeySupportsRequest',
+      'getActivePublicKeySupportsResponse',
+      'getVersionRequest',
+      'getVersionResponse',
+      'isConnectedError',
+      'isConnectedRequest',
+      'isConnectedResponse',
+      'signError',
+      'signMessageError',
+      'signMessageRequest',
+      'signMessageResponse',
+      'signRequest',
+      'signResponse',
+      'signTypedDataError',
+      'signTypedDataRequest',
+      'signTypedDataResponse',
+      'switchAccountError',
+      'switchAccountRequest',
+      'switchAccountResponse'
+    ]);
   });
 
   it('freezes every .type literal', () => {
@@ -161,9 +198,19 @@ describe('SdkMethodEventType (bonus)', () => {
   });
 });
 
-describe('sdkEvent (7 entries)', () => {
-  it('has exactly 7 entries', () => {
-    expect(Object.keys(sdkEvent)).toHaveLength(7);
+describe('sdkEvent', () => {
+  it('exposes exactly the expected entries', () => {
+    expect(Object.keys(sdkEvent).sort()).toEqual(
+      [
+        'changedActiveAccountSupportsEvent',
+        'changedConnectedAccountEvent',
+        'changedTab',
+        'connectedAccountEvent',
+        'disconnectedAccountEvent',
+        'lockedEvent',
+        'unlockedEvent'
+      ].sort()
+    );
   });
 
   it('freezes every .type literal', () => {
@@ -185,9 +232,17 @@ describe('sdkEvent (7 entries)', () => {
   });
 });
 
-describe('bringWeb3Events (5 entries)', () => {
-  it('has exactly 5 entries', () => {
-    expect(Object.keys(bringWeb3Events)).toHaveLength(5);
+describe('bringWeb3Events', () => {
+  it('exposes exactly the expected entries', () => {
+    expect(Object.keys(bringWeb3Events).sort()).toEqual(
+      [
+        'getActivePublicKey',
+        'getActivePublicKeyResponse',
+        'getTheme',
+        'getThemeResponse',
+        'promptLoginRequest'
+      ].sort()
+    );
   });
 
   it('freezes every .type literal', () => {

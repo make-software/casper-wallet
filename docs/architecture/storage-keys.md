@@ -1,11 +1,14 @@
 # `storage.local` key inventory
 
 This document describes every key Casper Wallet writes to the extension's
-`storage.local`, defined in
-[`src/background/redux/get-main-store.ts`](../../src/background/redux/get-main-store.ts).
-It exists so that anyone touching persistence understands two things before
-they change a key string: **the names are immutable**, and **the names are
-not a security control**.
+`storage.local`. Most are defined in
+[`src/background/redux/get-main-store.ts`](../../src/background/redux/get-main-store.ts);
+two — the standalone absolute-deadline keys — are defined in
+[`src/background/redux/storage-keys.ts`](../../src/background/redux/storage-keys.ts)
+(see the "Standalone absolute-deadline keys" section below). It exists so
+that anyone touching persistence understands two things before they change a
+key string: **the names are immutable**, and **the names are not a security
+control**.
 
 ## Key inventory
 
@@ -39,8 +42,12 @@ subscription tick (see `get-main-store.ts`).
 Added in DEP-99/PR3 to survive MV3 service-worker restarts. These are written
 directly to `storage.local` by the vault sagas — they are **not** part of the
 Redux state shape and are not covered by `selectPopupState` or the
-subscription-driven persistence above. See the deadline-key comment block in
-`get-main-store.ts` for why they exist.
+subscription-driven persistence above. Defined separately from the
+Redux-slice-backed keys above, in
+[`src/background/redux/storage-keys.ts`](../../src/background/redux/storage-keys.ts),
+so a consumer (or a test) can read the real values without importing the
+Redux store. See the deadline-key comment block in that file for why they
+exist.
 
 | Constant                           | Obfuscated key   | Stores                                                                              | Secret? | Plaintext at rest? |
 | ---------------------------------- | ---------------- | ----------------------------------------------------------------------------------- | ------- | ------------------ |

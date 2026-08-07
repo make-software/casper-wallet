@@ -182,7 +182,12 @@ export async function handleSdkMethod(
     try {
       deployJson = JSON.parse(action.payload.deployJson);
     } catch (err) {
-      throw Error('Desploy json string parse error');
+      // The dapp-facing message stays generic (it crosses a trust boundary);
+      // the cause is kept here, otherwise a parse failure is unrecoverable
+      // from a bug report.
+      // Static message + error object, never the payload.
+      console.error('sdk-methods: deploy json string parse failed:', err);
+      throw Error('Deploy json string parse error');
     }
 
     const deploy: Deploy = deployJson.deploy;
@@ -469,6 +474,8 @@ export async function handleSdkMethod(
     try {
       PublicKey.fromHex(signingPublicKeyHex);
     } catch (e) {
+      // Static message + error object, never key material.
+      console.error('sdk-methods: public key hex invalid:', e);
       throw Error('Public key hex is not valid');
     }
 
@@ -494,6 +501,8 @@ export async function handleSdkMethod(
         )
       };
     } catch (e) {
+      // Static message + error object, never the message content.
+      console.error('sdk-methods: message encryption failed:', e);
       throw Error('Error during message encryption');
     }
   } else if (sdkMethod.getActivePublicKeySupportsRequest.match(action)) {

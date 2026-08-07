@@ -1,6 +1,9 @@
 import { runtime, storage } from 'webextension-polyfill';
 
-import { backgroundEvent } from '@background/background-events';
+import {
+  BackgroundEvent,
+  backgroundEvent
+} from '@background/background-events';
 import { selectPrivateState } from '@background/handlers/private-state';
 import { privateStateChanged } from '@background/private-state-broadcast';
 import { AppEventsState } from '@background/redux/app-events/types';
@@ -36,19 +39,6 @@ const RATE_APP = 'p4cGYubbwnd9ke';
 const APP_EVENTS = 'k4uL4wqkvCMoxB';
 const TRUSTED_WASM = 'k1uC4wqkwCMwxL';
 const CSPR_NAME_EXPIRATIONS = 'TVn5HXvXCfYRpJ';
-
-// Absolute-timestamp deadlines (`Date.now() + remaining`, in ms) written
-// directly to `storage.local` by the vault sagas so the login-retry lockout and
-// the auto-lock inactivity timers survive MV3 service-worker restarts. These are
-// NOT part of the Redux state shape — they are standalone storage entries the
-// sagas read on `startBackground` to resume the residual delay.
-//
-// IMPORTANT: once shipped, these key strings are immutable. Existing installs
-// persist deadlines under exactly these strings; renaming them would strand the
-// old entries and break resume-after-restart for already-locked-out users.
-// See docs/architecture/storage-keys.md for the full key inventory.
-export const LOGIN_RETRY_LOCKOUT_DEADLINE_KEY = 'q9Tf3Lm4pRxVne';
-export const AUTO_LOCK_DEADLINE_KEY = 'r3Wj7Nc8vBhQyD';
 
 type StorageState = {
   [VAULT_CIPHER_KEY]: string;
@@ -103,6 +93,24 @@ const selectPopupState = (state: RootState): PopupState => {
     csprNameExpirations: state.csprNameExpirations
   };
 };
+
+// Only "no receiver" is expected: `runtime.sendMessage` delivers to every
+// extension context except the sender, so with no popup open Chrome rejects
+// with "Receiving end does not exist." Everything else — a structured-clone
+// failure, a throwing listener, a message-size limit — means an OPEN replica
+// just missed an update and is now silently stale, so it must be visible.
+// Same idiom as keep-alive.ts.
+function broadcastToReplicas(message: BackgroundEvent, source: string): void {
+  runtime.sendMessage(message).catch((error: unknown) => {
+    const text = error instanceof Error ? error.message : String(error);
+    if (text.includes('Receiving end does not exist')) {
+      return;
+    }
+    // The broadcast payload (which carries the decrypted vault) is never
+    // logged — only a static source label and the error object.
+    console.error(`${source} broadcast failed:`, error);
+  });
+}
 
 // If this flag is true, we initialize the initial state for the tests
 const isMockStateEnable = Boolean(process.env.MOCK_STATE);
@@ -180,22 +188,20 @@ export async function getExistingMainStoreSingletonOrInit() {
 
         // propagate state to replicas
         const popupState = selectPopupState(state);
-        runtime
-          .sendMessage(backgroundEvent.popupStateUpdated(popupState))
-          .catch(() => {
-            // no UI replica is open to receive the update — expected, ignore
-          });
+        broadcastToReplicas(
+          backgroundEvent.popupStateUpdated(popupState),
+          'popupStateUpdated'
+        );
 
         // P0.1: tell replicas to re-fetch private state on change, without
         // ever including the private material itself in the broadcast.
         const nextPrivateState = selectPrivateState(state);
         if (privateStateChanged(previousPrivateState, nextPrivateState)) {
           previousPrivateState = nextPrivateState;
-          runtime
-            .sendMessage(backgroundEvent.privateStateUpdated())
-            .catch(() => {
-              // no UI replica open to receive it — expected, ignore
-            });
+          broadcastToReplicas(
+            backgroundEvent.privateStateUpdated(),
+            'privateStateUpdated'
+          );
         }
 
         // persist selected state
