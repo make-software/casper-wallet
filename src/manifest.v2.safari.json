@@ -13,7 +13,6 @@
     "tabs",
     "declarativeNetRequest",
     "https://image-proxy-cdn.make.services/*",
-    "https://casper-assets.s3.amazonaws.com/*",
     "https://api.testnet.casperwallet.io/*",
     "https://api.mainnet.casperwallet.io/*",
     "https://onramp-api.cspr.click/api/*",

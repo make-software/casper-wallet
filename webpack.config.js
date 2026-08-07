@@ -35,6 +35,8 @@ const {
   isFirefox
 } = require('./constants');
 
+const cspConfig = require('./src/csp.json');
+
 const isDev = env.NODE_ENV === 'development';
 
 const ASSET_PATH = process.env.ASSET_PATH || '/';
@@ -90,7 +92,10 @@ const getCSP = () => {
   const styleDirectives = CSP_NONCE
     ? `style-src 'self' 'nonce-${CSP_NONCE}'; style-src-attr 'unsafe-inline'`
     : "style-src 'unsafe-inline'";
-  const csp = `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'self' 'wasm-unsafe-eval'; ${styleDirectives}; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://onramp-api.cspr.click/api/ https://cspr-wallet-api.dev.make.services/ https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/ https://cspr-wallet-api-condor.dev.make.services/ https://cspr-wallet-api.stg.make.services/ https://api.casperwallet.io/ https://api.integration.casperwallet.io/ https://node.integration.cspr.cloud/`;
+  // `baseDirectives` (which now also carries img-src/media-src) and `connectSrc`
+  // are shared with the Safari runtime <meta> policy in src/utils.ts — see
+  // src/csp.json. Only the style arm differs per target, so it stays here.
+  const csp = `${cspConfig.baseDirectives}; ${styleDirectives}; connect-src ${cspConfig.connectSrc.join(' ')}`;
 
   if (isFirefox) {
     return csp;

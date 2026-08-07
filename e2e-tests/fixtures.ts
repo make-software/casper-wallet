@@ -42,10 +42,11 @@ export const test = base.extend<{
     // getByRole/toBeVisible assertions all still pass against an unstyled page —
     // the page has to report the violation itself for the suite to notice.
     //
-    // Deliberately scoped to CSP violations only: page errors are not asserted here
-    // because the suite has never been held to that bar, and a flood of unrelated
-    // failures would bury this signal.
-    const cspViolations: string[] = [];
+    // Both markers are explicit, self-authored prefixes rather than a blanket
+    // page-error assertion: the suite has never been held to that bar, and a
+    // flood of unrelated failures would bury this signal.
+    const policyViolations: string[] = [];
+    const VIOLATION_MARKERS = ['[CSP]', '[SvgIcon]'];
 
     await context.addInitScript(() => {
       // Extension documents only. The suite also drives pages this repo does not
@@ -67,8 +68,10 @@ export const test = base.extend<{
 
     context.on('page', page => {
       page.on('console', message => {
-        if (message.text().startsWith('[CSP]')) {
-          cspViolations.push(message.text());
+        const text = message.text();
+
+        if (VIOLATION_MARKERS.some(marker => text.startsWith(marker))) {
+          policyViolations.push(text);
         }
       });
     });
@@ -97,7 +100,10 @@ export const test = base.extend<{
     await use(context);
     await context.close();
 
-    expect(cspViolations, 'Content Security Policy violations').toEqual([]);
+    expect(
+      policyViolations,
+      'Content Security Policy / icon rendering violations'
+    ).toEqual([]);
   },
   extensionId: async ({ context }, use) => {
     let background = context.serviceWorkers()[0];

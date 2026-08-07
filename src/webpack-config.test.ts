@@ -200,6 +200,33 @@ describe('webpack.config.js CSP nonce', () => {
 });
 
 /**
+ * The casper-assets host was removed from host_permissions/permissions (and the CSP
+ * arms) in five places; only the CSP side had a guard (see the nonce block above,
+ * which itself doesn't check for this string). This asserts against the manifest as
+ * CopyWebpackPlugin actually emits it — not src/manifest.*.json directly — because a
+ * transform that reintroduced the host would still leave the source files clean.
+ * Stringifying the whole manifest, rather than reading a specific key, catches the
+ * host resurfacing in `permissions` (where MV2/Safari embed their host allowlist),
+ * `host_permissions` (MV3's separate array), or `content_security_policy` alike.
+ */
+describe('manifest host allowlist', () => {
+  const originalEnv = { ...process.env };
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
+  });
+
+  it.each(['chrome', 'firefox', 'safari'])(
+    'keeps the casper-assets host out of the built %s manifest',
+    browser => {
+      const { manifest } = loadConfig(browser, 'production');
+
+      expect(JSON.stringify(manifest)).not.toContain('casper-assets');
+    }
+  );
+});
+
+/**
  * The assertions above compare the two nonce channels as the config *describes* them.
  * AssertCspNonceIntegrity (webpack.config.js) compares them as the build *emits* them,
  * which is where WALLET-1388 went wrong: an ambient CSP_NONCE was substituted into the

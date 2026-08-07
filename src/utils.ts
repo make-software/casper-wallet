@@ -8,6 +8,8 @@ import { CasperWalletSupports } from '@content/sdk-types';
 
 import { Account, HardwareWalletType } from '@libs/types/account';
 
+import cspConfig from './csp.json';
+
 interface ImageProxyUrlProps {
   ttl: string;
   width?: string | number;
@@ -16,6 +18,29 @@ interface ImageProxyUrlProps {
 const httpPrefixRegex = /^https?:\/\//;
 
 export const hasHttpPrefix = (url: string) => httpPrefixRegex.test(url);
+
+// Anchored at BOTH ends, over a charset that cannot express markup. A bare
+// `^/?assets/` prefix test puts no constraint on the remainder, so an
+// API-supplied `assets/<svg onload=…></svg>` satisfies it and reaches the
+// inliner — `<`, `>`, spaces, quotes, `?`, `#`, `:` and `,` are all excluded,
+// and requiring a final `.ext` also rejects `..` traversal segments.
+const bundledAssetPathRegex = /^\/?assets\/(?:[\w-]+\/)*[\w.-]+\.[a-z0-9]+$/i;
+
+/**
+ * Whether a src points at a file webpack bundled into the extension.
+ *
+ * This is an allow-list on purpose, and it is the inverse of how the routing
+ * used to work. SvgIcon is react-inlinesvg, which injects `data:image/svg+xml`
+ * payloads and raw `<svg …>` strings straight into the DOM without any fetch —
+ * so connect-src never sees them. Deciding "is this ours" rather than "is this
+ * remote" keeps every unrecognised shape out of the inliner by default.
+ *
+ * The allow-list has to constrain the WHOLE string, not just its prefix: the
+ * shape it is guarding against is markup, and `assets/<svg …>` is both a valid
+ * prefix match and a payload react-inlinesvg inlines verbatim.
+ */
+export const isBundledAssetPath = (src: string) =>
+  bundledAssetPathRegex.test(src);
 
 export const getUrlOrigin = (url: string | undefined) => {
   if (!url) {
@@ -163,6 +188,16 @@ export const getSigningAccount = (
     isEqualCaseInsensitive(account.publicKey, signingPublicKeyHex)
   );
 
+/**
+ * Safari ships no manifest CSP — getCSP() in webpack.config.js has no Safari
+ * branch, so the <meta> this builds IS the whole policy. Exported so a test can
+ * pin it: sharing `baseDirectives` with the other targets is what keeps the
+ * policies from drifting, but it also means an edit to src/csp.json silently
+ * changes what Safari enforces.
+ */
+export const getSafariCspContent = () =>
+  `${cspConfig.baseDirectives}; style-src 'unsafe-inline'; connect-src ${cspConfig.connectSrc.join(' ')}`;
+
 export const setCSPForSafari = () => {
   if (isSafariBuild) {
     const metaTag = document.querySelector('[http-equiv]');
@@ -171,10 +206,12 @@ export const setCSPForSafari = () => {
       const meta = document.createElement('meta');
 
       meta.setAttribute('http-equiv', 'Content-Security-Policy');
-      meta.setAttribute(
-        'content',
-        `default-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src https: data:; media-src https: data:; connect-src https://event-store-api-clarity-testnet.make.services https://event-store-api-clarity-mainnet.make.services https://casper-assets.s3.amazonaws.com/ https://image-proxy-cdn.make.services/ https://node.cspr.cloud/ https://node.testnet.cspr.cloud/ https://api.testnet.casperwallet.io/ https://api.mainnet.casperwallet.io/ https://cspr-wallet-api-condor.dev.make.services/ https://cspr-wallet-api.stg.make.services/ https://api.casperwallet.io/ https://api.integration.casperwallet.io/ https://node.integration.cspr.cloud/ https://onramp-api.cspr.click/api/ https://cspr-wallet-api.dev.make.services/ https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/ https://cspr-wallet-api-condor.dev.make.services/`
-      );
+      // Shared directives (img-src/media-src included) come from src/csp.json
+      // so they cannot drift from the other targets again; only the style
+      // arm is Safari-specific.
+      // Note: frame-ancestors inside a <meta http-equiv> is ignored by browsers;
+      // it is present for parity with the built manifests, not as protection.
+      meta.setAttribute('content', getSafariCspContent());
 
       document.getElementsByTagName('head')[0].appendChild(meta);
     }
