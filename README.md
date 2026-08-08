@@ -136,6 +136,32 @@ All at once:
 npm run build:all
 ```
 
+### Reproducible builds from the source package
+
+`npm run build:src` produces `build/casper-wallet-src#<sha>.zip`, the package
+submitted alongside the extension for source review. Rebuilding it yields an
+artifact byte-identical to the published one — including `manifest.json`:
+
+```shell
+unzip casper-wallet-src#<sha>.zip -d casper-wallet-src
+cd casper-wallet-src
+npm ci
+npm run build:firefox   # or build:chrome / build:safari
+```
+
+The package carries no `.git`, so the `HASH=$(git rev-parse HEAD)` in the build
+scripts resolves to nothing there. The commit stamped into
+`manifest.version_name` comes from `build-hash.json`, written into the package by
+`npm run build:src`. To build a tree that has neither — a downloaded tarball, for
+instance — pass the commit explicitly:
+
+```shell
+HASH=<full commit sha> npm run build:manifest:v2:firefox
+```
+
+A production build with no commit available anywhere fails rather than stamping a
+placeholder, since the resulting artifact could not be reproduced.
+
 ## Unit tests
 
 Unit tests are written with [Jest](https://jestjs.io/) and colocated with the source code.

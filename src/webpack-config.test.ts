@@ -1,5 +1,15 @@
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
+
+import pkg from '../package.json';
+// The module webpack.config.js resolves the version stamp through. Imported by
+// path because utils/ is plain CommonJS, outside tsconfig's `include`.
+import {
+  BUILD_HASH_FILE,
+  UNKNOWN_COMMIT_HASH,
+  resolveCommitHash
+} from '../utils/commit-hash';
 
 /**
  * The Chrome-production CSP nonce is wired through two independent channels: the
@@ -21,6 +31,10 @@ import path from 'path';
 
 const ROOT = path.join(__dirname, '..');
 const CONFIG_PATH = path.join(ROOT, 'webpack.config.js');
+const BUILD_SRC_PATH = path.join(ROOT, 'scripts', 'build_src.sh');
+
+/** Any sha will do; it only has to be the one the config stamps back out. */
+const TEST_COMMIT_HASH = 'abc1234def5678901234567890abcdef12345678';
 
 interface CopyPattern {
   from: string;
@@ -43,6 +57,7 @@ interface ConfigLike {
 
 interface Manifest {
   content_security_policy?: string | { extension_pages: string };
+  version_name?: string;
 }
 
 /** The slice of webpack's compilation/compiler API the emit-time assertion touches. */
@@ -77,6 +92,10 @@ interface LoadedConfig {
 const loadConfig = (browser: string, nodeEnv: string): LoadedConfig => {
   process.env.BROWSER = browser;
   process.env.NODE_ENV = nodeEnv;
+  // Pinned rather than inherited: GITHUB_SHA is set for every CI job, so without
+  // this the config would resolve a different commit stamp under CI than locally.
+  process.env.HASH = TEST_COMMIT_HASH;
+  delete process.env.GITHUB_SHA;
   // webpack.config.js and its ./constants + ./utils/env dependencies read the env
   // at require time, so the whole chain has to be re-evaluated per combination.
   jest.resetModules();
@@ -222,6 +241,113 @@ describe('manifest host allowlist', () => {
       const { manifest } = loadConfig(browser, 'production');
 
       expect(JSON.stringify(manifest)).not.toContain('casper-assets');
+    }
+  );
+});
+
+/**
+ * WALLET-1392: `manifest.version_name` used to fall back to `Date.now()` when no
+ * commit hash was in the environment. scripts/build_src.sh zips `src scripts utils
+ * *.* .env` and no `.git`, so on the tree an AMO reviewer unpacks, the build
+ * scripts' `HASH=$(git rev-parse HEAD)` resolves to the empty string and the
+ * fallback fired — the rebuilt manifest read `2.7.0 (1785914)` against the
+ * uploaded artifact's `2.7.0 (905e0c8)`, and source-review comparison failed on
+ * manifest.json alone.
+ *
+ * The stamp now comes from the source package itself (build-hash.json), and there
+ * is no per-build-varying fallback left to reach.
+ */
+describe('commit hash resolution', () => {
+  /** A root holding whatever build-hash.json the case is about (or none). */
+  const rootWith = (buildHashFile?: string): string => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'commit-hash-'));
+
+    if (buildHashFile !== undefined) {
+      fs.writeFileSync(path.join(root, BUILD_HASH_FILE), buildHashFile);
+    }
+
+    return root;
+  };
+
+  it('prefers HASH, which the build scripts read out of the git checkout', () => {
+    const root = rootWith(JSON.stringify({ commitHash: 'ffffffffff' }));
+
+    expect(
+      resolveCommitHash({
+        root,
+        env: { HASH: TEST_COMMIT_HASH, GITHUB_SHA: 'eeeeeeeeee' }
+      })
+    ).toBe(TEST_COMMIT_HASH);
+  });
+
+  it('falls back to GITHUB_SHA when HASH is absent', () => {
+    expect(
+      resolveCommitHash({ root: rootWith(), env: { GITHUB_SHA: 'eeeeeeeeee' } })
+    ).toBe('eeeeeeeeee');
+  });
+
+  it('reads the shipped stamp when HASH resolves empty off a git tree', () => {
+    const root = rootWith(JSON.stringify({ commitHash: TEST_COMMIT_HASH }));
+
+    // Exactly what `HASH=$(git rev-parse HEAD)` leaves behind when git fails:
+    // the variable is set, to nothing.
+    expect(resolveCommitHash({ root, env: { HASH: '' } })).toBe(
+      TEST_COMMIT_HASH
+    );
+  });
+
+  it('refuses to stamp a production build it cannot attribute to a commit', () => {
+    expect(() =>
+      resolveCommitHash({ root: rootWith(), env: {}, isDev: false })
+    ).toThrow(/no commit hash available/);
+  });
+
+  it('resolves the same value on every dev build that reaches the fallback', () => {
+    const root = rootWith();
+    const first = resolveCommitHash({ root, env: {}, isDev: true });
+
+    expect(first).toBe(UNKNOWN_COMMIT_HASH);
+    // The defect in one line: a fallback that differs per build.
+    expect(resolveCommitHash({ root, env: {}, isDev: true })).toBe(first);
+    expect(first).not.toMatch(/^\d{13}$/);
+  });
+
+  it.each([
+    ['malformed JSON', 'not json at all'],
+    ['a missing commitHash', JSON.stringify({ sha: TEST_COMMIT_HASH })],
+    ['a non-sha commitHash', JSON.stringify({ commitHash: 'v2.7.0-rc1' })],
+    ['a non-string commitHash', JSON.stringify({ commitHash: 1785914829890 })]
+  ])('rejects a shipped stamp with %s', (_case, buildHashFile) => {
+    // A broken stamp must not degrade into the unknown/placeholder path — that
+    // would put the reviewer back on a manifest that cannot match the upload.
+    expect(() =>
+      resolveCommitHash({ root: rootWith(buildHashFile), env: {}, isDev: true })
+    ).toThrow(new RegExp(BUILD_HASH_FILE));
+  });
+
+  it('is what build_src.sh writes into the source package', () => {
+    const script = fs.readFileSync(BUILD_SRC_PATH, 'utf8');
+
+    // The producer and the consumer of the stamp live in different languages and
+    // are only ever exercised together by a full release build.
+    expect(script).toContain(`> ${BUILD_HASH_FILE}`);
+    expect(script).toMatch(new RegExp(`zip .*\\b${BUILD_HASH_FILE}\\b`));
+  });
+
+  it.each(['chrome', 'firefox', 'safari'])(
+    'stamps the resolved commit into the built %s manifest',
+    browser => {
+      const originalEnv = { ...process.env };
+
+      try {
+        const { manifest } = loadConfig(browser, 'production');
+
+        expect(manifest.version_name).toBe(
+          `${pkg.version} (${TEST_COMMIT_HASH.slice(0, 7)})`
+        );
+      } finally {
+        process.env = { ...originalEnv };
+      }
     }
   );
 });
