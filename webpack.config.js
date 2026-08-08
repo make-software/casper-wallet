@@ -8,14 +8,8 @@ const webpack = require('webpack'),
   HtmlWebpackPlugin = require('html-webpack-plugin'),
   TerserPlugin = require('terser-webpack-plugin'),
   TsconfigPaths = require('tsconfig-paths-webpack-plugin'),
-  Dotenv = require('dotenv-webpack');
-
-const commitHash =
-  process.env.HASH || process.env.GITHUB_SHA || Date.now().toFixed();
-
-if (!commitHash) {
-  throw Error('No commit hash env!');
-}
+  Dotenv = require('dotenv-webpack'),
+  { resolveCommitHash } = require('./utils/commit-hash');
 
 const htmlWebpackPluginOptions = {
   cache: false,
@@ -38,6 +32,10 @@ const {
 const cspConfig = require('./src/csp.json');
 
 const isDev = env.NODE_ENV === 'development';
+
+// Stamped into manifest.version_name below. Must be derivable without `.git`,
+// which the source package reviewers rebuild from does not carry.
+const commitHash = resolveCommitHash({ root: __dirname, isDev });
 
 const ASSET_PATH = process.env.ASSET_PATH || '/';
 const buildDir = isChrome
