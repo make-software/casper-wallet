@@ -427,8 +427,13 @@ export const TransferNftPage = () => {
             const shouldAskForReview =
               askForReviewAfter == null || currentDate > askForReviewAfter;
 
+            // Set once here, before the branch, rather than on the Home leg
+            // only: every exit from RateApp is a post-submission exit, and its
+            // four `navigate(RouterPath.Home)` calls would otherwise return the
+            // user to whatever tab they started the transfer from.
+            setActiveHomeTab(HomePageTabName.Activity);
+
             if (ratedInStore || !shouldAskForReview) {
-              setActiveHomeTab(HomePageTabName.Activity);
               navigate(RouterPath.Home);
             } else {
               // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.

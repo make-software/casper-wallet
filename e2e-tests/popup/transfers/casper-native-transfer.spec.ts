@@ -1,4 +1,9 @@
-import { DEFAULT_SECOND_ACCOUNT, RPC_RESPONSE, URLS } from '../../constants';
+import {
+  ACCOUNT_NAMES,
+  DEFAULT_SECOND_ACCOUNT,
+  RPC_RESPONSE,
+  URLS
+} from '../../constants';
 import { popup, popupExpect } from '../../fixtures';
 
 popup.describe('Popup UI: Casper Native Transfer', () => {
@@ -83,6 +88,14 @@ popup.describe('Popup UI: Casper Native Transfer', () => {
       ).toBeVisible();
 
       await popupPage.getByRole('button', { name: 'Done' }).click();
+
+      // `askForReviewAfter` is null on fresh mock state, so Done routes to
+      // RateApp. Every exit from RateApp is a post-submission exit, so the
+      // Activity override has to survive it. `getByTitle` observes activeness:
+      // only `ActiveTabContainer` carries the attribute.
+      await popupPage.getByText('Close').click();
+
+      await popupExpect(popupPage.getByTitle('Activity')).toBeVisible();
     }
   );
 
@@ -171,4 +184,40 @@ popup.describe('Popup UI: Casper Native Transfer', () => {
 
     await popupPage.getByRole('button', { name: 'Close' }).click();
   });
+
+  popup(
+    'should switch the recipient tabs',
+    async ({ popupPage, unlockVault }) => {
+      await unlockVault();
+
+      await new Promise(r => setTimeout(r, 5000));
+
+      await popupPage.getByText('Send').click();
+
+      await popupPage.getByRole('button', { name: 'Next' }).click();
+
+      await popupExpect(
+        popupPage.getByRole('heading', { name: 'Specify recipient' })
+      ).toBeVisible();
+
+      // The strip only renders while the input is empty — typing a valid key
+      // swaps it for `SearchItemByPublicKey`. This is the tree's only
+      // uncontrolled `<Tabs>`, so it is the only thing exercising the
+      // `activeTabName === undefined` branch of `handleTabClick`.
+      await popupExpect(popupPage.getByTitle('Recent')).toBeVisible();
+
+      await popupPage.getByText('My accounts').click();
+
+      await popupExpect(popupPage.getByTitle('My accounts')).toBeVisible();
+      await popupExpect(
+        popupPage.getByText(ACCOUNT_NAMES.defaultSecondAccountName, {
+          exact: true
+        })
+      ).toBeVisible();
+
+      await popupPage.getByText('Recent').click();
+
+      await popupExpect(popupPage.getByTitle('Recent')).toBeVisible();
+    }
+  );
 });

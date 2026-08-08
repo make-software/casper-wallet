@@ -102,4 +102,32 @@ popup.describe('Popup UI: Home tabs', () => {
       ).toBeVisible();
     }
   );
+
+  popup(
+    'should reset to the Tokens tab after the vault is locked',
+    async ({ popupPage, unlockVault, lockVault }) => {
+      await unlockVault();
+
+      // Home opens on Tokens. Waiting for that rather than sleeping a fixed
+      // 2s keeps a slow unlock from surfacing as an opaque timeout on the
+      // tab click below.
+      await popupExpect(popupPage.getByTitle('Tokens')).toBeVisible();
+
+      await popupPage.getByText('NFTs').click();
+      await popupExpect(popupPage.getByTitle('NFTs')).toBeVisible();
+
+      // The tab is a plain `useState` with no persistence and no reset of its
+      // own — its ephemerality rests entirely on `HomeTabProvider` sitting
+      // below the `isLocked` gate in `app-router.tsx`, so the subtree unmounts.
+      await lockVault();
+      await unlockVault();
+
+      // `lockVault` goes through the burger menu, and `showNavigationMenu`
+      // outlives the lock in `location.state` — so unlocking lands back in the
+      // menu rather than on Home. Closing it is what the user does next.
+      await popupPage.getByTestId('menu-close-icon').click();
+
+      await popupExpect(popupPage.getByTitle('Tokens')).toBeVisible();
+    }
+  );
 });

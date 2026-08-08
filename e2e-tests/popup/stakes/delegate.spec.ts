@@ -63,7 +63,11 @@ popup.describe('Popup UI: Delegation', () => {
       await popupPage.waitForTimeout(1000);
       await popupPage.getByRole('button', { name: 'Done' }).click();
 
+      // Close exits RateApp, which Done routes to on fresh mock state; the
+      // Activity override set at submission time has to survive the round trip.
       await popupPage.getByText('Close').click();
+
+      await popupExpect(popupPage.getByTitle('Activity')).toBeVisible();
     }
   );
 });
