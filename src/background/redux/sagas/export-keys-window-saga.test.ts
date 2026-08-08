@@ -262,6 +262,55 @@ describe('openExportKeysWindowSaga', () => {
     }
   });
 
+  it('closes a window that arrives after a hang in getCurrent, not only in create', async () => {
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    try {
+      // The sibling test above hangs in `create`, so the retry lands BETWEEN the
+      // pre-create snapshot and the post-create re-read. Here the hang is one
+      // call earlier — in `getCurrent` — so the retry lands BEFORE the snapshot
+      // too. That ordering is what makes the position of the snapshot, rather
+      // than the comparison itself, the thing under test: read it downstream of
+      // the hang and it already holds the retry's id, so `trackedNow !==
+      // trackedBeforeCreate` is false exactly when a straggler must be caught.
+      let trackedId: number | null = null;
+      const trackedByTheRetry = 99;
+      const arrivedLate = 100;
+
+      const { allEffects } = await expectSaga(openExportKeysWindowSaga)
+        .withState({ windowManagement: { exportKeysWindowId: null } })
+        .provide([
+          [
+            matchers.select.selector(selectExportKeysWindowId),
+            dynamic(() => trackedId)
+          ],
+          [
+            matchers.call.fn(windows.getCurrent),
+            dynamic(() => {
+              // While this worker was parked here, the entry saga's bound fired,
+              // the banner invited a retry, and that retry ran to completion.
+              trackedId = trackedByTheRetry;
+
+              return currentWindow;
+            })
+          ],
+          [matchers.call.fn(windows.create), { id: arrivedLate }],
+          [matchers.call.fn(windows.remove), undefined]
+        ])
+        // Tracking the late window would strand window 99 — the one the user is
+        // actually looking at — with no id in the store to focus or close it by.
+        .not.put.actionType(exportKeysWindowIdChanged.type)
+        .call([windows, windows.remove], arrivedLate)
+        .run();
+
+      expect(countPutsOfType(allEffects, sagaError.type)).toBe(0);
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
   it('bounds a hung windows.* call and leaves the menu item usable', async () => {
     const consoleError = jest
       .spyOn(console, 'error')

@@ -80,6 +80,20 @@ function* runOpenExportKeysWindow() {
       yield put(exportKeysWindowIdCleared());
     }
 
+    // Snapshotted rather than null-checked after the fact: the stale-id path
+    // above may have just cleared the tracked id, and re-reading it below would
+    // otherwise depend on that clear having been applied by the reducer already.
+    //
+    // Taken BEFORE the first unbounded windows.* call rather than just before
+    // create: the entry saga stops waiting after WINDOWS_API_TIMEOUT_MS, so
+    // every call below can resume in a world where the retry that timeout
+    // invited already tracked a window of its own. A snapshot read downstream
+    // of the hang would already hold that retry's id, leaving the comparison
+    // below always false — silent, and precisely when it must fire.
+    const trackedBeforeCreate: number | null = yield select(
+      selectExportKeysWindowId
+    );
+
     const currentWindow: Windows.Window = yield call([
       windows,
       windows.getCurrent
@@ -89,13 +103,6 @@ function* runOpenExportKeysWindow() {
     const windowWidth = currentWindow.width ?? 0;
     const xOffset = currentWindow.left ?? 0;
     const yOffset = currentWindow.top ?? 0;
-
-    // Snapshotted rather than null-checked after the fact: the stale-id path
-    // above may have just cleared the tracked id, and re-reading it below would
-    // otherwise depend on that clear having been applied by the reducer already.
-    const trackedBeforeCreate: number | null = yield select(
-      selectExportKeysWindowId
-    );
 
     const created: Windows.Window = yield call(
       [windows, windows.create],
