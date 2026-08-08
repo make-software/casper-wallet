@@ -26,30 +26,47 @@ type State = VaultState;
  * every popup-state broadcast, since `selectPopupState` sends `vault` whole.
  *
  * Ten is far above real concurrency (one approval window means 1-2 in-flight
- * requests) and far below anything that costs memory.
+ * requests) and far below anything that costs memory. See `storePayload` for
+ * which write loses when the ceiling is reached, and why it is the incoming one.
  */
 export const MAX_STORED_PAYLOADS = 10;
 
 type PayloadMap = State['jsonById'];
 
-// Insertion order = the order requests first stored a payload, since re-writing
-// an existing key keeps its original position — so the FIFO eviction below drops
-// the request that has been waiting longest, not one that merely refreshed.
+// At capacity the INCOMING write is refused; nothing already stored is evicted.
+//
+// The obvious alternative — make room by dropping the oldest entry — puts the
+// loss on the request that has waited longest, which is exactly the one this
+// fix exists to protect: a request the user is confirming on a Ledger while a
+// page pushes ten more. `signRequest` has no connected-site precondition, the
+// message handlers are concurrent, and a supersede only frees a slot after
+// `windows.create` plus `CANCEL_GRACE_MS`, so a burst lands entirely before any
+// `windowRequestResponded` can. Refusing instead puts the loss on the request
+// the caller controls.
+//
+// A rewrite of an id already present is always applied — it cannot grow the map.
+//
+// Residual, accepted: entries leak when a request is never answered at all
+// (auto-lock while an approval window is open, then the MV3 worker dies with no
+// `windows.onRemoved` handler alive to cancel it). Leaks survive lock/unlock,
+// because `lockVaultSaga` flushes the cipher before `deploysReseted` and
+// `vaultLoaded` restores from it — so enough of them would fill the map and
+// refuse every later payload. That needs `MAX_STORED_PAYLOADS` such events on
+// one profile; reclaiming those slots means reconciling the map against the
+// windows actually open, which is a separate change.
 function storePayload(
   payloads: PayloadMap,
   requestId: string,
   json: string
 ): PayloadMap {
-  const next: PayloadMap = { ...payloads, [requestId]: json };
-
-  const overflow = Object.keys(next).length - MAX_STORED_PAYLOADS;
-  if (overflow > 0) {
-    for (const staleId of Object.keys(next).slice(0, overflow)) {
-      delete next[staleId];
-    }
+  if (
+    Object.keys(payloads).length >= MAX_STORED_PAYLOADS &&
+    getPayload(payloads, requestId) == null
+  ) {
+    return payloads;
   }
 
-  return next;
+  return { ...payloads, [requestId]: json };
 }
 
 const initialState: State = {

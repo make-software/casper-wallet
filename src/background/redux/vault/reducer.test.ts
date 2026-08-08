@@ -22,6 +22,7 @@ import {
   vaultLoaded,
   vaultReseted
 } from './actions';
+import { getPayload } from './payload-map';
 import { MAX_STORED_PAYLOADS, reducer } from './reducer';
 import { VaultState } from './types';
 
@@ -451,46 +452,77 @@ describe('vault reducer', () => {
       expect(s.eip712ById).toEqual({ other: 'keep', same: 'fresh' });
     });
 
-    it('evicts the oldest entries past MAX_STORED_PAYLOADS', () => {
-      const overflowing = Array.from(
-        { length: MAX_STORED_PAYLOADS + 1 },
-        (_, i) => `id-${i}`
+    // Measured, not assumed. `__proto__` never reaches here in production —
+    // `handleSdkMethod` rejects it at the message boundary for every approval
+    // type (sdk-methods.ts, `isStorableRequestId`) — but the reducer must be
+    // safe on its own: immer's copy ASSIGNS the returned object's keys, and
+    // assigning a string to `__proto__` is a silent no-op, so the entry is
+    // dropped rather than stored, and the map's prototype is untouched.
+    it('drops a __proto__ payload without touching the prototype', () => {
+      const s = reducer(
+        initialState,
+        deployPayloadReceived({ id: '__proto__', json: 'poison' })
       );
 
-      const s = overflowing.reduce(
-        (state, id) =>
-          reducer(
-            reducer(state, deployPayloadReceived({ id, json: `d-${id}` })),
-            eip712PayloadReceived({ id, json: `e-${id}` })
-          ),
-        initialState
-      );
-
-      expect(Object.keys(s.jsonById)).toHaveLength(MAX_STORED_PAYLOADS);
-      expect(Object.keys(s.eip712ById)).toHaveLength(MAX_STORED_PAYLOADS);
-      expect(s.jsonById['id-0']).toBeUndefined();
-      expect(s.eip712ById['id-0']).toBeUndefined();
-      expect(s.jsonById[`id-${MAX_STORED_PAYLOADS}`]).toBe(
-        `d-id-${MAX_STORED_PAYLOADS}`
-      );
-      expect(s.eip712ById[`id-${MAX_STORED_PAYLOADS}`]).toBe(
-        `e-id-${MAX_STORED_PAYLOADS}`
-      );
+      expect(Object.keys(s.jsonById)).toEqual([]);
+      expect(Object.getPrototypeOf(s.jsonById)).toBe(Object.prototype);
+      expect(({} as Record<string, unknown>).poison).toBeUndefined();
     });
 
-    // Re-writing an existing key keeps its original insertion position, so a
-    // refreshed payload must NOT be treated as the newest one by the FIFO
-    // eviction above — otherwise a long-lived request could outlive a newer one.
-    it('does not move an entry to the back of the queue on rewrite', () => {
-      const seeded: VaultState = {
+    // The ceiling must never cost an ALREADY STORED request its payload: the
+    // oldest entry is the long-lived one — a request being confirmed on a
+    // Ledger while a page pushes a burst of its own — and dropping it would
+    // reproduce, behind a threshold, exactly the failure this reducer fixes.
+    describe('at MAX_STORED_PAYLOADS', () => {
+      const atCapacity = (map: 'jsonById' | 'eip712ById'): VaultState => ({
         ...initialState,
-        jsonById: { first: 'a', second: 'b' }
-      };
-      const s = reducer(
-        seeded,
-        deployPayloadReceived({ id: 'first', json: 'a2' })
-      );
-      expect(Object.keys(s.jsonById)).toEqual(['first', 'second']);
+        [map]: Object.fromEntries(
+          Array.from({ length: MAX_STORED_PAYLOADS }, (_, i) => [
+            `id-${i}`,
+            `json-${i}`
+          ])
+        )
+      });
+
+      it.each([
+        ['jsonById', deployPayloadReceived] as const,
+        ['eip712ById', eip712PayloadReceived] as const
+      ])('refuses an incoming %s write instead of evicting', (map, action) => {
+        const full = atCapacity(map);
+
+        const s = reducer(full, action({ id: 'incoming', json: 'refused' }));
+
+        expect(s[map]).toEqual(full[map]);
+        expect(Object.keys(s[map])).toHaveLength(MAX_STORED_PAYLOADS);
+        expect(s[map]['id-0']).toBe('json-0');
+        expect(s[map].incoming).toBeUndefined();
+      });
+
+      it.each([
+        ['jsonById', deployPayloadReceived] as const,
+        ['eip712ById', eip712PayloadReceived] as const
+      ])('still applies a rewrite of an id already in %s', (map, action) => {
+        const full = atCapacity(map);
+
+        const s = reducer(full, action({ id: 'id-0', json: 'refreshed' }));
+
+        expect(s[map]['id-0']).toBe('refreshed');
+        expect(Object.keys(s[map])).toHaveLength(MAX_STORED_PAYLOADS);
+      });
+
+      // A burst answering one request must hand the freed slot to the next
+      // write, or the refusal above would be permanent rather than a ceiling.
+      it('accepts a new payload once an answered request frees a slot', () => {
+        const full = atCapacity('jsonById');
+
+        const s = reducer(
+          reducer(full, windowRequestResponded({ requestId: 'id-3' })),
+          deployPayloadReceived({ id: 'incoming', json: 'accepted' })
+        );
+
+        expect(s.jsonById.incoming).toBe('accepted');
+        expect(s.jsonById['id-3']).toBeUndefined();
+      });
     });
   });
 
@@ -521,6 +553,38 @@ describe('vault reducer', () => {
       );
       expect(s.eip712ById).toEqual({ other: 'kept' });
     });
+
+    // `requestId` is dapp-controlled, so an id naming an inherited
+    // Object.prototype member must be answered from OWN properties only — the
+    // same reason windowManagement/request-map.ts exists, on the same key space.
+    it.each(['toString', 'constructor', 'valueOf', 'hasOwnProperty'])(
+      'drops a stored payload under the inherited name %s',
+      key => {
+        const seeded = reducer(
+          initialState,
+          deployPayloadReceived({ id: key, json: 'stored' })
+        );
+        expect(getPayload(seeded.jsonById, key)).toBe('stored');
+
+        const s = reducer(seeded, windowRequestResponded({ requestId: key }));
+
+        expect(getPayload(s.jsonById, key)).toBeUndefined();
+      }
+    );
+
+    it.each(['toString', 'constructor', 'valueOf', 'hasOwnProperty'])(
+      'leaves the map alone for an unstored inherited name %s',
+      key => {
+        const state: VaultState = {
+          ...initialState,
+          jsonById: { other: 'kept' }
+        };
+
+        expect(reducer(state, windowRequestResponded({ requestId: key }))).toBe(
+          state
+        );
+      }
+    );
 
     // Every `windows.onRemoved` in the browser can reach this reducer, and the
     // store subscriber does no state-change comparison: a fresh object means a
