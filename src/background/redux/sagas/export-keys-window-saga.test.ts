@@ -1,6 +1,7 @@
 import * as matchers from 'redux-saga-test-plan/matchers';
 import { expectSaga } from 'redux-saga-test-plan';
-import { throwError } from 'redux-saga-test-plan/providers';
+import { dynamic, throwError } from 'redux-saga-test-plan/providers';
+import { CallEffectDescriptor } from 'redux-saga/effects';
 import { windows } from 'webextension-polyfill';
 
 import {
@@ -11,9 +12,11 @@ import {
   exportKeysWindowIdChanged,
   exportKeysWindowIdCleared
 } from '@background/redux/windowManagement/actions';
+import { selectExportKeysWindowId } from '@background/redux/windowManagement/selectors';
 
 import { openExportKeysWindow } from './actions';
 import {
+  WINDOWS_API_TIMEOUT_MS,
   exportKeysWindowSaga,
   openExportKeysWindowSaga
 } from './export-keys-window-saga';
@@ -23,7 +26,8 @@ jest.mock('webextension-polyfill', () => ({
     getAll: jest.fn(),
     getCurrent: jest.fn(),
     update: jest.fn(),
-    create: jest.fn()
+    create: jest.fn(),
+    remove: jest.fn()
   }
 }));
 
@@ -42,6 +46,12 @@ const countPutsOfType = (allEffects: unknown, type: string) =>
   ).length;
 
 describe('openExportKeysWindowSaga', () => {
+  // The worker is spawned detached, so a test that abandons one leaks its real
+  // windows.* invocations into whatever runs next. Counts must start at zero.
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   const currentWindow = {
     id: 1,
     state: 'normal',
@@ -170,6 +180,14 @@ describe('openExportKeysWindowSaga', () => {
         .not.put.actionType(exportKeysWindowIdCleared.type)
         .run();
 
+      // Exactly one argument. The saga deliberately does not log `created`:
+      // a Windows.Window can carry tabs[].url, which here is the
+      // download-account-keys route. Nothing else in the tree pins that
+      // redaction, so a later "improvement" to console.error(msg, created)
+      // would otherwise ship green.
+      expect(consoleError).toHaveBeenCalledWith(
+        'openExportKeysWindowSaga: the export window resolved without an id'
+      );
       expect(countPutsOfType(allEffects, sagaError.type)).toBe(1);
     } finally {
       consoleError.mockRestore();
@@ -208,28 +226,95 @@ describe('openExportKeysWindowSaga', () => {
     }
   });
 
-  it('reports a timeout instead of leaving the menu item inert', async () => {
+  it('closes a window that arrives after another one was already tracked', async () => {
     const consoleError = jest
       .spyOn(console, 'error')
       .mockImplementation(() => {});
 
     try {
-      // A static `race` provider settles the race deterministically. Letting
-      // the real delay run would mean a 5s test, and driving it with fake
-      // timers would fight redux-saga's own scheduler.
+      // Three selects run in this flow: the reuse guard, the pre-create
+      // snapshot, and the post-create re-read. Only the last one sees a
+      // tracked id — i.e. the retry the timeout banner invited won the race
+      // while this create was still in flight.
+      let selects = 0;
+      const trackedByTheRetry = 55;
+
       const { allEffects } = await expectSaga(openExportKeysWindowSaga)
         .withState({ windowManagement: { exportKeysWindowId: null } })
-        .provide({ race: () => ({ timedOut: true }) })
-        .put(
-          sagaError({
-            source: 'openExportKeysWindowSaga',
-            message: 'The export window did not open in time; try again'
-          })
-        )
+        .provide([
+          [
+            matchers.select.selector(selectExportKeysWindowId),
+            dynamic(() => (selects++ < 2 ? null : trackedByTheRetry))
+          ],
+          [matchers.call.fn(windows.getCurrent), currentWindow],
+          [matchers.call.fn(windows.create), { id: 99 }],
+          [matchers.call.fn(windows.remove), undefined]
+        ])
+        // Overwriting the tracked id would strand the retry's window instead —
+        // two windows rendering key material is exactly what 1391 is about.
         .not.put.actionType(exportKeysWindowIdChanged.type)
+        .call([windows, windows.remove], 99)
         .run();
 
-      expect(countPutsOfType(allEffects, sagaError.type)).toBe(1);
+      expect(countPutsOfType(allEffects, sagaError.type)).toBe(0);
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
+  it('bounds a hung windows.* call and leaves the menu item usable', async () => {
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    const delaysRequested: unknown[] = [];
+
+    try {
+      // The hang the bound exists for: windows.getCurrent never settles.
+      (windows.getCurrent as jest.Mock).mockReturnValue(new Promise(() => {}));
+
+      // Only redux-saga's own delay is short-circuited, so the real race runs
+      // against the real WINDOWS_API_TIMEOUT_MS. A static `race` provider would
+      // be shape-blind — it replaces the whole effect, the worker is never
+      // entered, and the bound under test is never exercised.
+      const saga = expectSaga(exportKeysWindowSaga)
+        .withState({ windowManagement: { exportKeysWindowId: null } })
+        .provide({
+          call: (
+            effect: CallEffectDescriptor<unknown>,
+            next: () => unknown
+          ) => {
+            if (effect.fn?.name !== 'delayP') return next();
+
+            delaysRequested.push(effect.args[0]);
+
+            return true;
+          }
+        });
+
+      saga.dispatch(openExportKeysWindow());
+      const runPromise = saga.silentRun(100);
+
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // The wedged first attempt must not swallow this one — that inert menu
+      // item is the whole point of the ticket's timeout item.
+      saga.dispatch(openExportKeysWindow());
+
+      const { allEffects } = await runPromise;
+
+      expect(windows.getCurrent).toHaveBeenCalledTimes(2);
+      // Literal on purpose. Asserting against the imported constant is a
+      // tautology — both sides move together, and dropping the bound to 50ms
+      // sails straight through. 5000 is a product-visible wait; changing it
+      // should have to change this line too.
+      expect(delaysRequested).toEqual([5000, 5000]);
+      expect(WINDOWS_API_TIMEOUT_MS).toBe(5000);
+      expect(countPutsOfType(allEffects, sagaError.type)).toBe(2);
+      expect(countPutsOfType(allEffects, dismissSagaErrorsBySource.type)).toBe(
+        2
+      );
     } finally {
       consoleError.mockRestore();
     }
