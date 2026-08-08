@@ -44,12 +44,13 @@ popup.describe('Popup UI: signature request scenarios', () => {
     ).toBeVisible();
     await popupExpect(signatureRequestPage.getByText('1234')).toBeVisible();
 
-    page.on('dialog', async dialog => {
-      popupExpect(dialog.message()).toContain('Sign successful');
-      await dialog.accept();
-    });
+    const [dialog] = await Promise.all([
+      page.waitForEvent('dialog', { timeout: 15000 }),
+      signatureRequestPage.getByRole('button', { name: 'Sign' }).click()
+    ]);
 
-    await signatureRequestPage.getByRole('button', { name: 'Sign' }).click();
+    popupExpect(dialog.message()).toContain('Sign successful');
+    await dialog.accept();
   });
 
   popup('should signing the delegate deploy', async ({ page, context }) => {
@@ -77,12 +78,13 @@ popup.describe('Popup UI: signature request scenarios', () => {
 
     await popupExpect(signatureRequestPage.getByText('2.5 CSPR')).toBeVisible();
 
-    page.on('dialog', async dialog => {
-      popupExpect(dialog.message()).toContain('Sign successful');
-      await dialog.accept();
-    });
+    const [dialog] = await Promise.all([
+      page.waitForEvent('dialog', { timeout: 15000 }),
+      signatureRequestPage.getByRole('button', { name: 'Sign' }).click()
+    ]);
 
-    await signatureRequestPage.getByRole('button', { name: 'Sign' }).click();
+    popupExpect(dialog.message()).toContain('Sign successful');
+    await dialog.accept();
   });
 
   popup('should signing the undelegate deploy', async ({ page, context }) => {
@@ -112,12 +114,13 @@ popup.describe('Popup UI: signature request scenarios', () => {
 
     await popupExpect(signatureRequestPage.getByText('2.5 CSPR')).toBeVisible();
 
-    page.on('dialog', async dialog => {
-      popupExpect(dialog.message()).toContain('Sign successful');
-      await dialog.accept();
-    });
+    const [dialog] = await Promise.all([
+      page.waitForEvent('dialog', { timeout: 15000 }),
+      signatureRequestPage.getByRole('button', { name: 'Sign' }).click()
+    ]);
 
-    await signatureRequestPage.getByRole('button', { name: 'Sign' }).click();
+    popupExpect(dialog.message()).toContain('Sign successful');
+    await dialog.accept();
   });
 
   popup('should signing the redelegate deploy', async ({ page, context }) => {
@@ -141,12 +144,13 @@ popup.describe('Popup UI: signature request scenarios', () => {
 
     await popupExpect(signatureRequestPage.getByText('2.5 CSPR')).toBeVisible();
 
-    page.on('dialog', async dialog => {
-      popupExpect(dialog.message()).toContain('Sign successful');
-      await dialog.accept();
-    });
+    const [dialog] = await Promise.all([
+      page.waitForEvent('dialog', { timeout: 15000 }),
+      signatureRequestPage.getByRole('button', { name: 'Sign' }).click()
+    ]);
 
-    await signatureRequestPage.getByRole('button', { name: 'Sign' }).click();
+    popupExpect(dialog.message()).toContain('Sign successful');
+    await dialog.accept();
   });
 
   popup('should cancel the signing process', async ({ page, context }) => {
@@ -158,11 +162,13 @@ popup.describe('Popup UI: signature request scenarios', () => {
       page.getByRole('button', { name: 'Transfer' }).first().click()
     ]);
     await signatureRequestPage.waitForLoadState('domcontentloaded');
-    page.on('dialog', async dialog => {
-      popupExpect(dialog.message()).toContain('Sign cancelled');
-      await dialog.accept();
-    });
 
-    await signatureRequestPage.getByRole('button', { name: 'Cancel' }).click();
+    const [dialog] = await Promise.all([
+      page.waitForEvent('dialog', { timeout: 15000 }),
+      signatureRequestPage.getByRole('button', { name: 'Cancel' }).click()
+    ]);
+
+    popupExpect(dialog.message()).toContain('Sign cancelled');
+    await dialog.accept();
   });
 });
