@@ -82,6 +82,11 @@ popup.describe('Popup UI:  review flow', () => {
 
       await popupExpect(popupPage.getByText('Total balance')).toBeVisible();
       await popupExpect(popupPage.getByText('Delegated')).toBeVisible();
+
+      // Every exit from RateApp is a post-submission exit, so the Activity
+      // override set at submission time has to survive the round trip.
+      // `getByTitle` observes activeness: only `ActiveTabContainer` carries it.
+      await popupExpect(popupPage.getByTitle('Activity')).toBeVisible();
     }
   );
 });

@@ -170,7 +170,7 @@ export const TransactionContainer: FC<
   };
 
   return (
-    <Container ref={containerRef} onClick={onClick}>
+    <Container ref={containerRef} onClick={onClick} data-testid="deploy-plate">
       <Header>
         <AlignedFlexRow gap={SpacingSize.Medium}>
           <AccountInfoIcon

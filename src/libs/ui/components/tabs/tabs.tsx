@@ -24,7 +24,7 @@ const StickyTabsContainer = styled.div`
 
 const ActiveTabContainer = styled(CenteredFlexRow)`
   cursor: pointer;
-  width: calc(33% - 8px);
+  flex: 1;
   border-radius: ${({ theme }) => theme.borderRadius.sixteen}px;
   background-color: ${({ theme }) => theme.color.backgroundPrimary};
   padding: 4px 8px;
@@ -32,15 +32,9 @@ const ActiveTabContainer = styled(CenteredFlexRow)`
 
 const TabContainer = styled(CenteredFlexRow)<{ disable?: boolean }>`
   cursor: ${({ disable }) => (disable ? 'not-allowed' : 'pointer')};
-  width: calc(33% - 8px);
+  flex: 1;
   padding: 4px 8px;
 `;
-
-export const HomePageTabsId = {
-  Tokens: 0,
-  NFTs: 1,
-  Deploys: 2
-};
 
 export const Tab = styled.div<TabProps>``;
 
@@ -51,24 +45,58 @@ interface TabProps {
 
 interface TabsProps {
   children: React.ReactElement<TabProps>[];
-  preferActiveTabId?: number;
+  /**
+   * When provided, the parent owns the active tab. Without it the component
+   * keeps its own state and starts on the first tab.
+   */
+  activeTabName?: string;
+  onTabChange?: (tabName: string) => void;
   onClick?: () => void;
 }
 
-export function Tabs({ children, preferActiveTabId, onClick }: TabsProps) {
-  // set preferActiveTabId as the default value if it is provided. We do not need to track props change, so we can set it directly in useState
-  const [activeTabId, setActiveTabId] = useState(preferActiveTabId || 0);
+export function Tabs({
+  children,
+  activeTabName,
+  onTabChange,
+  onClick
+}: TabsProps) {
+  const firstTabName = children[0]?.props.tabName ?? '';
+
+  const [uncontrolledTabName, setUncontrolledTabName] = useState(firstTabName);
+
+  const requestedTabName = activeTabName ?? uncontrolledTabName;
+  // Fall back to the first tab rather than rendering nothing if the requested
+  // name matches no child.
+  const currentTabName = children.some(
+    tab => tab.props.tabName === requestedTabName
+  )
+    ? requestedTabName
+    : firstTabName;
 
   const { t } = useTranslation();
+
+  const handleTabClick = (tabName: string) => {
+    if (activeTabName === undefined) {
+      setUncontrolledTabName(tabName);
+    }
+
+    if (onTabChange) {
+      onTabChange(tabName);
+    }
+
+    if (onClick) {
+      onClick();
+    }
+  };
 
   return (
     <>
       <StickyTabsContainer>
         <TabsContainer flexGrow={1}>
-          {children.map((tab, index) => {
+          {children.map(tab => {
             const { tabName } = tab.props;
 
-            return activeTabId === index ? (
+            return tabName === currentTabName ? (
               <ActiveTabContainer title={tabName} key={tabName}>
                 <Typography type="captionMedium">
                   <Trans t={t}>{tabName}</Trans>
@@ -76,12 +104,7 @@ export function Tabs({ children, preferActiveTabId, onClick }: TabsProps) {
               </ActiveTabContainer>
             ) : (
               <TabContainer
-                onClick={() => {
-                  setActiveTabId(index);
-                  if (onClick) {
-                    onClick();
-                  }
-                }}
+                onClick={() => handleTabClick(tabName)}
                 key={tabName}
               >
                 <Typography type="captionRegular">
@@ -93,9 +116,10 @@ export function Tabs({ children, preferActiveTabId, onClick }: TabsProps) {
         </TabsContainer>
       </StickyTabsContainer>
 
-      {children.map((tab, index) =>
-        activeTabId === index ? tab.props.children : null
-      )}
+      {
+        children.find(tab => tab.props.tabName === currentTabName)?.props
+          .children
+      }
     </>
   );
 }

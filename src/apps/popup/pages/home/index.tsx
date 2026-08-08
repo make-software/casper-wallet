@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -6,7 +6,8 @@ import styled from 'styled-components';
 import { HomePageTabName, NetworkSetting } from '@src/constants';
 import { isSafariBuild } from '@src/utils';
 
-import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
+import { useHomeTab } from '@popup/hooks/use-home-tab';
+import { RouterPath, useTypedNavigate } from '@popup/router';
 
 import {
   selectActiveNetworkSetting,
@@ -61,12 +62,18 @@ const Container = styled(TileContainer)`
 export function HomePageContent() {
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
-  const location = useTypedLocation();
   const dismissedAppEventIds = useSelector(
     selectDismissedAppEvents,
     shallowEqual
   );
-  const state = location.state;
+
+  const { activeHomeTab, setActiveHomeTab } = useHomeTab();
+
+  const handleTabChange = (tabName: string) => {
+    // `Tabs` is name-addressed and generic over plain strings; on this page
+    // the names are exactly the HomePageTabName members rendered below.
+    setActiveHomeTab(tabName as HomePageTabName);
+  };
 
   const network = useSelector(selectActiveNetworkSetting);
   const activeAccount = useSelector(selectVaultActiveAccount);
@@ -83,14 +90,6 @@ export function HomePageContent() {
   if (showExpirationBanner) {
     wasExpirationBannerShown.current = true;
   }
-
-  useEffect(() => {
-    if (!state?.activeTabId) {
-      const container = document.querySelector('#ms-container');
-
-      container?.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    }
-  }, [state?.activeTabId]);
 
   const { activeMarketingEvent } =
     useGetActiveAppMarketingEvent(dismissedAppEventIds);
@@ -150,7 +149,7 @@ export function HomePageContent() {
         </Tile>
       )}
       <VerticalSpaceContainer top={SpacingSize.Tiny}>
-        <Tabs preferActiveTabId={state?.activeTabId}>
+        <Tabs activeTabName={activeHomeTab} onTabChange={handleTabChange}>
           <Tab tabName={HomePageTabName.Tokens}>
             <TokensList />
           </Tab>

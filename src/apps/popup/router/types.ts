@@ -8,11 +8,9 @@ import { ErrorLocationState } from '@libs/layout/error/types';
 
 export interface LocationState extends ErrorLocationState {
   showNavigationMenu?: boolean;
-  activeTabId?: number;
   tokenData?: TokenType | null;
   nftData?: NFTData;
   recipientPublicKey?: string;
   deploy?: IDeploy;
-  navigateHome?: boolean;
   appEvent?: IAppMarketingEvent;
 }
