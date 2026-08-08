@@ -12,6 +12,7 @@ import {
 import { selectLedgerNewWindowId } from '@background/redux/ledger/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 
+import { createLedgerWindowCloseTracker } from '@hooks/ledger-window-close-listener';
 import { registerLedgerPermissionWindow } from '@hooks/register-ledger-permission-window';
 
 import {
@@ -196,6 +197,10 @@ export const useLedger = ({
     }
   }, [isLedgerConnected, makeSubmitLedgerAction]);
 
+  // One per hook instance, stable across renders: the effect below arms it and
+  // the two effects after it are the only things that take it back down.
+  const closeTracker = useMemo(() => createLedgerWindowCloseTracker(), []);
+
   /** We have to open new browser window to handle device permission */
   useEffect(() => {
     (async () => {
@@ -230,12 +235,7 @@ export const useLedger = ({
 
         triggeredRef.current = true;
 
-        const handleCloseWindow = () => {
-          dispatchToMainStore(ledgerStateCleared());
-          windows.onRemoved.removeListener(handleCloseWindow);
-        };
-
-        windows.onRemoved.addListener(handleCloseWindow);
+        closeTracker.arm(w.id);
       }
     })().catch(error => {
       // `openNewSeparateWindow` is an awaited call that can reject, and without
@@ -258,10 +258,29 @@ export const useLedger = ({
   }, [
     askPermissionUrlData.domain,
     askPermissionUrlData.params?.requestId,
+    closeTracker,
     ledgerEventStatusToRender.status,
     url,
     windowId
   ]);
+
+  // Unmount only — deliberately NOT the cleanup of the effect above. `windowId`
+  // is one of that effect's dependencies and the arm path dispatches
+  // ledgerNewWindowIdChanged, so its cleanup would run a broadcast round-trip
+  // after arming and remove the listener that was just registered.
+  useEffect(() => () => closeTracker.detach(), [closeTracker]);
+
+  // The slice can be cleared without this window ever closing —
+  // LedgerDisconnectedFooter's Connect CTA does it, and renderLedgerFooter
+  // shows that footer for LedgerAskPermission as well as Disconnected. Once
+  // that happens another useLedger instance can open its own permission window
+  // and take over the slice; a listener still watching ours would wipe that
+  // flow's deploy/transaction the moment our stale window is closed.
+  useEffect(() => {
+    if (windowId != null) return;
+
+    closeTracker.detach();
+  }, [closeTracker, windowId]);
 
   const closeNewLedgerWindowsAndClearState = useCallback(async () => {
     if (windowId) {
