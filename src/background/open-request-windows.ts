@@ -1,15 +1,6 @@
 import { Windows, runtime, windows } from 'webextension-polyfill';
 
-// Matches open-window.ts: a browser error message is unbounded.
-const MAX_LOGGED_ERROR_LENGTH = 200;
-
-// A `signMessage` approval URL carries the user's plaintext message as a search
-// param, and a windows-API rejection can quote the URL it failed on.
-function redactUrlQuery(error: unknown): string {
-  const message = error instanceof Error ? error.message : String(error);
-
-  return message.split('?')[0].slice(0, MAX_LOGGED_ERROR_LENGTH);
-}
+import { redactUrlQuery } from '@background/redact-url-query';
 
 /**
  * Every `requestId` currently displayed by a browser window, or `null` if the

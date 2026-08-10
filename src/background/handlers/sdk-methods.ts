@@ -213,6 +213,8 @@ export async function handleSdkMethod(
       };
     }
 
+    // No `await` before `windowRequestOpened` below: `reconcileStalePayloadsSaga`
+    // purges a payload that no descriptor and no window claims.
     store.dispatch(
       deployPayloadReceived({
         id: action.meta.requestId,
@@ -310,6 +312,7 @@ export async function handleSdkMethod(
 
     const { signingPublicKeyHex, typedData, options } = action.payload;
 
+    // Same synchronous block as the deploy branch, for the same reason.
     store.dispatch(
       eip712PayloadReceived({
         id: action.meta.requestId,

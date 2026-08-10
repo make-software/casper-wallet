@@ -178,6 +178,24 @@ describe('vault reducer', () => {
       }
     );
 
+    // A cipher written before the field entered `VaultState` decrypts without
+    // it — `decryptVault` is a bare cast and there is no migration — and a
+    // throw here escapes into `unlockVaultSaga`'s catch, so the vault never
+    // unlocks again.
+    it.each(['jsonById', 'eip712ById'] as const)(
+      'loads a cipher written before %s existed as an empty dict instead of throwing',
+      field => {
+        const legacy: VaultState = { ...payload };
+        delete (legacy as Partial<VaultState>)[field];
+        const other = field === 'jsonById' ? 'eip712ById' : 'jsonById';
+
+        const s = reducer(initialState, vaultLoaded(legacy));
+
+        expect(s[field]).toEqual({});
+        expect(s[other]).toEqual(payload[other]);
+      }
+    );
+
     // `Object.keys`, not a bare lookup: an inherited name would answer the
     // latter.
     it('returns dicts owning nothing when cipher and memory are both empty', () => {

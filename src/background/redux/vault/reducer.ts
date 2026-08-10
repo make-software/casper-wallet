@@ -25,9 +25,10 @@ type State = VaultState;
  * nothing; the debounced re-encrypt early-returns because the vault is locked;
  * and `vaultLoaded` restores the entry on the next unlock. No service-worker
  * death is involved — it reproduces on Firefox and Safari too, where the
- * background page is persistent. Nothing else deletes a key, so a leaked payload
- * lives in `storage.local` for good — while riding along in every popup-state
- * broadcast, since `selectPopupState` sends `vault` whole.
+ * background page is persistent. Nothing else in this reducer deletes a key, so
+ * a leaked payload sits in `storage.local` — riding along in every popup-state
+ * broadcast, since `selectPopupState` sends `vault` whole — until
+ * `reconcileStalePayloadsSaga` reclaims its slot on the next unlock.
  *
  * Ten is far above real concurrency (one approval window means 1-2 in-flight
  * requests) and far below anything that costs memory. See `storePayload` for
@@ -97,12 +98,13 @@ function storePayload(
   return { ...payloads, [requestId]: json };
 }
 
-// `storePayload`'s key guard, re-stated on the merge path: `vaultLoaded` is
-// forwarded into the store with no `isTrustedUiSender` gate. Not reachable from
-// a page today — `content/index.ts` admits only `SDK_REQUEST_TYPES`.
-function sanitizePayloadMap(payloads: PayloadMap): PayloadMap {
+// `storePayload`'s key guard on the merge path — `vaultLoaded` is forwarded
+// with no `isTrustedUiSender` gate. Widened past `VaultState` because a cipher
+// written before a map existed decrypts without it, and throwing here would
+// leave the vault permanently locked.
+function sanitizePayloadMap(payloads: PayloadMap | undefined): PayloadMap {
   return Object.fromEntries(
-    Object.entries(payloads).filter(([requestId]) =>
+    Object.entries(payloads ?? {}).filter(([requestId]) =>
       isStorableRequestId(requestId)
     )
   );

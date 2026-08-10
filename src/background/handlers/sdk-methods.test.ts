@@ -12,12 +12,17 @@ import { openWindow } from '@background/open-window';
 import { MainStore } from '@background/redux/get-main-store';
 import { selectVaultIsLocked } from '@background/redux/session/selectors';
 import {
+  deployPayloadReceived,
+  eip712PayloadReceived
+} from '@background/redux/vault/actions';
+import {
   selectAccountNamesByOriginDict,
   selectDeploysJsonById,
   selectEip712JsonById,
   selectIsAccountConnected,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
+import { windowRequestOpened } from '@background/redux/windowManagement/actions';
 import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 
 import { sdkMethod } from '@content/sdk-method';
@@ -118,6 +123,31 @@ const SENDER = {
   url: 'https://dapp.example/page',
   tab: { id: 9 }
 } as Runtime.MessageSender;
+
+// `reconcileStalePayloadsSaga` may resume at any `await`, and a payload that no
+// descriptor and no window claims is exactly what it purges — so the payload
+// write and `windowRequestOpened` have to land in one synchronous block. The
+// probe is a microtask queued at the write: an `await` in between would let it
+// run before the descriptor.
+function watchGapBeforeDescriptor(dispatch: jest.Mock, payloadType: string) {
+  const seen: { microtaskRanBeforeDescriptor: boolean | null } = {
+    microtaskRanBeforeDescriptor: null
+  };
+  let microtaskRan = false;
+
+  dispatch.mockImplementation((action: { type: string }) => {
+    if (action.type === payloadType) {
+      void Promise.resolve().then(() => {
+        microtaskRan = true;
+      });
+    }
+    if (action.type === windowRequestOpened.type) {
+      seen.microtaskRanBeforeDescriptor = microtaskRan;
+    }
+  });
+
+  return seen;
+}
 
 let consoleErrorSpy: jest.SpyInstance;
 
@@ -459,6 +489,21 @@ describe('signRequest', () => {
     expect(result).toEqual({ handled: true, response: undefined });
   });
 
+  it('dispatches the deploy payload and the descriptor in one synchronous block', async () => {
+    isEqualCIMock.mockReturnValue(false);
+    const { store, dispatch } = makeStore();
+    const seen = watchGapBeforeDescriptor(dispatch, deployPayloadReceived.type);
+
+    await handleSdkMethod(
+      sdkMethod.signRequest({ deployJson, signingPublicKeyHex: 'PK-1' }, META),
+      SENDER,
+      store
+    );
+
+    // `null` would mean no descriptor was dispatched at all.
+    expect(seen.microtaskRanBeforeDescriptor).toBe(false);
+  });
+
   it('payload write refused at capacity → cancelled response, no window', async () => {
     // The map stays empty after the dispatch, so the signature page would have
     // had nothing to render and the dapp promise would have hung to its own
@@ -638,6 +683,26 @@ describe('signTypedDataRequest', () => {
       expect.objectContaining({ windowApp: WindowApp.SignatureRequestEip712 })
     );
     expect(result).toEqual({ handled: true, response: undefined });
+  });
+
+  it('dispatches the eip712 payload and the descriptor in one synchronous block', async () => {
+    const { store, dispatch } = makeStore();
+    const seen = watchGapBeforeDescriptor(dispatch, eip712PayloadReceived.type);
+
+    await handleSdkMethod(
+      sdkMethod.signTypedDataRequest(
+        {
+          typedData: { foo: 'bar' } as any,
+          options: undefined,
+          signingPublicKeyHex: 'PK-1'
+        },
+        META
+      ),
+      SENDER,
+      store
+    );
+
+    expect(seen.microtaskRanBeforeDescriptor).toBe(false);
   });
 
   it('payload write refused at capacity → cancelled response, no window', async () => {
