@@ -25,6 +25,7 @@ import {
 } from '@background/redux/cspr-name-expirations/actions';
 import { MainStore } from '@background/redux/get-main-store';
 import {
+  closeLedgerFlowWindows,
   ledgerDeployChanged,
   ledgerNewWindowIdChanged,
   ledgerRecipientToSaveOnSuccessChanged,
@@ -112,6 +113,7 @@ import {
   vaultCipherReseted
 } from '../redux/vault-cipher/actions';
 import { attachWindowToRequest } from './attach-window-to-request';
+import { handleCloseLedgerFlowWindows } from './close-ledger-flow-windows';
 import { isTrustedUiSender } from './private-state';
 import { HandlerResult } from './types';
 
@@ -231,6 +233,34 @@ export async function handleReduxAction(
       payload.requestId as string,
       payload.windowId as number
     );
+    return { handled: true, response: undefined };
+  }
+
+  // Intercepted rather than forwarded: there is no reducer case for it, and the
+  // window set it closes is derived from `windowManagement.requests`, which no
+  // replica can see. Gated on `sender` for the same reason as the branch above —
+  // closing an approval window reaches `cancelOpenRequestsForClosedWindow`, so
+  // this decides a request's lifecycle.
+  if (closeLedgerFlowWindows.match(action)) {
+    if (!isTrustedUiSender(sender)) {
+      return { handled: true };
+    }
+
+    // `.match` says nothing about the payload, and this crosses
+    // `runtime.sendMessage`. Read it defensively so a payload-less message
+    // becomes the no-requestId (internal-flow) case instead of a TypeError the
+    // router reports as a generic sendError.
+    const payload: Partial<{ requestId: string }> = action.payload ?? {};
+
+    // Fire-and-forget: the dispatcher's document is one of the windows being
+    // closed. `handleCloseLedgerFlowWindows` never rejects; the `.catch` is the
+    // belt for a synchronous throw before its first await.
+    void Promise.resolve(
+      handleCloseLedgerFlowWindows(store, payload.requestId)
+    ).catch(error =>
+      console.error('closeLedgerFlowWindows: handler failed', error)
+    );
+
     return { handled: true, response: undefined };
   }
 
