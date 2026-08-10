@@ -69,7 +69,7 @@ describe('vault reducer', () => {
       eip712ById: { pe: 'payload-eip' }
     };
 
-    it('replaces state and takes payload dicts when existing dicts are empty', () => {
+    it('takes the cipher payload dicts when the in-memory dicts are empty', () => {
       expect(reducer(initialState, vaultLoaded(payload))).toEqual({
         secretPhrase: ['w1', 'w2'],
         accounts: [acc('a')],
@@ -81,7 +81,7 @@ describe('vault reducer', () => {
       });
     });
 
-    it('keeps existing non-empty jsonById / eip712ById', () => {
+    it('merges the cipher dicts into the in-memory ones', () => {
       const state: VaultState = {
         ...initialState,
         jsonById: { existing: 'keep-json' },
@@ -93,9 +93,101 @@ describe('vault reducer', () => {
         accountNamesByOriginDict: { o1: ['a'] },
         siteNameByOriginDict: { o1: 'Title' },
         activeAccountName: 'a',
-        jsonById: { existing: 'keep-json' },
-        eip712ById: { existing: 'keep-eip' }
+        jsonById: { pj: 'payload-json', existing: 'keep-json' },
+        eip712ById: { pe: 'payload-eip', existing: 'keep-eip' }
       });
+    });
+
+    // `updateVaultCipher` early-returns while locked, so memory holds the
+    // later write.
+    it('lets the in-memory value win on an id present in both dicts', () => {
+      const state: VaultState = {
+        ...initialState,
+        jsonById: { pj: 'fresh-json' },
+        eip712ById: { pe: 'fresh-eip' }
+      };
+
+      const s = reducer(state, vaultLoaded(payload));
+
+      expect(s.jsonById).toEqual({ pj: 'fresh-json' });
+      expect(s.eip712ById).toEqual({ pe: 'fresh-eip' });
+    });
+
+    // Asserted on what the reducer owns: at es2017 the merge is emitted as
+    // `Object.assign`, where a string `__proto__` vanishes silently and an
+    // object one replaces the map's prototype.
+    it.each([
+      ['a string', '"poison"'],
+      ['an object, as the deploy path dispatches', '{ "poisoned": true }']
+    ])(
+      'drops a __proto__ key carrying %s from the loaded dicts',
+      (_l, json) => {
+        // Object-literal `__proto__` is prototype syntax, not a key;
+        // `JSON.parse` is what creates the own property.
+        const poisoned: VaultState = {
+          ...payload,
+          jsonById: JSON.parse(
+            `{ "__proto__": ${json}, "pj": "payload-json" }`
+          ),
+          eip712ById: JSON.parse(
+            `{ "__proto__": ${json}, "pe": "payload-eip" }`
+          )
+        };
+
+        const s = reducer(initialState, vaultLoaded(poisoned));
+
+        expect(Object.keys(s.jsonById)).toEqual(['pj']);
+        expect(Object.keys(s.eip712ById)).toEqual(['pe']);
+        expect(Object.getPrototypeOf(s.jsonById)).toBe(Object.prototype);
+        expect(Object.getPrototypeOf(s.eip712ById)).toBe(Object.prototype);
+        expect(getPayload(s.jsonById, '__proto__')).toBeUndefined();
+        expect(getPayload(s.eip712ById, '__proto__')).toBeUndefined();
+      }
+    );
+
+    // The sanitizer must not overreach: a request keyed `constructor` still has
+    // a payload to sign.
+    it.each(['toString', 'constructor', 'valueOf', 'hasOwnProperty'])(
+      'keeps a cipher payload stored under the inherited name %s',
+      key => {
+        const state: VaultState = {
+          ...initialState,
+          jsonById: { inMemory: 'keep-json' },
+          eip712ById: { inMemory: 'keep-eip' }
+        };
+
+        const s = reducer(
+          state,
+          vaultLoaded({
+            ...payload,
+            jsonById: { [key]: 'from-cipher' },
+            eip712ById: { [key]: 'from-cipher' }
+          })
+        );
+
+        expect(Object.prototype.hasOwnProperty.call(s.jsonById, key)).toBe(
+          true
+        );
+        expect(Object.prototype.hasOwnProperty.call(s.eip712ById, key)).toBe(
+          true
+        );
+        expect(getPayload(s.jsonById, key)).toBe('from-cipher');
+        expect(getPayload(s.eip712ById, key)).toBe('from-cipher');
+        expect(getPayload(s.jsonById, 'inMemory')).toBe('keep-json');
+        expect(getPayload(s.eip712ById, 'inMemory')).toBe('keep-eip');
+      }
+    );
+
+    // `Object.keys`, not a bare lookup: an inherited name would answer the
+    // latter.
+    it('returns dicts owning nothing when cipher and memory are both empty', () => {
+      const s = reducer(
+        initialState,
+        vaultLoaded({ ...payload, jsonById: {}, eip712ById: {} })
+      );
+
+      expect(Object.keys(s.jsonById)).toEqual([]);
+      expect(Object.keys(s.eip712ById)).toEqual([]);
     });
   });
 

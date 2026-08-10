@@ -17,14 +17,17 @@ type State = VaultState;
  * Ceiling on `jsonById` / `eip712ById`.
  *
  * Both maps are cleared per request by the `windowRequestResponded` case in
- * `extraReducers` below — but a deletion can be MISSED. An MV3 service-worker
- * restart wipes `windowManagement.requests` (in-memory only) while these maps
- * come back from the encrypted cipher through `vaultLoaded`, so the response
- * for a pre-restart id can never arrive. Nothing else deletes a key:
- * `deploysReseted` is a full-slice reset dispatched on lock, and `lockVaultSaga`
- * flushes `updateVaultCipher` BEFORE it, so a leaked payload is re-loaded on the
- * next unlock and lives in `storage.local` for good — while riding along in
- * every popup-state broadcast, since `selectPopupState` sends `vault` whole.
+ * `extraReducers` below — but a deletion can be MISSED, and a clean auto-lock
+ * with an approval window open is enough on its own. `lockVaultSaga` runs
+ * `updateVaultCipher()` BEFORE `vaultReseted()`/`deploysReseted()`, so the
+ * unanswered payload is persisted into the cipher; the `windowRequestResponded`
+ * that arrives afterwards finds an already-emptied in-memory map and deletes
+ * nothing; the debounced re-encrypt early-returns because the vault is locked;
+ * and `vaultLoaded` restores the entry on the next unlock. No service-worker
+ * death is involved — it reproduces on Firefox and Safari too, where the
+ * background page is persistent. Nothing else deletes a key, so a leaked payload
+ * lives in `storage.local` for good — while riding along in every popup-state
+ * broadcast, since `selectPopupState` sends `vault` whole.
  *
  * Ten is far above real concurrency (one approval window means 1-2 in-flight
  * requests) and far below anything that costs memory. See `storePayload` for
@@ -63,22 +66,18 @@ type PayloadMap = State['jsonById'];
 // A rewrite of an id already present is always applied — it cannot grow the map.
 //
 // Residual, accepted: a payload leaks whenever its deletion never reaches the
-// cipher. Two routes, not one — the request is never answered at all (auto-lock
-// while an approval window is open, then the MV3 worker dies with no
-// `windows.onRemoved` handler alive to cancel it), or it IS answered and the
-// worker dies inside the 500ms re-encrypt debounce that would have persisted
-// the deletion. Either way the entry outlives lock/unlock, because
-// `lockVaultSaga` flushes the cipher before `deploysReseted` and `vaultLoaded`
-// restores from it, so enough of them fill the map and refuse every later
-// payload.
+// cipher. Two routes, not one — the request is never answered at all, which a
+// clean auto-lock with an approval window open causes on its own (`lockVaultSaga`
+// runs `updateVaultCipher()` BEFORE `vaultReseted()`/`deploysReseted()`, so the
+// entry is persisted; the later `windowRequestResponded` finds an already-emptied
+// in-memory map and deletes nothing; the debounced re-encrypt early-returns while
+// the vault is locked — no worker death anywhere, and it reproduces on Firefox
+// and Safari too, where the background page is persistent), or it IS answered and
+// the worker dies inside the 500ms re-encrypt debounce that would have persisted
+// the deletion. Either way `vaultLoaded` restores the entry on unlock, so enough
+// of them fill the map and refuse every later payload.
 //
-// That state has an exit, and it is worth writing down because nothing in the
-// UI points at it: `vaultLoaded` keeps the IN-MEMORY map whenever it is
-// non-empty and discards the cipher's. `signRequest` has no lock gate, so one
-// request arriving while the vault is locked writes the only entry there is —
-// lock, let a dapp send one request, unlock, and the accumulated entries are
-// gone. Reclaiming the slots without that sequence means reconciling the map
-// against the windows actually open, which is a separate change.
+// Reclaimed by `reconcileStalePayloadsSaga` (sagas/vault-sagas.ts).
 function storePayload(
   payloads: PayloadMap,
   requestId: string,
@@ -98,6 +97,17 @@ function storePayload(
   return { ...payloads, [requestId]: json };
 }
 
+// `storePayload`'s key guard, re-stated on the merge path: `vaultLoaded` is
+// forwarded into the store with no `isTrustedUiSender` gate. Not reachable from
+// a page today — `content/index.ts` admits only `SDK_REQUEST_TYPES`.
+function sanitizePayloadMap(payloads: PayloadMap): PayloadMap {
+  return Object.fromEntries(
+    Object.entries(payloads).filter(([requestId]) =>
+      isStorableRequestId(requestId)
+    )
+  );
+}
+
 const initialState: State = {
   secretPhrase: null,
   accounts: [],
@@ -113,6 +123,11 @@ const slice = createSlice({
   initialState,
   reducers: {
     vaultReseted: () => initialState,
+    // The maps merge, in-memory winning: `updateVaultCipher` early-returns while
+    // locked, so a payload written then exists only in memory. Not via
+    // `storePayload` — it refuses at `MAX_STORED_PAYLOADS` and would drop them.
+    // The union may sit over the ceiling until `reconcileStalePayloadsSaga`
+    // runs, and a signature request arriving in that window is refused.
     vaultLoaded: (
       state,
       {
@@ -132,12 +147,8 @@ const slice = createSlice({
       accounts,
       activeAccountName,
       secretPhrase,
-      jsonById:
-        Object.keys(state.jsonById).length === 0 ? jsonById : state.jsonById,
-      eip712ById:
-        Object.keys(state.eip712ById).length === 0
-          ? eip712ById
-          : state.eip712ById
+      jsonById: { ...sanitizePayloadMap(jsonById), ...state.jsonById },
+      eip712ById: { ...sanitizePayloadMap(eip712ById), ...state.eip712ById }
     }),
     secretPhraseCreated: (
       state,
