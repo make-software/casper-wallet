@@ -1,17 +1,18 @@
-import { createReducer } from 'typesafe-actions';
-
-import { loginRetryCountIncremented, loginRetryCountReseted } from './actions';
+import { createSlice } from '@reduxjs/toolkit';
 
 export type LoginRetryCountState = number;
 
 const initialState = 0 as LoginRetryCountState;
 
-export const reducer = createReducer(initialState)
-  .handleAction(
-    loginRetryCountReseted,
-    (): LoginRetryCountState => initialState
-  )
-  .handleAction(
-    loginRetryCountIncremented,
-    (state): LoginRetryCountState => state + 1
-  );
+const slice = createSlice({
+  name: 'loginRetryCount',
+  initialState,
+  reducers: {
+    loginRetryCountReseted: () => initialState,
+    loginRetryCountIncremented: state => state + 1
+  }
+});
+
+export const { loginRetryCountIncremented, loginRetryCountReseted } =
+  slice.actions;
+export const reducer = slice.reducer;

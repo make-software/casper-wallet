@@ -1,4 +1,3 @@
-import { Player } from '@lottiefiles/react-lottie-player';
 import React, { useEffect, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -19,6 +18,7 @@ import {
 } from '@libs/layout';
 import { ILedgerEvent, LedgerEventStatus } from '@libs/services/ledger';
 import { Link, List, SvgIcon, Typography } from '@libs/ui/components';
+import { LottiePlayer } from '@libs/ui/components/lottie-player';
 
 const ItemContainer = styled(AlignedFlexRow)`
   padding: 16px;
@@ -62,13 +62,11 @@ export const NoConnectedLedger: React.FC<INoConnectedLedgerProps> = ({
     container?.scrollTo(0, 0);
   }, []);
 
-  if (
-    !(
-      event?.status === LedgerEventStatus.Disconnected ||
-      event?.status === LedgerEventStatus.WaitingResponseFromDevice ||
-      event?.status === LedgerEventStatus.LedgerAskPermission
-    )
-  ) {
+  if (!(
+    event?.status === LedgerEventStatus.Disconnected ||
+    event?.status === LedgerEventStatus.WaitingResponseFromDevice ||
+    event?.status === LedgerEventStatus.LedgerAskPermission
+  )) {
     return null;
   }
 
@@ -142,8 +140,7 @@ export const NoConnectedLedger: React.FC<INoConnectedLedgerProps> = ({
 
       {event.status === LedgerEventStatus.WaitingResponseFromDevice && (
         <CenteredFlexColumn>
-          <Player
-            renderer="svg"
+          <LottiePlayer
             autoplay
             loop
             src={isDarkMode ? dotsDarkModeAnimation : dotsLightModeAnimation}

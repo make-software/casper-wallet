@@ -20,17 +20,19 @@ import {
   SpacingSize
 } from '@libs/layout';
 import { useFetchContractPackage } from '@libs/services/contract-package';
-import { Link, SvgIcon, Typography } from '@libs/ui/components';
+import { Link, Typography } from '@libs/ui/components';
 import { AccountInfoIcon } from '@libs/ui/components/account-info-icon/account-info-icon';
 import { HashTooltip } from '@libs/ui/components/hash/hash-tooltip';
 import { PortalTooltip } from '@libs/ui/components/portal-tooltip/portal-tooltip';
+
+import { ContractIcon } from './contract-icon';
 
 const AlignedFlexRowContainer = styled(AlignedFlexRow)`
   column-gap: 8px;
   flex-wrap: wrap;
 `;
 
-export const NftIndexContainer = styled.div`
+const NftIndexContainer = styled.div`
   padding: 0 6px;
   background: ${({ theme }) => theme.color.backgroundSecondary};
   max-width: 296px;
@@ -106,7 +108,7 @@ export const ActionContainerWithLink = ({
     <LeftAlignedFlexColumn gap={SpacingSize.Tiny}>
       <AlignedFlexRow gap={SpacingSize.Small}>
         <Typography type="bodySemiBold">{title}</Typography>
-        <SvgIcon src={contractIcon} size={20} />
+        <ContractIcon contractIcon={contractIcon} contractName={contractName} />
         <Link color="contentAction" href={contractLink ?? link} target="_blank">
           <Typography type="captionRegular">{contractName}</Typography>
         </Link>
@@ -125,7 +127,7 @@ interface NftInfoRowProps {
   contractHash: string;
   collectionName?: Maybe<string>;
   isApprove?: boolean;
-  defaultSvg?: string;
+  defaultSvg?: DeployIcon;
   collectionHash: string;
   contractLink?: Maybe<string>;
 }
@@ -276,7 +278,7 @@ interface ContractInfoRowProps {
   iconUrl?: Maybe<string>;
   label?: string;
   additionalInfo?: string;
-  defaultSvg?: string;
+  defaultSvg?: DeployIcon;
   contractLink?: Maybe<string>;
 }
 

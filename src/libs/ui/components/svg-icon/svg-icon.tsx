@@ -1,8 +1,12 @@
+import isPropValid from '@emotion/is-prop-valid';
 import React, { HTMLAttributes, forwardRef } from 'react';
 import ReactSVG from 'react-inlinesvg';
 import styled from 'styled-components';
 
 import { Color, getColorFromTheme } from '@libs/ui/utils';
+
+import { assertLocalIconSrc } from './assert-local-icon-src';
+import { reportIconLoadFailure } from './report-icon-load-failure';
 
 type Ref = HTMLDivElement;
 
@@ -36,8 +40,7 @@ const getMargin = (size?: 'small' | 'medium') => {
 };
 
 const Container = styled('div').withConfig({
-  shouldForwardProp: (prop, defaultValidatorFn) =>
-    !['flipByAxis'].includes(prop) && defaultValidatorFn(prop)
+  shouldForwardProp: prop => !['flipByAxis'].includes(prop) && isPropValid(prop)
 })<{
   size: number;
   width?: string | number;
@@ -73,12 +76,53 @@ const Container = styled('div').withConfig({
   })
 );
 
-const StyledReactSVG = styled(ReactSVG)<SvgIconProps>(
-  ({ size, width, height }) => ({
-    display: 'flex',
-    width: width != null ? width : size,
-    height: height != null ? height : size
-  })
+// Only the three props the callback below actually reads. Typing this with the
+// full SvgIconProps pulls in HTMLAttributes' `onError?: ReactEventHandler`,
+// which intersects with react-inlinesvg's `onError?: (error: Error) => void`
+// and leaves no handler able to satisfy both.
+const StyledReactSVG = styled(ReactSVG)<{
+  size: number;
+  width?: number | string;
+  height?: number | string;
+}>(({ size, width, height }) => ({
+  display: 'flex',
+  width: width != null ? width : size,
+  height: height != null ? height : size
+}));
+
+/**
+ * Stands in for an icon whose file failed to fetch or parse. Written as
+ * literal JSX rather than pointed at an asset path on purpose: it must not
+ * fetch anything and it must not route back through SvgIcon. RemoteIcon's
+ * error-recovery path already ends in an SvgIcon, so an asset-backed fallback
+ * here could fail in turn and loop.
+ *
+ * Container already fixes the width and height, so a failed icon never shifted
+ * the layout — this changes nothing geometrically, it only makes the breakage
+ * visible instead of leaving a hole.
+ *
+ * react-inlinesvg's FAILED branch (`react-inlinesvg/src/index.tsx:46-48`)
+ * returns `children` verbatim — unlike its success branch, it does not
+ * `cloneElement` them with StyledReactSVG's generated class. So this
+ * placeholder never receives that class; its effective parent is Container,
+ * and the `width="100%" height="100%"` below resolve against Container's box.
+ */
+const BrokenIconPlaceholder = () => (
+  <svg
+    viewBox="0 0 24 24"
+    width="100%"
+    height="100%"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.5}
+    opacity={0.4}
+    aria-hidden="true"
+    focusable="false"
+    data-testid="broken-icon-placeholder"
+  >
+    <rect x="3" y="3" width="18" height="18" rx="4" />
+    <path d="M8 16 16 8" />
+  </svg>
 );
 
 export const SvgIcon = forwardRef<Ref, SvgIconProps>(
@@ -97,6 +141,8 @@ export const SvgIcon = forwardRef<Ref, SvgIconProps>(
     }: SvgIconProps,
     ref
   ) => {
+    assertLocalIconSrc(src);
+
     const handleClick =
       onClick &&
       ((ev: any) => {
@@ -128,7 +174,10 @@ export const SvgIcon = forwardRef<Ref, SvgIconProps>(
           size={size}
           height={height}
           width={width}
-        />
+          onError={error => reportIconLoadFailure(src, error)}
+        >
+          <BrokenIconPlaceholder />
+        </StyledReactSVG>
       </Container>
     );
   }

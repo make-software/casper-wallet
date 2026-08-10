@@ -11,6 +11,8 @@ import { accountTrackingIdOfSentNftTokensRemoved } from '@background/redux/accou
 import { selectAccountTrackingIdOfSentNftTokens } from '@background/redux/account-info/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 
+import { useIsDarkMode } from '@hooks/use-is-dark-mode';
+
 import {
   AlignedFlexRow,
   AlignedSpaceBetweenFlexRow,
@@ -35,6 +37,8 @@ import {
   Tile,
   Typography
 } from '@libs/ui/components';
+
+import { NftTokenDetailIcon } from './nft-token-detail-icon';
 
 const NftImageContainer = styled(CenteredFlexRow)`
   width: 100%;
@@ -61,6 +65,29 @@ const AudioNftContainer = styled(CenteredFlexRow)`
   background-color: ${({ theme }) => theme.color.backgroundSecondary};
 `;
 
+// Without an explicit width this column shrink-to-fits the 120px placeholder icon,
+// which collapses the player's `width: 100%` to 120px — narrow enough that the
+// browser drops the seek bar and timestamp from the native controls.
+const AudioNftWrapper = styled(CenteredFlexColumn)`
+  width: 100%;
+`;
+
+interface AudioPlayerProps {
+  isDarkMode: boolean;
+}
+
+// NFT audio previews are arbitrary third-party media with no caption track
+// available, so this player is intentionally rendered without one.
+const AudioPlayer = styled.audio<AudioPlayerProps>`
+  width: 100%;
+
+  color-scheme: ${({ isDarkMode }) => (isDarkMode ? 'dark' : 'light')};
+
+  &::-webkit-media-controls-panel {
+    background-color: ${({ theme }) => theme.color.backgroundSecondary};
+  }
+`;
+
 const Container = styled(AlignedSpaceBetweenFlexRow)<{ withIcon: boolean }>`
   padding: ${({ withIcon }) => (withIcon ? '14px 16px' : '18px 16px')};
 `;
@@ -73,7 +100,7 @@ const ButtonContainer = styled(CenteredFlexColumn)<{ disabled: boolean }>`
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 `;
 
-const Player = styled(ReactPlayer)`
+const Player = styled(ReactPlayer).attrs({ wrapper: 'div' })`
   max-height: 312px;
   max-width: 312px;
 
@@ -104,6 +131,7 @@ export const NftDetailsContent = ({
 
   const { t } = useTranslation();
   const navigate = useTypedNavigate();
+  const isDarkMode = useIsDarkMode();
 
   const preview = nftToken?.previewUrl;
   const cachedUrl = nftToken?.proxyPreviewUrl;
@@ -200,33 +228,37 @@ export const NftDetailsContent = ({
                 onError={onError}
               />
             )}
-            {(isAudio || isVideo) && (
+            {isVideo && (
               <CenteredFlexColumn>
-                {isAudio && (
-                  <AudioNftContainer>
-                    <SvgIcon
-                      src="assets/icons/audio-nft-placeholder.svg"
-                      height={120}
-                      width={120}
-                    />
-                  </AudioNftContainer>
-                )}
                 <Player
-                  style={
-                    isVideo
-                      ? { display: loading ? 'none' : 'block' }
-                      : undefined
-                  }
-                  url={cachedUrl || preview}
+                  style={{ display: loading ? 'none' : 'block' }}
+                  src={(cachedUrl || preview) as string}
                   controls={true}
                   volume={0.5}
-                  width={isVideo ? 'auto' : undefined}
-                  height={isVideo ? 'auto' : 70}
+                  width="auto"
+                  height="auto"
                   onError={onError}
-                  onReady={onLoad}
-                  config={{ file: { forceAudio: isAudio } }}
+                  onCanPlay={onLoad}
                 />
               </CenteredFlexColumn>
+            )}
+            {isAudio && (
+              <AudioNftWrapper gap={SpacingSize.Small}>
+                <AudioNftContainer>
+                  <SvgIcon
+                    src="assets/icons/audio-nft-placeholder.svg"
+                    height={120}
+                    width={120}
+                  />
+                </AudioNftContainer>
+                <AudioPlayer
+                  src={(cachedUrl || preview) as string}
+                  controls
+                  onCanPlay={onLoad}
+                  onError={onError}
+                  isDarkMode={isDarkMode}
+                />
+              </AudioNftWrapper>
             )}
             {((loading && !isAudio) || isLoadingMediaType) && !error && (
               <LoadingMediaPlaceholder />
@@ -311,7 +343,7 @@ export const NftDetailsContent = ({
                 >
                   {token.value}
                 </Typography>
-                <SvgIcon src={token.image} size={32} />
+                <NftTokenDetailIcon image={token.image} alt={token.value} />
               </AlignedFlexRow>
             ) : (
               <Typography

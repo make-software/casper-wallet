@@ -1,4 +1,9 @@
-import React, { PropsWithChildren, useCallback, useState } from 'react';
+import React, {
+  type JSX,
+  PropsWithChildren,
+  useCallback,
+  useState
+} from 'react';
 import styled from 'styled-components';
 
 import { FullWidthPortalTooltip } from './fullwidth-portal-tooltip';

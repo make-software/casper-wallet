@@ -1,4 +1,3 @@
-import { Player } from '@lottiefiles/react-lottie-player';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -39,6 +38,7 @@ import {
   Tile,
   Typography
 } from '@libs/ui/components';
+import { LottiePlayer } from '@libs/ui/components/lottie-player';
 
 import { ILedgerAccountListItem } from './types';
 
@@ -176,8 +176,7 @@ export const ConnectedLedger: React.FC<IConnectedLedgerProps> = ({
             <VerticalSpaceContainer top={SpacingSize.XL}>
               <Tile>
                 <AnimationContainer>
-                  <Player
-                    renderer="svg"
+                  <LottiePlayer
                     autoplay
                     loop
                     src={

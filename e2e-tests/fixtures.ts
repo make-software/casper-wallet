@@ -2,12 +2,12 @@ import {
   type BrowserContext,
   Page,
   test as base,
-  chromium
+  chromium,
+  expect
 } from '@playwright/test';
 import path from 'path';
 
 import {
-  DEFAULT_FIRST_ACCOUNT,
   DEFAULT_SECOND_ACCOUNT,
   FIRST_CONTACT,
   PLAYGROUND_URL,
@@ -28,6 +28,7 @@ export const test = base.extend<{
     const pathToExtension = path.join(__dirname, `../build/chrome`);
     const context = await chromium.launchPersistentContext('', {
       headless: false,
+      channel: 'chromium',
       args: [
         `--headless=new`,
         `--disable-extensions-except=${pathToExtension}`,
@@ -35,8 +36,74 @@ export const test = base.extend<{
       ]
     });
 
+    // e2e is the only job that exercises a production Chrome artifact, and therefore
+    // the only one where the manifest CSP is the nonce-pinned one. A broken nonce
+    // blocks every stylesheet while leaving the DOM intact, so the existing
+    // getByRole/toBeVisible assertions all still pass against an unstyled page —
+    // the page has to report the violation itself for the suite to notice.
+    //
+    // Both markers are explicit, self-authored prefixes rather than a blanket
+    // page-error assertion: the suite has never been held to that bar, and a
+    // flood of unrelated failures would bury this signal.
+    const policyViolations: string[] = [];
+    const VIOLATION_MARKERS = ['[CSP]', '[SvgIcon]'];
+
+    await context.addInitScript(() => {
+      // Extension documents only. The suite also drives pages this repo does not
+      // control — the Topper on-ramp the buy-CSPR flow redirects to, and the
+      // playground dapp — and those enforce a CSP of their own. Topper's blocks
+      // its own analytics on every load, which says nothing about this extension.
+      if (window.location.protocol !== 'chrome-extension:') {
+        return;
+      }
+
+      document.addEventListener('securitypolicyviolation', event => {
+        console.error(
+          `[CSP] ${event.effectiveDirective} blocked ${
+            event.blockedURI || 'inline'
+          } in ${event.documentURI}`
+        );
+      });
+    });
+
+    context.on('page', page => {
+      page.on('console', message => {
+        const text = message.text();
+
+        if (VIOLATION_MARKERS.some(marker => text.startsWith(marker))) {
+          policyViolations.push(text);
+        }
+      });
+    });
+
+    // `checkCasper2NetworkSaga` asks the node for its api_version on every unlock
+    // and on every network switch. It runs in the background service worker, and
+    // `page.route` does not cover service-worker requests — only `context.route`
+    // does. Until this route existed the suite therefore reached the live
+    // cspr.cloud node on every test. Once that node began answering 429 (daily
+    // organization quota), the probe failed, `casperNetworkApiVersion` stayed on
+    // the pre-2.0 default, `sendSignedTx` fell back to `putDeploy`, and every
+    // submitting test died on a transaction-shaped mock with
+    // "Cannot read properties of undefined (reading 'toHex')".
+    //
+    // Only the status probe is answered here: the per-test `popupPage.route` that
+    // fulfils the submit is a page route, and page routes are matched first.
+    await context.route(URLS.anyRpcNode, async route => {
+      if (route.request().postDataJSON()?.method === 'info_get_status') {
+        await route.fulfill(RPC_RESPONSE.getStatus);
+        return;
+      }
+
+      await route.fallback();
+    });
+
     await use(context);
     await context.close();
+
+    expect(
+      policyViolations,
+      'Content Security Policy / icon rendering violations'
+    ).toEqual([]);
   },
   extensionId: async ({ context }, use) => {
     let background = context.serviceWorkers()[0];

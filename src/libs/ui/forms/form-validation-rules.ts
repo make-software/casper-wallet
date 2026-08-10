@@ -36,14 +36,18 @@ export function useCreatePasswordRule() {
   const passwordAmountCharactersMessage = t(
     `Should be at least ${minPasswordLength} characters`
   );
+  const passwordIsRequiredMessage = t('Password is required');
 
-  return Yup.string().min(minPasswordLength, passwordAmountCharactersMessage);
+  return Yup.string()
+    .required(passwordIsRequiredMessage)
+    .min(minPasswordLength, passwordAmountCharactersMessage);
 }
 
 export function useVerifyPasswordAgainstHashRule(
   passwordHash: string,
   passwordSaltHash: string
 ) {
+  const { t } = useTranslation();
   const loginRetryCount = useSelector(selectLoginRetryCount);
 
   const attemptsLeft =
@@ -52,27 +56,33 @@ export function useVerifyPasswordAgainstHashRule(
     ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED;
 
   const errorMessage = getErrorMessageForIncorrectPassword(attemptsLeft);
+  const passwordIsRequiredMessage = t('Password is required');
 
-  return Yup.string().test('authenticate', errorMessage, async password => {
-    const result = await verifyPasswordAgainstHash(
-      passwordHash,
-      passwordSaltHash,
-      password
-    );
+  return Yup.string()
+    .required(passwordIsRequiredMessage)
+    .test('authenticate', errorMessage, async password => {
+      const result = await verifyPasswordAgainstHash(
+        passwordHash,
+        passwordSaltHash,
+        password
+      );
 
-    if (!result) {
-      dispatchToMainStore(loginRetryCountIncremented());
-    }
+      if (!result) {
+        dispatchToMainStore(loginRetryCountIncremented());
+      }
 
-    return result;
-  });
+      return result;
+    });
 }
 
 export function useRepeatPasswordRule(inputName: string) {
   const { t } = useTranslation();
   const passwordsDoesntMatchMessage = t("Passwords don't match");
+  const confirmPasswordIsRequiredMessage = t('Confirm password is required');
 
-  return Yup.string().oneOf([Yup.ref(inputName)], passwordsDoesntMatchMessage);
+  return Yup.string()
+    .required(confirmPasswordIsRequiredMessage)
+    .oneOf([Yup.ref(inputName)], passwordsDoesntMatchMessage);
 }
 
 export function useValidSecretPhraseRule() {
@@ -80,14 +90,17 @@ export function useValidSecretPhraseRule() {
   const errorMessage = t(
     'There should be 12 or 24 words in a valid secret phrase.'
   );
+  const secretPhraseIsRequiredMessage = t('Secret phrase is required');
 
-  return Yup.string().test('unique', errorMessage, value => {
-    return (
-      value != null &&
-      (value.trim().split(' ').length === 24 ||
-        value.trim().split(' ').length === 12)
-    );
-  });
+  return Yup.string()
+    .required(secretPhraseIsRequiredMessage)
+    .test('unique', errorMessage, value => {
+      return (
+        value != null &&
+        (value.trim().split(' ').length === 24 ||
+          value.trim().split(' ').length === 12)
+      );
+    });
 }
 
 export function useAccountNameRule(
@@ -101,7 +114,7 @@ export function useAccountNameRule(
     .required(t('Name is required'))
     .max(20, t("Account name can't be longer than 20 characters"))
     .matches(
-      /^[\daA-zZ\s]+$/,
+      /^[\da-zA-Z_\s]+$/,
       t('Account name can’t contain special characters')
     )
     .test(
@@ -596,7 +609,7 @@ export const useContactNameRule = (
       value => value != null && value.trim() !== ''
     )
     .matches(
-      /^[\daA-zZ\s]+$/,
+      /^[\da-zA-Z_\s]+$/,
       t('Contact name can’t contain special characters')
     )
     .test(

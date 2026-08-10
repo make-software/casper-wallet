@@ -7,13 +7,13 @@
     "192": "logo192.png"
   },
   "permissions": [
-    "background",
     "management",
     "storage",
     "tabs",
     "declarativeNetRequest",
     "alarms"
   ],
+  "minimum_chrome_version": "120",
   "declarative_net_request": {
     "rule_resources": [
       {
@@ -36,6 +36,7 @@
     "https://cspr-api-gateway.dev.make.services/cspr-node-proxy-rpc-dev-condor/*",
     "https://api.integration.casperwallet.io/*",
     "https://node.integration.cspr.cloud/*",
+    "https://onramp-api.cspr.click/api/*",
     "https://*.bringweb3.io/*"
   ],
   "background": {

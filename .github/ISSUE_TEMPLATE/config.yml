@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/make-software/casper-wallet/security/policy
+    about: Please report security vulnerabilities privately as described in our security policy — do not open a public issue.
+  - name: Questions & community support
+    url: https://t.me/CSPRhub
+    about: Join the Casper community on Telegram to get help and stay up to date about Casper Wallet.
+  - name: User guides & FAQ
+    url: https://www.casperwallet.io/user-guide
+    about: Check the Casper Wallet user guides and FAQ before filing an issue.

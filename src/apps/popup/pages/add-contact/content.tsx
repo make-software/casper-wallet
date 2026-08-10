@@ -44,7 +44,7 @@ export const AddContactPageContent = ({
         />
         <FormField
           statusText={errors.publicKey?.message}
-          status={!!errors.publicKey ? FormFieldStatus.Error : undefined}
+          status={errors.publicKey ? FormFieldStatus.Error : undefined}
           label={t('Public address')}
         >
           <TextArea

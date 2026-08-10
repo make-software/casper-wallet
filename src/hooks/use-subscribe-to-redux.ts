@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect } from 'react';
-import { getType, isActionOf } from 'typesafe-actions';
 import { runtime } from 'webextension-polyfill';
 
 import {
@@ -19,9 +18,10 @@ export const useSubscribeToRedux = ({
   setPopupState
 }: Props) => {
   const handleStateUpdate = useCallback(
-    (message: BackgroundEvent) => {
-      if (isActionOf(backgroundEvent.popupStateUpdated)(message)) {
-        setPopupState(message.payload);
+    (message: unknown) => {
+      const event = message as BackgroundEvent;
+      if (backgroundEvent.popupStateUpdated.match(event)) {
+        setPopupState(event.payload);
       }
     },
     [setPopupState]
@@ -33,7 +33,7 @@ export const useSubscribeToRedux = ({
     }
 
     runtime.sendMessage((windowInitAction as any)()).catch(() => {
-      console.error('window init: ' + getType(windowInitAction));
+      console.error('window init: ' + String(windowInitAction));
     });
 
     return () => {

@@ -10,11 +10,10 @@ import {
 
 import { getAccountHashFromPublicKey } from '@libs/entities/Account';
 
-import { handleError } from '../utils';
 import { isWithinNoticeWindow } from './expiring-cspr-names';
 import { chunkArray } from './utils';
 
-export type CsprNameExpirationsPayload = Record<
+type CsprNameExpirationsPayload = Record<
   string,
   { csprName: string; expiresAt: string }
 >;
@@ -129,7 +128,7 @@ export const getCsprNameExpirations = async (
       // expired/unknown names) — otherwise a transient error would wipe the
       // stored record and its dismissed flag.
       if (error != null) {
-        handleError(error);
+        console.error(error);
         failedPublicKeys.push(publicKey);
 
         return;

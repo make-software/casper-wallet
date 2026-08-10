@@ -1,13 +1,12 @@
-import { QRCodeCanvas } from 'qrcode.react';
 import React, { useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import styled, { useTheme } from 'styled-components';
-import { RootState } from 'typesafe-actions';
+import styled from 'styled-components';
 
 import { RouterPath, useTypedNavigate } from '@popup/router';
 
+import { RootState } from '@background/redux/store-types';
 import { dispatchToMainStore } from '@background/redux/utils';
 import { hideAccountFromListChanged } from '@background/redux/vault/actions';
 import {
@@ -30,14 +29,23 @@ import { useFetchAccountsInfo } from '@libs/services/account-info';
 import {
   Hash,
   HashVariant,
+  QrCode,
   SvgIcon,
   Tile,
   Typography
 } from '@libs/ui/components';
 
+// At 120px the modules were 2.45px each — the smallest QR we render, on the
+// screen with the most room to spare (WALLET-1347). The tile gives us 296px;
+// 240 takes the modules to 5.33px and still reads as an inset thumbnail rather
+// than taking over the screen.
+const QrCodeContainer = styled(VerticalSpaceContainer)`
+  display: flex;
+  justify-content: center;
+`;
+
 export function AccountSettingsPageContent() {
   const { t } = useTranslation();
-  const theme = useTheme();
 
   const { accountName } = useParams();
   const account = useSelector((state: RootState) =>
@@ -60,16 +68,9 @@ export function AccountSettingsPageContent() {
         <Tile>
           <TileContainer paddingVertical={SpacingSize.XL}>
             <Typography type="header">{account.name}</Typography>
-            <VerticalSpaceContainer top={SpacingSize.XL}>
-              <QRCodeCanvas
-                id="qrCode"
-                value={account.publicKey}
-                size={120}
-                fgColor={theme.color.contentPrimary}
-                bgColor={theme.color.backgroundPrimary}
-                level={'H'}
-              />
-            </VerticalSpaceContainer>
+            <QrCodeContainer top={SpacingSize.XL}>
+              <QrCode value={account.publicKey} size={240} />
+            </QrCodeContainer>
             <VerticalSpaceContainer top={SpacingSize.XL}>
               <FlexColumn gap={SpacingSize.Small}>
                 <Typography type="bodySemiBold">

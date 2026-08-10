@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect';
-import { RootState } from 'typesafe-actions';
 
+import { RootState } from '@background/redux/store-types';
 import { VaultState } from '@background/redux/vault/types';
 
 import { SecretPhrase } from '@libs/crypto';
@@ -19,12 +19,15 @@ export const selectSecretPhrase = (state: RootState): null | SecretPhrase =>
 export const selectVaultAccounts = (state: RootState): Account[] =>
   state.vault.accounts;
 
-export const selectVaultAccountsPublicKeys = (state: RootState): string[] =>
-  state.vault.accounts.map(key => key.publicKey);
+export const selectVaultAccountsPublicKeys = createSelector(
+  selectVaultAccounts,
+  accounts => accounts.map(account => account.publicKey)
+);
 
-export const selectVaultAccountsExceptLedgersAccounts = (
-  state: RootState
-): Account[] => state.vault.accounts.filter(account => !account.hardware);
+export const selectVaultAccountsExceptLedgersAccounts = createSelector(
+  selectVaultAccounts,
+  accounts => accounts.filter(account => !account.hardware)
+);
 
 export const selectVaultCountsOfAccounts = createSelector(
   selectVaultAccounts,
@@ -62,11 +65,6 @@ export const selectVaultHiddenAccounts = createSelector(
 export const selectVaultHiddenAccountsNames = createSelector(
   selectVaultHiddenAccounts,
   accounts => accounts.map(account => account.name)
-);
-
-export const selectVaultHasImportedAccount = createSelector(
-  selectVaultImportedAccounts,
-  importedAccounts => importedAccounts.length > 0
 );
 
 export const selectVaultDerivedAccounts = createSelector(
@@ -146,12 +144,13 @@ export const selectAccountsByOriginDict = createSelector(
 
 export const selectIsAccountConnected = createSelector(
   selectAccountNamesByOriginDict,
+  (_: RootState, origin: string | undefined) => origin,
   (
     _: RootState,
-    origin: string | undefined,
+    _origin: string | undefined,
     accountName: string | undefined
-  ) => [origin, accountName],
-  (accountNamesByOriginDict, [origin, accountName]) => {
+  ) => accountName,
+  (accountNamesByOriginDict, origin, accountName) => {
     const accountNames: '' | string[] | undefined =
       origin && accountNamesByOriginDict[origin];
     if (accountNames == null || !accountName) {
@@ -224,11 +223,6 @@ export const selectUnconnectedAccountsWithActiveOrigin = createSelector(
           connectedAccount => connectedAccount.name === account.name
         )
     )
-);
-
-export const selectCountOfAccounts = createSelector(
-  selectVaultAccounts,
-  accounts => accounts.length
 );
 
 export const selectCountOfConnectedAccountsWithActiveOrigin = createSelector(

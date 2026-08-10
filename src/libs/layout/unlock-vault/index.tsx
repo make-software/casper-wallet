@@ -1,11 +1,8 @@
-import * as Yup from 'yup';
-import { Player } from '@lottiefiles/react-lottie-player';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { AnyObject } from 'yup/es/types';
 
 import {
   ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED,
@@ -14,20 +11,16 @@ import {
 import { PasswordDoesNotExistError } from '@src/errors';
 import { getErrorMessageForIncorrectPassword } from '@src/utils';
 
-import {
-  selectKeyDerivationSaltHash,
-  selectPasswordHash,
-  selectPasswordSaltHash
-} from '@background/redux/keys/selectors';
+import { selectKeysDoesExist } from '@background/redux/keys/selectors';
 import { loginRetryCountIncremented } from '@background/redux/login-retry-count/actions';
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
 import { unlockVault } from '@background/redux/sagas/actions';
 import { UnlockVault } from '@background/redux/sagas/types';
 import { dispatchToMainStore } from '@background/redux/utils';
-import { selectVaultCipher } from '@background/redux/vault-cipher/selectors';
 import { VaultState } from '@background/redux/vault/types';
 
 import { useLockWalletWhenNoMoreRetries } from '@hooks/use-lock-wallet-when-no-more-retries';
+import { usePrivateState } from '@hooks/use-private-state';
 
 import unlockAnimation from '@libs/animations/unlock_animation.json';
 import {
@@ -37,9 +30,11 @@ import {
   LayoutWindow,
   LockedRouterPath,
   PopupLayout,
+  PrivateStateErrorPage,
   SpacingSize
 } from '@libs/layout';
 import { Button, Typography } from '@libs/ui/components';
+import { LottiePlayer } from '@libs/ui/components/lottie-player';
 import { UnlockWalletFormValues } from '@libs/ui/forms/unlock-wallet';
 
 import { UnlockVaultPageContent } from './content';
@@ -54,11 +49,7 @@ interface UnlockVaultPageProps {
 
 interface VerifyPasswordMessageEvent extends MessageEvent {
   data: {
-    isPasswordCorrect: Yup.StringSchema<
-      string | undefined,
-      AnyObject,
-      string | undefined
-    >;
+    isPasswordCorrect: boolean;
   };
 }
 
@@ -68,10 +59,12 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const passwordHash = useSelector(selectPasswordHash);
-  const passwordSaltHash = useSelector(selectPasswordSaltHash);
-  const keyDerivationSaltHash = useSelector(selectKeyDerivationSaltHash);
-  const vaultCipher = useSelector(selectVaultCipher);
+  const {
+    privateState,
+    error: privateStateError,
+    retry: retryPrivateState
+  } = usePrivateState();
+  const keysDoesExist = useSelector(selectKeysDoesExist);
   const loginRetryCount = useSelector(selectLoginRetryCount);
 
   const attemptsLeft =
@@ -79,7 +72,7 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
     loginRetryCount -
     ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED;
 
-  if (passwordHash == null || passwordSaltHash == null) {
+  if (!keysDoesExist) {
     throw new PasswordDoesNotExistError();
   }
 
@@ -96,7 +89,14 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
   });
 
   async function handleUnlockVault({ password }: UnlockWalletFormValues) {
-    if (isLoading) return;
+    if (isLoading || privateState == null) return;
+
+    const {
+      passwordHash,
+      passwordSaltHash,
+      keyDerivationSaltHash,
+      vaultCipher
+    } = privateState;
 
     setIsLoading(true);
 
@@ -205,6 +205,20 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
 
   useLockWalletWhenNoMoreRetries(resetField);
 
+  if (privateStateError) {
+    return (
+      <PrivateStateErrorPage
+        layout={popupLayout ? 'popup' : 'window'}
+        onRetry={retryPrivateState}
+      />
+    );
+  }
+
+  // private state (hashes + cipher) arrives in ms; matches existing async-boot behavior
+  if (privateState == null) {
+    return null;
+  }
+
   const footer = (
     <FooterButtonsContainer>
       <Button
@@ -213,8 +227,7 @@ export const UnlockVaultPage = ({ popupLayout }: UnlockVaultPageProps) => {
       >
         {isLoading ? (
           <AlignedFlexRow gap={SpacingSize.Small}>
-            <Player
-              renderer={'svg'}
+            <LottiePlayer
               autoplay
               loop
               src={unlockAnimation}

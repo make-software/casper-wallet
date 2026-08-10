@@ -1,13 +1,19 @@
-import { createReducer } from 'typesafe-actions';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import {
-  loginRetryLockoutTimeReseted,
-  loginRetryLockoutTimeSet
-} from './actions';
 import { LoginRetryLockoutTimeState } from './types';
 
 const initialState = null as LoginRetryLockoutTimeState;
 
-export const reducer = createReducer(initialState)
-  .handleAction(loginRetryLockoutTimeReseted, () => initialState)
-  .handleAction(loginRetryLockoutTimeSet, (state, action) => action.payload);
+const slice = createSlice({
+  name: 'loginRetryLockoutTime',
+  initialState,
+  reducers: {
+    loginRetryLockoutTimeReseted: () => initialState,
+    loginRetryLockoutTimeSet: (_state, action: PayloadAction<number>) =>
+      action.payload
+  }
+});
+
+export const { loginRetryLockoutTimeReseted, loginRetryLockoutTimeSet } =
+  slice.actions;
+export const reducer = slice.reducer;

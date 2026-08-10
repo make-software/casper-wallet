@@ -3,7 +3,7 @@ import { hexToRGBA } from '@libs/ui/utils';
 const PAGE_MIN_WIDTH = 320;
 const PAGE_MAX_WIDTH = 1176;
 
-export const themeConfig = {
+const themeConfig = {
   minWidth: PAGE_MIN_WIDTH,
   maxWidth: PAGE_MAX_WIDTH,
   zIndex: {
@@ -149,14 +149,14 @@ export const darkTheme = {
   }
 };
 
-export type LightTheme = typeof lightTheme;
-export type DarkTheme = typeof darkTheme;
+type LightTheme = typeof lightTheme;
+type DarkTheme = typeof darkTheme;
 interface ThemeColors
-  extends Omit<LightTheme['color'], 'fillSecondary' | 'fillSecondaryHover'>,
+  extends
+    Omit<LightTheme['color'], 'fillSecondary' | 'fillSecondaryHover'>,
     Omit<DarkTheme['color'], 'fillSecondary' | 'fillSecondaryHover'> {
   fillSecondary:
-    | LightTheme['color']['fillSecondary']
-    | DarkTheme['color']['fillSecondary'];
+    LightTheme['color']['fillSecondary'] | DarkTheme['color']['fillSecondary'];
   fillSecondaryHover:
     | LightTheme['color']['fillSecondaryHover']
     | DarkTheme['color']['fillSecondaryHover'];

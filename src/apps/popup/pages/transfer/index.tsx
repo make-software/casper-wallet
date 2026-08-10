@@ -7,10 +7,12 @@ import styled from 'styled-components';
 import {
   ERC20_PAYMENT_AMOUNT_AVERAGE_MOTES,
   ErrorMessages,
+  HomePageTabName,
   networkNameToSdkNetworkNameMap
 } from '@src/constants';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
+import { useHomeTab } from '@popup/hooks/use-home-tab';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
 
 import { accountPendingDeployHashesChanged } from '@background/redux/account-info/actions';
@@ -66,7 +68,6 @@ import {
 import { HardwareWalletType } from '@libs/types/account';
 import {
   Button,
-  HomePageTabsId,
   LedgerEventView,
   SvgIcon,
   TransferSuccessScreen,
@@ -106,6 +107,7 @@ export const TransferPage = () => {
   const isCasper2Network = useSelector(selectIsCasper2Network);
   const casperNetworkApiVersion = useSelector(selectCasperNetworkApiVersion);
   const { changeActiveAccountSupportsWithEvent } = useAccountManager();
+  const { setActiveHomeTab } = useHomeTab();
 
   const [isErc20Transfer, setIsErc20Transfer] = useState<boolean>(false);
   const [selectedToken, setSelectedToken] = useState<TokenType | null>();
@@ -514,16 +516,14 @@ export const TransferPage = () => {
             const shouldAskForReview =
               askForReviewAfter == null || currentDate > askForReviewAfter;
 
-            if (ratedInStore || !shouldAskForReview) {
-              const homeRoutesState = {
-                state: {
-                  // set the active tab to deploys
-                  activeTabId: HomePageTabsId.Deploys
-                }
-              };
+            // Set once here, before the branch, rather than on the Home leg
+            // only: every exit from RateApp is a post-submission exit, and its
+            // four `navigate(RouterPath.Home)` calls would otherwise return the
+            // user to whatever tab they started the transfer from.
+            setActiveHomeTab(HomePageTabName.Activity);
 
-              // Navigate to "Home" with the pre-defined state
-              navigate(RouterPath.Home, homeRoutesState);
+            if (ratedInStore || !shouldAskForReview) {
+              navigate(RouterPath.Home);
             } else {
               // Navigate to "RateApp" when the application has not been rated in the store, and it's time to ask for a review.
               navigate(RouterPath.RateApp);

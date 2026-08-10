@@ -29,7 +29,7 @@ export class LedgerError extends Error {
   }
 }
 
-export class Ledger {
+class Ledger {
   cachedAccounts: LedgerAccount[] = [];
 
   #transport: Transport | null = null;
@@ -285,7 +285,7 @@ export class Ledger {
             Buffer.from(tx.toBytes())
           );
         } else {
-          let txBytes = tx.toBytes();
+          const txBytes = tx.toBytes();
           result = await this.#ledgerApp?.sign(
             this.#getAccountPath(account.index),
             Buffer.from(txBytes)

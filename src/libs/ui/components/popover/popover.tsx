@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useEffect } from 'react';
+import React, { type JSX, PropsWithChildren, useEffect } from 'react';
 import { ContentRenderer, Popover as TinyPopover } from 'react-tiny-popover';
 
 interface PopoverProps {
@@ -19,29 +19,19 @@ export function Popover({
   isAllAccountsPage = false
 }: PropsWithChildren<PopoverProps>) {
   useEffect(() => {
-    // Get the container with class "ms-container"
-    // (to manage scroll behavior while the popover is open)
-    const scrollableContainer = document.querySelector('.ms-container');
-    if (scrollableContainer) {
-      const style = scrollableContainer.getAttribute('style');
-      if (isOpen) {
-        scrollableContainer.setAttribute('style', `${style} overflow: hidden;`);
-      } else {
-        scrollableContainer.setAttribute(
-          'style',
-          style?.replace('overflow: hidden;', '')!
-        );
-      }
+    // Manage scroll on the mac-scrollbar container while the popover is open.
+    // Use the CSSOM `style` property (not an inline style-attribute write) so
+    // this is not subject to the nonce-based style-src CSP (WALLET-1343).
+    const scrollableContainer =
+      document.querySelector<HTMLElement>('.ms-container');
+    if (!scrollableContainer) {
+      return;
     }
 
+    scrollableContainer.style.overflow = isOpen ? 'hidden' : '';
+
     return () => {
-      if (scrollableContainer) {
-        const style = scrollableContainer.getAttribute('style');
-        scrollableContainer.setAttribute(
-          'style',
-          style?.replace('overflow: hidden;', '')!
-        );
-      }
+      scrollableContainer.style.overflow = '';
     };
   }, [isOpen]);
 

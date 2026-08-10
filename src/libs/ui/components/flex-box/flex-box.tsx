@@ -3,7 +3,6 @@ import styled from 'styled-components';
 
 import { BaseProps } from '@libs/ui/types';
 
-/* eslint-disable-next-line */
 export interface FlexBoxProps extends BaseProps {
   /* @description will add spacing between children, work depending on row/column layout */
   itemsSpacing?: number;
@@ -51,8 +50,8 @@ const StyledFlexBox = styled('div')<FlexBoxProps>(
   })
 );
 
-export const FlexBox = forwardRef<HTMLDivElement, FlexBoxProps>(
-  (props, ref) => <StyledFlexBox ref={ref} {...props} />
-);
+const FlexBox = forwardRef<HTMLDivElement, FlexBoxProps>((props, ref) => (
+  <StyledFlexBox ref={ref} {...props} />
+));
 
 export default FlexBox;

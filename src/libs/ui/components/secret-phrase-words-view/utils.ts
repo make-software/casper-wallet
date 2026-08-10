@@ -5,12 +5,14 @@ import { PartialPhraseArray } from './types';
 function getRandomInt(min: number, max: number): number {
   min = Math.ceil(min);
   max = Math.floor(max);
+  // nosemgrep: ajinabraham.njsscan.crypto.crypto_node.node_insecure_random_generator — picks UI quiz word positions, no key material derived
   return Math.floor(Math.random() * (max - min) + min);
 }
 
 function shuffle(list: number[]) {
   for (let i = list.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
+    // nosemgrep: ajinabraham.njsscan.crypto.crypto_node.node_insecure_random_generator — shuffles UI quiz options, no key material derived
+    const j = Math.floor(Math.random() * (i + 1));
     [list[i], list[j]] = [list[j], list[i]];
   }
 }

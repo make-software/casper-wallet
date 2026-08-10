@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
+import { yupResolver } from '@hookform/resolvers/yup';
 import {
   DEFAULT_MAXIMUM_DELEGATION_AMOUNT,
   DEFAULT_MINIMUM_DELEGATION_AMOUNT

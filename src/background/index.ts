@@ -1,7 +1,6 @@
 import { bringInitBackground } from '@bringweb3/chrome-extension-kit';
-import { Deploy, PublicKey } from 'casper-js-sdk';
-import { RootAction, getType } from 'typesafe-actions';
 import {
+  Runtime,
   Tabs,
   action,
   browserAction,
@@ -15,172 +14,40 @@ import {
   getActiveAccountSupports,
   getUrlOrigin,
   hasHttpPrefix,
-  isChromeBuild,
-  isEqualCaseInsensitive
+  isChromeBuild
 } from '@src/utils';
 
+import { handleBringWeb3 } from '@background/handlers/bringweb3';
+import { handleLegacyImport } from '@background/handlers/legacy-import';
 import {
-  backgroundEvent,
-  popupStateUpdated
-} from '@background/background-events';
-import {
-  BringWeb3Events,
-  bringWeb3Events
-} from '@background/bring-web3-events';
-import { WindowApp } from '@background/create-open-window';
+  isPrivateStateRequest,
+  isTrustedUiSender,
+  selectPrivateState
+} from '@background/handlers/private-state';
+import { handleReduxAction } from '@background/handlers/redux-actions';
+import { handleSdkMethod } from '@background/handlers/sdk-methods';
+import { handleSdkResponseToTab } from '@background/handlers/sdk-response-to-tab';
+import { handleWindowRemoved } from '@background/handlers/window-removed';
 import { initKeepAlive } from '@background/keep-alive';
 import {
   disableOnboardingFlow,
-  enableOnboardingFlow,
   openOnboardingUi
 } from '@background/open-onboarding-flow';
-import {
-  accountInfoReset,
-  accountPendingDeployHashesChanged,
-  accountPendingDeployHashesRemove,
-  accountTrackingIdOfSentNftTokensChanged,
-  accountTrackingIdOfSentNftTokensRemoved
-} from '@background/redux/account-info/actions';
 import { activeOriginFaviconChanged } from '@background/redux/active-origin-favicon/actions';
-import {
-  dismissAppEvent,
-  resetAppEventsDismission
-} from '@background/redux/app-events/actions';
-import {
-  contactRemoved,
-  contactUpdated,
-  contactsReseted,
-  newContactAdded
-} from '@background/redux/contacts/actions';
-import {
-  csprNameExpirationsUpdated,
-  expiringCsprNamesDismissed
-} from '@background/redux/cspr-name-expirations/actions';
 import { getExistingMainStoreSingletonOrInit } from '@background/redux/get-main-store';
 import {
-  CheckAccountNameIsTakenAction,
-  CheckSecretKeyExistAction
-} from '@background/redux/import-account-actions-should-be-removed';
-import {
-  ledgerDeployChanged,
-  ledgerNewWindowIdChanged,
-  ledgerRecipientToSaveOnSuccessChanged,
-  ledgerStateCleared,
-  ledgerTransactionChanged
-} from '@background/redux/ledger/actions';
-import {
-  askForReviewAfterChanged,
-  ratedInStoreChanged,
-  resetRateApp
-} from '@background/redux/rate-app/actions';
-import { ThemeMode } from '@background/redux/settings/types';
-import {
-  addWasmToTrusted,
-  removeAllWasmFromTrustedOrigin,
-  removeWasmFromTrusted,
-  resetTrustedWasmState
-} from '@background/redux/trusted-wasm/actions';
-import {
-  accountAdded,
-  accountDisconnected,
-  accountImported,
-  accountRemoved,
-  accountRenamed,
-  accountsAdded,
-  accountsImported,
-  activeAccountChanged,
-  activeAccountSupportsChanged,
-  addWatchingAccount,
-  anotherAccountConnected,
-  deployPayloadReceived,
-  deploysReseted,
-  eip712PayloadReceived,
-  hideAccountFromListChanged,
-  secretPhraseCreated,
-  siteConnected,
-  siteDisconnected,
-  vaultLoaded,
-  vaultReseted
-} from '@background/redux/vault/actions';
-import {
-  selectAccountNamesByOriginDict,
   selectIsAccountConnected,
-  selectVaultAccountsNames,
-  selectVaultAccountsSecretKeysBase64,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
-import {
-  connectWindowInit,
-  importWindowInit,
-  onboardingAppInit,
-  popupWindowInit,
-  signWindowInit,
-  windowIdChanged,
-  windowIdCleared
-} from '@background/redux/windowManagement/actions';
-import { selectWindowId } from '@background/redux/windowManagement/selectors';
 
-import { SiteNotConnectedError, WalletLockedError } from '@content/sdk-errors';
 import { sdkEvent } from '@content/sdk-event';
-import { SdkMethod, isSDKMethod, sdkMethod } from '@content/sdk-method';
+import { isSDKMethod } from '@content/sdk-method';
 
-import { encryptAsHexWithCasperPublicKey } from '@libs/crypto';
-
-import {
-  CannotGetActiveAccountError,
-  CannotGetSenderOriginError,
-  ENCRYPT_MESSAGE_MAX_LENGTH
-} from './internal-errors';
-import { openWindow } from './open-window';
 import { activeOriginChanged } from './redux/active-origin/actions';
-import { keysReseted, keysUpdated } from './redux/keys/actions';
 import { selectKeysDoesExist } from './redux/keys/selectors';
-import { lastActivityTimeRefreshed } from './redux/last-activity-time/actions';
-import {
-  loginRetryCountIncremented,
-  loginRetryCountReseted
-} from './redux/login-retry-count/actions';
-import { loginRetryLockoutTimeSet } from './redux/login-retry-lockout-time/actions';
-import {
-  recipientPublicKeyAdded,
-  recipientPublicKeyReseted
-} from './redux/recent-recipient-public-keys/actions';
-import {
-  createAccount,
-  initKeys,
-  initVault,
-  lockVault,
-  recoverVault,
-  resetVault,
-  unlockVault
-} from './redux/sagas/actions';
-import {
-  contactEditingPermissionChanged,
-  encryptionKeyHashCreated,
-  sessionReseted,
-  vaultUnlocked
-} from './redux/session/actions';
 import { selectVaultIsLocked } from './redux/session/selectors';
-import {
-  activeNetworkSettingChanged,
-  activeTimeoutDurationSettingChanged,
-  systemColorSchemeChanged,
-  themeModeSettingChanged,
-  vaultSettingsReseted
-} from './redux/settings/actions';
-import {
-  selectSystemColorScheme,
-  selectThemeModeSetting
-} from './redux/settings/selectors';
-import {
-  vaultCipherCreated,
-  vaultCipherReseted
-} from './redux/vault-cipher/actions';
 import { selectVaultCipherDoesExist } from './redux/vault-cipher/selectors';
-import {
-  emitSdkEventToActiveTabs,
-  emitSdkEventToActiveTabsWithOrigin
-} from './utils';
+import { emitSdkEventToActiveTabsWithOrigin } from './utils';
 // to resolve all repositories
 import './wallet-repositories';
 
@@ -302,670 +169,138 @@ tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 });
 
+// Single init-time listener for the approval-window lifecycle. Replaces the
+// per-creation `windows.onRemoved` listeners that used to be added inside
+// `createOpenWindow` (one leaked per opened window). `windows.onRemoved` fires
+// for ANY window; `handleWindowRemoved` itself decides whether the removed
+// window was the last display for any open request (a request the Ledger
+// permission window still shows survives), waits a grace period, then cancels
+// the survivors, nulls the slice `windowId` if it is still tracking the removed
+// window, and clears the tracked export-keys id.
+//
+// The body lives in a handler so it can be tested — this entry point is
+// imported by no test. Only the store init is left here, and its rejection is
+// caught: `getExistingMainStoreSingletonOrInit` can reject, and `void` on a
+// bare IIFE would discard that with no `unhandledrejection` handler anywhere.
+windows.onRemoved.addListener((removedWindowId: number) => {
+  void (async () => {
+    const store = await getExistingMainStoreSingletonOrInit();
+    await handleWindowRemoved(store, removedWindowId);
+  })().catch(error => console.error('windows.onRemoved handler failed', error));
+});
+
 // NOTE: if two events are send at the same time (same function) it must reuse the same store instance
+// Thin router: parse → route → delegate. All business logic lives in
+// `@background/handlers/*`; each handler returns a `HandlerResult`:
+//   { handled: false }                   → try the next handler
+//   { handled: true }                    → handled, never respond (promise
+//                                           stays pending — e.g. popupStateUpdated)
+//   { handled: true, response: <value> } → handled, sendResponse(value)
+// A thrown error becomes sendError(error).
 runtime.onMessage.addListener(
-  async (
-    action: RootAction | SdkMethod | popupStateUpdated | BringWeb3Events,
-    sender
-  ) => {
+  async (message: unknown, sender: Runtime.MessageSender) => {
     const store = await getExistingMainStoreSingletonOrInit();
 
     return new Promise(async (sendResponse, sendError) => {
-      // Popup comms handling
-      if (isSDKMethod(action)) {
-        switch (action.type) {
-          case getType(sdkMethod.connectRequest): {
-            const origin = getUrlOrigin(sender.url);
-            if (!origin) {
-              return sendError(CannotGetSenderOriginError());
-            }
-            const senderTabId = sender.tab?.id;
-
-            if (senderTabId == null) {
-              return sendError(Error('Missing sender tab id'));
-            }
-
-            const activeAccount = selectVaultActiveAccount(store.getState());
-
-            const query: Record<string, string> = {
-              requestId: action.meta.requestId,
-              origin: origin,
-              tabId: String(senderTabId)
-            };
-            if (action.payload.title != null) {
-              query.title = action.payload.title;
-            }
-            const isAccountAlreadyConnected = selectIsAccountConnected(
-              store.getState(),
-              origin,
-              activeAccount?.name
-            );
-
-            if (isAccountAlreadyConnected) {
-              return sendResponse(sdkMethod.connectResponse(true, action.meta));
-            } else {
-              openWindow({
-                windowApp: WindowApp.ConnectToApp,
-                searchParams: query
-              });
-            }
-
-            return sendResponse(undefined);
-          }
-
-          case getType(sdkMethod.switchAccountRequest): {
-            const origin = getUrlOrigin(sender.url);
-            if (!origin) {
-              return sendError(CannotGetSenderOriginError());
-            }
-
-            const senderTabId = sender.tab?.id;
-
-            if (senderTabId == null) {
-              return sendError(Error('Missing sender tab id'));
-            }
-
-            const query: Record<string, string> = {
-              requestId: action.meta.requestId,
-              origin: origin,
-              tabId: String(senderTabId)
-            };
-            if (action.payload.title != null) {
-              query.title = action.payload.title;
-            }
-
-            openWindow({
-              windowApp: WindowApp.SwitchAccount,
-              searchParams: query
-            });
-
-            return sendResponse(undefined);
-          }
-
-          case getType(sdkMethod.signRequest): {
-            const origin = getUrlOrigin(sender.url);
-            if (!origin) {
-              return sendError(CannotGetSenderOriginError());
-            }
-
-            const senderTabId = sender.tab?.id;
-
-            if (senderTabId == null) {
-              return sendError(Error('Missing sender tab id'));
-            }
-
-            const { signingPublicKeyHex } = action.payload;
-            let deployJson;
-            try {
-              deployJson = JSON.parse(action.payload.deployJson);
-            } catch (err) {
-              return sendError(Error('Desploy json string parse error'));
-            }
-
-            const deploy: Deploy = deployJson.deploy;
-
-            const isDeployAlreadySigningWithThisAccount =
-              deploy?.approvals?.some(approvals =>
-                isEqualCaseInsensitive(
-                  approvals.signer.toString(),
-                  signingPublicKeyHex
-                )
-              ) ?? false;
-
-            if (isDeployAlreadySigningWithThisAccount) {
-              return sendResponse(
-                sdkMethod.signResponse(
-                  {
-                    cancelled: true,
-                    message: 'This deploy already sign by this account'
-                  },
-                  { requestId: action.meta.requestId }
-                )
-              );
-            }
-
-            store.dispatch(
-              deployPayloadReceived({
-                id: action.meta.requestId,
-                json: deployJson
-              })
-            );
-
-            openWindow({
-              windowApp: WindowApp.SignatureRequestDeploy,
-              searchParams: {
-                requestId: action.meta.requestId,
-                signingPublicKeyHex,
-                origin,
-                tabId: String(senderTabId)
-              }
-            });
-
-            return sendResponse(undefined);
-          }
-
-          case getType(sdkMethod.signMessageRequest): {
-            const origin = getUrlOrigin(sender.url);
-            if (!origin) {
-              return sendError(CannotGetSenderOriginError());
-            }
-
-            const senderTabId = sender.tab?.id;
-
-            if (senderTabId == null) {
-              return sendError(Error('Missing sender tab id'));
-            }
-
-            const { signingPublicKeyHex, message } = action.payload;
-
-            openWindow({
-              windowApp: WindowApp.SignatureRequestMessage,
-              searchParams: {
-                requestId: action.meta.requestId,
-                signingPublicKeyHex,
-                message,
-                origin,
-                tabId: String(senderTabId)
-              }
-            });
-
-            return sendResponse(undefined);
-          }
-
-          case getType(sdkMethod.signTypedDataRequest): {
-            const origin = getUrlOrigin(sender.url);
-            if (!origin) {
-              return sendError(CannotGetSenderOriginError());
-            }
-
-            const senderTabId = sender.tab?.id;
-
-            if (senderTabId == null) {
-              return sendError(Error('Missing sender tab id'));
-            }
-
-            const { signingPublicKeyHex, typedData, options } = action.payload;
-
-            store.dispatch(
-              eip712PayloadReceived({
-                id: action.meta.requestId,
-                json: JSON.stringify({ typedData, options })
-              })
-            );
-
-            openWindow({
-              windowApp: WindowApp.SignatureRequestEip712,
-              searchParams: {
-                requestId: action.meta.requestId,
-                signingPublicKeyHex,
-                origin,
-                tabId: String(senderTabId)
-              }
-            });
-
-            return sendResponse(undefined);
-          }
-
-          case getType(sdkMethod.decryptMessageRequest): {
-            const origin = getUrlOrigin(sender.url);
-
-            if (!origin) {
-              return sendError(CannotGetSenderOriginError());
-            }
-
-            const senderTabId = sender.tab?.id;
-
-            if (senderTabId == null) {
-              return sendError(Error('Missing sender tab id'));
-            }
-
-            const { signingPublicKeyHex, message } = action.payload;
-
-            openWindow({
-              windowApp: WindowApp.DecryptMessageRequest,
-              searchParams: {
-                requestId: action.meta.requestId,
-                signingPublicKeyHex,
-                message,
-                origin,
-                tabId: String(senderTabId)
-              }
-            });
-
-            return sendResponse(undefined);
-          }
-
-          case getType(sdkMethod.disconnectRequest): {
-            const origin = getUrlOrigin(sender.url);
-            if (!origin) {
-              return sendError(CannotGetSenderOriginError());
-            }
-
-            let success = false;
-
-            const isLocked = selectVaultIsLocked(store.getState());
-
-            const activeAccount = selectVaultActiveAccount(store.getState());
-            if (activeAccount == null) {
-              return sendError(CannotGetActiveAccountError());
-            }
-            const isActiveAccountConnected = selectIsAccountConnected(
-              store.getState(),
-              origin,
-              activeAccount.name
-            );
-
-            emitSdkEventToActiveTabsWithOrigin(
-              origin,
-              sdkEvent.disconnectedAccountEvent({
-                isLocked: isLocked,
-                isConnected: isLocked ? undefined : false,
-                activeKey:
-                  !isLocked && isActiveAccountConnected
-                    ? activeAccount.publicKey
-                    : undefined,
-                activeKeySupports:
-                  !isLocked && isActiveAccountConnected
-                    ? getActiveAccountSupports(activeAccount)
-                    : undefined
-              })
-            );
-            store.dispatch(
-              siteDisconnected({
-                siteOrigin: origin
-              })
-            );
-            success = true;
-
-            return sendResponse(
-              sdkMethod.disconnectResponse(success, action.meta)
-            );
-          }
-
-          case getType(sdkMethod.isConnectedRequest): {
-            const origin = getUrlOrigin(sender.url);
-            if (!origin) {
-              return sendError(CannotGetSenderOriginError());
-            }
-
-            const isLocked = selectVaultIsLocked(store.getState());
-            if (isLocked) {
-              return sendResponse(
-                sdkMethod.isConnectedError(WalletLockedError(), action.meta)
-              );
-            }
-            const accountNamesByOriginDict = selectAccountNamesByOriginDict(
-              store.getState()
-            );
-            const isConnected = Boolean(origin in accountNamesByOriginDict);
-
-            return sendResponse(
-              sdkMethod.isConnectedResponse(isConnected, action.meta)
-            );
-          }
-
-          case getType(sdkMethod.getActivePublicKeyRequest): {
-            const origin = getUrlOrigin(sender.url);
-            if (!origin) {
-              return sendError(CannotGetSenderOriginError());
-            }
-
-            const isLocked = selectVaultIsLocked(store.getState());
-            if (isLocked) {
-              return sendResponse(
-                sdkMethod.getActivePublicKeyError(
-                  WalletLockedError(),
-                  action.meta
-                )
-              );
-            }
-
-            const activeAccount = selectVaultActiveAccount(store.getState());
-            if (activeAccount == null) {
-              return sendError(CannotGetActiveAccountError());
-            }
-
-            const isConnected = selectIsAccountConnected(
-              store.getState(),
-              origin,
-              activeAccount?.name
-            );
-
-            if (!isConnected) {
-              return sendResponse(
-                sdkMethod.getActivePublicKeyError(
-                  SiteNotConnectedError(),
-                  action.meta
-                )
-              );
-            }
-
-            return sendResponse(
-              sdkMethod.getActivePublicKeyResponse(
-                activeAccount.publicKey,
-                action.meta
-              )
-            );
-          }
-
-          case getType(sdkMethod.encryptMessageRequest): {
-            const origin = getUrlOrigin(sender.url);
-
-            const { signingPublicKeyHex, message = '' } = action.payload;
-
-            if (!origin) {
-              return sendError(CannotGetSenderOriginError());
-            }
-
-            try {
-              PublicKey.fromHex(signingPublicKeyHex);
-            } catch (e) {
-              return sendError(Error('Public key hex is not valid'));
-            }
-
-            if (message.length > ENCRYPT_MESSAGE_MAX_LENGTH) {
-              return sendError(
-                Error(
-                  `Message should be less than ${ENCRYPT_MESSAGE_MAX_LENGTH} symbols`
-                )
-              );
-            }
-
-            try {
-              const encryptedMessage = await encryptAsHexWithCasperPublicKey(
-                signingPublicKeyHex,
-                message
-              );
-
-              return sendResponse(
-                sdkMethod.encryptMessageResponse(
-                  {
-                    encryptedMessage
-                  },
-                  action.meta
-                )
-              );
-            } catch (e) {
-              return sendError(Error('Error during message encryption'));
-            }
-          }
-
-          case getType(sdkMethod.getActivePublicKeySupportsRequest): {
-            const origin = getUrlOrigin(sender.url);
-
-            if (!origin) {
-              return sendError(CannotGetSenderOriginError());
-            }
-
-            const isLocked = selectVaultIsLocked(store.getState());
-
-            if (isLocked) {
-              return sendResponse(
-                sdkMethod.getActivePublicKeySupportsError(
-                  WalletLockedError(),
-                  action.meta
-                )
-              );
-            }
-
-            const activeAccount = selectVaultActiveAccount(store.getState());
-
-            if (!activeAccount) {
-              return sendError(CannotGetActiveAccountError());
-            }
-
-            const isConnected = selectIsAccountConnected(
-              store.getState(),
-              origin,
-              activeAccount?.name
-            );
-
-            if (!isConnected) {
-              return sendResponse(
-                sdkMethod.getActivePublicKeySupportsError(
-                  SiteNotConnectedError(),
-                  action.meta
-                )
-              );
-            }
-
-            const supports = getActiveAccountSupports(activeAccount);
-
-            return sendResponse(
-              sdkMethod.getActivePublicKeySupportsResponse(
-                supports,
-                action.meta
-              )
-            );
-          }
-
-          case getType(sdkMethod.getVersionRequest): {
-            const manifestData = await chrome.runtime.getManifest();
-            const version = manifestData.version;
-
-            return sendResponse(
-              sdkMethod.getVersionResponse(version, action.meta)
-            );
-          }
-
-          default:
-            throw Error(
-              'Background: Unknown sdk message: ' + JSON.stringify(action)
-            );
+      // A handled result either carries a `response` (→ sendResponse) or not
+      // (→ leave the promise pending). Centralized so all handler call sites
+      // route their result identically.
+      const respond = (result: { response?: unknown }) =>
+        'response' in result ? sendResponse(result.response) : undefined;
+
+      try {
+        if (message === 'keepAlive') {
+          return sendResponse({ status: 'alive' });
         }
-      } else if (action.type != null) {
-        switch (action.type) {
-          case getType(resetVault): {
-            store.dispatch(action);
-            await enableOnboardingFlow();
-            return sendResponse(undefined);
+
+        const action = message as { type?: unknown; from?: unknown };
+
+        if (isSDKMethod(action)) {
+          const result = await handleSdkMethod(action, sender, store);
+          if (result.handled) {
+            return respond(result);
           }
+          throw Error(
+            'Background: Unknown sdk message: ' + JSON.stringify(action)
+          );
+        }
 
-          case getType(lockVault):
-          case getType(unlockVault):
-          case getType(initKeys):
-          case getType(initVault):
-          case getType(recoverVault):
-          case getType(createAccount):
-          case getType(deploysReseted):
-          case getType(sessionReseted):
-          case getType(encryptionKeyHashCreated):
-          case getType(vaultUnlocked):
-          case getType(vaultLoaded):
-          case getType(vaultReseted):
-          case getType(secretPhraseCreated):
-          case getType(accountImported):
-          case getType(accountsImported):
-          case getType(accountAdded):
-          case getType(accountsAdded):
-          case getType(accountRemoved):
-          case getType(accountRenamed):
-          case getType(activeAccountChanged):
-          case getType(activeAccountSupportsChanged):
-          case getType(hideAccountFromListChanged):
-          case getType(activeTimeoutDurationSettingChanged):
-          case getType(activeNetworkSettingChanged):
-          case getType(vaultSettingsReseted):
-          case getType(themeModeSettingChanged):
-          case getType(lastActivityTimeRefreshed):
-          case getType(siteConnected):
-          case getType(anotherAccountConnected):
-          case getType(accountDisconnected):
-          case getType(siteDisconnected):
-          case getType(windowIdChanged):
-          case getType(windowIdCleared):
-          case getType(onboardingAppInit):
-          case getType(popupWindowInit):
-          case getType(connectWindowInit):
-          case getType(importWindowInit):
-          case getType(signWindowInit):
-          case getType(vaultCipherReseted):
-          case getType(vaultCipherCreated):
-          case getType(keysReseted):
-          case getType(keysUpdated):
-          case getType(loginRetryCountReseted):
-          case getType(loginRetryCountIncremented):
-          case getType(loginRetryLockoutTimeSet):
-          case getType(recipientPublicKeyAdded):
-          case getType(recipientPublicKeyReseted):
-          case getType(accountInfoReset):
-          case getType(accountPendingDeployHashesChanged):
-          case getType(accountPendingDeployHashesRemove):
-          case getType(accountTrackingIdOfSentNftTokensChanged):
-          case getType(accountTrackingIdOfSentNftTokensRemoved):
-          case getType(newContactAdded):
-          case getType(contactRemoved):
-          case getType(contactEditingPermissionChanged):
-          case getType(contactUpdated):
-          case getType(contactsReseted):
-          case getType(ratedInStoreChanged):
-          case getType(askForReviewAfterChanged):
-          case getType(resetRateApp):
-          case getType(ledgerNewWindowIdChanged):
-          case getType(ledgerStateCleared):
-          case getType(ledgerDeployChanged):
-          case getType(ledgerTransactionChanged):
-          case getType(ledgerRecipientToSaveOnSuccessChanged):
-          case getType(addWatchingAccount):
-          case getType(dismissAppEvent):
-          case getType(resetAppEventsDismission):
-          case getType(csprNameExpirationsUpdated):
-          case getType(expiringCsprNamesDismissed):
-          case getType(addWasmToTrusted):
-          case getType(removeWasmFromTrusted):
-          case getType(removeAllWasmFromTrustedOrigin):
-          case getType(resetTrustedWasmState):
-          case getType(systemColorSchemeChanged):
-            store.dispatch(action);
-            return sendResponse(undefined);
-
-          case getType(backgroundEvent.popupStateUpdated):
-            // do nothing
+        // Must stay AFTER the isSDKMethod branch: a page-crafted message with
+        // this type and meta.requestId passes the content-script relay filter
+        // and has to be captured (and rejected) by the SDK branch first
+        if (isPrivateStateRequest(action)) {
+          if (!isTrustedUiSender(sender)) {
+            if (sender.id === runtime.id) {
+              // Same-extension sender rejected by the URL-prefix check —
+              // distinguishes a legitimate-but-unrecognized UI origin
+              // (packaging variant, sandboxed frame) from a probing sender.
+              // Origin only: a content-script sender's full page URL could
+              // carry tokens in query strings
+              const senderOrigin =
+                sender.url != null ? new URL(sender.url).origin : undefined;
+              console.warn(
+                'Background: private-state request from same-extension sender rejected by URL check:',
+                senderOrigin
+              );
+            }
+            // No data (and no error detail) for untrusted senders
             return;
-
-          case getType(bringWeb3Events.getActivePublicKey): {
-            const activeAccount = selectVaultActiveAccount(store.getState());
-
-            return sendResponse(
-              bringWeb3Events.getActivePublicKeyResponse({
-                publicKey: activeAccount?.publicKey!
-              })
-            );
           }
-
-          case getType(bringWeb3Events.promptLoginRequest): {
-            const isLocked = selectVaultIsLocked(store.getState());
-
-            if (isLocked) {
-              windows.getCurrent().then(currentWindow => {
-                const windowWidth = currentWindow.width ?? 0;
-                const xOffset = currentWindow.left ?? 0;
-                const yOffset = currentWindow.top ?? 0;
-                const popupWidth = 360;
-                const popupHeight = 700;
-
-                windows.create({
-                  url: 'popup.html#/bring-web3-unlock',
-                  type: 'popup',
-                  height: popupHeight,
-                  width: popupWidth,
-                  left: windowWidth + xOffset - popupWidth,
-                  top: yOffset,
-                  focused: true
-                });
-              });
-            } else {
-              emitSdkEventToActiveTabs(tab => {
-                if (!tab.url) {
-                  return;
-                }
-
-                const activeAccount = selectVaultActiveAccount(
-                  store.getState()
-                );
-
-                return sdkEvent.changedConnectedAccountEvent({
-                  isLocked: isLocked,
-                  isConnected: undefined,
-                  activeKey: activeAccount?.publicKey,
-                  activeKeySupports: activeAccount
-                    ? getActiveAccountSupports(activeAccount)
-                    : undefined
-                });
-              });
-            }
-
-            return sendResponse(undefined);
-          }
-
-          case getType(bringWeb3Events.getTheme): {
-            const themeMode = selectThemeModeSetting(store.getState());
-            const systemColorScheme = selectSystemColorScheme(store.getState());
-
-            const isDarkMode =
-              themeMode === ThemeMode.SYSTEM
-                ? systemColorScheme === null || systemColorScheme === 'dark'
-                : themeMode === ThemeMode.DARK;
-
-            return sendResponse(
-              bringWeb3Events.getThemeResponse({
-                theme: isDarkMode ? 'dark' : 'light'
-              })
-            );
-          }
-
-          // TODO: All below should be removed when Import Account is integrated with window
-          case 'check-secret-key-exist' as any: {
-            const { secretKeyBase64 } = (
-              action as any as CheckSecretKeyExistAction
-            ).payload;
-            const vaultAccountsSecretKeysBase64 =
-              selectVaultAccountsSecretKeysBase64(store.getState());
-
-            const response = secretKeyBase64
-              ? vaultAccountsSecretKeysBase64.includes(secretKeyBase64)
-              : false;
-            return sendResponse(response);
-          }
-
-          case 'check-account-name-is-taken' as any: {
-            const { accountName } = (
-              action as any as CheckAccountNameIsTakenAction
-            ).payload;
-            const vaultAccountsNames = selectVaultAccountsNames(
-              store.getState()
-            );
-            const response = accountName
-              ? vaultAccountsNames.includes(accountName)
-              : false;
-            return sendResponse(response);
-          }
-
-          case 'get-window-id' as any:
-            const windowId = selectWindowId(store.getState());
-            return sendResponse(windowId);
-
-          default:
-            throw Error(
-              'Background: Unknown redux action: ' + JSON.stringify(action)
-            );
+          return sendResponse(selectPrivateState(store.getState()));
         }
-      } else {
-        if (action === 'keepAlive') {
-          // Send an asynchronous response
-          sendResponse({ status: 'alive' });
 
-          // returning true to indicate an asynchronous response
-          return true;
+        if (typeof action.type === 'string') {
+          const typedAction = action as { type: string };
+
+          // Redux forwarding takes `sender`: its window-attach branch decides a
+          // request's lifecycle, so that one is gated the same way the two
+          // handlers below are. It is therefore called directly rather than
+          // through a uniform (action, store) loop.
+          const reduxResult = await handleReduxAction(
+            typedAction,
+            sender,
+            store
+          );
+          if (reduxResult.handled) {
+            return respond(reduxResult);
+          }
+
+          const bringWeb3Result = await handleBringWeb3(typedAction, store);
+          if (bringWeb3Result.handled) {
+            return respond(bringWeb3Result);
+          }
+
+          // SDK-response reroute is gated on `sender` (only extension UI may
+          // originate it), so it is called outside the uniform loop above.
+          const sdkResponseResult = await handleSdkResponseToTab(
+            typedAction,
+            sender,
+            store
+          );
+          if (sdkResponseResult.handled) {
+            return respond(sdkResponseResult);
+          }
+
+          // Legacy import handler is gated on `sender` (P0.1), so it is called
+          // outside the uniform loop above.
+          const legacyResult = handleLegacyImport(typedAction, sender, store);
+          if (legacyResult.handled) {
+            return respond(legacyResult);
+          }
+
+          throw Error(
+            'Background: Unknown redux action: ' + JSON.stringify(action)
+          );
         }
+
         // this is added for not spamming with errors from bringweb3
-        if ('from' in action) {
-          // @ts-ignore
-          if (action.from === 'bringweb3') {
-            return;
-          }
+        if (action?.from === 'bringweb3') {
+          return;
         }
+
         throw Error('Background: Unknown message: ' + JSON.stringify(action));
+      } catch (error) {
+        return sendError(error);
       }
     });
   }

@@ -1,4 +1,3 @@
-import { Player } from '@lottiefiles/react-lottie-player';
 import React, { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -19,6 +18,7 @@ import {
   ledgerErrorsData
 } from '@libs/services/ledger';
 import { SvgIcon, Typography } from '@libs/ui/components';
+import { LottiePlayer } from '@libs/ui/components/lottie-player';
 
 interface ILedgerErrorProps {
   event: ILedgerEvent;
@@ -78,8 +78,7 @@ export const LedgerErrorView: React.FC<ILedgerErrorProps> = ({ event }) => {
 
       {withLoader && (
         <CenteredFlexColumn>
-          <Player
-            renderer="svg"
+          <LottiePlayer
             autoplay
             loop
             src={isDarkMode ? dotsDarkModeAnimation : dotsLightModeAnimation}

@@ -35,7 +35,7 @@ export interface SignTypedDataParams {
   };
 }
 
-export interface EIP712HashArtifacts {
+interface EIP712HashArtifacts {
   domainTypeString?: string;
   domain?: Record<string, unknown>;
   domainSeparator?: string;

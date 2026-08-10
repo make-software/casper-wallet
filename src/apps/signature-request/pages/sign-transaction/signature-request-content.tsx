@@ -63,14 +63,9 @@ export interface SignatureRequestContentProps {
 }
 
 export type TxCommonDetailsKeys =
-  | 'network'
-  | 'memo'
-  | 'txHash'
-  | 'expires'
-  | 'fee'
-  | 'sender';
+  'network' | 'memo' | 'txHash' | 'expires' | 'fee' | 'sender';
 
-export interface ISignatureRequestRecords {
+interface ISignatureRequestRecords {
   network: string;
   txHash: string;
   memo?: string;

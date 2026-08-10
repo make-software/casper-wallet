@@ -1,9 +1,7 @@
-import * as Yup from 'yup';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { AnyObject } from 'yup/es/types';
 
 import {
   ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED,
@@ -12,10 +10,7 @@ import {
 import { PasswordDoesNotExistError } from '@src/errors';
 import { getErrorMessageForIncorrectPassword } from '@src/utils';
 
-import {
-  selectPasswordHash,
-  selectPasswordSaltHash
-} from '@background/redux/keys/selectors';
+import { selectKeysDoesExist } from '@background/redux/keys/selectors';
 import {
   loginRetryCountIncremented,
   loginRetryCountReseted
@@ -23,11 +18,14 @@ import {
 import { selectLoginRetryCount } from '@background/redux/login-retry-count/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 
+import { usePrivateState } from '@hooks/use-private-state';
+
 import {
   FooterButtonsContainer,
   HeaderPopup,
   HeaderSubmenuBarNavLink,
   PopupLayout,
+  PrivateStateErrorPage,
   UnlockProtectedPageContent
 } from '@libs/layout';
 import { Button } from '@libs/ui/components';
@@ -36,29 +34,36 @@ interface BackupSecretPhrasePasswordPageType {
   setPasswordConfirmed?: () => void;
   onClick?: (password: string) => Promise<void>;
   isLoading?: boolean;
+  // Set when this page is rendered inside a dedicated window rather than the
+  // extension popup (WALLET-1345). Such a window has a single history entry, so
+  // the default "back" link is a no-op and would trap the user; it also has no
+  // business showing the wallet menu / network switcher. Passing this swaps the
+  // header for a bare one whose only action closes the window.
+  onCloseWindow?: () => void;
 }
 
 interface VerifyPasswordMessageEvent extends MessageEvent {
   data: {
-    isPasswordCorrect: Yup.StringSchema<
-      string | undefined,
-      AnyObject,
-      string | undefined
-    >;
+    isPasswordCorrect: boolean;
   };
 }
 
 export const PasswordProtectionPage = ({
   setPasswordConfirmed,
   onClick,
-  isLoading = false
+  isLoading = false,
+  onCloseWindow
 }: BackupSecretPhrasePasswordPageType) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { t } = useTranslation();
 
-  const passwordHash = useSelector(selectPasswordHash);
-  const passwordSaltHash = useSelector(selectPasswordSaltHash);
+  const {
+    privateState,
+    error: privateStateError,
+    retry: retryPrivateState
+  } = usePrivateState();
+  const keysDoesExist = useSelector(selectKeysDoesExist);
   const loginRetryCount = useSelector(selectLoginRetryCount);
 
   const attemptsLeft =
@@ -66,7 +71,7 @@ export const PasswordProtectionPage = ({
     loginRetryCount -
     ERROR_DISPLAYED_BEFORE_ATTEMPT_IS_DECREMENTED;
 
-  if (passwordHash == null || passwordSaltHash == null) {
+  if (!keysDoesExist) {
     throw new PasswordDoesNotExistError();
   }
 
@@ -83,6 +88,13 @@ export const PasswordProtectionPage = ({
   });
 
   const onSubmit = () => {
+    if (privateState == null) return;
+    // The field is now read-only rather than disabled while verifying (so it
+    // keeps focus), which leaves Enter able to re-submit. Guard against that.
+    if (isSubmitting) return;
+
+    const { passwordHash, passwordSaltHash } = privateState;
+
     setIsSubmitting(true);
 
     const { password } = getValues();
@@ -110,12 +122,23 @@ export const PasswordProtectionPage = ({
         setIsSubmitting(false);
       } else {
         if (onClick) {
-          onClick(password).then(() => {
-            if (setPasswordConfirmed) {
-              setPasswordConfirmed();
-            }
-            dispatchToMainStore(loginRetryCountReseted());
-          });
+          onClick(password)
+            .then(() => {
+              if (setPasswordConfirmed) {
+                setPasswordConfirmed();
+              }
+              dispatchToMainStore(loginRetryCountReseted());
+            })
+            // Without this a rejected onClick leaves the page stuck submitting
+            // — and now that the field is read-only-while-submitting, frozen
+            // too. The error itself is logged rather than discarded: silently
+            // resetting the button is indistinguishable from a wrong password.
+            .catch((error: unknown) => {
+              // The password is in scope but is deliberately not referenced
+              // here — only a static message and the error object are logged.
+              console.error('Password confirmation failed:', error);
+              setIsSubmitting(false);
+            });
         } else {
           if (setPasswordConfirmed) {
             setPasswordConfirmed();
@@ -131,22 +154,46 @@ export const PasswordProtectionPage = ({
     };
   };
 
+  if (privateStateError) {
+    return <PrivateStateErrorPage layout="popup" onRetry={retryPrivateState} />;
+  }
+
+  // private state (hashes) arrives in ms; matches existing async-boot behavior
+  if (privateState == null) {
+    return null;
+  }
+
   return (
     <PopupLayout
       variant="form"
       onSubmit={handleSubmit(onSubmit)}
-      renderHeader={() => (
-        <HeaderPopup
-          withNetworkSwitcher
-          withMenu
-          withConnectionStatus
-          renderSubmenuBarItems={() => (
-            <HeaderSubmenuBarNavLink linkType="back" />
-          )}
-        />
-      )}
+      renderHeader={() =>
+        onCloseWindow ? (
+          <HeaderPopup
+            renderSubmenuBarItems={() => (
+              <HeaderSubmenuBarNavLink
+                linkType="close"
+                onClick={onCloseWindow}
+              />
+            )}
+          />
+        ) : (
+          <HeaderPopup
+            withNetworkSwitcher
+            withMenu
+            withConnectionStatus
+            renderSubmenuBarItems={() => (
+              <HeaderSubmenuBarNavLink linkType="back" />
+            )}
+          />
+        )
+      }
       renderContent={() => (
-        <UnlockProtectedPageContent errors={errors} register={register} />
+        <UnlockProtectedPageContent
+          errors={errors}
+          register={register}
+          readOnly={isSubmitting || isLoading}
+        />
       )}
       renderFooter={() => (
         <FooterButtonsContainer>

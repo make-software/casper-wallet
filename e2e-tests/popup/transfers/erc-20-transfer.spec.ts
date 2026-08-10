@@ -1,4 +1,3 @@
-
 import { DEFAULT_SECOND_ACCOUNT, RPC_RESPONSE, URLS } from '../../constants';
 import { popup, popupExpect } from '../../fixtures';
 

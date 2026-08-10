@@ -3,7 +3,7 @@ import React, { Suspense, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 // skeleton styles
 import 'react-loading-skeleton/dist/skeleton.css';
-import { Provider as ReduxProvider } from 'react-redux/es/exports';
+import { Provider as ReduxProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
 import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
@@ -22,7 +22,13 @@ import { useSystemThemeDetector } from '@hooks/use-system-theme-detector';
 import '@libs/i18n/i18n';
 import { ErrorBoundary } from '@libs/layout';
 import { newQueryClient } from '@libs/services/query-client';
-import { GlobalStyle, darkTheme, lightTheme } from '@libs/ui';
+import {
+  CspStyleSheetManager,
+  GlobalStyle,
+  darkTheme,
+  lightTheme
+} from '@libs/ui';
+import { SagaErrorBanner } from '@libs/ui/components/saga-error-banner/saga-error-banner';
 
 import { AppRouter } from './app-router';
 
@@ -60,16 +66,19 @@ const Tree = () => {
 
   return (
     <Suspense fallback={null}>
-      <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
-        <GlobalStyle />
-        <ReduxProvider store={store}>
-          <QueryClientProvider client={newQueryClient}>
-            <ErrorBoundary>
-              <AppRouter />
-            </ErrorBoundary>
-          </QueryClientProvider>
-        </ReduxProvider>
-      </ThemeProvider>
+      <CspStyleSheetManager>
+        <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
+          <GlobalStyle />
+          <ReduxProvider store={store}>
+            <SagaErrorBanner />
+            <QueryClientProvider client={newQueryClient}>
+              <ErrorBoundary>
+                <AppRouter />
+              </ErrorBoundary>
+            </QueryClientProvider>
+          </ReduxProvider>
+        </ThemeProvider>
+      </CspStyleSheetManager>
     </Suspense>
   );
 };

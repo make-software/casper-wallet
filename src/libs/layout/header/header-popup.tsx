@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type JSX } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -44,7 +44,7 @@ export function HeaderPopup({
   const activeAccount = useSelector(selectVaultActiveAccount);
   const headerDataUpdaterEnabled = Boolean(
     activeAccount?.publicKey &&
-      (withMenu || withConnectionStatus || withNetworkSwitcher)
+    (withMenu || withConnectionStatus || withNetworkSwitcher)
   );
 
   return (

@@ -1,4 +1,4 @@
-import { RootState } from 'typesafe-actions';
+import { RootState } from '@background/redux/store-types';
 
 export const selectLedgerNewWindowId = (state: RootState): number | null =>
   state.ledger.windowId;

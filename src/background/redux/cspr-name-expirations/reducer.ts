@@ -1,9 +1,6 @@
-import { createReducer } from 'typesafe-actions';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { CasperNetwork } from 'casper-wallet-core';
 
-import {
-  csprNameExpirationsUpdated,
-  expiringCsprNamesDismissed
-} from './actions';
 import {
   CsprNameExpirationsByAccount,
   CsprNameExpirationsState
@@ -11,12 +8,18 @@ import {
 
 const initialState: CsprNameExpirationsState = {};
 
-export const reducer = createReducer(initialState)
-  .handleAction(
-    csprNameExpirationsUpdated,
-    (
-      state: CsprNameExpirationsState,
-      action: ReturnType<typeof csprNameExpirationsUpdated>
+const slice = createSlice({
+  name: 'csprNameExpirations',
+  initialState,
+  reducers: {
+    csprNameExpirationsUpdated: (
+      state,
+      action: PayloadAction<{
+        network: CasperNetwork;
+        expirations: Record<string, { csprName: string; expiresAt: string }>;
+        /** Accounts whose resolution failed this fetch — their stored records must be kept, not dropped */
+        failedPublicKeys?: string[];
+      }>
     ): CsprNameExpirationsState => {
       const { network, expirations, failedPublicKeys } = action.payload;
       const prevForNetwork = state[network] ?? {};
@@ -25,17 +28,15 @@ export const reducer = createReducer(initialState)
         Object.entries(expirations).map(
           ([publicKey, { csprName, expiresAt }]) => {
             const prev = prevForNetwork[publicKey];
-            const sameNameAndDate =
-              prev?.csprName === csprName && prev?.expiresAt === expiresAt;
+            // The dismissed flag survives only while the record is unchanged:
+            // a renewed date or a different name resets it.
+            const dismissed =
+              prev != null &&
+              prev.csprName === csprName &&
+              prev.expiresAt === expiresAt &&
+              prev.dismissed;
 
-            return [
-              publicKey,
-              {
-                csprName,
-                expiresAt,
-                dismissed: sameNameAndDate ? prev.dismissed : false
-              }
-            ];
+            return [publicKey, { csprName, expiresAt, dismissed }];
           }
         )
       );
@@ -54,13 +55,13 @@ export const reducer = createReducer(initialState)
         ...state,
         [network]: nextForNetwork
       };
-    }
-  )
-  .handleAction(
-    expiringCsprNamesDismissed,
-    (
-      state: CsprNameExpirationsState,
-      action: ReturnType<typeof expiringCsprNamesDismissed>
+    },
+    expiringCsprNamesDismissed: (
+      state,
+      action: PayloadAction<{
+        network: CasperNetwork;
+        publicKeys: string[];
+      }>
     ): CsprNameExpirationsState => {
       const { network, publicKeys } = action.payload;
       const forNetwork = state[network];
@@ -81,4 +82,9 @@ export const reducer = createReducer(initialState)
         )
       };
     }
-  );
+  }
+});
+
+export const { csprNameExpirationsUpdated, expiringCsprNamesDismissed } =
+  slice.actions;
+export const reducer = slice.reducer;

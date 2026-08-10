@@ -6,9 +6,7 @@ import { secp256k1 } from './secp256k1';
 
 export * from './hex';
 
-export { ed25519, secp256k1 };
-
-export async function encrypt(
+async function encrypt(
   publicKeyHex: string,
   message: string
 ): Promise<Uint8Array> {
@@ -18,7 +16,7 @@ export async function encrypt(
   throw new Error('Unknown public key type');
 }
 
-export async function encryptAsHex(
+async function encryptAsHex(
   publicKeyHex: string,
   message: string
 ): Promise<string> {

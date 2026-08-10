@@ -1,22 +1,34 @@
-import { createReducer } from 'typesafe-actions';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import { keysReseted, keysUpdated } from './actions';
 import { KeysState } from './types';
 
-type State = KeysState;
-
-const initialState: State = {
+const initialState: KeysState = {
   passwordHash: null,
   passwordSaltHash: null,
-  keyDerivationSaltHash: null
+  keyDerivationSaltHash: null,
+  keysDoesExist: false
 };
 
-export const reducer = createReducer(initialState)
-  .handleAction(
-    keysUpdated,
-    (state, action): State => ({
-      ...state,
-      ...action.payload
-    })
-  )
-  .handleAction(keysReseted, () => initialState);
+export const withDerivedFlag = (state: KeysState): KeysState => ({
+  ...state,
+  keysDoesExist:
+    state.passwordHash != null &&
+    state.passwordSaltHash != null &&
+    state.keyDerivationSaltHash != null
+});
+
+const slice = createSlice({
+  name: 'keys',
+  initialState,
+  reducers: {
+    keysUpdated: (
+      state,
+      // keysDoesExist is derived — callers can never set it, even type-level
+      action: PayloadAction<Partial<Omit<KeysState, 'keysDoesExist'>>>
+    ) => withDerivedFlag({ ...state, ...action.payload }),
+    keysReseted: () => initialState
+  }
+});
+
+export const { keysReseted, keysUpdated } = slice.actions;
+export const reducer = slice.reducer;

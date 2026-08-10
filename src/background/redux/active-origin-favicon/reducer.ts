@@ -1,10 +1,19 @@
-import { createReducer } from 'typesafe-actions';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import { activeOriginFaviconChanged } from './actions';
 import { ActiveOriginFaviconState } from './types';
 
-const initialState: ActiveOriginFaviconState = null;
+const initialState = null as ActiveOriginFaviconState;
 
-export const reducer = createReducer<ActiveOriginFaviconState>(
-  initialState
-).handleAction(activeOriginFaviconChanged, (state, { payload }) => payload);
+const slice = createSlice({
+  name: 'activeOriginFavicon',
+  initialState,
+  reducers: {
+    activeOriginFaviconChanged: (
+      _state,
+      action: PayloadAction<string | null>
+    ) => action.payload
+  }
+});
+
+export const { activeOriginFaviconChanged } = slice.actions;
+export const reducer = slice.reducer;

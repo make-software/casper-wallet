@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { isBundledAssetPath } from '@src/utils';
+
 import { TokenType } from '@hooks/use-casper-token';
 
 import {
@@ -10,7 +12,7 @@ import {
   SpacingSize,
   getSpacingSize
 } from '@libs/layout';
-import { SvgIcon, Tooltip, Typography } from '@libs/ui/components';
+import { RemoteIcon, SvgIcon, Tooltip, Typography } from '@libs/ui/components';
 import { truncateKey } from '@libs/ui/components/hash/utils';
 
 const TokenAmountContainer = styled(FlexColumn)`
@@ -34,11 +36,6 @@ const TokenDetailsContainer = styled(AlignedFlexRow)`
   row-gap: ${getSpacingSize(SpacingSize.None)};
 `;
 
-const LogoImg = styled.img`
-  width: 32px;
-  height: 32px;
-`;
-
 interface TokenPlateProps {
   token: TokenType | null;
   chevron?: boolean;
@@ -50,9 +47,6 @@ export const TokenPlate = ({
   chevron,
   handleOnClick
 }: TokenPlateProps) => {
-  const tokenIconFormat = token?.icon?.split('.').pop()?.toLowerCase();
-  const isTokenIconSvg = tokenIconFormat === 'svg';
-
   const nameTooltipTitle = token?.contractPackageHash ? (
     <FlexColumn gap={SpacingSize.Tiny}>
       <Typography type="captionRegular" overflowWrap>
@@ -74,11 +68,12 @@ export const TokenPlate = ({
       clickable={!!handleOnClick}
     >
       <AlignedFlexRow gap={SpacingSize.Medium}>
-        {isTokenIconSvg ? (
-          <SvgIcon src={token?.icon || ''} alt={token?.name} size={32} />
+        {token?.icon != null && isBundledAssetPath(token.icon) ? (
+          <SvgIcon src={token.icon} alt={token?.name} size={32} />
         ) : (
-          <LogoImg
-            src={token?.icon || ''}
+          <RemoteIcon
+            src={token?.icon}
+            size={32}
             alt={token?.name}
             title={token?.name}
           />

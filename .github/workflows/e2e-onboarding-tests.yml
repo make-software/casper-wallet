@@ -1,10 +1,16 @@
 name: E2E onboarding tests
 
+# release/** is included to match ci-check: these are the only jobs that build a
+# production Chrome artifact, so the manifest CSP and the nonce wiring that goes
+# with it are exercised nowhere else.
 on:
   push:
-    branches: [ master, develop ]
+    branches: [ master, develop, release/** ]
   pull_request:
-    branches: [ master, develop ]
+    branches: [ master, develop, release/** ]
+
+permissions:
+  contents: read
 
 jobs:
   e2e-onboarding-tests:
@@ -17,10 +23,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
 
       - name: Install dependencies
         run: npm ci
+
+      # Run approved dependency install scripts (.npmrc sets ignore-scripts=true)
+      # and fail the build if a dependency ships an install script not in the
+      # `lavamoat.allowScripts` allowlist — same supply-chain gate as ci-check.
+      - name: Allow approved install scripts
+        run: npm run allow-scripts
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps

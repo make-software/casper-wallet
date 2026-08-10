@@ -1,0 +1,71 @@
+# Casper Wallet — paths excluded from Semgrep scans.
+# Syntax is similar to .gitignore.
+
+# Dependencies
+node_modules/
+
+# Build artifacts
+build/
+output/
+web-ext-artifacts/
+xcode-project/
+chrome.crx
+dist/
+
+# E2E tests & reports — separate runtime, low scan value
+e2e-tests/
+playwright-report/
+test-results/
+analyzer-report/
+
+# Coverage & test reports
+coverage/
+.nyc_output/
+
+# Jest snapshots — generated, noisy, not source
+**/__snapshots__/
+*.snap
+
+# Bundles / minified JS
+*.min.js
+*.bundle.js
+*.bundle
+
+# Translations — generated/maintained via i18next-parser, not source logic
+lang/
+
+# Assets (binary)
+assets/
+src/assets/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.webp
+*.ttf
+*.otf
+*.woff
+*.woff2
+
+# Test-fixture keys used by parse-secret-key-string.test.ts — intentionally
+# committed, not real credentials. Only these two files; any other .pem in the
+# repo should still be flagged.
+src/libs/crypto/ed_secret_key.pem
+src/libs/crypto/secp_secret_key.pem
+
+# Test-only fixture constants (FIXED_PASSWORD_TEXT/SALT/HASH) for crypto unit
+# tests — intentional dummy values, not credentials.
+src/libs/crypto/__fixtures.ts
+
+# Lock files — not source code
+package-lock.json
+
+# Env files — handled by secrets scanner separately; don't scan contents
+.env
+.env.*
+
+# Editor
+.vscode/
+.idea/
+.DS_Store

@@ -3,13 +3,7 @@ import {
   IEIP712SignTypedDataOptions,
   IEIP712TypedData
 } from 'casper-wallet-core';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { shallowEqual, useSelector } from 'react-redux';
 
@@ -23,6 +17,7 @@ import { SignatureRequestLoading } from '@signature-request/pages/sign-transacti
 import { SignatureRequestRawJson } from '@signature-request/pages/sign-transaction/signature-request-raw-json';
 
 import { closeCurrentWindow } from '@background/close-current-window';
+import { getPayload } from '@background/redux/vault/payload-map';
 import {
   selectConnectedAccountNamesByOrigin,
   selectEip712JsonById,
@@ -73,7 +68,6 @@ export function SignEip712Page() {
   }
 
   const [showRawJson, setShowRawJson] = useState(false);
-  const responseSentRef = useRef(false);
 
   const accounts = useSelector(selectVaultAccounts, shallowEqual);
   const eip712JsonById = useSelector(selectEip712JsonById, shallowEqual);
@@ -88,7 +82,9 @@ export function SignEip712Page() {
     options?: IEIP712SignTypedDataOptions;
     isInvalidPayload?: boolean;
   }>(() => {
-    const raw = eip712JsonById[requestId];
+    // `getPayload`, never a bare index — `requestId` is dapp-controlled and an
+    // inherited Object.prototype member would parse as anything but typed data.
+    const raw = getPayload(eip712JsonById, requestId);
 
     if (!raw) {
       return {};
@@ -185,8 +181,6 @@ export function SignEip712Page() {
   }, [requestOrigin, connectAnotherAccount, signingAccount.name]);
 
   const handleCancel = useCallback(() => {
-    if (responseSentRef.current) return;
-    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
       sdkMethod.signTypedDataResponse(
         {
@@ -204,7 +198,7 @@ export function SignEip712Page() {
   }, [requestId, requestTabId]);
 
   const handleSign = useCallback(() => {
-    if (!typedData || responseSentRef.current) {
+    if (!typedData) {
       return;
     }
 
@@ -224,7 +218,6 @@ export function SignEip712Page() {
         options
       });
 
-      responseSentRef.current = true;
       sendSdkResponseToSpecificTab(
         sdkMethod.signTypedDataResponse(
           {
@@ -241,7 +234,6 @@ export function SignEip712Page() {
       );
       closeCurrentWindow();
     } catch {
-      responseSentRef.current = true;
       sendSdkResponseToSpecificTab(
         sdkMethod.signTypedDataError(
           Error(ErrorMessages.signTypedData.SIGNING_FAILED.description),
@@ -259,12 +251,6 @@ export function SignEip712Page() {
     requestId,
     requestTabId
   ]);
-
-  useEffect(() => {
-    window.addEventListener('beforeunload', handleCancel);
-
-    return () => window.removeEventListener('beforeunload', handleCancel);
-  }, [handleCancel]);
 
   const renderFooter = () => {
     if (shouldTryToConnectAccount) {

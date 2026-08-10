@@ -1,3 +1,4 @@
+import isPropValid from '@emotion/is-prop-valid';
 import React, { forwardRef } from 'react';
 import styled, { CSSObject, DefaultTheme } from 'styled-components';
 
@@ -7,7 +8,7 @@ import { ContentColor, getColorFromTheme } from '@libs/ui/utils';
 
 type Ref = HTMLSpanElement | HTMLHeadingElement;
 
-export type TypographyType =
+type TypographyType =
   | 'header'
   | 'headerBig'
   | 'body'
@@ -24,9 +25,9 @@ export type TypographyType =
   | 'subtitle'
   | 'listSubtextHash';
 
-export type CSPRSize = '2.8rem' | '2.4rem' | '2rem' | '1.8rem' | '1.6rem';
+type CSPRSize = '2.8rem' | '2.4rem' | '2rem' | '1.8rem' | '1.6rem';
 
-export interface BodyStylesProps extends BaseProps {
+interface BodyStylesProps extends BaseProps {
   color?: ContentColor;
   uppercase?: boolean;
   capitalize?: boolean;
@@ -105,8 +106,7 @@ function getBodyStyles(
 }
 
 const StyledTypography = styled('span').withConfig({
-  shouldForwardProp: (prop, defaultValidatorFn) =>
-    !['loading'].includes(prop) && defaultValidatorFn(prop)
+  shouldForwardProp: prop => !['loading'].includes(prop) && isPropValid(prop)
 })<TypographyProps>(
   ({ theme, type, fontSize, lineHeight, ...restProps }): CSSObject => {
     const base = getBodyStyles(theme, restProps);
@@ -222,8 +222,7 @@ const StyledTypography = styled('span').withConfig({
 );
 
 const StyledHeader = styled('h1').withConfig({
-  shouldForwardProp: (prop, defaultValidatorFn) =>
-    !['loading'].includes(prop) && defaultValidatorFn(prop)
+  shouldForwardProp: prop => !['loading'].includes(prop) && isPropValid(prop)
 })<TypographyProps>(({ theme, type, ...props }) => {
   const body = getBodyStyles(theme, props);
 

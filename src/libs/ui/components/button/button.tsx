@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { type JSX, forwardRef } from 'react';
 import styled from 'styled-components';
 
 import { BaseProps } from '@libs/ui/types';
@@ -45,11 +45,11 @@ const BaseButton = styled.button<BaseButtonProps>(
       padding: '12px'
     }),
 
-    ':focus': {
+    '&:focus': {
       outline: 'none'
     },
 
-    ':hover': {
+    '&:hover': {
       cursor: 'pointer'
     },
 
@@ -64,10 +64,10 @@ const PrimaryBlueButton = styled(BaseButton)<BaseButtonProps>(
     color: theme.color.contentOnFill,
     background: theme.color.fillPrimary,
 
-    ': hover': {
+    '&:hover': {
       background: theme.color.fillPrimaryHover
     },
-    ': active': {
+    '&:active': {
       background: theme.color.fillPrimaryClick
     },
 
@@ -83,10 +83,10 @@ const PrimaryRedButton = styled(BaseButton)<BaseButtonProps>(
     color: theme.color.contentOnFill,
     background: theme.color.fillCritical,
 
-    ': hover': {
+    '&:hover': {
       background: theme.color.fillCriticalHover
     },
-    ': active': {
+    '&:active': {
       background: theme.color.fillCriticalClick
     },
 
@@ -102,10 +102,10 @@ const SecondaryBlueButton = styled(BaseButton)<BaseButtonProps>(
     color: theme.color.contentAction,
     background: getLinearGradientColor(theme.color.fillSecondary),
 
-    ': hover': {
+    '&:hover': {
       background: getLinearGradientColor(theme.color.fillSecondaryHover)
     },
-    ': active': {
+    '&:active': {
       background: theme.color.fillNeutral
     },
 
@@ -121,10 +121,10 @@ const SecondaryRedButton = styled(BaseButton)<BaseButtonProps>(
     color: theme.color.fillCritical,
     background: getLinearGradientColor(theme.color.fillSecondary),
 
-    ': hover': {
+    '&:hover': {
       background: getLinearGradientColor(theme.color.fillSecondaryHover)
     },
-    ': active': {
+    '&:active': {
       background: theme.color.fillNeutral
     },
 
@@ -140,10 +140,10 @@ const UtilityButton = styled(BaseButton)<BaseButtonProps>(
     color: theme.color.contentOnFill,
     background: theme.color.fillPrimary,
 
-    ': hover': {
+    '&:hover': {
       background: theme.color.fillPrimaryHover
     },
-    ': active': {
+    '&:active': {
       background: theme.color.fillPrimaryClick
     },
 
@@ -165,11 +165,7 @@ const BUTTON_COMPONENT_BY_COLOR_DICT = {
 export interface ButtonProps extends BaseButtonProps {
   // TODO: change color to variant, and remove variant prop, using width is enough
   color?:
-    | 'primaryBlue'
-    | 'primaryRed'
-    | 'secondaryBlue'
-    | 'secondaryRed'
-    | 'utility';
+    'primaryBlue' | 'primaryRed' | 'secondaryBlue' | 'secondaryRed' | 'utility';
   as?: (props: any) => JSX.Element;
   onClick?: (ev: any) => void;
   circle?: boolean;

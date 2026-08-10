@@ -75,6 +75,12 @@ popup.describe('Popup UI: NFT Transfer', () => {
       ).toBeVisible();
 
       await popupPage.getByRole('button', { name: 'Done' }).click();
+
+      // Done routes to RateApp on fresh mock state; the Activity override set
+      // at submission time has to survive the round trip.
+      await popupPage.getByText('Close').click();
+
+      await popupExpect(popupPage.getByTitle('Activity')).toBeVisible();
     }
   );
 });

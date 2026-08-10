@@ -1,4 +1,4 @@
-import { concatBytes } from '@noble/ciphers/utils';
+import { concatBytes } from '@noble/ciphers/utils.js';
 import { Conversions, KeyAlgorithm, PrivateKey } from 'casper-js-sdk';
 
 import {

@@ -1,4 +1,3 @@
-import { Player } from '@lottiefiles/react-lottie-player';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -14,6 +13,7 @@ import {
   VerticalSpaceContainer
 } from '@libs/layout';
 import { Tile, Typography } from '@libs/ui/components';
+import { LottiePlayer } from '@libs/ui/components/lottie-player';
 
 const AnimationContainer = styled(CenteredFlexColumn)`
   padding: 106px 16px;
@@ -46,8 +46,7 @@ export const SelectAccountsToRecoverContent = ({
         <VerticalSpaceContainer top={SpacingSize.XL}>
           <Tile>
             <AnimationContainer>
-              <Player
-                renderer="svg"
+              <LottiePlayer
                 autoplay
                 loop
                 src={

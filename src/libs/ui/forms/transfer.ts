@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
-import { UseFormProps, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { Resolver, UseFormProps, useForm } from 'react-hook-form';
 
 import { TRANSFER_MIN_AMOUNT_MOTES } from '@src/constants';
 
@@ -53,6 +53,11 @@ export const useTransferAmountForm = (
 
   const csprAmountFormSchema = Yup.object().shape({
     amount: useCSPRTransferAmountRule(amountMotes),
+    // paymentAmount is ERC-20-only in the domain model (custom transaction
+    // payment/gas); it's unvalidated here purely so both branches of the
+    // amountFormSchema union share the same key set (mirrors buy-cspr.ts's
+    // casperAmount treatment) — do not add validation for CSPR transfers.
+    paymentAmount: Yup.string(),
     transferIdMemo: useTransferIdMemoRule()
   });
 
@@ -63,7 +68,12 @@ export const useTransferAmountForm = (
   const amountFormOptions: UseFormProps<TransferAmountFormValues> = {
     reValidateMode: 'onChange',
     mode: 'onTouched',
-    resolver: yupResolver(amountFormSchema),
+    // amountFormSchema is a union of two ObjectSchema branches (erc20 vs cspr) whose
+    // paymentAmount/transferIdMemo keys are inferred as optional (Input/Output asymmetry,
+    // same cause as buy-cspr.ts's casperAmount) — cast to bridge that gap.
+    resolver: yupResolver(
+      amountFormSchema
+    ) as Resolver<TransferAmountFormValues>,
     defaultValues: isErc20
       ? {
           paymentAmount

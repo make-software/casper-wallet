@@ -1,13 +1,20 @@
-import { createReducer } from 'typesafe-actions';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import { vaultCipherCreated, vaultCipherReseted } from './actions';
 import { VaultCipherState } from './types';
 
 const initialState = null as VaultCipherState;
 
-export const reducer = createReducer(initialState)
-  .handleAction(vaultCipherReseted, (): VaultCipherState => initialState)
-  .handleAction(
-    vaultCipherCreated,
-    (state, action): VaultCipherState => action.payload.vaultCipher
-  );
+const slice = createSlice({
+  name: 'vaultCipher',
+  initialState,
+  reducers: {
+    vaultCipherReseted: () => initialState,
+    vaultCipherCreated: (
+      _state,
+      action: PayloadAction<{ vaultCipher: string }>
+    ) => action.payload.vaultCipher
+  }
+});
+
+export const { vaultCipherCreated, vaultCipherReseted } = slice.actions;
+export const reducer = slice.reducer;

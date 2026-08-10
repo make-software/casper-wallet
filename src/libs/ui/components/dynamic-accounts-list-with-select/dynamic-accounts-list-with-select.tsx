@@ -1,4 +1,3 @@
-import { Player } from '@lottiefiles/react-lottie-player';
 import { formatNumber } from 'casper-wallet-core';
 import { ICsprBalance } from 'casper-wallet-core/src/domain/tokens';
 import React, { useEffect, useState } from 'react';
@@ -44,6 +43,7 @@ import {
   Tooltip,
   Typography
 } from '@libs/ui/components';
+import { LottiePlayer } from '@libs/ui/components/lottie-player';
 import { calculateSubmitButtonDisabled } from '@libs/ui/forms/get-submit-button-state-from-validation';
 import { motesToCSPR } from '@libs/ui/utils';
 
@@ -326,7 +326,7 @@ export const DynamicAccountsListWithSelect = ({
                     name={`accountNames.${inputFieldIndex}.name`}
                     rules={{
                       pattern: {
-                        value: /^[\daA-zZ\s]+$/,
+                        value: /^[\da-zA-Z_\s]+$/,
                         message: t(
                           'Account name can’t contain special characters'
                         )
@@ -389,8 +389,7 @@ export const DynamicAccountsListWithSelect = ({
       marginLeftForItemSeparatorLine={56}
       renderFooter={() =>
         isLoadingMore ? (
-          <Player
-            renderer="svg"
+          <LottiePlayer
             autoplay
             loop
             src={isDarkMode ? dotsDarkModeAnimation : dotsLightModeAnimation}

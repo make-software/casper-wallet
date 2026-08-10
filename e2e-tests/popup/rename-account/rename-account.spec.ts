@@ -29,8 +29,14 @@ popup.describe('Popup UI: rename account', () => {
 
       await popupPage.getByText('Close').click();
 
+      // Scoped to the header banner: react-router 7 no longer unmounts the
+      // outgoing route synchronously with the incoming one (v6 did), so the
+      // account-settings page's heading can still be in the DOM for a few ms
+      // after navigating home, making an unscoped getByText ambiguous.
       await popupExpect(
-        popupPage.getByText(ACCOUNT_NAMES.renamedAccountName)
+        popupPage
+          .getByRole('banner')
+          .getByText(ACCOUNT_NAMES.renamedAccountName)
       ).toBeVisible();
     }
   );
@@ -63,8 +69,14 @@ popup.describe('Popup UI: rename account', () => {
 
       await popupPage.getByText('Close').click();
 
+      // Scoped to the header banner: react-router 7 no longer unmounts the
+      // outgoing route synchronously with the incoming one (v6 did), so the
+      // account-settings page's heading can still be in the DOM for a few ms
+      // after navigating home, making an unscoped getByText ambiguous.
       await popupExpect(
-        popupPage.getByText(ACCOUNT_NAMES.renamedAccountName)
+        popupPage
+          .getByRole('banner')
+          .getByText(ACCOUNT_NAMES.renamedAccountName)
       ).toBeVisible();
     }
   );

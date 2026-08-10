@@ -2,7 +2,7 @@ import { Conversions, PrivateKey, PublicKey } from 'casper-js-sdk';
 
 import { getPrivateKeyHexFromSecretKey } from '@src/utils';
 
-export const CASPER_MESSAGE_HEADER = `Casper Message:\n`;
+const CASPER_MESSAGE_HEADER = `Casper Message:\n`;
 
 /**
  * Prepends the string with Casper message header and converts to the byte array.

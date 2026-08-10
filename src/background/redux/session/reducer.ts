@@ -1,41 +1,42 @@
-import { createReducer } from 'typesafe-actions';
+import { createSlice } from '@reduxjs/toolkit';
 
-import {
-  contactEditingPermissionChanged,
-  encryptionKeyHashCreated,
-  sessionReseted,
-  vaultUnlocked
-} from './actions';
 import { SessionState } from './types';
 
-type State = SessionState;
-
-const initialState: State = {
+const initialState: SessionState = {
   encryptionKeyHash: null,
+  encryptionKeyDoesExist: false,
   isLocked: true,
   isContactEditingAllowed: false
 };
 
-export const reducer = createReducer(initialState)
-  .handleAction(sessionReseted, (): State => initialState)
-  .handleAction(
-    vaultUnlocked,
-    (state): State => ({
+const slice = createSlice({
+  name: 'session',
+  initialState,
+  reducers: {
+    sessionReseted: () => initialState,
+    vaultUnlocked: {
+      prepare: () => ({ payload: { lastActivityTime: Date.now() } }),
+      reducer: (state: SessionState) => ({ ...state, isLocked: false })
+    },
+    encryptionKeyHashCreated: (
+      state,
+      action: { payload: { encryptionKeyHash: string } }
+    ) => ({
       ...state,
-      isLocked: false
-    })
-  )
-  .handleAction(
-    encryptionKeyHashCreated,
-    (state, action): State => ({
-      ...state,
-      encryptionKeyHash: action.payload.encryptionKeyHash
-    })
-  )
-  .handleAction(
-    contactEditingPermissionChanged,
-    (state): State => ({
+      encryptionKeyHash: action.payload.encryptionKeyHash,
+      encryptionKeyDoesExist: true
+    }),
+    contactEditingPermissionChanged: state => ({
       ...state,
       isContactEditingAllowed: true
     })
-  );
+  }
+});
+
+export const {
+  contactEditingPermissionChanged,
+  encryptionKeyHashCreated,
+  sessionReseted,
+  vaultUnlocked
+} = slice.actions;
+export const reducer = slice.reducer;

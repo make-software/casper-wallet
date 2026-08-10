@@ -1,5 +1,3 @@
-import { ActionType } from 'typesafe-actions';
-
 import * as accountInfo from './account-info/actions';
 import * as activeOriginFavicon from './active-origin-favicon/actions';
 import * as activeOrigin from './active-origin/actions';
@@ -44,13 +42,14 @@ const reduxAction = {
   csprNameExpirations
 };
 
-export type ReduxAction = ActionType<typeof reduxAction>;
+type Creators = typeof reduxAction;
 
-export function isReduxAction(action?: {
-  type?: unknown;
-  meta?: unknown;
-}): action is ReduxAction {
-  return typeof action?.type === 'string';
-}
+type ActionsOf<NS> = {
+  [K in keyof NS]: NS[K] extends (...args: never[]) => infer A ? A : never;
+}[keyof NS];
+
+export type ReduxAction = {
+  [NS in keyof Creators]: ActionsOf<Creators[NS]>;
+}[keyof Creators];
 
 export default reduxAction;

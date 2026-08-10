@@ -1,40 +1,28 @@
-import { createReducer } from 'typesafe-actions';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import {
-  askForReviewAfterChanged,
-  ratedInStoreChanged,
-  resetRateApp
-} from '@background/redux/rate-app/actions';
 import { RateAppState } from '@background/redux/rate-app/types';
 
-// Define the initial State for the Rate App
 const initialState: RateAppState = {
   ratedInStore: false,
   askForReviewAfter: null
 };
 
-/**
- * Reducer for handling changes related to Reviews
- *
- * @name reducer
- * @function
- * @returns {RateAppState} - The updated state
- */
-export const reducer = createReducer(initialState)
-  // Handling action when InStore rating changes
-  .handleAction(
-    ratedInStoreChanged,
-    (state: RateAppState, action: ReturnType<typeof ratedInStoreChanged>) => ({
+const slice = createSlice({
+  name: 'rateApp',
+  initialState,
+  reducers: {
+    ratedInStoreChanged: (state, action: PayloadAction<boolean>) => ({
       ...state,
       ratedInStore: action.payload
-    })
-  )
-  // Handles the action triggered when the time period, after which a rate app request should be made, is updated.
-  .handleAction(
-    askForReviewAfterChanged,
-    (state, action: ReturnType<typeof askForReviewAfterChanged>) => ({
+    }),
+    askForReviewAfterChanged: (state, action: PayloadAction<number>) => ({
       ...state,
       askForReviewAfter: action.payload
-    })
-  )
-  .handleAction(resetRateApp, () => initialState);
+    }),
+    resetRateApp: () => initialState
+  }
+});
+
+export const { askForReviewAfterChanged, ratedInStoreChanged, resetRateApp } =
+  slice.actions;
+export const reducer = slice.reducer;

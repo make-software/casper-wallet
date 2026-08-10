@@ -26,6 +26,7 @@ export const STAKE_COST_MOTES = '2500000000'; // 2.5 CSPR
 export const DELEGATION_MIN_AMOUNT_MOTES = '500000000000'; // 500 CSPR
 export const MAX_DELEGATORS = 1200;
 
+// nosemgrep: ajinabraham.njsscan.generic.hardcoded_secrets.node_username — public docs URL, "USER" in the name is not a credential
 export const USER_GUIDES_URL = 'https://casperwallet.io/user-guide';
 export const SHARE_FEEDBACK_URL =
   'https://casper-wallet.canny.io/feature-requests';
@@ -193,7 +194,7 @@ export enum AuctionDeployEntryPoint {
   activate = 'activate_bid'
 }
 
-export const AuctionDeployEntryPointNameMap = {
+const AuctionDeployEntryPointNameMap = {
   [AuctionDeployEntryPoint.add]: 'Add bid',
   [AuctionDeployEntryPoint.withdraw]: 'Withdraw bid',
   [AuctionDeployEntryPoint.activate]: 'Activate bid',
@@ -202,7 +203,7 @@ export const AuctionDeployEntryPointNameMap = {
   [AuctionDeployEntryPoint.redelegate]: 'Redelegate'
 };
 
-export const AuctionDeployActionName = {
+const AuctionDeployActionName = {
   [AuctionDeployEntryPoint.add]: 'Add bid',
   [AuctionDeployEntryPoint.withdraw]: 'Withdraw bid',
   [AuctionDeployEntryPoint.activate]: 'Activate bid',
@@ -222,7 +223,7 @@ export enum NftDeployEntryPoint {
   safe_transfer_from = 'safe_transfer_from'
 }
 
-export const NftDeployEntryPointNameMap = {
+const NftDeployEntryPointNameMap = {
   [NftDeployEntryPoint.approve]: 'Approve transfer',
   [NftDeployEntryPoint.burn]: 'Burn',
   [NftDeployEntryPoint.mint]: 'Mint',
@@ -233,7 +234,7 @@ export const NftDeployEntryPointNameMap = {
   [NftDeployEntryPoint.set_approval_for_all]: 'Approve transfer'
 };
 
-export const NftDeployActionName = {
+const NftDeployActionName = {
   [NftDeployEntryPoint.approve]: 'Approve transfer rights',
   [NftDeployEntryPoint.burn]: 'Burn',
   [NftDeployEntryPoint.mint]: 'Mint',
@@ -244,7 +245,7 @@ export const NftDeployActionName = {
   [NftDeployEntryPoint.set_approval_for_all]: 'Approve transfer rights'
 };
 
-export const NftDeployResultName = {
+const NftDeployResultName = {
   [NftDeployEntryPoint.approve]: 'Granted transfer rights',
   [NftDeployEntryPoint.burn]: 'Burned',
   [NftDeployEntryPoint.mint]: 'Minted',
@@ -262,21 +263,21 @@ export enum Cep18DeployEntryPoint {
   transfer = 'transfer'
 }
 
-export const Cep18DeployEntryPointNameMap = {
+const Cep18DeployEntryPointNameMap = {
   [Cep18DeployEntryPoint.approve]: 'Approve',
   [Cep18DeployEntryPoint.burn]: 'Burn',
   [Cep18DeployEntryPoint.mint]: 'Mint',
   [Cep18DeployEntryPoint.transfer]: 'Transfer'
 };
 
-export const Cep18DeployActionName = {
+const Cep18DeployActionName = {
   [Cep18DeployEntryPoint.approve]: 'Approve transfer rights',
   [Cep18DeployEntryPoint.burn]: 'Burn',
   [Cep18DeployEntryPoint.mint]: 'Mint',
   [Cep18DeployEntryPoint.transfer]: 'Transfer'
 };
 
-export const Cep18DeployResultName = {
+const Cep18DeployResultName = {
   [Cep18DeployEntryPoint.approve]: 'Granted transfer rights',
   [Cep18DeployEntryPoint.burn]: 'Burned',
   [Cep18DeployEntryPoint.mint]: 'Minted',
@@ -291,7 +292,7 @@ export enum CsprMarketDeployEntryPoint {
   make_offer = 'make_offer'
 }
 
-export const CsprMarketDeployEntryPointNameMap = {
+const CsprMarketDeployEntryPointNameMap = {
   [CsprMarketDeployEntryPoint.accept_offer]: 'Accept offer',
   [CsprMarketDeployEntryPoint.cancel_offer]: 'Cancel offer',
   [CsprMarketDeployEntryPoint.delist_token]: 'Delist',
@@ -416,6 +417,11 @@ export const ErrorMessages = {
       message: 'Unsupported Target Type',
       description:
         'The target provided in the transfer data is neither an AccountHash nor a PublicKey. Ensure the target type is valid.'
+    },
+    REQUEST_NO_LONGER_AVAILABLE: {
+      message: 'Signature Request No Longer Available',
+      description:
+        'The data for this signature request is no longer available, so it cannot be signed. Please make the request again from the application.'
     }
   },
   decryptMessage: {

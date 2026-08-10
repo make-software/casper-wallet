@@ -34,22 +34,6 @@ const formatDistanceTokens: Record<FormatDistanceToken, string> = {
   almostXYears: 'year'
 };
 
-export const formatTimestamp = (value: string): string => {
-  const date = new Date(value);
-  const locale = 'en';
-  const nativeIntl = new Intl.DateTimeFormat(locale, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-    timeZoneName: 'short'
-  });
-
-  return `${nativeIntl.format(date)}`;
-};
-
 export const formatShortTimestamp = (value: string): string => {
   const date = new Date(value);
   const locale = 'en';
@@ -124,8 +108,7 @@ export const CSPRtoMotes = (cspr: string): string => {
   return Big(cspr).mul(MOTES_PER_CSPR_RATE).toFixed();
 };
 
-export const tokenDivider = (decimals: number | null) =>
-  Big(10).pow(decimals || 0);
+const tokenDivider = (decimals: number | null) => Big(10).pow(decimals || 0);
 
 export const divideErc20Balance = (
   balance: string | null,
@@ -166,14 +149,6 @@ export const motesToCurrency = (
 
   return amount.toFixed();
 };
-
-export function snakeAndKebabToCamel(str: string): string {
-  return str
-    .toLowerCase()
-    .replace(/([-_][a-z0-9])/g, group =>
-      group.toUpperCase().replace('-', '').replace('_', '')
-    );
-}
 
 export function capitalizeString(str: string): string {
   return `${str[0].toUpperCase()}${str.slice(1)}`;

@@ -9,6 +9,7 @@ export function useNavigationMenu() {
     navigate(location.pathname, {
       replace: true,
       state: {
+        ...location.state,
         showNavigationMenu: !location.state?.showNavigationMenu
       }
     });
@@ -17,13 +18,13 @@ export function useNavigationMenu() {
   const openNavigationMenu = () => {
     navigate(location.pathname, {
       replace: true,
-      state: { showNavigationMenu: true }
+      state: { ...location.state, showNavigationMenu: true }
     });
   };
   const closeNavigationMenu = () => {
     navigate(location.pathname, {
       replace: true,
-      state: { showNavigationMenu: false }
+      state: { ...location.state, showNavigationMenu: false }
     });
   };
 

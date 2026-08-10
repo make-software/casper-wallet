@@ -51,11 +51,7 @@ export const DeploysList = () => {
           contentTop={SpacingSize.None}
           rows={deploys}
           renderRow={deploy => (
-            <DeployPlate
-              deploy={deploy}
-              navigateHome={true}
-              onClick={setActivityPlateYPosition}
-            />
+            <DeployPlate deploy={deploy} onClick={setActivityPlateYPosition} />
           )}
           marginLeftForItemSeparatorLine={0}
           borderBottomPseudoElementRules={activityBottomPseudoElementRules}

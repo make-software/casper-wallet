@@ -5,11 +5,11 @@ import { isChromeBuild } from '@src/utils';
 
 const getActivePublicKye = async (): Promise<string | undefined> => {
   try {
-    const response = await runtime.sendMessage({
+    const response = (await runtime.sendMessage({
       type: 'GET_ACTIVE_PUBLIC_KEY'
-    });
+    })) as { payload?: { publicKey?: string | null } } | undefined;
 
-    return response?.payload?.publicKey;
+    return response?.payload?.publicKey ?? undefined;
   } catch (e) {
     console.log(e, 'getActivePublicKye error');
 
@@ -19,11 +19,11 @@ const getActivePublicKye = async (): Promise<string | undefined> => {
 
 const getTheme = async (): Promise<string> => {
   try {
-    const response = await runtime.sendMessage({
+    const response = (await runtime.sendMessage({
       type: 'GET_THEME'
-    });
+    })) as { payload?: { theme?: string } } | undefined;
 
-    return response?.payload?.theme;
+    return response?.payload?.theme ?? 'dark';
   } catch (e) {
     console.log(e, 'getTheme error');
 

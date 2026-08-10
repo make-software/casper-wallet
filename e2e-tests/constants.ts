@@ -1,6 +1,4 @@
-import { Page } from '@playwright/test';
 import path from 'path';
-
 
 export const newPassword = 'this is new password';
 export const vaultPassword = '3hQqzYn4C7Y8rEZTVEZb';
@@ -133,10 +131,45 @@ export const NEW_VALIDATOR_FOR_STAKE = {
 };
 
 export const URLS = {
-  rpc: 'https://node.testnet.cspr.cloud/rpc'
+  rpc: 'https://node.testnet.cspr.cloud/rpc',
+  // Every cspr.cloud RPC node the suite can end up pointed at. The buy-CSPR specs
+  // switch to Mainnet, which moves the background probe onto `node.cspr.cloud` —
+  // matching only `rpc` above would leave that one reaching the live network.
+  anyRpcNode: /^https:\/\/node\.(\w+\.)?cspr\.cloud\/rpc$/
 };
 
 export const RPC_RESPONSE = {
+  // `checkCasper2NetworkSaga` probes the node for its api_version on every unlock
+  // and on every network switch, to learn whether it is talking to a Casper 2.x
+  // network. It runs in the background service worker, so `page.route` never sees
+  // it — see the context-level route in `fixtures.ts`. The api_version here has to
+  // stay in the 2.x line: it is what flips the send path onto `putTransaction`,
+  // which is the only shape `success` below answers with.
+  getStatus: {
+    status: 200,
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1717761373590,
+      result: {
+        api_version: '2.0.0',
+        protocol_version: '2.0.0',
+        build_version: '2.0.0-e2e',
+        chainspec_name: 'casper-test',
+        starting_state_root_hash:
+          '0000000000000000000000000000000000000000000000000000000000000000',
+        our_public_signing_key:
+          '0106ca7c39cd272dbf21a86eeb3b36b7c26e2e9b94af64292419f7862936bca2ca',
+        round_length: null,
+        next_upgrade: null,
+        uptime: '1m 0ms',
+        reactor_state: 'Validate',
+        last_progress: '2026-01-01T00:00:00.000Z',
+        available_block_range: { low: 0, high: 0 },
+        block_sync: {},
+        peers: []
+      }
+    })
+  },
   success: {
     status: 200,
     body: JSON.stringify({

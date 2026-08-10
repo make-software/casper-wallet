@@ -2,7 +2,7 @@
 
 ![signer logo](src/assets/img/logo128.png)
 
-*Securely manage your CSPR tokens, interact with dapps and sign transactions with Casper Wallet, the Go-To self-custody wallet for the Casper blockchain.*
+_Securely manage your CSPR tokens, interact with dapps and sign transactions with Casper Wallet, the Go-To self-custody wallet for the Casper blockchain._
 
 ---
 
@@ -12,14 +12,14 @@ The recommended way of integrating Casper Wallet into your app is through [CSPR.
 
 ## Testing Casper Wallet integration on **Casper Wallet Playground**
 
-*Casper Wallet Playground is a React webapp created as a developer tool to help test integration with various features available in Casper Wallet.*
+_Casper Wallet Playground is a React webapp created as a developer tool to help test integration with various features available in Casper Wallet._
 
 ### Access Casper Wallet Playground repo
 
 Open <https://github.com/make-software/casper-wallet-playground>
 
 Clone this repository and run following commands from the repo root folder.
-*NOTE: Node.js LTS is required.*
+_NOTE: Node.js LTS is required._
 
 ```shell
 npm install
@@ -60,16 +60,27 @@ For more information please [follow the link](https://developer.apple.com/docume
 
 ## Development setup
 
-Working on any macOS or Linux machine with NodeJS LTS installed.
+Working on any macOS or Linux machine with Node.js 22 and npm 10+ installed (see `.nvmrc` for the exact version). If you use [nvm](https://github.com/nvm-sh/nvm), run `nvm use` from the repo root to pick up the right version.
 
 ### Install dependencies
 
-Clone this repository and run following commands from the repo root folder.
-*NOTE: Node.js LTS is required.*
+Clone this repository and run the following command from the repo root folder.
 
 ```shell
-npm install
+npm run setup
 ```
+
+npm lifecycle scripts are disabled by default (`.npmrc` sets `ignore-scripts=true`)
+as a supply-chain safeguard, so a plain `npm install` runs **no** dependency
+install scripts and does **not** set up the git hooks. `npm run setup` performs a
+full install: `npm ci`, then runs the approved install scripts via
+`@lavamoat/allow-scripts`, then installs the git hooks.
+
+Approved dependency install scripts live in the `lavamoat.allowScripts` allowlist
+in `package.json`. To add a dependency that ships an install script, run
+`npx allow-scripts auto`, then review the diff and set the new entry to `true`
+only if the script is trusted and required — otherwise leave it `false`. CI fails
+on any install script that is not explicitly configured.
 
 ### Grant script execution permissions for `scripts` folder
 
@@ -125,43 +136,86 @@ All at once:
 npm run build:all
 ```
 
-## Redux DevTools
+### Reproducible builds from the source package
 
-### What is it?
+`npm run build:src` produces `build/casper-wallet-src#<sha>.zip`, the package
+submitted alongside the extension for source review. Rebuilding it yields an
+artifact byte-identical to the published one — including `manifest.json`:
 
-Developer Tools to power-up Redux development workflow or any other architecture which handles the state change.
+```shell
+unzip casper-wallet-src#<sha>.zip -d casper-wallet-src
+cd casper-wallet-src
+npm ci
+npm run build:firefox   # or build:chrome / build:safari
+```
 
-It can be used as a browser extension (for Chrome, Edge and Firefox), as a standalone app or as a React component integrated in the client app.
+The package carries no `.git`, so the `HASH=$(git rev-parse HEAD)` in the build
+scripts resolves to nothing there. The commit stamped into
+`manifest.version_name` comes from `build-hash.json`, written into the package by
+`npm run build:src`. To build a tree that has neither — a downloaded tarball, for
+instance — pass the commit explicitly:
 
-You can read more about Redux DevTools on link <https://github.com/reduxjs/redux-devtools>
+```shell
+HASH=<full commit sha> npm run build:manifest:v2:firefox
+```
 
-### How to configure?
+A production build with no commit available anywhere fails rather than stamping a
+placeholder, since the resulting artifact could not be reproduced.
 
-We are using redux devtool as separate local server. It can be started with `devtools:redux` npm start script.
+## Unit tests
 
-All npm start scripts, except Safari (`start:chrome`, `start:firefox`) for dev-environment, already include launching the redux dev tools on `8000` port for Chrome and `8001` port for Firefox.
+Unit tests are written with [Jest](https://jestjs.io/) and colocated with the source code.
 
-You should install Redux DevTools browser extension and connect it to Redux DevTool local server
+```shell
+npm test
+```
 
-### How to run?
+To collect coverage (CI enforces a coverage gate):
 
-1. Install browser extension
-   - For Chrome - <https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=en>
-   - For Firefox - <https://addons.mozilla.org/en-US/firefox/addon/reduxdevtools/>
-   - Safari not supported 😢
+```shell
+npm run test:coverage
+```
 
-2. Start npm script for browser you need. For example, run `npm run start:chrome` for Chrome
-3. Connect your extension with local redux dev server with steps:
-    1. Open extension and click by right mouse button on it then pick `Redux DevTools` menu item and click on `Open Remote DevTools`![Opening Redux DevTools app](./src/assets/illustrations/redux-devtools-guide/opening-redux-devtools.png)
-    2. Open `Settings` of Redux DevTools app then select `use local (custom) server` option and set hostname as a `localhost` and set a port depends on browser you need (`8000` for Chrome and `8001` for Firefox) ![Redux DevTools settings](./src/assets/illustrations/redux-devtools-guide/redux-devtools-settings.png)
-    3. Click `Connect` button and enjoy 🙂
+## Code quality checks
+
+Run the same checks as CI (Prettier, ESLint, TypeScript, knip and unit tests with coverage) with a single command:
+
+```shell
+npm run ci-check
+```
+
+The individual checks are also available as separate scripts: `npm run format:check`, `npm run lint`, `npm run tsc`, `npm run knip`.
+
+To run the project's [Semgrep](https://semgrep.dev/) static-analysis rules locally (requires the `semgrep` CLI):
+
+```shell
+npm run semgrep
+```
 
 ## E2E tests
 
-Write tests into `e2e-tests` folder.
+Write tests into the `e2e-tests` folder. Each script below builds the extension first and then runs the [Playwright](https://playwright.dev/docs/running-tests) suite.
 
-To run e2e tests, you must use npm script `npm run e2e:chrome:ui:popup` or `e2e:chrome:ui:onboarding`.
-Tests are run in UI mode.
+In UI mode:
 
-All information
-about how to run and debug tests can be found in [playwright docs](https://playwright.dev/docs/running-tests).
+```shell
+npm run e2e:chrome:ui:popup
+npm run e2e:chrome:ui:onboarding
+```
+
+Headless:
+
+```shell
+npm run e2e:chrome:headless:popup
+npm run e2e:chrome:headless:onboarding
+npm run e2e:firefox:headless:smoke
+```
+
+## Contributing & security
+
+- Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+- To report a security vulnerability, please follow [SECURITY.md](SECURITY.md) — do not open a public issue.
+
+## License
+
+Casper Wallet is licensed under the [Apache License 2.0](LICENSE).

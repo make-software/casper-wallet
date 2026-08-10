@@ -27,7 +27,7 @@ import {
 } from '@onboarding/router';
 
 import { selectKeysDoesExist } from '@background/redux/keys/selectors';
-import { selectEncryptionKeyHash } from '@background/redux/session/selectors';
+import { selectEncryptionKeyDoesExist } from '@background/redux/session/selectors';
 
 import { ErrorPath, TabErrorPage } from '@libs/layout';
 
@@ -38,9 +38,9 @@ export function AppRouter() {
   const isLoggedIn = loadIsLoggedIn();
 
   const keysDoesExist = useSelector(selectKeysDoesExist);
-  const encryptionKeyHash = useSelector(selectEncryptionKeyHash);
+  const encryptionKeyDoesExist = useSelector(selectEncryptionKeyDoesExist);
 
-  if (keysDoesExist && encryptionKeyHash != null) {
+  if (keysDoesExist && encryptionKeyDoesExist) {
     if (isLoggedIn) {
       return (
         <AuthorizedUserRoutes

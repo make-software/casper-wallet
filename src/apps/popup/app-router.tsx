@@ -4,6 +4,7 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 
 import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 
+import { HomeTabProvider } from '@popup/hooks/use-home-tab';
 import { AccountSettingsPage } from '@popup/pages/account-settings';
 import { AddContactPage } from '@popup/pages/add-contact';
 import { AddWatchAccount } from '@popup/pages/add-watch-account';
@@ -63,7 +64,9 @@ export function AppRouter() {
 
   return (
     <HashRouter>
-      <AppRoutes />
+      <HomeTabProvider>
+        <AppRoutes />
+      </HomeTabProvider>
     </HashRouter>
   );
 }

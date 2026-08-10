@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { getCasperNetwork } from '@src/constants';
@@ -16,9 +16,14 @@ export const useExpiringCsprNames = () => {
 
   const network = getCasperNetwork(networkSetting);
 
+  // Time reference captured once per mount, keeping render pure (react-hooks
+  // purity rule). A popup session lives seconds while the notice window spans
+  // days, so a stable "now" cannot change which names count as expiring.
+  const [now] = useState(() => Date.now());
+
   const expiringNames = useMemo(
-    () => getExpiringCsprNames(expirations[network] ?? {}, Date.now()),
-    [expirations, network]
+    () => getExpiringCsprNames(expirations[network] ?? {}, now),
+    [expirations, network, now]
   );
 
   const dismissExpiringNames = useCallback(() => {

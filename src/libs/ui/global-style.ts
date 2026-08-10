@@ -1,6 +1,6 @@
 import { createGlobalStyle } from 'styled-components';
 
-export const GlobalStyle = createGlobalStyle<{ theme: any }>`
+export const GlobalStyle = createGlobalStyle`
   html {
     height: 100%;
     

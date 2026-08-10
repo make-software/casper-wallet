@@ -33,7 +33,7 @@ import { CasperWalletSupports } from '@content/sdk-types';
 
 import { Account } from '@libs/types/account';
 
-export function findAccountInAListClosestToGivenAccountFilteredByNames(
+function findAccountInAListClosestToGivenAccountFilteredByNames(
   accounts: Account[],
   givenAccount: Account,
   allowedAccountNames: string[]

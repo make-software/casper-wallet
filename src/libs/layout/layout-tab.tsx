@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type JSX } from 'react';
 import styled from 'styled-components';
 
 import { SvgIcon } from '@libs/ui/components';

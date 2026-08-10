@@ -1,38 +1,35 @@
-import { composeWithDevTools } from '@redux-devtools/remote';
-import {
-  applyMiddleware, // TODO: Move to actual `createStore`
-  compose,
-  legacy_createStore as createStoreRedux
-} from 'redux';
+import { Reducer, configureStore } from '@reduxjs/toolkit';
 import createSagaMiddleware from 'redux-saga';
-import { RootState } from 'typesafe-actions';
 
-import { isChromeBuild } from '@src/utils';
+import { RootState } from '@background/redux/store-types';
 
-import reduxAction from './redux-action';
+import reduxAction, { ReduxAction } from './redux-action';
 import rootReducer from './root-reducer';
 import rootSaga from './root-saga';
 
-export const composeEnhancers =
-  process.env.NODE_ENV === 'development' && isChromeBuild
-    ? composeWithDevTools({
-        name: 'Casper Wallet',
-        hostname: 'localhost',
-        port: 8000
-      })
-    : compose;
-
 export const createStore = (initialState: Partial<RootState>) => {
   const sagaMiddleware = createSagaMiddleware();
-  // configure middlewares
-  const middlewares = [sagaMiddleware];
-  // compose enhancers
-  // @ts-ignore
-  const enhancer = composeEnhancers(applyMiddleware(...middlewares));
-  // create store
-  // @ts-ignore
-  const store = createStoreRedux(rootReducer, initialState, enhancer);
-  // run sagas
+
+  const store = configureStore({
+    // `rootReducer` is a `combineReducers` result; RTK
+    // cannot infer its combined shape, so it collapses `preloadedState` to a
+    // never-shape. Re-assert the reducer's real type (state + `Partial` preload
+    // slot) so `preloadedState: Partial<RootState>` type-checks unchanged.
+    reducer: rootReducer as unknown as Reducer<
+      RootState,
+      ReduxAction,
+      Partial<RootState>
+    >,
+    preloadedState: initialState,
+    middleware: getDefaultMiddleware =>
+      getDefaultMiddleware({
+        thunk: false,
+        serializableCheck: false,
+        immutableCheck: false
+      }).concat(sagaMiddleware),
+    devTools: false
+  });
+
   sagaMiddleware.run(rootSaga);
 
   return store;

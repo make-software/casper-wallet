@@ -12,7 +12,6 @@
     "tabs",
     "declarativeNetRequest",
     "https://image-proxy-cdn.make.services/*",
-    "https://casper-assets.s3.amazonaws.com/*",
     "https://node.cspr.cloud/*",
     "https://node.testnet.cspr.cloud/*",
     "https://api.testnet.casperwallet.io/*",
@@ -34,6 +33,11 @@
         "path": "declarative_net_request_rules.json"
       }
     ]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "strict_min_version": "113.0"
+    }
   },
   "background": {
     "scripts": ["./background.bundle.js"],

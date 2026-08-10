@@ -17,12 +17,7 @@ const LinkWithIconContainer = styled.div`
 `;
 
 type LinkType =
-  | 'back'
-  | 'close'
-  | 'cancel'
-  | 'done'
-  | 'switchAccount'
-  | 'cancelWindow';
+  'back' | 'close' | 'cancel' | 'done' | 'switchAccount' | 'cancelWindow';
 
 interface HeaderSubmenuBarNavLinkProps {
   linkType: LinkType;

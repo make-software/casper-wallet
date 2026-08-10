@@ -2,9 +2,12 @@ name: CI Check
 
 on:
   push:
-    branches: [ master, develop ]
+    branches: [ master, develop, release/** ]
   pull_request:
-    branches: [ master, develop ]
+    branches: [ master, develop, release/** ]
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -12,8 +15,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
-    
+        node-version: [22.x]
+
     steps:
     - uses: actions/checkout@v4
 
@@ -38,5 +41,32 @@ jobs:
 
     - name: Install & Check
       run: |
-        npm install
+        npm ci
+        # Run approved dependency install scripts (.npmrc sets ignore-scripts=true).
+        # Builds the unrs-resolver native binding needed by eslint/jest, and fails
+        # the build if a dependency ships an install script not in the
+        # `lavamoat.allowScripts` allowlist.
+        npm run allow-scripts
         npm run ci-check
+
+    # Blocking: custom wallet rules (.semgrep.yml) + security-focused registry
+    # packs, plus the casper-js-sdk version parity check. Pinned to the semgrep
+    # version the config was validated against (see .semgrep/README.md).
+    - name: Semgrep (blocking)
+      run: |
+        pipx install semgrep==1.157.0
+        npm run semgrep:test
+        npm run semgrep:ci
+
+    # Blocking: fail the build on a high+ vulnerability in runtime deps. Plain
+    # `npm audit` cannot tell whether a vulnerable package is actually bundled,
+    # so the gate runs through scripts/audit-ci.mjs, which allows only advisories
+    # reviewed and shown not to reach the shipped bundle. Each exception carries
+    # its evidence and an expiry date; anything else still fails the build.
+    - name: Audit runtime dependencies (blocking)
+      run: npm run audit:ci
+
+    # Non-blocking: surface dev/build-toolchain advisories for visibility
+    # without failing CI (these never reach the extension bundle).
+    - name: Audit full dependency tree (non-blocking)
+      run: npm audit || true

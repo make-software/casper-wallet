@@ -9,7 +9,7 @@ import { Stepper } from '@onboarding/components/stepper';
 import { RouterPath } from '@onboarding/router';
 import { useTypedNavigate } from '@onboarding/router/use-typed-navigate';
 
-import { selectPasswordHash } from '@background/redux/keys/selectors';
+import { selectKeysDoesExist } from '@background/redux/keys/selectors';
 import { initKeys } from '@background/redux/sagas/actions';
 import { dispatchToMainStore } from '@background/redux/utils';
 
@@ -37,7 +37,7 @@ export function CreateVaultPasswordPage({
   const [isChecked, setIsChecked] = useState(false);
   const navigate = useTypedNavigate();
   const { t } = useTranslation();
-  const passwordHash = useSelector(selectPasswordHash);
+  const keysDoesExist = useSelector(selectKeysDoesExist);
 
   const {
     register,
@@ -52,10 +52,10 @@ export function CreateVaultPasswordPage({
   });
 
   useEffect(() => {
-    if (passwordHash) {
+    if (keysDoesExist) {
       navigate(RouterPath.CreateSecretPhrase);
     }
-  }, [navigate, passwordHash]);
+  }, [navigate, keysDoesExist]);
 
   async function onSubmit(data: CreatePasswordFormValues) {
     dispatchToMainStore(initKeys({ password: data.password }));

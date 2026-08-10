@@ -33,6 +33,7 @@ import {
 } from '@background/redux/trusted-wasm/actions';
 import { selectTrustedWasmByOrigin } from '@background/redux/trusted-wasm/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
+import { getPayload } from '@background/redux/vault/payload-map';
 import {
   selectConnectedAccountNamesByOrigin,
   selectDeploysJsonById,
@@ -120,7 +121,6 @@ export function SignTransactionPage() {
     useState(false);
 
   const wasmApprovalInitialisedRef = useRef(false);
-  const responseSentRef = useRef(false);
 
   const [isSigningAccountFromLedger, setIsSigningAccountFromLedger] =
     useState(false);
@@ -139,8 +139,11 @@ export function SignTransactionPage() {
     [accounts, signingPublicKeyHex]
   );
 
+  // `getPayload`, never a bare index: `requestId` is dapp-controlled, so
+  // `deployJsonById['constructor']` would hand this page an inherited
+  // Object.prototype member instead of transaction JSON.
   const transactionJson = useMemo<string | undefined>(
-    () => deployJsonById[requestId],
+    () => getPayload(deployJsonById, requestId),
     [deployJsonById, requestId]
   );
 
@@ -227,6 +230,23 @@ export function SignTransactionPage() {
     let signature: Uint8Array | null = null;
 
     if (!transaction) {
+      // Every signing route funnels through here, including the Ledger footer's
+      // Connect, which is outside the `disabled` gate on the main footer. If the
+      // payload is gone the request can never be answered from this window, so
+      // returning silently strands both the window and the dapp.
+      // Keyed on `transactionJson`: a payload present but not yet parsed is an
+      // ordinary in-flight state and must not error out.
+      if (!transactionJson) {
+        const error = Error(
+          ErrorMessages.signTransaction.REQUEST_NO_LONGER_AVAILABLE.description
+        );
+        sendSdkResponseToSpecificTab(
+          sdkMethod.signError(error, { requestId }),
+          requestTabId
+        );
+        closeCurrentWindow();
+      }
+
       return;
     }
 
@@ -253,7 +273,6 @@ export function SignTransactionPage() {
       return;
     }
 
-    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
       sdkMethod.signResponse(
         { signatureHex: convertBytesToHex(signature), cancelled: false },
@@ -264,6 +283,7 @@ export function SignTransactionPage() {
     closeCurrentWindow();
   }, [
     transaction,
+    transactionJson,
     signingAccount.hardware,
     signingAccount.derivationIndex,
     signingAccount.publicKey,
@@ -274,20 +294,12 @@ export function SignTransactionPage() {
   ]);
 
   const handleCancel = useCallback(() => {
-    if (responseSentRef.current) return;
-    responseSentRef.current = true;
     sendSdkResponseToSpecificTab(
       sdkMethod.signResponse({ cancelled: true }, { requestId }),
       requestTabId
     );
     closeCurrentWindow();
   }, [requestId, requestTabId]);
-
-  useEffect(() => {
-    window.addEventListener('beforeunload', handleCancel);
-
-    return () => window.removeEventListener('beforeunload', handleCancel);
-  }, [handleCancel]);
 
   const {
     ledgerEventStatusToRender,
@@ -318,9 +330,9 @@ export function SignTransactionPage() {
 
   const maybeRequireApproval = Boolean(
     signatureRequest &&
-      (isTxSignatureRequestWasmAction(signatureRequest.action) ||
-        isTxSignatureRequestWasmProxyAction(signatureRequest.action)) &&
-      !requestOriginTrustedWasm.includes(signatureRequest.action.washHash)
+    (isTxSignatureRequestWasmAction(signatureRequest.action) ||
+      isTxSignatureRequestWasmProxyAction(signatureRequest.action)) &&
+    !requestOriginTrustedWasm.includes(signatureRequest.action.washHash)
   );
 
   useEffect(() => {
@@ -333,14 +345,12 @@ export function SignTransactionPage() {
   const toggleWasmApproval = useCallback(() => {
     const origin = requestOrigin;
 
-    if (
-      !(
-        origin &&
-        signatureRequest &&
-        (isTxSignatureRequestWasmAction(signatureRequest.action) ||
-          isTxSignatureRequestWasmProxyAction(signatureRequest.action))
-      )
-    ) {
+    if (!(
+      origin &&
+      signatureRequest &&
+      (isTxSignatureRequestWasmAction(signatureRequest.action) ||
+        isTxSignatureRequestWasmProxyAction(signatureRequest.action))
+    )) {
       return;
     }
 
@@ -411,8 +421,14 @@ export function SignTransactionPage() {
           <Button
             color="primaryRed"
             flexWidth
+            // `!signatureRequest` mirrors the eip712 page. `transaction` is
+            // local state that outlives the payload it was parsed from, so
+            // once the answered request's payload is dropped from the vault
+            // this button would stay enabled over the empty pane the content
+            // branch below renders without a `signatureRequest`.
             disabled={
               !transaction ||
+              !signatureRequest ||
               isLoadingSignatureRequest ||
               (additionalApproveRequired && !wasmApproved)
             }
@@ -471,7 +487,20 @@ export function SignTransactionPage() {
           );
         }
 
-        return isLoadingSignatureRequest ? (
+        // `isLoadingSignatureRequest` is the query's `isFetching`, which is
+        // false for a DISABLED query — so once the answered request's payload
+        // is gone the two content children below are guarded away and this
+        // branch rendered an empty pane. Per-request deletion makes that
+        // routine, not hypothetical.
+        //
+        // `LedgerEventView` is the exception and is excluded from the added
+        // term: it carries no `signatureRequest`, and it is the only thing the
+        // Ledger permission window — the second window, the one that survives a
+        // supersede — has to show while the device is being read. Replacing it
+        // with a skeleton would blank exactly the screen this fix protects.
+        return isLoadingSignatureRequest ||
+          (!signatureRequest &&
+            signingPageState !== SigningPageState.LedgerConfirmation) ? (
           <SignatureRequestLoading />
         ) : (
           <>

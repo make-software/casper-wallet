@@ -12,6 +12,9 @@ import {
 import { selectLedgerNewWindowId } from '@background/redux/ledger/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
 
+import { createLedgerWindowCloseTracker } from '@hooks/ledger-window-close-listener';
+import { registerLedgerPermissionWindow } from '@hooks/register-ledger-permission-window';
+
 import {
   ILedgerEvent,
   IsBluetoothLedgerTransportAvailable,
@@ -26,6 +29,21 @@ import {
   usbTransportCreator
 } from '@libs/services/ledger';
 
+/**
+ * Search params carried into the permission window's URL. Spelled out rather
+ * than `Record<string, string>` so renaming `requestId` at a call site is a
+ * compile error: the lookup below is what registers the window against its
+ * request, and against a string record a renamed key silently yields
+ * `undefined` and takes the whole approval back to the P0 this model fixes.
+ */
+interface LedgerPermissionParams {
+  requestId?: string;
+  signingPublicKeyHex?: string;
+  message?: string;
+  origin?: string;
+  tabId?: string;
+}
+
 interface IUseLedgerParams {
   ledgerAction: () => Promise<void>;
   beforeLedgerActionCb: () => Promise<void>;
@@ -35,7 +53,7 @@ interface IUseLedgerParams {
   /** We have to open new browser window to handle device permission */
   askPermissionUrlData?: {
     domain: string;
-    params?: Record<string, string>;
+    params?: LedgerPermissionParams;
     hash: string;
   };
 }
@@ -65,13 +83,24 @@ export const useLedger = ({
   const isFirstEventRef = useRef<boolean>(true);
   const triggeredRef = useRef(false);
 
-  const params = new URLSearchParams({
-    ...(askPermissionUrlData.params ?? {}),
-    initialEventToRender: LedgerEventStatus.LedgerAskPermission,
-    ...(selectedTransportRef.current
-      ? { ledgerTransport: selectedTransportRef.current }
-      : {})
-  }).toString();
+  // Built key by key (rather than spread into the constructor) because
+  // `LedgerPermissionParams` has optional members: an absent one must be left
+  // out, not stringified as "undefined". Insertion order matches the previous
+  // spread, so the URL is unchanged for every existing flow.
+  const searchParams = new URLSearchParams();
+  Object.entries(askPermissionUrlData.params ?? {}).forEach(([key, value]) => {
+    if (value != null) {
+      searchParams.set(key, value);
+    }
+  });
+  searchParams.set(
+    'initialEventToRender',
+    LedgerEventStatus.LedgerAskPermission
+  );
+  if (selectedTransportRef.current) {
+    searchParams.set('ledgerTransport', selectedTransportRef.current);
+  }
+  const params = searchParams.toString();
 
   const url = useMemo(
     () =>
@@ -156,7 +185,6 @@ export const useLedger = ({
       }
 
       isFirstEventRef.current = false;
-      console.log('-------- event', JSON.stringify(event.status, null, ' '));
     });
 
     return () => sub.unsubscribe();
@@ -169,6 +197,10 @@ export const useLedger = ({
     }
   }, [isLedgerConnected, makeSubmitLedgerAction]);
 
+  // One per hook instance, stable across renders: the effect below arms it and
+  // the two effects after it are the only things that take it back down.
+  const closeTracker = useMemo(() => createLedgerWindowCloseTracker(), []);
+
   /** We have to open new browser window to handle device permission */
   useEffect(() => {
     (async () => {
@@ -180,20 +212,75 @@ export const useLedger = ({
       ) {
         const w = await openNewSeparateWindow({ url });
 
-        if (w.id) {
-          dispatchToMainStore(ledgerNewWindowIdChanged(w.id));
-          triggeredRef.current = true;
-
-          const handleCloseWindow = () => {
-            dispatchToMainStore(ledgerStateCleared());
-            windows.onRemoved.removeListener(handleCloseWindow);
-          };
-
-          windows.onRemoved.addListener(handleCloseWindow);
+        if (w.id == null) {
+          // Nothing below can run, and no `windows.onRemoved` will ever fire
+          // for a window without an id — so the request keeps claiming a
+          // display it does not have.
+          console.error(
+            'useLedger: the permission window resolved without an id'
+          );
+          setLedgerEventStatusToRender({
+            status: LedgerEventStatus.PermissionWindowFailed
+          });
+          return;
         }
+
+        dispatchToMainStore(ledgerNewWindowIdChanged(w.id));
+
+        registerLedgerPermissionWindow({
+          domain: askPermissionUrlData.domain,
+          requestId: askPermissionUrlData.params?.requestId,
+          windowId: w.id
+        });
+
+        triggeredRef.current = true;
+
+        closeTracker.arm(w.id);
       }
-    })();
-  }, [ledgerEventStatusToRender.status, url, windowId]);
+    })().catch(error => {
+      // `openNewSeparateWindow` is an awaited call that can reject, and without
+      // this the whole body — including the attach that keeps the request alive
+      // — is skipped with nothing anywhere. Log the error's NAME only: `url`
+      // embeds the plaintext `signMessage` message as a query param, and a
+      // rejection's text can echo the URL it failed on.
+      console.error('useLedger: opening the permission window failed', {
+        errorName: (error as Error)?.name
+      });
+      // Without this the screen keeps rendering LedgerPermissionRequired: it
+      // tells the user to grant permission in a window that was never opened
+      // and never will be, with no retry path — nothing in this effect's
+      // dependency array has changed, so it will not run again. The only exit
+      // was the CTA that abandons the approval.
+      setLedgerEventStatusToRender({
+        status: LedgerEventStatus.PermissionWindowFailed
+      });
+    });
+  }, [
+    askPermissionUrlData.domain,
+    askPermissionUrlData.params?.requestId,
+    closeTracker,
+    ledgerEventStatusToRender.status,
+    url,
+    windowId
+  ]);
+
+  // Unmount only — deliberately NOT the cleanup of the effect above. `windowId`
+  // is one of that effect's dependencies and the arm path dispatches
+  // ledgerNewWindowIdChanged, so its cleanup would run a broadcast round-trip
+  // after arming and remove the listener that was just registered.
+  useEffect(() => () => closeTracker.detach(), [closeTracker]);
+
+  // The slice can be cleared without this window ever closing —
+  // LedgerDisconnectedFooter's Connect CTA does it, and renderLedgerFooter
+  // shows that footer for LedgerAskPermission as well as Disconnected. Once
+  // that happens another useLedger instance can open its own permission window
+  // and take over the slice; a listener still watching ours would wipe that
+  // flow's deploy/transaction the moment our stale window is closed.
+  useEffect(() => {
+    if (windowId != null) return;
+
+    closeTracker.detach();
+  }, [closeTracker, windowId]);
 
   const closeNewLedgerWindowsAndClearState = useCallback(async () => {
     if (windowId) {

@@ -1,11 +1,13 @@
 import { put, takeLatest } from 'redux-saga/effects';
-import { getType } from 'typesafe-actions';
 import { storage } from 'webextension-polyfill';
 
 import { ErrorMessages } from '@src/constants';
 
 import { disableOnboardingFlow } from '@background/open-onboarding-flow';
-import { resetAppEventsDismission } from '@background/redux/app-events/actions';
+import {
+  resetAppEventsDismission,
+  sagaError
+} from '@background/redux/app-events/actions';
 import { contactsReseted } from '@background/redux/contacts/actions';
 import { resetRateApp } from '@background/redux/rate-app/actions';
 import { recipientPublicKeyReseted } from '@background/redux/recent-recipient-public-keys/actions';
@@ -37,12 +39,13 @@ import {
   vaultReseted
 } from '../vault/actions';
 import { initKeys, initVault, recoverVault, resetVault } from './actions';
+import { errorToMessage } from './utils';
 
 export function* onboardingSagas() {
-  yield takeLatest(getType(resetVault), resetVaultSaga);
-  yield takeLatest(getType(initKeys), initKeysSage);
-  yield takeLatest(getType(initVault), initVaultSaga);
-  yield takeLatest(getType(recoverVault), recoverVaultSaga);
+  yield takeLatest(resetVault.type, resetVaultSaga);
+  yield takeLatest(initKeys.type, initKeysSage);
+  yield takeLatest(initVault.type, initVaultSaga);
+  yield takeLatest(recoverVault.type, recoverVaultSaga);
 }
 
 /**
@@ -66,6 +69,9 @@ function* resetVaultSaga() {
     storage.local.clear();
   } catch (err) {
     console.error(err);
+    yield put(
+      sagaError({ source: 'resetVaultSaga', message: errorToMessage(err) })
+    );
   }
 }
 
@@ -98,6 +104,9 @@ function* initKeysSage(action: ReturnType<typeof initKeys>) {
     );
   } catch (err) {
     console.error(err);
+    yield put(
+      sagaError({ source: 'initKeysSage', message: errorToMessage(err) })
+    );
   }
 }
 
@@ -125,6 +134,9 @@ function* initVaultSaga(action: ReturnType<typeof initVault>) {
     disableOnboardingFlow();
   } catch (err) {
     console.error(err);
+    yield put(
+      sagaError({ source: 'initVaultSaga', message: errorToMessage(err) })
+    );
   }
 }
 
@@ -142,5 +154,8 @@ function* recoverVaultSaga(action: ReturnType<typeof recoverVault>) {
     disableOnboardingFlow();
   } catch (err) {
     console.error(err);
+    yield put(
+      sagaError({ source: 'recoverVaultSaga', message: errorToMessage(err) })
+    );
   }
 }

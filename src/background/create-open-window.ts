@@ -44,10 +44,17 @@ function getUrlByWindowApp(
   }
 }
 
+// Approval-window tracking, and therefore all three of these, is background-only.
+// The UI's only consumers (`useWindowManager` → account-list, navigation-menu)
+// both pass `isNewWindow: true`, which forces `id = null` below — so the reuse
+// branch and `clearWindowId` are unreachable from the UI, and the `!isNewWindow`
+// guard makes `setWindowId` unreachable too. Optional here rather than
+// no-op'd at the call site, so a UI caller cannot accidentally retarget the
+// shared approval slot.
 interface CreateOpenWindowProps {
-  windowId: number | null;
-  clearWindowId: () => void;
-  setWindowId: (id: number) => void;
+  windowId?: number | null;
+  clearWindowId?: () => void;
+  setWindowId?: (id: number) => void;
 }
 
 export interface OpenWindowProps {
@@ -58,25 +65,25 @@ export interface OpenWindowProps {
 
 // This function returns a window instance that was created or reused
 export function createOpenWindow({
-  windowId,
+  windowId = null,
   setWindowId,
   clearWindowId
-}: CreateOpenWindowProps) {
+}: CreateOpenWindowProps = {}) {
   return async function openWindow({
     windowApp,
     isNewWindow,
     searchParams
-  }: OpenWindowProps): Promise<Windows.Window> {
+  }: OpenWindowProps): Promise<{ window: Windows.Window; reused: boolean }> {
     const id = isNewWindow ? null : windowId;
 
     if (id != null) {
       const window = await reuseExistingWindow(id);
       if (window != null) {
-        return window;
+        return { window, reused: true };
       }
     }
 
-    return openNewWindow();
+    return { window: await openNewWindow(), reused: false };
 
     // helpers
 
@@ -97,14 +104,14 @@ export function createOpenWindow({
           // update tab url
           const tab = window.tabs?.[0];
           if (tab?.id != null) {
-            await tabs.update({
+            await tabs.update(tab.id, {
               url: getUrlByWindowApp(windowApp, searchParams)
             });
           }
           return window;
         }
       } else {
-        clearWindowId();
+        clearWindowId?.();
       }
     }
 
@@ -140,14 +147,12 @@ export function createOpenWindow({
               });
 
         return newWindow.then(newWindow => {
-          if (newWindow.id) {
-            setWindowId(newWindow.id);
-
-            const handleCloseWindow = () => {
-              windows.onRemoved.removeListener(handleCloseWindow);
-              clearWindowId();
-            };
-            windows.onRemoved.addListener(handleCloseWindow);
+          // `isNewWindow` opens a deliberately SEPARATE window (import-account
+          // flows). Tracking it would retarget the shared approval slot: a
+          // later close of that separate window would clear the tracked id
+          // and a dapp approval could be cancelled by the wrong event.
+          if (newWindow.id && !isNewWindow) {
+            setWindowId?.(newWindow.id);
           }
           return newWindow;
         });

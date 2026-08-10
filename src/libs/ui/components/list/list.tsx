@@ -1,10 +1,6 @@
 import { MacScrollbar } from 'mac-scrollbar';
-import React from 'react';
-import styled, {
-  DefaultTheme,
-  FlattenInterpolation,
-  ThemeProps
-} from 'styled-components';
+import React, { type JSX } from 'react';
+import styled, { Interpolation } from 'styled-components';
 
 import {
   BorderBottomPseudoElementProps,
@@ -14,9 +10,8 @@ import {
 } from '@libs/layout';
 import { Tile, Typography } from '@libs/ui/components';
 
-type BorderBottomPseudoElementRulesType = FlattenInterpolation<
-  ThemeProps<DefaultTheme> & BorderBottomPseudoElementProps
->;
+type BorderBottomPseudoElementRulesType =
+  Interpolation<BorderBottomPseudoElementProps>;
 
 interface ListHeaderContainerProps extends BorderBottomPseudoElementProps {
   borderBottomPseudoElementRules: BorderBottomPseudoElementRulesType;

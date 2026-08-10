@@ -1,18 +1,10 @@
-import { createReducer } from 'typesafe-actions';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 import { NetworkSetting } from '@src/constants';
 import { isSafariBuild } from '@src/utils';
 
 import { TimeoutDurationSetting } from '@popup/constants';
 
-import {
-  activeNetworkSettingChanged,
-  activeTimeoutDurationSettingChanged,
-  casperNetworkApiVersionChanged,
-  systemColorSchemeChanged,
-  themeModeSettingChanged,
-  vaultSettingsReseted
-} from './actions';
 import { SettingsState, ThemeMode } from './types';
 
 const initialState: SettingsState = {
@@ -24,40 +16,40 @@ const initialState: SettingsState = {
   systemColorScheme: null
 };
 
-export const reducer = createReducer(initialState)
-  .handleAction(vaultSettingsReseted, (): SettingsState => initialState)
-  .handleAction(
-    activeTimeoutDurationSettingChanged,
-    (state, { payload }): SettingsState => ({
-      ...state,
-      activeTimeoutDuration: payload
-    })
-  )
-  .handleAction(
-    activeNetworkSettingChanged,
-    (state, { payload }): SettingsState => ({
-      ...state,
-      activeNetwork: payload
-    })
-  )
-  .handleAction(
-    themeModeSettingChanged,
-    (state, { payload }): SettingsState => ({
-      ...state,
-      themeMode: payload
-    })
-  )
-  .handleAction(
-    casperNetworkApiVersionChanged,
-    (state, action): SettingsState => ({
-      ...state,
-      casperNetworkApiVersion: action.payload
-    })
-  )
-  .handleAction(
-    systemColorSchemeChanged,
-    (state, { payload }): SettingsState => ({
-      ...state,
-      systemColorScheme: payload
-    })
-  );
+const slice = createSlice({
+  name: 'settings',
+  initialState,
+  reducers: {
+    vaultSettingsReseted: () => initialState,
+    activeTimeoutDurationSettingChanged: (
+      state,
+      { payload }: PayloadAction<TimeoutDurationSetting>
+    ) => ({ ...state, activeTimeoutDuration: payload }),
+    activeNetworkSettingChanged: (
+      state,
+      { payload }: PayloadAction<NetworkSetting>
+    ) => ({ ...state, activeNetwork: payload }),
+    themeModeSettingChanged: (
+      state,
+      { payload }: PayloadAction<ThemeMode>
+    ) => ({ ...state, themeMode: payload }),
+    casperNetworkApiVersionChanged: (
+      state,
+      { payload }: PayloadAction<string>
+    ) => ({ ...state, casperNetworkApiVersion: payload }),
+    systemColorSchemeChanged: (
+      state,
+      { payload }: PayloadAction<'dark' | 'light'>
+    ) => ({ ...state, systemColorScheme: payload })
+  }
+});
+
+export const {
+  activeNetworkSettingChanged,
+  activeTimeoutDurationSettingChanged,
+  casperNetworkApiVersionChanged,
+  systemColorSchemeChanged,
+  themeModeSettingChanged,
+  vaultSettingsReseted
+} = slice.actions;
+export const reducer = slice.reducer;

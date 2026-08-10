@@ -1,25 +1,21 @@
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { isKeysEqual } from 'casper-wallet-core';
-import { createReducer } from 'typesafe-actions';
 
-import {
-  addWasmToTrusted,
-  removeAllWasmFromTrustedOrigin,
-  removeWasmFromTrusted,
-  resetTrustedWasmState
-} from './actions';
 import { TrustedWasmState } from './types';
 
-type State = TrustedWasmState;
-
-const initialState: State = {
+const initialState: TrustedWasmState = {
   hashesByOriginDict: {}
 };
 
-export const reducer = createReducer(initialState)
-  .handleAction(resetTrustedWasmState, () => initialState)
-  .handleAction(
-    addWasmToTrusted,
-    (state, action: ReturnType<typeof addWasmToTrusted>): State => {
+const slice = createSlice({
+  name: 'trustedWasm',
+  initialState,
+  reducers: {
+    resetTrustedWasmState: () => initialState,
+    addWasmToTrusted: (
+      state,
+      action: PayloadAction<{ origin: string; wasmHash: string }>
+    ) => {
       const { wasmHash, origin } = action.payload;
       const currentTrustedWasm =
         state.hashesByOriginDict ?? initialState.hashesByOriginDict;
@@ -29,20 +25,20 @@ export const reducer = createReducer(initialState)
         hashesByOriginDict: {
           ...currentTrustedWasm,
           [origin]: [
-            ...new Set([...(currentTrustedWasm?.[origin] ?? []), wasmHash])
+            ...new Set([...(currentTrustedWasm[origin] ?? []), wasmHash])
           ]
         }
       };
-    }
-  )
-  .handleAction(
-    removeWasmFromTrusted,
-    (state, action: ReturnType<typeof removeWasmFromTrusted>): State => {
+    },
+    removeWasmFromTrusted: (
+      state,
+      action: PayloadAction<{ origin: string; wasmHash: string }>
+    ) => {
       const { wasmHash, origin } = action.payload;
       const currentTrustedWasm =
         state.hashesByOriginDict ?? initialState.hashesByOriginDict;
 
-      if (currentTrustedWasm?.[origin]) {
+      if (currentTrustedWasm[origin]) {
         return {
           ...state,
           hashesByOriginDict: {
@@ -55,22 +51,31 @@ export const reducer = createReducer(initialState)
       } else {
         return { ...state };
       }
-    }
-  )
-  .handleAction(
-    removeAllWasmFromTrustedOrigin,
-    (
+    },
+    removeAllWasmFromTrustedOrigin: (
       state,
-      action: ReturnType<typeof removeAllWasmFromTrustedOrigin>
-    ): State => {
+      action: PayloadAction<{ origin: string }>
+    ) => {
       const { origin } = action.payload;
-      const currentTrustedWasm =
-        state.hashesByOriginDict ?? initialState.hashesByOriginDict;
+      // Copy-then-delete instead of computed-key rest destructuring: the latter
+      // compiles to TS's `__rest` helper, which contains a `typeof key ===
+      // 'symbol'` branch that is unreachable for a string origin (dead branch,
+      // and ts-jest strips inline istanbul-ignore comments). Behaviour is
+      // identical: drop `origin`'s key while keeping the rest.
+      const rest = {
+        ...(state.hashesByOriginDict ?? initialState.hashesByOriginDict)
+      };
+      delete rest[origin];
 
-      if (currentTrustedWasm?.[origin]) {
-        delete currentTrustedWasm[origin];
-      }
-
-      return { ...state, hashesByOriginDict: { ...currentTrustedWasm } };
+      return { ...state, hashesByOriginDict: rest };
     }
-  );
+  }
+});
+
+export const {
+  addWasmToTrusted,
+  removeAllWasmFromTrustedOrigin,
+  removeWasmFromTrusted,
+  resetTrustedWasmState
+} = slice.actions;
+export const reducer = slice.reducer;

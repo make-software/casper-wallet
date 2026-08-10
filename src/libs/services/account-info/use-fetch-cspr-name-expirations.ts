@@ -10,7 +10,6 @@ import { dispatchToMainStore } from '@background/redux/utils';
 import { selectVaultAccountsPublicKeys } from '@background/redux/vault/selectors';
 import { accountInfoRepository } from '@background/wallet-repositories';
 
-import { handleError } from '../utils';
 import { getAccountsInfoQueryOptions } from './accounts-info-query';
 import { getCsprNameExpirations } from './get-cspr-name-expirations';
 
@@ -57,7 +56,7 @@ export const useFetchCsprNameExpirations = (): void => {
         // The query error is consumed nowhere (no retry, no polling), so log
         // it here — otherwise a failed fetch leaves the banner silently
         // hidden for the whole popup session with nothing to debug from.
-        handleError(error as Error);
+        console.error(error);
 
         throw error;
       }
