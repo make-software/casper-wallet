@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { windows } from 'webextension-polyfill';
 
 import { RouterPath } from '@popup/router';
 
 import { openNewSeparateWindow } from '@background/create-open-window';
 import {
-  ledgerNewWindowIdChanged,
-  ledgerStateCleared
+  closeLedgerFlowWindows,
+  ledgerNewWindowIdChanged
 } from '@background/redux/ledger/actions';
 import { selectLedgerNewWindowId } from '@background/redux/ledger/selectors';
 import { dispatchToMainStore } from '@background/redux/utils';
@@ -282,14 +281,31 @@ export const useLedger = ({
     closeTracker.detach();
   }, [closeTracker, windowId]);
 
-  const closeNewLedgerWindowsAndClearState = useCallback(async () => {
-    if (windowId) {
-      const all = await windows.getAll({ windowTypes: ['popup'] });
-      all.forEach(w => w.id && windows.remove(w.id));
-      dispatchToMainStore(ledgerStateCleared());
-      await windows.remove(windowId);
-    }
-  }, [windowId]);
+  // Asks the background to close the windows THIS flow owns — the tracked
+  // permission window plus every window still displaying this flow's request —
+  // and to clear the ledger slice.
+  //
+  // The decision cannot be made here. The owning window ids live in
+  // `windowManagement.requests`, which `selectPopupState` strips from every
+  // replica on purpose (it maps requestIds to dapp origins and tab ids). What
+  // this replaced asked `windows.getAll({ windowTypes: ['popup'] })` instead
+  // and removed every popup window in the profile: other dapps' approval
+  // windows, the secret-key export window, and popup windows belonging to
+  // ordinary web pages. It never closed its own permission window either —
+  // `openNewSeparateWindow` creates that one `type: 'normal'`. WALLET-1416.
+  //
+  // Synchronous by design: `dispatchToMainStore` is fire-and-forget, and every
+  // call site is unawaited — the previous `async` body handed each of them a
+  // promise that rejected on a stale windowId with nothing to catch it.
+  const closeNewLedgerWindowsAndClearState = useCallback(() => {
+    if (!windowId) return;
+
+    dispatchToMainStore(
+      closeLedgerFlowWindows({
+        requestId: askPermissionUrlData.params?.requestId
+      })
+    );
+  }, [askPermissionUrlData.params?.requestId, windowId]);
 
   useEffect(() => {
     if (windowId && askPermissionUrlData?.domain !== 'popup.html') {
