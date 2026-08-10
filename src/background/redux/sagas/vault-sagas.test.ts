@@ -1,4 +1,5 @@
 import * as matchers from 'redux-saga-test-plan/matchers';
+import { combineReducers } from '@reduxjs/toolkit';
 import { expectSaga } from 'redux-saga-test-plan';
 import { storage, tabs } from 'webextension-polyfill';
 
@@ -37,12 +38,14 @@ import { selectTimeoutDurationSetting } from '../settings/selectors';
 import { vaultCipherCreated } from '../vault-cipher/actions';
 import { selectVaultCipherDoesExist } from '../vault-cipher/selectors';
 import { accountRenamed, vaultLoaded } from '../vault/actions';
+import { reducer as vaultReducer } from '../vault/reducer';
 import {
   selectAccountNamesByOriginDict,
   selectVault,
   selectVaultActiveAccount
 } from '../vault/selectors';
 import { VaultState } from '../vault/types';
+import { windowRequestResponded } from '../windowManagement/actions';
 import { lockVault, startBackground, unlockVault } from './actions';
 import {
   VAULT_REENCRYPT_DEBOUNCE_MS,
@@ -439,6 +442,49 @@ describe('updateVaultCipher debounce', () => {
       .silentRun(VAULT_REENCRYPT_DEBOUNCE_MS + 200);
 
     expect(encryptSpy).toHaveBeenCalledTimes(1);
+  });
+
+  // WALLET-1384: the vault reducer deletes an answered request's signing
+  // payload, and that deletion must reach the cipher. Otherwise an MV3
+  // service-worker restart re-loads the entry from a stale blob through
+  // `vaultLoaded`, for a requestId whose `windowRequestResponded` has already
+  // fired — so nothing would ever remove it.
+  //
+  // Driven through the REAL vault reducer (`withReducer`) and asserted on the
+  // value handed to `encryptVault`, not on a call count. Providing `selectVault`
+  // instead would pin only that `windowRequestResponded.type` sits in the
+  // debounce array — the reducer half of the contract would go unobserved, and
+  // deleting the whole `extraReducers` block would leave the test green.
+  it('re-encrypts the vault WITHOUT the answered payload', async () => {
+    const encryptSpy = jest
+      .spyOn(vaultCryptoModule, 'encryptVault')
+      .mockResolvedValue('cipher-blob');
+
+    const seeded: VaultState = {
+      ...EMPTY_VAULT,
+      jsonById: { answered: 'gone', other: 'kept' },
+      eip712ById: { answered: 'gone' }
+    };
+
+    await expectSaga(vaultSagas)
+      .withReducer(
+        combineReducers({ vault: vaultReducer }) as never,
+        {
+          vault: seeded
+        } as never
+      )
+      .provide([
+        [matchers.select.selector(selectEncryptionKeyHash), 'key-hash']
+      ])
+      .dispatch(windowRequestResponded({ requestId: 'answered' }))
+      .silentRun(VAULT_REENCRYPT_DEBOUNCE_MS + 200);
+
+    expect(encryptSpy).toHaveBeenCalledTimes(1);
+    // `toEqual` on each map, not `toMatchObject` on the vault: a recursive
+    // subset match tolerates the very key this test exists to prove is gone.
+    const encrypted = encryptSpy.mock.calls[0][1];
+    expect(encrypted.jsonById).toEqual({ other: 'kept' });
+    expect(encrypted.eip712ById).toEqual({});
   });
 
   it('re-encrypts once per edit when edits are spaced beyond the debounce window', async () => {

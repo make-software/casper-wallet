@@ -17,6 +17,7 @@ import { SignatureRequestLoading } from '@signature-request/pages/sign-transacti
 import { SignatureRequestRawJson } from '@signature-request/pages/sign-transaction/signature-request-raw-json';
 
 import { closeCurrentWindow } from '@background/close-current-window';
+import { getPayload } from '@background/redux/vault/payload-map';
 import {
   selectConnectedAccountNamesByOrigin,
   selectEip712JsonById,
@@ -81,7 +82,9 @@ export function SignEip712Page() {
     options?: IEIP712SignTypedDataOptions;
     isInvalidPayload?: boolean;
   }>(() => {
-    const raw = eip712JsonById[requestId];
+    // `getPayload`, never a bare index — `requestId` is dapp-controlled and an
+    // inherited Object.prototype member would parse as anything but typed data.
+    const raw = getPayload(eip712JsonById, requestId);
 
     if (!raw) {
       return {};

@@ -1,3 +1,5 @@
+import { windowRequestResponded } from '@background/redux/windowManagement/actions';
+
 import {
   accountAdded,
   accountDisconnected,
@@ -20,7 +22,8 @@ import {
   vaultLoaded,
   vaultReseted
 } from './actions';
-import { reducer } from './reducer';
+import { getPayload } from './payload-map';
+import { MAX_STORED_PAYLOADS, reducer } from './reducer';
 import { VaultState } from './types';
 
 // Compact fixture — never real key material.
@@ -400,22 +403,209 @@ describe('vault reducer', () => {
 
   // 16
   describe('deployPayloadReceived / eip712PayloadReceived', () => {
-    it('replaces the whole jsonById dict with a single-entry dict', () => {
+    // The regression WALLET-1384 is about: these used to build a NEW
+    // single-entry dict, so a second request erased the first one's payload.
+    // `cancelRequestsDisplacedBy` spares a request another window still shows
+    // (the Ledger permission window), so that survivor stayed 'open' on screen
+    // with no transaction to sign.
+    it('keeps an earlier deploy payload when a second request arrives', () => {
       const state: VaultState = {
         ...initialState,
-        jsonById: { old: 'x' }
+        jsonById: { first: 'json-first' }
       };
-      const s = reducer(state, deployPayloadReceived({ id: 'new', json: 'j' }));
-      expect(s.jsonById).toEqual({ new: 'j' });
+      const s = reducer(
+        state,
+        deployPayloadReceived({ id: 'second', json: 'json-second' })
+      );
+      expect(s.jsonById).toEqual({
+        first: 'json-first',
+        second: 'json-second'
+      });
     });
 
-    it('replaces the whole eip712ById dict with a single-entry dict', () => {
+    it('keeps an earlier eip712 payload when a second request arrives', () => {
       const state: VaultState = {
         ...initialState,
-        eip712ById: { old: 'x' }
+        eip712ById: { first: 'eip-first' }
       };
-      const s = reducer(state, eip712PayloadReceived({ id: 'new', json: 'j' }));
-      expect(s.eip712ById).toEqual({ new: 'j' });
+      const s = reducer(
+        state,
+        eip712PayloadReceived({ id: 'second', json: 'eip-second' })
+      );
+      expect(s.eip712ById).toEqual({
+        first: 'eip-first',
+        second: 'eip-second'
+      });
+    });
+
+    it('overwrites only its own entry when the same id is sent twice', () => {
+      const state: VaultState = {
+        ...initialState,
+        jsonById: { other: 'keep', same: 'stale' },
+        eip712ById: { other: 'keep', same: 'stale' }
+      };
+      const s = reducer(
+        reducer(state, deployPayloadReceived({ id: 'same', json: 'fresh' })),
+        eip712PayloadReceived({ id: 'same', json: 'fresh' })
+      );
+      expect(s.jsonById).toEqual({ other: 'keep', same: 'fresh' });
+      expect(s.eip712ById).toEqual({ other: 'keep', same: 'fresh' });
+    });
+
+    // Asserted on what the reducer owns, so a `target` bump cannot move it.
+    // `tsconfig.json` is es2017 today, which emits the spread as `Object.assign`
+    // and makes `__proto__` run the setter rather than add an entry; at es2018
+    // the native spread would store it as an own property instead. Either way
+    // `storePayload` refuses the id, so the map stays empty and keeps its
+    // prototype — and `getPayload` agrees with the map about both.
+    //
+    // The object case is not a variation for its own sake: the deploy path
+    // dispatches `JSON.parse(...)`, i.e. an object, into a map declared
+    // `Record<string, string>` (sdk-methods.ts), and an object value is what
+    // makes the setter actually replace this map's prototype.
+    it.each([
+      ['a string', 'poison'],
+      ['an object, as the deploy path dispatches', { poisoned: true }]
+    ])('refuses a __proto__ payload carrying %s', (_label, json) => {
+      const s = reducer(
+        initialState,
+        deployPayloadReceived({ id: '__proto__', json: json as string })
+      );
+
+      expect(Object.keys(s.jsonById)).toEqual([]);
+      expect(Object.getPrototypeOf(s.jsonById)).toBe(Object.prototype);
+      expect(getPayload(s.jsonById, '__proto__')).toBeUndefined();
+    });
+
+    // The ceiling must never cost an ALREADY STORED request its payload: the
+    // oldest entry is the long-lived one — a request being confirmed on a
+    // Ledger while a page pushes a burst of its own — and dropping it would
+    // reproduce, behind a threshold, exactly the failure this reducer fixes.
+    describe('at MAX_STORED_PAYLOADS', () => {
+      const atCapacity = (map: 'jsonById' | 'eip712ById'): VaultState => ({
+        ...initialState,
+        [map]: Object.fromEntries(
+          Array.from({ length: MAX_STORED_PAYLOADS }, (_, i) => [
+            `id-${i}`,
+            `json-${i}`
+          ])
+        )
+      });
+
+      it.each([
+        ['jsonById', deployPayloadReceived] as const,
+        ['eip712ById', eip712PayloadReceived] as const
+      ])('refuses an incoming %s write instead of evicting', (map, action) => {
+        const full = atCapacity(map);
+
+        const s = reducer(full, action({ id: 'incoming', json: 'refused' }));
+
+        expect(s[map]).toEqual(full[map]);
+        expect(Object.keys(s[map])).toHaveLength(MAX_STORED_PAYLOADS);
+        expect(s[map]['id-0']).toBe('json-0');
+        expect(s[map].incoming).toBeUndefined();
+      });
+
+      it.each([
+        ['jsonById', deployPayloadReceived] as const,
+        ['eip712ById', eip712PayloadReceived] as const
+      ])('still applies a rewrite of an id already in %s', (map, action) => {
+        const full = atCapacity(map);
+
+        const s = reducer(full, action({ id: 'id-0', json: 'refreshed' }));
+
+        expect(s[map]['id-0']).toBe('refreshed');
+        expect(Object.keys(s[map])).toHaveLength(MAX_STORED_PAYLOADS);
+      });
+
+      // A burst answering one request must hand the freed slot to the next
+      // write, or the refusal above would be permanent rather than a ceiling.
+      it('accepts a new payload once an answered request frees a slot', () => {
+        const full = atCapacity('jsonById');
+
+        const s = reducer(
+          reducer(full, windowRequestResponded({ requestId: 'id-3' })),
+          deployPayloadReceived({ id: 'incoming', json: 'accepted' })
+        );
+
+        expect(s.jsonById.incoming).toBe('accepted');
+        expect(s.jsonById['id-3']).toBeUndefined();
+      });
+    });
+  });
+
+  // 16b — the per-request cleanup. Without it the maps only ever shrink on
+  // `deploysReseted`, and `lockVaultSaga` flushes the cipher BEFORE that reset,
+  // so `vaultLoaded` restores every stale payload on the next unlock.
+  describe('windowRequestResponded', () => {
+    it('drops the answered request from jsonById and leaves the rest', () => {
+      const state: VaultState = {
+        ...initialState,
+        jsonById: { answered: 'gone', other: 'kept' }
+      };
+      const s = reducer(
+        state,
+        windowRequestResponded({ requestId: 'answered' })
+      );
+      expect(s.jsonById).toEqual({ other: 'kept' });
+    });
+
+    it('drops the answered request from eip712ById and leaves the rest', () => {
+      const state: VaultState = {
+        ...initialState,
+        eip712ById: { answered: 'gone', other: 'kept' }
+      };
+      const s = reducer(
+        state,
+        windowRequestResponded({ requestId: 'answered' })
+      );
+      expect(s.eip712ById).toEqual({ other: 'kept' });
+    });
+
+    // `requestId` is dapp-controlled, so an id naming an inherited
+    // Object.prototype member must be answered from OWN properties only — the
+    // same reason windowManagement/request-map.ts exists, on the same key space.
+    it.each(['toString', 'constructor', 'valueOf', 'hasOwnProperty'])(
+      'drops a stored payload under the inherited name %s',
+      key => {
+        const seeded = reducer(
+          initialState,
+          deployPayloadReceived({ id: key, json: 'stored' })
+        );
+        expect(getPayload(seeded.jsonById, key)).toBe('stored');
+
+        const s = reducer(seeded, windowRequestResponded({ requestId: key }));
+
+        expect(getPayload(s.jsonById, key)).toBeUndefined();
+      }
+    );
+
+    it.each(['toString', 'constructor', 'valueOf', 'hasOwnProperty'])(
+      'leaves the map alone for an unstored inherited name %s',
+      key => {
+        const state: VaultState = {
+          ...initialState,
+          jsonById: { other: 'kept' }
+        };
+
+        expect(reducer(state, windowRequestResponded({ requestId: key }))).toBe(
+          state
+        );
+      }
+    );
+
+    // Every `windows.onRemoved` in the browser can reach this reducer, and the
+    // store subscriber does no state-change comparison: a fresh object means a
+    // popupState broadcast to every replica plus a full storage.local rewrite.
+    it('returns the same state object when the id is in neither map', () => {
+      const state: VaultState = {
+        ...initialState,
+        jsonById: { other: 'kept' },
+        eip712ById: { other: 'kept' }
+      };
+      expect(
+        reducer(state, windowRequestResponded({ requestId: 'unknown' }))
+      ).toBe(state);
     });
   });
 
