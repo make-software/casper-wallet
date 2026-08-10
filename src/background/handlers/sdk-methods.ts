@@ -20,8 +20,11 @@ import {
   eip712PayloadReceived,
   siteDisconnected
 } from '@background/redux/vault/actions';
+import { getPayload } from '@background/redux/vault/payload-map';
 import {
   selectAccountNamesByOriginDict,
+  selectDeploysJsonById,
+  selectEip712JsonById,
   selectIsAccountConnected,
   selectVaultActiveAccount
 } from '@background/redux/vault/selectors';
@@ -217,6 +220,27 @@ export async function handleSdkMethod(
       })
     );
 
+    // At capacity `storePayload` refuses the INCOMING write. Answering here is
+    // what makes that residual visible: without it the window opens on a
+    // payload the page can never read.
+    if (
+      getPayload(
+        selectDeploysJsonById(store.getState()),
+        action.meta.requestId
+      ) == null
+    ) {
+      return {
+        handled: true,
+        response: sdkMethod.signResponse(
+          {
+            cancelled: true,
+            message: 'Too many pending signature requests'
+          },
+          { requestId: action.meta.requestId }
+        )
+      };
+    }
+
     store.dispatch(
       windowRequestOpened({
         requestId: action.meta.requestId,
@@ -292,6 +316,28 @@ export async function handleSdkMethod(
         json: JSON.stringify({ typedData, options })
       })
     );
+
+    // Same refusal as the deploy branch above, on the other map.
+    if (
+      getPayload(
+        selectEip712JsonById(store.getState()),
+        action.meta.requestId
+      ) == null
+    ) {
+      return {
+        handled: true,
+        response: sdkMethod.signTypedDataResponse(
+          {
+            cancelled: true,
+            signature: null,
+            digest: null,
+            publicKey: null,
+            error: 'Too many pending signature requests'
+          },
+          { requestId: action.meta.requestId }
+        )
+      };
+    }
 
     store.dispatch(
       windowRequestOpened({
