@@ -18,7 +18,8 @@ import {
 } from '@background/redux/storage-keys';
 
 import * as vaultCryptoModule from '@libs/crypto/vault';
-import { encryptVault } from '@libs/crypto/vault';
+import { FIXED_ENCRYPTION_KEY_HASH } from '@libs/crypto/__fixtures';
+import { decryptVault, encryptVault } from '@libs/crypto/vault';
 
 import { keysUpdated } from '../keys/actions';
 import { lastActivityTimeRefreshed } from '../last-activity-time/actions';
@@ -939,4 +940,112 @@ describe('reconcileStalePayloadsSaga', () => {
     expect(encrypted.jsonById).toEqual({ 'live-1': '{"deploy":1}' });
     expect(encrypted.eip712ById).toEqual({});
   });
+});
+
+// WALLET-1418. `eip712ById` entered `VaultState` after v2.4.2 shipped,
+// `decryptVault` is a bare `JSON.parse` cast and no migration exists, so an old
+// cipher decrypts without the field. A throw in `sanitizePayloadMap` lands in
+// `put(vaultLoaded(vault))`, is swallowed by `unlockVaultSaga`'s own catch, and
+// the vault never unlocks again. Driven through the REAL crypto: a hand-shaped
+// `vaultLoaded` payload cannot show that the round trip produces that shape.
+describe('unlockVaultSaga on a cipher written before a payload map existed', () => {
+  const PAYLOAD_MAPS = ['jsonById', 'eip712ById'] as const;
+
+  const ENTRIES = {
+    jsonById: { 'req-json': '{"deploy":1}' },
+    eip712ById: { 'req-eip': '{"eip712":2}' }
+  };
+
+  const legacyVaultState = (missing: (typeof PAYLOAD_MAPS)[number]) => {
+    const vault: VaultState = {
+      secretPhrase: ['w1', 'w2'],
+      accounts: [
+        {
+          name: 'Account 1',
+          publicKey: '0201aa',
+          secretKey: 'sk-1',
+          hidden: false
+        },
+        {
+          name: 'Account 2',
+          publicKey: '0201bb',
+          secretKey: 'sk-2',
+          hidden: false
+        }
+      ],
+      accountNamesByOriginDict: { 'https://dapp.example': ['Account 1'] },
+      siteNameByOriginDict: { 'https://dapp.example': 'Dapp' },
+      activeAccountName: 'Account 1',
+      jsonById: ENTRIES.jsonById,
+      eip712ById: ENTRIES.eip712ById
+    };
+
+    // The key absent, as `JSON.stringify` produced on a build without it.
+    delete (vault as Partial<VaultState>)[missing];
+
+    return vault;
+  };
+
+  const decryptLegacyCipher = async (
+    missing: (typeof PAYLOAD_MAPS)[number]
+  ) => {
+    const cipher = await encryptVault(
+      FIXED_ENCRYPTION_KEY_HASH,
+      legacyVaultState(missing)
+    );
+
+    return decryptVault(FIXED_ENCRYPTION_KEY_HASH, cipher);
+  };
+
+  it.each(PAYLOAD_MAPS)(
+    'round-trips through the real crypto into an object owning no %s',
+    async missing => {
+      const decrypted = await decryptLegacyCipher(missing);
+
+      expect(Object.prototype.hasOwnProperty.call(decrypted, missing)).toBe(
+        false
+      );
+    }
+  );
+
+  it.each(PAYLOAD_MAPS)(
+    'completes the unlock with %s absent, defaulting it to an empty dict',
+    async missing => {
+      const decrypted = await decryptLegacyCipher(missing);
+      const present = missing === 'jsonById' ? 'eip712ById' : 'jsonById';
+
+      const { storeState, effects } = await expectSaga(
+        unlockVaultSaga,
+        unlockVault({
+          vault: decrypted,
+          newKeyDerivationSaltHash: 'salt-hash',
+          newVaultCipher: 'new-cipher-blob',
+          newEncryptionKeyHash: 'new-key-hash'
+        })
+      )
+        .withReducer(
+          combineReducers({ vault: vaultReducer }) as never,
+          { vault: EMPTY_VAULT } as never
+        )
+        .put(vaultUnlocked())
+        .run();
+
+      const putTypes = (
+        (effects.put ?? []) as Array<{
+          payload: { action: { type: string } };
+        }>
+      ).map(e => e.payload.action.type);
+      expect(putTypes).not.toContain(sagaError.type);
+
+      const vault = (storeState as { vault: VaultState }).vault;
+
+      expect(vault[missing]).toEqual({});
+      expect(vault[present]).toEqual(ENTRIES[present]);
+      expect(vault.accounts.map(account => account.name)).toEqual([
+        'Account 1',
+        'Account 2'
+      ]);
+      expect(vault.activeAccountName).toBe('Account 1');
+    }
+  );
 });
