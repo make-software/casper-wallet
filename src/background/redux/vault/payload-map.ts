@@ -18,14 +18,11 @@ type PayloadMap = VaultState['jsonById'] | VaultState['eip712ById'];
  * Mirrors `getRequest` in windowManagement/request-map.ts, which exists for the
  * same reason on the same key space.
  *
- * Writes need no equivalent guard, for a different reason than the shape of the
- * write suggests. `{ ...map, [id]: json }` does define an own property, but the
- * copy immer makes when it finalizes the returned state ASSIGNS the keys, and
- * assigning a string to `__proto__` is a silent no-op — so a `__proto__`
- * payload is dropped rather than stored, and the map's prototype is untouched
- * either way (pinned in reducer.test.ts). It cannot arise regardless:
- * `handleSdkMethod` rejects that id at the message boundary for every approval
- * type, before anything is dispatched.
+ * The write side is guarded separately and deliberately, in `storePayload`:
+ * `__proto__` is refused there rather than left to the shape of the write. What
+ * the source looks like does not decide it — `tsconfig.json` targets es2017, so
+ * the spread is emitted as `Object.assign`, and assignment runs the `__proto__`
+ * setter instead of adding an entry. See the rationale on `storePayload`.
  */
 export function getPayload(
   payloads: PayloadMap,

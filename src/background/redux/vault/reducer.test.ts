@@ -452,21 +452,29 @@ describe('vault reducer', () => {
       expect(s.eip712ById).toEqual({ other: 'keep', same: 'fresh' });
     });
 
-    // Measured, not assumed. `__proto__` never reaches here in production —
-    // `handleSdkMethod` rejects it at the message boundary for every approval
-    // type (sdk-methods.ts, `isStorableRequestId`) — but the reducer must be
-    // safe on its own: immer's copy ASSIGNS the returned object's keys, and
-    // assigning a string to `__proto__` is a silent no-op, so the entry is
-    // dropped rather than stored, and the map's prototype is untouched.
-    it('drops a __proto__ payload without touching the prototype', () => {
+    // Asserted on what the reducer owns, so a `target` bump cannot move it.
+    // `tsconfig.json` is es2017 today, which emits the spread as `Object.assign`
+    // and makes `__proto__` run the setter rather than add an entry; at es2018
+    // the native spread would store it as an own property instead. Either way
+    // `storePayload` refuses the id, so the map stays empty and keeps its
+    // prototype — and `getPayload` agrees with the map about both.
+    //
+    // The object case is not a variation for its own sake: the deploy path
+    // dispatches `JSON.parse(...)`, i.e. an object, into a map declared
+    // `Record<string, string>` (sdk-methods.ts), and an object value is what
+    // makes the setter actually replace this map's prototype.
+    it.each([
+      ['a string', 'poison'],
+      ['an object, as the deploy path dispatches', { poisoned: true }]
+    ])('refuses a __proto__ payload carrying %s', (_label, json) => {
       const s = reducer(
         initialState,
-        deployPayloadReceived({ id: '__proto__', json: 'poison' })
+        deployPayloadReceived({ id: '__proto__', json: json as string })
       );
 
       expect(Object.keys(s.jsonById)).toEqual([]);
       expect(Object.getPrototypeOf(s.jsonById)).toBe(Object.prototype);
-      expect(({} as Record<string, unknown>).poison).toBeUndefined();
+      expect(getPayload(s.jsonById, '__proto__')).toBeUndefined();
     });
 
     // The ceiling must never cost an ALREADY STORED request its payload: the

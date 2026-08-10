@@ -469,12 +469,20 @@ export function SignTransactionPage() {
           );
         }
 
-        // `!signatureRequest` mirrors sign-eip712. `isLoadingSignatureRequest`
-        // is the query's `isFetching`, which is false for a DISABLED query — so
-        // once the answered request's payload is gone every child below is
-        // guarded away and this branch rendered an empty pane. Per-request
-        // deletion makes that routine, not hypothetical.
-        return isLoadingSignatureRequest || !signatureRequest ? (
+        // `isLoadingSignatureRequest` is the query's `isFetching`, which is
+        // false for a DISABLED query — so once the answered request's payload
+        // is gone the two content children below are guarded away and this
+        // branch rendered an empty pane. Per-request deletion makes that
+        // routine, not hypothetical.
+        //
+        // `LedgerEventView` is the exception and is excluded from the added
+        // term: it carries no `signatureRequest`, and it is the only thing the
+        // Ledger permission window — the second window, the one that survives a
+        // supersede — has to show while the device is being read. Replacing it
+        // with a skeleton would blank exactly the screen this fix protects.
+        return isLoadingSignatureRequest ||
+          (!signatureRequest &&
+            signingPageState !== SigningPageState.LedgerConfirmation) ? (
           <SignatureRequestLoading />
         ) : (
           <>

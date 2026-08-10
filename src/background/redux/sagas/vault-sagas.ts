@@ -131,7 +131,8 @@ export function* vaultSagas() {
       // re-encryption the cipher still holds the entry, and an MV3
       // service-worker restart before the next vault write would resurrect it
       // through `vaultLoaded` — for a requestId `windowRequestResponded` has
-      // already fired for, so nothing but the FIFO cap would ever remove it.
+      // already fired for — and nothing removes it: the map has a ceiling, but
+      // the ceiling refuses new writes rather than evicting stored ones.
       // Most responses have no payload entry, so this usually re-encrypts an
       // unchanged vault; at ~2ms behind a 500ms debounce that is cheaper than
       // the alternative of persisting writes but not deletes.

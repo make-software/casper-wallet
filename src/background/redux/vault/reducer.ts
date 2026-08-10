@@ -1,6 +1,7 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 import { windowRequestResponded } from '@background/redux/windowManagement/actions';
+import { isStorableRequestId } from '@background/redux/windowManagement/request-map';
 
 import { CasperWalletSupports } from '@content/sdk-types';
 
@@ -33,6 +34,21 @@ export const MAX_STORED_PAYLOADS = 10;
 
 type PayloadMap = State['jsonById'];
 
+// `__proto__` is refused outright, for the reason `isStorableRequestId` was
+// written: the map is built by assignment, and assigning `__proto__` runs the
+// setter instead of adding an entry. `tsconfig.json` targets es2017, so
+// `{ ...payloads, [requestId]: json }` is EMITTED as nested `Object.assign` —
+// with a string value that setter is a silent no-op, but the deploy path
+// dispatches a parsed OBJECT (see the note on `deployPayloadReceived`), and an
+// object value sets this map's prototype for every later lookup. Relying on the
+// emit would also make the guarantee a `target` setting: at es2018 the spread is
+// native and the computed key becomes an own property instead. The guard states
+// it here so neither the toolchain nor the value type can move it.
+//
+// Not reachable today either — `handleSdkMethod` rejects that id at the message
+// boundary for every approval type — but the two guards answer to different
+// owners, and this map is the one at risk.
+//
 // At capacity the INCOMING write is refused; nothing already stored is evicted.
 //
 // The obvious alternative — make room by dropping the oldest entry — puts the
@@ -46,19 +62,32 @@ type PayloadMap = State['jsonById'];
 //
 // A rewrite of an id already present is always applied — it cannot grow the map.
 //
-// Residual, accepted: entries leak when a request is never answered at all
-// (auto-lock while an approval window is open, then the MV3 worker dies with no
-// `windows.onRemoved` handler alive to cancel it). Leaks survive lock/unlock,
-// because `lockVaultSaga` flushes the cipher before `deploysReseted` and
-// `vaultLoaded` restores from it — so enough of them would fill the map and
-// refuse every later payload. That needs `MAX_STORED_PAYLOADS` such events on
-// one profile; reclaiming those slots means reconciling the map against the
-// windows actually open, which is a separate change.
+// Residual, accepted: a payload leaks whenever its deletion never reaches the
+// cipher. Two routes, not one — the request is never answered at all (auto-lock
+// while an approval window is open, then the MV3 worker dies with no
+// `windows.onRemoved` handler alive to cancel it), or it IS answered and the
+// worker dies inside the 500ms re-encrypt debounce that would have persisted
+// the deletion. Either way the entry outlives lock/unlock, because
+// `lockVaultSaga` flushes the cipher before `deploysReseted` and `vaultLoaded`
+// restores from it, so enough of them fill the map and refuse every later
+// payload.
+//
+// That state has an exit, and it is worth writing down because nothing in the
+// UI points at it: `vaultLoaded` keeps the IN-MEMORY map whenever it is
+// non-empty and discards the cipher's. `signRequest` has no lock gate, so one
+// request arriving while the vault is locked writes the only entry there is —
+// lock, let a dapp send one request, unlock, and the accumulated entries are
+// gone. Reclaiming the slots without that sequence means reconciling the map
+// against the windows actually open, which is a separate change.
 function storePayload(
   payloads: PayloadMap,
   requestId: string,
   json: string
 ): PayloadMap {
+  if (!isStorableRequestId(requestId)) {
+    return payloads;
+  }
+
   if (
     Object.keys(payloads).length >= MAX_STORED_PAYLOADS &&
     getPayload(payloads, requestId) == null
