@@ -1,7 +1,7 @@
 import * as matchers from 'redux-saga-test-plan/matchers';
 import { combineReducers } from '@reduxjs/toolkit';
 import { expectSaga } from 'redux-saga-test-plan';
-import { storage, tabs } from 'webextension-polyfill';
+import { storage, tabs, windows } from 'webextension-polyfill';
 
 import {
   LOCK_VAULT_TIMEOUT,
@@ -37,8 +37,12 @@ import {
 import { selectTimeoutDurationSetting } from '../settings/selectors';
 import { vaultCipherCreated } from '../vault-cipher/actions';
 import { selectVaultCipherDoesExist } from '../vault-cipher/selectors';
-import { accountRenamed, vaultLoaded } from '../vault/actions';
-import { reducer as vaultReducer } from '../vault/reducer';
+import {
+  accountRenamed,
+  deployPayloadReceived,
+  vaultLoaded
+} from '../vault/actions';
+import { MAX_STORED_PAYLOADS, reducer as vaultReducer } from '../vault/reducer';
 import {
   selectAccountNamesByOriginDict,
   selectVault,
@@ -46,11 +50,15 @@ import {
 } from '../vault/selectors';
 import { VaultState } from '../vault/types';
 import { windowRequestResponded } from '../windowManagement/actions';
+import { reducer as windowManagementReducer } from '../windowManagement/reducer';
+import { selectOpenRequests } from '../windowManagement/selectors';
+import { WindowManagementState } from '../windowManagement/types';
 import { lockVault, startBackground, unlockVault } from './actions';
 import {
   VAULT_REENCRYPT_DEBOUNCE_MS,
   delay,
   lockVaultSaga,
+  reconcileStalePayloadsSaga,
   setDelayForLockoutVaultSaga,
   timeoutCounterSaga,
   unlockVaultSaga,
@@ -65,14 +73,19 @@ jest.mock('webextension-polyfill', () => ({
       remove: jest.fn().mockResolvedValue(undefined)
     }
   },
-  runtime: { sendMessage: jest.fn().mockResolvedValue(undefined) },
-  tabs: { query: jest.fn().mockResolvedValue([]), sendMessage: jest.fn() }
+  runtime: {
+    sendMessage: jest.fn().mockResolvedValue(undefined),
+    getURL: jest.fn(() => 'chrome-extension://abcdefghijklmnop/')
+  },
+  tabs: { query: jest.fn().mockResolvedValue([]), sendMessage: jest.fn() },
+  windows: { getAll: jest.fn().mockResolvedValue([]) }
 }));
 
 const mockStorageGet = storage.local.get as jest.Mock;
 const mockStorageSet = storage.local.set as jest.Mock;
 const mockStorageRemove = storage.local.remove as jest.Mock;
 const mockTabsQuery = tabs.query as jest.Mock;
+const mockWindowsGetAll = windows.getAll as jest.Mock;
 
 const NOW = 1_700_000_000_000;
 const FIVE_SECONDS = 5000;
@@ -103,7 +116,9 @@ beforeEach(() => {
   mockStorageSet.mockReset().mockResolvedValue(undefined);
   mockStorageRemove.mockReset().mockResolvedValue(undefined);
   mockTabsQuery.mockClear();
+  mockWindowsGetAll.mockReset().mockResolvedValue([]);
   jest.spyOn(console, 'error').mockImplementation(() => undefined);
+  jest.spyOn(console, 'warn').mockImplementation(() => undefined);
 });
 
 afterEach(() => {
@@ -532,5 +547,396 @@ describe('updateVaultCipher debounce', () => {
     );
     expect(putTypes).not.toContain(vaultCipherCreated.type);
     expect(putTypes).not.toContain(sagaError.type);
+  });
+});
+
+// WALLET-1418. `MAX_STORED_PAYLOADS` refuses the INCOMING write once
+// `jsonById`/`eip712ById` hold ten entries, and nothing evicts a stored one, so
+// ten payloads whose `windowRequestResponded` never arrived — a clean auto-lock
+// with an approval window open is enough, no worker death needed — permanently
+// refuse every later `sign` on the profile. This saga is the deliberate
+// replacement for the accidental exit `vaultLoaded` used to provide.
+describe('reconcileStalePayloadsSaga', () => {
+  const EMPTY_WINDOW_MANAGEMENT: WindowManagementState = {
+    windowId: null,
+    exportKeysWindowId: null,
+    requests: {}
+  };
+
+  // Hash included, as `createOpenWindow` produces it: `searchParams` must find
+  // `requestId` in front of a fragment.
+  const approvalWindowUrl = (requestId: string) =>
+    `chrome-extension://abcdefghijklmnop/signature-request.html` +
+    `?requestId=${requestId}&origin=https%3A%2F%2Fdapp.example&tabId=7` +
+    `#/sign-deploy`;
+
+  const openRequest = {
+    status: 'open',
+    tabId: 7,
+    origin: 'https://dapp.example',
+    method: 'sign',
+    windowIds: [1]
+  } as const;
+
+  const combinedReducer = () =>
+    combineReducers({
+      vault: vaultReducer,
+      windowManagement: windowManagementReducer
+    }) as never;
+
+  const seedState = (
+    vault: Partial<VaultState>,
+    windowManagement: Partial<WindowManagementState> = {}
+  ) =>
+    ({
+      vault: { ...EMPTY_VAULT, ...vault },
+      windowManagement: { ...EMPTY_WINDOW_MANAGEMENT, ...windowManagement }
+    }) as never;
+
+  const vaultOf = (storeState: unknown) =>
+    (storeState as { vault: VaultState }).vault;
+
+  // The window half of the keep-set. `windowManagement.requests` is not
+  // persisted, so after a service-worker restart the descriptor is gone while
+  // the window is still on screen and still signable.
+  it('keeps a payload whose requestId appears in an open window tab URL, with no descriptor in the store', async () => {
+    mockWindowsGetAll.mockResolvedValue([
+      { id: 1, tabs: [{ url: approvalWindowUrl('live-1') }] }
+    ]);
+
+    const { storeState } = await expectSaga(reconcileStalePayloadsSaga)
+      .withReducer(
+        combinedReducer(),
+        seedState({ jsonById: { 'live-1': '{"deploy":1}' } })
+      )
+      .run();
+
+    expect(vaultOf(storeState).jsonById).toEqual({ 'live-1': '{"deploy":1}' });
+  });
+
+  // The other half. On window reuse `tabs.update` resolves when navigation
+  // starts, so a live window can still report the previous request's URL.
+  it('keeps a payload whose requestId is an open request but appears in no window URL', async () => {
+    mockWindowsGetAll.mockResolvedValue([
+      { id: 1, tabs: [{ url: approvalWindowUrl('previous-request') }] }
+    ]);
+
+    const { storeState } = await expectSaga(reconcileStalePayloadsSaga)
+      .withReducer(
+        combinedReducer(),
+        seedState(
+          { jsonById: { navigating: '{"deploy":2}' } },
+          { requests: { navigating: openRequest } }
+        )
+      )
+      .run();
+
+    expect(vaultOf(storeState).jsonById).toEqual({
+      navigating: '{"deploy":2}'
+    });
+  });
+
+  it('purges a payload in neither the window URLs nor the open requests, from BOTH maps', async () => {
+    mockWindowsGetAll.mockResolvedValue([
+      { id: 1, tabs: [{ url: approvalWindowUrl('live-1') }] }
+    ]);
+
+    const { storeState } = await expectSaga(reconcileStalePayloadsSaga)
+      .withReducer(
+        combinedReducer(),
+        seedState({
+          jsonById: { 'live-1': '{"deploy":1}', orphan: '{"deploy":9}' },
+          eip712ById: { orphan: '{"eip712":9}', 'orphan-2': '{"eip712":8}' }
+        })
+      )
+      .run();
+
+    // `toEqual`, never `toMatchObject`: a subset match tolerates the very key
+    // this test proves is gone.
+    expect(vaultOf(storeState).jsonById).toEqual({ 'live-1': '{"deploy":1}' });
+    expect(vaultOf(storeState).eip712ById).toEqual({});
+  });
+
+  // `windowManagement`'s reducer no-ops the transition unless the request is
+  // 'open', so an orphan spends none of the `MAX_RESPONDED_TOMBSTONES` budget,
+  // while the vault reducer keys off the action and still deletes the payload.
+  it('does not leave a responded tombstone behind for a purged orphan', async () => {
+    mockWindowsGetAll.mockResolvedValue([]);
+
+    const { storeState } = await expectSaga(reconcileStalePayloadsSaga)
+      .withReducer(
+        combinedReducer(),
+        seedState({ jsonById: { orphan: '{"deploy":9}' } })
+      )
+      .run();
+
+    expect(vaultOf(storeState).jsonById).toEqual({});
+    expect(
+      (storeState as { windowManagement: WindowManagementState })
+        .windowManagement.requests
+    ).toEqual({});
+  });
+
+  // Fail closed: a rejected enumeration is no evidence, and purging on no
+  // evidence strands a live request.
+  it('purges nothing when windows.getAll rejects', async () => {
+    mockWindowsGetAll.mockRejectedValue(new Error('no windows API'));
+
+    const { storeState, effects } = await expectSaga(reconcileStalePayloadsSaga)
+      .withReducer(
+        combinedReducer(),
+        seedState({
+          jsonById: { orphan: '{"deploy":9}' },
+          eip712ById: { 'orphan-2': '{"eip712":8}' }
+        })
+      )
+      .run();
+
+    expect(vaultOf(storeState).jsonById).toEqual({ orphan: '{"deploy":9}' });
+    expect(vaultOf(storeState).eip712ById).toEqual({
+      'orphan-2': '{"eip712":8}'
+    });
+    expect(effects.put ?? []).toEqual([]);
+  });
+
+  // A window can be enumerated before its first tab has a URL. That is not an
+  // error and may not abort the run.
+  it('does not throw when windows have tabs without a url, and still keeps what selectOpenRequests covers', async () => {
+    mockWindowsGetAll.mockResolvedValue([
+      { id: 1, tabs: [{}] },
+      { id: 2, tabs: [{ url: '' }] },
+      { id: 3 }
+    ]);
+
+    const { storeState } = await expectSaga(reconcileStalePayloadsSaga)
+      .withReducer(
+        combinedReducer(),
+        seedState(
+          { jsonById: { navigating: '{"deploy":2}', orphan: '{"deploy":9}' } },
+          { requests: { navigating: openRequest } }
+        )
+      )
+      .run();
+
+    expect(vaultOf(storeState).jsonById).toEqual({
+      navigating: '{"deploy":2}'
+    });
+  });
+
+  it('skips a tab whose url cannot be parsed without aborting the run', async () => {
+    mockWindowsGetAll.mockResolvedValue([
+      { id: 1, tabs: [{ url: 'not a url' }] },
+      { id: 2, tabs: [{ url: approvalWindowUrl('live-1') }] }
+    ]);
+
+    const { storeState } = await expectSaga(reconcileStalePayloadsSaga)
+      .withReducer(
+        combinedReducer(),
+        seedState({
+          jsonById: { 'live-1': '{"deploy":1}', orphan: '{"deploy":9}' }
+        })
+      )
+      .run();
+
+    expect(vaultOf(storeState).jsonById).toEqual({ 'live-1': '{"deploy":1}' });
+  });
+
+  // The Ledger permission window carries the same requestId as the approval
+  // window that spawned it (`src/hooks/use-ledger.ts`).
+  it('unions requestIds across every window rather than taking the last one seen', async () => {
+    mockWindowsGetAll.mockResolvedValue([
+      { id: 1, tabs: [{ url: approvalWindowUrl('ledger-request') }] },
+      { id: 2, tabs: [{ url: approvalWindowUrl('other-request') }] }
+    ]);
+
+    const { storeState } = await expectSaga(reconcileStalePayloadsSaga)
+      .withReducer(
+        combinedReducer(),
+        seedState({
+          jsonById: {
+            'ledger-request': '{"deploy":1}',
+            'other-request': '{"deploy":2}'
+          }
+        })
+      )
+      .run();
+
+    expect(vaultOf(storeState).jsonById).toEqual({
+      'ledger-request': '{"deploy":1}',
+      'other-request': '{"deploy":2}'
+    });
+  });
+
+  // The param is dapp-chosen: without the origin check an origin that knows the
+  // ids it leaked could keep them alive from its own tab.
+  it('does not let a non-extension tab carrying the same requestId keep a payload alive', async () => {
+    mockWindowsGetAll.mockResolvedValue([
+      { id: 1, tabs: [{ url: 'https://evil.example/?requestId=orphan' }] }
+    ]);
+
+    const { storeState } = await expectSaga(reconcileStalePayloadsSaga)
+      .withReducer(
+        combinedReducer(),
+        seedState({ jsonById: { orphan: '{"deploy":9}' } })
+      )
+      .run();
+
+    expect(vaultOf(storeState).jsonById).toEqual({});
+  });
+
+  // Enumerating anyway would pull every tab URL in the browser into the
+  // extension process for no gain.
+  it('does not enumerate windows at all when both payload maps are empty', async () => {
+    const { effects } = await expectSaga(reconcileStalePayloadsSaga)
+      .withReducer(combinedReducer(), seedState({}))
+      .run();
+
+    expect(mockWindowsGetAll).not.toHaveBeenCalled();
+    expect(effects.put ?? []).toEqual([]);
+  });
+
+  // An escaping throw would abort the whole saga tree. Driven by an enumeration
+  // that resolves with a non-list, the one way past the oracle's own catch.
+  it('contains an unexpected throw, purges nothing, and reports it', async () => {
+    mockWindowsGetAll.mockResolvedValue(undefined);
+
+    const { storeState, effects } = await expectSaga(reconcileStalePayloadsSaga)
+      .withReducer(
+        combinedReducer(),
+        seedState({ jsonById: { orphan: '{"deploy":9}' } })
+      )
+      .put(
+        sagaError({
+          source: 'reconcileStalePayloadsSaga',
+          message: 'Could not reclaim stored signing payloads'
+        })
+      )
+      .run();
+
+    expect(vaultOf(storeState).jsonById).toEqual({ orphan: '{"deploy":9}' });
+    // The matched `.put()` above is removed from `effects.put`, so what is left
+    // must be empty: no `windowRequestResponded` escaped before the throw.
+    expect(effects.put ?? []).toEqual([]);
+  });
+
+  // The ordering guard: hoisting the two `sagaSelect` calls above the `sagaCall`
+  // leaves every other test in this file green. `fresh` arrives during the round
+  // trip, so a keep-set read before it would purge a request the user is about
+  // to sign. The provider — not a `.dispatch()`, which only flushes against a
+  // matching `take` — is what observes WHEN the read happens.
+  it('computes the keep-set AFTER the window round trip, so a request registered during it survives', async () => {
+    let roundTripDone = false;
+
+    mockWindowsGetAll.mockImplementation(
+      () =>
+        new Promise<unknown[]>(resolve =>
+          setTimeout(() => {
+            roundTripDone = true;
+            resolve([]);
+          }, 120)
+        )
+    );
+
+    // No window is ever reported: the descriptor is the only thing that can
+    // save `fresh`.
+    const { storeState } = await expectSaga(vaultSagas)
+      .withReducer(
+        combinedReducer(),
+        // `fresh` arrived while the vault was locked and lives only in memory.
+        seedState({ jsonById: { fresh: '{"deploy":42}' } })
+      )
+      .provide({
+        select({ selector }: { selector: unknown }, next: () => unknown) {
+          if (selector === selectEncryptionKeyHash) {
+            return null;
+          }
+          if (selector === selectOpenRequests) {
+            return roundTripDone
+              ? [
+                  {
+                    requestId: 'fresh',
+                    status: 'open',
+                    tabId: 7,
+                    origin: 'https://dapp.example',
+                    method: 'sign',
+                    windowIds: [1]
+                  }
+                ]
+              : [];
+          }
+          return next();
+        }
+      } as never)
+      // The cipher contributes the leaked `orphan`; the merge is Task 1's.
+      .dispatch(
+        vaultLoaded({ ...EMPTY_VAULT, jsonById: { orphan: '{"deploy":9}' } })
+      )
+      .silentRun(600);
+
+    expect(vaultOf(storeState).jsonById).toEqual({ fresh: '{"deploy":42}' });
+  });
+
+  // The acceptance test, driven through the root saga so the
+  // `takeLatest(vaultLoaded.type, …)` registration is part of what is asserted.
+  it('reclaims all ten leaked slots on vaultLoaded so the next deploy payload is accepted', async () => {
+    mockWindowsGetAll.mockResolvedValue([]);
+
+    const leaked = Object.fromEntries(
+      Array.from({ length: MAX_STORED_PAYLOADS }, (_, i) => [
+        `leaked-${i}`,
+        `{"deploy":${i}}`
+      ])
+    );
+
+    const { storeState } = await expectSaga(vaultSagas)
+      .withReducer(combinedReducer(), seedState({}))
+      // A null key makes `updateVaultCipher` early-return instead of reaching
+      // a `session` slice this reducer has not got.
+      .provide([[matchers.select.selector(selectEncryptionKeyHash), null]])
+      .dispatch(vaultLoaded({ ...EMPTY_VAULT, jsonById: leaked }))
+      // Without this gap the fresh payload is offered to a map still holding
+      // ten entries and refused — which is the bug, not the fix.
+      .delay(50)
+      .dispatch(
+        deployPayloadReceived({ id: 'fresh-request', json: '{"fresh":true}' })
+      )
+      .silentRun(200);
+
+    expect(vaultOf(storeState).jsonById).toEqual({
+      'fresh-request': '{"fresh":true}'
+    });
+  });
+
+  // Without a re-encryption the cipher still holds the entry and the next
+  // `vaultLoaded` resurrects it; this pins `windowRequestResponded.type` in the
+  // debounce array.
+  it('carries the reclaimed slots into the re-encrypted cipher', async () => {
+    mockWindowsGetAll.mockResolvedValue([
+      { id: 1, tabs: [{ url: approvalWindowUrl('live-1') }] }
+    ]);
+
+    const encryptSpy = jest
+      .spyOn(vaultCryptoModule, 'encryptVault')
+      .mockResolvedValue('cipher-blob');
+
+    await expectSaga(vaultSagas)
+      .withReducer(combinedReducer(), seedState({}))
+      .provide([
+        [matchers.select.selector(selectEncryptionKeyHash), 'key-hash']
+      ])
+      .dispatch(
+        vaultLoaded({
+          ...EMPTY_VAULT,
+          jsonById: { 'live-1': '{"deploy":1}', orphan: '{"deploy":9}' },
+          eip712ById: { 'orphan-2': '{"eip712":8}' }
+        })
+      )
+      .silentRun(VAULT_REENCRYPT_DEBOUNCE_MS + 300);
+
+    expect(encryptSpy).toHaveBeenCalled();
+    const encrypted =
+      encryptSpy.mock.calls[encryptSpy.mock.calls.length - 1][1];
+    expect(encrypted.jsonById).toEqual({ 'live-1': '{"deploy":1}' });
+    expect(encrypted.eip712ById).toEqual({});
   });
 });
