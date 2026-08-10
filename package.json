@@ -7,6 +7,13 @@
     "node": ">=22",
     "npm": ">=10"
   },
+  "//sideEffects": "Lets webpack drop barrel re-exports nothing uses. Without it, importing one name from @libs/ui/components linked that barrel's whole tree — which is how the Ledger transports reached the popup entry that never renders them (WALLET-1381). Listed below is every src module that DOES something when evaluated; a new one that is imported for its side effect and not listed here will be dropped silently.",
+  "sideEffects": [
+    "*.css",
+    "./src/set-webpack-nonce.ts",
+    "./src/libs/i18n/i18n.ts",
+    "./src/background/wallet-repositories.ts"
+  ],
   "scripts": {
     "build:manifest:v2:firefox": "NODE_ENV=production BROWSER=firefox HASH=$(git rev-parse HEAD) node utils/build.js",
     "build:manifest:v2:safari": "NODE_ENV=production BROWSER=safari HASH=$(git rev-parse HEAD) node utils/build.js",
