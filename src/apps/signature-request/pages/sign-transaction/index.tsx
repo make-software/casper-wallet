@@ -230,6 +230,23 @@ export function SignTransactionPage() {
     let signature: Uint8Array | null = null;
 
     if (!transaction) {
+      // Every signing route funnels through here, including the Ledger footer's
+      // Connect, which is outside the `disabled` gate on the main footer. If the
+      // payload is gone the request can never be answered from this window, so
+      // returning silently strands both the window and the dapp.
+      // Keyed on `transactionJson`: a payload present but not yet parsed is an
+      // ordinary in-flight state and must not error out.
+      if (!transactionJson) {
+        const error = Error(
+          ErrorMessages.signTransaction.REQUEST_NO_LONGER_AVAILABLE.description
+        );
+        sendSdkResponseToSpecificTab(
+          sdkMethod.signError(error, { requestId }),
+          requestTabId
+        );
+        closeCurrentWindow();
+      }
+
       return;
     }
 
@@ -266,6 +283,7 @@ export function SignTransactionPage() {
     closeCurrentWindow();
   }, [
     transaction,
+    transactionJson,
     signingAccount.hardware,
     signingAccount.derivationIndex,
     signingAccount.publicKey,

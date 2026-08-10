@@ -417,6 +417,11 @@ export const ErrorMessages = {
       message: 'Unsupported Target Type',
       description:
         'The target provided in the transfer data is neither an AccountHash nor a PublicKey. Ensure the target type is valid.'
+    },
+    REQUEST_NO_LONGER_AVAILABLE: {
+      message: 'Signature Request No Longer Available',
+      description:
+        'The data for this signature request is no longer available, so it cannot be signed. Please make the request again from the application.'
     }
   },
   decryptMessage: {
