@@ -109,7 +109,7 @@
     "react-loading-skeleton": "^3.5.0",
     "react-player": "^3.4.0",
     "react-redux": "^9.3.0",
-    "react-router-dom": "^7.18.0",
+    "react-router-dom": "^7.18.2",
     "react-tiny-popover": "^8.1.6",
     "redux": "^5.0.1",
     "redux-saga": "^1.5.0",
