@@ -129,7 +129,8 @@
     "brace-expansion@2": "^2.1.2",
     "fast-uri": "^3.1.5",
     "adm-zip": "^0.6.0",
-    "js-yaml@4": "^4.3.0",
+    "js-yaml@3": "^3.15.1",
+    "js-yaml@4": "^4.3.1",
     "shell-quote": "^1.9.0",
     "linkify-it": "^5.0.2"
   },
