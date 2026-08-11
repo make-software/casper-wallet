@@ -37,7 +37,8 @@ const initialState: VaultState = {
   siteNameByOriginDict: {},
   activeAccountName: null,
   jsonById: {},
-  eip712ById: {}
+  eip712ById: {},
+  payloadSeqById: {}
 };
 
 describe('vault reducer', () => {
@@ -66,7 +67,8 @@ describe('vault reducer', () => {
       siteNameByOriginDict: { o1: 'Title' },
       activeAccountName: 'a',
       jsonById: { pj: 'payload-json' },
-      eip712ById: { pe: 'payload-eip' }
+      eip712ById: { pe: 'payload-eip' },
+      payloadSeqById: { pj: 0, pe: 1 }
     };
 
     it('takes the cipher payload dicts when the in-memory dicts are empty', () => {
@@ -77,7 +79,8 @@ describe('vault reducer', () => {
         siteNameByOriginDict: { o1: 'Title' },
         activeAccountName: 'a',
         jsonById: { pj: 'payload-json' },
-        eip712ById: { pe: 'payload-eip' }
+        eip712ById: { pe: 'payload-eip' },
+        payloadSeqById: { pj: 0, pe: 1 }
       });
     });
 
@@ -94,7 +97,10 @@ describe('vault reducer', () => {
         siteNameByOriginDict: { o1: 'Title' },
         activeAccountName: 'a',
         jsonById: { pj: 'payload-json', existing: 'keep-json' },
-        eip712ById: { pe: 'payload-eip', existing: 'keep-eip' }
+        eip712ById: { pe: 'payload-eip', existing: 'keep-eip' },
+        // Renumbered into one sequence: the two carried entries keep their
+        // relative age and both sit below the in-memory one.
+        payloadSeqById: { pj: 0, pe: 1, existing: 2 }
       });
     });
 
@@ -222,13 +228,24 @@ describe('vault reducer', () => {
           ])
         );
 
+      const seqOf = (prefix: string, count: number, from = 0) =>
+        Object.fromEntries(
+          Array.from({ length: count }, (_, i) => [`${prefix}-${i}`, from + i])
+        );
+
       const loaded = (
         cipher: Record<string, string>,
-        inMemory: Record<string, string>
+        inMemory: Record<string, string>,
+        cipherSeq: Record<string, number> = {}
       ) =>
         reducer(
           { ...initialState, jsonById: inMemory, eip712ById: inMemory },
-          vaultLoaded({ ...payload, jsonById: cipher, eip712ById: cipher })
+          vaultLoaded({
+            ...payload,
+            jsonById: cipher,
+            eip712ById: cipher,
+            payloadSeqById: cipherSeq
+          })
         );
 
       it.each(['jsonById', 'eip712ById'] as const)(
@@ -312,6 +329,145 @@ describe('vault reducer', () => {
         expect(Object.keys(s.jsonById)).toHaveLength(MAX_STORED_PAYLOADS);
         expect(getPayload(s.jsonById, 'cipher-0')).toBe('cipher-json-0');
         expect(getPayload(s.jsonById, 'shared')).toBe('fresh');
+      });
+
+      // "Newest" is read off `payloadSeqById`. Reading it off the map's own
+      // key order is what these pin against: an object hoists integer-like
+      // keys ahead of every string key, in ascending numeric order, and
+      // `requestId` is dapp-chosen — only `__proto__` is rejected — so `"42"`
+      // is an id the wallet accepts and stores.
+      describe('ranked by payloadSeqById, not by key order', () => {
+        it('evicts by ordinal even when the key order says the opposite', () => {
+          const cipher = { ...mapOf('stale', 9), '42': 'live-json' };
+          const cipherSeq = { ...seqOf('stale', 9), '42': 9 };
+
+          // The hoisting the ranking must not follow: the entry written LAST
+          // enumerates FIRST, where the eviction takes from.
+          expect(Object.keys(cipher)[0]).toBe('42');
+
+          const s = loaded(cipher, mapOf('memory', 1), cipherSeq);
+
+          expect(getPayload(s.jsonById, '42')).toBe('live-json');
+          expect(getPayload(s.jsonById, 'stale-0')).toBeUndefined();
+        });
+
+        // The mirror, so the rule reads as "follow the ordinal" rather than
+        // "spare integer-like keys".
+        it('evicts an integer-like id that really is the oldest', () => {
+          const cipher = { ...mapOf('fresh', 9), '42': 'stale-json' };
+          const cipherSeq = { '42': 0, ...seqOf('fresh', 9, 1) };
+
+          const s = loaded(cipher, mapOf('memory', 1), cipherSeq);
+
+          expect(getPayload(s.jsonById, '42')).toBeUndefined();
+          expect(getPayload(s.jsonById, 'fresh-0')).toBe('fresh-json-0');
+        });
+
+        // An entry with no ordinal was written before the field existed, so it
+        // predates everything stamped.
+        it('treats an unstamped entry as older than every stamped one', () => {
+          const cipher = { legacy: 'legacy-json', ...mapOf('stamped', 9) };
+
+          const s = loaded(cipher, mapOf('memory', 1), seqOf('stamped', 9));
+
+          expect(getPayload(s.jsonById, 'legacy')).toBeUndefined();
+          expect(getPayload(s.jsonById, 'stamped-0')).toBe('stamped-json-0');
+        });
+
+        // A cipher written before the field existed carries no ordinals at
+        // all, so the merge falls back to the map's own order — what it did
+        // before this ranking, rather than treating every entry as unrankable.
+        it('falls back to cipher order when the cipher predates the field', () => {
+          const legacy: VaultState = {
+            ...payload,
+            jsonById: mapOf('cipher', MAX_STORED_PAYLOADS),
+            eip712ById: {}
+          };
+          delete (legacy as Partial<VaultState>).payloadSeqById;
+
+          const s = reducer(
+            { ...initialState, jsonById: mapOf('memory', 3) },
+            vaultLoaded(legacy)
+          );
+
+          expect(Object.keys(s.jsonById)).toHaveLength(MAX_STORED_PAYLOADS);
+          expect(getPayload(s.jsonById, 'cipher-0')).toBeUndefined();
+          expect(getPayload(s.jsonById, 'cipher-9')).toBe('cipher-json-9');
+        });
+
+        // The two sides' ordinals came from different counters — the cipher's
+        // from before the lock, memory's restarted at 0 by `vaultReseted` —
+        // so they are renumbered into one sequence rather than left to be
+        // compared across epochs at the next unlock.
+        it('renumbers the survivors into one sequence, carried entries first', () => {
+          const s = loaded(
+            mapOf('cipher', 6),
+            mapOf('memory', 6),
+            seqOf('cipher', 6)
+          );
+
+          expect(s.payloadSeqById).toEqual({
+            'cipher-2': 0,
+            'cipher-3': 1,
+            'cipher-4': 2,
+            'cipher-5': 3,
+            'memory-0': 4,
+            'memory-1': 5,
+            'memory-2': 6,
+            'memory-3': 7,
+            'memory-4': 8,
+            'memory-5': 9
+          });
+        });
+
+        it('leaves no ordinal behind for an evicted entry', () => {
+          const s = loaded(
+            mapOf('cipher', MAX_STORED_PAYLOADS),
+            mapOf('memory', 3),
+            seqOf('cipher', MAX_STORED_PAYLOADS)
+          );
+
+          expect(Object.keys(s.payloadSeqById).sort()).toEqual(
+            Object.keys(s.jsonById).sort()
+          );
+        });
+
+        // The whole cycle, with no hand-written ordinal anywhere: every one of
+        // them is the reducer's own. A dapp that numbers its requests fills the
+        // map before a lock, the live request is the newest, and the unlock
+        // must not hand its slot to nine leaks.
+        it('keeps the live numerically-keyed request across a lock', () => {
+          let preLock = initialState;
+
+          for (let i = 0; i < MAX_STORED_PAYLOADS - 1; i++) {
+            preLock = reducer(
+              preLock,
+              deployPayloadReceived({ id: `leak-${i}`, json: `leak-json-${i}` })
+            );
+          }
+
+          // The request the user is about to confirm, keyed as a dapp may.
+          preLock = reducer(
+            preLock,
+            deployPayloadReceived({ id: '42', json: 'live-json' })
+          );
+
+          // `lockVaultSaga` flushes the cipher BEFORE the reset, so `preLock`
+          // is what the cipher holds while the in-memory map is emptied.
+          const locked = reducer(preLock, vaultReseted());
+          // `signRequest` has no lock gate: one lands while locked.
+          const whileLocked = reducer(
+            locked,
+            deployPayloadReceived({ id: 'locked-0', json: 'locked-json-0' })
+          );
+
+          const s = reducer(whileLocked, vaultLoaded(preLock));
+
+          expect(getPayload(s.jsonById, '42')).toBe('live-json');
+          expect(getPayload(s.jsonById, 'leak-0')).toBeUndefined();
+          expect(getPayload(s.jsonById, 'locked-0')).toBe('locked-json-0');
+          expect(Object.keys(s.jsonById)).toHaveLength(MAX_STORED_PAYLOADS);
+        });
       });
     });
   });
@@ -613,7 +769,8 @@ describe('vault reducer', () => {
       siteNameByOriginDict: { o1: 'Title' },
       activeAccountName: 'a',
       jsonById: { j: 'x' },
-      eip712ById: { e: 'y' }
+      eip712ById: { e: 'y' },
+      payloadSeqById: { j: 0, e: 1 }
     };
     expect(reducer(seeded, deploysReseted())).toEqual(initialState);
   });
@@ -652,6 +809,45 @@ describe('vault reducer', () => {
       expect(s.eip712ById).toEqual({
         first: 'eip-first',
         second: 'eip-second'
+      });
+    });
+
+    // The write order the merge on unlock ranks on. It has to be stored: a
+    // plain object hoists integer-like keys ahead of every string key, so the
+    // maps themselves cannot answer which entry came last.
+    describe('payloadSeqById', () => {
+      it('stamps one ascending ordinal per stored request, across both maps', () => {
+        const s = [
+          deployPayloadReceived({ id: 'first', json: 'json-first' }),
+          eip712PayloadReceived({ id: 'second', json: 'eip-second' }),
+          deployPayloadReceived({ id: 'third', json: 'json-third' })
+        ].reduce(reducer, initialState);
+
+        expect(s.payloadSeqById).toEqual({ first: 0, second: 1, third: 2 });
+      });
+
+      // A rewrite is the same request refreshed, and it is the REQUEST's age
+      // the merge ranks on — re-stamping would let a page promote its own
+      // entry past a live one simply by re-sending it.
+      it('keeps the original ordinal when the same id is stored again', () => {
+        const s = [
+          deployPayloadReceived({ id: 'first', json: 'json-first' }),
+          deployPayloadReceived({ id: 'second', json: 'json-second' }),
+          deployPayloadReceived({ id: 'first', json: 'refreshed' })
+        ].reduce(reducer, initialState);
+
+        expect(s.payloadSeqById).toEqual({ first: 0, second: 1 });
+        expect(getPayload(s.jsonById, 'first')).toBe('refreshed');
+      });
+
+      it('stamps no ordinal for a refused __proto__ write', () => {
+        const s = reducer(
+          initialState,
+          deployPayloadReceived({ id: '__proto__', json: 'poison' })
+        );
+
+        expect(Object.keys(s.payloadSeqById)).toEqual([]);
+        expect(Object.getPrototypeOf(s.payloadSeqById)).toBe(Object.prototype);
       });
     });
 
@@ -737,6 +933,17 @@ describe('vault reducer', () => {
         expect(Object.keys(s[map])).toHaveLength(MAX_STORED_PAYLOADS);
       });
 
+      it.each([
+        ['jsonById', deployPayloadReceived] as const,
+        ['eip712ById', eip712PayloadReceived] as const
+      ])('stamps no ordinal for a %s write it refused', (map, action) => {
+        const full = atCapacity(map);
+
+        const s = reducer(full, action({ id: 'incoming', json: 'refused' }));
+
+        expect(s.payloadSeqById.incoming).toBeUndefined();
+      });
+
       // A burst answering one request must hand the freed slot to the next
       // write, or the refusal above would be permanent rather than a ceiling.
       it('accepts a new payload once an answered request frees a slot', () => {
@@ -767,6 +974,22 @@ describe('vault reducer', () => {
         windowRequestResponded({ requestId: 'answered' })
       );
       expect(s.jsonById).toEqual({ other: 'kept' });
+    });
+
+    // An ordinal outliving its payload is a leaked slot of the same kind this
+    // case exists to reclaim, in a map nothing else enumerates.
+    it('drops the ordinal along with the payload it dates', () => {
+      const seeded = [
+        deployPayloadReceived({ id: 'answered', json: 'gone' }),
+        deployPayloadReceived({ id: 'other', json: 'kept' })
+      ].reduce(reducer, initialState);
+
+      const s = reducer(
+        seeded,
+        windowRequestResponded({ requestId: 'answered' })
+      );
+
+      expect(s.payloadSeqById).toEqual({ other: 1 });
     });
 
     it('drops the answered request from eip712ById and leaves the rest', () => {

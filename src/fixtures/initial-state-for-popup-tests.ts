@@ -71,7 +71,8 @@ export const initialStateForPopupTests: RootState = {
     siteNameByOriginDict: {},
     activeAccountName: 'Account 1',
     jsonById: {},
-    eip712ById: {}
+    eip712ById: {},
+    payloadSeqById: {}
   },
   windowManagement: {
     windowId: null,

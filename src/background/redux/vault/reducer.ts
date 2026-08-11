@@ -38,6 +38,7 @@ type State = VaultState;
 export const MAX_STORED_PAYLOADS = 10;
 
 type PayloadMap = State['jsonById'];
+type PayloadSeqMap = State['payloadSeqById'];
 
 // `__proto__` is refused outright, for the reason `isStorableRequestId` was
 // written: the map is built by assignment, and assigning `__proto__` runs the
@@ -100,6 +101,77 @@ function storePayload(
   return { ...payloads, [requestId]: json };
 }
 
+// The ordinal is stamped once per request. A rewrite of an id already stored is
+// the same request refreshed, and it is the request's age the merge ranks on —
+// re-stamping it would make a page able to promote its own entry by re-sending.
+// A refused write (`__proto__`, or the ceiling) gets none, so the sequence only
+// ever names ids a map actually holds and cannot leak a slot of its own.
+function stampPayloadSeq(
+  seqById: PayloadSeqMap,
+  requestId: string,
+  stored: boolean
+): PayloadSeqMap {
+  if (!stored || payloadSeqOf(seqById, requestId) != null) {
+    return seqById;
+  }
+
+  // Read without a type check, unlike `payloadSeqOf`: this map is never the
+  // cipher's. `vaultLoaded` renumbers whatever it decrypts, so everything that
+  // reaches here is an ordinal this reducer wrote. Guarding it anyway would add
+  // a branch nothing can enter.
+  const stamped = Object.values(seqById);
+
+  return {
+    ...seqById,
+    [requestId]: stamped.length === 0 ? 0 : Math.max(...stamped) + 1
+  };
+}
+
+// Own properties only, for the reason `getPayload` exists: `requestId` is
+// dapp-chosen, so a bare index answers `toString` with a function. The type
+// check is not decoration either — this map arrives from the cipher as an
+// unchecked cast.
+function payloadSeqOf(
+  seqById: PayloadSeqMap | undefined,
+  requestId: string
+): number | undefined {
+  const seq =
+    seqById != null && Object.prototype.hasOwnProperty.call(seqById, requestId)
+      ? seqById[requestId]
+      : undefined;
+
+  return typeof seq === 'number' ? seq : undefined;
+}
+
+// Oldest first, by stored ordinal rather than by enumeration order — see the
+// note on `payloadSeqById` for why the two are not the same thing.
+//
+// An id carrying no ordinal comes from a cipher written before the field
+// existed, so it predates everything stamped and sorts first. Those keep their
+// enumeration order among themselves, which is exactly the ranking this
+// replaced, so a legacy cipher merges the way it did before.
+function orderOldestFirst(
+  requestIds: string[],
+  seqById: PayloadSeqMap | undefined
+): string[] {
+  const ranked: [string, number][] = [];
+  const unranked: string[] = [];
+
+  for (const requestId of requestIds) {
+    const seq = payloadSeqOf(seqById, requestId);
+
+    if (seq == null) {
+      unranked.push(requestId);
+    } else {
+      ranked.push([requestId, seq]);
+    }
+  }
+
+  ranked.sort(([, a], [, b]) => a - b);
+
+  return [...unranked, ...ranked.map(([requestId]) => requestId)];
+}
+
 // `storePayload`'s key guard on the merge path — `vaultLoaded` is forwarded
 // with no `isTrustedUiSender` gate. Widened past `VaultState` because a cipher
 // written before a map existed decrypts without it, and throwing here would
@@ -123,19 +195,74 @@ function sanitizePayloadMap(payloads: PayloadMap | undefined): PayloadMap {
 // NEWEST first — the reverse of `storePayload`, because age means the opposite
 // across a lock: not the request waited on longest, but the entry that survived
 // the most unlocks unanswered. A live pre-lock request is the newest of them.
+//
+// "Newest" is read off `payloadSeqById`, never off the map's own key order: an
+// object hoists integer-like keys ahead of every string key, and `requestId` is
+// dapp-chosen, so ranking on enumeration order evicted a live request keyed
+// `"42"` ahead of ten leaked UUID-keyed ones — the exact inversion of the rule
+// this comment states.
 function mergePayloadMaps(
   cipher: PayloadMap | undefined,
+  cipherSeq: PayloadSeqMap | undefined,
   inMemory: PayloadMap
 ): PayloadMap {
-  const entries = [
-    ...Object.entries(sanitizePayloadMap(cipher)).filter(
-      ([requestId]) => getPayload(inMemory, requestId) == null
+  const carried = sanitizePayloadMap(cipher);
+  const carriedIds = orderOldestFirst(
+    Object.keys(carried).filter(
+      requestId => getPayload(inMemory, requestId) == null
     ),
+    cipherSeq
+  );
+
+  // Never taken out of the in-memory side: an id held by both spends one slot,
+  // so `carriedIds` is already what the cipher is asking to add.
+  const room = Math.max(MAX_STORED_PAYLOADS - Object.keys(inMemory).length, 0);
+
+  return Object.fromEntries([
+    ...carriedIds
+      .slice(Math.max(carriedIds.length - room, 0))
+      .map((requestId): [string, string] => [requestId, carried[requestId]]),
     ...Object.entries(inMemory)
-  ];
+  ]);
+}
+
+// The merged map holds ordinals minted by two different counters — the
+// cipher's, from before the lock, and this session's, which restarted at 0 when
+// `vaultReseted` cleared the maps. Left side by side they would rank a pre-lock
+// entry above everything written since, and the error would compound at every
+// later lock. Renumbered into one sequence instead: carried entries keep their
+// relative age and all sit below the in-memory ones, which are newer by
+// construction — each arrived in THIS worker session.
+//
+// Built from the merged maps, so an evicted payload takes its ordinal with it
+// and this map cannot outgrow the slots it describes.
+function renumberPayloadSeq(
+  merged: Pick<State, 'jsonById' | 'eip712ById'>,
+  cipherSeq: PayloadSeqMap | undefined,
+  inMemory: Pick<State, 'jsonById' | 'eip712ById' | 'payloadSeqById'>
+): PayloadSeqMap {
+  const fromCipher: string[] = [];
+  const fromMemory: string[] = [];
+
+  for (const requestId of new Set([
+    ...Object.keys(merged.jsonById),
+    ...Object.keys(merged.eip712ById)
+  ])) {
+    if (
+      getPayload(inMemory.jsonById, requestId) == null &&
+      getPayload(inMemory.eip712ById, requestId) == null
+    ) {
+      fromCipher.push(requestId);
+    } else {
+      fromMemory.push(requestId);
+    }
+  }
 
   return Object.fromEntries(
-    entries.slice(Math.max(entries.length - MAX_STORED_PAYLOADS, 0))
+    [
+      ...orderOldestFirst(fromCipher, cipherSeq),
+      ...orderOldestFirst(fromMemory, inMemory.payloadSeqById)
+    ].map((requestId, index): [string, number] => [requestId, index])
   );
 }
 
@@ -146,7 +273,8 @@ const initialState: State = {
   siteNameByOriginDict: {},
   activeAccountName: null,
   jsonById: {},
-  eip712ById: {}
+  eip712ById: {},
+  payloadSeqById: {}
 };
 
 const slice = createSlice({
@@ -164,18 +292,30 @@ const slice = createSlice({
           activeAccountName,
           secretPhrase,
           jsonById,
-          eip712ById
+          eip712ById,
+          payloadSeqById
         }
       }: PayloadAction<VaultState>
-    ) => ({
-      accountNamesByOriginDict,
-      siteNameByOriginDict,
-      accounts,
-      activeAccountName,
-      secretPhrase,
-      jsonById: mergePayloadMaps(jsonById, state.jsonById),
-      eip712ById: mergePayloadMaps(eip712ById, state.eip712ById)
-    }),
+    ) => {
+      const merged = {
+        jsonById: mergePayloadMaps(jsonById, payloadSeqById, state.jsonById),
+        eip712ById: mergePayloadMaps(
+          eip712ById,
+          payloadSeqById,
+          state.eip712ById
+        )
+      };
+
+      return {
+        accountNamesByOriginDict,
+        siteNameByOriginDict,
+        accounts,
+        activeAccountName,
+        secretPhrase,
+        ...merged,
+        payloadSeqById: renumberPayloadSeq(merged, payloadSeqById, state)
+      };
+    },
     secretPhraseCreated: (
       state,
       action: PayloadAction<SecretPhrase>
@@ -412,17 +552,41 @@ const slice = createSlice({
     deployPayloadReceived: (
       state,
       { payload }: PayloadAction<{ id: string; json: string }>
-    ): State => ({
-      ...state,
-      jsonById: storePayload(state.jsonById, payload.id, payload.json)
-    }),
+    ): State => {
+      const jsonById = storePayload(state.jsonById, payload.id, payload.json);
+
+      return {
+        ...state,
+        jsonById,
+        // Identity is how a refusal is told from a write: `storePayload`
+        // returns the map it was given when it declines one.
+        payloadSeqById: stampPayloadSeq(
+          state.payloadSeqById,
+          payload.id,
+          jsonById !== state.jsonById
+        )
+      };
+    },
     eip712PayloadReceived: (
       state,
       { payload }: PayloadAction<{ id: string; json: string }>
-    ): State => ({
-      ...state,
-      eip712ById: storePayload(state.eip712ById, payload.id, payload.json)
-    }),
+    ): State => {
+      const eip712ById = storePayload(
+        state.eip712ById,
+        payload.id,
+        payload.json
+      );
+
+      return {
+        ...state,
+        eip712ById,
+        payloadSeqById: stampPayloadSeq(
+          state.payloadSeqById,
+          payload.id,
+          eip712ById !== state.eip712ById
+        )
+      };
+    },
     hideAccountFromListChanged: (
       state,
       { payload: { accountName } }: PayloadAction<{ accountName: string }>
@@ -487,11 +651,16 @@ const slice = createSlice({
 
         const jsonById = { ...state.jsonById };
         const eip712ById = { ...state.eip712ById };
+        // Dropped with the payload it dates. An ordinal outliving its entry
+        // would be a leaked slot of the same kind this reducer exists to
+        // reclaim, only in a map nothing enumerates.
+        const payloadSeqById = { ...state.payloadSeqById };
 
         delete jsonById[requestId];
         delete eip712ById[requestId];
+        delete payloadSeqById[requestId];
 
-        return { ...state, jsonById, eip712ById };
+        return { ...state, jsonById, eip712ById, payloadSeqById };
       }
     );
   }

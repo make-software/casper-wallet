@@ -101,7 +101,8 @@ const EMPTY_VAULT: VaultState = {
   siteNameByOriginDict: {},
   activeAccountName: null,
   jsonById: {},
-  eip712ById: {}
+  eip712ById: {},
+  payloadSeqById: {}
 };
 
 // Instantly resolve the module's own delay helper so tests never wait on a real
@@ -977,7 +978,8 @@ describe('unlockVaultSaga on a cipher written before a payload map existed', () 
       siteNameByOriginDict: { 'https://dapp.example': 'Dapp' },
       activeAccountName: 'Account 1',
       jsonById: ENTRIES.jsonById,
-      eip712ById: ENTRIES.eip712ById
+      eip712ById: ENTRIES.eip712ById,
+      payloadSeqById: { 'req-json': 0, 'req-eip': 1 }
     };
 
     // The key absent, as `JSON.stringify` produced on a build without it.
