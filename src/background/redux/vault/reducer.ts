@@ -28,7 +28,8 @@ type State = VaultState;
  * background page is persistent. Nothing else in this reducer deletes a key, so
  * a leaked payload sits in `storage.local` — riding along in every popup-state
  * broadcast, since `selectPopupState` sends `vault` whole — until
- * `reconcileStalePayloadsSaga` reclaims its slot on the next unlock.
+ * `reconcileStalePayloadsSaga` reclaims its slot, or `mergePayloadMaps` drops
+ * it as the oldest entry over the ceiling.
  *
  * Ten is far above real concurrency (one approval window means 1-2 in-flight
  * requests) and far below anything that costs memory. See `storePayload` for
@@ -78,7 +79,8 @@ type PayloadMap = State['jsonById'];
 // the deletion. Either way `vaultLoaded` restores the entry on unlock, so enough
 // of them fill the map and refuse every later payload.
 //
-// Reclaimed by `reconcileStalePayloadsSaga` (sagas/vault-sagas.ts).
+// Reclaimed by `reconcileStalePayloadsSaga` (sagas/vault-sagas.ts), and by
+// `mergePayloadMaps` when the merge on unlock is over the ceiling.
 function storePayload(
   payloads: PayloadMap,
   requestId: string,
@@ -110,6 +112,33 @@ function sanitizePayloadMap(payloads: PayloadMap | undefined): PayloadMap {
   );
 }
 
+// The one writer to these maps `storePayload` does not cover: the union of two
+// capped maps is twice the cap, so it bounds itself instead of waiting for
+// `reconcileStalePayloadsSaga`, which returns without reclaiming on an empty
+// entry read, on a failed `windows.getAll` and in its catch, with no retry.
+//
+// In-memory entries win and all survive: each arrived in THIS worker session
+// (`signRequest` has no lock gate, so one lands while locked too), so none can
+// be a payload stranded before the last restart. The cipher fills the rest
+// NEWEST first — the reverse of `storePayload`, because age means the opposite
+// across a lock: not the request waited on longest, but the entry that survived
+// the most unlocks unanswered. A live pre-lock request is the newest of them.
+function mergePayloadMaps(
+  cipher: PayloadMap | undefined,
+  inMemory: PayloadMap
+): PayloadMap {
+  const entries = [
+    ...Object.entries(sanitizePayloadMap(cipher)).filter(
+      ([requestId]) => getPayload(inMemory, requestId) == null
+    ),
+    ...Object.entries(inMemory)
+  ];
+
+  return Object.fromEntries(
+    entries.slice(Math.max(entries.length - MAX_STORED_PAYLOADS, 0))
+  );
+}
+
 const initialState: State = {
   secretPhrase: null,
   accounts: [],
@@ -125,11 +154,6 @@ const slice = createSlice({
   initialState,
   reducers: {
     vaultReseted: () => initialState,
-    // The maps merge, in-memory winning: `updateVaultCipher` early-returns while
-    // locked, so a payload written then exists only in memory. Not via
-    // `storePayload` — it refuses at `MAX_STORED_PAYLOADS` and would drop them.
-    // The union may sit over the ceiling until `reconcileStalePayloadsSaga`
-    // runs, and a signature request arriving in that window is refused.
     vaultLoaded: (
       state,
       {
@@ -149,8 +173,8 @@ const slice = createSlice({
       accounts,
       activeAccountName,
       secretPhrase,
-      jsonById: { ...sanitizePayloadMap(jsonById), ...state.jsonById },
-      eip712ById: { ...sanitizePayloadMap(eip712ById), ...state.eip712ById }
+      jsonById: mergePayloadMaps(jsonById, state.jsonById),
+      eip712ById: mergePayloadMaps(eip712ById, state.eip712ById)
     }),
     secretPhraseCreated: (
       state,

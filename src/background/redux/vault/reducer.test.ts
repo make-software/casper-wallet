@@ -207,6 +207,113 @@ describe('vault reducer', () => {
       expect(Object.keys(s.jsonById)).toEqual([]);
       expect(Object.keys(s.eip712ById)).toEqual([]);
     });
+
+    // The merge is the one writer to these maps no `storePayload` guard covers:
+    // each side is capped at `MAX_STORED_PAYLOADS`, so their union can be twice
+    // that. Bounded here rather than left to `reconcileStalePayloadsSaga`, which
+    // returns without reclaiming on an empty entry read, on a failed window
+    // enumeration and in its catch, and is a `takeLatest` with no retry.
+    describe('over MAX_STORED_PAYLOADS', () => {
+      const mapOf = (prefix: string, count: number) =>
+        Object.fromEntries(
+          Array.from({ length: count }, (_, i) => [
+            `${prefix}-${i}`,
+            `${prefix}-json-${i}`
+          ])
+        );
+
+      const loaded = (
+        cipher: Record<string, string>,
+        inMemory: Record<string, string>
+      ) =>
+        reducer(
+          { ...initialState, jsonById: inMemory, eip712ById: inMemory },
+          vaultLoaded({ ...payload, jsonById: cipher, eip712ById: cipher })
+        );
+
+      it.each(['jsonById', 'eip712ById'] as const)(
+        'caps the merged %s at MAX_STORED_PAYLOADS',
+        map => {
+          const s = loaded(
+            mapOf('cipher', MAX_STORED_PAYLOADS),
+            mapOf('memory', MAX_STORED_PAYLOADS)
+          );
+
+          expect(Object.keys(s[map])).toHaveLength(MAX_STORED_PAYLOADS);
+        }
+      );
+
+      // An in-memory entry arrived in THIS worker session — `signRequest` has
+      // no lock gate, so one lands even while locked — and cannot be a payload
+      // stranded by an earlier session. A cipher entry can.
+      it('keeps every in-memory entry and takes the drop from the cipher', () => {
+        const inMemory = mapOf('memory', 4);
+
+        const s = loaded(mapOf('cipher', MAX_STORED_PAYLOADS), inMemory);
+
+        expect(Object.keys(s.jsonById)).toHaveLength(MAX_STORED_PAYLOADS);
+        Object.entries(inMemory).forEach(([id, json]) => {
+          expect(getPayload(s.jsonById, id)).toBe(json);
+        });
+      });
+
+      // Cipher order is insertion order across sessions, and a rewrite keeps
+      // its original position, so the oldest key is the entry that has survived
+      // the most locks unanswered — a leak. The newest is the one written just
+      // before this lock, the only one an approval window can still be on.
+      it('drops the oldest cipher entries and keeps the newest', () => {
+        const s = loaded(
+          mapOf('cipher', MAX_STORED_PAYLOADS),
+          mapOf('memory', 3)
+        );
+
+        expect(getPayload(s.jsonById, 'cipher-0')).toBeUndefined();
+        expect(getPayload(s.jsonById, 'cipher-2')).toBeUndefined();
+        expect(getPayload(s.jsonById, 'cipher-3')).toBe('cipher-json-3');
+        expect(getPayload(s.jsonById, 'cipher-9')).toBe('cipher-json-9');
+      });
+
+      // Survivors stay ahead of the in-memory entries, so the next lock
+      // persists them in the same order and "oldest" keeps its meaning.
+      it('leaves the surviving cipher entries before the in-memory ones', () => {
+        const s = loaded(mapOf('cipher', 6), mapOf('memory', 6));
+
+        expect(Object.keys(s.jsonById)).toEqual([
+          'cipher-2',
+          'cipher-3',
+          'cipher-4',
+          'cipher-5',
+          'memory-0',
+          'memory-1',
+          'memory-2',
+          'memory-3',
+          'memory-4',
+          'memory-5'
+        ]);
+      });
+
+      it('leaves a union that fits under the ceiling untouched', () => {
+        const cipher = mapOf('cipher', 5);
+        const inMemory = mapOf('memory', 5);
+
+        const s = loaded(cipher, inMemory);
+
+        expect(s.jsonById).toEqual({ ...cipher, ...inMemory });
+        expect(s.eip712ById).toEqual({ ...cipher, ...inMemory });
+      });
+
+      // An id on both sides is one entry: counting it twice would evict a
+      // cipher entry to free a slot that was never spent.
+      it('spends one slot on an id held by both sides', () => {
+        const cipher = { ...mapOf('cipher', 9), shared: 'stale' };
+
+        const s = loaded(cipher, { shared: 'fresh' });
+
+        expect(Object.keys(s.jsonById)).toHaveLength(MAX_STORED_PAYLOADS);
+        expect(getPayload(s.jsonById, 'cipher-0')).toBe('cipher-json-0');
+        expect(getPayload(s.jsonById, 'shared')).toBe('fresh');
+      });
+    });
   });
 
   // 3
@@ -587,10 +694,12 @@ describe('vault reducer', () => {
       expect(getPayload(s.jsonById, '__proto__')).toBeUndefined();
     });
 
-    // The ceiling must never cost an ALREADY STORED request its payload: the
-    // oldest entry is the long-lived one — a request being confirmed on a
-    // Ledger while a page pushes a burst of its own — and dropping it would
-    // reproduce, behind a threshold, exactly the failure this reducer fixes.
+    // On this path the ceiling must never cost an ALREADY STORED request its
+    // payload: within a session the oldest entry is the long-lived one — a
+    // request being confirmed on a Ledger while a page pushes a burst of its
+    // own — and dropping it would reproduce, behind a threshold, exactly the
+    // failure this reducer fixes. Across a lock the age reads the other way,
+    // which is why the merge above evicts the opposite end.
     describe('at MAX_STORED_PAYLOADS', () => {
       const atCapacity = (map: 'jsonById' | 'eip712ById'): VaultState => ({
         ...initialState,
