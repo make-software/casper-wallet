@@ -36,6 +36,7 @@ import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 import { SiteNotConnectedError, WalletLockedError } from '@content/sdk-errors';
 import { sdkEvent } from '@content/sdk-event';
 import { SdkMethod, sdkMethod } from '@content/sdk-method';
+import { SdkErrorCode } from '@content/sdk-types';
 
 import { encryptAsHexWithCasperPublicKey } from '@libs/crypto';
 
@@ -53,6 +54,20 @@ const APPROVAL_REQUEST_TYPES: ReadonlySet<string> = new Set([
   sdkMethod.signTypedDataRequest.type,
   sdkMethod.decryptMessageRequest.type
 ]);
+
+const CAPACITY_REFUSAL_MESSAGE = 'Too many pending signature requests';
+
+// The dapp half of a capacity refusal is `errorCode`; this is the extension
+// half, so a wallet refusing every signature is not invisible on this side
+// either. Identifiers only — never the deploy, the typed data or the origin.
+// Log-only rather than `sagaError`: this path is dapp-triggerable, and a banner
+// mounted over every app surface would be a page's to spam.
+function reportCapacityRefusal(action: SdkMethod) {
+  console.error(
+    'sdk-methods: pending-payload map at capacity, request refused',
+    { requestId: action.meta.requestId, method: action.type }
+  );
+}
 
 export async function handleSdkMethod(
   action: SdkMethod,
@@ -231,12 +246,15 @@ export async function handleSdkMethod(
         action.meta.requestId
       ) == null
     ) {
+      reportCapacityRefusal(action);
+
       return {
         handled: true,
         response: sdkMethod.signResponse(
           {
             cancelled: true,
-            message: 'Too many pending signature requests'
+            message: CAPACITY_REFUSAL_MESSAGE,
+            errorCode: SdkErrorCode.tooManyPendingRequests
           },
           { requestId: action.meta.requestId }
         )
@@ -327,6 +345,8 @@ export async function handleSdkMethod(
         action.meta.requestId
       ) == null
     ) {
+      reportCapacityRefusal(action);
+
       return {
         handled: true,
         response: sdkMethod.signTypedDataResponse(
@@ -335,7 +355,8 @@ export async function handleSdkMethod(
             signature: null,
             digest: null,
             publicKey: null,
-            error: 'Too many pending signature requests'
+            error: CAPACITY_REFUSAL_MESSAGE,
+            errorCode: SdkErrorCode.tooManyPendingRequests
           },
           { requestId: action.meta.requestId }
         )

@@ -26,6 +26,7 @@ import { windowRequestOpened } from '@background/redux/windowManagement/actions'
 import { emitSdkEventToActiveTabsWithOrigin } from '@background/utils';
 
 import { sdkMethod } from '@content/sdk-method';
+import { SdkErrorCode } from '@content/sdk-types';
 
 import { encryptAsHexWithCasperPublicKey } from '@libs/crypto';
 
@@ -454,6 +455,12 @@ describe('signRequest', () => {
         { requestId: 'req-1' }
       )
     });
+    // A different condition from a capacity refusal, and it must stay
+    // distinguishable: this one is about the deploy, not about the wallet.
+    const refused = result as {
+      response: { payload: { errorCode?: string } };
+    };
+    expect(refused.response.payload.errorCode).toBeUndefined();
     expect(openWindowMock).not.toHaveBeenCalled();
     expect(dispatch).not.toHaveBeenCalled();
   });
@@ -523,7 +530,8 @@ describe('signRequest', () => {
       response: sdkMethod.signResponse(
         {
           cancelled: true,
-          message: 'Too many pending signature requests'
+          message: 'Too many pending signature requests',
+          errorCode: SdkErrorCode.tooManyPendingRequests
         },
         { requestId: 'req-1' }
       )
@@ -531,6 +539,26 @@ describe('signRequest', () => {
     // Only the payload dispatch — no `windowRequestOpened` descriptor.
     expect(dispatch).toHaveBeenCalledTimes(1);
     expect(openWindowMock).not.toHaveBeenCalled();
+  });
+
+  it('a capacity refusal is surfaced in the extension log, identifiers only', async () => {
+    isEqualCIMock.mockReturnValue(false);
+    selectDeploysJsonByIdMock.mockReturnValue({});
+    const { store } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.signRequest({ deployJson, signingPublicKeyHex: 'PK-1' }, META),
+      SENDER,
+      store
+    );
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.any(String), {
+      requestId: 'req-1',
+      method: sdkMethod.signRequest.type
+    });
+    const logged = JSON.stringify(consoleErrorSpy.mock.calls);
+    expect(logged).not.toContain('PK-1');
+    expect(logged).not.toContain(ORIGIN);
   });
 
   it('a prototype-name requestId reads as absent, not as an inherited member', async () => {
@@ -554,7 +582,8 @@ describe('signRequest', () => {
       response: sdkMethod.signResponse(
         {
           cancelled: true,
-          message: 'Too many pending signature requests'
+          message: 'Too many pending signature requests',
+          errorCode: SdkErrorCode.tooManyPendingRequests
         },
         { requestId: 'constructor' }
       )
@@ -730,13 +759,40 @@ describe('signTypedDataRequest', () => {
           signature: null,
           digest: null,
           publicKey: null,
-          error: 'Too many pending signature requests'
+          error: 'Too many pending signature requests',
+          errorCode: SdkErrorCode.tooManyPendingRequests
         },
         { requestId: 'req-1' }
       )
     });
     expect(dispatch).toHaveBeenCalledTimes(1);
     expect(openWindowMock).not.toHaveBeenCalled();
+  });
+
+  it('a capacity refusal is surfaced in the extension log, identifiers only', async () => {
+    selectEip712JsonByIdMock.mockReturnValue({});
+    const { store } = makeStore();
+
+    await handleSdkMethod(
+      sdkMethod.signTypedDataRequest(
+        {
+          typedData: { foo: 'secret' } as any,
+          options: undefined,
+          signingPublicKeyHex: 'PK-1'
+        },
+        META
+      ),
+      SENDER,
+      store
+    );
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.any(String), {
+      requestId: 'req-1',
+      method: sdkMethod.signTypedDataRequest.type
+    });
+    const logged = JSON.stringify(consoleErrorSpy.mock.calls);
+    expect(logged).not.toContain('secret');
+    expect(logged).not.toContain(ORIGIN);
   });
 
   it('a prototype-name requestId reads as absent, not as an inherited member', async () => {
@@ -764,7 +820,8 @@ describe('signTypedDataRequest', () => {
           signature: null,
           digest: null,
           publicKey: null,
-          error: 'Too many pending signature requests'
+          error: 'Too many pending signature requests',
+          errorCode: SdkErrorCode.tooManyPendingRequests
         },
         { requestId: 'constructor' }
       )

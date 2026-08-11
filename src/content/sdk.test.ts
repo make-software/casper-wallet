@@ -1,5 +1,9 @@
-import type { CasperWalletProvider as CasperWalletProviderFactory } from './sdk';
+import type {
+  CasperWalletProvider as CasperWalletProviderFactory,
+  SignatureResponse
+} from './sdk';
 import { SDK_HANDSHAKE_TYPE } from './sdk-channel';
+import { SdkErrorCode, SignTypedDataResult } from './sdk-types';
 
 // The project's jest config runs with `testEnvironment: 'node'` (no
 // `jest-environment-jsdom` dependency is installed), so `window`/`document`
@@ -240,5 +244,36 @@ describe('CasperWalletProvider pre-handshake queueing', () => {
     );
 
     expect(port.postMessage).toHaveBeenCalledTimes(1);
+  });
+});
+
+// Compile-level: a dapp must be able to branch on the marker WITHOUT a cast —
+// TS consumers are the audience most likely to handle the refusal properly, and
+// ts-jest type-checks this file, so dropping `errorCode` from either public
+// result type fails here rather than silently shipping a JS-only guarantee.
+describe('a wallet-generated refusal is readable from the public types', () => {
+  it('exposes `errorCode` on both signature result types after narrowing', () => {
+    const deployRefusal: SignatureResponse = {
+      cancelled: true,
+      message: 'Too many pending signature requests',
+      errorCode: SdkErrorCode.tooManyPendingRequests
+    };
+    const typedDataRefusal: SignTypedDataResult = {
+      cancelled: true,
+      signature: null,
+      digest: null,
+      publicKey: null,
+      error: 'Too many pending signature requests',
+      errorCode: SdkErrorCode.tooManyPendingRequests
+    };
+
+    const codes = deployRefusal.cancelled
+      ? [deployRefusal.errorCode, typedDataRefusal.errorCode]
+      : [];
+
+    expect(codes).toEqual([
+      SdkErrorCode.tooManyPendingRequests,
+      SdkErrorCode.tooManyPendingRequests
+    ]);
   });
 });
