@@ -258,14 +258,123 @@ const assertSingleFileEntries = compilation => {
       );
     }
 
-    // Initial files only — getFiles() does not include chunks reached through a
-    // dynamic import, which the service worker loads through importScripts and
-    // which are therefore allowed.
+    // Initial files only — chunks behind a dynamic import are checked below.
     const files = entrypoint.getFiles().filter(file => file.endsWith('.js'));
 
     if (files.length !== 1) {
       throw new Error(
         `Single-file entry check: entry "${name}" emitted ${files.length} JS files (${files.join(', ')}), expected exactly 1. Nothing loads a second file for that entry, so those modules would be missing at runtime.`
+      );
+    }
+
+    // No async chunks either. With no `target` set, loading defaults to jsonp,
+    // and publicPath is '/': a content script would fetch the chunk from the
+    // visited site's origin and the callback would land in the page world,
+    // where the isolated world's promise never settles. The service worker has
+    // no document to append a <script> to at all.
+    //
+    // Nothing emits one today. To let the worker load chunks, set
+    // `chunkLoading: 'import-scripts'` on that entry first, then exempt it here.
+    const asyncFiles = collectAsyncFiles(entrypoint);
+
+    if (asyncFiles.length > 0) {
+      throw new Error(
+        `Single-file entry check: entry "${name}" emitted ${asyncFiles.length} async chunk(s) (${asyncFiles.join(', ')}). Nothing can load a chunk for that entry: a content script would fetch it from the visited page's origin and its jsonp callback would never reach this world, and the service worker has no document to load it with. Import the module statically, or use webpackMode "eager".`
+      );
+    }
+  }
+};
+
+// Transitive: a dynamic import inside a dynamically imported module is still an
+// async chunk of this entry.
+const collectAsyncFiles = (group, seen = new Set()) => {
+  const files = [];
+
+  for (const child of group.getChildren()) {
+    if (seen.has(child)) {
+      continue;
+    }
+
+    seen.add(child);
+    files.push(...child.getFiles().filter(file => file.endsWith('.js')));
+    files.push(...collectAsyncFiles(child, seen));
+  }
+
+  return files;
+};
+
+// casper-js-sdk is a prebuilt UMD blob with no ESM build, so one value import
+// costs ~900 KB no bundler can shake out — parsed on every popup open
+// (WALLET-1381). Whether it stays out turns on which *names* eagerly-reached
+// modules pull from the @libs/ui/components barrel: `PasswordInputs` or
+// `NoConnectedLedger` re-link it, and nothing else would fail. Hence a tripwire
+// rather than a one-off measurement.
+//
+// Not every page entry: onboarding, importAccountWithFile and signatureRequest
+// still link it eagerly. Add one here once it is cleaned up.
+const SDK_FREE_PAGE_ENTRY_NAMES = ['popup', 'connectToApp'];
+const CASPER_SDK_RESOURCE = /node_modules[\\/]casper-js-sdk[\\/]/;
+
+class AssertSdkFreePageEntries {
+  apply(compiler) {
+    compiler.hooks.thisCompilation.tap(
+      'AssertSdkFreePageEntries',
+      compilation => {
+        compilation.hooks.processAssets.tap(
+          {
+            name: 'AssertSdkFreePageEntries',
+            stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT
+          },
+          () => assertSdkFreePageEntries(compilation)
+        );
+      }
+    );
+  }
+}
+
+// A ConcatenatedModule has no `resource` of its own — its merged modules hang
+// off `.modules`. Missing that would blind the check in production builds,
+// which is where concatenation runs.
+const resourcesOf = module =>
+  module.modules?.length
+    ? module.modules.flatMap(resourcesOf)
+    : [module.resource].filter(Boolean);
+
+const assertSdkFreePageEntries = compilation => {
+  for (const name of SDK_FREE_PAGE_ENTRY_NAMES) {
+    const entrypoint = compilation.entrypoints.get(name);
+
+    if (!entrypoint) {
+      throw new Error(
+        `SDK-free entry check: the build emitted no entry "${name}".`
+      );
+    }
+
+    const offenders = new Set();
+
+    // Initial chunks only: the entry's own plus any split chunk the page loads
+    // with it. Chunks behind a dynamic import are the intended fix, not a
+    // violation.
+    for (const chunk of entrypoint.chunks) {
+      for (const module of compilation.chunkGraph.getChunkModulesIterable(
+        chunk
+      )) {
+        if (!resourcesOf(module).some(r => CASPER_SDK_RESOURCE.test(r))) {
+          continue;
+        }
+
+        const issuer = compilation.moduleGraph.getIssuer(module);
+        offenders.add(
+          issuer?.resource
+            ? `${path.relative(__dirname, issuer.resource)} -> casper-js-sdk`
+            : 'casper-js-sdk'
+        );
+      }
+    }
+
+    if (offenders.size > 0) {
+      throw new Error(
+        `SDK-free entry check: entry "${name}" links casper-js-sdk into its initial chunks via:\n  ${[...offenders].join('\n  ')}\nThat is ~900 KB parsed on every open of this page. Import the SDK behind a dynamic import at a service boundary, or use a type-only import if you only need its types.`
       );
     }
   }
@@ -394,6 +503,7 @@ const options = {
     // afterEmit, so registration order here does not matter.
     new AssertCspNonceIntegrity(),
     new AssertSingleFileEntries(),
+    new AssertSdkFreePageEntries(),
     // manifest file generation
     new CopyWebpackPlugin({
       patterns: [
