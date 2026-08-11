@@ -73,7 +73,12 @@ type PayloadSeqMap = State['payloadSeqById'];
 // boundary for every approval type — but the two guards answer to different
 // owners, and this map is the one at risk.
 //
-// At capacity the INCOMING write is refused; nothing already stored is evicted.
+// At capacity the INCOMING write is refused; nothing already stored is evicted
+// HERE. That is a property of this function, not of the map: `mergePayloadMaps`
+// does evict stored entries, from both sides, and it is the only path that
+// does. See the note there — the trade runs the opposite way across a lock,
+// because "oldest" ranges over a different population once entries have
+// outlived their request lifecycle.
 //
 // The obvious alternative — make room by dropping the oldest entry — puts the
 // loss on the request that has waited longest, which is exactly the one this
@@ -277,13 +282,25 @@ function mergePayloadMaps(
     Math.max(liveIds.length - (MAX_STORED_PAYLOADS - cipherSlots), 0)
   );
 
-  // Logged the way the sibling reclaim does (`reconcileStalePayloadsSaga`),
-  // ids and counts only and never payloads: this is the one eviction a user
-  // can reach on demand, and without a line here a vanished pending
-  // transaction looks the same as every other cause.
+  // Both sides log, the way the sibling reclaim does
+  // (`reconcileStalePayloadsSaga`): ids and counts only, never payloads.
+  // Separate lines because the two losses are not the same event. A dropped
+  // locked-session write is the eviction a page can reach on demand; a dropped
+  // carried entry is usually a leak this merge is here to reclaim, but it is
+  // NOT always one — the reserve is a count, not a liveness test, so a live
+  // pre-lock request outside the newest `CIPHER_RESERVED_SLOTS` goes the same
+  // way. Without a line for each, a vanished pending transaction looks the
+  // same as every other cause, and the two are diagnosed differently.
   if (keptLive.length < liveIds.length) {
     console.warn('mergePayloadMaps: evicted locked-session payloads', {
       evicted: liveIds.slice(0, liveIds.length - keptLive.length),
+      keptCount: keptCarried.length + keptLive.length
+    });
+  }
+
+  if (keptCarried.length < carriedIds.length) {
+    console.warn('mergePayloadMaps: evicted carried payloads', {
+      evicted: carriedIds.slice(0, carriedIds.length - keptCarried.length),
       keptCount: keptCarried.length + keptLive.length
     });
   }

@@ -233,6 +233,20 @@ describe('vault reducer', () => {
           Array.from({ length: count }, (_, i) => [`${prefix}-${i}`, from + i])
         );
 
+      // Every merge below can evict, and eviction warns. Spied rather than
+      // silenced: the warning is the only signal that tells a support log
+      // "the unlock merge took it" apart from every other reason a pending
+      // transaction vanished, so it is asserted here rather than left to print.
+      let warn: jest.SpyInstance;
+
+      beforeEach(() => {
+        warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+      });
+
+      afterEach(() => {
+        warn.mockRestore();
+      });
+
       const loaded = (
         cipher: Record<string, string>,
         inMemory: Record<string, string>,
@@ -329,8 +343,10 @@ describe('vault reducer', () => {
       });
 
       // The slots come out of the in-memory side oldest first: those writes
-      // arrived while the vault was locked, none is approved, and their dapp
-      // can still be told.
+      // arrived while the vault was locked and none is approved, so they are
+      // the cheapest to lose. Not free — nothing here answers the dapp, and
+      // the window for an evicted id renders with no payload until the user
+      // closes it. The warning below is the only trace it leaves.
       it('takes the drop from the oldest in-memory entries, not the newest', () => {
         const cipher = { ...mapOf('stale', 9), live: 'live-json' };
         const cipherSeq = { ...seqOf('stale', 9), live: 9 };
@@ -347,6 +363,30 @@ describe('vault reducer', () => {
         ).toBe(`memory-json-${MAX_STORED_PAYLOADS - 1}`);
       });
 
+      // The reserve is two, and both directions cost something: at one the
+      // second pre-lock request is never restored, at three the extra slot is
+      // paid out of live locked-session writes. The fixture above cannot see
+      // either, because it carries a single live cipher entry.
+      it('reserves exactly two cipher slots, no more and no fewer', () => {
+        const cipher = {
+          ...mapOf('stale', 8),
+          'live-a': 'live-a-json',
+          'live-b': 'live-b-json'
+        };
+        const cipherSeq = { ...seqOf('stale', 8), 'live-a': 8, 'live-b': 9 };
+
+        const s = loaded(
+          cipher,
+          mapOf('memory', MAX_STORED_PAYLOADS),
+          cipherSeq
+        );
+
+        expect(getPayload(s.jsonById, 'live-a')).toBe('live-a-json');
+        expect(getPayload(s.jsonById, 'live-b')).toBe('live-b-json');
+        expect(getPayload(s.jsonById, 'stale-7')).toBeUndefined();
+        expect(Object.keys(s.jsonById)).toHaveLength(MAX_STORED_PAYLOADS);
+      });
+
       it('leaves a union that fits under the ceiling untouched', () => {
         const cipher = mapOf('cipher', 5);
         const inMemory = mapOf('memory', 5);
@@ -355,6 +395,102 @@ describe('vault reducer', () => {
 
         expect(s.jsonById).toEqual({ ...cipher, ...inMemory });
         expect(s.eip712ById).toEqual({ ...cipher, ...inMemory });
+      });
+
+      // The case above has `carried === MAX - live` exactly, where both clamps
+      // in the slot arithmetic are no-ops. Here the cipher asks for less than
+      // the reserve while the union still fits: dropping either clamp makes
+      // this merge discard entries that had room, on the two sides in turn.
+      it('drops nothing when the cipher asks for less than the reserve', () => {
+        const cipher = mapOf('cipher', 3);
+        const inMemory = mapOf('memory', 6);
+
+        const s = loaded(cipher, inMemory);
+
+        expect(s.jsonById).toEqual({ ...cipher, ...inMemory });
+      });
+
+      // The shape the ticket describes: locked with nothing pending, a page
+      // fires a full map at the locked wallet, unlock. The reserve must not be
+      // paid when the cipher is asking for nothing.
+      it('keeps every locked-session payload when the cipher is empty', () => {
+        const inMemory = mapOf('memory', MAX_STORED_PAYLOADS);
+
+        const s = loaded({}, inMemory);
+
+        expect(s.jsonById).toEqual(inMemory);
+        expect(warn).not.toHaveBeenCalled();
+      });
+
+      // `payloadSeqById` decides which locked-session write is destroyed, and
+      // the map's own key order is not a stand-in for it: `orderOldestFirst`
+      // ranks an unstamped integer-like id NEWEST, so falling back to key order
+      // here would spare '42' — which is in fact the oldest entry in the map.
+      it('picks the evicted in-memory entry by ordinal, not by key order', () => {
+        let inMemory = reducer(
+          initialState,
+          deployPayloadReceived({ id: '42', json: 'oldest-json' })
+        );
+
+        for (let i = 0; i < MAX_STORED_PAYLOADS - 1; i++) {
+          inMemory = reducer(
+            inMemory,
+            deployPayloadReceived({ id: `uuid-${i}`, json: `uuid-json-${i}` })
+          );
+        }
+
+        // Fixture integrity: '42' really is the oldest, by the reducer's own
+        // ordinal, and really is hoisted to the front of the map.
+        expect(inMemory.payloadSeqById['42']).toBe(0);
+        expect(Object.keys(inMemory.jsonById)[0]).toBe('42');
+
+        const s = reducer(
+          inMemory,
+          vaultLoaded({
+            ...payload,
+            jsonById: mapOf('cipher', 2),
+            eip712ById: {},
+            payloadSeqById: seqOf('cipher', 2)
+          })
+        );
+
+        expect(getPayload(s.jsonById, '42')).toBeUndefined();
+        expect(getPayload(s.jsonById, 'uuid-0')).toBeUndefined();
+        expect(getPayload(s.jsonById, 'uuid-1')).toBe('uuid-json-1');
+      });
+
+      it('warns with the evicted locked-session ids and the kept count', () => {
+        const cipher = { ...mapOf('stale', 9), live: 'live-json' };
+        const cipherSeq = { ...seqOf('stale', 9), live: 9 };
+
+        loaded(cipher, mapOf('memory', MAX_STORED_PAYLOADS), cipherSeq);
+
+        expect(warn).toHaveBeenCalledWith(
+          'mergePayloadMaps: evicted locked-session payloads',
+          {
+            evicted: ['memory-0', 'memory-1'],
+            keptCount: MAX_STORED_PAYLOADS
+          }
+        );
+      });
+
+      // The other half, and the one the reserve can take a live request out
+      // of: a carried entry outside the newest `CIPHER_RESERVED_SLOTS` is
+      // dropped whether it is a leak or not, so it says so too.
+      it('warns with the evicted carried ids and the kept count', () => {
+        loaded(
+          mapOf('cipher', MAX_STORED_PAYLOADS),
+          mapOf('memory', 3),
+          seqOf('cipher', MAX_STORED_PAYLOADS)
+        );
+
+        expect(warn).toHaveBeenCalledWith(
+          'mergePayloadMaps: evicted carried payloads',
+          {
+            evicted: ['cipher-0', 'cipher-1', 'cipher-2'],
+            keptCount: MAX_STORED_PAYLOADS
+          }
+        );
       });
 
       // An id on both sides is one entry: counting it twice would evict a

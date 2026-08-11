@@ -553,11 +553,14 @@ describe('updateVaultCipher debounce', () => {
 });
 
 // WALLET-1418. `MAX_STORED_PAYLOADS` refuses the INCOMING write once
-// `jsonById`/`eip712ById` hold ten entries, and nothing evicts a stored one, so
-// ten payloads whose `windowRequestResponded` never arrived — a clean auto-lock
-// with an approval window open is enough, no worker death needed — permanently
-// refuse every later `sign` on the profile. This saga is the deliberate
-// replacement for the accidental exit `vaultLoaded` used to provide.
+// `jsonById`/`eip712ById` hold ten entries, and the only path that evicts a
+// stored one is `mergePayloadMaps` — which runs inside the reducer, on the same
+// `vaultLoaded` this saga takes, so it has already decided what survives before
+// this saga sees the action and cannot be relied on to reclaim anything for it.
+// So ten payloads whose `windowRequestResponded` never arrived — a clean
+// auto-lock with an approval window open is enough, no worker death needed —
+// permanently refuse every later `sign` on the profile. This saga is the
+// deliberate replacement for the accidental exit `vaultLoaded` used to provide.
 describe('reconcileStalePayloadsSaga', () => {
   const EMPTY_WINDOW_MANAGEMENT: WindowManagementState = {
     windowId: null,
