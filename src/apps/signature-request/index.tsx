@@ -9,7 +9,7 @@ import { ThemeProvider } from 'styled-components';
 import { useSubscribeToRedux } from '@src/hooks/use-subscribe-to-redux';
 import { isSafariBuild, setCSPForSafari } from '@src/utils';
 
-import { createMainStoreReplica } from '@background/redux/get-main-store';
+import { createMainStoreReplica } from '@background/redux/create-main-store-replica';
 import { themeModeSettingChanged } from '@background/redux/settings/actions';
 import { selectThemeModeSetting } from '@background/redux/settings/selectors';
 import { ThemeMode } from '@background/redux/settings/types';
