@@ -96,6 +96,10 @@ describe('collectRequestIdsFromOpenWindows', () => {
 
   // A silently skipped tab purges a live request with nothing pointing at the
   // cause, so the skip is logged — redacted, never the raw url.
+  //
+  // Asserted positively as well as negatively: `new URL`'s TypeError says only
+  // `Invalid URL`, so absence assertions alone would still pass on a line that
+  // names no tab at all and leaves the operator where they were.
   it('logs the skipped url without its query string', async () => {
     const consoleError = jest.spyOn(console, 'error');
     mockWindowsGetAll.mockResolvedValue([
@@ -105,8 +109,12 @@ describe('collectRequestIdsFromOpenWindows', () => {
     expect(await collectRequestIdsFromOpenWindows()).toEqual(new Set());
 
     expect(consoleError).toHaveBeenCalledTimes(1);
+    expect(consoleError).toHaveBeenCalledWith(
+      'collectRequestIdsFromOpenWindows: could not parse a tab url',
+      'http://[::1/',
+      expect.any(String)
+    );
     const logged = JSON.stringify(consoleError.mock.calls);
-    expect(logged).toContain('could not parse a tab url');
     expect(logged).not.toContain('my-secret-message');
     expect(logged).not.toContain('?');
   });
@@ -235,6 +243,11 @@ describe('collectRequestIdsFromOpenWindows', () => {
     expect(await collectRequestIdsFromOpenWindows()).toBeNull();
   });
 
+  // The argument's TYPE is asserted, not only its content. A plain `Error` has
+  // no enumerable own properties, so `JSON.stringify` renders it `{}` and the
+  // two absence assertions below hold whatever the code does — dropping
+  // `redactUrlQuery` and logging the error object would keep them green while
+  // the console started printing the untruncated message.
   it('never puts a window URL into the log when the enumeration rejects', async () => {
     const consoleError = jest.spyOn(console, 'error');
     mockWindowsGetAll.mockRejectedValue(
@@ -245,6 +258,10 @@ describe('collectRequestIdsFromOpenWindows', () => {
 
     await collectRequestIdsFromOpenWindows();
 
+    expect(consoleError).toHaveBeenCalledWith(
+      'collectRequestIdsFromOpenWindows: could not enumerate windows',
+      expect.any(String)
+    );
     const logged = JSON.stringify(consoleError.mock.calls);
     expect(logged).not.toContain('my-secret-message');
     expect(logged).not.toContain('?');

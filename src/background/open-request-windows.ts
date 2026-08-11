@@ -58,8 +58,15 @@ export async function collectRequestIdsFromOpenWindows(): Promise<Set<string> | 
       } catch (error) {
         // One unparseable tab must not turn the whole reading into no evidence,
         // but a silent skip purges a live request with nothing pointing here.
+        //
+        // The url is logged as well as the error: `new URL`'s TypeError reads
+        // `Invalid URL` and names nothing, so the error alone says a skip
+        // happened without saying which tab it was. Redacted, both of them —
+        // a `signMessage` approval url carries the user's plaintext message as
+        // a search param.
         console.error(
           'collectRequestIdsFromOpenWindows: could not parse a tab url',
+          redactUrlQuery(url),
           redactUrlQuery(error)
         );
 
