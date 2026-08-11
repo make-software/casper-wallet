@@ -6,15 +6,14 @@ import { useUserActivityTracker } from '@src/hooks/use-user-activity-tracker';
 
 import { HomeTabProvider } from '@popup/hooks/use-home-tab';
 import { LazyPageFallback } from '@popup/lazy-page-fallback';
-// Only the home screen, the navigation menu and the error page are statically
-// imported. Everything else is a separate chunk that is parsed the first time
-// its route is reached, instead of on every popup open (WALLET-1381).
-//
-// The home screen is eager because it is what the popup renders on open — a
-// lazy boundary there would trade the parse cost for a visible loading state.
-// The navigation menu is eager because it is one click away on every screen and
-// is cheap. WindowErrorPage is eager so the error route can never itself fail
-// to load.
+// Everything not listed here is a separate chunk, parsed the first time its
+// route is reached rather than on every popup open (WALLET-1381). The eager
+// four each have a reason: home is what the popup renders on open, the
+// navigation menu is one click away everywhere and is cheap, BringWeb3Unlock is
+// a ten-line stub whose window only opens against a locked vault (lazy would
+// put a loading state on the unlock path), and WindowErrorPage must not itself
+// be able to fail to load.
+import { BringWeb3Unlock } from '@popup/pages/bring-web3-unlock';
 import { HomePageContent } from '@popup/pages/home';
 import { NavigationMenuPageContent } from '@popup/pages/navigation-menu';
 import { RouterPath, useTypedLocation, useTypedNavigate } from '@popup/router';
@@ -54,11 +53,6 @@ const AllAccountsPage = lazy(() =>
 const BackupSecretPhrasePage = lazy(() =>
   import('@popup/pages/backup-secret-phrase').then(m => ({
     default: m.BackupSecretPhrasePage
-  }))
-);
-const BringWeb3Unlock = lazy(() =>
-  import('@popup/pages/bring-web3-unlock').then(m => ({
-    default: m.BringWeb3Unlock
   }))
 );
 const BuyCSPRPage = lazy(() =>
@@ -201,33 +195,36 @@ function AppRoutes() {
     return null;
   }
 
+  // Both branches return a <Suspense> at the same position so the boundary
+  // survives the menu toggle. startTransition only protects content an
+  // *existing* boundary has already revealed; a freshly mounted one paints its
+  // fallback instead. Since menu items navigate to lazy routes in the same
+  // click handler, dropping this wrapper puts the fallback on every one.
   if (state?.showNavigationMenu) {
     return (
-      <Routes>
-        <Route
-          path={RouterPath.Any}
-          element={
-            <PopupLayout
-              renderHeader={() => (
-                <HeaderPopup
-                  withConnectionStatus
-                  withMenu
-                  withNetworkSwitcher
-                />
-              )}
-              renderContent={() => <NavigationMenuPageContent />}
-            />
-          }
-        />
-      </Routes>
+      <Suspense fallback={<LazyPageFallback />}>
+        <Routes>
+          <Route
+            path={RouterPath.Any}
+            element={
+              <PopupLayout
+                renderHeader={() => (
+                  <HeaderPopup
+                    withConnectionStatus
+                    withMenu
+                    withNetworkSwitcher
+                  />
+                )}
+                renderContent={() => <NavigationMenuPageContent />}
+              />
+            }
+          />
+        </Routes>
+      </Suspense>
     );
   }
 
   return (
-    // A single boundary around the route table is enough: react-router drives
-    // every navigation through startTransition, so React keeps the current
-    // screen on screen while the next route's chunk loads and this fallback
-    // only renders when a lazy route is the *first* thing the window mounts.
     <Suspense fallback={<LazyPageFallback />}>
       <Routes>
         <Route
