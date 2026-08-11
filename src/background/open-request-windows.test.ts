@@ -94,12 +94,31 @@ describe('collectRequestIdsFromOpenWindows', () => {
     );
   });
 
+  // A silently skipped tab purges a live request with nothing pointing at the
+  // cause, so the skip is logged — redacted, never the raw url.
+  it('logs the skipped url without its query string', async () => {
+    const consoleError = jest.spyOn(console, 'error');
+    mockWindowsGetAll.mockResolvedValue([
+      { id: 1, tabs: [{ url: 'http://[::1/?message=my-secret-message' }] }
+    ]);
+
+    expect(await collectRequestIdsFromOpenWindows()).toEqual(new Set());
+
+    expect(consoleError).toHaveBeenCalledTimes(1);
+    const logged = JSON.stringify(consoleError.mock.calls);
+    expect(logged).toContain('could not parse a tab url');
+    expect(logged).not.toContain('my-secret-message');
+    expect(logged).not.toContain('?');
+  });
+
   it('ignores an empty requestId param, which keeps no slot alive', async () => {
     mockWindowsGetAll.mockResolvedValue([
       {
         id: 1,
         tabs: [
-          { url: 'chrome-extension://abcdefghijklmnop/popup.html?requestId=' }
+          {
+            url: 'chrome-extension://abcdefghijklmnop/signature-request.html?requestId='
+          }
         ]
       }
     ]);
@@ -131,7 +150,67 @@ describe('collectRequestIdsFromOpenWindows', () => {
     );
   });
 
-  // `runtime.getURL('')` carries this extension's id, so the prefix test is
+  // `sdk.bundle.js` is web-accessible on all three targets, and the extension
+  // id is public (`content/index.ts` puts it in the page DOM), so the origin
+  // alone does not make a URL ours to trust.
+  it('ignores a requestId on a web-accessible resource of our own extension', async () => {
+    mockWindowsGetAll.mockResolvedValue([
+      {
+        id: 1,
+        tabs: [
+          {
+            url: 'chrome-extension://abcdefghijklmnop/sdk.bundle.js?requestId=req-1'
+          }
+        ]
+      }
+    ]);
+
+    expect(await collectRequestIdsFromOpenWindows()).toEqual(new Set());
+  });
+
+  // The closed set. `popup.html` carries no `requestId` today, but it is
+  // `use-ledger.ts`'s default `domain`, and a missed Ledger window purges a
+  // payload mid-signature.
+  it.each(['signature-request.html', 'connect-to-app.html', 'popup.html'])(
+    'reads a requestId carried by %s',
+    async page => {
+      mockWindowsGetAll.mockResolvedValue([
+        {
+          id: 1,
+          tabs: [
+            {
+              url: `chrome-extension://abcdefghijklmnop/${page}?requestId=req-1&tabId=7`
+            }
+          ]
+        }
+      ]);
+
+      expect(await collectRequestIdsFromOpenWindows()).toEqual(
+        new Set(['req-1'])
+      );
+    }
+  );
+
+  // Neither is ever opened with a `requestId`, and neither reads one.
+  it.each(['onboarding.html', 'import-account-with-file.html'])(
+    'ignores a requestId carried by %s, which never legitimately has one',
+    async page => {
+      mockWindowsGetAll.mockResolvedValue([
+        {
+          id: 1,
+          tabs: [
+            {
+              url: `chrome-extension://abcdefghijklmnop/${page}?requestId=req-1`
+            }
+          ]
+        }
+      ]);
+
+      expect(await collectRequestIdsFromOpenWindows()).toEqual(new Set());
+    }
+  );
+
+  // `runtime.getURL('')` carries this extension's id, so the origin test is
   // per-extension, not merely per-protocol.
   it('ignores an extension page belonging to a different extension', async () => {
     mockWindowsGetAll.mockResolvedValue([
