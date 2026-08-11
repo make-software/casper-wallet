@@ -6,7 +6,8 @@ import { Browser } from '@src/constants';
 import {
   getSafariCspContent,
   hasHttpPrefix,
-  isBundledAssetPath
+  isBundledAssetPath,
+  isValidPublicKey
 } from './utils';
 
 // Splits a `directive value; directive value` policy string into a
@@ -368,6 +369,47 @@ describe('setCSPForSafari', () => {
       expect(stubDocument.head.children).toHaveLength(0);
     }
   );
+});
+
+// Gates every recipient address the user can type. WALLET-1381 changed how it
+// decides — `PublicKey.fromHex` throwing, versus casper-wallet-core's SDK-free
+// derivation throwing — so the boundaries of the accept set are pinned here: a
+// looser one sends funds to an unresolvable address, a tighter one rejects
+// valid keys.
+describe('isValidPublicKey', () => {
+  const ED25519 =
+    '0125c4ffb9cc43f8211f9f5917f1eb941ccd0a8aec086154b046d4dbd290c476c5';
+  const SECP256K1 =
+    '0202d137fdf848673f12b8b50c8204cd5dee9bd39083deb22178e549cac3d882d429';
+
+  it.each([
+    ['an ED25519 key', ED25519],
+    ['a SECP256K1 key', SECP256K1],
+    ['an upper-case key', ED25519.toUpperCase()]
+  ])('accepts %s', (_label, publicKey) => {
+    expect(isValidPublicKey(publicKey)).toBe(true);
+  });
+
+  it.each([
+    ['null', null],
+    ['undefined', undefined],
+    ['the empty string', ''],
+    ['a non-hex character', ED25519.slice(0, -1) + 'z'],
+    ['an unknown algorithm prefix', '03' + ED25519.slice(2)],
+    ['an ED25519 key one character short', ED25519.slice(0, -1)],
+    ['an ED25519 key one character long', ED25519 + 'a'],
+    ['a SECP256K1 key at ED25519 length', SECP256K1.slice(0, 66)],
+    ['the prefix alone', '01']
+  ])('rejects %s', (_label, publicKey) => {
+    expect(isValidPublicKey(publicKey)).toBe(false);
+  });
+
+  it('accepts a well-formed SECP256K1 key that is not on the curve', () => {
+    // Matches casper-js-sdk: `PublicKey.fromHex` validates shape, not curve
+    // membership. Recorded so tightening it stays a decision rather than a
+    // surprise — it would start rejecting input the wallet accepts today.
+    expect(isValidPublicKey('02' + '02' + '00'.repeat(32))).toBe(true);
+  });
 });
 
 // setCSPForSafari only protects the documents that call it, and the call is a

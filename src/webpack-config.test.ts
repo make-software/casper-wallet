@@ -3,6 +3,9 @@ import os from 'os';
 import path from 'path';
 
 import pkg from '../package.json';
+// The alias table the sideEffects check resolves specifiers through, read from
+// the same file the compiler uses so the two cannot drift.
+import tsconfig from '../tsconfig.json';
 // The module webpack.config.js resolves the version stamp through. Imported by
 // path because utils/ is plain CommonJS, outside tsconfig's `include`.
 import {
@@ -50,9 +53,16 @@ interface PluginLike {
 
 type EntryLike = Record<string, string | string[]>;
 
+/** The shape of a chunk as far as the splitChunks predicate is concerned. */
+interface ChunkLike {
+  name?: string;
+  canBeInitial: () => boolean;
+}
+
 interface ConfigLike {
   plugins: PluginLike[];
   entry: EntryLike;
+  optimization?: { splitChunks?: { chunks?: (chunk: ChunkLike) => boolean } };
 }
 
 interface Manifest {
@@ -86,6 +96,10 @@ interface LoadedConfig {
   manifest: Manifest;
   /** The AssertCspNonceIntegrity instance registered by this config. */
   assertPlugin: PluginLike;
+  /** The AssertSingleFileEntries instance registered by this config. */
+  singleFilePlugin: PluginLike;
+  /** optimization.splitChunks.chunks — the predicate deciding what may split. */
+  splitChunksPredicate: (chunk: ChunkLike) => boolean;
   entry: EntryLike;
 }
 
@@ -129,7 +143,23 @@ const loadConfig = (browser: string, nodeEnv: string): LoadedConfig => {
     throw new Error('AssertCspNonceIntegrity is not registered');
   }
 
+  const singleFilePlugin = config.plugins.find(
+    plugin => plugin.constructor?.name === 'AssertSingleFileEntries'
+  );
+
+  if (!singleFilePlugin) {
+    throw new Error('AssertSingleFileEntries is not registered');
+  }
+
+  const splitChunksPredicate = config.optimization?.splitChunks?.chunks;
+
+  if (typeof splitChunksPredicate !== 'function') {
+    throw new Error('optimization.splitChunks.chunks is not a predicate');
+  }
+
   return {
+    singleFilePlugin,
+    splitChunksPredicate,
     nonceLiteral: definitions.__CSP_NONCE__,
     manifest: JSON.parse(
       manifestPattern
@@ -562,4 +592,282 @@ describe('AssertCspNonceIntegrity', () => {
       ).toThrow(/but this build generated null/);
     });
   });
+});
+
+/**
+ * The guards that keep the MV3 service worker and the two content scripts
+ * single-file now that splitChunks is on. They had no test of their own, in the
+ * one file that exists because nothing else in CI evaluates webpack.config.js —
+ * relaxing `files.length !== 1` to `< 1` left ci-check green.
+ */
+interface FakeEntrypoint {
+  getFiles: () => string[];
+  getChildren: () => FakeEntrypoint[];
+}
+
+const fakeEntrypoint = (
+  files: string[],
+  asyncFiles: string[] = []
+): FakeEntrypoint => ({
+  getFiles: () => files,
+  getChildren: () =>
+    asyncFiles.map(file => ({
+      getFiles: () => [file],
+      getChildren: () => []
+    }))
+});
+
+const runSingleFileAssertion = (
+  plugin: PluginLike,
+  entrypoints: Record<string, FakeEntrypoint>
+) => {
+  let tapped: (() => void) | undefined;
+
+  const compilation = {
+    hooks: {
+      processAssets: {
+        tap: (_options: unknown, fn: () => void) => {
+          tapped = fn;
+        }
+      }
+    },
+    entrypoints: new Map(Object.entries(entrypoints))
+  };
+
+  plugin.apply?.({
+    hooks: {
+      thisCompilation: {
+        tap: (_name: string, fn: (c: unknown) => void) => fn(compilation)
+      }
+    }
+  } as unknown as FakeCompiler);
+
+  if (!tapped) {
+    throw new Error('AssertSingleFileEntries tapped no processAssets hook');
+  }
+
+  return tapped;
+};
+
+/** Every single-file entry, each emitting exactly one JS file and no chunks. */
+const healthyEntrypoints = (): Record<string, FakeEntrypoint> => ({
+  background: fakeEntrypoint(['background.bundle.js']),
+  contentScript: fakeEntrypoint(['contentScript.bundle.js']),
+  sdk: fakeEntrypoint(['sdk.bundle.js'])
+});
+
+describe('AssertSingleFileEntries', () => {
+  it('accepts one JS file per single-file entry', () => {
+    const { singleFilePlugin } = loadConfig('chrome', 'production');
+
+    expect(
+      runSingleFileAssertion(singleFilePlugin, healthyEntrypoints())
+    ).not.toThrow();
+  });
+
+  it('ignores non-JS files in the entrypoint', () => {
+    const { singleFilePlugin } = loadConfig('chrome', 'production');
+
+    expect(
+      runSingleFileAssertion(singleFilePlugin, {
+        ...healthyEntrypoints(),
+        background: fakeEntrypoint([
+          'background.bundle.js',
+          'background.bundle.js.map'
+        ])
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects an entry split across two JS files', () => {
+    const { singleFilePlugin } = loadConfig('chrome', 'production');
+
+    expect(
+      runSingleFileAssertion(singleFilePlugin, {
+        ...healthyEntrypoints(),
+        contentScript: fakeEntrypoint([
+          'vendors.bundle.js',
+          'contentScript.bundle.js'
+        ])
+      })
+    ).toThrow(/emitted 2 JS files/);
+  });
+
+  it('rejects an entry the build did not emit at all', () => {
+    const { singleFilePlugin } = loadConfig('chrome', 'production');
+    const entrypoints = healthyEntrypoints();
+    delete entrypoints.sdk;
+
+    expect(runSingleFileAssertion(singleFilePlugin, entrypoints)).toThrow(
+      /emitted no entry "sdk"/
+    );
+  });
+
+  // None of the three can load one: a content script would fetch it from the
+  // visited site's origin, and the service worker has no document.
+  it.each(['contentScript', 'sdk', 'background'])(
+    'rejects an async chunk owned by %s',
+    name => {
+      const { singleFilePlugin } = loadConfig('chrome', 'production');
+
+      expect(
+        runSingleFileAssertion(singleFilePlugin, {
+          ...healthyEntrypoints(),
+          [name]: fakeEntrypoint([`${name}.bundle.js`], ['417.bundle.js'])
+        })
+      ).toThrow(/emitted 1 async chunk/);
+    }
+  );
+
+  it('follows async chunks reached through another async chunk', () => {
+    // Still a chunk this entry owns; a first-level-only walk would miss it.
+    const { singleFilePlugin } = loadConfig('chrome', 'production');
+    const nested = {
+      getFiles: () => ['nested.bundle.js'],
+      getChildren: () => []
+    };
+
+    expect(
+      runSingleFileAssertion(singleFilePlugin, {
+        ...healthyEntrypoints(),
+        sdk: {
+          getFiles: () => ['sdk.bundle.js'],
+          getChildren: () => [
+            { getFiles: () => ['417.bundle.js'], getChildren: () => [nested] }
+          ]
+        }
+      })
+    ).toThrow(/emitted 2 async chunk/);
+  });
+});
+
+describe('optimization.splitChunks predicate', () => {
+  it.each(['background', 'contentScript', 'sdk'])(
+    'refuses to split the initial chunk of %s',
+    name => {
+      const { splitChunksPredicate } = loadConfig('chrome', 'production');
+
+      expect(splitChunksPredicate({ name, canBeInitial: () => true })).toBe(
+        false
+      );
+    }
+  );
+
+  it.each([
+    'popup',
+    'importAccountWithFile',
+    'connectToApp',
+    'signatureRequest',
+    'onboarding'
+  ])('splits the initial chunk of %s', name => {
+    const { splitChunksPredicate } = loadConfig('chrome', 'production');
+
+    expect(splitChunksPredicate({ name, canBeInitial: () => true })).toBe(true);
+  });
+
+  it('keeps the webpack async default for dynamic-import chunks', () => {
+    const { splitChunksPredicate } = loadConfig('chrome', 'production');
+
+    expect(
+      splitChunksPredicate({ name: '417', canBeInitial: () => false })
+    ).toBe(true);
+  });
+
+  it('applies in development too, so the dev graph matches what ships', () => {
+    const { splitChunksPredicate } = loadConfig('chrome', 'development');
+
+    expect(
+      splitChunksPredicate({ name: 'background', canBeInitial: () => true })
+    ).toBe(false);
+    expect(
+      splitChunksPredicate({ name: 'popup', canBeInitial: () => true })
+    ).toBe(true);
+  });
+});
+
+/**
+ * `sideEffects` declares every module under src/ side-effect-free unless listed,
+ * letting webpack drop a bare `import './x'` whose exports are unused. Nothing
+ * else ties the list to the imports it governs — an omission is invisible to
+ * format, lint, tsc, knip and the suite, and surfaces only in a production
+ * bundle, as a popup rendering raw translation keys because i18next never
+ * initialised. Enumerated from disk so the next bare import is covered too.
+ */
+describe('package.json sideEffects', () => {
+  const SRC = path.join(ROOT, 'src');
+
+  const aliases: Record<string, string> = Object.fromEntries(
+    Object.entries(
+      tsconfig.compilerOptions.paths as Record<string, string[]>
+    ).map(([pattern, [target]]) => [
+      pattern.replace(/\/\*$/, ''),
+      path.join(ROOT, target.replace(/^\.\//, '').replace(/\/\*$/, ''))
+    ])
+  );
+
+  const sourceFiles = (dir: string): string[] =>
+    fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
+      const full = path.join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        return sourceFiles(full);
+      }
+
+      return /\.tsx?$/.test(entry.name) ? [full] : [];
+    });
+
+  /** Resolves an import specifier to a file inside src/, or null. */
+  const resolveSpecifier = (specifier: string, importer: string) => {
+    let base: string | null = null;
+
+    if (specifier.startsWith('.')) {
+      base = path.resolve(path.dirname(importer), specifier);
+    } else {
+      const alias = Object.keys(aliases).find(
+        prefix => specifier === prefix || specifier.startsWith(`${prefix}/`)
+      );
+
+      if (alias) {
+        base = path.join(aliases[alias], specifier.slice(alias.length));
+      }
+    }
+
+    if (base === null) {
+      return null;
+    }
+
+    const candidates = [
+      `${base}.ts`,
+      `${base}.tsx`,
+      path.join(base, 'index.ts'),
+      path.join(base, 'index.tsx')
+    ];
+
+    return candidates.find(candidate => fs.existsSync(candidate)) ?? null;
+  };
+
+  const bareImports = sourceFiles(SRC).flatMap(file => {
+    const source = fs.readFileSync(file, 'utf8');
+    const matches = [...source.matchAll(/^import\s+'([^']+)';/gm)];
+
+    return matches
+      .map(match => resolveSpecifier(match[1], file))
+      .filter((resolved): resolved is string => resolved !== null)
+      .map(
+        resolved =>
+          `./${path.relative(ROOT, resolved).split(path.sep).join('/')}`
+      );
+  });
+
+  it('finds the bare imports it is meant to check', () => {
+    // A scan that matched nothing would turn the assertion below into a pass.
+    expect(bareImports.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it.each([...new Set(bareImports)])(
+    '%s is declared side-effectful',
+    resolved => {
+      expect(pkg.sideEffects).toContain(resolved);
+    }
+  );
 });

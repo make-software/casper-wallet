@@ -24,6 +24,13 @@ export function LottiePlayer({
     }
 
     let anim: AnimationItem | undefined;
+    // The unlock spinner unmounts the moment unlock succeeds, so it routinely
+    // loses the race with the chunk fetch. Without this flag loadAnimation runs
+    // against a detached container and `anim` lands in a closure whose cleanup
+    // already ran — destroy() never fires and the rAF loop leaks.
+    //
+    // No test covers it: the repo has no React rendering harness. Change by
+    // reading, not by leaning on the suite.
     let cancelled = false;
 
     // SVG-only light build: drops the canvas/html renderers and the eval/Function-based
