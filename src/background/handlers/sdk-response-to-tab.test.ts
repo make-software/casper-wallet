@@ -567,4 +567,18 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     expect(sendMessageMock).not.toHaveBeenCalled();
     expect(dispatch).not.toHaveBeenCalled();
   });
+
+  it('no descriptor (service worker restarted) → still delivers, dispatches nothing', async () => {
+    const { store, dispatch } = makeStore(undefined);
+
+    const result = await handleSdkResponseToTab(
+      makeMessage(),
+      UI_SENDER,
+      store
+    );
+
+    expect(sendMessageMock).toHaveBeenCalledTimes(1);
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(result).toEqual({ handled: true, response: undefined });
+  });
 });

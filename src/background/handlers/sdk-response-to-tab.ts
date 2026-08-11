@@ -2,13 +2,18 @@ import { Runtime, tabs } from 'webextension-polyfill';
 
 import { sagaError } from '@background/redux/app-events/actions';
 import { MainStore } from '@background/redux/get-main-store';
-import { windowRequestResponded } from '@background/redux/windowManagement/actions';
 import { selectRequestStatus } from '@background/redux/windowManagement/selectors';
 import {
   SDK_RESPONSE_TO_TAB,
   SdkResponseToTabMessage
 } from '@background/send-sdk-response-to-specific-tab';
 
+import {
+  NOTHING_DISPLAYS,
+  RespondedDisplays,
+  closeLedgerWindowsAfterResponse,
+  markRequestResponded
+} from './close-windows-on-response';
 import { deliverViaOrigin } from './deliver-via-origin';
 import { isTrustedUiSender } from './private-state';
 import { HandlerResult } from './types';
@@ -161,6 +166,8 @@ export async function handleSdkResponseToTab(
   const origin = recoverDappOrigin(sender.url);
   const validTab = Number.isInteger(tabId) && tabId >= 0;
 
+  let displays: RespondedDisplays = NOTHING_DISPLAYS;
+
   if (!validTab) {
     // No usable tab. Attempt the same-origin fallback (broadcast to any active
     // tab of the recovered dapp origin). Only mark responded when the fallback
@@ -170,9 +177,10 @@ export async function handleSdkResponseToTab(
     // still be able to deliver. Either way surface the non-fatal error.
     const delivered = await deliverViaOrigin(origin, action);
     if (delivered > 0 && requestId != null) {
-      store.dispatch(windowRequestResponded({ requestId }));
+      displays = markRequestResponded(store, requestId);
     }
     store.dispatch(deliveryFailedError(tabId, delivered > 0));
+    void closeLedgerWindowsAfterResponse(store, displays);
     return { handled: true, response: undefined };
   }
 
@@ -186,8 +194,10 @@ export async function handleSdkResponseToTab(
   // 'responded' and drops. Trade-off: on a genuine delivery failure the request
   // stays 'responded' and any retry is dropped — acceptable, since delivery
   // failure is already terminal (no retry path) and deterministic dedup is the goal.
+  // The read that snapshots the display windows must stay in this same
+  // synchronous block, for the same reason.
   if (requestId != null) {
-    store.dispatch(windowRequestResponded({ requestId }));
+    displays = markRequestResponded(store, requestId);
   }
 
   try {
@@ -200,6 +210,8 @@ export async function handleSdkResponseToTab(
     const delivered = await deliverViaOrigin(origin, action);
     store.dispatch(deliveryFailedError(tabId, delivered > 0));
   }
+
+  void closeLedgerWindowsAfterResponse(store, displays);
 
   return { handled: true, response: undefined };
 }
