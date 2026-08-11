@@ -356,6 +356,13 @@ export const ErrorMessages = {
       description:
         'Please check the browser console for error details, this will be valuable for our team to fix the issue.'
     },
+    // A lazy route chunk failed to load — usually an extension update swapping
+    // the build out from under an open window. Reopening picks up the new one.
+    CHUNK_LOAD_ERROR: {
+      message: 'Casper Wallet was updated',
+      description:
+        'Please close this window and open the wallet again to continue.'
+    },
     MISSING_SEARCH_PARAM: {
       message: 'Missing Search Parameter',
       description:
