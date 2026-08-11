@@ -7,6 +7,7 @@ import {
   cancelRequestsDisplacedBy,
   failRequestOnWindowError
 } from '@background/handlers/cancel-requests';
+import { redactUrlQuery } from '@background/redact-url-query';
 import { MainStore } from '@background/redux/get-main-store';
 import {
   windowIdChanged,
@@ -26,17 +27,6 @@ export interface OpenApprovalWindowProps extends OpenWindowProps {
    * one state no window event can ever cancel.
    */
   requestId: string;
-}
-
-const MAX_LOGGED_ERROR_LENGTH = 200;
-
-// Everything from the first `?` onward is dropped: that is where a window URL
-// carries its search params, and for `signMessage` one of them is the user's
-// plaintext message.
-function redactUrlQuery(error: unknown): string {
-  const message = error instanceof Error ? error.message : String(error);
-
-  return message.split('?')[0].slice(0, MAX_LOGGED_ERROR_LENGTH);
 }
 
 // Fire-and-forget by design (the message handler must not block on a browser

@@ -17,6 +17,7 @@ export type SagaErrorSource =
   | 'unlockVaultSaga'
   | 'timeoutCounterSaga'
   | 'updateVaultCipher'
+  | 'reconcileStalePayloadsSaga'
   | 'createAccountSaga'
   | 'openExportKeysWindowSaga'
   // approval-request lifecycle failures
