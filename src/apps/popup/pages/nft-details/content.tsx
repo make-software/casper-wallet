@@ -1,7 +1,6 @@
 import { INft } from 'casper-wallet-core/src/domain';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import ReactPlayer from 'react-player';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -100,15 +99,23 @@ const ButtonContainer = styled(CenteredFlexColumn)<{ disabled: boolean }>`
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 `;
 
-const Player = styled(ReactPlayer).attrs({ wrapper: 'div' })`
-  max-height: 312px;
+// NFT video previews are arbitrary third-party media with no caption track
+// available, so this player is intentionally rendered without one.
+//
+// A plain <video> rather than react-player: the only sources that reach this
+// branch are ones deriveNftMediaType resolved to a `video/*` content type (it
+// returns 'unknown' for anything else, which renders EmptyMediaPlaceholder
+// instead). An HLS or DASH manifest is served as application/vnd.apple.mpegurl
+// or application/dash+xml, and an embed page as text/html, so react-player's
+// streaming and oEmbed players — dashjs, hls.js and @mux/mux-player-react,
+// 1.8 MB of the package between them — were unreachable here (WALLET-1380).
+const VideoPlayer = styled.video`
   max-width: 312px;
-
-  video {
-    max-width: 312px;
-    max-height: 312px;
-  }
+  max-height: 312px;
 `;
+
+// Half volume, as react-player was configured to play these at.
+const PREVIEW_VOLUME = 0.5;
 
 interface NftDetailsContentProps {
   nftToken: INft | null;
@@ -205,6 +212,14 @@ export const NftDetailsContent = ({
     setLoading(false);
   }, []);
 
+  // `volume` is a DOM property with no HTML attribute behind it, so React never
+  // writes it from JSX — it has to be set on the element once it mounts.
+  const applyPreviewVolume = useCallback((node: HTMLVideoElement | null) => {
+    if (node) {
+      node.volume = PREVIEW_VOLUME;
+    }
+  }, []);
+
   const isImage = contentType?.startsWith('image');
   const isVideo = contentType?.startsWith('video');
   const isAudio = contentType?.startsWith('audio');
@@ -230,13 +245,11 @@ export const NftDetailsContent = ({
             )}
             {isVideo && (
               <CenteredFlexColumn>
-                <Player
+                <VideoPlayer
                   style={{ display: loading ? 'none' : 'block' }}
                   src={(cachedUrl || preview) as string}
-                  controls={true}
-                  volume={0.5}
-                  width="auto"
-                  height="auto"
+                  controls
+                  ref={applyPreviewVolume}
                   onError={onError}
                   onCanPlay={onLoad}
                 />
