@@ -37,6 +37,24 @@ type State = VaultState;
  */
 export const MAX_STORED_PAYLOADS = 10;
 
+/**
+ * Slots `mergePayloadMaps` holds back for the cipher side, whatever the
+ * in-memory map is holding.
+ *
+ * Without it the cipher's share is whatever the in-memory map leaves over, and
+ * that reaches zero on demand: `handleSdkMethod` has no lock gate on either
+ * sign branch, so a page that fires `MAX_STORED_PAYLOADS` requests at a locked
+ * wallet fills the map by itself and the whole cipher side is discarded on the
+ * next unlock — including the request the user was already mid-approval on
+ * when the lock hit, which is the one entry `storePayload` names as the one
+ * that must never be lost.
+ *
+ * Two, because that is the concurrency `MAX_STORED_PAYLOADS` documents for a
+ * single approval window: the deploy itself, plus the Ledger permission window
+ * that can accompany it.
+ */
+const CIPHER_RESERVED_SLOTS = 2;
+
 type PayloadMap = State['jsonById'];
 type PayloadSeqMap = State['payloadSeqById'];
 
@@ -143,25 +161,48 @@ function payloadSeqOf(
   return typeof seq === 'number' ? seq : undefined;
 }
 
+// An array index in the spec's sense: the keys an object enumerates FIRST, in
+// ascending numeric order, ahead of every string key. `requestId` is
+// dapp-chosen and only `__proto__` is refused, so `"42"` is an id the wallet
+// accepts and stores.
+function isHoistedKey(requestId: string): boolean {
+  const index = Number(requestId);
+
+  return (
+    Number.isInteger(index) &&
+    index >= 0 &&
+    index < 2 ** 32 - 1 &&
+    String(index) === requestId
+  );
+}
+
 // Oldest first, by stored ordinal rather than by enumeration order — see the
 // note on `payloadSeqById` for why the two are not the same thing.
 //
 // An id carrying no ordinal comes from a cipher written before the field
-// existed, so it predates everything stamped and sorts first. Those keep their
-// enumeration order among themselves, which is exactly the ranking this
-// replaced, so a legacy cipher merges the way it did before.
+// existed, so it predates everything stamped and sorts first. Among themselves
+// those keep their enumeration order, which is exactly the ranking this
+// replaced — with one exception, because that order lies about one class of
+// id. A hoisted key sits at the front of the map whenever it was written, so
+// its position carries no age at all, while an ordinary key's does. Its true
+// position is unrecoverable, so it is ranked NEWEST rather than oldest: the two
+// mistakes do not cost the same. Keeping a leak spends a slot
+// `reconcileStalePayloadsSaga` reclaims on this same unlock; evicting a live
+// request loses the payload the user is about to approve, which is the
+// WALLET-1418 symptom itself.
 function orderOldestFirst(
   requestIds: string[],
   seqById: PayloadSeqMap | undefined
 ): string[] {
   const ranked: [string, number][] = [];
   const unranked: string[] = [];
+  const unrankedHoisted: string[] = [];
 
   for (const requestId of requestIds) {
     const seq = payloadSeqOf(seqById, requestId);
 
     if (seq == null) {
-      unranked.push(requestId);
+      (isHoistedKey(requestId) ? unrankedHoisted : unranked).push(requestId);
     } else {
       ranked.push([requestId, seq]);
     }
@@ -169,7 +210,13 @@ function orderOldestFirst(
 
   ranked.sort(([, a], [, b]) => a - b);
 
-  return [...unranked, ...ranked.map(([requestId]) => requestId)];
+  // Still ahead of everything stamped: an unstamped entry predates the field,
+  // and the hoisting question only orders the unstamped set against itself.
+  return [
+    ...unranked,
+    ...unrankedHoisted,
+    ...ranked.map(([requestId]) => requestId)
+  ];
 }
 
 // `storePayload`'s key guard on the merge path — `vaultLoaded` is forwarded
@@ -204,25 +251,52 @@ function sanitizePayloadMap(payloads: PayloadMap | undefined): PayloadMap {
 function mergePayloadMaps(
   cipher: PayloadMap | undefined,
   cipherSeq: PayloadSeqMap | undefined,
-  inMemory: PayloadMap
+  inMemory: PayloadMap,
+  inMemorySeq: PayloadSeqMap | undefined
 ): PayloadMap {
   const carried = sanitizePayloadMap(cipher);
+
+  // Never taken out of the in-memory side: an id held by both spends one slot,
+  // so `carriedIds` is already what the cipher is asking to add.
   const carriedIds = orderOldestFirst(
     Object.keys(carried).filter(
       requestId => getPayload(inMemory, requestId) == null
     ),
     cipherSeq
   );
+  const liveIds = orderOldestFirst(Object.keys(inMemory), inMemorySeq);
 
-  // Never taken out of the in-memory side: an id held by both spends one slot,
-  // so `carriedIds` is already what the cipher is asking to add.
-  const room = Math.max(MAX_STORED_PAYLOADS - Object.keys(inMemory).length, 0);
+  // The room left over after the in-memory side — but never less than the
+  // reserve, so the cipher cannot be displaced wholesale.
+  const cipherSlots = Math.min(
+    carriedIds.length,
+    Math.max(MAX_STORED_PAYLOADS - liveIds.length, CIPHER_RESERVED_SLOTS)
+  );
+  const keptCarried = carriedIds.slice(carriedIds.length - cipherSlots);
+  const keptLive = liveIds.slice(
+    Math.max(liveIds.length - (MAX_STORED_PAYLOADS - cipherSlots), 0)
+  );
+
+  // Logged the way the sibling reclaim does (`reconcileStalePayloadsSaga`),
+  // ids and counts only and never payloads: this is the one eviction a user
+  // can reach on demand, and without a line here a vanished pending
+  // transaction looks the same as every other cause.
+  if (keptLive.length < liveIds.length) {
+    console.warn('mergePayloadMaps: evicted locked-session payloads', {
+      evicted: liveIds.slice(0, liveIds.length - keptLive.length),
+      keptCount: keptCarried.length + keptLive.length
+    });
+  }
 
   return Object.fromEntries([
-    ...carriedIds
-      .slice(Math.max(carriedIds.length - room, 0))
-      .map((requestId): [string, string] => [requestId, carried[requestId]]),
-    ...Object.entries(inMemory)
+    ...keptCarried.map((requestId): [string, string] => [
+      requestId,
+      carried[requestId]
+    ]),
+    ...keptLive.map((requestId): [string, string] => [
+      requestId,
+      inMemory[requestId]
+    ])
   ]);
 }
 
@@ -298,11 +372,17 @@ const slice = createSlice({
       }: PayloadAction<VaultState>
     ) => {
       const merged = {
-        jsonById: mergePayloadMaps(jsonById, payloadSeqById, state.jsonById),
+        jsonById: mergePayloadMaps(
+          jsonById,
+          payloadSeqById,
+          state.jsonById,
+          state.payloadSeqById
+        ),
         eip712ById: mergePayloadMaps(
           eip712ById,
           payloadSeqById,
-          state.eip712ById
+          state.eip712ById,
+          state.payloadSeqById
         )
       };
 

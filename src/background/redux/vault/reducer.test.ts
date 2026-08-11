@@ -309,6 +309,44 @@ describe('vault reducer', () => {
         ]);
       });
 
+      // `room` reaches 0 once the in-memory map is at the ceiling, and before
+      // this the whole cipher side went with it — the live pre-lock request
+      // included — on count alone. A page puts it there on demand:
+      // `signRequest` has no lock gate, so ten requests fired at a locked
+      // wallet fill the map.
+      it('keeps the newest cipher entries when the in-memory map is at the ceiling', () => {
+        const cipher = { ...mapOf('stale', 9), live: 'live-json' };
+        const cipherSeq = { ...seqOf('stale', 9), live: 9 };
+
+        const s = loaded(
+          cipher,
+          mapOf('memory', MAX_STORED_PAYLOADS),
+          cipherSeq
+        );
+
+        expect(Object.keys(s.jsonById)).toHaveLength(MAX_STORED_PAYLOADS);
+        expect(getPayload(s.jsonById, 'live')).toBe('live-json');
+      });
+
+      // The slots come out of the in-memory side oldest first: those writes
+      // arrived while the vault was locked, none is approved, and their dapp
+      // can still be told.
+      it('takes the drop from the oldest in-memory entries, not the newest', () => {
+        const cipher = { ...mapOf('stale', 9), live: 'live-json' };
+        const cipherSeq = { ...seqOf('stale', 9), live: 9 };
+
+        const s = loaded(
+          cipher,
+          mapOf('memory', MAX_STORED_PAYLOADS),
+          cipherSeq
+        );
+
+        expect(getPayload(s.jsonById, 'memory-0')).toBeUndefined();
+        expect(
+          getPayload(s.jsonById, `memory-${MAX_STORED_PAYLOADS - 1}`)
+        ).toBe(`memory-json-${MAX_STORED_PAYLOADS - 1}`);
+      });
+
       it('leaves a union that fits under the ceiling untouched', () => {
         const cipher = mapOf('cipher', 5);
         const inMemory = mapOf('memory', 5);
@@ -393,6 +431,50 @@ describe('vault reducer', () => {
           expect(Object.keys(s.jsonById)).toHaveLength(MAX_STORED_PAYLOADS);
           expect(getPayload(s.jsonById, 'cipher-0')).toBeUndefined();
           expect(getPayload(s.jsonById, 'cipher-9')).toBe('cipher-json-9');
+        });
+
+        // The fallback order lies about exactly one class of id. An
+        // integer-like key is hoisted to the front of the map whenever it was
+        // written, so reading it as the oldest evicts the entry a legacy
+        // cipher is least able to spare.
+        it('does not evict an integer-like id from a cipher that predates the field', () => {
+          const legacy: VaultState = {
+            ...payload,
+            jsonById: { ...mapOf('leak', 9), '42': 'live-json' },
+            eip712ById: {}
+          };
+          delete (legacy as Partial<VaultState>).payloadSeqById;
+
+          // The hoisting: written LAST, enumerates FIRST.
+          expect(Object.keys(legacy.jsonById)[0]).toBe('42');
+
+          const s = reducer(
+            { ...initialState, jsonById: mapOf('memory', 3) },
+            vaultLoaded(legacy)
+          );
+
+          expect(getPayload(s.jsonById, '42')).toBe('live-json');
+          expect(getPayload(s.jsonById, 'leak-0')).toBeUndefined();
+        });
+
+        // An ordinary key's position IS its age, so the fallback still reads
+        // it — the rule is "distrust the hoisted key", not "spare every
+        // unstamped one".
+        it('still evicts the oldest ordinary id from a cipher that predates the field', () => {
+          const legacy: VaultState = {
+            ...payload,
+            jsonById: mapOf('leak', MAX_STORED_PAYLOADS),
+            eip712ById: {}
+          };
+          delete (legacy as Partial<VaultState>).payloadSeqById;
+
+          const s = reducer(
+            { ...initialState, jsonById: mapOf('memory', 3) },
+            vaultLoaded(legacy)
+          );
+
+          expect(getPayload(s.jsonById, 'leak-0')).toBeUndefined();
+          expect(getPayload(s.jsonById, 'leak-9')).toBe('leak-json-9');
         });
 
         // The two sides' ordinals came from different counters — the cipher's
