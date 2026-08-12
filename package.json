@@ -173,7 +173,7 @@
     "jest": "^30.4.2",
     "knip": "^6.32.0",
     "lint-staged": "^17.0.8",
-    "markdownlint-cli": "0.49.0",
+    "markdownlint-cli": "0.49.1",
     "playwright": "^1.61.0",
     "prettier": "^3.9.3",
     "redux-saga-test-plan": "^4.0.6",
