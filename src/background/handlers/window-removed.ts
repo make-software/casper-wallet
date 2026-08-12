@@ -1,4 +1,6 @@
 import { MainStore } from '@background/redux/get-main-store';
+import { ledgerStateCleared } from '@background/redux/ledger/actions';
+import { selectLedgerNewWindowId } from '@background/redux/ledger/selectors';
 import { exportKeysWindowIdCleared } from '@background/redux/windowManagement/actions';
 import { selectExportKeysWindowId } from '@background/redux/windowManagement/selectors';
 
@@ -15,6 +17,16 @@ export async function handleWindowRemoved(
   store: MainStore,
   removedWindowId: number
 ): Promise<void> {
+  // Before the cancel below, which sleeps CANCEL_GRACE_MS and then awaits a
+  // dapp-page tabs.sendMessage: every later Ledger flow is blocked until this lands.
+  try {
+    if (removedWindowId === selectLedgerNewWindowId(store.getState())) {
+      store.dispatch(ledgerStateCleared());
+    }
+  } catch (error) {
+    console.error('window-removed: ledger window cleanup failed', error);
+  }
+
   try {
     await cancelOpenRequestsForClosedWindow(store, removedWindowId);
   } catch (error) {
