@@ -90,9 +90,9 @@ it('closes only the permission window for an internal flow with no requestId', a
   expect(removeMock.mock.calls.map(([id]) => id)).toEqual([20]);
 });
 
-it('closes only the permission window when the descriptor is already a tombstone', async () => {
-  // The response can win the race to the background and collapse the descriptor
-  // to { status: 'responded' }, which drops windowIds. Degrade loudly, not silently.
+it('closes only the permission window when the response path already collapsed the descriptor', async () => {
+  // After close-windows-on-response.ts runs, the descriptor is already
+  // { status: 'responded' } (dropping windowIds); this is the normal residue.
   const { store } = makeStore(20, { r1: { status: 'responded' } });
 
   await handleCloseLedgerFlowWindows(store, 'r1');
@@ -105,13 +105,21 @@ it('closes only the permission window when the descriptor is already a tombstone
 });
 
 it('reads the requests map by own properties only', async () => {
-  // requestId is dapp-controlled (generateRequestId, src/content/sdk.ts), so a
-  // bare requests[requestId] can read an inherited Object.prototype member.
-  const { store } = makeStore(20);
+  // requestId is dapp-controlled (generateRequestId, src/content/sdk.ts). The
+  // console.warn assertion is what proves the safe read fell into the
+  // no-descriptor branch rather than reaching the inherited one.
+  const { store } = makeStore(
+    20,
+    Object.create({ polluted: openRequest([10, 20]) })
+  );
 
-  await handleCloseLedgerFlowWindows(store, 'hasOwnProperty');
+  await handleCloseLedgerFlowWindows(store, 'polluted');
 
   expect(removeMock.mock.calls.map(([id]) => id)).toEqual([20]);
+  expect(consoleWarn).toHaveBeenCalledWith(
+    'closeLedgerFlowWindows: no open descriptor for the request; closing the permission window only',
+    { requestId: 'polluted' }
+  );
 });
 
 it('clears the ledger slice even when every removal fails', async () => {
