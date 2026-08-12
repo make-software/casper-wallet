@@ -7,6 +7,7 @@ import { getSigningAccount } from '@src/utils';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
+import { runLedgerFlowControl } from '@signature-request/ledger-flow-controls';
 import { RouterPath } from '@signature-request/router';
 
 import { closeCurrentWindow } from '@background/close-current-window';
@@ -178,7 +179,8 @@ export function SignMessagePage() {
   const {
     ledgerEventStatusToRender,
     makeSubmitLedgerAction,
-    closeNewLedgerWindowsAndClearState
+    closeNewLedgerWindowsAndClearState,
+    windowId: ledgerPermissionWindowId
   } = useLedger({
     ledgerAction: handleSign,
     beforeLedgerActionCb: async () => setShowLedgerConfirm(true),
@@ -197,10 +199,15 @@ export function SignMessagePage() {
     }
   });
 
-  const onErrorCtaPressed = () => {
-    setShowLedgerConfirm(false);
-    closeNewLedgerWindowsAndClearState();
-  };
+  const onErrorCtaPressed = () =>
+    runLedgerFlowControl(isLedgerNewWindow, ledgerPermissionWindowId, {
+      returnToMain: () => setShowLedgerConfirm(false),
+      dismissThisWindow: () =>
+        closeCurrentWindow().catch(error =>
+          console.error('sign-message: dismissing this window failed', error)
+        ),
+      endLedgerFlow: closeNewLedgerWindowsAndClearState
+    });
 
   const renderFooter = () => {
     if (shouldTryToConnectAccount) {

@@ -19,6 +19,7 @@ import { getSigningAccount, isEqualCaseInsensitive } from '@src/utils';
 
 import { useAccountManager } from '@popup/hooks/use-account-actions-with-events';
 
+import { runLedgerFlowControl } from '@signature-request/ledger-flow-controls';
 import { SignatureRequestContent } from '@signature-request/pages/sign-transaction/signature-request-content';
 import { SignatureRequestLoading } from '@signature-request/pages/sign-transaction/signature-request-loading';
 import { SignatureRequestRawJson } from '@signature-request/pages/sign-transaction/signature-request-raw-json';
@@ -282,7 +283,8 @@ export function SignTransactionPage() {
   const {
     ledgerEventStatusToRender,
     makeSubmitLedgerAction,
-    closeNewLedgerWindowsAndClearState
+    closeNewLedgerWindowsAndClearState,
+    windowId: ledgerPermissionWindowId
   } = useLedger({
     ledgerAction: handleSign,
     beforeLedgerActionCb: async () =>
@@ -301,10 +303,18 @@ export function SignTransactionPage() {
     }
   });
 
-  const onErrorCtaPressed = () => {
-    setSigningPageState(SigningPageState.MainContent);
-    closeNewLedgerWindowsAndClearState();
-  };
+  const onErrorCtaPressed = () =>
+    runLedgerFlowControl(isLedgerNewWindow, ledgerPermissionWindowId, {
+      returnToMain: () => setSigningPageState(SigningPageState.MainContent),
+      dismissThisWindow: () =>
+        closeCurrentWindow().catch(error =>
+          console.error(
+            'sign-transaction: dismissing this window failed',
+            error
+          )
+        ),
+      endLedgerFlow: closeNewLedgerWindowsAndClearState
+    });
 
   const maybeRequireApproval = Boolean(
     signatureRequest &&
