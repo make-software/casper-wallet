@@ -306,13 +306,13 @@ const collectAsyncFiles = (group, seen = new Set()) => {
 // casper-js-sdk is a prebuilt UMD blob with no ESM build, so one value import
 // costs ~900 KB no bundler can shake out — parsed on every popup open
 // (WALLET-1381). Whether it stays out turns on which *names* eagerly-reached
-// modules pull from the @libs/ui/components barrel: `PasswordInputs` or
-// `NoConnectedLedger` re-link it, and nothing else would fail. Hence a tripwire
-// rather than a one-off measurement.
+// modules pull from the @libs/ui/components barrel: `NoConnectedLedger` re-links
+// it through @libs/services/ledger, and nothing else would fail. Hence a
+// tripwire rather than a one-off measurement.
 //
-// Not every page entry: onboarding, importAccountWithFile and signatureRequest
-// still link it eagerly. Add one here once it is cleaned up.
-const SDK_FREE_PAGE_ENTRY_NAMES = ['popup', 'connectToApp'];
+// Not every page entry: importAccountWithFile and signatureRequest still link it
+// eagerly. Add one here once it is cleaned up.
+const SDK_FREE_PAGE_ENTRY_NAMES = ['popup', 'connectToApp', 'onboarding'];
 const CASPER_SDK_RESOURCE = /node_modules[\\/]casper-js-sdk[\\/]/;
 
 class AssertSdkFreePageEntries {
