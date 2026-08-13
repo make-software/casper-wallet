@@ -110,7 +110,7 @@
     "qrcode.react": "^4.2.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-hook-form": "^7.80.0",
+    "react-hook-form": "^7.85.0",
     "react-i18next": "^17.0.8",
     "react-infinite-scroll-hook": "^6.0.1",
     "react-inlinesvg": "^4.5.0",
