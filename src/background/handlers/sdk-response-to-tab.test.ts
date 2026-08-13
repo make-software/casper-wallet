@@ -133,6 +133,17 @@ function makeCancelMessage(tabId: number = TAB_ID): SdkResponseToTabMessage {
   };
 }
 
+// Everything a spy actually wrote, as text. `JSON.stringify` alone cannot see an
+// Error's `message` (non-enumerable), and the third log argument IS an Error —
+// so stringifying the raw call list would vet nothing about the channel these
+// logs newly opened.
+function loggedText(spy: jest.SpyInstance) {
+  return spy.mock.calls
+    .flat()
+    .map(arg => (arg instanceof Error ? arg.message : JSON.stringify(arg)))
+    .join(' ');
+}
+
 // Find the single `sagaError` dispatch (source === 'sdk-response-to-tab').
 function findSagaError(dispatch: jest.Mock) {
   return dispatch.mock.calls.find(
@@ -144,6 +155,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
   // The delivery paths below log their cause. The nested `describe` installs its
   // own spies on top of this one and restores them first, so both coexist.
   let outerConsoleError: jest.SpyInstance;
+  let outerConsoleWarn: jest.SpyInstance;
 
   beforeEach(() => {
     sendMessageMock.mockReset();
@@ -154,10 +166,12 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     outerConsoleError = jest
       .spyOn(console, 'error')
       .mockImplementation(() => {});
+    outerConsoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterEach(() => {
     outerConsoleError.mockRestore();
+    outerConsoleWarn.mockRestore();
   });
 
   it('fresh request (no prior status) → delivers to the tab AND marks responded', async () => {
@@ -407,11 +421,19 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
     // Direct delivery was attempted (and rejected).
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
-    expect(outerConsoleError).toHaveBeenCalledWith(
-      'sdk-response-to-tab: delivery to tab failed',
-      { requestId: REQUEST_ID, tabId: TAB_ID, type: expect.any(String) },
+    // Recovered elsewhere → warn, and the log says so. Before, this was byte
+    // identical to the case where the signature was destroyed.
+    expect(outerConsoleWarn).toHaveBeenCalledWith(
+      'sdk-response-to-tab: delivery to tab failed; recovered via same-origin fallback',
+      {
+        requestId: REQUEST_ID,
+        tabId: TAB_ID,
+        type: expect.any(String),
+        delivered: 1
+      },
       expect.any(Error)
     );
+    expect(outerConsoleError).not.toHaveBeenCalled();
     expect(sendMessageMock).toHaveBeenCalledWith(TAB_ID, makeMessage().action);
 
     // Fallback broadcast to the same-origin active tab.
@@ -450,8 +472,13 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
     expect(emitToOriginMock).toHaveBeenCalledTimes(1);
     expect(outerConsoleError).toHaveBeenCalledWith(
-      'sdk-response-to-tab: delivery to tab failed',
-      { requestId: REQUEST_ID, tabId: TAB_ID, type: expect.any(String) },
+      'sdk-response-to-tab: delivery to tab failed; response not delivered',
+      {
+        requestId: REQUEST_ID,
+        tabId: TAB_ID,
+        type: expect.any(String),
+        delivered: 0
+      },
       expect.any(Error)
     );
 
@@ -479,8 +506,13 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
     expect(sendMessageMock).toHaveBeenCalledTimes(1);
     expect(outerConsoleError).toHaveBeenCalledWith(
-      'sdk-response-to-tab: delivery to tab failed',
-      { requestId: REQUEST_ID, tabId: TAB_ID, type: expect.any(String) },
+      'sdk-response-to-tab: delivery to tab failed; response not delivered',
+      {
+        requestId: REQUEST_ID,
+        tabId: TAB_ID,
+        type: expect.any(String),
+        delivered: 0
+      },
       expect.any(Error)
     );
     // No origin recoverable → no fallback broadcast.
@@ -499,14 +531,15 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
 
     await handleSdkResponseToTab(makeMessage(), UI_SENDER, store);
 
-    // This log is the newest place that could leak the signed payload.
-    expect(JSON.stringify(outerConsoleError.mock.calls)).not.toContain(
-      'deadbeef'
-    );
+    // This log is the newest place that could leak the signed payload, and the
+    // check has to see inside the Error argument too — that is the part whose
+    // text this code does not control.
+    expect(loggedText(outerConsoleError)).not.toContain('deadbeef');
     expect(outerConsoleError.mock.calls[0][1]).toEqual({
       requestId: REQUEST_ID,
       tabId: TAB_ID,
-      type: expect.any(String)
+      type: expect.any(String),
+      delivered: 0
     });
   });
 
@@ -530,9 +563,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
       { origin: DAPP_ORIGIN, type: expect.any(String) },
       expect.any(Error)
     );
-    expect(JSON.stringify(outerConsoleError.mock.calls)).not.toContain(
-      'deadbeef'
-    );
+    expect(loggedText(outerConsoleError)).not.toContain('deadbeef');
     const sagaError = findSagaError(dispatch);
     expect(sagaError).toBeDefined();
     expect(sagaError.payload.message).toContain(NOT_DELIVERED_MSG);
@@ -557,9 +588,7 @@ describe('handleSdkResponseToTab (background dedupe of SDK responses)', () => {
       { origin: DAPP_ORIGIN, type: expect.any(String) },
       expect.any(Error)
     );
-    expect(JSON.stringify(outerConsoleError.mock.calls)).not.toContain(
-      'deadbeef'
-    );
+    expect(loggedText(outerConsoleError)).not.toContain('deadbeef');
     // Nothing delivered → NOT marked responded.
     expect(dispatch).not.toHaveBeenCalledWith(
       expect.objectContaining({ payload: { requestId: REQUEST_ID } })
