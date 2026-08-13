@@ -220,9 +220,9 @@ runtime.onMessage.addListener(
           if (result.handled) {
             return respond(result);
           }
-          throw Error(
-            'Background: Unknown sdk message: ' + JSON.stringify(action)
-          );
+          // Type only: this message is returned to the dapp's SDK, and an SDK
+          // action's payload can carry signature material.
+          throw Error('Background: Unknown sdk message: ' + action.type);
         }
 
         // Must stay AFTER the isSDKMethod branch: a page-crafted message with
@@ -288,9 +288,7 @@ runtime.onMessage.addListener(
             return respond(legacyResult);
           }
 
-          throw Error(
-            'Background: Unknown redux action: ' + JSON.stringify(action)
-          );
+          throw Error('Background: Unknown redux action: ' + typedAction.type);
         }
 
         // this is added for not spamming with errors from bringweb3
@@ -298,7 +296,9 @@ runtime.onMessage.addListener(
           return;
         }
 
-        throw Error('Background: Unknown message: ' + JSON.stringify(action));
+        // No string `type` by definition on this branch, so `typeof` is all
+        // that can be reported without echoing the message back.
+        throw Error('Background: Unknown message: typeof ' + typeof action);
       } catch (error) {
         return sendError(error);
       }
