@@ -1,3 +1,5 @@
+import { FakePort, installFakeDom } from './__fixtures';
+
 jest.mock('webextension-polyfill', () => ({
   runtime: {
     sendMessage: jest.fn(),
@@ -10,27 +12,6 @@ jest.mock('@content/bring', () => ({ initBringScript: jest.fn() }));
 
 const ORIGIN = 'https://dapp.example';
 
-type Handler = (e: { data: unknown }) => void;
-
-class FakePort {
-  peer!: FakePort;
-  onmessage: Handler | null = null;
-  listeners: Handler[] = [];
-
-  postMessage = (data: unknown) => {
-    this.peer.onmessage?.({ data });
-    this.peer.listeners.slice().forEach(cb => cb({ data }));
-  };
-  addEventListener = (type: string, cb: Handler) => {
-    if (type === 'message') this.listeners.push(cb);
-  };
-  removeEventListener = (type: string, cb: Handler) => {
-    this.listeners = this.listeners.filter(l => l !== cb);
-  };
-  start = () => undefined;
-  close = () => undefined;
-}
-
 type MockedRuntime = {
   sendMessage: jest.Mock;
   getURL: jest.Mock;
@@ -40,50 +21,10 @@ type MockedRuntime = {
 // Loads sdk.ts first (registers the handshake listener at module load), then
 // index.ts, then fires the injected script's onload to hand off the port.
 const loadBothModules = () => {
-  const messageListeners: ((e: unknown) => void)[] = [];
-  const scriptTags: { onload?: () => void; setAttribute: jest.Mock }[] = [];
-
-  (global as { MessageChannel?: unknown }).MessageChannel = function () {
-    const port1 = new FakePort();
-    const port2 = new FakePort();
-    port1.peer = port2;
-    port2.peer = port1;
-    return { port1, port2 };
-  };
-
-  const win = {
-    location: { origin: ORIGIN },
-    addEventListener: (type: string, cb: (e: unknown) => void) => {
-      if (type === 'message') messageListeners.push(cb);
-    },
-    removeEventListener: () => undefined,
-    dispatchEvent: () => true,
-    postMessage: (data: unknown, origin: string, transfer: FakePort[]) => {
-      messageListeners
-        .slice()
-        .forEach(cb => cb({ source: win, origin, data, ports: transfer }));
-    }
-  };
-
-  (global as { window?: unknown }).window = win;
-  (global as { document?: unknown }).document = {
-    title: 'test dapp',
-    head: {
-      children: [{}],
-      insertBefore: () => undefined,
-      removeChild: () => undefined
-    },
-    createElement: () => {
-      const tag = { setAttribute: jest.fn() } as (typeof scriptTags)[number];
-      scriptTags.push(tag);
-      return tag;
-    }
-  };
-  (global as { CustomEvent?: unknown }).CustomEvent = class {
-    constructor(
-      public type: string,
-      public init?: unknown
-    ) {}
+  const { scriptTags, messageListeners, win } = installFakeDom(ORIGIN);
+  win.postMessage = (data: unknown, origin: string, transfer: FakePort[]) => {
+    const event = { source: win, origin, data, ports: transfer };
+    messageListeners.slice().forEach(cb => cb(event));
   };
 
   jest.resetModules();
