@@ -1,4 +1,4 @@
-import { Deploy } from 'casper-js-sdk';
+import { CasperNetworkName, Deploy } from 'casper-js-sdk';
 import { formatNumber } from 'casper-wallet-core';
 import { ValidatorDto } from 'casper-wallet-core/src/data/dto/validators';
 import React, { useState } from 'react';
@@ -184,7 +184,11 @@ export const StakesPage = () => {
       const { transaction, fallbackDeploy } = buildAuctionTransactions(
         {
           amount: motesAmount,
-          chainName: networkNameToSdkNetworkNameMap[networkName],
+          // The map is typed as the enum's string values so @src/constants stays SDK-free;
+          // the core API asks for the nominal enum, which the same string satisfies.
+          chainName: networkNameToSdkNetworkNameMap[
+            networkName
+          ] as CasperNetworkName,
           contractEntryPoint: stakeType,
           delegatorPublicKeyHex: activeAccount.publicKey,
           newValidatorPublicKeyHex: newValidatorPublicKey,
@@ -240,7 +244,11 @@ export const StakesPage = () => {
       const { transaction, fallbackDeploy } = buildAuctionTransactions(
         {
           amount: motesAmount,
-          chainName: networkNameToSdkNetworkNameMap[networkName],
+          // The map is typed as the enum's string values so @src/constants stays SDK-free;
+          // the core API asks for the nominal enum, which the same string satisfies.
+          chainName: networkNameToSdkNetworkNameMap[
+            networkName
+          ] as CasperNetworkName,
           contractEntryPoint: stakeType,
           delegatorPublicKeyHex: activeAccount.publicKey,
           newValidatorPublicKeyHex: newValidatorPublicKey,
